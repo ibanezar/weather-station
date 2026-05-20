@@ -3,357 +3,948 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weather Station IREICA1</title>
+<title>Rečica ob Savinji — Weather Station</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;1,9..144,200;1,9..144,300&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --card: rgba(255,255,255,0.03);
-    --card-border: rgba(255,255,255,0.07);
-    --text: #e8edf5;
-    --muted: #7a8898;
-    --accent: #5b9cf6;
-    --accent2: #38bdf8;
-    --warm: #f0a050;
-    --green: #4ade80;
-    --red: #f87171;
-    --wind: #a78bfa;
-  }
-  body {
-    background: #06090f;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 2rem 1rem 4rem;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(99,102,241,0.05) 0%, transparent 60%);
-  }
-  .container { max-width: 960px; margin: 0 auto; }
-  header { text-align: center; padding: 3rem 0 2.5rem; }
-  .station-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem; letter-spacing: 0.25em;
-    color: var(--accent); text-transform: uppercase; margin-bottom: 0.75rem;
-  }
-  h1 {
-    font-family: 'Fraunces', serif; font-weight: 300;
-    font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; letter-spacing: -0.02em;
-  }
-  h1 em { font-style: italic; color: var(--accent2); }
-  .location-line { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  .status-bar {
-    display: flex; align-items: center; justify-content: center;
-    gap: 1.5rem; margin: 1.5rem 0 2.5rem;
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
-    color: var(--muted); flex-wrap: wrap;
-  }
-  .dot {
-    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); margin-right: 5px;
-    box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite;
-  }
-  .dot.loading { background: var(--warm); box-shadow: 0 0 8px var(--warm); }
-  .dot.error   { background: var(--red); box-shadow: 0 0 8px var(--red); animation: none; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+:root{
+  --bg:       #04070e;
+  --s1:       rgba(12,18,32,0.9);
+  --s2:       rgba(18,26,46,0.7);
+  --border:   rgba(255,255,255,0.07);
+  --bh:       rgba(255,255,255,0.13);
+  --text:     #e8edf8;
+  --muted:    #56677e;
+  --blue:     #4d9ff8;
+  --cyan:     #22d3ee;
+  --purple:   #a78bfa;
+  --amber:    #f59e0b;
+  --green:    #34d399;
+  --red:      #f87171;
+  --rain-col: #60a5fa;
+}
 
-  .hero {
-    display: flex; align-items: center; justify-content: center;
-    gap: 3rem; padding: 2rem;
-    background: var(--card); border: 1px solid var(--card-border);
-    border-radius: 20px; margin-bottom: 1.25rem; position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content:''; position:absolute; inset:0;
-    background: linear-gradient(135deg, rgba(91,156,246,0.04) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .temp-value {
-    font-family: 'Fraunces', serif; font-weight: 300;
-    font-size: clamp(4rem, 10vw, 6.5rem); line-height: 1; letter-spacing: -0.04em;
-  }
-  .temp-unit { font-size: 0.4em; color: var(--muted); vertical-align: super; font-weight: 300; }
-  .temp-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.25rem; }
-  .hero-divider { width: 1px; height: 80px; background: var(--card-border); }
-  .hero-secondary { display: flex; flex-direction: column; gap: 1rem; }
-  .hero-stat { display: flex; align-items: baseline; gap: 0.5rem; }
-  .hero-stat .val { font-family: 'IBM Plex Mono', monospace; font-size: 1.25rem; }
-  .hero-stat .unit, .hero-stat .lbl { font-size: 0.7rem; color: var(--muted); }
-  .hero-stat .lbl { min-width: 80px; }
+html{scroll-behavior:smooth}
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-  .card {
-    background: var(--card); border: 1px solid var(--card-border);
-    border-radius: 16px; padding: 1.25rem 1.5rem; transition: border-color 0.2s;
-  }
-  .card:hover { border-color: rgba(255,255,255,0.12); }
-  .card-label {
-    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
-  }
-  .card-label svg { opacity: 0.6; flex-shrink: 0; }
-  .card-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.85rem; font-weight: 300; line-height: 1.1; }
-  .card-unit { font-size: 0.8rem; color: var(--muted); margin-left: 0.2em; }
-  .card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  min-height:100vh;
+  overflow-x:hidden;
+}
 
-  .wind-card { display: flex; align-items: center; gap: 1.5rem; }
-  .compass { width: 72px; height: 72px; flex-shrink: 0; }
-  .compass svg { width: 100%; height: 100%; }
-  .wind-speed-big { font-family: 'IBM Plex Mono', monospace; font-size: 1.85rem; font-weight: 300; line-height: 1; }
-  .wind-dir-label { font-size: 0.75rem; color: var(--wind); margin-top: 0.3rem; letter-spacing: 0.05em; }
-  .wind-gust { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; }
+/* ── Background layer ── */
+#bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -5%, rgba(30,60,120,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 40% at 90% 90%,  rgba(80,40,120,0.08) 0%, transparent 60%);
+}
+.rain-drop{
+  position:absolute;
+  width:1px;
+  background:linear-gradient(to bottom, transparent, rgba(100,160,255,0.45), transparent);
+  animation:rain-fall linear infinite;
+  transform-origin:top;
+}
+@keyframes rain-fall{
+  0%  {transform:translateY(-120px) rotate(12deg);opacity:0}
+  8%  {opacity:1}
+  92% {opacity:1}
+  100%{transform:translateY(105vh) rotate(12deg);opacity:0}
+}
+.star{
+  position:absolute;
+  border-radius:50%;
+  background:#fff;
+  animation:twinkle ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.2;transform:scale(.6)}}
 
-  .pressure-trend {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; margin-top: 0.4rem;
-  }
-  .trend-up   { background: rgba(74,222,128,0.12); color: var(--green); }
-  .trend-down { background: rgba(248,113,113,0.12); color: var(--red); }
-  .trend-flat { background: rgba(148,163,184,0.1);  color: var(--muted); }
+/* ── Layout ── */
+.wrap{
+  max-width:1000px;
+  margin:0 auto;
+  padding:2.5rem 1.25rem 5rem;
+  position:relative;z-index:1;
+}
 
-  .rain-bar-wrap { margin-top: 0.75rem; height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
-  .rain-bar-fill { height: 100%; background: linear-gradient(90deg,#3b82f6,#38bdf8); border-radius: 4px; transition: width 0.8s ease; }
+/* ── Header ── */
+header{text-align:center;padding:2.5rem 0 2rem}
+.stn-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;
+  letter-spacing:.25em;color:var(--blue);text-transform:uppercase;
+  border:1px solid rgba(77,159,248,.25);border-radius:20px;
+  padding:4px 12px;margin-bottom:1rem;
+}
+.stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+h1{
+  font-family:'Fraunces',serif;font-weight:200;
+  font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;
+  color:var(--text);
+}
+h1 em{font-style:italic;color:var(--cyan)}
+.sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
 
-  .uv-bar { margin-top: 0.75rem; height: 4px; border-radius: 4px; background: linear-gradient(90deg,#4ade80,#facc15,#f97316,#ef4444,#9333ea); position: relative; }
-  .uv-marker { position: absolute; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: white; transform: translateX(-50%); transition: left 0.6s ease; box-shadow: 0 0 6px rgba(0,0,0,0.5); }
+/* ── Status ── */
+.status{
+  display:flex;align-items:center;justify-content:center;
+  gap:1.75rem;padding:.6rem 0 2rem;
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);
+  flex-wrap:wrap;
+}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;
+  background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
+.dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.dot.error  {background:var(--red);  box-shadow:0 0 8px var(--red);  animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-  footer { text-align: center; margin-top: 3rem; font-size: 0.7rem; color: var(--muted); line-height: 2; }
-  footer a { color: var(--accent); text-decoration: none; }
+/* ── Cards ── */
+.card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:1.4rem 1.6rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.card:hover{border-color:var(--bh);box-shadow:0 4px 30px rgba(0,0,0,.3)}
+.clabel{
+  font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.45rem;
+}
+.cval{
+  font-family:'IBM Plex Mono',monospace;font-weight:300;
+  font-size:2rem;line-height:1;color:var(--text);
+}
+.unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
+.csub{font-size:.7rem;color:var(--muted);margin-top:.4rem}
 
-  @media (max-width: 560px) {
-    .hero { flex-direction: column; gap: 1.5rem; }
-    .hero-divider { width: 80px; height: 1px; }
-    .hero-secondary { flex-direction: row; flex-wrap: wrap; gap: 1rem; }
-  }
+/* ── Hero ── */
+.hero{
+  display:grid;grid-template-columns:1fr auto;gap:2rem;
+  padding:2rem 2.25rem;margin-bottom:1rem;
+  background:var(--s1);border:1px solid var(--border);border-radius:22px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(77,159,248,.05) 0%,rgba(167,139,250,.03) 60%,transparent 100%);
+  pointer-events:none;
+}
+.condition-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  border-radius:30px;padding:5px 14px;font-size:.72rem;
+  color:var(--cyan);letter-spacing:.06em;margin-bottom:1rem;width:fit-content;
+}
+#cond-icon{font-size:1rem}
+.temp-huge{
+  font-family:'Fraunces',serif;font-weight:200;
+  font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;
+  letter-spacing:-.05em;color:var(--text);
+  display:flex;align-items:flex-start;
+}
+.temp-unit-sup{
+  font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:300;
+}
+.feels{font-size:.78rem;color:var(--muted);margin-top:.65rem}
+.feels strong{color:var(--text);font-weight:400}
+
+.hero-stats{
+  display:flex;flex-direction:column;justify-content:center;gap:.9rem;
+  min-width:140px;
+}
+.hs{display:flex;flex-direction:column;gap:.15rem}
+.hs-val{
+  font-family:'IBM Plex Mono',monospace;font-size:1.15rem;
+  font-weight:300;color:var(--text);
+}
+.hs-lbl{font-size:.62rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+
+/* ── 2-col grid ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
+
+/* ── Wind card ── */
+.wind-body{display:flex;align-items:center;gap:1.5rem}
+.compass-svg{width:110px;height:110px;flex-shrink:0}
+.ws-big{
+  font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1;
+}
+.ws-unit{font-size:.8rem;color:var(--muted);margin-left:3px}
+.wdir{font-size:.8rem;color:var(--purple);margin-top:.3rem;letter-spacing:.05em;font-weight:400}
+.wgust{font-size:.68rem;color:var(--muted);margin-top:.3rem}
+
+/* ── Pressure ── */
+.pressure-arc-svg{width:100%;height:80px}
+.p-trend{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.68rem;padding:2px 10px;border-radius:20px;margin-top:.5rem;
+}
+.t-up  {background:rgba(52,211,153,.12);color:var(--green)}
+.t-dn  {background:rgba(248,113,113,.12);color:var(--red)}
+.t-flat{background:rgba(148,163,184,.08);color:var(--muted)}
+
+/* ── Charts ── */
+.chart-card{margin-bottom:1rem;padding:1.4rem 1.6rem 1rem}
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem}
+.chart-range{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)}
+.chart-svg-wrap{width:100%;overflow:hidden}
+.chart-svg{width:100%;display:block}
+
+/* ── Sunrise card ── */
+.sun-svg-wrap{padding:.5rem 0}
+.sun-svg{width:100%;display:block}
+.sun-times{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);
+  margin-top:.3rem;padding:0 .25rem;
+}
+.sun-times .daylen{color:var(--amber);font-size:.68rem}
+
+/* ── UV bar ── */
+.uv-bar{
+  height:4px;border-radius:4px;margin:1rem 0 .4rem;
+  background:linear-gradient(90deg,#4ade80,#facc15,#f97316,#ef4444,#9333ea);
+  position:relative;
+}
+.uv-dot{
+  position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;
+  background:#fff;transform:translateX(-50%);
+  box-shadow:0 0 8px rgba(255,255,255,.6);transition:left .6s ease;
+}
+
+/* ── Rain bar ── */
+.rain-bar-wrap{height:4px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-top:.8rem}
+.rain-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:4px;transition:width .8s ease}
+
+/* ── Footer ── */
+footer{text-align:center;padding-top:3rem;font-size:.68rem;color:var(--muted);line-height:2.2}
+footer a{color:var(--blue);text-decoration:none}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .hero{grid-template-columns:1fr;gap:1.5rem}
+  .hero-stats{flex-direction:row;flex-wrap:wrap;gap:.75rem 1.5rem}
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
+  .g3,.g4{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="container">
 
+<div id="bg"></div>
+
+<div class="wrap">
   <header>
-    <p class="station-label">Personal Weather Station · IREICA1</p>
-    <h1>Weather <em>Observatory</em></h1>
-    <p class="location-line" id="location-line">Loading location…</p>
+    <div class="stn-badge"><span></span> IREICA1 · Personal Weather Station</div>
+    <h1>Rečica ob <em>Savinji</em></h1>
+    <p class="sub-loc">Velenje Region · Slovenia · 46.326°N, 14.921°E · 366 m asl</p>
   </header>
 
-  <div class="status-bar">
-    <span><span class="dot loading" id="status-dot"></span><span id="status-text">Fetching data…</span></span>
-    <span>Updated: <span id="last-updated">—</span></span>
-    <span>Auto-refresh: 5 min</span>
+  <div class="status">
+    <span><span class="dot loading" id="dot"></span><span id="status-text">Loading…</span></span>
+    <span>Updated <span id="updated">—</span></span>
+    <span id="local-time">—</span>
   </div>
 
-  <div class="hero">
+  <!-- Hero -->
+  <div class="hero card" id="hero-card">
     <div>
-      <div class="temp-value" id="temp">—<span class="temp-unit">°C</span></div>
-      <div class="temp-label">Temperature</div>
+      <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
+      <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
+      <div class="feels">Feels like <strong id="feels-val">—</strong> °C &nbsp;·&nbsp; Dew point <strong id="dewpt-hero">—</strong> °C</div>
     </div>
-    <div class="hero-divider"></div>
-    <div class="hero-secondary">
-      <div class="hero-stat"><span class="lbl">Feels like</span><span class="val" id="feels">—</span><span class="unit">°C</span></div>
-      <div class="hero-stat"><span class="lbl">Dew point</span><span class="val" id="dewpt">—</span><span class="unit">°C</span></div>
-      <div class="hero-stat"><span class="lbl">Humidity</span><span class="val" id="hum-hero">—</span><span class="unit">%</span></div>
+    <div class="hero-stats">
+      <div class="hs">
+        <span class="hs-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span>
+        <span class="hs-lbl">Humidity</span>
+      </div>
+      <div class="hs">
+        <span class="hs-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hs-lbl">Pressure</span>
+      </div>
+      <div class="hs">
+        <span class="hs-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hs-lbl">Wind</span>
+      </div>
+      <div class="hs">
+        <span class="hs-val" id="hs-uv">—</span>
+        <span class="hs-lbl">UV Index</span>
+      </div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card" style="grid-column: span 2;">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.7 7.7A2.5 2.5 0 1 1 21 10.5H3"/><path d="M9.6 4.6A2 2 0 1 1 11 8H3"/><path d="M12.6 19.4A2 2 0 1 0 14 16H3"/></svg>
-        Wind
+  <!-- Wind + Pressure -->
+  <div class="g2">
+    <div class="card">
+      <div class="clabel">🧭 Wind</div>
+      <div class="wind-body">
+        <svg class="compass-svg" viewBox="0 0 110 110" id="compass-svg">
+          <circle cx="55" cy="55" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+          <circle cx="55" cy="55" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <!-- Cardinal marks -->
+          <line x1="55" y1="8"  x2="55" y2="16" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="55" y1="94" x2="55" y2="102" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="8"  y1="55" x2="16" y2="55" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="94" y1="55" x2="102" y2="55" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <!-- Intercardinal -->
+          <line x1="19.9" y1="19.9" x2="25.6" y2="25.6" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <line x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <line x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <line x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <!-- Labels -->
+          <text x="55" y="6"  text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.5)" font-family="IBM Plex Mono,monospace">N</text>
+          <text x="55" y="108" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">S</text>
+          <text x="4"  y="58" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">W</text>
+          <text x="107" y="58" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">E</text>
+          <!-- Needle -->
+          <g id="needle" style="transform-origin:55px 55px;transform:rotate(0deg);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)">
+            <polygon points="55,15 58,55 55,63 52,55" fill="#a78bfa" opacity=".95"/>
+            <polygon points="55,95 58,55 55,63 52,55" fill="rgba(167,139,250,0.25)"/>
+            <circle cx="55" cy="55" r="4" fill="#a78bfa"/>
+            <circle cx="55" cy="55" r="2" fill="#1a1030"/>
+          </g>
+        </svg>
+        <div>
+          <div class="ws-big" id="wind-speed">—<span class="ws-unit">km/h</span></div>
+          <div class="wdir" id="wind-dir-lbl">—</div>
+          <div class="wgust">Gusts <span id="wind-gust">—</span> km/h</div>
+        </div>
       </div>
-      <div class="wind-card">
-        <div class="compass">
-          <svg viewBox="0 0 72 72" fill="none">
-            <circle cx="36" cy="36" r="34" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-            <text x="36" y="10"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">N</text>
-            <text x="36" y="67"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">S</text>
-            <text x="7"  y="39"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">W</text>
-            <text x="66" y="39"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">E</text>
-            <g id="compass-needle" style="transform-origin:36px 36px">
-              <polygon points="36,14 39,36 36,42 33,36" fill="#a78bfa"/>
-              <polygon points="36,58 39,36 36,42 33,36" fill="rgba(167,139,250,0.3)"/>
-              <circle cx="36" cy="36" r="3" fill="#a78bfa"/>
-            </g>
-          </svg>
+    </div>
+
+    <div class="card">
+      <div class="clabel">📊 Pressure</div>
+      <div class="cval" id="pressure-val">—<span class="unit">hPa</span></div>
+      <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— steady</div>
+      <svg class="pressure-arc-svg" viewBox="0 0 220 80" id="pressure-arc-svg">
+        <defs>
+          <linearGradient id="pg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#f87171"/>
+            <stop offset="50%"  stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#4d9ff8"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="url(#pg)" stroke-width="6" stroke-linecap="round" opacity=".4"/>
+        <circle id="p-dot" cx="110" cy="-20" r="6" fill="#4d9ff8" style="filter:drop-shadow(0 0 6px #4d9ff8)"/>
+        <text x="20"  y="78" font-size="9" fill="rgba(255,255,255,0.25)" font-family="IBM Plex Mono,monospace">Low</text>
+        <text x="200" y="78" font-size="9" fill="rgba(255,255,255,0.25)" font-family="IBM Plex Mono,monospace" text-anchor="end">High</text>
+      </svg>
+      <div class="csub" id="pressure-label">—</div>
+    </div>
+  </div>
+
+  <!-- Rain + Solar/Dewpt small cards -->
+  <div class="g4" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🌧 Rain rate</div>
+      <div class="cval" id="rain-rate">—<span class="unit">mm/h</span></div>
+      <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
+      <div class="csub">Today: <span id="rain-total">—</span> mm</div>
+    </div>
+    <div class="card">
+      <div class="clabel">☀ UV Index</div>
+      <div class="cval" id="uv-val">—</div>
+      <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
+      <div class="csub" id="uv-label">—</div>
+    </div>
+    <div class="card">
+      <div class="clabel">⚡ Solar</div>
+      <div class="cval" id="solar-val">—<span class="unit">W/m²</span></div>
+      <div class="csub" id="solar-label">—</div>
+    </div>
+    <div class="card">
+      <div class="clabel">💧 Dew point</div>
+      <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
+      <div class="csub" id="dewpt-label">—</div>
+    </div>
+  </div>
+
+  <!-- Temperature Chart -->
+  <div class="card chart-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🌡 Temperature — last 24 h</span>
+      <span class="chart-range" id="temp-range">—</span>
+    </div>
+    <div class="chart-svg-wrap">
+      <svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="temp-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#4d9ff8" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#4d9ff8" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="line-glow">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Rain Chart -->
+  <div class="card chart-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🌧 Precipitation — last 24 h</span>
+      <span class="chart-range" id="rain-range">—</span>
+    </div>
+    <div class="chart-svg-wrap">
+      <svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="rain-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#60a5fa" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.2"/>
+          </linearGradient>
+        </defs>
+        <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Sunrise / Sunset -->
+  <div class="g3" style="margin-bottom:1rem">
+    <div class="card" style="grid-column:span 1">
+      <div class="clabel">🌅 Daylight</div>
+      <div class="sun-svg-wrap">
+        <svg class="sun-svg" viewBox="0 0 260 140" id="sun-svg">
+          <defs>
+            <radialGradient id="sun-glow-g" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stop-color="#f59e0b" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="sglow">
+              <feGaussianBlur stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Ground line -->
+          <line x1="10" y1="125" x2="250" y2="125" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <!-- Background arc -->
+          <path d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" stroke-linecap="round"/>
+          <!-- Progress arc -->
+          <path id="sun-progress" d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 1000"/>
+          <!-- Sun glow halo -->
+          <circle id="sun-halo" cx="130" cy="10" r="18" fill="url(#sun-glow-g)" opacity="0"/>
+          <!-- Sun dot -->
+          <circle id="sun-dot" cx="130" cy="10" r="7" fill="#f59e0b" filter="url(#sglow)" opacity="0"/>
+          <!-- Horizon labels -->
+          <text id="sr-label" x="15"  y="138" font-size="9" fill="rgba(255,255,255,0.4)" font-family="IBM Plex Mono,monospace">—</text>
+          <text id="ss-label" x="245" y="138" font-size="9" fill="rgba(255,255,255,0.4)" font-family="IBM Plex Mono,monospace" text-anchor="end">—</text>
+        </svg>
+      </div>
+      <div class="sun-times">
+        <span>↑ <span id="sunrise-time">—</span></span>
+        <span class="daylen" id="daylen">—</span>
+        <span>↓ <span id="sunset-time">—</span></span>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:span 2">
+      <div class="clabel">📍 Station snapshot</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
+        <div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Visibility / Fog</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div>
         </div>
         <div>
-          <div class="wind-speed-big"><span id="wind-speed">—</span><span style="font-size:0.8rem;color:var(--muted);margin-left:4px">km/h</span></div>
-          <div class="wind-dir-label" id="wind-dir-label">—</div>
-          <div class="wind-gust">Gusts: <span id="wind-gust">—</span> km/h</div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Wind chill</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-chill">—</div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Heat index</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Elevation</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Station SW</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">QC Status</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        Humidity
-      </div>
-      <div class="card-value" id="humidity">—<span class="card-unit">%</span></div>
-      <div class="card-sub" id="hum-feel">—</div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Pressure
-      </div>
-      <div class="card-value" id="pressure">—<span class="card-unit">hPa</span></div>
-      <div id="pressure-trend" class="pressure-trend trend-flat">— steady</div>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="8" y1="20" x2="8.01" y2="20"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="12" y1="22" x2="12.01" y2="22"/><line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/></svg>
-        Rain rate
-      </div>
-      <div class="card-value" id="rain-rate">—<span class="card-unit">mm/h</span></div>
-      <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
-      <div class="card-sub" style="margin-top:0.6rem">Total today: <span id="rain-total">—</span> mm</div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        UV Index
-      </div>
-      <div class="card-value" id="uv">—</div>
-      <div class="uv-bar"><div class="uv-marker" id="uv-marker" style="left:0%"></div></div>
-      <div class="card-sub" style="margin-top:0.6rem" id="uv-label">—</div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        Solar Radiation
-      </div>
-      <div class="card-value" id="solar">—<span class="card-unit">W/m²</span></div>
-      <div class="card-sub" id="solar-label">—</div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-        Dew point
-      </div>
-      <div class="card-value" id="dewpt-card">—<span class="card-unit">°C</span></div>
-      <div class="card-sub" id="dewpt-label">—</div>
     </div>
   </div>
 
   <footer>
-    Data from <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground · IREICA1</a>
-    &nbsp;·&nbsp; Hosted on GitHub Pages<br>
-    Refreshes automatically every 5 minutes
+    Weather Station IREICA1 · Rečica ob Savinji, Slovenia<br>
+    Data via <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground</a>
+    &nbsp;·&nbsp; Auto-refreshes every 5 minutes
   </footer>
 </div>
 
 <script>
-  // ▼ Paste your Cloudflare Worker URL here after deploying worker.js ▼
-  const PROXY_URL = 'https://weatherireica1.filip-eremita.workers.dev/';
-  // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+const PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+const LAT = 46.325779, LON = 14.921137;
 
-  function windDirLabel(deg) {
-    const d = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-    return d[Math.round(deg / 22.5) % 16];
+// ── Utilities ──────────────────────────────────────────────
+function fmt(v,d=1){ return (v==null||v==='')?'—':Number(v).toFixed(d); }
+function set(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+
+function windDir(deg){
+  const d=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return d[Math.round(deg/22.5)%16];
+}
+function uvLabel(u){
+  if(u<=2) return 'Low'; if(u<=5) return 'Moderate';
+  if(u<=7) return 'High'; if(u<=10) return 'Very High'; return 'Extreme';
+}
+function solarLabel(w){
+  if(!w&&w!==0) return '—';
+  if(w<20)  return 'Night / dark';
+  if(w<100) return 'Overcast';
+  if(w<300) return 'Partly cloudy';
+  if(w<600) return 'Mostly sunny';
+  return 'Bright sunshine';
+}
+function dewLabel(d){
+  if(d<5)  return 'Very dry';
+  if(d<10) return 'Dry';
+  if(d<15) return 'Comfortable';
+  if(d<20) return 'Slightly humid';
+  return 'Muggy';
+}
+function getCondition(obs){
+  const pr = obs.metric.precipRate||0;
+  const sr = obs.metric.solarRadiation||obs.solarRadiation||0;
+  const h  = new Date().getHours();
+  const night = h<5||h>22;
+  if(pr>7)   return{icon:'⛈',label:'Heavy Rain'};
+  if(pr>2.5) return{icon:'🌧',label:'Rain'};
+  if(pr>0)   return{icon:'🌦',label:'Light Rain'};
+  if(night && sr<10) return{icon:'🌙',label:'Clear Night'};
+  if(night)  return{icon:'☁',label:'Cloudy Night'};
+  if(sr>700) return{icon:'☀',label:'Bright Sunshine'};
+  if(sr>300) return{icon:'🌤',label:'Mostly Sunny'};
+  if(sr>80)  return{icon:'⛅',label:'Partly Cloudy'};
+  if(sr>10)  return{icon:'🌥',label:'Mostly Cloudy'};
+  return{icon:'☁',label:'Overcast'};
+}
+
+// ── Sunrise / Sunset ──────────────────────────────────────
+function sunTimes(lat,lon,date){
+  const rad=Math.PI/180, deg=180/Math.PI;
+  const start=new Date(date.getFullYear(),0,0);
+  const doy=Math.floor((date-start)/864e5);
+  const leap=(date.getFullYear()%4===0&&(date.getFullYear()%100!==0||date.getFullYear()%400===0));
+  const g=2*Math.PI/(leap?366:365)*(doy-1);
+  const eqtime=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.04089*Math.sin(2*g));
+  const decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const cosHA=(Math.cos(90.833*rad)-(Math.sin(lat*rad)*Math.sin(decl)))/(Math.cos(lat*rad)*Math.cos(decl));
+  if(Math.abs(cosHA)>1) return null;
+  const ha=deg*Math.acos(cosHA);
+  const noon=720-4*lon-eqtime;
+  const sr=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon-4*ha)));
+  const ss=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon+4*ha)));
+  return{sunrise:sr,sunset:ss};
+}
+function fmtTime(d){
+  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function updateSunArc(lat,lon){
+  const now=new Date();
+  const st=sunTimes(lat,lon,now);
+  if(!st) return;
+  set('sunrise-time',fmtTime(st.sunrise));
+  set('sunset-time', fmtTime(st.sunset));
+  const durMs=st.sunset-st.sunrise;
+  const durH=Math.floor(durMs/36e5), durM=Math.floor((durMs%36e5)/6e4);
+  set('daylen',durH+'h '+(durM<10?'0':'')+durM+'m');
+
+  // Position sun on arc
+  const t=Math.max(0,Math.min(1,(now-st.sunrise)/(st.sunset-st.sunrise)));
+  const cx=130, cy=125, r=115;
+  const theta=Math.PI*(1-t);
+  const sx=cx+r*Math.cos(theta);
+  const sy=cy-r*Math.sin(theta);
+
+  const sunDot=document.getElementById('sun-dot');
+  const sunHalo=document.getElementById('sun-halo');
+  const prog=document.getElementById('sun-progress');
+  const srLabel=document.getElementById('sr-label');
+  const ssLabel=document.getElementById('ss-label');
+
+  if(sunDot){sunDot.setAttribute('cx',sx);sunDot.setAttribute('cy',sy);sunDot.setAttribute('opacity',t>0&&t<1?'1':'0.3')}
+  if(sunHalo){sunHalo.setAttribute('cx',sx);sunHalo.setAttribute('cy',sy);sunHalo.setAttribute('opacity','0.5')}
+  if(srLabel) srLabel.textContent=fmtTime(st.sunrise);
+  if(ssLabel) ssLabel.textContent=fmtTime(st.sunset);
+
+  // Draw progress arc
+  if(prog && t>0.01){
+    const large=t>0.5?1:0;
+    if(t>=0.99){
+      prog.setAttribute('d','M 15 125 A 115 115 0 0 1 245 125');
+    } else {
+      prog.setAttribute('d','M 15 125 A 115 115 0 '+large+' 1 '+sx.toFixed(1)+' '+sy.toFixed(1));
+    }
+    prog.setAttribute('stroke-dasharray','none');
   }
-  function uvLabel(uv) {
-    if (uv<=2) return 'Low'; if (uv<=5) return 'Moderate';
-    if (uv<=7) return 'High'; if (uv<=10) return 'Very High'; return 'Extreme';
+}
+
+// ── Background effect ──────────────────────────────────────
+let bgEffect=null;
+function setBgEffect(type){
+  const bg=document.getElementById('bg');
+  // Remove existing dynamic elements
+  bg.querySelectorAll('.rain-drop,.star').forEach(e=>e.remove());
+  clearInterval(bgEffect);
+
+  if(type==='rain'){
+    for(let i=0;i<70;i++){
+      const d=document.createElement('div');
+      d.className='rain-drop';
+      d.style.cssText='left:'+Math.random()*110+'%;top:0;height:'+(12+Math.random()*18)+'px;animation-delay:'+(-Math.random()*2)+'s;animation-duration:'+(0.5+Math.random()*0.4)+'s;opacity:'+(0.3+Math.random()*0.3);
+      bg.appendChild(d);
+    }
+  } else if(type==='night'){
+    for(let i=0;i<120;i++){
+      const s=document.createElement('div');
+      s.className='star';
+      const sz=.5+Math.random()*2;
+      s.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*70+'%;width:'+sz+'px;height:'+sz+'px;animation-delay:'+Math.random()*4+'s;animation-duration:'+(2+Math.random()*3)+'s';
+      bg.appendChild(s);
+    }
   }
-  function solarLabel(w) {
-    if (!w && w!==0) return '—';
-    if (w<50) return 'Overcast / night'; if (w<250) return 'Partly cloudy';
-    if (w<600) return 'Mostly sunny'; return 'Bright sunshine';
+}
+
+// ── Pressure arc ──────────────────────────────────────────
+function updatePressureArc(p){
+  const pMin=970, pMax=1050;
+  const t=Math.max(0,Math.min(1,(p-pMin)/(pMax-pMin)));
+  const cx=110, cy=70, r=90;
+  const theta=Math.PI*(1-t);
+  const x=cx+r*Math.cos(theta);
+  const y=cy-r*Math.sin(theta);
+  const dot=document.getElementById('p-dot');
+  if(dot){dot.setAttribute('cx',x.toFixed(1));dot.setAttribute('cy',y.toFixed(1))}
+}
+
+// ── Charts ────────────────────────────────────────────────
+function smoothPath(pts){
+  if(pts.length<2) return '';
+  let d='M '+pts[0].x+' '+pts[0].y;
+  for(let i=1;i<pts.length;i++){
+    const p0=pts[i-2]||pts[0], p1=pts[i-1], p2=pts[i], p3=pts[i+1]||p2;
+    const cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
+    const cp2x=p2.x-(p3.x-p1.x)/6, cp2y=p2.y-(p3.y-p1.y)/6;
+    d+=' C '+cp1x.toFixed(1)+','+cp1y.toFixed(1)+' '+cp2x.toFixed(1)+','+cp2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
   }
-  function humidityFeel(h) {
-    if (h<30) return 'Dry'; if (h<50) return 'Comfortable';
-    if (h<70) return 'Slightly humid'; if (h<85) return 'Humid'; return 'Very humid';
-  }
-  function dewptComfort(d) {
-    if (d<10) return 'Dry and comfortable'; if (d<16) return 'Comfortable';
-    if (d<21) return 'Slightly uncomfortable'; return 'Muggy';
-  }
-  function fmt(v, dec=1) {
-    if (v===null||v===undefined||v==='') return '—';
-    return Number(v).toFixed(dec);
-  }
-  function setEl(id, val) { const e=document.getElementById(id); if(e) e.textContent=val; }
+  return d;
+}
 
-  function applyData(obs) {
-    const m = obs.metric;
-    document.getElementById('location-line').textContent =
-      `${obs.neighborhood||obs.stationID} · ${fmt(obs.lat,4)}°N, ${fmt(obs.lon,4)}°E`;
+function drawTempChart(data){
+  const svg=document.getElementById('temp-svg');
+  if(!svg||!data.length) return;
+  svg.innerHTML='';
 
-    document.getElementById('temp').innerHTML =
-      `${fmt(m.temp,1)}<span class="temp-unit">°C</span>`;
-    setEl('feels',    fmt(m.heatIndex??m.windChill??m.temp, 1));
-    setEl('dewpt',    fmt(m.dewpt, 1));
-    setEl('hum-hero', Math.round(obs.humidity));
+  const VW=880, VH=200;
+  const pad={t:25,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r, ch=VH-pad.t-pad.b;
 
-    setEl('wind-speed', fmt(m.windSpeed, 1));
-    setEl('wind-gust',  fmt(m.windGust, 1));
-    const dl = windDirLabel(obs.winddir);
-    setEl('wind-dir-label', `${dl} · ${obs.winddir}°`);
-    document.getElementById('compass-needle').style.transform = `rotate(${obs.winddir}deg)`;
+  const temps=data.map(d=>d.temp);
+  const mn=Math.min(...temps), mx=Math.max(...temps);
+  const yMin=mn-1, yMax=mx+1;
 
-    setEl('humidity', Math.round(obs.humidity));
-    setEl('hum-feel', humidityFeel(obs.humidity));
+  const xS=(i)=>pad.l+i/(data.length-1)*cw;
+  const yS=(v)=>pad.t+(1-(v-yMin)/(yMax-yMin))*ch;
 
-    setEl('pressure', fmt(m.pressure, 1));
-    const pEl = document.getElementById('pressure-trend');
-    const p = m.pressure;
-    if (p>1013)      { pEl.className='pressure-trend trend-up';   pEl.textContent='↑ Above average'; }
-    else if (p<1005) { pEl.className='pressure-trend trend-down'; pEl.textContent='↓ Below average'; }
-    else             { pEl.className='pressure-trend trend-flat'; pEl.textContent='→ Near average'; }
-
-    const rate = m.precipRate??0;
-    setEl('rain-rate',  fmt(rate,2));
-    setEl('rain-total', fmt(m.precipTotal,1));
-    document.getElementById('rain-bar').style.width = Math.min(100,(rate/10)*100)+'%';
-
-    const uvVal = obs.uv??0;
-    setEl('uv', uvVal);
-    setEl('uv-label', uvLabel(uvVal));
-    document.getElementById('uv-marker').style.left = Math.min(98,(uvVal/11)*100)+'%';
-
-    const sol = m.solarRadiation??obs.solarRadiation;
-    setEl('solar', sol!==undefined ? Math.round(sol) : '—');
-    setEl('solar-label', solarLabel(sol));
-
-    setEl('dewpt-card', fmt(m.dewpt,1));
-    setEl('dewpt-label', dewptComfort(m.dewpt));
-
-    document.getElementById('status-dot').className = 'dot';
-    const t = new Date(obs.obsTimeUtc);
-    setEl('last-updated', t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
-    setEl('status-text', 'Live');
+  // Grid lines
+  const yTicks=5;
+  for(let i=0;i<=yTicks;i++){
+    const y=pad.t+i/yTicks*ch;
+    const val=yMax-(i/yTicks*(yMax-yMin));
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',pad.l); line.setAttribute('x2',VW-pad.r);
+    line.setAttribute('y1',y); line.setAttribute('y2',y);
+    line.setAttribute('stroke','rgba(255,255,255,0.05)'); line.setAttribute('stroke-width','1');
+    svg.appendChild(line);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',pad.l-6); t.setAttribute('y',y+4);
+    t.setAttribute('text-anchor','end'); t.setAttribute('font-size','9');
+    t.setAttribute('fill','rgba(255,255,255,0.25)'); t.setAttribute('font-family','IBM Plex Mono,monospace');
+    t.textContent=val.toFixed(1)+'°';
+    svg.appendChild(t);
   }
 
-  async function fetchWeather() {
-    const dot  = document.getElementById('status-dot');
-    const text = document.getElementById('status-text');
-    dot.className = 'dot loading';
-    text.textContent = 'Refreshing…';
-    try {
-      const res  = await fetch(PROXY_URL);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const obs  = data.observations?.[0];
-      if (!obs) throw new Error('No observation data');
-      applyData(obs);
-    } catch (e) {
-      dot.className = 'dot error';
-      text.textContent = `Error: ${e.message}`;
+  // X axis labels (every 4 hours)
+  data.forEach((d,i)=>{
+    const h=d.time.getHours();
+    if(h%4===0){
+      const x=xS(i);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',x); t.setAttribute('y',VH-4);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','9');
+      t.setAttribute('fill','rgba(255,255,255,0.25)'); t.setAttribute('font-family','IBM Plex Mono,monospace');
+      t.textContent=(h<10?'0':'')+h+':00';
+      svg.appendChild(t);
+    }
+  });
+
+  // Defs
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML='<linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4d9ff8" stop-opacity="0.35"/><stop offset="100%" stop-color="#4d9ff8" stop-opacity="0"/></linearGradient><filter id="lg"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg.appendChild(defs);
+
+  const pts=data.map((d,i)=>({x:xS(i),y:yS(d.temp)}));
+  const linePath=smoothPath(pts);
+
+  // Area fill
+  const areaPath=linePath+' L '+xS(data.length-1)+' '+(VH-pad.b)+' L '+xS(0)+' '+(VH-pad.b)+' Z';
+  const area=document.createElementNS('http://www.w3.org/2000/svg','path');
+  area.setAttribute('d',areaPath); area.setAttribute('fill','url(#tg)');
+  svg.appendChild(area);
+
+  // Line
+  const line=document.createElementNS('http://www.w3.org/2000/svg','path');
+  line.setAttribute('d',linePath); line.setAttribute('fill','none');
+  line.setAttribute('stroke','#4d9ff8'); line.setAttribute('stroke-width','2');
+  line.setAttribute('filter','url(#lg)'); line.setAttribute('stroke-linecap','round');
+  svg.appendChild(line);
+
+  // Current time marker
+  const now=new Date();
+  const nowH=now.getHours()+(now.getMinutes()/60);
+  const firstH=data[0].time.getHours()+(data[0].time.getMinutes()/60);
+  const lastH=data[data.length-1].time.getHours()+(data[data.length-1].time.getMinutes()/60);
+  const nt=(nowH-firstH)/(lastH-firstH);
+  if(nt>=0&&nt<=1){
+    const nx=pad.l+nt*cw;
+    const vl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    vl.setAttribute('x1',nx);vl.setAttribute('x2',nx);
+    vl.setAttribute('y1',pad.t);vl.setAttribute('y2',VH-pad.b);
+    vl.setAttribute('stroke','rgba(255,255,255,0.2)');vl.setAttribute('stroke-width','1');
+    vl.setAttribute('stroke-dasharray','4,3');
+    svg.appendChild(vl);
+    const nl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    nl.setAttribute('x',nx+4);nl.setAttribute('y',pad.t+10);
+    nl.setAttribute('font-size','8');nl.setAttribute('fill','rgba(255,255,255,0.35)');
+    nl.setAttribute('font-family','IBM Plex Mono,monospace');nl.textContent='now';
+    svg.appendChild(nl);
+  }
+
+  // Range label
+  set('temp-range',fmt(mn,1)+'° – '+fmt(mx,1)+'°C');
+}
+
+function drawRainChart(data){
+  const svg=document.getElementById('rain-svg');
+  if(!svg||!data.length) return;
+  svg.innerHTML='';
+
+  const VW=880, VH=150;
+  const pad={t:15,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r, ch=VH-pad.t-pad.b;
+
+  const totals=data.map(d=>d.rain);
+  const maxR=Math.max(...totals, 0.5);
+  const totalDay=totals.reduce((a,b)=>a+b,0);
+
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML='<linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa" stop-opacity="0.85"/><stop offset="100%" stop-color="#60a5fa" stop-opacity="0.2"/></linearGradient>';
+  svg.appendChild(defs);
+
+  // Grid
+  for(let i=0;i<=3;i++){
+    const y=pad.t+i/3*ch;
+    const val=maxR*(1-i/3);
+    const gl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',pad.l);gl.setAttribute('x2',VW-pad.r);
+    gl.setAttribute('y1',y);gl.setAttribute('y2',y);
+    gl.setAttribute('stroke','rgba(255,255,255,0.05)');gl.setAttribute('stroke-width','1');
+    svg.appendChild(gl);
+    if(val>0){
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',pad.l-5);t.setAttribute('y',y+4);
+      t.setAttribute('text-anchor','end');t.setAttribute('font-size','9');
+      t.setAttribute('fill','rgba(255,255,255,0.25)');t.setAttribute('font-family','IBM Plex Mono,monospace');
+      t.textContent=val.toFixed(1);
+      svg.appendChild(t);
     }
   }
 
-  fetchWeather();
-  setInterval(fetchWeather, 5 * 60 * 1000);
+  const bw=Math.max(2,(cw/data.length)*0.65);
+  data.forEach((d,i)=>{
+    const x=pad.l+i/(data.length)*cw;
+    const h=(d.rain/maxR)*ch;
+    if(d.rain>0){
+      const bar=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bar.setAttribute('x',(x-bw/2).toFixed(1));
+      bar.setAttribute('y',(pad.t+ch-h).toFixed(1));
+      bar.setAttribute('width',bw.toFixed(1));
+      bar.setAttribute('height',h.toFixed(1));
+      bar.setAttribute('fill','url(#rg)');
+      bar.setAttribute('rx','2');
+      svg.appendChild(bar);
+    }
+    if(d.time.getHours()%4===0){
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      const h2=d.time.getHours();
+      t.setAttribute('x',x);t.setAttribute('y',VH-4);
+      t.setAttribute('text-anchor','middle');t.setAttribute('font-size','9');
+      t.setAttribute('fill','rgba(255,255,255,0.25)');t.setAttribute('font-family','IBM Plex Mono,monospace');
+      t.textContent=(h2<10?'0':'')+h2+':00';
+      svg.appendChild(t);
+    }
+  });
+
+  // No rain message
+  if(totalDay<0.1){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',VW/2);t.setAttribute('y',VH/2);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size','12');
+    t.setAttribute('fill','rgba(255,255,255,0.2)');t.setAttribute('font-family','DM Sans,sans-serif');
+    t.textContent='No precipitation in the last 24 h';
+    svg.appendChild(t);
+  }
+  set('rain-range','Total: '+totalDay.toFixed(1)+' mm');
+}
+
+// ── Apply current observation ──────────────────────────────
+function applyObs(obs){
+  const m=obs.metric;
+  const cond=getCondition(obs);
+
+  // Hero
+  set('temp-val',    fmt(m.temp,1));
+  set('feels-val',   fmt(m.heatIndex??m.windChill??m.temp,1));
+  set('dewpt-hero',  fmt(m.dewpt,1));
+  set('hs-humidity', Math.round(obs.humidity));
+  set('hs-pressure', fmt(m.pressure,1));
+  set('hs-wind',     fmt(m.windSpeed,1));
+  set('hs-uv',       obs.uv??'—');
+  set('cond-icon',   cond.icon);
+  set('cond-label',  cond.label);
+
+  // Wind
+  set('wind-speed',  fmt(m.windSpeed,1));
+  set('wind-gust',   fmt(m.windGust,1));
+  set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
+  document.getElementById('needle').style.transform='rotate('+obs.winddir+'deg)';
+
+  // Pressure
+  set('pressure-val',fmt(m.pressure,1));
+  const pEl=document.getElementById('p-trend');
+  if(m.pressure>1013){pEl.className='p-trend t-up';pEl.textContent='↑ Above average';}
+  else if(m.pressure<1005){pEl.className='p-trend t-dn';pEl.textContent='↓ Below average';}
+  else{pEl.className='p-trend t-flat';pEl.textContent='→ Near average';}
+  set('pressure-label',m.pressure>1020?'High pressure — stable':'m.pressure'<1005?'Low pressure — unsettled':'Moderate pressure');
+  updatePressureArc(m.pressure);
+
+  // Small cards
+  const rr=m.precipRate??0;
+  set('rain-rate',  fmt(rr,2));
+  set('rain-total', fmt(m.precipTotal,1));
+  document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
+  const uv=obs.uv??0;
+  set('uv-val',     uv);
+  set('uv-label',   uvLabel(uv));
+  document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
+  const sol=m.solarRadiation??obs.solarRadiation;
+  set('solar-val',  sol!=null?Math.round(sol):'—');
+  set('solar-label',solarLabel(sol));
+  set('dewpt-val',  fmt(m.dewpt,1));
+  set('dewpt-label',dewLabel(m.dewpt));
+
+  // Snapshot panel
+  set('snap-fog',   obs.humidity>95?'Fog / mist likely':'Clear');
+  set('snap-chill', fmt(m.windChill,1)+'°C');
+  set('snap-heat',  fmt(m.heatIndex,1)+'°C');
+  set('snap-sw',    obs.softwareType||'—');
+  set('snap-qc',    obs.qcStatus===1?'✓ Passed':'—');
+
+  // Status
+  document.getElementById('dot').className='dot';
+  set('status-text','Live');
+  const t=new Date(obs.obsTimeUtc);
+  set('updated',fmtTime(t));
+
+  // Background effect
+  const h=new Date().getHours();
+  if(rr>0) setBgEffect('rain');
+  else if(h<5||h>22) setBgEffect('night');
+  else setBgEffect('clear');
+
+  // Sunrise
+  updateSunArc(obs.lat,obs.lon);
+}
+
+// ── Apply hourly data (charts) ─────────────────────────────
+function applyHourly(observations){
+  // Take last 24 entries
+  const raw=observations.slice(-24);
+  const tempData=raw.map(o=>({
+    time:new Date(o.obsTimeLocal.replace(' ','T')),
+    temp:o.metric.tempAvg??o.metric.temp??0
+  }));
+  const rainData=raw.map(o=>({
+    time:new Date(o.obsTimeLocal.replace(' ','T')),
+    rain:o.metric.precipTotal??0
+  }));
+  if(tempData.length>1) drawTempChart(tempData);
+  if(rainData.length>1) drawRainChart(rainData);
+}
+
+// ── Local clock ───────────────────────────────────────────
+function tickClock(){
+  const now=new Date();
+  set('local-time',now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+}
+setInterval(tickClock,1000); tickClock();
+
+// ── Fetch ─────────────────────────────────────────────────
+async function fetchCurrent(){
+  const dot=document.getElementById('dot');
+  dot.className='dot loading';
+  set('status-text','Refreshing…');
+  try{
+    const res=await fetch(PROXY+'/');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const obs=data.observations?.[0];
+    if(!obs) throw new Error('No data');
+    applyObs(obs);
+  } catch(e){
+    dot.className='dot error';
+    set('status-text','Error: '+e.message);
+  }
+}
+
+async function fetchHourly(){
+  try{
+    const res=await fetch(PROXY+'/hourly');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.observations?.length) applyHourly(data.observations);
+  } catch(e){
+    console.warn('Hourly data error:',e);
+  }
+}
+
+async function init(){
+  await Promise.all([fetchCurrent(), fetchHourly()]);
+}
+
+init();
+setInterval(fetchCurrent, 5*60*1000);
+setInterval(fetchHourly,  30*60*1000);
+setInterval(updateSunArc.bind(null,LAT,LON), 60*1000);
 </script>
 </body>
 </html>
