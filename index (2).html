@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Station IREICA1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --card: rgba(255,255,255,0.03);
+    --card-border: rgba(255,255,255,0.07);
+    --text: #e8edf5;
+    --muted: #7a8898;
+    --accent: #5b9cf6;
+    --accent2: #38bdf8;
+    --warm: #f0a050;
+    --green: #4ade80;
+    --red: #f87171;
+    --wind: #a78bfa;
+  }
+  body {
+    background: #06090f;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(99,102,241,0.05) 0%, transparent 60%);
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; padding: 3rem 0 2.5rem; }
+  .station-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.25em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--accent2); }
+  .location-line { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; }
+
+  .status-bar {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.5rem; margin: 1.5rem 0 2.5rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem;
+    color: var(--muted); flex-wrap: wrap;
+  }
+  .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green); margin-right: 5px;
+    box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite;
+  }
+  .dot.loading { background: var(--warm); box-shadow: 0 0 8px var(--warm); }
+  .dot.error   { background: var(--red); box-shadow: 0 0 8px var(--red); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .hero {
+    display: flex; align-items: center; justify-content: center;
+    gap: 3rem; padding: 2rem;
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 20px; margin-bottom: 1.25rem; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(91,156,246,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .temp-value {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: clamp(4rem, 10vw, 6.5rem); line-height: 1; letter-spacing: -0.04em;
+  }
+  .temp-unit { font-size: 0.4em; color: var(--muted); vertical-align: super; font-weight: 300; }
+  .temp-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.25rem; }
+  .hero-divider { width: 1px; height: 80px; background: var(--card-border); }
+  .hero-secondary { display: flex; flex-direction: column; gap: 1rem; }
+  .hero-stat { display: flex; align-items: baseline; gap: 0.5rem; }
+  .hero-stat .val { font-family: 'IBM Plex Mono', monospace; font-size: 1.25rem; }
+  .hero-stat .unit, .hero-stat .lbl { font-size: 0.7rem; color: var(--muted); }
+  .hero-stat .lbl { min-width: 80px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 16px; padding: 1.25rem 1.5rem; transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.12); }
+  .card-label {
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .card-label svg { opacity: 0.6; flex-shrink: 0; }
+  .card-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.85rem; font-weight: 300; line-height: 1.1; }
+  .card-unit { font-size: 0.8rem; color: var(--muted); margin-left: 0.2em; }
+  .card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; }
+
+  .wind-card { display: flex; align-items: center; gap: 1.5rem; }
+  .compass { width: 72px; height: 72px; flex-shrink: 0; }
+  .compass svg { width: 100%; height: 100%; }
+  .wind-speed-big { font-family: 'IBM Plex Mono', monospace; font-size: 1.85rem; font-weight: 300; line-height: 1; }
+  .wind-dir-label { font-size: 0.75rem; color: var(--wind); margin-top: 0.3rem; letter-spacing: 0.05em; }
+  .wind-gust { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; }
+
+  .pressure-trend {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; margin-top: 0.4rem;
+  }
+  .trend-up   { background: rgba(74,222,128,0.12); color: var(--green); }
+  .trend-down { background: rgba(248,113,113,0.12); color: var(--red); }
+  .trend-flat { background: rgba(148,163,184,0.1);  color: var(--muted); }
+
+  .rain-bar-wrap { margin-top: 0.75rem; height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .rain-bar-fill { height: 100%; background: linear-gradient(90deg,#3b82f6,#38bdf8); border-radius: 4px; transition: width 0.8s ease; }
+
+  .uv-bar { margin-top: 0.75rem; height: 4px; border-radius: 4px; background: linear-gradient(90deg,#4ade80,#facc15,#f97316,#ef4444,#9333ea); position: relative; }
+  .uv-marker { position: absolute; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: white; transform: translateX(-50%); transition: left 0.6s ease; box-shadow: 0 0 6px rgba(0,0,0,0.5); }
+
+  footer { text-align: center; margin-top: 3rem; font-size: 0.7rem; color: var(--muted); line-height: 2; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 560px) {
+    .hero { flex-direction: column; gap: 1.5rem; }
+    .hero-divider { width: 80px; height: 1px; }
+    .hero-secondary { flex-direction: row; flex-wrap: wrap; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <p class="station-label">Personal Weather Station · IREICA1</p>
+    <h1>Weather <em>Observatory</em></h1>
+    <p class="location-line" id="location-line">Loading location…</p>
+  </header>
+
+  <div class="status-bar">
+    <span><span class="dot loading" id="status-dot"></span><span id="status-text">Fetching data…</span></span>
+    <span>Updated: <span id="last-updated">—</span></span>
+    <span>Auto-refresh: 5 min</span>
+  </div>
+
+  <div class="hero">
+    <div>
+      <div class="temp-value" id="temp">—<span class="temp-unit">°C</span></div>
+      <div class="temp-label">Temperature</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-secondary">
+      <div class="hero-stat"><span class="lbl">Feels like</span><span class="val" id="feels">—</span><span class="unit">°C</span></div>
+      <div class="hero-stat"><span class="lbl">Dew point</span><span class="val" id="dewpt">—</span><span class="unit">°C</span></div>
+      <div class="hero-stat"><span class="lbl">Humidity</span><span class="val" id="hum-hero">—</span><span class="unit">%</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card" style="grid-column: span 2;">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.7 7.7A2.5 2.5 0 1 1 21 10.5H3"/><path d="M9.6 4.6A2 2 0 1 1 11 8H3"/><path d="M12.6 19.4A2 2 0 1 0 14 16H3"/></svg>
+        Wind
+      </div>
+      <div class="wind-card">
+        <div class="compass">
+          <svg viewBox="0 0 72 72" fill="none">
+            <circle cx="36" cy="36" r="34" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="36" y="10"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">N</text>
+            <text x="36" y="67"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">S</text>
+            <text x="7"  y="39"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">W</text>
+            <text x="66" y="39"  text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">E</text>
+            <g id="compass-needle" style="transform-origin:36px 36px">
+              <polygon points="36,14 39,36 36,42 33,36" fill="#a78bfa"/>
+              <polygon points="36,58 39,36 36,42 33,36" fill="rgba(167,139,250,0.3)"/>
+              <circle cx="36" cy="36" r="3" fill="#a78bfa"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <div class="wind-speed-big"><span id="wind-speed">—</span><span style="font-size:0.8rem;color:var(--muted);margin-left:4px">km/h</span></div>
+          <div class="wind-dir-label" id="wind-dir-label">—</div>
+          <div class="wind-gust">Gusts: <span id="wind-gust">—</span> km/h</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        Humidity
+      </div>
+      <div class="card-value" id="humidity">—<span class="card-unit">%</span></div>
+      <div class="card-sub" id="hum-feel">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Pressure
+      </div>
+      <div class="card-value" id="pressure">—<span class="card-unit">hPa</span></div>
+      <div id="pressure-trend" class="pressure-trend trend-flat">— steady</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="8" y1="20" x2="8.01" y2="20"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="12" y1="22" x2="12.01" y2="22"/><line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/></svg>
+        Rain rate
+      </div>
+      <div class="card-value" id="rain-rate">—<span class="card-unit">mm/h</span></div>
+      <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
+      <div class="card-sub" style="margin-top:0.6rem">Total today: <span id="rain-total">—</span> mm</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        UV Index
+      </div>
+      <div class="card-value" id="uv">—</div>
+      <div class="uv-bar"><div class="uv-marker" id="uv-marker" style="left:0%"></div></div>
+      <div class="card-sub" style="margin-top:0.6rem" id="uv-label">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Solar Radiation
+      </div>
+      <div class="card-value" id="solar">—<span class="card-unit">W/m²</span></div>
+      <div class="card-sub" id="solar-label">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+        Dew point
+      </div>
+      <div class="card-value" id="dewpt-card">—<span class="card-unit">°C</span></div>
+      <div class="card-sub" id="dewpt-label">—</div>
+    </div>
+  </div>
+
+  <footer>
+    Data from <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground · IREICA1</a>
+    &nbsp;·&nbsp; Hosted on GitHub Pages<br>
+    Refreshes automatically every 5 minutes
+  </footer>
+</div>
+
+<script>
+  // ▼ Paste your Cloudflare Worker URL here after deploying worker.js ▼
+  const PROXY_URL = 'https://weatherireica1.filip-eremita.workers.dev/';
+  // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+  function windDirLabel(deg) {
+    const d = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    return d[Math.round(deg / 22.5) % 16];
+  }
+  function uvLabel(uv) {
+    if (uv<=2) return 'Low'; if (uv<=5) return 'Moderate';
+    if (uv<=7) return 'High'; if (uv<=10) return 'Very High'; return 'Extreme';
+  }
+  function solarLabel(w) {
+    if (!w && w!==0) return '—';
+    if (w<50) return 'Overcast / night'; if (w<250) return 'Partly cloudy';
+    if (w<600) return 'Mostly sunny'; return 'Bright sunshine';
+  }
+  function humidityFeel(h) {
+    if (h<30) return 'Dry'; if (h<50) return 'Comfortable';
+    if (h<70) return 'Slightly humid'; if (h<85) return 'Humid'; return 'Very humid';
+  }
+  function dewptComfort(d) {
+    if (d<10) return 'Dry and comfortable'; if (d<16) return 'Comfortable';
+    if (d<21) return 'Slightly uncomfortable'; return 'Muggy';
+  }
+  function fmt(v, dec=1) {
+    if (v===null||v===undefined||v==='') return '—';
+    return Number(v).toFixed(dec);
+  }
+  function setEl(id, val) { const e=document.getElementById(id); if(e) e.textContent=val; }
+
+  function applyData(obs) {
+    const m = obs.metric;
+    document.getElementById('location-line').textContent =
+      `${obs.neighborhood||obs.stationID} · ${fmt(obs.lat,4)}°N, ${fmt(obs.lon,4)}°E`;
+
+    document.getElementById('temp').innerHTML =
+      `${fmt(m.temp,1)}<span class="temp-unit">°C</span>`;
+    setEl('feels',    fmt(m.heatIndex??m.windChill??m.temp, 1));
+    setEl('dewpt',    fmt(m.dewpt, 1));
+    setEl('hum-hero', Math.round(obs.humidity));
+
+    setEl('wind-speed', fmt(m.windSpeed, 1));
+    setEl('wind-gust',  fmt(m.windGust, 1));
+    const dl = windDirLabel(obs.winddir);
+    setEl('wind-dir-label', `${dl} · ${obs.winddir}°`);
+    document.getElementById('compass-needle').style.transform = `rotate(${obs.winddir}deg)`;
+
+    setEl('humidity', Math.round(obs.humidity));
+    setEl('hum-feel', humidityFeel(obs.humidity));
+
+    setEl('pressure', fmt(m.pressure, 1));
+    const pEl = document.getElementById('pressure-trend');
+    const p = m.pressure;
+    if (p>1013)      { pEl.className='pressure-trend trend-up';   pEl.textContent='↑ Above average'; }
+    else if (p<1005) { pEl.className='pressure-trend trend-down'; pEl.textContent='↓ Below average'; }
+    else             { pEl.className='pressure-trend trend-flat'; pEl.textContent='→ Near average'; }
+
+    const rate = m.precipRate??0;
+    setEl('rain-rate',  fmt(rate,2));
+    setEl('rain-total', fmt(m.precipTotal,1));
+    document.getElementById('rain-bar').style.width = Math.min(100,(rate/10)*100)+'%';
+
+    const uvVal = obs.uv??0;
+    setEl('uv', uvVal);
+    setEl('uv-label', uvLabel(uvVal));
+    document.getElementById('uv-marker').style.left = Math.min(98,(uvVal/11)*100)+'%';
+
+    const sol = m.solarRadiation??obs.solarRadiation;
+    setEl('solar', sol!==undefined ? Math.round(sol) : '—');
+    setEl('solar-label', solarLabel(sol));
+
+    setEl('dewpt-card', fmt(m.dewpt,1));
+    setEl('dewpt-label', dewptComfort(m.dewpt));
+
+    document.getElementById('status-dot').className = 'dot';
+    const t = new Date(obs.obsTimeUtc);
+    setEl('last-updated', t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+    setEl('status-text', 'Live');
+  }
+
+  async function fetchWeather() {
+    const dot  = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    dot.className = 'dot loading';
+    text.textContent = 'Refreshing…';
+    try {
+      const res  = await fetch(PROXY_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const obs  = data.observations?.[0];
+      if (!obs) throw new Error('No observation data');
+      applyData(obs);
+    } catch (e) {
+      dot.className = 'dot error';
+      text.textContent = `Error: ${e.message}`;
+    }
+  }
+
+  fetchWeather();
+  setInterval(fetchWeather, 5 * 60 * 1000);
+</script>
+</body>
+</html>
