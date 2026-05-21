@@ -19,7 +19,13 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
 
 /* Background */
-#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 100% 50% at 50% -5%,rgba(30,60,120,.18) 0%,transparent 65%),radial-gradient(ellipse 60% 40% at 90% 90%,rgba(80,40,120,.08) 0%,transparent 60%)}
+#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:#04070e}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.b1{width:600px;height:600px;background:radial-gradient(circle,rgba(77,159,248,.22),transparent 70%);top:-15%;left:-10%;animation:blob-drift 20s ease-in-out infinite}
+.b2{width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,.18),transparent 70%);top:15%;right:-8%;animation:blob-drift 26s ease-in-out infinite reverse 3s}
+.b3{width:420px;height:420px;background:radial-gradient(circle,rgba(34,211,238,.14),transparent 70%);bottom:5%;left:10%;animation:blob-drift 18s ease-in-out infinite 7s}
+.b4{width:350px;height:350px;background:radial-gradient(circle,rgba(52,211,153,.1),transparent 70%);bottom:25%;right:15%;animation:blob-drift 23s ease-in-out infinite 12s}
+@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
 .rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(100,160,255,.45),transparent);animation:rain-fall linear infinite;transform-origin:top}
 @keyframes rain-fall{0%{transform:translateY(-120px) rotate(12deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(105vh) rotate(12deg);opacity:0}}
 .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle ease-in-out infinite}
@@ -43,8 +49,8 @@ h1 em{font-style:italic;color:var(--cyan)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* Cards */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:1.4rem 1.6rem;transition:border-color .2s,box-shadow .2s}
-.card:hover{border-color:var(--bh);box-shadow:0 4px 30px rgba(0,0,0,.3)}
+.card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.4rem 1.6rem;transition:border-color .25s,box-shadow .25s,background .25s;box-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.09)}
+.card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.17);box-shadow:0 8px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.13)}
 .clabel{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem}
 .cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1}
 .unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
@@ -260,7 +266,12 @@ footer a{color:var(--blue);text-decoration:none}
 </style>
 </head>
 <body>
-<div id="bg"></div>
+<div id="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
 <div id="chart-tip"></div>
 
 <div class="wrap">
