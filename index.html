@@ -138,8 +138,44 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes star-wink {0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
-/* span2 helper */
-.span2{grid-column:span 2}
+/* Alert banner */
+.alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
+@keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+.alert-body{flex:1}
+.alert-title{font-weight:500;letter-spacing:.02em}
+.alert-desc{font-size:.68rem;opacity:.8;margin-top:.1rem}
+.alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.55;margin-left:.25rem;flex-shrink:0;line-height:1}
+.alert-close:hover{opacity:1}
+.a-frost {background:rgba(147,197,253,.1);border-color:rgba(147,197,253,.3);color:#93c5fd}
+.a-freeze{background:rgba(103,232,249,.1);border-color:rgba(103,232,249,.3);color:#67e8f9}
+.a-heat  {background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#f87171}
+.a-uv    {background:rgba(251,146,60,.1); border-color:rgba(251,146,60,.3); color:#fb923c}
+.a-wind  {background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:#a78bfa}
+
+/* Today's summary strip */
+.day-summary{display:flex;margin-bottom:1rem;background:var(--s1);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.ds-item{flex:1;padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.3rem;position:relative}
+.ds-item+.ds-item::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:var(--border)}
+.ds-arrow{font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.ds-temp{font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1}
+.ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
+.ds-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;line-height:1.4}
+.ds-time{font-family:'IBM Plex Mono',monospace;font-weight:300}
+.ds-high .ds-arrow{color:var(--red)}
+.ds-low  .ds-arrow{color:var(--blue)}
+.ds-rain .ds-arrow{color:var(--rain-col)}
+.ds-avg  .ds-arrow{color:var(--green)}
+
+/* Pressure rate label */
+.p-rate{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:.3rem}
+
+@media(max-width:520px){
+  .day-summary{flex-wrap:wrap}
+  .ds-item{flex:0 0 50%;box-sizing:border-box}
+  .ds-item:nth-child(3)::before,.ds-item:nth-child(4)::before,.ds-item:nth-child(odd)::before{display:none}
+}
 
 /* Chart scrollable on mobile */
 .chart-svg-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -240,6 +276,9 @@ footer a{color:var(--blue);text-decoration:none}
     <span id="local-time">—</span>
   </div>
 
+  <!-- Alert banners (injected by JS) -->
+  <div id="alerts-wrap" class="alerts-wrap"></div>
+
   <!-- Hero -->
   <div class="hero card">
     <div>
@@ -257,6 +296,30 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="hs"><span class="hs-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span><span class="hs-lbl">Pressure</span></div>
       <div class="hs"><span class="hs-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span><span class="hs-lbl">Wind</span></div>
       <div class="hs"><span class="hs-val" id="hs-uv">—</span><span class="hs-lbl">UV Index</span></div>
+    </div>
+  </div>
+
+  <!-- Today's summary -->
+  <div class="day-summary">
+    <div class="ds-item ds-high">
+      <span class="ds-arrow">↑ High</span>
+      <span class="ds-temp"><span id="day-high">—</span><span class="ds-unit">°C</span></span>
+      <span class="ds-lbl">at <span class="ds-time" id="day-hi-time">—</span></span>
+    </div>
+    <div class="ds-item ds-low">
+      <span class="ds-arrow">↓ Low</span>
+      <span class="ds-temp"><span id="day-low">—</span><span class="ds-unit">°C</span></span>
+      <span class="ds-lbl">at <span class="ds-time" id="day-lo-time">—</span></span>
+    </div>
+    <div class="ds-item ds-rain">
+      <span class="ds-arrow">🌧 Rain</span>
+      <span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span>
+      <span class="ds-lbl">Total today</span>
+    </div>
+    <div class="ds-item ds-avg">
+      <span class="ds-arrow">~ Avg</span>
+      <span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit">°C</span></span>
+      <span class="ds-lbl">Daily average</span>
     </div>
   </div>
 
@@ -300,6 +363,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="clabel">📊 Pressure</div>
       <div class="cval" id="pressure-val">—<span class="unit">hPa</span></div>
       <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— steady</div>
+      <div id="p-rate" class="p-rate"></div>
       <svg class="pressure-arc-svg" viewBox="0 0 220 80">
         <defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f87171"/><stop offset="50%" stop-color="#34d399"/><stop offset="100%" stop-color="#4d9ff8"/></linearGradient></defs>
         <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6" stroke-linecap="round"/>
@@ -726,7 +790,78 @@ function drawRainChart(data){
   set('rain-range','Total: '+total.toFixed(1)+' mm');
 }
 
-// ── Apply current observation ─────────────────────────────
+// ── Alert banners ─────────────────────────────────────────
+function checkAlerts(obs){
+  const m=obs.metric, uv=obs.uv??0, wind=m.windSpeed??0;
+  const alerts=[];
+  if(m.temp<=0)
+    alerts.push({cls:'a-freeze',icon:'🧊',title:'Freezing conditions',desc:'Temperature at or below 0°C — frost and ice likely on roads and surfaces.'});
+  else if(m.temp<=3)
+    alerts.push({cls:'a-frost',icon:'❄️',title:'Near-frost conditions',desc:'Temperature below 3°C — protect sensitive plants overnight.'});
+  if(uv>=11)
+    alerts.push({cls:'a-uv',icon:'☀️',title:'Extreme UV — UV '+uv,desc:'Avoid outdoor exposure. SPF 50+ sunscreen, hat and shade essential.'});
+  else if(uv>=8)
+    alerts.push({cls:'a-uv',icon:'🌞',title:'Very high UV — UV '+uv,desc:'Sun protection strongly recommended. Limit midday sun exposure.'});
+  if(m.temp>=35)
+    alerts.push({cls:'a-heat',icon:'🌡️',title:'Heat warning — '+m.temp.toFixed(1)+'°C',desc:'Stay hydrated, avoid strenuous outdoor activity during peak hours.'});
+  if(wind>=50)
+    alerts.push({cls:'a-wind',icon:'💨',title:'Strong wind — '+wind.toFixed(1)+' km/h',desc:'Secure loose outdoor items. Driving may be affected.'});
+  const wrap=document.getElementById('alerts-wrap');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  alerts.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='alert-bar '+a.cls;
+    div.innerHTML='<span class="alert-icon">'+a.icon+'</span><div class="alert-body"><div class="alert-title">'+a.title+'</div><div class="alert-desc">'+a.desc+'</div></div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    wrap.appendChild(div);
+  });
+}
+
+// ── Today's high / low / rain ─────────────────────────────
+function applyDayStats(observations){
+  const today=new Date().toDateString();
+  const todayObs=observations.filter(o=>new Date(o.obsTimeLocal.replace(' ','T')).toDateString()===today);
+  if(!todayObs.length) return;
+  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0;
+  let totalRain=0;
+  todayObs.forEach(o=>{
+    const t=new Date(o.obsTimeLocal.replace(' ','T'));
+    const temp=o.metric.tempAvg??o.metric.temp??0;
+    if(temp>maxT){maxT=temp;maxTime=t;}
+    if(temp<minT){minT=temp;minTime=t;}
+    tempSum+=temp;
+    totalRain+=o.metric.precipTotal??0;
+  });
+  set('day-high',fmt(maxT,1));
+  set('day-low', fmt(minT,1));
+  set('day-rain',fmt(totalRain,1));
+  set('day-avg', fmt(tempSum/todayObs.length,1));
+  if(maxTime) set('day-hi-time',fmtTime(maxTime));
+  if(minTime) set('day-lo-time',fmtTime(minTime));
+}
+
+// ── Pressure trend (rate of change) ──────────────────────
+function applyPressureTrend(observations){
+  if(observations.length<4) return;
+  const last=observations[observations.length-1];
+  const prev=observations[observations.length-4]; // ~3 hours back
+  const pNow=last.metric.pressureMax??last.metric.pressure;
+  const pOld=prev.metric.pressureMax??prev.metric.pressure;
+  if(!pNow||!pOld) return;
+  const diff=pNow-pOld;
+  let arrow,label,cls,desc;
+  if     (diff> 3){arrow='↑↑';label='Rising fast'; cls='t-up';  desc='Rapid improvement — clearing likely';}
+  else if(diff> 1){arrow='↑'; label='Rising';      cls='t-up';  desc='Gradually improving';}
+  else if(diff>-1){arrow='→'; label='Steady';      cls='t-flat';desc='Stable — no significant change';}
+  else if(diff>-3){arrow='↓'; label='Falling';     cls='t-dn';  desc='Conditions may deteriorate';}
+  else            {arrow='↓↓';label='Falling fast';cls='t-dn';  desc='Possible storm or heavy rain soon';}
+  const pEl=document.getElementById('p-trend');
+  if(pEl){pEl.className='p-trend '+cls;pEl.textContent=arrow+' '+label;}
+  const rEl=document.getElementById('p-rate');
+  if(rEl) rEl.textContent=(diff>=0?'+':'')+diff.toFixed(1)+' hPa / 3 h · '+desc;
+}
+
+
 function applyObs(obs){
   const m=obs.metric;
   const cond=getCondition(obs);
@@ -800,12 +935,15 @@ function applyObs(obs){
   else setBgEffect('clear');
 
   updateSunArc(obs.lat,obs.lon);
+  checkAlerts(obs);
 }
 
 function applyHourly(observations){
   const raw=observations.slice(-24);
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
+  applyDayStats(observations);
+  applyPressureTrend(observations);
 }
 
 // ── Clock ──────────────────────────────────────────────────
