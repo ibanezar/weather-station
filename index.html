@@ -138,14 +138,89 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes star-wink {0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
-/* Responsive */
-@media(max-width:680px){
-  .hero{grid-template-columns:1fr;gap:1.5rem}
-  .hero-icon{order:-1;justify-content:flex-start}.hero-icon svg{width:90px;height:90px}
-  .hero-stats{flex-direction:row;flex-wrap:wrap;gap:.75rem 1.5rem}
-  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+/* span2 helper */
+.span2{grid-column:span 2}
+
+/* Chart scrollable on mobile */
+.chart-svg-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart-svg{width:100%;min-width:600px;display:block;cursor:crosshair}
+
+/* ── Responsive ── */
+
+/* Tablet */
+@media(max-width:860px){
+  .wrap{padding:2rem 1rem 4rem}
+  .hero{grid-template-columns:1fr 130px auto;gap:1.5rem}
+  .hero-icon svg{width:120px;height:120px}
 }
-@media(max-width:420px){.g3,.g4{grid-template-columns:1fr}}
+
+/* Large mobile */
+@media(max-width:680px){
+  .wrap{padding:1.5rem .9rem 3.5rem}
+  header{padding:1.75rem 0 1.25rem}
+  /* Hero: temp + icon side by side, stats full-width below */
+  .hero{grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:1rem;padding:1.5rem 1.25rem}
+  .hero>div:first-child{grid-column:1;grid-row:1}
+  .hero-icon{grid-column:2;grid-row:1;align-items:flex-start;padding-top:.4rem}
+  .hero-icon svg{width:96px;height:96px}
+  .hero-stats{grid-column:1 / -1;grid-row:2;flex-direction:row;flex-wrap:wrap;gap:.5rem 1.5rem}
+  .hs-val{font-size:1rem}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr}
+  .span2{grid-column:span 1}
+  .g4{grid-template-columns:1fr 1fr}
+  .sun-times{font-size:.65rem}
+}
+
+/* Mobile */
+@media(max-width:520px){
+  .wrap{padding:1rem .75rem 3rem}
+  header{padding:1.25rem 0 1rem}
+  h1{font-size:clamp(1.7rem,8vw,2.6rem)}
+  .sub-loc{font-size:.68rem}
+  .stn-badge{font-size:.56rem;padding:3px 10px;letter-spacing:.18em}
+  .status{gap:.75rem;font-size:.6rem;padding:.3rem 0 1.25rem}
+  .card{padding:1rem 1.1rem}
+  .chart-card{padding:1rem 1.1rem .7rem}
+  .clabel{font-size:.6rem}
+  .cval{font-size:1.65rem}
+  /* Hero */
+  .hero{padding:1.1rem;gap:.9rem}
+  .temp-huge{font-size:clamp(3.8rem,20vw,5.5rem)}
+  .temp-unit-sup{margin-top:.4em}
+  .hero-icon svg{width:80px;height:80px}
+  .feels{font-size:.72rem}
+  .condition-badge{font-size:.66rem;padding:4px 11px}
+  /* Wind */
+  .wind-body{gap:1rem}
+  .compass-svg{width:84px;height:84px}
+  .ws-big{font-size:1.55rem}
+  .wdir{font-size:.72rem}
+  .beaufort-badge{font-size:.62rem}
+  /* Pressure arc */
+  .pressure-arc-svg{height:65px}
+  /* Charts — fixed width so they stay readable, scroll on mobile */
+  .chart-svg{min-width:480px}
+  /* Sunrise */
+  .sun-svg{max-height:110px}
+  .sun-times{font-size:.6rem}
+  /* Snapshot grid */
+  [id^="snap-"]{font-size:.8rem}
+  /* Footer */
+  footer{font-size:.62rem}
+}
+
+/* Small phones */
+@media(max-width:380px){
+  .g2{grid-template-columns:1fr}
+  .g4{grid-template-columns:1fr 1fr}
+  .hero{grid-template-columns:1fr auto}
+  .hero-icon svg{width:72px;height:72px}
+  .hero-stats .hs-val{font-size:.9rem}
+  .temp-huge{font-size:clamp(3.4rem,22vw,5rem)}
+  .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
+  .compass-svg{width:72px;height:72px}
+}
 </style>
 </head>
 <body>
@@ -270,7 +345,7 @@ footer a{color:var(--blue);text-decoration:none}
       <span class="chart-range" id="temp-range">—</span>
     </div>
     <div class="chart-svg-wrap">
-      <svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="none">
+      <svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet">
         <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
       </svg>
     </div>
@@ -283,7 +358,7 @@ footer a{color:var(--blue);text-decoration:none}
       <span class="chart-range" id="rain-range">—</span>
     </div>
     <div class="chart-svg-wrap">
-      <svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="none">
+      <svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet">
         <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
       </svg>
     </div>
@@ -314,7 +389,7 @@ footer a{color:var(--blue);text-decoration:none}
         <span>↓ <span id="sunset-time">—</span></span>
       </div>
     </div>
-    <div class="card" style="grid-column:span 2">
+    <div class="card span2">
       <div class="clabel">📍 Station snapshot</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
         <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Fog likelihood</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
@@ -536,8 +611,7 @@ function drawTempChart(data){
   if(!svg||!data.length) return;
   svg.innerHTML='';
   _tempData=data;
-  const VW=svg.parentElement.clientWidth||880,VH=200,pad={t:25,r:20,b:42,l:46};
-  svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+  const VW=880,VH=200,pad={t:25,r:20,b:42,l:46};
   const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const temps=data.map(d=>d.temp);
   const mn=Math.min(...temps),mx=Math.max(...temps);
@@ -728,16 +802,11 @@ function applyObs(obs){
   updateSunArc(obs.lat,obs.lon);
 }
 
-let _lastHourlyData = null;
 function applyHourly(observations){
-  _lastHourlyData = observations;
   const raw=observations.slice(-24);
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
 }
-window.addEventListener('resize', () => {
-  if(_lastHourlyData) applyHourly(_lastHourlyData);
-});
 
 // ── Clock ──────────────────────────────────────────────────
 function tickClock(){ set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})); }
