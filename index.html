@@ -77,8 +77,22 @@ h1 em{font-style:italic;color:var(--cyan)}
 #cond-icon{font-size:1rem}
 
 /* Temp big */
-.temp-huge{font-family:'Fraunces',serif;font-weight:200;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.05em;display:flex;align-items:flex-start}
-.temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:300}
+.temp-huge {
+    font-family: system-ui, -apple-system, sans-serif; /* Updated line */
+    font-weight: 200;
+    font-size: clamp(4.5rem, 12vw, 7.5rem);
+    line-height: .95;
+    letter-spacing: -.05em;
+    display: flex;
+    align-items: flex-start;
+}
+
+.temp-unit-sup {
+    font-size: .28em;
+    color: var(--muted);
+    margin-top: .3em;
+    font-weight: 300;
+}
 
 /* Hero stats */
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
