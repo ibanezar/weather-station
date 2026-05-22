@@ -276,6 +276,72 @@ footer a{color:var(--blue);text-decoration:none}
   .temp-huge{font-size:clamp(3.4rem,22vw,5rem)}
   .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
   .compass-svg{width:72px;height:72px}
+
+  .forecast-card {
+    background: rgba(255, 255, 255, 0.08); /* Frosted glass aesthetic to match your site */
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.forecast-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.forecast-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.forecast-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.forecast-day {
+    font-weight: 600;
+    width: 60px;
+    color: #e0e0e0;
+}
+
+.forecast-icon-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+}
+
+.forecast-icon-box img {
+    width: 40px;
+    height: 40px;
+}
+
+.forecast-condition {
+    font-size: 0.9rem;
+    color: #b0b0b0;
+    text-transform: capitalize;
+}
+
+.forecast-temp {
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: right;
+    width: 50px;
+    color: #ffffff;
+}
 }
 </style>
 </head>
