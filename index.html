@@ -5,40 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rečica ob Savinji — Weather Station</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;1,9..144,200;1,9..144,300&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#04070e;--s1:rgba(12,18,32,0.9);--s2:rgba(18,26,46,0.7);
-  --border:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.13);
-  --text:#e8edf8;--muted:#56677e;
-  --blue:#4d9ff8;--cyan:#22d3ee;--purple:#a78bfa;
-  --amber:#f59e0b;--green:#34d399;--red:#f87171;--rain-col:#60a5fa;
+  --bg:#eef2f9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:rgba(0,0,0,0.08);
+  --bh:rgba(0,0,0,0.15);
+  --blue:#2563eb;
+  --cyan:#0891b2;
+  --purple:#7c3aed;
+  --amber:#d97706;
+  --green:#059669;
+  --red:#dc2626;
+  --rain-col:#3b82f6;
+  --card-bg:rgba(255,255,255,0.62);
+  --card-shadow:0 2px 20px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.9);
+  --card-shadow-hover:0 8px 36px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.95);
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
 
-/* Background */
-#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:#04070e}
-.blob{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
-.b1{width:600px;height:600px;background:radial-gradient(circle,rgba(77,159,248,.22),transparent 70%);top:-15%;left:-10%;animation:blob-drift 20s ease-in-out infinite}
-.b2{width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,.18),transparent 70%);top:15%;right:-8%;animation:blob-drift 26s ease-in-out infinite reverse 3s}
-.b3{width:420px;height:420px;background:radial-gradient(circle,rgba(34,211,238,.14),transparent 70%);bottom:5%;left:10%;animation:blob-drift 18s ease-in-out infinite 7s}
-.b4{width:350px;height:350px;background:radial-gradient(circle,rgba(52,211,153,.1),transparent 70%);bottom:25%;right:15%;animation:blob-drift 23s ease-in-out infinite 12s}
-@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.02)}}
-.rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(100,160,255,.45),transparent);animation:rain-fall linear infinite;transform-origin:top}
+/* Background blobs */
+#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg)}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+.b1{width:650px;height:650px;background:radial-gradient(circle,rgba(147,197,253,.55),transparent 70%);top:-15%;left:-10%;animation:blob-drift 22s ease-in-out infinite}
+.b2{width:520px;height:520px;background:radial-gradient(circle,rgba(196,181,253,.45),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
+.b3{width:440px;height:440px;background:radial-gradient(circle,rgba(103,232,249,.35),transparent 70%);bottom:5%;left:8%;animation:blob-drift 19s ease-in-out infinite 8s}
+.b4{width:380px;height:380px;background:radial-gradient(circle,rgba(110,231,183,.3),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
+@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
+
+/* Rain / stars */
+.rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.35),transparent);animation:rain-fall linear infinite;transform-origin:top}
 @keyframes rain-fall{0%{transform:translateY(-120px) rotate(12deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(105vh) rotate(12deg);opacity:0}}
-.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.2;transform:scale(.6)}}
+.star{position:absolute;border-radius:50%;background:rgba(30,60,120,.6);animation:twinkle ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.1;transform:scale(.5)}}
 
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
 
 /* Header */
 header{text-align:center;padding:2.5rem 0 2rem}
-.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.25em;color:var(--blue);text-transform:uppercase;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px}
+.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.25em;color:var(--blue);text-transform:uppercase;border:1px solid rgba(37,99,235,.25);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:rgba(37,99,235,.06)}
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-h1{font-family:'Fraunces',serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em}
+h1{font-family:'Fraunces',serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
 h1 em{font-style:italic;color:var(--cyan)}
 .sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
 
@@ -48,78 +60,83 @@ h1 em{font-style:italic;color:var(--cyan)}
 .dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* Cards */
-.card{background:rgba(255,255,255,.05);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.4rem 1.6rem}
-.card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.17);box-shadow:0 8px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.13)}
+/* Alerts */
+.alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
+@keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+.alert-body{flex:1}
+.alert-title{font-weight:500}
+.alert-desc{font-size:.68rem;opacity:.75;margin-top:.1rem}
+.alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.5;flex-shrink:0;line-height:1}
+.alert-close:hover{opacity:.9}
+.a-frost {background:rgba(37,99,235,.07); border-color:rgba(37,99,235,.2); color:#1d4ed8}
+.a-freeze{background:rgba(8,145,178,.07); border-color:rgba(8,145,178,.2); color:#0e7490}
+.a-heat  {background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.2); color:#dc2626}
+.a-uv    {background:rgba(217,119,6,.07); border-color:rgba(217,119,6,.2); color:#b45309}
+.a-wind  {background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:#7c3aed}
+
+/* Cards — glassmorphism light */
+.card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid rgba(255,255,255,0.75);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .25s;box-shadow:var(--card-shadow)}
+.card:hover{background:rgba(255,255,255,.72);border-color:rgba(255,255,255,.9);box-shadow:var(--card-shadow-hover)}
 .clabel{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem}
-.cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1}
+.cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
 .unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
 .csub{font-size:.7rem;color:var(--muted);margin-top:.4rem}
 
 /* Hero */
-.hero{display:grid;grid-template-columns:1fr 160px auto;gap:2rem;padding:2rem 2.25rem;margin-bottom:1rem;background:var(--s1);border:1px solid var(--border);border-radius:22px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(77,159,248,.05) 0%,rgba(167,139,250,.03) 60%,transparent 100%);pointer-events:none}
-
-/* Hero icon */
-.hero-icon{display:flex;align-items:center;justify-content:center}
-.hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 0 24px rgba(255,255,255,.08));transition:opacity .5s}
-
-/* Temperature colour */
+.hero{display:grid;grid-template-columns:1fr 160px auto;gap:2rem;padding:2rem 2.25rem;margin-bottom:1rem;background:rgba(255,255,255,.68);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid rgba(255,255,255,.85);border-radius:22px;position:relative;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.09),0 1px 6px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,1)}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.04) 0%,rgba(124,58,237,.03) 60%,transparent 100%);pointer-events:none}
 #temp-val{transition:color .8s ease}
-
-/* Feels-like pill */
 .feels{font-size:.78rem;color:var(--muted);margin-top:.65rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .feels strong{color:var(--text);font-weight:400}
-.feels-pill{display:inline-flex;align-items:center;font-size:.62rem;padding:2px 10px;border-radius:20px;font-weight:400;letter-spacing:.05em;border:1px solid transparent;transition:background .5s,color .5s}
-
-/* Condition badge */
-.condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--cyan)}
+.feels-pill{display:inline-flex;align-items:center;font-size:.62rem;padding:2px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
+.condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.18);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--blue);letter-spacing:.06em;margin-bottom:1rem;width:fit-content}
 #cond-icon{font-size:1rem}
-
-/* Temp big */
-.temp-huge {
-    font-family: system-ui, -apple-system, sans-serif;
-    font-weight: 300;
-    font-size: clamp(4.5rem, 12vw, 7.5rem);
-    line-height: .95;
-    letter-spacing: -.05em;
-    display: flex;
-    align-items: flex-start;
-}
-
-.temp-unit-sup {
-    font-size: .28em;
-    color: var(--muted);
-    margin-top: .3em;
-    font-weight: 300;
-}
-
-/* Hero stats */
+.temp-huge{font-family:'Fraunces',serif;font-weight:200;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.05em;display:flex;align-items:flex-start}
+.temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:300}
+.hero-icon{display:flex;align-items:center;justify-content:center}
+.hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));transition:opacity .5s}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
-.hs-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:300}
+.hs-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:300;color:var(--text)}
 .hs-lbl{font-size:.62rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
 
-/* Grid */
+/* Grids */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
+.span2{grid-column:span 2}
+
+/* Today summary */
+.day-summary{display:flex;margin-bottom:1rem;background:rgba(255,255,255,.62);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid rgba(255,255,255,.8);border-radius:18px;overflow:hidden;box-shadow:var(--card-shadow)}
+.ds-item{flex:1;padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.3rem;position:relative}
+.ds-item+.ds-item::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:rgba(0,0,0,.07)}
+.ds-arrow{font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.ds-temp{font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1;color:var(--text)}
+.ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
+.ds-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.ds-time{font-family:'IBM Plex Mono',monospace;font-weight:300}
+.ds-high .ds-arrow{color:var(--red)}
+.ds-low  .ds-arrow{color:var(--blue)}
+.ds-rain .ds-arrow{color:var(--rain-col)}
+.ds-avg  .ds-arrow{color:var(--green)}
 
 /* Wind */
 .wind-body{display:flex;align-items:center;gap:1.5rem}
 .compass-svg{width:110px;height:110px;flex-shrink:0}
-.ws-big{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1}
+.ws-big{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1;color:var(--text)}
 .ws-unit{font-size:.8rem;color:var(--muted);margin-left:3px}
-.wdir{font-size:.8rem;color:var(--purple);margin-top:.3rem;letter-spacing:.05em;font-weight:400}
+.wdir{font-size:.8rem;color:var(--purple);margin-top:.3rem;letter-spacing:.05em;font-weight:500}
 .wgust{font-size:.68rem;color:var(--muted);margin-top:.3rem}
-/* Beaufort badge */
-.beaufort-badge{display:inline-flex;align-items:center;gap:.4rem;margin-top:.55rem;font-size:.68rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:20px;padding:3px 12px}
-.bft-num{font-weight:400}
+.beaufort-badge{display:inline-flex;align-items:center;gap:.4rem;margin-top:.55rem;font-size:.68rem;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:20px;padding:3px 10px;color:var(--purple);font-family:'IBM Plex Mono',monospace}
 
 /* Pressure */
-.pressure-arc-svg{width:100%;height:80px}
-.p-trend{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;padding:2px 10px;border-radius:20px;margin-top:.5rem}
-.t-up{background:rgba(52,211,153,.12);color:var(--green)}.t-dn{background:rgba(248,113,113,.12);color:var(--red)}.t-flat{background:rgba(148,163,184,.08);color:var(--muted)}
+.p-trend{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;padding:2px 10px;border-radius:20px;margin-top:.5rem;font-weight:500}
+.t-up  {background:rgba(5,150,105,.1); color:var(--green)}
+.t-dn  {background:rgba(220,38,38,.1); color:var(--red)}
+.t-flat{background:rgba(100,116,139,.08);color:var(--muted)}
+.p-rate{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:.3rem}
 
 /* Charts */
 .chart-card{margin-bottom:1rem;padding:1.4rem 1.6rem 1rem}
@@ -127,94 +144,41 @@ h1 em{font-style:italic;color:var(--cyan)}
 .chart-range{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)}
 .chart-svg-wrap{width:100%;overflow:hidden}
 .chart-svg{width:100%;display:block;cursor:crosshair}
+#chart-tip{position:fixed;pointer-events:none;z-index:200;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.1);border-radius:8px;padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.1)}
 
-/* Chart tooltip */
-#chart-tip{position:fixed;pointer-events:none;z-index:200;background:rgba(6,9,14,.92);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--text);line-height:1.4}
+/* Small cards */
+.rain-bar-wrap{height:4px;background:rgba(0,0,0,.07);border-radius:4px;overflow:hidden;margin-top:.8rem}
+.rain-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:4px;transition:width .8s ease}
+.uv-bar{height:4px;border-radius:4px;margin:1rem 0 .4rem;background:linear-gradient(90deg,#4ade80,#facc15,#f97316,#ef4444,#9333ea);position:relative}
+.uv-dot{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid rgba(0,0,0,.2);transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,.2);transition:left .6s ease}
 
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
 .sun-svg{width:100%;display:block}
 .sun-times{display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.3rem;padding:0 .25rem}
-.sun-times .daylen{color:var(--amber);font-size:.68rem}
-
-/* UV */
-.uv-bar{height:4px;border-radius:4px;margin:1rem 0 .4rem;background:linear-gradient(90deg,#4ade80,#facc15,#f97316,#ef4444,#9333ea);position:relative}
-.uv-dot{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:#fff;transform:translateX(-50%);box-shadow:0 0 8px rgba(255,255,255,.6);transition:left .6s ease}
-
-/* Rain rate bar */
-.rain-bar-wrap{height:4px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-top:.8rem}
-.rain-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:4px;transition:width .8s ease}
+.sun-times .daylen{color:var(--amber);font-size:.68rem;font-weight:500}
 
 /* Footer */
 footer{text-align:center;padding-top:3rem;font-size:.68rem;color:var(--muted);line-height:2.2}
 footer a{color:var(--blue);text-decoration:none}
 
-/* SVG icon animations */
+/* SVG weather icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
 @keyframes drop-fall {0%{opacity:0;transform:translateY(-4px)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateY(14px)}}
 @keyframes cloud-bob {0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes moon-glow {0%,100%{filter:drop-shadow(0 0 6px rgba(248,213,114,.5))}50%{filter:drop-shadow(0 0 14px rgba(248,213,114,.85))}}
-@keyframes star-wink {0%,100%{opacity:.9;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
+@keyframes moon-glow {0%,100%{filter:drop-shadow(0 0 6px rgba(217,119,6,.4))}50%{filter:drop-shadow(0 0 14px rgba(217,119,6,.7))}}
+@keyframes star-wink {0%,100%{opacity:.8;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
-/* Alert banner */
-.alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
-.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
-@keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
-.alert-body{flex:1}
-.alert-title{font-weight:500;letter-spacing:.02em}
-.alert-desc{font-size:.68rem;opacity:.8;margin-top:.1rem}
-.alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.55;margin-left:.25rem;flex-shrink:0;line-height:1}
-.alert-close:hover{opacity:1}
-.a-frost {background:rgba(147,197,253,.1);border-color:rgba(147,197,253,.3);color:#93c5fd}
-.a-freeze{background:rgba(103,232,249,.1);border-color:rgba(103,232,249,.3);color:#67e8f9}
-.a-heat  {background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#f87171}
-.a-uv    {background:rgba(251,146,60,.1); border-color:rgba(251,146,60,.3); color:#fb923c}
-.a-wind  {background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:#a78bfa}
-
-/* Today's summary strip */
-.day-summary{display:flex;margin-bottom:1rem;background:var(--s1);border:1px solid var(--border);border-radius:18px;overflow:hidden}
-.ds-item{flex:1;padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.3rem;position:relative}
-.ds-item+.ds-item::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:var(--border)}
-.ds-arrow{font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
-.ds-temp{font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1}
-.ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
-.ds-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;line-height:1.4}
-.ds-time{font-family:'IBM Plex Mono',monospace;font-weight:300}
-.ds-high .ds-arrow{color:var(--red)}
-.ds-low  .ds-arrow{color:var(--blue)}
-.ds-rain .ds-arrow{color:var(--rain-col)}
-.ds-avg  .ds-arrow{color:var(--green)}
-
-/* Pressure rate label */
-.p-rate{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:.3rem}
-
-@media(max-width:520px){
-  .day-summary{flex-wrap:wrap}
-  .ds-item{flex:0 0 50%;box-sizing:border-box}
-  .ds-item:nth-child(3)::before,.ds-item:nth-child(4)::before,.ds-item:nth-child(odd)::before{display:none}
-}
-
-/* Chart scrollable on mobile */
-.chart-svg-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.chart-svg{width:100%;min-width:600px;display:block;cursor:crosshair}
-
-/* ── Responsive ── */
-
-/* Tablet */
+/* Responsive */
 @media(max-width:860px){
-  .wrap{padding:2rem 1rem 4rem}
-  .hero{grid-template-columns:1fr 130px auto;gap:1.5rem}
-  .hero-icon svg{width:120px;height:120px}
+  .g3{grid-template-columns:1fr 1fr}
+  .span2{grid-column:span 1}
 }
-
-/* Large mobile */
 @media(max-width:680px){
   .wrap{padding:1.5rem .9rem 3.5rem}
   header{padding:1.75rem 0 1.25rem}
-  /* Hero: temp + icon side by side, stats full-width below */
   .hero{grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:1rem;padding:1.5rem 1.25rem}
   .hero>div:first-child{grid-column:1;grid-row:1}
   .hero-icon{grid-column:2;grid-row:1;align-items:flex-start;padding-top:.4rem}
@@ -225,128 +189,30 @@ footer a{color:var(--blue);text-decoration:none}
   .g3{grid-template-columns:1fr}
   .span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
-  .sun-times{font-size:.65rem}
+  .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .chart-svg{min-width:520px;width:520px}
 }
-
-/* Mobile */
 @media(max-width:520px){
-  .wrap{padding:1rem .75rem 3rem}
-  header{padding:1.25rem 0 1rem}
-  h1{font-size:clamp(1.7rem,8vw,2.6rem)}
-  .sub-loc{font-size:.68rem}
-  .stn-badge{font-size:.56rem;padding:3px 10px;letter-spacing:.18em}
-  .status{gap:.75rem;font-size:.6rem;padding:.3rem 0 1.25rem}
-  .card{padding:1rem 1.1rem}
-  .chart-card{padding:1rem 1.1rem .7rem}
-  .clabel{font-size:.6rem}
-  .cval{font-size:1.65rem}
-  /* Hero */
-  .hero{padding:1.1rem;gap:.9rem}
-  .temp-huge{font-size:clamp(3.8rem,20vw,5.5rem)}
-  .temp-unit-sup{margin-top:.4em}
-  .hero-icon svg{width:80px;height:80px}
-  .feels{font-size:.72rem}
-  .condition-badge{font-size:.66rem;padding:4px 11px}
-  /* Wind */
-  .wind-body{gap:1rem}
-  .compass-svg{width:84px;height:84px}
-  .ws-big{font-size:1.55rem}
-  .wdir{font-size:.72rem}
-  .beaufort-badge{font-size:.62rem}
-  /* Pressure arc */
-  .pressure-arc-svg{height:65px}
-  /* Charts — fixed width so they stay readable, scroll on mobile */
-  .chart-svg{min-width:480px}
-  /* Sunrise */
-  .sun-svg{max-height:110px}
-  .sun-times{font-size:.6rem}
-  /* Snapshot grid */
-  [id^="snap-"]{font-size:.8rem}
-  /* Footer */
-  footer{font-size:.62rem}
-}
-
-/* Small phones */
-@media(max-width:380px){
   .g2{grid-template-columns:1fr}
-  .g4{grid-template-columns:1fr 1fr}
+  .temp-huge{font-size:clamp(3.8rem,16vw,5.5rem)}
+  .hero-icon svg{width:80px;height:80px}
+  .day-summary{flex-wrap:wrap}
+  .ds-item{flex:0 0 50%;box-sizing:border-box}
+  .ds-item:nth-child(odd)::before{display:none}
+  .ds-item:nth-child(3)::before,.ds-item:nth-child(4)::before{display:none}
+}
+@media(max-width:380px){
   .hero{grid-template-columns:1fr auto}
   .hero-icon svg{width:72px;height:72px}
-  .hero-stats .hs-val{font-size:.9rem}
-  .temp-huge{font-size:clamp(3.4rem,22vw,5rem)}
+  .temp-huge{font-size:clamp(3.2rem,20vw,4.5rem)}
   .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
   .compass-svg{width:72px;height:72px}
-}
-
-/* Forecast widget styles */
-.forecast-card {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-.widget-title {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    color: #ffffff;
-}
-
-.forecast-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.forecast-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 8px;
-    transition: background 0.3s ease;
-}
-
-.forecast-row:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.forecast-day {
-    font-weight: 600;
-    width: 60px;
-    color: #e0e0e0;
-}
-
-.forecast-icon-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    justify-content: center;
-}
-
-.forecast-icon-box img {
-    width: 40px;
-    height: 40px;
-}
-
-.forecast-condition {
-    font-size: 0.9rem;
-    color: #b0b0b0;
-    text-transform: capitalize;
-}
-
-.forecast-temp {
-    font-weight: bold;
-    font-size: 1.1rem;
-    text-align: right;
-    width: 50px;
-    color: #ffffff;
+  .g4{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
+
 <div id="bg">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -368,10 +234,8 @@ footer a{color:var(--blue);text-decoration:none}
     <span id="local-time">—</span>
   </div>
 
-  <!-- Alert banners (injected by JS) -->
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
-  <!-- Hero -->
   <div class="hero card">
     <div>
       <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
@@ -391,7 +255,6 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
-  <!-- Today's summary -->
   <div class="day-summary">
     <div class="ds-item ds-high">
       <span class="ds-arrow">↑ High</span>
@@ -415,38 +278,37 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
-  <!-- Wind + Pressure -->
   <div class="g2">
     <div class="card">
       <div class="clabel">🧭 Wind</div>
       <div class="wind-body">
-        <svg class="compass-svg" viewBox="0 0 110 110" id="compass-svg">
-          <circle cx="55" cy="55" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
-          <circle cx="55" cy="55" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="55" y1="8"  x2="55" y2="16" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-          <line x1="55" y1="94" x2="55" y2="102" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-          <line x1="8"  y1="55" x2="16" y2="55" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-          <line x1="94" y1="55" x2="102" y2="55" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-          <line x1="19.9" y1="19.9" x2="25.6" y2="25.6" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-          <line x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-          <line x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-          <line x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-          <text x="55" y="6"   text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.5)" font-family="IBM Plex Mono,monospace">N</text>
-          <text x="55" y="108" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">S</text>
-          <text x="4"  y="58"  text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">W</text>
-          <text x="107" y="58" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)" font-family="IBM Plex Mono,monospace">E</text>
+        <svg class="compass-svg" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="50" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1.5"/>
+          <circle cx="55" cy="55" r="38" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+          <line x1="55" y1="8"  x2="55" y2="16" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+          <line x1="55" y1="94" x2="55" y2="102" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+          <line x1="8"  y1="55" x2="16" y2="55" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+          <line x1="94" y1="55" x2="102" y2="55" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+          <line x1="19.9" y1="19.9" x2="25.6" y2="25.6" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <line x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <line x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <line x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <text x="55" y="6"   text-anchor="middle" font-size="8" fill="rgba(0,0,0,0.5)" font-family="IBM Plex Mono,monospace" font-weight="500">N</text>
+          <text x="55" y="108" text-anchor="middle" font-size="8" fill="rgba(0,0,0,0.3)" font-family="IBM Plex Mono,monospace">S</text>
+          <text x="4"  y="58"  text-anchor="middle" font-size="8" fill="rgba(0,0,0,0.3)" font-family="IBM Plex Mono,monospace">W</text>
+          <text x="107" y="58" text-anchor="middle" font-size="8" fill="rgba(0,0,0,0.3)" font-family="IBM Plex Mono,monospace">E</text>
           <g id="needle" style="transform-origin:55px 55px;transform:rotate(0deg);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)">
-            <polygon points="55,15 58,55 55,63 52,55" fill="#a78bfa" opacity=".95"/>
-            <polygon points="55,95 58,55 55,63 52,55" fill="rgba(167,139,250,0.25)"/>
-            <circle cx="55" cy="55" r="4" fill="#a78bfa"/>
-            <circle cx="55" cy="55" r="2" fill="#1a1030"/>
+            <polygon points="55,15 58,55 55,63 52,55" fill="#7c3aed" opacity=".9"/>
+            <polygon points="55,95 58,55 55,63 52,55" fill="rgba(124,58,237,0.2)"/>
+            <circle cx="55" cy="55" r="4" fill="#7c3aed"/>
+            <circle cx="55" cy="55" r="2" fill="white"/>
           </g>
         </svg>
         <div>
           <div class="ws-big"><span id="wind-speed">—</span><span class="ws-unit">km/h</span></div>
           <div class="wdir" id="wind-dir-lbl">—</div>
           <div class="wgust">Gusts <span id="wind-gust">—</span> km/h</div>
-          <div class="beaufort-badge"><span class="bft-num" id="bft-num">Bft —</span><span id="bft-label">—</span></div>
+          <div class="beaufort-badge"><span id="bft-num">Bft —</span><span id="bft-label">—</span></div>
         </div>
       </div>
     </div>
@@ -456,19 +318,18 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="cval" id="pressure-val">—<span class="unit">hPa</span></div>
       <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— steady</div>
       <div id="p-rate" class="p-rate"></div>
-      <svg class="pressure-arc-svg" viewBox="0 0 220 80">
-        <defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f87171"/><stop offset="50%" stop-color="#34d399"/><stop offset="100%" stop-color="#4d9ff8"/></linearGradient></defs>
-        <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6" stroke-linecap="round"/>
+      <svg style="width:100%;height:80px;margin-top:.5rem" viewBox="0 0 220 80">
+        <defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f87171"/><stop offset="50%" stop-color="#059669"/><stop offset="100%" stop-color="#2563eb"/></linearGradient></defs>
+        <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="6" stroke-linecap="round"/>
         <path d="M 20 70 A 90 90 0 0 1 200 70" fill="none" stroke="url(#pg)" stroke-width="6" stroke-linecap="round" opacity=".4"/>
-        <circle id="p-dot" cx="110" cy="-20" r="6" fill="#4d9ff8" style="filter:drop-shadow(0 0 6px #4d9ff8)"/>
-        <text x="20"  y="78" font-size="9" fill="rgba(255,255,255,0.25)" font-family="IBM Plex Mono,monospace">Low</text>
-        <text x="200" y="78" font-size="9" fill="rgba(255,255,255,0.25)" font-family="IBM Plex Mono,monospace" text-anchor="end">High</text>
+        <circle id="p-dot" cx="110" cy="-20" r="6" fill="#2563eb" style="filter:drop-shadow(0 2px 6px rgba(37,99,235,.5))"/>
+        <text x="20"  y="78" font-size="9" fill="rgba(0,0,0,0.3)" font-family="IBM Plex Mono,monospace">Low</text>
+        <text x="200" y="78" font-size="9" fill="rgba(0,0,0,0.3)" font-family="IBM Plex Mono,monospace" text-anchor="end">High</text>
       </svg>
       <div class="csub" id="pressure-label">—</div>
     </div>
   </div>
 
-  <!-- Small 4-card row -->
   <div class="g4" style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel">🌧 Rain rate</div>
@@ -494,7 +355,6 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
-  <!-- Temperature chart -->
   <div class="card chart-card">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🌡 Temperature — last 24 h</span>
@@ -502,12 +362,11 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="chart-svg-wrap">
       <svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet">
-        <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
+        <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(0,0,0,0.2)" font-family="DM Sans,sans-serif">Loading chart…</text>
       </svg>
     </div>
   </div>
 
-  <!-- Rain chart -->
   <div class="card chart-card">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🌧 Precipitation — last 24 h</span>
@@ -515,28 +374,27 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="chart-svg-wrap">
       <svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet">
-        <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.15)" font-family="DM Sans,sans-serif">Loading chart…</text>
+        <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(0,0,0,0.2)" font-family="DM Sans,sans-serif">Loading chart…</text>
       </svg>
     </div>
   </div>
 
-  <!-- Sunrise + snapshot -->
   <div class="g3" style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel">🌅 Daylight</div>
       <div class="sun-svg-wrap">
         <svg class="sun-svg" viewBox="0 0 260 140" id="sun-svg">
           <defs>
-            <radialGradient id="sgg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.6"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+            <radialGradient id="sgg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.5"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
             <filter id="sgf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          <line x1="10" y1="125" x2="250" y2="125" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-          <path d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" stroke-linecap="round"/>
-          <path id="sun-progress" d="M 15 125" fill="none" stroke="rgba(245,158,11,0.35)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="10" y1="125" x2="250" y2="125" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
+          <path d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="3" stroke-linecap="round"/>
+          <path id="sun-progress" d="M 15 125" fill="none" stroke="rgba(217,119,6,0.4)" stroke-width="3" stroke-linecap="round"/>
           <circle id="sun-halo" cx="130" cy="10" r="18" fill="url(#sgg)" opacity="0"/>
           <circle id="sun-dot" cx="130" cy="10" r="7" fill="#f59e0b" filter="url(#sgf)" opacity="0"/>
-          <text id="sr-label" x="15"  y="138" font-size="9" fill="rgba(255,255,255,0.4)" font-family="IBM Plex Mono,monospace">—</text>
-          <text id="ss-label" x="245" y="138" font-size="9" fill="rgba(255,255,255,0.4)" font-family="IBM Plex Mono,monospace" text-anchor="end">—</text>
+          <text id="sr-label" x="15"  y="138" font-size="9" fill="rgba(0,0,0,0.4)" font-family="IBM Plex Mono,monospace">—</text>
+          <text id="ss-label" x="245" y="138" font-size="9" fill="rgba(0,0,0,0.4)" font-family="IBM Plex Mono,monospace" text-anchor="end">—</text>
         </svg>
       </div>
       <div class="sun-times">
@@ -548,12 +406,12 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="card span2">
       <div class="clabel">📍 Station snapshot</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Fog likelihood</div><div id="snap-fog" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">—</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Wind chill</div><div id="snap-wc" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">—</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Heat index</div><div id="snap-hi" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">—</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Elevation</div><div id="snap-elev" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Station SW</div><div id="snap-sw" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">—</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">QC Status</div><div id="snap-qc" style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Fog likelihood</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Wind chill</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Heat index</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Elevation</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Station SW</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">QC Status</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
       </div>
     </div>
   </div>
@@ -565,6 +423,386 @@ footer a{color:var(--blue);text-decoration:none}
   </footer>
 </div>
 
-<script src="main.js"></script>
+<script>
+const PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+const LAT = 46.325779, LON = 14.921137;
+
+// Chart colour constants (light theme)
+const C_GRID  = 'rgba(0,0,0,0.06)';
+const C_LABEL = 'rgba(0,0,0,0.38)';
+const C_NOW   = 'rgba(0,0,0,0.18)';
+const C_TEMP_LINE  = '#2563eb';
+const C_TEMP_FILL0 = 'rgba(37,99,235,0.18)';
+const C_TEMP_FILL1 = 'rgba(37,99,235,0)';
+const C_RAIN_FILL0 = 'rgba(59,130,246,0.75)';
+const C_RAIN_FILL1 = 'rgba(59,130,246,0.2)';
+
+// ── Utilities ─────────────────────────────────────────────
+function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d);}
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function windDir(deg){const d=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];return d[Math.round(deg/22.5)%16];}
+function uvLabel(u){if(u<=2)return 'Low';if(u<=5)return 'Moderate';if(u<=7)return 'High';if(u<=10)return 'Very High';return 'Extreme';}
+function solarLabel(w){if(!w&&w!==0)return '—';if(w<20)return 'Night / dark';if(w<100)return 'Overcast';if(w<300)return 'Partly cloudy';if(w<600)return 'Mostly sunny';return 'Bright sunshine';}
+function dewLabel(d){if(d<5)return 'Very dry';if(d<10)return 'Dry';if(d<15)return 'Comfortable';if(d<20)return 'Slightly humid';return 'Muggy';}
+
+// ── Temperature colour (adjusted for light bg) ────────────
+function tempColor(t){
+  if(t<0)  return '#1d4ed8';
+  if(t<8)  return '#0369a1';
+  if(t<15) return '#0f766e';
+  if(t<22) return '#0f172a';
+  if(t<28) return '#b45309';
+  if(t<35) return '#c2410c';
+  return '#dc2626';
+}
+
+// ── Feels-like pill ───────────────────────────────────────
+function feelsStyle(t){
+  if(t<0)  return{label:'Freezing',c:'#1d4ed8',bg:'rgba(29,78,216,.08)', b:'rgba(29,78,216,.2)'};
+  if(t<8)  return{label:'Cold',    c:'#0369a1',bg:'rgba(3,105,161,.08)', b:'rgba(3,105,161,.2)'};
+  if(t<15) return{label:'Cool',    c:'#0f766e',bg:'rgba(15,118,110,.08)',b:'rgba(15,118,110,.2)'};
+  if(t<22) return{label:'Comfortable',c:'#059669',bg:'rgba(5,150,105,.08)',b:'rgba(5,150,105,.2)'};
+  if(t<28) return{label:'Warm',   c:'#b45309',bg:'rgba(180,83,9,.08)',  b:'rgba(180,83,9,.2)'};
+  return          {label:'Hot',   c:'#dc2626',bg:'rgba(220,38,38,.08)', b:'rgba(220,38,38,.2)'};
+}
+
+// ── Beaufort ──────────────────────────────────────────────
+function beaufort(kmh){const s=[[1,'0','Calm'],[5,'1','Light air'],[11,'2','Light breeze'],[19,'3','Gentle breeze'],[28,'4','Moderate breeze'],[38,'5','Fresh breeze'],[49,'6','Strong breeze'],[61,'7','Near gale'],[74,'8','Gale'],[88,'9','Strong gale'],[102,'10','Storm'],[117,'11','Violent storm'],[999,'12','Hurricane']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Hurricane'};}
+
+// ── Count-up ──────────────────────────────────────────────
+function countUp(id,target,dec,unitHTML,dur){
+  const el=document.getElementById(id);
+  if(!el||isNaN(Number(target)))return;
+  const uHTML=unitHTML||'';
+  const t0=performance.now();
+  const step=(now)=>{
+    const p=Math.min((now-t0)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    el.innerHTML=(Number(target)*ease).toFixed(dec)+uHTML;
+    if(p<1)requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ── Condition detection ───────────────────────────────────
+function getCondition(obs){
+  const pr=obs.metric.precipRate||0,sr=obs.metric.solarRadiation||obs.solarRadiation||0;
+  const h=new Date().getHours(),night=h<5||h>22;
+  if(pr>7)   return{icon:'⛈',label:'Heavy Rain'};
+  if(pr>2.5) return{icon:'🌧',label:'Rain'};
+  if(pr>0)   return{icon:'🌦',label:'Light Rain'};
+  if(night&&sr<10)return{icon:'🌙',label:'Clear Night'};
+  if(night)  return{icon:'☁',label:'Cloudy Night'};
+  if(sr>700) return{icon:'☀',label:'Bright Sunshine'};
+  if(sr>300) return{icon:'🌤',label:'Mostly Sunny'};
+  if(sr>80)  return{icon:'⛅',label:'Partly Cloudy'};
+  if(sr>10)  return{icon:'🌥',label:'Mostly Cloudy'};
+  return{icon:'☁',label:'Overcast'};
+}
+
+// ── Weather icons (adjusted for light bg) ────────────────
+function iconSunny(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="#f59e0b" opacity=".1"/><circle cx="50" cy="50" r="22" fill="#f59e0b" opacity=".12"/><g style="transform-origin:50px 50px;animation:spin 18s linear infinite"><line x1="50" y1="7" x2="50" y2="20" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="50" y1="80" x2="50" y2="93" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="7" y1="50" x2="20" y2="50" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="80" y1="50" x2="93" y2="50" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="19" y1="19" x2="28" y2="28" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="72" y1="19" x2="81" y2="28" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="19" y1="81" x2="28" y2="72" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="72" y1="81" x2="81" y2="72" stroke="#d97706" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="17" fill="#f59e0b" style="animation:ray-pulse 3s ease-in-out infinite;transform-origin:50px 50px"/></svg>';}
+function iconPartlyCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g opacity=".9"><g style="transform-origin:36px 36px;animation:spin 20s linear infinite"><line x1="36" y1="8" x2="36" y2="17" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="36" x2="17" y2="36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="16" x2="22" y2="22" stroke="#d97706" stroke-width="2" stroke-linecap="round"/></g><circle cx="36" cy="36" r="13" fill="#f59e0b"/></g><ellipse cx="52" cy="62" rx="21" ry="13" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="66" cy="66" rx="17" ry="11" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="58" cy="70" rx="25" ry="12" fill="#b0bec5" style="animation:cloud-bob 4s ease-in-out infinite"/></svg>';}
+function iconCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="42" cy="40" rx="23" ry="15" fill="#94a3b8" opacity=".5" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="62" cy="44" rx="19" ry="13" fill="#94a3b8" opacity=".5" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="36" cy="58" rx="23" ry="15" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite .5s"/><ellipse cx="58" cy="62" rx="20" ry="14" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite .5s"/><ellipse cx="47" cy="67" rx="28" ry="14" fill="#78909c" style="animation:cloud-bob 4s ease-in-out infinite .5s"/></svg>';}
+function iconRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="38" rx="22" ry="14" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="58" cy="42" rx="18" ry="12" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="48" cy="47" rx="26" ry="14" fill="#78909c" style="animation:cloud-bob 4s ease-in-out infinite"/><line x1="32" y1="62" x2="28" y2="76" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite"/><line x1="47" y1="64" x2="43" y2="78" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .35s"/><line x1="62" y1="62" x2="58" y2="76" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .7s"/><line x1="39" y1="72" x2="35" y2="84" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .18s"/><line x1="55" y1="70" x2="51" y2="82" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .55s"/></svg>';}
+function iconHeavyRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="34" rx="22" ry="14" fill="#475569"/><ellipse cx="58" cy="38" rx="18" ry="12" fill="#475569"/><ellipse cx="48" cy="43" rx="26" ry="14" fill="#64748b"/><polyline points="53,44 44,58 51,58 40,76" stroke="#d97706" stroke-width="3" fill="none" stroke-linejoin="round" style="animation:lightning 3s ease-in-out infinite"/><line x1="28" y1="56" x2="24" y2="68" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite"/><line x1="66" y1="54" x2="62" y2="66" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite .28s"/></svg>';}
+function iconNight(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 55 18 A 27 27 0 1 0 55 78 A 17 17 0 1 1 55 18" fill="#d97706" style="animation:moon-glow 3s ease-in-out infinite"/><circle cx="76" cy="24" r="2.5" fill="rgba(30,60,120,.7)" style="animation:star-wink 2.5s ease-in-out infinite"/><circle cx="82" cy="44" r="1.8" fill="rgba(30,60,120,.7)" style="animation:star-wink 2.5s ease-in-out infinite .8s"/><circle cx="72" cy="60" r="1.5" fill="rgba(30,60,120,.7)" style="animation:star-wink 2.5s ease-in-out infinite 1.5s"/><circle cx="20" cy="32" r="2" fill="rgba(30,60,120,.7)" style="animation:star-wink 2.5s ease-in-out infinite .4s"/><circle cx="24" cy="55" r="1.3" fill="rgba(30,60,120,.7)" style="animation:star-wink 2.5s ease-in-out infinite 1.1s"/></svg>';}
+function iconNightCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 40 16 A 18 18 0 1 0 40 52 A 11 11 0 1 1 40 16" fill="#d97706" opacity=".8"/><ellipse cx="52" cy="58" rx="22" ry="14" fill="#64748b" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="68" cy="63" rx="17" ry="12" fill="#64748b" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="59" cy="68" rx="26" ry="13" fill="#78909c" style="animation:cloud-bob 5s ease-in-out infinite"/></svg>';}
+function weatherIcon(label){const m={'Bright Sunshine':iconSunny,'Mostly Sunny':iconPartlyCloudy,'Partly Cloudy':iconPartlyCloudy,'Mostly Cloudy':iconCloudy,'Overcast':iconCloudy,'Light Rain':iconRain,'Rain':iconRain,'Heavy Rain':iconHeavyRain,'Clear Night':iconNight,'Cloudy Night':iconNightCloudy,'Foggy Night':iconNightCloudy};return(m[label]||iconCloudy)();}
+
+// ── Sunrise / sunset ──────────────────────────────────────
+function sunTimes(lat,lon,date){
+  const rad=Math.PI/180,deg=180/Math.PI;
+  const start=new Date(date.getFullYear(),0,0);
+  const doy=Math.floor((date-start)/864e5);
+  const leap=(date.getFullYear()%4===0&&(date.getFullYear()%100!==0||date.getFullYear()%400===0));
+  const g=2*Math.PI/(leap?366:365)*(doy-1);
+  const eqtime=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.04089*Math.sin(2*g));
+  const decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const cosHA=(Math.cos(90.833*rad)-(Math.sin(lat*rad)*Math.sin(decl)))/(Math.cos(lat*rad)*Math.cos(decl));
+  if(Math.abs(cosHA)>1)return null;
+  const ha=deg*Math.acos(cosHA),noon=720-4*lon-eqtime;
+  return{sunrise:new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon-4*ha))),sunset:new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon+4*ha)))};
+}
+function fmtTime(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function updateSunArc(lat,lon){
+  const now=new Date(),st=sunTimes(lat,lon,now);
+  if(!st)return;
+  set('sunrise-time',fmtTime(st.sunrise));set('sunset-time',fmtTime(st.sunset));
+  const dur=st.sunset-st.sunrise,dh=Math.floor(dur/36e5),dm=Math.floor((dur%36e5)/6e4);
+  set('daylen',dh+'h '+(dm<10?'0':'')+dm+'m');
+  const t=Math.max(0,Math.min(1,(now-st.sunrise)/(st.sunset-st.sunrise)));
+  const cx=130,cy=125,r=115,theta=Math.PI*(1-t),sx=cx+r*Math.cos(theta),sy=cy-r*Math.sin(theta);
+  const d=document.getElementById('sun-dot'),h=document.getElementById('sun-halo'),p=document.getElementById('sun-progress');
+  if(d){d.setAttribute('cx',sx);d.setAttribute('cy',sy);d.setAttribute('opacity',t>0&&t<1?'1':'0.3');}
+  if(h){h.setAttribute('cx',sx);h.setAttribute('cy',sy);h.setAttribute('opacity','0.5');}
+  if(p){const lg=t>0.5?1:0;p.setAttribute('d',t>=0.99?'M 15 125 A 115 115 0 0 1 245 125':t<=0.01?'M 15 125':'M 15 125 A 115 115 0 '+lg+' 1 '+sx.toFixed(1)+' '+sy.toFixed(1));}
+  const sr=document.getElementById('sr-label'),ss=document.getElementById('ss-label');
+  if(sr)sr.textContent=fmtTime(st.sunrise);if(ss)ss.textContent=fmtTime(st.sunset);
+}
+
+// ── Background effects ────────────────────────────────────
+function setBgEffect(type){
+  const bg=document.getElementById('bg');
+  bg.querySelectorAll('.rain-drop,.star').forEach(e=>e.remove());
+  if(type==='rain'){
+    for(let i=0;i<60;i++){
+      const d=document.createElement('div');d.className='rain-drop';
+      d.style.cssText='left:'+Math.random()*110+'%;height:'+(12+Math.random()*18)+'px;animation-delay:'+(-Math.random()*2)+'s;animation-duration:'+(0.5+Math.random()*0.4)+'s;opacity:'+(0.25+Math.random()*0.25);
+      bg.appendChild(d);
+    }
+  } else if(type==='night'){
+    for(let i=0;i<80;i++){
+      const s=document.createElement('div');s.className='star';
+      const sz=.5+Math.random()*1.5;
+      s.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*65+'%;width:'+sz+'px;height:'+sz+'px;animation-delay:'+Math.random()*4+'s;animation-duration:'+(2+Math.random()*3)+'s';
+      bg.appendChild(s);
+    }
+  }
+}
+
+// ── Pressure arc ──────────────────────────────────────────
+function updatePressureArc(p){
+  const t=Math.max(0,Math.min(1,(p-970)/80));
+  const cx=110,cy=70,r=90,theta=Math.PI*(1-t),x=cx+r*Math.cos(theta),y=cy-r*Math.sin(theta);
+  const dot=document.getElementById('p-dot');
+  if(dot){dot.setAttribute('cx',x.toFixed(1));dot.setAttribute('cy',y.toFixed(1));}
+}
+
+// ── Charts ────────────────────────────────────────────────
+function smoothPath(pts){
+  if(pts.length<2)return'';
+  let d='M '+pts[0].x+' '+pts[0].y;
+  for(let i=1;i<pts.length;i++){
+    const p0=pts[i-2]||pts[0],p1=pts[i-1],p2=pts[i],p3=pts[i+1]||p2;
+    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+    d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
+  }
+  return d;
+}
+function mkSVG(parent,tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.appendChild(el);return el;}
+function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(evt.clientX-r.left)/r.width*vb.width;}
+
+let _tempData=[],_rainData=[];
+
+function drawTempChart(data){
+  const svg=document.getElementById('temp-svg');
+  if(!svg||!data.length)return;
+  svg.innerHTML='';_tempData=data;
+  const VW=880,VH=200,pad={t:25,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const temps=data.map(d=>d.temp),mn=Math.min(...temps),mx=Math.max(...temps);
+  const yMin=mn-1,yMax=mx+1;
+  const xS=i=>pad.l+i/(data.length-1)*cw;
+  const yS=v=>pad.t+(1-(v-yMin)/(yMax-yMin))*ch;
+  for(let i=0;i<=5;i++){
+    const y=pad.t+i/5*ch,val=yMax-(i/5*(yMax-yMin));
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:C_GRID,'stroke-width':'1'});
+    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:C_LABEL,'font-family':'IBM Plex Mono,monospace'});
+    t.textContent=val.toFixed(1)+'°';
+  }
+  data.forEach((d,i)=>{
+    if(d.time.getHours()%4===0){
+      const h=d.time.getHours(),t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:C_LABEL,'font-family':'IBM Plex Mono,monospace'});
+      t.textContent=(h<10?'0':'')+h+':00';
+    }
+  });
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML='<linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+C_TEMP_LINE+'" stop-opacity="0.18"/><stop offset="100%" stop-color="'+C_TEMP_LINE+'" stop-opacity="0"/></linearGradient><filter id="lg"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  const pts=data.map((d,i)=>({x:xS(i),y:yS(d.temp)}));
+  const lp=smoothPath(pts);
+  mkSVG(svg,'path',{d:lp+' L '+xS(data.length-1)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z',fill:'url(#tg)'});
+  mkSVG(svg,'path',{d:lp,fill:'none',stroke:C_TEMP_LINE,'stroke-width':'2.5',filter:'url(#lg)','stroke-linecap':'round'});
+  const now=new Date(),f0=data[0].time,fl=data[data.length-1].time,nt=(now-f0)/(fl-f0);
+  if(nt>=0&&nt<=1){
+    const nx=pad.l+nt*cw;
+    mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:C_NOW,'stroke-width':'1','stroke-dasharray':'4,3'});
+    const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:C_NOW,'font-family':'IBM Plex Mono,monospace'});nl.textContent='now';
+  }
+  const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'5',fill:C_TEMP_LINE,stroke:'#fff','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
+  const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:C_NOW,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const tip=document.getElementById('chart-tip');
+  svg.addEventListener('mousemove',e=>{
+    if(!_tempData.length)return;
+    const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_tempData.length-1,Math.round((sx-pad.l)/cw*(_tempData.length-1))));
+    const d=_tempData[idx];if(!d)return;
+    const px=xS(idx),py=yS(d.temp);
+    tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');
+    tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');
+    tip.innerHTML='<span style="color:'+C_TEMP_LINE+'">'+d.temp.toFixed(1)+'°C</span>  ·  '+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';
+  });
+  svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
+  set('temp-range',fmt(mn,1)+'° – '+fmt(mx,1)+'°C');
+}
+
+function drawRainChart(data){
+  const svg=document.getElementById('rain-svg');
+  if(!svg||!data.length)return;
+  svg.innerHTML='';_rainData=data;
+  const VW=880,VH=150,pad={t:15,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const maxR=Math.max(...data.map(d=>d.rain),0.5),total=data.reduce((a,b)=>a+b.rain,0);
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML='<linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.75"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0.15"/></linearGradient>';
+  for(let i=0;i<=3;i++){
+    const y=pad.t+i/3*ch,val=maxR*(1-i/3);
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:C_GRID,'stroke-width':'1'});
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:C_LABEL,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}
+  }
+  const bw=Math.max(2,(cw/data.length)*0.65);
+  const xS=i=>pad.l+i/data.length*cw;
+  const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:'#3b82f6',stroke:'#fff','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
+  const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:C_NOW,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
+  data.forEach((d,i)=>{
+    const x=xS(i),h=(d.rain/maxR)*ch;
+    if(d.rain>0)mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#rg)',rx:'2'});
+    if(d.time.getHours()%4===0){const hr=d.time.getHours(),t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:C_LABEL,'font-family':'IBM Plex Mono,monospace'});t.textContent=(hr<10?'0':'')+hr+':00';}
+  });
+  if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:'rgba(0,0,0,0.2)','font-family':'DM Sans,sans-serif'});t.textContent='No precipitation in the last 24 h';}
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const tip=document.getElementById('chart-tip');
+  svg.addEventListener('mousemove',e=>{
+    if(!_rainData.length)return;
+    const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));
+    const d=_rainData[idx];if(!d)return;
+    const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;
+    tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');
+    tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');
+    tip.innerHTML='<span style="color:#3b82f6">'+d.rain.toFixed(2)+' mm</span>  ·  '+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';
+  });
+  svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
+  set('rain-range','Total: '+total.toFixed(1)+' mm');
+}
+
+// ── Alerts ────────────────────────────────────────────────
+function checkAlerts(obs){
+  const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0;
+  const alerts=[];
+  if(m.temp<=0)        alerts.push({cls:'a-freeze',icon:'🧊',title:'Freezing conditions',desc:'Temperature at or below 0°C — frost and ice likely on surfaces.'});
+  else if(m.temp<=3)   alerts.push({cls:'a-frost', icon:'❄️',title:'Near-frost conditions',desc:'Temperature below 3°C — protect sensitive plants overnight.'});
+  if(uv>=11)           alerts.push({cls:'a-uv',icon:'☀️',title:'Extreme UV — UV '+uv,desc:'Avoid outdoor exposure. SPF 50+ and shade essential.'});
+  else if(uv>=8)       alerts.push({cls:'a-uv',icon:'🌞',title:'Very high UV — UV '+uv,desc:'Sun protection strongly recommended.'});
+  if(m.temp>=35)       alerts.push({cls:'a-heat',icon:'🌡️',title:'Heat warning — '+m.temp.toFixed(1)+'°C',desc:'Stay hydrated and avoid prolonged outdoor activity.'});
+  if(wind>=50)         alerts.push({cls:'a-wind',icon:'💨',title:'Strong wind — '+wind.toFixed(1)+' km/h',desc:'Secure loose outdoor items. Driving may be affected.'});
+  const wrap=document.getElementById('alerts-wrap');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  alerts.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='alert-bar '+a.cls;
+    div.innerHTML='<span class="alert-icon">'+a.icon+'</span><div class="alert-body"><div class="alert-title">'+a.title+'</div><div class="alert-desc">'+a.desc+'</div></div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    wrap.appendChild(div);
+  });
+}
+
+// ── Today's summary ───────────────────────────────────────
+function applyDayStats(observations){
+  const today=new Date().toDateString();
+  const todayObs=observations.filter(o=>new Date(o.obsTimeLocal.replace(' ','T')).toDateString()===today);
+  if(!todayObs.length)return;
+  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0,totalRain=0;
+  todayObs.forEach(o=>{
+    const t=new Date(o.obsTimeLocal.replace(' ','T')),temp=o.metric.tempAvg??o.metric.temp??0;
+    if(temp>maxT){maxT=temp;maxTime=t;}if(temp<minT){minT=temp;minTime=t;}
+    tempSum+=temp;totalRain+=o.metric.precipTotal??0;
+  });
+  set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));
+  set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/todayObs.length,1));
+  if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
+}
+
+// ── Pressure trend ────────────────────────────────────────
+function applyPressureTrend(observations){
+  if(observations.length<4)return;
+  const last=observations[observations.length-1],prev=observations[observations.length-4];
+  const pNow=last.metric.pressureMax??last.metric.pressure,pOld=prev.metric.pressureMax??prev.metric.pressure;
+  if(!pNow||!pOld)return;
+  const diff=pNow-pOld;
+  let arrow,label,cls,desc;
+  if     (diff> 3){arrow='↑↑';label='Rising fast'; cls='t-up';  desc='Rapid improvement — clearing likely';}
+  else if(diff> 1){arrow='↑'; label='Rising';      cls='t-up';  desc='Gradually improving';}
+  else if(diff>-1){arrow='→'; label='Steady';      cls='t-flat';desc='Stable — no significant change';}
+  else if(diff>-3){arrow='↓'; label='Falling';     cls='t-dn';  desc:'Conditions may deteriorate';}
+  else            {arrow='↓↓';label='Falling fast';cls='t-dn';  desc:'Possible storm or heavy rain soon';}
+  const pEl=document.getElementById('p-trend');
+  if(pEl){pEl.className='p-trend '+cls;pEl.textContent=arrow+' '+label;}
+  const rEl=document.getElementById('p-rate');
+  if(rEl)rEl.textContent=(diff>=0?'+':'')+diff.toFixed(1)+' hPa / 3 h · '+desc;
+}
+
+// ── Apply observation ─────────────────────────────────────
+function applyObs(obs){
+  const m=obs.metric,cond=getCondition(obs);
+  set('cond-icon',cond.icon);set('cond-label',cond.label);
+  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
+  const tc=tempColor(m.temp);
+  const tempEl=document.getElementById('temp-val');if(tempEl){tempEl.style.color=tc;countUp('temp-val',m.temp,1,'',1200);}
+  const feelsVal=m.heatIndex??m.windChill??m.temp;
+  set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
+  const fs=feelsStyle(feelsVal);
+  const pill=document.getElementById('feels-pill');
+  if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
+  countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)">%</span>',1000);
+  countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
+  countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
+  set('hs-uv',obs.uv??'—');
+  countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit">km/h</span>',900);
+  set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
+  document.getElementById('needle').style.transform='rotate('+obs.winddir+'deg)';
+  const bf=beaufort(m.windSpeed||0);set('bft-num','Bft '+bf.n);set('bft-label',bf.name);
+  countUp('pressure-val',m.pressure,1,'<span class="unit">hPa</span>',1200);
+  const pEl=document.getElementById('p-trend');
+  if(m.pressure>1013){pEl.className='p-trend t-up';pEl.textContent='↑ Above average';}
+  else if(m.pressure<1005){pEl.className='p-trend t-dn';pEl.textContent='↓ Below average';}
+  else{pEl.className='p-trend t-flat';pEl.textContent='→ Near average';}
+  set('pressure-label',m.pressure>1020?'High pressure — stable':m.pressure<1005?'Low pressure — unsettled':'Moderate pressure');
+  updatePressureArc(m.pressure);
+  const rr=m.precipRate??0;
+  set('rain-rate',fmt(rr,2));set('rain-total',fmt(m.precipTotal,1));
+  document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
+  const uv=obs.uv??0;set('uv-val',uv);set('uv-label',uvLabel(uv));
+  document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
+  const sol=m.solarRadiation??obs.solarRadiation;
+  set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));
+  set('dewpt-val',fmt(m.dewpt,1));set('dewpt-label',dewLabel(m.dewpt));
+  set('snap-fog',obs.humidity>95?'Fog / mist likely':'Clear');
+  set('snap-chill',fmt(m.windChill,1)+'°C');set('snap-heat',fmt(m.heatIndex,1)+'°C');
+  set('snap-sw',obs.softwareType||'—');set('snap-qc',obs.qcStatus===1?'✓ Passed':'—');
+  document.getElementById('dot').className='dot';set('status-text','Live');
+  set('updated',fmtTime(new Date(obs.obsTimeUtc)));
+  const h=new Date().getHours();
+  if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
+  updateSunArc(obs.lat,obs.lon);
+  checkAlerts(obs);
+}
+
+function applyHourly(observations){
+  const raw=observations.slice(-24);
+  drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
+  drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
+  applyDayStats(observations);
+  applyPressureTrend(observations);
+}
+
+function tickClock(){set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
+setInterval(tickClock,1000);tickClock();
+
+async function fetchCurrent(){
+  const dot=document.getElementById('dot');dot.className='dot loading';set('status-text','Refreshing…');
+  try{const res=await fetch(PROXY+'/');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();const obs=data.observations?.[0];if(!obs)throw new Error('No data');applyObs(obs);}
+  catch(e){dot.className='dot error';set('status-text','Error: '+e.message);}
+}
+async function fetchHourly(){
+  try{const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.observations?.length)applyHourly(data.observations);}
+  catch(e){console.warn('Hourly:',e);}
+}
+async function init(){await Promise.all([fetchCurrent(),fetchHourly()]);}
+init();
+setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+</script>
 </body>
 </html>
