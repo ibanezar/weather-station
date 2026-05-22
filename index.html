@@ -1072,6 +1072,57 @@ init();
 setInterval(fetchCurrent,5*60*1000);
 setInterval(fetchHourly,30*60*1000);
 setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+const OWM_API_KEY = '836d3b9becedea0f18d254afa7aa7c26'; // Replace with your actual API key
+const LAT = 46.326;
+const LON = 14.921;
+const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${OWM_API_KEY}&units=metric`;
+
+async function updateMultiDayForecast() {
+    try {
+        const response = await fetch(FORECAST_URL);
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        
+        const data = await response.json();
+        const container = document.getElementById('forecast-container');
+        container.innerHTML = ''; // Clear out the loading state text
+        
+        // Filter out data to grab only the timestamps representing 12:00 PM
+        const middayForecasts = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+        middayForecasts.forEach(day => {
+            // Convert Unix timestamp to local Date object
+            const date = new Date(day.dt * 1000);
+            
+            // Format options: 'Mon', 'Tue', etc.
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }); 
+            const temp = Math.round(day.main.temp);
+            const condition = day.weather[0].description;
+            const iconCode = day.weather[0].icon;
+
+            // Generate HTML for each row
+            const rowHTML = `
+                <div class="forecast-row">
+                    <span class="forecast-day">${dayName}</span>
+                    <div class="forecast-icon-box">
+                        <img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="${condition}">
+                        <span class="forecast-condition">${condition}</span>
+                    </div>
+                    <span class="forecast-temp">${temp}°C</span>
+                </div>
+            `;
+            
+            container.innerHTML += rowHTML;
+        });
+
+    } catch (error) {
+        console.error("Failed to load multi-day forecast:", error);
+        document.getElementById('forecast-container').innerHTML = 
+            `<div class="error-text" style="color: #ff6b6b;">Unable to load forecast data.</div>`;
+    }
+}
+
+// Fire it off when the DOM finishes loading
+window.addEventListener('DOMContentLoaded', updateMultiDayForecast);
 </script>
 </body>
 </html>
