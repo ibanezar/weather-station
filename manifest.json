@@ -1,0 +1,22 @@
+{
+  "name": "Vreme Rečica ob Savinji",
+  "short_name": "Vreme IREICA1",
+  "description": "Osebna meteorološka postaja IREICA1 – Rečica ob Savinji",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef2f9",
+  "theme_color": "#2563eb",
+  "lang": "sl",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='72' x='50' text-anchor='middle' font-size='60'>🌤</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["weather", "utilities"],
+  "screenshots": []
+}
