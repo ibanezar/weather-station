@@ -940,8 +940,10 @@ function applyHourly(observations){
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);applyYesterdayDelta(observations);
   _hourlyObs=observations;
-  delete _histCache['7']; // invalidate so next switch re-derives
-  if(_historyLoaded&&_currentPeriod==='7') applyHistory(buildDailySummaries(observations));
+  const dailies=buildDailySummaries(observations);
+  saveToLocalHistory(dailies);          // accumulate for history tab
+  delete _histCache['7'];
+  if(_historyLoaded&&_currentPeriod==='7') applyHistory(dailies);
 }
 
 // ── Forecast ──────────────────────────────────────────────
@@ -981,64 +983,114 @@ function switchTab(tab){
 const _histCache={};
 let _currentPeriod='7';
 
-function getPeriodDates(period){
-  const now=new Date();
-  const pad=n=>String(n).padStart(2,'0');
-  const fd=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
-  const end=fd(now);
-  if(period==='30'){const s=new Date(now-30*864e5);return{start:fd(s),end};}
-  if(period==='year'){return{start:now.getFullYear()+'0101',end};}
-  if(period==='5year'){return{start:(now.getFullYear()-5)+'0101',end};}
-  return null;
+// ── localStorage accumulation ─────────────────────────────
+const LS_KEY='wx-history-v1';
+
+function saveToLocalHistory(dailySummaries){
+  try{
+    const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    dailySummaries.forEach(s=>{stored[s.obsTimeLocal]=s.metric;});
+    const cutoff=new Date(Date.now()-6*365*24*3600*1000).toISOString().slice(0,10);
+    Object.keys(stored).forEach(k=>{if(k<cutoff)delete stored[k];});
+    localStorage.setItem(LS_KEY,JSON.stringify(stored));
+  }catch(e){}
+}
+
+function getLocalHistory(period){
+  try{
+    const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    const now=new Date();
+    let cutoff;
+    if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
+    else if(period==='year')  cutoff=now.getFullYear()+'-01-01';
+    else if(period==='5year') cutoff=(now.getFullYear()-5)+'-01-01';
+    else cutoff='2000-01-01';
+    return Object.entries(stored)
+      .filter(([k])=>k>=cutoff)
+      .map(([k,v])=>({obsTimeLocal:k,metric:v}))
+      .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+  }catch(e){return[];}
+}
+
+function localHistoryDays(){
+  try{return Object.keys(JSON.parse(localStorage.getItem(LS_KEY)||'{}')).length;}catch(e){return 0;}
 }
 
 function setPeriodBtns(period,loading){
-  document.querySelectorAll('.period-btn').forEach(b=>{b.classList.remove('active');b.disabled=loading;});
+  document.querySelectorAll('.period-btn').forEach(b=>{b.classList.remove('active');b.disabled=!!loading;});
   const btn=document.getElementById('pbtn-'+period);
   if(btn)btn.classList.add('active');
 }
 
 function showHistLoading(){
-  const tbody=document.getElementById('history-tbody');
-  if(tbody)tbody.innerHTML='<tr><td colspan="8" class="hist-loading" style="text-align:center;padding:3rem;color:var(--muted)">Nalaganje podatkov…</td></tr>';
+  const t=document.getElementById('history-tbody');
+  if(t)t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--muted)">Nalaganje…</td></tr>';
+}
+
+function updateAccumInfo(shown,total){
+  let el=document.getElementById('hist-accum-info');
+  if(!el){
+    el=document.createElement('div');el.id='hist-accum-info';
+    el.style.cssText='font-size:.68rem;color:var(--muted);margin-bottom:.75rem;font-family:"IBM Plex Mono",monospace';
+    const pn=document.querySelector('.period-nav');if(pn)pn.after(el);
+  }
+  el.textContent='📦 Lokalna shramba: '+total+' dni · prikazujem '+shown+' dni';
+}
+
+function getPeriodRange(period){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const fd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const end=fd(now);
+  if(period==='30')   return{start:fd(new Date(now-30*864e5)),end};
+  if(period==='year') return{start:now.getFullYear()+'-01-01',end};
+  if(period==='5year')return{start:(now.getFullYear()-5)+'-01-01',end};
+  return null;
 }
 
 async function switchPeriod(period){
   _currentPeriod=period;
   setPeriodBtns(period,false);
+  const infoEl=document.getElementById('hist-accum-info');if(infoEl)infoEl.textContent='';
 
-  // 7 days — derive from hourly data (no API call needed)
   if(period==='7'){
-    if(!_histCache['7']&&_hourlyObs.length) _histCache['7']=buildDailySummaries(_hourlyObs);
-    if(_histCache['7']) applyHistory(_histCache['7']);
+    if(!_histCache['7']&&_hourlyObs.length)_histCache['7']=buildDailySummaries(_hourlyObs);
+    if(_histCache['7'])applyHistory(_histCache['7']);
     else showHistErr('Čakam na urne podatke…');
     return;
   }
 
-  // Use cache if available
+  // Use cache
   if(_histCache[period]){applyHistory(_histCache[period]);return;}
 
-  // Fetch from API
-  showHistLoading();
-  setPeriodBtns(period,true);
+  // Try Ecowitt API
+  const r=getPeriodRange(period);
+  showHistLoading();setPeriodBtns(period,true);
   try{
-    const d=getPeriodDates(period);
-    const res=await fetch(PROXY+'/history?start='+d.start+'&end='+d.end);
+    const res=await fetch(PROXY+'/ecowitt-history?start='+r.start+'&end='+r.end);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
-    const summaries=data.summaries??[];
+    if(data.error) throw new Error(data.error);
+    const summaries=data.summaries||[];
     if(!summaries.length) throw new Error('Ni podatkov');
     _histCache[period]=summaries;
+    saveToLocalHistory(summaries); // cache locally too
     applyHistory(summaries);
   }catch(e){
-    showHistErr('Napaka: '+e.message);
+    // Fallback: localStorage
+    const stored=getLocalHistory(period);
+    if(stored.length){
+      applyHistory(stored);
+      updateAccumInfo(stored.length,localHistoryDays());
+    }else{
+      showHistErr('Napaka: '+e.message+'<br><span style="color:var(--muted);font-size:.85em">Lokalna shramba: '+localHistoryDays()+' dni podatkov</span>');
+    }
   }finally{
     setPeriodBtns(period,false);
   }
 }
 
 async function fetchHistory(){
-  if(_histCache['7']){applyHistory(_histCache['7']);_historyLoaded=true;return;}
   if(!_hourlyObs.length){
     const tb=document.getElementById('history-tbody');
     if(tb)tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Čakam na urne podatke…</td></tr>';
@@ -1046,9 +1098,7 @@ async function fetchHistory(){
       if(_hourlyObs.length){
         _histCache['7']=buildDailySummaries(_hourlyObs);
         applyHistory(_histCache['7']);_historyLoaded=true;
-      } else {
-        showHistErr('Urni podatki niso na voljo');
-      }
+      }else showHistErr('Urni podatki niso na voljo');
     },4000);
     return;
   }
@@ -1056,52 +1106,6 @@ async function fetchHistory(){
   applyHistory(_histCache['7']);
   _historyLoaded=true;
 }
-function buildDailySummaries(observations){
-  const byDay={};
-  observations.forEach(o=>{
-    const day=o.obsTimeLocal.slice(0,10);
-    if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],gusts:[],hums:[]};
-    const m=o.metric;
-    if(m.tempAvg!=null)        byDay[day].temps.push(m.tempAvg);
-    if(m.precipTotal!=null)    byDay[day].rains.push(m.precipTotal);
-    if(m.windspeedAvg!=null)   byDay[day].winds.push(m.windspeedAvg);
-    if(m.windspeedHigh!=null)  byDay[day].gusts.push(m.windspeedHigh);
-    if(m.humidityAvg!=null)    byDay[day].hums.push(m.humidityAvg);
-  });
-  return Object.values(byDay)
-    .map(d=>({
-      obsTimeLocal:d.date,
-      metric:{
-        tempHigh:      d.temps.length ? Math.max(...d.temps) : null,
-        tempLow:       d.temps.length ? Math.min(...d.temps) : null,
-        tempAvg:       d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
-        precipTotal:   d.rains.length ? Math.max(...d.rains) : 0,
-        windspeedAvg:  d.winds.length ? d.winds.reduce((a,b)=>a+b,0)/d.winds.length : null,
-        windspeedHigh: d.gusts.length ? Math.max(...d.gusts) : null,
-        humidityAvg:   d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
-      }
-    }))
-    .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
-}
-
-async function fetchHistory(){
-  if(!_hourlyObs.length){
-    const tb=document.getElementById('history-tbody');
-    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Čakam na urne podatke…</td></tr>';
-    setTimeout(()=>{
-      if(_hourlyObs.length){
-        applyHistory(buildDailySummaries(_hourlyObs));_historyLoaded=true;
-      } else {
-        const tb2=document.getElementById('history-tbody');
-        if(tb2)tb2.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Urni podatki še niso na voljo — počakaj trenutek in poskusi znova</td></tr>';
-      }
-    },4000);
-    return;
-  }
-  applyHistory(buildDailySummaries(_hourlyObs));
-  _historyLoaded=true;
-}
-
 function fmtHistDate(s){
   const d=new Date(s.slice(0,10)+'T12:00:00');
   return d.toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
