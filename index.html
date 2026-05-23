@@ -1,11 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rečica ob Savinji — Meteorološka postaja</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="theme-color" content="#2563eb" id="theme-color-meta">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vreme IREICA1">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -244,7 +249,34 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes star-wink {0%,100%{opacity:.8;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
-/* Responsive */
+/* Countdown bar */
+.countdown-wrap{height:2px;background:var(--rain-track);margin:-1.4rem 0 1.6rem;overflow:hidden}
+.countdown-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width 1s linear;width:0%}
+
+/* Yesterday delta */
+.yesterday-delta{font-size:.72rem;margin-top:.45rem}
+.yesterday-delta .dv{font-family:'IBM Plex Mono',monospace;font-weight:400}
+
+/* Share & install buttons */
+.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 12px;font-size:.68rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,color .2s;line-height:1.5}
+.share-btn:hover{border-color:var(--blue);color:var(--blue)}
+.install-btn{display:none;align-items:center;gap:.4rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:20px;padding:3px 12px;font-size:.68rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.install-btn.show{display:inline-flex}
+
+/* Toast */
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--card-bg);border:1px solid var(--card-border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:.55rem 1.4rem;border-radius:30px;font-size:.75rem;color:var(--text);box-shadow:var(--card-shadow);opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:400;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Wind rose */
+.wind-rose-card{margin-bottom:1rem}
+.wind-rose-body{display:flex;align-items:center;gap:1.75rem;flex-wrap:wrap}
+.wind-rose-legend{display:flex;flex-direction:column;gap:.45rem}
+.wrl{font-size:.65rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.wrl-dot{width:12px;height:4px;border-radius:2px;flex-shrink:0}
+
+/* Responsive: wind rose */
+@media(max-width:520px){.wind-rose-body{gap:1rem}}
+
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
   .span2{grid-column:span 1}
@@ -299,7 +331,10 @@ footer a{color:var(--blue);text-decoration:none}
     <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje…</span></span>
     <span>Posodobljeno <span id="updated">—</span></span>
     <span id="local-time">—</span>
+    <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
+    <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
   </div>
+  <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
@@ -309,6 +344,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
       <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
       <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
+      <div class="yesterday-delta" id="yesterday-delta"></div>
     </div>
     <div class="hero-icon" id="hero-icon"></div>
     <div class="hero-stats">
@@ -382,6 +418,22 @@ footer a{color:var(--blue);text-decoration:none}
             <text class="p-arc-lbl" x="117" y="70" font-size="8" text-anchor="end">High</text>
           </svg>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wind rose -->
+  <div class="card wind-rose-card">
+    <div class="clabel">🌹 Vetroza — zadnjih 7 dni</div>
+    <div class="wind-rose-body">
+      <svg id="wind-rose-svg" viewBox="0 0 150 150" style="width:150px;height:150px;flex-shrink:0"></svg>
+      <div>
+        <div class="wind-rose-legend">
+          <div class="wrl"><div class="wrl-dot" style="background:#60a5fa"></div>0 – 10 km/h</div>
+          <div class="wrl"><div class="wrl-dot" style="background:#4d9ff8"></div>10 – 30 km/h</div>
+          <div class="wrl"><div class="wrl-dot" style="background:#a78bfa"></div>&gt; 30 km/h</div>
+        </div>
+        <div id="wind-rose-stats" style="margin-top:.8rem;font-size:.7rem;color:var(--muted);line-height:1.6"></div>
       </div>
     </div>
   </div>
@@ -746,6 +798,8 @@ function applyObs(obs){
   document.getElementById('dot').className='dot';set('status-text','V živo');set('updated',fmtTime(new Date(obs.obsTimeUtc)));
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
   updateSunArc(obs.lat,obs.lon);checkAlerts(obs);
+  setFavicon(cond.icon);
+  _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
 
 function applyHourly(observations){
@@ -753,6 +807,7 @@ function applyHourly(observations){
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
   applyDayStats(observations);applyPressureTrend(observations);
+  drawWindRose(observations);applyYesterdayDelta(observations);
 }
 
 // ── Forecast ──────────────────────────────────────────────
@@ -778,6 +833,109 @@ function applyForecast(list){
 }
 
 // ── Clock + fetch ─────────────────────────────────────────
+// ── Dynamic favicon ───────────────────────────────────────
+function setFavicon(emoji){
+  try{
+    const c=document.createElement('canvas');c.width=64;c.height=64;
+    const ctx=c.getContext('2d');ctx.font='52px serif';ctx.textAlign='center';
+    ctx.fillText(emoji,32,52);
+    let lnk=document.querySelector("link[rel~='icon']");
+    if(!lnk){lnk=document.createElement('link');lnk.rel='icon';document.head.appendChild(lnk);}
+    lnk.href=c.toDataURL();
+  }catch(e){}
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ── Share ─────────────────────────────────────────────────
+function shareWeather(){
+  const g=id=>document.getElementById(id)?.textContent||'—';
+  const cond=g('cond-label'),hum=g('hs-humidity').replace(/\D/g,'');
+  const wSpd=g('wind-speed').replace(/[^0-9.]/g,''),wDir=g('wind-dir-lbl').split('·')[0].trim();
+  const rain=g('rain-total'),high=g('day-high'),low=g('day-low');
+  const temp=_lastTemp!=null?_lastTemp.toFixed(1)+'°C':'—';
+  const txt=`🌤 Vreme – Rečica ob Savinji\n🌡 ${temp} — ${cond}\n💧 Vlažnost: ${hum} %  |  Rosišče: ${g('dewpt-hero')}°C\n💨 Veter: ${wDir} ${wSpd} km/h\n🌧 Padavine danes: ${rain} mm\n📈 Maks: ${high}°C  |  Min: ${low}°C\n\n📡 Postaja IREICA1 · Rečica ob Savinji`;
+  if(navigator.share){navigator.share({title:'Vreme Rečica ob Savinji',text:txt}).catch(()=>{});}
+  else{navigator.clipboard.writeText(txt).then(()=>showToast('✓ Kopirano v odložišče!')).catch(()=>showToast('Deljenje ni podprto'));}
+}
+
+// ── Countdown ─────────────────────────────────────────────
+let _nextRefresh=Date.now()+5*60*1000;
+function updateCountdown(){
+  const elapsed=Date.now()-(_nextRefresh-5*60*1000);
+  const pct=Math.min(100,(elapsed/(5*60*1000))*100);
+  const bar=document.getElementById('countdown-fill');if(bar)bar.style.width=pct+'%';
+}
+setInterval(updateCountdown,1000);updateCountdown();
+
+// ── Yesterday delta ───────────────────────────────────────
+function applyYesterdayDelta(observations){
+  const target=new Date(Date.now()-24*3600*1000);
+  let closest=null,minDiff=Infinity;
+  observations.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T'));const df=Math.abs(t-target);if(df<minDiff){minDiff=df;closest=o;}});
+  if(!closest||_lastTemp===null)return;
+  const ty=closest.metric?.tempAvg??closest.metric?.temp;if(ty==null)return;
+  const d=_lastTemp-ty,sign=d>0?'+':'';
+  const word=d>0.5?'topleje kot včeraj':d<-0.5?'hladneje kot včeraj':'podobno kot včeraj';
+  const col=d>0.5?'var(--red)':d<-0.5?'var(--blue)':'var(--muted)';
+  const el=document.getElementById('yesterday-delta');
+  if(el)el.innerHTML=`<span class="dv" style="color:${col}">${sign}${d.toFixed(1)}°C</span> <span style="color:var(--muted)">${word}</span>`;
+}
+
+// ── Wind rose ─────────────────────────────────────────────
+function drawWindRose(observations){
+  const svg=document.getElementById('wind-rose-svg');if(!svg)return;
+  const dirs=new Array(8).fill(0),spds=new Array(8).fill(0);
+  observations.forEach(o=>{
+    const d=o.winddirAvg??o.winddir??0;
+    const sp=o.metric?.windspeedAvg??o.metric?.windSpeed??0;
+    const sec=Math.round(d/45)%8;dirs[sec]++;spds[sec]+=sp;
+  });
+  const total=observations.length||1,maxF=Math.max(...dirs)||1;
+  svg.innerHTML='';
+  const cx=75,cy=75,maxR=52;
+  const labels=['S','SV','V','JV','J','JZ','Z','SZ'];
+  [.33,.66,1].forEach(r=>mkSVG(svg,'circle',{cx,cy,r:(maxR*r).toFixed(1),fill:'none',stroke:CC.grid,'stroke-width':'1'}));
+  [[0,maxR,0,-maxR],[maxR,0,-maxR,0]].forEach(([x1,y1,x2,y2])=>mkSVG(svg,'line',{x1:cx+x1,y1:cy+y1,x2:cx+x2,y2:cy+y2,stroke:CC.grid,'stroke-width':'1'}));
+  dirs.forEach((cnt,i)=>{
+    if(cnt===0)return;
+    const len=(cnt/maxF)*maxR*.88,avgSp=spds[i]/cnt;
+    const color=avgSp<10?'#60a5fa':avgSp<30?'#4d9ff8':'#a78bfa';
+    const angle=(i*45-90)*Math.PI/180;
+    mkSVG(svg,'line',{x1:cx,y1:cy,x2:(cx+len*Math.cos(angle)).toFixed(1),y2:(cy+len*Math.sin(angle)).toFixed(1),stroke:color,'stroke-width':'10','stroke-linecap':'round',opacity:'.8'});
+  });
+  labels.forEach((lbl,i)=>{
+    const angle=(i*45-90)*Math.PI/180,lr=maxR+11;
+    const t=mkSVG(svg,'text',{x:(cx+lr*Math.cos(angle)).toFixed(1),y:(cy+lr*Math.sin(angle)).toFixed(1),'text-anchor':'middle','dominant-baseline':'central','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    t.textContent=lbl;
+  });
+  mkSVG(svg,'circle',{cx,cy,r:'3',fill:'var(--muted)'});
+  const dom=dirs.indexOf(maxF),pct=Math.round(dirs[dom]/total*100);
+  const calm=Math.round(observations.filter(o=>(o.metric?.windspeedAvg??o.metric?.windSpeed??0)<2).length/total*100);
+  const el=document.getElementById('wind-rose-stats');
+  if(el)el.innerHTML=`Prevladujoča smer: <strong>${labels[dom]}</strong> (${pct} % časa)<br>Mirno: ${calm} % časa`;
+}
+
+// ── PWA install ───────────────────────────────────────────
+let _installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();_installPrompt=e;
+  const btn=document.getElementById('install-btn');if(btn)btn.classList.add('show');
+});
+function installApp(){
+  if(!_installPrompt)return;
+  _installPrompt.prompt();
+  _installPrompt.userChoice.then(()=>{_installPrompt=null;const b=document.getElementById('install-btn');if(b)b.classList.remove('show');});
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
 function tickClock(){set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
 
@@ -794,5 +952,6 @@ async function init(){await Promise.all([fetchCurrent(),fetchHourly(),fetchForec
 init();
 setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
+<div id="toast"></div>
 </body>
 </html>
