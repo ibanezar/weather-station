@@ -582,7 +582,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Temperature band chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 30 dni</span>
+        <span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-temp-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -595,7 +595,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Rain history chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌧 Padavine — zadnjih 30 dni</span>
+        <span class="clabel" style="margin:0">🌧 Padavine — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-rain-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -607,7 +607,7 @@ footer a{color:var(--blue);text-decoration:none}
 
     <!-- Daily table -->
     <div class="card" style="margin-bottom:1rem;padding:1.4rem 1.6rem">
-      <div class="clabel">📋 Dnevni podatki (zadnjih 30 dni)</div>
+      <div class="clabel">📋 Dnevni podatki (zadnjih 7 dni)</div>
       <div style="overflow-x:auto;margin-top:.5rem">
         <table class="history-table">
           <thead>
@@ -791,7 +791,7 @@ function smoothPath(pts){if(pts.length<2)return'';let d='M '+pts[0].x+' '+pts[0]
 function mkSVG(parent,tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.appendChild(el);return el;}
 function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(evt.clientX-r.left)/r.width*vb.width;}
 
-let _tempData=[],_rainData=[];
+let _tempData=[],_rainData=[],_hourlyObs=[];
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -918,6 +918,8 @@ function applyHourly(observations){
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);applyYesterdayDelta(observations);
+  _hourlyObs=observations;
+  if(_historyLoaded) applyHistory(buildDailySummaries(observations));
 }
 
 // ── Forecast ──────────────────────────────────────────────
@@ -953,18 +955,49 @@ function switchTab(tab){
   if(tab==='history'&&!_historyLoaded) fetchHistory();
 }
 
-// ── History fetch ─────────────────────────────────────────
+// ── History — derive from hourly data (free tier) ─────────
+function buildDailySummaries(observations){
+  const byDay={};
+  observations.forEach(o=>{
+    const day=o.obsTimeLocal.slice(0,10);
+    if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],hums:[]};
+    const m=o.metric;
+    if(m.tempAvg!=null)    byDay[day].temps.push(m.tempAvg);
+    if(m.precipTotal!=null)byDay[day].rains.push(m.precipTotal);
+    if(m.windspeedHigh!=null)byDay[day].winds.push(m.windspeedHigh);
+    if(m.humidityAvg!=null)byDay[day].hums.push(m.humidityAvg);
+  });
+  return Object.values(byDay)
+    .map(d=>({
+      obsTimeLocal:d.date,
+      metric:{
+        tempHigh: d.temps.length ? Math.max(...d.temps)    : null,
+        tempLow:  d.temps.length ? Math.min(...d.temps)    : null,
+        tempAvg:  d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
+        precipTotal: d.rains.reduce((a,b)=>a+b,0),
+        windspeedHigh: d.winds.length ? Math.max(...d.winds) : null,
+        humidityAvg:   d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
+      }
+    }))
+    .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+}
+
 async function fetchHistory(){
-  try{
-    const res=await fetch(PROXY+'/history');
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    if(data.summaries?.length){applyHistory(data.summaries);_historyLoaded=true;}
-    else throw new Error('Ni podatkov');
-  }catch(e){
+  if(!_hourlyObs.length){
     const tb=document.getElementById('history-tbody');
-    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red);padding:2rem">Napaka: '+e.message+'</td></tr>';
+    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Čakam na urne podatke…</td></tr>';
+    setTimeout(()=>{
+      if(_hourlyObs.length){
+        applyHistory(buildDailySummaries(_hourlyObs));_historyLoaded=true;
+      } else {
+        const tb2=document.getElementById('history-tbody');
+        if(tb2)tb2.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Urni podatki še niso na voljo — počakaj trenutek in poskusi znova</td></tr>';
+      }
+    },4000);
+    return;
   }
+  applyHistory(buildDailySummaries(_hourlyObs));
+  _historyLoaded=true;
 }
 
 function fmtHistDate(s){
