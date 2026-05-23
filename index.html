@@ -477,10 +477,16 @@ const LAT = 46.325779, LON = 14.921137;
 
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
+let _lastTemp = null; // remember temp so theme toggle can re-colour it
 function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
   try { localStorage.setItem('wx-theme', t); } catch(e){}
+  // Re-apply temperature colour with new theme
+  if(_lastTemp !== null){
+    const el = document.getElementById('temp-val');
+    if(el) el.style.color = tempColor(_lastTemp);
+  }
   if(_tempData.length) drawTempChart(_tempData);
   if(_rainData.length) drawRainChart(_rainData);
 }
@@ -512,11 +518,22 @@ function dewLabel(d){if(d<5)return'Very dry';if(d<10)return'Dry';if(d<15)return'
 
 function tempColor(t){
   if(isDark()){
-    if(t<0)  return'#93c5fd';if(t<8)  return'#7dd3fc';if(t<15)return'#6ee7b7';
-    if(t<22) return'#e8edf8';if(t<28) return'#fcd34d';if(t<35)return'#fb923c';return'#f87171';
+    // Bright, saturated colours — all high contrast on dark navy
+    if(t<0)  return '#bae6fd';  // bright sky blue
+    if(t<8)  return '#67e8f9';  // bright cyan
+    if(t<15) return '#6ee7b7';  // bright mint
+    if(t<22) return '#f1f5f9';  // bright white
+    if(t<28) return '#fcd34d';  // bright amber
+    if(t<35) return '#fb923c';  // bright orange
+    return '#f87171';
   } else {
-    if(t<0)  return'#1d4ed8';if(t<8)  return'#0369a1';if(t<15)return'#0f766e';
-    if(t<22) return'#0f172a';if(t<28) return'#b45309';if(t<35)return'#c2410c';return'#dc2626';
+    if(t<0)  return '#1d4ed8';
+    if(t<8)  return '#0369a1';
+    if(t<15) return '#0f766e';
+    if(t<22) return '#0f172a';
+    if(t<28) return '#b45309';
+    if(t<35) return '#c2410c';
+    return '#dc2626';
   }
 }
 function feelsStyle(t){
@@ -555,7 +572,7 @@ function getCondition(obs){
   if(sr>10)  return{icon:'🌥',label:'Mostly Cloudy'};return{icon:'☁',label:'Overcast'};
 }
 function iconSunny(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="28" fill="#f59e0b" opacity=".08"/><circle cx="50" cy="50" r="20" fill="#f59e0b" opacity=".12"/><g style="transform-origin:50px 50px;animation:spin 18s linear infinite"><line x1="50" y1="29" x2="50" y2="17" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="50" y1="71" x2="50" y2="83" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="29" y1="50" x2="17" y2="50" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="71" y1="50" x2="83" y2="50" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/><line x1="64.8" y1="35.2" x2="73.3" y2="26.7" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="35.2" y1="35.2" x2="26.7" y2="26.7" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="64.8" y1="64.8" x2="73.3" y2="73.3" stroke="#d97706" stroke-width="3" stroke-linecap="round"/><line x1="35.2" y1="64.8" x2="26.7" y2="73.3" stroke="#d97706" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="16" fill="#f59e0b" style="animation:ray-pulse 3s ease-in-out infinite;transform-origin:50px 50px"/></svg>';}
-function iconPartlyCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g opacity=".9"><g style="transform-origin:36px 36px;animation:spin 20s linear infinite"><line x1="36" y1="21" x2="36" y2="12" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="36" y1="51" x2="36" y2="60" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" opacity=".4"/><line x1="21" y1="36" x2="12" y2="36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="51" y1="36" x2="60" y2="36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" opacity=".5"/><line x1="26.8" y1="26.8" x2="20.4" y2="20.4" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><line x1="45.2" y1="26.8" x2="51.6" y2="20.4" stroke="#d97706" stroke-width="2" stroke-linecap="round" opacity=".4"/></g><circle cx="36" cy="36" r="13" fill="#f59e0b"/></g><ellipse cx="52" cy="62" rx="21" ry="13" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="66" cy="66" rx="17" ry="11" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="58" cy="70" rx="25" ry="12" fill="#b0bec5" style="animation:cloud-bob 4s ease-in-out infinite"/></svg>';}
+function iconPartlyCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g style="transform-origin:40px 36px;animation:spin 20s linear infinite"><line x1="40" y1="19" x2="40" y2="9" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="53" x2="40" y2="63" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" opacity=".35"/><line x1="23" y1="36" x2="13" y2="36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/><line x1="57" y1="36" x2="67" y2="36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" opacity=".5"/><line x1="52" y1="24" x2="59" y2="17" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><line x1="28" y1="24" x2="21" y2="17" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><line x1="52" y1="48" x2="59" y2="55" stroke="#d97706" stroke-width="2" stroke-linecap="round" opacity=".35"/><line x1="28" y1="48" x2="21" y2="55" stroke="#d97706" stroke-width="2" stroke-linecap="round" opacity=".35"/></g><circle cx="40" cy="36" r="14" fill="#f59e0b"/><ellipse cx="46" cy="61" rx="17" ry="10" fill="#94a3b8" opacity=".85" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="68" cy="64" rx="14" ry="9" fill="#94a3b8" opacity=".85" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="56" cy="68" rx="25" ry="12" fill="#b0bec5" style="animation:cloud-bob 4s ease-in-out infinite"/></svg>';}
 function iconCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="42" cy="40" rx="23" ry="15" fill="#94a3b8" opacity=".5" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="62" cy="44" rx="19" ry="13" fill="#94a3b8" opacity=".5" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="36" cy="58" rx="23" ry="15" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite .5s"/><ellipse cx="58" cy="62" rx="20" ry="14" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite .5s"/><ellipse cx="47" cy="67" rx="28" ry="14" fill="#78909c" style="animation:cloud-bob 4s ease-in-out infinite .5s"/></svg>';}
 function iconRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="38" rx="22" ry="14" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="58" cy="42" rx="18" ry="12" fill="#64748b" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="48" cy="47" rx="26" ry="14" fill="#78909c" style="animation:cloud-bob 4s ease-in-out infinite"/><line x1="32" y1="62" x2="28" y2="76" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite"/><line x1="47" y1="64" x2="43" y2="78" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .35s"/><line x1="62" y1="62" x2="58" y2="76" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .7s"/><line x1="39" y1="72" x2="35" y2="84" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .18s"/><line x1="55" y1="70" x2="51" y2="82" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall 1.3s ease-in infinite .55s"/></svg>';}
 function iconHeavyRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="34" rx="22" ry="14" fill="#475569"/><ellipse cx="58" cy="38" rx="18" ry="12" fill="#475569"/><ellipse cx="48" cy="43" rx="26" ry="14" fill="#64748b"/><polyline points="53,44 44,58 51,58 40,76" stroke="#d97706" stroke-width="3" fill="none" stroke-linejoin="round" style="animation:lightning 3s ease-in-out infinite"/><line x1="28" y1="56" x2="24" y2="68" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite"/><line x1="66" y1="54" x2="62" y2="66" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite .28s"/></svg>';}
@@ -698,7 +715,8 @@ function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
-  const tempEl=document.getElementById('temp-val');if(tempEl){tempEl.style.color=tempColor(m.temp);countUp('temp-val',m.temp,1,'',1200);}
+  const tempEl=document.getElementById('temp-val');
+  if(tempEl){_lastTemp=m.temp;tempEl.style.color=tempColor(m.temp);countUp('temp-val',m.temp,1,'',1200);}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
