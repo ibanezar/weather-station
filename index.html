@@ -300,6 +300,13 @@ footer a{color:var(--blue);text-decoration:none}
 /* Responsive: wind rose */
 @media(max-width:520px){.wind-rose-body{gap:1rem}}
 
+/* Period filter buttons */
+.period-nav{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.period-btn{padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
+.period-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 2px 10px rgba(37,99,235,.3)}
+.period-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.period-btn:disabled{opacity:.45;cursor:wait}
+
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
   .span2{grid-column:span 1}
@@ -555,8 +562,16 @@ footer a{color:var(--blue);text-decoration:none}
   <!-- ══ TAB: ZGODOVINA ══ -->
   <div id="tab-history" class="tab-pane">
 
-    <!-- Records -->
-    <div class="g4" style="margin-bottom:1rem">
+    <!-- Period filter -->
+    <div class="period-nav">
+      <button class="period-btn active" id="pbtn-7"     onclick="switchPeriod('7')">7 dni</button>
+      <button class="period-btn"        id="pbtn-30"    onclick="switchPeriod('30')">30 dni</button>
+      <button class="period-btn"        id="pbtn-year"  onclick="switchPeriod('year')">Letos</button>
+      <button class="period-btn"        id="pbtn-5year" onclick="switchPeriod('5year')">5 let</button>
+    </div>
+
+    <!-- Records — 5 cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1rem">
       <div class="card rec-card-high">
         <div class="clabel">🌡 Najvišja temp.</div>
         <div class="cval" id="rec-temp-high">—<span class="unit">°C</span></div>
@@ -573,9 +588,14 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="csub" id="rec-rain-date">—</div>
       </div>
       <div class="card rec-card-wind">
-        <div class="clabel">💨 Najmočnejši veter</div>
+        <div class="clabel">💨 Najm. veter</div>
         <div class="cval" id="rec-wind">—<span class="unit">km/h</span></div>
         <div class="csub" id="rec-wind-date">—</div>
+      </div>
+      <div class="card" style="--t-up-c:var(--purple)">
+        <div class="clabel" style="color:var(--purple)">💥 Najm. sunek</div>
+        <div class="cval" id="rec-gust" style="color:var(--purple)">—<span class="unit">km/h</span></div>
+        <div class="csub" id="rec-gust-date">—</div>
       </div>
     </div>
 
@@ -618,11 +638,12 @@ footer a{color:var(--blue);text-decoration:none}
               <th>Povp. °C</th>
               <th>Padavine mm</th>
               <th>Veter km/h</th>
+              <th>Sunek km/h</th>
               <th>Vlažnost %</th>
             </tr>
           </thead>
           <tbody id="history-tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nalaganje podatkov…</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Nalaganje podatkov…</td></tr>
           </tbody>
         </table>
       </div>
@@ -919,7 +940,8 @@ function applyHourly(observations){
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);applyYesterdayDelta(observations);
   _hourlyObs=observations;
-  if(_historyLoaded) applyHistory(buildDailySummaries(observations));
+  delete _histCache['7']; // invalidate so next switch re-derives
+  if(_historyLoaded&&_currentPeriod==='7') applyHistory(buildDailySummaries(observations));
 }
 
 // ── Forecast ──────────────────────────────────────────────
@@ -955,29 +977,108 @@ function switchTab(tab){
   if(tab==='history'&&!_historyLoaded) fetchHistory();
 }
 
-// ── History — derive from hourly data (free tier) ─────────
+// ── History period system ─────────────────────────────────
+const _histCache={};
+let _currentPeriod='7';
+
+function getPeriodDates(period){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const fd=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+  const end=fd(now);
+  if(period==='30'){const s=new Date(now-30*864e5);return{start:fd(s),end};}
+  if(period==='year'){return{start:now.getFullYear()+'0101',end};}
+  if(period==='5year'){return{start:(now.getFullYear()-5)+'0101',end};}
+  return null;
+}
+
+function setPeriodBtns(period,loading){
+  document.querySelectorAll('.period-btn').forEach(b=>{b.classList.remove('active');b.disabled=loading;});
+  const btn=document.getElementById('pbtn-'+period);
+  if(btn)btn.classList.add('active');
+}
+
+function showHistLoading(){
+  const tbody=document.getElementById('history-tbody');
+  if(tbody)tbody.innerHTML='<tr><td colspan="8" class="hist-loading" style="text-align:center;padding:3rem;color:var(--muted)">Nalaganje podatkov…</td></tr>';
+}
+
+async function switchPeriod(period){
+  _currentPeriod=period;
+  setPeriodBtns(period,false);
+
+  // 7 days — derive from hourly data (no API call needed)
+  if(period==='7'){
+    if(!_histCache['7']&&_hourlyObs.length) _histCache['7']=buildDailySummaries(_hourlyObs);
+    if(_histCache['7']) applyHistory(_histCache['7']);
+    else showHistErr('Čakam na urne podatke…');
+    return;
+  }
+
+  // Use cache if available
+  if(_histCache[period]){applyHistory(_histCache[period]);return;}
+
+  // Fetch from API
+  showHistLoading();
+  setPeriodBtns(period,true);
+  try{
+    const d=getPeriodDates(period);
+    const res=await fetch(PROXY+'/history?start='+d.start+'&end='+d.end);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const summaries=data.summaries??[];
+    if(!summaries.length) throw new Error('Ni podatkov');
+    _histCache[period]=summaries;
+    applyHistory(summaries);
+  }catch(e){
+    showHistErr('Napaka: '+e.message);
+  }finally{
+    setPeriodBtns(period,false);
+  }
+}
+
+async function fetchHistory(){
+  if(_histCache['7']){applyHistory(_histCache['7']);_historyLoaded=true;return;}
+  if(!_hourlyObs.length){
+    const tb=document.getElementById('history-tbody');
+    if(tb)tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Čakam na urne podatke…</td></tr>';
+    setTimeout(()=>{
+      if(_hourlyObs.length){
+        _histCache['7']=buildDailySummaries(_hourlyObs);
+        applyHistory(_histCache['7']);_historyLoaded=true;
+      } else {
+        showHistErr('Urni podatki niso na voljo');
+      }
+    },4000);
+    return;
+  }
+  _histCache['7']=buildDailySummaries(_hourlyObs);
+  applyHistory(_histCache['7']);
+  _historyLoaded=true;
+}
 function buildDailySummaries(observations){
   const byDay={};
   observations.forEach(o=>{
     const day=o.obsTimeLocal.slice(0,10);
-    if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],hums:[]};
+    if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],gusts:[],hums:[]};
     const m=o.metric;
-    if(m.tempAvg!=null)      byDay[day].temps.push(m.tempAvg);
-    // precipTotal is a CUMULATIVE daily total — take max (last value), not sum
-    if(m.precipTotal!=null)  byDay[day].rains.push(m.precipTotal);
-    if(m.windspeedHigh!=null)byDay[day].winds.push(m.windspeedHigh);
-    if(m.humidityAvg!=null)  byDay[day].hums.push(m.humidityAvg);
+    if(m.tempAvg!=null)        byDay[day].temps.push(m.tempAvg);
+    if(m.precipTotal!=null)    byDay[day].rains.push(m.precipTotal);
+    if(m.windspeedAvg!=null)   byDay[day].winds.push(m.windspeedAvg);
+    if(m.windspeedHigh!=null)  byDay[day].gusts.push(m.windspeedHigh);
+    if(m.humidityAvg!=null)    byDay[day].hums.push(m.humidityAvg);
   });
   return Object.values(byDay)
     .map(d=>({
       obsTimeLocal:d.date,
       metric:{
-        tempHigh:     d.temps.length ? Math.max(...d.temps) : null,
-        tempLow:      d.temps.length ? Math.min(...d.temps) : null,
-        tempAvg:      d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
-        precipTotal:  d.rains.length ? Math.max(...d.rains) : 0,   // max = end-of-day total
-        windspeedHigh:d.winds.length ? Math.max(...d.winds) : null,
-        humidityAvg:  d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
+        tempHigh:      d.temps.length ? Math.max(...d.temps) : null,
+        tempLow:       d.temps.length ? Math.min(...d.temps) : null,
+        tempAvg:       d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
+        precipTotal:   d.rains.length ? Math.max(...d.rains) : 0,
+        windspeedAvg:  d.winds.length ? d.winds.reduce((a,b)=>a+b,0)/d.winds.length : null,
+        windspeedHigh: d.gusts.length ? Math.max(...d.gusts) : null,
+        humidityAvg:   d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
       }
     }))
     .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
@@ -1011,27 +1112,29 @@ function fmtHistDateShort(s){
 }
 
 function applyHistory(summaries){
+  if(!summaries||!summaries.length){
+    showHistErr('Ni podatkov za izbrano obdobje');return;
+  }
   const sorted=[...summaries].sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
-  let maxT={v:-Infinity,d:''},minT={v:Infinity,d:''},maxR={v:-Infinity,d:''},maxW={v:-Infinity,d:''};
+  let maxT={v:-Infinity,d:''},minT={v:Infinity,d:''},maxR={v:-Infinity,d:''},maxW={v:-Infinity,d:''},maxG={v:-Infinity,d:''};
   sorted.forEach(s=>{
     const m=s.metric,dt=fmtHistDate(s.obsTimeLocal);
-    if((m.tempHigh??-999)>maxT.v){maxT={v:m.tempHigh,d:dt};}
-    if((m.tempLow??999)<minT.v) {minT={v:m.tempLow, d:dt};}
-    if((m.precipTotal??0)>maxR.v){maxR={v:m.precipTotal,d:dt};}
-    if((m.windspeedHigh??0)>maxW.v){maxW={v:m.windspeedHigh,d:dt};}
+    if((m.tempHigh??-999)>maxT.v)    {maxT={v:m.tempHigh,d:dt};}
+    if((m.tempLow??999)<minT.v)      {minT={v:m.tempLow, d:dt};}
+    if((m.precipTotal??0)>maxR.v)    {maxR={v:m.precipTotal,d:dt};}
+    if((m.windspeedAvg??0)>maxW.v)   {maxW={v:m.windspeedAvg,d:dt};}
+    if((m.windspeedHigh??0)>maxG.v)  {maxG={v:m.windspeedHigh,d:dt};}
   });
-
-  // Record cards — use innerHTML to keep unit spans
   const su=(id,val,unit)=>{const e=document.getElementById(id);if(e)e.innerHTML=val+'<span class="unit">'+unit+'</span>';};
   su('rec-temp-high',fmt(maxT.v,1),'°C'); set('rec-temp-high-date',maxT.d);
   su('rec-temp-low', fmt(minT.v,1),'°C'); set('rec-temp-low-date', minT.d);
   su('rec-rain',     fmt(maxR.v,1),' mm');set('rec-rain-date',     maxR.d);
   su('rec-wind',     fmt(maxW.v,1),' km/h');set('rec-wind-date',   maxW.d);
+  su('rec-gust',     fmt(maxG.v,1),' km/h');set('rec-gust-date',   maxG.d);
 
   drawHistTempChart(sorted);
   drawHistRainChart(sorted);
 
-  // Table — newest first, units in each cell
   const u='<span style="font-size:.65rem;color:var(--muted);margin-left:1px">';
   const tbody=document.getElementById('history-tbody');
   if(!tbody)return;tbody.innerHTML='';
@@ -1044,10 +1147,16 @@ function applyHistory(summaries){
       '<td class="td-low">'+fmt(m.tempLow,1)+u+'°C</span></td>'+
       '<td>'+fmt(m.tempAvg,1)+u+'°C</span></td>'+
       '<td class="td-rain">'+fmt(m.precipTotal,1)+u+'mm</span></td>'+
-      '<td>'+fmt(m.windspeedHigh,1)+u+'km/h</span></td>'+
+      '<td>'+fmt(m.windspeedAvg,1)+u+'km/h</span></td>'+
+      '<td style="color:var(--purple)">'+fmt(m.windspeedHigh,1)+u+'km/h</span></td>'+
       '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>';
     tbody.appendChild(tr);
   });
+}
+
+function showHistErr(msg){
+  const tbody=document.getElementById('history-tbody');
+  if(tbody)tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--red);padding:2rem">'+msg+'</td></tr>';
 }
 
 function drawHistTempChart(data){
