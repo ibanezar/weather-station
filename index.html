@@ -249,7 +249,30 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes star-wink {0%,100%{opacity:.8;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
-/* Countdown bar */
+/* Tabs */
+.tab-nav{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:.5rem 1.25rem;border-radius:25px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
+.tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3)}
+.tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* History table */
+.history-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:500px}
+.history-table th{text-align:right;padding:.55rem .85rem;color:var(--muted);font-weight:500;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.history-table th:first-child{text-align:left}
+.history-table td{padding:.55rem .85rem;font-family:'IBM Plex Mono',monospace;font-size:.78rem;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.history-table td:first-child{text-align:left;color:var(--muted);font-size:.72rem}
+.history-table tbody tr:last-child td{border-bottom:none}
+.history-table tbody tr:hover td{background:rgba(128,128,128,.04)}
+.td-high{color:var(--red) !important}.td-low{color:var(--blue) !important}.td-rain{color:var(--rain-col) !important}
+
+/* History record cards accent */
+.rec-card-high .cval{color:var(--red)}
+.rec-card-low  .cval{color:var(--blue)}
+.rec-card-rain .cval{color:var(--rain-col)}
+.rec-card-wind .cval{color:var(--purple)}
+
+
 .countdown-wrap{height:2px;background:var(--rain-track);margin:-1.4rem 0 1.6rem;overflow:hidden}
 .countdown-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width 1s linear;width:0%}
 
@@ -338,7 +361,14 @@ footer a{color:var(--blue);text-decoration:none}
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
-  <!-- Hero -->
+  <!-- Tab navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌤 Aktualno</button>
+    <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
+  </div>
+
+  <!-- ══ TAB: AKTUALNO ══ -->
+  <div id="tab-current" class="tab-pane active">
   <div class="hero card">
     <div>
       <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
@@ -519,6 +549,86 @@ footer a{color:var(--blue);text-decoration:none}
       </div>
     </div>
   </div>
+
+  </div><!-- /tab-current -->
+
+  <!-- ══ TAB: ZGODOVINA ══ -->
+  <div id="tab-history" class="tab-pane">
+
+    <!-- Records -->
+    <div class="g4" style="margin-bottom:1rem">
+      <div class="card rec-card-high">
+        <div class="clabel">🌡 Najvišja temp.</div>
+        <div class="cval" id="rec-temp-high">—<span class="unit">°C</span></div>
+        <div class="csub" id="rec-temp-high-date">—</div>
+      </div>
+      <div class="card rec-card-low">
+        <div class="clabel">❄ Najnižja temp.</div>
+        <div class="cval" id="rec-temp-low">—<span class="unit">°C</span></div>
+        <div class="csub" id="rec-temp-low-date">—</div>
+      </div>
+      <div class="card rec-card-rain">
+        <div class="clabel">🌧 Največ padavin</div>
+        <div class="cval" id="rec-rain">—<span class="unit">mm</span></div>
+        <div class="csub" id="rec-rain-date">—</div>
+      </div>
+      <div class="card rec-card-wind">
+        <div class="clabel">💨 Najmočnejši veter</div>
+        <div class="cval" id="rec-wind">—<span class="unit">km/h</span></div>
+        <div class="csub" id="rec-wind-date">—</div>
+      </div>
+    </div>
+
+    <!-- Temperature band chart -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 30 dni</span>
+        <span class="chart-range" id="hist-temp-range">—</span>
+      </div>
+      <div class="chart-svg-wrap">
+        <svg class="chart-svg" viewBox="0 0 880 200" id="hist-temp-svg" preserveAspectRatio="xMidYMid meet">
+          <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Rain history chart -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌧 Padavine — zadnjih 30 dni</span>
+        <span class="chart-range" id="hist-rain-range">—</span>
+      </div>
+      <div class="chart-svg-wrap">
+        <svg class="chart-svg" viewBox="0 0 880 150" id="hist-rain-svg" preserveAspectRatio="xMidYMid meet">
+          <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Daily table -->
+    <div class="card" style="margin-bottom:1rem;padding:1.4rem 1.6rem">
+      <div class="clabel">📋 Dnevni podatki (zadnjih 30 dni)</div>
+      <div style="overflow-x:auto;margin-top:.5rem">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Datum</th>
+              <th>Maks °C</th>
+              <th>Min °C</th>
+              <th>Povp. °C</th>
+              <th>Padavine mm</th>
+              <th>Veter km/h</th>
+              <th>Vlažnost %</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nalaganje podatkov…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-history -->
 
   <footer>Meteorološka postaja IREICA1 · Rečica ob Savinji, Slovenija<br>Podatki: <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground</a> &nbsp;·&nbsp; Samodejno posodablja vsakih 5 minut</footer>
 </div>
@@ -833,7 +943,155 @@ function applyForecast(list){
 }
 
 // ── Clock + fetch ─────────────────────────────────────────
-// ── Dynamic favicon ───────────────────────────────────────
+// ── Tab switching ─────────────────────────────────────────
+let _historyLoaded=false;
+function switchTab(tab){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('tab-btn-'+tab).classList.add('active');
+  if(tab==='history'&&!_historyLoaded) fetchHistory();
+}
+
+// ── History fetch ─────────────────────────────────────────
+async function fetchHistory(){
+  try{
+    const res=await fetch(PROXY+'/history');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.summaries?.length){applyHistory(data.summaries);_historyLoaded=true;}
+    else throw new Error('Ni podatkov');
+  }catch(e){
+    const tb=document.getElementById('history-tbody');
+    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red);padding:2rem">Napaka: '+e.message+'</td></tr>';
+  }
+}
+
+function fmtHistDate(s){
+  const d=new Date(s.slice(0,10)+'T12:00:00');
+  return d.toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtHistDateShort(s){
+  const d=new Date(s.slice(0,10)+'T12:00:00');
+  return d.toLocaleDateString('sl',{day:'numeric',month:'numeric'});
+}
+
+function applyHistory(summaries){
+  const sorted=[...summaries].sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+  let maxT={v:-Infinity,d:''},minT={v:Infinity,d:''},maxR={v:-Infinity,d:''},maxW={v:-Infinity,d:''};
+  sorted.forEach(s=>{
+    const m=s.metric,dt=fmtHistDate(s.obsTimeLocal);
+    if((m.tempHigh??-999)>maxT.v){maxT={v:m.tempHigh,d:dt};}
+    if((m.tempLow??999)<minT.v) {minT={v:m.tempLow, d:dt};}
+    if((m.precipTotal??0)>maxR.v){maxR={v:m.precipTotal,d:dt};}
+    if((m.windspeedHigh??0)>maxW.v){maxW={v:m.windspeedHigh,d:dt};}
+  });
+  set('rec-temp-high',fmt(maxT.v,1));set('rec-temp-high-date',maxT.d);
+  set('rec-temp-low', fmt(minT.v,1));set('rec-temp-low-date', minT.d);
+  set('rec-rain',     fmt(maxR.v,1));set('rec-rain-date',     maxR.d);
+  set('rec-wind',     fmt(maxW.v,1));set('rec-wind-date',     maxW.d);
+
+  drawHistTempChart(sorted);
+  drawHistRainChart(sorted);
+
+  // Table (newest first)
+  const tbody=document.getElementById('history-tbody');
+  if(!tbody)return;tbody.innerHTML='';
+  [...sorted].reverse().forEach(s=>{
+    const m=s.metric;
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td>'+fmtHistDate(s.obsTimeLocal)+'</td>'+
+      '<td class="td-high">'+fmt(m.tempHigh,1)+'</td>'+
+      '<td class="td-low">'+fmt(m.tempLow,1)+'</td>'+
+      '<td>'+fmt(m.tempAvg,1)+'</td>'+
+      '<td class="td-rain">'+fmt(m.precipTotal,1)+'</td>'+
+      '<td>'+fmt(m.windspeedHigh,1)+'</td>'+
+      '<td>'+fmt(m.humidityAvg,0)+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function drawHistTempChart(data){
+  const svg=document.getElementById('hist-temp-svg');if(!svg||!data.length)return;
+  svg.innerHTML='';
+  const VW=880,VH=200,pad={t:30,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const allT=[...data.map(d=>d.metric.tempHigh??0),...data.map(d=>d.metric.tempLow??0)];
+  const mn=Math.min(...allT)-1,mx=Math.max(...allT)+1;
+  const xS=i=>pad.l+i/(data.length-1)*cw,yS=v=>pad.t+(1-(v-mn)/(mx-mn))*ch;
+
+  for(let i=0;i<=4;i++){
+    const y=pad.t+i/4*ch,val=mx-(i/4*(mx-mn));
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});
+    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    t.textContent=val.toFixed(0)+'°';
+  }
+  data.forEach((d,i)=>{
+    if(i%5===0||i===data.length-1){
+      const t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+      t.textContent=fmtHistDateShort(d.obsTimeLocal);
+    }
+  });
+
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML=
+    '<linearGradient id="hgh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f87171" stop-opacity="0.22"/><stop offset="100%" stop-color="#f87171" stop-opacity="0"/></linearGradient>'+
+    '<linearGradient id="hgl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.tempLine+'" stop-opacity="0.15"/><stop offset="100%" stop-color="'+CC.tempLine+'" stop-opacity="0"/></linearGradient>';
+
+  const hPts=data.map((d,i)=>({x:xS(i),y:yS(d.metric.tempHigh??mn)}));
+  const lPts=data.map((d,i)=>({x:xS(i),y:yS(d.metric.tempLow??mn)}));
+  const hP=smoothPath(hPts),lP=smoothPath(lPts);
+  const base=' L '+xS(data.length-1)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z';
+
+  mkSVG(svg,'path',{d:hP+base,fill:'url(#hgh)'});
+  mkSVG(svg,'path',{d:lP+base,fill:'url(#hgl)'});
+  mkSVG(svg,'path',{d:hP,fill:'none',stroke:'#f87171','stroke-width':'2','stroke-linecap':'round'});
+  mkSVG(svg,'path',{d:lP,fill:'none',stroke:CC.tempLine,'stroke-width':'2','stroke-linecap':'round'});
+
+  // Legend
+  [{c:'#f87171',l:'Maks'},{c:CC.tempLine,l:'Min'}].forEach(({c,l},i)=>{
+    const lx=VW-pad.r-(i===0?105:55);
+    mkSVG(svg,'line',{x1:lx,x2:lx+12,y1:pad.t-8,y2:pad.t-8,stroke:c,'stroke-width':'2.5','stroke-linecap':'round'});
+    const t=mkSVG(svg,'text',{x:lx+16,y:pad.t-4,'font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=l;
+  });
+
+  const highs=data.map(d=>d.metric.tempHigh??-999),lows=data.map(d=>d.metric.tempLow??999);
+  set('hist-temp-range','Min '+fmt(Math.min(...lows),1)+'° / Maks '+fmt(Math.max(...highs),1)+'°C');
+}
+
+function drawHistRainChart(data){
+  const svg=document.getElementById('hist-rain-svg');if(!svg||!data.length)return;
+  svg.innerHTML='';
+  const VW=880,VH=150,pad={t:15,r:20,b:42,l:46};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const rains=data.map(d=>d.metric.precipTotal??0);
+  const maxR=Math.max(...rains,0.5),total=rains.reduce((a,b)=>a+b,0);
+
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML='<linearGradient id="hrg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.rainBar+'" stop-opacity="0.8"/><stop offset="100%" stop-color="'+CC.rainBar+'" stop-opacity="0.15"/></linearGradient>';
+
+  for(let i=0;i<=3;i++){
+    const y=pad.t+i/3*ch,val=maxR*(1-i/3);
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}
+  }
+
+  const bw=Math.max(1.5,(cw/data.length)*0.7);
+  const xS=i=>pad.l+i/data.length*cw;
+  data.forEach((d,i)=>{
+    const r=d.metric.precipTotal??0,x=xS(i),h=(r/maxR)*ch;
+    if(r>0)mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#hrg)',rx:'2'});
+    if(i%5===0||i===data.length-1){
+      const t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+      t.textContent=fmtHistDateShort(d.obsTimeLocal);
+    }
+  });
+  if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Plus Jakarta Sans,sans-serif'});t.textContent='Ni padavin v izbranem obdobju';}
+  set('hist-rain-range','Skupaj: '+fmt(total,1)+' mm');
+}
+
+
 function setFavicon(emoji){
   try{
     const c=document.createElement('canvas');c.width=64;c.height=64;
