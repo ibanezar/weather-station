@@ -962,21 +962,22 @@ function buildDailySummaries(observations){
     const day=o.obsTimeLocal.slice(0,10);
     if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],hums:[]};
     const m=o.metric;
-    if(m.tempAvg!=null)    byDay[day].temps.push(m.tempAvg);
-    if(m.precipTotal!=null)byDay[day].rains.push(m.precipTotal);
+    if(m.tempAvg!=null)      byDay[day].temps.push(m.tempAvg);
+    // precipTotal is a CUMULATIVE daily total — take max (last value), not sum
+    if(m.precipTotal!=null)  byDay[day].rains.push(m.precipTotal);
     if(m.windspeedHigh!=null)byDay[day].winds.push(m.windspeedHigh);
-    if(m.humidityAvg!=null)byDay[day].hums.push(m.humidityAvg);
+    if(m.humidityAvg!=null)  byDay[day].hums.push(m.humidityAvg);
   });
   return Object.values(byDay)
     .map(d=>({
       obsTimeLocal:d.date,
       metric:{
-        tempHigh: d.temps.length ? Math.max(...d.temps)    : null,
-        tempLow:  d.temps.length ? Math.min(...d.temps)    : null,
-        tempAvg:  d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
-        precipTotal: d.rains.reduce((a,b)=>a+b,0),
-        windspeedHigh: d.winds.length ? Math.max(...d.winds) : null,
-        humidityAvg:   d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
+        tempHigh:     d.temps.length ? Math.max(...d.temps) : null,
+        tempLow:      d.temps.length ? Math.min(...d.temps) : null,
+        tempAvg:      d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
+        precipTotal:  d.rains.length ? Math.max(...d.rains) : 0,   // max = end-of-day total
+        windspeedHigh:d.winds.length ? Math.max(...d.winds) : null,
+        humidityAvg:  d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
       }
     }))
     .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
@@ -1019,15 +1020,19 @@ function applyHistory(summaries){
     if((m.precipTotal??0)>maxR.v){maxR={v:m.precipTotal,d:dt};}
     if((m.windspeedHigh??0)>maxW.v){maxW={v:m.windspeedHigh,d:dt};}
   });
-  set('rec-temp-high',fmt(maxT.v,1));set('rec-temp-high-date',maxT.d);
-  set('rec-temp-low', fmt(minT.v,1));set('rec-temp-low-date', minT.d);
-  set('rec-rain',     fmt(maxR.v,1));set('rec-rain-date',     maxR.d);
-  set('rec-wind',     fmt(maxW.v,1));set('rec-wind-date',     maxW.d);
+
+  // Record cards — use innerHTML to keep unit spans
+  const su=(id,val,unit)=>{const e=document.getElementById(id);if(e)e.innerHTML=val+'<span class="unit">'+unit+'</span>';};
+  su('rec-temp-high',fmt(maxT.v,1),'°C'); set('rec-temp-high-date',maxT.d);
+  su('rec-temp-low', fmt(minT.v,1),'°C'); set('rec-temp-low-date', minT.d);
+  su('rec-rain',     fmt(maxR.v,1),' mm');set('rec-rain-date',     maxR.d);
+  su('rec-wind',     fmt(maxW.v,1),' km/h');set('rec-wind-date',   maxW.d);
 
   drawHistTempChart(sorted);
   drawHistRainChart(sorted);
 
-  // Table (newest first)
+  // Table — newest first, units in each cell
+  const u='<span style="font-size:.65rem;color:var(--muted);margin-left:1px">';
   const tbody=document.getElementById('history-tbody');
   if(!tbody)return;tbody.innerHTML='';
   [...sorted].reverse().forEach(s=>{
@@ -1035,12 +1040,12 @@ function applyHistory(summaries){
     const tr=document.createElement('tr');
     tr.innerHTML=
       '<td>'+fmtHistDate(s.obsTimeLocal)+'</td>'+
-      '<td class="td-high">'+fmt(m.tempHigh,1)+'</td>'+
-      '<td class="td-low">'+fmt(m.tempLow,1)+'</td>'+
-      '<td>'+fmt(m.tempAvg,1)+'</td>'+
-      '<td class="td-rain">'+fmt(m.precipTotal,1)+'</td>'+
-      '<td>'+fmt(m.windspeedHigh,1)+'</td>'+
-      '<td>'+fmt(m.humidityAvg,0)+'</td>';
+      '<td class="td-high">'+fmt(m.tempHigh,1)+u+'°C</span></td>'+
+      '<td class="td-low">'+fmt(m.tempLow,1)+u+'°C</span></td>'+
+      '<td>'+fmt(m.tempAvg,1)+u+'°C</span></td>'+
+      '<td class="td-rain">'+fmt(m.precipTotal,1)+u+'mm</span></td>'+
+      '<td>'+fmt(m.windspeedHigh,1)+u+'km/h</span></td>'+
+      '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>';
     tbody.appendChild(tr);
   });
 }
