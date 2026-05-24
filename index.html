@@ -933,6 +933,34 @@ function applyObs(obs){
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
 
+function buildDailySummaries(observations){
+  const byDay={};
+  observations.forEach(o=>{
+    const day=o.obsTimeLocal.slice(0,10);
+    if(!byDay[day]) byDay[day]={date:day,temps:[],rains:[],winds:[],gusts:[],hums:[]};
+    const m=o.metric;
+    if(m.tempAvg!=null)        byDay[day].temps.push(m.tempAvg);
+    if(m.precipTotal!=null)    byDay[day].rains.push(m.precipTotal);
+    if(m.windspeedAvg!=null)   byDay[day].winds.push(m.windspeedAvg);
+    if(m.windspeedHigh!=null)  byDay[day].gusts.push(m.windspeedHigh);
+    if(m.humidityAvg!=null)    byDay[day].hums.push(m.humidityAvg);
+  });
+  return Object.values(byDay)
+    .map(d=>({
+      obsTimeLocal:d.date,
+      metric:{
+        tempHigh:      d.temps.length ? Math.max(...d.temps) : null,
+        tempLow:       d.temps.length ? Math.min(...d.temps) : null,
+        tempAvg:       d.temps.length ? d.temps.reduce((a,b)=>a+b,0)/d.temps.length : null,
+        precipTotal:   d.rains.length ? Math.max(...d.rains) : 0,
+        windspeedAvg:  d.winds.length ? d.winds.reduce((a,b)=>a+b,0)/d.winds.length : null,
+        windspeedHigh: d.gusts.length ? Math.max(...d.gusts) : null,
+        humidityAvg:   d.hums.length  ? Math.round(d.hums.reduce((a,b)=>a+b,0)/d.hums.length) : null,
+      }
+    }))
+    .sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+}
+
 function applyHourly(observations){
   const raw=observations.slice(-24);
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
@@ -940,10 +968,9 @@ function applyHourly(observations){
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);applyYesterdayDelta(observations);
   _hourlyObs=observations;
-  const dailies=buildDailySummaries(observations);
-  saveToLocalHistory(dailies);          // accumulate for history tab
-  delete _histCache['7'];
-  if(_historyLoaded&&_currentPeriod==='7') applyHistory(dailies);
+  _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
+  saveToLocalHistory(_histCache['7']);
+  if(histTabActive()&&_currentPeriod==='7') applyHistory(_histCache['7']);
 }
 
 // ── Forecast ──────────────────────────────────────────────
@@ -974,9 +1001,27 @@ let _historyLoaded=false;
 function switchTab(tab){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  document.getElementById('tab-btn-'+tab).classList.add('active');
-  if(tab==='history'&&!_historyLoaded) fetchHistory();
+  document.getElementById('tab-'+tab)?.classList.add('active');
+  document.getElementById('tab-btn-'+tab)?.classList.add('active');
+  if(tab==='history') showHistory7();
+}
+function histTabActive(){
+  return !!document.getElementById('tab-history')?.classList.contains('active');
+}
+function showHistory7(){
+  _currentPeriod='7';
+  setPeriodBtns('7',false);
+  // Priority: pre-built cache → build from hourly → localStorage → loading
+  const d = _histCache['7']?.length ? _histCache['7']
+          : _hourlyObs.length        ? (_histCache['7']=buildDailySummaries(_hourlyObs))
+          : getLocalHistory('7');
+  if(d&&d.length){
+    try{ applyHistory(d); }
+    catch(e){ showHistErr('Napaka pri prikazu: '+e.message); }
+  } else {
+    showHistLoading();
+    // Will be triggered by applyHourly when data arrives
+  }
 }
 
 // ── History period system ─────────────────────────────────
@@ -1053,12 +1098,7 @@ async function switchPeriod(period){
   setPeriodBtns(period,false);
   const infoEl=document.getElementById('hist-accum-info');if(infoEl)infoEl.textContent='';
 
-  if(period==='7'){
-    if(!_histCache['7']&&_hourlyObs.length)_histCache['7']=buildDailySummaries(_hourlyObs);
-    if(_histCache['7'])applyHistory(_histCache['7']);
-    else showHistErr('Čakam na urne podatke…');
-    return;
-  }
+  if(period==='7'){ showHistory7(); return; }
 
   // Use cache
   if(_histCache[period]){applyHistory(_histCache[period]);return;}
@@ -1077,13 +1117,17 @@ async function switchPeriod(period){
     saveToLocalHistory(summaries); // cache locally too
     applyHistory(summaries);
   }catch(e){
-    // Fallback: localStorage
+    // Show the actual error prominently, then fallback to localStorage
     const stored=getLocalHistory(period);
     if(stored.length){
       applyHistory(stored);
       updateAccumInfo(stored.length,localHistoryDays());
     }else{
-      showHistErr('Napaka: '+e.message+'<br><span style="color:var(--muted);font-size:.85em">Lokalna shramba: '+localHistoryDays()+' dni podatkov</span>');
+      showHistErr(
+        '<strong>API napaka:</strong> '+e.message+
+        '<br><small style="color:var(--muted)">Lokalna shramba: '+localHistoryDays()+' dni · '+
+        'Preizkusite znova ali preverite konzolo (F12)</small>'
+      );
     }
   }finally{
     setPeriodBtns(period,false);
@@ -1091,20 +1135,8 @@ async function switchPeriod(period){
 }
 
 async function fetchHistory(){
-  if(!_hourlyObs.length){
-    const tb=document.getElementById('history-tbody');
-    if(tb)tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Čakam na urne podatke…</td></tr>';
-    setTimeout(()=>{
-      if(_hourlyObs.length){
-        _histCache['7']=buildDailySummaries(_hourlyObs);
-        applyHistory(_histCache['7']);_historyLoaded=true;
-      }else showHistErr('Urni podatki niso na voljo');
-    },4000);
-    return;
-  }
-  _histCache['7']=buildDailySummaries(_hourlyObs);
-  applyHistory(_histCache['7']);
-  _historyLoaded=true;
+  // Now handled by switchPeriod — kept for backwards compatibility
+  switchPeriod('7');
 }
 function fmtHistDate(s){
   const d=new Date(s.slice(0,10)+'T12:00:00');
