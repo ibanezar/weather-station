@@ -461,7 +461,7 @@ footer a{color:var(--blue);text-decoration:none}
 
   <!-- Wind rose -->
   <div class="card wind-rose-card">
-    <div class="clabel">🌹 Vetroza — zadnjih 7 dni</div>
+    <div class="clabel" id="wind-rose-title">🌹 Vetroza — zadnjih 7 dni</div>
     <div class="wind-rose-body">
       <svg id="wind-rose-svg" viewBox="0 0 150 150" style="width:150px;height:150px;flex-shrink:0"></svg>
       <div>
@@ -602,7 +602,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Temperature band chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 7 dni</span>
+        <span class="clabel" style="margin:0" id="hist-temp-title">🌡 Temperatura — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-temp-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -615,7 +615,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Rain history chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌧 Padavine — zadnjih 7 dni</span>
+        <span class="clabel" style="margin:0" id="hist-rain-title">🌧 Padavine — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-rain-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -627,7 +627,7 @@ footer a{color:var(--blue);text-decoration:none}
 
     <!-- Daily table -->
     <div class="card" style="margin-bottom:1rem;padding:1.4rem 1.6rem">
-      <div class="clabel">📋 Dnevni podatki (zadnjih 7 dni)</div>
+      <div class="clabel" id="hist-table-title">📋 Dnevni podatki (zadnjih 7 dni)</div>
       <div style="overflow-x:auto;margin-top:.5rem">
         <table class="history-table">
           <thead>
@@ -1011,6 +1011,7 @@ function histTabActive(){
 function showHistory7(){
   _currentPeriod='7';
   setPeriodBtns('7',false);
+  updateHistTitles('7');
   // Priority: pre-built cache → build from hourly → localStorage → loading
   const d = _histCache['7']?.length ? _histCache['7']
           : _hourlyObs.length        ? (_histCache['7']=buildDailySummaries(_hourlyObs))
@@ -1094,7 +1095,15 @@ function getPeriodRange(period){
   return null;
 }
 
-let _allHistoryData=null;
+const PERIOD_LABEL={'7':'zadnjih 7 dni','30':'zadnjih 30 dni','year':'letos','5year':'zadnjih 5 let'};
+function updateHistTitles(period){
+  const lbl=PERIOD_LABEL[period]||period;
+  const el=id=>document.getElementById(id);
+  if(el('hist-temp-title'))  el('hist-temp-title').textContent  ='🌡 Temperatura — '+lbl;
+  if(el('hist-rain-title'))  el('hist-rain-title').textContent  ='🌧 Padavine — '+lbl;
+  if(el('hist-table-title')) el('hist-table-title').textContent ='📋 Dnevni podatki ('+lbl+')';
+  if(el('wind-rose-title'))  el('wind-rose-title').textContent  ='🌹 Vetroza — '+lbl;
+}
 let _allHistoryLoading=null;
 
 async function loadAllHistory(){
@@ -1109,7 +1118,7 @@ async function loadAllHistory(){
 async function switchPeriod(period){
   _currentPeriod=period;
   setPeriodBtns(period,false);
-  const infoEl=document.getElementById('hist-accum-info');if(infoEl)infoEl.textContent='';
+  updateHistTitles(period);if(infoEl)infoEl.textContent='';
 
   if(period==='7'){ showHistory7(); return; }
 
