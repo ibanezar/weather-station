@@ -1849,53 +1849,98 @@ async function fetchClimateComparison(){
   try{
     const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
     const pad=n=>String(n).padStart(2,'0');
-    const monthStr=y+'-'+pad(m);
-    const daysThisMonth=new Date(y,m,0).getDate();
-    const endDay=Math.min(now.getDate(),daysThisMonth);
-    // Fetch same month for past 5 years
-    const years=[1,2,3,4,5].map(n=>y-n);
+    const daysInMonth=new Date(y,m,0).getDate();
+    const endDay=Math.min(now.getDate(),daysInMonth);
+
+    const years=[1,2,3,4,5].map(n=>y-n).reverse(); // oldest first
     const results=await Promise.all(years.map(async yr=>{
-      const sd=yr+'-'+pad(m)+'-01',ed=yr+'-'+pad(m)+'-'+pad(daysThisMonth);
-      const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+sd+'&end_date='+ed+'&daily=temperature_2m_mean,precipitation_sum&timezone=Europe%2FLjubljana';
-      const res=await fetch(url);const data=await res.json();
-      const temps=data.daily?.temperature_2m_mean?.filter(x=>x!=null)??[];
-      const rains=data.daily?.precipitation_sum?.filter(x=>x!=null)??[];
-      const avgT=temps.length?temps.reduce((a,b)=>a+b,0)/temps.length:null;
-      const totR=rains.reduce((a,b)=>a+b,0);
-      return{yr,avgT,totR};
+      const sd=yr+'-'+pad(m)+'-01',ed=yr+'-'+pad(m)+'-'+pad(daysInMonth);
+      try{
+        const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON
+          +'&start_date='+sd+'&end_date='+ed
+          +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum'
+          +'&timezone=Europe%2FLjubljana';
+        const res=await fetch(url);const data=await res.json();
+        const maxT=data.daily?.temperature_2m_max??[];
+        const minT=data.daily?.temperature_2m_min??[];
+        const means=maxT.map((mx,i)=>mx!=null&&minT[i]!=null?(mx+minT[i])/2:null).filter(x=>x!=null);
+        const rains=(data.daily?.precipitation_sum??[]).filter(x=>x!=null);
+        // Only count up to endDay to compare fairly with current (partial) month
+        const meansPartial=means.slice(0,endDay);
+        const rainsPartial=rains.slice(0,endDay);
+        const avgT=meansPartial.length?meansPartial.reduce((a,b)=>a+b,0)/meansPartial.length:null;
+        const totR=rainsPartial.reduce((a,b)=>a+b,0);
+        return{yr,avgT,totR,ok:true};
+      }catch(e){return{yr,avgT:null,totR:0,ok:false};}
     }));
-    const histAvgT=results.filter(r=>r.avgT!=null).reduce((s,r)=>s+r.avgT,0)/results.filter(r=>r.avgT!=null).length;
-    const histAvgR=results.reduce((s,r)=>s+r.totR,0)/results.length;
-    // Current month from localStorage
+
+    // Current month from localStorage (partial)
+    const pfx=y+'-'+pad(m);
     const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
-    const curEntries=Object.entries(stored).filter(([k])=>k.startsWith(monthStr));
-    const curT=curEntries.filter(([,v])=>v.tempAvg).map(([,v])=>v.tempAvg);
-    const curAvgT=curT.length?curT.reduce((a,b)=>a+b,0)/curT.length:null;
+    const curEntries=Object.entries(stored).filter(([k])=>k.startsWith(pfx));
+    const curTemps=curEntries.map(([,v])=>v.tempAvg).filter(x=>x!=null);
+    const curAvgT=curTemps.length?curTemps.reduce((a,b)=>a+b,0)/curTemps.length:null;
     const curR=curEntries.reduce((s,[,v])=>s+(v.precipTotal||0),0);
+    const allResults=[...results,{yr:y,avgT:curAvgT,totR:curR,isCurrent:true}];
+
+    const histOk=results.filter(r=>r.avgT!=null);
+    const histAvgT=histOk.length?histOk.reduce((s,r)=>s+r.avgT,0)/histOk.length:null;
+    const histAvgR=results.reduce((s,r)=>s+r.totR,0)/results.length;
+
     const monthName=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
     set('clim-month-lbl',monthName);
-    const cont=document.getElementById('clim-content');
-    if(!cont)return;
-    if(curAvgT!=null){
-      const diffT=(curAvgT-histAvgT).toFixed(1);
-      const diffR=((curR-histAvgR)/histAvgR*100).toFixed(0);
-      const tSign=parseFloat(diffT)>0?'+':'';
-      const rSign=parseFloat(diffR)>0?'+':'';
-      cont.innerHTML=
-        '<div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:.75rem">'+
-        '<div><div class="chart-range">Povp. temp.</div>'+
-          '<div style="font-family:IBM Plex Mono,monospace;font-size:1.1rem;color:var(--text)">'+curAvgT.toFixed(1)+'°C <span style="font-size:.75rem;color:'+(parseFloat(diffT)>0?'var(--red)':'var(--blue)')+'">'+tSign+diffT+'° vs. povp.</span></div></div>'+
-        '<div><div class="chart-range">Padavine</div>'+
-          '<div style="font-family:IBM Plex Mono,monospace;font-size:1.1rem;color:var(--text)">'+curR.toFixed(1)+' mm <span style="font-size:.75rem;color:'+(parseFloat(diffR)>0?'var(--blue)':'var(--amber)')+'">'+rSign+diffR+'% vs. povp.</span></div></div>'+
-        '</div>'+
-        '<div class="clim-bars">'+
-        results.map(r=>'<div class="clim-bw"><div class="clim-bg" style="height:60px"><div class="clim-fill" style="height:'+(r.avgT?Math.max(4,(r.avgT/35*100))+'%':'0')+';background:var(--red);opacity:.6"></div></div><div class="clim-lbl">'+r.yr+'</div></div>').join('')+
-        '<div class="clim-bw"><div class="clim-bg" style="height:60px;border-color:var(--blue)"><div class="clim-fill" style="height:'+(curAvgT?Math.max(4,(curAvgT/35*100))+'%':'0')+';background:var(--blue)"></div></div><div class="clim-lbl" style="color:var(--blue)">'+y+'</div></div>'+
-        '</div>';
-    }else{
-      cont.innerHTML='<span style="color:var(--muted);font-size:.75rem">Zberi vsaj 5 dni podatkov za primerjavo</span>';
+    set('clim-range','vs. povprečje '+(histOk.length)+' let (1.–'+endDay+'. '+now.toLocaleDateString('sl',{month:'short'})+')');
+
+    const cont=document.getElementById('clim-content');if(!cont)return;
+
+    // Stats row
+    let statsHtml='<div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1rem">';
+    if(curAvgT!=null&&histAvgT!=null){
+      const dT=(curAvgT-histAvgT),sT=dT>=0?'+':'';
+      const col=Math.abs(dT)<1?'var(--muted)':dT>0?'var(--red)':'var(--blue)';
+      statsHtml+='<div><div class="chart-range">Povp. temp. (1.–'+endDay+'.)</div>'
+        +'<div style="font-size:1.1rem;font-family:IBM Plex Mono,monospace;color:var(--text)">'+curAvgT.toFixed(1)+'°C'
+        +' <span style="font-size:.78rem;color:'+col+'">'+sT+dT.toFixed(1)+'° vs. povp.</span></div></div>';
     }
-  }catch(e){console.warn('Klima:',e);}
+    if(histAvgR>0){
+      const dR=((curR-histAvgR)/histAvgR*100),sR=dR>=0?'+':'';
+      const colR=Math.abs(dR)<10?'var(--muted)':dR>0?'var(--blue)':'var(--amber)';
+      statsHtml+='<div><div class="chart-range">Padavine</div>'
+        +'<div style="font-size:1.1rem;font-family:IBM Plex Mono,monospace;color:var(--text)">'+curR.toFixed(1)+' mm'
+        +' <span style="font-size:.78rem;color:'+colR+'">'+sR+dR.toFixed(0)+'% vs. povp.</span></div></div>';
+    }
+    statsHtml+='</div>';
+
+    // Bars — scaled relative to max value among all years
+    const allT=allResults.map(r=>r.avgT).filter(x=>x!=null);
+    const allR=allResults.map(r=>r.totR);
+    const maxT=allT.length?Math.max(...allT):20;
+    const maxR=Math.max(...allR,1);
+
+    const barsHtml='<div style="display:flex;gap:.5rem;margin-bottom:1.5rem">'
+      +allResults.map(r=>{
+        const hT=r.avgT!=null?Math.max(5,(r.avgT/maxT*100)).toFixed(0):5;
+        const hR=Math.max(5,(r.totR/maxR*100)).toFixed(0);
+        const isCur=r.isCurrent;
+        const tCol=isCur?'var(--red)':'rgba(248,113,113,.45)';
+        const rCol=isCur?'var(--blue)':'rgba(96,165,250,.45)';
+        return '<div style="flex:1;display:flex;flex-direction:column;gap:3px;align-items:center">'
+          +'<div style="width:100%;height:60px;display:flex;align-items:flex-end;gap:2px">'
+          +'<div style="flex:1;height:'+hT+'%;background:'+tCol+';border-radius:3px 3px 0 0;min-height:3px;transition:height .8s"></div>'
+          +'<div style="flex:1;height:'+hR+'%;background:'+rCol+';border-radius:3px 3px 0 0;min-height:3px;transition:height .8s"></div>'
+          +'</div>'
+          +'<div style="font-size:.62rem;color:'+(isCur?'var(--blue)':'var(--muted)')+';font-family:IBM Plex Mono,monospace;font-weight:'+(isCur?'600':'400')+'">'+r.yr+'</div>'
+          +(r.avgT!=null?'<div style="font-size:.6rem;color:var(--muted)">'+r.avgT.toFixed(1)+'°</div>':'')
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:1rem;font-size:.65rem;color:var(--muted)">'
+      +'<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:var(--red);margin-right:3px;vertical-align:middle"></span>Temperatura</span>'
+      +'<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:var(--blue);margin-right:3px;vertical-align:middle"></span>Padavine</span>'
+      +'</div>';
+
+    cont.innerHTML=statsHtml+barsHtml;
+  }catch(e){console.warn('Klima:',e);const c=document.getElementById('clim-content');if(c)c.innerHTML='<span style="color:var(--muted);font-size:.8rem">Napaka pri nalaganju klimatskih podatkov</span>';}
 }
 
 // ── Monthly summary ───────────────────────────────────────
