@@ -1108,7 +1108,11 @@ async function switchPeriod(period){
   showHistLoading();setPeriodBtns(period,true);
   try{
     const res=await fetch(PROXY+'/ecowitt-history?start='+r.start+'&end='+r.end);
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(!res.ok){
+      const body=await res.json().catch(()=>({}));
+      const detail=body.details?body.details.join(' | '):body.error||('HTTP '+res.status);
+      throw new Error(detail);
+    }
     const data=await res.json();
     if(data.error) throw new Error(data.error);
     const summaries=data.summaries||[];
@@ -1117,17 +1121,15 @@ async function switchPeriod(period){
     saveToLocalHistory(summaries); // cache locally too
     applyHistory(summaries);
   }catch(e){
-    // Show the actual error prominently, then fallback to localStorage
     const stored=getLocalHistory(period);
     if(stored.length){
       applyHistory(stored);
       updateAccumInfo(stored.length,localHistoryDays());
     }else{
-      showHistErr(
-        '<strong>API napaka:</strong> '+e.message+
-        '<br><small style="color:var(--muted)">Lokalna shramba: '+localHistoryDays()+' dni · '+
-        'Preizkusite znova ali preverite konzolo (F12)</small>'
-      );
+      // Try to show Ecowitt's exact error details
+      let errMsg=e.message;
+      try{const j=JSON.parse(e.message);if(j.details)errMsg=j.details.join(' | ');}catch(_){}
+      showHistErr('<strong>Napaka:</strong> '+errMsg);
     }
   }finally{
     setPeriodBtns(period,false);
