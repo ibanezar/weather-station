@@ -1046,7 +1046,8 @@ function getLocalHistory(period){
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     const now=new Date();
     let cutoff;
-    if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
+    if(period==='7')      cutoff=new Date(now-7*864e5).toISOString().slice(0,10);
+    else if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
     else if(period==='year')  cutoff=now.getFullYear()+'-01-01';
     else if(period==='5year') cutoff=(now.getFullYear()-5)+'-01-01';
     else cutoff='2000-01-01';
@@ -1101,7 +1102,7 @@ async function loadAllHistory(){
   if(_allHistoryLoading) return _allHistoryLoading;
   _allHistoryLoading=fetch('history.json')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(d=>{_allHistoryData=d.summaries||[];saveToLocalHistory(_allHistoryData);return _allHistoryData;});
+    .then(d=>{_allHistoryData=d.summaries||[];return _allHistoryData;});
   return _allHistoryLoading;
 }
 
