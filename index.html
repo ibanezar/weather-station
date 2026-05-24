@@ -322,6 +322,66 @@ footer a{color:var(--blue);text-decoration:none}
 .period-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
 .period-btn:disabled{opacity:.45;cursor:wait}
 
+
+/* Weather Score */
+.score-wrap{display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap}
+.score-ring{width:88px;height:88px;border-radius:50%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:box-shadow .8s}
+.score-n{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1}
+.score-l{font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem;opacity:.8}
+.acts{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem}
+.act{display:inline-flex;align-items:center;gap:.3rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:4px 12px;font-size:.72rem;transition:border-color .2s}
+.act:hover{border-color:var(--border)}
+/* Moon */
+.moon-body{display:flex;gap:1.5rem;align-items:center}
+.moon-big{font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(217,119,6,.3))}
+.moon-pn{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.3rem}
+.moon-il{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--muted)}
+.moon-nx{font-size:.66rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
+/* Air Quality */
+.aqi-bar-wrap{height:6px;background:linear-gradient(90deg,#22c55e 0%,#86efac 20%,#fbbf24 40%,#f97316 60%,#ef4444 80%,#9333ea 100%);border-radius:3px;margin:.8rem 0 .3rem;position:relative}
+.aqi-dot{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:var(--card-bg);border:2.5px solid var(--text);transform:translateX(-50%);transition:left .8s ease;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.aqi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.8rem}
+.aqi-cell{text-align:center;padding:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
+.aqi-cv{font-family:'IBM Plex Mono',monospace;font-size:.9rem}
+.aqi-cl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.1rem}
+/* Agrometeo */
+.agro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:.65rem}
+.agro-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.7rem .85rem;text-align:center}
+.agro-n{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;color:var(--green)}
+.agro-l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem;line-height:1.35}
+/* Lightning */
+.ltg-wrap{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap}
+.ltg-count{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:300;color:var(--amber);line-height:1}
+.ltg-sub{font-size:.68rem;color:var(--muted);margin-top:.25rem}
+.ltg-list{flex:1;max-height:90px;overflow-y:auto;font-size:.66rem;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
+.ltg-row{padding:.18rem 0;border-bottom:1px solid var(--border);white-space:nowrap}
+.ltg-close{color:var(--red)}.ltg-far{color:var(--muted)}
+/* Windy */
+.windy-frame{width:100%;height:420px;border:0;border-radius:14px;display:block}
+/* Heatmap */
+.hm-outer{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.5rem}
+.hm-svg{display:block}
+.hm-legend{display:flex;align-items:center;gap:.5rem;margin-top:.6rem;font-size:.65rem;color:var(--muted)}
+.hm-swatches{display:flex;gap:2px}
+.hm-sw{width:11px;height:11px;border-radius:2px}
+/* Year records */
+.yr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.75rem;margin-top:.25rem}
+.yr-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
+.yr-val{font-family:'IBM Plex Mono',monospace;font-size:1.35rem;font-weight:300}
+.yr-dt{font-size:.62rem;color:var(--muted);margin-top:.2rem}
+/* Monthly summary */
+.month-txt{font-size:.82rem;line-height:1.85;color:var(--text)}
+.month-txt b{color:var(--blue)}
+/* Climate comparison */
+.clim-bars{display:flex;gap:.4rem;align-items:flex-end;height:80px;margin-top:.75rem}
+.clim-bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.clim-bg{flex:1;width:100%;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:4px 4px 0 0;overflow:hidden;display:flex;align-items:flex-end}
+.clim-fill{width:100%;border-radius:4px 4px 0 0;transition:height .8s ease}
+.clim-lbl{font-size:.58rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+/* Notification button */
+.notif-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:.68rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,color .2s;color:var(--muted);line-height:1.5}
+.notif-btn.on{border-color:var(--green);color:var(--green)}
+
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
   .span2{grid-column:span 1}
@@ -378,6 +438,7 @@ footer a{color:var(--blue);text-decoration:none}
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
     <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
+    <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -556,6 +617,106 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
+  <!-- Weather Score + Moon -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🎯 Vremenski indeks</div>
+      <div class="score-wrap">
+        <div class="score-ring" id="score-ring">
+          <div class="score-n" id="score-num">—</div>
+          <div class="score-l" id="score-lbl">—</div>
+        </div>
+        <div style="flex:1">
+          <div class="csub" id="score-desc" style="margin-bottom:.3rem">—</div>
+          <div class="acts" id="activities"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌙 Lunina faza</div>
+      <div class="moon-body">
+        <div class="moon-big" id="moon-emoji">🌑</div>
+        <div>
+          <div class="moon-pn" id="moon-phase">—</div>
+          <div class="moon-il">Osvetlitev: <span id="moon-illum">—</span>%</div>
+          <div class="moon-il">Starost: <span id="moon-age">—</span> dni</div>
+          <div class="moon-nx" id="moon-next"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Air Quality + Agrometeo -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">💨 Kakovost zraka</div>
+      <div class="cval" id="aqi-val">—<span class="unit" id="aqi-lbl" style="font-size:.75rem"></span></div>
+      <div class="aqi-bar-wrap"><div class="aqi-dot" id="aqi-dot" style="left:0%"></div></div>
+      <div class="aqi-grid">
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm25">—</div><div class="aqi-cl">PM2.5</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm10">—</div><div class="aqi-cl">PM10</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-no2">—</div><div class="aqi-cl">NO₂</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-ozone">—</div><div class="aqi-cl">Ozon</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌾 Agrometeo</div>
+      <div class="csub" id="agro-date" style="margin-bottom:.25rem">Danes</div>
+      <div class="agro-grid">
+        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ mm/dan</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-sun">—</div><div class="agro-l">Sončnih ur</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (baza 10°)</div></div>
+      </div>
+      <div class="csub" id="agro-note" style="margin-top:.5rem"></div>
+    </div>
+  </div>
+
+  <!-- Monthly summary + Year records -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">📊 <span id="month-title">Mesečni povzetek</span></div>
+      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
+    </div>
+    <div class="card">
+      <div class="clabel">🏅 Rekordi leta <span id="rec-year-lbl"></span></div>
+      <div class="yr-grid" id="yr-grid">
+        <div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Climate comparison -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">☀️ Klimatsko primerjanje — <span id="clim-month-lbl">ta mesec</span></span>
+      <span class="chart-range" id="clim-range">vs. povprečje 10 let</span>
+    </div>
+    <div id="clim-content" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
+  </div>
+
+  <!-- Lightning -->
+  <div class="card" style="margin-bottom:1rem" id="ltg-card">
+    <div class="clabel">⚡ Strele v bližini (200 km)</div>
+    <div class="ltg-wrap">
+      <div>
+        <div class="ltg-count" id="ltg-count">0</div>
+        <div class="ltg-sub">strel v zadnji uri<br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
+      </div>
+      <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.68rem">Čakam na podatke…</div></div>
+    </div>
+  </div>
+
+  <!-- Windy Radar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
+      <span class="chart-range">Windy · ECMWF</span>
+    </div>
+    <iframe class="windy-frame" id="windy-frame"
+      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      allowfullscreen loading="lazy"></iframe>
+  </div>
+
   <!-- Sunrise + snapshot -->
   <div class="g3" style="margin-bottom:1rem">
     <div class="card">
@@ -633,6 +794,25 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="clabel" style="color:var(--purple)">💥 Najm. sunek</div>
         <div class="cval" id="rec-gust" style="color:var(--purple)">—<span class="unit">km/h</span></div>
         <div class="csub" id="rec-gust-date">—</div>
+      </div>
+    </div>
+
+
+    <!-- Heatmap calendar -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌡 Temperaturna karta — <span id="hm-year-lbl">leto</span></span>
+        <div style="display:flex;gap:.4rem">
+          <button class="period-btn" id="hm-btn-t" onclick="setHeatmapMode('temp')" style="font-size:.65rem;padding:2px 10px">Temp</button>
+          <button class="period-btn active" id="hm-btn-r" onclick="setHeatmapMode('rain')" style="font-size:.65rem;padding:2px 10px">Padavine</button>
+        </div>
+      </div>
+      <div class="hm-outer"><svg id="heatmap-svg" class="hm-svg"></svg></div>
+      <div class="hm-legend">
+        <span>Manj</span>
+        <div class="hm-swatches" id="hm-swatches"></div>
+        <span>Več</span>
+        <span style="margin-left:auto;color:var(--muted)">Vsak kvadrat = 1 dan</span>
       </div>
     </div>
 
@@ -894,7 +1074,7 @@ function drawRainChart(data){
 // ── Alerts ────────────────────────────────────────────────
 function checkAlerts(obs){
   const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,alerts=[];
-  if(m.temp<=0)      alerts.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
+  if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) alerts.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
   else if(m.temp<=3) alerts.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
   if(uv>=11)         alerts.push({cls:'a-uv',icon:'☀️',title:'Ekstremni UV — UV '+uv,desc:'Izogibajte se bivanju zunaj. Nujen SPF 50+ in senca.'});
   else if(uv>=8)     alerts.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
@@ -966,6 +1146,7 @@ function applyObs(obs){
   document.getElementById('dot').className='dot';set('status-text','V živo');set('updated',fmtTime(new Date(obs.obsTimeUtc)));
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
   updateSunArc(obs.lat,obs.lon);checkAlerts(obs);
+  applyScore(obs);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
@@ -1180,7 +1361,7 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
-  if(tab==='history') showHistory7();
+  if(tab==='history'){ showHistory7(); drawHeatmap(); applyYearRecords(); }
 }
 function histTabActive(){
   return !!document.getElementById('tab-history')?.classList.contains('active');
@@ -1557,6 +1738,336 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
+
+// ── Moon phase ─────────────────────────────────────────────
+function calcMoon(date=new Date()){
+  const KNOWN=new Date(Date.UTC(2000,0,6,18,14));
+  const SYN=29.53058867;
+  const age=((( date-KNOWN)/(864e5)%SYN)+SYN)%SYN;
+  const illum=Math.round(50*(1-Math.cos(2*Math.PI*age/SYN)));
+  const phases=[
+    [1.85,'🌑','Mlaj'],[7.38,'🌒','Rastoči srpec'],[9.22,'🌓','Prva četrtina'],
+    [14.77,'🌔','Rastoča luna'],[16.61,'🌕','Polna luna'],[22.15,'🌖','Pojemajoča luna'],
+    [23.99,'🌗','Zadnja četrtina'],[29.53,'🌘','Padajoči srpec']
+  ];
+  let emoji='🌑',phase='Mlaj';
+  for(const[limit,em,ph] of phases){if(age<limit){emoji=em;phase=ph;break;}}
+  // Next full moon
+  const toFull=((14.77-age)+SYN)%SYN;
+  const toNew=((0-age)+SYN)%SYN;
+  return{age:age.toFixed(1),illum,emoji,phase,toFull:toFull.toFixed(0),toNew:toNew.toFixed(0)};
+}
+function applyMoon(){
+  const m=calcMoon();
+  set('moon-emoji',m.emoji);set('moon-phase',m.phase);set('moon-illum',m.illum);set('moon-age',m.age);
+  const nx=document.getElementById('moon-next');
+  if(nx)nx.innerHTML='Polna čez <b>'+m.toFull+'</b> dni · Mlaj čez <b>'+m.toNew+'</b> dni';
+}
+
+// ── Weather Score + Activities ────────────────────────────
+function calcScore(obs){
+  if(!obs)return{score:50,label:'—',color:'#64748b'};
+  const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,wind=m.windSpeed??0,uv=obs.uv??0,hum=obs.humidity??60;
+  let sc=100;
+  if(temp<-10)sc-=55;else if(temp<0)sc-=38;else if(temp<5)sc-=22;else if(temp<10)sc-=10;
+  if(temp>35)sc-=45;else if(temp>30)sc-=22;
+  if(temp>=17&&temp<=24)sc+=5;
+  sc-=Math.min(40,rain*8);
+  if(wind>60)sc-=32;else if(wind>40)sc-=18;else if(wind>25)sc-=8;
+  if(uv>=11)sc-=22;else if(uv>=8)sc-=10;
+  if(hum>90)sc-=10;else if(hum>80)sc-=5;
+  sc=Math.max(0,Math.min(100,Math.round(sc)));
+  const [label,color]=sc>=90?['Odlično 🌟','#22c55e']:sc>=75?['Lepo ☀️','#84cc16']:sc>=60?['Prijetno 🌤','#eab308']:sc>=45?['Zmerno ⛅','#f97316']:sc>=30?['Slabo 🌦','#ef4444']:['Neurje ⛈','#9333ea'];
+  return{score:sc,label,color};
+}
+function getActivities(obs){
+  if(!obs)return[];
+  const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,wind=m.windSpeed??0,uv=obs.uv??0;
+  const sc=calcScore(obs).score;
+  const acts=[];
+  if(sc>=82&&temp>=14&&rain<0.1){if(temp>=17)acts.push('🚴 Kolesarjenje');acts.push('🏔 Planinarjenje');}
+  if(sc>=75&&temp>=22&&rain<0.1)acts.push('🔥 Žar & piknik');
+  if(sc>=70&&rain<0.1)acts.push('🌱 Vrtnarjenje');
+  if(sc>=85&&temp>=24&&rain<0.1)acts.push('🏊 Kopanje');
+  if(rain>0&&wind<15)acts.push('🍄 Gobarjenje');
+  if(rain>5||sc<35)acts.push('📚 Doma je lepo');
+  if(wind>=25&&wind<50&&rain<0.1)acts.push('🪁 Kite/jadralec');
+  if(acts.length===0)acts.push('🚶 Sprehod');
+  return acts.slice(0,3);
+}
+function applyScore(obs){
+  const{score,label,color}=calcScore(obs);
+  const ring=document.getElementById('score-ring');
+  if(ring){ring.style.boxShadow='0 0 0 3px '+color+',0 0 24px '+color+'55';}
+  set('score-num',score);set('score-lbl',label.split(' ')[0]);
+  const desc=document.getElementById('score-desc');
+  if(desc)desc.textContent=score>=75?'Dobro vreme za aktivnosti zunaj':score>=50?'Zmerno vreme':'Slabe razmere';
+  const actEl=document.getElementById('activities');
+  if(actEl){actEl.innerHTML='';getActivities(obs).forEach(a=>{const d=document.createElement('div');d.className='act';d.textContent=a;actEl.appendChild(d);});}
+}
+
+// ── Air Quality ───────────────────────────────────────────
+async function fetchAirQuality(){
+  try{
+    const url='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+LAT+'&longitude='+LON+'&hourly=pm10,pm2_5,european_aqi,ozone,nitrogen_dioxide&timezone=Europe%2FLjubljana&forecast_days=1';
+    const res=await fetch(url);const data=await res.json();
+    const h=new Date().getHours();
+    const aqi=data.hourly?.european_aqi?.[h]??0;
+    const pm25=data.hourly?.pm2_5?.[h]??0;
+    const pm10=data.hourly?.pm10?.[h]??0;
+    const no2=data.hourly?.nitrogen_dioxide?.[h]??0;
+    const ozone=data.hourly?.ozone?.[h]??0;
+    const[label,col]=aqi<=20?['Zelo dobro','#22c55e']:aqi<=40?['Dobro','#84cc16']:aqi<=60?['Zmerno','#eab308']:aqi<=80?['Slabo','#f97316']:aqi<=100?['Zelo slabo','#ef4444']:['Nevarno','#9333ea'];
+    const el=document.getElementById('aqi-val');if(el){el.style.color=col;el.childNodes[0].textContent=aqi;}
+    set('aqi-lbl',' · '+label);
+    const dot=document.getElementById('aqi-dot');if(dot)dot.style.left=Math.min(95,aqi/120*100)+'%';
+    set('aqi-pm25',pm25.toFixed(1));set('aqi-pm10',pm10.toFixed(1));
+    set('aqi-no2',no2.toFixed(1));set('aqi-ozone',ozone.toFixed(0));
+  }catch(e){console.warn('AQI:',e);}
+}
+
+// ── Agrometeo ─────────────────────────────────────────────
+async function fetchAgrometeo(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+'&daily=et0_fao_evapotranspiration,sunshine_duration,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FLjubljana&forecast_days=1';
+    const res=await fetch(url);const data=await res.json();
+    const d=data.daily;
+    const et0=(d?.et0_fao_evapotranspiration?.[0]??0).toFixed(1);
+    const sun=((d?.sunshine_duration?.[0]??0)/3600).toFixed(1);
+    const tmax=d?.temperature_2m_max?.[0]??0,tmin=d?.temperature_2m_min?.[0]??0;
+    const gdd=Math.max(0,(tmax+tmin)/2-10).toFixed(1);
+    set('agro-et0',et0);set('agro-sun',sun);set('agro-gdd',gdd);
+    const rain=d?.precipitation_sum?.[0]??0;
+    const note=parseFloat(et0)>parseFloat(rain)?'💧 Zalijevanje priporočeno (ET₀ > padavine)':'🌱 Padavine zadoščajo';
+    set('agro-note',note);
+    set('agro-date',new Date().toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'}));
+  }catch(e){console.warn('Agro:',e);}
+}
+
+// ── Climate comparison ────────────────────────────────────
+async function fetchClimateComparison(){
+  try{
+    const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+    const pad=n=>String(n).padStart(2,'0');
+    const monthStr=y+'-'+pad(m);
+    const daysThisMonth=new Date(y,m,0).getDate();
+    const endDay=Math.min(now.getDate(),daysThisMonth);
+    // Fetch same month for past 5 years
+    const years=[1,2,3,4,5].map(n=>y-n);
+    const results=await Promise.all(years.map(async yr=>{
+      const sd=yr+'-'+pad(m)+'-01',ed=yr+'-'+pad(m)+'-'+pad(daysThisMonth);
+      const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+sd+'&end_date='+ed+'&daily=temperature_2m_mean,precipitation_sum&timezone=Europe%2FLjubljana';
+      const res=await fetch(url);const data=await res.json();
+      const temps=data.daily?.temperature_2m_mean?.filter(x=>x!=null)??[];
+      const rains=data.daily?.precipitation_sum?.filter(x=>x!=null)??[];
+      const avgT=temps.length?temps.reduce((a,b)=>a+b,0)/temps.length:null;
+      const totR=rains.reduce((a,b)=>a+b,0);
+      return{yr,avgT,totR};
+    }));
+    const histAvgT=results.filter(r=>r.avgT!=null).reduce((s,r)=>s+r.avgT,0)/results.filter(r=>r.avgT!=null).length;
+    const histAvgR=results.reduce((s,r)=>s+r.totR,0)/results.length;
+    // Current month from localStorage
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    const curEntries=Object.entries(stored).filter(([k])=>k.startsWith(monthStr));
+    const curT=curEntries.filter(([,v])=>v.tempAvg).map(([,v])=>v.tempAvg);
+    const curAvgT=curT.length?curT.reduce((a,b)=>a+b,0)/curT.length:null;
+    const curR=curEntries.reduce((s,[,v])=>s+(v.precipTotal||0),0);
+    const monthName=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
+    set('clim-month-lbl',monthName);
+    const cont=document.getElementById('clim-content');
+    if(!cont)return;
+    if(curAvgT!=null){
+      const diffT=(curAvgT-histAvgT).toFixed(1);
+      const diffR=((curR-histAvgR)/histAvgR*100).toFixed(0);
+      const tSign=parseFloat(diffT)>0?'+':'';
+      const rSign=parseFloat(diffR)>0?'+':'';
+      cont.innerHTML=
+        '<div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:.75rem">'+
+        '<div><div class="chart-range">Povp. temp.</div>'+
+          '<div style="font-family:IBM Plex Mono,monospace;font-size:1.1rem;color:var(--text)">'+curAvgT.toFixed(1)+'°C <span style="font-size:.75rem;color:'+(parseFloat(diffT)>0?'var(--red)':'var(--blue)')+'">'+tSign+diffT+'° vs. povp.</span></div></div>'+
+        '<div><div class="chart-range">Padavine</div>'+
+          '<div style="font-family:IBM Plex Mono,monospace;font-size:1.1rem;color:var(--text)">'+curR.toFixed(1)+' mm <span style="font-size:.75rem;color:'+(parseFloat(diffR)>0?'var(--blue)':'var(--amber)')+'">'+rSign+diffR+'% vs. povp.</span></div></div>'+
+        '</div>'+
+        '<div class="clim-bars">'+
+        results.map(r=>'<div class="clim-bw"><div class="clim-bg" style="height:60px"><div class="clim-fill" style="height:'+(r.avgT?Math.max(4,(r.avgT/35*100))+'%':'0')+';background:var(--red);opacity:.6"></div></div><div class="clim-lbl">'+r.yr+'</div></div>').join('')+
+        '<div class="clim-bw"><div class="clim-bg" style="height:60px;border-color:var(--blue)"><div class="clim-fill" style="height:'+(curAvgT?Math.max(4,(curAvgT/35*100))+'%':'0')+';background:var(--blue)"></div></div><div class="clim-lbl" style="color:var(--blue)">'+y+'</div></div>'+
+        '</div>';
+    }else{
+      cont.innerHTML='<span style="color:var(--muted);font-size:.75rem">Zberi vsaj 5 dni podatkov za primerjavo</span>';
+    }
+  }catch(e){console.warn('Klima:',e);}
+}
+
+// ── Monthly summary ───────────────────────────────────────
+function applyMonthlySummary(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+  const pad=n=>String(n).padStart(2,'0');
+  const pfx=y+'-'+pad(m);
+  try{
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    const entries=Object.entries(stored).filter(([k])=>k.startsWith(pfx));
+    if(entries.length<3){set('month-txt','Zbiranje podatkov za '+now.toLocaleDateString('sl',{month:'long',year:'numeric'})+'…');return;}
+    const temps=entries.map(([,v])=>v.tempAvg).filter(x=>x!=null);
+    const highs=entries.map(([,v])=>v.tempHigh).filter(x=>x!=null);
+    const lows=entries.map(([,v])=>v.tempLow).filter(x=>x!=null);
+    const rains=entries.map(([,v])=>v.precipTotal||0);
+    const avgT=(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1);
+    const totR=rains.reduce((a,b)=>a+b,0).toFixed(1);
+    const rainyDays=rains.filter(r=>r>1).length;
+    const frostDays=lows.filter(t=>t<0).length;
+    const maxT=Math.max(...highs).toFixed(1);
+    const minT=Math.min(...lows).toFixed(1);
+    const maxE=entries.find(([,v])=>v.tempHigh===parseFloat(maxT));
+    const minE=entries.find(([,v])=>v.tempLow===parseFloat(minT));
+    const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+    const mn=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
+    set('month-title',mn);
+    set('month-txt',mn+' — '+entries.length+' dni podatkov. Povprečna temperatura: <b>'+avgT+'°C</b>. Skupne padavine: <b>'+totR+' mm</b> v <b>'+rainyDays+' deževnih dnevih</b>.'+(frostDays>0?' Zmrzujočih dni: <b>'+frostDays+'</b>.':'')+' Najtoplejše: <b>'+maxT+'°C</b>'+(maxE?' ('+fmtD(maxE[0])+')':"")+'.'+ ' Najhladnejše: <b>'+minT+'°C</b>'+(minE?' ('+fmtD(minE[0])+')':"")+'.');
+    document.getElementById('month-txt').innerHTML=document.getElementById('month-txt').textContent;
+    // Rebuild with innerHTML
+    const el=document.getElementById('month-txt');
+    if(el)el.innerHTML=mn+' — '+entries.length+' dni podatkov. Povprečna temperatura: <b>'+avgT+'°C</b>. Skupne padavine: <b>'+totR+' mm</b> v <b>'+rainyDays+' deževnih dnevih</b>.'+(frostDays>0?' Zmrzujočih dni: <b>'+frostDays+'</b>.':'')+' Najtoplejše: <b>'+maxT+'°C</b>'+(maxE?' ('+fmtD(maxE[0])+')':"")+'.'+ ' Najhladnejše: <b>'+minT+'°C</b>'+(minE?' ('+fmtD(minE[0])+')':"")+'.'
+  }catch(e){set('month-txt','Napaka: '+e.message);}
+}
+
+// ── Year records ──────────────────────────────────────────
+function applyYearRecords(){
+  const y=new Date().getFullYear();
+  set('rec-year-lbl',y);
+  try{
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    const entries=Object.entries(stored).filter(([k])=>k.startsWith(y+'-'));
+    if(entries.length<3){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za '+y+'…</div>';return;}
+    const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+    const recs=[
+      {icon:'🌡',lbl:'Najhoglejša temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
+      {icon:'❄️',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:parseFloat(e[1].tempLow).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--blue)'},
+      {icon:'🌧',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:parseFloat(e[1].precipTotal).toFixed(1)+' mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
+      {icon:'💨',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:parseFloat(e[1].windspeedHigh).toFixed(1)+' km/h',d:fmtD(e[0])};},col:'var(--purple)'},
+    ];
+    const g=document.getElementById('yr-grid');if(!g)return;g.innerHTML='';
+    recs.forEach(r=>{
+      try{const{v,d}=r.val();const item=document.createElement('div');item.className='yr-item';item.innerHTML='<div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">'+r.icon+' '+r.lbl+'</div><div class="yr-val" style="color:'+r.col+'">'+v+'</div><div class="yr-dt">'+d+'</div>';g.appendChild(item);}catch(_){}
+    });
+  }catch(e){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni dovolj podatkov</div>';}
+}
+
+// ── Heatmap calendar ──────────────────────────────────────
+let _hmMode='rain';
+function setHeatmapMode(mode){
+  _hmMode=mode;
+  document.getElementById('hm-btn-t')?.classList.toggle('active',mode==='temp');
+  document.getElementById('hm-btn-r')?.classList.toggle('active',mode==='rain');
+  drawHeatmap();
+}
+function drawHeatmap(){
+  const svg=document.getElementById('heatmap-svg');if(!svg)return;
+  const y=new Date().getFullYear();
+  set('hm-year-lbl',y);
+  try{
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    const SZ=11,GAP=2,STEP=SZ+GAP,TOP=20,LEFT=24;
+    const weeks=54,W=LEFT+weeks*STEP+20,H=TOP+7*STEP+30;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width',W);svg.setAttribute('height',H);
+    svg.innerHTML='';
+    const mkS=(parent,tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;parent.appendChild(e);return e;};
+    // Temp colors: cold=blue, mild=green, hot=red
+    const tempColor=t=>{if(t==null)return isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';if(t<0)return'#93c5fd';if(t<8)return'#6ee7b7';if(t<16)return'#86efac';if(t<22)return'#fcd34d';if(t<27)return'#fb923c';return'#f87171';};
+    // Rain colors: white=dry, blue=wet
+    const rainColor=r=>{if(r==null||r===0)return isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';if(r<1)return'#bfdbfe';if(r<5)return'#60a5fa';if(r<15)return'#3b82f6';if(r<30)return'#2563eb';return'#1e3a8a';};
+    const jan1=new Date(y,0,1);
+    const startWd=(jan1.getDay()+6)%7; // Mon=0
+    const today=new Date();
+    const months=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+    let prevMonth=-1;
+    for(let d=0;d<365;d++){
+      const date=new Date(y,0,d+1);if(date>today)continue;
+      const key=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+      const val=stored[key]??null;
+      const col=_hmMode==='temp'?tempColor(val?.tempAvg??null):rainColor(val?.precipTotal??null);
+      const col1=d+startWd,week=Math.floor(col1/7),dow=col1%7;
+      const x=LEFT+week*STEP,y2=TOP+dow*STEP;
+      const r=mkS(svg,'rect',{x,y:y2,width:SZ,height:SZ,rx:'2',fill:col});
+      // Month labels
+      if(date.getDate()===1&&prevMonth!==date.getMonth()){
+        mkS(svg,'text',{x:x+2,y:TOP-5,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'IBM Plex Mono,monospace'},months[date.getMonth()]);
+        prevMonth=date.getMonth();
+      }
+    }
+    // Day labels Mon/Wed/Fri
+    ['P','T','S','Č','P','S','N'].forEach((d,i)=>{if(i%2===0)mkS(svg,'text',{x:2,y:TOP+i*STEP+SZ-2,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'IBM Plex Mono,monospace'},d);});
+    // Legend swatches
+    const sw=document.getElementById('hm-swatches');
+    if(sw){sw.innerHTML='';(_hmMode==='temp'?['#93c5fd','#86efac','#fcd34d','#fb923c','#f87171']:['rgba(0,0,0,.06)','#bfdbfe','#60a5fa','#3b82f6','#1e3a8a']).forEach(c=>{const d=document.createElement('div');d.className='hm-sw';d.style.background=c;d.style.border='1px solid var(--border)';sw.appendChild(d);});}
+  }catch(e){console.warn('Heatmap:',e);}
+}
+
+// ── Lightning (Blitzortung) ───────────────────────────────
+let _ltgStrikes=[],_ltgWs=null;
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function connectLightning(){
+  if(_ltgWs&&_ltgWs.readyState<2)return;
+  try{
+    _ltgWs=new WebSocket('wss://ws.blitzortung.org/');
+    _ltgWs.onopen=()=>{_ltgWs.send(JSON.stringify({west:10,east:20,north:50,south:43}));};
+    _ltgWs.onmessage=e=>{
+      try{
+        const d=JSON.parse(e.data);
+        if(!d.lat||!d.lon)return;
+        const dist=haversine(LAT,LON,d.lat,d.lon);
+        if(dist>200)return;
+        const t=new Date();
+        _ltgStrikes.unshift({dist:dist.toFixed(0),time:t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
+        if(_ltgStrikes.length>50)_ltgStrikes.pop();
+        applyLightning();
+      }catch(_){}
+    };
+    _ltgWs.onerror=_ltgWs.onclose=()=>{setTimeout(connectLightning,10000);};
+  }catch(e){}
+}
+function applyLightning(){
+  const hourAgo=Date.now()-3600000;
+  const c=document.getElementById('ltg-count');
+  if(c)c.textContent=_ltgStrikes.length;
+  const nearest=_ltgStrikes.length?_ltgStrikes.reduce((m,s)=>parseFloat(s.dist)<parseFloat(m.dist)?s:m):null;
+  const nEl=document.getElementById('ltg-nearest');
+  if(nEl)nEl.textContent=nearest?'Najbližja: '+nearest.dist+' km':nearest?'':'—';
+  const list=document.getElementById('ltg-list');
+  if(!list)return;list.innerHTML='';
+  if(!_ltgStrikes.length){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri</div>';return;}
+  _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
+}
+
+// ── Push notifications ────────────────────────────────────
+function toggleNotifications(){
+  if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
+    localStorage.setItem('wx-notif','off');
+    document.getElementById('notif-btn')?.classList.remove('on');
+    return;
+  }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){
+      localStorage.setItem('wx-notif','on');
+      document.getElementById('notif-btn')?.classList.add('on');
+      new Notification('Vreme IREICA1',{body:'Obvestila so vklopljena. Obvestili te bomo ob nevihti, zmrzali in UV alarmih.',icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🌤</text></svg>'});
+    }
+  });
+}
+function initNotifBtn(){
+  const btn=document.getElementById('notif-btn');
+  if(btn&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on')btn.classList.add('on');
+  if(!('Notification' in window)&&btn)btn.style.display='none';
+}
+function maybePushAlert(title,body){
+  if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
+    new Notification(title,{body,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">⚠️</text></svg>'});
+  }
+}
+
 function tickClock(){set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
 
@@ -1570,8 +2081,13 @@ async function fetchHourly(){
   catch(e){console.warn('Hourly:',e);}
 }
 async function init(){
-  applyStationOnThisDay(); // show immediately from localStorage
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay()]);
+  applyStationOnThisDay();
+  applyMoon();
+  applyMonthlySummary();
+  applyYearRecords();
+  initNotifBtn();
+  connectLightning();
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison()]);
 }
 init();
 setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
