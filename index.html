@@ -548,6 +548,13 @@ footer a{color:var(--blue);text-decoration:none}
         </div>
         <div id="wind-rose-stats" style="margin-top:.8rem;font-size:.7rem;color:var(--muted);line-height:1.6"></div>
       </div>
+      <!-- Daily wind trend (right column) -->
+      <div style="flex:1;min-width:0;border-left:1px solid var(--border);padding-left:1.25rem">
+        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Dnevni sunek — max km/h</div>
+        <svg id="wind-trend-svg" style="width:100%;display:block" viewBox="0 0 220 90"></svg>
+        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:1rem 0 .4rem">Porazdelitev ur</div>
+        <div id="wind-dist" style="display:flex;flex-direction:column;gap:.25rem"></div>
+      </div>
     </div>
   </div>
 
@@ -1184,7 +1191,7 @@ function applyHourly(observations){
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
   applyDayStats(observations);applyPressureTrend(observations);
-  drawWindRose(observations);applyYesterdayDelta(observations);
+  drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   _hourlyObs=observations;
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
@@ -1689,7 +1696,69 @@ function applyYesterdayDelta(observations){
   if(el)el.innerHTML=`<span class="dv" style="color:${col}">${sign}${d.toFixed(1)}°C</span> <span style="color:var(--muted)">${word}</span>`;
 }
 
-// ── Wind rose ─────────────────────────────────────────────
+function drawWindTrend(observations){
+  const svg=document.getElementById('wind-trend-svg');if(!svg)return;
+  // Build daily max gust from observations
+  const byDay={};
+  observations.forEach(o=>{
+    const day=o.obsTimeLocal.slice(0,10);
+    const sp=o.metric?.windspeedHigh??o.metric?.windSpeed??0;
+    if(!byDay[day]||sp>byDay[day].max) byDay[day]={day,max:sp,avg:o.metric?.windspeedAvg??0};
+  });
+  const days=Object.values(byDay).sort((a,b)=>a.day.localeCompare(b.day)).slice(-7);
+  if(!days.length)return;
+  svg.innerHTML='';
+  const VW=220,VH=90,pad={t:10,r:8,b:28,l:8};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const maxV=Math.max(...days.map(d=>d.max),5);
+  const bw=Math.max(4,(cw/days.length)*0.55);
+  const mk=(tag,attrs)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));svg.appendChild(e);return e;};
+  // Grid lines
+  [0.5,1].forEach(f=>{const y=pad.t+ch*(1-f);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});});
+  days.forEach((d,i)=>{
+    const x=pad.l+i/(days.length)*cw+(cw/days.length-bw)/2+bw/2;
+    const h=Math.max(3,(d.max/maxV)*ch);
+    const col=d.max<10?'#60a5fa':d.max<30?'#4d9ff8':'#a78bfa';
+    mk('rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:col,rx:'2',opacity:'.85'});
+    // Value label on top
+    if(d.max>0){const t=mk('text',{x:x.toFixed(1),y:(pad.t+ch-h-3).toFixed(1),'text-anchor':'middle','font-size':'7',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=d.max.toFixed(0);}
+    // Day label
+    const date=new Date(d.day+'T12:00:00');
+    const lbl=date.toLocaleDateString('sl',{weekday:'short'}).slice(0,2);
+    const t2=mk('text',{x:x.toFixed(1),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    t2.textContent=lbl;
+  });
+}
+
+function drawWindDist(observations){
+  const el=document.getElementById('wind-dist');if(!el)return;
+  const total=observations.length||1;
+  const calm=observations.filter(o=>(o.metric?.windspeedAvg??0)<2).length;
+  const light=observations.filter(o=>{const s=o.metric?.windspeedAvg??0;return s>=2&&s<10;}).length;
+  const mod=observations.filter(o=>{const s=o.metric?.windspeedAvg??0;return s>=10&&s<30;}).length;
+  const strong=observations.filter(o=>(o.metric?.windspeedAvg??0)>=30).length;
+  const cats=[
+    {lbl:'Mirno (<2)',  n:calm,  col:'var(--muted)'},
+    {lbl:'Lahek (2–10)',n:light, col:'#60a5fa'},
+    {lbl:'Zmeren (10–30)',n:mod, col:'#4d9ff8'},
+    {lbl:'Močan (>30)', n:strong,col:'#a78bfa'},
+  ];
+  el.innerHTML='';
+  cats.forEach(c=>{
+    const pct=Math.round(c.n/total*100);
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:.4rem;font-size:.65rem';
+    row.innerHTML=
+      '<div style="width:60px;color:var(--muted);flex-shrink:0">'+c.lbl+'</div>'+
+      '<div style="flex:1;height:5px;background:var(--rain-track);border-radius:3px;overflow:hidden">'+
+        '<div style="height:100%;width:'+pct+'%;background:'+c.col+';border-radius:3px;transition:width .8s ease"></div>'+
+      '</div>'+
+      '<div style="width:28px;text-align:right;font-family:IBM Plex Mono,monospace;color:var(--muted)">'+pct+'%</div>';
+    el.appendChild(row);
+  });
+}
+
+
 function drawWindRose(observations){
   const svg=document.getElementById('wind-rose-svg');if(!svg)return;
   const dirs=new Array(8).fill(0),spds=new Array(8).fill(0);
