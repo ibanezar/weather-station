@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -301,7 +300,22 @@ footer a{color:var(--blue);text-decoration:none}
 /* Responsive: wind rose */
 @media(max-width:520px){.wind-rose-body{gap:1rem}}
 
-/* Period filter buttons */
+/* On This Day widget */
+.otd-grid{display:flex;gap:.65rem;margin-top:.5rem;flex-wrap:wrap}
+.otd-item{flex:1;min-width:130px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.2rem;transition:background .2s,box-shadow .2s}
+.otd-item:hover{background:var(--card-bg);box-shadow:var(--card-shadow-h)}
+.otd-year{font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.otd-emoji{font-size:1.75rem;line-height:1.25;margin:.1rem 0}
+.otd-desc{font-size:.64rem;color:var(--muted);text-transform:capitalize;line-height:1.3;min-height:1.8em}
+.otd-temps{font-family:'IBM Plex Mono',monospace;font-size:.95rem;display:flex;align-items:baseline;gap:.3rem;margin-top:.15rem}
+.otd-temps .th{color:#f87171}.otd-temps .tl{color:var(--blue)}
+.otd-rain{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--rain-col);margin-top:.1rem}
+.otd-wind{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted)}
+@media(max-width:520px){.otd-grid{gap:.5rem}.otd-item{min-width:calc(50% - .25rem);flex:0 0 calc(50% - .25rem)}}
+.otd-station .otd-item{border-color:rgba(167,139,250,.15)}
+.otd-station .otd-item:hover{border-color:rgba(167,139,250,.3)}
+.otd-station .otd-year{color:var(--purple)}
+.otd-nodata{font-size:.7rem;color:var(--muted);font-style:italic;padding:.25rem 0}
 .period-nav{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
 .period-btn{padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
 .period-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 2px 10px rgba(37,99,235,.3)}
@@ -518,6 +532,28 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr"><span class="clabel" style="margin:0">📅 Napoved za 5 dni</span><span class="chart-range">Rečica ob Savinji</span></div>
     <div class="forecast-grid" id="forecast-grid"><div class="fc-loading">Nalaganje napovedi…</div></div>
+  </div>
+
+  <!-- On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-title">📅 Vreme na ta dan v preteklosti</span>
+      <span class="chart-range" id="otd-source">Open-Meteo ERA5</span>
+    </div>
+    <div class="otd-grid" id="otd-grid">
+      <div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+    </div>
+  </div>
+
+  <!-- Station On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-station-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-station-title">📡 Ta dan na postaji IREICA1</span>
+      <span class="chart-range" id="otd-station-source">Lokalna shramba</span>
+    </div>
+    <div class="otd-grid otd-station" id="otd-station-grid">
+      <div class="otd-nodata">Nalaganje…</div>
+    </div>
   </div>
 
   <!-- Sunrise + snapshot -->
@@ -996,8 +1032,148 @@ function applyForecast(list){
   });
 }
 
+// ── Station On This Day ───────────────────────────────────
+function metricToCondition(m){
+  if(!m) return{emoji:'—',desc:'Ni podatkov'};
+  const r=m.precipTotal||0, t=m.tempAvg??m.tempHigh??0, w=m.windspeedHigh||0;
+  if(t<=0&&r>0)  return{emoji:'❄️',desc:'Sneg/slana'};
+  if(t<=0)       return{emoji:'🌡',desc:'Zmrzuje'};
+  if(r>15)       return{emoji:'⛈', desc:'Močan dež'};
+  if(r>5)        return{emoji:'🌧', desc:'Dežen dan'};
+  if(r>1)        return{emoji:'🌦', desc:'Plohe'};
+  if(r>0)        return{emoji:'🌦', desc:'Rahel dež'};
+  if(w>50)       return{emoji:'🌬', desc:'Viharno'};
+  if(t>30)       return{emoji:'🌡', desc:'Vročinski val'};
+  if(t>24)       return{emoji:'☀️', desc:'Vroče'};
+  if(t>18)       return{emoji:'🌤', desc:'Sončno'};
+  if(t>12)       return{emoji:'⛅', desc:'Prijetno'};
+  return                {emoji:'🌥', desc:'Hladno'};
+}
+
+function getStationOnThisDay(){
+  try{
+    const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    const today=new Date();
+    const mm=String(today.getMonth()+1).padStart(2,'0');
+    const dd=String(today.getDate()).padStart(2,'0');
+    const yy=today.getFullYear();
+    return [1,2,3,4,5].map(n=>{
+      const yr=yy-n, key=yr+'-'+mm+'-'+dd;
+      return{year:yr,date:key,metric:stored[key]||null};
+    });
+  }catch(e){return[];}
+}
+
+function applyStationOnThisDay(){
+  const grid=document.getElementById('otd-station-grid');
+  if(!grid)return;
+  const today=new Date();
+  const titleEl=document.getElementById('otd-station-title');
+  if(titleEl)titleEl.textContent='📡 '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' — postaja IREICA1';
+  const results=getStationOnThisDay();
+  grid.innerHTML='';
+  results.forEach(r=>{
+    const item=document.createElement('div');item.className='otd-item';
+    if(!r.metric){
+      item.innerHTML='<div class="otd-year">'+r.year+'</div><div class="otd-emoji" style="font-size:1.1rem;color:var(--muted)">—</div><div class="otd-desc" style="font-size:.62rem">Ni podatkov</div>';
+    }else{
+      const c=metricToCondition(r.metric);
+      item.innerHTML=
+        '<div class="otd-year">'+r.year+'</div>'+
+        '<div class="otd-emoji">'+c.emoji+'</div>'+
+        '<div class="otd-desc">'+c.desc+'</div>'+
+        '<div class="otd-temps"><span class="th">'+(r.metric.tempHigh!=null?r.metric.tempHigh.toFixed(1):'—')+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+(r.metric.tempLow!=null?r.metric.tempLow.toFixed(1):'—')+'°</span></div>'+
+        (r.metric.precipTotal>0?'<div class="otd-rain">🌧 '+r.metric.precipTotal.toFixed(1)+' mm</div>':'')+
+        (r.metric.windspeedHigh!=null?'<div class="otd-wind">💨 '+r.metric.windspeedHigh.toFixed(1)+' km/h</div>':'');
+    }
+    grid.appendChild(item);
+  });
+  const filled=results.filter(r=>r.metric).length;
+  const src=document.getElementById('otd-station-source');
+  if(src)src.textContent=filled>0?filled+'/5 let podatkov':'Shramba prazna — zbira se z obiski';
+}
+
 // ── Clock + fetch ─────────────────────────────────────────
-// ── Tab switching ─────────────────────────────────────────
+// ── On This Day ───────────────────────────────────────────
+function wmoInfo(code){
+  if(code==null)return{emoji:'❓',desc:'Neznano'};
+  if(code===0)  return{emoji:'☀️',desc:'Jasno'};
+  if(code<=2)   return{emoji:'🌤',desc:'Pretežno sončno'};
+  if(code<=3)   return{emoji:'⛅',desc:'Delno oblačno'};
+  if(code<=9)   return{emoji:'🌫',desc:'Oblačno'};
+  if(code<=19)  return{emoji:'🌦',desc:'Plohe'};
+  if(code<=29)  return{emoji:'⛈',desc:'Nevihte'};
+  if(code<=39)  return{emoji:'🌬',desc:'Prah/pesek'};
+  if(code<=49)  return{emoji:'🌫',desc:'Megla'};
+  if(code<=59)  return{emoji:'🌦',desc:'Rosenje'};
+  if(code<=69)  return{emoji:'🌧',desc:'Dež'};
+  if(code<=79)  return{emoji:'❄️',desc:'Sneg'};
+  if(code<=84)  return{emoji:'🌦',desc:'Dežne plohe'};
+  if(code<=90)  return{emoji:'🌨',desc:'Snežne plohe'};
+  if(code<=99)  return{emoji:'⛈',desc:'Nevihta'};
+  return{emoji:'❓',desc:'Neznano'};
+}
+
+async function fetchOnThisDay(){
+  const today=new Date();
+  const mm=String(today.getMonth()+1).padStart(2,'0');
+  const dd=String(today.getDate()).padStart(2,'0');
+  const yy=today.getFullYear();
+
+  // Update title with today's date
+  const titleEl=document.getElementById('otd-title');
+  if(titleEl) titleEl.textContent='📅 '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' skozi leta';
+
+  // Fetch 5 years in parallel
+  const years=[1,2,3,4,5].map(n=>yy-n);
+  const results=await Promise.all(years.map(async yr=>{
+    const date=yr+'-'+mm+'-'+dd;
+    try{
+      const url='https://archive-api.open-meteo.com/v1/archive'
+        +'?latitude='+LAT+'&longitude='+LON
+        +'&start_date='+date+'&end_date='+date
+        +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode'
+        +'&timezone=Europe%2FLjubljana';
+      const res=await fetch(url);
+      const data=await res.json();
+      return{
+        year:yr, date,
+        tMax: data.daily?.temperature_2m_max?.[0],
+        tMin: data.daily?.temperature_2m_min?.[0],
+        rain: data.daily?.precipitation_sum?.[0],
+        wind: data.daily?.windspeed_10m_max?.[0],
+        code: data.daily?.weathercode?.[0],
+      };
+    }catch(e){return{year:yr,date,error:true};}
+  }));
+
+  applyOnThisDay(results);
+}
+
+function applyOnThisDay(results){
+  const grid=document.getElementById('otd-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  results.forEach(r=>{
+    const info=wmoInfo(r.error?null:r.code);
+    const item=document.createElement('div');
+    item.className='otd-item';
+    const hasData=!r.error&&r.tMax!=null;
+    item.innerHTML=
+      '<div class="otd-year">'+r.year+'</div>'+
+      '<div class="otd-emoji">'+(hasData?info.emoji:'—')+'</div>'+
+      '<div class="otd-desc">'+(hasData?info.desc:'Ni podatkov')+'</div>'+
+      (hasData
+        ? '<div class="otd-temps"><span class="th">'+r.tMax.toFixed(1)+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+r.tMin.toFixed(1)+'°</span></div>'
+          +(r.rain>0?'<div class="otd-rain">🌧 '+r.rain.toFixed(1)+' mm</div>':'')
+          +'<div class="otd-wind">💨 '+(r.wind!=null?r.wind.toFixed(1)+' km/h':'—')+'</div>'
+        : ''
+      );
+    grid.appendChild(item);
+  });
+}
+
+
 let _historyLoaded=false;
 function switchTab(tab){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
@@ -1028,7 +1204,6 @@ function showHistory7(){
 // ── History period system ─────────────────────────────────
 const _histCache={};
 let _currentPeriod='7';
-let _staticHistoryCache=null;
 
 // ── localStorage accumulation ─────────────────────────────
 const LS_KEY='wx-history-v1';
@@ -1040,6 +1215,7 @@ function saveToLocalHistory(dailySummaries){
     const cutoff=new Date(Date.now()-6*365*24*3600*1000).toISOString().slice(0,10);
     Object.keys(stored).forEach(k=>{if(k<cutoff)delete stored[k];});
     localStorage.setItem(LS_KEY,JSON.stringify(stored));
+    applyStationOnThisDay(); // refresh widget with newly accumulated data
   }catch(e){}
 }
 
@@ -1095,26 +1271,6 @@ function getPeriodRange(period){
   return null;
 }
 
-// ── Static history.json fallback (works on all devices) ──────
-async function fetchStaticHistory(period){
-  if(!_staticHistoryCache){
-    const res=await fetch('./history.json');
-    if(!res.ok) throw new Error('history.json not found');
-    const data=await res.json();
-    _staticHistoryCache=data.summaries||[];
-  }
-  const cutoffs={'30':new Date(Date.now()-30*864e5).toISOString().slice(0,10),'year':new Date().getFullYear()+'-01-01','5year':(new Date().getFullYear()-5)+'-01-01'};
-  const cutoff=cutoffs[period]||'2000-01-01';
-  let filtered=_staticHistoryCache.filter(s=>s.obsTimeLocal>=cutoff);
-  // Merge with live 7-day data to fill any recent gap
-  if(_histCache['7']&&_histCache['7'].length){
-    const seen=new Set(filtered.map(s=>s.obsTimeLocal));
-    const recent=_histCache['7'].filter(s=>s.obsTimeLocal>=cutoff&&!seen.has(s.obsTimeLocal));
-    if(recent.length) filtered=[...filtered,...recent].sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
-  }
-  return filtered;
-}
-
 async function switchPeriod(period){
   _currentPeriod=period;
   setPeriodBtns(period,false);
@@ -1143,17 +1299,12 @@ async function switchPeriod(period){
     saveToLocalHistory(summaries); // cache locally too
     applyHistory(summaries);
   }catch(e){
-    // Try static history.json (works on all devices, no API key needed)
-    try{
-      const staticData=await fetchStaticHistory(period);
-      if(staticData&&staticData.length){_histCache[period]=staticData;applyHistory(staticData);return;}
-    }catch(_){}
-    // Last resort: localStorage (device-specific accumulation)
     const stored=getLocalHistory(period);
     if(stored.length){
       applyHistory(stored);
       updateAccumInfo(stored.length,localHistoryDays());
     }else{
+      // Try to show Ecowitt's exact error details
       let errMsg=e.message;
       try{const j=JSON.parse(e.message);if(j.details)errMsg=j.details.join(' | ');}catch(_){}
       showHistErr('<strong>Napaka:</strong> '+errMsg);
@@ -1418,7 +1569,10 @@ async function fetchHourly(){
   try{const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.observations?.length)applyHourly(data.observations);}
   catch(e){console.warn('Hourly:',e);}
 }
-async function init(){await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast()]);}
+async function init(){
+  applyStationOnThisDay(); // show immediately from localStorage
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay()]);
+}
 init();
 setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
