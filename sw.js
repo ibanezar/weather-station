@@ -1,4 +1,4 @@
-const CACHE = 'vreme-ireica1-v1';
+const CACHE = 'vreme-ireica1-v2';
 const OFFLINE = ['./'];
 
 self.addEventListener('install', e => {
