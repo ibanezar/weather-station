@@ -1118,7 +1118,8 @@ async function loadAllHistory(){
 async function switchPeriod(period){
   _currentPeriod=period;
   setPeriodBtns(period,false);
-  updateHistTitles(period);if(infoEl)infoEl.textContent='';
+  updateHistTitles(period);
+  const infoEl=document.getElementById('hist-accum-info');if(infoEl)infoEl.textContent='';
 
   if(period==='7'){ showHistory7(); return; }
 
