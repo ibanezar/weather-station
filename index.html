@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -11,7 +12,6 @@
 <meta name="apple-mobile-web-app-title" content="Vreme IREICA1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<script src="history-data.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -462,7 +462,7 @@ footer a{color:var(--blue);text-decoration:none}
 
   <!-- Wind rose -->
   <div class="card wind-rose-card">
-    <div class="clabel" id="wind-rose-title">🌹 Vetroza — zadnjih 7 dni</div>
+    <div class="clabel">🌹 Vetroza — zadnjih 7 dni</div>
     <div class="wind-rose-body">
       <svg id="wind-rose-svg" viewBox="0 0 150 150" style="width:150px;height:150px;flex-shrink:0"></svg>
       <div>
@@ -603,7 +603,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Temperature band chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0" id="hist-temp-title">🌡 Temperatura — zadnjih 7 dni</span>
+        <span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-temp-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -616,7 +616,7 @@ footer a{color:var(--blue);text-decoration:none}
     <!-- Rain history chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0" id="hist-rain-title">🌧 Padavine — zadnjih 7 dni</span>
+        <span class="clabel" style="margin:0">🌧 Padavine — zadnjih 7 dni</span>
         <span class="chart-range" id="hist-rain-range">—</span>
       </div>
       <div class="chart-svg-wrap">
@@ -628,7 +628,7 @@ footer a{color:var(--blue);text-decoration:none}
 
     <!-- Daily table -->
     <div class="card" style="margin-bottom:1rem;padding:1.4rem 1.6rem">
-      <div class="clabel" id="hist-table-title">📋 Dnevni podatki (zadnjih 7 dni)</div>
+      <div class="clabel">📋 Dnevni podatki (zadnjih 7 dni)</div>
       <div style="overflow-x:auto;margin-top:.5rem">
         <table class="history-table">
           <thead>
@@ -1012,7 +1012,6 @@ function histTabActive(){
 function showHistory7(){
   _currentPeriod='7';
   setPeriodBtns('7',false);
-  updateHistTitles('7');
   // Priority: pre-built cache → build from hourly → localStorage → loading
   const d = _histCache['7']?.length ? _histCache['7']
           : _hourlyObs.length        ? (_histCache['7']=buildDailySummaries(_hourlyObs))
@@ -1029,6 +1028,7 @@ function showHistory7(){
 // ── History period system ─────────────────────────────────
 const _histCache={};
 let _currentPeriod='7';
+let _staticHistoryCache=null;
 
 // ── localStorage accumulation ─────────────────────────────
 const LS_KEY='wx-history-v1';
@@ -1048,8 +1048,7 @@ function getLocalHistory(period){
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     const now=new Date();
     let cutoff;
-    if(period==='7')      cutoff=new Date(now-7*864e5).toISOString().slice(0,10);
-    else if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
+    if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
     else if(period==='year')  cutoff=now.getFullYear()+'-01-01';
     else if(period==='5year') cutoff=(now.getFullYear()-5)+'-01-01';
     else cutoff='2000-01-01';
@@ -1096,35 +1095,29 @@ function getPeriodRange(period){
   return null;
 }
 
-const PERIOD_LABEL={'7':'zadnjih 7 dni','30':'zadnjih 30 dni','year':'letos','5year':'zadnjih 5 let'};
-function updateHistTitles(period){
-  const lbl=PERIOD_LABEL[period]||period;
-  const el=id=>document.getElementById(id);
-  if(el('hist-temp-title'))  el('hist-temp-title').textContent  ='🌡 Temperatura — '+lbl;
-  if(el('hist-rain-title'))  el('hist-rain-title').textContent  ='🌧 Padavine — '+lbl;
-  if(el('hist-table-title')) el('hist-table-title').textContent ='📋 Dnevni podatki ('+lbl+')';
-  if(el('wind-rose-title'))  el('wind-rose-title').textContent  ='🌹 Vetroza — '+lbl;
-}
-let _allHistoryLoading=null;
-
-async function loadAllHistory(){
-  if(_allHistoryData) return _allHistoryData;
-  if(typeof HISTORY_DATA !== 'undefined' && HISTORY_DATA.length){
-    _allHistoryData = HISTORY_DATA;
-    return _allHistoryData;
+// ── Static history.json fallback (works on all devices) ──────
+async function fetchStaticHistory(period){
+  if(!_staticHistoryCache){
+    const res=await fetch('./history.json');
+    if(!res.ok) throw new Error('history.json not found');
+    const data=await res.json();
+    _staticHistoryCache=data.summaries||[];
   }
-  // fallback: try fetch
-  if(_allHistoryLoading) return _allHistoryLoading;
-  _allHistoryLoading=fetch('history.json')
-    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(d=>{_allHistoryData=d.summaries||[];return _allHistoryData;});
-  return _allHistoryLoading;
+  const cutoffs={'30':new Date(Date.now()-30*864e5).toISOString().slice(0,10),'year':new Date().getFullYear()+'-01-01','5year':(new Date().getFullYear()-5)+'-01-01'};
+  const cutoff=cutoffs[period]||'2000-01-01';
+  let filtered=_staticHistoryCache.filter(s=>s.obsTimeLocal>=cutoff);
+  // Merge with live 7-day data to fill any recent gap
+  if(_histCache['7']&&_histCache['7'].length){
+    const seen=new Set(filtered.map(s=>s.obsTimeLocal));
+    const recent=_histCache['7'].filter(s=>s.obsTimeLocal>=cutoff&&!seen.has(s.obsTimeLocal));
+    if(recent.length) filtered=[...filtered,...recent].sort((a,b)=>a.obsTimeLocal.localeCompare(b.obsTimeLocal));
+  }
+  return filtered;
 }
 
 async function switchPeriod(period){
   _currentPeriod=period;
   setPeriodBtns(period,false);
-  updateHistTitles(period);
   const infoEl=document.getElementById('hist-accum-info');if(infoEl)infoEl.textContent='';
 
   if(period==='7'){ showHistory7(); return; }
@@ -1132,21 +1125,38 @@ async function switchPeriod(period){
   // Use cache
   if(_histCache[period]){applyHistory(_histCache[period]);return;}
 
+  // Try Ecowitt API
   const r=getPeriodRange(period);
   showHistLoading();setPeriodBtns(period,true);
   try{
-    const all=await loadAllHistory();
-    const summaries=all.filter(s=>s.obsTimeLocal>=r.start&&s.obsTimeLocal<=r.end);
-    if(!summaries.length) throw new Error('Ni podatkov za izbrano obdobje');
+    const res=await fetch(PROXY+'/ecowitt-history?start='+r.start+'&end='+r.end);
+    if(!res.ok){
+      const body=await res.json().catch(()=>({}));
+      const detail=body.details?body.details.join(' | '):body.error||('HTTP '+res.status);
+      throw new Error(detail);
+    }
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    const summaries=data.summaries||[];
+    if(!summaries.length) throw new Error('Ni podatkov');
     _histCache[period]=summaries;
+    saveToLocalHistory(summaries); // cache locally too
     applyHistory(summaries);
   }catch(e){
+    // Try static history.json (works on all devices, no API key needed)
+    try{
+      const staticData=await fetchStaticHistory(period);
+      if(staticData&&staticData.length){_histCache[period]=staticData;applyHistory(staticData);return;}
+    }catch(_){}
+    // Last resort: localStorage (device-specific accumulation)
     const stored=getLocalHistory(period);
     if(stored.length){
       applyHistory(stored);
       updateAccumInfo(stored.length,localHistoryDays());
     }else{
-      showHistErr('<strong>Napaka:</strong> '+e.message);
+      let errMsg=e.message;
+      try{const j=JSON.parse(e.message);if(j.details)errMsg=j.details.join(' | ');}catch(_){}
+      showHistErr('<strong>Napaka:</strong> '+errMsg);
     }
   }finally{
     setPeriodBtns(period,false);
