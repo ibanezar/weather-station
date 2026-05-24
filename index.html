@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Vreme IREICA1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="history-data.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1108,6 +1109,11 @@ let _allHistoryLoading=null;
 
 async function loadAllHistory(){
   if(_allHistoryData) return _allHistoryData;
+  if(typeof HISTORY_DATA !== 'undefined' && HISTORY_DATA.length){
+    _allHistoryData = HISTORY_DATA;
+    return _allHistoryData;
+  }
+  // fallback: try fetch
   if(_allHistoryLoading) return _allHistoryLoading;
   _allHistoryLoading=fetch('history.json')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
