@@ -382,6 +382,38 @@ footer a{color:var(--blue);text-decoration:none}
 .notif-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:.68rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,color .2s;color:var(--muted);line-height:1.5}
 .notif-btn.on{border-color:var(--green);color:var(--green)}
 
+
+/* Biometeo */
+.bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:.5rem}
+.bio-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
+.bio-val{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:300;line-height:1}
+.bio-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
+.bio-cat{font-size:.7rem;font-weight:500;margin-top:.3rem}
+.bio-tip{font-size:.65rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
+/* Fog */
+.fog-timeline{display:flex;gap:2px;margin-top:.65rem;align-items:flex-end;height:44px}
+.fog-bar{flex:1;border-radius:3px 3px 0 0;transition:height .6s ease;min-height:2px}
+.fog-labels{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:.25rem}
+/* Hourly profile */
+.hourly-peak{display:flex;gap:2rem;flex-wrap:wrap;margin-top:.5rem}
+.hourly-peak-item{font-size:.7rem;color:var(--muted)}
+.hourly-peak-item b{font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400}
+/* Phenological calendar */
+.pheno-list{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem}
+.pheno-row{display:flex;align-items:center;gap:.75rem;font-size:.75rem}
+.pheno-icon{font-size:1.1rem;flex-shrink:0;width:1.5rem;text-align:center}
+.pheno-name{flex:1;color:var(--text)}
+.pheno-gdd{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);white-space:nowrap}
+.pheno-date{font-family:'IBM Plex Mono',monospace;font-size:.68rem;white-space:nowrap}
+.pheno-done{opacity:.6}.pheno-soon{color:var(--green)}.pheno-future{color:var(--muted)}
+/* Water balance */
+.wbal-summary{display:flex;gap:1.5rem;margin-bottom:.75rem;flex-wrap:wrap}
+.wbal-stat{font-family:'IBM Plex Mono',monospace;font-size:.95rem}
+.wbal-sl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.1rem}
+.wbal-bars{display:flex;gap:2px;align-items:center;height:50px;margin-top:.5rem}
+.wbal-bar{flex:1;border-radius:2px;min-width:3px;transition:height .6s ease}
+.wbal-axis{height:1px;background:var(--border);width:100%;align-self:center;margin:0 2px}
+
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
   .span2{grid-column:span 1}
@@ -558,6 +590,38 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
+  <!-- Biometeo + Fog -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🌡 Biometeorološki indeks</div>
+      <div class="bio-grid">
+        <div class="bio-item" id="bio-humidex-box">
+          <div class="bio-val" id="bio-humidex">—</div>
+          <div class="bio-lbl">Humidex</div>
+          <div class="bio-cat" id="bio-humidex-cat">—</div>
+          <div class="bio-tip" id="bio-humidex-tip"></div>
+        </div>
+        <div class="bio-item" id="bio-chill-box">
+          <div class="bio-val" id="bio-chill">—</div>
+          <div class="bio-lbl">Wind Chill</div>
+          <div class="bio-cat" id="bio-chill-cat">—</div>
+          <div class="bio-tip" id="bio-chill-tip"></div>
+        </div>
+      </div>
+      <div class="csub" id="bio-overall" style="margin-top:.6rem"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌫 Napoved megle — <span id="fog-location">Rečica ob Savinji</span></div>
+      <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
+        <div class="cval" id="fog-now-val">—<span class="unit">%</span></div>
+        <div class="csub" id="fog-now-lbl">verjetnost megle zdaj</div>
+      </div>
+      <div class="fog-timeline" id="fog-timeline"></div>
+      <div class="fog-labels" id="fog-labels"></div>
+      <div class="csub" id="fog-note" style="margin-top:.5rem"></div>
+    </div>
+  </div>
+
   <!-- 4 small cards -->
   <div class="g4" style="margin-bottom:1rem">
     <div class="card">
@@ -584,6 +648,20 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
+  <!-- Hourly temperature profile -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">⏰ Urni temperaturni profil — povprečen potek dneva</span>
+      <span class="chart-range" id="hourly-range">Zadnjih 7 dni</span>
+    </div>
+    <div class="chart-svg-wrap">
+      <svg class="chart-svg" viewBox="0 0 880 160" id="hourly-svg" preserveAspectRatio="xMidYMid meet">
+        <text x="440" y="80" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+      </svg>
+    </div>
+    <div class="hourly-peak" id="hourly-peaks"></div>
+  </div>
+
   <!-- Temp chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 24 ur</span><span class="chart-range" id="temp-range">—</span></div>
@@ -600,6 +678,37 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr"><span class="clabel" style="margin:0">📅 Napoved za 5 dni</span><span class="chart-range">Rečica ob Savinji</span></div>
     <div class="forecast-grid" id="forecast-grid"><div class="fc-loading">Nalaganje napovedi…</div></div>
+  </div>
+
+  <!-- Phenological calendar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
+      <span class="chart-range">Nakopičeni GDD: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
+    </div>
+    <div class="g2" style="gap:.75rem">
+      <div class="pheno-list" id="pheno-list-left"></div>
+      <div class="pheno-list" id="pheno-list-right"></div>
+    </div>
+    <div class="csub" id="pheno-note" style="margin-top:.75rem"></div>
+  </div>
+
+  <!-- Water balance -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
+      <span class="chart-range" id="wbal-status"></span>
+    </div>
+    <div class="wbal-summary">
+      <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
+      <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
+      <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
+    </div>
+    <div style="height:60px;position:relative;margin-top:.25rem">
+      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
   </div>
 
   <!-- On This Day -->
@@ -1154,6 +1263,7 @@ function applyObs(obs){
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
   updateSunArc(obs.lat,obs.lon);checkAlerts(obs);
   applyScore(obs);
+  applyBiometeo(obs);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
@@ -1192,6 +1302,7 @@ function applyHourly(observations){
   drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
+  drawHourlyProfile(observations);
   _hourlyObs=observations;
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
@@ -2182,6 +2293,282 @@ function maybePushAlert(title,body){
   }
 }
 
+
+// ── Biometeorological index ───────────────────────────────
+function calcHumidex(T,Td){
+  const e=6.112*Math.exp(17.67*Td/(Td+243.5));
+  return+(T+0.5555*(e-10)).toFixed(1);
+}
+function calcWindChill(T,V){
+  if(T>10||V<=5)return null;
+  return+(13.12+0.6215*T-11.37*Math.pow(V,0.16)+0.3965*T*Math.pow(V,0.16)).toFixed(1);
+}
+function applyBiometeo(obs){
+  const m=obs.metric,T=m.temp??15,Td=m.dewpt??T-5,V=m.windSpeed??0;
+  // Humidex
+  const hx=calcHumidex(T,Td);
+  const[hCat,hCol,hTip]=hx<27?['Prijetno','var(--green)','Normalne razmere']:
+    hx<32?['Opazno neudobje','var(--amber)','Nekoliko neugodno']:
+    hx<40?['Precejšnje neudobje','#f97316','Izogibaj se fizičnemu naporu']:
+    hx<46?['Vroče — nevarnost','var(--red)','Možna toplotna izčrpanost']:
+    ['NEVARNO','#9333ea','Toplotni udar — ostani v senci!'];
+  set('bio-humidex',hx+'°');set('bio-humidex-cat',hCat);set('bio-humidex-tip',hTip);
+  const hBox=document.getElementById('bio-humidex-box');
+  if(hBox)hBox.style.borderColor=hCol+'55';
+  document.getElementById('bio-humidex')?.style&&(document.getElementById('bio-humidex').style.color=hCol);
+  document.getElementById('bio-humidex-cat')&&(document.getElementById('bio-humidex-cat').style.color=hCol);
+  // Wind Chill
+  const wc=calcWindChill(T,V);
+  const wcEl=document.getElementById('bio-chill');
+  if(wc===null){
+    set('bio-chill','—');set('bio-chill-cat',T>10?'Ni hladno':'Premalo vetra');set('bio-chill-tip','');
+  }else{
+    const[wcCat,wcCol,wcTip]=wc>0?['Sveže','var(--cyan)','']:
+      wc>-10?['Hladno','#60a5fa','']:
+      wc>-28?['Zelo hladno','#3b82f6','Možnost ozeblin po 30+ min']:
+      wc>-40?['Nevarno hladno','var(--purple)','Ozebline v 10–30 min']:
+      ['EKSTREMNO','#9333ea','Ozebline v manj kot 5 min!'];
+    set('bio-chill',wc+'°');set('bio-chill-cat',wcCat);set('bio-chill-tip',wcTip);
+    if(wcEl)wcEl.style.color=wcCol;
+    const cBox=document.getElementById('bio-chill-box');if(cBox)cBox.style.borderColor=wcCol+'55';
+    document.getElementById('bio-chill-cat')&&(document.getElementById('bio-chill-cat').style.color=wcCol);
+  }
+  // Overall
+  const ov=document.getElementById('bio-overall');
+  if(ov){
+    if(hx>=40)ov.innerHTML='⚠️ <strong>Visok toplotni stres</strong> — omejite gibanje na prostem';
+    else if(wc!==null&&wc<-20)ov.innerHTML='⚠️ <strong>Hladni stres</strong> — pokrijte izpostavljeno kožo';
+    else ov.innerHTML='✓ Biometeorološke razmere so ugodne';
+  }
+}
+
+// ── Fog forecast ──────────────────────────────────────────
+function fogProb(T,Td,wind,hour){
+  const dep=T-Td;
+  let p=0;
+  if(dep<1)p=85;else if(dep<2)p=65;else if(dep<3)p=40;else if(dep<5)p=15;
+  if(wind>15)p-=30;else if(wind>8)p-=15;else if(wind<3)p+=12;
+  if(hour>=20||hour<7)p+=15; // night/dawn bonus for valley fog
+  return Math.max(0,Math.min(100,Math.round(p)));
+}
+async function fetchFogForecast(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=temperature_2m,dew_point_2m,wind_speed_10m,visibility&timezone=Europe%2FLjubljana&forecast_days=2';
+    const res=await fetch(url);const data=await res.json();
+    const times=data.hourly?.time??[];
+    const temps=data.hourly?.temperature_2m??[];
+    const dews=data.hourly?.dew_point_2m??[];
+    const winds=data.hourly?.wind_speed_10m??[];
+    const vis=data.hourly?.visibility??[];
+    const now=new Date(),nowH=now.getHours();
+    // Find current and next 24h
+    const startIdx=times.findIndex(t=>new Date(t)>=now)||(0);
+    const slice=times.slice(startIdx,startIdx+24);
+    const fogData=slice.map((_,i)=>{
+      const idx=startIdx+i;
+      const T=temps[idx]??15,Td=dews[idx]??T-5,V=winds[idx]??0;
+      const h=new Date(times[idx]).getHours();
+      const vis_m=vis[idx]??10000;
+      // Use actual visibility if available, else calculate
+      const prob=vis_m<1000?90:vis_m<5000?Math.max(fogProb(T,Td,V,h),50):fogProb(T,Td,V,h);
+      return{time:times[idx],prob,h};
+    });
+    // Current fog
+    const curProb=fogData[0]?.prob??0;
+    const curEl=document.getElementById('fog-now-val');
+    if(curEl){curEl.childNodes[0].textContent=curProb;curEl.style.color=curProb>=70?'var(--amber)':curProb>=40?'var(--blue)':'var(--green)';}
+    const lbl=curProb>=70?'⚠️ Velika verjetnost megle':curProb>=40?'Zmerna verjetnost megle':curProb>=20?'Majhna verjetnost megle':'Megla malo verjetna';
+    set('fog-now-lbl',lbl);
+    // Timeline (every 3h for 24h = 8 bars)
+    const step3=fogData.filter((_,i)=>i%3===0);
+    const tl=document.getElementById('fog-timeline'),ll=document.getElementById('fog-labels');
+    if(tl){tl.innerHTML='';step3.forEach(d=>{const bar=document.createElement('div');bar.className='fog-bar';const h=Math.max(4,d.prob)+'%';bar.style.cssText='flex:1;border-radius:3px;height:'+h+';align-self:flex-end;background:'+(d.prob>=70?'rgba(217,119,6,.7)':d.prob>=40?'rgba(77,159,248,.6)':'rgba(100,160,100,.4)');tl.appendChild(bar);});}
+    if(ll){ll.innerHTML='';step3.forEach(d=>{const s=document.createElement('span');s.textContent=String(new Date(d.time).getHours()).padStart(2,'0')+':00';ll.appendChild(s);});}
+    // Peak fog note
+    const maxFog=Math.max(...fogData.map(d=>d.prob));
+    const maxFogEntry=fogData.find(d=>d.prob===maxFog);
+    const note=document.getElementById('fog-note');
+    if(note&&maxFog>=40){const t=new Date(maxFogEntry.time);note.textContent='Največja verjetnost: '+maxFog+'% ob '+t.getHours()+':00';}
+    else if(note){note.textContent='Megla v naslednjih 24 urah malo verjetna';}
+  }catch(e){console.warn('Fog:',e);}
+}
+
+// ── Hourly temperature profile ────────────────────────────
+function drawHourlyProfile(observations){
+  const svg=document.getElementById('hourly-svg');if(!svg||!observations.length)return;
+  const byHour=Array.from({length:24},()=>[]);
+  observations.forEach(o=>{
+    const h=new Date(o.obsTimeLocal.replace(' ','T')).getHours();
+    const t=o.metric?.tempAvg??o.metric?.temp;
+    if(t!=null)byHour[h].push(t);
+  });
+  const avgs=byHour.map((ts,h)=>({h,avg:ts.length?ts.reduce((a,b)=>a+b,0)/ts.length:null}));
+  const validAvgs=avgs.filter(a=>a.avg!=null);if(validAvgs.length<6){return;}
+  // Interpolate missing hours
+  const filled=avgs.map((a,i)=>{
+    if(a.avg!=null)return a;
+    const prev=avgs.slice(0,i).reverse().find(x=>x.avg!=null);
+    const next=avgs.slice(i+1).find(x=>x.avg!=null);
+    if(prev&&next){const w=(i-prev.h)/(next.h-prev.h);return{h:i,avg:prev.avg*(1-w)+next.avg*w};}
+    return{h:i,avg:prev?.avg??next?.avg??15};
+  });
+  svg.innerHTML='';
+  const VW=880,VH=160,pad={t:20,r:20,b:30,l:40};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const temps=filled.map(a=>a.avg);
+  const mn=Math.min(...temps)-1,mx=Math.max(...temps)+1;
+  const xS=h=>pad.l+h/23*cw,yS=v=>pad.t+(1-(v-mn)/(mx-mn))*ch;
+  const mk=(tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;svg.appendChild(e);return e;};
+  // Grid
+  for(let i=0;i<=4;i++){const y=pad.t+i/4*ch,v=mx-(i/4*(mx-mn));mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},v.toFixed(0)+'°');}
+  [0,3,6,9,12,15,18,21].forEach(h=>mk('text',{x:xS(h),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},(h<10?'0':'')+h+':00'));
+  const defs=mk('defs',{});
+  defs.innerHTML='<linearGradient id="hpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.tempLine+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+CC.tempLine+'" stop-opacity="0"/></linearGradient>';
+  const pts=filled.map(a=>({x:xS(a.h),y:yS(a.avg)}));
+  const lp=smoothPath(pts);
+  mk('path',{d:lp+' L '+xS(23)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z',fill:'url(#hpg)'});
+  mk('path',{d:lp,fill:'none',stroke:CC.tempLine,'stroke-width':'2.5','stroke-linecap':'round'});
+  // Highlight max and min
+  const maxA=filled.reduce((m,a)=>a.avg>m.avg?a:m);
+  const minA=filled.reduce((m,a)=>a.avg<m.avg?a:m);
+  mk('circle',{cx:xS(maxA.h),cy:yS(maxA.avg),r:'5',fill:'#f87171',stroke:'white','stroke-width':'2'});
+  mk('circle',{cx:xS(minA.h),cy:yS(minA.avg),r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2'});
+  mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'IBM Plex Mono,monospace'},maxA.avg.toFixed(1)+'°');
+  mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'IBM Plex Mono,monospace'},minA.avg.toFixed(1)+'°');
+  const peaks=document.getElementById('hourly-peaks');
+  if(peaks)peaks.innerHTML='<div class="hourly-peak-item">🔴 Najtopleje ob <b>'+(maxA.h<10?'0':'')+maxA.h+':00 ('+maxA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">🔵 Najhladneje ob <b>'+(minA.h<10?'0':'')+minA.h+':00 ('+minA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">Amplituda: <b>'+(maxA.avg-minA.avg).toFixed(1)+'°C</b></div>';
+}
+
+// ── Phenological calendar ─────────────────────────────────
+const PHENO=[
+  {gdd:20, icon:'🌳',name:'Leska zacveti'},
+  {gdd:50, icon:'🌼',name:'Regrat cveti'},
+  {gdd:100,icon:'🌸',name:'Marelice cvetijo'},
+  {gdd:130,icon:'🍒',name:'Češnje cvetijo'},
+  {gdd:160,icon:'🍎',name:'Jablane cvetijo'},
+  {gdd:210,icon:'🌿',name:'Hrast ozeleni'},
+  {gdd:300,icon:'🐦',name:'Lastovke prispejo'},
+  {gdd:380,icon:'🌺',name:'Bezeg cveti'},
+  {gdd:520,icon:'🌾',name:'Pšenica klasi'},
+  {gdd:820,icon:'🚜',name:'Žetev pšenice'},
+];
+function applyPheno(){
+  const y=new Date().getFullYear();
+  set('pheno-year',y);
+  try{
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    // Get all entries for current year sorted by date
+    const entries=Object.entries(stored)
+      .filter(([k])=>k.startsWith(y+'-'))
+      .sort(([a],[b])=>a.localeCompare(b));
+    if(entries.length<5){const pl=document.getElementById('pheno-list-left');if(pl)pl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za fenološki izračun…</div>';return;}
+    // Accumulate GDD from Jan 1
+    let totalGdd=0;
+    const gddByDate={};
+    entries.forEach(([date,v])=>{
+      const tmax=v.tempHigh??v.tempAvg??0,tmin=v.tempLow??v.tempAvg??0;
+      const daily=Math.max(0,(tmax+tmin)/2-10);
+      totalGdd+=daily;
+      gddByDate[date]=totalGdd;
+    });
+    set('pheno-gdd-total',Math.round(totalGdd));
+    // Daily GDD rate (for estimating future dates)
+    const rate=entries.length>0?totalGdd/entries.length:2;
+    const today=new Date();
+    const fmtD=d=>d.toLocaleDateString('sl',{day:'numeric',month:'short'});
+    const half=Math.ceil(PHENO.length/2);
+    const renderList=(items,elId)=>{
+      const el=document.getElementById(elId);if(!el)return;el.innerHTML='';
+      items.forEach(p=>{
+        const done=totalGdd>=p.gdd;
+        // Find exact date when GDD was reached
+        let dateStr='';
+        if(done){
+          const entry=Object.entries(gddByDate).find(([,g])=>g>=p.gdd);
+          if(entry)dateStr=fmtD(new Date(entry[0]+'T12:00:00'));
+        }else{
+          const daysNeeded=(p.gdd-totalGdd)/rate;
+          const est=new Date(today.getTime()+daysNeeded*864e5);
+          dateStr='~'+fmtD(est);
+        }
+        const row=document.createElement('div');
+        row.className='pheno-row '+(done?'pheno-done':p.gdd-totalGdd<50?'pheno-soon':'pheno-future');
+        row.innerHTML=
+          '<div class="pheno-icon">'+p.icon+'</div>'+
+          '<div class="pheno-name">'+(done?'<del style="opacity:.5">':'')+'<span>'+p.name+'</span>'+(done?'</del>':'')+'</div>'+
+          '<div class="pheno-gdd">'+p.gdd+' GDD</div>'+
+          '<div class="pheno-date" style="color:'+(done?'var(--green)':p.gdd-totalGdd<50?'var(--amber)':'var(--muted)')+'">'+
+            (done?'✓ ':'')+'<span>'+dateStr+'</span></div>';
+        el.appendChild(row);
+      });
+    };
+    renderList(PHENO.slice(0,half),'pheno-list-left');
+    renderList(PHENO.slice(half),'pheno-list-right');
+    const next=PHENO.find(p=>totalGdd<p.gdd);
+    const note=document.getElementById('pheno-note');
+    if(note&&next){const left=next.gdd-totalGdd,daysEst=Math.round(left/rate);note.textContent='Naslednji: '+next.icon+' '+next.name+' (še '+Math.round(left)+' GDD, ocena: ~'+daysEst+' dni)';}
+  }catch(e){console.warn('Pheno:',e);}
+}
+
+// ── Water balance ─────────────────────────────────────────
+async function fetchWaterBalance(){
+  try{
+    const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+    const pad=n=>String(n).padStart(2,'0');
+    const pfx=y+'-'+pad(m);
+    const sd=y+'-'+pad(m)+'-01',ed=y+'-'+pad(m)+'-'+pad(now.getDate());
+    // Fetch ET₀ from archive
+    const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+sd+'&end_date='+ed+'&daily=et0_fao_evapotranspiration,precipitation_sum&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);const data=await res.json();
+    const et0List=data.daily?.et0_fao_evapotranspiration??[];
+    const omRain=data.daily?.precipitation_sum??[];
+    // Get local station rain from localStorage
+    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+    const stationEntries=Object.entries(stored).filter(([k])=>k.startsWith(pfx));
+    const dates=data.daily?.time??[];
+    // Build daily balance
+    const balDays=dates.map((date,i)=>{
+      const stEntry=stationEntries.find(([k])=>k===date);
+      const rain=stEntry?stEntry[1].precipTotal:omRain[i]??0;
+      const et=et0List[i]??0;
+      return{date,rain:rain??0,et0:et,bal:(rain??0)-et};
+    }).filter(d=>d.date<=ed);
+    const totRain=balDays.reduce((s,d)=>s+d.rain,0);
+    const totEt=balDays.reduce((s,d)=>s+d.et0,0);
+    const totBal=totRain-totEt;
+    const monthName=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
+    set('wbal-month',monthName);
+    set('wbal-rain',totRain.toFixed(1)+' mm');
+    set('wbal-et0',totEt.toFixed(1)+' mm');
+    const balEl=document.getElementById('wbal-bal');
+    if(balEl){balEl.textContent=(totBal>=0?'+':'')+totBal.toFixed(1)+' mm';balEl.style.color=totBal>=0?'var(--blue)':'var(--amber)';}
+    const statusEl=document.getElementById('wbal-status');
+    if(statusEl){statusEl.textContent=totBal>20?'💧 Presežek — mokro':totBal>0?'🌱 Uravnoteženo':totBal>-20?'🌤 Rahel primanjkljaj':'☀️ Suho — priporočeno zalivanje';statusEl.style.color=totBal>0?'var(--blue)':'var(--amber)';}
+    // Bar chart
+    const maxAbs=Math.max(...balDays.map(d=>Math.abs(d.bal)),1);
+    const barsEl=document.getElementById('wbal-bars');
+    const labsEl=document.getElementById('wbal-labels');
+    if(barsEl){
+      barsEl.innerHTML='';
+      balDays.forEach(d=>{
+        const pct=Math.min(48,(Math.abs(d.bal)/maxAbs)*48);
+        const pos=d.bal>=0;
+        const wrap=document.createElement('div');
+        wrap.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:'+(pos?'flex-end':'flex-start')+';height:100%';
+        const bar=document.createElement('div');
+        bar.style.cssText='width:100%;height:'+pct+'px;background:'+(pos?'rgba(96,165,250,.7)':'rgba(251,191,36,.6)')+';border-radius:'+(pos?'3px 3px 0 0':'0 0 3px 3px')+';min-height:1px';
+        wrap.appendChild(bar);barsEl.appendChild(wrap);
+      });
+    }
+    if(labsEl){
+      labsEl.innerHTML='';
+      const step=Math.max(1,Math.floor(balDays.length/6));
+      balDays.forEach((d,i)=>{const s=document.createElement('span');s.textContent=i%step===0?new Date(d.date+'T12:00:00').getDate()+'.':'';labsEl.appendChild(s);});
+    }
+  }catch(e){console.warn('WaterBalance:',e);}
+}
+
 function tickClock(){set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
 
@@ -2201,7 +2588,8 @@ async function init(){
   applyYearRecords();
   initNotifBtn();
   connectLightning();
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
+  applyPheno();
 }
 init();
 setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
