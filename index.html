@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="sl" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,10 +139,6 @@ header{text-align:center;padding:2.5rem 0 2rem}
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
 h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
-.title-row{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
-.title-logo{width:78px;height:78px;border-radius:22px;padding:7px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-.title-logo:hover{transform:translateY(-2px) scale(1.02);box-shadow:var(--card-shadow-h);border-color:var(--card-border-h)}
-.title-logo svg{width:100%;height:100%;display:block}
 .sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
 .status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);flex-wrap:wrap}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
@@ -253,6 +248,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .fc-day.today{background:var(--fc-today-bg);border-color:var(--fc-today-border)}
 .fc-name{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .fc-day.today .fc-name{color:var(--blue)}
+.fc-icon{font-size:2.2rem;line-height:1.1;display:block}
 .fc-icon{width:54px;height:54px}
 .fc-desc{font-size:.62rem;color:var(--muted);text-transform:capitalize;line-height:1.3;min-height:2rem;display:flex;align-items:center;justify-content:center}
 .fc-temps{display:flex;align-items:baseline;gap:.4rem;margin-top:.1rem}
@@ -600,8 +596,6 @@ footer a{color:var(--blue);text-decoration:none}
   .chart-svg{min-width:520px;width:520px}
 }
 @media(max-width:520px){
-  .title-row{gap:.7rem}
-  .title-logo{width:62px;height:62px;border-radius:18px;padding:5px}
   .g2{grid-template-columns:1fr}
   .temp-huge{font-size:clamp(3.8rem,16vw,5.5rem)}
   .hero-icon svg{width:80px;height:80px}
@@ -618,73 +612,6 @@ footer a{color:var(--blue);text-decoration:none}
   .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
   .g4{grid-template-columns:1fr 1fr}
 }
-
-
-/* ── UX additions: quick brief, risks, hourly cards, modals ── */
-.ux-fresh-pill{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--border);border-radius:999px;padding:3px 10px;background:var(--card-bg);font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--muted)}
-.ux-fresh-pill.fresh-ok{color:var(--green);border-color:rgba(5,150,105,.25);background:rgba(5,150,105,.08)}
-.ux-fresh-pill.fresh-warn{color:var(--amber);border-color:rgba(217,119,6,.28);background:rgba(217,119,6,.08)}
-.ux-fresh-pill.fresh-stale{color:var(--red);border-color:rgba(220,38,38,.28);background:rgba(220,38,38,.08)}
-.mobile-live-strip{display:none;position:fixed;top:0;left:0;right:0;z-index:160;padding:.42rem 4.1rem .42rem .75rem;background:var(--card-bg);border-bottom:1px solid var(--card-border);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);box-shadow:0 3px 18px rgba(0,0,0,.1);font-size:.74rem;color:var(--text);align-items:center;gap:.55rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mobile-live-strip .mls-temp{font-family:'IBM Plex Mono',monospace;font-size:.92rem;color:var(--blue)}
-.mobile-live-strip .mls-muted{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
-.ux-brief-card{margin-bottom:1rem;padding:1.25rem 1.35rem;overflow:hidden;position:relative}
-.ux-brief-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.07),rgba(124,58,237,.035),transparent 65%);pointer-events:none}
-.ux-brief-top{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:start;margin-bottom:1rem}
-.ux-kicker{font-size:.62rem;color:var(--blue);text-transform:uppercase;letter-spacing:.13em;font-weight:600;margin-bottom:.35rem}
-.ux-summary-main{font-size:1.03rem;line-height:1.55;font-weight:500;color:var(--text)}
-.ux-summary-sub{font-size:.73rem;line-height:1.65;color:var(--muted);margin-top:.35rem}
-.ux-brief-actions{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;position:relative}
-.ux-action{border:1px solid var(--border);background:var(--fc-bg);border-radius:999px;color:var(--muted);padding:.38rem .75rem;font-size:.68rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .18s,color .18s,background .18s;line-height:1.25}
-.ux-action:hover{border-color:var(--blue);color:var(--blue);background:var(--badge-bg)}
-.ux-grid{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:.9rem;margin-bottom:.9rem}
-.ux-panel{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:15px;padding:.85rem .95rem;min-width:0}
-.ux-panel-title{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.55rem;font-weight:600}
-.ux-risk-list{display:flex;gap:.4rem;flex-wrap:wrap}
-.ux-risk{display:inline-flex;align-items:center;gap:.33rem;border:1px solid var(--border);border-radius:999px;padding:.34rem .64rem;font-size:.69rem;background:var(--card-bg);line-height:1.25}
-.ux-risk.good{color:var(--green);border-color:rgba(5,150,105,.22);background:rgba(5,150,105,.07)}
-.ux-risk.watch{color:var(--amber);border-color:rgba(217,119,6,.25);background:rgba(217,119,6,.08)}
-.ux-risk.alert{color:var(--red);border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.08)}
-.ux-rec-list,.ux-activity-list{display:flex;gap:.38rem;flex-wrap:wrap}
-.ux-rec,.ux-activity{display:inline-flex;align-items:center;gap:.32rem;background:var(--card-bg);border:1px solid var(--border);border-radius:999px;padding:.34rem .65rem;font-size:.69rem;color:var(--text);line-height:1.25}
-.ux-rec.no,.ux-activity.bad{opacity:.72;color:var(--muted)}
-.ux-rec.yes,.ux-activity.good{border-color:rgba(5,150,105,.23);color:var(--green)}
-.ux-rec.warn,.ux-activity.warn{border-color:rgba(217,119,6,.25);color:var(--amber)}
-.ux-fact{position:relative;display:flex;align-items:flex-start;gap:.55rem;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.18);border-radius:14px;padding:.8rem .9rem;font-size:.74rem;line-height:1.6;color:var(--text)}
-.ux-fact strong{color:var(--purple);font-weight:600}
-.ux-location-note{position:relative;margin-top:.75rem;font-size:.7rem;color:var(--muted);line-height:1.6;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
-.ux-hour-card{margin-bottom:1rem}
-.ux-hour-strip{display:flex;gap:.45rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:.15rem 0 .35rem}
-.ux-hour-strip::-webkit-scrollbar{display:none}
-.ux-hour{flex:0 0 72px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.62rem .42rem;text-align:center;display:flex;flex-direction:column;gap:.18rem;align-items:center}
-.ux-hour.now{border-color:var(--blue);background:var(--fc-today-bg)}
-.ux-hour-time{font-size:.6rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
-.ux-hour-emoji{font-size:1.35rem;line-height:1.2}
-.ux-hour-temp{font-family:'IBM Plex Mono',monospace;font-size:.88rem;color:var(--text)}
-.ux-hour-rain{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--rain-col);min-height:.85em}
-.ux-hour-wind{font-size:.58rem;color:var(--muted)}
-.ux-hour-note{font-size:.68rem;color:var(--muted);line-height:1.6;margin-top:.35rem}
-.wx-help{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--border);font-size:.58rem;color:var(--muted);cursor:help;margin-left:.35rem;background:var(--fc-bg);vertical-align:middle;font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0}
-.wx-help:hover{color:var(--blue);border-color:var(--blue)}
-.ux-station-card{margin-bottom:1rem}
-.ux-station-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.5rem}
-.ux-station-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.75rem .9rem}
-.ux-station-l{font-size:.58rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem}
-.ux-station-v{font-size:.78rem;color:var(--text);line-height:1.55}
-.ux-modal{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem}
-.ux-modal.open{display:flex}
-.ux-modal-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.35);width:min(620px,96vw);max-height:86vh;overflow-y:auto;backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%)}
-.ux-modal-h{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);gap:1rem}
-.ux-modal-h strong{font-size:.95rem}
-.ux-modal-x{border:0;background:none;color:var(--muted);font-size:1.25rem;cursor:pointer;line-height:1}
-.ux-modal-b{padding:1.15rem 1.25rem;font-size:.78rem;line-height:1.75;color:var(--text)}
-.ux-notif-row{display:grid;grid-template-columns:auto 1fr auto;gap:.65rem;align-items:center;padding:.65rem .75rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;margin-bottom:.5rem}
-.ux-notif-row input[type="number"]{width:68px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--text);padding:.35rem .4rem;font-family:'IBM Plex Mono',monospace}
-.ux-notif-title{font-weight:600;font-size:.76rem}.ux-notif-desc{font-size:.66rem;color:var(--muted);line-height:1.45;margin-top:.1rem}
-.ux-err{border-color:rgba(220,38,38,.28)!important;background:rgba(220,38,38,.07)!important;color:var(--red)!important}
-@media(max-width:760px){.mobile-live-strip{display:flex}.wrap{padding-top:3rem}.ux-brief-top,.ux-grid{grid-template-columns:1fr}.ux-brief-actions{justify-content:flex-start}.theme-btn{top:.42rem}.ux-hour{flex-basis:68px}}
-@media(max-width:420px){.ux-panel{padding:.75rem}.ux-summary-main{font-size:.94rem}.ux-action{padding:.34rem .58rem}.ux-station-grid{grid-template-columns:1fr}}
-
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -693,59 +620,21 @@ footer a{color:var(--blue);text-decoration:none}
 <div id="bg" class="no-photo"><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
 <div id="chart-tip"></div>
 <button class="theme-btn" id="theme-btn" title="Preklopi temo">🌙</button>
-<div id="mobile-live-strip" class="mobile-live-strip" aria-live="polite"><span class="mls-temp" id="mls-temp">—°C</span><span id="mls-cond" class="mls-muted">Nalaganje vremena…</span><span id="mls-fresh" class="mls-muted">—</span></div>
 
 <div class="wrap">
   <header>
     <div class="stn-badge"><span></span> IREICA1 · Osebna meteorološka postaja</div>
-    <div class="title-row">
-      <div class="title-logo" aria-hidden="true">
-        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo vremenske postaje">
-          <defs>
-            <linearGradient id="logoBg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#60a5fa"/>
-              <stop offset="55%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#a78bfa"/>
-            </linearGradient>
-            <linearGradient id="logoHill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#22c55e"/>
-              <stop offset="100%" stop-color="#15803d"/>
-            </linearGradient>
-            <linearGradient id="logoDrop" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#dbeafe"/>
-              <stop offset="100%" stop-color="#60a5fa"/>
-            </linearGradient>
-          </defs>
-          <circle cx="36" cy="36" r="33" fill="url(#logoBg)"/>
-          <circle cx="26" cy="23" r="9" fill="#fde68a" opacity=".98"/>
-          <g fill="#ffffff" opacity=".96">
-            <circle cx="39" cy="28" r="8"/>
-            <circle cx="47" cy="29" r="6.5"/>
-            <circle cx="32" cy="31" r="6"/>
-            <rect x="31" y="29" width="22" height="8" rx="4"/>
-          </g>
-          <path d="M13 49 C19 43, 27 41, 35 44 S52 49, 59 44 L59 58 L13 58 Z" fill="url(#logoHill)" opacity=".96"/>
-          <path d="M48 40 C48 37, 51 35, 53 33 C55 35, 58 37, 58 40 C58 43, 55.8 45.2, 53 45.2 C50.2 45.2, 48 43, 48 40 Z" fill="url(#logoDrop)"/>
-          <g stroke="rgba(255,255,255,.8)" stroke-width="2.2" stroke-linecap="round" fill="none">
-            <path d="M55.5 17c4 2 6.3 6 6.3 10.6"/>
-            <path d="M58.7 12.5c6 3 9.6 9 9.6 15.7" opacity=".72"/>
-          </g>
-          <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.1"/>
-        </svg>
-      </div>
-      <h1>Rečica ob <em>Savinji</em></h1>
-    </div>
+    <h1>Rečica ob <em>Savinji</em></h1>
     <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n.v.</p>
   </header>
 
   <div class="status">
     <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje…</span></span>
     <span>Posodobljeno <span id="updated">—</span></span>
-    <span id="freshness-pill" class="ux-fresh-pill fresh-warn">● čakam na podatke</span>
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
     <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
-    <button class="notif-btn" id="notif-btn" onclick="openNotificationSettings()" title="Prilagodljiva obvestila">🔔 Obvestila</button>
+    <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -764,45 +653,6 @@ footer a{color:var(--blue);text-decoration:none}
 
   <!-- ══ TAB: AKTUALNO ══ -->
   <div id="tab-current" class="tab-pane active">
-
-  <section class="card ux-brief-card" id="ux-brief-card" aria-live="polite">
-    <div class="ux-brief-top">
-      <div>
-        <div class="ux-kicker">Kaj to pomeni zame?</div>
-        <div class="ux-summary-main" id="ux-summary-main">Čakam na podatke postaje IREICA1…</div>
-        <div class="ux-summary-sub" id="ux-summary-sub">Ko pridejo meritve, se tukaj prikaže kratek povzetek v navadnem jeziku.</div>
-      </div>
-      <div class="ux-brief-actions">
-        <button class="ux-action" onclick="shareCurrentWeatherImage()">🖼 Deli sliko</button>
-        <button class="ux-action" onclick="downloadCurrentCsv()">⬇ CSV</button>
-        <button class="ux-action" onclick="copyChartLink('temp-svg')">🔗 Graf</button>
-        <button class="ux-action" onclick="openAboutStation()">ℹ️ O postaji</button>
-      </div>
-    </div>
-    <div class="ux-grid">
-      <div class="ux-panel">
-        <div class="ux-panel-title">Opozorilne značke</div>
-        <div class="ux-risk-list" id="ux-risk-badges"><span class="ux-risk watch">⏳ Nalaganje…</span></div>
-      </div>
-      <div class="ux-panel">
-        <div class="ux-panel-title">Vzemi s sabo</div>
-        <div class="ux-rec-list" id="ux-recs"><span class="ux-rec no">—</span></div>
-      </div>
-    </div>
-    <div class="ux-grid" style="margin-bottom:.75rem">
-      <div class="ux-panel">
-        <div class="ux-panel-title">Za dejavnosti</div>
-        <div class="ux-activity-list" id="ux-activity-helper"><span class="ux-activity no">—</span></div>
-      </div>
-      <div class="ux-panel">
-        <div class="ux-panel-title">Moja lokacija vs. postaja</div>
-        <div id="ux-location-compare" style="font-size:.72rem;line-height:1.65;color:var(--muted)">Meritve veljajo za Rečico ob Savinji, 366 m n. v. V višjih legah je lahko hladneje, vetrovneje ali manj megleno.</div>
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem"><button class="ux-action" onclick="compareMyLocation()">📍 Primerjaj z mojo lokacijo</button><button class="ux-action" onclick="switchTab('surroundings')">🌍 Okolica</button></div>
-      </div>
-    </div>
-    <div class="ux-fact" id="ux-fact"><span>✨</span><div><strong>Zanimivost dneva:</strong> Ko bo na voljo dovolj podatkov, se tukaj prikaže primerjava z včeraj, rekordom ali zgodovino postaje.</div></div>
-  </section>
-
   <div class="hero card">
     <div>
       <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
@@ -818,16 +668,6 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="hs"><span class="hs-val" id="hs-uv">—</span><span class="hs-lbl">UV indeks</span></div>
     </div>
   </div>
-
-  <div class="card ux-hour-card" id="ux-hour-card">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🕒 Danes po urah</span>
-      <span class="chart-range" id="ux-hour-sub">naslednjih 24 ur</span>
-    </div>
-    <div class="ux-hour-strip" id="ux-hourly-strip"><div class="fc-loading">Nalaganje urne napovedi…</div></div>
-    <div class="ux-hour-note" id="ux-hour-note">Prikaz združuje lokalno postajo in kratkoročno napoved za Rečico ob Savinji.</div>
-  </div>
-
 
   <!-- Day summary -->
   <div class="day-summary">
@@ -878,7 +718,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="pressure-body">
         <div class="pressure-left">
           <div class="cval" id="pressure-val">—<span class="unit">hPa</span></div>
-          <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— stabilno</div>
+          <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— steady</div>
           <div id="p-rate" class="p-rate"></div>
           <div class="csub" id="pressure-label">—</div>
         </div>
@@ -888,8 +728,8 @@ footer a{color:var(--blue);text-decoration:none}
             <path class="p-arc-track" d="M 13 62 A 52 52 0 0 1 117 62" fill="none" stroke-width="5" stroke-linecap="round"/>
             <path d="M 13 62 A 52 52 0 0 1 117 62" fill="none" stroke="url(#pg)" stroke-width="5" stroke-linecap="round" opacity=".4"/>
             <circle id="p-dot" cx="65" cy="10" r="5" fill="var(--blue)" style="filter:drop-shadow(0 2px 4px rgba(37,99,235,.5))"/>
-            <text class="p-arc-lbl" x="13"  y="70" font-size="8">Nizko</text>
-            <text class="p-arc-lbl" x="117" y="70" font-size="8" text-anchor="end">Visoko</text>
+            <text class="p-arc-lbl" x="13"  y="70" font-size="8">Low</text>
+            <text class="p-arc-lbl" x="117" y="70" font-size="8" text-anchor="end">High</text>
           </svg>
         </div>
       </div>
@@ -932,7 +772,7 @@ footer a{color:var(--blue);text-decoration:none}
         </div>
         <div class="bio-item" id="bio-chill-box">
           <div class="bio-val" id="bio-chill">—</div>
-          <div class="bio-lbl">Občutek mraza</div>
+          <div class="bio-lbl">Wind Chill</div>
           <div class="bio-cat" id="bio-chill-cat">—</div>
           <div class="bio-tip" id="bio-chill-tip"></div>
         </div>
@@ -1224,23 +1064,10 @@ footer a{color:var(--blue);text-decoration:none}
         <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
         <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
         <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
-        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Preverjanje kakovosti</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
+        <div><div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
       </div>
     </div>
   </div>
-
-
-
-  <div class="card ux-station-card">
-    <div class="chart-hdr"><span class="clabel" style="margin:0">ℹ️ O postaji in zaupanju v podatke</span><span class="chart-range">IREICA1 · lokalne meritve</span></div>
-    <div class="ux-station-grid">
-      <div class="ux-station-item"><div class="ux-station-l">Lokacija</div><div class="ux-station-v">Rečica ob Savinji · 46.326°N, 14.921°E · 366 m n. v.</div></div>
-      <div class="ux-station-item"><div class="ux-station-l">Osveževanje</div><div class="ux-station-v">Trenutne meritve se preverijo približno vsakih 5 minut. Svežina je prikazana nad zavihki.</div></div>
-      <div class="ux-station-item"><div class="ux-station-l">Viri</div><div class="ux-station-v">Osebna postaja IREICA1, Weather Underground, Open-Meteo in izračunani lokalni indeksi.</div></div>
-      <div class="ux-station-item"><div class="ux-station-l">Uporaba</div><div class="ux-station-v">Podatki so najprimernejši za lokalno orientacijo. V hribih in stranskih dolinah so razmere lahko drugačne.</div></div>
-    </div>
-  </div>
-
 
   </div><!-- /tab-current -->
 
@@ -1600,38 +1427,8 @@ footer a{color:var(--blue);text-decoration:none}
   <footer>Meteorološka postaja IREICA1 · Rečica ob Savinji, Slovenija<br>Podatki: <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground</a> &nbsp;·&nbsp; Samodejno posodablja vsakih 5 minut</footer>
 </div>
 
-
-
-<div id="about-station-modal" class="ux-modal" role="dialog" aria-modal="true" aria-labelledby="about-station-title">
-  <div class="ux-modal-card">
-    <div class="ux-modal-h"><strong id="about-station-title">ℹ️ O postaji IREICA1</strong><button class="ux-modal-x" onclick="closeAboutStation()">×</button></div>
-    <div class="ux-modal-b">
-      <p><strong>IREICA1</strong> je osebna meteorološka postaja za Rečico ob Savinji v Savinjski dolini. Stran združuje lokalne meritve, vremenske napovedi, zgodovino, primerjavo okolice in izračunane indekse.</p>
-      <p style="margin-top:.75rem">Meritve veljajo za lokacijo postaje pri približno <strong>366 m n. v.</strong>. V višjih legah, ob Savinji, v senčnih predelih ali na vetrovnih grebenih se lahko temperatura, megla in veter razlikujejo.</p>
-      <p style="margin-top:.75rem">Oznaka svežine pove, ali so podatki aktualni. Če je prikazana rumena ali rdeča oznaka, uporabi podatke kot zadnjo znano orientacijo.</p>
-    </div>
-  </div>
-</div>
-
-<div id="notif-settings-modal" class="ux-modal" role="dialog" aria-modal="true" aria-labelledby="notif-settings-title">
-  <div class="ux-modal-card">
-    <div class="ux-modal-h"><strong id="notif-settings-title">🔔 Prilagodljiva obvestila</strong><button class="ux-modal-x" onclick="closeNotificationSettings()">×</button></div>
-    <div class="ux-modal-b">
-      <div style="color:var(--muted);font-size:.72rem;margin-bottom:.9rem">Izberi, za katere razmere želiš lokalna opozorila v brskalniku. Nastavitve se shranijo samo v tvojem brskalniku.</div>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-frost"><div><div class="ux-notif-title">❄️ Zmrzal / poledica</div><div class="ux-notif-desc">Ko temperatura pade pod izbrani prag.</div></div><input type="number" id="ns-frost-t" value="0" step="1" title="°C"></label>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-wind"><div><div class="ux-notif-title">💨 Močan veter</div><div class="ux-notif-desc">Ko sunki ali povprečni veter presežejo prag.</div></div><input type="number" id="ns-wind-t" value="50" step="5" title="km/h"></label>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-rain"><div><div class="ux-notif-title">🌧 Dež / naliv</div><div class="ux-notif-desc">Ko začne deževati ali je intenziteta visoka.</div></div><input type="number" id="ns-rain-t" value="1" step="0.5" title="mm/h"></label>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-fog"><div><div class="ux-notif-title">🌫 Megla</div><div class="ux-notif-desc">Ko je verjetnost megle visoka.</div></div><input type="number" id="ns-fog-t" value="70" step="5" title="%"></label>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-uv"><div><div class="ux-notif-title">☀️ Visok UV</div><div class="ux-notif-desc">Ko UV indeks doseže ali preseže prag.</div></div><input type="number" id="ns-uv-t" value="6" step="1" title="UV"></label>
-      <label class="ux-notif-row"><input type="checkbox" id="ns-lightning"><div><div class="ux-notif-title">⚡ Strele v bližini</div><div class="ux-notif-desc">Ko so zaznane strele v okolici.</div></div><input type="number" id="ns-lightning-t" value="30" step="5" title="km"></label>
-      <div style="display:flex;gap:.55rem;justify-content:flex-end;flex-wrap:wrap;margin-top:1rem"><button class="ux-action" onclick="disableNotificationSettings()">Izklopi</button><button class="ux-action" onclick="saveNotificationSettings()">Shrani in vklopi</button></div>
-    </div>
-  </div>
-</div>
-
 <script>
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
-const OWM_KEY = "836d3b9becedea0f18d254afa7aa7c26";
 const LAT = 46.325779, LON = 14.921137;
 
 // ── Theme ─────────────────────────────────────────────────
@@ -1713,7 +1510,7 @@ function feelsStyle(t){
     return         {label:'Vroče',        c:'#dc2626',bg:'rgba(220,38,38,.08)', b:'rgba(220,38,38,.2)'};
   }
 }
-function beaufort(kmh){const s=[[1,'0','Tišina'],[5,'1','Tih zrak'],[11,'2','Lahek vetrič'],[19,'3','Blagi vetrič'],[28,'4','Zmerni vetrič'],[38,'5','Svež veter'],[49,'6','Močan veter'],[61,'7','Skoraj vihar'],[74,'8','Vihar'],[88,'9','Močan vihar'],[102,'10','Nevihta'],[117,'11','Silovit vihar'],[999,'12','Orkan']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Orkan'};}
+function beaufort(kmh){const s=[[1,'0','Tišina'],[5,'1','Tih zrak'],[11,'2','Lahek vetrič'],[19,'3','Blagi vetrič'],[28,'4','Zmerni vetrič'],[38,'5','Svež veter'],[49,'6','Močan veter'],[61,'7','Skoraj vihar'],[74,'8','Vihar'],[88,'9','Močan vihar'],[102,'10','Nevihta'],[117,'11','Silovit vihar'],[999,'12','Orkan']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Hurricane'};}
 function countUp(id,target,dec,unitHTML,dur){
   const el=document.getElementById(id);if(!el||isNaN(Number(target)))return;
   const uHTML=unitHTML||'',t0=performance.now();
@@ -1802,7 +1599,7 @@ function drawTempChart(data){
   mkSVG(svg,'path',{d:lp+' L '+xS(data.length-1)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z',fill:'url(#tg)'});
   mkSVG(svg,'path',{d:lp,fill:'none',stroke:CC.tempLine,'stroke-width':'2.5',filter:'url(#lg)','stroke-linecap':'round'});
   const now=new Date(),f0=data[0].time,fl=data[data.length-1].time,nt=(now-f0)/(fl-f0);
-  if(nt>=0&&nt<=1){const nx=pad.l+nt*cw;mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,3'});const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'IBM Plex Mono,monospace'});nl.textContent='zdaj';}
+  if(nt>=0&&nt<=1){const nx=pad.l+nt*cw;mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,3'});const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'IBM Plex Mono,monospace'});nl.textContent='now';}
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'5',fill:CC.tipDot,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
@@ -1827,7 +1624,7 @@ function drawRainChart(data){
   const tip=document.getElementById('chart-tip');
   svg.addEventListener('mousemove',e=>{if(!_rainData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+'">'+d.rain.toFixed(2)+' mm</span>  ·  '+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
   svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
-  set('rain-range','Skupaj: '+total.toFixed(1)+' mm');
+  set('rain-range','Total: '+total.toFixed(1)+' mm');
 }
 
 // ── Alerts ────────────────────────────────────────────────
@@ -1872,7 +1669,6 @@ function applyPressureTrend(observations){
 
 // ── Apply observation ─────────────────────────────────────
 function applyObs(obs){
-  wxClearDataError();
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
@@ -1911,7 +1707,6 @@ function applyObs(obs){
   updatePhotoBackground(obs);
   applyPhotographyWidget(obs);
   setFavicon(cond.icon);
-  wxApplyUX(obs);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
 
@@ -1950,7 +1745,6 @@ function applyHourly(observations){
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   drawHourlyProfile(observations);
-  wxApplyHourlyUX(observations);
   _hourlyObs=observations;
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
@@ -1958,23 +1752,37 @@ function applyHourly(observations){
 }
 
 // ── Forecast ──────────────────────────────────────────────
+// ── 5-day forecast — Open-Meteo (brez API ključa) ────────
 async function fetchForecast(){
   try{
-    const res=await fetch('https://api.openweathermap.org/data/2.5/forecast?lat='+LAT+'&lon='+LON+'&appid='+OWM_KEY+'&units=metric&lang=sl&cnt=40');
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();applyForecast(data.list);
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+      +'&timezone=Europe%2FLjubljana&forecast_days=7';
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();applyForecast(data.daily);
   }catch(e){const g=document.getElementById('forecast-grid');if(g)g.innerHTML='<div class="fc-loading">Napoved ni na voljo</div>';console.warn('Forecast:',e);}
 }
-function applyForecast(list){
-  const today=new Date().toDateString(),days={};
-  list.forEach(item=>{const date=new Date(item.dt*1000),key=date.toDateString();if(!days[key])days[key]={date,highs:[],lows:[],icons:[],descs:[],pops:[],isToday:key===today};days[key].highs.push(item.main.temp_max);days[key].lows.push(item.main.temp_min);days[key].icons.push(item.weather[0].icon);days[key].descs.push(item.weather[0].description);days[key].pops.push(item.pop||0);});
-  const grid=document.getElementById('forecast-grid');if(!grid)return;grid.innerHTML='';
-  Object.values(days).slice(0,5).forEach(day=>{
-    const high=Math.round(Math.max(...day.highs)),low=Math.round(Math.min(...day.lows)),pop=Math.max(...day.pops);
-    const midIcon=(day.icons.find(ic=>ic.endsWith('d'))||day.icons[0]).slice(0,-1)+'d';
-    const desc=day.descs[Math.floor(day.descs.length/2)],name=day.isToday?'Danes':day.date.toLocaleDateString('sl',{weekday:'short'});
-    const cell=document.createElement('div');cell.className='fc-day'+(day.isToday?' today':'');
-    cell.innerHTML='<div class="fc-name">'+name+'</div><img class="fc-icon" src="https://openweathermap.org/img/wn/'+midIcon+'@2x.png" alt="'+desc+'" loading="lazy"><div class="fc-desc">'+desc+'</div><div class="fc-temps"><span class="fc-high">'+high+'°</span><span class="fc-sep">/</span><span class="fc-low">'+low+'°</span></div>'+(pop>0.05?'<div class="fc-pop"><div class="fc-pop-track"><div class="fc-pop-fill" style="width:'+Math.round(pop*100)+'%"></div></div><span>'+Math.round(pop*100)+'%</span></div>':'');
+function applyForecast(daily){
+  const grid=document.getElementById('forecast-grid');if(!grid||!daily?.time)return;
+  grid.innerHTML='';
+  const today=new Date().toDateString();
+  daily.time.slice(0,7).forEach((t,i)=>{
+    const date=new Date(t+'T12:00:00');
+    const isToday=date.toDateString()===today;
+    const name=isToday?'Danes':date.toLocaleDateString('sl',{weekday:'short'});
+    const wmo=daily.weather_code[i];
+    const high=Math.round(daily.temperature_2m_max[i]);
+    const low=Math.round(daily.temperature_2m_min[i]);
+    const rain=daily.precipitation_sum[i]||0;
+    const pop=(daily.precipitation_probability_max[i]||0)/100;
+    const desc=_wmoTxt(wmo);
+    const cell=document.createElement('div');cell.className='fc-day'+(isToday?' today':'');
+    cell.innerHTML=
+      '<div class="fc-name">'+name+'</div>'+
+      '<div class="fc-icon">'+_wmoEmoji(wmo)+'</div>'+
+      '<div class="fc-desc">'+desc+'</div>'+
+      '<div class="fc-temps"><span class="fc-high">'+high+'°</span><span class="fc-sep">/</span><span class="fc-low">'+low+'°</span></div>'+
+      (pop>0.1?'<div class="fc-pop"><div class="fc-pop-track"><div class="fc-pop-fill" style="width:'+Math.round(pop*100)+'%"></div></div><span>'+Math.round(pop*100)+'%</span></div>':'');
     grid.appendChild(cell);
   });
 }
@@ -3365,8 +3173,8 @@ function toggleNotifications(){
 }
 function initNotifBtn(){
   const btn=document.getElementById('notif-btn');
-  if(!('Notification' in window)){if(btn)btn.style.display='none';return;}
   if(btn&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on')btn.classList.add('on');
+  if(!('Notification' in window)&&btn)btn.style.display='none';
 }
 function maybePushAlert(title,body){
   if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
@@ -4254,269 +4062,6 @@ async function initSurroundings(){
     }
   }catch(e){console.warn('Surroundings:',e);}
 }
-
-
-// ── UX helpers: brief, freshness, recommendations, hourly forecast ─────
-let _lastObs=null,_lastUXHourly=null,_uxLastNotify={};
-const UX_NS_KEY='wx-notif-settings-v2';
-function wxSetHTML(id,html){const e=document.getElementById(id);if(e)e.innerHTML=html;}
-function wxNum(v,def=0){const n=Number(v);return Number.isFinite(n)?n:def;}
-function wxObsTime(obs){
-  if(!obs)return null;
-  const raw=obs.obsTimeUtc||obs.obsTimeLocal||obs.epoch;
-  if(!raw)return null;
-  if(typeof raw==='number')return new Date(raw*1000);
-  const s=String(raw).trim();
-  if(/Z$|[+-]\d\d:?\d\d$/.test(s))return new Date(s.replace(' ','T'));
-  if(obs.obsTimeUtc)return new Date(s.replace(' ','T')+'Z');
-  return new Date(s.replace(' ','T'));
-}
-function wxRelativeTime(d){
-  if(!d||isNaN(d))return 'čas neznan';
-  const mins=Math.round((Date.now()-d.getTime())/60000);
-  if(mins<1)return 'pravkar';
-  if(mins<60)return 'pred '+mins+' min';
-  const h=Math.floor(mins/60),m=mins%60;
-  return 'pred '+h+' h'+(m?' '+m+' min':'');
-}
-function updateFreshness(obs,forceError){
-  const pill=document.getElementById('freshness-pill');
-  const summary=document.getElementById('ux-summary-sub');
-  const mls=document.getElementById('mls-fresh');
-  if(!pill)return;
-  if(forceError){pill.className='ux-fresh-pill fresh-stale';pill.textContent='● podatki niso na voljo';if(mls)mls.textContent='ni povezave';return;}
-  const t=wxObsTime(obs),mins=t&&!isNaN(t)?Math.round((Date.now()-t.getTime())/60000):null;
-  let cls='fresh-warn',txt='● čas meritve neznan';
-  if(mins!=null){
-    if(mins<=12){cls='fresh-ok';txt='● podatki sveži · '+wxRelativeTime(t);} else if(mins<=45){cls='fresh-warn';txt='● podatki starejši · '+wxRelativeTime(t);} else {cls='fresh-stale';txt='● podatki niso sveži · '+wxRelativeTime(t);}  
-  }
-  pill.className='ux-fresh-pill '+cls;pill.textContent=txt;
-  if(mls)mls.textContent=mins!=null?wxRelativeTime(t):'čas neznan';
-  if(summary&&mins!=null&&mins>45)summary.innerHTML='Zadnja meritev je starejša od 45 minut, zato podatke uporabi kot orientacijo.';
-}
-function wxFogRisk(obs){
-  const m=obs?.metric||{},T=wxNum(m.temp),Td=wxNum(m.dewpt,T-5),wind=wxNum(m.windSpeed),h=wxNum(obs?.humidity);
-  const dep=T-Td;let p=0;
-  if(dep<=0.8||h>=97)p=85; else if(dep<=1.7||h>=93)p=65; else if(dep<=3||h>=88)p=35; else p=10;
-  if(wind>15)p-=25; else if(wind<4)p+=10;
-  return Math.max(0,Math.min(100,Math.round(p)));
-}
-function wxMaxNext(field,hrs=12){
-  const h=_lastUXHourly?.hours||[];if(!h.length)return null;
-  const vals=h.slice(0,hrs).map(x=>x[field]).filter(v=>v!=null&&!isNaN(v));
-  return vals.length?Math.max(...vals):null;
-}
-function wxBuildRiskData(obs){
-  const m=obs?.metric||{},T=wxNum(m.temp),rr=wxNum(m.precipRate),gust=wxNum(m.windGust||m.windSpeed),wind=wxNum(m.windSpeed),uv=wxNum(obs?.uv),fog=wxFogRisk(obs);
-  const rainProb=wxMaxNext('rainProb',12),stormNext=(_lastUXHourly?.hours||[]).slice(0,12).some(h=>[95,96,99].includes(h.code));
-  const risks=[];
-  const add=(key,emoji,label,level,desc)=>risks.push({key,emoji,label,level,desc});
-  add('fog','🌫','Megla',fog>=70?'alert':fog>=40?'watch':'good',fog+'%');
-  add('ice','🧊','Poledica',T<=0?'alert':T<=3?'watch':'good',T.toFixed(1)+'°C');
-  add('wind','💨','Veter',(gust>=50||wind>=40)?'alert':(gust>=35||wind>=25)?'watch':'good',(gust||wind).toFixed(0)+' km/h');
-  add('uv','☀️','UV',uv>=8?'alert':uv>=6?'watch':'good','UV '+uv);
-  add('rain','🌧','Naliv',(rr>=5||rainProb>=80)?'alert':(rr>0||rainProb>=45)?'watch':'good',rr>0?rr.toFixed(1)+' mm/h':(rainProb!=null?rainProb+'%':'mirno'));
-  add('storm','⛈','Nevihta',stormNext?'alert':(_ltgStrikes?.length?'watch':'good'),stormNext?'možna':(_ltgStrikes?.length?'strele v okolici':'ni znakov'));
-  add('heat','🌡','Vročina',T>=32?'alert':T>=28?'watch':'good',T.toFixed(1)+'°C');
-  add('cold','❄️','Mraz',T<=-5?'alert':T<=2?'watch':'good',T.toFixed(1)+'°C');
-  return risks;
-}
-function wxApplyRiskBadges(obs){
-  const el=document.getElementById('ux-risk-badges');if(!el)return;
-  const risks=wxBuildRiskData(obs);
-  el.innerHTML=risks.map(r=>'<span class="ux-risk '+r.level+'" title="'+r.desc.replace(/"/g,'&quot;')+'">'+r.emoji+' '+r.label+' · '+r.desc+'</span>').join('');
-}
-function wxApplyRecommendations(obs){
-  const el=document.getElementById('ux-recs');if(!el)return;
-  const m=obs?.metric||{},T=wxNum(m.temp),rr=wxNum(m.precipRate),uv=wxNum(obs?.uv),wind=wxNum(m.windSpeed),hum=wxNum(obs?.humidity),rainProb=wxMaxNext('rainProb',12);
-  const recs=[];
-  const add=(emoji,lbl,cls)=>recs.push('<span class="ux-rec '+cls+'">'+emoji+' '+lbl+'</span>');
-  add('☂️',(rr>0||rainProb>=50)?'Dežnik: da':'Dežnik: ne',(rr>0||rainProb>=50)?'yes':'no');
-  add('🧥',T<12?'Jakna: da':T<18?'Jakna zjutraj':'Jakna: ne',T<18?'warn':'no');
-  add('🧴',uv>=6?'SPF: nujno':uv>=3?'SPF: priporočljivo':'SPF: ni nujno',uv>=6?'yes':uv>=3?'warn':'no');
-  add('🚲',(T>=8&&T<=28&&wind<25&&rr<0.2)?'Kolesarjenje: dobro':'Kolesarjenje: preveri',(T>=8&&T<=28&&wind<25&&rr<0.2)?'yes':'warn');
-  add('👕',(rr<0.1&&rainProb<35&&hum<80&&wind<25)?'Sušenje perila: dobro':'Sušenje perila: slabše',(rr<0.1&&rainProb<35&&hum<80&&wind<25)?'yes':'warn');
-  el.innerHTML=recs.join('');
-}
-function wxApplyActivityHelper(obs){
-  const el=document.getElementById('ux-activity-helper');if(!el)return;
-  const m=obs?.metric||{},T=wxNum(m.temp),rr=wxNum(m.precipRate),uv=wxNum(obs?.uv),wind=wxNum(m.windSpeed),hum=wxNum(obs?.humidity),fog=wxFogRisk(obs);
-  const goodWalk=T>-2&&T<32&&rr<1&&wind<35;
-  const goodGarden=(rr<0.5&&T>6&&T<30);
-  const goodPhoto=(wind<18&&rr<0.4&&(fog>=40||uv<8));
-  const fireSafe=wind<18&&hum>35&&rr<0.5;
-  const items=[
-    ['🚶','Sprehod',goodWalk?'good':'warn'],['🚲','Kolo',(T>=8&&T<=28&&wind<24&&rr<0.3)?'good':'warn'],['🌱','Vrt',goodGarden?'good':'warn'],['📷','Fotografiranje',goodPhoto?'good':'warn'],['🔥','Delo zunaj',fireSafe?'good':'warn']
-  ];
-  el.innerHTML=items.map(i=>'<span class="ux-activity '+i[2]+'">'+i[0]+' '+i[1]+'</span>').join('');
-}
-function wxSummarySentence(obs){
-  const m=obs?.metric||{},T=wxNum(m.temp),cond=document.getElementById('cond-label')?.textContent||'vreme',rr=wxNum(m.precipRate),uv=wxNum(obs?.uv),wind=wxNum(m.windSpeed),fog=wxFogRisk(obs),rainProb=wxMaxNext('rainProb',12);
-  const bits=[];
-  bits.push(T<3?'hladno in blizu zmrzišča':T<12?'hladno':T<22?'prijetno':T<28?'toplo':'vroče');
-  bits.push(rr>0?'trenutno dežuje':(rainProb>=50?'dež je možen kasneje':'za zdaj brez večje možnosti dežja'));
-  if(fog>=70)bits.push('megla je zelo verjetna'); else if(fog>=40)bits.push('megla je možna');
-  if(wind>=30)bits.push('veter je izrazit');
-  if(uv>=6)bits.push('opoldne je potrebna zaščita pred soncem');
-  return 'Zdaj je '+T.toFixed(1)+' °C in '+cond.toLowerCase()+'. Dan bo predvsem '+bits.join(', ')+'.';
-}
-function wxApplyBrief(obs){
-  const main=document.getElementById('ux-summary-main');
-  const sub=document.getElementById('ux-summary-sub');
-  if(main)main.textContent=wxSummarySentence(obs);
-  const t=wxObsTime(obs);
-  if(sub)sub.innerHTML='Meritev: '+(t&&!isNaN(t)?t.toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'čas neznan')+' · Postaja IREICA1 · Rečica ob Savinji.';
-}
-function wxApplyFact(obs){
-  const el=document.getElementById('ux-fact');if(!el)return;
-  const m=obs?.metric||{},T=wxNum(m.temp),hi=document.getElementById('day-high')?.textContent,lo=document.getElementById('day-low')?.textContent,delta=document.getElementById('yesterday-delta')?.textContent?.trim();
-  let txt='Današnja trenutna temperatura je '+T.toFixed(1)+' °C.';
-  if(hi&&hi!=='—'&&lo&&lo!=='—')txt+=' Današnji razpon je od '+lo+' °C do '+hi+' °C.';
-  if(delta)txt+=' V primerjavi z včeraj: '+delta+'.';
-  const fog=wxFogRisk(obs);if(fog>=50)txt+=' Dolinska megla je danes ena pomembnejših lokalnih značilnosti.';
-  el.innerHTML='<span>✨</span><div><strong>Zanimivost dneva:</strong> '+txt+'</div>';
-}
-function wxUpdateMobileStrip(obs){
-  const m=obs?.metric||{},T=wxNum(m.temp),cond=document.getElementById('cond-label')?.textContent||'—';
-  set('mls-temp',T.toFixed(1)+'°C');
-  set('mls-cond',cond+' · veter '+wxNum(m.windSpeed).toFixed(0)+' km/h · dež '+wxNum(m.precipTotal).toFixed(1)+' mm');
-}
-function wxApplyUX(obs){
-  try{_lastObs=obs;updateFreshness(obs);wxApplyBrief(obs);wxApplyRiskBadges(obs);wxApplyRecommendations(obs);wxApplyActivityHelper(obs);wxApplyFact(obs);wxUpdateMobileStrip(obs);wxCheckCustomNotifications(obs);}catch(e){console.warn('UX apply:',e);}
-}
-function wxApplyHourlyUX(observations){
-  try{if(_lastObs)wxApplyFact(_lastObs);}catch(e){}
-}
-function wxShowDataError(e){
-  updateFreshness(null,true);
-  wxSetHTML('ux-summary-main','Podatki trenutno niso na voljo. Stran bo samodejno poskusila znova.');
-  wxSetHTML('ux-summary-sub','Razlog: '+(e?.message||'neznana napaka')+'. Če so prikazane stare meritve, jih uporabi samo kot orientacijo.');
-  const card=document.getElementById('ux-brief-card');if(card)card.classList.add('ux-err');
-  set('mls-cond','Podatki niso na voljo');
-}
-function wxClearDataError(){const card=document.getElementById('ux-brief-card');if(card)card.classList.remove('ux-err');}
-async function fetchUXHourlyForecast(){
-  try{
-    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+'&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&timezone=Europe%2FLjubljana&forecast_days=2';
-    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json(),h=data.hourly||{},times=h.time||[];
-    const now=new Date();
-    let start=times.findIndex(t=>new Date(t)>=now);if(start<0)start=0;
-    const hours=times.slice(start,start+24).map((t,i)=>({time:t,temp:h.temperature_2m[start+i],feel:h.apparent_temperature[start+i],rainProb:h.precipitation_probability[start+i],rain:h.precipitation[start+i],code:h.weather_code[start+i],wind:h.wind_speed_10m[start+i],uv:h.uv_index[start+i]}));
-    _lastUXHourly={hours,raw:data};renderUXHourlyForecast(hours);if(_lastObs)wxApplyUX(_lastObs);
-  }catch(e){
-    const el=document.getElementById('ux-hourly-strip');if(el)el.innerHTML='<div class="fc-loading">Urna napoved trenutno ni na voljo.</div>';
-    const note=document.getElementById('ux-hour-note');if(note)note.textContent='Kratkoročne napovedi ni bilo mogoče pridobiti. Aktualne meritve ostajajo prikazane zgoraj.';
-    console.warn('UX hourly forecast:',e);
-  }
-}
-function renderUXHourlyForecast(hours){
-  const el=document.getElementById('ux-hourly-strip');if(!el)return;
-  if(!hours?.length){el.innerHTML='<div class="fc-loading">Ni urnih podatkov.</div>';return;}
-  const take=hours.filter((_,i)=>i%3===0).slice(0,9);
-  el.innerHTML=take.map((h,i)=>{const d=new Date(h.time);const now=i===0?' now':'';const rp=h.rainProb!=null?Math.round(h.rainProb):null;return '<div class="ux-hour'+now+'" title="'+_wmoTxt(h.code||0)+'"><div class="ux-hour-time">'+d.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+'</div><div class="ux-hour-emoji">'+_wmoEmoji(h.code||0)+'</div><div class="ux-hour-temp">'+wxNum(h.temp).toFixed(0)+'°</div><div class="ux-hour-rain">'+(rp!=null&&rp>10?'🌧 '+rp+'%':'')+'</div><div class="ux-hour-wind">💨 '+wxNum(h.wind).toFixed(0)+'</div></div>';}).join('');
-  const maxRain=Math.max(...hours.slice(0,24).map(h=>wxNum(h.rainProb,0)));
-  const minT=Math.min(...hours.slice(0,24).map(h=>wxNum(h.temp,999)));
-  const maxT=Math.max(...hours.slice(0,24).map(h=>wxNum(h.temp,-999)));
-  const note=document.getElementById('ux-hour-note');if(note)note.textContent='Naslednjih 24 ur: '+minT.toFixed(0)+'–'+maxT.toFixed(0)+' °C · največja verjetnost padavin '+maxRain+'%.';
-  const sub=document.getElementById('ux-hour-sub');if(sub)sub.textContent='posodobljeno '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-}
-function initMetricHelp(){
-  const map=[
-    ['rosišče','Temperatura, pri kateri zrak postane nasičen z vlago. Višje rosišče pomeni bolj soparen občutek in večjo možnost rose ali megle.'],
-    ['humidex','Indeks soparnosti: upošteva temperaturo in vlago. Višja vrednost pomeni večji toplotni stres.'],
-    ['občutek mraza','Občutena temperatura v vetru. Pri mrazu in vetru je občutek lahko precej nižji od izmerjene temperature.'],
-    ['et₀','Referenčna evapotranspiracija: približek dnevnega izhlapevanja vode iz tal in rastlin.'],
-    ['gdd','Growing Degree Days: vsota toplote nad izbrano bazo, uporabna za rast rastlin.'],
-    ['vodni bilans','Razlika med padavinami in ocenjenim izhlapevanjem. Negativna vrednost pomeni sušni pritisk.'],
-    ['preverjanje kakovosti','QC označuje, ali so podatki prestali osnovno preverjanje kakovosti.'],
-    ['bft','Beaufortova lestvica opisuje moč vetra od tišine do orkanskega vetra.'],
-    ['uv indeks','UV indeks pove moč sončnega ultravijoličnega sevanja in potrebo po zaščiti kože.'],
-    ['sončno sevanje','Količina sončne energije na kvadratni meter. Pomaga oceniti oblačnost in moč sonca.'],
-    ['tlak','Zračni tlak. Hitro padanje pogosto pomeni slabšanje vremena, naraščanje pa stabilnejše razmere.']
-  ];
-  const labels=[...document.querySelectorAll('.clabel,.hs-lbl,.bio-lbl,.agro-l,.wbal-sl,.p-trend,.beaufort-badge')];
-  labels.forEach(el=>{
-    if(el.dataset.helped)return;
-    const txt=el.textContent.toLowerCase();
-    const hit=map.find(([k])=>txt.includes(k));
-    if(hit){const s=document.createElement('span');s.className='wx-help';s.textContent='?';s.title=hit[1];s.setAttribute('aria-label',hit[1]);el.appendChild(s);el.dataset.helped='1';}
-  });
-}
-function copyChartLink(id){
-  const url=location.href.split('#')[0]+'#'+id;
-  navigator.clipboard?.writeText(url).then(()=>showToast('✓ Povezava do grafa kopirana')).catch(()=>showToast('Povezave ni bilo mogoče kopirati'));
-}
-function downloadCurrentCsv(){
-  const rows=[['čas','temperatura_C','obcuteno_C','vlaznost_pct','rosišče_C','tlak_hPa','veter_kmh','sunek_kmh','padavine_danes_mm','uv']];
-  if(_lastObs){const m=_lastObs.metric||{};rows.push([new Date().toISOString(),m.temp,m.heatIndex??m.windChill??m.temp,_lastObs.humidity,m.dewpt,m.pressure,m.windSpeed,m.windGust,m.precipTotal,_lastObs.uv]);}
-  (_tempData||[]).slice(-24).forEach(d=>rows.push([d.time.toISOString(),d.temp,'','','','','','','','']));
-  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='ireica1-vreme-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-}
-async function shareCurrentWeatherImage(){
-  try{
-    const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=630;const ctx=canvas.getContext('2d');
-    const dark=isDark();ctx.fillStyle=dark?'#07111f':'#eef2f9';ctx.fillRect(0,0,1200,630);
-    const grad=ctx.createLinearGradient(0,0,1200,630);grad.addColorStop(0,dark?'rgba(77,159,248,.45)':'rgba(37,99,235,.28)');grad.addColorStop(1,dark?'rgba(167,139,250,.25)':'rgba(124,58,237,.18)');ctx.fillStyle=grad;ctx.fillRect(0,0,1200,630);
-    ctx.fillStyle=dark?'#e8edf8':'#0f172a';ctx.font='700 42px Plus Jakarta Sans, Arial';ctx.fillText('Rečica ob Savinji · IREICA1',70,88);
-    ctx.font='300 150px Plus Jakarta Sans, Arial';ctx.fillText((_lastTemp!=null?_lastTemp.toFixed(1):'—')+'°C',70,255);
-    ctx.font='500 38px Plus Jakarta Sans, Arial';ctx.fillText((document.getElementById('cond-icon')?.textContent||'🌤')+' '+(document.getElementById('cond-label')?.textContent||'Vreme'),75,330);
-    ctx.font='28px IBM Plex Mono, monospace';ctx.fillStyle=dark?'#b6c3d5':'#334155';
-    const lines=['Vlažnost '+(document.getElementById('hs-humidity')?.textContent||'—'),'Veter '+(document.getElementById('wind-dir-lbl')?.textContent||'—')+' '+(document.getElementById('wind-speed')?.textContent||'—'),'Padavine danes '+(document.getElementById('rain-total')?.textContent||'—')+' mm','Posodobljeno '+(document.getElementById('updated')?.textContent||'—')];
-    lines.forEach((l,i)=>ctx.fillText(l,75,395+i*42));
-    ctx.font='22px Plus Jakarta Sans, Arial';ctx.fillText(location.href.split('#')[0],75,585);
-    const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
-    const file=new File([blob],'ireica1-vreme.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Vreme IREICA1',text:'Trenutno vreme v Rečici ob Savinji',files:[file]});}
-    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ireica1-vreme.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);showToast('✓ Slika pripravljena');}
-  }catch(e){showToast('Slike ni bilo mogoče pripraviti');console.warn(e);}
-}
-function openAboutStation(){document.getElementById('about-station-modal')?.classList.add('open');}
-function closeAboutStation(){document.getElementById('about-station-modal')?.classList.remove('open');}
-function wxDefaultNotifSettings(){return{enabled:false,frost:true,frostT:0,wind:true,windT:50,rain:true,rainT:1,fog:true,fogT:70,uv:true,uvT:6,lightning:true,lightningT:30};}
-function wxGetNotifSettings(){try{return Object.assign(wxDefaultNotifSettings(),JSON.parse(localStorage.getItem(UX_NS_KEY)||'{}'));}catch(e){return wxDefaultNotifSettings();}}
-function wxSaveNotifSettings(s){localStorage.setItem(UX_NS_KEY,JSON.stringify(s));localStorage.setItem('wx-notif',s.enabled?'on':'off');const b=document.getElementById('notif-btn');if(b)b.classList.toggle('on',!!s.enabled);}
-function openNotificationSettings(){
-  const s=wxGetNotifSettings();
-  [['frost','ns-frost'],['wind','ns-wind'],['rain','ns-rain'],['fog','ns-fog'],['uv','ns-uv'],['lightning','ns-lightning']].forEach(([k,id])=>{const e=document.getElementById(id);if(e)e.checked=!!s[k];});
-  [['frostT','ns-frost-t'],['windT','ns-wind-t'],['rainT','ns-rain-t'],['fogT','ns-fog-t'],['uvT','ns-uv-t'],['lightningT','ns-lightning-t']].forEach(([k,id])=>{const e=document.getElementById(id);if(e)e.value=s[k];});
-  document.getElementById('notif-settings-modal')?.classList.add('open');
-}
-function closeNotificationSettings(){document.getElementById('notif-settings-modal')?.classList.remove('open');}
-function saveNotificationSettings(){
-  const commit=()=>{const s=wxDefaultNotifSettings();s.enabled=true;s.frost=document.getElementById('ns-frost')?.checked;s.wind=document.getElementById('ns-wind')?.checked;s.rain=document.getElementById('ns-rain')?.checked;s.fog=document.getElementById('ns-fog')?.checked;s.uv=document.getElementById('ns-uv')?.checked;s.lightning=document.getElementById('ns-lightning')?.checked;s.frostT=wxNum(document.getElementById('ns-frost-t')?.value,0);s.windT=wxNum(document.getElementById('ns-wind-t')?.value,50);s.rainT=wxNum(document.getElementById('ns-rain-t')?.value,1);s.fogT=wxNum(document.getElementById('ns-fog-t')?.value,70);s.uvT=wxNum(document.getElementById('ns-uv-t')?.value,6);s.lightningT=wxNum(document.getElementById('ns-lightning-t')?.value,30);wxSaveNotifSettings(s);closeNotificationSettings();showToast('✓ Obvestila shranjena');};
-  if(!('Notification' in window)){showToast('Brskalnik ne podpira obvestil');return;}
-  if(Notification.permission==='granted')commit();else Notification.requestPermission().then(p=>{if(p==='granted')commit();else showToast('Obvestila niso dovoljena');});
-}
-function disableNotificationSettings(){const s=wxGetNotifSettings();s.enabled=false;wxSaveNotifSettings(s);closeNotificationSettings();showToast('Obvestila izklopljena');}
-function wxNotifAllowed(type){const s=wxGetNotifSettings();return s.enabled&&s[type]!==false;}
-function wxNotifyOnce(type,title,body){
-  if(!('Notification' in window)||Notification.permission!=='granted'||localStorage.getItem('wx-notif')!=='on'||!wxNotifAllowed(type))return;
-  const key=type+'-'+new Date().toISOString().slice(0,13);
-  if(_uxLastNotify[key])return;_uxLastNotify[key]=true;
-  new Notification(title,{body,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">⚠️</text></svg>'});
-}
-function maybePushAlert(title,body,type='frost'){wxNotifyOnce(type,title,body);}
-function wxCheckCustomNotifications(obs){
-  const s=wxGetNotifSettings();if(!s.enabled)return;
-  const m=obs?.metric||{},T=wxNum(m.temp),wind=Math.max(wxNum(m.windSpeed),wxNum(m.windGust)),rain=wxNum(m.precipRate),uv=wxNum(obs?.uv),fog=wxFogRisk(obs);
-  if(s.frost&&T<=s.frostT)wxNotifyOnce('frost','❄️ Zmrzal / poledica','Temperatura je '+T.toFixed(1)+' °C.');
-  if(s.wind&&wind>=s.windT)wxNotifyOnce('wind','💨 Močan veter','Veter ali sunki do '+wind.toFixed(0)+' km/h.');
-  if(s.rain&&rain>=s.rainT)wxNotifyOnce('rain','🌧 Dež v Rečici','Intenziteta padavin '+rain.toFixed(1)+' mm/h.');
-  if(s.uv&&uv>=s.uvT)wxNotifyOnce('uv','☀️ Visok UV indeks','UV indeks je '+uv+'. Priporočena zaščita.');
-  if(s.fog&&fog>=s.fogT)wxNotifyOnce('fog','🌫 Megla verjetna','Ocenjena verjetnost megle je '+fog+' %.');
-}
-function toggleNotifications(){openNotificationSettings();}
-function initUX(){initMetricHelp();document.querySelectorAll('.ux-modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));const s=wxGetNotifSettings();const b=document.getElementById('notif-btn');if(b)b.classList.toggle('on',!!s.enabled);}
-async function compareMyLocation(){
-  if(!navigator.geolocation){showToast('Geolokacija ni podprta');return;}
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    try{const lat=pos.coords.latitude,lon=pos.coords.longitude;const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,wind_speed_10m,relative_humidity_2m,weather_code&timezone=Europe%2FLjubljana';const res=await fetch(url);const data=await res.json();const c=data.current||{},st=_lastObs?.metric||{};const diff=c.temperature_2m!=null&&st.temp!=null?c.temperature_2m-st.temp:null;const el=document.getElementById('ux-location-compare');if(el)el.innerHTML='Tvoja lokacija: '+(c.temperature_2m!=null?c.temperature_2m.toFixed(1)+' °C':'—')+' · '+_wmoEmoji(c.weather_code||0)+' '+_wmoTxt(c.weather_code||0)+(diff!=null?' · razlika do postaje '+(diff>0?'+':'')+diff.toFixed(1)+' °C':'')+'.';}
-    catch(e){showToast('Primerjava lokacije ni uspela');}
-  },()=>showToast('Dostop do lokacije ni dovoljen'),{enableHighAccuracy:false,timeout:8000,maximumAge:600000});
-}
-
 function tickClock(){
 set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
@@ -4524,7 +4069,7 @@ setInterval(tickClock,1000);tickClock();
 async function fetchCurrent(){
   const dot=document.getElementById('dot');dot.className='dot loading';set('status-text','Posodabljanje…');
   try{const res=await fetch(PROXY+'/');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();const obs=data.observations?.[0];if(!obs)throw new Error('Ni podatkov');applyObs(obs);}
-  catch(e){dot.className='dot error';set('status-text','Napaka: '+e.message);wxShowDataError(e);}
+  catch(e){dot.className='dot error';set('status-text','Napaka: '+e.message);}
 }
 async function fetchHourly(){
   try{const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.observations?.length)applyHourly(data.observations);}
@@ -4536,15 +4081,14 @@ async function init(){
   applyMonthlySummary();
   applyYearRecords();
   initNotifBtn();
-  initUX();
   connectLightning();
   autoLoadHistoryFile();
   checkSmartNotifications(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchUXHourlyForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
   applyPheno();
 }
 init();
-setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchUXHourlyForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
