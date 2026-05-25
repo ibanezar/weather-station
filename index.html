@@ -140,6 +140,10 @@ header{text-align:center;padding:2.5rem 0 2rem}
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
 h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
+.title-row{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.title-logo{width:78px;height:78px;border-radius:22px;padding:7px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.title-logo:hover{transform:translateY(-2px) scale(1.02);box-shadow:var(--card-shadow-h);border-color:var(--card-border-h)}
+.title-logo svg{width:100%;height:100%;display:block}
 .sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
 .status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);flex-wrap:wrap}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
@@ -596,6 +600,8 @@ footer a{color:var(--blue);text-decoration:none}
   .chart-svg{min-width:520px;width:520px}
 }
 @media(max-width:520px){
+  .title-row{gap:.7rem}
+  .title-logo{width:62px;height:62px;border-radius:18px;padding:5px}
   .g2{grid-template-columns:1fr}
   .temp-huge{font-size:clamp(3.8rem,16vw,5.5rem)}
   .hero-icon svg{width:80px;height:80px}
@@ -692,7 +698,43 @@ footer a{color:var(--blue);text-decoration:none}
 <div class="wrap">
   <header>
     <div class="stn-badge"><span></span> IREICA1 · Osebna meteorološka postaja</div>
-    <h1>Rečica ob <em>Savinji</em></h1>
+    <div class="title-row">
+      <div class="title-logo" aria-hidden="true">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo vremenske postaje">
+          <defs>
+            <linearGradient id="logoBg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="55%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+            <linearGradient id="logoHill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22c55e"/>
+              <stop offset="100%" stop-color="#15803d"/>
+            </linearGradient>
+            <linearGradient id="logoDrop" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#dbeafe"/>
+              <stop offset="100%" stop-color="#60a5fa"/>
+            </linearGradient>
+          </defs>
+          <circle cx="36" cy="36" r="33" fill="url(#logoBg)"/>
+          <circle cx="26" cy="23" r="9" fill="#fde68a" opacity=".98"/>
+          <g fill="#ffffff" opacity=".96">
+            <circle cx="39" cy="28" r="8"/>
+            <circle cx="47" cy="29" r="6.5"/>
+            <circle cx="32" cy="31" r="6"/>
+            <rect x="31" y="29" width="22" height="8" rx="4"/>
+          </g>
+          <path d="M13 49 C19 43, 27 41, 35 44 S52 49, 59 44 L59 58 L13 58 Z" fill="url(#logoHill)" opacity=".96"/>
+          <path d="M48 40 C48 37, 51 35, 53 33 C55 35, 58 37, 58 40 C58 43, 55.8 45.2, 53 45.2 C50.2 45.2, 48 43, 48 40 Z" fill="url(#logoDrop)"/>
+          <g stroke="rgba(255,255,255,.8)" stroke-width="2.2" stroke-linecap="round" fill="none">
+            <path d="M55.5 17c4 2 6.3 6 6.3 10.6"/>
+            <path d="M58.7 12.5c6 3 9.6 9 9.6 15.7" opacity=".72"/>
+          </g>
+          <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.1"/>
+        </svg>
+      </div>
+      <h1>Rečica ob <em>Savinji</em></h1>
+    </div>
     <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n.v.</p>
   </header>
 
@@ -722,22 +764,6 @@ footer a{color:var(--blue);text-decoration:none}
 
   <!-- ══ TAB: AKTUALNO ══ -->
   <div id="tab-current" class="tab-pane active">
-
-  <div class="hero card">
-    <div>
-      <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
-      <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
-      <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
-      <div class="yesterday-delta" id="yesterday-delta"></div>
-    </div>
-    <div class="hero-icon" id="hero-icon"></div>
-    <div class="hero-stats">
-      <div class="hs"><span class="hs-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span><span class="hs-lbl">Vlažnost</span></div>
-      <div class="hs"><span class="hs-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span><span class="hs-lbl">Tlak</span></div>
-      <div class="hs"><span class="hs-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span><span class="hs-lbl">Veter</span></div>
-      <div class="hs"><span class="hs-val" id="hs-uv">—</span><span class="hs-lbl">UV indeks</span></div>
-    </div>
-  </div>
 
   <section class="card ux-brief-card" id="ux-brief-card" aria-live="polite">
     <div class="ux-brief-top">
@@ -776,6 +802,22 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="ux-fact" id="ux-fact"><span>✨</span><div><strong>Zanimivost dneva:</strong> Ko bo na voljo dovolj podatkov, se tukaj prikaže primerjava z včeraj, rekordom ali zgodovino postaje.</div></div>
   </section>
+
+  <div class="hero card">
+    <div>
+      <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
+      <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
+      <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
+      <div class="yesterday-delta" id="yesterday-delta"></div>
+    </div>
+    <div class="hero-icon" id="hero-icon"></div>
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span><span class="hs-lbl">Vlažnost</span></div>
+      <div class="hs"><span class="hs-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span><span class="hs-lbl">Tlak</span></div>
+      <div class="hs"><span class="hs-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span><span class="hs-lbl">Veter</span></div>
+      <div class="hs"><span class="hs-val" id="hs-uv">—</span><span class="hs-lbl">UV indeks</span></div>
+    </div>
+  </div>
 
   <div class="card ux-hour-card" id="ux-hour-card">
     <div class="chart-hdr">
