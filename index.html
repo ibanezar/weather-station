@@ -450,18 +450,11 @@ footer a{color:var(--blue);text-decoration:none}
 
 
 
-/* ARSO & Meteoalarm */
-.arso-radar-img{width:100%;border-radius:10px;display:block;image-rendering:crisp-edges}
-.arso-cam-img{width:100%;border-radius:10px;display:block;max-height:280px;object-fit:cover}
-.arso-row{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1rem}
-@media(max-width:640px){.arso-row{grid-template-columns:1fr}}
-.ma-list{display:flex;flex-direction:column;gap:.45rem;margin-top:.25rem}
-.ma-item{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border-radius:10px;font-size:.76rem}
-.ma-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.ma-title{flex:1;font-weight:500;color:var(--text)}
-.ma-meta{font-size:.62rem;color:var(--muted);white-space:nowrap}
-.ma-none{font-size:.78rem;color:var(--green);padding:.3rem 0}
-.arso-timestamp{font-size:.62rem;color:var(--muted);margin-top:.35rem;text-align:right;font-family:'IBM Plex Mono',monospace}
+/* Station logo */
+.station-logo{width:68px;height:68px;display:block;margin:0 auto .85rem;filter:drop-shadow(0 0 14px rgba(56,189,248,.35));flex-shrink:0}
+header{display:flex;flex-direction:column;align-items:center;text-align:center}
+
+
 
 /* Photography widget */
 .photo-timeline{display:flex;height:18px;border-radius:9px;overflow:hidden;margin:.65rem 0 .3rem;position:relative}
@@ -637,6 +630,41 @@ footer a{color:var(--blue);text-decoration:none}
 
 <div class="wrap">
   <header>
+    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Postaja IREICA1">
+      <defs>
+        <linearGradient id="lbg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0c1e3d"/>
+          <stop offset="100%" stop-color="#0f2a50"/>
+        </linearGradient>
+      </defs>
+      <!-- Background -->
+      <circle cx="32" cy="32" r="31" fill="url(#lbg)"/>
+      <circle cx="32" cy="32" r="31" fill="none" stroke="rgba(56,189,248,.55)" stroke-width="1.5"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(56,189,248,.12)" stroke-width=".8"/>
+      <!-- Mountains (Savinja) -->
+      <path d="M5 48 L16 29 L24 40 L32 20 L40 35 L48 23 L59 48Z" fill="rgba(56,189,248,.1)" stroke="rgba(56,189,248,.3)" stroke-width="1.2" stroke-linejoin="round"/>
+      <!-- Measurement pole -->
+      <line x1="32" y1="48" x2="32" y2="9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+      <!-- Anemometer arms -->
+      <line x1="32" y1="11" x2="24" y2="16" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="32" y1="11" x2="40" y2="16" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="24" cy="16" r="3.5" fill="#0c1e3d" stroke="#38bdf8" stroke-width="1.5"/>
+      <circle cx="40" cy="16" r="3.5" fill="#0c1e3d" stroke="#38bdf8" stroke-width="1.5"/>
+      <circle cx="32" cy="11" r="2" fill="#38bdf8"/>
+      <!-- Thermometer -->
+      <rect x="23.5" y="32" width="3.5" height="12" rx="1.75" fill="rgba(248,113,113,.25)" stroke="#f87171" stroke-width="1"/>
+      <circle cx="25.25" cy="45" r="3.5" fill="#f87171"/>
+      <!-- Rain drop -->
+      <path d="M39 44 L42 36 L45 44 Q45 47.5 42 47.5 Q39 47.5 39 44Z" fill="rgba(96,165,250,.45)" stroke="#60a5fa" stroke-width="1"/>
+      <!-- Sun (top right) -->
+      <circle cx="52" cy="16" r="4.5" fill="rgba(251,191,36,.25)" stroke="#fbbf24" stroke-width="1"/>
+      <line x1="52" y1="9" x2="52" y2="11" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="57.5" y1="10.5" x2="56.2" y2="11.8" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="59" y1="16" x2="57" y2="16" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="46.5" y1="10.5" x2="47.8" y2="11.8" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Label -->
+      <text x="32" y="57.5" text-anchor="middle" font-size="5.5" font-family="IBM Plex Mono,monospace" fill="rgba(56,189,248,.85)" letter-spacing="1.5" font-weight="600">IREICA1</text>
+    </svg>
     <div class="stn-badge"><span></span> IREICA1 · Osebna meteorološka postaja</div>
     <h1>Rečica ob <em>Savinji</em></h1>
     <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n.v.</p>
@@ -1017,39 +1045,15 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
-  <!-- ARSO Radar + Kamera -->
-  <div class="arso-row">
-    <div class="card chart-card">
-      <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌧 ARSO radar padavin</span>
-        <span style="display:flex;gap:.5rem;align-items:center">
-          <span class="chart-range" id="radar-ts">—</span>
-          <button onclick="refreshArso()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:0" title="Osveži">↻</button>
-        </span>
-      </div>
-      <img id="arso-radar-img" class="arso-radar-img" alt="ARSO padavinski radar"
-           style="min-height:180px;background:var(--fc-bg)">
-      <div style="font-size:.6rem;color:var(--muted);margin-top:.35rem">Vir: ARSO · posodobitev vsake 15 min</div>
+  <!-- Windy Radar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
+      <span class="chart-range">Windy · ECMWF</span>
     </div>
-    <div class="card chart-card">
-      <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📷 Spletna kamera</span>
-        <span class="chart-range" id="cam-lbl">Celje</span>
-      </div>
-      <img id="arso-cam-img" class="arso-cam-img" alt="ARSO spletna kamera"
-           style="min-height:180px;background:var(--fc-bg)"
-           onerror="tryCamFallback(this)">
-      <div class="arso-timestamp" id="cam-ts">—</div>
-    </div>
-  </div>
-
-  <!-- Meteoalarm -->
-  <div class="card" style="margin-bottom:1rem" id="meteoalarm-card">
-    <div class="chart-hdr" style="margin-bottom:.5rem">
-      <span class="clabel" style="margin:0">⚠️ Meteoalarm — opozorila za Slovenijo</span>
-      <span class="chart-range" id="ma-updated">—</span>
-    </div>
-    <div class="ma-list" id="ma-list"><div style="color:var(--muted);font-size:.75rem">Nalaganje…</div></div>
+    <iframe class="windy-frame" id="windy-frame"
+      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      allowfullscreen loading="lazy"></iframe>
   </div>
 
   <!-- Photography helper -->
@@ -3284,189 +3288,6 @@ async function fetchTextForecast(){
 
 
 
-// ── ARSO Radar & Kamera ───────────────────────────────────
-const ARSO_CAMS = [
-  {station:'CELJE',       dir:'sw', label:'Celje (JZ)'},
-  {station:'CELJE',       dir:'nw', label:'Celje (SZ)'},
-  {station:'SOSTANJ',     dir:'sw', label:'Šoštanj'},
-  {station:'LOGARSKA-D',  dir:'nw', label:'Logarska dolina'},
-  {station:'LJUBL-ANA_BRNIK', dir:'nw', label:'Brnik'},
-];
-let _camIdx=0;
-
-function buildArsoUrl(path){return PROXY+path+'?_='+Math.floor(Date.now()/300000);}
-
-function loadArsoRadar(){
-  const img=document.getElementById('arso-radar-img');if(!img)return;
-  const ts=document.getElementById('radar-ts');
-  const url=buildArsoUrl('/arso-radar');
-  img.src=url;
-  img.onload=()=>{if(ts)ts.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});};
-  img.onerror=()=>{if(ts)ts.textContent='radar ni dosegljiv';};
-}
-
-function loadArsoCamera(idx){
-  idx=((idx%ARSO_CAMS.length)+ARSO_CAMS.length)%ARSO_CAMS.length;
-  _camIdx=idx;
-  const cam=ARSO_CAMS[idx];
-  const img=document.getElementById('arso-cam-img');if(!img)return;
-  const ts=document.getElementById('cam-ts');
-  const lbl=document.getElementById('cam-lbl');if(lbl)lbl.textContent=cam.label;
-  img.src=PROXY+'/arso-cam?station='+cam.station+'&dir='+cam.dir+'&_='+Math.floor(Date.now()/120000);
-  img.onload=()=>{if(ts)ts.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
-}
-
-function tryCamFallback(img){
-  _camIdx=(_camIdx+1)%ARSO_CAMS.length;
-  const cam=ARSO_CAMS[_camIdx];
-  const lbl=document.getElementById('cam-lbl');if(lbl)lbl.textContent=cam.label+' (rezerva)';
-  if(_camIdx<ARSO_CAMS.length-1){
-    img.onerror=()=>tryCamFallback(img);
-    img.src=PROXY+'/arso-cam?station='+cam.station+'&dir='+cam.dir+'&_='+Date.now();
-  }else{
-    img.onerror=null;
-    img.alt='Kamera ni dostopna';
-    img.style.display='none';
-    const ts=document.getElementById('cam-ts');if(ts)ts.textContent='Kamera trenutno ni na voljo';
-  }
-}
-
-function refreshArso(){loadArsoRadar();loadArsoCamera(_camIdx);}
-
-// ── Meteoalarm ────────────────────────────────────────────
-const MA_COLORS={
-  'minor':   {bg:'rgba(74,222,128,.15)',dot:'#4ade80',txt:'Zeleno'},
-  'moderate':{bg:'rgba(251,191,36,.15)',dot:'#fbbf24',txt:'Rumeno'},
-  'severe':  {bg:'rgba(249,115,22,.18)',dot:'#f97316',txt:'Oranžno'},
-  'extreme': {bg:'rgba(248,113,113,.2)', dot:'#f87171',txt:'Rdeče'},
-};
-const MA_TYPES={
-  'Wind':'💨 Veter','Rain':'🌧 Padavine','Snow-Ice':'❄️ Sneg/Led',
-  'Thunderstorms':'⛈ Nevihte','Fog':'🌫 Megla','Extreme high temperature':'🌡 Vročina',
-  'Extreme low temperature':'❄️ Mraz','Avalanches':'🏔 Plazovi',
-  'Flooding':'🌊 Poplave','Rain-Flooding':'🌊 Padavine/Poplave','Forest fire':'🔥 Požari',
-};
-async function fetchMeteoalarm(){
-  try{
-    const res=await fetch(PROXY+'/meteoalarm');
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const text=await res.text();
-    const doc=new DOMParser().parseFromString(text,'application/xml');
-    const entries=[...doc.querySelectorAll('entry')];
-    const list=document.getElementById('ma-list');
-    const upd=document.getElementById('ma-updated');
-    if(!list)return;
-
-    // Filter active & upcoming warnings (cap:certainty not Unlikely)
-    const ns='urn:oasis:names:tc:emergency:cap:1.1';
-    const getEl=(e,tag)=>e.getElementsByTagNameNS(ns,tag)[0]?.textContent||
-                         e.getElementsByTagName(tag)[0]?.textContent||'';
-
-    const warnings=entries.map(e=>{
-      const sev=(getEl(e,'severity')||'').toLowerCase();
-      const evType=getEl(e,'event')||e.querySelector('title')?.textContent||'Opozorilo';
-      const area=getEl(e,'areaDesc')||'Slovenija';
-      const eff=getEl(e,'effective')||getEl(e,'onset')||'';
-      const exp=getEl(e,'expires')||'';
-      const cert=(getEl(e,'certainty')||'').toLowerCase();
-      return{sev,evType,area,eff,exp,cert};
-    }).filter(w=>w.sev&&w.sev!=='unknown'&&w.cert!=='unlikely');
-
-    if(!warnings.length){
-      list.innerHTML='<div class="ma-none">✅ Trenutno ni aktivnih vremenskih opozoril za Slovenijo</div>';
-      const card=document.getElementById('meteoalarm-card');
-      if(card)card.style.borderColor='rgba(74,222,128,.3)';
-    }else{
-      list.innerHTML='';
-      warnings.forEach(w=>{
-        const col=MA_COLORS[w.sev]||MA_COLORS.moderate;
-        const typeLbl=Object.entries(MA_TYPES).find(([k])=>w.evType.toLowerCase().includes(k.toLowerCase()))?.[1]||('⚠️ '+w.evType);
-        const fmtT=t=>{try{return new Date(t).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(_){return t;}};
-        const item=document.createElement('div');item.className='ma-item';
-        item.style.background=col.bg;
-        item.innerHTML=
-          '<div class="ma-dot" style="background:'+col.dot+'"></div>'+
-          '<div class="ma-title">'+typeLbl+'</div>'+
-          '<div class="ma-meta">'+col.txt+' · '+(w.exp?'do '+fmtT(w.exp):'')+'</div>';
-        list.appendChild(item);
-        // Also trigger smart notification if severe+
-        if(['severe','extreme'].includes(w.sev))maybePushAlert('⚠️ Meteoalarm: '+typeLbl,'Opozorilo za Slovenijo. Jakost: '+col.txt);
-      });
-      const card=document.getElementById('meteoalarm-card');
-      const worstSev=warnings.find(w=>w.sev==='extreme')?'extreme':warnings.find(w=>w.sev==='severe')?'severe':'moderate';
-      if(card)card.style.borderColor=(MA_COLORS[worstSev]||MA_COLORS.moderate).dot+'66';
-    }
-    if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){
-    const list=document.getElementById('ma-list');
-    if(list)list.innerHTML='<div style="color:var(--muted);font-size:.75rem">Meteoalarm trenutno ni dosegljiv</div>';
-    console.warn('Meteoalarm:',e);
-  }
-}
-
-
-function calcPhotoTimes(){
-  const now=new Date();
-  const jd=now.getTime()/86400000+2440587.5;
-  const n=jd-2451545;
-  const L=(280.46+0.9856474*n)%360;
-  const g=((357.528+0.9856003*n)%360)*Math.PI/180;
-  const lam=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*Math.PI/180;
-  const eps=23.439*Math.PI/180;
-  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
-  const latR=LAT*Math.PI/180;
-  const eot=-7.655*Math.sin(g)+9.873*Math.sin(2*lam+3.588)+0.439*Math.sin(4*lam-6.714);
-  const snUtc=12-LON/15-eot/60;
-  const tz=-now.getTimezoneOffset()/60;
-  const ha=elev=>{const c=(Math.sin(elev*Math.PI/180)-Math.sin(latR)*Math.sin(dec))/(Math.cos(latR)*Math.cos(dec));return Math.abs(c)<=1?Math.acos(c)*180/Math.PI/15:null;};
-  const toLocal=h=>((h+tz)%24+24)%24;
-  const fmt=h=>{if(h==null)return null;h=toLocal(h);return String(Math.floor(h)).padStart(2,'0')+':'+String(Math.round((h%1)*60)).padStart(2,'0');};
-  const toH=h=>h==null?null:toLocal(h);
-  const hh=ha(0),hg=ha(-6),hb=ha(-12);
-  if(!hh)return null;
-  return{blueAM:fmt(snUtc-(hb||hg||hh)),blueAMh:toH(snUtc-(hb||hg||hh)),goldenAM:fmt(snUtc-(hg||hh)),goldenAMh:toH(snUtc-(hg||hh)),sunrise:fmt(snUtc-hh),sunriseH:toH(snUtc-hh),noon:fmt(snUtc),noonH:toH(snUtc),sunset:fmt(snUtc+hh),sunsetH:toH(snUtc+hh),goldenPM:fmt(snUtc+(hg||hh)),goldenPMh:toH(snUtc+(hg||hh)),bluePM:fmt(snUtc+(hb||hg||hh)),bluePMh:toH(snUtc+(hb||hg||hh))};
-}
-function calcMacroScore(temp,wind,humidity,rain){
-  let s=100;
-  if(temp<10)s-=50;else if(temp<16)s-=20;else if(temp>30)s-=30;else if(temp>26)s-=10;
-  if(wind>20)s-=40;else if(wind>12)s-=20;else if(wind>6)s-=8;
-  if(humidity<40)s-=20;else if(humidity>95)s-=10;
-  if(rain>0)s-=30;
-  return Math.max(0,Math.min(100,Math.round(s)));
-}
-function applyPhotographyWidget(obs){
-  const pt=calcPhotoTimes();if(!pt)return;
-  const now=new Date(),nowH=now.getHours()+now.getMinutes()/60;
-  const segs=[{from:0,to:pt.blueAMh,c:'#0f172a'},{from:pt.blueAMh,to:pt.goldenAMh,c:'#1e3a5f'},{from:pt.goldenAMh,to:pt.sunriseH,c:'#92400e'},{from:pt.sunriseH,to:pt.goldenPMh,c:'#38bdf8'},{from:pt.goldenPMh,to:pt.sunsetH,c:'#b45309'},{from:pt.sunsetH,to:pt.bluePMh,c:'#1e3a5f'},{from:pt.bluePMh,to:24,c:'#0f172a'}].filter(s=>s.to>s.from);
-  const tl=document.getElementById('photo-timeline');
-  if(tl){tl.innerHTML='';segs.forEach(seg=>{const d=document.createElement('div');d.className='photo-tl-seg';d.style.cssText='flex:'+(seg.to-seg.from)+';background:'+seg.c;tl.appendChild(d);});const ind=document.createElement('div');ind.className='photo-tl-now';ind.style.left=(nowH/24*100)+'%';tl.appendChild(ind);}
-  let phase='☀️ Dan',phaseColor='var(--blue)';
-  if(nowH<pt.blueAMh||nowH>pt.bluePMh){phase='🌙 Noč';phaseColor='var(--muted)';}
-  else if(nowH<pt.goldenAMh){phase='💙 Modra ura';phaseColor='#38bdf8';}
-  else if(nowH<pt.sunriseH){phase='🌅 Zlata ura ↑';phaseColor='#f97316';}
-  else if(nowH>pt.goldenPMh&&nowH<pt.sunsetH){phase='🌇 Zlata ura ↓';phaseColor='#f97316';}
-  else if(nowH>pt.sunsetH&&nowH<pt.bluePMh){phase='💙 Modra ura';phaseColor='#38bdf8';}
-  const phEl=document.getElementById('photo-phase-lbl');if(phEl){phEl.textContent=phase;phEl.style.color=phaseColor;}
-  const ev=document.getElementById('photo-events');
-  if(ev)ev.innerHTML=[{h:pt.blueAMh,l:'💙 '+pt.blueAM},{h:pt.goldenAMh,l:'🌅 '+pt.goldenAM},{h:pt.sunriseH,l:'☀️ '+pt.sunrise},{h:pt.noonH,l:'🌞 '+pt.noon},{h:pt.goldenPMh,l:'🌇 '+pt.goldenPM},{h:pt.sunsetH,l:'🌆 '+pt.sunset},{h:pt.bluePMh,l:'🌙 '+pt.bluePM}].map(p=>`<span style="color:${Math.abs(p.h-nowH)<0.5?'var(--amber)':'var(--muted)'}">${p.l}</span>`).join('');
-  const m=obs?.metric||{};const T=m.temp??15,W=m.windSpeed??0,H=obs?.humidity??70,R=m.precipRate??0;
-  const ms=calcMacroScore(T,W,H,R);
-  const ls=phase.includes('Zlata')?95:phase.includes('Modra')?85:phase.includes('Noč')?10:65;
-  const ws=Math.max(0,100-W*3.5);
-  const mg=document.getElementById('photo-macro-grid');
-  if(mg)mg.innerHTML=[{n:ms,l:'Makro pogoji',c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',s:'%'},{n:ls,l:'Kakovost svetlobe',c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',s:'%'},{n:Math.round(ws),l:'Mirnost vetra',c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',s:'%'},{n:T.toFixed(1),l:'Temperatura',c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:'°C'}].map(it=>`<div class="photo-macro-item"><div class="photo-macro-score" style="color:${it.c}">${it.n}${it.s}</div><div class="photo-macro-lbl">${it.l}</div></div>`).join('');
-  const subjects=[{e:'🦋',n:'Metulji',a:T>=18&&T<=30&&W<15&&R<0.1},{e:'🐝',n:'Čebele',a:T>=15&&W<20&&R<0.1},{e:'🦗',n:'Kobilice',a:T>=22&&W<20&&R<0.1},{e:'🐛',n:'Hrošči',a:T>=14&&T<=28},{e:'🕷',n:'Pajki',a:T>=10&&T<=24},{e:'🐉',n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},{e:'🌸',n:'Cvetlice',a:true},{e:'🍄',n:'Gobe',a:R>0||H>=85}];
-  const sEl=document.getElementById('photo-subjects');
-  if(sEl)sEl.innerHTML=subjects.map(s=>`<div class="photo-subject ${s.a?'active':'low'}">${s.e} ${s.n}</div>`).join('');
-  const tips=[];
-  if(phase.includes('Zlata'))tips.push('Idealen čas — zlata svetloba, dolge sence.');
-  if(phase.includes('Modra'))tips.push('Modra ura: mehka brez senc, super za detajle.');
-  if(H>=80&&T>=10&&T<=20)tips.push('Visoka vlaga — pričakuj roso in kapljice.');
-  if(R<0.1&&T>=18&&W<10)tips.push('Idealni pogoji za žuželke — mirno in toplo.');
-  if(W>20)tips.push('Preveč vetra za makro. Poiščite zavetje.');
-  const tipEl=document.getElementById('photo-tip');if(tipEl)tipEl.textContent=tips[0]||'';
-}
-
 // ── Smart notifications ───────────────────────────────────
 async function checkSmartNotifications(){
   if(!('Notification'in window)||Notification.permission!=='granted'||localStorage.getItem('wx-notif')!=='on')return;
@@ -4242,19 +4063,11 @@ async function init(){
   connectLightning();
   autoLoadHistoryFile();
   checkSmartNotifications(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchMeteoalarm()]);
-  loadArsoRadar();loadArsoCamera(0);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
   applyPheno();
 }
 init();
-setInterval(fetchCurrent,5*60*1000);
-setInterval(fetchHourly,30*60*1000);
-setInterval(fetchForecast,60*60*1000);
-setInterval(fetchTextForecast,60*60*1000);
-setInterval(loadArsoRadar,15*60*1000);       // radar vsake 15 min
-setInterval(()=>loadArsoCamera(_camIdx),5*60*1000); // kamera vsake 5 min
-setInterval(fetchMeteoalarm,15*60*1000);     // opozorila vsake 15 min
-setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
