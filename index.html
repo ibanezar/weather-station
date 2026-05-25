@@ -459,6 +459,21 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
+
+/* Sky strip */
+.sky-strip-wrap{position:relative;border-radius:14px;overflow:hidden;margin-top:.25rem}
+.sky-strip-svg{display:block;width:100%;cursor:crosshair}
+.sky-tooltip{position:absolute;background:rgba(15,23,42,.88);border:1px solid rgba(56,189,248,.35);border-radius:8px;padding:.4rem .7rem;font-size:.68rem;font-family:'IBM Plex Mono',monospace;color:#e2e8f0;pointer-events:none;white-space:nowrap;transition:opacity .15s;z-index:10}
+
+
+/* Sky strip */
+.sky-strip-outer{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:14px}
+.sky-strip-outer::-webkit-scrollbar{display:none}
+#sky-strip-svg{display:block;min-width:960px}
+.sky-legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.62rem;color:var(--muted);margin-top:.5rem}
+.sky-leg-item{display:flex;align-items:center;gap:.3rem}
+.sky-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
 /* Why weather */
 .why-text{font-size:.84rem;line-height:1.9;color:var(--text)}
 .why-text em{font-style:normal;color:var(--blue);font-weight:500}
@@ -955,6 +970,28 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
     </div>
     <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
+  </div>
+
+  <!-- 24h Sky Strip -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.5rem">
+      <span class="clabel" style="margin:0">🌅 Dnevni trak neba — naslednjih 24 ur</span>
+      <span class="chart-range" id="sky-range">—</span>
+    </div>
+    <div class="sky-strip-outer">
+      <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
+           xmlns="http://www.w3.org/2000/svg" height="128">
+        <text x="480" y="64" text-anchor="middle" font-size="12"
+              fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+      </svg>
+    </div>
+    <div class="sky-legend">
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#f87171"></span>Temperatura</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
+      <span style="margin-left:auto;opacity:.6">↔ drsaj za cel dan</span>
+    </div>
   </div>
 
   <!-- Forecast -->
@@ -1529,6 +1566,20 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
+    <!-- Sky Strip -->
+    <div class="card chart-card" style="margin-bottom:1.25rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌅 Dnevni trak neba — 24 ur</span>
+        <span class="chart-range" id="sky-strip-info">Nalaganje…</span>
+      </div>
+      <div class="sky-strip-wrap" id="sky-strip-wrap">
+        <svg id="sky-strip-svg" class="sky-strip-svg" viewBox="0 0 1000 170" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="sky-tooltip" id="sky-tooltip" style="opacity:0;display:none"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.6rem;color:var(--muted)">
+        <span>🌡 Temperatura</span><span style="color:#a78bfa">💨 Veter</span><span style="color:#fbbf24">☀️ UV</span><span style="color:#60a5fa">🌧 Padavine</span>
+      </div>
+    </div>
     <div class="nt-section">
       <div class="nt-title">Temperatura & padavine — naslednjih 48 ur</div>
       <div class="nt-card">
@@ -3993,6 +4044,175 @@ function initAnalysisCharts(){
 // ── Tab: Podrobna napoved 48h ──────────────────────────
 // ═══════════════════════════════════════════════════════
 let _fc2Init=false;
+// ── Dnevni trak neba ──────────────────────────────────────
+async function drawDailySkyStrip(){
+  const svg=document.getElementById('sky-strip-svg');
+  const info=document.getElementById('sky-strip-info');
+  if(!svg)return;
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=temperature_2m,precipitation,wind_speed_10m,uv_index,weather_code,cloud_cover'
+      +'&timezone=Europe%2FLjubljana&forecast_days=2';
+    const res=await fetch(url);const data=await res.json();
+    const h=data.hourly;if(!h?.time)return;
+    const now=new Date();
+    const hi=Math.max(0,h.time.findIndex(t=>new Date(t)>=now)||0);
+    const N=24;
+    const sl={
+      times:h.time.slice(hi,hi+N),temp:h.temperature_2m.slice(hi,hi+N),
+      rain:h.precipitation.slice(hi,hi+N),wind:h.wind_speed_10m.slice(hi,hi+N),
+      uv:h.uv_index.slice(hi,hi+N),wmo:h.weather_code.slice(hi,hi+N),
+      cloud:h.cloud_cover.slice(hi,hi+N),
+    };
+    if(sl.temp.length<6)return;
+    const VW=1000,VH=170,pad={t:28,r:10,b:30,l:10};
+    const CW=VW-pad.l-pad.r,CH=VH-pad.t-pad.b;
+    const xS=i=>pad.l+i/(N-1)*CW;
+    const pt=calcPhotoTimes()||{};
+    const nowH=now.getHours()+now.getMinutes()/60;
+    const bw=CW/N;
+
+    // Sky color interpolation
+    function skyAtHour(absH){
+      const h24=((absH%24)+24)%24;
+      const lerp=(a,b,t)=>Math.round(a+(b-a)*Math.max(0,Math.min(1,t)));
+      const lerpRGB=(ca,cb,t)=>ca.map((v,i)=>lerp(v,cb[i],t));
+      const NIGHT=[2,6,23],NAUT=[12,26,63],BLUE=[22,60,153],
+            ORANGE=[146,64,9],GOLD=[174,80,9],SKY=[3,132,199];
+      const na=pt.nautAMh??4,bl=pt.blueAMh??5,sr=pt.sunriseH??5.5,
+            ga=pt.goldAMh??6.5,gp=pt.goldPMh??19.5,ss=pt.sunsetH??20.5,
+            bp=pt.bluePMh??21.5,np=pt.nautPMh??22.5;
+      if(h24<=na||h24>=np) return NIGHT;
+      if(h24<=bl)  return lerpRGB(NIGHT,BLUE,(h24-na)/(bl-na));
+      if(h24<=sr)  return lerpRGB(BLUE,ORANGE,(h24-bl)/(sr-bl));
+      if(h24<=ga)  return lerpRGB(ORANGE,GOLD,(h24-sr)/(ga-sr));
+      if(h24<=ga+1.5) return lerpRGB(GOLD,SKY,(h24-ga)/1.5);
+      if(h24>=np-0.5) return lerpRGB(NAUT,NIGHT,(h24-(np-0.5))/0.5);
+      if(h24>=bp)  return lerpRGB(BLUE,NAUT,(h24-bp)/(np-bp));
+      if(h24>=ss)  return lerpRGB(ORANGE,BLUE,(h24-ss)/(bp-ss));
+      if(h24>=gp)  return lerpRGB(GOLD,ORANGE,(h24-gp)/(ss-gp));
+      if(h24>=gp-1.5) return lerpRGB(SKY,GOLD,(h24-(gp-1.5))/1.5);
+      return SKY;
+    }
+
+    const mk=(tag,attrs,txt)=>{
+      const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+      Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+      if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;
+    };
+    svg.innerHTML='';
+
+    // Layer 1: Sky gradient
+    const defs=mk('defs',{});
+    let gs='';
+    for(let i=0;i<N;i++){const [r,g,b]=skyAtHour(nowH+i);gs+=`<stop offset="${(i/(N-1)*100).toFixed(1)}%" stop-color="rgb(${r},${g},${b})"/>`;}
+    defs.innerHTML=`<linearGradient id="sg" x1="0" x2="1" y1="0" y2="0">${gs}</linearGradient><linearGradient id="tg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="rgba(56,189,248,.28)"/><stop offset="100%" stop-color="rgba(56,189,248,0)"/></linearGradient>`;
+    mk('rect',{x:0,y:0,width:VW,height:VH,fill:'url(#sg)'});
+
+    // Layer 2: Cloud/fog overlays
+    sl.cloud.forEach((cc,i)=>{
+      if(!cc&&!(sl.wmo[i]>=45&&sl.wmo[i]<=48))return;
+      const isFog=sl.wmo[i]>=45&&sl.wmo[i]<=48;
+      const alpha=isFog?0.42:(cc/100)*0.32;
+      mk('rect',{x:(xS(i)-bw/2).toFixed(1),y:pad.t,width:(bw+1).toFixed(1),height:CH,fill:isFog?`rgba(220,220,220,${alpha})`:`rgba(150,160,185,${alpha})`});
+    });
+
+    // Layer 3: UV band (top strip)
+    const maxUV=Math.max(...sl.uv,1);
+    sl.uv.forEach((uv,i)=>{
+      if(!uv||uv<0.5)return;
+      const bh=Math.min(11,(uv/Math.max(maxUV,8))*11);
+      mk('rect',{x:(xS(i)-bw/2+1).toFixed(1),y:(pad.t-bh).toFixed(1),width:(bw-2).toFixed(1),height:bh.toFixed(1),fill:`rgba(251,191,36,${0.35+uv/12*0.5})`,rx:'2'});
+    });
+
+    // Layer 4: Rain bars (bottom)
+    const maxRain=Math.max(...sl.rain,0.5);
+    sl.rain.forEach((r,i)=>{
+      if(r<0.1)return;
+      const bh=Math.min(24,(r/maxRain)*24);
+      mk('rect',{x:(xS(i)-bw/2+2).toFixed(1),y:(pad.t+CH-bh).toFixed(1),width:(bw-4).toFixed(1),height:bh.toFixed(1),fill:'rgba(96,165,250,0.75)',rx:'2'});
+    });
+
+    // Layer 5: Temperature area + line
+    const temps=sl.temp.filter(t=>t!=null);
+    const tmin=Math.min(...temps)-2,tmax=Math.max(...temps)+2;
+    const yT=t=>pad.t+(1-(t-tmin)/(tmax-tmin))*CH;
+    const pts=sl.temp.map((t,i)=>({x:xS(i),y:t!=null?yT(t):null})).filter(p=>p.y!=null);
+    if(pts.length>1){
+      const lp=smoothPath(pts);
+      mk('path',{d:lp+' L '+xS(N-1)+','+(pad.t+CH)+' L '+xS(0)+','+(pad.t+CH)+' Z',fill:'url(#tg)'});
+      mk('path',{d:lp,fill:'none',stroke:'#38bdf8','stroke-width':'2.5','stroke-linecap':'round'});
+    }
+
+    // Layer 6: Wind spikes
+    sl.wind.forEach((w,i)=>{
+      if(w<18)return;
+      const intensity=Math.min(1,(w-18)/40);
+      const x=xS(i),baseY=yT(sl.temp[i]??((tmin+tmax)/2))-3;
+      const sh=4+intensity*12;
+      mk('line',{x1:x,y1:baseY,x2:x,y2:baseY-sh,stroke:`rgba(167,139,250,${0.55+intensity*0.4})`,strokeWidth:'2','stroke-width':'2','stroke-linecap':'round'});
+      mk('polygon',{points:`${x},${baseY-sh} ${x-3.5},${baseY-sh+6} ${x+3.5},${baseY-sh+6}`,fill:`rgba(167,139,250,${0.45+intensity*0.4})`});
+    });
+
+    // Layer 7: Weather emojis every 3h
+    for(let i=0;i<N;i+=3){
+      const e=mk('text',{x:xS(i).toFixed(1),y:(pad.t-8).toFixed(1),'text-anchor':'middle','font-size':'14'});
+      e.textContent=_wmoEmoji(sl.wmo[i]||0);
+    }
+
+    // Layer 8: Temperature labels (max + min)
+    const maxTi=sl.temp.indexOf(Math.max(...sl.temp));
+    const minTi=sl.temp.indexOf(Math.min(...sl.temp));
+    [[maxTi,'#f87171',true],[minTi,'#7dd3fc',false]].forEach(([i,col,above])=>{
+      if(i<0)return;
+      const y=yT(sl.temp[i]);
+      mk('text',{x:xS(i).toFixed(1),y:(above?y-6:y+13).toFixed(1),'text-anchor':'middle','font-size':'9.5',fill:col,'font-family':'IBM Plex Mono,monospace','font-weight':'600'},sl.temp[i].toFixed(1)+'°');
+    });
+
+    // Layer 9: Time labels every 3h
+    for(let i=0;i<N;i+=3){
+      const date=new Date(sl.times[i]);
+      const hr=date.getHours();
+      const lbl=i===0?'zdaj':(hr<10?'0':'')+hr+':00';
+      const [r,g,b]=skyAtHour(nowH+i);
+      const textCol=(r+g+b)/3<80?'rgba(255,255,255,.65)':'rgba(0,0,0,.5)';
+      mk('text',{x:xS(i).toFixed(1),y:(VH-8).toFixed(1),'text-anchor':'middle','font-size':'8.5',fill:textCol,'font-family':'IBM Plex Mono,monospace'},lbl);
+    }
+
+    // Layer 10: Now line
+    mk('line',{x1:xS(0)+1,x2:xS(0)+1,y1:pad.t,y2:VH-pad.b,stroke:'rgba(255,200,0,.85)','stroke-width':'2','stroke-dasharray':'4,3'});
+
+    // Layer 11: Sunrise/sunset markers
+    [[pt.sunriseH,'☀️'],[pt.sunsetH,'🌇']].forEach(([h,lbl])=>{
+      if(!h)return;
+      const diffH=h-nowH;if(diffH<0.5||diffH>N-0.5)return;
+      const x=xS(diffH/(N-1)*(N-1));
+      mk('line',{x1:x.toFixed(1),x2:x.toFixed(1),y1:pad.t,y2:VH-pad.b,stroke:'rgba(251,191,36,.35)','stroke-width':'1','stroke-dasharray':'3,5'});
+      mk('text',{x:x.toFixed(1),y:(pad.t-9).toFixed(1),'text-anchor':'middle','font-size':'11'},lbl);
+    });
+
+    // Hover tooltip
+    const wrap=document.getElementById('sky-strip-wrap');
+    const tip=document.getElementById('sky-tooltip');
+    if(wrap&&tip){
+      svg.onmousemove=e=>{
+        const rect=svg.getBoundingClientRect();
+        const idx=Math.round(((e.clientX-rect.left)/rect.width)*(N-1));
+        if(idx<0||idx>=N)return;
+        const dt=new Date(sl.times[idx]);
+        const lbl=idx===0?'Zdaj':dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+        tip.style.cssText=`display:block;opacity:1;left:${Math.min(e.clientX-rect.left+12,rect.width-160)}px;top:8px`;
+        tip.innerHTML=`<b>${lbl}</b> ${_wmoEmoji(sl.wmo[idx]||0)}<br>🌡 ${sl.temp[idx]?.toFixed(1)??'—'}°C  💨 ${Math.round(sl.wind[idx]||0)} km/h<br>🌧 ${(sl.rain[idx]||0).toFixed(1)} mm  ☀️ UV ${(sl.uv[idx]||0).toFixed(1)}`;
+      };
+      svg.onmouseleave=()=>{tip.style.opacity='0';setTimeout(()=>{tip.style.display='none';},200);};
+    }
+
+    const tRange=`${Math.min(...temps).toFixed(1)}° – ${Math.max(...temps).toFixed(1)}°C`;
+    const totalRain=sl.rain.reduce((a,b)=>a+b,0);
+    if(info)info.textContent=tRange+(totalRain>0.1?'  ·  🌧 '+totalRain.toFixed(1)+' mm':'');
+  }catch(e){console.warn('SkyStrip:',e);}
+}
+
 async function initForecast2(){
   if(_fc2Init)return;_fc2Init=true;
   try{
@@ -4335,7 +4555,183 @@ async function initSurroundings(){
   }catch(e){console.warn('Surroundings:',e);}
 }
 
-// ── "Zakaj je danes takšno vreme?" ────────────────────────
+// ── 24h Sky Strip ──────────────────────────────────────────
+function skyColorForHour(hour, wmo, isDark){
+  // Base sky color by hour
+  const h=((hour%24)+24)%24;
+  let r,g,b;
+  if(h<5||h>22){r=2;g=6;b=23;}          // deep night
+  else if(h<6){r=15;g=23;b=42;}         // pre-dawn
+  else if(h<7){r=120;g=53;b=14;}        // golden AM
+  else if(h<8){r=180;g=100;b=30;}       // warm morning
+  else if(h<10){r=3;g=105;b=161;}       // fresh morning
+  else if(h<17){r=2;g=132;b=199;}       // full day sky
+  else if(h<18){r=3;g=105;b=161;}       // afternoon
+  else if(h<19.5){r=120;g=53;b=14;}     // golden PM
+  else if(h<21){r=30;g=58;b=95;}        // dusk
+  else{r=15;g=23;b=42;}                 // night
+  // Weather modifier (overcast = darker/greyer)
+  const overcast=wmo>=2&&wmo<50?0.55:wmo>=50?0.35:1.0;
+  const grey=isDark?15:140;
+  r=Math.round(r*(overcast)+(grey*(1-overcast)));
+  g=Math.round(g*(overcast)+(grey*(1-overcast)));
+  b=Math.round(b*(overcast)+(grey*(1-overcast)));
+  return`rgb(${r},${g},${b})`;
+}
+function uvToColor(uv){
+  if(!uv||uv<1)return'rgba(30,30,30,0)';
+  if(uv<3) return`rgba(250,204,21,${Math.min(0.5,uv*0.15)})`;
+  if(uv<6) return`rgba(251,146,60,${Math.min(0.6,uv*0.1)})`;
+  if(uv<9) return`rgba(239,68,68,${Math.min(0.65,uv*0.08)})`;
+  return`rgba(168,85,247,0.7)`;
+}
+
+async function fetchAndDrawSkyStrip(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=temperature_2m,precipitation,wind_speed_10m,uv_index,weather_code,apparent_temperature'
+      +'&timezone=Europe%2FLjubljana&forecast_days=2&past_hours=1';
+    const res=await fetch(url);const data=await res.json();
+    const h=data.hourly;if(!h?.time?.length)return;
+    const now=new Date();
+    // Find current hour index
+    const startIdx=Math.max(0,h.time.findIndex(t=>new Date(t)>=now));
+    const slice=h.time.slice(startIdx,startIdx+24);
+    const hours=slice.map((_,i)=>{
+      const idx=startIdx+i;
+      const date=new Date(h.time[idx]);
+      return{
+        hour:date.getHours(),
+        label:String(date.getHours()).padStart(2,'0')+':00',
+        temp:h.temperature_2m[idx]??0,
+        apparent:h.apparent_temperature[idx]??0,
+        rain:h.precipitation[idx]??0,
+        wind:h.wind_speed_10m[idx]??0,
+        uv:h.uv_index[idx]??0,
+        wmo:h.weather_code[idx]??0,
+        isNow:i===0,
+      };
+    });
+    const rangeEl=document.getElementById('sky-range');
+    if(rangeEl)rangeEl.textContent=hours[0]?.label+' – '+hours[hours.length-1]?.label;
+    drawSkyStrip(hours);
+  }catch(e){console.warn('SkyStrip:',e);}
+}
+
+function drawSkyStrip(hours){
+  const svg=document.getElementById('sky-strip-svg');if(!svg||!hours.length)return;
+  const VW=960,VH=128;
+  const cellW=VW/hours.length;
+  const LABEL_H=14, SKY_TOP=LABEL_H, SKY_H=72;
+  const UV_Y=SKY_TOP+SKY_H+2, UV_H=8;
+  const RAIN_Y=UV_Y+UV_H+2, RAIN_H=14;
+  const WIND_Y=RAIN_Y+RAIN_H+2, WIND_H=10;
+  const dark=isDark();
+
+  svg.innerHTML='';
+  const mk=(tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;};
+  const defs=mk('defs',{});
+
+  // ── Sky background cells (smooth gradient between hours)
+  hours.forEach((h,i)=>{
+    const x=i*cellW;
+    const col=skyColorForHour(h.hour,h.wmo,dark);
+    const colNext=i<hours.length-1?skyColorForHour(hours[i+1].hour,hours[i+1].wmo,dark):col;
+    const gid='sg'+i;
+    defs.innerHTML+=`<linearGradient id="${gid}" x1="0" x2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="${colNext}"/></linearGradient>`;
+    mk('rect',{x:x.toFixed(1),y:SKY_TOP,width:(cellW+1).toFixed(1),height:SKY_H,fill:`url(#${gid})`});
+  });
+
+  // ── UV band
+  hours.forEach((h,i)=>{
+    const x=i*cellW;
+    mk('rect',{x:x.toFixed(1),y:UV_Y,width:cellW.toFixed(1),height:UV_H,fill:uvToColor(h.uv)});
+  });
+
+  // ── Precipitation bars
+  const maxRain=Math.max(...hours.map(h=>h.rain),0.5);
+  hours.forEach((h,i)=>{
+    if(h.rain<0.1)return;
+    const bh=Math.max(3,Math.min(RAIN_H,(h.rain/maxRain)*RAIN_H));
+    mk('rect',{x:(i*cellW+1.5).toFixed(1),y:(RAIN_Y+RAIN_H-bh).toFixed(1),
+      width:(cellW-3).toFixed(1),height:bh.toFixed(1),
+      fill:h.wmo>=71?'rgba(147,197,253,0.75)':'rgba(96,165,250,0.75)',rx:'1.5'});
+  });
+
+  // ── Wind bars
+  const maxWind=Math.max(...hours.map(h=>h.wind),5);
+  hours.forEach((h,i)=>{
+    if(h.wind<8)return;
+    const bh=Math.max(2,Math.min(WIND_H,((h.wind-8)/(maxWind-8))*WIND_H));
+    mk('rect',{x:(i*cellW+1.5).toFixed(1),y:(WIND_Y+WIND_H-bh).toFixed(1),
+      width:(cellW-3).toFixed(1),height:bh.toFixed(1),
+      fill:'rgba(167,139,250,0.7)',rx:'1.5'});
+  });
+
+  // ── Temperature line + area
+  const temps=hours.map(h=>h.temp);
+  const tmin=Math.min(...temps)-1,tmax=Math.max(...temps)+1;
+  const tY=t=>SKY_TOP+4+(1-(t-tmin)/(tmax-tmin))*(SKY_H-8);
+  const pts=hours.map((h,i)=>({x:i*cellW+cellW/2,y:tY(h.temp)}));
+  const tempPath=smoothPath(pts);
+  const lastPt=pts[pts.length-1];
+  const firstPt=pts[0];
+  // Area fill
+  const areaId='ta';
+  defs.innerHTML+=`<linearGradient id="${areaId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f87171" stop-opacity="0.25"/><stop offset="100%" stop-color="#f87171" stop-opacity="0"/></linearGradient>`;
+  mk('path',{d:`${tempPath} L${lastPt.x},${SKY_TOP+SKY_H} L${firstPt.x},${SKY_TOP+SKY_H} Z`,fill:`url(#${areaId})`});
+  mk('path',{d:tempPath,fill:'none',stroke:'#f87171','stroke-width':'2','stroke-linecap':'round'});
+  // Temp dots at peaks/troughs
+  const maxT=Math.max(...temps),minT=Math.min(...temps);
+  const maxIdx=temps.indexOf(maxT),minIdx=temps.indexOf(minT);
+  [[maxIdx,maxT,'#f87171',-10],[minIdx,minT,'#38bdf8',14]].forEach(([idx,t,col,dy])=>{
+    if(idx<0)return;
+    const x=idx*cellW+cellW/2,y=tY(t);
+    mk('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:'4',fill:col,stroke:'white','stroke-width':'1.5'});
+    mk('text',{x:x.toFixed(1),y:(y+dy).toFixed(1),'text-anchor':'middle','font-size':'8',fill:col,'font-family':'IBM Plex Mono,monospace','font-weight':'600'},t.toFixed(1)+'°');
+  });
+
+  // ── Condition icons (every 2h, skip if too many)
+  hours.forEach((h,i)=>{
+    if(i%2!==0)return;
+    const x=i*cellW+cellW;
+    const iconY=SKY_TOP+SKY_H*0.55;
+    mk('text',{x:x.toFixed(1),y:iconY.toFixed(1),'text-anchor':'middle','font-size':'13',
+      'dominant-baseline':'central','font-family':'sans-serif'},_wmoEmoji(h.wmo));
+  });
+
+  // ── Apparent temperature mini dots (feels like) — subtle
+  hours.forEach((h,i)=>{
+    if(Math.abs(h.apparent-h.temp)<1.5)return;
+    const x=i*cellW+cellW/2,y=tY(h.apparent);
+    mk('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:'2',fill:'rgba(248,113,113,0.35)'});
+  });
+
+  // ── Time labels every 3h
+  hours.forEach((h,i)=>{
+    if(i%3!==0)return;
+    mk('text',{x:(i*cellW+cellW/2).toFixed(1),y:(LABEL_H-2).toFixed(1),'text-anchor':'middle',
+      'font-size':'8',fill:dark?'rgba(148,163,184,0.8)':'rgba(71,85,105,0.8)',
+      'font-family':'IBM Plex Mono,monospace'},h.label);
+  });
+
+  // ── "Zdaj" marker
+  const nowX=cellW/2;
+  mk('line',{x1:nowX.toFixed(1),x2:nowX.toFixed(1),y1:SKY_TOP,y2:VH,
+    stroke:'rgba(255,180,0,0.7)','stroke-width':'1.5','stroke-dasharray':'3,3'});
+  mk('text',{x:(nowX+3).toFixed(1),y:(SKY_TOP+8).toFixed(1),
+    'font-size':'7',fill:'rgba(255,180,0,0.8)','font-family':'IBM Plex Mono,monospace'},'zdaj');
+
+  // ── Bottom section labels
+  const lbls=[['UV',UV_Y+5],['mm',RAIN_Y+9],['km/h',WIND_Y+7]];
+  lbls.forEach(([lbl,y])=>{
+    mk('text',{x:(VW-2).toFixed(1),y:y.toFixed(1),'text-anchor':'end',
+      'font-size':'6.5',fill:dark?'rgba(148,163,184,0.5)':'rgba(100,116,139,0.5)',
+      'font-family':'IBM Plex Mono,monospace'},lbl);
+  });
+}
+
+
 function generateWhyWeather(obs){
   const el=document.getElementById('why-text');
   const upd=document.getElementById('why-updated');
@@ -4893,11 +5289,11 @@ async function init(){
   connectLightning();
   autoLoadHistoryFile();
   checkSmartNotifications(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip()]);
   applyPheno();
 }
 init();
-setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
