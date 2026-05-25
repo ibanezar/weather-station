@@ -494,6 +494,57 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mc-datum{font-size:.65rem;font-family:'IBM Plex Mono',monospace;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:6px;padding:2px 8px;color:var(--text)}
 .mc-none{font-size:.78rem;color:var(--green);padding:.25rem 0}
 
+
+/* Zanimivosti tab */
+.tri-section{margin-bottom:2rem}
+.tri-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding-bottom:.5rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.tri-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1rem;backdrop-filter:blur(12px)}
+/* Records */
+.rec-compare{display:grid;grid-template-columns:1fr repeat(3,auto);gap:.5rem .75rem;font-size:.75rem;align-items:center}
+.rec-compare-hdr{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center}
+.rec-compare .mine{color:var(--blue);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
+.rec-compare .slo{color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
+.rec-compare .world{color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
+.rec-sub{font-size:.6rem;color:var(--muted);line-height:1.3;margin-top:.1rem}
+/* Proverb */
+.proverb-text{font-size:1.05rem;font-style:italic;line-height:1.6;color:var(--text);margin-bottom:.75rem}
+.proverb-valid{display:inline-flex;align-items:center;gap:.4rem;padding:3px 12px;border-radius:20px;font-size:.7rem;font-weight:500}
+.proverb-true{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.25)}
+.proverb-partial{background:rgba(251,191,36,.12);color:var(--amber);border:1px solid rgba(251,191,36,.25)}
+.proverb-myth{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.25)}
+.proverb-expl{font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:.75rem}
+/* Phenomenon */
+.phenom-layout{display:grid;grid-template-columns:1fr 140px;gap:1.25rem;align-items:start}
+@media(max-width:500px){.phenom-layout{grid-template-columns:1fr}}
+.phenom-name{font-size:1rem;font-weight:600;margin-bottom:.35rem}
+.phenom-desc{font-size:.78rem;line-height:1.75;color:var(--muted)}
+.phenom-svg{border-radius:12px;overflow:hidden;background:var(--fc-bg)}
+/* Nature */
+.nat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.65rem}
+.nat-item{display:flex;align-items:flex-start;gap:.6rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .75rem;font-size:.74rem;line-height:1.5}
+.nat-icon{font-size:1.3rem;flex-shrink:0}
+.nat-sign{font-weight:500;color:var(--text)}
+.nat-pred{color:var(--muted);font-size:.68rem;margin-top:.1rem}
+.nat-active{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05)}
+.nat-active .nat-sign{color:var(--green)}
+/* World compare */
+.world-cards{display:flex;gap:.65rem;flex-wrap:wrap}
+.world-card{flex:1;min-width:140px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.75rem .9rem;text-align:center}
+.world-city{font-size:.7rem;font-weight:600;color:var(--text)}
+.world-country{font-size:.6rem;color:var(--muted);margin-bottom:.3rem}
+.world-temp{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:300}
+.world-diff{font-size:.65rem;margin-top:.2rem;font-family:'IBM Plex Mono',monospace}
+.world-match{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06)}
+/* Quiz */
+.quiz-q{font-size:.9rem;font-weight:500;line-height:1.55;margin-bottom:1rem;color:var(--text)}
+.quiz-opts{display:flex;flex-direction:column;gap:.45rem}
+.quiz-opt{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .9rem;font-size:.78rem;cursor:pointer;transition:all .18s;text-align:left}
+.quiz-opt:hover:not(:disabled){border-color:var(--blue);background:rgba(56,189,248,.06)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(74,222,128,.1);color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.08);color:var(--red);opacity:.7}
+.quiz-expl{font-size:.76rem;line-height:1.65;color:var(--muted);margin-top:.85rem;padding:.7rem .9rem;background:var(--fc-bg);border-radius:10px;border-left:3px solid var(--blue)}
+.quiz-streak{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted)}
+
 /* Generative art */
 .weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
 #weather-art-canvas{display:block;width:100%;height:140px}
@@ -765,7 +816,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn" id="tab-btn-extremes"   onclick="switchTab('extremes')">⚡ Dogodki</button>
     <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🎯 Rekordi</button>
     <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
-    <button class="tab-btn" id="tab-btn-diary" onclick="switchTab('diary')">📸 Dnevnik</button>
+    <button class="tab-btn" id="tab-btn-diary"   onclick="switchTab('diary')">📸 Dnevnik</button>
+    <button class="tab-btn" id="tab-btn-trivia" onclick="switchTab('trivia')">🎲 Zanimivosti</button>
   </div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
@@ -1530,6 +1582,47 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   </div><!-- /tab-analysis -->
 
+  <!-- ═══ ZANIMIVOSTI TAB ═══ -->
+  <div id="tab-trivia" class="tab-pane">
+    <!-- Rekordi -->
+    <div class="tri-section">
+      <div class="tri-title">🌍 Vremenski rekordi — postaja vs. Slovenija vs. svet</div>
+      <div class="tri-card"><div id="tri-records">Nalaganje…</div></div>
+    </div>
+    <!-- Pregovor dneva -->
+    <div class="tri-section">
+      <div class="tri-title">💬 Pregovor dneva</div>
+      <div class="tri-card" id="tri-proverb-card">Nalaganje…</div>
+    </div>
+    <!-- Pojav dneva -->
+    <div class="tri-section">
+      <div class="tri-title">🧠 Pojav dneva</div>
+      <div class="tri-card" id="tri-phenom-card">Nalaganje…</div>
+    </div>
+    <!-- Naravni napovedovalci -->
+    <div class="tri-section">
+      <div class="tri-title">🐞 Naravni napovedovalci</div>
+      <div id="tri-nature-grid" class="nat-grid"></div>
+    </div>
+    <!-- Postaja vs. svet -->
+    <div class="tri-section">
+      <div class="tri-title">📊 Moja postaja vs. svet — kje je danes enako vreme?</div>
+      <div class="tri-card">
+        <div class="csub" id="tri-world-subtitle" style="margin-bottom:.75rem">Iščem…</div>
+        <div class="world-cards" id="tri-world-cards"></div>
+      </div>
+    </div>
+    <!-- Kviz -->
+    <div class="tri-section">
+      <div class="tri-title">❓ Vremenski kviz dneva
+        <span class="quiz-streak" id="quiz-streak" style="float:right"></span>
+      </div>
+      <div class="tri-card" id="tri-quiz-card">Nalaganje…</div>
+    </div>
+  </div>
+
+
+
   <!-- ═══ FOTODNEVNIK ═══ -->
   <div id="tab-diary" class="tab-pane">
     <div class="chart-hdr" style="margin-bottom:1.25rem">
@@ -2175,6 +2268,7 @@ function switchTab(tab){
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  initAnalysisCharts(); buildFingerprint(); }
+  if(tab==='trivia'){    initTrivia(); }
   if(tab==='forecast2'){ initForecast2(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
@@ -5264,6 +5358,225 @@ async function buildFingerprint(){
   }
 }
 
+
+// ══════════════════════════════════════════════════════════
+// ── TAB: ZANIMIVOSTI ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+// ── Data: Vremenski pregovori ──────────────────────────────
+const PROVERBS=[
+  {text:'Rdeče nebo zvečer, pastirjeva slast; rdeče nebo zjutraj, pastirjeva jeza.',valid:'true',expl:'Resnično! Rdeče nebo zvečer kaže na visok tlak in prah na zahodu — lepo vreme prihaja. Zjutraj rdeče nebo pomeni vlago in oblake na zahodu — dež se bliža.'},
+  {text:'Kadar mačka gobček umiva, bo kmalu dežuralo.',valid:'partial',expl:'Delno resnično. Mačke se pogosteje čistijo pri višji vlagi (dlaka postane lepljiva). Korelacija obstaja, a ni zanesljiva napoved.'},
+  {text:'Kadar dim gre navzgor, bo jutri lep dan.',valid:'true',expl:'Resnično! Visok tlak pritiska dim navzgor, nizek tlak pa ga tlači k tlom. Dim, ki se dviga, je zanesljiv znak stabilnega anticiklona.'},
+  {text:'Če se storžki borovih borov zapirajo, prihaja dež.',valid:'true',expl:'Resnično! Borovi storžki se odzivajo na vlago — pri visoki vlagi se luskine zaprejo. Naravni higrometer!'},
+  {text:'Kadar žabe regajo pri lepem vremenu, bo dež.',valid:'true',expl:'Resnično! Žabe so bolj aktivne pri padajočem tlaku in naraščajoči vlagi — zanesljiv bioindikator za prihod dežja.'},
+  {text:'Kadar so mravlje aktivne in nosijo jajčeca navzgor, prihaja dež.',valid:'true',expl:'Resnično! Mravlje so zelo občutljive na spremembe vlage in tlaka. Pred dežjem prenesejo zarod na višje nivoje rova.'},
+  {text:'Kdor se boji megle, se ne bo veselil lesa.',valid:'partial',expl:'Folklorni pregovor: kdor se izogiba neugodnim razmeram, ne bo doživel lepih plodov. Megla v Savinjski dolini je pogosta, a napoveduje pogosto sončen dan po razjasnitvi.'},
+  {text:'Sneg v aprilu, leto bogato.',valid:'partial',expl:'Delno resnično. Pozna snežna odeja poveča zalogo vode v tleh. A moderna kmetijska praksa je manj odvisna od tega.'},
+  {text:'Kadar luna ima venec, bo dež ali sneg.',valid:'true',expl:'Resnično! Lunin venec (halo) nastane, ko svetloba prehaja skozi ledene kristale visoko oblačje (cirrus) — ki so pogosto predhodnik fronte.'},
+  {text:'Kakršen je 7. januar, takšno bo zimo.',valid:'myth',expl:'Mit! Ni statistične zveze med enim datumom in celotno zimo. Vzorci cirkulacije so preveč kaotični za tovrstne napovedi.'},
+  {text:'Kadar lastovice nizko letijo, bo dež.',valid:'true',expl:'Resnično! Insekti se pred dežjem spustijo bliže tlom (nižji tlak otežuje let). Lastovice sledijo plenu — nižji insekti, nižji let.'},
+  {text:'Svečnica z jasnim nebom napoveduje hudo zimo.',valid:'myth',expl:'Mit! Ni zanesljive zveze. Podobno kot ameriški "Groundhog Day" — statistično ni potrjeno.'},
+  {text:'Kadar se rosa nabira na zelju, bo naslednji dan lep.',valid:'partial',expl:'Delno resnično. Obilen rosni izpad nakazuje jasno, mirno noč (brez oblakov) — kar je pogosto predhodnik lepega dne. A ne vedno.'},
+];
+
+// ── Data: Pojavi dneva ─────────────────────────────────────
+const PHENOMENA=[
+  {name:'Mavrnica',en:'Rainbow',icon:'🌈',
+   desc:'Nastane, ko sončna svetloba vstopi v kapljice dežja, se lomi, odbije od notranje stene in znova lomi ob izhodu. Vsaka barva se lomi pod različnim kotom (rdeča 42°, vijolična 40°). V Savinjski dolini jo vidimo najpogosteje ob popoldanskih plohah, ko sonce posije z zahoda.',
+   svg:'<svg viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="80" fill="#0ea5e9"/><rect y="60" width="140" height="20" fill="#16a34a" opacity=".7"/><path d="M5,75 Q70,-20 135,75" fill="none" stroke="#ef4444" stroke-width="4" opacity=".8"/><path d="M12,75 Q70,-5 128,75" fill="none" stroke="#f97316" stroke-width="4" opacity=".8"/><path d="M19,75 Q70,8 121,75" fill="none" stroke="#fbbf24" stroke-width="4" opacity=".8"/><path d="M26,75 Q70,18 114,75" fill="none" stroke="#22c55e" stroke-width="4" opacity=".8"/><path d="M33,75 Q70,26 107,75" fill="none" stroke="#3b82f6" stroke-width="4" opacity=".8"/><path d="M40,75 Q70,32 100,75" fill="none" stroke="#8b5cf6" stroke-width="4" opacity=".8"/></svg>'},
+  {name:'Virga',en:'Virga',icon:'🌂',
+   desc:'Dež ali sneg, ki pada iz oblakov, a izhlapi preden doseže tla. Nastane, ko je zrak pod oblaki zelo suh. Vidimo jo kot navpične "proge" ali "repe" pod oblaki. V Savinjski dolini se pojavi poleti ob visokih poletnih nevihtah.',
+   svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#1e3a5f"/><ellipse cx="70" cy="30" rx="45" ry="18" fill="#475569"/><line x1="55" y1="48" x2="45" y2="80" stroke="#60a5fa" stroke-width="1.5" opacity=".7"/><line x1="65" y1="48" x2="60" y2="85" stroke="#60a5fa" stroke-width="1.5" opacity=".7"/><line x1="75" y1="48" x2="72" y2="88" stroke="#60a5fa" stroke-width="1.5" opacity=".6"/><line x1="85" y1="48" x2="80" y2="78" stroke="#60a5fa" stroke-width="1.5" opacity=".5"/><text x="70" y="98" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="sans-serif">kapljice izhlapijo</text></svg>'},
+  {name:'Sončni kolobar',en:'Sun halo',icon:'🌟',
+   desc:'Svetlobni krog premera 22° okoli sonca ali lune. Nastane, ko svetloba prehaja skozi šesterokotne ledene kristale v visokih cirrus oblakih na 6–10 km višine. Pojav pogosto napoveduje fronto v naslednjih 12–24 urah.',
+   svg:'<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="140" fill="#0c1a33"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12"/><circle cx="70" cy="70" r="10" fill="#fbbf24"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><text x="70" y="128" text-anchor="middle" font-size="7" fill="#64748b" font-family="sans-serif">kolobar 22°</text></svg>'},
+  {name:'Temperaturna inverzija',en:'Temperature inversion',icon:'🔄',
+   desc:'Normalno temperatura z višino pada. Pri inverziji je plast toplega zraka nad hladnim. V dolinah (kot Rečica) se hladen zrak zbira ponoči. Povzroča meglo, smog in "past" za onesnaženost. Pozimi pogosta.',
+   svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#0f172a"/><rect y="70" width="140" height="30" fill="#1e3a5f" opacity=".8"/><rect y="40" width="140" height="30" fill="#1e3a5f" opacity=".4"/><text x="8" y="90" font-size="8" fill="#94a3b8" font-family="IBM Plex Mono,monospace">2°C (dno)</text><text x="8" y="60" font-size="8" fill="#f87171" font-family="IBM Plex Mono,monospace">8°C (inv.)</text><text x="8" y="30" font-size="8" fill="#60a5fa" font-family="IBM Plex Mono,monospace">3°C (vrh)</text><path d="M95,85 L105,55 L95,25" fill="none" stroke="#fbbf24" stroke-width="2"/><text x="110" y="58" font-size="7" fill="#fbbf24" font-family="sans-serif">↑ toplo</text></svg>'},
+  {name:'Orografski oblaki',en:'Orographic clouds',icon:'⛰️',
+   desc:'Nastanejo, ko vlažen zrak naleti na gorski greben, se dvigne, ohladi in kondenzira. Savinjske Alpe ustvarjajo čudovite lečaste oblake (lenticularis), ki pogosto visijo nepremično nad Logарsko dolino.',
+   svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0ea5e9"/><polygon points="0,90 40,30 70,50 100,20 140,90" fill="#475569"/><ellipse cx="105" cy="22" rx="28" ry="12" fill="white" opacity=".8"/><ellipse cx="105" cy="22" rx="22" ry="8" fill="white" opacity=".9"/><path d="M50,30 Q70,10 90,22" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="3,2"/><text x="5" y="25" font-size="7" fill="white" opacity=".7" font-family="sans-serif">vlažen tok →</text></svg>'},
+  {name:'Žled',en:'Glaze ice',icon:'🧊',
+   desc:'Dež zamrzne takoj ko zadane hladno površino. Nastane pri temperaturni inverziji: dež pade skozi topel sloj, a se zamrzne na tleh ali rastlinah (<0°C). Povzroča ogromno škodo v gozdovih in na elektrovodih.',
+   svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#1e3a5f"/><line x1="30" y1="10" x2="30" y2="60" stroke="#8b5cf6" stroke-width="2"/><line x1="30" y1="60" x2="10" y2="80" stroke="#8b5cf6" stroke-width="2"/><line x1="30" y1="60" x2="50" y2="80" stroke="#8b5cf6" stroke-width="2"/><ellipse cx="30" cy="10" rx="8" ry="5" fill="#e0f2fe" opacity=".7"/><ellipse cx="10" cy="80" rx="8" ry="4" fill="#bae6fd" opacity=".8"/><ellipse cx="50" cy="80" rx="8" ry="4" fill="#bae6fd" opacity=".8"/><text x="70" y="45" font-size="8" fill="#94a3b8" font-family="sans-serif">dež → led</text><line x1="80" y1="5" x2="80" y2="55" stroke="#93c5fd" stroke-width="1" opacity=".6" stroke-dasharray="3,2"/></svg>'},
+  {name:'Fen (Foehnski veter)',en:'Foehn wind',icon:'🌬️',
+   desc:'Topel, suh veter na vetrni strani gore. Ko vlažen zrak prestopi greben, izgubi vlago (kondenzacija → padavine), nato pa se spušča suho-adiabatno. Za vsak kilometer spusta se segreje za 10°C. Savinjska dolina leži v "fen coni" Julijskih Alp.',
+   svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0c1a33"/><polygon points="0,90 50,20 80,40 140,90" fill="#334155"/><path d="M0,40 Q30,30 50,20" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,2"/><path d="M50,20 Q80,55 140,50" fill="none" stroke="#f97316" stroke-width="2.5"/><text x="5" y="38" font-size="7" fill="#60a5fa" font-family="sans-serif">hladno vlažno</text><text x="95" y="45" font-size="7" fill="#f97316" font-family="sans-serif">toplo suho</text></svg>'},
+  {name:'Ivje (Hoarfrost)',en:'Hoarfrost',icon:'❄️',
+   desc:'Ledeni kristali, ki se neposredno odlagajo iz vodne pare na hladnih površinah (pod 0°C). Za razliko od slane (zamrznjena rosa) je ivje lepo kristalne strukture. Najpogosteje zjutraj pri jasnem vremenu in hladnih tleh.',
+   svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0f172a"/><g stroke="#e0f2fe" stroke-width="1" opacity=".8"><line x1="70" y1="20" x2="70" y2="70"/><line x1="45" y1="32" x2="95" y2="58"/><line x1="95" y1="32" x2="45" y2="58"/><line x1="70" y1="20" x2="58" y2="35"/><line x1="70" y1="20" x2="82" y2="35"/><line x1="70" y1="70" x2="58" y2="55"/><line x1="70" y1="70" x2="82" y2="55"/></g><circle cx="70" cy="45" r="3" fill="#bae6fd"/></svg>'},
+  {name:'Toča',en:'Hail',icon:'🌨️',
+   desc:'Nastane v kumulonimbus oblakih z intenzivnimi navpičnimi tokovi. Kapljice vode se dvignejo visoko, zamrznejo, naberejo nov sloj ledu, padejo, znova dvignejo... Plasti se vidijo na prerezanem zrnu. Savinjska dolina je ena ogroženih regij v Sloveniji.',
+   svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#1e1b4b"/><ellipse cx="70" cy="28" rx="50" ry="22" fill="#334155"/><ellipse cx="70" cy="22" rx="35" ry="16" fill="#475569"/><circle cx="45" cy="60" r="7" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="70" cy="70" r="6" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="95" cy="58" r="8" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="55" cy="82" r="5" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="85" cy="85" r="6" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/></svg>'},
+];
+
+// ── Data: Naravni napovedovalci ────────────────────────────
+const NATURE_INDICATORS=[
+  {icon:'🐜',sign:'Mravlje nosijo jajčeca navzgor',pred:'Prihaja dež ali nevihta',check:obs=>obs?.metric?.precipRate>0||(obs?.humidity??0)>85},
+  {icon:'🕷️',sign:'Pajčevine zjutraj — vidne in suhe',pred:'Lep dan',check:obs=>(obs?.metric?.precipRate??0)<0.1&&(obs?.humidity??99)<80&&new Date().getHours()<11},
+  {icon:'🐸',sign:'Žabe regajo pri suhem vremenu',pred:'Dež se bliža (tlak pada)',check:obs=>((obs?.metric?.pressure??1013))<1010},
+  {icon:'🐄',sign:'Krave ležijo na pašniku',pred:'Dež prihaja',check:obs=>(obs?.metric?.precipRate??0)>0.2||(obs?.humidity??0)>88},
+  {icon:'🦅',sign:'Lastovice nizko letijo',pred:'Dež — insekti se spustijo',check:obs=>(obs?.metric?.precipRate??0)>0||(obs?.humidity??0)>85},
+  {icon:'🌲',sign:'Storžki bora se zapirajo',pred:'Visoka vlaga ali dež',check:obs=>(obs?.humidity??0)>80},
+  {icon:'💨',sign:'Dim iz dimnika gre navzgor',pred:'Visok tlak — lepo vreme',check:obs=>(obs?.metric?.pressure??1013)>1018&&(obs?.metric?.windSpeed??0)<8},
+  {icon:'💧',sign:'Rosa na travi zjutraj',pred:'Lep dan — brez dežja',check:obs=>(obs?.metric?.temp??15-obs?.metric?.dewpt??10)<2&&(obs?.metric?.precipRate??0)<0.1&&new Date().getHours()<10},
+  {icon:'🐝',sign:'Čebele so aktivne',pred:'Temp >15°C, lepo, ni vetra',check:obs=>(obs?.metric?.temp??0)>=15&&(obs?.metric?.windSpeed??99)<15&&(obs?.metric?.precipRate??0)<0.1},
+  {icon:'🌻',sign:'Cvetovi maslačka zaprti',pred:'Dež ali slabo vreme',check:obs=>(obs?.humidity??0)>80||(obs?.metric?.precipRate??0)>0},
+];
+
+// ── Data: Kviz vprašanja ───────────────────────────────────
+const QUIZ_QUESTIONS=[
+  {q:'Pri kateri relativni vlagi se tvori megla?',opts:['Pod 50%','Med 50-70%','Nad 80%','Točno pri 100%'],a:2,expl:'Megla nastane, ko relativna vlaga doseže ~100% in nastopi kondenzacija. V praksi se začne tvoriti pri vlagi nad 80-90%, ko je rosišče blizu temperature.'},
+  {q:'Kaj pomeni, ko tlak pada za več kot 3 hPa v 3 urah?',opts:['Lepo vreme','Huda nevihta prihaja','Anticiklon se krepi','Normalne razmere'],a:1,expl:'Hiter padec tlaka (>3 hPa/3h) je zanesljiv znak prihajajočega ciklona z nevihto ali močnimi padavinami. Mornarji temu pravijo "padajoči barometer".'},
+  {q:'Zakaj je temperatura v dolini Savinje (366 m) pogosto nižja od temperature na pobočjih?',opts:['Ker je bližje reki','Temperaturna inverzija','Višji UV indeks v dolini','Večja vlaga'),a:1,expl:'Temperaturna inverzija: hladen težki zrak se zbira na dnu doline. Pri mirnem, jasnem vremenu se dno doline ohladi hitreje kot pobočja.'],
+  {q:'Katera smer vetra je značilna za Savinjsko dolino pri previharnem vremenu z Jadrana?',opts:['Severni','Jugozahodni','Vzhodni','Severovzhodni'],a:1,expl:'Jugozahodni tok je najpogostejši v Savinjski dolini ob atlantskih in mediteranskih ciklonih. Prinaša vlago z Jadrana in je vzrok obilnih jesenskih padavin.'},
+  {q:'Kaj je "virga"?',opts:['Vrsta megle','Dež ki ne doseže tal','Sončni kolobar','Ledena igla'],a:1,expl:'Virga so padavine (dež ali sneg) iz oblakov, ki izparijo preden dosežejo tla. Vidne so kot "repi" pod oblaki, pogosto pri sušnem zraku poleti.'},
+  {q:'Na koliko metrov višine se temperatura normalno zniža za 1°C?',opts:['50 m','100 m','150 m','200 m'],a:2,expl:'Standardna temperatura lapse rate (suho adiabatno): 9.8°C/1000 m ≈ 1°C na 100 m. V vlažnem zraku je manjša (~6°C/1000 m). Za Rečico (366 m) to pomeni ~3.6°C razlike do morja.'},
+  {q:'Kateri pojav napoveduje lunin venec (halo)?',opts:['Lepo vreme','Dež ali sneg v 12-24h','Močna burja','Temperaturna inverzija'],a:1,expl:'Lunin halo nastane pri prehodu svetlobe skozi ledene kristale v cirrus oblakih (6-10 km). Cirrus oblaki so pogosto predhodnik fronte — dež ali sneg v 12-24 urah.'},
+  {q:'Kakšna je povprečna letna količina padavin v Savinjski dolini?',opts:['600-800 mm','900-1100 mm','1200-1600 mm','2000+ mm'],a:2,expl:'Savinjska dolina prejme 1200-1600 mm padavin letno — kar je nadpovprečno za Slovenijo. Orografski učinek Savinjskih Alp povzroča obilne padavine, posebej jeseni.'},
+  {q:'Kdaj nastane rosa?',opts:['Ko temperatura zraka doseže 0°C','Ko temperatura pade do rosišča','Ko vlaga preseže 60%','Pri vetru > 20 km/h'],a:1,expl:'Rosa nastane, ko se površine (trava, listi) ohladijo pod rosišče — temperaturo pri kateri zrak ne more zadržati vsa vlage. Nastane pri mirnem, jasnem vremenu.'},
+  {q:'Kateri faktor NAJMANJ vpliva na nastajanje megle v dolini Savinje?',opts:['Vlaga','Smer vetra','Moč vetra','Temperatura'],a:1,expl:'Smer vetra ima minimalen vpliv na nastanek radiacijsko megle v dolini — pomembnejša je hitrost vetra (mešanje zraka), vlaga in temperaturni gradient.'},
+];
+
+// ── Main: init trivia ──────────────────────────────────────
+let _triviaInit=false;
+async function initTrivia(){
+  if(_triviaInit)return;_triviaInit=true;
+  buildTriviaRecords();
+  buildTriviaProverb();
+  buildTriviaPhenomenon();
+  buildTriviaNature();
+  buildTriviaQuiz();
+  await buildTriviaWorldCompare();
+}
+
+function buildTriviaRecords(){
+  const el=document.getElementById('tri-records');if(!el)return;
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const entries=Object.entries(stored).map(([d,v])=>({d,v}));
+  const withT=entries.filter(e=>e.v.tempAvg!=null);
+  const withR=entries.filter(e=>e.v.precipTotal>0);
+  const withW=entries.filter(e=>e.v.windspeedHigh>0);
+  const fmtD=d=>new Date(d+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
+  const maxT=withT.length?withT.reduce((m,e)=>e.v.tempAvg>m.v.tempAvg?e:m):{d:'—',v:{tempAvg:null}};
+  const minT=withT.length?withT.reduce((m,e)=>e.v.tempAvg<m.v.tempAvg?e:m):{d:'—',v:{tempAvg:null}};
+  const maxR=withR.length?withR.reduce((m,e)=>e.v.precipTotal>m.v.precipTotal?e:m):{d:'—',v:{precipTotal:null}};
+  const maxW=withW.length?withW.reduce((m,e)=>e.v.windspeedHigh>m.v.windspeedHigh?e:m):{d:'—',v:{windspeedHigh:null}};
+  const rows=[
+    {lbl:'🌡 Maks. temp.',mine:maxT.v.tempAvg!=null?maxT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(maxT.d),slo:'41.0°C',sloD:'Črnomelj, 19.7.1950',world:'54.4°C',worldD:'Death Valley, CA, 2020'},
+    {lbl:'❄️ Min. temp.',mine:minT.v.tempAvg!=null?minT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(minT.d),slo:'−34.5°C',sloD:'Babno Polje, 13.2.1956',world:'−89.2°C',worldD:'Vostok, Antarktika, 1983'},
+    {lbl:'🌧 Max. padavine/dan',mine:maxR.v.precipTotal!=null?maxR.v.precipTotal.toFixed(0)+' mm':'—',mineD:fmtD(maxR.d),slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
+    {lbl:'💨 Max. sunek',mine:maxW.v.windspeedHigh!=null?maxW.v.windspeedHigh.toFixed(0)+' km/h':'—',mineD:fmtD(maxW.d),slo:'180 km/h',sloD:'Godič, 1989',world:'408 km/h',worldD:'Barrow Island, AUS, 1996'},
+  ];
+  el.innerHTML='<div class="rec-compare">'+
+    '<div></div><div class="rec-compare-hdr">📡 IREICA1</div><div class="rec-compare-hdr">🇸🇮 Slovenija</div><div class="rec-compare-hdr">🌍 Svet</div>'+
+    rows.map(r=>`<div style="font-size:.75rem;color:var(--text);padding:.25rem 0">${r.lbl}</div><div class="mine">${r.mine}<div class="rec-sub">${r.mineD}</div></div><div class="slo">${r.slo}<div class="rec-sub">${r.sloD}</div></div><div class="world">${r.world}<div class="rec-sub">${r.worldD}</div></div>`).join('')+
+    '</div>';
+}
+
+function buildTriviaProverb(){
+  const el=document.getElementById('tri-proverb-card');if(!el)return;
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(864e5));
+  const p=PROVERBS[doy%PROVERBS.length];
+  const vcls=p.valid==='true'?'proverb-true':p.valid==='partial'?'proverb-partial':'proverb-myth';
+  const vtxt=p.valid==='true'?'✅ Resnično':p.valid==='partial'?'⚠️ Delno resnično':'❌ Mit';
+  el.innerHTML=`<div class="proverb-text">"${p.text}"</div><span class="proverb-valid ${vcls}">${vtxt}</span><div class="proverb-expl">${p.expl}</div>`;
+}
+
+function buildTriviaPhenomenon(){
+  const el=document.getElementById('tri-phenom-card');if(!el)return;
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(864e5));
+  const ph=PHENOMENA[doy%PHENOMENA.length];
+  el.innerHTML=`<div class="phenom-layout"><div><div class="phenom-name">${ph.icon} ${ph.name} <span style="font-size:.7rem;color:var(--muted);font-weight:400">(${ph.en})</span></div><div class="phenom-desc">${ph.desc}</div></div><div class="phenom-svg">${ph.svg}</div></div>`;
+}
+
+function buildTriviaNature(){
+  const grid=document.getElementById('tri-nature-grid');if(!grid)return;
+  const obs=_lastBriefObs;
+  grid.innerHTML='';
+  NATURE_INDICATORS.forEach(ni=>{
+    let active=false;try{active=ni.check(obs);}catch(_){}
+    const div=document.createElement('div');div.className='nat-item'+(active?' nat-active':'');
+    div.innerHTML=`<div class="nat-icon">${ni.icon}</div><div><div class="nat-sign">${ni.sign}</div><div class="nat-pred">→ ${ni.pred}</div>${active?'<div style="font-size:.62rem;color:var(--green);margin-top:.1rem">✓ Aktivno zdaj</div>':''}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+async function buildTriviaWorldCompare(){
+  const sub=document.getElementById('tri-world-subtitle');
+  const cards=document.getElementById('tri-world-cards');
+  if(!cards)return;
+  const myT=_lastBriefObs?.metric?.temp??null;
+  if(myT===null){if(sub)sub.textContent='Čakam na meritve postaje…';return;}
+  const cities=[
+    {name:'Oslo',country:'🇳🇴 Norveška',lat:59.9,lon:10.7},
+    {name:'Zürich',country:'🇨🇭 Švica',lat:47.4,lon:8.5},
+    {name:'München',country:'🇩🇪 Nemčija',lat:48.1,lon:11.6},
+    {name:'Budimpešta',country:'🇭🇺 Madžarska',lat:47.5,lon:19.0},
+    {name:'Sarajevo',country:'🇧🇦 BiH',lat:43.8,lon:18.4},
+    {name:'Barcelona',country:'🇪🇸 Španija',lat:41.4,lon:2.2},
+    {name:'Moskva',country:'🇷🇺 Rusija',lat:55.8,lon:37.6},
+    {name:'Reykjavik',country:'🇮🇸 Islandija',lat:64.1,lon:-21.9},
+    {name:'Atene',country:'🇬🇷 Grčija',lat:37.9,lon:23.7},
+    {name:'Dubrovnik',country:'🇭🇷 Hrvaška',lat:42.6,lon:18.1},
+  ];
+  try{
+    const results=await Promise.all(cities.map(async c=>{
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code&timezone=auto`;
+      const res=await fetch(url);const data=await res.json();
+      return{...c,temp:data.current?.temperature_2m??null,wmo:data.current?.weather_code??0};
+    }));
+    const sorted=results.filter(r=>r.temp!=null).sort((a,b)=>Math.abs(a.temp-myT)-Math.abs(b.temp-myT));
+    const top3=sorted.slice(0,3);
+    if(sub)sub.textContent=`Danes je v Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
+    cards.innerHTML='';
+    // Add Rečica card first
+    const myCard=document.createElement('div');myCard.className='world-card world-match';
+    myCard.innerHTML=`<div class="world-city">Rečica ob Savinji</div><div class="world-country">📡 IREICA1</div><div class="world-temp" style="color:var(--blue)">${myT.toFixed(1)}°</div><div class="world-diff" style="color:var(--blue)">referenca</div>`;
+    cards.appendChild(myCard);
+    top3.forEach(c=>{
+      const diff=+(c.temp-myT).toFixed(1);
+      const card=document.createElement('div');card.className='world-card';
+      card.innerHTML=`<div class="world-city">${c.name}</div><div class="world-country">${c.country}</div><div class="world-temp">${c.temp.toFixed(1)}°</div><div class="world-diff" style="color:${Math.abs(diff)<1?'var(--green)':diff>0?'var(--red)':'var(--blue)'}">${diff>0?'+':''}${diff}°C</div>`;
+      cards.appendChild(card);
+    });
+  }catch(e){if(sub)sub.textContent='Ni podatkov.';}
+}
+
+function buildTriviaQuiz(){
+  const el=document.getElementById('tri-quiz-card');if(!el)return;
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(864e5));
+  const q=QUIZ_QUESTIONS[doy%QUIZ_QUESTIONS.length];
+  const today=new Date().toDateString();
+  const stored=JSON.parse(localStorage.getItem('quiz-v1')||'{}');
+  const answered=stored[today];
+  const streak=Object.values(stored).filter(v=>v.correct).length;
+  const streakEl=document.getElementById('quiz-streak');
+  if(streakEl&&streak>0)streakEl.textContent='🔥 '+streak+' pravilnih';
+  let optsHtml=q.opts.map((o,i)=>{
+    let cls='quiz-opt';
+    if(answered!=null){cls+=' '+(i===q.a?'correct':i===answered.chosen?'wrong':'')}
+    return`<button class="quiz-opt${answered!=null&&i===q.a?' correct':answered!=null&&i===answered.chosen&&i!==q.a?' wrong':''}" ${answered!=null?'disabled':''} onclick="answerQuiz(${i},${q.a},'${today.replace(/'/g,`\\'`)}')">${String.fromCharCode(65+i)}. ${o}</button>`;
+  }).join('');
+  el.innerHTML=`<div class="quiz-q">${q.q}</div><div class="quiz-opts">${optsHtml}</div>${answered!=null?`<div class="quiz-expl">${q.expl}</div>`:''}`;
+}
+
+function answerQuiz(chosen,correct,dateStr){
+  const stored=JSON.parse(localStorage.getItem('quiz-v1')||'{}');
+  stored[dateStr]={chosen,correct:chosen===correct};
+  // Keep last 60 days
+  const keys=Object.keys(stored).sort();
+  if(keys.length>60)keys.slice(0,-60).forEach(k=>delete stored[k]);
+  localStorage.setItem('quiz-v1',JSON.stringify(stored));
+  buildTriviaQuiz(); // re-render with answer shown
+}
+
+"""
+
+with open('/tmp/trivia_js.py','w') as f:
+    f.write("TRIVIA_JS = r'''" + TRIVIA_JS + "'''")
+print("JS ready
 function tickClock(){
 set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
