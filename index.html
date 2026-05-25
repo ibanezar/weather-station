@@ -458,6 +458,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
+
+/* Why weather */
+.why-text{font-size:.84rem;line-height:1.9;color:var(--text)}
+.why-text em{font-style:normal;color:var(--blue);font-weight:500}
+.why-updated{font-size:.6rem;color:var(--muted);margin-top:.5rem;font-family:'IBM Plex Mono',monospace}
+
 /* Microclimate analysis */
 .mc-list{display:flex;flex-direction:column;gap:.55rem;margin-top:.25rem}
 .mc-item{border-radius:12px;padding:.8rem 1rem;border-left:3px solid transparent;transition:background .2s}
@@ -995,6 +1001,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <span class="chart-range" id="mc-updated">—</span>
     </div>
     <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
+  </div>
+
+  <!-- Why is weather like this -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.4rem">
+      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
+      <span class="why-updated" id="why-updated">—</span>
+    </div>
+    <div class="why-text" id="why-text">Nalaganje razlage…</div>
   </div>
 
   <!-- On This Day -->
@@ -1875,6 +1890,7 @@ function applyObs(obs){
   updatePhotoBackground(obs);
   applyPhotographyWidget(obs);
   analyzeLocalMicroclimate(obs);
+  generateWhyWeather(obs);
   _lastBriefObs=obs;
   setWeatherArt(parseInt(document.getElementById("cond-icon")?.textContent?.codePointAt(0)||0),obs.metric?.temp??15,obs.metric?.windSpeed??0,obs.metric?.precipRate??0);
   setFavicon(cond.icon);
@@ -4319,7 +4335,86 @@ async function initSurroundings(){
   }catch(e){console.warn('Surroundings:',e);}
 }
 
-// ── Mikroklimatski podpis Rečice ──────────────────────────
+// ── "Zakaj je danes takšno vreme?" ────────────────────────
+function generateWhyWeather(obs){
+  const el=document.getElementById('why-text');
+  const upd=document.getElementById('why-updated');
+  if(!el)return;
+
+  const m=obs.metric||{};
+  const T=+(m.temp??15).toFixed(1), Td=+(m.dewpt??T-5).toFixed(1);
+  const hum=obs.humidity??70, wind=+(m.windSpeed??0).toFixed(0);
+  const pres=+(m.pressure??1013).toFixed(0), rain=+(m.precipRate??0).toFixed(1);
+  const dep=+(T-Td).toFixed(1), hour=new Date().getHours();
+
+  // Pressure trend (from rolling history, 3h window)
+  const now3h=Date.now()-3*3600000;
+  const old=_pressureHistory.find(x=>x.t>=now3h);
+  const pTrend=old?+(pres-old.p).toFixed(1):0;
+
+  // ── Blok 1: Tlačni sistem ─────────────────────────────
+  let b1='';
+  if(pres>1022&&Math.abs(pTrend)<0.8){
+    b1=`Nad regijo vlada <em>anticiklon</em> — tlak je visok (${pres} hPa) in stabilen. Zrak v atmosferi počasi tone navzdol, kar zatre nastanek oblakov in padavin.`;
+  } else if(pTrend<-2.5){
+    b1=`Tlak <em>hitro pada</em> (${pTrend} hPa/3h) — hladna fronta se hitro bliža. Pred nami je bistveno poslabšanje.`;
+  } else if(pTrend<-1){
+    b1=`Tlak <em>postopno pada</em> (${pTrend} hPa/3h) — ciklon se počasi bliža z zahoda. Vreme bo v naslednjih urah nestabilnejše.`;
+  } else if(pTrend>1.5){
+    b1=`Tlak <em>narašča</em> (+${pTrend} hPa/3h) — anticiklon prevzema nadzor. Vreme se bo predvidoma izboljšalo.`;
+  } else if(pres<1005){
+    b1=`Nad območjem je <em>nizek tlak</em> (${pres} hPa) — ciklon. Zrak se dviga, kondenzira in ustvarja oblake ter padavine.`;
+  } else if(pres>1018){
+    b1=`Visok tlak (${pres} hPa) ohranja <em>stabilne razmere</em>. Brez večjih vertikalnih gibanj v atmosferi.`;
+  } else {
+    b1=`Tlak je <em>zmeren</em> (${pres} hPa) brez izrazitega trenda — prehodne razmere med anticiklonom in ciklonom.`;
+  }
+
+  // ── Blok 2: Vlaga, zrak, dolinski efekt ──────────────
+  let b2='';
+  if(dep<1.5&&wind<5){
+    b2=`Ker je rosišče le <em>${dep}°C</em> pod temperaturo in je veter skoraj nič (${wind} km/h), se zrak v dolini ne meša. Vlažen nočni zrak ostaja pri tleh — megla je zelo verjetna, posebej ob reki Savinji.`;
+  } else if(dep<3&&hum>80){
+    b2=`Zrak je <em>nasičen z vlago</em> (${hum}%, rosišče ${Td}°C). Dolina Savinje zadržuje vlago z reke in travnikov — kondenzacija na hladnih površinah je pričakovana.`;
+  } else if(T<2&&dep<4){
+    b2=`Pri <em>${T}°C</em> in rosišču ${Td}°C so pogoji za <em>slano ali ivje</em>. Miren zrak v dolini ne meša temperaturnih plasti — nočno ohlajanje je intenzivnejše kot na pobočjih.`;
+  } else if(wind<5&&pres>1015&&(hour<9||hour>19)){
+    b2=`Miren zrak (${wind} km/h) in dolinska <em>lega Rečice (366 m)</em> pogosto ustvarita temperaturno inverzijo: hladen težji zrak se zbira v kotanji, medtem ko je na pobočjih Šoštanja ali Logarske doline toplejše.`;
+  } else if(rain>0.5){
+    b2=`Savinjska dolina je s treh strani obkrožena z gorami — vlažni <em>jugozahodni tokovi</em> se ob pobočjih dvigajo, kondenzirajo in prinašajo več padavin kot na Štajerski ravnini (do 2× več).`;
+  } else if(hum>70){
+    b2=`Reka Savinja in mokrotni travniki vzdržujejo <em>višjo vlažnost</em> (${hum}%) v dolini, kot jo poznajo okoliška višja območja. Tipično za zaprto dolino.`;
+  } else if(wind>25){
+    b2=`Mocân veter (${wind} km/h) <em>intenzivno meša</em> zrak v dolini. Temperaturne razlike med dnom doline in pobočji so v takih razmerah minimalne.`;
+  } else {
+    b2=`Razmerje med temperaturo (${T}°C) in rosiščem (${Td}°C) kaže na <em>relativno suh zrak</em> za savinjsko dolino — atipično za to področje.`;
+  }
+
+  // ── Blok 3: Napoved za preostanek dneva ──────────────
+  let b3='';
+  const isAM=hour<13, isPM=hour>=13&&hour<20, isEvening=hour>=20;
+  if(dep<2&&wind<5&&pres>1015&&isAM){
+    b3=`Čez dan bo <em>sonce postopno razbilo</em> vlažno plast — megla se navadno dvigne med 9. in 11. uro. Popoldan bo sončno in prijetno.`;
+  } else if(pTrend<-2&&rain<0.5){
+    b3=`V naslednjih <em>urah pričakujemo poslabšanje</em> — oblačnost se bo povečala, možne so padavine in sunki vetra.`;
+  } else if(pres>1020&&hum<65&&wind<15&&rain<0.1){
+    b3=`<em>Stabilne razmere</em> se bodo nadaljevale do večera. Idealen dan za aktivnosti na prostem.`;
+  } else if(isEvening&&T<10&&wind<5){
+    b3=`Noč bo <em>hladna in mirna</em> — idealni pogoji za temperaturno inverzijo do jutra. Pričakujte ${T-3>0?'roso':'slano'} na vegetaciji.`;
+  } else if(rain>0.5){
+    b3=`Padavine <em>bodo postopno prehajale</em> — sledite radarskim slikam za natančen čas razjasnitve.`;
+  } else if(isPM&&T>22&&hum>60){
+    b3=`Popoldne je v dolini Savinje <em>možna termična konvekcija</em> — lokalne popoldanske plohe ali nevihte se razvijejo nad pobočji.`;
+  } else {
+    b3=`Razmere se v naslednjih urah bistveno <em>ne bodo spremenile</em>.`;
+  }
+
+  // Combine into flowing text
+  el.innerHTML=b1+' '+b2+' '+b3;
+  if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+}
+
+
 const _pressureHistory = [];  // rolling 6h of pressure readings
 
 function analyzeLocalMicroclimate(obs){
