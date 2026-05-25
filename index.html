@@ -449,6 +449,20 @@ footer a{color:var(--blue);text-decoration:none}
 
 
 
+
+/* ARSO & Meteoalarm */
+.arso-radar-img{width:100%;border-radius:10px;display:block;image-rendering:crisp-edges}
+.arso-cam-img{width:100%;border-radius:10px;display:block;max-height:280px;object-fit:cover}
+.arso-row{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1rem}
+@media(max-width:640px){.arso-row{grid-template-columns:1fr}}
+.ma-list{display:flex;flex-direction:column;gap:.45rem;margin-top:.25rem}
+.ma-item{display:flex;align-items:center;gap:.75rem;padding:.55rem .8rem;border-radius:10px;font-size:.76rem}
+.ma-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ma-title{flex:1;font-weight:500;color:var(--text)}
+.ma-meta{font-size:.62rem;color:var(--muted);white-space:nowrap}
+.ma-none{font-size:.78rem;color:var(--green);padding:.3rem 0}
+.arso-timestamp{font-size:.62rem;color:var(--muted);margin-top:.35rem;text-align:right;font-family:'IBM Plex Mono',monospace}
+
 /* Photography widget */
 .photo-timeline{display:flex;height:18px;border-radius:9px;overflow:hidden;margin:.65rem 0 .3rem;position:relative}
 .photo-tl-seg{flex:1;transition:opacity .3s}
@@ -1003,15 +1017,39 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
   </div>
 
-  <!-- Windy Radar -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
-      <span class="chart-range">Windy · ECMWF</span>
+  <!-- ARSO Radar + Kamera -->
+  <div class="arso-row">
+    <div class="card chart-card">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌧 ARSO radar padavin</span>
+        <span style="display:flex;gap:.5rem;align-items:center">
+          <span class="chart-range" id="radar-ts">—</span>
+          <button onclick="refreshArso()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:0" title="Osveži">↻</button>
+        </span>
+      </div>
+      <img id="arso-radar-img" class="arso-radar-img" alt="ARSO padavinski radar"
+           style="min-height:180px;background:var(--fc-bg)">
+      <div style="font-size:.6rem;color:var(--muted);margin-top:.35rem">Vir: ARSO · posodobitev vsake 15 min</div>
     </div>
-    <iframe class="windy-frame" id="windy-frame"
-      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
-      allowfullscreen loading="lazy"></iframe>
+    <div class="card chart-card">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📷 Spletna kamera</span>
+        <span class="chart-range" id="cam-lbl">Celje</span>
+      </div>
+      <img id="arso-cam-img" class="arso-cam-img" alt="ARSO spletna kamera"
+           style="min-height:180px;background:var(--fc-bg)"
+           onerror="tryCamFallback(this)">
+      <div class="arso-timestamp" id="cam-ts">—</div>
+    </div>
+  </div>
+
+  <!-- Meteoalarm -->
+  <div class="card" style="margin-bottom:1rem" id="meteoalarm-card">
+    <div class="chart-hdr" style="margin-bottom:.5rem">
+      <span class="clabel" style="margin:0">⚠️ Meteoalarm — opozorila za Slovenijo</span>
+      <span class="chart-range" id="ma-updated">—</span>
+    </div>
+    <div class="ma-list" id="ma-list"><div style="color:var(--muted);font-size:.75rem">Nalaganje…</div></div>
   </div>
 
   <!-- Photography helper -->
@@ -3246,7 +3284,127 @@ async function fetchTextForecast(){
 
 
 
-// ── Photo times (astronomical) ────────────────────────────
+// ── ARSO Radar & Kamera ───────────────────────────────────
+const ARSO_CAMS = [
+  {station:'CELJE',       dir:'sw', label:'Celje (JZ)'},
+  {station:'CELJE',       dir:'nw', label:'Celje (SZ)'},
+  {station:'SOSTANJ',     dir:'sw', label:'Šoštanj'},
+  {station:'LOGARSKA-D',  dir:'nw', label:'Logarska dolina'},
+  {station:'LJUBL-ANA_BRNIK', dir:'nw', label:'Brnik'},
+];
+let _camIdx=0;
+
+function buildArsoUrl(path){return PROXY+path+'?_='+Math.floor(Date.now()/300000);}
+
+function loadArsoRadar(){
+  const img=document.getElementById('arso-radar-img');if(!img)return;
+  const ts=document.getElementById('radar-ts');
+  const url=buildArsoUrl('/arso-radar');
+  img.src=url;
+  img.onload=()=>{if(ts)ts.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});};
+  img.onerror=()=>{if(ts)ts.textContent='radar ni dosegljiv';};
+}
+
+function loadArsoCamera(idx){
+  idx=((idx%ARSO_CAMS.length)+ARSO_CAMS.length)%ARSO_CAMS.length;
+  _camIdx=idx;
+  const cam=ARSO_CAMS[idx];
+  const img=document.getElementById('arso-cam-img');if(!img)return;
+  const ts=document.getElementById('cam-ts');
+  const lbl=document.getElementById('cam-lbl');if(lbl)lbl.textContent=cam.label;
+  img.src=PROXY+'/arso-cam?station='+cam.station+'&dir='+cam.dir+'&_='+Math.floor(Date.now()/120000);
+  img.onload=()=>{if(ts)ts.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+}
+
+function tryCamFallback(img){
+  _camIdx=(_camIdx+1)%ARSO_CAMS.length;
+  const cam=ARSO_CAMS[_camIdx];
+  const lbl=document.getElementById('cam-lbl');if(lbl)lbl.textContent=cam.label+' (rezerva)';
+  if(_camIdx<ARSO_CAMS.length-1){
+    img.onerror=()=>tryCamFallback(img);
+    img.src=PROXY+'/arso-cam?station='+cam.station+'&dir='+cam.dir+'&_='+Date.now();
+  }else{
+    img.onerror=null;
+    img.alt='Kamera ni dostopna';
+    img.style.display='none';
+    const ts=document.getElementById('cam-ts');if(ts)ts.textContent='Kamera trenutno ni na voljo';
+  }
+}
+
+function refreshArso(){loadArsoRadar();loadArsoCamera(_camIdx);}
+
+// ── Meteoalarm ────────────────────────────────────────────
+const MA_COLORS={
+  'minor':   {bg:'rgba(74,222,128,.15)',dot:'#4ade80',txt:'Zeleno'},
+  'moderate':{bg:'rgba(251,191,36,.15)',dot:'#fbbf24',txt:'Rumeno'},
+  'severe':  {bg:'rgba(249,115,22,.18)',dot:'#f97316',txt:'Oranžno'},
+  'extreme': {bg:'rgba(248,113,113,.2)', dot:'#f87171',txt:'Rdeče'},
+};
+const MA_TYPES={
+  'Wind':'💨 Veter','Rain':'🌧 Padavine','Snow-Ice':'❄️ Sneg/Led',
+  'Thunderstorms':'⛈ Nevihte','Fog':'🌫 Megla','Extreme high temperature':'🌡 Vročina',
+  'Extreme low temperature':'❄️ Mraz','Avalanches':'🏔 Plazovi',
+  'Flooding':'🌊 Poplave','Rain-Flooding':'🌊 Padavine/Poplave','Forest fire':'🔥 Požari',
+};
+async function fetchMeteoalarm(){
+  try{
+    const res=await fetch(PROXY+'/meteoalarm');
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const doc=new DOMParser().parseFromString(text,'application/xml');
+    const entries=[...doc.querySelectorAll('entry')];
+    const list=document.getElementById('ma-list');
+    const upd=document.getElementById('ma-updated');
+    if(!list)return;
+
+    // Filter active & upcoming warnings (cap:certainty not Unlikely)
+    const ns='urn:oasis:names:tc:emergency:cap:1.1';
+    const getEl=(e,tag)=>e.getElementsByTagNameNS(ns,tag)[0]?.textContent||
+                         e.getElementsByTagName(tag)[0]?.textContent||'';
+
+    const warnings=entries.map(e=>{
+      const sev=(getEl(e,'severity')||'').toLowerCase();
+      const evType=getEl(e,'event')||e.querySelector('title')?.textContent||'Opozorilo';
+      const area=getEl(e,'areaDesc')||'Slovenija';
+      const eff=getEl(e,'effective')||getEl(e,'onset')||'';
+      const exp=getEl(e,'expires')||'';
+      const cert=(getEl(e,'certainty')||'').toLowerCase();
+      return{sev,evType,area,eff,exp,cert};
+    }).filter(w=>w.sev&&w.sev!=='unknown'&&w.cert!=='unlikely');
+
+    if(!warnings.length){
+      list.innerHTML='<div class="ma-none">✅ Trenutno ni aktivnih vremenskih opozoril za Slovenijo</div>';
+      const card=document.getElementById('meteoalarm-card');
+      if(card)card.style.borderColor='rgba(74,222,128,.3)';
+    }else{
+      list.innerHTML='';
+      warnings.forEach(w=>{
+        const col=MA_COLORS[w.sev]||MA_COLORS.moderate;
+        const typeLbl=Object.entries(MA_TYPES).find(([k])=>w.evType.toLowerCase().includes(k.toLowerCase()))?.[1]||('⚠️ '+w.evType);
+        const fmtT=t=>{try{return new Date(t).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(_){return t;}};
+        const item=document.createElement('div');item.className='ma-item';
+        item.style.background=col.bg;
+        item.innerHTML=
+          '<div class="ma-dot" style="background:'+col.dot+'"></div>'+
+          '<div class="ma-title">'+typeLbl+'</div>'+
+          '<div class="ma-meta">'+col.txt+' · '+(w.exp?'do '+fmtT(w.exp):'')+'</div>';
+        list.appendChild(item);
+        // Also trigger smart notification if severe+
+        if(['severe','extreme'].includes(w.sev))maybePushAlert('⚠️ Meteoalarm: '+typeLbl,'Opozorilo za Slovenijo. Jakost: '+col.txt);
+      });
+      const card=document.getElementById('meteoalarm-card');
+      const worstSev=warnings.find(w=>w.sev==='extreme')?'extreme':warnings.find(w=>w.sev==='severe')?'severe':'moderate';
+      if(card)card.style.borderColor=(MA_COLORS[worstSev]||MA_COLORS.moderate).dot+'66';
+    }
+    if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    const list=document.getElementById('ma-list');
+    if(list)list.innerHTML='<div style="color:var(--muted);font-size:.75rem">Meteoalarm trenutno ni dosegljiv</div>';
+    console.warn('Meteoalarm:',e);
+  }
+}
+
+
 function calcPhotoTimes(){
   const now=new Date();
   const jd=now.getTime()/86400000+2440587.5;
@@ -4084,11 +4242,19 @@ async function init(){
   connectLightning();
   autoLoadHistoryFile();
   checkSmartNotifications(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchMeteoalarm()]);
+  loadArsoRadar();loadArsoCamera(0);
   applyPheno();
 }
 init();
-setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchCurrent,5*60*1000);
+setInterval(fetchHourly,30*60*1000);
+setInterval(fetchForecast,60*60*1000);
+setInterval(fetchTextForecast,60*60*1000);
+setInterval(loadArsoRadar,15*60*1000);       // radar vsake 15 min
+setInterval(()=>loadArsoCamera(_camIdx),5*60*1000); // kamera vsake 5 min
+setInterval(fetchMeteoalarm,15*60*1000);     // opozorila vsake 15 min
+setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
