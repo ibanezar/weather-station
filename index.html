@@ -457,6 +457,22 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
+
+/* Microclimate analysis */
+.mc-list{display:flex;flex-direction:column;gap:.55rem;margin-top:.25rem}
+.mc-item{border-radius:12px;padding:.8rem 1rem;border-left:3px solid transparent;transition:background .2s}
+.mc-item-warn{background:rgba(251,191,36,.08);border-color:var(--amber)}
+.mc-item-good{background:rgba(74,222,128,.07);border-color:var(--green)}
+.mc-item-info{background:rgba(56,189,248,.07);border-color:var(--blue)}
+.mc-item-alert{background:rgba(248,113,113,.08);border-color:var(--red)}
+.mc-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem}
+.mc-icon{font-size:1.1rem}
+.mc-name{font-size:.8rem;font-weight:600;color:var(--text)}
+.mc-text{font-size:.74rem;line-height:1.7;color:var(--muted)}
+.mc-data{display:flex;gap:.75rem;margin-top:.35rem;flex-wrap:wrap}
+.mc-datum{font-size:.65rem;font-family:'IBM Plex Mono',monospace;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:6px;padding:2px 8px;color:var(--text)}
+.mc-none{font-size:.78rem;color:var(--green);padding:.25rem 0}
+
 /* Generative art */
 .weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
 #weather-art-canvas{display:block;width:100%;height:140px}
@@ -970,6 +986,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
     </div>
     <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
+  </div>
+
+  <!-- Microclimate analysis -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.25rem">
+      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
+      <span class="chart-range" id="mc-updated">—</span>
+    </div>
+    <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
   </div>
 
   <!-- On This Day -->
@@ -1849,6 +1874,7 @@ function applyObs(obs){
   applyBiometeo(obs);
   updatePhotoBackground(obs);
   applyPhotographyWidget(obs);
+  analyzeLocalMicroclimate(obs);
   _lastBriefObs=obs;
   setWeatherArt(parseInt(document.getElementById("cond-icon")?.textContent?.codePointAt(0)||0),obs.metric?.temp??15,obs.metric?.windSpeed??0,obs.metric?.precipRate??0);
   setFavicon(cond.icon);
@@ -4293,8 +4319,131 @@ async function initSurroundings(){
   }catch(e){console.warn('Surroundings:',e);}
 }
 
-// ══════════════════════════════════════════════════════════
-// ── Generativna vremenska umetnost ────────────────────────
+// ── Mikroklimatski podpis Rečice ──────────────────────────
+const _pressureHistory = [];  // rolling 6h of pressure readings
+
+function analyzeLocalMicroclimate(obs){
+  const m=obs.metric||{};
+  const T=m.temp??15, Td=m.dewpt??T-5, hum=obs.humidity??70;
+  const wind=m.windSpeed??0, pres=m.pressure??1013, rain=m.precipRate??0;
+  const hour=new Date().getHours();
+  const dep=+(T-Td).toFixed(1);  // rosišče depression
+
+  // Store pressure history (max 12 entries = ~1h at 5min refresh)
+  _pressureHistory.push({t:Date.now(),p:pres});
+  if(_pressureHistory.length>72)_pressureHistory.shift();
+
+  // Pressure trend over last 3h
+  const now3h=Date.now()-3*3600000;
+  const old=_pressureHistory.find(x=>x.t>=now3h);
+  const pTrend=old?+(pres-old.p).toFixed(1):0;
+
+  const conditions=[];
+
+  // ── 1. Megleni kotel
+  if(dep<2&&wind<5&&hum>87){
+    const prob=dep<0.8?'zelo verjetna':dep<1.5?'verjetna':'možna';
+    conditions.push({
+      type:'fog',cls:'mc-item-info',icon:'🌫',name:'Megleni kotel',
+      text:`Rosišče je le ${dep}°C pod temperaturo, veter pa ${wind.toFixed(0)} km/h. Vlažen zrak se zadržuje v dolini Savinje — megla je ${prob}, posebej ob reki in na nižjih legah.`,
+      data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
+    });
+  }
+
+  // ── 2. Temperaturna inverzija
+  if(wind<6&&pres>1018&&rain<0.1&&(hour<10||hour>19)){
+    conditions.push({
+      type:'inversion',cls:'mc-item-info',icon:'🔄',name:'Temperaturna inverzija',
+      text:`Visok tlak (${pres.toFixed(0)} hPa) in miren veter (${wind.toFixed(0)} km/h) ustvarjata pogoje za inverzijo. Rečica ob Savinji (366 m) je v takih situacijah pogosto 2–5°C hladnejša od Šoštanja ali Velenja na višjih legah.`,
+      data:[`Tlak ${pres.toFixed(0)} hPa`,`V ${wind.toFixed(0)} km/h`,`Ura ${hour}:00`],
+    });
+  }
+
+  // ── 3. Prehod fronte / nevihtni rob
+  if(pTrend<-1.5){
+    const speed=pTrend<-3?'hitro':'počasi';
+    conditions.push({
+      type:'front',cls:'mc-item-alert',icon:'⛈',name:'Prihaja fronta',
+      text:`Tlak pada ${Math.abs(pTrend).toFixed(1)} hPa v 3 urah — ${speed} pada. Savinjska dolina je pogosto tarča močnih neviht ob prehodu front. Možna povečana možnost toče in sunkov.`,
+      data:[`Trend ${pTrend>0?'+':''}${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
+    });
+  } else if(pTrend>1.5){
+    conditions.push({
+      type:'clearing',cls:'mc-item-good',icon:'🌤',name:'Vremenska razjasnitev',
+      text:`Tlak narašča ${pTrend.toFixed(1)} hPa v 3 urah — anticiklon krepi. Vreme se bo predvidoma izboljšalo.`,
+      data:[`Trend +${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
+    });
+  }
+
+  // ── 4. Anticiklonalno stabilno vreme
+  if(pres>1022&&wind<12&&hum<60&&rain<0.1&&Math.abs(pTrend)<0.5){
+    conditions.push({
+      type:'anticyclone',cls:'mc-item-good',icon:'☀️',name:'Anticiklonalno stabilno vreme',
+      text:`Tlak ${pres.toFixed(0)} hPa, vlaga ${hum}%, miren veter — klasičen anticiklon. Savinjska dolina ima v takih razmerah pogosto lepše vreme kot višje lege, ki so pogosto pod oblaki.`,
+      data:[`Tlak ${pres.toFixed(0)} hPa`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
+    });
+  }
+
+  // ── 5. Rosa / slana / poledica
+  if(T<4&&dep<3){
+    const risk=T<-1?{n:'Nevarnost poledice',t:`Temperatura ${T.toFixed(1)}°C z visoko vlago pomeni tveganje za poledico ali slano. Pozor na ceste in mostove ob Savinji.`,c:'mc-item-alert',i:'🧊'}:
+               T<1?{n:'Možna slana ali ivje',t:`Temperatura pri rosišču blizu 0°C. Slana je možna na travnikih in rastlinah — prečudovito za makro fotografijo rose in ledenih kristalov.`,c:'mc-item-warn',i:'🌨'}:
+                   {n:'Rosa bo padla',t:`Temperatura ${T.toFixed(1)}°C blizu rosišča ${Td.toFixed(1)}°C. Pred sončnim vzhodom bo rosa na rastlinah — idealni pogoji za makro fotografijo kapljic.`,c:'mc-item-info',i:'💧'};
+    conditions.push({type:'dew',cls:risk.c,icon:risk.i,name:risk.n,text:risk.t,
+      data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`]});
+  }
+
+  // ── 6. Vlažen dolinski zrak (ko ni drugega)
+  if(hum>78&&dep<6&&!conditions.find(c=>c.type==='fog')){
+    conditions.push({
+      type:'moist',cls:'mc-item-info',icon:'💦',name:'Vlažen dolinski zrak',
+      text:`Vlaga ${hum}% je visoka — tipično za dolino Savinje. Reka in mokrotni travniki vzdržujejo visoko vlažnost, ki jo okoliška pobočja ne poznajo.`,
+      data:[`Vlaga ${hum}%`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`],
+    });
+  }
+
+  // ── 7. Mrzli dolinski žep (hladnejše od okolice)
+  if(wind<4&&rain<0.1&&T<10&&pres>1015){
+    conditions.push({
+      type:'cold_pool',cls:'mc-item-info',icon:'🌡',name:'Mrzli dolinski žep',
+      text:`Miren zrak in dolinska lega (366 m) pogosto povzročita, da se hladen zrak zbira v dolini. Okoliška pobočja (Šoštanj, Logarska) so v takih razmerah 2–4°C toplejša.`,
+      data:[`T ${T.toFixed(1)}°C`,`V ${wind.toFixed(0)} km/h`,`Tlak ${pres.toFixed(0)} hPa`],
+    });
+  }
+
+  // ── 8. Orografske padavine
+  if(rain>1&&pres<1010){
+    conditions.push({
+      type:'orographic',cls:'mc-item-warn',icon:'🌧',name:'Orografske padavine',
+      text:`Nizek tlak + padavine. Savinjska dolina je zaprta z vseh strani — vlažni jugozahodni tokovi prinašajo obilne padavine ob zahodnih pobočjih (do 2× več kot na Štajerskem).`,
+      data:[`Dež ${rain.toFixed(1)} mm/h`,`Tlak ${pres.toFixed(0)} hPa`],
+    });
+  }
+
+  // Render
+  const list=document.getElementById('mc-list');
+  const upd=document.getElementById('mc-updated');
+  if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  if(!list)return;
+
+  if(!conditions.length){
+    list.innerHTML='<div class="mc-none">✓ Normalne razmere — ni posebnih mikroklimatskih pojavov.</div>';
+    return;
+  }
+
+  list.innerHTML='';
+  conditions.slice(0,4).forEach(c=>{
+    const div=document.createElement('div');
+    div.className='mc-item '+c.cls;
+    div.innerHTML=
+      '<div class="mc-head"><span class="mc-icon">'+c.icon+'</span><span class="mc-name">'+c.name+'</span></div>'+
+      '<div class="mc-text">'+c.text+'</div>'+
+      '<div class="mc-data">'+c.data.map(d=>'<span class="mc-datum">'+d+'</span>').join('')+'</div>';
+    list.appendChild(div);
+  });
+}
+
+
 // ══════════════════════════════════════════════════════════
 let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
 function initWeatherArt(){
