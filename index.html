@@ -456,6 +456,43 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
+
+/* Generative art */
+.weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
+#weather-art-canvas{display:block;width:100%;height:140px}
+.art-label{position:absolute;bottom:.4rem;right:.6rem;font-size:.6rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono',monospace;pointer-events:none}
+
+/* AI Brief */
+.ai-brief-text{font-size:.88rem;line-height:1.85;color:var(--text);margin-top:.5rem}
+.ai-brief-meta{font-size:.62rem;color:var(--muted);margin-top:.5rem;font-family:'IBM Plex Mono',monospace}
+.ai-brief-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 14px;font-size:.7rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--muted);transition:all .2s}
+.ai-brief-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Fotodnevnik */
+.fd-upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;color:var(--muted);font-size:.8rem;transition:border-color .2s}
+.fd-upload-zone:hover{border-color:var(--blue);color:var(--blue)}
+.fd-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;margin-top:1rem}
+.fd-entry{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
+.fd-entry:hover{box-shadow:var(--card-shadow-h)}
+.fd-thumb{width:100%;height:130px;object-fit:cover;display:block}
+.fd-thumb-placeholder{width:100%;height:130px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:2rem}
+.fd-meta{padding:.6rem .75rem;font-size:.65rem;color:var(--muted);line-height:1.6}
+.fd-temp{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text);font-weight:300}
+.fd-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem}
+.fd-modal-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;width:min(560px,96vw);max-height:88vh;overflow-y:auto;padding:1.5rem}
+.fd-modal-img{width:100%;max-height:280px;object-fit:contain;border-radius:12px;background:var(--fc-bg);display:block}
+.fd-badge-row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.65rem 0}
+.fd-badge{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 10px;font-size:.65rem;font-family:'IBM Plex Mono',monospace}
+
+/* Mikroklima fingerprint */
+.fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-top:.5rem}
+.fp-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
+.fp-val{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:300}
+.fp-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem}
+.fp-bar{height:4px;background:var(--fc-bg);border-radius:2px;margin-top:.4rem;overflow:hidden}
+.fp-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.fp-desc{font-size:.68rem;color:var(--muted);margin-top:.3rem;line-height:1.4}
+
 /* Photography widget */
 .photo-timeline{display:flex;height:18px;border-radius:9px;overflow:hidden;margin:.65rem 0 .3rem;position:relative}
 .photo-tl-seg{flex:1;transition:opacity .3s}
@@ -691,6 +728,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn" id="tab-btn-extremes"   onclick="switchTab('extremes')">⚡ Dogodki</button>
     <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🎯 Rekordi</button>
     <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
+    <button class="tab-btn" id="tab-btn-diary" onclick="switchTab('diary')">📸 Dnevnik</button>
   </div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
@@ -953,6 +991,25 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="otd-grid otd-station" id="otd-station-grid">
       <div class="otd-nodata">Nalaganje…</div>
+    </div>
+  </div>
+
+  <!-- Generative Weather Art + AI Brief -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card" style="padding:0;overflow:hidden">
+      <canvas id="weather-art-canvas" height="140"></canvas>
+      <div class="art-label" id="art-label">—</div>
+    </div>
+    <div class="card">
+      <div class="chart-hdr" style="margin-bottom:.25rem">
+        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="chart-range" id="brief-date"></span>
+          <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
+        </div>
+      </div>
+      <div class="ai-brief-text" id="ai-brief-text">Nalaganje…</div>
+      <div class="ai-brief-meta" id="ai-brief-meta"></div>
     </div>
   </div>
 
@@ -1272,6 +1329,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="an-kpi"><div class="an-kpi-n" style="color:var(--purple)">115.6</div><div class="an-kpi-l">Max sunek km/h</div></div>
     </div>
 
+
+    <div class="an-section" id="fingerprint-section">
+      <div class="an-title">🌊 Mikroklima fingerprint — Rečica ob Savinji</div>
+      <div class="nt-card" style="margin-bottom:1rem">
+        <div class="clabel" style="margin:0 0 .5rem" id="fp-subtitle">Izračunavam iz shranjenih podatkov…</div>
+        <div class="fp-grid" id="fp-grid"></div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:1rem;line-height:1.7" id="fp-narrative"></div>
+      </div>
+    </div>
+
     <!-- TEMPERATURA -->
     <div class="an-section">
       <div class="an-title">🌡 Temperatura</div>
@@ -1385,6 +1452,40 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
   </div><!-- /tab-analysis -->
+
+  <!-- ═══ FOTODNEVNIK ═══ -->
+  <div id="tab-diary" class="tab-pane">
+    <div class="chart-hdr" style="margin-bottom:1.25rem">
+      <span class="clabel" style="margin:0">📸 Fotodnevnik z vremenskimi podatki</span>
+      <button class="ai-brief-btn" onclick="document.getElementById('fd-file-input').click()">+ Dodaj fotografijo</button>
+    </div>
+    <input type="file" id="fd-file-input" accept="image/*" style="display:none" onchange="fdAddEntry(this)">
+    <div id="fd-empty" style="color:var(--muted);font-size:.85rem;text-align:center;padding:3rem 0;display:none">
+      📷 Nimate še nobene fotografije v dnevniku.<br>
+      <span style="font-size:.75rem">Kliknite "+ Dodaj fotografijo" da začnete.</span>
+    </div>
+    <div class="fd-gallery" id="fd-gallery"></div>
+    <!-- Entry modal -->
+    <div class="fd-modal" id="fd-modal" style="display:none" onclick="if(event.target===this)fdCloseModal()">
+      <div class="fd-modal-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <div style="font-size:.95rem;font-weight:600" id="fd-modal-title">—</div>
+          <button onclick="fdCloseModal()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
+        </div>
+        <img id="fd-modal-img" class="fd-modal-img" alt="">
+        <div class="fd-badge-row" id="fd-modal-badges"></div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin:.5rem 0" id="fd-modal-desc"></div>
+        <textarea id="fd-modal-notes" placeholder="Opombe (lokacija, subjekt, nastavitve fotoaparata…)"
+          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;resize:vertical;min-height:60px;margin-top:.5rem"></textarea>
+        <div style="display:flex;justify-content:space-between;margin-top:1rem">
+          <button onclick="fdDeleteEntry()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:.5rem 1rem;font-size:.75rem;cursor:pointer;color:var(--red)">🗑 Izbriši</button>
+          <button onclick="fdSaveNotes()" class="period-btn active" style="font-size:.75rem">Shrani opombe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
@@ -1748,6 +1849,8 @@ function applyObs(obs){
   applyBiometeo(obs);
   updatePhotoBackground(obs);
   applyPhotographyWidget(obs);
+  _lastBriefObs=obs;
+  setWeatherArt(parseInt(document.getElementById("cond-icon")?.textContent?.codePointAt(0)||0),obs.metric?.temp??15,obs.metric?.windSpeed??0,obs.metric?.precipRate??0);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
@@ -1978,7 +2081,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); }
+  if(tab==='analysis'){  initAnalysisCharts(); buildFingerprint(); }
   if(tab==='forecast2'){ initForecast2(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
@@ -4189,6 +4292,321 @@ async function initSurroundings(){
     }
   }catch(e){console.warn('Surroundings:',e);}
 }
+
+// ══════════════════════════════════════════════════════════
+// ── Generativna vremenska umetnost ────────────────────────
+// ══════════════════════════════════════════════════════════
+let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
+function initWeatherArt(){
+  const c=document.getElementById('weather-art-canvas');if(!c)return;
+  c.width=c.offsetWidth||600;c.height=140;
+  _artCtx=c.getContext('2d');
+  if(_artAnim)cancelAnimationFrame(_artAnim);
+  _artParticles=[];
+  artFrame();
+}
+function setWeatherArt(wmoCode,temp,wind,rain){
+  if(wmoCode===0||wmoCode===1) _artCondition=temp>24?'hot':'sunny';
+  else if(wmoCode<=3)          _artCondition='cloudy';
+  else if(wmoCode<=48)         _artCondition='fog';
+  else if(wmoCode<=67)         _artCondition=rain>5?'heavy_rain':'rain';
+  else if(wmoCode<=77)         _artCondition='snow';
+  else if(wmoCode<=82)         _artCondition='rain';
+  else if(wmoCode<=86)         _artCondition='snow';
+  else                         _artCondition='storm';
+  const h=new Date().getHours();
+  if(h<5||h>22)                _artCondition='night';
+  const lbl=document.getElementById('art-label');
+  if(lbl)lbl.textContent={sunny:'Sončno',hot:'Vroče',cloudy:'Oblačno',fog:'Megla',rain:'Dež',heavy_rain:'Plohe',snow:'Sneg',storm:'Nevihta',night:'Noč'}[_artCondition]||'';
+  initWeatherArt();
+}
+function artFrame(){
+  const ctx=_artCtx;if(!ctx)return;
+  const c=document.getElementById('weather-art-canvas');
+  const W=c.width,H=c.height;const dark=isDark();
+  ctx.clearRect(0,0,W,H);
+  const cond=_artCondition;
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  const bgs={sunny:['#fff7ed','#fef3c7'],hot:['#fef3c7','#fed7aa'],cloudy:['#f1f5f9','#e2e8f0'],fog:['#f8fafc','#e2e8f0'],rain:['#eff6ff','#dbeafe'],heavy_rain:['#dbeafe','#bfdbfe'],snow:['#f0f9ff','#e0f2fe'],storm:['#1e1b4b','#312e81'],night:['#020617','#0f172a']};
+  const dc={sunny:['#1e3a5f','#0f2a44'],hot:['#1c1917','#0c0a09'],cloudy:['#1e293b','#0f172a'],fog:['#1e293b','#0f172a'],rain:['#0f172a','#0c1829'],heavy_rain:['#0a0f1c','#060b14'],snow:['#0f172a','#0c1829'],storm:['#020617','#000000'],night:['#020617','#000000']};
+  const pair=dark?(dc[cond]||dc.cloudy):(bgs[cond]||bgs.cloudy);
+  bg.addColorStop(0,pair[0]);bg.addColorStop(1,pair[1]);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const t=Date.now()/1000;
+  if(cond==='sunny'||cond==='hot'){
+    // Pulsing sun + rotating rays
+    const cx=W*0.15,cy=H/2,r=22+Math.sin(t)*3;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r*3);
+    g.addColorStop(0,cond==='hot'?'rgba(251,146,60,.9)':'rgba(251,191,36,.9)');
+    g.addColorStop(1,'rgba(251,191,36,0)');
+    ctx.beginPath();ctx.arc(cx,cy,r*3,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=cond==='hot'?'#fb923c':'#fbbf24';ctx.fill();
+    for(let i=0;i<12;i++){const a=t*0.3+i*Math.PI/6;const x1=cx+Math.cos(a)*(r+6),y1=cy+Math.sin(a)*(r+6),x2=cx+Math.cos(a)*(r+16+Math.sin(t*2+i)*3),y2=cy+Math.sin(a)*(r+16+Math.sin(t*2+i)*3);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle='rgba(251,191,36,0.6)';ctx.lineWidth=2;ctx.stroke();}
+    // Floating light particles
+    if(_artParticles.length<25)_artParticles.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2,vx:(Math.random()-0.5)*0.3,vy:-0.2-Math.random()*0.3,a:0.4+Math.random()*0.4});
+    _artParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a-=0.003;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(251,191,36,${p.a})`;ctx.fill();});
+    _artParticles=_artParticles.filter(p=>p.a>0);
+  } else if(cond==='rain'||cond==='heavy_rain'){
+    const count=cond==='heavy_rain'?3:1.2;
+    while(_artParticles.length<60*count)_artParticles.push({x:Math.random()*W,y:Math.random()*H,l:6+Math.random()*12,v:4+Math.random()*4,a:0.3+Math.random()*0.5,w:0.8+Math.random()});
+    _artParticles.forEach(p=>{p.y+=p.v;p.x+=0.8;if(p.y>H){p.y=-p.l;p.x=Math.random()*W;}ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+p.l*0.2,p.y+p.l);ctx.strokeStyle=`rgba(96,165,250,${p.a})`;ctx.lineWidth=p.w;ctx.stroke();});
+  } else if(cond==='snow'){
+    while(_artParticles.length<50)_artParticles.push({x:Math.random()*W,y:Math.random()*H,r:1.5+Math.random()*3,v:0.4+Math.random()*0.8,vx:Math.sin(Math.random()*Math.PI*2)*0.3,a:0.5+Math.random()*0.4,phase:Math.random()*Math.PI*2});
+    _artParticles.forEach(p=>{p.y+=p.v;p.x+=Math.sin(t*0.5+p.phase)*0.4;if(p.y>H){p.y=-p.r;p.x=Math.random()*W;}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(224,242,254,${p.a})`;ctx.fill();});
+  } else if(cond==='storm'){
+    if(Math.random()<0.015){
+      // Lightning bolt
+      const sx=W*0.2+Math.random()*W*0.6,sy=0;
+      ctx.beginPath();ctx.moveTo(sx,sy);
+      let cx=sx,cy=sy;
+      for(let i=0;i<6;i++){cx+=(Math.random()-0.5)*40;cy+=H/6;ctx.lineTo(cx,cy);}
+      ctx.strokeStyle='rgba(253,224,71,0.9)';ctx.lineWidth=2;ctx.stroke();
+      ctx.shadowColor='#fde047';ctx.shadowBlur=20;ctx.stroke();ctx.shadowBlur=0;
+    }
+    // Rain in storm
+    while(_artParticles.length<80)_artParticles.push({x:Math.random()*W,y:Math.random()*H,l:10,v:7,a:0.4});
+    _artParticles.forEach(p=>{p.y+=p.v;p.x+=2;if(p.y>H){p.y=-10;p.x=Math.random()*W;}ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+2,p.y+p.l);ctx.strokeStyle=`rgba(148,163,184,${p.a})`;ctx.lineWidth=1;ctx.stroke();});
+  } else if(cond==='fog'){
+    // Drifting fog layers
+    for(let i=0;i<3;i++){const g2=ctx.createLinearGradient(0,0,W,0);const offset=(t*0.03*(i+1))%1;g2.addColorStop((offset)%1,`rgba(148,163,184,0)`);g2.addColorStop((offset+0.3)%1,`rgba(148,163,184,${0.06*(i+1)})`);g2.addColorStop((offset+0.6)%1,`rgba(148,163,184,${0.03*(i+1)})`);g2.addColorStop((offset+1)%1,`rgba(148,163,184,0)`);ctx.fillStyle=g2;ctx.fillRect(0,H/3*i,W,H/3);}
+  } else if(cond==='night'){
+    // Stars
+    if(_artParticles.length===0){for(let i=0;i<80;i++)_artParticles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5,phase:Math.random()*Math.PI*2,twinkle:0.3+Math.random()*0.4});}
+    _artParticles.forEach(p=>{const a=p.twinkle+Math.sin(t*2+p.phase)*0.15;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(226,232,240,${a})`;ctx.fill();});
+    // Moon
+    const mx=W*0.8,my=H*0.3;const mg=ctx.createRadialGradient(mx,my,0,mx,my,28);mg.addColorStop(0,'rgba(241,245,249,0.9)');mg.addColorStop(1,'rgba(241,245,249,0)');ctx.beginPath();ctx.arc(mx,my,28,0,Math.PI*2);ctx.fillStyle=mg;ctx.fill();
+    ctx.beginPath();ctx.arc(mx,my,16,0,Math.PI*2);ctx.fillStyle='rgba(241,245,249,0.85)';ctx.fill();
+  } else { // cloudy
+    for(let i=0;i<2;i++){const blobX=(t*12*(i+1)+i*W/2)%W,blobY=H*0.3+i*H*0.25;const bg2=ctx.createRadialGradient(blobX,blobY,0,blobX,blobY,80);bg2.addColorStop(0,dark?'rgba(51,65,85,0.4)':'rgba(148,163,184,0.25)');bg2.addColorStop(1,'rgba(148,163,184,0)');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(blobX,blobY,90,50,0,0,Math.PI*2);ctx.fill();}
+  }
+  _artAnim=requestAnimationFrame(artFrame);
+}
+
+// ══════════════════════════════════════════════════════════
+// ── AI dnevni fotobriefing ─────────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _lastBriefObs=null;
+async function fetchAIBrief(force=false){
+  const today=new Date().toDateString();
+  const cached=localStorage.getItem('ai-brief-v1');
+  const cachedData=cached?JSON.parse(cached):null;
+  if(!force&&cachedData?.date===today&&cachedData?.text){
+    showAIBrief(cachedData.text,cachedData.date,cachedData.source||'cache');return;
+  }
+  const briefEl=document.getElementById('ai-brief-text');
+  if(briefEl)briefEl.textContent='Generiram brief…';
+  try{
+    const obs=_lastBriefObs||{};const m=obs.metric||{};
+    const pt=calcPhotoTimes()||{};
+    const gddEl=document.getElementById('pheno-gdd-total');
+    const gdd=gddEl?parseInt(gddEl.textContent)||0:0;
+    const phenoPhases=['Pozna zima','Zgodnja pomlad (leska)','Pomlad (cvetlice)','Zgodnje poletje (metulji)','Poletje (kačji pastirji)','Pozno poletje (pajki)','Jesen'];
+    const phenoIdx=gdd<50?0:gdd<120?1:gdd<300?2:gdd<500?3:gdd<700?4:gdd<900?5:6;
+    const moon=calcMoon();
+    const payload={
+      temp:(m.temp??15).toFixed(1),hum:obs.humidity??70,wind:(m.windSpeed??0).toFixed(0),rain:(m.precipRate??0).toFixed(1),
+      cond:document.getElementById('cond-label')?.textContent||'—',
+      gdd,phenoPhase:phenoPhases[phenoIdx],
+      goldAM:pt.goldAM||'—',goldPM:pt.goldPM||'—',sunrise:pt.sunrise||'—',sunset:pt.sunset||'—',
+      moon:moon.phase,moonIllum:moon.illum,
+      timeStr:new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}),
+    };
+    const res=await fetch(PROXY+'/ai-brief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.error==='no_key'){
+      // Fallback: rule-based brief
+      const brief=generateRuleBasedBrief(payload);
+      localStorage.setItem('ai-brief-v1',JSON.stringify({date:today,text:brief,source:'rule'}));
+      showAIBrief(brief,today,'Lokalni generator');
+    }else if(data.brief){
+      localStorage.setItem('ai-brief-v1',JSON.stringify({date:today,text:data.brief,source:'Claude AI'}));
+      showAIBrief(data.brief,today,'Claude AI');
+    }
+  }catch(e){
+    const brief=generateRuleBasedBrief({});
+    showAIBrief(brief,today,'Lokalni generator');
+  }
+}
+function showAIBrief(text,date,source){
+  const el=document.getElementById('ai-brief-text');if(el)el.textContent=text;
+  const meta=document.getElementById('ai-brief-meta');
+  if(meta)meta.textContent=source+' · '+new Date(date||Date.now()).toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+  const bd=document.getElementById('brief-date');
+  if(bd)bd.textContent=source;
+}
+function generateRuleBasedBrief(p){
+  const gdd=p.gdd||0,T=parseFloat(p.temp||15),rain=parseFloat(p.rain||0);
+  const h=new Date().getHours();
+  const subjects=gdd<120?'lesko in teloh':gdd<300?'spomladanske cvetlice in prve čebele':gdd<500?'metulje in hrošče':gdd<700?'kačje pastirje in kobilice':'pajke in jesenske cvetlice';
+  const time=h<9?p.goldAM?`Danes je zlata ura ob ${p.goldAM} — izvrsten čas za makro!`:'Jutranjo roso ujemi zgodaj.':h>18&&p.goldPM?`Večerna zlata ura ob ${p.goldPM} se bliža.`:'';
+  const loc=gdd<300?'gozdnem robu nad Rečico ali ob potoku':gdd<600?'mokrotnih travnikih ob Savinji':'bregovih Savinje ali visokem travišču';
+  const cond=rain>0?'Po dežju so rastline mokre — idealno za kapljice.':`Pri ${T}°C je aktivnost ${T>=18?'žuželk odlična':'žuželk zmerna — išči zavetišče'}.`;
+  return `${time} Danes so aktivni ${subjects}. Najboljša lokacija: ${loc}. ${cond} Luna (${p.moon||'—'}, ${p.moonIllum||0}%) vpliva na nočne subjekte.`;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── Fotodnevnik ────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+const FD_KEY='fd-diary-v1';
+let _fdCurrent=null;
+
+function fdLoadDiary(){
+  try{return JSON.parse(localStorage.getItem(FD_KEY)||'[]');}catch(_){return[];}
+}
+function fdSaveDiary(entries){localStorage.setItem(FD_KEY,JSON.stringify(entries));}
+
+function fdAddEntry(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const imgData=e.target.result;
+    // Get current weather
+    const obs=_lastBriefObs||{};const m=obs.metric||{};
+    const moon=calcMoon();const pt=calcPhotoTimes()||{};
+    const gddEl=document.getElementById('pheno-gdd-total');
+    const gdd=gddEl?parseInt(gddEl.textContent)||0:0;
+    const now=new Date();
+    // Determine current photo phase
+    const nowH=now.getHours()+now.getMinutes()/60;
+    let photoPhase='☀️ Dan';
+    if(pt.sunriseH&&pt.goldAMh&&nowH>=pt.sunriseH&&nowH<=pt.goldAMh)photoPhase='🌅 Zlata ura ↑';
+    else if(pt.goldPMh&&pt.sunsetH&&nowH>=pt.goldPMh&&nowH<=pt.sunsetH)photoPhase='🌇 Zlata ura ↓';
+    else if(pt.blueAMh&&pt.sunriseH&&nowH>=pt.blueAMh&&nowH<pt.sunriseH)photoPhase='💙 Modra ura ↑';
+    else if(pt.sunsetH&&pt.bluePMh&&nowH>pt.sunsetH&&nowH<=pt.bluePMh)photoPhase='💙 Modra ura ↓';
+    else if(nowH<(pt.nautAMh||5)||nowH>(pt.nautPMh||22))photoPhase='🌙 Noč';
+    const entry={
+      id:Date.now(),
+      date:now.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'}),
+      dateISO:now.toISOString().slice(0,10),
+      time:now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}),
+      imgData:imgData,
+      weather:{
+        temp:(m.temp??'—'),hum:(obs.humidity??'—'),
+        wind:(m.windSpeed??'—'),rain:(m.precipRate??0),
+        cond:document.getElementById('cond-label')?.textContent||'—',
+      },
+      gdd,moon:{phase:moon.phase,emoji:moon.emoji,illum:moon.illum},
+      photoPhase,notes:'',
+    };
+    const entries=fdLoadDiary();
+    entries.unshift(entry);
+    if(entries.length>100)entries.splice(100);
+    fdSaveDiary(entries);
+    fdRenderGallery();
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+
+function fdRenderGallery(){
+  const gallery=document.getElementById('fd-gallery');
+  const empty=document.getElementById('fd-empty');
+  if(!gallery)return;
+  const entries=fdLoadDiary();
+  if(!entries.length){gallery.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  gallery.innerHTML='';
+  entries.forEach(e=>{
+    const card=document.createElement('div');card.className='fd-entry';
+    card.onclick=()=>fdOpenModal(e.id);
+    card.innerHTML=
+      `<img class="fd-thumb" src="${e.imgData}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">`+
+      `<div class="fd-thumb-placeholder" style="display:none">📷</div>`+
+      `<div class="fd-meta">`+
+        `<div class="fd-temp">${e.weather?.temp??'—'}°C <span style="opacity:.5;font-size:.75em">${e.photoPhase||''}</span></div>`+
+        `<div>${e.date} · ${e.time}</div>`+
+        `<div>${e.moon?.emoji||''} ${e.moon?.phase||''} · GDD ${e.gdd||0}</div>`+
+      `</div>`;
+    gallery.appendChild(card);
+  });
+}
+
+function fdOpenModal(id){
+  const entries=fdLoadDiary();
+  const e=entries.find(x=>x.id===id);if(!e)return;
+  _fdCurrent=id;
+  const m=document.getElementById('fd-modal');if(!m)return;
+  document.getElementById('fd-modal-img').src=e.imgData;
+  document.getElementById('fd-modal-title').textContent=e.date+' · '+e.time;
+  document.getElementById('fd-modal-notes').value=e.notes||'';
+  const badges=document.getElementById('fd-modal-badges');
+  if(badges)badges.innerHTML=[
+    e.photoPhase,`🌡 ${e.weather?.temp??'—'}°C`,`💧 ${e.weather?.hum??'—'}%`,
+    `💨 ${e.weather?.wind??'—'} km/h`,e.moon?.emoji+' '+e.moon?.phase,`🌱 GDD ${e.gdd||0}`,
+    e.weather?.cond,
+  ].filter(Boolean).map(b=>`<span class="fd-badge">${b}</span>`).join('');
+  const desc=document.getElementById('fd-modal-desc');
+  if(desc)desc.textContent=`Pogoji ob fotografiranju: ${e.weather?.cond||'—'} pri ${e.weather?.temp||'—'}°C s ${e.weather?.hum||'—'}% vlago. Fenofaza: ${e.gdd||0} GDD.`;
+  m.style.display='flex';
+}
+function fdCloseModal(){const m=document.getElementById('fd-modal');if(m)m.style.display='none';_fdCurrent=null;}
+function fdSaveNotes(){
+  if(!_fdCurrent)return;
+  const entries=fdLoadDiary();const idx=entries.findIndex(x=>x.id===_fdCurrent);
+  if(idx>=0){entries[idx].notes=document.getElementById('fd-modal-notes').value;fdSaveDiary(entries);fdRenderGallery();}
+  fdCloseModal();
+}
+function fdDeleteEntry(){
+  if(!_fdCurrent)return;
+  if(!confirm('Izbriši fotografijo iz dnevnika?'))return;
+  const entries=fdLoadDiary().filter(x=>x.id!==_fdCurrent);
+  fdSaveDiary(entries);fdRenderGallery();fdCloseModal();
+}
+
+// ══════════════════════════════════════════════════════════
+// ── Mikroklima fingerprint ─────────────────────────────────
+// ══════════════════════════════════════════════════════════
+async function buildFingerprint(){
+  const grid=document.getElementById('fp-grid');
+  const sub=document.getElementById('fp-subtitle');
+  const narr=document.getElementById('fp-narrative');
+  if(!grid)return;
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const entries=Object.entries(stored).map(([d,v])=>({d,v}));
+  if(entries.length<90){if(sub)sub.textContent='Premalo podatkov (potrebnih vsaj 90 dni)';return;}
+  // Compute fingerprint metrics
+  const withT=entries.filter(e=>e.v.tempAvg!=null);
+  const withR=entries.filter(e=>e.v.precipTotal!=null);
+  // Fog days (humidity proxy: days where temp low and likely foggy)
+  const winterLowTemp=entries.filter(e=>{const m=new Date(e.d+'T12:00:00').getMonth();return (m<=2||m>=10)&&(e.v.tempAvg??99)<5&&(e.v.humidityAvg??0)>85;}).length;
+  const fogDaysPerYear=withT.length>0?Math.round(winterLowTemp/(withT.length/365)):0;
+  // Temperature inversions (approx: very cold night vs mild day)
+  const inversions=withT.filter(e=>(e.v.tempLow??99)<2&&(e.v.tempHigh??0)>8).length;
+  const invPerYear=Math.round(inversions/(withT.length/365));
+  // Annual precipitation
+  const years=new Set(entries.map(e=>e.d.slice(0,4)));
+  const annualPrecip=years.size>0?[...years].map(y=>entries.filter(e=>e.d.startsWith(y)).reduce((s,e)=>s+(e.v.precipTotal||0),0)):[];
+  const avgPrecip=annualPrecip.length?Math.round(annualPrecip.reduce((a,b)=>a+b,0)/annualPrecip.length):0;
+  // Frost days per year
+  const frostTotal=withT.filter(e=>(e.v.tempLow??99)<=0).length;
+  const frostPerYear=Math.round(frostTotal/(withT.length/365));
+  // Rainy days per year
+  const rainyTotal=withR.filter(e=>e.v.precipTotal>1).length;
+  const rainyPerYear=Math.round(rainyTotal/(withR.length/365));
+  // Max single-day rain
+  const maxRain=withR.reduce((m,e)=>e.v.precipTotal>m?e.v.precipTotal:m,0);
+  // Summer heat days (avg ≥ 20°C)
+  const heatDays=Math.round(withT.filter(e=>(e.v.tempAvg??0)>=20).length/(withT.length/365));
+  const stats=[
+    {icon:'🌡',n:withT.length?(withT.reduce((s,e)=>s+e.v.tempAvg,0)/withT.length).toFixed(1)+'°C':'—',l:'Povp. temperatura',bar:null,desc:'Letno povprečje za Rečico ob Savinji'},
+    {icon:'🌧',n:avgPrecip+' mm',l:'Letne padavine',bar:avgPrecip/1800,col:'#60a5fa',desc:'Savinjska dolina je med mokrejšimi v SLO'},
+    {icon:'☔',n:rainyPerYear+' dni',l:'Deževnih dni/leto',bar:rainyPerYear/150,col:'#38bdf8',desc:'Dni z >1mm padavin'},
+    {icon:'❄️',n:frostPerYear+' dni',l:'Zmrzali/leto',bar:frostPerYear/60,col:'#7dd3fc',desc:'Nočne temperature ≤0°C'},
+    {icon:'☀️',n:heatDays+' dni',l:'Poletnih dni/leto',bar:heatDays/80,col:'#fbbf24',desc:'Dnevi z povp. temp ≥20°C'},
+    {icon:'🌊',n:maxRain.toFixed(0)+' mm',l:'Rekordni dan',bar:Math.min(1,maxRain/100),col:'#f87171',desc:'Maksimalne dnevne padavine'},
+    {icon:'🌫',n:'~'+fogDaysPerYear+' dni',l:'Megleni dni/leto',bar:Math.min(1,fogDaysPerYear/80),col:'#94a3b8',desc:'Nizka temp + visoka vlaga (ocena)'},
+    {icon:'🔄',n:'~'+invPerYear+' dni',l:'Temp. inverzij/leto',bar:Math.min(1,invPerYear/50),col:'#a78bfa',desc:'Hladne noči z toplimi dnevi — dolinski učinek'},
+  ];
+  if(sub)sub.textContent='Analiza '+entries.length+' dni meritev ('+[...years].sort()[0]+'–'+[...years].sort().pop()+')';
+  grid.innerHTML=stats.map(st=>`<div class="fp-item"><div class="fp-val">${st.n}</div><div class="fp-lbl">${st.icon} ${st.l}</div>${st.bar!=null?`<div class="fp-bar"><div class="fp-bar-fill" style="width:${Math.round(st.bar*100)}%;background:${st.col||'var(--blue)'}"></div></div>`:''}${st.desc?`<div class="fp-desc">${st.desc}</div>`:''}</div>`).join('');
+  // Narrative
+  if(narr){
+    const warm=avgPrecip>1300?'nadpovprečno mokra':'normalno vlažna';
+    narr.textContent=`Postaja IREICA1 v Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
+  }
+}
+
 function tickClock(){
 set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
@@ -4207,7 +4625,9 @@ async function init(){
   applyMoon();
   applyMonthlySummary();
   applyYearRecords();
-  applyPhotographyWidget(null); // light timeline visible immediately
+  applyPhotographyWidget(null);
+  setTimeout(initWeatherArt,100);
+  setTimeout(fetchAIBrief,500);
   initNotifBtn();
   connectLightning();
   autoLoadHistoryFile();
