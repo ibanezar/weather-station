@@ -1892,7 +1892,7 @@ function applyObs(obs){
   analyzeLocalMicroclimate(obs);
   generateWhyWeather(obs);
   _lastBriefObs=obs;
-  setWeatherArt(parseInt(document.getElementById("cond-icon")?.textContent?.codePointAt(0)||0),obs.metric?.temp??15,obs.metric?.windSpeed??0,obs.metric?.precipRate??0);
+  setWeatherArt(obs);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
@@ -4549,19 +4549,36 @@ function initWeatherArt(){
   _artParticles=[];
   artFrame();
 }
-function setWeatherArt(wmoCode,temp,wind,rain){
-  if(wmoCode===0||wmoCode===1) _artCondition=temp>24?'hot':'sunny';
-  else if(wmoCode<=3)          _artCondition='cloudy';
-  else if(wmoCode<=48)         _artCondition='fog';
-  else if(wmoCode<=67)         _artCondition=rain>5?'heavy_rain':'rain';
-  else if(wmoCode<=77)         _artCondition='snow';
-  else if(wmoCode<=82)         _artCondition='rain';
-  else if(wmoCode<=86)         _artCondition='snow';
-  else                         _artCondition='storm';
-  const h=new Date().getHours();
-  if(h<5||h>22)                _artCondition='night';
+function setWeatherArt(obs){
+  const rain=obs?.metric?.precipRate??0;
+  const temp=obs?.metric?.temp??15;
+  const wind=obs?.metric?.windSpeed??0;
+  const hum=obs?.humidity??70;
+  const uv=obs?.uv??0;
+  const solar=obs?.metric?.solarRadiation??obs?.solarRadiation??0;
+  const hour=new Date().getHours();
+
+  let cond='sunny';
+  if(hour<5||hour>22)              cond='night';
+  else if(rain>5)                  cond='heavy_rain';
+  else if(rain>0.3)                cond='rain';
+  else if(wind>45)                 cond='storm';
+  else if(temp<0&&rain>0.05)       cond='snow';
+  else if(hum>91&&wind<5&&uv<1)    cond='fog';
+  else if(temp>27&&uv>3&&rain<0.1) cond='hot';
+  else{
+    // Use solar radiation to estimate cloud cover
+    const sinH=Math.sin(Math.max(0,(hour-6)/12*Math.PI));
+    const expSolar=sinH*880;
+    const ratio=expSolar>80?solar/expSolar:1;
+    if(ratio<0.35) cond='cloudy';
+    else           cond='sunny';
+  }
+
+  _artCondition=cond;
+  const labels={sunny:'Sončno ☀️',hot:'Vroče 🌡',cloudy:'Oblačno ☁️',fog:'Megla 🌫',rain:'Dež 🌧',heavy_rain:'Plohe 🌧',snow:'Sneg ❄️',storm:'Nevihta ⛈',night:'Noč 🌙'};
   const lbl=document.getElementById('art-label');
-  if(lbl)lbl.textContent={sunny:'Sončno',hot:'Vroče',cloudy:'Oblačno',fog:'Megla',rain:'Dež',heavy_rain:'Plohe',snow:'Sneg',storm:'Nevihta',night:'Noč'}[_artCondition]||'';
+  if(lbl)lbl.textContent=labels[cond]||'';
   initWeatherArt();
 }
 function artFrame(){
