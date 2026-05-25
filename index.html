@@ -1458,6 +1458,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-gust" style="color:var(--purple)">—</div><div class="an-kpi-l">Max sunek km/h</div></div>
     </div>
     <div style="font-size:.65rem;color:var(--muted);margin-bottom:1rem;font-family:'IBM Plex Mono',monospace" id="an-data-source">Nalaganje podatkov…</div>
+    <!-- Flood data gap notice -->
+    <div id="an-flood-note" style="display:none;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:12px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.74rem;line-height:1.7;color:var(--muted)">
+      🌊 <strong style="color:#38bdf8">Opomba — poplave 3./4. avg 2023:</strong> Postaja je v 12 urah zabeležila <strong style="color:#38bdf8">≥235,5 mm</strong> padavin, nato je nastopil izpad elektrike. Podatki za avgust 2023 so nepopolni — dejanska skupna količina je bila verjetno bistveno višja. Letna vsota padavin za 2023 je zato podcenjena.
+    </div>
 
 
     <div class="an-section" id="fingerprint-section">
@@ -2241,20 +2245,36 @@ function applyOnThisDay(results){
   const grid=document.getElementById('otd-grid');
   if(!grid)return;
   grid.innerHTML='';
+
+  // Check if today is near Aug 3-4 — show flood note
+  const now=new Date();
+  const isFloodAnniversary=(now.getMonth()===7&&(now.getDate()===3||now.getDate()===4));
+  if(isFloodAnniversary){
+    const note=document.createElement('div');
+    note.style.cssText='grid-column:1/-1;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.35);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.5rem';
+    note.innerHTML='<div style="font-size:.82rem;font-weight:600;color:#38bdf8;margin-bottom:.3rem">🌊 '+FLOOD_2023.dateSl+' — Katastrofalne poplave</div>'
+      +'<div style="font-size:.74rem;color:var(--muted);line-height:1.7">Postaja je v '+FLOOD_2023.duration_h+' urah zabeležila vsaj <strong style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm</strong> padavin, nato pa je nastopil izpad elektrike. '+FLOOD_2023.context+'</div>';
+    grid.appendChild(note);
+  }
+
   results.forEach(r=>{
+    // Inject flood note for 2023
+    if(r.year===2023&&isFloodAnniversary) return; // already shown above
     const info=wmoInfo(r.error?null:r.code);
     const item=document.createElement('div');
     item.className='otd-item';
     const hasData=!r.error&&r.tMax!=null;
+    // Special flag for 2023 data gap
+    const is2023aug=(r.year===2023&&now.getMonth()===7&&(now.getDate()===3||now.getDate()===4));
     item.innerHTML=
-      '<div class="otd-year">'+r.year+'</div>'+
-      '<div class="otd-emoji">'+(hasData?info.emoji:'—')+'</div>'+
-      '<div class="otd-desc">'+(hasData?info.desc:'Ni podatkov')+'</div>'+
+      '<div class="otd-year">'+r.year+(is2023aug?' 🌊':'')+'</div>'+
+      '<div class="otd-emoji">'+(hasData?info.emoji:is2023aug?'🌊':'—')+'</div>'+
+      '<div class="otd-desc">'+(is2023aug?'Katastrofalne poplave':hasData?info.desc:'Ni podatkov')+'</div>'+
       (hasData
         ? '<div class="otd-temps"><span class="th">'+r.tMax.toFixed(1)+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+r.tMin.toFixed(1)+'°</span></div>'
           +(r.rain>0?'<div class="otd-rain">🌧 '+r.rain.toFixed(1)+' mm</div>':'')
           +'<div class="otd-wind">💨 '+(r.wind!=null?r.wind.toFixed(1)+' km/h':'—')+'</div>'
-        : ''
+        : is2023aug?'<div class="otd-rain" style="color:#38bdf8">≥'+FLOOD_2023.rainfall_mm+' mm/12h</div>':''
       );
     grid.appendChild(item);
   });
@@ -4142,6 +4162,10 @@ function initAnalysisCharts(){
   const srcEl=document.getElementById('an-data-source');
   if(srcEl)srcEl.textContent=src+' · '+AN.years[0]+'–'+AN.years[AN.years.length-1];
 
+  // Flood / data gap warning for 2023
+  const floodNote=document.getElementById('an-flood-note');
+  if(floodNote)floodNote.style.display='block';
+
   // ── KPI cards — compute from AN data ──────────────────
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   const validT=AN.annualTemps.filter(x=>x!=null);
@@ -4511,6 +4535,18 @@ async function initForecast2(){
 }
 
 // ═══════════════════════════════════════════════════════
+
+// ── Poplave 3./4. avg 2023 — historični rekord ─────────────
+const FLOOD_2023 = {
+  dateISO: '2023-08-04',
+  dateSl: '3./4. avgust 2023',
+  rainfall_mm: 235.5,
+  duration_h: 12,
+  note: 'Izpad elektrike med nevihto — postaja je prenehala beležiti. Dejansko skupno je verjetno precej preseglo 235,5 mm.',
+  context: 'Avgustovske poplave 2023 so bile najhujše naravne katastrofe v Sloveniji v zadnjih desetletjih. Savinjska dolina je bila med najbolj prizadetimi področji — reka Savinja je prestopila bregove na številnih mestih.',
+  impact: 'Rečica ob Savinji: poplavljeni kleti, kmetijske površine, cesta vzdolž Savinje. Elektrika ugasnila med nevihto.',
+  source: 'Osebna meteorološka postaja IREICA1 (Weather Underground)',
+};
 // ── Tab: Ekstremni dogodki ─────────────────────────────
 // ═══════════════════════════════════════════════════════
 let _evAll=[],_evFilter='all',_evInit=false;
@@ -4551,6 +4587,18 @@ function initExtremes(){
     events.push({type:'wind',icon:'💨',label:'Močan sunek',sub:(e.windspeedHigh).toFixed(1)+' km/h',date:fmtD(e.date),sort:e.date,badge:e.windspeedHigh>=80?'🔴 Vihar':'🟠 Močan',bc:e.windspeedHigh>=80?'rgba(248,113,113,.15)':'rgba(167,139,250,.1)'});
   });
 
+  // Always inject the flood event (it may be missing due to power outage)
+  const floodAlreadyIn=events.some(e=>e.sort==='2023-08-04'&&e.type==='rain'&&e.rainMm>=200);
+  if(!floodAlreadyIn){
+    events.push({
+      type:'flood',icon:'🌊',label:'KATASTROFALNE POPLAVE',
+      sub:FLOOD_2023.rainfall_mm+' mm v '+FLOOD_2023.duration_h+'h (+ izpad elektrike)',
+      date:FLOOD_2023.dateSl,sort:'2023-08-04',
+      badge:'🔴 REKORD POSTAJE',bc:'rgba(56,189,248,.18)',
+      detail:FLOOD_2023.context+' '+FLOOD_2023.note,
+      border:'rgba(56,189,248,.5)',special:true,
+    });
+  }
   _evAll=events.sort((a,b)=>b.sort.localeCompare(a.sort));
   renderEvents();
 }
@@ -4562,16 +4610,20 @@ function evFilter(type,btn){
 }
 function renderEvents(){
   const list=document.getElementById('ev-list');if(!list)return;
-  const filtered=_evFilter==='all'?_evAll:_evAll.filter(e=>e.type===_evFilter);
+  const filtered=_evFilter==='all'?_evAll:_evAll.filter(e=>e.type===_evFilter||(_evFilter==='rain'&&e.type==='flood'));
   if(!filtered.length){list.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Ni dogodkov za ta filter.</div>';return;}
   list.innerHTML='';
   filtered.forEach(e=>{
-    const row=document.createElement('div');row.className='ev-row';row.style.borderColor=e.bc?e.bc.replace('.1)','0.4)').replace('.15)','0.4)').replace('.2)','0.4)'):'var(--fc-border)';
+    const row=document.createElement('div');row.className='ev-row';
+    const bc=e.bc||'rgba(56,189,248,.1)';
+    row.style.borderColor=e.border||bc.replace(/[\d.]+\)$/,'0.45)');
+    if(e.special)row.style.cssText+=';border-width:2px;background:rgba(56,189,248,.05)';
     row.innerHTML=
       '<div class="ev-icon">'+e.icon+'</div>'+
       '<div class="ev-body">'+
-        '<div class="ev-label">'+e.label+'<span class="ev-badge" style="background:'+e.bc+'">'+e.badge+'</span></div>'+
+        '<div class="ev-label">'+e.label+'<span class="ev-badge" style="background:'+bc+'">'+e.badge+'</span></div>'+
         '<div class="ev-meta">'+e.date+'  ·  '+e.sub+'</div>'+
+        (e.detail?'<div style="font-size:.72rem;color:var(--muted);margin-top:.35rem;line-height:1.65">'+e.detail+'</div>':'')+
       '</div>';
     list.appendChild(row);
   });
@@ -4603,8 +4655,10 @@ function initRecords(){
       {icon:'❄️',val:cold.tempAvg.toFixed(1)+'°C',lbl:'Najhladnejši dan',date:fmtD(cold.date),col:'var(--cyan)'},
       wet?{icon:'🌧',val:wet.precipTotal.toFixed(1)+' mm',lbl:'Največ padavin/dan',date:fmtD(wet.date),col:'var(--rain-col)'}:null,
       wind?{icon:'💨',val:wind.windspeedHigh.toFixed(1)+' km/h',lbl:'Najmočnejši sunek',date:fmtD(wind.date),col:'var(--purple)'}:null,
+      // Flood event always shown (power outage = data gap in localStorage)
+      {icon:'🌊',val:'≥'+FLOOD_2023.rainfall_mm+' mm',lbl:'Rekord padavin/12h (poplave)',date:FLOOD_2023.dateSl,col:'#38bdf8',special:true,note:'⚠️ Izpad el. — dejanska skupna neznana'},
     ].filter(Boolean);
-    hof.innerHTML=items.map(it=>`<div class="rec-hof-card"><div class="rec-hof-icon">${it.icon}</div><div class="rec-hof-val" style="color:${it.col}">${it.val}</div><div class="rec-hof-lbl">${it.lbl}</div><div class="rec-hof-date">${it.date}</div></div>`).join('');
+    hof.innerHTML=items.map(it=>`<div class="rec-hof-card" style="${it.special?'border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.06)':''}"><div class="rec-hof-icon">${it.icon}</div><div class="rec-hof-val" style="color:${it.col}">${it.val}</div><div class="rec-hof-lbl">${it.lbl}</div><div class="rec-hof-date">${it.date}</div>${it.note?`<div style="font-size:.58rem;color:var(--amber);margin-top:.2rem">${it.note}</div>`:''}</div>`).join('');
   }
 
   // Monthly records
@@ -5558,7 +5612,7 @@ function buildTriviaRecords(){
   const rows=[
     {lbl:'🌡 Maks. temp.',mine:maxT.v.tempAvg!=null?maxT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(maxT.d),slo:'41.0°C',sloD:'Črnomelj, 19.7.1950',world:'54.4°C',worldD:'Death Valley, CA, 2020'},
     {lbl:'❄️ Min. temp.',mine:minT.v.tempAvg!=null?minT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(minT.d),slo:'−34.5°C',sloD:'Babno Polje, 13.2.1956',world:'−89.2°C',worldD:'Vostok, Antarktika, 1983'},
-    {lbl:'🌧 Max. padavine/dan',mine:maxR.v.precipTotal!=null?maxR.v.precipTotal.toFixed(0)+' mm':'—',mineD:fmtD(maxR.d),slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
+    {lbl:'🌧 Max. padavine/dan',mine:'≥'+FLOOD_2023.rainfall_mm+' mm ⚠️',mineD:'3./4. avg 2023 (12h; izpad el.)',slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
     {lbl:'💨 Max. sunek',mine:maxW.v.windspeedHigh!=null?maxW.v.windspeedHigh.toFixed(0)+' km/h':'—',mineD:fmtD(maxW.d),slo:'180 km/h',sloD:'Godič, 1989',world:'408 km/h',worldD:'Barrow Island, AUS, 1996'},
   ];
   el.innerHTML='<div class="rec-compare">'+
