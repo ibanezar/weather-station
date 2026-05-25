@@ -1671,7 +1671,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="chart-range" id="sky-strip-info">Nalaganje…</span>
       </div>
       <div class="sky-strip-wrap" id="sky-strip-wrap">
-        <svg id="sky-strip-svg" class="sky-strip-svg" viewBox="0 0 1000 170" preserveAspectRatio="xMidYMid meet"></svg>
+        <svg id="sky-strip-fc" class="sky-strip-svg" viewBox="0 0 1000 170" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="sky-tooltip" id="sky-tooltip" style="opacity:0;display:none"></div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.6rem;color:var(--muted)">
@@ -2290,7 +2290,7 @@ function switchTab(tab){
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  _anChartsInit=false; initAnalysisCharts(); buildFingerprint(); }
   if(tab==='trivia'){    initTrivia(); }
-  if(tab==='forecast2'){ initForecast2(); }
+  if(tab==='forecast2'){ _fc2Init=false; initForecast2(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); }
@@ -4256,7 +4256,7 @@ function initAnalysisCharts(){
 let _fc2Init=false;
 // ── Dnevni trak neba ──────────────────────────────────────
 async function drawDailySkyStrip(){
-  const svg=document.getElementById('sky-strip-svg');
+  const svg=document.getElementById('sky-strip-fc');
   const info=document.getElementById('sky-strip-info');
   if(!svg)return;
   try{
@@ -4425,6 +4425,7 @@ async function drawDailySkyStrip(){
 
 async function initForecast2(){
   if(_fc2Init)return;_fc2Init=true;
+  drawDailySkyStrip(); // sky strip – neodvisno od 48h podatkov
   try{
     const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
       +'&hourly=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,uv_index,relative_humidity_2m,weather_code'
