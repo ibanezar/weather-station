@@ -3288,7 +3288,155 @@ async function fetchTextForecast(){
 
 
 
-// ── Smart notifications ───────────────────────────────────
+// ── Photo times (astronomical) ────────────────────────────
+function calcPhotoTimes(){
+  const now=new Date();
+  const jd=now.getTime()/86400000+2440587.5;
+  const n=jd-2451545;
+  const L=(280.46+0.9856474*n)%360;
+  const g=((357.528+0.9856003*n)%360)*Math.PI/180;
+  const lam=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*Math.PI/180;
+  const eps=23.439*Math.PI/180;
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const latR=LAT*Math.PI/180;
+  const eot=-7.655*Math.sin(g)+9.873*Math.sin(2*lam+3.588)+0.439*Math.sin(4*lam-6.714);
+  const snUtc=12-LON/15-eot/60;
+  const tz=-now.getTimezoneOffset()/60;
+
+  // Hour angle for given solar elevation (null if no crossing)
+  const ha=elev=>{
+    const c=(Math.sin(elev*Math.PI/180)-Math.sin(latR)*Math.sin(dec))/(Math.cos(latR)*Math.cos(dec));
+    return Math.abs(c)<=1?Math.acos(c)*180/Math.PI/15:null;
+  };
+  const toLocal=h=>((h+tz)%24+24)%24;
+  const fmt=h=>{if(h==null)return'—';const l=toLocal(h);return String(Math.floor(l)).padStart(2,'0')+':'+String(Math.round((l%1)*60)).padStart(2,'0');};
+  const toH=h=>h==null?null:toLocal(h);
+
+  const hh=ha(0);   if(hh==null)return null;  // no sunrise — polar day/night
+  const hg=ha(10);  // golden hour: sun 0°→10° (after sunrise / before sunset)
+  const hb=ha(-6);  // blue hour: sun 0°→-6° (civil twilight)
+  const hn=ha(-12); // nautical twilight end
+
+  return{
+    // Morning (dark → bright)
+    nautAMh: toH(snUtc-(hn||hb||hh)),  nautAM:  fmt(snUtc-(hn||hb||hh)),
+    blueAMh: toH(snUtc-(hb||hh)),      blueAM:  fmt(snUtc-(hb||hh)),
+    sunriseH:toH(snUtc-hh),             sunrise: fmt(snUtc-hh),
+    goldAMh: toH(snUtc-(hg||hh)+(hg?0:1)), goldAM:fmt(snUtc-(hg||hh)),  // end of golden AM
+    // Midday
+    noonH:   toH(snUtc),                noon:    fmt(snUtc),
+    // Evening (bright → dark)
+    goldPMh: toH(snUtc+(hg||hh)),       goldPM:  fmt(snUtc+(hg||hh)),  // start of golden PM
+    sunsetH: toH(snUtc+hh),             sunset:  fmt(snUtc+hh),
+    bluePMh: toH(snUtc+(hb||hh)),       bluePM:  fmt(snUtc+(hb||hh)),
+    nautPMh: toH(snUtc+(hn||hb||hh)),   nautPM:  fmt(snUtc+(hn||hb||hh)),
+  };
+}
+
+function calcMacroScore(temp,wind,humidity,rain){
+  let s=100;
+  if(temp<10)s-=50;else if(temp<16)s-=20;else if(temp>30)s-=30;else if(temp>26)s-=10;
+  if(wind>20)s-=40;else if(wind>12)s-=20;else if(wind>6)s-=8;
+  if(humidity<40)s-=20;else if(humidity>95)s-=10;
+  if(rain>0)s-=30;
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+
+function applyPhotographyWidget(obs){
+  try{
+    const pt=calcPhotoTimes();if(!pt)return;
+    const now=new Date(),nowH=now.getHours()+now.getMinutes()/60;
+
+    // ── Light timeline (correct order: night→blue→sunrise→gold→day→gold→sunset→blue→night)
+    const segs=[
+      {from:0,           to:pt.nautAMh,  c:'#020617'},
+      {from:pt.nautAMh,  to:pt.blueAMh,  c:'#1e3a5f'},
+      {from:pt.blueAMh,  to:pt.sunriseH, c:'#1d4ed8'},
+      {from:pt.sunriseH, to:pt.goldAMh,  c:'#b45309'},
+      {from:pt.goldAMh,  to:pt.goldPMh,  c:'#38bdf8'},
+      {from:pt.goldPMh,  to:pt.sunsetH,  c:'#b45309'},
+      {from:pt.sunsetH,  to:pt.bluePMh,  c:'#1d4ed8'},
+      {from:pt.bluePMh,  to:pt.nautPMh,  c:'#1e3a5f'},
+      {from:pt.nautPMh,  to:24,          c:'#020617'},
+    ].filter(sg=>sg.from!=null&&sg.to!=null&&sg.to>sg.from);
+
+    const tl=document.getElementById('photo-timeline');
+    if(tl){
+      tl.innerHTML='';
+      segs.forEach(sg=>{
+        const d=document.createElement('div');d.className='photo-tl-seg';
+        d.style.cssText='flex:'+(sg.to-sg.from)+';background:'+sg.c;
+        tl.appendChild(d);
+      });
+      const ind=document.createElement('div');ind.className='photo-tl-now';
+      ind.style.left=(nowH/24*100)+'%';tl.appendChild(ind);
+    }
+
+    // ── Current phase
+    let phase='☀️ Dan',phaseColor='var(--blue)';
+    if(nowH<pt.nautAMh||nowH>pt.nautPMh)          {phase='🌙 Noč';         phaseColor='var(--muted)';}
+    else if(nowH<pt.blueAMh)                       {phase='🌌 Somrak';      phaseColor='#475569';}
+    else if(nowH<pt.sunriseH)                      {phase='💙 Modra ura ↑'; phaseColor='#3b82f6';}
+    else if(nowH<pt.goldAMh)                       {phase='🌅 Zlata ura ↑'; phaseColor='#f97316';}
+    else if(nowH>pt.goldPMh&&nowH<pt.sunsetH)      {phase='🌇 Zlata ura ↓'; phaseColor='#f97316';}
+    else if(nowH>pt.sunsetH&&nowH<pt.bluePMh)      {phase='💙 Modra ura ↓'; phaseColor='#3b82f6';}
+    else if(nowH>pt.bluePMh&&nowH<pt.nautPMh)      {phase='🌌 Somrak';      phaseColor='#475569';}
+    const phEl=document.getElementById('photo-phase-lbl');
+    if(phEl){phEl.textContent=phase;phEl.style.color=phaseColor;}
+
+    // ── Event labels
+    const ev=document.getElementById('photo-events');
+    if(ev)ev.innerHTML=[
+      {h:pt.blueAMh,  l:'💙 '+pt.blueAM},
+      {h:pt.sunriseH, l:'☀️ '+pt.sunrise},
+      {h:pt.goldAMh,  l:'🌅 '+pt.goldAM},
+      {h:pt.noonH,    l:'🌞 '+pt.noon},
+      {h:pt.goldPMh,  l:'🌇 '+pt.goldPM},
+      {h:pt.sunsetH,  l:'🌆 '+pt.sunset},
+      {h:pt.bluePMh,  l:'💙 '+pt.bluePM},
+    ].filter(p=>p.h!=null).map(p=>`<span style="color:${Math.abs(p.h-nowH)<0.5?'var(--amber)':'var(--muted)'}">${p.l}</span>`).join('');
+
+    // ── Macro scores
+    const m=obs?.metric||{};
+    const T=m.temp??15,W=m.windSpeed??0,H=obs?.humidity??70,R=m.precipRate??0;
+    const ms=calcMacroScore(T,W,H,R);
+    const ls=phase.includes('Zlata')?95:phase.includes('Modra')?85:phase.includes('Noč')||phase.includes('Somrak')?10:65;
+    const ws=Math.max(0,Math.round(100-W*3.5));
+    const mg=document.getElementById('photo-macro-grid');
+    if(mg)mg.innerHTML=[
+      {n:ms,          l:'Makro pogoji', c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',    s:'%'},
+      {n:ls,          l:'Svetloba',     c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',   s:'%'},
+      {n:ws,          l:'Mirnost vetra',c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',    s:'%'},
+      {n:T.toFixed(1),l:'Temperatura',  c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:'°C'},
+    ].map(it=>`<div class="photo-macro-item"><div class="photo-macro-score" style="color:${it.c}">${it.n}${it.s}</div><div class="photo-macro-lbl">${it.l}</div></div>`).join('');
+
+    // ── Subjects
+    const subjects=[
+      {e:'🦋',n:'Metulji',      a:T>=18&&T<=30&&W<15&&R<0.1},
+      {e:'🐝',n:'Čebele',       a:T>=15&&W<20&&R<0.1},
+      {e:'🦗',n:'Kobilice',     a:T>=22&&W<20&&R<0.1},
+      {e:'🐛',n:'Hrošči',       a:T>=14&&T<=28},
+      {e:'🕷',n:'Pajki',        a:T>=10&&T<=24},
+      {e:'🐉',n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},
+      {e:'🌸',n:'Cvetlice',     a:true},
+      {e:'🍄',n:'Gobe',         a:R>0||H>=85},
+    ];
+    const sEl=document.getElementById('photo-subjects');
+    if(sEl)sEl.innerHTML=subjects.map(s=>`<div class="photo-subject ${s.a?'active':'low'}">${s.e} ${s.n}</div>`).join('');
+
+    // ── Tip
+    const tips=[];
+    if(phase.includes('Zlata'))     tips.push('Idealen čas — zlata svetloba, dolge sence.');
+    if(phase.includes('Modra'))     tips.push('Modra ura: mehka difuzna svetloba brez senc.');
+    if(H>=80&&T>=10&&T<=20)         tips.push('Visoka vlaga — pričakuj roso in kapljice.');
+    if(R<0.1&&T>=18&&W<10)          tips.push('Idealni pogoji za žuželke — mirno in toplo.');
+    if(W>20)                        tips.push('Preveč vetra za makro. Poiščite zavetje.');
+    const tipEl=document.getElementById('photo-tip');
+    if(tipEl)tipEl.textContent=tips[0]||'';
+  }catch(e){console.warn('PhotoWidget:',e);}
+}
+
+
 async function checkSmartNotifications(){
   if(!('Notification'in window)||Notification.permission!=='granted'||localStorage.getItem('wx-notif')!=='on')return;
   const today=new Date().toDateString();
@@ -4059,6 +4207,7 @@ async function init(){
   applyMoon();
   applyMonthlySummary();
   applyYearRecords();
+  applyPhotographyWidget(null); // light timeline visible immediately
   initNotifBtn();
   connectLightning();
   autoLoadHistoryFile();
