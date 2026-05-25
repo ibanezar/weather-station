@@ -1450,12 +1450,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- KPI row -->
     <div class="an-kpi-row">
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--blue)">10.4°C</div><div class="an-kpi-l">Povp. temp. (2020–25)</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--red)">27.6°C</div><div class="an-kpi-l">Rekord vročine</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--cyan)">−9.5°C</div><div class="an-kpi-l">Rekord mraza</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--amber)">+0.29°</div><div class="an-kpi-l">°C/leto trend</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--rain-col)">1377 mm</div><div class="an-kpi-l">Povp. letne padavine</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" style="color:var(--purple)">115.6</div><div class="an-kpi-l">Max sunek km/h</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tavg" style="color:var(--blue)">—</div><div class="an-kpi-l">Povp. temp.</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmax" style="color:var(--red)">—</div><div class="an-kpi-l">Rekord vročine</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmin" style="color:var(--cyan)">—</div><div class="an-kpi-l">Rekord mraza</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-trend" style="color:var(--amber)">—</div><div class="an-kpi-l">°C/leto trend</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-rain" style="color:var(--rain-col)">—</div><div class="an-kpi-l">Povp. letne padavine</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-gust" style="color:var(--purple)">—</div><div class="an-kpi-l">Max sunek km/h</div></div>
     </div>
     <div style="font-size:.65rem;color:var(--muted);margin-bottom:1rem;font-family:'IBM Plex Mono',monospace" id="an-data-source">Nalaganje podatkov…</div>
 
@@ -4141,6 +4141,36 @@ function initAnalysisCharts(){
   // Show data source
   const srcEl=document.getElementById('an-data-source');
   if(srcEl)srcEl.textContent=src+' · '+AN.years[0]+'–'+AN.years[AN.years.length-1];
+
+  // ── KPI cards — compute from AN data ──────────────────
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const validT=AN.annualTemps.filter(x=>x!=null);
+  const avgT=validT.length?validT.reduce((a,b)=>a+b,0)/validT.length:null;
+  set('an-kpi-tavg', avgT!=null ? avgT.toFixed(1)+'°C' : '—');
+
+  // Max/min temps from raw localStorage entries
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const rawEntries=Object.values(stored);
+  const allHigh=rawEntries.map(v=>v.tempHigh??v.tempAvg).filter(x=>x!=null);
+  const allLow =rawEntries.map(v=>v.tempLow??v.tempAvg).filter(x=>x!=null);
+  set('an-kpi-tmax', allHigh.length ? Math.max(...allHigh).toFixed(1)+'°C' : '27.6°C');
+  set('an-kpi-tmin', allLow.length  ? Math.min(...allLow).toFixed(1)+'°C'  : '−9.5°C');
+
+  // Trend slope °C/year from first to last valid annual temp
+  const validYrIdx=AN.years.reduce((acc,_,i)=>AN.annualTemps[i]!=null?[...acc,i]:acc,[]);
+  if(validYrIdx.length>=2){
+    const dy=AN.annualTemps[validYrIdx[validYrIdx.length-1]]-AN.annualTemps[validYrIdx[0]];
+    const dx=AN.years[validYrIdx[validYrIdx.length-1]]-AN.years[validYrIdx[0]];
+    const slope=dx>0?dy/dx:0;
+    set('an-kpi-trend',(slope>=0?'+':'')+slope.toFixed(2)+'°');
+  } else set('an-kpi-trend','—');
+
+  // Avg rain
+  const validR=AN.annualRain.filter(x=>x>0);
+  set('an-kpi-rain', validR.length ? Math.round(validR.reduce((a,b)=>a+b,0)/validR.length)+' mm' : '—');
+
+  // Max gust
+  set('an-kpi-gust', AN.topGusts?.length ? AN.topGusts[0].v.toFixed(0) : '—');
 
   const dark=isDark();
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
