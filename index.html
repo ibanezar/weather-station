@@ -476,6 +476,18 @@ footer a{color:var(--blue);text-decoration:none}
 .an-insight-list li{list-style:none;padding:.5rem .75rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
 @media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}}
 
+
+/* Text forecast */
+.txfc-today{font-size:.88rem;line-height:1.85;color:var(--text);margin-bottom:.85rem;padding-bottom:.85rem;border-bottom:1px solid var(--border)}
+.txfc-today strong{color:var(--blue)}
+.txfc-days{display:flex;flex-direction:column;gap:.35rem}
+.txfc-day{display:flex;gap:.75rem;align-items:baseline;font-size:.77rem;line-height:1.55;padding:.3rem 0;border-bottom:1px solid var(--fc-border)}
+.txfc-day:last-child{border:none}
+.txfc-day-lbl{font-weight:600;min-width:90px;flex-shrink:0;color:var(--text)}
+.txfc-day-txt{color:var(--muted);flex:1}
+.txfc-day-temp{font-family:'IBM Plex Mono',monospace;font-size:.75rem;white-space:nowrap;color:var(--text)}
+.txfc-source{font-size:.6rem;color:var(--muted);margin-top:.65rem;opacity:.7}
+
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
   .span2{grid-column:span 1}
@@ -736,6 +748,17 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌧 Padavine — zadnjih 24 ur</span><span class="chart-range" id="rain-range">—</span></div>
     <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
+  </div>
+
+  <!-- Text forecast -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">📝 Besedilna napoved</span>
+      <span class="chart-range" id="txfc-updated"></span>
+    </div>
+    <div id="txfc-today" class="txfc-today">Nalaganje napovedi…</div>
+    <div id="txfc-days" class="txfc-days"></div>
+    <div class="txfc-source">Vir: Open-Meteo · ECMWF · Rečica ob Savinji 46.326°N 14.921°E</div>
   </div>
 
   <!-- Forecast -->
@@ -2952,7 +2975,127 @@ function maybePushAlert(title,body){
 }
 
 
-// ── Biometeorological index ───────────────────────────────
+// ── Besedilna napoved ─────────────────────────────────────
+const _WMO_SL = {
+  0:'jasno',1:'pretežno jasno',2:'delno oblačno',3:'oblačno',
+  45:'megla',48:'ivjna megla',
+  51:'rahlo rosenje',53:'zmerno rosenje',55:'močno rosenje',
+  56:'ledeno rosenje',57:'močno ledeno rosenje',
+  61:'lahek dež',63:'zmeren dež',65:'močan dež',
+  66:'zmrzujoč dež',67:'močan zmrzujoč dež',
+  71:'lahek sneg',73:'zmeren sneg',75:'močan sneg',77:'ledene iglice',
+  80:'plohe',81:'zmerne plohe',82:'močne plohe',
+  85:'snežne plohe',86:'močne snežne plohe',
+  95:'nevihta',96:'nevihta s točo',99:'nevihta z močno točo'
+};
+const _WIND_DIR=['S','SV','V','JV','J','JZ','Z','SZ'];
+function _wmoSl(code){return _WMO_SL[code]||_WMO_SL[Math.floor(code/10)*10]||'spremenljivo';}
+function _windDir(deg){if(deg==null)return'';return _WIND_DIR[Math.round(((deg%360)+360)%360/45)%8];}
+function _windDesc(spd){if(!spd||spd<5)return'mirno';if(spd<15)return'šibak veter';if(spd<30)return'zmeren veter';if(spd<50)return'močan veter';return'viharni veter';}
+function _precipDesc(mm,prob){
+  if(!mm||mm<0.5)return null;
+  const amt=mm<2?'rahle':(mm<8?'zmerne':(mm<20?'obilne':'zelo obilne'));
+  return amt+' padavine ('+mm.toFixed(1)+' mm'+(prob?', '+prob+'% verj.':'')+')';}
+function _tempComment(tmax,tmin){
+  if(tmax>=32)return'Zelo vroče.';if(tmax>=26)return'Toplo.';if(tmax>=20)return'Prijetno.';
+  if(tmax>=14)return'Sveže.';if(tmax>=6)return'Hladno.';return'Mrzlo.';
+}
+
+function buildDayText(day, isToday){
+  const wmo=_wmoSl(day.wmo);
+  const wind=_windDesc(day.windMax);
+  const dir=_windDir(day.windDir);
+  const precip=_precipDesc(day.rain, day.prob);
+  const tComment=_tempComment(day.tmax,day.tmin);
+
+  // Capitalize first letter
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+  let txt=cap(wmo)+'. ';
+  txt+=tComment+' ';
+  if(precip) txt+=cap(precip)+'. ';
+  if(day.windMax>=15) txt+=cap(wind)+(dir?' iz '+dir:'')+' do '+Math.round(day.windMax)+' km/h. ';
+  return txt.trim();
+}
+
+async function fetchTextForecast(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast'
+      +'?latitude='+LAT+'&longitude='+LON
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,'
+      +'wind_speed_10m_max,wind_direction_10m_dominant,precipitation_probability_max'
+      +'&timezone=Europe%2FLjubljana&forecast_days=7';
+    const res=await fetch(url);
+    const data=await res.json();
+    const d=data.daily;
+    if(!d?.time?.length)return;
+
+    const days=d.time.map((t,i)=>({
+      date:new Date(t+'T12:00:00'),
+      wmo:d.weather_code[i],
+      tmax:d.temperature_2m_max[i],
+      tmin:d.temperature_2m_min[i],
+      rain:d.precipitation_sum[i],
+      windMax:d.wind_speed_10m_max[i],
+      windDir:d.wind_direction_10m_dominant[i],
+      prob:d.precipitation_probability_max[i],
+    }));
+
+    const SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+    const SL_MONTHS=['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'];
+
+    const fmtDate=(d,isToday,isTomorrow)=>{
+      if(isToday)return'Danes';
+      if(isTomorrow)return'Jutri';
+      return SL_DAYS[d.getDay()]+', '+d.getDate()+'. '+SL_MONTHS[d.getMonth()];
+    };
+
+    // TODAY — full prose
+    const td=days[0];
+    const todayLbl=td.date.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+    const todayTxt=buildDayText(td,true);
+    const todayEl=document.getElementById('txfc-today');
+    if(todayEl) todayEl.innerHTML=
+      '<strong>'+todayLbl.charAt(0).toUpperCase()+todayLbl.slice(1)+'</strong> — '+
+      todayTxt+'<br>'+
+      '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.82rem">'+
+      '<span style="color:var(--red)">↑ '+td.tmax.toFixed(1)+'°C</span>'+
+      '  <span style="color:var(--blue)">↓ '+td.tmin.toFixed(1)+'°C</span>'+
+      (td.rain>0?'  <span style="color:var(--rain-col)">🌧 '+td.rain.toFixed(1)+' mm</span>':'')+
+      '</span>';
+
+    // NEXT 6 DAYS — compact rows
+    const daysEl=document.getElementById('txfc-days');
+    if(daysEl){
+      daysEl.innerHTML='';
+      days.slice(1).forEach((day,i)=>{
+        const lbl=fmtDate(day.date,false,i===0);
+        const txt=buildDayText(day,false);
+        const row=document.createElement('div');row.className='txfc-day';
+        row.innerHTML=
+          '<div class="txfc-day-lbl">'+lbl+'</div>'+
+          '<div class="txfc-day-txt">'+txt+'</div>'+
+          '<div class="txfc-day-temp">'+
+            '<span style="color:var(--red)">'+day.tmax.toFixed(0)+'°</span>'+
+            '<span style="color:var(--muted)">/</span>'+
+            '<span style="color:var(--blue)">'+day.tmin.toFixed(0)+'°</span>'+
+          '</div>';
+        daysEl.appendChild(row);
+      });
+    }
+
+    // Updated time
+    const now=new Date();
+    const upd=document.getElementById('txfc-updated');
+    if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    const el=document.getElementById('txfc-today');
+    if(el)el.textContent='Napoved trenutno ni na voljo.';
+    console.warn('TextForecast:',e);
+  }
+}
+
+
 function calcHumidex(T,Td){
   const e=6.112*Math.exp(17.67*Td/(Td+243.5));
   return+(T+0.5555*(e-10)).toFixed(1);
@@ -3321,11 +3464,11 @@ async function init(){
   initNotifBtn();
   connectLightning();
   autoLoadHistoryFile(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance()]);
   applyPheno();
 }
 init();
-setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
