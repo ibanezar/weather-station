@@ -3098,33 +3098,84 @@ function drawWindRose(observations){
   const svg=document.getElementById('wind-rose-svg');if(!svg)return;
   const dirs=new Array(8).fill(0),spds=new Array(8).fill(0);
   observations.forEach(o=>{
-    const d=o.winddirAvg??o.winddir??0;
+    const d=o.winddirAvg??o.winddir;
+    if(d==null)return;
     const sp=o.metric?.windspeedAvg??o.metric?.windSpeed??0;
     const sec=Math.round(d/45)%8;dirs[sec]++;spds[sec]+=sp;
   });
-  const total=observations.length||1,maxF=Math.max(...dirs)||1;
+  const total=dirs.reduce((a,b)=>a+b,0);
+
+  // Fall back to XLSX climatology if recent data is too sparse (<24 readings)
+  let usingClimo=false;
+  if(total<24&&typeof XLSX_WIND!=='undefined'){
+    usingClimo=true;
+    // XLSX order: N,NE,E,SE,S,SW,W,NW → map to our index (0=N)
+    const order=['N','NE','E','SE','S','SW','W','NW'];
+    order.forEach((d,i)=>{
+      const w=XLSX_WIND.find(x=>x.dir===d);
+      dirs[i]=w?w.pct:0; spds[i]=(w?w.avg:0)*(w?w.pct:0);
+    });
+  }
+
+  const maxF=Math.max(...dirs)||1;
   svg.innerHTML='';
-  const cx=75,cy=75,maxR=52;
+  const cx=75,cy=75,maxR=50;
   const labels=['S','SV','V','JV','J','JZ','Z','SZ'];
+
+  // Grid rings + radial guides
   [.33,.66,1].forEach(r=>mkSVG(svg,'circle',{cx,cy,r:(maxR*r).toFixed(1),fill:'none',stroke:CC.grid,'stroke-width':'1'}));
-  [[0,maxR,0,-maxR],[maxR,0,-maxR,0]].forEach(([x1,y1,x2,y2])=>mkSVG(svg,'line',{x1:cx+x1,y1:cy+y1,x2:cx+x2,y2:cy+y2,stroke:CC.grid,'stroke-width':'1'}));
+  for(let i=0;i<8;i++){
+    const a=(i*45-90)*Math.PI/180;
+    mkSVG(svg,'line',{x1:cx,y1:cy,x2:(cx+maxR*Math.cos(a)).toFixed(1),y2:(cy+maxR*Math.sin(a)).toFixed(1),stroke:CC.grid,'stroke-width':'.5',opacity:'.5'});
+  }
+
+  // Current wind direction (highlight)
+  const curDir=_lastBriefObs?.winddir??_lastBriefObs?.metric?.winddir;
+  const curSec=curDir!=null?Math.round(curDir/45)%8:-1;
+
+  // Filled petals (wedges)
+  const half=20*Math.PI/180; // petal half-width in radians
   dirs.forEach((cnt,i)=>{
     if(cnt===0)return;
-    const len=(cnt/maxF)*maxR*.88,avgSp=spds[i]/cnt;
+    const len=(cnt/maxF)*maxR*.92;
+    const avgSp=cnt>0?spds[i]/cnt:0;
     const color=avgSp<10?'#60a5fa':avgSp<30?'#4d9ff8':'#a78bfa';
-    const angle=(i*45-90)*Math.PI/180;
-    mkSVG(svg,'line',{x1:cx,y1:cy,x2:(cx+len*Math.cos(angle)).toFixed(1),y2:(cy+len*Math.sin(angle)).toFixed(1),stroke:color,'stroke-width':'10','stroke-linecap':'round',opacity:'.8'});
+    const a=(i*45-90)*Math.PI/180;
+    const tipX=cx+len*Math.cos(a),tipY=cy+len*Math.sin(a);
+    const baseR=len*0.18;
+    const lX=cx+baseR*Math.cos(a-half),lY=cy+baseR*Math.sin(a-half);
+    const rX=cx+baseR*Math.cos(a+half),rY=cy+baseR*Math.sin(a+half);
+    const isCur=i===curSec;
+    mkSVG(svg,'path',{
+      d:`M${cx},${cy} L${lX.toFixed(1)},${lY.toFixed(1)} L${tipX.toFixed(1)},${tipY.toFixed(1)} L${rX.toFixed(1)},${rY.toFixed(1)} Z`,
+      fill:color,opacity:isCur?'.95':'.62',
+      stroke:isCur?'var(--text)':'none','stroke-width':isCur?'1':'0'
+    });
   });
+
+  // Direction labels
   labels.forEach((lbl,i)=>{
-    const angle=(i*45-90)*Math.PI/180,lr=maxR+11;
-    const t=mkSVG(svg,'text',{x:(cx+lr*Math.cos(angle)).toFixed(1),y:(cy+lr*Math.sin(angle)).toFixed(1),'text-anchor':'middle','dominant-baseline':'central','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    const a=(i*45-90)*Math.PI/180,lr=maxR+12;
+    const isCard=i%2===0; // N,E,S,W bigger
+    const t=mkSVG(svg,'text',{x:(cx+lr*Math.cos(a)).toFixed(1),y:(cy+lr*Math.sin(a)).toFixed(1),'text-anchor':'middle','dominant-baseline':'central','font-size':isCard?'8.5':'7',fill:i===curSec?'var(--text)':CC.label,'font-family':'IBM Plex Mono,monospace','font-weight':isCard?'600':'400'});
     t.textContent=lbl;
   });
-  mkSVG(svg,'circle',{cx,cy,r:'3',fill:'var(--muted)'});
-  const dom=dirs.indexOf(maxF),pct=Math.round(dirs[dom]/total*100);
-  const calm=Math.round(observations.filter(o=>(o.metric?.windspeedAvg??o.metric?.windSpeed??0)<2).length/total*100);
+  mkSVG(svg,'circle',{cx,cy,r:'2.5',fill:'var(--muted)'});
+
+  // Stats
+  const dom=dirs.indexOf(maxF);
+  const domPct=usingClimo?Math.round(dirs[dom]):Math.round(dirs[dom]/total*100);
+  const calm=usingClimo?null:Math.round(observations.filter(o=>(o.metric?.windspeedAvg??o.metric?.windSpeed??0)<2).length/(observations.length||1)*100);
   const el=document.getElementById('wind-rose-stats');
-  if(el)el.innerHTML=`Prevladujoča smer: <strong>${labels[dom]}</strong> (${pct} % časa)<br>Mirno: ${calm} % časa`;
+  if(el){
+    el.innerHTML=`Prevladujoča smer: <strong style="color:var(--text)">${labels[dom]}</strong> (${domPct}% časa)`
+      +(calm!=null?`<br>Mirno: ${calm}% časa`:'')
+      +(usingClimo?`<br><span style="font-size:.64rem;opacity:.8">📊 Klimatologija 2019–2026 (premalo svežih meritev)</span>`:'');
+  }
+
+  // Update card title to reflect data source
+  const titleEl=svg.closest('.wind-rose-card')?.querySelector('.clabel');
+  if(titleEl)titleEl.innerHTML=usingClimo?'🌹 Vetroza — klimatologija':'🌹 Vetroza — zadnjih 7 dni';
 }
 
 // ── PWA install ───────────────────────────────────────────
