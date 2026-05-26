@@ -2288,9 +2288,10 @@ function switchTab(tab){
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  _anChartsInit=false; initAnalysisCharts(); buildFingerprint(); }
-  if(tab==='trivia'){    initTrivia(); }
-  if(tab==='forecast2'){ _fc2Init=false; initForecast2(); }
+  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); }
+  if(tab==='diary'){    fdRenderGallery(); }
+  if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
+  if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); }
@@ -4153,6 +4154,37 @@ function computeAN(){
 // Fallback hardcoded data from XLSX analysis (used if localStorage has <30 days)
 const AN_FALLBACK={years:[2020,2021,2022,2023,2024,2025],annualTemps:[10.20,9.77,10.97,11.07,11.48,11.18],trendLine:[10.05,10.34,10.63,10.92,11.21,11.50],annualRain:[1348,1363,1110,1711,1506,1224],annualFrost:[34,46,32,30,27,29],annualHot:[0,4,4,5,6,6],seasonTemps:{Pomlad:[9.8,8.2,9.5,9.8,11.4,10.9],Poletje:[19.1,20.1,21.0,20.0,21.3,20.5],Jesen:[10.0,9.5,11.1,12.4,10.6,11.0],Zima:[2.4,1.1,2.1,2.2,2.5,2.1]},monthlyTemp:[1.0,3.8,6.2,9.8,13.9,20.0,20.8,20.3,15.8,11.4,5.3,1.6],monthlyRain:[93.8,72.6,91.3,86.8,181.3,110.2,176.4,97.8,167.7,144.1,131.7,124.5],sepRain:[145,67,293,48,247,206],octRain:[203,71,52,238,207,94],topGusts:[{d:'1. apr 2024',v:115.6},{d:'18. avg 2022',v:77.1},{d:'9. mar 2023',v:73.4},{d:'21. okt 2020',v:64.4}],rainMatrix:{2020:[24,36,100,22,110,180,171,137,145,203,56,164],2021:[112,97,34,78,263,45,179,149,67,71,185,84],2022:[17,30,33,94,124,122,86,41,293,52,77,140],2023:[160,25,78,90,171,161,291,96,48,238,183,170],2024:[95,90,121,118,183,124,148,89,247,207,53,30],2025:[91,60,162,85,114,30,183,75,206,94,88,36]},months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
 
+
+// Update only KPI cards (no chart recreation)
+function updateAnalysisKPIs(){
+  const AN=computeAN()||AN_FALLBACK;
+  const src=computeAN()?'📡 Postaja IREICA1 (localStorage)':'🛰 Referenčni podatki XLSX';
+  const srcEl=document.getElementById('an-data-source');
+  if(srcEl)srcEl.textContent=src+' · '+AN.years[0]+'–'+AN.years[AN.years.length-1];
+  const floodNote=document.getElementById('an-flood-note');
+  if(floodNote)floodNote.style.display='block';
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const validT=AN.annualTemps.filter(x=>x!=null);
+  const avgT=validT.length?validT.reduce((a,b)=>a+b,0)/validT.length:null;
+  set('an-kpi-tavg', avgT!=null?avgT.toFixed(1)+'°C':'—');
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const rawEntries=Object.values(stored);
+  const allHigh=rawEntries.map(v=>v.tempHigh??v.tempAvg).filter(x=>x!=null);
+  const allLow=rawEntries.map(v=>v.tempLow??v.tempAvg).filter(x=>x!=null);
+  set('an-kpi-tmax', allHigh.length?Math.max(...allHigh).toFixed(1)+'°C':'27.6°C');
+  set('an-kpi-tmin', allLow.length?Math.min(...allLow).toFixed(1)+'°C':'−9.5°C');
+  const validYrIdx=AN.years.reduce((acc,_,i)=>AN.annualTemps[i]!=null?[...acc,i]:acc,[]);
+  if(validYrIdx.length>=2){
+    const dy=AN.annualTemps[validYrIdx[validYrIdx.length-1]]-AN.annualTemps[validYrIdx[0]];
+    const dx=AN.years[validYrIdx[validYrIdx.length-1]]-AN.years[validYrIdx[0]];
+    const slope=dx>0?dy/dx:0;
+    set('an-kpi-trend',(slope>=0?'+':'')+slope.toFixed(2)+'°');
+  }
+  const validR=AN.annualRain.filter(x=>x>0);
+  set('an-kpi-rain', validR.length?Math.round(validR.reduce((a,b)=>a+b,0)/validR.length)+' mm':'—');
+  set('an-kpi-gust', AN.topGusts?.length?AN.topGusts[0].v.toFixed(0):'—');
+}
+
 let _anChartsInit=false;
 function initAnalysisCharts(){
   if(_anChartsInit)return; _anChartsInit=true;
@@ -4166,35 +4198,7 @@ function initAnalysisCharts(){
   const floodNote=document.getElementById('an-flood-note');
   if(floodNote)floodNote.style.display='block';
 
-  // ── KPI cards — compute from AN data ──────────────────
-  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  const validT=AN.annualTemps.filter(x=>x!=null);
-  const avgT=validT.length?validT.reduce((a,b)=>a+b,0)/validT.length:null;
-  set('an-kpi-tavg', avgT!=null ? avgT.toFixed(1)+'°C' : '—');
-
-  // Max/min temps from raw localStorage entries
-  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-  const rawEntries=Object.values(stored);
-  const allHigh=rawEntries.map(v=>v.tempHigh??v.tempAvg).filter(x=>x!=null);
-  const allLow =rawEntries.map(v=>v.tempLow??v.tempAvg).filter(x=>x!=null);
-  set('an-kpi-tmax', allHigh.length ? Math.max(...allHigh).toFixed(1)+'°C' : '27.6°C');
-  set('an-kpi-tmin', allLow.length  ? Math.min(...allLow).toFixed(1)+'°C'  : '−9.5°C');
-
-  // Trend slope °C/year from first to last valid annual temp
-  const validYrIdx=AN.years.reduce((acc,_,i)=>AN.annualTemps[i]!=null?[...acc,i]:acc,[]);
-  if(validYrIdx.length>=2){
-    const dy=AN.annualTemps[validYrIdx[validYrIdx.length-1]]-AN.annualTemps[validYrIdx[0]];
-    const dx=AN.years[validYrIdx[validYrIdx.length-1]]-AN.years[validYrIdx[0]];
-    const slope=dx>0?dy/dx:0;
-    set('an-kpi-trend',(slope>=0?'+':'')+slope.toFixed(2)+'°');
-  } else set('an-kpi-trend','—');
-
-  // Avg rain
-  const validR=AN.annualRain.filter(x=>x>0);
-  set('an-kpi-rain', validR.length ? Math.round(validR.reduce((a,b)=>a+b,0)/validR.length)+' mm' : '—');
-
-  // Max gust
-  set('an-kpi-gust', AN.topGusts?.length ? AN.topGusts[0].v.toFixed(0) : '—');
+  updateAnalysisKPIs(); // KPI cards updated here
 
   const dark=isDark();
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
@@ -4813,7 +4817,7 @@ function skyColorForHour(hour, wmo, isDark){
   else{r=15;g=23;b=42;}                 // night
   // Weather modifier (overcast = darker/greyer)
   const overcast=wmo>=2&&wmo<50?0.55:wmo>=50?0.35:1.0;
-  const grey=isDark?15:140;
+  const grey=isDark()?15:140;
   r=Math.round(r*(overcast)+(grey*(1-overcast)));
   g=Math.round(g*(overcast)+(grey*(1-overcast)));
   b=Math.round(b*(overcast)+(grey*(1-overcast)));
@@ -5180,7 +5184,7 @@ function analyzeLocalMicroclimate(obs){
 let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
 function initWeatherArt(){
   const c=document.getElementById('weather-art-canvas');if(!c)return;
-  c.width=c.offsetWidth||600;c.height=140;
+  c.width=c.parentElement?.offsetWidth||c.offsetWidth||600;c.height=140;
   _artCtx=c.getContext('2d');
   if(_artAnim)cancelAnimationFrame(_artAnim);
   _artParticles=[];
@@ -5655,7 +5659,7 @@ async function buildTriviaWorldCompare(){
   const cards=document.getElementById('tri-world-cards');
   if(!cards)return;
   const myT=_lastBriefObs?.metric?.temp??null;
-  if(myT===null){if(sub)sub.textContent='Čakam na meritve postaje…';return;}
+  if(myT===null){if(sub)sub.textContent='Čakam na meritve postaje (naložite Aktualno tab najprej)…';return;}
   const cities=[
     {name:'Oslo',country:'🇳🇴 Norveška',lat:59.9,lon:10.7},
     {name:'Zürich',country:'🇨🇭 Švica',lat:47.4,lon:8.5},
@@ -5737,7 +5741,7 @@ async function init(){
   applyMonthlySummary();
   applyYearRecords();
   applyPhotographyWidget(null);
-  setTimeout(initWeatherArt,100);
+  setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
   setTimeout(fetchAIBrief,500);
   initNotifBtn();
   connectLightning();
