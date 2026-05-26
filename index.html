@@ -281,9 +281,9 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
 /* Tabs */
-.tab-nav{display:flex;gap:.4rem;margin-bottom:1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.4rem}
-.tab-nav::-webkit-scrollbar{display:none}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.5rem 1rem;border-radius:25px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
+.tab-nav-wrap{position:relative;margin-bottom:1.5rem}.tab-nav-wrap::after{content:"";position:absolute;right:0;top:0;bottom:.4rem;width:52px;background:linear-gradient(to left,var(--bg) 40%,transparent);pointer-events:none;z-index:5}.tab-nav{display:flex;gap:.35rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.4rem;scroll-snap-type:x proximity}
+.tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4}
 .tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3)}
 .tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
 .tab-pane{display:none}.tab-pane.active{display:block}
@@ -840,7 +840,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
   <!-- Tab navigation -->
-  <div class="tab-nav">
+  <div class="tab-nav-wrap"><div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌤 Aktualno</button>
     <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
     <button class="tab-btn" id="tab-btn-analysis"   onclick="switchTab('analysis')">🔬 Analize</button>
@@ -850,7 +850,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
     <button class="tab-btn" id="tab-btn-diary"   onclick="switchTab('diary')">📸 Dnevnik</button>
     <button class="tab-btn" id="tab-btn-trivia" onclick="switchTab('trivia')">🎲 Zanimivosti</button>
-  </div>
+  </div></div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
   <div id="tab-current" class="tab-pane active">
