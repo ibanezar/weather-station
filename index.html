@@ -781,7 +781,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 </head>
 <body>
 
-<div id="bg" class="no-photo"><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+<div id="bg" class="no-photo"><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
 <div id="chart-tip"></div>
 <button class="theme-btn" id="theme-btn" title="Preklopi temo">🌙</button>
 
@@ -2148,6 +2148,7 @@ function applyObs(obs){
   generateWhyWeather(obs);
   _lastBriefObs=obs;
   setWeatherArt(obs);
+  updateBgFromObs(obs);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
 }
@@ -5355,6 +5356,127 @@ function buildPrecipNormals(){
 }
 
 
+// ══════════════════════════════════════════════════════════
+// ── Dinamičen vremenski background ────────────────────────
+// ══════════════════════════════════════════════════════════
+const WX_THEMES={
+  night:      {bg:'#020617',b:['rgba(30,27,75,.6)','rgba(12,20,50,.5)','rgba(15,23,42,.5)','rgba(2,6,23,.4)'],    p:'star', n:55},
+  sunny:      {bg:'#0c2340',b:['rgba(14,165,233,.4)','rgba(56,189,248,.3)','rgba(3,105,161,.45)','rgba(7,89,133,.3)'],p:'mote',n:18},
+  hot:        {bg:'#18060a',b:['rgba(239,68,68,.35)','rgba(249,115,22,.4)','rgba(251,191,36,.2)','rgba(220,38,38,.25)'],p:'mote',n:12},
+  cloudy:     {bg:'#0f1a2e',b:['rgba(71,85,105,.45)','rgba(51,65,85,.4)','rgba(100,116,139,.3)','rgba(71,85,105,.3)'],p:null,n:0},
+  fog:        {bg:'#131e2d',b:['rgba(148,163,184,.3)','rgba(100,116,139,.25)','rgba(148,163,184,.22)','rgba(71,85,105,.2)'],p:'fog',n:7},
+  rain:       {bg:'#060f1c',b:['rgba(30,58,95,.55)','rgba(15,23,42,.65)','rgba(37,99,235,.22)','rgba(29,78,216,.2)'],p:'rain',n:48},
+  heavy_rain: {bg:'#040a14',b:['rgba(30,58,95,.65)','rgba(15,23,42,.75)','rgba(37,99,235,.28)','rgba(29,78,216,.25)'],p:'rain',n:80},
+  storm:      {bg:'#04040e',b:['rgba(49,46,129,.6)','rgba(30,27,75,.7)','rgba(67,56,202,.3)','rgba(15,23,42,.8)'],p:'storm',n:90},
+  snow:       {bg:'#060f1c',b:['rgba(30,58,95,.45)','rgba(186,230,253,.12)','rgba(56,189,248,.2)','rgba(14,165,233,.2)'],p:'snow',n:40},
+};
+const WX_LIGHT_BG={night:'#0f172a',sunny:'#0c3a5e',hot:'#2d1208',cloudy:'#1e293b',fog:'#2d3748',rain:'#0f1a2e',heavy_rain:'#09111f',storm:'#0a0a1f',snow:'#0d1a30'};
+
+let _wxParticles=[],_wxCond='',_lightningTimer=null;
+
+function initBgCanvas(){
+  const c=document.getElementById('bg-wx-canvas');if(!c)return;
+  const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
+  resize();window.addEventListener('resize',resize,{passive:true});
+}
+
+function clearWxParticles(){_wxParticles.forEach(p=>p.remove());_wxParticles=[];}
+
+function spawnWxParticles(type,count){
+  const bg=document.getElementById('bg');if(!bg||!type||!count)return;
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    if(type==='rain'||type==='storm'){
+      el.className='wx-rain';
+      const len=14+Math.random()*20,spd=0.45+Math.random()*0.55;
+      el.style.cssText=`left:${Math.random()*115-7}%;height:${len}px;width:${type==='storm'?1.5:1}px;animation-duration:${spd}s;animation-delay:-${(Math.random()*2).toFixed(2)}s;opacity:${type==='storm'?0.55:0.4}`;
+    }else if(type==='snow'){
+      el.className='wx-snow';
+      const sz=2+Math.random()*4,spd=3.5+Math.random()*5;
+      el.style.cssText=`left:${Math.random()*100}%;top:-20px;width:${sz}px;height:${sz}px;animation-duration:${spd}s;animation-delay:-${(Math.random()*7).toFixed(2)}s;opacity:${(0.4+Math.random()*0.35).toFixed(2)}`;
+    }else if(type==='star'){
+      el.className='wx-star';
+      const sz=0.8+Math.random()*1.8,spd=2+Math.random()*4.5;
+      el.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*80}%;width:${sz}px;height:${sz}px;animation-duration:${spd}s;animation-delay:-${(Math.random()*6).toFixed(2)}s`;
+    }else if(type==='mote'){
+      el.className='wx-mote';
+      const sz=5+Math.random()*16,spd=4+Math.random()*6;
+      const hue=_wxCond==='hot'?`249,115,22`:`56,189,248`;
+      el.style.cssText=`left:${Math.random()*100}%;top:${35+Math.random()*60}%;width:${sz}px;height:${sz}px;background:radial-gradient(circle,rgba(${hue},${(0.2+Math.random()*0.2).toFixed(2)}),transparent 70%);animation-duration:${spd}s;animation-delay:-${(Math.random()*7).toFixed(2)}s`;
+    }else if(type==='fog'){
+      el.className='wx-fog';
+      const w=200+Math.random()*320,h=60+Math.random()*110,spd=7+Math.random()*11;
+      el.style.cssText=`left:${-15+Math.random()*80}%;top:${5+Math.random()*75}%;width:${w}px;height:${h}px;background:radial-gradient(ellipse,rgba(148,163,184,.18),transparent 70%);animation-duration:${spd}s;animation-delay:-${(Math.random()*12).toFixed(2)}s`;
+    }
+    bg.appendChild(el);_wxParticles.push(el);
+  }
+}
+
+function applyWeatherBg(cond){
+  if(cond===_wxCond)return;
+  _wxCond=cond;
+  const dark=isDark();
+  const t=WX_THEMES[cond]||WX_THEMES.cloudy;
+  const bgEl=document.getElementById('bg');if(!bgEl)return;
+
+  // Base background colour
+  bgEl.style.background=dark?t.bg:(WX_LIGHT_BG[cond]||t.bg);
+
+  // Blob colours
+  ['b1','b2','b3','b4'].forEach((cls,i)=>{
+    const el=bgEl.querySelector('.'+cls);
+    if(el)el.style.background=`radial-gradient(circle,${t.b[i]},transparent 70%)`;
+  });
+
+  // Particles
+  clearWxParticles();
+  if(t.p&&t.n>0)spawnWxParticles(t.p,t.n);
+
+  // Storm lightning
+  clearTimeout(_lightningTimer);
+  if(cond==='storm')scheduleLightning();
+}
+
+function scheduleLightning(){
+  if(_wxCond!=='storm')return;
+  _lightningTimer=setTimeout(()=>{
+    const c=document.getElementById('bg-wx-canvas');if(!c||_wxCond!=='storm')return;
+    const ctx=c.getContext('2d');if(!ctx)return;
+    ctx.clearRect(0,0,c.width,c.height);
+    // Draw bolt
+    const sx=c.width*0.2+Math.random()*c.width*0.6;
+    ctx.save();ctx.strokeStyle='rgba(196,210,255,0.75)';ctx.lineWidth=1.5;
+    ctx.shadowColor='#a5b4fc';ctx.shadowBlur=22;ctx.beginPath();ctx.moveTo(sx,0);
+    let bx=sx,by=0;
+    for(let i=0;i<7;i++){bx+=(Math.random()-.5)*52;by+=c.height/7;ctx.lineTo(bx,by);}
+    ctx.stroke();ctx.restore();
+    // Fade out
+    let a=1;
+    const fade=()=>{a-=0.12;ctx.clearRect(0,0,c.width,c.height);
+      if(a>0&&_wxCond==='storm'){ctx.save();ctx.globalAlpha=a*0.04;ctx.fillStyle='rgba(200,215,255,1)';ctx.fillRect(0,0,c.width,c.height);ctx.restore();requestAnimationFrame(fade);}
+    };
+    setTimeout(fade,50);
+    scheduleLightning();
+  },4000+Math.random()*9000);
+}
+
+function updateBgFromObs(obs){
+  const rain=obs?.metric?.precipRate??0,temp=obs?.metric?.temp??15;
+  const wind=obs?.metric?.windSpeed??0,hum=obs?.humidity??70;
+  const uv=obs?.uv??0,solar=obs?.solarRadiation??obs?.metric?.solarRadiation??0;
+  const hour=new Date().getHours();
+  let cond='cloudy';
+  if(hour<5||hour>22)             cond='night';
+  else if(rain>5)                 cond='heavy_rain';
+  else if(rain>0.3)               cond='rain';
+  else if(wind>45)                cond='storm';
+  else if(temp<0&&rain>0.05)      cond='snow';
+  else if(hum>91&&wind<5&&uv<1)  cond='fog';
+  else if(temp>27&&uv>3&&rain<.1) cond='hot';
+  else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
+  applyWeatherBg(cond);
+}
+
 function generateWhyWeather(obs){
   const el=document.getElementById('why-text');
   const upd=document.getElementById('why-updated');
@@ -6120,6 +6242,8 @@ async function init(){
   applyYearRecords();
   applyPhotographyWidget(null);
   setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
+  initBgCanvas();
+  applyWeatherBg('night'); // initial state until obs loads
   setTimeout(fetchAIBrief,500);
   initNotifBtn();
   connectLightning();
