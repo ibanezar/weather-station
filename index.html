@@ -12,6 +12,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -400,6 +402,38 @@ footer a{color:var(--blue);text-decoration:none}
 .ltg-list{flex:1;max-height:90px;overflow-y:auto;font-size:.74rem;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
 .ltg-row{padding:.18rem 0;border-bottom:1px solid var(--border);white-space:nowrap}
 .ltg-close{color:var(--red)}.ltg-far{color:var(--muted)}
+
+/* RainViewer radar map */
+.radar-map-wrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--fc-border)}
+#radar-map{width:100%;height:420px;background:var(--fc-bg);border-radius:14px}
+.radar-controls{display:flex;align-items:center;gap:.65rem;margin-top:.7rem;flex-wrap:wrap}
+.radar-btn{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:.35rem .85rem;font-size:.74rem;color:var(--text);cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem}
+.radar-btn:hover{border-color:var(--blue);color:var(--blue)}
+.radar-time{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--text);min-width:130px}
+.radar-track{flex:1;min-width:120px;height:5px;background:var(--rain-track);border-radius:3px;position:relative;cursor:pointer}
+.radar-track-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .2s}
+.radar-now-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);font-weight:600}
+.radar-fc-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(167,139,250,.15);color:var(--purple);font-weight:600}
+.leaflet-container{font-family:'Plus Jakarta Sans',sans-serif!important;background:var(--fc-bg)!important}
+.radar-legend{display:flex;align-items:center;gap:.4rem;font-size:.66rem;color:var(--muted);margin-top:.5rem;flex-wrap:wrap}
+.radar-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#60a5fa,#3b82f6,#22c55e,#eab308,#f97316,#ef4444,#a855f7)}
+
+/* Pollen */
+.pollen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:.55rem;margin-top:.6rem}
+.pollen-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .55rem;text-align:center}
+.pollen-icon{font-size:1.1rem}
+.pollen-name{font-size:.66rem;color:var(--muted);margin:.2rem 0 .1rem}
+.pollen-val{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:500}
+.pollen-level{font-size:.6rem;padding:1px 6px;border-radius:8px;margin-top:.25rem;display:inline-block}
+
+/* Flood / river discharge */
+.flood-status{display:flex;align-items:center;gap:.85rem;padding:.5rem 0}
+.flood-icon{font-size:1.8rem;flex-shrink:0}
+.flood-bar-wrap{height:6px;background:var(--rain-track);border-radius:3px;margin-top:.5rem;overflow:hidden;position:relative}
+.flood-bar{height:100%;border-radius:3px;transition:width 1s ease}
+.flood-spark{display:flex;align-items:flex-end;gap:3px;height:36px;margin-top:.6rem}
+.flood-spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height .5s}
+
 /* Windy */
 .windy-frame{width:100%;height:420px;border:0;border-radius:14px;display:block}
 /* Heatmap */
@@ -1262,6 +1296,22 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
+
+  <!-- Pollen + Savinja river -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🌸 Pelod & alergeni</div>
+      <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
+      <div class="pollen-grid" id="pollen-grid"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌊 Reka Savinja — pretok</div>
+      <div id="flood-content">
+        <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Monthly summary + Year records -->
   <div class="g2" style="margin-bottom:1rem">
     <div class="card">
@@ -1875,6 +1925,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="sur-station-grid" id="sur-grid"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
     </div>
     <div class="nt-section">
+      <div class="nt-title">🌧 Animirani radar padavin (RainViewer)</div>
+      <div class="nt-card">
+        <div class="radar-map-wrap">
+          <div id="radar-map"></div>
+        </div>
+        <div class="radar-controls">
+          <button class="radar-btn" id="radar-play" onclick="toggleRadarPlay()">⏸ Pavza</button>
+          <span class="radar-time" id="radar-time">—</span>
+          <div class="radar-track" id="radar-track" onclick="radarSeek(event)"><div class="radar-track-fill" id="radar-track-fill"></div></div>
+        </div>
+        <div class="radar-legend">
+          <span>Šibko</span><div class="radar-legend-grad"></div><span>Močno</span>
+          <span style="margin-left:auto">Vir: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener" style="color:var(--blue)">RainViewer</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nt-section">
       <div class="nt-title">📈 Temperaturna primerjava danes (24h)</div>
       <div class="nt-card">
         <div class="nt-chart"><svg id="sur-chart-svg" style="width:100%;display:block" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet"></svg></div>
@@ -2438,7 +2506,7 @@ function switchTab(tab){
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
-  if(tab==='surroundings'){ initSurroundings(); }
+  if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
 }
 function histTabActive(){
   return !!document.getElementById('tab-history')?.classList.contains('active');
@@ -3190,7 +3258,208 @@ function drawWindRose(observations){
   if(titleEl)titleEl.innerHTML=usingClimo?'🌹 Vetroza — klimatologija':'🌹 Vetroza — zadnjih 7 dni';
 }
 
-// ── PWA install ───────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ── RainViewer animirani radar ────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _radarMap=null,_radarFrames=[],_radarIdx=0,_radarTimer=null,_radarLayers={},_radarPlaying=true,_radarHost='';
+
+async function initRadarMap(){
+  if(_radarMap||typeof L==='undefined')return;
+  const mapEl=document.getElementById('radar-map');if(!mapEl)return;
+
+  _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false}).setView([LAT,LON],8);
+
+  // Base tiles — theme-aware
+  const dark=isDark();
+  const baseUrl=dark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  L.tileLayer(baseUrl,{maxZoom:19,subdomains:'abcd'}).addTo(_radarMap);
+
+  // Station marker
+  L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2}).addTo(_radarMap).bindPopup('IREICA1 · Rečica ob Savinji');
+
+  await loadRadarFrames();
+}
+
+async function loadRadarFrames(){
+  try{
+    const res=await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const data=await res.json();
+    _radarHost=data.host;
+    const past=(data.radar?.past||[]).map(f=>({...f,kind:'past'}));
+    const now=(data.radar?.nowcast||[]).map(f=>({...f,kind:'nowcast'}));
+    _radarFrames=[...past,...now];
+    if(!_radarFrames.length)return;
+    _radarIdx=past.length-1; // start at "now"
+    showRadarFrame(_radarIdx);
+    if(_radarPlaying)startRadarAnim();
+  }catch(e){console.warn('RainViewer:',e);
+    const t=document.getElementById('radar-time');if(t)t.textContent='Radar ni dosegljiv';
+  }
+}
+
+function showRadarFrame(i){
+  if(!_radarFrames[i]||!_radarMap)return;
+  const f=_radarFrames[i];
+  // Lazy-create layer
+  if(!_radarLayers[f.path]){
+    const color=isDark()?2:4; // 2=universal blue, 4=TWC for light
+    const url=`${_radarHost}${f.path}/256/{z}/{x}/{y}/${color}/1_1.png`;
+    _radarLayers[f.path]=L.tileLayer(url,{opacity:0,maxZoom:19,tileSize:256});
+    _radarLayers[f.path].addTo(_radarMap);
+  }
+  // Fade: hide others, show this
+  Object.entries(_radarLayers).forEach(([p,layer])=>{
+    layer.setOpacity(p===f.path?0.72:0);
+  });
+  // Update UI
+  const dt=new Date(f.time*1000);
+  const tEl=document.getElementById('radar-time');
+  if(tEl)tEl.innerHTML=dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+
+    (f.kind==='nowcast'?' <span class="radar-fc-badge">napoved</span>':i===_radarFrames.filter(x=>x.kind==='past').length-1?' <span class="radar-now-badge">zdaj</span>':'');
+  const fill=document.getElementById('radar-track-fill');
+  if(fill)fill.style.width=((i+1)/_radarFrames.length*100)+'%';
+}
+
+function startRadarAnim(){
+  clearInterval(_radarTimer);
+  _radarTimer=setInterval(()=>{
+    _radarIdx=(_radarIdx+1)%_radarFrames.length;
+    showRadarFrame(_radarIdx);
+  },700);
+}
+
+function toggleRadarPlay(){
+  _radarPlaying=!_radarPlaying;
+  const btn=document.getElementById('radar-play');
+  if(_radarPlaying){startRadarAnim();if(btn)btn.textContent='⏸ Pavza';}
+  else{clearInterval(_radarTimer);if(btn)btn.textContent='▶ Predvajaj';}
+}
+
+function radarSeek(e){
+  const track=document.getElementById('radar-track');if(!track||!_radarFrames.length)return;
+  const rect=track.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  _radarIdx=Math.max(0,Math.min(_radarFrames.length-1,Math.floor(pct*_radarFrames.length)));
+  showRadarFrame(_radarIdx);
+  _radarPlaying=false;clearInterval(_radarTimer);
+  const btn=document.getElementById('radar-play');if(btn)btn.textContent='▶ Predvajaj';
+}
+
+// ══════════════════════════════════════════════════════════
+// ── Pelod & alergeni (Open-Meteo CAMS) ───────────────────
+// ══════════════════════════════════════════════════════════
+const POLLEN_TYPES=[
+  {key:'alder_pollen',   icon:'🌳',name:'Jelša',  low:5,  mod:25, high:50},
+  {key:'birch_pollen',   icon:'🌲',name:'Breza',  low:5,  mod:25, high:90},
+  {key:'grass_pollen',   icon:'🌾',name:'Trave',  low:5,  mod:20, high:50},
+  {key:'mugwort_pollen', icon:'🌿',name:'Pelin',  low:5,  mod:15, high:50},
+  {key:'ragweed_pollen', icon:'🪴',name:'Ambrozija',low:5,mod:15, high:50},
+];
+
+async function fetchPollen(){
+  const grid=document.getElementById('pollen-grid');
+  const sub=document.getElementById('pollen-sub');
+  if(!grid)return;
+  try{
+    const params=POLLEN_TYPES.map(p=>p.key).join(',');
+    const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=${params}&timezone=Europe%2FLjubljana&forecast_days=1`;
+    const res=await fetch(url);
+    const data=await res.json();
+    const h=data.hourly;
+    if(!h){grid.innerHTML='<div style="color:var(--muted);font-size:.74rem">Podatki o pelodu niso dosegljivi za to lokacijo.</div>';return;}
+
+    const hourNow=new Date().getHours();
+    const items=POLLEN_TYPES.map(p=>{
+      const arr=h[p.key]||[];
+      const val=arr[hourNow]??arr.find(v=>v!=null)??null;
+      return {...p,val};
+    }).filter(p=>p.val!=null);
+
+    if(!items.length){grid.innerHTML='<div style="color:var(--muted);font-size:.74rem">Trenutno ni zaznanega peloda (izven sezone).</div>';if(sub)sub.textContent='Zunaj pelodne sezone';return;}
+
+    const levelOf=(p)=>{
+      if(p.val<p.low)return{txt:'nizko',bg:'rgba(74,222,128,.15)',c:'var(--green)'};
+      if(p.val<p.mod)return{txt:'zmerno',bg:'rgba(251,191,36,.15)',c:'var(--amber)'};
+      if(p.val<p.high)return{txt:'visoko',bg:'rgba(249,115,22,.15)',c:'#ea580c'};
+      return{txt:'zelo viš.',bg:'rgba(248,113,113,.18)',c:'var(--red)'};
+    };
+
+    grid.innerHTML=items.map(p=>{
+      const lv=levelOf(p);
+      return `<div class="pollen-item">
+        <div class="pollen-icon">${p.icon}</div>
+        <div class="pollen-name">${p.name}</div>
+        <div class="pollen-val" style="color:${lv.c}">${Math.round(p.val)}</div>
+        <div class="pollen-level" style="background:${lv.bg};color:${lv.c}">${lv.txt}</div>
+      </div>`;
+    }).join('');
+
+    const worst=items.reduce((a,b)=>b.val>a.val?b:a);
+    const wl=levelOf(worst);
+    if(sub)sub.innerHTML=`Najvišje: <strong style="color:${wl.c}">${worst.name} (${wl.txt})</strong> · enote grains/m³`;
+  }catch(e){
+    grid.innerHTML='<div style="color:var(--muted);font-size:.74rem">Pelod ni dosegljiv.</div>';
+    console.warn('Pollen:',e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── Reka Savinja — pretok (Open-Meteo Flood / GloFAS) ────
+// ══════════════════════════════════════════════════════════
+async function fetchFlood(){
+  const el=document.getElementById('flood-content');if(!el)return;
+  try{
+    const url=`https://flood-api.open-meteo.com/v1/flood?latitude=${LAT}&longitude=${LON}&daily=river_discharge,river_discharge_mean,river_discharge_max&forecast_days=7`;
+    const res=await fetch(url);
+    const data=await res.json();
+    const d=data.daily;
+    if(!d||!d.river_discharge){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki o pretoku niso dosegljivi.</div>';return;}
+
+    const discharge=d.river_discharge.filter(v=>v!=null);
+    const today=discharge[0];
+    const mean=d.river_discharge_mean?.[0]??(discharge.reduce((a,b)=>a+b,0)/discharge.length);
+    const max7=Math.max(...discharge);
+    const ratio=mean>0?today/mean:1;
+
+    // Status by ratio to typical
+    let status,col,icon;
+    if(ratio<0.6){status='Nizek pretok';col='var(--amber)';icon='🏜';}
+    else if(ratio<1.5){status='Normalen pretok';col='var(--green)';icon='🌊';}
+    else if(ratio<2.5){status='Povišan pretok';col='#ea580c';icon='⚠️';}
+    else{status='Visok pretok!';col='var(--red)';icon='🚨';}
+
+    const sparkMax=Math.max(...discharge)||1;
+    const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+    const startDay=new Date().getDay();
+    const spark=discharge.map((v,i)=>{
+      const hPct=Math.max(8,v/sparkMax*100);
+      const dn=days[(startDay+i)%7];
+      const bcol=i===0?col:'var(--blue)';
+      return `<div class="flood-spark-bar" style="height:${hPct}%;background:${bcol};opacity:${i===0?1:.5}" title="${dn}: ${v.toFixed(1)} m³/s"></div>`;
+    }).join('');
+
+    el.innerHTML=`
+      <div class="flood-status">
+        <span class="flood-icon">${icon}</span>
+        <div style="flex:1">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.3rem;color:var(--text)">${today.toFixed(1)} <span style="font-size:.7rem;color:var(--muted)">m³/s</span></div>
+          <div style="font-size:.74rem;color:${col};font-weight:500">${status}</div>
+        </div>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:.3rem">Tipično ${mean.toFixed(1)} m³/s · ${Math.round(ratio*100)}% normale</div>
+      <div class="flood-spark">${spark}</div>
+      <div style="font-size:.66rem;color:var(--muted);margin-top:.4rem">7-dnevna napoved pretoka · GloFAS model</div>
+      ${ratio>=2.5?'<div style="font-size:.7rem;color:var(--red);margin-top:.5rem;padding:.5rem;background:rgba(248,113,113,.1);border-radius:8px">⚠️ Spomni se avgusta 2023 — spremljaj uradna ARSO opozorila.</div>':''}
+    `;
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Pretok ni dosegljiv.</div>';
+    console.warn('Flood:',e);
+  }
+}
+
+
 let _installPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();_installPrompt=e;
@@ -6486,11 +6755,16 @@ async function init(){
   await Promise.all([fetchCurrent(),fetchHourly(),fetchForecast(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip()]);
   fetchEcowittCurrent();
   buildPrecipNormals();
+  fetchPollen();
+  fetchFlood();
   applyPheno();
 }
 init();
 setInterval(fetchCurrent,5*60*1000);
-setInterval(fetchEcowittCurrent,5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(fetchEcowittCurrent,5*60*1000);
+setInterval(fetchPollen,30*60*1000);
+setInterval(fetchFlood,60*60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
