@@ -1504,7 +1504,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- KPI row -->
     <div class="an-kpi-row">
-      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tavg" style="color:var(--blue)">—</div><div class="an-kpi-l">Povp. temp.</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tavg" style="color:var(--blue)">—</div><div class="an-kpi-l">Povp. temp. 2020–25</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmax" style="color:var(--red)">—</div><div class="an-kpi-l">Rekord vročine</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmin" style="color:var(--cyan)">—</div><div class="an-kpi-l">Rekord mraza</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-trend" style="color:var(--amber)">—</div><div class="an-kpi-l">°C/leto trend</div></div>
@@ -4192,7 +4192,7 @@ async function fetchWaterBalance(){
 // ── Klimatogram (Walter-Lieth) + XLSX enhanced Analize ─────
 function buildKlimatogram(){
   const el=document.getElementById('klima-svg');if(!el)return;
-  const W=el.parentElement?.offsetWidth||600,H=220;
+  const W=Math.max(300,el.closest('.nt-card,.chart-card,.card')?.offsetWidth-40||el.parentElement?.offsetWidth||600),H=220;
   el.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const pad={l:44,r:16,t:18,b:28};
   const cw=(W-pad.l-pad.r)/12;
@@ -4267,7 +4267,7 @@ function buildXLSXCharts(){
     scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gridC}},
             y:{ticks:{color:tc,font:{size:10}},grid:{color:gridC}}}};
   const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;
-    const existing=Chart.getChart(el);if(existing)existing.destroy();
+    try{const existing=typeof Chart.getChart==='function'?Chart.getChart(el):null;if(existing)existing.destroy();}catch(_){}
     new Chart(el.getContext('2d'),cfg);};
 
   const yrs=XLSX_LETNO.map(l=>l.y);
@@ -5049,7 +5049,7 @@ async function initSurroundings(){
 }
 
 // ── 24h Sky Strip ──────────────────────────────────────────
-function skyColorForHour(hour, wmo, isDark){
+function skyColorForHour(hour, wmo, darkMode){
   // Base sky color by hour
   const h=((hour%24)+24)%24;
   let r,g,b;
@@ -5065,7 +5065,7 @@ function skyColorForHour(hour, wmo, isDark){
   else{r=15;g=23;b=42;}                 // night
   // Weather modifier (overcast = darker/greyer)
   const overcast=wmo>=2&&wmo<50?0.55:wmo>=50?0.35:1.0;
-  const grey=isDark()?15:140;
+  const grey=darkMode?15:140;
   r=Math.round(r*(overcast)+(grey*(1-overcast)));
   g=Math.round(g*(overcast)+(grey*(1-overcast)));
   b=Math.round(b*(overcast)+(grey*(1-overcast)));
@@ -5283,7 +5283,7 @@ async function fetchARSOComparison(){
     const getV=(st,sel)=>{const v=parseFloat(st?.querySelector(sel)?.textContent);return isNaN(v)?null:v;};
     const arsoT=getV(arso,'t'),arsoH=getV(arso,'rh'),arsoP=getV(arso,'msl')||getV(arso,'p'),arsoW=getV(arso,'ff_val')||getV(arso,'ff10');
     const arsoName=arso?.querySelector('domain_title')?.textContent||'ARSO';
-    const obs=_lastBriefObs,m=obs?.metric||{};
+    const obs=_lastBriefObs||{},m=obs?.metric||{};
     const myT=m.temp??null,myH=obs?.humidity??null,myP=m.pressure??null,myW=m.windSpeed??null;
     if(myT!=null&&arsoT!=null){
       const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
@@ -5331,7 +5331,7 @@ function buildPrecipNormals(){
   const sum=arr=>arr.reduce((s,e)=>s+(e.v.precipTotal||0),0);
   const curMonTotal=sum(entries.filter(e=>e.year===curYear&&e.month===curMonth));
   // Use XLSX climatological normals as fallback (better than computed)
-  const xlsxNorm=XLSX_KLIMA.find(k=>k.m===curMonth);
+  const xlsxNorm=(typeof XLSX_KLIMA!=='undefined'?XLSX_KLIMA:[]).find(k=>k.m===curMonth);
   const histMon=years.length>=3?years.map(y=>sum(entries.filter(e=>e.year===y&&e.month===curMonth))).reduce((a,b)=>a+b,0)/years.length:(xlsxNorm?.rain||null);
   const curSeaTotal=sum(entries.filter(e=>season==='Zima'?((e.year===curYear&&[1,2].includes(e.month))||(e.year===curYear-1&&e.month===12)):(e.year===curYear&&curSM.includes(e.month))));
   const histSea=years.length?years.map(y=>sum(entries.filter(e=>season==='Zima'?((e.year===y&&[1,2].includes(e.month))||(e.year===y-1&&e.month===12)):(e.year===y&&curSM.includes(e.month))))).reduce((a,b)=>a+b,0)/years.length:null;
@@ -5562,7 +5562,7 @@ function analyzeLocalMicroclimate(obs){
 let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
 function initWeatherArt(){
   const c=document.getElementById('weather-art-canvas');if(!c)return;
-  c.width=c.parentElement?.offsetWidth||c.offsetWidth||600;c.height=140;
+  c.width=Math.max(200,c.parentElement?.offsetWidth||c.offsetWidth||600);c.height=140;
   _artCtx=c.getContext('2d');
   if(_artAnim)cancelAnimationFrame(_artAnim);
   _artParticles=[];
@@ -5677,7 +5677,7 @@ async function fetchAIBrief(force=false){
   const briefEl=document.getElementById('ai-brief-text');
   if(briefEl)briefEl.textContent='Generiram brief…';
   try{
-    const obs=_lastBriefObs||{};const m=obs.metric||{};
+    const obs=_lastBriefObs||{};const m=obs?.metric||{};
     const pt=calcPhotoTimes()||{};
     const gddEl=document.getElementById('pheno-gdd-total');
     const gdd=gddEl?parseInt(gddEl.textContent)||0:0;
@@ -5742,7 +5742,7 @@ function fdAddEntry(input){
   reader.onload=e=>{
     const imgData=e.target.result;
     // Get current weather
-    const obs=_lastBriefObs||{};const m=obs.metric||{};
+    const obs=_lastBriefObs||{};const m=obs?.metric||{};
     const moon=calcMoon();const pt=calcPhotoTimes()||{};
     const gddEl=document.getElementById('pheno-gdd-total');
     const gdd=gddEl?parseInt(gddEl.textContent)||0:0;
