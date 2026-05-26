@@ -19,9 +19,9 @@
 :root {
   --bg:#eef2f9; --text:#0f172a; --muted:#4a5a72;
   --border:rgba(0,0,0,.08); --bh:rgba(0,0,0,.15);
-  --blue:#2563eb; --cyan:#0891b2; --purple:#7c3aed;
-  --amber:#d97706; --green:#059669; --red:#dc2626; --rain-col:#3b82f6;
-  --card-bg:rgba(255,255,255,.62); --card-border:rgba(255,255,255,.75);
+  --blue:#2563eb; --cyan:#0e7490; --purple:#7c3aed;
+  --amber:#b45309; --green:#047857; --red:#b91c1c; --rain-col:#3b82f6;
+  --card-bg:rgba(255,255,255,.78); --card-border:rgba(255,255,255,.75);
   --card-border-h:rgba(255,255,255,.92);
   --card-shadow:0 2px 20px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.9);
   --card-shadow-h:0 8px 36px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.95);
@@ -29,9 +29,9 @@
   --hero-shadow:0 4px 32px rgba(0,0,0,.09),inset 0 1px 0 white;
   --day-bg:rgba(255,255,255,.62); --day-border:rgba(255,255,255,.8);
   --day-divider:rgba(0,0,0,.07);
-  --fc-bg:rgba(255,255,255,.45); --fc-border:rgba(255,255,255,.75);
+  --fc-bg:rgba(255,255,255,.65); --fc-border:rgba(255,255,255,.75);
   --fc-today-bg:rgba(37,99,235,.07); --fc-today-border:rgba(37,99,235,.25);
-  --stn-bg:rgba(37,99,235,.06); --stn-border:rgba(37,99,235,.25);
+  --stn-bg:rgba(37,99,235,.1);  --stn-border:rgba(37,99,235,.45);
   --badge-bg:rgba(37,99,235,.07); --badge-border:rgba(37,99,235,.18);
   --bft-bg:rgba(124,58,237,.08); --bft-border:rgba(124,58,237,.2);
   --tip-bg:rgba(255,255,255,.95); --tip-border:rgba(0,0,0,.1);
@@ -40,8 +40,8 @@
   --blob-1:rgba(147,197,253,.55); --blob-2:rgba(196,181,253,.45);
   --blob-3:rgba(103,232,249,.35); --blob-4:rgba(110,231,183,.3);
   --svg-ring:rgba(0,0,0,.08); --svg-tick:rgba(0,0,0,.2);
-  --svg-tick-m:rgba(0,0,0,.1); --svg-lbl:rgba(0,0,0,.5);
-  --svg-lbl-d:rgba(0,0,0,.3); --svg-track:rgba(0,0,0,.08);
+  --svg-tick-m:rgba(0,0,0,.1); --svg-lbl:rgba(0,0,0,.65);
+  --svg-lbl-d:rgba(0,0,0,.55); --svg-track:rgba(0,0,0,.08);
   --needle:#7c3aed; --needle-tip:white;
   --t-up-bg:rgba(5,150,105,.1); --t-up-c:var(--green);
   --t-dn-bg:rgba(220,38,38,.1);  --t-dn-c:var(--red);
@@ -1533,6 +1533,31 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
 
+
+    <div class="an-section">
+      <div class="an-title">🌡 Podnebni pasovi — segrevanje postaje (2020–2025)</div>
+      <div class="nt-card">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">
+          Vsak pas = eno leto. 🔵 hladnejše od povprečja · 🔴 toplejše. Slog: Ed Hawkins #ShowYourStripes
+        </div>
+        <svg id="climate-stripes-svg" width="100%" height="120" viewBox="0 0 600 120"></svg>
+      </div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-title">👯 Vremenski dvojnik — najbolj podoben dan v arhivu</div>
+      <div class="nt-card">
+        <div id="twin-content"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
+      </div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-title">📅 Fenološki koledar — naravni mejniki leta</div>
+      <div class="nt-card">
+        <div id="pheno-content"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
+      </div>
+    </div>
+
     <div class="an-section">
       <div class="an-title">🌡 Klimatogram — Rečica ob Savinji (IREICA1, 2019–2026)</div>
       <div class="nt-card">
@@ -2395,7 +2420,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); }
+  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); }
   if(tab==='diary'){    fdRenderGallery(); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
@@ -4190,7 +4215,148 @@ async function fetchWaterBalance(){
 }
 
 // ── Analysis charts ───────────────────────────────────────
-// ── Klimatogram (Walter-Lieth) + XLSX enhanced Analize ─────
+// ══════════════════════════════════════════════════════════
+// ── 1. Climate Stripes (Ed Hawkins stil) ─────────────────
+// ══════════════════════════════════════════════════════════
+function buildClimateStripes(){
+  const el=document.getElementById('climate-stripes-svg');if(!el)return;
+  const data=XLSX_LETNO.filter(l=>l.y>=2020); // skip partial years
+  if(!data.length)return;
+  const W=Math.max(300,el.closest('.nt-card,.card')?.offsetWidth-40||600),H=120;
+  el.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  const temps=data.map(l=>l.T);
+  const tMin=Math.min(...temps),tMax=Math.max(...temps),tRange=tMax-tMin||1;
+  const sw=W/data.length;
+
+  // Ed Hawkins blue→red colour scale based on deviation from mean
+  const mean=temps.reduce((a,b)=>a+b,0)/temps.length;
+  const stripeColor=t=>{
+    const dev=(t-mean)/(tRange/2); // -1..+1 roughly
+    if(dev<0){ // cooler = blue
+      const i=Math.min(1,Math.abs(dev));
+      const r=Math.round(8+(180-8)*(1-i)),g=Math.round(48+(210-48)*(1-i)),b=Math.round(107+(230-107)*(1-i));
+      return `rgb(${r},${g},${b})`;
+    }else{ // warmer = red
+      const i=Math.min(1,dev);
+      const r=Math.round(255-(255-103)*(1-i)),g=Math.round(80+(180-80)*(1-i)),b=Math.round(60+(160-60)*(1-i));
+      return `rgb(${Math.min(255,r)},${g},${b})`;
+    }
+  };
+
+  let svg='';
+  data.forEach((l,i)=>{
+    svg+=`<rect x="${(i*sw).toFixed(1)}" y="0" width="${(sw+0.5).toFixed(1)}" height="${H-22}" fill="${stripeColor(l.T)}"/>`;
+    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${String(l.y).slice(2)}</text>`;
+    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${(H-30).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)" font-family="IBM Plex Mono,monospace" style="paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:2px">${l.T.toFixed(1)}°</text>`;
+  });
+  el.innerHTML=svg;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 2. Vremenski dvojnik (najbolj podoben dan) ───────────
+// ══════════════════════════════════════════════════════════
+function findWeatherTwin(){
+  const el=document.getElementById('twin-content');if(!el)return;
+  const obs=_lastBriefObs;
+  if(!obs?.metric){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Čakam na trenutne meritve…</div>';return;}
+
+  const m=obs.metric;
+  const today={T:m.temp,hum:obs.humidity,pres:m.pressure,wind:m.windSpeed};
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const todayStr=new Date().toISOString().slice(0,10);
+
+  let best=null,bestScore=Infinity;
+  Object.entries(stored).forEach(([date,v])=>{
+    if(date===todayStr)return;
+    const t=v.tempAvg??v.tempHigh;if(t==null)return;
+    // Weighted distance (T matters most, then humidity, pressure)
+    const dT=Math.abs(t-today.T)*3;
+    const dH=v.humidity!=null&&today.hum!=null?Math.abs(v.humidity-today.hum)*0.3:0;
+    const dP=v.pressure!=null&&today.pres!=null?Math.abs(v.pressure-today.pres)*0.5:0;
+    const score=dT+dH+dP;
+    if(score<bestScore){bestScore=score;best={date,...v,score};}
+  });
+
+  if(!best){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Premalo zgodovinskih podatkov za primerjavo.</div>';return;}
+
+  const bd=new Date(best.date+'T12:00:00');
+  const daysAgo=Math.round((Date.now()-bd)/864e5);
+  const fmt=(v,u)=>v!=null?Math.round(v)+u:'—';
+  const tempV=best.tempAvg??best.tempHigh;
+
+  el.innerHTML=
+    `<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.6rem">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:1.4rem;color:var(--text)">${bd.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'})}</span>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:.7rem">pred ${daysAgo} dnevi · ujemanje ${Math.max(0,Math.round(100-best.score*2))}%</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:.5rem">
+      <div class="ecw-item"><div class="ecw-val">${fmt(tempV,'°C')}</div><div class="ecw-lbl">Temp (dvojnik)</div></div>
+      <div class="ecw-item"><div class="ecw-val">${fmt(best.humidity,'%')}</div><div class="ecw-lbl">Vlaga</div></div>
+      <div class="ecw-item"><div class="ecw-val">${fmt(best.pressure,'')}</div><div class="ecw-lbl">Tlak hPa</div></div>
+      ${best.precipTotal?`<div class="ecw-item"><div class="ecw-val">${best.precipTotal.toFixed(1)}</div><div class="ecw-lbl">Dež mm</div></div>`:''}
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:.7rem;line-height:1.6">Danes: ${fmt(today.T,'°C')} · ${fmt(today.hum,'%')} vlaga · ${fmt(today.pres,'')} hPa. Najbolj podoben dan v arhivu postaje.</div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 3. Fenološki koledar ──────────────────────────────────
+// ══════════════════════════════════════════════════════════
+function buildPhenologyCalendar(){
+  const el=document.getElementById('pheno-content');if(!el)return;
+  const a=XLSX_PHENO.avg,r=XLSX_PHENO.ranges;
+  const d2date=doy=>{const d=new Date(2025,0,1);d.setDate(doy);return d.toLocaleDateString('sl',{day:'numeric',month:'long'});};
+  const d2short=doy=>{const d=new Date(2025,0,1);d.setDate(doy);return d.toLocaleDateString('sl',{day:'numeric',month:'short'});};
+  const now=new Date();
+  const todayDoy=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);
+
+  const events=[
+    {icon:'❄️',name:'Zadnja spomladanska zmrzal',doy:a.lastSpringFrost,range:r.lastSpringFrost,col:'#60a5fa',note:'Po tem datumu varno saditi občutljive rastline'},
+    {icon:'🌱',name:'Prvi poletni dan (25°C)',doy:a.firstSummer,range:r.firstSummer,col:'#fbbf24',note:'Začetek aktivne sezone žuželk'},
+    {icon:'🔥',name:'Prvi vroči dan (30°C)',doy:a.firstHot,range:r.firstHot,col:'#f87171',note:'Vrhunec poletne aktivnosti'},
+    {icon:'🍂',name:'Prva jesenska zmrzal',doy:a.firstAutumnFrost,range:r.firstAutumnFrost,col:'#a78bfa',note:'Konec rastne sezone'},
+  ].filter(e=>e.doy);
+
+  const growSeason=a.firstAutumnFrost&&a.lastSpringFrost?a.firstAutumnFrost-a.lastSpringFrost:null;
+
+  let html='<div style="position:relative;margin:.5rem 0 1rem">';
+  // Year timeline bar
+  html+='<div style="position:relative;height:8px;background:linear-gradient(to right,#60a5fa,#34d399,#fbbf24,#f87171,#fbbf24,#a78bfa,#60a5fa);border-radius:4px;margin-bottom:1.2rem">';
+  // Today marker
+  const todayPct=todayDoy/365*100;
+  html+=`<div style="position:absolute;left:${todayPct}%;top:-4px;width:2px;height:16px;background:var(--text)"></div>`;
+  html+=`<div style="position:absolute;left:${todayPct}%;top:-20px;transform:translateX(-50%);font-size:.62rem;color:var(--text);white-space:nowrap">danes</div>`;
+  // Event markers
+  events.forEach(e=>{
+    const pct=e.doy/365*100;
+    html+=`<div style="position:absolute;left:${pct}%;top:10px;transform:translateX(-50%);font-size:.85rem" title="${e.name}">${e.icon}</div>`;
+  });
+  html+='</div></div>';
+
+  // Event list
+  html+='<div style="display:flex;flex-direction:column;gap:.55rem">';
+  events.forEach(e=>{
+    const passed=todayDoy>e.doy;
+    html+=`<div style="display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.1rem;flex-shrink:0">${e.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:.78rem;color:var(--text);font-weight:500">${e.name} ${passed?'<span style="color:var(--green);font-size:.66rem">✓ že mimo</span>':''}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:${e.col};margin:.15rem 0">povp. ${d2date(e.doy)}</div>
+        <div style="font-size:.68rem;color:var(--muted)">razpon ${d2short(e.range[0])} – ${d2short(e.range[1])} · ${e.note}</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+
+  if(growSeason){
+    html+=`<div style="margin-top:.8rem;padding:.65rem .85rem;background:var(--fc-bg);border-radius:9px;font-size:.74rem;color:var(--muted);line-height:1.6">
+      🌿 <strong style="color:var(--text)">Rastna sezona ≈ ${growSeason} dni</strong> (med zadnjo in prvo zmrzaljo). Tipično za dolinsko lego 366 m z radiacijskim ohlajanjem.</div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+
 function buildKlimatogram(){
   const el=document.getElementById('klima-svg');if(!el)return;
   const W=Math.max(300,el.closest('.nt-card,.chart-card,.card')?.offsetWidth-40||el.parentElement?.offsetWidth||600),H=220;
@@ -4769,6 +4935,11 @@ const XLSX_WIND=[{"dir": "N", "pct": 1.3, "avg": 3.4, "max": 64.4}, {"dir": "NE"
 
 const XLSX_EPISODES=[{"type": "heat30", "start": "2025-06-22", "end": "2025-07-04", "days": 13, "Tmax": 36.0, "Tmin": 11.0, "rain": 6.4}, {"type": "heat30", "start": "2024-08-07", "end": "2024-08-18", "days": 12, "Tmax": 35.3, "Tmin": 14.7, "rain": 35.0}, {"type": "heat30", "start": "2023-08-19", "end": "2023-08-27", "days": 9, "Tmax": 34.9, "Tmin": 15.2, "rain": 0.5}, {"type": "heat30", "start": "2021-06-17", "end": "2021-06-24", "days": 8, "Tmax": 33.1, "Tmin": 12.0, "rain": 0.8}, {"type": "heat30", "start": "2024-08-28", "end": "2024-09-04", "days": 8, "Tmax": 33.2, "Tmin": 13.8, "rain": 0.0}, {"type": "heat30", "start": "2021-08-10", "end": "2021-08-16", "days": 7, "Tmax": 34.5, "Tmin": 13.4, "rain": 0.0}, {"type": "heat30", "start": "2022-07-19", "end": "2022-07-25", "days": 7, "Tmax": 36.5, "Tmin": 11.6, "rain": 1.5}, {"type": "heat30", "start": "2022-06-26", "end": "2022-07-01", "days": 6, "Tmax": 33.1, "Tmin": 14.8, "rain": 0.0}, {"type": "heat30", "start": "2024-07-14", "end": "2024-07-19", "days": 6, "Tmax": 34.0, "Tmin": 15.3, "rain": 48.0}, {"type": "heat30", "start": "2022-08-14", "end": "2022-08-18", "days": 5, "Tmax": 33.7, "Tmin": 11.5, "rain": 0.0}, {"type": "summer25", "start": "2024-07-21", "end": "2024-09-08", "days": 50, "Tmax": 35.3, "Tmin": 13.2, "rain": 160.8}, {"type": "summer25", "start": "2022-06-11", "end": "2022-07-07", "days": 27, "Tmax": 33.5, "Tmin": 9.7, "rain": 66.3}, {"type": "summer25", "start": "2025-06-18", "end": "2025-07-06", "days": 19, "Tmax": 36.0, "Tmin": 11.0, "rain": 11.5}, {"type": "summer25", "start": "2022-07-12", "end": "2022-07-29", "days": 18, "Tmax": 36.5, "Tmin": 9.5, "rain": 41.9}, {"type": "summer25", "start": "2023-08-11", "end": "2023-08-28", "days": 18, "Tmax": 34.9, "Tmin": 12.2, "rain": 23.2}, {"type": "summer25", "start": "2021-06-15", "end": "2021-06-30", "days": 16, "Tmax": 33.1, "Tmin": 7.1, "rain": 0.8}, {"type": "summer25", "start": "2024-07-05", "end": "2024-07-19", "days": 15, "Tmax": 34.0, "Tmin": 10.9, "rain": 61.8}, {"type": "summer25", "start": "2025-08-07", "end": "2025-08-20", "days": 14, "Tmax": 34.7, "Tmin": 10.0, "rain": 10.4}, {"type": "summer25", "start": "2021-07-19", "end": "2021-07-31", "days": 13, "Tmax": 31.3, "Tmin": 12.6, "rain": 6.0}, {"type": "summer25", "start": "2022-07-31", "end": "2022-08-11", "days": 12, "Tmax": 33.1, "Tmin": 9.5, "rain": 6.4}, {"type": "summer25", "start": "2022-01-06", "end": "2022-02-03", "days": 29, "Tmax": 14.9, "Tmin": -9.9, "rain": 1.5}, {"type": "summer25", "start": "2022-02-28", "end": "2022-03-28", "days": 29, "Tmax": 23.2, "Tmin": -10.3, "rain": 30.2}, {"type": "summer25", "start": "2023-01-26", "end": "2023-02-17", "days": 23, "Tmax": 14.7, "Tmin": -10.2, "rain": 8.1}, {"type": "summer25", "start": "2026-01-03", "end": "2026-01-24", "days": 22, "Tmax": 11.7, "Tmin": -16.5, "rain": 19.8}, {"type": "summer25", "start": "2021-12-03", "end": "2021-12-23", "days": 21, "Tmax": 6.1, "Tmin": -10.0, "rain": 33.0}, {"type": "summer25", "start": "2024-01-19", "end": "2024-02-06", "days": 19, "Tmax": 17.5, "Tmin": -15.6, "rain": 10.7}, {"type": "summer25", "start": "2025-01-10", "end": "2025-01-22", "days": 13, "Tmax": 10.8, "Tmin": -7.3, "rain": 8.2}, {"type": "summer25", "start": "2021-12-25", "end": "2022-01-04", "days": 11, "Tmax": 12.0, "Tmin": -3.0, "rain": 14.6}, {"type": "summer25", "start": "2025-02-13", "end": "2025-02-23", "days": 11, "Tmax": 13.6, "Tmin": -9.7, "rain": 24.4}, {"type": "summer25", "start": "2021-03-17", "end": "2021-03-26", "days": 10, "Tmax": 19.5, "Tmin": -9.4, "rain": 3.5}];
 // Epizode: type(heat30/cold/summer25), start, end, days, Tmax, Tmin, rain
+
+
+// Fenološki podatki (povprečja 2020–2025, dan v letu)
+const XLSX_PHENO = {"byYear": {"2020": {"lastSpringFrost": 85, "firstAutumnFrost": 326, "firstSummer": null, "firstHot": null}, "2021": {"lastSpringFrost": 114, "firstAutumnFrost": 286, "firstSummer": 91, "firstHot": 168}, "2022": {"lastSpringFrost": 111, "firstAutumnFrost": 324, "firstSummer": 131, "firstHot": 155}, "2023": {"lastSpringFrost": 101, "firstAutumnFrost": 290, "firstSummer": 125, "firstHot": 170}, "2024": {"lastSpringFrost": 114, "firstAutumnFrost": 309, "firstSummer": 97, "firstHot": 170}, "2025": {"lastSpringFrost": 101, "firstAutumnFrost": 276, "firstSummer": 121, "firstHot": 166}, "2026": {"lastSpringFrost": 121, "firstAutumnFrost": null, "firstSummer": 114, "firstHot": null}}, "avg": {"lastSpringFrost": 107, "firstAutumnFrost": 302, "firstSummer": 113, "firstHot": 166}, "ranges": {"lastSpringFrost": [85, 121], "firstAutumnFrost": [276, 326], "firstSummer": [91, 131], "firstHot": [155, 170]}};
+// avg: lastSpringFrost, firstAutumnFrost, firstSummer(25°C), firstHot(30°C)
 
 // Absolutni rekordi postaje (iz XLSX analize)
 const STATION_RECORDS = {
