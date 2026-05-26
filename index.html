@@ -93,6 +93,18 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .b4{width:380px;height:380px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
 @keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
 .rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.3),transparent);animation:rain-fall linear infinite}
+/* Dynamic weather background particles */
+#bg-wx-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.wx-rain{position:absolute;top:0;width:1px;pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(96,165,250,.4),transparent);animation:wx-rain-fall linear infinite;border-radius:1px}
+@keyframes wx-rain-fall{0%{transform:translateY(-80px) skewX(-8deg);opacity:0}8%{opacity:1}92%{opacity:.8}100%{transform:translateY(105vh) skewX(-8deg);opacity:0}}
+.wx-snow{position:absolute;top:0;border-radius:50%;pointer-events:none;background:rgba(224,242,254,.75);animation:wx-snow-fall ease-in infinite}
+@keyframes wx-snow-fall{0%{opacity:0;transform:translateY(-20px) translateX(0)}10%{opacity:.8}50%{transform:translateY(50vh) translateX(20px)}90%{opacity:.6}100%{opacity:0;transform:translateY(102vh) translateX(-15px)}}
+.wx-star{position:absolute;border-radius:50%;pointer-events:none;background:rgba(226,232,240,.8);animation:wx-twinkle ease-in-out infinite}
+@keyframes wx-twinkle{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
+.wx-mote{position:absolute;border-radius:50%;pointer-events:none;animation:wx-mote-float ease-in-out infinite}
+@keyframes wx-mote-float{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:.5}80%{opacity:.15}100%{opacity:0;transform:translateY(-130px) scale(.2)}}
+.wx-fog{position:absolute;border-radius:50%;pointer-events:none;animation:wx-fog-drift ease-in-out infinite alternate}
+@keyframes wx-fog-drift{from{transform:translateX(-3%) scaleX(1);opacity:.06}to{transform:translateX(3%) scaleX(1.05);opacity:.14}}
 @keyframes rain-fall{0%{transform:translateY(-120px) rotate(12deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(105vh) rotate(12deg);opacity:0}}
 .star{position:absolute;border-radius:50%;background:rgba(200,220,255,.7);animation:twinkle ease-in-out infinite}
 @keyframes twinkle{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.1;transform:scale(.5)}}
