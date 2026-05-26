@@ -1532,6 +1532,44 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
+
+    <div class="an-section">
+      <div class="an-title">🌡 Klimatogram — Rečica ob Savinji (IREICA1, 2019–2026)</div>
+      <div class="nt-card">
+        <div style="font-size:.68rem;color:var(--muted);margin-bottom:.5rem">
+          🔵 Mesečne padavine (mm) · 🔴 Povprečna temperatura (°C) · Vir: XLSX analiza
+        </div>
+        <svg id="klima-svg" width="100%" height="220" viewBox="0 0 600 220"></svg>
+      </div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-title">☀️ Poletni & vroči dnevi po letih (XLSX)</div>
+      <div class="nt-card"><div class="nt-chart"><canvas id="xlsx-summer-chart" height="160"></canvas></div>
+      <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">Poletni dan: Tmax ≥ 25°C · Vroč dan: Tmax ≥ 30°C · Rekord poletnih: 103 dni (2022) · Rekord vročih: 46 dni (2024)</div>
+      </div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-title">🌬 Smer vetra — distribucija (XLSX)</div>
+      <div class="nt-card" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+        <div><div class="nt-chart"><canvas id="xlsx-wind-rose" height="180"></canvas></div></div>
+        <div style="font-size:.74rem;line-height:1.8;color:var(--muted);padding:.5rem 0">
+          <strong style="color:var(--text)">Prevladujoča smer: JUG (S)</strong><br>
+          S: 51.5% · SE: 23.4% · skupaj J/JV: <strong style="color:var(--blue)">74.9%</strong><br><br>
+          Dolina Savinje kanalizira veter vzdolž osi SZ–JV. Max sunek 115.6 km/h prišel iz S smeri (1. apr 2024).<br><br>
+          Povprečna cirkularična smer: <strong>158.9°</strong> (JJV)
+        </div>
+      </div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-title">🔥/❄️ Ogrevalne in hladilne enote (HDD/CDD) po letih</div>
+      <div class="nt-card"><div class="nt-chart"><canvas id="xlsx-hdd-chart" height="160"></canvas></div>
+      <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">HDD18 = seštevek (18 – Tavg) za dneve pod 18°C · CDD22 = seštevek (Tavg – 22) za dneve nad 22°C</div>
+      </div>
+    </div>
+
     <div class="an-section" id="fingerprint-section">
       <div class="an-title">🌊 Mikroklima fingerprint — Rečica ob Savinji</div>
       <div class="nt-card" style="margin-bottom:1rem">
@@ -2356,7 +2394,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); }
+  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); }
   if(tab==='diary'){    fdRenderGallery(); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
@@ -4151,7 +4189,112 @@ async function fetchWaterBalance(){
 }
 
 // ── Analysis charts ───────────────────────────────────────
-// ── Analize: izračun iz localStorage ──────────────────────
+// ── Klimatogram (Walter-Lieth) + XLSX enhanced Analize ─────
+function buildKlimatogram(){
+  const el=document.getElementById('klima-svg');if(!el)return;
+  const W=el.parentElement?.offsetWidth||600,H=220;
+  el.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const pad={l:44,r:16,t:18,b:28};
+  const cw=(W-pad.l-pad.r)/12;
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+
+  // Scales
+  const Ts=XLSX_KLIMA.map(k=>k.T);
+  const Rs=XLSX_KLIMA.map(k=>k.rain);
+  const Tmin=Math.min(...Ts)-2,Tmax=Math.max(...Ts)+2;
+  const Rmax=Math.max(...Rs)*1.2;
+  const dark=isDark();
+  const tc=dark?'rgba(255,255,255,.6)':'rgba(0,0,0,.55)';
+  const yT=t=>pad.t+(1-(t-Tmin)/(Tmax-Tmin))*(H-pad.t-pad.b);
+  const yR=r=>pad.t+(1-r/Rmax)*(H-pad.t-pad.b);
+
+  let svg=`<defs><linearGradient id="kgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(96,165,250,.5)"/><stop offset="100%" stop-color="rgba(96,165,250,.05)"/></linearGradient></defs>`;
+
+  // Rain bars
+  XLSX_KLIMA.forEach((k,i)=>{
+    const x=pad.l+i*cw,bh=yR(0)-yR(k.rain),by=yR(k.rain);
+    const col=k.rain>150?'rgba(37,99,235,.7)':k.rain>100?'rgba(59,130,246,.6)':'rgba(147,197,253,.6)';
+    svg+=`<rect x="${(x+2).toFixed(1)}" y="${by.toFixed(1)}" width="${(cw-4).toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}" rx="2"/>`;
+  });
+
+  // Temperature area + line
+  const tPts=XLSX_KLIMA.map((k,i)=>({x:pad.l+i*cw+cw/2,y:yT(k.T)}));
+  const d=tPts.map((p,i)=>i===0?`M${p.x.toFixed(1)},${p.y.toFixed(1)}`:`L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const lastP=tPts[tPts.length-1],firstP=tPts[0];
+  svg+=`<path d="${d} L${lastP.x},${yT(0)} L${firstP.x},${yT(0)} Z" fill="url(#kgrad)" opacity=".6"/>`;
+  svg+=`<path d="${d}" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linejoin="round"/>`;
+
+  // T dots + labels
+  XLSX_KLIMA.forEach((k,i)=>{
+    const x=pad.l+i*cw+cw/2,y=yT(k.T);
+    svg+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#f87171" stroke="white" stroke-width="1"/>`;
+    if(i===0||i===6||k.T===Math.max(...Ts)||k.T===Math.min(...Ts)){
+      svg+=`<text x="${x.toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#f87171" font-family="IBM Plex Mono,monospace">${k.T}°</text>`;
+    }
+  });
+
+  // Rain labels on tallest bars
+  XLSX_KLIMA.forEach((k,i)=>{
+    if(k.rain>=130||i===0){
+      const x=pad.l+i*cw+cw/2,y=yR(k.rain)-3;
+      svg+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="7" fill="${dark?'rgba(147,197,253,.9)':'rgba(37,99,235,.8)'}" font-family="IBM Plex Mono,monospace">${k.rain}</text>`;
+    }
+  });
+
+  // X axis labels
+  months.forEach((m,i)=>{
+    const x=pad.l+i*cw+cw/2;
+    svg+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="${tc}" font-family="Plus Jakarta Sans,sans-serif">${m}</text>`;
+  });
+
+  // Y axis (T left, rain right)
+  [Tmin,0,10,20,Tmax].forEach(t=>{
+    if(t<Tmin-1||t>Tmax+1)return;
+    const y=yT(t);
+    svg+=`<line x1="${pad.l-4}" x2="${(W-pad.r).toFixed(1)}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}" stroke-width="1"/>`;
+    svg+=`<text x="${(pad.l-6).toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="8" fill="${tc}" font-family="IBM Plex Mono,monospace">${t}°</text>`;
+  });
+
+  el.innerHTML=svg;
+}
+
+function buildXLSXCharts(){
+  const dark=isDark();
+  const tc=dark?'#94a3b8':'#64748b';
+  const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
+  const base={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:tc,font:{size:10},boxWidth:10}}},
+    scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gridC}},
+            y:{ticks:{color:tc,font:{size:10}},grid:{color:gridC}}}};
+  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;
+    const existing=Chart.getChart(el);if(existing)existing.destroy();
+    new Chart(el.getContext('2d'),cfg);};
+
+  const yrs=XLSX_LETNO.map(l=>l.y);
+
+  // Summer + Hot days per year
+  mk('xlsx-summer-chart',{type:'bar',data:{labels:yrs,datasets:[
+    {label:'Poletni dni (≥25°C)',data:XLSX_LETNO.map(l=>l.summer),backgroundColor:'rgba(251,191,36,.6)',borderColor:'#fbbf24',borderWidth:1},
+    {label:'Vroči dni (≥30°C)',data:XLSX_LETNO.map(l=>l.hot),backgroundColor:'rgba(248,113,113,.6)',borderColor:'#f87171',borderWidth:1},
+  ]},options:{...JSON.parse(JSON.stringify(base)),plugins:{...base.plugins,title:{display:false}}}});
+
+  // HDD/CDD per year
+  mk('xlsx-hdd-chart',{type:'bar',data:{labels:yrs,datasets:[
+    {label:'HDD18 (ogrevalne enote)',data:XLSX_LETNO.map(l=>l.HDD),backgroundColor:'rgba(96,165,250,.5)',borderColor:'#60a5fa',borderWidth:1,yAxisID:'y'},
+    {label:'CDD22 (hladilne enote)',data:XLSX_LETNO.map(l=>l.CDD),backgroundColor:'rgba(248,113,113,.5)',borderColor:'#f87171',borderWidth:1,yAxisID:'y1'},
+  ]},options:{...JSON.parse(JSON.stringify(base)),scales:{x:{ticks:{color:tc},grid:{color:gridC}},y:{ticks:{color:tc},grid:{color:gridC},position:'left'},y1:{ticks:{color:tc},grid:{color:'transparent'},position:'right'}}}});
+
+  // Wind rose (horizontal bar, sorted)
+  const wSorted=[...XLSX_WIND].sort((a,b)=>b.pct-a.pct);
+  mk('xlsx-wind-rose',{type:'bar',indexAxis:'y',data:{labels:wSorted.map(w=>w.dir),datasets:[
+    {label:'% časa',data:wSorted.map(w=>w.pct),backgroundColor:wSorted.map(w=>w.pct>30?'rgba(248,113,113,.7)':w.pct>10?'rgba(251,191,36,.6)':'rgba(96,165,250,.5)'),borderWidth:0},
+  ]},options:{...JSON.parse(JSON.stringify(base)),plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:tc,callback:v=>v+'%'},grid:{color:gridC}},y:{ticks:{color:tc,font:{size:11,weight:'500'}},grid:{color:'transparent'}}}}});
+
+  buildKlimatogram();
+}
+
+
 function computeAN(){
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   const entries=Object.entries(stored)
@@ -4220,7 +4363,7 @@ function computeAN(){
 }
 
 // Fallback hardcoded data from XLSX analysis (used if localStorage has <30 days)
-const AN_FALLBACK={years:[2020,2021,2022,2023,2024,2025],annualTemps:[10.20,9.77,10.97,11.07,11.48,11.18],trendLine:[10.05,10.34,10.63,10.92,11.21,11.50],annualRain:[1348,1363,1110,1711,1506,1224],annualFrost:[34,46,32,30,27,29],annualHot:[0,4,4,5,6,6],seasonTemps:{Pomlad:[9.8,8.2,9.5,9.8,11.4,10.9],Poletje:[19.1,20.1,21.0,20.0,21.3,20.5],Jesen:[10.0,9.5,11.1,12.4,10.6,11.0],Zima:[2.4,1.1,2.1,2.2,2.5,2.1]},monthlyTemp:[1.0,3.8,6.2,9.8,13.9,20.0,20.8,20.3,15.8,11.4,5.3,1.6],monthlyRain:[93.8,72.6,91.3,86.8,181.3,110.2,176.4,97.8,167.7,144.1,131.7,124.5],sepRain:[145,67,293,48,247,206],octRain:[203,71,52,238,207,94],topGusts:[{d:'1. apr 2024',v:115.6},{d:'18. avg 2022',v:77.1},{d:'9. mar 2023',v:73.4},{d:'21. okt 2020',v:64.4}],rainMatrix:{2020:[24,36,100,22,110,180,171,137,145,203,56,164],2021:[112,97,34,78,263,45,179,149,67,71,185,84],2022:[17,30,33,94,124,122,86,41,293,52,77,140],2023:[160,25,78,90,171,161,291,96,48,238,183,170],2024:[95,90,121,118,183,124,148,89,247,207,53,30],2025:[91,60,162,85,114,30,183,75,206,94,88,36]},months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
+const AN_FALLBACK={years:[2020,2021,2022,2023,2024,2025],annualTemps:[10.20,9.77,10.97,11.07,11.48,11.18],trendLine:[10.05,10.34,10.63,10.92,11.21,11.50],annualRain:[1353,1396,1069,1959,1449,1287],annualFrost:[0,70,108,106,90,93],annualHot:[0,29,36,26,46,29],seasonTemps:{Pomlad:[9.8,8.2,9.5,9.8,11.4,10.9],Poletje:[19.1,20.1,21.0,20.0,21.3,20.5],Jesen:[10.0,9.5,11.1,12.4,10.6,11.0],Zima:[2.4,1.1,2.1,2.2,2.5,2.1]},monthlyTemp:[1.0,3.8,6.2,9.8,13.9,20.0,20.8,20.3,15.8,11.4,5.3,1.6],monthlyRain:[93.8,72.6,91.3,86.8,181.3,110.2,176.4,97.8,167.7,144.1,131.7,124.5],sepRain:[145,67,293,48,247,206],octRain:[203,71,52,238,207,94],topGusts:[{d:'1. apr 2024',v:115.6},{d:'18. avg 2022',v:77.1},{d:'9. mar 2023',v:73.4},{d:'21. okt 2020',v:64.4}],rainMatrix:{2020:[24,36,100,22,110,180,171,137,145,203,56,164],2021:[112,97,34,78,263,45,179,149,67,71,185,84],2022:[17,30,33,94,124,122,86,41,293,52,77,140],2023:[160,25,78,90,171,161,291,96,48,238,183,170],2024:[95,90,121,118,183,124,148,89,247,207,53,30],2025:[91,60,162,85,114,30,183,75,206,94,88,36]},months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
 
 
 // Update only KPI cards (no chart recreation)
@@ -4239,8 +4382,8 @@ function updateAnalysisKPIs(){
   const rawEntries=Object.values(stored);
   const allHigh=rawEntries.map(v=>v.tempHigh??v.tempAvg).filter(x=>x!=null);
   const allLow=rawEntries.map(v=>v.tempLow??v.tempAvg).filter(x=>x!=null);
-  set('an-kpi-tmax', allHigh.length?Math.max(...allHigh).toFixed(1)+'°C':'27.6°C');
-  set('an-kpi-tmin', allLow.length?Math.min(...allLow).toFixed(1)+'°C':'−9.5°C');
+  set('an-kpi-tmax', STATION_RECORDS.Tmax.val.toFixed(1)+'°C');
+  set('an-kpi-tmin', STATION_RECORDS.Tmin.val.toFixed(1)+'°C');
   const validYrIdx=AN.years.reduce((acc,_,i)=>AN.annualTemps[i]!=null?[...acc,i]:acc,[]);
   if(validYrIdx.length>=2){
     const dy=AN.annualTemps[validYrIdx[validYrIdx.length-1]]-AN.annualTemps[validYrIdx[0]];
@@ -4609,6 +4752,34 @@ async function initForecast2(){
 
 // ═══════════════════════════════════════════════════════
 
+
+// ══════════════════════════════════════════════════════════
+// ── XLSX klimatološki podatki (postaja IREICA1, 2019–2026) ─
+// ══════════════════════════════════════════════════════════
+const XLSX_KLIMA=[{"m": 1, "name": "Jan", "T": 1.0, "Tmin": -16.5, "Tmax": 15.2, "rain": 78, "rainDays": 7.4, "vlaga": 88.2, "solar": 211, "uviMax": 3}, {"m": 2, "name": "Feb", "T": 3.8, "Tmin": -10.2, "Tmax": 18.5, "rain": 61, "rainDays": 6.0, "vlaga": 82.6, "solar": 350, "uviMax": 14}, {"m": 3, "name": "Mar", "T": 6.2, "Tmin": -10.3, "Tmax": 24.2, "rain": 117, "rainDays": 8.9, "vlaga": 77.0, "solar": 586, "uviMax": 15}, {"m": 4, "name": "Apr", "T": 9.8, "Tmin": -7.3, "Tmax": 29.1, "rain": 72, "rainDays": 7.6, "vlaga": 74.6, "solar": 711, "uviMax": 15}, {"m": 5, "name": "May", "T": 13.9, "Tmin": -2.0, "Tmax": 29.6, "rain": 147, "rainDays": 13.4, "vlaga": 80.5, "solar": 802, "uviMax": 15}, {"m": 6, "name": "Jun", "T": 20.0, "Tmin": 4.1, "Tmax": 35.6, "rain": 108, "rainDays": 10.2, "vlaga": 76.9, "solar": 876, "uviMax": 15}, {"m": 7, "name": "Jul", "T": 20.8, "Tmin": 8.2, "Tmax": 36.5, "rain": 183, "rainDays": 13.2, "vlaga": 78.8, "solar": 865, "uviMax": 15}, {"m": 8, "name": "Aug", "T": 20.3, "Tmin": 6.6, "Tmax": 35.3, "rain": 135, "rainDays": 9.8, "vlaga": 82.0, "solar": 780, "uviMax": 14}, {"m": 9, "name": "Sep", "T": 15.8, "Tmin": 0.8, "Tmax": 32.4, "rain": 163, "rainDays": 9.5, "vlaga": 85.1, "solar": 641, "uviMax": 15}, {"m": 10, "name": "Oct", "T": 11.4, "Tmin": -2.6, "Tmax": 26.9, "rain": 133, "rainDays": 7.7, "vlaga": 88.6, "solar": 435, "uviMax": 14}, {"m": 11, "name": "Nov", "T": 5.3, "Tmin": -7.4, "Tmax": 23.2, "rain": 112, "rainDays": 8.9, "vlaga": 91.8, "solar": 237, "uviMax": 4}, {"m": 12, "name": "Dec", "T": 1.6, "Tmin": -10.0, "Tmax": 15.5, "rain": 106, "rainDays": 9.7, "vlaga": 92.7, "solar": 168, "uviMax": 14}];
+// Mesečni normals: T[°C], rain[mm], rainDays, vlaga[%], solar[W/m²], uviMax
+
+const XLSX_LETNO=[{"y": 2020, "T": 10.2, "Tmin": -3.6, "Tmax": 24.8, "rain": 1353, "frost": 0, "ice": 0, "summer": 0, "hot": 0, "tropical": 0, "HDD": 2964, "CDD": 18.5}, {"y": 2021, "T": 9.77, "Tmin": -10.0, "Tmax": 34.5, "rain": 1396, "frost": 70, "ice": 1, "summer": 78, "hot": 29, "tropical": 0, "HDD": 3249, "CDD": 50.9}, {"y": 2022, "T": 10.97, "Tmin": -10.3, "Tmax": 36.5, "rain": 1069, "frost": 108, "ice": 1, "summer": 103, "hot": 36, "tropical": 0, "HDD": 2877, "CDD": 49.3}, {"y": 2023, "T": 11.07, "Tmin": -10.2, "Tmax": 34.9, "rain": 1959, "frost": 106, "ice": 2, "summer": 92, "hot": 26, "tropical": 0, "HDD": 2735, "CDD": 44.7}, {"y": 2024, "T": 11.47, "Tmin": -15.6, "Tmax": 35.3, "rain": 1449, "frost": 90, "ice": 1, "summer": 95, "hot": 46, "tropical": 0, "HDD": 2746, "CDD": 63.0}, {"y": 2025, "T": 11.18, "Tmin": -9.7, "Tmax": 36.0, "rain": 1287, "frost": 93, "ice": 3, "summer": 90, "hot": 29, "tropical": 0, "HDD": 2737, "CDD": 53.1}, {"y": 2026, "T": 6.61, "Tmin": -16.5, "Tmax": 26.2, "rain": 433, "frost": 58, "ice": 4, "summer": 7, "hot": 0, "tropical": 0, "HDD": 1617, "CDD": 0.0}];
+// Letni podatki: y, T, Tmin, Tmax, rain, frost, ice, summer, hot, tropical, HDD, CDD
+
+const XLSX_WIND=[{"dir": "N", "pct": 1.3, "avg": 3.4, "max": 64.4}, {"dir": "NE", "pct": 8.0, "avg": 1.9, "max": 60.5}, {"dir": "E", "pct": 8.6, "avg": 2.0, "max": 55.0}, {"dir": "SE", "pct": 23.4, "avg": 1.9, "max": 48.0}, {"dir": "S", "pct": 51.5, "avg": 2.4, "max": 115.6}, {"dir": "SW", "pct": 6.2, "avg": 3.6, "max": 73.4}, {"dir": "W", "pct": 0.6, "avg": 2.8, "max": 46.0}, {"dir": "NW", "pct": 0.4, "avg": 1.7, "max": 40.4}];
+// Smeri vetra: dir, pct[%], avg[km/h], max[km/h]
+// Dominantno: S=51.5%, SE=23.4% (dolinska kanalizacija)
+
+const XLSX_EPISODES=[{"type": "heat30", "start": "2025-06-22", "end": "2025-07-04", "days": 13, "Tmax": 36.0, "Tmin": 11.0, "rain": 6.4}, {"type": "heat30", "start": "2024-08-07", "end": "2024-08-18", "days": 12, "Tmax": 35.3, "Tmin": 14.7, "rain": 35.0}, {"type": "heat30", "start": "2023-08-19", "end": "2023-08-27", "days": 9, "Tmax": 34.9, "Tmin": 15.2, "rain": 0.5}, {"type": "heat30", "start": "2021-06-17", "end": "2021-06-24", "days": 8, "Tmax": 33.1, "Tmin": 12.0, "rain": 0.8}, {"type": "heat30", "start": "2024-08-28", "end": "2024-09-04", "days": 8, "Tmax": 33.2, "Tmin": 13.8, "rain": 0.0}, {"type": "heat30", "start": "2021-08-10", "end": "2021-08-16", "days": 7, "Tmax": 34.5, "Tmin": 13.4, "rain": 0.0}, {"type": "heat30", "start": "2022-07-19", "end": "2022-07-25", "days": 7, "Tmax": 36.5, "Tmin": 11.6, "rain": 1.5}, {"type": "heat30", "start": "2022-06-26", "end": "2022-07-01", "days": 6, "Tmax": 33.1, "Tmin": 14.8, "rain": 0.0}, {"type": "heat30", "start": "2024-07-14", "end": "2024-07-19", "days": 6, "Tmax": 34.0, "Tmin": 15.3, "rain": 48.0}, {"type": "heat30", "start": "2022-08-14", "end": "2022-08-18", "days": 5, "Tmax": 33.7, "Tmin": 11.5, "rain": 0.0}, {"type": "summer25", "start": "2024-07-21", "end": "2024-09-08", "days": 50, "Tmax": 35.3, "Tmin": 13.2, "rain": 160.8}, {"type": "summer25", "start": "2022-06-11", "end": "2022-07-07", "days": 27, "Tmax": 33.5, "Tmin": 9.7, "rain": 66.3}, {"type": "summer25", "start": "2025-06-18", "end": "2025-07-06", "days": 19, "Tmax": 36.0, "Tmin": 11.0, "rain": 11.5}, {"type": "summer25", "start": "2022-07-12", "end": "2022-07-29", "days": 18, "Tmax": 36.5, "Tmin": 9.5, "rain": 41.9}, {"type": "summer25", "start": "2023-08-11", "end": "2023-08-28", "days": 18, "Tmax": 34.9, "Tmin": 12.2, "rain": 23.2}, {"type": "summer25", "start": "2021-06-15", "end": "2021-06-30", "days": 16, "Tmax": 33.1, "Tmin": 7.1, "rain": 0.8}, {"type": "summer25", "start": "2024-07-05", "end": "2024-07-19", "days": 15, "Tmax": 34.0, "Tmin": 10.9, "rain": 61.8}, {"type": "summer25", "start": "2025-08-07", "end": "2025-08-20", "days": 14, "Tmax": 34.7, "Tmin": 10.0, "rain": 10.4}, {"type": "summer25", "start": "2021-07-19", "end": "2021-07-31", "days": 13, "Tmax": 31.3, "Tmin": 12.6, "rain": 6.0}, {"type": "summer25", "start": "2022-07-31", "end": "2022-08-11", "days": 12, "Tmax": 33.1, "Tmin": 9.5, "rain": 6.4}, {"type": "summer25", "start": "2022-01-06", "end": "2022-02-03", "days": 29, "Tmax": 14.9, "Tmin": -9.9, "rain": 1.5}, {"type": "summer25", "start": "2022-02-28", "end": "2022-03-28", "days": 29, "Tmax": 23.2, "Tmin": -10.3, "rain": 30.2}, {"type": "summer25", "start": "2023-01-26", "end": "2023-02-17", "days": 23, "Tmax": 14.7, "Tmin": -10.2, "rain": 8.1}, {"type": "summer25", "start": "2026-01-03", "end": "2026-01-24", "days": 22, "Tmax": 11.7, "Tmin": -16.5, "rain": 19.8}, {"type": "summer25", "start": "2021-12-03", "end": "2021-12-23", "days": 21, "Tmax": 6.1, "Tmin": -10.0, "rain": 33.0}, {"type": "summer25", "start": "2024-01-19", "end": "2024-02-06", "days": 19, "Tmax": 17.5, "Tmin": -15.6, "rain": 10.7}, {"type": "summer25", "start": "2025-01-10", "end": "2025-01-22", "days": 13, "Tmax": 10.8, "Tmin": -7.3, "rain": 8.2}, {"type": "summer25", "start": "2021-12-25", "end": "2022-01-04", "days": 11, "Tmax": 12.0, "Tmin": -3.0, "rain": 14.6}, {"type": "summer25", "start": "2025-02-13", "end": "2025-02-23", "days": 11, "Tmax": 13.6, "Tmin": -9.7, "rain": 24.4}, {"type": "summer25", "start": "2021-03-17", "end": "2021-03-26", "days": 10, "Tmax": 19.5, "Tmin": -9.4, "rain": 3.5}];
+// Epizode: type(heat30/cold/summer25), start, end, days, Tmax, Tmin, rain
+
+// Absolutni rekordi postaje (iz XLSX analize)
+const STATION_RECORDS = {
+  Tmax:  {val: 36.5, date: '2022-07-23', desc: 'Rekord dnevnega maksimuma'},
+  Tmin:  {val: -16.5, date: '2026-01-08', desc: 'Rekord dnevnega minimuma'},
+  rain1d:{val: 235.5, date: '2023-08-04', desc: '≥235.5 mm/12h (poplave; izpad elektrike)'},
+  gust:  {val: 115.6, date: '2024-04-01', desc: 'Rekordni sunek vetra'},
+  frost: {val: 108, year: 2022, desc: 'Rekord zmrzalnih dni (Tmin ≤ 0°C)'},
+  summer:{val: 103, year: 2022, desc: 'Rekord poletnih dni (Tmax ≥ 25°C)'},
+  hot:   {val: 46,  year: 2024, desc: 'Rekord vročih dni (Tmax ≥ 30°C)'},
+};
+
 // ── Poplave 3./4. avg 2023 — historični rekord ─────────────
 const FLOOD_2023 = {
   dateISO: '2023-08-04',
@@ -4672,6 +4843,15 @@ function initExtremes(){
       border:'rgba(56,189,248,.5)',special:true,
     });
   }
+  // Inject XLSX heat wave episodes
+  const xlsxHeatDone=new Set(events.filter(e=>e.type==='heat').map(e=>e.sort));
+  XLSX_EPISODES.filter(e=>e.type==='heat30').forEach(e=>{
+    if(xlsxHeatDone.has(e.start))return;
+    events.push({type:'heat',icon:'🌡',label:'Vročinski val (≥30°C)',
+      sub:e.days+' dni · Tmax '+e.Tmax+'°C'+(e.rain>0?' · '+e.rain+'mm':''),
+      date:new Date(e.start+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'})+' – '+new Date(e.end+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'long'}),
+      sort:e.start,badge:e.Tmax>=35?'🔴 Ekstremno':'🟠 Hudo',bc:e.Tmax>=35?'rgba(248,113,113,.2)':'rgba(251,191,36,.15)'});
+  });
   _evAll=events.sort((a,b)=>b.sort.localeCompare(a.sort));
   renderEvents();
 }
@@ -5150,7 +5330,9 @@ function buildPrecipNormals(){
   const years=[...new Set(entries.map(e=>e.year))].filter(y=>y<curYear).sort();
   const sum=arr=>arr.reduce((s,e)=>s+(e.v.precipTotal||0),0);
   const curMonTotal=sum(entries.filter(e=>e.year===curYear&&e.month===curMonth));
-  const histMon=years.length?years.map(y=>sum(entries.filter(e=>e.year===y&&e.month===curMonth))).reduce((a,b)=>a+b,0)/years.length:null;
+  // Use XLSX climatological normals as fallback (better than computed)
+  const xlsxNorm=XLSX_KLIMA.find(k=>k.m===curMonth);
+  const histMon=years.length>=3?years.map(y=>sum(entries.filter(e=>e.year===y&&e.month===curMonth))).reduce((a,b)=>a+b,0)/years.length:(xlsxNorm?.rain||null);
   const curSeaTotal=sum(entries.filter(e=>season==='Zima'?((e.year===curYear&&[1,2].includes(e.month))||(e.year===curYear-1&&e.month===12)):(e.year===curYear&&curSM.includes(e.month))));
   const histSea=years.length?years.map(y=>sum(entries.filter(e=>season==='Zima'?((e.year===y&&[1,2].includes(e.month))||(e.year===y-1&&e.month===12)):(e.year===y&&curSM.includes(e.month))))).reduce((a,b)=>a+b,0)/years.length:null;
   const curYtd=sum(entries.filter(e=>e.year===curYear));
