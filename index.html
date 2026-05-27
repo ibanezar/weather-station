@@ -172,6 +172,23 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .a-heat{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.2);color:var(--red)}
 .a-uv{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.2);color:var(--amber)}
 .a-wind{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:var(--purple)}
+.a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
+.a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
+/* Official Meteoalarm severity levels */
+.a-ma-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
+.a-ma-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
+.a-ma-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
+/* Severe = pulsing attention */
+.alert-bar.a-severe{border-width:2px;animation:alert-in .35s ease, alert-pulse 2.2s ease-in-out infinite}
+@keyframes alert-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}
+  50%{box-shadow:0 0 0 4px rgba(248,113,113,.18)}
+}
+.alert-bar.a-severe.a-ma-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
+@keyframes alert-pulse-o{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 0 4px rgba(249,115,22,.18)}}
+.alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'IBM Plex Mono',monospace}
+.alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
+
 
 /* Cards */
 .card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
@@ -2171,6 +2188,24 @@ function drawRainChart(data){
 }
 
 // ── Alerts ────────────────────────────────────────────────
+// Persistent alert store: forecast/official alerts live here, merged with live obs alerts
+let _severeAlerts=[],_meteoalarmAlerts=[];
+
+function renderAllAlerts(liveAlerts){
+  const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
+  // Order: official Meteoalarm (most severe first) → forecast severe → live obs
+  const all=[..._meteoalarmAlerts,..._severeAlerts,...(liveAlerts||[])];
+  // Dedupe by title
+  const seen=new Set();const uniq=all.filter(a=>{if(seen.has(a.title))return false;seen.add(a.title);return true;});
+  wrap.innerHTML='';
+  uniq.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='alert-bar '+a.cls+(a.severe?' a-severe':'');
+    div.innerHTML='<span class="alert-icon">'+a.icon+'</span><div class="alert-body"><div class="alert-title">'+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    wrap.appendChild(div);
+  });
+}
+
 function checkAlerts(obs){
   const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,alerts=[];
   if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) alerts.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
@@ -2179,9 +2214,117 @@ function checkAlerts(obs){
   else if(uv>=8)     alerts.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
   if(m.temp>=35)     alerts.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
   if(wind>=50)       alerts.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
-  const wrap=document.getElementById('alerts-wrap');if(!wrap)return;wrap.innerHTML='';
-  alerts.forEach(a=>{const div=document.createElement('div');div.className='alert-bar '+a.cls;div.innerHTML='<span class="alert-icon">'+a.icon+'</span><div class="alert-body"><div class="alert-title">'+a.title+'</div><div class="alert-desc">'+a.desc+'</div></div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';wrap.appendChild(div);});
+  renderAllAlerts(alerts);
 }
+
+// ── Napoved nevihte / huda vremena (Open-Meteo) ──────────
+async function fetchSevereWeather(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=weather_code,precipitation,precipitation_probability,wind_gusts_10m,cape'
+      +'&timezone=Europe%2FLjubljana&forecast_days=1';
+    const res=await fetch(url);
+    const data=await res.json();
+    const h=data.hourly;if(!h)return;
+    const nowH=new Date().getHours();
+    _severeAlerts=[];
+
+    // Scan remaining hours of today
+    const stormHours=[],heavyRainHours=[],gustHours=[];
+    let maxCape=0,maxGust=0,maxPrecip=0,worstCode=0;
+    for(let i=nowH;i<h.time.length;i++){
+      const wc=h.weather_code[i],cape=h.cape?.[i]??0,gust=h.wind_gusts_10m?.[i]??0;
+      const pr=h.precipitation?.[i]??0,pp=h.precipitation_probability?.[i]??0;
+      const hr=new Date(h.time[i]).getHours();
+      if([95,96,99].includes(wc)){stormHours.push(hr);if(wc>worstCode)worstCode=wc;}
+      if(pr>=8||(pp>=70&&pr>=4))heavyRainHours.push(hr);
+      if(gust>=60)gustHours.push(hr);
+      maxCape=Math.max(maxCape,cape);maxGust=Math.max(maxGust,gust);maxPrecip=Math.max(maxPrecip,pr);
+    }
+
+    const fmtWindow=arr=>{
+      if(!arr.length)return'';
+      const a=Math.min(...arr),b=Math.max(...arr);
+      return a===b?('ob '+a+'h'):('med '+a+'h in '+(b+1)+'h');
+    };
+
+    // Thunderstorm alert
+    if(stormHours.length){
+      const hail=worstCode>=96;
+      const severe=worstCode===99||maxGust>=70||maxCape>2000;
+      _severeAlerts.push({
+        cls:'a-storm',severe,icon:hail?'⛈🧊':'⛈',
+        title:'Napovedane nevihte danes'+(hail?' s točo':''),
+        desc:'Pričakovane nevihte '+fmtWindow(stormHours)+'.'+(hail?' Možna toča — zaščitite vozila in rastline.':' Možni sunki vetra in nalivi.'),
+        meta:'⚡ '+(maxCape>0?'CAPE '+Math.round(maxCape)+' J/kg · ':'')+(maxGust>0?'sunki do '+Math.round(maxGust)+' km/h · ':'')+(maxPrecip>0?'do '+maxPrecip.toFixed(1)+' mm/h':'')
+      });
+    } else if(heavyRainHours.length){
+      _severeAlerts.push({
+        cls:'a-rain-heavy',severe:maxPrecip>=15,icon:'🌧',
+        title:'Močnejši dež danes',
+        desc:'Obilnejše padavine '+fmtWindow(heavyRainHours)+'.',
+        meta:'do '+maxPrecip.toFixed(1)+' mm/h'+(maxGust>=40?' · sunki '+Math.round(maxGust)+' km/h':'')
+      });
+    }
+    // Damaging wind (independent of storm)
+    if(gustHours.length&&!stormHours.length){
+      _severeAlerts.push({
+        cls:'a-wind',severe:maxGust>=80,icon:'💨',
+        title:'Močan veter danes',
+        desc:'Sunki vetra '+fmtWindow(gustHours)+'. Zavarujte predmete na prostem.',
+        meta:'sunki do '+Math.round(maxGust)+' km/h'
+      });
+    }
+    renderAllAlerts([]);
+  }catch(e){console.warn('Severe weather:',e);}
+}
+
+// ── Uradna Meteoalarm opozorila ──────────────────────────
+async function fetchMeteoalarm(){
+  try{
+    const res=await fetch(PROXY+'/meteoalarm');
+    const txt=await res.text();
+    const doc=new DOMParser().parseFromString(txt,'application/xml');
+    _meteoalarmAlerts=[];
+
+    const entries=[...doc.querySelectorAll('entry')];
+    const now=Date.now();
+    const levelMap={
+      '2':{cls:'a-ma-yellow',sev:false,name:'Rumeno'},
+      '3':{cls:'a-ma-orange',sev:true, name:'Oranžno'},
+      '4':{cls:'a-ma-red',   sev:true, name:'Rdeče'},
+    };
+    const typeIcon={Thunderstorm:'⛈',Rain:'🌧',Wind:'💨',Snow:'❄️','Snow/Ice':'🧊',Fog:'🌫','high-temperature':'🌡️','low-temperature':'🥶',Heat:'🌡️',Forest:'🔥',Avalanche:'🏔',Flood:'🌊',Coastal:'🌊'};
+
+    entries.forEach(en=>{
+      const content=(en.querySelector('summary,content')?.textContent||'')+' '+(en.querySelector('title')?.textContent||'');
+      // Legacy atom embeds awareness level/type in content; parse defensively
+      const lvlMatch=content.match(/awareness_level[^0-9]*([2-4])/i)||content.match(/\b([2-4])\s*[;:]\s*(yellow|orange|red|rumen|oranžn|rdeč)/i)||(/(red|rdeč)/i.test(content)?[null,'4']:/(orange|oranžn)/i.test(content)?[null,'3']:/(yellow|rumen)/i.test(content)?[null,'2']:null);
+      if(!lvlMatch)return;
+      const lvl=levelMap[lvlMatch[1]];if(!lvl)return;
+      // Check validity window
+      const expires=en.querySelector('expires,cap\\:expires')?.textContent;
+      if(expires&&new Date(expires).getTime()<now)return;
+      // Type
+      const typeMatch=content.match(/awareness_type[^a-z]*([a-z\-]+)/i);
+      const evt=en.querySelector('event,cap\\:event')?.textContent||'';
+      let icon='⚠️';
+      for(const[k,v]of Object.entries(typeIcon))if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}
+      const title=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
+      _meteoalarmAlerts.push({
+        cls:lvl.cls,severe:lvl.sev,official:true,icon,
+        title:lvl.name+' opozorilo ARSO/Meteoalarm',
+        desc:title.length>140?title.slice(0,140)+'…':title,
+        meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''
+      });
+    });
+    // Most severe first
+    _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
+    renderAllAlerts([]);
+  }catch(e){console.warn('Meteoalarm:',e);}
+}
+
+
 
 // ── Day stats ─────────────────────────────────────────────
 function applyDayStats(observations){
@@ -6767,12 +6910,16 @@ async function init(){
   buildPrecipNormals();
   fetchPollen();
   fetchFlood();
+  fetchSevereWeather();
+  fetchMeteoalarm();
   applyPheno();
 }
 init();
 setInterval(fetchCurrent,5*60*1000);
 setInterval(fetchEcowittCurrent,5*60*1000);
 setInterval(fetchPollen,30*60*1000);
+setInterval(fetchSevereWeather,30*60*1000);
+setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
