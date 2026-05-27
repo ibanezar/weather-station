@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -171,6 +172,12 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 @keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
 .alert-body{flex:1}.alert-title{font-weight:500}.alert-desc{font-size:.76rem;opacity:.75;margin-top:.1rem}
+.alert-actions{margin-top:.45rem}.alert-more-btn{border:1px solid currentColor;background:rgba(255,255,255,.08);color:inherit;border-radius:999px;padding:.22rem .62rem;font:inherit;font-size:.68rem;cursor:pointer;opacity:.9}
+.alert-more-btn:hover{opacity:1;background:rgba(255,255,255,.14)}
+.alert-more{margin-top:.55rem;padding:.65rem .75rem;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:inherit}
+.alert-more-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.45rem .7rem}
+.alert-more-item{font-size:.7rem}.alert-more-item strong{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;opacity:.65;margin-bottom:.08rem}
+.alert-more-note{font-size:.7rem;opacity:.82;margin-top:.55rem}
 .alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.5;flex-shrink:0;line-height:1}
 .alert-close:hover{opacity:.9}
 .a-frost{background:rgba(37,99,235,.07);border-color:rgba(37,99,235,.2);color:var(--blue)}
@@ -2206,6 +2213,16 @@ function warnTriangle(size=22, color='#dc2626', textColor='#fff'){
   </svg>`;
 }
 
+function toggleAlertMore(btn){
+  const alert=btn.closest('.alert-bar');
+  const more=alert?.querySelector('.alert-more');
+  if(!more)return;
+  const open=more.hidden;
+  more.hidden=!open;
+  btn.textContent=open?'Manj informacij':'Več informacij';
+  btn.setAttribute('aria-expanded',open?'true':'false');
+}
+
 function renderAllAlerts(liveAlerts){
   const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
   // Order: official Meteoalarm (most severe first) → forecast severe → live obs
@@ -2221,7 +2238,8 @@ function renderAllAlerts(liveAlerts){
     const iconHtml=useTriangle
       ? '<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'
       : '<span class="alert-icon">'+a.icon+'</span>';
-    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    const moreHtml=a.more?'<div class="alert-actions"><button type="button" class="alert-more-btn" aria-expanded="false" onclick="toggleAlertMore(this)">Več informacij</button></div><div class="alert-more" hidden>'+a.more+'</div>':'';
+    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+moreHtml+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
     wrap.appendChild(div);
   });
 }
@@ -2272,11 +2290,22 @@ async function fetchSevereWeather(){
     if(stormHours.length){
       const hail=worstCode>=96;
       const severe=worstCode===99||maxGust>=70||maxCape>2000;
+      const stormWindow=fmtWindow(stormHours);
+      const stormRisk=severe?'Povišano tveganje':'Lokalno tveganje';
+      const stormMore='<div class="alert-more-grid">'
+        +'<div class="alert-more-item"><strong>Časovni okvir</strong>'+stormWindow+'</div>'
+        +'<div class="alert-more-item"><strong>Intenziteta</strong>'+stormRisk+'</div>'
+        +'<div class="alert-more-item"><strong>CAPE</strong>'+(maxCape>0?Math.round(maxCape)+' J/kg':'ni podatka')+'</div>'
+        +'<div class="alert-more-item"><strong>Sunki vetra</strong>'+(maxGust>0?'do '+Math.round(maxGust)+' km/h':'ni podatka')+'</div>'
+        +'<div class="alert-more-item"><strong>Padavine</strong>'+(maxPrecip>0?'do '+maxPrecip.toFixed(1)+' mm/h':'ni podatka')+'</div>'
+        +'<div class="alert-more-item"><strong>Vir</strong>Open-Meteo, osveženo ob prikazu</div>'
+        +'</div><div class="alert-more-note">'+(hail?'Model nakazuje možnost neviht s točo. Priporočeno je umakniti vozila in zaščititi občutljive rastline.':'Možni so krajevni nalivi in močnejši sunki vetra. Spremljaj radar in umakni lažje predmete na prostem.')+'</div>';
       _severeAlerts.push({
         cls:'a-storm',severe,icon:hail?'⛈🧊':'⛈',
         title:'Napovedane nevihte danes'+(hail?' s točo':''),
-        desc:'Pričakovane nevihte '+fmtWindow(stormHours)+'.'+(hail?' Možna toča — zaščitite vozila in rastline.':' Možni sunki vetra in nalivi.'),
-        meta:'⚡ '+(maxCape>0?'CAPE '+Math.round(maxCape)+' J/kg · ':'')+(maxGust>0?'sunki do '+Math.round(maxGust)+' km/h · ':'')+(maxPrecip>0?'do '+maxPrecip.toFixed(1)+' mm/h':'')
+        desc:'Pričakovane nevihte '+stormWindow+'.'+(hail?' Možna toča — zaščitite vozila in rastline.':' Možni sunki vetra in nalivi.'),
+        meta:'⚡ '+(maxCape>0?'CAPE '+Math.round(maxCape)+' J/kg · ':'')+(maxGust>0?'sunki do '+Math.round(maxGust)+' km/h · ':'')+(maxPrecip>0?'do '+maxPrecip.toFixed(1)+' mm/h':''),
+        more:stormMore
       });
     } else if(heavyRainHours.length){
       _severeAlerts.push({
