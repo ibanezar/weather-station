@@ -161,6 +161,12 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 
 /* Alerts */
 .alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.alert-triangle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.alert-triangle svg{filter:drop-shadow(0 1px 3px rgba(220,38,38,.4));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes tri-pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.a-severe .alert-triangle svg{filter:drop-shadow(0 0 5px rgba(220,38,38,.55));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275),tri-glow 2.2s ease-in-out infinite}
+@keyframes tri-glow{0%,100%{filter:drop-shadow(0 0 3px rgba(220,38,38,.3))}50%{filter:drop-shadow(0 0 8px rgba(220,38,38,.7))}}
+
 .alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
 @keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
@@ -2191,6 +2197,15 @@ function drawRainChart(data){
 // Persistent alert store: forecast/official alerts live here, merged with live obs alerts
 let _severeAlerts=[],_meteoalarmAlerts=[];
 
+
+function warnTriangle(size=22, color='#dc2626', textColor='#fff'){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2.5L2 21h20L12 2.5z" fill="${color}" stroke="${color}" stroke-width=".5" stroke-linejoin="round"/>
+    <path d="M12 2.5L2 21h20L12 2.5z" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".75" stroke-linejoin="round"/>
+    <text x="12" y="18" text-anchor="middle" font-size="11" font-weight="800" fill="${textColor}" font-family="Arial,sans-serif">!</text>
+  </svg>`;
+}
+
 function renderAllAlerts(liveAlerts){
   const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
   // Order: official Meteoalarm (most severe first) → forecast severe → live obs
@@ -2201,7 +2216,12 @@ function renderAllAlerts(liveAlerts){
   uniq.forEach(a=>{
     const div=document.createElement('div');
     div.className='alert-bar '+a.cls+(a.severe?' a-severe':'');
-    div.innerHTML='<span class="alert-icon">'+a.icon+'</span><div class="alert-body"><div class="alert-title">'+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    const useTriangle=a.severe||a.official||['a-storm','a-ma-red','a-ma-orange'].some(c=>a.cls.includes(c.split('-').pop()));
+    const triColor=a.cls.includes('ma-red')||a.cls.includes('heat')?'#dc2626':a.cls.includes('ma-orange')||a.cls.includes('storm')?'#ea580c':'#dc2626';
+    const iconHtml=useTriangle
+      ? '<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'
+      : '<span class="alert-icon">'+a.icon+'</span>';
+    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
     wrap.appendChild(div);
   });
 }
