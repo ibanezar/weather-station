@@ -290,7 +290,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .uv-dot{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--card-bg);border:2px solid rgba(100,100,100,.3);transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.2);transition:left .6s ease,background .35s}
 
 /* Forecast */
-.omx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.omx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
 .omx-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.85rem 1rem;min-height:150px}
 .omx-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
 .omx-title{font-size:.76rem;font-weight:650;color:var(--text)}
@@ -302,7 +302,8 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .omx-bars{display:flex;gap:3px;align-items:flex-end;height:42px;margin-top:.7rem}
 .omx-bar{flex:1;min-width:3px;border-radius:3px 3px 1px 1px;background:var(--rain-col);opacity:.35}
 .omx-bar.hit{opacity:.95}.omx-bar.storm{background:#ea580c;opacity:1}
-@media(max-width:820px){.omx-grid{grid-template-columns:1fr}}
+@media(max-width:1100px){.omx-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.omx-grid{grid-template-columns:1fr}}
 
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
@@ -1143,6 +1144,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Advanced Open-Meteo signals -->
   <div class="omx-grid" id="omx-grid">
+    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zaupanje napovedi…</div></div>
     <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
     <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
     <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
@@ -2511,6 +2513,7 @@ function applyHourly(observations){
   _hourlyObs=observations;
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
+  fetchForecastTrust();
   if(histTabActive()&&_currentPeriod==='7') applyHistory(_histCache['7']);
 }
 
@@ -4318,7 +4321,65 @@ function _omxLoadingError(id,title){_omxSet(id,'<div class="omx-head"><div class
 
 async function fetchForecastExtras(){
   if(!document.getElementById('omx-grid'))return;
-  await Promise.allSettled([fetchEnsembleConfidence(),fetchMinuteNowcast(),fetchSoilForecast()]);
+  await Promise.allSettled([fetchForecastTrust(),fetchEnsembleConfidence(),fetchMinuteNowcast(),fetchSoilForecast()]);
+}
+
+function _trustYesterdayKey(){
+  const d=new Date();d.setDate(d.getDate()-1);
+  return d.toISOString().slice(0,10);
+}
+function _trustActualFor(dateKey){
+  const fromCache=(_histCache['7']||[]).find(d=>d.obsTimeLocal===dateKey);
+  if(fromCache?.metric)return fromCache.metric;
+  const fromLS=getLocalHistory('all').find(d=>d.obsTimeLocal===dateKey);
+  return fromLS?.metric||null;
+}
+function _trustGrade(score){
+  return score>=85?['Odlično','var(--green)']:score>=70?['Dobro','var(--blue)']:score>=55?['Mešano','var(--amber)']:['Slabo','var(--red)'];
+}
+async function fetchForecastTrust(){
+  const el=document.getElementById('omx-trust');if(!el)return;
+  const dateKey=_trustYesterdayKey();
+  const actual=_trustActualFor(dateKey);
+  if(!actual||actual.tempHigh==null||actual.tempLow==null){
+    _omxSet('omx-trust','<div class="omx-head"><div class="omx-title">✅ Zaupanje napovedi</div><span class="omx-badge">IREICA1</span></div><div class="omx-sub">Za oceno potrebujem zaključen včerajšnji dan iz postaje. Podatek se prikaže, ko se naloži zgodovina.</div>');
+    return;
+  }
+  try{
+    const url='https://historical-forecast-api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&start_date='+dateKey+'&end_date='+dateKey
+      +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_gusts_10m_max'
+      +'&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+    const d=(await res.json()).daily;if(!d?.time?.length)throw new Error('No forecast verification data');
+    const f={
+      tempHigh:d.temperature_2m_max?.[0],
+      tempLow:d.temperature_2m_min?.[0],
+      precipTotal:d.precipitation_sum?.[0]??0,
+      windspeedHigh:d.wind_gusts_10m_max?.[0],
+    };
+    const tempErr=((Math.abs((f.tempHigh??actual.tempHigh)-actual.tempHigh)+Math.abs((f.tempLow??actual.tempLow)-actual.tempLow))/2);
+    const rainErr=Math.abs((f.precipTotal??0)-(actual.precipTotal??0));
+    const windErr=actual.windspeedHigh!=null&&f.windspeedHigh!=null?Math.abs(f.windspeedHigh-actual.windspeedHigh):0;
+    const rainMiss=((actual.precipTotal??0)>=1&&(f.precipTotal??0)<0.5)||((actual.precipTotal??0)<0.5&&(f.precipTotal??0)>=1);
+    let score=100;
+    score-=Math.min(35,tempErr*8);
+    score-=Math.min(25,rainErr*4);
+    score-=Math.min(22,windErr*1.2);
+    if(rainMiss)score-=12;
+    score=Math.max(0,Math.round(score));
+    const [grade,col]=_trustGrade(score);
+    _omxSet('omx-trust',
+      '<div class="omx-head"><div class="omx-title">✅ Zaupanje napovedi</div><span class="omx-badge">včeraj</span></div>'+
+      '<div class="omx-main" style="color:'+col+'">'+score+'/100</div>'+
+      '<div class="omx-sub">'+grade+' ujemanje modela z meritvami IREICA1 za '+new Date(dateKey+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'})+'.</div>'+
+      '<div class="omx-kpis">'+
+        '<div class="omx-kpi"><b>'+tempErr.toFixed(1)+'°C</b>napaka temp.</div>'+
+        '<div class="omx-kpi"><b>'+rainErr.toFixed(1)+' mm</b>napaka dežja</div>'+
+        '<div class="omx-kpi"><b>'+windErr.toFixed(0)+' km/h</b>napaka sunkov</div>'+
+        '<div class="omx-kpi"><b>'+Math.round(f.tempHigh)+'/'+Math.round(actual.tempHigh)+'°</b>max model/postaja</div>'+
+      '</div>');
+  }catch(e){console.warn('ForecastTrust:',e);_omxLoadingError('omx-trust','✅ Zaupanje napovedi');}
 }
 
 async function fetchEnsembleConfidence(){
