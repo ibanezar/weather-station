@@ -187,6 +187,9 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .a-wind{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:var(--purple)}
 .a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
 .a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
+.a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
+.a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
+.a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
 /* Official Meteoalarm severity levels */
 .a-ma-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
 .a-ma-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
@@ -198,6 +201,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
   50%{box-shadow:0 0 0 4px rgba(248,113,113,.18)}
 }
 .alert-bar.a-severe.a-ma-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
+.alert-bar.a-severe.a-level-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
 @keyframes alert-pulse-o{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 0 4px rgba(249,115,22,.18)}}
 .alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'IBM Plex Mono',monospace}
 .alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
@@ -2255,8 +2259,8 @@ function renderAllAlerts(liveAlerts){
   uniq.forEach(a=>{
     const div=document.createElement('div');
     div.className='alert-bar '+a.cls+(a.severe?' a-severe':'');
-    const useTriangle=a.severe||a.official||['a-storm','a-ma-red','a-ma-orange'].some(c=>a.cls.includes(c.split('-').pop()));
-    const triColor=a.cls.includes('ma-red')||a.cls.includes('heat')?'#dc2626':a.cls.includes('ma-orange')||a.cls.includes('storm')?'#ea580c':'#dc2626';
+    const useTriangle=a.severe||a.official||['a-storm','a-ma-red','a-ma-orange','a-level-yellow','a-level-orange','a-level-red'].some(c=>a.cls.includes(c.split('-').pop()));
+    const triColor=a.cls.includes('red')||a.cls.includes('heat')?'#dc2626':a.cls.includes('orange')||a.cls.includes('storm')?'#ea580c':a.cls.includes('yellow')?'#d97706':'#dc2626';
     const iconHtml=useTriangle
       ? '<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'
       : '<span class="alert-icon">'+a.icon+'</span>';
@@ -2311,9 +2315,11 @@ async function fetchSevereWeather(){
     // Thunderstorm alert
     if(stormHours.length){
       const hail=worstCode>=96;
-      const severe=worstCode===99||maxGust>=70||maxCape>2000;
+      const alarmLevel=(worstCode===99||maxGust>=90||maxCape>=2500||maxPrecip>=25)?'red'
+        :(hail||maxGust>=70||maxCape>=1500||maxPrecip>=12)?'orange':'yellow';
+      const severe=alarmLevel!=='yellow';
       const stormWindow=fmtWindow(stormHours);
-      const stormRisk=severe?'Povišano tveganje':'Lokalno tveganje';
+      const stormRisk=alarmLevel==='red'?'Rdeča stopnja':alarmLevel==='orange'?'Oranžna stopnja':'Rumena stopnja';
       const stormMore='<div class="alert-more-grid">'
         +'<div class="alert-more-item"><strong>Časovni okvir</strong>'+stormWindow+'</div>'
         +'<div class="alert-more-item"><strong>Intenziteta</strong>'+stormRisk+'</div>'
@@ -2323,7 +2329,7 @@ async function fetchSevereWeather(){
         +'<div class="alert-more-item"><strong>Vir</strong>Open-Meteo, osveženo ob prikazu</div>'
         +'</div><div class="alert-more-note">'+(hail?'Model nakazuje možnost neviht s točo. Priporočeno je umakniti vozila in zaščititi občutljive rastline.':'Možni so krajevni nalivi in močnejši sunki vetra. Spremljaj radar in umakni lažje predmete na prostem.')+'</div>';
       _severeAlerts.push({
-        cls:'a-storm',severe,icon:hail?'⛈🧊':'⛈',
+        cls:'a-level-'+alarmLevel,severe,icon:hail?'⛈🧊':'⛈',
         title:'Napovedane nevihte danes'+(hail?' s točo':''),
         desc:'Pričakovane nevihte '+stormWindow+'.'+(hail?' Možna toča — zaščitite vozila in rastline.':' Možni sunki vetra in nalivi.'),
         meta:'⚡ '+(maxCape>0?'CAPE '+Math.round(maxCape)+' J/kg · ':'')+(maxGust>0?'sunki do '+Math.round(maxGust)+' km/h · ':'')+(maxPrecip>0?'do '+maxPrecip.toFixed(1)+' mm/h':''),
