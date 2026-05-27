@@ -290,6 +290,19 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .uv-dot{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--card-bg);border:2px solid rgba(100,100,100,.3);transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.2);transition:left .6s ease,background .35s}
 
 /* Forecast */
+.omx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.omx-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.85rem 1rem;min-height:150px}
+.omx-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
+.omx-title{font-size:.76rem;font-weight:650;color:var(--text)}
+.omx-badge{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);border:1px solid var(--fc-border);border-radius:999px;padding:1px 7px}
+.omx-main{font-family:'IBM Plex Mono',monospace;font-size:1.35rem;line-height:1.1;color:var(--text)}
+.omx-sub{font-size:.74rem;color:var(--muted);line-height:1.6;margin-top:.45rem}
+.omx-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.45rem;margin-top:.7rem}
+.omx-kpi{font-size:.68rem;color:var(--muted)}.omx-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--text);font-weight:400}
+.omx-bars{display:flex;gap:3px;align-items:flex-end;height:42px;margin-top:.7rem}
+.omx-bar{flex:1;min-width:3px;border-radius:3px 3px 1px 1px;background:var(--rain-col);opacity:.35}
+.omx-bar.hit{opacity:.95}.omx-bar.storm{background:#ea580c;opacity:1}
+@media(max-width:820px){.omx-grid{grid-template-columns:1fr}}
 
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
@@ -1126,6 +1139,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
     </div>
     <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
+  </div>
+
+  <!-- Advanced Open-Meteo signals -->
+  <div class="omx-grid" id="omx-grid">
+    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
+    <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
+    <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
   </div>
 
   <!-- 24h Sky Strip -->
@@ -4286,6 +4306,81 @@ async function fetchTextForecast(){
   }
 }
 
+function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}
+function _omxPct(arr,p){
+  const a=_omxNums(arr).sort((x,y)=>x-y);if(!a.length)return null;
+  const i=(a.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);
+  return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(i-lo);
+}
+function _omxMemberKeys(hourly,base){return Object.keys(hourly||{}).filter(k=>k.startsWith(base+'_member')).sort();}
+function _omxSet(id,html){const el=document.getElementById(id);if(el)el.innerHTML=html;}
+function _omxLoadingError(id,title){_omxSet(id,'<div class="omx-head"><div class="omx-title">'+title+'</div><span class="omx-badge">Open-Meteo</span></div><div class="omx-sub">Podatek trenutno ni na voljo.</div>');}
+
+async function fetchForecastExtras(){
+  if(!document.getElementById('omx-grid'))return;
+  await Promise.allSettled([fetchEnsembleConfidence(),fetchMinuteNowcast(),fetchSoilForecast()]);
+}
+
+async function fetchEnsembleConfidence(){
+  try{
+    const url='https://ensemble-api.open-meteo.com/v1/ensemble?latitude='+LAT+'&longitude='+LON
+      +'&hourly=temperature_2m,precipitation,wind_gusts_10m&models=icon_eu'
+      +'&forecast_hours=24&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+    const h=(await res.json()).hourly;if(!h?.time?.length)throw new Error('No ensemble data');
+    const tempKeys=_omxMemberKeys(h,'temperature_2m');
+    const rainKeys=_omxMemberKeys(h,'precipitation');
+    const gustKeys=_omxMemberKeys(h,'wind_gusts_10m');
+    const tempMax=tempKeys.map(k=>Math.max(..._omxNums(h[k])));
+    const rainTotals=rainKeys.map(k=>_omxNums(h[k]).reduce((a,b)=>a+b,0));
+    const gustMax=gustKeys.map(k=>Math.max(..._omxNums(h[k])));
+    const tempSpread=(_omxPct(tempMax,.9)??0)-(_omxPct(tempMax,.1)??0);
+    const rainProb=rainTotals.length?rainTotals.filter(v=>v>=0.5).length/rainTotals.length*100:0;
+    const heavyProb=rainTotals.length?rainTotals.filter(v=>v>=8).length/rainTotals.length*100:0;
+    const gustP90=_omxPct(gustMax,.9)??0;
+    const disagreement=Math.min(rainProb,100-rainProb);
+    const confidence=tempSpread<=2.2&&disagreement<=20?'Visoka':tempSpread<=4&&disagreement<=35?'Srednja':'Nizka';
+    const ccol=confidence==='Visoka'?'var(--green)':confidence==='Srednja'?'var(--amber)':'var(--red)';
+    _omxSet('omx-ensemble','<div class="omx-head"><div class="omx-title">🎲 Zanesljivost napovedi</div><span class="omx-badge">ICON-EU EPS</span></div><div class="omx-main" style="color:'+ccol+'">'+confidence+'</div><div class="omx-sub">Razpon med člani ansambla za naslednjih 24 ur. Nižja zanesljivost pomeni, da so možni hitri lokalni obrati.</div><div class="omx-kpis"><div class="omx-kpi"><b>'+tempSpread.toFixed(1)+'°C</b>razpon Tmax</div><div class="omx-kpi"><b>'+Math.round(rainProb)+'%</b>člani z dežjem</div><div class="omx-kpi"><b>'+Math.round(heavyProb)+'%</b>močnejši dež</div><div class="omx-kpi"><b>'+Math.round(gustP90)+' km/h</b>p90 sunki</div></div>');
+  }catch(e){console.warn('Ensemble:',e);_omxLoadingError('omx-ensemble','🎲 Zanesljivost napovedi');}
+}
+
+async function fetchMinuteNowcast(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&minutely_15=precipitation,weather_code,wind_gusts_10m,cape'
+      +'&forecast_minutely_15=16&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+    const m=(await res.json()).minutely_15;if(!m?.time?.length)throw new Error('No minutely data');
+    const rain=m.precipitation||[],wmo=m.weather_code||[],gust=m.wind_gusts_10m||[],cape=m.cape||[];
+    const firstWet=rain.findIndex((v,i)=>v>0.1||[80,81,82,95,96,99].includes(wmo[i]));
+    const stormIdx=wmo.findIndex(v=>[95,96,99].includes(v));
+    const total=rain.reduce((a,b)=>a+(b||0),0);
+    const maxGust=Math.max(0,..._omxNums(gust));
+    const maxCape=Math.max(0,..._omxNums(cape));
+    const msg=firstWet<0?'Naslednje 4 ure večinoma suho':(firstWet===0?'Padavine zdaj':('Prve padavine okoli '+new Date(m.time[firstWet]).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})));
+    const bars=rain.map((v,i)=>{const h=Math.max(6,Math.min(100,(v||0)/Math.max(1,total,2)*100));const cls=[95,96,99].includes(wmo[i])?' storm':(v>0.1?' hit':'');return '<div class="omx-bar'+cls+'" title="'+new Date(m.time[i]).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+' · '+(v||0).toFixed(1)+' mm" style="height:'+h+'%"></div>';}).join('');
+    _omxSet('omx-nowcast','<div class="omx-head"><div class="omx-title">⏱ 15-minutni potek</div><span class="omx-badge">4 ure</span></div><div class="omx-main">'+msg+'</div><div class="omx-bars">'+bars+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+total.toFixed(1)+' mm</b>skupaj</div><div class="omx-kpi"><b>'+Math.round(maxGust)+' km/h</b>najvišji sunek</div><div class="omx-kpi"><b>'+Math.round(maxCape)+'</b>CAPE</div><div class="omx-kpi"><b>'+(stormIdx>=0?'možna':'ne')+'</b>nevihta</div></div>');
+  }catch(e){console.warn('15-min forecast:',e);_omxLoadingError('omx-nowcast','⏱ 15-minutni potek');}
+}
+
+async function fetchSoilForecast(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=soil_temperature_0cm,soil_temperature_6cm,soil_moisture_0_to_1cm,soil_moisture_1_to_3cm,soil_moisture_3_to_9cm'
+      +'&forecast_hours=6&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+    const h=(await res.json()).hourly;if(!h?.time?.length)throw new Error('No soil data');
+    const t0=h.soil_temperature_0cm?.[0],t6=h.soil_temperature_6cm?.[0];
+    const m1=h.soil_moisture_0_to_1cm?.[0],m3=h.soil_moisture_1_to_3cm?.[0],m9=h.soil_moisture_3_to_9cm?.[0];
+    const root=(m3+m9)/2;
+    const status=root<0.09?'Zelo suho':root<0.16?'Suho':root<0.28?'V redu':'Mokro';
+    const scol=status==='V redu'?'var(--green)':status==='Mokro'?'var(--blue)':status==='Suho'?'var(--amber)':'var(--red)';
+    const note=status==='Zelo suho'||status==='Suho'?'Tla imajo malo vode v zgornji plasti; za vrt je smiselno spremljati padavine.':status==='Mokro'?'Zgornje plasti so dobro namočene; po nalivih pričakuj počasnejše sušenje.':'Vlaga v zgornjih plasteh je trenutno ugodna.';
+    _omxSet('omx-soil','<div class="omx-head"><div class="omx-title">🌱 Tla in vlaga</div><span class="omx-badge">0–9 cm</span></div><div class="omx-main" style="color:'+scol+'">'+status+'</div><div class="omx-sub">'+note+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+Number(t0).toFixed(1)+'°C</b>površina</div><div class="omx-kpi"><b>'+Number(t6).toFixed(1)+'°C</b>6 cm</div><div class="omx-kpi"><b>'+Number(m1).toFixed(3)+'</b>0–1 cm</div><div class="omx-kpi"><b>'+root.toFixed(3)+'</b>1–9 cm</div></div>');
+  }catch(e){console.warn('Soil forecast:',e);_omxLoadingError('omx-soil','🌱 Tla in vlaga');}
+}
+
 
 
 
@@ -7038,7 +7133,7 @@ async function init(){
   connectLightning();
   autoLoadHistoryFile();
   checkSmartNotifications(); // non-blocking — fetches history.json from GitHub
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip()]);
   fetchEcowittCurrent();
   buildPrecipNormals();
   fetchPollen();
@@ -7054,7 +7149,7 @@ setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
-setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
