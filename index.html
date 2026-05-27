@@ -4935,9 +4935,10 @@ function buildXLSXCharts(){
   const yrs=XLSX_LETNO.map(l=>l.y);
 
   // Summer + Hot days per year
-  mk('xlsx-summer-chart',{type:'bar',data:{labels:yrs,datasets:[
-    {label:'Poletni dni (≥25°C)',data:XLSX_LETNO.map(l=>l.summer),backgroundColor:'rgba(251,191,36,.6)',borderColor:'#fbbf24',borderWidth:1},
-    {label:'Vroči dni (≥30°C)',data:XLSX_LETNO.map(l=>l.hot),backgroundColor:'rgba(248,113,113,.6)',borderColor:'#f87171',borderWidth:1},
+  mk('xlsx-summer-chart',{type:'bar',data:{labels:yrs.filter(y=>y<new Date().getFullYear()),datasets:[
+    {label:'Poletni (≥25°C)',data:XLSX_LETNO.filter(l=>l.y<new Date().getFullYear()).map(l=>l.summer),backgroundColor:'rgba(251,191,36,.55)',borderColor:'#fbbf24',borderWidth:1},
+    {label:'Vroči (≥30°C)',data:XLSX_LETNO.filter(l=>l.y<new Date().getFullYear()).map(l=>l.hot),backgroundColor:'rgba(248,113,113,.55)',borderColor:'#f87171',borderWidth:1},
+    {label:'Zmrzalni (≤0°C)',data:XLSX_LETNO.filter(l=>l.y<new Date().getFullYear()).map(l=>l.frost),backgroundColor:'rgba(56,189,248,.45)',borderColor:'#60a5fa',borderWidth:1},
   ]},options:{...JSON.parse(JSON.stringify(base)),plugins:{...base.plugins,title:{display:false}}}});
 
   // HDD/CDD per year
@@ -4989,7 +4990,8 @@ function computeAN(){
 
   const annualRain=years.map(y=>Math.round(entries.filter(e=>e.year===y).reduce((s,e)=>s+(e.v.precipTotal||0),0)));
   const annualFrost=years.map(y=>entries.filter(e=>e.year===y&&(e.v.tempLow??e.v.tempAvg??1)<=0).length);
-  const annualHot=years.map(y=>entries.filter(e=>e.year===y&&(e.v.tempHigh??e.v.tempAvg??0)>=25).length);
+  const annualSummer=years.map(y=>entries.filter(e=>e.year===y&&(e.v.tempHigh??e.v.tempAvg??0)>=25).length);
+  const annualHot30=years.map(y=>entries.filter(e=>e.year===y&&(e.v.tempHigh??e.v.tempAvg??0)>=30).length);
 
   const seasonMonths={Pomlad:[3,4,5],Poletje:[6,7,8],Jesen:[9,10,11],Zima:[12,1,2]};
   const seasonTemps={};
@@ -5021,17 +5023,18 @@ function computeAN(){
     .sort((a,b)=>b.v.windspeedHigh-a.v.windspeedHigh).slice(0,6)
     .map(e=>({d:new Date(e.d+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'}),v:e.v.windspeedHigh}));
 
-  return{years,annualTemps,trendLine,annualRain,annualFrost,annualHot,seasonTemps,monthlyTemp,monthlyRain,sepRain,octRain,rainMatrix,topGusts,months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
+  return{years,annualTemps,trendLine,annualRain,annualFrost,annualSummer,annualHot30,seasonTemps,monthlyTemp,monthlyRain,sepRain,octRain,rainMatrix,topGusts,months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
 }
 
 // Fallback hardcoded data from XLSX analysis (used if localStorage has <30 days)
-const AN_FALLBACK={years:[2020,2021,2022,2023,2024,2025],annualTemps:[10.20,9.77,10.97,11.07,11.48,11.18],trendLine:[10.05,10.34,10.63,10.92,11.21,11.50],annualRain:[1353,1396,1069,1959,1449,1287],annualFrost:[0,70,108,106,90,93],annualHot:[0,29,36,26,46,29],seasonTemps:{Pomlad:[9.8,8.2,9.5,9.8,11.4,10.9],Poletje:[19.1,20.1,21.0,20.0,21.3,20.5],Jesen:[10.0,9.5,11.1,12.4,10.6,11.0],Zima:[2.4,1.1,2.1,2.2,2.5,2.1]},monthlyTemp:[1.0,3.8,6.2,9.8,13.9,20.0,20.8,20.3,15.8,11.4,5.3,1.6],monthlyRain:[93.8,72.6,91.3,86.8,181.3,110.2,176.4,97.8,167.7,144.1,131.7,124.5],sepRain:[145,67,293,48,247,206],octRain:[203,71,52,238,207,94],topGusts:[{d:'1. apr 2024',v:115.6},{d:'18. avg 2022',v:77.1},{d:'9. mar 2023',v:73.4},{d:'21. okt 2020',v:64.4}],rainMatrix:{2020:[24,36,100,22,110,180,171,137,145,203,56,164],2021:[112,97,34,78,263,45,179,149,67,71,185,84],2022:[17,30,33,94,124,122,86,41,293,52,77,140],2023:[160,25,78,90,171,161,291,96,48,238,183,170],2024:[95,90,121,118,183,124,148,89,247,207,53,30],2025:[91,60,162,85,114,30,183,75,206,94,88,36]},months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
+const AN_FALLBACK={years:[2020,2021,2022,2023,2024,2025],annualTemps:[10.20,9.77,10.97,11.07,11.48,11.18],trendLine:[10.05,10.34,10.63,10.92,11.21,11.50],annualRain:[1353,1396,1069,1959,1449,1287],annualFrost:[0,70,108,106,90,93],annualSummer:[0,78,103,92,95,90],annualHot30:[0,29,36,26,46,29],seasonTemps:{Pomlad:[9.8,8.2,9.5,9.8,11.4,10.9],Poletje:[19.1,20.1,21.0,20.0,21.3,20.5],Jesen:[10.0,9.5,11.1,12.4,10.6,11.0],Zima:[2.4,1.1,2.1,2.2,2.5,2.1]},monthlyTemp:[1.0,3.8,6.2,9.8,13.9,20.0,20.8,20.3,15.8,11.4,5.3,1.6],monthlyRain:[93.8,72.6,91.3,86.8,181.3,110.2,176.4,97.8,167.7,144.1,131.7,124.5],sepRain:[145,67,293,48,247,206],octRain:[203,71,52,238,207,94],topGusts:[{d:'1. apr 2024',v:115.6},{d:'18. avg 2022',v:77.1},{d:'9. mar 2023',v:73.4},{d:'21. okt 2020',v:64.4}],rainMatrix:{2020:[24,36,100,22,110,180,171,137,145,203,56,164],2021:[112,97,34,78,263,45,179,149,67,71,185,84],2022:[17,30,33,94,124,122,86,41,293,52,77,140],2023:[160,25,78,90,171,161,291,96,48,238,183,170],2024:[95,90,121,118,183,124,148,89,247,207,53,30],2025:[91,60,162,85,114,30,183,75,206,94,88,36]},months:['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec']};
 
 
 // Update only KPI cards (no chart recreation)
 function updateAnalysisKPIs(){
-  const AN=computeAN()||AN_FALLBACK;
-  const src=computeAN()?'📡 Postaja IREICA1 (localStorage)':'🛰 Referenčni podatki XLSX';
+  const _an=computeAN();
+  const AN=_an||AN_FALLBACK;
+  const src=_an?'📡 Postaja IREICA1 (localStorage)':'🛰 Referenčni podatki XLSX';
   const srcEl=document.getElementById('an-data-source');
   if(srcEl)srcEl.textContent=src+' · '+AN.years[0]+'–'+AN.years[AN.years.length-1];
   const floodNote=document.getElementById('an-flood-note');
@@ -5040,10 +5043,6 @@ function updateAnalysisKPIs(){
   const validT=AN.annualTemps.filter(x=>x!=null);
   const avgT=validT.length?validT.reduce((a,b)=>a+b,0)/validT.length:null;
   set('an-kpi-tavg', avgT!=null?avgT.toFixed(1)+'°C':'—');
-  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-  const rawEntries=Object.values(stored);
-  const allHigh=rawEntries.map(v=>v.tempHigh??v.tempAvg).filter(x=>x!=null);
-  const allLow=rawEntries.map(v=>v.tempLow??v.tempAvg).filter(x=>x!=null);
   set('an-kpi-tmax', STATION_RECORDS.Tmax.val.toFixed(1)+'°C');
   set('an-kpi-tmin', STATION_RECORDS.Tmin.val.toFixed(1)+'°C');
   const validYrIdx=AN.years.reduce((acc,_,i)=>AN.annualTemps[i]!=null?[...acc,i]:acc,[]);
@@ -5061,8 +5060,9 @@ function updateAnalysisKPIs(){
 let _anChartsInit=false;
 function initAnalysisCharts(){
   if(_anChartsInit)return; _anChartsInit=true;
-  const AN=computeAN()||AN_FALLBACK;
-  const src=computeAN()?'📡 Postaja IREICA1 (localStorage)':'🛰 Referenčni podatki XLSX';
+  const _an=computeAN();
+  const AN=_an||AN_FALLBACK;
+  const src=_an?'📡 Postaja IREICA1 (localStorage)':'🛰 Referenčni podatki XLSX';
   // Show data source
   const srcEl=document.getElementById('an-data-source');
   if(srcEl)srcEl.textContent=src+' · '+AN.years[0]+'–'+AN.years[AN.years.length-1];
@@ -5095,12 +5095,13 @@ function initAnalysisCharts(){
 
   // Frost + hot days
   mk('an-extremes',{type:'bar',data:{labels:yr,datasets:[
-    {label:'Zmrzali ≤0°C',data:AN.annualFrost,backgroundColor:'rgba(56,189,248,.65)',borderRadius:4},
-    {label:'Vroči ≥25°C',data:AN.annualHot,backgroundColor:'rgba(248,113,113,.65)',borderRadius:4}
+    {label:'Zmrzalni dnevi (Tmin≤0°C)',data:AN.annualFrost,backgroundColor:'rgba(56,189,248,.65)',borderRadius:4},
+    {label:'Poletni dnevi (Tmax≥25°C)',data:AN.annualSummer,backgroundColor:'rgba(251,191,36,.6)',borderRadius:4},
+    {label:'Vroči dnevi (Tmax≥30°C)',data:AN.annualHot30,backgroundColor:'rgba(248,113,113,.65)',borderRadius:4}
   ]},options:base});
 
   // Annual rain
-  mk('an-rain-annual',{type:'bar',data:{labels:yr,datasets:[{label:'mm',data:AN.annualRain,backgroundColor:AN.annualRain.map(r=>r>1500?'rgba(56,189,248,.8)':r>1300?'rgba(96,165,250,.6)':'rgba(251,191,36,.6)'),borderRadius:6}]},options:{...base,plugins:{legend:{display:false}},scales:{...base.scales,y:{...base.scales.y,min:900}}}});
+  mk('an-rain-annual',{type:'bar',data:{labels:yr,datasets:[{label:'mm',data:AN.annualRain,backgroundColor:AN.annualRain.map(r=>r>1500?'rgba(56,189,248,.8)':r>1300?'rgba(96,165,250,.6)':'rgba(251,191,36,.6)'),borderRadius:6}]},options:{...base,plugins:{legend:{display:false}}}});
 
   // Sep + Oct
   mk('an-sepokt',{type:'bar',data:{labels:yr,datasets:[
