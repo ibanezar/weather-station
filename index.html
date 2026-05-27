@@ -5557,67 +5557,116 @@ function initRecords(){
   if(_recInit)return;_recInit=true;
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   const entries=Object.entries(stored).map(([date,v])=>({date,...v}));
-  if(entries.length<30){const g=document.getElementById('rec-hof');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.8rem">Zbiranje podatkov…</div>';return;}
-  const fmtD=ds=>new Date(ds+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
-  const withT=entries.filter(e=>e.tempAvg!=null);
-  const withR=entries.filter(e=>e.precipTotal>0);
-  const withW=entries.filter(e=>e.windspeedHigh>0);
+  const fmtD=ds=>new Date(ds+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'});
+  const fmtV=(v,d,u)=>v!=null?v.toFixed(d)+u:'—';
 
-  // Hall of fame
+  // Use tempHigh for max records, tempLow for min records
+  const withH=entries.filter(e=>e.tempHigh!=null);
+  const withL=entries.filter(e=>e.tempLow!=null);
+  const withR=entries.filter(e=>(e.precipTotal||0)>0);
+  const withW=entries.filter(e=>(e.windspeedHigh||0)>0);
+
+  // ── Hall of Fame ──────────────────────────────────────
   const hof=document.getElementById('rec-hof');
-  if(hof&&withT.length){
-    const hot=withT.reduce((m,e)=>e.tempAvg>m.tempAvg?e:m);
-    const cold=withT.reduce((m,e)=>e.tempAvg<m.tempAvg?e:m);
+  if(hof){
+    // Hottest: compare localStorage tempHigh vs XLSX record
+    const hotLS=withH.length?withH.reduce((m,e)=>e.tempHigh>m.tempHigh?e:m):null;
+    const useXH=!hotLS||(STATION_RECORDS.Tmax.val>=(hotLS.tempHigh||0));
+    const hotVal=useXH?STATION_RECORDS.Tmax.val:hotLS.tempHigh;
+    const hotDate=useXH?fmtD(STATION_RECORDS.Tmax.date):fmtD(hotLS.date);
+
+    // Coldest: compare localStorage tempLow vs XLSX record
+    const coldLS=withL.length?withL.reduce((m,e)=>e.tempLow<m.tempLow?e:m):null;
+    const useXC=!coldLS||(STATION_RECORDS.Tmin.val<=(coldLS.tempLow||0));
+    const coldVal=useXC?STATION_RECORDS.Tmin.val:coldLS.tempLow;
+    const coldDate=useXC?fmtD(STATION_RECORDS.Tmin.date):fmtD(coldLS.date);
+
+    // Wettest day
     const wet=withR.length?withR.reduce((m,e)=>e.precipTotal>m.precipTotal?e:m):null;
-    const wind=withW.length?withW.reduce((m,e)=>e.windspeedHigh>m.windspeedHigh?e:m):null;
+
+    // Max gust — compare with XLSX
+    const windLS=withW.length?withW.reduce((m,e)=>e.windspeedHigh>m.windspeedHigh?e:m):null;
+    const useXW=!windLS||(STATION_RECORDS.gust.val>=(windLS.windspeedHigh||0));
+    const windVal=useXW?STATION_RECORDS.gust.val:windLS.windspeedHigh;
+    const windDate=useXW?(STATION_RECORDS.gust.date?fmtD(STATION_RECORDS.gust.date):'1. apr 2024'):fmtD(windLS.date);
+
+    // Annual stats from XLSX
+    const maxSummer=XLSX_LETNO.reduce((m,l)=>l.summer>m.val?{val:l.summer,yr:l.y}:m,{val:0,yr:0});
+    const maxHot=XLSX_LETNO.reduce((m,l)=>l.hot>m.val?{val:l.hot,yr:l.y}:m,{val:0,yr:0});
+    const maxFrost=XLSX_LETNO.reduce((m,l)=>l.frost>m.val?{val:l.frost,yr:l.y}:m,{val:0,yr:0});
+
     const items=[
-      {icon:'🌡',val:hot.tempAvg.toFixed(1)+'°C',lbl:'Najtoplejši dan',date:fmtD(hot.date),col:'var(--red)'},
-      {icon:'❄️',val:cold.tempAvg.toFixed(1)+'°C',lbl:'Najhladnejši dan',date:fmtD(cold.date),col:'var(--cyan)'},
-      wet?{icon:'🌧',val:wet.precipTotal.toFixed(1)+' mm',lbl:'Največ padavin/dan',date:fmtD(wet.date),col:'var(--rain-col)'}:null,
-      wind?{icon:'💨',val:wind.windspeedHigh.toFixed(1)+' km/h',lbl:'Najmočnejši sunek',date:fmtD(wind.date),col:'var(--purple)'}:null,
-      // Flood event always shown (power outage = data gap in localStorage)
+      {icon:'🔴',val:hotVal.toFixed(1)+'°C', lbl:'Rekord max. temperature',date:hotDate,col:'var(--red)'},
+      {icon:'🔵',val:coldVal.toFixed(1)+'°C',lbl:'Rekord min. temperature',date:coldDate,col:'var(--cyan)'},
+      wet?{icon:'🌧',val:wet.precipTotal.toFixed(1)+' mm',lbl:'Največ padavin/dan',date:fmtD(wet.date),col:'var(--blue)'}:null,
+      {icon:'💨',val:windVal.toFixed(0)+' km/h',lbl:'Najmočnejši sunek',date:windDate,col:'var(--purple)'},
+      {icon:'☀️',val:maxSummer.val+' dni',lbl:'Največ poletnih dni (≥25°C)',date:String(maxSummer.yr),col:'var(--amber)'},
+      {icon:'🔥',val:maxHot.val+' dni',  lbl:'Največ vročih dni (≥30°C)',date:String(maxHot.yr),col:'var(--red)'},
+      {icon:'❄️',val:maxFrost.val+' dni',lbl:'Največ zmrzalnih dni (≤0°C)',date:String(maxFrost.yr),col:'var(--cyan)'},
       {icon:'🌊',val:'≥'+FLOOD_2023.rainfall_mm+' mm',lbl:'Rekord padavin/12h (poplave)',date:FLOOD_2023.dateSl,col:'#38bdf8',special:true,note:'⚠️ Izpad el. — dejanska skupna neznana'},
     ].filter(Boolean);
-    hof.innerHTML=items.map(it=>`<div class="rec-hof-card" style="${it.special?'border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.06)':''}"><div class="rec-hof-icon">${it.icon}</div><div class="rec-hof-val" style="color:${it.col}">${it.val}</div><div class="rec-hof-lbl">${it.lbl}</div><div class="rec-hof-date">${it.date}</div>${it.note?`<div style="font-size:.76rem;color:var(--amber);margin-top:.2rem">${it.note}</div>`:''}</div>`).join('');
+
+    hof.innerHTML=items.map(it=>`<div class="rec-hof-card" style="${it.special?'border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.06)':''}"><div class="rec-hof-icon">${it.icon}</div><div class="rec-hof-val" style="color:${it.col}">${it.val}</div><div class="rec-hof-lbl">${it.lbl}</div><div class="rec-hof-date">${it.date}</div>${it.note?`<div style="font-size:.7rem;color:var(--amber);margin-top:.2rem">${it.note}</div>`:''}</div>`).join('');
   }
 
-  // Monthly records
+  // ── Monthly records ───────────────────────────────────
   const monthNames=['Januar','Februar','Marec','April','Maj','Junij','Julij','Avgust','September','Oktober','November','December'];
   const grid=document.getElementById('rec-month-grid');
   if(grid){
     grid.innerHTML='';
     for(let m=1;m<=12;m++){
       const me=entries.filter(e=>new Date(e.date+'T12:00:00').getMonth()+1===m);
-      if(!me.length)continue;
-      const mt=me.filter(e=>e.tempAvg!=null);
-      const mr=me.filter(e=>e.precipTotal>0);
-      const mw=me.filter(e=>e.windspeedHigh>0);
+      const klima=XLSX_KLIMA.find(k=>k.m===m);
+
+      // tempHigh for max, tempLow for min
+      const highs=me.filter(e=>e.tempHigh!=null);
+      const lows=me.filter(e=>e.tempLow!=null);
+      const rains=me.filter(e=>(e.precipTotal||0)>0);
+      const winds=me.filter(e=>(e.windspeedHigh||0)>0);
+
+      let maxT=highs.length?Math.max(...highs.map(e=>e.tempHigh)):null;
+      let minT=lows.length?Math.min(...lows.map(e=>e.tempLow)):null;
+
+      // Override/augment with XLSX absolute monthly records if better
+      if(klima){
+        if(maxT===null||klima.Tmax>maxT)maxT=klima.Tmax;
+        if(minT===null||klima.Tmin<minT)minT=klima.Tmin;
+      }
+
+      const maxR=rains.length?Math.max(...rains.map(e=>e.precipTotal)):null;
+      const maxW=winds.length?Math.max(...winds.map(e=>e.windspeedHigh)):null;
+      if(maxT===null&&maxR===null&&!klima)continue;
+
       const card=document.createElement('div');card.className='rec-month-card';
-      card.innerHTML=`<div class="rec-month-name">${monthNames[m-1]}</div>`+
-        (mt.length?`<div class="rec-month-row"><span>🌡 Max</span><span class="rec-month-val" style="color:var(--red)">${Math.max(...mt.map(e=>e.tempAvg)).toFixed(1)}°C</span></div>`+
-        `<div class="rec-month-row"><span>❄️ Min</span><span class="rec-month-val" style="color:var(--cyan)">${Math.min(...mt.map(e=>e.tempAvg)).toFixed(1)}°C</span></div>`:'')+
-        (mr.length?`<div class="rec-month-row"><span>🌧 Max dež</span><span class="rec-month-val" style="color:var(--rain-col)">${Math.max(...mr.map(e=>e.precipTotal)).toFixed(1)} mm</span></div>`:'')+
-        (mw.length?`<div class="rec-month-row"><span>💨 Max v.</span><span class="rec-month-val" style="color:var(--purple)">${Math.max(...mw.map(e=>e.windspeedHigh)).toFixed(0)} km/h</span></div>`:'');
+      card.innerHTML=
+        `<div class="rec-month-name">${monthNames[m-1]}</div>`+
+        (maxT!=null?`<div class="rec-month-row"><span>🌡 Max T</span><span class="rec-month-val" style="color:var(--red)">${maxT.toFixed(1)}°C</span></div>`:'') +
+        (minT!=null?`<div class="rec-month-row"><span>❄️ Min T</span><span class="rec-month-val" style="color:var(--cyan)">${minT.toFixed(1)}°C</span></div>`:'') +
+        (maxR!=null?`<div class="rec-month-row"><span>🌧 Max dež</span><span class="rec-month-val" style="color:var(--blue)">${maxR.toFixed(1)} mm</span></div>`:'') +
+        (maxW!=null?`<div class="rec-month-row"><span>💨 Max v.</span><span class="rec-month-val" style="color:var(--purple)">${maxW.toFixed(0)} km/h</span></div>`:'') +
+        (klima?`<div class="rec-month-row" style="margin-top:.3rem;padding-top:.3rem;border-top:1px solid var(--border)"><span style="font-size:.64rem;color:var(--muted)">📊 Povp.</span><span class="rec-month-val" style="font-size:.7rem;color:var(--muted)">${klima.T.toFixed(1)}°C · ${klima.rain} mm</span></div>`:'');
       grid.appendChild(card);
     }
   }
 
-  // Top 10 lists
+  // ── Top 10 lists ──────────────────────────────────────
   const top10El=document.getElementById('rec-top10');
   if(top10El){
-    const t10hot=withT.sort((a,b)=>b.tempAvg-a.tempAvg).slice(0,10);
-    const t10wet=withR.sort((a,b)=>b.precipTotal-a.precipTotal).slice(0,10);
-    const t10wind=withW.sort((a,b)=>b.windspeedHigh-a.windspeedHigh).slice(0,10);
+    const t10hot=[...withH].sort((a,b)=>b.tempHigh-a.tempHigh).slice(0,10);
+    const t10cold=[...withL].sort((a,b)=>a.tempLow-b.tempLow).slice(0,10);
+    const t10wet=[...withR].sort((a,b)=>b.precipTotal-a.precipTotal).slice(0,10);
+    const t10wind=[...withW].sort((a,b)=>b.windspeedHigh-a.windspeedHigh).slice(0,10);
     const mkTop=(title,icon,data,valFn,colFn)=>{
       const card=document.createElement('div');card.className='nt-card';
       card.innerHTML='<div class="clabel" style="margin:0 0 .65rem">'+icon+' '+title+'</div>'+
-        data.map((e,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid var(--fc-border);font-size:.72rem"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;width:1.2rem">${i+1}</span><span style="flex:1;color:var(--muted);font-size:.74rem">${fmtD(e.date)}</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:${colFn(e)}">${valFn(e)}</span></div>`).join('');
+        data.map((e,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid var(--fc-border);font-size:.72rem"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;width:1.2rem">${i+1}</span><span style="flex:1;color:var(--text)">${fmtD(e.date)}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:${colFn(e)}">${valFn(e)}</span></div>`).join('');
       return card;
     };
     top10El.innerHTML='';
-    top10El.appendChild(mkTop('Najtoplejši dnevi','🌡',t10hot,e=>e.tempAvg.toFixed(1)+'°C',e=>e.tempAvg>=25?'var(--red)':'var(--amber)'));
-    top10El.appendChild(mkTop('Najdeževnejši dnevi','🌧',t10wet,e=>e.precipTotal.toFixed(1)+' mm',()=>'var(--blue)'));
-    if(t10wind.length)top10El.appendChild(mkTop('Najmočnejši sunki','💨',t10wind,e=>e.windspeedHigh.toFixed(0)+' km/h',e=>e.windspeedHigh>=80?'var(--red)':'var(--purple)'));
+    if(t10hot.length) top10El.appendChild(mkTop('Najtoplejši dnevi','🌡',t10hot,e=>e.tempHigh.toFixed(1)+'°C',_=>'var(--red)'));
+    if(t10cold.length)top10El.appendChild(mkTop('Najhladnejši dnevi','❄️',t10cold,e=>e.tempLow.toFixed(1)+'°C',_=>'var(--cyan)'));
+    if(t10wet.length) top10El.appendChild(mkTop('Najbolj mokri dnevi','🌧',t10wet,e=>e.precipTotal.toFixed(1)+' mm',_=>'var(--blue)'));
+    if(t10wind.length)top10El.appendChild(mkTop('Najmočnejši sunki','💨',t10wind,e=>e.windspeedHigh.toFixed(0)+' km/h',_=>'var(--purple)'));
   }
 }
 
