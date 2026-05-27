@@ -1383,7 +1383,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ltg-wrap">
       <div>
         <div class="ltg-count" id="ltg-count">0</div>
-        <div class="ltg-sub">strel v zadnji uri<br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
+        <div class="ltg-sub"><span id="ltg-window">strel v zadnji uri</span><br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
       </div>
       <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.76rem">Čakam na podatke…</div></div>
     </div>
@@ -4119,7 +4119,7 @@ function drawHeatmap(){
 }
 
 // ── Lightning (Blitzortung) ───────────────────────────────
-let _ltgStrikes=[],_ltgWs=null;
+let _ltgStrikes=[],_ltgWs=null,_ltgEcowitt=null;
 function haversine(lat1,lon1,lat2,lon2){
   const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -4133,28 +4133,52 @@ function connectLightning(){
     _ltgWs.onmessage=e=>{
       try{
         const d=JSON.parse(e.data);
-        if(!d.lat||!d.lon)return;
-        const dist=haversine(LAT,LON,d.lat,d.lon);
+        const lat=Number(d.lat??d.latitude??d[1]);
+        const lon=Number(d.lon??d.lng??d.longitude??d[2]);
+        if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+        const dist=haversine(LAT,LON,lat,lon);
         if(dist>200)return;
-        const t=new Date();
-        _ltgStrikes.unshift({dist:dist.toFixed(0),time:t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
-        if(_ltgStrikes.length>50)_ltgStrikes.pop();
+        const ts=Date.now();
+        const t=new Date(ts);
+        _ltgStrikes.unshift({dist:dist.toFixed(0),ts,time:t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),source:'Blitzortung'});
+        _ltgStrikes=_ltgStrikes.filter(s=>s.ts>Date.now()-3600000).slice(0,80);
         applyLightning();
       }catch(_){}
     };
     _ltgWs.onerror=_ltgWs.onclose=()=>{setTimeout(connectLightning,10000);};
   }catch(e){}
 }
+function updateLightningFromEcowitt(count,dist){
+  if(count==null&&dist==null)return;
+  _ltgEcowitt={
+    count:Number(count)||0,
+    dist:dist!=null&&Number.isFinite(Number(dist))?Number(dist):null,
+    ts:Date.now()
+  };
+  applyLightning();
+}
 function applyLightning(){
   const hourAgo=Date.now()-3600000;
+  _ltgStrikes=_ltgStrikes.filter(s=>(s.ts||0)>hourAgo);
+  if(_ltgEcowitt&&Date.now()-_ltgEcowitt.ts>15*60*1000)_ltgEcowitt=null;
   const c=document.getElementById('ltg-count');
-  if(c)c.textContent=_ltgStrikes.length;
+  const primaryCount=_ltgEcowitt?Math.round(_ltgEcowitt.count):_ltgStrikes.length;
+  if(c)c.textContent=primaryCount;
+  const win=document.getElementById('ltg-window');
+  if(win)win.textContent=_ltgEcowitt?'udarov danes (Ecowitt)':'strel v zadnji uri';
   const nearest=_ltgStrikes.length?_ltgStrikes.reduce((m,s)=>parseFloat(s.dist)<parseFloat(m.dist)?s:m):null;
+  const nearestDist=_ltgEcowitt?.dist??(nearest?parseFloat(nearest.dist):null);
   const nEl=document.getElementById('ltg-nearest');
-  if(nEl)nEl.textContent=nearest?'Najbližja: '+nearest.dist+' km':nearest?'':'—';
+  if(nEl)nEl.textContent=nearestDist!=null?'Najbližja: '+nearestDist.toFixed(0)+' km':'—';
   const list=document.getElementById('ltg-list');
   if(!list)return;list.innerHTML='';
-  if(!_ltgStrikes.length){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri</div>';return;}
+  if(_ltgEcowitt){
+    const row=document.createElement('div');
+    row.className='ltg-row '+(_ltgEcowitt.dist!=null&&_ltgEcowitt.dist<30?'ltg-close':'ltg-far');
+    row.textContent='Ecowitt · '+Math.round(_ltgEcowitt.count)+' danes'+(_ltgEcowitt.dist!=null?' · najbližja '+_ltgEcowitt.dist.toFixed(0)+' km':'');
+    list.appendChild(row);
+  }
+  if(!_ltgStrikes.length&&!_ltgEcowitt){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri</div>';return;}
   _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
 }
 
@@ -6206,6 +6230,7 @@ async function fetchEcowittCurrent(){
     if(!items.length){grid.innerHTML='<div class="ecw-offline">Ecowitt: ni senzorjev ali napaka API.</div>';return;}
     grid.innerHTML=items.map(it=>`<div class="ecw-item"><div class="ecw-val" style="color:${it.col}">${it.icon} ${it.val}</div><div class="ecw-lbl">${it.lbl}</div></div>`).join('');
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    updateLightningFromEcowitt(ltCount,ltDist);
     if(ltCount>0){const mc=document.getElementById('mc-list');if(mc&&!mc.querySelector('.lightning-alert')){const div=document.createElement('div');div.className='mc-item mc-item-alert lightning-alert';div.innerHTML='<div class="mc-head"><span class="mc-icon">⚡</span><span class="mc-name">Aktivne strele v okolici</span></div><div class="mc-text">Danes '+Math.round(ltCount)+' udarov'+(ltDist?', najbližja '+parseFloat(ltDist).toFixed(0)+' km stran':'')+'.</div>';mc.prepend(div);}}
   }catch(e){if(grid)grid.innerHTML='<div class="ecw-offline">Ecowitt ni dosegljiv.</div>';console.warn('Ecowitt:',e);}
 }
