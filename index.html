@@ -816,6 +816,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
+.daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
+.daily-fc-main{display:flex;gap:1rem;align-items:center}
+.daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}
+.daily-fc-title{font-size:1.05rem;font-weight:650;color:var(--text);margin-bottom:.25rem}
+.daily-fc-text{font-size:.8rem;line-height:1.65;color:var(--muted)}
+.daily-fc-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem}
+.daily-fc-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.65rem .75rem}
+.daily-fc-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
+.daily-fc-kpi span{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.daily-fc-note{margin-top:.75rem;font-size:.72rem;color:var(--muted);line-height:1.55}
+@media(max-width:720px){.daily-fc-hero{grid-template-columns:1fr}.daily-fc-main{align-items:flex-start}.daily-fc-icon{font-size:2.6rem}}
 
 @media(max-width:860px){
   .g3{grid-template-columns:1fr 1fr}
@@ -1887,6 +1898,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
+    <!-- Local daily forecast -->
+    <div class="card chart-card" style="margin-bottom:1.25rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📝 Dnevna napoved za Rečico ob Savinji</span>
+        <span class="chart-range" id="daily-fc-updated">Nalaganje…</span>
+      </div>
+      <div id="daily-fc-content" class="daily-fc-hero">
+        <div style="color:var(--muted);font-size:.8rem">Pripravljam lokalno napoved…</div>
+      </div>
+    </div>
+
     <!-- Sky Strip -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
@@ -2695,7 +2717,7 @@ function switchTab(tab){
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); }
   if(tab==='diary'){    fdRenderGallery(); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
-  if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
+  if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
@@ -4200,6 +4222,70 @@ const _WIND_DIR_SL=['S','SV','V','JV','J','JZ','Z','SZ'];
 function _wmoTxt(c){return _WMO_SL[c]||_WMO_SL[Math.floor((c||0)/10)*10]||'Spremenljivo';}
 function _wmoEmoji(c){return _WMO_EMOJI[c]||_WMO_EMOJI[Math.floor((c||0)/10)*10]||'🌤';}
 
+function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv}){
+  const parts=[];
+  const desc=_wmoTxt(wmo).toLowerCase();
+  parts.push('Danes bo v Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
+  if(rain>=8)parts.push('Pričakovane so izrazitejše padavine, skupaj približno '+rain.toFixed(1)+' mm.');
+  else if(rain>=0.5)parts.push('Možne so padavine, skupaj okoli '+rain.toFixed(1)+' mm.');
+  else parts.push('Večjih padavin model za danes ne nakazuje.');
+  if(prob>=60)parts.push('Verjetnost padavin je povišana ('+Math.round(prob)+'%).');
+  if(wind>=45)parts.push('Veter bo lahko moteč, z najmočnejšimi sunki okoli '+Math.round(wind)+' km/h.');
+  else if(wind>=25)parts.push('Občasno bo pihal zmeren veter do približno '+Math.round(wind)+' km/h.');
+  if(uv>=8)parts.push('UV indeks bo visok, zato je priporočljiva zaščita pred soncem.');
+  return parts.join(' ');
+}
+
+async function fetchLocalDailyForecast(){
+  const box=document.getElementById('daily-fc-content');
+  const upd=document.getElementById('daily-fc-updated');
+  if(!box)return;
+  try{
+    const url='https://api.open-meteo.com/v1/forecast'
+      +'?latitude='+LAT+'&longitude='+LON
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max'
+      +'&timezone=Europe%2FLjubljana&forecast_days=1';
+    const res=await fetch(url);
+    const data=await res.json();
+    const d=data.daily;
+    if(!d?.time?.length)throw new Error('No daily forecast');
+    const wmo=d.weather_code[0]||0;
+    const tmax=d.temperature_2m_max[0]??0;
+    const tmin=d.temperature_2m_min[0]??0;
+    const rain=d.precipitation_sum[0]??0;
+    const prob=d.precipitation_probability_max[0]??0;
+    const wind=d.wind_speed_10m_max[0]??0;
+    const uv=d.uv_index_max[0]??0;
+    const text=buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv});
+    const today=new Date(d.time[0]+'T12:00:00');
+    const dateLbl=today.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+    box.innerHTML=
+      '<div>'+
+        '<div class="daily-fc-main">'+
+          '<div class="daily-fc-icon">'+_wmoEmoji(wmo)+'</div>'+
+          '<div>'+
+            '<div class="daily-fc-title">'+dateLbl+' · '+_wmoTxt(wmo)+'</div>'+
+            '<div class="daily-fc-text">'+text+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="daily-fc-note">Napoved je modelna ocena za koordinate postaje IREICA1 pri Rečici ob Savinji in se samodejno osvežuje iz Open-Meteo.</div>'+
+      '</div>'+
+      '<div class="daily-fc-kpis">'+
+        '<div class="daily-fc-kpi"><strong>'+Math.round(tmax)+'° / '+Math.round(tmin)+'°</strong><span>temperatura</span></div>'+
+        '<div class="daily-fc-kpi"><strong>'+rain.toFixed(1)+' mm</strong><span>padavine</span></div>'+
+        '<div class="daily-fc-kpi"><strong>'+Math.round(prob)+'%</strong><span>verj. padavin</span></div>'+
+        '<div class="daily-fc-kpi"><strong>'+Math.round(wind)+' km/h</strong><span>veter max</span></div>'+
+        '<div class="daily-fc-kpi"><strong>'+Math.round(uv)+'</strong><span>UV max</span></div>'+
+        '<div class="daily-fc-kpi"><strong>Rečica</strong><span>lokacija</span></div>'+
+      '</div>';
+    if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    box.innerHTML='<div style="color:var(--muted);font-size:.8rem">Dnevna napoved trenutno ni na voljo.</div>';
+    if(upd)upd.textContent='ni na voljo';
+    console.warn('LocalDailyForecast:',e);
+  }
+}
+
 async function fetchTextForecast(){
   try{
     const url='https://api.open-meteo.com/v1/forecast'
@@ -5332,6 +5418,7 @@ async function drawDailySkyStrip(){
 
 async function initForecast2(){
   if(_fc2Init)return;_fc2Init=true;
+  fetchLocalDailyForecast();
   drawDailySkyStrip(); // sky strip – neodvisno od 48h podatkov
   try{
     const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
@@ -7020,7 +7107,7 @@ setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
-setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecast,60*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
