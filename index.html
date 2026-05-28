@@ -2280,7 +2280,7 @@ function drawRainChart(data){
 
 // ── Alerts ────────────────────────────────────────────────
 // Persistent alert store: forecast/official alerts live here, merged with live obs alerts
-let _severeAlerts=[],_meteoalarmAlerts=[];
+let _severeAlerts=[],_meteoalarmAlerts=[],_liveAlerts=[];
 let _stormMode={
   active:false,level:'yellow',window:'',cape:null,gust:null,precip:null,wmo:0,hail:false,
   nowcast:null,lightningCount:null,lightningDist:null,updated:null
@@ -2472,10 +2472,10 @@ function renderStormAutopsy(){
     '<div class="intel-kpis"><div class="intel-kpi"><b>'+recent.rain.toFixed(1)+' mm</b><span>dež 6h</span></div><div class="intel-kpi"><b>'+Math.round(maxGust)+' km/h</b><span>sunek</span></div><div class="intel-kpi"><b>'+Math.round(cape)+'</b><span>CAPE</span></div><div class="intel-kpi"><b>'+(lightning||0)+(lightningDist!=null?' / '+Math.round(lightningDist)+' km':'')+'</b><span>strele</span></div></div>';
 }
 
-function renderAllAlerts(liveAlerts){
+function renderAllAlerts(){
   const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
   // Order: official Meteoalarm (most severe first) → forecast severe → live obs
-  const all=[..._meteoalarmAlerts,..._severeAlerts,...(liveAlerts||[])];
+  const all=[..._meteoalarmAlerts,..._severeAlerts,..._liveAlerts];
   // Dedupe by title
   const seen=new Set();const uniq=all.filter(a=>{if(seen.has(a.title))return false;seen.add(a.title);return true;});
   wrap.innerHTML='';
@@ -2501,7 +2501,8 @@ function checkAlerts(obs){
   else if(uv>=8)     alerts.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
   if(m.temp>=35)     alerts.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
   if(wind>=50)       alerts.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
-  renderAllAlerts(alerts);
+  _liveAlerts=alerts;
+  renderAllAlerts();
 }
 
 // ── Napoved nevihte / huda vremena (Open-Meteo) ──────────
@@ -2579,7 +2580,7 @@ async function fetchSevereWeather(){
         meta:'sunki do '+Math.round(maxGust)+' km/h'
       });
     }
-    renderAllAlerts([]);
+    renderAllAlerts();
   }catch(e){console.warn('Severe weather:',e);}
 }
 
@@ -2624,7 +2625,7 @@ async function fetchMeteoalarm(){
     });
     // Most severe first
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
-    renderAllAlerts([]);
+    renderAllAlerts();
   }catch(e){console.warn('Meteoalarm:',e);}
 }
 
