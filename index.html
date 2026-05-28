@@ -632,7 +632,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 /* Generative art */
 .weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
-#weather-art-canvas{display:block;width:100%;height:140px}
+#weather-art-canvas{display:block;width:100%;height:100%;min-height:230px}
 .art-label{position:absolute;bottom:.4rem;right:.6rem;font-size:.7rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono',monospace;pointer-events:none}
 
 /* AI Brief */
@@ -1274,8 +1274,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Generative Weather Art + AI Brief -->
   <div class="g2" style="margin-bottom:1rem">
-    <div class="card" style="padding:0;overflow:hidden">
-      <canvas id="weather-art-canvas" height="140"></canvas>
+    <div class="card weather-art-wrap" style="padding:0;overflow:hidden">
+      <canvas id="weather-art-canvas"></canvas>
       <div class="art-label" id="art-label">—</div>
     </div>
     <div class="card">
@@ -6810,9 +6810,21 @@ function renderDailyMicroclimateFingerprint(obs,h){
 }
 
 let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
+function resizeWeatherArtCanvas(){
+  const c=document.getElementById('weather-art-canvas');if(!c)return false;
+  const rect=c.getBoundingClientRect();
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const w=Math.max(260,Math.round(rect.width*dpr));
+  const h=Math.max(220,Math.round(rect.height*dpr));
+  if(c.width!==w||c.height!==h){
+    c.width=w;c.height=h;
+    return true;
+  }
+  return false;
+}
 function initWeatherArt(){
   const c=document.getElementById('weather-art-canvas');if(!c)return;
-  c.width=Math.max(200,c.parentElement?.offsetWidth||c.offsetWidth||600);c.height=140;
+  resizeWeatherArtCanvas();
   _artCtx=c.getContext('2d');
   if(_artAnim)cancelAnimationFrame(_artAnim);
   _artParticles=[];
@@ -6853,6 +6865,7 @@ function setWeatherArt(obs){
 function artFrame(){
   const ctx=_artCtx;if(!ctx)return;
   const c=document.getElementById('weather-art-canvas');
+  if(resizeWeatherArtCanvas())_artParticles=[];
   const W=c.width,H=c.height;const dark=isDark();
   ctx.clearRect(0,0,W,H);
   const cond=_artCondition;
@@ -7353,6 +7366,7 @@ function answerQuiz(chosen,correct,dateStr){
 function tickClock(){
 set('local-time',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));}
 setInterval(tickClock,1000);tickClock();
+window.addEventListener('resize',()=>{if(_artCtx){resizeWeatherArtCanvas();_artParticles=[];}});
 
 async function fetchCurrent(){
   const dot=document.getElementById('dot');dot.className='dot loading';set('status-text','Posodabljanje…');
