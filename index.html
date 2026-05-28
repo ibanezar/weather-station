@@ -520,7 +520,9 @@ footer a{color:var(--blue);text-decoration:none}
 .pheno-name{flex:1;color:var(--text)}
 .pheno-gdd{font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--muted);white-space:nowrap}
 .pheno-date{font-family:'IBM Plex Mono',monospace;font-size:.76rem;white-space:nowrap}
-.pheno-done{opacity:.6}.pheno-soon{color:var(--green)}.pheno-future{color:var(--muted)}
+.pheno-done{opacity:.62}.pheno-soon{color:var(--green)}.pheno-future{color:var(--muted)}
+.pheno-row.active{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);border-radius:10px;padding:.45rem .55rem;margin-left:-.55rem}
+.pheno-status{font-size:.66rem;border-radius:999px;padding:1px 7px;border:1px solid var(--fc-border);white-space:nowrap}
 /* Water balance */
 .wbal-summary{display:flex;gap:1.5rem;margin-bottom:.75rem;flex-wrap:wrap}
 .wbal-stat{font-family:'IBM Plex Mono',monospace;font-size:.95rem}
@@ -1192,7 +1194,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
-      <span class="chart-range">Nakopičeni GDD: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
+      <span class="chart-range">Fenološki GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
     </div>
     <div class="g2" style="gap:.75rem">
       <div class="pheno-list" id="pheno-list-left"></div>
@@ -4898,72 +4900,78 @@ function drawHourlyProfile(observations){
 
 // ── Phenological calendar ─────────────────────────────────
 const PHENO=[
-  {gdd:20, icon:'🌳',name:'Leska zacveti'},
-  {gdd:50, icon:'🌼',name:'Regrat cveti'},
-  {gdd:100,icon:'🌸',name:'Marelice cvetijo'},
-  {gdd:130,icon:'🍒',name:'Češnje cvetijo'},
-  {gdd:160,icon:'🍎',name:'Jablane cvetijo'},
-  {gdd:210,icon:'🌿',name:'Hrast ozeleni'},
-  {gdd:300,icon:'🐦',name:'Lastovke prispejo'},
-  {gdd:380,icon:'🌺',name:'Bezeg cveti'},
-  {gdd:520,icon:'🌾',name:'Pšenica klasi'},
-  {gdd:820,icon:'🚜',name:'Žetev pšenice'},
+  {gdd:[20,90],doy:[35,85],icon:'🌳',name:'Leska / dren cveti',note:'zgodnja pomlad, zelo odvisno od mikrolokacije'},
+  {gdd:[80,170],doy:[65,105],icon:'🌼',name:'Regrat in prve travniške cvetlice',note:'prisojni travniki prej, dolina kasneje'},
+  {gdd:[140,260],doy:[85,120],icon:'🌸',name:'Koščičasto sadje cveti',note:'sliva, češnja; pozeba je še pomembno tveganje'},
+  {gdd:[220,380],doy:[105,140],icon:'🍎',name:'Jablane in hruške cvetijo',note:'sadovnjakarsko najobčutljivejše okno'},
+  {gdd:[360,560],doy:[125,160],icon:'🌿',name:'Polno olistanje gozda',note:'bukev/hrast na pobočjih, dolina z zamikom'},
+  {gdd:[520,760],doy:[145,175],icon:'🌺',name:'Bezeg in akacija',note:'močan lokalni signal pozne pomladi'},
+  {gdd:[700,980],doy:[160,195],icon:'🌾',name:'Prva košnja / travni vrh',note:'odvisno od padavin in rasti trav'},
+  {gdd:[950,1350],doy:[185,230],icon:'🦋',name:'Poletni insekti in suhi travniki',note:'metulji, kobilice, kačji pastirji'},
+  {gdd:[1350,1850],doy:[225,275],icon:'🍄',name:'Pozno poletje: rosa, pajki, gobe po dežju',note:'vlaga in padavine sta pomembnejši od GDD'},
+  {gdd:[0,9999],doy:[276,330],icon:'🍂',name:'Jesensko obarvanje in prva slana',note:'vodijo nočne temperature in dolinska inverzija'},
 ];
-function applyPheno(){
+async function applyPheno(){
   const y=new Date().getFullYear();
   set('pheno-year',y);
   try{
     const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
     // Get all entries for current year sorted by date
-    const entries=Object.entries(stored)
+    let entries=Object.entries(stored)
       .filter(([k])=>k.startsWith(y+'-'))
       .sort(([a],[b])=>a.localeCompare(b));
+    if(entries.length<5){
+      const start=y+'-01-01';
+      const end=new Date().toISOString().slice(0,10);
+      const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+start+'&end_date='+end+'&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLjubljana';
+      const res=await fetch(url);const data=await res.json();
+      entries=(data.daily?.time||[]).map((d,i)=>[d,{tempHigh:data.daily.temperature_2m_max?.[i],tempLow:data.daily.temperature_2m_min?.[i]}]);
+    }
     if(entries.length<5){const pl=document.getElementById('pheno-list-left');if(pl)pl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za fenološki izračun…</div>';return;}
-    // Accumulate GDD from Jan 1
+    // Accumulate phenological GDD base 5 from Jan 1
     let totalGdd=0;
     const gddByDate={};
     entries.forEach(([date,v])=>{
       const tmax=v.tempHigh??v.tempAvg??0,tmin=v.tempLow??v.tempAvg??0;
-      const daily=Math.max(0,(tmax+tmin)/2-10);
+      const daily=Math.max(0,(tmax+tmin)/2-5);
       totalGdd+=daily;
       gddByDate[date]=totalGdd;
     });
     set('pheno-gdd-total',Math.round(totalGdd));
-    // Daily GDD rate (for estimating future dates)
-    const rate=entries.length>0?totalGdd/entries.length:2;
     const today=new Date();
+    const doy=Math.floor((today-new Date(y,0,0))/864e5);
     const fmtD=d=>d.toLocaleDateString('sl',{day:'numeric',month:'short'});
+    const fmtDoy=d=>fmtD(new Date(y,0,d));
+    const statusFor=p=>{
+      const inGdd=totalGdd>=p.gdd[0]&&totalGdd<=p.gdd[1];
+      const inDate=doy>=p.doy[0]&&doy<=p.doy[1];
+      if(inGdd&&inDate)return{cls:'active',txt:'aktivno',col:'var(--green)'};
+      if(doy>p.doy[1]||totalGdd>p.gdd[1])return{cls:'pheno-done',txt:'mimo',col:'var(--muted)'};
+      if(doy>=p.doy[0]-14||totalGdd>=p.gdd[0]-80)return{cls:'pheno-soon',txt:'kmalu',col:'var(--amber)'};
+      return{cls:'pheno-future',txt:'kasneje',col:'var(--muted)'};
+    };
     const half=Math.ceil(PHENO.length/2);
     const renderList=(items,elId)=>{
       const el=document.getElementById(elId);if(!el)return;el.innerHTML='';
       items.forEach(p=>{
-        const done=totalGdd>=p.gdd;
-        // Find exact date when GDD was reached
-        let dateStr='';
-        if(done){
-          const entry=Object.entries(gddByDate).find(([,g])=>g>=p.gdd);
-          if(entry)dateStr=fmtD(new Date(entry[0]+'T12:00:00'));
-        }else{
-          const daysNeeded=(p.gdd-totalGdd)/rate;
-          const est=new Date(today.getTime()+daysNeeded*864e5);
-          dateStr='~'+fmtD(est);
-        }
+        const st=statusFor(p);
+        const reached=Object.entries(gddByDate).find(([,g])=>g>=p.gdd[0]);
+        const dateStr=st.txt==='mimo'&&reached?fmtD(new Date(reached[0]+'T12:00:00')):fmtDoy(p.doy[0])+'–'+fmtDoy(p.doy[1]);
         const row=document.createElement('div');
-        row.className='pheno-row '+(done?'pheno-done':p.gdd-totalGdd<50?'pheno-soon':'pheno-future');
+        row.className='pheno-row '+st.cls;
         row.innerHTML=
           '<div class="pheno-icon">'+p.icon+'</div>'+
-          '<div class="pheno-name">'+(done?'<del style="opacity:.5">':'')+'<span>'+p.name+'</span>'+(done?'</del>':'')+'</div>'+
-          '<div class="pheno-gdd">'+p.gdd+' GDD</div>'+
-          '<div class="pheno-date" style="color:'+(done?'var(--green)':p.gdd-totalGdd<50?'var(--amber)':'var(--muted)')+'">'+
-            (done?'✓ ':'')+'<span>'+dateStr+'</span></div>';
+          '<div class="pheno-name"><span>'+p.name+'</span><div style="font-size:.68rem;color:var(--muted);line-height:1.35">'+p.note+'</div></div>'+
+          '<div class="pheno-gdd">'+p.gdd[0]+'–'+p.gdd[1]+' GDD5</div>'+
+          '<div class="pheno-date" style="color:'+st.col+'"><span>'+dateStr+'</span><br><span class="pheno-status">'+st.txt+'</span></div>';
         el.appendChild(row);
       });
     };
     renderList(PHENO.slice(0,half),'pheno-list-left');
     renderList(PHENO.slice(half),'pheno-list-right');
-    const next=PHENO.find(p=>totalGdd<p.gdd);
+    const next=PHENO.find(p=>statusFor(p).txt==='aktivno')||PHENO.find(p=>statusFor(p).txt==='kmalu');
     const note=document.getElementById('pheno-note');
-    if(note&&next){const left=next.gdd-totalGdd,daysEst=Math.round(left/rate);note.textContent='Naslednji: '+next.icon+' '+next.name+' (še '+Math.round(left)+' GDD, ocena: ~'+daysEst+' dni)';}
+    if(note&&next)note.textContent='Fenološki koledar je ocena za dolinsko lego Rečice: GDD5 + sezonsko okno. Trenutni signal: '+next.icon+' '+next.name+'. To ni točen datum cvetenja, ampak lokalno verjetnostno okno.';
   }catch(e){console.warn('Pheno:',e);}
 }
 
