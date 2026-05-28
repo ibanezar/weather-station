@@ -636,6 +636,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.08);color:var(--red);opacity:.7}
 .quiz-expl{font-size:.76rem;line-height:1.65;color:var(--muted);margin-top:.85rem;padding:.7rem .9rem;background:var(--fc-bg);border-radius:10px;border-left:3px solid var(--blue)}
 .quiz-streak{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted-text,var(--muted))}
+/* Proverb stats */
+.prov-row{padding:.9rem 0;border-bottom:1px solid var(--border)}
+.prov-row:last-child{border-bottom:none;padding-bottom:0}
+.prov-row:first-child{padding-top:0}
+.prov-row-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.prov-row-name{font-weight:600;font-size:.82rem;margin-bottom:.22rem}
+.prov-row-text{font-style:italic;font-size:.82rem;line-height:1.5;color:var(--text)}
+.prov-row-note{font-size:.69rem;color:var(--muted);margin-top:.2rem}
+.prov-rate{font-family:'IBM Plex Mono',monospace;font-size:.96rem;font-weight:400}
+.prov-tested{font-size:.68rem;color:var(--muted)}
+.prov-dots{display:flex;gap:4px;margin-top:.55rem;flex-wrap:wrap;align-items:center}
+.prov-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;cursor:default}
+.prov-year-labels{font-size:.65rem;color:var(--muted);margin-left:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em}
 
 /* Generative art */
 .weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
@@ -1879,6 +1892,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ ZANIMIVOSTI TAB ═══ -->
   <div id="tab-trivia" class="tab-pane">
+    <!-- Pregovor analiza -->
+    <div class="tri-section">
+      <div class="tri-title">📜 Slovenski vremenski pregovori — analiza zadetosti</div>
+      <div class="tri-card">
+        <div id="prov-stats-wrap" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
+      </div>
+    </div>
     <!-- Rekordi -->
     <div class="tri-section">
       <div class="tri-title">🌍 Vremenski rekordi — postaja vs. Slovenija vs. svet</div>
@@ -2924,7 +2944,7 @@ function switchTab(tab){
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); }
   if(tab==='diary'){    fdRenderGallery(); }
-  if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
+  if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
@@ -7395,6 +7415,210 @@ const QUIZ_QUESTIONS=[
   {q:'Kdaj nastane rosa?',opts:['Ko temperatura zraka doseže 0°C','Ko temperatura pade do rosišča','Ko vlaga preseže 60%','Pri vetru > 20 km/h'],a:1,expl:'Rosa nastane, ko se površine (trava, listi) ohladijo pod rosišče — temperaturo pri kateri zrak ne more zadržati vsa vlage. Nastane pri mirnem, jasnem vremenu.'},
   {q:'Kateri faktor NAJMANJ vpliva na nastajanje megle v dolini Savinje?',opts:['Vlaga','Smer vetra','Moč vetra','Temperatura'],a:1,expl:'Smer vetra ima minimalen vpliv na nastanek radiacijsko megle v dolini — pomembnejša je hitrost vetra (mešanje zraka), vlaga in temperaturni gradient.'},
 ];
+
+// ── Proverb accuracy stats ─────────────────────────────────
+function buildProverbStats(){
+  const wrap=document.getElementById('prov-stats-wrap');
+  if(!wrap||wrap.dataset.built==='1')return;
+
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const dayCount=Object.keys(stored).length;
+  if(dayCount<100){
+    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni dovolj zgodovinskih podatkov. Uvozi XLSX datoteko v zavihku Zgodovina.</div>';
+    return;
+  }
+
+  const years=[...new Set(Object.keys(stored).map(k=>+k.slice(0,4)))].sort();
+
+  // Helpers
+  function d(date){return stored[date]||null;}
+  function sumPrecip(s,e){
+    let tot=0,cnt=0;
+    const ds=new Date(s),de=new Date(e),days=Math.round((de-ds)/864e5)+1;
+    for(let cur=new Date(ds);cur<=de;cur.setDate(cur.getDate()+1)){
+      const k=cur.toISOString().slice(0,10);
+      if(stored[k]){tot+=stored[k].precipTotal||0;cnt++;}
+    }
+    return cnt>=days*0.75?tot:null;
+  }
+  function avgTemp(s,e){
+    let sum=0,cnt=0;
+    const ds=new Date(s),de=new Date(e),days=Math.round((de-ds)/864e5)+1;
+    for(let cur=new Date(ds);cur<=de;cur.setDate(cur.getDate()+1)){
+      const k=cur.toISOString().slice(0,10);
+      const v=stored[k]?.tempAvg??null;
+      if(v!=null){sum+=v;cnt++;}
+    }
+    return cnt>=days*0.7?sum/cnt:null;
+  }
+  function frostDays(s,e){
+    let fr=0,cnt=0;
+    const ds=new Date(s),de=new Date(e),days=Math.round((de-ds)/864e5)+1;
+    for(let cur=new Date(ds);cur<=de;cur.setDate(cur.getDate()+1)){
+      const k=cur.toISOString().slice(0,10);
+      if(stored[k]){cnt++;if((stored[k].tempLow??99)<=0)fr++;}
+    }
+    return cnt>=days*0.7?fr:null;
+  }
+  function rainyRatio(s,e){
+    let rainy=0,cnt=0;
+    const ds=new Date(s),de=new Date(e),days=Math.round((de-ds)/864e5)+1;
+    for(let cur=new Date(ds);cur<=de;cur.setDate(cur.getDate()+1)){
+      const k=cur.toISOString().slice(0,10);
+      if(stored[k]){cnt++;if((stored[k].precipTotal||0)>=1)rainy++;}
+    }
+    return cnt>=days*0.7?rainy/cnt:null;
+  }
+  function addDays(dateStr,n){const d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+
+  const proverbs=[
+    {
+      name:'Svečnica ❄️', date:'02-02',
+      text:'Če na Svečnico sonce sija, zima še šest tednov traja.',
+      note:'Sončna Svečnica (Tmax > 3°C, < 1mm) → Tmax < 8°C na Gregorjevo (16. mar)',
+      test(y){
+        const day=d(`${y}-02-02`);if(!day)return null;
+        if(!((day.tempHigh??0)>3&&(day.precipTotal??99)<1))return 'skip';
+        const d2=d(`${y}-03-16`);if(!d2)return null;
+        return(d2.tempHigh??0)<8?'hit':'miss';
+      }
+    },
+    {
+      name:'Jurjevo 🌿', date:'04-23',
+      text:'Če na Jurjevo dežuje, bo suho poletje.',
+      note:'Deževen Jurjev (≥ 2mm) → jun–avg skupaj < 280mm',
+      test(y){
+        const day=d(`${y}-04-23`);if(!day)return null;
+        if(!((day.precipTotal??0)>=2))return 'skip';
+        const s=sumPrecip(`${y}-06-01`,`${y}-08-31`);
+        return s===null?null:s<280?'hit':'miss';
+      }
+    },
+    {
+      name:'Medard ☔', date:'06-08',
+      text:'Če na Medarda dežuje, štirideset dni mokro ostane.',
+      note:'Deževen Medard (≥ 1mm) → ≥ 45% deževnih dni v naslednjih 40 dneh',
+      test(y){
+        const day=d(`${y}-06-08`);if(!day)return null;
+        if(!((day.precipTotal??0)>=1))return 'skip';
+        const ratio=rainyRatio(`${y}-06-09`,addDays(`${y}-06-09`,39));
+        return ratio===null?null:ratio>=0.45?'hit':'miss';
+      }
+    },
+    {
+      name:'Magdalena ☀️', date:'07-22',
+      text:'Magdalena jesen napove — kakor julij, tako jesen.',
+      note:'Vroča Magdalena (Tmax ≥ 27°C) → september povp. ≥ 15.5°C',
+      test(y){
+        const day=d(`${y}-07-22`);if(!day)return null;
+        if(!((day.tempHigh??0)>=27))return 'skip';
+        const avg=avgTemp(`${y}-09-01`,`${y}-09-30`);
+        return avg===null?null:avg>=15.5?'hit':'miss';
+      }
+    },
+    {
+      name:'Červinka 🍂', date:'08-10',
+      text:'Červinka jesen napoveduje.',
+      note:'Deževen 10. avg (≥ 2mm) → september > 90mm padavin',
+      test(y){
+        const day=d(`${y}-08-10`);if(!day)return null;
+        if(!((day.precipTotal??0)>=2))return 'skip';
+        const s=sumPrecip(`${y}-09-01`,`${y}-09-30`);
+        return s===null?null:s>90?'hit':'miss';
+      }
+    },
+    {
+      name:'Galus 🌨', date:'10-16',
+      text:'Galus zimo napove — kakor je Galus, taka bo zima.',
+      note:'Hladen Galus (Tmax < 10°C) → ≥ 18 zmrzalnih noči (dec–feb)',
+      test(y){
+        const day=d(`${y}-10-16`);if(!day)return null;
+        if(!((day.tempHigh??99)<10))return 'skip';
+        const fd=frostDays(`${y}-12-01`,`${y+1}-02-28`);
+        return fd===null?null:fd>=18?'hit':'miss';
+      }
+    },
+    {
+      name:'Martinovo 🍷', date:'11-11',
+      text:'Na Martina kakršno vreme, takšen december.',
+      note:'Deževano Martinovo (≥ 1mm) → december > 75mm',
+      test(y){
+        const day=d(`${y}-11-11`);if(!day)return null;
+        if(!((day.precipTotal??0)>=1))return 'skip';
+        const s=sumPrecip(`${y}-12-01`,`${y}-12-31`);
+        return s===null?null:s>75?'hit':'miss';
+      }
+    },
+    {
+      name:'Mokra pomlad 🌸', date:null,
+      text:'Mokra pomlad — suho poletje.',
+      note:'April > 110mm → poletje (jun–avg) < 280mm',
+      test(y){
+        const apr=sumPrecip(`${y}-04-01`,`${y}-04-30`);
+        if(apr===null)return null;
+        if(!(apr>110))return 'skip';
+        const sum=sumPrecip(`${y}-06-01`,`${y}-08-31`);
+        return sum===null?null:sum<280?'hit':'miss';
+      }
+    }
+  ];
+
+  // Compute results
+  const results=proverbs.map(p=>{
+    const yr={};
+    years.forEach(y=>{try{yr[y]=p.test(y);}catch(e){yr[y]=null;}});
+    const tested=Object.values(yr).filter(v=>v==='hit'||v==='miss');
+    const hits=Object.values(yr).filter(v=>v==='hit').length;
+    const rate=tested.length?Math.round(hits/tested.length*100):null;
+    return{...p,yr,rate,tested:tested.length,hits};
+  });
+
+  function verdict(rate,tested){
+    if(tested<2)return{cls:'proverb-partial',label:'? premalo let'};
+    if(rate>=65)return{cls:'proverb-true',label:'✓ drži'};
+    if(rate>=40)return{cls:'proverb-partial',label:'~ delno'};
+    return{cls:'proverb-myth',label:'✗ mit'};
+  }
+
+  let html=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.65">
+    Analiza temelji na <b style="color:var(--text)">${dayCount} dneh</b> podatkov postaje IREICA1 (${years[0]}–${years[years.length-1]}).
+    Pregovor se testira samo v letih, ko je bil pogoj sprožen (npr. dejansko dežuje na ta dan).
+    <span style="margin-left:.5rem">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo &nbsp;
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo &nbsp;
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni sprožilo / ni podatka
+    </span>
+  </div>`;
+
+  results.forEach(r=>{
+    const v=verdict(r.rate,r.tested);
+    const dots=years.map(y=>{
+      const res=r.yr[y];
+      const bg=res==='hit'?'var(--green)':res==='miss'?'var(--red)':'var(--border)';
+      const title=res==='hit'?`${y}: zadelo`:res==='miss'?`${y}: zgrešilo`:res==='skip'?`${y}: pogoj ni bil sprožen`:`${y}: ni podatka`;
+      return`<span class="prov-dot" title="${title}" style="background:${bg}"></span>`;
+    }).join('');
+    const yearLabels=years.join(' · ');
+    html+=`<div class="prov-row">
+      <div class="prov-row-head">
+        <div>
+          <div class="prov-row-name">${r.name}</div>
+          <div class="prov-row-text">${r.text}</div>
+          <div class="prov-row-note">${r.note}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0;text-align:right">
+          <span class="proverb-valid ${v.cls}">${v.label}</span>
+          <span class="prov-rate">${r.rate!==null?r.rate+'%':'—'}</span>
+          <span class="prov-tested">${r.tested?r.hits+'/'+r.tested+' let':'—'}</span>
+        </div>
+      </div>
+      <div class="prov-dots">${dots}<span class="prov-year-labels">${yearLabels}</span></div>
+    </div>`;
+  });
+
+  wrap.innerHTML=html;
+  wrap.dataset.built='1';
+}
 
 // ── Main: init trivia ──────────────────────────────────────
 let _triviaInit=false;
