@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -950,25 +949,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
   <div id="storm-mode" class="storm-mode"></div>
-  <div class="local-intel-grid">
-    <div class="intel-card" id="daily-almanac">
-      <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
-      <div class="intel-text">Sestavljam dnevni almanah…</div>
-    </div>
-    <div class="intel-card" id="weather-memory">
-      <div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">IREICA1</span></div>
-      <div class="intel-text">Iščem podoben dan v zgodovini…</div>
-    </div>
-    <div class="intel-card" id="forecast-personality">
-      <div class="intel-head"><div class="intel-label">Dnevni značaj vremena</div><span class="intel-badge">Rečica</span></div>
-      <div class="intel-text">Berem lokalni podpis vremena…</div>
-    </div>
-    <div class="intel-card hidden" id="storm-autopsy">
-      <div class="intel-head"><div class="intel-label">Savinjska Storm Autopsy</div><span class="intel-badge">dogodek</span></div>
-      <div class="intel-text">Čakam na nevihtni dogodek…</div>
-    </div>
-  </div>
-
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌤 Aktualno</button>
@@ -1145,6 +1125,26 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="clabel">💧 Rosišče</div>
       <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
       <div class="csub" id="dewpt-label">—</div>
+    </div>
+  </div>
+
+  <!-- AI intel grid -->
+  <div class="local-intel-grid">
+    <div class="intel-card" id="daily-almanac">
+      <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
+      <div class="intel-text">Sestavljam dnevni almanah…</div>
+    </div>
+    <div class="intel-card" id="weather-memory">
+      <div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">IREICA1</span></div>
+      <div class="intel-text">Iščem podoben dan v zgodovini…</div>
+    </div>
+    <div class="intel-card" id="forecast-personality">
+      <div class="intel-head"><div class="intel-label">Dnevni značaj vremena</div><span class="intel-badge">Rečica</span></div>
+      <div class="intel-text">Berem lokalni podpis vremena…</div>
+    </div>
+    <div class="intel-card hidden" id="storm-autopsy">
+      <div class="intel-head"><div class="intel-label">Savinjska Storm Autopsy</div><span class="intel-badge">dogodek</span></div>
+      <div class="intel-text">Čakam na nevihtni dogodek…</div>
     </div>
   </div>
 
