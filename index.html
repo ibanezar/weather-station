@@ -7430,8 +7430,8 @@ function buildProverbStats(){
 
   const years=[...new Set(Object.keys(stored).map(k=>+k.slice(0,4)))].sort();
 
-  // Helpers
-  function d(date){return stored[date]||null;}
+  // ── Helpers ──────────────────────────────────────────────
+  function day(date){return stored[date]||null;}
   function sumPrecip(s,e){
     let tot=0,cnt=0;
     const ds=new Date(s),de=new Date(e),days=Math.round((de-ds)/864e5)+1;
@@ -7471,99 +7471,158 @@ function buildProverbStats(){
   }
   function addDays(dateStr,n){const d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 
+  // ── Proverbs — bidirectional testing ─────────────────────
+  // Every year with data counts. 'hit' = proverb prediction correct in both directions.
+  // (rainy day → wet outcome) AND (dry day → dry outcome) both count as correct.
   const proverbs=[
     {
       name:'Svečnica ❄️', date:'02-02',
       text:'Če na Svečnico sonce sija, zima še šest tednov traja.',
-      note:'Sončna Svečnica (Tmax > 3°C, < 1mm) → Tmax < 8°C na Gregorjevo (16. mar)',
+      note:'Sončna Svečnica (< 1mm, Tmax > 3°C) ↔ Tmax < 8°C na Gregorjevo (16. mar)',
       test(y){
-        const day=d(`${y}-02-02`);if(!day)return null;
-        if(!((day.tempHigh??0)>3&&(day.precipTotal??99)<1))return 'skip';
-        const d2=d(`${y}-03-16`);if(!d2)return null;
-        return(d2.tempHigh??0)<8?'hit':'miss';
+        const d1=day(`${y}-02-02`),d2=day(`${y}-03-16`);
+        if(!d1||!d2)return null;
+        const sunny=(d1.tempHigh??0)>3&&(d1.precipTotal??99)<1;
+        const stillCold=(d2.tempHigh??0)<8;
+        return sunny===stillCold?'hit':'miss';
       }
     },
     {
       name:'Jurjevo 🌿', date:'04-23',
       text:'Če na Jurjevo dežuje, bo suho poletje.',
-      note:'Deževen Jurjev (≥ 2mm) → jun–avg skupaj < 280mm',
+      note:'Deževen Jurjev (≥ 2mm) ↔ poletje jun–avg < 300mm, suh Jurjev ↔ mokro poletje',
       test(y){
-        const day=d(`${y}-04-23`);if(!day)return null;
-        if(!((day.precipTotal??0)>=2))return 'skip';
+        const d1=day(`${y}-04-23`);
         const s=sumPrecip(`${y}-06-01`,`${y}-08-31`);
-        return s===null?null:s<280?'hit':'miss';
+        if(!d1||s===null)return null;
+        const rainy=(d1.precipTotal??0)>=2;
+        const drySummer=s<300;
+        return rainy===drySummer?'hit':'miss';
       }
     },
     {
       name:'Medard ☔', date:'06-08',
       text:'Če na Medarda dežuje, štirideset dni mokro ostane.',
-      note:'Deževen Medard (≥ 1mm) → ≥ 45% deževnih dni v naslednjih 40 dneh',
+      note:'Deževen Medard (≥ 1mm) ↔ > 45% deževnih dni v naslednjih 40 dneh',
       test(y){
-        const day=d(`${y}-06-08`);if(!day)return null;
-        if(!((day.precipTotal??0)>=1))return 'skip';
+        const d1=day(`${y}-06-08`);
         const ratio=rainyRatio(`${y}-06-09`,addDays(`${y}-06-09`,39));
-        return ratio===null?null:ratio>=0.45?'hit':'miss';
+        if(!d1||ratio===null)return null;
+        const rainyDay=(d1.precipTotal??0)>=1;
+        const rainyPeriod=ratio>=0.45;
+        return rainyDay===rainyPeriod?'hit':'miss';
       }
     },
     {
       name:'Magdalena ☀️', date:'07-22',
       text:'Magdalena jesen napove — kakor julij, tako jesen.',
-      note:'Vroča Magdalena (Tmax ≥ 27°C) → september povp. ≥ 15.5°C',
+      note:'Vroča Magdalena (Tmax ≥ 27°C) ↔ september povp. ≥ 15°C',
       test(y){
-        const day=d(`${y}-07-22`);if(!day)return null;
-        if(!((day.tempHigh??0)>=27))return 'skip';
+        const d1=day(`${y}-07-22`);
         const avg=avgTemp(`${y}-09-01`,`${y}-09-30`);
-        return avg===null?null:avg>=15.5?'hit':'miss';
+        if(!d1||avg===null)return null;
+        const hot=(d1.tempHigh??0)>=27;
+        const warmSep=avg>=15;
+        return hot===warmSep?'hit':'miss';
       }
     },
     {
       name:'Červinka 🍂', date:'08-10',
       text:'Červinka jesen napoveduje.',
-      note:'Deževen 10. avg (≥ 2mm) → september > 90mm padavin',
+      note:'Deževen 10. avg (≥ 2mm) ↔ september > 90mm',
       test(y){
-        const day=d(`${y}-08-10`);if(!day)return null;
-        if(!((day.precipTotal??0)>=2))return 'skip';
+        const d1=day(`${y}-08-10`);
         const s=sumPrecip(`${y}-09-01`,`${y}-09-30`);
-        return s===null?null:s>90?'hit':'miss';
+        if(!d1||s===null)return null;
+        const rainy=(d1.precipTotal??0)>=2;
+        const wetSep=s>90;
+        return rainy===wetSep?'hit':'miss';
       }
     },
     {
       name:'Galus 🌨', date:'10-16',
       text:'Galus zimo napove — kakor je Galus, taka bo zima.',
-      note:'Hladen Galus (Tmax < 10°C) → ≥ 18 zmrzalnih noči (dec–feb)',
+      note:'Hladen Galus (Tmax < 10°C) ↔ ≥ 18 zmrzalnih noči (dec–feb)',
       test(y){
-        const day=d(`${y}-10-16`);if(!day)return null;
-        if(!((day.tempHigh??99)<10))return 'skip';
+        const d1=day(`${y}-10-16`);
         const fd=frostDays(`${y}-12-01`,`${y+1}-02-28`);
-        return fd===null?null:fd>=18?'hit':'miss';
+        if(!d1||fd===null)return null;
+        const cold=(d1.tempHigh??99)<10;
+        const hardWinter=fd>=18;
+        return cold===hardWinter?'hit':'miss';
       }
     },
     {
       name:'Martinovo 🍷', date:'11-11',
       text:'Na Martina kakršno vreme, takšen december.',
-      note:'Deževano Martinovo (≥ 1mm) → december > 75mm',
+      note:'Deževano Martinovo (≥ 1mm) ↔ december > 80mm',
       test(y){
-        const day=d(`${y}-11-11`);if(!day)return null;
-        if(!((day.precipTotal??0)>=1))return 'skip';
+        const d1=day(`${y}-11-11`);
         const s=sumPrecip(`${y}-12-01`,`${y}-12-31`);
-        return s===null?null:s>75?'hit':'miss';
+        if(!d1||s===null)return null;
+        const rainy=(d1.precipTotal??0)>=1;
+        const wetDec=s>80;
+        return rainy===wetDec?'hit':'miss';
       }
     },
     {
-      name:'Mokra pomlad 🌸', date:null,
+      name:'Mokra pomlad 🌸',
       text:'Mokra pomlad — suho poletje.',
-      note:'April > 110mm → poletje (jun–avg) < 280mm',
+      note:'April > 110mm ↔ poletje jun–avg < 300mm',
       test(y){
         const apr=sumPrecip(`${y}-04-01`,`${y}-04-30`);
-        if(apr===null)return null;
-        if(!(apr>110))return 'skip';
         const sum=sumPrecip(`${y}-06-01`,`${y}-08-31`);
-        return sum===null?null:sum<280?'hit':'miss';
+        if(apr===null||sum===null)return null;
+        return(apr>110)===(sum<300)?'hit':'miss';
+      }
+    },
+    {
+      name:'Januar & julij 🌡',
+      text:'Ko januar zmrzuje, julij praži.',
+      note:'Januar povp. < 0°C ↔ julij povp. > 20°C',
+      test(y){
+        const jan=avgTemp(`${y}-01-01`,`${y}-01-31`);
+        const jul=avgTemp(`${y}-07-01`,`${y}-07-31`);
+        if(jan===null||jul===null)return null;
+        return(jan<0)===(jul>20)?'hit':'miss';
+      }
+    },
+    {
+      name:'Topla zima 🌿',
+      text:'Topla zima — mrzla pomlad.',
+      note:'Dec–feb povp. > 3°C ↔ mar–maj povp. < 10°C',
+      test(y){
+        const win=avgTemp(`${y-1}-12-01`,`${y}-02-28`);
+        const spr=avgTemp(`${y}-03-01`,`${y}-05-31`);
+        if(win===null||spr===null)return null;
+        return(win>3)===(spr<10)?'hit':'miss';
+      }
+    },
+    {
+      name:'Suh maj 🌼',
+      text:'Suh maj — moker junij.',
+      note:'Maj < 70mm ↔ junij > 110mm',
+      test(y){
+        const may=sumPrecip(`${y}-05-01`,`${y}-05-31`);
+        const jun=sumPrecip(`${y}-06-01`,`${y}-06-30`);
+        if(may===null||jun===null)return null;
+        return(may<70)===(jun>110)?'hit':'miss';
+      }
+    },
+    {
+      name:'Moker oktober 🍁',
+      text:'Ko je oktober moker, bo november suh.',
+      note:'Oktober > 130mm ↔ november < 90mm',
+      test(y){
+        const oct=sumPrecip(`${y}-10-01`,`${y}-10-31`);
+        const nov=sumPrecip(`${y}-11-01`,`${y}-11-30`);
+        if(oct===null||nov===null)return null;
+        return(oct>130)===(nov<90)?'hit':'miss';
       }
     }
   ];
 
-  // Compute results
+  // ── Compute + filter ──────────────────────────────────────
   const results=proverbs.map(p=>{
     const yr={};
     years.forEach(y=>{try{yr[y]=p.test(y);}catch(e){yr[y]=null;}});
@@ -7571,48 +7630,52 @@ function buildProverbStats(){
     const hits=Object.values(yr).filter(v=>v==='hit').length;
     const rate=tested.length?Math.round(hits/tested.length*100):null;
     return{...p,yr,rate,tested:tested.length,hits};
-  });
+  }).filter(r=>r.tested>=3); // only show proverbs with enough data
 
-  function verdict(rate,tested){
-    if(tested<2)return{cls:'proverb-partial',label:'? premalo let'};
+  if(!results.length){
+    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Uvozi XLSX datoteko (zavihek Zgodovina) za prikaz analize.</div>';
+    return;
+  }
+
+  function verdict(rate){
     if(rate>=65)return{cls:'proverb-true',label:'✓ drži'};
-    if(rate>=40)return{cls:'proverb-partial',label:'~ delno'};
+    if(rate>=45)return{cls:'proverb-partial',label:'~ delno'};
     return{cls:'proverb-myth',label:'✗ mit'};
   }
 
+  // Sort: best hit rate first
+  results.sort((a,b)=>(b.rate??0)-(a.rate??0));
+
   let html=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.65">
     Analiza temelji na <b style="color:var(--text)">${dayCount} dneh</b> podatkov postaje IREICA1 (${years[0]}–${years[years.length-1]}).
-    Pregovor se testira samo v letih, ko je bil pogoj sprožen (npr. dejansko dežuje na ta dan).
-    <span style="margin-left:.5rem">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo &nbsp;
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo &nbsp;
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni sprožilo / ni podatka
-    </span>
+    Testiranje je bidirekcijsko — šteje pravilna napoved v obe smeri (npr. dežuje → mokro, suho → suho).
+    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo
+    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo
+    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni podatka
   </div>`;
 
   results.forEach(r=>{
-    const v=verdict(r.rate,r.tested);
+    const v=verdict(r.rate);
     const dots=years.map(y=>{
       const res=r.yr[y];
       const bg=res==='hit'?'var(--green)':res==='miss'?'var(--red)':'var(--border)';
-      const title=res==='hit'?`${y}: zadelo`:res==='miss'?`${y}: zgrešilo`:res==='skip'?`${y}: pogoj ni bil sprožen`:`${y}: ni podatka`;
-      return`<span class="prov-dot" title="${title}" style="background:${bg}"></span>`;
+      const lbl=res==='hit'?`${y}: zadelo`:res==='miss'?`${y}: zgrešilo`:`${y}: ni podatka`;
+      return`<span class="prov-dot" title="${lbl}" style="background:${bg}"></span>`;
     }).join('');
-    const yearLabels=years.join(' · ');
     html+=`<div class="prov-row">
       <div class="prov-row-head">
         <div>
-          <div class="prov-row-name">${r.name}</div>
+          <div class="prov-row-name">${r.name}${r.date?` <span style="font-size:.65rem;color:var(--muted);font-weight:400">${r.date}</span>`:''}</div>
           <div class="prov-row-text">${r.text}</div>
           <div class="prov-row-note">${r.note}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0;text-align:right">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0;text-align:right;min-width:72px">
           <span class="proverb-valid ${v.cls}">${v.label}</span>
           <span class="prov-rate">${r.rate!==null?r.rate+'%':'—'}</span>
-          <span class="prov-tested">${r.tested?r.hits+'/'+r.tested+' let':'—'}</span>
+          <span class="prov-tested">${r.hits}/${r.tested} let</span>
         </div>
       </div>
-      <div class="prov-dots">${dots}<span class="prov-year-labels">${yearLabels}</span></div>
+      <div class="prov-dots">${dots}<span class="prov-year-labels">${years.join(' · ')}</span></div>
     </div>`;
   });
 
