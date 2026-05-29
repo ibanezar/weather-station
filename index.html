@@ -232,13 +232,27 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 
 /* Hero */
-.hero{display:grid;grid-template-columns:1fr 160px auto;gap:2rem;padding:2rem 2.25rem;margin-bottom:1rem;background:var(--hero-bg);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid var(--hero-border);border-radius:22px;position:relative;overflow:hidden;box-shadow:var(--hero-shadow);transition:background .35s,border-color .35s,box-shadow 2s ease}
+.hero{display:flex;flex-direction:column;gap:0;padding:1.85rem 2rem 1.5rem;margin-bottom:1rem;background:var(--hero-bg);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid var(--hero-border);border-radius:22px;position:relative;overflow:hidden;box-shadow:var(--hero-shadow);transition:background .35s,border-color .35s,box-shadow 2s ease}
 .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(124,58,237,.03) 60%,transparent 100%);pointer-events:none;z-index:0}
 .hero>*{position:relative;z-index:1}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.55;border-radius:inherit}
 @keyframes hero-breathe{0%,100%{opacity:.55}50%{opacity:.75}}
 #hero-canvas.active{animation:hero-breathe 4s ease-in-out infinite}
+/* Hero top row */
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1.5rem;margin-bottom:1.35rem}
+.hero-left{flex:1;min-width:0}
+/* Hero metrics strip */
+.hero-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+.hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
+.hm-val{font-family:'IBM Plex Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
+.hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-uv{--hm-accent:var(--amber)}
+/* Live pulse animations */
+@keyframes live-pulse{0%{background:var(--fc-bg);box-shadow:none}30%{background:rgba(255,255,255,.07);box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}100%{background:var(--fc-bg);box-shadow:none}}
+@keyframes temp-pulse{0%,100%{text-shadow:0 0 40px currentColor}35%{text-shadow:0 0 80px currentColor,0 0 140px currentColor}}
+.hm.pulse-live{animation:live-pulse 1.5s ease-out}
 #temp-val{transition:color .8s ease;text-shadow:0 0 40px currentColor}
+#temp-val.pulse-live{animation:temp-pulse 1.5s ease-out}
 @keyframes chart-draw{from{stroke-dashoffset:var(--path-len)}to{stroke-dashoffset:0}}
 .feels{font-size:.78rem;color:var(--muted);margin-top:.65rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .feels strong{color:var(--text);font-weight:400}
@@ -879,12 +893,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 }
 @media(max-width:680px){
   .wrap{padding:1.5rem .9rem 3.5rem}
-  .hero{grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:1rem;padding:1.5rem 1.25rem}
-  .hero>div:first-child{grid-column:1;grid-row:1}
-  .hero-icon{grid-column:2;grid-row:1;align-items:flex-start;padding-top:.4rem}
+  .hero{padding:1.4rem 1.25rem 1.2rem}
+  .hero-top{gap:.9rem;margin-bottom:1rem}
+  .hero-metrics{grid-template-columns:repeat(2,1fr);gap:.5rem;padding-top:.85rem}
+  .hm-val{font-size:1.08rem}
   .hero-icon svg{width:96px;height:96px}
-  .hero-stats{grid-column:1 / -1;grid-row:2;flex-direction:row;flex-wrap:wrap;gap:.5rem 1.5rem}
-  .hs-val{font-size:1rem}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr}.span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
@@ -987,18 +1000,32 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="tab-current" class="tab-pane active">
   <div class="hero card">
     <canvas id="hero-canvas"></canvas>
-    <div>
-      <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
-      <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
-      <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
-      <div class="yesterday-delta" id="yesterday-delta"></div>
+    <div class="hero-top">
+      <div class="hero-left">
+        <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
+        <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
+        <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
+        <div class="yesterday-delta" id="yesterday-delta"></div>
+      </div>
+      <div class="hero-icon" id="hero-icon"></div>
     </div>
-    <div class="hero-icon" id="hero-icon"></div>
-    <div class="hero-stats">
-      <div class="hs"><span class="hs-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span><span class="hs-lbl">Vlažnost</span></div>
-      <div class="hs"><span class="hs-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span><span class="hs-lbl">Tlak</span></div>
-      <div class="hs"><span class="hs-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span><span class="hs-lbl">Veter</span></div>
-      <div class="hs"><span class="hs-val" id="hs-uv">—</span><span class="hs-lbl">UV indeks</span></div>
+    <div class="hero-metrics">
+      <div class="hm hm-hum" id="hm-humidity">
+        <span class="hm-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span>
+        <span class="hm-lbl">Vlažnost</span>
+      </div>
+      <div class="hm hm-pres" id="hm-pressure">
+        <span class="hm-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-lbl">Tlak</span>
+      </div>
+      <div class="hm hm-wind" id="hm-wind">
+        <span class="hm-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-lbl">Veter</span>
+      </div>
+      <div class="hm hm-uv" id="hm-uv">
+        <span class="hm-val" id="hs-uv">—</span>
+        <span class="hm-lbl">UV indeks</span>
+      </div>
     </div>
   </div>
 
@@ -2745,6 +2772,19 @@ function applyPressureTrend(observations){
 }
 
 // ── Apply observation ─────────────────────────────────────
+function triggerLivePulse(){
+  // Pulse the hero metrics and temperature on fresh data arrival
+  ['hm-humidity','hm-pressure','hm-wind','hm-uv'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove('pulse-live');void el.offsetWidth;
+    el.classList.add('pulse-live');
+    el.addEventListener('animationend',()=>el.classList.remove('pulse-live'),{once:true});
+  });
+  const tv=document.getElementById('temp-val');
+  if(tv){tv.classList.remove('pulse-live');void tv.offsetWidth;tv.classList.add('pulse-live');
+    tv.addEventListener('animationend',()=>tv.classList.remove('pulse-live'),{once:true});}
+}
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
@@ -2795,6 +2835,7 @@ function applyObs(obs){
   updateBgFromObs(obs);
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
+  triggerLivePulse();
 }
 
 function buildDailySummaries(observations){
