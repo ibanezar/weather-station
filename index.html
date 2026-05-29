@@ -52,11 +52,11 @@
 
 /* ── Dark theme ── */
 [data-theme="dark"] {
-  --bg:#04070e; --text:#e8edf8; --muted:#8299b8;
+  --bg:#04070e; --text:#e8edf8; --muted:#adc0d8;
   --border:rgba(255,255,255,.07); --bh:rgba(255,255,255,.14);
   --blue:#4d9ff8; --cyan:#22d3ee; --purple:#a78bfa;
   --amber:#f59e0b; --green:#34d399; --red:#f87171; --rain-col:#60a5fa;
-  --card-bg:rgba(12,18,32,.9); --card-border:rgba(255,255,255,.09);
+  --card-bg:rgba(10,15,28,.94); --card-border:rgba(255,255,255,.11);
   --card-border-h:rgba(255,255,255,.17);
   --card-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
   --card-shadow-h:0 8px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08);
@@ -93,6 +93,8 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 .b2{width:520px;height:520px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
 .b3{width:440px;height:440px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:5%;left:8%;animation:blob-drift 19s ease-in-out infinite 8s}
 .b4{width:380px;height:380px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
+#mesh-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+/* Mountain sky + silhouette */
 @keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
 .rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.3),transparent);animation:rain-fall linear infinite}
 /* Dynamic weather background particles */
@@ -148,7 +150,7 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-header{text-align:center;padding:2.5rem 0 2rem}
+header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
 .stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
@@ -341,9 +343,9 @@ footer a{color:var(--blue);text-decoration:none}
 /* Tabs */
 .tab-nav-wrap{position:relative;margin-bottom:1.5rem}.tab-nav-wrap::after{content:"";position:absolute;right:0;top:0;bottom:.4rem;width:52px;background:linear-gradient(to left,var(--bg) 40%,transparent);pointer-events:none;z-index:5}.tab-nav{display:flex;gap:.35rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.4rem;scroll-snap-type:x proximity}
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4}
-.tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3)}
-.tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
+.tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
+.tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);opacity:1}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* History table */
@@ -904,7 +906,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 </head>
 <body>
 
-<div id="bg" class="no-photo"><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+<div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+</div>
 <div id="chart-tip"></div>
 <button class="theme-btn" id="theme-btn" title="Preklopi temo">🌙</button>
 
@@ -6697,6 +6700,84 @@ function scheduleLightning(){
   },4000+Math.random()*9000);
 }
 
+
+// ── Mesh gradient canvas ──────────────────────────────────
+let _meshCtx=null,_meshNodes=[],_meshAnimId=null,_meshFrame=0;
+let _meshWindAngle=0,_meshWindSpeed=0.5;
+
+const MESH_DEFS=[
+  {bx:.12,by:.10,r:.75},{bx:.88,by:.08,r:.72},{bx:.50,by:.18,r:.90},
+  {bx:.04,by:.52,r:.68},{bx:.96,by:.48,r:.68},
+  {bx:.22,by:.88,r:.65},{bx:.78,by:.90,r:.65},{bx:.50,by:.60,r:.80},
+];
+
+// Per-condition mesh palettes  [dark mode rgba strings]
+const MESH_PALETTES={
+  night:     ['rgba(88,28,235,.32)','rgba(49,46,129,.28)','rgba(109,40,217,.30)','rgba(30,27,75,.25)','rgba(76,29,149,.28)','rgba(17,24,39,.30)','rgba(49,46,129,.22)','rgba(88,28,235,.18)'],
+  sunny:     ['rgba(14,165,233,.30)','rgba(3,105,161,.26)','rgba(56,189,248,.22)','rgba(7,89,133,.28)','rgba(2,132,199,.24)','rgba(12,74,110,.30)','rgba(14,165,233,.18)','rgba(56,189,248,.14)'],
+  hot:       ['rgba(239,68,68,.32)','rgba(249,115,22,.30)','rgba(245,158,11,.22)','rgba(220,38,38,.26)','rgba(251,146,60,.28)','rgba(180,40,15,.32)','rgba(234,88,12,.20)','rgba(239,68,68,.18)'],
+  cloudy:    ['rgba(71,85,105,.25)','rgba(51,65,85,.22)','rgba(100,116,139,.20)','rgba(71,85,105,.18)','rgba(51,65,85,.24)','rgba(30,41,59,.28)','rgba(71,85,105,.16)','rgba(100,116,139,.14)'],
+  fog:       ['rgba(148,163,184,.24)','rgba(100,116,139,.22)','rgba(148,163,184,.18)','rgba(71,85,105,.20)','rgba(100,116,139,.24)','rgba(51,65,85,.22)','rgba(148,163,184,.16)','rgba(203,213,225,.14)'],
+  rain:      ['rgba(29,78,216,.32)','rgba(37,99,235,.28)','rgba(15,23,42,.35)','rgba(30,58,95,.30)','rgba(29,78,216,.24)','rgba(15,23,42,.38)','rgba(37,99,235,.18)','rgba(29,78,216,.15)'],
+  heavy_rain:['rgba(15,23,42,.40)','rgba(29,78,216,.32)','rgba(12,18,35,.38)','rgba(30,58,95,.34)','rgba(15,23,42,.42)','rgba(12,18,35,.40)','rgba(29,78,216,.20)','rgba(15,23,42,.25)'],
+  storm:     ['rgba(109,40,217,.38)','rgba(67,20,180,.35)','rgba(139,92,246,.30)','rgba(49,46,129,.40)','rgba(167,139,250,.22)','rgba(30,27,75,.45)','rgba(88,28,235,.28)','rgba(109,40,217,.20)'],
+  snow:      ['rgba(14,165,233,.26)','rgba(99,102,241,.22)','rgba(186,230,253,.16)','rgba(2,132,199,.24)','rgba(56,189,248,.18)','rgba(7,89,133,.30)','rgba(14,116,144,.22)','rgba(186,230,253,.12)'],
+};
+// Dawn/dusk time overrides
+function meshTimeOverride(t){
+  if(t>=5   &&t<6.5) return ['rgba(194,65,12,.32)','rgba(251,146,60,.28)','rgba(234,88,12,.26)','rgba(180,40,15,.30)','rgba(251,146,60,.22)','rgba(120,30,8,.32)','rgba(220,80,20,.18)','rgba(251,146,60,.15)'];
+  if(t>=6.5 &&t<7.5) return ['rgba(180,100,9,.28)','rgba(245,158,11,.25)','rgba(250,204,21,.20)','rgba(161,80,5,.28)','rgba(245,158,11,.22)','rgba(120,60,5,.30)','rgba(180,100,9,.16)','rgba(245,158,11,.12)'];
+  if(t>=19  &&t<20.5)return ['rgba(180,100,9,.30)','rgba(245,158,11,.26)','rgba(234,88,12,.24)','rgba(161,80,5,.28)','rgba(251,146,60,.22)','rgba(120,30,8,.32)','rgba(180,100,9,.18)','rgba(245,158,11,.14)'];
+  if(t>=20.5&&t<22)  return ['rgba(109,40,217,.28)','rgba(167,139,250,.24)','rgba(88,28,235,.26)','rgba(49,46,129,.30)','rgba(139,92,246,.20)','rgba(30,27,75,.35)','rgba(109,40,217,.18)','rgba(167,139,250,.14)'];
+  return null;
+}
+
+function initMeshCanvas(){
+  const c=document.getElementById('mesh-canvas');
+  if(!c)return;
+  _meshCtx=c.getContext('2d');
+  const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
+  resize();
+  window.addEventListener('resize',resize);
+  _meshNodes=MESH_DEFS.map((d,i)=>({
+    x:d.bx,y:d.by,r:d.r,
+    vx:(Math.random()-.5)*.00015,vy:(Math.random()-.5)*.00015,
+    color:MESH_PALETTES.sunny[i]||'rgba(14,165,233,.2)',
+    targetColor:null,
+  }));
+  const draw=()=>{
+    const ctx=_meshCtx,W=c.width,H=c.height;
+    ctx.clearRect(0,0,W,H);
+    _meshNodes.forEach(n=>{
+      const x=n.x*W,y=n.y*H,r=n.r*Math.max(W,H)*0.85;
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,n.color);g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+    if(_meshFrame%3===0){
+      const spd=_meshWindSpeed*.00006,dx=Math.sin(_meshWindAngle)*spd,dy=-Math.cos(_meshWindAngle)*spd;
+      _meshNodes.forEach(n=>{
+        n.x+=dx+n.vx;n.y+=dy+n.vy;
+        if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
+        if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
+      });
+    }
+    _meshFrame++;
+    _meshAnimId=requestAnimationFrame(draw);
+  };
+  draw();
+}
+
+function updateMeshColors(cond,windDir,windSpeed){
+  if(!_meshNodes.length)return;
+  _meshWindAngle=((windDir??225)*Math.PI)/180;
+  _meshWindSpeed=Math.min(windSpeed??5,80);
+  const t=new Date().getHours()+new Date().getMinutes()/60;
+  const override=meshTimeOverride(t);
+  const palette=override||(MESH_PALETTES[cond]||MESH_PALETTES.cloudy);
+  _meshNodes.forEach((n,i)=>{n.color=palette[i]||palette[0];});
+}
+
 function updateBgFromObs(obs){
   const rain=obs?.metric?.precipRate??0,temp=obs?.metric?.temp??15;
   const wind=obs?.metric?.windSpeed??0,hum=obs?.humidity??70;
@@ -6712,7 +6793,9 @@ function updateBgFromObs(obs){
   else if(temp>27&&uv>3&&rain<.1) cond='hot';
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
   applyWeatherBg(cond);
+  updateMeshColors(cond,obs?.winddir,wind);
 }
+
 
 function generateWhyWeather(obs){
   const el=document.getElementById('why-text');
@@ -6985,7 +7068,7 @@ function renderDailyMicroclimateFingerprint(obs,h){
   if(southChannel)add(gustMax>=50?'alert':'info','💨','Southern valley wind channel active',`Južni do jugovzhodni tok se kanalizira po Savinjski dolini. Pričakovani sunki do ${Math.round(gustMax||wind)} km/h lahko lokalno premešajo dolinski zrak.`,gustMax);
   const stormOutflow=wmoStorm||capeMax>=900&&gustMax>=45||pTrend<-1.5&&capeMax>=500;
   if(stormOutflow)add(gustMax>=70||capeMax>=1500?'alert':'warn','⛈','Storm outflow risk from Savinja valley',`Nestabilnost CAPE ${Math.round(capeMax)} J/kg in sunki do ${Math.round(gustMax)} km/h nakazujejo možnost nevihtnega iztoka po dolini.`,capeMax/20+gustMax);
-  if(rain12>=6&&_mcfDirIn(fcDir,180,260))add('warn','🌧','Orographic rain boost',`Vlažen J/JZ tok in relief Savinjskih Alp lahko okrepita padavine; model v 12 urah kaže ${rain12.toFixed(1)} mm.`,rain12*5);
+  if(rain12>=6&&_mcfDirIn(fcDir,180,260))add('warn','🌧','Orografsko ojačanje padavin',`Vlažen J/JZ tok in relief Savinjskih Alp lahko okrepita padavine; model v 12 urah kaže ${rain12.toFixed(1)} mm.`,rain12*5);
   if(!signals.length)add('good','✓','Quiet valley day',`Ni izrazitega lokalnega signala: veter, vlaga in napoved ne kažejo posebne dolinske anomalije.`,1);
   signals.sort((a,b)=>(b.type==='alert')-(a.type==='alert')||b.score-a.score);
   const main=signals[0];
@@ -7646,12 +7729,96 @@ function buildProverbStats(){
   // Sort: best hit rate first
   results.sort((a,b)=>(b.rate??0)-(a.rate??0));
 
-  let html=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.65">
+  // ── Wheel SVG ────────────────────────────────────────────
+  // Circular year calendar: trigger dots + forecast arcs, coloured by accuracy
+  const CX=140,CY=140,RO=116,RI=76,RARC_O=97,RARC_I=82,RTRIG=107,DAYS=366;
+  const MCUM=[0,31,60,91,121,152,182,213,244,274,305,335];
+  const MNAMES=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+  function wAngle(mmdd){
+    const[m,d]=mmdd.split('-').map(Number);
+    return((MCUM[m-1]+d)/DAYS)*360-90;
+  }
+  function wXY(a,r){const rad=a*Math.PI/180;return[CX+r*Math.cos(rad),CY+r*Math.sin(rad)];}
+  function wArc(mmdd1,mmdd2,ri,ro,col,op){
+    let a1=wAngle(mmdd1),a2=wAngle(mmdd2);
+    if(a2<=a1)a2+=360;
+    if(a2-a1>=359.5)return'';
+    const lg=a2-a1>180?1:0;
+    const[ox1,oy1]=wXY(a1,ro),[ox2,oy2]=wXY(a2,ro);
+    const[ix1,iy1]=wXY(a1,ri),[ix2,iy2]=wXY(a2,ri);
+    const f=(v)=>+v.toFixed(2);
+    return`<path d="M${f(ox1)},${f(oy1)} A${ro},${ro},0,${lg},1,${f(ox2)},${f(oy2)} L${f(ix2)},${f(iy2)} A${ri},${ri},0,${lg},0,${f(ix1)},${f(iy1)}Z" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="0.8" stroke-opacity="0.7"/>`;
+  }
+  // Forecast windows: [triggerMMDD, [[fromMMDD,toMMDD],...]]
+  const PW={
+    'Svečnica ❄️':      ['02-02',[['02-02','03-16']]],
+    'Jurjevo 🌿':       ['04-23',[['06-01','08-31']]],
+    'Medard ☔':        ['06-08',[['06-08','07-18']]],
+    'Magdalena ☀️':    ['07-22',[['09-01','09-30']]],
+    'Červinka 🍂':     ['08-10',[['09-01','09-30']]],
+    'Galus 🌨':        ['10-16',[['12-01','12-31'],['01-01','02-28']]],
+    'Martinovo 🍷':    ['11-11',[['12-01','12-31']]],
+    'Mokra pomlad 🌸': ['04-15',[['06-01','08-31']]],
+    'Januar & julij 🌡':['01-15',[['07-01','07-31']]],
+    'Topla zima 🌿':   ['02-15',[['03-01','05-31']]],
+    'Suh maj 🌼':      ['05-15',[['06-01','06-30']]],
+    'Moker oktober 🍁':['10-15',[['11-01','11-30']]],
+  };
+  const wColor=rate=>rate>=65?'var(--green)':rate>=45?'var(--amber)':'var(--red)';
+
+  let wsvg=`<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:260px;display:block;margin:0 auto 1.25rem;overflow:visible">`;
+  // Base rings
+  wsvg+=`<circle cx="${CX}" cy="${CY}" r="${RO}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+  wsvg+=`<circle cx="${CX}" cy="${CY}" r="${RI}" fill="none" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+  // Month grid
+  MNAMES.forEach((mn,i)=>{
+    const a=wAngle(`${String(i+1).padStart(2,'0')}-01`);
+    const[x1,y1]=wXY(a,RI+1),[x2,y2]=wXY(a,RO-1);
+    wsvg+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--border)" stroke-width="0.5"/>`;
+    const mdays=[31,29,31,30,31,30,31,31,30,31,30,31];
+    const midA=wAngle(`${String(i+1).padStart(2,'0')}-${String(Math.round(mdays[i]/2)).padStart(2,'0')}`);
+    const[lx,ly]=wXY(midA,RO+14);
+    wsvg+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="7.5" font-family="IBM Plex Mono,monospace" fill="var(--muted)">${mn}</text>`;
+  });
+  // Forecast arcs
+  results.forEach(r=>{
+    const pw=PW[r.name];if(!pw)return;
+    const col=wColor(r.rate??0);
+    pw[1].forEach(([f,t])=>{wsvg+=wArc(f,t,RARC_I,RARC_O,col,0.32);});
+  });
+  // Trigger dots
+  results.forEach(r=>{
+    const pw=PW[r.name];if(!pw)return;
+    const a=wAngle(pw[0]);
+    const[tx,ty]=wXY(a,RTRIG);
+    const col=wColor(r.rate??0);
+    wsvg+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="5" fill="${col}" stroke="var(--card-bg,#0f172a)" stroke-width="1.5"/>`;
+    wsvg+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="5" fill="${col}" fill-opacity="0.25" stroke="none"/>`;
+  });
+  // Today marker
+  const now=new Date(),nm=String(now.getMonth()+1).padStart(2,'0'),nd=String(now.getDate()).padStart(2,'0');
+  const na=wAngle(`${nm}-${nd}`);
+  const[nx1,ny1]=wXY(na,RI-4),[nx2,ny2]=wXY(na,RO+2);
+  wsvg+=`<line x1="${nx1.toFixed(1)}" y1="${ny1.toFixed(1)}" x2="${nx2.toFixed(1)}" y2="${ny2.toFixed(1)}" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>`;
+  // Center text
+  wsvg+=`<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Plus Jakarta Sans,sans-serif" fill="var(--muted)" letter-spacing="0.08em">PREGOVORNI KROG</text>`;
+  wsvg+=`<text x="${CX}" y="${CY+6}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--text)">IREICA1</text>`;
+  wsvg+=`<text x="${CX}" y="${CY+22}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Plus Jakarta Sans,sans-serif" fill="var(--muted)">${years[0]}–${years[years.length-1]}</text>`;
+  wsvg+=`</svg>`;
+  // Legend
+  const wlegend=`<div style="display:flex;justify-content:center;gap:.85rem;font-size:.67rem;color:var(--muted);margin-bottom:1.1rem;flex-wrap:wrap">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);vertical-align:middle;margin-right:3px"></span>drži ≥65%</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);vertical-align:middle;margin-right:3px"></span>delno 45–64%</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:middle;margin-right:3px"></span>mit &lt;45%</span>
+    <span><span style="display:inline-block;width:18px;height:2px;background:var(--blue);vertical-align:middle;margin-right:3px;border-radius:1px"></span>danes</span>
+  </div>`;
+
+  let html=wsvg+wlegend+`<div style="font-size:.7rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
     Analiza temelji na <b style="color:var(--text)">${dayCount} dneh</b> podatkov postaje IREICA1 (${years[0]}–${years[years.length-1]}).
-    Testiranje je bidirekcijsko — šteje pravilna napoved v obe smeri (npr. dežuje → mokro, suho → suho).
-    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo
-    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo
-    &nbsp;<span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni podatka
+    Testiranje je bidirekcijsko — šteje pravilna napoved v obe smeri.
+    &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo
+    &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo
+    &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni podatka
   </div>`;
 
   results.forEach(r=>{
@@ -7732,7 +7899,7 @@ function buildTriviaPhenomenon(){
   const el=document.getElementById('tri-phenom-card');if(!el)return;
   const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(864e5));
   const ph=PHENOMENA[doy%PHENOMENA.length];
-  el.innerHTML=`<div class="phenom-layout"><div><div class="phenom-name">${ph.icon} ${ph.name} <span style="font-size:.7rem;color:var(--muted);font-weight:400">(${ph.en})</span></div><div class="phenom-desc">${ph.desc}</div></div><div class="phenom-svg">${ph.svg}</div></div>`;
+  el.innerHTML=`<div class="phenom-layout"><div><div class="phenom-name">${ph.icon} ${ph.name}</div><div class="phenom-desc">${ph.desc}</div></div><div class="phenom-svg">${ph.svg}</div></div>`;
 }
 
 function buildTriviaNature(){
@@ -7837,6 +8004,7 @@ async function init(){
   applyPhotographyWidget(null);
   setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
   initBgCanvas();
+  initMeshCanvas();
   applyWeatherBg('night'); // initial state until obs loads
   setTimeout(fetchAIBrief,500);
   initNotifBtn();
