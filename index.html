@@ -232,9 +232,14 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 
 /* Hero */
-.hero{display:grid;grid-template-columns:1fr 160px auto;gap:2rem;padding:2rem 2.25rem;margin-bottom:1rem;background:var(--hero-bg);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid var(--hero-border);border-radius:22px;position:relative;overflow:hidden;box-shadow:var(--hero-shadow);transition:background .35s,border-color .35s}
-.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(124,58,237,.03) 60%,transparent 100%);pointer-events:none}
-#temp-val{transition:color .8s ease}
+.hero{display:grid;grid-template-columns:1fr 160px auto;gap:2rem;padding:2rem 2.25rem;margin-bottom:1rem;background:var(--hero-bg);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border:1px solid var(--hero-border);border-radius:22px;position:relative;overflow:hidden;box-shadow:var(--hero-shadow);transition:background .35s,border-color .35s,box-shadow 2s ease}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(124,58,237,.03) 60%,transparent 100%);pointer-events:none;z-index:0}
+.hero>*{position:relative;z-index:1}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.55;border-radius:inherit}
+@keyframes hero-breathe{0%,100%{opacity:.55}50%{opacity:.75}}
+#hero-canvas.active{animation:hero-breathe 4s ease-in-out infinite}
+#temp-val{transition:color .8s ease;text-shadow:0 0 40px currentColor}
+@keyframes chart-draw{from{stroke-dashoffset:var(--path-len)}to{stroke-dashoffset:0}}
 .feels{font-size:.78rem;color:var(--muted);margin-top:.65rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .feels strong{color:var(--text);font-weight:400}
 .feels-pill{display:inline-flex;align-items:center;font-size:.72rem;padding:2px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
@@ -981,6 +986,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ══ TAB: AKTUALNO ══ -->
   <div id="tab-current" class="tab-pane active">
   <div class="hero card">
+    <canvas id="hero-canvas"></canvas>
     <div>
       <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
       <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
@@ -2266,19 +2272,62 @@ function drawTempChart(data){
   const VW=880,VH=200,pad={t:25,r:20,b:42,l:46},cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const temps=data.map(d=>d.temp),mn=Math.min(...temps),mx=Math.max(...temps),yMin=mn-1,yMax=mx+1;
   const xS=i=>pad.l+i/(data.length-1)*cw,yS=v=>pad.t+(1-(v-yMin)/(yMax-yMin))*ch;
-  for(let i=0;i<=5;i++){const y=pad.t+i/5*ch,val=yMax-(i/5*(yMax-yMin));mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1)+'°';}
+
+  // Temperature-mapped gradient stops (horizontal, by position)
+  const step=Math.max(1,Math.floor(data.length/24));
+  let lineStops='',fillStops='';
+  for(let i=0;i<data.length;i+=step){
+    const pct=((i/(data.length-1))*100).toFixed(1)+'%';
+    const c=tempColor(data[i].temp);
+    lineStops+=`<stop offset="${pct}" stop-color="${c}" stop-opacity="0.9"/>`;
+    fillStops+=`<stop offset="${pct}" stop-color="${c}" stop-opacity="0.18"/>`;
+  }
+  const lastC=tempColor(data[data.length-1].temp);
+  lineStops+=`<stop offset="100%" stop-color="${lastC}" stop-opacity="0.9"/>`;
+  fillStops+=`<stop offset="100%" stop-color="${lastC}" stop-opacity="0.18"/>`;
+
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML=
+    `<linearGradient id="tl" x1="0" y1="0" x2="1" y2="0">${lineStops}</linearGradient>`+
+    `<linearGradient id="tf" x1="0" y1="0" x2="1" y2="0">${fillStops}</linearGradient>`+
+    `<linearGradient id="tfv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="white" stop-opacity="1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient>`+
+    `<mask id="tfm"><rect x="${pad.l}" y="${pad.t}" width="${cw}" height="${ch}" fill="url(#tfv)"/></mask>`+
+    `<filter id="lg"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+
+  // Grid
+  for(let i=0;i<=5;i++){const y=pad.t+i/5*ch,val=yMax-(i/5*(yMax-yMin));
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
+    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    t.textContent=val.toFixed(1)+'°';}
   data.forEach((d,i)=>{if(d.time.getHours()%4===0){const h=d.time.getHours(),t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=(h<10?'0':'')+h+':00';}});
-  const defs=mkSVG(svg,'defs',{});defs.innerHTML='<linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.tempLine+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+CC.tempLine+'" stop-opacity="0"/></linearGradient><filter id="lg"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+
   const pts=data.map((d,i)=>({x:xS(i),y:yS(d.temp)})),lp=smoothPath(pts);
-  mkSVG(svg,'path',{d:lp+' L '+xS(data.length-1)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z',fill:'url(#tg)'});
-  mkSVG(svg,'path',{d:lp,fill:'none',stroke:CC.tempLine,'stroke-width':'2.5',filter:'url(#lg)','stroke-linecap':'round'});
+
+  // Gradient fill area (masked to fade at top)
+  const fillPath=mkSVG(svg,'path',{d:lp+' L '+xS(data.length-1)+','+(VH-pad.b)+' L '+xS(0)+','+(VH-pad.b)+' Z',fill:'url(#tf)',mask:'url(#tfm)',opacity:'0.7'});
+
+  // Animated temperature line
+  const linePath=mkSVG(svg,'path',{d:lp,fill:'none',stroke:'url(#tl)','stroke-width':'2.8',filter:'url(#lg)','stroke-linecap':'round','stroke-linejoin':'round'});
+  try{
+    const len=Math.ceil(linePath.getTotalLength());
+    linePath.style.strokeDasharray=len;
+    linePath.style.strokeDashoffset=len;
+    linePath.style.transition='stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{linePath.style.strokeDashoffset='0';}));
+  }catch(e){}
+
+  // Now line
   const now=new Date(),f0=data[0].time,fl=data[data.length-1].time,nt=(now-f0)/(fl-f0);
-  if(nt>=0&&nt<=1){const nx=pad.l+nt*cw;mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,3'});const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'IBM Plex Mono,monospace'});nl.textContent='now';}
+  if(nt>=0&&nt<=1){const nx=pad.l+nt*cw;
+    mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,3'});
+    const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'IBM Plex Mono,monospace'});
+    nl.textContent='zdaj';}
+
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'5',fill:CC.tipDot,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
-  svg.addEventListener('mousemove',e=>{if(!_tempData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_tempData.length-1,Math.round((sx-pad.l)/cw*(_tempData.length-1))));const d=_tempData[idx];if(!d)return;const px=xS(idx),py=yS(d.temp);tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.tempLine+'">'+d.temp.toFixed(1)+'°C</span>  ·  '+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
+  svg.addEventListener('mousemove',e=>{if(!_tempData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_tempData.length-1,Math.round((sx-pad.l)/cw*(_tempData.length-1))));const d=_tempData[idx];if(!d)return;const px=xS(idx),py=yS(d.temp);tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');tipDot.setAttribute('fill',tempColor(d.temp));tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+tempColor(d.temp)+';font-weight:600">'+d.temp.toFixed(1)+'°C</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
   svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
   set('temp-range',fmt(mn,1)+'° – '+fmt(mx,1)+'°C');
 }
@@ -2287,18 +2336,32 @@ function drawRainChart(data){
   svg.innerHTML='';_rainData=data;
   const VW=880,VH=150,pad={t:15,r:20,b:42,l:46},cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const maxR=Math.max(...data.map(d=>d.rain),.5),total=data.reduce((a,b)=>a+b.rain,0);
-  const defs=mkSVG(svg,'defs',{});defs.innerHTML='<linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.rainBar+'" stop-opacity="0.75"/><stop offset="100%" stop-color="'+CC.rainBar+'" stop-opacity="0.15"/></linearGradient>';
-  for(let i=0;i<=3;i++){const y=pad.t+i/3*ch,val=maxR*(1-i/3);mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}}
-  const bw=Math.max(2,(cw/data.length)*.65),xS=i=>pad.l+i/data.length*cw;
+  const defs=mkSVG(svg,'defs',{});
+  defs.innerHTML=
+    `<linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${CC.rainBar}" stop-opacity="0.85"/><stop offset="100%" stop-color="${CC.rainBar}" stop-opacity="0.12"/></linearGradient>`+
+    `<filter id="rblur"><feGaussianBlur stdDeviation="0.8"/></filter>`;
+  for(let i=0;i<=3;i++){const y=pad.t+i/3*ch,val=maxR*(1-i/3);
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}}
+  const bw=Math.max(3,(cw/data.length)*.72),xS=i=>pad.l+i/data.length*cw;
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:CC.rainBar,stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
-  data.forEach((d,i)=>{const x=xS(i),h=(d.rain/maxR)*ch;if(d.rain>0)mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#rg)',rx:'2'});if(d.time.getHours()%4===0){const hr=d.time.getHours(),t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=(hr<10?'0':'')+hr+':00';}});
+  data.forEach((d,i)=>{
+    const x=xS(i),h=(d.rain/maxR)*ch;
+    if(d.rain>0){
+      // Main bar
+      const bar=mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#rg)',rx:'3'});
+      // Subtle top glow line
+      mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:'2',fill:CC.rainBar,rx:'1',opacity:'0.6'});
+    }
+    if(d.time.getHours()%4===0){const hr=d.time.getHours(),t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=(hr<10?'0':'')+hr+':00';}
+  });
   if(total<.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Plus Jakarta Sans,sans-serif'});t.textContent='Ni padavin v zadnjih 24 urah';}
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
-  svg.addEventListener('mousemove',e=>{if(!_rainData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+'">'+d.rain.toFixed(2)+' mm</span>  ·  '+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
+  svg.addEventListener('mousemove',e=>{if(!_rainData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+d.rain.toFixed(2)+' mm</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
   svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
-  set('rain-range','Total: '+total.toFixed(1)+' mm');
+  set('rain-range','Skupaj: '+total.toFixed(1)+' mm');
 }
 
 // ── Alerts ────────────────────────────────────────────────
@@ -6701,6 +6764,87 @@ function scheduleLightning(){
 }
 
 
+// ── Hero canvas particles ─────────────────────────────────
+let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='';
+function initHeroCanvas(){
+  _heroCanvas=document.getElementById('hero-canvas');
+  if(!_heroCanvas)return;
+  _heroCtx=_heroCanvas.getContext('2d');
+  const hero=_heroCanvas.parentElement;
+  const resize=()=>{_heroCanvas.width=hero.offsetWidth||460;_heroCanvas.height=hero.offsetHeight||180;};
+  resize();
+  new ResizeObserver(resize).observe(hero);
+  animateHero();
+}
+function spawnHeroParticles(cond){
+  if(!_heroCanvas)return;
+  const W=_heroCanvas.width,H=_heroCanvas.height;
+  const counts={rain:38,heavy_rain:55,snow:28,storm:45,night:35,sunny:22,hot:25,fog:18,cloudy:12};
+  const n=counts[cond]||12;
+  _heroParticles=[];
+  for(let i=0;i<n;i++)_heroParticles.push(makeHeroP(cond,W,H,true));
+}
+function makeHeroP(cond,W,H,init=false){
+  const r=()=>Math.random();
+  if(cond==='rain'||cond==='heavy_rain'||cond==='storm'){
+    const speed=cond==='storm'?14+r()*8:7+r()*5;
+    return{type:'rain',x:r()*W,y:init?r()*H:-15,vx:cond==='storm'?2.5:1,vy:speed,len:7+r()*11,op:.18+r()*.18};
+  }
+  if(cond==='snow')return{type:'snow',x:r()*W,y:init?r()*H:-8,vx:(r()-.5)*.4,vy:.7+r()*1.1,r:1.2+r()*2.2,op:.35+r()*.3,ph:r()*Math.PI*2};
+  if(cond==='night')return{type:'star',x:r()*W,y:r()*H,r:.6+r()*1.4,op:r(),ph:r()*Math.PI*2};
+  if(cond==='sunny'||cond==='hot')return{type:'mote',x:r()*W,y:init?r()*H:H+8,vx:(r()-.5)*.25,vy:-(0.25+r()*.7),r:.8+r()*1.8,op:.12+r()*.15};
+  if(cond==='fog')return{type:'wisp',x:r()*W,y:r()*H,vx:.12+r()*.2,w:50+r()*90,h:5+r()*10,op:.03+r()*.04};
+  return{type:'wisp',x:r()*W,y:r()*H,vx:.08+r()*.12,w:20+r()*35,h:4+r()*8,op:.02+r()*.03};
+}
+function animateHero(){
+  if(!_heroCtx||!_heroCanvas){return;}
+  const ctx=_heroCtx,W=_heroCanvas.width,H=_heroCanvas.height,t=performance.now()/1000;
+  ctx.clearRect(0,0,W,H);
+  const cond=_heroCond;
+  _heroParticles.forEach((p,i)=>{
+    if(p.type==='star'){
+      p.ph+=.025;const op=Math.max(0,p.op*.5+Math.sin(p.ph)*.35);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(226,232,240,${op})`;ctx.fill();return;
+    }
+    if(p.type==='rain'){
+      p.x+=p.vx;p.y+=p.vy;
+      ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+p.vx*(p.len/p.vy),p.y+p.len);
+      ctx.strokeStyle=`rgba(147,197,253,${p.op})`;ctx.lineWidth=.8;ctx.stroke();
+      if(p.y>H+22)Object.assign(p,makeHeroP(cond,W,H));return;
+    }
+    if(p.type==='snow'){
+      p.ph+=.02;p.x+=p.vx+Math.sin(p.ph+i*.4)*.25;p.y+=p.vy;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(186,230,253,${p.op})`;ctx.fill();
+      if(p.y>H+8)Object.assign(p,makeHeroP(cond,W,H));return;
+    }
+    if(p.type==='mote'){
+      p.x+=p.vx;p.y+=p.vy;p.op*=.9985;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(253,224,71,${p.op})`;ctx.fill();
+      if(p.y<-8||p.op<.012)Object.assign(p,makeHeroP(cond,W,H,true));return;
+    }
+    if(p.type==='wisp'){
+      p.x+=p.vx;if(p.x>W+p.w/2)p.x=-p.w/2;
+      ctx.beginPath();ctx.ellipse(p.x,p.y,p.w,p.h,0,0,Math.PI*2);
+      ctx.fillStyle=`rgba(203,213,225,${p.op})`;ctx.fill();
+    }
+  });
+  // Replenish
+  if(_heroParticles.length<(cond==='rain'||cond==='heavy_rain'?55:cond==='storm'?45:40)){
+    _heroParticles.push(makeHeroP(cond,W,H));
+  }
+  _heroAnimId=requestAnimationFrame(animateHero);
+}
+function setHeroCond(cond){
+  if(cond===_heroCond)return;
+  _heroCond=cond;
+  spawnHeroParticles(cond);
+  const c=document.getElementById('hero-canvas');
+  if(c)c.classList.toggle('active',cond!=='cloudy');
+}
+
 // ── Mesh gradient canvas ──────────────────────────────────
 let _meshCtx=null,_meshNodes=[],_meshAnimId=null,_meshFrame=0;
 let _meshWindAngle=0,_meshWindSpeed=0.5;
@@ -6794,6 +6938,7 @@ function updateBgFromObs(obs){
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
   applyWeatherBg(cond);
   updateMeshColors(cond,obs?.winddir,wind);
+  setHeroCond(cond);
 }
 
 
@@ -8005,6 +8150,7 @@ async function init(){
   setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
   initBgCanvas();
   initMeshCanvas();
+  initHeroCanvas();
   applyWeatherBg('night'); // initial state until obs loads
   setTimeout(fetchAIBrief,500);
   initNotifBtn();
