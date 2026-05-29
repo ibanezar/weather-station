@@ -268,6 +268,19 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .hs-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:300;color:var(--text)}
 .hs-lbl{font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.07em;text-transform:uppercase}
 
+/* Card accent system */
+.ca-blue{border-left:3px solid var(--blue)}
+.ca-green{border-left:3px solid var(--green)}
+.ca-amber{border-left:3px solid var(--amber)}
+.ca-purple{border-left:3px solid var(--purple)}
+.ca-cyan{border-left:3px solid var(--cyan)}
+.ca-red{border-left:3px solid var(--red)}
+/* Tab pane fade-in */
+@keyframes tab-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.tab-pane.active{animation:tab-in .22s ease}
+/* Card live pulse */
+@keyframes card-pulse{0%,100%{box-shadow:var(--card-shadow)}35%{box-shadow:var(--card-shadow),0 0 0 1px rgba(255,255,255,.1),0 0 18px 0 rgba(255,255,255,.06)}}
+.card.pulse-card{animation:card-pulse 1.5s ease-out}
 /* Grids */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
@@ -1039,7 +1052,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Wind + Pressure -->
   <div class="g2">
-    <div class="card">
+    <div class="card ca-green">
       <div class="clabel">🧭 Veter</div>
       <div class="wind-body">
         <svg width="110" height="110" viewBox="0 0 110 110">
@@ -1073,7 +1086,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card ca-purple">
       <div class="clabel">📊 Tlak</div>
       <div class="pressure-body">
         <div class="pressure-left">
@@ -1121,7 +1134,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Biometeo + Fog -->
   <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
+    <div class="card ca-red">
       <div class="clabel">🌡 Biometeorološki indeks</div>
       <div class="bio-grid">
         <div class="bio-item" id="bio-humidex-box">
@@ -1139,7 +1152,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="csub" id="bio-overall" style="margin-top:.6rem"></div>
     </div>
-    <div class="card">
+    <div class="card ca-cyan">
       <div class="clabel">🌫 Napoved megle — <span id="fog-location">Rečica ob Savinji</span></div>
       <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
         <div class="cval" id="fog-now-val">—<span class="unit">%</span></div>
@@ -1153,24 +1166,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- 4 small cards -->
   <div class="g4" style="margin-bottom:1rem">
-    <div class="card">
+    <div class="card ca-blue">
       <div class="clabel">🌧 Intenz. padavin</div>
       <div class="cval" id="rain-rate">—<span class="unit">mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
       <div class="csub">Danes: <span id="rain-total">—</span> mm</div>
     </div>
-    <div class="card">
+    <div class="card ca-amber">
       <div class="clabel">☀ UV indeks</div>
       <div class="cval" id="uv-val">—</div>
       <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
       <div class="csub" id="uv-label">—</div>
     </div>
-    <div class="card">
+    <div class="card ca-amber">
       <div class="clabel">⚡ Sončno sevanje</div>
       <div class="cval" id="solar-val">—<span class="unit">W/m²</span></div>
       <div class="csub" id="solar-label">—</div>
     </div>
-    <div class="card">
+    <div class="card ca-cyan">
       <div class="clabel">💧 Rosišče</div>
       <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
       <div class="csub" id="dewpt-label">—</div>
@@ -2772,17 +2785,48 @@ function applyPressureTrend(observations){
 }
 
 // ── Apply observation ─────────────────────────────────────
+// ── Auto-accent cards by emoji ────────────────────────────
+// Runs once on load — applies ca-* accent to .card elements across ALL tabs
+function autoAccentCards(){
+  const map={
+    '🧭':'ca-green','💨':'ca-green','🌹':'ca-green','🌿':'ca-green','🌾':'ca-green','🌱':'ca-green',
+    '📊':'ca-purple','🔬':'ca-purple','🎯':'ca-purple','📈':'ca-purple','🏆':'ca-purple',
+    '🌧':'ca-blue','🌊':'ca-blue','🌍':'ca-blue','💧':'ca-cyan','🌫':'ca-cyan','💎':'ca-cyan',
+    '☀':'ca-amber','⚡':'ca-amber','🌡':'ca-red','🔥':'ca-red','🌸':'ca-green',
+    '🌙':'ca-purple','⭐':'ca-amber','🎲':'ca-purple','📸':'ca-cyan',
+    '🌞':'ca-amber','🌈':'ca-cyan','❄':'ca-blue','🧊':'ca-blue',
+    '💨':'ca-green','🌬':'ca-green','🏔':'ca-cyan',
+  };
+  document.querySelectorAll('.card .clabel, .card .chart-hdr .clabel').forEach(label=>{
+    const card=label.closest('.card');
+    if(!card||[...card.classList].some(c=>c.startsWith('ca-'))||card.classList.contains('hero'))return;
+    const txt=label.textContent.trim();
+    for(const[emoji,cls]of Object.entries(map)){
+      if(txt.includes(emoji)){card.classList.add(cls);break;}
+    }
+  });
+}
+
 function triggerLivePulse(){
-  // Pulse the hero metrics and temperature on fresh data arrival
+  // Hero metric cards
   ['hm-humidity','hm-pressure','hm-wind','hm-uv'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     el.classList.remove('pulse-live');void el.offsetWidth;
     el.classList.add('pulse-live');
     el.addEventListener('animationend',()=>el.classList.remove('pulse-live'),{once:true});
   });
+  // Temperature glow
   const tv=document.getElementById('temp-val');
   if(tv){tv.classList.remove('pulse-live');void tv.offsetWidth;tv.classList.add('pulse-live');
     tv.addEventListener('animationend',()=>tv.classList.remove('pulse-live'),{once:true});}
+  // Small data cards — pulse the parent .card
+  ['rain-rate','uv-val','solar-val','dewpt-val','pressure-val','wind-speed','fog-now-val','bio-humidex'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const card=el.closest('.card');if(!card)return;
+    card.classList.remove('pulse-card');void card.offsetWidth;
+    card.classList.add('pulse-card');
+    card.addEventListener('animationend',()=>card.classList.remove('pulse-card'),{once:true});
+  });
 }
 
 function applyObs(obs){
@@ -3056,6 +3100,7 @@ function switchTab(tab){
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
+  setTimeout(autoAccentCards, 80); // catch any dynamically-rendered cards
 }
 function histTabActive(){
   return !!document.getElementById('tab-history')?.classList.contains('active');
@@ -8192,6 +8237,7 @@ async function init(){
   initBgCanvas();
   initMeshCanvas();
   initHeroCanvas();
+  autoAccentCards();
   applyWeatherBg('night'); // initial state until obs loads
   setTimeout(fetchAIBrief,500);
   initNotifBtn();
