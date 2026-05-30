@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -170,410 +169,13 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .storm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}.storm-kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.62rem .7rem}.storm-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400;color:var(--text)}.storm-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .storm-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}.storm-action{border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.08);color:inherit;padding:.28rem .7rem;font-size:.7rem;cursor:pointer;text-decoration:none}.storm-action:hover{background:rgba(255,255,255,.14)}
 @media(max-width:820px){.storm-grid{grid-template-columns:repeat(2,1fr)}.storm-head{flex-direction:column}}
-.local-intel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
+.local-intel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1rem}
 .intel-card{border:1px solid var(--card-border);border-radius:16px;background:var(--card-bg);box-shadow:var(--card-shadow);padding:1rem 1.15rem;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}.intel-card.hidden{display:none}
 .intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
 .intel-main{display:flex;gap:.85rem;align-items:flex-start}.intel-icon{font-size:2.2rem;line-height:1;flex-shrink:0}.intel-title{font-size:1.05rem;font-weight:750;color:var(--text);margin-bottom:.25rem}.intel-text{font-size:.78rem;line-height:1.65;color:var(--muted)}
 .intel-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.intel-tag{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border-radius:999px;padding:2px 8px;background:var(--fc-bg);border:1px solid var(--fc-border);color:var(--muted)}
 .intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.75rem}.intel-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.48rem .6rem}.intel-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:400;color:var(--text)}.intel-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-@media(max-width:1180px){.local-intel-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:680px){.local-intel-grid{grid-template-columns:1fr}.intel-kpis{grid-template-columns:repeat(2,1fr)}}
-.alert-triangle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-.alert-triangle svg{filter:drop-shadow(0 1px 3px rgba(220,38,38,.4));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275)}
-@keyframes tri-pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.a-severe .alert-triangle svg{filter:drop-shadow(0 0 5px rgba(220,38,38,.55));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275),tri-glow 2.2s ease-in-out infinite}
-@keyframes tri-glow{0%,100%{filter:drop-shadow(0 0 3px rgba(220,38,38,.3))}50%{filter:drop-shadow(0 0 8px rgba(220,38,38,.7))}}
-
-.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
-@keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
-.alert-body{flex:1}.alert-title{font-weight:500}.alert-desc{font-size:.76rem;opacity:.75;margin-top:.1rem}
-.alert-actions{margin-top:.45rem}.alert-more-btn{border:1px solid currentColor;background:rgba(255,255,255,.08);color:inherit;border-radius:999px;padding:.22rem .62rem;font:inherit;font-size:.68rem;cursor:pointer;opacity:.9}
-.alert-more-btn:hover{opacity:1;background:rgba(255,255,255,.14)}
-.alert-more{margin-top:.55rem;padding:.65rem .75rem;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:inherit}
-.alert-more-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.45rem .7rem}
-.alert-more-item{font-size:.7rem}.alert-more-item strong{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;opacity:.65;margin-bottom:.08rem}
-.alert-more-note{font-size:.7rem;opacity:.82;margin-top:.55rem}
-.alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.5;flex-shrink:0;line-height:1}
-.alert-close:hover{opacity:.9}
-.a-frost{background:rgba(37,99,235,.07);border-color:rgba(37,99,235,.2);color:var(--blue)}
-.a-freeze{background:rgba(8,145,178,.07);border-color:rgba(8,145,178,.2);color:var(--cyan)}
-.a-heat{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.2);color:var(--red)}
-.a-uv{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.2);color:var(--amber)}
-.a-wind{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:var(--purple)}
-.a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
-.a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
-.a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
-.a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
-.a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
-/* Official Meteoalarm severity levels */
-.a-ma-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
-.a-ma-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
-.a-ma-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
-/* Severe = pulsing attention */
-.alert-bar.a-severe{border-width:2px;animation:alert-in .35s ease, alert-pulse 2.2s ease-in-out infinite}
-@keyframes alert-pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}
-  50%{box-shadow:0 0 0 4px rgba(248,113,113,.18)}
-}
-.alert-bar.a-severe.a-ma-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
-.alert-bar.a-severe.a-level-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
-@keyframes alert-pulse-o{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 0 4px rgba(249,115,22,.18)}}
-.alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'IBM Plex Mono',monospace}
-.alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
-
-
-/* Cards */
-.card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
-.card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
-[data-theme="light"] .card:hover{background:rgba(255,255,255,.72)}
-.clabel{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;transition:color .35s}
-.cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
-.unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
-.csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
-
-/* Hero */
-.hero{display:flex;flex-direction:column;gap:0  --stn-bg:rgba(29,78,216,.09);  --stn-border:rgba(29,78,216,.40);
-  --badge-bg:rgba(29,78,216,.07); --badge-border:rgba(29,78,216,.18);
-  --bft-bg:rgba(109,40,217,.08); --bft-border:rgba(109,40,217,.2);
-  --tip-bg:rgba(255,255,255,.97); --tip-border:rgba(0,0,0,.12);
-  --tip-shadow:0 4px 16px rgba(0,0,0,.12);
-  --rain-track:rgba(0,0,0,.08);
-  --blob-1:rgba(147,197,253,.45); --blob-2:rgba(196,181,253,.35);
-  --blob-3:rgba(103,232,249,.28); --blob-4:rgba(110,231,183,.25);
-  --svg-ring:rgba(0,0,0,.09); --svg-tick:rgba(0,0,0,.28);
-  --svg-tick-m:rgba(0,0,0,.14); --svg-lbl:rgba(0,0,0,.75);
-  --svg-lbl-d:rgba(0,0,0,.62); --svg-track:rgba(0,0,0,.09);
-  --needle:#6d28d9; --needle-tip:white;
-  --t-up-bg:rgba(5,150,105,.1); --t-up-c:var(--green);
-  --t-dn-bg:rgba(220,38,38,.1);  --t-dn-c:var(--red);
-  --t-fl-bg:rgba(100,116,139,.08);--t-fl-c:var(--muted);
-}
-
-/* ── Dark theme ── */
-[data-theme="dark"] {
-  --bg:#04070e; --text:#e8edf8; --muted:#adc0d8;
-  --border:rgba(255,255,255,.07); --bh:rgba(255,255,255,.14);
-  --blue:#4d9ff8; --cyan:#22d3ee; --purple:#a78bfa;
-  --amber:#f59e0b; --green:#34d399; --red:#f87171; --rain-col:#60a5fa;
-  --card-bg:rgba(10,15,28,.94); --card-border:rgba(255,255,255,.11);
-  --card-border-h:rgba(255,255,255,.17);
-  --card-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
-  --card-shadow-h:0 8px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08);
-  --hero-bg:rgba(12,18,32,.85); --hero-border:rgba(255,255,255,.1);
-  --hero-shadow:0 8px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);
-  --day-bg:rgba(12,18,32,.85); --day-border:rgba(255,255,255,.08);
-  --day-divider:rgba(255,255,255,.07);
-  --fc-bg:rgba(255,255,255,.04); --fc-border:rgba(255,255,255,.08);
-  --fc-today-bg:rgba(77,159,248,.1); --fc-today-border:rgba(77,159,248,.3);
-  --stn-bg:rgba(77,159,248,.14); --stn-border:rgba(77,159,248,.4);
-  --badge-bg:rgba(255,255,255,.06); --badge-border:rgba(255,255,255,.12);
-  --bft-bg:rgba(167,139,250,.1); --bft-border:rgba(167,139,250,.2);
-  --tip-bg:rgba(6,9,14,.93); --tip-border:rgba(255,255,255,.12);
-  --tip-shadow:0 4px 20px rgba(0,0,0,.35);
-  --rain-track:rgba(255,255,255,.06);
-  --blob-1:rgba(77,159,248,.22); --blob-2:rgba(167,139,250,.18);
-  --blob-3:rgba(34,211,238,.14); --blob-4:rgba(52,211,153,.1);
-  --svg-ring:rgba(255,255,255,.07); --svg-tick:rgba(255,255,255,.2);
-  --svg-tick-m:rgba(255,255,255,.1); --svg-lbl:rgba(255,255,255,.5);
-  --svg-lbl-d:rgba(255,255,255,.3); --svg-track:rgba(255,255,255,.07);
-  --needle:#a78bfa; --needle-tip:#0a0d16;
-  --t-up-bg:rgba(52,211,153,.12);  --t-up-c:var(--green);
-  --t-dn-bg:rgba(248,113,113,.12); --t-dn-c:var(--red);
-  --t-fl-bg:rgba(148,163,184,.08); --t-fl-c:var(--muted);
-}
-
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:350;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s}
-
-/* Background blobs */
-#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
-.blob{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;transition:background 1s}
-.b1{width:650px;height:650px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-15%;left:-10%;animation:blob-drift 22s ease-in-out infinite}
-.b2{width:520px;height:520px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
-.b3{width:440px;height:440px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:5%;left:8%;animation:blob-drift 19s ease-in-out infinite 8s}
-.b4{width:380px;height:380px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
-#mesh-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-/* Mountain sky + silhouette */
-@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
-.rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.3),transparent);animation:rain-fall linear infinite}
-/* Dynamic weather background particles */
-#bg-wx-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.wx-rain{position:absolute;top:0;width:1px;pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(96,165,250,.4),transparent);animation:wx-rain-fall linear infinite;border-radius:1px}
-@keyframes wx-rain-fall{0%{transform:translateY(-80px) skewX(-8deg);opacity:0}8%{opacity:1}92%{opacity:.8}100%{transform:translateY(105vh) skewX(-8deg);opacity:0}}
-.wx-snow{position:absolute;top:0;border-radius:50%;pointer-events:none;background:rgba(224,242,254,.75);animation:wx-snow-fall ease-in infinite}
-@keyframes wx-snow-fall{0%{opacity:0;transform:translateY(-20px) translateX(0)}10%{opacity:.8}50%{transform:translateY(50vh) translateX(20px)}90%{opacity:.6}100%{opacity:0;transform:translateY(102vh) translateX(-15px)}}
-.wx-star{position:absolute;border-radius:50%;pointer-events:none;background:rgba(226,232,240,.8);animation:wx-twinkle ease-in-out infinite}
-@keyframes wx-twinkle{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
-.wx-mote{position:absolute;border-radius:50%;pointer-events:none;animation:wx-mote-float ease-in-out infinite}
-@keyframes wx-mote-float{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:.5}80%{opacity:.15}100%{opacity:0;transform:translateY(-130px) scale(.2)}}
-.wx-fog{position:absolute;border-radius:50%;pointer-events:none;animation:wx-fog-drift ease-in-out infinite alternate}
-@keyframes wx-fog-drift{from{transform:translateX(-3%) scaleX(1);opacity:.06}to{transform:translateX(3%) scaleX(1.05);opacity:.14}}
-@keyframes rain-fall{0%{transform:translateY(-120px) rotate(12deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(105vh) rotate(12deg);opacity:0}}
-.star{position:absolute;border-radius:50%;background:rgba(200,220,255,.7);animation:twinkle ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.1;transform:scale(.5)}}
-
-/* Theme toggle */
-
-/* ── Photo background ─────────────────────────────────────── */
-.photo-layer{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center center;
-  transition:opacity 2.8s ease;
-  will-change:transform;
-}
-.photo-layer.active{animation:ken-burns 38s ease-in-out infinite alternate;}
-@keyframes ken-burns{
-  from{transform:scale(1) translate(0%,0%);}
-  50%{transform:scale(1.05) translate(-1%,0.5%);}
-  to{transform:scale(1.08) translate(1%,-0.5%);}
-}
-#photo-overlay{
-  position:absolute;inset:0;pointer-events:none;
-  transition:background .6s ease;
-}
-[data-theme="light"] #photo-overlay{background:rgba(238,242,249,.55);}
-[data-theme="dark"]  #photo-overlay{background:rgba(4,7,14,.68);}
-#bg.has-photo .blob{opacity:.18;transition:opacity 2s;}
-#bg.no-photo  .blob{opacity:1;  transition:opacity 2s;}
-.photo-credit{
-  position:fixed;bottom:.5rem;left:1rem;
-  font-size:.7rem;color:rgba(255,255,255,.45);
-  pointer-events:none;z-index:2;
-  text-shadow:0 1px 4px rgba(0,0,0,.5);
-  transition:opacity .5s;
-  max-width:300px;line-height:1.4;
-}
-.theme-btn{position:fixed;top:1rem;right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s;line-height:1}
-.theme-btn:hover{box-shadow:var(--card-shadow-h);transform:scale(1.08)}
-.theme-btn:active{transform:scale(.93)}
-
-/* Layout */
-.wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
-.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
-.stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
-h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
-.sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
-.status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
-.dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* Alerts */
-.alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
-.storm-mode{display:none;border:1px solid transparent;border-radius:16px;padding:1rem 1.15rem;margin:-.15rem 0 1rem;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber);animation:alert-in .35s ease}
-.storm-mode.show{display:block}.storm-mode.orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.55);color:#ea580c}.storm-mode.red{background:rgba(248,113,113,.17);border-color:rgba(248,113,113,.65);color:var(--red)}
-.storm-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}.storm-title{font-size:.9rem;font-weight:700;color:inherit}.storm-sub{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:.12rem}
-.storm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}.storm-kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.62rem .7rem}.storm-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400;color:var(--text)}.storm-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.storm-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}.storm-action{border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.08);color:inherit;padding:.28rem .7rem;font-size:.7rem;cursor:pointer;text-decoration:none}.storm-action:hover{background:rgba(255,255,255,.14)}
-@media(max-width:820px){.storm-grid{grid-template-columns:repeat(2,1fr)}.storm-head{flex-direction:column}}
-.local-intel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
-.intel-card{border:1px solid var(--card-border);border-radius:16px;background:var(--card-bg);box-shadow:var(--card-shadow);padding:1rem 1.15rem;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}.intel-card.hidden{display:none}
-.intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
-.intel-main{display:flex;gap:.85rem;align-items:flex-start}.intel-icon{font-size:2.2rem;line-height:1;flex-shrink:0}.intel-title{font-size:1.05rem;font-weight:750;color:var(--text);margin-bottom:.25rem}.intel-text{font-size:.78rem;line-height:1.65;color:var(--muted)}
-.intel-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.intel-tag{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border-radius:999px;padding:2px 8px;background:var(--fc-bg);border:1px solid var(--fc-border);color:var(--muted)}
-.intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.75rem}.intel-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.48rem .6rem}.intel-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:400;color:var(--text)}.intel-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-@media(max-width:1180px){.local-intel-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:680px){.local-intel-grid{grid-template-columns:1fr}.intel-kpis{grid-template-columns:repeat(2,1fr)}}
-.alert-triangle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-.alert-triangle svg{filter:drop-shadow(0 1px 3px rgba(220,38,38,.4));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275)}
-@keyframes tri-pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.a-severe .alert-triangle svg{filter:drop-shadow(0 0 5px rgba(220,38,38,.55));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275),tri-glow 2.2s ease-in-out infinite}
-@keyframes tri-glow{0%,100%{filter:drop-shadow(0 0 3px rgba(220,38,38,.3))}50%{filter:drop-shadow(0 0 8px rgba(220,38,38,.7))}}
-
-.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
-@keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
-.alert-body{flex:1}.alert-title{font-weight:500}.alert-desc{font-size:.76rem;opacity:.75;margin-top:.1rem}
-.alert-actions{margin-top:.45rem}.alert-more-btn{border:1px solid currentColor;background:rgba(255,255,255,.08);color:inherit;border-radius:999px;padding:.22rem .62rem;font:inherit;font-size:.68rem;cursor:pointer;opacity:.9}
-.alert-more-btn:hover{opacity:1;background:rgba(255,255,255,.14)}
-.alert-more{margin-top:.55rem;padding:.65rem .75rem;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:inherit}
-.alert-more-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.45rem .7rem}
-.alert-more-item{font-size:.7rem}.alert-more-item strong{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;opacity:.65;margin-bottom:.08rem}
-.alert-more-note{font-size:.7rem;opacity:.82;margin-top:.55rem}
-.alert-close{background:none;border:none;color:inherit;cursor:pointer;font-size:1.15rem;padding:0;opacity:.5;flex-shrink:0;line-height:1}
-.alert-close:hover{opacity:.9}
-.a-frost{background:rgba(37,99,235,.07);border-color:rgba(37,99,235,.2);color:var(--blue)}
-.a-freeze{background:rgba(8,145,178,.07);border-color:rgba(8,145,178,.2);color:var(--cyan)}
-.a-heat{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.2);color:var(--red)}
-.a-uv{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.2);color:var(--amber)}
-.a-wind{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:var(--purple)}
-.a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
-.a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
-.a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
-.a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
-.a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
-/* Official Meteoalarm severity levels */
-.a-ma-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
-.a-ma-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
-.a-ma-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
-/* Severe = pulsing attention */
-.alert-bar.a-severe{border-width:2px;animation:alert-in .35s ease, alert-pulse 2.2s ease-in-out infinite}
-@keyframes alert-pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}
-  50%{box-shadow:0 0 0 4px rgba(248,113,113,.18)}
-}
-.alert-bar.a-severe.a-ma-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
-.alert-bar.a-severe.a-level-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
-@keyframes alert-pulse-o{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 0 4px rgba(249,115,22,.18)}}
-.alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'IBM Plex Mono',monospace}
-.alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
-
-
-/* Cards */
-.card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
-.card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
-[data-theme="light"] .card:hover{background:rgba(255,255,255,.72)}
-.clabel{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;transition:color .35s}
-.cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
-.unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
-.csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
-
-/* Hero */
-.hero{display:flex;flex-direction:column;gap:0  --badge-bg:rgba(29,78,216,.07); --badge-border:rgba(29,78,216,.18);
-  --bft-bg:rgba(109,40,217,.08); --bft-border:rgba(109,40,217,.2);
-  --tip-bg:rgba(255,255,255,.97); --tip-border:rgba(0,0,0,.12);
-  --tip-shadow:0 4px 16px rgba(0,0,0,.12);
-  --rain-track:rgba(0,0,0,.08);
-  --blob-1:rgba(147,197,253,.45); --blob-2:rgba(196,181,253,.35);
-  --blob-3:rgba(103,232,249,.28); --blob-4:rgba(110,231,183,.25);
-  --svg-ring:rgba(0,0,0,.09); --svg-tick:rgba(0,0,0,.28);
-  --svg-tick-m:rgba(0,0,0,.14); --svg-lbl:rgba(0,0,0,.75);
-  --svg-lbl-d:rgba(0,0,0,.62); --svg-track:rgba(0,0,0,.09);
-  --needle:#6d28d9; --needle-tip:white;
-  --t-up-bg:rgba(5,150,105,.1); --t-up-c:var(--green);
-  --t-dn-bg:rgba(220,38,38,.1);  --t-dn-c:var(--red);
-  --t-fl-bg:rgba(100,116,139,.08);--t-fl-c:var(--muted);
-}
-
-/* ── Dark theme ── */
-[data-theme="dark"] {
-  --bg:#04070e; --text:#e8edf8; --muted:#adc0d8;
-  --border:rgba(255,255,255,.07); --bh:rgba(255,255,255,.14);
-  --blue:#4d9ff8; --cyan:#22d3ee; --purple:#a78bfa;
-  --amber:#f59e0b; --green:#34d399; --red:#f87171; --rain-col:#60a5fa;
-  --card-bg:rgba(10,15,28,.94); --card-border:rgba(255,255,255,.11);
-  --card-border-h:rgba(255,255,255,.17);
-  --card-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
-  --card-shadow-h:0 8px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08);
-  --hero-bg:rgba(12,18,32,.85); --hero-border:rgba(255,255,255,.1);
-  --hero-shadow:0 8px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);
-  --day-bg:rgba(12,18,32,.85); --day-border:rgba(255,255,255,.08);
-  --day-divider:rgba(255,255,255,.07);
-  --fc-bg:rgba(255,255,255,.04); --fc-border:rgba(255,255,255,.08);
-  --fc-today-bg:rgba(77,159,248,.1); --fc-today-border:rgba(77,159,248,.3);
-  --stn-bg:rgba(77,159,248,.14); --stn-border:rgba(77,159,248,.4);
-  --badge-bg:rgba(255,255,255,.06); --badge-border:rgba(255,255,255,.12);
-  --bft-bg:rgba(167,139,250,.1); --bft-border:rgba(167,139,250,.2);
-  --tip-bg:rgba(6,9,14,.93); --tip-border:rgba(255,255,255,.12);
-  --tip-shadow:0 4px 20px rgba(0,0,0,.35);
-  --rain-track:rgba(255,255,255,.06);
-  --blob-1:rgba(77,159,248,.22); --blob-2:rgba(167,139,250,.18);
-  --blob-3:rgba(34,211,238,.14); --blob-4:rgba(52,211,153,.1);
-  --svg-ring:rgba(255,255,255,.07); --svg-tick:rgba(255,255,255,.2);
-  --svg-tick-m:rgba(255,255,255,.1); --svg-lbl:rgba(255,255,255,.5);
-  --svg-lbl-d:rgba(255,255,255,.3); --svg-track:rgba(255,255,255,.07);
-  --needle:#a78bfa; --needle-tip:#0a0d16;
-  --t-up-bg:rgba(52,211,153,.12);  --t-up-c:var(--green);
-  --t-dn-bg:rgba(248,113,113,.12); --t-dn-c:var(--red);
-  --t-fl-bg:rgba(148,163,184,.08); --t-fl-c:var(--muted);
-}
-
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:350;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s}
-
-/* Background blobs */
-#bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
-.blob{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;transition:background 1s}
-.b1{width:650px;height:650px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-15%;left:-10%;animation:blob-drift 22s ease-in-out infinite}
-.b2{width:520px;height:520px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
-.b3{width:440px;height:440px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:5%;left:8%;animation:blob-drift 19s ease-in-out infinite 8s}
-.b4{width:380px;height:380px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
-#mesh-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-/* Mountain sky + silhouette */
-@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
-.rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.3),transparent);animation:rain-fall linear infinite}
-/* Dynamic weather background particles */
-#bg-wx-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.wx-rain{position:absolute;top:0;width:1px;pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(96,165,250,.4),transparent);animation:wx-rain-fall linear infinite;border-radius:1px}
-@keyframes wx-rain-fall{0%{transform:translateY(-80px) skewX(-8deg);opacity:0}8%{opacity:1}92%{opacity:.8}100%{transform:translateY(105vh) skewX(-8deg);opacity:0}}
-.wx-snow{position:absolute;top:0;border-radius:50%;pointer-events:none;background:rgba(224,242,254,.75);animation:wx-snow-fall ease-in infinite}
-@keyframes wx-snow-fall{0%{opacity:0;transform:translateY(-20px) translateX(0)}10%{opacity:.8}50%{transform:translateY(50vh) translateX(20px)}90%{opacity:.6}100%{opacity:0;transform:translateY(102vh) translateX(-15px)}}
-.wx-star{position:absolute;border-radius:50%;pointer-events:none;background:rgba(226,232,240,.8);animation:wx-twinkle ease-in-out infinite}
-@keyframes wx-twinkle{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:.1;transform:scale(.4)}}
-.wx-mote{position:absolute;border-radius:50%;pointer-events:none;animation:wx-mote-float ease-in-out infinite}
-@keyframes wx-mote-float{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:.5}80%{opacity:.15}100%{opacity:0;transform:translateY(-130px) scale(.2)}}
-.wx-fog{position:absolute;border-radius:50%;pointer-events:none;animation:wx-fog-drift ease-in-out infinite alternate}
-@keyframes wx-fog-drift{from{transform:translateX(-3%) scaleX(1);opacity:.06}to{transform:translateX(3%) scaleX(1.05);opacity:.14}}
-@keyframes rain-fall{0%{transform:translateY(-120px) rotate(12deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(105vh) rotate(12deg);opacity:0}}
-.star{position:absolute;border-radius:50%;background:rgba(200,220,255,.7);animation:twinkle ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.1;transform:scale(.5)}}
-
-/* Theme toggle */
-
-/* ── Photo background ─────────────────────────────────────── */
-.photo-layer{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center center;
-  transition:opacity 2.8s ease;
-  will-change:transform;
-}
-.photo-layer.active{animation:ken-burns 38s ease-in-out infinite alternate;}
-@keyframes ken-burns{
-  from{transform:scale(1) translate(0%,0%);}
-  50%{transform:scale(1.05) translate(-1%,0.5%);}
-  to{transform:scale(1.08) translate(1%,-0.5%);}
-}
-#photo-overlay{
-  position:absolute;inset:0;pointer-events:none;
-  transition:background .6s ease;
-}
-[data-theme="light"] #photo-overlay{background:rgba(238,242,249,.55);}
-[data-theme="dark"]  #photo-overlay{background:rgba(4,7,14,.68);}
-#bg.has-photo .blob{opacity:.18;transition:opacity 2s;}
-#bg.no-photo  .blob{opacity:1;  transition:opacity 2s;}
-.photo-credit{
-  position:fixed;bottom:.5rem;left:1rem;
-  font-size:.7rem;color:rgba(255,255,255,.45);
-  pointer-events:none;z-index:2;
-  text-shadow:0 1px 4px rgba(0,0,0,.5);
-  transition:opacity .5s;
-  max-width:300px;line-height:1.4;
-}
-.theme-btn{position:fixed;top:1rem;right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s;line-height:1}
-.theme-btn:hover{box-shadow:var(--card-shadow-h);transform:scale(1.08)}
-.theme-btn:active{transform:scale(.93)}
-
-/* Layout */
-.wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
-.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
-.stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
-h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
-.sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
-.status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
-.dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* Alerts */
-.alerts-wrap{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
-.storm-mode{display:none;border:1px solid transparent;border-radius:16px;padding:1rem 1.15rem;margin:-.15rem 0 1rem;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber);animation:alert-in .35s ease}
-.storm-mode.show{display:block}.storm-mode.orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.55);color:#ea580c}.storm-mode.red{background:rgba(248,113,113,.17);border-color:rgba(248,113,113,.65);color:var(--red)}
-.storm-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}.storm-title{font-size:.9rem;font-weight:700;color:inherit}.storm-sub{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:.12rem}
-.storm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}.storm-kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.62rem .7rem}.storm-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400;color:var(--text)}.storm-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.storm-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}.storm-action{border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.08);color:inherit;padding:.28rem .7rem;font-size:.7rem;cursor:pointer;text-decoration:none}.storm-action:hover{background:rgba(255,255,255,.14)}
-@media(max-width:820px){.storm-grid{grid-template-columns:repeat(2,1fr)}.storm-head{flex-direction:column}}
-.local-intel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
-.intel-card{border:1px solid var(--card-border);border-radius:16px;background:var(--card-bg);box-shadow:var(--card-shadow);padding:1rem 1.15rem;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}.intel-card.hidden{display:none}
-.intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
-.intel-main{display:flex;gap:.85rem;align-items:flex-start}.intel-icon{font-size:2.2rem;line-height:1;flex-shrink:0}.intel-title{font-size:1.05rem;font-weight:750;color:var(--text);margin-bottom:.25rem}.intel-text{font-size:.78rem;line-height:1.65;color:var(--muted)}
-.intel-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.intel-tag{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border-radius:999px;padding:2px 8px;background:var(--fc-bg);border:1px solid var(--fc-border);color:var(--muted)}
-.intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.75rem}.intel-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.48rem .6rem}.intel-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:400;color:var(--text)}.intel-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-@media(max-width:1180px){.local-intel-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){.local-intel-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.local-intel-grid{grid-template-columns:1fr}.intel-kpis{grid-template-columns:repeat(2,1fr)}}
 .alert-triangle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .alert-triangle svg{filter:drop-shadow(0 1px 3px rgba(220,38,38,.4));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275)}
@@ -644,14 +246,15 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
 .hm-val{font-family:'IBM Plex Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-uv{--hm-accent:var(--amber)}
+.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}
 /* Live pulse animations */
 @keyframes live-pulse{0%{background:var(--fc-bg);box-shadow:none}30%{background:rgba(255,255,255,.07);box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}100%{background:var(--fc-bg);box-shadow:none}}
 @keyframes temp-pulse{0%,100%{text-shadow:0 0 40px currentColor}35%{text-shadow:0 0 80px currentColor,0 0 140px currentColor}}
 .hm.pulse-live{animation:live-pulse 1.5s ease-out}
 #temp-val{transition:color .8s ease;text-shadow:0 0 40px currentColor}
 #temp-val.pulse-live{animation:temp-pulse 1.5s ease-out}
-@keyframes chart-draw{from{stroke-dashoffset:var(--path-len)}to{stroke-dashoffset:0}}
+@keyframes heat-wave{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-3px) scaleX(1.04)}}
+@keyframes fog-drift{0%,100%{transform:translateX(0);opacity:.65}50%{transform:translateX(5px);opacity:.45}}
 .feels{font-size:.78rem;color:var(--muted);margin-top:.65rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .feels strong{color:var(--text);font-weight:400}
 .feels-pill{display:inline-flex;align-items:center;font-size:.72rem;padding:2px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
@@ -736,6 +339,33 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .twh-legend{display:flex;align-items:center;gap:.4rem;font-size:.64rem;color:var(--muted);margin-top:.7rem;justify-content:flex-end}
 .twh-legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
 @media(max-width:680px){.insights-row{grid-template-columns:1fr}}
+/* Inversion detector */
+.inv-wrap{display:flex;align-items:center;gap:1rem}
+.inv-visual{flex-shrink:0;width:72px}
+.inv-info{flex:1;min-width:0}
+.inv-status{font-size:1.05rem;font-weight:700;line-height:1.15;margin-bottom:.2rem}
+.inv-sub{font-size:.72rem;color:var(--muted);line-height:1.5}
+.inv-active{color:var(--amber)}.inv-none{color:var(--green)}
+/* Milestones (first/last) */
+.ms-list{display:flex;flex-direction:column;gap:.45rem}
+.ms-item{display:flex;align-items:center;gap:.65rem;padding:.45rem .6rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.ms-icon{font-size:1.05rem;flex-shrink:0}
+.ms-body{flex:1;min-width:0}
+.ms-title{font-size:.74rem;font-weight:600;line-height:1.2}
+.ms-date{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)}
+.ms-delta{font-size:.6rem;padding:.1rem .42rem;border-radius:8px;white-space:nowrap;font-weight:600}
+.ms-early{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.3);color:var(--amber)}
+.ms-late{background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.3);color:var(--blue)}
+.ms-same{background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--muted)}
+/* Astro / dark sky */
+.astro-wrap{display:flex;align-items:center;gap:1.1rem}
+.astro-moon{font-size:2.4rem;flex-shrink:0;line-height:1}
+.astro-info{flex:1;min-width:0}
+.astro-window{font-size:1rem;font-weight:600;line-height:1.2;margin-bottom:.25rem}
+.astro-sub{font-size:.72rem;color:var(--muted);line-height:1.55}
+.astro-kpis{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.6rem}
+.astro-kpi{font-size:.66rem;color:var(--muted)}
+.astro-kpi b{font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:400;font-size:.78rem;display:block}
 /* Tab pane fade-in */
 @keyframes tab-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .tab-pane.active{animation:tab-in .22s ease}
@@ -1459,18 +1089,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="storm-mode" class="storm-mode"></div>
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
-    <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌤 Aktualno</button>
+    <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌡 Zdaj</button>
+    <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">🧠 Vpogledi</button>
+    <button class="tab-btn" id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
     <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
     <button class="tab-btn" id="tab-btn-analysis"   onclick="switchTab('analysis')">🔬 Analize</button>
-    <button class="tab-btn" id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
-    <button class="tab-btn" id="tab-btn-extremes"   onclick="switchTab('extremes')">⚡ Dogodki</button>
-    <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🎯 Rekordi</button>
     <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
+    <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🏆 Rekordi & Dogodki</button>
     <button class="tab-btn" id="tab-btn-diary"   onclick="switchTab('diary')">📸 Dnevnik</button>
     <button class="tab-btn" id="tab-btn-trivia" onclick="switchTab('trivia')">🎲 Zanimivosti</button>
   </div></div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
+
   <div id="tab-current" class="tab-pane active">
   <div class="hero card">
     <canvas id="hero-canvas"></canvas>
@@ -1496,9 +1127,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="hm-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter</span>
       </div>
-      <div class="hm hm-uv" id="hm-uv">
-        <span class="hm-val" id="hs-uv">—</span>
-        <span class="hm-lbl">UV indeks</span>
+      <div class="hm hm-rain" id="hm-rain">
+        <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)">mm</span></span>
+        <span class="hm-lbl">Padavine danes</span>
       </div>
     </div>
   </div>
@@ -1511,39 +1142,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ds-item ds-avg"><span class="ds-arrow">~ Povpr</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">Dnevno povprečje</span></div>
   </div>
 
-  <!-- ══ INSIGHTS (6 features) ══ -->
   <div class="insights-row">
-    <div class="insight-card" id="ic-anomaly">
-      <div class="ic-head"><span>📐 Klimatska anomalija dneva</span><span class="ic-badge" id="anom-badge">—</span></div>
-      <div id="anom-body"><div class="anom-note">Nalaganje…</div></div>
+    <div class="insight-card" id="ic-inversion">
+      <div class="ic-head"><span>🔄 Temperaturna inverzija</span><span class="ic-badge" id="inv-badge">—</span></div>
+      <div id="inv-body"><div class="inv-sub">Nalaganje…</div></div>
     </div>
     <div class="insight-card" id="ic-streaks">
       <div class="ic-head"><span>🔥 Aktivni nizi</span><span class="ic-badge" id="streak-badge">—</span></div>
       <div id="streak-body"><div class="streak-empty">Nalaganje…</div></div>
-    </div>
-  </div>
-  <div class="insights-row">
-    <div class="insight-card" id="ic-season">
-      <div class="ic-head"><span>🌿 Sezona v teku</span><span class="ic-badge" id="season-badge">—</span></div>
-      <div id="season-body"><div class="season-sub">Nalaganje…</div></div>
-    </div>
-    <div class="insight-card" id="ic-mood">
-      <div class="ic-head"><span>🎭 Značaj postaje — 48h</span><span class="ic-badge" id="mood-badge">—</span></div>
-      <div id="mood-body"><div class="mood-sub">Nalaganje…</div></div>
-    </div>
-  </div>
-  <div class="insights-row">
-    <div class="insight-card" id="ic-analog">
-      <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">7 let</span></div>
-      <div class="analog-controls">
-        <input type="date" id="analog-date">
-        <button class="analog-btn" id="analog-go">Najdi dvojčke</button>
-      </div>
-      <div id="analog-body"><div class="analog-empty">Izberi datum in poišči najbolj podobne dni v zgodovini postaje.</div></div>
-    </div>
-    <div class="insight-card" id="ic-twh">
-      <div class="ic-head"><span>🗓 Ta teden v zgodovini</span><span class="ic-badge" id="twh-badge">—</span></div>
-      <div id="twh-body"><div class="streak-empty">Nalaganje…</div></div>
     </div>
   </div>
 
@@ -1555,23 +1161,39 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <svg width="110" height="110" viewBox="0 0 110 110">
           <circle class="c-ring" cx="55" cy="55" r="50" stroke-width="1.5"/>
           <circle class="c-ring" cx="55" cy="55" r="38" stroke-width="1" opacity=".6"/>
-          <line class="c-tick" x1="55" y1="8"  x2="55" y2="16" stroke-width="1.5"/>
-          <line class="c-tick" x1="55" y1="94" x2="55" y2="102" stroke-width="1.5"/>
-          <line class="c-tick" x1="8"  y1="55" x2="16" y2="55" stroke-width="1.5"/>
-          <line class="c-tick" x1="94" y1="55" x2="102" y2="55" stroke-width="1.5"/>
+          <!-- Speed glow ring (JS-driven) -->
+          <circle id="wind-speed-ring" cx="55" cy="55" r="47" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="5 3" opacity="0" style="transition:stroke .8s,opacity .8s"/>
+          <line class="c-tick" x1="55" y1="8"  x2="55" y2="17" stroke-width="2"/>
+          <line class="c-tick" x1="55" y1="93" x2="55" y2="102" stroke-width="1.5"/>
+          <line class="c-tick" x1="8"  y1="55" x2="17" y2="55" stroke-width="1.5"/>
+          <line class="c-tick" x1="93" y1="55" x2="102" y2="55" stroke-width="1.5"/>
           <line class="c-tick-m" x1="19.9" y1="19.9" x2="25.6" y2="25.6" stroke-width="1"/>
           <line class="c-tick-m" x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke-width="1"/>
           <line class="c-tick-m" x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke-width="1"/>
           <line class="c-tick-m" x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke-width="1"/>
-          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="8" font-weight="500">N</text>
-          <text class="c-lbl-d" x="55" y="108" text-anchor="middle" font-size="8">S</text>
+          <!-- Cardinal labels: N in amber, rest muted -->
+          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="9" font-weight="700" fill="var(--amber)">N</text>
+          <text class="c-lbl-d" x="55" y="110" text-anchor="middle" font-size="8">S</text>
           <text class="c-lbl-d" x="4"  y="58"  text-anchor="middle" font-size="8">W</text>
           <text class="c-lbl-d" x="107" y="58" text-anchor="middle" font-size="8">E</text>
+          <!-- Intercardinal labels -->
+          <text class="c-lbl-d" x="89" y="23" text-anchor="middle" font-size="6.5" opacity=".6">NE</text>
+          <text class="c-lbl-d" x="89" y="92" text-anchor="middle" font-size="6.5" opacity=".6">SE</text>
+          <text class="c-lbl-d" x="21" y="92" text-anchor="middle" font-size="6.5" opacity=".6">SW</text>
+          <text class="c-lbl-d" x="21" y="23" text-anchor="middle" font-size="6.5" opacity=".6">NW</text>
+          <!-- Enhanced needle: gradient tip + tail -->
+          <defs>
+            <linearGradient id="ndl-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--amber)"/>
+              <stop offset="100%" stop-color="var(--needle)"/>
+            </linearGradient>
+            <filter id="ndl-glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
           <g id="needle" style="transform-origin:55px 55px;transform:rotate(0deg);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)">
-            <polygon points="55,15 58,55 55,63 52,55" fill="var(--needle)" opacity=".9"/>
-            <polygon points="55,95 58,55 55,63 52,55" fill="var(--needle)" opacity=".2"/>
-            <circle cx="55" cy="55" r="4" fill="var(--needle)"/>
-            <circle cx="55" cy="55" r="2" fill="var(--needle-tip)"/>
+            <polygon points="55,14 59,55 55,64 51,55" fill="url(#ndl-grad)" filter="url(#ndl-glow)" opacity=".95"/>
+            <polygon points="55,96 59,55 55,64 51,55" fill="var(--needle)" opacity=".18"/>
+            <circle cx="55" cy="55" r="5" fill="var(--needle)" opacity=".9"/>
+            <circle cx="55" cy="55" r="2.5" fill="white" opacity=".9"/>
           </g>
         </svg>
         <div>
@@ -1662,7 +1284,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
   <!-- 4 small cards -->
-  <div class="g4" style="margin-bottom:1rem">
+  <div class="g3" style="margin-bottom:1rem">
     <div class="card ca-blue">
       <div class="clabel">🌧 Intenz. padavin</div>
       <div class="cval" id="rain-rate">—<span class="unit">mm/h</span></div>
@@ -1679,31 +1301,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="clabel">⚡ Sončno sevanje</div>
       <div class="cval" id="solar-val">—<span class="unit">W/m²</span></div>
       <div class="csub" id="solar-label">—</div>
-    </div>
-    <div class="card ca-cyan">
-      <div class="clabel">💧 Rosišče</div>
-      <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
-      <div class="csub" id="dewpt-label">—</div>
-    </div>
-  </div>
-
-  <!-- AI intel grid -->
-  <div class="local-intel-grid">
-    <div class="intel-card" id="daily-almanac">
-      <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
-      <div class="intel-text">Sestavljam dnevni almanah…</div>
-    </div>
-    <div class="intel-card" id="weather-memory">
-      <div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">IREICA1</span></div>
-      <div class="intel-text">Iščem podoben dan v zgodovini…</div>
-    </div>
-    <div class="intel-card" id="forecast-personality">
-      <div class="intel-head"><div class="intel-label">Dnevni značaj vremena</div><span class="intel-badge">Rečica</span></div>
-      <div class="intel-text">Berem lokalni podpis vremena…</div>
-    </div>
-    <div class="intel-card hidden" id="storm-autopsy">
-      <div class="intel-head"><div class="intel-label">Savinjska Storm Autopsy</div><span class="intel-badge">dogodek</span></div>
-      <div class="intel-text">Čakam na nevihtni dogodek…</div>
     </div>
   </div>
 
@@ -1733,79 +1330,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
   </div>
 
-  <!-- Text forecast -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">📝 Napoved za 7 dni</span>
-      <span class="chart-range" id="txfc-updated"></span>
-    </div>
-    <div id="txfc-grid" class="txfc-grid">
-      <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
-    </div>
-    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
-  </div>
-
-  <!-- Advanced Open-Meteo signals -->
-  <div class="omx-grid" id="omx-grid">
-    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zaupanje napovedi…</div></div>
-    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
-    <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
-    <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
-  </div>
-
-  <!-- 24h Sky Strip -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.5rem">
-      <span class="clabel" style="margin:0">🌅 Dnevni trak neba — naslednjih 24 ur</span>
-      <span class="chart-range" id="sky-range">—</span>
-    </div>
-    <div class="sky-strip-outer">
-      <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
-           xmlns="http://www.w3.org/2000/svg" height="128">
-        <text x="480" y="64" text-anchor="middle" font-size="12"
-              fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
-      </svg>
-    </div>
-    <div class="sky-legend">
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#f87171"></span>Temperatura</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
-      <span style="margin-left:auto;opacity:.6">↔ drsaj za cel dan</span>
-    </div>
-  </div>
-
-  <!-- Phenological calendar -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
-      <span class="chart-range">Fenološki GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
-    </div>
-    <div class="g2" style="gap:.75rem">
-      <div class="pheno-list" id="pheno-list-left"></div>
-      <div class="pheno-list" id="pheno-list-right"></div>
-    </div>
-    <div class="csub" id="pheno-note" style="margin-top:.75rem"></div>
-  </div>
-
-  <!-- Water balance -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
-      <span class="chart-range" id="wbal-status"></span>
-    </div>
-    <div class="wbal-summary">
-      <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
-      <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
-      <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
-    </div>
-    <div style="height:60px;position:relative;margin-top:.25rem">
-      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
-      <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
-  </div>
-
   <!-- Daily microclimate fingerprint -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.45rem">
@@ -1814,65 +1338,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div id="mcf-content" class="mcf-hero">
       <div style="color:var(--muted);font-size:.78rem">Berem lokalne signale doline…</div>
-    </div>
-  </div>
-
-  <!-- Microclimate analysis -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.25rem">
-      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
-      <span class="chart-range" id="mc-updated">—</span>
-    </div>
-    <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
-  </div>
-
-  <!-- Why is weather like this -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.4rem">
-      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
-      <span class="why-updated" id="why-updated">—</span>
-    </div>
-    <div class="why-text" id="why-text">Nalaganje razlage…</div>
-  </div>
-
-  <!-- On This Day -->
-  <div class="card chart-card" style="margin-bottom:1rem" id="otd-card">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0" id="otd-title">📅 Vreme na ta dan v preteklosti</span>
-      <span class="chart-range" id="otd-source">Open-Meteo ERA5</span>
-    </div>
-    <div class="otd-grid" id="otd-grid">
-      <div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
-    </div>
-  </div>
-
-  <!-- Station On This Day -->
-  <div class="card chart-card" style="margin-bottom:1rem" id="otd-station-card">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0" id="otd-station-title">📡 Ta dan na postaji IREICA1</span>
-      <span class="chart-range" id="otd-station-source">Lokalna shramba</span>
-    </div>
-    <div class="otd-grid otd-station" id="otd-station-grid">
-      <div class="otd-nodata">Nalaganje…</div>
-    </div>
-  </div>
-
-  <!-- Generative Weather Art + AI Brief -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card weather-art-wrap" style="padding:0;overflow:hidden">
-      <canvas id="weather-art-canvas"></canvas>
-      <div class="art-label" id="art-label">—</div>
-    </div>
-    <div class="card">
-      <div class="chart-hdr" style="margin-bottom:.25rem">
-        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
-        <div style="display:flex;gap:.4rem;align-items:center">
-          <span class="chart-range" id="brief-date"></span>
-          <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
-        </div>
-      </div>
-      <div class="ai-brief-text" id="ai-brief-text">Nalaganje…</div>
-      <div class="ai-brief-meta" id="ai-brief-meta"></div>
     </div>
   </div>
 
@@ -1898,137 +1363,21 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-  <!-- Weather Score + Moon -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel">🎯 Vremenski indeks</div>
-      <div class="score-wrap">
-        <div class="score-ring" id="score-ring">
-          <div class="score-n" id="score-num">—</div>
-          <div class="score-l" id="score-lbl">—</div>
-        </div>
-        <div style="flex:1">
-          <div class="csub" id="score-desc" style="margin-bottom:.3rem">—</div>
-          <div class="acts" id="activities"></div>
-        </div>
+  <!-- Weather Score -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="clabel">🎯 Vremenski indeks</div>
+    <div class="score-wrap">
+      <div class="score-ring" id="score-ring">
+        <div class="score-n" id="score-num">—</div>
+        <div class="score-l" id="score-lbl">—</div>
       </div>
-    </div>
-    <div class="card">
-      <div class="clabel">🌙 Lunina faza</div>
-      <div class="moon-body">
-        <div class="moon-big" id="moon-emoji">🌑</div>
-        <div>
-          <div class="moon-pn" id="moon-phase">—</div>
-          <div class="moon-il">Osvetlitev: <span id="moon-illum">—</span>%</div>
-          <div class="moon-il">Starost: <span id="moon-age">—</span> dni</div>
-          <div class="moon-nx" id="moon-next"></div>
-        </div>
+      <div style="flex:1">
+        <div class="csub" id="score-desc" style="margin-bottom:.3rem">—</div>
+        <div class="acts" id="activities"></div>
       </div>
     </div>
   </div>
 
-  <!-- Air Quality + Agrometeo -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel">💨 Kakovost zraka</div>
-      <div class="cval" id="aqi-val">—<span class="unit" id="aqi-lbl" style="font-size:.75rem"></span></div>
-      <div class="aqi-bar-wrap"><div class="aqi-dot" id="aqi-dot" style="left:0%"></div></div>
-      <div class="aqi-grid">
-        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm25">—</div><div class="aqi-cl">PM2.5</div></div>
-        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm10">—</div><div class="aqi-cl">PM10</div></div>
-        <div class="aqi-cell"><div class="aqi-cv" id="aqi-no2">—</div><div class="aqi-cl">NO₂</div></div>
-        <div class="aqi-cell"><div class="aqi-cv" id="aqi-ozone">—</div><div class="aqi-cl">Ozon</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="clabel">🌾 Agrometeo</div>
-      <div class="csub" id="agro-date" style="margin-bottom:.25rem">Danes</div>
-      <div class="agro-grid">
-        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ mm/dan</div></div>
-        <div class="agro-item"><div class="agro-n" id="agro-sun">—</div><div class="agro-l">Sončnih ur</div></div>
-        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (baza 10°)</div></div>
-      </div>
-      <div class="csub" id="agro-note" style="margin-top:.5rem"></div>
-    </div>
-  </div>
-
-
-  <!-- Pollen + Savinja river -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel">🌸 Pelod & alergeni</div>
-      <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
-      <div class="pollen-grid" id="pollen-grid"></div>
-    </div>
-    <div class="card">
-      <div class="clabel">🌊 Reka Savinja — pretok</div>
-      <div id="flood-content">
-        <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Monthly summary + Year records -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel">📊 <span id="month-title">Mesečni povzetek</span></div>
-      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
-    </div>
-    <div class="card">
-      <div class="clabel">🏅 Rekordi leta <span id="rec-year-lbl"></span></div>
-      <div class="yr-grid" id="yr-grid">
-        <div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Climate comparison -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">☀️ Klimatsko primerjanje — <span id="clim-month-lbl">ta mesec</span></span>
-      <span class="chart-range" id="clim-range">vs. povprečje 10 let</span>
-    </div>
-    <div id="clim-content" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
-  </div>
-
-  <!-- Lightning -->
-  <div class="card" style="margin-bottom:1rem" id="ltg-card">
-    <div class="clabel">⚡ Strele v bližini (200 km)</div>
-    <div class="ltg-wrap">
-      <div>
-        <div class="ltg-count" id="ltg-count">0</div>
-        <div class="ltg-sub"><span id="ltg-window">strel v zadnji uri</span><br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
-      </div>
-      <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.76rem">Čakam na podatke…</div></div>
-    </div>
-  </div>
-
-  <!-- Windy Radar -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
-      <span class="chart-range">Windy · ECMWF</span>
-    </div>
-    <iframe class="windy-frame" id="windy-frame"
-      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
-      allowfullscreen loading="lazy"></iframe>
-  </div>
-
-  <!-- Photography helper -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">📷 Fotografski pomočnik</span>
-      <span class="chart-range" id="photo-phase-lbl">—</span>
-    </div>
-    <!-- Light timeline -->
-    <div class="photo-timeline" id="photo-timeline"></div>
-    <div class="photo-events" id="photo-events"></div>
-    <!-- Macro conditions -->
-    <div class="photo-macro-grid" id="photo-macro-grid"></div>
-    <!-- Active subjects -->
-    <div class="clabel" style="font-size:.72rem;margin:.4rem 0 .3rem">Aktivnost danes</div>
-    <div class="photo-subjects" id="photo-subjects"></div>
-    <div class="csub" id="photo-tip" style="margin-top:.65rem;font-style:italic"></div>
   </div>
 
   <!-- Sunrise + snapshot -->
@@ -2070,6 +1419,154 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
   </div><!-- /tab-current -->
+
+  <div id="tab-insights" class="tab-pane">
+
+    <!-- AI intel grid -->
+  <div class="local-intel-grid">
+    <div class="intel-card" id="daily-almanac">
+      <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
+      <div class="intel-text">Sestavljam dnevni almanah…</div>
+    </div>
+    <div class="intel-card" id="weather-memory">
+      <div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">IREICA1</span></div>
+      <div class="intel-text">Iščem podoben dan v zgodovini…</div>
+    </div>
+    <div class="intel-card" id="forecast-personality">
+      <div class="intel-head"><div class="intel-label">Dnevni značaj vremena</div><span class="intel-badge">Rečica</span></div>
+      <div class="intel-text">Berem lokalni podpis vremena…</div>
+    </div>
+    <div class="intel-card hidden" id="storm-autopsy">
+      <div class="intel-head"><div class="intel-label">Savinjska Storm Autopsy</div><span class="intel-badge">dogodek</span></div>
+      <div class="intel-text">Čakam na nevihtni dogodek…</div>
+    </div>
+  </div>
+
+    <!-- ══ INSIGHTS ══ -->
+  <!-- Astro + Milestones (moved from Aktualno) -->
+  <div class="insights-row">
+    <div class="insight-card" id="ic-astro">
+      <div class="ic-head"><span>🌌 Nočno nebo & astro</span><span class="ic-badge" id="astro-badge">—</span></div>
+      <div id="astro-body"><div class="astro-sub">Nalaganje…</div></div>
+    </div>
+    <div class="insight-card" id="ic-anomaly">
+      <div class="ic-head"><span>📐 Klimatska anomalija dneva</span><span class="ic-badge" id="anom-badge">—</span></div>
+      <div id="anom-body"><div class="anom-note">Nalaganje…</div></div>
+    </div>
+  </div>
+  <div class="insights-row">
+    <div class="insight-card" id="ic-season">
+      <div class="ic-head"><span>🌿 Sezona v teku</span><span class="ic-badge" id="season-badge">—</span></div>
+      <div id="season-body"><div class="season-sub">Nalaganje…</div></div>
+    </div>
+    <div class="insight-card" id="ic-mood">
+      <div class="ic-head"><span>🎭 Značaj postaje — 48h</span><span class="ic-badge" id="mood-badge">—</span></div>
+      <div id="mood-body"><div class="mood-sub">Nalaganje…</div></div>
+    </div>
+  </div>
+  <div class="insights-row">
+    <div class="insight-card" id="ic-analog">
+      <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">7 let</span></div>
+      <div class="analog-controls">
+        <input type="date" id="analog-date">
+        <button class="analog-btn" id="analog-go">Najdi dvojčke</button>
+      </div>
+      <div id="analog-body"><div class="analog-empty">Izberi datum in poišči najbolj podobne dni v zgodovini postaje.</div></div>
+    </div>
+    <div class="insight-card" id="ic-twh">
+      <div class="ic-head"><span>🗓 Ta teden v zgodovini</span><span class="ic-badge" id="twh-badge">—</span></div>
+      <div id="twh-body"><div class="streak-empty">Nalaganje…</div></div>
+    </div>
+  </div>
+  <div class="insights-row">
+    <div class="insight-card" id="ic-milestones" style="grid-column:1 / -1">
+      <div class="ic-head"><span>📅 Sezonski mejniki — prvi & zadnji</span><span class="ic-badge" id="ms-badge">—</span></div>
+      <div id="ms-body"><div class="streak-empty">Nalaganje…</div></div>
+    </div>
+  </div>
+
+  <!-- Photography helper (moved from Aktualno) -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">📷 Fotografski pomočnik</span>
+      <span class="chart-range" id="photo-phase-lbl">—</span>
+    </div>
+    <div class="photo-timeline" id="photo-timeline"></div>
+    <div class="photo-events" id="photo-events"></div>
+    <div class="photo-macro-grid" id="photo-macro-grid"></div>
+    <div class="clabel" style="font-size:.72rem;margin:.4rem 0 .3rem">Aktivnost danes</div>
+    <div class="photo-subjects" id="photo-subjects"></div>
+    <div class="csub" id="photo-tip" style="margin-top:.65rem;font-style:italic"></div>
+  </div>
+
+  
+    <!-- On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-title">📅 Vreme na ta dan v preteklosti</span>
+      <span class="chart-range" id="otd-source">Open-Meteo ERA5</span>
+    </div>
+    <div class="otd-grid" id="otd-grid">
+      <div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+    </div>
+  </div>
+
+  
+    <!-- Station On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-station-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-station-title">📡 Ta dan na postaji IREICA1</span>
+      <span class="chart-range" id="otd-station-source">Lokalna shramba</span>
+    </div>
+    <div class="otd-grid otd-station" id="otd-station-grid">
+      <div class="otd-nodata">Nalaganje…</div>
+    </div>
+  </div>
+
+  
+    <!-- Microclimate analysis -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.25rem">
+      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
+      <span class="chart-range" id="mc-updated">—</span>
+    </div>
+    <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
+  </div>
+
+  
+    <!-- Why is weather like this -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.4rem">
+      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
+      <span class="why-updated" id="why-updated">—</span>
+    </div>
+    <div class="why-text" id="why-text">Nalaganje razlage…</div>
+  </div>
+
+  
+    <!-- Generative Weather Art + AI Brief -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card weather-art-wrap" style="padding:0;overflow:hidden">
+      <canvas id="weather-art-canvas"></canvas>
+      <div class="art-label" id="art-label">—</div>
+    </div>
+    <div class="card">
+      <div class="chart-hdr" style="margin-bottom:.25rem">
+        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="chart-range" id="brief-date"></span>
+          <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
+        </div>
+      </div>
+      <div class="ai-brief-text" id="ai-brief-text">Nalaganje…</div>
+      <div class="ai-brief-meta" id="ai-brief-meta"></div>
+    </div>
+  </div>
+
+  
+
+  </div><!-- /tab-insights -->
+
 
   <!-- ══ TAB: ZGODOVINA ══ -->
   <div id="tab-history" class="tab-pane">
@@ -2520,6 +2017,82 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
+
+  <!-- Iz Aktualno -->
+<!-- Text forecast -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">📝 Napoved za 7 dni</span>
+      <span class="chart-range" id="txfc-updated"></span>
+    </div>
+    <div id="txfc-grid" class="txfc-grid">
+      <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+    </div>
+    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
+  </div>
+
+  <!-- Advanced Open-Meteo signals -->
+  <div class="omx-grid" id="omx-grid">
+    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zaupanje napovedi…</div></div>
+    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
+    <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
+    <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
+  </div>
+
+  <!-- 24h Sky Strip -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.5rem">
+      <span class="clabel" style="margin:0">🌅 Dnevni trak neba — naslednjih 24 ur</span>
+      <span class="chart-range" id="sky-range">—</span>
+    </div>
+    <div class="sky-strip-outer">
+      <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
+           xmlns="http://www.w3.org/2000/svg" height="128">
+        <text x="480" y="64" text-anchor="middle" font-size="12"
+              fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+      </svg>
+    </div>
+    <div class="sky-legend">
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#f87171"></span>Temperatura</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
+      <span style="margin-left:auto;opacity:.6">↔ drsaj za cel dan</span>
+    </div>
+  </div>
+
+  <!-- Phenological calendar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
+      <span class="chart-range">Fenološki GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
+    </div>
+    <div class="g2" style="gap:.75rem">
+      <div class="pheno-list" id="pheno-list-left"></div>
+      <div class="pheno-list" id="pheno-list-right"></div>
+    </div>
+    <div class="csub" id="pheno-note" style="margin-top:.75rem"></div>
+  </div>
+
+  <!-- Water balance -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
+      <span class="chart-range" id="wbal-status"></span>
+    </div>
+    <div class="wbal-summary">
+      <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
+      <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
+      <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
+    </div>
+    <div style="height:60px;position:relative;margin-top:.25rem">
+      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
+  </div>
+
+  
     <!-- Local daily forecast -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
@@ -2564,7 +2137,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
   <!-- ═══ EKSTREMNI DOGODKI ═══ -->
-  <div id="tab-extremes" class="tab-pane">
+  <div id="tab-records" class="tab-pane">
+
+    <!-- Dogodki (merged) -->
+    <div class="nt-section">
+      <div class="nt-title">⚡ Ekstremni vremenski dogodki</div>
+  
     <div class="ev-filter" id="ev-filter">
       <button class="ev-filter-btn on" onclick="evFilter('all',this)">Vsi</button>
       <button class="ev-filter-btn" onclick="evFilter('heat',this)">🌡 Vročina</button>
@@ -2574,10 +2152,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <button class="ev-filter-btn" onclick="evFilter('wind',this)">💨 Veter</button>
     </div>
     <div class="ev-list" id="ev-list"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
-  </div>
+  
+    </div>
 
-  <!-- ═══ REKORDI ═══ -->
-  <div id="tab-records" class="tab-pane">
     <div class="nt-section">
       <div class="nt-title">🏆 Dvorana slavnih — vse-časovni rekordi</div>
       <div class="rec-hof" id="rec-hof"></div>
@@ -2636,6 +2213,94 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="clabel" style="margin:0 0 .5rem">ℹ️ O primerjavi</div>
       <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n.v.) je označena z modro.</div>
     </div>
+
+  <!-- Iz Aktualno: okolje -->
+<!-- Air Quality + Agrometeo -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">💨 Kakovost zraka</div>
+      <div class="cval" id="aqi-val">—<span class="unit" id="aqi-lbl" style="font-size:.75rem"></span></div>
+      <div class="aqi-bar-wrap"><div class="aqi-dot" id="aqi-dot" style="left:0%"></div></div>
+      <div class="aqi-grid">
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm25">—</div><div class="aqi-cl">PM2.5</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm10">—</div><div class="aqi-cl">PM10</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-no2">—</div><div class="aqi-cl">NO₂</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-ozone">—</div><div class="aqi-cl">Ozon</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌾 Agrometeo</div>
+      <div class="csub" id="agro-date" style="margin-bottom:.25rem">Danes</div>
+      <div class="agro-grid">
+        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ mm/dan</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-sun">—</div><div class="agro-l">Sončnih ur</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (baza 10°)</div></div>
+      </div>
+      <div class="csub" id="agro-note" style="margin-top:.5rem"></div>
+    </div>
+  </div>
+
+
+  <!-- Pollen + Savinja river -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🌸 Pelod & alergeni</div>
+      <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
+      <div class="pollen-grid" id="pollen-grid"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌊 Reka Savinja — pretok</div>
+      <div id="flood-content">
+        <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly summary + Year records -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">📊 <span id="month-title">Mesečni povzetek</span></div>
+      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
+    </div>
+    <div class="card">
+      <div class="clabel">🏅 Rekordi leta <span id="rec-year-lbl"></span></div>
+      <div class="yr-grid" id="yr-grid">
+        <div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Climate comparison -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">☀️ Klimatsko primerjanje — <span id="clim-month-lbl">ta mesec</span></span>
+      <span class="chart-range" id="clim-range">vs. povprečje 10 let</span>
+    </div>
+    <div id="clim-content" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
+  </div>
+
+  <!-- Lightning -->
+  <div class="card" style="margin-bottom:1rem" id="ltg-card">
+    <div class="clabel">⚡ Strele v bližini (200 km)</div>
+    <div class="ltg-wrap">
+      <div>
+        <div class="ltg-count" id="ltg-count">0</div>
+        <div class="ltg-sub"><span id="ltg-window">strel v zadnji uri</span><br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
+      </div>
+      <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.76rem">Čakam na podatke…</div></div>
+    </div>
+  </div>
+
+  <!-- Windy Radar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
+      <span class="chart-range">Windy · ECMWF</span>
+    </div>
+    <iframe class="windy-frame" id="windy-frame"
+      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      allowfullscreen loading="lazy"></iframe>
+  
   </div>
 
 
@@ -2753,7 +2418,25 @@ function iconRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2
 function iconHeavyRain(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="34" rx="22" ry="14" fill="#475569"/><ellipse cx="58" cy="38" rx="18" ry="12" fill="#475569"/><ellipse cx="48" cy="43" rx="26" ry="14" fill="#64748b"/><polyline points="53,44 44,58 51,58 40,76" stroke="#d97706" stroke-width="3" fill="none" stroke-linejoin="round" style="animation:lightning 3s ease-in-out infinite"/><line x1="28" y1="56" x2="24" y2="68" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite"/><line x1="66" y1="54" x2="62" y2="66" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" style="animation:drop-fall 1s ease-in infinite .28s"/></svg>';}
 function iconNight(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 55 18 A 27 27 0 1 0 55 78 A 17 17 0 1 1 55 18" fill="#d97706" style="animation:moon-glow 3s ease-in-out infinite"/><circle cx="76" cy="24" r="2.5" fill="rgba(80,100,150,.8)" style="animation:star-wink 2.5s ease-in-out infinite"/><circle cx="82" cy="44" r="1.8" fill="rgba(80,100,150,.8)" style="animation:star-wink 2.5s ease-in-out infinite .8s"/><circle cx="72" cy="60" r="1.5" fill="rgba(80,100,150,.8)" style="animation:star-wink 2.5s ease-in-out infinite 1.5s"/><circle cx="20" cy="32" r="2" fill="rgba(80,100,150,.8)" style="animation:star-wink 2.5s ease-in-out infinite .4s"/><circle cx="24" cy="55" r="1.3" fill="rgba(80,100,150,.8)" style="animation:star-wink 2.5s ease-in-out infinite 1.1s"/></svg>';}
 function iconNightCloudy(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 40 16 A 18 18 0 1 0 40 52 A 11 11 0 1 1 40 16" fill="#d97706" opacity=".8"/><ellipse cx="52" cy="58" rx="22" ry="14" fill="#64748b" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="68" cy="63" rx="17" ry="12" fill="#64748b" style="animation:cloud-bob 5s ease-in-out infinite"/><ellipse cx="59" cy="68" rx="26" ry="13" fill="#78909c" style="animation:cloud-bob 5s ease-in-out infinite"/></svg>';}
-function weatherIcon(label){const m={'Jasno sončno':iconSunny,'Pretežno sončno':iconPartlyCloudy,'Delno oblačno':iconPartlyCloudy,'Pretežno oblačno':iconCloudy,'Oblačno':iconCloudy,'Rahel dež':iconRain,'Dež':iconRain,'Močan dež':iconHeavyRain,'Jasna noč':iconNight,'Oblačna noč':iconNightCloudy,'Meglena noč':iconNightCloudy};return(m[label]||iconCloudy)();}
+function iconSnow(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="38" cy="36" rx="22" ry="14" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="58" cy="40" rx="18" ry="12" fill="#94a3b8" style="animation:cloud-bob 4s ease-in-out infinite"/><ellipse cx="48" cy="45" rx="26" ry="14" fill="#78909c" style="animation:cloud-bob 4s ease-in-out infinite"/><!-- Snowflake 1 --><g style="animation:drop-fall 2.2s ease-in infinite;transform-origin:32px 0"><line x1="32" y1="62" x2="32" y2="74" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="65" x2="38" y2="71" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="71" x2="38" y2="65" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/></g><!-- Snowflake 2 --><g style="animation:drop-fall 2.2s ease-in infinite .65s;transform-origin:50px 0"><line x1="50" y1="60" x2="50" y2="72" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round"/><line x1="44" y1="63" x2="56" y2="69" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/><line x1="44" y1="69" x2="56" y2="63" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/></g><!-- Snowflake 3 --><g style="animation:drop-fall 2.2s ease-in infinite 1.3s;transform-origin:67px 0"><line x1="67" y1="61" x2="67" y2="73" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round"/><line x1="61" y1="64" x2="73" y2="70" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/><line x1="61" y1="70" x2="73" y2="64" stroke="#bfdbfe" stroke-width="1.5" stroke-linecap="round"/></g></svg>';}
+function iconStorm(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><filter id="lf"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="36" cy="30" rx="24" ry="16" fill="#334155"/><ellipse cx="60" cy="34" rx="20" ry="14" fill="#334155"/><ellipse cx="48" cy="40" rx="30" ry="16" fill="#1e293b"/><!-- Lightning bolt --><polyline points="56,41 45,60 53,60 38,82" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linejoin="round" filter="url(#lf)" style="animation:lightning 2.5s ease-in-out infinite"/><!-- Rain --><line x1="24" y1="52" x2="20" y2="65" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall .9s ease-in infinite"/><line x1="72" y1="50" x2="68" y2="63" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall .9s ease-in infinite .3s"/><line x1="30" y1="62" x2="26" y2="75" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall .9s ease-in infinite .15s"/><line x1="68" y1="60" x2="64" y2="73" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="animation:drop-fall .9s ease-in infinite .45s"/></svg>';}
+function iconFog(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="28" r="18" fill="#fbbf24" opacity=".25" style="animation:ray-pulse 4s ease-in-out infinite"/><circle cx="50" cy="28" r="11" fill="#fbbf24" opacity=".55"/><!-- Fog wisps --><rect x="8" y="50" width="84" height="8" rx="4" fill="#cbd5e1" opacity=".70" style="animation:fog-drift 5s ease-in-out infinite"/><rect x="4" y="63" width="76" height="8" rx="4" fill="#94a3b8" opacity=".60" style="animation:fog-drift 5s ease-in-out infinite .8s"/><rect x="14" y="76" width="80" height="8" rx="4" fill="#64748b" opacity=".50" style="animation:fog-drift 5s ease-in-out infinite 1.6s"/></svg>';}
+function iconHot(){return'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="34" fill="#f97316" opacity=".07"/><circle cx="50" cy="50" r="24" fill="#f97316" opacity=".11"/><g style="transform-origin:50px 50px;animation:spin 14s linear infinite"><line x1="50" y1="22" x2="50" y2="10" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="78" x2="50" y2="90" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/><line x1="22" y1="50" x2="10" y2="50" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/><line x1="78" y1="50" x2="90" y2="50" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/><line x1="68.5" y1="31.5" x2="77" y2="23" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/><line x1="31.5" y1="31.5" x2="23" y2="23" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/><line x1="68.5" y1="68.5" x2="77" y2="77" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/><line x1="31.5" y1="68.5" x2="23" y2="77" stroke="#f97316" stroke-width="3.5" stroke-linecap="round"/></g><circle cx="50" cy="50" r="18" fill="#ef4444" style="animation:ray-pulse 2.5s ease-in-out infinite;transform-origin:50px 50px"/><!-- Heat waves --><path d="M 30 78 Q 36 73 42 78 Q 48 83 54 78 Q 60 73 66 78 Q 72 83 78 78" stroke="#f97316" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5" style="animation:heat-wave 2s ease-in-out infinite"/><path d="M 25 87 Q 32 82 39 87 Q 46 92 53 87 Q 60 82 67 87" stroke="#f97316" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".35" style="animation:heat-wave 2s ease-in-out infinite .5s"/></svg>';}
+function weatherIcon(label){
+  // Use _wxCond (set by updateBgFromObs) for special conditions
+  const wc=typeof _wxCond==='string'?_wxCond:'';
+  if(wc==='snow')        return iconSnow();
+  if(wc==='fog')         return iconFog();
+  if(wc==='hot')         return iconHot();
+  if(wc==='storm')       return iconStorm();
+  if(wc==='heavy_rain')  return iconHeavyRain();
+  if(wc==='rain')        return iconRain();
+  if(wc==='night')       return iconNight();
+  if(wc==='cloudy')      return iconCloudy();
+  if(wc==='sunny')       return iconSunny();
+  const m={'Jasno sončno':iconSunny,'Pretežno sončno':iconPartlyCloudy,'Delno oblačno':iconPartlyCloudy,'Pretežno oblačno':iconCloudy,'Oblačno':iconCloudy,'Rahel dež':iconRain,'Dež':iconRain,'Močan dež':iconHeavyRain,'Jasna noč':iconNight,'Oblačna noč':iconNightCloudy,'Meglena noč':iconNightCloudy};
+  return(m[label]||iconCloudy)();
+}
 
 // ── Sunrise / sunset ──────────────────────────────────────
 function sunTimes(lat,lon,date){
@@ -3303,12 +2986,200 @@ function renderThisWeekHistory(){
 }
 
 // ── Master refresh ───────────────────────────────────────
+// ── 7. Temperature inversion detector ────────────────────
+// Compares valley station (366m) with Open-Meteo temp at a higher elevation.
+let _invData=null,_invFetchTime=0;
+async function fetchInversion(){
+  // Cache for 30 min
+  if(_invData&&Date.now()-_invFetchTime<30*60*1000){renderInversion();return;}
+  try{
+    // Open-Meteo 850hPa (~1500m) temperature + 2m temp at valley
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+
+      '&hourly=temperature_2m,temperature_850hPa&timezone=Europe%2FLjubljana&forecast_days=1';
+    const r=await fetch(url);const d=await r.json();
+    const h=new Date().getHours();
+    _invData={
+      valley2m:d.hourly?.temperature_2m?.[h],
+      upper:d.hourly?.temperature_850hPa?.[h],
+    };
+    _invFetchTime=Date.now();
+    renderInversion();
+  }catch(e){
+    const body=document.getElementById('inv-body');
+    if(body)body.innerHTML='<div class="inv-sub">Podatkov o višinski temperaturi trenutno ni mogoče pridobiti.</div>';
+  }
+}
+function renderInversion(){
+  const body=document.getElementById('inv-body'),badge=document.getElementById('inv-badge');
+  if(!body||!_invData)return;
+  // Station's own current temp preferred over model 2m
+  const stationT=_lastBriefObs?.metric?.temp;
+  const valleyT=stationT??_invData.valley2m;
+  const upperT=_invData.upper; // ~1500m (850hPa)
+  if(valleyT==null||upperT==null){body.innerHTML='<div class="inv-sub">Ni dovolj podatkov za oceno inverzije.</div>';badge.textContent='—';return;}
+  // Normal lapse rate: ~ -6.5°C per 1000m. From 366m to ~1500m (Δ1134m) → expect ~-7.4°C
+  const dz=1134;
+  const expectedUpper=valleyT-6.5*dz/1000;
+  const diff=upperT-expectedUpper; // positive → warmer aloft than expected = inversion tendency
+  const actualDiff=upperT-valleyT; // if positive → genuinely warmer up high (strong inversion)
+  let status,cls,sub,emoji;
+  if(actualDiff>=0){
+    status='Inverzija';cls='inv-active';emoji='🔄';
+    sub='Topleje na višini kot v dolini — hladen zrak je ujet v Savinjski dolini. Klasičen zimski/jutranji pojav. Pričakuj meglo ali nizko oblačnost v dolini.';
+  }else if(diff>3){
+    status='Šibka inverzija';cls='inv-active';emoji='🌫️';
+    sub='Ozračje je bolj stabilno od običajnega — temperatura z višino pada počasneje. Možna jutranja megla v dolini.';
+  }else{
+    status='Normalna stratifikacija';cls='inv-none';emoji='✅';
+    sub='Temperatura normalno pada z višino. Brez inverzijskega ujetja v dolini.';
+  }
+  // Visual: valley vs peak thermometer
+  const vis='<svg class="inv-visual" viewBox="0 0 72 72"><line x1="20" y1="58" x2="52" y2="14" stroke="var(--fc-border)" stroke-width="2"/>'+
+    '<circle cx="20" cy="58" r="6" fill="var(--blue)"/><text x="20" y="72" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="IBM Plex Mono,monospace">'+valleyT.toFixed(0)+'°</text>'+
+    '<circle cx="52" cy="14" r="6" fill="'+(actualDiff>=0?'var(--amber)':'var(--cyan)')+'"/><text x="52" y="9" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="IBM Plex Mono,monospace">'+upperT.toFixed(0)+'°</text></svg>';
+  body.innerHTML='<div class="inv-wrap">'+vis+'<div class="inv-info"><div class="inv-status '+cls+'">'+emoji+' '+status+'</div><div class="inv-sub">'+sub+'</div></div></div>';
+  badge.textContent=(actualDiff>=0?'+':'')+actualDiff.toFixed(1)+'°C @1500m';
+}
+
+// ── Moon phase SVG renderer (mathematical) ───────────────
+function moonPhaseSVG(age){
+  const SYN=29.53058867,r=38,cx=50,cy=50;
+  const angle=(age/SYN)*2*Math.PI;
+  const waxing=age<SYN/2;
+  // Terminator x-radius: negative = bows toward dark side (crescent)
+  const tx=-r*Math.cos(angle);
+  const absT=Math.abs(tx).toFixed(2);
+  const top=cy-r,bot=cy+r;
+  let lit;
+  if(waxing){
+    const sw2=tx<0?1:0;
+    lit=`M${cx} ${top} A${r} ${r} 0 0 1 ${cx} ${bot} A${absT} ${r} 0 0 ${sw2} ${cx} ${top}Z`;
+  }else{
+    const sw2=tx<0?0:1;
+    lit=`M${cx} ${top} A${r} ${r} 0 0 0 ${cx} ${bot} A${absT} ${r} 0 0 ${sw2} ${cx} ${top}Z`;
+  }
+  const illum=Math.round(50*(1-Math.cos(angle)));
+  const nearFull=illum>88;
+  // Subtle crater marks on lit side
+  const craters=nearFull?
+    `<circle cx="44" cy="42" r="3.5" fill="rgba(0,0,0,.08)"/><circle cx="60" cy="55" r="2.5" fill="rgba(0,0,0,.07)"/><circle cx="50" cy="60" r="2" fill="rgba(0,0,0,.06)"/>`:
+    `<circle cx="46" cy="44" r="3" fill="rgba(0,0,0,.07)"/><circle cx="58" cy="52" r="2" fill="rgba(0,0,0,.06)"/>`;
+  const glow=nearFull?`<circle cx="${cx}" cy="${cy}" r="${r+6}" fill="none" stroke="rgba(240,225,120,.12)" stroke-width="8" filter="url(#mf)"/>`:
+    illum>50?`<circle cx="${cx}" cy="${cy}" r="${r+3}" fill="none" stroke="rgba(240,225,120,.06)" stroke-width="5" filter="url(#mf)"/>`:'';
+  return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 2px 12px rgba(240,225,120,.18))">
+  <defs>
+    <radialGradient id="mlit" cx="42%" cy="35%" r="68%">
+      <stop offset="0%" stop-color="#fffff5"/><stop offset="45%" stop-color="#e8d97a"/><stop offset="100%" stop-color="#b8962a"/>
+    </radialGradient>
+    <radialGradient id="mdark" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#16203a"/><stop offset="100%" stop-color="#0a1120"/>
+    </radialGradient>
+    <filter id="mf"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <clipPath id="mclip"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>
+  </defs>
+  ${glow}
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#mdark)"/>
+  <path d="${lit}" fill="url(#mlit)" clip-path="url(#mclip)"/>
+  <g clip-path="url(#mclip)">${craters}</g>
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(232,217,122,.14)" stroke-width="1"/>
+</svg>`;
+}
+
+function renderAstro(){
+  const body=document.getElementById('astro-body'),badge=document.getElementById('astro-badge');
+  if(!body)return;
+  const moon=calcMoon();
+  const pt=(typeof calcPhotoTimes==='function')?calcPhotoTimes():null;
+  const duskH=pt?.nautPMh, dawnH=pt?.nautAMh;
+  const illum=moon.illum;
+  let skyQual,skyColor;
+  if(illum<15){skyQual='Odlično temno nebo';skyColor='var(--purple)';}
+  else if(illum<40){skyQual='Dobro — šibka lunina svetloba';skyColor='var(--blue)';}
+  else if(illum<70){skyQual='Zmerno — luna moti';skyColor='var(--amber)';}
+  else{skyQual='Svetlo — močna luna';skyColor='var(--amber)';}
+  let windowTxt='—';
+  if(duskH!=null&&dawnH!=null){
+    const f=h=>String(Math.floor(h)).padStart(2,'0')+':'+String(Math.round((h%1)*60)).padStart(2,'0');
+    windowTxt=f(duskH)+' → '+f(dawnH);
+  }
+  const moonSvg=moonPhaseSVG(+moon.age);
+  body.innerHTML=`<div class="astro-wrap">
+    <div style="flex-shrink:0;width:80px;height:80px">${moonSvg}</div>
+    <div class="astro-info">
+      <div class="astro-window" style="color:${skyColor}">${skyQual}</div>
+      <div class="astro-sub">${moon.phase}, ${illum}% osvetljena. ${illum<25?'Idealno za Mlečno cesto in deep-sky.':illum>75?'Primerno le za Luno in svetle objekte.':'Zmerni pogoji za astrofotografijo.'}</div>
+      <div class="astro-kpis">
+        <div class="astro-kpi"><b>${windowTxt}</b>temni interval</div>
+        <div class="astro-kpi"><b>${illum}%</b>lunina osvetlitev</div>
+        <div class="astro-kpi"><b>${moon.toNew} dni</b>do mlaja</div>
+        <div class="astro-kpi"><b>Bortle 4–5</b>Rečica ocena</div>
+      </div>
+    </div>
+  </div>`;
+  badge.textContent=illum+'% luna';
+}
+
+// ── 9. Seasonal milestones (first / last) ────────────────
+function renderMilestones(){
+  const body=document.getElementById('ms-body'),badge=document.getElementById('ms-badge');
+  if(!body)return;
+  const store=_insStore();
+  const keys=Object.keys(store).sort();
+  if(keys.length<60){body.innerHTML='<div class="streak-empty">Premalo podatkov za sezonske mejnike.</div>';badge.textContent='—';return;}
+  const yr=new Date().getFullYear();
+  const thisYear=keys.filter(k=>+k.slice(0,4)===yr);
+  const lastYear=keys.filter(k=>+k.slice(0,4)===yr-1);
+  // Helper: find first date in a year matching a predicate (chronological)
+  const firstMatch=(yearKeys,pred)=>{for(const k of yearKeys){if(pred(store[k]))return k;}return null;};
+  const lastMatch=(yearKeys,pred)=>{for(let i=yearKeys.length-1;i>=0;i--){if(pred(store[yearKeys[i]]))return yearKeys[i];}return null;};
+  const dd=(k)=>k?new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'}):'—';
+  const dayOfYear=(k)=>{const d=new Date(k+'T12:00:00');return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5);};
+  const milestones=[];
+  // First summer day (Tmax >= 25) this year
+  const fsd=firstMatch(thisYear,m=>_tHi(m)>=25);
+  const fsdLast=firstMatch(lastYear,m=>_tHi(m)>=25);
+  if(fsd)milestones.push({icon:'☀️',title:'Prvi poletni dan (≥25°C)',date:fsd,lastDate:fsdLast});
+  // First hot day (Tmax >= 30)
+  const fhd=firstMatch(thisYear,m=>_tHi(m)>=30);
+  const fhdLast=firstMatch(lastYear,m=>_tHi(m)>=30);
+  if(fhd)milestones.push({icon:'🔥',title:'Prvi vroči dan (≥30°C)',date:fhd,lastDate:fhdLast});
+  // Last frost of spring (Tmin <= 0, before July)
+  const springKeys=thisYear.filter(k=>+k.slice(5,7)<=6);
+  const lf=lastMatch(springKeys,m=>_tLo(m)<=0);
+  const springKeysLast=lastYear.filter(k=>+k.slice(5,7)<=6);
+  const lfLast=lastMatch(springKeysLast,m=>_tLo(m)<=0);
+  if(lf)milestones.push({icon:'❄️',title:'Zadnja spomladanska pozeba',date:lf,lastDate:lfLast});
+  // First frost of autumn (Tmin <= 0, after July)
+  const autumnKeys=thisYear.filter(k=>+k.slice(5,7)>=8);
+  const ff=firstMatch(autumnKeys,m=>_tLo(m)<=0);
+  if(ff)milestones.push({icon:'🌬️',title:'Prva jesenska pozeba',date:ff,lastDate:null});
+  // First warm spring day (Tmax >= 20)
+  const fw=firstMatch(thisYear,m=>_tHi(m)>=20);
+  const fwLast=firstMatch(lastYear,m=>_tHi(m)>=20);
+  if(fw)milestones.push({icon:'🌷',title:'Prvi topli dan (≥20°C)',date:fw,lastDate:fwLast});
+  if(!milestones.length){body.innerHTML='<div class="streak-empty">Letos še ni zabeleženih mejnikov.</div>';badge.textContent='0';return;}
+  body.innerHTML='<div class="ms-list">'+milestones.map(ms=>{
+    let deltaHtml='';
+    if(ms.lastDate){
+      const diff=dayOfYear(ms.date)-dayOfYear(ms.lastDate);
+      if(Math.abs(diff)<=2)deltaHtml='<span class="ms-delta ms-same">≈ kot lani</span>';
+      else if(diff<0)deltaHtml='<span class="ms-delta ms-early">'+Math.abs(diff)+' dni prej</span>';
+      else deltaHtml='<span class="ms-delta ms-late">'+diff+' dni pozneje</span>';
+    }
+    return'<div class="ms-item"><span class="ms-icon">'+ms.icon+'</span><div class="ms-body"><div class="ms-title">'+ms.title+'</div><div class="ms-date">'+dd(ms.date)+' '+yr+(ms.lastDate?' · lani '+dd(ms.lastDate):'')+'</div></div>'+deltaHtml+'</div>';
+  }).join('')+'</div>';
+  badge.textContent=milestones.length+' mejnikov';
+}
+
 function refreshInsights(){
   try{renderClimateAnomaly();}catch(e){}
   try{renderStreaks();}catch(e){}
   try{renderSeasonProgress();}catch(e){}
   try{renderStationMood();}catch(e){}
   try{renderThisWeekHistory();}catch(e){}
+  try{renderMilestones();}catch(e){}
+  try{renderAstro();}catch(e){}
+  try{fetchInversion();}catch(e){}
 }
 function initInsights(){
   const dateInput=document.getElementById('analog-date');
@@ -3590,7 +3461,7 @@ function autoAccentCards(){
 
 function triggerLivePulse(){
   // Hero metric cards
-  ['hm-humidity','hm-pressure','hm-wind','hm-uv'].forEach(id=>{
+  ['hm-humidity','hm-pressure','hm-wind','hm-rain'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     el.classList.remove('pulse-live');void el.offsetWidth;
     el.classList.add('pulse-live');
@@ -3613,7 +3484,6 @@ function triggerLivePulse(){
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
-  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
   const tempEl=document.getElementById('temp-val');
   if(tempEl){_lastTemp=m.temp;tempEl.style.color=tempColor(m.temp);countUp('temp-val',m.temp,1,'',1200);}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
@@ -3622,10 +3492,15 @@ function applyObs(obs){
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)">%</span>',1000);
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
-  set('hs-uv',obs.uv??'—');
+  set('hs-uv',obs.uv??'—'); // UV small card still populated
+  countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)">mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit">km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
   document.getElementById('needle').style.transform='rotate('+obs.winddir+'deg)';
+  // Speed glow ring: green→amber→red by speed
+  const spd=m.windSpeed||0;
+  const sring=document.getElementById('wind-speed-ring');
+  if(sring){const sc=spd>45?'var(--red)':spd>25?'var(--amber)':'var(--green)';sring.style.stroke=sc;sring.style.opacity=Math.min(.85,spd/55).toFixed(2);}
   const bf=beaufort(m.windSpeed||0);set('bft-num','Bft '+bf.n);set('bft-label',bf.name);
   countUp('pressure-val',m.pressure,1,'<span class="unit">hPa</span>',1200);
   const pEl=document.getElementById('p-trend');
@@ -3658,6 +3533,10 @@ function applyObs(obs){
   renderStormAutopsy();
   setWeatherArt(obs);
   updateBgFromObs(obs);
+  // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
+  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
+  // Refresh astro moon phase
+  try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
   triggerLivePulse();
@@ -3882,7 +3761,8 @@ function switchTab(tab){
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
-  setTimeout(autoAccentCards, 80); // catch any dynamically-rendered cards
+  if(tab==='insights'){ if(_lastBriefObs)applyPhotographyWidget(_lastBriefObs); refreshInsights(); setTimeout(autoAccentCards,80); return; }
+  setTimeout(autoAccentCards, 80);
 }
 function histTabActive(){
   return !!document.getElementById('tab-history')?.classList.contains('active');
