@@ -7316,7 +7316,7 @@ function setHeroCond(cond){
 }
 
 // ── Mesh gradient canvas ──────────────────────────────────
-let _meshCtx=null,_meshNodes=[],_meshAnimId=null,_meshFrame=0;
+let _meshCtx=null,_meshCanvas=null,_meshNodes=[],_meshAnimId=null,_meshFrame=0;
 let _meshWindAngle=0,_meshWindSpeed=0.5;
 
 const MESH_DEFS=[
@@ -7349,6 +7349,7 @@ function meshTimeOverride(t){
 function initMeshCanvas(){
   const c=document.getElementById('mesh-canvas');
   if(!c)return;
+  _meshCanvas=c;
   _meshCtx=c.getContext('2d');
   c.style.opacity = isDark() ? '1' : '0.35';
   const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
@@ -7409,8 +7410,7 @@ function updateBgFromObs(obs){
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
   applyWeatherBg(cond);
   // Reduce mesh visibility in light mode so cards stay readable
-  const meshOpacity = isDark() ? 1 : 0.35;
-  if(_meshNodes.length) _meshCanvas.style.opacity = meshOpacity;
+  if(_meshCanvas) _meshCanvas.style.opacity = isDark() ? '1' : '0.35';
   updateMeshColors(cond,obs?.winddir,wind);
   setHeroCond(cond);
 }
