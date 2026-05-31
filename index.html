@@ -8982,15 +8982,55 @@ async function fetchHourly(){
 let _scData=null,_scFetchTime=0,_scInit=false;
 async function fetchStormChaser(){
   if(_scData&&Date.now()-_scFetchTime<15*60*1000){renderStormChaser();return;}
+  const setStatus=(msg)=>{const b=document.getElementById('sc-desc');if(b)b.textContent=msg;};
+  setStatus('Pridobivam podatke…');
   try{
-    const h=['temperature_2m','dew_point_2m','relative_humidity_2m','cape','cin','lifted_index','freezing_level_height','precipitation_probability','showers','precipitation','wind_gusts_10m','wind_speed_10m','wind_direction_10m','wind_speed_80m','wind_direction_80m','wind_speed_120m','wind_direction_120m','wind_speed_180m','wind_direction_180m'].join(',');
-    const pl=['temperature_850hPa','relative_humidity_850hPa','temperature_700hPa','relative_humidity_700hPa','temperature_500hPa','wind_speed_850hPa','wind_direction_850hPa','wind_speed_700hPa','wind_direction_700hPa','wind_speed_500hPa','wind_direction_500hPa','wind_speed_300hPa','wind_direction_300hPa','geopotential_height_850hPa','geopotential_height_500hPa'].join(',');
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${h},${pl}&timezone=Europe%2FLjubljana&forecast_days=2`);
-    const d=await r.json();_scData=d.hourly;_scFetchTime=Date.now();renderStormChaser();
-  }catch(e){const b=document.getElementById('sc-desc');if(b)b.textContent='Napaka pri pridobivanju podatkov.';}
+    // Split into two smaller requests to avoid URL length issues and bad parameters
+    const url1=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`+
+      `&hourly=temperature_2m,dew_point_2m,relative_humidity_2m,cape,lifted_index`+
+      `,freezing_level_height,precipitation_probability,wind_gusts_10m`+
+      `,wind_speed_10m,wind_direction_10m,wind_speed_80m,wind_direction_80m`+
+      `,wind_speed_120m,wind_direction_120m,wind_speed_180m,wind_direction_180m`+
+      `&timezone=Europe%2FLjubljana&forecast_days=2`;
+    const url2=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`+
+      `&hourly=temperature_850hPa,relative_humidity_850hPa`+
+      `,temperature_700hPa,relative_humidity_700hPa,temperature_500hPa`+
+      `,wind_speed_850hPa,wind_direction_850hPa`+
+      `,wind_speed_700hPa,wind_direction_700hPa`+
+      `,wind_speed_500hPa,wind_direction_500hPa`+
+      `,wind_speed_300hPa,wind_direction_300hPa`+
+      `&timezone=Europe%2FLjubljana&forecast_days=2`;
+    const [r1,r2]=await Promise.all([fetch(url1),fetch(url2)]);
+    const [d1,d2]=await Promise.all([r1.json(),r2.json()]);
+    if(d1.error||d2.error){
+      const msg=(d1.reason||d2.reason||'API napaka');
+      console.error('Storm API error:',msg,d1,d2);
+      setStatus('Napaka API: '+msg);return;
+    }
+    // Merge hourly fields from both responses
+    _scData=Object.assign({},d1.hourly,d2.hourly);
+    _scFetchTime=Date.now();
+  }catch(e){
+    console.error('Storm fetch error:',e);
+    setStatus('Napaka pri pridobivanju podatkov: '+e.message);
+    return;
+  }
+  try{
+    renderStormChaser();
+  }catch(e){
+    console.error('Storm render error:',e);
+    document.getElementById('sc-desc').textContent='Napaka pri prikazu: '+e.message;
+  }
 }
-function scIdx(a,i){return a?.[i]??null;}
-function scMagnus(T,rh){const a=17.625,b=243.04,g=Math.log(rh/100)+a*T/(b+T);return b*g/(a-g);}
+function scIdx(a,i){return(a&&i>=0&&i<a.length)?a[i]??null:null;}
+function scMagnus(T,rh){
+  // Dewpoint from temperature and relative humidity
+  if(rh==null||rh<=0||T==null)return T-10; // fallback
+  const rhSafe=Math.max(1,Math.min(100,rh));
+  const a=17.625,b=243.04;
+  const g=Math.log(rhSafe/100)+a*T/(b+T);
+  return b*g/(a-g);
+}
 function scUV(spd,dir){const rad=dir*Math.PI/180;return{u:-spd*Math.sin(rad),v:-spd*Math.cos(rad)};}
 function scDirLbl(d){const dirs=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return dirs[Math.round(d/22.5)%16];}
 function calcStormThreat(cape,cin,li,tt,shear){
@@ -9026,10 +9066,10 @@ function renderStormChaser(){
   const ws700=scIdx(d.wind_speed_700hPa,ci)??ws80,wd700=scIdx(d.wind_direction_700hPa,ci)??wd80;
   const ws500=scIdx(d.wind_speed_500hPa,ci)??ws80,wd500=scIdx(d.wind_direction_500hPa,ci)??wd80;
   const ws300=scIdx(d.wind_speed_300hPa,ci)??ws500,wd300=scIdx(d.wind_direction_300hPa,ci)??wd500;
-  const tt=T850+Td850-2*T500;
-  const ki=T850-T500+Td850-(T700-Td700);
-  const uv0=scUV(ws10,wd10),uv5=scUV(ws500,wd500);
-  const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2);
+  const tt=isFinite(T850+Td850-2*T500)?T850+Td850-2*T500:0;
+  const ki=isFinite(T850-T500+Td850-(T700-Td700))?T850-T500+Td850-(T700-Td700):20;
+  const uv0=scUV(ws10||0,wd10||0),uv5=scUV(ws500||0,wd500||0);
+  const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2)||0;
   const pwat=Math.max(5,Math.round((Td2+20)*0.8+rh850*0.1));
   // Threat
   const thr=calcStormThreat(cape,cin,li,tt,shear);
