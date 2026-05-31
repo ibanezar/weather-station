@@ -1133,6 +1133,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
+
   <!-- Day summary -->
   <div class="day-summary">
     <div class="ds-item ds-high"><span class="ds-arrow">↑ Maks</span><span class="ds-temp"><span id="day-high">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">—</span></span></div>
@@ -1141,7 +1142,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ds-item ds-avg"><span class="ds-arrow">~ Povpr</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">Dnevno povprečje</span></div>
   </div>
 
-  <div class="insights-row">
+<div class="insights-row">
     <div class="insight-card" id="ic-inversion">
       <div class="ic-head"><span>🔄 Temperaturna inverzija</span><span class="ic-badge" id="inv-badge">—</span></div>
       <div id="inv-body"><div class="inv-sub">Nalaganje…</div></div>
@@ -1152,47 +1153,31 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-  <!-- Wind + Pressure -->
+    <!-- Wind + Pressure -->
   <div class="g2">
-    <div class="card ca-green">
+    <div class="card">
       <div class="clabel">🧭 Veter</div>
       <div class="wind-body">
         <svg width="110" height="110" viewBox="0 0 110 110">
           <circle class="c-ring" cx="55" cy="55" r="50" stroke-width="1.5"/>
           <circle class="c-ring" cx="55" cy="55" r="38" stroke-width="1" opacity=".6"/>
-          <!-- Speed glow ring (JS-driven) -->
-          <circle id="wind-speed-ring" cx="55" cy="55" r="47" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="5 3" opacity="0" style="transition:stroke .8s,opacity .8s"/>
-          <line class="c-tick" x1="55" y1="8"  x2="55" y2="17" stroke-width="2"/>
-          <line class="c-tick" x1="55" y1="93" x2="55" y2="102" stroke-width="1.5"/>
-          <line class="c-tick" x1="8"  y1="55" x2="17" y2="55" stroke-width="1.5"/>
-          <line class="c-tick" x1="93" y1="55" x2="102" y2="55" stroke-width="1.5"/>
+          <line class="c-tick" x1="55" y1="8"  x2="55" y2="16" stroke-width="1.5"/>
+          <line class="c-tick" x1="55" y1="94" x2="55" y2="102" stroke-width="1.5"/>
+          <line class="c-tick" x1="8"  y1="55" x2="16" y2="55" stroke-width="1.5"/>
+          <line class="c-tick" x1="94" y1="55" x2="102" y2="55" stroke-width="1.5"/>
           <line class="c-tick-m" x1="19.9" y1="19.9" x2="25.6" y2="25.6" stroke-width="1"/>
           <line class="c-tick-m" x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke-width="1"/>
           <line class="c-tick-m" x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke-width="1"/>
           <line class="c-tick-m" x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke-width="1"/>
-          <!-- Cardinal labels: N in amber, rest muted -->
-          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="9" font-weight="700" fill="var(--amber)">N</text>
-          <text class="c-lbl-d" x="55" y="110" text-anchor="middle" font-size="8">S</text>
+          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="8" font-weight="500">N</text>
+          <text class="c-lbl-d" x="55" y="108" text-anchor="middle" font-size="8">S</text>
           <text class="c-lbl-d" x="4"  y="58"  text-anchor="middle" font-size="8">W</text>
           <text class="c-lbl-d" x="107" y="58" text-anchor="middle" font-size="8">E</text>
-          <!-- Intercardinal labels -->
-          <text class="c-lbl-d" x="89" y="23" text-anchor="middle" font-size="6.5" opacity=".6">NE</text>
-          <text class="c-lbl-d" x="89" y="92" text-anchor="middle" font-size="6.5" opacity=".6">SE</text>
-          <text class="c-lbl-d" x="21" y="92" text-anchor="middle" font-size="6.5" opacity=".6">SW</text>
-          <text class="c-lbl-d" x="21" y="23" text-anchor="middle" font-size="6.5" opacity=".6">NW</text>
-          <!-- Enhanced needle: gradient tip + tail -->
-          <defs>
-            <linearGradient id="ndl-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--amber)"/>
-              <stop offset="100%" stop-color="var(--needle)"/>
-            </linearGradient>
-            <filter id="ndl-glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
           <g id="needle" style="transform-origin:55px 55px;transform:rotate(0deg);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)">
-            <polygon points="55,14 59,55 55,64 51,55" fill="url(#ndl-grad)" filter="url(#ndl-glow)" opacity=".95"/>
-            <polygon points="55,96 59,55 55,64 51,55" fill="var(--needle)" opacity=".18"/>
-            <circle cx="55" cy="55" r="5" fill="var(--needle)" opacity=".9"/>
-            <circle cx="55" cy="55" r="2.5" fill="white" opacity=".9"/>
+            <polygon points="55,15 58,55 55,63 52,55" fill="var(--needle)" opacity=".9"/>
+            <polygon points="55,95 58,55 55,63 52,55" fill="var(--needle)" opacity=".2"/>
+            <circle cx="55" cy="55" r="4" fill="var(--needle)"/>
+            <circle cx="55" cy="55" r="2" fill="var(--needle-tip)"/>
           </g>
         </svg>
         <div>
@@ -1204,7 +1189,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
-    <div class="card ca-purple">
+    <div class="card">
       <div class="clabel">📊 Tlak</div>
       <div class="pressure-body">
         <div class="pressure-left">
@@ -1252,7 +1237,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Biometeo + Fog -->
   <div class="g2" style="margin-bottom:1rem">
-    <div class="card ca-red">
+    <div class="card">
       <div class="clabel">🌡 Biometeorološki indeks</div>
       <div class="bio-grid">
         <div class="bio-item" id="bio-humidex-box">
@@ -1270,7 +1255,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="csub" id="bio-overall" style="margin-top:.6rem"></div>
     </div>
-    <div class="card ca-cyan">
+    <div class="card">
       <div class="clabel">🌫 Napoved megle — <span id="fog-location">Rečica ob Savinji</span></div>
       <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
         <div class="cval" id="fog-now-val">—<span class="unit">%</span></div>
@@ -1283,23 +1268,28 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
   <!-- 4 small cards -->
-  <div class="g3" style="margin-bottom:1rem">
-    <div class="card ca-blue">
+  <div class="g4" style="margin-bottom:1rem">
+    <div class="card">
       <div class="clabel">🌧 Intenz. padavin</div>
       <div class="cval" id="rain-rate">—<span class="unit">mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
       <div class="csub">Danes: <span id="rain-total">—</span> mm</div>
     </div>
-    <div class="card ca-amber">
+    <div class="card">
       <div class="clabel">☀ UV indeks</div>
       <div class="cval" id="uv-val">—</div>
       <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
       <div class="csub" id="uv-label">—</div>
     </div>
-    <div class="card ca-amber">
+    <div class="card">
       <div class="clabel">⚡ Sončno sevanje</div>
       <div class="cval" id="solar-val">—<span class="unit">W/m²</span></div>
       <div class="csub" id="solar-label">—</div>
+    </div>
+    <div class="card">
+      <div class="clabel">💧 Rosišče</div>
+      <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
+      <div class="csub" id="dewpt-label">—</div>
     </div>
   </div>
 
@@ -1329,6 +1319,79 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
   </div>
 
+  <!-- Text forecast -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">📝 Napoved za 7 dni</span>
+      <span class="chart-range" id="txfc-updated"></span>
+    </div>
+    <div id="txfc-grid" class="txfc-grid">
+      <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+    </div>
+    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
+  </div>
+
+  <!-- Advanced Open-Meteo signals -->
+  <div class="omx-grid" id="omx-grid">
+    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zaupanje napovedi…</div></div>
+    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
+    <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
+    <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
+  </div>
+
+  <!-- 24h Sky Strip -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.5rem">
+      <span class="clabel" style="margin:0">🌅 Dnevni trak neba — naslednjih 24 ur</span>
+      <span class="chart-range" id="sky-range">—</span>
+    </div>
+    <div class="sky-strip-outer">
+      <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
+           xmlns="http://www.w3.org/2000/svg" height="128">
+        <text x="480" y="64" text-anchor="middle" font-size="12"
+              fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+      </svg>
+    </div>
+    <div class="sky-legend">
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#f87171"></span>Temperatura</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
+      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
+      <span style="margin-left:auto;opacity:.6">↔ drsaj za cel dan</span>
+    </div>
+  </div>
+
+  <!-- Phenological calendar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
+      <span class="chart-range">Fenološki GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
+    </div>
+    <div class="g2" style="gap:.75rem">
+      <div class="pheno-list" id="pheno-list-left"></div>
+      <div class="pheno-list" id="pheno-list-right"></div>
+    </div>
+    <div class="csub" id="pheno-note" style="margin-top:.75rem"></div>
+  </div>
+
+  <!-- Water balance -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
+      <span class="chart-range" id="wbal-status"></span>
+    </div>
+    <div class="wbal-summary">
+      <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
+      <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
+      <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
+    </div>
+    <div style="height:60px;position:relative;margin-top:.25rem">
+      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
+      <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
+  </div>
+
   <!-- Daily microclimate fingerprint -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.45rem">
@@ -1337,6 +1400,65 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div id="mcf-content" class="mcf-hero">
       <div style="color:var(--muted);font-size:.78rem">Berem lokalne signale doline…</div>
+    </div>
+  </div>
+
+  <!-- Microclimate analysis -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.25rem">
+      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
+      <span class="chart-range" id="mc-updated">—</span>
+    </div>
+    <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
+  </div>
+
+  <!-- Why is weather like this -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.4rem">
+      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
+      <span class="why-updated" id="why-updated">—</span>
+    </div>
+    <div class="why-text" id="why-text">Nalaganje razlage…</div>
+  </div>
+
+  <!-- On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-title">📅 Vreme na ta dan v preteklosti</span>
+      <span class="chart-range" id="otd-source">Open-Meteo ERA5</span>
+    </div>
+    <div class="otd-grid" id="otd-grid">
+      <div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+    </div>
+  </div>
+
+  <!-- Station On This Day -->
+  <div class="card chart-card" style="margin-bottom:1rem" id="otd-station-card">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0" id="otd-station-title">📡 Ta dan na postaji IREICA1</span>
+      <span class="chart-range" id="otd-station-source">Lokalna shramba</span>
+    </div>
+    <div class="otd-grid otd-station" id="otd-station-grid">
+      <div class="otd-nodata">Nalaganje…</div>
+    </div>
+  </div>
+
+  <!-- Generative Weather Art + AI Brief -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card weather-art-wrap" style="padding:0;overflow:hidden">
+      <canvas id="weather-art-canvas"></canvas>
+      <div class="art-label" id="art-label">—</div>
+    </div>
+    <div class="card">
+      <div class="chart-hdr" style="margin-bottom:.25rem">
+        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="chart-range" id="brief-date"></span>
+          <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
+        </div>
+      </div>
+      <div class="ai-brief-text" id="ai-brief-text">Nalaganje…</div>
+      <div class="ai-brief-meta" id="ai-brief-meta"></div>
     </div>
   </div>
 
@@ -1362,85 +1484,125 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-  <!-- Weather Score -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="clabel">🎯 Vremenski indeks</div>
-    <div class="score-wrap">
-      <div class="score-ring" id="score-ring">
-        <div class="score-n" id="score-num">—</div>
-        <div class="score-l" id="score-lbl">—</div>
-      </div>
-      <div style="flex:1">
-        <div class="csub" id="score-desc" style="margin-bottom:.3rem">—</div>
-        <div class="acts" id="activities"></div>
-      </div>
-    </div>
-  </div>
-
-  </div>
-
-  <!-- Sunrise + snapshot -->
-  <div class="g3" style="margin-bottom:1rem">
+  <!-- Weather Score + Moon -->
+  <div class="g2" style="margin-bottom:1rem">
     <div class="card">
-      <div class="clabel">🌅 Sončni dan</div>
-      <div class="sun-svg-wrap">
-        <svg class="sun-svg" viewBox="0 0 260 140" id="sun-svg">
-          <defs>
-            <radialGradient id="sgg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f59e0b" stop-opacity=".5"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
-            <filter id="sgf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <line class="sun-ground" x1="10" y1="125" x2="250" y2="125" stroke-width="1"/>
-          <path class="sun-track" d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke-width="3" stroke-linecap="round"/>
-          <path id="sun-progress" d="M 15 125" fill="none" stroke="rgba(217,119,6,.4)" stroke-width="3" stroke-linecap="round"/>
-          <circle id="sun-halo" cx="130" cy="10" r="18" fill="url(#sgg)" opacity="0"/>
-          <circle id="sun-dot" cx="130" cy="10" r="7" fill="#f59e0b" filter="url(#sgf)" opacity="0"/>
-          <text class="sun-lbl" id="sr-label" x="15"  y="138" font-size="9">—</text>
-          <text class="sun-lbl" id="ss-label" x="245" y="138" font-size="9" text-anchor="end">—</text>
-        </svg>
-      </div>
-      <div class="sun-times">
-        <span>↑ <span id="sunrise-time">—</span></span>
-        <span class="daylen" id="daylen">—</span>
-        <span>↓ <span id="sunset-time">—</span></span>
+      <div class="clabel">🎯 Vremenski indeks</div>
+      <div class="score-wrap">
+        <div class="score-ring" id="score-ring">
+          <div class="score-n" id="score-num">—</div>
+          <div class="score-l" id="score-lbl">—</div>
+        </div>
+        <div style="flex:1">
+          <div class="csub" id="score-desc" style="margin-bottom:.3rem">—</div>
+          <div class="acts" id="activities"></div>
+        </div>
       </div>
     </div>
-    <div class="card span2">
-      <div class="clabel">📍 Pregled postaje</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
+    <div class="card">
+      <div class="clabel">🌙 Lunina faza</div>
+      <div class="moon-body">
+        <div class="moon-big" id="moon-emoji">🌑</div>
+        <div>
+          <div class="moon-pn" id="moon-phase">—</div>
+          <div class="moon-il">Osvetlitev: <span id="moon-illum">—</span>%</div>
+          <div class="moon-il">Starost: <span id="moon-age">—</span> dni</div>
+          <div class="moon-nx" id="moon-next"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  </div><!-- /day-summary -->
-
-  <!-- AI intel grid -->
-  <div class="local-intel-grid">
-    <div class="intel-card" id="daily-almanac">
-      <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
-      <div class="intel-text">Sestavljam dnevni almanah…</div>
+  <!-- Air Quality + Agrometeo -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">💨 Kakovost zraka</div>
+      <div class="cval" id="aqi-val">—<span class="unit" id="aqi-lbl" style="font-size:.75rem"></span></div>
+      <div class="aqi-bar-wrap"><div class="aqi-dot" id="aqi-dot" style="left:0%"></div></div>
+      <div class="aqi-grid">
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm25">—</div><div class="aqi-cl">PM2.5</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-pm10">—</div><div class="aqi-cl">PM10</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-no2">—</div><div class="aqi-cl">NO₂</div></div>
+        <div class="aqi-cell"><div class="aqi-cv" id="aqi-ozone">—</div><div class="aqi-cl">Ozon</div></div>
+      </div>
     </div>
-    <div class="intel-card" id="weather-memory">
-      <div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">IREICA1</span></div>
-      <div class="intel-text">Iščem podoben dan v zgodovini…</div>
-    </div>
-    <div class="intel-card" id="forecast-personality">
-      <div class="intel-head"><div class="intel-label">Dnevni značaj vremena</div><span class="intel-badge">Rečica</span></div>
-      <div class="intel-text">Berem lokalni podpis vremena…</div>
-    </div>
-    <div class="intel-card hidden" id="storm-autopsy">
-      <div class="intel-head"><div class="intel-label">Savinjska Storm Autopsy</div><span class="intel-badge">dogodek</span></div>
-      <div class="intel-text">Čakam na nevihtni dogodek…</div>
+    <div class="card">
+      <div class="clabel">🌾 Agrometeo</div>
+      <div class="csub" id="agro-date" style="margin-bottom:.25rem">Danes</div>
+      <div class="agro-grid">
+        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ mm/dan</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-sun">—</div><div class="agro-l">Sončnih ur</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (baza 10°)</div></div>
+      </div>
+      <div class="csub" id="agro-note" style="margin-top:.5rem"></div>
     </div>
   </div>
 
-  <!-- Wind + Pressure -->
-  <div class="insights-row">
+
+  <!-- Pollen + Savinja river -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">🌸 Pelod & alergeni</div>
+      <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
+      <div class="pollen-grid" id="pollen-grid"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">🌊 Reka Savinja — pretok</div>
+      <div id="flood-content">
+        <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly summary + Year records -->
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="clabel">📊 <span id="month-title">Mesečni povzetek</span></div>
+      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
+    </div>
+    <div class="card">
+      <div class="clabel">🏅 Rekordi leta <span id="rec-year-lbl"></span></div>
+      <div class="yr-grid" id="yr-grid">
+        <div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Climate comparison -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">☀️ Klimatsko primerjanje — <span id="clim-month-lbl">ta mesec</span></span>
+      <span class="chart-range" id="clim-range">vs. povprečje 10 let</span>
+    </div>
+    <div id="clim-content" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
+  </div>
+
+  <!-- Lightning -->
+  <div class="card" style="margin-bottom:1rem" id="ltg-card">
+    <div class="clabel">⚡ Strele v bližini (200 km)</div>
+    <div class="ltg-wrap">
+      <div>
+        <div class="ltg-count" id="ltg-count">0</div>
+        <div class="ltg-sub"><span id="ltg-window">strel v zadnji uri</span><br><span id="ltg-nearest" style="color:var(--amber)"></span></div>
+      </div>
+      <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.76rem">Čakam na podatke…</div></div>
+    </div>
+  </div>
+
+  <!-- Windy Radar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
+      <span class="chart-range">Windy · ECMWF</span>
+    </div>
+    <iframe class="windy-frame" id="windy-frame"
+      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      allowfullscreen loading="lazy"></iframe>
+  </div>
+
+
+  <!-- ══ INSIGHTS ══ -->
+<div class="insights-row">
     <div class="insight-card" id="ic-astro">
       <div class="ic-head"><span>🌌 Nočno nebo & astro</span><span class="ic-badge" id="astro-badge">—</span></div>
       <div id="astro-body"><div class="astro-sub">Nalaganje…</div></div>
@@ -1481,87 +1643,63 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-  <!-- Photography helper (moved from Aktualno) -->
+    <!-- Photography helper -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">📷 Fotografski pomočnik</span>
       <span class="chart-range" id="photo-phase-lbl">—</span>
     </div>
+    <!-- Light timeline -->
     <div class="photo-timeline" id="photo-timeline"></div>
     <div class="photo-events" id="photo-events"></div>
+    <!-- Macro conditions -->
     <div class="photo-macro-grid" id="photo-macro-grid"></div>
+    <!-- Active subjects -->
     <div class="clabel" style="font-size:.72rem;margin:.4rem 0 .3rem">Aktivnost danes</div>
     <div class="photo-subjects" id="photo-subjects"></div>
     <div class="csub" id="photo-tip" style="margin-top:.65rem;font-style:italic"></div>
   </div>
 
-  
-    <!-- On This Day -->
-  <div class="card chart-card" style="margin-bottom:1rem" id="otd-card">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0" id="otd-title">📅 Vreme na ta dan v preteklosti</span>
-      <span class="chart-range" id="otd-source">Open-Meteo ERA5</span>
-    </div>
-    <div class="otd-grid" id="otd-grid">
-      <div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
-    </div>
-  </div>
-
-  
-    <!-- Station On This Day -->
-  <div class="card chart-card" style="margin-bottom:1rem" id="otd-station-card">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0" id="otd-station-title">📡 Ta dan na postaji IREICA1</span>
-      <span class="chart-range" id="otd-station-source">Lokalna shramba</span>
-    </div>
-    <div class="otd-grid otd-station" id="otd-station-grid">
-      <div class="otd-nodata">Nalaganje…</div>
-    </div>
-  </div>
-
-  
-    <!-- Microclimate analysis -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.25rem">
-      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
-      <span class="chart-range" id="mc-updated">—</span>
-    </div>
-    <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
-  </div>
-
-  
-    <!-- Why is weather like this -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.4rem">
-      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
-      <span class="why-updated" id="why-updated">—</span>
-    </div>
-    <div class="why-text" id="why-text">Nalaganje razlage…</div>
-  </div>
-
-  
-    <!-- Generative Weather Art + AI Brief -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card weather-art-wrap" style="padding:0;overflow:hidden">
-      <canvas id="weather-art-canvas"></canvas>
-      <div class="art-label" id="art-label">—</div>
-    </div>
+  <!-- Sunrise + snapshot -->
+  <div class="g3" style="margin-bottom:1rem">
     <div class="card">
-      <div class="chart-hdr" style="margin-bottom:.25rem">
-        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
-        <div style="display:flex;gap:.4rem;align-items:center">
-          <span class="chart-range" id="brief-date"></span>
-          <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
-        </div>
+      <div class="clabel">🌅 Sončni dan</div>
+      <div class="sun-svg-wrap">
+        <svg class="sun-svg" viewBox="0 0 260 140" id="sun-svg">
+          <defs>
+            <radialGradient id="sgg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f59e0b" stop-opacity=".5"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+            <filter id="sgf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <line class="sun-ground" x1="10" y1="125" x2="250" y2="125" stroke-width="1"/>
+          <path class="sun-track" d="M 15 125 A 115 115 0 0 1 245 125" fill="none" stroke-width="3" stroke-linecap="round"/>
+          <path id="sun-progress" d="M 15 125" fill="none" stroke="rgba(217,119,6,.4)" stroke-width="3" stroke-linecap="round"/>
+          <circle id="sun-halo" cx="130" cy="10" r="18" fill="url(#sgg)" opacity="0"/>
+          <circle id="sun-dot" cx="130" cy="10" r="7" fill="#f59e0b" filter="url(#sgf)" opacity="0"/>
+          <text class="sun-lbl" id="sr-label" x="15"  y="138" font-size="9">—</text>
+          <text class="sun-lbl" id="ss-label" x="245" y="138" font-size="9" text-anchor="end">—</text>
+        </svg>
       </div>
-      <div class="ai-brief-text" id="ai-brief-text">Nalaganje…</div>
-      <div class="ai-brief-meta" id="ai-brief-meta"></div>
+      <div class="sun-times">
+        <span>↑ <span id="sunrise-time">—</span></span>
+        <span class="daylen" id="daylen">—</span>
+        <span>↓ <span id="sunset-time">—</span></span>
+      </div>
+    </div>
+    <div class="card span2">
+      <div class="clabel">📍 Pregled postaje</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
+      </div>
     </div>
   </div>
-
-  
 
   </div><!-- /tab-current -->
+
 
 
   <!-- ══ TAB: ZGODOVINA ══ -->
