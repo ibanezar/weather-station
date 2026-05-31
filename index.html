@@ -1090,7 +1090,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌡 Zdaj</button>
-    <button class="tab-btn" id="tab-btn-insights" onclick="switchTab('insights')">🧠 Vpogledi</button>
     <button class="tab-btn" id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
     <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
     <button class="tab-btn" id="tab-btn-analysis"   onclick="switchTab('analysis')">🔬 Analize</button>
@@ -1418,11 +1417,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-  </div><!-- /tab-current -->
+  </div><!-- /day-summary -->
 
-  <div id="tab-insights" class="tab-pane">
-
-    <!-- AI intel grid -->
+  <!-- AI intel grid -->
   <div class="local-intel-grid">
     <div class="intel-card" id="daily-almanac">
       <div class="intel-head"><div class="intel-label">Rečica Daily Almanac</div><span class="intel-badge">danes</span></div>
@@ -1442,8 +1439,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 
-    <!-- ══ INSIGHTS ══ -->
-  <!-- Astro + Milestones (moved from Aktualno) -->
+  <!-- Wind + Pressure -->
   <div class="insights-row">
     <div class="insight-card" id="ic-astro">
       <div class="ic-head"><span>🌌 Nočno nebo & astro</span><span class="ic-badge" id="astro-badge">—</span></div>
@@ -1565,7 +1561,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   
 
-  </div><!-- /tab-insights -->
+  </div><!-- /tab-current -->
 
 
   <!-- ══ TAB: ZGODOVINA ══ -->
@@ -3761,7 +3757,6 @@ function switchTab(tab){
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
-  if(tab==='insights'){ if(_lastBriefObs)applyPhotographyWidget(_lastBriefObs); refreshInsights(); setTimeout(autoAccentCards,80); return; }
   setTimeout(autoAccentCards, 80);
 }
 function histTabActive(){
