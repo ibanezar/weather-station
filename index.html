@@ -1094,7 +1094,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
     <button class="tab-btn" id="tab-btn-analysis"   onclick="switchTab('analysis')">🔬 Analize</button>
     <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
-    <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🏆 Rekordi & Dogodki</button>
+    <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🏆 Rekordi</button>
+    <button class="tab-btn" id="tab-btn-extremes"   onclick="switchTab('extremes')">⚡ Dogodki</button>
     <button class="tab-btn" id="tab-btn-diary"   onclick="switchTab('diary')">📸 Dnevnik</button>
     <button class="tab-btn" id="tab-btn-trivia" onclick="switchTab('trivia')">🎲 Zanimivosti</button>
   </div></div>
@@ -2069,7 +2070,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ ZANIMIVOSTI TAB ═══ -->
   <div id="tab-trivia" class="tab-pane">
-    <!-- Pregovor analiza -->
+    <!-- 📜 Pregovor analiza -->
     <div class="tri-section">
       <div class="tri-title">📜 Slovenski vremenski pregovori — analiza zadetosti</div>
       <div class="tri-card">
@@ -2196,12 +2197,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
   <!-- ═══ EKSTREMNI DOGODKI ═══ -->
-  <div id="tab-records" class="tab-pane">
-
-    <!-- Dogodki (merged) -->
-    <div class="nt-section">
-      <div class="nt-title">⚡ Ekstremni vremenski dogodki</div>
-  
+  <div id="tab-extremes" class="tab-pane">
     <div class="ev-filter" id="ev-filter">
       <button class="ev-filter-btn on" onclick="evFilter('all',this)">Vsi</button>
       <button class="ev-filter-btn" onclick="evFilter('heat',this)">🌡 Vročina</button>
@@ -2211,9 +2207,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <button class="ev-filter-btn" onclick="evFilter('wind',this)">💨 Veter</button>
     </div>
     <div class="ev-list" id="ev-list"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
-  
-    </div>
+  </div>
 
+  <!-- ═══ REKORDI ═══ -->
+  
+
+  <!-- ═══ REKORDI ═══ -->
+
+<div id="tab-records" class="tab-pane">
     <div class="nt-section">
       <div class="nt-title">🏆 Dvorana slavnih — vse-časovni rekordi</div>
       <div class="rec-hof" id="rec-hof"></div>
@@ -3125,7 +3126,7 @@ function switchTab(tab){
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); }
   if(tab==='diary'){    fdRenderGallery(); }
-  if(tab==='trivia'){    initTrivia(); buildTriviaNature(); }
+  if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
