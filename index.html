@@ -343,6 +343,41 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
 .fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
+/* Data assimilation */
+.da-section-hdr{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--border)}
+.da-section-hdr h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0;font-weight:700}
+/* Kalman fused estimate */
+.kf-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.75rem}
+.kf-var{padding:.8rem 1rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);position:relative;overflow:hidden}
+.kf-var::after{content:'';position:absolute;inset:0;opacity:.06;background:var(--kf-col,var(--blue))}
+.kf-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+.kf-value{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:500;line-height:1;color:var(--text)}
+.kf-unit{font-size:.75rem;color:var(--muted);font-weight:400}
+.kf-uncertainty{font-size:.67rem;color:var(--muted);margin-top:.2rem}
+.kf-uncertainty b{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.kf-gain-bar{height:4px;border-radius:2px;background:var(--rain-track);margin-top:.4rem;overflow:hidden}
+.kf-gain-fill{height:100%;border-radius:2px;background:var(--kf-col,var(--blue));transition:width .6s ease}
+.kf-sources{display:flex;flex-direction:column;gap:.3rem}
+.kf-src{display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--muted);padding:.25rem 0}
+.kf-src-name{width:90px;flex-shrink:0;font-weight:600;color:var(--text)}
+.kf-src-val{font-family:'JetBrains Mono',monospace;font-size:.75rem;width:55px;flex-shrink:0}
+.kf-src-sigma{font-size:.62rem;color:var(--muted);width:50px}
+.kf-src-bar{flex:1;height:4px;border-radius:2px;background:var(--rain-track);overflow:hidden}
+.kf-src-fill{height:100%;border-radius:2px}
+/* 3D-Var grid */
+.var3d-wrap{position:relative;overflow:hidden;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.var3d-wrap svg{display:block;width:100%}
+.var3d-legend{display:flex;gap:.75rem;font-size:.67rem;color:var(--muted);margin-top:.5rem;flex-wrap:wrap;align-items:center}
+.var3d-legend-grad{width:80px;height:8px;border-radius:4px;display:inline-block;vertical-align:middle;margin-right:4px}
+/* O-B tracking */
+.ob-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem}
+.ob-stat{padding:.55rem .7rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.ob-stat-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:500;color:var(--text)}
+.ob-stat-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.1rem}
+.ob-bias-good{color:#4ade80}.ob-bias-warn{color:var(--amber)}.ob-bias-bad{color:#f87171}
+.ob-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ob-wrap svg{display:block;min-width:480px;width:100%}
+@media(max-width:680px){.kf-hero{grid-template-columns:1fr}.ob-stats-grid{grid-template-columns:repeat(2,1fr)}}
 /* Sounding analysis */
 .sounding-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin-bottom:.75rem}
 .snd-card{padding:.75rem .9rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--snd-accent,var(--blue))}
@@ -2415,7 +2450,61 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
-  </div><!-- /tab-analysis -->
+  </div><!-- /tab-analysis (DA cards below, dynamically appended) -->
+
+  <!-- DATA ASSIMILATION cards (appended into tab-analysis by initDA) -->
+  <div id="tab-da-host" style="display:none">
+
+    <div class="da-section-hdr"><span style="font-size:1rem">🔭</span><h3>Data Assimilation — Optimalna fuzija podatkov</h3></div>
+
+    <!-- 1. Kalman filter -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🎯 Kalman Filter — optimalna ocene stanja</span>
+        <span class="chart-range" id="kf-updated">—</span>
+      </div>
+      <div class="kf-hero" id="kf-hero">
+        <div class="kf-var" style="--kf-col:var(--red)"><div class="kf-label">🌡 Temperatura</div><div class="kf-value"><span id="kf-t">—</span><span class="kf-unit">°C</span></div><div class="kf-uncertainty">±<b id="kf-t-unc">—</b>°C (1σ)</div><div class="kf-gain-bar"><div class="kf-gain-fill" id="kf-t-gain" style="--kf-col:var(--red);width:0%"></div></div></div>
+        <div class="kf-var" style="--kf-col:var(--blue)"><div class="kf-label">💧 Vlažnost</div><div class="kf-value"><span id="kf-h">—</span><span class="kf-unit">%</span></div><div class="kf-uncertainty">±<b id="kf-h-unc">—</b>% (1σ)</div><div class="kf-gain-bar"><div class="kf-gain-fill" id="kf-h-gain" style="--kf-col:var(--blue);width:0%"></div></div></div>
+        <div class="kf-var" style="--kf-col:var(--purple)"><div class="kf-label">📊 Tlak</div><div class="kf-value"><span id="kf-p">—</span><span class="kf-unit"> hPa</span></div><div class="kf-uncertainty">±<b id="kf-p-unc">—</b> hPa (1σ)</div><div class="kf-gain-bar"><div class="kf-gain-fill" id="kf-p-gain" style="--kf-col:var(--purple);width:0%"></div></div></div>
+      </div>
+      <div id="kf-sources" class="kf-sources"><div class="clim-loading">Nalaganje…</div></div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.65rem;line-height:1.5">
+        <strong style="color:var(--text)">Metodologija:</strong> Skalaren Kalman filter na vsaki spremenljivki. Predikt = prejšnja ocena + procesni šum Q. Update: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
+      </div>
+    </div>
+
+    <!-- 2. 3D-Var -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🗺 3D-Var — prostorska interpolacija temperature</span>
+        <span class="chart-range" id="var3d-range">—</span>
+      </div>
+      <div class="var3d-wrap"><svg id="var3d-svg" viewBox="0 0 600 300" height="300"></svg></div>
+      <div class="var3d-legend">
+        <span><span class="var3d-legend-grad" style="background:linear-gradient(90deg,#1e40af,#3b82f6,#93c5fd,#fde68a,#f97316,#dc2626)"></span>Temperatura ozadja (Open-Meteo)</span>
+        <span>⬡ Postaja (IREICA1)</span>
+        <span style="color:var(--muted)">Increment = analiza - ozadje (Gaussova razporeditev, L=80km)</span>
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
+        <strong style="color:var(--text)">3D-Var:</strong> J(x) = ½(x−xb)ᵀ B⁻¹(x−xb) + ½(y−Hx)ᵀ R⁻¹(y−Hx). Gaussian korelacijska dolžina L=80km, σ_B=1.2°C, σ_obs=0.3°C. Background grid: Open-Meteo 6×4 točke nad SLO.
+      </div>
+    </div>
+
+    <!-- 3. O-B tracking -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📉 O-B tracking — postaja vs NWP first-guess</span>
+        <span class="chart-range" id="ob-count-badge">—</span>
+      </div>
+      <div class="ob-stats-grid" id="ob-stats"><div class="clim-loading" style="grid-column:1/-1">Zbiranje O-B statistik…</div></div>
+      <div class="ob-wrap"><svg id="ob-svg" viewBox="0 0 880 130" height="130"></svg></div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
+        <strong style="color:var(--text)">O-B:</strong> Razlika opazovane vrednosti postaje in NWP first-guess (Open-Meteo current-hour). Sistem. odmik ≠ 0 kaže na napako senzorja ali bias modela. Avtokorelacija kaže na procesni šum. Referenca: ECMWF definiranO-B kot standardna metrika kakovosti opazovanj.
+      </div>
+    </div>
+
+  </div><!-- /tab-da-host -->
 
   <!-- ═══ KLIMATOLOGIJA TAB ═══ -->
   <div id="tab-climate" class="tab-pane">
@@ -4216,6 +4305,8 @@ function applyObs(obs){
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
   triggerLivePulse();
   refreshLife();
+  updateOBLog(); // keep O-B log current even when analysis tab isn't open
+  if(_daInit){ try{runKalmanFilter();}catch(e){} }
   if(document.getElementById('tab-storm')?.classList.contains('active'))
     try{buildTurbulenceIndex();}catch(e){}
 }
@@ -4454,7 +4545,7 @@ function switchTab(tab){
     }
   }
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); }
+  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); }
   if(tab==='diary'){    fdRenderGallery(); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
@@ -11313,6 +11404,308 @@ async function initSensorDiag(){
   if(typeof tf!=='undefined'&&typeof tf.sequential==='function'&&_aiNorm){
     setTimeout(buildAndTrainAE,500);
   }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── DATA ASSIMILATION — Kalman / 3D-Var / O-B ─────────────
+// ══════════════════════════════════════════════════════════
+const KF_KEY='wx-kf-state-v1';
+const OB_KEY='wx-ob-log-v1';
+let _daInit=false;
+
+// ── Scalar Kalman filter helper ───────────────────────────
+// Single prediction-update cycle for one scalar state variable
+function kfPredict(x,P,Q){return{x,P:P+Q};}
+function kfUpdate(x,P,obs,R){
+  const K=P/(P+R);           // Kalman gain
+  const x_new=x+K*(obs-x);  // updated estimate
+  const P_new=(1-K)*P;       // updated covariance
+  return{x:x_new,P:P_new,K};
+}
+// Fuse multiple observations sequentially (optimal with independent obs)
+function kfFuseObs(x0,P0,observations){
+  let x=x0,P=P0;
+  const gains=[];
+  observations.forEach(o=>{
+    if(o.value==null)return;
+    const r=kfUpdate(x,P,o.value,o.sigma*o.sigma);
+    x=r.x;P=r.P;gains.push({name:o.name,K:r.K,value:o.value,sigma:o.sigma});
+  });
+  return{x,P,uncertainty:Math.sqrt(P),gains};
+}
+
+// Persistent Kalman state storage
+function kfLoadState(){
+  try{return JSON.parse(localStorage.getItem(KF_KEY)||'{}');}catch(e){return{};}
+}
+function kfSaveState(state){
+  try{localStorage.setItem(KF_KEY,JSON.stringify(state));}catch(e){}
+}
+
+// ── Run Kalman filter ─────────────────────────────────────
+async function runKalmanFilter(){
+  const saved=kfLoadState();
+  const obs=_lastBriefObs||{},m=obs?.metric||{};
+  const now=Date.now();
+  const dt_h=saved.ts?Math.min(3,(now-saved.ts)/3600000):1;
+
+  // Station observations
+  const T_sta=m.temp??null,H_sta=obs.humidity??null,P_sta=m.pressure??null;
+
+  // Open-Meteo background (from existing SC fetch or direct)
+  const omH=_scData?.temperature_2m;
+  const ci=omH?(()=>{const times=(_scData?.time||[]).map(t=>new Date(t));let ci=times.findIndex(t=>t>=new Date())-1;return Math.max(0,ci);})():null;
+  const T_om=ci!=null?(_scData?.temperature_2m?.[ci]??null):null;
+  const H_om=ci!=null?(_scData?.relative_humidity_2m?.[ci]??null):null;
+
+  // METAR (already fetched)
+  const T_metar=_metarData?.temp_c??null;
+  const H_metar=_metarData?.dewp_c!=null?Math.round(100-5/3*(_metarData.temp_c-_metarData.dewp_c)):null;
+  const P_metar=_metarData?.press_hpa??null;
+
+  // Process noise per hour (how much state drifts: σ² per hour)
+  const Q={T:0.4,H:4,P:0.2};
+  // Observation error variances (σ²):
+  const R={T_sta:0.09,T_om:2.25,T_metar:0.64,  // 0.3°C, 1.5°C, 0.8°C
+           H_sta:4,   H_om:25,   H_metar:16,
+           P_sta:0.09,P_metar:1};
+
+  // Initial state from station if no saved state
+  const xT_0=saved.T?.x??(T_sta??T_om??15);
+  const xH_0=saved.H?.x??(H_sta??H_om??65);
+  const xP_0=saved.P?.x??(P_sta??P_metar??1013);
+  const PT_0=saved.T?.P??4,PH_0=saved.H?.P??100,PP_0=saved.P?.P??9;
+
+  // Predict step
+  const predT=kfPredict(xT_0,PT_0,Q.T*dt_h);
+  const predH=kfPredict(xH_0,PH_0,Q.H*dt_h);
+  const predP=kfPredict(xP_0,PP_0,Q.P*dt_h);
+
+  // Update with all available observations
+  const fusedT=kfFuseObs(predT.x,predT.P,[
+    {name:'Postaja',value:T_sta,sigma:Math.sqrt(R.T_sta)},
+    {name:'Open-Meteo',value:T_om,sigma:Math.sqrt(R.T_om)},
+    {name:'METAR LJLJ',value:T_metar,sigma:Math.sqrt(R.T_metar)},
+  ]);
+  const fusedH=kfFuseObs(predH.x,predH.P,[
+    {name:'Postaja',value:H_sta,sigma:Math.sqrt(R.H_sta)},
+    {name:'Open-Meteo',value:H_om,sigma:Math.sqrt(R.H_om)},
+  ]);
+  const fusedP=kfFuseObs(predP.x,predP.P,[
+    {name:'Postaja',value:P_sta,sigma:Math.sqrt(R.P_sta)},
+    {name:'METAR LJLJ',value:P_metar,sigma:Math.sqrt(R.P_metar)},
+  ]);
+
+  // Save state
+  kfSaveState({T:{x:fusedT.x,P:fusedT.P},H:{x:fusedH.x,P:fusedH.P},P:{x:fusedP.x,P:fusedP.P},ts:now});
+
+  // Render
+  const g=id=>document.getElementById(id);
+  const fmtV=(v,dec)=>v!=null?v.toFixed(dec):'—';
+  if(g('kf-t'))g('kf-t').textContent=fmtV(fusedT.x,1);
+  if(g('kf-t-unc'))g('kf-t-unc').textContent=fmtV(fusedT.uncertainty,2);
+  if(g('kf-t-gain'))g('kf-t-gain').style.width=((fusedT.gains[0]?.K||0)*100).toFixed(0)+'%';
+  if(g('kf-h'))g('kf-h').textContent=fmtV(fusedH.x,0);
+  if(g('kf-h-unc'))g('kf-h-unc').textContent=fmtV(fusedH.uncertainty,1);
+  if(g('kf-h-gain'))g('kf-h-gain').style.width=((fusedH.gains[0]?.K||0)*100).toFixed(0)+'%';
+  if(g('kf-p'))g('kf-p').textContent=fmtV(fusedP.x,1);
+  if(g('kf-p-unc'))g('kf-p-unc').textContent=fmtV(fusedP.uncertainty,2);
+  if(g('kf-p-gain'))g('kf-p-gain').style.width=((fusedP.gains[0]?.K||0)*100).toFixed(0)+'%';
+
+  const srcDiv=g('kf-sources');
+  if(srcDiv){
+    const allGains=[...fusedT.gains.map(g=>({...g,var:'T',unit:'°C'})),...fusedH.gains.map(g=>({...g,var:'H',unit:'%'})),...fusedP.gains.map(g=>({...g,var:'P',unit:' hPa'}))];
+    const byName={};
+    allGains.forEach(g=>{if(!byName[g.name])byName[g.name]={name:g.name,items:[]};byName[g.name].items.push(g);});
+    srcDiv.innerHTML=Object.values(byName).map(src=>{
+      const avgK=src.items.reduce((s,i)=>s+i.K,0)/src.items.length;
+      const vals=src.items.map(i=>`${i.var}:${i.value!=null?i.value.toFixed(1):'—'}${i.unit}`).join(' · ');
+      const colW=Math.round(avgK*100);
+      const col=avgK>0.7?'#4ade80':avgK>0.4?'var(--amber)':'var(--blue)';
+      return`<div class="kf-src"><span class="kf-src-name">${src.name}</span><span class="kf-src-sigma">σ: ±${src.items[0].sigma.toFixed(1)}</span><span class="kf-src-val">${vals.split(' · ')[0].split(':')[1]}</span><div class="kf-src-bar"><div class="kf-src-fill" style="width:${colW}%;background:${col};height:100%"></div></div><span style="font-size:.62rem;color:var(--muted);width:36px;flex-shrink:0">K=${(avgK).toFixed(2)}</span></div>`;
+    }).join('');
+  }
+  if(g('kf-updated'))g('kf-updated').textContent=`±σ T:${fusedT.uncertainty.toFixed(2)}°C  H:${fusedH.uncertainty.toFixed(1)}%  P:${fusedP.uncertainty.toFixed(2)}hPa`;
+}
+
+// ── 3D-Var analysis ───────────────────────────────────────
+async function buildThreeDVar(){
+  const svg=document.getElementById('var3d-svg');
+  const rng=document.getElementById('var3d-range');
+  if(!svg)return;
+  svg.innerHTML='<text x="300" y="150" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Nalaganje ozadja...</text>';
+
+  // Grid: 6×4 points over Slovenia approx.
+  // Lat: 45.5, 46.0, 46.5, 47.0  Lon: 13.5, 14.5, 15.5, 16.0, 16.5
+  const lats=[45.5,46.0,46.5,47.0];
+  const lons=[13.5,14.2,15.0,15.8,16.5,17.0];
+  const latStr=lats.join(',');
+  const lonStr=lons.join(',');
+
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${latStr}&longitude=${lonStr}&current=temperature_2m&timezone=Europe%2FLjubljana`;
+    const r=await fetch(url);const d=await r.json();
+
+    // Extract background temperatures (may be returned as array or single)
+    const bkgTemps=[];
+    if(Array.isArray(d)){d.forEach(pt=>bkgTemps.push(pt.current?.temperature_2m??15));}
+    else{bkgTemps.push(d.current?.temperature_2m??15);}
+    // Fill to grid size if needed
+    while(bkgTemps.length<lats.length*lons.length)bkgTemps.push(bkgTemps[bkgTemps.length-1]??15);
+
+    // Our observation
+    const T_obs=(_lastBriefObs?.metric?.temp)??15;
+    const obs_lat=LAT,obs_lon=LON;
+    const sigma_B=1.2,sigma_obs=0.3,L_km=80; // correlation length
+
+    // Apply 3D-Var analysis increment at each grid point
+    const analysis=lats.flatMap((lat,li)=>lons.map((lon,loi)=>{
+      const idx=li*lons.length+loi;
+      const xb=bkgTemps[idx]??15;
+      // Distance from our station to this grid point
+      const dLat=(lat-obs_lat)*111.0,dLon=(lon-obs_lon)*111.0*Math.cos(obs_lat*Math.PI/180);
+      const d_km=Math.sqrt(dLat*dLat+dLon*dLon);
+      // Gaussian background error correlation
+      const rho=Math.exp(-(d_km*d_km)/(2*L_km*L_km));
+      // Analysis increment: Δx = B·Hᵀ(H·B·Hᵀ+R)⁻¹·(y-Hxb)
+      const S=sigma_B**2+sigma_obs**2;
+      const gain=sigma_B**2*rho/S;
+      const innov=T_obs-xb;
+      const xa=xb+gain*innov;
+      return{lat,lon,xb,xa,increment:xa-xb};
+    }));
+
+    // Draw SVG
+    const W=600,VH=300,pl=30,pr=30,pt=20,pb=30;
+    const latMin=Math.min(...lats)-0.3,latMax=Math.max(...lats)+0.3;
+    const lonMin=Math.min(...lons)-0.3,lonMax=Math.max(...lons)+0.3;
+    const mapX=lon=>pl+(lon-lonMin)/(lonMax-lonMin)*(W-pl-pr);
+    const mapY=lat=>pt+(1-(lat-latMin)/(latMax-latMin))*(VH-pt-pb);
+    const allXa=analysis.map(a=>a.xa);
+    const minT=Math.min(...allXa)-0.5,maxT=Math.max(...allXa)+0.5;
+
+    // Color scale: blue→cyan→yellow→orange→red
+    const tempColor=t=>{
+      const p=Math.max(0,Math.min(1,(t-minT)/(maxT-minT)));
+      const stops=[[30,64,175],[37,99,235],[147,197,253],[253,224,71],[249,115,22],[220,38,38]];
+      const seg=p*(stops.length-1),i=Math.min(stops.length-2,Math.floor(seg)),f=seg-i;
+      const c=stops[i].map((v,j)=>Math.round(v+(stops[i+1][j]-v)*f));
+      return`rgb(${c.join(',')})`;
+    };
+
+    const cellW=(W-pl-pr)/lons.length,cellH=(VH-pt-pb)/lats.length;
+    let html='';
+    analysis.forEach(a=>{
+      const x=mapX(a.lon)-cellW/2,y=mapY(a.lat)-cellH/2;
+      html+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${cellW.toFixed(1)}" height="${cellH.toFixed(1)}" fill="${tempColor(a.xa)}" opacity="0.85"/>`;
+      html+=`<text x="${(x+cellW/2).toFixed(1)}" y="${(y+cellH/2+4).toFixed(1)}" text-anchor="middle" font-size="9" font-family="JetBrains Mono,monospace" fill="rgba(255,255,255,.85)" font-weight="500">${a.xa.toFixed(1)}</text>`;
+      // Show increment as +/- overlay
+      if(Math.abs(a.increment)>0.05){const c=a.increment>0?'#fde68a':'#93c5fd';html+=`<text x="${(x+cellW/2).toFixed(1)}" y="${(y+cellH/2+14).toFixed(1)}" text-anchor="middle" font-size="7" font-family="JetBrains Mono,monospace" fill="${c}">${a.increment>0?'+':''}${a.increment.toFixed(2)}</text>`;}
+    });
+    // Station marker
+    const sx=mapX(obs_lon),sy=mapY(obs_lat);
+    html+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="8" fill="white" stroke="#1d4ed8" stroke-width="2.5"/>`;
+    html+=`<text x="${sx.toFixed(1)}" y="${(sy-12).toFixed(1)}" text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="Inter,sans-serif">IREICA1</text>`;
+    html+=`<text x="${sx.toFixed(1)}" y="${(sy-2).toFixed(1)}" text-anchor="middle" font-size="8" fill="#1d4ed8" font-weight="700" font-family="JetBrains Mono,monospace">${(_lastBriefObs?.metric?.temp??'—').toString().slice(0,4)}</text>`;
+    // Lat/lon axis labels
+    lons.forEach((lon,i)=>html+=`<text x="${mapX(lon).toFixed(1)}" y="${VH-8}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lon.toFixed(1)}°E</text>`);
+    lats.forEach((lat,i)=>html+=`<text x="${pl-4}" y="${mapY(lat).toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lat.toFixed(1)}°N</text>`);
+    svg.innerHTML=html;
+    if(rng)rng.textContent=`Analiza: T_obs=${(_lastBriefObs?.metric?.temp??'—').toString().slice(0,4)}°C · L=80km · σ_B=1.2°C`;
+  }catch(e){
+    svg.innerHTML=`<text x="300" y="150" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">3D-Var API ni dosegljiv.</text>`;
+    console.warn('3D-Var:',e);
+  }
+}
+
+// ── O-B tracking ──────────────────────────────────────────
+function updateOBLog(){
+  const obs=_lastBriefObs?.metric||{};
+  const T_sta=obs.temp??null;
+  if(T_sta==null)return;
+  // NWP first-guess: Open-Meteo current hour temperature
+  const ci=_scData?.temperature_2m?((()=>{const times=(_scData.time||[]).map(t=>new Date(t));let i=times.findIndex(t=>t>=new Date())-1;return Math.max(0,i);})()):-1;
+  const T_om=ci>=0?(_scData?.temperature_2m?.[ci]??null):null;
+  const T_metar=_metarData?.temp_c??null;
+  if(T_om==null&&T_metar==null)return;
+  const log=JSON.parse(localStorage.getItem(OB_KEY)||'[]');
+  log.push({t:Date.now(),T_sta,T_om,T_metar,ob_om:T_om!=null?+(T_sta-T_om).toFixed(2):null,ob_metar:T_metar!=null?+(T_sta-T_metar).toFixed(2):null});
+  // Keep 30 days
+  const cutoff=Date.now()-30*864e5;
+  const trimmed=log.filter(e=>e.t>cutoff);
+  if(trimmed.length>720)trimmed.splice(0,trimmed.length-720);
+  try{localStorage.setItem(OB_KEY,JSON.stringify(trimmed));}catch(e){}
+}
+
+function renderOBTracking(){
+  const stats=document.getElementById('ob-stats');
+  const svgEl=document.getElementById('ob-svg');
+  const badge=document.getElementById('ob-count-badge');
+  if(!stats||!svgEl)return;
+  const log=JSON.parse(localStorage.getItem(OB_KEY)||'[]').filter(e=>e.ob_om!=null);
+  if(!badge){}else badge.textContent=log.length+' opazovanj';
+  if(log.length<3){stats.innerHTML='<div class="clim-loading" style="grid-column:1/-1">Zbiranje O-B statistik… potrebno vsaj 3 meritvi z Open-Meteo podatki.</div>';svgEl.innerHTML='';return;}
+
+  const obs=log.map(e=>e.ob_om);
+  const n=obs.length;
+  const mean=+(obs.reduce((a,b)=>a+b,0)/n).toFixed(3);
+  const std=+(Math.sqrt(obs.reduce((s,x)=>s+(x-mean)**2,0)/(n-1))).toFixed(3);
+  const latest=obs[obs.length-1].toFixed(2);
+  // Autocorrelation lag-1
+  const ac1=n>5?+(obs.slice(0,-1).reduce((s,v,i)=>(s+(v-mean)*(obs[i+1]-mean)),0)/((n-1)*std**2||1)).toFixed(2):null;
+  // Bias class
+  const biasClass=Math.abs(mean)<0.3?'ob-bias-good':Math.abs(mean)<0.8?'ob-bias-warn':'ob-bias-bad';
+  const biasTxt=Math.abs(mean)<0.3?'Brez biasa':Math.abs(mean)<0.8?'Zmeren bias':'⚠️ Sistemat. bias';
+
+  stats.innerHTML=[
+    {v:mean+'°C',l:'Srednji O-B',c:biasClass},
+    {v:'±'+std+'°C',l:'Std odmik',c:''},
+    {v:latest+'°C',l:'Zadnji O-B',c:obs[obs.length-1]>0?'ob-bias-bad':obs[obs.length-1]<-0.3?'ob-bias-warn':'ob-bias-good'},
+    {v:ac1!=null?ac1:'—',l:'Lag-1 avtokor.',c:''},
+  ].map(s=>`<div class="ob-stat"><div class="ob-stat-val ${s.c}">${s.v}</div><div class="ob-stat-lbl">${s.l}</div></div>`).join('');
+
+  // Draw O-B time series
+  const VW=880,VH=130,pl=42,pr=15,pt=8,pb=28;
+  const times=log.map(e=>e.t);
+  const minT2=Math.min(...times),maxT2=Math.max(...times);
+  const minV=Math.min(...obs,-1),maxV=Math.max(...obs,1);
+  const mapX=t=>pl+(t-minT2)/Math.max(1,maxT2-minT2)*(VW-pl-pr);
+  const mapY=v=>pt+(1-(v-minV)/(maxV-minV||1))*(VH-pt-pb);
+  const zy=mapY(0).toFixed(1);
+  let h=`<line x1="${pl}" x2="${VW-pr}" y1="${zy}" y2="${zy}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`;
+  // Mean line
+  const my=mapY(mean).toFixed(1);
+  h+=`<line x1="${pl}" x2="${VW-pr}" y1="${my}" y2="${my}" stroke="${Math.abs(mean)<0.3?'#4ade80':'#fbbf24'}" stroke-width="1" stroke-dasharray="5,3" opacity="0.6"/>`;
+  // Y axis
+  [minV,0,mean,maxV].forEach(v=>{const y=mapY(v).toFixed(1);h+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${v.toFixed(1)}</text>`;});
+  // Colored area under curve
+  const ptsPoly=log.map(e=>`${mapX(e.t).toFixed(1)},${mapY(e.ob_om).toFixed(1)}`);
+  h+=`<polygon points="${mapX(minT2)},${zy} ${ptsPoly.join(' ')} ${mapX(maxT2)},${zy}" fill="${mean>0?'rgba(248,113,113,.12)':'rgba(96,165,250,.12)'}"/>`;
+  // Line
+  h+=`<polyline points="${ptsPoly.join(' ')}" fill="none" stroke="${mean>0.3?'#f87171':mean<-0.3?'#60a5fa':'#4ade80'}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  // X axis dates (every ~10 points)
+  const step=Math.max(1,Math.floor(log.length/6));
+  log.filter((_,i)=>i%step===0).forEach(e=>{h+=`<text x="${mapX(e.t).toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${new Date(e.t).toLocaleDateString('sl',{day:'numeric',month:'short'})}</text>`;});
+  h+=`<text x="${pl+5}" y="${pt+12}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">${biasTxt}</text>`;
+  svgEl.innerHTML=h;
+}
+
+async function initDA(){
+  if(!_daInit){
+    _daInit=true;
+    // Inject DA cards into analysis tab
+    const host=document.getElementById('tab-da-host');
+    const analysisTab=document.getElementById('tab-analysis');
+    if(host&&analysisTab&&host.style.display==='none'){
+      host.style.display='';
+      analysisTab.appendChild(host);
+    }
+  }
+  // Run all three
+  updateOBLog();
+  try{await runKalmanFilter();}catch(e){console.warn('KF:',e);}
+  try{await buildThreeDVar();}catch(e){console.warn('3DVar:',e);}
+  renderOBTracking();
 }
 
 function initLife(){
