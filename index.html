@@ -9483,7 +9483,7 @@ function renderStormChaser(){
   if(vd){const flowAngle=Math.abs(((wd850-140+180)%360)-180);const oroF=Math.max(0,Math.round((1-flowAngle/90)*100));vd.innerHTML=[{v:oroF+'%',l:'Orografski faktor (850 hPa)'},{v:oroF>60?'Visok — ojačitev padavin':oroF>30?'Zmeren':'Nizek',l:'Vpliv reliefa'},{v:Math.round(wd850)+'° '+scDirLbl(wd850),l:'Tok 850 hPa'},{v:freeze<2500?'Možna':'Malo verjetna',l:'Toča — ocena'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');}
   // Pressure tendency
   const pd=g('sc-pressure-body');
-  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=pressureTrend3h??null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
+  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
 }
 // ══════════════════════════════════════════════════════════
 // ── KLIMATOLOGIJA (4 features) ────────────────────────────
@@ -10402,7 +10402,7 @@ function buildWindFingerprint(){
   // Live station data
   const obs=_lastBriefObs||{},m=obs?.metric||{};
   const curP=m.pressure??null;
-  const curPTrend=typeof pressureTrend3h!=='undefined'?pressureTrend3h:null;
+  const curPTrend=typeof pressureTrend3h==='function'?pressureTrend3h():null;
   const curT=m.temp??null;
   const curW=m.windSpeed??0;
   const curH=obs?.humidity??null;
