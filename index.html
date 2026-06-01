@@ -10366,13 +10366,30 @@ function aiBuildSequences(normalized,raw){
 // ── Load TF.js lazily ─────────────────────────────────────
 function loadTFJS(){
   return new Promise((res,rej)=>{
-    if(typeof tf!=='undefined'){res();return;}
+    // If already loaded and has Layers API, done
+    if(typeof tf!=='undefined'&&typeof tf.sequential==='function'){res();return;}
     aiSetStatus('Nalagam TF.js knjižnico…',5);
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.11.0/tf.min.js';
-    s.onload=()=>{aiSetStatus('TF.js naložen.',10);res();};
-    s.onerror=()=>rej(new Error('TF.js ni dosegljiv'));
-    document.head.appendChild(s);
+    const tryLoad=(urls,idx=0)=>{
+      if(idx>=urls.length){rej(new Error('TF.js ni dosegljiv na nobenem CDN-u'));return;}
+      const s=document.createElement('script');
+      s.src=urls[idx];
+      s.onload=()=>{
+        if(typeof tf!=='undefined'&&typeof tf.sequential==='function'){
+          aiSetStatus('TF.js naložen ('+urls[idx].split('/')[2]+')',10);res();
+        }else{
+          // Wrong bundle — try next URL
+          console.warn('TF.js loaded but missing Layers API from',urls[idx],', trying next...');
+          tryLoad(urls,idx+1);
+        }
+      };
+      s.onerror=()=>{console.warn('TF.js failed from',urls[idx]);tryLoad(urls,idx+1);};
+      document.head.appendChild(s);
+    };
+    tryLoad([
+      'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.21.0/tf.min.js',
+      'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js',
+    ]);
   });
 }
 
@@ -10579,7 +10596,7 @@ async function aiDrawComparisonChart(){
 }
 
 async function initAINowcast(){
-  if(_aiInit)return;_aiInit=true;
+  // Allow retry if previous attempt failed (button is re-enabled on error)
   await aiTrainAndPredict();
 }
 
