@@ -742,8 +742,32 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
 /* Tabs */
-.tab-nav-wrap{position:relative;margin-bottom:1.5rem}.tab-nav-wrap::after{content:"";position:absolute;right:0;top:0;bottom:.4rem;width:52px;background:linear-gradient(to left,var(--bg) 40%,transparent);pointer-events:none;z-index:5;opacity:0}.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem}
-@media(max-width:760px){.tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}.tab-nav-wrap::after{opacity:1}}
+.tab-nav-wrap{position:relative;margin-bottom:1.5rem}
+.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem;align-items:center}
+/* Dropdown container */
+.tab-dropdown{position:relative}
+.tab-dd-trigger{display:flex;align-items:center;gap:.3rem}
+.tab-dd-trigger.dd-active{background:var(--blue);color:#fff;border-color:var(--blue);opacity:1}
+/* Dropdown menu */
+.tab-dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);
+  padding:.5rem .45rem;min-width:210px;box-shadow:var(--card-shadow-h);
+  animation:dd-in .15s ease}
+.tab-dd-menu.open{display:block}
+@keyframes dd-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.tab-dd-group-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);
+  padding:.3rem .6rem .15rem;margin-top:.1rem}
+.tab-dd-divider{height:1px;background:var(--border);margin:.35rem .4rem}
+.tab-dd-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;
+  padding:.42rem .65rem;font-size:.78rem;color:var(--text);cursor:pointer;
+  transition:background .12s;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;white-space:nowrap}
+.tab-dd-menu button:hover{background:var(--fc-bg)}
+.tab-dd-menu button.active{background:var(--blue);color:#fff}
+@media(max-width:760px){
+  .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
+  .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
+}
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
 .tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
 .tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
@@ -1374,19 +1398,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="storm-mode" class="storm-mode"></div>
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
-    <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">🌡 Zdaj</button>
-    <button class="tab-btn" id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
-    <button class="tab-btn" id="tab-btn-history" onclick="switchTab('history')">📊 Zgodovina</button>
-    <button class="tab-btn" id="tab-btn-analysis"   onclick="switchTab('analysis')">🔬 Analize</button>
-    <button class="tab-btn" id="tab-btn-climate"    onclick="switchTab('climate')">🌍 Klimatologija</button>
-    <button class="tab-btn" id="tab-btn-surroundings" onclick="switchTab('surroundings')">🌍 Okolica</button>
-    <button class="tab-btn" id="tab-btn-records"    onclick="switchTab('records')">🏆 Rekordi</button>
-    <button class="tab-btn" id="tab-btn-extremes"   onclick="switchTab('extremes')">⚡ Dogodki</button>
-    <button class="tab-btn" id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
-    <button class="tab-btn" id="tab-btn-life"       onclick="switchTab('life')">🌱 Vreme & Življenje</button>
-    <button class="tab-btn" id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
-    <button class="tab-btn" id="tab-btn-diary"      onclick="switchTab('diary')">📸 Dnevnik</button>
-    <button class="tab-btn" id="tab-btn-trivia" onclick="switchTab('trivia')">🎲 Zanimivosti</button>
+    <button class="tab-btn active" id="tab-btn-current"    onclick="switchTab('current')">🌡 Zdaj</button>
+    <button class="tab-btn"        id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
+    <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
+    <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
+    <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
+    <!-- Podatki dropdown -->
+    <div class="tab-dropdown" id="tab-dd-data">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-data-menu">
+        <div class="tab-dd-group-lbl">Meritve & Analiza</div>
+        <button id="tab-btn-history"     onclick="switchTab('history');closeTabDDs()">📊 Zgodovina</button>
+        <button id="tab-btn-analysis"    onclick="switchTab('analysis');closeTabDDs()">🔬 Analize</button>
+        <button id="tab-btn-climate"     onclick="switchTab('climate');closeTabDDs()">🌍 Klimatologija</button>
+        <div class="tab-dd-divider"></div>
+        <div class="tab-dd-group-lbl">Rekordi & Okolje</div>
+        <button id="tab-btn-records"     onclick="switchTab('records');closeTabDDs()">🏆 Rekordi</button>
+        <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
+        <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
+      </div>
+    </div>
+    <!-- Ostalo dropdown -->
+    <div class="tab-dropdown" id="tab-dd-misc">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-misc-btn" onclick="toggleTabDD('misc')">⋯ Ostalo ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-misc-menu">
+        <div class="tab-dd-group-lbl">Dnevnik & Zabava</div>
+        <button id="tab-btn-diary"   onclick="switchTab('diary');closeTabDDs()">📸 Dnevnik</button>
+        <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
+      </div>
+    </div>
   </div></div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
@@ -4384,11 +4424,33 @@ function applyOnThisDay(results){
 
 
 let _historyLoaded=false;
+// Tabs in each dropdown group
+const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings'],misc:['diary','trivia']};
+function toggleTabDD(group){
+  const menu=document.getElementById('tab-dd-'+group+'-menu');
+  const isOpen=menu?.classList.contains('open');
+  closeTabDDs();
+  if(!isOpen)menu?.classList.add('open');
+}
+function closeTabDDs(){document.querySelectorAll('.tab-dd-menu').forEach(m=>m.classList.remove('open'));}
+// Close on outside click
+document.addEventListener('click',e=>{if(!e.target.closest('.tab-dropdown'))closeTabDDs();});
+
 function switchTab(tab){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn, .tab-dd-menu button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-dd-trigger').forEach(b=>b.classList.remove('dd-active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
-  document.getElementById('tab-btn-'+tab)?.classList.add('active');
+  // Activate button — either primary or inside dropdown
+  const directBtn=document.getElementById('tab-btn-'+tab);
+  if(directBtn&&!directBtn.closest('.tab-dd-menu'))directBtn.classList.add('active');
+  // Activate dropdown trigger if tab is inside a dropdown, and highlight button inside menu
+  for(const[group,tabs] of Object.entries(DD_TABS)){
+    if(tabs.includes(tab)){
+      document.getElementById('tab-dd-'+group+'-btn')?.classList.add('dd-active');
+      if(directBtn)directBtn.classList.add('active');
+    }
+  }
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); }
   if(tab==='diary'){    fdRenderGallery(); }
@@ -4399,8 +4461,9 @@ function switchTab(tab){
   if(tab==='storm'){     initStormChaser(); }
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
-  if(tab==='ai'){  initSensorDiag(); }
+  if(tab==='ai'){        initSensorDiag(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
+  closeTabDDs();
   setTimeout(autoAccentCards, 80);
 }
 function histTabActive(){
