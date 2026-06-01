@@ -11,7 +11,9 @@
 <meta name="apple-mobile-web-app-title" content="Vreme IREICA1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -19,31 +21,31 @@
 
 /* ── Light theme (default) ── */
 :root {
-  --bg:#eef2f9; --text:#0c1220; --muted:#374860;
-  --border:rgba(0,0,0,.09); --bh:rgba(0,0,0,.17);
+  --bg:#eef2f9; --text:#0a0f1e; --muted:#3a4a6a;
+  --border:rgba(0,0,0,.11); --bh:rgba(0,0,0,.2);
   --blue:#1d4ed8; --cyan:#0e7490; --purple:#6d28d9;
   --amber:#92400e; --green:#065f46; --red:#991b1b; --rain-col:#2563eb;
-  --card-bg:rgba(255,255,255,.93); --card-border:rgba(255,255,255,.95);
-  --card-border-h:rgba(255,255,255,.98);
-  --card-shadow:0 2px 20px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95);
-  --card-shadow-h:0 8px 36px rgba(0,0,0,.13),inset 0 1px 0 white;
-  --hero-bg:rgba(255,255,255,.92); --hero-border:rgba(255,255,255,.98);
-  --hero-shadow:0 4px 32px rgba(0,0,0,.10),inset 0 1px 0 white;
-  --day-bg:rgba(255,255,255,.90); --day-border:rgba(255,255,255,.96);
-  --day-divider:rgba(0,0,0,.08);
-  --fc-bg:rgba(255,255,255,.90); --fc-border:rgba(255,255,255,.95);
+  --card-bg:rgba(255,255,255,.97); --card-border:rgba(0,0,0,.07);
+  --card-border-h:rgba(0,0,0,.12);
+  --card-shadow:0 2px 16px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.05);
+  --card-shadow-h:0 8px 32px rgba(0,0,0,.12);
+  --hero-bg:rgba(255,255,255,.96); --hero-border:rgba(0,0,0,.06);
+  --hero-shadow:0 4px 32px rgba(0,0,0,.09);
+  --day-bg:rgba(255,255,255,.95); --day-border:rgba(0,0,0,.06);
+  --day-divider:rgba(0,0,0,.09);
+  --fc-bg:rgba(240,244,252,.98); --fc-border:rgba(0,0,0,.08);
   --fc-today-bg:rgba(29,78,216,.07); --fc-today-border:rgba(29,78,216,.25);
   --stn-bg:rgba(29,78,216,.09);  --stn-border:rgba(29,78,216,.40);
   --badge-bg:rgba(29,78,216,.07); --badge-border:rgba(29,78,216,.18);
   --bft-bg:rgba(109,40,217,.08); --bft-border:rgba(109,40,217,.2);
-  --tip-bg:rgba(255,255,255,.97); --tip-border:rgba(0,0,0,.12);
+  --tip-bg:rgba(255,255,255,.99); --tip-border:rgba(0,0,0,.12);
   --tip-shadow:0 4px 16px rgba(0,0,0,.12);
-  --rain-track:rgba(0,0,0,.08);
+  --rain-track:rgba(0,0,0,.1);
   --blob-1:rgba(147,197,253,.45); --blob-2:rgba(196,181,253,.35);
   --blob-3:rgba(103,232,249,.28); --blob-4:rgba(110,231,183,.25);
-  --svg-ring:rgba(0,0,0,.09); --svg-tick:rgba(0,0,0,.28);
-  --svg-tick-m:rgba(0,0,0,.14); --svg-lbl:rgba(0,0,0,.75);
-  --svg-lbl-d:rgba(0,0,0,.62); --svg-track:rgba(0,0,0,.09);
+  --svg-ring:rgba(0,0,0,.10); --svg-tick:rgba(0,0,0,.35);
+  --svg-tick-m:rgba(0,0,0,.18); --svg-lbl:rgba(0,0,0,.80);
+  --svg-lbl-d:rgba(0,0,0,.65); --svg-track:rgba(0,0,0,.10);
   --needle:#6d28d9; --needle-tip:white;
   --t-up-bg:rgba(5,150,105,.1); --t-up-c:var(--green);
   --t-dn-bg:rgba(220,38,38,.1);  --t-dn-c:var(--red);
@@ -84,7 +86,7 @@
 }
 
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:350;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
@@ -151,12 +153,12 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
 header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
-.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
+.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
-h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
+h1{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.03em;color:var(--text)}
+h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
-.status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
+.status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
 .dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -166,15 +168,15 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .storm-mode{display:none;border:1px solid transparent;border-radius:16px;padding:1rem 1.15rem;margin:-.15rem 0 1rem;background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber);animation:alert-in .35s ease}
 .storm-mode.show{display:block}.storm-mode.orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.55);color:#ea580c}.storm-mode.red{background:rgba(248,113,113,.17);border-color:rgba(248,113,113,.65);color:var(--red)}
 .storm-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem}.storm-title{font-size:.9rem;font-weight:700;color:inherit}.storm-sub{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:.12rem}
-.storm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}.storm-kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.62rem .7rem}.storm-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400;color:var(--text)}.storm-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.storm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}.storm-kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.62rem .7rem}.storm-kpi strong{display:block;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:400;color:var(--text)}.storm-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .storm-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}.storm-action{border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.08);color:inherit;padding:.28rem .7rem;font-size:.7rem;cursor:pointer;text-decoration:none}.storm-action:hover{background:rgba(255,255,255,.14)}
 @media(max-width:820px){.storm-grid{grid-template-columns:repeat(2,1fr)}.storm-head{flex-direction:column}}
 .local-intel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1rem}
 .intel-card{border:1px solid var(--card-border);border-radius:16px;background:var(--card-bg);box-shadow:var(--card-shadow);padding:1rem 1.15rem;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}.intel-card.hidden{display:none}
-.intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
+.intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'JetBrains Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
 .intel-main{display:flex;gap:.85rem;align-items:flex-start}.intel-icon{font-size:2.2rem;line-height:1;flex-shrink:0}.intel-title{font-size:1.05rem;font-weight:750;color:var(--text);margin-bottom:.25rem}.intel-text{font-size:.78rem;line-height:1.65;color:var(--muted)}
-.intel-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.intel-tag{font-family:'IBM Plex Mono',monospace;font-size:.66rem;border-radius:999px;padding:2px 8px;background:var(--fc-bg);border:1px solid var(--fc-border);color:var(--muted)}
-.intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.75rem}.intel-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.48rem .6rem}.intel-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:400;color:var(--text)}.intel-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.intel-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.intel-tag{font-family:'JetBrains Mono',monospace;font-size:.66rem;border-radius:999px;padding:2px 8px;background:var(--fc-bg);border:1px solid var(--fc-border);color:var(--muted)}
+.intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.75rem}.intel-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.48rem .6rem}.intel-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:400;color:var(--text)}.intel-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 @media(max-width:820px){.local-intel-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.local-intel-grid{grid-template-columns:1fr}.intel-kpis{grid-template-columns:repeat(2,1fr)}}
 .alert-triangle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -218,16 +220,16 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .alert-bar.a-severe.a-ma-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
 .alert-bar.a-severe.a-level-orange{animation:alert-in .35s ease, alert-pulse-o 2.2s ease-in-out infinite}
 @keyframes alert-pulse-o{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 0 4px rgba(249,115,22,.18)}}
-.alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'IBM Plex Mono',monospace}
+.alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'JetBrains Mono',monospace}
 .alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
 
 
 /* Cards */
 .card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
 .card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
-[data-theme="light"] .card:hover{background:rgba(255,255,255,.72)}
-.clabel{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;transition:color .35s}
-.cval{font-family:'IBM Plex Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
+[data-theme="light"] .card:hover{background:rgba(255,255,255,.99)}
+.clabel{font-size:.72rem;letter-spacing:.10em;text-transform:uppercase;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;transition:color .35s;font-weight:600;opacity:.85}
+.cval{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
 .unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
 .csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 
@@ -244,7 +246,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Hero metrics strip */
 .hero-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
-.hm-val{font-family:'IBM Plex Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
+.hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 .hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}
 /* Live pulse animations */
@@ -260,13 +262,13 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .feels-pill{display:inline-flex;align-items:center;font-size:.72rem;padding:2px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
 .condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--blue);letter-spacing:.06em;margin-bottom:1rem;width:fit-content;transition:background .35s}
 #cond-icon{font-size:1rem}
-.temp-huge{font-family:'Plus Jakarta Sans',sans-serif;font-weight:200;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start}
-.temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:300}
+.temp-huge{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start}
+.temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:600}
 .hero-icon{display:flex;align-items:center;justify-content:center}
 .hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));transition:opacity .5s}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
-.hs-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:300;color:var(--text)}
+.hs-val{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:300;color:var(--text)}
 .hs-lbl{font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.07em;text-transform:uppercase}
 
 /* ── Vreme & Življenje Tab ── */
@@ -309,13 +311,13 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .fp-level-desc{font-size:.78rem;color:var(--muted);line-height:1.55}
 .fp-factors{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.75rem}
 .fp-factor{padding:.5rem .65rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.fp-factor-val{font-family:'IBM Plex Mono',monospace;font-size:.88rem;color:var(--text)}
+.fp-factor-val{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text)}
 .fp-factor-lbl{font-size:.61rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 /* Time capsule */
 .capsule-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem}
 .capsule-year{border-radius:14px;padding:1rem 1.1rem;background:var(--fc-bg);border:1px solid var(--fc-border);position:relative;overflow:hidden}
 .capsule-yr-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
-.capsule-temp{font-family:'IBM Plex Mono',monospace;font-size:1.7rem;font-weight:200;line-height:1;margin-bottom:.15rem}
+.capsule-temp{font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:200;line-height:1;margin-bottom:.15rem}
 .capsule-weather{font-size:.72rem;color:var(--muted);line-height:1.5}
 .capsule-delta{font-size:.67rem;padding:.12rem .45rem;border-radius:8px;margin-top:.35rem;display:inline-block;font-weight:600}
 .capsule-delta.warm{background:rgba(249,115,22,.15);color:#fb923c}
@@ -326,7 +328,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .dew-hero{display:flex;align-items:center;gap:1.25rem;margin-bottom:.85rem}
 .dew-factors{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:.65rem}
 .dew-factor{padding:.45rem .6rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.dew-factor-val{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text)}
+.dew-factor-val{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text)}
 .dew-factor-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .dew-advice{font-size:.76rem;color:var(--muted);line-height:1.55;padding:.6rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
 /* Fauna radar */
@@ -336,7 +338,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .fauna-icon{font-size:1.5rem;transition:transform .6s;display:inline-block}
 .fauna-icon.hop{animation:fauna-hop .7s ease infinite alternate}
 @keyframes fauna-hop{from{transform:translateY(0)}to{transform:translateY(-6px)}}
-.fauna-pct{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--fa-accent,var(--green));margin-left:auto}
+.fauna-pct{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--fa-accent,var(--green));margin-left:auto}
 .fauna-name{font-size:.76rem;font-weight:600;color:var(--text)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
@@ -344,7 +346,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Sounding analysis */
 .sounding-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin-bottom:.75rem}
 .snd-card{padding:.75rem .9rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--snd-accent,var(--blue))}
-.snd-val{font-family:'IBM Plex Mono',monospace;font-size:1.55rem;font-weight:200;line-height:1.1;color:var(--text)}
+.snd-val{font-family:'JetBrains Mono',monospace;font-size:1.55rem;font-weight:200;line-height:1.1;color:var(--text)}
 .snd-lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.25rem}
 .snd-desc{font-size:.66rem;color:var(--muted);margin-top:.3rem;line-height:1.4}
 .snd-bar{height:5px;border-radius:3px;background:var(--rain-track);margin:.4rem 0 .2rem;overflow:hidden}
@@ -361,10 +363,10 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .turb-title{font-size:.98rem;font-weight:700;margin-bottom:.25rem}
 .turb-calm .turb-title{color:#4ade80}.turb-mod .turb-title{color:var(--amber)}.turb-high .turb-title,.turb-xhigh .turb-title{color:#fb923c}
 .turb-sub{font-size:.75rem;color:var(--muted);line-height:1.5}
-.turb-idx{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:200;line-height:1;flex-shrink:0}
+.turb-idx{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:200;line-height:1;flex-shrink:0}
 /* Candlestick chart */
 .candle-tab-row{display:flex;gap:.45rem;margin-bottom:.75rem}
-.candle-tab-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-size:.74rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'IBM Plex Mono',monospace}
+.candle-tab-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-size:.74rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'JetBrains Mono',monospace}
 .candle-tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .candle-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(0,0,0,.03);border-radius:12px;padding:.5rem}
 [data-theme="dark"] .candle-wrap{background:rgba(255,255,255,.02)}
@@ -375,7 +377,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .diag-section-hdr h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0;font-weight:600}
 .metar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-bottom:.75rem}
 .metar-cell{padding:.55rem .7rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.metar-cell-val{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text)}
+.metar-cell-val{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text)}
 .metar-cell-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em;margin-top:.1rem}
 .metar-delta{font-size:.72rem;padding:.15rem .45rem;border-radius:8px;margin-top:.2rem;display:inline-block;font-weight:600}
 .md-ok{background:rgba(74,222,128,.12);color:#4ade80}.md-warn{background:rgba(245,158,11,.12);color:var(--amber)}.md-bad{background:rgba(248,113,113,.12);color:#f87171}
@@ -386,7 +388,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .aq-sensor-name{font-size:.78rem;font-weight:600}
 .aq-sensor-detail{font-size:.66rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
 .aq-score-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;flex-shrink:0}
-.aq-score{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:300}
+.aq-score{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:300}
 .aq-badge{font-size:.6rem;padding:.1rem .42rem;border-radius:8px;font-weight:700;white-space:nowrap}
 .aq-ok{--aq-col:#4ade80}.aq-warn{--aq-col:var(--amber)}.aq-bad{--aq-col:#f87171}
 .aq-ok .aq-score{color:#4ade80}.aq-warn .aq-score{color:var(--amber)}.aq-bad .aq-score{color:#f87171}
@@ -396,7 +398,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .cal-card{border-radius:13px;padding:.8rem 1rem;background:var(--fc-bg);border:1px solid var(--fc-border)}
 .cal-card-sig{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.05)}
 .cal-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.35rem}
-.cal-offset{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:300;line-height:1}
+.cal-offset{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:300;line-height:1}
 .cal-stat{font-size:.66rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
 .cal-sig-badge{display:inline-block;font-size:.62rem;padding:.1rem .45rem;border-radius:8px;font-weight:700;margin-top:.3rem}
 .cal-sig-yes{background:rgba(245,158,11,.15);color:var(--amber)}.cal-sig-no{background:var(--badge-bg);color:var(--muted)}
@@ -414,7 +416,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .ai-fc-card{border-radius:13px;padding:.65rem .5rem;text-align:center;background:var(--fc-bg);border:1px solid var(--fc-border);position:relative;overflow:hidden}
 .ai-fc-card.ai-fc-best{border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.07)}
 .ai-fc-hour{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.25rem}
-.ai-fc-temp{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:300;line-height:1;color:var(--text)}
+.ai-fc-temp{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:300;line-height:1;color:var(--text)}
 .ai-fc-unit{font-size:.65rem;color:var(--muted)}
 .ai-fc-delta{font-size:.65rem;margin-top:.2rem}
 .ai-fc-delta.up{color:var(--red)}.ai-fc-delta.dn{color:var(--blue)}.ai-fc-delta.flat{color:var(--muted)}
@@ -426,9 +428,9 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Architecture info */
 .ai-arch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-top:.5rem}
 .ai-arch-item{padding:.5rem .7rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.ai-arch-val{font-family:'IBM Plex Mono',monospace;font-size:.88rem;color:var(--text)}
+.ai-arch-val{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text)}
 .ai-arch-lbl{font-size:.61rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
-.ai-train-btn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:10px;padding:.5rem 1.1rem;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
+.ai-train-btn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:10px;padding:.5rem 1.1rem;color:#fff;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
 .ai-train-btn:hover{opacity:.88}.ai-train-btn:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:680px){.ai-forecast-grid{grid-template-columns:repeat(3,1fr)}}
 .clim-twin-hero{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:1.5rem 1.75rem;border-radius:18px;background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(124,58,237,.07));border:1px solid var(--card-border);margin-bottom:1rem}
@@ -437,26 +439,26 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .clim-twin-label{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
 .clim-twin-place{font-size:1.5rem;font-weight:700;line-height:1.15;margin-bottom:.25rem}
 .clim-twin-sub{font-size:.78rem;color:var(--muted);line-height:1.55}
-.clim-twin-match{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.72rem;padding:.2rem .6rem;border-radius:10px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:var(--blue);margin-top:.5rem}
+.clim-twin-match{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.2rem .6rem;border-radius:10px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:var(--blue);margin-top:.5rem}
 .clim-twin-alts{font-size:.72rem;color:var(--muted);margin-top:.6rem;line-height:1.6}
 /* Wrapped */
 .wrap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem}
 .wrap-stat{padding:.85rem 1rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);position:relative;overflow:hidden;transition:transform .2s}
 .wrap-stat:hover{transform:translateY(-2px)}
 .wrap-stat-icon{font-size:1.3rem;margin-bottom:.3rem}
-.wrap-stat-val{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:300;line-height:1.1;color:var(--text)}
+.wrap-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:300;line-height:1.1;color:var(--text)}
 .wrap-stat-lbl{font-size:.66rem;color:var(--muted);line-height:1.4;margin-top:.2rem}
 .wrap-stat-date{font-size:.6rem;color:var(--muted);opacity:.7;margin-top:.15rem}
 .wrap-year-sel{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
-.wrap-year-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted);cursor:pointer;transition:all .2s}
+.wrap-year-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);cursor:pointer;transition:all .2s}
 .wrap-year-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 /* Growing season */
 .gs-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--day-divider);font-size:.78rem}
 .gs-row:last-child{border-bottom:none}
-.gs-year{font-family:'IBM Plex Mono',monospace;font-weight:600;width:42px;flex-shrink:0}
+.gs-year{font-family:'JetBrains Mono',monospace;font-weight:600;width:42px;flex-shrink:0}
 .gs-bar-track{flex:1;height:18px;background:var(--fc-bg);border-radius:9px;position:relative;overflow:hidden;min-width:100px}
 .gs-bar{position:absolute;height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:9px;opacity:.85}
-.gs-len{font-family:'IBM Plex Mono',monospace;font-size:.74rem;width:60px;text-align:right;flex-shrink:0}
+.gs-len{font-family:'JetBrains Mono',monospace;font-size:.74rem;width:60px;text-align:right;flex-shrink:0}
 .gs-dates{font-size:.66rem;color:var(--muted);width:130px;flex-shrink:0;text-align:right}
 .gs-trend{padding:.6rem .85rem;border-radius:11px;margin-top:.85rem;font-size:.76rem;line-height:1.55}
 .gs-trend.warming{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25)}
@@ -465,18 +467,18 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Heat/cold spells */
 .spell-section{margin-bottom:1.25rem}
 .spell-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .7rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border);margin-bottom:.5rem;border-left:3px solid var(--sp-accent,var(--red))}
-.spell-rank{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--sp-accent);width:28px;flex-shrink:0;text-align:center}
+.spell-rank{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--sp-accent);width:28px;flex-shrink:0;text-align:center}
 .spell-body{flex:1;min-width:0}
 .spell-dates{font-size:.78rem;font-weight:600}
 .spell-detail{font-size:.66rem;color:var(--muted);line-height:1.4}
-.spell-dur{font-family:'IBM Plex Mono',monospace;font-size:.92rem;color:var(--sp-accent);white-space:nowrap}
+.spell-dur{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--sp-accent);white-space:nowrap}
 .clim-loading{color:var(--muted);font-size:.8rem;padding:1rem 0;text-align:center}
 @media(max-width:680px){.gs-dates{display:none}.clim-twin-place{font-size:1.25rem}}
 /* Drift engine */
 .drift-chart-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .drift-kpi-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.85rem}
 .drift-kpi{padding:.55rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border);min-width:120px}
-.drift-kpi-val{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:300;line-height:1.1}
+.drift-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:300;line-height:1.1}
 .drift-kpi-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.15rem}
 .drift-cold{color:var(--blue)}.drift-warm{color:var(--red)}.drift-humid{color:var(--cyan)}.drift-dry{color:var(--amber)}
 /* Agro pulse */
@@ -485,7 +487,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .pulse-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem}
 .pulse-icon{font-size:1.1rem;flex-shrink:0}
 .pulse-name{font-size:.8rem;font-weight:600;flex:1}
-.pulse-eta{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--pi-accent,var(--green));white-space:nowrap}
+.pulse-eta{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--pi-accent,var(--green));white-space:nowrap}
 .pulse-bar-bg{height:5px;background:var(--rain-track);border-radius:3px;overflow:hidden;margin:.3rem 0}
 .pulse-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
 .pulse-note{font-size:.66rem;color:var(--muted);line-height:1.4}
@@ -501,7 +503,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .fp-alert-sub{font-size:.74rem;color:var(--muted);line-height:1.5}
 .fp-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.75rem}
 .fp-metric{padding:.5rem .65rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.fp-metric-val{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text)}
+.fp-metric-val{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text)}
 .fp-metric-lbl{font-size:.61rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em;margin-top:.1rem}
 .fp-history{font-size:.7rem;color:var(--muted);line-height:1.55;margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--day-divider)}
 @media(max-width:680px){.drift-kpi-row{gap:.4rem}.fp-metrics{grid-template-columns:repeat(2,1fr)}}
@@ -515,7 +517,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
 .sc-threat-tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.sc-threat-level{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:.08em}
+.sc-threat-level{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:.08em}
 .sc-none .sc-threat-level{color:var(--muted)}
 .sc-low .sc-threat-level{color:#4ade80}
 .sc-moderate .sc-threat-level{color:#fbbf24}
@@ -524,22 +526,22 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .sc-threat-desc{font-size:.78rem;color:var(--muted);line-height:1.55;max-width:500px}
 .sc-hero-kpis{display:flex;gap:.65rem;flex-wrap:wrap}
 .sc-hero-kpi{display:flex;flex-direction:column;gap:.15rem;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.5rem .75rem;min-width:72px}
-.sc-hero-kpi b{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:300;color:var(--text)}
+.sc-hero-kpi b{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:300;color:var(--text)}
 .sc-hero-kpi small{font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.sc-idx-val{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:200;line-height:1.1;margin-bottom:.2rem}
+.sc-idx-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:200;line-height:1.1;margin-bottom:.2rem}
 .sc-idx-desc{font-size:.68rem;color:var(--muted);line-height:1.45}
 .sc-idx-bar{height:6px;border-radius:3px;background:var(--fc-border);margin:.55rem 0 .35rem;overflow:hidden}
 .sc-idx-fill{height:100%;border-radius:3px;transition:width .8s ease}
 .sc-wind-table{width:100%;border-collapse:collapse;font-size:.74rem}
 .sc-wind-table th{color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;padding:.3rem .4rem;text-align:left;border-bottom:1px solid var(--border)}
-.sc-wind-table td{padding:.38rem .4rem;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;vertical-align:middle}
+.sc-wind-table td{padding:.38rem .4rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;vertical-align:middle}
 .sc-wind-table tr:last-child td{border-bottom:none}
 .sc-hodo{display:block;width:100%;max-width:240px;margin:0 auto}
 .sc-timeline{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sc-timeline svg{display:block;min-width:420px;width:100%}
 .sc-valley-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 .sc-valley-item{padding:.6rem .75rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.sc-valley-val{font-family:'IBM Plex Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
+.sc-valley-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
 .sc-valley-lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.15rem}
 @media(max-width:680px){.sc-hero-kpis{gap:.4rem}.sc-hero-kpi{min-width:60px}}
 /* Card accent system */
@@ -557,7 +559,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Anomaly */
 .anom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 .anom-item{display:flex;flex-direction:column;gap:.15rem;padding:.55rem .7rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
-.anom-val{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:300;line-height:1.1;display:flex;align-items:baseline;gap:.2rem}
+.anom-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:300;line-height:1.1;display:flex;align-items:baseline;gap:.2rem}
 .anom-val .au{font-size:.7rem;color:var(--muted)}
 .anom-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 .anom-pos{color:var(--red)}.anom-neg{color:var(--blue)}.anom-zero{color:var(--muted)}
@@ -567,7 +569,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .streak-item{display:flex;align-items:center;gap:.7rem;padding:.5rem .65rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--st-accent,var(--blue))}
 .streak-icon{font-size:1.15rem;flex-shrink:0}
 .streak-body{flex:1;min-width:0}
-.streak-count{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:400;line-height:1.15}
+.streak-count{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:400;line-height:1.15}
 .streak-desc{font-size:.66rem;color:var(--muted);line-height:1.35}
 .streak-rec{font-size:.6rem;padding:.1rem .4rem;border-radius:8px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.3);color:var(--amber);white-space:nowrap;font-weight:600}
 .streak-empty{font-size:.74rem;color:var(--muted);line-height:1.5}
@@ -590,23 +592,23 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .mood-spark{margin-top:.5rem;width:100%;height:34px;display:block}
 /* Analog days */
 .analog-controls{display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap}
-.analog-controls input[type=date]{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.35rem .55rem;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:.72rem;color-scheme:light dark}
-.analog-btn{background:var(--blue);border:none;border-radius:9px;padding:.4rem .8rem;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.analog-controls input[type=date]{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.35rem .55rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;color-scheme:light dark}
+.analog-btn{background:var(--blue);border:none;border-radius:9px;padding:.4rem .8rem;color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:opacity .2s}
 .analog-btn:hover{opacity:.88}
 .analog-result{display:flex;flex-direction:column;gap:.5rem}
 .analog-day{padding:.6rem .75rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
 .analog-day-top{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
 .analog-date{font-weight:600;font-size:.82rem}
-.analog-sim{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--green)}
+.analog-sim{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green)}
 .analog-detail{font-size:.68rem;color:var(--muted);margin-top:.25rem;line-height:1.45}
 .analog-after{font-size:.68rem;color:var(--text);margin-top:.35rem;padding-top:.35rem;border-top:1px solid var(--day-divider);line-height:1.45}
 .analog-empty{font-size:.74rem;color:var(--muted);line-height:1.5}
 /* This week in history */
 .twh-grid-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .twh-grid{border-collapse:collapse;width:100%;font-size:.66rem}
-.twh-grid th{font-family:'IBM Plex Mono',monospace;font-weight:400;color:var(--muted);padding:.25rem .3rem;font-size:.62rem;text-align:center}
-.twh-grid td.twh-yr{font-family:'IBM Plex Mono',monospace;color:var(--muted);padding-right:.5rem;text-align:right;white-space:nowrap}
-.twh-cell{width:30px;height:26px;border-radius:5px;text-align:center;vertical-align:middle;font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.92);font-weight:500}
+.twh-grid th{font-family:'JetBrains Mono',monospace;font-weight:400;color:var(--muted);padding:.25rem .3rem;font-size:.62rem;text-align:center}
+.twh-grid td.twh-yr{font-family:'JetBrains Mono',monospace;color:var(--muted);padding-right:.5rem;text-align:right;white-space:nowrap}
+.twh-cell{width:30px;height:26px;border-radius:5px;text-align:center;vertical-align:middle;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.92);font-weight:500}
 [data-theme="light"] .twh-cell{color:rgba(0,0,0,.78)}
 .twh-cell.twh-empty{background:var(--fc-bg);color:transparent}
 .twh-legend{display:flex;align-items:center;gap:.4rem;font-size:.64rem;color:var(--muted);margin-top:.7rem;justify-content:flex-end}
@@ -625,7 +627,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .ms-icon{font-size:1.05rem;flex-shrink:0}
 .ms-body{flex:1;min-width:0}
 .ms-title{font-size:.74rem;font-weight:600;line-height:1.2}
-.ms-date{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)}
+.ms-date{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
 .ms-delta{font-size:.6rem;padding:.1rem .42rem;border-radius:8px;white-space:nowrap;font-weight:600}
 .ms-early{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.3);color:var(--amber)}
 .ms-late{background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.3);color:var(--blue)}
@@ -638,7 +640,7 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .astro-sub{font-size:.72rem;color:var(--muted);line-height:1.55}
 .astro-kpis{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.6rem}
 .astro-kpi{font-size:.66rem;color:var(--muted)}
-.astro-kpi b{font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:400;font-size:.78rem;display:block}
+.astro-kpi b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:400;font-size:.78rem;display:block}
 /* Tab pane fade-in */
 @keyframes tab-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .tab-pane.active{animation:tab-in .22s ease}
@@ -656,26 +658,26 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .ds-item{flex:1;padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.3rem;position:relative}
 .ds-item+.ds-item::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:var(--day-divider)}
 .ds-arrow{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
-.ds-temp{font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1;color:var(--text)}
+.ds-temp{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1;color:var(--text)}
 .ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
 .ds-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.ds-time{font-family:'IBM Plex Mono',monospace;font-weight:300}
+.ds-time{font-family:'JetBrains Mono',monospace;font-weight:300}
 .ds-high .ds-arrow{color:var(--red)}.ds-low .ds-arrow{color:var(--blue)}
 .ds-rain .ds-arrow{color:var(--rain-col)}.ds-avg .ds-arrow{color:var(--green)}
 
 /* Wind */
 .wind-body{display:flex;align-items:center;gap:1.5rem}
-.ws-big{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1;color:var(--text)}
+.ws-big{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:300;line-height:1;color:var(--text)}
 .ws-unit{font-size:.8rem;color:var(--muted);margin-left:3px}
 .wdir{font-size:.8rem;color:var(--purple);margin-top:.3rem;letter-spacing:.05em;font-weight:500}
 .wgust{font-size:.76rem;color:var(--muted);margin-top:.3rem}
-.beaufort-badge{display:inline-flex;align-items:center;gap:.4rem;margin-top:.55rem;font-size:.76rem;background:var(--bft-bg);border:1px solid var(--bft-border);border-radius:20px;padding:3px 10px;color:var(--purple);font-family:'IBM Plex Mono',monospace;transition:background .35s}
+.beaufort-badge{display:inline-flex;align-items:center;gap:.4rem;margin-top:.55rem;font-size:.76rem;background:var(--bft-bg);border:1px solid var(--bft-border);border-radius:20px;padding:3px 10px;color:var(--purple);font-family:'JetBrains Mono',monospace;transition:background .35s}
 
 /* SVG compass theming via CSS vars */
 .c-ring{stroke:var(--svg-ring);fill:none}.c-ring-i{stroke:var(--svg-ring)}
 .c-tick{stroke:var(--svg-tick)}.c-tick-m{stroke:var(--svg-tick-m)}
-.c-lbl{fill:var(--svg-lbl);font-family:'IBM Plex Mono',monospace}
-.c-lbl-d{fill:var(--svg-lbl-d);font-family:'IBM Plex Mono',monospace}
+.c-lbl{fill:var(--svg-lbl);font-family:'JetBrains Mono',monospace}
+.c-lbl-d{fill:var(--svg-lbl-d);font-family:'JetBrains Mono',monospace}
 
 /* Pressure */
 .pressure-body{display:flex;align-items:center;gap:1rem;justify-content:space-between}
@@ -683,16 +685,16 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .pressure-right{flex-shrink:0;width:115px}
 .p-trend{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;padding:2px 10px;border-radius:20px;margin-top:.5rem;font-weight:500}
 .t-up{background:var(--t-up-bg);color:var(--t-up-c)}.t-dn{background:var(--t-dn-bg);color:var(--t-dn-c)}.t-flat{background:var(--t-fl-bg);color:var(--t-fl-c)}
-.p-rate{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--muted);margin-top:.3rem}
-.p-arc-track{stroke:var(--svg-track)}.p-arc-lbl{fill:var(--svg-lbl-d);font-family:'IBM Plex Mono',monospace}
+.p-rate{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);margin-top:.3rem}
+.p-arc-track{stroke:var(--svg-track)}.p-arc-lbl{fill:var(--svg-lbl-d);font-family:'JetBrains Mono',monospace}
 
 /* Charts */
 .chart-card{margin-bottom:1rem;padding:1.4rem 1.6rem 1rem}
 .chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem}
-.chart-range{font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--muted)}
+.chart-range{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted)}
 .chart-svg-wrap{width:100%;overflow:hidden}
 .chart-svg{width:100%;display:block;cursor:crosshair}
-#chart-tip{position:fixed;pointer-events:none;z-index:200;background:var(--tip-bg);border:1px solid var(--tip-border);border-radius:8px;padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:var(--tip-shadow)}
+#chart-tip{position:fixed;pointer-events:none;z-index:200;background:var(--tip-bg);border:1px solid var(--tip-border);border-radius:8px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:var(--tip-shadow)}
 
 /* Small cards */
 .rain-bar-wrap{height:4px;background:var(--rain-track);border-radius:4px;overflow:hidden;margin-top:.8rem}
@@ -705,11 +707,11 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .omx-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.85rem 1rem;min-height:150px}
 .omx-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
 .omx-title{font-size:.76rem;font-weight:650;color:var(--text)}
-.omx-badge{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted);border:1px solid var(--fc-border);border-radius:999px;padding:1px 7px}
-.omx-main{font-family:'IBM Plex Mono',monospace;font-size:1.35rem;line-height:1.1;color:var(--text)}
+.omx-badge{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);border:1px solid var(--fc-border);border-radius:999px;padding:1px 7px}
+.omx-main{font-family:'JetBrains Mono',monospace;font-size:1.35rem;line-height:1.1;color:var(--text)}
 .omx-sub{font-size:.74rem;color:var(--muted);line-height:1.6;margin-top:.45rem}
 .omx-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.45rem;margin-top:.7rem}
-.omx-kpi{font-size:.68rem;color:var(--muted)}.omx-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--text);font-weight:400}
+.omx-kpi{font-size:.68rem;color:var(--muted)}.omx-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);font-weight:400}
 .omx-bars{display:flex;gap:3px;align-items:flex-end;height:42px;margin-top:.7rem}
 .omx-bar{flex:1;min-width:3px;border-radius:3px 3px 1px 1px;background:var(--rain-col);opacity:.35}
 .omx-bar.hit{opacity:.95}.omx-bar.storm{background:#ea580c;opacity:1}
@@ -719,13 +721,13 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
 .sun-svg{width:100%;display:block}
-.sun-times{display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.3rem;padding:0 .25rem}
+.sun-times{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.3rem;padding:0 .25rem}
 .sun-times .daylen{color:var(--amber);font-size:.76rem;font-weight:500}
-.sun-ground{stroke:var(--svg-ring)}.sun-track{stroke:var(--svg-track)}.sun-lbl{fill:var(--svg-lbl-d);font-family:'IBM Plex Mono',monospace}
+.sun-ground{stroke:var(--svg-ring)}.sun-track{stroke:var(--svg-track)}.sun-lbl{fill:var(--svg-lbl-d);font-family:'JetBrains Mono',monospace}
 
 /* Footer */
 footer{text-align:center;padding-top:3rem;font-size:.76rem;color:var(--muted);line-height:2.2}
-.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);margin-top:.75rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
+.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);margin-top:.75rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
 .visitor-counter:hover{border-color:var(--blue)}
 .visitor-counter .vc-num{color:var(--text);font-weight:500}
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
@@ -761,7 +763,7 @@ footer a{color:var(--blue);text-decoration:none}
 .tab-dd-divider{height:1px;background:var(--border);margin:.35rem .4rem}
 .tab-dd-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;
   padding:.42rem .65rem;font-size:.78rem;color:var(--text);cursor:pointer;
-  transition:background .12s;font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;white-space:nowrap}
+  transition:background .12s;font-family:'Inter',sans-serif;font-weight:500;white-space:nowrap}
 .tab-dd-menu button:hover{background:var(--fc-bg)}
 .tab-dd-menu button.active{background:var(--blue);color:#fff}
 @media(max-width:760px){
@@ -769,7 +771,7 @@ footer a{color:var(--blue);text-decoration:none}
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
 }
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
 .tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
 .tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);opacity:1}
 .tab-pane{display:none}.tab-pane.active{display:block}
@@ -778,7 +780,7 @@ footer a{color:var(--blue);text-decoration:none}
 .history-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:500px}
 .history-table th{text-align:right;padding:.55rem .85rem;color:var(--muted);font-weight:500;font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
 .history-table th:first-child{text-align:left}
-.history-table td{padding:.55rem .85rem;font-family:'IBM Plex Mono',monospace;font-size:.78rem;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.history-table td{padding:.55rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
 .history-table td:first-child{text-align:left;color:var(--muted);font-size:.72rem}
 .history-table tbody tr:last-child td{border-bottom:none}
 .history-table tbody tr:hover td{background:rgba(128,128,128,.04)}
@@ -796,12 +798,12 @@ footer a{color:var(--blue);text-decoration:none}
 
 /* Yesterday delta */
 .yesterday-delta{font-size:.72rem;margin-top:.45rem}
-.yesterday-delta .dv{font-family:'IBM Plex Mono',monospace;font-weight:400}
+.yesterday-delta .dv{font-family:'JetBrains Mono',monospace;font-weight:400}
 
 /* Share & install buttons */
-.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,color .2s;line-height:1.5}
+.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s;line-height:1.5}
 .share-btn:hover{border-color:var(--blue);color:var(--blue)}
-.install-btn{display:none;align-items:center;gap:.4rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.install-btn{display:none;align-items:center;gap:.4rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif}
 .install-btn.show{display:inline-flex}
 
 /* Toast */
@@ -825,17 +827,17 @@ footer a{color:var(--blue);text-decoration:none}
 .otd-year{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .otd-emoji{font-size:1.75rem;line-height:1.25;margin:.1rem 0}
 .otd-desc{font-size:.73rem;color:var(--muted);text-transform:capitalize;line-height:1.3;min-height:1.8em}
-.otd-temps{font-family:'IBM Plex Mono',monospace;font-size:.95rem;display:flex;align-items:baseline;gap:.3rem;margin-top:.15rem}
+.otd-temps{font-family:'JetBrains Mono',monospace;font-size:.95rem;display:flex;align-items:baseline;gap:.3rem;margin-top:.15rem}
 .otd-temps .th{color:#f87171}.otd-temps .tl{color:var(--blue)}
-.otd-rain{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--rain-col);margin-top:.1rem}
-.otd-wind{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--muted)}
+.otd-rain{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--rain-col);margin-top:.1rem}
+.otd-wind{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)}
 @media(max-width:520px){.otd-grid{gap:.5rem}.otd-item{min-width:calc(50% - .25rem);flex:0 0 calc(50% - .25rem)}}
 .otd-station .otd-item{border-color:rgba(167,139,250,.15)}
 .otd-station .otd-item:hover{border-color:rgba(167,139,250,.3)}
 .otd-station .otd-year{color:var(--purple)}
 .otd-nodata{font-size:.7rem;color:var(--muted);font-style:italic;padding:.25rem 0}
 .period-nav{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
-.period-btn{padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
+.period-btn{padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);font-family:'Inter',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
 .period-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 2px 10px rgba(37,99,235,.3)}
 .period-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
 .period-btn:disabled{opacity:.45;cursor:wait}
@@ -844,7 +846,7 @@ footer a{color:var(--blue);text-decoration:none}
 /* Weather Score */
 .score-wrap{display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap}
 .score-ring{width:88px;height:88px;border-radius:50%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:box-shadow .8s}
-.score-n{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:300;line-height:1}
+.score-n{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:300;line-height:1}
 .score-l{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem;opacity:.8}
 .acts{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem}
 .act{display:inline-flex;align-items:center;gap:.3rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:4px 12px;font-size:.72rem;transition:border-color .2s}
@@ -853,25 +855,25 @@ footer a{color:var(--blue);text-decoration:none}
 .moon-body{display:flex;gap:1.5rem;align-items:center}
 .moon-big{font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(217,119,6,.3))}
 .moon-pn{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.3rem}
-.moon-il{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--muted)}
+.moon-il{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted)}
 .moon-nx{font-size:.74rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
 /* Air Quality */
 .aqi-bar-wrap{height:6px;background:linear-gradient(90deg,#22c55e 0%,#86efac 20%,#fbbf24 40%,#f97316 60%,#ef4444 80%,#9333ea 100%);border-radius:3px;margin:.8rem 0 .3rem;position:relative}
 .aqi-dot{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:var(--card-bg);border:2.5px solid var(--text);transform:translateX(-50%);transition:left .8s ease;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .aqi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.8rem}
 .aqi-cell{text-align:center;padding:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
-.aqi-cv{font-family:'IBM Plex Mono',monospace;font-size:.9rem}
+.aqi-cv{font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .aqi-cl{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.1rem}
 /* Agrometeo */
 .agro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:.65rem}
 .agro-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.7rem .85rem;text-align:center}
-.agro-n{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;color:var(--green)}
+.agro-n{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--green)}
 .agro-l{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem;line-height:1.35}
 /* Lightning */
 .ltg-wrap{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap}
-.ltg-count{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:300;color:var(--amber);line-height:1}
+.ltg-count{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:300;color:var(--amber);line-height:1}
 .ltg-sub{font-size:.76rem;color:var(--muted);margin-top:.25rem}
-.ltg-list{flex:1;max-height:90px;overflow-y:auto;font-size:.74rem;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
+.ltg-list{flex:1;max-height:90px;overflow-y:auto;font-size:.74rem;font-family:'JetBrains Mono',monospace;color:var(--muted)}
 .ltg-row{padding:.18rem 0;border-bottom:1px solid var(--border);white-space:nowrap}
 .ltg-close{color:var(--red)}.ltg-far{color:var(--muted)}
 
@@ -881,12 +883,12 @@ footer a{color:var(--blue);text-decoration:none}
 .radar-controls{display:flex;align-items:center;gap:.65rem;margin-top:.7rem;flex-wrap:wrap}
 .radar-btn{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:.35rem .85rem;font-size:.74rem;color:var(--text);cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem}
 .radar-btn:hover{border-color:var(--blue);color:var(--blue)}
-.radar-time{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--text);min-width:130px}
+.radar-time{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);min-width:130px}
 .radar-track{flex:1;min-width:120px;height:5px;background:var(--rain-track);border-radius:3px;position:relative;cursor:pointer}
 .radar-track-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .2s}
 .radar-now-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);font-weight:600}
 .radar-fc-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(167,139,250,.15);color:var(--purple);font-weight:600}
-.leaflet-container{font-family:'Plus Jakarta Sans',sans-serif!important;background:var(--fc-bg)!important}
+.leaflet-container{font-family:'Inter',sans-serif!important;background:var(--fc-bg)!important}
 .radar-legend{display:flex;align-items:center;gap:.4rem;font-size:.66rem;color:var(--muted);margin-top:.5rem;flex-wrap:wrap}
 .radar-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#60a5fa,#3b82f6,#22c55e,#eab308,#f97316,#ef4444,#a855f7)}
 
@@ -895,7 +897,7 @@ footer a{color:var(--blue);text-decoration:none}
 .pollen-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .55rem;text-align:center}
 .pollen-icon{font-size:1.1rem}
 .pollen-name{font-size:.66rem;color:var(--muted);margin:.2rem 0 .1rem}
-.pollen-val{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:500}
+.pollen-val{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:500}
 .pollen-level{font-size:.6rem;padding:1px 6px;border-radius:8px;margin-top:.25rem;display:inline-block}
 
 /* Flood / river discharge */
@@ -917,7 +919,7 @@ footer a{color:var(--blue);text-decoration:none}
 /* Year records */
 .yr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.75rem;margin-top:.25rem}
 .yr-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
-.yr-val{font-family:'IBM Plex Mono',monospace;font-size:1.35rem;font-weight:300}
+.yr-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:300}
 .yr-dt{font-size:.72rem;color:var(--muted-text,var(--muted));margin-top:.2rem}
 /* Monthly summary */
 .month-txt{font-size:.82rem;line-height:1.85;color:var(--text)}
@@ -927,34 +929,34 @@ footer a{color:var(--blue);text-decoration:none}
 .clim-bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem}
 .clim-bg{flex:1;width:100%;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:4px 4px 0 0;overflow:hidden;display:flex;align-items:flex-end}
 .clim-fill{width:100%;border-radius:4px 4px 0 0;transition:height .8s ease}
-.clim-lbl{font-size:.76rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.clim-lbl{font-size:.76rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 /* Notification button */
-.notif-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,color .2s;color:var(--muted);line-height:1.5}
+.notif-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s;color:var(--muted);line-height:1.5}
 .notif-btn.on{border-color:var(--green);color:var(--green)}
 
 
 /* Biometeo */
 .bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:.5rem}
 .bio-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
-.bio-val{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:300;line-height:1}
+.bio-val{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;line-height:1}
 .bio-lbl{font-size:.72rem;color:var(--muted-text,var(--muted));text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
 .bio-cat{font-size:.7rem;font-weight:500;margin-top:.3rem}
 .bio-tip{font-size:.74rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
 /* Fog */
 .fog-timeline{display:flex;gap:2px;margin-top:.65rem;align-items:flex-end;height:44px}
 .fog-bar{flex:1;border-radius:3px 3px 0 0;transition:height .6s ease;min-height:2px}
-.fog-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:.25rem}
+.fog-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.25rem}
 /* Hourly profile */
 .hourly-peak{display:flex;gap:2rem;flex-wrap:wrap;margin-top:.5rem}
 .hourly-peak-item{font-size:.7rem;color:var(--muted)}
-.hourly-peak-item b{font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:400}
+.hourly-peak-item b{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:400}
 /* Phenological calendar */
 .pheno-list{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem}
 .pheno-row{display:grid;grid-template-columns:1.5rem 1fr auto;grid-template-rows:auto auto;column-gap:.65rem;row-gap:.1rem;font-size:.75rem;align-items:start}
 .pheno-icon{font-size:1.1rem;text-align:center;grid-column:1;grid-row:1/3;align-self:center}
 .pheno-name{grid-column:2;grid-row:1;color:var(--text)}
-.pheno-gdd{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);white-space:nowrap;grid-column:3;grid-row:1;text-align:right}
-.pheno-date{font-family:'IBM Plex Mono',monospace;font-size:.7rem;white-space:nowrap;grid-column:2/4;grid-row:2;text-align:right}
+.pheno-gdd{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);white-space:nowrap;grid-column:3;grid-row:1;text-align:right}
+.pheno-date{font-family:'JetBrains Mono',monospace;font-size:.7rem;white-space:nowrap;grid-column:2/4;grid-row:2;text-align:right}
 .pheno-done{opacity:.62}.pheno-soon{color:var(--green)}.pheno-future{color:var(--muted)}
 .pheno-row.active{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);border-radius:10px;padding:.45rem .55rem;margin-left:-.55rem}
 .pheno-status{font-size:.66rem;border-radius:999px;padding:1px 7px;border:1px solid var(--fc-border);white-space:nowrap}
@@ -966,7 +968,7 @@ footer a{color:var(--blue);text-decoration:none}
 }
 /* Water balance */
 .wbal-summary{display:flex;gap:1.5rem;margin-bottom:.75rem;flex-wrap:wrap}
-.wbal-stat{font-family:'IBM Plex Mono',monospace;font-size:.95rem}
+.wbal-stat{font-family:'JetBrains Mono',monospace;font-size:.95rem}
 .wbal-sl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.1rem}
 .wbal-bars{display:flex;gap:2px;align-items:center;height:50px;margin-top:.5rem}
 .wbal-bar{flex:1;border-radius:2px;min-width:3px;transition:height .6s ease}
@@ -989,7 +991,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 /* Sky strip */
 .sky-strip-wrap{position:relative;border-radius:14px;overflow:hidden;margin-top:.25rem}
 .sky-strip-svg{display:block;width:100%;cursor:crosshair}
-.sky-tooltip{position:absolute;background:rgba(15,23,42,.88);border:1px solid rgba(56,189,248,.35);border-radius:8px;padding:.4rem .7rem;font-size:.76rem;font-family:'IBM Plex Mono',monospace;color:#e2e8f0;pointer-events:none;white-space:nowrap;transition:opacity .15s;z-index:10}
+.sky-tooltip{position:absolute;background:rgba(15,23,42,.88);border:1px solid rgba(56,189,248,.35);border-radius:8px;padding:.4rem .7rem;font-size:.76rem;font-family:'JetBrains Mono',monospace;color:#e2e8f0;pointer-events:none;white-space:nowrap;transition:opacity .15s;z-index:10}
 
 
 /* Sky strip */
@@ -1003,7 +1005,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 /* Why weather */
 .why-text{font-size:.84rem;line-height:1.9;color:var(--text)}
 .why-text em{font-style:normal;color:var(--blue);font-weight:500}
-.why-updated{font-size:.7rem;color:var(--muted);margin-top:.5rem;font-family:'IBM Plex Mono',monospace}
+.why-updated{font-size:.7rem;color:var(--muted);margin-top:.5rem;font-family:'JetBrains Mono',monospace}
 
 /* Microclimate analysis */
 .mc-list{display:flex;flex-direction:column;gap:.55rem;margin-top:.25rem}
@@ -1017,7 +1019,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mc-name{font-size:.8rem;font-weight:600;color:var(--text)}
 .mc-text{font-size:.74rem;line-height:1.7;color:var(--muted)}
 .mc-data{display:flex;gap:.75rem;margin-top:.35rem;flex-wrap:wrap}
-.mc-datum{font-size:.74rem;font-family:'IBM Plex Mono',monospace;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:6px;padding:2px 8px;color:var(--text)}
+.mc-datum{font-size:.74rem;font-family:'JetBrains Mono',monospace;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:6px;padding:2px 8px;color:var(--text)}
 .mc-none{font-size:.78rem;color:var(--green);padding:.25rem 0}
 
 
@@ -1028,9 +1030,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 /* Records */
 .rec-compare{display:grid;grid-template-columns:1fr repeat(3,auto);gap:.5rem .75rem;font-size:.75rem;align-items:center}
 .rec-compare-hdr{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center}
-.rec-compare .mine{color:var(--blue);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
-.rec-compare .slo{color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
-.rec-compare .world{color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:.82rem}
+.rec-compare .mine{color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.rec-compare .slo{color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.rec-compare .world{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.82rem}
 .rec-sub{font-size:.7rem;color:var(--muted);line-height:1.3;margin-top:.1rem}
 /* Proverb */
 .proverb-text{font-size:1.05rem;font-style:italic;line-height:1.6;color:var(--text);margin-bottom:.75rem}
@@ -1058,8 +1060,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .world-card{flex:1;min-width:140px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.75rem .9rem;text-align:center}
 .world-city{font-size:.7rem;font-weight:600;color:var(--text)}
 .world-country{font-size:.7rem;color:var(--muted);margin-bottom:.3rem}
-.world-temp{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:300}
-.world-diff{font-size:.74rem;margin-top:.2rem;font-family:'IBM Plex Mono',monospace}
+.world-temp{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:300}
+.world-diff{font-size:.74rem;margin-top:.2rem;font-family:'JetBrains Mono',monospace}
 .world-match{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06)}
 /* Quiz */
 .quiz-q{font-size:.9rem;font-weight:500;line-height:1.55;margin-bottom:1rem;color:var(--text)}
@@ -1069,7 +1071,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .quiz-opt.correct{border-color:var(--green);background:rgba(74,222,128,.1);color:var(--green)}
 .quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.08);color:var(--red);opacity:.7}
 .quiz-expl{font-size:.76rem;line-height:1.65;color:var(--muted);margin-top:.85rem;padding:.7rem .9rem;background:var(--fc-bg);border-radius:10px;border-left:3px solid var(--blue)}
-.quiz-streak{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted-text,var(--muted))}
+.quiz-streak{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted-text,var(--muted))}
 /* Proverb stats */
 .prov-row{padding:.9rem 0;border-bottom:1px solid var(--border)}
 .prov-row:last-child{border-bottom:none;padding-bottom:0}
@@ -1078,21 +1080,21 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .prov-row-name{font-weight:600;font-size:.82rem;margin-bottom:.22rem}
 .prov-row-text{font-style:italic;font-size:.82rem;line-height:1.5;color:var(--text)}
 .prov-row-note{font-size:.69rem;color:var(--muted);margin-top:.2rem}
-.prov-rate{font-family:'IBM Plex Mono',monospace;font-size:.96rem;font-weight:400}
+.prov-rate{font-family:'JetBrains Mono',monospace;font-size:.96rem;font-weight:400}
 .prov-tested{font-size:.68rem;color:var(--muted)}
 .prov-dots{display:flex;gap:4px;margin-top:.55rem;flex-wrap:wrap;align-items:center}
 .prov-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;cursor:default}
-.prov-year-labels{font-size:.65rem;color:var(--muted);margin-left:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em}
+.prov-year-labels{font-size:.65rem;color:var(--muted);margin-left:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
 
 /* Generative art */
 .weather-art-wrap{border-radius:16px;overflow:hidden;position:relative;background:var(--card-bg)}
 #weather-art-canvas{display:block;width:100%;height:100%;min-height:230px}
-.art-label{position:absolute;bottom:.4rem;right:.6rem;font-size:.7rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono',monospace;pointer-events:none}
+.art-label{position:absolute;bottom:.4rem;right:.6rem;font-size:.7rem;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;pointer-events:none}
 
 /* AI Brief */
 .ai-brief-text{font-size:.88rem;line-height:1.85;color:var(--text);margin-top:.5rem}
-.ai-brief-meta{font-size:.72rem;color:var(--muted-text,var(--muted));margin-top:.5rem;font-family:'IBM Plex Mono',monospace}
-.ai-brief-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 14px;font-size:.7rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--muted);transition:all .2s}
+.ai-brief-meta{font-size:.72rem;color:var(--muted-text,var(--muted));margin-top:.5rem;font-family:'JetBrains Mono',monospace}
+.ai-brief-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 14px;font-size:.7rem;cursor:pointer;font-family:'Inter',sans-serif;color:var(--muted);transition:all .2s}
 .ai-brief-btn:hover{border-color:var(--blue);color:var(--blue)}
 
 /* Fotodnevnik */
@@ -1104,17 +1106,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .fd-thumb{width:100%;height:130px;object-fit:cover;display:block}
 .fd-thumb-placeholder{width:100%;height:130px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:2rem}
 .fd-meta{padding:.6rem .75rem;font-size:.74rem;color:var(--muted);line-height:1.6}
-.fd-temp{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text);font-weight:300}
+.fd-temp{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);font-weight:300}
 .fd-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem}
 .fd-modal-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;width:min(560px,96vw);max-height:88vh;overflow-y:auto;padding:1.5rem}
 .fd-modal-img{width:100%;max-height:280px;object-fit:contain;border-radius:12px;background:var(--fc-bg);display:block}
 .fd-badge-row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.65rem 0}
-.fd-badge{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 10px;font-size:.74rem;font-family:'IBM Plex Mono',monospace}
+.fd-badge{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 10px;font-size:.74rem;font-family:'JetBrains Mono',monospace}
 
 /* Mikroklima fingerprint */
 .fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-top:.5rem}
 .fp-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.85rem 1rem}
-.fp-val{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:300}
+.fp-val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:300}
 .fp-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem}
 .fp-bar{height:4px;background:var(--fc-bg);border-radius:2px;margin-top:.4rem;overflow:hidden}
 .fp-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
@@ -1126,14 +1128,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mcf-signal.warn{border-left-color:var(--amber)}.mcf-signal.alert{border-left-color:var(--red)}.mcf-signal.good{border-left-color:var(--green)}
 .mcf-sig-name{font-size:.76rem;font-weight:650;color:var(--text);display:flex;align-items:center;gap:.35rem}.mcf-sig-text{font-size:.72rem;color:var(--muted);line-height:1.5;margin-top:.16rem}
 .mcf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.85rem}.mcf-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .65rem}
-.mcf-kpi b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-weight:400;color:var(--text)}.mcf-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.mcf-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:400;color:var(--text)}.mcf-kpi span{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 @media(max-width:780px){.mcf-hero{grid-template-columns:1fr}.mcf-kpis{grid-template-columns:repeat(2,1fr)}}
 
 
 /* Ecowitt widget */
 .ecw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-top:.5rem}
 .ecw-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .8rem}
-.ecw-val{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:300}
+.ecw-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:300}
 .ecw-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.15rem}
 .ecw-offline{font-size:.75rem;color:var(--muted);padding:.5rem 0}
 
@@ -1142,9 +1144,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .arso-diff-row:last-child{border-bottom:none}
 .arso-diff-param{width:120px;color:var(--muted);flex-shrink:0}
 .arso-diff-vals{display:flex;gap:.5rem;align-items:baseline;flex:1}
-.arso-val-mine{font-family:'IBM Plex Mono',monospace;color:var(--blue)}
-.arso-val-ref{font-family:'IBM Plex Mono',monospace;color:var(--muted)}
-.arso-val-diff{font-family:'IBM Plex Mono',monospace;font-size:.7rem;border-radius:5px;padding:1px 6px}
+.arso-val-mine{font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.arso-val-ref{font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.arso-val-diff{font-family:'JetBrains Mono',monospace;font-size:.7rem;border-radius:5px;padding:1px 6px}
 .arso-ok{background:rgba(74,222,128,.12);color:var(--green)}
 .arso-warn{background:rgba(251,191,36,.12);color:var(--amber)}
 .arso-bad{background:rgba(248,113,113,.12);color:var(--red)}
@@ -1155,7 +1157,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:480px){.precip-norm-grid{grid-template-columns:1fr}}
 .pn-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.8rem 1rem}
 .pn-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.3rem}
-.pn-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:300}
+.pn-val{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:300}
 .pn-norm{font-size:.76rem;color:var(--muted);margin-top:.1rem}
 .pn-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:.45rem;overflow:hidden}
 .pn-bar{height:100%;border-radius:2px;transition:width 1s ease}
@@ -1165,10 +1167,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .photo-timeline{display:flex;height:18px;border-radius:9px;overflow:hidden;margin:.65rem 0 .3rem;position:relative}
 .photo-tl-seg{flex:1;transition:opacity .3s}
 .photo-tl-now{position:absolute;top:-3px;bottom:-3px;width:3px;background:white;border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,.7);transform:translateX(-50%);pointer-events:none;transition:left .5s}
-.photo-events{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:.7rem}
+.photo-events{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.7rem}
 .photo-macro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin:.65rem 0}
 .photo-macro-item{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .7rem}
-.photo-macro-score{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:300}
+.photo-macro-score{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:300}
 .photo-macro-lbl{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.1rem}
 .photo-subjects{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
 .photo-subject{display:inline-flex;align-items:center;gap:.25rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 10px;font-size:.76rem;transition:border-color .2s}
@@ -1191,14 +1193,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .fc2-hour-grid::-webkit-scrollbar{display:none}
 .fc2-h{flex-shrink:0;width:52px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.18rem;font-size:.7rem;text-align:center}
 .fc2-h.now{border-color:var(--blue);background:rgba(56,189,248,.08)}
-.fc2-h-time{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:.76rem}
+.fc2-h-time{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.76rem}
 .fc2-h-emoji{font-size:1.1rem;line-height:1}
-.fc2-h-temp{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)}
-.fc2-h-rain{color:var(--rain-col);font-family:'IBM Plex Mono',monospace;min-height:.85em}
+.fc2-h-temp{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text)}
+.fc2-h-rain{color:var(--rain-col);font-family:'JetBrains Mono',monospace;min-height:.85em}
 .fc2-h-wind{color:var(--muted)}
 .fc2-stats{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.85rem}
 .fc2-stat{flex:1;min-width:110px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .8rem}
-.fc2-stat-n{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;font-weight:300}
+.fc2-stat-n{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:300}
 .fc2-stat-l{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.1rem}
 
 /* ── Extreme events ── */
@@ -1208,10 +1210,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .ev-icon{font-size:1.4rem;flex-shrink:0;width:2rem;text-align:center;padding-top:.05rem}
 .ev-body{flex:1;min-width:0}
 .ev-label{font-size:.78rem;font-weight:500;color:var(--text)}
-.ev-meta{font-size:.74rem;color:var(--muted);margin-top:.1rem;font-family:'IBM Plex Mono',monospace}
+.ev-meta{font-size:.74rem;color:var(--muted);margin-top:.1rem;font-family:'JetBrains Mono',monospace}
 .ev-badge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:.7rem;font-weight:600;margin-left:.4rem;vertical-align:middle}
 .ev-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem}
-.ev-filter-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif}
+.ev-filter-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif}
 .ev-filter-btn.on{border-color:var(--blue);color:var(--blue);background:rgba(56,189,248,.08)}
 
 /* ── Records ── */
@@ -1219,13 +1221,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .rec-month-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.9rem 1rem}
 .rec-month-name{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:var(--muted);margin-bottom:.55rem}
 .rec-month-row{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;padding:.15rem 0}
-.rec-month-val{font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:500}
+.rec-month-val{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500}
 .rec-hof{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-bottom:1.5rem}
 .rec-hof-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;padding:1rem 1.1rem;text-align:center}
 .rec-hof-icon{font-size:1.8rem;margin-bottom:.35rem}
-.rec-hof-val{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:300}
+.rec-hof-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:300}
 .rec-hof-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
-.rec-hof-date{font-size:.74rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:.15rem}
+.rec-hof-date{font-size:.74rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.15rem}
 
 /* ── Surroundings ── */
 .sur-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.85rem;margin-top:.25rem}
@@ -1233,9 +1235,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-card.mine{border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.05)}
 .sur-name{font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:.1rem}
 .sur-dist{font-size:.7rem;color:var(--muted)}
-.sur-temp{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
+.sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
-.sur-diff{font-size:.76rem;font-family:'IBM Plex Mono',monospace;margin-top:.3rem}
+.sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
 
 @media(max-width:520px){.nt-grid2,.nt-grid3{grid-template-columns:1fr}.rec-month-grid{grid-template-columns:repeat(2,1fr)}}
 
@@ -1255,13 +1257,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .an-tag-r{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.22)}
 .an-kpi-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .an-kpi{flex:1;min-width:130px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:.9rem 1rem;backdrop-filter:blur(12px)}
-.an-kpi-n{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:300;line-height:1}
+.an-kpi-n{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:300;line-height:1}
 .an-kpi-l{font-size:.76rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:.25rem}
 .an-rec-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.25rem}
 .an-rec-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem .7rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;font-size:.75rem}
-.an-rec-val{font-family:'IBM Plex Mono',monospace;font-weight:500}
-.an-rec-d{font-size:.72rem;color:var(--muted-text,var(--muted));font-family:'IBM Plex Mono',monospace}
-.hm-tbl{width:100%;border-collapse:collapse;font-size:.76rem;font-family:'IBM Plex Mono',monospace;margin-top:.5rem}
+.an-rec-val{font-family:'JetBrains Mono',monospace;font-weight:500}
+.an-rec-d{font-size:.72rem;color:var(--muted-text,var(--muted));font-family:'JetBrains Mono',monospace}
+.hm-tbl{width:100%;border-collapse:collapse;font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.5rem}
 .hm-tbl th{padding:.3rem .45rem;color:var(--muted);font-weight:400;text-align:center;font-size:.7rem}
 .hm-tbl td{padding:.28rem .35rem;text-align:center;border-radius:3px;cursor:default;transition:transform .1s}
 .hm-tbl td:hover{transform:scale(1.2);z-index:1;position:relative}
@@ -1282,9 +1284,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-emoji{font-size:1.55rem;line-height:1.2;margin:.15rem 0}
 .txfc-card.today .txfc-emoji{font-size:1.9rem}
 .txfc-desc{font-size:.76rem;color:var(--muted);line-height:1.35;min-height:2.1em;display:flex;align-items:center;justify-content:center}
-.txfc-temp{font-family:'IBM Plex Mono',monospace;font-size:.78rem;display:flex;gap:.2rem;align-items:baseline;margin-top:.1rem}
+.txfc-temp{font-family:'JetBrains Mono',monospace;font-size:.78rem;display:flex;gap:.2rem;align-items:baseline;margin-top:.1rem}
 .txfc-th{color:#f87171}.txfc-tl{color:var(--blue)}
-.txfc-rain{font-size:.7rem;color:var(--rain-col);font-family:'IBM Plex Mono',monospace}
+.txfc-rain{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
@@ -1295,7 +1297,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .daily-fc-text{font-size:.8rem;line-height:1.65;color:var(--muted)}
 .daily-fc-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem}
 .daily-fc-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.65rem .75rem}
-.daily-fc-kpi strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
+.daily-fc-kpi strong{display:block;font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
 .daily-fc-kpi span{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .daily-fc-note{margin-top:.75rem;font-size:.72rem;color:var(--muted);line-height:1.55}
 @media(max-width:720px){.daily-fc-hero{grid-template-columns:1fr}.daily-fc-main{align-items:flex-start}.daily-fc-icon{font-size:2.6rem}}
@@ -1377,7 +1379,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <line x1="59" y1="16" x2="57" y2="16" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
       <line x1="46.5" y1="10.5" x2="47.8" y2="11.8" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
       <!-- Label -->
-      <text x="32" y="57.5" text-anchor="middle" font-size="5.5" font-family="IBM Plex Mono,monospace" fill="rgba(56,189,248,.85)" letter-spacing="1.5" font-weight="600">IREICA1</text>
+      <text x="32" y="57.5" text-anchor="middle" font-size="5.5" font-family="JetBrains Mono,monospace" fill="rgba(56,189,248,.85)" letter-spacing="1.5" font-weight="600">IREICA1</text>
     </svg>
     <div class="stn-badge"><span></span> IREICA1 · Osebna meteorološka postaja</div>
     <h1>Rečica ob <em>Savinji</em></h1>
@@ -1631,7 +1633,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="chart-svg-wrap">
       <svg class="chart-svg" viewBox="0 0 880 160" id="hourly-svg" preserveAspectRatio="xMidYMid meet">
-        <text x="440" y="80" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+        <text x="440" y="80" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
       </svg>
     </div>
     <div class="hourly-peak" id="hourly-peaks"></div>
@@ -1640,13 +1642,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Temp chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 24 ur</span><span class="chart-range" id="temp-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
   </div>
 
   <!-- Rain chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌧 Padavine — zadnjih 24 ur</span><span class="chart-range" id="rain-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
   </div>
 
   <!-- Text forecast -->
@@ -1679,7 +1681,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
            xmlns="http://www.w3.org/2000/svg" height="128">
         <text x="480" y="64" text-anchor="middle" font-size="12"
-              fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+              fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Nalaganje…</text>
       </svg>
     </div>
     <div class="sky-legend">
@@ -2018,12 +2020,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card span2">
       <div class="clabel">📍 Pregled postaje</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem">366 m</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem">366 m</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
       </div>
     </div>
   </div>
@@ -2134,7 +2136,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="chart-svg-wrap">
         <svg class="chart-svg" viewBox="0 0 880 200" id="hist-temp-svg" preserveAspectRatio="xMidYMid meet">
-          <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+          <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
         </svg>
       </div>
     </div>
@@ -2147,7 +2149,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="chart-svg-wrap">
         <svg class="chart-svg" viewBox="0 0 880 150" id="hist-rain-svg" preserveAspectRatio="xMidYMid meet">
-          <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text>
+          <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
         </svg>
       </div>
     </div>
@@ -2190,7 +2192,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-rain" style="color:var(--rain-col)">—</div><div class="an-kpi-l">Povp. letne padavine</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-gust" style="color:var(--purple)">—</div><div class="an-kpi-l">Max sunek km/h</div></div>
     </div>
-    <div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-family:'IBM Plex Mono',monospace" id="an-data-source">Nalaganje podatkov…</div>
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-family:'JetBrains Mono',monospace" id="an-data-source">Nalaganje podatkov…</div>
     <!-- Flood data gap notice -->
     <div id="an-flood-note" style="display:none;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:12px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.74rem;line-height:1.7;color:var(--muted)">
       🌊 <strong style="color:#38bdf8">Opomba — poplave 3./4. avg 2023:</strong> Postaja je v 12 urah zabeležila <strong style="color:#38bdf8">≥235,5 mm</strong> padavin, nato je nastopil izpad elektrike. Podatki za avgust 2023 so nepopolni — dejanska skupna količina je bila verjetno bistveno višja. Letna vsota padavin za 2023 je zato podcenjena.
@@ -2572,7 +2574,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <!-- Simplified T-profile sketch -->
       <div class="mix-profile">
         <svg id="snd-profile-svg" viewBox="0 0 500 120" height="120" xmlns="http://www.w3.org/2000/svg">
-          <text x="250" y="60" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Sounding profil se naloži po prvem fetchanju podatkov.</text>
+          <text x="250" y="60" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Sounding profil se naloži po prvem fetchanju podatkov.</text>
         </svg>
       </div>
       <div class="snd-source" id="snd-source-note">Vir: Open-Meteo NWP model (proxy za radiosonde — Graz 11240, Ljubljana 14023, Zagreb 14240). Točnost ≈ radiosondaža za operativne namene.</div>
@@ -2835,7 +2837,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="fd-badge-row" id="fd-modal-badges"></div>
         <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin:.5rem 0" id="fd-modal-desc"></div>
         <textarea id="fd-modal-notes" placeholder="Opombe (lokacija, subjekt, nastavitve fotoaparata…)"
-          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;resize:vertical;min-height:60px;margin-top:.5rem"></textarea>
+          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:60px;margin-top:.5rem"></textarea>
         <div style="display:flex;justify-content:space-between;margin-top:1rem">
           <button onclick="fdDeleteEntry()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:.5rem 1rem;font-size:.75rem;cursor:pointer;color:var(--red)">🗑 Izbriši</button>
           <button onclick="fdSaveNotes()" class="period-btn active" style="font-size:.75rem">Shrani opombe</button>
@@ -3012,8 +3014,8 @@ document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 // ── Chart colour helpers ──────────────────────────────────
 const CC = {
   get grid()     { return isDark() ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.10)'; },
-  get label()    { return isDark() ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.55)'; },
-  get now()      { return isDark() ? 'rgba(255,255,255,.2)'  : 'rgba(0,0,0,.30)'; },
+  get label()    { return isDark() ? 'rgba(255,255,255,.28)' : 'rgba(0,0,0,.60)'; },
+  get now()      { return isDark() ? 'rgba(255,255,255,.2)'  : 'rgba(0,0,0,.35)'; },
   get tempLine() { return isDark() ? '#4d9ff8' : '#1d4ed8'; },
   get tempFill() { return isDark() ? 'rgba(77,159,248,.18)'  : 'rgba(29,78,216,.15)'; },
   get rainBar()  { return isDark() ? '#60a5fa' : '#2563eb'; },
@@ -3191,9 +3193,9 @@ function drawTempChart(data){
   // Grid
   for(let i=0;i<=5;i++){const y=pad.t+i/5*ch,val=yMax-(i/5*(yMax-yMin));
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
-    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t.textContent=val.toFixed(1)+'°';}
-  data.forEach((d,i)=>{if(d.time.getHours()%4===0){const h=d.time.getHours(),t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=(h<10?'0':'')+h+':00';}});
+  data.forEach((d,i)=>{if(d.time.getHours()%4===0){const h=d.time.getHours(),t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=(h<10?'0':'')+h+':00';}});
 
   const pts=data.map((d,i)=>({x:xS(i),y:yS(d.temp)})),lp=smoothPath(pts);
 
@@ -3214,7 +3216,7 @@ function drawTempChart(data){
   const now=new Date(),f0=data[0].time,fl=data[data.length-1].time,nt=(now-f0)/(fl-f0);
   if(nt>=0&&nt<=1){const nx=pad.l+nt*cw;
     mkSVG(svg,'line',{x1:nx,x2:nx,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,3'});
-    const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'IBM Plex Mono,monospace'});
+    const nl=mkSVG(svg,'text',{x:nx+4,y:pad.t+10,'font-size':'8',fill:CC.now,'font-family':'JetBrains Mono,monospace'});
     nl.textContent='zdaj';}
 
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'5',fill:CC.tipDot,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
@@ -3236,7 +3238,7 @@ function drawRainChart(data){
     `<filter id="rblur"><feGaussianBlur stdDeviation="0.8"/></filter>`;
   for(let i=0;i<=3;i++){const y=pad.t+i/3*ch,val=maxR*(1-i/3);
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
-    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}}
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=val.toFixed(1);}}
   const bw=Math.max(3,(cw/data.length)*.72),xS=i=>pad.l+i/data.length*cw;
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:CC.rainBar,stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
@@ -3248,9 +3250,9 @@ function drawRainChart(data){
       // Subtle top glow line
       mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:'2',fill:CC.rainBar,rx:'1',opacity:'0.6'});
     }
-    if(d.time.getHours()%4===0){const hr=d.time.getHours(),t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=(hr<10?'0':'')+hr+':00';}
+    if(d.time.getHours()%4===0){const hr=d.time.getHours(),t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=(hr<10?'0':'')+hr+':00';}
   });
-  if(total<.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Plus Jakarta Sans,sans-serif'});t.textContent='Ni padavin v zadnjih 24 urah';}
+  if(total<.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Inter,sans-serif'});t.textContent='Ni padavin v zadnjih 24 urah';}
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
   svg.addEventListener('mousemove',e=>{if(!_rainData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+d.rain.toFixed(2)+' mm</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
@@ -3533,7 +3535,7 @@ function renderSeasonProgress(){
   const ring='<svg class="season-ring" width="80" height="80" viewBox="0 0 80 80">'+
     '<circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--fc-border)" stroke-width="7"/>'+
     '<circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--green)" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 40 40)"/>'+
-    '<text x="40" y="38" text-anchor="middle" font-size="16" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--text)">'+Math.round(pct*100)+'%</text>'+
+    '<text x="40" y="38" text-anchor="middle" font-size="16" font-weight="600" font-family="JetBrains Mono,monospace" fill="var(--text)">'+Math.round(pct*100)+'%</text>'+
     '<text x="40" y="52" text-anchor="middle" font-size="8" fill="var(--muted)">'+daysLeft+' dni</text></svg>';
   let paceHtml='';
   if(gNow&&gLast){
@@ -3708,8 +3710,8 @@ function renderInversion(){
   }
   // Visual: valley vs peak thermometer
   const vis='<svg class="inv-visual" viewBox="0 0 72 72"><line x1="20" y1="58" x2="52" y2="14" stroke="var(--fc-border)" stroke-width="2"/>'+
-    '<circle cx="20" cy="58" r="6" fill="var(--blue)"/><text x="20" y="72" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="IBM Plex Mono,monospace">'+valleyT.toFixed(0)+'°</text>'+
-    '<circle cx="52" cy="14" r="6" fill="'+(actualDiff>=0?'var(--amber)':'var(--cyan)')+'"/><text x="52" y="9" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="IBM Plex Mono,monospace">'+upperT.toFixed(0)+'°</text></svg>';
+    '<circle cx="20" cy="58" r="6" fill="var(--blue)"/><text x="20" y="72" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+valleyT.toFixed(0)+'°</text>'+
+    '<circle cx="52" cy="14" r="6" fill="'+(actualDiff>=0?'var(--amber)':'var(--cyan)')+'"/><text x="52" y="9" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+upperT.toFixed(0)+'°</text></svg>';
   body.innerHTML='<div class="inv-wrap">'+vis+'<div class="inv-info"><div class="inv-status '+cls+'">'+emoji+' '+status+'</div><div class="inv-sub">'+sub+'</div></div></div>';
   badge.textContent=(actualDiff>=0?'+':'')+actualDiff.toFixed(1)+'°C @1500m';
 }
@@ -4538,7 +4540,7 @@ function updateAccumInfo(shown,total){
   let el=document.getElementById('hist-accum-info');
   if(!el){
     el=document.createElement('div');el.id='hist-accum-info';
-    el.style.cssText='font-size:.76rem;color:var(--muted);margin-bottom:.75rem;font-family:"IBM Plex Mono",monospace';
+    el.style.cssText='font-size:.76rem;color:var(--muted);margin-bottom:.75rem;font-family:"JetBrains Mono",monospace';
     const pn=document.querySelector('.period-nav');if(pn)pn.after(el);
   }
   el.textContent='📦 Lokalna shramba: '+total+' dni · prikazujem '+shown+' dni';
@@ -4865,7 +4867,7 @@ function _showArchiveNote(period,stationDays,total){
   let el=document.getElementById('hist-accum-info');
   if(!el){
     el=document.createElement('div');el.id='hist-accum-info';
-    el.style.cssText='font-size:.76rem;color:var(--muted);margin-bottom:.75rem;font-family:"IBM Plex Mono",monospace';
+    el.style.cssText='font-size:.76rem;color:var(--muted);margin-bottom:.75rem;font-family:"JetBrains Mono",monospace';
     const pn=document.querySelector('.period-nav');if(pn)pn.after(el);
   }
   const src=stationDays>0
@@ -4948,12 +4950,12 @@ function drawHistTempChart(data){
   for(let i=0;i<=4;i++){
     const y=pad.t+i/4*ch,val=mx-(i/4*(mx-mn));
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});
-    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t.textContent=val.toFixed(0)+'°';
   }
   data.forEach((d,i)=>{
     if(i%5===0||i===data.length-1){
-      const t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+      const t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
       t.textContent=fmtHistDateShort(d.obsTimeLocal);
     }
   });
@@ -4977,7 +4979,7 @@ function drawHistTempChart(data){
   [{c:'#f87171',l:'Maks'},{c:CC.tempLine,l:'Min'}].forEach(({c,l},i)=>{
     const lx=VW-pad.r-(i===0?105:55);
     mkSVG(svg,'line',{x1:lx,x2:lx+12,y1:pad.t-8,y2:pad.t-8,stroke:c,'stroke-width':'2.5','stroke-linecap':'round'});
-    const t=mkSVG(svg,'text',{x:lx+16,y:pad.t-4,'font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=l;
+    const t=mkSVG(svg,'text',{x:lx+16,y:pad.t-4,'font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=l;
   });
 
   const highs=data.map(d=>d.metric.tempHigh??-999),lows=data.map(d=>d.metric.tempLow??999);
@@ -4998,7 +5000,7 @@ function drawHistRainChart(data){
   for(let i=0;i<=3;i++){
     const y=pad.t+i/3*ch,val=maxR*(1-i/3);
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});
-    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=val.toFixed(1);}
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=val.toFixed(1);}
   }
 
   const bw=Math.max(1.5,(cw/data.length)*0.7);
@@ -5007,11 +5009,11 @@ function drawHistRainChart(data){
     const r=d.metric.precipTotal??0,x=xS(i),h=(r/maxR)*ch;
     if(r>0)mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#hrg)',rx:'2'});
     if(i%5===0||i===data.length-1){
-      const t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+      const t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
       t.textContent=fmtHistDateShort(d.obsTimeLocal);
     }
   });
-  if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Plus Jakarta Sans,sans-serif'});t.textContent='Ni padavin v izbranem obdobju';}
+  if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Inter,sans-serif'});t.textContent='Ni padavin v izbranem obdobju';}
   set('hist-rain-range','Skupaj: '+fmt(total,1)+' mm');
 }
 
@@ -5094,11 +5096,11 @@ function drawWindTrend(observations){
     const col=d.max<10?'#60a5fa':d.max<30?'#4d9ff8':'#a78bfa';
     mk('rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:col,rx:'2',opacity:'.85'});
     // Value label on top
-    if(d.max>0){const t=mk('text',{x:x.toFixed(1),y:(pad.t+ch-h-3).toFixed(1),'text-anchor':'middle','font-size':'7',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});t.textContent=d.max.toFixed(0);}
+    if(d.max>0){const t=mk('text',{x:x.toFixed(1),y:(pad.t+ch-h-3).toFixed(1),'text-anchor':'middle','font-size':'7',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=d.max.toFixed(0);}
     // Day label
     const date=new Date(d.day+'T12:00:00');
     const lbl=date.toLocaleDateString('sl',{weekday:'short'}).slice(0,2);
-    const t2=mk('text',{x:x.toFixed(1),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'});
+    const t2=mk('text',{x:x.toFixed(1),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t2.textContent=lbl;
   });
 }
@@ -5126,7 +5128,7 @@ function drawWindDist(observations){
       '<div style="flex:1;height:5px;background:var(--rain-track);border-radius:3px;overflow:hidden">'+
         '<div style="height:100%;width:'+pct+'%;background:'+c.col+';border-radius:3px;transition:width .8s ease"></div>'+
       '</div>'+
-      '<div style="width:28px;text-align:right;font-family:IBM Plex Mono,monospace;color:var(--muted)">'+pct+'%</div>';
+      '<div style="width:28px;text-align:right;font-family:JetBrains Mono,monospace;color:var(--muted)">'+pct+'%</div>';
     el.appendChild(row);
   });
 }
@@ -5195,7 +5197,7 @@ function drawWindRose(observations){
   labels.forEach((lbl,i)=>{
     const a=(i*45-90)*Math.PI/180,lr=maxR+12;
     const isCard=i%2===0; // N,E,S,W bigger
-    const t=mkSVG(svg,'text',{x:(cx+lr*Math.cos(a)).toFixed(1),y:(cy+lr*Math.sin(a)).toFixed(1),'text-anchor':'middle','dominant-baseline':'central','font-size':isCard?'8.5':'7',fill:i===curSec?'var(--text)':CC.label,'font-family':'IBM Plex Mono,monospace','font-weight':isCard?'600':'400'});
+    const t=mkSVG(svg,'text',{x:(cx+lr*Math.cos(a)).toFixed(1),y:(cy+lr*Math.sin(a)).toFixed(1),'text-anchor':'middle','dominant-baseline':'central','font-size':isCard?'8.5':'7',fill:i===curSec?'var(--text)':CC.label,'font-family':'JetBrains Mono,monospace','font-weight':isCard?'600':'400'});
     t.textContent=lbl;
   });
   mkSVG(svg,'circle',{cx,cy,r:'2.5',fill:'var(--muted)'});
@@ -5402,7 +5404,7 @@ async function fetchFlood(){
       <div class="flood-status">
         <span class="flood-icon">${icon}</span>
         <div style="flex:1">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.3rem;color:var(--text)">${today.toFixed(1)} <span style="font-size:.7rem;color:var(--muted)">m³/s</span></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:var(--text)">${today.toFixed(1)} <span style="font-size:.7rem;color:var(--muted)">m³/s</span></div>
           <div style="font-size:.74rem;color:${col};font-weight:500">${status}</div>
         </div>
       </div>
@@ -5744,14 +5746,14 @@ async function fetchClimateComparison(){
       const dT=(curAvgT-histAvgT),sT=dT>=0?'+':'';
       const col=Math.abs(dT)<1?'var(--muted)':dT>0?'var(--red)':'var(--blue)';
       statsHtml+='<div><div class="chart-range">Povp. temp. (1.–'+endDay+'.)</div>'
-        +'<div style="font-size:1.1rem;font-family:IBM Plex Mono,monospace;color:var(--text)">'+curAvgT.toFixed(1)+'°C'
+        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+curAvgT.toFixed(1)+'°C'
         +' <span style="font-size:.78rem;color:'+col+'">'+sT+dT.toFixed(1)+'° vs. povp.</span></div></div>';
     }
     if(histAvgR>0){
       const dR=((curR-histAvgR)/histAvgR*100),sR=dR>=0?'+':'';
       const colR=Math.abs(dR)<10?'var(--muted)':dR>0?'var(--blue)':'var(--amber)';
       statsHtml+='<div><div class="chart-range">Padavine</div>'
-        +'<div style="font-size:1.1rem;font-family:IBM Plex Mono,monospace;color:var(--text)">'+curR.toFixed(1)+' mm'
+        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+curR.toFixed(1)+' mm'
         +' <span style="font-size:.78rem;color:'+colR+'">'+sR+dR.toFixed(0)+'% vs. povp.</span></div></div>';
     }
     statsHtml+='</div>';
@@ -5774,7 +5776,7 @@ async function fetchClimateComparison(){
           +'<div style="flex:1;height:'+hT+'%;background:'+tCol+';border-radius:3px 3px 0 0;min-height:3px;transition:height .8s"></div>'
           +'<div style="flex:1;height:'+hR+'%;background:'+rCol+';border-radius:3px 3px 0 0;min-height:3px;transition:height .8s"></div>'
           +'</div>'
-          +'<div style="font-size:.72rem;color:'+(isCur?'var(--blue)':'var(--muted)')+';font-family:IBM Plex Mono,monospace;font-weight:'+(isCur?'600':'400')+'">'+r.yr+'</div>'
+          +'<div style="font-size:.72rem;color:'+(isCur?'var(--blue)':'var(--muted)')+';font-family:JetBrains Mono,monospace;font-weight:'+(isCur?'600':'400')+'">'+r.yr+'</div>'
           +(r.avgT!=null?'<div style="font-size:.7rem;color:var(--muted)">'+r.avgT.toFixed(1)+'°</div>':'')
           +'</div>';
       }).join('')
@@ -5880,12 +5882,12 @@ function drawHeatmap(){
       const r=mkS(svg,'rect',{x,y:y2,width:SZ,height:SZ,rx:'2',fill:col});
       // Month labels
       if(date.getDate()===1&&prevMonth!==date.getMonth()){
-        mkS(svg,'text',{x:x+2,y:TOP-5,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'IBM Plex Mono,monospace'},months[date.getMonth()]);
+        mkS(svg,'text',{x:x+2,y:TOP-5,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'JetBrains Mono,monospace'},months[date.getMonth()]);
         prevMonth=date.getMonth();
       }
     }
     // Day labels Mon/Wed/Fri
-    ['P','T','S','Č','P','S','N'].forEach((d,i)=>{if(i%2===0)mkS(svg,'text',{x:2,y:TOP+i*STEP+SZ-2,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'IBM Plex Mono,monospace'},d);});
+    ['P','T','S','Č','P','S','N'].forEach((d,i)=>{if(i%2===0)mkS(svg,'text',{x:2,y:TOP+i*STEP+SZ-2,'font-size':'7',fill:'var(--svg-lbl-d)','font-family':'JetBrains Mono,monospace'},d);});
     // Legend swatches
     const sw=document.getElementById('hm-swatches');
     if(sw){sw.innerHTML='';(_hmMode==='temp'?['#93c5fd','#86efac','#fcd34d','#fb923c','#f87171']:['rgba(0,0,0,.06)','#bfdbfe','#60a5fa','#3b82f6','#1e3a8a']).forEach(c=>{const d=document.createElement('div');d.className='hm-sw';d.style.background=c;d.style.border='1px solid var(--border)';sw.appendChild(d);});}
@@ -6429,21 +6431,21 @@ function drawElevationProfile(stations){
   const yS=a=>pad.t+(1-a/amax)*ch;
   const mk=(tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;svg.appendChild(e);return e;};
   svg.innerHTML='';
-  for(let i=0;i<=4;i++){const x=pad.l+i/4*cw;mk('line',{x1:x,x2:x,y1:pad.t,y2:VH-pad.b,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:x,y:VH-pad.b+14,'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},(tmin+i/4*(tmax-tmin)).toFixed(1)+'°');}
-  [0,300,600,900,1200,1500].filter(a=>a<=amax).forEach(a=>{const y=yS(a);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'10',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},a);});
+  for(let i=0;i<=4;i++){const x=pad.l+i/4*cw;mk('line',{x1:x,x2:x,y1:pad.t,y2:VH-pad.b,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:x,y:VH-pad.b+14,'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(tmin+i/4*(tmax-tmin)).toFixed(1)+'°');}
+  [0,300,600,900,1200,1500].filter(a=>a<=amax).forEach(a=>{const y=yS(a);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'},a);});
   // Lapse line
   const ref=valid.find(s=>s.mine)||valid[0];
   const lt1=ref.cur.temperature_2m+6.5*(ref.alt/1000),lt2=ref.cur.temperature_2m-6.5*((amax-ref.alt)/1000);
   mk('line',{x1:xS(lt1),y1:yS(0),x2:xS(lt2),y2:yS(amax),stroke:'rgba(255,255,255,.12)','stroke-width':'2','stroke-dasharray':'6,4'});
-  mk('text',{x:VW-pad.r+6,y:yS(amax/2),'font-size':'9',fill:'rgba(255,255,255,.3)','font-family':'IBM Plex Mono,monospace'},'-6.5°/km');
+  mk('text',{x:VW-pad.r+6,y:yS(amax/2),'font-size':'9',fill:'rgba(255,255,255,.3)','font-family':'JetBrains Mono,monospace'},'-6.5°/km');
   const colors=['#38bdf8','#4ade80','#fbbf24','#f87171','#a78bfa','#67e8f9'];
   valid.forEach((s,i)=>{
     const x=xS(s.cur.temperature_2m),y=yS(s.alt),col=s.mine?'#38bdf8':colors[(i+1)%colors.length];
     mk('circle',{cx:x,cy:y,r:s.mine?9:6,fill:col,stroke:'white','stroke-width':s.mine?'2':'1.5'});
     const anchor=s.cur.temperature_2m<(tmin+tmax)/2?'start':'end';
-    mk('text',{x:x+(anchor==='start'?12:-12),y:y+4,'text-anchor':anchor,'font-size':'10',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},s.name.split(' ')[0]+' '+s.cur.temperature_2m.toFixed(1)+'°');
+    mk('text',{x:x+(anchor==='start'?12:-12),y:y+4,'text-anchor':anchor,'font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'},s.name.split(' ')[0]+' '+s.cur.temperature_2m.toFixed(1)+'°');
   });
-  mk('text',{x:pad.l+cw/2,y:VH-5,'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},'Temperatura (°C)');
+  mk('text',{x:pad.l+cw/2,y:VH-5,'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'},'Temperatura (°C)');
   const sorted=valid.slice().sort((a,b)=>a.alt-b.alt);
   if(sorted.length>=2){
     const lr=(sorted[0].cur.temperature_2m-sorted[sorted.length-1].cur.temperature_2m)/(sorted[sorted.length-1].alt-sorted[0].alt)*1000;
@@ -6580,8 +6582,8 @@ function drawHourlyProfile(observations){
   const xS=h=>pad.l+h/23*cw,yS=v=>pad.t+(1-(v-mn)/(mx-mn))*ch;
   const mk=(tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;svg.appendChild(e);return e;};
   // Grid
-  for(let i=0;i<=4;i++){const y=pad.t+i/4*ch,v=mx-(i/4*(mx-mn));mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},v.toFixed(0)+'°');}
-  [0,3,6,9,12,15,18,21].forEach(h=>mk('text',{x:xS(h),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},(h<10?'0':'')+h+':00'));
+  for(let i=0;i<=4;i++){const y=pad.t+i/4*ch,v=mx-(i/4*(mx-mn));mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'},v.toFixed(0)+'°');}
+  [0,3,6,9,12,15,18,21].forEach(h=>mk('text',{x:xS(h),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h<10?'0':'')+h+':00'));
   const defs=mk('defs',{});
   defs.innerHTML='<linearGradient id="hpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.tempLine+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+CC.tempLine+'" stop-opacity="0"/></linearGradient>';
   const pts=filled.map(a=>({x:xS(a.h),y:yS(a.avg)}));
@@ -6593,8 +6595,8 @@ function drawHourlyProfile(observations){
   const minA=filled.reduce((m,a)=>a.avg<m.avg?a:m);
   mk('circle',{cx:xS(maxA.h),cy:yS(maxA.avg),r:'5',fill:'#f87171',stroke:'white','stroke-width':'2'});
   mk('circle',{cx:xS(minA.h),cy:yS(minA.avg),r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2'});
-  mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'IBM Plex Mono,monospace'},maxA.avg.toFixed(1)+'°');
-  mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'IBM Plex Mono,monospace'},minA.avg.toFixed(1)+'°');
+  mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'JetBrains Mono,monospace'},maxA.avg.toFixed(1)+'°');
+  mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'JetBrains Mono,monospace'},minA.avg.toFixed(1)+'°');
   const peaks=document.getElementById('hourly-peaks');
   if(peaks)peaks.innerHTML='<div class="hourly-peak-item">🔴 Najtopleje ob <b>'+(maxA.h<10?'0':'')+maxA.h+':00 ('+maxA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">🔵 Najhladneje ob <b>'+(minA.h<10?'0':'')+minA.h+':00 ('+minA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">Amplituda: <b>'+(maxA.avg-minA.avg).toFixed(1)+'°C</b></div>';
 }
@@ -6767,8 +6769,8 @@ function buildClimateStripes(){
   let svg='';
   data.forEach((l,i)=>{
     svg+=`<rect x="${(i*sw).toFixed(1)}" y="0" width="${(sw+0.5).toFixed(1)}" height="${H-22}" fill="${stripeColor(l.T)}"/>`;
-    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${String(l.y).slice(2)}</text>`;
-    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${(H-30).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)" font-family="IBM Plex Mono,monospace" style="paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:2px">${l.T.toFixed(1)}°</text>`;
+    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">${String(l.y).slice(2)}</text>`;
+    svg+=`<text x="${(i*sw+sw/2).toFixed(1)}" y="${(H-30).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)" font-family="JetBrains Mono,monospace" style="paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:2px">${l.T.toFixed(1)}°</text>`;
   });
   el.innerHTML=svg;
 }
@@ -6807,7 +6809,7 @@ function findWeatherTwin(){
 
   el.innerHTML=
     `<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.6rem">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:1.4rem;color:var(--text)">${bd.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'})}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;color:var(--text)">${bd.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'})}</span>
     </div>
     <div style="font-size:.74rem;color:var(--muted);margin-bottom:.7rem">pred ${daysAgo} dnevi · ujemanje ${Math.max(0,Math.round(100-best.score*2))}%</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:.5rem">
@@ -6861,7 +6863,7 @@ function buildPhenologyCalendar(){
       <span style="font-size:1.1rem;flex-shrink:0">${e.icon}</span>
       <div style="flex:1">
         <div style="font-size:.78rem;color:var(--text);font-weight:500">${e.name} ${passed?'<span style="color:var(--green);font-size:.66rem">✓ že mimo</span>':''}</div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:${e.col};margin:.15rem 0">povp. ${d2date(e.doy)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:${e.col};margin:.15rem 0">povp. ${d2date(e.doy)}</div>
         <div style="font-size:.68rem;color:var(--muted)">razpon ${d2short(e.range[0])} – ${d2short(e.range[1])} · ${e.note}</div>
       </div>
     </div>`;
@@ -6916,7 +6918,7 @@ function buildKlimatogram(){
     const x=pad.l+i*cw+cw/2,y=yT(k.T);
     svg+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#f87171" stroke="white" stroke-width="1"/>`;
     if(i===0||i===6||k.T===Math.max(...Ts)||k.T===Math.min(...Ts)){
-      svg+=`<text x="${x.toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#f87171" font-family="IBM Plex Mono,monospace">${k.T}°</text>`;
+      svg+=`<text x="${x.toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#f87171" font-family="JetBrains Mono,monospace">${k.T}°</text>`;
     }
   });
 
@@ -6924,14 +6926,14 @@ function buildKlimatogram(){
   XLSX_KLIMA.forEach((k,i)=>{
     if(k.rain>=130||i===0){
       const x=pad.l+i*cw+cw/2,y=yR(k.rain)-3;
-      svg+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="7" fill="${dark?'rgba(147,197,253,.9)':'rgba(37,99,235,.8)'}" font-family="IBM Plex Mono,monospace">${k.rain}</text>`;
+      svg+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="7" fill="${dark?'rgba(147,197,253,.9)':'rgba(37,99,235,.8)'}" font-family="JetBrains Mono,monospace">${k.rain}</text>`;
     }
   });
 
   // X axis labels
   months.forEach((m,i)=>{
     const x=pad.l+i*cw+cw/2;
-    svg+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="${tc}" font-family="Plus Jakarta Sans,sans-serif">${m}</text>`;
+    svg+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="${tc}" font-family="Inter,sans-serif">${m}</text>`;
   });
 
   // Y axis (T left, rain right)
@@ -6939,7 +6941,7 @@ function buildKlimatogram(){
     if(t<Tmin-1||t>Tmax+1)return;
     const y=yT(t);
     svg+=`<line x1="${pad.l-4}" x2="${(W-pad.r).toFixed(1)}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}" stroke-width="1"/>`;
-    svg+=`<text x="${(pad.l-6).toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="8" fill="${tc}" font-family="IBM Plex Mono,monospace">${t}°</text>`;
+    svg+=`<text x="${(pad.l-6).toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="8" fill="${tc}" font-family="JetBrains Mono,monospace">${t}°</text>`;
   });
 
   el.innerHTML=svg;
@@ -7279,7 +7281,7 @@ async function drawDailySkyStrip(){
     [[maxTi,'#f87171',true],[minTi,'#7dd3fc',false]].forEach(([i,col,above])=>{
       if(i<0)return;
       const y=yT(sl.temp[i]);
-      mk('text',{x:xS(i).toFixed(1),y:(above?y-6:y+13).toFixed(1),'text-anchor':'middle','font-size':'9.5',fill:col,'font-family':'IBM Plex Mono,monospace','font-weight':'600'},sl.temp[i].toFixed(1)+'°');
+      mk('text',{x:xS(i).toFixed(1),y:(above?y-6:y+13).toFixed(1),'text-anchor':'middle','font-size':'9.5',fill:col,'font-family':'JetBrains Mono,monospace','font-weight':'600'},sl.temp[i].toFixed(1)+'°');
     });
 
     // Layer 9: Time labels every 3h
@@ -7289,7 +7291,7 @@ async function drawDailySkyStrip(){
       const lbl=i===0?'zdaj':(hr<10?'0':'')+hr+':00';
       const [r,g,b]=skyAtHour(nowH+i);
       const textCol=(r+g+b)/3<80?'rgba(255,255,255,.65)':'rgba(0,0,0,.5)';
-      mk('text',{x:xS(i).toFixed(1),y:(VH-8).toFixed(1),'text-anchor':'middle','font-size':'8.5',fill:textCol,'font-family':'IBM Plex Mono,monospace'},lbl);
+      mk('text',{x:xS(i).toFixed(1),y:(VH-8).toFixed(1),'text-anchor':'middle','font-size':'8.5',fill:textCol,'font-family':'JetBrains Mono,monospace'},lbl);
     }
 
     // Layer 10: Now line
@@ -7358,9 +7360,9 @@ async function initForecast2(){
       const defs=mk('defs',{});
       defs.innerHTML='<linearGradient id="fc2g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+CC.tempLine+'" stop-opacity="0.18"/><stop offset="100%" stop-color="'+CC.tempLine+'" stop-opacity="0"/></linearGradient>';
       // Grid lines
-      for(let i=0;i<=3;i++){const y=pad.t+i/3*ch;const v=(tmax-i/3*(tmax-tmin)).toFixed(0);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-4,y:y+3,'text-anchor':'end','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},v+'°');}
+      for(let i=0;i<=3;i++){const y=pad.t+i/3*ch;const v=(tmax-i/3*(tmax-tmin)).toFixed(0);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-4,y:y+3,'text-anchor':'end','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},v+'°');}
       // Hour labels every 6h
-      slice48.forEach((t,i)=>{if(i%6===0){const h2=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},(h2<10?'0':'')+h2+':00');}});
+      slice48.forEach((t,i)=>{if(i%6===0){const h2=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h2<10?'0':'')+h2+':00');}});
       // Precip bars
       const bw=cw/slice48.length*0.7;
       rains.forEach((r,i)=>{if(r>0){const bh=Math.max(3,(r/rmax)*ch*0.4);mk('rect',{x:(xS(i)-bw/2).toFixed(1),y:(VH-pad.b-bh).toFixed(1),width:bw.toFixed(1),height:bh.toFixed(1),fill:CC.rainBar,rx:'1.5',opacity:'.7'});}});
@@ -7424,7 +7426,7 @@ async function initForecast2(){
             '<div style="font-size:.72rem;font-weight:600">'+(isToday?'<span style="color:var(--blue)">Danes</span>':lbl)+'</div>'+
             '<div style="font-size:1.2rem">'+_wmoEmoji(d.weather_code[i])+'</div>'+
           '</div>'+
-          '<div style="display:flex;gap:.75rem;font-family:\'IBM Plex Mono\',monospace;font-size:.88rem">'+
+          '<div style="display:flex;gap:.75rem;font-family:\'JetBrains Mono\',monospace;font-size:.88rem">'+
             '<span style="color:var(--red)">↑ '+(d.temperature_2m_max[i]||0).toFixed(1)+'°</span>'+
             '<span style="color:var(--blue)">↓ '+(d.temperature_2m_min[i]||0).toFixed(1)+'°</span>'+
           '</div>'+
@@ -7686,7 +7688,7 @@ function initRecords(){
     const mkTop=(title,icon,data,valFn,colFn)=>{
       const card=document.createElement('div');card.className='nt-card';
       card.innerHTML='<div class="clabel" style="margin:0 0 .65rem">'+icon+' '+title+'</div>'+
-        data.map((e,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid var(--fc-border);font-size:.72rem"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;width:1.2rem">${i+1}</span><span style="flex:1;color:var(--text)">${fmtD(e.date)}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:${colFn(e)}">${valFn(e)}</span></div>`).join('');
+        data.map((e,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid var(--fc-border);font-size:.72rem"><span style="color:var(--muted);font-family:'JetBrains Mono',monospace;width:1.2rem">${i+1}</span><span style="flex:1;color:var(--text)">${fmtD(e.date)}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:${colFn(e)}">${valFn(e)}</span></div>`).join('');
       return card;
     };
     top10El.innerHTML='';
@@ -7775,7 +7777,7 @@ async function initSurroundings(){
       svg.innerHTML='';
       for(let i=0;i<=3;i++){const y=pad.t+i/3*ch;mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});}
       const labels=[...hourlyData[0].times.slice(refIdx,refIdx+take)];
-      labels.forEach((t,i)=>{if(i%4===0){const h=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'IBM Plex Mono,monospace'},(h<10?'0':'')+h+':00');}});
+      labels.forEach((t,i)=>{if(i%4===0){const h=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h<10?'0':'')+h+':00');}});
       // Now line
       const nowIdx=hourlyData[0].times.slice(refIdx,refIdx+take).findIndex(t=>new Date(t)>=now);
       if(nowIdx>=0)mk('line',{x1:xS(nowIdx),x2:xS(nowIdx),y1:pad.t,y2:VH-pad.b,stroke:'rgba(255,180,0,.5)','stroke-width':'1.5','stroke-dasharray':'4,3'});
@@ -7934,7 +7936,7 @@ function drawSkyStrip(hours){
     if(idx<0)return;
     const x=idx*cellW+cellW/2,y=tY(t);
     mk('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:'4',fill:col,stroke:'white','stroke-width':'1.5'});
-    mk('text',{x:x.toFixed(1),y:(y+dy).toFixed(1),'text-anchor':'middle','font-size':'8',fill:col,'font-family':'IBM Plex Mono,monospace','font-weight':'600'},t.toFixed(1)+'°');
+    mk('text',{x:x.toFixed(1),y:(y+dy).toFixed(1),'text-anchor':'middle','font-size':'8',fill:col,'font-family':'JetBrains Mono,monospace','font-weight':'600'},t.toFixed(1)+'°');
   });
 
   // ── Condition icons (every 2h, skip if too many)
@@ -7958,7 +7960,7 @@ function drawSkyStrip(hours){
     if(i%3!==0)return;
     mk('text',{x:(i*cellW+cellW/2).toFixed(1),y:(LABEL_H-2).toFixed(1),'text-anchor':'middle',
       'font-size':'8',fill:dark?'rgba(148,163,184,0.8)':'rgba(71,85,105,0.8)',
-      'font-family':'IBM Plex Mono,monospace'},h.label);
+      'font-family':'JetBrains Mono,monospace'},h.label);
   });
 
   // ── "Zdaj" marker
@@ -7966,14 +7968,14 @@ function drawSkyStrip(hours){
   mk('line',{x1:nowX.toFixed(1),x2:nowX.toFixed(1),y1:SKY_TOP,y2:VH,
     stroke:'rgba(255,180,0,0.7)','stroke-width':'1.5','stroke-dasharray':'3,3'});
   mk('text',{x:(nowX+3).toFixed(1),y:(SKY_TOP+8).toFixed(1),
-    'font-size':'7',fill:'rgba(255,180,0,0.8)','font-family':'IBM Plex Mono,monospace'},'zdaj');
+    'font-size':'7',fill:'rgba(255,180,0,0.8)','font-family':'JetBrains Mono,monospace'},'zdaj');
 
   // ── Bottom section labels
   const lbls=[['UV',UV_Y+5],['mm',RAIN_Y+9],['km/h',WIND_Y+7]];
   lbls.forEach(([lbl,y])=>{
     mk('text',{x:(VW-2).toFixed(1),y:y.toFixed(1),'text-anchor':'end',
       'font-size':'6.5',fill:dark?'rgba(148,163,184,0.5)':'rgba(100,116,139,0.5)',
-      'font-family':'IBM Plex Mono,monospace'},lbl);
+      'font-family':'JetBrains Mono,monospace'},lbl);
   });
 }
 
@@ -9037,7 +9039,7 @@ const PHENOMENA=[
    svg:'<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="140" fill="#0c1a33"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12"/><circle cx="70" cy="70" r="10" fill="#fbbf24"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><text x="70" y="128" text-anchor="middle" font-size="7" fill="#64748b" font-family="sans-serif">kolobar 22°</text></svg>'},
   {name:'Temperaturna inverzija',en:'Temperature inversion',icon:'🔄',
    desc:'Normalno temperatura z višino pada. Pri inverziji je plast toplega zraka nad hladnim. V dolinah (kot Rečica) se hladen zrak zbira ponoči. Povzroča meglo, smog in "past" za onesnaženost. Pozimi pogosta.',
-   svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#0f172a"/><rect y="70" width="140" height="30" fill="#1e3a5f" opacity=".8"/><rect y="40" width="140" height="30" fill="#1e3a5f" opacity=".4"/><text x="8" y="90" font-size="8" fill="#94a3b8" font-family="IBM Plex Mono,monospace">2°C (dno)</text><text x="8" y="60" font-size="8" fill="#f87171" font-family="IBM Plex Mono,monospace">8°C (inv.)</text><text x="8" y="30" font-size="8" fill="#60a5fa" font-family="IBM Plex Mono,monospace">3°C (vrh)</text><path d="M95,85 L105,55 L95,25" fill="none" stroke="#fbbf24" stroke-width="2"/><text x="110" y="58" font-size="7" fill="#fbbf24" font-family="sans-serif">↑ toplo</text></svg>'},
+   svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#0f172a"/><rect y="70" width="140" height="30" fill="#1e3a5f" opacity=".8"/><rect y="40" width="140" height="30" fill="#1e3a5f" opacity=".4"/><text x="8" y="90" font-size="8" fill="#94a3b8" font-family="JetBrains Mono,monospace">2°C (dno)</text><text x="8" y="60" font-size="8" fill="#f87171" font-family="JetBrains Mono,monospace">8°C (inv.)</text><text x="8" y="30" font-size="8" fill="#60a5fa" font-family="JetBrains Mono,monospace">3°C (vrh)</text><path d="M95,85 L105,55 L95,25" fill="none" stroke="#fbbf24" stroke-width="2"/><text x="110" y="58" font-size="7" fill="#fbbf24" font-family="sans-serif">↑ toplo</text></svg>'},
   {name:'Orografski oblaki',en:'Orographic clouds',icon:'⛰️',
    desc:'Nastanejo, ko vlažen zrak naleti na gorski greben, se dvigne, ohladi in kondenzira. Savinjske Alpe ustvarjajo čudovite lečaste oblake (lenticularis), ki pogosto visijo nepremično nad Logарsko dolino.',
    svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0ea5e9"/><polygon points="0,90 40,30 70,50 100,20 140,90" fill="#475569"/><ellipse cx="105" cy="22" rx="28" ry="12" fill="white" opacity=".8"/><ellipse cx="105" cy="22" rx="22" ry="8" fill="white" opacity=".9"/><path d="M50,30 Q70,10 90,22" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="3,2"/><text x="5" y="25" font-size="7" fill="white" opacity=".7" font-family="sans-serif">vlažen tok →</text></svg>'},
@@ -9381,7 +9383,7 @@ function buildProverbStats(){
     const mdays=[31,29,31,30,31,30,31,31,30,31,30,31];
     const midA=wAngle(`${String(i+1).padStart(2,'0')}-${String(Math.round(mdays[i]/2)).padStart(2,'0')}`);
     const[lx,ly]=wXY(midA,RO+14);
-    wsvg+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="7.5" font-family="IBM Plex Mono,monospace" fill="var(--muted)">${mn}</text>`;
+    wsvg+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="7.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${mn}</text>`;
   });
   // Forecast arcs
   results.forEach(r=>{
@@ -9404,9 +9406,9 @@ function buildProverbStats(){
   const[nx1,ny1]=wXY(na,RI-4),[nx2,ny2]=wXY(na,RO+2);
   wsvg+=`<line x1="${nx1.toFixed(1)}" y1="${ny1.toFixed(1)}" x2="${nx2.toFixed(1)}" y2="${ny2.toFixed(1)}" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>`;
   // Center text
-  wsvg+=`<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Plus Jakarta Sans,sans-serif" fill="var(--muted)" letter-spacing="0.08em">PREGOVORNI KROG</text>`;
-  wsvg+=`<text x="${CX}" y="${CY+6}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--text)">IREICA1</text>`;
-  wsvg+=`<text x="${CX}" y="${CY+22}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Plus Jakarta Sans,sans-serif" fill="var(--muted)">${years[0]}–${years[years.length-1]}</text>`;
+  wsvg+=`<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Inter,sans-serif" fill="var(--muted)" letter-spacing="0.08em">PREGOVORNI KROG</text>`;
+  wsvg+=`<text x="${CX}" y="${CY+6}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="JetBrains Mono,monospace" fill="var(--text)">IREICA1</text>`;
+  wsvg+=`<text x="${CX}" y="${CY+22}" text-anchor="middle" dominant-baseline="middle" font-size="7" font-family="Inter,sans-serif" fill="var(--muted)">${years[0]}–${years[years.length-1]}</text>`;
   wsvg+=`</svg>`;
   // Legend
   const wlegend=`<div style="display:flex;justify-content:center;gap:.85rem;font-size:.67rem;color:var(--muted);margin-bottom:1.1rem;flex-wrap:wrap">
@@ -9857,7 +9859,7 @@ function drawSoundingProfile(T_sfc,Td_sfc,T850,Td850,T700,T500,H_lcl,H_mix,cape)
   // Isobar labels
   [{p:1013,h:0,lbl:'Sfc'},{p:850,h:1134,lbl:'850'},{p:700,h:3000,lbl:'700'},{p:500,h:5500,lbl:'500'}].forEach(({h,lbl})=>{
     const y=mapY(h);html+=`<line x1="${pl-4}" x2="${W-pr}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="0.4" stroke-dasharray="3,4"/>`;
-    html+=`<text x="${pl-5}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${lbl}</text>`;
+    html+=`<text x="${pl-5}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lbl}</text>`;
   });
   // LCL line
   const lclY=mapY(H_lcl).toFixed(1);
@@ -9882,7 +9884,7 @@ function drawSoundingProfile(T_sfc,Td_sfc,T850,Td850,T700,T500,H_lcl,H_mix,cape)
   html+=`<polyline points="${parPts}" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5,2" stroke-linejoin="round"/>`;
   // T-axis labels
   const tStep=Math.ceil((maxT-minT)/5);
-  for(let t=Math.ceil(minT/tStep)*tStep;t<=maxT;t+=tStep){html+=`<text x="${mapX(t).toFixed(1)}" y="${VH-pb+10}" text-anchor="middle" font-size="7.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${t.toFixed(0)}°</text>`;}
+  for(let t=Math.ceil(minT/tStep)*tStep;t<=maxT;t+=tStep){html+=`<text x="${mapX(t).toFixed(1)}" y="${VH-pb+10}" text-anchor="middle" font-size="7.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">${t.toFixed(0)}°</text>`;}
   // Legend
   html+=`<text x="${pl+4}" y="${pt+8}" font-size="7.5" fill="#60a5fa">— Okolje</text>`;
   html+=`<text x="${pl+54}" y="${pt+8}" font-size="7.5" fill="#f87171">-- Parcel</text>`;
@@ -9958,14 +9960,14 @@ function renderStormChaser(){
   if(hs){
     const cx=110,cy=110,sc=2.8;
     let s='';
-    [10,20,30,40].forEach(r=>{s+=`<circle cx="${cx}" cy="${cy}" r="${r*sc}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;s+=`<text x="${cx+r*sc+2}" y="${cy-2}" font-size="7" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${r}</text>`;});
+    [10,20,30,40].forEach(r=>{s+=`<circle cx="${cx}" cy="${cy}" r="${r*sc}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;s+=`<text x="${cx+r*sc+2}" y="${cy-2}" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">${r}</text>`;});
     s+=`<line x1="${cx-40*sc}" x2="${cx+40*sc}" y1="${cy}" y2="${cy}" stroke="var(--border)" stroke-width="0.4"/><line x1="${cx}" x2="${cx}" y1="${cy-40*sc}" y2="${cy+40*sc}" stroke="var(--border)" stroke-width="0.4"/>`;
     ['N','S','E','W'].forEach((lbl,i)=>{const x=[cx,cx,cx+40*sc+5,cx-40*sc-14][i],y=[cy-40*sc-3,cy+40*sc+10,cy+3,cy+3][i];s+=`<text x="${x}" y="${y}" text-anchor="middle" font-size="8" fill="var(--muted)">${lbl}</text>`;});
     const lvls=[{ws:ws10,wd:wd10,c:'#94a3b8',l:'10m'},{ws:ws850,wd:wd850,c:'#60a5fa',l:'850'},{ws:ws700,wd:wd700,c:'#4ade80',l:'700'},{ws:ws500,wd:wd500,c:'#fbbf24',l:'500'},{ws:ws300,wd:wd300,c:'#f87171',l:'300'}];
     const pts=lvls.map(l=>{const uv=scUV(l.ws,l.wd);return{x:+(cx+uv.u*sc).toFixed(1),y:+(cy+uv.v*sc).toFixed(1),c:l.c,l:l.l};});
     const segC=['#60a5fa','#4ade80','#fbbf24','#f87171'];
     for(let i=0;i<pts.length-1;i++)s+=`<line x1="${pts[i].x}" y1="${pts[i].y}" x2="${pts[i+1].x}" y2="${pts[i+1].y}" stroke="${segC[i]}" stroke-width="2.5" stroke-linecap="round"/>`;
-    pts.forEach(p=>{s+=`<circle cx="${p.x}" cy="${p.y}" r="4" fill="${p.c}" stroke="var(--card-bg)" stroke-width="1.5"/><text x="${p.x+6}" y="${p.y+4}" font-size="7" fill="${p.c}" font-family="IBM Plex Mono,monospace">${p.l}</text>`;});
+    pts.forEach(p=>{s+=`<circle cx="${p.x}" cy="${p.y}" r="4" fill="${p.c}" stroke="var(--card-bg)" stroke-width="1.5"/><text x="${p.x+6}" y="${p.y+4}" font-size="7" fill="${p.c}" font-family="JetBrains Mono,monospace">${p.l}</text>`;});
     hs.innerHTML=s;
   }
   // Timeline
@@ -9974,12 +9976,12 @@ function renderStormChaser(){
   const caps=his.map(i=>scIdx(d.cape,i)??0),gsts=his.map(i=>scIdx(d.wind_gusts_10m,i)??0),pps=his.map(i=>scIdx(d.precipitation_probability,i)??0);
   const cw=(VW-pl.l-pl.r)/nH,mC=Math.max(...caps,100),mG=Math.max(...gsts,40);
   let ts='';
-  his.forEach((hi,k)=>{const x=pl.l+k*cw,bh=(caps[k]/mC)*(VH-pl.t-pl.b),by=VH-pl.b-bh;ts+=`<rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${(cw-2).toFixed(1)}" height="${bh.toFixed(1)}" fill="#f87171" opacity="0.7" rx="3"/>`;if(k%2===0){const t=times[hi];ts+=`<text x="${(x+cw/2).toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${String(t.getHours()).padStart(2,'0')}:00</text>`;}});
+  his.forEach((hi,k)=>{const x=pl.l+k*cw,bh=(caps[k]/mC)*(VH-pl.t-pl.b),by=VH-pl.b-bh;ts+=`<rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${(cw-2).toFixed(1)}" height="${bh.toFixed(1)}" fill="#f87171" opacity="0.7" rx="3"/>`;if(k%2===0){const t=times[hi];ts+=`<text x="${(x+cw/2).toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="JetBrains Mono,monospace">${String(t.getHours()).padStart(2,'0')}:00</text>`;}});
   const gPts=his.map((_,k)=>`${(pl.l+k*cw+cw/2).toFixed(1)},${(VH-pl.b-(gsts[k]/mG)*(VH-pl.t-pl.b)).toFixed(1)}`).join(' ');
   const pPts=his.map((_,k)=>`${(pl.l+k*cw+cw/2).toFixed(1)},${(VH-pl.b-(pps[k]/100)*(VH-pl.t-pl.b)).toFixed(1)}`).join(' ');
   ts+=`<polyline points="${gPts}" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linejoin="round"/>`;
   ts+=`<polyline points="${pPts}" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="5,3"/>`;
-  [0,1000,2000,3000].filter(v=>v<=mC).forEach(v=>{ts+=`<text x="${pl.l-4}" y="${(VH-pl.b-(v/mC)*(VH-pl.t-pl.b)).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${v}</text>`;});
+  [0,1000,2000,3000].filter(v=>v<=mC).forEach(v=>{ts+=`<text x="${pl.l-4}" y="${(VH-pl.b-(v/mC)*(VH-pl.t-pl.b)).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${v}</text>`;});
   const tsvg=g('sc-timeline-svg');if(tsvg)tsvg.innerHTML=ts;
   const rng=g('sc-timeline-range');if(rng)rng.textContent=`CAPE max ${Math.round(mC)} J/kg · sunki max ${Math.round(mG)} km/h`;
   // Moisture
@@ -9990,7 +9992,7 @@ function renderStormChaser(){
   if(vd){const flowAngle=Math.abs(((wd850-140+180)%360)-180);const oroF=Math.max(0,Math.round((1-flowAngle/90)*100));vd.innerHTML=[{v:oroF+'%',l:'Orografski faktor (850 hPa)'},{v:oroF>60?'Visok — ojačitev padavin':oroF>30?'Zmeren':'Nizek',l:'Vpliv reliefa'},{v:Math.round(wd850)+'° '+scDirLbl(wd850),l:'Tok 850 hPa'},{v:freeze<2500?'Možna':'Malo verjetna',l:'Toča — ocena'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');}
   // Pressure tendency
   const pd=g('sc-pressure-body');
-  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
+  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
 }
 // ══════════════════════════════════════════════════════════
 // ── KLIMATOLOGIJA (4 features) ────────────────────────────
@@ -10524,10 +10526,10 @@ function buildDewMatrix(){
   const arcSvg=`<svg width="80" height="48" viewBox="0 0 80 48" xmlns="http://www.w3.org/2000/svg">
     <path d="M 8 44 A 32 32 0 0 1 72 44" fill="none" stroke="var(--fc-border)" stroke-width="7" stroke-linecap="round"/>
     <path d="M 8 44 A 32 32 0 0 1 72 44" fill="none" stroke="${level.c}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(circ*pct).toFixed(1)} ${circ}" />
-    <text x="40" y="38" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono,monospace" fill="${level.c}">${idx}%</text>
+    <text x="40" y="38" text-anchor="middle" font-size="12" font-weight="600" font-family="JetBrains Mono,monospace" fill="${level.c}">${idx}%</text>
   </svg>`;
   body.innerHTML=
-    `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.75rem">${arcSvg}<div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;color:${level.c}">${level.l}</div><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Rosišče indeks</div></div></div>`+
+    `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.75rem">${arcSvg}<div><div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;color:${level.c}">${level.l}</div><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Rosišče indeks</div></div></div>`+
     `<div class="dew-factors">
       <div class="dew-factor"><div class="dew-factor-val">${Td.toFixed(1)}°C</div><div class="dew-factor-lbl">Rosišče</div></div>
       <div class="dew-factor"><div class="dew-factor-val">${dpd.toFixed(2)}°C</div><div class="dew-factor-lbl">ΔT (DPD)</div></div>
@@ -10639,7 +10641,7 @@ function buildCandlestick(){
   if(_candleMode==='hourly'){
     // From hourly obs — group by hour, compute open/high/low/close temp
     const hourly=(_hourlyObs||[]).filter(o=>o.metric?.temp!=null);
-    if(hourly.length<4){svg.innerHTML='<text x="440" y="90" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Premalo urnih podatkov — pridi jutri.</text>';return;}
+    if(hourly.length<4){svg.innerHTML='<text x="440" y="90" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo urnih podatkov — pridi jutri.</text>';return;}
     const byHour={};
     hourly.forEach(o=>{
       const d=new Date(o.obsTimeLocal||o.time||0);
@@ -10672,7 +10674,7 @@ function buildCandlestick(){
   gridTemps.forEach(t=>{
     const y=mapY(t).toFixed(1);
     html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`;
-    html+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}</text>`;
+    html+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}</text>`;
   });
   // Zero line
   if(minT<0&&maxT>0){const zy=mapY(0).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${zy}" y2="${zy}" stroke="rgba(96,165,250,.3)" stroke-width="1" stroke-dasharray="4,3"/>`;}
@@ -10693,7 +10695,7 @@ function buildCandlestick(){
     const labelEvery=Math.max(1,Math.ceil(candles.length/8));
     if(i%labelEvery===0){
       const lbl=_candleMode==='hourly'?String(c.ts.getHours()).padStart(2,'0')+':00':c.ts.toLocaleDateString('sl',{day:'numeric',month:'short'});
-      html+=`<text x="${cx.toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${lbl}</text>`;
+      html+=`<text x="${cx.toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lbl}</text>`;
     }
   });
   svg.innerHTML=html;
@@ -10838,11 +10840,11 @@ function aiDrawLoss(losses){
   const mapY=v=>pt+(1-(v-minL)/Math.max(0.001,maxL-minL))*(VH-pt-pb);
   let html='';
   // Grid
-  [minL,(minL+maxL)/2,maxL].forEach(v=>{const y=mapY(v).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${v.toFixed(4)}</text>`;});
+  [minL,(minL+maxL)/2,maxL].forEach(v=>{const y=mapY(v).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8.5" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${v.toFixed(4)}</text>`;});
   const pts=losses.map((v,i)=>`${(pl+(i/(losses.length-1||1))*(VW-pl-pr)).toFixed(1)},${mapY(v).toFixed(1)}`).join(' ');
   html+=`<polyline points="${pts}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   // X axis
-  [0,Math.floor(losses.length/2),losses.length-1].forEach(i=>{if(i<losses.length)html+=`<text x="${(pl+(i/(losses.length-1||1))*(VW-pl-pr)).toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">ep ${i+1}</text>`;});
+  [0,Math.floor(losses.length/2),losses.length-1].forEach(i=>{if(i<losses.length)html+=`<text x="${(pl+(i/(losses.length-1||1))*(VW-pl-pr)).toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">ep ${i+1}</text>`;});
   svg.innerHTML=html;
   const r=document.getElementById('ai-loss-range');if(r)r.textContent=`Final MSE: ${losses[losses.length-1].toFixed(5)}`;
 }
@@ -10853,7 +10855,7 @@ function aiDrawComparison(actual,lstm,omPast){
   if(!svg)return;
   const VW=880,VH=160,pl=40,pr=15,pt=10,pb=28;
   const allT=[...actual.map(d=>d.v),...lstm.map(d=>d.v),...omPast.map(d=>d.v)].filter(v=>v!=null);
-  if(!allT.length){svg.innerHTML='<text x="440" y="80" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Premalo podatkov za primerjavo.</text>';return;}
+  if(!allT.length){svg.innerHTML='<text x="440" y="80" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Premalo podatkov za primerjavo.</text>';return;}
   const minT=Math.min(...allT)-1,maxT=Math.max(...allT)+1;
   const tMin=Math.min(...[...actual,...lstm,...omPast].map(d=>d.t));
   const tMax=Math.max(...[...actual,...lstm,...omPast].map(d=>d.t));
@@ -10862,7 +10864,7 @@ function aiDrawComparison(actual,lstm,omPast){
   let html='';
   // Grid lines
   const step=Math.ceil((maxT-minT)/4);
-  for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){const y=mapY(t).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}°</text>`;}
+  for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){const y=mapY(t).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}°</text>`;}
   const polyline=(data,col,dash='')=>{if(!data.length)return '';const pts=data.filter(d=>d.v!=null).map(d=>`${mapX(d.t).toFixed(1)},${mapY(d.v).toFixed(1)}`).join(' ');return pts?`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"${dash?` stroke-dasharray="${dash}"`:''}/>`:''};
   html+=polyline(actual,'#4ade80');
   html+=polyline(omPast,'#60a5fa','5,3');
@@ -11080,7 +11082,7 @@ function renderMETAR(){
       <div class="metar-cell"><div class="metar-cell-val">${metarKmh!=null?metarKmh+' km/h':'—'}</div><div class="metar-cell-lbl">Veter LJLJ</div></div>
       <div class="metar-cell"><div class="metar-cell-val">${md.wxString||'CAVOK'}</div><div class="metar-cell-lbl">Vreme LJLJ</div></div>
     </div>`+
-    `<div style="font-size:.67rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:.35rem;line-height:1.5">RAW: ${md.rawText||'—'}</div>`;
+    `<div style="font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.35rem;line-height:1.5">RAW: ${md.rawText||'—'}</div>`;
   if(upd)upd.textContent=md.time?new Date(md.time*1000||md.time).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+'h LJLJ':'LJLJ';
 }
 
@@ -11386,7 +11388,7 @@ function renderDriftEngine(){
   // Zero line
   const zy=mapY(0).toFixed(1);
   svg+=`<line x1="${pl}" x2="${W-pr}" y1="${zy}" y2="${zy}" stroke="var(--border)" stroke-width="0.8" stroke-dasharray="4,3"/>`;
-  svg+=`<text x="${pl-3}" y="${zy}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">0</text>`;
+  svg+=`<text x="${pl-3}" y="${zy}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">0</text>`;
   // Area fill
   let areaPts=`${pl},${pt+yw}`;
   hourlyDT.forEach((v,h)=>{
@@ -11401,9 +11403,9 @@ function renderDriftEngine(){
   if(pts.length)svg+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linejoin="round"/>`;
   // Hour labels
   [0,6,12,18,23].forEach(h=>{
-    svg+=`<text x="${(pl+(h/23)*xw).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${String(h).padStart(2,'0')}:00</text>`;
+    svg+=`<text x="${(pl+(h/23)*xw).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}:00</text>`;
   });
-  svg+=`<text x="${pl-3}" y="${mapY(maxDT).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--red)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${maxDT>0?'+':''}${maxDT.toFixed(1)}</text>`;
+  svg+=`<text x="${pl-3}" y="${mapY(maxDT).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--red)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${maxDT>0?'+':''}${maxDT.toFixed(1)}</text>`;
   svg+='</svg>';
   body.innerHTML=
     `<div class="drift-kpi-row">`+
