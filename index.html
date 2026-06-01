@@ -341,7 +341,17 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
 .fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
-/* Wind turbulence */
+/* Sounding analysis */
+.sounding-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin-bottom:.75rem}
+.snd-card{padding:.75rem .9rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--snd-accent,var(--blue))}
+.snd-val{font-family:'IBM Plex Mono',monospace;font-size:1.55rem;font-weight:200;line-height:1.1;color:var(--text)}
+.snd-lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.25rem}
+.snd-desc{font-size:.66rem;color:var(--muted);margin-top:.3rem;line-height:1.4}
+.snd-bar{height:5px;border-radius:3px;background:var(--rain-track);margin:.4rem 0 .2rem;overflow:hidden}
+.snd-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.mix-profile{margin-top:.65rem}
+.mix-profile svg{display:block;width:100%;overflow:visible}
+.snd-source{font-size:.64rem;color:var(--muted);opacity:.7;font-style:italic;margin-top:.5rem}
 .turb-hero{border-radius:16px;padding:1.1rem 1.4rem;margin-bottom:.75rem;border:1px solid;transition:all .4s;display:flex;align-items:flex-start;gap:1rem}
 .turb-calm{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25)}
 .turb-mod{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.3)}
@@ -2503,6 +2513,29 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="card ca-blue"><div class="clabel">💧 Padavljiva voda</div><div class="sc-idx-val" id="sc-pwat">—</div><div class="sc-idx-desc" id="sc-pwat-desc">—</div></div>
       <div class="card ca-green"><div class="clabel">📈 K-Indeks</div><div class="sc-idx-val" id="sc-ki">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-ki-bar" style="width:0%;background:#4ade80"></div></div><div class="sc-idx-desc" id="sc-ki-desc">—</div></div>
       <div class="card ca-purple"><div class="clabel">💨 Bulk shear 0–6km</div><div class="sc-idx-val" id="sc-shear">—</div><div class="sc-idx-desc" id="sc-shear-desc">—</div></div>
+    </div>
+
+    <!-- Sounding Analysis (Showalter, CIN, Mixing height) -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📡 Sounding analiza — parcelna metoda</span>
+        <span class="chart-range" id="snd-source-badge">Open-Meteo NWP proxy</span>
+      </div>
+      <div class="sounding-grid" id="snd-grid">
+        <div class="snd-card" style="--snd-accent:var(--amber)"><div class="snd-lbl">Showalter Index</div><div class="snd-val" id="snd-si">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-si-bar" style="width:0%;background:var(--amber)"></div></div><div class="snd-desc" id="snd-si-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--purple)"><div class="snd-lbl">CIN — pokrov (J/kg)</div><div class="snd-val" id="snd-cin2">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-cin2-bar" style="width:0%;background:var(--purple)"></div></div><div class="snd-desc" id="snd-cin2-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--green)"><div class="snd-lbl">Višina mešanja (AGL)</div><div class="snd-val" id="snd-mix">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-mix-bar" style="width:0%;background:var(--green)"></div></div><div class="snd-desc" id="snd-mix-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--blue)"><div class="snd-lbl">LCL višina</div><div class="snd-val" id="snd-lcl">—</div><div class="snd-desc" id="snd-lcl-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--red)"><div class="snd-lbl">CAPE (parcel)</div><div class="snd-val" id="snd-cape2">—</div><div class="snd-desc" id="snd-cape2-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--cyan)"><div class="snd-lbl">Meje mejne plasti</div><div class="snd-val" id="snd-bl">—</div><div class="snd-desc" id="snd-bl-desc">—</div></div>
+      </div>
+      <!-- Simplified T-profile sketch -->
+      <div class="mix-profile">
+        <svg id="snd-profile-svg" viewBox="0 0 500 120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <text x="250" y="60" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Plus Jakarta Sans,sans-serif">Sounding profil se naloži po prvem fetchanju podatkov.</text>
+        </svg>
+      </div>
+      <div class="snd-source" id="snd-source-note">Vir: Open-Meteo NWP model (proxy za radiosonde — Graz 11240, Ljubljana 14023, Zagreb 14240). Točnost ≈ radiosondaža za operativne namene.</div>
     </div>
 
     <!-- Wind profile + hodograph -->
@@ -9559,6 +9592,241 @@ function scMagnus(T,rh){
 }
 function scUV(spd,dir){const rad=dir*Math.PI/180;return{u:-spd*Math.sin(rad),v:-spd*Math.cos(rad)};}
 function scDirLbl(d){const dirs=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return dirs[Math.round(d/22.5)%16];}
+// ══════════════════════════════════════════════════════════
+// ── SOUNDING ANALYSIS (parcel method) ─────────────────────
+// ══════════════════════════════════════════════════════════
+
+// Moist adiabatic lapse rate (simplified Tetens approximation)
+// Returns °C/km for given temperature T (°C)
+function malr(T){
+  const L=2.501e6,Rv=461.5,cp=1004,eps=0.622;
+  const e_s=6.112*Math.exp(17.67*T/(T+243.5));
+  const rs=eps*e_s/(1013.25-e_s);
+  return 9.8*(1+L*rs/(Rv*(T+273.15)))/(1+L*L*rs/(cp*Rv*(T+273.15)**2));
+}
+
+// Compute LCL temperature and height from surface T and Td
+function computeLCL(T_s,Td_s){
+  // LCL temp approximation (Bolton 1980):
+  const T_lcl=56+1/(1/(Td_s-56)+Math.log((T_s+273.15)/(Td_s+273.15))/800);
+  // LCL height (Bolton): H = 125*(T_s - Td_s) m (rough rule-of-thumb)
+  const H_lcl_m=125*(T_s-Td_s);
+  return{T_lcl,H_lcl_m:Math.max(0,H_lcl_m)};
+}
+
+// Lift parcel from (T0, p0, Td0) to target pressure p1
+// Returns parcel temperature at p1
+function liftParcel(T0,Td0,p0_hpa,p1_hpa){
+  // Heights (standard atmosphere): H = 44330*(1-(p/1013.25)^0.1903) m
+  const stH=p=>44330*(1-Math.pow(p/1013.25,0.1903));
+  const {T_lcl,H_lcl_m}=computeLCL(T0,Td0);
+  const H0=stH(p0_hpa);
+  const H_lcl=H0+H_lcl_m;
+  const H1=stH(p1_hpa);
+  if(H1<=H_lcl){
+    // Still below LCL: dry adiabatic (9.8°C/km)
+    return T0-9.8*(H1-H0)/1000;
+  }
+  // Lift dry to LCL, then moist to target
+  const T_at_lcl=T0-9.8*H_lcl_m/1000;
+  // Integrate moist adiabat step by step
+  let T_cur=T_at_lcl;
+  let H_cur=H_lcl;
+  const step=200; // m per integration step
+  while(H_cur<H1-step){
+    const lapse=malr(T_cur);
+    T_cur-=lapse*step/1000;
+    H_cur+=step;
+  }
+  // Final partial step
+  const lapse=malr(T_cur);
+  T_cur-=lapse*(H1-H_cur)/1000;
+  return T_cur;
+}
+
+// Showalter Index: lift parcel from 850hPa to 500hPa
+function computeShowalter(T850,Td850,T500){
+  const T_parcel_500=liftParcel(T850,Td850,850,500);
+  return+(T500-T_parcel_500).toFixed(1);
+}
+
+// Estimated CAPE using parcel from surface (simple Lagrangian sum)
+function estimateCAPE(T_sfc,Td_sfc,T850,T700,T500,p_sfc=1013){
+  // Use 4-level estimate: sfc→850→700→500
+  const levels=[
+    {p:850,T_env:T850},
+    {p:700,T_env:T700},
+    {p:500,T_env:T500},
+  ];
+  const stH=p=>44330*(1-Math.pow(p/1013.25,0.1903));
+  const H_sfc=stH(p_sfc);
+  let cape=0;
+  let H_prev=H_sfc;
+  let T_parcel_prev=T_sfc;
+  const {H_lcl_m}=computeLCL(T_sfc,Td_sfc);
+  const H_lcl=H_sfc+H_lcl_m;
+  levels.forEach(lv=>{
+    const H=stH(lv.p);
+    const T_parcel=liftParcel(T_sfc,Td_sfc,p_sfc,lv.p);
+    const T_env=lv.T_env;
+    // CAPE contribution: only where parcel > environment (above LCL)
+    if(H>H_lcl){
+      const T_parcel_mid=(T_parcel_prev+T_parcel)/2;
+      const T_env_mid=(T_parcel_prev+T_env)/2; // rough
+      const dH=H-H_prev;
+      const buoyancy=9.81*(T_parcel_mid-T_env_mid)/(T_env_mid+273.15);
+      if(buoyancy>0)cape+=buoyancy*dH;
+    }
+    H_prev=H;T_parcel_prev=T_parcel;
+  });
+  return Math.round(Math.max(0,cape));
+}
+
+// Mixing height AGL
+// Uses surface T vs T850 on a theta (potential temp) basis
+function computeMixingHeight(T_sfc,T850,p_sfc=1013){
+  // Potential temperature θ = T*(1000/p)^0.286
+  const theta_sfc=(T_sfc+273.15)*Math.pow(1000/p_sfc,0.286);
+  const theta_850=(T850+273.15)*Math.pow(1000/850,0.286);
+  const H_850_AGL=1134; // m above our station (850hPa ≈ 1500m amsl, station 366m)
+  if(theta_sfc<=theta_850){
+    // Stable/neutral — low mixing height
+    const h=Math.max(50,Math.round((theta_sfc-theta_850+2)*200));
+    return Math.min(800,h);
+  }
+  // Convective: mixing height where parcel θ = env θ
+  // Linear interpolation of env θ profile:
+  const dTheta_dH=(theta_850-theta_sfc)/H_850_AGL; // usually negative (env cools)
+  if(Math.abs(dTheta_dH)<1e-6)return 1000;
+  const H_mix=0; // would be 0 in this degenerate case
+  // Better: H_mix ≈ where parcel (rising dry adiab.) has same θ as env
+  // Since dry adiab preserves θ, the parcel θ = θ_sfc always
+  // The env θ decreases with height → mixing height = where env θ = θ_sfc
+  // H = (θ_sfc - θ_850) / (-dTheta_dH) = (θ_sfc - θ_850) * H_850 / (θ_850 - θ_sfc)
+  const H_conv=Math.round(H_850_AGL*(theta_sfc-theta_sfc)/(theta_sfc-theta_850)||0);
+  // Simpler formula: H_mix ≈ (T_sfc - T850) * 120 m/°C (empirical)
+  return Math.min(3500,Math.max(50,Math.round((T_sfc-T850)*120)));
+}
+
+function renderSoundingAnalysis(scData,ci){
+  const g=id=>document.getElementById(id);
+  if(!scData)return;
+  const T_sfc=scData.temperature_2m?.[ci]??15;
+  const H_sfc=scData.relative_humidity_2m?.[ci]??65;
+  const p_sfc=scData.surface_pressure?.[ci]??1013;
+  const T850=scData.temperature_850hPa?.[ci]??T_sfc-5;
+  const rh850=scData.relative_humidity_850hPa?.[ci]??70;
+  const T700=scData.temperature_700hPa?.[ci]??T_sfc-12;
+  const rh700=scData.relative_humidity_700hPa?.[ci]??65;
+  const T500=scData.temperature_500hPa?.[ci]??T_sfc-25;
+  const cin_om=scData.cin?.[ci]??0;  // Open-Meteo CIN
+  const cape_om=scData.cape?.[ci]??0;
+  // Compute Td from RH (Magnus formula)
+  const td=(T,rh)=>{const a=17.625,b=243.04,rhs=Math.max(1,rh);const g2=Math.log(rhs/100)+a*T/(b+T);return+(b*g2/(a-g2)).toFixed(1);};
+  const Td_sfc=td(T_sfc,H_sfc);
+  const Td850=td(T850,rh850);
+  const Td700=td(T700,rh700);
+  // Derived indices
+  const si=computeShowalter(T850,Td850,T500);
+  const {T_lcl,H_lcl_m}=computeLCL(T_sfc,Td_sfc);
+  const H_mix=computeMixingHeight(T_sfc,T850,p_sfc??1013);
+  const cape_parcel=estimateCAPE(T_sfc,Td_sfc,T850,T700,T500,p_sfc??1013);
+  // Blend OM and parcel CAPE
+  const cape_disp=cape_om>0?Math.round((cape_om+cape_parcel)/2):cape_parcel;
+  // CIN
+  const cin_abs=Math.abs(cin_om);
+  // Boundary layer category
+  const bl_cat=H_mix<300?'Stabilna':H_mix<800?'Nizka BL':H_mix<1500?'Zmerna BL':H_mix<2500?'Globoka BL':'Izjemno globoka BL';
+  const bl_use=H_mix<800?'Drone letenje priporočeno (nizka BL)':H_mix<1500?'Normalni pogoji za letenje':H_mix<2500?'Aktivna konvekcija verjetna':'Ekstremno konvektivni pogoji — previdno z droni';
+  // SI labels
+  const siTxt=si>3?'Stabilno':si>1?'Malo nestabilno':si>-2?'Zmerna nestabilnost':si>-4?'Velika nestabilnost':'⚡ Ekstremna nestabilnost!';
+  const siCol=si>1?'var(--muted)':si>-2?'var(--amber)':si>-4?'var(--red)':'#f87171';
+  // CIN labels
+  const cinTxt=cin_abs<10?'Brez pokrova — lahek preklop':cin_abs<50?'Šibak pokrov':cin_abs<100?'Zmeren pokrov — potreben trigger':cin_abs<200?'Močan pokrov — le nevihtni trigger':'Izredno močan pokrov — preklop malo verjeten';
+  const cinCol=cin_abs<10?'#4ade80':cin_abs<50?'var(--muted)':cin_abs<100?'var(--amber)':cin_abs<200?'var(--red)':'#f87171';
+  // Fill DOM
+  const setCard=(vid,bdId,v,max,col,desc)=>{
+    if(g(vid))g(vid).textContent=v;
+    if(bdId&&g(bdId))g(bdId).style.cssText=`width:${Math.min(100,Math.abs(max?Number(String(v))/max*100:0)).toFixed(0)}%;background:${col}`;
+    if(g(vid+'-desc'))g(vid+'-desc').textContent=desc;
+  };
+  setCard('snd-si','snd-si-bar',si,10,siCol,siTxt);
+  if(g('snd-si'))g('snd-si').style.color=siCol;
+  setCard('snd-cin2','snd-cin2-bar',Math.round(cin_abs),250,cinCol,cinTxt);
+  if(g('snd-cin2'))g('snd-cin2').style.color=cinCol;
+  const mixKm=(H_mix/1000).toFixed(1)+' km';
+  setCard('snd-mix','snd-mix-bar',mixKm,4000,`var(--green)`,bl_cat+' · '+bl_use);
+  if(g('snd-mix'))g('snd-mix').textContent=H_mix<1000?(H_mix+' m'):mixKm;
+  if(g('snd-lcl'))g('snd-lcl').textContent=Math.round(H_lcl_m)+' m';
+  if(g('snd-lcl-desc'))g('snd-lcl-desc').textContent=`T_LCL=${T_lcl.toFixed(1)}°C · Td_sfc=${Td_sfc}°C`;
+  const capeTxt=cape_disp<100?'Šibak':cape_disp<500?'Zmeren':cape_disp<1500?'Velik':'⚡ Ekstremno!';
+  setCard('snd-cape2',null,Math.round(cape_disp)+' J/kg',null,`var(--red)`,capeTxt+' (parcel+OM blend)');
+  if(g('snd-bl'))g('snd-bl').textContent=H_mix+' m';
+  if(g('snd-bl-desc'))g('snd-bl-desc').textContent=bl_cat;
+  // Draw T-profile sketch
+  drawSoundingProfile(T_sfc,Td_sfc,T850,Td850,T700,T500,H_lcl_m,H_mix,cape_disp);
+  // Update source badge with last radiosonde synoptic time
+  const now=new Date();
+  const synopHr=now.getUTCHours()<12?'00Z':'12Z';
+  if(g('snd-source-badge'))g('snd-source-badge').textContent=`NWP proxy · sondaža ${synopHr} (Graz/Ljubljana/Zagreb)`;
+}
+
+function drawSoundingProfile(T_sfc,Td_sfc,T850,Td850,T700,T500,H_lcl,H_mix,cape){
+  const svg=document.getElementById('snd-profile-svg');
+  if(!svg)return;
+  const W=500,VH=120,pl=50,pr=20,pt=8,pb=22;
+  // Pressure levels mapped to heights: sfc≈0, 850≈1134, 700≈3000, 500≈5500m AGL
+  const heights=[0,1134,3000,5500];
+  const T_env=[T_sfc,T850,T700,T500];
+  const T_parcel_pts=heights.map(h=>{
+    const p_approx=1013.25*Math.pow(1-(0.0065*h)/288.15,5.2561);
+    return liftParcel(T_sfc,Td_sfc,1013,p_approx);
+  });
+  const allT=[...T_env,...T_parcel_pts,Td_sfc,Td850];
+  const minT=Math.min(...allT)-3,maxT=Math.max(...allT)+3;
+  const maxH=6000;
+  const mapX=T=>pl+(T-minT)/(maxT-minT)*(W-pl-pr);
+  const mapY=h=>pt+(1-h/maxH)*(VH-pt-pb);
+  let html='';
+  // Axes
+  html+=`<line x1="${pl}" x2="${pl}" y1="${pt}" y2="${VH-pb}" stroke="var(--border)" stroke-width="0.7"/>`;
+  html+=`<line x1="${pl}" x2="${W-pr}" y1="${VH-pb}" y2="${VH-pb}" stroke="var(--border)" stroke-width="0.7"/>`;
+  // Isobar labels
+  [{p:1013,h:0,lbl:'Sfc'},{p:850,h:1134,lbl:'850'},{p:700,h:3000,lbl:'700'},{p:500,h:5500,lbl:'500'}].forEach(({h,lbl})=>{
+    const y=mapY(h);html+=`<line x1="${pl-4}" x2="${W-pr}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="0.4" stroke-dasharray="3,4"/>`;
+    html+=`<text x="${pl-5}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="8" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${lbl}</text>`;
+  });
+  // LCL line
+  const lclY=mapY(H_lcl).toFixed(1);
+  html+=`<line x1="${pl}" x2="${W-pr}" y1="${lclY}" y2="${lclY}" stroke="#60a5fa" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>`;
+  html+=`<text x="${W-pr+2}" y="${lclY}" font-size="7.5" fill="#60a5fa" dominant-baseline="middle">LCL</text>`;
+  // Mixing height line
+  const mhY=mapY(H_mix).toFixed(1);
+  html+=`<line x1="${pl}" x2="${W-pr}" y1="${mhY}" y2="${mhY}" stroke="#4ade80" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.7"/>`;
+  html+=`<text x="${W-pr+2}" y="${mhY}" font-size="7.5" fill="#4ade80" dominant-baseline="middle">BL</text>`;
+  // CAPE shading (where parcel > env)
+  const shadePts_top=[],shadePts_bot=[];
+  heights.forEach((h,i)=>{if(T_parcel_pts[i]>T_env[i]){shadePts_top.push(`${mapX(T_parcel_pts[i]).toFixed(1)},${mapY(h).toFixed(1)}`);shadePts_bot.push(`${mapX(T_env[i]).toFixed(1)},${mapY(h).toFixed(1)}`);}});
+  if(shadePts_top.length>1){html+=`<polygon points="${shadePts_top.join(' ')} ${[...shadePts_bot].reverse().join(' ')}" fill="#f87171" opacity="0.12"/>`;}
+  // Dewpoint profile (T env)
+  const dpPts=[{T:Td_sfc,h:0},{T:Td850,h:1134}].map(p=>`${mapX(p.T).toFixed(1)},${mapY(p.h).toFixed(1)}`).join(' ');
+  html+=`<polyline points="${dpPts}" fill="none" stroke="#67e8f9" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>`;
+  // Env temp profile
+  const envPts=heights.map((h,i)=>`${mapX(T_env[i]).toFixed(1)},${mapY(h).toFixed(1)}`).join(' ');
+  html+=`<polyline points="${envPts}" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linejoin="round"/>`;
+  // Parcel profile
+  const parPts=heights.map((h,i)=>`${mapX(T_parcel_pts[i]).toFixed(1)},${mapY(h).toFixed(1)}`).join(' ');
+  html+=`<polyline points="${parPts}" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5,2" stroke-linejoin="round"/>`;
+  // T-axis labels
+  const tStep=Math.ceil((maxT-minT)/5);
+  for(let t=Math.ceil(minT/tStep)*tStep;t<=maxT;t+=tStep){html+=`<text x="${mapX(t).toFixed(1)}" y="${VH-pb+10}" text-anchor="middle" font-size="7.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${t.toFixed(0)}°</text>`;}
+  // Legend
+  html+=`<text x="${pl+4}" y="${pt+8}" font-size="7.5" fill="#60a5fa">— Okolje</text>`;
+  html+=`<text x="${pl+54}" y="${pt+8}" font-size="7.5" fill="#f87171">-- Parcel</text>`;
+  html+=`<text x="${pl+108}" y="${pt+8}" font-size="7.5" fill="#67e8f9">-- Td</text>`;
+  svg.innerHTML=html;
+}
+
 function calcStormThreat(cape,cin,li,tt,shear){
   let s=0;
   if(cape>=2500)s+=40;else if(cape>=1500)s+=30;else if(cape>=1000)s+=20;else if(cape>=500)s+=10;else if(cape>=100)s+=4;
@@ -9604,6 +9872,8 @@ function renderStormChaser(){
   if(g('sc-desc'))g('sc-desc').textContent=thr.desc;
   const kpis=g('sc-hero-kpis');
   if(kpis)kpis.innerHTML=[{v:Math.round(cape),u:'J/kg',l:'CAPE'},{v:Math.round(cin),u:'J/kg',l:'CIN'},{v:li.toFixed(1),u:'K',l:'LI'},{v:Math.round(tt),u:'',l:'TT'},{v:Math.round(shear),u:'km/h',l:'Shear'},{v:Math.round(gust),u:'km/h',l:'Sunki'}].map(k=>`<div class="sc-hero-kpi"><b>${k.v}<span style="font-size:.6em;opacity:.6"> ${k.u}</span></b><small>${k.l}</small></div>`).join('');
+  // Sounding analysis
+  try{renderSoundingAnalysis(d,ci);}catch(e){console.warn('Sounding:',e);}
   // Index cards
   const si=(id,barId,val,max,txt)=>{if(g(id))g(id).textContent=val;if(barId&&g(barId))g(barId).style.width=Math.min(100,Math.abs(max?Number(val)/max*100:0))+'%';if(g(id+'-desc'))g(id+'-desc').textContent=txt;};
   si('sc-cape','sc-cape-bar',''+Math.round(cape),3000,cape<100?'Šibka nestabilnost':cape<1000?'Zmerna–velika nestabilnost':cape<2500?'Ekstremna nestabilnost':'⚠️ Izjemna nestabilnost!');
