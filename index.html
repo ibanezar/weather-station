@@ -322,6 +322,44 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .capsule-delta.cold{background:rgba(56,189,248,.15);color:var(--blue)}
 .capsule-delta.same{background:var(--badge-bg);color:var(--muted)}
 @media(max-width:680px){.fp-factors{grid-template-columns:repeat(2,1fr)}.capsule-grid{grid-template-columns:1fr 1fr}}
+/* Dew point matrix */
+.dew-hero{display:flex;align-items:center;gap:1.25rem;margin-bottom:.85rem}
+.dew-factors{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:.65rem}
+.dew-factor{padding:.45rem .6rem;border-radius:10px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.dew-factor-val{font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text)}
+.dew-factor-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
+.dew-advice{font-size:.76rem;color:var(--muted);line-height:1.55;padding:.6rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+/* Fauna radar */
+.fauna-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.fauna-card{padding:.8rem 1rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--fa-accent,var(--green))}
+.fauna-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
+.fauna-icon{font-size:1.5rem;transition:transform .6s;display:inline-block}
+.fauna-icon.hop{animation:fauna-hop .7s ease infinite alternate}
+@keyframes fauna-hop{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.fauna-pct{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--fa-accent,var(--green));margin-left:auto}
+.fauna-name{font-size:.76rem;font-weight:600;color:var(--text)}
+.fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
+.fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
+.fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
+/* Wind turbulence */
+.turb-hero{border-radius:16px;padding:1.1rem 1.4rem;margin-bottom:.75rem;border:1px solid;transition:all .4s;display:flex;align-items:flex-start;gap:1rem}
+.turb-calm{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25)}
+.turb-mod{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.3)}
+.turb-high{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.45)}
+.turb-xhigh{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.55)}
+.turb-left{flex:1}
+.turb-title{font-size:.98rem;font-weight:700;margin-bottom:.25rem}
+.turb-calm .turb-title{color:#4ade80}.turb-mod .turb-title{color:var(--amber)}.turb-high .turb-title,.turb-xhigh .turb-title{color:#fb923c}
+.turb-sub{font-size:.75rem;color:var(--muted);line-height:1.5}
+.turb-idx{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:200;line-height:1;flex-shrink:0}
+/* Candlestick chart */
+.candle-tab-row{display:flex;gap:.45rem;margin-bottom:.75rem}
+.candle-tab-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-size:.74rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'IBM Plex Mono',monospace}
+.candle-tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.candle-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(0,0,0,.03);border-radius:12px;padding:.5rem}
+[data-theme="dark"] .candle-wrap{background:rgba(255,255,255,.02)}
+.candle-wrap svg{display:block;min-width:480px;width:100%}
+.candle-legend{display:flex;gap:1rem;font-size:.68rem;color:var(--muted);margin-top:.5rem;flex-wrap:wrap}
 .clim-twin-hero{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:1.5rem 1.75rem;border-radius:18px;background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(124,58,237,.07));border:1px solid var(--card-border);margin-bottom:1rem}
 .clim-twin-globe{font-size:3.5rem;flex-shrink:0;line-height:1}
 .clim-twin-info{flex:1;min-width:200px}
@@ -2245,6 +2283,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
+    <!-- Candlestick chart -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🕯 Vremenske Svečke — OHLC temperatura</span>
+        <span class="chart-range" id="candle-range">—</span>
+      </div>
+      <div class="candle-tab-row">
+        <button class="candle-tab-btn active" id="candle-btn-hourly" onclick="setCandleMode('hourly')">Urno</button>
+        <button class="candle-tab-btn" id="candle-btn-daily" onclick="setCandleMode('daily')">Dnevno</button>
+      </div>
+      <div class="candle-wrap"><svg id="candle-svg" viewBox="0 0 880 180" height="180"></svg></div>
+      <div class="candle-legend">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#4ade80;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Segrevanje (close > open)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#f87171;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Ohlajanje (close < open)</span>
+        <span style="color:var(--muted)">Dolg rep = fronta / hiter temperaturni preskok</span>
+      </div>
+    </div>
+
   </div><!-- /tab-analysis -->
 
   <!-- ═══ KLIMATOLOGIJA TAB ═══ -->
@@ -2409,6 +2465,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
 
+    <!-- Wind Turbulence Index -->
+    <div class="card ca-amber" style="margin-bottom:1rem">
+      <div class="clabel">🌀 Savinjski Vetrni Lijak — turbulenca doline</div>
+      <div id="turb-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
     <!-- 12h CAPE/shear timeline -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
@@ -2451,6 +2513,18 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ VREME & ŽIVLJENJE TAB ═══ -->
   <div id="tab-life" class="tab-pane">
+
+    <!-- Dew matrix + Fauna radar -->
+    <div class="g2" style="margin-bottom:1rem">
+      <div class="card">
+        <div class="clabel">🌿 Makro-Rosiščna Matrika</div>
+        <div id="dew-matrix-body"><div class="clim-loading">Nalaganje…</div></div>
+      </div>
+      <div class="card">
+        <div class="clabel">🔍 Polžji & Kuščarjev Radar</div>
+        <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
+      </div>
+    </div>
 
     <!-- 1. Golden Window -->
     <div class="card chart-card" style="margin-bottom:1rem">
@@ -3894,6 +3968,8 @@ function applyObs(obs){
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
   triggerLivePulse();
   refreshLife();
+  if(document.getElementById('tab-storm')?.classList.contains('active'))
+    try{buildTurbulenceIndex();}catch(e){}
 }
 
 function buildDailySummaries(observations){
@@ -4108,7 +4184,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab)?.classList.add('active');
   document.getElementById('tab-btn-'+tab)?.classList.add('active');
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); }
+  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); }
   if(tab==='diary'){    fdRenderGallery(); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
@@ -9907,16 +9983,227 @@ function buildTimeCapsule(){
   })();
 }
 
+// ══════════════════════════════════════════════════════════
+// ── 1. DEW POINT MATRIX ───────────────────────────────────
+// ══════════════════════════════════════════════════════════
+function buildDewMatrix(){
+  const body=document.getElementById('dew-matrix-body');
+  if(!body)return;
+  const obs=_lastBriefObs||{},m=obs?.metric||{};
+  const T=m.temp??null,H=obs.humidity??null;
+  if(T==null||H==null){body.innerHTML='<div class="clim-loading">Čakam na podatke o temperaturi in vlagi.</div>';return;}
+  // Magnus formula dewpoint
+  const a=17.625,b=243.04;
+  const g=Math.log(Math.max(1,H)/100)+a*T/(b+T);
+  const Td=b*g/(a-g);
+  const dpd=T-Td; // dew point depression
+  const W=m.windSpeed??0;
+  const hour=new Date().getHours();
+  const isDawn=hour>=4&&hour<=8;
+  const isNight=hour>=22||hour<=6;
+  // Index: lower DPD and lower wind = higher dew probability (0-100%)
+  const dpdScore=dpd<0?100:dpd<0.5?95:dpd<1?85:dpd<1.5?70:dpd<2.5?50:dpd<4?25:5;
+  const windScore=W<2?100:W<5?80:W<8?55:W<12?30:10;
+  const timeScore=isDawn?100:isNight?70:hour<=10?50:20;
+  const tempScore=T>0&&T<20?100:T>=20&&T<25?70:T<0?40:20;
+  const idx=Math.round(dpdScore*0.4+windScore*0.25+timeScore*0.2+tempScore*0.15);
+  const level=idx>=90?{l:'POPOLNO',c:'#4ade80',desc:'Idealni makro pogoji! ΔT='+dpd.toFixed(2)+'°C — kondenz je zagotovljen. Žuželke so hipotermične in negibljive, pajčevine prekrite s kapljicami. Zbudi se pred sončnim vzhodom!'}:
+    idx>=75?{l:'ODLIČNO',c:'var(--blue)',desc:'Visoka verjetnost rosnih kapljic. ΔT='+dpd.toFixed(2)+'°C — tanka plast kondenza bo pokrita stebla in mreže. Pojdi ven pred 8:00.'}:
+    idx>=55?{l:'DOBRO',c:'var(--amber)',desc:'Zmerni pogoji. ΔT='+dpd.toFixed(2)+'°C — rosa je možna, a ne zagotovljena. Vredi poskusiti.'}:
+    idx>=35?{l:'ŠIBKO',c:'var(--muted)',desc:'ΔT='+dpd.toFixed(2)+'°C — zrak je presuhi ali pretopel/preveterjen za kondenz. Rosa malo verjetna.'}:
+    {l:'BREZ',c:'var(--muted)',desc:'Pogoji ne omogočajo rosnih kapljic (ΔT='+dpd.toFixed(2)+'°C, V='+W.toFixed(1)+' km/h).'};
+  // Arc SVG gauge
+  const pct=idx/100,R=32,circ=Math.PI*R;
+  const arcSvg=`<svg width="80" height="48" viewBox="0 0 80 48" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 8 44 A 32 32 0 0 1 72 44" fill="none" stroke="var(--fc-border)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 8 44 A 32 32 0 0 1 72 44" fill="none" stroke="${level.c}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(circ*pct).toFixed(1)} ${circ}" />
+    <text x="40" y="38" text-anchor="middle" font-size="12" font-weight="600" font-family="IBM Plex Mono,monospace" fill="${level.c}">${idx}%</text>
+  </svg>`;
+  body.innerHTML=
+    `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.75rem">${arcSvg}<div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;color:${level.c}">${level.l}</div><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Rosišče indeks</div></div></div>`+
+    `<div class="dew-factors">
+      <div class="dew-factor"><div class="dew-factor-val">${Td.toFixed(1)}°C</div><div class="dew-factor-lbl">Rosišče</div></div>
+      <div class="dew-factor"><div class="dew-factor-val">${dpd.toFixed(2)}°C</div><div class="dew-factor-lbl">ΔT (DPD)</div></div>
+      <div class="dew-factor"><div class="dew-factor-val">${W.toFixed(1)} km/h</div><div class="dew-factor-lbl">Veter</div></div>
+    </div>`+
+    `<div class="dew-advice">${level.desc}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 2. FAUNA RADAR ────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+function buildFaunaRadar(){
+  const body=document.getElementById('fauna-grid');
+  if(!body)return;
+  const obs=_lastBriefObs||{},m=obs?.metric||{};
+  const T=m.temp??null,H=obs.humidity??null,W=m.windSpeed??0;
+  const rain3h=(m.precipRate??0)*3+(m.precipTotal??0);
+  const solar=m.solarRadiation??0;
+  const hour=new Date().getHours();
+  const mo=new Date().getMonth()+1;
+  const store=_insStore();
+  let rain72=0;
+  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);rain72+=(store[d.toISOString().slice(0,10)]?.precipTotal||0);}
+  const fauna=[
+    {icon:'🐌',name:'Polžji pohod',color:'var(--cyan)',
+     pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>13&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
+     desc:()=>`Rain: ${rain72.toFixed(0)}mm/72h · Vlaga: ${Math.round(H||0)}% · T: ${T?.toFixed(1)||'—'}°C`},
+    {icon:'🦎',name:'Kuščarji na kamnih',color:'var(--amber)',
+     pct:()=>{let s=0;if(T!=null&&T<15&&solar>400)s+=50;if(T!=null&&T>=15&&T<28&&solar>300)s+=40;if(W<10)s+=10;if(mo>=4&&mo<=9)s+=20;return Math.min(100,s);},
+     desc:()=>`Solar: ${Math.round(solar)} W/m² · T: ${T?.toFixed(1)||'—'}°C · ${mo>=4&&mo<=9?'Sezona aktivna':'Izven sezone'}`},
+    {icon:'🐛',name:'Gosenice & hrošči',color:'var(--green)',
+     pct:()=>{let s=0;if(T!=null&&T>15)s+=40;if(W<12)s+=20;if(hour>=9&&hour<=17)s+=20;if(rain72<5)s+=20;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=9&&hour<=17?'Dan':'Noč/jutr'}· Wind: ${W.toFixed(0)} km/h`},
+    {icon:'🦔',name:'Ježki (mrak)',color:'var(--purple)',
+     pct:()=>{let s=0;if(hour<=7||hour>=19)s+=50;if(T!=null&&T>8)s+=25;if(W<10)s+=15;if(rain72<20)s+=10;return Math.min(100,s);},
+     desc:()=>`Aktivno: ${hour<=7||hour>=19?'DA (mrak/noč)':'čakaj mrak'} · T: ${T?.toFixed(1)||'—'}°C`},
+    {icon:'🐸',name:'Žabe & pupki',color:'var(--blue)',
+     pct:()=>{let s=0;if(rain3h>0.5||rain72>10)s+=40;if(T!=null&&T>10&&T<22)s+=30;if(H!=null&&H>80)s+=20;if(hour<=8||hour>=19)s+=10;return Math.min(100,s);},
+     desc:()=>`Rain 72h: ${rain72.toFixed(0)}mm · T: ${T?.toFixed(1)||'—'}°C`},
+    {icon:'🦗',name:'Kobilice & murni',color:'var(--green)',
+     pct:()=>{let s=0;if(T!=null&&T>20)s+=40;if(W<10)s+=20;if(hour>=10&&hour<=19)s+=25;if(mo>=6&&mo<=9)s+=15;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${mo>=6&&mo<=9?'Sezona':'Izven sezone'}`},
+  ];
+  body.innerHTML=fauna.map(f=>{
+    const pct=f.pct();
+    const active=pct>=70;
+    return `<div class="fauna-card" style="--fa-accent:${f.color}">
+      <div class="fauna-header">
+        <span class="fauna-icon${active?' hop':''}">${f.icon}</span>
+        <span class="fauna-name">${f.name}</span>
+        <span class="fauna-pct">${pct}%</span>
+      </div>
+      <div class="fauna-bar-bg"><div class="fauna-bar-fill" style="width:${pct}%;background:${f.color}"></div></div>
+      <div class="fauna-desc">${f.desc()}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 3. WIND TURBULENCE INDEX ──────────────────────────────
+// ══════════════════════════════════════════════════════════
+function buildTurbulenceIndex(){
+  const body=document.getElementById('turb-body');
+  if(!body)return;
+  const obs=_lastBriefObs||{},m=obs?.metric||{};
+  const avgW=m.windSpeed??0;
+  const gustW=m.windGust??m.windGusts??avgW;
+  const wd=m.winddir??m.windDirection??null;
+  if(avgW<0.5){body.innerHTML='<div class="clim-loading">Premirno — veter premajhen za izračun turbulence.</div>';return;}
+  const ti=avgW>0?gustW/avgW:1;
+  // Valley channeling: Savinja valley oriented ~NW-SE (~310-130°)
+  const valleyAligned=wd!=null&&((wd>=280&&wd<=360)||(wd>=0&&wd<=50)||(wd>=110&&wd<=170));
+  let cls,title,desc;
+  if(ti>=3){cls='turb-xhigh';title='⚠️ Ekstremna turbulenca';desc='Razmerje sunek/povprečje '+ti.toFixed(2)+'. Neuredno, sunkovito gibanje zraka. Nevarno za drone in jadralce.';}
+  else if(ti>=2.5){cls='turb-high';title='🌀 Dolinska turbulenca';desc='Razmerje '+ti.toFixed(2)+' presega prag 2.5. '+(valleyAligned?'Smer vetra ('+Math.round(wd??0)+'°) vzdolž doline — "Savinjski lijak" aktiven! Sunki so precej močnejši od povprečja.':'Posamični sunki precej nad povprečjem.');}
+  else if(ti>=1.8){cls='turb-mod';title='💨 Zmerna turbulenca';desc='Razmerje '+ti.toFixed(2)+'. Zmerno sunkovit veter, a ne alarmajoče. Normalno za spremenljive razmere.';}
+  else{cls='turb-calm';title='✅ Gladek tok';desc='Razmerje sunek/povprečje: '+ti.toFixed(2)+' — laminaren tok, malo turbulence. Ugodno za drone, fotografijo, opazovanje narave.';}
+  // Historical context (last 7 days from hourly obs)
+  const hourly=_hourlyObs||[];
+  const hist=hourly.filter(o=>o.metric?.windGust&&o.metric?.windSpeed&&o.metric.windSpeed>0.5);
+  const histTxt=hist.length>20?'Povprečni TI zadnjih 7 dni: '+(hist.reduce((s,o)=>s+o.metric.windGust/o.metric.windSpeed,0)/hist.length).toFixed(2):null;
+  body.innerHTML=
+    `<div class="turb-hero ${cls}">
+      <div class="turb-left">
+        <div class="turb-title">${title}</div>
+        <div class="turb-sub">${desc}${histTxt?'<br><small>'+histTxt+'</small>':''}</div>
+      </div>
+      <div class="turb-idx">${ti.toFixed(2)}</div>
+    </div>`+
+    `<div class="drift-kpi-row">
+      <div class="drift-kpi"><div class="drift-kpi-val">${avgW.toFixed(1)} km/h</div><div class="drift-kpi-lbl">Povprečje</div></div>
+      <div class="drift-kpi"><div class="drift-kpi-val">${gustW.toFixed(1)} km/h</div><div class="drift-kpi-lbl">Sunek</div></div>
+      <div class="drift-kpi"><div class="drift-kpi-val">${wd!=null?Math.round(wd)+'°':'—'}</div><div class="drift-kpi-lbl">Smer</div></div>
+      <div class="drift-kpi"><div class="drift-kpi-val">${valleyAligned?'DA':'NE'}</div><div class="drift-kpi-lbl">Dolinski kanal</div></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── 4. WEATHER CANDLESTICK ────────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _candleMode='hourly';
+function setCandleMode(m){_candleMode=m;document.querySelectorAll('.candle-tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('candle-btn-'+m)?.classList.add('active');buildCandlestick();}
+function buildCandlestick(){
+  const svg=document.getElementById('candle-svg');
+  const rng=document.getElementById('candle-range');
+  if(!svg)return;
+  let candles=[];
+  const VW=880,VH=180,pl=42,pr=15,pt=12,pb=28;
+  if(_candleMode==='hourly'){
+    // From hourly obs — group by hour, compute open/high/low/close temp
+    const hourly=(_hourlyObs||[]).filter(o=>o.metric?.temp!=null);
+    if(hourly.length<4){svg.innerHTML='<text x="440" y="90" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Premalo urnih podatkov — pridi jutri.</text>';return;}
+    const byHour={};
+    hourly.forEach(o=>{
+      const d=new Date(o.obsTimeLocal||o.time||0);
+      const key=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()+'-'+d.getHours();
+      if(!byHour[key])byHour[key]={temps:[],ts:d};
+      byHour[key].temps.push(o.metric.temp);
+    });
+    candles=Object.entries(byHour).sort((a,b)=>a[1].ts-b[1].ts).slice(-36).map(([,v])=>{
+      const t=v.temps;
+      return{open:t[0],close:t[t.length-1],high:Math.max(...t),low:Math.min(...t),ts:v.ts};
+    });
+    if(rng)rng.textContent=`Zadnjih ${candles.length} ur`;
+  }else{
+    // From XLSX daily — open=Tmin,close=Tmax as proxy (no true OHLC for daily)
+    const store=_insStore();
+    const keys=Object.keys(store).sort().slice(-60);
+    candles=keys.map(k=>{const r=store[k];return r?{open:r.tempLow??r.tempAvg,close:r.tempHigh??r.tempAvg,high:r.tempHigh??r.tempAvg,low:r.tempLow??r.tempAvg,ts:new Date(k+'T12:00:00')}:null;}).filter(Boolean);
+    if(rng)rng.textContent=`Zadnjih ${candles.length} dni`;
+  }
+  if(!candles.length)return;
+  const allTemps=candles.flatMap(c=>[c.high,c.low]);
+  const minT=Math.min(...allTemps)-1,maxT=Math.max(...allTemps)+1;
+  const cw=(VW-pl-pr)/candles.length;
+  const mapY=v=>pt+(1-(v-minT)/(maxT-minT))*(VH-pt-pb);
+  // Grid lines
+  let html='';
+  const gridTemps=[];
+  const step=Math.ceil((maxT-minT)/5);
+  for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step)gridTemps.push(t);
+  gridTemps.forEach(t=>{
+    const y=mapY(t).toFixed(1);
+    html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`;
+    html+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="IBM Plex Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}</text>`;
+  });
+  // Zero line
+  if(minT<0&&maxT>0){const zy=mapY(0).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${zy}" y2="${zy}" stroke="rgba(96,165,250,.3)" stroke-width="1" stroke-dasharray="4,3"/>`;}
+  // Candles
+  candles.forEach((c,i)=>{
+    const x=pl+i*cw+cw*0.1;
+    const cw2=cw*0.8;
+    const cx=x+cw2/2;
+    const open=mapY(c.open),close=mapY(c.close),high=mapY(c.high),low=mapY(c.low);
+    const bullish=c.close>=c.open;
+    const col=bullish?'#4ade80':'#f87171';
+    const bodyTop=Math.min(open,close),bodyH=Math.max(1,Math.abs(open-close));
+    // Wick
+    html+=`<line x1="${cx.toFixed(1)}" x2="${cx.toFixed(1)}" y1="${high.toFixed(1)}" y2="${low.toFixed(1)}" stroke="${col}" stroke-width="1.2" opacity="0.7"/>`;
+    // Body
+    html+=`<rect x="${x.toFixed(1)}" y="${bodyTop.toFixed(1)}" width="${cw2.toFixed(1)}" height="${bodyH.toFixed(1)}" fill="${col}" opacity="${bullish?'0.85':'0.8'}" rx="1.5"/>`;
+    // X label (every N candles)
+    const labelEvery=Math.max(1,Math.ceil(candles.length/8));
+    if(i%labelEvery===0){
+      const lbl=_candleMode==='hourly'?String(c.ts.getHours()).padStart(2,'0')+':00':c.ts.toLocaleDateString('sl',{day:'numeric',month:'short'});
+      html+=`<text x="${cx.toFixed(1)}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${lbl}</text>`;
+    }
+  });
+  svg.innerHTML=html;
+}
+
 function initLife(){
   if(_lifeInit)return;_lifeInit=true;
+  try{buildDewMatrix();}catch(e){console.error('dew',e);}
+  try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
-  try{buildForestPulse();}catch(e){console.error('fp',e);}
+  try{buildForestPulse();}catch(e){console.error('fp2',e);}
   try{buildTimeCapsule();}catch(e){console.error('capsule',e);}
 }
 function refreshLife(){
   if(!_lifeInit)return;
-  try{buildGoldenWindow();buildKidsActivity();buildForestPulse();buildTimeCapsule();}catch(e){}
+  try{buildDewMatrix();buildFaunaRadar();buildGoldenWindow();buildKidsActivity();buildForestPulse();buildTimeCapsule();}catch(e){}
 }
 
 function initClimate(){
@@ -10191,6 +10478,7 @@ function initStormChaser(){
   if(!_scInit){_scInit=true;}
   fetchStormChaser();
   try{buildWindFingerprint();}catch(e){console.error('fp',e);}
+  try{buildTurbulenceIndex();}catch(e){console.error('turb',e);}
 }
 // ══════════════════════════════════════════════════════════
 
