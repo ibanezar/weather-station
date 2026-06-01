@@ -548,7 +548,8 @@ footer a{color:var(--blue);text-decoration:none}
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
 /* Tabs */
-.tab-nav-wrap{position:relative;margin-bottom:1.5rem}.tab-nav-wrap::after{content:"";position:absolute;right:0;top:0;bottom:.4rem;width:52px;background:linear-gradient(to left,var(--bg) 40%,transparent);pointer-events:none;z-index:5}.tab-nav{display:flex;gap:.35rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.4rem;scroll-snap-type:x proximity}
+.tab-nav-wrap{position:relative;margin-bottom:1.5rem}.tab-nav-wrap::after{content:"";position:absolute;right:0;top:0;bottom:.4rem;width:52px;background:linear-gradient(to left,var(--bg) 40%,transparent);pointer-events:none;z-index:5;opacity:0}.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem}
+@media(max-width:760px){.tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}.tab-nav-wrap::after{opacity:1}}
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
 .tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
 .tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
