@@ -421,6 +421,10 @@ h1 em{font-style:normal;font-weight:700;color:var(--cyan)}
 .chart-range{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted)}
 .chart-svg-wrap{width:100%;overflow:hidden}
 .chart-svg{width:100%;display:block;cursor:crosshair}
+/* Collapse empty chart wrappers */
+.chart-svg-wrap:empty{display:none}
+/* Empty chart state */
+.chart-empty{display:flex;align-items:center;justify-content:center;height:80px;color:var(--muted);font-size:.8rem;gap:.5rem;font-family:'Inter',sans-serif;opacity:.6}
 #chart-tip{position:fixed;pointer-events:none;z-index:200;background:var(--tip-bg);border:1px solid var(--tip-border);border-radius:8px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:var(--tip-shadow)}
 
 /* Small cards */
@@ -467,11 +471,11 @@ footer a{color:var(--blue);text-decoration:none}
 
 /* Tabs with dropdown */
 .tab-nav-wrap{position:relative;margin-bottom:1.5rem}
-.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem;align-items:center}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.8}
+.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem;align-items:center;align-content:flex-start}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.85}
 .tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
 .tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);opacity:1}
-.tab-dropdown{position:relative}
+.tab-dropdown{position:relative;display:inline-flex;align-items:center}
 .tab-dd-trigger.dd-active{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important;opacity:1!important}
 .tab-dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:.5rem .45rem;min-width:200px;box-shadow:var(--card-shadow-h);animation:dd-in .15s ease}
 .tab-dd-menu.open{display:block}
@@ -481,7 +485,7 @@ footer a{color:var(--blue);text-decoration:none}
 .tab-dd-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;padding:.42rem .65rem;font-size:.78rem;color:var(--text);cursor:pointer;transition:background .12s;font-family:'Inter',sans-serif;font-weight:500;white-space:nowrap}
 .tab-dd-menu button:hover{background:rgba(29,78,216,.08)}
 .tab-dd-menu button.active{background:var(--blue);color:#fff}
-@media(max-width:760px){.tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.tab-dd-menu{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%);top:auto;width:240px}}
+@media(max-width:760px){.tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;align-content:center}.tab-dd-menu{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%);top:auto;width:240px}}
 .sc-bar-bg{height:6px;background:var(--rain-track);border-radius:3px;margin:.35rem 0;overflow:hidden}
 .sc-bar-fill{height:100%;border-radius:3px;background:var(--red);transition:width .6s ease;width:0%}
 .sc-wind-table{width:100%;border-collapse:collapse;font-size:.74rem}
@@ -841,7 +845,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .fp-bar{height:4px;background:var(--fc-bg);border-radius:2px;margin-top:.4rem;overflow:hidden}
 .fp-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
 .fp-desc{font-size:.76rem;color:var(--muted);margin-top:.3rem;line-height:1.4}
-.mcf-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.9fr);gap:1rem;align-items:stretch}
+.mcf-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.9fr);gap:1rem;align-items:start}
 .mcf-main{display:flex;gap:.9rem;align-items:flex-start}.mcf-icon{font-size:2.4rem;line-height:1;flex-shrink:0}
 .mcf-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.25rem}.mcf-text{font-size:.78rem;color:var(--muted);line-height:1.65}
 .mcf-signals{display:flex;flex-direction:column;gap:.55rem}.mcf-signal{border-radius:11px;padding:.68rem .78rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--blue)}
@@ -1368,13 +1372,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Temp chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 24 ur</span><span class="chart-range" id="temp-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.35)" font-family="Inter,sans-serif">Ni urnih podatkov — preveri proxy ali počakaj na nalaganje</text></svg></div>
   </div>
 
   <!-- Rain chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌧 Padavine — zadnjih 24 ur</span><span class="chart-range" id="rain-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Plus Jakarta Sans,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.35)" font-family="Inter,sans-serif">Ni urnih podatkov — preveri proxy ali počakaj na nalaganje</text></svg></div>
   </div>
 
   <!-- Daily microclimate fingerprint -->
@@ -1384,12 +1388,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <span class="chart-range" id="mcf-updated">Nalaganje…</span>
     </div>
     <div id="mcf-content" class="mcf-hero">
-      <div style="color:var(--muted);font-size:.78rem">Berem lokalne signale doline…</div>
+      <div style="color:var(--muted);font-size:.78rem;padding:.25rem 0">Berem lokalne signale doline…</div>
     </div>
   </div>
 
   <!-- Ecowitt live: indoor + lightning + soil -->
-  <div class="card" id="ecowitt-card" style="margin-bottom:1rem">
+  <div class="card" id="ecowitt-card" style="margin-bottom:1rem;display:none">
     <div class="chart-hdr" style="margin-bottom:.25rem">
       <span class="clabel" style="margin:0">🏠 Notranje razmere & strele (Ecowitt)</span>
       <span class="chart-range" id="ecw-updated">—</span>
@@ -2676,7 +2680,12 @@ function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox
 
 let _tempData=[],_rainData=[],_hourlyObs=[];
 function drawTempChart(data){
-  const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
+  const svg=document.getElementById('temp-svg');if(!svg)return;
+  if(!data.length){
+    svg.setAttribute('viewBox','0 0 880 80');
+    svg.innerHTML='<text x="440" y="42" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">📡 Ni urnih podatkov — preveri proxy ali počakaj na nalaganje</text>';
+    return;
+  }
   svg.innerHTML='';_tempData=data;
   const VW=880,VH=200,pad={t:25,r:20,b:42,l:46},cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const temps=data.map(d=>d.temp),mn=Math.min(...temps),mx=Math.max(...temps),yMin=mn-1,yMax=mx+1;
@@ -2741,7 +2750,12 @@ function drawTempChart(data){
   set('temp-range',fmt(mn,1)+'° – '+fmt(mx,1)+'°C');
 }
 function drawRainChart(data){
-  const svg=document.getElementById('rain-svg');if(!svg||!data.length)return;
+  const svg=document.getElementById('rain-svg');if(!svg)return;
+  if(!data.length){
+    svg.setAttribute('viewBox','0 0 880 80');
+    svg.innerHTML='<text x="440" y="42" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">📡 Ni urnih podatkov padavin</text>';
+    return;
+  }
   svg.innerHTML='';_rainData=data;
   const VW=880,VH=150,pad={t:15,r:20,b:42,l:46},cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const maxR=Math.max(...data.map(d=>d.rain),.5),total=data.reduce((a,b)=>a+b.rain,0);
@@ -3957,7 +3971,7 @@ function switchTab(tab){
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='records'){   initRecords(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
-  if(tab==='storm'){    if(!window._scInit){window._scInit=true;fetchStormChaser();} }
+  if(tab==='storm'){    fetchStormChaser(); }
   if(tab==='life'){     initLife(); }
   if(tab==='ai'){       initAITab(); }
   closeTabDDs();
@@ -7509,6 +7523,8 @@ async function fetchEcowittCurrent(){
     if(soilH!=null)items.push({icon:'💦',val:parseFloat(soilH).toFixed(0)+'%',lbl:'Vlaga tal',col:'var(--blue)'});
     if(!items.length){grid.innerHTML='<div class="ecw-offline">Ecowitt: ni senzorjev ali napaka API.</div>';return;}
     grid.innerHTML=items.map(it=>`<div class="ecw-item"><div class="ecw-val" style="color:${it.col}">${it.icon} ${it.val}</div><div class="ecw-lbl">${it.lbl}</div></div>`).join('');
+    // Show card now that we have data
+    const card=document.getElementById('ecowitt-card');if(card)card.style.display='';
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     updateLightningFromEcowitt(ltCount,ltDist);
     if(ltCount>0){const mc=document.getElementById('mc-list');if(mc&&!mc.querySelector('.lightning-alert')){const div=document.createElement('div');div.className='mc-item mc-item-alert lightning-alert';div.innerHTML='<div class="mc-head"><span class="mc-icon">⚡</span><span class="mc-name">Aktivne strele v okolici</span></div><div class="mc-text">Danes '+Math.round(ltCount)+' udarov'+(ltDist?', najbližja '+parseFloat(ltDist).toFixed(0)+' km stran':'')+'.</div>';mc.prepend(div);}}
