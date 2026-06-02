@@ -2735,6 +2735,86 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="sc-pressure-body" style="font-size:.78rem;color:var(--muted)">Pridobivam…</div>
     </div>
 
+    <!-- ── Advanced scientific visualizations ── -->
+
+    <!-- 1. Hodograph -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌀 Hodograf — vertikalni vetrovni profil</span>
+        <span class="chart-range" id="hodo-info">—</span>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+        <svg id="hodo-svg" viewBox="0 0 280 280" width="280" height="280" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;background:rgba(0,0,0,.15);border-radius:10px">
+          <text x="140" y="145" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)" font-family="sans-serif">Čakam podatke…</text>
+        </svg>
+        <div style="flex:1;min-width:180px">
+          <div id="hodo-stats" style="font-size:.73rem;color:var(--muted);line-height:1.8"></div>
+          <div style="margin-top:.6rem;display:flex;flex-wrap:wrap;gap:.5rem;font-size:.65rem;color:var(--muted)">
+            <span><span style="display:inline-block;width:12px;height:3px;background:#f87171;vertical-align:middle;margin-right:2px;border-radius:2px"></span>Sfc–850</span>
+            <span><span style="display:inline-block;width:12px;height:3px;background:#fb923c;vertical-align:middle;margin-right:2px;border-radius:2px"></span>850–700</span>
+            <span><span style="display:inline-block;width:12px;height:3px;background:#a78bfa;vertical-align:middle;margin-right:2px;border-radius:2px"></span>700–500</span>
+            <span><span style="display:inline-block;width:12px;height:3px;background:#67e8f9;vertical-align:middle;margin-right:2px;border-radius:2px"></span>500–300</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Skew-T -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">☁️ Skew-T ln-P — stabilnostni diagram</span>
+        <span class="chart-range" id="skewt-info">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <svg id="skewt-svg" viewBox="0 0 600 380" height="380" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:500px;width:100%">
+          <text x="300" y="195" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.2)" font-family="sans-serif">Čakam sondažne podatke…</text>
+        </svg>
+      </div>
+      <div style="display:flex;gap:.75rem;font-size:.67rem;color:var(--muted);margin-top:.4rem;flex-wrap:wrap">
+        <span><span style="display:inline-block;width:16px;height:2px;background:#60a5fa;vertical-align:middle;margin-right:3px"></span>T okolja</span>
+        <span><span style="display:inline-block;width:16px;height:2px;background:#67e8f9;border-top:2px dashed #67e8f9;vertical-align:middle;margin-right:3px"></span>Rosišče</span>
+        <span><span style="display:inline-block;width:16px;height:2px;background:#f87171;border-top:2px dashed #f87171;vertical-align:middle;margin-right:3px"></span>Parcel</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:rgba(248,113,113,.2);vertical-align:middle;margin-right:3px;border-radius:1px"></span>CAPE</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:rgba(167,139,250,.2);vertical-align:middle;margin-right:3px;border-radius:1px"></span>CIN</span>
+      </div>
+    </div>
+
+    <!-- 3. Phase-space T × DPD -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🔵 Fazni prostor — T × DPD trajektorija</span>
+        <span class="chart-range" id="phase-info">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <svg id="phase-svg" viewBox="0 0 700 300" height="300" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:480px;width:100%">
+          <text x="350" y="155" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.2)" font-family="sans-serif">Zbiram urne podatke…</text>
+        </svg>
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
+        Barva: <b style="color:#a78bfa">preteklost</b> → <b style="color:#4ade80">sedanjost</b> · Velikost = tlak · 🌬 Foehn: visok T + nizek DPD · 🌨 Fronta: hiter padec T
+      </div>
+    </div>
+
+    <!-- 4. FFT Periodogram -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">〰️ FFT Periodogram — tlačne oscilacije</span>
+        <span class="chart-range" id="fft-info">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <svg id="fft-svg" viewBox="0 0 880 200" height="200" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:500px;width:100%">
+          <text x="440" y="105" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.2)" font-family="sans-serif">Čakam urne tlačne podatke…</text>
+        </svg>
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
+        Cooley-Tukey FFT · Hann okno · log osi period
+        <span style="margin-left:.75rem"><span style="display:inline-block;width:8px;height:8px;background:#fbbf24;border-radius:1px;vertical-align:middle;margin-right:2px"></span>24h dnevni</span>
+        <span style="margin-left:.4rem"><span style="display:inline-block;width:8px;height:8px;background:#a78bfa;border-radius:1px;vertical-align:middle;margin-right:2px"></span>12h polodnevni</span>
+        <span style="margin-left:.4rem"><span style="display:inline-block;width:8px;height:8px;background:#60a5fa;border-radius:1px;vertical-align:middle;margin-right:2px"></span>2–5d sinoptični</span>
+        <span style="margin-left:.4rem"><span style="display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:1px;vertical-align:middle;margin-right:2px"></span>&lt;6h mezoskalen</span>
+      </div>
+    </div>
+
   </div><!-- /tab-storm -->
 
   <!-- ═══ VREME & ŽIVLJENJE TAB ═══ -->
@@ -4128,47 +4208,65 @@ async function fetchSevereWeather(){
 
 // ── Uradna Meteoalarm opozorila ──────────────────────────
 async function fetchMeteoalarm(){
+  // Try multiple sources in order
+  const sources=[
+    'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-slovenia',
+    'https://meteo.arso.gov.si/uploads/probase/www/warning/rss/sl/rss_si-region_si.xml',
+    PROXY+'/meteoalarm',
+  ];
+  let txt='';
+  for(const url of sources){
+    try{
+      const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);
+      const r=await fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+      if(!r.ok)continue;
+      const t=await r.text();
+      if(t.includes('<entry>')||t.includes('<item>')){txt=t;break;}
+    }catch(e){/* try next */}
+  }
+  if(!txt){console.warn('Meteoalarm: vse vire ni bilo mogoče prebrati');return;}
   try{
-    const res=await fetch(PROXY+'/meteoalarm');
-    const txt=await res.text();
     const doc=new DOMParser().parseFromString(txt,'application/xml');
     _meteoalarmAlerts=[];
-
-    const entries=[...doc.querySelectorAll('entry')];
     const now=Date.now();
     const levelMap={
       '2':{cls:'a-ma-yellow',sev:false,name:'Rumeno'},
-      '3':{cls:'a-ma-orange',sev:true, name:'Oranžno'},
-      '4':{cls:'a-ma-red',   sev:true, name:'Rdeče'},
+      '3':{cls:'a-ma-orange',sev:true,name:'Oranžno'},
+      '4':{cls:'a-ma-red',sev:true,name:'Rdeče'},
     };
     const typeIcon={Thunderstorm:'⛈',Rain:'🌧',Wind:'💨',Snow:'❄️','Snow/Ice':'🧊',Fog:'🌫','high-temperature':'🌡️','low-temperature':'🥶',Heat:'🌡️',Forest:'🔥',Avalanche:'🏔',Flood:'🌊',Coastal:'🌊'};
 
+    const entries=[...doc.querySelectorAll('entry, item')];
     entries.forEach(en=>{
-      const content=(en.querySelector('summary,content')?.textContent||'')+' '+(en.querySelector('title')?.textContent||'');
-      // Legacy atom embeds awareness level/type in content; parse defensively
-      const lvlMatch=content.match(/awareness_level[^0-9]*([2-4])/i)||content.match(/\b([2-4])\s*[;:]\s*(yellow|orange|red|rumen|oranžn|rdeč)/i)||(/(red|rdeč)/i.test(content)?[null,'4']:/(orange|oranžn)/i.test(content)?[null,'3']:/(yellow|rumen)/i.test(content)?[null,'2']:null);
-      if(!lvlMatch)return;
-      const lvl=levelMap[lvlMatch[1]];if(!lvl)return;
-      // Check validity window
-      const expires=en.querySelector('expires,cap\\:expires')?.textContent;
+      const content=(en.querySelector('summary,content,description')?.textContent||'')+' '+(en.querySelector('title')?.textContent||'');
+      // Parse awareness level — try numeric match, then color keyword
+      let lvlKey=null;
+      const numM=content.match(/awareness_level[^0-9]*([2-4])/i);
+      if(numM)lvlKey=numM[1];
+      else if(/(red|rdeče?|extreme)/i.test(content))lvlKey='4';
+      else if(/(orange|oranžno?|severe)/i.test(content))lvlKey='3';
+      else if(/(yellow|rumeno?|moderate)/i.test(content))lvlKey='2';
+      if(!lvlKey)return;
+      const lvl=levelMap[lvlKey];if(!lvl)return;
+      // Check expiry
+      const expires=en.querySelector('expires, cap\\:expires')?.textContent;
       if(expires&&new Date(expires).getTime()<now)return;
-      // Type
-      const typeMatch=content.match(/awareness_type[^a-z]*([a-z\-]+)/i);
-      const evt=en.querySelector('event,cap\\:event')?.textContent||'';
+      // Event type icon
+      const evt=en.querySelector('event, cap\\:event')?.textContent||'';
       let icon='⚠️';
-      for(const[k,v]of Object.entries(typeIcon))if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}
-      const title=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
+      for(const[k,v]of Object.entries(typeIcon)){if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}}
+      const rawTitle=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
+      const desc=rawTitle.length>160?rawTitle.slice(0,160)+'…':rawTitle;
       _meteoalarmAlerts.push({
         cls:lvl.cls,severe:lvl.sev,official:true,icon,
-        title:lvl.name+' opozorilo ARSO/Meteoalarm',
-        desc:title.length>140?title.slice(0,140)+'…':title,
+        title:lvl.name+' opozorilo (ARSO/Meteoalarm)',
+        desc,
         meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''
       });
     });
-    // Most severe first
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
     renderAllAlerts();
-  }catch(e){console.warn('Meteoalarm:',e);}
+  }catch(e){console.warn('Meteoalarm parse error:',e);}
 }
 
 
@@ -10084,6 +10182,8 @@ function renderStormChaser(){
   // Pressure tendency
   const pd=g('sc-pressure-body');
   if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
+  // Advanced visualizations
+  try{updateAdvViz(d,ci);}catch(e){console.warn('AdvViz:',e);}
 }
 // ══════════════════════════════════════════════════════════
 // ── KLIMATOLOGIJA (4 features) ────────────────────────────
@@ -11989,6 +12089,255 @@ function buildWindFingerprint(){
     `</div><div class="fp-history">${histTxt}</div>`;
 }
 
+
+// ══════════════════════════════════════════════════════════
+// ── ADVANCED STORM CHASER VISUALIZATIONS ──────────────────
+// ══════════════════════════════════════════════════════════
+
+// Moist adiabatic lapse rate (°C/km) — simplified Tetens
+function _malr(T){
+  const Tk=T+273.15,L=2.501e6,Rv=461.5,cp=1004,eps=0.622;
+  const es=6.112*Math.exp(17.67*T/(T+243.5));
+  const rs=eps*es/(1013.25-es);
+  return 9.8*(1+L*rs/(Rv*Tk))/(1+L*L*rs/(cp*Rv*Tk*Tk));
+}
+// Standard atmosphere height from pressure (m)
+function _stH(p){return 44330*(1-Math.pow(p/1013.25,0.1903));}
+// Dewpoint from T(°C) and RH(%)
+function _dp(T,rh){const a=17.625,b=243.04,g=Math.log(Math.max(1,rh)/100)+a*T/(b+T);return b*g/(a-g);}
+// Lift parcel from (T0,Td0,p0) to p1 — dry then moist adiabatic
+function _liftP(T0,Td0,p0,p1){
+  const H_lcl=125*(T0-Td0),H0=_stH(p0),H1=_stH(p1);
+  const Tlcl=T0-9.8*H_lcl/1000,Hlcl=H0+H_lcl;
+  if(H1<=Hlcl)return T0-9.8*(H1-H0)/1000;
+  let Tc=Tlcl,Hc=Hlcl,step=200;
+  while(Hc<H1-step){Tc-=_malr(Tc)*step/1000;Hc+=step;}
+  Tc-=_malr(Tc)*(H1-Hc)/1000;
+  return Tc;
+}
+
+// ── 1. HODOGRAPH ─────────────────────────────────────────
+function drawAdvHodograph(d,ci){
+  const svg=document.getElementById('hodo-svg');
+  const info=document.getElementById('hodo-info');
+  const stats=document.getElementById('hodo-stats');
+  if(!svg)return;
+  const g=id=>document.getElementById(id);
+  const obs=_lastBriefObs?.metric||{};
+  const ws10=(obs.windSpeed??0),wd10=(obs.winddir??obs.windDirection??0);
+  const toUV=(spd,dir)=>[spd*Math.sin(dir*Math.PI/180),-spd*Math.cos(dir*Math.PI/180)];
+  const levels=[
+    {label:'Sfc',spd:ws10,dir:wd10,col:'#f87171'},
+    {label:'850',spd:(d.wind_speed_850hPa?.[ci]??0)*1.852,dir:d.wind_direction_850hPa?.[ci]??wd10,col:'#fb923c'},
+    {label:'700',spd:(d.wind_speed_700hPa?.[ci]??0)*1.852,dir:d.wind_direction_700hPa?.[ci]??wd10,col:'#a78bfa'},
+    {label:'500',spd:(d.wind_speed_500hPa?.[ci]??0)*1.852,dir:d.wind_direction_500hPa?.[ci]??wd10,col:'#67e8f9'},
+    {label:'300',spd:(d.wind_speed_300hPa?.[ci]??0)*1.852,dir:d.wind_direction_300hPa?.[ci]??wd10,col:'#4ade80'},
+  ];
+  const W=280,cx=W/2,cy=W/2,R=120;
+  const maxSpd=Math.max(...levels.map(l=>l.spd),20);
+  const sc=R/maxSpd;
+  const mapU=u=>cx+u*sc, mapV=v=>cy+v*sc;
+  let h='';
+  // Rings
+  [20,40,60,80,100].filter(r=>r<=maxSpd+20).forEach(r=>{
+    h+=`<circle cx="${cx}" cy="${cy}" r="${(r*sc).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="0.7"/>`;
+    h+=`<text x="${cx+r*sc+2}" y="${cy}" font-size="7.5" fill="rgba(255,255,255,.25)" font-family="monospace">${r}</text>`;
+  });
+  // Axes
+  h+=`<line x1="${cx}" x2="${cx}" y1="${cy-R-12}" y2="${cy+R+12}" stroke="rgba(255,255,255,.12)" stroke-width="0.5"/>`;
+  h+=`<line x1="${cx-R-12}" x2="${cx+R+12}" y1="${cy}" y2="${cy}" stroke="rgba(255,255,255,.12)" stroke-width="0.5"/>`;
+  [['N',cx,cy-R-15],['S',cx,cy+R+18],['E',cx+R+12,cy+4],['W',cx-R-12,cy+4]].forEach(([l,x,y])=>
+    h+=`<text x="${x}" y="${y}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.35)" font-family="sans-serif">${l}</text>`);
+  // Hodograph line
+  const pts=levels.map(l=>{const[u,v]=toUV(l.spd,l.dir);return{u,v,col:l.col,label:l.label,spd:l.spd,dir:l.dir};});
+  const segCol=['#fb923c','#a78bfa','#67e8f9','#4ade80'];
+  for(let i=1;i<pts.length;i++){
+    h+=`<line x1="${mapU(pts[i-1].u).toFixed(1)}" y1="${mapV(pts[i-1].v).toFixed(1)}" x2="${mapU(pts[i].u).toFixed(1)}" y2="${mapV(pts[i].v).toFixed(1)}" stroke="${segCol[i-1]}" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
+  pts.forEach(p=>{
+    const x=mapU(p.u),y=mapV(p.v);
+    h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${p.col}" stroke="rgba(0,0,0,.4)" stroke-width="1.5"/>`;
+    h+=`<text x="${(x+7).toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="8.5" fill="${p.col}" font-family="monospace" font-weight="600">${p.label}</text>`;
+  });
+  svg.innerHTML=h;
+  // Shear and veering analysis
+  const sfc=pts[0],h500=pts[3]||pts[2];
+  const shear0_6=Math.sqrt((h500.u-sfc.u)**2+(h500.v-sfc.v)**2).toFixed(0);
+  const dDir=(pts[pts.length-1].dir-pts[0].dir+360)%360;
+  const veering=dDir<180;
+  const veeringTxt=veering?'↻ Veering (topla adveksija)':'↺ Backing (hladna adveksija)';
+  if(stats)stats.innerHTML=`<b style="color:var(--text)">Shear 0–6 km:</b> ${shear0_6} km/h<br><b style="color:var(--text)">Rotacija:</b> ${veeringTxt}<br><b style="color:var(--text)">Sfc smer:</b> ${Math.round(sfc.dir)}° @ ${sfc.spd.toFixed(0)} km/h<br><b style="color:var(--text)">500 hPa:</b> ${Math.round((pts[3]||pts[2]).dir)}° @ ${(pts[3]||pts[2]).spd.toFixed(0)} km/h`;
+  if(info)info.textContent=`0–6km shear: ${shear0_6} km/h · ${veering?'Veering':'Backing'}`;
+}
+
+// ── 2. SKEW-T ────────────────────────────────────────────
+function drawSkewT(d,ci){
+  const svg=document.getElementById('skewt-svg');
+  const info=document.getElementById('skewt-info');
+  if(!svg)return;
+  const obs=_lastBriefObs?.metric||{};
+  const T_sfc=obs.temp??15,H_sfc=_lastBriefObs?.humidity??65;
+  const Td_sfc=_dp(T_sfc,H_sfc);
+  const levels=[
+    {p:1013,T:T_sfc,Td:Td_sfc},
+    {p:925,T:d.temperature_925hPa?.[ci]??T_sfc-5,Td:_dp(d.temperature_925hPa?.[ci]??T_sfc-5,d.relative_humidity_925hPa?.[ci]??H_sfc)},
+    {p:850,T:d.temperature_850hPa?.[ci]??T_sfc-9,Td:_dp(d.temperature_850hPa?.[ci]??T_sfc-9,d.relative_humidity_850hPa?.[ci]??60)},
+    {p:700,T:d.temperature_700hPa?.[ci]??T_sfc-18,Td:_dp(d.temperature_700hPa?.[ci]??T_sfc-18,d.relative_humidity_700hPa?.[ci]??50)},
+    {p:500,T:d.temperature_500hPa?.[ci]??T_sfc-32,Td:_dp(d.temperature_500hPa?.[ci]??T_sfc-32,30)},
+    {p:300,T:d.temperature_300hPa?.[ci]??T_sfc-55,Td:null},
+  ];
+  const VW=600,VH=380,pl=52,pr=25,pt=15,pb=30;
+  const pLevels=[1050,925,850,700,600,500,400,300];
+  const lp=p=>Math.log(p),lp0=lp(1050),lp1=lp(280);
+  const mapY=p=>pt+(lp(p)-lp0)/(lp1-lp0)*(VH-pt-pb);
+  const Tmin=-40,Tmax=40,skew=0.8;
+  const mapX=(T,p)=>pl+(T-Tmin)/(Tmax-Tmin)*(VW-pl-pr)+skew*(1050-p)/100;
+  let h='';
+  // Isobars
+  pLevels.forEach(p=>{
+    const y=mapY(p).toFixed(1);
+    h+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.08)" stroke-width="0.7"/>`;
+    h+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="9" fill="rgba(255,255,255,.35)" font-family="monospace" dominant-baseline="middle">${p}</text>`;
+  });
+  // Dry adiabats
+  for(let theta=-30;theta<=70;theta+=10){
+    const pts=pLevels.map(p=>{const T=(theta+273.15)*Math.pow(p/1000,0.286)-273.15;return`${mapX(T,p).toFixed(1)},${mapY(p).toFixed(1)}`;}).join(' ');
+    h+=`<polyline points="${pts}" fill="none" stroke="rgba(234,179,8,.18)" stroke-width="0.6"/>`;
+  }
+  // Moist adiabats
+  [-10,0,10,20,30].forEach(Ts=>{
+    let Tc=Ts,pc=1000,maPts=[];
+    while(pc>=300){maPts.push(`${mapX(Tc,pc).toFixed(1)},${mapY(pc).toFixed(1)}`);Tc-=_malr(Tc)*(_stH(pc-50)-_stH(pc))/1000;pc-=50;}
+    h+=`<polyline points="${maPts.join(' ')}" fill="none" stroke="rgba(34,197,94,.18)" stroke-width="0.6"/>`;
+  });
+  // Isotherms
+  for(let T=Tmin;T<=Tmax;T+=10){
+    const pts=pLevels.map(p=>`${mapX(T,p).toFixed(1)},${mapY(p).toFixed(1)}`).join(' ');
+    h+=`<polyline points="${pts}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="0.5" stroke-dasharray="4,4"/>`;
+    h+=`<text x="${mapX(T,1050).toFixed(1)}" y="${VH-pb+12}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.3)" font-family="monospace">${T}°</text>`;
+  }
+  // Zero isotherm
+  h+=`<polyline points="${pLevels.map(p=>`${mapX(0,p).toFixed(1)},${mapY(p).toFixed(1)}`).join(' ')}" fill="none" stroke="rgba(96,165,250,.35)" stroke-width="1.2"/>`;
+  // CAPE / CIN shading
+  const parT=levels.map(l=>({p:l.p,T:_liftP(T_sfc,Td_sfc,1013,l.p)}));
+  for(let i=1;i<levels.length;i++){
+    const e1=levels[i-1],e2=levels[i],pa1=parT[i-1],pa2=parT[i];
+    const poly=[`${mapX(e1.T,e1.p).toFixed(1)},${mapY(e1.p).toFixed(1)}`,`${mapX(e2.T,e2.p).toFixed(1)},${mapY(e2.p).toFixed(1)}`,`${mapX(pa2.T,pa2.p).toFixed(1)},${mapY(pa2.p).toFixed(1)}`,`${mapX(pa1.T,pa1.p).toFixed(1)},${mapY(pa1.p).toFixed(1)}`].join(' ');
+    if(pa1.T>e1.T||pa2.T>e2.T)h+=`<polygon points="${poly}" fill="rgba(248,113,113,.25)"/>`;
+    else if(pa1.T<e1.T&&pa2.T<e2.T)h+=`<polygon points="${poly}" fill="rgba(167,139,250,.15)"/>`;
+  }
+  // Env T
+  h+=`<polyline points="${levels.map(l=>`${mapX(l.T,l.p).toFixed(1)},${mapY(l.p).toFixed(1)}`).join(' ')}" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linejoin="round"/>`;
+  // Dewpoint
+  h+=`<polyline points="${levels.filter(l=>l.Td!=null).map(l=>`${mapX(l.Td,l.p).toFixed(1)},${mapY(l.p).toFixed(1)}`).join(' ')}" fill="none" stroke="#67e8f9" stroke-width="2" stroke-dasharray="6,3" stroke-linejoin="round"/>`;
+  // Parcel
+  h+=`<polyline points="${parT.map(p=>`${mapX(p.T,p.p).toFixed(1)},${mapY(p.p).toFixed(1)}`).join(' ')}" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5,2" stroke-linejoin="round"/>`;
+  // LCL
+  const H_lcl=125*(T_sfc-Td_sfc),p_lcl=1013.25*Math.pow(1-H_lcl/44330,5.2561);
+  if(p_lcl>300&&p_lcl<1013){const lclY=mapY(p_lcl).toFixed(1);h+=`<line x1="${pl}" x2="${VW-pr}" y1="${lclY}" y2="${lclY}" stroke="#60a5fa" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>`;h+=`<text x="${VW-pr+2}" y="${lclY}" font-size="8.5" fill="#60a5fa" dominant-baseline="middle">LCL</text>`;}
+  svg.innerHTML=h;
+  if(info)info.textContent=`T=${T_sfc.toFixed(1)}°C · Td=${Td_sfc.toFixed(1)}°C · LCL≈${Math.round(H_lcl)}m`;
+}
+
+// ── 3. PHASE-SPACE T × DPD ───────────────────────────────
+function drawPhaseSpace(){
+  const svg=document.getElementById('phase-svg');
+  const info=document.getElementById('phase-info');
+  if(!svg)return;
+  const hourly=_hourlyObs||[];
+  const pts=hourly.filter(o=>o.metric?.temp!=null&&o.humidity!=null).map((o,i)=>{
+    const T=o.metric.temp,Td=_dp(T,o.humidity),DPD=Math.max(0,T-Td),P=o.metric.pressure??1013;
+    return{T,DPD,P,i};
+  });
+  if(pts.length<8){svg.innerHTML='<text x="350" y="155" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)" font-family="sans-serif">Premalo urnih podatkov (min 8h)</text>';return;}
+  const VW=700,VH=300,pl=50,pr=20,pt=15,pb=38;
+  const allT=pts.map(p=>p.T),allD=pts.map(p=>p.DPD),allP=pts.map(p=>p.P);
+  const minT=Math.min(...allT)-2,maxT=Math.max(...allT)+2;
+  const maxDPD=Math.max(...allD)+2,minP=Math.min(...allP),maxP=Math.max(...allP);
+  const mapX=T=>pl+(T-minT)/(maxT-minT)*(VW-pl-pr);
+  const mapY=d=>pt+(1-d/maxDPD)*(VH-pt-pb);
+  const pSize=P=>2+4*(P-minP)/Math.max(1,maxP-minP);
+  const tCol=(i,n)=>{const f=i/Math.max(1,n-1);const r=Math.round(167+(75-167)*f),g2=Math.round(139+(222-139)*f),b=Math.round(250+(128-250)*f);return`rgb(${r},${g2},${b})`;};
+  let h='';
+  // Grid
+  const tStep=Math.ceil((maxT-minT)/6);
+  for(let t=Math.ceil(minT/tStep)*tStep;t<=maxT;t+=tStep){const x=mapX(t).toFixed(1);h+=`<line x1="${x}" x2="${x}" y1="${pt}" y2="${VH-pb}" stroke="rgba(255,255,255,.07)" stroke-width="0.5"/>`;h+=`<text x="${x}" y="${VH-pb+13}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.3)" font-family="monospace">${t.toFixed(0)}°C</text>`;}
+  const dStep=Math.ceil(maxDPD/5);
+  for(let d=0;d<=maxDPD;d+=dStep){const y=mapY(d).toFixed(1);h+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)" stroke-width="0.5"/>`;h+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="8.5" fill="rgba(255,255,255,.3)" font-family="monospace" dominant-baseline="middle">${d.toFixed(0)}°</text>`;}
+  // Regime labels
+  h+=`<text x="${mapX(maxT-3).toFixed(1)}" y="${mapY(1).toFixed(1)}" font-size="8.5" fill="rgba(251,146,60,.45)" font-family="sans-serif" text-anchor="end">Foehn/sušno</text>`;
+  h+=`<text x="${mapX(minT+3).toFixed(1)}" y="${mapY(2.5).toFixed(1)}" font-size="8.5" fill="rgba(96,165,250,.45)" font-family="sans-serif">Polarna/vlažna</text>`;
+  // Axis labels
+  h+=`<text x="${VW/2}" y="${VH-2}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.35)" font-family="sans-serif">Temperatura (°C)</text>`;
+  // Trajectory + points
+  const linePts=pts.map(p=>`${mapX(p.T).toFixed(1)},${mapY(p.DPD).toFixed(1)}`).join(' ');
+  h+=`<polyline points="${linePts}" fill="none" stroke="rgba(167,139,250,.2)" stroke-width="1"/>`;
+  pts.forEach((p,i)=>{h+=`<circle cx="${mapX(p.T).toFixed(1)}" cy="${mapY(p.DPD).toFixed(1)}" r="${pSize(p.P).toFixed(1)}" fill="${tCol(i,pts.length)}" opacity="0.8"/>`;});
+  // Latest
+  const last=pts[pts.length-1];
+  h+=`<circle cx="${mapX(last.T).toFixed(1)}" cy="${mapY(last.DPD).toFixed(1)}" r="7" fill="#4ade80" stroke="rgba(0,0,0,.4)" stroke-width="2"/>`;
+  svg.innerHTML=h;
+  const foehn=last.T>18&&last.DPD<3,coldFront=pts.length>3&&(pts[pts.length-1].T-pts[pts.length-4].T)<-3;
+  if(info)info.textContent=`${pts.length}h · T=${last.T.toFixed(1)}°C DPD=${last.DPD.toFixed(1)}°C${foehn?' · 🌬 Foehn?':''}${coldFront?' · 🌨 Fronta?':''}`;
+}
+
+// ── 4. FFT PERIODOGRAM ───────────────────────────────────
+function _fft(re,im){
+  const n=re.length;let j=0;
+  for(let i=1;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]];}}
+  for(let len=2;len<=n;len<<=1){const ang=-2*Math.PI/len,wR=Math.cos(ang),wI=Math.sin(ang);for(let i=0;i<n;i+=len){let cR=1,cI=0;for(let k=0;k<len/2;k++){const uR=re[i+k],uI=im[i+k],vR=re[i+k+len/2]*cR-im[i+k+len/2]*cI,vI=re[i+k+len/2]*cI+im[i+k+len/2]*cR;re[i+k]=uR+vR;im[i+k]=uI+vI;re[i+k+len/2]=uR-vR;im[i+k+len/2]=uI-vI;const nR=cR*wR-cI*wI;cI=cR*wI+cI*wR;cR=nR;}}}
+}
+function drawFFTPeriodogram(){
+  const svg=document.getElementById('fft-svg');
+  const info=document.getElementById('fft-info');
+  if(!svg)return;
+  const hourly=_hourlyObs||[];
+  const pressures=hourly.map(o=>o.metric?.pressure).filter(v=>v!=null&&v>900&&v<1100);
+  if(pressures.length<32){svg.innerHTML='<text x="440" y="105" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)" font-family="sans-serif">Premalo tlačnih podatkov (min 32h)</text>';return;}
+  // Pad to next power of 2
+  let N=1;while(N<pressures.length)N<<=1;
+  const re=new Float64Array(N),im=new Float64Array(N);
+  const mean=pressures.reduce((s,v)=>s+v,0)/pressures.length;
+  const n2=pressures.length,slope=(pressures[n2-1]-pressures[0])/(n2-1);
+  // Detrend + Hann window
+  pressures.forEach((v,i)=>{re[i]=(v-mean-slope*i)*(0.5-0.5*Math.cos(2*Math.PI*i/(n2-1)));});
+  _fft(re,im);
+  // Power (one-sided), period in hours
+  const power=[];
+  for(let k=1;k<=N/2;k++)power.push({k,pow:re[k]*re[k]+im[k]*im[k],period:N/k});
+  const maxP=Math.max(...power.map(p=>p.pow));
+  power.forEach(p=>p.norm=p.pow/maxP);
+  const filtered=power.filter(p=>p.period>=1&&p.period<=240);
+  const VW=880,VH=200,pl=42,pr=20,pt=15,pb=38;
+  const periods=filtered.map(p=>p.period);
+  const minLP=Math.log10(Math.max(1,Math.min(...periods))),maxLP=Math.log10(Math.max(...periods));
+  const mapX=T=>pl+(Math.log10(T)-minLP)/(maxLP-minLP)*(VW-pl-pr);
+  const mapY=v=>pt+(1-v)*(VH-pt-pb);
+  let h='';
+  // Key period grid lines
+  [1,2,4,6,12,24,48,72,120,168].forEach(p=>{if(p<Math.pow(10,minLP)||p>Math.pow(10,maxLP))return;const x=mapX(p).toFixed(1);h+=`<line x1="${x}" x2="${x}" y1="${pt}" y2="${VH-pb}" stroke="rgba(255,255,255,.08)" stroke-width="0.5"/>`;h+=`<text x="${x}" y="${VH-pb+13}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.3)" font-family="monospace">${p<24?p+'h':p/24+'d'}</text>`;});
+  // Power bars coloured by period category
+  filtered.forEach(p=>{const x=mapX(p.period),barH=p.norm*(VH-pt-pb);const col=p.period>23.5&&p.period<24.5?'#fbbf24':p.period>11.5&&p.period<12.5?'#a78bfa':p.period>47&&p.period<120?'#60a5fa':p.period<7?'#4ade80':'rgba(148,163,184,.4)';h+=`<rect x="${(x-.8).toFixed(1)}" y="${(VH-pb-barH).toFixed(1)}" width="1.6" height="${barH.toFixed(1)}" fill="${col}" opacity="0.85"/>`;});
+  // Top-5 peaks
+  const peaks=[];for(let i=1;i<filtered.length-1;i++){if(filtered[i].norm>filtered[i-1].norm&&filtered[i].norm>filtered[i+1].norm)peaks.push(filtered[i]);}
+  peaks.sort((a,b)=>b.norm-a.norm).slice(0,5).forEach(p=>{
+    const lbl=p.period>23&&p.period<25?'24h':p.period>11.5&&p.period<12.5?'12h':p.period>47&&p.period<73?`${(p.period/24).toFixed(1)}d`:`${p.period.toFixed(1)}h`;
+    const x=mapX(p.period),y=mapY(p.norm);
+    h+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${(y-4).toFixed(1)}" y2="${(y-20).toFixed(1)}" stroke="rgba(255,255,255,.3)" stroke-width="0.8"/>`;
+    h+=`<text x="${x.toFixed(1)}" y="${(y-23).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="white" font-family="sans-serif">${lbl}</text>`;
+  });
+  svg.innerHTML=h;
+  const dom=peaks[0];
+  if(info)info.textContent=`${pressures.length} urnih točk · N=${N} · dominanta: ${dom?dom.period.toFixed(1)+'h':'—'}`;
+}
+
+// Called from renderStormChaser to update all viz
+function updateAdvViz(d,ci){
+  try{drawAdvHodograph(d,ci);}catch(e){console.warn('Hodo:',e);}
+  try{drawSkewT(d,ci);}catch(e){console.warn('SkewT:',e);}
+  try{drawPhaseSpace();}catch(e){console.warn('Phase:',e);}
+  try{drawFFTPeriodogram();}catch(e){console.warn('FFT:',e);}
+}
 
 function initStormChaser(){
   if(!_scInit){_scInit=true;}
