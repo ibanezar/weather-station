@@ -4228,7 +4228,7 @@ async function fetchMeteoalarm(){
   // Sekundarni vir: /meteoalarm (MeteoAlarm atom feed, ko je online)
   try{
     const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),7000);
-    const res=await fetch(PROXY+'/arso-warning?region=SLOVENIA_MIDDLE&day=d1',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    const res=await fetch(PROXY+'/arso-warning?region=SLOVENIA_NORTH-EAST',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
     if(res.ok){
       const data=await res.json();
       _meteoalarmAlerts=[];

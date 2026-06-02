@@ -110,42 +110,37 @@ export default {
     try {
 
       // ── /arso-warning ─────────────────────────────────────
-      // ARSO uradna vremensko opozorila za osrednjo Slovenijo (Savinjska regija)
-      // Brez API ključa — javno dostopni ARSO podatki
+      // ARSO uradna vremensko opozorila — ATOM feed (strukturiran, zanesljiv)
+      // Regija za Rečico ob Savinji: SLOVENIA_NORTH-EAST
       if (path === "/arso-warning") {
-        const day = url.searchParams.get("day") || "d1"; // d1=danes, d2=jutri
-        const region = url.searchParams.get("region") || "SLOVENIA_MIDDLE";
-        const arsoUrl = `https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/bundle/warning_all_${region}_${day}.html`;
+        const region = url.searchParams.get("region") || "SLOVENIA_NORTH-EAST";
+        const atomUrl = `https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_${region}_latest.atom`;
         try {
-          const r = await fetch(arsoUrl, {
+          const r = await fetch(atomUrl, {
             headers: {
               "User-Agent": "Mozilla/5.0",
               "Referer": "https://meteo.arso.gov.si/",
-              "Accept": "text/html",
+              "Accept": "application/atom+xml,application/xml,text/xml,*/*",
             }
           });
           if (!r.ok) throw new Error("ARSO HTTP " + r.status);
-          const html = await r.text();
-          // Parse warning levels from ARSO HTML structure
+          const text = await r.text();
           const alerts = [];
-          // Yellow warnings
-          const yellowMatches = html.matchAll(/warning.*?yellow[^"]*"[^>]*>([^<]{5,})/gi);
-          for (const m of yellowMatches) alerts.push({ level: "yellow", text: m[1].trim() });
-          // Orange warnings
-          const orangeMatches = html.matchAll(/warning.*?orange[^"]*"[^>]*>([^<]{5,})/gi);
-          for (const m of orangeMatches) alerts.push({ level: "orange", text: m[1].trim() });
-          // Red warnings
-          const redMatches = html.matchAll(/warning.*?red[^"]*"[^>]*>([^<]{5,})/gi);
-          for (const m of redMatches) alerts.push({ level: "red", text: m[1].trim() });
-          // Also extract any text cells with warning descriptions
-          const tableMatches = html.matchAll(/<td[^>]*class="[^"]*warning[^"]*"[^>]*>[\s\S]*?<\/td>/gi);
-          const descriptions = [];
-          for (const m of tableMatches) {
-            const text = m[0].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-            if (text.length > 10) descriptions.push(text.slice(0, 200));
+          const entryRx = /<entry[\s>]([\s\S]*?)<\/entry>/gi;
+          let m;
+          while ((m = entryRx.exec(text)) !== null) {
+            const entry = m[1];
+            const title   = (entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i)  ?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+            const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+            const content = title + ' ' + summary;
+            let level = null;
+            if (/(rdeč|red|extreme)/i.test(content))           level = 'red';
+            else if (/(oranžn|orange|severe)/i.test(content))  level = 'orange';
+            else if (/(rumen|yellow|moderate)/i.test(content)) level = 'yellow';
+            if (level) alerts.push({ level, text: (summary || title).slice(0, 200) });
           }
-          return new Response(JSON.stringify({ alerts, descriptions, url: arsoUrl }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=900" }
+          return new Response(JSON.stringify({ alerts, url: atomUrl }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
           });
         } catch (e) {
           return new Response(JSON.stringify({ alerts: [], error: e.message }), {
@@ -180,12 +175,11 @@ export default {
       }
 
       // ── /meteoalarm ───────────────────────────────────────
-      // Poskusi MeteoAlarm feed, fallback na ARSO RSS
+      // MeteoAlarm legacy Atom feed (aktiven), fallback na ARSO ATOM
       if (path === "/meteoalarm") {
         const sources = [
           "https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-slovenia",
-          "https://meteoalarm.org/en_UK/0/0/SI-SI.rss",
-          "https://meteo.arso.gov.si/uploads/probase/www/warning/rss/sl/rss_si-region_si.xml",
+          "https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_SLOVENIA_NORTH-EAST_latest.atom",
         ];
         for (const src of sources) {
           try {
