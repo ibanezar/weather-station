@@ -4320,8 +4320,9 @@ async function fetchGoogleAlerts(){
 function applyDayStats(observations){
   const today=new Date().toDateString(),todayObs=observations.filter(o=>new Date(o.obsTimeLocal.replace(' ','T')).toDateString()===today);
   if(!todayObs.length)return;
-  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0,totalRain=0;
-  todayObs.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T')),temp=o.metric.tempAvg??o.metric.temp??0;if(temp>maxT){maxT=temp;maxTime=t;}if(temp<minT){minT=temp;minTime=t;}tempSum+=temp;totalRain+=o.metric.precipTotal??0;});
+  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0;
+  todayObs.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T')),temp=o.metric.tempAvg??o.metric.temp??0;if(temp>maxT){maxT=temp;maxTime=t;}if(temp<minT){minT=temp;minTime=t;}tempSum+=temp;});
+  const totalRain=todayObs.reduce((mx,o)=>Math.max(mx,o.metric.precipTotal??0),0);
   set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/todayObs.length,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
 }
@@ -4485,7 +4486,13 @@ function buildDailySummaries(observations){
 function applyHourly(observations){
   const raw=observations.slice(-24);
   drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
-  drawRainChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),rain:o.metric.precipTotal??0})));
+  drawRainChart(raw.map((o,i,arr)=>{
+    const curr=o.metric.precipTotal??0;
+    if(i===0) return{time:new Date(o.obsTimeLocal.replace(' ','T')),rain:0};
+    const prevDay=arr[i-1].obsTimeLocal.slice(0,10),currDay=o.obsTimeLocal.slice(0,10);
+    const inc=currDay!==prevDay?curr:Math.max(0,curr-(arr[i-1].metric.precipTotal??0));
+    return{time:new Date(o.obsTimeLocal.replace(' ','T')),rain:inc};
+  }));
   applyDayStats(observations);applyPressureTrend(observations);
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   drawHourlyProfile(observations);
