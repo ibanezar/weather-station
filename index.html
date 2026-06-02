@@ -4217,9 +4217,6 @@ async function fetchComingUp(){
       allHours.forEach((x,i)=>pp+=' L '+xS(i)+' '+yP(x.prob));
       pp+=' L '+W+' '+H+' Z';
 
-      // temperature line
-      const tl=hours.map((x,i)=>(i?'L ':'M ')+xS(i)+' '+yT(x.temp)).join(' ');
-
       // temp line
       const tl=allHours.map((x,i)=>(i?'L ':'M ')+xS(i)+' '+yT(x.temp)).join(' ');
 
