@@ -137,7 +137,7 @@ export default {
             if (/(rdeč|red|extreme)/i.test(content))           level = 'red';
             else if (/(oranžn|orange|severe)/i.test(content))  level = 'orange';
             else if (/(rumen|yellow|moderate)/i.test(content)) level = 'yellow';
-            if (level) alerts.push({ level, text: (summary || title).slice(0, 200) });
+            if (level) alerts.push({ level, text: (summary || title).slice(0, 600) });
           }
           return new Response(JSON.stringify({ alerts, url: atomUrl }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
