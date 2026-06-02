@@ -4189,7 +4189,7 @@ async function fetchComingUp(){
   try{
     const url='https://api.open-meteo.com/v1/forecast'
       +'?latitude='+LAT+'&longitude='+LON
-      +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code'
+      +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=4';
     const data=await _archFetch(url);
@@ -4203,7 +4203,7 @@ async function fetchComingUp(){
 
     const hours=[];
     for(let i=si;i<h.time.length&&hours.length<25;i++)
-      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0});
+      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     const stripHours=hours.filter((_,i)=>i===0||i%3===0).slice(0,8);
 
     // Hourly cells
@@ -4216,7 +4216,7 @@ async function fetchComingUp(){
         div.className='cu-hour'+(i===0?' cu-now':'');
         div.innerHTML=
           '<span class="cu-ht">'+(i===0?'zdaj':(hr<10?'0':'')+hr+':00')+'</span>'+
-          '<span class="cu-he">'+_wmoEmoji(x.wmo)+'</span>'+
+          '<span class="cu-he">'+_wmoEmojiDN(x.wmo,x.isDay)+'</span>'+
           '<span class="cu-htemp" style="color:'+tempColor(x.temp)+'">'+Math.round(x.temp)+'°</span>'+
           (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>');
         strip.appendChild(div);
@@ -6339,9 +6339,11 @@ function maybePushAlert(title,body){
 // ── Besedilna napoved — kompaktne kartice ────────────────
 const _WMO_SL={0:'Jasno',1:'Pretežno jasno',2:'Delno oblačno',3:'Oblačno',45:'Megla',48:'Ivjna megla',51:'Rahlo rosenje',53:'Rosenje',55:'Močno rosenje',61:'Lahek dež',63:'Zmeren dež',65:'Močan dež',66:'Zmrzujoč dež',71:'Lahek sneg',73:'Zmeren sneg',75:'Močan sneg',77:'Sneg',80:'Plohe',81:'Plohe',82:'Močne plohe',85:'Snežne plohe',86:'Snežne plohe',95:'Nevihta',96:'Nevihta + toča',99:'Nevihta + toča'};
 const _WMO_EMOJI={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',66:'🌨',71:'🌨',73:'❄️',75:'❄️',77:'❄️',80:'🌦',81:'🌧',82:'🌧',85:'🌨',86:'🌨',95:'⛈',96:'⛈',99:'⛈'};
+const _WMO_EMOJI_NIGHT={0:'🌙',1:'🌙',2:'☁️',3:'☁️'};
 const _WIND_DIR_SL=['S','SV','V','JV','J','JZ','Z','SZ'];
 function _wmoTxt(c){return _WMO_SL[c]||_WMO_SL[Math.floor((c||0)/10)*10]||'Spremenljivo';}
 function _wmoEmoji(c){return _WMO_EMOJI[c]||_WMO_EMOJI[Math.floor((c||0)/10)*10]||'🌤';}
+function _wmoEmojiDN(c,isDay){if(!isDay&&c in _WMO_EMOJI_NIGHT)return _WMO_EMOJI_NIGHT[c];return _wmoEmoji(c);}
 
 function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv}){
   const parts=[];
