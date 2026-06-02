@@ -3157,6 +3157,23 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// Archive API throttle — max 1 request per 600ms, in-memory cache keyed by URL
+const _archCache={};
+const _archQ=[];let _archRunning=false;
+function _archFetch(url){
+  if(_archCache[url])return Promise.resolve(_archCache[url]);
+  return new Promise((res,rej)=>{
+    _archQ.push({url,res,rej});
+    if(!_archRunning)_archDrain();
+  });
+}
+function _archDrain(){
+  if(!_archQ.length){_archRunning=false;return;}
+  _archRunning=true;
+  const{url,res,rej}=_archQ.shift();
+  fetch(url).then(r=>r.json()).then(d=>{_archCache[url]=d;res(d);}).catch(rej).finally(()=>setTimeout(_archDrain,650));
+}
+
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
 let _lastTemp = null; // remember temp so theme toggle can re-colour it
@@ -4133,8 +4150,7 @@ async function fetchSevereWeather(){
     const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
       +'&hourly=weather_code,precipitation,precipitation_probability,wind_gusts_10m,cape'
       +'&timezone=Europe%2FLjubljana&forecast_days=1';
-    const res=await fetch(url);
-    const data=await res.json();
+    const data=await _archFetch(url);
     const h=data.hourly;if(!h)return;
     const nowH=new Date().getHours();
     _severeAlerts=[];
@@ -4208,38 +4224,23 @@ async function fetchSevereWeather(){
 
 // ── Uradna Meteoalarm opozorila ──────────────────────────
 async function fetchMeteoalarm(){
-  // Try multiple sources in order
-  const sources=[
-    'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-slovenia',
-    'https://meteo.arso.gov.si/uploads/probase/www/warning/rss/sl/rss_si-region_si.xml',
-    PROXY+'/meteoalarm',
-  ];
-  let txt='';
-  for(const url of sources){
-    try{
-      const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);
-      const r=await fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
-      if(!r.ok)continue;
-      const t=await r.text();
-      if(t.includes('<entry>')||t.includes('<item>')){txt=t;break;}
-    }catch(e){/* try next */}
-  }
-  if(!txt){console.warn('Meteoalarm: vse vire ni bilo mogoče prebrati');return;}
+  // Direct feeds (meteoalarm.org, arso.gov.si) are CORS-blocked from browser.
+  // All requests must go through the proxy Worker.
+  // Add route to Worker: if(url.pathname==='/meteoalarm'){return proxyFeed('https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-slovenia');}
   try{
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch(PROXY+'/meteoalarm',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!res.ok){console.warn('Meteoalarm proxy HTTP',res.status);return;}
+    const txt=await res.text();
+    if(!txt.includes('<entry>')&&!txt.includes('<item>')){console.warn('Meteoalarm: prazen odgovor ali napaka proxy');return;}
     const doc=new DOMParser().parseFromString(txt,'application/xml');
     _meteoalarmAlerts=[];
     const now=Date.now();
-    const levelMap={
-      '2':{cls:'a-ma-yellow',sev:false,name:'Rumeno'},
-      '3':{cls:'a-ma-orange',sev:true,name:'Oranžno'},
-      '4':{cls:'a-ma-red',sev:true,name:'Rdeče'},
-    };
+    const levelMap={'2':{cls:'a-ma-yellow',sev:false,name:'Rumeno'},'3':{cls:'a-ma-orange',sev:true,name:'Oranžno'},'4':{cls:'a-ma-red',sev:true,name:'Rdeče'}};
     const typeIcon={Thunderstorm:'⛈',Rain:'🌧',Wind:'💨',Snow:'❄️','Snow/Ice':'🧊',Fog:'🌫','high-temperature':'🌡️','low-temperature':'🥶',Heat:'🌡️',Forest:'🔥',Avalanche:'🏔',Flood:'🌊',Coastal:'🌊'};
-
     const entries=[...doc.querySelectorAll('entry, item')];
     entries.forEach(en=>{
       const content=(en.querySelector('summary,content,description')?.textContent||'')+' '+(en.querySelector('title')?.textContent||'');
-      // Parse awareness level — try numeric match, then color keyword
       let lvlKey=null;
       const numM=content.match(/awareness_level[^0-9]*([2-4])/i);
       if(numM)lvlKey=numM[1];
@@ -4248,25 +4249,22 @@ async function fetchMeteoalarm(){
       else if(/(yellow|rumeno?|moderate)/i.test(content))lvlKey='2';
       if(!lvlKey)return;
       const lvl=levelMap[lvlKey];if(!lvl)return;
-      // Check expiry
       const expires=en.querySelector('expires, cap\\:expires')?.textContent;
       if(expires&&new Date(expires).getTime()<now)return;
-      // Event type icon
       const evt=en.querySelector('event, cap\\:event')?.textContent||'';
       let icon='⚠️';
       for(const[k,v]of Object.entries(typeIcon)){if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}}
       const rawTitle=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
-      const desc=rawTitle.length>160?rawTitle.slice(0,160)+'…':rawTitle;
       _meteoalarmAlerts.push({
         cls:lvl.cls,severe:lvl.sev,official:true,icon,
         title:lvl.name+' opozorilo (ARSO/Meteoalarm)',
-        desc,
+        desc:rawTitle.length>160?rawTitle.slice(0,160)+'…':rawTitle,
         meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''
       });
     });
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
     renderAllAlerts();
-  }catch(e){console.warn('Meteoalarm parse error:',e);}
+  }catch(e){console.warn('Meteoalarm:',e.name==='AbortError'?'timeout':'error',e.message);}
 }
 
 
@@ -4558,8 +4556,7 @@ async function fetchOnThisDay(){
         +'&start_date='+date+'&end_date='+date
         +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode'
         +'&timezone=Europe%2FLjubljana';
-      const res=await fetch(url);
-      const data=await res.json();
+      const data=await _archFetch(url);
       return{
         year:yr, date,
         tMax: data.daily?.temperature_2m_max?.[0],
@@ -5514,8 +5511,7 @@ async function fetchPollen(){
   try{
     const params=POLLEN_TYPES.map(p=>p.key).join(',');
     const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=${params}&timezone=Europe%2FLjubljana&forecast_days=1`;
-    const res=await fetch(url);
-    const data=await res.json();
+    const data=await _archFetch(url);
     const h=data.hourly;
     if(!h){grid.innerHTML='<div style="color:var(--muted);font-size:.74rem">Podatki o pelodu niso dosegljivi za to lokacijo.</div>';return;}
 
@@ -5561,8 +5557,7 @@ async function fetchFlood(){
   const el=document.getElementById('flood-content');if(!el)return;
   try{
     const url=`https://flood-api.open-meteo.com/v1/flood?latitude=${LAT}&longitude=${LON}&daily=river_discharge,river_discharge_mean,river_discharge_max&forecast_days=7`;
-    const res=await fetch(url);
-    const data=await res.json();
+    const data=await _archFetch(url);
     const d=data.daily;
     if(!d||!d.river_discharge){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki o pretoku niso dosegljivi.</div>';return;}
 
@@ -6206,8 +6201,7 @@ async function fetchLocalDailyForecast(){
       +'?latitude='+LAT+'&longitude='+LON
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=1';
-    const res=await fetch(url);
-    const data=await res.json();
+    const data=await _archFetch(url);
     const d=data.daily;
     if(!d?.time?.length)throw new Error('No daily forecast');
     const wmo=d.weather_code[0]||0;
@@ -6816,7 +6810,7 @@ async function applyPheno(){
       const start=y+'-01-01';
       const end=new Date().toISOString().slice(0,10);
       const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+start+'&end_date='+end+'&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLjubljana';
-      const res=await fetch(url);const data=await res.json();
+      const data=await _archFetch(url);
       entries=(data.daily?.time||[]).map((d,i)=>[d,{tempHigh:data.daily.temperature_2m_max?.[i],tempLow:data.daily.temperature_2m_min?.[i]}]);
     }
     if(entries.length<5){const pl=document.getElementById('pheno-list-left');if(pl)pl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za fenološki izračun…</div>';return;}
@@ -6876,7 +6870,7 @@ async function fetchWaterBalance(){
     const sd=y+'-'+pad(m)+'-01',ed=y+'-'+pad(m)+'-'+pad(now.getDate());
     // Fetch ET₀ from archive
     const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+sd+'&end_date='+ed+'&daily=et0_fao_evapotranspiration,precipitation_sum&timezone=Europe%2FLjubljana';
-    const res=await fetch(url);const data=await res.json();
+    const data=await _archFetch(url);
     const et0List=data.daily?.et0_fao_evapotranspiration??[];
     const omRain=data.daily?.precipitation_sum??[];
     // Get local station rain from localStorage
@@ -12353,41 +12347,24 @@ async function initVisitorCounter(){
   const el=document.getElementById('vc-num');
   const wrap=document.getElementById('visitor-counter');
   if(!el)return;
-  // Use counterapi.dev — free, no sign-up, persists globally
-  const NAMESPACE='ibanezar-weather';
-  const KEY='station-v1';
+  // counterapi.dev (503) and hits.seeyoufarm (CORS) both unavailable from browser.
+  // Use proxy endpoint if configured, otherwise localStorage session count.
   try{
-    const r=await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${KEY}/up`);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    const n=d.count??d.value??null;
-    if(n!=null){
-      el.textContent=Number(n).toLocaleString('sl');
-      wrap?.classList.add('loaded');
-      return;
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),4000);
+    const r=await fetch(PROXY+'/counter',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(r.ok){
+      const d=await r.json();
+      const n=d.count??d.value??d.visits??null;
+      if(n!=null){el.textContent=Number(n).toLocaleString('sl');wrap?.classList.add('loaded');return;}
     }
-  }catch(e){
-    // fallback: try hits.seeyoufarm.com count endpoint
-    try{
-      const r2=await fetch('https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fibanezar.github.io%2Fweather-station%2F',{method:'GET'});
-      // seeyoufarm returns SVG — extract today/total from text
-      const txt=await r2.text();
-      const m=txt.match(/(\d+)\s*<\/text>/g);
-      if(m&&m.length>=2){
-        const total=m[m.length-1].replace(/<[^>]+>/g,'').trim();
-        el.textContent=Number(total).toLocaleString('sl');
-        wrap?.classList.add('loaded');
-        return;
-      }
-    }catch(_){}
-    // Final fallback: local session counter
-    try{
-      let lc=parseInt(localStorage.getItem('wx-visit-count')||'0')+1;
-      localStorage.setItem('wx-visit-count',lc);
-      el.textContent=lc.toLocaleString('sl')+' (lokalno)';
-      wrap?.classList.add('loaded');
-    }catch(_){el.textContent='—';}
-  }
+  }catch(_){}
+  // Fallback: localStorage-based session count (device-local, not global)
+  try{
+    const lc=parseInt(localStorage.getItem('wx-visit-count')||'0')+1;
+    localStorage.setItem('wx-visit-count',lc);
+    el.textContent=lc.toLocaleString('sl');
+    wrap?.classList.add('loaded');
+  }catch(_){if(wrap)wrap.style.display='none';}
 }
 
 async function init(){
