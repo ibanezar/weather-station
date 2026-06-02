@@ -1376,12 +1376,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-svg{width:100%;height:52px;display:block;margin-bottom:.55rem;overflow:visible}
 .cu-strip{display:flex;gap:2px;overflow-x:auto;padding-bottom:.3rem;scrollbar-width:none}
 .cu-strip::-webkit-scrollbar{display:none}
-.cu-hour{display:flex;flex-direction:column;align-items:center;gap:.18rem;min-width:52px;padding:.42rem .25rem .38rem;border-radius:10px;flex-shrink:0}
+.cu-hour{display:flex;flex-direction:column;align-items:center;gap:.25rem;min-width:70px;padding:.52rem .3rem .45rem;border-radius:12px;flex-shrink:0}
 .cu-now{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
-.cu-ht{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted)}
-.cu-he{font-size:1.05rem;line-height:1}
-.cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:500}
-.cu-hprob{font-size:.6rem;color:var(--blue)}
+.cu-ht{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
+.cu-he{font-size:1.5rem;line-height:1}
+.cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:500}
+.cu-hprob{font-size:.68rem;color:var(--blue)}
 .cu-sep{height:1px;background:var(--border);margin:.72rem 0}
 .cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
 .cu-day{display:flex;flex-direction:column;align-items:center;gap:.22rem;padding:.65rem .4rem .6rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center}
@@ -4197,15 +4197,16 @@ async function fetchComingUp(){
     let si=0;
     for(let i=0;i<h.time.length;i++){if(new Date(h.time[i]).getTime()>=nowMs-1800000){si=i;break;}}
 
-    const hours=[];
-    for(let i=si;i<h.time.length&&hours.length<13;i++)
-      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0});
+    const allHours=[];
+    for(let i=si;i<h.time.length&&allHours.length<25;i++)
+      allHours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0});
+    const hours=allHours.filter((_,i)=>i===0||i%3===0).slice(0,9);
 
-    // SVG: prob area + temperature gradient line
+    // SVG: prob area + temperature gradient line (vse ure za gladko krivuljo)
     const svg=document.getElementById('cu-svg');
-    if(svg&&hours.length>1){
-      const W=400,H=52,n=hours.length;
-      const temps=hours.map(x=>x.temp),probs=hours.map(x=>x.prob);
+    if(svg&&allHours.length>1){
+      const W=400,H=52,n=allHours.length;
+      const temps=allHours.map(x=>x.temp),probs=allHours.map(x=>x.prob);
       const minT=Math.min(...temps)-1,maxT=Math.max(...temps)+1;
       const xS=i=>+(i/(n-1)*W).toFixed(2);
       const yT=t=>+(H*.82-(t-minT)/(maxT-minT)*H*.58).toFixed(2);
@@ -4213,18 +4214,14 @@ async function fetchComingUp(){
 
       // precipitation probability filled area
       let pp='M '+xS(0)+' '+H;
-      hours.forEach((x,i)=>pp+=' L '+xS(i)+' '+yP(x.prob));
+      allHours.forEach((x,i)=>pp+=' L '+xS(i)+' '+yP(x.prob));
       pp+=' L '+W+' '+H+' Z';
 
       // temperature line
       const tl=hours.map((x,i)=>(i?'L ':'M ')+xS(i)+' '+yT(x.temp)).join(' ');
 
-      // tick marks for hour labels
-      const ticks=hours.map((x,i)=>{
-        const hr=x.t.getHours();
-        if(i===0||hr%4===0)return`<line x1="${xS(i)}" x2="${xS(i)}" y1="${H-2}" y2="${H}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`;
-        return'';
-      }).join('');
+      // temp line
+      const tl=allHours.map((x,i)=>(i?'L ':'M ')+xS(i)+' '+yT(x.temp)).join(' ');
 
       svg.innerHTML=
         '<defs>'+
@@ -4233,11 +4230,10 @@ async function fetchComingUp(){
           '<stop offset="100%" stop-color="#60a5fa" stop-opacity=".03"/>'+
         '</linearGradient>'+
         '<linearGradient id="cu-tg" x1="0" y1="0" x2="1" y2="0">'+
-          hours.map((x,i)=>`<stop offset="${+(i/(n-1)*100).toFixed(0)}%" stop-color="${tempColor(x.temp)}"/>`).join('')+
+          allHours.map((x,i)=>`<stop offset="${+(i/(n-1)*100).toFixed(0)}%" stop-color="${tempColor(x.temp)}"/>`).join('')+
         '</linearGradient>'+
         '</defs>'+
         '<path d="'+pp+'" fill="url(#cu-pg)"/>'+
-        ticks+
         '<path d="'+tl+'" fill="none" stroke="url(#cu-tg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 3px rgba(251,191,36,.4))"/>';
     }
 
