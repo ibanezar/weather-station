@@ -1369,6 +1369,30 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
   .g4{grid-template-columns:1fr 1fr}
 }
+/* ── Kaj prihaja ── */
+.cu-card{padding:1rem 1.2rem 1.1rem}
+.cu-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
+.cu-time{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted)}
+.cu-svg{width:100%;height:52px;display:block;margin-bottom:.55rem;overflow:visible}
+.cu-strip{display:flex;gap:2px;overflow-x:auto;padding-bottom:.3rem;scrollbar-width:none}
+.cu-strip::-webkit-scrollbar{display:none}
+.cu-hour{display:flex;flex-direction:column;align-items:center;gap:.18rem;min-width:52px;padding:.42rem .25rem .38rem;border-radius:10px;flex-shrink:0}
+.cu-now{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+.cu-ht{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted)}
+.cu-he{font-size:1.05rem;line-height:1}
+.cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:500}
+.cu-hprob{font-size:.6rem;color:var(--blue)}
+.cu-sep{height:1px;background:var(--border);margin:.72rem 0}
+.cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.cu-day{display:flex;flex-direction:column;align-items:center;gap:.22rem;padding:.65rem .4rem .6rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center}
+.cu-dlbl{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.cu-demo{font-size:1.5rem;line-height:1.1}
+.cu-ddesc{font-size:.64rem;color:var(--muted);line-height:1.3;min-height:1.8em}
+.cu-dtemp{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:500}
+.cu-dtl{color:var(--muted);font-size:.76rem}
+.cu-drain{font-size:.66rem;color:var(--blue)}
+.cu-dry{color:var(--green)!important}
+@media(max-width:420px){.cu-days{grid-template-columns:repeat(3,1fr);gap:.35rem}.cu-day{padding:.5rem .25rem}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -1507,6 +1531,18 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ds-item ds-low"><span class="ds-arrow">↓ Min</span><span class="ds-temp"><span id="day-low">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">—</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">Skupaj danes</span></div>
     <div class="ds-item ds-avg"><span class="ds-arrow">~ Povpr</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">Dnevno povprečje</span></div>
+  </div>
+
+  <!-- Kaj prihaja -->
+  <div class="card cu-card" id="cu-wrap">
+    <div class="cu-hdr">
+      <span class="clabel" style="margin:0">🔮 Kaj prihaja</span>
+      <span class="cu-time" id="cu-updated">—</span>
+    </div>
+    <svg id="cu-svg" class="cu-svg" viewBox="0 0 400 52" preserveAspectRatio="none"></svg>
+    <div class="cu-strip" id="cu-hourly"></div>
+    <div class="cu-sep"></div>
+    <div class="cu-days" id="cu-days"></div>
   </div>
 
 <div class="insights-row">
@@ -4142,6 +4178,113 @@ function checkAlerts(obs){
   if(wind>=50)       alerts.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
   _liveAlerts=alerts;
   renderAllAlerts();
+}
+
+// ── Kaj prihaja — urni strip + 3 dni ─────────────────────
+async function fetchComingUp(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast'
+      +'?latitude='+LAT+'&longitude='+LON
+      +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code'
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+      +'&timezone=Europe%2FLjubljana&forecast_days=4';
+    const data=await _archFetch(url);
+    const h=data.hourly,d=data.daily;
+    if(!h||!d)return;
+
+    // Find current hour index
+    const now=new Date(),nowMs=now.getTime();
+    let si=0;
+    for(let i=0;i<h.time.length;i++){if(new Date(h.time[i]).getTime()>=nowMs-1800000){si=i;break;}}
+
+    const hours=[];
+    for(let i=si;i<h.time.length&&hours.length<13;i++)
+      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0});
+
+    // SVG: prob area + temperature gradient line
+    const svg=document.getElementById('cu-svg');
+    if(svg&&hours.length>1){
+      const W=400,H=52,n=hours.length;
+      const temps=hours.map(x=>x.temp),probs=hours.map(x=>x.prob);
+      const minT=Math.min(...temps)-1,maxT=Math.max(...temps)+1;
+      const xS=i=>+(i/(n-1)*W).toFixed(2);
+      const yT=t=>+(H*.82-(t-minT)/(maxT-minT)*H*.58).toFixed(2);
+      const yP=p=>+(H*.88-p/100*H*.55).toFixed(2);
+
+      // precipitation probability filled area
+      let pp='M '+xS(0)+' '+H;
+      hours.forEach((x,i)=>pp+=' L '+xS(i)+' '+yP(x.prob));
+      pp+=' L '+W+' '+H+' Z';
+
+      // temperature line
+      const tl=hours.map((x,i)=>(i?'L ':'M ')+xS(i)+' '+yT(x.temp)).join(' ');
+
+      // tick marks for hour labels
+      const ticks=hours.map((x,i)=>{
+        const hr=x.t.getHours();
+        if(i===0||hr%4===0)return`<line x1="${xS(i)}" x2="${xS(i)}" y1="${H-2}" y2="${H}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`;
+        return'';
+      }).join('');
+
+      svg.innerHTML=
+        '<defs>'+
+        '<linearGradient id="cu-pg" x1="0" y1="0" x2="0" y2="1">'+
+          '<stop offset="0%" stop-color="#60a5fa" stop-opacity=".4"/>'+
+          '<stop offset="100%" stop-color="#60a5fa" stop-opacity=".03"/>'+
+        '</linearGradient>'+
+        '<linearGradient id="cu-tg" x1="0" y1="0" x2="1" y2="0">'+
+          hours.map((x,i)=>`<stop offset="${+(i/(n-1)*100).toFixed(0)}%" stop-color="${tempColor(x.temp)}"/>`).join('')+
+        '</linearGradient>'+
+        '</defs>'+
+        '<path d="'+pp+'" fill="url(#cu-pg)"/>'+
+        ticks+
+        '<path d="'+tl+'" fill="none" stroke="url(#cu-tg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 3px rgba(251,191,36,.4))"/>';
+    }
+
+    // Hourly cells
+    const strip=document.getElementById('cu-hourly');
+    if(strip){
+      strip.innerHTML='';
+      hours.forEach((x,i)=>{
+        const hr=x.t.getHours();
+        const div=document.createElement('div');
+        div.className='cu-hour'+(i===0?' cu-now':'');
+        div.innerHTML=
+          '<span class="cu-ht">'+(i===0?'zdaj':(hr<10?'0':'')+hr+':00')+'</span>'+
+          '<span class="cu-he">'+_wmoEmoji(x.wmo)+'</span>'+
+          '<span class="cu-htemp" style="color:'+tempColor(x.temp)+'">'+Math.round(x.temp)+'°</span>'+
+          (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:0">·</span>');
+        strip.appendChild(div);
+      });
+    }
+
+    // Next 3 days
+    const SL=['ned','pon','tor','sre','čet','pet','sob'];
+    const daysEl=document.getElementById('cu-days');
+    if(daysEl){
+      daysEl.innerHTML='';
+      for(let i=1;i<=3&&i<d.time.length;i++){
+        const date=new Date(d.time[i]+'T12:00:00');
+        const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
+        const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
+        const div=document.createElement('div');
+        div.className='cu-day';
+        div.innerHTML=
+          '<span class="cu-dlbl">'+lbl+'</span>'+
+          '<span class="cu-demo">'+_wmoEmoji(d.weather_code[i])+'</span>'+
+          '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+'</span>'+
+          '<div class="cu-dtemp"><span style="color:'+tempColor(d.temperature_2m_max[i])+'">'+Math.round(d.temperature_2m_max[i])+'°</span>'+
+            '<span class="cu-dtl"> / '+Math.round(d.temperature_2m_min[i])+'°</span></div>'+
+          (rain>0.3
+            ?'<span class="cu-drain">🌧 '+rain.toFixed(1)+' mm'+(prob?' · '+prob+'%':'')+'</span>'
+            :'<span class="cu-drain cu-dry">Suho</span>');
+        daysEl.appendChild(div);
+      }
+    }
+
+    const upd=document.getElementById('cu-updated');
+    if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){console.warn('ComingUp:',e);}
 }
 
 // ── Napoved nevihte / huda vremena (Open-Meteo) ──────────
@@ -12440,7 +12583,7 @@ async function init(){
   initMeshCanvas();
   initHeroCanvas();
   // Fetch all data in parallel, then initialise data-dependent widgets
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip(),fetchComingUp()]);
   fetchEcowittCurrent();
   autoAccentCards();
   initInsights();
@@ -12459,6 +12602,7 @@ setInterval(fetchEcowittCurrent,5*60*1000);
 setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
+setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
