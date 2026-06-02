@@ -4222,24 +4222,46 @@ async function fetchSevereWeather(){
   }catch(e){console.warn('Severe weather:',e);}
 }
 
-// ── Uradna Meteoalarm opozorila ──────────────────────────
+// ── Uradna ARSO opozorila via proxy ──────────────────────
 async function fetchMeteoalarm(){
-  // Direct feeds (meteoalarm.org, arso.gov.si) are CORS-blocked from browser.
-  // All requests must go through the proxy Worker.
-  // Add route to Worker: if(url.pathname==='/meteoalarm'){return proxyFeed('https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-slovenia');}
+  // Primarni vir: /arso-warning (Worker fetcha ARSO HTML brez CORS)
+  // Sekundarni vir: /meteoalarm (MeteoAlarm atom feed, ko je online)
   try{
-    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),6000);
-    const res=await fetch(PROXY+'/meteoalarm',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
-    if(!res.ok){console.warn('Meteoalarm proxy HTTP',res.status);return;}
-    const txt=await res.text();
-    if(!txt.includes('<entry>')&&!txt.includes('<item>')){console.warn('Meteoalarm: prazen odgovor ali napaka proxy');return;}
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),7000);
+    const res=await fetch(PROXY+'/arso-warning?region=SLOVENIA_MIDDLE&day=d1',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(res.ok){
+      const data=await res.json();
+      _meteoalarmAlerts=[];
+      if(data.alerts?.length){
+        const lvlMap={red:{cls:'a-ma-red',sev:true,name:'Rdeče'},orange:{cls:'a-ma-orange',sev:true,name:'Oranžno'},yellow:{cls:'a-ma-yellow',sev:false,name:'Rumeno'}};
+        const typeIcon={nevihte:'⛈',dež:'🌧',veter:'💨',sneg:'❄️',megla:'🌫',toča:'⛈🧊',poplav:'🌊'};
+        data.alerts.forEach(a=>{
+          const lv=lvlMap[a.level]||lvlMap.yellow;
+          let icon='⚠️';
+          const t=(a.text||'').toLowerCase();
+          for(const[k,v]of Object.entries(typeIcon)){if(t.includes(k)){icon=v;break;}}
+          _meteoalarmAlerts.push({cls:lv.cls,severe:lv.sev,official:true,icon,title:lv.name+' opozorilo ARSO',desc:a.text||'Vremensko opozorilo za osrednjo Slovenijo',meta:''});
+        });
+        _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
+        renderAllAlerts();
+        return; // ARSO source succeeded
+      }
+    }
+  }catch(e){console.warn('ARSO warning:',e.name==='AbortError'?'timeout':e.message);}
+
+  // Fallback: MeteoAlarm atom feed via proxy
+  try{
+    const ctrl2=new AbortController();const tid2=setTimeout(()=>ctrl2.abort(),6000);
+    const res2=await fetch(PROXY+'/meteoalarm',{signal:ctrl2.signal}).finally(()=>clearTimeout(tid2));
+    if(!res2.ok)return;
+    const txt=await res2.text();
+    if(!txt.includes('<entry>')&&!txt.includes('<item>'))return;
     const doc=new DOMParser().parseFromString(txt,'application/xml');
     _meteoalarmAlerts=[];
     const now=Date.now();
     const levelMap={'2':{cls:'a-ma-yellow',sev:false,name:'Rumeno'},'3':{cls:'a-ma-orange',sev:true,name:'Oranžno'},'4':{cls:'a-ma-red',sev:true,name:'Rdeče'}};
     const typeIcon={Thunderstorm:'⛈',Rain:'🌧',Wind:'💨',Snow:'❄️','Snow/Ice':'🧊',Fog:'🌫','high-temperature':'🌡️','low-temperature':'🥶',Heat:'🌡️',Forest:'🔥',Avalanche:'🏔',Flood:'🌊',Coastal:'🌊'};
-    const entries=[...doc.querySelectorAll('entry, item')];
-    entries.forEach(en=>{
+    [...doc.querySelectorAll('entry, item')].forEach(en=>{
       const content=(en.querySelector('summary,content,description')?.textContent||'')+' '+(en.querySelector('title')?.textContent||'');
       let lvlKey=null;
       const numM=content.match(/awareness_level[^0-9]*([2-4])/i);
@@ -4255,19 +4277,44 @@ async function fetchMeteoalarm(){
       let icon='⚠️';
       for(const[k,v]of Object.entries(typeIcon)){if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}}
       const rawTitle=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
+      _meteoalarmAlerts.push({cls:lvl.cls,severe:lvl.sev,official:true,icon,title:lvl.name+' opozorilo (MeteoAlarm)',desc:rawTitle.slice(0,160),meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''});
+    });
+    _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
+    renderAllAlerts();
+  }catch(e){console.warn('Meteoalarm:',e.name==='AbortError'?'timeout':e.message);}
+}
+
+// ── Google Weather API — publicAlerts ─────────────────────
+async function fetchGoogleAlerts(){
+  try{
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch(PROXY+'/google-weather-alerts',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!res.ok){console.warn('Google Alerts HTTP',res.status);return;}
+    const data=await res.json();
+    if(data.error||!data.alerts?.length)return;
+
+    const sevMap={EXTREME:{cls:'a-ma-red',sev:true,name:'Rdeče'},SEVERE:{cls:'a-ma-orange',sev:true,name:'Oranžno'},MODERATE:{cls:'a-ma-yellow',sev:false,name:'Rumeno'},MINOR:{cls:'a-ma-yellow',sev:false,name:'Rumeno'}};
+    const typeIcon={flood:'🌊',thunder:'⛈',storm:'⛈',wind:'💨',snow:'❄️',ice:'🧊',fog:'🌫',heat:'🌡️',cold:'🥶',fire:'🔥',avalanche:'🏔',rain:'🌧'};
+    const now=Date.now();
+
+    data.alerts.forEach(alert=>{
+      if(alert.expirationTime&&new Date(alert.expirationTime).getTime()<now)return;
+      const sev=sevMap[alert.severity]||sevMap.MINOR;
+      const hl=(alert.headline||'').toLowerCase();
+      let icon='⚠️';
+      for(const[k,v] of Object.entries(typeIcon)){if(hl.includes(k)){icon=v;break;}}
+      const expires=alert.expirationTime?new Date(alert.expirationTime).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
       _meteoalarmAlerts.push({
-        cls:lvl.cls,severe:lvl.sev,official:true,icon,
-        title:lvl.name+' opozorilo (ARSO/Meteoalarm)',
-        desc:rawTitle.length>160?rawTitle.slice(0,160)+'…':rawTitle,
-        meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''
+        cls:sev.cls,severe:sev.sev,official:true,icon,
+        title:sev.name+' opozorilo'+((alert.dataSource?.name)?' ('+alert.dataSource.name+')':''),
+        desc:(alert.headline||'Vremensko opozorilo').slice(0,160),
+        meta:expires?'Velja do '+expires:''
       });
     });
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
     renderAllAlerts();
-  }catch(e){console.warn('Meteoalarm:',e.name==='AbortError'?'timeout':'error',e.message);}
+  }catch(e){console.warn('Google Alerts:',e.name==='AbortError'?'timeout':e.message);}
 }
-
-
 
 // ── Day stats ─────────────────────────────────────────────
 function applyDayStats(observations){
@@ -12396,6 +12443,7 @@ async function init(){
   fetchFlood();
   fetchSevereWeather();
   fetchMeteoalarm();
+  fetchGoogleAlerts();
   applyPheno();
 }
 init();
@@ -12404,6 +12452,7 @@ setInterval(fetchEcowittCurrent,5*60*1000);
 setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
+setInterval(fetchGoogleAlerts,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
