@@ -4168,6 +4168,14 @@ function renderStormAutopsy(){
     '<div class="intel-kpis"><div class="intel-kpi"><b>'+recent.rain.toFixed(1)+' mm</b><span>dež 6h</span></div><div class="intel-kpi"><b>'+Math.round(maxGust)+' km/h</b><span>sunek</span></div><div class="intel-kpi"><b>'+Math.round(cape)+'</b><span>CAPE</span></div><div class="intel-kpi"><b>'+(lightning||0)+(lightningDist!=null?' / '+Math.round(lightningDist)+' km':'')+'</b><span>strele</span></div></div>';
 }
 
+function dismissAlert(btn){
+  const bar=btn.closest('.alert-bar');
+  const title=bar?.dataset.alertTitle;
+  bar?.remove();
+  if(title)[_meteoalarmAlerts,_severeAlerts,_liveAlerts].forEach(arr=>{
+    const i=arr.findIndex(x=>x.title===title);if(i>=0)arr.splice(i,1);
+  });
+}
 function renderAllAlerts(){
   const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
   // Order: official Meteoalarm (most severe first) → forecast severe → live obs
@@ -4184,7 +4192,8 @@ function renderAllAlerts(){
       ? '<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'
       : '<span class="alert-icon">'+a.icon+'</span>';
     const moreHtml=a.more?'<div class="alert-actions"><button type="button" class="alert-more-btn" aria-expanded="false" onclick="toggleAlertMore(this)">Več informacij</button></div><div class="alert-more" hidden>'+a.more+'</div>':'';
-    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+moreHtml+'</div><button class="alert-close" onclick="this.closest(\'.alert-bar\').remove()">×</button>';
+    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+moreHtml+'</div><button class="alert-close" onclick="dismissAlert(this)">×</button>';
+    div.dataset.alertTitle=a.title;
     wrap.appendChild(div);
   });
 }
@@ -4371,9 +4380,9 @@ async function fetchMeteoalarm(){
           _meteoalarmAlerts.push({cls:lv.cls,severe:lv.sev,official:true,icon,title:lv.name+' opozorilo ARSO',desc:a.text||'Vremensko opozorilo za osrednjo Slovenijo',meta:''});
         });
         _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
-        renderAllAlerts();
-        return; // ARSO source succeeded
       }
+      renderAllAlerts();
+      return; // ARSO source succeeded
     }
   }catch(e){console.warn('ARSO warning:',e.name==='AbortError'?'timeout':e.message);}
 
