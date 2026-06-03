@@ -1389,6 +1389,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
+.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 18px rgba(59,130,246,.5);z-index:900;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
+.game-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(59,130,246,.65)}
+.game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.game-modal-overlay.open{display:flex}
+.game-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(500px,96vw)}
+.game-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text)}
+.game-modal-close{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:.2rem .4rem;border-radius:6px;line-height:1}
+.game-modal-close:hover{background:var(--border);color:var(--text)}
+.game-stats{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)}
+.game-stats b{color:var(--text)}
 .cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
 .cu-day{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem .7rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center;position:relative;overflow:hidden}
 .cu-day::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--cu-accent,var(--border))}
@@ -3065,6 +3075,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
+  <!-- ═══ IGRA ═══ -->
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
 
@@ -12578,6 +12589,147 @@ async function init(){
   fetchGoogleAlerts();
   applyPheno();
 }
+// ── Igra: Lovec na dež ───────────────────────────────────
+(function(){
+let _gRaf=null,_gStarted=false,_gOver=false,_gInit=false;
+function openGameModal(){
+  document.getElementById('game-modal-overlay').classList.add('open');
+  initWeatherGame();
+}
+function closeGameModal(e){
+  if(e&&e.target!==document.getElementById('game-modal-overlay'))return;
+  document.getElementById('game-modal-overlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('game-modal-overlay')?.classList.remove('open');});
+window.openGameModal=openGameModal;window.closeGameModal=closeGameModal;
+window.initWeatherGame=function(){
+  const canvas=document.getElementById('game-canvas');
+  if(!canvas||_gInit)return;
+  _gInit=true;
+  const ctx=canvas.getContext('2d');
+  const W=480,H=300,BW=64,BH=18;
+  let bx=W/2-BW/2,score=0,lives=3,frame=0,speed=2.2;
+  let hs=parseInt(localStorage.getItem('wx-game-hs')||'0');
+  let drops=[],bolts=[];
+  const keys={};
+
+  // Keyboard
+  document.addEventListener('keydown',e=>{keys[e.key]=1;if(['ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault();});
+  document.addEventListener('keyup',e=>{keys[e.key]=0;});
+
+  // Touch drag
+  let tx=null;
+  canvas.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;e.preventDefault();},{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    const dx=(e.touches[0].clientX-tx)*1.4;tx=e.touches[0].clientX;
+    bx=Math.max(0,Math.min(W-BW,bx+dx));e.preventDefault();
+  },{passive:false});
+
+  // Click to start / restart
+  canvas.addEventListener('click',()=>{
+    if(!_gStarted){_gStarted=true;return;}
+    if(_gOver){score=0;lives=3;drops=[];bolts=[];frame=0;speed=2.2;_gOver=false;bx=W/2-BW/2;}
+  });
+
+  function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+  function draw(){
+    // Sky
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0c1420');g.addColorStop(1,'#1a3050');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    // Stars (static decoration)
+    ctx.fillStyle='rgba(255,255,255,.35)';
+    [[30,18],[90,8],[150,22],[250,10],[370,15],[430,20],[460,6]].forEach(([x,y])=>{ctx.fillRect(x,y,1.5,1.5);});
+    // Clouds
+    [[70,40,50,22],[200,28,62,24],[370,38,45,20]].forEach(([cx,cy,rx,ry])=>{
+      const cg=ctx.createRadialGradient(cx,cy,2,cx,cy,rx);
+      cg.addColorStop(0,'#3d5060');cg.addColorStop(1,'#2a3a48');
+      ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
+    });
+    // Drops
+    ctx.fillStyle='#60a5fa';
+    drops.forEach(d=>{
+      ctx.beginPath();ctx.ellipse(d.x,d.y,3,7,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(d.x,d.y-6,1.5,3,0,0,Math.PI*2);ctx.fillStyle='rgba(96,165,250,.4)';ctx.fill();
+      ctx.fillStyle='#60a5fa';
+    });
+    // Bolts
+    bolts.forEach(b=>{
+      ctx.save();ctx.shadowColor='#fbbf24';ctx.shadowBlur=10;
+      ctx.strokeStyle='#fbbf24';ctx.lineWidth=2.5;ctx.lineJoin='round';
+      ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-6,b.y+13);ctx.lineTo(b.x+3,b.y+13);ctx.lineTo(b.x-5,b.y+28);ctx.stroke();
+      ctx.restore();
+    });
+    // Bucket (trapezoid)
+    const by=H-BH-4;
+    ctx.fillStyle='#2563eb';
+    ctx.beginPath();ctx.moveTo(bx+4,by);ctx.lineTo(bx+BW-4,by);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#60a5fa';ctx.lineWidth=1.5;ctx.stroke();
+    // Water inside bucket
+    if(score>0){
+      const wh=Math.min(BH-4,2+Math.floor(score/3));
+      ctx.fillStyle='rgba(96,165,250,.5)';
+      ctx.beginPath();ctx.moveTo(bx+3,by+BH-wh);ctx.lineTo(bx+BW-3,by+BH-wh);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
+    }
+    // HUD
+    set('game-score',score);set('game-lives',lives);set('game-hs',hs);
+    // Overlays
+    if(!_gStarted||_gOver){
+      ctx.fillStyle='rgba(0,0,0,.62)';ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      if(!_gStarted){
+        ctx.fillStyle='#f1f5f9';ctx.font='bold 22px Inter,sans-serif';ctx.fillText('🌧 Lovec na dež',W/2,H/2-28);
+        ctx.fillStyle='#94a3b8';ctx.font='13px Inter,sans-serif';
+        ctx.fillText('Lovi kapljice · izogni se streli',W/2,H/2+2);
+        ctx.fillText('← → / A D / dotik za premik',W/2,H/2+22);
+        ctx.fillStyle='#60a5fa';ctx.font='bold 14px Inter,sans-serif';ctx.fillText('▶  Klikni za začetek',W/2,H/2+50);
+      }else{
+        ctx.fillStyle='#f1f5f9';ctx.font='bold 22px Inter,sans-serif';ctx.fillText('Igra končana!',W/2,H/2-25);
+        ctx.fillStyle='#94a3b8';ctx.font='14px JetBrains Mono,monospace';
+        ctx.fillText('Rezultat: '+score+(score===hs&&score>0?' 🏆 Nov rekord!':''),W/2,H/2+8);
+        ctx.fillStyle='#60a5fa';ctx.font='bold 14px Inter,sans-serif';ctx.fillText('▶  Klikni za ponovni zagon',W/2,H/2+38);
+      }
+      ctx.textAlign='left';
+    }
+  }
+
+  function update(){
+    if(!_gStarted||_gOver)return;
+    frame++;
+    // Move bucket
+    const spd=7;
+    if((keys['ArrowLeft']||keys['a']||keys['A'])&&bx>0)bx=Math.max(0,bx-spd);
+    if((keys['ArrowRight']||keys['d']||keys['D'])&&bx<W-BW)bx=Math.min(W-BW,bx+spd);
+    // Spawn
+    const sr=Math.max(14,38-Math.floor(score/8));
+    if(frame%sr===0)drops.push({x:10+Math.random()*(W-20),y:-12,s:speed+Math.random()*1.2});
+    if(frame%100===0&&Math.random()<.35+score*.006)bolts.push({x:15+Math.random()*(W-30),y:-30,s:speed*.75+.8});
+    // Physics
+    drops.forEach(d=>d.y+=d.s);bolts.forEach(b=>b.y+=b.s);
+    const by=H-BH-4;
+    // Catch drops
+    drops=drops.filter(d=>{
+      if(d.y>=by-4&&d.y<=by+BH&&d.x>=bx-3&&d.x<=bx+BW+3){
+        score++;speed=2.2+Math.floor(score/10)*.45;
+        if(score>hs){hs=score;localStorage.setItem('wx-game-hs',hs);}
+        return false;
+      }
+      return d.y<H+12;
+    });
+    // Hit by bolt
+    bolts=bolts.filter(b=>{
+      if(b.y>=by-8&&b.y<=by+BH+4&&b.x>=bx-4&&b.x<=bx+BW+4){
+        lives--;if(lives<=0)_gOver=true;return false;
+      }
+      return b.y<H+12;
+    });
+  }
+
+  function loop(){_gRaf=requestAnimationFrame(loop);update();draw();}
+  loop();
+};
+})();
+
 init();
 setInterval(fetchCurrent,5*60*1000);
 setInterval(fetchEcowittCurrent,5*60*1000);
@@ -12591,5 +12743,26 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
+
+<!-- Game FAB -->
+<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">🎮</button>
+
+<!-- Game modal -->
+<div class="game-modal-overlay" id="game-modal-overlay" onclick="closeGameModal(event)">
+  <div class="game-modal">
+    <div class="game-modal-hdr">
+      <span>🌧 Lovec na dež</span>
+      <button class="game-modal-close" onclick="closeGameModal()">✕</button>
+    </div>
+    <canvas id="game-canvas" width="480" height="300" style="display:block;width:100%;height:auto;cursor:pointer;touch-action:none;border-radius:0 0 4px 4px"></canvas>
+    <div class="game-stats">
+      <span>💧 <b id="game-score">0</b></span>
+      <span>❤️ <b id="game-lives">3</b></span>
+      <span>🏆 <b id="game-hs">0</b></span>
+      <span style="margin-left:auto;font-size:.65rem;color:var(--muted)">← → · A/D · dotik</span>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
