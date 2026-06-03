@@ -579,6 +579,12 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sc-valley-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:400;color:var(--text)}
 .sc-valley-lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.15rem}
 @media(max-width:680px){.sc-hero-kpis{gap:.4rem}.sc-hero-kpi{min-width:60px}}
+.sc-threat-icon{position:absolute;top:.9rem;right:1.2rem;font-size:3.8rem;line-height:1;opacity:.55;pointer-events:none;transition:opacity .5s,transform .5s,filter .5s;filter:drop-shadow(0 0 0px transparent)}
+.sc-low .sc-threat-icon{opacity:.7}
+.sc-moderate .sc-threat-icon{opacity:.8;filter:drop-shadow(0 0 8px rgba(245,158,11,.4));animation:sc-icon-pulse 2.5s ease-in-out infinite}
+.sc-high .sc-threat-icon{opacity:.9;filter:drop-shadow(0 0 14px rgba(249,115,22,.55));animation:sc-icon-pulse 1.8s ease-in-out infinite}
+.sc-extreme .sc-threat-icon{opacity:1;filter:drop-shadow(0 0 20px rgba(239,68,68,.7));animation:sc-icon-pulse 1s ease-in-out infinite}
+@keyframes sc-icon-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 /* Card accent system */
 .ca-blue{border-left:3px solid var(--blue)}
 .ca-green{border-left:3px solid var(--green)}
@@ -2663,6 +2669,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- Threat hero -->
     <div class="sc-hero sc-none" id="sc-hero">
+      <div class="sc-threat-icon" id="sc-threat-icon">☁️</div>
       <div class="sc-threat-row">
         <div class="sc-threat-left">
           <div class="sc-threat-tag">⚡ Nevihto Chaser — Rečica ob Savinji</div>
@@ -10287,6 +10294,8 @@ function renderStormChaser(){
   const hero=g('sc-hero');if(hero)hero.className='sc-hero '+thr.cls;
   if(g('sc-level'))g('sc-level').textContent=thr.level;
   if(g('sc-desc'))g('sc-desc').textContent=thr.desc;
+  const _scIcons={none:'☁️',low:'🌩️',moderate:'⛈️',high:'⛈️',extreme:'🌪️'};
+  const scIcon=g('sc-threat-icon');if(scIcon)scIcon.textContent=_scIcons[thr.cls.replace('sc-','')]||'☁️';
   const kpis=g('sc-hero-kpis');
   if(kpis)kpis.innerHTML=[{v:Math.round(cape),u:'J/kg',l:'CAPE'},{v:Math.round(cin),u:'J/kg',l:'CIN'},{v:li.toFixed(1),u:'K',l:'LI'},{v:Math.round(tt),u:'',l:'TT'},{v:Math.round(shear),u:'km/h',l:'Shear'},{v:Math.round(gust),u:'km/h',l:'Sunki'}].map(k=>`<div class="sc-hero-kpi"><b>${k.v}<span style="font-size:.6em;opacity:.6"> ${k.u}</span></b><small>${k.l}</small></div>`).join('');
   // Sounding analysis
