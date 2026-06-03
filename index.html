@@ -1543,7 +1543,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <span class="clabel" style="margin:0">🔮 Kaj prihaja</span>
       <span class="cu-time" id="cu-updated">—</span>
     </div>
-    <div class="cu-section-lbl">Naslednjih 12 ur</div>
+    <div class="cu-section-lbl">Naslednjih 24 ur</div>
     <div class="cu-strip" id="cu-hourly"></div>
     <div class="cu-sep"></div>
     <div class="cu-section-lbl">Naslednji dnevi</div>
@@ -4205,7 +4205,7 @@ async function fetchComingUp(){
     const hours=[];
     for(let i=si;i<h.time.length&&hours.length<25;i++)
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
-    const stripHours=hours.filter((_,i)=>i===0||i%3===0).slice(0,8);
+    const stripHours=hours.filter((_,i)=>i===0||i%3===0).slice(0,10);
 
     // Hourly cells
     const strip=document.getElementById('cu-hourly');
