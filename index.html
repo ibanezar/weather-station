@@ -11176,21 +11176,21 @@ async function aiBuildModel(){
 }
 
 // ── Save / load weights ───────────────────────────────────
-async function aiSaveWeights(model,norm){
+async function aiSaveWeights(model,norm,losses){
   try{
     const ws=model.getWeights().map(w=>({data:Array.from(w.dataSync()),shape:w.shape}));
-    localStorage.setItem(AI_WEIGHTS_KEY,JSON.stringify({ws,norm,ts:Date.now()}));
+    localStorage.setItem(AI_WEIGHTS_KEY,JSON.stringify({ws,norm,ts:Date.now(),losses:losses||[]}));
   }catch(e){console.warn('AI weights save:',e);}
 }
 async function aiLoadWeights(model){
   try{
     const raw=localStorage.getItem(AI_WEIGHTS_KEY);
     if(!raw)return null;
-    const{ws,norm,ts}=JSON.parse(raw);
+    const{ws,norm,ts,losses}=JSON.parse(raw);
     const tensors=ws.map(w=>tf.tensor(w.data,w.shape));
     model.setWeights(tensors);
     tensors.forEach(t=>t.dispose());
-    return{norm,ts};
+    return{norm,ts,losses:losses||[]};
   }catch(e){return null;}
 }
 
@@ -11266,6 +11266,7 @@ async function aiTrainAndPredict(){
     const cached=await aiLoadWeights(_aiModel);
     if(cached){
       _aiNorm=cached.norm;
+      if(cached.losses&&cached.losses.length)aiDrawLoss(cached.losses);
       aiSetStatus('✅ Naložene shranjene uteži ('+new Date(cached.ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+'). Osvežujem napoved…',95);
     }else{
       aiSetStatus('Učim LSTM… (0/80 epoch)',25);
@@ -11286,7 +11287,7 @@ async function aiTrainAndPredict(){
       });
       xT.dispose();yT.dispose();
       aiSetStatus('Shranjujem uteži…',92);
-      await aiSaveWeights(_aiModel,_aiNorm);
+      await aiSaveWeights(_aiModel,_aiNorm,lossHistory);
       aiDrawLoss([]);
     }
     // Predict next 6 hours using last AI_SEQ_LEN observations
