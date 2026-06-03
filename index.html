@@ -1389,8 +1389,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 18px rgba(59,130,246,.5);z-index:900;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
-.game-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(59,130,246,.65)}
+.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:900;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center;padding:0}
+.game-fab:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(59,130,246,.75)}
 .game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .game-modal-overlay.open{display:flex}
 .game-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(500px,96vw)}
@@ -12823,7 +12823,24 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 <div class="photo-credit" id="photo-credit"></div>
 
 <!-- Game FAB -->
-<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">🎮</button>
+<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">
+  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cloud -->
+    <ellipse cx="12" cy="8" rx="6" ry="3.5" fill="rgba(255,255,255,0.85)"/>
+    <ellipse cx="17" cy="9" rx="4.5" ry="3" fill="rgba(255,255,255,0.85)"/>
+    <ellipse cx="8.5" cy="9.5" rx="3.5" ry="2.5" fill="rgba(255,255,255,0.85)"/>
+    <!-- Raindrop -->
+    <ellipse cx="11" cy="16" rx="1.8" ry="3.5" fill="rgba(147,197,253,0.95)"/>
+    <line x1="11" y1="12.5" x2="11" y2="13.5" stroke="rgba(147,197,253,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Lightning bolt -->
+    <polyline points="19,11 16,18 19,18 15,26" stroke="#fef08a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+    <!-- Bucket -->
+    <path d="M5 22 L7 28 L17 28 L19 22 Z" fill="rgba(255,255,255,0.9)"/>
+    <line x1="4.5" y1="22" x2="19.5" y2="22" stroke="rgba(255,255,255,1)" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Water in bucket -->
+    <path d="M7.5 26 L16.5 26 L17 28 L7 28 Z" fill="rgba(147,197,253,0.7)"/>
+  </svg>
+</button>
 
 <!-- Game modal -->
 <div class="game-modal-overlay" id="game-modal-overlay" onclick="closeGameModal(event)">
