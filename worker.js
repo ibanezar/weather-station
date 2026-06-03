@@ -134,9 +134,17 @@ export default {
             const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
             const content = title + ' ' + summary;
             let level = null;
-            if (/(rdeč|red|extreme)/i.test(content))           level = 'red';
-            else if (/(oranžn|orange|severe)/i.test(content))  level = 'orange';
-            else if (/(rumen|yellow|moderate)/i.test(content)) level = 'yellow';
+            // Primary: CAP severity attribute (structured, reliable)
+            const capSev = (entry.match(/<cap:severity[^>]*>([\s\S]*?)<\/cap:severity>/i)?.[1] || '').trim().toLowerCase();
+            if      (capSev === 'extreme')                    level = 'red';
+            else if (capSev === 'severe')                     level = 'orange';
+            else if (capSev === 'moderate' || capSev === 'minor') level = 'yellow';
+            // Fallback: explicit color word in title/summary
+            if (!level) {
+              if      (/(rdeče?\s*opozorilo|red\s*warning)/i.test(content))    level = 'red';
+              else if (/(oranžno?\s*opozorilo|orange\s*warning)/i.test(content)) level = 'orange';
+              else if (/(rumeno?\s*opozorilo|yellow\s*warning)/i.test(content))  level = 'yellow';
+            }
             if (level) alerts.push({ level, text: (summary || title).slice(0, 600) });
           }
           return new Response(JSON.stringify({ alerts, url: atomUrl }), {
