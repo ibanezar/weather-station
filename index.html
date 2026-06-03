@@ -12635,10 +12635,16 @@ window.initWeatherGame=function(){
     const dx=(e.touches[0].clientX-tx)*1.5;tx=e.touches[0].clientX;
     bx=Math.max(0,Math.min(W-BW,bx+dx));e.preventDefault();
   },{passive:false});
-  canvas.addEventListener('click',()=>{
+  function _gameAction(){
     if(!_gStarted){_gStarted=true;return;}
     if(_gOver){score=0;lives=3;drops=[];bolts=[];splashes=[];frame=0;speed=2.4;_gOver=false;bx=W/2-BW/2;}
-  });
+  }
+  canvas.addEventListener('click',_gameAction);
+  canvas.addEventListener('touchend',e=>{
+    // Only treat as a tap (not end of a drag)
+    if(tx!==null&&Math.abs(e.changedTouches[0].clientX-tx)<12)_gameAction();
+    e.preventDefault();
+  },{passive:false});
 
   function drawCloud(bumps,ox){
     ctx.save();ctx.translate(ox,0);
