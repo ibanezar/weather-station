@@ -1389,16 +1389,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 18px rgba(59,130,246,.5);z-index:900;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
-.game-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(59,130,246,.65)}
+.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:900;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center;padding:0}
+.game-fab:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(59,130,246,.75)}
 .game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .game-modal-overlay.open{display:flex}
 .game-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(500px,96vw)}
 .game-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text)}
 .game-modal-close{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:.2rem .4rem;border-radius:6px;line-height:1}
 .game-modal-close:hover{background:var(--border);color:var(--text)}
-.game-stats{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)}
-.game-stats b{color:var(--text)}
 .cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
 .cu-day{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem .7rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center;position:relative;overflow:hidden}
 .cu-day::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--cu-accent,var(--border))}
@@ -12591,7 +12589,7 @@ async function init(){
 }
 // ── Igra: Lovec na dež ───────────────────────────────────
 (function(){
-let _gRaf=null,_gStarted=false,_gOver=false,_gInit=false;
+let _gInit=false,_gStarted=false,_gOver=false;
 function openGameModal(){
   document.getElementById('game-modal-overlay').classList.add('open');
   initWeatherGame();
@@ -12602,92 +12600,172 @@ function closeGameModal(e){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('game-modal-overlay')?.classList.remove('open');});
 window.openGameModal=openGameModal;window.closeGameModal=closeGameModal;
+
 window.initWeatherGame=function(){
   const canvas=document.getElementById('game-canvas');
   if(!canvas||_gInit)return;
   _gInit=true;
   const ctx=canvas.getContext('2d');
-  const W=480,H=300,BW=64,BH=18;
-  let bx=W/2-BW/2,score=0,lives=3,frame=0,speed=2.2;
+  const W=480,H=320,BW=68,BH=22;
+  let bx=W/2-BW/2,score=0,lives=3,frame=0,speed=2.4;
   let hs=parseInt(localStorage.getItem('wx-game-hs')||'0');
-  let drops=[],bolts=[];
+  let drops=[],bolts=[],splashes=[],flashAlpha=0;
   const keys={};
+  // Cloud x-offsets for animation
+  const clouds=[
+    {bumps:[[80,36,34,18],[56,42,22,14],[108,43,24,13]],spd:.10},
+    {bumps:[[248,25,42,21],[216,33,28,16],[280,33,30,15],[250,16,22,11]],spd:.07},
+    {bumps:[[410,38,30,17],[386,44,21,13],[436,44,24,13]],spd:.09},
+  ];
 
-  // Keyboard
   document.addEventListener('keydown',e=>{keys[e.key]=1;if(['ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault();});
   document.addEventListener('keyup',e=>{keys[e.key]=0;});
-
-  // Touch drag
   let tx=null;
   canvas.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;e.preventDefault();},{passive:false});
   canvas.addEventListener('touchmove',e=>{
-    const dx=(e.touches[0].clientX-tx)*1.4;tx=e.touches[0].clientX;
+    const dx=(e.touches[0].clientX-tx)*1.5;tx=e.touches[0].clientX;
     bx=Math.max(0,Math.min(W-BW,bx+dx));e.preventDefault();
   },{passive:false});
-
-  // Click to start / restart
   canvas.addEventListener('click',()=>{
     if(!_gStarted){_gStarted=true;return;}
-    if(_gOver){score=0;lives=3;drops=[];bolts=[];frame=0;speed=2.2;_gOver=false;bx=W/2-BW/2;}
+    if(_gOver){score=0;lives=3;drops=[];bolts=[];splashes=[];frame=0;speed=2.4;_gOver=false;bx=W/2-BW/2;}
   });
 
-  function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+  function drawCloud(bumps,ox){
+    ctx.save();ctx.translate(ox,0);
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,.18)';
+    bumps.forEach(([x,y,rx,ry])=>{ctx.beginPath();ctx.ellipse(x+3,y+5,rx,ry*.7,0,0,Math.PI*2);ctx.fill();});
+    // Body gradient
+    const [bx0,by0,br]=bumps[0];
+    const cg=ctx.createLinearGradient(bx0,by0-br,bx0,by0+br);
+    cg.addColorStop(0,'#4a6378');cg.addColorStop(.5,'#2e4255');cg.addColorStop(1,'#1a2e3e');
+    ctx.fillStyle=cg;
+    bumps.forEach(([x,y,rx,ry])=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill();});
+    // Highlight
+    ctx.fillStyle='rgba(255,255,255,.06)';
+    bumps.forEach(([x,y,rx,ry])=>{ctx.beginPath();ctx.ellipse(x,y-ry*.3,rx*.7,ry*.4,0,0,Math.PI*2);ctx.fill();});
+    ctx.restore();
+  }
 
   function draw(){
     // Sky
-    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0c1420');g.addColorStop(1,'#1a3050');
-    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    // Stars (static decoration)
-    ctx.fillStyle='rgba(255,255,255,.35)';
-    [[30,18],[90,8],[150,22],[250,10],[370,15],[430,20],[460,6]].forEach(([x,y])=>{ctx.fillRect(x,y,1.5,1.5);});
-    // Clouds
-    [[70,40,50,22],[200,28,62,24],[370,38,45,20]].forEach(([cx,cy,rx,ry])=>{
-      const cg=ctx.createRadialGradient(cx,cy,2,cx,cy,rx);
-      cg.addColorStop(0,'#3d5060');cg.addColorStop(1,'#2a3a48');
-      ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
-    });
-    // Drops
-    ctx.fillStyle='#60a5fa';
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,'#06101e');sg.addColorStop(.55,'#0d1f35');sg.addColorStop(1,'#142840');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+
+    // Lightning sky flash
+    if(flashAlpha>0){
+      ctx.fillStyle=`rgba(255,240,150,${flashAlpha})`;ctx.fillRect(0,0,W,H);
+      flashAlpha=Math.max(0,flashAlpha-.04);
+    }
+
+    // Background rain streaks
+    ctx.save();ctx.globalAlpha=.07;ctx.strokeStyle='#93c5fd';ctx.lineWidth=1;
+    for(let i=0;i<18;i++){const x=((i*31+frame*.7)%W+W)%W;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x-10,H);ctx.stroke();}
+    ctx.restore();
+
+    // Stars
+    const stars=[[28,10],[88,5],[156,16],[264,7],[378,13],[448,18],[472,4],[118,28],[312,22],[200,14]];
+    stars.forEach(([sx,sy])=>{ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(sx,sy,1.5,1.5);});
+
+    // Clouds (animated drift)
+    clouds.forEach(c=>{const ox=(frame*c.spd)%60-30;drawCloud(c.bumps,ox);});
+
+    // Raindrops (teardrop + highlight + motion trail)
     drops.forEach(d=>{
-      ctx.beginPath();ctx.ellipse(d.x,d.y,3,7,0,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.ellipse(d.x,d.y-6,1.5,3,0,0,Math.PI*2);ctx.fillStyle='rgba(96,165,250,.4)';ctx.fill();
-      ctx.fillStyle='#60a5fa';
+      // trail
+      ctx.strokeStyle='rgba(147,197,253,.22)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(d.x,d.y-16);ctx.lineTo(d.x,d.y-5);ctx.stroke();
+      // body
+      ctx.fillStyle='#93c5fd';
+      ctx.beginPath();ctx.ellipse(d.x,d.y,2.8,6,0,0,Math.PI*2);ctx.fill();
+      // specular
+      ctx.fillStyle='rgba(255,255,255,.55)';
+      ctx.beginPath();ctx.ellipse(d.x-.8,d.y-2,1,2.2,-.3,0,Math.PI*2);ctx.fill();
     });
-    // Bolts
+
+    // Lightning bolts
     bolts.forEach(b=>{
-      ctx.save();ctx.shadowColor='#fbbf24';ctx.shadowBlur=10;
-      ctx.strokeStyle='#fbbf24';ctx.lineWidth=2.5;ctx.lineJoin='round';
-      ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-6,b.y+13);ctx.lineTo(b.x+3,b.y+13);ctx.lineTo(b.x-5,b.y+28);ctx.stroke();
+      ctx.save();
+      ctx.shadowColor='#fef08a';ctx.shadowBlur=18;
+      ctx.strokeStyle='#fef08a';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-7,b.y+9);ctx.lineTo(b.x+3,b.y+9);
+      ctx.lineTo(b.x-8,b.y+21);ctx.lineTo(b.x+2,b.y+21);ctx.lineTo(b.x-6,b.y+34);
+      ctx.stroke();
+      // Warning ring
+      ctx.strokeStyle='rgba(254,240,138,.1)';ctx.lineWidth=10;ctx.shadowBlur=0;
+      ctx.beginPath();ctx.arc(b.x-2,b.y+17,14,0,Math.PI*2);ctx.stroke();
       ctx.restore();
     });
-    // Bucket (trapezoid)
-    const by=H-BH-4;
-    ctx.fillStyle='#2563eb';
-    ctx.beginPath();ctx.moveTo(bx+4,by);ctx.lineTo(bx+BW-4,by);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#60a5fa';ctx.lineWidth=1.5;ctx.stroke();
-    // Water inside bucket
+
+    // Splash particles
+    splashes=splashes.filter(s=>{
+      s.life--;
+      const a=s.life/s.maxLife;
+      s.pts.forEach(p=>{
+        p.x+=p.vx;p.y+=p.vy;p.vy+=.35;
+        ctx.fillStyle=`rgba(147,197,253,${a*.75})`;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r*(a+.2),0,Math.PI*2);ctx.fill();
+      });
+      return s.life>0;
+    });
+
+    // Ground
+    const gg=ctx.createLinearGradient(0,H-10,0,H);
+    gg.addColorStop(0,'rgba(20,50,70,.7)');gg.addColorStop(1,'rgba(6,16,30,.95)');
+    ctx.fillStyle=gg;ctx.fillRect(0,H-10,W,10);
+
+    // Bucket
+    const by=H-BH-10;
+    // shadow
+    ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(bx+BW/2,H-4,BW/2+6,5,0,0,Math.PI*2);ctx.fill();
+    // body gradient
+    const bg2=ctx.createLinearGradient(bx,by,bx+BW,by+BH);
+    bg2.addColorStop(0,'#1d4ed8');bg2.addColorStop(.45,'#3b82f6');bg2.addColorStop(1,'#1e3a8a');
+    ctx.fillStyle=bg2;
+    ctx.beginPath();ctx.moveTo(bx+6,by);ctx.lineTo(bx+BW-6,by);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
+    // water fill
     if(score>0){
-      const wh=Math.min(BH-4,2+Math.floor(score/3));
-      ctx.fillStyle='rgba(96,165,250,.5)';
-      ctx.beginPath();ctx.moveTo(bx+3,by+BH-wh);ctx.lineTo(bx+BW-3,by+BH-wh);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
+      const wh=Math.min(BH-5,3+Math.floor(score/2.2));
+      const wg2=ctx.createLinearGradient(bx,by+BH-wh,bx,by+BH);
+      wg2.addColorStop(0,'rgba(147,197,253,.55)');wg2.addColorStop(1,'rgba(96,165,250,.85)');
+      ctx.fillStyle=wg2;
+      ctx.beginPath();ctx.moveTo(bx+4,by+BH-wh);ctx.lineTo(bx+BW-4,by+BH-wh);ctx.lineTo(bx+BW,by+BH);ctx.lineTo(bx,by+BH);ctx.closePath();ctx.fill();
     }
-    // HUD
-    set('game-score',score);set('game-lives',lives);set('game-hs',hs);
+    // rim
+    ctx.strokeStyle='#93c5fd';ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.moveTo(bx+4,by);ctx.lineTo(bx+BW-4,by);ctx.stroke();
+    // side sheen
+    ctx.fillStyle='rgba(255,255,255,.1)';
+    ctx.beginPath();ctx.moveTo(bx+8,by+2);ctx.lineTo(bx+14,by+2);ctx.lineTo(bx+10,by+BH);ctx.lineTo(bx+6,by+BH);ctx.closePath();ctx.fill();
+
+    // HUD bar
+    ctx.fillStyle='rgba(6,16,30,.75)';
+    ctx.beginPath();ctx.roundRect(0,0,W,30,4);ctx.fill();
+    ctx.font='bold 13px JetBrains Mono,monospace';
+    ctx.fillStyle='#93c5fd';ctx.textAlign='left'; ctx.fillText('💧 '+score,12,20);
+    ctx.fillStyle='#fb7185';ctx.textAlign='center';ctx.fillText('❤ '.repeat(lives).trim(),W/2,20);
+    ctx.fillStyle='#fbbf24';ctx.textAlign='right'; ctx.fillText('🏆 '+hs,W-12,20);
+    ctx.textAlign='left';
+
     // Overlays
     if(!_gStarted||_gOver){
-      ctx.fillStyle='rgba(0,0,0,.62)';ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(0,0,0,.68)';ctx.fillRect(0,0,W,H);
       ctx.textAlign='center';
       if(!_gStarted){
-        ctx.fillStyle='#f1f5f9';ctx.font='bold 22px Inter,sans-serif';ctx.fillText('🌧 Lovec na dež',W/2,H/2-28);
-        ctx.fillStyle='#94a3b8';ctx.font='13px Inter,sans-serif';
+        ctx.fillStyle='#e2e8f0';ctx.font='bold 24px Inter,sans-serif';ctx.fillText('🌧 Lovec na dež',W/2,H/2-32);
+        ctx.fillStyle='#64748b';ctx.font='13px Inter,sans-serif';
         ctx.fillText('Lovi kapljice · izogni se streli',W/2,H/2+2);
-        ctx.fillText('← → / A D / dotik za premik',W/2,H/2+22);
-        ctx.fillStyle='#60a5fa';ctx.font='bold 14px Inter,sans-serif';ctx.fillText('▶  Klikni za začetek',W/2,H/2+50);
+        ctx.fillText('← →  ·  A D  ·  dotik (mobile)',W/2,H/2+22);
+        ctx.fillStyle='#3b82f6';ctx.font='bold 15px Inter,sans-serif';ctx.fillText('▶  Klikni za začetek',W/2,H/2+54);
       }else{
-        ctx.fillStyle='#f1f5f9';ctx.font='bold 22px Inter,sans-serif';ctx.fillText('Igra končana!',W/2,H/2-25);
+        ctx.fillStyle='#f1f5f9';ctx.font='bold 24px Inter,sans-serif';ctx.fillText('Igra končana!',W/2,H/2-30);
+        if(score===hs&&score>0){ctx.fillStyle='#fbbf24';ctx.font='bold 14px Inter,sans-serif';ctx.fillText('🏆 Nov rekord!',W/2,H/2-4);}
         ctx.fillStyle='#94a3b8';ctx.font='14px JetBrains Mono,monospace';
-        ctx.fillText('Rezultat: '+score+(score===hs&&score>0?' 🏆 Nov rekord!':''),W/2,H/2+8);
-        ctx.fillStyle='#60a5fa';ctx.font='bold 14px Inter,sans-serif';ctx.fillText('▶  Klikni za ponovni zagon',W/2,H/2+38);
+        ctx.fillText('Rezultat: '+score,W/2,H/2+(score===hs&&score>0?18:4));
+        ctx.fillStyle='#3b82f6';ctx.font='bold 15px Inter,sans-serif';ctx.fillText('▶  Klikni za ponovni zagon',W/2,H/2+48);
       }
       ctx.textAlign='left';
     }
@@ -12696,36 +12774,36 @@ window.initWeatherGame=function(){
   function update(){
     if(!_gStarted||_gOver)return;
     frame++;
-    // Move bucket
     const spd=7;
     if((keys['ArrowLeft']||keys['a']||keys['A'])&&bx>0)bx=Math.max(0,bx-spd);
     if((keys['ArrowRight']||keys['d']||keys['D'])&&bx<W-BW)bx=Math.min(W-BW,bx+spd);
-    // Spawn
-    const sr=Math.max(14,38-Math.floor(score/8));
-    if(frame%sr===0)drops.push({x:10+Math.random()*(W-20),y:-12,s:speed+Math.random()*1.2});
-    if(frame%100===0&&Math.random()<.35+score*.006)bolts.push({x:15+Math.random()*(W-30),y:-30,s:speed*.75+.8});
-    // Physics
+    const sr=Math.max(12,36-Math.floor(score/8));
+    if(frame%sr===0)drops.push({x:12+Math.random()*(W-24),y:-16,s:speed+Math.random()*1.3});
+    if(frame%90===0&&Math.random()<.32+score*.006)bolts.push({x:18+Math.random()*(W-36),y:-38,s:speed*.72+.9});
     drops.forEach(d=>d.y+=d.s);bolts.forEach(b=>b.y+=b.s);
-    const by=H-BH-4;
-    // Catch drops
+    const by=H-BH-10;
+    // Catch
     drops=drops.filter(d=>{
-      if(d.y>=by-4&&d.y<=by+BH&&d.x>=bx-3&&d.x<=bx+BW+3){
-        score++;speed=2.2+Math.floor(score/10)*.45;
+      if(d.y>=by-5&&d.y<=by+BH+2&&d.x>=bx-4&&d.x<=bx+BW+4){
+        score++;speed=2.4+Math.floor(score/10)*.4;
         if(score>hs){hs=score;localStorage.setItem('wx-game-hs',hs);}
+        // Splash
+        const pts=Array.from({length:6},()=>({x:d.x,y:by,vx:(Math.random()-0.5)*3.5,vy:-(Math.random()*3+1.5),r:Math.random()*2+1}));
+        splashes.push({pts,life:18,maxLife:18});
         return false;
       }
-      return d.y<H+12;
+      return d.y<H+15;
     });
-    // Hit by bolt
+    // Bolt hit
     bolts=bolts.filter(b=>{
-      if(b.y>=by-8&&b.y<=by+BH+4&&b.x>=bx-4&&b.x<=bx+BW+4){
-        lives--;if(lives<=0)_gOver=true;return false;
+      if(b.y>=by-10&&b.y<=by+BH+5&&b.x>=bx-5&&b.x<=bx+BW+5){
+        lives--;flashAlpha=.35;if(lives<=0)_gOver=true;return false;
       }
-      return b.y<H+12;
+      return b.y<H+15;
     });
   }
 
-  function loop(){_gRaf=requestAnimationFrame(loop);update();draw();}
+  function loop(){requestAnimationFrame(loop);update();draw();}
   loop();
 };
 })();
@@ -12745,7 +12823,24 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 <div class="photo-credit" id="photo-credit"></div>
 
 <!-- Game FAB -->
-<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">🎮</button>
+<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">
+  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cloud -->
+    <ellipse cx="12" cy="8" rx="6" ry="3.5" fill="rgba(255,255,255,0.85)"/>
+    <ellipse cx="17" cy="9" rx="4.5" ry="3" fill="rgba(255,255,255,0.85)"/>
+    <ellipse cx="8.5" cy="9.5" rx="3.5" ry="2.5" fill="rgba(255,255,255,0.85)"/>
+    <!-- Raindrop -->
+    <ellipse cx="11" cy="16" rx="1.8" ry="3.5" fill="rgba(147,197,253,0.95)"/>
+    <line x1="11" y1="12.5" x2="11" y2="13.5" stroke="rgba(147,197,253,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Lightning bolt -->
+    <polyline points="19,11 16,18 19,18 15,26" stroke="#fef08a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+    <!-- Bucket -->
+    <path d="M5 22 L7 28 L17 28 L19 22 Z" fill="rgba(255,255,255,0.9)"/>
+    <line x1="4.5" y1="22" x2="19.5" y2="22" stroke="rgba(255,255,255,1)" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Water in bucket -->
+    <path d="M7.5 26 L16.5 26 L17 28 L7 28 Z" fill="rgba(147,197,253,0.7)"/>
+  </svg>
+</button>
 
 <!-- Game modal -->
 <div class="game-modal-overlay" id="game-modal-overlay" onclick="closeGameModal(event)">
@@ -12754,13 +12849,7 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
       <span>🌧 Lovec na dež</span>
       <button class="game-modal-close" onclick="closeGameModal()">✕</button>
     </div>
-    <canvas id="game-canvas" width="480" height="300" style="display:block;width:100%;height:auto;cursor:pointer;touch-action:none;border-radius:0 0 4px 4px"></canvas>
-    <div class="game-stats">
-      <span>💧 <b id="game-score">0</b></span>
-      <span>❤️ <b id="game-lives">3</b></span>
-      <span>🏆 <b id="game-hs">0</b></span>
-      <span style="margin-left:auto;font-size:.65rem;color:var(--muted)">← → · A/D · dotik</span>
-    </div>
+    <canvas id="game-canvas" width="480" height="320" style="display:block;width:100%;height:auto;cursor:pointer;touch-action:none"></canvas>
   </div>
 </div>
 
