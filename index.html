@@ -1523,6 +1523,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="hm hm-rain" id="hm-rain">
         <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)">mm</span></span>
         <span class="hm-lbl">Padavine danes</span>
+        <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted);display:none">— mm/h trenutno</span>
       </div>
     </div>
   </div>
@@ -4529,6 +4530,7 @@ function applyObs(obs){
   set('pressure-label',m.pressure>1020?'Visok tlak — stabilno':m.pressure<1005?'Nizek tlak — nestabilno':'Zmerni tlak');
   updatePressureArc(m.pressure);
   const rr=m.precipRate??0;set('rain-rate',fmt(rr,2));set('rain-total',fmt(m.precipTotal,1));
+  const rrEl=document.getElementById('hs-rain-rate');if(rrEl){if(rr>=0.1){rrEl.textContent=rr.toFixed(1)+' mm/h trenutno';rrEl.style.display='';rrEl.style.color='var(--blue)';}else{rrEl.style.display='none';}}
   document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
   const uv=obs.uv??0;set('uv-val',uv);set('uv-label',uvLabel(uv));document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
   const sol=m.solarRadiation??obs.solarRadiation;set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));
