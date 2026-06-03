@@ -1389,12 +1389,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.game-wrap{display:flex;flex-direction:column;align-items:center;gap:1rem}
-.game-canvas-box{position:relative;width:100%;max-width:480px;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-#game-canvas{display:block;width:100%;height:auto;cursor:pointer;touch-action:none}
-.game-stats{display:flex;gap:1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted)}
+.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 18px rgba(59,130,246,.5);z-index:900;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
+.game-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(59,130,246,.65)}
+.game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.game-modal-overlay.open{display:flex}
+.game-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(500px,96vw)}
+.game-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text)}
+.game-modal-close{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:.2rem .4rem;border-radius:6px;line-height:1}
+.game-modal-close:hover{background:var(--border);color:var(--text)}
+.game-stats{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)}
 .game-stats b{color:var(--text)}
-.game-hint{font-size:.72rem;color:var(--muted);text-align:center}
 .cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
 .cu-day{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem .7rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center;position:relative;overflow:hidden}
 .cu-day::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--cu-accent,var(--border))}
@@ -1501,7 +1505,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="tab-dd-group-lbl">Dnevnik & Zabava</div>
         <button id="tab-btn-diary"   onclick="switchTab('diary');closeTabDDs()">📸 Dnevnik</button>
         <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
-        <button id="tab-btn-game"    onclick="switchTab('game');closeTabDDs()">🎮 Igra</button>
       </div>
     </div>
   </div></div>
@@ -3073,24 +3076,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
   <!-- ═══ IGRA ═══ -->
-  <div id="tab-game" class="tab-pane">
-    <div class="card" style="margin-bottom:1rem">
-      <div class="clabel" style="margin-bottom:.8rem">🎮 Lovec na dež</div>
-      <p style="font-size:.78rem;color:var(--muted);margin:0 0 1rem">Lovi kapljice dežja z vedrom. Izogni se strelam. Kapljice = točke, strela = izguba življenja.</p>
-      <div class="game-wrap">
-        <div class="game-canvas-box">
-          <canvas id="game-canvas" width="480" height="300"></canvas>
-        </div>
-        <div class="game-stats">
-          <span>💧 Točke: <b id="game-score">0</b></span>
-          <span>❤️ Življenja: <b id="game-lives">3</b></span>
-          <span>🏆 Rekord: <b id="game-hs">0</b></span>
-        </div>
-        <div class="game-hint">← → ali A/D za premik · Dotik na mobilnem · Klikni platno za začetek</div>
-      </div>
-    </div>
-  </div>
-
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
 
@@ -4813,7 +4798,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings'],misc:['diary','trivia','game']};
+const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings'],misc:['diary','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -4851,7 +4836,6 @@ function switchTab(tab){
   if(tab==='life'){      initLife(); }
   if(tab==='ai'){        initSensorDiag(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
-  if(tab==='game'){        initWeatherGame(); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
 }
@@ -12608,6 +12592,16 @@ async function init(){
 // ── Igra: Lovec na dež ───────────────────────────────────
 (function(){
 let _gRaf=null,_gStarted=false,_gOver=false,_gInit=false;
+function openGameModal(){
+  document.getElementById('game-modal-overlay').classList.add('open');
+  initWeatherGame();
+}
+function closeGameModal(e){
+  if(e&&e.target!==document.getElementById('game-modal-overlay'))return;
+  document.getElementById('game-modal-overlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('game-modal-overlay')?.classList.remove('open');});
+window.openGameModal=openGameModal;window.closeGameModal=closeGameModal;
 window.initWeatherGame=function(){
   const canvas=document.getElementById('game-canvas');
   if(!canvas||_gInit)return;
@@ -12749,5 +12743,26 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
+
+<!-- Game FAB -->
+<button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">🎮</button>
+
+<!-- Game modal -->
+<div class="game-modal-overlay" id="game-modal-overlay" onclick="closeGameModal(event)">
+  <div class="game-modal">
+    <div class="game-modal-hdr">
+      <span>🌧 Lovec na dež</span>
+      <button class="game-modal-close" onclick="closeGameModal()">✕</button>
+    </div>
+    <canvas id="game-canvas" width="480" height="300" style="display:block;width:100%;height:auto;cursor:pointer;touch-action:none;border-radius:0 0 4px 4px"></canvas>
+    <div class="game-stats">
+      <span>💧 <b id="game-score">0</b></span>
+      <span>❤️ <b id="game-lives">3</b></span>
+      <span>🏆 <b id="game-hs">0</b></span>
+      <span style="margin-left:auto;font-size:.65rem;color:var(--muted)">← → · A/D · dotik</span>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
