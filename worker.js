@@ -13,9 +13,6 @@ const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 // Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
 const AMBEE_KEY = "4a654676f62aec4e724a5dcdc5d1b5665e3da3602d3270c8a65195d02e1faa09";
 
-// Tomorrow.io — minutna napoved padavin (registracija: app.tomorrow.io, 500 klicev/dan brezplačno)
-const TOMORROW_KEY = "REPLACE_WITH_TOMORROW_API_KEY";
-
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
 
@@ -379,29 +376,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const aqData  = aqRes.ok  ? await aqRes.json()  : null;
         return new Response(JSON.stringify({ pollen: polData, aqi: aqData }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
-        });
-      }
-
-      // ── /tomorrow-minutely ────────────────────────────────
-      // Tomorrow.io — minutna napoved padavin za naslednjih 60 min
-      // Zahteva: GET /tomorrow-minutely  (brezplačno, 500 klicev/dan)
-      if (path === "/tomorrow-minutely") {
-        if (!TOMORROW_KEY || TOMORROW_KEY.startsWith("REPLACE")) {
-          return new Response(JSON.stringify({ error: "no_key" }),
-            { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
-        }
-        const lat = 46.325779, lng = 14.921137;
-        const fields = "precipitationIntensity,precipitationType,precipitationProbability";
-        const tmUrl = `https://api.tomorrow.io/v4/weather/forecast?location=${lat},${lng}&timesteps=1m&fields=${fields}&apikey=${TOMORROW_KEY}`;
-        const tmRes = await fetch(tmUrl, { headers: { "Accept": "application/json" } });
-        if (!tmRes.ok) {
-          const errText = await tmRes.text();
-          return new Response(JSON.stringify({ error: `Tomorrow.io HTTP ${tmRes.status}`, detail: errText }),
-            { status: tmRes.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
-        }
-        const tmData = await tmRes.json();
-        return new Response(JSON.stringify(tmData), {
-          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
         });
       }
 
