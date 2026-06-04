@@ -3003,6 +3003,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="gw-grid" id="gw-grid"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
+    <!-- Vremenska misija dneva -->
+    <div class="card" style="margin-bottom:1rem;border:2px solid var(--blue);border-radius:16px">
+      <div class="chart-hdr" style="margin-bottom:.65rem">
+        <span class="clabel" style="margin:0">🎯 Vremenska misija dneva</span>
+        <span class="chart-range" id="mission-weather-lbl">—</span>
+      </div>
+      <div id="mission-body"><div class="clim-loading">Nalaganje misije…</div></div>
+    </div>
+
     <!-- 2. Kids activity -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
@@ -10931,6 +10940,125 @@ function buildGoldenWindow(){
   if(upd)upd.textContent=now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
+// ══════════════════════════════════════════════════════════
+// ── VREMENSKA MISIJA DNEVA ─────────────────────────────────
+// ══════════════════════════════════════════════════════════
+const _MISSION_STREAK_KEY='wx-mission-streak';
+const _MISSIONS=[
+  // Rain
+  {w:'rain',icon:'🌧',title:'Dežni merilnik',desc:'Postavi kozarec ven med dežjem. Po 10 minutah preštej milimetre (1 mm dežja = 1 ml na 1 cm² površine). Koliko je padlo?',stars:2,cat:'📏 Izmeri'},
+  {w:'rain',icon:'🌈',title:'Lovi mavrico',desc:'Po dežju takoj pojdi ven, ko se nebo jасni. Mavrica nastane kadar je sonce ZA teboj in dež PRED teboj. V katero smer gledaš?',stars:1,cat:'🔭 Opazuj'},
+  {w:'rain',icon:'🐌',title:'Polžja ekspedicija',desc:'Polži obožujejo vlažne dni. Poišči vsaj 3 polže in si oglej sledi ki jih puščajo na listih.',stars:1,cat:'🔭 Opazuj'},
+  {w:'rain',icon:'💧',title:'Kapljice na listu',desc:'Poišči velik list z vodnimi kapljicami. Preštej kapljice na enem listu. Zakaj ostanejo okrogle in ne razlijejo?',stars:2,cat:'🧪 Poskusi'},
+  {w:'rain',icon:'🌊',title:'Potočni krogi',desc:'Pojdi do luže ali potoka in opazuj, kako kapljica ustvari kroge na vodi. Zakaj so krogi — ne kvadrati?',stars:1,cat:'🔭 Opazuj'},
+  {w:'rain',icon:'🐸',title:'Žabji koncert',desc:'Po dežju zvečer poslušaj — žabe pojejo! Odidi k potoku ali mlaki in preštej, iz koliko smeri slišiš žabe.',stars:1,cat:'🔭 Opazuj'},
+  // Sunny
+  {w:'sunny',icon:'🌡',title:'Vroče tla',desc:'Dotakni se z roko asfalta, trave in zemlje. Katero je najtoplejše? Izmeri s termometrom, če imaš — kakšna je razlika?',stars:2,cat:'🧪 Poskusi'},
+  {w:'sunny',icon:'📐',title:'Moja senca',desc:'Postavi se naravnost na soncu in izmeri svojo senco v centimetrih. Zjutraj je daljša ali krajša kot opoldne? Zakaj?',stars:2,cat:'📏 Izmeri'},
+  {w:'sunny',icon:'🦋',title:'Metulj na dopustu',desc:'Sedi 10 minut tiho v vrt ali na travnik. Koliko različnih vrst metuljev vidiš? Ali vsi letijo enako?',stars:1,cat:'🔭 Opazuj'},
+  {w:'sunny',icon:'☀️',title:'Sončna ura',desc:'Postavi palico navpično v zemljo in obriši konico sence na tleh. Po eni uri poglej znova — kam se je pomaknila senca?',stars:3,cat:'🧪 Poskusi'},
+  {w:'sunny',icon:'🌻',title:'Cvetlični atlas',desc:'Poišči 5 različnih cvetlic v bližini. Nariši jih ali fotografiraj. Katera je privabila največ čebel ali metuljev?',stars:2,cat:'🎨 Ustvari'},
+  {w:'sunny',icon:'🔍',title:'Živi pod kamnom',desc:'Dvigni kamen in poglej, kdo živi pod njim. Preštej različne živali — kmalu vrni kamen nazaj da ostane njihov dom!',stars:1,cat:'🔭 Opazuj'},
+  // Windy
+  {w:'windy',icon:'🌬',title:'Smer vetra',desc:'Drži moker prst v zrak — katera stran se najhitreje ohladi? To je smer od koder piha veter. Se ujema z vremensko napoved?',stars:2,cat:'🧪 Poskusi'},
+  {w:'windy',icon:'🍃',title:'Drevesa v vetru',desc:'Opazuj drevesa v vetru. Kateri deli se gibljejo — tanka vejica ali debelo deblo? Zakaj deblo ostane mirno?',stars:1,cat:'🔭 Opazuj'},
+  {w:'windy',icon:'📄',title:'Papirni jadralnik',desc:'Naredi papirnato letalo in ga vrzi z vetrom in proti vetru. Kdaj leti dlje? Meri razdaljo!',stars:2,cat:'🧪 Poskusi'},
+  {w:'windy',icon:'🌾',title:'Pšenični val',desc:'Poglej polje ali visoko travo v vetru — vidiš valovite vzorce? Kakšno hitrost ima val? Ga lahko ujameš z očmi?',stars:1,cat:'🔭 Opazuj'},
+  // Cold
+  {w:'cold',icon:'❄️',title:'Iskanje slane',desc:'Zjutraj zgodaj poglej travo — ali je posuta z belim? To je slana ali ivje! Poglej jo s povečevalnim steklom da vidiš kristale.',stars:1,cat:'🔭 Opazuj'},
+  {w:'cold',icon:'💨',title:'Dihanje v mrazu',desc:'Zakaj vidiš oblak iz ust v hladnem zraku? To je kondenzacija! Razloži prijatelju ali starišu kako deluje.',stars:2,cat:'🧪 Poskusi'},
+  {w:'cold',icon:'🌡',title:'Temperatura tal',desc:'V mrzlem dnevu primerjaj temperaturo zraka in tal (tla so pogosto toplejša pozimi). Izmeri in zapiši razliko.',stars:2,cat:'📏 Izmeri'},
+  {w:'cold',icon:'🌿',title:'Zimzelene rastline',desc:'V hladnem dnevu poišči rastlino, ki je še vedno zelena. Zakaj nekatere rastline ne izgubijo listov pozimi?',stars:2,cat:'🔭 Opazuj'},
+  // Hot
+  {w:'hot',icon:'💧',title:'Izhlapevanje',desc:'Z mokrimi prsti nariši svojo dlančico na asfalt ali beton. Meri v sekundah kako dolgo traja, da izgine. To je izhlapevanje!',stars:1,cat:'🧪 Poskusi'},
+  {w:'hot',icon:'🌡',title:'Senca vs sonce',desc:'Izmeri temperaturo na soncu in v senci — kakšna je razlika v stopinjah? Zakaj je senca hladnejša čeprav je isti zrak?',stars:2,cat:'📏 Izmeri'},
+  {w:'hot',icon:'🐝',title:'Opazuj čebele',desc:'Čebele obožujejo vroče sončne dni. Pojdi k cvetočemu grmu ali drevetu in preštej čebele v 5 minutah.',stars:1,cat:'🔭 Opazuj'},
+  {w:'hot',icon:'🌵',title:'Sušne rastline',desc:'Poišči rastlino, ki ima debele mesnate liste (npr. tolščak). Zakaj takšne rastline shranijo vodo v listih?',stars:2,cat:'🔭 Opazuj'},
+  // Foggy
+  {w:'fog',icon:'🕸',title:'Pajkova mreža v megli',desc:'V megli poišči pajkovo mrežo z vodnimi kapljicami. Preštej kapljice na eni niti! Zakaj se kapljice lovijo na niti in ne odpadejo?',stars:2,cat:'🔭 Opazuj'},
+  {w:'fog',icon:'🌫',title:'Megla v kozarcu',desc:'Daj kocko ledu v kozarec tople vode in pokrij s pokrovom. Opazuj kaj se zgodi znotraj. Prav tako nastane megla v naravi!',stars:3,cat:'🧪 Poskusi'},
+  {w:'fog',icon:'🌿',title:'Kapljice na rastlinah',desc:'V megli rastline "lovijo" vodo z listi. Poišči rastlino in preštej kapljice na enem listu.',stars:1,cat:'🔭 Opazuj'},
+  // Cloudy default
+  {w:'cloudy',icon:'☁️',title:'Oblačni atlas',desc:'Poglej nebo in poišči vsaj 2 vrsti oblakov. Kumulusi so kodrasti, stratusi so ploščati, cirrusi so tanka vlakna visoko.',stars:2,cat:'🎨 Ustvari'},
+  {w:'cloudy',icon:'🌤',title:'Napoved z oblaki',desc:'Kumulusni oblaki ki rastejo navzgor popoldne napovedujejo nevihto. So danes oblaki bolj ploščati ali kodrasti?',stars:2,cat:'🔭 Opazuj'},
+  {w:'cloudy',icon:'🐛',title:'Žuželčji lov',desc:'Pod kamnom, hlodovino ali listjem poišči vsaj 3 različne žuželke. Koliko nog ima vsaka — pravi žuželki imajo točno 6!',stars:1,cat:'🔭 Opazuj'},
+  {w:'cloudy',icon:'🌱',title:'Razpoka v asfaltu',desc:'Poišči rastlino, ki raste iz razpoke v asfaltu ali betonu. Kako ji je uspelo? Izmeri njeno višino.',stars:2,cat:'🔭 Opazuj'},
+  // Any weather
+  {w:'any',icon:'📖',title:'Vremenski dnevnik',desc:'Nariši današnje vreme: temperatura, oblaki, veter, posebne opazbe. Dodaj datum — čez mesec primerjaj s tem zapisom!',stars:1,cat:'🎨 Ustvari'},
+  {w:'any',icon:'🦜',title:'Ptica dneva',desc:'Sedi 5 minut tiho zunaj. Koliko različnih ptičjih glasov slišiš? Poizkusi posnemati enega — ali se ti ptica odzove?',stars:1,cat:'🔭 Opazuj'},
+  {w:'any',icon:'🌱',title:'Starosti drevesa',desc:'Poišči hlodovino ali podrto drevo. Preštej letnice (kolobarje) — koliko je staro drevo? Katera leta so kolobarji debelejši?',stars:2,cat:'🔭 Opazuj'},
+  {w:'any',icon:'🌈',title:'Mavrica barv',desc:'Ali veš da vsaka barva mavrce pomeni drugo valovno dolžino svetlobe? Z enim razpršilnikom vode naredi svojo mavrico na soncu.',stars:3,cat:'🧪 Poskusi'},
+  {w:'any',icon:'🦠',title:'Mikrobit pod lupo',desc:'Naberi kapljico vode iz mlake ali potoka in jo poglej skozi povečevalno steklo. Kaj vidiš v kapljici vode?',stars:2,cat:'🔭 Opazuj'},
+];
+
+const _WX_CAT_LABELS={rain:'Deževen dan',sunny:'Sončen dan',windy:'Vetrovnen dan',cold:'Mrzel dan',hot:'Vročinski dan',fog:'Megleno jutro',cloudy:'Oblačen dan'};
+
+function _getMissionWeather(){
+  const t=_lastTemp??15;
+  const m=_lastBriefObs?.metric||{};
+  const wind=m.windSpeed??0;
+  const rr=m.precipRate??0;
+  const rt=m.precipTotal??0;
+  const hum=_lastBriefObs?.humidity??60;
+  const uv=_lastBriefObs?.uv??0;
+  if(t<5)return'cold';
+  if(hum>90&&t<15)return'fog';
+  if(rr>0.5||rt>3)return'rain';
+  if(t>28)return'hot';
+  if(wind>20)return'windy';
+  if(uv>3)return'sunny';
+  return'cloudy';
+}
+
+function buildMission(){
+  const el=document.getElementById('mission-body');if(!el)return;
+  const wx=_getMissionWeather();
+  const lbl=document.getElementById('mission-weather-lbl');
+  if(lbl)lbl.textContent=_WX_CAT_LABELS[wx]||'';
+  const pool=_MISSIONS.filter(m=>m.w===wx||m.w==='any');
+  const today=new Date();
+  const doy=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
+  const seed=today.getFullYear()*1000+doy;
+  const mission=pool[seed%pool.length];
+  const todayStr=today.toISOString().slice(0,10);
+  let streak=0,completed=false;
+  try{const d=JSON.parse(localStorage.getItem(_MISSION_STREAK_KEY)||'{}');completed=d.lastDate===todayStr;streak=d.streak||0;}catch(_){}
+  const stars='🌟'.repeat(mission.stars)+'<span style="opacity:.25">🌟</span>'.repeat(3-mission.stars);
+  el.innerHTML=
+    '<div style="display:flex;gap:.85rem;align-items:flex-start;margin-bottom:.7rem">'
+    +'<div style="font-size:2.4rem;line-height:1;flex-shrink:0">'+mission.icon+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-weight:700;font-size:.98rem;margin-bottom:.3rem">'+mission.title+'</div>'
+    +'<div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem">'
+    +'<span style="font-size:.63rem;padding:.15rem .55rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:12px;color:var(--muted)">'+mission.cat+'</span>'
+    +'<span style="font-size:.72rem">'+stars+'</span>'
+    +'</div>'
+    +'<div style="font-size:.8rem;color:var(--muted);line-height:1.55">'+mission.desc+'</div>'
+    +'</div></div>'
+    +(completed
+      ?'<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;background:rgba(34,197,94,.1);border:1px solid #22c55e;border-radius:10px">'
+       +'<span style="font-size:1.2rem">✅</span>'
+       +'<div><div style="font-size:.78rem;font-weight:600;color:#22c55e">Misija opravljena!</div>'
+       +'<div style="font-size:.66rem;color:var(--muted)">Niz: '+streak+' '+(streak>=7?'🏆':streak>=3?'🔥':'')+'</div>'
+       +'</div></div>'
+      :'<button onclick="completeMission()" style="width:100%;padding:.55rem;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;transition:opacity .15s" onmouseover="this.style.opacity=.85" onmouseout="this.style.opacity=1">'
+       +'🎯 Misija opravljena!</button>'
+    )
+    +(streak>0&&!completed?'<div style="font-size:.64rem;color:var(--muted);margin-top:.45rem;text-align:center">Trenutni niz: '+streak+' dan'+(streak!==1?'i':'')+(streak>=7?' 🏆':streak>=3?' 🔥':'')+'</div>':'');
+}
+
+function completeMission(){
+  const todayStr=new Date().toISOString().slice(0,10);
+  let data={};
+  try{data=JSON.parse(localStorage.getItem(_MISSION_STREAK_KEY)||'{}');}catch(_){}
+  if(data.lastDate===todayStr)return;
+  const yd=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const streak=(data.lastDate===yd?(data.streak||0)+1:1);
+  try{localStorage.setItem(_MISSION_STREAK_KEY,JSON.stringify({lastDate:todayStr,streak}));}catch(_){}
+  buildMission();
+}
+
+
 // ── 2. Kids Activity Translator ──────────────────────────
 function buildKidsActivity(){
   const body=document.getElementById('kids-body');
@@ -12758,6 +12886,7 @@ function initLife(){
   fetchFireWeather();
   fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
+  buildMission();
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
   try{buildForestPulse();}catch(e){console.error('fp2',e);}
   try{buildTimeCapsule();}catch(e){console.error('capsule',e);}
