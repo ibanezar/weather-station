@@ -379,6 +379,53 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /arso-water ───────────────────────────────────────
+      // ARSO hidrološka postaja — vodostaj Savinje pri Mozirju/Letušu
+      // Poskusi GeoJSON feed z vsemi postajami, filtriraj za Savinjo v bližini
+      if (path === "/arso-water") {
+        const candidates = [
+          "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1&rb_Pq=Q",
+          "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1",
+        ];
+        for (const arsoUrl of candidates) {
+          try {
+            const ctrl = new AbortController();
+            const tid = setTimeout(() => ctrl.abort(), 7000);
+            const r = await fetch(arsoUrl, {
+              headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json,*/*", "Referer": "https://vode.arso.gov.si/" },
+              signal: ctrl.signal,
+            });
+            clearTimeout(tid);
+            if (!r.ok) continue;
+            const ct = r.headers.get("Content-Type") || "";
+            const text = await r.text();
+            // Try JSON parse
+            let geojson;
+            try { geojson = JSON.parse(text); } catch(_) { continue; }
+            const features = geojson?.features || geojson?.Features || [];
+            // Filter: near Rečica (lat 46.1–46.6, lon 14.4–15.4), prefer Savinja
+            const nearby = features.filter(f => {
+              const coords = f.geometry?.coordinates;
+              if (!coords) return false;
+              const [lon, lat] = coords;
+              return lat > 46.0 && lat < 46.7 && lon > 14.3 && lon < 15.5;
+            });
+            const savinja = nearby.filter(f => {
+              const p = f.properties || {};
+              const txt = JSON.stringify(p).toLowerCase();
+              return txt.includes("savinja") || txt.includes("mozirje") || txt.includes("letuš") || txt.includes("letus") || txt.includes("nazarje");
+            });
+            const out = (savinja.length ? savinja : nearby).slice(0, 6);
+            return new Response(JSON.stringify({ stations: out, total: features.length, source: arsoUrl }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+            });
+          } catch (_) { continue; }
+        }
+        return new Response(JSON.stringify({ stations: [], error: "ARSO vode nedostopen" }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });

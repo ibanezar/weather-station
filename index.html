@@ -331,6 +331,35 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .dew-factor-val{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text)}
 .dew-factor-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .dew-advice{font-size:.76rem;color:var(--muted);line-height:1.55;padding:.6rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+/* Savinja river / flood */
+.river-status{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.river-pill{padding:.28rem .85rem;border-radius:999px;font-size:.73rem;font-weight:700;border:1px solid}
+.river-pill.normal{background:rgba(74,222,128,.14);border-color:rgba(74,222,128,.4);color:var(--green)}
+.river-pill.raised{background:rgba(251,191,36,.14);border-color:rgba(251,191,36,.45);color:var(--amber)}
+.river-pill.warning{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#f97316}
+.river-pill.alarm{background:rgba(248,113,113,.18);border-color:rgba(248,113,113,.65);color:var(--red)}
+.river-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem}
+@media(max-width:560px){.river-kpis{grid-template-columns:1fr 1fr}}
+.river-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.6rem .8rem}
+.river-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:400;color:var(--text);line-height:1.1}
+.river-kpi-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.12rem}
+.river-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:.6rem}
+.river-chart-svg{display:block;min-width:340px;width:100%}
+.river-legend{display:flex;gap:.75rem;flex-wrap:wrap;font-size:.65rem;color:var(--muted);align-items:center;margin-top:.35rem}
+.river-legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+/* CMIP6 climate projections */
+.cmip6-intro{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.85rem}
+.cmip6-scenarios{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.85rem}
+@media(max-width:560px){.cmip6-scenarios{grid-template-columns:1fr}}
+.cmip6-block{border-radius:14px;padding:.9rem 1.1rem;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.cmip6-model{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.5rem}
+.cmip6-delta-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem}
+.cmip6-delta{display:flex;flex-direction:column;gap:.08rem}
+.cmip6-delta-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:400;color:var(--text)}
+.cmip6-delta-lbl{font-size:.62rem;color:var(--muted)}
+.cmip6-bar-wrap{height:6px;border-radius:3px;background:var(--fc-border);overflow:hidden;margin-top:.4rem}
+.cmip6-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.cmip6-baseline{font-size:.68rem;color:var(--muted);border-top:1px solid var(--fc-border);padding-top:.55rem;margin-top:.2rem;line-height:1.5}
 /* iNaturalist observations */
 .inat-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
 .inat-filter{padding:.25rem .65rem;border-radius:999px;font-size:.68rem;border:1px solid var(--card-border);background:var(--fc-bg);color:var(--muted);cursor:pointer;transition:all .2s;font-family:inherit}
@@ -2610,6 +2639,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="norm-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
+    <!-- CMIP6 klimatske projekcije 2050/2100 -->
+    <div class="card chart-card" style="margin-bottom:1rem" id="cmip6-card">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌍 Rečica 2050 — Klimatske Projekcije CMIP6</span>
+        <span class="chart-range" id="cmip6-src">Open-Meteo · —</span>
+      </div>
+      <div id="cmip6-body"><div class="clim-loading">Nalaganje projekcij…</div></div>
+    </div>
+
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
@@ -2950,6 +2988,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button class="inat-filter" onclick="inatSetFilter('Arachnida')">🕷 Pajkovci</button>
       </div>
       <div id="inat-list"><div class="clim-loading">Nalaganje opazitev…</div></div>
+    </div>
+
+    <!-- Savinja vodostaj & napoved pretoka -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌊 Savinja — Vodostaj & Napoved Pretoka</span>
+        <span class="chart-range" id="river-updated">Open-Meteo GloFAS · ARSO · —</span>
+      </div>
+      <div id="river-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
     <!-- Ambee Pollen + AQI -->
@@ -11114,6 +11161,234 @@ function buildDewMatrix(){
 }
 
 // ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// ── SAVINJA RIVER — vodostaj & napoved pretoka ─────────────
+// ══════════════════════════════════════════════════════════
+const _RIVER_CACHE_KEY='wx-river-v1';
+const _RIVER_THRESHOLDS={normal:30,raised:80,warning:200,alarm:400}; // m³/s GloFAS at Rečica
+
+async function fetchSavinjaRiver(){
+  const el=document.getElementById('river-body');
+  // 3h client cache
+  try{
+    const c=JSON.parse(localStorage.getItem(_RIVER_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<3*3600000){renderSavinjaRiver(c.arso,c.flood);return;}
+  }catch(_){}
+  // Fetch in parallel: ARSO proxy + Open-Meteo Flood
+  const [arsoRes, floodRes] = await Promise.allSettled([
+    fetch(PROXY+'/arso-water').then(r=>r.json()),
+    fetch('https://flood-api.open-meteo.com/v1/flood?latitude='+LAT+'&longitude='+LON
+      +'&daily=river_discharge&forecast_days=16&past_days=7').then(r=>r.json()),
+  ]);
+  const arsoData = arsoRes.status==='fulfilled' ? arsoRes.value : null;
+  const floodData = floodRes.status==='fulfilled' ? floodRes.value : null;
+  try{localStorage.setItem(_RIVER_CACHE_KEY,JSON.stringify({ts:Date.now(),arso:arsoData,flood:floodData}));}catch(_){}
+  renderSavinjaRiver(arsoData, floodData);
+  const upd=document.getElementById('river-updated');
+  if(upd)upd.textContent='GloFAS + ARSO · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderSavinjaRiver(arsoData, floodData){
+  const el=document.getElementById('river-body');if(!el)return;
+  const T=_RIVER_THRESHOLDS;
+  // ── Parse Open-Meteo flood data ─────────────────────────
+  const times=floodData?.daily?.time||[];
+  const flows=floodData?.daily?.river_discharge||[];
+  const today=new Date().toISOString().slice(0,10);
+  const todayIdx=times.indexOf(today);
+  const todayQ=todayIdx>=0?flows[todayIdx]:flows[7]||null; // 7=today if past_days=7
+  const maxQ=Math.max(...flows.filter(v=>v!=null),0.01);
+  // ── Status ─────────────────────────────────────────────
+  let pillCls='normal',pillTxt='Normalen pretok';
+  if(todayQ!=null){
+    if(todayQ>=T.alarm){pillCls='alarm';pillTxt='ALARM — poplavna nevarnost';}
+    else if(todayQ>=T.warning){pillCls='warning';pillTxt='Opozorilo — zvišan pretok';}
+    else if(todayQ>=T.raised){pillCls='raised';pillTxt='Povečan pretok';}
+  }
+  // ── ARSO station info ───────────────────────────────────
+  let arsoHtml='';
+  if(arsoData?.stations?.length){
+    const st=arsoData.stations[0];
+    const p=st.properties||{};
+    const name=p.postaja||p.name||p.station||'ARSO postaja';
+    const h=p.vodostaj||p.h||p.level||'—';
+    const q=p.pretok||p.q||p.flow||'—';
+    arsoHtml=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">ARSO: <b style="color:var(--text)">${name}</b> · Vodostaj: <b>${h}</b> cm · Pretok: <b>${q}</b> m³/s</div>`;
+  }
+  // ── KPIs ────────────────────────────────────────────────
+  const next3max=flows.slice(Math.max(0,todayIdx),Math.min(flows.length,(todayIdx>=0?todayIdx:7)+4)).filter(v=>v!=null);
+  const max3d=next3max.length?Math.max(...next3max):null;
+  const kpis=
+    '<div class="river-kpis">'+
+    `<div class="river-kpi"><div class="river-kpi-val">${todayQ!=null?todayQ.toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Pretok zdaj</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${max3d!=null?max3d.toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max 3 dni</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${maxQ.toFixed(0)} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max 16 dni</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${flows.length}</div><div class="river-kpi-lbl">Dni napovedi</div></div>`+
+    '</div>';
+  // ── SVG chart ───────────────────────────────────────────
+  const W=600,H=110,PL=40,PR=10,PT=12,PB=28,CW=W-PL-PR,CH=H-PT-PB;
+  const N=times.length;
+  const barW=Math.max(4,Math.floor(CW/N)-1);
+  const Qy=q=>q!=null?PT+CH-Math.max(0,Math.min(1,q/Math.max(maxQ,1)))*CH:PT+CH;
+  // Threshold lines
+  let thLines='';
+  [T.raised,T.warning,T.alarm].forEach((tv,i)=>{
+    if(tv>maxQ*1.1)return;
+    const y=Qy(tv).toFixed(1);
+    const cols=['rgba(251,191,36,.5)','rgba(249,115,22,.5)','rgba(248,113,113,.6)'];
+    const lbls=['Zvišan','Opozorilo','Alarm'];
+    thLines+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="${cols[i]}" stroke-width="1" stroke-dasharray="4,3"/>`;
+    thLines+=`<text x="${PL+3}" y="${(+y-2).toFixed(1)}" font-size="7.5" fill="${cols[i]}" font-family="Inter,sans-serif">${lbls[i]}</text>`;
+  });
+  // Bars
+  let bars='',xLabels='';
+  const tIdx=todayIdx>=0?todayIdx:7;
+  times.forEach((t,i)=>{
+    const q=flows[i];if(q==null)return;
+    const x=PL+i*(CW/N);
+    const bh=Math.max(3,(q/Math.max(maxQ,1))*CH);
+    const y=PT+CH-bh;
+    const isPast=i<tIdx,isToday=i===tIdx;
+    const col=isToday?(q>=T.warning?'#f97316':q>=T.raised?'#fbbf24':'#4ade80'):
+              isPast?'rgba(148,163,184,.35)':
+              q>=T.alarm?'#f87171':q>=T.warning?'#fb923c':q>=T.raised?'#fbbf24':'#60a5fa';
+    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" fill="${col}" rx="2"><title>${t} · ${q.toFixed(1)} m³/s</title></rect>`;
+    if(isToday)bars+=`<line x1="${(x+barW/2).toFixed(1)}" y1="${PT}" x2="${(x+barW/2).toFixed(1)}" y2="${PT+CH}" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+    // X labels every 4 days
+    if(i%4===0||isToday){
+      const d=new Date(t);
+      const lbl=isToday?'Danes':(d.getDate()+'.'+(d.getMonth()+1)+'.');
+      xLabels+=`<text x="${(x+barW/2).toFixed(1)}" y="${H-5}" font-size="${isToday?9:8}" fill="${isToday?'var(--text)':'rgba(128,128,128,.55)'}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="${isToday?700:400}">${lbl}</text>`;
+    }
+  });
+  // Y axis ticks
+  let yTicks='';
+  const yVals=[0,50,100,200,400].filter(v=>v<=maxQ*1.05);
+  yVals.forEach(v=>{
+    const y=Qy(v).toFixed(1);
+    yTicks+=`<text x="${(PL-3).toFixed(1)}" y="${(+y+3).toFixed(1)}" font-size="8" fill="rgba(128,128,128,.5)" text-anchor="end" font-family="JetBrains Mono,monospace">${v}</text>`;
+  });
+  const svg=`<svg class="river-chart-svg" viewBox="0 0 ${W} ${H}" height="${H}" xmlns="http://www.w3.org/2000/svg">`+
+    `<line x1="${PL}" y1="${PT+CH}" x2="${W-PR}" y2="${PT+CH}" stroke="rgba(128,128,128,.15)" stroke-width="1"/>`+
+    thLines+bars+yTicks+xLabels+
+    `<text x="${PL-3}" y="${(PT+CH/2+3).toFixed(1)}" font-size="8" fill="rgba(128,128,128,.45)" text-anchor="end" transform="rotate(-90,${(PL-3).toFixed(1)},${(PT+CH/2+3).toFixed(1)})" font-family="Inter,sans-serif">m³/s</text>`+
+    `</svg>`;
+
+  el.innerHTML=
+    '<div class="river-status">'+
+      `<span class="river-pill ${pillCls}">${pillTxt}</span>`+
+    '</div>'+
+    arsoHtml+kpis+
+    '<div class="river-chart-wrap">'+svg+'</div>'+
+    '<div class="river-legend">'+
+      '<span><span class="river-legend-dot" style="background:rgba(148,163,184,.5)"></span>Preteklost</span>'+
+      '<span><span class="river-legend-dot" style="background:#4ade80"></span>Danes</span>'+
+      '<span><span class="river-legend-dot" style="background:#60a5fa"></span>Napoved</span>'+
+      '<span style="margin-left:auto;font-size:.65rem">GloFAS · <a href="https://flood-api.open-meteo.com" target="_blank" rel="noopener" style="color:var(--muted)">Open-Meteo</a></span>'+
+    '</div>';
+  if(!floodData&&!arsoData){
+    el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki pretoka začasno nedostopni</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── CMIP6 CLIMATE PROJECTIONS ──────────────────────────────
+// ══════════════════════════════════════════════════════════
+const _CMIP6_CACHE_KEY='wx-cmip6-v2';
+
+async function fetchCMIP6(){
+  const el=document.getElementById('cmip6-body');if(!el)return;
+  // 7-day cache (projections don't change)
+  try{
+    const c=JSON.parse(localStorage.getItem(_CMIP6_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<7*864e5){renderCMIP6(c.d2050,c.d2100);return;}
+  }catch(_){}
+  const base='https://climate-api.open-meteo.com/v1/climate?latitude='+LAT+'&longitude='+LON
+    +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&models=EC_Earth3P_HR,MPI_ESM1_2_XR';
+  // Fetch 2050 + try 2100
+  const [r2050,r2100]=await Promise.allSettled([
+    fetch(base+'&start_date=2049-01-01&end_date=2050-12-31').then(r=>r.json()),
+    fetch(base+'&start_date=2099-01-01&end_date=2100-12-31').then(r=>r.json()),
+  ]);
+  const d2050=r2050.status==='fulfilled'?r2050.value:null;
+  const d2100=r2100.status==='fulfilled'?r2100.value:null;
+  try{localStorage.setItem(_CMIP6_CACHE_KEY,JSON.stringify({ts:Date.now(),d2050,d2100}));}catch(_){}
+  renderCMIP6(d2050,d2100);
+  const src=document.getElementById('cmip6-src');
+  if(src)src.textContent='Open-Meteo CMIP6 · '+new Date().toLocaleDateString('sl');
+}
+
+function _cmip6Annual(data, modelSuffix){
+  if(!data||!data.daily)return null;
+  const d=data.daily;
+  // Model variable names have suffix, e.g. temperature_2m_max_EC_Earth3P_HR
+  const tmaxKey=Object.keys(d).find(k=>k.startsWith('temperature_2m_max')&&k.includes(modelSuffix));
+  const tminKey=Object.keys(d).find(k=>k.startsWith('temperature_2m_min')&&k.includes(modelSuffix));
+  const precipKey=Object.keys(d).find(k=>k.startsWith('precipitation_sum')&&k.includes(modelSuffix));
+  const tmax=d[tmaxKey]||d.temperature_2m_max||[];
+  const tmin=d[tminKey]||d.temperature_2m_min||[];
+  const precip=d[precipKey]||d.precipitation_sum||[];
+  const means=tmax.map((mx,i)=>mx!=null&&tmin[i]!=null?(mx+tmin[i])/2:null).filter(v=>v!=null);
+  const meanT=means.length?means.reduce((a,b)=>a+b,0)/means.length:null;
+  const totalP=precip.filter(v=>v!=null).reduce((a,b)=>a+b,0);
+  return{meanT,totalP};
+}
+
+function renderCMIP6(d2050, d2100){
+  const el=document.getElementById('cmip6-body');if(!el)return;
+  if(!d2050){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Projekcije začasno nedostopne</div>';return;}
+  const N=ARSO_NORMALS;
+  const baseT=(N.temp.reduce((s,v)=>s+v,0)/12);
+  const baseP=N.precip.reduce((s,v)=>s+v,0);
+
+  const models=[
+    {key:'EC_Earth3P_HR',label:'EC-Earth3P (EU)',ssp:'SSP5-8.5'},
+    {key:'MPI_ESM1_2_XR',label:'MPI-ESM1.2 (DE)',ssp:'SSP5-8.5'},
+  ];
+
+  const renderBlock=(data, year, model)=>{
+    const ann=_cmip6Annual(data, model.key);
+    if(!ann||ann.meanT==null)return `<div class="cmip6-block"><div class="cmip6-model">${model.label} · ${year}</div><div style="font-size:.75rem;color:var(--muted)">Ni podatkov za ${year}</div></div>`;
+    const dT=ann.meanT-baseT;
+    const dP=ann.totalP-baseP;
+    const dPpct=(dP/baseP*100);
+    const tBarW=Math.min(100,Math.abs(dT)/5*100);
+    const pBarW=Math.min(100,Math.abs(dPpct)/30*100);
+    const tCol=dT>0?'#f87171':'#60a5fa';
+    const pCol=dP>0?'#60a5fa':'#fbbf24';
+    return `<div class="cmip6-block">`+
+      `<div class="cmip6-model">${model.label} · ${year} · <span style="color:var(--amber)">${model.ssp}</span></div>`+
+      `<div class="cmip6-delta-row">`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${tCol}">${dT>=0?'+':''}${dT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Temp. vs 1991–2020</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${pCol}">${dP>=0?'+':''}${dP.toFixed(0)} mm</div><div class="cmip6-delta-lbl">Padavine vs norma</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val">${ann.meanT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Letna srednja T</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val">${ann.totalP.toFixed(0)} mm</div><div class="cmip6-delta-lbl">Letne padavine</div></div>`+
+      `</div>`+
+      `<div class="cmip6-bar-wrap"><div class="cmip6-bar-fill" style="width:${tBarW.toFixed(0)}%;background:${tCol}"></div></div>`+
+      `</div>`;
+  };
+
+  // 2050 grid: 2 models side by side
+  let grid2050='<div class="cmip6-scenarios">';
+  models.forEach(m=>{ grid2050+=renderBlock(d2050,2049+'–2050',m); });
+  grid2050+='</div>';
+
+  // 2100 grid if available
+  let grid2100='';
+  if(d2100){
+    grid2100='<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem;margin-top:.15rem">Konec stoletja (2099–2100)</div>';
+    grid2100+='<div class="cmip6-scenarios">';
+    models.forEach(m=>{ grid2100+=renderBlock(d2100,'2099–2100',m); });
+    grid2100+='</div>';
+  }
+
+  el.innerHTML=
+    `<div class="cmip6-intro">Projekcije temperature in padavin za Rečico ob Savinji glede na referenčno obdobje ARSO 1991–2020 (Celje, popravljeno za višino). Modeli: CMIP6, scenarij SSP5-8.5 (visoke emisije).</div>`+
+    '<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem">Sredina stoletja (2049–2050)</div>'+
+    grid2050+grid2100+
+    `<div class="cmip6-baseline">Referenca 1991–2020 (ARSO Celje): <b>${baseT.toFixed(1)}°C</b> letna srednja T · <b>${baseP} mm</b> letne padavine · <a href="https://climate-api.open-meteo.com" target="_blank" rel="noopener" style="color:var(--blue)">Open-Meteo Climate API</a></div>`;
+}
+
 // ── iNaturalist nearby observations ───────────────────────
 // ══════════════════════════════════════════════════════════
 const _INAT_CACHE_KEY='wx-inat-v1';
@@ -12459,6 +12734,7 @@ function initLife(){
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
   fetchINatObservations();
+  fetchSavinjaRiver();
   fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
@@ -12612,6 +12888,7 @@ function buildArsoNormals(curMonthT, curMonthR){
 function initClimate(){
   if(_climInit)return;_climInit=true;
   try{buildArsoNormals(null,null);}catch(e){console.error('arso-norm',e);}
+  fetchCMIP6();
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
   try{buildGrowingSeason();}catch(e){console.error('gs',e);}
