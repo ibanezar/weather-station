@@ -11,7 +11,7 @@ const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&form
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 
 // Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
-const AMBEE_KEY = "REPLACE_WITH_AMBEE_API_KEY";
+const AMBEE_KEY = "4a654676f62aec4e724a5dcdc5d1b5665e3da3602d3270c8a65195d02e1faa09";
 
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
