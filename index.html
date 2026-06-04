@@ -10644,15 +10644,15 @@ function buildGoldenWindow(){
   const bluePMendH = ptimes.bluePMh??21;
   const isGoldAM = hour>=sunriseH && hour<goldAMendH;
   const isGoldPM = hour>=goldPMstartH && hour<sunsetH;
-  const isBlue   = (hour>sunsetH && hour<bluePMendH) || (hour>=ptimes.blueAMh??5.5 && hour<sunriseH);
+  const isBlue   = (hour>sunsetH && hour<bluePMendH) || (hour>=(ptimes.blueAMh??5.5) && hour<sunriseH);
   const isDawn   = hour>=(ptimes.nautAMh??5) && hour<sunriseH;
   const isNight  = hour<(ptimes.nautAMh??5) || hour>=(bluePMendH);
   // Countdown to next window
   let countdown='';
-  const minLeft=m=>Math.round(m*60);
+  const minLeft=v=>Math.round(v*60);
   if(isGoldAM){const ml=minLeft(goldAMendH-hour);countdown=`⏱ Jutranja zlata ura: še ${ml} min (konec ob ${ptimes.goldAM})`;}
   else if(isGoldPM){const ml=minLeft(sunsetH-hour);countdown=`⏱ Večerna zlata ura: še ${ml} min (sončni zahod ${ptimes.sunset})`;}
-  else if(hour<goldAMstartH??sunriseH){const ml=minLeft((ptimes.sunriseH??6)-hour);countdown=ml<180?`⏱ Do sončnega vzhoda (${ptimes.sunrise}): ${ml} min`:'';}
+  else if(hour<sunriseH){const ml=minLeft((ptimes.sunriseH??6)-hour);countdown=ml<180?`⏱ Do sončnega vzhoda (${ptimes.sunrise}): ${ml} min`:'';}
   else if(hour<goldPMstartH){const ml=minLeft(goldPMstartH-hour);countdown=ml<120?`⏱ Do zlate ure večer (${ptimes.goldPM}): ${ml} min`:'';}
   const score=(conds)=>conds.filter(Boolean).length/conds.length;
   const activities=[
