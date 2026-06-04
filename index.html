@@ -6533,7 +6533,7 @@ function _wmoEmojiDN(c,isDay){if(!isDay&&c in _WMO_EMOJI_NIGHT)return _WMO_EMOJI
 function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv}){
   const parts=[];
   const desc=_wmoTxt(wmo).toLowerCase();
-  parts.push('Danes bo v Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
+  parts.push('Danes bo na Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
   if(rain>=8)parts.push('Pričakovane so izrazitejše padavine, skupaj približno '+rain.toFixed(1)+' mm.');
   else if(rain>=0.5)parts.push('Možne so padavine, skupaj okoli '+rain.toFixed(1)+' mm.');
   else parts.push('Večjih padavin model za danes ne nakazuje.');
@@ -9611,7 +9611,7 @@ async function buildFingerprint(){
   // Narrative
   if(narr){
     const warm=avgPrecip>1300?'nadpovprečno mokra':'normalno vlažna';
-    narr.textContent=`Postaja IREICA1 v Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
+    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
   }
 }
 
