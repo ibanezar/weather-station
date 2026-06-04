@@ -343,7 +343,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
 .fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
-.fauna-tip{font-size:.61rem;color:var(--muted);margin-top:.3rem;display:flex;gap:.35rem;flex-wrap:wrap}.fauna-tip b{color:var(--text);font-weight:500}.kids-meta{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 .6rem;font-size:.7rem;color:var(--muted)}.kids-meta span{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.18rem .5rem}.kids-bag{font-size:.71rem;color:var(--blue);background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:.4rem .75rem;margin-top:.6rem;text-align:left;display:inline-block;max-width:100%}.kids-fact{font-size:.69rem;color:var(--muted);font-style:italic;margin-top:.65rem;line-height:1.55}.gw-spot{font-size:.64rem;color:var(--muted);margin-top:.28rem;font-style:italic}.gw-countdown{font-size:.7rem;font-weight:600;color:var(--amber);padding:.35rem .75rem;background:rgba(245,158,11,.08);border-radius:10px;border:1px solid rgba(245,158,11,.2);margin-bottom:.65rem;display:inline-block}
+.ambee-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:.85rem}@media(max-width:600px){.ambee-grid{grid-template-columns:1fr 1fr}}.ambee-card{border-radius:14px;padding:.9rem 1.1rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--amb-col,var(--green))}.ambee-hdr{display:flex;align-items:center;gap:.55rem;margin-bottom:.3rem}.ambee-icon{font-size:1.4rem;flex-shrink:0}.ambee-name{font-size:.8rem;font-weight:600;flex:1}.ambee-risk{font-size:.65rem;font-weight:700;padding:.18rem .5rem;border-radius:8px;white-space:nowrap}.ambee-risk.low{background:rgba(74,222,128,.15);color:var(--green)}.ambee-risk.moderate{background:rgba(251,191,36,.15);color:var(--amber)}.ambee-risk.high{background:rgba(249,115,22,.15);color:#f97316}.ambee-risk.very_high,.ambee-risk.unhealthy{background:rgba(248,113,113,.18);color:var(--red)}.ambee-count{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:300;color:var(--amb-col,var(--green));line-height:1.1}.ambee-bar-bg{height:4px;background:var(--fc-border);border-radius:2px;margin:.35rem 0}.ambee-bar-fill{height:100%;border-radius:2px;background:var(--amb-col,var(--green));transition:width .8s ease}.ambee-species{font-size:.61rem;color:var(--muted);line-height:1.5;margin-top:.1rem}.ambee-aqi-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.2rem}.ambee-aqi-chip{font-size:.66rem;padding:.2rem .55rem;border-radius:8px;background:var(--fc-bg);border:1px solid var(--fc-border);font-family:'JetBrains Mono',monospace}.fauna-tip{font-size:.61rem;color:var(--muted);margin-top:.3rem;display:flex;gap:.35rem;flex-wrap:wrap}.fauna-tip b{color:var(--text);font-weight:500}.kids-meta{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 .6rem;font-size:.7rem;color:var(--muted)}.kids-meta span{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.18rem .5rem}.kids-bag{font-size:.71rem;color:var(--blue);background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:.4rem .75rem;margin-top:.6rem;text-align:left;display:inline-block;max-width:100%}.kids-fact{font-size:.69rem;color:var(--muted);font-style:italic;margin-top:.65rem;line-height:1.55}.gw-spot{font-size:.64rem;color:var(--muted);margin-top:.28rem;font-style:italic}.gw-countdown{font-size:.7rem;font-weight:600;color:var(--amber);padding:.35rem .75rem;background:rgba(245,158,11,.08);border-radius:10px;border:1px solid rgba(245,158,11,.2);margin-bottom:.65rem;display:inline-block}
 /* Data assimilation */
 .da-section-hdr{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--border)}
 .da-section-hdr h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0;font-weight:700}
@@ -2886,6 +2886,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🔍 Polžji & Kuščarjev Radar</div>
       <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- Ambee Pollen + AQI -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌸 Pelod & Kakovost zraka — Ambee Live</span>
+        <span class="chart-range" id="ambee-updated">—</span>
+      </div>
+      <div id="ambee-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
     <!-- 1. Golden Window -->
@@ -12186,10 +12195,103 @@ async function initDA(){
   renderOBTracking();
 }
 
+// ══════════════════════════════════════════════════════════
+// ── AMBEE POLLEN + AQI ────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+const _AMBEE_CACHE_KEY='wx-ambee-v1';
+async function fetchAmbeePollen(){
+  const body=document.getElementById('ambee-body');
+  const upd=document.getElementById('ambee-updated');
+  if(!body)return;
+  // Use cache if fresh (3h)
+  try{
+    const cached=JSON.parse(localStorage.getItem(_AMBEE_CACHE_KEY)||'null');
+    if(cached&&(Date.now()-cached.ts)<3*3600*1000){renderAmbeePollen(cached.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/pollen');
+    const data=await r.json();
+    if(data.error==='no_key'){
+      body.innerHTML=`<div style="font-size:.78rem;color:var(--muted);line-height:1.65;padding:.25rem 0">
+        Ambee API ključ ni nastavljen.<br>
+        1. Registriraj se na <a href="https://app.ambeedata.com" target="_blank" style="color:var(--blue)">app.ambeedata.com</a> (brezplačno)<br>
+        2. Kopiraj API Key → worker.js → <code style="background:var(--fc-bg);padding:.1rem .3rem;border-radius:4px">AMBEE_KEY</code>
+      </div>`;
+      return;
+    }
+    localStorage.setItem(_AMBEE_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));
+    renderAmbeePollen(data);
+  }catch(e){
+    if(body)body.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ambee ni dosegljiv.</div>';
+    console.warn('Ambee pollen:',e);
+  }
+}
+
+function renderAmbeePollen(data){
+  const body=document.getElementById('ambee-body');
+  const upd=document.getElementById('ambee-updated');
+  if(!body)return;
+  const pol=data?.pollen?.data?.[0];
+  const aq=data?.aqi?.stations?.[0];
+  if(!pol&&!aq){body.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov.</div>';return;}
+  const riskSl={'Low':'Nizko','Moderate':'Zmerno','High':'Visoko','Very High':'Zelo visoko'};
+  const riskCls={'Low':'low','Moderate':'moderate','High':'high','Very High':'very_high'};
+  const aqiColor=v=>v<=50?'var(--green)':v<=100?'var(--amber)':v<=150?'#f97316':v<=200?'var(--red)':'#9333ea';
+  const aqiLabel=v=>v<=50?'Odlično':v<=100?'Dobro':v<=150?'Zmerno':v<=200?'Slabo':'Nevarno';
+  // Pollen cards
+  const polCards=pol?[
+    {icon:'🌾',name:'Trave',col:'#4ade80',count:pol.Count?.grass_pollen??0,risk:pol.Risk?.grass_pollen??'Low',
+     species:pol.Species?.Grass??{}},
+    {icon:'🌳',name:'Drevesa',col:'#60a5fa',count:pol.Count?.tree_pollen??0,risk:pol.Risk?.tree_pollen??'Low',
+     species:pol.Species?.Tree??{}},
+    {icon:'🌿',name:'Plevel',col:'#f59e0b',count:pol.Count?.weed_pollen??0,risk:pol.Risk?.weed_pollen??'Low',
+     species:pol.Species?.Weed??{}},
+  ]:[];
+  const maxPol=Math.max(...polCards.map(c=>c.count),1);
+  let html='<div class="ambee-grid">';
+  polCards.forEach(c=>{
+    const pct=Math.round((c.count/maxPol)*100);
+    const topSp=Object.entries(c.species).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([n,v])=>`${n}: ${v}`).join(' · ');
+    html+=`<div class="ambee-card" style="--amb-col:${c.col}">
+      <div class="ambee-hdr">
+        <span class="ambee-icon">${c.icon}</span>
+        <span class="ambee-name">${c.name}</span>
+        <span class="ambee-risk ${riskCls[c.risk]||'low'}">${riskSl[c.risk]||c.risk}</span>
+      </div>
+      <div class="ambee-count">${c.count}<span style="font-size:.68rem;color:var(--muted)"> gr/m³</span></div>
+      <div class="ambee-bar-bg"><div class="ambee-bar-fill" style="width:${pct}%"></div></div>
+      ${topSp?`<div class="ambee-species">${topSp}</div>`:''}
+    </div>`;
+  });
+  html+='</div>';
+  // AQI row
+  if(aq){
+    const aqi=aq.AQI??aq.aqiInfo?.aqiCategory??null;
+    const aqiN=parseInt(aq.AQI)||0;
+    html+=`<div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;padding:.6rem .2rem;border-top:1px solid var(--fc-border);margin-top:.25rem">
+      <span style="font-size:.75rem;font-weight:600;color:${aqiColor(aqiN)}">AQI ${aqiN} — ${aqiLabel(aqiN)}</span>`;
+    const chips=[
+      aq.PM25!=null?`PM₂.₅ ${aq.PM25}`:null,
+      aq.PM10!=null?`PM₁₀ ${aq.PM10}`:null,
+      aq.NO2!=null?`NO₂ ${aq.NO2}`:null,
+      aq.SO2!=null?`SO₂ ${aq.SO2}`:null,
+      aq.CO!=null?`CO ${aq.CO}`:null,
+    ].filter(Boolean);
+    chips.forEach(c=>{html+=`<span class="ambee-aqi-chip">${c}</span>`;});
+    html+='</div>';
+  }
+  // Footer
+  const ts=pol?.updatedAt||aq?.updatedAt||null;
+  html+=`<div style="font-size:.64rem;color:var(--muted);margin-top:.4rem">📍 Rečica ob Savinji · Vir: Ambee Weather Intelligence${ts?' · '+new Date(ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):''}</div>`;
+  body.innerHTML=html;
+  if(upd&&ts)upd.textContent=new Date(ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+}
+
 function initLife(){
   if(_lifeInit)return;_lifeInit=true;
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
+  fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
   try{buildForestPulse();}catch(e){console.error('fp2',e);}

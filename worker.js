@@ -10,6 +10,9 @@ const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&form
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 
+// Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
+const AMBEE_KEY = "REPLACE_WITH_AMBEE_API_KEY";
+
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
 
@@ -350,6 +353,29 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const buf = await camRes.arrayBuffer();
         return new Response(buf, {
           headers: { ...CORS_ALLOWED, "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=120" }
+        });
+      }
+
+      // ── /pollen ───────────────────────────────────────────
+      // Ambee pollen + AQI — registracija: ambeedata.com → API Keys
+      if (path === "/pollen") {
+        if (!AMBEE_KEY || AMBEE_KEY.startsWith("REPLACE")) {
+          return new Response(JSON.stringify({ error: "no_key" }),
+            { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const lat = 46.325779, lng = 14.921137;
+        const [polRes, aqRes] = await Promise.all([
+          fetch(`https://api.ambeedata.com/latest/pollen/by-lat-lng?lat=${lat}&lng=${lng}`, {
+            headers: { "x-api-key": AMBEE_KEY, "Accept": "application/json" }
+          }),
+          fetch(`https://api.ambeedata.com/latest/by-lat-lng?lat=${lat}&lng=${lng}`, {
+            headers: { "x-api-key": AMBEE_KEY, "Accept": "application/json" }
+          }),
+        ]);
+        const polData = polRes.ok ? await polRes.json() : null;
+        const aqData  = aqRes.ok  ? await aqRes.json()  : null;
+        return new Response(JSON.stringify({ pollen: polData, aqi: aqData }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
         });
       }
 
