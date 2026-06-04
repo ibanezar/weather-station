@@ -2625,6 +2625,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="cmip6-body"><div class="clim-loading">Nalaganje projekcij…</div></div>
     </div>
 
+    <!-- PVGIS solar potential -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">☀️ Solarni potencial — PVGIS EU JRC</span>
+        <span class="chart-range" id="pvgis-src">re.jrc.ec.europa.eu · —</span>
+      </div>
+      <div id="pvgis-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
@@ -2967,7 +2976,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="inat-list"><div class="clim-loading">Nalaganje opazitev…</div></div>
     </div>
 
-
+    <!-- Fire Weather Index -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🔥 Požarna nevarnost — Fire Weather Index</span>
+        <span class="chart-range" id="fwi-updated">EFFIS metodologija · —</span>
+      </div>
+      <div id="fwi-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
 
     <!-- Ambee Pollen + AQI -->
     <div class="card chart-card" style="margin-bottom:1rem">
@@ -12739,6 +12755,7 @@ function initLife(){
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
   fetchINatObservations();
+  fetchFireWeather();
   fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
@@ -12895,10 +12912,201 @@ function buildArsoNormals(curMonthT, curMonthR){
     kpis+anomHtml+altNote;
 }
 
+
+// ══════════════════════════════════════════════════════════
+// ── PVGIS Solar Potential — EU JRC ────────────────────────
+// ══════════════════════════════════════════════════════════
+const _PVGIS_CACHE_KEY='wx-pvgis-v1';
+
+async function fetchPVGIS(){
+  const el=document.getElementById('pvgis-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_PVGIS_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<7*864e5){renderPVGIS(c.data);return;}
+  }catch(_){}
+  try{
+    const url='https://re.jrc.ec.europa.eu/api/v5_2/MRcalc?lat='+LAT+'&lon='+LON
+      +'&outputformat=json&raddatabase=PVGIS-SARAH3&browser=0';
+    const data=await fetch(url).then(r=>r.json());
+    try{localStorage.setItem(_PVGIS_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderPVGIS(data);
+    const src=document.getElementById('pvgis-src');
+    if(src)src.textContent='PVGIS-SARAH3 · EU JRC · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">PVGIS ni dosegljiv.</div>';
+    console.warn('PVGIS:',e);
+  }
+}
+
+function renderPVGIS(data){
+  const el=document.getElementById('pvgis-body');if(!el)return;
+  const monthly=data?.outputs?.monthly?.fixed||[];
+  const totals=data?.outputs?.totals?.fixed||{};
+  if(!monthly.length){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const vals=monthly.map(m=>+(m.H_h||0));
+  const maxV=Math.max(...vals,0.01);
+  const MN=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const MNF=['Januar','Februar','Marec','April','Maj','Junij','Julij','Avgust','September','Oktober','November','December'];
+  const cur=new Date().getMonth();
+  const bars=vals.map((v,i)=>{
+    const h=Math.max(6,(v/maxV)*64);
+    const col=i===cur?'var(--amber)':'var(--blue)';
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+      +'<div style="font-size:.52rem;color:var(--muted)">'+v.toFixed(1)+'</div>'
+      +'<div style="height:'+h+'px;width:100%;max-width:26px;background:'+col+';border-radius:3px 3px 0 0;opacity:'+(i===cur?1:.6)+'" title="'+MN[i]+': '+v.toFixed(2)+' kWh/m²/dan"></div>'
+      +'<div style="font-size:.58rem;color:var(--muted)">'+MN[i]+'</div>'
+      +'</div>';
+  }).join('');
+  const annTot=totals.H_h!=null?Math.round(totals.H_h*365):Math.round(vals.reduce((a,b)=>a+b,0)*30.44);
+  const optAng=totals.optimal_angle!=null?totals.optimal_angle+'°':'—';
+  const bestM=MNF[vals.indexOf(Math.max(...vals))];
+  el.innerHTML=
+    '<div style="display:flex;gap:1.5rem;margin-bottom:.65rem;flex-wrap:wrap">'
+    +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Letno sevanje</div>'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem;color:var(--amber)">'+annTot+' <span style="font-size:.68rem;color:var(--muted)">kWh/m²</span></div></div>'
+    +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Optimalni naklon</div>'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem">'+optAng+'</div></div>'
+    +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Najboljši mesec</div>'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem">'+bestM+'</div></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:2px;align-items:flex-end;height:80px">'+bars+'</div>'
+    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Globalno horizontalno sevanje H_h (kWh/m²/dan) · PVGIS-SARAH3 · EU Joint Research Centre</div>';
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── Fire Weather Index (FWI) — kanadska/EFFIS metodologija ─
+// ══════════════════════════════════════════════════════════
+const _FWI_CACHE_KEY='wx-fwi-v1';
+
+function _calcOneDayFWI(prev,T,H,W,r,month){
+  H=Math.max(1,Math.min(H,99));W=Math.max(0,W);r=Math.max(0,r);
+  const F0=prev.ffmc??85,P0=prev.dmc??6,D0=prev.dc??15;
+  // FFMC
+  const mo=147.2*(101-F0)/(59.5+F0);
+  let mR=mo;
+  if(r>0.5){
+    const rf=r-0.5;
+    let mr=mo+42.5*rf*Math.exp(-100/(251-mo))*(1-Math.exp(-6.93/rf));
+    if(mo>150)mr+=0.0015*Math.pow(mo-150,2)*Math.sqrt(rf);
+    mR=Math.min(mr,250);
+  }
+  const Ed=0.942*Math.pow(H,0.679)+11*Math.exp((H-100)/10)+0.18*(21.1-T)*(1-Math.exp(-0.115*H));
+  const Ew=0.618*Math.pow(H,0.753)+10*Math.exp((H-100)/10)+0.18*(21.1-T)*(1-Math.exp(-0.115*H));
+  let m1;
+  if(mR>Ed){const kd=0.424*(1-Math.pow(H/100,1.7))+0.0694*Math.sqrt(W)*(1-Math.pow(H/100,8));m1=Ed+(mR-Ed)*Math.exp(-2.303*kd);}
+  else if(mR<Ew){const kw=0.424*(1-Math.pow((100-H)/100,1.7))+0.0694*Math.sqrt(W)*(1-Math.pow((100-H)/100,8));m1=Ew-(Ew-mR)*Math.exp(-2.303*kw);}
+  else{m1=mR;}
+  const ffmc=59.5*(250-m1)/(147.2+m1);
+  // DMC
+  let Pr=P0;
+  if(r>1.5){
+    const re=0.92*r-1.27;
+    const Mo=20+Math.exp(5.6348-P0/43.43);
+    const b=P0<=33?100/(0.5+0.3*P0):P0<=65?14-1.3*Math.log(P0):6.2*Math.log(P0)-17.2;
+    const Mr=Mo+1000*re/(48.77+b*re);
+    Pr=Math.max(244.72-43.43*Math.log(Mr-20),0);
+  }
+  const Le=[6.5,7.5,9.0,12.8,13.9,13.9,12.4,10.9,9.4,8.0,7.0,6.0][month];
+  const K=1.894*(T+1.1)*(100-H)*Le*1e-6;
+  const dmc=Math.max(Pr+100*K,0);
+  // DC
+  let Dr=D0;
+  if(r>2.8){const rd=0.83*r-1.27;const Qo=800*Math.exp(-D0/400);const Qr=Qo+3.937*rd;Dr=Math.max(400*Math.log(800/Qr),0);}
+  const Lf=[-1.6,-1.6,-1.6,0.9,3.8,5.8,6.4,5.0,2.4,0.4,-1.6,-1.6][month];
+  const dc=Math.max(Dr+Math.max(0,0.36*(T+2.8)+Lf)/2,0);
+  // ISI
+  const fW=Math.exp(0.05039*W);
+  const mF=147.2*(101-ffmc)/(59.5+ffmc);
+  const fF=91.9*Math.exp(-0.1386*mF)*(1+Math.pow(mF,5.31)/4.93e7);
+  const isi=0.208*fW*fF;
+  // BUI
+  const bui=dmc<=0.4*dc?0.8*dmc*dc/(dmc+0.4*dc):dmc-(1-0.8*dc/(dmc+0.4*dc))*(0.92+Math.pow(0.0114*dmc,1.7));
+  // FWI
+  const fD=bui<=80?0.626*Math.pow(Math.max(bui,0),0.809)+2:1000/(25+108.64*Math.exp(-0.023*bui));
+  const B=0.1*isi*fD;
+  const fwi=B>1?Math.exp(2.72*Math.pow(0.434*Math.log(B),0.647)):B;
+  return{ffmc,dmc,dc,isi,bui,fwi:Math.max(0,fwi)};
+}
+
+function _fwiClass(v){
+  if(v<5.2)return{label:'Nizko',col:'#22c55e'};
+  if(v<11.2)return{label:'Zmerno',col:'#84cc16'};
+  if(v<21.3)return{label:'Visoko',col:'#f59e0b'};
+  if(v<38.0)return{label:'Zelo visoko',col:'#ef4444'};
+  return{label:'Ekstremno',col:'#7c3aed'};
+}
+
+async function fetchFireWeather(){
+  const el=document.getElementById('fwi-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_FWI_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<3*3600000){renderFireWeather(c.days);return;}
+  }catch(_){}
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&daily=temperature_2m_max,relative_humidity_2m_min,windspeed_10m_max,precipitation_sum'
+      +'&forecast_days=7&past_days=7&timezone=Europe%2FLjubljana';
+    const data=await fetch(url).then(r=>r.json());
+    const d=data.daily;
+    if(!d?.time?.length)throw new Error('no data');
+    let prev={ffmc:85,dmc:6,dc:15};
+    const days=d.time.map((date,i)=>{
+      const T=d.temperature_2m_max[i]??20;
+      const H=d.relative_humidity_2m_min[i]??50;
+      const W=d.windspeed_10m_max[i]??0;
+      const r=d.precipitation_sum[i]??0;
+      const month=new Date(date).getMonth();
+      const res=_calcOneDayFWI(prev,T,H,W,r,month);
+      prev=res;return{date,...res};
+    });
+    try{localStorage.setItem(_FWI_CACHE_KEY,JSON.stringify({ts:Date.now(),days}));}catch(_){}
+    renderFireWeather(days);
+    const upd=document.getElementById('fwi-updated');
+    if(upd)upd.textContent='EFFIS metodologija · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">FWI ni dosegljiv.</div>';
+    console.warn('FWI:',e);
+  }
+}
+
+function renderFireWeather(days){
+  const el=document.getElementById('fwi-body');if(!el||!days?.length)return;
+  const today=new Date().toISOString().slice(0,10);
+  const ti=days.findIndex(d=>d.date===today);
+  const td=ti>=0?days[ti]:days[Math.min(7,days.length-1)];
+  const cls=_fwiClass(td.fwi);
+  const maxF=Math.max(...days.map(d=>d.fwi),5);
+  const DN=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  const bars=days.map(d=>{
+    const h=Math.max(4,(d.fwi/maxF)*64);
+    const c=_fwiClass(d.fwi);
+    const isTd=d.date===today;
+    const dn=DN[new Date(d.date).getDay()];
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+      +'<div style="height:'+h+'px;width:100%;max-width:20px;background:'+c.col+';border-radius:3px 3px 0 0;opacity:'+(isTd?1:.58)+';'+(isTd?'outline:2px solid var(--text);outline-offset:1px':'')+'" title="'+d.date+': FWI '+d.fwi.toFixed(1)+' ('+c.label+')"></div>'
+      +'<div style="font-size:.53rem;color:var(--muted)">'+dn+'</div>'
+      +'</div>';
+  }).join('');
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.65rem;flex-wrap:wrap">'
+    +'<div style="text-align:center;min-width:3.5rem">'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2rem;font-weight:700;color:'+cls.col+';line-height:1.1">'+td.fwi.toFixed(1)+'</div>'
+    +'<div style="font-size:.58rem;color:var(--muted);margin-top:.1rem">FWI danes</div>'
+    +'</div>'
+    +'<div style="flex:1">'
+    +'<div style="display:inline-block;padding:.25rem .75rem;background:'+cls.col+'22;border:1px solid '+cls.col+';border-radius:20px;color:'+cls.col+';font-size:.76rem;font-weight:600;margin-bottom:.3rem">'+cls.label+'</div>'
+    +'<div style="font-size:.7rem;color:var(--muted)">ISI: '+td.isi.toFixed(1)+' · BUI: '+td.bui.toFixed(0)+' · FFMC: '+td.ffmc.toFixed(0)+'</div>'
+    +'</div></div>'
+    +'<div style="display:flex;gap:3px;align-items:flex-end;height:74px">'+bars+'</div>'
+    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Kanadska FWI metodologija (EFFIS/GWIS) · Open-Meteo · 7 dni nazaj + 7-dnevna napoved</div>';
+}
+
 function initClimate(){
   if(_climInit)return;_climInit=true;
   try{buildArsoNormals(null,null);}catch(e){console.error('arso-norm',e);}
   fetchCMIP6();
+  fetchPVGIS();
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
   try{buildGrowingSeason();}catch(e){console.error('gs',e);}
