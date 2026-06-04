@@ -343,6 +343,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
 .fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
+.fauna-tip{font-size:.61rem;color:var(--muted);margin-top:.3rem;display:flex;gap:.35rem;flex-wrap:wrap}.fauna-tip b{color:var(--text);font-weight:500}.kids-meta{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 .6rem;font-size:.7rem;color:var(--muted)}.kids-meta span{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.18rem .5rem}.kids-bag{font-size:.71rem;color:var(--blue);background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:.4rem .75rem;margin-top:.6rem;text-align:left;display:inline-block;max-width:100%}.kids-fact{font-size:.69rem;color:var(--muted);font-style:italic;margin-top:.65rem;line-height:1.55}.gw-spot{font-size:.64rem;color:var(--muted);margin-top:.28rem;font-style:italic}.gw-countdown{font-size:.7rem;font-weight:600;color:var(--amber);padding:.35rem .75rem;background:rgba(245,158,11,.08);border-radius:10px;border:1px solid rgba(245,158,11,.2);margin-bottom:.65rem;display:inline-block}
 /* Data assimilation */
 .da-section-hdr{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--border)}
 .da-section-hdr h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0;font-weight:700}
@@ -10630,100 +10631,149 @@ function buildGoldenWindow(){
   const H=obs.humidity??null;
   const W=m.windSpeed??0;
   const gust=m.windGust??W;
-  const uv=m.uv??0;
   const rain=m.precipRate??0;
   const solar=m.solarRadiation??null;
-  const hour=new Date().getHours();
   const now=new Date();
-  // Sun timing helpers (rough)
-  const sunrise=5.5,sunset=20.5,goldAM=sunrise+0.7,goldPM=sunset-0.7;
-  const blueAM=sunrise-0.5,bluePM=sunset+0.5;
-  const isGoldAM=hour>=sunrise&&hour<goldAM+0.5;
-  const isGoldPM=hour>=goldPM-0.5&&hour<sunset;
-  const isBlue=(!isGoldAM&&hour<sunrise+0.2)||(hour>sunset-0.2&&hour<bluePM);
-  const isDawn=hour>=blueAM&&hour<goldAM;
-  const isNight=hour<5||hour>22;
-  const score=(conditions)=>conditions.reduce((s,c)=>s+(c?1:0),0)/conditions.length;
-  // Define activities
+  const hour=now.getHours()+now.getMinutes()/60;
+  // Use proper calculated photo times
+  const ptimes=calcPhotoTimes()||{};
+  const sunriseH = ptimes.sunriseH??6;
+  const sunsetH  = ptimes.sunsetH??20;
+  const goldAMendH = ptimes.goldAMh??6.8;
+  const goldPMstartH = ptimes.goldPMh??19.2;
+  const bluePMendH = ptimes.bluePMh??21;
+  const isGoldAM = hour>=sunriseH && hour<goldAMendH;
+  const isGoldPM = hour>=goldPMstartH && hour<sunsetH;
+  const isBlue   = (hour>sunsetH && hour<bluePMendH) || (hour>=ptimes.blueAMh??5.5 && hour<sunriseH);
+  const isDawn   = hour>=(ptimes.nautAMh??5) && hour<sunriseH;
+  const isNight  = hour<(ptimes.nautAMh??5) || hour>=(bluePMendH);
+  // Countdown to next window
+  let countdown='';
+  const minLeft=m=>Math.round(m*60);
+  if(isGoldAM){const ml=minLeft(goldAMendH-hour);countdown=`⏱ Jutranja zlata ura: še ${ml} min (konec ob ${ptimes.goldAM})`;}
+  else if(isGoldPM){const ml=minLeft(sunsetH-hour);countdown=`⏱ Večerna zlata ura: še ${ml} min (sončni zahod ${ptimes.sunset})`;}
+  else if(hour<goldAMstartH??sunriseH){const ml=minLeft((ptimes.sunriseH??6)-hour);countdown=ml<180?`⏱ Do sončnega vzhoda (${ptimes.sunrise}): ${ml} min`:'';}
+  else if(hour<goldPMstartH){const ml=minLeft(goldPMstartH-hour);countdown=ml<120?`⏱ Do zlate ure večer (${ptimes.goldPM}): ${ml} min`:'';}
+  const score=(conds)=>conds.filter(Boolean).length/conds.length;
   const activities=[
     {
-      icon:'🕸️',name:'Makro — rose & pajčevine',
-      conditions:[H!=null&&H>85,W<5,hour>=5&&hour<=8,T!=null&&T>5&&T<18,rain<0.1],
+      icon:'🕸️',name:'Makro — rosa & pajčevine',
+      spot:'Jutrovi travniki ob Savinji, vrtne meje',
+      equip:'Makro 90–105 mm, tripod, reflektorček',
+      conditions:[H!=null&&H>85,W<5,hour>=4.5&&hour<=9,T!=null&&T>5&&T<20,rain<0.1],
       desc:()=>{
-        if(H>90&&W<3&&hour>=5&&hour<=7)return '🟢 POPOLNI pogoji! Visoka vlaga '+Math.round(H)+'%, veter '+W.toFixed(1)+' km/h — rosne kapljice na pajčevinah bodo zamrznjene. Zbudi se pred sončnim vzhodom!';
-        if(H>85&&W<5)return '🔵 Dobri pogoji. Vlaga '+Math.round(H)+'% — ros verjetna, veter '+(W<3?'idealen':'zmeren')+'.';
-        if(H<70)return '⚪ Nezadostna vlaga ('+Math.round(H||0)+'%). Ros se ni posadila.';
-        return '🟡 Pogoji delno ustrezni — '+(!isDawn?'vrni se ob zori':'veter moti').toString();
+        if(H>90&&W<3&&hour>=5&&hour<=7.5)return `🟢 POPOLNI pogoji! Vlaga ${Math.round(H)}%, veter ${W.toFixed(1)} km/h — rosne kapljice na pajčevinah do ~${ptimes.goldAM||'8:00'}. Izhodi pred sončnim vzhodom!`;
+        if(H>85&&W<5&&hour<10)return `🔵 Dobri pogoji. Vlaga ${Math.round(H)}% — rosa verjetna. ${W<3?'Veter idealen.':'Veter zmeren.'}`;
+        if(!isDawn&&!isGoldAM&&hour<10)return `🟡 Predalba. Najboljši čas od ${ptimes.blueAM||'5:30'} naprej.`;
+        if(H<70)return `⚪ Vlaga ${Math.round(H||0)}% — suho za roso. Naslednjič po dežju.`;
+        return `⚪ Optimalni čas: ${ptimes.blueAM||'5:30'}–${ptimes.goldAM||'8:00'}. Vrni se zjutraj.`;
       },
       rating:()=>H>90&&W<3&&hour>=5&&hour<=8?'perfect':H>80&&W<6&&hour<10?'good':H>70&&hour<11?'ok':'poor'
     },
     {
       icon:'🦋',name:'Metulje & opraševalci',
-      conditions:[T!=null&&T>=18,W<15,rain<0.2,hour>=9&&hour<=17,uv>=2],
+      spot:'Cvetoča polja nad Rečico, ob robu gozda',
+      equip:'Telefoto 200–400 mm ali makro, hitri čas (1/500+)',
+      conditions:[T!=null&&T>=18,W<15,rain<0.2,hour>=9&&hour<=17,solar!=null&&solar>150],
       desc:()=>{
-        if(T>=22&&W<8&&rain<0.1)return '🟢 Visoka aktivnost! Temperatura '+T.toFixed(1)+'°C, veter '+W.toFixed(1)+' km/h — metulje in čebele aktivno iščejo cvetni prah. Odprta polja in travniki priporočeni.';
-        if(T>=18&&W<15)return '🔵 Dobri pogoji za opazovanje metuljev. '+T.toFixed(1)+'°C.';
-        if(T<15)return '⚪ Temperatura '+T?.toFixed(1)+'°C — metulje pri tleh, malo aktivnosti.';
-        return '🟡 Delno ustrezno. '+(W>15?'Veter moti let.':'Temperatura mejna.');
+        if(T>=22&&W<8&&rain<0.1)return `🟢 Visoka aktivnost! T ${T.toFixed(1)}°C, veter ${W.toFixed(1)} km/h — metulje in čebele aktivno iščejo cvetni prah.`;
+        if(T>=18&&W<15&&solar>200)return `🔵 Dobri pogoji. T ${T.toFixed(1)}°C — aktivnost metuljev zmerna do visoka.`;
+        if(T<15)return `⚪ T ${T?.toFixed(1)}°C — metulje pri tleh, malo aktivnosti. Čakaj toplino.`;
+        return `🟡 ${W>15?'Veter '+W.toFixed(0)+' km/h moti let.':'T na meji za polno aktivnost.'}`;
       },
       rating:()=>T>=22&&W<8&&rain<0.1&&hour>=10&&hour<=16?'perfect':T>=18&&W<15&&rain<0.3?'good':T>=15?'ok':'poor'
     },
     {
-      icon:'🌅',name:'Zlata & modra ura — fotografija',
-      conditions:[isGoldAM||isGoldPM||isBlue,rain<0.5,W<20],
+      icon:'🌅',name:'Zlata & modra ura — krajina',
+      spot:'Kamniti breg Savinje, Logarjev travnik, greben nad vasjo',
+      equip:'Širokokotni 16–35 mm, polarizcijski filter, tripod',
+      conditions:[isGoldAM||isGoldPM||isBlue,rain<0.5,W<25],
       desc:()=>{
-        if(isGoldAM)return '🟢 ZLATA URA JUTRANJA — sedaj! Topla svetloba pod nizkim kotom do ~'+Math.round(goldAM+0.5)+':00. Idealno za pokrajino, makro, portrete.';
-        if(isGoldPM)return '🟢 ZLATA URA VEČERNA — sedaj! Mehka topla svetloba do ~'+Math.round(sunset)+':00.';
-        if(isBlue)return '🔵 MODRA URA — mehka difuzna svetloba. Brez ostrih senc. Odlično za ulice, arhitekturo.';
-        if(isDawn)return '🟡 Predalba — nebo se prebuja. Pripravi se na zlato uro ob sončnem vzhodu.';
-        if(solar>400&&hour>=10&&hour<=14)return '⚠️ Trda opoldanska svetloba ('+Math.round(solar)+' W/m²). Izogibaj se portretom, raje macro v senci.';
-        if(isNight)return '🌙 Astronomska noč. Lunarni pogoji: '+Math.round(calcMoon().illum)+'% lune.';
-        return '⚪ Naslednja zlata ura ob '+Math.round(goldPM)+':00.';
+        if(isGoldAM)return `🟢 JUTRANJA ZLATA URA — zdaj! Topla nizka svetloba do ${ptimes.goldAM||'8:00'}. Idealno za pokrajino, makro, portrete ob Savinji.`;
+        if(isGoldPM)return `🟢 VEČERNA ZLATA URA — zdaj! Mehka topla svetloba do ${ptimes.sunset||'20:00'}. Smer: zahod nad dolino.`;
+        if(isBlue)return `🔵 MODRA URA — mehka difuzna svetloba. Ni ostrih senc. Odlično za vodne odseve na Savinji.`;
+        if(isDawn)return `🟡 Predalba ob ${ptimes.blueAM||'—'}. Pripravi se na zlato uro (${ptimes.sunrise||'—'}).`;
+        if(solar!=null&&solar>500&&hour>=10&&hour<=14)return `⚠️ Trda opoldanska svetloba (${Math.round(solar)} W/m²). Raje makro v senci ali senčna dolina.`;
+        if(isNight)return `🌙 Noč. Luna ${Math.round(calcMoon().illum)}% — morebitna lunina fotografija.`;
+        return `⚪ Naslednja zlata ura: ${hour<goldPMstartH?ptimes.goldPM:'jutri ob '+ptimes.goldAM}.`;
       },
       rating:()=>isGoldAM||isGoldPM?'perfect':isBlue?'good':isDawn?'ok':'poor'
     },
     {
-      icon:'🦌',name:'Opazovanje divjadi (aurore, srne)',
-      conditions:[hour<=7||hour>=19,W<12,rain<1,T!=null&&T>0],
+      icon:'🌊',name:'Odsevi v vodi & pokrajina',
+      spot:'Savinja pri Letuš mostu, Rečica — stari mlin, Solčavska jezera',
+      equip:'Tripod, polarizcijski filter (zmanjša odseve), dolgačas (<1/4s)',
+      conditions:[W<8,rain<0.2,solar!=null&&solar>0],
       desc:()=>{
-        const isMagicHour=hour<=7||hour>=19;
-        if(isMagicHour&&W<8&&rain<0.5)return '🟢 Optimalni čas! '+(hour<=7?'Jutranja':'Večerna')+' aktivnost srnjadi in gozdnih živali — tiho, mirno vreme poveča možnost opazitve.';
-        if(!isMagicHour)return '⚪ Zunaj aktivnega okna divjadi. Najboljši čas: 5:00–8:00 in 19:00–22:00.';
-        return '🟡 Delni pogoji. '+(W>12?'Veter nosi vonj — živali so pozorne.':'Zmeren dež zmanjša aktivnost.');
+        if(W<3&&(isGoldAM||isGoldPM))return `🟢 POPOLNO za odseve! Veter ${W.toFixed(1)} km/h — površina Savinje kot steklo. Zlata ura poudari barve.`;
+        if(W<5&&rain<0.1)return `🔵 Dobri pogoji za odseve v vodi. Veter ${W.toFixed(1)} km/h — minimalni valovi.`;
+        if(W>10)return `⚪ Veter ${W.toFixed(0)} km/h moti gladino. Počakaj umiritev.`;
+        return `🟡 Zmerni pogoji — poskusi, valovi manjši odsevi.`;
       },
-      rating:()=>(hour<=7||hour>=19)&&W<8&&rain<0.5?'perfect':(hour<=7||hour>=19)&&W<15?'good':(hour<=9||hour>=18)?'ok':'poor'
+      rating:()=>W<3&&(isGoldAM||isGoldPM)?'perfect':W<5&&rain<0.1?'good':W<10?'ok':'poor'
     },
     {
-      icon:'🌌',name:'Astrofotografija & nočno nebo',
-      conditions:[isNight,rain<0.1,W<15,calcMoon().illum<25],
+      icon:'🦌',name:'Opazovanje divjadi',
+      spot:'Gozdni rob pri Trnavi, Rečiški travniki ob gozdu, Savinjska dolina',
+      equip:'Telefoto 400 mm+, monopod, zelena/rjava oblačila',
+      conditions:[hour<=7.5||hour>=19,W<12,rain<1,T!=null&&T>0],
+      desc:()=>{
+        const isMagic=hour<=7.5||hour>=19;
+        if(isMagic&&W<8&&rain<0.5)return `🟢 Optimalni čas! ${hour<=7.5?'Jutranja':'Večerna'} aktivnost srnjadi — tiho, mirno. Priporoča se prihod 30 min prej.`;
+        if(!isMagic)return `⚪ Izven aktivnega okna. Srnjad počiva. Najboljši čas: 5:00–8:00 in 19:00–22:00.`;
+        return `🟡 ${W>12?'Veter '+W.toFixed(0)+' km/h prenese vonj — živali se umaknejo.':'Zmerni dež zmanjša aktivnost.'}`;
+      },
+      rating:()=>(hour<=7.5||hour>=19)&&W<8&&rain<0.5?'perfect':(hour<=7.5||hour>=19)&&W<15?'good':(hour<=9||hour>=18)?'ok':'poor'
+    },
+    {
+      icon:'🌌',name:'Astrofotografija & Mlečna cesta',
+      spot:'Odprti travniki SZ od Rečice, hrbet nad vasjo (Bortle 4–5)',
+      equip:'Širokokotni 14–24 mm f/1.8+, ISO 3200–6400, tripod, intervalom.',
+      conditions:[isNight,rain<0.1,W<15,calcMoon().illum<30],
       desc:()=>{
         const moon=calcMoon();
-        if(isNight&&moon.illum<15&&W<10&&rain<0.1)return '🟢 Odlični pogoji za Mlečno cesto! Luna '+moon.illum+'% — nebo temno. Savinjska dolina (Bortle 4-5). Optimalna usmeritev: JUG.';
-        if(isNight&&moon.illum<40)return '🔵 Dobri pogoji. Luna '+moon.illum+'% ne moti preveč.';
-        if(moon.illum>70)return '🌕 Luna '+moon.illum+'% — preveč svetla za deep-sky. Primerno za Lunin fotografijo.';
-        if(!isNight)return '⚪ Čakaj mrak ('+(hour<21?Math.round(bluePM):'5')+':00).';
-        return '🟡 '+( W>15?'Veter '+W.toFixed(0)+' km/h — nestabilna atmosfera.':'Oblačnost ali vlaga zmanjšujeta kakovost.');
+        if(isNight&&moon.illum<15&&W<10&&rain<0.1)return `🟢 Odlično za Mlečno cesto! Luna ${moon.illum}% — nebo temno. Usmeritev: JUG. Savinjska dolina Bortle 4–5.`;
+        if(isNight&&moon.illum<40)return `🔵 Dobri pogoji. Luna ${moon.illum}% ne moti preveč. Deep-sky objekti vidni.`;
+        if(moon.illum>70)return `🌕 Luna ${moon.illum}% — preveč svetla za Mlečno cesto. Idealno za lunin površje.`;
+        if(!isNight)return `⚪ Čakaj astronomski mrak (${ptimes.nautPM||'—'}).`;
+        return `🟡 ${W>15?'Atmosferska turbulenca ('+W.toFixed(0)+' km/h).':'Vlaga ali oblačnost moti transparentnost.'}`;
       },
       rating:()=>isNight&&calcMoon().illum<15&&rain<0.1?'perfect':isNight&&calcMoon().illum<35?'good':isNight?'ok':'poor'
     },
     {
-      icon:'🐸',name:'Amfibiji & ribniki (dvoživke)',
+      icon:'🐸',name:'Dvoživke & ribniki',
+      spot:'Mrtvica ob Savinji pri Letuš, ribniki pri Šempetru, jarki',
+      equip:'Gumijasti škornji, makro objektiv, naglavna svetilka (rdeča za noč)',
       conditions:[T!=null&&T>8,rain>=0.5||H>85,hour>=19||hour<=8],
       desc:()=>{
-        if(T>12&&rain>0.5)return '🟢 Aktivno gibanje dvoživk! Topel dež aktivira selitve žab in pupkov. Preverite ribniki in jarke.';
-        if(T>8&&H>85&&(hour<=8||hour>=19))return '🔵 Dobri pogoji — vlažna noč/jutro spodbujata aktivnost.';
-        if(T<8)return '⚪ Prehladno ('+T.toFixed(1)+'°C) — dvoživke mirujejo.';
-        return '🟡 Pogoji delno ustrezni.';
+        if(T>12&&rain>0.5)return `🟢 Aktivno gibanje dvoživk! Topel dež (T ${T.toFixed(1)}°C) aktivira selitvene pohode žab in pupkov.`;
+        if(T>8&&H>85&&(hour<=8||hour>=19))return `🔵 Dobri pogoji — vlažna ${hour>=19?'noč':'jutro'} spodbuja aktivnost.`;
+        if(T<8)return `⚪ Prehladno (${T.toFixed(1)}°C) — dvoživke mirujejo pod kamenjem.`;
+        return `🟡 Delni pogoji. ${rain<0.5?'Potreben je dež ali visoka vlaga.':'Temperatura mejna.'}`;
       },
       rating:()=>T>12&&rain>0.5?'perfect':T>8&&H>85&&(hour<=8||hour>=19)?'good':T>8?'ok':'poor'
-    }
+    },
+    {
+      icon:'🍄',name:'Gobe & mah — gozdni makro',
+      spot:'Mešani gozd nad Rečico, senčni hudourniki, Mozirski Gaj',
+      equip:'Makro 60–100 mm, tripod, bočna luč za dramatično svetlobo',
+      conditions:[T!=null&&T>10,H!=null&&H>70,rain<2],
+      desc:()=>{
+        const store2=_insStore();let r72=0;for(let i=0;i<3;i++){const d2=new Date();d2.setDate(d2.getDate()-i);r72+=(store2[d2.toISOString().slice(0,10)]?.precipTotal||0);}
+        if(r72>20&&T>12&&T<20)return `🟢 Odlično za gozdni makro! ${r72.toFixed(0)} mm dežja v 72h + T ${T.toFixed(1)}°C — gobe rastejo, mah nabrekel.`;
+        if(H>80&&T>12)return `🔵 Visoka vlaga ${Math.round(H)}% — gozdni makro subjekti (mah, lišaji, kapljice na listih) so odlični.`;
+        if(T<10)return `⚪ Prehladno (${T.toFixed(1)}°C) — gobe v mirovanju, mah suh.`;
+        return `🟡 Delni pogoji — vlaga ${Math.round(H||0)}%. ${r72<5?'Potreben je dež za gobe.':'Preverite gozdni rob.'}`;
+      },
+      rating:()=>{const st=_insStore();let r72=0;for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);r72+=(st[d.toISOString().slice(0,10)]?.precipTotal||0);}return r72>20&&T>12?'perfect':H>75&&T>10?'good':T>8&&H>65?'ok':'poor';}
+    },
   ];
   const ratingLabel={perfect:'POPOLNO',good:'DOBRO',ok:'SPREJEMLJIVO',poor:'SLABO'};
   const ratingBadge={perfect:'badge-perfect',good:'badge-good',ok:'badge-ok',poor:'badge-poor'};
-  // Sort by rating
   const order={perfect:0,good:1,ok:2,poor:3};
   activities.sort((a,b)=>order[a.rating()]-order[b.rating()]);
-  body.innerHTML=activities.map(a=>{
+  const countdownHtml=countdown?`<div class="gw-countdown">${countdown}</div>`:'';
+  body.innerHTML=countdownHtml+activities.map(a=>{
     const r=a.rating();
     return `<div class="gw-item gw-${r}">
       <div class="gw-header">
@@ -10732,6 +10782,8 @@ function buildGoldenWindow(){
         <span class="gw-badge ${ratingBadge[r]}">${ratingLabel[r]}</span>
       </div>
       <div class="gw-desc">${a.desc()}</div>
+      ${a.spot?`<div class="gw-spot">📍 ${a.spot}</div>`:''}
+      ${a.equip?`<div class="gw-cond">📷 ${a.equip}</div>`:''}
     </div>`;
   }).join('');
   if(upd)upd.textContent=now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
@@ -10747,26 +10799,88 @@ function buildKidsActivity(){
   const W=m.windSpeed??0;
   const H=obs.humidity??null;
   const hour=new Date().getHours();
-  const isDay=hour>=8&&hour<=19;
   const mo=new Date().getMonth()+1; // 1-12
   const isWinter=mo<=2||mo===12;
+  const isSpring=mo>=3&&mo<=5;
   const isSummer=mo>=6&&mo<=8;
-  // Primary suggestion matrix
+  const isAutumn=mo>=9&&mo<=11;
+  const isDay=hour>=8&&hour<=20;
+  const isMorning=hour>=6&&hour<9;
+  const isEvening=hour>=19&&hour<=21;
+  // Pick scenario
   let main,alts=[];
-  if(!isDay){main={emoji:'🌙',title:'Večerni čas!',desc:'Preden spite, preverite s starši kako bo jutri vreme. Jutri pa nova avantura!'};alts=[];}
-  else if(rain>2&&T>15){main={emoji:'🌧️',title:'Deževen topel dan!',desc:'Popoln dan za gumijaste škornje in testiranje globine luž na dvorišču! Koliko je globoka največja luža?'};alts=[{e:'🌂',t:'Nariši deževne kapljice pod mikroskopom (na papirju)',},{e:'🐌',t:'Lov na polže — jih v dežju vidiš 10x več kot sicer!'},{e:'🎨',t:'Barvaj z deževno vodo (javorjev sok + barve)'}];}
-  else if(rain>2&&T<=15){main={emoji:'🏠',title:'Kavč, toplo in ustvarjalno!',desc:'Zunaj kaplja in je sveže — idealen dan za ustvarjanje v hiši. Kaj pa gradnja ...'};alts=[{e:'🚂',t:'Gradnja železniške proge ali LEGO mesta'},{e:'🎭',t:'Improvizacijsko gledališče z lutkami iz nogavic'},{e:'🍪',t:'Pečenje piškotov in provjanje receptov'}];}
-  else if(W>25){main={emoji:'💨',title:'Vetrovno!',desc:'Veter '+Math.round(W)+' km/h — idealni pogoji za sestavljanje in spuščanje vetrnic ali zmajev nad travnikom!'};alts=[{e:'🌬️',t:'Pisanje pisem/listov ki jih unese veter'},{e:'🍂',t:'Zbiranje listov in opazovanje kako letijo'},{e:'🎈',t:'Pustolovščina s povoji — kdo drži balon najdlje'}];}
-  else if(T>25&&W<10&&rain<0.1){main={emoji:'☀️',title:'Vroč poletni dan!',desc:'Temperatura '+T.toFixed(0)+'°C — čas za vodni boj! Vodne puške, bazen ali iskanje hladnega potoka.'};alts=[{e:'🍦',t:'Domači sladoled iz zamrznjenega soka'},{e:'🦎',t:'Lov na kuščarje in opazovanje mravljišč'},{e:'🌸',t:'Herbarij — nabiranje in stiskanje cvetov v knjigo'}];}
-  else if(T>15&&T<=25&&W<15&&rain<0.5){main={emoji:'🌤️',title:'Idealen dan za odkrivanje!',desc:'Temperatura '+T?.toFixed(0)+'°C, malo vetra — perfektni pogoji za naraven pohod in zbiranje naravnih zakladov.'};alts=[{e:'🔍',t:'Fotosafarji z mamino kamero: najdi 10 različnih hroščev'},{e:'🎯',t:'Naravni smerni pohod: sever, jug, vzhod, zahod'},{e:'🏕️',t:'Mini tabor na vrtu z nagnjenim šotorom iz rjuh'}];}
-  else if(isWinter&&T<0){main={emoji:'❄️',title:'Mraz & led!',desc:'Temperatura '+T?.toFixed(1)+'°C — idealen dan za iskanje ledenih vzorcev! Vsak list zamrzne drugače.'};alts=[{e:'🌡️',t:'Meri temperaturo v senci, na soncu, ob fasadi'},{e:'🎿',t:'Sanke ali igra na snegu (če je sneg)'},{e:'🔭',t:'Astro večer — v mrzlu je zrak čistejši, zvezde jasnejše'}];}
-  else if(T>10&&T<=15&&rain<0.5){main={emoji:'🍂',title:'Jesenski/pomladni dan!',desc:'Prijetna temperatura '+T?.toFixed(0)+'°C — idealno za opazovanje narave.'};alts=[{e:'🍄',t:'Iskanje gob v gozdu (vedno s starši!)'},{e:'🌰',t:'Zbiranje kostanjev in bukev za jesensko dekoracijo'},{e:'🦔',t:'Postavi domčke za ježke in ptice'}];}
-  else{main={emoji:'🌈',title:'Navaden dan... ali pa ne?',desc:'Vsakršno vreme je priložnost za odkrivanje!'};alts=[{e:'📚',t:'Vremenski dnevnik — danes nariši vreme'},{e:'🐛',t:'Iskanje živali pod kamni in lubjem'},{e:'💧',t:'Preizkus: katera posoda zbere največ dežja?'}];}
+  if(!isDay&&!isMorning&&!isEvening){
+    main={emoji:'🌙',title:'Čas za spanje!',age:'all',duration:'15 min',where:'Doma',bring:[],
+      desc:'Preden spite, poglejte skupaj na zvezde skozi okno. Koliko zvezd vidite? Jutri vas čaka nova avantura!',
+      fact:'Sova vidi 100× bolje v temi kot mi — ona šele zdaj začne lov!'};
+    alts=[];}
+  else if(isMorning&&rain<0.5&&T!=null&&T>8){
+    main={emoji:'🌅',title:'Jutranja ekspedicija!',age:'all',duration:'30-60 min',where:'Vrt, travnik',bring:['škornji','povečevalno steklo'],
+      desc:`Zjutraj je narava najbolj aktivna! T ${T?.toFixed(0)||'—'}°C — ptice pojo, rosa sveti na pajčevinah, polži se sprehajajo. Pojdite ven ZDAJ!`,
+      fact:'Ptice pojo najglasneje uro pred sončnim vzhodom — to imenujemo "jutranji zbor" ali dawn chorus.'};
+    alts=[{e:'🕷️',t:'Fotografiraj pajčevino z rosnimi kapljicami (makro z mamino kamero)'},{e:'🐌',t:'Preštej vse polže, ki jih najdeš — si jih vidi le zjutraj'},{e:'🐦',t:'Jutranji ptičji bingo: zabeleži 5 različnih glasov ptic'}];}
+  else if(H!=null&&H>95&&T!=null&&T>8&&rain<0.5){
+    main={emoji:'🌫️',title:'Megleni dan!',age:'big',duration:'1-2h',where:'Travnik, gozdni rob',bring:['škornji','povečevalno steklo','papir'],
+      desc:'Megla je pesnik narave! Pajčevine postanejo vidne, drevesa izginjajo v belini. Čas za pravo ekspedicijo v meglo.',
+      fact:'Pajek v meglo stke mrežo vsako noč na novo — zjutraj je prevlečena z rosnimi kapljicami kot biserni ogrlici.'};
+    alts=[{e:'🕸️',t:'Fotografiraj kar največ različnih pajčevin (vsaka vrsta je drugačna!)'},{e:'🌳',t:'Pojdi globlje v meglo in nariši drevo, ki ga vidiš — je drugačno kot brez megle?'},{e:'🧭',t:'Igra: S kompasom se orientiraj samo po zvoku — katera smer je od kod voda?'},{e:'📐',t:'Meri: koliko metrov v meglo vidiš? Zabeleži v dnevnik'}];}
+  else if(rain>3&&T>15){
+    main={emoji:'🌧️',title:'Deževen topel dan!',age:'all',duration:'1-2h',where:'Ob Savinji, dvorišče',bring:['dežnik ali dežna jakna','gumijasti škornji','vrečka za vzorce'],
+      desc:`T ${T?.toFixed(0)||'—'}°C in dežuje — popoln dan za gumijaste škornje! Koliko je globoka največja luža? Kje reke odtekajo? Deževnice so inženirji narave.`,
+      fact:'Deževniki prihajajo na površje med dežjem, ker zemlja postane premočena — dihati morajo!'};
+    alts=[{e:'🐌',t:'Lov na polže — v dežju jih vidiš 10× več, vsak je drugačen'},{e:'🌧️',t:'Postavi 3 posode in meri, katera zbere največ dežja'},{e:'🎨',t:'Nariši sliko z deževno vodo + barvice (pustite kapljice kapati)'},{e:'🔬',t:'Zberi luže iz različnih tal in primerjaj pod povečevalnim steklom'}];}
+  else if(rain>1&&T<=15){
+    main={emoji:'🏠',title:'Kreativni dan doma!',age:'all',duration:'cel dan',where:'Doma',bring:['papir','lepilo','naravni materiali'],
+      desc:'Zunaj je hladno in mokro — čas za ustvarjanje. Najboljši znanstveniki so postali veliki, ker so opazovali naravo doma.',
+      fact:'Darwin je 40 let opazoval deževnike v svojem vrtu in napisal o tem celo knjigo!'};
+    alts=[{e:'🚂',t:'Gradnja mini delovnega modela — katero preprosto stroj zgradiš?'},{e:'🌱',t:'Posej semena v lonček in vodi dnevnik rasti z meritvami'},{e:'🎭',t:'Improvizacijsko gledališče: odigraj zgodbo žuželke'},{e:'🍪',t:'Peka z naravnimi barvili: kurkuma = rumena, pesa = rdeča'}];}
+  else if(W>28){
+    main={emoji:'💨',title:'Vetroven dan!',age:'all',duration:'1-2h',where:'Travnik, odprt prostor',bring:['veter ni problem!'],
+      desc:`Veter ${Math.round(W)} km/h — idealno za zmaje in vetrnice! Veter je energija, ki giblje oblake, valove in vetroelektrarne.`,
+      fact:`Hitrost vetra ${Math.round(W)} km/h je stopnja ${Math.round(W/3.6/0.836)} po Beaufortovi lestvici — dovolj za plovbo!'`};
+    alts=[{e:'🪁',t:'Sestavi in spusti zmaja — višje od sosedove hiše?'},{e:'🌬️',t:'Zmeriti: s papirnato vetrnico, katera smer vetra je trenutno?'},{e:'🍂',t:'Pustolovščina: pusti list, da ga unese veter, in ga sledi 5 minut'},{e:'📊',t:'Naredi preprosti anemometer iz kozarcev in palčke'}];}
+  else if(T>27&&rain<0.5){
+    main={emoji:'☀️',title:'Vročinski dan!',age:'all',duration:'cel dan',where:'Ob Savinji, bazen',bring:['sončno kremo','vodo za pitje','škornji za vodo'],
+      desc:`T ${T?.toFixed(0)||'—'}°C — čas za vodo! Savinja je polna presenečenj: ribe, raki, žuželke na površini vode.`,
+      fact:'Vodni drsalec (insekt) hodi po vodi zahvaljujoč površinski napetosti — noge ima pokrite z drobnimi dlačicami!'};
+    alts=[{e:'🦟',t:'Lov na vodne žuželke s cedilom — koliko vrst najdeš?'},{e:'🌸',t:'Herbarij: naberi in stisni 5 cvetov v knjigo (vsak z etiketo!)'},{e:'🎯',t:'Orientacijska igra s kompasem med drevesi'},{e:'🦎',t:'Tiho postavi se na skalnat breg Savinje in čakaj na kuščarje'}];}
+  else if(isSpring&&T>12&&T<=20&&rain<1){
+    main={emoji:'🌱',title:'Pomladni odkrivalci!',age:'all',duration:'1-2h',where:'Travnik, gozdni rob, ob vodi',bring:['povečevalno steklo','škatlica za vzorce','skicirka'],
+      desc:`Pomlad T ${T?.toFixed(0)||'—'}°C — zemlja se prebuja! To je edini čas v letu, ko vidiš pupke, jajčeca žab in prve cvetove hkrati.`,
+      fact:'Čmaž (čebela) se zbudi med prvim toplim dnem marca in takoj išče cvetni prah — prva hrana po zimi!'};
+    alts=[{e:'🐸',t:'Iskanje žabjih jajčec v jarkih in mlakužah (ne vzamemo domov!)'},{e:'🌼',t:'Pomladni cvetni bingo: regrat, vijolica, zvonček, čemaž, trobentice'},{e:'🐛',t:'Pod kamenjem in lubjem: katere žuželke so prve aktivne?'},{e:'🌿',t:'Vzorci: naberi 5 različnih listov in jih prepariraj z voščenkami'}];}
+  else if(isAutumn&&T>5&&T<=15&&rain<1){
+    main={emoji:'🍂',title:'Jesenski zakladniki!',age:'all',duration:'1-2h',where:'Gozd, sadovnjak',bring:['vrečka za zaklad','škornji','rokavice'],
+      desc:`Jesen T ${T?.toFixed(0)||'—'}°C — narava shranjuje zaklado! Kostanj, bukvice, brinove jagode, gobice. Gozd je poln hrane za živali.`,
+      fact:'Veverica v jeseni skrije do 10.000 kostanjev in žirov — in pozabi, kje jih je zakopala. S tem posadi gozd!'};
+    alts=[{e:'🍄',t:'Iskanje gob (samo fotografiraj, ne vzemi brez staršev!)'},{e:'🌰',t:'Zberi kostanje in ustvari mini živalski vrt iz naravnih materialov'},{e:'🦔',t:'Postavi domček za ježke: kupu listja + lesa pri vrtnem robu'},{e:'🔭',t:'Jesenski zvezdni večer — Orion se pojavi na vzhodu ob 20:00'}];}
+  else if(isWinter&&T<=0){
+    main={emoji:'❄️',title:'Ledeni znanstvenik!',age:'all',duration:'30-60 min',where:'Vrt, dvorišče',bring:['topla obleka','rukavice','lupa'],
+      desc:`T ${T?.toFixed(1)||'—'}°C — vsak zamrznjen listek je drugačen! Sneg pod lupo razkriva šesterokotne kristale, katerih ni dveh enakih.`,
+      fact:'Snežinka nastane v oblaku v 45 minutah — začne se pri enem molekulu vode na prahovu delcem!'};
+    alts=[{e:'❄️',t:'Zberi snežinke na temen papir in opazuj pod lupo (hitro!)'},{e:'🌡️',t:'Termometrska ekspedicija: meri T v senci, na soncu, pod snegom, ob fasadi'},{e:'🏗️',t:'Zgradi iglujski čudež: kako je toplo notri (s termometrom!)'},{e:'🌟',t:'Noč: jasno zimsko nebo je NAJBOLJŠE za zvezde — poišči Orion'}];}
+  else if(T>10&&T<=15&&rain<0.5){
+    main={emoji:'🔍',title:'Naravni detective!',age:'all',duration:'1-2h',where:'Travnik, gozdni rob',bring:['povečevalno steklo','skicirka','škatlica'],
+      desc:`T ${T?.toFixed(0)||'—'}°C — prijetno za bivanje zunaj. Narava je polna skrivnosti: sledovi živali, lubadur na drevesu, gobe v listju.`,
+      fact:'Drevo komunicira s sosedi prek gozdnega "interneta" — nitke gliv pod tlemi prenašajo sporočila in hrano!'};
+    alts=[{e:'🐾',t:'Iskanje in risanje sledov živali (srna, lisica, polh, ptice)'},{e:'🌿',t:'Zeliščna lov: timijan, rožmarin, materina dušica — vonjaj in prepoznaj'},{e:'🍄',t:'Gozdna kartografija: nariši tloris 10×10 m gozda s vsemi vrstami'},{e:'🦉',t:'Iskanje puh ali perja — katere ptice živijo tu?'}];}
+  else{
+    main={emoji:'🌈',title:'Vsak dan je odkritje!',age:'all',duration:'30 min+',where:'Kjerkoli si',bring:['radovednost'],
+      desc:'Vsakršno vreme je priložnost! Narava nikoli ne počiva. Kaj opazuješ ti danes?',
+      fact:'Charles Darwin je začel zbirati hrošče pri 8 letih — postal je največji naravoslovec vseh časov!'};
+    alts=[{e:'📸',t:'Foto izziv: poišči 10 stvari, ki so okrogle v naravi'},{e:'🐛',t:'Pod kamenjem in lubjem: beleži vse živali, ki jih najdeš'},{e:'💧',t:'Vodna sled: od kje prihaja voda na pipe v vaši hiši?'},{e:'📊',t:'Vremenski dnevnik: vsak dan zabeleži T, oblačnost, veter'}];}
   body.innerHTML=
     `<div class="kids-hero">
       <div class="kids-emoji">${main.emoji}</div>
       <div class="kids-title">${main.title}</div>
+      <div class="kids-meta">
+        <span>⏱ ${main.duration}</span>
+        <span>📍 ${main.where}</span>
+        <span>${main.age==='all'?'👨‍👩‍👧 Vsi':main.age==='little'?'👶 3–7 let':'🧒 8+ let'}</span>
+      </div>
       <div class="kids-desc">${main.desc}</div>
+      ${main.bring?.length?`<div class="kids-bag">🎒 Vzemi: ${main.bring.join(' · ')}</div>`:''}
+      ${main.fact?`<div class="kids-fact">💡 Vedel si? ${main.fact}</div>`:''}
     </div>`+
     (alts.length?`<div class="kids-alts">`+alts.map(a=>`<div class="kids-alt">${a.e} ${a.t}</div>`).join('')+'</div>':'');
   const u=document.getElementById('kids-updated');if(u)u.textContent=T!=null?T.toFixed(1)+'°C · '+Math.round(W)+' km/h':'—';
@@ -10942,23 +11056,41 @@ function buildFaunaRadar(){
   for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);rain72+=(store[d.toISOString().slice(0,10)]?.precipTotal||0);}
   const fauna=[
     {icon:'🐌',name:'Polžji pohod',color:'var(--cyan)',
-     pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>13&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
-     desc:()=>`Rain: ${rain72.toFixed(0)}mm/72h · Vlaga: ${Math.round(H||0)}% · T: ${T?.toFixed(1)||'—'}°C`},
-    {icon:'🦎',name:'Kuščarji na kamnih',color:'var(--amber)',
-     pct:()=>{let s=0;if(T!=null&&T<15&&solar>400)s+=50;if(T!=null&&T>=15&&T<28&&solar>300)s+=40;if(W<10)s+=10;if(mo>=4&&mo<=9)s+=20;return Math.min(100,s);},
-     desc:()=>`Solar: ${Math.round(solar)} W/m² · T: ${T?.toFixed(1)||'—'}°C · ${mo>=4&&mo<=9?'Sezona aktivna':'Izven sezone'}`},
+     pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>10&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
+     desc:()=>`Dež 72h: ${rain72.toFixed(0)} mm · Vlaga: ${Math.round(H||0)}% · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Živice, zelenjavni vrt, gozdni rob · 🕐 ${rain3h>0.5?'Aktivni takoj':'Po dežju, jutranje ure'} · ℹ️ V dežju vidnih do 10× več`},
+    {icon:'🦎',name:'Kuščarji — sončenje',color:'var(--amber)',
+     pct:()=>{let s=0;if(T!=null&&T>=15&&T<28&&solar>200)s+=45;if(T!=null&&T<15&&solar>400)s+=30;if(W<10)s+=15;if(mo>=4&&mo<=9)s+=20;else s-=30;return Math.max(0,Math.min(100,s));},
+     desc:()=>`Solar: ${Math.round(solar)} W/m² · T: ${T?.toFixed(1)||'—'}°C · ${mo>=4&&mo<=9?'Sezona aktivna':'Hibernacija'}`,
+     tip:()=>`📍 Suhe kamnite zidove, skalnate brežine · 🕐 10:00–14:00 · ℹ️ Iščejo toploto kamna po hladni noči`},
     {icon:'🐛',name:'Gosenice & hrošči',color:'var(--green)',
      pct:()=>{let s=0;if(T!=null&&T>15)s+=40;if(W<12)s+=20;if(hour>=9&&hour<=17)s+=20;if(rain72<5)s+=20;return Math.min(100,s);},
-     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=9&&hour<=17?'Dan':'Noč/jutr'}· Wind: ${W.toFixed(0)} km/h`},
-    {icon:'🦔',name:'Ježki (mrak)',color:'var(--purple)',
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=9&&hour<=17?'Dan':'Noč/jutro'} · Veter: ${W.toFixed(0)} km/h`,
+     tip:()=>`📍 Listje grmičevja, spodnja stran listov, lubje · 🕐 Cel dan · ℹ️ Po dežju iščejo suha mesta`},
+    {icon:'🦔',name:'Ježki (mrak/noč)',color:'var(--purple)',
      pct:()=>{let s=0;if(hour<=7||hour>=19)s+=50;if(T!=null&&T>8)s+=25;if(W<10)s+=15;if(rain72<20)s+=10;return Math.min(100,s);},
-     desc:()=>`Aktivno: ${hour<=7||hour>=19?'DA (mrak/noč)':'čakaj mrak'} · T: ${T?.toFixed(1)||'—'}°C`},
+     desc:()=>`Aktivno: ${hour<=7||hour>=19?'DA — mrak/noč':'Čakaj 19:00+'} · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Gozdni rob, vrtovi z mrtvim lesom, kompost · 🕐 19:00–23:00 · ℹ️ Tiho posedi pri robu trave`},
     {icon:'🐸',name:'Žabe & pupki',color:'var(--blue)',
      pct:()=>{let s=0;if(rain3h>0.5||rain72>10)s+=40;if(T!=null&&T>10&&T<22)s+=30;if(H!=null&&H>80)s+=20;if(hour<=8||hour>=19)s+=10;return Math.min(100,s);},
-     desc:()=>`Rain 72h: ${rain72.toFixed(0)}mm · T: ${T?.toFixed(1)||'—'}°C`},
+     desc:()=>`Dež 72h: ${rain72.toFixed(0)} mm · T: ${T?.toFixed(1)||'—'}°C · Vlaga: ${Math.round(H||0)}%`,
+     tip:()=>`📍 Mrtvica ob Savinji, lokve, jarki · 🕐 Večer/noč v dežju · ℹ️ Topel dež sproži selitvene pohode`},
     {icon:'🦗',name:'Kobilice & murni',color:'var(--green)',
      pct:()=>{let s=0;if(T!=null&&T>20)s+=40;if(W<10)s+=20;if(hour>=10&&hour<=19)s+=25;if(mo>=6&&mo<=9)s+=15;return Math.min(100,s);},
-     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${mo>=6&&mo<=9?'Sezona':'Izven sezone'}`},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${mo>=6&&mo<=9?'Visoka sezona':'Izven sezone'}`,
+     tip:()=>`📍 Visoka trava, njive, suhi travniki · 🕐 Topli opoldanevi · ℹ️ Oglašanje = merjenje temperature (štetje čirikov)`},
+    {icon:'🐝',name:'Čebele & ose',color:'#f59e0b',
+     pct:()=>{let s=0;if(T!=null&&T>15)s+=35;if(solar>200)s+=25;if(W<15)s+=20;if(rain3h<0.5)s+=20;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · Solar: ${Math.round(solar)} W/m² · Veter: ${W.toFixed(0)} km/h`,
+     tip:()=>`📍 Cvetoči sadovnjaki, travniki, lipove lipe · 🕐 9:00–17:00 pri sončnem vremenu · ℹ️ Pri T<12°C ne letajo`},
+    {icon:'🦅',name:'Ujede (kanje, kragulji)',color:'#94a3b8',
+     pct:()=>{let s=0;if(solar>350&&hour>=10&&hour<=16)s+=50;if(T!=null&&T>12)s+=20;if(W>5&&W<20)s+=20;if(rain3h<0.5)s+=10;return Math.min(100,s);},
+     desc:()=>`Solar: ${Math.round(solar)} W/m² · Termike: ${solar>350&&hour>=10&&hour<=16?'AKTIVNE':'slabe'} · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Odprti travniki, gozdni rob, nad grebeni · 🕐 10:00–15:00 · ℹ️ Krožijo na termikah ob lepem opoldanskem vremenu`},
+    {icon:'🌙',name:'Netopirji (somrak)',color:'#a78bfa',
+     pct:()=>{let s=0;if(hour>=20||hour<=5)s+=50;if(T!=null&&T>10)s+=25;if(rain3h<0.5)s+=15;if(mo>=4&&mo<=10)s+=10;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=20||hour<=5?'Nočno okno aktivno':'Čakaj 20:00+'} · ${mo>=4&&mo<=10?'V sezoni':'Zimsko spanje'}`,
+     tip:()=>`📍 Ob vodi (Savinja), pod mostovi, vrtovi · 🕐 20:00–23:00 · ℹ️ Lovijo mušice in komarje — eden sam ulovi 600 žuželk/noč`},
   ];
   body.innerHTML=fauna.map(f=>{
     const pct=f.pct();
@@ -10971,6 +11103,7 @@ function buildFaunaRadar(){
       </div>
       <div class="fauna-bar-bg"><div class="fauna-bar-fill" style="width:${pct}%;background:${f.color}"></div></div>
       <div class="fauna-desc">${f.desc()}</div>
+      <div class="fauna-tip">${f.tip()}</div>
     </div>`;
   }).join('');
 }
