@@ -379,6 +379,43 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /arso-forecast ───────────────────────────────────
+      // ARSO krajevna napoved — Rečica ob Savinji
+      if (path === "/arso-forecast") {
+        const arsoUrls = [
+          "https://vreme.arso.gov.si/api/1.0/location/?location=Re%C4%8Dica+ob+Savinji&lang=sl",
+          "https://vreme.arso.gov.si/api/1.0/forecast_geo/?lat=46.3258&lon=14.9211&lang=sl",
+        ];
+        for (const arsoUrl of arsoUrls) {
+          try {
+            const ctrl = new AbortController();
+            const tid = setTimeout(() => ctrl.abort(), 8000);
+            const r = await fetch(arsoUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "application/json,*/*",
+                "Referer": "https://vreme.arso.gov.si/",
+              },
+              signal: ctrl.signal,
+            });
+            clearTimeout(tid);
+            if (!r.ok) continue;
+            const json = await r.json();
+            // Normalize — ARSO returns {forecast:{location:{},metric:[]}} or {forecast:{...}}
+            const fc = json?.forecast ?? json;
+            const loc = fc?.location ?? {};
+            const days = fc?.metric ?? fc?.days ?? [];
+            if (!days.length) continue;
+            return new Response(JSON.stringify({ location: loc, days, source: arsoUrl }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=1800" }
+            });
+          } catch (_) { continue; }
+        }
+        return new Response(JSON.stringify({ error: "ARSO napoved nedostopna" }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       // ── /arso-water ───────────────────────────────────────
       // ARSO hidrološka postaja — vodostaj Savinje pri Mozirju/Letušu
       // Poskusi GeoJSON feed z vsemi postajami, filtriraj za Savinjo v bližini
