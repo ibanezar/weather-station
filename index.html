@@ -332,7 +332,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .dew-factor-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .dew-advice{font-size:.76rem;color:var(--muted);line-height:1.55;padding:.6rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
 /* Fauna radar */
-.fauna-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.fauna-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}@media(max-width:700px){.fauna-grid{grid-template-columns:1fr 1fr}}
 .fauna-card{padding:.8rem 1rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--fa-accent,var(--green))}
 .fauna-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
 .fauna-icon{font-size:1.5rem;transition:transform .6s;display:inline-block}
@@ -2877,16 +2877,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ═══ VREME & ŽIVLJENJE TAB ═══ -->
   <div id="tab-life" class="tab-pane">
 
-    <!-- Dew matrix + Fauna radar -->
-    <div class="g2" style="margin-bottom:1rem">
-      <div class="card">
-        <div class="clabel">🌿 Makro-Rosiščna Matrika</div>
-        <div id="dew-matrix-body"><div class="clim-loading">Nalaganje…</div></div>
-      </div>
-      <div class="card">
-        <div class="clabel">🔍 Polžji & Kuščarjev Radar</div>
-        <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
-      </div>
+    <!-- Dew matrix -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌿 Makro-Rosiščna Matrika</div>
+      <div id="dew-matrix-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+    <!-- Fauna radar -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔍 Polžji & Kuščarjev Radar</div>
+      <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
     <!-- 1. Golden Window -->
