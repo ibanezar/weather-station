@@ -343,6 +343,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .fauna-bar-bg{height:4px;background:var(--rain-track);border-radius:2px;margin:.35rem 0}
 .fauna-bar-fill{height:100%;border-radius:2px;transition:width .9s ease}
 .fauna-desc{font-size:.66rem;color:var(--muted);line-height:1.4}
+.fauna-tip{font-size:.61rem;color:var(--muted);margin-top:.3rem;display:flex;gap:.35rem;flex-wrap:wrap}.fauna-tip b{color:var(--text);font-weight:500}.kids-meta{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 .6rem;font-size:.7rem;color:var(--muted)}.kids-meta span{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.18rem .5rem}.kids-bag{font-size:.71rem;color:var(--blue);background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:.4rem .75rem;margin-top:.6rem;text-align:left;display:inline-block;max-width:100%}.kids-fact{font-size:.69rem;color:var(--muted);font-style:italic;margin-top:.65rem;line-height:1.55}.gw-spot{font-size:.64rem;color:var(--muted);margin-top:.28rem;font-style:italic}.gw-countdown{font-size:.7rem;font-weight:600;color:var(--amber);padding:.35rem .75rem;background:rgba(245,158,11,.08);border-radius:10px;border:1px solid rgba(245,158,11,.2);margin-bottom:.65rem;display:inline-block}
 /* Data assimilation */
 .da-section-hdr{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--border)}
 .da-section-hdr h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0;font-weight:700}
@@ -10942,23 +10943,41 @@ function buildFaunaRadar(){
   for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);rain72+=(store[d.toISOString().slice(0,10)]?.precipTotal||0);}
   const fauna=[
     {icon:'🐌',name:'Polžji pohod',color:'var(--cyan)',
-     pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>13&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
-     desc:()=>`Rain: ${rain72.toFixed(0)}mm/72h · Vlaga: ${Math.round(H||0)}% · T: ${T?.toFixed(1)||'—'}°C`},
-    {icon:'🦎',name:'Kuščarji na kamnih',color:'var(--amber)',
-     pct:()=>{let s=0;if(T!=null&&T<15&&solar>400)s+=50;if(T!=null&&T>=15&&T<28&&solar>300)s+=40;if(W<10)s+=10;if(mo>=4&&mo<=9)s+=20;return Math.min(100,s);},
-     desc:()=>`Solar: ${Math.round(solar)} W/m² · T: ${T?.toFixed(1)||'—'}°C · ${mo>=4&&mo<=9?'Sezona aktivna':'Izven sezone'}`},
+     pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>10&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
+     desc:()=>`Dež 72h: ${rain72.toFixed(0)} mm · Vlaga: ${Math.round(H||0)}% · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Živice, zelenjavni vrt, gozdni rob · 🕐 ${rain3h>0.5?'Aktivni takoj':'Po dežju, jutranje ure'} · ℹ️ V dežju vidnih do 10× več`},
+    {icon:'🦎',name:'Kuščarji — sončenje',color:'var(--amber)',
+     pct:()=>{let s=0;if(T!=null&&T>=15&&T<28&&solar>200)s+=45;if(T!=null&&T<15&&solar>400)s+=30;if(W<10)s+=15;if(mo>=4&&mo<=9)s+=20;else s-=30;return Math.max(0,Math.min(100,s));},
+     desc:()=>`Solar: ${Math.round(solar)} W/m² · T: ${T?.toFixed(1)||'—'}°C · ${mo>=4&&mo<=9?'Sezona aktivna':'Hibernacija'}`,
+     tip:()=>`📍 Suhe kamnite zidove, skalnate brežine · 🕐 10:00–14:00 · ℹ️ Iščejo toploto kamna po hladni noči`},
     {icon:'🐛',name:'Gosenice & hrošči',color:'var(--green)',
      pct:()=>{let s=0;if(T!=null&&T>15)s+=40;if(W<12)s+=20;if(hour>=9&&hour<=17)s+=20;if(rain72<5)s+=20;return Math.min(100,s);},
-     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=9&&hour<=17?'Dan':'Noč/jutr'}· Wind: ${W.toFixed(0)} km/h`},
-    {icon:'🦔',name:'Ježki (mrak)',color:'var(--purple)',
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=9&&hour<=17?'Dan':'Noč/jutro'} · Veter: ${W.toFixed(0)} km/h`,
+     tip:()=>`📍 Listje grmičevja, spodnja stran listov, lubje · 🕐 Cel dan · ℹ️ Po dežju iščejo suha mesta`},
+    {icon:'🦔',name:'Ježki (mrak/noč)',color:'var(--purple)',
      pct:()=>{let s=0;if(hour<=7||hour>=19)s+=50;if(T!=null&&T>8)s+=25;if(W<10)s+=15;if(rain72<20)s+=10;return Math.min(100,s);},
-     desc:()=>`Aktivno: ${hour<=7||hour>=19?'DA (mrak/noč)':'čakaj mrak'} · T: ${T?.toFixed(1)||'—'}°C`},
+     desc:()=>`Aktivno: ${hour<=7||hour>=19?'DA — mrak/noč':'Čakaj 19:00+'} · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Gozdni rob, vrtovi z mrtvim lesom, kompost · 🕐 19:00–23:00 · ℹ️ Tiho posedi pri robu trave`},
     {icon:'🐸',name:'Žabe & pupki',color:'var(--blue)',
      pct:()=>{let s=0;if(rain3h>0.5||rain72>10)s+=40;if(T!=null&&T>10&&T<22)s+=30;if(H!=null&&H>80)s+=20;if(hour<=8||hour>=19)s+=10;return Math.min(100,s);},
-     desc:()=>`Rain 72h: ${rain72.toFixed(0)}mm · T: ${T?.toFixed(1)||'—'}°C`},
+     desc:()=>`Dež 72h: ${rain72.toFixed(0)} mm · T: ${T?.toFixed(1)||'—'}°C · Vlaga: ${Math.round(H||0)}%`,
+     tip:()=>`📍 Mrtvica ob Savinji, lokve, jarki · 🕐 Večer/noč v dežju · ℹ️ Topel dež sproži selitvene pohode`},
     {icon:'🦗',name:'Kobilice & murni',color:'var(--green)',
      pct:()=>{let s=0;if(T!=null&&T>20)s+=40;if(W<10)s+=20;if(hour>=10&&hour<=19)s+=25;if(mo>=6&&mo<=9)s+=15;return Math.min(100,s);},
-     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${mo>=6&&mo<=9?'Sezona':'Izven sezone'}`},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${mo>=6&&mo<=9?'Visoka sezona':'Izven sezone'}`,
+     tip:()=>`📍 Visoka trava, njive, suhi travniki · 🕐 Topli opoldanevi · ℹ️ Oglašanje = merjenje temperature (štetje čirikov)`},
+    {icon:'🐝',name:'Čebele & ose',color:'#f59e0b',
+     pct:()=>{let s=0;if(T!=null&&T>15)s+=35;if(solar>200)s+=25;if(W<15)s+=20;if(rain3h<0.5)s+=20;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · Solar: ${Math.round(solar)} W/m² · Veter: ${W.toFixed(0)} km/h`,
+     tip:()=>`📍 Cvetoči sadovnjaki, travniki, lipove lipe · 🕐 9:00–17:00 pri sončnem vremenu · ℹ️ Pri T<12°C ne letajo`},
+    {icon:'🦅',name:'Ujede (kanje, kragulji)',color:'#94a3b8',
+     pct:()=>{let s=0;if(solar>350&&hour>=10&&hour<=16)s+=50;if(T!=null&&T>12)s+=20;if(W>5&&W<20)s+=20;if(rain3h<0.5)s+=10;return Math.min(100,s);},
+     desc:()=>`Solar: ${Math.round(solar)} W/m² · Termike: ${solar>350&&hour>=10&&hour<=16?'AKTIVNE':'slabe'} · T: ${T?.toFixed(1)||'—'}°C`,
+     tip:()=>`📍 Odprti travniki, gozdni rob, nad grebeni · 🕐 10:00–15:00 · ℹ️ Krožijo na termikah ob lepem opoldanskem vremenu`},
+    {icon:'🌙',name:'Netopirji (somrak)',color:'#a78bfa',
+     pct:()=>{let s=0;if(hour>=20||hour<=5)s+=50;if(T!=null&&T>10)s+=25;if(rain3h<0.5)s+=15;if(mo>=4&&mo<=10)s+=10;return Math.min(100,s);},
+     desc:()=>`T: ${T?.toFixed(1)||'—'}°C · ${hour>=20||hour<=5?'Nočno okno aktivno':'Čakaj 20:00+'} · ${mo>=4&&mo<=10?'V sezoni':'Zimsko spanje'}`,
+     tip:()=>`📍 Ob vodi (Savinja), pod mostovi, vrtovi · 🕐 20:00–23:00 · ℹ️ Lovijo mušice in komarje — eden sam ulovi 600 žuželk/noč`},
   ];
   body.innerHTML=fauna.map(f=>{
     const pct=f.pct();
@@ -10971,6 +10990,7 @@ function buildFaunaRadar(){
       </div>
       <div class="fauna-bar-bg"><div class="fauna-bar-fill" style="width:${pct}%;background:${f.color}"></div></div>
       <div class="fauna-desc">${f.desc()}</div>
+      <div class="fauna-tip">${f.tip()}</div>
     </div>`;
   }).join('');
 }
