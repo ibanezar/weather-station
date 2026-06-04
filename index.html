@@ -6548,6 +6548,15 @@ async function fetchLocalDailyForecast(){
   const box=document.getElementById('daily-fc-content');
   const upd=document.getElementById('daily-fc-updated');
   if(!box)return;
+  // ── Try ARSO first ─────────────────────────────────────────
+  try{
+    const arso=await fetch(PROXY+'/arso-forecast').then(r=>r.json());
+    if(arso?.days?.length){
+      _renderArsoDailyForecast(arso,box,upd);
+      return;
+    }
+  }catch(_){}
+  // ── Fallback: Open-Meteo ───────────────────────────────────
   try{
     const url='https://api.open-meteo.com/v1/forecast'
       +'?latitude='+LAT+'&longitude='+LON
@@ -6575,7 +6584,7 @@ async function fetchLocalDailyForecast(){
             '<div class="daily-fc-text">'+text+'</div>'+
           '</div>'+
         '</div>'+
-        '<div class="daily-fc-note">Napoved je modelna ocena za koordinate postaje IREICA1 pri Rečici ob Savinji in se samodejno osvežuje iz Open-Meteo.</div>'+
+        '<div class="daily-fc-note">Rezervni vir: Open-Meteo (ARSO ni dosegljiv). Modelna ocena za koordinate IREICA1.</div>'+
       '</div>'+
       '<div class="daily-fc-kpis">'+
         '<div class="daily-fc-kpi"><strong>'+Math.round(tmax)+'° / '+Math.round(tmin)+'°</strong><span>temperatura</span></div>'+
@@ -6583,14 +6592,81 @@ async function fetchLocalDailyForecast(){
         '<div class="daily-fc-kpi"><strong>'+Math.round(prob)+'%</strong><span>verj. padavin</span></div>'+
         '<div class="daily-fc-kpi"><strong>'+Math.round(wind)+' km/h</strong><span>veter max</span></div>'+
         '<div class="daily-fc-kpi"><strong>'+Math.round(uv)+'</strong><span>UV max</span></div>'+
-        '<div class="daily-fc-kpi"><strong>Rečica</strong><span>lokacija</span></div>'+
+        '<div class="daily-fc-kpi"><strong>Open-Meteo</strong><span>vir</span></div>'+
       '</div>';
-    if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    if(upd)upd.textContent='Open-Meteo · posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){
     box.innerHTML='<div style="color:var(--muted);font-size:.8rem">Dnevna napoved trenutno ni na voljo.</div>';
     if(upd)upd.textContent='ni na voljo';
     console.warn('LocalDailyForecast:',e);
   }
+}
+
+function _renderArsoDailyForecast(arso,box,upd){
+  // Flexible field extraction — ARSO field names may vary between endpoints
+  const loc=arso.location||{};
+  const locTitle=loc.title||loc.name||'Rečica ob Savinji';
+  const locAlt=loc.altitude||loc.nadmVis||'';
+  // Use today's entry (first day or match by date)
+  const todayStr=new Date().toISOString().slice(0,10);
+  const d=arso.days.find(x=>(x.valid_date||'').startsWith(todayStr))||arso.days[0];
+  if(!d){if(box)box.innerHTML='<div style="color:var(--muted);font-size:.8rem">ARSO: ni podatkov za danes.</div>';return;}
+
+  // Normalize fields — try multiple naming conventions
+  const tmax=d.tmax_24h??d.tmax??d.tx??d.temperature_max??null;
+  const tmin=d.tmin_24h??d.tmin??d.tn??d.temperature_min??null;
+  const rain=d.rr24??d.rr??d.tp24??d.precipitation??null;
+  const prob=d.prob_rr24??d.probRr24??d.pp24??null;
+  // ARSO wind in m/s → convert to km/h
+  const windMs=d.ffavg10m??d.ff??d.wind_speed??null;
+  const wind=windMs!=null?Math.round(windMs*3.6):null;
+  const windDir=d.ddavg??d.dd??d.wind_dir??'';
+  const uv=d.uvg??d.uv_i??d.uv??null;
+  const desc=d.nn24||d.nn||d.weather||d.shortFcst_sl||d.shortFcst||'';
+  // Full forecast text (Slovenian) — priority: longFcst, then shortFcst, then description
+  const fcText=d.longFcst_sl||d.longFcst||d.shortFcst_sl||d.shortFcst||d.fcst||d.napoved||'';
+  // Date label
+  const dateStr=d.valid_date||d.date||todayStr;
+  const dateLbl=d.valid_date_txt||new Date(dateStr+'T12:00:00').toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+
+  // Weather icon: derive from description if no wmo code
+  const iconTxt=desc||fcText||'';
+  const icon=iconTxt.match(/dež|padavin|ploha/i)?'🌧':
+             iconTxt.match(/sneg|snežen/i)?'❄️':
+             iconTxt.match(/burja|veter|vetrovno/i)?'💨':
+             iconTxt.match(/megla|megleno/i)?'🌫':
+             iconTxt.match(/jasno|sončno|jasn/i)?'☀️':
+             iconTxt.match(/oblačno|oblak/i)?'🌥':'🌤';
+
+  // Build KPI row (only show non-null values)
+  const kpis=[
+    tmax!=null&&tmin!=null?`<div class="daily-fc-kpi"><strong>${Math.round(tmax)}° / ${Math.round(tmin)}°</strong><span>temperatura</span></div>`:'',
+    rain!=null?`<div class="daily-fc-kpi"><strong>${(+rain).toFixed(1)} mm</strong><span>padavine</span></div>`:'',
+    prob!=null?`<div class="daily-fc-kpi"><strong>${Math.round(prob)}%</strong><span>verj. padavin</span></div>`:'',
+    wind!=null?`<div class="daily-fc-kpi"><strong>${wind} km/h${windDir?' '+windDir:''}</strong><span>veter</span></div>`:'',
+    uv!=null?`<div class="daily-fc-kpi"><strong>${Math.round(uv)}</strong><span>UV indeks</span></div>`:'',
+    `<div class="daily-fc-kpi"><strong>${locTitle}${locAlt?' · '+locAlt+' m':''}</strong><span>lokacija ARSO</span></div>`,
+  ].filter(Boolean).join('');
+
+  // Main forecast text block
+  const fcBlock=fcText
+    ?`<div class="daily-fc-text" style="font-size:.82rem;line-height:1.7;color:var(--text)">${fcText}</div>`
+    :(desc?`<div class="daily-fc-text">${desc}</div>`:'');
+
+  box.innerHTML=
+    '<div>'+
+      '<div class="daily-fc-main">'+
+        '<div class="daily-fc-icon">'+icon+'</div>'+
+        '<div>'+
+          `<div class="daily-fc-title">${dateLbl}${desc?' · '+desc:''}</div>`+
+          fcBlock+
+        '</div>'+
+      '</div>'+
+      `<div class="daily-fc-note" style="margin-top:.55rem">Uradna napoved ARSO — Agencija RS za okolje · lokacija: ${locTitle}${locAlt?' ('+locAlt+' m n.m.)':''}</div>`+
+    '</div>'+
+    `<div class="daily-fc-kpis">${kpis}</div>`;
+
+  if(upd)upd.textContent='ARSO · posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
 async function fetchTextForecast(){
