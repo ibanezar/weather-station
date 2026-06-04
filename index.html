@@ -593,6 +593,27 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .ca-purple{border-left:3px solid var(--purple)}
 .ca-cyan{border-left:3px solid var(--cyan)}
 .ca-red{border-left:3px solid var(--red)}
+/* ARSO normals climatogram */
+.norm-card{border-radius:18px;padding:1.25rem 1.5rem;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);margin-bottom:1rem}
+.norm-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.85rem}
+.norm-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text)}
+.norm-src{font-size:.66rem;color:var(--muted)}
+.norm-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:.85rem}
+.norm-chart-svg{display:block;min-width:340px;width:100%}
+.norm-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-bottom:.85rem}
+@media(max-width:580px){.norm-kpi-row{grid-template-columns:1fr 1fr}}
+.norm-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .85rem}
+.norm-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:400;color:var(--text);line-height:1.1}
+.norm-kpi-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.15rem}
+.norm-anom{border-radius:13px;padding:.8rem 1rem;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.norm-anom-title{font-size:.72rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+.norm-anom-row{display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.78rem}
+.norm-anom-item{display:flex;flex-direction:column;gap:.1rem}
+.norm-anom-val{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:400;color:var(--text)}
+.norm-anom-lbl{font-size:.63rem;color:var(--muted)}
+.norm-delta{font-size:.72rem;font-weight:600;margin-left:.3rem}
+.norm-delta.pos{color:var(--red)}.norm-delta.neg{color:var(--blue)}.norm-delta.neutral{color:var(--muted)}
+.norm-alt-note{font-size:.67rem;color:var(--muted);margin-top:.55rem;padding-top:.55rem;border-top:1px solid var(--fc-border);line-height:1.6}
 /* ── Insights row (6 new features) ── */
 .insights-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .insight-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.25rem;box-shadow:var(--card-shadow);position:relative;overflow:hidden;transition:background .35s;min-height:80px}
@@ -2564,6 +2585,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ═══ KLIMATOLOGIJA TAB ═══ -->
   <div id="tab-climate" class="tab-pane">
+
+    <!-- ARSO normale 1991–2020 -->
+    <div class="norm-card" id="norm-card">
+      <div class="norm-hdr">
+        <span class="norm-title">📊 ARSO Klimatološke normale 1991–2020</span>
+        <span class="norm-src" id="norm-src">Celje · 241 m n.m. · referenčna postaja</span>
+      </div>
+      <div id="norm-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
 
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
@@ -6120,6 +6150,8 @@ async function fetchClimateComparison(){
     const curAvgT=curTemps.length?curTemps.reduce((a,b)=>a+b,0)/curTemps.length:null;
     const curR=curEntries.reduce((s,[,v])=>s+(v.precipTotal||0),0);
     const allResults=[...results,{yr:y,avgT:curAvgT,totR:curR,isCurrent:true}];
+    // Refresh ARSO normals anomaly with current month data
+    try{buildArsoNormals(curAvgT,curR);}catch(_){}
 
     const histOk=results.filter(r=>r.avgT!=null);
     const histAvgT=histOk.length?histOk.reduce((s,r)=>s+r.avgT,0)/histOk.length:null;
@@ -12302,8 +12334,148 @@ function refreshLife(){
   try{buildDewMatrix();buildFaunaRadar();buildGoldenWindow();buildKidsActivity();buildForestPulse();buildTimeCapsule();}catch(e){}
 }
 
+// ── ARSO klimatološke normale 1991–2020 — Celje (0014) ────
+// Vir: ARSO, Klimatološke normale za obdobje 1991–2020
+const ARSO_NORMALS={
+  station:'Celje',stationId:'0014',lat:46.238,lon:15.225,elev:241,period:'1991–2020',
+  // indeks 0=jan … 11=dec
+  temp:  [0.8,3.2,7.6,12.4,17.1,20.3,22.1,21.7,16.2,10.8,5.1,1.5],  // srednja T (°C)
+  tmax:  [3.8,6.7,12.0,17.4,22.4,25.9,27.7,27.3,21.7,15.4,8.3,4.3], // srednji Tmax
+  tmin:  [-2.2,-0.3,3.2,7.5,11.8,14.7,16.5,16.1,10.7,6.2,1.9,-1.3], // srednji Tmin
+  precip:[56,51,77,93,102,120,107,108,103,111,106,77],               // mesečne padavine (mm)
+  sun:   [68,95,145,171,208,229,253,236,185,125,67,54],              // sončne ure
+};
+const SL_MON_SHORT=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+
+function buildArsoNormals(curMonthT, curMonthR){
+  const el=document.getElementById('norm-body');if(!el)return;
+  const N=ARSO_NORMALS;
+  const curM=new Date().getMonth(); // 0-based
+
+  // ── SVG climatogram ────────────────────────────────────────
+  const W=600,H=200,PL=42,PR=48,PT=18,PB=34;
+  const CW=W-PL-PR,CH=H-PT-PB;
+  const barW=Math.floor(CW/12)-2;
+  const maxP=Math.max(...N.precip,1);
+  const minT=Math.min(...N.tmin,-5),maxT=Math.max(...N.tmax,25);
+  const Ty=t=>PT+CH-(t-minT)/(maxT-minT)*CH;
+  const Py=p=>PT+CH-p/maxP*CH;
+
+  // Precipitation bars
+  let bars='';
+  N.precip.forEach((p,i)=>{
+    const x=PL+i*(CW/12)+1;
+    const bh=p/maxP*CH;
+    const isCur=i===curM;
+    const fill=isCur?'rgba(96,165,250,.85)':'rgba(96,165,250,.38)';
+    const stroke=isCur?'rgba(96,165,250,1)':'none';
+    bars+=`<rect x="${x.toFixed(1)}" y="${(PT+CH-bh).toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1" rx="3"><title>${SL_MON_SHORT[i]}: ${p} mm padavin</title></rect>`;
+    // Precip label on hover (value inside bar if tall enough)
+    if(bh>20)bars+=`<text x="${(x+barW/2).toFixed(1)}" y="${(PT+CH-bh+13).toFixed(1)}" font-size="8.5" fill="${isCur?'#fff':'rgba(96,165,250,.8)'}" text-anchor="middle" font-family="JetBrains Mono,monospace">${p}</text>`;
+  });
+
+  // Temperature line (mean)
+  const tPts=N.temp.map((t,i)=>[(PL+i*(CW/12)+barW/2+1).toFixed(1),Ty(t).toFixed(1)]);
+  const tPath='M '+tPts.map(p=>p.join(',')).join(' L ');
+  // Area fill under temp line
+  const tArea='M '+tPts[0][0]+','+PT+' L '+tPts.map(p=>p.join(',')).join(' L ')+' L '+tPts[11][0]+','+PT+' Z';
+
+  // Current month marker (circle on temp line)
+  const [cx,cy]=tPts[curM];
+  const curCircle=`<circle cx="${cx}" cy="${cy}" r="5" fill="#f97316" stroke="white" stroke-width="2"/>`;
+
+  // Axes
+  // Temp axis (left): ticks at 0, 5, 10, 15, 20 °C
+  let yTicks='';
+  [-5,0,5,10,15,20,25].filter(v=>v>=minT&&v<=maxT).forEach(v=>{
+    const y=Ty(v).toFixed(1);
+    yTicks+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="rgba(128,128,128,.1)" stroke-width="1"/>`;
+    yTicks+=`<text x="${(PL-4).toFixed(1)}" y="${(+y+3.5).toFixed(1)}" font-size="8.5" fill="rgba(128,128,128,.55)" text-anchor="end" font-family="JetBrains Mono,monospace">${v}°</text>`;
+  });
+  // Precip axis (right): ticks at 0, 50, 100, 150
+  [0,50,100,150].filter(v=>v<=maxP+20).forEach(v=>{
+    const y=(PT+CH-v/maxP*CH).toFixed(1);
+    yTicks+=`<text x="${(W-PR+5).toFixed(1)}" y="${(+y+3.5).toFixed(1)}" font-size="8.5" fill="rgba(96,165,250,.6)" text-anchor="start" font-family="JetBrains Mono,monospace">${v}</text>`;
+  });
+  // Month labels
+  let xLabels='';
+  SL_MON_SHORT.forEach((m,i)=>{
+    const x=(PL+i*(CW/12)+barW/2+1).toFixed(1);
+    const isCur=i===curM;
+    xLabels+=`<text x="${x}" y="${(H-5).toFixed(1)}" font-size="${isCur?9.5:8.5}" fill="${isCur?'var(--text)':'rgba(128,128,128,.65)'}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="${isCur?700:400}">${m}</text>`;
+  });
+  // Axis labels
+  const axisLbls=
+    `<text x="${(PL-34).toFixed(1)}" y="${(PT+CH/2).toFixed(1)}" font-size="8" fill="rgba(249,115,22,.7)" transform="rotate(-90,${(PL-34).toFixed(1)},${(PT+CH/2).toFixed(1)})" text-anchor="middle" font-family="Inter,sans-serif">Temp (°C)</text>`+
+    `<text x="${(W-PR+38).toFixed(1)}" y="${(PT+CH/2).toFixed(1)}" font-size="8" fill="rgba(96,165,250,.7)" transform="rotate(90,${(W-PR+38).toFixed(1)},${(PT+CH/2).toFixed(1)})" text-anchor="middle" font-family="Inter,sans-serif">Padavine (mm)</text>`;
+
+  const svg=
+    `<svg class="norm-chart-svg" viewBox="0 0 ${W} ${H}" height="${H}" xmlns="http://www.w3.org/2000/svg">`+
+    `<defs><linearGradient id="tAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(249,115,22,.18)"/><stop offset="100%" stop-color="rgba(249,115,22,.02)"/></linearGradient></defs>`+
+    yTicks+bars+
+    `<path d="${tArea}" fill="url(#tAreaGrad)"/>`+
+    `<path d="${tPath}" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linejoin="round"/>`+
+    curCircle+xLabels+axisLbls+
+    `</svg>`;
+
+  // ── Annual KPIs ─────────────────────────────────────────────
+  const annualT=(N.temp.reduce((s,v)=>s+v,0)/12).toFixed(1);
+  const annualP=N.precip.reduce((s,v)=>s+v,0);
+  const annualSun=N.sun.reduce((s,v)=>s+v,0);
+  const kpis=
+    '<div class="norm-kpi-row">'+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualT}°C</div><div class="norm-kpi-lbl">Let. srednja T</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualP} mm</div><div class="norm-kpi-lbl">Let. padavine</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualSun} h</div><div class="norm-kpi-lbl">Sončne ure/leto</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${N.elev} m</div><div class="norm-kpi-lbl">Nadm. višina</div></div>`+
+    '</div>';
+
+  // ── Current month anomaly ───────────────────────────────────
+  let anomHtml='';
+  const normT=N.temp[curM], normP=N.precip[curM];
+  const mName=new Date().toLocaleDateString('sl',{month:'long'});
+  if(curMonthT!=null||curMonthR!=null){
+    const dT=curMonthT!=null?curMonthT-normT:null;
+    const dP=curMonthR!=null?curMonthR-normP:null;
+    const dPpct=curMonthR!=null?((curMonthR-normP)/normP*100):null;
+    const Tcls=dT==null?'neutral':Math.abs(dT)<0.5?'neutral':dT>0?'pos':'neg';
+    const Pcls=dP==null?'neutral':Math.abs(dPpct)<8?'neutral':dP>0?'neg':'pos'; // more precip = blue
+    anomHtml=
+      '<div class="norm-anom">'+
+      `<div class="norm-anom-title">${mName} — anomalija vs. normala ${N.period}</div>`+
+      '<div class="norm-anom-row">'+
+      (curMonthT!=null?
+        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthT.toFixed(1)}°C<span class="norm-delta ${Tcls}">${dT>=0?'+':''}${dT.toFixed(1)}°</span></div><div class="norm-anom-lbl">Srednja T (norma ${normT.toFixed(1)}°)</div></div>`:'')  +
+      (curMonthR!=null?
+        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthR.toFixed(0)} mm<span class="norm-delta ${Pcls}">${dP>=0?'+':''}${dP.toFixed(0)} mm</span></div><div class="norm-anom-lbl">Padavine (norma ${normP} mm)</div></div>`:'')  +
+      '</div>'+
+      '</div>';
+  } else {
+    anomHtml=`<div class="norm-anom"><div class="norm-anom-title">${mName} — norma ${N.period}</div>`+
+      `<div class="norm-anom-row">`+
+      `<div class="norm-anom-item"><div class="norm-anom-val">${normT.toFixed(1)}°C</div><div class="norm-anom-lbl">Srednja T norma</div></div>`+
+      `<div class="norm-anom-item"><div class="norm-anom-val">${normP} mm</div><div class="norm-anom-lbl">Padavine norma</div></div>`+
+      `</div></div>`;
+  }
+
+  // ── Altitude note ───────────────────────────────────────────
+  const elevDiff=366-N.elev; // Rečica 366m vs Celje 241m
+  const tCorr=(elevDiff*0.0065).toFixed(1);
+  const altNote=`<div class="norm-alt-note">Rečica ob Savinji (366 m n.m.) je za ${elevDiff} m višja od Celje — termični popravek ≈ −${tCorr}°C. Normale so za Celje; lokalno pričakuj nekoliko hladnejše temperature in podoben padavinski režim. · <a href="https://meteo.arso.gov.si/met/sl/climate/tables/climate-normals/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO vir</a></div>`;
+
+  el.innerHTML=
+    '<div class="norm-chart-wrap">'+svg+'</div>'+
+    '<div style="display:flex;gap:.5rem;flex-wrap:wrap;font-size:.65rem;color:var(--muted);margin-bottom:.75rem">'+
+    '<span><span style="display:inline-block;width:14px;height:8px;background:rgba(96,165,250,.55);border-radius:2px;vertical-align:middle;margin-right:3px"></span>Padavine (mm) ↗ desna os</span>'+
+    '<span><span style="display:inline-block;width:16px;height:2.5px;background:#f97316;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Srednja T (°C) ↗ leva os</span>'+
+    '<span style="background:rgba(249,115,22,.15);border-radius:50%;width:9px;height:9px;display:inline-block;vertical-align:middle;margin-right:3px;border:1.5px solid #f97316"></span><span>Ta mesec</span>'+
+    '</div>'+
+    kpis+anomHtml+altNote;
+}
+
 function initClimate(){
   if(_climInit)return;_climInit=true;
+  try{buildArsoNormals(null,null);}catch(e){console.error('arso-norm',e);}
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
   try{buildGrowingSeason();}catch(e){console.error('gs',e);}
