@@ -593,6 +593,20 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .ca-purple{border-left:3px solid var(--purple)}
 .ca-cyan{border-left:3px solid var(--cyan)}
 .ca-red{border-left:3px solid var(--red)}
+/* Tomorrow.io minutely precip */
+.tm-status{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.tm-pill{padding:.28rem .8rem;border-radius:999px;font-size:.72rem;font-weight:600;border:1px solid}
+.tm-pill.dry{background:rgba(74,222,128,.14);border-color:rgba(74,222,128,.35);color:var(--green)}
+.tm-pill.rain{background:rgba(96,165,250,.14);border-color:rgba(96,165,250,.35);color:var(--blue)}
+.tm-pill.snow{background:rgba(34,211,238,.14);border-color:rgba(34,211,238,.35);color:var(--cyan)}
+.tm-pill.heavy{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#f97316}
+.tm-pill.storm{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
+.tm-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
+.tm-chart-svg{display:block;min-width:360px;width:100%}
+.tm-legend{display:flex;gap:.7rem;flex-wrap:wrap;font-size:.65rem;color:var(--muted);margin-top:.5rem;align-items:center}
+.tm-legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.tm-setup{font-size:.78rem;color:var(--muted);line-height:1.6;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.9rem 1.1rem}
+.tm-setup code{font-family:'JetBrains Mono',monospace;font-size:.74rem;background:rgba(0,0,0,.1);padding:.1rem .35rem;border-radius:5px}
 /* ── Insights row (6 new features) ── */
 .insights-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .insight-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.25rem;box-shadow:var(--card-shadow);position:relative;overflow:hidden;transition:background .35s;min-height:80px}
@@ -2687,6 +2701,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
         <div class="sc-hero-kpis" id="sc-hero-kpis"></div>
       </div>
+    </div>
+
+    <!-- Tomorrow.io Minutely Precipitation -->
+    <div class="card chart-card" style="margin-bottom:1rem" id="tm-card">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">⛈ Minutna napoved padavin — naslednja ura</span>
+        <span class="chart-range" id="tm-updated">Tomorrow.io · —</span>
+      </div>
+      <div id="tm-body"><div class="clim-loading">Nalaganje minutnih podatkov…</div></div>
     </div>
 
     <!-- Instability indices -->
@@ -12819,9 +12842,110 @@ function updateAdvViz(d,ci){
   try{drawFFTPeriodogram();}catch(e){console.warn('FFT:',e);}
 }
 
+// ── Tomorrow.io minutely precipitation ─────────────────────
+const _TM_CACHE_KEY='wx-tomorrow-minutely-v1';
+async function fetchTomorrowMinutely(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(_TM_CACHE_KEY)||'null');
+    if(cached&&Date.now()-cached.ts<10*60000){renderMinutelyRain(cached.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/tomorrow-minutely');
+    if(!r.ok){
+      const d=await r.json().catch(()=>({}));
+      if(d.error==='no_key'){renderMinutelyRainSetup();return;}
+      throw new Error('HTTP '+r.status);
+    }
+    const data=await r.json();
+    try{localStorage.setItem(_TM_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderMinutelyRain(data);
+  }catch(e){
+    const el=document.getElementById('tm-body');
+    if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Minutni podatki nedostopni</div>';
+    console.warn('Tomorrow.io:',e);
+  }
+}
+function renderMinutelyRainSetup(){
+  const el=document.getElementById('tm-body');if(!el)return;
+  el.innerHTML='<div class="tm-setup"><b>Aktivacija Tomorrow.io minutnih padavin:</b><br>1. Registracija na <a href="https://app.tomorrow.io" target="_blank" rel="noopener" style="color:var(--blue)">app.tomorrow.io</a> (brezplačno, 500 klicev/dan)<br>2. Kopiraj API ključ iz Development → API Keys<br>3. V <code>worker.js</code> nastavi <code>TOMORROW_KEY = "tvoj-ključ"</code><br>4. Redeploy worker</div>';
+}
+function renderMinutelyRain(data){
+  const el=document.getElementById('tm-body');if(!el)return;
+  const minutes=data?.timelines?.minutely;
+  if(!minutes||!minutes.length){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Ni minutnih podatkov</div>';return;}
+  const pts=minutes.slice(0,60).map(m=>({
+    t:new Date(m.time),
+    intensity:m.values?.precipitationIntensity??0,
+    type:m.values?.precipitationType??0,
+    prob:m.values?.precipitationProbability??0
+  }));
+  const maxInt=Math.max(...pts.map(p=>p.intensity),0.01);
+  const total=pts.reduce((s,p)=>s+p.intensity/60,0);
+  const firstWet=pts.findIndex(p=>p.intensity>0.1);
+  const hasRain=firstWet>=0;
+  const typeNames={0:'Suho',1:'Dež',2:'Sneg',3:'Žled',4:'Sodra'};
+  const dominantType=hasRain?(pts.filter(p=>p.intensity>0.1).sort((a,b)=>b.intensity-a.intensity)[0]?.type||1):0;
+  let pillClass='dry',pillText='Brez padavin 60 min';
+  if(hasRain){
+    const inten=pts[firstWet].intensity;
+    if(inten>10){pillClass='storm';pillText='Nevihta';}
+    else if(inten>4){pillClass='heavy';pillText='Mocen dez';}
+    else{pillClass=dominantType===2?'snow':'rain';pillText=dominantType===2?'Sneg':'Dez';}
+    if(firstWet>0)pillText+=' cez '+firstWet+' min';
+    else pillText+=' zdaj';
+  }
+  // SVG bar chart
+  const W=600,H=100,PAD_B=22,chartH=H-PAD_B;
+  const typeCol=t=>t===2?'#22d3ee':(t===3||t===4)?'#a78bfa':'#60a5fa';
+  let bars='',probPts=[];
+  pts.forEach((p,i)=>{
+    const x=i*(W/60);
+    const barH=Math.max(2,(Math.sqrt(p.intensity/Math.max(maxInt,0.01)))*chartH);
+    const y=chartH-barH;
+    const col=p.intensity>0.1?typeCol(p.type):'rgba(100,116,139,.15)';
+    const op=p.intensity>0.1?Math.min(1,0.35+(p.intensity/maxInt)*0.65):1;
+    const lbl=p.t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+' · '+p.intensity.toFixed(1)+' mm/h · '+typeNames[p.type];
+    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(W/60-1).toFixed(1)}" height="${barH.toFixed(1)}" fill="${col}" opacity="${op.toFixed(2)}" rx="2"><title>${lbl}</title></rect>`;
+    probPts.push(`${(x+W/120).toFixed(1)},${(chartH-(p.prob/100)*chartH).toFixed(1)}`);
+  });
+  const probPath='M '+probPts.join(' L ');
+  let xlabels='';
+  [0,10,20,30,40,50,59].forEach(i=>{
+    const x=(i*(W/60)+W/120).toFixed(1);
+    const lbl=pts[i].t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    xlabels+=`<text x="${x}" y="${H-5}" font-size="8" fill="rgba(128,128,128,.55)" text-anchor="middle" font-family="JetBrains Mono,monospace">${lbl}</text>`;
+  });
+  const statsHtml=hasRain
+    ?`<span>Max: <strong>${maxInt.toFixed(1)} mm/h</strong></span><span>Skupaj: <strong>${total.toFixed(2)} mm</strong></span><span>Tip: <strong>${typeNames[dominantType]}</strong></span>`
+    :'<span style="color:var(--green)">Suho v naslednjih 60 minutah</span>';
+  el.innerHTML=
+    '<div class="tm-status">'+
+      '<span class="tm-pill '+pillClass+'">'+(hasRain?'':'✅ ')+pillText+'</span>'+
+      (hasRain?'<span style="font-size:.72rem;color:var(--muted)">Max '+maxInt.toFixed(1)+' mm/h · '+total.toFixed(2)+' mm skupaj</span>':'')+
+    '</div>'+
+    '<div class="tm-chart-wrap">'+
+      '<svg class="tm-chart-svg" viewBox="0 0 '+W+' '+H+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg">'+
+        bars+
+        '<path d="'+probPath+'" fill="none" stroke="rgba(251,191,36,.55)" stroke-width="1.5" stroke-dasharray="3,2"/>'+
+        '<line x1="0" y1="'+chartH+'" x2="'+W+'" y2="'+chartH+'" stroke="rgba(128,128,128,.15)" stroke-width="1"/>'+
+        xlabels+
+      '</svg>'+
+    '</div>'+
+    '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.55rem;font-size:.72rem;color:var(--muted)">'+statsHtml+'</div>'+
+    '<div class="tm-legend">'+
+      '<span><span class="tm-legend-dot" style="background:#60a5fa"></span>Dež</span>'+
+      '<span><span class="tm-legend-dot" style="background:#22d3ee"></span>Sneg</span>'+
+      '<span><span class="tm-legend-dot" style="background:#a78bfa"></span>Žled/sodra</span>'+
+      '<span><span class="tm-legend-dot" style="background:rgba(251,191,36,.7)"></span>Verjetnost (%)</span>'+
+      '<span style="margin-left:auto"><a href="https://tomorrow.io" target="_blank" rel="noopener" style="color:var(--muted)">Tomorrow.io</a></span>'+
+    '</div>';
+  const upd=document.getElementById('tm-updated');
+  if(upd)upd.textContent='Tomorrow.io · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+}
 function initStormChaser(){
   if(!_scInit){_scInit=true;}
   fetchStormChaser();
+  fetchTomorrowMinutely();
   try{buildWindFingerprint();}catch(e){console.error('fp',e);}
   try{buildTurbulenceIndex();}catch(e){console.error('turb',e);}
 }
@@ -13119,6 +13243,7 @@ setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchComingUp,30*60*1000);
+setInterval(()=>{if(document.getElementById('tab-storm')?.classList.contains('active'))fetchTomorrowMinutely();},10*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
 setInterval(fetchFlood,60*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
