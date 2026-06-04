@@ -1293,18 +1293,20 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .nt-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.1rem;margin-bottom:1.1rem}
 .nt-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:1.1rem}
 .nt-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.2rem;backdrop-filter:blur(12px)}
-.nt-chart{position:relative;height:200px;margin-top:.75rem}
+.nt-chart{position:relative;height:220px;margin-top:.75rem}
+@media(max-width:600px){.nt-chart{height:240px}}
 
 /* ── Detailed forecast ── */
 .fc2-hour-grid{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;-webkit-overflow-scrolling:touch;margin-top:.75rem;scrollbar-width:none}
 .fc2-hour-grid::-webkit-scrollbar{display:none}
-.fc2-h{flex-shrink:0;width:52px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .3rem;display:flex;flex-direction:column;align-items:center;gap:.18rem;font-size:.7rem;text-align:center}
+.fc2-h{flex-shrink:0;width:58px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .35rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.72rem;text-align:center}
 .fc2-h.now{border-color:var(--blue);background:rgba(56,189,248,.08)}
-.fc2-h-time{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.76rem}
-.fc2-h-emoji{font-size:1.1rem;line-height:1}
+.fc2-h-time{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.fc2-h-emoji{font-size:1.25rem;line-height:1}
 .fc2-h-temp{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text)}
 .fc2-h-rain{color:var(--rain-col);font-family:'JetBrains Mono',monospace;min-height:.85em}
 .fc2-h-wind{color:var(--muted)}
+@media(max-width:600px){.fc2-h{width:68px;padding:.65rem .4rem;font-size:.78rem}.fc2-h-time{font-size:.82rem}.fc2-h-emoji{font-size:1.4rem}.fc2-hour-grid{gap:.5rem}}
 .fc2-stats{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.85rem}
 .fc2-stat{flex:1;min-width:110px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .8rem}
 .fc2-stat-n{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:300}
@@ -3262,7 +3264,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           <span class="clabel" style="margin:0" id="fc2-chart-lbl">—</span>
           <span class="chart-range" id="fc2-chart-sub"></span>
         </div>
-        <div class="nt-chart"><svg id="fc2-svg" style="width:100%;display:block" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div class="nt-chart"><svg id="fc2-svg" style="width:100%;height:100%;display:block" viewBox="0 0 900 180" preserveAspectRatio="none"></svg></div>
         <div class="fc2-stats" id="fc2-stats"></div>
       </div>
     </div>
@@ -6533,7 +6535,7 @@ function _wmoEmojiDN(c,isDay){if(!isDay&&c in _WMO_EMOJI_NIGHT)return _WMO_EMOJI
 function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv}){
   const parts=[];
   const desc=_wmoTxt(wmo).toLowerCase();
-  parts.push('Danes bo v Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
+  parts.push('Danes bo na Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
   if(rain>=8)parts.push('Pričakovane so izrazitejše padavine, skupaj približno '+rain.toFixed(1)+' mm.');
   else if(rain>=0.5)parts.push('Možne so padavine, skupaj okoli '+rain.toFixed(1)+' mm.');
   else parts.push('Večjih padavin model za danes ne nakazuje.');
@@ -9611,7 +9613,7 @@ async function buildFingerprint(){
   // Narrative
   if(narr){
     const warm=avgPrecip>1300?'nadpovprečno mokra':'normalno vlažna';
-    narr.textContent=`Postaja IREICA1 v Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
+    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
   }
 }
 
@@ -10156,7 +10158,7 @@ async function buildTriviaWorldCompare(){
     }));
     const sorted=results.filter(r=>r.temp!=null).sort((a,b)=>Math.abs(a.temp-myT)-Math.abs(b.temp-myT));
     const top3=sorted.slice(0,3);
-    if(sub)sub.textContent=`Danes je v Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
+    if(sub)sub.textContent=`Danes je na Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
     cards.innerHTML='';
     // Add Rečica card first
     const myCard=document.createElement('div');myCard.className='world-card world-match';
