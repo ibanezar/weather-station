@@ -331,6 +331,21 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .dew-factor-val{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text)}
 .dew-factor-lbl{font-size:.6rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .dew-advice{font-size:.76rem;color:var(--muted);line-height:1.55;padding:.6rem .8rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+/* iNaturalist observations */
+.inat-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+.inat-filter{padding:.25rem .65rem;border-radius:999px;font-size:.68rem;border:1px solid var(--card-border);background:var(--fc-bg);color:var(--muted);cursor:pointer;transition:all .2s;font-family:inherit}
+.inat-filter.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.inat-list{display:flex;flex-direction:column;gap:.5rem}
+.inat-obs{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--inat-col,var(--green));text-decoration:none;color:inherit;transition:background .2s}
+.inat-obs:hover{background:var(--card-bg)}
+.inat-thumb{width:44px;height:44px;border-radius:9px;object-fit:cover;flex-shrink:0;background:var(--fc-border)}
+.inat-thumb-ph{width:44px;height:44px;border-radius:9px;background:var(--fc-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.inat-info{flex:1;min-width:0}
+.inat-name{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inat-sci{font-size:.68rem;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inat-meta{font-size:.65rem;color:var(--muted);margin-top:.12rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.inat-date{padding:.08rem .4rem;border-radius:6px;background:rgba(0,0,0,.06);font-family:'JetBrains Mono',monospace}
+.inat-empty{font-size:.78rem;color:var(--muted);padding:.75rem 0;text-align:center}
 /* Fauna radar */
 .fauna-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}@media(max-width:700px){.fauna-grid{grid-template-columns:1fr 1fr}}
 .fauna-card{padding:.8rem 1rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--fa-accent,var(--green))}
@@ -2916,6 +2931,25 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🔍 Polžji & Kuščarjev Radar</div>
       <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- iNaturalist live sightings -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-hdr" style="margin-bottom:.65rem">
+        <span class="clabel" style="margin:0">🔭 iNaturalist — Nedavne opazitve v 10 km</span>
+        <span class="chart-range" id="inat-updated">—</span>
+      </div>
+      <div class="inat-filters" id="inat-filters">
+        <button class="inat-filter active" onclick="inatSetFilter('vse')">Vse</button>
+        <button class="inat-filter" onclick="inatSetFilter('Insecta')">🐛 Žuželke</button>
+        <button class="inat-filter" onclick="inatSetFilter('Amphibia')">🐸 Dvoživke</button>
+        <button class="inat-filter" onclick="inatSetFilter('Reptilia')">🦎 Plazilci</button>
+        <button class="inat-filter" onclick="inatSetFilter('Aves')">🐦 Ptice</button>
+        <button class="inat-filter" onclick="inatSetFilter('Mammalia')">🦦 Sesalci</button>
+        <button class="inat-filter" onclick="inatSetFilter('Fungi')">🍄 Glive</button>
+        <button class="inat-filter" onclick="inatSetFilter('Arachnida')">🕷 Pajkovci</button>
+      </div>
+      <div id="inat-list"><div class="clim-loading">Nalaganje opazitev…</div></div>
     </div>
 
     <!-- Ambee Pollen + AQI -->
@@ -11080,6 +11114,107 @@ function buildDewMatrix(){
 }
 
 // ══════════════════════════════════════════════════════════
+// ── iNaturalist nearby observations ───────────────────────
+// ══════════════════════════════════════════════════════════
+const _INAT_CACHE_KEY='wx-inat-v1';
+let _inatData=null,_inatFilter='vse';
+
+const _INAT_TAXA={
+  'Insecta':    {icon:'🐛',label:'Žuželke',   col:'var(--green)'},
+  'Amphibia':   {icon:'🐸',label:'Dvoživke',  col:'var(--blue)'},
+  'Reptilia':   {icon:'🦎',label:'Plazilci',  col:'var(--amber)'},
+  'Aves':       {icon:'🐦',label:'Ptice',     col:'var(--cyan)'},
+  'Mammalia':   {icon:'🦦',label:'Sesalci',   col:'var(--purple)'},
+  'Fungi':      {icon:'🍄',label:'Glive',     col:'#f97316'},
+  'Plantae':    {icon:'🌿',label:'Rastline',  col:'#4ade80'},
+  'Arachnida':  {icon:'🕷',label:'Pajkovci',  col:'#94a3b8'},
+  'Mollusca':   {icon:'🐌',label:'Mehkužci',  col:'var(--cyan)'},
+  'Actinopterygii':{icon:'🐟',label:'Ribe',   col:'var(--blue)'},
+};
+
+function _inatDaysAgo(dateStr){
+  const d=new Date(dateStr),now=new Date();
+  const diff=Math.round((now-d)/864e5);
+  if(diff===0)return 'danes';if(diff===1)return '1 dan nazaj';
+  if(diff<5)return diff+' dni nazaj';return diff+' dni nazaj';
+}
+
+function _inatHaversine(lat1,lon1,lat2,lon2){
+  const R=6371,dL=(lat2-lat1)*Math.PI/180,dN=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dN/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+async function fetchINatObservations(){
+  // 6-hour client cache
+  try{
+    const c=JSON.parse(localStorage.getItem(_INAT_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<6*3600000){_inatData=c.data;renderINatObs();return;}
+  }catch(_){}
+  try{
+    const url='https://api.inaturalist.org/v1/observations'
+      +'?lat='+LAT+'&lng='+LON+'&radius=10&order_by=observed_on&per_page=40'
+      +'&quality_grade=research&locale=sl';
+    const r=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!r.ok)throw new Error('iNat HTTP '+r.status);
+    const data=await r.json();
+    _inatData=data.results||[];
+    try{localStorage.setItem(_INAT_CACHE_KEY,JSON.stringify({ts:Date.now(),data:_inatData}));}catch(_){}
+    renderINatObs();
+    const upd=document.getElementById('inat-updated');
+    if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    const el=document.getElementById('inat-list');
+    if(el)el.innerHTML='<div class="inat-empty">iNaturalist nedostopen — poskusi kasneje</div>';
+    console.warn('iNat:',e);
+  }
+}
+
+function inatSetFilter(taxon){
+  _inatFilter=taxon;
+  document.querySelectorAll('.inat-filter').forEach(b=>{
+    b.classList.toggle('active',b.textContent.trim().includes(
+      taxon==='vse'?'Vse':(_INAT_TAXA[taxon]?.label||'')
+    ));
+  });
+  renderINatObs();
+}
+
+function renderINatObs(){
+  const el=document.getElementById('inat-list');if(!el||!_inatData)return;
+  let obs=_inatData;
+  if(_inatFilter!=='vse')obs=obs.filter(o=>o.taxon?.iconic_taxon_name===_inatFilter);
+  if(!obs.length){el.innerHTML='<div class="inat-empty">Ni opazitev za izbrano skupino v zadnjem času</div>';return;}
+  el.innerHTML='<div class="inat-list">'+obs.slice(0,20).map(o=>{
+    const taxon=o.taxon||{};
+    const iconTaxon=taxon.iconic_taxon_name||'';
+    const tx=_INAT_TAXA[iconTaxon]||{icon:'🔵',label:'Drugo',col:'var(--muted)'};
+    const commonName=taxon.preferred_common_name||taxon.name||'Neznana vrsta';
+    const sciName=taxon.name||'';
+    const photoUrl=taxon.default_photo?.square_url||o.photos?.[0]?.url||null;
+    const thumbHtml=photoUrl
+      ?`<img class="inat-thumb" src="${photoUrl}" alt="${sciName}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+        `<div class="inat-thumb-ph" style="display:none">${tx.icon}</div>`
+      :`<div class="inat-thumb-ph">${tx.icon}</div>`;
+    const dist=o.location?_inatHaversine(LAT,LON,...o.location.split(',').map(Number).reverse()).toFixed(1)+' km':null;
+    const dateStr=o.observed_on?_inatDaysAgo(o.observed_on):'—';
+    const place=o.place_guess||dist||(dist?dist+' od postaje':'—');
+    return `<a class="inat-obs" href="${o.uri||'https://www.inaturalist.org'}" target="_blank" rel="noopener" style="--inat-col:${tx.col}">`+
+      thumbHtml+
+      `<div class="inat-info">`+
+        `<div class="inat-name">${tx.icon} ${commonName}</div>`+
+        `<div class="inat-sci">${sciName}</div>`+
+        `<div class="inat-meta">`+
+          `<span class="inat-date">${dateStr}</span>`+
+          (place?`<span>📍 ${place}</span>`:'')  +
+          (o.user?.login?`<span>@${o.user.login}</span>`:'')  +
+        `</div>`+
+      `</div>`+
+    `</a>`;
+  }).join('')+'</div>';
+}
+
+// ══════════════════════════════════════════════════════════
 // ── 2. FAUNA RADAR ────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
 function buildFaunaRadar(){
@@ -12323,6 +12458,7 @@ function initLife(){
   if(_lifeInit)return;_lifeInit=true;
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
+  fetchINatObservations();
   fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
