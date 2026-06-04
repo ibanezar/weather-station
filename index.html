@@ -2983,6 +2983,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-train-samples">—</div><div class="ai-arch-lbl">Trening vzorci</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-final-loss">—</div><div class="ai-arch-lbl">Končni MSE</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-trained-at">—</div><div class="ai-arch-lbl">Naučen ob</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val" id="ai-pred-acc">—</div><div class="ai-arch-lbl">Točnost ±1h</div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:.6rem">
+        <button class="ai-brief-btn" onclick="aiResetModel()" style="color:var(--red);border-color:rgba(248,113,113,.3)">🗑 Izbriši model</button>
       </div>
       <div style="font-size:.7rem;color:var(--muted);margin-top:.85rem;line-height:1.6">
         <strong style="color:var(--text)">Features:</strong> temperatura, vlaga, hitrost vetra, tlačni trend, ura dneva (sin/cos), dan leta (sin/cos), padavine.<br>
@@ -3404,7 +3408,7 @@ function smoothPath(pts){if(pts.length<2)return'';let d='M '+pts[0].x+' '+pts[0]
 function mkSVG(parent,tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.appendChild(el);return el;}
 function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(evt.clientX-r.left)/r.width*vb.width;}
 
-let _tempData=[],_rainData=[],_hourlyObs=[];
+let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -4230,6 +4234,7 @@ async function fetchComingUp(){
     const hours=[];
     for(let i=si;i<h.time.length&&hours.length<25;i++)
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
+    _forecastHours=hours;
     const stripHours=hours.filter((_,i)=>i===0||i%3===0).slice(0,10);
 
     // Hourly cells
@@ -4573,6 +4578,7 @@ function applyObs(obs){
   generateWhyWeather(obs);
   fetchDailyMicroclimateFingerprint(obs);
   _lastBriefObs=obs;
+  checkAIPredAccuracy(m.temp);
   renderDailyAlmanac(obs);
   renderWeatherMemory(obs);
   renderForecastPersonality(obs);
@@ -11086,6 +11092,7 @@ function buildCandlestick(){
 // ── AI NOWCAST — LSTM/GRU HYPERLOCAL FORECASTING ──────────
 // ══════════════════════════════════════════════════════════
 const AI_WEIGHTS_KEY='wx-lstm-weights-v2';
+const AI_PRED_LOG_KEY='wx-lstm-pred-log-v1';
 const AI_SEQ_LEN=12;   // 12-hour input window
 const AI_N_FEAT=8;     // features per timestep
 const AI_OUT_LEN=6;    // predict 6 hours ahead
@@ -11328,6 +11335,8 @@ async function aiTrainAndPredict(){
     const driftCorr=r24.length?r24.reduce((s,d)=>s+d.dT,0)/r24.length:0;
     const predsCorrected=preds.map(p=>p+driftCorr*0.4); // partial correction
     _aiLstmPredictions={preds:predsCorrected,raw:preds,driftCorr,ts:Date.now()};
+    // Save prediction log for accuracy tracking
+    localStorage.setItem(AI_PRED_LOG_KEY,JSON.stringify({madeAt:Date.now(),preds:predsCorrected.map((v,i)=>({t:Date.now()+(i+1)*3600000,v}))}));
     // Render forecast cards
     aiRenderForecastCards(predsCorrected);
     // Update meta
@@ -11359,15 +11368,21 @@ function aiRenderForecastCards(preds){
     const d=curT!=null?p-curT:null;
     const dc=d==null?'flat':d>0.5?'up':d<-0.5?'dn':'flat';
     const dl=d==null?'':d>=0?`+${d.toFixed(1)}°`:d.toFixed(1)+'°';
-    // Confidence: higher for near-term
     const conf=Math.round(95-i*7);
     const isBest=i===0;
+    // Enrich from Open-Meteo forecast hours (nearest match by time)
+    const fh=_forecastHours.reduce((best,x)=>Math.abs(x.t-h)<Math.abs((best?.t||Infinity)-h)?x:best,null);
+    const prob=fh?.prob??null;
+    const emoji=fh?_wmoEmojiDN(fh.wmo,fh.isDay):'';
+    const probHtml=prob!=null?`<div style="font-size:.62rem;color:${prob>=50?'var(--blue)':'var(--muted)'};margin-top:.15rem">💧${prob}%</div>`:'';
     return `<div class="ai-fc-card${isBest?' ai-fc-best':''}">
       <div class="ai-fc-hour">+${i+1}h · ${hStr}</div>
+      <div style="font-size:1.35rem;line-height:1.1;margin:.1rem 0">${emoji}</div>
       <div class="ai-fc-temp">${p.toFixed(1)}<span class="ai-fc-unit">°C</span></div>
       <div class="ai-fc-delta ${dc}">${dl}</div>
-      <div class="ai-fc-conf" style="width:${conf}%;max-width:100%;margin-left:auto;margin-right:auto"></div>
-      <div style="font-size:.58rem;color:var(--muted);margin-top:.15rem">${conf}%</div>
+      ${probHtml}
+      <div class="ai-fc-conf" style="width:${conf}%;max-width:100%;margin-left:auto;margin-right:auto;margin-top:.25rem"></div>
+      <div style="font-size:.58rem;color:var(--muted);margin-top:.1rem">${conf}%</div>
     </div>`;
   }).join('');
   if(rng)rng.textContent=`Mikroklimatska korekcija: ${_aiLstmPredictions?.driftCorr>=0?'+':''}${(_aiLstmPredictions?.driftCorr||0).toFixed(2)}°C`;
@@ -11401,6 +11416,36 @@ function _autoInitAI(){
   if(_aiTraining||_aiModel)return;
   if(!localStorage.getItem(AI_WEIGHTS_KEY))return;
   setTimeout(()=>{if(!_aiTraining&&!_aiModel)initAINowcast();},300);
+}
+
+function checkAIPredAccuracy(currentTemp){
+  try{
+    if(currentTemp==null)return;
+    const raw=localStorage.getItem(AI_PRED_LOG_KEY);
+    if(!raw)return;
+    const{preds}=JSON.parse(raw);
+    const now=Date.now();
+    const match=preds.find(p=>Math.abs(p.t-now)<45*60000);
+    if(!match)return;
+    const err=Math.abs(currentTemp-match.v);
+    const el=document.getElementById('ai-pred-acc');
+    if(el)el.textContent='±'+err.toFixed(1)+'°C';
+  }catch(e){}
+}
+
+function aiResetModel(){
+  if(!confirm('Izbrisati shranjeni model in zgodovino napovedi?'))return;
+  localStorage.removeItem(AI_WEIGHTS_KEY);
+  localStorage.removeItem(AI_PRED_LOG_KEY);
+  _aiModel=null;_aiNorm=null;_aiLstmPredictions=null;_aiInit=false;
+  const btn=document.getElementById('ai-train-btn');
+  if(btn){btn.textContent='▶ Naloži TF.js & Začni učenje';btn.disabled=false;}
+  aiSetStatus('Model izbrisan. Klikni za novo učenje.',0);
+  const fg=document.getElementById('ai-forecast-grid');
+  if(fg)fg.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Model še ni naučen. Klikni "Začni učenje" zgoraj.</div>';
+  const ls=document.getElementById('ai-loss-svg');if(ls)ls.innerHTML='';
+  const cs=document.getElementById('ai-compare-svg');if(cs)cs.innerHTML='';
+  ['ai-final-loss','ai-pred-acc','ai-trained-at','ai-loss-range','ai-compare-range','ai-fc-range'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
 }
 
 // ══════════════════════════════════════════════════════════
