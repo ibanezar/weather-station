@@ -4841,7 +4841,7 @@ function switchTab(tab){
   if(tab==='storm'){     initStormChaser(); }
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
-  if(tab==='ai'){        initSensorDiag(); }
+  if(tab==='ai'){        initSensorDiag(); _autoInitAI(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
@@ -11281,11 +11281,15 @@ async function aiTrainAndPredict(){
     aiSetStatus('Gradim LSTM model…',20);
     _aiModel=await aiBuildModel();
     // Try loading cached weights
+    let _finalLoss=null;
     const cached=await aiLoadWeights(_aiModel);
     if(cached){
       _aiNorm=cached.norm;
-      if(cached.losses&&cached.losses.length)aiDrawLoss(cached.losses);
-      aiSetStatus('✅ Naložene shranjene uteži ('+new Date(cached.ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+'). Osvežujem napoved…',95);
+      if(cached.losses&&cached.losses.length){aiDrawLoss(cached.losses);_finalLoss=cached.losses[cached.losses.length-1];}
+      const ageDays=Math.floor((Date.now()-cached.ts)/864e5);
+      const ageStr=ageDays===0?'danes':ageDays===1?'včeraj':`pred ${ageDays} dnevi`;
+      const staleWarn=ageDays>=7?' ⚠️ Model je star — priporoča se ponoven trening.':'';
+      aiSetStatus('✅ Naložene shranjene uteži ('+new Date(cached.ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+', naučen '+ageStr+'). Osvežujem napoved…'+staleWarn,95);
     }else{
       aiSetStatus('Učim LSTM… (0/80 epoch)',25);
       // Prepare tensors
@@ -11306,7 +11310,7 @@ async function aiTrainAndPredict(){
       xT.dispose();yT.dispose();
       aiSetStatus('Shranjujem uteži…',92);
       await aiSaveWeights(_aiModel,_aiNorm,lossHistory);
-      aiDrawLoss([]);
+      if(lossHistory.length)_finalLoss=lossHistory[lossHistory.length-1];
     }
     // Predict next 6 hours using last AI_SEQ_LEN observations
     aiSetStatus('Generiram napoved…',96);
@@ -11330,7 +11334,7 @@ async function aiTrainAndPredict(){
     const curT=_lastBriefObs?.metric?.temp??null;
     aiSetMeta(`Model naučen na ${raw.length} urnih opazovanjih (${AI_N_FEAT} feature, sekvenca ${AI_SEQ_LEN}h). Mikroklimatska korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C.`);
     const ta=document.getElementById('ai-trained-at');if(ta)ta.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    const fl=document.getElementById('ai-final-loss');if(fl)fl.textContent='—';
+    const fl=document.getElementById('ai-final-loss');if(fl)fl.textContent=_finalLoss!=null?_finalLoss.toFixed(5):'—';
     aiSetStatus('✅ Napoved pripravljena — IREICA1 lokalni LSTM model',100);
     // Draw comparison
     aiDrawComparisonChart();
@@ -11391,6 +11395,12 @@ async function aiDrawComparisonChart(){
 async function initAINowcast(){
   // Allow retry if previous attempt failed (button is re-enabled on error)
   await aiTrainAndPredict();
+}
+
+function _autoInitAI(){
+  if(_aiTraining||_aiModel)return;
+  if(!localStorage.getItem(AI_WEIGHTS_KEY))return;
+  setTimeout(()=>{if(!_aiTraining&&!_aiModel)initAINowcast();},300);
 }
 
 // ══════════════════════════════════════════════════════════
