@@ -10156,7 +10156,7 @@ async function buildTriviaWorldCompare(){
     }));
     const sorted=results.filter(r=>r.temp!=null).sort((a,b)=>Math.abs(a.temp-myT)-Math.abs(b.temp-myT));
     const top3=sorted.slice(0,3);
-    if(sub)sub.textContent=`Danes je v Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
+    if(sub)sub.textContent=`Danes je na Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
     cards.innerHTML='';
     // Add Rečica card first
     const myCard=document.createElement('div');myCard.className='world-card world-match';
