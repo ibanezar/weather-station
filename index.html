@@ -1293,8 +1293,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .nt-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.1rem;margin-bottom:1.1rem}
 .nt-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:1.1rem}
 .nt-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.2rem;backdrop-filter:blur(12px)}
-.nt-chart{position:relative;height:220px;margin-top:.75rem}
-@media(max-width:600px){.nt-chart{height:240px}}
+.nt-chart{position:relative;margin-top:.75rem}
 
 /* ── Detailed forecast ── */
 .fc2-hour-grid{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;-webkit-overflow-scrolling:touch;margin-top:.75rem;scrollbar-width:none}
@@ -3264,7 +3263,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           <span class="clabel" style="margin:0" id="fc2-chart-lbl">—</span>
           <span class="chart-range" id="fc2-chart-sub"></span>
         </div>
-        <div class="nt-chart"><svg id="fc2-svg" style="width:100%;height:100%;display:block" viewBox="0 0 900 180" preserveAspectRatio="none"></svg></div>
+        <div class="nt-chart"><svg id="fc2-svg" style="width:100%;height:auto;display:block" viewBox="0 0 900 240" preserveAspectRatio="xMidYMid meet"></svg></div>
         <div class="fc2-stats" id="fc2-stats"></div>
       </div>
     </div>
@@ -5636,7 +5635,7 @@ function drawWindTrend(observations){
     // Day label
     const date=new Date(d.day+'T12:00:00');
     const lbl=date.toLocaleDateString('sl',{weekday:'short'}).slice(0,2);
-    const t2=mk('text',{x:x.toFixed(1),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+    const t2=mk('text',{x:x.toFixed(1),y:VH-10,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t2.textContent=lbl;
   });
 }
@@ -7962,7 +7961,7 @@ async function initForecast2(){
     if(svg){
       const temps=h.temperature_2m.slice(hi,hi+48);
       const rains=h.precipitation.slice(hi,hi+48);
-      const VW=900,VH=180,pad={t:18,r:20,b:30,l:36};
+      const VW=900,VH=240,pad={t:20,r:20,b:38,l:36};
       const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
       const tmin=Math.min(...temps)-1,tmax=Math.max(...temps)+1;
       const rmax=Math.max(...rains,0.5);
@@ -7975,7 +7974,7 @@ async function initForecast2(){
       // Grid lines
       for(let i=0;i<=3;i++){const y=pad.t+i/3*ch;const v=(tmax-i/3*(tmax-tmin)).toFixed(0);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});mk('text',{x:pad.l-4,y:y+3,'text-anchor':'end','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},v+'°');}
       // Hour labels every 6h
-      slice48.forEach((t,i)=>{if(i%6===0){const h2=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h2<10?'0':'')+h2+':00');}});
+      slice48.forEach((t,i)=>{if(i%6===0){const h2=new Date(t).getHours();mk('text',{x:xS(i),y:VH-10,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h2<10?'0':'')+h2+':00');}});
       // Precip bars
       const bw=cw/slice48.length*0.7;
       rains.forEach((r,i)=>{if(r>0){const bh=Math.max(3,(r/rmax)*ch*0.4);mk('rect',{x:(xS(i)-bw/2).toFixed(1),y:(VH-pad.b-bh).toFixed(1),width:bw.toFixed(1),height:bh.toFixed(1),fill:CC.rainBar,rx:'1.5',opacity:'.7'});}});
@@ -7999,11 +7998,11 @@ async function initForecast2(){
       const uvs=h.uv_index.slice(hi,hi+48);
       const winds=h.wind_speed_10m.slice(hi,hi+48);
       statsEl.innerHTML=[
-        {n:Math.max(...temps2).toFixed(1)+'°C',l:'Max temp (48h)',c:'var(--red)'},
-        {n:Math.min(...temps2).toFixed(1)+'°C',l:'Min temp (48h)',c:'var(--blue)'},
-        {n:totRain.toFixed(1)+' mm',l:'Skupaj padavine',c:'var(--rain-col)'},
-        {n:Math.max(...uvs).toFixed(0),l:'Max UV indeks',c:'var(--amber)'},
-        {n:Math.max(...winds).toFixed(0)+' km/h',l:'Max hitrost vetra',c:'var(--purple)'},
+        {n:Math.max(...temps2).toFixed(1)+'°C',l:'Max temp',c:'var(--red)'},
+        {n:Math.min(...temps2).toFixed(1)+'°C',l:'Min temp',c:'var(--blue)'},
+        {n:totRain.toFixed(1)+' mm',l:'Padavine',c:'var(--rain-col)'},
+        {n:Math.max(...uvs).toFixed(0),l:'Max UV',c:'var(--amber)'},
+        {n:Math.max(...winds).toFixed(0)+' km/h',l:'Max veter',c:'var(--purple)'},
       ].map(s=>`<div class="fc2-stat"><div class="fc2-stat-n" style="color:${s.c}">${s.n}</div><div class="fc2-stat-l">${s.l}</div></div>`).join('');
     }
 
@@ -8379,7 +8378,7 @@ async function initSurroundings(){
       const now=new Date();
       const refIdx=hourlyData[0].times.findIndex(t=>new Date(t)>=new Date(now.getTime()-12*3600000))||0;
       const take=24;
-      const VW=900,VH=180,pad={t:18,r:20,b:30,l:36};
+      const VW=900,VH=240,pad={t:20,r:20,b:38,l:36};
       const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
       const allTemps=hourlyData.flatMap(d=>d.temps.slice(refIdx,refIdx+take));
       const tmin=Math.min(...allTemps.filter(x=>x!=null))-1;
@@ -8390,7 +8389,7 @@ async function initSurroundings(){
       svg.innerHTML='';
       for(let i=0;i<=3;i++){const y=pad.t+i/3*ch;mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1'});}
       const labels=[...hourlyData[0].times.slice(refIdx,refIdx+take)];
-      labels.forEach((t,i)=>{if(i%4===0){const h=new Date(t).getHours();mk('text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h<10?'0':'')+h+':00');}});
+      labels.forEach((t,i)=>{if(i%4===0){const h=new Date(t).getHours();mk('text',{x:xS(i),y:VH-10,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'},(h<10?'0':'')+h+':00');}});
       // Now line
       const nowIdx=hourlyData[0].times.slice(refIdx,refIdx+take).findIndex(t=>new Date(t)>=now);
       if(nowIdx>=0)mk('line',{x1:xS(nowIdx),x2:xS(nowIdx),y1:pad.t,y2:VH-pad.b,stroke:'rgba(255,180,0,.5)','stroke-width':'1.5','stroke-dasharray':'4,3'});
