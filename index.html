@@ -1547,6 +1547,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
+    <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -1862,23 +1863,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="csub" id="pheno-note" style="margin-top:.75rem"></div>
   </div>
 
-  <!-- Water balance -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
-      <span class="chart-range" id="wbal-status"></span>
-    </div>
-    <div class="wbal-summary">
-      <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
-      <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
-      <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
-    </div>
-    <div style="height:60px;position:relative;margin-top:.25rem">
-      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
-      <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
-  </div>
+
 
   <!-- Daily microclimate fingerprint -->
   <div class="card chart-card" style="margin-bottom:1rem">
@@ -2027,19 +2012,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
 
 
-  <!-- Pollen + Savinja river -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel">🌸 Pelod & alergeni</div>
-      <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
-      <div class="pollen-grid" id="pollen-grid"></div>
-    </div>
-    <div class="card">
-      <div class="clabel">🌊 Reka Savinja — pretok</div>
-      <div id="flood-content">
-        <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
-      </div>
-    </div>
+  <!-- Pollen -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="clabel">🌸 Pelod & alergeni</div>
+    <div class="csub" id="pollen-sub" style="margin-bottom:.1rem">Nalaganje…</div>
+    <div class="pollen-grid" id="pollen-grid"></div>
   </div>
 
   <!-- Monthly summary + Year records -->
@@ -2990,14 +2967,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="inat-list"><div class="clim-loading">Nalaganje opazitev…</div></div>
     </div>
 
-    <!-- Savinja vodostaj & napoved pretoka -->
-    <div class="card chart-card" style="margin-bottom:1rem">
-      <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌊 Savinja — Vodostaj & Napoved Pretoka</span>
-        <span class="chart-range" id="river-updated">Open-Meteo GloFAS · ARSO · —</span>
-      </div>
-      <div id="river-body"><div class="clim-loading">Nalaganje…</div></div>
-    </div>
+
 
     <!-- Ambee Pollen + AQI -->
     <div class="card chart-card" style="margin-bottom:1rem">
@@ -3044,6 +3014,40 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
   </div><!-- /tab-life -->
+
+  <!-- ═══ VODOSTAJ TAB ═══ -->
+  <div id="tab-water" class="tab-pane">
+
+    <!-- Savinja vodostaj & napoved pretoka -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌊 Savinja — Vodostaj & Napoved Pretoka</span>
+        <span class="chart-range" id="river-updated">Open-Meteo GloFAS · ARSO · —</span>
+      </div>
+      <div id="river-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- Water balance -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">💧 Vodni bilans — <span id="wbal-month"></span></span>
+        <span class="chart-range" id="wbal-status"></span>
+      </div>
+      <div class="wbal-summary">
+        <div><div class="wbal-sl">Padavine</div><div class="wbal-stat" id="wbal-rain" style="color:var(--blue)">— mm</div></div>
+        <div><div class="wbal-sl">ET₀ (izhlapevanje)</div><div class="wbal-stat" id="wbal-et0" style="color:var(--amber)">— mm</div></div>
+        <div><div class="wbal-sl">Bilans</div><div class="wbal-stat" id="wbal-bal">— mm</div></div>
+      </div>
+      <div style="height:60px;position:relative;margin-top:.25rem">
+        <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
+        <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
+    </div>
+
+  </div><!-- /tab-water -->
+
+
 
   <!-- ═══ AI NOWCAST TAB ═══ -->
   <div id="tab-ai" class="tab-pane">
@@ -4967,6 +4971,7 @@ function switchTab(tab){
   if(tab==='storm'){     initStormChaser(); }
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
+  if(tab==='water'){     initVodostaj(); }
   if(tab==='ai'){        initSensorDiag(); _autoInitAI(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   closeTabDDs();
@@ -12734,7 +12739,6 @@ function initLife(){
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
   fetchINatObservations();
-  fetchSavinjaRiver();
   fetchAmbeePollen();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
@@ -12744,6 +12748,12 @@ function initLife(){
 function refreshLife(){
   if(!_lifeInit)return;
   try{buildDewMatrix();buildFaunaRadar();buildGoldenWindow();buildKidsActivity();buildForestPulse();buildTimeCapsule();}catch(e){}
+}
+let _waterInit=false;
+function initVodostaj(){
+  if(_waterInit)return;_waterInit=true;
+  fetchSavinjaRiver();
+  fetchWaterBalance();
 }
 
 // ── ARSO klimatološke normale 1991–2020 — Celje (0014) ────
@@ -13457,14 +13467,13 @@ async function init(){
   initMeshCanvas();
   initHeroCanvas();
   // Fetch all data in parallel, then initialise data-dependent widgets
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchWaterBalance(),fetchAndDrawSkyStrip(),fetchComingUp()]);
+  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchAndDrawSkyStrip(),fetchComingUp()]);
   fetchEcowittCurrent();
   autoAccentCards();
   initInsights();
   initVisitorCounter();
   buildPrecipNormals();
   fetchPollen();
-  fetchFlood();
   fetchSevereWeather();
   fetchMeteoalarm();
   fetchGoogleAlerts();
@@ -13705,7 +13714,6 @@ setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
-setInterval(fetchFlood,60*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 </script>
 <div id="toast"></div>
