@@ -3325,7 +3325,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ═══ OKOLICA ═══ -->
   <div id="tab-surroundings" class="tab-pane">
     <div class="nt-section">
-      <div class="nt-title">📡 Primerjava z okoliškimi lokacijami — trenutne razmere</div>
+      <div class="nt-title">📡 Bližnje vremenske postaje — Weather Underground</div>
+      <div class="sur-station-grid" id="wu-nearby-grid"><div style="color:var(--muted);font-size:.8rem">Iščem bližnje postaje…</div></div>
+    </div>
+    <div class="nt-section">
+      <div class="nt-title">🌍 Primerjava z okoliškimi lokacijami — model Open-Meteo</div>
       <div class="sur-station-grid" id="sur-grid"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
     </div>
     <div class="nt-section">
@@ -8310,8 +8314,62 @@ const NEARBY=[
   {name:'Rogla',note:'45 km, 1517 m n.v.',lat:46.450,lon:15.333,alt:1517},
 ];
 let _surInit=false;
+
+async function fetchWUNearby(){
+  const grid=document.getElementById('wu-nearby-grid');
+  if(!grid)return;
+  try{
+    const data=await fetch(PROXY+'/wu-nearby?lat='+LAT+'&lon='+LON).then(r=>r.json());
+    const stations=(data.location?.stationIdentifier||data.stations||[]);
+    if(!stations.length){grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni bližnjih postaj.</div>';return;}
+
+    // Fetch current obs for each station in parallel (skip our own)
+    const nearby=stations.filter(s=>(s.stationIdentifier||s.id||'').toUpperCase()!=='IREICA1').slice(0,8);
+    const obs=await Promise.all(nearby.map(async s=>{
+      const id=s.stationIdentifier||s.id;
+      try{
+        const d=await fetch(PROXY+'/wu-station?id='+id).then(r=>r.json());
+        const o=d.observations?.[0];
+        if(!o)return null;
+        const distKm=s.distanceKm??s.distance?.kilometers??null;
+        return{id,name:s.neighborhood||s.stationName||id,distKm,obs:o};
+      }catch(_){return null;}
+    }));
+
+    const valid=obs.filter(Boolean);
+    if(!valid.length){grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni dostopnih postaj.</div>';return;}
+
+    const myTemp=_lastTemp??null;
+    grid.innerHTML='';
+    valid.forEach(s=>{
+      const m=s.obs.metric||{};
+      const T=m.temp??null;
+      const hum=s.obs.humidity??null;
+      const wind=m.windSpeed??null;
+      const rain=m.precipRate??null;
+      const diff=myTemp!=null&&T!=null?T-myTemp:null;
+      const diffCol=diff==null?'var(--muted)':diff>0?'var(--red)':'var(--blue)';
+      const card=document.createElement('div');
+      card.className='sur-card';
+      card.innerHTML=
+        '<div class="sur-name">'+s.name+'</div>'+
+        '<div class="sur-dist">'+(s.distKm!=null?(+s.distKm).toFixed(1)+' km · ':'')+s.id+'</div>'+
+        '<div class="sur-temp">'+(T!=null?T.toFixed(1)+'°C':'—')+'</div>'+
+        '<div class="sur-meta">'+
+          (hum!=null?'💧 '+hum+'%  ':'')+
+          (wind!=null?'💨 '+wind.toFixed(0)+' km/h  ':'')+
+          (rain!=null&&rain>0?'🌧 '+rain.toFixed(1)+' mm/h':'')+
+        '</div>'+
+        (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1)+'° vs IREICA1</div>':'');
+      grid.appendChild(card);
+    });
+  }catch(e){
+    if(grid)grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">WU postaje nedostopne: '+e.message+'</div>';
+  }
+}
 async function initSurroundings(){
   if(_surInit)return;_surInit=true;
+  fetchWUNearby();
   try{
     const grid=document.getElementById('sur-grid');
     // Fetch current conditions for all nearby locations in parallel
