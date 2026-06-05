@@ -91,14 +91,15 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
 
-.blob{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;transition:background 1s}
-.b1{width:650px;height:650px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-15%;left:-10%;animation:blob-drift 22s ease-in-out infinite}
-.b2{width:520px;height:520px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
-.b3{width:440px;height:440px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:5%;left:8%;animation:blob-drift 19s ease-in-out infinite 8s}
-.b4{width:380px;height:380px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:12%;animation:blob-drift 25s ease-in-out infinite 14s}
+.blob{position:absolute;border-radius:50%;filter:blur(130px);pointer-events:none;transition:background 1.2s}
+.b1{width:960px;height:960px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-20%;left:-15%;animation:blob-drift 22s ease-in-out infinite}
+.b2{width:780px;height:780px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:15%;right:-12%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
+.b3{width:680px;height:680px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:-5%;left:5%;animation:blob-drift 19s ease-in-out infinite 8s}
+.b4{width:580px;height:580px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:8%;animation:blob-drift 25s ease-in-out infinite 14s}
+.b5{width:500px;height:500px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:38%;left:32%;animation:blob-drift 33s ease-in-out infinite reverse 10s;opacity:.7}
 #mesh-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 /* Mountain sky + silhouette */
-@keyframes blob-drift{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(35px,-22px) scale(1.07)}50%{transform:translate(-18px,28px) scale(.94)}75%{transform:translate(22px,12px) scale(1.04)}}
+@keyframes blob-drift{0%{transform:translate(0,0) scale(1)}20%{transform:translate(42px,-28px) scale(1.09)}40%{transform:translate(-22px,35px) scale(.93)}60%{transform:translate(28px,18px) scale(1.06)}80%{transform:translate(-18px,-22px) scale(.97)}100%{transform:translate(0,0) scale(1)}}
 .rain-drop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(37,99,235,.3),transparent);animation:rain-fall linear infinite}
 /* Dynamic weather background particles */
 #bg-wx-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
@@ -1506,7 +1507,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 </head>
 <body>
 
-<div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+<div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
 </div>
 <div id="chart-tip"></div>
 <button class="theme-btn" id="theme-btn" title="Preklopi temo">🌙</button>
@@ -6082,14 +6083,14 @@ const PHOTOS = {
 
   // 📅 Sezonska rezervna ozadja
   seasons: {
-    winter: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // december · januar · februar
-    spring: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // marec · april · maj
-    summer: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // junij · julij · avgust
-    autumn: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // september · oktober · november
+    winter: [],  // december · januar · februar
+    spring: [],  // marec · april · maj
+    summer: [],  // junij · julij · avgust
+    autumn: [],  // september · oktober · november
   },
 
   // 🌤 Privzeto (ko ni drugega)
-  default: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],
+  default: [],
 };
 // ══════════════════════════════════════════════════════════════
 
@@ -8947,15 +8948,15 @@ function buildPrecipNormals(){
 // ── Dinamičen vremenski background ────────────────────────
 // ══════════════════════════════════════════════════════════
 const WX_THEMES={
-  night:      {bg:'#020617',b:['rgba(30,27,75,.6)','rgba(12,20,50,.5)','rgba(15,23,42,.5)','rgba(2,6,23,.4)'],    p:'star', n:55},
-  sunny:      {bg:'#0c2340',b:['rgba(14,165,233,.4)','rgba(56,189,248,.3)','rgba(3,105,161,.45)','rgba(7,89,133,.3)'],p:'mote',n:18},
-  hot:        {bg:'#18060a',b:['rgba(239,68,68,.35)','rgba(249,115,22,.4)','rgba(251,191,36,.2)','rgba(220,38,38,.25)'],p:'mote',n:12},
-  cloudy:     {bg:'#0f1a2e',b:['rgba(71,85,105,.45)','rgba(51,65,85,.4)','rgba(100,116,139,.3)','rgba(71,85,105,.3)'],p:null,n:0},
-  fog:        {bg:'#131e2d',b:['rgba(148,163,184,.3)','rgba(100,116,139,.25)','rgba(148,163,184,.22)','rgba(71,85,105,.2)'],p:'fog',n:7},
-  rain:       {bg:'#060f1c',b:['rgba(30,58,95,.55)','rgba(15,23,42,.65)','rgba(37,99,235,.22)','rgba(29,78,216,.2)'],p:'rain',n:48},
-  heavy_rain: {bg:'#040a14',b:['rgba(30,58,95,.65)','rgba(15,23,42,.75)','rgba(37,99,235,.28)','rgba(29,78,216,.25)'],p:'rain',n:80},
-  storm:      {bg:'#04040e',b:['rgba(49,46,129,.6)','rgba(30,27,75,.7)','rgba(67,56,202,.3)','rgba(15,23,42,.8)'],p:'storm',n:90},
-  snow:       {bg:'#060f1c',b:['rgba(30,58,95,.45)','rgba(186,230,253,.12)','rgba(56,189,248,.2)','rgba(14,165,233,.2)'],p:'snow',n:40},
+  night:      {bg:'#020617',b:['rgba(30,27,75,.85)','rgba(12,20,50,.75)','rgba(15,23,42,.7)','rgba(49,46,129,.55)'],  p:'star',n:55},
+  sunny:      {bg:'#0c2340',b:['rgba(14,165,233,.6)','rgba(56,189,248,.5)','rgba(3,105,161,.65)','rgba(7,89,133,.45)'],p:'mote',n:18},
+  hot:        {bg:'#18060a',b:['rgba(239,68,68,.55)','rgba(249,115,22,.6)','rgba(251,191,36,.35)','rgba(220,38,38,.45)'],p:'mote',n:12},
+  cloudy:     {bg:'#0f1a2e',b:['rgba(71,85,105,.65)','rgba(51,65,85,.6)','rgba(100,116,139,.5)','rgba(71,85,105,.45)'], p:null,n:0},
+  fog:        {bg:'#131e2d',b:['rgba(148,163,184,.5)','rgba(100,116,139,.45)','rgba(148,163,184,.4)','rgba(71,85,105,.35)'],p:'fog',n:7},
+  rain:       {bg:'#060f1c',b:['rgba(30,58,95,.75)','rgba(15,23,42,.8)','rgba(37,99,235,.42)','rgba(29,78,216,.4)'],   p:'rain',n:48},
+  heavy_rain: {bg:'#040a14',b:['rgba(30,58,95,.85)','rgba(15,23,42,.9)','rgba(37,99,235,.52)','rgba(29,78,216,.48)'],  p:'rain',n:80},
+  storm:      {bg:'#04040e',b:['rgba(49,46,129,.8)','rgba(30,27,75,.9)','rgba(67,56,202,.5)','rgba(15,23,42,.95)'],    p:'storm',n:90},
+  snow:       {bg:'#060f1c',b:['rgba(30,58,95,.6)','rgba(186,230,253,.25)','rgba(56,189,248,.4)','rgba(14,165,233,.38)'],p:'snow',n:40},
 };
 const WX_LIGHT_BG={night:'#0f172a',sunny:'#0c3a5e',hot:'#2d1208',cloudy:'#1e293b',fog:'#2d3748',rain:'#0f1a2e',heavy_rain:'#09111f',storm:'#0a0a1f',snow:'#0d1a30'};
 
