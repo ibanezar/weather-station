@@ -870,13 +870,22 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sun-ground{stroke:var(--svg-ring)}.sun-track{stroke:var(--svg-track)}.sun-lbl{fill:var(--svg-lbl-d);font-family:'JetBrains Mono',monospace}
 
 /* Footer */
-footer{text-align:center;padding-top:3rem;font-size:.76rem;color:var(--muted);line-height:2.2}
-.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);margin-top:.75rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
+footer{margin-top:3rem;border-top:1px solid var(--fc-border);padding:2.25rem 0 2rem;font-size:.76rem;color:var(--muted)}
+.ft-inner{display:grid;grid-template-columns:1fr auto;gap:1.5rem 2rem;align-items:start}
+@media(max-width:600px){.ft-inner{grid-template-columns:1fr}}
+.ft-brand{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text);font-weight:600;letter-spacing:.04em;margin-bottom:.3rem}
+.ft-loc{font-size:.73rem;color:var(--muted);margin-bottom:.9rem}
+.ft-sources{display:flex;flex-wrap:wrap;gap:.35rem .65rem;font-size:.69rem;color:var(--muted);line-height:1.8}
+.ft-sources a{color:var(--blue);text-decoration:none;transition:opacity .15s}.ft-sources a:hover{opacity:.75}
+.ft-sep{color:var(--fc-border)}
+.ft-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.55rem}
+@media(max-width:600px){.ft-right{align-items:flex-start;text-align:left}}
+.ft-copy{font-size:.68rem;color:var(--muted);line-height:1.6}
+.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
 .visitor-counter:hover{border-color:var(--blue)}
 .visitor-counter .vc-num{color:var(--text);font-weight:500}
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .visitor-counter.loaded{animation:vc-in .4s ease}
-footer a{color:var(--blue);text-decoration:none}
 
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -3455,10 +3464,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
-  <footer>Meteorološka postaja IREICA1 · Rečica ob Savinji, Slovenija<br>Podatki: <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground</a> &nbsp;·&nbsp; Samodejno posodablja vsakih 5 minut
-    <br>
-    <div class="visitor-counter" id="visitor-counter" title="Skupaj obiskov strani">
-      👁 Skupaj obiskov: <span class="vc-num" id="vc-num">…</span>
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">📡 IREICA1 — Meteorološka postaja</div>
+        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n.v. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
+        <div class="ft-sources">
+          <span>Viri podatkov:</span>
+          <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank" rel="noopener">Weather Underground</a>
+          <span class="ft-sep">·</span>
+          <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+          <span class="ft-sep">·</span>
+          <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a>
+          <span class="ft-sep">·</span>
+          <a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER</a>
+          <span class="ft-sep">·</span>
+          <a href="https://re.jrc.ec.europa.eu/pvg_tools/" target="_blank" rel="noopener">PVGIS · EU JRC</a>
+          <span class="ft-sep">·</span>
+          <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>
+        </div>
+      </div>
+      <div class="ft-right">
+        <div class="visitor-counter" id="visitor-counter" title="Skupaj obiskov strani">
+          👁 <span class="vc-num" id="vc-num">…</span> obiskov
+        </div>
+        <div class="ft-copy">
+          Samodejno posodablja vsakih 5 minut<br>
+          © <span id="ft-year"></span> IREICA1
+        </div>
+      </div>
     </div>
   </footer>
 </div>
@@ -14354,6 +14388,8 @@ function initStormChaser(){
 
 // ── Visitor counter ───────────────────────────────────────
 async function initVisitorCounter(){
+  const ftYear=document.getElementById('ft-year');
+  if(ftYear)ftYear.textContent=new Date().getFullYear();
   const el=document.getElementById('vc-num');
   const wrap=document.getElementById('visitor-counter');
   if(!el)return;
