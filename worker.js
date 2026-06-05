@@ -475,6 +475,23 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         }
       }
 
+      // ── /pvgis ───────────────────────────────────────────
+      if (path === "/pvgis") {
+        const pvgisUrl = `https://re.jrc.ec.europa.eu/api/v5_2/MRcalc?lat=46.3258&lon=14.9211&outputformat=json&raddatabase=PVGIS-SARAH3&browser=0`;
+        try {
+          const r = await fetch(pvgisUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const data = await r.json();
+          return new Response(JSON.stringify(data), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=604800" },
+          });
+        } catch(e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // ── /arso-forecast ───────────────────────────────────
       // ARSO krajevna napoved — Rečica ob Savinji
       if (path === "/arso-forecast") {

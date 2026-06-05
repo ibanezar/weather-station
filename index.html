@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -870,13 +870,22 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sun-ground{stroke:var(--svg-ring)}.sun-track{stroke:var(--svg-track)}.sun-lbl{fill:var(--svg-lbl-d);font-family:'JetBrains Mono',monospace}
 
 /* Footer */
-footer{text-align:center;padding-top:3rem;font-size:.76rem;color:var(--muted);line-height:2.2}
-.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);margin-top:.75rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
+footer{margin-top:3rem;border-top:1px solid var(--fc-border);padding:2.25rem 0 2rem;font-size:.76rem;color:var(--muted)}
+.ft-inner{display:grid;grid-template-columns:1fr auto;gap:1.5rem 2rem;align-items:start}
+@media(max-width:600px){.ft-inner{grid-template-columns:1fr}}
+.ft-brand{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text);font-weight:600;letter-spacing:.04em;margin-bottom:.3rem}
+.ft-loc{font-size:.73rem;color:var(--muted);margin-bottom:.9rem}
+.ft-sources{display:flex;flex-wrap:wrap;gap:.35rem .65rem;font-size:.69rem;color:var(--muted);line-height:1.8}
+.ft-sources a{color:var(--blue);text-decoration:none;transition:opacity .15s}.ft-sources a:hover{opacity:.75}
+.ft-sep{color:var(--fc-border)}
+.ft-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.55rem}
+@media(max-width:600px){.ft-right{align-items:flex-start;text-align:left}}
+.ft-copy{font-size:.68rem;color:var(--muted);line-height:1.6}
+.visitor-counter{display:inline-flex;align-items:center;gap:.5rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:border-color .3s}
 .visitor-counter:hover{border-color:var(--blue)}
 .visitor-counter .vc-num{color:var(--text);font-weight:500}
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .visitor-counter.loaded{animation:vc-in .4s ease}
-footer a{color:var(--blue);text-decoration:none}
 
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -1547,7 +1556,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 <div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
 </div>
 <div id="chart-tip"></div>
-<button class="theme-btn" id="theme-btn" title="Preklopi temo">🌙</button>
+<button class="theme-btn" id="theme-btn" title="Preklopi temo">☀️</button>
 
 <div class="wrap">
   <header>
@@ -2732,7 +2741,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
     <!-- Drift engine -->
-    <div class="card chart-card" style="margin-bottom:1rem">
+    <div id="drift-card" class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
         <span class="clabel" style="margin:0">🌡 Mikroklimni drift — IREICA1 vs ARSO</span>
         <span class="chart-range" id="drift-range">—</span>
@@ -3455,10 +3464,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 
-  <footer>Meteorološka postaja IREICA1 · Rečica ob Savinji, Slovenija<br>Podatki: <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank">Weather Underground</a> &nbsp;·&nbsp; Samodejno posodablja vsakih 5 minut
-    <br>
-    <div class="visitor-counter" id="visitor-counter" title="Skupaj obiskov strani">
-      👁 Skupaj obiskov: <span class="vc-num" id="vc-num">…</span>
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">📡 IREICA1 — Meteorološka postaja</div>
+        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n.v. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
+        <div class="ft-sources">
+          <span>Viri podatkov:</span>
+          <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank" rel="noopener">Weather Underground</a>
+          <span class="ft-sep">·</span>
+          <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+          <span class="ft-sep">·</span>
+          <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a>
+          <span class="ft-sep">·</span>
+          <a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER</a>
+          <span class="ft-sep">·</span>
+          <a href="https://re.jrc.ec.europa.eu/pvg_tools/" target="_blank" rel="noopener">PVGIS · EU JRC</a>
+          <span class="ft-sep">·</span>
+          <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>
+        </div>
+      </div>
+      <div class="ft-right">
+        <div class="visitor-counter" id="visitor-counter" title="Skupaj obiskov strani">
+          👁 <span class="vc-num" id="vc-num">…</span> obiskov
+        </div>
+        <div class="ft-copy">
+          Samodejno posodablja vsakih 5 minut<br>
+          © <span id="ft-year"></span> IREICA1
+        </div>
+      </div>
     </div>
   </footer>
 </div>
@@ -13645,8 +13679,7 @@ async function fetchPVGIS(){
     if(c&&Date.now()-c.ts<7*864e5){renderPVGIS(c.data);return;}
   }catch(_){}
   try{
-    const url='https://re.jrc.ec.europa.eu/api/v5_2/MRcalc?lat='+LAT+'&lon='+LON
-      +'&outputformat=json&raddatabase=PVGIS-SARAH3&browser=0';
+    const url=PROXY+'/pvgis';
     const data=await fetch(url).then(r=>r.json());
     try{localStorage.setItem(_PVGIS_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
     renderPVGIS(data);
@@ -13850,7 +13883,7 @@ function renderDriftEngine(){
   const range=document.getElementById('drift-range');
   if(!body)return;
   const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
-  if(drifts.length<6){body.innerHTML='<div class="clim-loading">Zbiranje drift podatkov… potrebno vsaj 6 meritev (≈30 min).</div>';return;}
+  if(drifts.length<6){const card=document.getElementById('drift-card');if(card)card.style.display='none';return;}
   // Enrich with hour info
   const rich=drifts.map(d=>({...d,hour:new Date(d.t).getHours(),month:new Date(d.t).getMonth()}));
   // KPIs
@@ -14355,6 +14388,8 @@ function initStormChaser(){
 
 // ── Visitor counter ───────────────────────────────────────
 async function initVisitorCounter(){
+  const ftYear=document.getElementById('ft-year');
+  if(ftYear)ftYear.textContent=new Date().getFullYear();
   const el=document.getElementById('vc-num');
   const wrap=document.getElementById('visitor-counter');
   if(!el)return;
@@ -14747,8 +14782,8 @@ async function fetchNASASolar(){
 function renderNASASolar(data){
   const el=document.getElementById('nasa-solar-body');if(!el||!data?.length)return;
   const monthly=data[0]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
-  const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
-  if(!monthly||!clim30){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN||null;
+  if(!monthly){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
   const now=new Date();
   const curY=String(now.getFullYear());
   const prevY=String(now.getFullYear()-1);
@@ -14764,7 +14799,7 @@ function renderNASASolar(data){
     const v=monthly[prevY]?.[k];
     return (v==null||v===-999)?null:v;
   });
-  const climVals=CLIM_KEYS.map(k=>{const v=clim30[k];return(v==null||v===-999)?null:v;});
+  const climVals=CLIM_KEYS.map(k=>{const v=clim30?clim30[k]:null;return(v==null||v===-999)?null:v;});
 
   const thisMonthVal=curVals[curMon];
   const climThisMonth=climVals[curMon];
