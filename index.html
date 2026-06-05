@@ -1508,8 +1508,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.game-fab{position:fixed;bottom:5.5rem;right:1.5rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:295;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center;padding:0}
-.game-fab:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(59,130,246,.75)}
+.game-fab{position:fixed;bottom:5.5rem;right:1.5rem;height:44px;padding:0 1.1rem 0 .85rem;border-radius:22px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:295;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;gap:.45rem;white-space:nowrap;font-family:inherit}.game-fab-lbl{font-size:.78rem;font-weight:700;color:#fff;letter-spacing:.01em}
+.game-fab:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(59,130,246,.75)}
 .game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .game-modal-overlay.open{display:flex}
 .game-modal{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(500px,96vw)}
@@ -14580,7 +14580,7 @@ async function sendChatMsg(){
 
 <!-- Game FAB -->
 <button class="game-fab" id="game-fab" onclick="openGameModal()" title="Lovec na dež">
-  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="22" height="22" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- Cloud -->
     <ellipse cx="12" cy="8" rx="6" ry="3.5" fill="rgba(255,255,255,0.85)"/>
     <ellipse cx="17" cy="9" rx="4.5" ry="3" fill="rgba(255,255,255,0.85)"/>
@@ -14596,6 +14596,7 @@ async function sendChatMsg(){
     <!-- Water in bucket -->
     <path d="M7.5 26 L16.5 26 L17 28 L7 28 Z" fill="rgba(147,197,253,0.7)"/>
   </svg>
+  <span class="game-fab-lbl">Lovec na dež</span>
 </button>
 
 <!-- Game modal -->
