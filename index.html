@@ -4841,6 +4841,7 @@ function applyHourly(observations){
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   drawHourlyProfile(observations);
   _hourlyObs=observations;
+  _autoInitAI();
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
   fetchForecastTrust();
@@ -5048,7 +5049,7 @@ function switchTab(tab){
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
   if(tab==='water'){     initVodostaj(); }
-  if(tab==='ai'){        initSensorDiag(); _autoInitAI(); }
+  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
@@ -12120,6 +12121,7 @@ function buildCandlestick(){
 // ── AI NOWCAST — LSTM/GRU HYPERLOCAL FORECASTING ──────────
 // ══════════════════════════════════════════════════════════
 const AI_WEIGHTS_KEY='wx-lstm-weights-v3';
+const AI_OM_CACHE_KEY='wx-om-history-v1';
 const AI_PRED_LOG_KEY='wx-lstm-pred-log-v1';
 const AI_SEQ_LEN=12;   // 12-hour input window
 const AI_N_FEAT=8;     // features per timestep
@@ -12486,10 +12488,42 @@ async function initAINowcast(){
   await aiTrainAndPredict();
 }
 
+// ── Fast auto-load: uses cached weights, no training ─────
+async function aiAutoLoad(){
+  if(_aiTraining)return;
+  if(_aiModel){aiDrawComparisonChart();return;}
+  if(!localStorage.getItem(AI_WEIGHTS_KEY))return;
+  try{
+    await loadTFJS();
+    _aiModel=await aiBuildModel();
+    const loaded=await aiLoadWeights(_aiModel);
+    if(!loaded){_aiModel.dispose();_aiModel=null;return;}
+    _aiNorm=loaded.norm;
+    const wuRaw=aiExtractFeatures(_hourlyObs||[]);
+    if(wuRaw.length<AI_SEQ_LEN)return;
+    const wuNorm=aiNormalize(wuRaw,_aiNorm);
+    const lastSeq=wuNorm.slice(-AI_SEQ_LEN);
+    const inputT=tf.tensor3d([lastSeq],[1,AI_SEQ_LEN,AI_N_FEAT]);
+    const predT=_aiModel.predict(inputT);
+    const predRaw=Array.from(await predT.data());
+    inputT.dispose();predT.dispose();
+    const preds=predRaw.map(v=>aiDenormalize(v,_aiNorm,0));
+    const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
+    const r24=drifts.filter(d=>d.t>Date.now()-864e5);
+    const driftCorr=r24.length?r24.reduce((s,d)=>s+d.dT,0)/r24.length:0;
+    const predsCorrected=preds.map(p=>p+driftCorr*0.4);
+    _aiLstmPredictions={preds:predsCorrected,raw:preds,driftCorr,ts:Date.now()};
+    aiRenderForecastCards(predsCorrected);
+    const ageDays=Math.floor((Date.now()-loaded.ts)/864e5);
+    const ageStr=ageDays===0?'danes':ageDays===1?'včeraj':`pred ${ageDays} dnevi`;
+    aiSetStatus(`✅ Napoved iz predpomnilnika (model naučen ${ageStr})${ageDays>=7?' · ⚠️ Priporoča se ponoven trening':''}`,100);
+    aiDrawComparisonChart();
+  }catch(e){console.warn('aiAutoLoad:',e);_aiModel=null;}
+}
+
 function _autoInitAI(){
   if(_aiTraining||_aiModel)return;
-  if(!localStorage.getItem(AI_WEIGHTS_KEY))return;
-  setTimeout(()=>{if(!_aiTraining&&!_aiModel)initAINowcast();},300);
+  setTimeout(()=>aiAutoLoad(),600);
 }
 
 function checkAIPredAccuracy(currentTemp){
