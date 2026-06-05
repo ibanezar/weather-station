@@ -9,7 +9,7 @@ const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=j
 const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
-const GEMINI_KEY    = "AIzaSyAjN-Iwlg3oa0bP3PmVyvOkimlPoc_6U5M";
+// GEMINI_KEY: add as Secret in Cloudflare Workers dashboard → Settings → Variables → Secret variables
 
 // Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
 const AMBEE_KEY = "4a654676f62aec4e724a5dcdc5d1b5665e3da3602d3270c8a65195d02e1faa09";
@@ -331,7 +331,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
       // ── /ai-chat ──────────────────────────────────────────
       if (path === "/ai-chat" && request.method === "POST") {
-        if (!GEMINI_KEY || GEMINI_KEY.startsWith("REPLACE")) {
+        const GEMINI_KEY = env.GEMINI_KEY;
+        if (!GEMINI_KEY) {
           return new Response(JSON.stringify({error:"no_key"}),
             {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
         }
