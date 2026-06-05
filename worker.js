@@ -439,6 +439,42 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         });
       }
 
+      // ── /nasa-power ──────────────────────────────────────
+      if (path === "/nasa-power") {
+        const qtype = new URL(request.url).searchParams.get("type") || "solar";
+        const BASE = "https://power.larc.nasa.gov/api/temporal";
+        const LAT_P = "46.3258", LON_P = "14.9211";
+        const yr = new Date().getFullYear();
+        const urlMap = {
+          solar: [
+            `${BASE}/monthly/point?parameters=ALLSKY_SFC_SW_DWN&latitude=${LAT_P}&longitude=${LON_P}&start=${yr-1}&end=${yr}&community=RE&format=JSON`,
+            `${BASE}/climatology/point?parameters=ALLSKY_SFC_SW_DWN&latitude=${LAT_P}&longitude=${LON_P}&community=RE&format=JSON`,
+          ],
+          baselines: [
+            `${BASE}/climatology/point?parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR&latitude=${LAT_P}&longitude=${LON_P}&community=AG&format=JSON`,
+          ],
+          agro: [
+            `${BASE}/climatology/point?parameters=EVPTRNS,ALLSKY_SFC_PAR_TOT,FROST_DAYS&latitude=${LAT_P}&longitude=${LON_P}&community=AG&format=JSON`,
+          ],
+        };
+        const urls = urlMap[qtype] || urlMap.solar;
+        try {
+          const results = await Promise.all(
+            urls.map(u => fetch(u, { headers: { "User-Agent": "Mozilla/5.0" } })
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null))
+          );
+          const filtered = results.filter(Boolean);
+          return new Response(JSON.stringify(filtered), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=14400" },
+          });
+        } catch(e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // ── /arso-forecast ───────────────────────────────────
       // ARSO krajevna napoved — Rečica ob Savinji
       if (path === "/arso-forecast") {

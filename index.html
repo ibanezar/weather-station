@@ -854,6 +854,14 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 @media(max-width:1100px){.omx-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.omx-grid{grid-template-columns:1fr}}
 
+/* NASA POWER widgets */
+.nasa-kpi-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.85rem}
+.nasa-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .75rem;flex:1;min-width:110px}
+.nasa-kpi-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--text)}
+.nasa-kpi-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.15rem}
+.nasa-section-lbl{font-size:.73rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .3rem}
+.nasa-src{font-size:.65rem;color:var(--muted);margin-top:.5rem;text-align:right;opacity:.8}
+
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
 .sun-svg{width:100%;display:block}
@@ -1448,8 +1456,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:720px){.daily-fc-hero{grid-template-columns:1fr}.daily-fc-main{align-items:flex-start}.daily-fc-icon{font-size:2.6rem}}
 .fc3-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-top:.5rem}
 @media(max-width:860px){.fc3-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.fc3-grid{grid-template-columns:1fr}}
-.fc3-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;padding:.9rem 1rem}
+.fc3-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;padding:.9rem 1rem;cursor:pointer;transition:border-color .15s,background .15s}
+.fc3-card:hover{background:var(--card-bg)}
 .fc3-card.fc3-today{border-color:var(--blue);background:rgba(56,189,248,.06)}
+.fc3-card.fc3-active{border-color:var(--blue);background:rgba(56,189,248,.1);box-shadow:0 0 0 2px rgba(56,189,248,.2)}
 .fc3-day{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem}
 .fc3-today .fc3-day{color:var(--blue)}
 .fc3-icon{font-size:2rem;line-height:1;margin:.15rem 0 .4rem}
@@ -2691,6 +2701,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="pvgis-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
+    <!-- NASA POWER Solar Monitor -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">☀️ Solarni nadzor — NASA POWER</span>
+        <span class="chart-range" id="nasa-solar-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-solar-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- NASA POWER Climate Baselines -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌍 Satelitske bazlinije — NASA POWER</span>
+        <span class="chart-range" id="nasa-clim-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-clim-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
@@ -3040,6 +3068,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="chart-range" id="fwi-updated">EFFIS metodologija · —</span>
       </div>
       <div id="fwi-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- NASA POWER Agro Atlas -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌾 Agrometeorološki atlas — NASA POWER</span>
+        <span class="chart-range" id="nasa-agro-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-agro-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
     <!-- Ambee Pollen + AQI -->
@@ -6597,18 +6634,57 @@ function _wmoTxt(c){return _WMO_SL[c]||_WMO_SL[Math.floor((c||0)/10)*10]||'Sprem
 function _wmoEmoji(c){return _WMO_EMOJI[c]||_WMO_EMOJI[Math.floor((c||0)/10)*10]||'🌤';}
 function _wmoEmojiDN(c,isDay){if(!isDay&&c in _WMO_EMOJI_NIGHT)return _WMO_EMOJI_NIGHT[c];return _wmoEmoji(c);}
 
-function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv}){
+let _fcDailyData=null; // cached Open-Meteo daily data for all 4 forecast days
+const _SL_DAYS_LOC=['nedeljo','ponedeljek','torek','sredo','četrtek','petek','soboto'];
+
+function buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv,dayIdx=0}){
   const parts=[];
   const desc=_wmoTxt(wmo).toLowerCase();
-  parts.push('Danes bo na Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
+  let dayWord='Danes';
+  if(dayIdx===1)dayWord='Jutri';
+  else if(dayIdx>1&&_fcDailyData){
+    const dateObj=new Date(_fcDailyData.time[dayIdx]+'T12:00:00');
+    dayWord='V '+_SL_DAYS_LOC[dateObj.getDay()];
+  }
+  parts.push(dayWord+' bo na Rečici ob Savinji predvidoma '+desc+', s temperaturo med '+Math.round(tmin)+'°C in '+Math.round(tmax)+'°C.');
   if(rain>=8)parts.push('Pričakovane so izrazitejše padavine, skupaj približno '+rain.toFixed(1)+' mm.');
   else if(rain>=0.5)parts.push('Možne so padavine, skupaj okoli '+rain.toFixed(1)+' mm.');
-  else parts.push('Večjih padavin model za danes ne nakazuje.');
+  else parts.push('Večjih padavin model ne nakazuje.');
   if(prob>=60)parts.push('Verjetnost padavin je povišana ('+Math.round(prob)+'%).');
   if(wind>=45)parts.push('Veter bo lahko moteč, z najmočnejšimi sunki okoli '+Math.round(wind)+' km/h.');
   else if(wind>=25)parts.push('Občasno bo pihal zmeren veter do približno '+Math.round(wind)+' km/h.');
   if(uv>=8)parts.push('UV indeks bo visok, zato je priporočljiva zaščita pred soncem.');
   return parts.join(' ');
+}
+
+function selectFcDay(el,i){
+  document.querySelectorAll('#daily-fc-content .fc3-card').forEach(c=>c.classList.remove('fc3-active'));
+  el.classList.add('fc3-active');
+  if(!_fcDailyData)return;
+  const d=_fcDailyData;
+  const wmo=d.weather_code[i]||0;
+  const tmax=d.temperature_2m_max[i]??0;
+  const tmin=d.temperature_2m_min[i]??0;
+  const rain=d.precipitation_sum[i]??0;
+  const prob=d.precipitation_probability_max[i]??0;
+  const wind=d.wind_speed_10m_max[i]??0;
+  const uv=d.uv_index_max[i]??0;
+  const dateObj=new Date(d.time[i]+'T12:00:00');
+  const dateLbl=dateObj.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+  const text=buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv,dayIdx:i});
+  const box=document.getElementById('daily-fc-content');
+  const icon=box?.querySelector('.daily-fc-icon');
+  const title=box?.querySelector('.daily-fc-title');
+  const txt=box?.querySelector('.daily-fc-text');
+  const kpis=box?.querySelectorAll('.daily-fc-kpi strong');
+  if(icon)icon.textContent=_wmoEmoji(wmo);
+  if(title)title.textContent=dateLbl+' · '+_wmoTxt(wmo);
+  if(txt)txt.textContent=text;
+  if(kpis?.[0])kpis[0].textContent=Math.round(tmax)+'° / '+Math.round(tmin)+'°';
+  if(kpis?.[1])kpis[1].textContent=rain.toFixed(1)+' mm';
+  if(kpis?.[2])kpis[2].textContent=Math.round(prob)+'%';
+  if(kpis?.[3])kpis[3].textContent=Math.round(wind)+' km/h';
+  if(kpis?.[4])kpis[4].textContent=Math.round(uv);
 }
 
 async function fetchLocalDailyForecast(){
@@ -6624,6 +6700,7 @@ async function fetchLocalDailyForecast(){
     const omData=await _archFetch(omUrl);
     const d=omData.daily;
     if(!d?.time?.length)throw new Error('No Open-Meteo data');
+    _fcDailyData=d;
     const wmo=d.weather_code[0]||0;
     const tmax=d.temperature_2m_max[0]??0;
     const tmin=d.temperature_2m_min[0]??0;
@@ -6631,7 +6708,7 @@ async function fetchLocalDailyForecast(){
     const prob=d.precipitation_probability_max[0]??0;
     const wind=d.wind_speed_10m_max[0]??0;
     const uv=d.uv_index_max[0]??0;
-    const text=buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv});
+    const text=buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv,dayIdx:0});
     const today=new Date(d.time[0]+'T12:00:00');
     const dateLbl=today.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
     // ── Try ARSO for 4-day cards ───────────────────────────────
@@ -6654,7 +6731,7 @@ async function fetchLocalDailyForecast(){
         const isToday=i===0,isTomorrow=i===1;
         const dayLbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS[dateObj.getDay()];
         const dl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
-        return`<div class="fc3-card${isToday?' fc3-today':''}">
+        return`<div class="fc3-card${isToday?' fc3-today fc3-active':''}" onclick="selectFcDay(this,${i})">
   <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dl}</span></div>
   <div class="fc3-icon">${_wmoEmoji(wcode)}</div>
   ${tx!=null&&tn!=null?`<div class="fc3-temps">${Math.round(tx)}° <span class="fc3-tmin">/ ${Math.round(tn)}°</span></div>`:''}
@@ -6714,7 +6791,7 @@ function _buildArsoDailyCards(arso){
     const dateObj=new Date((key||todayStr)+'T12:00:00');
     const dayLbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS[dateObj.getDay()];
     const dateLbl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
-    return`<div class="fc3-card${isToday?' fc3-today':''}">
+    return`<div class="fc3-card${isToday?' fc3-today fc3-active':''}" onclick="selectFcDay(this,${i})">
   <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dateLbl}</span></div>
   <div class="fc3-icon">${icon}</div>
   ${tmax!=null&&tmin!=null?`<div class="fc3-temps">${Math.round(tmax)}° <span class="fc3-tmin">/ ${Math.round(tmin)}°</span></div>`:''}
@@ -13403,6 +13480,7 @@ function initLife(){
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
   try{buildForestPulse();}catch(e){console.error('fp2',e);}
   try{buildTimeCapsule();}catch(e){console.error('capsule',e);}
+  try{fetchNASAAgro();}catch(e){console.error('nasa-agro',e);}
 }
 function refreshLife(){
   if(!_lifeInit)return;
@@ -13749,6 +13827,8 @@ function initClimate(){
   try{buildArsoNormals(null,null);}catch(e){console.error('arso-norm',e);}
   fetchCMIP6();
   fetchPVGIS();
+  try{fetchNASASolar();}catch(e){console.error('nasa-solar',e);}
+  try{fetchNASABaselines();}catch(e){console.error('nasa-baselines',e);}
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
   try{buildGrowingSeason();}catch(e){console.error('gs',e);}
@@ -14635,6 +14715,311 @@ async function sendChatMsg(){
     typing.remove();
     _chatAppend('bot','Oprostite, prišlo je do napake. Preverite internetno povezavo.');
   }finally{btn.disabled=false;input.focus();}
+}
+
+// ══════════════════════════════════════════════════════════
+// ── NASA POWER — Solar Monitor ─────────────────────────────
+// ══════════════════════════════════════════════════════════
+const _NASA_SOLAR_CACHE_KEY='wx-nasa-solar-v1';
+const SL_MON=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+const CLIM_KEYS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+async function fetchNASASolar(){
+  const el=document.getElementById('nasa-solar-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_NASA_SOLAR_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<4*3600000){renderNASASolar(c.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/nasa-power?type=solar');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    try{localStorage.setItem(_NASA_SOLAR_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderNASASolar(data);
+    const src=document.getElementById('nasa-solar-src');
+    if(src)src.textContent='NASA POWER · GEWEX SRB · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER solar ni dosegljiv.</div>';
+    console.warn('nasa-solar:',e);
+  }
+}
+
+function renderNASASolar(data){
+  const el=document.getElementById('nasa-solar-body');if(!el||!data?.length)return;
+  const monthly=data[0]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
+  const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
+  if(!monthly||!clim30){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const now=new Date();
+  const curY=String(now.getFullYear());
+  const prevY=String(now.getFullYear()-1);
+  const curMon=now.getMonth(); // 0-based
+
+  const curVals=Array.from({length:12},(_,i)=>{
+    const k=String(i+1).padStart(2,'0');
+    const v=monthly[curY]?.[k];
+    return (v==null||v===-999||i>curMon)?null:v;
+  });
+  const prevVals=Array.from({length:12},(_,i)=>{
+    const k=String(i+1).padStart(2,'0');
+    const v=monthly[prevY]?.[k];
+    return (v==null||v===-999)?null:v;
+  });
+  const climVals=CLIM_KEYS.map(k=>{const v=clim30[k];return(v==null||v===-999)?null:v;});
+
+  const thisMonthVal=curVals[curMon];
+  const climThisMonth=climVals[curMon];
+  const prevThisMonth=prevVals[curMon];
+  const annCur=monthly[curY]?.['13'];
+  const vsClim=thisMonthVal!=null&&climThisMonth?((thisMonthVal-climThisMonth)/climThisMonth*100):null;
+  const vsPrev=thisMonthVal!=null&&prevThisMonth?((thisMonthVal-prevThisMonth)/prevThisMonth*100):null;
+
+  const fmt=(v,d=2)=>v==null?'—':v.toFixed(d);
+  const fmtPct=(v)=>v==null?'—':(v>=0?'+':'')+v.toFixed(0)+'%';
+
+  const kpi=`<div class="nasa-kpi-row">
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(thisMonthVal)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²/dan</span></div><div class="nasa-kpi-lbl">Ta mesec</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsClim==null?'var(--text)':vsClim>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsClim)}</div><div class="nasa-kpi-lbl">vs 30-letno avg</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsPrev==null?'var(--text)':vsPrev>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsPrev)}</div><div class="nasa-kpi-lbl">vs lani</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(annCur!=null&&annCur!==-999?annCur:null)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²</span></div><div class="nasa-kpi-lbl">Letno (${curY.slice(2)})</div></div>
+  </div>`;
+
+  // SVG bar chart
+  const W=880,H=220,mL=45,mR=15,mT=18,mB=35;
+  const cW=W-mL-mR,cH=H-mT-mB;
+  const allVals=[...curVals,...prevVals,...climVals].filter(v=>v!=null);
+  const maxV=Math.max(...allVals,0.01);
+  const minV=0;
+  const yS=v=>(mT+cH-(v-minV)/(maxV-minV)*cH);
+  const barSlotW=cW/12;
+  const barW=Math.floor(barSlotW*0.28);
+
+  // Grid lines
+  const ticks=4;
+  let gridLines='';
+  for(let i=0;i<=ticks;i++){
+    const v=maxV*i/ticks;
+    const y=yS(v);
+    gridLines+=`<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W-mR}" y2="${y.toFixed(1)}" stroke="var(--fc-border)" stroke-width="0.5"/>`;
+    gridLines+=`<text x="${(mL-4).toFixed(0)}" y="${(y+3.5).toFixed(1)}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${v.toFixed(1)}</text>`;
+  }
+
+  let bars='',prevBars='',climDots='',climLine='';
+  const climPts=[];
+  for(let i=0;i<12;i++){
+    const cx=mL+i*barSlotW+barSlotW/2;
+    // prev year bar (left)
+    if(prevVals[i]!=null){
+      const bh=(prevVals[i]-minV)/(maxV-minV)*cH;
+      prevBars+=`<rect x="${(cx-barW*1.2).toFixed(1)}" y="${yS(prevVals[i]).toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" fill="var(--muted)" opacity="0.45" rx="2"><title>${SL_MON[i]} ${prevY}: ${prevVals[i].toFixed(2)} kWh/m²/dan</title></rect>`;
+    }
+    // cur year bar (right)
+    if(curVals[i]!=null){
+      const bh=(curVals[i]-minV)/(maxV-minV)*cH;
+      bars+=`<rect x="${(cx+barW*0.2).toFixed(1)}" y="${yS(curVals[i]).toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" fill="var(--blue)" opacity="${i===curMon?1:0.7}" rx="2"><title>${SL_MON[i]} ${curY}: ${curVals[i].toFixed(2)} kWh/m²/dan</title></rect>`;
+    }
+    // climatology dots
+    if(climVals[i]!=null){
+      climPts.push({x:cx,y:yS(climVals[i])});
+      climDots+=`<circle cx="${cx.toFixed(1)}" cy="${yS(climVals[i]).toFixed(1)}" r="3" fill="var(--amber)"/>`;
+    }
+    // x labels
+    gridLines+=`<text x="${cx.toFixed(1)}" y="${(H-mB+14).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
+  }
+  // dashed amber line
+  if(climPts.length>1){
+    climLine=`<polyline points="${climPts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')}" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  }
+  // Y-axis label
+  const yLabel=`<text x="11" y="${(mT+cH/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cH/2).toFixed(0)})">kWh/m²/dan</text>`;
+  // Legend
+  const legend=`<rect x="${mL+4}" y="${H-mB-16}" width="10" height="8" fill="var(--muted)" opacity="0.45" rx="1"/><text x="${mL+17}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">lani (${prevY})</text>`+
+    `<rect x="${mL+70}" y="${H-mB-16}" width="10" height="8" fill="var(--blue)" opacity="0.8" rx="1"/><text x="${mL+83}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">letos (${curY})</text>`+
+    `<line x1="${mL+138}" y1="${H-mB-12}" x2="${mL+148}" y2="${H-mB-12}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${mL+143}" cy="${H-mB-12}" r="2.5" fill="var(--amber)"/><text x="${mL+151}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">30-letno avg</text>`;
+
+  const svg=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${gridLines}${prevBars}${bars}${climLine}${climDots}${yLabel}${legend}</svg></div>`;
+  const src=`<div class="nasa-src">NASA POWER · GEWEX SRB · satelitski podatki</div>`;
+  el.innerHTML=kpi+svg+src;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── NASA POWER — Climate Baselines ─────────────────────────
+// ══════════════════════════════════════════════════════════
+const _NASA_CLIM_CACHE_KEY='wx-nasa-clim-v1';
+
+async function fetchNASABaselines(){
+  const el=document.getElementById('nasa-clim-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_NASA_CLIM_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<4*3600000){renderNASABaselines(c.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/nasa-power?type=baselines');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    try{localStorage.setItem(_NASA_CLIM_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderNASABaselines(data);
+    const src=document.getElementById('nasa-clim-src');
+    if(src)src.textContent='NASA POWER · MERRA-2 · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER baselines ni dosegljiv.</div>';
+    console.warn('nasa-clim:',e);
+  }
+}
+
+function renderNASABaselines(data){
+  const el=document.getElementById('nasa-clim-body');if(!el||!data?.length)return;
+  const p=data[0]?.properties?.parameter;
+  if(!p){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const t2m=CLIM_KEYS.map(k=>{const v=p.T2M?.[k];return(v==null||v===-999)?null:v;});
+  const tmax=CLIM_KEYS.map(k=>{const v=p.T2M_MAX?.[k];return(v==null||v===-999)?null:v;});
+  const tmin=CLIM_KEYS.map(k=>{const v=p.T2M_MIN?.[k];return(v==null||v===-999)?null:v;});
+  const prec=CLIM_KEYS.map(k=>{const v=p.PRECTOTCORR?.[k];return(v==null||v===-999)?null:v;});
+
+  // Temperature chart
+  const W=880,HT=200,mL=45,mR=15,mT=18,mB=35;
+  const cW=W-mL-mR,cHT=HT-mT-mB;
+  const allT=[...tmax,...t2m,...tmin].filter(v=>v!=null);
+  const minT=Math.floor(Math.min(...allT)-1),maxT=Math.ceil(Math.max(...allT)+1);
+  const yT=v=>mT+cHT-(v-minT)/(maxT-minT)*cHT;
+
+  let tGrid='';
+  const tTicks=5;
+  for(let i=0;i<=tTicks;i++){
+    const v=minT+(maxT-minT)*i/tTicks;
+    const y=yT(v);
+    tGrid+=`<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W-mR}" y2="${y.toFixed(1)}" stroke="var(--fc-border)" stroke-width="0.5"/>`;
+    tGrid+=`<text x="${(mL-4)}" y="${(y+3.5).toFixed(1)}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${v.toFixed(0)}</text>`;
+  }
+  // Zero line
+  if(minT<0&&maxT>0){
+    const y0=yT(0);
+    tGrid+=`<line x1="${mL}" y1="${y0.toFixed(1)}" x2="${W-mR}" y2="${y0.toFixed(1)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>`;
+  }
+
+  // Tmax area fill
+  let tmaxPts=[],tminPts=[],t2mPts=[];
+  for(let i=0;i<12;i++){
+    const cx=mL+(i+0.5)*(cW/12);
+    if(tmax[i]!=null)tmaxPts.push(`${cx.toFixed(1)},${yT(tmax[i]).toFixed(1)}`);
+    if(t2m[i]!=null)t2mPts.push(`${cx.toFixed(1)},${yT(t2m[i]).toFixed(1)}`);
+    if(tmin[i]!=null)tminPts.push(`${cx.toFixed(1)},${yT(tmin[i]).toFixed(1)}`);
+    tGrid+=`<text x="${cx.toFixed(1)}" y="${(HT-mB+14).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
+  }
+  // Area between tmax and tmin
+  const allXY=[...tmax.map((v,i)=>v!=null?`${(mL+(i+0.5)*(cW/12)).toFixed(1)},${yT(v).toFixed(1)}`:null).filter(Boolean),
+    ...[...tmin].reverse().map((v,i,a)=>{const ri=11-i;return tmin[ri]!=null?`${(mL+(ri+0.5)*(cW/12)).toFixed(1)},${yT(tmin[ri]).toFixed(1)}`:null}).filter(Boolean)];
+  const tmaxArea=allXY.length?`<polygon points="${allXY.join(' ')}" fill="var(--red)" opacity="0.12"/>`:
+    '';
+  const yLabel=`<text x="11" y="${(mT+cHT/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cHT/2).toFixed(0)})">°C</text>`;
+  const tLegend=`<line x1="${mL+4}" y1="${HT-mB-12}" x2="${mL+16}" y2="${HT-mB-12}" stroke="var(--red)" stroke-width="2"/><text x="${mL+19}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tmax</text>`+
+    `<line x1="${mL+58}" y1="${HT-mB-12}" x2="${mL+70}" y2="${HT-mB-12}" stroke="var(--muted)" stroke-width="1.5"/><text x="${mL+73}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tsred</text>`+
+    `<line x1="${mL+116}" y1="${HT-mB-12}" x2="${mL+128}" y2="${HT-mB-12}" stroke="var(--blue)" stroke-width="2"/><text x="${mL+131}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tmin</text>`;
+  const svgT=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HT}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${tGrid}${tmaxArea}<polyline points="${tmaxPts.join(' ')}" fill="none" stroke="var(--red)" stroke-width="1.8"/><polyline points="${t2mPts.join(' ')}" fill="none" stroke="var(--muted)" stroke-width="1.5"/><polyline points="${tminPts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="1.8"/>${yLabel}${tLegend}</svg></div>`;
+
+  // Precipitation chart
+  const HP=140,cHP=HP-mT-mB;
+  const maxP=Math.max(...prec.filter(v=>v!=null),1);
+  const yP=v=>mT+cHP-v/maxP*cHP;
+  let pGrid='',pBars='';
+  const pTicks=3;
+  for(let i=0;i<=pTicks;i++){
+    const v=maxP*i/pTicks;
+    const y=yP(v);
+    pGrid+=`<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W-mR}" y2="${y.toFixed(1)}" stroke="var(--fc-border)" stroke-width="0.5"/>`;
+    pGrid+=`<text x="${(mL-4)}" y="${(y+3.5).toFixed(1)}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${v.toFixed(0)}</text>`;
+  }
+  const pbW=Math.floor((cW/12)*0.6);
+  for(let i=0;i<12;i++){
+    const cx=mL+(i+0.5)*(cW/12);
+    if(prec[i]!=null){
+      const bh=prec[i]/maxP*cHP;
+      pBars+=`<rect x="${(cx-pbW/2).toFixed(1)}" y="${yP(prec[i]).toFixed(1)}" width="${pbW}" height="${bh.toFixed(1)}" fill="var(--blue)" opacity="0.7" rx="2"><title>${SL_MON[i]}: ${prec[i].toFixed(1)} mm</title></rect>`;
+    }
+    pGrid+=`<text x="${cx.toFixed(1)}" y="${(HP-mB+14).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
+  }
+  const pYLabel=`<text x="11" y="${(mT+cHP/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cHP/2).toFixed(0)})">mm/mesec</text>`;
+  const svgP=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HP}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${pGrid}${pBars}${pYLabel}</svg></div>`;
+
+  const note=`<div style="font-size:.67rem;color:var(--muted);margin-top:.5rem">🛸 Satelitski podatki NASA POWER (1994–2023) · primerjaj z ARSO normalami 1991–2020 zgoraj</div>`;
+  const src=`<div class="nasa-src">NASA POWER · MERRA-2 reanaliza · kalibrirana za lokacijo</div>`;
+  el.innerHTML=svgT+svgP+note+src;
+}
+
+// ══════════════════════════════════════════════════════════
+// ── NASA POWER — Agro Atlas ────────────────────────────────
+// ══════════════════════════════════════════════════════════
+const _NASA_AGRO_CACHE_KEY='wx-nasa-agro-v1';
+const _DAYS_IN_MON=[31,28,31,30,31,30,31,31,30,31,30,31];
+
+async function fetchNASAAgro(){
+  const el=document.getElementById('nasa-agro-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_NASA_AGRO_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<4*3600000){renderNASAAgro(c.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/nasa-power?type=agro');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    try{localStorage.setItem(_NASA_AGRO_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderNASAAgro(data);
+    const src=document.getElementById('nasa-agro-src');
+    if(src)src.textContent='NASA POWER · AG · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER agro ni dosegljiv.</div>';
+    console.warn('nasa-agro:',e);
+  }
+}
+
+function renderNASAAgro(data){
+  const el=document.getElementById('nasa-agro-body');if(!el||!data?.length)return;
+  const p=data[0]?.properties?.parameter;
+  if(!p){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const evpt=CLIM_KEYS.map((k,i)=>{const v=p.EVPTRNS?.[k];return(v==null||v===-999)?null:v*_DAYS_IN_MON[i];});
+  const par=CLIM_KEYS.map(k=>{const v=p.ALLSKY_SFC_PAR_TOT?.[k];return(v==null||v===-999)?null:v;});
+  const frost=CLIM_KEYS.map(k=>{const v=p.FROST_DAYS?.[k];return(v==null||v===-999)?null:v;});
+
+  const annET=p.EVPTRNS?.ANN;
+  const annFrost=p.FROST_DAYS?.ANN;
+  const julPAR=par[6];
+
+  const kpi=`<div class="nasa-kpi-row">
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${annET!=null&&annET!==-999?(annET*365).toFixed(0):'—'} <span style="font-size:.7rem;color:var(--muted)">mm</span></div><div class="nasa-kpi-lbl">Letna ET</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${annFrost!=null&&annFrost!==-999?Math.round(annFrost):'—'} <span style="font-size:.7rem;color:var(--muted)">dni</span></div><div class="nasa-kpi-lbl">Dni s pozebo</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${julPAR!=null?julPAR.toFixed(1):'—'} <span style="font-size:.7rem;color:var(--muted)">W/m²</span></div><div class="nasa-kpi-lbl">PAR julij</div></div>
+  </div>`;
+
+  function miniChart(vals,color,yLabel,H){
+    const W=880,mL=45,mR=15,mT=12,mB=30;
+    const cW=W-mL-mR,cH=H-mT-mB;
+    const allV=vals.filter(v=>v!=null);
+    const maxV=Math.max(...allV,0.01);
+    const bW=Math.floor((cW/12)*0.6);
+    let inner='';
+    const ticks=3;
+    for(let i=0;i<=ticks;i++){
+      const v=maxV*i/ticks;
+      const y=mT+cH-v/maxV*cH;
+      inner+=`<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W-mR}" y2="${y.toFixed(1)}" stroke="var(--fc-border)" stroke-width="0.5"/>`;
+      inner+=`<text x="${(mL-4)}" y="${(y+3.5).toFixed(1)}" font-size="8" text-anchor="end" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${v.toFixed(v<10?1:0)}</text>`;
+    }
+    for(let i=0;i<12;i++){
+      const cx=mL+(i+0.5)*(cW/12);
+      if(vals[i]!=null){
+        const bh=vals[i]/maxV*cH;
+        inner+=`<rect x="${(cx-bW/2).toFixed(1)}" y="${(mT+cH-bh).toFixed(1)}" width="${bW}" height="${bh.toFixed(1)}" fill="${color}" opacity="0.78" rx="2"><title>${SL_MON[i]}: ${vals[i].toFixed(1)}</title></rect>`;
+      }
+      inner+=`<text x="${cx.toFixed(1)}" y="${(H-mB+12).toFixed(0)}" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
+    }
+    inner+=`<text x="10" y="${(mT+cH/2).toFixed(0)}" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,10,${(mT+cH/2).toFixed(0)})">${yLabel}</text>`;
+    return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${inner}</svg></div>`;
+  }
+
+  const s1=`<div class="nasa-section-lbl">Evapotranspiracija (ET₀)</div>`+miniChart(evpt,'var(--green)','mm',120);
+  const s2=`<div class="nasa-section-lbl">Dni s pozebo (Tmin&lt;0°C)</div>`+miniChart(frost,'var(--blue)','dni',120);
+  const s3=`<div class="nasa-section-lbl">Fotosintetsko aktivna radiacija (PAR)</div>`+miniChart(par,'var(--amber)','W/m²',120);
+  const src=`<div class="nasa-src">NASA POWER · satelitski + modelski podatki · klimatološko povprečje 1994–2023</div>`;
+  el.innerHTML=kpi+s1+s2+s3+src;
 }
 
 </script>
