@@ -356,8 +356,14 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           parts: [{ text: m.content }],
         }));
 
+        // Gemini needs at least one message
+        if (!geminiMsgs.length) {
+          return new Response(JSON.stringify({reply:"Prosim, pošljite sporočilo."}),
+            {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
+        }
+
         const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -369,6 +375,12 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           }
         );
         const aiData = await aiRes.json();
+        if (!aiRes.ok || aiData.error) {
+          const errMsg = aiData.error?.message || `HTTP ${aiRes.status}`;
+          console.error("Gemini error:", errMsg);
+          return new Response(JSON.stringify({reply:`[Gemini napaka: ${errMsg}]`}),
+            {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
+        }
         const reply = aiData.candidates?.[0]?.content?.parts?.[0]?.text
           || "Oprostite, trenutno ne morem odgovoriti.";
         return new Response(JSON.stringify({reply}),
