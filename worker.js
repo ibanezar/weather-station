@@ -467,20 +467,30 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       if (path === "/wu-nearby") {
         const lat = url.searchParams.get("lat") || "46.3258";
         const lon = url.searchParams.get("lon") || "14.9211";
-        const nearUrl = `https://api.weather.com/v2/pws/nearby?geocode=${lat},${lon}&format=json&units=m&apiKey=${WU_KEY}`;
-        const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 8000);
-        try {
-          const r = await fetch(nearUrl, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
-          const data = await r.json();
-          return new Response(JSON.stringify(data), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
-          });
-        } catch (e) {
-          return new Response(JSON.stringify({ error: e.message }), {
-            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
+        // Try v3 first (more reliable), then v2 fallback
+        const urls = [
+          `https://api.weather.com/v3/location/near?geocode=${lat},${lon}&product=pws&format=json&language=en-US&apiKey=${WU_KEY}`,
+          `https://api.weather.com/v2/pws/nearby?geocode=${lat},${lon}&format=json&units=m&apiKey=${WU_KEY}`,
+        ];
+        for (const nearUrl of urls) {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 8000);
+          try {
+            const r = await fetch(nearUrl, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+            if (!r.ok) continue;
+            const data = await r.json();
+            // Normalize: extract station list from either v3 or v2 format
+            const loc = data.location || {};
+            const ids = loc.stationIdentifier || loc.stationId || [];
+            if (!ids.length) continue;
+            return new Response(JSON.stringify(data), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+            });
+          } catch (_) { continue; }
         }
+        return new Response(JSON.stringify({ error: "WU nearby nedostopen", _debug: "tried v3+v2" }), {
+          status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
       }
 
       // ── /wu-station?id=XXX — trenutni podatki za poljubno postajo ──
