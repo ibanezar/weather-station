@@ -12119,7 +12119,7 @@ function buildCandlestick(){
 // ══════════════════════════════════════════════════════════
 // ── AI NOWCAST — LSTM/GRU HYPERLOCAL FORECASTING ──────────
 // ══════════════════════════════════════════════════════════
-const AI_WEIGHTS_KEY='wx-lstm-weights-v2';
+const AI_WEIGHTS_KEY='wx-lstm-weights-v3';
 const AI_PRED_LOG_KEY='wx-lstm-pred-log-v1';
 const AI_SEQ_LEN=12;   // 12-hour input window
 const AI_N_FEAT=8;     // features per timestep
@@ -12292,6 +12292,47 @@ function aiDrawComparison(actual,lstm,omPast){
   const r=document.getElementById('ai-compare-range');if(r)r.textContent='Zadnjih 24h + napoved 6h';
 }
 
+// ── Fetch 92-day Open-Meteo history for LSTM training ────
+async function aiFetchOMHistory(){
+  try{
+    const end=new Date();
+    const start=new Date(end.getTime()-92*864e5);
+    const sd=start.toISOString().slice(0,10);
+    const ed=end.toISOString().slice(0,10);
+    const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LON}`+
+      `&start_date=${sd}&end_date=${ed}`+
+      `&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,surface_pressure`+
+      `&timezone=Europe%2FLjubljana`;
+    const r=await fetch(url);
+    if(!r.ok)return[];
+    const d=await r.json();
+    const times=d.hourly?.time??[];
+    const temp=d.hourly?.temperature_2m??[];
+    const hum=d.hourly?.relative_humidity_2m??[];
+    const wind=d.hourly?.wind_speed_10m??[];
+    const rain=d.hourly?.precipitation??[];
+    const pres=d.hourly?.surface_pressure??[];
+    const result=[];
+    times.forEach((t,i)=>{
+      if(temp[i]==null)return;
+      const dt=new Date(t);
+      const hour=dt.getHours();
+      const doy=Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5);
+      result.push([
+        temp[i],
+        hum[i]??65,
+        wind[i]??0,
+        rain[i]??0,
+        pres[i]??1013,
+        Math.sin(2*Math.PI*hour/24),
+        Math.cos(2*Math.PI*hour/24),
+        Math.sin(2*Math.PI*doy/365),
+      ]);
+    });
+    return result;
+  }catch(e){console.warn('OM history fetch failed:',e);return[];}
+}
+
 // ── Main: train and predict ───────────────────────────────
 let _aiLstmPredictions=null;
 async function aiTrainAndPredict(){
@@ -12300,12 +12341,15 @@ async function aiTrainAndPredict(){
   const btn=document.getElementById('ai-train-btn');if(btn)btn.disabled=true;
   try{
     await loadTFJS();
+    aiSetStatus('Nalagam 92-dnevno zgodovino (Open-Meteo)…',10);
+    const omRaw=await aiFetchOMHistory();
     aiSetStatus('Pripravljam podatke…',15);
-    // Collect hourly obs
-    const raw=aiExtractFeatures(_hourlyObs||[]);
+    // WU station hourly obs + OM history combined for training
+    const wuRaw=aiExtractFeatures(_hourlyObs||[]);
+    const raw=[...omRaw,...wuRaw];
     const nSamples=document.getElementById('ai-train-samples');
     if(raw.length<AI_SEQ_LEN+AI_OUT_LEN+5){
-      aiSetStatus('❌ Premalo urnih podatkov ('+raw.length+'). Potrebujem vsaj '+(AI_SEQ_LEN+AI_OUT_LEN+5)+' urnih opazovanj.');
+      aiSetStatus('❌ Premalo podatkov ('+raw.length+' ur). Preverite internetno povezavo.');
       if(nSamples)nSamples.textContent=raw.length+'';
       return;
     }
@@ -12349,7 +12393,9 @@ async function aiTrainAndPredict(){
     }
     // Predict next 6 hours using last AI_SEQ_LEN observations
     aiSetStatus('Generiram napoved…',96);
-    const lastSeq=norm.slice(-AI_SEQ_LEN);
+    // Predict from last AI_SEQ_LEN WU obs (most recent local data)
+    const wuNorm=aiNormalize(wuRaw,_aiNorm);
+    const lastSeq=(wuNorm.length>=AI_SEQ_LEN?wuNorm:norm).slice(-AI_SEQ_LEN);
     if(lastSeq.length<AI_SEQ_LEN){aiSetStatus('❌ Premalo podatkov za napoved.');return;}
     const inputT=tf.tensor3d([lastSeq],[1,AI_SEQ_LEN,AI_N_FEAT]);
     const predT=_aiModel.predict(inputT);
@@ -12369,7 +12415,7 @@ async function aiTrainAndPredict(){
     aiRenderForecastCards(predsCorrected);
     // Update meta
     const curT=_lastBriefObs?.metric?.temp??null;
-    aiSetMeta(`Model naučen na ${raw.length} urnih opazovanjih (${AI_N_FEAT} feature, sekvenca ${AI_SEQ_LEN}h). Mikroklimatska korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C.`);
+    aiSetMeta(`Model naučen na ${raw.length} urnih vzorcih — OM arhiv: ${omRaw.length}, WU postaja: ${wuRaw.length}, ${AI_N_FEAT} atributov. Mikroklimatska korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C.`);
     const ta=document.getElementById('ai-trained-at');if(ta)ta.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     const fl=document.getElementById('ai-final-loss');if(fl)fl.textContent=_finalLoss!=null?_finalLoss.toFixed(5):'—';
     aiSetStatus('✅ Napoved pripravljena — IREICA1 lokalni LSTM model',100);
