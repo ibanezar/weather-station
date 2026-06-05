@@ -3293,7 +3293,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="clabel" style="margin:0">📅 Napoved za 4 dni — Rečica ob Savinji</span>
         <span class="chart-range" id="daily-fc-updated">Nalaganje…</span>
       </div>
-      <div id="daily-fc-content" class="daily-fc-hero">
+      <div id="daily-fc-content">
         <div style="color:var(--muted);font-size:.8rem">Pripravljam lokalno napoved…</div>
       </div>
     </div>
@@ -6615,46 +6615,112 @@ async function fetchLocalDailyForecast(){
   const box=document.getElementById('daily-fc-content');
   const upd=document.getElementById('daily-fc-updated');
   if(!box)return;
-  // ── Try ARSO first ─────────────────────────────────────────
   try{
-    const arso=await fetch(PROXY+'/arso-forecast').then(r=>r.json());
-    if(arso?.days?.length){
-      _renderArsoDailyForecast(arso,box,upd);
-      return;
-    }
-  }catch(_){}
-  // ── Fallback: Open-Meteo 3 days ───────────────────────────
-  try{
-    const url='https://api.open-meteo.com/v1/forecast'
+    // ── Open-Meteo: today for narrative text + KPIs, 4 days for cards ─
+    const omUrl='https://api.open-meteo.com/v1/forecast'
       +'?latitude='+LAT+'&longitude='+LON
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=4';
-    const data=await _archFetch(url);
-    const d=data.daily;
-    if(!d?.time?.length)throw new Error('No daily forecast');
-    const SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
-    const cards=d.time.slice(0,4).map((t,i)=>{
-      const wmo=d.weather_code[i]||0;
-      const tmax=d.temperature_2m_max[i]??null;
-      const tmin=d.temperature_2m_min[i]??null;
-      const dateObj=new Date(t+'T12:00:00');
-      const isToday=i===0,isTomorrow=i===1;
-      const dayLbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS[dateObj.getDay()];
-      const dateLbl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
-      return`<div class="fc3-card${isToday?' fc3-today':''}">
-  <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dateLbl}</span></div>
-  <div class="fc3-icon">${_wmoEmoji(wmo)}</div>
-  ${tmax!=null&&tmin!=null?`<div class="fc3-temps">${Math.round(tmax)}° <span class="fc3-tmin">/ ${Math.round(tmin)}°</span></div>`:''}
-  <div class="fc3-text" style="-webkit-line-clamp:unset">${_wmoTxt(wmo)}</div>
+    const omData=await _archFetch(omUrl);
+    const d=omData.daily;
+    if(!d?.time?.length)throw new Error('No Open-Meteo data');
+    const wmo=d.weather_code[0]||0;
+    const tmax=d.temperature_2m_max[0]??0;
+    const tmin=d.temperature_2m_min[0]??0;
+    const rain=d.precipitation_sum[0]??0;
+    const prob=d.precipitation_probability_max[0]??0;
+    const wind=d.wind_speed_10m_max[0]??0;
+    const uv=d.uv_index_max[0]??0;
+    const text=buildDailyForecastText({wmo,tmax,tmin,rain,prob,wind,uv});
+    const today=new Date(d.time[0]+'T12:00:00');
+    const dateLbl=today.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'});
+    // ── Try ARSO for 4-day cards ───────────────────────────────
+    let cards4='',cardsSrc='Open-Meteo (rezervni vir)';
+    try{
+      const arso=await fetch(PROXY+'/arso-forecast').then(r=>r.json());
+      if(arso?.days?.length){
+        cards4=_buildArsoDailyCards(arso);
+        if(cards4)cardsSrc='ARSO · '+(arso.location?.title||arso.location?.name||'Rečica ob Savinji');
+      }
+    }catch(_){}
+    // ── Fallback: Open-Meteo 4-day cards ──────────────────────
+    if(!cards4){
+      const SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+      cards4=d.time.slice(0,4).map((t,i)=>{
+        const wcode=d.weather_code[i]||0;
+        const tx=d.temperature_2m_max[i]??null;
+        const tn=d.temperature_2m_min[i]??null;
+        const dateObj=new Date(t+'T12:00:00');
+        const isToday=i===0,isTomorrow=i===1;
+        const dayLbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS[dateObj.getDay()];
+        const dl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
+        return`<div class="fc3-card${isToday?' fc3-today':''}">
+  <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dl}</span></div>
+  <div class="fc3-icon">${_wmoEmoji(wcode)}</div>
+  ${tx!=null&&tn!=null?`<div class="fc3-temps">${Math.round(tx)}° <span class="fc3-tmin">/ ${Math.round(tn)}°</span></div>`:''}
+  <div class="fc3-text" style="-webkit-line-clamp:unset">${_wmoTxt(wcode)}</div>
 </div>`;
-    }).join('');
-    box.innerHTML=`<div class="fc3-grid">${cards}</div><div class="fc3-src">Open-Meteo (rezervni vir)</div>`;
-    if(upd)upd.textContent='Open-Meteo · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+      }).join('');
+    }
+    box.innerHTML=
+      '<div class="daily-fc-hero">'+
+        '<div>'+
+          '<div class="daily-fc-main">'+
+            '<div class="daily-fc-icon">'+_wmoEmoji(wmo)+'</div>'+
+            '<div>'+
+              '<div class="daily-fc-title">'+dateLbl+' · '+_wmoTxt(wmo)+'</div>'+
+              '<div class="daily-fc-text">'+text+'</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="daily-fc-note">Napoved je modelna ocena za koordinate postaje IREICA1 pri Rečici ob Savinji in se samodejno osvežuje.</div>'+
+        '</div>'+
+        '<div class="daily-fc-kpis">'+
+          '<div class="daily-fc-kpi"><strong>'+Math.round(tmax)+'° / '+Math.round(tmin)+'°</strong><span>temperatura</span></div>'+
+          '<div class="daily-fc-kpi"><strong>'+rain.toFixed(1)+' mm</strong><span>padavine</span></div>'+
+          '<div class="daily-fc-kpi"><strong>'+Math.round(prob)+'%</strong><span>verj. padavin</span></div>'+
+          '<div class="daily-fc-kpi"><strong>'+Math.round(wind)+' km/h</strong><span>veter max</span></div>'+
+          '<div class="daily-fc-kpi"><strong>'+Math.round(uv)+'</strong><span>UV max</span></div>'+
+          '<div class="daily-fc-kpi"><strong>Rečica</strong><span>lokacija</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="fc3-grid" style="margin-top:1rem">'+cards4+'</div>'+
+      '<div class="fc3-src">'+cardsSrc+'</div>';
+    if(upd)upd.textContent=(cardsSrc.startsWith('ARSO')?'ARSO':'Open-Meteo')+' · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){
     box.innerHTML='<div style="color:var(--muted);font-size:.8rem">Dnevna napoved trenutno ni na voljo.</div>';
     if(upd)upd.textContent='ni na voljo';
     console.warn('LocalDailyForecast:',e);
   }
+}
+
+function _buildArsoDailyCards(arso){
+  const todayStr=new Date().toISOString().slice(0,10);
+  const targets=[0,1,2,3].map(i=>new Date(Date.now()+i*864e5).toISOString().slice(0,10));
+  const SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+  const days4=[];
+  for(const t of targets){
+    const found=arso.days.find(x=>(x.valid_date||x.date||'').startsWith(t));
+    if(found)days4.push({d:found,key:t});
+  }
+  if(!days4.length)arso.days.slice(0,4).forEach((d,i)=>days4.push({d,key:targets[i]||''}));
+  if(!days4.length)return'';
+  return days4.map(({d,key},i)=>{
+    const tmax=d.tmax_24h??d.tmax??d.tx??d.temperature_max??null;
+    const tmin=d.tmin_24h??d.tmin??d.tn??d.temperature_min??null;
+    const desc=d.nn24||d.nn||d.weather||d.shortFcst_sl||d.shortFcst||'';
+    const fcText=d.longFcst_sl||d.longFcst||d.shortFcst_sl||d.shortFcst||d.fcst||d.napoved||'';
+    const icon=_arsoIcon(desc||fcText);
+    const isToday=i===0,isTomorrow=i===1;
+    const dateObj=new Date((key||todayStr)+'T12:00:00');
+    const dayLbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS[dateObj.getDay()];
+    const dateLbl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
+    return`<div class="fc3-card${isToday?' fc3-today':''}">
+  <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dateLbl}</span></div>
+  <div class="fc3-icon">${icon}</div>
+  ${tmax!=null&&tmin!=null?`<div class="fc3-temps">${Math.round(tmax)}° <span class="fc3-tmin">/ ${Math.round(tmin)}°</span></div>`:''}
+  ${fcText||desc?`<div class="fc3-text" style="-webkit-line-clamp:unset">${fcText||desc}</div>`:''}
+</div>`;
+  }).join('');
 }
 
 function _arsoIcon(txt){
