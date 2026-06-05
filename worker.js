@@ -328,6 +328,47 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
       }
 
+      // ── /ai-chat ──────────────────────────────────────────
+      if (path === "/ai-chat" && request.method === "POST") {
+        if (!ANTHROPIC_KEY || ANTHROPIC_KEY.startsWith("REPLACE")) {
+          return new Response(JSON.stringify({error:"no_key"}),
+            {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
+        }
+        const body = await request.json();
+        const { messages=[], wx={} } = body;
+        const now = new Date().toLocaleString('sl-SI',{timeZone:'Europe/Ljubljana',hour:'2-digit',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
+        const system = `Si Meteorec, prijazen vremenski asistent vremenske postaje IREICA1 v Rečici ob Savinji, Slovenija (Savinjska dolina, 366 m n.v.). Ustvaril te je Filip Eremita.
+
+Trenutne razmere (${now}):
+🌡 Temperatura: ${wx.temp}°C (občutek: ${wx.feels}°C)
+💧 Vlaga: ${wx.hum}% · Rosišče: ${wx.dew}°C
+💨 Veter: ${wx.wind} km/h ${wx.windDir} (sunki do ${wx.gust} km/h)
+🌧 Padavine: ${wx.rain} mm/h · danes skupaj: ${wx.rainDay} mm
+📊 Tlak: ${wx.pres} hPa
+☀️ UV: ${wx.uv} · Sončno sevanje: ${wx.solar} W/m²
+
+Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 stavki). Specializiran si za lokalno mikroklimo Savinjske doline — poznavaš kotlinski efekt, föhnske situacije in vpliv reke Savinje.`;
+
+        const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": ANTHROPIC_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 450,
+            system,
+            messages: messages.slice(-12),
+          }),
+        });
+        const aiData = await aiRes.json();
+        const reply = aiData.content?.[0]?.text || "Oprostite, trenutno ne morem odgovoriti.";
+        return new Response(JSON.stringify({reply}),
+          {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
+      }
+
       // ── /arso-radar ───────────────────────────────────────
       if (path === "/arso-radar") {
         const radarRes = await fetch(
