@@ -90,8 +90,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
-[data-theme="dark"] #bg{background:linear-gradient(rgba(4,7,14,.52) 0%,rgba(4,7,14,.80) 32%,rgba(4,7,14,.93) 100%),url('160502078.15_mn.jpg') center/cover no-repeat fixed;}
-@media(max-width:768px){[data-theme="dark"] #bg{background-attachment:scroll}}
+
 .blob{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;transition:background 1s}
 .b1{width:650px;height:650px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-15%;left:-10%;animation:blob-drift 22s ease-in-out infinite}
 .b2{width:520px;height:520px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:10%;right:-8%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
@@ -6082,14 +6081,14 @@ const PHOTOS = {
 
   // 📅 Sezonska rezervna ozadja
   seasons: {
-    winter: [],  // december · januar · februar
-    spring: [],  // marec · april · maj
-    summer: [],  // junij · julij · avgust
-    autumn: [],  // september · oktober · november
+    winter: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // december · januar · februar
+    spring: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // marec · april · maj
+    summer: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // junij · julij · avgust
+    autumn: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],  // september · oktober · november
   },
 
   // 🌤 Privzeto (ko ni drugega)
-  default: [],
+  default: [{url:'160502078.15_mn.jpg', caption:'Jutranska megla v gozdu · Rečica ob Savinji'}],
 };
 // ══════════════════════════════════════════════════════════════
 
