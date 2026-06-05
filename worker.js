@@ -9,6 +9,7 @@ const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=j
 const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
+const GEMINI_KEY    = "AIzaSyAjN-Iwlg3oa0bP3PmVyvOkimlPoc_6U5M";
 
 // Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
 const AMBEE_KEY = "4a654676f62aec4e724a5dcdc5d1b5665e3da3602d3270c8a65195d02e1faa09";
@@ -330,14 +331,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
       // ── /ai-chat ──────────────────────────────────────────
       if (path === "/ai-chat" && request.method === "POST") {
-        if (!ANTHROPIC_KEY || ANTHROPIC_KEY.startsWith("REPLACE")) {
+        if (!GEMINI_KEY || GEMINI_KEY.startsWith("REPLACE")) {
           return new Response(JSON.stringify({error:"no_key"}),
             {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
         }
         const body = await request.json();
         const { messages=[], wx={} } = body;
         const now = new Date().toLocaleString('sl-SI',{timeZone:'Europe/Ljubljana',hour:'2-digit',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
-        const system = `Si Meteorec, prijazen vremenski asistent vremenske postaje IREICA1 v Rečici ob Savinji, Slovenija (Savinjska dolina, 366 m n.v.). Ustvaril te je Filip Eremita.
+        const systemText = `Si Meteorec, prijazen vremenski asistent vremenske postaje IREICA1 v Rečici ob Savinji, Slovenija (Savinjska dolina, 366 m n.v.). Ustvaril te je Filip Eremita.
 
 Trenutne razmere (${now}):
 🌡 Temperatura: ${wx.temp}°C (občutek: ${wx.feels}°C)
@@ -349,22 +350,27 @@ Trenutne razmere (${now}):
 
 Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 stavki). Specializiran si za lokalno mikroklimo Savinjske doline — poznavaš kotlinski efekt, föhnske situacije in vpliv reke Savinje.`;
 
-        const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": ANTHROPIC_KEY,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 450,
-            system,
-            messages: messages.slice(-12),
-          }),
-        });
+        // Convert Anthropic message format → Gemini format
+        const geminiMsgs = messages.slice(-12).map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }));
+
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemText }] },
+              contents: geminiMsgs,
+              generationConfig: { maxOutputTokens: 450, temperature: 0.7 },
+            }),
+          }
+        );
         const aiData = await aiRes.json();
-        const reply = aiData.content?.[0]?.text || "Oprostite, trenutno ne morem odgovoriti.";
+        const reply = aiData.candidates?.[0]?.content?.parts?.[0]?.text
+          || "Oprostite, trenutno ne morem odgovoriti.";
         return new Response(JSON.stringify({reply}),
           {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
       }
