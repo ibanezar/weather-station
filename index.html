@@ -148,6 +148,33 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   transition:opacity .5s;
   max-width:300px;line-height:1.4;
 }
+/* ── Meteorec chat widget ───────────────────────────────── */
+.chat-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;height:44px;padding:0 1.1rem 0 .85rem;border-radius:999px;border:none;background:linear-gradient(135deg,#0ea5e9,#6366f1);cursor:pointer;box-shadow:0 4px 24px rgba(14,165,233,.45);transition:transform .2s,box-shadow .2s,padding .2s;display:flex;align-items:center;gap:.5rem;color:#fff;font-size:.82rem;font-weight:600;font-family:Inter,sans-serif;letter-spacing:.01em;white-space:nowrap}
+.chat-btn:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(14,165,233,.6)}
+.chat-btn.open{background:linear-gradient(135deg,#6366f1,#0ea5e9)}
+.chat-btn-icon{font-size:1.1rem;line-height:1}
+.chat-btn-lbl{transition:opacity .15s}
+.chat-panel{position:fixed;bottom:4.75rem;right:1.5rem;z-index:299;width:360px;border-radius:20px;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:0 12px 48px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden;transform:translateY(16px) scale(0.96);opacity:0;transition:transform .22s ease,opacity .22s ease;pointer-events:none;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.chat-panel.visible{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
+.chat-hdr{padding:.85rem 1rem;border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:.65rem;flex-shrink:0;background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(99,102,241,.06))}
+.chat-hdr-info{flex:1;min-width:0}
+.chat-hdr-name{font-weight:700;font-size:.88rem;color:var(--text);letter-spacing:.01em}
+.chat-hdr-sub{font-size:.62rem;color:var(--muted);margin-top:.05rem}
+.chat-online{width:8px;height:8px;border-radius:50%;background:#22d3ee;flex-shrink:0;box-shadow:0 0 8px #22d3ee;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.chat-msgs{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.45rem;max-height:360px;min-height:180px;scrollbar-width:thin}
+.chat-msg{max-width:88%;padding:.55rem .85rem;border-radius:16px;font-size:.81rem;line-height:1.5;word-break:break-word;white-space:pre-wrap}
+.chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.bot{align-self:flex-start;background:var(--fc-bg);border:1px solid var(--card-border);color:var(--text);border-bottom-left-radius:4px}
+.chat-msg.typing{color:var(--muted);font-style:italic;letter-spacing:.15em}
+.chat-input-row{padding:.6rem;border-top:1px solid var(--card-border);display:flex;gap:.45rem;flex-shrink:0;align-items:flex-end}
+.chat-input{flex:1;padding:.5rem .75rem;border-radius:12px;border:1px solid var(--card-border);background:var(--fc-bg);color:var(--text);font-size:.81rem;font-family:inherit;resize:none;outline:none;max-height:80px;line-height:1.4;scrollbar-width:thin}
+.chat-input:focus{border-color:var(--cyan)}
+.chat-send{width:34px;height:34px;border-radius:50%;border:none;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;cursor:pointer;font-size:1rem;flex-shrink:0;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center}
+.chat-send:hover{transform:scale(1.08)}
+.chat-send:disabled{opacity:.4;cursor:default;transform:none}
+.chat-nokey{font-size:.72rem;color:var(--muted);padding:.4rem .75rem .6rem;text-align:center}
+@media(max-width:500px){.chat-panel{width:calc(100vw - 2rem);right:1rem}.chat-btn{bottom:1rem;right:1rem}}
 .theme-btn{position:fixed;top:1rem;right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s;line-height:1}
 .theme-btn:hover{box-shadow:var(--card-shadow-h);transform:scale(1.08)}
 .theme-btn:active{transform:scale(.93)}
@@ -1481,7 +1508,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.game-fab{position:fixed;bottom:1.4rem;right:1.4rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:900;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center;padding:0}
+.game-fab{position:fixed;bottom:5.5rem;right:1.5rem;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.55);z-index:295;transition:transform .18s,box-shadow .18s;display:flex;align-items:center;justify-content:center;padding:0}
 .game-fab:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(59,130,246,.75)}
 .game-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .game-modal-overlay.open{display:flex}
@@ -14475,6 +14502,78 @@ setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+
+// ── Meteorec chat widget ──────────────────────────────────
+let _chatHistory=[], _chatOpen=false;
+
+function toggleChat(){
+  _chatOpen=!_chatOpen;
+  document.getElementById('chat-panel')?.classList.toggle('visible',_chatOpen);
+  document.getElementById('chat-btn')?.classList.toggle('open',_chatOpen);
+  const lbl=document.getElementById('chat-btn-lbl');
+  if(lbl) lbl.textContent=_chatOpen?'Zapri':'Vprašaj Meteorec';
+  const icon=document.querySelector('.chat-btn-icon');
+  if(icon) icon.textContent=_chatOpen?'✕':'💬';
+  if(_chatOpen) setTimeout(()=>document.getElementById('chat-input')?.focus(),250);
+}
+
+function chatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}
+}
+
+function _chatAppend(cls,text){
+  const msgs=document.getElementById('chat-msgs');
+  if(!msgs)return null;
+  const el=document.createElement('div');
+  el.className='chat-msg '+cls;
+  el.textContent=text;
+  msgs.appendChild(el);
+  msgs.scrollTop=msgs.scrollHeight;
+  return el;
+}
+
+async function sendChatMsg(){
+  const input=document.getElementById('chat-input');
+  const btn=document.getElementById('chat-send');
+  if(!input||!btn)return;
+  const text=input.value.trim();
+  if(!text)return;
+  _chatHistory.push({role:'user',content:text});
+  _chatAppend('user',text);
+  input.value='';input.style.height='auto';
+  btn.disabled=true;
+  const typing=_chatAppend('bot typing','● ● ●');
+  try{
+    const obs=_lastBriefObs||{},m=obs.metric||{};
+    const wx={
+      temp:(m.temp??'—'),feels:(+(m.heatIndex??m.windChill??m.temp??15)).toFixed(1),
+      hum:(obs.humidity??'—'),dew:(+(m.dewpt??0)).toFixed(1),
+      wind:(+(m.windSpeed??0)).toFixed(0),windDir:windDir(obs.winddir??0),
+      gust:(+(m.windGust??0)).toFixed(0),
+      rain:(+(m.precipRate??0)).toFixed(1),rainDay:(+(m.precipTotal??0)).toFixed(1),
+      pres:(+(m.pressure??1013)).toFixed(0),
+      uv:(obs.uv??0),solar:(obs.solarRadiation??0),
+    };
+    const r=await fetch(PROXY+'/ai-chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:_chatHistory.slice(-12),wx}),
+    });
+    const data=await r.json();
+    if(data.error==='no_key'){
+      typing.remove();
+      _chatAppend('bot','⚠️ Anthropic API ključ ni nastavljen v worker.js. Dodajte ga in znova deployajte.');
+      return;
+    }
+    const reply=data.reply||'Oprostite, ne morem odgovoriti.';
+    typing.remove();
+    _chatHistory.push({role:'assistant',content:reply});
+    _chatAppend('bot',reply);
+  }catch(e){
+    typing.remove();
+    _chatAppend('bot','Oprostite, prišlo je do napake. Preverite internetno povezavo.');
+  }finally{btn.disabled=false;input.focus();}
+}
+
 </script>
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>
@@ -14509,6 +14608,32 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
     <canvas id="game-canvas" width="480" height="320" style="display:block;width:100%;height:auto;cursor:pointer;touch-action:none"></canvas>
   </div>
 </div>
+
+  <!-- ── Meteorec chat widget ── -->
+  <button class="chat-btn" id="chat-btn" onclick="toggleChat()" title="Vprašaj Meteorec" aria-label="Odpri chat z Meteorec">
+    <span class="chat-btn-icon">💬</span>
+    <span class="chat-btn-lbl" id="chat-btn-lbl">Vprašaj Meteorec</span>
+  </button>
+  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Meteorec chat">
+    <div class="chat-hdr">
+      <svg width="34" height="34" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:50%;overflow:hidden">
+        <circle cx="32" cy="32" r="32" fill="#0c2040"/>
+        <text x="32" y="44" text-anchor="middle" font-size="30" font-family="Inter,sans-serif" font-weight="800" fill="#38bdf8">M</text>
+      </svg>
+      <div class="chat-hdr-info">
+        <div class="chat-hdr-name">Meteorec</div>
+        <div class="chat-hdr-sub">Vremenski asistent · IREICA1</div>
+      </div>
+      <span class="chat-online" title="Online"></span>
+    </div>
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="chat-msg bot">Živijo! Sem Meteorec, vaš vremenski asistent za Rečico ob Savinji. Vprašajte me karkoli o vremenu, napovedi ali lokalni mikroklimi. 🌤</div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Vprašajte o vremenu…" rows="1" onkeydown="chatKeydown(event)" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+      <button class="chat-send" id="chat-send" onclick="sendChatMsg()" title="Pošlji">↑</button>
+    </div>
+  </div>
 
 </body>
 </html>
