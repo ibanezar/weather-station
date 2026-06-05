@@ -8320,19 +8320,25 @@ async function fetchWUNearby(){
   if(!grid)return;
   try{
     const data=await fetch(PROXY+'/wu-nearby?lat='+LAT+'&lon='+LON).then(r=>r.json());
-    const stations=(data.location?.stationIdentifier||data.stations||[]);
-    if(!stations.length){grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni bližnjih postaj.</div>';return;}
+    // WU returns parallel arrays inside data.location
+    const loc=data.location||{};
+    const ids=loc.stationIdentifier||[];
+    if(!ids.length){grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni bližnjih postaj.</div>';return;}
 
-    // Fetch current obs for each station in parallel (skip our own)
-    const nearby=stations.filter(s=>(s.stationIdentifier||s.id||'').toUpperCase()!=='IREICA1').slice(0,8);
-    const obs=await Promise.all(nearby.map(async s=>{
-      const id=s.stationIdentifier||s.id;
+    // Zip parallel arrays into objects, skip our own station
+    const stations=ids.map((id,i)=>({
+      id,
+      name:loc.neighborhood?.[i]||loc.stationName?.[i]||id,
+      distKm:loc.distanceKm?.[i]??null,
+    })).filter(s=>s.id.toUpperCase()!=='IREICA1').slice(0,8);
+
+    // Fetch current obs in parallel
+    const obs=await Promise.all(stations.map(async s=>{
       try{
-        const d=await fetch(PROXY+'/wu-station?id='+id).then(r=>r.json());
+        const d=await fetch(PROXY+'/wu-station?id='+s.id).then(r=>r.json());
         const o=d.observations?.[0];
         if(!o)return null;
-        const distKm=s.distanceKm??s.distance?.kilometers??null;
-        return{id,name:s.neighborhood||s.stationName||id,distKm,obs:o};
+        return{...s,obs:o};
       }catch(_){return null;}
     }));
 
