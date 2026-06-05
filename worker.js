@@ -442,6 +442,32 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
       // ── /arso-forecast ───────────────────────────────────
       // ARSO krajevna napoved — Rečica ob Savinji
       if (path === "/arso-forecast") {
+        // Aggregate ARSO hourly/3-hourly metric slots into daily summaries
+        const aggregateArsoDaily = (metric) => {
+          if (!metric || !metric.length) return [];
+          const map = {};
+          for (const slot of metric) {
+            const valid = slot.valid || '';
+            const d = valid.slice(0, 10); // "YYYY-MM-DD" from ISO with offset
+            if (!d.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
+            if (!map[d]) map[d] = { temps: [], slots: [] };
+            if (slot.t != null) map[d].temps.push(slot.t);
+            map[d].slots.push(slot);
+          }
+          return Object.entries(map).sort((a,b) => a[0] < b[0] ? -1 : 1).map(([date, {temps, slots}]) => {
+            const tmax = temps.length ? Math.max(...temps) : null;
+            const tmin = temps.length ? Math.min(...temps) : null;
+            // Pick midday slot for the most representative description
+            const noon = slots.find(s => (s.valid||'').includes('T12:00'))
+              || slots.find(s => (s.valid||'').includes('T11:00'))
+              || slots.find(s => (s.valid||'').includes('T13:00'))
+              || slots[Math.floor(slots.length / 2)]
+              || slots[0];
+            const desc = noon.nn || noon.clouds_lowAlt_shortText || noon.weather_shortText_sl || '';
+            return { valid_date: date, tmax, tmin, shortFcst_sl: desc };
+          });
+        }
+
         const arsoUrls = [
           "https://vreme.arso.gov.si/api/1.0/location/?location=Re%C4%8Dica+ob+Savinji&lang=sl",
           "https://vreme.arso.gov.si/api/1.0/forecast_geo/?lat=46.3258&lon=14.9211&lang=sl",
@@ -464,7 +490,11 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
             // Normalize — ARSO returns {forecast:{location:{},metric:[]}} or {forecast:{...}}
             const fc = json?.forecast ?? json;
             const loc = fc?.location ?? {};
-            const days = fc?.metric ?? fc?.days ?? [];
+            // If ARSO provides already-daily data, use it; otherwise aggregate hourly metric slots
+            let days = fc?.days ?? [];
+            if (!days.length && fc?.metric?.length) {
+              days = aggregateArsoDaily(fc.metric);
+            }
             if (!days.length) continue;
             return new Response(JSON.stringify({ location: loc, days, source: arsoUrl }), {
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=1800" }
