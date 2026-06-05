@@ -8349,26 +8349,50 @@ async function fetchWUHistory(){
   const section=document.getElementById('wuh-section');
   const rankEl=document.getElementById('wuh-rank');
   if(!section)return;
-  const allIds=['IREICA1',...WU_NEARBY_IDS];
-  const results=await Promise.all(allIds.map(async(id,idx)=>{
+
+  // IREICA1: use real WU 7-day daily history
+  // Nearby stations: fetch current obs to get lat/lon, then Open-Meteo for history
+  const results=await Promise.all(['IREICA1',...WU_NEARBY_IDS].map(async(id,idx)=>{
     try{
-      const d=await fetch(PROXY+'/wu-station-history?id='+id).then(r=>r.json());
-      const obs=d.observations||[];
-      if(!obs.length)return null;
+      if(id==='IREICA1'){
+        const d=await fetch(PROXY+'/wu-station-history?id=IREICA1').then(r=>r.json());
+        const obs=d.observations||[];
+        if(!obs.length)throw new Error('no data');
+        return{
+          id,name:obs[0]?.neighborhood||'IREICA1',
+          color:WUH_PALETTE[0],mine:true,
+          days:obs.map(o=>({
+            date:(o.obsTimeLocal||'').slice(0,10),
+            tmax:o.metric?.tempHigh??null,
+            tmin:o.metric?.tempLow??null,
+            rain:o.metric?.precipTotal??null,
+          })).filter(d=>d.date&&d.tmax!=null)
+        };
+      }
+      // Nearby: get coords from current obs, then Open-Meteo history
+      const cur=await fetch(PROXY+'/wu-station?id='+id).then(r=>r.json());
+      const obs=cur.observations?.[0];
+      if(!obs)return null;
+      const lat=obs.lat,lon=obs.lon;
+      const name=obs.neighborhood||id;
+      const omUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+        +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum'
+        +'&timezone=Europe%2FLjubljana&past_days=7&forecast_days=0';
+      const om=await fetch(omUrl).then(r=>r.json());
+      const d2=om.daily;
+      if(!d2?.time?.length)return null;
       return{
-        id,
-        name:obs[0]?.neighborhood||id,
-        color:WUH_PALETTE[idx%WUH_PALETTE.length],
-        mine:id==='IREICA1',
-        days:obs.map(o=>({
-          date:(o.obsTimeLocal||'').slice(0,10),
-          tmax:o.metric?.tempHigh??null,
-          tmin:o.metric?.tempLow??null,
-          rain:o.metric?.precipTotal??null,
-        })).filter(d=>d.date&&d.tmax!=null)
+        id,name,color:WUH_PALETTE[idx%WUH_PALETTE.length],mine:false,
+        days:d2.time.map((t,i)=>({
+          date:t,
+          tmax:d2.temperature_2m_max[i]??null,
+          tmin:d2.temperature_2m_min[i]??null,
+          rain:d2.precipitation_sum[i]??null,
+        })).filter(d=>d.tmax!=null)
       };
     }catch(_){return null;}
   }));
+
   const valid=results.filter(r=>r&&r.days.length);
   if(!valid.length){if(rankEl)rankEl.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni podatkov.</div>';return;}
   _renderWUHRanking(valid);
