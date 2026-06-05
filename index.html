@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rečica ob Savinji — Meteorološka postaja</title>
+<title>Meteorec — Rečica ob Savinji</title>
 <meta name="theme-color" content="#2563eb" id="theme-color-meta">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Vreme IREICA1">
+<meta name="apple-mobile-web-app-title" content="Meteorec">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1512,43 +1512,34 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Postaja IREICA1">
+    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
       <defs>
-        <linearGradient id="lbg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0c1e3d"/>
-          <stop offset="100%" stop-color="#0f2a50"/>
-        </linearGradient>
+        <radialGradient id="lbg" cx="50%" cy="38%" r="60%">
+          <stop offset="0%" stop-color="#0d2242"/>
+          <stop offset="100%" stop-color="#060f1e"/>
+        </radialGradient>
       </defs>
       <!-- Background -->
       <circle cx="32" cy="32" r="31" fill="url(#lbg)"/>
-      <circle cx="32" cy="32" r="31" fill="none" stroke="rgba(56,189,248,.55)" stroke-width="1.5"/>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(56,189,248,.12)" stroke-width=".8"/>
-      <!-- Mountains (Savinja) -->
-      <path d="M5 48 L16 29 L24 40 L32 20 L40 35 L48 23 L59 48Z" fill="rgba(56,189,248,.1)" stroke="rgba(56,189,248,.3)" stroke-width="1.2" stroke-linejoin="round"/>
-      <!-- Measurement pole -->
-      <line x1="32" y1="48" x2="32" y2="9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-      <!-- Anemometer arms -->
-      <line x1="32" y1="11" x2="24" y2="16" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="32" y1="11" x2="40" y2="16" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="24" cy="16" r="3.5" fill="#0c1e3d" stroke="#38bdf8" stroke-width="1.5"/>
-      <circle cx="40" cy="16" r="3.5" fill="#0c1e3d" stroke="#38bdf8" stroke-width="1.5"/>
-      <circle cx="32" cy="11" r="2" fill="#38bdf8"/>
-      <!-- Thermometer -->
-      <rect x="23.5" y="32" width="3.5" height="12" rx="1.75" fill="rgba(248,113,113,.25)" stroke="#f87171" stroke-width="1"/>
-      <circle cx="25.25" cy="45" r="3.5" fill="#f87171"/>
-      <!-- Rain drop -->
-      <path d="M39 44 L42 36 L45 44 Q45 47.5 42 47.5 Q39 47.5 39 44Z" fill="rgba(96,165,250,.45)" stroke="#60a5fa" stroke-width="1"/>
-      <!-- Sun (top right) -->
-      <circle cx="52" cy="16" r="4.5" fill="rgba(251,191,36,.25)" stroke="#fbbf24" stroke-width="1"/>
-      <line x1="52" y1="9" x2="52" y2="11" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
-      <line x1="57.5" y1="10.5" x2="56.2" y2="11.8" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
-      <line x1="59" y1="16" x2="57" y2="16" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
-      <line x1="46.5" y1="10.5" x2="47.8" y2="11.8" stroke="#fbbf24" stroke-width="1.2" stroke-linecap="round"/>
-      <!-- Label -->
-      <text x="32" y="57.5" text-anchor="middle" font-size="5.5" font-family="JetBrains Mono,monospace" fill="rgba(56,189,248,.85)" letter-spacing="1.5" font-weight="600">IREICA1</text>
+      <circle cx="32" cy="32" r="31" fill="none" stroke="rgba(56,189,248,.5)" stroke-width="1.5"/>
+      <!-- Sky arc -->
+      <path d="M10 30 Q32 8 54 30" fill="none" stroke="rgba(56,189,248,.18)" stroke-width="1"/>
+      <!-- Cloud (meteo) -->
+      <circle cx="22" cy="20" r="3.5" fill="rgba(56,189,248,.35)"/>
+      <circle cx="28" cy="16.5" r="4.5" fill="rgba(56,189,248,.45)"/>
+      <circle cx="35" cy="15.5" r="5" fill="rgba(56,189,248,.5)"/>
+      <circle cx="42" cy="17.5" r="4" fill="rgba(56,189,248,.4)"/>
+      <circle cx="47" cy="21" r="3" fill="rgba(56,189,248,.3)"/>
+      <rect x="18.5" y="20" width="32" height="7" rx="3" fill="rgba(56,189,248,.22)"/>
+      <!-- Big M -->
+      <text x="32" y="46" text-anchor="middle" font-size="24" font-family="Inter,sans-serif" font-weight="800" fill="#38bdf8" letter-spacing="-1.5">M</text>
+      <!-- Rečica wave -->
+      <path d="M13 53 Q18 49.5 23 53 Q28 56.5 33 53 Q38 49.5 43 53 Q48 56.5 51 53" fill="none" stroke="rgba(56,189,248,.55)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- METEOREC label -->
+      <text x="32" y="62" text-anchor="middle" font-size="4.8" font-family="JetBrains Mono,monospace" fill="rgba(56,189,248,.8)" letter-spacing="1.8" font-weight="600">METEOREC</text>
     </svg>
-    <div class="stn-badge"><span></span> IREICA1 · Osebna meteorološka postaja</div>
-    <h1>Rečica ob <em>Savinji</em></h1>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+    <h1>Meteo<em>rec</em></h1>
     <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n.v.</p>
   </header>
 
@@ -5624,7 +5615,7 @@ function shareWeather(){
   const rain=g('rain-total'),high=g('day-high'),low=g('day-low');
   const temp=_lastTemp!=null?_lastTemp.toFixed(1)+'°C':'—';
   const txt=`🌤 Vreme – Rečica ob Savinji\n🌡 ${temp} — ${cond}\n💧 Vlažnost: ${hum} %  |  Rosišče: ${g('dewpt-hero')}°C\n💨 Veter: ${wDir} ${wSpd} km/h\n🌧 Padavine danes: ${rain} mm\n📈 Maks: ${high}°C  |  Min: ${low}°C\n\n📡 Postaja IREICA1 · Rečica ob Savinji`;
-  if(navigator.share){navigator.share({title:'Vreme Rečica ob Savinji',text:txt}).catch(()=>{});}
+  if(navigator.share){navigator.share({title:'Meteorec — Rečica ob Savinji',text:txt}).catch(()=>{});}
   else{navigator.clipboard.writeText(txt).then(()=>showToast('✓ Kopirano v odložišče!')).catch(()=>showToast('Deljenje ni podprto'));}
 }
 
