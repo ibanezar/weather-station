@@ -463,6 +463,46 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /wu-nearby — bližnje WU postaje ──────────────────
+      if (path === "/wu-nearby") {
+        const lat = url.searchParams.get("lat") || "46.3258";
+        const lon = url.searchParams.get("lon") || "14.9211";
+        const nearUrl = `https://api.weather.com/v2/pws/nearby?geocode=${lat},${lon}&format=json&units=m&apiKey=${WU_KEY}`;
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          const r = await fetch(nearUrl, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+          const data = await r.json();
+          return new Response(JSON.stringify(data), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+      }
+
+      // ── /wu-station?id=XXX — trenutni podatki za poljubno postajo ──
+      if (path === "/wu-station") {
+        const stationId = url.searchParams.get("id");
+        if (!stationId) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        const stUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=m&apiKey=${WU_KEY}&numericPrecision=decimal`;
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          const r = await fetch(stUrl, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+          const data = await r.json();
+          return new Response(JSON.stringify(data), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
