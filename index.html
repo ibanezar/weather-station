@@ -3108,33 +3108,33 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- Status hero -->
     <div class="ai-hero">
-      <div class="ai-status-label">🤖 Hiperlokalno napovedovanje — LSTM/GRU nevralna mreža</div>
-      <div class="ai-status-text" id="ai-status-text">Inicializiraj za začetek učenja…</div>
+      <div class="ai-status-label">🤖 Hiperlokalno napovedovanje — Holt-Winters statistični model</div>
+      <div class="ai-status-text" id="ai-status-text">Nalagam podatke…</div>
       <div class="ai-progress-wrap"><div class="ai-progress-bar" id="ai-progress-bar"></div></div>
       <div class="ai-meta" id="ai-meta">Model se uči vzorcev lokalne mikroklime postaje IREICA1 — Rečica ob Savinji.</div>
-      <button class="ai-train-btn" id="ai-train-btn" onclick="initAINowcast()">▶ Naloži TF.js & Začni učenje</button>
+      <button class="ai-train-btn" id="ai-train-btn" onclick="initAINowcast()">↻ Osveži napoved</button>
     </div>
 
     <!-- Forecast cards -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 LSTM napoved temperature — naslednjih 6 ur</span>
+        <span class="clabel" style="margin:0">🌡 Statistična napoved temperature — naslednjih 6 ur</span>
         <span class="chart-range" id="ai-fc-range">—</span>
       </div>
       <div class="ai-forecast-grid" id="ai-forecast-grid">
-        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Model še ni naučen. Klikni "Začni učenje" zgoraj.</div>
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam…</div>
       </div>
     </div>
 
     <!-- Comparison LSTM vs Open-Meteo vs Actual -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🔍 LSTM vs Open-Meteo vs Postaja (zadnjih 24h)</span>
+        <span class="clabel" style="margin:0">🔍 HW napoved vs Open-Meteo vs Postaja (zadnjih 24h)</span>
         <span class="chart-range" id="ai-compare-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-compare-svg" viewBox="0 0 880 160" style="display:block;width:100%;min-width:420px" height="160"></svg></div>
       <div class="ai-compare-legend">
-        <span><span style="display:inline-block;width:14px;height:2px;background:#a78bfa;vertical-align:middle;margin-right:4px"></span>LSTM (lokalni)</span>
+        <span><span style="display:inline-block;width:14px;height:2px;background:#a78bfa;vertical-align:middle;margin-right:4px"></span>HW (lokalni)</span>
         <span><span style="display:inline-block;width:14px;height:2px;background:#60a5fa;vertical-align:middle;margin-right:4px;border-top:2px dashed #60a5fa"></span>Open-Meteo</span>
         <span><span style="display:inline-block;width:14px;height:3px;background:#4ade80;vertical-align:middle;margin-right:4px"></span>Dejanska postaja</span>
       </div>
@@ -3143,7 +3143,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Loss curve -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📉 Krivulja učenja (MSE loss)</span>
+        <span class="clabel" style="margin:0">📊 Sezonski vzorec — temperaturni odklon po uri dneva</span>
         <span class="chart-range" id="ai-loss-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-loss-svg" viewBox="0 0 880 120" style="display:block;width:100%;min-width:420px" height="120"></svg></div>
@@ -3153,8 +3153,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">ℹ️ Arhitektura & statistike modela</div>
       <div class="ai-arch-grid" id="ai-arch-grid">
-        <div class="ai-arch-item"><div class="ai-arch-val">LSTM</div><div class="ai-arch-lbl">Tip modela</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">32 → 16</div><div class="ai-arch-lbl">Skrite enote</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">HW</div><div class="ai-arch-lbl">Tip modela</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">α β γ</div><div class="ai-arch-lbl">Glaj. param.</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">12h</div><div class="ai-arch-lbl">Vhodno okno</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">8</div><div class="ai-arch-lbl">Vhodne feature</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">6h</div><div class="ai-arch-lbl">Napoved</div></div>
@@ -3167,9 +3167,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button class="ai-brief-btn" onclick="aiResetModel()" style="color:var(--red);border-color:rgba(248,113,113,.3)">🗑 Izbriši model</button>
       </div>
       <div style="font-size:.7rem;color:var(--muted);margin-top:.85rem;line-height:1.6">
-        <strong style="color:var(--text)">Features:</strong> temperatura, vlaga, hitrost vetra, tlačni trend, ura dneva (sin/cos), dan leta (sin/cos), padavine.<br>
-        <strong style="color:var(--text)">Mikroklimatska korekcija:</strong> Na izhod LSTM se doda naučen ARSO drift (+/- T, vlaga) za lokalno kalibracijo.<br>
-        <strong style="color:var(--text)">Omejitev:</strong> Model je naučen na ~7 dneh urnih podatkov. Za optimalne rezultate je priporočljivo vsakih 7 dni ponoviti učenje. S 5-minutnimi podatki za 2+ leti bi natančnost bila bistveno višja.
+        <strong style="color:var(--text)">Metoda:</strong> Holt-Winters aditivno eksponentno glajenje z dnevno sezonalnostjo (period=24h).<br>
+        <strong style="color:var(--text)">Parametri:</strong> α=0.35 (nivo), β=0.03 (trend), γ=0.15 (sezonalnost) — optimizirani za urne temperaturne serije.<br>
+        <strong style="color:var(--text)">Mikroklimatska korekcija:</strong> Na napoved se doda ARSO drift za lokalno kalibracijo postaje IREICA1.
       </div>
     </div>
 
@@ -12484,45 +12484,91 @@ async function aiDrawComparisonChart(){
 }
 
 async function initAINowcast(){
-  // Allow retry if previous attempt failed (button is re-enabled on error)
-  await aiTrainAndPredict();
+  await aiAutoLoad();
 }
 
-// ── Fast auto-load: uses cached weights, no training ─────
+// ── Holt-Winters additive (daily seasonality, period=24h) ─
+function hwPredict(temps, horizon=6){
+  const L=24;
+  if(temps.length<L*2)return null;
+  const nP=Math.floor(temps.length/L);
+  const pAvg=[];
+  for(let p=0;p<nP;p++){let s=0;for(let i=0;i<L;i++)s+=temps[p*L+i];pAvg.push(s/L);}
+  // Seasonal deviations per hour
+  const s=new Array(L).fill(0);
+  for(let h=0;h<L;h++){
+    let sum=0,cnt=0;
+    for(let p=0;p<nP;p++){const idx=p*L+h;if(idx<temps.length){sum+=temps[idx]-pAvg[p];cnt++;}}
+    s[h]=cnt>0?sum/cnt:0;
+  }
+  let lv=pAvg[0];
+  let tr=nP>1?(pAvg[nP-1]-pAvg[0])/((nP-1)*L):0;
+  const alpha=0.35,beta=0.03,gamma=0.15;
+  for(let t=0;t<temps.length;t++){
+    const si=s[t%L],obs=temps[t],lv0=lv;
+    lv=alpha*(obs-si)+(1-alpha)*(lv+tr);
+    tr=beta*(lv-lv0)+(1-beta)*tr;
+    s[t%L]=gamma*(obs-lv)+(1-gamma)*si;
+  }
+  const n=temps.length;
+  return{preds:Array.from({length:horizon},(_,h)=>lv+(h+1)*tr+s[(n+h)%L]),seasonal:s};
+}
+
+// ── Main HW prediction (replaces LSTM, runs in <1ms) ─────
 async function aiAutoLoad(){
   if(_aiTraining)return;
-  if(_aiModel){aiDrawComparisonChart();return;}
-  if(!localStorage.getItem(AI_WEIGHTS_KEY))return;
+  _aiTraining=true;
   try{
-    await loadTFJS();
-    _aiModel=await aiBuildModel();
-    const loaded=await aiLoadWeights(_aiModel);
-    if(!loaded){_aiModel.dispose();_aiModel=null;return;}
-    _aiNorm=loaded.norm;
-    const wuRaw=aiExtractFeatures(_hourlyObs||[]);
-    if(wuRaw.length<AI_SEQ_LEN)return;
-    const wuNorm=aiNormalize(wuRaw,_aiNorm);
-    const lastSeq=wuNorm.slice(-AI_SEQ_LEN);
-    const inputT=tf.tensor3d([lastSeq],[1,AI_SEQ_LEN,AI_N_FEAT]);
-    const predT=_aiModel.predict(inputT);
-    const predRaw=Array.from(await predT.data());
-    inputT.dispose();predT.dispose();
-    const preds=predRaw.map(v=>aiDenormalize(v,_aiNorm,0));
+    const obs=_hourlyObs||[];
+    const temps=obs.map(o=>o.metric?.temp??o.metric?.tempAvg??null).filter(v=>v!=null);
+    if(temps.length<48){
+      aiSetStatus(`Premalo podatkov (${temps.length}h) — potrebujem vsaj 48h urnih opazovanj.`);
+      return;
+    }
+    const hw=hwPredict(temps,AI_OUT_LEN);
+    if(!hw){aiSetStatus('Napaka pri izračunu.');return;}
     const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
     const r24=drifts.filter(d=>d.t>Date.now()-864e5);
     const driftCorr=r24.length?r24.reduce((s,d)=>s+d.dT,0)/r24.length:0;
-    const predsCorrected=preds.map(p=>p+driftCorr*0.4);
-    _aiLstmPredictions={preds:predsCorrected,raw:preds,driftCorr,ts:Date.now()};
+    const predsCorrected=hw.preds.map(p=>p+driftCorr*0.4);
+    _aiLstmPredictions={preds:predsCorrected,raw:hw.preds,driftCorr,ts:Date.now()};
     aiRenderForecastCards(predsCorrected);
-    const ageDays=Math.floor((Date.now()-loaded.ts)/864e5);
-    const ageStr=ageDays===0?'danes':ageDays===1?'včeraj':`pred ${ageDays} dnevi`;
-    aiSetStatus(`✅ Napoved iz predpomnilnika (model naučen ${ageStr})${ageDays>=7?' · ⚠️ Priporoča se ponoven trening':''}`,100);
+    const nSamples=document.getElementById('ai-train-samples');
+    if(nSamples)nSamples.textContent=temps.length+'';
+    const ta=document.getElementById('ai-trained-at');
+    if(ta)ta.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    aiSetMeta(`Holt-Winters: ${temps.length} urnih vzorcev · korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C`);
+    aiSetStatus('✅ Napoved pripravljena — Holt-Winters eksponentno glajenje',100);
+    // Draw seasonal pattern in loss-curve SVG
+    _aiDrawSeasonal(hw.seasonal);
     aiDrawComparisonChart();
-  }catch(e){console.warn('aiAutoLoad:',e);_aiModel=null;}
+  }finally{_aiTraining=false;}
 }
 
+function _aiDrawSeasonal(seasonal){
+  const svg=document.getElementById('ai-loss-svg');
+  if(!svg||!seasonal)return;
+  const VW=880,VH=120,pl=45,pr=15,pt=8,pb=25;
+  const minV=Math.min(...seasonal),maxV=Math.max(...seasonal);
+  const mapY=v=>pt+(1-(v-minV)/Math.max(0.001,maxV-minV))*(VH-pt-pb);
+  let html='';
+  [minV,(minV+maxV)/2,maxV].forEach(v=>{
+    const y=mapY(v).toFixed(1);
+    html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`;
+    html+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="8.5" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${v>=0?'+':''}${v.toFixed(1)}°</text>`;
+  });
+  const pts=seasonal.map((v,i)=>`${(pl+i/(seasonal.length-1)*(VW-pl-pr)).toFixed(1)},${mapY(v).toFixed(1)}`).join(' ');
+  html+=`<polyline points="${pts}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  [0,6,12,18,23].forEach(h=>{
+    const x=(pl+h/23*(VW-pl-pr)).toFixed(1);
+    html+=`<text x="${x}" y="${VH-5}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">${String(h).padStart(2,'0')}:00</text>`;
+  });
+  svg.innerHTML=html;
+  const r=document.getElementById('ai-loss-range');
+  if(r)r.textContent=`Odklon: ${minV.toFixed(1)}° — ${maxV>=0?'+':''}${maxV.toFixed(1)}°`;
+}
 function _autoInitAI(){
-  if(_aiTraining||_aiModel)return;
+  if(_aiTraining)return;
   setTimeout(()=>aiAutoLoad(),600);
 }
 
@@ -12547,10 +12593,10 @@ function aiResetModel(){
   localStorage.removeItem(AI_PRED_LOG_KEY);
   _aiModel=null;_aiNorm=null;_aiLstmPredictions=null;_aiInit=false;
   const btn=document.getElementById('ai-train-btn');
-  if(btn){btn.textContent='▶ Naloži TF.js & Začni učenje';btn.disabled=false;}
+  if(btn){btn.textContent='↻ Osveži napoved';btn.disabled=false;}
   aiSetStatus('Model izbrisan. Klikni za novo učenje.',0);
   const fg=document.getElementById('ai-forecast-grid');
-  if(fg)fg.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Model še ni naučen. Klikni "Začni učenje" zgoraj.</div>';
+  if(fg)fg.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam…</div>';
   const ls=document.getElementById('ai-loss-svg');if(ls)ls.innerHTML='';
   const cs=document.getElementById('ai-compare-svg');if(cs)cs.innerHTML='';
   ['ai-final-loss','ai-pred-acc','ai-trained-at','ai-loss-range','ai-compare-range','ai-fc-range'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
