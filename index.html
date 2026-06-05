@@ -6518,8 +6518,11 @@ function haversine(lat1,lon1,lat2,lon2){
 function connectLightning(){
   if(_ltgWs&&_ltgWs.readyState<2)return;
   try{
-    _ltgWs=new WebSocket('wss://ws.blitzortung.org/');
-    _ltgWs.onopen=()=>{_ltgWs.send(JSON.stringify({west:10,east:20,north:50,south:43}));};
+    const wsUrls=['wss://live.blitzortung.org/','wss://ws.blitzortung.org/'];
+    const wsUrl=wsUrls[(_ltgRetry||0)%wsUrls.length];
+    _ltgRetry=(_ltgRetry||0)+1;
+    _ltgWs=new WebSocket(wsUrl);
+    _ltgWs.onopen=()=>{_ltgWs.send(JSON.stringify({west:10,east:20,north:50,south:43}));applyLightning();};
     _ltgWs.onmessage=e=>{
       try{
         const d=JSON.parse(e.data);
@@ -6570,7 +6573,7 @@ function applyLightning(){
     row.textContent='Ecowitt · '+Math.round(_ltgEcowitt.count)+' danes'+(_ltgEcowitt.dist!=null?' · najbližja '+_ltgEcowitt.dist.toFixed(0)+' km':'');
     list.appendChild(row);
   }
-  if(!_ltgStrikes.length&&!_ltgEcowitt){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri</div>';return;}
+  if(!_ltgStrikes.length&&!_ltgEcowitt){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri · WebSocket: '+((_ltgWs&&_ltgWs.readyState===1)?'🟢 aktiven':'🔴 ni povezave')+'</div>';return;}
   _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
 }
 
@@ -8389,19 +8392,25 @@ async function fetchWUHistory(){
   const results=await Promise.all(['IREICA1',...WU_NEARBY_IDS].map(async(id,idx)=>{
     try{
       if(id==='IREICA1'){
-        const d=await fetch(PROXY+'/wu-station-history?id=IREICA1').then(r=>r.json());
-        const obs=d.observations||[];
-        if(!obs.length)throw new Error('no data');
-        return{
-          id,name:obs[0]?.neighborhood||'IREICA1',
-          color:WUH_PALETTE[0],mine:true,
-          days:obs.map(o=>({
-            date:(o.obsTimeLocal||'').slice(0,10),
+        let days=[];
+        try{
+          const d=await fetch(PROXY+'/wu-station-history?id=IREICA1').then(r=>r.json());
+          const obs=d.observations||d.summaries||[];
+          days=obs.map(o=>({
+            date:(o.obsTimeLocal||o.obsTimeUtc||'').slice(0,10),
             tmax:o.metric?.tempHigh??null,
             tmin:o.metric?.tempLow??null,
             rain:o.metric?.precipTotal??null,
-          })).filter(d=>d.date&&d.tmax!=null)
-        };
+          })).filter(d=>d.date&&d.tmax!=null);
+        }catch(_){}
+        if(!days.length){
+          // Fallback: Open-Meteo for IREICA1 coords
+          const om=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FLjubljana&past_days=7&forecast_days=0').then(r=>r.json());
+          const d2=om.daily;
+          if(d2?.time?.length) days=d2.time.map((t,i)=>({date:t,tmax:d2.temperature_2m_max[i]??null,tmin:d2.temperature_2m_min[i]??null,rain:d2.precipitation_sum[i]??null})).filter(d=>d.tmax!=null);
+        }
+        if(!days.length)throw new Error('no data');
+        return{id,name:'IREICA1 (Rečica)',color:WUH_PALETTE[0],mine:true,days};
       }
       // Nearby: get coords from current obs, then Open-Meteo history
       const cur=await fetch(PROXY+'/wu-station?id='+id).then(r=>r.json());
@@ -8723,7 +8732,11 @@ async function fetchAndDrawSkyStrip(){
     const rangeEl=document.getElementById('sky-range');
     if(rangeEl)rangeEl.textContent=hours[0]?.label+' – '+hours[hours.length-1]?.label;
     drawSkyStrip(hours);
-  }catch(e){console.warn('SkyStrip:',e);}
+  }catch(e){
+    console.warn('SkyStrip:',e);
+    const s=document.getElementById('sky-strip-svg');
+    if(s){s.innerHTML='<text x="480" y="64" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.5)" font-family="Inter,sans-serif">Trak neba ni dosegljiv ('+e.message+')</text>';}
+  }
 }
 
 function drawSkyStrip(hours){
