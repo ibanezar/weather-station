@@ -8320,10 +8320,16 @@ async function fetchWUNearby(){
   if(!grid)return;
   try{
     const data=await fetch(PROXY+'/wu-nearby?lat='+LAT+'&lon='+LON).then(r=>r.json());
-    // WU returns parallel arrays inside data.location
+    console.log('[WU nearby raw]', JSON.stringify(data).slice(0,500));
+    // WU returns parallel arrays inside data.location (v2 or v3 format)
     const loc=data.location||{};
-    const ids=loc.stationIdentifier||[];
-    if(!ids.length){grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni bližnjih postaj.</div>';return;}
+    const ids=loc.stationIdentifier||loc.stationId||[];
+    if(!ids.length){
+      grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni bližnjih postaj. ('+
+        (data.error||JSON.stringify(Object.keys(loc)))+
+      ')</div>';
+      return;
+    }
 
     // Zip parallel arrays into objects, skip our own station
     const stations=ids.map((id,i)=>({
