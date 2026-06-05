@@ -2732,7 +2732,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
     <!-- Drift engine -->
-    <div class="card chart-card" style="margin-bottom:1rem">
+    <div id="drift-card" class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
         <span class="clabel" style="margin:0">🌡 Mikroklimni drift — IREICA1 vs ARSO</span>
         <span class="chart-range" id="drift-range">—</span>
@@ -13645,8 +13645,7 @@ async function fetchPVGIS(){
     if(c&&Date.now()-c.ts<7*864e5){renderPVGIS(c.data);return;}
   }catch(_){}
   try{
-    const url='https://re.jrc.ec.europa.eu/api/v5_2/MRcalc?lat='+LAT+'&lon='+LON
-      +'&outputformat=json&raddatabase=PVGIS-SARAH3&browser=0';
+    const url=PROXY+'/pvgis';
     const data=await fetch(url).then(r=>r.json());
     try{localStorage.setItem(_PVGIS_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
     renderPVGIS(data);
@@ -13850,7 +13849,7 @@ function renderDriftEngine(){
   const range=document.getElementById('drift-range');
   if(!body)return;
   const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
-  if(drifts.length<6){body.innerHTML='<div class="clim-loading">Zbiranje drift podatkov… potrebno vsaj 6 meritev (≈30 min).</div>';return;}
+  if(drifts.length<6){const card=document.getElementById('drift-card');if(card)card.style.display='none';return;}
   // Enrich with hour info
   const rich=drifts.map(d=>({...d,hour:new Date(d.t).getHours(),month:new Date(d.t).getMonth()}));
   // KPIs
@@ -14747,8 +14746,8 @@ async function fetchNASASolar(){
 function renderNASASolar(data){
   const el=document.getElementById('nasa-solar-body');if(!el||!data?.length)return;
   const monthly=data[0]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
-  const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
-  if(!monthly||!clim30){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN||null;
+  if(!monthly){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
   const now=new Date();
   const curY=String(now.getFullYear());
   const prevY=String(now.getFullYear()-1);
@@ -14764,7 +14763,7 @@ function renderNASASolar(data){
     const v=monthly[prevY]?.[k];
     return (v==null||v===-999)?null:v;
   });
-  const climVals=CLIM_KEYS.map(k=>{const v=clim30[k];return(v==null||v===-999)?null:v;});
+  const climVals=CLIM_KEYS.map(k=>{const v=clim30?clim30[k]:null;return(v==null||v===-999)?null:v;});
 
   const thisMonthVal=curVals[curMon];
   const climThisMonth=climVals[curMon];
