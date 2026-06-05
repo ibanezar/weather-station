@@ -4516,7 +4516,7 @@ async function fetchComingUp(){
     for(let i=si;i<h.time.length&&hours.length<25;i++)
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
-    const stripHours=hours.filter((_,i)=>i===0||i%3===0).slice(0,10);
+    const stripHours=hours.filter((_,i)=>i===0||i%2===0).slice(0,13);
 
     // Hourly cells
     const strip=document.getElementById('cu-hourly');
