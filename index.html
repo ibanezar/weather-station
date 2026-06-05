@@ -1346,6 +1346,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+.wuh-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wuh-table{width:100%;border-collapse:collapse;font-size:.73rem}
+.wuh-table th{padding:.4rem .4rem;font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;text-align:center}
+.wuh-table th.wuh-label{text-align:left}
+.wuh-table td{padding:.35rem .4rem;text-align:center;border-bottom:1px solid var(--border)}
+.wuh-table td.wuh-label{text-align:left;white-space:nowrap}
+.wuh-table tr:last-child td{border-bottom:none}
+.wuh-rank-grid{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem}
 
 @media(max-width:520px){.nt-grid2,.nt-grid3{grid-template-columns:1fr}.rec-month-grid{grid-template-columns:repeat(2,1fr)}}
 
@@ -3369,6 +3377,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="nt-card" style="margin-top:1rem">
       <div class="clabel" style="margin:0 0 .5rem">ℹ️ O primerjavi</div>
       <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n.v.) je označena z modro.</div>
+    </div>
+  </div>
+
+    <!-- WU 7-day history comparison -->
+    <div class="nt-section" id="wuh-section">
+      <div class="nt-title">📊 Primerjava zadnjih 7 dni — WU postaje v dolini</div>
+      <div class="wuh-rank-grid" id="wuh-rank"><div style="color:var(--muted);font-size:.8rem">Nalaganje rangiranja…</div></div>
+      <div class="nt-card" style="margin-bottom:.85rem">
+        <div class="chart-hdr">
+          <span class="clabel" style="margin:0">🌡 Tmax zadnjih 7 dni</span>
+          <span class="chart-range" id="wuh-chart-lbl">—</span>
+        </div>
+        <div class="nt-chart"><svg id="wuh-svg" style="width:100%;height:auto;display:block" viewBox="0 0 900 240" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div id="wuh-legend" style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.65rem;font-size:.74rem"></div>
+      </div>
+      <div class="nt-card">
+        <div class="wuh-table-wrap"><div id="wuh-table"><div style="color:var(--muted);font-size:.8rem">Nalaganje tabele…</div></div></div>
+      </div>
     </div>
   </div>
 
@@ -8317,6 +8343,123 @@ let _surInit=false;
 
 // Hardcoded nearby WU stations (bližnje postaje, ročno potrjene)
 const WU_NEARBY_IDS=['IMOZIR4','IMARTN16','IBRASL105','IMOZIR5','INAZAR37','IGORNJ48','IGORNJ53','IKAMNI50'];
+const WUH_PALETTE=['#38bdf8','#4ade80','#fbbf24','#f87171','#a78bfa','#67e8f9','#fb923c','#34d399','#e879f9'];
+
+async function fetchWUHistory(){
+  const section=document.getElementById('wuh-section');
+  const rankEl=document.getElementById('wuh-rank');
+  if(!section)return;
+  const allIds=['IREICA1',...WU_NEARBY_IDS];
+  const results=await Promise.all(allIds.map(async(id,idx)=>{
+    try{
+      const d=await fetch(PROXY+'/wu-station-history?id='+id).then(r=>r.json());
+      const obs=d.observations||[];
+      if(!obs.length)return null;
+      return{
+        id,
+        name:obs[0]?.neighborhood||id,
+        color:WUH_PALETTE[idx%WUH_PALETTE.length],
+        mine:id==='IREICA1',
+        days:obs.map(o=>({
+          date:(o.obsTimeLocal||'').slice(0,10),
+          tmax:o.metric?.tempHigh??null,
+          tmin:o.metric?.tempLow??null,
+          rain:o.metric?.precipTotal??null,
+        })).filter(d=>d.date&&d.tmax!=null)
+      };
+    }catch(_){return null;}
+  }));
+  const valid=results.filter(r=>r&&r.days.length);
+  if(!valid.length){if(rankEl)rankEl.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni podatkov.</div>';return;}
+  _renderWUHRanking(valid);
+  _renderWUHChart(valid);
+  _renderWUHTable(valid);
+}
+
+function _renderWUHRanking(stations){
+  const el=document.getElementById('wuh-rank');
+  if(!el)return;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const ranked=stations
+    .map(s=>({...s,todayMax:s.days.find(d=>d.date===todayStr)?.tmax??null}))
+    .filter(s=>s.todayMax!=null)
+    .sort((a,b)=>b.todayMax-a.todayMax);
+  if(!ranked.length){el.innerHTML='';return;}
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=ranked.map((s,i)=>
+    `<div style="background:var(--fc-bg);border:1px solid ${s.mine?'var(--blue)':'var(--fc-border)'};border-left:3px solid ${s.color};border-radius:12px;padding:.55rem .85rem;min-width:110px">`+
+    `<div style="font-size:.67rem;color:var(--muted);margin-bottom:.1rem">${medals[i]||(i+1)+'.'} ${s.mine?'📡 ':''}${s.name}</div>`+
+    `<div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:${s.color}">${s.todayMax.toFixed(1)}°C</div>`+
+    `</div>`
+  ).join('');
+}
+
+function _renderWUHChart(stations){
+  const svg=document.getElementById('wuh-svg');
+  const leg=document.getElementById('wuh-legend');
+  const lbl=document.getElementById('wuh-chart-lbl');
+  if(!svg)return;
+  const allDates=[...new Set(stations.flatMap(s=>s.days.map(d=>d.date)))].sort();
+  const allTemps=stations.flatMap(s=>s.days.map(d=>d.tmax)).filter(v=>v!=null);
+  if(!allDates.length||!allTemps.length)return;
+  const VW=900,VH=240,pad={t:20,r:20,b:38,l:40};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const tmin=Math.min(...allTemps)-1,tmax=Math.max(...allTemps)+1;
+  const xS=i=>pad.l+i/Math.max(1,allDates.length-1)*cw;
+  const yT=v=>pad.t+(1-(v-tmin)/(tmax-tmin))*ch;
+  const ns='http://www.w3.org/2000/svg';
+  const mk=(tag,attrs={},text='')=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text)el.textContent=text;svg.appendChild(el);return el;};
+  svg.innerHTML='';
+  for(let i=0;i<=4;i++){const y=pad.t+i/4*ch;const v=(tmax-i/4*(tmax-tmin)).toFixed(0);mk('line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:'rgba(128,128,128,.12)','stroke-width':'1'});mk('text',{x:pad.l-4,y:y+3,'text-anchor':'end','font-size':'8',fill:'rgba(180,180,180,.7)','font-family':'JetBrains Mono,monospace'},v+'°');}
+  allDates.forEach((date,i)=>{
+    const d=new Date(date+'T12:00:00');
+    mk('text',{x:xS(i),y:VH-10,'text-anchor':'middle','font-size':'7.5',fill:'rgba(180,180,180,.7)','font-family':'JetBrains Mono,monospace'},d.getDate()+'.'+(d.getMonth()+1)+'.');
+  });
+  [...stations].sort((a,b)=>a.mine?1:-1).forEach(s=>{
+    const ptArr=allDates.map((date,i)=>{const day=s.days.find(d=>d.date===date);return day?xS(i).toFixed(1)+','+yT(day.tmax).toFixed(1):null;});
+    // Draw as segments to handle gaps
+    let seg=[];
+    ptArr.forEach((pt,i)=>{
+      if(pt){seg.push(pt);}
+      else if(seg.length){mk('polyline',{points:seg.join(' '),fill:'none',stroke:s.color,'stroke-width':s.mine?'2.5':'1.5','stroke-linecap':'round','stroke-linejoin':'round',opacity:s.mine?'1':'0.7'});seg=[];}
+    });
+    if(seg.length)mk('polyline',{points:seg.join(' '),fill:'none',stroke:s.color,'stroke-width':s.mine?'2.5':'1.5','stroke-linecap':'round','stroke-linejoin':'round',opacity:s.mine?'1':'0.7'});
+  });
+  if(leg)leg.innerHTML=stations.map(s=>`<span style="display:flex;align-items:center;gap:.3rem"><span style="width:16px;height:${s.mine?'3':'2'}px;background:${s.color};border-radius:2px;display:inline-block;flex-shrink:0"></span><span style="color:var(--muted)">${s.mine?'📡 ':''}${s.name}</span></span>`).join('');
+  if(lbl)lbl.textContent=allDates[0]?.slice(5).replace('-','.')+'–'+allDates.at(-1)?.slice(5).replace('-','.');
+}
+
+function _renderWUHTable(stations){
+  const el=document.getElementById('wuh-table');
+  if(!el)return;
+  const allDates=[...new Set(stations.flatMap(s=>s.days.map(d=>d.date)))].sort();
+  const SL=['ned','pon','tor','sre','čet','pet','sob'];
+  const todayStr=new Date().toISOString().slice(0,10);
+  let t='<table class="wuh-table"><tr><th class="wuh-label">Postaja</th>';
+  allDates.forEach(date=>{
+    const d=new Date(date+'T12:00:00');
+    const today=date===todayStr;
+    t+=`<th style="color:${today?'var(--blue)':'var(--muted)'};font-weight:${today?700:500}">${SL[d.getDay()]}<br><span style="font-size:.63rem">${d.getDate()}.${d.getMonth()+1}.</span></th>`;
+  });
+  t+='</tr>';
+  stations.forEach(s=>{
+    t+=`<tr><td class="wuh-label"><span style="width:8px;height:8px;border-radius:50%;background:${s.color};display:inline-block;margin-right:.3rem"></span>${s.mine?'📡 ':''}${s.name}</td>`;
+    allDates.forEach(date=>{
+      const day=s.days.find(d=>d.date===date);
+      const today=date===todayStr;
+      t+=`<td style="background:${today?'rgba(56,189,248,.04)':'transparent'}">`;
+      if(day&&day.tmax!=null){
+        t+=`<span style="font-family:'JetBrains Mono',monospace;color:var(--red)">${day.tmax.toFixed(0)}°</span>`;
+        if(day.tmin!=null)t+=`<span style="font-size:.63rem;color:var(--muted)">/${day.tmin.toFixed(0)}°</span>`;
+        if(day.rain)t+=`<br><span style="font-size:.63rem;color:var(--blue)">${(+day.rain).toFixed(1)}mm</span>`;
+      }else t+='<span style="color:var(--border)">—</span>';
+      t+='</td>';
+    });
+    t+='</tr>';
+  });
+  t+='</table>';
+  el.innerHTML=t;
+}
 
 async function fetchWUNearby(){
   const grid=document.getElementById('wu-nearby-grid');
@@ -8371,6 +8514,7 @@ async function fetchWUNearby(){
 async function initSurroundings(){
   if(_surInit)return;_surInit=true;
   fetchWUNearby();
+  fetchWUHistory();
   try{
     const grid=document.getElementById('sur-grid');
     // Fetch current conditions for all nearby locations in parallel

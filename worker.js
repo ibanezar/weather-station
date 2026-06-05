@@ -493,6 +493,26 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /wu-station-history?id=XXX — 7-dnevna zgodovina ─────────
+      if (path === "/wu-station-history") {
+        const stationId = url.searchParams.get("id");
+        if (!stationId) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        const histUrl = `https://api.weather.com/v2/pws/observations/daily/7day?stationId=${stationId}&format=json&units=m&apiKey=${WU_KEY}&numericPrecision=decimal`;
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          const r = await fetch(histUrl, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+          const data = await r.json();
+          return new Response(JSON.stringify(data), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=3600" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+      }
+
       // ── /wu-station?id=XXX — trenutni podatki za poljubno postajo ──
       if (path === "/wu-station") {
         const stationId = url.searchParams.get("id");
