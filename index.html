@@ -854,6 +854,14 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 @media(max-width:1100px){.omx-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.omx-grid{grid-template-columns:1fr}}
 
+/* NASA POWER widgets */
+.nasa-kpi-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.85rem}
+.nasa-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .75rem;flex:1;min-width:110px}
+.nasa-kpi-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--text)}
+.nasa-kpi-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.15rem}
+.nasa-section-lbl{font-size:.73rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .3rem}
+.nasa-src{font-size:.65rem;color:var(--muted);margin-top:.5rem;text-align:right;opacity:.8}
+
 /* Sunrise */
 .sun-svg-wrap{padding:.5rem 0}
 .sun-svg{width:100%;display:block}
@@ -2691,6 +2699,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="pvgis-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
+    <!-- NASA POWER Solar Monitor -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">☀️ Solarni nadzor — NASA POWER</span>
+        <span class="chart-range" id="nasa-solar-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-solar-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- NASA POWER Climate Baselines -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌍 Satelitske bazlinije — NASA POWER</span>
+        <span class="chart-range" id="nasa-clim-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-clim-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
@@ -3040,6 +3066,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="chart-range" id="fwi-updated">EFFIS metodologija · —</span>
       </div>
       <div id="fwi-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- NASA POWER Agro Atlas -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌾 Agrometeorološki atlas — NASA POWER</span>
+        <span class="chart-range" id="nasa-agro-src">NASA POWER · —</span>
+      </div>
+      <div id="nasa-agro-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
     <!-- Ambee Pollen + AQI -->
