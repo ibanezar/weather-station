@@ -9,7 +9,7 @@ const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=j
 const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
-const GEMINI_KEY    = "REPLACE_WITH_GEMINI_API_KEY";  // aistudio.google.com → Get API key (brezplačno)
+const GEMINI_KEY    = "AIzaSyAjN-Iwlg3oa0bP3PmVyvOkimlPoc_6U5M";
 
 // Ambee Weather Intelligence — pollen + AQI (registracija: ambeedata.com, free tier)
 const AMBEE_KEY = "4a654676f62aec4e724a5dcdc5d1b5665e3da3602d3270c8a65195d02e1faa09";
