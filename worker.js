@@ -371,7 +371,7 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
             body: JSON.stringify({
               system_instruction: { parts: [{ text: systemText }] },
               contents: geminiMsgs,
-              generationConfig: { maxOutputTokens: 450, temperature: 0.7 },
+              generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
             }),
           }
         );
