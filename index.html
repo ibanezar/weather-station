@@ -476,7 +476,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 /* Candlestick chart */
 .candle-tab-row{display:flex;gap:.45rem;margin-bottom:.75rem}
 .candle-tab-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.35rem .8rem;font-size:.74rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'JetBrains Mono',monospace}
-.candle-tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.candle-tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}.wind-rose-card{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
 .candle-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(0,0,0,.03);border-radius:12px;padding:.5rem}
 [data-theme="dark"] .candle-wrap{background:rgba(255,255,255,.02)}
 .candle-wrap svg{display:block;min-width:480px;width:100%}
@@ -1415,7 +1415,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .hm-yr-lbl{color:var(--muted);text-align:left!important;padding-right:.6rem;white-space:nowrap}
 .an-insight-list{display:flex;flex-direction:column;gap:.7rem;font-size:.78rem;line-height:1.65;color:var(--text)}
 .an-insight-list li{list-style:none;padding:.5rem .75rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
-@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}}
+@media(max-width:640px){.an-grid2,.an-grid3,.nt-grid2,.nt-grid3{grid-template-columns:1fr}}@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}.an-card,.nt-card{padding:.85rem .9rem}.an-chart-wrap{height:155px}.candle-wrap svg{min-width:300px}.wind-rose-card{grid-template-columns:1fr}}
 
 
 /* Text forecast — compact cards */
@@ -2448,7 +2448,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <div class="an-section">
       <div class="an-title">🌬 Smer vetra — distribucija (XLSX)</div>
-      <div class="nt-card" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+      <div class="nt-card wind-rose-card">
         <div><div class="nt-chart"><canvas id="xlsx-wind-rose" height="180"></canvas></div></div>
         <div style="font-size:.74rem;line-height:1.8;color:var(--muted);padding:.5rem 0">
           <strong style="color:var(--text)">Prevladujoča smer: JUG (S)</strong><br>
