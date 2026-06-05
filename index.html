@@ -5807,14 +5807,14 @@ async function initRadarMap(){
   if(_radarMap||typeof L==='undefined')return;
   const mapEl=document.getElementById('radar-map');if(!mapEl)return;
 
-  _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false}).setView([LAT,LON],8);
+  _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false,minZoom:4,maxZoom:10}).setView([LAT,LON],7);
 
   // Base tiles — theme-aware
   const dark=isDark();
   const baseUrl=dark
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  L.tileLayer(baseUrl,{maxZoom:19,subdomains:'abcd'}).addTo(_radarMap);
+  L.tileLayer(baseUrl,{maxZoom:10,maxNativeZoom:19,subdomains:'abcd'}).addTo(_radarMap);
 
   // Station marker
   L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2}).addTo(_radarMap).bindPopup('IREICA1 · Rečica ob Savinji');
@@ -5846,7 +5846,7 @@ function showRadarFrame(i){
   if(!_radarLayers[f.path]){
     const color=isDark()?2:4; // 2=universal blue, 4=TWC for light
     const url=`${_radarHost}${f.path}/256/{z}/{x}/{y}/${color}/1_1.png`;
-    _radarLayers[f.path]=L.tileLayer(url,{opacity:0,maxZoom:19,tileSize:256});
+    _radarLayers[f.path]=L.tileLayer(url,{opacity:0,tileSize:256,maxNativeZoom:8,maxZoom:10,errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'});
     _radarLayers[f.path].addTo(_radarMap);
   }
   // Fade: hide others, show this
