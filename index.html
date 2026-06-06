@@ -1711,13 +1711,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-records"     onclick="switchTab('records');closeTabDDs()">🏆 Rekordi</button>
         <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
         <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
-      </div>
-    </div>
-    <!-- Ostalo dropdown -->
-    <div class="tab-dropdown" id="tab-dd-misc">
-      <button class="tab-btn tab-dd-trigger" id="tab-dd-misc-btn" onclick="toggleTabDD('misc')">⋯ Ostalo ▾</button>
-      <div class="tab-dd-menu" id="tab-dd-misc-menu">
-        <div class="tab-dd-group-lbl">Dnevnik & Zabava</div>
+        <div class="tab-dd-divider"></div>
+        <div class="tab-dd-group-lbl">Zabava</div>
         <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
       </div>
     </div>
@@ -5305,7 +5300,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings'],misc:['trivia']};
+const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
