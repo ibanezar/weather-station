@@ -528,7 +528,7 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         const entryId = idPart.split("/")[0];
         const sub     = idPart.split("/")[1] || "";
 
-        // GET /diary always works — returns empty list if KV not bound yet
+        // GET /diary — always returns, even without KV
         if (path === "/diary" && request.method === "GET") {
           if (!env?.COUNTER_KV) return new Response(JSON.stringify([]), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
@@ -539,7 +539,21 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           });
         }
 
-        // All write/read-by-id operations require KV
+        // GET /diary/{id}/img — also graceful without KV
+        if (entryId && sub === "img" && request.method === "GET") {
+          if (!env?.COUNTER_KV) return new Response(JSON.stringify({ imgData: null }), {
+            status: 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          const imgData = await env.COUNTER_KV.get("diary:img:" + entryId);
+          if (!imgData) return new Response(JSON.stringify({ error: "not found" }), {
+            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          return new Response(JSON.stringify({ imgData }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" }
+          });
+        }
+
+        // Write operations require KV
         if (!env?.COUNTER_KV) return new Response(JSON.stringify({ error: "KV binding COUNTER_KV ni konfiguriran" }), {
           status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
@@ -560,16 +574,6 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           await env.COUNTER_KV.put("diary:index", JSON.stringify(filtered));
           return new Response(JSON.stringify({ ok: true, id: entry.id }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
-        }
-
-        if (entryId && sub === "img" && request.method === "GET") {
-          const imgData = await env.COUNTER_KV.get("diary:img:" + entryId);
-          if (!imgData) return new Response(JSON.stringify({ error: "not found" }), {
-            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
-          return new Response(JSON.stringify({ imgData }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" }
           });
         }
 
