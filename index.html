@@ -10489,15 +10489,26 @@ let _fdCurrent=null,_pendingEntry=null,_fdFilter='all',_diaryEntries=[];
 
 // ── Diary API helpers ──────────────────────────────────────
 async function fdLoadDiary(){
+  let apiEntries=null;
   try{
     const r=await fetch(PROXY+'/diary');
     if(!r.ok)throw new Error('HTTP '+r.status);
-    return await r.json();
+    apiEntries=await r.json();
   }catch(e){
     console.warn('Diary API:',e.message);
-    // fallback: old localStorage entries (read-only)
-    try{return JSON.parse(localStorage.getItem(FD_KEY)||'[]');}catch(_){return[];}
   }
+  // Merge API entries with any locally-saved entries (offline fallback)
+  const localRaw=localStorage.getItem(FD_KEY);
+  const localEntries=localRaw?JSON.parse(localRaw):[];
+  if(apiEntries===null)return localEntries; // full offline fallback
+  if(!apiEntries.length&&localEntries.length){
+    // API returned [] (likely preview/no-KV) — show local entries so user sees their data
+    return localEntries;
+  }
+  // Merge: local entries not present in API (saved offline) come first
+  const apiIds=new Set(apiEntries.map(e=>String(e.id)));
+  const localOnly=localEntries.filter(e=>!apiIds.has(String(e.id)));
+  return [...localOnly,...apiEntries];
 }
 async function fdGetImage(id){
   const k=FD_IMG_CACHE+id;
@@ -10511,9 +10522,23 @@ async function fdGetImage(id){
   }catch(_){return null;}
 }
 async function fdSaveEntry(entry){
+  // Always cache image locally first
   if(entry.imgData){try{localStorage.setItem(FD_IMG_CACHE+entry.id,entry.imgData);}catch(_){}}
-  const r=await fetch(PROXY+'/diary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)});
-  if(!r.ok)throw new Error('HTTP '+r.status);
+  // Also save full entry to legacy localStorage as offline fallback
+  try{
+    const local=JSON.parse(localStorage.getItem(FD_KEY)||'[]');
+    const pruned=local.filter(e=>String(e.id)!==String(entry.id));
+    pruned.unshift(entry);
+    localStorage.setItem(FD_KEY,JSON.stringify(pruned.slice(0,100)));
+  }catch(_){}
+  // Try API — if KV not available (preview deployment), degrade gracefully
+  try{
+    const r=await fetch(PROXY+'/diary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)});
+    if(!r.ok&&r.status!==503)throw new Error('HTTP '+r.status);
+    if(r.status===503)showToast('⚠️ Shranjeno lokalno — API ni dostopen na tej različici');
+  }catch(e){
+    if(!e.message.includes('503'))throw e;
+  }
 }
 async function fdUpdateEntry(id,updates){
   const r=await fetch(PROXY+'/diary/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)});
