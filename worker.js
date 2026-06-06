@@ -524,19 +524,25 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
       // PUT    /diary/{id}    → update metadata (subject, category, notes)
       // DELETE /diary/{id}    → delete entry + image
       if (path === "/diary" || path.startsWith("/diary/")) {
-        if (!env?.COUNTER_KV) return new Response(JSON.stringify({ error: "KV not configured" }), {
-          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-        });
         const idPart  = path.startsWith("/diary/") ? path.slice(7) : "";
         const entryId = idPart.split("/")[0];
         const sub     = idPart.split("/")[1] || "";
 
+        // GET /diary always works — returns empty list if KV not bound yet
         if (path === "/diary" && request.method === "GET") {
+          if (!env?.COUNTER_KV) return new Response(JSON.stringify([]), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
           const index = await env.COUNTER_KV.get("diary:index", "json") || [];
           return new Response(JSON.stringify(index), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
           });
         }
+
+        // All write/read-by-id operations require KV
+        if (!env?.COUNTER_KV) return new Response(JSON.stringify({ error: "KV binding COUNTER_KV ni konfiguriran" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
 
         if (path === "/diary" && request.method === "POST") {
           const entry = await request.json();
