@@ -10684,10 +10684,11 @@ async function fdRenderGallery(){
     const subject=e.subject||(e.category?cat.label:'Opazovanje');
     const cachedImg=localStorage.getItem(FD_IMG_CACHE+e.id)||'';
     const card=document.createElement('div');card.className='obs-card';card.onclick=()=>fdOpenModal(e.id);
+    // img always starts hidden — shown only after src is set (avoids mobile onerror race)
     card.innerHTML=
       `<div class="obs-photo-wrap">`+
-      `<img${cachedImg?' src="'+cachedImg+'"':''} data-eid="${e.id}" class="obs-card-img" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
-      `<div class="obs-photo-placeholder" style="display:${cachedImg?'none':'flex'}">📷</div>`+
+      `<img data-eid="${e.id}" class="obs-card-img" alt="" style="display:none">`+
+      `<div class="obs-photo-placeholder" style="display:flex">📷</div>`+
       `<div class="obs-quality" style="color:${q.col}">${q.icon} ${q.label}</div>`+
       (e.category?`<div class="obs-cat-chip">${cat.emoji} ${cat.label}</div>`:'')+
       `</div>`+
@@ -10700,17 +10701,20 @@ async function fdRenderGallery(){
       (e.photoPhase?`<span class="obs-chip">${e.photoPhase}</span>`:'')+
       `</div></div>`;
     gallery.appendChild(card);
-    // Async-load image if not cached
-    if(!cachedImg) fdLoadCardImage(e.id,card);
+    fdLoadCardImage(e.id,card,cachedImg||null);
   });
 }
 
-async function fdLoadCardImage(id,card){
-  const imgData=await fdGetImage(id);if(!imgData)return;
+async function fdLoadCardImage(id,card,prefetched){
+  const imgData=prefetched||await fdGetImage(id);
+  if(!imgData)return;
   const img=card.querySelector('.obs-card-img');
   const ph=card.querySelector('.obs-photo-placeholder');
-  if(img){img.src=imgData;img.style.display='';}
-  if(ph)ph.style.display='none';
+  if(!img)return;
+  // Set src first, reveal only after browser confirms it loaded
+  img.onload=()=>{img.style.display='';if(ph)ph.style.display='none';};
+  img.onerror=()=>{img.style.display='none';if(ph)ph.style.display='flex';};
+  img.src=imgData;
 }
 
 async function fdOpenModal(id){
@@ -10737,8 +10741,14 @@ async function fdOpenModal(id){
     e.gdd?`🌱 GDD ${e.gdd}`:null,
   ].filter(Boolean).map(b=>`<span class="fd-badge">${b}</span>`).join('');
   m.style.display='flex';
-  // Load image async
-  fdGetImage(id).then(img=>{if(img&&modalImg)modalImg.src=img;});
+  // Load image async — set src only after confirmed loaded
+  modalImg.style.display='none';
+  fdGetImage(id).then(imgData=>{
+    if(!imgData||!modalImg)return;
+    modalImg.onload=()=>{modalImg.style.display='';};
+    modalImg.onerror=()=>{modalImg.style.display='none';};
+    modalImg.src=imgData;
+  });
 }
 function fdModalSelectCat(el){
   document.querySelectorAll('#fd-modal-cat-grid .obs-cat-opt').forEach(b=>b.classList.remove('selected'));
