@@ -899,6 +899,47 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @media(max-width:520px){.ticker-tag{font-size:.55rem;padding:0 .65rem}.ticker-inner{font-size:.7rem}}
 
+/* ── Agrometeo ─────────────────────────────────────────── */
+.agro-hero{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.65rem;margin-bottom:1rem}
+.agro-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;padding:.85rem .9rem;text-align:center}
+.agro-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:300;line-height:1.1}
+.agro-kpi-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.2rem}
+.agro-kpi-sub{font-size:.66rem;color:var(--muted);margin-top:.1rem}
+.hop-phase-bar{height:10px;background:var(--fc-bg);border-radius:5px;overflow:hidden;margin:.4rem 0 .3rem}
+.hop-phase-fill{height:100%;border-radius:5px;transition:width 1s ease}
+.agro-risk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin:.5rem 0}
+.agro-risk-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .85rem}
+.agro-risk-bar{height:5px;background:var(--border);border-radius:3px;margin:.3rem 0 .2rem}
+.agro-risk-fill{height:100%;border-radius:3px}
+.spray-timeline{display:flex;gap:2px;margin:.55rem 0;flex-wrap:wrap}
+.spray-slot{flex:1;min-width:16px;height:26px;border-radius:3px}
+.spray-ok{background:rgba(74,222,128,.55)}
+.spray-no{background:var(--fc-bg);border:1px solid var(--fc-border)}
+.spray-lbl-row{display:flex;gap:2px;margin-bottom:.15rem;flex-wrap:wrap}
+.spray-lbl{flex:1;min-width:16px;font-size:.5rem;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden}
+.frost-row{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin:.6rem 0}
+.frost-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .25rem;text-align:center}
+.frost-day-name{font-size:.59rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.frost-day-temp{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:300;margin:.2rem 0}
+.frost-day-badge{font-size:.56rem;border-radius:5px;padding:1px 4px;display:inline-block;margin-top:.1rem}
+.frost-danger{background:rgba(248,113,113,.18);color:var(--red)}
+.frost-frost{background:rgba(251,191,36,.15);color:var(--amber)}
+.frost-warn{background:rgba(250,204,21,.1);color:#ca8a04}
+.frost-safe{background:rgba(74,222,128,.1);color:var(--green)}
+.frost-ok{background:var(--fc-bg);color:var(--muted)}
+.hay-window{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .85rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.45rem}
+.hay-window-info{flex:1}
+.hay-window-dates{font-size:.77rem;font-weight:600;color:var(--text)}
+.hay-window-details{font-size:.67rem;color:var(--muted);margin-top:.1rem}
+.hay-window-badge{border:1px solid;border-radius:8px;padding:3px 8px;font-size:.67rem;white-space:nowrap;flex-shrink:0}
+.gdd-crop-row{display:flex;align-items:center;gap:.65rem;padding:.35rem 0}
+.gdd-crop-lbl{width:90px;font-size:.74rem;color:var(--muted);flex-shrink:0}
+.gdd-crop-bar{flex:1;height:7px;background:var(--fc-bg);border-radius:4px;overflow:hidden}
+.gdd-crop-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.gdd-crop-val{font-family:'JetBrains Mono',monospace;font-size:.74rem;width:55px;text-align:right;flex-shrink:0}
+.gdd-crop-stage{font-size:.67rem;color:var(--muted);width:110px;flex-shrink:0}
+@media(max-width:520px){.frost-row{grid-template-columns:repeat(4,1fr)}.gdd-crop-stage{display:none}}
+/* ── end Agrometeo ─────────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -1666,6 +1707,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
+    <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -3237,6 +3279,56 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   </div><!-- /tab-water -->
 
+  <!-- ═══ AGROMETEO TAB ═══ -->
+  <div id="tab-agro" class="tab-pane">
+
+    <!-- Hero KPIs -->
+    <div class="agro-hero">
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-et0">—</div><div class="agro-kpi-lbl">ET₀ danes</div><div class="agro-kpi-sub">mm/dan</div></div>
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-rain30">—</div><div class="agro-kpi-lbl">Padavine/30d</div><div class="agro-kpi-sub">mm skupaj</div></div>
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-gdd5">—</div><div class="agro-kpi-lbl">GDD₅ letos</div><div class="agro-kpi-sub">od 1. jan.</div></div>
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-gdd10">—</div><div class="agro-kpi-lbl">GDD₁₀ letos</div><div class="agro-kpi-sub">od 1. jan.</div></div>
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-sun">—</div><div class="agro-kpi-lbl">Sonce danes</div><div class="agro-kpi-sub">ure</div></div>
+      <div class="agro-kpi"><div class="agro-kpi-val" id="ak-wbal">—</div><div class="agro-kpi-lbl">Vodni bilans</div><div class="agro-kpi-sub">padavine − ET₀</div></div>
+    </div>
+
+    <!-- Hop phenology + disease risk -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌿 Fenologija hmelja &amp; tveganje bolezni</div>
+      <div id="agro-hop-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+    <!-- GDD by crop -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌾 Toplota rasti (GDD) — pridelki</div>
+      <div id="agro-gdd-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+    <!-- Spray window -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">💦 Okno škropljenja — 7 dni</div>
+      <div id="agro-spray-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+    <!-- Frost alarm -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🧊 Alarm pozebe — 7 dni</div>
+      <div id="agro-frost-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+    <!-- Water balance -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">💧 Vodni bilans — zadnjih 14 + napoved 7 dni</div>
+      <div id="agro-wbal-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+    <!-- Hay drying -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌾 Okno sušenja sena — 5 dni</div>
+      <div id="agro-hay-body"><div style="color:var(--muted);font-size:.8rem">Nalaganje…</div></div>
+    </div>
+
+  </div><!-- /tab-agro -->
 
 
   <!-- ═══ AI NOWCAST TAB ═══ -->
@@ -5265,6 +5357,7 @@ function switchTab(tab){
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
   if(tab==='water'){     initVodostaj(); }
+  if(tab==='agro'){      initAgro(); }
   if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   closeTabDDs();
@@ -6489,6 +6582,368 @@ async function fetchAgrometeo(){
     set('agro-note',note);
     set('agro-date',new Date().toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'long'}));
   }catch(e){console.warn('Agro:',e);}
+}
+
+// ── Agrometeo Tab ─────────────────────────────────────────
+const HOP_STAGES=[
+  {min:0,   max:50,   label:'Mirovanje',           emoji:'💤',col:'#6b7280'},
+  {min:50,  max:150,  label:'Vznova poganjkov',     emoji:'🌱',col:'#4ade80'},
+  {min:150, max:350,  label:'Rast brun',            emoji:'🌿',col:'#22c55e'},
+  {min:350, max:600,  label:'Stransko razvejanje',  emoji:'🌾',col:'#86efac'},
+  {min:600, max:850,  label:'Cvetenje / storžki',   emoji:'🌸',col:'#f59e0b'},
+  {min:850, max:1100, label:'Polnjenje storžkov',   emoji:'🍺',col:'#f97316'},
+  {min:1100,max:9999, label:'Zrelost / žetev',      emoji:'🎉',col:'#ef4444'},
+];
+const CROP_GDD=[
+  {name:'Hmelj',     emoji:'🌿',base:5, milestones:[{v:50,l:'vznova'},{v:350,l:'razvejanje'},{v:850,l:'storžki'},{v:1100,l:'žetev'}],     col:'#22c55e'},
+  {name:'Koruza',    emoji:'🌽',base:10,milestones:[{v:100,l:'kalitev'},{v:600,l:'svila'},{v:1300,l:'metlica'},{v:2400,l:'žetev'}],        col:'#f59e0b'},
+  {name:'Krompir',   emoji:'🥔',base:7, milestones:[{v:200,l:'vznova'},{v:500,l:'gomolji'},{v:1000,l:'polnjenje'},{v:1500,l:'žetev'}],     col:'#a78bfa'},
+  {name:'Pšenica',   emoji:'🌾',base:5, milestones:[{v:200,l:'vznik'},{v:600,l:'vzravnanje'},{v:1200,l:'klasenje'},{v:2000,l:'žetev'}],    col:'#fbbf24'},
+  {name:'Trava',     emoji:'🌱',base:5, milestones:[{v:100,l:'1. porast'},{v:400,l:'1. košnja'},{v:800,l:'2. košnja'},{v:1200,l:'3. košnja'}],col:'#34d399'},
+];
+
+let _agroFcCache=null,_agroFcTime=0;
+
+async function initAgro(){
+  const [gdd5,gdd10,rain30]=_calcAgroAccum();
+  _buildAgroKPIs(gdd5,gdd10,rain30);
+  _buildAgroHop(gdd5);
+  _buildAgroGDD(gdd5,gdd10);
+  _buildAgroFrost();
+  await _fetchAgroFc(gdd5);
+}
+
+function _calcAgroAccum(){
+  const store=_insStore();
+  const yr=new Date().getFullYear();
+  const today=new Date().toISOString().slice(0,10);
+  const d30=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  let gdd5=0,gdd10=0,rain30=0;
+  for(const[k,v] of Object.entries(store)){
+    const avg=(v.tempHigh!=null&&v.tempLow!=null)?(v.tempHigh+v.tempLow)/2:(v.tempAvg??null);
+    if(k>=yr+'-01-01'&&k<=today&&avg!=null){
+      gdd5+=Math.max(0,avg-5);
+      gdd10+=Math.max(0,avg-10);
+    }
+    if(k>=d30&&k<=today) rain30+=(v.precipTotal||0);
+  }
+  return[Math.round(gdd5),Math.round(gdd10),Math.round(rain30)];
+}
+
+function _buildAgroKPIs(gdd5,gdd10,rain30){
+  set('ak-gdd5',gdd5);
+  set('ak-gdd10',gdd10);
+  set('ak-rain30',rain30);
+  // ET₀, sun, wbal come from the hourly fetch — show loading for now
+  const et0El=document.getElementById('ak-et0');
+  const sunEl=document.getElementById('ak-sun');
+  const wbalEl=document.getElementById('ak-wbal');
+  if(et0El&&et0El.textContent==='—'){et0El.textContent='…';}
+  if(sunEl&&sunEl.textContent==='—'){sunEl.textContent='…';}
+  if(wbalEl&&wbalEl.textContent==='—'){wbalEl.textContent='…';}
+}
+
+function _buildAgroHop(gdd5){
+  const body=document.getElementById('agro-hop-body');
+  if(!body)return;
+  const stage=HOP_STAGES.find(s=>gdd5>=s.min&&gdd5<s.max)||HOP_STAGES[HOP_STAGES.length-1];
+  const nextStage=HOP_STAGES.find(s=>s.min>gdd5);
+  const pct=Math.min(100,Math.round((gdd5-stage.min)/(stage.max-stage.min)*100));
+  const toNext=nextStage?nextStage.min-gdd5:0;
+  body.innerHTML=
+    '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem">'
+    +'<div style="font-size:2rem">'+stage.emoji+'</div>'
+    +'<div><div style="font-size:.95rem;font-weight:600;color:var(--text)">'+stage.label+'</div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">GDD₅: '+gdd5+(nextStage?' · čez '+toNext+' GDD₅: '+nextStage.label:'')+'</div></div>'
+    +'</div>'
+    +'<div class="hop-phase-bar"><div class="hop-phase-fill" style="width:'+pct+'%;background:'+stage.col+'"></div></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.85rem">'
+    +'<span>'+stage.min+' GDD₅</span><span>'+pct+'%</span>'+(stage.max<9999?'<span>'+stage.max+' GDD₅</span>':'')+'</div>'
+    +'<div class="agro-risk-grid" id="agro-disease-grid">'
+    +'<div style="color:var(--muted);font-size:.75rem">Tveganje bolezni — nalaganje podatkov…</div>'
+    +'</div>';
+}
+
+function _buildAgroHopDisease(rh,temp){
+  const grid=document.getElementById('agro-disease-grid');
+  if(!grid)return;
+  const dm=Math.max(0,Math.min(100,((rh-60)/30*60+(temp>10&&temp<25?30:0))));
+  const pm=Math.max(0,Math.min(100,((temp>15&&temp<28?40:0)+(rh>45&&rh<80?40:0)+(temp>18&&temp<26?20:0))));
+  const bot=Math.max(0,Math.min(100,((rh>80?50:0)+(temp>15&&temp<22?30:0)+(rh>90?20:0))));
+  const diseases=[
+    {name:'Peronospera (plesni)',risk:dm,note:'T>10°C + visoka vlaga'},
+    {name:'Pepelasta plesen',   risk:pm,note:'T 15–27°C + zmerna vlaga'},
+    {name:'Botrytis',          risk:bot,note:'T 15–22°C + vlaga >80%'},
+  ];
+  grid.innerHTML=diseases.map(d=>{
+    const col=d.risk<30?'var(--green)':d.risk<60?'var(--amber)':'var(--red)';
+    const lbl=d.risk<30?'Nizko':d.risk<60?'Zmerno':'Visoko';
+    return '<div class="agro-risk-card">'
+      +'<div style="font-size:.75rem;font-weight:600;color:var(--text)">'+d.name+'</div>'
+      +'<div class="agro-risk-bar"><div class="agro-risk-fill" style="width:'+Math.round(d.risk)+'%;background:'+col+'"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:.66rem">'
+      +'<span style="color:'+col+'">'+lbl+' ('+Math.round(d.risk)+'%)</span>'
+      +'<span style="color:var(--muted)">'+d.note+'</span></div>'
+      +'</div>';
+  }).join('');
+}
+
+function _buildAgroGDD(gdd5,gdd10){
+  const body=document.getElementById('agro-gdd-body');
+  if(!body)return;
+  body.innerHTML='<div>'+CROP_GDD.map(c=>{
+    const gdd=c.base===5?gdd5:c.base===7?Math.round(gdd5*0.72):c.base===10?gdd10:gdd5;
+    const maxMil=c.milestones[c.milestones.length-1].v;
+    const pct=Math.min(100,Math.round(gdd/maxMil*100));
+    const curMil=c.milestones.slice().reverse().find(m=>gdd>=m.v);
+    const nextMil=c.milestones.find(m=>m.v>gdd);
+    const stageLabel=curMil?curMil.l:'pred vznikom';
+    const nextLabel=nextMil?nextMil.l+' čez '+(nextMil.v-gdd)+' GDD':'zaključeno';
+    return '<div class="gdd-crop-row">'
+      +'<div class="gdd-crop-lbl">'+c.emoji+' '+c.name+'</div>'
+      +'<div class="gdd-crop-bar"><div class="gdd-crop-fill" style="width:'+pct+'%;background:'+c.col+'"></div></div>'
+      +'<div class="gdd-crop-val" style="color:'+c.col+'">'+gdd+'</div>'
+      +'<div class="gdd-crop-stage">'+stageLabel+' · '+nextLabel+'</div>'
+      +'</div>';
+  }).join('')+'</div>';
+}
+
+function _buildAgroFrost(){
+  const body=document.getElementById('agro-frost-body');
+  if(!body)return;
+  const fc=_fcDailyData;
+  if(!fc||!fc.time?.length){body.innerHTML='<div style="color:var(--muted);font-size:.8rem">Napoved temperature ni na voljo.</div>';return;}
+  const days=Math.min(7,fc.time.length);
+  let html='<div class="frost-row">';
+  for(let i=0;i<days;i++){
+    const tmin=fc.temperature_2m_min?.[i]??null;
+    const tmax=fc.temperature_2m_max?.[i]??null;
+    const dateObj=new Date(fc.time[i]+'T12:00:00');
+    const dayName=dateObj.toLocaleDateString('sl',{weekday:'short'});
+    let bClass='frost-ok',bLabel='V redu';
+    if(tmin!=null){
+      if(tmin<=-3){bClass='frost-danger';bLabel='Pozeba!';}
+      else if(tmin<0){bClass='frost-frost';bLabel='Zmrzal';}
+      else if(tmin<3){bClass='frost-warn';bLabel='Pozor';}
+      else{bClass='frost-safe';bLabel='Varno';}
+    }
+    html+='<div class="frost-day">'
+      +'<div class="frost-day-name">'+dayName+'</div>'
+      +'<div class="frost-day-temp">'+(tmax!=null?Math.round(tmax)+'°':'—')+'</div>'
+      +'<div class="frost-day-temp" style="font-size:.73rem;color:var(--muted)">'+(tmin!=null?Math.round(tmin)+'°':'—')+'</div>'
+      +'<div class="frost-day-badge '+bClass+'">'+bLabel+'</div>'
+      +'</div>';
+  }
+  html+='</div>';
+  const frostDays=[];
+  for(let i=0;i<days;i++){
+    const tmin=fc.temperature_2m_min?.[i]??null;
+    if(tmin!=null&&tmin<0){
+      const dateObj=new Date(fc.time[i]+'T12:00:00');
+      frostDays.push(dateObj.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'short'})+' ('+Math.round(tmin)+'°C)');
+    }
+  }
+  if(frostDays.length){
+    html+='<div style="margin-top:.5rem;padding:.5rem .7rem;background:rgba(248,113,113,.08);border-radius:8px;font-size:.74rem;color:var(--red)">⚠️ Pozeba/zmrzal predvidena: '+frostDays.join(', ')+'</div>';
+  }else{
+    html+='<div style="margin-top:.5rem;font-size:.74rem;color:var(--green)">✅ V naslednjih 7 dneh ni predvidene pozebe.</div>';
+  }
+  body.innerHTML=html;
+}
+
+async function _fetchAgroFc(gdd5){
+  try{
+    if(!_agroFcCache||Date.now()-_agroFcTime>3600000){
+      const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+        +'&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,is_day'
+        +'&daily=et0_fao_evapotranspiration,precipitation_sum,sunshine_duration,temperature_2m_max,temperature_2m_min'
+        +'&timezone=Europe%2FLjubljana&forecast_days=7';
+      const r=await fetch(url);
+      _agroFcCache=await r.json();
+      _agroFcTime=Date.now();
+    }
+    const d=_agroFcCache;
+    // Update KPIs with fresh ET₀/sun
+    if(d.daily?.et0_fao_evapotranspiration?.[0]!=null){
+      const et0=d.daily.et0_fao_evapotranspiration[0].toFixed(1);
+      const sun=((d.daily.sunshine_duration?.[0]??0)/3600).toFixed(1);
+      const [,, rain30]=_calcAgroAccum();
+      const todayRain=(d.daily.precipitation_sum?.[0]??0);
+      const wbal=(todayRain-parseFloat(et0)).toFixed(1);
+      set('ak-et0',et0);
+      set('ak-sun',sun);
+      set('ak-wbal',(parseFloat(wbal)>=0?'+':'')+wbal);
+    }
+    // Disease risk from current humidity (use hour 12 of today if available)
+    const h=d.hourly;
+    if(h?.relative_humidity_2m?.length){
+      const nowHour=new Date().getHours();
+      const rh=h.relative_humidity_2m[nowHour]??h.relative_humidity_2m[0]??70;
+      const temp=h.temperature_2m[nowHour]??h.temperature_2m[0]??15;
+      _buildAgroHopDisease(rh,temp);
+    }
+    _buildAgroSpray(d);
+    _buildAgroHay(d);
+    _buildAgroWaterBalance(d);
+  }catch(e){
+    console.warn('Agro fc:',e);
+    ['agro-spray-body','agro-hay-body','agro-wbal-body'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&el.textContent.includes('Nalaganje'))el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Napaka pri nalaganju podatkov.</div>';
+    });
+  }
+}
+
+function _buildAgroSpray(d){
+  const body=document.getElementById('agro-spray-body');
+  if(!body)return;
+  const h=d.hourly;
+  if(!h?.time?.length){body.innerHTML='<div style="color:var(--muted);font-size:.8rem">Urni podatki niso na voljo.</div>';return;}
+  // Group by day, show 7 days × 24h grid (day hours 6-19 only shown)
+  const days=[];
+  const now=new Date();
+  const todayStr=now.toISOString().slice(0,10);
+  for(let i=0;i<7;i++){
+    const d2=new Date(now);d2.setDate(d2.getDate()+i);
+    days.push(d2.toISOString().slice(0,10));
+  }
+  let html='';
+  for(const day of days){
+    const indices=h.time.map((t,i)=>t.startsWith(day)?i:-1).filter(i=>i>=0);
+    if(!indices.length)continue;
+    const dateObj=new Date(day+'T12:00:00');
+    const dayLbl=dateObj.toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'numeric'});
+    // Daytime slots 6-19
+    const daySlots=indices.filter(i=>{
+      const hr=parseInt(h.time[i].slice(11,13));
+      return hr>=6&&hr<20;
+    });
+    if(!daySlots.length)continue;
+    const slots=daySlots.map(i=>{
+      const wind=h.wind_speed_10m[i]??99;
+      const precip=h.precipitation[i]??0;
+      const temp=h.temperature_2m[i]??0;
+      const hr=parseInt(h.time[i].slice(11,13));
+      const ok=wind<=4&&precip<0.1&&temp>=5;
+      return{ok,hr,wind,precip,temp};
+    });
+    const okCount=slots.filter(s=>s.ok).length;
+    html+='<div style="margin-bottom:.6rem">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem">'
+      +'<span style="font-size:.73rem;color:var(--text);font-weight:600">'+dayLbl+'</span>'
+      +'<span style="font-size:.67rem;color:'+(okCount>=4?'var(--green)':okCount>=2?'var(--amber)':'var(--red)')+'">'+okCount+' primernih ur</span>'
+      +'</div>'
+      +'<div class="spray-lbl-row">'+slots.map(s=>'<div class="spray-lbl">'+s.hr+'</div>').join('')+'</div>'
+      +'<div class="spray-timeline">'+slots.map(s=>
+        '<div class="spray-slot '+(s.ok?'spray-ok':'spray-no')+'" title="'+s.hr+':00 · veter '+s.wind.toFixed(1)+'m/s · padavine '+s.precip.toFixed(1)+'mm · '+s.temp.toFixed(0)+'°C"></div>'
+      ).join('')+'</div>'
+      +'</div>';
+  }
+  body.innerHTML=html
+    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.25rem">🟢 primerno (veter ≤4 m/s, brez dežja, T≥5°C) &nbsp;⬜ neprimerno</div>';
+}
+
+function _buildAgroHay(d){
+  const body=document.getElementById('agro-hay-body');
+  if(!body)return;
+  const h=d.hourly;
+  if(!h?.time?.length){body.innerHTML='<div style="color:var(--muted);font-size:.8rem">Urni podatki niso na voljo.</div>';return;}
+  // Find windows of ≥6 consecutive daylight hours with: no rain, RH<65%, isDay
+  const now=new Date();
+  const windows=[];
+  let currentWin=null;
+  for(let i=0;i<Math.min(h.time.length,5*24);i++){
+    const isDay=h.is_day?.[i]??0;
+    const precip=h.precipitation?.[i]??0;
+    const rh=h.relative_humidity_2m?.[i]??100;
+    const temp=h.temperature_2m?.[i]??0;
+    const wind=h.wind_speed_10m?.[i]??0;
+    const goodDrying=isDay&&precip<0.1&&rh<65&&temp>=12;
+    if(goodDrying){
+      if(!currentWin)currentWin={start:h.time[i],end:h.time[i],hours:1,minRh:rh,maxTemp:temp,avgWind:wind};
+      else{currentWin.end=h.time[i];currentWin.hours++;currentWin.minRh=Math.min(currentWin.minRh,rh);currentWin.maxTemp=Math.max(currentWin.maxTemp,temp);currentWin.avgWind=(currentWin.avgWind*(currentWin.hours-1)+wind)/currentWin.hours;}
+    }else{
+      if(currentWin&&currentWin.hours>=4)windows.push(currentWin);
+      currentWin=null;
+    }
+  }
+  if(currentWin&&currentWin.hours>=4)windows.push(currentWin);
+  if(!windows.length){
+    body.innerHTML='<div style="padding:.6rem;background:rgba(248,113,113,.07);border-radius:8px;font-size:.8rem;color:var(--muted)">⛅ V naslednjih 5 dneh ni ugodnih oken za sušenje sena (vlaga, dež ali mraz).</div>';
+    return;
+  }
+  body.innerHTML=windows.slice(0,4).map(w=>{
+    const s=new Date(w.start),e=new Date(w.end);
+    const sdl=s.toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'short'});
+    const stl=s.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    const etl=e.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    const quality=w.hours>=8&&w.minRh<55?'Odlično':w.hours>=6&&w.minRh<60?'Dobro':'Zadostno';
+    const qualityCol=quality==='Odlično'?'var(--green)':quality==='Dobro'?'var(--amber)':'var(--muted)';
+    return '<div class="hay-window">'
+      +'<div style="font-size:1.5rem">🌾</div>'
+      +'<div class="hay-window-info">'
+      +'<div class="hay-window-dates">'+sdl+' '+stl+'–'+etl+'</div>'
+      +'<div class="hay-window-details">'+w.hours+'h sušenja · vlaga min '+Math.round(w.minRh)+'% · T max '+Math.round(w.maxTemp)+'°C · veter ~'+w.avgWind.toFixed(1)+' m/s</div>'
+      +'</div>'
+      +'<div class="hay-window-badge" style="color:'+qualityCol+';border-color:'+qualityCol+'">'+quality+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function _buildAgroWaterBalance(d){
+  const body=document.getElementById('agro-wbal-body');
+  if(!body)return;
+  const store=_insStore();
+  const now=new Date();
+  const rows=[];
+  // Last 14 days from localStorage
+  for(let i=13;i>=0;i--){
+    const dt=new Date(now);dt.setDate(dt.getDate()-i);
+    const k=dt.toISOString().slice(0,10);
+    const v=store[k];
+    rows.push({date:k,rain:v?.precipTotal??null,et0:null,isHist:true});
+  }
+  // Next 7 days from forecast daily
+  const fd=d.daily;
+  if(fd?.time){
+    for(let i=1;i<Math.min(fd.time.length,8);i++){
+      const k=fd.time[i];
+      if(rows.some(r=>r.date===k))continue;
+      rows.push({date:k,rain:fd.precipitation_sum?.[i]??null,et0:fd.et0_fao_evapotranspiration?.[i]??null,isHist:false});
+    }
+  }
+  const maxRain=Math.max(1,...rows.map(r=>r.rain??0));
+  const maxET=Math.max(1,...rows.map(r=>r.et0??0));
+  const maxBar=Math.max(maxRain,maxET);
+  let html='<div style="display:flex;align-items:flex-end;gap:2px;height:65px;margin-bottom:.25rem">';
+  for(const r of rows){
+    const rainH=r.rain!=null?Math.round((r.rain/maxBar)*60):0;
+    const et0H=r.et0!=null?Math.round((r.et0/maxBar)*60):0;
+    const bal=(r.rain??0)-(r.et0??0);
+    const col=r.rain==null?'var(--border)':bal>=0?'rgba(56,189,248,.6)':'rgba(248,113,113,.5)';
+    html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0">';
+    if(r.et0!=null)html+='<div style="width:100%;height:'+et0H+'px;background:rgba(251,191,36,.35);border-radius:2px 2px 0 0" title="ET₀ '+r.et0?.toFixed(1)+' mm"></div>';
+    html+='<div style="width:100%;height:'+rainH+'px;background:'+col+';border-radius:'+(r.et0!=null?'0':'2px 2px')+'2px 2px" title="padavine '+(r.rain?.toFixed(1)??'—')+' mm"></div>';
+    html+='</div>';
+  }
+  html+='</div>';
+  // date labels (every ~4)
+  html+='<div style="display:flex;gap:2px;margin-bottom:.35rem">';
+  for(let i=0;i<rows.length;i++){
+    const lbl=i%4===0?new Date(rows[i].date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'numeric'}):'';
+    html+='<div style="flex:1;font-size:.52rem;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden">'+lbl+'</div>';
+  }
+  html+='</div>';
+  // Cumulative balance
+  const histRows=rows.filter(r=>r.isHist&&r.rain!=null);
+  const totalRain=histRows.reduce((s,r)=>s+(r.rain||0),0);
+  const histEt0rows=rows.filter(r=>!r.isHist&&r.et0!=null);
+  html+='<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">'
+    +'<span style="color:rgba(56,189,248,.9)">■</span> Padavine'
+    +'&nbsp;&nbsp;<span style="background:rgba(251,191,36,.35);padding:0 3px">■</span> ET₀ (napoved)'
+    +'&nbsp;&nbsp;Skupaj 14d: <strong style="color:var(--text)">'+Math.round(totalRain)+' mm</strong>'
+    +'</div>';
+  body.innerHTML=html;
 }
 
 // ── Climate comparison ────────────────────────────────────
