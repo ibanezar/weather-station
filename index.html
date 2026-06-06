@@ -1013,16 +1013,17 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .fly-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
 .fly-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.06rem}
 .fly-window-wrap{position:relative;margin-top:.7rem}
-.fly-slots{display:grid;gap:2px}
-.fly-slot{border-radius:4px;min-height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.6rem;font-weight:600;color:rgba(0,0,0,.7);padding:.15rem .1rem;transition:opacity .2s}
+.fly-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.fly-slots{display:flex;gap:4px;min-width:max-content}
+.fly-slot{width:54px;flex-shrink:0;border-radius:6px;height:72px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:.35rem .2rem;transition:opacity .2s}
 .fly-go{background:rgba(74,222,128,.65)}
 .fly-maybe{background:rgba(251,191,36,.6)}
-.fly-no{background:rgba(248,113,113,.35);color:var(--muted)}
-.fly-night{background:rgba(100,116,139,.1);color:var(--muted)}
-.fly-slot-time{font-size:.58rem;opacity:.75;margin-bottom:.1rem}
-.fly-slot-bl{font-size:.62rem;font-weight:700}
-.fly-lbl-row{display:flex;gap:2px;margin-top:.25rem}
-.fly-lbl{flex:1;text-align:center;font-size:.58rem;color:var(--muted)}
+.fly-no{background:rgba(248,113,113,.35)}
+.fly-night{background:rgba(100,116,139,.1)}
+.fly-slot-time{font-size:.68rem;font-weight:600;color:rgba(0,0,0,.6);line-height:1}
+.fly-slot-bl{font-size:.75rem;font-weight:800;color:rgba(0,0,0,.75);line-height:1;text-align:center}
+.fly-slot-wind{font-size:.62rem;color:rgba(0,0,0,.55);line-height:1}
+.fly-night .fly-slot-time,.fly-night .fly-slot-bl,.fly-night .fly-slot-wind{color:var(--muted)}
 .fly-daily-row{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-top:.65rem}
 .fly-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.45rem .3rem;text-align:center}
 .fly-day-name{font-size:.62rem;color:var(--muted);margin-bottom:.2rem}
@@ -15883,24 +15884,22 @@ function _buildPadalciFlyWindow(d){
     slots.push({hr,score,bl:Math.round(bl),wind:Math.round(wind),precip});
   });
   if(!slots.length){el.innerHTML='<div style="color:var(--muted)">Ni podatkov za danes</div>';return;}
-  const cols=slots.length;
-  let html=`<div class="fly-slots" style="grid-template-columns:repeat(${cols},1fr)">`;
+  let slotsHtml='';
   slots.forEach(s=>{
-    const {cls,txt,col}=_flyLabel(s.score);
-    const blTxt=s.bl>0?s.bl+'m':'';
-    html+=`<div class="fly-slot ${cls}"${col?` style="color:${col}"`:''}>
+    const {cls,txt}=_flyLabel(s.score);
+    const midTxt=s.score<0?'—':s.score>=40&&s.bl>0?s.bl+'m':txt;
+    const windTxt=s.score>=0?'💨'+s.wind:'';
+    slotsHtml+=`<div class="fly-slot ${cls}">
       <div class="fly-slot-time">${s.hr}h</div>
-      <div class="fly-slot-bl">${txt==='FLY'||txt==='MAY'?blTxt:txt}</div>
+      <div class="fly-slot-bl">${midTxt}</div>
+      <div class="fly-slot-wind">${windTxt}</div>
     </div>`;
   });
-  html+='</div>';
-  // Legend row
-  html+=`<div class="fly-lbl-row">`+slots.map(s=>`<div class="fly-lbl">${s.wind}km/h</div>`).join('')+'</div>';
-  // Score legend
-  html+=`<div style="display:flex;gap:1rem;margin-top:.5rem;font-size:.65rem">
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(74,222,128,.65);margin-right:3px"></span>FLY ≥70</span>
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(251,191,36,.6);margin-right:3px"></span>Meja 40–69</span>
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(248,113,113,.35);margin-right:3px"></span>Ne leti &lt;40</span>
+  const html=`<div class="fly-scroll"><div class="fly-slots">${slotsHtml}</div></div>
+  <div style="display:flex;gap:1rem;margin-top:.6rem;font-size:.65rem;flex-wrap:wrap">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(74,222,128,.65);margin-right:3px;vertical-align:middle"></span>FLY ≥70 · BL višina</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(251,191,36,.6);margin-right:3px;vertical-align:middle"></span>Meja 40–69</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(248,113,113,.35);margin-right:3px;vertical-align:middle"></span>Ne leti &lt;40</span>
   </div>`;
   el.innerHTML=html;
 }
