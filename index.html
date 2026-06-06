@@ -1262,16 +1262,46 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .ai-brief-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 14px;font-size:.7rem;cursor:pointer;font-family:'Inter',sans-serif;color:var(--muted);transition:all .2s}
 .ai-brief-btn:hover{border-color:var(--blue);color:var(--blue)}
 
-/* Fotodnevnik */
-.fd-upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;color:var(--muted);font-size:.8rem;transition:border-color .2s}
-.fd-upload-zone:hover{border-color:var(--blue);color:var(--blue)}
-.fd-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;margin-top:1rem}
-.fd-entry{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
-.fd-entry:hover{box-shadow:var(--card-shadow-h)}
-.fd-thumb{width:100%;height:130px;object-fit:cover;display:block}
-.fd-thumb-placeholder{width:100%;height:130px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:2rem}
-.fd-meta{padding:.6rem .75rem;font-size:.74rem;color:var(--muted);line-height:1.6}
-.fd-temp{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);font-weight:300}
+/* Fotodnevnik — iNaturalist stil */
+.obs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem}
+.obs-stats{display:flex;gap:.5rem;flex-wrap:wrap}
+.obs-stat{display:flex;flex-direction:column;align-items:center;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.35rem .85rem;min-width:52px}
+.obs-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:300;color:var(--text)}
+.obs-stat-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.obs-add-btn{background:var(--blue);color:#fff;border:none;border-radius:20px;padding:.45rem 1.2rem;font-size:.75rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;transition:filter .15s}
+.obs-add-btn:hover{filter:brightness(1.15)}
+.obs-filter-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.obs-filter-btn{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;cursor:pointer;color:var(--muted);white-space:nowrap;transition:all .15s;font-family:'Inter',sans-serif}
+.obs-filter-btn.active,.obs-filter-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.obs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.85rem}
+.obs-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:16px;overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .2s}
+.obs-card:hover{box-shadow:var(--card-shadow-h);transform:translateY(-2px)}
+.obs-photo-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--border)}
+.obs-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.obs-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.obs-quality{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border-radius:20px;padding:2px 8px;font-size:.6rem;display:flex;align-items:center;gap:.25rem;white-space:nowrap}
+.obs-cat-chip{position:absolute;bottom:.5rem;left:.5rem;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border-radius:20px;padding:3px 9px;font-size:.68rem;color:#fff;white-space:nowrap}
+.obs-card-body{padding:.65rem .8rem .75rem}
+.obs-card-subject{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.obs-card-date{font-size:.69rem;color:var(--muted);margin-bottom:.35rem}
+.obs-card-chips{display:flex;gap:.3rem;flex-wrap:wrap}
+.obs-chip{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:2px 7px;font-size:.63rem;color:var(--muted);white-space:nowrap}
+/* Kategorijski picker modal */
+.obs-cat-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem}
+.obs-cat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;width:min(440px,96vw);padding:1.5rem;max-height:88vh;overflow-y:auto}
+.obs-cat-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:1rem}
+.obs-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:1rem}
+.obs-cat-opt{background:var(--fc-bg);border:2px solid var(--fc-border);border-radius:12px;padding:.6rem .3rem;text-align:center;cursor:pointer;transition:all .15s;font-size:.72rem;color:var(--muted);font-family:'Inter',sans-serif}
+.obs-cat-opt:hover{border-color:var(--blue);color:var(--text)}
+.obs-cat-opt.selected{border-color:var(--blue);background:rgba(59,130,246,.12);color:var(--blue)}
+.obs-cat-emoji{font-size:1.35rem;display:block;margin-bottom:.2rem}
+.obs-subject-input{width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Inter',sans-serif;box-sizing:border-box}
+.obs-subject-input::placeholder{color:var(--muted)}
+.obs-subject-input:focus{outline:none;border-color:var(--blue)}
+.obs-modal-btn-row{display:flex;gap:.5rem;margin-top:1rem;justify-content:flex-end}
+.obs-btn-primary{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:.5rem 1.2rem;font-size:.77rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
+.obs-btn-secondary{background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.5rem 1rem;font-size:.77rem;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif}
+@media(max-width:520px){.obs-grid{grid-template-columns:repeat(2,1fr)}.obs-cat-grid{grid-template-columns:repeat(3,1fr)}}
 .fd-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem}
 .fd-modal-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;width:min(560px,96vw);max-height:88vh;overflow-y:auto;padding:1.5rem}
 .fd-modal-img{width:100%;max-height:280px;object-fit:contain;border-radius:12px;background:var(--fc-bg);display:block}
@@ -3326,34 +3356,57 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
   <div id="tab-diary" class="tab-pane">
-    <div class="chart-hdr" style="margin-bottom:1.25rem">
-      <span class="clabel" style="margin:0">📸 Fotodnevnik z vremenskimi podatki</span>
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <span id="fd-storage-lbl" style="font-size:.68rem;color:var(--muted)"></span>
-        <button class="ai-brief-btn" onclick="document.getElementById('fd-file-input').click()">+ Dodaj fotografijo</button>
+    <!-- Header: stats + add button -->
+    <div class="obs-header">
+      <div class="obs-stats" id="obs-stats"></div>
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <span id="fd-storage-lbl" style="font-size:.66rem;color:var(--muted)"></span>
+        <button class="obs-add-btn" onclick="document.getElementById('fd-file-input').click()">+ Dodaj opazovanje</button>
       </div>
     </div>
     <input type="file" id="fd-file-input" accept="image/*" style="display:none" onchange="fdAddEntry(this)">
+    <!-- Category filters (populated by JS) -->
+    <div class="obs-filter-row" id="obs-filter-row"></div>
+    <!-- Empty state -->
     <div id="fd-empty" style="color:var(--muted);font-size:.85rem;text-align:center;padding:3rem 0;display:none">
-      📷 Nimate še nobene fotografije v dnevniku.<br>
-      <span style="font-size:.75rem">Kliknite "+ Dodaj fotografijo" da začnete.</span>
+      📷 Nimate še opazovanj.<br>
+      <span style="font-size:.75rem">Kliknite "+ Dodaj opazovanje" da začnete.</span>
     </div>
-    <div class="fd-gallery" id="fd-gallery"></div>
-    <!-- Entry modal -->
+    <!-- Observation grid -->
+    <div class="obs-grid" id="fd-gallery"></div>
+
+    <!-- Category picker modal (shown after photo selected) -->
+    <div class="obs-cat-modal" id="obs-cat-modal" style="display:none" onclick="if(event.target===this)fdCancelCat()">
+      <div class="obs-cat-card">
+        <div class="obs-cat-title">Kaj si opazoval/a?</div>
+        <div class="obs-cat-grid" id="obs-cat-grid"></div>
+        <input type="text" id="obs-subject-input" class="obs-subject-input"
+          placeholder="Kratek opis (npr. 'Dvojna mavrica nad Savinjo')">
+        <div class="obs-modal-btn-row">
+          <button class="obs-btn-secondary" onclick="fdCancelCat()">Prekliči</button>
+          <button class="obs-btn-primary" onclick="fdConfirmCat()">Shrani opazovanje</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
     <div class="fd-modal" id="fd-modal" style="display:none" onclick="if(event.target===this)fdCloseModal()">
       <div class="fd-modal-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
           <div style="font-size:.95rem;font-weight:600" id="fd-modal-title">—</div>
           <button onclick="fdCloseModal()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
         </div>
         <img id="fd-modal-img" class="fd-modal-img" alt="">
         <div class="fd-badge-row" id="fd-modal-badges"></div>
-        <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin:.5rem 0" id="fd-modal-desc"></div>
-        <textarea id="fd-modal-notes" placeholder="Opombe (lokacija, subjekt, nastavitve fotoaparata…)"
-          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:60px;margin-top:.5rem"></textarea>
-        <div style="display:flex;justify-content:space-between;margin-top:1rem">
-          <button onclick="fdDeleteEntry()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:.5rem 1rem;font-size:.75rem;cursor:pointer;color:var(--red)">🗑 Izbriši</button>
-          <button onclick="fdSaveNotes()" class="period-btn active" style="font-size:.75rem">Shrani opombe</button>
+        <!-- Subject + category edit -->
+        <input type="text" id="fd-modal-subject" placeholder="Opis opazovanja…"
+          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.6rem;font-size:.78rem;color:var(--text);font-family:'Inter',sans-serif;box-sizing:border-box;margin-bottom:.5rem">
+        <div class="obs-cat-grid" id="fd-modal-cat-grid" style="margin-bottom:.5rem"></div>
+        <textarea id="fd-modal-notes" placeholder="Opombe (lokacija, nastavitve fotoaparata…)"
+          style="width:100%;background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.65rem;font-size:.78rem;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:55px;box-sizing:border-box"></textarea>
+        <div style="display:flex;justify-content:space-between;margin-top:.85rem">
+          <button onclick="fdDeleteEntry()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:.45rem .9rem;font-size:.74rem;cursor:pointer;color:var(--red)">🗑 Izbriši</button>
+          <button onclick="fdSaveNotes()" class="obs-btn-primary" style="font-size:.74rem">Shrani</button>
         </div>
       </div>
     </div>
@@ -9976,7 +10029,27 @@ function generateRuleBasedBrief(p){
 // ── Fotodnevnik ────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
 const FD_KEY='fd-diary-v1';
-let _fdCurrent=null;
+let _fdCurrent=null,_pendingEntry=null,_fdFilter='all';
+
+const OBS_CATEGORIES=[
+  {id:'storm',   emoji:'⛈️', label:'Nevihta'},
+  {id:'fog',     emoji:'🌫️', label:'Megla'},
+  {id:'snow',    emoji:'❄️', label:'Sneg'},
+  {id:'rainbow', emoji:'🌈', label:'Mavrica'},
+  {id:'frost',   emoji:'🧊', label:'Slana'},
+  {id:'flood',   emoji:'🌊', label:'Poplava'},
+  {id:'flora',   emoji:'🌸', label:'Flora'},
+  {id:'fauna',   emoji:'🦋', label:'Favna'},
+  {id:'golden',  emoji:'🌅', label:'Zlata ura'},
+  {id:'landscape',emoji:'⛰️',label:'Pokrajina'},
+  {id:'other',   emoji:'📌', label:'Drugo'},
+];
+function fdCatById(id){return OBS_CATEGORIES.find(c=>c.id===id)||{emoji:'📌',label:'Opazovanje'};}
+function fdQuality(e){
+  if(e.notes&&e.notes.trim()&&e.category&&e.subject&&e.subject.trim())return{label:'Preverjeno',col:'var(--green)',icon:'✅'};
+  if(e.category||e.subject)return{label:'Potrebuje opis',col:'var(--amber)',icon:'🔍'};
+  return{label:'Priložnostno',col:'var(--muted)',icon:'📌'};
+}
 
 function fdLoadDiary(){
   try{return JSON.parse(localStorage.getItem(FD_KEY)||'[]');}catch(_){return[];}
@@ -9991,8 +10064,8 @@ function fdCompress(dataUrl,cb){const img=new Image();img.onload=()=>{const MAX=
 function fdAddEntry(input){
   const file=input.files?.[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{
-    fdCompress(e.target.result,compressed=>{
+  reader.onload=ev=>{
+    fdCompress(ev.target.result,compressed=>{
       const obs=_lastBriefObs||{};const m=obs?.metric||{};
       const moon=calcMoon();const pt=calcPhotoTimes()||{};
       const gddEl=document.getElementById('pheno-gdd-total');
@@ -10004,32 +10077,112 @@ function fdAddEntry(input){
       else if(pt.blueAMh&&pt.sunriseH&&nowH>=pt.blueAMh&&nowH<pt.sunriseH)photoPhase='💙 Modra ura ↑';
       else if(pt.sunsetH&&pt.bluePMh&&nowH>pt.sunsetH&&nowH<=pt.bluePMh)photoPhase='💙 Modra ura ↓';
       else if(nowH<(pt.nautAMh||5)||nowH>(pt.nautPMh||22))photoPhase='🌙 Noč';
-      const entry={id:Date.now(),date:now.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'}),dateISO:now.toISOString().slice(0,10),time:now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}),imgData:compressed,weather:{temp:(m.temp??'—'),hum:(obs.humidity??'—'),wind:(m.windSpeed??'—'),rain:(m.precipRate??0),cond:document.getElementById('cond-label')?.textContent||'—'},gdd,moon:{phase:moon.phase,emoji:moon.emoji,illum:moon.illum},photoPhase,notes:''};
-      const entries=fdLoadDiary();entries.unshift(entry);
-      if(entries.length>100)entries.splice(100);
-      fdSaveDiary(entries);fdRenderGallery();
+      _pendingEntry={id:Date.now(),date:now.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'}),
+        dateISO:now.toISOString().slice(0,10),time:now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}),
+        imgData:compressed,weather:{temp:(m.temp??'—'),hum:(obs.humidity??'—'),wind:(m.windSpeed??'—'),
+        rain:(m.precipRate??0),cond:document.getElementById('cond-label')?.textContent||'—'},
+        gdd,moon:{phase:moon.phase,emoji:moon.emoji,illum:moon.illum},photoPhase,
+        category:'',subject:'',notes:''};
+      fdShowCatPicker();
     });
   };
   reader.readAsDataURL(file);input.value='';
+}
+
+function fdShowCatPicker(){
+  const grid=document.getElementById('obs-cat-grid');
+  if(grid)grid.innerHTML=OBS_CATEGORIES.map(c=>`<div class="obs-cat-opt" data-cat="${c.id}" onclick="fdSelectCat(this,'${c.id}')"><span class="obs-cat-emoji">${c.emoji}</span>${c.label}</div>`).join('');
+  document.getElementById('obs-subject-input').value='';
+  document.getElementById('obs-cat-modal').style.display='flex';
+}
+function fdSelectCat(el,id){
+  document.querySelectorAll('#obs-cat-grid .obs-cat-opt').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function fdCancelCat(){_pendingEntry=null;document.getElementById('obs-cat-modal').style.display='none';}
+function fdConfirmCat(){
+  if(!_pendingEntry)return;
+  const sel=document.querySelector('#obs-cat-grid .obs-cat-opt.selected');
+  _pendingEntry.category=sel?.dataset.cat||'';
+  _pendingEntry.subject=document.getElementById('obs-subject-input').value.trim();
+  const entries=fdLoadDiary();entries.unshift(_pendingEntry);
+  if(entries.length>100)entries.splice(100);
+  fdSaveDiary(entries);fdRenderGallery();
+  document.getElementById('obs-cat-modal').style.display='none';
+  _pendingEntry=null;
+}
+
+function fdFilter(cat,btn){
+  _fdFilter=cat;
+  document.querySelectorAll('.obs-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  fdRenderGallery();
 }
 
 function fdRenderGallery(){
   const gallery=document.getElementById('fd-gallery');
   const empty=document.getElementById('fd-empty');
   if(!gallery)return;
-  const entries=fdLoadDiary();
+  const all=fdLoadDiary();
+
+  // Stats bar
+  const statsEl=document.getElementById('obs-stats');
+  if(statsEl){
+    const thisMonth=new Date().toISOString().slice(0,7);
+    const mCount=all.filter(e=>e.dateISO&&e.dateISO.startsWith(thisMonth)).length;
+    const cats=new Set(all.map(e=>e.category).filter(Boolean)).size;
+    statsEl.innerHTML=
+      `<div class="obs-stat"><span class="obs-stat-val">${all.length}</span><span class="obs-stat-lbl">opazovanj</span></div>`+
+      `<div class="obs-stat"><span class="obs-stat-val">${mCount}</span><span class="obs-stat-lbl">ta mesec</span></div>`+
+      `<div class="obs-stat"><span class="obs-stat-val">${cats||'—'}</span><span class="obs-stat-lbl">kategorij</span></div>`;
+  }
+
+  // Storage label
   const storLbl=document.getElementById('fd-storage-lbl');
-  if(storLbl){const kb=Math.round(JSON.stringify(entries).length/1024);const pct=Math.min(100,Math.round(kb/5120*100));storLbl.textContent=`${entries.length} foto · ${kb<1024?kb+'KB':(kb/1024).toFixed(1)+'MB'} / ~5MB`;storLbl.style.color=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--muted)';}
-  if(!entries.length){gallery.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(storLbl){const kb=Math.round(JSON.stringify(all).length/1024);const pct=Math.min(100,Math.round(kb/5120*100));storLbl.textContent=`${kb<1024?kb+' KB':(kb/1024).toFixed(1)+' MB'} / ~5 MB`;storLbl.style.color=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--muted)';}
+
+  // Filter row
+  const filterRow=document.getElementById('obs-filter-row');
+  if(filterRow){
+    const used=OBS_CATEGORIES.filter(c=>all.some(e=>e.category===c.id));
+    filterRow.innerHTML=`<button class="obs-filter-btn${_fdFilter==='all'?' active':''}" onclick="fdFilter('all',this)">Vsa</button>`+
+      used.map(c=>`<button class="obs-filter-btn${_fdFilter===c.id?' active':''}" onclick="fdFilter('${c.id}',this)">${c.emoji} ${c.label}</button>`).join('');
+  }
+
+  if(!all.length){gallery.innerHTML='';if(empty)empty.style.display='block';return;}
   if(empty)empty.style.display='none';
+
+  const entries=_fdFilter==='all'?all:all.filter(e=>e.category===_fdFilter);
+
   gallery.style.transition='opacity .15s';gallery.style.opacity='0';
   requestAnimationFrame(()=>{
     gallery.innerHTML='';
-    entries.forEach(e=>{
-      const card=document.createElement('div');card.className='fd-entry';card.onclick=()=>fdOpenModal(e.id);
-      card.innerHTML=`<img class="fd-thumb" src="${e.imgData}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div class="fd-thumb-placeholder" style="display:none">📷</div><div class="fd-meta"><div class="fd-temp">${e.weather?.temp??'—'}°C <span style="opacity:.5;font-size:.75em">${e.photoPhase||''}</span></div><div>${e.date} · ${e.time}</div><div>${e.moon?.emoji||''} ${e.moon?.phase||''} · GDD ${e.gdd||0}</div></div>`;
-      gallery.appendChild(card);
-    });
+    if(!entries.length){
+      gallery.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:1.5rem 0">Ni opazovanj za ta filter.</div>';
+    } else {
+      entries.forEach(e=>{
+        const cat=fdCatById(e.category);
+        const q=fdQuality(e);
+        const subject=e.subject||(e.category?cat.label:'Opazovanje');
+        const card=document.createElement('div');card.className='obs-card';card.onclick=()=>fdOpenModal(e.id);
+        card.innerHTML=
+          `<div class="obs-photo-wrap">`+
+          `<img src="${e.imgData}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">`+
+          `<div class="obs-photo-placeholder" style="display:none">📷</div>`+
+          `<div class="obs-quality" style="color:${q.col}">${q.icon} ${q.label}</div>`+
+          (e.category?`<div class="obs-cat-chip">${cat.emoji} ${cat.label}</div>`:'')+
+          `</div>`+
+          `<div class="obs-card-body">`+
+          `<div class="obs-card-subject">${subject}</div>`+
+          `<div class="obs-card-date">📅 ${e.date} · ${e.time}</div>`+
+          `<div class="obs-card-chips">`+
+          (e.weather?.temp!=null&&e.weather.temp!=='—'?`<span class="obs-chip">🌡 ${e.weather.temp}°C</span>`:'')+
+          (e.weather?.hum!=null&&e.weather.hum!=='—'?`<span class="obs-chip">💧 ${e.weather.hum}%</span>`:'')+
+          (e.photoPhase?`<span class="obs-chip">${e.photoPhase}</span>`:'')+
+          `</div></div>`;
+        gallery.appendChild(card);
+      });
+    }
     requestAnimationFrame(()=>{gallery.style.opacity='1';});
   });
 }
@@ -10042,26 +10195,43 @@ function fdOpenModal(id){
   document.getElementById('fd-modal-img').src=e.imgData;
   document.getElementById('fd-modal-title').textContent=e.date+' · '+e.time;
   document.getElementById('fd-modal-notes').value=e.notes||'';
+  document.getElementById('fd-modal-subject').value=e.subject||'';
+  // Category selector in modal
+  const catGrid=document.getElementById('fd-modal-cat-grid');
+  if(catGrid)catGrid.innerHTML=OBS_CATEGORIES.map(c=>`<div class="obs-cat-opt${e.category===c.id?' selected':''}" data-cat="${c.id}" onclick="fdModalSelectCat(this,'${c.id}')"><span class="obs-cat-emoji">${c.emoji}</span>${c.label}</div>`).join('');
   const badges=document.getElementById('fd-modal-badges');
+  const q=fdQuality(e);
   if(badges)badges.innerHTML=[
-    e.photoPhase,`🌡 ${e.weather?.temp??'—'}°C`,`💧 ${e.weather?.hum??'—'}%`,
-    `💨 ${e.weather?.wind??'—'} km/h`,e.moon?.emoji+' '+e.moon?.phase,`🌱 GDD ${e.gdd||0}`,
-    e.weather?.cond,
+    `<span style="color:${q.col}">${q.icon} ${q.label}</span>`,
+    e.photoPhase,
+    e.weather?.temp!=='—'?`🌡 ${e.weather?.temp}°C`:null,
+    e.weather?.hum!=='—'?`💧 ${e.weather?.hum}%`:null,
+    e.weather?.wind!=='—'?`💨 ${e.weather?.wind} km/h`:null,
+    e.moon?.emoji&&e.moon?.phase?e.moon.emoji+' '+e.moon.phase:null,
+    e.gdd?`🌱 GDD ${e.gdd}`:null,
   ].filter(Boolean).map(b=>`<span class="fd-badge">${b}</span>`).join('');
-  const desc=document.getElementById('fd-modal-desc');
-  if(desc)desc.textContent=`Pogoji ob fotografiranju: ${e.weather?.cond||'—'} pri ${e.weather?.temp||'—'}°C s ${e.weather?.hum||'—'}% vlago. Fenofaza: ${e.gdd||0} GDD.`;
   m.style.display='flex';
+}
+function fdModalSelectCat(el,id){
+  document.querySelectorAll('#fd-modal-cat-grid .obs-cat-opt').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
 }
 function fdCloseModal(){const m=document.getElementById('fd-modal');if(m)m.style.display='none';_fdCurrent=null;}
 function fdSaveNotes(){
   if(!_fdCurrent)return;
   const entries=fdLoadDiary();const idx=entries.findIndex(x=>x.id===_fdCurrent);
-  if(idx>=0){entries[idx].notes=document.getElementById('fd-modal-notes').value;fdSaveDiary(entries);fdRenderGallery();}
+  if(idx>=0){
+    entries[idx].notes=document.getElementById('fd-modal-notes').value;
+    entries[idx].subject=document.getElementById('fd-modal-subject').value.trim();
+    const sel=document.querySelector('#fd-modal-cat-grid .obs-cat-opt.selected');
+    if(sel)entries[idx].category=sel.dataset.cat;
+    fdSaveDiary(entries);fdRenderGallery();
+  }
   fdCloseModal();
 }
 function fdDeleteEntry(){
   if(!_fdCurrent)return;
-  if(!confirm('Izbriši fotografijo iz dnevnika?'))return;
+  if(!confirm('Izbriši opazovanje iz dnevnika?'))return;
   const entries=fdLoadDiary().filter(x=>x.id!==_fdCurrent);
   fdSaveDiary(entries);fdRenderGallery();fdCloseModal();
 }
