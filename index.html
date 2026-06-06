@@ -974,6 +974,38 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .nerd-embed-wrap iframe{display:block;width:100%;border:0}
 @media(max-width:520px){.nerd-snd-wrap{grid-template-columns:1fr}.nerd-links-grid{grid-template-columns:1fr 1fr}}
 /* ── end Meteo Nerd ──────────────────────────────────────── */
+/* ── Morje & Gore ───────────────────────────────────────── */
+.sea-kpi-row,.mtn-kpi-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.sea-kpi,.mtn-kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.55rem .75rem;min-width:88px;flex:1}
+.sea-kpi-val,.mtn-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text)}
+.sea-kpi-lbl,.mtn-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
+.sea-kpi-sub,.mtn-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.06rem}
+.sea-fc-row{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-top:.65rem}
+.sea-fc-day,.mtn-fc-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.45rem .35rem;text-align:center}
+.sea-fc-name,.mtn-fc-name{font-size:.62rem;color:var(--muted);margin-bottom:.2rem}
+.sea-fc-icon,.mtn-fc-icon{font-size:1.2rem;margin:.1rem 0}
+.sea-fc-t,.mtn-fc-t{font-size:.7rem;font-weight:600}
+.sea-fc-sub,.mtn-fc-sub{font-size:.6rem;color:var(--muted);margin-top:.15rem;line-height:1.3}
+.sea-state-bar{height:6px;border-radius:3px;margin:.3rem 0;background:var(--rain-track)}
+.sea-state-fill{height:100%;border-radius:3px;background:var(--cyan);transition:width .5s}
+.mtn-fc-row{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-top:.65rem}
+.mtn-freeze-chart{position:relative;height:110px;margin:.65rem 0 .2rem}
+.mtn-freeze-svg{width:100%;height:100%;display:block}
+.mtn-freeze-legend{display:flex;flex-wrap:wrap;gap:.5rem;font-size:.63rem;color:var(--muted);margin-top:.25rem}
+.mtn-freeze-legend span{display:flex;align-items:center;gap:.25rem}
+.sea-wind-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:.6rem}
+.sea-wind-table th{text-align:left;color:var(--muted);font-weight:500;padding:.25rem .3rem;border-bottom:1px solid var(--border);font-size:.65rem}
+.sea-wind-table td{padding:.3rem .3rem;border-bottom:1px solid var(--border)}
+.sea-wind-type{display:inline-block;padding:.1rem .45rem;border-radius:4px;font-size:.65rem;font-weight:600}
+.sea-bora{background:rgba(96,165,250,.15);color:var(--blue)}
+.sea-jugo{background:rgba(251,146,60,.15);color:var(--amber)}
+.sea-ostalo{background:var(--badge-bg);color:var(--muted)}
+.mtn-summit-info{font-size:.75rem;color:var(--muted);margin-top:.4rem;line-height:1.7}
+.mtn-summit-info b{color:var(--text)}
+.mtn-avk-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:.5rem;padding:.35rem .7rem;border-radius:7px;border:1px solid var(--border);background:var(--fc-bg);font-size:.72rem;font-weight:600;text-decoration:none;color:var(--text);transition:all .18s}
+.mtn-avk-link:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:520px){.sea-fc-row,.mtn-fc-row{grid-template-columns:repeat(4,1fr)}}
+/* ── end Morje & Gore ────────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -1691,7 +1723,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-current"    onclick="switchTab('current')">🌡 Zdaj</button>
-    <button class="tab-btn"        id="tab-btn-forecast2"  onclick="switchTab('forecast2')">🔮 Napoved</button>
+    <!-- Napoved dropdown -->
+    <div class="tab-dropdown" id="tab-dd-fc">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-fc-btn" onclick="toggleTabDD('fc')">🔮 Napoved ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-fc-menu">
+        <div class="tab-dd-group-lbl">Napoved</div>
+        <button id="tab-btn-forecast2" onclick="switchTab('forecast2');closeTabDDs()">🔮 Lokalna napoved</button>
+        <button id="tab-btn-morje"     onclick="switchTab('morje');closeTabDDs()">🌊 Morje</button>
+        <button id="tab-btn-gore"      onclick="switchTab('gore');closeTabDDs()">⛰ Gore</button>
+      </div>
+    </div>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
@@ -3533,6 +3574,67 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="nt-grid3" id="fc2-daily-grid" style="margin-top:1rem"></div>
   </div>
 
+  <!-- ═══ MORJE TAB ═══ -->
+  <div id="tab-morje" class="tab-pane">
+    <div class="sea-kpi-row" id="sea-kpis">
+      <div class="sea-kpi"><div class="sea-kpi-val">…</div><div class="sea-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌊 Stanje morja — Portorož / Piran</div>
+      <div id="sea-marine-body" style="font-size:.78rem;color:var(--muted);margin-top:.5rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔮 7-dnevna napoved — Slovensko primorje</div>
+      <div id="sea-fc-body" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">💨 Veter — Bora / Jugo analiza</div>
+      <div id="sea-wind-body" style="font-size:.78rem;color:var(--muted);margin-top:.5rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔗 Jadransko morje — viri</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 ARSO — pomorska napoved</a>
+        <a href="https://www.windy.com/?waves,45.5,13.6,8" target="_blank" rel="noopener" class="mtn-avk-link">🌊 Windy — valovanje</a>
+        <a href="https://www.meteologix.com/si/model-charts/00z/europe/wind-10m.html" target="_blank" rel="noopener" class="mtn-avk-link">💨 Meteologix — veter</a>
+        <a href="https://www.navionics.com/weatherzone" target="_blank" rel="noopener" class="mtn-avk-link">⚓ Navionics</a>
+        <a href="https://hr.prometeo.si/" target="_blank" rel="noopener" class="mtn-avk-link">🚢 Prometeo SI</a>
+      </div>
+    </div>
+  </div><!-- /tab-morje -->
+
+  <!-- ═══ GORE TAB ═══ -->
+  <div id="tab-gore" class="tab-pane">
+    <div class="mtn-kpi-row" id="mtn-kpis">
+      <div class="mtn-kpi"><div class="mtn-kpi-val">…</div><div class="mtn-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">❄️ Meja zmrzali — 7 dni</div>
+      <div class="mtn-freeze-chart" id="mtn-freeze-chart">
+        <div style="font-size:.75rem;color:var(--muted);padding-top:1rem">Nalagam…</div>
+      </div>
+      <div class="mtn-freeze-legend" id="mtn-freeze-legend"></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">⛰ Triglav (2864 m) — napoved</div>
+      <div id="mtn-triglav-body" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🏔 Krvavec (1971 m) — primerjava</div>
+      <div id="mtn-krvavec-body" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔗 Planinska napoved — viri</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://www.gore-ljudje.net/informacije/vreme/" target="_blank" rel="noopener" class="mtn-avk-link">⛰ Gore-Ljudje — vreme</a>
+        <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 ARSO — planinska napoved</a>
+        <a href="https://www.lawinenwarndienst-bayern.de/" target="_blank" rel="noopener" class="mtn-avk-link">⚠️ Nevarnost plazov (SI/AT)</a>
+        <a href="https://www.windy.com/?46.38,13.84,9" target="_blank" rel="noopener" class="mtn-avk-link">🌀 Windy — Triglav</a>
+        <a href="https://www.bergfex.si/" target="_blank" rel="noopener" class="mtn-avk-link">🎿 Bergfex SI</a>
+      </div>
+    </div>
+  </div><!-- /tab-gore -->
+
   <!-- ═══ EKSTREMNI DOGODKI ═══ -->
   <div id="tab-extremes" class="tab-pane">
     <div class="ev-filter" id="ev-filter">
@@ -5300,7 +5402,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','morje','gore'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -5330,6 +5432,8 @@ function switchTab(tab){
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
+  if(tab==='morje'){     initMorje(); }
+  if(tab==='gore'){      initGore(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='storm'){     initStormChaser(); }
@@ -15617,6 +15721,281 @@ function renderNASAAgro(data){
   const src=`<div class="nasa-src">NASA POWER · satelitski + modelski podatki · klimatološko povprečje 1994–2023</div>`;
   el.innerHTML=kpi+s1+s2+s3+src;
 }
+
+// ═══ MORJE ════════════════════════════════════════════════
+const SEA_LAT=45.514,SEA_LON=13.601; // Portorož
+let _morjeInit=false,_morjeCache=null,_morjeCacheT=0;
+
+async function initMorje(){
+  if(_morjeInit)return; _morjeInit=true;
+  try{
+    const now=Date.now();
+    if(!_morjeCache||now-_morjeCacheT>3600000){
+      const [fc,marine]=await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${SEA_LAT}&longitude=${SEA_LON}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&timezone=Europe%2FLjubljana&forecast_days=7`).then(r=>r.json()),
+        fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${SEA_LAT}&longitude=${SEA_LON}&current=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,sea_surface_temperature&daily=wave_height_max,wave_period_max,sea_surface_temperature_mean&timezone=Europe%2FLjubljana&forecast_days=7`).then(r=>r.json()),
+      ]);
+      _morjeCache={fc,marine}; _morjeCacheT=now;
+    }
+    _buildMorjeKPIs(_morjeCache);
+    _buildMorjeMarine(_morjeCache);
+    _buildMorjeFc(_morjeCache);
+    _buildMorjeWind(_morjeCache);
+  }catch(e){console.error('initMorje',e);}
+}
+
+function _seaStateLabel(h){
+  if(h<0.1)return'mirno';if(h<0.5)return'rahlo';if(h<1.25)return'zmerno valovito';
+  if(h<2.5)return'razburkano';return'hudo razburkano';
+}
+function _windDirLabel(deg){
+  const dirs=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];
+  return dirs[Math.round(deg/22.5)%16];
+}
+
+function _buildMorjeKPIs({fc,marine}){
+  const el=document.getElementById('sea-kpis'); if(!el)return;
+  const c=marine.current||{},cf=fc.current||{};
+  const wh=c.wave_height??null,sst=c.sea_surface_temperature??null;
+  const uv=fc.daily?.uv_index_max?.[0]??null;
+  const kpis=[
+    {val:wh!=null?wh.toFixed(1)+' m':'—',lbl:'Valovanje',sub:wh!=null?_seaStateLabel(wh):'—'},
+    {val:c.wave_period!=null?c.wave_period.toFixed(0)+' s':'—',lbl:'Period vala',sub:'sekund'},
+    {val:sst!=null?sst.toFixed(1)+' °C':'—',lbl:'Temp. morja',sub:'površina'},
+    {val:cf.wind_speed_10m!=null?Math.round(cf.wind_speed_10m)+' km/h':'—',lbl:'Veter',sub:cf.wind_direction_10m!=null?_windDirLabel(cf.wind_direction_10m):'—'},
+    {val:uv!=null?uv.toFixed(1):'—',lbl:'UV max',sub:uv!=null?(uv>7?'visok':uv>3?'zmeren':'nizek'):'—'},
+    {val:cf.temperature_2m!=null?cf.temperature_2m.toFixed(0)+' °C':'—',lbl:'T zrak',sub:'Portorož'},
+  ];
+  el.innerHTML=kpis.map(k=>`<div class="sea-kpi"><div class="sea-kpi-val">${k.val}</div><div class="sea-kpi-lbl">${k.lbl}</div><div class="sea-kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+function _buildMorjeMarine({marine}){
+  const el=document.getElementById('sea-marine-body'); if(!el)return;
+  const c=marine.current||{};
+  const rows=[
+    ['🌊 Skupna višina valov',c.wave_height!=null?c.wave_height.toFixed(2)+' m':'—'],
+    ['🌊 Vetrni valovi',c.wind_wave_height!=null?c.wind_wave_height.toFixed(2)+' m':'—'],
+    ['🌊 Valovanje (swell)',c.swell_wave_height!=null?c.swell_wave_height.toFixed(2)+' m':'—'],
+    ['⏱ Period vala',c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—'],
+    ['🧭 Smer valov',c.wave_direction!=null?c.wave_direction.toFixed(0)+'° ('+_windDirLabel(c.wave_direction)+')':'—'],
+    ['🌡 Temp. morja',c.sea_surface_temperature!=null?c.sea_surface_temperature.toFixed(1)+' °C':'—'],
+  ];
+  // Wave height bar
+  const maxH=4, pct=Math.min(100,((c.wave_height??0)/maxH)*100);
+  const lbl=_seaStateLabel(c.wave_height??0);
+  el.innerHTML=`<div style="margin-bottom:.6rem">
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:.2rem">Stanje morja: <b style="color:var(--text)">${lbl}</b> · ${c.wave_height!=null?c.wave_height.toFixed(2)+' m':'—'}</div>
+    <div class="sea-state-bar"><div class="sea-state-fill" style="width:${pct}%"></div></div>
+  </div>`+
+  rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:.18rem 0;border-bottom:1px solid var(--border);font-size:.75rem"><span style="color:var(--muted)">${l}</span><b>${v}</b></div>`).join('');
+}
+
+function _buildMorjeFc({fc,marine}){
+  const el=document.getElementById('sea-fc-body'); if(!el)return;
+  const d=fc.daily||{};
+  const dm=marine.daily||{};
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  const n=Math.min(7,(d.time||[]).length);
+  let html='<div class="sea-fc-row">';
+  for(let i=0;i<n;i++){
+    const dt=new Date(d.time[i]); const dn=days[dt.getDay()];
+    const wmo=d.weather_code?.[i]??0;
+    const tmax=d.temperature_2m_max?.[i]!=null?Math.round(d.temperature_2m_max[i])+'°':'—';
+    const tmin=d.temperature_2m_min?.[i]!=null?Math.round(d.temperature_2m_min[i])+'°':'—';
+    const wh=dm.wave_height_max?.[i]!=null?dm.wave_height_max[i].toFixed(1)+' m':'—';
+    const rain=d.precipitation_sum?.[i]!=null?d.precipitation_sum[i].toFixed(0):'0';
+    const wind=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i])+' km/h':'—';
+    html+=`<div class="sea-fc-day">
+      <div class="sea-fc-name">${dn}</div>
+      <div class="sea-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="sea-fc-t">${tmax}/${tmin}</div>
+      <div class="sea-fc-sub">🌊 ${wh}<br>💨 ${wind}<br>🌧 ${rain}mm</div>
+    </div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function _buildMorjeWind({fc}){
+  const el=document.getElementById('sea-wind-body'); if(!el)return;
+  const d=fc.daily||{};
+  const n=Math.min(7,(d.time||[]).length);
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  // Classify each day: Bora (NE: 30-80°), Jugo (SE-S: 110-180°), ostalo
+  let html='<table class="sea-wind-table"><thead><tr><th>Dan</th><th>Hitrost</th><th>Sunki</th><th>Smer</th><th>Tip</th></tr></thead><tbody>';
+  for(let i=0;i<n;i++){
+    const dt=new Date(d.time[i]); const dn=days[dt.getDay()];
+    const spd=d.wind_speed_10m_max?.[i]!=null?Math.round(d.wind_speed_10m_max[i]):'—';
+    const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
+    const dir=d.wind_direction_10m_dominant?.[i];
+    const dirLbl=dir!=null?_windDirLabel(dir):'—';
+    let type='ostalo',cls='sea-ostalo';
+    if(dir!=null){
+      if(dir>=30&&dir<=80){type='Bora';cls='sea-bora';}
+      else if(dir>=110&&dir<=190){type='Jugo';cls='sea-jugo';}
+    }
+    html+=`<tr><td>${dn}</td><td>${spd} km/h</td><td>${gust} km/h</td><td>${dirLbl}</td><td><span class="sea-wind-type ${cls}">${type}</span></td></tr>`;
+  }
+  html+='</tbody></table>';
+  html+=`<div style="margin-top:.65rem;font-size:.7rem;color:var(--muted);line-height:1.6">
+    <b style="color:var(--blue)">Bora</b> — hladen SV veter (30–80°), sunkovit, suh. Tipičen za zimo in pomlad, hitrost do 200 km/h v izjemnih razmerah.<br>
+    <b style="color:var(--amber)">Jugo</b> — topel JV veter (110–190°), vlaži, prinaša visoke valove. Pogost pred in med atlantskimi cikloni.
+  </div>`;
+  el.innerHTML=html;
+}
+
+// ═══ GORE ══════════════════════════════════════════════════
+const MTN_TRIGLAV_LAT=46.3794,MTN_TRIGLAV_LON=13.8376; // Triglav area
+const MTN_KRVAVEC_LAT=46.2989,MTN_KRVAVEC_LON=14.5360; // Krvavec
+let _goreInit=false,_goreCache=null,_goreCacheT=0;
+
+// Lapse rate correction: ~6.5°C per 1000m
+function _mtnTempAtElev(T_valley,elev_valley,elev_target){
+  return T_valley - 6.5*(elev_target-elev_valley)/1000;
+}
+
+async function initGore(){
+  if(_goreInit)return; _goreInit=true;
+  try{
+    const now=Date.now();
+    if(!_goreCache||now-_goreCacheT>3600000){
+      const params='daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max,freezinglevel_height_max,freezinglevel_height_min&current=temperature_2m,wind_speed_10m,wind_gusts_10m,snowfall,freezinglevel_height&timezone=Europe%2FLjubljana&forecast_days=7';
+      const [triglav,krvavec]=await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_TRIGLAV_LAT}&longitude=${MTN_TRIGLAV_LON}&${params}`).then(r=>r.json()),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_KRVAVEC_LAT}&longitude=${MTN_KRVAVEC_LON}&${params}`).then(r=>r.json()),
+      ]);
+      _goreCache={triglav,krvavec}; _goreCacheT=now;
+    }
+    _buildGoreKPIs(_goreCache);
+    _buildGoreFreeze(_goreCache);
+    _buildGoreTriglav(_goreCache);
+    _buildGoreKrvavec(_goreCache);
+  }catch(e){console.error('initGore',e);}
+}
+
+function _buildGoreKPIs({triglav}){
+  const el=document.getElementById('mtn-kpis'); if(!el)return;
+  const c=triglav.current||{};
+  const d=triglav.daily||{};
+  const freeze=c.freezinglevel_height??d.freezinglevel_height_max?.[0]??null;
+  // Estimate Triglav summit temp (2864m from valley ~500m level)
+  const tVallMax=d.temperature_2m_max?.[0]??null;
+  const tTriglav=tVallMax!=null?_mtnTempAtElev(tVallMax,500,2864):null;
+  const snowfall=d.snowfall_sum?.[0]??null;
+  const gust=d.wind_gusts_10m_max?.[0]??null;
+  const kpis=[
+    {val:freeze!=null?Math.round(freeze)+' m':'—',lbl:'Meja zmrzali',sub:'danes',col:freeze!=null&&freeze<1000?'var(--blue)':null},
+    {val:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',lbl:'T Triglav 2864m',sub:'ocena (lapse 6.5°/km)',col:tTriglav!=null&&tTriglav<0?'var(--blue)':null},
+    {val:snowfall!=null&&snowfall>0?snowfall.toFixed(0)+' cm':'0 cm',lbl:'Sneg danes',sub:'cm novega snega'},
+    {val:gust!=null?Math.round(gust)+' km/h':'—',lbl:'Max sunki',sub:'triglav območje'},
+  ];
+  el.innerHTML=kpis.map(k=>`<div class="mtn-kpi"><div class="mtn-kpi-val"${k.col?` style="color:${k.col}"`:''}>${k.val}</div><div class="mtn-kpi-lbl">${k.lbl}</div><div class="mtn-kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+function _buildGoreFreeze({triglav}){
+  const chartEl=document.getElementById('mtn-freeze-chart');
+  const legEl=document.getElementById('mtn-freeze-legend');
+  if(!chartEl)return;
+  const d=triglav.daily||{};
+  const n=Math.min(7,(d.time||[]).length);
+  if(!n){chartEl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
+  const maxH=d.freezinglevel_height_max||[];
+  const minH=d.freezinglevel_height_min||[];
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  // SVG bar chart 0–4000m
+  const W=880,H=100,pad={l:40,r:10,t:10,b:20};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const yScale=v=>(cH-(v/4000)*cH+pad.t);
+  const bW=Math.floor(cW/n)-4;
+  // Reference lines: Krvavec 1971m, Vogel 1922m, Triglav 2864m
+  const refs=[{h:1922,lbl:'Vogel',col:'#34d399'},{h:1971,lbl:'Krvavec',col:'#60a5fa'},{h:2864,lbl:'Triglav',col:'#f87171'}];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="mtn-freeze-svg">`;
+  // Ref lines
+  refs.forEach(r=>{
+    const y=yScale(r.h);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="${r.col}" stroke-width="1" stroke-dasharray="4,3" opacity=".6"/>`;
+    svg+=`<text x="${W-pad.r-2}" y="${y-2}" font-size="7" fill="${r.col}" text-anchor="end" opacity=".8">${r.lbl}</text>`;
+  });
+  // Y axis ticks
+  [0,1000,2000,3000,4000].forEach(v=>{
+    const y=yScale(v);
+    svg+=`<text x="${pad.l-3}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v}</text>`;
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+2}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>`;
+  });
+  // Bars
+  for(let i=0;i<n;i++){
+    const x=pad.l+i*(cW/n)+2;
+    const hi=maxH[i]??2000,lo=minH[i]??hi;
+    const yTop=yScale(hi),yBot=yScale(lo);
+    const barH=Math.max(3,yBot-yTop);
+    const col=hi<1000?'#818cf8':hi<2000?'#60a5fa':hi<3000?'#4ade80':'#fbbf24';
+    svg+=`<rect x="${x}" y="${yTop}" width="${bW}" height="${barH}" fill="${col}" rx="2" opacity=".8"/>`;
+    const dt=new Date(d.time[i]);
+    svg+=`<text x="${x+bW/2}" y="${H-3}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${days[dt.getDay()]}</text>`;
+  }
+  svg+='</svg>';
+  chartEl.innerHTML=svg;
+  if(legEl) legEl.innerHTML=refs.map(r=>`<span><svg width="14" height="2"><line x1="0" y1="1" x2="14" y2="1" stroke="${r.col}" stroke-width="1.5" stroke-dasharray="4,2"/></svg>${r.lbl} ${r.h} m</span>`).join('')
+    +'<span style="opacity:.6">Stolpci = min–max meja zmrzali</span>';
+}
+
+function _buildGoreTriglav({triglav}){
+  const el=document.getElementById('mtn-triglav-body'); if(!el)return;
+  const d=triglav.daily||{};
+  const n=Math.min(7,(d.time||[]).length);
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  let html='<div class="mtn-fc-row">';
+  for(let i=0;i<n;i++){
+    const dt=new Date(d.time[i]);
+    const wmo=d.weather_code?.[i]??0;
+    const tmax=d.temperature_2m_max?.[i];
+    const tmin=d.temperature_2m_min?.[i];
+    // Extrapolate to Triglav 2864m (valley model ~500m)
+    const tmaxT=tmax!=null?_mtnTempAtElev(tmax,500,2864):null;
+    const tminT=tmin!=null?_mtnTempAtElev(tmin,500,2864):null;
+    const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
+    const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
+    html+=`<div class="mtn-fc-day">
+      <div class="mtn-fc-name">${days[dt.getDay()]}</div>
+      <div class="mtn-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="mtn-fc-t">${tmaxT!=null?tmaxT.toFixed(0)+'°':'—'}/${tminT!=null?tminT.toFixed(0)+'°':'—'}</div>
+      <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
+    </div>`;
+  }
+  html+='</div>';
+  html+=`<div class="mtn-summit-info">
+    <b>Opomba:</b> temperature so ocenjene z vertikalnim gradientom −6.5°C/1000m iz modelske točke (~500 m) na vrh Triglava (2864 m). Za operativno planinarjenje vedno preveri
+    <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
+  </div>`;
+  el.innerHTML=html;
+}
+
+function _buildGoreKrvavec({krvavec}){
+  const el=document.getElementById('mtn-krvavec-body'); if(!el)return;
+  const d=krvavec.daily||{};
+  const n=Math.min(7,(d.time||[]).length);
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  let html='<div class="mtn-fc-row">';
+  for(let i=0;i<n;i++){
+    const dt=new Date(d.time[i]);
+    const wmo=d.weather_code?.[i]??0;
+    const tmax=d.temperature_2m_max?.[i];
+    const tmin=d.temperature_2m_min?.[i];
+    const tmaxK=tmax!=null?_mtnTempAtElev(tmax,400,1971):null;
+    const tminK=tmin!=null?_mtnTempAtElev(tmin,400,1971):null;
+    const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
+    const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
+    html+=`<div class="mtn-fc-day">
+      <div class="mtn-fc-name">${days[dt.getDay()]}</div>
+      <div class="mtn-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="mtn-fc-t">${tmaxK!=null?tmaxK.toFixed(0)+'°':'—'}/${tminK!=null?tminK.toFixed(0)+'°':'—'}</div>
+      <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
+    </div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+// ═══ end GORE ══════════════════════════════════════════════
 
 // ═══ METEO NERD ═══════════════════════════════════════════
 let _nerdInit=false;
