@@ -940,6 +940,40 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .gdd-crop-stage{font-size:.67rem;color:var(--muted);width:110px;flex-shrink:0}
 @media(max-width:520px){.frost-row{grid-template-columns:repeat(4,1fr)}.gdd-crop-stage{display:none}}
 /* ── end Agrometeo ─────────────────────────────────────── */
+/* ── Meteo Nerd ─────────────────────────────────────────── */
+.nerd-kpi-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.nerd-kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.55rem .75rem;min-width:88px;flex:1}
+.nerd-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text)}
+.nerd-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
+.nerd-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.08rem}
+.nerd-section-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:1.1rem 0 .55rem}
+.nerd-links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.6rem}
+.nerd-link-a{text-decoration:none;color:var(--text);display:block}
+.nerd-link-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.65rem .8rem;transition:all .18s;height:100%}
+.nerd-link-a:hover .nerd-link-card{border-color:var(--blue);box-shadow:0 4px 16px rgba(37,99,235,.14);transform:translateY(-1px)}
+.nerd-link-top{display:flex;align-items:center;gap:.45rem;margin-bottom:.25rem}
+.nerd-link-icon{font-size:1.15rem;flex-shrink:0}
+.nerd-link-name{font-size:.8rem;font-weight:600}
+.nerd-link-desc{font-size:.7rem;color:var(--muted);line-height:1.45}
+.nerd-link-tag{display:inline-block;font-size:.58rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:4px;padding:.08rem .32rem;margin-top:.3rem;color:var(--blue);font-weight:500}
+.nerd-snd-wrap{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+.nerd-snd-info{font-size:.78rem;line-height:1.75;color:var(--text)}
+.nerd-snd-info b{font-weight:600}
+.nerd-snd-info small{color:var(--muted);font-size:.7rem}
+.nerd-snd-btns{display:flex;flex-direction:column;gap:.4rem;min-width:110px}
+.nerd-snd-btn{display:block;padding:.38rem .7rem;border-radius:7px;font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid var(--border);background:var(--card-bg);color:var(--text);transition:all .18s;text-align:center;white-space:nowrap}
+.nerd-snd-btn:hover{border-color:var(--blue);color:var(--blue)}
+.nerd-idx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.55rem}
+.nerd-idx-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.55rem .65rem}
+.nerd-idx-name{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.15rem}
+.nerd-idx-abbr{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--text)}
+.nerd-idx-full{font-size:.65rem;color:var(--muted);margin-top:.15rem;line-height:1.35}
+.nerd-idx-link{font-size:.62rem;color:var(--blue);margin-top:.3rem;display:inline-block;text-decoration:none}
+.nerd-idx-link:hover{text-decoration:underline}
+.nerd-embed-wrap{border-radius:8px;overflow:hidden;margin-top:.75rem;position:relative}
+.nerd-embed-wrap iframe{display:block;width:100%;border:0}
+@media(max-width:520px){.nerd-snd-wrap{grid-template-columns:1fr}.nerd-links-grid{grid-template-columns:1fr 1fr}}
+/* ── end Meteo Nerd ──────────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -1663,6 +1697,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
+    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Meteo Nerd</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -3284,6 +3319,58 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   </div><!-- /tab-agro -->
 
+  <!-- ═══ METEO NERD TAB ═══ -->
+  <div id="tab-nerd" class="tab-pane">
+
+    <!-- Computed local nerd metrics -->
+    <div class="nerd-kpi-row" id="nerd-kpis">
+      <div class="nerd-kpi"><div class="nerd-kpi-val">…</div><div class="nerd-kpi-lbl">Nalagam</div></div>
+    </div>
+
+    <!-- 500 hPa ECMWF embed -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🗺 500 hPa — ECMWF model (Windy)</div>
+      <div class="nerd-embed-wrap">
+        <iframe height="340"
+          src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=340&zoom=5&level=500h&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+          loading="lazy" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Radiosounding -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📡 Radiosondaža — Ljubljana (WMO 14015)</div>
+      <div class="nerd-snd-wrap" style="margin-top:.75rem">
+        <div class="nerd-snd-info">
+          <div><b>Postaja:</b> Ljubljana Bežigrad (LJLJ)</div>
+          <div><b>Koord.:</b> 46.07°N, 14.52°E · 299 m n.m.</div>
+          <div><b>Vzleti:</b> 00:00 UTC in 12:00 UTC dnevno</div>
+          <div style="margin-top:.4rem"><b>Skew-T log-P:</b> termodinamski diagram — CAPE, CIN, LCL, LFC, EL, vrtičnost</div>
+          <div style="margin-top:.3rem"><small>Najbližja postaja za zgornjetroposferske meritve; naslednja sondaža iz Udine (16044, 46.03°N, 13.18°E).</small></div>
+        </div>
+        <div class="nerd-snd-btns">
+          <a class="nerd-snd-btn" id="nerd-snd-skewt" href="#" target="_blank">Skew-T (UW)</a>
+          <a class="nerd-snd-btn" id="nerd-snd-text"  href="#" target="_blank">Tekst (UW)</a>
+          <a class="nerd-snd-btn" href="https://radiosonde.eu/" target="_blank">radiosonde.eu</a>
+          <a class="nerd-snd-btn" href="https://www.spc.noaa.gov/exper/soundingclimo/" target="_blank">Climatology</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Climate indices -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌐 Telekonektivni / klimatski indeksi</div>
+      <div class="nerd-idx-grid" style="margin-top:.75rem" id="nerd-idx-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Professional links -->
+    <div id="nerd-links-section">
+      <!-- populated by JS -->
+    </div>
+
+  </div><!-- /tab-nerd -->
 
   <!-- ═══ AI NOWCAST TAB ═══ -->
   <div id="tab-ai" class="tab-pane">
@@ -5255,6 +5342,7 @@ function switchTab(tab){
   if(tab==='life'){      initLife(); }
   if(tab==='water'){     initVodostaj(); }
   if(tab==='agro'){      initAgro(); }
+  if(tab==='nerd'){      initNerd(); }
   if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   closeTabDDs();
@@ -15534,6 +15622,219 @@ function renderNASAAgro(data){
   const src=`<div class="nasa-src">NASA POWER · satelitski + modelski podatki · klimatološko povprečje 1994–2023</div>`;
   el.innerHTML=kpi+s1+s2+s3+src;
 }
+
+// ═══ METEO NERD ═══════════════════════════════════════════
+let _nerdInit=false;
+function initNerd(){
+  if(_nerdInit)return; _nerdInit=true;
+  _buildNerdKPIs();
+  _buildNerdSoundingLinks();
+  _buildNerdIndexCards();
+  _buildNerdLinks();
+}
+
+// Monthly temperature normals for Rečica ob Savinji (366m, 1991–2020 proxy)
+const _TNORM=[-0.5,1.5,5.5,10.0,14.5,18.0,20.0,19.5,15.0,10.0,5.0,1.0];
+// Monthly precipitation normals (mm/month)
+const _PNORM=[70,60,80,90,110,130,115,110,115,125,105,85];
+
+function _buildNerdKPIs(){
+  const el=document.getElementById('nerd-kpis');
+  if(!el)return;
+
+  // Live obs values from DOM (already rendered by main data fetch)
+  const T  = parseFloat(document.querySelector('#temp-val')?.textContent) || null;
+  const Td = parseFloat(document.getElementById('dewpt-val')?.textContent) || null;
+  const RH = parseFloat(document.querySelector('.hm-humidity .hm-val')?.textContent) || null;
+  const P  = parseFloat(document.getElementById('pressure-val')?.textContent) || null;
+
+  // Pressure tendency 3h (existing fn, returns number hPa)
+  const dp3=pressureTrend3h();
+
+  // Wet bulb via Stull (2011) — acc ±0.65°C for 5%≤RH≤99%
+  let Tw=null;
+  if(T!=null&&RH!=null&&RH>0){
+    Tw=T*Math.atan(0.151977*Math.sqrt(RH+8.313659))
+      +Math.atan(T+RH)
+      -Math.atan(RH-1.676331)
+      +0.00391838*Math.pow(RH,1.5)*Math.atan(0.023101*RH)
+      -4.686035;
+    Tw=Math.round(Tw*10)/10;
+  }
+
+  // Dew point depression
+  const DPD=(T!=null&&Td!=null)?Math.round((T-Td)*10)/10:null;
+
+  // Precipitable water estimate (empirical fit, ±20%)
+  const PW=Td!=null?Math.round(6.2*Math.exp(0.067*Td)*10)/10:null;
+
+  // Temperature anomaly vs monthly normal
+  const mo=new Date().getMonth();
+  const Tanom=(T!=null)?Math.round((T-_TNORM[mo])*10)/10:null;
+
+  // 30-day rain from history
+  const store=_insStore();
+  const today=new Date();
+  let rain30=0;
+  for(let d=0;d<30;d++){
+    const dt=new Date(today); dt.setDate(dt.getDate()-d);
+    const k=dt.toISOString().slice(0,10);
+    rain30+=(store[k]?.rain??0);
+  }
+  const rainAnom=Math.round(rain30-_PNORM[mo]);
+
+  const col=(v)=>v>0?'var(--red)':v<0?'var(--blue)':'var(--muted)';
+  const sign=(v)=>v>0?'+':'';
+  const f=(v,d=1)=>v!=null?v.toFixed(d):'—';
+
+  const kpis=[
+    {
+      val: dp3!=null?(dp3>0?'+':'')+dp3.toFixed(1)+' hPa': '—',
+      lbl:'Δ tlak/3h',
+      sub: dp3>2?'rast':dp3<-2?'padanje':'stabilen',
+      col: dp3>2?'var(--green)':dp3<-2?'var(--red)':null
+    },
+    {
+      val: Tw!=null?Tw+' °C':'—',
+      lbl:'Mokri term.',
+      sub:'Tw · Stull 2011'
+    },
+    {
+      val: DPD!=null?DPD+' K':'—',
+      lbl:'Dep. rosišča',
+      sub: DPD!=null?(DPD>20?'suho':DPD>10?'normalno':DPD>5?'vlažno':'blizu nasič.'):'—'
+    },
+    {
+      val: PW!=null?PW+' mm':'—',
+      lbl:'Padav. voda',
+      sub:'PW estim.'
+    },
+    {
+      val: Tanom!=null?sign(Tanom)+Tanom+' K':'—',
+      lbl:'T odklon',
+      sub:'vs mes. norma',
+      col: Tanom!=null?col(Tanom):null
+    },
+    {
+      val: rain30>0?(sign(rainAnom)+rainAnom+' mm'):'—',
+      lbl:'Padav. odklon',
+      sub:'30d vs norma',
+      col: rainAnom!=0?col(rainAnom):null
+    },
+  ];
+
+  el.innerHTML=kpis.map(k=>`<div class="nerd-kpi">
+    <div class="nerd-kpi-val"${k.col?` style="color:${k.col}"`:''}>` +
+    (k.val!=='—'?k.val:'<span style="color:var(--muted)">—</span>') +
+    `</div>
+    <div class="nerd-kpi-lbl">${k.lbl}</div>
+    <div class="nerd-kpi-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+function _buildNerdSoundingLinks(){
+  // Build dynamic UWYO URLs with today's date (latest 12z sounding)
+  const now=new Date();
+  const y=now.getUTCFullYear();
+  const mo=String(now.getUTCMonth()+1).padStart(2,'0');
+  const d=String(now.getUTCDate()).padStart(2,'0');
+  const time=now.getUTCHours()>=12?'1212':'0000';
+  const base='https://weather.uwyo.edu/upperair/';
+  const params=`sounding.html?region=europe&TYPE=GIF%3ASKEWT&YEAR=${y}&MONTH=${mo}&FROM=${d}${time.slice(0,2)}&TO=${d}${time.slice(0,2)}&STNM=14015`;
+  const textP=`bufrraob.shtml?region=europe&TYPE=TEXT%3ALIST&YEAR=${y}&MONTH=${mo}&FROM=${d}${time.slice(0,2)}&TO=${d}${time.slice(0,2)}&STNM=14015`;
+  const sk=document.getElementById('nerd-snd-skewt');
+  const tx=document.getElementById('nerd-snd-text');
+  if(sk) sk.href=base+params;
+  if(tx) tx.href=base+textP;
+}
+
+const _NERD_INDICES=[
+  {abbr:'NAO',full:'Severnoatlantska oscilacija',desc:'Razlika tlaka Azori–Islandija. Pos. faza → toplejše, vetrovno ZS-Eur.',link:'https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/nao.shtml',color:'#60a5fa'},
+  {abbr:'AO',full:'Arktična oscilacija',desc:'Polarni vrtinec. Pos. faza → toplejše, manj arktičnih vdorov v Evropo.',link:'https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/ao.shtml',color:'#818cf8'},
+  {abbr:'ENSO',full:'El Niño / La Niña',desc:'SST Tihega oceana. El Niño → toplejše zime EU, La Niña → hladnejše.',link:'https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php',color:'#f59e0b'},
+  {abbr:'QBO',full:'Kvazi-dveletna oscilacija',desc:'Stratosferski zonalni veter nad ekvatorjem. Vpliva na polarni vrtinec.',link:'https://www.cpc.ncep.noaa.gov/data/indices/qbo.u30.index',color:'#34d399'},
+  {abbr:'MJO',full:'Madden-Julian oscilacija',desc:'40–50-dnevni val vlage v tropih. Faza 4–6 poveča padavine EU.',link:'https://www.cpc.ncep.noaa.gov/products/precip/CWlink/MJO/mjo.shtml',color:'#fb923c'},
+  {abbr:'AMO',full:'Atlantska multidekadna osc.',desc:'Dolgoperiodni SST SZ-Atlantika. Faza + → sušnejša poletja CEU.',link:'https://psl.noaa.gov/data/climateindices/list/',color:'#a78bfa'},
+  {abbr:'PDO',full:'Pacifična dekadna osc.',desc:'Vzorec SST S-Tihega oceana. Sekundaren vpliv na evropske zime.',link:'https://psl.noaa.gov/pdo/',color:'#22d3ee'},
+  {abbr:'NAM',full:'Severni anularni način',desc:'Meridionalni tlačni gradient od tropov do pola. Korelira z AO.',link:'https://psl.noaa.gov/data/climateindices/list/',color:'#4ade80'},
+];
+
+function _buildNerdIndexCards(){
+  const el=document.getElementById('nerd-idx-grid');
+  if(!el)return;
+  el.innerHTML=_NERD_INDICES.map(idx=>`
+    <div class="nerd-idx-card">
+      <div class="nerd-idx-name" style="color:${idx.color}">${idx.abbr}</div>
+      <div class="nerd-idx-abbr">${idx.abbr}</div>
+      <div class="nerd-idx-full">${idx.full}</div>
+      <div class="nerd-idx-full" style="margin-top:.2rem;font-size:.63rem">${idx.desc}</div>
+      <a class="nerd-idx-link" href="${idx.link}" target="_blank" rel="noopener">→ CPC/PSL</a>
+    </div>`).join('');
+}
+
+const _NERD_LINKS=[
+  {cat:'🌐 Sinoptični modeli & napoved',links:[
+    {icon:'🌀',name:'Tropical Tidbits',desc:'GFS, ECMWF, ICON, GEM — karte zgornjih nivojev, CAPE, padavine',url:'https://www.tropicaltidbi.ts/gfs/euro_atl/',tag:'GFS·ECMWF·ICON'},
+    {icon:'🌤',name:'Windy.com',desc:'Interaktivni model prikaz: ECMWF, GFS, ICON, AROME, val, plimovanje',url:'https://www.windy.com/?46.3,14.9,8',tag:'multi-model'},
+    {icon:'📊',name:'ECMWF Charts',desc:'Uradne ECMWF prognostične karte — deterministični in ENS model',url:'https://charts.ecmwf.int/',tag:'ECMWF ENS'},
+    {icon:'🗺',name:'Meteologix',desc:'Vizualizacija modelov ICON-EU, GFS, WRF za Slovenijo in regijo',url:'https://meteologix.com/si/',tag:'ICON-EU·WRF'},
+    {icon:'🔬',name:'College of DuPage',desc:'HD model prikazi, karte po nivojih, mesoscale analiza',url:'https://weather.cod.edu/forecast/',tag:'analiza'},
+    {icon:'⚡',name:'Pivotal Weather',desc:'Profesionalni NWP viewer: GFS, NAM, HRRR, RAP — za operativce',url:'https://www.pivotalweather.com/',tag:'operativno'},
+  ]},
+  {cat:'🌡 Sondaže & zg. troposfera',links:[
+    {icon:'📡',name:'UW Wyoming Soundings',desc:'Arhiv in realno-časovne radiosondaže — Skew-T, hodograf, indeksi',url:'https://weather.uwyo.edu/upperair/sounding.html',tag:'Skew-T·CAPE'},
+    {icon:'🎈',name:'radiosonde.eu',desc:'Live sondaže z GPS balonov po Evropi in Balkanu — razgibano!',url:'https://radiosonde.eu/',tag:'live balloons'},
+    {icon:'🌬',name:'IEM Skew-T viewer',desc:'Iowa State Mesonet — Skew-T za EUR postaje z arhivom',url:'https://mesonet.agron.iastate.edu/GIS/upper.phtml?network=EU_RAOB',tag:'EUR RAOB'},
+    {icon:'🧊',name:'SPC Sounding Climatology',desc:'Klimatološki Skew-T profili za 00z/12z po postajah',url:'https://www.spc.noaa.gov/exper/soundingclimo/',tag:'klimatološki'},
+  ]},
+  {cat:'🛰 Satelit',links:[
+    {icon:'🌍',name:'Sat24',desc:'MSG Meteosat — VIS, IR, WV animacije za Slovenijo v visoki ločljivosti',url:'https://sat24.com/sl/si/vis5',tag:'MSG·HR'},
+    {icon:'📡',name:'EUMETSAT viewer',desc:'Uradni EUMETSAT prikaz — RGB kompoziti, HRV, Rapid Scan (5 min)',url:'https://view.eumetsat.int/',tag:'EUMETSAT'},
+    {icon:'🌐',name:'RealEarth (SSEC)',desc:'Globalni večsatelitski viewer — Himawari, GOES, MSG v HD',url:'https://realearth.ssec.wisc.edu/',tag:'global'},
+    {icon:'🌊',name:'Copernicus Marine',desc:'SST, klorofil, tok oceanskih površin — ERA5 morski podatki',url:'https://marine.copernicus.eu/',tag:'ocean'},
+  ]},
+  {cat:'⛈ Radar & strele',links:[
+    {icon:'📻',name:'ARSO Radar',desc:'Uradni composite radar za Slovenijo — 5-minutni update, animacija 1h',url:'https://meteo.arso.gov.si/met/sl/observ/radar/',tag:'Slo · 5min'},
+    {icon:'⚡',name:'Blitzortung',desc:'Mreža detekcije strel v realnem času — pokritost Evrope in sveta',url:'https://www.blitzortung.org/en/live_lightning_maps.php',tag:'live lightning'},
+    {icon:'🗺',name:'Lightningmaps.org',desc:'Alternativni prikaz Blitzortung mreže — cleaner UI, statistike',url:'https://www.lightningmaps.org/',tag:'strele'},
+    {icon:'🌩',name:'ESTOFEX',desc:'Evropska stormchaser mreža — napovedana žarišča neviht',url:'https://www.estofex.org/',tag:'severe wx'},
+  ]},
+  {cat:'🏔 Slovenija & regija',links:[
+    {icon:'🇸🇮',name:'ARSO Meteo',desc:'Uradna slovenska meteorološka agencija — observacije, napovedi, opozorila',url:'https://meteo.arso.gov.si/met/sl/',tag:'uradni'},
+    {icon:'🇦🇹',name:'ZAMG GeoSphere',desc:'Avstrijska meteo služba — AlpExt karte, sinoptika Alp, nevihtni arhiv',url:'https://www.zamg.ac.at/cms/de/wetter/wetterkarte',tag:'Avstrija'},
+    {icon:'🇨🇭',name:'MeteoSwiss',desc:'Švicarska meteo — COSMO model, alpska sinoptika, sondaža Payerne',url:'https://www.meteoswiss.admin.ch/',tag:'Švica·COSMO'},
+    {icon:'🌊',name:'ARSO Vodostaj',desc:'Hidrološki portal — pretoki, nivoji rek, snežna odeja',url:'https://www.arso.gov.si/vode/podatki/amp/H_vod_00_AMP.html',tag:'hidrologija'},
+    {icon:'🔥',name:'ARSO Požari',desc:'Indeks požarne ogroženosti in monitoring — Slo in regija',url:'https://meteo.arso.gov.si/met/sl/agromet/pozar/',tag:'FWI'},
+  ]},
+  {cat:'📚 Reanaliza & arhiv',links:[
+    {icon:'🌡',name:'Climate Reanalyzer',desc:'Dnevne globalne anomalije — temperatura, morski led, SST vs ERA5 norma',url:'https://climatereanalyzer.org/',tag:'ERA5 anomalije'},
+    {icon:'🗄',name:'ERA5 (Copernicus CDS)',desc:'ECMWF ERA5 reanaliza 1940–danes — 31 km, 137 nivojev, urno',url:'https://cds.climate.copernicus.eu/',tag:'ERA5'},
+    {icon:'📈',name:'NOAA PSL Indices',desc:'Kompletna baza klimatskih indeksov — NAO, AO, PDO, AMO, ENSO, QBO…',url:'https://psl.noaa.gov/data/climateindices/list/',tag:'telekonektivnost'},
+    {icon:'🌎',name:'Wetterzentrale archive',desc:'Arhiv sinoptičnih kart od 1948 — MSLP, 500hPa geopotencial',url:'https://www.wetterzentrale.de/topkarten/fsslpeur.html',tag:'arhiv·1948+'},
+    {icon:'🔭',name:'NOAA 20CR reanalysis',desc:'20. stoletje reanaliza — podatki od 1836, samo tlak na površini',url:'https://psl.noaa.gov/data/20thC_Rean/',tag:'1836–2015'},
+  ]},
+];
+
+function _buildNerdLinks(){
+  const el=document.getElementById('nerd-links-section');
+  if(!el)return;
+  el.innerHTML=_NERD_LINKS.map(section=>`
+    <div class="nerd-section-lbl">${section.cat}</div>
+    <div class="nerd-links-grid">
+      ${section.links.map(l=>`
+        <a class="nerd-link-a" href="${l.url}" target="_blank" rel="noopener">
+          <div class="nerd-link-card">
+            <div class="nerd-link-top">
+              <span class="nerd-link-icon">${l.icon}</span>
+              <span class="nerd-link-name">${l.name}</span>
+            </div>
+            <div class="nerd-link-desc">${l.desc}</div>
+            <span class="nerd-link-tag">${l.tag}</span>
+          </div>
+        </a>`).join('')}
+    </div>`).join('');
+}
+// ═══ end METEO NERD ════════════════════════════════════════
 
 </script>
 <div id="toast"></div>
