@@ -887,6 +887,18 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .visitor-counter.loaded{animation:vc-in .4s ease}
 
+/* News ticker */
+.ticker-wrap{display:flex;align-items:center;height:34px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:1.25rem;overflow:hidden}
+.ticker-tag{flex-shrink:0;background:var(--blue);color:#fff;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:0 .9rem;height:100%;display:flex;align-items:center;white-space:nowrap;border-radius:9px 0 0 9px}
+.ticker-divider{width:1px;height:60%;background:var(--card-border);flex-shrink:0;margin:0 .1rem}
+.ticker-track{flex:1;overflow:hidden;position:relative;height:100%;display:flex;align-items:center}
+.ticker-inner{display:flex;align-items:center;white-space:nowrap;font-size:.75rem;color:var(--text);padding-left:1.5rem;animation:ticker-scroll 45s linear infinite;will-change:transform}
+.ticker-inner:hover{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:.3rem}
+.ticker-dot{color:var(--fc-border);margin:0 .8rem;opacity:.6;font-size:.6rem}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@media(max-width:520px){.ticker-tag{font-size:.55rem;padding:0 .65rem}.ticker-inner{font-size:.7rem}}
+
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -1649,6 +1661,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
   </div></div>
+
+  <!-- ══ NEWS TICKER ══ -->
+  <div class="ticker-wrap" id="ticker-wrap">
+    <div class="ticker-tag">📡 IREICA1</div>
+    <div class="ticker-divider"></div>
+    <div class="ticker-track">
+      <div class="ticker-inner" id="ticker-inner">
+        <span class="ticker-item" style="color:var(--muted)">Nalagam podatke…</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ TAB: AKTUALNO ══ -->
 
@@ -4799,6 +4822,55 @@ function autoAccentCards(){
   });
 }
 
+function buildTicker(){
+  const inner=document.getElementById('ticker-inner');if(!inner)return;
+  const obs=_lastBriefObs,m=obs?.metric||{};
+  const fc=_fcDailyData;
+  const items=[];
+
+  // ── Trenutne razmere ──────────────────────────────────────
+  if(m.temp!=null)items.push(`🌡 Zdaj: <strong style="color:${tempColor(m.temp)}">${m.temp.toFixed(1)}°C</strong>`);
+  if(obs?.humidity!=null)items.push(`💧 Vlažnost: ${Math.round(obs.humidity)}%`);
+  if(m.pressure!=null){
+    const pt=m.pressure>1015?'↑ visok':m.pressure<1005?'↓ nizek':'→ normalen';
+    items.push(`📊 Tlak: ${Math.round(m.pressure)} hPa <span style="color:var(--muted);font-size:.68rem">${pt}</span>`);
+  }
+  if(m.windSpeed>2){
+    const gust=m.windGust??m.windSpeed;
+    items.push(`💨 Veter: ${m.windSpeed.toFixed(1)} km/h${gust>m.windSpeed+3?' · sunki '+gust.toFixed(1)+' km/h':''}`);
+  }
+  if(m.precipTotal>0.1)items.push(`🌧 Padavine danes: ${m.precipTotal.toFixed(1)} mm`);
+
+  // ── Napoved za danes ──────────────────────────────────────
+  if(fc){
+    const tmax=fc.temperature_2m_max[0],tmin=fc.temperature_2m_min[0];
+    const rain=fc.precipitation_sum[0]??0,prob=fc.precipitation_probability_max[0]??0;
+    const wind=fc.wind_speed_10m_max[0]??0,uv=fc.uv_index_max[0]??0;
+    if(tmax!=null&&tmin!=null)items.push(`📅 Danes: ${Math.round(tmax)}° / ${Math.round(tmin)}°C`);
+    if(rain>=0.5)items.push(`🌦 Pričakovane padavine: ${rain.toFixed(1)} mm (${prob}%)`);
+    else if(prob>=30)items.push(`🌦 Možne padavine: ${prob}% verjetnost`);
+    else items.push(`☀️ Suho — padavine malo verjetne`);
+    if(wind>=30)items.push(`🌬 Sunki vetra do ${Math.round(wind)} km/h`);
+    if(uv>=6)items.push(`☀️ UV indeks ${Math.round(uv)} — <span style="color:var(--amber)">priporočljiva zaščita</span>`);
+    else if(uv>=3)items.push(`🌤 UV indeks: ${Math.round(uv)}`);
+    // Jutri preview
+    if(fc.temperature_2m_max[1]!=null){
+      const tm1=fc.temperature_2m_max[1],tn1=fc.temperature_2m_min[1];
+      items.push(`📆 Jutri: ${Math.round(tm1)}° / ${Math.round(tn1)}°C`);
+    }
+  }
+
+  if(!items.length)return;
+
+  const dot='<span class="ticker-dot">●</span>';
+  const content=items.map(i=>`<span class="ticker-item">${i}</span>`).join(dot);
+  // Duplicate for seamless infinite loop
+  inner.innerHTML=content+dot+content;
+  // Scale duration to content length
+  const chars=inner.textContent.length/2;
+  inner.style.animationDuration=Math.max(20,Math.round(chars*0.28))+'s';
+}
+
 function triggerLivePulse(){
   // Hero metric cards
   ['hm-humidity','hm-pressure','hm-wind','hm-rain'].forEach(id=>{
@@ -4868,6 +4940,7 @@ function applyObs(obs){
   generateWhyWeather(obs);
   fetchDailyMicroclimateFingerprint(obs);
   _lastBriefObs=obs;
+  buildTicker();
   checkAIPredAccuracy(m.temp);
   renderDailyAlmanac(obs);
   renderWeatherMemory(obs);
@@ -6742,6 +6815,7 @@ async function fetchLocalDailyForecast(){
     const d=omData.daily;
     if(!d?.time?.length)throw new Error('No Open-Meteo data');
     _fcDailyData=d;
+    buildTicker();
     const wmo=d.weather_code[0]||0;
     const tmax=d.temperature_2m_max[0]??0;
     const tmin=d.temperature_2m_min[0]??0;
