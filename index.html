@@ -10682,9 +10682,10 @@ async function fdRenderGallery(){
     const cat=fdCatById(e.category);
     const q=fdQuality(e);
     const subject=e.subject||(e.category?cat.label:'Opazovanje');
+    // Check localStorage cache, then fall back to embedded imgData (old format)
     const cachedImg=localStorage.getItem(FD_IMG_CACHE+e.id)||'';
+    const prefetched=cachedImg||e.imgData||null;
     const card=document.createElement('div');card.className='obs-card';card.onclick=()=>fdOpenModal(e.id);
-    // img always starts hidden — shown only after src is set (avoids mobile onerror race)
     card.innerHTML=
       `<div class="obs-photo-wrap">`+
       `<img data-eid="${e.id}" class="obs-card-img" alt="" style="display:none">`+
@@ -10701,7 +10702,9 @@ async function fdRenderGallery(){
       (e.photoPhase?`<span class="obs-chip">${e.photoPhase}</span>`:'')+
       `</div></div>`;
     gallery.appendChild(card);
-    fdLoadCardImage(e.id,card,cachedImg||null);
+    fdLoadCardImage(e.id,card,prefetched);
+    // Migrate old-format entries (imgData embedded) to FD_IMG_CACHE + KV if not already there
+    if(e.imgData&&!cachedImg) fdMigrateEntry(e);
   });
 }
 
@@ -10711,10 +10714,28 @@ async function fdLoadCardImage(id,card,prefetched){
   const img=card.querySelector('.obs-card-img');
   const ph=card.querySelector('.obs-photo-placeholder');
   if(!img)return;
-  // Set src first, reveal only after browser confirms it loaded
-  img.onload=()=>{img.style.display='';if(ph)ph.style.display='none';};
-  img.onerror=()=>{img.style.display='none';if(ph)ph.style.display='flex';};
   img.src=imgData;
+  // img.decode() is more reliable than onload for data URLs on mobile
+  try{
+    await img.decode();
+    img.style.display='';
+    if(ph)ph.style.display='none';
+  }catch(_){
+    // decode failed — try onload fallback
+    img.onload=()=>{img.style.display='';if(ph)ph.style.display='none';};
+  }
+}
+
+async function fdMigrateEntry(e){
+  try{localStorage.setItem(FD_IMG_CACHE+e.id,e.imgData);}catch(_){}
+  // Push to KV in background so other devices can see it too
+  try{
+    const r=await fetch(PROXY+'/diary/'+e.id+'/img',{method:'GET'});
+    // Only upload if not already in KV (404 = not there)
+    if(r.status===404){
+      await fetch(PROXY+'/diary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});
+    }
+  }catch(_){}
 }
 
 async function fdOpenModal(id){
@@ -10741,13 +10762,14 @@ async function fdOpenModal(id){
     e.gdd?`🌱 GDD ${e.gdd}`:null,
   ].filter(Boolean).map(b=>`<span class="fd-badge">${b}</span>`).join('');
   m.style.display='flex';
-  // Load image async — set src only after confirmed loaded
   modalImg.style.display='none';
-  fdGetImage(id).then(imgData=>{
+  // Use entry's embedded imgData if available (old format / same device)
+  const localImg=localStorage.getItem(FD_IMG_CACHE+id)||e.imgData||null;
+  (localImg?Promise.resolve(localImg):fdGetImage(id)).then(async imgData=>{
     if(!imgData||!modalImg)return;
-    modalImg.onload=()=>{modalImg.style.display='';};
-    modalImg.onerror=()=>{modalImg.style.display='none';};
     modalImg.src=imgData;
+    try{await modalImg.decode();modalImg.style.display='';}
+    catch(_){modalImg.onload=()=>{modalImg.style.display='';};};
   });
 }
 function fdModalSelectCat(el){
