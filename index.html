@@ -5145,7 +5145,7 @@ function applyOnThisDay(results){
     const note=document.createElement('div');
     note.style.cssText='grid-column:1/-1;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.35);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.5rem';
     note.innerHTML='<div style="font-size:.82rem;font-weight:600;color:#38bdf8;margin-bottom:.3rem">🌊 '+FLOOD_2023.dateSl+' — Katastrofalne poplave</div>'
-      +'<div style="font-size:.74rem;color:var(--muted);line-height:1.7">Postaja je v '+FLOOD_2023.duration_h+' urah zabeležila vsaj <strong style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm</strong> padavin, nato pa je nastopil izpad elektrike. '+FLOOD_2023.context+'</div>';
+      +'<div style="font-size:.74rem;color:var(--muted);line-height:1.7">Postaja je v '+FLOOD_2023.duration_h+' urah zabeležila <strong style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm</strong> padavin (podatki popolni — ročno odčitano). '+FLOOD_2023.context+'</div>';
     grid.appendChild(note);
   }
 
@@ -5166,7 +5166,7 @@ function applyOnThisDay(results){
         ? '<div class="otd-temps"><span class="th">'+r.tMax.toFixed(1)+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+r.tMin.toFixed(1)+'°</span></div>'
           +(r.rain>0?'<div class="otd-rain">🌧 '+r.rain.toFixed(1)+' mm</div>':'')
           +'<div class="otd-wind">💨 '+(r.wind!=null?r.wind.toFixed(1)+' km/h':'—')+'</div>'
-        : is2023aug?'<div class="otd-rain" style="color:#38bdf8">≥'+FLOOD_2023.rainfall_mm+' mm/12h</div>':''
+        : is2023aug?'<div class="otd-rain" style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm/12h</div>':''
       );
     grid.appendChild(item);
   });
@@ -8390,7 +8390,7 @@ const FLOOD_2023 = {
   dateSl: '3./4. avgust 2023',
   rainfall_mm: 235.5,
   duration_h: 12,
-  note: 'Izpad elektrike med nevihto — postaja je prenehala beležiti. Dejansko skupno je verjetno precej preseglo 235,5 mm.',
+  note: 'Postaja deluje na baterije, zato so bili podatki ročno odčitani in so popolni. Med izpadom električne energije poročanje na internet ni bilo mogoče, podatki pa so bili naknadno vneseni ročno.',
   context: 'Avgustovske poplave 2023 so bile najhujše naravne katastrofe v Sloveniji v zadnjih desetletjih. Savinjska dolina je bila med najbolj prizadetimi področji — reka Savinja je prestopila bregove na številnih mestih.',
   impact: 'Rečica ob Savinji: poplavljeni kleti, kmetijske površine, cesta vzdolž Savinje. Elektrika ugasnila med nevihto.',
   source: 'Osebna meteorološka postaja IREICA1 (Weather Underground)',
@@ -8440,7 +8440,7 @@ function initExtremes(){
   if(!floodAlreadyIn){
     events.push({
       type:'flood',icon:'🌊',label:'KATASTROFALNE POPLAVE',
-      sub:FLOOD_2023.rainfall_mm+' mm v '+FLOOD_2023.duration_h+'h (+ izpad elektrike)',
+      sub:FLOOD_2023.rainfall_mm+' mm v '+FLOOD_2023.duration_h+'h (ročno odčitano — podatki popolni)',
       date:FLOOD_2023.dateSl,sort:'2023-08-04',
       badge:'🔴 REKORD POSTAJE',bc:'rgba(56,189,248,.18)',
       detail:FLOOD_2023.context+' '+FLOOD_2023.note,
@@ -8540,7 +8540,7 @@ function initRecords(){
       {icon:'☀️',val:maxSummer.val+' dni',lbl:'Največ poletnih dni (≥25°C)',date:String(maxSummer.yr),col:'var(--amber)'},
       {icon:'🔥',val:maxHot.val+' dni',  lbl:'Največ vročih dni (≥30°C)',date:String(maxHot.yr),col:'var(--red)'},
       {icon:'❄️',val:maxFrost.val+' dni',lbl:'Največ zmrzalnih dni (≤0°C)',date:String(maxFrost.yr),col:'var(--cyan)'},
-      {icon:'🌊',val:'≥'+FLOOD_2023.rainfall_mm+' mm',lbl:'Rekord padavin/12h (poplave)',date:FLOOD_2023.dateSl,col:'#38bdf8',special:true,note:'⚠️ Izpad el. — dejanska skupna neznana'},
+      {icon:'🌊',val:FLOOD_2023.rainfall_mm+' mm',lbl:'Rekord padavin/12h (poplave)',date:FLOOD_2023.dateSl,col:'#38bdf8',special:true,note:'✅ Ročno odčitano — podatki popolni'},
     ].filter(Boolean);
 
     hof.innerHTML=items.map(it=>`<div class="rec-hof-card" style="${it.special?'border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.06)':''}"><div class="rec-hof-icon">${it.icon}</div><div class="rec-hof-val" style="color:${it.col}">${it.val}</div><div class="rec-hof-lbl">${it.lbl}</div><div class="rec-hof-date">${it.date}</div>${it.note?`<div style="font-size:.7rem;color:var(--amber);margin-top:.2rem">${it.note}</div>`:''}</div>`).join('');
@@ -10597,7 +10597,7 @@ function buildTriviaRecords(){
   const rows=[
     {lbl:'🌡 Maks. temp.',mine:maxT.v.tempAvg!=null?maxT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(maxT.d),slo:'41.0°C',sloD:'Črnomelj, 19.7.1950',world:'54.4°C',worldD:'Death Valley, CA, 2020'},
     {lbl:'❄️ Min. temp.',mine:minT.v.tempAvg!=null?minT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(minT.d),slo:'−34.5°C',sloD:'Babno Polje, 13.2.1956',world:'−89.2°C',worldD:'Vostok, Antarktika, 1983'},
-    {lbl:'🌧 Max. padavine/dan',mine:'≥'+FLOOD_2023.rainfall_mm+' mm ⚠️',mineD:'3./4. avg 2023 (12h; izpad el.)',slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
+    {lbl:'🌧 Max. padavine/dan',mine:FLOOD_2023.rainfall_mm+' mm',mineD:'3./4. avg 2023 (12h; ročno odčitano)',slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
     {lbl:'💨 Max. sunek',mine:maxW.v.windspeedHigh!=null?maxW.v.windspeedHigh.toFixed(0)+' km/h':'—',mineD:fmtD(maxW.d),slo:'180 km/h',sloD:'Godič, 1989',world:'408 km/h',worldD:'Barrow Island, AUS, 1996'},
   ];
   el.innerHTML='<div class="rec-compare">'+
