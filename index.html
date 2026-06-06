@@ -16123,16 +16123,35 @@ function _mtnTempAtElev(T_valley,elev_valley,elev_target){
   return T_valley - 6.5*(elev_target-elev_valley)/1000;
 }
 
+// Compute daily {max,min} of freezinglevel_height from hourly data
+function _dailyFreezeStats(h){
+  const map={};
+  (h.time||[]).forEach((t,i)=>{
+    const date=t.slice(0,10),v=h.freezinglevel_height?.[i];
+    if(v==null)return;
+    if(!map[date]){map[date]={max:v,min:v};}
+    else{map[date].max=Math.max(map[date].max,v);map[date].min=Math.min(map[date].min,v);}
+  });
+  return Object.entries(map).sort(([a],[b])=>a<b?-1:1).map(([date,s])=>({date,...s}));
+}
+
 async function initGore(){
   if(_goreInit)return; _goreInit=true;
   try{
     const now=Date.now();
     if(!_goreCache||now-_goreCacheT>3600000){
-      const params='daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max,freezinglevel_height_max,freezinglevel_height_min&current=temperature_2m,wind_speed_10m,wind_gusts_10m,snowfall,freezinglevel_height&timezone=Europe%2FLjubljana&forecast_days=7';
+      const params='hourly=freezinglevel_height,snowfall'
+        +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,'
+        +'snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max'
+        +'&current=temperature_2m,wind_speed_10m,wind_gusts_10m'
+        +'&timezone=Europe%2FLjubljana&forecast_days=7';
       const [triglav,krvavec]=await Promise.all([
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_TRIGLAV_LAT}&longitude=${MTN_TRIGLAV_LON}&${params}`).then(r=>r.json()),
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_KRVAVEC_LAT}&longitude=${MTN_KRVAVEC_LON}&${params}`).then(r=>r.json()),
       ]);
+      // Pre-compute daily freeze stats from hourly
+      triglav._freezeStats=_dailyFreezeStats(triglav.hourly||{});
+      krvavec._freezeStats=_dailyFreezeStats(krvavec.hourly||{});
       _goreCache={triglav,krvavec}; _goreCacheT=now;
     }
     _buildGoreKPIs(_goreCache);
@@ -16144,10 +16163,9 @@ async function initGore(){
 
 function _buildGoreKPIs({triglav}){
   const el=document.getElementById('mtn-kpis'); if(!el)return;
-  const c=triglav.current||{};
   const d=triglav.daily||{};
-  const freeze=c.freezinglevel_height??d.freezinglevel_height_max?.[0]??null;
-  // Estimate Triglav summit temp (2864m from valley ~500m level)
+  const fs=triglav._freezeStats||[];
+  const freeze=fs[0]?.max??null;
   const tVallMax=d.temperature_2m_max?.[0]??null;
   const tTriglav=tVallMax!=null?_mtnTempAtElev(tVallMax,500,2864):null;
   const snowfall=d.snowfall_sum?.[0]??null;
@@ -16165,11 +16183,11 @@ function _buildGoreFreeze({triglav}){
   const chartEl=document.getElementById('mtn-freeze-chart');
   const legEl=document.getElementById('mtn-freeze-legend');
   if(!chartEl)return;
-  const d=triglav.daily||{};
-  const n=Math.min(7,(d.time||[]).length);
+  const fs=triglav._freezeStats||[];
+  const n=Math.min(7,fs.length);
   if(!n){chartEl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
-  const maxH=d.freezinglevel_height_max||[];
-  const minH=d.freezinglevel_height_min||[];
+  const maxH=fs.map(s=>s.max);
+  const minH=fs.map(s=>s.min);
   const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
   // SVG bar chart 0–4000m
   const W=880,H=100,pad={l:40,r:10,t:10,b:20};
@@ -16199,7 +16217,7 @@ function _buildGoreFreeze({triglav}){
     const barH=Math.max(3,yBot-yTop);
     const col=hi<1000?'#818cf8':hi<2000?'#60a5fa':hi<3000?'#4ade80':'#fbbf24';
     svg+=`<rect x="${x}" y="${yTop}" width="${bW}" height="${barH}" fill="${col}" rx="2" opacity=".8"/>`;
-    const dt=new Date(d.time[i]);
+    const dt=new Date(fs[i].date);
     svg+=`<text x="${x+bW/2}" y="${H-3}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${days[dt.getDay()]}</text>`;
   }
   svg+='</svg>';
