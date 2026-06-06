@@ -10028,8 +10028,47 @@ function generateRuleBasedBrief(p){
 // ══════════════════════════════════════════════════════════
 // ── Fotodnevnik ────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
-const FD_KEY='fd-diary-v1';
-let _fdCurrent=null,_pendingEntry=null,_fdFilter='all';
+const FD_KEY='fd-diary-v1'; // legacy localStorage key (read-only fallback)
+const FD_IMG_CACHE='diary:img:'; // localStorage prefix for image cache
+let _fdCurrent=null,_pendingEntry=null,_fdFilter='all',_diaryEntries=[];
+
+// ── Diary API helpers ──────────────────────────────────────
+async function fdLoadDiary(){
+  try{
+    const r=await fetch(PROXY+'/diary');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return await r.json();
+  }catch(e){
+    console.warn('Diary API:',e.message);
+    // fallback: old localStorage entries (read-only)
+    try{return JSON.parse(localStorage.getItem(FD_KEY)||'[]');}catch(_){return[];}
+  }
+}
+async function fdGetImage(id){
+  const k=FD_IMG_CACHE+id;
+  const c=localStorage.getItem(k);if(c)return c;
+  try{
+    const r=await fetch(PROXY+'/diary/'+id+'/img');
+    if(!r.ok)return null;
+    const{imgData}=await r.json();
+    if(imgData){try{localStorage.setItem(k,imgData);}catch(_){}}
+    return imgData||null;
+  }catch(_){return null;}
+}
+async function fdSaveEntry(entry){
+  if(entry.imgData){try{localStorage.setItem(FD_IMG_CACHE+entry.id,entry.imgData);}catch(_){}}
+  const r=await fetch(PROXY+'/diary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+}
+async function fdUpdateEntry(id,updates){
+  const r=await fetch(PROXY+'/diary/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+}
+async function fdDeleteFromAPI(id){
+  try{localStorage.removeItem(FD_IMG_CACHE+id);}catch(_){}
+  const r=await fetch(PROXY+'/diary/'+id,{method:'DELETE'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+}
 
 const OBS_CATEGORIES=[
   {id:'storm',   emoji:'⛈️', label:'Nevihta'},
@@ -10051,14 +10090,6 @@ function fdQuality(e){
   return{label:'Priložnostno',col:'var(--muted)',icon:'📌'};
 }
 
-function fdLoadDiary(){
-  try{return JSON.parse(localStorage.getItem(FD_KEY)||'[]');}catch(_){return[];}
-}
-function fdSaveDiary(entries){
-  try{localStorage.setItem(FD_KEY,JSON.stringify(entries));}
-  catch(e){if((e.name==='QuotaExceededError'||e.code===22)&&entries.length>1){entries.splice(entries.length-1,1);fdSaveDiary(entries);}
-  else{const g=document.getElementById('fd-gallery');if(g)g.insertAdjacentHTML('afterbegin','<div style="color:var(--red);font-size:.78rem;padding:.5rem;background:rgba(248,113,113,.1);border-radius:8px;margin-bottom:.75rem">⚠️ Ni dovolj prostora. Izbrišite starejše vnose.</div>');}}
-}
 function fdCompress(dataUrl,cb){const img=new Image();img.onload=()=>{const MAX=900,r=Math.min(MAX/img.width,MAX/img.height,1);const c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.65));};img.onerror=()=>cb(dataUrl);img.src=dataUrl;}
 
 function fdAddEntry(input){
@@ -10095,21 +10126,27 @@ function fdShowCatPicker(){
   document.getElementById('obs-subject-input').value='';
   document.getElementById('obs-cat-modal').style.display='flex';
 }
-function fdSelectCat(el,id){
+function fdSelectCat(el){
   document.querySelectorAll('#obs-cat-grid .obs-cat-opt').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
 }
 function fdCancelCat(){_pendingEntry=null;document.getElementById('obs-cat-modal').style.display='none';}
-function fdConfirmCat(){
+async function fdConfirmCat(){
   if(!_pendingEntry)return;
-  const sel=document.querySelector('#obs-cat-grid .obs-cat-opt.selected');
-  _pendingEntry.category=sel?.dataset.cat||'';
-  _pendingEntry.subject=document.getElementById('obs-subject-input').value.trim();
-  const entries=fdLoadDiary();entries.unshift(_pendingEntry);
-  if(entries.length>100)entries.splice(100);
-  fdSaveDiary(entries);fdRenderGallery();
-  document.getElementById('obs-cat-modal').style.display='none';
-  _pendingEntry=null;
+  const btn=document.querySelector('#obs-cat-modal .obs-btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Shranjujem…';}
+  try{
+    const sel=document.querySelector('#obs-cat-grid .obs-cat-opt.selected');
+    _pendingEntry.category=sel?.dataset.cat||'';
+    _pendingEntry.subject=document.getElementById('obs-subject-input').value.trim();
+    await fdSaveEntry(_pendingEntry);
+    document.getElementById('obs-cat-modal').style.display='none';
+    _pendingEntry=null;
+    fdRenderGallery();
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='Shrani opazovanje';}
+    alert('Napaka pri shranjevanju: '+e.message);
+  }
 }
 
 function fdFilter(cat,btn){
@@ -10119,11 +10156,15 @@ function fdFilter(cat,btn){
   fdRenderGallery();
 }
 
-function fdRenderGallery(){
+async function fdRenderGallery(){
   const gallery=document.getElementById('fd-gallery');
   const empty=document.getElementById('fd-empty');
   if(!gallery)return;
-  const all=fdLoadDiary();
+
+  // Show skeleton while loading
+  gallery.style.opacity='0.5';
+  const all=await fdLoadDiary();
+  _diaryEntries=all;
 
   // Stats bar
   const statsEl=document.getElementById('obs-stats');
@@ -10137,10 +10178,6 @@ function fdRenderGallery(){
       `<div class="obs-stat"><span class="obs-stat-val">${cats||'—'}</span><span class="obs-stat-lbl">kategorij</span></div>`;
   }
 
-  // Storage label
-  const storLbl=document.getElementById('fd-storage-lbl');
-  if(storLbl){const kb=Math.round(JSON.stringify(all).length/1024);const pct=Math.min(100,Math.round(kb/5120*100));storLbl.textContent=`${kb<1024?kb+' KB':(kb/1024).toFixed(1)+' MB'} / ~5 MB`;storLbl.style.color=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--muted)';}
-
   // Filter row
   const filterRow=document.getElementById('obs-filter-row');
   if(filterRow){
@@ -10149,91 +10186,105 @@ function fdRenderGallery(){
       used.map(c=>`<button class="obs-filter-btn${_fdFilter===c.id?' active':''}" onclick="fdFilter('${c.id}',this)">${c.emoji} ${c.label}</button>`).join('');
   }
 
-  if(!all.length){gallery.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(!all.length){gallery.innerHTML='';gallery.style.opacity='1';if(empty)empty.style.display='block';return;}
   if(empty)empty.style.display='none';
 
   const entries=_fdFilter==='all'?all:all.filter(e=>e.category===_fdFilter);
+  gallery.innerHTML='';
+  gallery.style.opacity='1';
 
-  gallery.style.transition='opacity .15s';gallery.style.opacity='0';
-  requestAnimationFrame(()=>{
-    gallery.innerHTML='';
-    if(!entries.length){
-      gallery.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:1.5rem 0">Ni opazovanj za ta filter.</div>';
-    } else {
-      entries.forEach(e=>{
-        const cat=fdCatById(e.category);
-        const q=fdQuality(e);
-        const subject=e.subject||(e.category?cat.label:'Opazovanje');
-        const card=document.createElement('div');card.className='obs-card';card.onclick=()=>fdOpenModal(e.id);
-        card.innerHTML=
-          `<div class="obs-photo-wrap">`+
-          `<img src="${e.imgData}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">`+
-          `<div class="obs-photo-placeholder" style="display:none">📷</div>`+
-          `<div class="obs-quality" style="color:${q.col}">${q.icon} ${q.label}</div>`+
-          (e.category?`<div class="obs-cat-chip">${cat.emoji} ${cat.label}</div>`:'')+
-          `</div>`+
-          `<div class="obs-card-body">`+
-          `<div class="obs-card-subject">${subject}</div>`+
-          `<div class="obs-card-date">📅 ${e.date} · ${e.time}</div>`+
-          `<div class="obs-card-chips">`+
-          (e.weather?.temp!=null&&e.weather.temp!=='—'?`<span class="obs-chip">🌡 ${e.weather.temp}°C</span>`:'')+
-          (e.weather?.hum!=null&&e.weather.hum!=='—'?`<span class="obs-chip">💧 ${e.weather.hum}%</span>`:'')+
-          (e.photoPhase?`<span class="obs-chip">${e.photoPhase}</span>`:'')+
-          `</div></div>`;
-        gallery.appendChild(card);
-      });
-    }
-    requestAnimationFrame(()=>{gallery.style.opacity='1';});
+  if(!entries.length){
+    gallery.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:1.5rem 0">Ni opazovanj za ta filter.</div>';
+    return;
+  }
+
+  entries.forEach(e=>{
+    const cat=fdCatById(e.category);
+    const q=fdQuality(e);
+    const subject=e.subject||(e.category?cat.label:'Opazovanje');
+    const cachedImg=localStorage.getItem(FD_IMG_CACHE+e.id)||'';
+    const card=document.createElement('div');card.className='obs-card';card.onclick=()=>fdOpenModal(e.id);
+    card.innerHTML=
+      `<div class="obs-photo-wrap">`+
+      `<img${cachedImg?' src="'+cachedImg+'"':''} data-eid="${e.id}" class="obs-card-img" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+      `<div class="obs-photo-placeholder" style="display:${cachedImg?'none':'flex'}">📷</div>`+
+      `<div class="obs-quality" style="color:${q.col}">${q.icon} ${q.label}</div>`+
+      (e.category?`<div class="obs-cat-chip">${cat.emoji} ${cat.label}</div>`:'')+
+      `</div>`+
+      `<div class="obs-card-body">`+
+      `<div class="obs-card-subject">${subject}</div>`+
+      `<div class="obs-card-date">📅 ${e.date} · ${e.time}</div>`+
+      `<div class="obs-card-chips">`+
+      (e.weather?.temp&&e.weather.temp!=='—'?`<span class="obs-chip">🌡 ${e.weather.temp}°C</span>`:'')+
+      (e.weather?.hum&&e.weather.hum!=='—'?`<span class="obs-chip">💧 ${e.weather.hum}%</span>`:'')+
+      (e.photoPhase?`<span class="obs-chip">${e.photoPhase}</span>`:'')+
+      `</div></div>`;
+    gallery.appendChild(card);
+    // Async-load image if not cached
+    if(!cachedImg) fdLoadCardImage(e.id,card);
   });
 }
 
-function fdOpenModal(id){
-  const entries=fdLoadDiary();
-  const e=entries.find(x=>x.id===id);if(!e)return;
-  _fdCurrent=id;
+async function fdLoadCardImage(id,card){
+  const imgData=await fdGetImage(id);if(!imgData)return;
+  const img=card.querySelector('.obs-card-img');
+  const ph=card.querySelector('.obs-photo-placeholder');
+  if(img){img.src=imgData;img.style.display='';}
+  if(ph)ph.style.display='none';
+}
+
+async function fdOpenModal(id){
+  const e=_diaryEntries.find(x=>String(x.id)===String(id));if(!e)return;
+  _fdCurrent=String(id);
   const m=document.getElementById('fd-modal');if(!m)return;
-  document.getElementById('fd-modal-img').src=e.imgData;
+  // Show modal immediately with placeholder image
+  const modalImg=document.getElementById('fd-modal-img');
+  modalImg.src='';
   document.getElementById('fd-modal-title').textContent=e.date+' · '+e.time;
   document.getElementById('fd-modal-notes').value=e.notes||'';
   document.getElementById('fd-modal-subject').value=e.subject||'';
-  // Category selector in modal
   const catGrid=document.getElementById('fd-modal-cat-grid');
-  if(catGrid)catGrid.innerHTML=OBS_CATEGORIES.map(c=>`<div class="obs-cat-opt${e.category===c.id?' selected':''}" data-cat="${c.id}" onclick="fdModalSelectCat(this,'${c.id}')"><span class="obs-cat-emoji">${c.emoji}</span>${c.label}</div>`).join('');
+  if(catGrid)catGrid.innerHTML=OBS_CATEGORIES.map(c=>`<div class="obs-cat-opt${e.category===c.id?' selected':''}" data-cat="${c.id}" onclick="fdModalSelectCat(this)"><span class="obs-cat-emoji">${c.emoji}</span>${c.label}</div>`).join('');
   const badges=document.getElementById('fd-modal-badges');
   const q=fdQuality(e);
   if(badges)badges.innerHTML=[
     `<span style="color:${q.col}">${q.icon} ${q.label}</span>`,
     e.photoPhase,
-    e.weather?.temp!=='—'?`🌡 ${e.weather?.temp}°C`:null,
-    e.weather?.hum!=='—'?`💧 ${e.weather?.hum}%`:null,
-    e.weather?.wind!=='—'?`💨 ${e.weather?.wind} km/h`:null,
+    e.weather?.temp&&e.weather.temp!=='—'?`🌡 ${e.weather.temp}°C`:null,
+    e.weather?.hum&&e.weather.hum!=='—'?`💧 ${e.weather.hum}%`:null,
+    e.weather?.wind&&e.weather.wind!=='—'?`💨 ${e.weather.wind} km/h`:null,
     e.moon?.emoji&&e.moon?.phase?e.moon.emoji+' '+e.moon.phase:null,
     e.gdd?`🌱 GDD ${e.gdd}`:null,
   ].filter(Boolean).map(b=>`<span class="fd-badge">${b}</span>`).join('');
   m.style.display='flex';
+  // Load image async
+  fdGetImage(id).then(img=>{if(img&&modalImg)modalImg.src=img;});
 }
-function fdModalSelectCat(el,id){
+function fdModalSelectCat(el){
   document.querySelectorAll('#fd-modal-cat-grid .obs-cat-opt').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
 }
 function fdCloseModal(){const m=document.getElementById('fd-modal');if(m)m.style.display='none';_fdCurrent=null;}
-function fdSaveNotes(){
+async function fdSaveNotes(){
   if(!_fdCurrent)return;
-  const entries=fdLoadDiary();const idx=entries.findIndex(x=>x.id===_fdCurrent);
-  if(idx>=0){
-    entries[idx].notes=document.getElementById('fd-modal-notes').value;
-    entries[idx].subject=document.getElementById('fd-modal-subject').value.trim();
-    const sel=document.querySelector('#fd-modal-cat-grid .obs-cat-opt.selected');
-    if(sel)entries[idx].category=sel.dataset.cat;
-    fdSaveDiary(entries);fdRenderGallery();
-  }
-  fdCloseModal();
+  const updates={
+    notes:document.getElementById('fd-modal-notes').value,
+    subject:document.getElementById('fd-modal-subject').value.trim(),
+  };
+  const sel=document.querySelector('#fd-modal-cat-grid .obs-cat-opt.selected');
+  if(sel)updates.category=sel.dataset.cat;
+  try{
+    await fdUpdateEntry(_fdCurrent,updates);
+    fdCloseModal();fdRenderGallery();
+  }catch(e){alert('Napaka: '+e.message);}
 }
-function fdDeleteEntry(){
+async function fdDeleteEntry(){
   if(!_fdCurrent)return;
-  if(!confirm('Izbriši opazovanje iz dnevnika?'))return;
-  const entries=fdLoadDiary().filter(x=>x.id!==_fdCurrent);
-  fdSaveDiary(entries);fdRenderGallery();fdCloseModal();
+  if(!confirm('Izbriši opazovanje?'))return;
+  try{
+    await fdDeleteFromAPI(_fdCurrent);
+    fdCloseModal();fdRenderGallery();
+  }catch(e){alert('Napaka: '+e.message);}
 }
 
 // ══════════════════════════════════════════════════════════
