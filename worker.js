@@ -492,6 +492,30 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         }
       }
 
+      // ── /enso ────────────────────────────────────────────
+      if (path === "/enso") {
+        const oniUrl = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt";
+        try {
+          const r = await fetch(oniUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const text = await r.text();
+          const records = [];
+          for (const line of text.trim().split('\n').slice(1)) {
+            const p = line.trim().split(/\s+/);
+            if (p.length < 3) continue;
+            const v = parseFloat(p[2]);
+            if (!isNaN(v) && v !== -99.9) records.push({ s: p[0], y: parseInt(p[1]), a: v });
+          }
+          return new Response(JSON.stringify(records.slice(-36)), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" },
+          });
+        } catch(e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // ── /arso-forecast ───────────────────────────────────
       // ARSO krajevna napoved — Rečica ob Savinji
       if (path === "/arso-forecast") {
