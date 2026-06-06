@@ -1006,6 +1006,35 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .mtn-avk-link:hover{border-color:var(--blue);color:var(--blue)}
 @media(max-width:520px){.sea-fc-row,.mtn-fc-row{grid-template-columns:repeat(4,1fr)}}
 /* ── end Morje & Gore ────────────────────────────────────── */
+/* ── Padalci ─────────────────────────────────────────────── */
+.fly-kpi-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.fly-kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.55rem .75rem;min-width:88px;flex:1}
+.fly-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text)}
+.fly-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
+.fly-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.06rem}
+.fly-window-wrap{position:relative;margin-top:.7rem}
+.fly-slots{display:grid;gap:2px}
+.fly-slot{border-radius:4px;min-height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.6rem;font-weight:600;color:rgba(0,0,0,.7);padding:.15rem .1rem;transition:opacity .2s}
+.fly-go{background:rgba(74,222,128,.65)}
+.fly-maybe{background:rgba(251,191,36,.6)}
+.fly-no{background:rgba(248,113,113,.35);color:var(--muted)}
+.fly-night{background:rgba(100,116,139,.1);color:var(--muted)}
+.fly-slot-time{font-size:.58rem;opacity:.75;margin-bottom:.1rem}
+.fly-slot-bl{font-size:.62rem;font-weight:700}
+.fly-lbl-row{display:flex;gap:2px;margin-top:.25rem}
+.fly-lbl{flex:1;text-align:center;font-size:.58rem;color:var(--muted)}
+.fly-daily-row{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-top:.65rem}
+.fly-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.45rem .3rem;text-align:center}
+.fly-day-name{font-size:.62rem;color:var(--muted);margin-bottom:.2rem}
+.fly-day-badge{font-size:1.1rem;margin:.1rem 0}
+.fly-day-score{font-size:.68rem;font-weight:700;margin:.1rem 0}
+.fly-day-sub{font-size:.6rem;color:var(--muted);margin-top:.15rem;line-height:1.3}
+.fly-bl-chart{position:relative;margin:.65rem 0 .2rem}
+.fly-bl-svg{width:100%;height:100%;display:block}
+.fly-legend{display:flex;flex-wrap:wrap;gap:.5rem;font-size:.63rem;color:var(--muted);margin-top:.25rem}
+.fly-legend span{display:flex;align-items:center;gap:.25rem}
+@media(max-width:520px){.fly-daily-row{grid-template-columns:repeat(4,1fr)}}
+/* ── end Padalci ──────────────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -1731,6 +1760,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-forecast2" onclick="switchTab('forecast2');closeTabDDs()">🔮 Lokalna napoved</button>
         <button id="tab-btn-morje"     onclick="switchTab('morje');closeTabDDs()">🌊 Morje</button>
         <button id="tab-btn-gore"      onclick="switchTab('gore');closeTabDDs()">⛰ Gore</button>
+        <button id="tab-btn-padalci"   onclick="switchTab('padalci');closeTabDDs()">🪂 Padalci</button>
       </div>
     </div>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
@@ -3635,6 +3665,41 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div><!-- /tab-gore -->
 
+  <!-- ═══ PADALCI TAB ═══ -->
+  <div id="tab-padalci" class="tab-pane">
+    <div class="fly-kpi-row" id="fly-kpis">
+      <div class="fly-kpi"><div class="fly-kpi-val">…</div><div class="fly-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🪂 Okno letenja — danes (6–20h)</div>
+      <div id="fly-window-body" style="margin-top:.5rem;color:var(--muted);font-size:.78rem">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📈 Višina konvekcijskega sloja (BL) — danes</div>
+      <div class="fly-bl-chart" id="fly-bl-chart" style="height:110px">
+        <div style="font-size:.75rem;color:var(--muted);padding-top:1rem">Nalagam…</div>
+      </div>
+      <div class="fly-legend" id="fly-bl-legend"></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📅 7-dnevni pregled — priletnost</div>
+      <div class="fly-daily-row" id="fly-daily-body">Nalagam…</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔗 Padalski vremenski viri</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://xcmeteo.net/" target="_blank" rel="noopener" class="mtn-avk-link">🌤 XCmeteo</a>
+        <a href="https://www.meteo-parapente.com/#/46.33,14.92,11" target="_blank" rel="noopener" class="mtn-avk-link">🪂 Meteo Parapente</a>
+        <a href="https://www.windguru.cz/49928" target="_blank" rel="noopener" class="mtn-avk-link">💨 Windguru — Celje</a>
+        <a href="https://www.xcskies.com/" target="_blank" rel="noopener" class="mtn-avk-link">☁️ XCSkies</a>
+        <a href="https://www.burnair.ch/" target="_blank" rel="noopener" class="mtn-avk-link">🔥 Burnair</a>
+        <a href="https://www.paraglidingmap.com/" target="_blank" rel="noopener" class="mtn-avk-link">🗺 ParaglidingMap</a>
+        <a href="https://www.xcontest.org/world/sl/" target="_blank" rel="noopener" class="mtn-avk-link">🏆 XContest SI</a>
+        <a href="https://skysight.io/" target="_blank" rel="noopener" class="mtn-avk-link">🔭 SkySight</a>
+      </div>
+    </div>
+  </div><!-- /tab-padalci -->
+
   <!-- ═══ EKSTREMNI DOGODKI ═══ -->
   <div id="tab-extremes" class="tab-pane">
     <div class="ev-filter" id="ev-filter">
@@ -5402,7 +5467,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','morje','gore'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','morje','gore','padalci'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -5434,6 +5499,7 @@ function switchTab(tab){
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='morje'){     initMorje(); }
   if(tab==='gore'){      initGore(); }
+  if(tab==='padalci'){   initPadalci(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='storm'){     initStormChaser(); }
@@ -15721,6 +15787,209 @@ function renderNASAAgro(data){
   const src=`<div class="nasa-src">NASA POWER · satelitski + modelski podatki · klimatološko povprečje 1994–2023</div>`;
   el.innerHTML=kpi+s1+s2+s3+src;
 }
+
+// ═══ PADALCI ══════════════════════════════════════════════
+let _padalciInit=false,_padalciCache=null,_padalciCacheT=0;
+
+async function initPadalci(){
+  if(_padalciInit)return; _padalciInit=true;
+  try{
+    const now=Date.now();
+    if(!_padalciCache||now-_padalciCacheT>3600000){
+      const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+        +'&hourly=boundary_layer_height,cape,lifted_index,wind_speed_10m,wind_speed_80m,'
+        +'wind_direction_10m,wind_direction_80m,precipitation_probability,precipitation,'
+        +'is_day,temperature_2m,dew_point_2m'
+        +'&daily=temperature_2m_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,'
+        +'sunshine_duration,weather_code'
+        +'&timezone=Europe%2FLjubljana&forecast_days=7';
+      _padalciCache=await fetch(url).then(r=>r.json());
+      _padalciCacheT=now;
+    }
+    _buildPadalciKPIs(_padalciCache);
+    _buildPadalciFlyWindow(_padalciCache);
+    _buildPadalciBLChart(_padalciCache);
+    _buildPadalciDailyFc(_padalciCache);
+  }catch(e){console.error('initPadalci',e);}
+}
+
+// Flyability score 0–100 for a single hour
+function _flyScore(windKmh,precipProb,cape,blH,isDay){
+  if(!isDay)return -1; // night
+  if(precipProb>70)return 0;
+  if(windKmh>45)return 0;
+  let s=100;
+  if(windKmh>35)s-=50;
+  else if(windKmh>25)s-=30;
+  else if(windKmh>18)s-=15;
+  if(cape>2000)s-=50;
+  else if(cape>1000)s-=30;
+  else if(cape>500)s-=15;
+  if(precipProb>50)s-=35;
+  else if(precipProb>30)s-=20;
+  else if(precipProb>15)s-=10;
+  if(blH<200)s-=25;
+  else if(blH<500)s-=10;
+  else if(blH>1500)s+=5;
+  return Math.max(0,Math.min(100,s));
+}
+
+function _flyLabel(score){
+  if(score<0)return{cls:'fly-night',txt:'•',bl:''};
+  if(score>=70)return{cls:'fly-go',txt:'FLY',col:'rgba(20,83,45,.9)'};
+  if(score>=40)return{cls:'fly-maybe',txt:'MAY',col:'rgba(92,45,3,.9)'};
+  return{cls:'fly-no',txt:'NO',col:null};
+}
+
+function _buildPadalciKPIs(d){
+  const el=document.getElementById('fly-kpis');if(!el)return;
+  const h=d.hourly||{};
+  const today=new Date().toISOString().slice(0,10);
+  // Collect today's daytime hours
+  const todayIdxs=[];
+  (h.time||[]).forEach((t,i)=>{if(t.startsWith(today)&&h.is_day?.[i])todayIdxs.push(i);});
+  const blVals=todayIdxs.map(i=>h.boundary_layer_height?.[i]??0).filter(v=>v>0);
+  const capeVals=todayIdxs.map(i=>h.cape?.[i]??0);
+  const windVals=todayIdxs.map(i=>h.wind_speed_10m?.[i]??0);
+  const maxBL=blVals.length?Math.round(Math.max(...blVals)):null;
+  const maxCAPE=capeVals.length?Math.round(Math.max(...capeVals)):null;
+  const maxWind=windVals.length?Math.round(Math.max(...windVals)):null;
+  const flyHours=todayIdxs.filter(i=>_flyScore(h.wind_speed_10m?.[i]??0,h.precipitation_probability?.[i]??0,h.cape?.[i]??0,h.boundary_layer_height?.[i]??0,h.is_day?.[i])>=70).length;
+  const kpis=[
+    {val:maxBL!=null?maxBL+' m':'—',lbl:'Max BL višina',sub:'konvekcijski strop',col:maxBL!=null&&maxBL>1500?'var(--green)':maxBL!=null&&maxBL<400?'var(--muted)':null},
+    {val:flyHours>0?flyHours+'h':'0h',lbl:'Ure letenja',sub:'score ≥70, danes',col:flyHours>=4?'var(--green)':flyHours>=2?'var(--amber)':flyHours>0?'var(--muted)':'var(--red)'},
+    {val:maxCAPE!=null?maxCAPE+' J/kg':'—',lbl:'Max CAPE',sub:maxCAPE!=null&&maxCAPE>1000?'⚠️ nevihtno':maxCAPE!=null&&maxCAPE>500?'pozor':'ok',col:maxCAPE!=null&&maxCAPE>1000?'var(--red)':maxCAPE!=null&&maxCAPE>500?'var(--amber)':null},
+    {val:maxWind!=null?maxWind+' km/h':'—',lbl:'Max veter',sub:'površina danes',col:maxWind!=null&&maxWind>30?'var(--red)':maxWind!=null&&maxWind>20?'var(--amber)':null},
+  ];
+  el.innerHTML=kpis.map(k=>`<div class="fly-kpi"><div class="fly-kpi-val"${k.col?` style="color:${k.col}"`:''}>${k.val}</div><div class="fly-kpi-lbl">${k.lbl}</div><div class="fly-kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+function _buildPadalciFlyWindow(d){
+  const el=document.getElementById('fly-window-body');if(!el)return;
+  const h=d.hourly||{};
+  const today=new Date().toISOString().slice(0,10);
+  // 6:00–20:00 = 15 slots
+  const slots=[];
+  (h.time||[]).forEach((t,i)=>{
+    if(!t.startsWith(today))return;
+    const hr=parseInt(t.slice(11,13));
+    if(hr<6||hr>20)return;
+    const wind=h.wind_speed_10m?.[i]??0;
+    const precip=h.precipitation_probability?.[i]??0;
+    const cape=h.cape?.[i]??0;
+    const bl=h.boundary_layer_height?.[i]??0;
+    const isDay=h.is_day?.[i]??0;
+    const score=_flyScore(wind,precip,cape,bl,isDay);
+    slots.push({hr,score,bl:Math.round(bl),wind:Math.round(wind),precip});
+  });
+  if(!slots.length){el.innerHTML='<div style="color:var(--muted)">Ni podatkov za danes</div>';return;}
+  const cols=slots.length;
+  let html=`<div class="fly-slots" style="grid-template-columns:repeat(${cols},1fr)">`;
+  slots.forEach(s=>{
+    const {cls,txt,col}=_flyLabel(s.score);
+    const blTxt=s.bl>0?s.bl+'m':'';
+    html+=`<div class="fly-slot ${cls}"${col?` style="color:${col}"`:''}>
+      <div class="fly-slot-time">${s.hr}h</div>
+      <div class="fly-slot-bl">${txt==='FLY'||txt==='MAY'?blTxt:txt}</div>
+    </div>`;
+  });
+  html+='</div>';
+  // Legend row
+  html+=`<div class="fly-lbl-row">`+slots.map(s=>`<div class="fly-lbl">${s.wind}km/h</div>`).join('')+'</div>';
+  // Score legend
+  html+=`<div style="display:flex;gap:1rem;margin-top:.5rem;font-size:.65rem">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(74,222,128,.65);margin-right:3px"></span>FLY ≥70</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(251,191,36,.6);margin-right:3px"></span>Meja 40–69</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(248,113,113,.35);margin-right:3px"></span>Ne leti &lt;40</span>
+  </div>`;
+  el.innerHTML=html;
+}
+
+function _buildPadalciBLChart(d){
+  const chartEl=document.getElementById('fly-bl-chart');
+  const legEl=document.getElementById('fly-bl-legend');
+  if(!chartEl)return;
+  const h=d.hourly||{};
+  const today=new Date().toISOString().slice(0,10);
+  const pts=[];
+  (h.time||[]).forEach((t,i)=>{
+    if(!t.startsWith(today))return;
+    const hr=parseInt(t.slice(11,13));
+    if(hr<5||hr>21)return;
+    pts.push({hr,bl:h.boundary_layer_height?.[i]??0,wind:h.wind_speed_10m?.[i]??0,cape:h.cape?.[i]??0});
+  });
+  if(!pts.length){chartEl.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
+  const W=880,H=100,pad={l:40,r:10,t:10,b:20};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const maxBL=4000;
+  const xScale=i=>(pad.l+i*(cW/(pts.length-1)));
+  const yScale=v=>(pad.t+cH-(v/maxBL)*cH);
+  // Fill under curve
+  let pathD=`M${xScale(0)},${yScale(0)}`;
+  pts.forEach((p,i)=>{pathD+=` L${xScale(i)},${yScale(p.bl)}`;});
+  pathD+=` L${xScale(pts.length-1)},${H-pad.b} L${xScale(0)},${H-pad.b} Z`;
+  // Line
+  let lineD=`M${xScale(0)},${yScale(pts[0].bl)}`;
+  pts.forEach((p,i)=>{if(i>0)lineD+=` L${xScale(i)},${yScale(p.bl)}`;});
+  // Ref lines
+  const refs=[{h:500,lbl:'500m · min',col:'#fbbf24'},{h:1500,lbl:'1500m · XC',col:'#4ade80'}];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="fly-bl-svg">`;
+  svg+=`<defs><linearGradient id="blGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity=".35"/><stop offset="100%" stop-color="var(--blue)" stop-opacity=".05"/></linearGradient></defs>`;
+  svg+=`<path d="${pathD}" fill="url(#blGrad)"/>`;
+  refs.forEach(r=>{
+    const y=yScale(r.h);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="${r.col}" stroke-width="1" stroke-dasharray="5,3" opacity=".7"/>`;
+    svg+=`<text x="${W-pad.r-2}" y="${y-2}" font-size="7" fill="${r.col}" text-anchor="end">${r.lbl}</text>`;
+  });
+  [0,1000,2000,3000,4000].forEach(v=>{
+    const y=yScale(v);
+    svg+=`<text x="${pad.l-3}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v}</text>`;
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+2}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>`;
+  });
+  svg+=`<path d="${lineD}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{
+    const x=xScale(i),y=yScale(p.bl);
+    const score=_flyScore(p.wind,0,p.cape,p.bl,1);
+    const dotCol=score>=70?'#4ade80':score>=40?'#fbbf24':'#f87171';
+    svg+=`<circle cx="${x}" cy="${y}" r="3" fill="${dotCol}" stroke="var(--card-bg)" stroke-width="1"/>`;
+    if(i%2===0)svg+=`<text x="${x}" y="${H-3}" font-size="7" fill="var(--muted)" text-anchor="middle">${p.hr}h</text>`;
+  });
+  svg+='</svg>';
+  chartEl.innerHTML=svg;
+  if(legEl)legEl.innerHTML=`<span style="color:var(--blue)">— BL višina (m)</span>`
+    +refs.map(r=>`<span><svg width="14" height="2"><line x1="0" y1="1" x2="14" y2="1" stroke="${r.col}" stroke-width="1.5" stroke-dasharray="4,2"/></svg>${r.lbl}</span>`).join('');
+}
+
+function _buildPadalciDailyFc(d){
+  const el=document.getElementById('fly-daily-body');if(!el)return;
+  const h=d.hourly||{},dd=d.daily||{};
+  const n=Math.min(7,(dd.time||[]).length);
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  let html='';
+  for(let di=0;di<n;di++){
+    const date=dd.time[di];
+    const dt=new Date(date); const dn=days[dt.getDay()];
+    // Collect daytime hours for this date
+    const idxs=[];
+    (h.time||[]).forEach((t,i)=>{if(t.startsWith(date)&&h.is_day?.[i])idxs.push(i);});
+    const scores=idxs.map(i=>_flyScore(h.wind_speed_10m?.[i]??0,h.precipitation_probability?.[i]??0,h.cape?.[i]??0,h.boundary_layer_height?.[i]??0,1));
+    const maxScore=scores.length?Math.max(...scores):0;
+    const flyHrs=scores.filter(s=>s>=70).length;
+    const badge=maxScore>=70?'🟢':maxScore>=40?'🟡':'🔴';
+    const scoreLabel=maxScore>=70?'Leti':maxScore>=40?'Meja':'Ne';
+    const tmax=dd.temperature_2m_max?.[di]!=null?Math.round(dd.temperature_2m_max[di])+'°':'—';
+    const precip=dd.precipitation_sum?.[di]!=null?dd.precipitation_sum[di].toFixed(0)+'mm':'—';
+    const sun=dd.sunshine_duration?.[di]!=null?Math.round(dd.sunshine_duration[di]/3600)+'h':'—';
+    html+=`<div class="fly-day">
+      <div class="fly-day-name">${dn}</div>
+      <div class="fly-day-badge">${badge}</div>
+      <div class="fly-day-score" style="color:${maxScore>=70?'var(--green)':maxScore>=40?'var(--amber)':'var(--red)'}">${scoreLabel}</div>
+      <div class="fly-day-sub">${flyHrs>0?flyHrs+'h fly':'—'}<br>${tmax}<br>🌧 ${precip}<br>☀️ ${sun}</div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+// ═══ end PADALCI ══════════════════════════════════════════
 
 // ═══ MORJE ════════════════════════════════════════════════
 const SEA_LAT=45.514,SEA_LON=13.601; // Portorož
