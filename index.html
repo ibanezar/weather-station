@@ -1047,6 +1047,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 /* Tabs */
 .tab-nav-wrap{position:relative;margin-bottom:1.5rem}
+.tab-nav-wrap::after{content:'';position:absolute;top:0;right:0;width:48px;height:100%;background:linear-gradient(to right,transparent,var(--bg) 85%);pointer-events:none;transition:opacity .3s;z-index:2}
+.tab-nav-wrap.at-end::after{opacity:0}
 .tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem;align-items:center}
 /* Dropdown container */
 .tab-dropdown{position:relative}
@@ -6477,6 +6479,20 @@ function installApp(){
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
+
+// Tab nav scroll-fade indicator
+(function(){
+  const nav=document.querySelector('.tab-nav');
+  const wrap=document.querySelector('.tab-nav-wrap');
+  if(!nav||!wrap)return;
+  function _updateFade(){
+    const atEnd=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-4;
+    wrap.classList.toggle('at-end',atEnd);
+  }
+  nav.addEventListener('scroll',_updateFade,{passive:true});
+  window.addEventListener('resize',_updateFade,{passive:true});
+  _updateFade();
+})();
 
 
 
