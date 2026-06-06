@@ -35,7 +35,7 @@ function isAllowedOrigin(request) {
 
 const CORS_ALLOWED = {
   "Access-Control-Allow-Origin":  "https://ibanezar.github.io",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
 const CORS_DENY = { "Access-Control-Allow-Origin": "null" };
@@ -514,6 +514,81 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
           });
         }
+      }
+
+      // ── /diary ───────────────────────────────────────────
+      // Shared photo diary backed by COUNTER_KV
+      // GET    /diary         → entry list (metadata, no images)
+      // POST   /diary         → create entry (splits image into separate KV key)
+      // GET    /diary/{id}/img → image data for entry
+      // PUT    /diary/{id}    → update metadata (subject, category, notes)
+      // DELETE /diary/{id}    → delete entry + image
+      if (path === "/diary" || path.startsWith("/diary/")) {
+        if (!env?.COUNTER_KV) return new Response(JSON.stringify({ error: "KV not configured" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const idPart  = path.startsWith("/diary/") ? path.slice(7) : "";
+        const entryId = idPart.split("/")[0];
+        const sub     = idPart.split("/")[1] || "";
+
+        if (path === "/diary" && request.method === "GET") {
+          const index = await env.COUNTER_KV.get("diary:index", "json") || [];
+          return new Response(JSON.stringify(index), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
+        }
+
+        if (path === "/diary" && request.method === "POST") {
+          const entry = await request.json();
+          if (!entry?.id) return new Response(JSON.stringify({ error: "id required" }), {
+            status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          if (entry.imgData) {
+            await env.COUNTER_KV.put("diary:img:" + entry.id, entry.imgData);
+          }
+          const { imgData, ...meta } = entry;
+          const index = await env.COUNTER_KV.get("diary:index", "json") || [];
+          const filtered = index.filter(e => String(e.id) !== String(entry.id));
+          filtered.unshift(meta);
+          if (filtered.length > 200) filtered.splice(200);
+          await env.COUNTER_KV.put("diary:index", JSON.stringify(filtered));
+          return new Response(JSON.stringify({ ok: true, id: entry.id }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+
+        if (entryId && sub === "img" && request.method === "GET") {
+          const imgData = await env.COUNTER_KV.get("diary:img:" + entryId);
+          if (!imgData) return new Response(JSON.stringify({ error: "not found" }), {
+            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          return new Response(JSON.stringify({ imgData }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" }
+          });
+        }
+
+        if (entryId && !sub && request.method === "PUT") {
+          const updates = await request.json();
+          const index = await env.COUNTER_KV.get("diary:index", "json") || [];
+          const idx = index.findIndex(e => String(e.id) === entryId);
+          if (idx >= 0) { Object.assign(index[idx], updates); await env.COUNTER_KV.put("diary:index", JSON.stringify(index)); }
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+
+        if (entryId && !sub && request.method === "DELETE") {
+          await env.COUNTER_KV.delete("diary:img:" + entryId);
+          const index = (await env.COUNTER_KV.get("diary:index", "json") || []).filter(e => String(e.id) !== entryId);
+          await env.COUNTER_KV.put("diary:index", JSON.stringify(index));
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+
+        return new Response(JSON.stringify({ error: "not found" }), {
+          status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
       }
 
       // ── /arso-forecast ───────────────────────────────────
