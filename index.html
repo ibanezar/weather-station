@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="sl" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1737,7 +1737,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </svg>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Meteo<em>rec</em></h1>
-    <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n.v.</p>
+    <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n. v.</p>
   </header>
 
   <div class="status">
@@ -1766,8 +1766,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-padalci"   onclick="switchTab('padalci');closeTabDDs()">🪂 Padalci</button>
       </div>
     </div>
-    <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Storm Chaser</button>
-    <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI Napoved</button>
+    <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Lovec na nevihte</button>
+    <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 Napoved UI</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
@@ -1776,12 +1776,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
       <div class="tab-dd-menu" id="tab-dd-data-menu">
-        <div class="tab-dd-group-lbl">Meritve & Analiza</div>
+        <div class="tab-dd-group-lbl">Meritve in analiza</div>
         <button id="tab-btn-history"     onclick="switchTab('history');closeTabDDs()">📊 Zgodovina</button>
         <button id="tab-btn-analysis"    onclick="switchTab('analysis');closeTabDDs()">🔬 Analize</button>
         <button id="tab-btn-climate"     onclick="switchTab('climate');closeTabDDs()">🌍 Klimatologija</button>
         <div class="tab-dd-divider"></div>
-        <div class="tab-dd-group-lbl">Rekordi & Okolje</div>
+        <div class="tab-dd-group-lbl">Rekordi in okolje</div>
         <button id="tab-btn-records"     onclick="switchTab('records');closeTabDDs()">🏆 Rekordi</button>
         <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
         <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
@@ -2097,7 +2097,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Daily microclimate fingerprint -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.45rem">
-      <span class="clabel" style="margin:0">🧭 Rečica microclimate fingerprint</span>
+      <span class="clabel" style="margin:0">🧭 Rečica mikroklimatski odtis</span>
       <span class="chart-range" id="mcf-updated">Nalaganje…</span>
     </div>
     <div id="mcf-content" class="mcf-hero">
@@ -2153,7 +2153,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="card">
       <div class="chart-hdr" style="margin-bottom:.25rem">
-        <span class="clabel" style="margin:0">🤖 AI fotografski brief</span>
+        <span class="clabel" style="margin:0">📷 Fotografski namig UI</span>
         <div style="display:flex;gap:.4rem;align-items:center">
           <span class="chart-range" id="brief-date"></span>
           <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
@@ -2332,7 +2332,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div>
   <div class="insights-row">
     <div class="insight-card" id="ic-milestones" style="grid-column:1 / -1">
-      <div class="ic-head"><span>📅 Sezonski mejniki — prvi & zadnji</span><span class="ic-badge" id="ms-badge">—</span></div>
+      <div class="ic-head"><span>📅 Sezonski mejniki — prvi in zadnji</span><span class="ic-badge" id="ms-badge">—</span></div>
       <div id="ms-body"><div class="streak-empty" style="opacity:.4">…</div></div>
     </div>
   </div>
@@ -2570,7 +2570,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           <span class="chart-range" id="arso-check-time">—</span>
         </div>
         <div id="arso-check-content">
-          <div style="color:var(--muted);font-size:.78rem">Odpri ta tab za nalaganje primerjave…</div>
+          <div style="color:var(--muted);font-size:.78rem">Odpri ta zavihek za nalaganje primerjave…</div>
         </div>
       </div>
     </div>
@@ -2782,12 +2782,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- DATA ASSIMILATION cards (appended into tab-analysis by initDA) -->
   <div id="tab-da-host" style="display:none">
 
-    <div class="da-section-hdr"><span style="font-size:1rem">🔭</span><h3>Data Assimilation — Optimalna fuzija podatkov</h3></div>
+    <div class="da-section-hdr"><span style="font-size:1rem">🔭</span><h3>Asimilacija podatkov — Optimalna fuzija podatkov</h3></div>
 
     <!-- 1. Kalman filter -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🎯 Kalman Filter — optimalna ocene stanja</span>
+        <span class="clabel" style="margin:0">🎯 Kalmanov filter — optimalna ocena stanja</span>
         <span class="chart-range" id="kf-updated">—</span>
       </div>
       <div class="kf-hero" id="kf-hero">
@@ -2797,7 +2797,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div id="kf-sources" class="kf-sources"><div class="clim-loading">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.65rem;line-height:1.5">
-        <strong style="color:var(--text)">Metodologija:</strong> Skalaren Kalman filter na vsaki spremenljivki. Predikt = prejšnja ocena + procesni šum Q. Update: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
+        <strong style="color:var(--text)">Metodologija:</strong> Skalaren Kalmanov filter na vsaki spremenljivki. Napoved = prejšnja ocena + procesni šum Q. Posodobitev: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
       </div>
     </div>
 
@@ -2814,20 +2814,20 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span style="color:var(--muted)">Increment = analiza - ozadje (Gaussova razporeditev, L=80km)</span>
       </div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
-        <strong style="color:var(--text)">3D-Var:</strong> J(x) = ½(x−xb)ᵀ B⁻¹(x−xb) + ½(y−Hx)ᵀ R⁻¹(y−Hx). Gaussian korelacijska dolžina L=80km, σ_B=1.2°C, σ_obs=0.3°C. Background grid: Open-Meteo 6×4 točke nad SLO.
+        <strong style="color:var(--text)">3D-Var:</strong> J(x) = ½(x−xb)ᵀ B⁻¹(x−xb) + ½(y−Hx)ᵀ R⁻¹(y−Hx). Gaussova korelacijska dolžina L=80km, σ_B=1.2°C, σ_obs=0.3°C. Ozadna mreža: Open-Meteo 6×4 točke nad SLO.
       </div>
     </div>
 
     <!-- 3. O-B tracking -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📉 O-B tracking — postaja vs NWP first-guess</span>
+        <span class="clabel" style="margin:0">📉 O-B sledenje — postaja vs NWP prva ocena</span>
         <span class="chart-range" id="ob-count-badge">—</span>
       </div>
       <div class="ob-stats-grid" id="ob-stats"><div class="clim-loading" style="grid-column:1/-1">Zbiranje O-B statistik…</div></div>
       <div class="ob-wrap"><svg id="ob-svg" viewBox="0 0 880 130" height="130"></svg></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
-        <strong style="color:var(--text)">O-B:</strong> Razlika opazovane vrednosti postaje in NWP first-guess (Open-Meteo current-hour). Sistem. odmik ≠ 0 kaže na napako senzorja ali bias modela. Avtokorelacija kaže na procesni šum. Referenca: ECMWF definiranO-B kot standardna metrika kakovosti opazovanj.
+        <strong style="color:var(--text)">O-B:</strong> Razlika opazovane vrednosti postaje in NWP prve ocene (Open-Meteo current-hour). Sistem. odmik ≠ 0 kaže na napako senzorja ali pristranskost modela. Avtokorelacija kaže na procesni šum. Referenca: ECMWF definira O-B kot standardno metriko kakovosti opazovanj.
       </div>
     </div>
 
@@ -2840,7 +2840,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="norm-card" id="norm-card">
       <div class="norm-hdr">
         <span class="norm-title">📊 ARSO Klimatološke normale 1991–2020</span>
-        <span class="norm-src" id="norm-src">Celje · 241 m n.m. · referenčna postaja</span>
+        <span class="norm-src" id="norm-src">Celje · 241 m n. m. · referenčna postaja</span>
       </div>
       <div id="norm-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
@@ -2905,7 +2905,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Drift engine -->
     <div id="drift-card" class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Mikroklimni drift — IREICA1 vs ARSO</span>
+        <span class="clabel" style="margin:0">🌡 Mikroklimatski odmik — IREICA1 vs ARSO</span>
         <span class="chart-range" id="drift-range">—</span>
       </div>
       <div id="drift-body"><div class="clim-loading">Zbira se drift — vrni se po prvem dnevu meritev.</div></div>
@@ -3006,7 +3006,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="sc-threat-icon" id="sc-threat-icon">☁️</div>
       <div class="sc-threat-row">
         <div class="sc-threat-left">
-          <div class="sc-threat-tag">⚡ Storm Chaser — Rečica ob Savinji</div>
+          <div class="sc-threat-tag">⚡ Lovec na nevihte — Rečica ob Savinji</div>
           <div class="sc-threat-level" id="sc-level">NALAGANJE</div>
           <div class="sc-threat-desc" id="sc-desc">Pridobivam podatke o atmosferski nestabilnosti…</div>
         </div>
@@ -3412,7 +3412,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="nerd-snd-wrap" style="margin-top:.75rem">
         <div class="nerd-snd-info">
           <div><b>Postaja:</b> Ljubljana Bežigrad (LJLJ)</div>
-          <div><b>Koord.:</b> 46.07°N, 14.52°E · 299 m n.m.</div>
+          <div><b>Koord.:</b> 46.07°N, 14.52°E · 299 m n. m.</div>
           <div><b>Vzleti:</b> 00:00 UTC in 12:00 UTC dnevno</div>
           <div style="margin-top:.4rem"><b>Skew-T log-P:</b> termodinamski diagram — CAPE, CIN, LCL, LFC, EL, vrtičnost</div>
           <div style="margin-top:.3rem"><small>Najbližja postaja za zgornjetroposferske meritve; naslednja sondaža iz Udine (16044, 46.03°N, 13.18°E).</small></div>
@@ -3494,9 +3494,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="ai-arch-item"><div class="ai-arch-val">HW</div><div class="ai-arch-lbl">Tip modela</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">α β γ</div><div class="ai-arch-lbl">Glaj. param.</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">12h</div><div class="ai-arch-lbl">Vhodno okno</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">8</div><div class="ai-arch-lbl">Vhodne feature</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">8</div><div class="ai-arch-lbl">Vhodni atributi</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">6h</div><div class="ai-arch-lbl">Napoved</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val" id="ai-train-samples">—</div><div class="ai-arch-lbl">Trening vzorci</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val" id="ai-train-samples">—</div><div class="ai-arch-lbl">Učni vzorci</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-final-loss">—</div><div class="ai-arch-lbl">Končni MSE</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-trained-at">—</div><div class="ai-arch-lbl">Naučen ob</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-pred-acc">—</div><div class="ai-arch-lbl">Točnost ±1h</div></div>
@@ -3535,7 +3535,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Anomaly scoring dashboard -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📊 Dashboard kakovosti podatkov — anomalije po senzorjih</span>
+        <span class="clabel" style="margin:0">📊 Nadzorna plošča kakovosti podatkov — anomalije po senzorjih</span>
         <span class="chart-range" id="aq-score-badge">—</span>
       </div>
       <div class="aq-sensor-list" id="aq-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3723,7 +3723,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div id="tab-records" class="tab-pane">
     <div class="nt-section">
-      <div class="nt-title">🏆 Dvorana slavnih — vse-časovni rekordi</div>
+      <div class="nt-title">🏆 Dvorana slavnih — rekordi vseh časov</div>
       <div class="rec-hof" id="rec-hof"></div>
     </div>
     <div class="nt-section">
@@ -3782,7 +3782,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="nt-card" style="margin-top:1rem">
       <div class="clabel" style="margin:0 0 .5rem">ℹ️ O primerjavi</div>
-      <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n.v.) je označena z modro.</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n. v.) je označena z modro.</div>
     </div>
   </div>
 
@@ -3793,7 +3793,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ft-inner">
       <div>
         <div class="ft-brand">📡 IREICA1 — Meteorološka postaja</div>
-        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n.v. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
+        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n. v. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
         <div class="ft-sources">
           <span>Viri podatkov:</span>
           <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank" rel="noopener">Weather Underground</a>
@@ -9287,11 +9287,11 @@ function initRecords(){
 // ═══════════════════════════════════════════════════════
 const NEARBY=[
   {name:'Rečica ob Savinji',note:'Postaja IREICA1',lat:46.326,lon:14.921,alt:366,mine:true},
-  {name:'Mozirje',note:'5 km, 340 m n.v.',lat:46.338,lon:14.976,alt:340},
-  {name:'Šoštanj',note:'15 km, 400 m n.v.',lat:46.383,lon:15.050,alt:400},
-  {name:'Celje',note:'35 km, 241 m n.v.',lat:46.233,lon:15.267,alt:241},
-  {name:'Logarska dolina',note:'25 km, 838 m n.v.',lat:46.393,lon:14.630,alt:838},
-  {name:'Rogla',note:'45 km, 1517 m n.v.',lat:46.450,lon:15.333,alt:1517},
+  {name:'Mozirje',note:'5 km, 340 m n. v.',lat:46.338,lon:14.976,alt:340},
+  {name:'Šoštanj',note:'15 km, 400 m n. v.',lat:46.383,lon:15.050,alt:400},
+  {name:'Celje',note:'35 km, 241 m n. v.',lat:46.233,lon:15.267,alt:241},
+  {name:'Logarska dolina',note:'25 km, 838 m n. v.',lat:46.393,lon:14.630,alt:838},
+  {name:'Rogla',note:'45 km, 1517 m n. v.',lat:46.450,lon:15.333,alt:1517},
 ];
 let _surInit=false;
 
@@ -10696,7 +10696,7 @@ async function buildFingerprint(){
   // Narrative
   if(narr){
     const warm=avgPrecip>1300?'nadpovprečno mokra':'normalno vlažna';
-    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n.v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
+    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n. v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
   }
 }
 
@@ -13648,7 +13648,7 @@ function runAnomalyScoring(){
     // Run AE inference
     setTimeout(()=>runAEAnomaly(sensors),200);
   }else if(aeNote){
-    aeNote.innerHTML='<strong style="color:var(--text)">Autoencoder drift detekcija:</strong> Dostopno po treningu LSTM modela v zavihku AI Napoved.';
+    aeNote.innerHTML='<strong style="color:var(--text)">Autoencoder — detekcija odmika:</strong> Dostopno po treningu LSTM modela v zavihku Napoved UI.';
   }
 }
 
@@ -14316,7 +14316,7 @@ function buildArsoNormals(curMonthT, curMonthR){
   // ── Altitude note ───────────────────────────────────────────
   const elevDiff=366-N.elev; // Rečica 366m vs Celje 241m
   const tCorr=(elevDiff*0.0065).toFixed(1);
-  const altNote=`<div class="norm-alt-note">Rečica ob Savinji (366 m n.m.) je za ${elevDiff} m višja od Celje — termični popravek ≈ −${tCorr}°C. Normale so za Celje; lokalno pričakuj nekoliko hladnejše temperature in podoben padavinski režim. · <a href="https://meteo.arso.gov.si/met/sl/climate/tables/climate-normals/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO vir</a></div>`;
+  const altNote=`<div class="norm-alt-note">Rečica ob Savinji (366 m n. m.) je za ${elevDiff} m višja od Celje — termični popravek ≈ −${tCorr}°C. Normale so za Celje; lokalno pričakuj nekoliko hladnejše temperature in podoben padavinski režim. · <a href="https://meteo.arso.gov.si/met/sl/climate/tables/climate-normals/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO vir</a></div>`;
 
   el.innerHTML=
     '<div class="norm-chart-wrap">'+svg+'</div>'+
@@ -16549,11 +16549,11 @@ function _buildNerdLinks(){
 </div>
 
   <!-- ── Meteorec chat widget ── -->
-  <button class="chat-btn" id="chat-btn" onclick="toggleChat()" title="Vprašaj Meteorec" aria-label="Odpri chat z Meteorec">
+  <button class="chat-btn" id="chat-btn" onclick="toggleChat()" title="Vprašaj Meteorec" aria-label="Odpri klepet z Meteorecem">
     <span class="chat-btn-icon">💬</span>
     <span class="chat-btn-lbl" id="chat-btn-lbl">Vprašaj Meteorec</span>
   </button>
-  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Meteorec chat">
+  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Klepet z Meteorecem">
     <div class="chat-hdr">
       <svg width="34" height="34" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:50%;overflow:hidden">
         <circle cx="32" cy="32" r="32" fill="#0c2040"/>
@@ -16563,10 +16563,10 @@ function _buildNerdLinks(){
         <div class="chat-hdr-name">Meteorec</div>
         <div class="chat-hdr-sub">Vremenski asistent · IREICA1</div>
       </div>
-      <span class="chat-online" title="Online"></span>
+      <span class="chat-online" title="Povezan"></span>
     </div>
     <div class="chat-msgs" id="chat-msgs">
-      <div class="chat-msg bot">Živijo! Sem Meteorec, vaš vremenski asistent za Rečico ob Savinji. Vprašajte me karkoli o vremenu, napovedi ali lokalni mikroklimi. 🌤</div>
+      <div class="chat-msg bot">Živijo! Sem Meteorec, vaš vremenski asistent za Rečico ob Savinji. Vprašajte me kar koli o vremenu, napovedi ali lokalni mikroklimi. 🌤</div>
     </div>
     <div class="chat-input-row">
       <textarea class="chat-input" id="chat-input" placeholder="Vprašajte o vremenu…" rows="1" onkeydown="chatKeydown(event)" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
