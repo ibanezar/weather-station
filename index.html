@@ -1684,6 +1684,46 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-prob-bar{width:80%;height:4px;background:var(--rain-track);border-radius:2px;overflow:hidden;margin-top:.1rem}
 .cu-prob-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .6s ease}
 @media(max-width:420px){.cu-days{gap:.35rem}.cu-day{padding:.65rem .25rem}}
+
+/* ── Srednja napoved Tab ── */
+.med-kpi-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:1.1rem}
+.med-kpi{flex:1;min-width:110px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.7rem .9rem;box-shadow:var(--shadow)}
+.med-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;line-height:1}
+.med-kpi-lbl{font-size:.6rem;color:var(--muted);margin-top:.2rem;text-transform:uppercase;letter-spacing:.04em}
+.med-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:.55rem}
+.med-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:11px;padding:.65rem .5rem;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:.15rem;transition:transform .15s,box-shadow .15s;cursor:default}
+.med-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.med-card.today{border-color:var(--blue);box-shadow:0 0 0 2px rgba(96,165,250,.25),var(--shadow)}
+.med-card-day{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.med-card-date{font-size:.6rem;color:var(--muted);margin-bottom:.05rem}
+.med-card-icon{font-size:1.6rem;line-height:1.1}
+.med-card-temps{font-size:.9rem;font-weight:800;white-space:nowrap}
+.med-card-tmin{font-weight:400;color:var(--muted)}
+.med-card-rain{font-size:.6rem;color:#60a5fa;margin-top:.05rem}
+.med-card-anom{font-size:.58rem;border-radius:4px;padding:.07rem .28rem;font-weight:700;margin-top:.08rem}
+.med-card-anom.warm{background:rgba(251,146,60,.18);color:#fb923c}
+.med-card-anom.cold{background:rgba(147,197,253,.2);color:#60a5fa}
+.med-card-anom.normal{background:rgba(100,100,100,.12);color:var(--muted)}
+
+/* ── Dolgoročna napoved Tab ── */
+.ltf-hero{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.15rem 1.25rem;margin-bottom:1.2rem;box-shadow:var(--shadow)}
+.ltf-hero-title{font-size:1rem;font-weight:700;margin-bottom:.45rem}
+.ltf-hero-body{font-size:.8rem;color:var(--text);line-height:1.65;opacity:.9}
+.ltf-hero-chips{display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap}
+.ltf-chip{flex:1;min-width:100px;background:var(--bg);border-radius:10px;padding:.55rem .8rem;text-align:center}
+.ltf-chip-val{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;line-height:1}
+.ltf-chip-lbl{font-size:.6rem;color:var(--muted);margin-top:.18rem;text-transform:uppercase;letter-spacing:.04em}
+.ltf-months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.65rem;margin-bottom:1.2rem}
+.ltf-month{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.75rem .8rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.ltf-month.cur{border-color:var(--blue);box-shadow:0 0 0 2px rgba(96,165,250,.2),var(--shadow)}
+.ltf-month.cur::after{content:'Zdaj';position:absolute;top:.3rem;right:.45rem;font-size:.52rem;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.06em}
+.ltf-mon-name{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.ltf-mon-season{font-size:.68rem;color:var(--muted);margin-bottom:.5rem}
+.ltf-bar-labels{display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);margin-bottom:.12rem}
+.ltf-bar-track{height:7px;border-radius:4px;background:var(--bg);overflow:hidden;position:relative;margin-bottom:.4rem}
+.ltf-bar-fill{height:100%;border-radius:4px;position:absolute;top:0}
+.ltf-annual{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.15rem 1.25rem;box-shadow:var(--shadow)}
+.ltf-annual-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -1764,6 +1804,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-morje"     onclick="switchTab('morje');closeTabDDs()">🌊 Morje</button>
         <button id="tab-btn-gore"      onclick="switchTab('gore');closeTabDDs()">⛰ Gore</button>
         <button id="tab-btn-padalci"   onclick="switchTab('padalci');closeTabDDs()">🪂 Padalci</button>
+        <div class="tab-dd-group-lbl" style="margin-top:.4rem">Razširjena napoved</div>
+        <button id="tab-btn-srednja"    onclick="switchTab('srednja');closeTabDDs()">📅 Srednja (16 dni)</button>
+        <button id="tab-btn-dolgorocna" onclick="switchTab('dolgorocna');closeTabDDs()">🗓 Dolgoročna</button>
       </div>
     </div>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Lovec na nevihte</button>
@@ -3703,6 +3746,34 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div><!-- /tab-padalci -->
 
+  <!-- ═══ SREDNJA NAPOVED TAB ═══ -->
+  <div id="tab-srednja" class="tab-pane">
+    <div class="med-kpi-row" id="med-kpis">
+      <div class="med-kpi"><div class="med-kpi-val">…</div><div class="med-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card chart-card" style="margin-bottom:1.1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📈 Temperatura in padavine — 16 dni</span>
+        <span class="chart-range" id="med-upd">Nalagam…</span>
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <svg id="med-svg" viewBox="0 0 900 230" style="display:block;width:100%;height:auto;min-width:320px"></svg>
+      </div>
+    </div>
+    <div class="med-cards-grid" id="med-cards"></div>
+  </div><!-- /tab-srednja -->
+
+  <!-- ═══ DOLGOROČNA NAPOVED TAB ═══ -->
+  <div id="tab-dolgorocna" class="tab-pane">
+    <div class="ltf-hero" id="ltf-hero">
+      <div style="color:var(--muted);font-size:.8rem">Nalagam…</div>
+    </div>
+    <div class="ltf-months-grid" id="ltf-grid"></div>
+    <div class="ltf-annual" id="ltf-annual">
+      <div style="color:var(--muted);font-size:.8rem">Nalagam…</div>
+    </div>
+  </div><!-- /tab-dolgorocna -->
+
   <!-- ═══ EKSTREMNI DOGODKI ═══ -->
   <div id="tab-extremes" class="tab-pane">
     <div class="ev-filter" id="ev-filter">
@@ -5470,7 +5541,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','morje','gore','padalci'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','morje','gore','padalci','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -5502,7 +5573,9 @@ function switchTab(tab){
   if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='morje'){     initMorje(); }
   if(tab==='gore'){      initGore(); }
-  if(tab==='padalci'){   initPadalci(); }
+  if(tab==='padalci'){    initPadalci(); }
+  if(tab==='srednja'){    initSrednja(); }
+  if(tab==='dolgorocna'){ initDolgorocna(); }
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='storm'){     initStormChaser(); }
@@ -16510,6 +16583,238 @@ function _buildNerdLinks(){
         </a>`).join('')}
     </div>`).join('');
 }
+// ═══ end METEO NERD ════════════════════════════════════════
+
+// ═══ SREDNJA NAPOVED ══════════════════════════════════════
+let _srednjaLoaded=false;
+async function initSrednja(){
+  if(_srednjaLoaded)return; _srednjaLoaded=true;
+  const kpis=document.getElementById('med-kpis');
+  const cards=document.getElementById('med-cards');
+  const upd=document.getElementById('med-upd');
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max'
+      +'&timezone=Europe%2FLjubljana&forecast_days=16';
+    const j=await fetch(url).then(r=>r.json());
+    const d=j.daily; if(!d||!d.time)throw new Error('no data');
+    const tx=d.temperature_2m_max, tn=d.temperature_2m_min, pr=d.precipitation_sum;
+    const SL_DS=['ned','pon','tor','sre','čet','pet','sob'];
+    const SL_MS=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+    const avg=(tx.reduce((a,b)=>a+(b||0),0)/tx.length);
+    const totP=pr.reduce((a,b)=>a+(b||0),0);
+    const wI=tx.indexOf(Math.max(...tx)), cI=tn.indexOf(Math.min(...tn));
+    kpis.innerHTML=[
+      {v:avg.toFixed(1)+'°C',l:'Povprečna T (16 dni)'},
+      {v:totP.toFixed(0)+' mm',l:'Skupne padavine'},
+      {v:Math.round(Math.max(...tx))+'°C',l:'Najtoplejši · '+SL_DS[new Date(d.time[wI]+'T12:00').getDay()]},
+      {v:Math.round(Math.min(...tn))+'°C',l:'Najhladnejši · '+SL_DS[new Date(d.time[cI]+'T12:00').getDay()]},
+    ].map(k=>`<div class="med-kpi"><div class="med-kpi-val">${k.v}</div><div class="med-kpi-lbl">${k.l}</div></div>`).join('');
+    _buildMedSvg(d);
+    cards.innerHTML=d.time.map((t,i)=>{
+      const dt=new Date(t+'T12:00'); const mo=dt.getMonth();
+      const tx2=tx[i],tn2=tn[i],rain=(pr[i]||0),wc=d.weather_code[i]||0;
+      const prob=d.precipitation_probability_max?.[i];
+      const anom=((tx2+tn2)/2)-_TNORM[mo];
+      const ac=anom>1.5?'warm':anom<-1.5?'cold':'normal';
+      const at=(anom>=0?'+':'')+anom.toFixed(1)+'°';
+      const dLbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
+      const rainStr=rain>0?`<div class="med-card-rain">💧 ${rain.toFixed(rain<10?1:0)} mm${prob!=null?' · '+Math.round(prob)+'%':''}</div>`:'';
+      return`<div class="med-card${i===0?' today':''}">
+<div class="med-card-day">${dLbl}</div>
+<div class="med-card-date">${dt.getDate()}. ${SL_MS[mo]}</div>
+<div class="med-card-icon">${_wmoEmoji(wc)}</div>
+<div class="med-card-temps">${Math.round(tx2)}° <span class="med-card-tmin">/ ${Math.round(tn2)}°</span></div>
+${rainStr}
+<div class="med-card-anom ${ac}">${at} norm.</div>
+</div>`;
+    }).join('');
+    if(upd)upd.textContent='Open-Meteo · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    if(kpis)kpis.innerHTML='<div style="color:var(--muted);font-size:.8rem">Napoved trenutno ni na voljo.</div>';
+    console.error('initSrednja',e);
+  }
+}
+function _buildMedSvg(d){
+  const svg=document.getElementById('med-svg'); if(!svg)return;
+  const n=d.time.length,W=900,H=230,PL=36,PR=8,PT=14,PB=54;
+  const CW=W-PL-PR,CH=H-PT-PB,PRECH=52,TEMPH=CH-PRECH-10;
+  const tx=d.temperature_2m_max,tn=d.temperature_2m_min,pr=d.precipitation_sum;
+  const allT=[...tx,...tn].filter(v=>v!=null);
+  const minT=Math.min(...allT)-3,maxT=Math.max(...allT)+3,maxP=Math.max(...pr,6);
+  const bw=CW/n;
+  const ty=t=>PT+TEMPH-(t-minT)/(maxT-minT)*TEMPH;
+  const SL_DS=['ned','pon','tor','sre','čet','pet','sob'];
+  // grid lines
+  let grid='',glbl='';
+  const step=Math.ceil((maxT-minT)/5/5)*5||5;
+  for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){
+    const y=ty(t); if(y<PT-2||y>PT+TEMPH+2)continue;
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="var(--border)" stroke-width=".5" stroke-dasharray="3,4"/>`;
+    glbl+=`<text x="${PL-3}" y="${y+3.5}" text-anchor="end" font-size="9" fill="var(--muted)">${t}°</text>`;
+  }
+  // temperature band polygon
+  const topPts=tx.map((t,i)=>`${PL+i*bw+bw/2},${ty(t??0)}`).join(' ');
+  const botPts=[...tn].reverse().map((t,i)=>`${PL+(n-1-i)*bw+bw/2},${ty(t??0)}`).join(' ');
+  // midline
+  const mid=tx.map((t,i)=>`${i?'L':'M'}${PL+i*bw+bw/2},${ty(((t??0)+(tn[i]??0))/2)}`).join('');
+  // precip bars
+  let pbars='',plbls='';
+  pr.forEach((p,i)=>{
+    if(!p)return;
+    const x=PL+i*bw+2,bwi=bw-4,topY=PT+CH-p/maxP*PRECH,botY=PT+CH;
+    pbars+=`<rect x="${x}" y="${topY}" width="${bwi}" height="${botY-topY}" fill="${i===0?'rgba(96,165,250,.8)':'rgba(96,165,250,.45)'}" rx="2"/>`;
+    if(p>=1)plbls+=`<text x="${x+bwi/2}" y="${topY-2}" text-anchor="middle" font-size="7" fill="#60a5fa">${p.toFixed(p<10?1:0)}</text>`;
+  });
+  // day labels
+  let dlbls='';
+  d.time.forEach((t,i)=>{
+    const dt=new Date(t+'T12:00'),x=PL+i*bw+bw/2,cur=i===0;
+    const day=cur?'Danes':SL_DS[dt.getDay()];
+    dlbls+=`<text x="${x}" y="${H-PB+13}" text-anchor="middle" font-size="${cur?9.5:8.5}" font-weight="${cur?700:400}" fill="${cur?'var(--blue)':'var(--muted)'}">${day}</text>`;
+    dlbls+=`<text x="${x}" y="${H-PB+24}" text-anchor="middle" font-size="7.5" fill="var(--muted)">${dt.getDate()}.</text>`;
+  });
+  // dots on line
+  let dots='';
+  tx.forEach((t,i)=>{
+    const x=PL+i*bw+bw/2,norm=(((t+tn[i])/2)-minT)/(maxT-minT);
+    const r=Math.round(Math.min(255,norm*255+35)),b=Math.round(Math.max(35,255-norm*220));
+    const col=`rgb(${r},100,${b})`;
+    if(t!=null)dots+=`<circle cx="${x}" cy="${ty(t)}" r="2.8" fill="${col}" stroke="var(--card-bg)" stroke-width="1.2"/>`;
+    if(tn[i]!=null)dots+=`<circle cx="${x}" cy="${ty(tn[i])}" r="2.2" fill="${col}" stroke="var(--card-bg)" stroke-width="1.2"/>`;
+  });
+  const sepY=PT+TEMPH+5;
+  svg.innerHTML=`<defs>
+  <linearGradient id="mband" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(251,146,60,.38)"/><stop offset="100%" stop-color="rgba(96,165,250,.22)"/></linearGradient>
+</defs>
+<rect x="${PL}" y="${PT}" width="${bw}" height="${CH}" fill="rgba(96,165,250,.05)" rx="3"/>
+${grid}${glbl}
+<polygon points="${topPts} ${botPts}" fill="url(#mband)" opacity=".75"/>
+<path d="${mid}" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+${pbars}${plbls}
+<line x1="${PL}" y1="${sepY}" x2="${W-PR}" y2="${sepY}" stroke="var(--border)" stroke-width=".8"/>
+${dots}${dlbls}
+<text x="${PL}" y="${H-6}" font-size="8" fill="var(--muted)">💧 padavine (mm)</text>
+<text x="${W-PR-70}" y="${H-6}" font-size="8" fill="var(--muted)">🌡 temperatura (°C)</text>`;
+}
+
+// ═══ DOLGOROČNA NAPOVED ═══════════════════════════════════
+let _dolgorocnaLoaded=false;
+function initDolgorocna(){
+  if(_dolgorocnaLoaded)return; _dolgorocnaLoaded=true;
+  const curM=new Date().getMonth();
+  const SL_MON_FULL=['Januar','Februar','Marec','April','Maj','Junij','Julij','Avgust','September','Oktober','November','December'];
+  const SL_SEASONS=['Zima','Zima','Pomlad','Pomlad','Pomlad','Poletje','Poletje','Poletje','Jesen','Jesen','Jesen','Zima'];
+  const SEA_EMJ=['❄️','❄️','🌱','🌸','🌿','☀️','🌞','🌞','🍂','🍁','🌫️','❄️'];
+  const elev=-(366-241)/1000*6.5; // elevation correction Rečica vs Celje
+  const N=ARSO_NORMALS;
+
+  // hero card
+  const hero=document.getElementById('ltf-hero'); if(hero){
+    const t=_TNORM[curM],p=_PNORM[curM];
+    const tmx=(N.tmax[curM]+elev).toFixed(1),tmn=(N.tmin[curM]+elev).toFixed(1);
+    const warm=t>10,cold=t<2,wet=p>110;
+    const outlook=warm&&wet?'Toplo in padavinsko mesečno povprečje.':warm&&!wet?'Toplo in razmeroma suho mesečno povprečje.':cold&&wet?'Hladno in padavinsko mesečno povprečje.':cold&&!wet?'Hladno in razmeroma suho mesečno povprečje.':'Zmerno mesečno povprečje za temperaturo in padavine.';
+    const tCol=t>15?'#fb923c':t>5?'#34d399':'#60a5fa';
+    const tmxCol=+tmx>20?'#f87171':+tmx>12?'#fb923c':'#60a5fa';
+    const tmnCol=+tmn<0?'#818cf8':'#34d399';
+    hero.innerHTML=`<div class="ltf-hero-title">${SEA_EMJ[curM]} ${SL_MON_FULL[curM]} — klimatska pričakovanja za Rečico</div>
+<div class="ltf-hero-body">${outlook} Povprečna temperatura ${t}°C, pričakovane padavine ${p} mm. Vrednosti temeljijo na klimatskih normalah 1991–2020 (postaja Celje) z višinsko korekcijo za Rečico (366 m).</div>
+<div class="ltf-hero-chips">
+<div class="ltf-chip"><div class="ltf-chip-val" style="color:${tCol}">${t}°C</div><div class="ltf-chip-lbl">Povprečna T</div></div>
+<div class="ltf-chip"><div class="ltf-chip-val" style="color:${tmxCol}">${tmx}°C</div><div class="ltf-chip-lbl">Pov. Tmax</div></div>
+<div class="ltf-chip"><div class="ltf-chip-val" style="color:${tmnCol}">${tmn}°C</div><div class="ltf-chip-lbl">Pov. Tmin</div></div>
+<div class="ltf-chip"><div class="ltf-chip-val" style="color:#60a5fa">${p} mm</div><div class="ltf-chip-lbl">Pov. padavine</div></div>
+</div>`;
+  }
+
+  // 12-month grid
+  const grid=document.getElementById('ltf-grid'); if(grid){
+    const maxP=Math.max(..._PNORM);
+    const allTx=N.tmax.map(t=>t+elev),allTn=N.tmin.map(t=>t+elev);
+    const fullMin=Math.min(...allTn)-2,fullMax=Math.max(...allTx)+2;
+    grid.innerHTML=_TNORM.map((t,i)=>{
+      const tmx=allTx[i],tmn=allTn[i],p=_PNORM[i];
+      const isCur=i===curM;
+      // temperature bar position within annual range
+      const leftPct=Math.max(0,(tmn-fullMin)/(fullMax-fullMin)*100);
+      const widthPct=Math.max(4,(tmx-tmn)/(fullMax-fullMin)*100);
+      // color: cold=blue, warm=orange/red
+      const norm=(t-(-5))/(22-(-5));
+      const r=Math.round(Math.min(255,norm*255+35)),b=Math.round(Math.max(30,255-norm*220));
+      const col=`rgb(${r},90,${b})`;
+      const pPct=Math.round(p/maxP*100);
+      return`<div class="ltf-month${isCur?' cur':''}">
+<div class="ltf-mon-name">${SL_MON_FULL[i]}</div>
+<div class="ltf-mon-season">${SEA_EMJ[i]} ${SL_SEASONS[i]}</div>
+<div class="ltf-bar-labels"><span>${Math.round(tmn)}°</span><span>${t}°</span><span>${Math.round(tmx)}°</span></div>
+<div class="ltf-bar-track">
+  <div class="ltf-bar-fill" style="left:${leftPct}%;width:${widthPct}%;background:${col}"></div>
+</div>
+<div class="ltf-bar-labels"><span>💧 ${p} mm</span></div>
+<div class="ltf-bar-track">
+  <div class="ltf-bar-fill" style="left:0;width:${pPct}%;background:linear-gradient(to right,rgba(96,165,250,.65),rgba(147,197,253,.9))"></div>
+</div>
+</div>`;
+    }).join('');
+  }
+
+  // annual climatogram
+  _buildLtfChart();
+}
+
+function _buildLtfChart(){
+  const el=document.getElementById('ltf-annual'); if(!el)return;
+  const W=700,H=180,PL=36,PR=10,PT=12,PB=32;
+  const CW=W-PL-PR,CH=H-PT-PB,PRECH=50,TEMPH=CH-PRECH-10;
+  const elev=-(366-241)/1000*6.5,N=ARSO_NORMALS;
+  const tmx=N.tmax.map(t=>t+elev),tmn=N.tmin.map(t=>t+elev);
+  const pr=_PNORM,maxP=Math.max(...pr);
+  const minT=Math.min(...tmn)-2,maxT=Math.max(...tmx)+2;
+  const bw=CW/12,ty=t=>PT+TEMPH-(t-minT)/(maxT-minT)*TEMPH;
+  const curM=new Date().getMonth();
+  const SML=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  // grid
+  let grid='',glbl='';
+  for(let t=-5;t<=30;t+=5){
+    const y=ty(t);if(y<PT-2||y>PT+TEMPH+2)continue;
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="var(--border)" stroke-width=".5" stroke-dasharray="2,4"/>`;
+    glbl+=`<text x="${PL-3}" y="${y+3.5}" text-anchor="end" font-size="8" fill="var(--muted)">${t}°</text>`;
+  }
+  // band polygon
+  const topPts=tmx.map((t,i)=>`${PL+i*bw+bw/2},${ty(t)}`).join(' ');
+  const botPts=[...tmn].reverse().map((t,i)=>`${PL+(11-i)*bw+bw/2},${ty(t)}`).join(' ');
+  const midLine=_TNORM.map((t,i)=>`${i?'L':'M'}${PL+i*bw+bw/2},${ty(t)}`).join('');
+  // precip
+  let pbars='';
+  pr.forEach((p,i)=>{
+    const x=PL+i*bw+2,bwi=bw-4,topY=PT+CH-p/maxP*PRECH,botY=PT+CH,cur=i===curM;
+    pbars+=`<rect x="${x}" y="${topY}" width="${bwi}" height="${botY-topY}" fill="${cur?'rgba(96,165,250,.85)':'rgba(96,165,250,.45)'}" rx="2"/>`;
+  });
+  // month labels
+  let mlbls='';
+  SML.forEach((s,i)=>{
+    const x=PL+i*bw+bw/2,cur=i===curM;
+    mlbls+=`<text x="${x}" y="${H-PB+14}" text-anchor="middle" font-size="${cur?9.5:8.5}" font-weight="${cur?700:400}" fill="${cur?'var(--blue)':'var(--muted)'}">${s}</text>`;
+  });
+  const sepY=PT+TEMPH+5;
+  el.innerHTML=`<div class="ltf-annual-title">📊 Letni klimatogram — Rečica ob Savinji (normale 1991–2020)</div>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto;min-width:280px">
+<defs><linearGradient id="ltfband" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(251,146,60,.38)"/><stop offset="100%" stop-color="rgba(96,165,250,.25)"/></linearGradient></defs>
+<rect x="${PL+curM*bw}" y="${PT}" width="${bw}" height="${CH}" fill="rgba(96,165,250,.07)" rx="2"/>
+${grid}${glbl}
+<polygon points="${topPts} ${botPts}" fill="url(#ltfband)" opacity=".8"/>
+<path d="${midLine}" fill="none" stroke="#fb923c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+${pbars}
+<line x1="${PL}" y1="${sepY}" x2="${W-PR}" y2="${sepY}" stroke="var(--border)" stroke-width=".8"/>
+${mlbls}
+<text x="${PL}" y="${H-3}" font-size="7.5" fill="var(--muted)">💧 padavine</text>
+<text x="${W-PR-60}" y="${H-3}" font-size="7.5" fill="var(--muted)">🌡 temperatura</text>
+</svg></div>`;
+}
+// ═══ end DOLGOROČNA ════════════════════════════════════════
+
 // ═══ end METEO NERD ════════════════════════════════════════
 
 </script>
