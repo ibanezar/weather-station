@@ -2728,6 +2728,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="nasa-clim-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
+    <!-- ENSO / El Niño monitor -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌊 ENSO monitor — El Niño / La Niña</span>
+        <span class="chart-range" id="enso-src">NOAA CPC · ONI</span>
+      </div>
+      <div id="enso-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
     <!-- 1. Global climate twin -->
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
@@ -13853,11 +13862,97 @@ function renderFireWeather(days){
     +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Kanadska FWI metodologija (EFFIS/GWIS) · Open-Meteo · 7 dni nazaj + 7-dnevna napoved</div>';
 }
 
+// ══════════════════════════════════════════════════════════
+// ── ENSO / El Niño monitor — NOAA CPC ONI ─────────────────
+// ══════════════════════════════════════════════════════════
+const _ENSO_CACHE='wx-enso-v1';
+
+async function fetchENSO(){
+  const el=document.getElementById('enso-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_ENSO_CACHE)||'null');
+    if(c&&Date.now()-c.ts<86400000){renderENSO(c.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/enso');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    if(!Array.isArray(data)||!data.length)throw new Error('no data');
+    try{localStorage.setItem(_ENSO_CACHE,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderENSO(data);
+    const src=document.getElementById('enso-src');
+    if(src)src.textContent='NOAA CPC · ONI · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">ENSO podatki niso dosegljivi.</div>';
+    console.warn('ENSO:',e);
+  }
+}
+
+function renderENSO(data){
+  const el=document.getElementById('enso-body');if(!el||!data?.length)return;
+  const last=data[data.length-1];
+  const oni=last.a;
+  const phase=oni>=2?'Zelo močan El Niño':oni>=1.5?'Močan El Niño':oni>=1?'Zmeren El Niño':oni>=0.5?'Šibak El Niño':oni<=-2?'Zelo močna La Niña':oni<=-1.5?'Močna La Niña':oni<=-1?'Zmerna La Niña':oni<=-0.5?'Šibka La Niña':'Nevtralno';
+  const phaseCol=oni>=0.5?'var(--amber)':oni<=-0.5?'var(--blue)':'var(--muted)';
+  const phaseEmoji=oni>=0.5?'🔴':oni<=-0.5?'🔵':'⚪';
+  const latestSeas=last.s+' '+last.y;
+
+  const kpi=`<div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+    <div style="background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.55rem 1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:300;color:${phaseCol}">${oni>=0?'+':''}${oni.toFixed(2)}</div>
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.1rem">ONI · ${latestSeas}</div>
+    </div>
+    <div style="background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.55rem 1rem;flex:1;min-width:140px">
+      <div style="font-size:.92rem;font-weight:600;color:${phaseCol}">${phaseEmoji} ${phase}</div>
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.1rem">Trenutna faza ENSO</div>
+    </div>
+  </div>`;
+
+  const W=880,H=160,mL=36,mR=8,mT=16,mB=28;
+  const cW=W-mL-mR,cH=H-mT-mB;
+  const maxAbs=Math.max(2.5,...data.map(d=>Math.abs(d.a)));
+  const yZ=mT+cH/2;
+  const yS=v=>yZ-(v/maxAbs)*(cH/2);
+  const bW=Math.max(2,Math.floor(cW/data.length)-1);
+
+  let gridLines='',bars='',labels='';
+  [-2,-1,-0.5,0,0.5,1,2].forEach(v=>{
+    const y=yS(v).toFixed(1);
+    const dash=Math.abs(v)===0.5?'4,3':'';
+    const col=v===0?'rgba(255,255,255,.15)':'rgba(255,255,255,.06)';
+    gridLines+=`<line x1="${mL}" x2="${W-mR}" y1="${y}" y2="${y}" stroke="${col}" stroke-width="${v===0?1:.5}"${dash?` stroke-dasharray="${dash}"`:''}/>`
+    gridLines+=`<text x="${mL-3}" y="${(+y+3.5).toFixed(0)}" font-size="8" text-anchor="end" fill="var(--muted)" font-family="'JetBrains Mono',monospace">${v>0?'+':''}${v}</text>`;
+  });
+
+  let lastYear=null;
+  data.forEach((d,i)=>{
+    const x=mL+i*(cW/data.length);
+    const barH=Math.abs((d.a/maxAbs)*(cH/2));
+    const y0=d.a>=0?yS(d.a):yZ;
+    const intensity=Math.min(1,Math.abs(d.a)/2);
+    const col=d.a>=0.5?`rgba(251,146,60,${0.45+intensity*0.55})`:d.a<=-0.5?`rgba(96,165,250,${0.45+intensity*0.55})`:'rgba(148,163,184,.35)';
+    bars+=`<rect x="${x.toFixed(1)}" y="${y0.toFixed(1)}" width="${bW}" height="${Math.max(1,barH).toFixed(1)}" fill="${col}" rx="1"><title>${d.s} ${d.y}: ${d.a>=0?'+':''}${d.a.toFixed(2)}</title></rect>`;
+    if(d.s==='DJF'&&d.y!==lastYear){
+      lastYear=d.y;
+      labels+=`<text x="${(x+bW/2).toFixed(0)}" y="${H-mB+13}" font-size="8.5" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${d.y}</text>`;
+    }
+  });
+
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%" xmlns="http://www.w3.org/2000/svg">
+    ${gridLines}${bars}${labels}
+    <text x="${W-mR}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(251,146,60,.8)" font-family="Inter,sans-serif">🔴 El Niño ≥ +0.5</text>
+    <text x="${W-mR-110}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(96,165,250,.8)" font-family="Inter,sans-serif">🔵 La Niña ≤ −0.5</text>
+  </svg>`;
+
+  el.innerHTML=kpi+svg+'<div style="font-size:.63rem;color:var(--muted);margin-top:.4rem;text-align:right">ONI = 3-mesečno drseče povprečje SST anomalije v regiji Niño 3.4 · Vir: NOAA Climate Prediction Center</div>';
+}
+
 function initClimate(){
   if(_climInit)return;_climInit=true;
   try{buildArsoNormals(null,null);}catch(e){console.error('arso-norm',e);}
   fetchCMIP6();
   fetchPVGIS();
+  fetchENSO();
   try{fetchNASASolar();}catch(e){console.error('nasa-solar',e);}
   try{fetchNASABaselines();}catch(e){console.error('nasa-baselines',e);}
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
