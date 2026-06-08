@@ -1343,7 +1343,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 
 /* Station logo */
-.station-logo{width:80px;height:80px;display:block;margin:0 auto .85rem;flex-shrink:0;clip-path:circle(45%);object-fit:cover}
+.station-logo{width:80px;height:80px;display:block;margin:0 auto .85rem;flex-shrink:0;border-radius:50%;overflow:hidden}
+.station-logo img{width:118%;height:118%;margin:-9%;display:block}
 header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
@@ -1821,7 +1822,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <img class="station-logo" src="logo.png" alt="Meteorec">
+    <div class="station-logo"><img src="logo.png" alt="Meteorec"></div>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Meteo<em>rec</em></h1>
     <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">metéorka</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor prebiva v Rečici ob Savinji in kaže živahno zanimanje za vremenske pojave</em></p>
