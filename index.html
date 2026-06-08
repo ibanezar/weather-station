@@ -7835,7 +7835,7 @@ async function fetchAIForecast(force=false){
   textEl.className='aifc-text loading';textEl.textContent='Generiram napoved…';
   if(daysEl)daysEl.innerHTML='';if(metaEl)metaEl.textContent='';
   try{
-    const res=await fetch(PROXY+'/ai-forecast');
+    const res=await fetch(PROXY+'/ai-forecast?_='+Date.now(),{cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const payload={...data,ts:Date.now()};
