@@ -410,42 +410,37 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
         if (!summaries.length) throw new Error("yr.no: no data");
 
-        // Without Anthropic key — return structured data only
-        if (!ANTHROPIC_KEY || ANTHROPIC_KEY.startsWith("REPLACE")) {
+        // Without Gemini key — return structured data only (frontend uses rule-based fallback)
+        const GEMINI_KEY = env.GEMINI_KEY;
+        if (!GEMINI_KEY) {
           return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
           });
         }
 
-        // Generate natural Slovenian text with Claude Haiku (fast + cheap)
+        // Generate natural Slovenian text with Gemini Flash (free tier)
         const rows = summaries.slice(0, 4).map((s, i) => {
           const lbl = i === 0 ? 'Danes' : i === 1 ? 'Jutri' : s.dayName.charAt(0).toUpperCase() + s.dayName.slice(1);
           return `${lbl}: ${s.tmin}–${s.tmax}°C, ${s.symbol}${s.rain > 0 ? ', ' + s.rain + ' mm padavin' : ''}${s.windMax > 30 ? ', veter do ' + s.windMax + ' km/h' : ''}`;
         }).join('\n');
 
-        const prompt = `Si meteorolog za postajo Rečica ob Savinji (Savinjska dolina, 366 m n.m., Slovenija). Napiši kratek napovedni tekst v slovenščini na podlagi podatkov yr.no:
+        const prompt = `Si meteorolog za postajo Rečica ob Savinji (Savinjska dolina, 366 m n.m., Slovenija). Napiši kratek napovedni tekst v slovenščini na podlagi podatkov yr.no:\n\n${rows}\n\nNapiši 3–4 stavke v naravni slovenščini. Opiši razvoj vremena od danes do konca tega obdobja. Omeni morebitne izrazitejše pojave. Ton: profesionalen a razumljiv. Ne naštevaj vrednosti — piši opisno.`;
 
-${rows}
-
-Napiši 3–4 stavke v naravni slovenščini. Opiši razvoj vremena od danes do konca tega obdobja. Omeni morebitne izrazitejše pojave. Ton: profesionalen a razumljiv. Ne naštevaj vrednosti — piši opisno.`;
-
-        const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": ANTHROPIC_KEY,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 350,
-            messages: [{ role: "user", content: prompt }],
-          }),
-        });
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 350, temperature: 0.5 },
+            }),
+          }
+        );
         const aiData = await aiRes.json();
-        const text = aiData.content?.[0]?.text?.trim() || null;
+        const text = aiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
 
-        return new Response(JSON.stringify({ summaries, text, source: "yr.no + Claude AI" }), {
+        return new Response(JSON.stringify({ summaries, text, source: "yr.no + Gemini" }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
         });
       }
