@@ -905,7 +905,8 @@ Podatki iz yr.no:
 ${rows}
 
 Pravila:
-- Začni TAKOJ z opisom vremena (npr. "V ponedeljek bo..." ali "Danes bo..." ali "Prihajajoči dnevi..."), brez pozdravov, nagovorov, uvodnih stavkov ali podpisov
+- Začni TAKOJ z opisom vremena (npr. "Na Rečici bo danes..." ali "Danes bo..." ali "Prihajajoči dnevi..."), brez pozdravov, nagovorov, uvodnih stavkov ali podpisov
+- Kadar omeniš kraj, uporabi "na Rečici ob Savinji" (ne "v Rečici")
 - 3–4 stavki, skupaj 60–100 besed
 - Omeni samo najpomembnejše spremembe, ne naštevaj vseh dni
 - Ton: kratek, neposreden, kot radijska napoved
