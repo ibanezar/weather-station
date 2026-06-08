@@ -329,6 +329,127 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
       }
 
+      // ── /ai-forecast ─────────────────────────────────────
+      // yr.no (AROME/MEPS 2.5 km) → daily summaries → Claude text
+      if (path === "/ai-forecast") {
+        // Ljubljana UTC offset (UTC+1 winter, UTC+2 summer)
+        const ljOff = (() => {
+          const d = new Date();
+          const jan = new Date(d.getFullYear(), 0, 1);
+          const jul = new Date(d.getFullYear(), 6, 1);
+          const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+          return d.getTimezoneOffset() < stdOff ? 2 : 1;
+        })();
+
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 8000);
+        const yrRes = await fetch(
+          "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=46.3258&lon=14.9211&altitude=366",
+          {
+            signal: ctrl.signal,
+            headers: {
+              "User-Agent": "Meteorec/1.0 github.com/ibanezar/weather-station filip.eremita@gmail.com",
+              "Accept": "application/json",
+            },
+          }
+        );
+        if (!yrRes.ok) throw new Error("yr.no HTTP " + yrRes.status);
+        const yrData = await yrRes.json();
+        const timeseries = yrData.properties?.timeseries || [];
+
+        // Aggregate hourly → daily (Ljubljana local time)
+        const days = {};
+        for (const ts of timeseries) {
+          const local = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
+          const date = local.toISOString().slice(0, 10);
+          const hour = local.getUTCHours();
+          if (!days[date]) days[date] = { temps: [], winds: [], rain: 0, syms: [], noonSym: null };
+          const det = ts.data.instant.details;
+          days[date].temps.push(det.air_temperature);
+          days[date].winds.push(det.wind_speed * 3.6);
+          const p = ts.data.next_1_hours?.details?.precipitation_amount;
+          if (p != null) days[date].rain += p;
+          const sym = ts.data.next_1_hours?.summary?.symbol_code || ts.data.next_6_hours?.summary?.symbol_code;
+          if (sym) {
+            days[date].syms.push(sym);
+            if (hour >= 11 && hour <= 13) days[date].noonSym = sym;
+          }
+        }
+
+        const SL_DAYS = ['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+        const SL_SYM = {
+          clearsky:'jasno',fair:'pretežno jasno',partlycloudy:'delno oblačno',cloudy:'oblačno',
+          fog:'megleno',lightrain:'rahel dež',rain:'dež',heavyrain:'močan dež',
+          lightrainshowers:'manjše plohe',rainshowers:'plohe',heavyrainshowers:'močne plohe',
+          lightsnow:'rahel sneg',snow:'sneg',heavysnow:'močan sneg',
+          sleet:'dež s snegom',lightsleet:'rahel dež s snegom',
+          thunderstorm:'nevihta',lightrainandthunder:'dež z grmevino',rainandthunder:'nevihte z dežjem',
+        };
+        const symLabel = c => {
+          const b = (c||'').replace(/_day|_night|_polartwilight/g,'');
+          return SL_SYM[b] || b.replace(/_/g,' ');
+        };
+
+        const summaries = Object.entries(days)
+          .sort(([a],[b]) => a < b ? -1 : 1)
+          .slice(0, 7)
+          .map(([date, d]) => {
+            const dt = new Date(date + 'T12:00:00');
+            const rawSym = d.noonSym || d.syms[Math.floor(d.syms.length/2)] || 'partlycloudy_day';
+            return {
+              date,
+              dayName: SL_DAYS[dt.getDay()],
+              tmax: d.temps.length ? Math.round(Math.max(...d.temps)) : null,
+              tmin: d.temps.length ? Math.round(Math.min(...d.temps)) : null,
+              windMax: d.winds.length ? Math.round(Math.max(...d.winds)) : null,
+              rain: Math.round(d.rain * 10) / 10,
+              symbol: symLabel(rawSym),
+              _rawSym: rawSym,
+            };
+          });
+
+        if (!summaries.length) throw new Error("yr.no: no data");
+
+        // Without Anthropic key — return structured data only
+        if (!ANTHROPIC_KEY || ANTHROPIC_KEY.startsWith("REPLACE")) {
+          return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+          });
+        }
+
+        // Generate natural Slovenian text with Claude Haiku (fast + cheap)
+        const rows = summaries.slice(0, 4).map((s, i) => {
+          const lbl = i === 0 ? 'Danes' : i === 1 ? 'Jutri' : s.dayName.charAt(0).toUpperCase() + s.dayName.slice(1);
+          return `${lbl}: ${s.tmin}–${s.tmax}°C, ${s.symbol}${s.rain > 0 ? ', ' + s.rain + ' mm padavin' : ''}${s.windMax > 30 ? ', veter do ' + s.windMax + ' km/h' : ''}`;
+        }).join('\n');
+
+        const prompt = `Si meteorolog za postajo Rečica ob Savinji (Savinjska dolina, 366 m n.m., Slovenija). Napiši kratek napovedni tekst v slovenščini na podlagi podatkov yr.no:
+
+${rows}
+
+Napiši 3–4 stavke v naravni slovenščini. Opiši razvoj vremena od danes do konca tega obdobja. Omeni morebitne izrazitejše pojave. Ton: profesionalen a razumljiv. Ne naštevaj vrednosti — piši opisno.`;
+
+        const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": ANTHROPIC_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 350,
+            messages: [{ role: "user", content: prompt }],
+          }),
+        });
+        const aiData = await aiRes.json();
+        const text = aiData.content?.[0]?.text?.trim() || null;
+
+        return new Response(JSON.stringify({ summaries, text, source: "yr.no + Claude AI" }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+        });
+      }
+
       // ── /ai-chat ──────────────────────────────────────────
       if (path === "/ai-chat" && request.method === "POST") {
         const GEMINI_KEY = env.GEMINI_KEY;
