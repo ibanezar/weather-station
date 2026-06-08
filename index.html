@@ -1643,28 +1643,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
-.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative}
-.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.07) 0%,transparent 60%);pointer-events:none;border-radius:16px}
-.aifc-header{display:flex;align-items:center;gap:.45rem;margin-bottom:.7rem;flex-wrap:wrap}
-.aifc-title{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.7}
-.aifc-badge{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.18rem .45rem;border-radius:6px;line-height:1.3}
-.aifc-badge.yr{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
-.aifc-badge.ai{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
-.aifc-refresh{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem;line-height:1;opacity:.7;transition:opacity .2s}
-.aifc-refresh:hover{opacity:1}
-.aifc-text{font-size:.88rem;line-height:1.78;color:var(--text);position:relative;z-index:1}
-.aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}
-.aifc-text.italic{font-style:italic}
-@keyframes aifc-pulse{0%,100%{opacity:.5}50%{opacity:1}}
-.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-top:.9rem;position:relative;z-index:1}
-.aifc-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.45rem .3rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.12rem}
-.aifc-day-lbl{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.aifc-day-sym{font-size:1.3rem;line-height:1.1}
-.aifc-day-t{font-size:.72rem;font-family:'JetBrains Mono',monospace}
-.aifc-day-t .th{color:#f87171}.aifc-day-t .tl{color:var(--blue)}
-.aifc-day-rain{font-size:.62rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
-.aifc-meta{font-size:.68rem;color:var(--muted);margin-top:.65rem;opacity:.6;position:relative;z-index:1}
-@media(max-width:540px){.aifc-days{grid-template-columns:repeat(4,1fr)}}
 .daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
 .daily-fc-main{display:flex;gap:1rem;align-items:center}
 .daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}
@@ -1763,7 +1741,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:420px){.cu-days{gap:.35rem}.cu-day{padding:.65rem .25rem}}
 
 /* ── AI Forecast card (yr.no + Claude) ── */
-.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative}
 .aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.07) 0%,transparent 60%);pointer-events:none}
 .aifc-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
 .aifc-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
