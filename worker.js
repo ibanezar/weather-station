@@ -817,22 +817,25 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
       }
 
       // ── /ai-forecast ─────────────────────────────────────
-      // yr.no + Gemini Flash — besedilna napoved za Rečico ob Savinji
+      // yr.no summaries + ARSO besedilna napoved — Savinjska regija
       if (path === "/ai-forecast") {
         const LAT_F = "46.3258", LON_F = "14.9211", ALT_F = "366";
-        const yrUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${LAT_F}&lon=${LON_F}&altitude=${ALT_F}`;
-        const yrRes = await fetch(yrUrl, {
-          headers: { "User-Agent": "meteorec-ireica1/1.0 filip.eremita@gmail.com" }
-        });
-        if (!yrRes.ok) {
-          return new Response(JSON.stringify({ error: "yr.no nedostopen" }), {
-            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
-        }
-        const yrData = await yrRes.json();
-        const timeseries = yrData?.properties?.timeseries || [];
 
-        // Determine Ljubljana UTC offset
+        // Fetch yr.no and ARSO text forecast in parallel
+        const [yrRes, arsoTxtRes] = await Promise.allSettled([
+          fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${LAT_F}&lon=${LON_F}&altitude=${ALT_F}`, {
+            headers: { "User-Agent": "meteorec-ireica1/1.0 filip.eremita@gmail.com" }
+          }),
+          fetch("https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_SI_SAVINJSKA_latest.xml", {
+            headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://meteo.arso.gov.si/" }
+          }),
+        ]);
+
+        // ── yr.no daily summaries ──────────────────────────────
+        const timeseries = yrRes.status === "fulfilled" && yrRes.value.ok
+          ? (await yrRes.value.json())?.properties?.timeseries || []
+          : [];
+
         const now = new Date();
         const ljOff = (() => {
           const mar = new Date(now.getFullYear(), 2, 31);
@@ -842,7 +845,6 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           return now >= mar && now < oct ? 2 : 1;
         })();
 
-        // Aggregate timeseries → daily summaries (next 7 days)
         const dailyMap = {};
         for (const ts of timeseries) {
           const utcH = new Date(ts.time).getUTCHours();
@@ -870,12 +872,11 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
           .slice(0, 7)
           .map(([date, v]) => {
             const dt = new Date(date + 'T12:00:00');
-            const isToday = date === todayKey;
             const isTomorrow = (() => { const t = new Date(new Date().getTime() + ljOff*3600000); t.setUTCDate(t.getUTCDate()+1); return t.toISOString().slice(0,10) === date; })();
-            const sym = v.noonSym || Object.values(dailyMap[date] || {}).find(x => typeof x === 'string') || 'partlycloudy_day';
+            const sym = v.noonSym || 'partlycloudy_day';
             return {
               date,
-              dayName: isToday ? 'danes' : isTomorrow ? 'jutri' : SL_DAYS[dt.getDay()],
+              dayName: date === todayKey ? 'danes' : isTomorrow ? 'jutri' : SL_DAYS[dt.getDay()],
               tmax: v.temps.length ? Math.round(Math.max(...v.temps)) : null,
               tmin: v.temps.length ? Math.round(Math.min(...v.temps)) : null,
               windMax: v.winds.length ? Math.round(Math.max(...v.winds)) : null,
@@ -884,56 +885,45 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
             };
           });
 
-        const GEMINI_KEY = env?.GEMINI_KEY;
-        if (!GEMINI_KEY) {
-          return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
-          });
-        }
-
-        // Build 4-day prompt rows
-        const rows = summaries.slice(0, 4).map(s => {
-          const parts = [`${s.dayName}: ${s.tmin}–${s.tmax}°C`];
-          if (s.rain > 0.3) parts.push(`dež ${s.rain} mm`);
-          if (s.windMax && s.windMax >= 20) parts.push(`veter ${s.windMax} km/h`);
-          parts.push(s.symbol.replace(/_day|_night|_polartwilight/g, ''));
-          return parts.join(', ');
-        }).join('\n');
-
-        const prompt = `Napiši kratko vremensko napoved za Rečico ob Savinji (dolina Savinje, 366 m, Slovenija).
-Podatki iz yr.no:
-${rows}
-
-Pravila:
-- Začni TAKOJ z opisom vremena (npr. "Na Rečici bo danes..." ali "Danes bo..." ali "Prihajajoči dnevi..."), brez pozdravov, nagovorov, uvodnih stavkov ali podpisov
-- Kadar omeniš kraj, uporabi "na Rečici ob Savinji" (ne "v Rečici")
-- 3–4 stavki, skupaj 60–100 besed
-- Omeni samo najpomembnejše spremembe, ne naštevaj vseh dni
-- Ton: kratek, neposreden, kot radijska napoved
-- Jezik: slovenščina, brez oklepajnih oznak in tehničnih oznak`;
-
-        try {
-          const gemRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: { maxOutputTokens: 500, temperature: 0.55 },
-              }),
+        // ── ARSO text forecast ─────────────────────────────────
+        let text = null, source = "yr.no";
+        if (arsoTxtRes.status === "fulfilled" && arsoTxtRes.value.ok) {
+          try {
+            const xml = await arsoTxtRes.value.text();
+            // Extract first <fcastStmt> or <body> or <text> paragraph
+            const m = xml.match(/<fcastStmt[^>]*>([\s\S]*?)<\/fcastStmt>/i)
+              || xml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+              || xml.match(/<tekst[^>]*>([\s\S]*?)<\/tekst>/i)
+              || xml.match(/<text[^>]*>([\s\S]*?)<\/text>/i);
+            if (m) {
+              text = m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+              source = "ARSO";
             }
-          );
-          const gemJson = await gemRes.json();
-          const text = gemJson?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-          return new Response(JSON.stringify({ summaries, text, source: "yr.no + Gemini" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
-          });
-        } catch (_) {
-          return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
-          });
+          } catch (_) {}
         }
+
+        // ── Template fallback from yr.no summaries ─────────────
+        if (!text && summaries.length) {
+          const SL_SYM = {
+            clearsky:'jasno', fair:'pretežno jasno', partlycloudy:'spremenljivo oblačno',
+            cloudy:'oblačno', fog:'megla', lightrain:'rahel dež', rain:'dež',
+            heavyrain:'močan dež', rainshowers:'plohe', lightrainshowers:'rahle plohe',
+            snow:'sneg', heavysnow:'močan sneg', sleet:'slota',
+            thunderstorm:'nevihte', lightrainandthunder:'plohe z nevihtami',
+          };
+          const sym = s => SL_SYM[(s||'').replace(/_day|_night|_polartwilight/g,'')] || 'spremenljivo';
+          const s0 = summaries[0], s1 = summaries[1], s2 = summaries[2];
+          const parts = [];
+          if (s0) parts.push(`Danes bo na Rečici ob Savinji ${sym(s0.symbol)}, temperatura med ${s0.tmin} in ${s0.tmax} °C${s0.rain > 0.5 ? `, pričakuje se ${s0.rain} mm padavin` : ''}.`);
+          if (s1) parts.push(`Jutri ${sym(s1.symbol)}, ${s1.tmin}–${s1.tmax} °C${s1.rain > 0.5 ? `, dež ${s1.rain} mm` : ''}.`);
+          if (s2) parts.push(`${s2.dayName.charAt(0).toUpperCase() + s2.dayName.slice(1)} bo ${sym(s2.symbol)}${s2.tmax != null ? `, do ${s2.tmax} °C` : ''}.`);
+          text = parts.join(' ');
+          source = "yr.no";
+        }
+
+        return new Response(JSON.stringify({ summaries, text, source }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
+        });
       }
 
       // ── /current ali /hourly ──────────────────────────────

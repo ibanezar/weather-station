@@ -3691,11 +3691,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="aifc-card">
       <div class="aifc-header">
         <span class="aifc-title">🔮 Napoved za Rečico</span>
-        <span class="aifc-badge yr">yr.no</span>
-        <span class="aifc-badge ai" id="aifc-ai-badge" style="display:none">Gemini</span>
+        <span class="aifc-badge yr" id="aifc-src-badge">yr.no</span>
         <button class="aifc-refresh" id="aifc-refresh" onclick="fetchAIForecast(true)" title="Osveži napoved">↻</button>
       </div>
-      <div class="aifc-text loading" id="aifc-text">Generiram napoved…</div>
+      <div class="aifc-text loading" id="aifc-text">Nalagam napoved…</div>
       <div class="aifc-days" id="aifc-days"></div>
       <div class="aifc-meta" id="aifc-meta"></div>
     </div>
@@ -7822,7 +7821,7 @@ function _yrIcon(sym){
 }
 
 async function fetchAIForecast(force=false){
-  const CACHE_KEY='aifc-v5',CACHE_TTL=3*60*60*1000;
+  const CACHE_KEY='aifc-v6',CACHE_TTL=3*60*60*1000;
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -7852,17 +7851,17 @@ function _renderAIFC(data){
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
-  const aiBadge=document.getElementById('aifc-ai-badge');
+  const srcBadge=document.getElementById('aifc-src-badge');
   const SL_DS=['ned','pon','tor','sre','čet','pet','sob'];
+  if(srcBadge&&data.source){srcBadge.textContent=data.source;}
   if(textEl){
     if(data.text){
-      textEl.className='aifc-text italic';
+      textEl.className='aifc-text';
       textEl.textContent=data.text;
-      if(aiBadge)aiBadge.style.display='';
     }else if(data.summaries?.length){
       const s=data.summaries;
       const lines=[];
-      if(s[0])lines.push(`Danes bo v Rečici ob Savinji s temperaturo med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
+      if(s[0])lines.push(`Danes bo na Rečici ob Savinji temperatura med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
       if(s[1])lines.push(`Jutri ${s[1].tmax!=null?s[1].tmin+'–'+s[1].tmax+'°C':''}.`);
       textEl.className='aifc-text';
       textEl.textContent=lines.join(' ');
