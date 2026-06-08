@@ -683,6 +683,13 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sc-hero.sc-moderate{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
 .sc-hero.sc-high{background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.5)}
 .sc-hero.sc-extreme{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.6)}
+.sc-scrub{padding:1rem 1.25rem}
+.sc-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem;flex-wrap:wrap}
+.sc-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--cyan)}
+.sc-scrub-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);outline:none;cursor:pointer}
+.sc-scrub-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer}
+.sc-scrub-range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--cyan);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer}
+.sc-scrub-ticks{display:flex;justify-content:space-between;margin-top:.45rem;font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
 .sc-threat-tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
@@ -3131,6 +3138,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
         <div class="sc-hero-kpis" id="sc-hero-kpis"></div>
       </div>
+    </div>
+
+    <!-- Hour scrubber: drag forward up to 48 h -->
+    <div class="sc-scrub card" style="margin-bottom:1rem">
+      <div class="sc-scrub-head">
+        <span class="clabel" style="margin:0">🕐 Časovni drsnik napovedi</span>
+        <span class="sc-scrub-time" id="sc-scrub-time">zdaj</span>
+      </div>
+      <input type="range" class="sc-scrub-range" id="sc-scrub-range" min="0" max="47" value="0" step="1" oninput="scSetHour(this.value)" aria-label="Premik napovedi naprej v urah">
+      <div class="sc-scrub-ticks"><span>zdaj</span><span>+12h</span><span>+24h</span><span>+36h</span><span>+48h</span></div>
     </div>
 
     <!-- Instability indices -->
@@ -11540,7 +11557,7 @@ async function fetchHourly(){
 }
 // ══════════════════════════════════════════════════════════
 // ── STORM CHASER TAB ──────────────────────────────────────
-let _scData=null,_scFetchTime=0,_scInit=false;
+let _scData=null,_scFetchTime=0,_scInit=false,_scHourOffset=0;
 async function fetchStormChaser(){
   if(_scData&&Date.now()-_scFetchTime<15*60*1000){renderStormChaser();return;}
   const setStatus=(msg)=>{const b=document.getElementById('sc-desc');if(b)b.textContent=msg;};
@@ -11846,8 +11863,13 @@ function renderStormChaser(){
   if(!_scData)return;
   const d=_scData,now=new Date();
   const times=(d.time||[]).map(t=>new Date(t));
-  let ci=times.findIndex(t=>t>=now)-1;if(ci<0)ci=0;
+  let ciNow=times.findIndex(t=>t>=now)-1;if(ciNow<0)ciNow=0;
+  // Display index = now + scrubber offset (clamped to available data)
+  let ci=Math.min(ciNow+_scHourOffset,times.length-1);if(ci<0)ci=0;
   const g=(id)=>document.getElementById(id);
+  // Update scrubber time label
+  const scTime=g('sc-scrub-time');
+  if(scTime&&times[ci]){const t=times[ci];const dayLbl=['ned','pon','tor','sre','čet','pet','sob'][t.getDay()];const hh=String(t.getHours()).padStart(2,'0');scTime.textContent=_scHourOffset===0?`zdaj · ${hh}:00`:`${dayLbl} ${hh}:00 · +${_scHourOffset}h`;}
   const T2=scIdx(d.temperature_2m,ci)??15,Td2=scIdx(d.dew_point_2m,ci)??5,rh2=scIdx(d.relative_humidity_2m,ci)??60;
   const cape=scIdx(d.cape,ci)??0,cin=scIdx(d.cin,ci)??0,li=scIdx(d.lifted_index,ci)??0;
   const freeze=scIdx(d.freezing_level_height,ci)??3000;
@@ -11934,6 +11956,11 @@ function renderStormChaser(){
   if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
   // Advanced visualizations
   try{updateAdvViz(d,ci);}catch(e){console.warn('AdvViz:',e);}
+}
+// Hour scrubber: set forecast offset (0–47 h ahead) and re-render
+function scSetHour(v){
+  _scHourOffset=Math.max(0,Math.min(47,parseInt(v,10)||0));
+  if(_scData)renderStormChaser();
 }
 // ══════════════════════════════════════════════════════════
 // ── KLIMATOLOGIJA (4 features) ────────────────────────────
