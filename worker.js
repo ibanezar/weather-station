@@ -424,7 +424,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           return `${lbl}: ${s.tmin}–${s.tmax}°C, ${s.symbol}${s.rain > 0 ? ', ' + s.rain + ' mm padavin' : ''}${s.windMax > 30 ? ', veter do ' + s.windMax + ' km/h' : ''}`;
         }).join('\n');
 
-        const prompt = `Si meteorolog za postajo Rečica ob Savinji (Savinjska dolina, 366 m n.m., Slovenija). Napiši kratek napovedni tekst v slovenščini na podlagi podatkov yr.no:\n\n${rows}\n\nNapiši 3–4 stavke v naravni slovenščini. Opiši razvoj vremena od danes do konca tega obdobja. Omeni morebitne izrazitejše pojave. Ton: profesionalen a razumljiv. Ne naštevaj vrednosti — piši opisno.`;
+        const prompt = `Napiši kratko vremensko napoved za Rečico ob Savinji (Savinjska dolina, 366 m n.m.) v slovenščini. Podatki yr.no:\n\n${rows}\n\nPravila:\n- Začni TAKOJ z opisom vremena (npr. "V ponedeljek bo..." ali "Danes bo..."), brez pozdravov, nagovorov ali uvodnih stavkov\n- 3–4 stavki\n- Opiši razvoj od danes do konca obdobja\n- Omeni izrazitejše pojave (nevihte, močan dež, vročina, mraz)\n- Ton: kratek, neposreden, kot radijska napoved\n- Ne naštevaj vrednosti — piši opisno`;
 
         const aiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
