@@ -887,7 +887,7 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         const GEMINI_KEY = env?.GEMINI_KEY;
         if (!GEMINI_KEY) {
           return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
           });
         }
 
@@ -927,11 +927,11 @@ Pravila:
           const gemJson = await gemRes.json();
           const text = gemJson?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
           return new Response(JSON.stringify({ summaries, text, source: "yr.no + Gemini" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
           });
         } catch (_) {
           return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
           });
         }
       }
