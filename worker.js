@@ -816,6 +816,125 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         }
       }
 
+      // ── /ai-forecast ─────────────────────────────────────
+      // yr.no + Gemini Flash — besedilna napoved za Rečico ob Savinji
+      if (path === "/ai-forecast") {
+        const LAT_F = "46.3258", LON_F = "14.9211", ALT_F = "366";
+        const yrUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${LAT_F}&lon=${LON_F}&altitude=${ALT_F}`;
+        const yrRes = await fetch(yrUrl, {
+          headers: { "User-Agent": "meteorec-ireica1/1.0 filip.eremita@gmail.com" }
+        });
+        if (!yrRes.ok) {
+          return new Response(JSON.stringify({ error: "yr.no nedostopen" }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+        const yrData = await yrRes.json();
+        const timeseries = yrData?.properties?.timeseries || [];
+
+        // Determine Ljubljana UTC offset
+        const now = new Date();
+        const ljOff = (() => {
+          const mar = new Date(now.getFullYear(), 2, 31);
+          mar.setDate(31 - ((mar.getDay() + 7 - 0) % 7));
+          const oct = new Date(now.getFullYear(), 9, 31);
+          oct.setDate(31 - ((oct.getDay() + 7 - 0) % 7));
+          return now >= mar && now < oct ? 2 : 1;
+        })();
+
+        // Aggregate timeseries → daily summaries (next 7 days)
+        const dailyMap = {};
+        for (const ts of timeseries) {
+          const utcH = new Date(ts.time).getUTCHours();
+          const localDate = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
+          const d = localDate.toISOString().slice(0, 10);
+          if (!dailyMap[d]) dailyMap[d] = { temps: [], winds: [], rain: 0, noonSym: null };
+          const inst = ts.data?.instant?.details || {};
+          const n1 = ts.data?.next_1_hours;
+          const n6 = ts.data?.next_6_hours;
+          if (inst.air_temperature != null) dailyMap[d].temps.push(inst.air_temperature);
+          if (inst.wind_speed != null) dailyMap[d].winds.push(inst.wind_speed * 3.6);
+          const precip = n1?.details?.precipitation_amount ?? n6?.details?.precipitation_amount ?? 0;
+          dailyMap[d].rain += precip;
+          const sym = n1?.summary?.symbol_code ?? n6?.summary?.symbol_code;
+          if (sym && (utcH + ljOff) >= 11 && (utcH + ljOff) <= 13 && !dailyMap[d].noonSym) {
+            dailyMap[d].noonSym = sym;
+          }
+        }
+
+        const SL_DAYS = ['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+        const todayKey = new Date(new Date().getTime() + ljOff * 3600000).toISOString().slice(0, 10);
+        const summaries = Object.entries(dailyMap)
+          .filter(([d]) => d >= todayKey)
+          .sort((a, b) => a[0] < b[0] ? -1 : 1)
+          .slice(0, 7)
+          .map(([date, v]) => {
+            const dt = new Date(date + 'T12:00:00');
+            const isToday = date === todayKey;
+            const isTomorrow = (() => { const t = new Date(new Date().getTime() + ljOff*3600000); t.setUTCDate(t.getUTCDate()+1); return t.toISOString().slice(0,10) === date; })();
+            const sym = v.noonSym || Object.values(dailyMap[date] || {}).find(x => typeof x === 'string') || 'partlycloudy_day';
+            return {
+              date,
+              dayName: isToday ? 'danes' : isTomorrow ? 'jutri' : SL_DAYS[dt.getDay()],
+              tmax: v.temps.length ? Math.round(Math.max(...v.temps)) : null,
+              tmin: v.temps.length ? Math.round(Math.min(...v.temps)) : null,
+              windMax: v.winds.length ? Math.round(Math.max(...v.winds)) : null,
+              rain: Math.round(v.rain * 10) / 10,
+              symbol: sym,
+            };
+          });
+
+        const GEMINI_KEY = env?.GEMINI_KEY;
+        if (!GEMINI_KEY) {
+          return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+          });
+        }
+
+        // Build 4-day prompt rows
+        const rows = summaries.slice(0, 4).map(s => {
+          const parts = [`${s.dayName}: ${s.tmin}–${s.tmax}°C`];
+          if (s.rain > 0.3) parts.push(`dež ${s.rain} mm`);
+          if (s.windMax && s.windMax >= 20) parts.push(`veter ${s.windMax} km/h`);
+          parts.push(s.symbol.replace(/_day|_night|_polartwilight/g, ''));
+          return parts.join(', ');
+        }).join('\n');
+
+        const prompt = `Napiši kratko vremensko napoved za Rečico ob Savinji (dolina Savinje, 366 m, Slovenija).
+Podatki iz yr.no:
+${rows}
+
+Pravila:
+- Začni TAKOJ z opisom vremena (npr. "V ponedeljek bo..." ali "Danes bo..." ali "Prihajajoči dnevi..."), brez pozdravov, nagovorov, uvodnih stavkov ali podpisov
+- 3–4 stavki, skupaj 60–100 besed
+- Omeni samo najpomembnejše spremembe, ne naštevaj vseh dni
+- Ton: kratek, neposreden, kot radijska napoved
+- Jezik: slovenščina, brez oklepajnih oznak in tehničnih oznak`;
+
+        try {
+          const gemRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 500, temperature: 0.55 },
+              }),
+            }
+          );
+          const gemJson = await gemRes.json();
+          const text = gemJson?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+          return new Response(JSON.stringify({ summaries, text, source: "yr.no + Gemini" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+          });
+        } catch (_) {
+          return new Response(JSON.stringify({ summaries, text: null, source: "yr.no" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=10800" }
+          });
+        }
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });

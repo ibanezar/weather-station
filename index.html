@@ -1643,6 +1643,28 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
+.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative}
+.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.07) 0%,transparent 60%);pointer-events:none;border-radius:16px}
+.aifc-header{display:flex;align-items:center;gap:.45rem;margin-bottom:.7rem;flex-wrap:wrap}
+.aifc-title{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.7}
+.aifc-badge{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.18rem .45rem;border-radius:6px;line-height:1.3}
+.aifc-badge.yr{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.aifc-badge.ai{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.aifc-refresh{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem;line-height:1;opacity:.7;transition:opacity .2s}
+.aifc-refresh:hover{opacity:1}
+.aifc-text{font-size:.88rem;line-height:1.78;color:var(--text);position:relative;z-index:1}
+.aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}
+.aifc-text.italic{font-style:italic}
+@keyframes aifc-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-top:.9rem;position:relative;z-index:1}
+.aifc-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.45rem .3rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.12rem}
+.aifc-day-lbl{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.aifc-day-sym{font-size:1.3rem;line-height:1.1}
+.aifc-day-t{font-size:.72rem;font-family:'JetBrains Mono',monospace}
+.aifc-day-t .th{color:#f87171}.aifc-day-t .tl{color:var(--blue)}
+.aifc-day-rain{font-size:.62rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
+.aifc-meta{font-size:.68rem;color:var(--muted);margin-top:.65rem;opacity:.6;position:relative;z-index:1}
+@media(max-width:540px){.aifc-days{grid-template-columns:repeat(4,1fr)}}
 .daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
 .daily-fc-main{display:flex;gap:1rem;align-items:center}
 .daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}
@@ -3687,7 +3709,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ═══ PODROBNA NAPOVED ═══ -->
   <div id="tab-forecast2" class="tab-pane">
 
-    <!-- yr.no + Claude AI forecast card -->
+    <!-- yr.no + Gemini AI forecast card -->
     <div class="aifc-card">
       <div class="aifc-header">
         <span class="aifc-title">🔮 Napoved za Rečico</span>
@@ -7807,14 +7829,14 @@ function _renderArsoDailyForecast(arso,box,upd){
   if(upd)upd.textContent='ARSO · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
-// ── AI Forecast (yr.no + Claude) ──────────────────────────
+// ── AI Forecast (yr.no + Gemini) ──────────────────────────
 const _YR_ICONS={
   clearsky:'☀️',fair:'🌤',partlycloudy:'⛅',cloudy:'☁️',fog:'🌫️',
   lightrain:'🌦',rain:'🌧',heavyrain:'🌧',lightrainshowers:'🌦',rainshowers:'🌧',heavyrainshowers:'🌧',
   lightsnow:'🌨',snow:'❄️',heavysnow:'❄️',lightsnowshowers:'🌨',snowshowers:'🌨',
   sleet:'🌧',lightsleet:'🌧',lightsleetshowers:'🌧',sleetshowers:'🌧',
   thunderstorm:'⛈',thunderstormlightrain:'⛈',lightrainandthunder:'⛈',rainandthunder:'⛈',
-  snowandthunder:'⛈',
+  snowandthunder:'⛈',thunder:'⛈',
 };
 function _yrIcon(sym){
   const base=(sym||'').replace(/_day|_night|_polartwilight/g,'');
@@ -7826,14 +7848,15 @@ async function fetchAIForecast(force=false){
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
-  const aiBadge=document.getElementById('aifc-ai-badge');
+  if(!textEl)return;
   if(!force){
     try{
       const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
       if(c&&Date.now()-c.ts<CACHE_TTL){_renderAIFC(c);return;}
     }catch(_){}
   }
-  if(textEl){textEl.className='aifc-text loading';textEl.textContent='Generiram napoved…';}
+  textEl.className='aifc-text loading';textEl.textContent='Generiram napoved…';
+  if(daysEl)daysEl.innerHTML='';if(metaEl)metaEl.textContent='';
   try{
     const res=await fetch(PROXY+'/ai-forecast');
     if(!res.ok)throw new Error('HTTP '+res.status);
@@ -7861,9 +7884,8 @@ function _renderAIFC(data){
     }else if(data.summaries?.length){
       const s=data.summaries;
       const lines=[];
-      if(s[0])lines.push(`Danes bo v Rečici ob Savinji ${s[0].symbol}, s temperaturo med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
-      if(s[1])lines.push(`Jutri ${s[1].symbol}${s[1].tmax!=null?', '+s[1].tmin+'–'+s[1].tmax+'°C':''}.`);
-      if(s[2]&&s[3])lines.push(`${s[2].dayName.charAt(0).toUpperCase()+s[2].dayName.slice(1)} in ${s[3].dayName} bo ${(s[2].symbol+s[3].symbol).includes('dež')?'padavinsko':'spremenljivo'}.`);
+      if(s[0])lines.push(`Danes bo v Rečici ob Savinji s temperaturo med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
+      if(s[1])lines.push(`Jutri ${s[1].tmax!=null?s[1].tmin+'–'+s[1].tmax+'°C':''}.`);
       textEl.className='aifc-text';
       textEl.textContent=lines.join(' ');
     }
@@ -7875,7 +7897,7 @@ function _renderAIFC(data){
       const lbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
-<div class="aifc-day-icon">${_yrIcon(s._rawSym||s.symbol)}</div>
+<div class="aifc-day-icon">${_yrIcon(s.symbol)}</div>
 <div class="aifc-day-t">${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span></div>
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 </div>`;
