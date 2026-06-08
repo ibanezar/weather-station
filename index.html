@@ -1343,8 +1343,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 
 /* Station logo */
-.station-logo{width:80px;height:80px;display:block;margin:0 auto .85rem;flex-shrink:0;border-radius:50%;overflow:hidden}
-.station-logo img{width:118%;height:118%;margin:-9%;display:block}
+.station-logo{width:72px;height:72px;display:block;margin:0 auto .85rem;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(56,189,248,.35))}
 header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
@@ -1822,7 +1821,34 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <div class="station-logo"><img src="logo.png" alt="Meteorec"></div>
+    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
+      <defs>
+        <linearGradient id="sunG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#fcd34d"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </linearGradient>
+        <linearGradient id="cloudG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e0f2fe"/>
+          <stop offset="100%" stop-color="#bae6fd"/>
+        </linearGradient>
+      </defs>
+      <!-- Sun with rays -->
+      <g stroke="url(#sunG)" stroke-width="2.4" stroke-linecap="round">
+        <line x1="24" y1="9"  x2="24" y2="14"/>
+        <line x1="11.5" y1="14.5" x2="15" y2="18"/>
+        <line x1="7" y1="27" x2="12" y2="27"/>
+        <line x1="36.5" y1="14.5" x2="33" y2="18"/>
+      </g>
+      <circle cx="24" cy="27" r="8.5" fill="url(#sunG)"/>
+      <!-- Cloud -->
+      <path d="M26 46c-5 0-9-4-9-9 0-4.6 3.4-8.4 7.9-8.95C26.6 23.5 31 20.5 36 20.5c6.6 0 12 5.1 12.4 11.6 3.6.7 6.3 3.85 6.3 7.65 0 4.3-3.5 7.75-7.8 7.75H26z" fill="url(#cloudG)" stroke="#7dd3fc" stroke-width="1"/>
+      <!-- Rain -->
+      <g stroke-width="2.6" stroke-linecap="round">
+        <line x1="27" y1="51" x2="25" y2="57" stroke="#38bdf8"/>
+        <line x1="36" y1="51" x2="34" y2="57" stroke="#a78bfa"/>
+        <line x1="45" y1="51" x2="43" y2="57" stroke="#38bdf8"/>
+      </g>
+    </svg>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Meteo<em>rec</em></h1>
     <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">metéorka</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor prebiva v Rečici ob Savinji in kaže živahno zanimanje za vremenske pojave</em></p>
