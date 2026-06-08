@@ -1343,7 +1343,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 
 /* Station logo */
-.station-logo{width:68px;height:68px;display:block;margin:0 auto .85rem;filter:drop-shadow(0 0 14px rgba(56,189,248,.35));flex-shrink:0}
+.station-logo{width:80px;height:80px;display:block;margin:0 auto .85rem;flex-shrink:0;clip-path:circle(45%);object-fit:cover}
 header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
@@ -1821,45 +1821,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
-      <defs>
-        <radialGradient id="lbg" cx="50%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#0c2040"/>
-          <stop offset="100%" stop-color="#050d1a"/>
-        </radialGradient>
-        <radialGradient id="sunGr" cx="40%" cy="38%" r="55%">
-          <stop offset="0%" stop-color="#fde68a"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </radialGradient>
-      </defs>
-      <!-- Background circle -->
-      <circle cx="32" cy="32" r="31" fill="url(#lbg)"/>
-      <circle cx="32" cy="32" r="31" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.45"/>
-      <!-- Sun (upper right, partially behind cloud) -->
-      <circle cx="41" cy="20" r="9" fill="url(#sunGr)"/>
-      <!-- Sun rays -->
-      <g stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round">
-        <line x1="41" y1="7"  x2="41" y2="10.5"/>
-        <line x1="50.4" y1="10.6" x2="48.1" y2="12.9"/>
-        <line x1="53.5" y1="20" x2="50"  y2="20"/>
-        <line x1="50.4" y1="29.4" x2="48.1" y2="27.1"/>
-      </g>
-      <!-- Cloud (overlaps sun) -->
-      <circle cx="21" cy="30" r="5.5"  fill="#dbeafe"/>
-      <circle cx="27" cy="26.5" r="7"  fill="#e0eeff"/>
-      <circle cx="35" cy="25.5" r="7.5" fill="#e0eeff"/>
-      <circle cx="42.5" cy="28" r="5.5" fill="#dbeafe"/>
-      <rect x="15.5" y="28.5" width="30" height="8" fill="#dbeafe"/>
-      <!-- Rain drops: cyan + violet alternating -->
-      <g stroke-width="2" stroke-linecap="round">
-        <line x1="22" y1="39" x2="20" y2="46" stroke="#38bdf8"/>
-        <line x1="29" y1="39" x2="27" y2="46" stroke="#a78bfa"/>
-        <line x1="36" y1="39" x2="34" y2="46" stroke="#38bdf8"/>
-        <line x1="43" y1="39" x2="41" y2="46" stroke="#a78bfa"/>
-      </g>
-      <!-- METEOREC wordmark -->
-      <text x="32" y="62" text-anchor="middle" font-size="4.6" font-family="Space Grotesk,Inter,sans-serif" fill="#38bdf8" letter-spacing="1.6" font-weight="700">METEOREC</text>
-    </svg>
+    <img class="station-logo" src="logo.png" alt="Meteorec">
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Meteo<em>rec</em></h1>
     <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">metéorka</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor prebiva v Rečici ob Savinji in kaže živahno zanimanje za vremenske pojave</em></p>
