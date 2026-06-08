@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -1725,7 +1725,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .ltf-annual{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.15rem 1.25rem;box-shadow:var(--shadow)}
 .ltf-annual-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 </head>
 <body>
 
@@ -15235,35 +15235,56 @@ async function initVisitorCounter(){
 }
 
 async function init(){
+  // ── Synchronous setup (no network) ──
   applyStationOnThisDay();
   applyMoon();
   applyMonthlySummary();
   applyYearRecords();
   applyPhotographyWidget(null);
-  setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
   initBgCanvas();
   applyWeatherBg('night');
   initNotifBtn();
-  connectLightning();
-  autoLoadHistoryFile();
-  checkSmartNotifications();
-  // Start background non-blocking fetches
-  setTimeout(fetchAIBrief,500);
-  // Initialise canvas/mesh immediately (no data needed)
   initMeshCanvas();
   initHeroCanvas();
-  // Fetch all data in parallel, then initialise data-dependent widgets
-  await Promise.all([fetchCurrent(),fetchHourly(),fetchTextForecast(),fetchForecastExtras(),fetchOnThisDay(),fetchAirQuality(),fetchAgrometeo(),fetchClimateComparison(),fetchFogForecast(),fetchAndDrawSkyStrip(),fetchComingUp()]);
-  fetchEcowittCurrent();
+  autoLoadHistoryFile();
+  setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
+
+  // ── Wave 1: critical for the initial visible tab ──
+  await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
-  initInsights();
-  initVisitorCounter();
-  buildPrecipNormals();
-  fetchPollen();
-  fetchSevereWeather();
-  fetchMeteoalarm();
-  fetchGoogleAlerts();
-  applyPheno();
+
+  // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
+  setTimeout(()=>{
+    fetchTextForecast();
+    fetchForecastExtras();
+    fetchAndDrawSkyStrip();
+    fetchComingUp();
+    fetchOnThisDay();
+  },800);
+
+  // ── Wave 3: secondary widgets (2.5 s) ──
+  setTimeout(()=>{
+    fetchAirQuality();
+    fetchAgrometeo();
+    fetchClimateComparison();
+    fetchFogForecast();
+    fetchEcowittCurrent();
+    initInsights();
+    initVisitorCounter();
+    checkSmartNotifications();
+  },2500);
+
+  // ── Wave 4: lowest priority (6 s) ──
+  setTimeout(()=>{
+    fetchSevereWeather();
+    fetchMeteoalarm();
+    fetchGoogleAlerts();
+    fetchPollen();
+    fetchAIBrief();
+    connectLightning();
+    buildPrecipNormals();
+    applyPheno();
+  },6000);
 }
 // ── Igra: Lovec na dež ───────────────────────────────────
 (function(){
