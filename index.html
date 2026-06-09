@@ -3712,17 +3712,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="aifc-meta" id="aifc-meta"></div>
     </div>
 
-    <!-- Local daily forecast -->
-    <div class="card chart-card" style="margin-bottom:1.25rem">
-      <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📅 Napoved za 4 dni — Rečica ob Savinji</span>
-        <span class="chart-range" id="daily-fc-updated">Nalaganje…</span>
-      </div>
-      <div id="daily-fc-content">
-        <div style="color:var(--muted);font-size:.8rem">Pripravljam lokalno napoved…</div>
-      </div>
-    </div>
-
     <!-- Sky Strip -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
@@ -5675,7 +5664,7 @@ function switchTab(tab){
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
-  if(tab==='forecast2'){ fetchLocalDailyForecast(); if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
+  if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='morje'){     initMorje(); }
   if(tab==='gore'){      initGore(); }
   if(tab==='padalci'){    initPadalci(); }
@@ -9171,7 +9160,6 @@ async function drawDailySkyStrip(){
 
 async function initForecast2(){
   if(_fc2Init)return;_fc2Init=true;
-  fetchLocalDailyForecast();
   drawDailySkyStrip(); // sky strip – neodvisno od 48h podatkov
   try{
     const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
@@ -15717,7 +15705,7 @@ setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
-setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchLocalDailyForecast,60*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 
 // ── Klepet z Meteorecem widget ──────────────────────────────────
 let _chatHistory=[], _chatOpen=false;
