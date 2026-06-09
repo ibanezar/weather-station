@@ -105,6 +105,60 @@ async function fetchArsoText() {
   return { text: null, source: null, url: null };
 }
 
+// Standard ARSO warning descriptions per type + severity
+const WARNING_TEXTS = {
+  WarningTS: {
+    yellow: { desc: "Možne so krajevne nevihte.", more: "Lokalno možni kratki nalivi, piš vetra in udari strel. Hitro lahko narastejo hudourniški vodotoki." },
+    orange: { desc: "Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.", more: "Pričakujte možnost škode. Odmakni se od dreves in daljnovodov." },
+    red:    { desc: "Hude nevihte z nevarno točo, izjemno obilnimi padavinami in nevarnimi sunki vetra.", more: "Ostani v zavetju. Izogibaj se poplavljenim cestam in hudourniškim vodam." },
+  },
+  WarningWind: {
+    yellow: { desc: "Pričakovati je močnejše sunke vetra.", more: "Zavarujte predmete na prostem." },
+    orange: { desc: "Sunki vetra bodo nevarno močni.", more: "Možna je škoda na objektih. Ne hodite v gozd." },
+    red:    { desc: "Izjemno nevarni sunki vetra z nevarnostjo večje škode.", more: "Ostani v zavetju. Nevarnost rušenja objektov." },
+  },
+  WarningRA: {
+    yellow: { desc: "Možni so krajevni obilnejši nalivi.", more: "Bodite pozorni na naraščanje hudourniških voda." },
+    orange: { desc: "Obilne padavine z nevarnostjo poplav.", more: "Izogibaj se nižinam ob vodotokih." },
+    red:    { desc: "Izjemno obilne padavine z nevarnostjo hudih poplav.", more: "Zapustite območja v bližini voda. Sledite navodilom služb." },
+  },
+  WarningSN: {
+    yellow: { desc: "Možno sneženje.", more: "Na cestah je možna povečana nevarnost." },
+    orange: { desc: "Obilno sneženje z nevarnostjo na cestah.", more: "Potujte samo, če je nujno. Prilagodite hitrost." },
+    red:    { desc: "Izjemno obilno sneženje.", more: "Ostani doma. Ceste so neprehodne." },
+  },
+  WarningFG: {
+    yellow: { desc: "Možna gosta megla z vidljivostjo pod 200 m.", more: "Prilagodite hitrost vožnje." },
+    orange: { desc: "Gosta megla z vidljivostjo pod 50 m.", more: "Izogibajte se vožnji. Prižgite meglenke." },
+    red:    { desc: "Izjemno gosta megla.", more: "Ne vozite, če ni nujno potrebno." },
+  },
+  WarningIC: {
+    yellow: { desc: "Možna poledica ali žled.", more: "Previdno na cestah in hodnikih. Preverite cestne razmere." },
+    orange: { desc: "Nevarnost poledice ali žleda.", more: "Možna škoda na drevju in infrastrukturi." },
+    red:    { desc: "Nevarni žledeni pojavi.", more: "Ostani doma. Nevarnost rušenja dreves in daljnovodov." },
+  },
+  WarningHT: {
+    yellow: { desc: "Visoke temperature.", more: "Pijte dovolj tekočine. Izogibajte se fizičnim naporom v vročini." },
+    orange: { desc: "Nevarna vročina.", more: "Poskrbite za starejše in bolne. Ne puščajte živali v zaprtih avtomobilih." },
+    red:    { desc: "Nevarno vroče vreme.", more: "Ostanite v hladnih prostorih. Sledite navodilom oblasti." },
+  },
+  WarningLT: {
+    yellow: { desc: "Nizke temperature.", more: "Zaščitite občutljive rastline in živali." },
+    orange: { desc: "Mrzlo vreme.", more: "Poskrbite za ogrevanje in zaščito pred mrazom." },
+    red:    { desc: "Nevarno mrzlo vreme.", more: "Omejite bivanje zunaj. Nevarnost ozeblin." },
+  },
+  WarningFF: {
+    yellow: { desc: "Povečana požarna ogroženost.", more: "Ne kuriti na prostem. Bodite previdni z ognjem." },
+    orange: { desc: "Visoka požarna ogroženost.", more: "Prepoved kurjenja na prostem." },
+    red:    { desc: "Kritična požarna ogroženost.", more: "Sledite navodilom gasilcev in oblasti." },
+  },
+  WarningAV: {
+    yellow: { desc: "Možnost sprožitve snežnih plazov.", more: "V goreh bodite previdni na nevarnih pobočjih." },
+    orange: { desc: "Povečana nevarnost snežnih plazov.", more: "Izogibajte se gorskim pobočjem." },
+    red:    { desc: "Velika nevarnost snežnih plazov.", more: "Ostanite v varnih predelih. Ne hodite v gore." },
+  },
+};
+
 // Fetch warnings from vreme.arso.gov.si JSON API (same host as text forecast — works from CF Workers)
 async function fetchArsoWarnings() {
   const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
@@ -146,7 +200,14 @@ async function fetchArsoWarnings() {
               ? ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)}–${e.toLocaleTimeString("sl", opts)}`
               : ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)} – ${e.toLocaleDateString("sl", dOpts)} ${e.toLocaleTimeString("sl", opts)}`;
           }
-          alerts.push({ level, text: typeDesc + timeStr });
+          const wt = WARNING_TEXTS[node.parameter]?.[level];
+          alerts.push({
+            level,
+            text: typeDesc + timeStr,
+            desc: wt?.desc || typeDesc,
+            more: wt?.more || "",
+            timeStr: timeStr.replace(/^ · /, ""),
+          });
         }
       }
       return; // don't recurse into an event node's children
