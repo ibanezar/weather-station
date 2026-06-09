@@ -276,7 +276,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .a-severe .alert-triangle svg{filter:drop-shadow(0 0 5px rgba(220,38,38,.55));animation:tri-pop .35s cubic-bezier(.175,.885,.32,1.275),tri-glow 2.2s ease-in-out infinite}
 @keyframes tri-glow{0%,100%{filter:drop-shadow(0 0 3px rgba(220,38,38,.3))}50%{filter:drop-shadow(0 0 8px rgba(220,38,38,.7))}}
 
-.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5}
+.alert-bar{display:flex;align-items:flex-start;gap:.75rem;border-radius:14px;padding:.9rem 1.2rem;font-size:.76rem;border:1px solid transparent;animation:alert-in .35s ease;line-height:1.5;position:relative;overflow:hidden}
 @keyframes alert-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
 .alert-body{flex:1}.alert-title{font-weight:500}.alert-desc{font-size:.76rem;opacity:.75;margin-top:.1rem}
@@ -298,10 +298,16 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
 .a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
 .a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
-/* Official Meteoalarm severity levels */
-.a-ma-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
-.a-ma-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
-.a-ma-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
+/* Official Meteoalarm severity levels — with left stripe via ::before + gradient */
+.a-ma-yellow{background:linear-gradient(100deg,rgba(251,191,36,.2) 0%,rgba(251,191,36,.07) 100%);border-color:rgba(251,191,36,.4);color:var(--amber);padding-left:1.5rem}
+.a-ma-orange{background:linear-gradient(100deg,rgba(249,115,22,.22) 0%,rgba(249,115,22,.08) 100%);border-color:rgba(249,115,22,.44);color:#ea580c;padding-left:1.5rem}
+.a-ma-red{background:linear-gradient(100deg,rgba(248,113,113,.24) 0%,rgba(248,113,113,.08) 100%);border-color:rgba(248,113,113,.52);color:var(--red);padding-left:1.5rem}
+.a-ma-yellow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#d97706;border-radius:14px 0 0 14px}
+.a-ma-orange::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#ea580c;border-radius:14px 0 0 14px}
+.a-ma-red::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#dc2626;border-radius:14px 0 0 14px}
+/* Live dot for active official alerts */
+.alert-live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;vertical-align:middle;margin-right:.35rem;flex-shrink:0;animation:live-pulse 1.8s ease-in-out infinite}
+@keyframes live-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
 /* Severe = pulsing attention */
 .alert-bar.a-severe{border-width:2px;animation:alert-in .35s ease, alert-pulse 2.2s ease-in-out infinite}
 @keyframes alert-pulse{
@@ -4990,7 +4996,8 @@ function renderAllAlerts(){
       ? '<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'
       : '<span class="alert-icon">'+a.icon+'</span>';
     const moreHtml=a.more?'<div class="alert-actions"><button type="button" class="alert-more-btn" aria-expanded="false" onclick="toggleAlertMore(this)">Več informacij</button></div><div class="alert-more" hidden>'+a.more+'</div>':'';
-    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+moreHtml+'</div><button class="alert-close" onclick="dismissAlert(this)">×</button>';
+    const liveDot=a.official?'<span class="alert-live-dot" aria-hidden="true"></span>':'';
+    div.innerHTML=iconHtml+'<div class="alert-body"><div class="alert-title">'+liveDot+a.icon+' '+a.title+(a.official?'<span class="alert-official">uradno</span>':'')+'</div><div class="alert-desc">'+a.desc+'</div>'+(a.meta?'<div class="alert-meta">'+a.meta+'</div>':'')+moreHtml+'</div><button class="alert-close" onclick="dismissAlert(this)">×</button>';
     div.dataset.alertTitle=a.title;
     wrap.appendChild(div);
   });
