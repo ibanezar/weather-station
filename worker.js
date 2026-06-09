@@ -40,6 +40,71 @@ const CORS_ALLOWED = {
 };
 const CORS_DENY = { "Access-Control-Allow-Origin": "null" };
 
+// ── ARSO official text forecast ────────────────────────────
+// Tries several known ARSO endpoints; uses the first that yields prose.
+const ARSO_TEXT_ENDPOINTS = [
+  "https://vreme.arso.gov.si/api/1.0/nonlocation/",
+  "https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_SLOVENIA_latest.xml",
+  "https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_SI_SAVINJSKA_latest.xml",
+];
+
+function _arsoExtractProse(body, ct) {
+  const proses = [];
+  const isProse = s => s.length > 45 && /\s/.test(s) && /[a-zčšžćđA-ZČŠŽ]/.test(s);
+  const push = s => {
+    s = (s || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (isProse(s)) proses.push(s);
+  };
+  let parsed = null;
+  if (/json/i.test(ct) || /^\s*[\{\[]/.test(body)) {
+    try { parsed = JSON.parse(body); } catch (_) {}
+  }
+  if (parsed) {
+    const walk = v => {
+      if (typeof v === "string") push(v);
+      else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") Object.values(v).forEach(walk);
+    };
+    walk(parsed);
+  } else {
+    body.replace(/<[^>]+>/g, "\n").split(/\n+/).forEach(push);
+  }
+  return proses;
+}
+
+async function _arsoFetch(url) {
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const r = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; Meteorec/1.0)",
+        "Accept": "application/json,text/xml,*/*",
+        "Referer": "https://meteo.arso.gov.si/",
+      },
+    });
+    return r;
+  } finally { clearTimeout(to); }
+}
+
+async function fetchArsoText() {
+  for (const url of ARSO_TEXT_ENDPOINTS) {
+    try {
+      const r = await _arsoFetch(url);
+      if (!r.ok) continue;
+      const ct = r.headers.get("content-type") || "";
+      const proses = _arsoExtractProse(await r.text(), ct);
+      if (proses.length) {
+        let t = proses.slice(0, 2).join(" ");
+        if (t.length > 600) t = t.slice(0, 580).replace(/\s+\S*$/, "") + "…";
+        return { text: t, source: "ARSO", url };
+      }
+    } catch (_) {}
+  }
+  return { text: null, source: null, url: null };
+}
+
 // ── Ecowitt helpers ────────────────────────────────────────
 const pad = n => String(n).padStart(2, "0");
 const fmtDate = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
@@ -346,7 +411,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         // Fetch yr.no forecast + ARSO official text in parallel
         const ctrl = new AbortController();
         setTimeout(() => ctrl.abort(), 8000);
-        const [yrRes, arsoRes] = await Promise.allSettled([
+        const [yrRes, arsoTry] = await Promise.allSettled([
           fetch(
             "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=46.3258&lon=14.9211&altitude=366",
             { signal: ctrl.signal, headers: {
@@ -354,10 +419,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
               "Accept": "application/json",
             } }
           ),
-          fetch(
-            "https://vreme.arso.gov.si/api/1.0/forecast_si_text/?lang=sl",
-            { headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json,*/*", "Referer": "https://vreme.arso.gov.si/" } }
-          ),
+          fetchArsoText(),
         ]);
 
         if (yrRes.status !== "fulfilled" || !yrRes.value.ok) throw new Error("yr.no nedostopen");
@@ -420,40 +482,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
         if (!summaries.length) throw new Error("yr.no: no data");
 
-        // 1) Try ARSO official Slovenian text forecast
+        // 1) ARSO official Slovenian text forecast (tried via fetchArsoText)
         let text = null, source = "yr.no";
-        if (arsoRes.status === "fulfilled" && arsoRes.value.ok) {
-          try {
-            const aj = await arsoRes.value.json();
-            // First try known text-bearing keys
-            const pick = obj => {
-              if (!obj || typeof obj !== "object") return null;
-              for (const k of ["fcast_text","besedilo","text","summary","title_text","content"]) {
-                if (typeof obj[k] === "string" && obj[k].trim().length > 40) return obj[k].trim();
-              }
-              for (const v of Object.values(obj)) { const r = pick(v); if (r) return r; }
-              return null;
-            };
-            let t = pick(aj);
-            // Fallback: recursively gather any substantial prose strings
-            if (!t) {
-              const proses = [];
-              const walk = v => {
-                if (typeof v === "string") {
-                  const s = v.replace(/\s+/g, " ").trim();
-                  if (s.length > 45 && /\s/.test(s) && /[a-zčšž]/i.test(s)) proses.push(s);
-                } else if (Array.isArray(v)) v.forEach(walk);
-                else if (v && typeof v === "object") Object.values(v).forEach(walk);
-              };
-              walk(aj);
-              if (proses.length) t = proses.slice(0, 2).join(" ");
-            }
-            if (t) {
-              t = t.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-              if (t.length > 520) t = t.slice(0, 500).replace(/\s+\S*$/, "") + "…";
-              text = t; source = "ARSO";
-            }
-          } catch (_) {}
+        if (arsoTry.status === "fulfilled" && arsoTry.value?.text) {
+          text = arsoTry.value.text;
+          source = "ARSO";
         }
 
         // 2) Fallback: build a complete description from yr.no summaries
@@ -484,6 +517,28 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         return new Response(JSON.stringify({ summaries, text, source }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
+        });
+      }
+
+      // ── /ai-debug ─────────────────────────────────────────
+      // Diagnostics: per-endpoint status + sample + extracted prose.
+      if (path === "/ai-debug") {
+        const out = [];
+        for (const url of ARSO_TEXT_ENDPOINTS) {
+          const rec = { url };
+          try {
+            const r = await _arsoFetch(url);
+            rec.status = r.status;
+            rec.contentType = r.headers.get("content-type") || "";
+            const body = await r.text();
+            rec.bodyLength = body.length;
+            rec.bodyHead = body.slice(0, 700);
+            rec.extracted = _arsoExtractProse(body, rec.contentType).slice(0, 3);
+          } catch (e) { rec.error = String(e); }
+          out.push(rec);
+        }
+        return new Response(JSON.stringify(out, null, 2), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
         });
       }
