@@ -296,6 +296,27 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
 .a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
 .a-precip-soon{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.25);color:#38bdf8}
+/* Threshold settings modal */
+.tp-panel{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:1.5rem;width:min(95vw,360px);box-shadow:0 8px 32px rgba(0,0,0,.45)}
+.tp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-weight:600;font-size:.92rem}
+.tp-header button{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:0;line-height:1}
+.tp-header button:hover{color:var(--text)}
+.tp-hint{font-size:.73rem;color:var(--muted);margin:0 0 1.1rem;line-height:1.5}
+.tp-body{display:flex;flex-direction:column;gap:.7rem}
+.tp-row{display:flex;align-items:center;gap:.75rem}
+.tp-row label{font-size:.78rem;color:var(--muted);flex:1;min-width:0}
+.tp-inp{display:flex;align-items:center;gap:.35rem}
+.tp-inp input{width:72px;background:var(--fc-bg);border:1px solid var(--border);border-radius:8px;padding:.38rem .55rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);text-align:right;-moz-appearance:textfield}
+.tp-inp input::-webkit-outer-spin-button,.tp-inp input::-webkit-inner-spin-button{-webkit-appearance:none}
+.tp-inp input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2)}
+.tp-unit{font-size:.7rem;color:var(--muted);white-space:nowrap}
+.tp-footer{display:flex;gap:.6rem;margin-top:1.3rem;justify-content:flex-end}
+.tp-btn-clear{padding:.42rem 1rem;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.78rem;cursor:pointer}
+.tp-btn-clear:hover{color:var(--text);border-color:var(--text)}
+.tp-btn-save{padding:.42rem 1.2rem;border-radius:9px;border:none;background:var(--blue);color:#fff;font-size:.78rem;cursor:pointer;font-weight:500}
+.tp-btn-save:hover{opacity:.9}
+/* Active threshold indicator on button */
+#threshold-btn.has-thresholds::after{content:'●';font-size:.55rem;vertical-align:super;margin-left:.15rem;color:var(--amber)}
 .a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
 .a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
 .a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
@@ -342,11 +363,11 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1.5rem;margin-bottom:1.35rem}
 .hero-left{flex:1;min-width:0}
 /* Hero metrics strip */
-.hero-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+.hero-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
 .hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}
+.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}.hm-uv{--hm-accent:var(--amber)}
 /* Live pulse animations */
 @keyframes live-pulse{0%{background:var(--fc-bg);box-shadow:none}30%{background:rgba(255,255,255,.07);box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}100%{background:var(--fc-bg);box-shadow:none}}
 @keyframes temp-pulse{0%,100%{text-shadow:0 0 40px currentColor}35%{text-shadow:0 0 80px currentColor,0 0 140px currentColor}}
@@ -1701,7 +1722,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .wrap{padding:1.5rem .9rem 3.5rem}
   .hero{padding:1.4rem 1.25rem 1.2rem}
   .hero-top{gap:.9rem;margin-bottom:1rem}
-  .hero-metrics{grid-template-columns:repeat(2,1fr);gap:.5rem;padding-top:.85rem}
+  .hero-metrics{grid-template-columns:repeat(3,1fr);gap:.5rem;padding-top:.85rem}
   .hm-val{font-size:1.08rem}
   .hero-icon svg{width:96px;height:96px}
   .g2{grid-template-columns:1fr 1fr}
@@ -1879,6 +1900,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
     <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
     <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
+    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Osebni pragovi opozoril">⚙ Pragovi</button>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -1969,6 +1991,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)">mm</span></span>
         <span class="hm-lbl">Padavine danes</span>
         <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted);display:none">— mm/h trenutno</span>
+      </div>
+      <div class="hm hm-uv" id="hm-uv">
+        <span class="hm-val" id="hs-uv">—</span>
+        <span class="hm-lbl" id="hs-uv-label">UV indeks</span>
       </div>
     </div>
   </div>
@@ -5004,16 +5030,72 @@ function renderAllAlerts(){
   });
 }
 
-function checkAlerts(obs){
-  const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,alerts=[];
-  if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) alerts.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
-  else if(m.temp<=3) alerts.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
-  if(uv>=11)         alerts.push({cls:'a-uv',icon:'☀️',title:'Ekstremni UV — UV '+uv,desc:'Izogibajte se bivanju zunaj. Nujen SPF 50+ in senca.'});
-  else if(uv>=8)     alerts.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
-  if(m.temp>=35)     alerts.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
-  if(wind>=50)       alerts.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
-  _liveAlerts=alerts;
+// ── Osebni pragovi opozoril ───────────────────────────────
+const THRESHOLD_KEY='wx-thresholds-v1';
+const _thr={tempMin:null,tempMax:null,wind:null,rain:null};
+
+function loadThresholds(){
+  try{const t=JSON.parse(localStorage.getItem(THRESHOLD_KEY)||'{}');
+    _thr.tempMin=t.tempMin??null;_thr.tempMax=t.tempMax??null;
+    _thr.wind=t.wind??null;_thr.rain=t.rain??null;
+  }catch{}
+  const hasAny=Object.values(_thr).some(v=>v!==null);
+  document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
+}
+
+function openThresholdModal(){
+  loadThresholds();
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??'';};
+  sv('thr-temp-min',_thr.tempMin);sv('thr-temp-max',_thr.tempMax);
+  sv('thr-wind',_thr.wind);sv('thr-rain',_thr.rain);
+  const m=document.getElementById('threshold-modal');if(m){m.style.display='flex';}
+}
+function closeThresholdModal(){
+  const m=document.getElementById('threshold-modal');if(m)m.style.display='none';
+}
+function saveThresholdSettings(){
+  const gv=(id)=>{const v=parseFloat(document.getElementById(id)?.value);return isNaN(v)?null:v;};
+  _thr.tempMin=gv('thr-temp-min');_thr.tempMax=gv('thr-temp-max');
+  _thr.wind=gv('thr-wind');_thr.rain=gv('thr-rain');
+  try{localStorage.setItem(THRESHOLD_KEY,JSON.stringify(_thr));}catch{}
+  const hasAny=Object.values(_thr).some(v=>v!==null);
+  document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
+  closeThresholdModal();
+  if(_lastBriefObs)checkThresholdAlerts(_lastBriefObs);
+}
+function clearThresholdSettings(){
+  _thr.tempMin=_thr.tempMax=_thr.wind=_thr.rain=null;
+  try{localStorage.removeItem(THRESHOLD_KEY);}catch{}
+  ['thr-temp-min','thr-temp-max','thr-wind','thr-rain'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('threshold-btn')?.classList.remove('has-thresholds');
+  _liveAlerts=_liveAlerts.filter(a=>!a._threshold);
   renderAllAlerts();
+}
+function checkThresholdAlerts(obs){
+  const m=obs.metric;
+  _liveAlerts=_liveAlerts.filter(a=>!a._threshold);
+  if(_thr.tempMin!==null&&m.temp<=_thr.tempMin)
+    _liveAlerts.push({cls:'a-freeze',icon:'🌡️',title:'Nizka temperatura — '+m.temp.toFixed(1)+'°C',desc:'Nastavljen prag: pod '+_thr.tempMin+'°C',_threshold:true});
+  if(_thr.tempMax!==null&&m.temp>=_thr.tempMax)
+    _liveAlerts.push({cls:'a-heat',icon:'🌡️',title:'Visoka temperatura — '+m.temp.toFixed(1)+'°C',desc:'Nastavljen prag: nad '+_thr.tempMax+'°C',_threshold:true});
+  if(_thr.wind!==null&&(m.windGust??m.windSpeed??0)>=_thr.wind)
+    _liveAlerts.push({cls:'a-wind',icon:'💨',title:'Sunek vetra — '+(m.windGust??m.windSpeed??0).toFixed(0)+' km/h',desc:'Nastavljen prag: nad '+_thr.wind+' km/h',_threshold:true});
+  if(_thr.rain!==null&&(m.precipRate??0)>=_thr.rain)
+    _liveAlerts.push({cls:'a-rain-heavy',icon:'🌧',title:'Intenziven dež — '+(m.precipRate??0).toFixed(1)+' mm/h',desc:'Nastavljen prag: nad '+_thr.rain+' mm/h',_threshold:true});
+  renderAllAlerts();
+}
+
+function checkAlerts(obs){
+  const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,base=[];
+  if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) base.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
+  else if(m.temp<=3) base.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
+  if(uv>=11)         base.push({cls:'a-uv',icon:'☀️',title:'Ekstremni UV — UV '+uv,desc:'Izogibajte se bivanju zunaj. Nujen SPF 50+ in senca.'});
+  else if(uv>=8)     base.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
+  if(m.temp>=35)     base.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
+  if(wind>=50)       base.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
+  // Preserve special-tagged alerts (nowcast, user thresholds)
+  _liveAlerts=[..._liveAlerts.filter(a=>a._precipNowcast||a._threshold),...base];
+  checkThresholdAlerts(obs);
 }
 
 // ── Kaj prihaja — urni strip + 3 dni ─────────────────────
@@ -5456,7 +5538,11 @@ function applyObs(obs){
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)">%</span>',1000);
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
-  set('hs-uv',obs.uv??'—'); // UV small card still populated
+  // UV hero card — value + color
+  {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
+  const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;}
+  set('hs-uv-label',uvLabel(uv));
+  document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)">mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit">km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
@@ -15532,6 +15618,7 @@ async function init(){
   autoLoadHistoryFile();
   setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
 
+  loadThresholds(); // restore user alert thresholds from localStorage
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
@@ -17187,6 +17274,27 @@ ${mlbls}
       <button class="chat-send" id="chat-send" onclick="sendChatMsg()" title="Pošlji">↑</button>
     </div>
   </div>
+
+<!-- ── Threshold settings modal ─────────────────────────── -->
+<div id="threshold-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);align-items:center;justify-content:center" onclick="if(event.target===this)closeThresholdModal()">
+  <div class="tp-panel">
+    <div class="tp-header">
+      <span>⚙ Osebni pragovi opozoril</span>
+      <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
+    </div>
+    <p class="tp-hint">Ko vrednost preseže prag, se pojavi opozorilo. Pusti prazno za brez omejitve.</p>
+    <div class="tp-body">
+      <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0"><span class="tp-unit">km/h</span></div></div>
+      <div class="tp-row"><label>🌧 Intenz. dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0"><span class="tp-unit">mm/h</span></div></div>
+    </div>
+    <div class="tp-footer">
+      <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>
+      <button class="tp-btn-save" onclick="saveThresholdSettings()">Shrani</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
