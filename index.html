@@ -342,6 +342,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'JetBrains Mono',monospace}
 .alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
 
+img.wx-icon{display:inline-block;vertical-align:middle}
 
 /* Cards */
 .card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
@@ -1994,7 +1995,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="hm hm-uv" id="hm-uv">
         <span class="hm-val" id="hs-uv">—</span>
-        <span class="hm-lbl" id="hs-uv-label">UV indeks</span>
+        <span class="hm-lbl">UV indeks</span>
+        <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
       </div>
     </div>
   </div>
@@ -5131,7 +5133,7 @@ async function fetchComingUp(){
         div.className='cu-hour'+(i===0?' cu-now':'');
         div.innerHTML=
           '<span class="cu-ht">'+(i===0?'zdaj':(hr<10?'0':'')+hr+':00')+'</span>'+
-          '<span class="cu-he">'+_wmoEmojiDN(x.wmo,x.isDay)+'</span>'+
+          '<span class="cu-he">'+_wmoImg(x.wmo,x.isDay,32)+'</span>'+
           '<span class="cu-htemp" style="color:'+tempColor(x.temp)+'">'+Math.round(x.temp)+'°</span>'+
           (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>');
         strip.appendChild(div);
@@ -5153,7 +5155,7 @@ async function fetchComingUp(){
         div.style.setProperty('--cu-accent',accent);
         div.innerHTML=
           '<span class="cu-dlbl">'+lbl+'</span>'+
-          '<span class="cu-demo">'+_wmoEmoji(d.weather_code[i])+'</span>'+
+          '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,40)+'</span>'+
           '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+'</span>'+
           '<div class="cu-dtemp"><span style="color:'+tempColor(d.temperature_2m_max[i])+'">'+Math.round(d.temperature_2m_max[i])+'°</span>'+
             '<span class="cu-dtl"> / '+Math.round(d.temperature_2m_min[i])+'°</span></div>'+
@@ -5587,7 +5589,7 @@ function applyObs(obs){
   setWeatherArt(obs);
   updateBgFromObs(obs);
   // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
-  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=weatherIcon(cond.label);
+  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=_condImg(cond.label,108);
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
@@ -7772,6 +7774,16 @@ const _WMO_SL={0:'Jasno',1:'Pretežno jasno',2:'Delno oblačno',3:'Oblačno',45:
 const _WMO_EMOJI={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',66:'🌨',71:'🌨',73:'❄️',75:'❄️',77:'❄️',80:'🌦',81:'🌧',82:'🌧',85:'🌨',86:'🌨',95:'⛈',96:'⛈',99:'⛈'};
 const _WMO_EMOJI_NIGHT={0:'🌙',1:'🌙',2:'☁️',3:'☁️'};
 const _WIND_DIR_SL=['S','SV','V','JV','J','JZ','Z','SZ'];
+// ── Meteocons static SVG icon mapping ─────────────────────
+const _WMO_ICON_DAY={0:'clear-day',1:'partly-cloudy-day',2:'partly-cloudy-day',3:'overcast',45:'fog-day',48:'fog-day',51:'drizzle',53:'drizzle',55:'overcast-drizzle',56:'sleet',57:'sleet',61:'rain',63:'overcast-rain',65:'overcast-rain',66:'sleet',67:'sleet',71:'overcast-day-snow',73:'overcast-snow',75:'overcast-snow',77:'snow',80:'partly-cloudy-day-rain',81:'partly-cloudy-day-rain',82:'overcast-rain',85:'partly-cloudy-day-snow',86:'overcast-snow',95:'thunderstorms-day-rain',96:'thunderstorms-day-hail',99:'thunderstorms-day-hail'};
+const _WMO_ICON_NIGHT={0:'clear-night',1:'partly-cloudy-night',2:'partly-cloudy-night',3:'overcast',45:'fog-night',48:'fog-night',71:'overcast-night-snow',80:'partly-cloudy-night-rain',81:'partly-cloudy-night-rain',85:'partly-cloudy-night-snow',95:'thunderstorms-night-rain',96:'thunderstorms-night-hail',99:'thunderstorms-night-hail'};
+const _COND_ICON={'Jasno sončno':'clear-day','Pretežno sončno':'partly-cloudy-day','Delno oblačno':'partly-cloudy-day','Pretežno oblačno':'overcast-day','Oblačno':'overcast','Jasna noč':'clear-night','Oblačna noč':'overcast-night','Rahel dež':'drizzle','Dež':'rain','Močan dež':'overcast-rain'};
+const _WXCOND_ICON={snow:'snow',fog:'fog-day','fog-night':'fog-night',hot:'clear-day',storm:'thunderstorms-day-rain',rain:'overcast-rain',night:'clear-night'};
+const _YR_ICON={clearsky:'clear-day',clearsky_night:'clear-night',fair:'partly-cloudy-day',fair_night:'partly-cloudy-night',partlycloudy:'partly-cloudy-day',partlycloudy_night:'partly-cloudy-night',cloudy:'overcast',fog:'fog-day',lightrain:'drizzle',rain:'rain',heavyrain:'overcast-rain',lightrainshowers:'partly-cloudy-day-rain',rainshowers:'partly-cloudy-day-rain',heavyrainshowers:'overcast-rain',lightsnow:'snow',snow:'snow',heavysnow:'overcast-snow',lightsnowshowers:'partly-cloudy-day-snow',snowshowers:'partly-cloudy-day-snow',sleet:'sleet',lightsleet:'sleet',lightsleetshowers:'sleet',sleetshowers:'sleet',thunderstorm:'thunderstorms-day-rain',thunderstormlightrain:'thunderstorms-day-rain',lightrainandthunder:'thunderstorms-day-rain',rainandthunder:'thunderstorms-day-rain',snowandthunder:'thunderstorms-day-rain',thunder:'thunderstorms-day-rain'};
+function _wmoIconName(c,isDay=true){const map=isDay?_WMO_ICON_DAY:_WMO_ICON_NIGHT;return map[c]||_WMO_ICON_DAY[c]||_WMO_ICON_DAY[Math.floor((c||0)/10)*10]||'partly-cloudy-day';}
+function _wmoImg(c,isDay=true,size=36){const n=_wmoIconName(c,isDay);return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${_wmoTxt(c)}">`;}
+function _yrImg(sym,size=32){const base=(sym||'').replace(/_polartwilight/g,'');const n=_YR_ICON[base]||_YR_ICON[base.replace('_night','')]||(/_night/.test(base)?'partly-cloudy-night':'partly-cloudy-day');return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${sym}">`;}
+function _condImg(label,size=100){const wc=typeof _wxCond==='string'?_wxCond:'';const n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
 function _wmoTxt(c){return _WMO_SL[c]||_WMO_SL[Math.floor((c||0)/10)*10]||'Spremenljivo';}
 function _wmoEmoji(c){return _WMO_EMOJI[c]||_WMO_EMOJI[Math.floor((c||0)/10)*10]||'🌤';}
 function _wmoEmojiDN(c,isDay){if(!isDay&&c in _WMO_EMOJI_NIGHT)return _WMO_EMOJI_NIGHT[c];return _wmoEmoji(c);}
@@ -7819,7 +7831,7 @@ function selectFcDay(el,i){
   const title=box?.querySelector('.daily-fc-title');
   const txt=box?.querySelector('.daily-fc-text');
   const kpis=box?.querySelectorAll('.daily-fc-kpi strong');
-  if(icon)icon.textContent=_wmoEmoji(wmo);
+  if(icon)icon.innerHTML=_wmoImg(wmo,true,56);
   if(title)title.textContent=dateLbl+' · '+_wmoTxt(wmo);
   if(txt)txt.textContent=text;
   if(kpis?.[0])kpis[0].textContent=Math.round(tmax)+'° / '+Math.round(tmin)+'°';
@@ -7876,7 +7888,7 @@ async function fetchLocalDailyForecast(){
         const dl=dateObj.toLocaleDateString('sl',{day:'numeric',month:'long'});
         return`<div class="fc3-card${isToday?' fc3-today fc3-active':''}" onclick="selectFcDay(this,${i})">
   <div class="fc3-day">${dayLbl} <span style="font-weight:400;text-transform:none">${dl}</span></div>
-  <div class="fc3-icon">${_wmoEmoji(wcode)}</div>
+  <div class="fc3-icon">${_wmoImg(wcode,true,44)}</div>
   ${tx!=null&&tn!=null?`<div class="fc3-temps">${Math.round(tx)}° <span class="fc3-tmin">/ ${Math.round(tn)}°</span></div>`:''}
   <div class="fc3-text" style="-webkit-line-clamp:unset">${_wmoTxt(wcode)}</div>
 </div>`;
@@ -7886,7 +7898,7 @@ async function fetchLocalDailyForecast(){
       '<div class="daily-fc-hero">'+
         '<div>'+
           '<div class="daily-fc-main">'+
-            '<div class="daily-fc-icon">'+_wmoEmoji(wmo)+'</div>'+
+            '<div class="daily-fc-icon">'+_wmoImg(wmo,true,64)+'</div>'+
             '<div>'+
               '<div class="daily-fc-title">'+dateLbl+' · '+_wmoTxt(wmo)+'</div>'+
               '<div class="daily-fc-text">'+text+'</div>'+
@@ -8062,7 +8074,7 @@ function _renderAIFC(data){
       const lbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
-<div class="aifc-day-icon">${_yrIcon(s.symbol)}</div>
+<div class="aifc-day-icon">${_yrImg(s.symbol,28)}</div>
 <div class="aifc-day-t">${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span></div>
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 </div>`;
@@ -8111,7 +8123,7 @@ async function fetchTextForecast(){
         +(wind?' · veter '+Math.round(wind)+' km/h':'');
       card.innerHTML=
         '<div class="txfc-lbl">'+lbl+'</div>'+
-        '<div class="txfc-emoji">'+_wmoEmoji(wmo)+'</div>'+
+        '<div class="txfc-emoji">'+_wmoImg(wmo,true,40)+'</div>'+
         '<div class="txfc-desc">'+desc+'</div>'+
         '<div class="txfc-temp"><span class="txfc-th">'+Math.round(tmax)+'°</span><span style="color:var(--muted);font-size:.74rem">/</span><span class="txfc-tl">'+Math.round(tmin)+'°</span></div>'+
         (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'');
@@ -9333,7 +9345,7 @@ async function drawDailySkyStrip(){
         const dt=new Date(sl.times[idx]);
         const lbl=idx===0?'Zdaj':dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
         tip.style.cssText=`display:block;opacity:1;left:${Math.min(e.clientX-rect.left+12,rect.width-160)}px;top:8px`;
-        tip.innerHTML=`<b>${lbl}</b> ${_wmoEmoji(sl.wmo[idx]||0)}<br>🌡 ${sl.temp[idx]?.toFixed(1)??'—'}°C  💨 ${Math.round(sl.wind[idx]||0)} km/h<br>🌧 ${(sl.rain[idx]||0).toFixed(1)} mm  ☀️ UV ${(sl.uv[idx]||0).toFixed(1)}`;
+        tip.innerHTML=`<b>${lbl}</b> ${_wmoImg(sl.wmo[idx]||0,true,16)}<br>🌡 ${sl.temp[idx]?.toFixed(1)??'—'}°C  💨 ${Math.round(sl.wind[idx]||0)} km/h<br>🌧 ${(sl.rain[idx]||0).toFixed(1)} mm  ☀️ UV ${(sl.uv[idx]||0).toFixed(1)}`;
       };
       svg.onmouseleave=()=>{tip.style.opacity='0';setTimeout(()=>{tip.style.display='none';},200);};
     }
@@ -9419,7 +9431,7 @@ async function initForecast2(){
         const wcode=h.weather_code[hi+i]||0;
         card.innerHTML=
           '<div class="fc2-h-time">'+(isNow?'zdaj':String(date.getHours()).padStart(2,'0')+':00')+'</div>'+
-          '<div class="fc2-h-emoji">'+_wmoEmoji(wcode)+'</div>'+
+          '<div class="fc2-h-emoji">'+_wmoImg(wcode,true,30)+'</div>'+
           '<div class="fc2-h-temp">'+(h.temperature_2m[hi+i]||0).toFixed(1)+'°</div>'+
           '<div class="fc2-h-rain">'+(h.precipitation[hi+i]>0.1?'🌧'+(h.precipitation[hi+i]).toFixed(1):'')+'</div>'+
           '<div class="fc2-h-wind">'+(h.wind_speed_10m[hi+i]>0?Math.round(h.wind_speed_10m[hi+i])+'km/h':'')+'</div>';
@@ -9439,7 +9451,7 @@ async function initForecast2(){
         card.innerHTML=
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">'+
             '<div style="font-size:.72rem;font-weight:600">'+(isToday?'<span style="color:var(--blue)">Danes</span>':lbl)+'</div>'+
-            '<div style="font-size:1.2rem">'+_wmoEmoji(d.weather_code[i])+'</div>'+
+            '<div>'+_wmoImg(d.weather_code[i],true,28)+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:.75rem;font-family:\'JetBrains Mono\',monospace;font-size:.88rem">'+
             '<span style="color:var(--red)">↑ '+(d.temperature_2m_max[i]||0).toFixed(1)+'°</span>'+
@@ -9958,7 +9970,7 @@ async function initSurroundings(){
             (c.temperature_2m!=null?c.temperature_2m.toFixed(1)+'°C':'—')+
           '</div>'+
           '<div class="sur-meta">'+
-            _wmoEmoji(c.weather_code||0)+' '+_wmoTxt(c.weather_code||0)+'<br>'+
+            _wmoImg(c.weather_code||0,true,18)+' '+_wmoTxt(c.weather_code||0)+'<br>'+
             (c.relative_humidity_2m!=null?'💧 '+c.relative_humidity_2m+'%  ':'')+
             (c.wind_speed_10m!=null?'💨 '+c.wind_speed_10m.toFixed(0)+' km/h':'')+
           '</div>'+
@@ -13755,7 +13767,7 @@ function aiRenderForecastCards(preds){
     // Enrich from Open-Meteo forecast hours (nearest match by time)
     const fh=_forecastHours.reduce((best,x)=>Math.abs(x.t-h)<Math.abs((best?.t||Infinity)-h)?x:best,null);
     const prob=fh?.prob??null;
-    const emoji=fh?_wmoEmojiDN(fh.wmo,fh.isDay):'';
+    const emoji=fh?_wmoImg(fh.wmo,fh.isDay,28):'';
     const probHtml=prob!=null?`<div style="font-size:.62rem;color:${prob>=50?'var(--blue)':'var(--muted)'};margin-top:.15rem">💧${prob}%</div>`:'';
     return `<div class="ai-fc-card${isBest?' ai-fc-best':''}">
       <div class="ai-fc-hour">+${i+1}h · ${hStr}</div>
@@ -16560,7 +16572,7 @@ function _buildMorjeFc({fc,marine}){
     const wind=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i])+' km/h':'—';
     html+=`<div class="sea-fc-day">
       <div class="sea-fc-name">${dn}</div>
-      <div class="sea-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="sea-fc-icon">${_wmoImg(wmo,true,28)}</div>
       <div class="sea-fc-t">${tmax}/${tmin}</div>
       <div class="sea-fc-sub">🌊 ${wh}<br>💨 ${wind}<br>🌧 ${rain}mm</div>
     </div>`;
@@ -16728,7 +16740,7 @@ function _buildGoreTriglav({triglav}){
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
       <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="mtn-fc-icon">${_wmoImg(wmo,true,28)}</div>
       <div class="mtn-fc-t">${tmaxT!=null?tmaxT.toFixed(0)+'°':'—'}/${tminT!=null?tminT.toFixed(0)+'°':'—'}</div>
       <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
     </div>`;
@@ -16758,7 +16770,7 @@ function _buildGoreKrvavec({krvavec}){
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
       <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoEmoji(wmo)}</div>
+      <div class="mtn-fc-icon">${_wmoImg(wmo,true,28)}</div>
       <div class="mtn-fc-t">${tmaxK!=null?tmaxK.toFixed(0)+'°':'—'}/${tminK!=null?tminK.toFixed(0)+'°':'—'}</div>
       <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
     </div>`;
@@ -17019,7 +17031,7 @@ async function initSrednja(){
       return`<div class="med-card${i===0?' today':''}">
 <div class="med-card-day">${dLbl}</div>
 <div class="med-card-date">${dt.getDate()}. ${SL_MS[mo]}</div>
-<div class="med-card-icon">${_wmoEmoji(wc)}</div>
+<div class="med-card-icon">${_wmoImg(wc,true,36)}</div>
 <div class="med-card-temps">${Math.round(tx2)}° <span class="med-card-tmin">/ ${Math.round(tn2)}°</span></div>
 ${rainStr}
 <div class="med-card-anom ${ac}">${at} norm.</div>
