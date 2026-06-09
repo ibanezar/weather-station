@@ -166,15 +166,17 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_ALLOWED });
     }
-    if (!isAllowedOrigin(request)) {
+
+    const url  = new URL(request.url);
+    const path = url.pathname;
+
+    // /ai-debug is openable directly in a browser for troubleshooting
+    if (!isAllowedOrigin(request) && path !== "/ai-debug") {
       return new Response(
         JSON.stringify({ error: "Nepooblaščen dostop", code: 403 }),
         { status: 403, headers: { ...CORS_DENY, "Content-Type": "application/json" } }
       );
     }
-
-    const url  = new URL(request.url);
-    const path = url.pathname;
 
     try {
 
