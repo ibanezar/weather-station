@@ -68,9 +68,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<link rel="preconnect" href="https://weatherireica1.filip-eremita.workers.dev" crossorigin>
+<link rel="dns-prefetch" href="https://api.open-meteo.com">
+<link rel="dns-prefetch" href="https://vreme.arso.gov.si">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet"></noscript>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -1818,7 +1820,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .ltf-annual{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.15rem 1.25rem;box-shadow:var(--shadow)}
 .ltf-annual-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 </head>
 <body>
 
@@ -3992,6 +3993,25 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// ── Lazy resource loader ──────────────────────────────────────
+const _resLoading = {};
+function _loadScript(src) {
+  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+  if (_resLoading[src]) return _resLoading[src];
+  _resLoading[src] = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src;
+    s.onload = () => { delete _resLoading[src]; res(); };
+    s.onerror = () => { delete _resLoading[src]; rej(new Error('Failed: ' + src)); };
+    document.head.appendChild(s);
+  });
+  return _resLoading[src];
+}
+function _loadCss(href) {
+  if (document.querySelector(`link[href="${href}"]`)) return;
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href;
+  document.head.appendChild(l);
+}
+
 // Archive API throttle — max 1 request per 600ms, in-memory cache keyed by URL
 const _archCache={};
 const _archQ=[];let _archRunning=false;
@@ -5663,7 +5683,11 @@ function switchTab(tab){
     }
   }
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
-  if(tab==='analysis'){  initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); }
+  if(tab==='analysis'){
+    const _runAnalysis=()=>{ initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); };
+    if(typeof Chart==='undefined') _loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js').then(_runAnalysis).catch(_runAnalysis);
+    else _runAnalysis();
+  }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='morje'){     initMorje(); }
@@ -6440,7 +6464,11 @@ function drawWindRose(observations){
 let _radarMap=null,_radarFrames=[],_radarIdx=0,_radarTimer=null,_radarLayers={},_radarPlaying=true,_radarHost='';
 
 async function initRadarMap(){
-  if(_radarMap||typeof L==='undefined')return;
+  if(_radarMap)return;
+  if(typeof L==='undefined'){
+    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+  }
   const mapEl=document.getElementById('radar-map');if(!mapEl)return;
 
   _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false,minZoom:4,maxZoom:10}).setView([LAT,LON],7);

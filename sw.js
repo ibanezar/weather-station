@@ -11,19 +11,32 @@ const API_TTL = {
   'seasonal-api.open-meteo.com':   60 * 60 * 1000,
   'fonts.googleapis.com':     7 * 24 * 60 * 60 * 1000, // 7 days
   'fonts.gstatic.com':        7 * 24 * 60 * 60 * 1000,
-  'cdnjs.cloudflare.com':     7 * 24 * 60 * 60 * 1000, // Chart.js
-  'unpkg.com':                7 * 24 * 60 * 60 * 1000, // Leaflet
+  'cdnjs.cloudflare.com':     7 * 24 * 60 * 60 * 1000, // Chart.js (if cached)
+  'unpkg.com':                7 * 24 * 60 * 60 * 1000, // Leaflet (if cached)
 };
 
-function ttlFor(url) {
-  try { return API_TTL[new URL(url).hostname] ?? null; }
-  catch { return null; }
+// Own-origin HTML/assets: stale-while-revalidate TTL (90 s)
+const OWN_TTL = 90 * 1000;
+
+function ttlFor(url, responseHeaders) {
+  try {
+    const hostname = new URL(url).hostname;
+    if (API_TTL[hostname] !== undefined) return API_TTL[hostname];
+    // Respect Cache-Control: max-age for other hosts (e.g. Cloudflare Worker)
+    if (responseHeaders) {
+      const cc = responseHeaders.get('cache-control') || '';
+      if (/no-store|no-cache/.test(cc)) return null;
+      const m = cc.match(/\bmax-age=(\d+)\b/);
+      if (m) { const s = parseInt(m[1], 10); if (s > 0) return s * 1000; }
+    }
+    return null;
+  } catch { return null; }
 }
 
 function isFresh(response) {
   const fetched = response.headers.get('sw-fetched-at');
   if (!fetched) return false;
-  const ttl = ttlFor(response.url);
+  const ttl = ttlFor(response.url, response.headers);
   return ttl !== null && (Date.now() - parseInt(fetched, 10)) < ttl;
 }
 
@@ -40,7 +53,7 @@ async function fetchAndCache(request, cacheName) {
 }
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./'])));
+  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './manifest.json'])));
   self.skipWaiting();
 });
 
@@ -60,10 +73,20 @@ self.addEventListener('fetch', e => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
-  // Own origin — network-first, fall back to cache
+  // Own origin — stale-while-revalidate (90 s TTL for fast repeat loads)
   if (url.origin === location.origin) {
     e.respondWith(
-      fetchAndCache(request, CACHE_STATIC).catch(() => caches.match(request))
+      caches.open(CACHE_STATIC).then(async cache => {
+        const cached = await cache.match(request);
+        const age = cached ? parseInt(cached.headers.get('sw-fetched-at') || '0', 10) : 0;
+        const fresh = age && (Date.now() - age) < OWN_TTL;
+        if (cached && fresh) {
+          fetchAndCache(request, CACHE_STATIC).catch(() => {}); // background refresh
+          return cached;
+        }
+        return fetchAndCache(request, CACHE_STATIC)
+          .catch(() => cached ?? new Response('', { status: 503 }));
+      })
     );
     return;
   }
@@ -84,6 +107,27 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cloudflare Worker proxy + everything else — network only
-  e.respondWith(fetch(request).catch(() => new Response('', { status: 503 })));
+  // Everything else (Cloudflare Worker proxy etc.) — network with max-age caching
+  e.respondWith(
+    caches.open(CACHE_API).then(async cache => {
+      const cached = await cache.match(request);
+      if (cached && isFresh(cached)) {
+        fetchAndCache(request, CACHE_API).catch(() => {}); // background refresh
+        return cached;
+      }
+      const res = await fetch(request).catch(() => null);
+      if (!res) return cached ?? new Response('', { status: 503 });
+      // Only cache if response has a positive max-age
+      const ttl = ttlFor(request.url, res.headers);
+      if (ttl && ttl > 0) {
+        const headers = new Headers(res.headers);
+        headers.set('sw-fetched-at', String(Date.now()));
+        const stamped = new Response(await res.clone().arrayBuffer(), {
+          status: res.status, statusText: res.statusText, headers,
+        });
+        cache.put(request, stamped);
+      }
+      return res;
+    })
+  );
 });
