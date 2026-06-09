@@ -425,7 +425,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (arsoRes.status === "fulfilled" && arsoRes.value.ok) {
           try {
             const aj = await arsoRes.value.json();
-            // Walk the ARSO JSON for the first substantial text field
+            // First try known text-bearing keys
             const pick = obj => {
               if (!obj || typeof obj !== "object") return null;
               for (const k of ["fcast_text","besedilo","text","summary","title_text","content"]) {
@@ -434,8 +434,25 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
               for (const v of Object.values(obj)) { const r = pick(v); if (r) return r; }
               return null;
             };
-            const t = pick(aj);
-            if (t) { text = t.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); source = "ARSO"; }
+            let t = pick(aj);
+            // Fallback: recursively gather any substantial prose strings
+            if (!t) {
+              const proses = [];
+              const walk = v => {
+                if (typeof v === "string") {
+                  const s = v.replace(/\s+/g, " ").trim();
+                  if (s.length > 45 && /\s/.test(s) && /[a-zčšž]/i.test(s)) proses.push(s);
+                } else if (Array.isArray(v)) v.forEach(walk);
+                else if (v && typeof v === "object") Object.values(v).forEach(walk);
+              };
+              walk(aj);
+              if (proses.length) t = proses.slice(0, 2).join(" ");
+            }
+            if (t) {
+              t = t.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+              if (t.length > 520) t = t.slice(0, 500).replace(/\s+\S*$/, "") + "…";
+              text = t; source = "ARSO";
+            }
           } catch (_) {}
         }
 
