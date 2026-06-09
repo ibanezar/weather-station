@@ -105,6 +105,120 @@ async function fetchArsoText() {
   return { text: null, source: null, url: null };
 }
 
+// Standard ARSO warning descriptions per type + severity
+const WARNING_TEXTS = {
+  WarningTS: {
+    yellow: { desc: "Možne so krajevne nevihte.", more: "Lokalno možni kratki nalivi, piš vetra in udari strel. Hitro lahko narastejo hudourniški vodotoki." },
+    orange: { desc: "Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.", more: "Pričakujte možnost škode. Odmakni se od dreves in daljnovodov." },
+    red:    { desc: "Hude nevihte z nevarno točo, izjemno obilnimi padavinami in nevarnimi sunki vetra.", more: "Ostani v zavetju. Izogibaj se poplavljenim cestam in hudourniškim vodam." },
+  },
+  WarningWind: {
+    yellow: { desc: "Pričakovati je močnejše sunke vetra.", more: "Zavarujte predmete na prostem." },
+    orange: { desc: "Sunki vetra bodo nevarno močni.", more: "Možna je škoda na objektih. Ne hodite v gozd." },
+    red:    { desc: "Izjemno nevarni sunki vetra z nevarnostjo večje škode.", more: "Ostani v zavetju. Nevarnost rušenja objektov." },
+  },
+  WarningRA: {
+    yellow: { desc: "Možni so krajevni obilnejši nalivi.", more: "Bodite pozorni na naraščanje hudourniških voda." },
+    orange: { desc: "Obilne padavine z nevarnostjo poplav.", more: "Izogibaj se nižinam ob vodotokih." },
+    red:    { desc: "Izjemno obilne padavine z nevarnostjo hudih poplav.", more: "Zapustite območja v bližini voda. Sledite navodilom služb." },
+  },
+  WarningSN: {
+    yellow: { desc: "Možno sneženje.", more: "Na cestah je možna povečana nevarnost." },
+    orange: { desc: "Obilno sneženje z nevarnostjo na cestah.", more: "Potujte samo, če je nujno. Prilagodite hitrost." },
+    red:    { desc: "Izjemno obilno sneženje.", more: "Ostani doma. Ceste so neprehodne." },
+  },
+  WarningFG: {
+    yellow: { desc: "Možna gosta megla z vidljivostjo pod 200 m.", more: "Prilagodite hitrost vožnje." },
+    orange: { desc: "Gosta megla z vidljivostjo pod 50 m.", more: "Izogibajte se vožnji. Prižgite meglenke." },
+    red:    { desc: "Izjemno gosta megla.", more: "Ne vozite, če ni nujno potrebno." },
+  },
+  WarningIC: {
+    yellow: { desc: "Možna poledica ali žled.", more: "Previdno na cestah in hodnikih. Preverite cestne razmere." },
+    orange: { desc: "Nevarnost poledice ali žleda.", more: "Možna škoda na drevju in infrastrukturi." },
+    red:    { desc: "Nevarni žledeni pojavi.", more: "Ostani doma. Nevarnost rušenja dreves in daljnovodov." },
+  },
+  WarningHT: {
+    yellow: { desc: "Visoke temperature.", more: "Pijte dovolj tekočine. Izogibajte se fizičnim naporom v vročini." },
+    orange: { desc: "Nevarna vročina.", more: "Poskrbite za starejše in bolne. Ne puščajte živali v zaprtih avtomobilih." },
+    red:    { desc: "Nevarno vroče vreme.", more: "Ostanite v hladnih prostorih. Sledite navodilom oblasti." },
+  },
+  WarningLT: {
+    yellow: { desc: "Nizke temperature.", more: "Zaščitite občutljive rastline in živali." },
+    orange: { desc: "Mrzlo vreme.", more: "Poskrbite za ogrevanje in zaščito pred mrazom." },
+    red:    { desc: "Nevarno mrzlo vreme.", more: "Omejite bivanje zunaj. Nevarnost ozeblin." },
+  },
+  WarningFF: {
+    yellow: { desc: "Povečana požarna ogroženost.", more: "Ne kuriti na prostem. Bodite previdni z ognjem." },
+    orange: { desc: "Visoka požarna ogroženost.", more: "Prepoved kurjenja na prostem." },
+    red:    { desc: "Kritična požarna ogroženost.", more: "Sledite navodilom gasilcev in oblasti." },
+  },
+  WarningAV: {
+    yellow: { desc: "Možnost sprožitve snežnih plazov.", more: "V goreh bodite previdni na nevarnih pobočjih." },
+    orange: { desc: "Povečana nevarnost snežnih plazov.", more: "Izogibajte se gorskim pobočjem." },
+    red:    { desc: "Velika nevarnost snežnih plazov.", more: "Ostanite v varnih predelih. Ne hodite v gore." },
+  },
+};
+
+// Fetch warnings from vreme.arso.gov.si JSON API (same host as text forecast — works from CF Workers)
+async function fetchArsoWarnings() {
+  const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
+  if (!r.ok) throw new Error("ARSO API " + r.status);
+  const data = await r.json();
+
+  // Field is warning_si (not warnings.summary as initially assumed)
+  const wsi = data?.warning_si;
+  if (!wsi) return [];
+
+  const now = Date.now();
+  const alerts = [];
+  const seen = new Set();
+
+  // Walk entire warning_si tree collecting event objects with degree + validEnd
+  const walkEvents = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) { node.forEach(walkEvents); return; }
+
+    // Event object: has degree + (validStart or validEnd or parameter_desc)
+    const degree = (node.degree || node.level || "").toLowerCase();
+    if (degree && (node.validEnd || node.validStart || node.parameter_desc || node.parameter)) {
+      const validEnd = node.validEnd ? new Date(node.validEnd).getTime() : Infinity;
+      if (validEnd >= now) {
+        const level = ["red", "orange", "yellow"].includes(degree) ? degree : "yellow";
+        const typeDesc = node.parameter_desc || node.type_desc || node.parameter || node.type || "Vremensko opozorilo";
+        const key = `${typeDesc}:${level}:${node.validStart || ""}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          let timeStr = "";
+          if (node.validStart && node.validEnd) {
+            const opts = { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" };
+            const dOpts = { weekday: "short", day: "numeric", month: "numeric", timeZone: "Europe/Ljubljana" };
+            const s = new Date(node.validStart);
+            const e = new Date(node.validEnd);
+            const sameDay = s.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" }) ===
+                            e.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" });
+            timeStr = sameDay
+              ? ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)}–${e.toLocaleTimeString("sl", opts)}`
+              : ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)} – ${e.toLocaleDateString("sl", dOpts)} ${e.toLocaleTimeString("sl", opts)}`;
+          }
+          const wt = WARNING_TEXTS[node.parameter]?.[level];
+          alerts.push({
+            level,
+            text: typeDesc + timeStr,
+            desc: wt?.desc || typeDesc,
+            more: wt?.more || "",
+            timeStr: timeStr.replace(/^ · /, ""),
+          });
+        }
+      }
+      return; // don't recurse into an event node's children
+    }
+    Object.values(node).forEach(walkEvents);
+  };
+
+  walkEvents(wsi);
+  return alerts;
+}
+
 // ── Ecowitt helpers ────────────────────────────────────────
 const pad = n => String(n).padStart(2, "0");
 const fmtDate = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
@@ -184,47 +298,54 @@ export default {
       // ARSO uradna vremensko opozorila — ATOM feed (strukturiran, zanesljiv)
       // Regija za Rečico ob Savinji: SLOVENIA_NORTH-EAST
       if (path === "/arso-warning") {
-        const region = url.searchParams.get("region") || "SLOVENIA_NORTH-EAST";
-        const atomUrl = `https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_${region}_latest.atom`;
+        // Primary: vreme.arso.gov.si JSON API — same host as text forecast, reliable from CF Workers
         try {
-          const r = await fetch(atomUrl, {
-            headers: {
-              "User-Agent": "Mozilla/5.0",
-              "Referer": "https://meteo.arso.gov.si/",
-              "Accept": "application/atom+xml,application/xml,text/xml,*/*",
-            }
-          });
-          if (!r.ok) throw new Error("ARSO HTTP " + r.status);
-          const text = await r.text();
-          const alerts = [];
-          const entryRx = /<entry[\s>]([\s\S]*?)<\/entry>/gi;
-          let m;
-          while ((m = entryRx.exec(text)) !== null) {
-            const entry = m[1];
-            const title   = (entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i)  ?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
-            const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
-            const content = title + ' ' + summary;
-            let level = null;
-            // Primary: CAP severity attribute (structured, reliable)
-            const capSev = (entry.match(/<cap:severity[^>]*>([\s\S]*?)<\/cap:severity>/i)?.[1] || '').trim().toLowerCase();
-            if      (capSev === 'extreme')                    level = 'red';
-            else if (capSev === 'severe')                     level = 'orange';
-            else if (capSev === 'moderate' || capSev === 'minor') level = 'yellow';
-            // Fallback: explicit color word in title/summary
-            if (!level) {
-              if      (/(rdeče?\s*opozorilo|red\s*warning)/i.test(content))    level = 'red';
-              else if (/(oranžno?\s*opozorilo|orange\s*warning)/i.test(content)) level = 'orange';
-              else if (/(rumeno?\s*opozorilo|yellow\s*warning)/i.test(content))  level = 'yellow';
-            }
-            if (level) alerts.push({ level, text: (summary || title).slice(0, 600) });
-          }
-          return new Response(JSON.stringify({ alerts, url: atomUrl }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
+          const alerts = await fetchArsoWarnings();
+          return new Response(JSON.stringify({ alerts, source: "arso-api" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
           });
         } catch (e) {
-          return new Response(JSON.stringify({ alerts: [], error: e.message }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
+          // Fallback: ARSO ATOM feed (may be blocked on some CF edge nodes)
+          const region = url.searchParams.get("region") || "SLOVENIA_NORTH-EAST";
+          const atomUrl = `https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_${region}_latest.atom`;
+          try {
+            const r = await fetch(atomUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0",
+                "Referer": "https://meteo.arso.gov.si/",
+                "Accept": "application/atom+xml,application/xml,text/xml,*/*",
+              }
+            });
+            if (!r.ok) throw new Error("ATOM HTTP " + r.status);
+            const text = await r.text();
+            const alerts = [];
+            const entryRx = /<entry[\s>]([\s\S]*?)<\/entry>/gi;
+            let m;
+            while ((m = entryRx.exec(text)) !== null) {
+              const entry = m[1];
+              const title   = (entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i)  ?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+              const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1] || '').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+              const content = title + ' ' + summary;
+              let level = null;
+              const capSev = (entry.match(/<cap:severity[^>]*>([\s\S]*?)<\/cap:severity>/i)?.[1] || '').trim().toLowerCase();
+              if      (capSev === 'extreme')                        level = 'red';
+              else if (capSev === 'severe')                         level = 'orange';
+              else if (capSev === 'moderate' || capSev === 'minor') level = 'yellow';
+              if (!level) {
+                if      (/(rdeče?\s*opozorilo|red\s*warning)/i.test(content))    level = 'red';
+                else if (/(oranžno?\s*opozorilo|orange\s*warning)/i.test(content)) level = 'orange';
+                else if (/(rumeno?\s*opozorilo|yellow\s*warning)/i.test(content))  level = 'yellow';
+              }
+              if (level) alerts.push({ level, text: (summary || title).slice(0, 600) });
+            }
+            return new Response(JSON.stringify({ alerts, source: "arso-atom" }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+            });
+          } catch (e2) {
+            return new Response(JSON.stringify({ alerts: [], error: e.message + " / " + e2.message }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+            });
+          }
         }
       }
 
@@ -540,7 +661,23 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           } catch (e) { rec.error = String(e); }
           out.push(rec);
         }
-        return new Response(JSON.stringify(out, null, 2), {
+        // Also show raw warnings structure for debugging
+        const warningsDebug = { url: "https://vreme.arso.gov.si/api/1.0/nonlocation/" };
+        try {
+          const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
+          warningsDebug.status = r.status;
+          if (r.ok) {
+            const data = await r.json();
+            warningsDebug.topLevelKeys = Object.keys(data || {});
+            // Show first 2000 chars of warning_si
+            const wsi = data?.warning_si;
+            warningsDebug.warning_si_raw = wsi
+              ? JSON.stringify(wsi).slice(0, 2000)
+              : "field 'warning_si' not found";
+            try { warningsDebug.parsed = await fetchArsoWarnings(); } catch(e2) { warningsDebug.parseError = String(e2); }
+          }
+        } catch(e) { warningsDebug.error = String(e); }
+        return new Response(JSON.stringify({ textEndpoints: out, warningsDebug }, null, 2), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
         });
       }

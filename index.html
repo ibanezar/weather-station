@@ -5174,9 +5174,13 @@ async function fetchMeteoalarm(){
         data.alerts.forEach(a=>{
           const lv=lvlMap[a.level]||lvlMap.yellow;
           let icon='⚠️';
-          const t=(a.text||'').toLowerCase();
+          const t=(a.desc||a.text||'').toLowerCase();
           for(const[k,v]of Object.entries(typeIcon)){if(t.includes(k)){icon=v;break;}}
-          _meteoalarmAlerts.push({cls:lv.cls,severe:lv.sev,official:true,icon,title:lv.name+' opozorilo ARSO',desc:a.text||'Vremensko opozorilo za osrednjo Slovenijo',meta:''});
+          _meteoalarmAlerts.push({cls:lv.cls,severe:lv.sev,official:true,icon,
+            title:lv.name+' opozorilo ARSO',
+            desc:a.desc||a.text||'Vremensko opozorilo za osrednjo Slovenijo',
+            meta:a.timeStr||'',
+            more:a.more||''});
         });
         _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
       }
