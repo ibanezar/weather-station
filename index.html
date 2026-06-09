@@ -1901,7 +1901,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
     <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
     <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
-    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Osebni pragovi opozoril">⚙ Pragovi</button>
+    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Nastavi lastna opozorila">🔔 Moja opozorila</button>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -5032,7 +5032,7 @@ function renderAllAlerts(){
   });
 }
 
-// ── Osebni pragovi opozoril ───────────────────────────────
+// ── Moja opozorila (osebni pragovi) ──────────────────────
 const THRESHOLD_KEY='wx-thresholds-v1';
 const _thr={tempMin:null,tempMax:null,wind:null,rain:null};
 
@@ -17291,7 +17291,7 @@ ${mlbls}
 <div id="threshold-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);align-items:center;justify-content:center" onclick="if(event.target===this)closeThresholdModal()">
   <div class="tp-panel">
     <div class="tp-header">
-      <span>⚙ Osebni pragovi opozoril</span>
+      <span>🔔 Moja opozorila</span>
       <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
     </div>
     <p class="tp-hint">Ko vrednost preseže prag, se pojavi opozorilo. Pusti prazno za brez omejitve.</p>
