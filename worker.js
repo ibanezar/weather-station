@@ -594,7 +594,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           } catch (e) { rec.error = String(e); }
           out.push(rec);
         }
-        return new Response(JSON.stringify(out, null, 2), {
+        // Also show raw warnings structure for debugging
+        const warningsDebug = { url: "https://vreme.arso.gov.si/api/1.0/nonlocation/" };
+        try {
+          const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
+          warningsDebug.status = r.status;
+          if (r.ok) {
+            const data = await r.json();
+            warningsDebug.warningsRaw = data?.warnings ?? "field 'warnings' not found";
+            warningsDebug.topLevelKeys = Object.keys(data || {});
+            try { warningsDebug.parsed = await fetchArsoWarnings(); } catch(e2) { warningsDebug.parseError = String(e2); }
+          }
+        } catch(e) { warningsDebug.error = String(e); }
+        return new Response(JSON.stringify({ textEndpoints: out, warningsDebug }, null, 2), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
         });
       }
