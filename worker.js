@@ -110,45 +110,51 @@ async function fetchArsoWarnings() {
   const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
   if (!r.ok) throw new Error("ARSO API " + r.status);
   const data = await r.json();
-  const summary = data?.warnings?.summary;
-  if (!Array.isArray(summary)) return [];
+
+  // Field is warning_si (not warnings.summary as initially assumed)
+  const wsi = data?.warning_si;
+  if (!wsi) return [];
 
   const now = Date.now();
   const alerts = [];
   const seen = new Set();
 
-  for (const item of summary) {
-    const events = Array.isArray(item.event) ? item.event : [];
-    for (const ev of events) {
-      const validEnd = ev.validEnd ? new Date(ev.validEnd).getTime() : Infinity;
-      if (validEnd < now) continue; // already expired
+  // Walk entire warning_si tree collecting event objects with degree + validEnd
+  const walkEvents = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) { node.forEach(walkEvents); return; }
 
-      const degree = (ev.degree || "").toLowerCase();
-      const level = ["red", "orange", "yellow"].includes(degree) ? degree : "yellow";
-      const typeDesc = ev.parameter_desc || ev.parameter || "Vremensko opozorilo";
-
-      // Deduplicate same warning type + level + start time
-      const key = `${ev.parameter}:${level}:${ev.validStart || ""}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      // Build human-readable time range
-      let timeStr = "";
-      if (ev.validStart && ev.validEnd) {
-        const opts = { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" };
-        const dOpts = { weekday: "short", day: "numeric", month: "numeric", timeZone: "Europe/Ljubljana" };
-        const s = new Date(ev.validStart);
-        const e = new Date(ev.validEnd);
-        const sameDay = s.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" }) ===
-                        e.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" });
-        timeStr = sameDay
-          ? ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)}–${e.toLocaleTimeString("sl", opts)}`
-          : ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)} – ${e.toLocaleDateString("sl", dOpts)} ${e.toLocaleTimeString("sl", opts)}`;
+    // Event object: has degree + (validStart or validEnd or parameter_desc)
+    const degree = (node.degree || node.level || "").toLowerCase();
+    if (degree && (node.validEnd || node.validStart || node.parameter_desc || node.parameter)) {
+      const validEnd = node.validEnd ? new Date(node.validEnd).getTime() : Infinity;
+      if (validEnd >= now) {
+        const level = ["red", "orange", "yellow"].includes(degree) ? degree : "yellow";
+        const typeDesc = node.parameter_desc || node.type_desc || node.parameter || node.type || "Vremensko opozorilo";
+        const key = `${typeDesc}:${level}:${node.validStart || ""}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          let timeStr = "";
+          if (node.validStart && node.validEnd) {
+            const opts = { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" };
+            const dOpts = { weekday: "short", day: "numeric", month: "numeric", timeZone: "Europe/Ljubljana" };
+            const s = new Date(node.validStart);
+            const e = new Date(node.validEnd);
+            const sameDay = s.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" }) ===
+                            e.toLocaleDateString("sl", { timeZone: "Europe/Ljubljana" });
+            timeStr = sameDay
+              ? ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)}–${e.toLocaleTimeString("sl", opts)}`
+              : ` · ${s.toLocaleDateString("sl", dOpts)} ${s.toLocaleTimeString("sl", opts)} – ${e.toLocaleDateString("sl", dOpts)} ${e.toLocaleTimeString("sl", opts)}`;
+          }
+          alerts.push({ level, text: typeDesc + timeStr });
+        }
       }
-
-      alerts.push({ level, text: typeDesc + timeStr });
+      return; // don't recurse into an event node's children
     }
-  }
+    Object.values(node).forEach(walkEvents);
+  };
+
+  walkEvents(wsi);
   return alerts;
 }
 
@@ -601,8 +607,12 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           warningsDebug.status = r.status;
           if (r.ok) {
             const data = await r.json();
-            warningsDebug.warningsRaw = data?.warnings ?? "field 'warnings' not found";
             warningsDebug.topLevelKeys = Object.keys(data || {});
+            // Show first 2000 chars of warning_si
+            const wsi = data?.warning_si;
+            warningsDebug.warning_si_raw = wsi
+              ? JSON.stringify(wsi).slice(0, 2000)
+              : "field 'warning_si' not found";
             try { warningsDebug.parsed = await fetchArsoWarnings(); } catch(e2) { warningsDebug.parseError = String(e2); }
           }
         } catch(e) { warningsDebug.error = String(e); }
