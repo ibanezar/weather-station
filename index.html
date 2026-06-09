@@ -388,6 +388,14 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));transition:opacity .5s}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
+.fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
+.fc-slider-info{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--muted)}
+.fc-slider-center{flex:1;text-align:center;font-size:.72rem;font-weight:600;color:var(--text);opacity:0;transition:opacity .2s;letter-spacing:.01em}
+.fc-slider-center.vis{opacity:1}
+.fc-slider{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;outline:none;cursor:pointer}
+.fc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);border:2.5px solid var(--hero-bg,#fff);box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;transition:transform .15s}
+.fc-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--blue);border:2.5px solid var(--hero-bg,#fff);box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;border-style:solid}
+.fc-slider::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .hs-val{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:300;color:var(--text)}
 .hs-lbl{font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.07em;text-transform:uppercase}
 
@@ -1974,6 +1982,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="yesterday-delta" id="yesterday-delta"></div>
       </div>
       <div class="hero-icon" id="hero-icon"></div>
+    </div>
+    <div class="fc-slider-wrap" id="fc-slider-wrap">
+      <div class="fc-slider-info">
+        <span>zdaj</span>
+        <span class="fc-slider-center" id="fc-slider-center"></span>
+        <span>+24h</span>
+      </div>
+      <input type="range" class="fc-slider" id="fc-slider" min="0" max="24" value="0" step="1">
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
@@ -4238,6 +4254,7 @@ function mkSVG(parent,tag,attrs){const el=document.createElementNS('http://www.w
 function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(evt.clientX-r.left)/r.width*vb.width;}
 
 let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
+let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -5121,6 +5138,7 @@ async function fetchComingUp(){
     for(let i=si;i<h.time.length&&hours.length<25;i++)
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
+    {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
     const stripHours=hours.filter((_,i)=>i===0||i%2===0).slice(0,13);
 
     // Hourly cells
@@ -5529,11 +5547,46 @@ function triggerLivePulse(){
   });
 }
 
+function _fcSliderUpdate(){
+  const sl=document.getElementById('fc-slider');
+  const lbl=document.getElementById('fc-slider-center');
+  const tv=document.getElementById('temp-val');
+  const iconEl=document.getElementById('hero-icon');
+  if(!sl)return;
+  const v=+sl.value,max=+sl.max;
+  const pct=(v/max)*100;
+  sl.style.background='linear-gradient(to right,var(--blue) '+pct+'%,var(--border) '+pct+'%)';
+  if(v===0){
+    _sliderActive=false;
+    if(lbl){lbl.textContent='';lbl.classList.remove('vis');}
+    if(tv&&_liveTemp!==null){tv.textContent=(+_liveTemp).toFixed(1);tv.style.color=_liveTempColor;}
+    if(iconEl&&_liveIconHtml)iconEl.innerHTML=_liveIconHtml;
+  }else{
+    _sliderActive=true;
+    const fh=_forecastHours;
+    const idx=Math.min(v-1,fh.length-1);
+    const h=fh[idx];if(!h)return;
+    const hr=h.t.getHours();
+    const timeStr=(hr<10?'0':'')+hr+':00';
+    const diffH=v;
+    if(lbl){lbl.textContent=timeStr+' · +'+diffH+'h';lbl.classList.add('vis');}
+    if(tv){tv.textContent=h.temp.toFixed(1);tv.style.color=tempColor(h.temp);}
+    if(iconEl)iconEl.innerHTML=_wmoImg(h.wmo,h.isDay,108);
+  }
+}
+
+function _fcSliderInit(){
+  const sl=document.getElementById('fc-slider');
+  if(!sl)return;
+  sl.style.background='linear-gradient(to right,var(--blue) 0%,var(--border) 0%)';
+  sl.addEventListener('input',_fcSliderUpdate);
+}
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const tempEl=document.getElementById('temp-val');
-  if(tempEl){_lastTemp=m.temp;tempEl.style.color=tempColor(m.temp);countUp('temp-val',m.temp,1,'',1200);}
+  if(tempEl){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
@@ -5589,7 +5642,7 @@ function applyObs(obs){
   setWeatherArt(obs);
   updateBgFromObs(obs);
   // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
-  const iconEl=document.getElementById('hero-icon');if(iconEl)iconEl.innerHTML=_condImg(cond.label,108);
+  _liveIconHtml=_condImg(cond.label,108);const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)iconEl.innerHTML=_liveIconHtml;
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
@@ -15631,6 +15684,7 @@ async function init(){
   setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
 
   loadThresholds(); // restore user alert thresholds from localStorage
+  _fcSliderInit();
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
