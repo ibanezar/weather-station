@@ -295,6 +295,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .a-wind{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.2);color:var(--purple)}
 .a-storm{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--purple)}
 .a-rain-heavy{background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.3);color:var(--blue)}
+.a-precip-soon{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.25);color:#38bdf8}
 .a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}
 .a-level-orange{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.5);color:#ea580c}
 .a-level-red{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.6);color:var(--red)}
@@ -5163,6 +5164,65 @@ async function fetchSevereWeather(){
     }
     renderAllAlerts();
   }catch(e){console.warn('Severe weather:',e);}
+}
+
+// ── Kratkoročna napoved padavin (Open-Meteo minutely_15) ─
+async function fetchPrecipNowcast(){
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`+
+      `&minutely_15=precipitation,rain,snowfall,showers&forecast_minutely_15=8&timezone=auto`;
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!res.ok)return;
+    const data=await res.json();
+    const m=data.minutely_15;
+    if(!m?.time?.length)return;
+
+    const now=Date.now();
+    // Build slots: {minutesAway, precip, rain, snow}
+    const slots=m.time.map((t,i)=>({
+      ms:new Date(t).getTime(),
+      precip:m.precipitation?.[i]||0,
+      rain:(m.rain?.[i]||0)+(m.showers?.[i]||0),
+      snow:m.snowfall?.[i]||0,
+    })).map(s=>({...s,minutesAway:Math.round((s.ms-now)/60000)}));
+
+    const THRESH=0.05; // mm/15 min — lahek dež
+    // Current slot = first slot where minutesAway is roughly 0 (within ±10 min)
+    const nowSlot=slots.find(s=>s.minutesAway>=-10&&s.minutesAway<=5);
+    // Future slots: those starting more than 5 min from now
+    const future=slots.filter(s=>s.minutesAway>5);
+    const firstWet=future.find(s=>s.precip>=THRESH);
+
+    // Remove previous nowcast alert
+    _liveAlerts=_liveAlerts.filter(a=>!a._precipNowcast);
+
+    const buildAlert=(slot,isCurrent)=>{
+      const isSnow=slot.snow>=slot.rain&&slot.snow>THRESH;
+      const mm=slot.precip;
+      const intensity=mm>=2?'močni':mm>=0.5?'zmerni':'lahki';
+      const vrsta=isSnow?'sneg':'dež';
+      const icon=isSnow?'❄️':mm>=2?'🌧':mm>=0.5?'🌦':'🌂';
+      const cls=mm>=1?'a-rain-heavy':'a-precip-soon';
+      if(isCurrent){
+        return{cls,icon,title:`Zdaj pada ${vrsta}`,
+          desc:`Intenziteta: ${intensity} · ${mm.toFixed(1)} mm/15 min`,
+          meta:'',severe:false,_precipNowcast:true};
+      }
+      const mins=slot.minutesAway;
+      const whenStr=mins<15?'Kmalu':mins<30?'Čez ~'+mins+' min':'Čez ~'+Math.round(mins/15)*15+' min';
+      return{cls,icon,title:`${whenStr} — ${vrsta}`,
+        desc:`Pričakovano: ${intensity} · ${mm.toFixed(1)} mm/15 min`,
+        meta:'Open-Meteo minutely forecast',severe:false,_precipNowcast:true};
+    };
+
+    if(nowSlot?.precip>=THRESH){
+      _liveAlerts.push(buildAlert(nowSlot,true));
+    }else if(firstWet){
+      _liveAlerts.push(buildAlert(firstWet,false));
+    }
+    renderAllAlerts();
+  }catch(e){if(e.name!=='AbortError')console.warn('PrecipNowcast:',e.message);}
 }
 
 // ── Uradna ARSO opozorila via proxy ──────────────────────
@@ -15498,6 +15558,9 @@ async function init(){
     checkSmartNotifications();
   },2500);
 
+  // ── Wave 3.5: precip nowcast (4 s) ──
+  setTimeout(fetchPrecipNowcast,4000);
+
   // ── Wave 4: lowest priority (6 s) ──
   setTimeout(()=>{
     fetchSevereWeather();
@@ -15743,6 +15806,7 @@ setInterval(fetchEcowittCurrent,5*60*1000);
 setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
+setInterval(fetchPrecipNowcast,10*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
 setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
