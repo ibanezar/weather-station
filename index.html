@@ -11846,8 +11846,8 @@ async function fetchStormChaser(){
       `,wind_speed_500hPa,wind_direction_500hPa`+
       `,wind_speed_300hPa,wind_direction_300hPa`+
       `&timezone=Europe%2FLjubljana&forecast_days=2`;
-    const [r1,r2]=await Promise.all([fetch(url1),fetch(url2)]);
-    const [d1,d2]=await Promise.all([r1.json(),r2.json()]);
+    const r1=await fetch(url1);const d1=await r1.json();
+    const r2=await fetch(url2);const d2=await r2.json();
     if(d1.error||d2.error){
       const msg=(d1.reason||d2.reason||'API napaka');
       console.error('Storm API error:',msg,d1,d2);
