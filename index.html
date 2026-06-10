@@ -5054,7 +5054,7 @@ function _renderOneAlert(wrap,a){
 }
 function renderAllAlerts(){
   const wrap=document.getElementById('alerts-wrap');if(!wrap)return;
-  const all=[..._meteoalarmAlerts,..._severeAlerts,..._liveAlerts];
+  const all=[..._meteoalarmAlerts,..._liveAlerts];
   const seen=new Set();const uniq=all.filter(a=>{if(seen.has(a.title))return false;seen.add(a.title);return true;});
   wrap.innerHTML='';
   const official=uniq.filter(a=>a.official);
