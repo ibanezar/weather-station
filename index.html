@@ -350,6 +350,8 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
 
 img.wx-icon{display:inline-block;vertical-align:middle}
+.cu-he .wx-icon{filter:drop-shadow(0 1px 5px rgba(0,0,0,.35))}
+[data-theme="dark"] .cu-he .wx-icon{filter:drop-shadow(0 1px 6px rgba(0,0,0,.6)) brightness(1.55) saturate(1.15)}
 
 /* Cards */
 .card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;transition:box-shadow .25s,border-color .25s,background .35s;box-shadow:var(--card-shadow)}
@@ -5180,7 +5182,7 @@ async function fetchComingUp(){
         div.className='cu-hour'+(i===0?' cu-now':'');
         div.innerHTML=
           '<span class="cu-ht">'+(i===0?'zdaj':(hr<10?'0':'')+hr+':00')+'</span>'+
-          '<span class="cu-he">'+_wmoImg(x.wmo,x.isDay,32)+'</span>'+
+          '<span class="cu-he">'+_wmoImg(x.wmo,x.isDay,40)+'</span>'+
           '<span class="cu-htemp" style="color:'+tempColor(x.temp)+'">'+Math.round(x.temp)+'°</span>'+
           (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>');
         strip.appendChild(div);
