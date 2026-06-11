@@ -17394,185 +17394,190 @@ ${mlbls}
 // ═══════════════════════════════════════════════════════════
 // BLOG
 // ═══════════════════════════════════════════════════════════
-const BLOG_PW_KEY  = 'blog_pw_hash';
-const BLOG_AUTH_KEY= 'blog_authed';
-const BLOG_POSTS_KEY='blog_posts';
-const BLOG_CAT_ICONS={nevihta:'⛈',sneg:'❄️',veter:'💨',dezevje:'🌧',susa:'🌵',toplota:'🌡',mraz:'🥶',ostalo:'📌'};
+const BLOG_REPO      = 'ibanezar/weather-station';
+const BLOG_BRANCH    = 'main';
+const BLOG_FILE      = 'blog.json';
+const BLOG_PW_KEY    = 'blog_pw_hash';
+const BLOG_TOKEN_KEY = 'blog_gh_token';
+const BLOG_CACHE_KEY = 'blog_posts_cache';
+const BLOG_CACHE_TS  = 'blog_posts_cache_ts';
+const BLOG_CACHE_TTL = 5 * 60 * 1000;
+const BLOG_CAT_ICONS = {nevihta:'⛈',sneg:'❄️',veter:'\U0001f4a8',dezevje:'\U0001f327',susa:'\U0001f335',toplota:'\U0001f321',mraz:'\U0001f976',ostalo:'\U0001f4cc'};
 
-let _blogPosts=[];        // loaded posts
-let _blogFilter='vse';    // active filter
-let _blogEditId=null;     // id of post being edited (null = new)
-let _blogAuthed=false;    // is admin unlocked this session
+let _blogPosts  = [];
+let _blogFilter = 'vse';
+let _blogEditId = null;
+let _blogAuthed = false;
+let _blogLoading= false;
 
 // ── helpers ──────────────────────────────────────────────
 function _blogHash(s){let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0}return h.toString(16)}
 function _blogYtId(s){if(!s)return '';const m=s.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:s.trim().slice(0,11)}
 function _blogUid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function _blogSave(){try{localStorage.setItem(BLOG_POSTS_KEY,JSON.stringify(_blogPosts))}catch(e){}}
-function _blogLoad(){try{const d=localStorage.getItem(BLOG_POSTS_KEY);if(d)_blogPosts=JSON.parse(d)}catch(e){_blogPosts=[]}}
 function _blogFmtDate(s){if(!s)return '';const d=new Date(s+'T12:00:00');return d.toLocaleDateString('sl',{day:'numeric',month:'long',year:'numeric'})}
+function _blogB64Enc(str){return btoa(unescape(encodeURIComponent(str)))}
+function _blogB64Dec(b64){return decodeURIComponent(escape(atob(b64.replace(/\n/g,''))))}
 
-// ── init (called when tab opens) ─────────────────────────
-function initBlog(){
-  _blogLoad();
-  renderBlogList();
+// ── GitHub API ───────────────────────────────────────────
+async function _ghFetch(path,opts={}){
+  const token=localStorage.getItem(BLOG_TOKEN_KEY);
+  const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(opts.headers||{})};
+  if(token)headers['Authorization']='Bearer '+token;
+  return fetch('https://api.github.com'+path,{...opts,headers});
+}
+async function _blogReadGH(){
+  const res=await _ghFetch(`/repos/${BLOG_REPO}/contents/${BLOG_FILE}?t=${Date.now()}`);
+  if(res.status===404)return{posts:[],sha:null};
+  if(!res.ok)throw new Error('GitHub napaka: '+res.status);
+  const d=await res.json();
+  return{posts:JSON.parse(_blogB64Dec(d.content)),sha:d.sha};
+}
+async function _blogWriteGH(posts,sha,msg='Posodobi blog objave'){
+  const token=localStorage.getItem(BLOG_TOKEN_KEY);
+  if(!token)throw new Error('Ni GitHub tokena. Dodaj ga v admin nastavitve.');
+  const body={message:msg,content:_blogB64Enc(JSON.stringify(posts,null,2)),branch:BLOG_BRANCH};
+  if(sha)body.sha=sha;
+  const res=await _ghFetch(`/repos/${BLOG_REPO}/contents/${BLOG_FILE}`,{
+    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||'GitHub napaka: '+res.status);}
+  return res.json();
+}
+function _blogCacheSave(posts){try{localStorage.setItem(BLOG_CACHE_KEY,JSON.stringify(posts));localStorage.setItem(BLOG_CACHE_TS,String(Date.now()));}catch(e){}}
+function _blogCacheLoad(){
+  try{const ts=parseInt(localStorage.getItem(BLOG_CACHE_TS)||'0',10);if(Date.now()-ts<BLOG_CACHE_TTL){const d=localStorage.getItem(BLOG_CACHE_KEY);if(d)return JSON.parse(d);}}catch(e){}return null;
 }
 
-// ── render post list ─────────────────────────────────────
+// ── init ─────────────────────────────────────────────────
+async function initBlog(){
+  if(_blogLoading)return;
+  const cached=_blogCacheLoad();
+  if(cached){_blogPosts=cached;renderBlogList();}
+  else document.getElementById('blog-content').innerHTML='<div class="blog-empty"><div class="blog-empty-icon">⏳</div><div>Nalagam objave…</div></div>';
+  _blogLoading=true;
+  try{
+    const{posts}=await _blogReadGH();
+    _blogPosts=posts;_blogCacheSave(posts);renderBlogList();
+  }catch(e){
+    if(!cached)document.getElementById('blog-content').innerHTML=`<div class="blog-empty"><div class="blog-empty-icon">⚠️</div><div>Napaka pri nalaganju: ${e.message}</div></div>`;
+  }finally{_blogLoading=false;}
+}
+
+// ── render ───────────────────────────────────────────────
 function renderBlogList(){
-  const el=document.getElementById('blog-content');
-  if(!el)return;
+  const el=document.getElementById('blog-content');if(!el)return;
   const posts=[..._blogPosts].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const filtered=_blogFilter==='vse'?posts:posts.filter(p=>p.cat===_blogFilter);
-  if(!filtered.length){
-    el.innerHTML=`<div class="blog-empty"><div class="blog-empty-icon">📭</div><div>Še ni objav${_blogFilter!=='vse'?' v tej kategoriji':''}</div></div>`;
-    return;
-  }
+  if(!filtered.length){el.innerHTML=`<div class="blog-empty"><div class="blog-empty-icon">\U0001f4ed</div><div>Ni objav${_blogFilter!=='vse'?' v tej kategoriji':''}</div></div>`;return;}
   el.innerHTML=`<div class="blog-grid">${filtered.map(blogCardHTML).join('')}</div>`;
 }
-
 function blogCardHTML(p){
-  const icon=BLOG_CAT_ICONS[p.cat]||'📌';
+  const icon=BLOG_CAT_ICONS[p.cat]||'\U0001f4cc';
   const ytId=_blogYtId(p.yt||'');
   const imgs=(p.imgs||[]).filter(Boolean);
   const firstImg=imgs[0]||'';
   let mediaHTML='';
-  if(ytId) mediaHTML=`<iframe class="blog-card-video" src="https://www.youtube.com/embed/${ytId}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
-  else if(firstImg) mediaHTML=`<img class="blog-card-img" src="${firstImg.replace(/"/g,'&quot;')}" alt="${(p.title||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none'">`;
+  if(ytId)mediaHTML=`<iframe class="blog-card-video" src="https://www.youtube.com/embed/${ytId}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+  else if(firstImg)mediaHTML=`<img class="blog-card-img" src="${firstImg.replace(/"/g,'&quot;')}" alt="${(p.title||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none'">`;
   const extraImgs=imgs.slice(ytId?0:1);
   const galleryHTML=extraImgs.length?`<div class="blog-card-imgs">${extraImgs.map(u=>`<img src="${u.replace(/"/g,'&quot;')}" alt="" loading="lazy" onclick="blogLightbox('${u.replace(/'/g,"\\'")}','${p.id}')" onerror="this.style.display='none'">`).join('')}</div>`:'';
   const excerpt=(p.content||'').slice(0,200)+(p.content&&p.content.length>200?'…':'');
-  const adminBtns=_blogAuthed?`<div class="blog-card-actions"><button class="blog-action-btn" onclick="blogOpenEdit('${p.id}')">✏ Uredi</button><button class="blog-action-btn del" onclick="blogDelete('${p.id}')">🗑 Izbriši</button></div>`:'';
-  return `<div class="blog-card" id="bcard-${p.id}">
-    ${mediaHTML}
-    <div class="blog-card-body">
-      <div class="blog-card-meta">
-        <span class="blog-card-date">${_blogFmtDate(p.date)}</span>
-        <span class="blog-card-tag ${p.cat||'ostalo'}">${icon} ${p.cat||'ostalo'}</span>
-      </div>
-      <div class="blog-card-title">${p.title||'(brez naslova)'}</div>
-      <div class="blog-card-excerpt">${excerpt.replace(/</g,'&lt;')}</div>
-      ${galleryHTML}
-      ${adminBtns}
-    </div>
-  </div>`;
+  const adminBtns=_blogAuthed?`<div class="blog-card-actions"><button class="blog-action-btn" onclick="blogOpenEdit('${p.id}')">✏ Uredi</button><button class="blog-action-btn del" onclick="blogDelete('${p.id}')">\U0001f5d1 Izbriši</button></div>`:'';
+  return `<div class="blog-card" id="bcard-${p.id}">${mediaHTML}<div class="blog-card-body"><div class="blog-card-meta"><span class="blog-card-date">${_blogFmtDate(p.date)}</span><span class="blog-card-tag ${p.cat||'ostalo'}">${icon} ${p.cat||'ostalo'}</span></div><div class="blog-card-title">${p.title||'(brez naslova)'}</div><div class="blog-card-excerpt">${excerpt.replace(/</g,'&lt;')}</div>${galleryHTML}${adminBtns}</div></div>`;
 }
 
 // ── filter ───────────────────────────────────────────────
 function blogFilter(cat,btn){
   _blogFilter=cat;
   document.querySelectorAll('.blog-filter-btn').forEach(b=>b.classList.remove('on'));
-  btn?.classList.add('on');
-  renderBlogList();
+  btn?.classList.add('on');renderBlogList();
 }
 
 // ── lightbox ─────────────────────────────────────────────
 function blogLightbox(url){
-  const lb=document.getElementById('blog-lightbox');
-  const img=document.getElementById('blog-lightbox-img');
-  if(!lb||!img)return;
-  img.src=url;
-  lb.style.display='flex';
-  document.body.style.overflow='hidden';
+  const lb=document.getElementById('blog-lightbox'),img=document.getElementById('blog-lightbox-img');
+  if(!lb||!img)return;img.src=url;lb.style.display='flex';document.body.style.overflow='hidden';
 }
 function blogCloseLightbox(){
-  const lb=document.getElementById('blog-lightbox');
-  if(lb)lb.style.display='none';
-  document.body.style.overflow='';
+  const lb=document.getElementById('blog-lightbox');if(lb)lb.style.display='none';document.body.style.overflow='';
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){blogCloseLightbox();blogCloseModal();}});
 
 // ── admin auth ───────────────────────────────────────────
 function blogToggleAdmin(){
   if(_blogAuthed){blogOpenEditor(null);return;}
-  const hasPw=!!localStorage.getItem(BLOG_PW_KEY);
-  _openBlogModal(hasPw?'pw':'set_pw');
+  _openBlogModal(localStorage.getItem(BLOG_PW_KEY)?'pw':'setup');
 }
-
 function _openBlogModal(mode){
-  const ov=document.getElementById('blog-modal-overlay');
-  const pw=document.getElementById('blog-pw-gate');
-  const ed=document.getElementById('blog-editor');
-  const hd=document.getElementById('blog-modal-heading');
-  if(!ov)return;
+  const ov=document.getElementById('blog-modal-overlay');if(!ov)return;
   ov.style.display='flex';
+  ['blog-pw-gate','blog-setup-gate','blog-editor','blog-settings-panel'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const hd=document.getElementById('blog-modal-heading');
   if(mode==='pw'){
-    pw.style.display='block';ed.style.display='none';
-    hd.textContent='Admin dostop';
-    document.getElementById('blog-pw-input').value='';
-    document.getElementById('blog-pw-error').style.display='none';
+    hd.textContent='Admin dostop';document.getElementById('blog-pw-gate').style.display='block';
+    document.getElementById('blog-pw-input').value='';document.getElementById('blog-pw-error').style.display='none';
     setTimeout(()=>document.getElementById('blog-pw-input')?.focus(),80);
-  } else if(mode==='set_pw'){
-    pw.style.display='block';ed.style.display='none';
-    hd.textContent='Nastavi admin geslo';
-    const el=document.getElementById('blog-pw-input');
-    el.placeholder='Novo geslo…';el.value='';
-    document.getElementById('blog-pw-error').style.display='none';
-    setTimeout(()=>el?.focus(),80);
-  } else if(mode==='editor'){
-    pw.style.display='none';ed.style.display='block';
+  }else if(mode==='setup'){
+    hd.textContent='Nastavi admin dostop';document.getElementById('blog-setup-gate').style.display='block';
+    setTimeout(()=>document.getElementById('blog-setup-pw')?.focus(),80);
+  }else if(mode==='editor'){
+    hd.textContent=_blogEditId?'Uredi objavo':'Nova objava';document.getElementById('blog-editor').style.display='block';
+  }else if(mode==='settings'){
+    hd.textContent='Nastavitve';document.getElementById('blog-settings-panel').style.display='block';
+    const tk=document.getElementById('blog-settings-token');if(tk)tk.value=localStorage.getItem(BLOG_TOKEN_KEY)||'';
   }
 }
-
 function blogCheckPw(){
   const val=document.getElementById('blog-pw-input')?.value||'';
-  if(!val){document.getElementById('blog-pw-error').style.display='block';document.getElementById('blog-pw-error').textContent='Geslo ne sme biti prazno.';return;}
-  const stored=localStorage.getItem(BLOG_PW_KEY);
-  if(!stored){
-    // first time: set password
-    localStorage.setItem(BLOG_PW_KEY,_blogHash(val));
-    _blogAuthed=true;
-    blogOpenEditor(null);
-    return;
-  }
-  if(_blogHash(val)===stored){
-    _blogAuthed=true;
-    blogOpenEditor(null);
-  } else {
-    document.getElementById('blog-pw-error').style.display='block';
-    document.getElementById('blog-pw-error').textContent='Napačno geslo.';
-  }
+  const errEl=document.getElementById('blog-pw-error');
+  if(!val){errEl.style.display='block';errEl.textContent='Geslo ne sme biti prazno.';return;}
+  if(_blogHash(val)===localStorage.getItem(BLOG_PW_KEY)){_blogAuthed=true;renderBlogList();blogOpenEditor(null);}
+  else{errEl.style.display='block';errEl.textContent='Napačno geslo.';}
+}
+function blogDoSetup(){
+  const pw=(document.getElementById('blog-setup-pw')?.value||'').trim();
+  const pw2=(document.getElementById('blog-setup-pw2')?.value||'').trim();
+  const token=(document.getElementById('blog-setup-token')?.value||'').trim();
+  const errEl=document.getElementById('blog-setup-error');
+  if(!pw){errEl.style.display='block';errEl.textContent='Geslo ne sme biti prazno.';return;}
+  if(pw!==pw2){errEl.style.display='block';errEl.textContent='Gesli se ne ujemata.';return;}
+  if(!token){errEl.style.display='block';errEl.textContent='GitHub token je obvezen.';return;}
+  localStorage.setItem(BLOG_PW_KEY,_blogHash(pw));localStorage.setItem(BLOG_TOKEN_KEY,token);
+  _blogAuthed=true;renderBlogList();blogOpenEditor(null);
+}
+function blogSaveSettings(){
+  const token=(document.getElementById('blog-settings-token')?.value||'').trim();
+  const newPw=(document.getElementById('blog-settings-newpw')?.value||'').trim();
+  const errEl=document.getElementById('blog-settings-error');
+  if(!token){errEl.style.display='block';errEl.textContent='Token ne sme biti prazen.';return;}
+  localStorage.setItem(BLOG_TOKEN_KEY,token);
+  if(newPw)localStorage.setItem(BLOG_PW_KEY,_blogHash(newPw));
+  errEl.style.display='none';showToast('Nastavitve shranjene.');blogOpenEditor(null);
 }
 
-// ── editor open ──────────────────────────────────────────
+// ── editor ───────────────────────────────────────────────
 function blogOpenEditor(id){
   _blogEditId=id;
-  const hd=document.getElementById('blog-modal-heading');
   const post=id?_blogPosts.find(p=>p.id===id):null;
-  if(hd)hd.textContent=id?'Uredi objavo':'Nova objava';
-  // fill fields
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('blog-f-title').value=post?.title||'';
   document.getElementById('blog-f-date').value=post?.date||today;
   document.getElementById('blog-f-cat').value=post?.cat||'nevihta';
   document.getElementById('blog-f-content').value=post?.content||'';
   document.getElementById('blog-f-yt').value=post?.yt||'';
-  // images
-  const il=document.getElementById('blog-img-list');
-  il.innerHTML='';
-  (post?.imgs||['']).forEach(u=>_addBlogImgRow(u));
-  if(!(post?.imgs||[]).length)_addBlogImgRow('');
+  const il=document.getElementById('blog-img-list');il.innerHTML='';
+  (post?.imgs?.length?post.imgs:['']).forEach(u=>_addBlogImgRow(u));
   _openBlogModal('editor');
 }
-
-function blogOpenEdit(id){
-  if(!_blogAuthed){blogToggleAdmin();return;}
-  blogOpenEditor(id);
-}
-
-// ── image rows ───────────────────────────────────────────
+function blogOpenEdit(id){if(!_blogAuthed){blogToggleAdmin();return;}blogOpenEditor(id);}
 function blogAddImgRow(){_addBlogImgRow('');}
 function _addBlogImgRow(val){
-  const il=document.getElementById('blog-img-list');
-  if(!il)return;
-  const row=document.createElement('div');
-  row.className='blog-img-row';
+  const il=document.getElementById('blog-img-list');if(!il)return;
+  const row=document.createElement('div');row.className='blog-img-row';
   row.innerHTML=`<input class="blog-form-input blog-img-url" type="url" placeholder="https://…slika.jpg" value="${(val||'').replace(/"/g,'&quot;')}"><button class="blog-img-remove" onclick="this.parentElement.remove()">Odstrani</button>`;
   il.appendChild(row);
 }
-
-// ── save post ────────────────────────────────────────────
-function blogSavePost(){
+async function blogSavePost(){
   const title=(document.getElementById('blog-f-title').value||'').trim();
   const date=document.getElementById('blog-f-date').value||new Date().toISOString().slice(0,10);
   const cat=document.getElementById('blog-f-cat').value||'ostalo';
@@ -17580,36 +17585,30 @@ function blogSavePost(){
   const yt=(document.getElementById('blog-f-yt').value||'').trim();
   const imgs=[...document.querySelectorAll('.blog-img-url')].map(i=>i.value.trim()).filter(Boolean);
   if(!title&&!content){showToast('Dodajte vsaj naslov ali besedilo.');return;}
-  const post={id:_blogEditId||_blogUid(),title,date,cat,content,yt,imgs};
-  if(_blogEditId){
-    const idx=_blogPosts.findIndex(p=>p.id===_blogEditId);
-    if(idx>=0)_blogPosts[idx]=post;
-    else _blogPosts.push(post);
-  } else {
-    _blogPosts.unshift(post);
-  }
-  _blogSave();
-  blogCloseModal();
-  renderBlogList();
-  showToast(_blogEditId?'Objava posodobljena.':'Objava shranjena.');
-  _blogEditId=null;
+  const btn=document.querySelector('#blog-editor .blog-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Objavljam…';}
+  try{
+    const{sha}=await _blogReadGH();
+    const post={id:_blogEditId||_blogUid(),title,date,cat,content,yt,imgs};
+    const updated=_blogEditId?_blogPosts.map(p=>p.id===_blogEditId?post:p):[post,..._blogPosts];
+    if(_blogEditId&&!updated.find(p=>p.id===_blogEditId))updated.unshift(post);
+    await _blogWriteGH(updated,sha,(_blogEditId?'Posodobi':'Dodaj')+` blog: ${title||date}`);
+    _blogPosts=updated;_blogCacheSave(updated);
+    blogCloseModal();renderBlogList();
+    showToast(_blogEditId?'Objava posodobljena ✓':'Objava objavljena ✓');_blogEditId=null;
+  }catch(e){showToast('Napaka: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.textContent='Objavi';}}
 }
-
-// ── delete ───────────────────────────────────────────────
-function blogDelete(id){
+async function blogDelete(id){
   if(!confirm('Res izbrišem to objavo?'))return;
-  _blogPosts=_blogPosts.filter(p=>p.id!==id);
-  _blogSave();
-  renderBlogList();
-  showToast('Objava izbrisana.');
+  try{
+    const{sha}=await _blogReadGH();
+    const updated=_blogPosts.filter(p=>p.id!==id);
+    await _blogWriteGH(updated,sha,'Izbriši blog objavo');
+    _blogPosts=updated;_blogCacheSave(updated);renderBlogList();showToast('Objava izbrisana.');
+  }catch(e){showToast('Napaka: '+e.message);}
 }
-
-// ── modal ────────────────────────────────────────────────
-function blogCloseModal(){
-  const ov=document.getElementById('blog-modal-overlay');
-  if(ov)ov.style.display='none';
-  _blogEditId=null;
-}
+function blogCloseModal(){const ov=document.getElementById('blog-modal-overlay');if(ov)ov.style.display='none';_blogEditId=null;}
 function blogOverlayClick(e){if(e.target===document.getElementById('blog-modal-overlay'))blogCloseModal();}
 
 </script>
@@ -17645,10 +17644,31 @@ function blogOverlayClick(e){if(e.target===document.getElementById('blog-modal-o
     <div id="blog-pw-gate" class="blog-pw-gate" style="display:none">
       <p>Vpišite geslo za admin dostop:</p>
       <input class="blog-form-input" type="password" id="blog-pw-input" placeholder="Geslo…" onkeydown="if(event.key==='Enter')blogCheckPw()">
-      <div class="blog-pw-error" id="blog-pw-error">Napačno geslo</div>
+      <div class="blog-pw-error" id="blog-pw-error" style="display:none"></div>
       <div class="blog-form-actions" style="justify-content:center;margin-top:.75rem">
         <button class="blog-submit-btn" onclick="blogCheckPw()">Potrdi</button>
         <button class="blog-cancel-btn" onclick="blogCloseModal()">Prekliči</button>
+      </div>
+    </div>
+    <!-- First-time setup gate -->
+    <div id="blog-setup-gate" style="display:none">
+      <div class="blog-form-group">
+        <label class="blog-form-label">Nastavi admin geslo</label>
+        <input class="blog-form-input" type="password" id="blog-setup-pw" placeholder="Novo geslo…">
+      </div>
+      <div class="blog-form-group">
+        <label class="blog-form-label">Potrdi geslo</label>
+        <input class="blog-form-input" type="password" id="blog-setup-pw2" placeholder="Ponovi geslo…">
+      </div>
+      <div class="blog-form-group">
+        <label class="blog-form-label">GitHub Personal Access Token</label>
+        <input class="blog-form-input" type="password" id="blog-setup-token" placeholder="ghp_…" autocomplete="off">
+        <p style="font-size:.7rem;color:var(--muted);margin-top:.35rem">Ustvari token na <b>github.com → Settings → Developer settings → Personal access tokens (Fine-grained)</b> z dovoljenjem <b>Contents: Read and write</b> za repozitorij <code>ibanezar/weather-station</code>. Token se shrani samo lokalno (localStorage).</p>
+      </div>
+      <div class="blog-pw-error" id="blog-setup-error" style="display:none"></div>
+      <div class="blog-form-actions" style="justify-content:flex-end;margin-top:.75rem">
+        <button class="blog-cancel-btn" onclick="blogCloseModal()">Prekliči</button>
+        <button class="blog-submit-btn" onclick="blogDoSetup()">Shrani in nadaljuj</button>
       </div>
     </div>
     <!-- Post editor -->
@@ -17681,17 +17701,34 @@ function blogOverlayClick(e){if(e.target===document.getElementById('blog-modal-o
         <textarea class="blog-form-textarea" id="blog-f-content" placeholder="Opišite vremenski dogodek…"></textarea>
       </div>
       <div class="blog-form-group">
-        <label class="blog-form-label">Slike (URL naslov za vsako sliko)</label>
+        <label class="blog-form-label">Slike (URL za vsako sliko)</label>
         <div class="blog-img-list" id="blog-img-list"></div>
         <button class="blog-add-img-btn" onclick="blogAddImgRow()">+ Dodaj sliko</button>
       </div>
       <div class="blog-form-group">
         <label class="blog-form-label">YouTube video (ID ali polni URL)</label>
-        <input class="blog-form-input" type="text" id="blog-f-yt" placeholder="Npr. dQw4w9WgXcQ ali https://youtu.be/dQw4w9WgXcQ">
+        <input class="blog-form-input" type="text" id="blog-f-yt" placeholder="Npr. dQw4w9WgXcQ ali https://youtu.be/…">
       </div>
       <div class="blog-form-actions">
+        <button class="blog-cancel-btn" onclick="_openBlogModal('settings')" style="margin-right:auto;font-size:.7rem">⚙ Nastavitve</button>
         <button class="blog-cancel-btn" onclick="blogCloseModal()">Prekliči</button>
-        <button class="blog-submit-btn" onclick="blogSavePost()">Shrani objavo</button>
+        <button class="blog-submit-btn" onclick="blogSavePost()">Objavi</button>
+      </div>
+    </div>
+    <!-- Settings panel -->
+    <div id="blog-settings-panel" style="display:none">
+      <div class="blog-form-group">
+        <label class="blog-form-label">GitHub token (posodobi)</label>
+        <input class="blog-form-input" type="password" id="blog-settings-token" placeholder="ghp_…" autocomplete="off">
+      </div>
+      <div class="blog-form-group">
+        <label class="blog-form-label">Novo geslo (pusti prazno = ne menjaj)</label>
+        <input class="blog-form-input" type="password" id="blog-settings-newpw" placeholder="Novo geslo…">
+      </div>
+      <div class="blog-pw-error" id="blog-settings-error" style="display:none"></div>
+      <div class="blog-form-actions">
+        <button class="blog-cancel-btn" onclick="_openBlogModal('editor')">← Nazaj</button>
+        <button class="blog-submit-btn" onclick="blogSaveSettings()">Shrani nastavitve</button>
       </div>
     </div>
   </div>
