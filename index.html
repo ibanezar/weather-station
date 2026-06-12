@@ -1907,17 +1907,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </svg>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Meteo<em>rec</em></h1>
-    <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor prebiva v Rečici ob Savinji in kaže živahno zanimanje za vremenske pojave</em></p>
+    <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <hr class="header-rule">
-    <p class="sub-loc">Savinjska regija · Slovenija · 46.326°N, 14.921°E · 366 m n. v.</p>
+    <p class="sub-loc">Savinjska regija · Slovenija · 46,326° N, 14,921° E · 366 m n. m.</p>
   </header>
 
   <div class="status">
-    <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje…</span></span>
-    <span>Posodobljeno <span id="updated">—</span></span>
+    <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje …</span></span>
+    <span>Posodobljeno: <span id="updated">—</span></span>
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
-    <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti</button>
+    <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti aplikacijo</button>
     <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
     <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Nastavi lastna opozorila">⚙ Moja opozorila</button>
   </div>
@@ -1943,11 +1943,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Lovec na nevihte</button>
-    <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 Napoved UI</button>
+    <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
-    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Meteo Nerd</button>
+    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Meteo za zahtevne</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -1987,8 +1987,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
-        <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup">°C</span></div>
-        <div class="feels">Občuteno <strong id="feels-val">—</strong>°C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Rosišče <strong id="dewpt-hero">—</strong>°C</div>
+        <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="feels">Občutena temperatura: <strong id="feels-val">—</strong> °C <span id="feels-pill" class="feels-pill"></span> &nbsp;·&nbsp; Temperatura rosišča: <strong id="dewpt-hero">—</strong> °C</div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
       </div>
       <div class="hero-icon" id="hero-icon"></div>
@@ -2003,21 +2003,21 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)">%</span></span>
-        <span class="hm-lbl">Vlažnost</span>
+        <span class="hm-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-lbl">Relativna vlažnost</span>
       </div>
       <div class="hm hm-pres" id="hm-pressure">
         <span class="hm-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
-        <span class="hm-lbl">Tlak</span>
+        <span class="hm-lbl">Zračni tlak</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
         <span class="hm-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter</span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
-        <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)">mm</span></span>
+        <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
         <span class="hm-lbl">Padavine danes</span>
-        <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">0.0 mm/h</span>
+        <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">intenziteta: 0,0 mm/h</span>
       </div>
       <div class="hm hm-uv" id="hm-uv">
         <span class="hm-val" id="hs-uv">—</span>
@@ -2030,16 +2030,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Day summary -->
   <div class="day-summary">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Maks</span><span class="ds-temp"><span id="day-high">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">—</span></span></div>
-    <div class="ds-item ds-low"><span class="ds-arrow">↓ Min</span><span class="ds-temp"><span id="day-low">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">—</span></span></div>
-    <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">Skupaj danes</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Povpr</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit">°C</span></span><span class="ds-lbl">Dnevno povprečje</span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">—</span></span></div>
+    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">—</span></span></div>
+    <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- Kaj prihaja -->
   <div class="card cu-card" id="cu-wrap">
     <div class="cu-hdr">
-      <span class="clabel" style="margin:0">🔮 Kaj prihaja</span>
+      <span class="clabel" style="margin:0">🔮 Vremenski obeti</span>
       <span class="cu-time" id="cu-updated">—</span>
     </div>
     <div class="cu-section-lbl">Naslednjih 24 ur</div>
@@ -2076,10 +2076,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           <line class="c-tick-m" x1="90.1" y1="19.9" x2="84.4" y2="25.6" stroke-width="1"/>
           <line class="c-tick-m" x1="19.9" y1="90.1" x2="25.6" y2="84.4" stroke-width="1"/>
           <line class="c-tick-m" x1="90.1" y1="90.1" x2="84.4" y2="84.4" stroke-width="1"/>
-          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="8" font-weight="500">N</text>
-          <text class="c-lbl-d" x="55" y="108" text-anchor="middle" font-size="8">S</text>
-          <text class="c-lbl-d" x="4"  y="58"  text-anchor="middle" font-size="8">W</text>
-          <text class="c-lbl-d" x="107" y="58" text-anchor="middle" font-size="8">E</text>
+          <text class="c-lbl" x="55" y="6"   text-anchor="middle" font-size="8" font-weight="500">S</text>
+          <text class="c-lbl-d" x="55" y="108" text-anchor="middle" font-size="8">J</text>
+          <text class="c-lbl-d" x="4"  y="58"  text-anchor="middle" font-size="8">Z</text>
+          <text class="c-lbl-d" x="107" y="58" text-anchor="middle" font-size="8">V</text>
           <g id="needle" style="transform-origin:55px 55px;transform:rotate(0deg);transition:transform 1.2s cubic-bezier(.34,1.56,.64,1)">
             <polygon points="55,15 58,55 55,63 52,55" fill="var(--needle)" opacity=".9"/>
             <polygon points="55,95 58,55 55,63 52,55" fill="var(--needle)" opacity=".2"/>
@@ -2088,10 +2088,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           </g>
         </svg>
         <div>
-          <div class="ws-big"><span id="wind-speed">—</span><span class="ws-unit">km/h</span></div>
+          <div class="ws-big"><span id="wind-speed">—</span><span class="ws-unit"> km/h</span></div>
           <div class="wdir" id="wind-dir-lbl">—</div>
-          <div class="wgust">Sunki <span id="wind-gust">—</span> km/h</div>
-          <div class="beaufort-badge"><span id="bft-num">Bft —</span><span id="bft-label">—</span></div>
+          <div class="wgust">Sunki vetra: <span id="wind-gust">—</span> km/h</div>
+          <div class="beaufort-badge"><span id="bft-num">Beaufort: —</span><span id="bft-label">—</span></div>
         </div>
       </div>
     </div>
@@ -2100,8 +2100,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="clabel">📊 Tlak</div>
       <div class="pressure-body">
         <div class="pressure-left">
-          <div class="cval" id="pressure-val">—<span class="unit">hPa</span></div>
-          <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— stalno</div>
+          <div class="cval" id="pressure-val">—<span class="unit"> hPa</span></div>
+          <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— stabilno</div>
           <div id="p-rate" class="p-rate"></div>
           <div class="csub" id="pressure-label">—</div>
         </div>
@@ -2121,7 +2121,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Wind rose -->
   <div class="card wind-rose-card">
-    <div class="clabel">🌹 Vetroza — zadnjih 7 dni</div>
+    <div class="clabel">🌹 Roža vetrov — zadnjih 7 dni</div>
     <div class="wind-rose-body">
       <svg id="wind-rose-svg" viewBox="0 0 150 150" style="width:150px;height:150px;flex-shrink:0"></svg>
       <div>
@@ -2134,9 +2134,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <!-- Daily wind trend (right column) -->
       <div style="flex:1;min-width:180px;border-left:1px solid var(--border);padding-left:1.25rem">
-        <div style="font-size:.72rem;color:var(--muted-text,var(--muted));text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;white-space:nowrap">Dnevni sunek — max km/h</div>
+        <div style="font-size:.72rem;color:var(--muted-text,var(--muted));text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;white-space:nowrap">Najmočnejši dnevni sunek: — km/h</div>
         <svg id="wind-trend-svg" style="width:100%;display:block" viewBox="0 0 220 90"></svg>
-        <div style="font-size:.72rem;color:var(--muted-text,var(--muted));text-transform:uppercase;letter-spacing:.1em;margin:1rem 0 .4rem;white-space:nowrap">Porazdelitev ur</div>
+        <div style="font-size:.72rem;color:var(--muted-text,var(--muted));text-transform:uppercase;letter-spacing:.1em;margin:1rem 0 .4rem;white-space:nowrap">Porazdelitev po urah</div>
         <div id="wind-dist" style="display:flex;flex-direction:column;gap:.25rem"></div>
       </div>
     </div>
@@ -2155,7 +2155,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
         <div class="bio-item" id="bio-chill-box">
           <div class="bio-val" id="bio-chill">—</div>
-          <div class="bio-lbl">Wind Chill</div>
+          <div class="bio-lbl">Občutek mraza</div>
           <div class="bio-cat" id="bio-chill-cat">—</div>
           <div class="bio-tip" id="bio-chill-tip"></div>
         </div>
@@ -2165,7 +2165,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card">
       <div class="clabel">🌫 Napoved megle — <span id="fog-location">Rečica ob Savinji</span></div>
       <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
-        <div class="cval" id="fog-now-val">—<span class="unit">%</span></div>
+        <div class="cval" id="fog-now-val">—<span class="unit"> %</span></div>
         <div class="csub" id="fog-now-lbl">verjetnost megle zdaj</div>
       </div>
       <div class="fog-timeline" id="fog-timeline"></div>
@@ -2177,8 +2177,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- 4 small cards -->
   <div class="g4" style="margin-bottom:1rem">
     <div class="card">
-      <div class="clabel">🌧 Intenz. padavin</div>
-      <div class="cval" id="rain-rate">—<span class="unit">mm/h</span></div>
+      <div class="clabel">🌧 Intenziteta padavin</div>
+      <div class="cval" id="rain-rate">—<span class="unit"> mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
       <div class="csub">Danes: <span id="rain-total">—</span> mm</div>
     </div>
@@ -2189,13 +2189,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="csub" id="uv-label">—</div>
     </div>
     <div class="card">
-      <div class="clabel">⚡ Sončno sevanje</div>
-      <div class="cval" id="solar-val">—<span class="unit">W/m²</span></div>
+      <div class="clabel">☀ Sončno sevanje</div>
+      <div class="cval" id="solar-val">—<span class="unit"> W/m²</span></div>
       <div class="csub" id="solar-label">—</div>
     </div>
     <div class="card">
-      <div class="clabel">💧 Rosišče</div>
-      <div class="cval" id="dewpt-val">—<span class="unit">°C</span></div>
+      <div class="clabel">💧 Temperatura rosišča</div>
+      <div class="cval" id="dewpt-val">—<span class="unit"> °C</span></div>
       <div class="csub" id="dewpt-label">—</div>
     </div>
   </div>
@@ -2229,7 +2229,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Text forecast -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
-      <span class="clabel" style="margin:0">📝 Napoved za 7 dni</span>
+      <span class="clabel" style="margin:0">📝 7-dnevna napoved</span>
       <span class="chart-range" id="txfc-updated"></span>
     </div>
     <div id="txfc-grid" class="txfc-grid">
@@ -2240,8 +2240,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- Advanced Open-Meteo signals -->
   <div class="omx-grid" id="omx-grid">
-    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zaupanje napovedi…</div></div>
-    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalaganje zanesljivosti napovedi…</div></div>
+    <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zanesljivost napovedi …</div></div>
+    <div class="omx-card" id="omx-ensemble"><div class="omx-sub">Nalagam oceno zanesljivosti napovedi …</div></div>
     <div class="omx-card" id="omx-nowcast"><div class="omx-sub">Nalaganje 15-minutnega poteka…</div></div>
     <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
   </div>
@@ -2249,7 +2249,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- 24h Sky Strip -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.5rem">
-      <span class="clabel" style="margin:0">🌅 Dnevni trak neba — naslednjih 24 ur</span>
+      <span class="clabel" style="margin:0">🌅 Pregled neba — naslednjih 24 ur</span>
       <span class="chart-range" id="sky-range">—</span>
     </div>
     <div class="sky-strip-outer">
@@ -2264,7 +2264,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
       <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
       <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
-      <span style="margin-left:auto;opacity:.6">↔ drsaj za cel dan</span>
+      <span style="margin-left:auto;opacity:.6">↔ povlecite za cel dan</span>
     </div>
   </div>
 
@@ -2272,7 +2272,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🌱 Fenološki koledar — <span id="pheno-year"></span></span>
-      <span class="chart-range">Fenološki GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
+      <span class="chart-range">GDD5: <span id="pheno-gdd-total" style="color:var(--green);font-weight:600">—</span></span>
     </div>
     <div class="g2 pheno-chart-grid" style="gap:.75rem">
       <div class="pheno-list" id="pheno-list-left"></div>
@@ -2286,7 +2286,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Daily mikroklimatski odtis -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.45rem">
-      <span class="clabel" style="margin:0">🧭 Rečica mikroklimatski odtis</span>
+      <span class="clabel" style="margin:0">🧭 Mikroklimatski odtis Rečice</span>
       <span class="chart-range" id="mcf-updated">Nalaganje…</span>
     </div>
     <div id="mcf-content" class="mcf-hero">
@@ -2342,7 +2342,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="card">
       <div class="chart-hdr" style="margin-bottom:.25rem">
-        <span class="clabel" style="margin:0">📷 Fotografski namig UI</span>
+        <span class="clabel" style="margin:0">📷 Fotografski namig AI</span>
         <div style="display:flex;gap:.4rem;align-items:center">
           <span class="chart-range" id="brief-date"></span>
           <button class="ai-brief-btn" id="brief-refresh-btn" onclick="fetchAIBrief(true)" title="Osveži">↻</button>
@@ -2356,7 +2356,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Ecowitt live: indoor + lightning + soil -->
   <div class="card" id="ecowitt-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.25rem">
-      <span class="clabel" style="margin:0">🏠 Notranje razmere in strele (Ecowitt)</span>
+      <span class="clabel" style="margin:0">🏠 Notranje razmere in zaznane strele (Ecowitt)</span>
       <span class="chart-range" id="ecw-updated">—</span>
     </div>
     <div class="ecw-grid" id="ecw-grid">
@@ -2367,7 +2367,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Padavinske norme -->
   <div class="card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.25rem">
-      <span class="clabel" style="margin:0">☔ Tekoča vsota padavin glede na normale</span>
+      <span class="clabel" style="margin:0">☔ Tekoča vsota padavin glede na dolgoletno povprečje</span>
       <span class="chart-range" id="pn-updated">—</span>
     </div>
     <div class="precip-norm-grid" id="pn-grid">
@@ -2396,7 +2396,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="moon-big" id="moon-emoji">🌑</div>
         <div>
           <div class="moon-pn" id="moon-phase">—</div>
-          <div class="moon-il">Osvetlitev: <span id="moon-illum">—</span>%</div>
+          <div class="moon-il">Osvetlitev: <span id="moon-illum">—</span> %</div>
           <div class="moon-il">Starost: <span id="moon-age">—</span> dni</div>
           <div class="moon-nx" id="moon-next"></div>
         </div>
@@ -2421,9 +2421,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="clabel">🌾 Agrometeo</div>
       <div class="csub" id="agro-date" style="margin-bottom:.25rem">Danes</div>
       <div class="agro-grid">
-        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ mm/dan</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-et0">—</div><div class="agro-l">ET₀ (mm/dan)</div></div>
         <div class="agro-item"><div class="agro-n" id="agro-sun">—</div><div class="agro-l">Sončnih ur</div></div>
-        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (baza 10°)</div></div>
+        <div class="agro-item"><div class="agro-n" id="agro-gdd">—</div><div class="agro-l">GDD (osnova 10 °C)</div></div>
       </div>
       <div class="csub" id="agro-note" style="margin-top:.5rem"></div>
     </div>
@@ -2454,7 +2454,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- Climate comparison -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
-      <span class="clabel" style="margin:0">☀️ Klimatsko primerjanje — <span id="clim-month-lbl">ta mesec</span></span>
+      <span class="clabel" style="margin:0">☀️ Podnebna primerjava — <span id="clim-month-lbl">ta mesec</span></span>
       <span class="chart-range" id="clim-range">glede na 10-letno povprečje</span>
     </div>
     <div id="clim-content" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
@@ -2491,7 +2491,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="astro-body"><div class="astro-sub" style="opacity:.4">…</div></div>
     </div>
     <div class="insight-card" id="ic-anomaly">
-      <div class="ic-head"><span>📐 Klimatska anomalija dneva</span><span class="ic-badge" id="anom-badge">—</span></div>
+      <div class="ic-head"><span>📐 Podnebna anomalija dneva</span><span class="ic-badge" id="anom-badge">—</span></div>
       <div id="anom-body"><div class="anom-note" style="opacity:.4">…</div></div>
     </div>
   </div>
@@ -2501,13 +2501,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="season-body"><div class="season-sub" style="opacity:.4">…</div></div>
     </div>
     <div class="insight-card" id="ic-mood">
-      <div class="ic-head"><span>🎭 Značaj postaje — 48h</span><span class="ic-badge" id="mood-badge">—</span></div>
+      <div class="ic-head"><span>🎭 Značaj postaje — 48 ur</span><span class="ic-badge" id="mood-badge">—</span></div>
       <div id="mood-body"><div class="mood-sub" style="opacity:.4">…</div></div>
     </div>
   </div>
   <div class="insights-row">
     <div class="insight-card" id="ic-analog">
-      <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">7 let</span></div>
+      <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">zadnjih 7 let</span></div>
       <div class="analog-controls">
         <input type="date" id="analog-date">
         <button class="analog-btn" id="analog-go">Najdi dvojčke</button>
@@ -2574,9 +2574,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadm. višina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem">366 m</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska op.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status QC</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadmorska višina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem">366 m</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska oprema</div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
+        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status kontrole kakovosti</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
       </div>
     </div>
   </div>
@@ -2608,17 +2608,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
         <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem">
           Podprte datoteke:<br>
-          • <b>Weather Underground</b> — CSV izvoz iz wu.com<br>
+          • <b>Weather Underground</b> — izvoz CSV iz wu.com<br>
           • <b>Cumulus MX</b> — <code>dayfile.txt</code><br>
           • <b>WeeWX</b> — CSV z dnevnimi povzetki<br>
-          • Generični CSV (stolpci: datum, max°C, min°C, padavine mm)<br>
+          • Splošni CSV (stolpci: datum, najvišja temperatura (°C), najnižja temperatura (°C), padavine (mm))<br>
         </div>
         <label style="display:flex;flex-direction:column;gap:.5rem;cursor:pointer">
           <div style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;font-size:.8rem;color:var(--muted);transition:border-color .2s" id="import-dropzone"
             ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
             ondragleave="this.style.borderColor='var(--border)'"
             ondrop="handleImportDrop(event)">
-            Povleci datoteko sem ali klikni
+            Povlecite datoteko sem ali kliknite
           </div>
           <input type="file" accept=".csv,.txt,.json" style="display:none" id="import-file-input" onchange="handleImportFile(this)">
         </label>
@@ -2634,28 +2634,28 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Records — 5 cards -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1rem">
       <div class="card rec-card-high">
-        <div class="clabel">🌡 Najvišja temp.</div>
-        <div class="cval" id="rec-temp-high">—<span class="unit">°C</span></div>
+        <div class="clabel">🌡 Najvišja temperatura</div>
+        <div class="cval" id="rec-temp-high">—<span class="unit"> °C</span></div>
         <div class="csub" id="rec-temp-high-date">—</div>
       </div>
       <div class="card rec-card-low">
-        <div class="clabel">❄ Najnižja temp.</div>
-        <div class="cval" id="rec-temp-low">—<span class="unit">°C</span></div>
+        <div class="clabel">❄ Najnižja temperatura</div>
+        <div class="cval" id="rec-temp-low">—<span class="unit"> °C</span></div>
         <div class="csub" id="rec-temp-low-date">—</div>
       </div>
       <div class="card rec-card-rain">
         <div class="clabel">🌧 Največ padavin</div>
-        <div class="cval" id="rec-rain">—<span class="unit">mm</span></div>
+        <div class="cval" id="rec-rain">—<span class="unit"> mm</span></div>
         <div class="csub" id="rec-rain-date">—</div>
       </div>
       <div class="card rec-card-wind">
         <div class="clabel">💨 Najmočnejši veter</div>
-        <div class="cval" id="rec-wind">—<span class="unit">km/h</span></div>
+        <div class="cval" id="rec-wind">—<span class="unit"> km/h</span></div>
         <div class="csub" id="rec-wind-date">—</div>
       </div>
       <div class="card" style="--t-up-c:var(--purple)">
         <div class="clabel" style="color:var(--purple)">💥 Najmočnejši sunek</div>
-        <div class="cval" id="rec-gust" style="color:var(--purple)">—<span class="unit">km/h</span></div>
+        <div class="cval" id="rec-gust" style="color:var(--purple)">—<span class="unit"> km/h</span></div>
         <div class="csub" id="rec-gust-date">—</div>
       </div>
     </div>
@@ -2664,7 +2664,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Heatmap calendar -->
     <div class="card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Temperaturna karta — <span id="hm-year-lbl">leto</span></span>
+        <span class="clabel" style="margin:0">🌡 Temperaturna karta <span id="hm-year-lbl">leto</span></span>
         <div style="display:flex;gap:.4rem">
           <button class="period-btn" id="hm-btn-t" onclick="setHeatmapMode('temp')" style="font-size:.74rem;padding:2px 10px">Temp</button>
           <button class="period-btn active" id="hm-btn-r" onclick="setHeatmapMode('rain')" style="font-size:.74rem;padding:2px 10px">Padavine</button>
@@ -2675,7 +2675,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span>Manj</span>
         <div class="hm-swatches" id="hm-swatches"></div>
         <span>Več</span>
-        <span style="margin-left:auto;color:var(--muted)">Vsak kvadrat = 1 dan</span>
+        <span style="margin-left:auto;color:var(--muted)">Vsak kvadrat predstavlja 1 dan</span>
       </div>
     </div>
 
@@ -2707,19 +2707,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- Daily table -->
     <div class="card" style="margin-bottom:1rem;padding:1.4rem 1.6rem">
-      <div class="clabel">📋 Dnevni podatki (zadnjih 7 dni)</div>
+      <div class="clabel">📋 Dnevni podatki za zadnjih 7 dni</div>
       <div style="overflow-x:auto;margin-top:.5rem">
         <table class="history-table">
           <thead>
             <tr>
               <th style="text-align:left">Datum</th>
-              <th>Maks °C</th>
-              <th>Min °C</th>
-              <th>Povp. °C</th>
-              <th>Padavine mm</th>
-              <th>Veter km/h</th>
-              <th>Sunek km/h</th>
-              <th>Vlažnost %</th>
+              <th>Najv. temp. (°C)</th>
+              <th>Najn. temp. (°C)</th>
+              <th>Povp. temp. (°C)</th>
+              <th>Padavine (mm)</th>
+              <th>Veter (km/h)</th>
+              <th>Sunek (km/h)</th>
+              <th>Vlažnost (%)</th>
             </tr>
           </thead>
           <tbody id="history-tbody">
@@ -2736,17 +2736,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- KPI row -->
     <div class="an-kpi-row">
-      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tavg" style="color:var(--blue)">—</div><div class="an-kpi-l">Povp. temp. 2020–25</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tavg" style="color:var(--blue)">—</div><div class="an-kpi-l">Povprečna temperatura 2020–2025</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmax" style="color:var(--red)">—</div><div class="an-kpi-l">Rekord vročine</div></div>
       <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-tmin" style="color:var(--cyan)">—</div><div class="an-kpi-l">Rekord mraza</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-trend" style="color:var(--amber)">—</div><div class="an-kpi-l">°C/leto trend</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-rain" style="color:var(--rain-col)">—</div><div class="an-kpi-l">Povp. letne padavine</div></div>
-      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-gust" style="color:var(--purple)">—</div><div class="an-kpi-l">Najv. sunek km/h</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-trend" style="color:var(--amber)">—</div><div class="an-kpi-l">Trend: °C/leto</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-rain" style="color:var(--rain-col)">—</div><div class="an-kpi-l">Povprečne letne padavine</div></div>
+      <div class="an-kpi"><div class="an-kpi-n" id="an-kpi-gust" style="color:var(--purple)">—</div><div class="an-kpi-l">Najmočnejši sunek vetra (km/h)</div></div>
     </div>
     <div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem;font-family:'JetBrains Mono',monospace" id="an-data-source">Nalaganje podatkov…</div>
     <!-- Flood data gap notice -->
     <div id="an-flood-note" style="display:none;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:12px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.74rem;line-height:1.7;color:var(--muted)">
-      🌊 <strong style="color:#38bdf8">Opomba — poplave 3./4. avg 2023:</strong> Postaja je v 12 urah zabeležila <strong style="color:#38bdf8">235,5 mm</strong> padavin — to je dejanska skupna vsota tega dogodka. Postaja deluje na baterije, zato so bili podatki ročno odčitani in so popolni. Med izpadom električne energije poročanje na internet ni bilo mogoče, podatki pa so bili naknadno vneseni ročno.
+      🌊 <strong style="color:#38bdf8">Opomba — poplave 3. in 4. avgusta 2023:</strong> Postaja je v 12 urah zabeležila <strong style="color:#38bdf8">235,5 mm</strong> padavin — to je dejanska skupna vsota tega dogodka. Postaja deluje na baterije, zato so bili podatki ročno odčitani in so popolni. Med izpadom električne energije poročanje na internet ni bilo mogoče, podatki pa so bili naknadno vneseni ročno.
     </div>
 
 
@@ -2767,10 +2767,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
     <div class="an-section">
-      <div class="an-title">🌡 Podnebni pasovi — segrevanje postaje (2020–2025)</div>
+      <div class="an-title">🌡 Podnebne črte — segrevanje postaje (2020–2025)</div>
       <div class="nt-card">
         <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">
-          Vsak pas = eno leto. 🔵 hladnejše od povprečja · 🔴 toplejše. Slog: Ed Hawkins #ShowYourStripes
+          Vsak pas predstavlja eno leto: 🔵 hladnejše od povprečja · 🔴 toplejše od povprečja. Slog: Ed Hawkins #ShowYourStripes
         </div>
         <svg id="climate-stripes-svg" width="100%" height="120" viewBox="0 0 600 120"></svg>
       </div>
@@ -2803,7 +2803,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="an-section">
       <div class="an-title">☀️ Poletni in vroči dnevi po letih (XLSX)</div>
       <div class="nt-card"><div class="nt-chart"><canvas id="xlsx-summer-chart" height="160"></canvas></div>
-      <div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">Poletni dan: Tmax ≥ 25°C · Vroč dan: Tmax ≥ 30°C · Rekord poletnih: 103 dni (2022) · Rekord vročih: 46 dni (2024)</div>
+      <div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">Poletni dan: Tmax ≥ 25 °C · vroč dan: Tmax ≥ 30 °C · Rekord poletnih: 103 dni (2022) · Rekord vročih: 46 dni (2024)</div>
       </div>
     </div>
 
@@ -2812,18 +2812,18 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="nt-card wind-rose-card">
         <div><div class="nt-chart"><canvas id="xlsx-wind-rose" height="180"></canvas></div></div>
         <div style="font-size:.74rem;line-height:1.8;color:var(--muted);padding:.5rem 0">
-          <strong style="color:var(--text)">Prevladujoča smer: JUG (S)</strong><br>
-          S: 51.5% · SE: 23.4% · skupaj J/JV: <strong style="color:var(--blue)">74.9%</strong><br><br>
-          Dolina Savinje kanalizira veter vzdolž osi SZ–JV. Max sunek 115.6 km/h prišel iz S smeri (1. apr 2024).<br><br>
-          Povprečna cirkularična smer: <strong>158.9°</strong> (JJV)
+          <strong style="color:var(--text)">Prevladujoča smer: jug (J)</strong><br>
+          J: 51,5 % · JV: 23,4 % · skupaj J/JV: <strong style="color:var(--blue)">74,9 %</strong><br><br>
+          Dolina Savinje kanalizira veter vzdolž osi SZ–JV. Najmočnejši sunek 115,6 km/h je prišel iz južne smeri (1. aprila 2024).<br><br>
+          Povprečna krožna smer: <strong>158,9°</strong> (JJV)
         </div>
       </div>
     </div>
 
     <div class="an-section">
-      <div class="an-title">🔥/❄️ Ogrevalne in hladilne stopinjske dneve (HDD/CDD) po letih</div>
+      <div class="an-title">🔥❄️ Ogrevalni in hladilni stopinjski dnevi (HDD/CDD) po letih</div>
       <div class="nt-card"><div class="nt-chart"><canvas id="xlsx-hdd-chart" height="160"></canvas></div>
-      <div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">HDD18 = seštevek (18 – Tavg) za dneve pod 18°C · CDD22 = seštevek (Tavg – 22) za dneve nad 22°C</div>
+      <div style="font-size:.74rem;color:var(--muted);margin-top:.3rem">HDD18 = vsota (18 − Tavg) za dneve pod 18 °C · CDD22 = vsota (Tavg − 22) za dneve nad 22 °C</div>
       </div>
     </div>
 
@@ -2843,12 +2843,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="an-card">
           <div class="clabel" style="margin:0">Letno povprečje + linearni trend</div>
           <div class="an-chart-wrap"><canvas id="an-temp-annual"></canvas></div>
-          <div class="an-finding"><span class="an-tag an-tag-w">Trend</span> Temperatura narašča za <strong>+0.29 °C/leto</strong> — v 6 letih skupaj skoraj <strong>+1 °C</strong>. Najtoplejše leto: <strong>2024 (11.5°C)</strong>, najhladnejše: <strong>2021 (9.8°C)</strong>.</div>
+          <div class="an-finding"><span class="an-tag an-tag-w">Trend</span> Temperatura narašča za <strong>+0,29 °C/leto</strong> — v 6 letih skupaj skoraj <strong>+1 °C</strong>. Najtoplejše leto: <strong>2024 (11,5 °C)</strong>, najhladnejše: <strong>2021 (9,8 °C)</strong>.</div>
         </div>
         <div class="an-card">
           <div class="clabel" style="margin:0">Trend po letnih časih</div>
           <div class="an-chart-wrap"><canvas id="an-seasons"></canvas></div>
-          <div class="an-finding"><span class="an-tag an-tag-w">Pomlad</span> Pomlad se segreva najhitreje: <strong>+0.43 °C/leto</strong>. Poletje in jesen +0.28°C/leto. <span class="an-tag an-tag-b">Zima</span> Zimske temperature praktično stagnirajo (+0.01°C/leto).</div>
+          <div class="an-finding"><span class="an-tag an-tag-w">Pomlad</span> Pomlad se segreva najhitreje: <strong>+0,43 °C/leto</strong>. Poletje in jesen: +0,28 °C/leto. <span class="an-tag an-tag-b">Zima</span> Zimske temperature praktično stagnirajo (+0,01 °C/leto).</div>
         </div>
       </div>
       <div class="an-grid3">
@@ -2857,19 +2857,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
           <div class="an-chart-wrap"><canvas id="an-monthly-temp"></canvas></div>
         </div>
         <div class="an-card">
-          <div class="clabel" style="margin:0">Zmrzali (≤0°C) in vroči dnevi (≥25°C)</div>
+          <div class="clabel" style="margin:0">Dnevi z zmrzaljo (≤ 0 °C) in vroči dnevi (≥ 25 °C)</div>
           <div class="an-chart-wrap"><canvas id="an-extremes"></canvas></div>
-          <div class="an-finding"><span class="an-tag an-tag-g">Trend</span> Zmrzali: 46 dni (2021) → 27 dni (2024). Vroči dnevi: 0 (2020) → 6 (2024/25). Ekstremni dnevi se premikajo v poletno smer.</div>
+          <div class="an-finding"><span class="an-tag an-tag-g">Trend</span> zmrzali: 46 dni (2021) → 27 dni (2024). Vroči dnevi: 0 (2020) → 6 (2024/25). Ekstremni dnevi se premikajo v poletno smer.</div>
         </div>
         <div class="an-card">
           <div class="clabel" style="margin:0">Temperaturni rekordi</div>
           <div class="an-rec-list">
-            <div class="an-rec-row"><span>🔴 Najtopleje</span><span class="an-rec-val" style="color:var(--red)">27.6°C</span><span class="an-rec-d">26. jun 2025</span></div>
-            <div class="an-rec-row"><span>🔵 Najhladneje</span><span class="an-rec-val" style="color:var(--cyan)">−9.5°C</span><span class="an-rec-d">8. jan 2026</span></div>
-            <div class="an-rec-row"><span>☀️ Najtoplejše leto</span><span class="an-rec-val" style="color:var(--amber)">11.5°C</span><span class="an-rec-d">2024</span></div>
-            <div class="an-rec-row"><span>❄️ Najhladnejše leto</span><span class="an-rec-val" style="color:var(--blue)">9.8°C</span><span class="an-rec-d">2021</span></div>
-            <div class="an-rec-row"><span>🌊 Povp. poletje</span><span class="an-rec-val">20.4°C</span><span class="an-rec-d">jun–avg</span></div>
-            <div class="an-rec-row"><span>🧊 Povp. zima</span><span class="an-rec-val">2.1°C</span><span class="an-rec-d">dec–feb</span></div>
+            <div class="an-rec-row"><span>🔴 Najtopleje</span><span class="an-rec-val" style="color:var(--red)">27,6 °C</span><span class="an-rec-d">26. junija 2025</span></div>
+            <div class="an-rec-row"><span>🔵 Najhladneje</span><span class="an-rec-val" style="color:var(--cyan)">−9,5 °C</span><span class="an-rec-d">8. januarja 2026</span></div>
+            <div class="an-rec-row"><span>☀️ Najtoplejše leto</span><span class="an-rec-val" style="color:var(--amber)">11,5 °C</span><span class="an-rec-d">2024</span></div>
+            <div class="an-rec-row"><span>❄️ Najhladnejše leto</span><span class="an-rec-val" style="color:var(--blue)">9,8 °C</span><span class="an-rec-d">2021</span></div>
+            <div class="an-rec-row"><span>🌊 Povp. poletje</span><span class="an-rec-val">20,4 °C</span><span class="an-rec-d">jun–avg</span></div>
+            <div class="an-rec-row"><span>🧊 Povp. zima</span><span class="an-rec-val">2,1 °C</span><span class="an-rec-d">dec–feb</span></div>
           </div>
         </div>
       </div>
@@ -2887,13 +2887,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="an-card">
           <div class="clabel" style="margin:0">September in oktober — orografski vzorec</div>
           <div class="an-chart-wrap"><canvas id="an-sepokt"></canvas></div>
-          <div class="an-finding"><span class="an-tag an-tag-w">Bimodalno</span> Ko je september moker, je oktober suh — in obratno. Klasičen vzorec Savinjske doline: fronta pride ali zgodaj ali pozno. Sep 2022: <strong>293 mm</strong>, Sep 2023: samo 48 mm.</div>
+          <div class="an-finding"><span class="an-tag an-tag-w">Bimodalnost</span> Ko je september moker, je oktober suh — in obratno. Klasičen vzorec Savinjske doline: fronta pride ali zgodaj ali pozno. Sep 2022: <strong>293 mm</strong>, Sep 2023: samo 48 mm.</div>
         </div>
       </div>
       <div class="an-card" style="margin-bottom:1.25rem">
         <div class="clabel" style="margin:0">Mesečne padavine po letih — toplotna karta (mm)</div>
         <div style="overflow-x:auto"><table class="hm-tbl" id="an-rain-hm"></table></div>
-        <div class="an-finding"><span class="an-tag an-tag-r">Rekord</span> September 2022: <strong>293 mm</strong> — absolutni mesečni rekord. <span class="an-tag an-tag-b">Sušno</span> Januar 2022: <strong>17 mm</strong>. Julij in september sta meseca z največjo variabilnostjo.</div>
+        <div class="an-finding"><span class="an-tag an-tag-r">Rekord</span> September 2022: <strong>293 mm</strong> — absolutni mesečni rekord. <span class="an-tag an-tag-b">Sušni</span> januar 2022: <strong>17 mm</strong>. Julij in september sta meseca z največjo variabilnostjo.</div>
       </div>
       <div class="an-grid2">
         <div class="an-card">
@@ -2903,9 +2903,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="an-card">
           <div class="clabel" style="margin:0">Rekordni padavinski dogodki</div>
           <div class="an-rec-list">
-            <div class="an-rec-row"><span>💧 Rekord/dan</span><span class="an-rec-val" style="color:var(--blue)">89.9 mm</span><span class="an-rec-d">12. sep 2024</span></div>
-            <div class="an-rec-row"><span>💧 2. mesto</span><span class="an-rec-val">64.8 mm</span><span class="an-rec-d">11. okt 2020</span></div>
-            <div class="an-rec-row"><span>💧 3. mesto</span><span class="an-rec-val">64.8 mm</span><span class="an-rec-d">27. okt 2023</span></div>
+            <div class="an-rec-row"><span>💧 Dnevni rekord</span><span class="an-rec-val" style="color:var(--blue)">89,9 mm</span><span class="an-rec-d">12. septembra 2024</span></div>
+            <div class="an-rec-row"><span>💧 2. mesto</span><span class="an-rec-val">64,8 mm</span><span class="an-rec-d">11. oktobra 2020</span></div>
+            <div class="an-rec-row"><span>💧 3. mesto</span><span class="an-rec-val">64,8 mm</span><span class="an-rec-d">27. oktobra 2023</span></div>
             <div class="an-rec-row"><span>🌵 Najdaljša suša</span><span class="an-rec-val">40 dni</span><span class="an-rec-d">jan–feb 2022</span></div>
             <div class="an-rec-row"><span>🌊 Najbolj mokro leto</span><span class="an-rec-val" style="color:var(--blue)">1711 mm</span><span class="an-rec-d">2023</span></div>
             <div class="an-rec-row"><span>☀️ Najbolj suho leto</span><span class="an-rec-val" style="color:var(--amber)">1110 mm</span><span class="an-rec-d">2022</span></div>
@@ -2921,26 +2921,26 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div class="an-card">
           <div class="clabel" style="margin:0">Rekordni sunki vetra</div>
           <div class="an-chart-wrap" style="height:150px"><canvas id="an-gusts"></canvas></div>
-          <div class="an-finding"><span class="an-tag an-tag-w">Rekord</span> <strong>115.6 km/h</strong> dne 1. aprila 2024 — najmočnejši sunek v celotnem obdobju meritev.</div>
+          <div class="an-finding"><span class="an-tag an-tag-w">Rekord</span> <strong>115,6 km/h</strong>, 1. aprila 2024 — najmočnejši sunek v celotnem obdobju meritev.</div>
         </div>
         <div class="an-card">
           <div class="clabel" style="margin:0">Tlak in vlaga</div>
           <div class="an-rec-list" style="margin-top:.5rem">
-            <div class="an-rec-row"><span>📊 Povp. tlak</span><span class="an-rec-val">1018.1 hPa</span><span class="an-rec-d"></span></div>
-            <div class="an-rec-row"><span>⬇️ Najniž. tlak</span><span class="an-rec-val" style="color:var(--red)">987.9 hPa</span><span class="an-rec-d">globoka ciklona</span></div>
-            <div class="an-rec-row"><span>⬆️ Najv. tlak</span><span class="an-rec-val" style="color:var(--green)">1043.9 hPa</span><span class="an-rec-d">anticiklon</span></div>
-            <div class="an-rec-row"><span>💧 Povp. vlaga</span><span class="an-rec-val">83.3%</span><span class="an-rec-d">visoka — dolina ob reki</span></div>
-            <div class="an-rec-row"><span>📉 Najniž. vlaga</span><span class="an-rec-val">38%</span><span class="an-rec-d"></span></div>
+            <div class="an-rec-row"><span>📊 Povprečni tlak</span><span class="an-rec-val">1018,1 hPa</span><span class="an-rec-d"></span></div>
+            <div class="an-rec-row"><span>⬇️ Najnižji tlak</span><span class="an-rec-val" style="color:var(--red)">987,9 hPa</span><span class="an-rec-d">globoka ciklona</span></div>
+            <div class="an-rec-row"><span>⬆️ Najvišji tlak</span><span class="an-rec-val" style="color:var(--green)">1043,9 hPa</span><span class="an-rec-d">anticiklon</span></div>
+            <div class="an-rec-row"><span>💧 Povprečna vlažnost</span><span class="an-rec-val">83,3 %</span><span class="an-rec-d">visoka — dolina ob reki</span></div>
+            <div class="an-rec-row"><span>📉 Najnižja vlažnost</span><span class="an-rec-val">38 %</span><span class="an-rec-d"></span></div>
           </div>
-          <div class="an-finding">Povprečna vlaga <strong>83.3%</strong> je visoka — tipično za dolino ob reki. Lokalna <strong>megla</strong> je pogost pojav, posebej pozimi in jeseni.</div>
+          <div class="an-finding">Povprečna vlažnost <strong>83,3 %</strong> je visoka — tipično za dolino ob reki. Lokalna <strong>megla</strong> je pogost pojav, posebej pozimi in jeseni.</div>
         </div>
         <div class="an-card">
           <div class="clabel" style="margin:0">Ključne ugotovitve</div>
           <ul class="an-insight-list">
-            <li>🌡 <strong>Ogrevanje +0.29°C/leto</strong> — ~+1°C v 6 letih. Pomlad se segreva najhitreje (+0.43°C/leto).</li>
+            <li>🌡 <strong>Segrevanje +0,29 °C/leto</strong> — ~+1 °C v 6 letih. Pomlad se segreva najhitreje (+0,43 °C/leto).</li>
             <li>🌧 <strong>2023 rekordno mokro</strong> (1711 mm) — leto prej 2022 rekordno suho (1110 mm). Razlika 601 mm.</li>
             <li>❄️ <strong>Število dni z zmrzaljo upada</strong> — z 46 (2021) na 27 (2024). Mrzle zime postajajo redkejše.</li>
-            <li>💨 <strong>115.6 km/h — 1. april 2024</strong> — absolutni rekord postaje. Ni bil prvoaprilska šala.</li>
+            <li>💨 <strong>115,6 km/h — 1. april 2024</strong> — absolutni rekord postaje. Ni bil prvoaprilska šala.</li>
             <li>🌵 <strong>40 dni suše jan–feb 2022</strong> — najdaljše sušno obdobje, skupaj 1110 mm tisto leto.</li>
             <li>🌊 <strong>Bimodalni vzorec september/oktober</strong> — en mesec moker, drugi suh. Značilno za Savinjsko dolino.</li>
           </ul>
@@ -2951,7 +2951,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Candlestick chart -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🕯 Vremenske Svečke — OHLC temperatura</span>
+        <span class="clabel" style="margin:0">🕯 Temperaturne svečke — OHLC</span>
         <span class="chart-range" id="candle-range">—</span>
       </div>
       <div class="candle-tab-row">
@@ -2960,8 +2960,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div class="candle-wrap"><svg id="candle-svg" viewBox="0 0 880 180" height="180"></svg></div>
       <div class="candle-legend">
-        <span><span style="display:inline-block;width:10px;height:10px;background:#4ade80;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Segrevanje (zaključek > začetek)</span>
-        <span><span style="display:inline-block;width:10px;height:10px;background:#f87171;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Ohlajanje (close < open)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#4ade80;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Segrevanje: zaključek > začetek</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#f87171;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Ohlajanje: zaključek < začetek</span>
         <span style="color:var(--muted)">Dolg rep = fronta ali hiter temperaturni preskok</span>
       </div>
     </div>
@@ -2971,7 +2971,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- DATA ASSIMILATION cards (appended into tab-analysis by initDA) -->
   <div id="tab-da-host" style="display:none">
 
-    <div class="da-section-hdr"><span style="font-size:1rem">🔭</span><h3>Asimilacija podatkov — optimalno združevanje podatkov</h3></div>
+    <div class="da-section-hdr"><span style="font-size:1rem">🔭</span><h3>Asimilacija podatkov — optimalno združevanje virov</h3></div>
 
     <!-- 1. Kalman filter -->
     <div class="card chart-card" style="margin-bottom:1rem">
@@ -2986,7 +2986,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <div id="kf-sources" class="kf-sources"><div class="clim-loading">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.65rem;line-height:1.5">
-        <strong style="color:var(--text)">Metodologija:</strong> Skalaren Kalmanov filter na vsaki spremenljivki. Napoved = prejšnja ocena + procesni šum Q. Posodobitev: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
+        <strong style="color:var(--text)">Metodologija:</strong> Skalarni Kalmanov filter na vsaki spremenljivki. Napoved = prejšnja ocena + procesni šum Q. Posodobitev: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
       </div>
     </div>
 
@@ -3000,23 +3000,23 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="var3d-legend">
         <span><span class="var3d-legend-grad" style="background:linear-gradient(90deg,#1e40af,#3b82f6,#93c5fd,#fde68a,#f97316,#dc2626)"></span>Temperatura ozadja (Open-Meteo)</span>
         <span>⬡ Postaja (IREICA1)</span>
-        <span style="color:var(--muted)">Increment = analiza - ozadje (Gaussova razporeditev, L=80km)</span>
+        <span style="color:var(--muted)">Prirastek = analiza − ozadje (Gaussova razporeditev, L = 80 km)</span>
       </div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
-        <strong style="color:var(--text)">3D-Var:</strong> J(x) = ½(x−xb)ᵀ B⁻¹(x−xb) + ½(y−Hx)ᵀ R⁻¹(y−Hx). Gaussova korelacijska dolžina L=80km, σ_B=1.2°C, σ_obs=0.3°C. Ozadna mreža: Open-Meteo 6×4 točke nad SLO.
+        <strong style="color:var(--text)">3D-Var:</strong> J(x) = ½(x−xb)ᵀ B⁻¹(x−xb) + ½(y−Hx)ᵀ R⁻¹(y−Hx). Gaussova korelacijska dolžina L = 80 km, σ_B = 1,2 °C, σ_obs = 0,3 °C. Ozadna mreža: Open-Meteo 6×4 točke nad SLO.
       </div>
     </div>
 
     <!-- 3. O-B tracking -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📉 O-B sledenje — postaja vs NWP prva ocena</span>
+        <span class="clabel" style="margin:0">📉 Sledenje O–B — postaja v primerjavi s prvo oceno NWP</span>
         <span class="chart-range" id="ob-count-badge">—</span>
       </div>
       <div class="ob-stats-grid" id="ob-stats"><div class="clim-loading" style="grid-column:1/-1">Zbiranje O-B statistik…</div></div>
       <div class="ob-wrap"><svg id="ob-svg" viewBox="0 0 880 130" height="130"></svg></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.5">
-        <strong style="color:var(--text)">O-B:</strong> Razlika opazovane vrednosti postaje in NWP prve ocene (Open-Meteo current-hour). Sistem. odmik ≠ 0 kaže na napako senzorja ali pristranskost modela. Avtokorelacija kaže na procesni šum. Referenca: ECMWF definira O-B kot standardno metriko kakovosti opazovanj.
+        <strong style="color:var(--text)">O-B:</strong> Razlika opazovane vrednosti postaje in NWP prve ocene (Open-Meteo current-hour). Sistematični odmik ≠ 0 kaže na napako senzorja ali pristranskost modela. Avtokorelacija kaže na procesni šum. Referenca: ECMWF definira O-B kot standardno metriko kakovosti opazovanj.
       </div>
     </div>
 
@@ -3028,7 +3028,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- ARSO normale 1991–2020 -->
     <div class="norm-card" id="norm-card">
       <div class="norm-hdr">
-        <span class="norm-title">📊 ARSO Klimatološke normale 1991–2020</span>
+        <span class="norm-title">📊 ARSO podnebne normale 1991–2020</span>
         <span class="norm-src" id="norm-src">Celje · 241 m n. m. · referenčna postaja</span>
       </div>
       <div id="norm-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3037,7 +3037,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- CMIP6 klimatske projekcije 2050/2100 -->
     <div class="card chart-card" style="margin-bottom:1rem" id="cmip6-card">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌍 Rečica 2050 — Klimatske Projekcije CMIP6</span>
+        <span class="clabel" style="margin:0">🌍 Rečica 2050 — podnebne projekcije CMIP6</span>
         <span class="chart-range" id="cmip6-src">Open-Meteo · —</span>
       </div>
       <div id="cmip6-body"><div class="clim-loading">Nalaganje projekcij…</div></div>
@@ -3064,7 +3064,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- NASA POWER Climate Baselines -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌍 Satelitske bazlinije — NASA POWER</span>
+        <span class="clabel" style="margin:0">🌍 Satelitske referenčne vrednosti — NASA POWER</span>
         <span class="chart-range" id="nasa-clim-src">NASA POWER · —</span>
       </div>
       <div id="nasa-clim-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3073,7 +3073,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- ENSO / El Niño monitor -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌊 ENSO monitor — El Niño / La Niña</span>
+        <span class="clabel" style="margin:0">🌊 Spremljanje ENSO — El Niño / La Niña</span>
         <span class="chart-range" id="enso-src">NOAA CPC · ONI</span>
       </div>
       <div id="enso-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3083,9 +3083,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="clim-twin-hero">
       <div class="clim-twin-globe">🌍</div>
       <div class="clim-twin-info">
-        <div class="clim-twin-label">Globalni klimatski dvojček</div>
+        <div class="clim-twin-label">Globalni podnebni dvojček</div>
         <div class="clim-twin-place" id="twin-place">Računam…</div>
-        <div class="clim-twin-sub" id="twin-sub">Primerjam klimo Rečice s svetovno bazo mest.</div>
+        <div class="clim-twin-sub" id="twin-sub">Primerjam podnebje Rečice s svetovno bazo mest.</div>
         <span class="clim-twin-match" id="twin-match"></span>
         <div class="clim-twin-alts" id="twin-alts"></div>
       </div>
@@ -3094,16 +3094,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Drift engine -->
     <div id="drift-card" class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Mikroklimatski odmik — IREICA1 vs ARSO</span>
+        <span class="clabel" style="margin:0">🌡 Mikroklimatski odmik — IREICA1 v primerjavi z ARSO</span>
         <span class="chart-range" id="drift-range">—</span>
       </div>
-      <div id="drift-body"><div class="clim-loading">Zbira se odmik — vrni se po prvem dnevu meritev.</div></div>
+      <div id="drift-body"><div class="clim-loading">Odmik se zbira — vrnite se po prvem dnevu meritev.</div></div>
     </div>
 
     <!-- Agro pulse predictor -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🔬 Agrometeorološki Pulse — napovedovalnik</span>
+        <span class="clabel" style="margin:0">🔬 Agrometeorološki utrip — napovedovalnik</span>
         <span class="chart-range" id="pulse-gdd-badge">GDD5: — · GDD10: —</span>
       </div>
       <div id="agro-pulse-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3112,7 +3112,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- 2. Weather Wrapped -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🎁 Vremenski Wrapped — letni pregled</span>
+        <span class="clabel" style="margin:0">🎁 Letni vremenski pregled</span>
       </div>
       <div class="wrap-year-sel" id="wrap-year-sel"></div>
       <div class="wrap-grid" id="wrap-grid"><div class="clim-loading">Nalaganje…</div></div>
@@ -3142,7 +3142,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="tab-trivia" class="tab-pane">
     <!-- 📜 Pregovor analiza -->
     <div class="tri-section">
-      <div class="tri-title">📜 Slovenski vremenski pregovori — analiza zadetosti</div>
+      <div class="tri-title">📜 Slovenski vremenski pregovori — preverjanje napovedne uspešnosti</div>
       <div class="tri-card">
         <div id="prov-stats-wrap" style="color:var(--muted);font-size:.8rem">Nalaganje…</div>
       </div>
@@ -3196,7 +3196,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="sc-threat-row">
         <div class="sc-threat-left">
           <div class="sc-threat-tag">⚡ Lovec na nevihte — Rečica ob Savinji</div>
-          <div class="sc-threat-level" id="sc-level">NALAGAM</div>
+          <div class="sc-threat-level" id="sc-level">Nalagam</div>
           <div class="sc-threat-desc" id="sc-desc">Pridobivam podatke o atmosferski nestabilnosti…</div>
         </div>
         <div class="sc-hero-kpis" id="sc-hero-kpis"></div>
@@ -3206,36 +3206,36 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Hour scrubber: drag forward up to 48 h -->
     <div class="sc-scrub card" style="margin-bottom:1rem">
       <div class="sc-scrub-head">
-        <span class="clabel" style="margin:0">🕐 Časovni drsnik napovedi</span>
+        <span class="clabel" style="margin:0">🕐 Časovni drsnik napovedi:</span>
         <span class="sc-scrub-time" id="sc-scrub-time">zdaj</span>
       </div>
       <input type="range" class="sc-scrub-range" id="sc-scrub-range" min="0" max="47" value="0" step="1" oninput="scSetHour(this.value)" aria-label="Premik napovedi naprej v urah">
-      <div class="sc-scrub-ticks"><span>zdaj</span><span>+12h</span><span>+24h</span><span>+36h</span><span>+48h</span></div>
+      <div class="sc-scrub-ticks"><span>zdaj</span><span>+12 h</span><span>+24 h</span><span>+36 h</span><span>+48 h</span></div>
     </div>
 
     <!-- Instability indices -->
     <div class="g4" style="margin-bottom:1rem" id="sc-idx-grid">
       <div class="card ca-red"><div class="clabel">⚡ CAPE</div><div class="sc-idx-val" id="sc-cape">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-cape-bar" style="width:0%;background:#f87171"></div></div><div class="sc-idx-desc" id="sc-cape-desc">—</div></div>
-      <div class="card ca-purple"><div class="clabel">🛡 CIN — pokrov</div><div class="sc-idx-val" id="sc-cin">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-cin-bar" style="width:0%;background:#a78bfa"></div></div><div class="sc-idx-desc" id="sc-cin-desc">—</div></div>
-      <div class="card ca-amber"><div class="clabel">📊 Lifted Index</div><div class="sc-idx-val" id="sc-li">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-li-bar" style="width:0%;background:#fbbf24"></div></div><div class="sc-idx-desc" id="sc-li-desc">—</div></div>
-      <div class="card ca-blue"><div class="clabel">🌩 Total Totals</div><div class="sc-idx-val" id="sc-tt">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-tt-bar" style="width:0%;background:#60a5fa"></div></div><div class="sc-idx-desc" id="sc-tt-desc">—</div></div>
+      <div class="card ca-purple"><div class="clabel">🛡 CIN — konvekcijska inhibicija</div><div class="sc-idx-val" id="sc-cin">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-cin-bar" style="width:0%;background:#a78bfa"></div></div><div class="sc-idx-desc" id="sc-cin-desc">—</div></div>
+      <div class="card ca-amber"><div class="clabel">📊 Indeks dviga (Lifted Index)</div><div class="sc-idx-val" id="sc-li">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-li-bar" style="width:0%;background:#fbbf24"></div></div><div class="sc-idx-desc" id="sc-li-desc">—</div></div>
+      <div class="card ca-blue"><div class="clabel">🌩 Indeks Total Totals</div><div class="sc-idx-val" id="sc-tt">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-tt-bar" style="width:0%;background:#60a5fa"></div></div><div class="sc-idx-desc" id="sc-tt-desc">—</div></div>
     </div>
     <div class="g4" style="margin-bottom:1rem">
       <div class="card ca-cyan"><div class="clabel">❄️ Višina ledišča</div><div class="sc-idx-val" id="sc-freeze">—</div><div class="sc-idx-desc" id="sc-freeze-desc">—</div></div>
       <div class="card ca-blue"><div class="clabel">💧 Padavinska voda</div><div class="sc-idx-val" id="sc-pwat">—</div><div class="sc-idx-desc" id="sc-pwat-desc">—</div></div>
       <div class="card ca-green"><div class="clabel">📈 K-indeks</div><div class="sc-idx-val" id="sc-ki">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-ki-bar" style="width:0%;background:#4ade80"></div></div><div class="sc-idx-desc" id="sc-ki-desc">—</div></div>
-      <div class="card ca-purple"><div class="clabel">💨 Bulk shear 0–6km</div><div class="sc-idx-val" id="sc-shear">—</div><div class="sc-idx-desc" id="sc-shear-desc">—</div></div>
+      <div class="card ca-purple"><div class="clabel">💨 Striženje vetra 0–6 km</div><div class="sc-idx-val" id="sc-shear">—</div><div class="sc-idx-desc" id="sc-shear-desc">—</div></div>
     </div>
 
     <!-- Sounding Analysis (Showalter, CIN, Mixing height) -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📡 Sounding analiza — parcelna metoda</span>
+        <span class="clabel" style="margin:0">📡 Sondažna analiza — parcelna metoda</span>
         <span class="chart-range" id="snd-source-badge">Open-Meteo NWP proxy</span>
       </div>
       <div class="sounding-grid" id="snd-grid">
         <div class="snd-card" style="--snd-accent:var(--amber)"><div class="snd-lbl">Showalter Index</div><div class="snd-val" id="snd-si">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-si-bar" style="width:0%;background:var(--amber)"></div></div><div class="snd-desc" id="snd-si-desc">—</div></div>
-        <div class="snd-card" style="--snd-accent:var(--purple)"><div class="snd-lbl">CIN — pokrov (J/kg)</div><div class="snd-val" id="snd-cin2">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-cin2-bar" style="width:0%;background:var(--purple)"></div></div><div class="snd-desc" id="snd-cin2-desc">—</div></div>
+        <div class="snd-card" style="--snd-accent:var(--purple)"><div class="snd-lbl">CIN — konvekcijska inhibicija (J/kg)</div><div class="snd-val" id="snd-cin2">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-cin2-bar" style="width:0%;background:var(--purple)"></div></div><div class="snd-desc" id="snd-cin2-desc">—</div></div>
         <div class="snd-card" style="--snd-accent:var(--green)"><div class="snd-lbl">Višina mešanja (AGL)</div><div class="snd-val" id="snd-mix">—</div><div class="snd-bar"><div class="snd-bar-fill" id="snd-mix-bar" style="width:0%;background:var(--green)"></div></div><div class="snd-desc" id="snd-mix-desc">—</div></div>
         <div class="snd-card" style="--snd-accent:var(--blue)"><div class="snd-lbl">LCL višina</div><div class="snd-val" id="snd-lcl">—</div><div class="snd-desc" id="snd-lcl-desc">—</div></div>
         <div class="snd-card" style="--snd-accent:var(--red)"><div class="snd-lbl">CAPE (parcel)</div><div class="snd-val" id="snd-cape2">—</div><div class="snd-desc" id="snd-cape2-desc">—</div></div>
@@ -3244,7 +3244,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <!-- Simplified T-profile sketch -->
       <div class="mix-profile">
         <svg id="snd-profile-svg" viewBox="0 0 500 120" height="120" xmlns="http://www.w3.org/2000/svg">
-          <text x="250" y="60" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Sounding profil se naloži po prvem nalaganju podatkov.</text>
+          <text x="250" y="60" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Sondažni profil se naloži po prvem nalaganju podatkov.</text>
         </svg>
       </div>
       <div class="snd-source" id="snd-source-note">Vir: model Open-Meteo NWP (proxy za radiosonde — Graz 11240, Ljubljana 14023, Zagreb 14240). Točnost ≈ radiosondaža za operativne namene.</div>
@@ -3274,7 +3274,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- Wind Turbulence Index -->
     <div class="card ca-amber" style="margin-bottom:1rem">
-      <div class="clabel">🌀 Savinjski Vetrni Lijak — turbulenca doline</div>
+      <div class="clabel">🌀 Savinjski vetrovni lijak — turbulenca doline</div>
       <div id="turb-body"><div class="clim-loading">Nalaganje…</div></div>
     </div>
 
@@ -3295,7 +3295,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Moisture + valley factors -->
     <div class="g2" style="margin-bottom:1rem">
       <div class="card ca-cyan">
-        <div class="clabel">💧 Vlaga & kondenzacija</div>
+        <div class="clabel">💧 Vlaga in kondenzacija</div>
         <div class="sc-valley-grid" id="sc-moisture"></div>
       </div>
       <div class="card ca-green">
@@ -3372,7 +3372,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </svg>
       </div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.35rem">
-        Barva: <b style="color:#a78bfa">preteklost</b> → <b style="color:#4ade80">sedanjost</b> · Velikost = tlak · 🌬 Foehn: visok T + nizek DPD · 🌨 Fronta: hiter padec T
+        Barva: <b style="color:#a78bfa">preteklost</b> → <b style="color:#4ade80">sedanjost</b> · Velikost = tlak · 🌬 Fen: visok T + nizek DPD · 🌨 Fronta: hiter padec T
       </div>
     </div>
 
@@ -3496,7 +3496,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- 4. Time capsule -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">⏳ Vremenska Časovna Kapsula</span>
+        <span class="clabel" style="margin:0">⏳ Vremenska časovna kapsula</span>
         <span class="chart-range" id="capsule-date">—</span>
       </div>
       <div id="capsule-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -3688,10 +3688,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
     <!-- Model architecture info -->
     <div class="card" style="margin-bottom:1rem">
-      <div class="clabel">ℹ️ Arhitektura & statistike modela</div>
+      <div class="clabel">ℹ️ Arhitektura in statistike modela</div>
       <div class="ai-arch-grid" id="ai-arch-grid">
         <div class="ai-arch-item"><div class="ai-arch-val">HW</div><div class="ai-arch-lbl">Tip modela</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">α β γ</div><div class="ai-arch-lbl">Glaj. param.</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">α β γ</div><div class="ai-arch-lbl">Parametri glajenja</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">12h</div><div class="ai-arch-lbl">Vhodno okno</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">8</div><div class="ai-arch-lbl">Vhodni atributi</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">6h</div><div class="ai-arch-lbl">Napoved</div></div>
@@ -3725,7 +3725,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- METAR comparison -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">✈️ METAR LJLJ vs Postaja IREICA1</span>
+        <span class="clabel" style="margin:0">✈️ METAR LJLJ v primerjavi s postajo IREICA1</span>
         <span class="chart-range" id="metar-updated">—</span>
       </div>
       <div id="metar-body"><div class="clim-loading">Nalaganje METAR podatkov…</div></div>
@@ -3778,7 +3778,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Sky Strip -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌅 Dnevni trak neba — 24 ur</span>
+        <span class="clabel" style="margin:0">🌅 Pregled neba — 24 ur</span>
         <span class="chart-range" id="sky-strip-info">Nalaganje…</span>
       </div>
       <div class="sky-strip-wrap" id="sky-strip-wrap">
@@ -3821,7 +3821,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div id="sea-fc-body" style="margin-top:.5rem">Nalagam…</div>
     </div>
     <div class="card" style="margin-bottom:1rem">
-      <div class="clabel">💨 Veter — Bora / Jugo analiza</div>
+      <div class="clabel">💨 Veter — analiza burje in juga</div>
       <div id="sea-wind-body" style="font-size:.78rem;color:var(--muted);margin-top:.5rem">Nalagam…</div>
     </div>
     <div class="card" style="margin-bottom:1rem">
@@ -4010,7 +4010,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
     <div class="nt-card" style="margin-top:1rem">
       <div class="clabel" style="margin:0 0 .5rem">ℹ️ O primerjavi</div>
-      <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n. v.) je označena z modro.</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7">Podatki iz <strong style="color:var(--text)">Open-Meteo ECMWF</strong> za različne lokacije v okolici Rečice ob Savinji. Primerjava prikazuje vpliv nadmorske višine in oddaljenosti od doline na temperaturo in padavine. Postaja IREICA1 (366 m n. m.) je označena z modro.</div>
     </div>
   </div>
 
@@ -4021,7 +4021,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ft-inner">
       <div>
         <div class="ft-brand">📡 IREICA1 — Meteorološka postaja</div>
-        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n. v. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
+        <div class="ft-loc">Rečica ob Savinji, Slovenija &nbsp;·&nbsp; 366 m n. m. &nbsp;·&nbsp; 46.326° N, 14.921° E</div>
         <div class="ft-sources">
           <span>Viri podatkov:</span>
           <a href="https://www.wunderground.com/dashboard/pws/IREICA1" target="_blank" rel="noopener">Weather Underground</a>
@@ -4128,7 +4128,7 @@ const CC = {
 // ── Utilities ─────────────────────────────────────────────
 function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d);}
 function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
-function windDir(deg){const d=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];return d[Math.round(deg/22.5)%16];}
+function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
 function dewLabel(d){if(d<5)return'Zelo suho';if(d<10)return'Suho';if(d<15)return'Prijetno';if(d<20)return'Rahlo vlažno';return'Soparno';}
@@ -4558,8 +4558,8 @@ function renderClimateAnomaly(){
   const it1=mkItem(todHi,normTHi,'°C',1,false);
   const it3=mkItem(todRain,normRain,'mm',1,true);
   let html='<div class="anom-grid">';
-  html+='<div class="anom-item"><div class="anom-val '+it1.cls+'">'+it1.txt+'<span class="au">°C</span></div><div class="anom-lbl">Tmax vs normala</div></div>';
-  html+='<div class="anom-item"><div class="anom-val '+it3.cls+'">'+it3.txt+'<span class="au">mm</span></div><div class="anom-lbl">Padavine vs normala</div></div>';
+  html+='<div class="anom-item"><div class="anom-val '+it1.cls+'">'+it1.txt+'<span class="au">°C</span></div><div class="anom-lbl">Tmax glede na normalo</div></div>';
+  html+='<div class="anom-item"><div class="anom-val '+it3.cls+'">'+it3.txt+'<span class="au">mm</span></div><div class="anom-lbl">Padavine glede na normalo</div></div>';
   html+='</div>';
   const warmer=it1.d>0;
   html+='<div class="anom-note">Normala za '+new Date().toLocaleDateString('sl',{day:'numeric',month:'long'})+' (±3 dni, '+yrs+' let): <b style="color:var(--text)">'+normTHi.toFixed(1)+'°C</b> Tmax, <b style="color:var(--text)">'+normRain.toFixed(1)+' mm</b> dež. Danes je '+(Math.abs(it1.d)<0.4?'skoraj točno povprečno':(warmer?'topleje':'hladneje'))+'.</div>';
@@ -5622,7 +5622,7 @@ function applyObs(obs){
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
-  countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)">%</span>',1000);
+  countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   // UV hero card — value + color
@@ -5630,16 +5630,16 @@ function applyObs(obs){
   const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;}
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);}
-  countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)">mm</span>',900);
-  countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit">km/h</span>',900);
+  countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
+  countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit"> km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
   document.getElementById('needle').style.transform='rotate('+obs.winddir+'deg)';
   // Speed glow ring: green→amber→red by speed
   const spd=m.windSpeed||0;
   const sring=document.getElementById('wind-speed-ring');
   if(sring){const sc=spd>45?'var(--red)':spd>25?'var(--amber)':'var(--green)';sring.style.stroke=sc;sring.style.opacity=Math.min(.85,spd/55).toFixed(2);}
-  const bf=beaufort(m.windSpeed||0);set('bft-num','Bft '+bf.n);set('bft-label',bf.name);
-  countUp('pressure-val',m.pressure,1,'<span class="unit">hPa</span>',1200);
+  const bf=beaufort(m.windSpeed||0);set("bft-num","Beaufort: "+bf.n);set('bft-label',bf.name);
+  countUp('pressure-val',m.pressure,1,'<span class="unit"> hPa</span>',1200);
   const pEl=document.getElementById('p-trend');
   if(m.pressure>1013){pEl.className='p-trend t-up';pEl.textContent='↑ Nad povprečjem';}
   else if(m.pressure<1005){pEl.className='p-trend t-dn';pEl.textContent='↓ Pod povprečjem';}
@@ -5647,7 +5647,7 @@ function applyObs(obs){
   set('pressure-label',m.pressure>1020?'Visok tlak — stabilno':m.pressure<1005?'Nizek tlak — nestabilno':'Zmerni tlak');
   updatePressureArc(m.pressure);
   const rr=m.precipRate??0;set('rain-rate',fmt(rr,2));set('rain-total',fmt(m.precipTotal,1));
-  const rrEl=document.getElementById('hs-rain-rate');if(rrEl){rrEl.textContent=rr.toFixed(1)+' mm/h';rrEl.style.color=rr>=0.1?'var(--blue)':'var(--muted)';}
+  const rrEl=document.getElementById('hs-rain-rate');if(rrEl){rrEl.textContent='intenziteta: '+rr.toFixed(1).replace('.',',')+' mm/h';rrEl.style.color=rr>=0.1?'var(--blue)':'var(--muted)';}
   document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
   const uv=obs.uv??0;set('uv-val',uv);set('uv-label',uvLabel(uv));document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
   const sol=m.solarRadiation??obs.solarRadiation;set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));
@@ -6388,7 +6388,7 @@ function applyHistory(summaries){
     if((m.windspeedAvg??0)>maxW.v)   {maxW={v:m.windspeedAvg,d:dt};}
     if((m.windspeedHigh??0)>maxG.v)  {maxG={v:m.windspeedHigh,d:dt};}
   });
-  const su=(id,val,unit)=>{const e=document.getElementById(id);if(e)e.innerHTML=val+'<span class="unit">'+unit+'</span>';};
+  const su=(id,val,unit)=>{const e=document.getElementById(id);if(e)e.innerHTML=val+'<span class="unit"> '+unit+'</span>';};
   su('rec-temp-high',fmt(maxT.v,1),'°C'); set('rec-temp-high-date',maxT.d);
   su('rec-temp-low', fmt(minT.v,1),'°C'); set('rec-temp-low-date', minT.d);
   su('rec-rain',     fmt(maxR.v,1),' mm');set('rec-rain-date',     maxR.d);
@@ -6699,7 +6699,7 @@ function drawWindRose(observations){
 
   // Update card title to reflect data source
   const titleEl=svg.closest('.wind-rose-card')?.querySelector('.clabel');
-  if(titleEl)titleEl.innerHTML=usingClimo?'🌹 Vetroza — klimatologija':'🌹 Vetroza — zadnjih 7 dni';
+  if(titleEl)titleEl.innerHTML=usingClimo?'🌹 Roža vetrov — klimatologija':'🌹 Roža vetrov — zadnjih 7 dni';
 }
 
 // ══════════════════════════════════════════════════════════
@@ -9816,11 +9816,11 @@ function initRecords(){
 // ═══════════════════════════════════════════════════════
 const NEARBY=[
   {name:'Rečica ob Savinji',note:'Postaja IREICA1',lat:46.326,lon:14.921,alt:366,mine:true},
-  {name:'Mozirje',note:'5 km, 340 m n. v.',lat:46.338,lon:14.976,alt:340},
-  {name:'Šoštanj',note:'15 km, 400 m n. v.',lat:46.383,lon:15.050,alt:400},
-  {name:'Celje',note:'35 km, 241 m n. v.',lat:46.233,lon:15.267,alt:241},
-  {name:'Logarska dolina',note:'25 km, 838 m n. v.',lat:46.393,lon:14.630,alt:838},
-  {name:'Rogla',note:'45 km, 1517 m n. v.',lat:46.450,lon:15.333,alt:1517},
+  {name:'Mozirje',note:'5 km, 340 m n. m.',lat:46.338,lon:14.976,alt:340},
+  {name:'Šoštanj',note:'15 km, 400 m n. m.',lat:46.383,lon:15.050,alt:400},
+  {name:'Celje',note:'35 km, 241 m n. m.',lat:46.233,lon:15.267,alt:241},
+  {name:'Logarska dolina',note:'25 km, 838 m n. m.',lat:46.393,lon:14.630,alt:838},
+  {name:'Rogla',note:'45 km, 1517 m n. m.',lat:46.450,lon:15.333,alt:1517},
 ];
 let _surInit=false;
 
@@ -10017,7 +10017,7 @@ async function fetchWUNearby(){
           (wind!=null?'💨 '+wind.toFixed(0)+' km/h  ':'')+
           (rain!=null&&rain>0?'🌧 '+rain.toFixed(1)+' mm/h':'')+
         '</div>'+
-        (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1)+'° vs IREICA1</div>':'');
+        (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1)+'° glede na IREICA1</div>':'');
       grid.appendChild(card);
     });
   }catch(e){
@@ -10060,7 +10060,7 @@ async function initSurroundings(){
             (c.wind_speed_10m!=null?'💨 '+c.wind_speed_10m.toFixed(0)+' km/h':'')+
           '</div>'+
           (diff!=null?'<div class="sur-diff" style="color:'+(diff>0?'var(--red)':'var(--blue)')+'">'+
-            (diff>0?'+':'')+diff.toFixed(1)+'° vs IREICA1</div>':'');
+            (diff>0?'+':'')+diff.toFixed(1)+'° glede na IREICA1</div>':'');
         grid.appendChild(card);
       });
     }
@@ -11225,7 +11225,7 @@ async function buildFingerprint(){
   // Narrative
   if(narr){
     const warm=avgPrecip>1300?'nadpovprečno mokra':'normalno vlažna';
-    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n. v.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
+    narr.textContent=`Postaja IREICA1 na Rečici ob Savinji (366 m n. m.) ima tipično mikroklimatsko sliko savinjske doline: ${frostPerYear} zmrzalnih noči letno, ${rainyPerYear} deževnih dni in ${fogDaysPerYear} meglenih dni — dolina je ${warm} v primerjavi z regijskim povprečjem. Temperaturne inverzije (~${invPerYear} dni/leto) so pogost pojav jeseni in pozimi, ko hladen zrak zaide v dolino. Savinjska regija velja za eno padavinsko bogatejših v Sloveniji, kar potrjuje povprečje ${avgPrecip} mm/leto.`;
   }
 }
 
@@ -14187,7 +14187,7 @@ function runAnomalyScoring(){
     // Run AE inference
     setTimeout(()=>runAEAnomaly(sensors),200);
   }else if(aeNote){
-    aeNote.innerHTML='<strong style="color:var(--text)">Autoencoder — detekcija odmika:</strong> Dostopno po učenju modela LSTM v zavihku Napoved UI.';
+    aeNote.innerHTML='<strong style="color:var(--text)">Autoencoder — detekcija odmika:</strong> Dostopno po učenju modela LSTM v zavihku AI napoved.';
   }
 }
 
@@ -14514,7 +14514,7 @@ async function buildThreeDVar(){
     lons.forEach((lon,i)=>html+=`<text x="${mapX(lon).toFixed(1)}" y="${VH-8}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lon.toFixed(1)}°E</text>`);
     lats.forEach((lat,i)=>html+=`<text x="${pl-4}" y="${mapY(lat).toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${lat.toFixed(1)}°N</text>`);
     svg.innerHTML=html;
-    if(rng)rng.textContent=`Analiza: T_obs=${(_lastBriefObs?.metric?.temp??'—').toString().slice(0,4)}°C · L=80km · σ_B=1.2°C`;
+    if(rng)rng.textContent=`Analiza: T_obs=${(_lastBriefObs?.metric?.temp??'—').toString().slice(0,4)}°C · L = 80 km · σ_B = 1,2 °C`;
   }catch(e){
     svg.innerHTML=`<text x="300" y="150" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">3D-Var API ni dosegljiv.</text>`;
     console.warn('3D-Var:',e);
@@ -14821,7 +14821,7 @@ function buildArsoNormals(curMonthT, curMonthR){
     `<div class="norm-kpi"><div class="norm-kpi-val">${annualT}°C</div><div class="norm-kpi-lbl">Let. srednja T</div></div>`+
     `<div class="norm-kpi"><div class="norm-kpi-val">${annualP} mm</div><div class="norm-kpi-lbl">Let. padavine</div></div>`+
     `<div class="norm-kpi"><div class="norm-kpi-val">${annualSun} h</div><div class="norm-kpi-lbl">Sončne ure/leto</div></div>`+
-    `<div class="norm-kpi"><div class="norm-kpi-val">${N.elev} m</div><div class="norm-kpi-lbl">Nadm. višina</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${N.elev} m</div><div class="norm-kpi-lbl">Nadmorska višina</div></div>`+
     '</div>';
 
   // ── Current month anomaly ───────────────────────────────────
@@ -15590,7 +15590,7 @@ function drawPhaseSpace(){
   const dStep=Math.ceil(maxDPD/5);
   for(let d=0;d<=maxDPD;d+=dStep){const y=mapY(d).toFixed(1);h+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)" stroke-width="0.5"/>`;h+=`<text x="${pl-4}" y="${y}" text-anchor="end" font-size="8.5" fill="rgba(255,255,255,.3)" font-family="monospace" dominant-baseline="middle">${d.toFixed(0)}°</text>`;}
   // Regime labels
-  h+=`<text x="${mapX(maxT-3).toFixed(1)}" y="${mapY(1).toFixed(1)}" font-size="8.5" fill="rgba(251,146,60,.45)" font-family="sans-serif" text-anchor="end">Foehn/sušno</text>`;
+  h+=`<text x="${mapX(maxT-3).toFixed(1)}" y="${mapY(1).toFixed(1)}" font-size="8.5" fill="rgba(251,146,60,.45)" font-family="sans-serif" text-anchor="end">Fen/sušno</text>`;
   h+=`<text x="${mapX(minT+3).toFixed(1)}" y="${mapY(2.5).toFixed(1)}" font-size="8.5" fill="rgba(96,165,250,.45)" font-family="sans-serif">Polarna/vlažna</text>`;
   // Axis labels
   h+=`<text x="${VW/2}" y="${VH-2}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.35)" font-family="sans-serif">Temperatura (°C)</text>`;
@@ -15603,7 +15603,7 @@ function drawPhaseSpace(){
   h+=`<circle cx="${mapX(last.T).toFixed(1)}" cy="${mapY(last.DPD).toFixed(1)}" r="7" fill="#4ade80" stroke="rgba(0,0,0,.4)" stroke-width="2"/>`;
   svg.innerHTML=h;
   const foehn=last.T>18&&last.DPD<3,coldFront=pts.length>3&&(pts[pts.length-1].T-pts[pts.length-4].T)<-3;
-  if(info)info.textContent=`${pts.length}h · T=${last.T.toFixed(1)}°C DPD=${last.DPD.toFixed(1)}°C${foehn?' · 🌬 Foehn?':''}${coldFront?' · 🌨 Fronta?':''}`;
+  if(info)info.textContent=`${pts.length}h · T=${last.T.toFixed(1)}°C DPD=${last.DPD.toFixed(1)}°C${foehn?' · 🌬 Fen?':''}${coldFront?' · 🌨 Fronta?':''}`;
 }
 
 // ── 4. FFT PERIODOGRAM ───────────────────────────────────
@@ -16682,14 +16682,14 @@ function _buildMorjeWind({fc}){
     const dirLbl=dir!=null?_windDirLabel(dir):'—';
     let type='ostalo',cls='sea-ostalo';
     if(dir!=null){
-      if(dir>=30&&dir<=80){type='Bora';cls='sea-bora';}
+      if(dir>=30&&dir<=80){type='Burja';cls='sea-bora';}
       else if(dir>=110&&dir<=190){type='Jugo';cls='sea-jugo';}
     }
     html+=`<tr><td>${dn}</td><td>${spd} km/h</td><td>${gust} km/h</td><td>${dirLbl}</td><td><span class="sea-wind-type ${cls}">${type}</span></td></tr>`;
   }
   html+='</tbody></table>';
   html+=`<div style="margin-top:.65rem;font-size:.7rem;color:var(--muted);line-height:1.6">
-    <b style="color:var(--blue)">Bora</b> — hladen SV veter (30–80°), sunkovit, suh. Tipičen za zimo in pomlad, hitrost do 200 km/h v izjemnih razmerah.<br>
+    <b style="color:var(--blue)">Burja</b> — hladen SV veter (30–80°), sunkovit, suh. Tipičen za zimo in pomlad, hitrost do 200 km/h v izjemnih razmerah.<br>
     <b style="color:var(--amber)">Jugo</b> — topel JV veter (110–190°), vlaži, prinaša visoke valove. Pogost pred in med atlantskimi cikloni.
   </div>`;
   el.innerHTML=html;
@@ -17387,7 +17387,7 @@ ${mlbls}
       <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0"><span class="tp-unit">km/h</span></div></div>
-      <div class="tp-row"><label>🌧 Intenz. dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0"><span class="tp-unit">mm/h</span></div></div>
     </div>
     <div class="tp-footer">
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>
