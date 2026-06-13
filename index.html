@@ -650,7 +650,39 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .ai-arch-lbl{font-size:.61rem;text-transform:uppercase;color:var(--muted);letter-spacing:.07em}
 .ai-train-btn{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:10px;padding:.5rem 1.1rem;color:#fff;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
 .ai-train-btn:hover{opacity:.88}.ai-train-btn:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:680px){.ai-forecast-grid{grid-template-columns:repeat(3,1fr)}}
+/* ── Event nowcast gauges ─────────────────────────────── */
+.ai-event-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+.ai-event-card{border-radius:14px;padding:.85rem .7rem;text-align:center;background:var(--fc-bg);border:1px solid var(--fc-border);position:relative;overflow:hidden;transition:border-color .3s,background .3s}
+.ai-event-card.hot{border-color:var(--ev-col,var(--red));background:color-mix(in srgb,var(--ev-col,var(--red)) 9%,transparent)}
+.ai-event-icon{font-size:1.5rem;line-height:1}
+.ai-event-name{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:.15rem 0 .35rem}
+.ai-event-ring{display:block;margin:0 auto}
+.ai-event-pct{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)}
+.ai-event-when{font-size:.62rem;color:var(--muted);margin-top:.3rem;min-height:1.5em;line-height:1.3}
+.ai-event-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.58rem;border-radius:999px;padding:1px 7px;margin-top:.35rem;border:1px solid var(--ev-col,var(--muted));color:var(--ev-col,var(--muted))}
+/* ── Fan chart + skill scoreboard ─────────────────────── */
+.ai-fan-legend{display:flex;gap:1.1rem;font-size:.68rem;color:var(--muted);margin-top:.5rem;flex-wrap:wrap;align-items:center}
+.ai-fan-swatch{display:inline-block;width:14px;height:10px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.ai-skill-wrap{margin-top:1rem;border-top:1px solid var(--border);padding-top:.85rem}
+.ai-skill-hdr{font-size:.72rem;letter-spacing:.04em;color:var(--muted);font-weight:650;margin-bottom:.6rem}
+.ai-skill-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.ai-skill-name{font-size:.74rem;width:104px;flex-shrink:0;color:var(--text);display:flex;align-items:center;gap:.3rem}
+.ai-skill-bar-bg{flex:1;height:8px;border-radius:5px;background:var(--rain-track);overflow:hidden}
+.ai-skill-bar{height:100%;border-radius:5px;transition:width .6s ease}
+.ai-skill-mae{font-family:'JetBrains Mono',monospace;font-size:.74rem;width:62px;text-align:right;flex-shrink:0;color:var(--text)}
+.ai-skill-verdict{font-size:.72rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+.ai-skill-verdict b{color:var(--text)}
+/* ── Analog days ──────────────────────────────────────── */
+.ai-analog-summary{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;padding:.4rem 0 .2rem}
+.ai-analog-match{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:200;line-height:1;color:var(--purple)}
+.ai-analog-headline{font-size:.82rem;color:var(--text);line-height:1.5;flex:1;min-width:180px}
+.ai-analog-list{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.8rem}
+.ai-analog-card{border-radius:12px;padding:.7rem .65rem;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.ai-analog-date{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--text);font-weight:500}
+.ai-analog-sim{font-size:.6rem;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin:.15rem 0 .4rem}
+.ai-analog-then{font-size:.7rem;color:var(--muted);line-height:1.5}
+.ai-analog-then b{color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:400}
+@media(max-width:680px){.ai-forecast-grid{grid-template-columns:repeat(3,1fr)}.ai-event-grid{grid-template-columns:1fr}.ai-analog-list{grid-template-columns:1fr}}
 .clim-twin-hero{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:1.5rem 1.75rem;border-radius:18px;background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(124,58,237,.07));border:1px solid var(--card-border);margin-bottom:1rem}
 .clim-twin-globe{font-size:3.5rem;flex-shrink:0;line-height:1}
 .clim-twin-info{flex:1;min-width:200px}
@@ -3684,6 +3716,57 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="chart-range" id="ai-loss-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-loss-svg" viewBox="0 0 880 120" style="display:block;width:100%;min-width:420px" height="120"></svg></div>
+    </div>
+
+    <!-- ⚡ Nowcast specifičnih dogodkov (megla / slana / nevihta) -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">⚡ Nowcast dogodkov — naslednjih 8 ur</span>
+        <span class="chart-range" id="ai-event-range">—</span>
+      </div>
+      <div class="ai-event-grid" id="ai-event-grid">
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Računam verjetnosti…</div>
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.55">
+        <strong style="color:var(--text)">Metoda:</strong> Hiperlokalni izpeljani indeksi iz senzorjev postaje in napovedi Open-Meteo —
+        rosiščna razlika (T−Td) za meglo, radiacijsko ohlajanje (jasno nebo + šibak veter) za slano, CAPE in koda vremena za nevihto.
+      </div>
+    </div>
+
+    <!-- 📈 Verjetnostna pahljača + skill semafor -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📈 Verjetnostna pahljača temperature — ansambel</span>
+        <span class="chart-range" id="ai-fan-range">—</span>
+      </div>
+      <div class="ai-loss-wrap"><svg id="ai-fan-svg" viewBox="0 0 880 170" style="display:block;width:100%;min-width:420px" height="170"></svg></div>
+      <div class="ai-fan-legend">
+        <span><span class="ai-fan-swatch" style="background:rgba(124,58,237,.18)"></span>P10–P90 (negotovost)</span>
+        <span><span style="display:inline-block;width:14px;height:2px;background:#a78bfa;vertical-align:middle;margin-right:4px"></span>Mediana (P50)</span>
+        <span id="ai-fan-members" style="opacity:.8"></span>
+      </div>
+      <div class="ai-skill-wrap" id="ai-skill-wrap">
+        <div class="ai-skill-hdr">🏆 Točnost skozi čas — kdo zmaga?</div>
+        <div class="ai-skill-body" id="ai-skill-body">
+          <div style="color:var(--muted);font-size:.74rem">Zbiram dovolj preverjenih napovedi za primerjavo…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔍 Analogni dnevi (k-NN) -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🔍 Analogni dnevi — kaj se je zgodilo prej?</span>
+        <span class="chart-range" id="ai-analog-range">—</span>
+      </div>
+      <div class="ai-analog-summary" id="ai-analog-summary">
+        <div style="color:var(--muted);font-size:.78rem;padding:.5rem 0">Iščem zgodovinsko najbolj podobne dneve…</div>
+      </div>
+      <div class="ai-analog-list" id="ai-analog-list"></div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.55">
+        <strong style="color:var(--text)">Metoda:</strong> k-najbližjih sosedov (k-NN) nad sezonskim oknom (±30 dni) zadnjih treh let iz arhiva Open-Meteo.
+        Trenutno stanje (temperatura, tlak, vlaga, veter in 3-urni trendi) primerja s tisoči preteklih ur in projicira, kako se je vreme razvilo naprej.
+      </div>
     </div>
 
     <!-- Model architecture info -->
@@ -13945,6 +14028,9 @@ async function aiAutoLoad(){
     // Draw seasonal pattern in loss-curve SVG
     _aiDrawSeasonal(hw.seasonal);
     aiDrawComparisonChart();
+    // ── Innovative AI features ──
+    _aiLastHW=hw;
+    aiRunInnovations(hw,temps,obs);
   }finally{_aiTraining=false;}
 }
 
@@ -14003,6 +14089,323 @@ function aiResetModel(){
   const ls=document.getElementById('ai-loss-svg');if(ls)ls.innerHTML='';
   const cs=document.getElementById('ai-compare-svg');if(cs)cs.innerHTML='';
   ['ai-final-loss','ai-pred-acc','ai-trained-at','ai-loss-range','ai-compare-range','ai-fc-range'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+}
+
+// ══════════════════════════════════════════════════════════
+// ── INNOVATIVE AI FEATURES ───────────────────────────────
+//   1) Event nowcast (megla / slana / nevihta)
+//   2) Verjetnostna pahljača (ansambel) + skill semafor
+//   3) Analogni dnevi (k-NN nad sezonskim arhivom)
+// ══════════════════════════════════════════════════════════
+let _aiLastHW=null,_aiAnalogCache=null,_aiNowFc=null;
+const AI_ANALOG_KEY='wx-ai-analog-v1';
+const AI_SKILL_KEY='wx-ai-skill-v1';
+
+function _dewpoint(t,rh){
+  if(t==null||rh==null||rh<=0)return null;
+  const a=17.625,b=243.04,g=Math.log(rh/100)+a*t/(b+t);
+  return b*g/(a-g);
+}
+function _clamp01(x){return x<0?0:x>1?1:x;}
+
+// ── Orchestrator — runs all three innovative features ─────
+async function aiRunInnovations(hw,temps,obs){
+  try{ await aiFetchNowcastForecast(); }catch(e){ console.warn('AI nowcast fc:',e); }
+  try{ aiEventNowcast(); }catch(e){ console.warn('AI event:',e); }
+  try{ aiFanChart(hw,temps); }catch(e){ console.warn('AI fan:',e); }
+  try{ aiLogEnsemblePreds(hw); }catch(e){ console.warn('AI log:',e); }
+  try{ aiRenderSkill(); }catch(e){ console.warn('AI skill:',e); }
+  try{ await aiAnalogDays(obs); }catch(e){ console.warn('AI analog:',e); }
+}
+
+// ── Richer hourly forecast (humidity, dewpoint, cloud, cape) ──
+async function aiFetchNowcastForecast(){
+  if(_aiNowFc&&Date.now()-_aiNowFc.ts<20*60000)return _aiNowFc;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`+
+    `&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,wind_speed_10m,wind_gusts_10m,precipitation_probability,weather_code,cape`+
+    `&timezone=Europe%2FLjubljana&forecast_days=2`;
+  const r=await fetch(url);
+  if(!r.ok)throw new Error('forecast '+r.status);
+  const d=await r.json();const h=d.hourly;if(!h)throw new Error('no hourly');
+  const now=Date.now();
+  const rows=h.time.map((t,i)=>({
+    t:new Date(t).getTime(),
+    temp:h.temperature_2m?.[i],rh:h.relative_humidity_2m?.[i],td:h.dew_point_2m?.[i],
+    cloud:h.cloud_cover?.[i],wind:h.wind_speed_10m?.[i],gust:h.wind_gusts_10m?.[i],
+    prob:h.precipitation_probability?.[i]??0,wmo:h.weather_code?.[i]??0,cape:h.cape?.[i]??0
+  })).filter(x=>x.t>=now-3600000);
+  _aiNowFc={ts:Date.now(),rows};
+  return _aiNowFc;
+}
+
+// ══ 1) EVENT NOWCAST ═════════════════════════════════════
+function aiEventNowcast(){
+  const grid=document.getElementById('ai-event-grid');if(!grid)return;
+  const rng=document.getElementById('ai-event-range');
+  const rows=(_aiNowFc?.rows||[]).slice(0,9);
+  if(rows.length<2){grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Napoved trenutno ni dosegljiva.</div>';return;}
+  const fmtH=ts=>String(new Date(ts).getHours()).padStart(2,'0')+':00';
+  const fog=[],frost=[],storm=[];
+  rows.forEach(r=>{
+    const hh=new Date(r.t).getHours();const isNight=hh>=21||hh<=6;
+    const td=r.td!=null?r.td:_dewpoint(r.temp,r.rh);
+    const spread=(r.temp!=null&&td!=null)?r.temp-td:99;
+    // FOG: small dew spread + high RH + calm; night boost; OM fog codes override
+    let pf=_clamp01((2.2-spread)/2.2)*_clamp01(((r.rh??0)-88)/12)*_clamp01((14-(r.wind??0))/14);
+    if(isNight)pf=_clamp01(pf*1.25+0.05);
+    if(r.wmo>=45&&r.wmo<=48)pf=Math.max(pf,0.85);
+    fog.push(pf);
+    // FROST: near/below 0 air temp; clear sky + calm = radiative; dewpoint sub-zero
+    let pr=0;
+    if(r.temp!=null&&r.temp<=4){
+      const tFac=_clamp01((4-r.temp)/6.5);
+      const clearFac=_clamp01((100-(r.cloud??100))/70);
+      const calmFac=_clamp01((12-(r.wind??0))/12);
+      const dryFac=td!=null?_clamp01((1-td)/4):.5;
+      pr=_clamp01(tFac*(0.45+0.55*clearFac*calmFac)*(0.6+0.4*dryFac));
+      if(r.temp<=0)pr=Math.max(pr,_clamp01(0.6+(0-r.temp)/8));
+    }
+    frost.push(pr);
+    // STORM: thunder codes + CAPE + precip probability
+    const thunder=(r.wmo>=95&&r.wmo<=99)?1:0;
+    const capeFac=_clamp01(((r.cape??0)-300)/2200);
+    const probFac=_clamp01((r.prob-30)/70);
+    let ps=_clamp01(Math.max(thunder?0.7:0,capeFac*0.55+probFac*0.35+capeFac*probFac*0.4));
+    if(thunder)ps=Math.max(ps,0.8);
+    storm.push(ps);
+  });
+  const peak=arr=>{let mi=0;arr.forEach((v,i)=>{if(v>arr[mi])mi=i;});return{p:arr[mi],i:mi};};
+  const defs=[
+    {name:'Megla',  icon:'🌫️',col:'#94a3b8',arr:fog,  onset:'Radiacijska meglica / megla'},
+    {name:'Slana',  icon:'❄️', col:'#60a5fa',arr:frost,onset:'Slana ob jasnem, mirnem vremenu'},
+    {name:'Nevihta',icon:'⛈️', col:'#f59e0b',arr:storm,onset:'Nevihtni potencial (CAPE)'},
+  ];
+  grid.innerHTML=defs.map(d=>{
+    const pk=peak(d.arr);const pct=Math.round(pk.p*100);const hot=pct>=55;
+    const R=22,C=2*Math.PI*R,off=C*(1-pk.p);
+    const whenStr=pct>=15?`vrh ${fmtH(rows[pk.i].t)} (+${pk.i}h)`:'—';
+    const level=pct>=70?'visoko':pct>=45?'zmerno':pct>=20?'nizko':'zanemarljivo';
+    return `<div class="ai-event-card${hot?' hot':''}" style="--ev-col:${d.col}">
+      <div class="ai-event-icon">${d.icon}</div>
+      <div class="ai-event-name">${d.name}</div>
+      <svg class="ai-event-ring" width="58" height="58" viewBox="0 0 58 58">
+        <circle cx="29" cy="29" r="${R}" fill="none" stroke="var(--rain-track)" stroke-width="5"/>
+        <circle cx="29" cy="29" r="${R}" fill="none" stroke="${d.col}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 29 29)"/>
+        <text x="29" y="29" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="13" fill="var(--text)">${pct}%</text>
+      </svg>
+      <div class="ai-event-when">${pct>=15?d.onset:'ni izrazitega tveganja'}</div>
+      <div class="ai-event-when">${whenStr}</div>
+      <div class="ai-event-tag">${level}</div>
+    </div>`;
+  }).join('');
+  if(rng)rng.textContent=`okno ${fmtH(rows[0].t)}–${fmtH(rows[rows.length-1].t)}`;
+}
+
+// ══ 2) PROBABILISTIC FAN CHART ═══════════════════════════
+function aiFanChart(hw,temps){
+  const svg=document.getElementById('ai-fan-svg');if(!svg||!temps?.length)return;
+  const H=AI_OUT_LEN;
+  const now=new Date(),hourNow=now.getHours();
+  const lastT=temps[temps.length-1];
+  const seasonal=hw?.seasonal||null;
+  const members=[],names=[];
+  if(_aiLstmPredictions?.preds?.length>=H){members.push(_aiLstmPredictions.preds.slice(0,H));names.push('Holt-Winters');}
+  const omRows=_aiNowFc?.rows||[];
+  const omNext=[];
+  for(let h=1;h<=H;h++){
+    const target=now.getTime()+h*3600000;
+    const r=omRows.reduce((b,x)=>Math.abs(x.t-target)<Math.abs((b?.t||Infinity)-target)?x:b,null);
+    omNext.push(r&&r.temp!=null?r.temp:null);
+  }
+  if(omNext.every(v=>v!=null)){members.push(omNext);names.push('Open-Meteo');}
+  if(seasonal&&lastT!=null){
+    const persist=[];for(let h=1;h<=H;h++)persist.push(lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]));
+    members.push(persist);names.push('Persistenca+klima');
+  }
+  if(_aiAnalogCache?.projection?.length>=H&&_aiAnalogCache.projection.every(v=>v!=null)){members.push(_aiAnalogCache.projection.slice(0,H));names.push('Analogni dnevi');}
+  if(members.length<2){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo članov ansambla za pahljačo.</text>';return;}
+  const stats=[];
+  for(let h=0;h<H;h++){
+    const vals=members.map(m=>m[h]).filter(v=>v!=null);
+    const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
+    const sd=Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length);
+    const sigma=Math.max(sd,0.3)+0.18*h;
+    stats.push({mean,p10:mean-1.2816*sigma,p90:mean+1.2816*sigma,sigma});
+  }
+  const VW=880,VH=170,pl=40,pr=15,pt=12,pb=26;
+  const all=[lastT,...stats.map(s=>s.p10),...stats.map(s=>s.p90)];
+  const minT=Math.min(...all)-0.5,maxT=Math.max(...all)+0.5;
+  const mapX=i=>pl+(i/H)*(VW-pl-pr);
+  const mapY=v=>pt+(1-(v-minT)/(maxT-minT))*(VH-pt-pb);
+  let html='';
+  const step=Math.max(1,Math.ceil((maxT-minT)/4));
+  for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){const y=mapY(t).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}°</text>`;}
+  const upper=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>[mapX(h+1),mapY(s.p90)])];
+  const lower=[...stats.map((s,h)=>[mapX(h+1),mapY(s.p10)]).reverse(),[mapX(0),mapY(lastT)]];
+  const bandPts=[...upper,...lower].map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  html+=`<polygon points="${bandPts}" fill="rgba(124,58,237,.18)" stroke="none"/>`;
+  const medPts=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>[mapX(h+1),mapY(s.mean)])].map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  html+=`<polyline points="${medPts}" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round"/>`;
+  stats.forEach((s,h)=>{html+=`<circle cx="${mapX(h+1).toFixed(1)}" cy="${mapY(s.mean).toFixed(1)}" r="2.5" fill="#a78bfa"/>`;});
+  for(let h=0;h<=H;h++){html+=`<text x="${mapX(h).toFixed(1)}" y="${VH-7}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${h===0?'zdaj':'+'+h+'h'}</text>`;}
+  svg.innerHTML=html;
+  const rng=document.getElementById('ai-fan-range');
+  const widest=stats[stats.length-1];
+  if(rng)rng.textContent=`±${(1.2816*widest.sigma).toFixed(1)}° pri +6h`;
+  const mem=document.getElementById('ai-fan-members');
+  if(mem)mem.textContent=`${members.length} članov: ${names.join(' · ')}`;
+}
+
+// ── Skill scoreboard: local model vs Open-Meteo ──────────
+function _skillLoad(){try{return JSON.parse(localStorage.getItem(AI_SKILL_KEY))||{pending:[],local:{s:0,n:0},om:{s:0,n:0}};}catch(e){return{pending:[],local:{s:0,n:0},om:{s:0,n:0}};}}
+function _skillSave(s){try{localStorage.setItem(AI_SKILL_KEY,JSON.stringify(s));}catch(e){}}
+function aiLogEnsemblePreds(hw){
+  const curT=_lastBriefObs?.metric?.temp;
+  const st=_skillLoad();const now=Date.now();
+  if(curT!=null){
+    st.pending=st.pending.filter(p=>{
+      if(Math.abs(p.target-now)<40*60000){
+        if(p.local!=null){st.local.s+=Math.abs(p.local-curT);st.local.n++;}
+        if(p.om!=null){st.om.s+=Math.abs(p.om-curT);st.om.n++;}
+        return false;
+      }
+      return p.target>now-3*3600000;
+    });
+  }
+  const localPreds=_aiLstmPredictions?.preds||hw?.preds||[];
+  const omRows=_aiNowFc?.rows||[];
+  for(let h=1;h<=AI_OUT_LEN;h++){
+    const target=now+h*3600000;
+    if(st.pending.some(p=>Math.abs(p.target-target)<40*60000))continue;
+    const r=omRows.reduce((b,x)=>Math.abs(x.t-target)<Math.abs((b?.t||Infinity)-target)?x:b,null);
+    st.pending.push({target,local:localPreds[h-1]??null,om:(r&&r.temp!=null)?r.temp:null});
+  }
+  if(st.pending.length>60)st.pending=st.pending.slice(-60);
+  _skillSave(st);
+}
+function aiRenderSkill(){
+  const body=document.getElementById('ai-skill-body');if(!body)return;
+  const st=_skillLoad();
+  const lMae=st.local.n?st.local.s/st.local.n:null;
+  const oMae=st.om.n?st.om.s/st.om.n:null;
+  const minN=Math.min(st.local.n,st.om.n);
+  if(minN<3||lMae==null||oMae==null){
+    body.innerHTML=`<div style="color:var(--muted);font-size:.74rem;line-height:1.5">Zbiram preverjene napovedi… (${minN}/3 ujemanj). Vsako uro se napoved samodejno primerja z dejansko izmerjeno temperaturo postaje.</div>`;
+    return;
+  }
+  const worst=Math.max(lMae,oMae,0.1);
+  const localWins=lMae<oMae;
+  const bar=(name,emoji,mae,col)=>`<div class="ai-skill-row"><div class="ai-skill-name">${emoji} ${name}</div><div class="ai-skill-bar-bg"><div class="ai-skill-bar" style="width:${Math.round(mae/worst*100)}%;background:${col}"></div></div><div class="ai-skill-mae">${mae.toFixed(2)}°</div></div>`;
+  const pct=oMae>0?Math.round(Math.abs(lMae-oMae)/oMae*100):0;
+  body.innerHTML=
+    bar('Lokalni (HW)','🤖',lMae,localWins?'#34d399':'#a78bfa')+
+    bar('Open-Meteo','🌐',oMae,localWins?'#a78bfa':'#34d399')+
+    `<div class="ai-skill-verdict">${pct<5
+      ? `⚖️ <b>Izenačeno</b> — modela sta praktično enako natančna (${minN} preverjenih napovedi).`
+      : localWins
+      ? `🏆 <b>Hiperlokalni model vodi</b> — povprečna napaka ${pct}% nižja kot Open-Meteo (${minN} preverjenih napovedi).`
+      : `🌐 <b>Open-Meteo vodi</b> za ${pct}% (${minN} preverjenih napovedi). Lokalni model se z več podatki izboljšuje.`}</div>`;
+}
+
+// ══ 3) ANALOG DAYS (k-NN) ════════════════════════════════
+async function aiFetchAnalogArchive(){
+  const dayKey=new Date().toISOString().slice(0,10);
+  try{const c=JSON.parse(localStorage.getItem(AI_ANALOG_KEY));if(c&&c.day===dayKey&&c.rows?.length)return c.rows;}catch(e){}
+  const today=new Date(),rows=[];
+  for(const y of [1,2,3]){
+    const center=new Date(today);center.setFullYear(today.getFullYear()-y);
+    const start=new Date(center.getTime()-30*864e5);
+    let end=new Date(center.getTime()+30*864e5);
+    const maxEnd=new Date(Date.now()-6*864e5);
+    if(end>maxEnd)end=maxEnd;
+    if(end<=start)continue;
+    const sd=start.toISOString().slice(0,10),ed=end.toISOString().slice(0,10);
+    const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LON}`+
+      `&start_date=${sd}&end_date=${ed}`+
+      `&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,surface_pressure`+
+      `&timezone=Europe%2FLjubljana`;
+    try{
+      const r=await fetch(url);if(!r.ok)continue;const d=await r.json();const h=d.hourly;if(!h)continue;
+      h.time.forEach((t,i)=>{
+        const T=h.temperature_2m?.[i];if(T==null)return;
+        rows.push({t,T,rh:h.relative_humidity_2m?.[i]??null,w:h.wind_speed_10m?.[i]??null,r:h.precipitation?.[i]??0,p:h.surface_pressure?.[i]??null});
+      });
+    }catch(e){}
+  }
+  try{localStorage.setItem(AI_ANALOG_KEY,JSON.stringify({day:dayKey,rows}));}catch(e){}
+  return rows;
+}
+async function aiAnalogDays(obs){
+  const sumEl=document.getElementById('ai-analog-summary');
+  const listEl=document.getElementById('ai-analog-list');
+  const rngEl=document.getElementById('ai-analog-range');
+  if(!sumEl)return;
+  const recent=(obs||[]).slice(-4);
+  const cur=recent[recent.length-1];if(!cur){return;}
+  const cm=cur.metric||{};
+  const curT=cm.temp??cm.tempAvg,curRH=cur.humidity??cm.humidityAvg,curW=cm.windSpeed??cm.windspeedAvg,curP=cm.pressure;
+  if(curT==null){sumEl.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni dovolj lokalnih podatkov za analogni izračun.</div>';return;}
+  const t3=recent.length>=4?recent[0].metric?.temp:null;
+  const p3=recent.length>=4?recent[0].metric?.pressure:null;
+  const dT3=(curT!=null&&t3!=null)?curT-t3:0;
+  const dP3=(curP!=null&&p3!=null)?curP-p3:0;
+  const rows=await aiFetchAnalogArchive();
+  if(!rows||rows.length<100){sumEl.innerHTML='<div style="color:var(--muted);font-size:.78rem">Arhiv trenutno ni dosegljiv za analogni izračun.</div>';return;}
+  const recs=rows.map(r=>{const dt=new Date(r.t);return{...r,dt,hour:dt.getHours()};});
+  const byTime=new Map();recs.forEach(r=>byTime.set(r.dt.getTime(),r));
+  const W={T:1/6,P:1/8,RH:1/18,Wind:1/10,dT:1/3,dP:1/4};
+  const hourNow=new Date().getHours();
+  const cand=[];
+  recs.forEach(r=>{
+    if(r.T==null)return;
+    let dh=Math.abs(r.hour-hourNow);if(dh>12)dh=24-dh;
+    if(dh>2)return;
+    const prev=byTime.get(r.dt.getTime()-3*3600000);
+    const rdT=prev&&prev.T!=null?r.T-prev.T:0;
+    const rdP=prev&&prev.p!=null&&r.p!=null?r.p-prev.p:0;
+    let dist=((r.T-curT)*W.T)**2;
+    if(r.p!=null&&curP!=null)dist+=((r.p-curP)*W.P)**2;
+    if(r.rh!=null&&curRH!=null)dist+=((r.rh-curRH)*W.RH)**2;
+    if(r.w!=null&&curW!=null)dist+=((r.w-curW)*W.Wind)**2;
+    dist+=((rdT-dT3)*W.dT)**2+((rdP-dP3)*W.dP)**2+dh*0.04;
+    cand.push({r,dist});
+  });
+  if(cand.length<5){sumEl.innerHTML='<div style="color:var(--muted);font-size:.78rem">Premalo primerljivih analogov.</div>';return;}
+  cand.sort((a,b)=>a.dist-b.dist);
+  const K=Math.min(25,cand.length);const knn=cand.slice(0,K);
+  const proj=new Array(AI_OUT_LEN).fill(0),projN=new Array(AI_OUT_LEN).fill(0);
+  let rainSumAll=0,rainCnt=0;
+  knn.forEach(c=>{
+    let anyRain=0;
+    for(let h=1;h<=AI_OUT_LEN;h++){
+      const fut=byTime.get(c.r.dt.getTime()+h*3600000);
+      if(fut&&fut.T!=null){proj[h-1]+=(fut.T-c.r.T);projN[h-1]++;}
+      if(fut)anyRain+=fut.r||0;
+    }
+    rainSumAll+=anyRain;rainCnt++;
+  });
+  const projection=proj.map((s,h)=>projN[h]?curT+s/projN[h]:null);
+  const avgRain=rainCnt?rainSumAll/rainCnt:0;
+  const sim=dist=>Math.max(0,Math.round((1-Math.min(1,dist/3))*100));
+  const bestSim=sim(knn[0].dist);
+  const endT=projection[projection.length-1];
+  const trendTxt=endT!=null?(endT-curT>0.8?`ogrelo na ~${endT.toFixed(0)}°C`:endT-curT<-0.8?`ohladilo na ~${endT.toFixed(0)}°C`:`ostalo okrog ${endT.toFixed(0)}°C`):'—';
+  const rainTxt=avgRain>=1.5?` z dežjem (povp. ~${avgRain.toFixed(1)} mm)`:avgRain>=0.3?' z rahlimi padavinami':' brez izrazitih padavin';
+  sumEl.innerHTML=`<div class="ai-analog-match">${bestSim}%</div><div class="ai-analog-headline">Najboljše ujemanje s preteklostjo. V <b>${K}</b> najbolj podobnih primerih se je v naslednjih 6 urah vreme ${trendTxt}${rainTxt}.</div>`;
+  const seen=new Set(),top=[];
+  for(const c of knn){const ds=c.r.dt.toISOString().slice(0,10);if(seen.has(ds))continue;seen.add(ds);top.push(c);if(top.length>=3)break;}
+  const fmtDay=dt=>dt.toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
+  if(listEl)listEl.innerHTML=top.map(c=>{
+    let endFut=null,rainSum=0;
+    for(let h=1;h<=AI_OUT_LEN;h++){const f=byTime.get(c.r.dt.getTime()+h*3600000);if(f){if(f.T!=null)endFut=f.T;rainSum+=f.r||0;}}
+    const dTxt=endFut!=null?`${c.r.T.toFixed(0)}° → <b>${endFut.toFixed(0)}°</b>`:`${c.r.T.toFixed(0)}°`;
+    const rTxt=rainSum>=0.3?` · 🌧 ${rainSum.toFixed(1)}mm`:'';
+    return `<div class="ai-analog-card"><div class="ai-analog-date">${fmtDay(c.r.dt)}</div><div class="ai-analog-sim">ujemanje ${sim(c.dist)}% · ${String(c.r.hour).padStart(2,'0')}:00</div><div class="ai-analog-then">Naslednjih 6 h: ${dTxt}${rTxt}</div></div>`;
+  }).join('');
+  if(rngEl)rngEl.textContent=`${recs.length} ur · k=${K}`;
+  _aiAnalogCache={projection,ts:Date.now()};
+  // Re-render fan chart now that the analog ensemble member exists
+  try{aiFanChart(_aiLastHW,(obs||[]).map(o=>o.metric?.temp??o.metric?.tempAvg).filter(v=>v!=null));}catch(e){}
 }
 
 // ══════════════════════════════════════════════════════════
