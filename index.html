@@ -6200,6 +6200,7 @@ function parseWUcsv(rows){
       windspeedHigh:_pf(_col(row,headers,'windhigh','maxwindspeedm','max wind speed (km/h)','wind high','max wind','gust')),
       windspeedAvg: _pf(_col(row,headers,'windavg','meanwindspeedm','avg wind speed (km/h)','wind avg','mean wind')),
       humidityAvg:  _pf(_col(row,headers,'humidityavg','meandewpointm','humidity','avg humidity','hum avg')),
+      _source:'import',
     }};
   });
 }
@@ -6221,6 +6222,7 @@ function parseCumulusDayfile(rows){
       windspeedHigh:_pf(c[1]),
       windspeedAvg: _pf(c[18]),
       humidityAvg:  _pf(c[34])??null,
+      _source:'import',
     }};
   });
 }
@@ -6241,6 +6243,7 @@ function parseGenericCsv(rows){
       windspeedHigh:_pf(_col(row,headers,'gust','windmax','wind_max')),
       windspeedAvg: _pf(_col(row,headers,'windavg','wind_avg','wind')),
       humidityAvg:  _pf(_col(row,headers,'humidity','hum','vlaga')),
+      _source:'import',
     }};
   });
 }
@@ -6383,17 +6386,24 @@ async function fetchArchiveHistory(period){
   }
   const d=data?.daily;
   if(!d?.time?.length) throw lastErr||new Error('Ni podatkov');
-  // Merge with localStorage station data where available
+  // Merge with localStorage station data where available.
+  // Only let stored data override ERA5 when it carries an explicit station/import tag.
+  // Data saved by buildDailySummaries (recent hourly obs) has no _source and must NOT
+  // replace ERA5 archive values, because ERA5 and station peaks are not comparable
+  // (ERA5 grid averages run ~2-4°C below actual station highs, so allowing the override
+  // makes a recent warm day beat genuinely hotter historical dates).
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-  return d.time.map((date,i)=>{
-    const st=stored[date]; // station data takes priority
+  const result=d.time.map((date,i)=>{
+    const raw=stored[date];
+    const st=(raw?._source==='postaja'||raw?._source==='import')?raw:null;
+    const era5Hi=d.temperature_2m_max?.[i];
     return{
       obsTimeLocal:date,
       metric:{
-        tempHigh:   st?.tempHigh   ?? d.temperature_2m_max?.[i]  ?? null,
+        tempHigh:   st?.tempHigh   ?? era5Hi  ?? null,
         tempLow:    st?.tempLow    ?? d.temperature_2m_min?.[i]  ?? null,
-        tempAvg:    st?.tempAvg    ?? (d.temperature_2m_max?.[i]!=null&&d.temperature_2m_min?.[i]!=null
-                                       ?(d.temperature_2m_max[i]+d.temperature_2m_min[i])/2:null),
+        tempAvg:    st?.tempAvg    ?? (era5Hi!=null&&d.temperature_2m_min?.[i]!=null
+                                       ?(era5Hi+d.temperature_2m_min[i])/2:null),
         precipTotal:st?.precipTotal?? d.precipitation_sum?.[i]  ?? 0,
         windspeedHigh:st?.windspeedHigh??d.wind_speed_10m_max?.[i]  ?? null,
         windspeedAvg: st?.windspeedAvg ??d.wind_speed_10m_mean?.[i] ?? null,
@@ -6402,6 +6412,15 @@ async function fetchArchiveHistory(period){
       }
     };
   }).filter(s=>s.metric.tempHigh!=null);
+  // Include station data from localStorage for dates after the ERA5 archive cutoff
+  // (very recent days that Open-Meteo hasn't processed yet).
+  const lastArchiveDate=d.time.length?d.time[d.time.length-1]:'';
+  const seen=new Set(result.map(s=>s.obsTimeLocal));
+  Object.entries(stored)
+    .filter(([k])=>k>lastArchiveDate&&k>=r.start&&k<=r.end&&!seen.has(k))
+    .filter(([,m])=>m.tempHigh!=null)
+    .forEach(([k,m])=>result.push({obsTimeLocal:k,metric:{...m,_source:m._source||'postaja'}}));
+  return result;
 }
 
 async function switchPeriod(period){
@@ -6423,7 +6442,7 @@ async function switchPeriod(period){
     const summaries=await fetchArchiveHistory(period);
     const stationDays=summaries.filter(s=>s.metric._source==='postaja').length;
     _histCache[period]={data:summaries,ts:Date.now(),stationDays};
-    saveToLocalHistory(summaries.filter(s=>s.metric._source==='postaja'||true)); // store ERA5 too for future
+    saveToLocalHistory(summaries.filter(s=>s.metric._source==='postaja')); // only actual station data
     applyHistory(summaries);
     _showArchiveNote(period,stationDays,summaries.length);
   }catch(e){
