@@ -1194,14 +1194,14 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
 /* Tabs */
-.tab-nav-wrap{position:relative;margin-bottom:1.5rem}
-.tab-nav-wrap::after{content:'';position:absolute;top:0;right:0;width:48px;height:100%;background:linear-gradient(to right,transparent,var(--bg) 85%);pointer-events:none;transition:opacity .3s;z-index:2}
+.tab-nav-wrap{position:relative;margin-bottom:1.5rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:.35rem .4rem;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 1px 5px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.06)}
+.tab-nav-wrap::after{content:'';position:absolute;top:0;right:0;width:56px;height:100%;background:linear-gradient(to right,transparent,var(--card-bg) 80%);pointer-events:none;border-radius:0 16px 16px 0;transition:opacity .3s;z-index:2}
 .tab-nav-wrap.at-end::after{opacity:0}
-.tab-nav{display:flex;flex-wrap:wrap;gap:.35rem;padding-bottom:.4rem;align-items:center}
+.tab-nav{display:flex;flex-wrap:wrap;gap:.2rem;align-items:center}
 /* Dropdown container */
 .tab-dropdown{position:relative}
 .tab-dd-trigger{display:flex;align-items:center;gap:.3rem}
-.tab-dd-trigger.dd-active{background:var(--blue);color:#fff;border-color:var(--blue);opacity:1}
+.tab-dd-trigger.dd-active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(29,78,216,.28)}
 /* Dropdown menu */
 .tab-dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;
   background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
@@ -1219,13 +1219,15 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .tab-dd-menu button:hover{background:var(--fc-bg)}
 .tab-dd-menu button.active{background:var(--blue);color:#fff}
 @media(max-width:760px){
+  .tab-nav-wrap{border-radius:14px;padding:.3rem .35rem}
   .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
 }
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.4;opacity:.75}
-.tab-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 4px 14px rgba(37,99,235,.3);opacity:1}
-.tab-btn:hover:not(.active){border-color:var(--blue);color:var(--blue);opacity:1}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.38rem .78rem;border-radius:10px;border:none;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s,transform .1s;line-height:1.4}
+.tab-btn.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(29,78,216,.28),0 1px 2px rgba(0,0,0,.1)}
+.tab-btn:hover:not(.active){background:var(--border);color:var(--text)}
+.tab-btn:active:not(.active){transform:scale(.97)}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* History table */
@@ -6200,6 +6202,7 @@ function parseWUcsv(rows){
       windspeedHigh:_pf(_col(row,headers,'windhigh','maxwindspeedm','max wind speed (km/h)','wind high','max wind','gust')),
       windspeedAvg: _pf(_col(row,headers,'windavg','meanwindspeedm','avg wind speed (km/h)','wind avg','mean wind')),
       humidityAvg:  _pf(_col(row,headers,'humidityavg','meandewpointm','humidity','avg humidity','hum avg')),
+      _source:'import',
     }};
   });
 }
@@ -6221,6 +6224,7 @@ function parseCumulusDayfile(rows){
       windspeedHigh:_pf(c[1]),
       windspeedAvg: _pf(c[18]),
       humidityAvg:  _pf(c[34])??null,
+      _source:'import',
     }};
   });
 }
@@ -6241,6 +6245,7 @@ function parseGenericCsv(rows){
       windspeedHigh:_pf(_col(row,headers,'gust','windmax','wind_max')),
       windspeedAvg: _pf(_col(row,headers,'windavg','wind_avg','wind')),
       humidityAvg:  _pf(_col(row,headers,'humidity','hum','vlaga')),
+      _source:'import',
     }};
   });
 }
@@ -6383,17 +6388,24 @@ async function fetchArchiveHistory(period){
   }
   const d=data?.daily;
   if(!d?.time?.length) throw lastErr||new Error('Ni podatkov');
-  // Merge with localStorage station data where available
+  // Merge with localStorage station data where available.
+  // Only let stored data override ERA5 when it carries an explicit station/import tag.
+  // Data saved by buildDailySummaries (recent hourly obs) has no _source and must NOT
+  // replace ERA5 archive values, because ERA5 and station peaks are not comparable
+  // (ERA5 grid averages run ~2-4°C below actual station highs, so allowing the override
+  // makes a recent warm day beat genuinely hotter historical dates).
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-  return d.time.map((date,i)=>{
-    const st=stored[date]; // station data takes priority
+  const result=d.time.map((date,i)=>{
+    const raw=stored[date];
+    const st=(raw?._source==='postaja'||raw?._source==='import')?raw:null;
+    const era5Hi=d.temperature_2m_max?.[i];
     return{
       obsTimeLocal:date,
       metric:{
-        tempHigh:   st?.tempHigh   ?? d.temperature_2m_max?.[i]  ?? null,
+        tempHigh:   st?.tempHigh   ?? era5Hi  ?? null,
         tempLow:    st?.tempLow    ?? d.temperature_2m_min?.[i]  ?? null,
-        tempAvg:    st?.tempAvg    ?? (d.temperature_2m_max?.[i]!=null&&d.temperature_2m_min?.[i]!=null
-                                       ?(d.temperature_2m_max[i]+d.temperature_2m_min[i])/2:null),
+        tempAvg:    st?.tempAvg    ?? (era5Hi!=null&&d.temperature_2m_min?.[i]!=null
+                                       ?(era5Hi+d.temperature_2m_min[i])/2:null),
         precipTotal:st?.precipTotal?? d.precipitation_sum?.[i]  ?? 0,
         windspeedHigh:st?.windspeedHigh??d.wind_speed_10m_max?.[i]  ?? null,
         windspeedAvg: st?.windspeedAvg ??d.wind_speed_10m_mean?.[i] ?? null,
@@ -6402,6 +6414,15 @@ async function fetchArchiveHistory(period){
       }
     };
   }).filter(s=>s.metric.tempHigh!=null);
+  // Include station data from localStorage for dates after the ERA5 archive cutoff
+  // (very recent days that Open-Meteo hasn't processed yet).
+  const lastArchiveDate=d.time.length?d.time[d.time.length-1]:'';
+  const seen=new Set(result.map(s=>s.obsTimeLocal));
+  Object.entries(stored)
+    .filter(([k])=>k>lastArchiveDate&&k>=r.start&&k<=r.end&&!seen.has(k))
+    .filter(([,m])=>m.tempHigh!=null)
+    .forEach(([k,m])=>result.push({obsTimeLocal:k,metric:{...m,_source:m._source||'postaja'}}));
+  return result;
 }
 
 async function switchPeriod(period){
@@ -6423,7 +6444,7 @@ async function switchPeriod(period){
     const summaries=await fetchArchiveHistory(period);
     const stationDays=summaries.filter(s=>s.metric._source==='postaja').length;
     _histCache[period]={data:summaries,ts:Date.now(),stationDays};
-    saveToLocalHistory(summaries.filter(s=>s.metric._source==='postaja'||true)); // store ERA5 too for future
+    saveToLocalHistory(summaries.filter(s=>s.metric._source==='postaja')); // only actual station data
     applyHistory(summaries);
     _showArchiveNote(period,stationDays,summaries.length);
   }catch(e){
