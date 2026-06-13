@@ -6367,11 +6367,22 @@ async function fetchArchiveHistory(period){
     +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,'
     +'wind_speed_10m_max,wind_speed_10m_mean,relative_humidity_2m_mean'
     +'&timezone=Europe%2FLjubljana';
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('Open-Meteo HTTP '+res.status);
-  const data=await res.json();
-  const d=data.daily;
-  if(!d?.time?.length) throw new Error('Ni podatkov');
+  // Route through the throttled/cached archive queue to avoid Open-Meteo
+  // "Too many concurrent requests" (429), which previously made the 5-year
+  // fetch fail and silently fall back to recent-only localStorage data.
+  let data=null,lastErr=null;
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      data=await _archFetch(url);
+      if(data?.daily?.time?.length)break;
+      lastErr=new Error(data?.reason||'Ni podatkov');
+    }catch(e){lastErr=e;}
+    delete _archCache[url]; // bust cached error so the retry actually refetches
+    data=null;
+    await new Promise(res=>setTimeout(res,800*(attempt+1)));
+  }
+  const d=data?.daily;
+  if(!d?.time?.length) throw lastErr||new Error('Ni podatkov');
   // Merge with localStorage station data where available
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   return d.time.map((date,i)=>{
@@ -6417,11 +6428,14 @@ async function switchPeriod(period){
     _showArchiveNote(period,stationDays,summaries.length);
   }catch(e){
     console.warn('Archive fetch failed:',e);
-    // Final fallback: localStorage only
+    // Final fallback: localStorage only — note this covers only locally
+    // accumulated days, so records (e.g. max temp) may be incomplete.
     const stored=getLocalHistory(period);
     if(stored.length){
       applyHistory(stored);
-      updateAccumInfo(stored.length,localHistoryDays());
+      const el=document.getElementById('hist-accum-info');
+      if(el)el.textContent='⚠️ Arhiv ni dosegljiv — prikazani so le lokalno shranjeni dnevi ('+stored.length+'). Rekordi so lahko nepopolni.';
+      else updateAccumInfo(stored.length,localHistoryDays());
     }else{
       showHistErr('Napaka pri nalaganju: '+e.message);
     }
