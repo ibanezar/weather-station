@@ -249,7 +249,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}
 .sskj-entry .sskj-gram{font-style:normal;opacity:.78}
 .sskj-entry .sskj-def{font-style:italic}
-.status{display:flex;align-items:center;justify-content:center;gap:1.75rem;padding:.6rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
+.status{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.6rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
 .dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -1125,11 +1125,11 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .visitor-counter.loaded{animation:vc-in .4s ease}
 
 /* News ticker */
-.ticker-wrap{display:flex;align-items:center;height:34px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:1.25rem;overflow:hidden}
+.ticker-wrap{display:flex;align-items:center;height:28px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;box-shadow:var(--card-shadow);margin-bottom:1.25rem;overflow:hidden}
 .ticker-tag{flex-shrink:0;background:var(--blue);color:#fff;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:0 .9rem;height:100%;display:flex;align-items:center;white-space:nowrap;border-radius:9px 0 0 9px}
 .ticker-divider{width:1px;height:60%;background:var(--card-border);flex-shrink:0;margin:0 .1rem}
 .ticker-track{flex:1;overflow:hidden;position:relative;height:100%;display:flex;align-items:center}
-.ticker-inner{display:flex;align-items:center;white-space:nowrap;font-size:.75rem;color:var(--text);padding-left:1.5rem;animation:ticker-scroll 45s linear infinite;will-change:transform}
+.ticker-inner{display:flex;align-items:center;white-space:nowrap;font-size:.72rem;color:var(--muted);padding-left:1.5rem;animation:ticker-scroll 45s linear infinite;will-change:transform}
 .ticker-inner:hover{animation-play-state:paused}
 .ticker-item{display:inline-flex;align-items:center;gap:.3rem}
 .ticker-dot{color:var(--fc-border);margin:0 .8rem;opacity:.6;font-size:.6rem}
@@ -1355,9 +1355,9 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .yesterday-delta .dv{font-family:'JetBrains Mono',monospace;font-weight:400}
 
 /* Share & install buttons */
-.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s;line-height:1.5}
-.share-btn:hover{border-color:var(--blue);color:var(--blue)}
-.install-btn{display:none;align-items:center;gap:.4rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif}
+.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;justify-content:center}
+.share-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(77,159,248,.08)}
+.install-btn{display:none;align-items:center;justify-content:center;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif}
 .install-btn.show{display:inline-flex}
 
 /* Toast */
@@ -1485,7 +1485,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .clim-fill{width:100%;border-radius:4px 4px 0 0;transition:height .8s ease}
 .clim-lbl{font-size:.76rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 /* Notification button */
-.notif-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:.76rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s;color:var(--muted);line-height:1.5}
+.notif-btn{background:none;border:1px solid var(--border);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;color:var(--muted);display:inline-flex;align-items:center;justify-content:center}
+.notif-btn:hover{background:rgba(77,159,248,.08);border-color:var(--border)}
 .notif-btn.on{border-color:var(--green);color:var(--green)}
 
 
@@ -2043,17 +2044,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <h1>Meteo<em>rec</em></h1>
     <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <hr class="header-rule">
-    <p class="sub-loc">Savinjska regija · Slovenija · 46,326° N, 14,921° E · 366 m n. m.</p>
+    <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
   </header>
 
   <div class="status">
     <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje …</span></span>
     <span>Posodobljeno: <span id="updated">—</span></span>
     <span id="local-time">—</span>
-    <button class="share-btn" onclick="shareWeather()">⬆ Deli</button>
-    <button class="install-btn" id="install-btn" onclick="installApp()">📲 Namesti aplikacijo</button>
-    <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔 Obvestila</button>
-    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Nastavi lastna opozorila">⚙ Moja opozorila</button>
+    <button class="share-btn" onclick="shareWeather()" title="Deli">⬆</button>
+    <button class="install-btn" id="install-btn" onclick="installApp()" title="Namesti aplikacijo">📲</button>
+    <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔</button>
+    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Moja opozorila">⚙</button>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -2077,7 +2078,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
-    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Meteo za zahtevne</button>
+    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -2100,8 +2101,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
   <!-- ══ NEWS TICKER ══ -->
   <div class="ticker-wrap" id="ticker-wrap">
-    <div class="ticker-tag">📡 IREICA1</div>
-    <div class="ticker-divider"></div>
     <div class="ticker-track">
       <div class="ticker-inner" id="ticker-inner">
         <span class="ticker-item" style="color:var(--muted)">Nalagam podatke…</span>
