@@ -4225,6 +4225,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
       </div>
       <div class="sc-risk-factors" id="gobe-suit-factors"></div>
+      <div class="sc-risk-scrub">
+        <div class="sc-risk-scrub-head">
+          <span class="clabel" style="margin:0">🗓 Napoved obrodnosti naprej:</span>
+          <span class="sc-risk-scrub-time" id="gobe-day-time">danes</span>
+        </div>
+        <input type="range" class="sc-scrub-range" id="gobe-day-range" min="0" max="13" value="0" step="1" oninput="scSetGobeDay(this.value)" aria-label="Premik napovedi obrodnosti naprej v dnevih">
+        <div class="sc-scrub-ticks"><span>danes</span><span>+3 d</span><span>+7 d</span><span>+10 d</span><span>+13 d</span></div>
+      </div>
     </div>
 
     <!-- 14-day fruiting outlook -->
@@ -18083,7 +18091,7 @@ const GOBE_SPOTS=[
   {name:'Golte',              lat:46.348, lon:14.840, elev:'≈1300 m'},
   {name:'Smrekovško pogorje', lat:46.430, lon:14.860, elev:'≈1300 m'},
 ];
-let _gobeInit=false,_gobeCache=null,_gobeCacheT=0;
+let _gobeInit=false,_gobeCache=null,_gobeCacheT=0,_gobeDayOffset=0,_gobePrimaryAgg=null;
 
 async function initGobe(){
   if(_gobeInit&&_gobeCache){_renderGobe();return;}
@@ -18158,24 +18166,37 @@ function _gobeLevel(p){
 function _renderGobe(){
   if(!_gobeCache||!_gobeCache.length)return;
   const aggs=_gobeCache.map(_gobeDailyAgg);
+  _gobePrimaryAgg=aggs[0];
   _buildGobeMain(_gobeCache[0],aggs[0]);
   _buildGobeStrip(_gobeCache[0],aggs[0]);
   _buildGobeSpots(_gobeCache,aggs);
   _buildGobeSpecies(_gobeCache[0],aggs[0]);
+}
+function scSetGobeDay(v){
+  _gobeDayOffset=Math.max(0,Math.min(13,parseInt(v,10)||0));
+  if(_gobeCache&&_gobeCache.length&&_gobePrimaryAgg){
+    _buildGobeMain(_gobeCache[0],_gobePrimaryAgg);
+    _buildGobeStrip(_gobeCache[0],_gobePrimaryAgg);
+  }
 }
 
 function _buildGobeMain(loc,agg){
   const g=id=>document.getElementById(id);
   const card=g('gobe-suit-card');if(!card)return;
   const d=loc.daily||{},ti=_gobeTodayIdx(loc);
-  const inp=_gobeInputs(loc,agg,ti);
+  const i=Math.min(ti+_gobeDayOffset,(d.time||[]).length-1);
+  const inp=_gobeInputs(loc,agg,i);
   const pct=_gobeScore(inp);
   const lv=_gobeLevel(pct);
   card.className='card sc-risk-card '+lv.cls;
-  // days since last good rain (≥5 mm)
-  let dsr=null;for(let k=ti;k>=0;k--){if((d.precipitation_sum?.[k]??0)>=5){dsr=ti-k;break;}}
-  // rain over last 14 days
-  let rain14=0;for(let k=ti-13;k<=ti;k++){if(k>=0)rain14+=(d.precipitation_sum?.[k]??0);}
+  // days since last good rain (≥5 mm), relative to the selected day
+  let dsr=null;for(let k=i;k>=0;k--){if((d.precipitation_sum?.[k]??0)>=5){dsr=i-k;break;}}
+  // rain over the 14 days up to the selected day
+  let rain14=0;for(let k=i-13;k<=i;k++){if(k>=0)rain14+=(d.precipitation_sum?.[k]??0);}
+  // Slider label + sync
+  const tEl=document.getElementById('gobe-day-time'),dt=d.time?.[i]?new Date(d.time[i]):null;
+  if(tEl){const dl=['ned','pon','tor','sre','čet','pet','sob'];tEl.textContent=_gobeDayOffset===0?'danes':(dt?`${dl[dt.getDay()]} ${dt.getDate()}.${dt.getMonth()+1}.`:'')+` · +${_gobeDayOffset} d`;}
+  const rng=document.getElementById('gobe-day-range');if(rng&&+rng.value!==_gobeDayOffset)rng.value=_gobeDayOffset;
   const desc=pct>=75?'Odlične razmere — tla vlažna in topla, gobe so verjetno v polni rasti.'
     :pct>=55?'Dobre razmere za gobe. Po izdatnem dežju je smiselno na lov.'
     :pct>=35?'Zmerne razmere — posamezne gobe možne, predvsem v vlažnih legah.'
@@ -18207,7 +18228,7 @@ function _buildGobeStrip(loc,agg){
     if(pct>best){best=pct;bestIdx=i;}
     const col=_gobeColor(pct),ht=Math.max(4,Math.round(pct/100*60));
     const dt=new Date(d.time[i]);
-    html+=`<div class="sc-risk-cell" title="${d.time[i]}: ${pct} %">`+
+    html+=`<div class="sc-risk-cell${k===_gobeDayOffset?' active':''}" onclick="scSetGobeDay(${k})" title="${d.time[i]}: ${pct} %">`+
       `<div class="sc-risk-cell-pct">${pct}</div>`+
       `<div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div>`+
       `<div class="sc-risk-cell-hr">${k===0?'danes':days[dt.getDay()]}</div></div>`;
