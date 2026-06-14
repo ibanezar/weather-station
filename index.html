@@ -18506,8 +18506,8 @@ function _renderActHour(key){
   if(tEl&&dt){const hh=String(dt.getHours()).padStart(2,'0');tEl.textContent=off===0?`zdaj · ${hh}:00`:`${['ned','pon','tor','sre','čet','pet','sob'][dt.getDay()]} ${hh}:00 · +${off} h`;}
   const rng=document.getElementById(key+'-range');if(rng&&+rng.value!==off)rng.value=off;
   const strip=document.getElementById(key+'-strip');
-  if(strip){let html='';for(let k=0;k<24;k++){const i=Math.min(nowIdx+k,t.length-1);const p=_actEval(key,h,i).pct;const col=_gobeColor(p),ht=Math.max(4,Math.round(p/100*60)),dd=t[i];const lbl=k===0?'zdaj':(dd.getHours()%3===0?dd.getHours():'');
-    html+=`<div class="sc-risk-cell${k===off?' active':''}" onclick="actSlide('${key}',${k})" title="+${k} h: ${p} %"><div class="sc-risk-cell-pct">${p}</div><div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div><div class="sc-risk-cell-hr">${lbl}</div></div>`;}
+  if(strip){let html='';for(let k=0;k<24;k++){const i=Math.min(nowIdx+k,t.length-1);const p=_actEval(key,h,i).pct;const col=_gobeColor(p),ht=Math.max(4,Math.round(p/100*60)),dd=t[i];const lbl=k===0?'zdaj':(dd.getHours()%3===0?String(dd.getHours()).padStart(2,'0'):'');
+    html+=`<div class="sc-risk-cell${k===off?' active':''}" onclick="actSlide('${key}',${k})" title="+${k} h: ${p} %"><div class="sc-risk-cell-pct">${p>0?p:''}</div><div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div><div class="sc-risk-cell-hr">${lbl}</div></div>`;}
     strip.innerHTML=html;
     const ac=strip.children[off];if(ac)strip.scrollLeft=ac.offsetLeft-strip.clientWidth/2+ac.offsetWidth/2;}
 }
