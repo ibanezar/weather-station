@@ -810,6 +810,17 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-hail-factor b{display:block;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:400;color:var(--text)}
 .sc-hail-factor small{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .sc-hail-factor span{display:block;font-size:.64rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
+.sc-hail-scrub{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border)}
+.sc-hail-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
+.sc-hail-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
+.sc-hail-scrub .sc-scrub-range{background:linear-gradient(90deg,#38bdf8,#fbbf24,#f87171)}
+.sc-hail-strip{display:flex;gap:3px;align-items:flex-end;margin-top:.8rem;height:96px}
+.sc-hail-cell{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem;cursor:pointer;height:100%;border-radius:6px;padding:.2rem 0;transition:background .2s}
+.sc-hail-cell:hover{background:rgba(255,255,255,.06)}
+.sc-hail-cell.active{background:rgba(255,255,255,.1);outline:1px solid var(--cyan)}
+.sc-hail-cell-pct{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)}
+.sc-hail-cell-bar{width:62%;min-height:3px;border-radius:3px 3px 0 0;transition:height .5s ease,background .3s}
+.sc-hail-cell-hr{font-size:.55rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
 .sc-threat-tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
@@ -3338,6 +3349,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
       </div>
       <div class="sc-hail-factors" id="sc-hail-factors"></div>
+      <div class="sc-hail-scrub">
+        <div class="sc-hail-scrub-head">
+          <span class="clabel" style="margin:0">🕐 Napoved toče naprej:</span>
+          <span class="sc-hail-scrub-time" id="sc-hail-time">zdaj</span>
+        </div>
+        <input type="range" class="sc-scrub-range" id="sc-hail-range" min="0" max="12" value="0" step="1" oninput="scSetHailHour(this.value)" aria-label="Premik napovedi toče naprej v urah">
+        <div class="sc-scrub-ticks"><span>zdaj</span><span>+3 h</span><span>+6 h</span><span>+9 h</span><span>+12 h</span></div>
+        <div class="sc-hail-strip" id="sc-hail-strip"></div>
+      </div>
     </div>
 
     <!-- Sounding Analysis (Showalter, CIN, Mixing height) -->
@@ -12388,6 +12408,58 @@ function renderHailRisk(cape,li,freeze,shear,tt){
   ];
   if(g('sc-hail-factors'))g('sc-hail-factors').innerHTML=factors.map(f=>`<div class="sc-hail-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
 }
+// Extract the hail-relevant indices from the storm dataset at a given hour index
+function scHailInputs(d,ci){
+  const cape=scIdx(d.cape,ci)??0,li=scIdx(d.lifted_index,ci)??0;
+  const freeze=scIdx(d.freezing_level_height,ci)??3000;
+  const ws10=scIdx(d.wind_speed_10m,ci)??0,wd10=scIdx(d.wind_direction_10m,ci)??0;
+  const ws500=scIdx(d.wind_speed_500hPa,ci)??ws10,wd500=scIdx(d.wind_direction_500hPa,ci)??wd10;
+  const uv0=scUV(ws10,wd10),uv5=scUV(ws500,wd500);
+  const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2)||0;
+  const T850=scIdx(d.temperature_850hPa,ci)??10,rh850=scIdx(d.relative_humidity_850hPa,ci)??60;
+  const T500=scIdx(d.temperature_500hPa,ci)??-15,Td850=scMagnus(T850,rh850);
+  const tt=isFinite(T850+Td850-2*T500)?T850+Td850-2*T500:0;
+  return{cape,li,freeze,shear,tt};
+}
+function hailColor(pct){
+  if(pct>=70)return'#f87171';if(pct>=45)return'#fb923c';if(pct>=25)return'#fbbf24';if(pct>=10)return'#38bdf8';return'#64748b';
+}
+// Dedicated 0–12 h hail slider + 12-hour outlook strip
+let _scHailOffset=0;
+function renderHailForOffset(){
+  if(!_scData)return;
+  const d=_scData,now=new Date();
+  const times=(d.time||[]).map(t=>new Date(t));
+  if(!times.length)return;
+  let ciNow=times.findIndex(t=>t>=now)-1;if(ciNow<0)ciNow=0;
+  const ci=Math.min(ciNow+_scHailOffset,times.length-1);
+  const inp=scHailInputs(d,ci);
+  renderHailRisk(inp.cape,inp.li,inp.freeze,inp.shear,inp.tt);
+  // Slider time label
+  const tEl=document.getElementById('sc-hail-time'),t=times[ci];
+  if(tEl&&t){const dl=['ned','pon','tor','sre','čet','pet','sob'][t.getDay()];const hh=String(t.getHours()).padStart(2,'0');tEl.textContent=_scHailOffset===0?`zdaj · ${hh}:00`:`${dl} ${hh}:00 · +${_scHailOffset} h`;}
+  const rng=document.getElementById('sc-hail-range');if(rng&&+rng.value!==_scHailOffset)rng.value=_scHailOffset;
+  // 12-hour outlook strip
+  const strip=document.getElementById('sc-hail-strip');
+  if(strip){
+    let html='';
+    for(let k=0;k<=12;k++){
+      const idx=Math.min(ciNow+k,times.length-1);
+      const pct=calcHailRisk(...Object.values(scHailInputs(d,idx))).pct;
+      const col=hailColor(pct);
+      const ht=Math.max(4,Math.round(pct/100*60));
+      html+=`<div class="sc-hail-cell${k===_scHailOffset?' active':''}" onclick="scSetHailHour(${k})" title="+${k} h: ${pct} %">`+
+        `<div class="sc-hail-cell-pct">${pct}</div>`+
+        `<div class="sc-hail-cell-bar" style="height:${ht}px;background:${col}"></div>`+
+        `<div class="sc-hail-cell-hr">${k===0?'zdaj':'+'+k}</div></div>`;
+    }
+    strip.innerHTML=html;
+  }
+}
+function scSetHailHour(v){
+  _scHailOffset=Math.max(0,Math.min(12,parseInt(v,10)||0));
+  renderHailForOffset();
+}
 function renderStormChaser(){
   if(!_scData)return;
   const d=_scData,now=new Date();
@@ -12418,8 +12490,8 @@ function renderStormChaser(){
   const uv0=scUV(ws10||0,wd10||0),uv5=scUV(ws500||0,wd500||0);
   const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2)||0;
   const pwat=Math.max(5,Math.round((Td2+20)*0.8+rh850*0.1));
-  // Hail risk
-  try{renderHailRisk(cape,li,freeze,shear,tt);}catch(e){console.warn('Hail:',e);}
+  // Hail risk (driven by its own 0–12 h slider)
+  try{renderHailForOffset();}catch(e){console.warn('Hail:',e);}
   // Threat
   const thr=calcStormThreat(cape,cin,li,tt,shear);
   const hero=g('sc-hero');if(hero)hero.className='sc-hero '+thr.cls;
