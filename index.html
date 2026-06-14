@@ -783,6 +783,33 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-slomap-note{font-size:.64rem;color:var(--muted);margin-top:.4rem;line-height:1.5}
 .sc-slomap-pop{font-family:'Inter',sans-serif;font-size:.72rem;line-height:1.5}
 .sc-slomap-pop b{font-family:'JetBrains Mono',monospace}
+/* Hail risk card */
+.sc-hail-card{border:1px solid;transition:all .5s}
+.sc-hail-card.sc-hail-none{background:rgba(71,85,105,.12);border-color:rgba(71,85,105,.3)}
+.sc-hail-card.sc-hail-low{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35)}
+.sc-hail-card.sc-hail-moderate{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.sc-hail-card.sc-hail-high{background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.5)}
+.sc-hail-card.sc-hail-extreme{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.6)}
+.sc-hail-head{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.sc-hail-icon{font-size:2.4rem;line-height:1}
+.sc-hail-text{flex:1;min-width:180px;display:flex;flex-direction:column;gap:.2rem}
+.sc-hail-level{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;letter-spacing:.05em}
+.sc-hail-none .sc-hail-level{color:var(--muted)}
+.sc-hail-low .sc-hail-level{color:#38bdf8}
+.sc-hail-moderate .sc-hail-level{color:#fbbf24}
+.sc-hail-high .sc-hail-level{color:#fb923c}
+.sc-hail-extreme .sc-hail-level{color:#f87171}
+.sc-hail-desc{font-size:.74rem;color:var(--muted);line-height:1.5;max-width:480px}
+.sc-hail-gauge{text-align:center;min-width:120px}
+.sc-hail-pct{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:300;color:var(--text)}
+.sc-hail-bar{height:7px;border-radius:4px;background:var(--fc-border);overflow:hidden;margin:.35rem 0 .25rem}
+.sc-hail-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#fbbf24,#f87171);transition:width .7s ease}
+.sc-hail-gauge-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.sc-hail-factors{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-top:1rem}
+.sc-hail-factor{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.55rem .7rem}
+.sc-hail-factor b{display:block;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:400;color:var(--text)}
+.sc-hail-factor small{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sc-hail-factor span{display:block;font-size:.64rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
 .sc-threat-tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
@@ -3293,6 +3320,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="card ca-blue"><div class="clabel">💧 Padavinska voda</div><div class="sc-idx-val" id="sc-pwat">—</div><div class="sc-idx-desc" id="sc-pwat-desc">—</div></div>
       <div class="card ca-green"><div class="clabel">📈 K-indeks</div><div class="sc-idx-val" id="sc-ki">—</div><div class="sc-idx-bar"><div class="sc-idx-fill" id="sc-ki-bar" style="width:0%;background:#4ade80"></div></div><div class="sc-idx-desc" id="sc-ki-desc">—</div></div>
       <div class="card ca-purple"><div class="clabel">💨 Striženje vetra 0–6 km</div><div class="sc-idx-val" id="sc-shear">—</div><div class="sc-idx-desc" id="sc-shear-desc">—</div></div>
+    </div>
+
+    <!-- Hail risk — Rečica ob Savinji -->
+    <div class="card sc-hail-card sc-hail-none" id="sc-hail-card" style="margin-bottom:1rem">
+      <div class="sc-hail-head">
+        <span class="sc-hail-icon" id="sc-hail-icon">🧊</span>
+        <div class="sc-hail-text">
+          <div class="clabel" style="margin:0">🧊 Možnost toče — Rečica ob Savinji</div>
+          <div class="sc-hail-level" id="sc-hail-level">—</div>
+          <div class="sc-hail-desc" id="sc-hail-desc">Pridobivam podatke…</div>
+        </div>
+        <div class="sc-hail-gauge">
+          <div class="sc-hail-pct" id="sc-hail-pct">—</div>
+          <div class="sc-hail-bar"><div class="sc-hail-fill" id="sc-hail-fill" style="width:0%"></div></div>
+          <div class="sc-hail-gauge-lbl">verjetnost</div>
+        </div>
+      </div>
+      <div class="sc-hail-factors" id="sc-hail-factors"></div>
     </div>
 
     <!-- Sounding Analysis (Showalter, CIN, Mixing height) -->
@@ -12293,6 +12338,56 @@ function calcStormThreat(cape,cin,li,tt,shear){
   if(s>=8)return{level:'NIZKO',cls:'sc-low',score:s,desc:'Majhen potencial. Izolirane nevihte niso izključene pri dovolj triggerju.'};
   return{level:'BREZ',cls:'sc-none',score:s,desc:'Atmosfera stabilna. Nevihten razvoj ni pričakovan.'};
 }
+// ── Hail risk (heuristic) — needs strong updraft (CAPE), instability,
+//    shear for hail growth, and a freezing level low enough that hail
+//    survives the fall to the ground without fully melting.
+function calcHailRisk(cape,li,freeze,shear,tt){
+  let h=0;
+  // Updraft strength — main driver of hail growth
+  if(cape>=2500)h+=42;else if(cape>=1800)h+=34;else if(cape>=1200)h+=26;else if(cape>=700)h+=16;else if(cape>=350)h+=7;
+  // Instability
+  if(li<=-6)h+=12;else if(li<=-4)h+=8;else if(li<=-2)h+=4;
+  // Total Totals
+  if(tt>=55)h+=10;else if(tt>=50)h+=6;else if(tt>=45)h+=3;
+  // Deep-layer shear — organizes storms, supports large hail / supercells
+  if(shear>=25)h+=18;else if(shear>=18)h+=12;else if(shear>=12)h+=6;else if(shear>=8)h+=2;
+  // Freezing-level melting factor: lower freezing level → less melting.
+  // Optimal hail-to-ground band ≈ 2.0–3.5 km; high FL melts hail before it lands.
+  let melt;
+  if(freeze<2000)melt=0.9;else if(freeze<=3300)melt=1.0;else if(freeze<=3900)melt=0.7;else if(freeze<=4500)melt=0.4;else melt=0.18;
+  let pct=Math.round(Math.max(0,Math.min(100,h*melt)));
+  let level,cls,icon;
+  if(pct>=70){level='EKSTREMNO';cls='sc-hail-extreme';icon='🧊⚠️';}
+  else if(pct>=45){level='VISOKO';cls='sc-hail-high';icon='🧊';}
+  else if(pct>=25){level='ZMERNO';cls='sc-hail-moderate';icon='🧊';}
+  else if(pct>=10){level='NIZKO';cls='sc-hail-low';icon='🌧';}
+  else{level='BREZ';cls='sc-hail-none';icon='☁️';}
+  const desc=pct>=70?'Velika verjetnost toče — možna velika zrna (>2 cm). Zaščitite vozila, rastline in steklene površine.'
+    :pct>=45?'Povečana možnost toče v nevihtah. Možna srednje velika zrna — pazite na izpostavljene predmete.'
+    :pct>=25?'Lokalno možna toča v močnejših nevihtah, večinoma manjša zrna.'
+    :pct>=10?'Majhna možnost toče — izolirana zrna ob morebitnih nevihtah.'
+    :'Toča ni pričakovana.';
+  return{pct,level,cls,icon,desc,melt};
+}
+function renderHailRisk(cape,li,freeze,shear,tt){
+  const g=(id)=>document.getElementById(id);
+  const card=g('sc-hail-card');if(!card)return;
+  const r=calcHailRisk(cape,li,freeze,shear,tt);
+  card.className='card sc-hail-card '+r.cls;
+  if(g('sc-hail-icon'))g('sc-hail-icon').textContent=r.icon;
+  if(g('sc-hail-level'))g('sc-hail-level').textContent=r.level;
+  if(g('sc-hail-desc'))g('sc-hail-desc').textContent=r.desc;
+  if(g('sc-hail-pct'))g('sc-hail-pct').textContent=r.pct+' %';
+  if(g('sc-hail-fill'))g('sc-hail-fill').style.width=r.pct+'%';
+  const fz=(freeze/1000).toFixed(1);
+  const factors=[
+    {l:'CAPE',v:Math.round(cape)+' J/kg',d:cape>=1200?'močan dvig — rast zrn':cape>=500?'zmeren dvig':'šibek dvig'},
+    {l:'Višina ledišča',v:fz+' km',d:freeze<2000?'nizko — manj taljenja':freeze<=3300?'ugodno za točo':freeze<=3900?'višje — delno taljenje':'visoko — toča se stali'},
+    {l:'Striženje 0–6 km',v:Math.round(shear)+' km/h',d:shear>=18?'organizirane nevihte':shear>=12?'zmerno':'šibko'},
+    {l:'Indeks dviga',v:li.toFixed(1)+' K',d:li<=-4?'velika nestabilnost':li<=-2?'zmerna':'stabilno'}
+  ];
+  if(g('sc-hail-factors'))g('sc-hail-factors').innerHTML=factors.map(f=>`<div class="sc-hail-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
+}
 function renderStormChaser(){
   if(!_scData)return;
   const d=_scData,now=new Date();
@@ -12323,6 +12418,8 @@ function renderStormChaser(){
   const uv0=scUV(ws10||0,wd10||0),uv5=scUV(ws500||0,wd500||0);
   const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2)||0;
   const pwat=Math.max(5,Math.round((Td2+20)*0.8+rh850*0.1));
+  // Hail risk
+  try{renderHailRisk(cape,li,freeze,shear,tt);}catch(e){console.warn('Hail:',e);}
   // Threat
   const thr=calcStormThreat(cape,cin,li,tt,shear);
   const hero=g('sc-hero');if(hero)hero.className='sc-hero '+thr.cls;
