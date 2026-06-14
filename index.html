@@ -825,6 +825,20 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .suit-fair .sc-risk-level{color:#fbbf24}
 .suit-poor .sc-risk-level{color:#fb923c}
 .suit-bad .sc-risk-level{color:#f87171}
+/* Gobarji tab */
+.gobe-spot{display:flex;align-items:center;gap:.7rem;padding:.5rem .2rem;border-bottom:1px solid var(--border)}
+.gobe-spot:last-child{border-bottom:none}
+.gobe-spot-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.gobe-spot-name{flex:1;font-size:.8rem;font-weight:600}
+.gobe-spot-elev{font-size:.65rem;color:var(--muted);font-weight:400}
+.gobe-spot-pct{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:500;min-width:46px;text-align:right}
+.gobe-spot-bar{flex:0 0 90px;height:6px;border-radius:3px;background:var(--fc-border);overflow:hidden}
+.gobe-spot-bar i{display:block;height:100%;border-radius:3px}
+.gobe-sp{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .2rem;border-bottom:1px solid var(--border)}
+.gobe-sp:last-child{border-bottom:none}
+.gobe-sp-ic{font-size:1.3rem;line-height:1.2;flex-shrink:0}
+.gobe-sp-nm{font-size:.8rem;font-weight:600}
+.gobe-sp-nt{font-size:.68rem;color:var(--muted);line-height:1.45}
 .sc-risk-scrub{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border)}
 .sc-risk-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
 .sc-risk-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
@@ -2047,6 +2061,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-morje"     onclick="switchTab('morje');closeTabDDs()">🌊 Morje</button>
         <button id="tab-btn-gore"      onclick="switchTab('gore');closeTabDDs()">⛰ Gore</button>
         <button id="tab-btn-padalci"   onclick="switchTab('padalci');closeTabDDs()">🪂 Padalci</button>
+        <button id="tab-btn-gobe"      onclick="switchTab('gobe');closeTabDDs()">🍄 Gobarji</button>
         <div class="tab-dd-group-lbl" style="margin-top:.4rem">Razširjena napoved</div>
         <button id="tab-btn-srednja"    onclick="switchTab('srednja');closeTabDDs()">📅 Srednja (16 dni)</button>
         <button id="tab-btn-dolgorocna" onclick="switchTab('dolgorocna');closeTabDDs()">🗓 Dolgoročna</button>
@@ -4192,6 +4207,63 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div><!-- /tab-padalci -->
 
+  <!-- ═══ GOBARJI TAB ═══ -->
+  <div id="tab-gobe" class="tab-pane">
+    <!-- Main mushroom index -->
+    <div class="card sc-risk-card suit-fair" id="gobe-suit-card" style="margin-bottom:1rem">
+      <div class="sc-risk-head">
+        <span class="sc-risk-icon" id="gobe-suit-icon">🍄</span>
+        <div class="sc-risk-text">
+          <div class="clabel" style="margin:0">🍄 Gobarski indeks — Rečica ob Savinji</div>
+          <div class="sc-risk-level" id="gobe-suit-level">—</div>
+          <div class="sc-risk-desc" id="gobe-suit-desc">Nalagam…</div>
+        </div>
+        <div class="sc-risk-gauge">
+          <div class="sc-risk-pct" id="gobe-suit-pct">—</div>
+          <div class="sc-risk-bar"><div class="sc-risk-fill" id="gobe-suit-fill" style="width:0%"></div></div>
+          <div class="sc-risk-gauge-lbl">obrodnost</div>
+        </div>
+      </div>
+      <div class="sc-risk-factors" id="gobe-suit-factors"></div>
+    </div>
+
+    <!-- 14-day fruiting outlook -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📅 Okno obrodnosti — naslednjih 14 dni</div>
+      <div class="sc-risk-strip" id="gobe-strip" style="margin-top:.4rem"></div>
+      <div style="font-size:.66rem;color:var(--muted);margin-top:.5rem;line-height:1.5">Ocena upošteva zamik rasti: dež pred ~5–12 dnevi sproži obrodnost. Višji stolpec = boljše okno za nabiranje.</div>
+    </div>
+
+    <!-- Nearby forests comparison -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌲 Okoliški gozdovi — primerjava danes</div>
+      <div id="gobe-spots" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+
+    <!-- Seasonal species hints -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🍂 Kaj utegne rasti — sezonski namigi</div>
+      <div id="gobe-species" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+
+    <!-- Tips, rules, links -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📋 Nasveti in pravila</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
+        ⚖️ V Sloveniji je dovoljeno nabrati <b>do 2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
+        🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
+        🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
+        ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu se posvetuj z gobarskim društvom ali mikologom.<br>
+        🌡 Najboljše razmere: vlažna tla, temperatura tal 10–18 °C, nekaj dni po izdatnem dežju.
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://www.gobe.si/" target="_blank" rel="noopener" class="mtn-avk-link">🍄 Gobe.si</a>
+        <a href="https://www.gobarskazveza.si/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 Gobarska zveza Slovenije</a>
+        <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
+      </div>
+    </div>
+  </div><!-- /tab-gobe -->
+
   <!-- ═══ SREDNJA NAPOVED TAB ═══ -->
   <div id="tab-srednja" class="tab-pane">
     <div class="med-kpi-row" id="med-kpis">
@@ -6189,7 +6261,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','morje','gore','padalci','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','morje','gore','padalci','gobe','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -6225,6 +6297,7 @@ function switchTab(tab){
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='morje'){     initMorje(); }
   if(tab==='gore'){      initGore(); }
+  if(tab==='gobe'){      initGobe(); }
   if(tab==='padalci'){    initPadalci(); }
   if(tab==='srednja'){    initSrednja(); }
   if(tab==='dolgorocna'){ initDolgorocna(); }
@@ -18001,6 +18074,209 @@ function _buildGoreKrvavec({krvavec}){
   el.innerHTML=html;
 }
 // ═══ end GORE ══════════════════════════════════════════════
+
+// ═══ GOBARJI ═══════════════════════════════════════════════
+const GOBE_SPOTS=[
+  {name:'Rečica ob Savinji', lat:46.326, lon:14.921, elev:'≈400 m'},
+  {name:'Dobrovlje – Čreta',  lat:46.300, lon:14.860, elev:'≈900 m'},
+  {name:'Logarska dolina',    lat:46.392, lon:14.628, elev:'≈750 m'},
+  {name:'Golte',              lat:46.348, lon:14.840, elev:'≈1300 m'},
+  {name:'Smrekovško pogorje', lat:46.430, lon:14.860, elev:'≈1300 m'},
+];
+let _gobeInit=false,_gobeCache=null,_gobeCacheT=0;
+
+async function initGobe(){
+  if(_gobeInit&&_gobeCache){_renderGobe();return;}
+  _gobeInit=true;
+  const setErr=m=>{const e=document.getElementById('gobe-suit-desc');if(e)e.textContent=m;};
+  try{
+    const now=Date.now();
+    if(!_gobeCache||now-_gobeCacheT>3600000){
+      const lats=GOBE_SPOTS.map(s=>s.lat).join(',');
+      const lons=GOBE_SPOTS.map(s=>s.lon).join(',');
+      const url='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons
+        +'&daily=precipitation_sum,temperature_2m_max,temperature_2m_min'
+        +'&hourly=soil_moisture_3_to_9cm,soil_temperature_6cm,relative_humidity_2m'
+        +'&past_days=14&forecast_days=14&timezone=Europe%2FLjubljana';
+      const res=await fetch(url).then(r=>r.json());
+      _gobeCache=Array.isArray(res)?res:[res];
+      _gobeCacheT=now;
+    }
+    _renderGobe();
+  }catch(e){console.error('initGobe',e);setErr('Napaka pri pridobivanju podatkov: '+e.message);}
+}
+
+// Aggregate hourly soil/RH to daily means, keyed by date string
+function _gobeDailyAgg(loc){
+  const h=loc.hourly||{},map={};
+  (h.time||[]).forEach((t,i)=>{
+    const d=t.slice(0,10);
+    const o=map[d]||(map[d]={sm:0,smn:0,st:0,stn:0,rh:0,rhn:0});
+    const sm=h.soil_moisture_3_to_9cm?.[i];if(sm!=null){o.sm+=sm;o.smn++;}
+    const st=h.soil_temperature_6cm?.[i];if(st!=null){o.st+=st;o.stn++;}
+    const rh=h.relative_humidity_2m?.[i];if(rh!=null){o.rh+=rh;o.rhn++;}
+  });
+  const res={};
+  Object.keys(map).forEach(d=>{const o=map[d];res[d]={sm:o.smn?o.sm/o.smn:null,st:o.stn?o.st/o.stn:null,rh:o.rhn?o.rh/o.rhn:null};});
+  return res;
+}
+function _gobeTodayIdx(loc){
+  const n=new Date();
+  const s=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  let i=(loc.daily?.time||[]).indexOf(s);
+  return i<0?14:i;
+}
+// Gather mushroom-relevant inputs for a given daily index
+function _gobeInputs(loc,agg,i){
+  const d=loc.daily||{};
+  const rainAt=k=>(k>=0&&k<(d.precipitation_sum||[]).length)?(d.precipitation_sum[k]??0):0;
+  let ar=0;for(let k=i-12;k<=i-4;k++)ar+=rainAt(k); // antecedent rain (fruiting trigger, ~5–12 d lag)
+  const date=d.time?.[i],a=date?agg[date]:null;
+  const tmax=d.temperature_2m_max?.[i],tmin=d.temperature_2m_min?.[i];
+  const tmean=(tmax!=null&&tmin!=null)?(tmax+tmin)/2:(tmax??tmin??null);
+  return{ar,sm:a?a.sm:null,st:a?a.st:null,rh:a?a.rh:null,tmean};
+}
+// Mushroom fruiting score 0–100
+function _gobeScore({ar,sm,st,rh,tmean}){
+  let s=0;
+  if(ar>=60)s+=34;else if(ar>=35)s+=27;else if(ar>=20)s+=18;else if(ar>=10)s+=9;else if(ar>=4)s+=3;
+  if(sm!=null){if(sm>=0.32)s+=24;else if(sm>=0.26)s+=18;else if(sm>=0.20)s+=11;else if(sm>=0.15)s+=4;}
+  if(st!=null){if(st>=10&&st<=18)s+=18;else if((st>=7&&st<10)||(st>18&&st<=21))s+=10;else if(st>=4&&st<=24)s+=4;}
+  if(rh!=null){if(rh>=85)s+=12;else if(rh>=75)s+=8;else if(rh>=65)s+=4;}
+  if(tmean!=null){if(tmean<2)s-=22;else if(tmean<5)s-=8;else if(tmean>26)s-=10;}
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+function _gobeColor(p){if(p>=70)return'#4ade80';if(p>=50)return'#a3e635';if(p>=30)return'#fbbf24';if(p>=15)return'#fb923c';return'#64748b';}
+function _gobeLevel(p){
+  if(p>=75)return{lvl:'ODLIČNA',cls:'suit-excellent'};
+  if(p>=55)return{lvl:'DOBRA',cls:'suit-good'};
+  if(p>=35)return{lvl:'ZMERNA',cls:'suit-fair'};
+  if(p>=18)return{lvl:'SLABA',cls:'suit-poor'};
+  return{lvl:'BREZ',cls:'suit-bad'};
+}
+
+function _renderGobe(){
+  if(!_gobeCache||!_gobeCache.length)return;
+  const aggs=_gobeCache.map(_gobeDailyAgg);
+  _buildGobeMain(_gobeCache[0],aggs[0]);
+  _buildGobeStrip(_gobeCache[0],aggs[0]);
+  _buildGobeSpots(_gobeCache,aggs);
+  _buildGobeSpecies(_gobeCache[0],aggs[0]);
+}
+
+function _buildGobeMain(loc,agg){
+  const g=id=>document.getElementById(id);
+  const card=g('gobe-suit-card');if(!card)return;
+  const d=loc.daily||{},ti=_gobeTodayIdx(loc);
+  const inp=_gobeInputs(loc,agg,ti);
+  const pct=_gobeScore(inp);
+  const lv=_gobeLevel(pct);
+  card.className='card sc-risk-card '+lv.cls;
+  // days since last good rain (≥5 mm)
+  let dsr=null;for(let k=ti;k>=0;k--){if((d.precipitation_sum?.[k]??0)>=5){dsr=ti-k;break;}}
+  // rain over last 14 days
+  let rain14=0;for(let k=ti-13;k<=ti;k++){if(k>=0)rain14+=(d.precipitation_sum?.[k]??0);}
+  const desc=pct>=75?'Odlične razmere — tla vlažna in topla, gobe so verjetno v polni rasti.'
+    :pct>=55?'Dobre razmere za gobe. Po izdatnem dežju je smiselno na lov.'
+    :pct>=35?'Zmerne razmere — posamezne gobe možne, predvsem v vlažnih legah.'
+    :pct>=18?'Slabe razmere — pretežno suho ali prehladno za obrodnost.'
+    :'Brez obrodnosti — premalo vlage ali prenizke temperature.';
+  if(g('gobe-suit-icon'))g('gobe-suit-icon').textContent=pct>=55?'🍄':pct>=35?'🍄':'🌱';
+  if(g('gobe-suit-level'))g('gobe-suit-level').textContent=lv.lvl;
+  if(g('gobe-suit-desc'))g('gobe-suit-desc').textContent=desc;
+  if(g('gobe-suit-pct'))g('gobe-suit-pct').textContent=pct+' %';
+  const fill=g('gobe-suit-fill');if(fill){fill.style.width=pct+'%';fill.style.background=_gobeColor(pct);}
+  const factors=[
+    {l:'Vlaga tal (3–9 cm)',v:inp.sm!=null?Math.round(inp.sm*100)+' %':'—',d:inp.sm==null?'—':inp.sm>=0.3?'vlažno':inp.sm>=0.22?'zmerno':inp.sm>=0.15?'sušnato':'suho'},
+    {l:'Temp. tal (6 cm)',v:inp.st!=null?inp.st.toFixed(0)+' °C':'—',d:inp.st==null?'—':inp.st>=10&&inp.st<=18?'idealno':inp.st<7?'hladno':inp.st>21?'toplo':'znosno'},
+    {l:'Dež (14 dni)',v:Math.round(rain14)+' mm',d:rain14>=40?'obilno':rain14>=15?'zmerno':'malo'},
+    {l:'Sprožilni dež (5–12 d)',v:Math.round(inp.ar)+' mm',d:inp.ar>=25?'močan zagon':inp.ar>=10?'zmeren':'šibek'},
+    {l:'Od zadnjega dežja',v:dsr==null?'>14 dni':dsr+' dni',d:dsr==null?'dolgo suho':dsr<=2?'sveže namočeno':dsr<=8?'optimalno okno':'se suši'}
+  ];
+  if(g('gobe-suit-factors'))g('gobe-suit-factors').innerHTML=factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
+}
+
+function _buildGobeStrip(loc,agg){
+  const strip=document.getElementById('gobe-strip');if(!strip)return;
+  const d=loc.daily||{},ti=_gobeTodayIdx(loc);
+  const days=['ned','pon','tor','sre','čet','pet','sob'];
+  let html='',best=-1,bestIdx=ti;
+  for(let k=0;k<14;k++){
+    const i=ti+k;if(i>=(d.time||[]).length)break;
+    const pct=_gobeScore(_gobeInputs(loc,agg,i));
+    if(pct>best){best=pct;bestIdx=i;}
+    const col=_gobeColor(pct),ht=Math.max(4,Math.round(pct/100*60));
+    const dt=new Date(d.time[i]);
+    html+=`<div class="sc-risk-cell" title="${d.time[i]}: ${pct} %">`+
+      `<div class="sc-risk-cell-pct">${pct}</div>`+
+      `<div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div>`+
+      `<div class="sc-risk-cell-hr">${k===0?'danes':days[dt.getDay()]}</div></div>`;
+  }
+  strip.innerHTML=html;
+}
+
+function _buildGobeSpots(all,aggs){
+  const el=document.getElementById('gobe-spots');if(!el)return;
+  const rows=GOBE_SPOTS.map((sp,n)=>{
+    const loc=all[n];if(!loc||!loc.daily)return{...sp,pct:null};
+    const ti=_gobeTodayIdx(loc);
+    const pct=_gobeScore(_gobeInputs(loc,aggs[n],ti));
+    return{...sp,pct};
+  }).sort((a,b)=>(b.pct??-1)-(a.pct??-1));
+  el.innerHTML=rows.map(r=>{
+    const pct=r.pct,col=pct!=null?_gobeColor(pct):'#64748b';
+    return `<div class="gobe-spot">
+      <span class="gobe-spot-dot" style="background:${col}"></span>
+      <span class="gobe-spot-name">${r.name} <span class="gobe-spot-elev">${r.elev}</span></span>
+      <span class="gobe-spot-bar"><i style="width:${pct??0}%;background:${col}"></i></span>
+      <span class="gobe-spot-pct">${pct!=null?pct+' %':'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+// Likely species for the current month (Savinjska / Slovenia)
+function _gobeSpeciesFor(month){
+  const S={
+    boletus:{ic:'🍄',nm:'Jurček (goban)',nt:'Listnati in iglasti gozdovi; 2–3 tedne po dežju, tla 12–18 °C.'},
+    chant:{ic:'🟡',nm:'Lisička',nt:'Mahovita, vlažna tla pod smreko in bukvijo; prenese več dežja.'},
+    morel:{ic:'🟤',nm:'Smrček (marela)',nt:'Pomladanska goba; gajbe, jesenovi logi, ob potokih, 8–15 °C.'},
+    stmgeorge:{ic:'⚪',nm:'Majska goba',nt:'Travniki in robovi gozda v aprilu–maju.'},
+    chestnut:{ic:'🌰',nm:'Turek / kostanjevka',nt:'Pod kostanjem in hrastom v toplih jesenskih dneh.'},
+    parasol:{ic:'☂️',nm:'Orjaški dežnik',nt:'Travniki, poseke; pozno poletje in jesen.'},
+    winter:{ic:'❄️',nm:'Zimska panjevka',nt:'Na štorih listavcev; raste tudi ob blagi zmrzali.'},
+    oyster:{ic:'🦪',nm:'Bukov ostrigar',nt:'Na bukovih deblih; pozna jesen in zima.'},
+    warn:{ic:'☠️',nm:'Pozor: strupene dvojnice',nt:'Mušnice in druge strupene vrste rastejo sočasno — preveri vsako gobo!'},
+  };
+  // 0=jan ... 11=dec
+  const byMonth=[
+    [S.winter,S.oyster],                       // jan
+    [S.winter,S.oyster],                       // feb
+    [S.morel],                                 // mar
+    [S.morel,S.stmgeorge],                     // apr
+    [S.stmgeorge,S.morel,S.boletus],           // may
+    [S.boletus,S.chant,S.warn],                // jun
+    [S.boletus,S.chant,S.warn],                // jul
+    [S.boletus,S.chant,S.parasol,S.warn],      // aug
+    [S.boletus,S.chant,S.chestnut,S.parasol,S.warn], // sep
+    [S.boletus,S.chant,S.chestnut,S.parasol,S.warn], // oct
+    [S.chant,S.winter,S.oyster],               // nov
+    [S.winter,S.oyster],                       // dec
+  ];
+  return byMonth[month]||[];
+}
+function _buildGobeSpecies(loc,agg){
+  const el=document.getElementById('gobe-species');if(!el)return;
+  const month=new Date().getMonth();
+  const ti=_gobeTodayIdx(loc);
+  const pct=_gobeScore(_gobeInputs(loc,agg,ti));
+  const list=_gobeSpeciesFor(month);
+  const mn=['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'][month];
+  const note=pct>=55?'Razmere so ugodne — spodaj naštete vrste so trenutno najbolj verjetne.'
+    :pct>=35?'Razmere so zmerne — verjetnost je manjša, a v vlažnih legah se splača pogledati.'
+    :'Trenutno je presuho/prehladno — kljub sezoni je obrodnost teh vrst malo verjetna.';
+  el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Tipično v ${mn} v Savinjski. ${note}</div>`+
+    list.map(s=>`<div class="gobe-sp"><span class="gobe-sp-ic">${s.ic}</span><div><div class="gobe-sp-nm">${s.nm}</div><div class="gobe-sp-nt">${s.nt}</div></div></div>`).join('');
+}
 
 // ═══ METEO NERD ═══════════════════════════════════════════
 let _nerdInit=false;
