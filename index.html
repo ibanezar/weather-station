@@ -243,12 +243,14 @@ header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0
 .stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 h1{font-family:'Space Grotesk','Inter',sans-serif;font-weight:800;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.025em;color:var(--text)}
 h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
-.header-rule{border:none;border-top:1px solid var(--border);width:3rem;margin:.75rem auto .5rem}
-.sub-loc{margin-top:.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em}
-.sskj-entry{margin:.35rem 0 0;font-size:.72rem;color:var(--muted);letter-spacing:.01em}
+.sub-loc{margin-top:.35rem;font-size:.68rem;color:var(--muted);letter-spacing:.06em;opacity:.7}
+.sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
+.sskj-entry.open{max-height:4rem;opacity:1}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}
 .sskj-entry .sskj-gram{font-style:normal;opacity:.78}
 .sskj-entry .sskj-def{font-style:italic}
+.sskj-toggle{background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--muted);line-height:1;padding:0 0 0 .35rem;vertical-align:middle;opacity:.55;transition:opacity .15s}
+.sskj-toggle:hover{opacity:1}
 .status{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.6rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
 .dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
@@ -2041,9 +2043,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </g>
     </svg>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-    <h1>Meteo<em>rec</em></h1>
-    <p class="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
-    <hr class="header-rule">
+    <h1>Meteo<em>rec</em><button class="sskj-toggle" id="sskj-toggle" title="O imenu Meteorec" onclick="document.getElementById('sskj-entry').classList.toggle('open')">ℹ</button></h1>
+    <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
   </header>
 
