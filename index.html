@@ -254,8 +254,14 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* Alerts – floating bar */
-.alerts-wrap{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;flex-direction:column;background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.25)}.alerts-wrap:empty{display:none}.alerts-wrap .alert-bar{border-radius:0;border:none;border-bottom:1px solid var(--border);padding:.72rem 1.4rem}.alerts-wrap .alert-bar:last-child{border-bottom:none}.alerts-wrap .a-ma-yellow::before,.alerts-wrap .a-ma-orange::before,.alerts-wrap .a-ma-red::before{border-radius:0}
+/* Alerts – ticker bar */
+.alerts-wrap{position:fixed;top:0;left:0;right:0;z-index:150;background:none}.alerts-wrap:empty{display:none}
+.alert-ticker{display:flex;align-items:stretch;height:40px;overflow:hidden;background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border);box-shadow:0 2px 16px rgba(0,0,0,.22)}
+.ticker-label{flex-shrink:0;display:flex;align-items:center;gap:.4rem;padding:0 .85rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-right:1px solid rgba(128,128,128,.2)}
+.ticker-track{flex:1;overflow:hidden;display:flex;align-items:center;-webkit-mask-image:linear-gradient(to right,transparent,black 3%,black 97%,transparent);mask-image:linear-gradient(to right,transparent,black 3%,black 97%,transparent)}
+.ticker-text{display:inline-block;white-space:nowrap;font-size:.74rem;animation:ticker-scroll linear infinite}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-close{flex-shrink:0;background:none;border:none;color:var(--muted);cursor:pointer;padding:0 .9rem;font-size:1.1rem;line-height:1;transition:color .15s}.ticker-close:hover{color:var(--text)}
 .local-intel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1rem}
 .intel-card{border:1px solid var(--card-border);border-radius:16px;background:var(--card-bg);box-shadow:var(--card-shadow);padding:1rem 1.15rem;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}.intel-card.hidden{display:none}
 .intel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem}.intel-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:650}.intel-badge{font-family:'JetBrains Mono',monospace;font-size:.66rem;border:1px solid var(--fc-border);border-radius:999px;padding:1px 8px;color:var(--muted)}
@@ -5446,28 +5452,27 @@ function renderAllAlerts(){
   const all=[..._meteoalarmAlerts,..._liveAlerts];
   const seen=new Set();const uniq=all.filter(a=>{if(seen.has(a.title))return false;seen.add(a.title);return true;});
   wrap.innerHTML='';
-  const official=uniq.filter(a=>a.official);
-  const rest=uniq.filter(a=>!a.official);
-  if(official.length>=2){
-    const sevOrder=['a-ma-red','a-ma-orange','a-ma-yellow'];
-    const topCls=sevOrder.find(c=>official.some(a=>a.cls===c))||official[0].cls;
-    const isSevere=official.some(a=>a.severe);
-    const triColor=topCls.includes('red')?'#dc2626':topCls.includes('orange')?'#ea580c':'#d97706';
-    const div=document.createElement('div');
-    div.className='alert-bar '+topCls+(isSevere?' a-severe':'');
-    const rows=official.map(a=>{
-      const moreHtml=a.more?'<div class="alert-actions" style="margin-top:.3rem"><button type="button" class="alert-more-btn" aria-expanded="false" onclick="toggleAlertMore(this)">Več informacij</button></div><div class="alert-more" hidden>'+a.more+'</div>':'';
-      return '<div class="ao-row"><span class="ao-row-icon">'+a.icon+'</span><div class="ao-row-body"><span class="ao-row-title">'+a.title+'</span><span class="ao-row-desc">'+a.desc+'</span>'+(a.meta?'<span class="ao-row-meta">'+a.meta+'</span>':'')+moreHtml+'</div></div>';
-    }).join('');
-    div.innerHTML='<span class="alert-triangle">'+warnTriangle(24,triColor)+'</span>'+
-      '<div class="alert-body"><div class="alert-title"><span class="alert-live-dot" aria-hidden="true"></span>'+(official.length===2?'2 uradni opozorili':official.length+' uradnih opozoril')+' ARSO<span class="alert-official">uradno</span></div>'+
-      '<div class="ao-rows">'+rows+'</div></div>'+
-      '<button class="alert-close" onclick="dismissGroupAlert(this)">×</button>';
-    wrap.appendChild(div);
-  }else if(official.length===1){
-    _renderOneAlert(wrap,official[0]);
-  }
-  rest.forEach(a=>_renderOneAlert(wrap,a));
+  if(!uniq.length){requestAnimationFrame(_syncAlertBarHeight);return;}
+  const sevOrder=['a-ma-red','a-ma-orange','a-ma-yellow'];
+  const topCls=sevOrder.find(c=>uniq.some(a=>a.cls===c))||uniq[0].cls;
+  const labelBg=topCls.includes('red')?'rgba(220,38,38,.22)':topCls.includes('orange')?'rgba(249,115,22,.2)':'rgba(251,191,36,.18)';
+  const labelColor=topCls.includes('red')?'#dc2626':topCls.includes('orange')?'#ea580c':'#d97706';
+  const triColor=topCls.includes('red')?'#dc2626':topCls.includes('orange')?'#ea580c':'#d97706';
+  const hasOfficial=uniq.some(a=>a.official);
+  const segments=uniq.map(a=>a.title+(a.desc?' — '+a.desc:'')+(a.meta?' · '+a.meta:''));
+  const text=segments.join('          ·          ');
+  const tickerText=text+'          ·          '+text;
+  const duration=Math.max(14,text.length*.1)+'s';
+  const div=document.createElement('div');
+  div.className='alert-ticker';
+  div.innerHTML=
+    '<div class="ticker-label" style="background:'+labelBg+';color:'+labelColor+'">'+
+      warnTriangle(13,triColor)+'<span>ARSO</span>'+
+      (hasOfficial?'<span class="alert-official">uradno</span>':'')+
+    '</div>'+
+    '<div class="ticker-track"><span class="ticker-text" style="animation-duration:'+duration+'">'+tickerText+'</span></div>'+
+    '<button class="ticker-close" title="Zapri" onclick="document.getElementById(\'alerts-wrap\').innerHTML=\'\';_meteoalarmAlerts=[];_liveAlerts=[];_syncAlertBarHeight()">×</button>';
+  wrap.appendChild(div);
   requestAnimationFrame(_syncAlertBarHeight);
 }
 
