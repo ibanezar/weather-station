@@ -1260,11 +1260,11 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 /* Tabs */
 .tab-nav-wrap{position:relative;z-index:100;margin-bottom:1.5rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:.45rem .5rem;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.10)}
-/* Tabs wrap into one or two rows — no horizontal scroll affordances needed */
-.tab-nav-wrap::after{display:none}
+/* Desktop: tabs wrap into one or two rows — no scroll affordances */
+.tab-nav-wrap::after,.tab-nav-wrap::before{display:none}
 .tab-nav{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
 .tab-nav-arrow{display:none}
-@keyframes tab-arr{0%,60%,100%{transform:translateY(-50%) translateX(0)}30%{transform:translateY(-50%) translateX(4px)}}
+@keyframes tab-arr{0%,60%,100%{transform:translateY(-50%) translateX(0)}30%{transform:translateY(-50%) translateX(5px)}}
 /* Dropdown container */
 .tab-dropdown{position:relative}
 .tab-dd-trigger{display:flex;align-items:center;gap:.3rem}
@@ -1288,10 +1288,17 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 @media(max-width:760px){
   .tab-nav-wrap{border-radius:14px;padding:.3rem .35rem}
   /* On mobile the nav is a horizontal slider instead of wrapping rows */
-  .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
   .tab-nav::-webkit-scrollbar{display:none}
+  .tab-btn{scroll-snap-align:start;font-size:.66rem;padding:.36rem .7rem}
+  /* Scroll affordances: edge fades + bouncing arrow */
+  .tab-nav-wrap::after{display:block;content:'';position:absolute;top:0;right:0;width:56px;height:100%;background:linear-gradient(to right,transparent,var(--card-bg) 72%);pointer-events:none;border-radius:0 14px 14px 0;transition:opacity .3s;z-index:2}
+  .tab-nav-wrap::before{display:block;content:'';position:absolute;top:0;left:0;width:34px;height:100%;background:linear-gradient(to left,transparent,var(--card-bg) 78%);pointer-events:none;border-radius:14px 0 0 14px;opacity:0;transition:opacity .3s;z-index:2}
+  .tab-nav-wrap.scrolled::before{opacity:1}
+  .tab-nav-wrap.at-end::after{opacity:0}
+  .tab-nav-arrow{display:flex;position:absolute;right:.5rem;top:50%;transform:translateY(-50%);z-index:11;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border:none;font-size:1.05rem;line-height:1;padding:0;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(29,78,216,.5);animation:tab-arr 1.3s ease-in-out infinite;transition:opacity .25s}
+  .tab-nav-wrap.at-end .tab-nav-arrow,.tab-nav-arrow.hidden{opacity:0;pointer-events:none}
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
-  .tab-btn{font-size:.66rem;padding:.36rem .7rem}
 }
 .tab-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.46rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.045em;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s;line-height:1.35;opacity:1}
 .tab-btn.active{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(29,78,216,.4),0 1px 3px rgba(0,0,0,.15)}
@@ -2069,7 +2076,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
       </div>
     </div>
-  </div></div>
+  </div><button class="tab-nav-arrow" id="tab-nav-arrow" aria-label="Drsaj za več zavihkov" title="Drsaj za več">›</button></div>
 
   <!-- ══ NEWS TICKER ══ -->
   <div class="ticker-wrap" id="ticker-wrap">
@@ -7244,6 +7251,7 @@ if('serviceWorker' in navigator){
   function _updateFade(){
     const atEnd=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-4;
     wrap.classList.toggle('at-end',atEnd);
+    wrap.classList.toggle('scrolled',nav.scrollLeft>4);
   }
   nav.addEventListener('scroll',_updateFade,{passive:true});
   window.addEventListener('resize',_updateFade,{passive:true});
