@@ -1287,8 +1287,11 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .tab-dd-menu button.active{background:var(--blue);color:#fff}
 @media(max-width:760px){
   .tab-nav-wrap{border-radius:14px;padding:.3rem .35rem}
+  /* On mobile the nav is a horizontal slider instead of wrapping rows */
+  .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tab-nav::-webkit-scrollbar{display:none}
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
-  .tab-btn{font-size:.66rem;padding:.36rem .6rem}
+  .tab-btn{font-size:.66rem;padding:.36rem .7rem}
 }
 .tab-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.46rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.045em;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s;line-height:1.35;opacity:1}
 .tab-btn.active{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(29,78,216,.4),0 1px 3px rgba(0,0,0,.15)}
