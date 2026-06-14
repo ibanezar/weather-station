@@ -850,12 +850,15 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-risk-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
 .sc-risk-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
 .sc-risk-scrub .sc-scrub-range{background:linear-gradient(90deg,#38bdf8,#fbbf24,#f87171)}
-.sc-risk-strip{display:flex;gap:3px;align-items:flex-end;margin-top:.8rem;height:96px}
-.sc-risk-cell{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem;cursor:pointer;height:100%;border-radius:6px;padding:.2rem 0;transition:background .2s}
+.sc-risk-strip{display:flex;gap:3px;align-items:flex-end;margin-top:.8rem;height:104px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.sc-risk-strip::-webkit-scrollbar{display:none}
+.sc-risk-cell{flex:1 0 30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.15rem;cursor:pointer;height:100%;border-radius:6px;padding:.2rem 0;transition:background .2s}
 .sc-risk-cell:hover{background:rgba(255,255,255,.06)}
-.sc-risk-cell.active{background:rgba(255,255,255,.1);outline:1px solid var(--cyan)}
+.sc-risk-cell.active{background:rgba(255,255,255,.06)}
+.sc-risk-cell.active .sc-risk-cell-pct{color:var(--cyan);font-weight:700}
+.sc-risk-cell.active .sc-risk-cell-bar{outline:2px solid var(--cyan);outline-offset:1px}
 .sc-risk-cell-pct{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)}
-.sc-risk-cell-bar{width:62%;min-height:3px;border-radius:3px 3px 0 0;transition:height .5s ease,background .3s}
+.sc-risk-cell-bar{width:64%;min-height:3px;border-radius:3px 3px 0 0;transition:height .5s ease,background .3s}
 .sc-risk-cell-hr{font-size:.55rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
@@ -18505,7 +18508,8 @@ function _renderActHour(key){
   const strip=document.getElementById(key+'-strip');
   if(strip){let html='';for(let k=0;k<24;k++){const i=Math.min(nowIdx+k,t.length-1);const p=_actEval(key,h,i).pct;const col=_gobeColor(p),ht=Math.max(4,Math.round(p/100*60)),dd=t[i];const lbl=k===0?'zdaj':(dd.getHours()%3===0?dd.getHours():'');
     html+=`<div class="sc-risk-cell${k===off?' active':''}" onclick="actSlide('${key}',${k})" title="+${k} h: ${p} %"><div class="sc-risk-cell-pct">${p}</div><div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div><div class="sc-risk-cell-hr">${lbl}</div></div>`;}
-    strip.innerHTML=html;}
+    strip.innerHTML=html;
+    const ac=strip.children[off];if(ac)strip.scrollLeft=ac.offsetLeft-strip.clientWidth/2+ac.offsetWidth/2;}
 }
 // Ribiči — daily aggregation
 function _actRibicDays(){
