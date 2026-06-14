@@ -839,6 +839,13 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .gobe-sp-ic{font-size:1.3rem;line-height:1.2;flex-shrink:0}
 .gobe-sp-nm{font-size:.8rem;font-weight:600}
 .gobe-sp-nt{font-size:.68rem;color:var(--muted);line-height:1.45}
+/* Napoved po meri — activity selector */
+.act-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.act-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.42rem .8rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-size:.74rem;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .1s}
+.act-chip:hover{background:var(--border);color:var(--text);transform:translateY(-1px)}
+.act-chip.active{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent;box-shadow:0 3px 12px rgba(29,78,216,.35)}
+.act-pane{display:none}
+.act-pane.active{display:block}
 .sc-risk-scrub{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border)}
 .sc-risk-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
 .sc-risk-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
@@ -2058,15 +2065,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <div class="tab-dd-menu" id="tab-dd-fc-menu">
         <div class="tab-dd-group-lbl">Napoved</div>
         <button id="tab-btn-forecast2" onclick="switchTab('forecast2');closeTabDDs()">🔮 Lokalna napoved</button>
-        <button id="tab-btn-morje"     onclick="switchTab('morje');closeTabDDs()">🌊 Morje</button>
-        <button id="tab-btn-gore"      onclick="switchTab('gore');closeTabDDs()">⛰ Gore</button>
-        <button id="tab-btn-padalci"   onclick="switchTab('padalci');closeTabDDs()">🪂 Padalci</button>
-        <button id="tab-btn-gobe"      onclick="switchTab('gobe');closeTabDDs()">🍄 Gobarji</button>
-        <div class="tab-dd-group-lbl" style="margin-top:.4rem">Razširjena napoved</div>
         <button id="tab-btn-srednja"    onclick="switchTab('srednja');closeTabDDs()">📅 Srednja (16 dni)</button>
         <button id="tab-btn-dolgorocna" onclick="switchTab('dolgorocna');closeTabDDs()">🗓 Dolgoročna</button>
       </div>
     </div>
+    <button class="tab-btn"        id="tab-btn-po-meri"   onclick="switchTab('po-meri')">🎯 Po meri</button>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Lovec na nevihte</button>
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
@@ -4063,8 +4066,18 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="nt-grid3" id="fc2-daily-grid" style="margin-top:1rem"></div>
   </div>
 
+  <!-- ═══ NAPOVED PO MERI (tipske napovedi) ═══ -->
+  <div id="tab-po-meri" class="tab-pane">
+    <div class="act-chips" id="act-chips"></div>
+    <div id="act-content">
+      <div class="act-pane" id="act-rekreacija"></div>
+      <div class="act-pane" id="act-cebelarji"></div>
+      <div class="act-pane" id="act-nebo"></div>
+      <div class="act-pane" id="act-pv"></div>
+      <div class="act-pane" id="act-ribic"></div>
+
   <!-- ═══ MORJE TAB ═══ -->
-  <div id="tab-morje" class="tab-pane">
+  <div id="tab-morje" class="act-pane">
     <div class="sea-kpi-row" id="sea-kpis">
       <div class="sea-kpi"><div class="sea-kpi-val">…</div><div class="sea-kpi-lbl">Nalagam</div></div>
     </div>
@@ -4109,7 +4122,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div><!-- /tab-morje -->
 
   <!-- ═══ GORE TAB ═══ -->
-  <div id="tab-gore" class="tab-pane">
+  <div id="tab-gore" class="act-pane">
     <div class="mtn-kpi-row" id="mtn-kpis">
       <div class="mtn-kpi"><div class="mtn-kpi-val">…</div><div class="mtn-kpi-lbl">Nalagam</div></div>
     </div>
@@ -4157,7 +4170,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div><!-- /tab-gore -->
 
   <!-- ═══ PADALCI TAB ═══ -->
-  <div id="tab-padalci" class="tab-pane">
+  <div id="tab-padalci" class="act-pane">
     <div class="fly-kpi-row" id="fly-kpis">
       <div class="fly-kpi"><div class="fly-kpi-val">…</div><div class="fly-kpi-lbl">Nalagam</div></div>
     </div>
@@ -4208,7 +4221,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   </div><!-- /tab-padalci -->
 
   <!-- ═══ GOBARJI TAB ═══ -->
-  <div id="tab-gobe" class="tab-pane">
+  <div id="tab-gobe" class="act-pane">
     <!-- Main mushroom index -->
     <div class="card sc-risk-card suit-fair" id="gobe-suit-card" style="margin-bottom:1rem">
       <div class="sc-risk-head">
@@ -4271,6 +4284,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
   </div><!-- /tab-gobe -->
+
+    </div><!-- /act-content -->
+  </div><!-- /tab-po-meri -->
 
   <!-- ═══ SREDNJA NAPOVED TAB ═══ -->
   <div id="tab-srednja" class="tab-pane">
@@ -6269,7 +6285,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','morje','gore','padalci','gobe','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -6303,6 +6319,7 @@ function switchTab(tab){
   }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
+  if(tab==='po-meri'){   initPoMeri(); }
   if(tab==='morje'){     initMorje(); }
   if(tab==='gore'){      initGore(); }
   if(tab==='gobe'){      initGobe(); }
@@ -18297,6 +18314,247 @@ function _buildGobeSpecies(loc,agg){
     :'Trenutno je presuho/prehladno — kljub sezoni je obrodnost teh vrst malo verjetna.';
   el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Tipično v ${mn} v Savinjski. ${note}</div>`+
     list.map(s=>`<div class="gobe-sp"><span class="gobe-sp-ic">${s.ic}</span><div><div class="gobe-sp-nm">${s.nm}</div><div class="gobe-sp-nt">${s.nt}</div></div></div>`).join('');
+}
+
+// ═══ NAPOVED PO MERI (tipske napovedi) ═════════════════════
+const ACTIVITIES=[
+  {key:'rekreacija',icon:'🏃',label:'Rekreacija',pane:'act-rekreacija'},
+  {key:'cebelarji', icon:'🐝',label:'Čebelarji', pane:'act-cebelarji'},
+  {key:'nebo',      icon:'🔭',label:'Nebo',      pane:'act-nebo'},
+  {key:'pv',        icon:'☀️',label:'Sončna e.', pane:'act-pv'},
+  {key:'ribic',     icon:'🎣',label:'Ribiči',    pane:'act-ribic'},
+  {key:'morje',     icon:'🌊',label:'Morje',     pane:'tab-morje',  init:()=>initMorje()},
+  {key:'gore',      icon:'⛰',label:'Gore',       pane:'tab-gore',   init:()=>initGore()},
+  {key:'padalci',   icon:'🪂',label:'Padalci',   pane:'tab-padalci',init:()=>initPadalci()},
+  {key:'gobe',      icon:'🍄',label:'Gobarji',   pane:'tab-gobe',   init:()=>initGobe()},
+];
+let _poMeriInit=false,_poMeriCur=null;
+function initPoMeri(){
+  if(!_poMeriInit){
+    _poMeriInit=true;
+    const chips=document.getElementById('act-chips');
+    if(chips)chips.innerHTML=ACTIVITIES.map(a=>`<button class="act-chip" id="act-chip-${a.key}" onclick="switchActivity('${a.key}')">${a.icon} ${a.label}</button>`).join('');
+  }
+  switchActivity(_poMeriCur||'rekreacija');
+}
+function switchActivity(key){
+  _poMeriCur=key;
+  ACTIVITIES.forEach(a=>{
+    document.getElementById(a.pane)?.classList.toggle('active',a.key===key);
+    document.getElementById('act-chip-'+a.key)?.classList.toggle('active',a.key===key);
+  });
+  const a=ACTIVITIES.find(x=>x.key===key);if(!a)return;
+  if(a.init)a.init(); else _initActivity(key);
+}
+
+// ── Shared data for the 5 native activities ──
+let _actData=null,_actDataT=0,_actBuilt={},_actOff={};
+async function _actEnsureData(){
+  const now=Date.now();
+  if(_actData&&now-_actDataT<3600000)return _actData;
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+    +'&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,dew_point_2m,precipitation,'
+    +'precipitation_probability,cloud_cover,wind_speed_10m,wind_gusts_10m,uv_index,shortwave_radiation,'
+    +'is_day,weather_code,surface_pressure'
+    +'&timezone=Europe%2FLjubljana&past_days=1&forecast_days=7';
+  _actData=await fetch(url).then(r=>r.json());
+  _actDataT=now;
+  return _actData;
+}
+const ACT_CFG={
+  rekreacija:{icon:'🏃',title:'🏃 Rekreacija (tek / kolo)',gauge:'primernost',gran:'hour',span:24,sliderLbl:'🕐 Napoved naprej:',strip:'🕐 Najboljši čas — naslednjih 24 ur',
+    tips:'Tek/kolo je najprijetnejši pri občutku temperature 8–18 °C, šibkem vetru in nizki verjetnosti dežja. V vročini izberi jutro ali večer in pij dovolj tekočine; pri visokem UV uporabi zaščito.'},
+  cebelarji:{icon:'🐝',title:'🐝 Čebelja paša',gauge:'paša',gran:'hour',span:24,sliderLbl:'🕐 Napoved naprej:',strip:'🕐 Pašne razmere — naslednjih 24 ur',
+    tips:'Čebele pašejo pri >12–15 °C, soncu in šibkem vetru. Pri toplem, vlažnem in mirnem vremenu po deževju je nevarnost rojenja večja — preglej panje. Pregledov ne opravljaj v dežju in mrazu.'},
+  nebo:{icon:'🔭',title:'🔭 Opazovanje neba',gauge:'pogoji',gran:'hour',span:24,sliderLbl:'🕐 Napoved naprej:',strip:'🕐 Vidnost neba — naslednjih 24 ur',
+    tips:'Za opazovanje so ključni jasno nebo, nizka vlaga (manj megle/rose) in tema. Polna luna prebije šibke objekte (galaksije, meglice) — za te izberi mlaj. Za planete in Luno je svetloba manj moteča.'},
+  pv:{icon:'☀️',title:'☀️ Sončna elektrarna',gauge:'proizvodnja',gran:'hour',span:24,sliderLbl:'🕐 Napoved naprej:',strip:'🕐 Proizvodnja — naslednjih 24 ur',
+    tips:'Ocena temelji na napovedanem sončnem sevanju (oblačnost je že upoštevana). »Ocena moči« velja za primer sistema 5 kWp z izkoristkom ~85 %. Največja proizvodnja je opoldne ob jasnem nebu.'},
+  ribic:{icon:'🎣',title:'🎣 Ribolov',gauge:'ugodnost',gran:'day',span:7,sliderLbl:'🗓 Napoved naprej:',strip:'📅 Ribiški obeti — 7 dni',
+    tips:'Ribe so pogosto bolj aktivne ob stabilnem ali rahlo rastočem zračnem tlaku, rahli oblačnosti in mirnem vetru. Hitri padec tlaka pred fronto lahko sproži kratko aktivnost, nato sledi zatišje. Upoštevaj lokalne predpise in dovolilnice.'},
+};
+function _actPanelHTML(key){
+  const c=ACT_CFG[key],max=c.span-1;
+  const ticks=c.gran==='hour'
+    ?'<span>zdaj</span><span>+6 h</span><span>+12 h</span><span>+18 h</span><span>+23 h</span>'
+    :'<span>danes</span><span>+2 d</span><span>+4 d</span><span>+6 d</span>';
+  return `<div class="card sc-risk-card suit-fair" id="${key}-card">
+    <div class="sc-risk-head">
+      <span class="sc-risk-icon" id="${key}-icon">${c.icon}</span>
+      <div class="sc-risk-text">
+        <div class="clabel" style="margin:0">${c.title} — Rečica ob Savinji</div>
+        <div class="sc-risk-level" id="${key}-level">—</div>
+        <div class="sc-risk-desc" id="${key}-desc">Nalagam…</div>
+      </div>
+      <div class="sc-risk-gauge">
+        <div class="sc-risk-pct" id="${key}-pct">—</div>
+        <div class="sc-risk-bar"><div class="sc-risk-fill" id="${key}-fill" style="width:0%"></div></div>
+        <div class="sc-risk-gauge-lbl">${c.gauge}</div>
+      </div>
+    </div>
+    <div class="sc-risk-factors" id="${key}-factors"></div>
+    <div class="sc-risk-scrub">
+      <div class="sc-risk-scrub-head"><span class="clabel" style="margin:0">${c.sliderLbl}</span><span class="sc-risk-scrub-time" id="${key}-time">zdaj</span></div>
+      <input type="range" class="sc-scrub-range" id="${key}-range" min="0" max="${max}" value="0" step="1" oninput="actSlide('${key}',this.value)">
+      <div class="sc-scrub-ticks">${ticks}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem"><div class="clabel">${c.strip}</div><div class="sc-risk-strip" id="${key}-strip" style="margin-top:.4rem"></div></div>
+  <div class="card" style="margin-top:1rem"><div class="clabel">📋 Nasveti</div><div style="font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:.4rem">${c.tips}</div></div>`;
+}
+async function _initActivity(key){
+  const pane=document.getElementById('act-'+key);if(!pane)return;
+  if(!_actBuilt[key]){pane.innerHTML=_actPanelHTML(key);_actBuilt[key]=true;}
+  try{await _actEnsureData();_renderActivity(key);}
+  catch(e){console.error('activity',key,e);const d=document.getElementById(key+'-desc');if(d)d.textContent='Napaka pri pridobivanju podatkov.';}
+}
+function actSlide(key,v){
+  const c=ACT_CFG[key];_actOff[key]=Math.max(0,Math.min(c.span-1,parseInt(v,10)||0));
+  _renderActivity(key);
+}
+function _renderActivity(key){
+  if(!_actData||!_actData.hourly)return;
+  if(ACT_CFG[key].gran==='hour')_renderActHour(key);else _renderActDay(key);
+}
+function _actDesc(key,pct){
+  const noun={rekreacija:'za tek/kolo',cebelarji:'za čebeljo pašo',nebo:'za opazovanje neba',pv:'za proizvodnjo',ribic:'za ribolov'}[key]||'';
+  if(pct>=80)return'Odlične razmere '+noun+'.';
+  if(pct>=60)return'Dobre razmere '+noun+'.';
+  if(pct>=40)return'Zmerne razmere '+noun+'.';
+  if(pct>=20)return'Slabe razmere '+noun+'.';
+  return'Neprimerno '+noun+'.';
+}
+function _actNowIdx(t){let i=t.findIndex(x=>x>=new Date())-1;return i<0?0:i;}
+function _localDateStr(n){return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+function _moonIllum(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14);let p=(((d.getTime()-ref)/86400000)%syn)/syn;if(p<0)p+=1;return(1-Math.cos(2*Math.PI*p))/2;}
+function _moonName(d){const syn=29.530588853,ref=Date.UTC(2000,0,6,18,14);let p=(((d.getTime()-ref)/86400000)%syn)/syn;if(p<0)p+=1;return['mlaj','mlada','prvi krajec','rastoča','ščip','pojemajoča','zadnji krajec','stara'][Math.round(p*8)%8];}
+
+// Hourly activity evaluation → {pct, factors}
+function _actEval(key,h,i){
+  const T=scIdx(h.temperature_2m,i),at=scIdx(h.apparent_temperature,i)??T,rh=scIdx(h.relative_humidity_2m,i),td=scIdx(h.dew_point_2m,i),
+        pp=scIdx(h.precipitation_probability,i)??0,cloud=scIdx(h.cloud_cover,i)??50,wind=scIdx(h.wind_speed_10m,i)??0,
+        gust=scIdx(h.wind_gusts_10m,i)??wind,uv=scIdx(h.uv_index,i)??0,rad=scIdx(h.shortwave_radiation,i)??0,
+        day=(scIdx(h.is_day,i)??1)>0,dt=new Date((h.time||[])[i]);
+  if(key==='rekreacija'){
+    let s=100,a=at??15;
+    if(a<-5)s-=55;else if(a<0)s-=35;else if(a<5)s-=15;else if(a<=18)s-=0;else if(a<=24)s-=8;else if(a<=28)s-=22;else if(a<=32)s-=40;else s-=60;
+    if(pp>=70)s-=45;else if(pp>=45)s-=28;else if(pp>=25)s-=14;else if(pp>=10)s-=5;
+    if(gust>=45)s-=35;else if(gust>=30)s-=18;else if(gust>=20)s-=8;
+    if(uv>=8)s-=10;else if(uv>=6)s-=4;
+    if((rh??60)>=90&&a>22)s-=8;
+    const pct=Math.max(0,Math.min(100,Math.round(s)));
+    return{pct,factors:[
+      {l:'Občutek T',v:(at!=null?Math.round(at):'—')+' °C',d:a>=8&&a<=20?'prijetno':a<5?'mrzlo':a>26?'vroče':'znosno'},
+      {l:'Dež',v:pp+' %',d:pp>=45?'verjeten':pp>=15?'možen':'suho'},
+      {l:'Sunki vetra',v:Math.round(gust)+' km/h',d:gust>=30?'močni':gust>=20?'zmerni':'šibki'},
+      {l:'UV indeks',v:Math.round(uv),d:uv>=8?'visok':uv>=3?'zmeren':'nizek'},
+      {l:'Vlaga',v:(rh!=null?Math.round(rh):'—')+' %',d:(rh??0)>=85?'soparno':'ok'}]};
+  }
+  if(key==='cebelarji'){
+    let s=0;const tt=T??10;
+    if(day){
+      if(tt>=18)s+=45;else if(tt>=15)s+=36;else if(tt>=12)s+=24;else if(tt>=10)s+=10;
+      if(wind<12)s+=18;else if(wind<20)s+=10;else if(wind<30)s+=3;
+      if(pp<10)s+=18;else if(pp<30)s+=8;
+      if(cloud<30)s+=19;else if(cloud<60)s+=10;else s+=3;
+    }
+    const pct=day?Math.max(0,Math.min(100,Math.round(s))):0;
+    return{pct,factors:[
+      {l:'Temperatura',v:(T!=null?Math.round(T):'—')+' °C',d:tt>=15?'aktivna paša':tt>=12?'zmerna':tt>=10?'šibka':'premrzlo'},
+      {l:'Veter',v:Math.round(wind)+' km/h',d:wind<12?'mirno':wind<20?'zmerno':'vetrovno'},
+      {l:'Dež',v:pp+' %',d:pp>=30?'moti pašo':'ok'},
+      {l:'Oblačnost',v:Math.round(cloud)+' %',d:cloud<30?'sončno':cloud<60?'delno':'oblačno'},
+      {l:'Čas dneva',v:day?'dan':'noč',d:day?'paša možna':'brez paše'}]};
+  }
+  if(key==='nebo'){
+    let s=0;const il=_moonIllum(dt),spread=(T!=null&&td!=null)?T-td:5;
+    if(!day){
+      if(cloud<10)s+=55;else if(cloud<25)s+=42;else if(cloud<50)s+=25;else if(cloud<75)s+=10;
+      if((rh??80)<70)s+=20;else if((rh??80)<85)s+=10;
+      if(pp<10)s+=15;else if(pp<30)s+=5;
+      if(spread>5)s+=10;else if(spread>2)s+=5;
+      if(il>0.85)s-=10;else if(il>0.6)s-=5;
+    }
+    const pct=day?0:Math.max(0,Math.min(100,Math.round(s)));
+    return{pct,factors:[
+      {l:'Oblačnost',v:Math.round(cloud)+' %',d:cloud<25?'jasno':cloud<50?'delno':'oblačno'},
+      {l:'Vlaga',v:(rh!=null?Math.round(rh):'—')+' %',d:(rh??0)<70?'suho':(rh??0)<85?'zmerno':'megla možna'},
+      {l:'Dež',v:pp+' %',d:pp>=20?'možen':'suho'},
+      {l:'Luna',v:Math.round(il*100)+' %',d:_moonName(dt)},
+      {l:'Čas dneva',v:day?'dan':'noč',d:day?'presvetlo':'temno'}]};
+  }
+  if(key==='pv'){
+    const pct=Math.max(0,Math.min(100,Math.round(rad/850*100)));
+    const power=rad/1000*5*0.85;
+    return{pct,factors:[
+      {l:'Sevanje',v:Math.round(rad)+' W/m²',d:rad>=600?'močno':rad>=300?'zmerno':rad>0?'šibko':'noč'},
+      {l:'Oblačnost',v:Math.round(cloud)+' %',d:cloud<30?'jasno':cloud<60?'delno':'oblačno'},
+      {l:'Ocena moči',v:power.toFixed(1)+' kW',d:'sistem 5 kWp'},
+      {l:'Delež max',v:pct+' %',d:'glede na ~850 W/m²'}]};
+  }
+  return{pct:0,factors:[]};
+}
+function _renderActHour(key){
+  const h=_actData.hourly,t=(h.time||[]).map(x=>new Date(x));if(!t.length)return;
+  const nowIdx=_actNowIdx(t),off=_actOff[key]||0,ci=Math.min(nowIdx+off,t.length-1);
+  const ev=_actEval(key,h,ci);
+  _renderSuitCard(key,ACT_CFG[key].icon,ev.pct,_actDesc(key,ev.pct),ev.factors);
+  const tEl=document.getElementById(key+'-time'),dt=t[ci];
+  if(tEl&&dt){const hh=String(dt.getHours()).padStart(2,'0');tEl.textContent=off===0?`zdaj · ${hh}:00`:`${['ned','pon','tor','sre','čet','pet','sob'][dt.getDay()]} ${hh}:00 · +${off} h`;}
+  const rng=document.getElementById(key+'-range');if(rng&&+rng.value!==off)rng.value=off;
+  const strip=document.getElementById(key+'-strip');
+  if(strip){let html='';for(let k=0;k<24;k++){const i=Math.min(nowIdx+k,t.length-1);const p=_actEval(key,h,i).pct;const col=_gobeColor(p),ht=Math.max(4,Math.round(p/100*60)),dd=t[i];const lbl=k===0?'zdaj':(dd.getHours()%3===0?dd.getHours():'');
+    html+=`<div class="sc-risk-cell${k===off?' active':''}" onclick="actSlide('${key}',${k})" title="+${k} h: ${p} %"><div class="sc-risk-cell-pct">${p}</div><div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div><div class="sc-risk-cell-hr">${lbl}</div></div>`;}
+    strip.innerHTML=html;}
+}
+// Ribiči — daily aggregation
+function _actRibicDays(){
+  if(_actData._ribicDays)return _actData._ribicDays;
+  const h=_actData.hourly||{},map={};
+  (h.time||[]).forEach((tt,i)=>{
+    const d=tt.slice(0,10),o=map[d]||(map[d]={cloud:0,cn:0,wind:0,pp:0,ppn:0,precip:0,temp:0,tn:0,pres:0,pn:0});
+    const c=scIdx(h.cloud_cover,i);if(c!=null){o.cloud+=c;o.cn++;}
+    const w=scIdx(h.wind_speed_10m,i);if(w!=null)o.wind=Math.max(o.wind,w);
+    const pp=scIdx(h.precipitation_probability,i);if(pp!=null){o.pp+=pp;o.ppn++;}
+    o.precip+=scIdx(h.precipitation,i)??0;
+    const tm=scIdx(h.temperature_2m,i);if(tm!=null){o.temp+=tm;o.tn++;}
+    const pr=scIdx(h.surface_pressure,i);if(pr!=null){o.pres+=pr;o.pn++;}
+  });
+  const arr=Object.keys(map).sort().map(d=>{const o=map[d];return{date:d,cloud:o.cn?o.cloud/o.cn:50,wind:o.wind,pp:o.ppn?o.pp/o.ppn:0,precip:o.precip,temp:o.tn?o.temp/o.tn:10,pres:o.pn?o.pres/o.pn:1013};});
+  _actData._ribicDays=arr;return arr;
+}
+function _ribicScore(days,i){
+  const d=days[i],prev=days[i-1],trend=prev?d.pres-prev.pres:0;
+  let s=50;
+  if(Math.abs(trend)<=0.7)s+=14;else if(trend>0)s+=8;else if(trend>=-2)s+=2;else s-=14;
+  if(d.cloud>=40&&d.cloud<=85)s+=12;else if(d.cloud<20)s+=4;
+  if(d.wind<12)s+=10;else if(d.wind<22)s+=4;else if(d.wind>35)s-=12;
+  if(d.precip<1)s+=4;else if(d.precip<8)s-=2;else s-=16;
+  const il=_moonIllum(new Date(d.date));if(il<=0.08||il>=0.92)s+=12;else if(il<=0.25||il>=0.75)s+=4;
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+function _ribicFactors(days,i){
+  const d=days[i],prev=days[i-1],trend=prev?d.pres-prev.pres:0;
+  return[
+    {l:'Tlak (trend)',v:Math.round(d.pres)+' hPa',d:Math.abs(trend)<=0.7?'stabilen':trend>0?'raste':'pada'},
+    {l:'Oblačnost',v:Math.round(d.cloud)+' %',d:d.cloud>=40&&d.cloud<=85?'ugodno':d.cloud<20?'jasno':'spremenljivo'},
+    {l:'Veter',v:Math.round(d.wind)+' km/h',d:d.wind<12?'mirno':d.wind<22?'zmerno':'vetrovno'},
+    {l:'Padavine',v:Math.round(d.precip)+' mm',d:d.precip<1?'suho':d.precip<8?'malo':'mokro'},
+    {l:'Luna',v:_moonName(new Date(d.date)),d:'faza'}];
+}
+function _renderActDay(key){
+  const days=_actRibicDays();if(!days.length)return;
+  const todayStr=_localDateStr(new Date());let ti=days.findIndex(d=>d.date===todayStr);if(ti<0)ti=1;
+  const off=_actOff[key]||0,di=Math.min(ti+off,days.length-1);
+  const pct=_ribicScore(days,di);
+  _renderSuitCard(key,ACT_CFG[key].icon,pct,_actDesc(key,pct),_ribicFactors(days,di));
+  const tEl=document.getElementById(key+'-time'),dt=new Date(days[di].date);
+  if(tEl)tEl.textContent=off===0?'danes':`${['ned','pon','tor','sre','čet','pet','sob'][dt.getDay()]} ${dt.getDate()}.${dt.getMonth()+1}. · +${off} d`;
+  const rng=document.getElementById(key+'-range');if(rng&&+rng.value!==off)rng.value=off;
+  const strip=document.getElementById(key+'-strip');
+  if(strip){let html='';for(let k=0;k<7;k++){const i=Math.min(ti+k,days.length-1);const p=_ribicScore(days,i);const col=_gobeColor(p),ht=Math.max(4,Math.round(p/100*60)),dd=new Date(days[i].date);
+    html+=`<div class="sc-risk-cell${k===off?' active':''}" onclick="actSlide('${key}',${k})" title="${days[i].date}: ${p} %"><div class="sc-risk-cell-pct">${p}</div><div class="sc-risk-cell-bar" style="height:${ht}px;background:${col}"></div><div class="sc-risk-cell-hr">${k===0?'danes':['ned','pon','tor','sre','čet','pet','sob'][dd.getDay()]}</div></div>`;}
+    strip.innerHTML=html;}
 }
 
 // ═══ METEO NERD ═══════════════════════════════════════════
