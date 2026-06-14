@@ -1194,10 +1194,14 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 @keyframes lightning {0%,88%,100%{opacity:0}90%,95%{opacity:1}93%{opacity:.2}}
 
 /* Tabs */
-.tab-nav-wrap{position:relative;margin-bottom:1.5rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:.35rem .4rem;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 1px 5px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.06)}
-.tab-nav-wrap::after{content:'';position:absolute;top:0;right:0;width:56px;height:100%;background:linear-gradient(to right,transparent,var(--card-bg) 80%);pointer-events:none;border-radius:0 16px 16px 0;transition:opacity .3s;z-index:2}
+.tab-nav-wrap{position:relative;margin-bottom:1.5rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:.45rem .5rem;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.10)}
+.tab-nav-wrap::after{content:'';position:absolute;top:0;right:0;width:80px;height:100%;background:linear-gradient(to right,transparent,var(--card-bg) 70%);pointer-events:none;border-radius:0 16px 16px 0;transition:opacity .3s;z-index:2}
 .tab-nav-wrap.at-end::after{opacity:0}
 .tab-nav{display:flex;flex-wrap:wrap;gap:.2rem;align-items:center}
+/* Scroll-right arrow indicator */
+.tab-nav-arrow{position:absolute;right:.55rem;top:50%;transform:translateY(-50%);z-index:11;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:1rem;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(29,78,216,.45);animation:tab-arr 1.3s ease-in-out infinite;transition:opacity .25s,transform .25s}
+.tab-nav-wrap.at-end .tab-nav-arrow,.tab-nav-arrow.hidden{opacity:0;pointer-events:none}
+@keyframes tab-arr{0%,60%,100%{transform:translateY(-50%) translateX(0)}30%{transform:translateY(-50%) translateX(4px)}}
 /* Dropdown container */
 .tab-dropdown{position:relative}
 .tab-dd-trigger{display:flex;align-items:center;gap:.3rem}
@@ -1224,9 +1228,9 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
 }
 .tab-nav::-webkit-scrollbar{display:none}.tab-btn{scroll-snap-align:start}
-.tab-btn{flex-shrink:0;white-space:nowrap;padding:.38rem .78rem;border-radius:10px;border:none;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s,transform .1s;line-height:1.4}
-.tab-btn.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(29,78,216,.28),0 1px 2px rgba(0,0,0,.1)}
-.tab-btn:hover:not(.active){background:var(--border);color:var(--text)}
+.tab-btn{flex-shrink:0;white-space:nowrap;padding:.4rem .82rem;border-radius:10px;border:none;background:transparent;color:var(--text);font-family:'Inter',sans-serif;font-size:.74rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s,opacity .15s,box-shadow .15s,transform .1s;line-height:1.4;opacity:.5}
+.tab-btn.active{background:var(--blue);color:#fff;font-weight:600;opacity:1;box-shadow:0 3px 12px rgba(29,78,216,.35),0 1px 3px rgba(0,0,0,.12)}
+.tab-btn:hover:not(.active){background:var(--border);color:var(--text);opacity:.9}
 .tab-btn:active:not(.active){transform:scale(.97)}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
@@ -2000,7 +2004,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
       </div>
     </div>
-  </div></div>
+  </div><button class="tab-nav-arrow" id="tab-nav-arrow" aria-hidden="true" title="Pokaži več">›</button></div>
 
   <!-- ══ NEWS TICKER ══ -->
   <div class="ticker-wrap" id="ticker-wrap">
@@ -7038,10 +7042,11 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-// Tab nav scroll-fade indicator
+// Tab nav scroll-fade indicator + bounce arrow
 (function(){
   const nav=document.querySelector('.tab-nav');
   const wrap=document.querySelector('.tab-nav-wrap');
+  const arrow=document.getElementById('tab-nav-arrow');
   if(!nav||!wrap)return;
   function _updateFade(){
     const atEnd=nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-4;
@@ -7049,6 +7054,11 @@ if('serviceWorker' in navigator){
   }
   nav.addEventListener('scroll',_updateFade,{passive:true});
   window.addEventListener('resize',_updateFade,{passive:true});
+  if(arrow){
+    arrow.addEventListener('click',()=>nav.scrollBy({left:140,behavior:'smooth'}));
+    // Hide arrow permanently after user scrolls manually (they know about it)
+    nav.addEventListener('scroll',()=>arrow.classList.add('hidden'),{once:true,passive:true});
+  }
   _updateFade();
 })();
 
