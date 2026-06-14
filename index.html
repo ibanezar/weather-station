@@ -17782,7 +17782,7 @@ function _buildGoreSuit({triglav}){
   const tmax=d.temperature_2m_max?.[0],gust=d.wind_gusts_10m_max?.[0];
   const precip=d.precipitation_sum?.[0],snow=d.snowfall_sum?.[0],wmo=d.weather_code?.[0]??0;
   const freeze=fs[0]?.max??null;
-  const tTriglav=tmax!=null?_mtnTempAtElev(tmax,500,2864):null;
+  const tTriglav=tmax;
   let s=62;
   if(gust!=null){if(gust<25)s+=10;else if(gust<40)s-=6;else if(gust<60)s-=24;else if(gust<80)s-=40;else s-=55;}
   if(precip!=null){if(precip<1)s+=8;else if(precip<5)s-=8;else if(precip<15)s-=22;else s-=38;}
@@ -17833,20 +17833,15 @@ function _buildPadalciSuit(d){
 }
 
 // ═══ GORE ══════════════════════════════════════════════════
-const MTN_TRIGLAV_LAT=46.3794,MTN_TRIGLAV_LON=13.8376; // Triglav area
-const MTN_KRVAVEC_LAT=46.2989,MTN_KRVAVEC_LON=14.5360; // Krvavec
+const MTN_TRIGLAV_LAT=46.3794,MTN_TRIGLAV_LON=13.8376,MTN_TRIGLAV_ELEV=2864; // Triglav
+const MTN_KRVAVEC_LAT=46.2989,MTN_KRVAVEC_LON=14.5360,MTN_KRVAVEC_ELEV=1971; // Krvavec
 let _goreInit=false,_goreCache=null,_goreCacheT=0;
 
-// Lapse rate correction: ~6.5°C per 1000m
-function _mtnTempAtElev(T_valley,elev_valley,elev_target){
-  return T_valley - 6.5*(elev_target-elev_valley)/1000;
-}
-
-// Compute daily {max,min} of freezinglevel_height from hourly data
+// Compute daily {max,min} of freezing_level_height from hourly data
 function _dailyFreezeStats(h){
   const map={};
   (h.time||[]).forEach((t,i)=>{
-    const date=t.slice(0,10),v=h.freezinglevel_height?.[i];
+    const date=t.slice(0,10),v=h.freezing_level_height?.[i];
     if(v==null)return;
     if(!map[date]){map[date]={max:v,min:v};}
     else{map[date].max=Math.max(map[date].max,v);map[date].min=Math.min(map[date].min,v);}
@@ -17859,14 +17854,15 @@ async function initGore(){
   try{
     const now=Date.now();
     if(!_goreCache||now-_goreCacheT>3600000){
-      const params='hourly=freezinglevel_height,snowfall'
+      const params='hourly=freezing_level_height,snowfall'
         +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,'
         +'snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max'
         +'&current=temperature_2m,wind_speed_10m,wind_gusts_10m'
         +'&timezone=Europe%2FLjubljana&forecast_days=7';
+      // Pass each summit's elevation so Open-Meteo downscales temperature to it
       const [triglav,krvavec]=await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_TRIGLAV_LAT}&longitude=${MTN_TRIGLAV_LON}&${params}`).then(r=>r.json()),
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_KRVAVEC_LAT}&longitude=${MTN_KRVAVEC_LON}&${params}`).then(r=>r.json()),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_TRIGLAV_LAT}&longitude=${MTN_TRIGLAV_LON}&elevation=${MTN_TRIGLAV_ELEV}&${params}`).then(r=>r.json()),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${MTN_KRVAVEC_LAT}&longitude=${MTN_KRVAVEC_LON}&elevation=${MTN_KRVAVEC_ELEV}&${params}`).then(r=>r.json()),
       ]);
       // Pre-compute daily freeze stats from hourly
       triglav._freezeStats=_dailyFreezeStats(triglav.hourly||{});
@@ -17886,13 +17882,12 @@ function _buildGoreKPIs({triglav}){
   const d=triglav.daily||{};
   const fs=triglav._freezeStats||[];
   const freeze=fs[0]?.max??null;
-  const tVallMax=d.temperature_2m_max?.[0]??null;
-  const tTriglav=tVallMax!=null?_mtnTempAtElev(tVallMax,500,2864):null;
+  const tTriglav=d.temperature_2m_max?.[0]??null;
   const snowfall=d.snowfall_sum?.[0]??null;
   const gust=d.wind_gusts_10m_max?.[0]??null;
   const kpis=[
     {val:freeze!=null?Math.round(freeze)+' m':'—',lbl:'Meja zmrzali',sub:'danes',col:freeze!=null&&freeze<1000?'var(--blue)':null},
-    {val:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',lbl:'T Triglav 2864m',sub:'ocena (lapse 6.5°/km)',col:tTriglav!=null&&tTriglav<0?'var(--blue)':null},
+    {val:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',lbl:'T Triglav 2864m',sub:'modelska višina vrha',col:tTriglav!=null&&tTriglav<0?'var(--blue)':null},
     {val:snowfall!=null&&snowfall>0?snowfall.toFixed(0)+' cm':'0 cm',lbl:'Sneg danes',sub:'cm novega snega'},
     {val:gust!=null?Math.round(gust)+' km/h':'—',lbl:'Max sunki',sub:'triglav območje'},
   ];
@@ -17955,11 +17950,8 @@ function _buildGoreTriglav({triglav}){
   for(let i=0;i<n;i++){
     const dt=new Date(d.time[i]);
     const wmo=d.weather_code?.[i]??0;
-    const tmax=d.temperature_2m_max?.[i];
-    const tmin=d.temperature_2m_min?.[i];
-    // Extrapolate to Triglav 2864m (valley model ~500m)
-    const tmaxT=tmax!=null?_mtnTempAtElev(tmax,500,2864):null;
-    const tminT=tmin!=null?_mtnTempAtElev(tmin,500,2864):null;
+    const tmaxT=d.temperature_2m_max?.[i]??null;
+    const tminT=d.temperature_2m_min?.[i]??null;
     const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
@@ -17971,7 +17963,7 @@ function _buildGoreTriglav({triglav}){
   }
   html+='</div>';
   html+=`<div class="mtn-summit-info">
-    <b>Opomba:</b> temperature so ocenjene z vertikalnim gradientom −6.5°C/1000m iz modelske točke (~500 m) na vrh Triglava (2864 m). Za operativno planinarjenje vedno preveri
+    <b>Opomba:</b> temperature so modelsko prilagojene na višino vrha Triglava (2864 m) prek Open-Meteo statističnega zniževanja. Za operativno planinarjenje vedno preveri
     <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
   </div>`;
   el.innerHTML=html;
@@ -17986,10 +17978,8 @@ function _buildGoreKrvavec({krvavec}){
   for(let i=0;i<n;i++){
     const dt=new Date(d.time[i]);
     const wmo=d.weather_code?.[i]??0;
-    const tmax=d.temperature_2m_max?.[i];
-    const tmin=d.temperature_2m_min?.[i];
-    const tmaxK=tmax!=null?_mtnTempAtElev(tmax,400,1971):null;
-    const tminK=tmin!=null?_mtnTempAtElev(tmin,400,1971):null;
+    const tmaxK=d.temperature_2m_max?.[i]??null;
+    const tminK=d.temperature_2m_min?.[i]??null;
     const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
