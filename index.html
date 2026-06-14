@@ -814,6 +814,17 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-risk-factor b{display:block;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:400;color:var(--text)}
 .sc-risk-factor small{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .sc-risk-factor span{display:block;font-size:.64rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
+/* Suitability colour variants (higher = better: green → red) */
+.sc-risk-card.suit-excellent{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4)}
+.sc-risk-card.suit-good{background:rgba(132,204,22,.1);border-color:rgba(132,204,22,.35)}
+.sc-risk-card.suit-fair{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.sc-risk-card.suit-poor{background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.45)}
+.sc-risk-card.suit-bad{background:rgba(239,68,68,.16);border-color:rgba(239,68,68,.55)}
+.suit-excellent .sc-risk-level{color:#4ade80}
+.suit-good .sc-risk-level{color:#a3e635}
+.suit-fair .sc-risk-level{color:#fbbf24}
+.suit-poor .sc-risk-level{color:#fb923c}
+.suit-bad .sc-risk-level{color:#f87171}
 .sc-risk-scrub{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border)}
 .sc-risk-scrub-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
 .sc-risk-scrub-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
@@ -4035,6 +4046,22 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="sea-kpi-row" id="sea-kpis">
       <div class="sea-kpi"><div class="sea-kpi-val">…</div><div class="sea-kpi-lbl">Nalagam</div></div>
     </div>
+    <div class="card sc-risk-card suit-fair" id="sea-suit-card" style="margin-bottom:1rem">
+      <div class="sc-risk-head">
+        <span class="sc-risk-icon" id="sea-suit-icon">🏖</span>
+        <div class="sc-risk-text">
+          <div class="clabel" style="margin:0">🏖 Primernost za morje danes — Portorož / Piran</div>
+          <div class="sc-risk-level" id="sea-suit-level">—</div>
+          <div class="sc-risk-desc" id="sea-suit-desc">Nalagam…</div>
+        </div>
+        <div class="sc-risk-gauge">
+          <div class="sc-risk-pct" id="sea-suit-pct">—</div>
+          <div class="sc-risk-bar"><div class="sc-risk-fill" id="sea-suit-fill" style="width:0%"></div></div>
+          <div class="sc-risk-gauge-lbl">ocena</div>
+        </div>
+      </div>
+      <div class="sc-risk-factors" id="sea-suit-factors"></div>
+    </div>
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🌊 Stanje morja — Portorož / Piran</div>
       <div id="sea-marine-body" style="font-size:.78rem;color:var(--muted);margin-top:.5rem">Nalagam…</div>
@@ -4063,6 +4090,22 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="tab-gore" class="tab-pane">
     <div class="mtn-kpi-row" id="mtn-kpis">
       <div class="mtn-kpi"><div class="mtn-kpi-val">…</div><div class="mtn-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card sc-risk-card suit-fair" id="mtn-suit-card" style="margin-bottom:1rem">
+      <div class="sc-risk-head">
+        <span class="sc-risk-icon" id="mtn-suit-icon">🥾</span>
+        <div class="sc-risk-text">
+          <div class="clabel" style="margin:0">🥾 Primernost za v gore danes — Triglav / Julijske Alpe</div>
+          <div class="sc-risk-level" id="mtn-suit-level">—</div>
+          <div class="sc-risk-desc" id="mtn-suit-desc">Nalagam…</div>
+        </div>
+        <div class="sc-risk-gauge">
+          <div class="sc-risk-pct" id="mtn-suit-pct">—</div>
+          <div class="sc-risk-bar"><div class="sc-risk-fill" id="mtn-suit-fill" style="width:0%"></div></div>
+          <div class="sc-risk-gauge-lbl">ocena</div>
+        </div>
+      </div>
+      <div class="sc-risk-factors" id="mtn-suit-factors"></div>
     </div>
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">❄️ Meja zmrzali — 7 dni</div>
@@ -4095,6 +4138,22 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <div id="tab-padalci" class="tab-pane">
     <div class="fly-kpi-row" id="fly-kpis">
       <div class="fly-kpi"><div class="fly-kpi-val">…</div><div class="fly-kpi-lbl">Nalagam</div></div>
+    </div>
+    <div class="card sc-risk-card suit-fair" id="fly-suit-card" style="margin-bottom:1rem">
+      <div class="sc-risk-head">
+        <span class="sc-risk-icon" id="fly-suit-icon">🪂</span>
+        <div class="sc-risk-text">
+          <div class="clabel" style="margin:0">🪂 Primernost za letenje danes — Rečica / Savinjska dolina</div>
+          <div class="sc-risk-level" id="fly-suit-level">—</div>
+          <div class="sc-risk-desc" id="fly-suit-desc">Nalagam…</div>
+        </div>
+        <div class="sc-risk-gauge">
+          <div class="sc-risk-pct" id="fly-suit-pct">—</div>
+          <div class="sc-risk-bar"><div class="sc-risk-fill" id="fly-suit-fill" style="width:0%"></div></div>
+          <div class="sc-risk-gauge-lbl">ocena</div>
+        </div>
+      </div>
+      <div class="sc-risk-factors" id="fly-suit-factors"></div>
     </div>
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🪂 Okno letenja — danes (6–20h)</div>
@@ -17359,6 +17418,7 @@ async function initPadalci(){
     _buildPadalciFlyWindow(_padalciCache);
     _buildPadalciBLChart(_padalciCache);
     _buildPadalciDailyFc(_padalciCache);
+    _buildPadalciSuit(_padalciCache);
   }catch(e){console.error('initPadalci',e);}
 }
 
@@ -17557,6 +17617,7 @@ async function initMorje(){
     _buildMorjeMarine(_morjeCache);
     _buildMorjeFc(_morjeCache);
     _buildMorjeWind(_morjeCache);
+    _buildMorjeSuit(_morjeCache);
   }catch(e){console.error('initMorje',e);}
 }
 
@@ -17660,6 +17721,117 @@ function _buildMorjeWind({fc}){
   el.innerHTML=html;
 }
 
+// ══════════════════════════════════════════════════════════
+// ── SUITABILITY CARDS (sea / mountains / paragliding) ─────
+// ══════════════════════════════════════════════════════════
+// Suitability level (higher = better)
+function _suitClass(pct){
+  if(pct>=80)return{cls:'suit-excellent',lvl:'ODLIČNO',col:'#4ade80'};
+  if(pct>=60)return{cls:'suit-good',lvl:'DOBRO',col:'#a3e635'};
+  if(pct>=40)return{cls:'suit-fair',lvl:'ZMERNO',col:'#fbbf24'};
+  if(pct>=20)return{cls:'suit-poor',lvl:'SLABO',col:'#fb923c'};
+  return{cls:'suit-bad',lvl:'NEPRIMERNO',col:'#f87171'};
+}
+function _wmoShort(w){
+  if(w<=1)return'jasno';if(w<=3)return'delno oblačno';if(w<=48)return'megla';
+  if(w<=57)return'rosenje';if(w<=67)return'dež';if(w<=77)return'sneg';
+  if(w<=82)return'plohe';if(w<=86)return'snežne plohe';return'nevihte';
+}
+// Generic renderer for a suitability card (prefix → element ids)
+function _renderSuitCard(prefix,icon,pct,desc,factors){
+  const g=id=>document.getElementById(id);
+  const card=g(prefix+'-card');if(!card)return;
+  const s=_suitClass(pct);
+  card.className='card sc-risk-card '+s.cls;
+  if(g(prefix+'-icon'))g(prefix+'-icon').textContent=icon;
+  if(g(prefix+'-level'))g(prefix+'-level').textContent=s.lvl;
+  if(g(prefix+'-desc'))g(prefix+'-desc').textContent=desc;
+  if(g(prefix+'-pct'))g(prefix+'-pct').textContent=pct+' %';
+  const fill=g(prefix+'-fill');if(fill){fill.style.width=pct+'%';fill.style.background=s.col;}
+  if(g(prefix+'-factors'))g(prefix+'-factors').innerHTML=factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
+}
+// Sea / beach suitability for today (Portorož)
+function _buildMorjeSuit({fc,marine}){
+  const c=marine.current||{},cf=fc.current||{},d=fc.daily||{};
+  const sst=c.sea_surface_temperature,wave=c.wave_height,wind=cf.wind_speed_10m;
+  const tmax=d.temperature_2m_max?.[0],wmo=d.weather_code?.[0]??0;
+  let s=50;
+  if(sst!=null){if(sst>=24)s+=22;else if(sst>=22)s+=15;else if(sst>=20)s+=6;else if(sst>=18)s-=6;else s-=22;}
+  if(tmax!=null){if(tmax>=28)s+=16;else if(tmax>=24)s+=10;else if(tmax>=20)s+=2;else s-=12;}
+  if(wave!=null){if(wave<0.3)s+=8;else if(wave<0.6)s+=2;else if(wave<1.0)s-=8;else if(wave<1.5)s-=18;else s-=30;}
+  if(wind!=null){if(wind<12)s+=6;else if(wind<20)s-=2;else if(wind<30)s-=14;else s-=28;}
+  if(wmo>=95)s-=40;else if(wmo>=80)s-=22;else if(wmo>=51)s-=14;else if(wmo>=45)s-=6;else if(wmo<=2)s+=6;
+  const pct=Math.max(0,Math.min(100,Math.round(s)));
+  const desc=pct>=80?'Odlične razmere za kopanje in plažo — toplo morje, mirna gladina.'
+    :pct>=60?'Dobre razmere za morje, manjše omejitve.'
+    :pct>=40?'Zmerne razmere — morje hladnejše ali rahlo valovito.'
+    :pct>=20?'Slabe razmere za kopanje — mrzlo morje, veter ali valovi.'
+    :'Neprimerno za morje — slabo vreme ali razburkano morje.';
+  const factors=[
+    {l:'Temp. morja',v:sst!=null?sst.toFixed(1)+' °C':'—',d:sst==null?'—':sst>=22?'prijetno toplo':sst>=20?'sveže':'mrzlo'},
+    {l:'Temp. zraka',v:tmax!=null?Math.round(tmax)+' °C':'—',d:tmax==null?'—':tmax>=28?'vroče':tmax>=24?'toplo':tmax>=20?'milo':'hladno'},
+    {l:'Valovanje',v:wave!=null?wave.toFixed(1)+' m':'—',d:wave==null?'—':_seaStateLabel(wave)},
+    {l:'Veter',v:wind!=null?Math.round(wind)+' km/h':'—',d:wind==null?'—':wind<12?'šibek':wind<25?'zmeren':'močan'},
+    {l:'Vreme',v:_wmoShort(wmo),d:''}
+  ];
+  _renderSuitCard('sea-suit','🏖',pct,desc,factors);
+}
+// Mountain hiking suitability for today (Triglav / Julian Alps)
+function _buildGoreSuit({triglav}){
+  const d=triglav.daily||{},fs=triglav._freezeStats||[];
+  const tmax=d.temperature_2m_max?.[0],gust=d.wind_gusts_10m_max?.[0];
+  const precip=d.precipitation_sum?.[0],snow=d.snowfall_sum?.[0],wmo=d.weather_code?.[0]??0;
+  const freeze=fs[0]?.max??null;
+  const tTriglav=tmax!=null?_mtnTempAtElev(tmax,500,2864):null;
+  let s=62;
+  if(gust!=null){if(gust<25)s+=10;else if(gust<40)s-=6;else if(gust<60)s-=24;else if(gust<80)s-=40;else s-=55;}
+  if(precip!=null){if(precip<1)s+=8;else if(precip<5)s-=8;else if(precip<15)s-=22;else s-=38;}
+  if(wmo>=95)s-=45;else if(wmo>=80)s-=24;else if(wmo>=71)s-=18;else if(wmo>=51)s-=12;else if(wmo<=2)s+=8;
+  if(snow!=null&&snow>0){if(snow<2)s-=4;else if(snow<10)s-=16;else s-=30;}
+  if(tTriglav!=null){if(tTriglav<-15)s-=18;else if(tTriglav<-8)s-=8;else if(tTriglav<0)s-=2;}
+  const pct=Math.max(0,Math.min(100,Math.round(s)));
+  const desc=pct>=80?'Odlične razmere za turo — mirno vreme, šibek veter.'
+    :pct>=60?'Dobre razmere v gorah, a preveri lokalne pogoje.'
+    :pct>=40?'Zmerne razmere — veter, mraz ali padavine zahtevajo previdnost.'
+    :pct>=20?'Slabe razmere — močan veter ali padavine, le za izkušene.'
+    :'Neprimerno za turo — nevarne razmere v visokogorju.';
+  const factors=[
+    {l:'T vrh (2864 m)',v:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',d:tTriglav==null?'—':tTriglav<-8?'hud mraz':tTriglav<0?'pod lediščem':'znosno'},
+    {l:'Sunki vetra',v:gust!=null?Math.round(gust)+' km/h':'—',d:gust==null?'—':gust<25?'šibki':gust<40?'zmerni':gust<60?'močni':'nevarni'},
+    {l:'Padavine',v:precip!=null?precip.toFixed(0)+' mm':'—',d:precip==null?'—':precip<1?'suho':precip<5?'malo':'mokro'},
+    {l:'Sneg danes',v:snow!=null&&snow>0?snow.toFixed(0)+' cm':'0 cm',d:snow>0?(snow>=10?'pozor plazovi':'sveži sneg'):'brez'},
+    {l:'Meja zmrzali',v:freeze!=null?Math.round(freeze)+' m':'—',d:freeze==null?'—':freeze<1500?'nizko':freeze<2500?'srednje':'visoko'}
+  ];
+  _renderSuitCard('mtn-suit','🥾',pct,desc,factors);
+}
+// Paragliding suitability for today (peak of daytime flyability)
+function _buildPadalciSuit(d){
+  const h=d.hourly||{};
+  const today=new Date().toISOString().slice(0,10);
+  const idxs=[];(h.time||[]).forEach((t,i)=>{if(t.startsWith(today)&&h.is_day?.[i])idxs.push(i);});
+  let best=0,flyHours=0,maxBL=0,maxWind=0,maxCAPE=0;
+  idxs.forEach(i=>{
+    const wind=h.wind_speed_10m?.[i]??0,pp=h.precipitation_probability?.[i]??0,cape=h.cape?.[i]??0,bl=h.boundary_layer_height?.[i]??0;
+    const sc=_flyScore(wind,pp,cape,bl,h.is_day?.[i]);
+    if(sc>best)best=sc;if(sc>=70)flyHours++;
+    if(bl>maxBL)maxBL=bl;if(wind>maxWind)maxWind=wind;if(cape>maxCAPE)maxCAPE=cape;
+  });
+  const pct=Math.max(0,Math.min(100,Math.round(best)));
+  const desc=pct>=80?`Odlični pogoji za letenje — okno kakovostne termike ~${flyHours} h.`
+    :pct>=60?`Dobri pogoji, okno letenja ~${flyHours} h.`
+    :pct>=40?'Zmerni pogoji — termika šibka ali veter mejni.'
+    :pct>=20?'Slabi pogoji — veter, dež ali premočna termika.'
+    :'Neprimerno za letenje danes.';
+  const factors=[
+    {l:'Vrhunec dneva',v:pct,d:'fly score 0–100'},
+    {l:'Ure letenja',v:flyHours+' h',d:'score ≥ 70'},
+    {l:'Max BL strop',v:Math.round(maxBL)+' m',d:maxBL>1500?'visok':maxBL<400?'nizek':'zmeren'},
+    {l:'Max veter',v:Math.round(maxWind)+' km/h',d:maxWind>30?'premočan':maxWind>20?'mejni':'ugoden'},
+    {l:'Max CAPE',v:Math.round(maxCAPE)+' J/kg',d:maxCAPE>1000?'⚠️ nevihtno':maxCAPE>500?'pozor':'mirno'}
+  ];
+  _renderSuitCard('fly-suit','🪂',pct,desc,factors);
+}
+
 // ═══ GORE ══════════════════════════════════════════════════
 const MTN_TRIGLAV_LAT=46.3794,MTN_TRIGLAV_LON=13.8376; // Triglav area
 const MTN_KRVAVEC_LAT=46.2989,MTN_KRVAVEC_LON=14.5360; // Krvavec
@@ -17705,6 +17877,7 @@ async function initGore(){
     _buildGoreFreeze(_goreCache);
     _buildGoreTriglav(_goreCache);
     _buildGoreKrvavec(_goreCache);
+    _buildGoreSuit(_goreCache);
   }catch(e){console.error('initGore',e);}
 }
 
