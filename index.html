@@ -771,6 +771,18 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-scrub-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer}
 .sc-scrub-range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--cyan);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer}
 .sc-scrub-ticks{display:flex;justify-content:space-between;margin-top:.45rem;font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+/* Storm map (Slovenia heatmap) */
+.sc-slomap-card{margin-bottom:1rem}
+.sc-slomap-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem;flex-wrap:wrap}
+.sc-slomap-time{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--cyan)}
+.sc-slomap{width:100%;height:340px;border-radius:12px;overflow:hidden;background:var(--fc-bg);border:1px solid var(--border)}
+.sc-slomap-canvas-overlay{image-rendering:auto}
+.sc-slomap-legend{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:.6rem;font-size:.64rem;color:var(--muted)}
+.sc-slomap-legend span{display:inline-flex;align-items:center;gap:.3rem}
+.sc-slomap-legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sc-slomap-note{font-size:.64rem;color:var(--muted);margin-top:.4rem;line-height:1.5}
+.sc-slomap-pop{font-family:'Inter',sans-serif;font-size:.72rem;line-height:1.5}
+.sc-slomap-pop b{font-family:'JetBrains Mono',monospace}
 .sc-threat-row{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .sc-threat-left{display:flex;flex-direction:column;gap:.3rem}
 .sc-threat-tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
@@ -3249,6 +3261,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
       <input type="range" class="sc-scrub-range" id="sc-scrub-range" min="0" max="47" value="0" step="1" oninput="scSetHour(this.value)" aria-label="Premik napovedi naprej v urah">
       <div class="sc-scrub-ticks"><span>zdaj</span><span>+12 h</span><span>+24 h</span><span>+36 h</span><span>+48 h</span></div>
+    </div>
+
+    <!-- Slovenia storm-potential heatmap -->
+    <div class="card sc-slomap-card">
+      <div class="sc-slomap-head">
+        <span class="clabel" style="margin:0">🗺 Karta Slovenije — možnost neviht</span>
+        <span class="sc-slomap-time" id="sc-slomap-time">nalagam…</span>
+      </div>
+      <div class="sc-slomap" id="sc-slo-map"></div>
+      <div class="sc-slomap-legend">
+        <span><i style="background:rgba(74,222,128,.55)"></i>Brez</span>
+        <span><i style="background:rgba(132,204,22,.7)"></i>Nizko</span>
+        <span><i style="background:rgba(251,191,36,.8)"></i>Zmerno</span>
+        <span><i style="background:rgba(249,115,22,.85)"></i>Visoko</span>
+        <span><i style="background:rgba(220,38,38,.9)"></i>Zelo visoko</span>
+        <span><i style="background:rgba(162,28,175,.9)"></i>Ekstremno</span>
+      </div>
+      <div class="sc-slomap-note" id="sc-slomap-note">Nevihtni potencial (CAPE, indeks dviga, Total Totals, striženje vetra) na mreži točk po Sloveniji. Premakni časovni drsnik za napoved do +48 h. Klikni mesto za podrobnosti. Vir: Open-Meteo.</div>
     </div>
 
     <!-- Instability indices -->
@@ -12245,18 +12275,23 @@ function drawSoundingProfile(T_sfc,Td_sfc,T850,Td850,T700,T500,H_lcl,H_mix,cape)
   svg.innerHTML=html;
 }
 
-function calcStormThreat(cape,cin,li,tt,shear){
+// Numeric storm-potential score (0–88) — single source of truth
+function scThreatScore(cape,cin,li,tt,shear){
   let s=0;
   if(cape>=2500)s+=40;else if(cape>=1500)s+=30;else if(cape>=1000)s+=20;else if(cape>=500)s+=10;else if(cape>=100)s+=4;
   if(li<=-6)s+=15;else if(li<=-4)s+=10;else if(li<=-2)s+=5;else if(li<=0)s+=2;
   if(tt>=55)s+=18;else if(tt>=50)s+=10;else if(tt>=45)s+=5;else if(tt>=40)s+=2;
   if(shear>=25)s+=15;else if(shear>=15)s+=8;else if(shear>=10)s+=4;
   if(cin<-200)s-=10;else if(cin<-100)s-=5;
-  if(s>=60)return{level:'EKSTREMNO',cls:'sc-extreme',desc:'Izjemne razmere za nevihte. Možne supercelice, toča in poplave.'};
-  if(s>=40)return{level:'VISOKO',cls:'sc-high',desc:'Ugodne razmere za nevihtni razvoj. Pričakovati sunkovit veter, intenzivne padavine, možna toča.'};
-  if(s>=22)return{level:'ZMERNO',cls:'sc-moderate',desc:'Zmeren potencial. Lokalne plohe in nevihte možne, zlasti v popoldanskih urah.'};
-  if(s>=8)return{level:'NIZKO',cls:'sc-low',desc:'Majhen potencial. Izolirane nevihte niso izključene pri dovolj triggerju.'};
-  return{level:'BREZ',cls:'sc-none',desc:'Atmosfera stabilna. Nevihten razvoj ni pričakovan.'};
+  return s;
+}
+function calcStormThreat(cape,cin,li,tt,shear){
+  const s=scThreatScore(cape,cin,li,tt,shear);
+  if(s>=60)return{level:'EKSTREMNO',cls:'sc-extreme',score:s,desc:'Izjemne razmere za nevihte. Možne supercelice, toča in poplave.'};
+  if(s>=40)return{level:'VISOKO',cls:'sc-high',score:s,desc:'Ugodne razmere za nevihtni razvoj. Pričakovati sunkovit veter, intenzivne padavine, možna toča.'};
+  if(s>=22)return{level:'ZMERNO',cls:'sc-moderate',score:s,desc:'Zmeren potencial. Lokalne plohe in nevihte možne, zlasti v popoldanskih urah.'};
+  if(s>=8)return{level:'NIZKO',cls:'sc-low',score:s,desc:'Majhen potencial. Izolirane nevihte niso izključene pri dovolj triggerju.'};
+  return{level:'BREZ',cls:'sc-none',score:s,desc:'Atmosfera stabilna. Nevihten razvoj ni pričakovan.'};
 }
 function renderStormChaser(){
   if(!_scData)return;
@@ -12360,6 +12395,193 @@ function renderStormChaser(){
 function scSetHour(v){
   _scHourOffset=Math.max(0,Math.min(47,parseInt(v,10)||0));
   if(_scData)renderStormChaser();
+  try{renderSloStormMap();}catch(e){console.warn('SloMap:',e);}
+}
+
+// ══════════════════════════════════════════════════════════
+// ── KARTA SLOVENIJE — toplotna karta nevihtnega potenciala ─
+// ══════════════════════════════════════════════════════════
+let _sloMap=null,_sloOverlay=null,_sloMarkers=[],_sloData=null,_sloFetchTime=0,_sloGrid=[];
+
+// Grobi obris Slovenije [lon,lat] — za filtriranje mreže in mehko bledenje robov
+const SLO_POLY=[[13.38,46.22],[13.70,46.51],[14.10,46.48],[14.46,46.61],[14.96,46.62],[15.35,46.65],[15.75,46.69],[16.07,46.66],[16.37,46.87],[16.52,46.50],[16.61,46.47],[16.20,46.32],[15.67,46.21],[15.72,45.88],[15.33,45.72],[15.28,45.60],[14.90,45.49],[14.55,45.62],[14.20,45.49],[13.92,45.45],[13.58,45.51],[13.76,45.59],[13.62,45.81],[13.65,46.01],[13.38,46.22]];
+
+function sloPointIn(lon,lat){
+  let inside=false;
+  for(let i=0,j=SLO_POLY.length-1;i<SLO_POLY.length;j=i++){
+    const xi=SLO_POLY[i][0],yi=SLO_POLY[i][1],xj=SLO_POLY[j][0],yj=SLO_POLY[j][1];
+    if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;
+  }
+  return inside;
+}
+
+// Referenčna mesta (anker za orientacijo)
+const SLO_CITIES=[
+  {n:'Ljubljana',la:46.056,lo:14.506},{n:'Maribor',la:46.554,lo:15.646},
+  {n:'Celje',la:46.231,lo:15.260},{n:'Kranj',la:46.239,lo:14.356},
+  {n:'Koper',la:45.548,lo:13.730},{n:'Novo mesto',la:45.804,lo:15.169},
+  {n:'Murska Sobota',la:46.658,lo:16.166},{n:'Nova Gorica',la:45.956,lo:13.648},
+  {n:'Postojna',la:45.776,lo:14.214},{n:'Ptuj',la:46.420,lo:15.870},
+  {n:'Rečica ob Savinji',la:46.326,lo:14.921}
+];
+
+// Sestavi mrežo točk znotraj Slovenije
+function buildSloGrid(){
+  const pts=[];
+  for(let la=45.45;la<=46.85;la+=0.18){
+    for(let lo=13.4;lo<=16.55;lo+=0.22){
+      if(sloPointIn(lo,la))pts.push({la:+la.toFixed(3),lo:+lo.toFixed(3)});
+    }
+  }
+  return pts;
+}
+
+// Barva po oceni nevihtnega potenciala → [r,g,b]
+function sloScoreColor(s){
+  const stops=[
+    [0,  [74,222,128]],   // brez (zelena)
+    [8,  [132,204,22]],   // nizko (limeta)
+    [22, [251,191,36]],   // zmerno (jantar)
+    [40, [249,115,22]],   // visoko (oranžna)
+    [60, [220,38,38]],    // zelo visoko (rdeča)
+    [78, [162,28,175]]    // ekstremno (vijolična)
+  ];
+  if(s<=stops[0][0])return stops[0][1];
+  if(s>=stops[stops.length-1][0])return stops[stops.length-1][1];
+  for(let i=1;i<stops.length;i++){
+    if(s<=stops[i][0]){
+      const [s0,c0]=stops[i-1],[s1,c1]=stops[i];
+      const t=(s-s0)/(s1-s0);
+      return [Math.round(c0[0]+(c1[0]-c0[0])*t),Math.round(c0[1]+(c1[1]-c0[1])*t),Math.round(c0[2]+(c1[2]-c0[2])*t)];
+    }
+  }
+  return stops[stops.length-1][1];
+}
+function sloScoreLevel(s){
+  if(s>=60)return'Ekstremno';if(s>=40)return'Zelo visoko';if(s>=22)return'Zmerno';if(s>=8)return'Nizko';return'Brez';
+}
+
+// Izračun ocene za eno točko pri urnem indeksu ci
+function sloPointScore(h,ci){
+  const cape=scIdx(h.cape,ci)??0;
+  const li=scIdx(h.lifted_index,ci)??0;
+  const T850=scIdx(h.temperature_850hPa,ci);
+  const T500=scIdx(h.temperature_500hPa,ci);
+  const rh850=scIdx(h.relative_humidity_850hPa,ci)??60;
+  const Td850=(T850!=null)?scMagnus(T850,rh850):null;
+  const tt=(T850!=null&&T500!=null&&Td850!=null)?(T850+Td850-2*T500):0;
+  const ws10=scIdx(h.wind_speed_10m,ci)??0,wd10=scIdx(h.wind_direction_10m,ci)??0;
+  const ws500=scIdx(h.wind_speed_500hPa,ci)??ws10,wd500=scIdx(h.wind_direction_500hPa,ci)??wd10;
+  const uv0=scUV(ws10,wd10),uv5=scUV(ws500,wd500);
+  const shear=Math.sqrt((uv5.u-uv0.u)**2+(uv5.v-uv0.v)**2)||0;
+  return{score:scThreatScore(cape,0,li,tt,shear),cape,li,tt,shear};
+}
+
+async function fetchSloStormMap(){
+  if(_sloData&&Date.now()-_sloFetchTime<15*60*1000){renderSloStormMap();return;}
+  if(!_sloGrid.length)_sloGrid=buildSloGrid();
+  const note=document.getElementById('sc-slomap-time');
+  if(note)note.textContent='nalagam mrežo…';
+  try{
+    const lats=_sloGrid.map(p=>p.la).join(',');
+    const lons=_sloGrid.map(p=>p.lo).join(',');
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}`+
+      `&hourly=cape,lifted_index,wind_speed_10m,wind_direction_10m`+
+      `,wind_speed_500hPa,wind_direction_500hPa`+
+      `,temperature_850hPa,temperature_500hPa,relative_humidity_850hPa`+
+      `&timezone=Europe%2FLjubljana&forecast_days=2`;
+    const r=await fetch(url);const d=await r.json();
+    const arr=Array.isArray(d)?d:[d];
+    if(arr[0]&&arr[0].error){if(note)note.textContent='napaka API';return;}
+    _sloData=arr.map((o,i)=>({la:_sloGrid[i]?.la??o.latitude,lo:_sloGrid[i]?.lo??o.longitude,hourly:o.hourly,time:(o.hourly?.time||[]).map(t=>new Date(t))}));
+    _sloFetchTime=Date.now();
+  }catch(e){
+    console.warn('SloMap fetch:',e);
+    if(note)note.textContent='ni dosegljivo';
+    return;
+  }
+  await initSloMap();
+  renderSloStormMap();
+}
+
+async function initSloMap(){
+  if(_sloMap)return;
+  if(typeof L==='undefined'){
+    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+  }
+  const el=document.getElementById('sc-slo-map');if(!el)return;
+  _sloMap=L.map('sc-slo-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:11}).setView([46.15,14.99],7);
+  const baseUrl=isDark()
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  L.tileLayer(baseUrl,{maxZoom:11,subdomains:'abcd'}).addTo(_sloMap);
+  // City reference markers
+  SLO_CITIES.forEach(c=>{
+    const m=L.circleMarker([c.la,c.lo],{radius:4,color:'#1e293b',weight:1,fillColor:'#e2e8f0',fillOpacity:.85}).addTo(_sloMap);
+    m._city=c;_sloMarkers.push(m);
+  });
+  _sloMap.whenReady(()=>setTimeout(()=>_sloMap&&_sloMap.invalidateSize(),200));
+}
+
+// Toplotna karta: IDW interpolacija na nizkoločljivem canvasu → georeferenciran imageOverlay
+function renderSloStormMap(){
+  if(!_sloMap||!_sloData||!_sloData.length)return;
+  const first=_sloData.find(p=>p.time&&p.time.length);if(!first)return;
+  const now=new Date();
+  let ciNow=first.time.findIndex(t=>t>=now)-1;if(ciNow<0)ciNow=0;
+  const ci=Math.min(ciNow+_scHourOffset,first.time.length-1);
+  // ocene po točkah
+  const pts=_sloData.filter(p=>p.hourly).map(p=>{const r=sloPointScore(p.hourly,ci);return{la:p.la,lo:p.lo,...r};});
+  if(!pts.length)return;
+  // bbox
+  const las=pts.map(p=>p.la),los=pts.map(p=>p.lo);
+  const minLa=Math.min(...las)-0.12,maxLa=Math.max(...las)+0.12;
+  const minLo=Math.min(...los)-0.15,maxLo=Math.max(...los)+0.15;
+  const W=200,H=140;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');const img=ctx.createImageData(W,H);
+  const reach=0.30; // ° — onkraj te razdalje od najbližje točke pobledi
+  for(let y=0;y<H;y++){
+    const lat=maxLa-(y/(H-1))*(maxLa-minLa);
+    for(let x=0;x<W;x++){
+      const lon=minLo+(x/(W-1))*(maxLo-minLo);
+      let num=0,den=0,nearest=Infinity;
+      for(const p of pts){
+        const dla=lat-p.la,dlo=(lon-p.lo)*0.69; // popravek za zemljepisno širino
+        const d2=dla*dla+dlo*dlo;
+        if(d2<nearest)nearest=d2;
+        const w=1/(d2+1e-4);
+        num+=w*p.score;den+=w;
+      }
+      const score=den?num/den:0;
+      const idx=(y*W+x)*4;
+      const [r,g,b]=sloScoreColor(score);
+      const nd=Math.sqrt(nearest);
+      // alfa: vidno znotraj dosega, mehko bledi do roba; tudi delno glede na oceno
+      let a=nd<reach?1:Math.max(0,1-(nd-reach)/0.22);
+      a*=0.30+0.50*Math.min(1,score/45)+0.20; // 0.5–0.95
+      img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=Math.round(Math.min(1,a)*200);
+    }
+  }
+  ctx.putImageData(img,0,0);
+  const dataUrl=cv.toDataURL();
+  const bounds=[[minLa,minLo],[maxLa,maxLo]];
+  if(_sloOverlay){_sloOverlay.setBounds(bounds);_sloOverlay.setUrl(dataUrl);}
+  else{_sloOverlay=L.imageOverlay(dataUrl,bounds,{opacity:0.78,interactive:false,className:'sc-slomap-canvas-overlay'}).addTo(_sloMap);}
+  // popups na mestnih markerjih (najbližja ocena)
+  _sloMarkers.forEach(m=>{
+    const c=m._city;let best=null,bd=Infinity;
+    for(const p of pts){const dla=c.la-p.la,dlo=(c.lo-p.lo)*0.69;const d2=dla*dla+dlo*dlo;if(d2<bd){bd=d2;best=p;}}
+    if(best){
+      const col=sloScoreColor(best.score);
+      m.bindPopup(`<div class="sc-slomap-pop"><b>${c.n}</b><br>Potencial: <b style="color:rgb(${col[0]},${col[1]},${col[2]})">${sloScoreLevel(best.score)}</b> (${Math.round(best.score)})<br>CAPE <b>${Math.round(best.cape)}</b> · LI <b>${best.li.toFixed(1)}</b> · TT <b>${Math.round(best.tt)}</b> · shear <b>${Math.round(best.shear)}</b> km/h</div>`);
+    }
+  });
+  // časovna oznaka
+  const tEl=document.getElementById('sc-slomap-time');
+  const t=first.time[ci];
+  if(tEl&&t){const dayLbl=['ned','pon','tor','sre','čet','pet','sob'][t.getDay()];const hh=String(t.getHours()).padStart(2,'0');tEl.textContent=_scHourOffset===0?`zdaj · ${hh}:00`:`${dayLbl} ${hh}:00 · +${_scHourOffset}h`;}
 }
 // ══════════════════════════════════════════════════════════
 // ── KLIMATOLOGIJA (4 features) ────────────────────────────
@@ -16115,6 +16337,7 @@ function updateAdvViz(d,ci){
 function initStormChaser(){
   if(!_scInit){_scInit=true;}
   fetchStormChaser();
+  try{fetchSloStormMap();}catch(e){console.error('slomap',e);}
   try{buildWindFingerprint();}catch(e){console.error('fp',e);}
   try{buildTurbulenceIndex();}catch(e){console.error('turb',e);}
 }
