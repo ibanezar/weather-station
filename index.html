@@ -2060,6 +2060,8 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
+#tab-gallery{isolation:isolate;contain:layout paint}
+@media(max-width:768px){.gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}}
 </style>
 </head>
 <body>
