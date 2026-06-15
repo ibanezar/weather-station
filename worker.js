@@ -36,7 +36,7 @@ function isAllowedOrigin(request) {
 const CORS_ALLOWED = {
   "Access-Control-Allow-Origin":  "https://ibanezar.github.io",
   "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
 };
 const CORS_DENY = { "Access-Control-Allow-Origin": "null" };
 
@@ -1129,6 +1129,13 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
           status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
+        const secret = env.DELETE_SECRET;
+        const auth = request.headers.get("Authorization") || "";
+        if (!secret || auth !== "Bearer " + secret) {
+          return new Response(JSON.stringify({ error: "Nepooblaščen dostop" }), {
+            status: 401, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
         const key = decodeURIComponent(path.slice("/gallery/delete/".length));
         if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
           status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
