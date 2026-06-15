@@ -2060,8 +2060,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
-#tab-gallery{isolation:isolate;contain:layout paint}
-@media(max-width:768px){.gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}}
+#tab-gallery{isolation:isolate;contain:layout paint;will-change:transform}
+@media(max-width:768px){
+  #tab-gallery.active{animation:none}
+  .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
+}
 </style>
 </head>
 <body>
@@ -6424,7 +6427,7 @@ let _lbIdx = 0;
 let _galleryPendingFile = null;
 
 function initGallery(){
-  if(!_galleryLoaded){ loadGallery(); _galleryLoaded=true; }
+  if(!_galleryLoaded){ _galleryLoaded=true; setTimeout(loadGallery, 260); }
   const drop = document.getElementById('gallery-drop');
   if(drop && !drop._ddSetup){
     drop._ddSetup = true;
@@ -6442,7 +6445,7 @@ async function loadGallery(){
     const data = await res.json();
     _galleryPhotos = data.photos || [];
     if(cnt) cnt.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';
-    renderGallery();
+    requestAnimationFrame(()=>requestAnimationFrame(renderGallery));
   } catch(e){
     if(grid) grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">⚠️</div><div class="gallery-empty-text">Napaka pri nalaganju fotografij.</div></div>';
   }
