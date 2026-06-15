@@ -2068,7 +2068,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
   .gallery-card{aspect-ratio:unset}
   .gallery-grid{grid-auto-rows:calc(50vw - 0.75rem)}
-  .alert-ticker{backdrop-filter:none;-webkit-backdrop-filter:none}
+  /* Na mobilnem backdrop-filter:blur povzroča stalno re-rasterizacijo (flicker)
+     zaradi neprekinjene ticker animacije — onemogočeno na touch napravah */
+  *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
 }
 </style>
 </head>
