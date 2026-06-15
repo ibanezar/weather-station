@@ -1,3 +1,7 @@
 name = "weatherireica1"
 main = "worker.js"
 compatibility_date = "2024-09-23"
+
+[[r2_buckets]]
+binding = "PHOTOS_R2"
+bucket_name = "meteorec-photos"

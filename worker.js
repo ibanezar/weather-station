@@ -1053,6 +1053,92 @@ Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 
         }
       }
 
+      // ── Gallery / photo endpoints ──────────────────────────
+      if (path === "/gallery") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ photos: [], error: "R2 not bound" }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const listed = await env.PHOTOS_R2.list({ include: ["customMetadata", "httpMetadata"] });
+        const photos = listed.objects
+          .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
+          .map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            uploaded: obj.uploaded,
+            contentType: obj.httpMetadata?.contentType || "image/jpeg",
+            ...(obj.customMetadata || {})
+          }));
+        return new Response(JSON.stringify({ photos, truncated: listed.truncated }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+        });
+      }
+
+      if (path === "/gallery/upload" && request.method === "POST") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        let fd;
+        try { fd = await request.formData(); } catch (e) {
+          return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const file = fd.get("photo");
+        if (!file || !file.size) return new Response(JSON.stringify({ error: "Ni datoteke" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const allowed = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+        if (!allowed.includes(file.type)) return new Response(JSON.stringify({ error: "Podprti formati: JPEG, PNG, WebP" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        if (file.size > 20 * 1024 * 1024) return new Response(JSON.stringify({ error: "Datoteka je prevelika (max 20 MB)" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+        const uuid = crypto.randomUUID().split("-")[0];
+        const key = `photos/${Date.now()}-${uuid}.${ext}`;
+        await env.PHOTOS_R2.put(key, file.stream(), {
+          httpMetadata: { contentType: file.type },
+          customMetadata: {
+            title:      (fd.get("title")   || "").slice(0, 120),
+            caption:    (fd.get("caption") || "").slice(0, 500),
+            author:     (fd.get("author")  || "Anonimno").slice(0, 60),
+            weather:    (fd.get("weather") || "").slice(0, 200),
+            uploadedAt: new Date().toISOString()
+          }
+        });
+        return new Response(JSON.stringify({ ok: true, key }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
+      if (path.startsWith("/gallery/img/")) {
+        if (!env.PHOTOS_R2) return new Response("R2 not bound", { status: 503 });
+        const key = decodeURIComponent(path.slice("/gallery/img/".length));
+        if (!key.startsWith("photos/")) return new Response("Not found", { status: 404 });
+        const obj = await env.PHOTOS_R2.get(key);
+        if (!obj) return new Response("Not found", { status: 404 });
+        return new Response(obj.body, {
+          headers: {
+            ...CORS_ALLOWED,
+            "Content-Type": obj.httpMetadata?.contentType || "image/jpeg",
+            "Cache-Control": "public, max-age=31536000, immutable",
+          }
+        });
+      }
+
+      if (path.startsWith("/gallery/delete/") && request.method === "DELETE") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const key = decodeURIComponent(path.slice("/gallery/delete/".length));
+        if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        await env.PHOTOS_R2.delete(key);
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
