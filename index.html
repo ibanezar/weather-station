@@ -11902,7 +11902,7 @@ function _scDesc(obs){
   return parts.join(' · ');
 }
 
-async function _scInit(){
+async function _soundscapeInit(){
   const T=window.Tone;if(!T)return;
   await T.start();
   T.getContext().resume();
@@ -12007,7 +12007,7 @@ async function toggleSoundscape(){
     lbl.textContent='Inicializiram…';
     if(desc)desc.textContent='';
     try{
-      await _scInit();
+      await _soundscapeInit();
       _scPlaying=true;
       lbl.textContent='V živo';
       if(_lastBriefObs)updateSoundscape(_lastBriefObs);
