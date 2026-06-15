@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vreme-static-v7';
-const CACHE_API    = 'vreme-api-v7';
+const CACHE_STATIC = 'vreme-static-v8';
+const CACHE_API    = 'vreme-api-v8';
 
 // Stale-while-revalidate TTLs per host (ms)
 const API_TTL = {
@@ -73,7 +73,22 @@ self.addEventListener('fetch', e => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
-  // Own origin — stale-while-revalidate (90 s TTL for fast repeat loads)
+  // HTML navigacije (app shell) — network-first, da uporabnik VEDNO dobi
+  // svežo verzijo. Cache je le offline fallback. Brez tega je SW serviral
+  // staro index.html in popravki niso prišli do uporabnika.
+  if (url.origin === location.origin &&
+      (request.mode === 'navigate' || request.destination === 'document')) {
+    e.respondWith(
+      fetchAndCache(request, CACHE_STATIC).catch(() =>
+        caches.open(CACHE_STATIC)
+          .then(c => c.match(request))
+          .then(r => r ?? new Response('', { status: 503 }))
+      )
+    );
+    return;
+  }
+
+  // Ostali own-origin viri — stale-while-revalidate (90 s TTL za hitre ponovne nalaganja)
   if (url.origin === location.origin) {
     e.respondWith(
       caches.open(CACHE_STATIC).then(async cache => {
