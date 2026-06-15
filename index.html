@@ -2062,8 +2062,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
-@media(max-width:768px){
-  #tab-gallery.active{animation:none}
+#tab-gallery{min-height:70vh}
+#tab-gallery.active{animation:none}
+@media(pointer:coarse),(max-width:768px){
   .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
   .gallery-card{aspect-ratio:unset}
   .gallery-grid{grid-auto-rows:calc(50vw - 0.75rem)}
@@ -4422,13 +4423,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ═══ GALERIJA TAB ═══ -->
   <div id="tab-gallery" class="tab-pane">
 
-    <div class="gallery-drop" id="gallery-drop" onclick="document.getElementById('gallery-file-input').click()">
+    <div class="gallery-drop" id="gallery-drop" onclick="galleryOpenPicker()">
       <div class="gallery-drop-icon">📸</div>
       <div class="gallery-drop-title">Dodaj fotografijo</div>
       <div class="gallery-drop-sub">Povleci in spusti ali klikni za izbiro · JPEG, PNG, WebP · max 20 MB</div>
-      <button class="gallery-pick-btn" onclick="event.stopPropagation();document.getElementById('gallery-file-input').click()">Izberi datoteko</button>
+      <button class="gallery-pick-btn" onclick="event.stopPropagation();galleryOpenPicker()">Izberi datoteko</button>
     </div>
-    <input type="file" id="gallery-file-input" accept="image/*" style="display:none" onchange="galleryFileSelected(this.files[0])">
 
     <div class="gallery-count" id="gallery-count"></div>
 
@@ -6430,6 +6430,14 @@ let _galleryLoaded = false;
 let _lbIdx = 0;
 let _galleryPendingFile = null;
 
+function galleryOpenPicker(){
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = () => { if(inp.files[0]) galleryFileSelected(inp.files[0]); };
+  inp.click();
+}
+
 function initGallery(){
   if(!_galleryLoaded){ _galleryLoaded=true; setTimeout(loadGallery, 260); }
   const drop = document.getElementById('gallery-drop');
@@ -6496,7 +6504,7 @@ function galleryFileSelected(file){
   const cond = document.getElementById('cond-label')?.textContent?.trim();
   if(chip) chip.textContent = [t ? t+'°C' : '', cond].filter(Boolean).join(' · ') || 'ni podatkov';
   document.getElementById('gallery-upload-modal')?.classList.add('open');
-  document.getElementById('gallery-file-input').value='';
+  // file input is dynamic, no need to reset
 }
 
 function closeGalleryUploadModal(){
