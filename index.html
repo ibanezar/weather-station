@@ -145,7 +145,11 @@
 }
 
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:100vh;min-height:100svh;overflow-x:hidden;transition:background .35s,color .35s}
+/* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
+   sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
+   -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
+   obeh stanjih URL vrstice -> body višina konstantna -> ni povratne zanke. */
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
@@ -2062,10 +2066,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
-/* Galerija je edini tab ki pristane v "mrtvi coni" med svh in lvh višino —
-   to povzroča oscilacijo URL vrstice (flicker). Z min-height:100lvh je stran
-   vedno scrollable, URL vrstica se skrije enkrat in ostane = stabilno. */
-#tab-gallery{min-height:100vh;min-height:100lvh}
 #tab-gallery.active{animation:none !important;opacity:1 !important}
 @media(pointer:coarse),(max-width:768px){
   .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
