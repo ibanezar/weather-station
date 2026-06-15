@@ -6516,11 +6516,23 @@ async function gallerySubmitUpload(){
     const data = await res.json();
     if(!res.ok || !data.ok) throw new Error(data.error || 'Napaka pri nalaganju');
     if(fill) fill.style.width='100%';
+    // Optimistic update — dodamo sliko direktno brez re-fetcha (nič ne flicera)
+    _galleryPhotos.unshift({
+      key: data.key,
+      uploaded: new Date().toISOString(),
+      uploadedAt: new Date().toISOString(),
+      contentType: _galleryPendingFile.type,
+      title:   fd.get('title')   || '',
+      caption: fd.get('caption') || '',
+      author:  fd.get('author')  || 'Anonimno',
+      weather: chip
+    });
+    const _cnt = document.getElementById('gallery-count');
+    if(_cnt) _cnt.textContent = _galleryPhotos.length+' fotografij';
+    renderGallery();
     closeGalleryUploadModal();
     showToast('Fotografija uspešno naložena! 📸');
     ['gallery-title','gallery-caption','gallery-author'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
-    _galleryLoaded = false;
-    loadGallery();
   } catch(e){
     showToast('Napaka: '+e.message);
   } finally {
@@ -6537,8 +6549,10 @@ async function galleryDelete(idx){
   try {
     await fetch(PROXY+'/gallery/delete/'+encodeURIComponent(photo.key), { method:'DELETE' });
     showToast('Fotografija izbrisana.');
-    _galleryLoaded = false;
-    loadGallery();
+    _galleryPhotos.splice(idx, 1);
+    const _cnt2 = document.getElementById('gallery-count');
+    if(_cnt2) _cnt2.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';
+    renderGallery();
   } catch(e){
     showToast('Napaka pri brisanju.');
   }
