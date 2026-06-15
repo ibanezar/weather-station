@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>Meteorec — Rečica ob Savinji</title>
 <meta name="theme-color" content="#2563eb" id="theme-color-meta">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2060,10 +2062,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
-#tab-gallery{isolation:isolate;contain:layout paint;will-change:transform}
 @media(max-width:768px){
   #tab-gallery.active{animation:none}
   .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
+  .gallery-card{aspect-ratio:unset}
+  .gallery-grid{grid-auto-rows:calc(50vw - 0.75rem)}
+  .alert-ticker{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 </style>
 </head>
