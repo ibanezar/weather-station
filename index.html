@@ -6566,8 +6566,22 @@ async function galleryDelete(idx){
   const photo = _galleryPhotos[idx];
   if(!photo) return;
   if(!confirm('Izbriši to fotografijo?')) return;
+  let pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd){
+    pwd = prompt('Geslo za brisanje:');
+    if(!pwd) return;
+  }
   try {
-    await fetch(PROXY+'/gallery/delete/'+encodeURIComponent(photo.key), { method:'DELETE' });
+    const res = await fetch(PROXY+'/gallery/delete/'+encodeURIComponent(photo.key), {
+      method:'DELETE',
+      headers:{ 'Authorization': 'Bearer '+pwd }
+    });
+    if(res.status === 401){
+      sessionStorage.removeItem('_galAdminPwd');
+      showToast('Napačno geslo.');
+      return;
+    }
+    sessionStorage.setItem('_galAdminPwd', pwd);
     showToast('Fotografija izbrisana.');
     _galleryPhotos.splice(idx, 1);
     const _cnt2 = document.getElementById('gallery-count');
