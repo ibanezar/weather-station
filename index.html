@@ -2027,7 +2027,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
 .gallery-empty-icon{font-size:3rem;margin-bottom:.75rem}
 .gallery-empty-text{font-size:.88rem}
-.gallery-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:1rem}
+.gallery-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
 .gallery-modal-overlay.open{display:flex}
 .gallery-modal{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(600px,98vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
 .gallery-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);font-size:.88rem;font-weight:700;flex-shrink:0}
@@ -6527,11 +6527,11 @@ async function gallerySubmitUpload(){
       author:  fd.get('author')  || 'Anonimno',
       weather: chip
     });
-    const _cnt = document.getElementById('gallery-count');
-    if(_cnt) _cnt.textContent = _galleryPhotos.length+' fotografij';
-    renderGallery();
     closeGalleryUploadModal();
     showToast('Fotografija uspešno naložena! 📸');
+    const _cnt = document.getElementById('gallery-count');
+    if(_cnt) _cnt.textContent = _galleryPhotos.length+' fotografij';
+    requestAnimationFrame(renderGallery);
     ['gallery-title','gallery-caption','gallery-author'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
   } catch(e){
     showToast('Napaka: '+e.message);
