@@ -2026,7 +2026,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-card-del{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:26px;height:26px;color:#fff;font-size:.8rem;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .15s}
 .gallery-card:hover .gallery-card-del{display:flex}
 .gallery-card-del:hover{background:rgba(220,38,38,.8)}
-.gallery-empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.gallery-empty{grid-column:1/-1;text-align:center;padding:3rem 1rem;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted)}
 .gallery-empty-icon{font-size:3rem;margin-bottom:.75rem}
 .gallery-empty-text{font-size:.88rem}
 .gallery-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
@@ -2062,12 +2062,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-lb-prev{left:1rem}
 .gallery-lb-next{right:1rem}
 .gallery-count{font-size:.65rem;color:var(--muted);margin-bottom:.75rem;text-align:right}
-#tab-gallery{min-height:70vh}
 #tab-gallery.active{animation:none !important;opacity:1 !important}
 @media(pointer:coarse),(max-width:768px){
   .gallery-card,.gallery-card img,.gallery-card-overlay,.gallery-card-del,.gallery-drop,.gallery-pick-btn{transition:none}
-  .gallery-card{aspect-ratio:unset}
-  .gallery-grid{grid-auto-rows:calc(50vw - 0.75rem)}
   /* Na mobilnem backdrop-filter:blur povzroča stalno re-rasterizacijo (flicker)
      zaradi neprekinjene ticker animacije — onemogočeno na touch napravah */
   *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
