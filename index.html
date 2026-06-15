@@ -6442,7 +6442,7 @@ function galleryOpenPicker(){
 }
 
 function initGallery(){
-  if(!_galleryLoaded){ _galleryLoaded=true; setTimeout(loadGallery, 260); }
+  if(!_galleryLoaded){ _galleryLoaded=true; loadGallery(); }
   const drop = document.getElementById('gallery-drop');
   if(drop && !drop._ddSetup){
     drop._ddSetup = true;
@@ -6460,7 +6460,7 @@ async function loadGallery(){
     const data = await res.json();
     _galleryPhotos = data.photos || [];
     if(cnt) cnt.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';
-    requestAnimationFrame(()=>requestAnimationFrame(renderGallery));
+    renderGallery();
   } catch(e){
     if(grid) grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">⚠️</div><div class="gallery-empty-text">Napaka pri nalaganju fotografij.</div></div>';
   }
