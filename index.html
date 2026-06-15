@@ -2038,7 +2038,23 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
      zaradi neprekinjene ticker animacije — onemogočeno na touch napravah */
   *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
 }
+
+/* ── Soundscape ── */
+.sc-bar{display:flex;align-items:center;gap:.75rem;padding-top:.75rem;border-top:1px solid var(--border);margin-top:.6rem}
+.sc-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .9rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.68rem;font-weight:600;cursor:pointer;transition:border-color .25s,color .25s,background .25s;font-family:'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;line-height:1;white-space:nowrap}
+.sc-btn:hover{border-color:var(--blue);color:var(--blue)}
+.sc-btn.sc-on{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.07)}
+.sc-btn .sc-icon{font-size:.9rem;transition:transform .4s}
+.sc-btn.sc-on .sc-icon{animation:sc-spin 8s linear infinite}
+@keyframes sc-spin{to{transform:rotate(360deg)}}
+.sc-eq{display:none;align-items:flex-end;gap:2px;height:12px}
+.sc-btn.sc-on .sc-eq{display:flex}
+.sc-eq span{display:inline-block;width:2.5px;background:var(--green);border-radius:2px;animation:sc-bar-anim .8s ease-in-out infinite}
+.sc-eq span:nth-child(1){height:4px;animation-delay:0s}.sc-eq span:nth-child(2){height:10px;animation-delay:.15s}.sc-eq span:nth-child(3){height:12px;animation-delay:.05s}.sc-eq span:nth-child(4){height:7px;animation-delay:.25s}.sc-eq span:nth-child(5){height:4px;animation-delay:.1s}
+@keyframes sc-bar-anim{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.sc-desc{font-size:.63rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3;opacity:.85;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
+<script src="https://unpkg.com/tone@14/build/Tone.js" defer></script>
 </head>
 <body>
 
@@ -2190,6 +2206,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="hm-lbl">UV indeks</span>
         <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
       </div>
+    </div>
+    <div class="sc-bar">
+      <button class="sc-btn" id="sc-btn" onclick="toggleSoundscape()" title="Ambientalni zvok trenutnega vremena">
+        <span class="sc-icon">🎧</span>
+        <span id="sc-btn-lbl">Poslušaj vreme</span>
+        <span class="sc-eq"><span></span><span></span><span></span><span></span><span></span></span>
+      </button>
+      <span class="sc-desc" id="sc-desc"></span>
     </div>
   </div>
 
@@ -6164,6 +6188,7 @@ function applyObs(obs){
   if(_daInit){ try{runKalmanFilter();}catch(e){} }
   if(document.getElementById('tab-storm')?.classList.contains('active'))
     try{buildTurbulenceIndex();}catch(e){}
+  updateSoundscape(obs);
 }
 
 function buildDailySummaries(observations){
@@ -11848,6 +11873,152 @@ function artFrame(){
     for(let i=0;i<2;i++){const blobX=(t*12*(i+1)+i*W/2)%W,blobY=H*0.3+i*H*0.25;const bg2=ctx.createRadialGradient(blobX,blobY,0,blobX,blobY,80);bg2.addColorStop(0,dark?'rgba(51,65,85,0.4)':'rgba(148,163,184,0.25)');bg2.addColorStop(1,'rgba(148,163,184,0)');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(blobX,blobY,90,50,0,0,Math.PI*2);ctx.fill();}
   }
   _artAnim=requestAnimationFrame(artFrame);
+}
+
+// ══════════════════════════════════════════════════════════
+// ── Soundscape Generator ────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _scPlaying=false,_scNodes=null;
+
+function _scDesc(obs){
+  if(!obs)return'';
+  const m=obs.metric,wind=m.windSpeed||0,pres=m.pressure||1013,precip=m.precipRate||0;
+  const parts=[];
+  if(precip>=5)parts.push('močan dež');
+  else if(precip>=1)parts.push('dež');
+  else if(precip>0)parts.push('rosenje');
+  if(wind<3)parts.push('brezvetrje');
+  else if(wind<15)parts.push('lahek veter');
+  else if(wind<30)parts.push('zmeren veter');
+  else if(wind<50)parts.push('močan veter');
+  else parts.push('nevihta');
+  if(pres>1025)parts.push('visok tlak');
+  else if(pres<1000)parts.push('nizek tlak');
+  const h=new Date().getHours();
+  if(h>=22||h<5)parts.push('noč');
+  else if(h<9)parts.push('jutro');
+  else if(h<18)parts.push('dan');
+  else parts.push('večer');
+  return parts.join(' · ');
+}
+
+async function _scInit(){
+  const T=window.Tone;if(!T)return;
+  await T.start();
+  T.getContext().resume();
+
+  // Master chain: masterVol → reverb → destination
+  const reverb=new T.Reverb({decay:5,preDelay:0.08,wet:0.35}).toDestination();
+  const masterVol=new T.Volume(-4).connect(reverb);
+
+  // ── Wind layer: pink noise → bandpass filter (LFO-modulated) → vol ──
+  const windNoise=new T.Noise('pink').start();
+  const windFilter=new T.Filter({type:'bandpass',frequency:500,Q:0.9});
+  const windLfo=new T.LFO({type:'sine',frequency:0.12,min:0.7,max:1.3}).start();
+  windLfo.connect(windFilter.frequency);
+  const windTrem=new T.Tremolo({frequency:0.07,depth:0.18}).start();
+  const windVol=new T.Volume(-38);
+  windNoise.chain(windFilter,windTrem,windVol,masterVol);
+
+  // ── Drone layer: 3 oscillators → gain → vol (pressure → pitch) ──
+  const droneA=new T.Oscillator({type:'sine',frequency:55}).start();
+  const droneB=new T.Oscillator({type:'sine',frequency:82.5}).start();
+  const droneC=new T.Oscillator({type:'triangle',frequency:110}).start();
+  const droneMix=new T.Gain(0.33);
+  droneA.connect(droneMix);droneB.connect(droneMix);droneC.connect(droneMix);
+  const droneVol=new T.Volume(-22);
+  droneMix.connect(droneVol);droneVol.connect(masterVol);
+
+  // ── Rain layer: white noise → highpass → vol ──
+  const rainNoise=new T.Noise('white').start();
+  const rainFilter=new T.Filter({type:'highpass',frequency:3800,Q:0.7});
+  const rainVol=new T.Volume(-60);
+  rainNoise.chain(rainFilter,rainVol,masterVol);
+
+  // ── Pressure whistle: high sine for falling pressure tension ──
+  const whistleOsc=new T.Oscillator({type:'sine',frequency:440}).start();
+  const whistleVol=new T.Volume(-60);
+  whistleOsc.connect(whistleVol);whistleVol.connect(masterVol);
+
+  _scNodes={reverb,masterVol,windNoise,windFilter,windLfo,windTrem,windVol,
+            droneA,droneB,droneC,droneMix,droneVol,
+            rainNoise,rainFilter,rainVol,
+            whistleOsc,whistleVol};
+}
+
+function updateSoundscape(obs){
+  if(!_scPlaying||!_scNodes||!obs)return;
+  const m=obs.metric;
+  const wind=m.windSpeed||0;
+  const pres=m.pressure||1013;
+  const hum=obs.humidity||60;
+  const precip=m.precipRate||0;
+  const {windVol,windFilter,windLfo,windTrem,reverb,droneA,droneB,droneC,droneVol,rainVol,whistleOsc,whistleVol}=_scNodes;
+
+  // Wind → noise volume & filter cutoff
+  const windDb=wind<2?-42:Math.max(-10,-42+wind*0.48);
+  windVol.volume.rampTo(windDb,3);
+  windFilter.frequency.rampTo(Math.min(3200,200+wind*38),4);
+  windLfo.frequency.rampTo(0.07+(wind/80)*0.35,6);
+  windTrem.depth.rampTo(Math.min(0.45,0.05+wind/100),5);
+
+  // Pressure → drone base pitch (975hPa→38Hz, 1040hPa→90Hz)
+  const baseFreq=Math.max(30,Math.min(95,38+((pres-975)/65)*52));
+  droneA.frequency.rampTo(baseFreq,8);
+  droneB.frequency.rampTo(baseFreq*1.5,8);
+  droneC.frequency.rampTo(baseFreq*2,8);
+  // Drone louder under low pressure
+  const droneDb=pres<1000?-14:pres>1025?-28:-20;
+  droneVol.volume.rampTo(droneDb,6);
+
+  // Humidity → reverb wetness
+  reverb.wet.rampTo(Math.min(0.65,0.08+(hum-30)/110),4);
+
+  // Rain
+  rainVol.volume.rampTo(precip<=0?-60:precip<0.5?-36:precip<2?-24:precip<6?-16:-10,2);
+
+  // Pressure whistle: only audible when pressure is very low & falling
+  const whistleDb=pres<998?Math.max(-22,-60+(998-pres)*2.5):-60;
+  whistleOsc.frequency.rampTo(200+Math.max(0,1013-pres)*3.5,10);
+  whistleVol.volume.rampTo(whistleDb,5);
+
+  // Update UI label
+  const desc=document.getElementById('sc-desc');
+  if(desc)desc.textContent=_scDesc(obs);
+}
+
+async function toggleSoundscape(){
+  const btn=document.getElementById('sc-btn');
+  const lbl=document.getElementById('sc-btn-lbl');
+  const desc=document.getElementById('sc-desc');
+  if(_scPlaying){
+    _scPlaying=false;
+    if(_scNodes){
+      try{window.Tone?.getTransport()?.stop();}catch(e){}
+      Object.values(_scNodes).forEach(n=>{try{n.dispose();}catch(e){}});
+      _scNodes=null;
+    }
+    btn.classList.remove('sc-on');
+    lbl.textContent='Poslušaj vreme';
+    if(desc)desc.textContent='';
+  }else{
+    if(!window.Tone){if(desc)desc.textContent='Tone.js se nalaga…';return;}
+    btn.classList.add('sc-on');
+    lbl.textContent='Inicializiram…';
+    if(desc)desc.textContent='';
+    try{
+      await _scInit();
+      _scPlaying=true;
+      lbl.textContent='V živo';
+      if(_lastBriefObs)updateSoundscape(_lastBriefObs);
+      else if(desc)desc.textContent='Čakam na podatke…';
+    }catch(e){
+      btn.classList.remove('sc-on');
+      lbl.textContent='Poslušaj vreme';
+      if(desc)desc.textContent='Napaka: '+e.message;
+      _scPlaying=false;_scNodes=null;
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════════
