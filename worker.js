@@ -682,65 +682,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
-      // ── /ai-chat ──────────────────────────────────────────
-      if (path === "/ai-chat" && request.method === "POST") {
-        const GEMINI_KEY = env.GEMINI_KEY;
-        if (!GEMINI_KEY) {
-          return new Response(JSON.stringify({error:"no_key"}),
-            {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
-        }
-        const body = await request.json();
-        const { messages=[], wx={} } = body;
-        const now = new Date().toLocaleString('sl-SI',{timeZone:'Europe/Ljubljana',hour:'2-digit',minute:'2-digit',weekday:'short',day:'numeric',month:'short'});
-        const systemText = `Si Meteorec, prijazen vremenski asistent vremenske postaje IREICA1 v Rečici ob Savinji, Slovenija (Savinjska dolina, 366 m n.v.). Ustvaril te je Filip Eremita.
-
-Trenutne razmere (${now}):
-🌡 Temperatura: ${wx.temp}°C (občutek: ${wx.feels}°C)
-💧 Vlaga: ${wx.hum}% · Rosišče: ${wx.dew}°C
-💨 Veter: ${wx.wind} km/h ${wx.windDir} (sunki do ${wx.gust} km/h)
-🌧 Padavine: ${wx.rain} mm/h · danes skupaj: ${wx.rainDay} mm
-📊 Tlak: ${wx.pres} hPa
-☀️ UV: ${wx.uv} · Sončno sevanje: ${wx.solar} W/m²
-
-Odgovarjaš vedno v slovenščini. Si natančen, prijazen in jedrnat (max 3–4 stavki). Specializiran si za lokalno mikroklimo Savinjske doline — poznavaš kotlinski efekt, föhnske situacije in vpliv reke Savinje.`;
-
-        // Convert Anthropic message format → Gemini format
-        const geminiMsgs = messages.slice(-12).map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
-
-        // Gemini needs at least one message
-        if (!geminiMsgs.length) {
-          return new Response(JSON.stringify({reply:"Prosim, pošljite sporočilo."}),
-            {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
-        }
-
-        const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemText }] },
-              contents: geminiMsgs,
-              generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
-            }),
-          }
-        );
-        const aiData = await aiRes.json();
-        if (!aiRes.ok || aiData.error) {
-          const errMsg = aiData.error?.message || `HTTP ${aiRes.status}`;
-          console.error("Gemini error:", errMsg);
-          return new Response(JSON.stringify({reply:`[Gemini napaka: ${errMsg}]`}),
-            {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
-        }
-        const reply = aiData.candidates?.[0]?.content?.parts?.[0]?.text
-          || "Oprostite, trenutno ne morem odgovoriti.";
-        return new Response(JSON.stringify({reply}),
-          {headers:{...CORS_ALLOWED,"Content-Type":"application/json","Cache-Control":"no-cache"}});
-      }
-
       // ── /arso-radar ───────────────────────────────────────
       if (path === "/arso-radar") {
         const radarRes = await fetch(
