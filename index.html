@@ -11911,12 +11911,10 @@ async function _soundscapeInit(){
   const reverb=new T.Reverb({decay:5,preDelay:0.08,wet:0.35}).toDestination();
   const masterVol=new T.Volume(-4).connect(reverb);
 
-  // ── Wind layer: pink noise → bandpass filter (LFO-modulated) → vol ──
+  // ── Wind layer: pink noise → bandpass filter → tremolo → vol ──
   const windNoise=new T.Noise('pink').start();
   const windFilter=new T.Filter({type:'bandpass',frequency:500,Q:0.9});
-  const windLfo=new T.LFO({type:'sine',frequency:0.12,min:0.7,max:1.3}).start();
-  windLfo.connect(windFilter.frequency);
-  const windTrem=new T.Tremolo({frequency:0.07,depth:0.18}).start();
+  const windTrem=new T.Tremolo({frequency:0.4,depth:0.15}).start();
   const windVol=new T.Volume(-38);
   windNoise.chain(windFilter,windTrem,windVol,masterVol);
 
@@ -11940,7 +11938,7 @@ async function _soundscapeInit(){
   const whistleVol=new T.Volume(-60);
   whistleOsc.connect(whistleVol);whistleVol.connect(masterVol);
 
-  _scNodes={reverb,masterVol,windNoise,windFilter,windLfo,windTrem,windVol,
+  _scNodes={reverb,masterVol,windNoise,windFilter,windTrem,windVol,
             droneA,droneB,droneC,droneMix,droneVol,
             rainNoise,rainFilter,rainVol,
             whistleOsc,whistleVol};
@@ -11953,13 +11951,12 @@ function updateSoundscape(obs){
   const pres=m.pressure||1013;
   const hum=obs.humidity||60;
   const precip=m.precipRate||0;
-  const {windVol,windFilter,windLfo,windTrem,reverb,droneA,droneB,droneC,droneVol,rainVol,whistleOsc,whistleVol}=_scNodes;
+  const {windVol,windFilter,windTrem,reverb,droneA,droneB,droneC,droneVol,rainVol,whistleOsc,whistleVol}=_scNodes;
 
   // Wind → noise volume & filter cutoff
   const windDb=wind<2?-42:Math.max(-10,-42+wind*0.48);
   windVol.volume.rampTo(windDb,3);
   windFilter.frequency.rampTo(Math.min(3200,200+wind*38),4);
-  windLfo.frequency.rampTo(0.07+(wind/80)*0.35,6);
   windTrem.depth.rampTo(Math.min(0.45,0.05+wind/100),5);
 
   // Pressure → drone base pitch (975hPa→38Hz, 1040hPa→90Hz)
