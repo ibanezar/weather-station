@@ -218,8 +218,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
 header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
-.stn-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.18em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:4px 14px;margin-bottom:1rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
-.stn-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.stn-badge{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;color:var(--text);text-transform:uppercase;border:1px solid var(--stn-border);border-radius:20px;padding:3px 11px;margin-top:.6rem;background:var(--stn-bg);transition:background .35s,border-color .35s}
+.stn-badge span{width:4px;height:4px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 h1{font-family:'Space Grotesk','Inter',sans-serif;font-weight:800;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;letter-spacing:-.025em;color:var(--text)}
 h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sub-loc{margin-top:.35rem;font-size:.68rem;color:var(--muted);letter-spacing:.06em;opacity:.7}
@@ -2090,7 +2090,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <div class="title-row">
       <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
         <defs>
@@ -2119,6 +2118,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </svg>
       <h1>Meteo<em>rec</em><button class="sskj-toggle" id="sskj-toggle" title="O imenu Meteorec" onclick="document.getElementById('sskj-entry').classList.toggle('open')">ℹ</button></h1>
     </div>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
   </header>
