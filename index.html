@@ -1515,8 +1515,10 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 
 /* Station logo */
-.station-logo{width:72px;height:72px;display:block;margin:0 auto .85rem;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(56,189,248,.35))}
+.station-logo{width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);display:block;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(56,189,248,.35))}
 header{display:flex;flex-direction:column;align-items:center;text-align:center}
+.title-row{display:flex;align-items:center;justify-content:center;gap:.7rem}
+.title-row h1{margin:0}
 
 
 
@@ -2088,36 +2090,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 <div class="wrap">
   <header>
-    <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
-      <defs>
-        <linearGradient id="sunG" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#fde68a"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </linearGradient>
-        <linearGradient id="cloudG" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f0f9ff"/>
-          <stop offset="100%" stop-color="#bae6fd"/>
-        </linearGradient>
-      </defs>
-      <!-- Sun (top-right, fully visible) -->
-      <g stroke="#fbbf24" stroke-width="2.6" stroke-linecap="round">
-        <line x1="44" y1="6" x2="44" y2="11"/>
-        <line x1="55" y1="9" x2="51.5" y2="12.5"/>
-        <line x1="59" y1="20" x2="54" y2="20"/>
-        <line x1="33" y1="9" x2="36.5" y2="12.5"/>
-      </g>
-      <circle cx="44" cy="20" r="8" fill="url(#sunG)"/>
-      <!-- Cloud (centered) -->
-      <path d="M22 47c-5.5 0-10-4.5-10-10 0-5.2 4-9.5 9.1-9.95C22 21 27 17.5 32.5 17.5c7 0 12.7 5.4 13.1 12.2 3.8.6 6.7 3.9 6.7 7.9 0 4.5-3.6 8.4-8.2 8.4H22z" fill="url(#cloudG)" stroke="#7dd3fc" stroke-width="1.1"/>
-      <!-- Rain -->
-      <g stroke-width="2.8" stroke-linecap="round">
-        <line x1="24" y1="52" x2="22" y2="58" stroke="#38bdf8"/>
-        <line x1="33" y1="52" x2="31" y2="58" stroke="#a78bfa"/>
-        <line x1="42" y1="52" x2="40" y2="58" stroke="#38bdf8"/>
-      </g>
-    </svg>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-    <h1>Meteo<em>rec</em><button class="sskj-toggle" id="sskj-toggle" title="O imenu Meteorec" onclick="document.getElementById('sskj-entry').classList.toggle('open')">ℹ</button></h1>
+    <div class="title-row">
+      <svg class="station-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meteorec">
+        <defs>
+          <linearGradient id="logoSunG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+          </linearGradient>
+          <linearGradient id="logoMtnG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#6366f1"/>
+          </linearGradient>
+        </defs>
+        <!-- Sun rising behind the ridge -->
+        <circle cx="32" cy="24" r="10" fill="url(#logoSunG)"/>
+        <g stroke="#fbbf24" stroke-width="2.4" stroke-linecap="round">
+          <line x1="32" y1="4" x2="32" y2="9"/>
+          <line x1="46" y1="10" x2="42.5" y2="13.5"/>
+          <line x1="18" y1="10" x2="21.5" y2="13.5"/>
+        </g>
+        <!-- Mountain ridge (Savinjska dolina) -->
+        <path d="M4 50 L22 30 L33 42 L44 24 L60 50 Z" fill="url(#logoMtnG)"/>
+        <path d="M44 24 L50 38 L38 38 Z" fill="#e0f2fe" opacity=".85"/>
+        <path d="M22 30 L28 39 L16 39 Z" fill="#e0f2fe" opacity=".85"/>
+        <!-- River Savinja -->
+        <path d="M4 54 q8 -4 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <h1>Meteo<em>rec</em><button class="sskj-toggle" id="sskj-toggle" title="O imenu Meteorec" onclick="document.getElementById('sskj-entry').classList.toggle('open')">ℹ</button></h1>
+    </div>
     <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
   </header>
