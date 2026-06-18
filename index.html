@@ -3993,10 +3993,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <span class="clabel" style="margin:0">📈 Verjetnostna pahljača temperature — ansambel</span>
         <span class="chart-range" id="ai-fan-range">—</span>
       </div>
-      <div class="ai-loss-wrap"><svg id="ai-fan-svg" viewBox="0 0 880 170" style="display:block;width:100%;min-width:420px" height="170"></svg></div>
+      <div class="ai-loss-wrap"><svg id="ai-fan-svg" viewBox="0 0 880 190" style="display:block;width:100%;min-width:420px" height="190"></svg></div>
       <div class="ai-fan-legend">
         <span><span class="ai-fan-swatch" style="background:rgba(124,58,237,.18)"></span>P10–P90 (negotovost)</span>
         <span><span style="display:inline-block;width:14px;height:2px;background:#a78bfa;vertical-align:middle;margin-right:4px"></span>Mediana (P50)</span>
+        <span><span style="display:inline-block;width:14px;height:2px;background:#4ade80;vertical-align:middle;margin-right:4px"></span>Dejanska postaja</span>
         <span id="ai-fan-members" style="opacity:.8"></span>
       </div>
       <div class="ai-skill-wrap" id="ai-skill-wrap">
@@ -15719,63 +15720,99 @@ function aiEventNowcast(){
 // ══ 2) PROBABILISTIC FAN CHART ═══════════════════════════
 function aiFanChart(hw,temps){
   const svg=document.getElementById('ai-fan-svg');if(!svg||!temps?.length)return;
-  const H=AI_OUT_LEN;
-  const now=new Date(),hourNow=now.getHours();
+  const FAN_H=24;               // chart horizon
+  const MODEL_H=AI_OUT_LEN;     // HW/Analog max horizon
+  const PAST_H=12;              // hours of history to show
+  const now=new Date(),nowMs=now.getTime(),hourNow=now.getHours();
   const lastT=temps[temps.length-1];
-  if(lastT==null){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Ni podatka o trenutni temperaturi.</text>';return;}
+  if(lastT==null){svg.innerHTML='<text x="440" y="95" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Ni podatka o trenutni temperaturi.</text>';return;}
   const seasonal=hw?.seasonal||null;
-  const members=[],names=[];
-  if(_aiLstmPredictions?.preds?.length>=H){members.push(_aiLstmPredictions.preds.slice(0,H));names.push('Holt-Winters');}
+
+  // Past actual station data (last PAST_H hours)
+  const actualPast=(_hourlyObs||[])
+    .map(o=>({t:new Date((o.obsTimeLocal||'').replace(' ','T')).getTime(),v:o.metric?.temp??null}))
+    .filter(d=>d.v!=null&&isFinite(d.t)&&d.t>=nowMs-PAST_H*3600000&&d.t<=nowMs)
+    .sort((a,b)=>a.t-b.t);
+
+  // Per-hour stats for future (h=1..FAN_H)
+  const hwPreds=_aiLstmPredictions?.preds||[];
   const omRows=_aiNowFc?.rows||[];
-  const omNext=[];
-  for(let h=1;h<=H;h++){
-    const target=now.getTime()+h*3600000;
-    const r=omRows.reduce((b,x)=>Math.abs(x.t-target)<Math.abs((b?.t||Infinity)-target)?x:b,null);
-    omNext.push(r&&r.temp!=null?r.temp:null);
-  }
-  if(omNext.every(v=>v!=null)){members.push(omNext);names.push('Open-Meteo');}
-  if(seasonal){
-    const persist=[];for(let h=1;h<=H;h++)persist.push(lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]));
-    members.push(persist);names.push('Persistenca+klima');
-  }
-  if(_aiAnalogCache?.projection?.length>=H&&_aiAnalogCache.ts&&Date.now()-_aiAnalogCache.ts<3600000&&_aiAnalogCache.projection.every(v=>v!=null)){members.push(_aiAnalogCache.projection.slice(0,H));names.push('Analogni dnevi');}
-  if(members.length<2){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo članov ansambla za pahljačo.</text>';return;}
+  const analogOk=_aiAnalogCache?.projection?.length>=MODEL_H&&_aiAnalogCache.ts&&Date.now()-_aiAnalogCache.ts<3600000&&_aiAnalogCache.projection.every(v=>v!=null);
   const stats=[];
-  for(let h=0;h<H;h++){
-    const vals=members.map(m=>m[h]).filter(v=>v!=null);
+  const memberNames=new Set();
+  for(let h=1;h<=FAN_H;h++){
+    const targetMs=nowMs+h*3600000;
+    const vals=[];
+    if(h<=MODEL_H&&hwPreds[h-1]!=null){vals.push(hwPreds[h-1]);memberNames.add('HW');}
+    const r=omRows.reduce((b,x)=>Math.abs(x.t-targetMs)<Math.abs((b?.t??Infinity)-targetMs)?x:b,null);
+    if(r&&r.temp!=null){vals.push(r.temp);memberNames.add('Open-Meteo');}
+    if(seasonal){const pv=lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]);vals.push(pv);memberNames.add('Persist+klima');}
+    if(h<=MODEL_H&&analogOk){vals.push(_aiAnalogCache.projection[h-1]);memberNames.add('Analogni dnevi');}
     if(!vals.length){stats.push(null);continue;}
     const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
-    const sd=Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length);
-    const sigma=Math.max(sd,0.3)+0.18*h;
-    stats.push({mean,p10:mean-1.2816*sigma,p90:mean+1.2816*sigma,sigma});
+    const sd=vals.length>1?Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length):0;
+    const sigma=(Math.max(sd,0.3)+0.15*h)*(vals.length<2?0.7:1);
+    stats.push({h,mean,p10:mean-1.2816*sigma,p90:mean+1.2816*sigma,sigma});
   }
   const validStats=stats.filter(Boolean);
-  if(!validStats.length){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo veljavnih podatkov za pahljačo.</text>';return;}
-  const VW=880,VH=170,pl=40,pr=15,pt=12,pb=26;
-  const all=[lastT,...validStats.map(s=>s.p10),...validStats.map(s=>s.p90)].filter(v=>v!=null&&isFinite(v));
-  const rawMin=Math.min(...all),rawMax=Math.max(...all);
+  if(!validStats.length){svg.innerHTML='<text x="440" y="95" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo veljavnih podatkov za pahljačo.</text>';return;}
+
+  // SVG layout
+  const VW=880,VH=190,pl=40,pr=15,pt=12,pb=28;
+  const tMin=nowMs-PAST_H*3600000,tMax=nowMs+FAN_H*3600000,tSpan=tMax-tMin;
+  const mapXt=t=>pl+(t-tMin)/tSpan*(VW-pl-pr);
+  const mapXh=h=>mapXt(nowMs+h*3600000);
+  const nowX=mapXt(nowMs);
+
+  // Temperature range
+  const allVals=[lastT,...actualPast.map(d=>d.v),...validStats.map(s=>s.p10),...validStats.map(s=>s.p90)].filter(v=>v!=null&&isFinite(v));
+  const rawMin=Math.min(...allVals),rawMax=Math.max(...allVals);
   const spread=rawMax-rawMin;
   const minT=rawMin-(spread<0.5?1:0.5),maxT=rawMax+(spread<0.5?1:0.5);
-  const mapX=i=>pl+(i/H)*(VW-pl-pr);
   const mapY=v=>{const d=maxT-minT;return d<0.01?(pt+(VH-pt-pb)/2):pt+(1-(v-minT)/d)*(VH-pt-pb);};
   const ok=p=>p&&isFinite(p[0])&&isFinite(p[1]);
+
   let html='';
+
+  // Grid lines
   const step=Math.max(1,Math.ceil((maxT-minT)/4));
   for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){const y=mapY(t).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}°</text>`;}
-  const upper=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>s?[mapX(h+1),mapY(s.p90)]:null)].filter(ok);
-  const lower=[...stats.map((s,h)=>s?[mapX(h+1),mapY(s.p10)]:null).filter(ok).reverse(),[mapX(0),mapY(lastT)]].filter(ok);
+
+  // "zdaj" divider
+  html+=`<line x1="${nowX.toFixed(1)}" x2="${nowX.toFixed(1)}" y1="${pt}" y2="${VH-pb}" stroke="rgba(255,255,255,.18)" stroke-width="1" stroke-dasharray="3,3"/>`;
+  html+=`<text x="${(nowX+4).toFixed(1)}" y="${pt+8}" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">zdaj</text>`;
+
+  // Fan band (P10–P90)
+  const upper=[[nowX,mapY(lastT)],...stats.map(s=>s?[mapXh(s.h),mapY(s.p90)]:null)].filter(ok);
+  const lower=[...stats.map(s=>s?[mapXh(s.h),mapY(s.p10)]:null).filter(ok).reverse(),[nowX,mapY(lastT)]].filter(ok);
   const bandPts=[...upper,...lower].map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
   if(bandPts)html+=`<polygon points="${bandPts}" fill="rgba(124,58,237,.18)" stroke="none"/>`;
-  const medPts=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>s?[mapX(h+1),mapY(s.mean)]:null)].filter(ok).map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
-  if(medPts)html+=`<polyline points="${medPts}" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round"/>`;
-  stats.forEach((s,h)=>{if(!s)return;const cx=mapX(h+1),cy=mapY(s.mean);if(isFinite(cx)&&isFinite(cy))html+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.5" fill="#a78bfa"/>`;});
-  for(let h=0;h<=H;h++){html+=`<text x="${mapX(h).toFixed(1)}" y="${VH-7}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${h===0?'zdaj':'+'+h+'h'}</text>`;}
+
+  // Median line (future)
+  const medPts=[[nowX,mapY(lastT)],...stats.map(s=>s?[mapXh(s.h),mapY(s.mean)]:null)].filter(ok).map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  if(medPts)html+=`<polyline points="${medPts}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linejoin="round"/>`;
+
+  // Median dots (smaller after MODEL_H where fewer members)
+  stats.forEach(s=>{if(!s)return;const cx=mapXh(s.h),cy=mapY(s.mean);if(isFinite(cx)&&isFinite(cy))html+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${s.h<=MODEL_H?2.5:1.8}" fill="#a78bfa"/>`;});
+
+  // Actual station line (green)
+  const actPoints=[...actualPast.map(d=>[mapXt(d.t),mapY(d.v)]),[nowX,mapY(lastT)]].filter(ok);
+  if(actPoints.length>1)html+=`<polyline points="${actPoints.map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')}" fill="none" stroke="#4ade80" stroke-width="2" stroke-linejoin="round"/>`;
+
+  // Time axis labels
+  for(let h=-PAST_H;h<=FAN_H;h+=3){
+    if(h===0)continue;
+    const x=mapXh(h),label=h<0?`-${Math.abs(h)}h`:`+${h}h`;
+    html+=`<text x="${x.toFixed(1)}" y="${VH-8}" text-anchor="middle" font-size="7.5" fill="var(--muted)" font-family="JetBrains Mono,monospace">${label}</text>`;
+  }
+
   svg.innerHTML=html;
+
   const rng=document.getElementById('ai-fan-range');
   const widest=validStats[validStats.length-1];
-  if(rng)rng.textContent=`±${(1.2816*widest.sigma).toFixed(1)}° pri +6h`;
+  if(rng)rng.textContent=`Zadnjih ${PAST_H}h + napoved ${FAN_H}h · ±${(1.2816*widest.sigma).toFixed(1)}° pri +${FAN_H}h`;
   const mem=document.getElementById('ai-fan-members');
-  if(mem)mem.textContent=`${members.length} članov: ${names.join(' · ')}`;
+  if(mem)mem.textContent=`${memberNames.size} članov: ${[...memberNames].join(' · ')}`;
 }
 
 // ── Skill scoreboard: local model vs Open-Meteo ──────────
