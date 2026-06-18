@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sl" data-theme="dark">
+<html lang="sl" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,28 +80,28 @@
 
 /* ── Light theme (default) ── */
 :root {
-  --bg:#eef2f9; --text:#0a0f1e; --muted:#3a4a6a;
-  --border:rgba(0,0,0,.11); --bh:rgba(0,0,0,.2);
-  --blue:#1d4ed8; --cyan:#0e7490; --purple:#6d28d9;
-  --amber:#92400e; --green:#065f46; --red:#991b1b; --rain-col:#2563eb;
+  --bg:#0ea5e9; --text:#0a1628; --muted:#2e4a6a;
+  --border:rgba(0,0,0,.10); --bh:rgba(0,0,0,.18);
+  --blue:#0284c7; --cyan:#0e7490; --purple:#6d28d9;
+  --amber:#92400e; --green:#065f46; --red:#991b1b; --rain-col:#0369a1;
   --card-bg:rgba(255,255,255,.97); --card-border:rgba(0,0,0,.07);
   --card-border-h:rgba(0,0,0,.12);
-  --card-shadow:0 2px 16px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.05);
-  --card-shadow-h:0 8px 32px rgba(0,0,0,.12);
-  --hero-bg:rgba(255,255,255,.96); --hero-border:rgba(0,0,0,.06);
-  --hero-shadow:0 4px 32px rgba(0,0,0,.09);
+  --card-shadow:0 4px 24px rgba(0,50,100,.14),0 1px 4px rgba(0,0,0,.06);
+  --card-shadow-h:0 12px 40px rgba(0,50,100,.2);
+  --hero-bg:rgba(255,255,255,.97); --hero-border:rgba(255,255,255,.6);
+  --hero-shadow:0 8px 40px rgba(0,50,100,.18);
   --day-bg:rgba(255,255,255,.95); --day-border:rgba(0,0,0,.06);
   --day-divider:rgba(0,0,0,.09);
-  --fc-bg:rgba(240,244,252,.98); --fc-border:rgba(0,0,0,.08);
-  --fc-today-bg:rgba(29,78,216,.07); --fc-today-border:rgba(29,78,216,.25);
-  --stn-bg:rgba(29,78,216,.09);  --stn-border:rgba(29,78,216,.40);
-  --badge-bg:rgba(29,78,216,.07); --badge-border:rgba(29,78,216,.18);
+  --fc-bg:rgba(240,249,255,.98); --fc-border:rgba(14,165,233,.15);
+  --fc-today-bg:rgba(14,165,233,.1); --fc-today-border:rgba(14,165,233,.3);
+  --stn-bg:rgba(255,255,255,.18); --stn-border:rgba(255,255,255,.5);
+  --badge-bg:rgba(14,165,233,.1); --badge-border:rgba(14,165,233,.25);
   --bft-bg:rgba(109,40,217,.08); --bft-border:rgba(109,40,217,.2);
   --tip-bg:rgba(255,255,255,.99); --tip-border:rgba(0,0,0,.12);
   --tip-shadow:0 4px 16px rgba(0,0,0,.12);
   --rain-track:rgba(0,0,0,.1);
-  --blob-1:rgba(147,197,253,.45); --blob-2:rgba(196,181,253,.35);
-  --blob-3:rgba(103,232,249,.28); --blob-4:rgba(110,231,183,.25);
+  --blob-1:rgba(255,255,255,.45); --blob-2:rgba(186,230,253,.5);
+  --blob-3:rgba(125,211,252,.35); --blob-4:rgba(240,249,255,.42);
   --svg-ring:rgba(0,0,0,.10); --svg-tick:rgba(0,0,0,.35);
   --svg-tick-m:rgba(0,0,0,.18); --svg-lbl:rgba(0,0,0,.80);
   --svg-lbl-d:rgba(0,0,0,.65); --svg-track:rgba(0,0,0,.10);
@@ -110,6 +110,32 @@
   --t-dn-bg:rgba(220,38,38,.1);  --t-dn-c:var(--red);
   --t-fl-bg:rgba(100,116,139,.08);--t-fl-c:var(--muted);
 }
+
+/* ── Light theme sky redesign ── */
+[data-theme="light"] body{background:linear-gradient(155deg,#0c85c7 0%,#0ea5e9 35%,#38bdf8 68%,#7dd3fc 100%)}
+[data-theme="light"] #bg{background:linear-gradient(155deg,#0c85c7 0%,#0ea5e9 35%,#38bdf8 68%,#7dd3fc 100%)}
+[data-theme="light"] header{color:#fff;text-shadow:0 2px 16px rgba(2,50,100,.2)}
+[data-theme="light"] h1{color:#fff;text-shadow:0 2px 20px rgba(2,50,100,.22)}
+[data-theme="light"] h1 em{color:rgba(224,242,254,.95)}
+[data-theme="light"] .sub-loc{color:rgba(255,255,255,.78)}
+[data-theme="light"] .stn-badge{color:rgba(255,255,255,.92);background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45)}
+[data-theme="light"] .stn-badge span{background:rgba(255,255,255,.9);box-shadow:0 0 6px rgba(255,255,255,.75)}
+[data-theme="light"] .status{color:rgba(255,255,255,.88)}
+[data-theme="light"] .dot{background:rgba(255,255,255,.9);box-shadow:0 0 8px rgba(255,255,255,.65)}
+[data-theme="light"] .sskj-entry,[data-theme="light"] .sskj-toggle{color:rgba(255,255,255,.7)}
+[data-theme="light"] .tab-nav-wrap{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.38);box-shadow:0 4px 24px rgba(0,0,0,.12);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
+[data-theme="light"] .tab-nav-wrap::after{background:linear-gradient(to right,transparent,rgba(56,189,248,.88) 72%)}
+[data-theme="light"] .tab-nav-wrap::before{background:linear-gradient(to left,transparent,rgba(56,189,248,.88) 78%)}
+[data-theme="light"] .tab-btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.32);color:rgba(255,255,255,.9)}
+[data-theme="light"] .tab-btn:hover:not(.active){background:rgba(255,255,255,.3);border-color:rgba(255,255,255,.52);color:#fff;transform:translateY(-1px)}
+[data-theme="light"] .tab-btn.active{background:#fff;color:#0369a1;border-color:transparent;box-shadow:0 4px 16px rgba(0,0,0,.15);font-weight:700}
+[data-theme="light"] .tab-dd-trigger.dd-active{background:#fff;color:#0369a1;border-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,.13)}
+[data-theme="light"] .tab-dd-menu{background:rgba(255,255,255,.97);backdrop-filter:blur(20px)}
+[data-theme="light"] .ticker-wrap{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);backdrop-filter:blur(12px);box-shadow:0 2px 12px rgba(0,0,0,.1)}
+[data-theme="light"] .ticker-inner{color:rgba(255,255,255,.85)}
+[data-theme="light"] .hero{box-shadow:0 12px 50px rgba(0,50,120,.22),0 2px 8px rgba(0,0,0,.08)}
+[data-theme="light"] .card{box-shadow:0 4px 24px rgba(0,50,100,.14),0 1px 4px rgba(0,0,0,.06)}
+[data-theme="light"] .card:hover{box-shadow:0 12px 40px rgba(0,50,100,.2)}
 
 /* ── Dark theme ── */
 [data-theme="dark"] {
@@ -199,7 +225,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   position:absolute;inset:0;pointer-events:none;
   transition:background .6s ease;
 }
-[data-theme="light"] #photo-overlay{background:rgba(238,242,249,.55);}
+[data-theme="light"] #photo-overlay{background:rgba(14,165,233,.1);}
 [data-theme="dark"]  #photo-overlay{background:rgba(4,7,14,.68);}
 #bg.has-photo .blob{opacity:.18;transition:opacity 2s;}
 #bg.no-photo  .blob{opacity:1;  transition:opacity 2s;}
