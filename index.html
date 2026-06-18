@@ -15627,10 +15627,10 @@ function _clamp01(x){return x<0?0:x>1?1:x;}
 async function aiRunInnovations(hw,temps,obs){
   try{ await aiFetchNowcastForecast(); }catch(e){ console.warn('AI nowcast fc:',e); }
   try{ aiEventNowcast(); }catch(e){ console.warn('AI event:',e); }
+  try{ await aiAnalogDays(obs); }catch(e){ console.warn('AI analog:',e); }
   try{ aiFanChart(hw,temps); }catch(e){ console.warn('AI fan:',e); }
   try{ aiLogEnsemblePreds(hw); }catch(e){ console.warn('AI log:',e); }
   try{ aiRenderSkill(); }catch(e){ console.warn('AI skill:',e); }
-  try{ await aiAnalogDays(obs); }catch(e){ console.warn('AI analog:',e); }
 }
 
 // ── Richer hourly forecast (humidity, dewpoint, cloud, cape) ──
@@ -15722,6 +15722,7 @@ function aiFanChart(hw,temps){
   const H=AI_OUT_LEN;
   const now=new Date(),hourNow=now.getHours();
   const lastT=temps[temps.length-1];
+  if(lastT==null){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Ni podatka o trenutni temperaturi.</text>';return;}
   const seasonal=hw?.seasonal||null;
   const members=[],names=[];
   if(_aiLstmPredictions?.preds?.length>=H){members.push(_aiLstmPredictions.preds.slice(0,H));names.push('Holt-Winters');}
@@ -15733,39 +15734,45 @@ function aiFanChart(hw,temps){
     omNext.push(r&&r.temp!=null?r.temp:null);
   }
   if(omNext.every(v=>v!=null)){members.push(omNext);names.push('Open-Meteo');}
-  if(seasonal&&lastT!=null){
+  if(seasonal){
     const persist=[];for(let h=1;h<=H;h++)persist.push(lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]));
     members.push(persist);names.push('Persistenca+klima');
   }
-  if(_aiAnalogCache?.projection?.length>=H&&_aiAnalogCache.projection.every(v=>v!=null)){members.push(_aiAnalogCache.projection.slice(0,H));names.push('Analogni dnevi');}
+  if(_aiAnalogCache?.projection?.length>=H&&_aiAnalogCache.ts&&Date.now()-_aiAnalogCache.ts<3600000&&_aiAnalogCache.projection.every(v=>v!=null)){members.push(_aiAnalogCache.projection.slice(0,H));names.push('Analogni dnevi');}
   if(members.length<2){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo članov ansambla za pahljačo.</text>';return;}
   const stats=[];
   for(let h=0;h<H;h++){
     const vals=members.map(m=>m[h]).filter(v=>v!=null);
+    if(!vals.length){stats.push(null);continue;}
     const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
     const sd=Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length);
     const sigma=Math.max(sd,0.3)+0.18*h;
     stats.push({mean,p10:mean-1.2816*sigma,p90:mean+1.2816*sigma,sigma});
   }
+  const validStats=stats.filter(Boolean);
+  if(!validStats.length){svg.innerHTML='<text x="440" y="85" text-anchor="middle" font-size="12" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Premalo veljavnih podatkov za pahljačo.</text>';return;}
   const VW=880,VH=170,pl=40,pr=15,pt=12,pb=26;
-  const all=[lastT,...stats.map(s=>s.p10),...stats.map(s=>s.p90)];
-  const minT=Math.min(...all)-0.5,maxT=Math.max(...all)+0.5;
+  const all=[lastT,...validStats.map(s=>s.p10),...validStats.map(s=>s.p90)].filter(v=>v!=null&&isFinite(v));
+  const rawMin=Math.min(...all),rawMax=Math.max(...all);
+  const spread=rawMax-rawMin;
+  const minT=rawMin-(spread<0.5?1:0.5),maxT=rawMax+(spread<0.5?1:0.5);
   const mapX=i=>pl+(i/H)*(VW-pl-pr);
-  const mapY=v=>pt+(1-(v-minT)/(maxT-minT))*(VH-pt-pb);
+  const mapY=v=>{const d=maxT-minT;return d<0.01?(pt+(VH-pt-pb)/2):pt+(1-(v-minT)/d)*(VH-pt-pb);};
+  const ok=p=>p&&isFinite(p[0])&&isFinite(p[1]);
   let html='';
   const step=Math.max(1,Math.ceil((maxT-minT)/4));
   for(let t=Math.ceil(minT/step)*step;t<=maxT;t+=step){const y=mapY(t).toFixed(1);html+=`<line x1="${pl}" x2="${VW-pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/><text x="${pl-4}" y="${y}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace" dominant-baseline="middle">${t.toFixed(0)}°</text>`;}
-  const upper=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>[mapX(h+1),mapY(s.p90)])];
-  const lower=[...stats.map((s,h)=>[mapX(h+1),mapY(s.p10)]).reverse(),[mapX(0),mapY(lastT)]];
+  const upper=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>s?[mapX(h+1),mapY(s.p90)]:null)].filter(ok);
+  const lower=[...stats.map((s,h)=>s?[mapX(h+1),mapY(s.p10)]:null).filter(ok).reverse(),[mapX(0),mapY(lastT)]].filter(ok);
   const bandPts=[...upper,...lower].map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
-  html+=`<polygon points="${bandPts}" fill="rgba(124,58,237,.18)" stroke="none"/>`;
-  const medPts=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>[mapX(h+1),mapY(s.mean)])].map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
-  html+=`<polyline points="${medPts}" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round"/>`;
-  stats.forEach((s,h)=>{html+=`<circle cx="${mapX(h+1).toFixed(1)}" cy="${mapY(s.mean).toFixed(1)}" r="2.5" fill="#a78bfa"/>`;});
+  if(bandPts)html+=`<polygon points="${bandPts}" fill="rgba(124,58,237,.18)" stroke="none"/>`;
+  const medPts=[[mapX(0),mapY(lastT)],...stats.map((s,h)=>s?[mapX(h+1),mapY(s.mean)]:null)].filter(ok).map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  if(medPts)html+=`<polyline points="${medPts}" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round"/>`;
+  stats.forEach((s,h)=>{if(!s)return;const cx=mapX(h+1),cy=mapY(s.mean);if(isFinite(cx)&&isFinite(cy))html+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.5" fill="#a78bfa"/>`;});
   for(let h=0;h<=H;h++){html+=`<text x="${mapX(h).toFixed(1)}" y="${VH-7}" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="JetBrains Mono,monospace">${h===0?'zdaj':'+'+h+'h'}</text>`;}
   svg.innerHTML=html;
   const rng=document.getElementById('ai-fan-range');
-  const widest=stats[stats.length-1];
+  const widest=validStats[validStats.length-1];
   if(rng)rng.textContent=`±${(1.2816*widest.sigma).toFixed(1)}° pri +6h`;
   const mem=document.getElementById('ai-fan-members');
   if(mem)mem.textContent=`${members.length} članov: ${names.join(' · ')}`;
@@ -15919,8 +15926,6 @@ async function aiAnalogDays(obs){
   }).join('');
   if(rngEl)rngEl.textContent=`${recs.length} ur · k=${K}`;
   _aiAnalogCache={projection,ts:Date.now()};
-  // Re-render fan chart now that the analog ensemble member exists
-  try{aiFanChart(_aiLastHW,(obs||[]).map(o=>o.metric?.temp??o.metric?.tempAvg).filter(v=>v!=null));}catch(e){}
 }
 
 // ══════════════════════════════════════════════════════════
