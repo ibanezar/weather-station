@@ -4683,7 +4683,7 @@ function setTheme(t){
   if(_tempData.length) drawTempChart(_tempData);
   if(_rainData.length) drawRainChart(_rainData);
   const mc = document.getElementById('mesh-canvas');
-  if(mc) mc.style.opacity = t === 'dark' ? '1' : '0.35';
+  if(mc) mc.style.opacity = t === 'dark' ? '1' : '0';
 }
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
@@ -11498,7 +11498,7 @@ function initMeshCanvas(){
   if(!c)return;
   _meshCanvas=c;
   _meshCtx=c.getContext('2d');
-  c.style.opacity = isDark() ? '1' : '0.35';
+  c.style.opacity = isDark() ? '1' : '0';
   const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
   resize();
   window.addEventListener('resize',resize);
@@ -11557,7 +11557,7 @@ function updateBgFromObs(obs){
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
   applyWeatherBg(cond);
   // Reduce mesh visibility in light mode so cards stay readable
-  if(_meshCanvas) _meshCanvas.style.opacity = isDark() ? '1' : '0.35';
+  if(_meshCanvas) _meshCanvas.style.opacity = isDark() ? '1' : '0';
   updateMeshColors(cond,obs?.winddir,wind);
   setHeroCond(cond);
 }
