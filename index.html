@@ -15489,6 +15489,16 @@ async function initAINowcast(){
   await aiAutoLoad();
 }
 
+// ── Outlier filter: replace values >threshold°C from rolling median ─
+function _hwFilterOutliers(arr,windowHalf=5,threshold=6){
+  return arr.map((v,i)=>{
+    const w=arr.slice(Math.max(0,i-windowHalf),i+windowHalf+1).filter(x=>x!=null&&isFinite(x)).sort((a,b)=>a-b);
+    if(!w.length)return v;
+    const med=w[Math.floor(w.length/2)];
+    return Math.abs(v-med)>threshold?med:v;
+  });
+}
+
 // ── Holt-Winters additive (daily seasonality, period=24h) ─
 function hwPredict(temps, horizon=6){
   const L=24;
@@ -15522,17 +15532,24 @@ async function aiAutoLoad(){
   _aiTraining=true;
   try{
     const obs=_hourlyObs||[];
-    const temps=obs.map(o=>o.metric?.temp??o.metric?.tempAvg??null).filter(v=>v!=null);
-    if(temps.length<48){
-      aiSetStatus(`Premalo podatkov (${temps.length}h) — potrebujem vsaj 48h urnih opazovanj.`);
+    const tempsRaw=obs.map(o=>o.metric?.temp??o.metric?.tempAvg??null).filter(v=>v!=null);
+    if(tempsRaw.length<48){
+      aiSetStatus(`Premalo podatkov (${tempsRaw.length}h) — potrebujem vsaj 48h urnih opazovanj.`);
       return;
     }
+    const temps=_hwFilterOutliers(tempsRaw);
     const hw=hwPredict(temps,AI_OUT_LEN);
     if(!hw){aiSetStatus('Napaka pri izračunu.');return;}
     const drifts=JSON.parse(localStorage.getItem(ARSO_DRIFT_KEY)||'[]');
     const r24=drifts.filter(d=>d.t>Date.now()-864e5);
     const driftCorr=r24.length?r24.reduce((s,d)=>s+d.dT,0)/r24.length:0;
-    const predsCorrected=hw.preds.map(p=>p+driftCorr*0.4);
+    const curT=tempsRaw[tempsRaw.length-1];
+    const predsCorrected=hw.preds.map((p,i)=>{
+      const corrected=p+driftCorr*0.4;
+      // Safety clamp: max plausible change from current temp grows with horizon
+      const maxDelta=3+i*1.5;
+      return Math.max(curT-maxDelta,Math.min(curT+maxDelta,corrected));
+    });
     _aiLstmPredictions={preds:predsCorrected,raw:hw.preds,driftCorr,ts:Date.now()};
     aiRenderForecastCards(predsCorrected);
     const nSamples=document.getElementById('ai-train-samples');
