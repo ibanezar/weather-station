@@ -1548,8 +1548,33 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .wbal-bars{display:flex;gap:2px;align-items:center;height:50px;margin-top:.5rem}
 .wbal-bar{flex:1;border-radius:2px;min-width:3px;transition:height .6s ease}
 .wbal-axis{height:1px;background:var(--border);width:100%;align-self:center;margin:0 2px}
-
-
+/* ARSO river station cards */
+.arso-stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.7rem;margin-top:.6rem}
+.arso-st{background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:12px;padding:.75rem .9rem}
+.arso-st-name{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arso-st-row{display:flex;justify-content:space-between;align-items:baseline;gap:.4rem}
+.arso-st-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500}
+.arso-st-unit{font-size:.62rem;color:var(--muted)}
+.arso-st-pill{display:inline-block;font-size:.58rem;padding:.1rem .45rem;border-radius:10px;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em}
+.arso-st-pill.normal{background:rgba(74,222,128,.15);color:#4ade80}
+.arso-st-pill.raised{background:rgba(251,191,36,.15);color:#fbbf24}
+.arso-st-pill.warning{background:rgba(249,115,22,.18);color:#fb923c}
+.arso-st-pill.alarm{background:rgba(248,113,113,.2);color:#f87171}
+/* Soil moisture depth bars */
+.soil-depths{display:flex;flex-direction:column;gap:.55rem;margin-top:.7rem}
+.soil-row{display:grid;grid-template-columns:90px 1fr 52px;align-items:center;gap:.6rem}
+.soil-lbl{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.soil-bar-bg{height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}
+.soil-bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.soil-val{font-size:.72rem;font-family:'JetBrains Mono',monospace;text-align:right}
+/* Historical floods timeline */
+.flood-history{display:flex;flex-direction:column;gap:0;margin-top:.6rem}
+.flood-ev{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--border)}
+.flood-ev:last-child{border-bottom:none}
+.flood-ev-date{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);white-space:nowrap}
+.flood-ev-info{font-size:.78rem;line-height:1.45}
+.flood-ev-q{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;white-space:nowrap;text-align:right}
+.flood-ev-bar{height:5px;border-radius:3px;margin-top:.2rem;background:currentColor;opacity:.35}
 
 
 
@@ -3859,6 +3884,33 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <div style="display:flex;gap:3px;height:100%;align-items:center" id="wbal-bars"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.25rem" id="wbal-labels"></div>
+    </div>
+
+    <!-- ARSO postaje vzdolž Savinje -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📍 ARSO postaje — Savinja</span>
+        <span class="chart-range" id="arso-stations-updated">Nalaganje…</span>
+      </div>
+      <div id="arso-stations-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- Vlaga v tleh -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">🌱 Vlaga v tleh — globine</span>
+        <span class="chart-range" id="soil-water-status">Open-Meteo</span>
+      </div>
+      <div id="soil-depths-body"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+
+    <!-- Zgodovinski poplavni dogodki Savinje -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0">📜 Zgodovinski poplavni dogodki — Savinja</span>
+        <span class="chart-range">Vir: ARSO, MOP</span>
+      </div>
+      <div id="flood-history-body"></div>
     </div>
 
   </div><!-- /tab-water -->

@@ -12006,6 +12006,125 @@ function initVodostaj(){
   if(_waterInit)return;_waterInit=true;
   fetchSavinjaRiver();
   fetchWaterBalance();
+  fetchArsoStations();
+  fetchSoilDepths();
+  renderFloodHistory();
+}
+
+// ── ARSO postaje vzdolž Savinje ───────────────────────────
+async function fetchArsoStations(){
+  const el=document.getElementById('arso-stations-body');
+  const upd=document.getElementById('arso-stations-updated');
+  if(!el)return;
+  try{
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);
+    const r=await fetch(PROXY+'/arso-water',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const stations=d.stations||[];
+    if(!stations.length){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki ARSO postaj trenutno nedostopni</div>';return;}
+    const T=_RIVER_THRESHOLDS;
+    let html='<div class="arso-stations">';
+    for(const st of stations){
+      const p=st.properties||{};
+      const name=(p.postaja||p.name||p.station||'ARSO').replace(/\s*\(.*?\)/g,'').trim();
+      const h=p.vodostaj!=null?p.vodostaj:(p.h!=null?p.h:'—');
+      const q=p.pretok!=null?p.pretok:(p.q!=null?p.q:null);
+      const coords=st.geometry?.coordinates;
+      const reka=(p.reka||p.river||'Savinja');
+      let pillCls='normal',pillTxt='Normalen';
+      if(q!=null){
+        if(q>=T.alarm){pillCls='alarm';pillTxt='Alarm';}
+        else if(q>=T.warning){pillCls='warning';pillTxt='Opozorilo';}
+        else if(q>=T.raised){pillCls='raised';pillTxt='Povečan';}
+      }
+      html+=`<div class="arso-st">`+
+        `<div class="arso-st-name" title="${name}">${name}</div>`+
+        `<div class="arso-st-row"><span class="arso-st-val" style="color:var(--blue)">${h!=='—'?Number(h).toFixed(0):h}</span><span class="arso-st-unit">cm</span></div>`+
+        (q!=null?`<div class="arso-st-row"><span class="arso-st-val" style="color:var(--cyan)">${Number(q).toFixed(1)}</span><span class="arso-st-unit">m³/s</span></div>`:'')+
+        `<div><span class="arso-st-pill ${pillCls}">${pillTxt}</span></div>`+
+        `</div>`;
+    }
+    html+='</div>';
+    el.innerHTML=html;
+    if(upd)upd.textContent='ARSO · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">ARSO postaje začasno nedostopne</div>';
+  }
+}
+
+// ── Vlaga v tleh — 4 globine ─────────────────────────────
+async function fetchSoilDepths(){
+  const el=document.getElementById('soil-depths-body');
+  if(!el)return;
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=soil_moisture_0_to_1cm,soil_moisture_1_to_3cm,soil_moisture_3_to_9cm,soil_moisture_9_to_27cm'
+      +'&forecast_hours=1&timezone=Europe%2FLjubljana';
+    const h=(await fetch(url).then(r=>r.json())).hourly;
+    if(!h?.soil_moisture_0_to_1cm)throw new Error('no data');
+    const layers=[
+      {lbl:'0 – 1 cm', key:'soil_moisture_0_to_1cm', dry:.05, wet:.35},
+      {lbl:'1 – 3 cm', key:'soil_moisture_1_to_3cm', dry:.06, wet:.38},
+      {lbl:'3 – 9 cm', key:'soil_moisture_3_to_9cm', dry:.07, wet:.40},
+      {lbl:'9 – 27 cm',key:'soil_moisture_9_to_27cm',dry:.08, wet:.42},
+    ];
+    const colForVal=(v,dry,wet)=>{
+      const pct=(v-dry)/Math.max(wet-dry,0.01);
+      if(pct<0.2)return'#f59e0b';
+      if(pct<0.5)return'#34d399';
+      if(pct<0.8)return'#60a5fa';
+      return'#818cf8';
+    };
+    const statusFor=(v,dry,wet)=>{
+      const pct=(v-dry)/Math.max(wet-dry,0.01);
+      if(pct<0.15)return'Suho';if(pct<0.45)return'Zmerno';if(pct<0.75)return'Mokro';return'Zasičeno';
+    };
+    let html='<div class="soil-depths">';
+    for(const L of layers){
+      const v=h[L.key]?.[0];
+      if(v==null)continue;
+      const pct=Math.min(100,Math.max(0,((v-L.dry)/(L.wet-L.dry))*100));
+      const col=colForVal(v,L.dry,L.wet);
+      const st=statusFor(v,L.dry,L.wet);
+      html+=`<div class="soil-row">`+
+        `<div class="soil-lbl">${L.lbl}</div>`+
+        `<div class="soil-bar-bg"><div class="soil-bar-fill" style="width:${pct.toFixed(1)}%;background:${col}"></div></div>`+
+        `<div class="soil-val" style="color:${col}">${st}</div>`+
+        `</div>`;
+    }
+    html+=`</div><div style="font-size:.64rem;color:var(--muted);margin-top:.6rem">Volumetrična vlažnost tal · <span style="color:#f59e0b">■</span> Suho &nbsp;<span style="color:#34d399">■</span> Zmerno &nbsp;<span style="color:#60a5fa">■</span> Mokro &nbsp;<span style="color:#818cf8">■</span> Zasičeno</div>`;
+    el.innerHTML=html;
+  }catch(e){
+    if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Vlaga v tleh začasno nedostopna</div>';
+  }
+}
+
+// ── Zgodovinski poplavni dogodki Savinje ─────────────────
+function renderFloodHistory(){
+  const el=document.getElementById('flood-history-body');
+  if(!el)return;
+  const events=[
+    {date:'Nov 1990',q:820, col:'#f87171',desc:'Poplave Savinje — ena prvih večjih po vojni, škoda po celotni dolini'},
+    {date:'Okt 1998',q:950, col:'#f87171',desc:'Katastrofalne poplave Zgornje Savinjske doline, škoda >100 mio DEM'},
+    {date:'Nov 2000',q:680, col:'#fb923c',desc:'Hude poplave, prelitje nasipov pri Letušu in Nazarjah'},
+    {date:'Sep 2007',q:420, col:'#fbbf24',desc:'Poplave po dolgotrajnih padavinah, lokalne evakuacije'},
+    {date:'Nov 2012',q:310, col:'#fbbf24',desc:'Povečan pretok, opozorilo ARSO — ni večjih škod'},
+    {date:'Avg 2023',q:1100,col:'#ef4444',desc:'Katastrofalne poplave — zgodovinski rekord Savinje, škoda >500 mio €'},
+  ];
+  const maxQ=Math.max(...events.map(e=>e.q));
+  let html='<div class="flood-history">';
+  for(const ev of events.slice().reverse()){
+    const barW=Math.round((ev.q/maxQ)*100);
+    html+=`<div class="flood-ev">`+
+      `<div class="flood-ev-date">${ev.date}</div>`+
+      `<div class="flood-ev-info">${ev.desc}<div class="flood-ev-bar" style="width:${barW}%;color:${ev.col}"></div></div>`+
+      `<div class="flood-ev-q" style="color:${ev.col}">${ev.q} <span style="font-size:.62rem;font-weight:400;color:var(--muted)">m³/s</span></div>`+
+      `</div>`;
+  }
+  const curQ=_RIVER_THRESHOLDS.normal;
+  html+=`</div><div style="font-size:.64rem;color:var(--muted);margin-top:.75rem">Pretoki so ocenjeni maksimumi pri merilni postaji Letuš (GloFAS / ARSO). Vir: ARSO, MOP, URSZR.</div>`;
+  el.innerHTML=html;
 }
 
 // ── ARSO klimatološke normale 1991–2020 — Celje (0014) ────
