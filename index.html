@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<title>Meteorec — Rečica ob Savinji</title>
+<title>Meteorec — vreme v živo, Rečica ob Savinji (Savinjska dolina)</title>
 <meta name="theme-color" content="#2563eb" id="theme-color-meta">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,58 +13,85 @@
 <meta name="apple-mobile-web-app-title" content="Meteorec">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="canonical" href="https://ibanezar.github.io/weather-station/">
+<link rel="canonical" href="https://meteorec.si/">
 
 <!-- SEO: basic -->
 <meta name="description" content="Meteorec — osebna meteorološka postaja IREICA1 pri Rečici ob Savinji (366 m n.m.). Trenutno vreme, napoved, meritve temperature, padavin, vlage in vetra v živo.">
 <meta name="keywords" content="vreme Rečica ob Savinji, meteorološka postaja, IREICA1, napoved, temperature, padavine, Meteorec, Savinjska dolina">
 <meta name="robots" content="index, follow">
-<meta name="author" content="Meteorec — ibanezar.github.io">
+<meta name="author" content="Meteorec — meteorec.si">
 
 <!-- Open Graph -->
-<meta property="og:type"        content="website">
-<meta property="og:url"         content="https://ibanezar.github.io/weather-station/">
-<meta property="og:site_name"   content="Meteorec">
-<meta property="og:title"       content="Meteorec — Vreme Rečica ob Savinji">
-<meta property="og:description" content="Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji — trenutno vreme, napoved, padavine in analize v živo.">
-<meta property="og:image"       content="https://ibanezar.github.io/weather-station/icon-192.png">
-<meta property="og:locale"      content="sl_SI">
+<meta property="og:type"          content="website">
+<meta property="og:url"           content="https://meteorec.si/">
+<meta property="og:site_name"     content="Meteorec">
+<meta property="og:title"         content="Meteorec — vreme v živo, Rečica ob Savinji">
+<meta property="og:description"   content="Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji — trenutno vreme, napoved, padavine in analize v živo.">
+<meta property="og:image"         content="https://meteorec.si/160502078.15_mn.jpg">
+<meta property="og:image:width"   content="632">
+<meta property="og:image:height"  content="421">
+<meta property="og:image:alt"     content="Megla nad gozdom v Savinjski dolini ob sončnem vzhodu">
+<meta property="og:locale"        content="sl_SI">
 
 <!-- Twitter Card -->
-<meta name="twitter:card"        content="summary">
-<meta name="twitter:title"       content="Meteorec — Vreme Rečica ob Savinji">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Meteorec — vreme v živo, Rečica ob Savinji">
 <meta name="twitter:description" content="Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji — trenutno vreme, napoved in analize v živo.">
-<meta name="twitter:image"       content="https://ibanezar.github.io/weather-station/icon-192.png">
+<meta name="twitter:image"       content="https://meteorec.si/160502078.15_mn.jpg">
+<meta name="twitter:image:alt"   content="Megla nad gozdom v Savinjski dolini ob sončnem vzhodu">
 
 <!-- JSON-LD structured data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Meteorec",
-  "url": "https://ibanezar.github.io/weather-station/",
-  "description": "Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji (366 m n.m.) — meritve in napoved vremena v živo.",
-  "applicationCategory": "WeatherApplication",
-  "operatingSystem": "All",
-  "inLanguage": "sl",
-  "author": {
-    "@type": "Person",
-    "name": "Filip Eremita"
-  },
-  "about": {
-    "@type": "Place",
-    "name": "Rečica ob Savinji",
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 46.325779,
-      "longitude": 14.921137,
-      "elevation": 366
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://meteorec.si/#website",
+      "url": "https://meteorec.si/",
+      "name": "Meteorec",
+      "description": "Vreme v živo z meteorološke postaje IREICA1 pri Rečici ob Savinji.",
+      "inLanguage": "sl",
+      "publisher": { "@id": "https://meteorec.si/#person" }
     },
-    "containedInPlace": {
-      "@type": "AdministrativeArea",
-      "name": "Savinjska dolina, Slovenija"
+    {
+      "@type": "Person",
+      "@id": "https://meteorec.si/#person",
+      "name": "Filip Eremita"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://meteorec.si/#app",
+      "name": "Meteorec",
+      "url": "https://meteorec.si/",
+      "description": "Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji (366 m n.m.) — meritve in napoved vremena v živo.",
+      "applicationCategory": "WeatherApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": "sl",
+      "isPartOf": { "@id": "https://meteorec.si/#website" },
+      "author": { "@id": "https://meteorec.si/#person" },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "about": {
+        "@type": "Place",
+        "name": "Rečica ob Savinji",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 46.325779,
+          "longitude": 14.921137,
+          "elevation": 366
+        },
+        "containedInPlace": {
+          "@type": "AdministrativeArea",
+          "name": "Savinjska dolina, Slovenija"
+        }
+      }
     }
-  }
+  ]
 }
 </script>
 
@@ -2190,6 +2217,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   <!-- ══ TAB: AKTUALNO ══ -->
 
   <div id="tab-current" class="tab-pane active">
+  <h2 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme v Rečici ob Savinji</h2>
   <div class="hero card">
     <canvas id="hero-canvas"></canvas>
     <div class="hero-top">
