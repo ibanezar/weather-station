@@ -60,14 +60,18 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap">
 <link rel="stylesheet" href="blog.css">
 </head>
 <body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
 
   <header class="site-head">
-    <a class="brand" href="/">Meteo<em>rec</em></a>
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
     <nav class="site-nav">
       <a href="/">Vreme v živo</a>
       <a href="/blog/">Blog</a>
@@ -78,8 +82,9 @@
     <a href="/">Meteorec</a> › Blog
   </nav>
 
-  <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:clamp(1.8rem,5vw,2.6rem);letter-spacing:-.02em;margin-bottom:.5rem">Blog</h1>
-  <p style="color:var(--muted);margin-bottom:1.5rem">Mesečni vremenski povzetki, rekordi in analize iz Rečice ob Savinji — na podlagi meritev postaje IREICA1.</p>
+  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+  <h1 class="page-title">Blog</h1>
+  <p class="page-intro">Mesečni vremenski povzetki, rekordi in analize iz Rečice ob Savinji — na podlagi meritev postaje IREICA1.</p>
 
   <ul class="post-list">
     <li>

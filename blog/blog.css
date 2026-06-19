@@ -1,40 +1,60 @@
-/* Meteorec blog — skupni slog (temna tema, usklajena z aplikacijo) */
+/* Meteorec blog — slog usklajen z glavno stranjo (temna tema + blobi) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#04070e; --text:#e8edf8; --muted:#adc0d8;
   --blue:#4d9ff8; --cyan:#22d3ee; --purple:#a78bfa; --green:#34d399; --amber:#f59e0b;
-  --card-bg:rgba(12,18,32,.85); --border:rgba(255,255,255,.1);
-  --shadow:0 8px 40px rgba(0,0,0,.25);
+  --card-bg:rgba(10,15,28,.94); --card-border:rgba(255,255,255,.11);
+  --card-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.1);
+  --stn-bg:rgba(77,159,248,.14); --stn-border:rgba(77,159,248,.4);
+  --blob-1:rgba(77,159,248,.22); --blob-2:rgba(167,139,250,.18);
+  --blob-3:rgba(34,211,238,.14); --blob-4:rgba(52,211,153,.1);
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
   font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  background:
-    radial-gradient(1200px 800px at 70% -10%,rgba(77,159,248,.12),transparent 60%),
-    radial-gradient(900px 700px at -10% 20%,rgba(167,139,250,.1),transparent 55%),
-    var(--bg);
-  color:var(--text); line-height:1.7; min-height:100vh;
-  padding:0 1.2rem;
+  background:var(--bg); color:var(--text); line-height:1.7;
+  min-height:100vh; overflow-x:hidden; padding:0 1.2rem;
 }
-.wrap{max-width:720px;margin:0 auto;padding:2rem 0 4rem}
 
-/* glava */
+/* ── ozadje z animiranimi blobi (kot na glavni strani) ── */
+#bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(130px)}
+.b1{width:960px;height:960px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-20%;left:-15%;animation:blob-drift 22s ease-in-out infinite}
+.b2{width:780px;height:780px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:15%;right:-12%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
+.b3{width:680px;height:680px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:-5%;left:5%;animation:blob-drift 19s ease-in-out infinite 8s}
+.b4{width:580px;height:580px;background:radial-gradient(circle,var(--blob-4),transparent 70%);bottom:20%;right:8%;animation:blob-drift 25s ease-in-out infinite 14s}
+.b5{width:500px;height:500px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:38%;left:32%;animation:blob-drift 33s ease-in-out infinite reverse 10s;opacity:.7}
+@keyframes blob-drift{0%{transform:translate(0,0) scale(1)}20%{transform:translate(42px,-28px) scale(1.09)}40%{transform:translate(-22px,35px) scale(.93)}60%{transform:translate(28px,18px) scale(1.06)}80%{transform:translate(-18px,-22px) scale(.97)}100%{transform:translate(0,0) scale(1)}}
+@media (prefers-reduced-motion:reduce){.blob{animation:none}}
+
+.wrap{max-width:720px;margin:0 auto;padding:2rem 0 4rem;position:relative;z-index:1}
+
+/* ── glava ── */
 .site-head{display:flex;align-items:center;justify-content:space-between;
-  padding:1.2rem 0;border-bottom:1px solid var(--border);margin-bottom:2.2rem;flex-wrap:wrap;gap:.6rem}
-.brand{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.35rem;
-  text-decoration:none;color:var(--text);letter-spacing:-.02em}
-.brand em{color:var(--blue);font-style:normal}
+  padding:1.1rem 0;border-bottom:1px solid var(--border);margin-bottom:2.2rem;flex-wrap:wrap;gap:.6rem}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text)}
+.brand-logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(56,189,248,.35))}
+.brand-name{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-.025em}
+.brand-name em{font-style:normal;color:var(--cyan)}
 .site-nav a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;margin-left:1.1rem}
-.site-nav a:hover{color:var(--blue)}
+.site-nav a:hover{color:var(--cyan)}
 
 /* drobtine */
 .crumbs{font-size:.82rem;color:var(--muted);margin-bottom:1.4rem}
 .crumbs a{color:var(--muted);text-decoration:none}
-.crumbs a:hover{color:var(--blue)}
+.crumbs a:hover{color:var(--cyan)}
+
+/* postaja-značka (kot na glavni strani) */
+.stn-badge{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;letter-spacing:.16em;color:var(--text);text-transform:uppercase;
+  border:1px solid var(--stn-border);border-radius:20px;padding:3px 11px;background:var(--stn-bg);margin-bottom:1.2rem}
+.stn-badge span{width:4px;height:4px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 
 /* objava */
-article h1{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:clamp(1.7rem,5vw,2.5rem);
-  line-height:1.15;letter-spacing:-.02em;margin-bottom:.8rem}
+article h1,.page-title{font-family:'Space Grotesk',sans-serif;font-weight:800;
+  font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.12;letter-spacing:-.025em;margin-bottom:.6rem;
+  text-shadow:0 2px 18px rgba(0,0,0,.5)}
 .post-meta{color:var(--muted);font-size:.88rem;margin-bottom:2rem;
   border-bottom:1px solid var(--border);padding-bottom:1.2rem}
 article h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;
@@ -42,35 +62,39 @@ article h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35
 article p{margin:0 0 1.1rem}
 article strong{color:#fff}
 .lead{font-size:1.12rem;color:#cfdbef}
-.hl{color:var(--blue);font-weight:600}
+.hl{color:var(--cyan);font-weight:600}
 
 /* statistična tabela */
-.stats{width:100%;border-collapse:collapse;margin:1.4rem 0 1.8rem;font-size:.95rem}
-.stats th,.stats td{text-align:left;padding:.7rem .9rem;border-bottom:1px solid var(--border)}
+.stats{width:100%;border-collapse:collapse;margin:1.4rem 0 1.8rem;font-size:.95rem;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.stats th,.stats td{text-align:left;padding:.7rem 1rem;border-bottom:1px solid var(--border)}
+.stats tr:last-child th,.stats tr:last-child td{border-bottom:0}
 .stats th{color:var(--muted);font-weight:500}
-.stats td{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.stats td{font-weight:600;text-align:right;font-variant-numeric:tabular-nums;color:#fff}
 .stats tr:hover{background:rgba(255,255,255,.03)}
 
-.callout{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;
-  padding:1.1rem 1.3rem;margin:1.6rem 0;box-shadow:var(--shadow)}
-.callout strong{color:var(--blue)}
+.callout{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;
+  padding:1.1rem 1.3rem;margin:1.6rem 0;box-shadow:var(--card-shadow);
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.callout strong{color:var(--cyan)}
 
 /* seznam objav (index) */
+.page-intro{color:var(--muted);margin-bottom:1.6rem}
 .post-list{list-style:none;margin-top:1rem}
 .post-card{display:block;text-decoration:none;color:inherit;background:var(--card-bg);
-  border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;margin-bottom:1.1rem;
-  box-shadow:var(--shadow);transition:border-color .2s,transform .2s}
-.post-card:hover{border-color:rgba(77,159,248,.4);transform:translateY(-2px)}
-.post-card h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin:0 0 .4rem}
-.post-card .date{color:var(--muted);font-size:.82rem;margin-bottom:.5rem}
-.post-card p{color:var(--muted);margin:0;font-size:.95rem}
-
-.empty{color:var(--muted);background:var(--card-bg);border:1px dashed var(--border);
-  border-radius:14px;padding:1.5rem;text-align:center}
+  border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;margin-bottom:1.1rem;
+  box-shadow:var(--card-shadow);transition:border-color .25s,transform .25s;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.post-card:hover{border-color:rgba(34,211,238,.45);transform:translateY(-2px)}
+.post-card h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;margin:0 0 .4rem;letter-spacing:-.01em}
+.post-card .date{color:var(--muted);font-size:.82rem;margin-bottom:.5rem;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.post-card p{color:var(--muted);margin:0;font-size:.95rem;line-height:1.6}
 
 /* noga */
 .site-foot{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);
   color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
-.site-foot a{color:var(--blue);text-decoration:none}
-.back-link{display:inline-block;margin-top:2rem;color:var(--blue);text-decoration:none;font-weight:600}
+.site-foot a{color:var(--cyan);text-decoration:none}
+.back-link{display:inline-block;margin-top:2rem;color:var(--cyan);text-decoration:none;font-weight:600}
 .back-link:hover{text-decoration:underline}
