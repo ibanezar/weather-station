@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sl" data-theme="light">
+<html lang="sl" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,31 +111,6 @@
   --t-fl-bg:rgba(100,116,139,.08);--t-fl-c:var(--muted);
 }
 
-/* ── Light theme sky redesign ── */
-[data-theme="light"] body{background:linear-gradient(155deg,#0c85c7 0%,#0ea5e9 35%,#38bdf8 68%,#7dd3fc 100%)}
-[data-theme="light"] #bg{background:linear-gradient(155deg,#0c85c7 0%,#0ea5e9 35%,#38bdf8 68%,#7dd3fc 100%)}
-[data-theme="light"] header{color:#fff;text-shadow:0 2px 16px rgba(2,50,100,.2)}
-[data-theme="light"] h1{color:#fff;text-shadow:0 2px 20px rgba(2,50,100,.22)}
-[data-theme="light"] h1 em{color:rgba(224,242,254,.95)}
-[data-theme="light"] .sub-loc{color:rgba(255,255,255,.78)}
-[data-theme="light"] .stn-badge{color:rgba(255,255,255,.92);background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45)}
-[data-theme="light"] .stn-badge span{background:rgba(255,255,255,.9);box-shadow:0 0 6px rgba(255,255,255,.75)}
-[data-theme="light"] .status{color:rgba(255,255,255,.88)}
-[data-theme="light"] .dot{background:rgba(255,255,255,.9);box-shadow:0 0 8px rgba(255,255,255,.65)}
-[data-theme="light"] .sskj-entry,[data-theme="light"] .sskj-toggle{color:rgba(255,255,255,.7)}
-[data-theme="light"] .tab-nav-wrap{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.38);box-shadow:0 4px 24px rgba(0,0,0,.12);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
-[data-theme="light"] .tab-nav-wrap::after{background:linear-gradient(to right,transparent,rgba(56,189,248,.88) 72%)}
-[data-theme="light"] .tab-nav-wrap::before{background:linear-gradient(to left,transparent,rgba(56,189,248,.88) 78%)}
-[data-theme="light"] .tab-btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.32);color:rgba(255,255,255,.9)}
-[data-theme="light"] .tab-btn:hover:not(.active){background:rgba(255,255,255,.3);border-color:rgba(255,255,255,.52);color:#fff;transform:translateY(-1px)}
-[data-theme="light"] .tab-btn.active{background:#fff;color:#0369a1;border-color:transparent;box-shadow:0 4px 16px rgba(0,0,0,.15);font-weight:700}
-[data-theme="light"] .tab-dd-trigger.dd-active{background:#fff;color:#0369a1;border-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,.13)}
-[data-theme="light"] .tab-dd-menu{background:rgba(255,255,255,.97);backdrop-filter:blur(20px)}
-[data-theme="light"] .ticker-wrap{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);backdrop-filter:blur(12px);box-shadow:0 2px 12px rgba(0,0,0,.1)}
-[data-theme="light"] .ticker-inner{color:rgba(255,255,255,.85)}
-[data-theme="light"] .hero{box-shadow:0 12px 50px rgba(0,50,120,.22),0 2px 8px rgba(0,0,0,.08)}
-[data-theme="light"] .card{box-shadow:0 4px 24px rgba(0,50,100,.14),0 1px 4px rgba(0,0,0,.06)}
-[data-theme="light"] .card:hover{box-shadow:0 12px 40px rgba(0,50,100,.2)}
 
 /* ── Dark theme ── */
 [data-theme="dark"] {
@@ -2112,7 +2087,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 <div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><canvas id="starfield-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
 </div>
 <div id="chart-tip"></div>
-<button class="theme-btn" id="theme-btn" title="Preklopi temo">☀️</button>
+<button class="theme-btn" id="theme-btn" title="Preklopi temo" style="display:none">☀️</button>
 
 <div class="wrap">
   <header>
@@ -4688,7 +4663,7 @@ function setTheme(t){
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 (function initTheme(){
-  try { const s = localStorage.getItem('wx-theme'); if(s) setTheme(s); } catch(e){}
+  setTheme('dark');try{localStorage.removeItem('wx-theme');}catch(e){}
 })();
 
 // ── Chart colour helpers ──────────────────────────────────
