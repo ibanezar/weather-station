@@ -1,0 +1,76 @@
+/* Meteorec blog — skupni slog (temna tema, usklajena z aplikacijo) */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04070e; --text:#e8edf8; --muted:#adc0d8;
+  --blue:#4d9ff8; --cyan:#22d3ee; --purple:#a78bfa; --green:#34d399; --amber:#f59e0b;
+  --card-bg:rgba(12,18,32,.85); --border:rgba(255,255,255,.1);
+  --shadow:0 8px 40px rgba(0,0,0,.25);
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:
+    radial-gradient(1200px 800px at 70% -10%,rgba(77,159,248,.12),transparent 60%),
+    radial-gradient(900px 700px at -10% 20%,rgba(167,139,250,.1),transparent 55%),
+    var(--bg);
+  color:var(--text); line-height:1.7; min-height:100vh;
+  padding:0 1.2rem;
+}
+.wrap{max-width:720px;margin:0 auto;padding:2rem 0 4rem}
+
+/* glava */
+.site-head{display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 0;border-bottom:1px solid var(--border);margin-bottom:2.2rem;flex-wrap:wrap;gap:.6rem}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.35rem;
+  text-decoration:none;color:var(--text);letter-spacing:-.02em}
+.brand em{color:var(--blue);font-style:normal}
+.site-nav a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;margin-left:1.1rem}
+.site-nav a:hover{color:var(--blue)}
+
+/* drobtine */
+.crumbs{font-size:.82rem;color:var(--muted);margin-bottom:1.4rem}
+.crumbs a{color:var(--muted);text-decoration:none}
+.crumbs a:hover{color:var(--blue)}
+
+/* objava */
+article h1{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:clamp(1.7rem,5vw,2.5rem);
+  line-height:1.15;letter-spacing:-.02em;margin-bottom:.8rem}
+.post-meta{color:var(--muted);font-size:.88rem;margin-bottom:2rem;
+  border-bottom:1px solid var(--border);padding-bottom:1.2rem}
+article h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;
+  margin:2.2rem 0 .8rem;letter-spacing:-.01em}
+article p{margin:0 0 1.1rem}
+article strong{color:#fff}
+.lead{font-size:1.12rem;color:#cfdbef}
+.hl{color:var(--blue);font-weight:600}
+
+/* statistična tabela */
+.stats{width:100%;border-collapse:collapse;margin:1.4rem 0 1.8rem;font-size:.95rem}
+.stats th,.stats td{text-align:left;padding:.7rem .9rem;border-bottom:1px solid var(--border)}
+.stats th{color:var(--muted);font-weight:500}
+.stats td{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.stats tr:hover{background:rgba(255,255,255,.03)}
+
+.callout{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;
+  padding:1.1rem 1.3rem;margin:1.6rem 0;box-shadow:var(--shadow)}
+.callout strong{color:var(--blue)}
+
+/* seznam objav (index) */
+.post-list{list-style:none;margin-top:1rem}
+.post-card{display:block;text-decoration:none;color:inherit;background:var(--card-bg);
+  border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;margin-bottom:1.1rem;
+  box-shadow:var(--shadow);transition:border-color .2s,transform .2s}
+.post-card:hover{border-color:rgba(77,159,248,.4);transform:translateY(-2px)}
+.post-card h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin:0 0 .4rem}
+.post-card .date{color:var(--muted);font-size:.82rem;margin-bottom:.5rem}
+.post-card p{color:var(--muted);margin:0;font-size:.95rem}
+
+.empty{color:var(--muted);background:var(--card-bg);border:1px dashed var(--border);
+  border-radius:14px;padding:1.5rem;text-align:center}
+
+/* noga */
+.site-foot{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);
+  color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
+.site-foot a{color:var(--blue);text-decoration:none}
+.back-link{display:inline-block;margin-top:2rem;color:var(--blue);text-decoration:none;font-weight:600}
+.back-link:hover{text-decoration:underline}
