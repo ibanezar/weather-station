@@ -14,8 +14,8 @@ const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
 
-const EW_APP_FALLBACK = "";
-const EW_API_FALLBACK = "";
+const EW_APP_FALLBACK = "ADD2D64EFD04BE4C689F1670C4C6CC2C";
+const EW_API_FALLBACK = "3bb47914-356e-4a17-851c-ef6336a40812";
 const EW_MAC = "BC:DD:C2:42:8D:56";
 
 const ALLOWED_ORIGINS = [
