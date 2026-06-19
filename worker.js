@@ -20,6 +20,8 @@ const EW_MAC = "BC:DD:C2:42:8D:56";
 
 const ALLOWED_ORIGINS = [
   "https://ibanezar.github.io",
+  "https://meteorec.si",
+  "https://www.meteorec.si",
   "http://localhost",
   "http://127.0.0.1",
 ];
@@ -31,7 +33,7 @@ function isAllowedOrigin(request) {
 }
 
 const CORS_ALLOWED = {
-  "Access-Control-Allow-Origin":  "https://ibanezar.github.io",
+  "Access-Control-Allow-Origin":  "*",
   "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type,Authorization",
 };
