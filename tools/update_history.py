@@ -18,9 +18,12 @@ KEYS = ("tempHigh", "tempLow", "tempAvg", "precipTotal",
 def fetch(start, end):
     url = f"{WORKER}/ecowitt-history?start={start}&end={end}"
     req = urllib.request.Request(url, headers={
-        "Referer": "https://meteorec.si",
+        "Referer": "https://meteorec.si/",
         "Origin": "https://meteorec.si",
         "Accept": "application/json",
+        # brskalniku podoben UA — privzeti Python-urllib UA Cloudflare blokira (403)
+        "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
     })
     with urllib.request.urlopen(req, timeout=45) as r:
         return json.load(r)
