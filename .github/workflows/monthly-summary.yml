@@ -1,0 +1,66 @@
+name: Mesečni vremenski povzetek
+
+# Vsakega 2. v mesecu zgenerira blog povzetek za pretekli mesec:
+#  1) osveži history.json iz Cloudflare workerja (/ecowitt-history)
+#  2) zažene generator objave (--wire posodobi blog.json, sitemap, index)
+#  3) commita in pusha na main (GitHub Pages se samodejno posodobi)
+
+on:
+  schedule:
+    - cron: "0 6 2 * *"   # 2. v mesecu ob 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Ciljni mesec (YYYY-MM); prazno = pretekli mesec"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-summary
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Določi ciljni mesec
+        id: month
+        run: |
+          if [ -n "${{ github.event.inputs.month }}" ]; then
+            YM="${{ github.event.inputs.month }}"
+          else
+            YM="$(date -u -d 'last month' +%Y-%m)"
+          fi
+          echo "ym=$YM" >> "$GITHUB_OUTPUT"
+          echo "Ciljni mesec: $YM"
+
+      - name: Osveži history.json
+        env:
+          WORKER_URL: https://weatherireica1.filip-eremita.workers.dev
+        run: python3 tools/update_history.py "${{ steps.month.outputs.ym }}"
+
+      - name: Zgeneriraj objavo
+        run: python3 tools/generate_monthly_post.py "${{ steps.month.outputs.ym }}" --wire
+
+      - name: Commit & push
+        run: |
+          git config user.name "meteorec-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Ni sprememb — preskakujem commit."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Samodejni vremenski povzetek — ${{ steps.month.outputs.ym }}"
+          git push origin main

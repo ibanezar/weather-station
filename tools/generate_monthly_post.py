@@ -10,12 +10,13 @@ Iz history.json izračuna statistiko meseca + klimatološko primerjavo
 blog/. Na koncu izpiše vrstice, ki jih dodaš v sitemap.xml, blog.json
 in blog/index.html (ali poženi z --wire za samodejno vpisovanje).
 """
-import json, sys, os, calendar, re
+import json, sys, os, calendar, re, datetime
 import statistics as st
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
-TODAY = "2026-06-19"  # datum objave; po potrebi spremeni
+# datum objave: privzeto današnji (UTC), z možnostjo prepisa prek POST_DATE
+TODAY = os.environ.get("POST_DATE") or datetime.date.today().isoformat()
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
@@ -34,8 +35,9 @@ def compute(ym):
     m = {k: d[k] for k in days}
     dim = calendar.monthrange(year, mon)[1]
     tavg = st.mean(v["tempAvg"] for v in m.values())
-    hi = max(m.items(), key=lambda kv: kv[1]["tempHigh"])
-    lo = min(m.items(), key=lambda kv: kv[1]["tempLow"])
+    # po dnevnem povprečju — dosledno za stare (high==low==avg) in nove podatke
+    hi = max(m.items(), key=lambda kv: kv[1]["tempAvg"])
+    lo = min(m.items(), key=lambda kv: kv[1]["tempAvg"])
     prec = sum(v["precipTotal"] for v in m.values())
     wettest = max(m.items(), key=lambda kv: kv[1]["precipTotal"])
     rainy = sum(1 for v in m.values() if v["precipTotal"] > 0.2)
@@ -111,8 +113,8 @@ def build_html(s):
     if anom is not None:
         rows.append(("Odstopanje od dolgoletnega povprečja", f"{'+' if anom>=0 else '−'}{num(abs(anom))} °C"))
     rows += [
-        ("Najtoplejši dan (po dnevnem povprečju)", f"{dayfmt(s['hi'][0],mon)} · {num(s['hi'][1]['tempHigh'])} °C"),
-        ("Najhladnejši dan (po dnevnem povprečju)", f"{dayfmt(s['lo'][0],mon)} · {num(s['lo'][1]['tempLow'])} °C"),
+        ("Najtoplejši dan (po dnevnem povprečju)", f"{dayfmt(s['hi'][0],mon)} · {num(s['hi'][1]['tempAvg'])} °C"),
+        ("Najhladnejši dan (po dnevnem povprečju)", f"{dayfmt(s['lo'][0],mon)} · {num(s['lo'][1]['tempAvg'])} °C"),
         ("Padavine skupaj", f"{num(s['prec'])} mm"),
         ("Deževnih dni", f"{s['rainy']}"),
         ("Najbolj moker dan", f"{dayfmt(s['wettest'][0],mon)} · {num(s['wettest'][1]['precipTotal'])} mm"),
@@ -191,7 +193,7 @@ def build_html(s):
   <article>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>{title} v Rečici ob Savinji</h1>
-    <p class="post-meta">19. junij {y} · Filip Eremita · postaja IREICA1 · ~3 min branja</p>
+    <p class="post-meta">{fmtdate(TODAY)} · Filip Eremita · postaja IREICA1 · ~3 min branja</p>
     <p class="lead">{lead}</p>
     {partial}
     <h2>Ključne številke</h2>
