@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poplave avgusta 2023 v Zgornji Savinjski dolini | Meteorec, Rečica ob Savinji</title>
+<link rel="canonical" href="https://meteorec.si/blog/poplave-2023.html">
+
+<meta name="description" content="Celovit pregled poplav avgusta 2023 v Zgornji Savinjski dolini: meteorološki vzroki, hidrološki rekordi (935 m³/s pri Letušu), škoda 2,98 mrd €, odziv ter potek obnove. Najhujša naravna nesreča v zgodovini samostojne Slovenije.">
+<meta name="keywords" content="poplave 2023, Zgornja Savinjska dolina, Savinja, Rečica ob Savinji, hidrološka analiza, naravna nesreča, BSH Nazarje, Luče, Ljubno, obnova">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+
+<meta property="og:type"          content="article">
+<meta property="og:url"           content="https://meteorec.si/blog/poplave-2023.html">
+<meta property="og:site_name"     content="Meteorec">
+<meta property="og:title"         content="Poplave avgusta 2023 v Zgornji Savinjski dolini — celovit pregled">
+<meta property="og:description"   content="Najhujša naravna nesreča v zgodovini Slovenije: 2,98 mrd € škode, rekordni pretoki Savinje in obnova, ki traja do 2028.">
+<meta property="og:image"         content="https://meteorec.si/og-image.jpg">
+<meta property="og:locale"        content="sl_SI">
+<meta property="article:published_time" content="2026-06-19">
+<meta property="article:author"   content="Filip Eremita">
+<meta name="twitter:card"         content="summary_large_image">
+<meta name="twitter:title"        content="Poplave avgusta 2023 v Zgornji Savinjski dolini">
+<meta name="twitter:description"  content="2,98 mrd € škode, rekordni pretoki, 7 smrtnih žrtev. Celovit pregled najhujše naravne nesreče v zgodovini Slovenije.">
+<meta name="twitter:image"        content="https://meteorec.si/og-image.jpg">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Poplave avgusta 2023 v Zgornji Savinjski dolini — celovit pregled",
+  "description": "Celovit pregled poplav avgusta 2023 v Zgornji Savinjski dolini: meteorološki vzroki, hidrološki rekordi, škoda 2,98 mrd €, odziv in obnova.",
+  "image": "https://meteorec.si/og-image.jpg",
+  "datePublished": "2026-06-19",
+  "dateModified": "2026-06-19",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Meteorec",
+    "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" }
+  },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/poplave-2023.html" },
+  "about": {
+    "@type": "Place",
+    "name": "Zgornja Savinjska dolina",
+    "geo": { "@type": "GeoCoordinates", "latitude": 46.395, "longitude": 14.835 }
+  },
+  "keywords": "poplave 2023, Savinja, Zgornja Savinjska dolina, Rečica ob Savinji, hidrološka analiza"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Poplave avgusta 2023" }
+  ]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap">
+<link rel="stylesheet" href="blog.css">
+
+<style>
+/* ── dodatni slogi za ta prispevek ── */
+.callout-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-left:3px solid #ef4444;border-radius:0 16px 16px 0;padding:1.1rem 1.3rem;margin:1.6rem 0}
+.callout-danger strong{color:#f87171}
+.callout-warning{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--amber);border-radius:0 16px 16px 0;padding:1.1rem 1.3rem;margin:1.6rem 0}
+.callout-warning strong{color:var(--amber)}
+
+.section-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);opacity:.75;margin:2.8rem 0 .4rem;display:block}
+
+.stat-card.c-danger .sc-val{color:#f87171}
+.stat-card.c-green .sc-val{color:var(--green)}
+.stat-card.c-cyan .sc-val{color:var(--cyan)}
+.stat-card.c-amber .sc-val{color:var(--amber)}
+
+.chart-card canvas{max-height:260px}
+.chart-card.tall canvas{max-height:340px}
+
+/* lokacijske oznake */
+.location-pills{display:flex;flex-wrap:wrap;gap:.4rem;margin:.8rem 0 1.4rem}
+.location-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;font-family:'JetBrains Mono',monospace;padding:.28rem .7rem;border-radius:20px;border:1px solid rgba(77,159,248,.35);background:rgba(77,159,248,.1);color:var(--blue);letter-spacing:.04em}
+.location-pill.severe{border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.1);color:#f87171}
+.location-pill.moderate{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.1);color:var(--amber)}
+.location-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* kronoliška os */
+.timeline{list-style:none;margin:1.2rem 0 2rem;padding-left:1.4rem;border-left:2px solid rgba(255,255,255,.1)}
+.timeline li{position:relative;padding:0 0 1.3rem 1.2rem}
+.timeline li:last-child{padding-bottom:0}
+.timeline li::before{content:'';position:absolute;left:-1.68rem;top:.38rem;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--bg);box-shadow:0 0 8px rgba(77,159,248,.5)}
+.timeline li.tl-peak::before{background:#f87171;box-shadow:0 0 8px rgba(239,68,68,.5)}
+.timeline li.tl-action::before{background:var(--green);box-shadow:0 0 8px rgba(52,211,153,.4)}
+.tl-time{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--cyan);letter-spacing:.06em;display:block;margin-bottom:.18rem}
+.tl-peak .tl-time{color:#f87171}
+.tl-action .tl-time{color:var(--green)}
+.tl-title{font-weight:600;color:#fff;margin-bottom:.15rem;font-size:.97rem}
+.tl-body{font-size:.9rem;color:var(--muted);line-height:1.6}
+
+/* napredek obnove */
+.prog-list{margin:.8rem 0 1.6rem}
+.prog-item{margin-bottom:.9rem}
+.prog-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem}
+.prog-header span:first-child{font-size:.88rem;color:var(--muted)}
+.prog-header span:last-child{font-size:.82rem;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace}
+.prog-track{height:7px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.prog-fill.blue{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+.prog-fill.green{background:linear-gradient(90deg,#059669,#34d399)}
+.prog-fill.amber{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.prog-fill.purple{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.prog-fill.red{background:linear-gradient(90deg,#dc2626,#f87171)}
+.prog-fill.cyan{background:linear-gradient(90deg,#0891b2,#22d3ee)}
+
+/* dvostebrna mreža za kraje */
+.place-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0 1.4rem}
+@media(max-width:500px){.place-grid{grid-template-columns:1fr}}
+.place-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.85rem 1rem;font-size:.9rem}
+.place-card h4{font-size:.8rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;margin-bottom:.3rem;color:var(--blue)}
+.place-card.ph h4{color:#f87171}
+.place-card p{color:var(--muted);font-size:.84rem;margin:0;line-height:1.55}
+.place-card strong{color:#fff}
+
+/* soovisnostna tabela (stacija → pretok) */
+.flow-table{width:100%;border-collapse:collapse;margin:1.4rem 0;font-size:.88rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
+.flow-table th,.flow-table td{padding:.65rem .9rem;border-bottom:1px solid var(--border)}
+.flow-table tr:last-child th,.flow-table tr:last-child td{border-bottom:0}
+.flow-table th{color:var(--muted);font-weight:500;font-size:.78rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;text-transform:uppercase}
+.flow-table td{font-variant-numeric:tabular-nums}
+.flow-table .record{color:#f87171;font-weight:700}
+.flow-table .near-record{color:var(--amber);font-weight:600}
+.flow-table .rp{font-size:.76rem;color:var(--muted);display:block}
+.flow-table tr:hover{background:rgba(255,255,255,.025)}
+
+/* horizontalni kazalniki (infografika) */
+.infographic-row{display:flex;gap:1rem;margin:1.4rem 0;flex-wrap:wrap}
+.infographic-block{flex:1;min-width:140px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1rem 1.1rem;text-align:center}
+.infographic-block .ib-icon{font-size:1.8rem;margin-bottom:.4rem;display:block}
+.infographic-block .ib-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.6rem;color:#fff;display:block;line-height:1}
+.infographic-block .ib-unit{font-size:.78rem;color:var(--muted);display:block;margin-top:.1rem}
+.infographic-block .ib-label{font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;display:block;margin-top:.35rem}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Vreme v živo</a>
+      <a href="/blog/">Blog</a>
+      <a href="/o-postaji.html">O postaji</a>
+    </nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Poplave avgusta 2023
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · Posebna analiza</div>
+    <h1>Poplave avgusta 2023 v Zgornji Savinjski dolini</h1>
+    <p class="post-meta">19. junija 2026 · Filip Eremita · ~10 min branja</p>
+
+    <p class="lead">V noči s 3. na 4. avgust 2023 je <strong>Zgornjo Savinjsko dolino</strong> — skupaj z Rečico ob Savinji — zajela <span class="hl">najhujša naravna nesreča v zgodovini samostojne Slovenije</span>. V 6 do 12 urah je padlo 150–200 mm dežja na že nasičena porečja Kamniško-Savinjskih Alp. Savinja je dosegla pretoke z več kot 100-letno povratno dobo, škoda je dosegla <strong>2,98 milijarde evrov</strong>.</p>
+
+    <div class="callout-danger">
+      <p><strong>Najhujša naravna nesreča v zgodovini samostojne Slovenije.</strong> Vlada RS je 25. oktobra 2023 potrdila končno oceno neposredne škode v višini <strong>2,98 milijarde evrov</strong>, od tega 1,32 milijarde evrov škode na vodotokih. Umrlo je sedem ljudi. Rečica ob Savinji je bila popolnoma poplavljena.</p>
+    </div>
+
+    <!-- KLJUČNE ŠTEVILKE -->
+    <span class="section-label">Ključne številke</span>
+    <div class="stat-grid">
+      <div class="stat-card c-danger">
+        <div class="sc-label">Skupna škoda</div>
+        <div class="sc-val">2,98</div>
+        <div class="sc-sub">mrd € · ocena vlade, okt. 2023</div>
+      </div>
+      <div class="stat-card c-rain">
+        <div class="sc-label">Dež v 6–12 urah</div>
+        <div class="sc-val">150–200</div>
+        <div class="sc-sub">mm · noč 3./4. avgusta</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="sc-label">Povratna doba</div>
+        <div class="sc-val">&gt;100</div>
+        <div class="sc-sub">let · Savinja zg. tok, Dreta</div>
+      </div>
+      <div class="stat-card c-wind">
+        <div class="sc-label">Smrtne žrtve</div>
+        <div class="sc-val">7</div>
+        <div class="sc-sub">v celotni ujmi in pri odpravljanju</div>
+      </div>
+    </div>
+
+    <!-- METEOROLOŠKI VZROKI -->
+    <span class="section-label">01 — Meteorološki vzroki</span>
+    <h2>Zakaj tako katastrofalno?</h2>
+    <p>Vremenska situacija na začetku avgusta 2023 je bila po opisu ARSO nenavadna: šlo je za <strong>dolgotrajno deževje jesensko-zimskega značaja</strong>, močno podkrepljeno z <strong>nadpovprečno toplim Sredozemskim morjem</strong>. Julij 2023 je prinesel dvakratnik do trikratnik dolgoletnega povprečja padavin, tla in struge so bila popolnoma nasičena.</p>
+
+    <div class="infographic-row">
+      <div class="infographic-block">
+        <span class="ib-icon">🌊</span>
+        <span class="ib-val">2–3×</span>
+        <span class="ib-unit">julijsko povprečje</span>
+        <span class="ib-label">predhodna namočenost</span>
+      </div>
+      <div class="infographic-block">
+        <span class="ib-icon">🌧️</span>
+        <span class="ib-val">200</span>
+        <span class="ib-unit">mm v 12 h</span>
+        <span class="ib-label">vrh naliva, 3./4. avg.</span>
+      </div>
+      <div class="infographic-block">
+        <span class="ib-icon">📅</span>
+        <span class="ib-val">3 dni</span>
+        <span class="ib-unit">100–300 mm skupaj</span>
+        <span class="ib-label">do 6. avgusta zjutraj</span>
+      </div>
+      <div class="infographic-block">
+        <span class="ib-icon">🌡️</span>
+        <span class="ib-val">+</span>
+        <span class="ib-unit">Sredozemsko morje</span>
+        <span class="ib-label">nadpovprečno toplo</span>
+      </div>
+    </div>
+
+    <p>Intenzivni nalivi z dne 3. na 4. avgust so bili statistično <strong>najbolj izjemni na severu države</strong> — povratna doba 6- do 12-urnih padavin je presegla 100 let. V treh dneh (do 6. avgusta zjutraj) je v večjem delu severozahodne in severne Slovenije padlo med 100 in 300 mm dežja.</p>
+
+    <div class="callout-warning">
+      <p><strong>Meteorologi ARSO so 3. avgusta opozorili</strong> na dolgotrajnejše nalive, med katerimi naj bi padla celomesečna količina padavin. Kljub opozorilu izjemnost dogodka ni bila predvidljiva v celoti — šlo je za kombinacijo meteoroloških dejavnikov z nizko verjetnostjo sočasnega nastopa.</p>
+    </div>
+
+    <!-- KRONOLOGIJA -->
+    <span class="section-label">02 — Kronologija</span>
+    <h2>Od oblakov do katastrofe</h2>
+
+    <ul class="timeline">
+      <li>
+        <span class="tl-time">Julij 2023</span>
+        <div class="tl-title">Izjemno moker julij</div>
+        <div class="tl-body">Na severozahodu in severu Slovenije 2–3× dolgoletno povprečje padavin. Tla in struge popolnoma nasičeni.</div>
+      </li>
+      <li>
+        <span class="tl-time">Četrtek, 3. avgust 2023</span>
+        <div class="tl-title">ARSO izda opozorilo</div>
+        <div class="tl-body">Napoved dolgotrajnejšega deževja — pričakovana celomesečna količina padavin v le enem dnevu.</div>
+      </li>
+      <li class="tl-peak">
+        <span class="tl-time">Noč 3./4. avgusta — od polnoči dalje</span>
+        <div class="tl-title">Vrhunec nalivov — 150–200 mm v 12 urah</div>
+        <div class="tl-body">Intenzivni nalivi zajamejo porečja Kamniško-Savinjskih Alp, Karavank in Škofjeloškega hribovja. Hudourniki izstopijo iz strug.</div>
+      </li>
+      <li class="tl-peak">
+        <span class="tl-time">Petek, 4. avgusta — 3.00–7.30</span>
+        <div class="tl-title">Rekordni pretoki na vseh postajah v dolini</div>
+        <div class="tl-body">Savinja v Letušu ob 7.20 doseže 935 m³/s — absolutni rekord v opazovalnem obdobju. Rečica ob Savinji je popolnoma poplavljena.</div>
+      </li>
+      <li>
+        <span class="tl-time">Petek, 4. avgusta — zjutraj</span>
+        <div class="tl-title">Aktiviran Državni načrt ZiR ob poplavah</div>
+        <div class="tl-body">168 gasilskih enot v 1039 intervencijah samo v prvih 12 urah. Helikopterska reševanja v Lučah (zaselek Struge).</div>
+      </li>
+      <li class="tl-action">
+        <span class="tl-time">4.–8. avgust</span>
+        <div class="tl-title">Mednarodna pomoč in evakuacije</div>
+        <div class="tl-body">ERCC (EU) in EADRCC (NATO) aktivirana. Francija, Nemčija, Hrvaška, Ukrajina pošljejo enote in delovne stroje. Rečica ob Savinji — izhodišče mednarodne pomoči.</div>
+      </li>
+      <li>
+        <span class="tl-time">25. oktober 2023</span>
+        <div class="tl-title">Vlada potrdi oceno škode: 2,98 mrd €</div>
+        <div class="tl-body">Sprejeti sklepi o preselitvi 348 poplavno ogroženih objektov iz 23 občin.</div>
+      </li>
+      <li class="tl-action">
+        <span class="tl-time">Konec 2023 — 2025</span>
+        <div class="tl-title">EU solidarnostni sklad: 428,4 mio €</div>
+        <div class="tl-body">100 mio € predplačila konec 2023; 328,4 mio € v drugi polovici 2024 (EP potrdil 8. oktobra 2024).</div>
+      </li>
+      <li class="tl-action">
+        <span class="tl-time">Do konca 2028 (načrt)</span>
+        <div class="tl-title">Zaključek najzahtevnejših ureditev Savinje</div>
+        <div class="tl-body">Trije državni prostorski načrti, suhi zadrževalniki, protipoplavni nasipi. Skupaj načrtovanih skoraj milijarda evrov za vodotoke.</div>
+      </li>
+    </ul>
+
+    <!-- HIDROLOŠKI PODATKI -->
+    <span class="section-label">03 — Hidrološki podatki</span>
+    <h2>Rekordni pretoki od izvira do sotočja</h2>
+    <p>ARSO je za 4. avgust 2023 zabeležil absolutne ali skoraj absolutne rekorde na vseh postajah v porečju Savinje. Vrednosti so začasne (samodejni prenos z vodomernih postaj), a hidrološka slika je nedvoumna: <strong>povratna doba nad 100 let</strong> za zgornji tok Savinje in Dreto.</p>
+
+    <div class="chart-card tall">
+      <h3>Vrhunski pretoki 4. avgusta 2023 (m³/s) — od izvira do izliva</h3>
+      <canvas id="chartFlows"></canvas>
+    </div>
+
+    <table class="flow-table">
+      <thead>
+        <tr>
+          <th>Merilna postaja</th>
+          <th>Pretok</th>
+          <th>Vodostaj</th>
+          <th>Čas konice</th>
+          <th>Rang</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Savinja — Solčava</strong></td>
+          <td class="record">ni ovrednoten*</td>
+          <td>335 cm</td>
+          <td>3.00</td>
+          <td class="record">1. najvišja (1959–2023)</td>
+        </tr>
+        <tr>
+          <td><strong>Lučnica — Luče</strong></td>
+          <td class="near-record">271 m³/s</td>
+          <td>402 cm</td>
+          <td>4.00</td>
+          <td class="near-record">2. najvišja vrednost</td>
+        </tr>
+        <tr>
+          <td><strong>Dreta — Kraše</strong></td>
+          <td class="record">345 m³/s</td>
+          <td>486 cm</td>
+          <td>5.50</td>
+          <td class="record">1. najvišja (1959–2023)</td>
+        </tr>
+        <tr>
+          <td><strong>Savinja — Nazarje</strong></td>
+          <td class="record">859 m³/s</td>
+          <td>536 cm</td>
+          <td>7.10</td>
+          <td class="record">1. najvišja (1926–2023)</td>
+        </tr>
+        <tr>
+          <td><strong>Savinja — Letuš</strong></td>
+          <td class="record">935 m³/s</td>
+          <td>696 cm</td>
+          <td>7.20</td>
+          <td class="record">1. najvišja vrednost</td>
+        </tr>
+        <tr>
+          <td><strong>Savinja — Celje</strong></td>
+          <td>1173 m³/s</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="rp">50-letna povratna doba</span></td>
+        </tr>
+        <tr>
+          <td><strong>Savinja — Laško</strong></td>
+          <td>1450 m³/s</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="rp">50-letna povratna doba</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:.82rem;color:var(--muted)">* V Solčavi merilno mesto obtekala; pretok ni bil ovrednoten. Vsi podatki ARSO so označeni kot začasni in informativni. Dolvodni poplavni val je imel po oceni Roka Fazarinca prostornino okrog 100 milijonov m³.</p>
+
+    <!-- PRIZADETA OBMOČJA -->
+    <span class="section-label">04 — Prizadeta območja</span>
+    <h2>Kraji, ki jih je doletela katastrofa</h2>
+
+    <div class="location-pills">
+      <span class="location-pill severe">Luče / Struge</span>
+      <span class="location-pill severe">Ljubno ob Savinji</span>
+      <span class="location-pill severe">Rečica ob Savinji</span>
+      <span class="location-pill severe">Nazarje</span>
+      <span class="location-pill moderate">Mozirje</span>
+      <span class="location-pill moderate">Gornji Grad</span>
+      <span class="location-pill moderate">Šmartno ob Dreti</span>
+      <span class="location-pill moderate">Solčava / Logarska</span>
+    </div>
+
+    <div class="place-grid">
+      <div class="place-card ph">
+        <h4>Luče — zaselek Struge</h4>
+        <p>Savinja je odnesla <strong>15 hiš</strong>. Evakuirali vseh <strong>50 prebivalcev</strong> Strug — nekatere s helikopterji s streh. Pred ujmo 14 hiš s cca. 40 prebiv.; do junija 2025 tam bivata le še dve osebi.</p>
+      </div>
+      <div class="place-card ph">
+        <h4>Ljubno ob Savinji</h4>
+        <p>Odneslo okrog <strong>10 hiš</strong>, uničena industrijska cona, porušen most. V kampu Na Otoku rešenih 130 gostov; v Savinji pogrešanih <strong>70+ avtomobilov</strong>.</p>
+      </div>
+      <div class="place-card ph">
+        <h4>Rečica ob Savinji</h4>
+        <p><strong>Popolnoma poplavljena.</strong> Ogroženo 5 naselij levega brega (Grušovlje, Šentjanž, Varpolje, Nizka, Spodnja Rečica). Pri kampu Menina rešenih ~1000 ljudi, med njimi županja s helikopterjem.</p>
+      </div>
+      <div class="place-card ph">
+        <h4>Nazarje — BSH</h4>
+        <p>Tovarno BSH (Bosch/Siemens) zalilo <strong>1,5 m vode</strong>. Škoda: <strong>nad 100 mio €</strong>. ~1700 zaposlenih, prek dobaviteljev 3000+ dodatnih delovnih mest. Prva linija v obratovanju mesec po poplavah.</p>
+      </div>
+      <div class="place-card">
+        <h4>Mozirje</h4>
+        <p>Poplavila Savinja in pritoki. Župan Ivan Suhoveršnik stanje označil za katastrofalno.</p>
+      </div>
+      <div class="place-card">
+        <h4>Gornji Grad / Šmartno ob Dreti</h4>
+        <p>Narasla Dreta in zemeljski plazovi. Poškodovana podružnična šola in vrtec v Šmartnem.</p>
+      </div>
+    </div>
+
+    <p>Cestna povezava od Mozirja do Ljubnega je bila poškodovana na več mestih; od Ljubnega do Luč pa <strong>popolnoma uničena</strong> — Savinja je na nekaterih odsekih odnesla po več sto metrov cestišča. Dolina je bila dneve odrezana od sveta. Solčava je bila dostopna le prek Jezerskega in Avstrije.</p>
+
+    <!-- ŠKODA -->
+    <span class="section-label">05 — Škoda in posledice</span>
+    <h2>Razsežnost katastrofe v številkah</h2>
+
+    <div class="stat-grid">
+      <div class="stat-card c-danger">
+        <div class="sc-label">Škoda na vodotokih</div>
+        <div class="sc-val">1,32</div>
+        <div class="sc-sub">mrd € · največji delež</div>
+      </div>
+      <div class="stat-card c-rain">
+        <div class="sc-label">Poškodovani vodotoki</div>
+        <div class="sc-val">4000+</div>
+        <div class="sc-sub">km po vsej Sloveniji</div>
+      </div>
+      <div class="stat-card c-cyan">
+        <div class="sc-label">Brez elektrike</div>
+        <div class="sc-val">16.000</div>
+        <div class="sc-sub">gospodinjstev v višku</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="sc-label">EU solidarnostni sklad</div>
+        <div class="sc-val">428</div>
+        <div class="sc-sub">mio € skupaj (2023–2024)</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Pregled ključnih finančnih kazalnikov (mio €)</h3>
+      <canvas id="chartFinance"></canvas>
+    </div>
+
+    <p>Za primerjavo: ocena škode se je od prvih ocen (500 mio € takoj po ujmi) do konca avgusta 2023 <strong>podeseterila</strong>. Končna vlada potrdila 2,98 mrd € — to je okrog 5 % slovenskega BDP. Evropska komisija je sprva opozorila na metodološke pomanjkljivosti pri vlogi za Solidarnostni sklad in zahtevala dodatna pojasnila.</p>
+
+    <div class="callout">
+      <p><strong>BSH Hišni aparati Nazarje</strong> — največja tovarna Bosch-Siemens v Evropi — je utrpela <strong>škodo nad 100 mio €</strong> (vključno z izpadom dohodka). V podjetju je bilo okrog 1700 zaposlenih, prek dobaviteljev pa 3000+ posrednih delovnih mest. Polna proizvodnja je bila vzpostavljena v 1. četrtletju 2024.</p>
+    </div>
+
+    <!-- ODZIV -->
+    <span class="section-label">06 — Odziv in reševanje</span>
+    <h2>Reševanje: domači in mednarodni odziv</h2>
+    <p>4. avgusta 2023 je bil aktiviran <strong>Državni načrt zaščite in reševanja ob poplavah</strong>. V samo prvih 12 urah je posredovalo <strong>168 gasilskih enot v 1039 intervencijah</strong>. Helikopterji so reševali obtičale stanovalce v Strugah in pri kampu Menina (Rečica ob Savinji).</p>
+
+    <div class="place-grid">
+      <div class="place-card">
+        <h4>Mehanizem civilne zaščite EU (ERCC)</h4>
+        <p>Slovenija zaprosila za delovne stroje z inženirskimi ekipami in montažne mostove. <strong>Francija</strong> — bagri z enotami; <strong>Nemčija</strong> — montažni mostovi, bagri.</p>
+      </div>
+      <div class="place-card">
+        <h4>Mehanizem Nata (EADRCC)</h4>
+        <p>Zaprosila za 5 težkih vojaških helikopterjev, 200 vojakov in 20 montažnih mostov. <strong>Hrvaška vojska</strong> od 8. avg. v občinah Ljubno, Nazarje, Luče in Rečica.</p>
+      </div>
+      <div class="place-card">
+        <h4>Ukrajna — tehična ekipa</h4>
+        <p>Bagri za urejanje vodotokov na <strong>Ljubnem</strong>. Izhodišče mednarodne pomoči: <strong>Rečica ob Savinji</strong>.</p>
+      </div>
+      <div class="place-card">
+        <h4>Vlada RS — okvir obnove</h4>
+        <p>Ustanovljena <strong>Služba za obnovo</strong> (vodil Boštjan Šefic). Sprejet interventni zakon (ZIUOPZP). Premier Golob dogodek označil za »največjo nesrečo v zgodovini Slovenije«.</p>
+      </div>
+    </div>
+
+    <!-- OBNOVA -->
+    <span class="section-label">07 — Obnova (2023–2028)</span>
+    <h2>Obnova: od interventnih ukrepov do novih protipoplavnih ureditev</h2>
+    <p>Direkcija RS za vode je sklenila <strong>68 sporazumov</strong> z zunanjimi izvajalci za izredne ukrepe. Skupaj je za vodotoke načrtovanih skoraj <strong>milijarda evrov</strong>, od tega za Savinjsko dolino doslej sanacij in intervencij za več kot 73 mio €.</p>
+
+    <div class="chart-card">
+      <h3>Realizacija sanacijskih del na vodotokih (mio €)</h3>
+      <canvas id="chartRecovery"></canvas>
+    </div>
+
+    <span class="section-label" style="margin-top:1.6rem">Napredek obnove ključnih projektov</span>
+    <div class="prog-list" id="progList">
+      <div class="prog-item">
+        <div class="prog-header"><span>Rečica ob Savinji — sanacija Savinje (Grušovlje, Homec, Šentjanž)</span><span>dokončano</span></div>
+        <div class="prog-track"><div class="prog-fill green" style="width:100%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Rečica — sanacija Rečice, Suhe in Lučnke</span><span>dokončano</span></div>
+        <div class="prog-track"><div class="prog-fill green" style="width:100%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Ljubno — ureditev Rastk (Ljubnica, Krumpah, Žep) · 18 mio €</span><span>začetek jesen 2026</span></div>
+        <div class="prog-track"><div class="prog-fill amber" style="width:18%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Nazarje — prestavitev BSH izven poplavnega območja</span><span>do 2027</span></div>
+        <div class="prog-track"><div class="prog-fill amber" style="width:30%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Suhi zadrževalnik Rjavec pri Rečici</span><span>v pripravi DPN</span></div>
+        <div class="prog-track"><div class="prog-fill blue" style="width:15%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Protipoplavni nasipi Okonina–Grušovlje</span><span>v pripravi DPN</span></div>
+        <div class="prog-track"><div class="prog-fill blue" style="width:15%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Luče — zaščitni zid, ureditev ceste Radmirje–Luče</span><span>gradnja jun. 2025</span></div>
+        <div class="prog-track"><div class="prog-fill cyan" style="width:55%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-header"><span>Celoten program obnove vodotokov</span><span>cilj: konec 2028</span></div>
+        <div class="prog-track"><div class="prog-fill purple" style="width:50%"></div></div>
+      </div>
+    </div>
+
+    <p>Vlada ocenjuje, da je realizirana <strong>najmanj polovica</strong> predvidenih ukrepov. Obnova je bila deležna kritik zaradi počasnosti, birokratskih ovir in psihičnih stisk prizadetih. Minister Uroš Brežan je opozoril, da bo treba pretehtati, kje se sme graditi; hidrolog Rok Fazarinc: <em>»Ključno je živeti s poplavami.«</em></p>
+
+    <!-- PRESELITEV -->
+    <h2>Preselitev ogroženih objektov</h2>
+    <p>Januarja 2024 je Služba vlade za obnovo objavila seznam <strong>348 evidentiranih objektov</strong> za odstranitev iz 23 občin:</p>
+
+    <table class="flow-table">
+      <thead>
+        <tr><th>Občina</th><th>Objektov na seznamu</th><th>Opomba</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Braslovče</strong></td><td class="record">137</td><td style="color:var(--muted);font-size:.85rem">večinoma Letuš</td></tr>
+        <tr><td><strong>Rečica ob Savinji</strong></td><td class="near-record">41 → 17</td><td style="color:var(--muted);font-size:.85rem">24 objektov naknadno umaknjenih s seznama</td></tr>
+        <tr><td><strong>Šmartno ob Paki</strong></td><td>31</td><td style="color:var(--muted);font-size:.85rem">—</td></tr>
+        <tr><td><strong>Ostale občine (20)</strong></td><td>139</td><td style="color:var(--muted);font-size:.85rem">razpršeno</td></tr>
+      </tbody>
+    </table>
+
+    <p>Lastniki izbirajo med: gradnjo nadomestnega objekta (12 arhitekturnih rešitev prek natečaja), izplačilom odškodnine ali nakupom nadomestne nepremičnine. Na območju Rečice so urejena zemljišča za <strong>nadomestno gradnjo 15 novih hiš</strong>.</p>
+
+    <!-- PRIPOROČILA -->
+    <span class="section-label">08 — Kaj to pomeni za vas</span>
+    <h2>Priporočila za prebivalce Rečice ob Savinji</h2>
+
+    <div class="callout-warning">
+      <p><strong>Do izgradnje zadrževalnikov in nasipov vsak večji dež ostaja nevarnost.</strong> Županja dr. Majda Potočnik je po poplavah opozorila: »Vsak večji dež nas spravi na obrate.« Dokler niso zgrajeni načrtovani suhi zadrževalniki in nasipi, se bo situacija le postopoma izboljševala.</p>
+    </div>
+
+    <ul style="margin:1rem 0 1.4rem;padding-left:1.4rem;color:var(--muted);line-height:1.8;font-size:.97rem">
+      <li>Aktivno spremljajte <strong>javne razgrnitve DPN</strong> za Zgornjo/Spodnjo Savinjsko dolino — vnos pripomb je ključen za zaščito lastnih interesov.</li>
+      <li>Preverite, ali je vaš objekt na <strong>seznamu za morebitno odstranitev</strong> ali v območju načrtovanih zadrževalnikov (Okonina–Grušovlje) in nasipov (Grušovlje, Šentjanž, Varpolje, Nizka, Spodnja Rečica).</li>
+      <li>Vključite se v <strong>lokalne sisteme obveščanja</strong>, poznajte evakuacijske poti in sledite opozorilom ARSO ob napovedanih intenzivnih nalivih.</li>
+      <li><strong>Hranite dokazila</strong> (fotografije, računi, popisi škode) in sledite objavam občine Rečica ob Savinji glede rokov za vloge in nadomestno gradnjo.</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Ključni mejnik:</strong> dokončanje suhega zadrževalnika Rjavec in protipoplavnih nasipov Okonina–Grušovlje bo bistveno zmanjšalo ogroženost dolvodnih naselij. Cilj je zaščita pred <em>100-letnimi vodami</em> z varnostno višino 100 cm in upoštevanjem podnebnih sprememb — do takrat pa ostajajo le začasni nasipi in zidovi.</p>
+    </div>
+
+    <!-- OPOMBE -->
+    <span class="section-label">Opombe in viri</span>
+    <p style="color:var(--muted);font-size:.85rem;line-height:1.7">Vsi hidrološki podatki ARSO za 4. avgust 2023 so v izvornem poročilu (<em>Izjemne poplave v Sloveniji med 4. in 8. avgustom 2023</em>) označeni kot začasni in informativni. Za Solčavo pretok ni ovrednoten zaradi obtekanja merilnega mesta; za Lučnico povratna doba ni bila določena. Ocene škode se razlikujejo glede na metodologijo (nacionalni sistem AJDA vs. PDNA za vlogo v Solidarnostni sklad EU). Podatki o obnovi za leto 2026 izhajajo iz lokalnih in medijskih virov ter so podvrženi spremembam. Roki (npr. zaključek do 2028) so načrtovani in ne dokončni.</p>
+
+    <p style="color:var(--muted);font-size:.85rem;margin-top:.6rem">Viri: ARSO — Poročilo o izjemnih poplavah avg. 2023; Vlada RS; Ministrstvo za naravne vire in prostor; Direkcija RS za vode; Služba vlade RS za obnovo; Delo, N1, 24ur (podatki 2025–2026). Meritve meteorološke postaje <a href="/" style="color:var(--blue)">IREICA1, Rečica ob Savinji</a>.</p>
+
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 900, easing: 'easeOutQuart' },
+  plugins: {
+    legend: { display: true, position: 'top',
+      labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 } },
+    tooltip: {
+      backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+      titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10
+    }
+  }
+};
+
+/* ── Grafikon 1: Vrhunski pretoki ── */
+new Chart(document.getElementById('chartFlows'), {
+  type: 'bar',
+  data: {
+    labels: [
+      'Lučnica / Luče',
+      'Dreta / Kraše',
+      'Savinja / Nazarje',
+      'Savinja / Letuš',
+      'Savinja / Celje',
+      'Savinja / Laško'
+    ],
+    datasets: [{
+      label: 'Vrhunski pretok (m³/s)',
+      data: [271, 345, 859, 935, 1173, 1450],
+      backgroundColor: [
+        'rgba(245,158,11,.75)',
+        'rgba(245,158,11,.75)',
+        'rgba(248,113,113,.8)',
+        'rgba(248,113,113,.95)',
+        'rgba(167,139,250,.75)',
+        'rgba(167,139,250,.75)'
+      ],
+      borderColor: [
+        'rgba(245,158,11,1)',
+        'rgba(245,158,11,1)',
+        'rgba(248,113,113,1)',
+        'rgba(248,113,113,1)',
+        'rgba(167,139,250,1)',
+        'rgba(167,139,250,1)'
+      ],
+      borderWidth: 1,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    indexAxis: 'y',
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      legend: { display: false },
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: {
+          label: ctx => ` ${ctx.parsed.x.toLocaleString('sl-SI')} m³/s`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' m³/s' }
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: '#e8edf8', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+/* ── Grafikon 2: Finančni pregled ── */
+new Chart(document.getElementById('chartFinance'), {
+  type: 'bar',
+  data: {
+    labels: ['Skupna škoda', 'Škoda na\nvodotokih', 'EU solidarnostni\nsklad', 'Načrtovana\nsredstva za vodotoke', 'Realizirano\n2024', 'Realizirano\n2025'],
+    datasets: [{
+      label: 'Vrednost (mio €)',
+      data: [2980, 1320, 428.4, 1000, 62.2, 100.4],
+      backgroundColor: [
+        'rgba(248,113,113,.8)',
+        'rgba(248,113,113,.55)',
+        'rgba(52,211,153,.75)',
+        'rgba(77,159,248,.75)',
+        'rgba(167,139,250,.65)',
+        'rgba(167,139,250,.85)'
+      ],
+      borderRadius: 4,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      legend: { display: false },
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: {
+          label: ctx => ` ${ctx.parsed.y.toLocaleString('sl-SI', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mio €`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,.04)' },
+        ticks: { color: '#adc0d8', font: { size: 9 }, maxRotation: 20 }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v >= 1000 ? (v/1000).toFixed(v%1000===0?0:2) + ' mrd' : v + ' mio' }
+      }
+    }
+  }
+});
+
+/* ── Grafikon 3: Realizacija sanacije po letih ── */
+new Chart(document.getElementById('chartRecovery'), {
+  type: 'bar',
+  data: {
+    labels: ['2024', '2025'],
+    datasets: [
+      {
+        label: 'Solidarnostni sklad EU',
+        data: [62.2, 38.2],
+        backgroundColor: 'rgba(52,211,153,.75)',
+        borderRadius: 4, borderWidth: 0
+      },
+      {
+        label: 'Sklad za obnovo (SI)',
+        data: [0, 62.2],
+        backgroundColor: 'rgba(77,159,248,.7)',
+        borderRadius: 4, borderWidth: 0
+      }
+    ]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: {
+          label: ctx => ` ${ctx.parsed.y.toFixed(1)} mio €`
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: { color: 'rgba(255,255,255,.04)' },
+        ticks: { color: '#adc0d8', font: { size: 11 } }
+      },
+      y: {
+        stacked: true,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mio €' }
+      }
+    }
+  }
+});
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
