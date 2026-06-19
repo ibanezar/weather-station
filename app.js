@@ -12961,24 +12961,16 @@ async function initVisitorCounter(){
   const el=document.getElementById('vc-num');
   const wrap=document.getElementById('visitor-counter');
   if(!el)return;
-  // counterapi.dev (503) and hits.seeyoufarm (CORS) both unavailable from browser.
-  // Use proxy endpoint if configured, otherwise localStorage session count.
   try{
-    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),4000);
-    const r=await fetch(PROXY+'/counter',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch('https://ibanezar.goatcounter.com/counter//.json',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
     if(r.ok){
       const d=await r.json();
-      const n=d.count??d.value??d.visits??null;
-      if(n!=null){el.textContent=Number(n).toLocaleString('sl');wrap?.classList.add('loaded');return;}
+      const n=parseInt((d.count??'').replace(/\s/g,''),10);
+      if(!isNaN(n)){el.textContent=n.toLocaleString('sl');wrap?.classList.add('loaded');return;}
     }
   }catch(_){}
-  // Fallback: localStorage-based session count (device-local, not global)
-  try{
-    const lc=parseInt(localStorage.getItem('wx-visit-count')||'0')+1;
-    localStorage.setItem('wx-visit-count',lc);
-    el.textContent=lc.toLocaleString('sl');
-    wrap?.classList.add('loaded');
-  }catch(_){if(wrap)wrap.style.display='none';}
+  if(wrap)wrap.style.display='none';
 }
 
 async function init(){
