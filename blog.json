@@ -1,10 +1,26 @@
 [
   {
+    "title": "Vremenski povzetek — maj 2026",
+    "slug": "vremenski-povzetek-maj-2026",
+    "url": "/blog/vremenski-povzetek-maj-2026.html",
+    "date": "2026-06-19",
+    "summary": "Povprečno 13,0 °C (0,8 °C pod dolgoletnim povprečjem) in 121,7 mm padavin.",
+    "tags": [
+      "povzetek",
+      "maj",
+      "2026"
+    ]
+  },
+  {
     "title": "Vremenski povzetek — april 2026",
     "slug": "vremenski-povzetek-april-2026",
     "url": "/blog/vremenski-povzetek-april-2026.html",
     "date": "2026-06-19",
     "summary": "Topel in izrazito suh april: povprečno 10,8 °C (1,1 °C nad dolgoletnim povprečjem) in le 34,2 mm padavin.",
-    "tags": ["povzetek", "april", "2026"]
+    "tags": [
+      "povzetek",
+      "april",
+      "2026"
+    ]
   }
 ]
