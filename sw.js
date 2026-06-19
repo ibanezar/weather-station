@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vreme-static-v10';
-const CACHE_API    = 'vreme-api-v10';
+const CACHE_STATIC = 'vreme-static-v11';
+const CACHE_API    = 'vreme-api-v11';
 
 // Stale-while-revalidate TTLs per host (ms)
 const API_TTL = {
@@ -53,7 +53,7 @@ async function fetchAndCache(request, cacheName) {
 }
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './manifest.json'])));
+  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './app.js', './manifest.json'])));
   self.skipWaiting();
 });
 
