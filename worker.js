@@ -14,8 +14,8 @@ const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
 
-const EW_APP = "66FE60BEB1C87BEBB8572050299DC8BA";
-const EW_API = "a713a55b-9cb5-4dbb-8ad2-8e3f8f6b0661";
+const EW_APP_FALLBACK = "";
+const EW_API_FALLBACK = "";
 const EW_MAC = "BC:DD:C2:42:8D:56";
 
 const ALLOWED_ORIGINS = [
@@ -222,10 +222,12 @@ async function fetchArsoWarnings() {
 const pad = n => String(n).padStart(2, "0");
 const fmtDate = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 
-async function fetchEcowitt(start, end) {
-  if (EW_APP.startsWith("REPLACE")) return null;
+async function fetchEcowitt(start, end, env) {
+  const app = env?.EW_APP || EW_APP_FALLBACK;
+  const api = env?.EW_API || EW_API_FALLBACK;
+  if (!app || !api) return null;
   const body = new URLSearchParams({
-    application_key: EW_APP, api_key: EW_API, mac: EW_MAC,
+    application_key: app, api_key: api, mac: EW_MAC,
     start_date: start+" 00:00:00", end_date: end+" 23:59:59",
     cycle_type: "1",
     call_back: "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",
@@ -432,7 +434,7 @@ export default {
         const now   = new Date();
         const start = url.searchParams.get("start") || fmtDate(new Date(now - 30*864e5));
         const end   = url.searchParams.get("end")   || fmtDate(now);
-        const data  = await fetchEcowitt(start, end);
+        const data  = await fetchEcowitt(start, end, env);
         if (!data) {
           return new Response(
             JSON.stringify({ error: "Ecowitt application_key ni nastavljen" }),
@@ -447,12 +449,14 @@ export default {
 
       // ── /ecowitt-current ──────────────────────────────────
       if (path === "/ecowitt-current") {
-        if (!EW_APP || EW_APP.startsWith("REPLACE") || !EW_API || EW_API.startsWith("REPLACE")) {
+        const ewApp = env?.EW_APP || EW_APP_FALLBACK;
+        const ewApi = env?.EW_API || EW_API_FALLBACK;
+        if (!ewApp || !ewApi) {
           return new Response(JSON.stringify({error:"no_key"}),
             {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
         }
         const ewUrl = "https://api.ecowitt.net/api/v3/device/real_time?" + new URLSearchParams({
-          application_key: EW_APP, api_key: EW_API, mac: EW_MAC,
+          application_key: ewApp, api_key: ewApi, mac: EW_MAC,
           call_back: "all", temp_unitid: "1", pressure_unitid: "3",
           wind_speed_unitid: "7", rainfall_unitid: "12", solar_irradiance_unitid: "16",
         });
