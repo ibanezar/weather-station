@@ -4663,7 +4663,8 @@ function setTheme(t){
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 (function initTheme(){
-  setTheme('dark');try{localStorage.removeItem('wx-theme');}catch(e){}
+  document.documentElement.dataset.theme='dark';
+  try{localStorage.removeItem('wx-theme');}catch(e){}
 })();
 
 // ── Chart colour helpers ──────────────────────────────────
