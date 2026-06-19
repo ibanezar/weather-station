@@ -92,6 +92,31 @@ article strong{color:#fff}
   font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
 .post-card p{color:var(--muted);margin:0;font-size:.95rem;line-height:1.6}
 
+/* ── stat kartice ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin:1.4rem 0 2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  animation:fadeUp .5s ease both}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sc-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-family:'JetBrains Mono',monospace}
+.sc-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:2rem;line-height:1.1;margin:.2rem 0 .15rem;color:#fff}
+.sc-sub{font-size:.78rem;color:var(--muted);line-height:1.3}
+.stat-card.c-temp .sc-val{color:var(--amber)}
+.stat-card.c-up .sc-val{color:#fb923c}
+.stat-card.c-down .sc-val{color:var(--cyan)}
+.stat-card.c-rain .sc-val{color:#60a5fa}
+.stat-card.c-wind .sc-val{color:var(--purple)}
+
+/* ── chart ovoj ── */
+.chart-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;
+  padding:1.3rem 1.3rem .9rem;margin:1rem 0 1.8rem;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.chart-card h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.9rem}
+.chart-card canvas{max-height:210px}
+
 /* noga */
 .site-foot{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);
   color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
