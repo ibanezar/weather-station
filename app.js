@@ -1535,39 +1535,81 @@ function triggerLivePulse(){
   });
 }
 
+function _histObsAtHoursAgo(hoursAgo){
+  if(!_hourlyObs.length)return null;
+  const target=Date.now()-hoursAgo*3600000;
+  return _hourlyObs.reduce((best,obs)=>{
+    const t=new Date(obs.obsTimeLocal.replace(' ','T')).getTime();
+    const bt=new Date(best.obsTimeLocal.replace(' ','T')).getTime();
+    return Math.abs(t-target)<Math.abs(bt-target)?obs:best;
+  });
+}
+
+function _getConditionLabelFromObs(obs){
+  const pr=obs.metric?.precipRate||0,sr=obs.metric?.solarRadiation||obs.solarRadiation||0;
+  const h=new Date(obs.obsTimeLocal.replace(' ','T')).getHours(),night=h<5||h>22;
+  if(pr>7)return'Močan dež';if(pr>2.5)return'Dež';if(pr>0)return'Rahel dež';
+  if(night&&sr<10)return'Jasna noč';if(night)return'Oblačna noč';
+  if(sr>700)return'Jasno sončno';if(sr>300)return'Pretežno sončno';
+  if(sr>80)return'Delno oblačno';if(sr>10)return'Pretežno oblačno';
+  return'Oblačno';
+}
+
 function _fcSliderUpdate(){
   const sl=document.getElementById('fc-slider');
   const lbl=document.getElementById('fc-slider-center');
   const tv=document.getElementById('temp-val');
   const iconEl=document.getElementById('hero-icon');
   if(!sl)return;
-  const v=+sl.value,max=+sl.max;
-  const pct=(v/max)*100;
-  sl.style.background='linear-gradient(to right,var(--blue) '+pct+'%,var(--border) '+pct+'%)';
+  const v=+sl.value,min=+sl.min,max=+sl.max;
+  const total=max-min;
+  const nowPct=((0-min)/total*100).toFixed(1);
+  const thumbPct=((v-min)/total*100).toFixed(1);
+  if(v<0){
+    sl.style.background='linear-gradient(to right,var(--border) '+thumbPct+'%,var(--amber) '+thumbPct+'%,var(--amber) '+nowPct+'%,var(--border) '+nowPct+'%)';
+  }else if(v>0){
+    sl.style.background='linear-gradient(to right,var(--border) '+nowPct+'%,var(--blue) '+nowPct+'%,var(--blue) '+thumbPct+'%,var(--border) '+thumbPct+'%)';
+  }else{
+    sl.style.background='var(--border)';
+  }
   if(v===0){
     _sliderActive=false;
-    if(lbl){lbl.textContent='';lbl.classList.remove('vis');}
+    if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
     if(tv&&_liveTemp!==null){tv.textContent=(+_liveTemp).toFixed(1);tv.style.color=_liveTempColor;}
     if(iconEl&&_liveIconHtml)iconEl.innerHTML=_liveIconHtml;
-  }else{
+  }else if(v>0){
     _sliderActive=true;
     const fh=_forecastHours;
     const idx=Math.min(v-1,fh.length-1);
     const h=fh[idx];if(!h)return;
     const hr=h.t.getHours();
     const timeStr=(hr<10?'0':'')+hr+':00';
-    const diffH=v;
-    if(lbl){lbl.textContent=timeStr+' · +'+diffH+'h';lbl.classList.add('vis');}
+    if(lbl){lbl.textContent=timeStr+' · +'+v+'h';lbl.classList.add('vis');}
     if(tv){tv.textContent=h.temp.toFixed(1);tv.style.color=tempColor(h.temp);}
     if(iconEl)iconEl.innerHTML=_wmoImg(h.wmo,h.isDay,108);
+  }else{
+    _sliderActive=true;
+    const hoursAgo=-v;
+    const obs=_histObsAtHoursAgo(hoursAgo);
+    if(!obs)return;
+    const t=new Date(obs.obsTimeLocal.replace(' ','T'));
+    const hr=t.getHours();
+    const timeStr=(hr<10?'0':'')+hr+':00';
+    if(lbl){lbl.textContent=timeStr+' · −'+hoursAgo+'h';lbl.classList.add('vis');}
+    const temp=obs.metric.tempAvg??obs.metric.temp??0;
+    if(tv){tv.textContent=(+temp).toFixed(1);tv.style.color=tempColor(temp);}
+    const condLabel=_getConditionLabelFromObs(obs);
+    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108);
   }
 }
 
 function _fcSliderInit(){
   const sl=document.getElementById('fc-slider');
   if(!sl)return;
-  sl.style.background='linear-gradient(to right,var(--blue) 0%,var(--border) 0%)';
+  sl.style.background='var(--border)';
   sl.addEventListener('input',_fcSliderUpdate);
+  const lbl=document.getElementById('fc-slider-center');
+  if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
 }
 
 function applyObs(obs){
