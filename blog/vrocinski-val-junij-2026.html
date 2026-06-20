@@ -3,38 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vročinski val junija 2026 — morda najdaljši v zgodovini meritev | Meteorec</title>
+<title>Vročinski val junija 2026: se obeta nov rekord? | Meteorec</title>
 <link rel="canonical" href="https://meteorec.si/blog/vrocinski-val-junij-2026.html">
-<meta name="description" content="Vročinski val junija 2026 traja že 14 dni — po podatkih ARSO bi to utegnil biti najdaljši vročinski val v zgodovini meritev v Sloveniji. Analiza in meritve postaje IREICA1, Rečica ob Savinji.">
-<meta name="keywords" content="vročinski val 2026, Slovenija rekord, Rečica ob Savinji, IREICA1, vročina junij 2026, Savinjska dolina, ARSO, tropske noči, klima">
+<meta name="description" content="Slovenijo je zajel prvi vročinski val poletja 2026. Temperature na Goriškem so se nevarno približale junijskemu rekordu 38,4 °C. Analiza rekordov, trajanja valov in podnebnega ozadja.">
+<meta name="keywords" content="vročinski val 2026, junijski rekord Slovenija, ARSO vrocinski val, temperatura rekord junij, podnebne spremembe Slovenija">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://meteorec.si/blog/vrocinski-val-junij-2026.html">
 <meta property="og:site_name" content="Meteorec">
-<meta property="og:title" content="Vročinski val junija 2026 — morda najdaljši v zgodovini meritev">
-<meta property="og:description" content="14 zaporednih dni z Tmax ≥ 30 °C: analiza izjemnega vročinskega vala, ki bi lahko bil rekorden za Slovenijo.">
+<meta property="og:title" content="Vročinski val junija 2026: se obeta nov rekord?">
+<meta property="og:description" content="Temperature na Goriškem blizu junijskega rekorda 38,4 °C. Analiza rekordov, trajanja valov in podnebnega ozadja.">
 <meta property="og:image" content="https://meteorec.si/og-image.jpg">
 <meta property="og:locale" content="sl_SI">
 <meta property="article:published_time" content="2026-06-20">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Vročinski val junija 2026 — morda najdaljši v zgodovini meritev">
-<meta name="twitter:description" content="14 zaporednih dni z Tmax ≥ 30 °C: analiza izjemnega vročinskega vala v Rečici ob Savinji.">
+<meta name="twitter:title" content="Vročinski val junija 2026: se obeta nov rekord?">
+<meta name="twitter:description" content="Temperature na Goriškem blizu junijskega rekorda 38,4 °C — analiza in kontekst.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "Vročinski val junija 2026 — morda najdaljši v zgodovini meritev",
-  "description": "Vročinski val junija 2026 traja že 14 dni — po podatkih ARSO bi to utegnil biti najdaljši vročinski val v zgodovini meritev v Sloveniji. Analiza in meritve postaje IREICA1, Rečica ob Savinji.",
+  "headline": "Vročinski val junija 2026: se obeta nov rekord?",
+  "description": "Slovenijo je zajel prvi vročinski val poletja 2026. Temperature na Goriškem blizu rekorda 38,4 °C. Analiza rekordov, trajanja valov in podnebnega ozadja.",
   "image": "https://meteorec.si/og-image.jpg",
   "datePublished": "2026-06-20",
   "dateModified": "2026-06-20",
   "inLanguage": "sl",
   "author": { "@type": "Person", "name": "Filip Eremita" },
   "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/vrocinski-val-junij-2026.html" },
-  "about": { "@type": "Place", "name": "Rečica ob Savinji", "geo": { "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 } }
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/vrocinski-val-junij-2026.html" }
 }
 </script>
 <script type="application/ld+json">
@@ -55,6 +54,8 @@
 <style>
 .stat-card.c-heat .sc-val { color: #f97316; }
 .stat-card.c-red  .sc-val { color: #ef4444; }
+
+/* heat banner */
 .heat-banner {
   background: linear-gradient(135deg, rgba(249,115,22,.18), rgba(239,68,68,.12));
   border: 1px solid rgba(249,115,22,.5);
@@ -68,47 +69,64 @@
 .heat-banner .hb-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
 .heat-banner p { margin: 0; color: #fed7aa; font-size: .97rem; line-height: 1.6; }
 .heat-banner strong { color: #fff; }
-.rec-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  background: rgba(239,68,68,.18);
-  border: 1px solid rgba(239,68,68,.55);
-  border-radius: 20px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .64rem;
-  letter-spacing: .12em;
+
+/* gauge / comparison bars */
+.gauge-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.gauge-title {
+  font-size: .68rem;
   text-transform: uppercase;
-  color: #fca5a5;
-  padding: 3px 10px;
-  margin-left: .6rem;
-  vertical-align: middle;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .9rem;
 }
-.rec-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 6px #ef4444; display: inline-block; animation: rec-pulse 1.4s ease-in-out infinite; }
-@keyframes rec-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-.timeline-list { list-style: none; margin: .6rem 0 1.8rem; }
-.timeline-list li {
-  display: flex;
-  gap: 1rem;
-  padding: .65rem 0;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  font-size: .97rem;
-}
-.timeline-list li:last-child { border-bottom: 0; }
-.tl-date { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--muted); min-width: 6.5rem; padding-top: .1rem; }
-.tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: .45rem; background: var(--amber); }
-.tl-dot.hot { background: #f97316; box-shadow: 0 0 6px #f97316; }
-.tl-dot.peak { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+.gauge-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .75rem; }
+.gauge-row:last-of-type { margin-bottom: .2rem; }
+.gr-label { min-width: 9.5rem; font-size: .74rem; color: var(--muted); line-height: 1.35; }
+.gr-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,.07); border-radius: 8px; }
+.gr-bar { height: 8px; border-radius: 8px; }
+.gr-val { min-width: 3.8rem; font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #fff; text-align: right; font-weight: 600; }
+.gauge-note { font-size: .7rem; color: var(--muted); margin-top: .65rem; padding-top: .5rem; border-top: 1px solid rgba(255,255,255,.06); }
+
+/* mini stats (Jun 2025) */
+.mini-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; margin: 1.2rem 0 1.8rem; }
+.mini-stat { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: .85rem .9rem; text-align: center; }
+.ms-label { font-size: .63rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-family: 'JetBrains Mono', monospace; }
+.ms-val { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.5rem; line-height: 1.1; margin: .12rem 0; }
+.ms-sub { font-size: .74rem; color: var(--muted); }
+@media (max-width: 480px) { .mini-stat-grid { grid-template-columns: 1fr 1fr; } }
+
+/* health grid */
 .health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: .8rem 0 1.6rem; }
 .h-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: .9rem 1rem; }
 .h-card .h-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: .35rem; }
 .h-card p { font-size: .9rem; margin: 0; line-height: 1.55; color: #cfdbef; }
 @media (max-width: 500px) { .health-grid { grid-template-columns: 1fr; } }
+
+/* definition box */
+.def-box {
+  background: rgba(77,159,248,.07);
+  border: 1px solid rgba(77,159,248,.28);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.def-box .def-title { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--blue); font-family: 'JetBrains Mono', monospace; margin-bottom: .4rem; }
+.def-box p { margin: 0; color: #cfdbef; font-size: .94rem; line-height: 1.6; }
+.def-thresholds { display: flex; gap: .5rem; margin-top: .7rem; flex-wrap: wrap; }
+.dt-chip { background: rgba(77,159,248,.1); border: 1px solid rgba(77,159,248,.25); border-radius: 8px; padding: .22rem .55rem; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--blue); }
 </style>
 </head>
 <body>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
+
   <header class="site-head">
     <a class="brand" href="/">
       <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
@@ -116,148 +134,193 @@
     </a>
     <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
   </header>
+
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Vročinski val junija 2026
   </nav>
 
   <article>
-    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+    <h1>Vročinski val junija 2026: se obeta nov rekord?</h1>
+    <p class="post-meta">20. junija 2026 · Filip Eremita · ~5 min branja</p>
 
-    <h1>Vročinski val junija 2026: potencialni rekord <span class="rec-badge">V teku</span></h1>
-    <p class="post-meta">20. junija 2026 · Filip Eremita · postaja IREICA1 · ~4 min branja</p>
-
-    <p class="lead">Slovenijo od <strong>7. junija 2026</strong> zajema izjemen vročinski val. V 14 zaporednih dneh so dnevne najvišje temperature v nižinah vztrajno presegale <strong>30 °C</strong> — po dostopnih podatkih ARSO bi to lahko bil <span class="hl">najdaljši vročinski val v zgodovini instrumentalnih meritev</span> v naši državi. Val <strong>še ni zaključen</strong>.</p>
-
-    <div class="heat-banner">
-      <div class="hb-icon">&#x1F321;&#xFE0F;</div>
-      <p><strong>Stanje ob 20. juniju:</strong> postaja IREICA1 v Rečici ob Savinji (366 m n. m.) je danes izmerila najvišjo temperaturo <strong>31,8 °C</strong>. V nižinah Savinjske doline je temperatura presegla <strong>36 °C</strong>. Napovedi kažejo, da se bo val v celoti umaknil šele med 22. in 24. junijem.</p>
-    </div>
+    <p class="lead">Slovenijo je zajel prvi vročinski val letošnjega poletja in z njim se je vrnilo vprašanje, ki ga vsako poletje slišimo vse pogosteje: bo postavljen nov rekord? Po napovedih Agencije RS za okolje (<strong>ARSO</strong>) bomo te dni plesali tik ob meji slovenskega junijskega rekorda — a kot bomo videli, je zgodba precej bolj zanimiva od ene same številke na termometru.</p>
 
     <div class="stat-grid">
       <div class="stat-card c-heat">
-        <div class="sc-label">Trajanje vala</div>
-        <div class="sc-val">14+</div>
-        <div class="sc-sub">dni · od 7. junija</div>
-      </div>
-      <div class="stat-card c-temp">
-        <div class="sc-label">Vrh pri IREICA1</div>
-        <div class="sc-val">35,3°</div>
-        <div class="sc-sub">15. junija · rekord za junij</div>
-      </div>
-      <div class="stat-card c-red">
-        <div class="sc-label">Tropske noči</div>
-        <div class="sc-val">5</div>
-        <div class="sc-sub">Tmin ≥ 20 °C · neobičajno</div>
+        <div class="sc-label">Junijski rekord SLO</div>
+        <div class="sc-val">38,4°</div>
+        <div class="sc-sub">26. jun. 2025 · Doblice</div>
       </div>
       <div class="stat-card c-up">
-        <div class="sc-label">Anomalija Tmax</div>
-        <div class="sc-val">+8,2°</div>
-        <div class="sc-sub">nad povprečnim junijem</div>
+        <div class="sc-label">Max ta vikend</div>
+        <div class="sc-val">~38°</div>
+        <div class="sc-sub">Goriška in Vipavska dolina</div>
+      </div>
+      <div class="stat-card c-temp">
+        <div class="sc-label">Vroče do</div>
+        <div class="sc-val">jul.</div>
+        <div class="sc-sub">30–35 °C do začetka julija</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="sc-label">Anomalija jun. 2025</div>
+        <div class="sc-val">+3,7°</div>
+        <div class="sc-sub">nad povprečjem 1991–2020</div>
       </div>
     </div>
 
-    <h2>Kaj je vročinski val?</h2>
-    <p>Po definiciji Agencije RS za okolje (<strong>ARSO</strong>) je vročinski val obdobje, ko dnevna najvišja temperatura za <strong>pet ali več zaporednih dni</strong> preseže <strong>30 °C</strong>. Za posamezno lokacijo se ta prag rahlo razlikuje glede na nadmorsko višino in podnebni tip — gorske postaje imajo nižji prag, nižinske pa višjega.</p>
-    <p>Postaja IREICA1 leži na <strong>366 m nadmorske višine</strong> v Zgornji Savinjski dolini, ki v normalnih razmerah ostaja za 2–3 °C hladnejša od bližnjih nižin (Celje, Laško). Kljub temu je bil prag 30 °C pri nas presežen vsakega dne med 7. in 20. junijem.</p>
+    <h2>Kaj se dogaja prav zdaj</h2>
 
-    <h2>Potek vala — časovnica</h2>
-    <ul class="timeline-list">
-      <li>
-        <span class="tl-date">1.–5. jun.</span>
-        <span class="tl-dot"></span>
-        <span>Normalne temperature (23–28 °C). Anticiklon se krepi nad zahodno Evropo.</span>
-      </li>
-      <li>
-        <span class="tl-date">6. jun.</span>
-        <span class="tl-dot"></span>
-        <span>Temperatura naraste na <strong>29,4 °C</strong>. Vetrovne razmere se umirjajo, vlažnost pada.</span>
-      </li>
-      <li>
-        <span class="tl-date">7. jun.</span>
-        <span class="tl-dot hot"></span>
-        <span><strong>Začetek vala.</strong> Postaja IREICA1 izmeri <strong>31,2 °C</strong> — za junij nenavadno zgodaj. V nižinah Celja 34,1 °C.</span>
-      </li>
-      <li>
-        <span class="tl-date">9.–10. jun.</span>
-        <span class="tl-dot hot"></span>
-        <span>Temperature se stopnjujejo: 10. junija <strong>34,2 °C</strong> pri IREICA1. Prva <strong>tropska noč</strong> (Tmin 20,1 °C).</span>
-      </li>
-      <li>
-        <span class="tl-date">13.–15. jun.</span>
-        <span class="tl-dot peak"></span>
-        <span><strong>Vrhunec vala.</strong> 15. junija rekordnih <strong>35,3 °C</strong> — dosedanji rekord za junij pri IREICA1. V Celju 38,7 °C. V Novem mestu 39,2 °C.</span>
-      </li>
-      <li>
-        <span class="tl-date">17.–20. jun.</span>
-        <span class="tl-dot hot"></span>
-        <span>Rahla ohladitev, a temperature ostajajo nad 30 °C. Val se nadaljuje že <strong>14. dan</strong>.</span>
-      </li>
-    </ul>
-
-    <h2>Temperature pri IREICA1 — junij 2026</h2>
-    <div class="chart-card">
-      <h3>Dnevna Tmax in Tmin (°C) — junij 2026 (1.–20. jun.) · IREICA1, 366 m</h3>
-      <canvas id="chartVrocina"></canvas>
+    <div class="heat-banner">
+      <div class="hb-icon">&#x1F321;&#xFE0F;</div>
+      <p><strong>Stanje ob 20. juniju 2026:</strong> prvi vročinski vrhunec tega poletja smo doživeli ta konec tedna — v večjem delu Slovenije od <strong>32 do 35 °C</strong>, na Goriškem in v Vipavski dolini ponekod <strong>okoli 38 °C</strong>. ARSO je izdala <strong>rumeno opozorilo</strong>.</p>
     </div>
-    <p>Oranžno območje prikazuje dni, ko je bila dnevna najvišja temperatura pri postaji IREICA1 <strong>≥ 30 °C</strong> (vročinski val). Prekinitev ni bilo — val teče brez prestanka od 7. junija.</p>
 
-    <h2>Zgodovinska primerjava</h2>
-    <p>Po podatkih ARSO so bili dosedanji najdaljši vročinski valovi v Sloveniji:</p>
+    <p>Vremenoslovec Brane Gregorčič je časovnico opisal jasno: val traja od četrtka vsaj do sredine prihodnjega tedna, z <strong>vrhuncem v ponedeljek ali torek</strong>. Od naslednje srede naprej naj bi vročina nekoliko popustila, vendar omembe vredne osvežitve ni pričakovati. <strong>Popoldanske temperature med 30 in 35 °C</strong> bodo v osrednji Sloveniji vztrajale vse do začetka julija.</p>
+
+    <p>Posebej obremenjujoče bodo noči. Junija so noči najkrajše, Sonce pa najmočnejše — učinki se hitro seštevajo. Marsikje bodo noči <strong>tropske</strong> (Tmin ≥ 20 °C), odstopanja od dolgoletnega povprečja pa bodo ponekod znašala <strong>okoli 10 °C</strong>.</p>
+
+    <h2>Se obeta nov rekord?</h2>
+
+    <p>Trenutni slovenski junijski rekord znaša <strong>38,4 °C</strong> — razmeroma svež, izmerjen <strong>26. junija 2025</strong> v Dobličah pri Črnomlju. Šlo je za nov rekord v nizu meritev od leta 1950, hkrati pa so takrat v Dobličah zabeležili tudi rekordno dnevno povprečje za junij: <strong>31,5 °C</strong>.</p>
+
+    <p>Je ta rekord letos ogrožen? <strong>Da.</strong> Termometri na Goriškem in v Vipavski dolini so v nedeljo ponekod lahko pokazali <em>okoli</em> 38 stopinj — rekordu smo se nevarno približali. Napovedi nakazujejo <span class="hl">možnost prekoračitve, ne pa zanesljive</span>.</p>
+
+    <div class="gauge-wrap">
+      <div class="gauge-title">Temperaturna lestvica — kje smo (izhodišče: 36,0 °C)</div>
+      <div class="gauge-row">
+        <div class="gr-label">Max ta vikend<br><span style="font-size:.68rem;color:#adc0d8">(Goriška, ocena)</span></div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:36%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div>
+        <div class="gr-val">~38,0°C</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Junijski rekord SLO<br><span style="font-size:.68rem;color:#adc0d8">(Doblice, jun. 2025)</span></div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:44%;background:linear-gradient(90deg,#f97316,#ef4444)"></div></div>
+        <div class="gr-val">38,4°C</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Absolutni rekord SLO<br><span style="font-size:.68rem;color:#adc0d8">(Crklje ob Krki, avg. 2013)</span></div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:87%;background:linear-gradient(90deg,#ef4444,#7f1d1d)"></div></div>
+        <div class="gr-val">40,8°C</div>
+      </div>
+      <div class="gauge-note">Absolutni rekord velja za vse mesece (izmerjen 8. avgusta 2013). Junijski rekord velja za niz meritev od leta 1950.</div>
+    </div>
+
+    <p>Druga, morda še zanimivejša plat te zgodbe ni najvišja temperatura, temveč <strong>trajanje</strong>. Več meteoroloških modelov kaže, da bi se zelo vroče vreme lahko nadaljevalo tudi v prvih dneh julija. Če se ta scenarij uresniči, bi bil tokratni vročinski val ponekod celo <span class="hl">rekordno dolg</span>.</p>
+
+    <h2>Kako se rekordi premikajo</h2>
+
+    <p>Da bomo razumeli, kako hitro se zgodovina prepisuje, si oglejmo, kako se je junijski rekord premikal skozi čas:</p>
+
     <table class="stats">
-      <tr><th>Leto</th><th>Trajanje</th><th>Opomba</th></tr>
-      <tr><th>2003</th><td>≈ 10–11 dni</td><td>Evropski mega-val, rekordne T v Franciji</td></tr>
-      <tr><th>2013</th><td>≈ 10 dni</td><td>Avgust 2013 · absolutni rekord SLO: 40,8 °C Cerklje ob Krki (8. 8. 2013)</td></tr>
-      <tr><th>2015</th><td>≈ 11–12 dni</td><td>Julij 2015, eden najdaljših v SLO do tedaj</td></tr>
-      <tr><th>2019</th><td>≈ 9–10 dni</td><td>Junij 2019, visoke temperature po EU</td></tr>
-      <tr><th>2022</th><td>≈ 8–9 dni</td><td>Julij 2022, požari po EU</td></tr>
-      <tr><th>2025</th><td>≈ 12 dni</td><td>Junij 2025 · junijski rekord SLO: 38,4 °C Doblice pri Črnomlju (26. 6. 2025)</td></tr>
-      <tr><th><strong>2026</strong></th><td><strong>14+ dni</strong></td><td><strong>Val še traja ← potencialni rekord</strong></td></tr>
+      <tr><th>Datum</th><th>Kraj</th><th>Temperatura</th></tr>
+      <tr><td>22. junij 2000</td><td>Metlika</td><td>37,5 °C</td></tr>
+      <tr><td>28. junij 2022</td><td>Podnanos pri Vipavi</td><td>38,0 °C</td></tr>
+      <tr><td>26. junij 2025</td><td>Dobliče pri Črnomlju</td><td>38,4 °C</td></tr>
     </table>
-    <div class="callout">
-      <p><strong>Opomba o rekordih:</strong> Trajanje vročinskega vala je odvisno od opazovane mreže postaj in izbranega praga Tmax. Uradno potrditev rekorda bo podal <strong>ARSO</strong> po koncu vala. Številke za pretekla leta temeljijo na dostopnih mesečnih biltenih ARSO in so informativne.</p>
+
+    <div class="chart-card">
+      <h3>Junijski temperaturni rekordi v Sloveniji — napredovanje</h3>
+      <canvas id="chartRec"></canvas>
     </div>
 
-    <h2>Zakaj je ta val tako izjemen?</h2>
-    <p>Dolgotrajnost je posledica kombinacije treh dejavnikov:</p>
-    <p><strong>1. Blokirajoči anticiklon.</strong> Obsežno območje visokega tlaka nad Atlantikom in zahodno Evropo preprečuje dostop hladnejših atlantskih mas. Takšne "blokade" so po podatkih klimatologov v zadnjih desetletjih pogostejše in dolgotrajnejše.</p>
-    <p><strong>2. Afriški vročinski tok.</strong> Med 13. in 16. junijem je nad Slovenijo z jugom pritekel zrak saharskega izvora — temperatura na 850 hPa (okoli 1500 m) je dosegla izjemnih <strong>+28 °C</strong>, kar je vrednost, ki so jo v tem delu Evrope prejšnje generacije poznale le redko.</p>
-    <p><strong>3. Ozadje podnebnih sprememb.</strong> Povprečna letna temperatura v Sloveniji se je od leta 1961 dvignila za <strong>+2,1 °C</strong> (ARSO, 2025). Junij 2026 je v skladu s trendom, ki naredi ekstreme pogostejše in intenzivnejše.</p>
+    <p>Vsak nov rekord je prejšnjega presegel le za desetinko ali nekaj desetink stopinje, a vzorec je očiten: pogostost, s katero junijske rekorde sploh prepisujemo, <strong>narašča</strong>. Za primerjavo: <strong>absolutni slovenski temperaturni rekord</strong> še vedno znaša <strong>40,8 °C</strong>, izmerjenih avgusta 2013 na letališču Crklje ob Krki.</p>
 
-    <h2>Lokalni učinek: Rečica ob Savinji</h2>
-    <p>Zgornja Savinjska dolina ima mikroklimatske lastnosti, ki vplivajo na potek vala:</p>
-    <p><strong>Toplotna akumulacija dna doline.</strong> Rečica leži v ozki dolini (366 m n. m.), od katere Savinja odteka v smeri vzhod–zahod. Ob anticiklonalnih razmerah se v dolini zjutraj razvije temperaturna inverzija, podnevi pa se zrak v kotlu segreje hitreje kot na prostem. Podatki IREICA1 kažejo, da so bile nočne temperature v primerjavi z višje ležečimi postajami (npr. Kamniška Bistrica) <strong>5–7 °C višje</strong>.</p>
-    <p><strong>Vlažnost tal.</strong> Relativna vlažnost pri IREICA1 je bila čez dan nizka (20–30 %), kar je za Savinjsko dolino neobičajno — normalno je junijska vlažnost ob 14:00 med 45–55 %. Suho ozračje je obenem pospešilo evapotranspiracijo in izsušitev vegetacije.</p>
-    <p><strong>Sava in Savinja</strong> · Gladina obeh rek je ob koncu vala za <strong>42 cm</strong> nižja od dolgoletnega junijskega povprečja. Temperatura Savinje pri Mozirju je konec tedna dosegla <strong>23,4 °C</strong>.</p>
+    <p>Novi rekordi nastajajo ne le pri najvišjih temperaturah, temveč tudi pri <strong>dolžini vročinskih valov</strong>. Najdaljši vročinski val v zgodovini uradnih meritev pri nas je bil leta 2022 v Kopru: <strong>29 dni</strong> (14. julija–11. avgusta). V Ljubljani je najdlje trajal 15 dni (2021), enako dolg val so istega leta zabeležili v Biljah pri Novi Gorici.</p>
 
-    <h2>Zdravje in priporočila</h2>
+    <div class="chart-card">
+      <h3>Najdaljši vročinski valovi po postajah (dni nad temperaturnim pragom)</h3>
+      <canvas id="chartDur"></canvas>
+    </div>
+
+    <h2>Lekcija lanskega »peklenskega« junija</h2>
+
+    <p>Junij 2025 je bil <span class="hl">najtoplejši od začetka primerljivih meritev leta 1950</span>, z odstopanjem <strong>+3,7 °C</strong> od povprečja 1991–2020 — s tem je prekosil prejšnji rekord iz junija 2003 (+3,4 °C). Toplota pa je bila le del zgodbe:</p>
+
+    <div class="mini-stat-grid">
+      <div class="mini-stat">
+        <div class="ms-label">Temp. anomalija</div>
+        <div class="ms-val" style="color:#ef4444">+3,7°C</div>
+        <div class="ms-sub">nad povp. 1991–2020</div>
+      </div>
+      <div class="mini-stat">
+        <div class="ms-label">Padavine</div>
+        <div class="ms-val" style="color:#38bdf8">24 %</div>
+        <div class="ms-sub">mesečne norme</div>
+      </div>
+      <div class="mini-stat">
+        <div class="ms-label">Sončnost</div>
+        <div class="ms-val" style="color:#f59e0b">144 %</div>
+        <div class="ms-sub">mesečne norme</div>
+      </div>
+    </div>
+
+    <div class="gauge-wrap">
+      <div class="gauge-title">Anomalija povp. junijske temperature glede na 1991–2020</div>
+      <div class="gauge-row">
+        <div class="gr-label">Jun 2003<br><span style="font-size:.68rem;color:#adc0d8">(prejšnji rekord)</span></div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:76%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div>
+        <div class="gr-val">+3,4°C</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Jun 2025<br><span style="font-size:.68rem;color:#adc0d8">(novi rekord)</span></div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:82%;background:linear-gradient(90deg,#f97316,#ef4444)"></div></div>
+        <div class="gr-val">+3,7°C</div>
+      </div>
+      <div class="gauge-note">Lestvica: 0 do +4,5 °C. Junij 2025 je bil hkrati rekordno suh (24 % norme) in rekordno osončen (144 % norme).</div>
+    </div>
+
+    <p>Ta kombinacija temperature, suše in sončnosti je naredila junij 2025 za <strong>najbolj ekstremen poletni mesec v zgodovini slovenskih meritev</strong>. Junij 2026 se tako meri z zelo visoko postavljeno letvico.</p>
+
+    <h2>Širša slika: ne gre le za Slovenijo</h2>
+
+    <p>Vročina, ki jo občutimo, ni lokalni pojav. Nad zahodno Evropo se je oblikovala obsežna <strong>toplotna kupola</strong> — območje izrazito nadpovprečno toplega zraka, razširjenega iz severozahodne Afrike. V Španiji in na Portugalskem so termometri lahko pokazali do <strong>45 °C</strong>. Suha tla po Evropi zmanjšujejo ohlajanje z izhlapevanjem, kar pojav dodatno zaostruje.</p>
+
+    <div class="def-box">
+      <div class="def-title">Definicija vročinskega vala — ARSO</div>
+      <p>Vsaj <strong>tri zaporedne dni</strong> nad temperaturnim pragom, ki se razlikuje glede na območje:</p>
+      <div class="def-thresholds">
+        <span class="dt-chip">Nižine osrednje / vzhodne SLO &nbsp;≥ 24 °C</span>
+        <span class="dt-chip">Primorska &nbsp;≥ 25 °C</span>
+        <span class="dt-chip">Višje ležeča območja &nbsp;≥ 22 °C</span>
+      </div>
+    </div>
+
+    <p>Trend je nedvoumen. Število in trajanje vročinskih valov se v zadnjih desetletjih povečujeta; posebej so izstopala leta 2003, 2013, 2022 in 2024. Svetovna zdravstvena organizacija (WHO) opozarja, da se Evropa segreva hitreje kot katera koli druga regija na svetu ter da je v zadnjih štirih letih zaradi vzrokov, povezanih z vročino, umrlo <strong>več kot 200.000 ljudi</strong>. Direktor WHO za Evropo vročino brez olepševanja označuje za »tihega morilca«.</p>
+
+    <h2>Kako se zaščititi</h2>
+
+    <p>Ne glede na to, ali bo rekord presežen ali ne, je obremenitev za telo resnična. NIJZ ob vročinskih valovih svetuje:</p>
+
     <div class="health-grid">
       <div class="h-card">
-        <div class="h-title">Hidracija</div>
-        <p>Pijte vsaj <strong>2–3 litre</strong> vode dnevno, tudi če ne čutite žeje. Izogibajte se alkoholu in sladkim pijačam.</p>
+        <div class="h-title">Hladite prostore</div>
+        <p>Prezračite <strong>ponoči in zgodaj zjutraj</strong>, čez dan zasenčite okna in omejite vnos toplote.</p>
       </div>
       <div class="h-card">
-        <div class="h-title">Čas bivanja zunaj</div>
-        <p>Izogibajte se naporu na prostem med <strong>11:00 in 17:00</strong>. UV-indeks je bil v tem valu konsistentno <strong>8–9</strong> (zelo visok).</p>
+        <div class="h-title">Omejite aktivnosti</div>
+        <p>Izogibajte se naporu na prostem med <strong>10:00 in 17:00</strong>, ko je Sonce najmočnejše.</p>
       </div>
       <div class="h-card">
-        <div class="h-title">Bivalni prostori</div>
-        <p>Zjutraj prezračite prostore, podnevi zasenčite okna. Preprosta evaporativna tehnika: mokra tkanina pred ventilatorjem zniža zaznano temperaturo za <strong>4–6 °C</strong>.</p>
+        <div class="h-title">Hidrirajte se</div>
+        <p>Pijte dovolj tekočine <strong>tudi kadar ne čutite žeje</strong>. Alkohol in sladke pijače niso primerni.</p>
       </div>
       <div class="h-card">
-        <div class="h-title">Rizične skupine</div>
-        <p>Posebej bodite pozorni na <strong>starejše, dojenčke in kronične bolnike</strong>. Simptomi toplotnega udara: zmeda, vroča koža brez znojenja, hiter utrip — <strong>kličite 112</strong>.</p>
+        <div class="h-title">Ranljive skupine</div>
+        <p>Posebej pazite na <strong>starejše, otroke in bolnike</strong>. Znaki vročinskega udara → <strong>kličite 112</strong>.</p>
       </div>
     </div>
 
-    <h2>Napoved</h2>
-    <p>Po napovedi ECMWF (European Centre for Medium-Range Weather Forecasts) bo dotok hladnejšega atlantskega zraka Slovenijo dosegel med <strong>22. in 24. junijem</strong>. Prehod bo po vsej verjetnosti hladna fronta z nevihtami — obilnejše padavine niso izključene, a zaenkrat ostajajo negotove.</p>
-    <p>Če bo temperatura pri IREICA1 <strong>21. junija</strong> znova presegla 30 °C, bo to pomenilo <strong>15. zaporedni vroči dan</strong> — kar bi rekordni status vala še utrdilo.</p>
+    <p>Najpogostejši zapleti so slabo počutje, dehidracija, kožni izpuščaji, vročinska izčrpanost in vročinska kap. Pri zadnjih dveh je nujna takojšnja zdravniška pomoč.</p>
+
+    <h2>Zaključek: bo postavljen nov rekord?</h2>
+
+    <p>Junijski temperaturni rekord (38,4 °C) je bil med tem vročinskim valom <strong>ogrožen predvsem na Primorskem</strong> — ali je bil presežen, bo potrdila analiza ARSO.</p>
 
     <div class="callout">
-      <p><strong>Na kratko:</strong> junij 2026 prinaša izjemen 14-dnevni vročinski val, ki ga poganja blokirani anticiklon in afriški tok toplega zraka. Postaja IREICA1 je 15. junija zabeležila rekord za junij: <strong>35,3 °C</strong>. Val po vsej verjetnosti podira dosedanji rekord v trajanju. Uradno potrditev bomo dočakali po zaključku vala, ko bo ARSO objavil analizo.</p>
+      <p>Resnična zgodba ni vprašanje, ali bomo namerili 38,5 namesto 38,4 °C. Resnična zgodba je, da junijske rekorde prepisujemo <strong>vse pogosteje</strong>, da so vročinski valovi <strong>vse daljši</strong> in da je lanski junij postavil mejnik, ki si ga pred desetletjem nismo znali predstavljati. Rekord ali ne — <span class="hl">vroča poletja postajajo naša nova normalnost</span>. In prav na to se velja pripraviti.</p>
     </div>
 
-    <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.) · ARSO mesečni bilteni · ECMWF napovedi. Vse meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: ARSO mesečni bilteni in napovedi · ECMWF · NIJZ · WHO Evropa. Meritve v živo na <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
 
@@ -269,115 +332,103 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
-const JUN_LABELS = ['1.6','2.6','3.6','4.6','5.6','6.6','7.6','8.6','9.6','10.6','11.6','12.6','13.6','14.6','15.6','16.6','17.6','18.6','19.6','20.6'];
-const JUN_TMAX   = [23.4, 25.1, 26.8, 24.2, 27.6, 29.4, 31.2, 32.7, 33.1, 34.2, 32.8, 31.4, 33.6, 34.9, 35.3, 33.8, 32.1, 33.7, 32.9, 31.8];
-const JUN_TMIN   = [11.2, 12.8, 13.5, 11.9, 14.3, 15.8, 17.3, 18.6, 19.4, 20.1, 19.8, 18.3, 19.7, 20.8, 21.2, 20.4, 19.1, 20.2, 19.6, 18.7];
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 800, easing: 'easeOutQuart' },
+  plugins: {
+    legend: {
+      display: true, position: 'top',
+      labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 }
+    },
+    tooltip: {
+      backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+      titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10
+    }
+  }
+};
 
-new Chart(document.getElementById('chartVrocina'), {
+/* Chart 1 — Record progression */
+new Chart(document.getElementById('chartRec'), {
   data: {
-    labels: JUN_LABELS,
+    labels: ['Jun 2000\n(Metlika)', 'Jun 2022\n(Podnanos)', 'Jun 2025\n(Doblice)'],
     datasets: [
       {
         type: 'bar',
-        label: 'Tmax ≥ 30 °C (vročinski val)',
-        data: JUN_TMAX.map((v, i) => i >= 6 ? v : null),
-        yAxisID: 'yT',
-        backgroundColor: 'rgba(249,115,22,.22)',
-        borderColor: 'rgba(249,115,22,.0)',
-        borderRadius: 3,
-        order: 3,
-      },
-      {
-        type: 'line',
-        label: 'Tmax (°C)',
-        data: JUN_TMAX,
-        yAxisID: 'yT',
-        borderColor: '#f97316',
-        backgroundColor: 'rgba(249,115,22,.08)',
-        fill: false,
-        tension: 0.35,
-        pointRadius: JUN_TMAX.map((v, i) => i === 14 ? 6 : 2.5),
-        pointHoverRadius: 7,
-        pointBackgroundColor: JUN_TMAX.map((v, i) => i === 14 ? '#ef4444' : '#f97316'),
-        borderWidth: 2.5,
-        order: 1,
-      },
-      {
-        type: 'line',
-        label: 'Tmin (°C)',
-        data: JUN_TMIN,
-        yAxisID: 'yT',
-        borderColor: '#38bdf8',
-        backgroundColor: 'rgba(56,189,248,.05)',
-        fill: false,
-        tension: 0.35,
-        pointRadius: 2,
-        pointHoverRadius: 5,
-        pointBackgroundColor: '#38bdf8',
+        label: 'Junijski rekord (°C)',
+        data: [37.5, 38.0, 38.4],
+        backgroundColor: ['rgba(245,158,11,.7)', 'rgba(249,115,22,.8)', 'rgba(239,68,68,.85)'],
+        borderColor: ['#f59e0b', '#f97316', '#ef4444'],
         borderWidth: 1.5,
-        borderDash: [4, 3],
+        borderRadius: 6,
         order: 2,
       },
       {
         type: 'line',
-        label: 'Prag vala (30 °C)',
-        data: JUN_LABELS.map(() => 30),
-        yAxisID: 'yT',
-        borderColor: 'rgba(239,68,68,.55)',
-        borderWidth: 1,
+        label: 'Absolutni rekord SLO (40,8 °C)',
+        data: [40.8, 40.8, 40.8],
+        borderColor: 'rgba(239,68,68,.4)',
+        borderWidth: 1.5,
         borderDash: [6, 4],
         pointRadius: 0,
         fill: false,
         tension: 0,
-        order: 4,
+        order: 1,
       }
     ]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    interaction: { mode: 'index', intersect: false },
-    animation: { duration: 900, easing: 'easeOutQuart' },
+    ...CHART_DEFAULTS,
     plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14,
-          filter: item => item.text !== 'Tmax ≥ 30 °C (vročinski val)' }
-      },
+      ...CHART_DEFAULTS.plugins,
       tooltip: {
-        backgroundColor: 'rgba(4,7,14,.96)',
-        borderColor: 'rgba(255,255,255,.1)',
-        borderWidth: 1,
-        titleColor: '#adc0d8',
-        bodyColor: '#e8edf8',
-        padding: 10,
-        filter: item => item.dataset.label !== 'Tmax ≥ 30 °C (vročinski val)',
-        callbacks: {
-          label: ctx => {
-            if (ctx.dataset.label === 'Prag vala (30 °C)') return ' 30,0 °C (prag)';
-            return ` ${ctx.parsed.y.toFixed(1)} °C`;
-          },
-          afterTitle: items => {
-            const i = items[0].dataIndex;
-            return i >= 6 ? '🔥 Vročinski val · dan ' + (i - 5) : '';
-          }
-        }
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(1)} °C` }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: {
+        min: 36, max: 42,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
+      }
+    }
+  }
+});
+
+/* Chart 2 — Duration (horizontal bar) */
+new Chart(document.getElementById('chartDur'), {
+  type: 'bar',
+  data: {
+    labels: ['Koper\n(jul.–avg. 2022)', 'Ljubljana\n(2021)', 'Bilje\n(2021)'],
+    datasets: [{
+      label: 'Trajanje (dni)',
+      data: [29, 15, 15],
+      backgroundColor: ['rgba(239,68,68,.8)', 'rgba(249,115,22,.7)', 'rgba(245,158,11,.65)'],
+      borderColor: ['#ef4444', '#f97316', '#f59e0b'],
+      borderWidth: 1.5,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    indexAxis: 'y',
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.x} dni` }
       }
     },
     scales: {
       x: {
-        grid: { color: 'rgba(255,255,255,.04)' },
-        ticks: { color: '#adc0d8', font: { size: 10 }, maxTicksLimit: 12 }
-      },
-      yT: {
-        type: 'linear',
-        position: 'left',
-        min: 8,
-        max: 38,
+        min: 0, max: 35,
         grid: { color: 'rgba(255,255,255,.05)' },
-        ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
-      }
+        ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' dni' }
+      },
+      y: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } }
     }
   }
 });
