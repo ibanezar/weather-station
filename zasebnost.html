@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politika zasebnosti — Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/zasebnost.html">
+<meta name="description" content="Politika zasebnosti spletnega mesta Meteorec — osebna meteorološka postaja IREICA1 v Rečici ob Savinji.">
+<meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/blog/blog.css">
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › Zasebnost
+  </nav>
+
+  <article>
+    <span class="stn-badge"><span></span>METEOREC · ZASEBNOST</span>
+    <h1>Politika zasebnosti</h1>
+    <p class="post-meta">Zadnja posodobitev: junij 2026</p>
+
+    <p class="lead">Stran Meteorec (<strong>meteorec.si</strong>) je osebna meteorološka postaja in ne zbira osebnih podatkov obiskovalcev. Ta stran pojasnjuje, katera tehnična orodja in storitve tretjih oseb se uporabljajo ter kako so vaši podatki obravnavani.</p>
+
+    <h2>Upravljavec</h2>
+    <p>Upravljavec spletnega mesta je:</p>
+    <table class="stats">
+      <tr><th>Ime</th><td>Filip Eremita</td></tr>
+      <tr><th>Spletna stran</th><td><a href="https://meteorec.si">meteorec.si</td></tr>
+      <tr><th>Kontakt</th><td>filip.eremita@gmail.com</td></tr>
+    </table>
+
+    <h2>Kateri podatki se zbirajo?</h2>
+    <p><strong>Meteorec sam po sebi ne zbira, ne shranjuje in ne obdeluje osebnih podatkov obiskovalcev.</strong> Spletna stran ne vsebuje registracij, prijav, obrazcev za zbiranje podatkov ali oglaševalskih skriptov.</p>
+
+    <h2>Lokalno shranjevanje (localStorage)</h2>
+    <p>Stran za lastne funkcije shranjuje nekatere nastavitve neposredno v vaš brskalnik (<em>localStorage</em>). Ti podatki ostanejo le pri vas, nikoli niso poslani na strežnik in se izbrišejo, ko počistite podatke brskalnika. Shranjevanje zajema:</p>
+    <ul>
+      <li><strong>Tema vmesnika</strong> (svetla / temna) — vaša vizualna nastavitev</li>
+      <li><strong>Opozorila</strong> — pragovi za obvestila o temperaturi, vetru in dežju</li>
+      <li><strong>Vremenski arhiv</strong> — dnevne meritve vaše postaje, zbrane med obiski (za funkcijo »Na ta dan«)</li>
+    </ul>
+    <p>Vse te podatke lahko kadarkoli izbrišete v nastavitvah brskalnika (razdelek »Piškotki in podatki strani«).</p>
+
+    <h2>Storitve tretjih oseb</h2>
+
+    <h3>Windy.com — interaktivni zemljevidi</h3>
+    <p>Stran vključuje dva interaktivna zemeljska prikaza vremenske napovedi vgrajena iz storitve <a href="https://www.windy.com" target="_blank" rel="noopener">Windy.com</a>. Ob nalaganju teh prikazov Windy.com v vašem brskalniku nastavi lastne piškotke in prejme vaš IP naslov. Windy.com ima svojo politiko zasebnosti, ki je dostopna na <a href="https://www.windy.com/privacy" target="_blank" rel="noopener">windy.com/privacy</a>.</p>
+    <p>Interaktivni prikazi Windy se ne naložijo samodejno — prikazani so šele po vašem izrecnem soglasju ali kliku na gumb »Prikaži«.</p>
+
+    <h3>GoatCounter — anonimna analitika</h3>
+    <p>Za štetje obiskov strani uporabljamo storitev <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>. GoatCounter <strong>ne nastavi piškotkov</strong> in <strong>ne zbira osebnih podatkov</strong>. Beležijo se le: URL strani, napotnik, tip brskalnika in okvirne informacije o napravi — brez IP naslova, brez sledenja med stranmi in brez povezave z identiteto posameznika. GoatCounter je odprtokodna, z zasebnostjo skladna alternativa klasičnim analitičnim orodjem.</p>
+
+    <h3>CDN za knjižnice (unpkg.com)</h3>
+    <p>Nekatere interaktivne funkcije za delovanje potrebujejo zunanji programski kodi:</p>
+    <ul>
+      <li><strong>Tone.js</strong> — zvočna kulisa vremena (naloži se le, ko kliknete »Poslušaj vreme«)</li>
+      <li><strong>Leaflet.js</strong> — interaktivni zemljevid postaje (naloži se le, ko odprete razdelek s karto)</li>
+    </ul>
+    <p>Oba se naložita iz storitve <a href="https://unpkg.com" target="_blank" rel="noopener">unpkg.com</a> šele ob vašem izrecnem dejanju (klik). Ob nalaganju unpkg.com prejme vaš IP naslov. Storitev ne nastavi piškotkov.</p>
+
+    <h3>Vremenski API-ji</h3>
+    <p>Stran za pridobivanje vremenskih podatkov in napovedi kliče naslednje javne programske vmesnike:</p>
+    <ul>
+      <li><a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> — vremenska napoved (brez piškotkov, brez sledenja)</li>
+      <li><a href="https://meteo.arso.gov.si" target="_blank" rel="noopener">ARSO</a> — uradni vremenski podatki RS</li>
+      <li><a href="https://www.rainviewer.com" target="_blank" rel="noopener">RainViewer</a> — radarski podatki</li>
+      <li><a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">NASA POWER</a> — klimatološki referenčni podatki</li>
+    </ul>
+    <p>Vsi klici se izvajajo prek posredniškega strežnika (Cloudflare Worker), ki ne beleži IP naslovov obiskovalcev.</p>
+
+    <h3>Infrastruktura (Cloudflare)</h3>
+    <p>Spletna stran je gostovana pri storitvi <a href="https://pages.cloudflare.com" target="_blank" rel="noopener">Cloudflare Pages</a>. Cloudflare kot ponudnik infrastrukture samodejno beleži nekatere tehnične informacije (IP naslovi, čas zahtev) za namene varnosti in zanesljivosti omrežja. Za podrobnosti glejte <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare politiko zasebnosti</a>.</p>
+
+    <h2>Piškotki</h2>
+    <p>Meteorec <strong>ne nastavi lastnih piškotkov</strong>. Piškotki tretjih oseb so možni le ob nalaganju prikazov Windy.com, kar se zgodi samo po vašem soglasju. GoatCounter in ostale vremensko-podatkovne storitve piškotkov ne nastavljajo.</p>
+
+    <h2>Vaše pravice (GDPR)</h2>
+    <p>Ker Meteorec ne zbira osebnih podatkov, večina pravic iz GDPR v praksi nima predmeta. Kljub temu imate vedno pravico do:</p>
+    <ul>
+      <li>vpogleda v morebitne shranjene osebne podatke</li>
+      <li>izbrisa podatkov, shranjenih v vašem brskalniku (localStorage) — to storite sami v nastavitvah brskalnika</li>
+      <li>pritožbe pri nadzornem organu (<a href="https://www.ip-rs.si" target="_blank" rel="noopener">Informacijski pooblaščenec RS</a>)</li>
+    </ul>
+    <p>Za morebitna vprašanja v zvezi z zasebnostjo nas kontaktirajte na <strong>filip.eremita@gmail.com</strong>.</p>
+
+    <h2>Spremembe politike</h2>
+    <p>Morebitne spremembe te politike bodo objavljene na tej strani z novo datumom posodobitve.</p>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/o-postaji.html">O postaji</a> · <a href="/zasebnost.html">Zasebnost</a></span>
+  </footer>
+</div>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
