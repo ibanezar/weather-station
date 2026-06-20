@@ -2149,6 +2149,7 @@ function switchTab(tab){
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='po-meri'){   initPoMeri(); }
   if(tab==='morje'){     initMorje(); }
+  if(tab==='oceanologija'){ initOceanologija(); }
   if(tab==='gore'){      initGore(); }
   if(tab==='gobe'){      initGobe(); }
   if(tab==='padalci'){    initPadalci(); }
@@ -13739,6 +13740,367 @@ function _seaStateLabel(h){
   if(h<0.1)return'mirno';if(h<0.5)return'rahlo';if(h<1.25)return'zmerno valovito';
   if(h<2.5)return'razburkano';return'hudo razburkano';
 }
+
+// ═══ OCEANOLOGIJA ══════════════════════════════════════════
+// Historical SST climatology for the Slovenian Adriatic coast (Portorož)
+const OCN_SST_AVG=[9.5,9.0,10.5,13.5,18.0,22.5,25.5,26.5,24.0,19.5,15.0,11.5];
+
+let _ocnInit=false,_ocnCache=null,_ocnCacheT=0;
+async function initOceanologija(){
+  if(_ocnInit)return; _ocnInit=true;
+  try{
+    const now=Date.now();
+    if(!_ocnCache||now-_ocnCacheT>3600000){
+      _ocnCache=await fetch(
+        `https://marine-api.open-meteo.com/v1/marine?latitude=${SEA_LAT}&longitude=${SEA_LON}`+
+        `&current=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,swell_wave_direction,swell_wave_period,sea_surface_temperature,ocean_current_velocity,ocean_current_direction`+
+        `&hourly=wave_height,wave_direction,swell_wave_height,sea_surface_temperature,ocean_current_velocity,ocean_current_direction`+
+        `&daily=wave_height_max,wave_period_max,sea_surface_temperature_mean`+
+        `&past_days=30&forecast_days=7&timezone=Europe%2FLjubljana`
+      ).then(r=>r.json());
+      _ocnCacheT=now;
+    }
+    _buildOcnKPIs(_ocnCache);
+    _buildOcnSSTChart(_ocnCache);
+    _buildOcnWaveChart(_ocnCache);
+    _buildOcnWaveRose(_ocnCache);
+    _buildOcnCurrents(_ocnCache);
+    _buildOcnTides(_ocnCache);
+    _buildOcnEcology(_ocnCache);
+    _buildOcnClimate(_ocnCache);
+  }catch(e){console.error('initOceanologija',e);}
+}
+
+function _buildOcnKPIs(m){
+  const el=document.getElementById('ocn-kpis');if(!el)return;
+  const c=m.current||{};
+  const vel=c.ocean_current_velocity!=null?(c.ocean_current_velocity*100).toFixed(0)+' cm/s':'—';
+  const kpis=[
+    {val:c.sea_surface_temperature!=null?c.sea_surface_temperature.toFixed(1)+' °C':'—',lbl:'Temp. morja',sub:'površinska (SST)'},
+    {val:c.wave_height!=null?c.wave_height.toFixed(2)+' m':'—',lbl:'Valovanje',sub:c.wave_height!=null?_seaStateLabel(c.wave_height):'—'},
+    {val:c.swell_wave_height!=null?c.swell_wave_height.toFixed(2)+' m':'—',lbl:'Ondulacija',sub:'swell valovi'},
+    {val:c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—',lbl:'Period vala',sub:'sekund'},
+    {val:vel,lbl:'Tok morja',sub:c.ocean_current_direction!=null?_windDirLabel(c.ocean_current_direction):'—'},
+    {val:c.wave_direction!=null?_windDirLabel(c.wave_direction):'—',lbl:'Smer valov',sub:c.wave_direction!=null?c.wave_direction.toFixed(0)+'°':'—'},
+  ];
+  el.innerHTML=kpis.map(k=>`<div class="ocn-kpi"><div class="ocn-kpi-val">${k.val}</div><div class="ocn-kpi-lbl">${k.lbl}</div><div class="ocn-kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+function _buildOcnSSTChart(m){
+  const el=document.getElementById('ocn-sst-wrap');if(!el)return;
+  const h=m.hourly||{};
+  const times=h.time||[];
+  const ssts=h.sea_surface_temperature||[];
+  // Aggregate to daily mean
+  const dailyMap={};
+  times.forEach((t,i)=>{
+    const d=t.slice(0,10);
+    if(ssts[i]!=null){
+      if(!dailyMap[d]){dailyMap[d]={sum:0,n:0};}
+      dailyMap[d].sum+=ssts[i];dailyMap[d].n++;
+    }
+  });
+  const dates=Object.keys(dailyMap).sort();
+  if(!dates.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
+  const vals=dates.map(d=>dailyMap[d].sum/dailyMap[d].n);
+  const todayStr=new Date().toISOString().slice(0,10);
+  const todayIdx=dates.indexOf(todayStr);
+
+  const W=880,H=100,pad={l:30,r:8,t:10,b:18};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const valid=vals.filter(v=>v!=null);
+  const vmin=Math.floor(Math.min(...valid)-0.5),vmax=Math.ceil(Math.max(...valid)+0.5);
+  const xS=i=>pad.l+i*(cW/Math.max(dates.length-1,1));
+  const yS=v=>pad.t+cH-(v-vmin)/(vmax-vmin)*cH;
+
+  let pathPast='',pathFuture='',firstFut=true;
+  dates.forEach((d,i)=>{
+    const v=vals[i];if(v==null)return;
+    const x=xS(i),y=yS(v);
+    if(i<=(todayIdx>=0?todayIdx:i)){
+      pathPast+=(pathPast?'L':'M')+x+','+y;
+    }
+    if(i>=(todayIdx>=0?todayIdx:dates.length)){
+      if(firstFut&&todayIdx>=0){pathFuture='M'+xS(todayIdx)+','+yS(vals[todayIdx]||v);firstFut=false;}
+      else if(firstFut){pathFuture='M'+x+','+y;firstFut=false;}
+      pathFuture+='L'+x+','+y;
+    }
+  });
+
+  const mon=new Date().getMonth();
+  const climAvg=OCN_SST_AVG[mon];
+  const avgY=yS(climAvg);
+  const todayX=todayIdx>=0?xS(todayIdx):null;
+  const step=vmax-vmin>8?2:1;
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">`;
+  for(let v=Math.ceil(vmin);v<=vmax;v+=step){
+    const y=yS(v);
+    svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<text x="${pad.l-3}" y="${y+3}" font-size="7.5" fill="var(--muted)" text-anchor="end">${v}°</text>`;
+  }
+  if(avgY>=pad.t&&avgY<=H-pad.b){
+    svg+=`<line x1="${pad.l}" y1="${avgY}" x2="${W-pad.r}" y2="${avgY}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="5,3" opacity=".55"/>`;
+    svg+=`<text x="${W-pad.r}" y="${avgY-2}" font-size="7" fill="var(--amber)" text-anchor="end" opacity=".75">klima avg ${climAvg}°</text>`;
+  }
+  if(todayX!=null)svg+=`<line x1="${todayX}" y1="${pad.t}" x2="${todayX}" y2="${H-pad.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity=".45"/>`;
+  if(pathPast)svg+=`<path d="${pathPast}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round"/>`;
+  if(pathFuture)svg+=`<path d="${pathFuture}" fill="none" stroke="var(--cyan)" stroke-width="1.5" stroke-dasharray="5,3" stroke-linejoin="round" opacity=".65"/>`;
+  // Month labels
+  let lastMon='';
+  const monNames=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+  dates.forEach((d,i)=>{
+    const mo=d.slice(5,7);
+    if(mo!==lastMon){lastMon=mo;svg+=`<text x="${xS(i)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${monNames[parseInt(mo,10)-1]}</text>`;}
+  });
+  svg+='</svg>';
+  el.innerHTML=svg;
+  const leg=document.getElementById('ocn-sst-leg');
+  if(leg)leg.innerHTML='<span>—— izmerjena SST</span><span style="opacity:.6">- - - napoved</span><span style="color:var(--amber)">— — klimatol. avg</span>';
+}
+
+function _buildOcnWaveChart(m){
+  const el=document.getElementById('ocn-wave-wrap');if(!el)return;
+  const d=m.daily||{};
+  const times=d.time||[];
+  if(!times.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
+  const today=new Date().toISOString().slice(0,10);
+  let start=times.findIndex(t=>t>=today);
+  if(start<0)start=Math.max(0,times.length-7);
+  const n=Math.min(7,times.length-start);
+  const fcT=times.slice(start,start+n);
+  const wh=(d.wave_height_max||[]).slice(start,start+n);
+  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+
+  const W=880,H=80,pL=28,pR=8,pT=6,pB=18;
+  const cW=W-pL-pR,cH=H-pT-pB;
+  const maxW=Math.max(0.5,...wh.filter(v=>v!=null))*1.15;
+  const bW=Math.floor(cW/n)-4;
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  [0,maxW/2,maxW].forEach(v=>{
+    const y=pT+cH-(v/maxW)*cH;
+    svg+=`<text x="${pL-3}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v.toFixed(1)}</text>`;
+  });
+  fcT.forEach((t,i)=>{
+    const x=pL+i*(cW/n)+2;
+    const v=wh[i]??0;
+    const bH=Math.max(2,(v/maxW)*cH);
+    const bY=pT+cH-bH;
+    const col=v<0.3?'var(--green)':v<0.6?'var(--cyan)':v<1.0?'var(--amber)':v<1.5?'#fb923c':'var(--red)';
+    svg+=`<rect x="${x}" y="${bY}" width="${bW}" height="${bH}" fill="${col}" rx="2" opacity=".78"/>`;
+    svg+=`<text x="${x+bW/2}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${days[new Date(t).getDay()]}</text>`;
+    if(v>0)svg+=`<text x="${x+bW/2}" y="${bY-2}" font-size="7" fill="var(--text)" text-anchor="middle">${v.toFixed(1)}</text>`;
+  });
+  svg+='</svg>';
+  el.innerHTML=svg;
+  const leg=document.getElementById('ocn-wave-leg');
+  if(leg)leg.innerHTML='<span style="color:var(--green)">▮ mirno &lt;0.3m</span><span style="color:var(--cyan)">▮ rahlo &lt;0.6m</span><span style="color:var(--amber)">▮ zmerno &lt;1m</span><span style="color:#fb923c">▮ razburkano &lt;1.5m</span><span style="color:var(--red)">▮ hudo</span>';
+}
+
+function _buildOcnWaveRose(m){
+  const el=document.getElementById('ocn-rose-wrap');if(!el)return;
+  const h=m.hourly||{};
+  const dirs=h.wave_direction||[];
+  const whs=h.wave_height||[];
+  const cutMs=Date.now()-7*24*3600000;
+  const futMs=Date.now()+7*24*3600000;
+  const bins=new Array(8).fill(0);
+  (h.time||[]).forEach((t,i)=>{
+    const ms=new Date(t).getTime();
+    if(ms<cutMs||ms>futMs)return;
+    const dir=dirs[i];if(dir==null)return;
+    bins[Math.round(dir/45)%8]+=(whs[i]??0.1);
+  });
+  const maxB=Math.max(...bins,0.1);
+  const labels=['S','SV','V','JV','J','JZ','Z','SZ'];
+  const cols=['var(--cyan)','var(--cyan)','var(--amber)','var(--amber)','var(--blue)','var(--blue)','var(--muted)','var(--muted)'];
+  const sz=130,cx=65,cy=65,maxR=48;
+  let svg=`<svg viewBox="0 0 ${sz} ${sz}" style="width:130px;height:130px">`;
+  [1/3,2/3,1].forEach(f=>{svg+=`<circle cx="${cx}" cy="${cy}" r="${maxR*f}" fill="none" stroke="var(--border)" stroke-width="1"/>`;});
+  [0,45,90,135].forEach(a=>{
+    const r=a*Math.PI/180;
+    svg+=`<line x1="${cx+Math.sin(r)*maxR}" y1="${cy-Math.cos(r)*maxR}" x2="${cx-Math.sin(r)*maxR}" y2="${cy+Math.cos(r)*maxR}" stroke="var(--border)" stroke-width="1"/>`;
+  });
+  bins.forEach((cnt,i)=>{
+    if(!cnt)return;
+    const r=(cnt/maxB)*maxR;
+    const a0=(i*45-22.5)*Math.PI/180,a1=(i*45+22.5)*Math.PI/180;
+    const x0=cx+Math.sin(a0)*r,y0=cy-Math.cos(a0)*r;
+    const x1=cx+Math.sin(a1)*r,y1=cy-Math.cos(a1)*r;
+    svg+=`<path d="M${cx},${cy}L${x0},${y0}A${r},${r},0,0,1,${x1},${y1}Z" fill="${cols[i]}" opacity=".7"/>`;
+  });
+  labels.forEach((lbl,i)=>{
+    const rad=i*45*Math.PI/180;
+    const lx=cx+Math.sin(rad)*(maxR+11),ly=cy-Math.cos(rad)*(maxR+11);
+    svg+=`<text x="${lx}" y="${ly+3}" font-size="8" fill="var(--muted)" text-anchor="middle" dominant-baseline="middle">${lbl}</text>`;
+  });
+  svg+='</svg>';
+  el.innerHTML=svg;
+}
+
+function _buildOcnCurrents(m){
+  const el=document.getElementById('ocn-currents');if(!el)return;
+  const c=m.current||{};
+  const vel=c.ocean_current_velocity!=null?c.ocean_current_velocity*100:null;
+  const dir=c.ocean_current_direction;
+  const velLbl=vel==null?'—':vel<5?'šibek':vel<15?'zmeren':vel<30?'močan':'zelo močan';
+  const bCls=vel==null?'ocn-badge-ok':vel<15?'ocn-badge-ok':vel<30?'ocn-badge-warn':'ocn-badge-bad';
+  const arrowSvg=dir!=null?`<svg viewBox="0 0 24 24" width="40" height="40" style="transform:rotate(${dir}deg);display:block;margin:.1rem auto .3rem"><polygon points="12,2 16,20 12,15 8,20" fill="var(--cyan)" opacity=".85"/></svg>`:`<div style="font-size:1.6rem;text-align:center;margin:.2rem 0">—</div>`;
+  el.innerHTML=`<div style="text-align:center">
+    ${arrowSvg}
+    <div style="font-size:1.0rem;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace">${vel!=null?vel.toFixed(0)+' cm/s':'—'}</div>
+    <div style="font-size:.62rem;color:var(--muted);margin:.1rem 0">${dir!=null?_windDirLabel(dir)+' ('+dir.toFixed(0)+'°)':'—'}</div>
+    <span class="ocn-badge ${bCls}">${velLbl}</span>
+  </div>
+  <div style="font-size:.68rem;color:var(--muted);line-height:1.55;margin-top:.55rem">
+    Jadransko morje ima šibke geostrofske tokove (5–20 cm/s). Ob burji drift JV, ob jugu SZ. Jadranski tok vzdolž obale redko preseže 50 cm/s.
+  </div>`;
+}
+
+function _buildOcnTides(m){
+  const el=document.getElementById('ocn-tides');if(!el)return;
+  // Harmonic tidal prediction for Koper (approximate)
+  // Constituents: [amplitude_m, angular_speed_deg/h, V0_deg, kappa_deg]
+  // Source: IHO/published harmonic constants for Northern Adriatic (Koper)
+  const J2000=Date.UTC(2000,0,1);
+  function _tH(ms){
+    const t=(ms-J2000)/3600000;
+    const C=[[0.21,28.9841,254.0,334.0],[0.10,30.0000,0.0,353.0],[0.07,15.0411,100.0,200.0],[0.03,13.9430,214.0,178.0]];
+    let h=0.35;
+    for(const [A,sig,V0,kap] of C)h+=A*Math.cos((sig*t+V0-kap)*Math.PI/180);
+    return h;
+  }
+  const now=Date.now();
+  // 25 points: -12h to +12h
+  const pts=Array.from({length:25},(_,i)=>({ms:now+(i-12)*3600000,h:_tH(now+(i-12)*3600000)}));
+  const allH=pts.map(p=>p.h);
+  const tmin=Math.min(...allH),tmax=Math.max(...allH);
+  const range=(tmax-tmin).toFixed(2);
+  // High/low water events in next 24h
+  const next24=Array.from({length:25},(_,i)=>({ms:now+i*3600000,h:_tH(now+i*3600000)}));
+  const events=[];
+  for(let i=1;i<next24.length-1;i++){
+    const prev=next24[i-1].h,cur=next24[i].h,nxt=next24[i+1].h;
+    if(cur>prev&&cur>nxt){const d=new Date(next24[i].ms);events.push({type:'V',h:cur,lbl:d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')});}
+    else if(cur<prev&&cur<nxt){const d=new Date(next24[i].ms);events.push({type:'N',h:cur,lbl:d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')});}
+  }
+  const moonIllum=_moonIllum(new Date());
+  const tidalType=moonIllum<0.1||moonIllum>0.9?'Škovišna plima (polni mesec / mlaj)':moonIllum>0.4&&moonIllum<0.6?'Kvadraturna plima (četrt mesec)':'Vmesna plima';
+
+  // SVG chart
+  const W=880,H=80,pL=30,pR=8,pT=8,pB=18;
+  const cW=W-pL-pR,cH=H-pT-pB;
+  const vmax2=Math.max(0.85,tmax+0.05);
+  const xS=i=>pL+i*(cW/(pts.length-1));
+  const yS=v=>pT+cH-(v/vmax2)*cH;
+  let path='';
+  pts.forEach((p,i)=>{path+=(i?'L':'M')+xS(i)+','+yS(p.h);});
+  const fill=path+`L${xS(pts.length-1)},${H-pB}L${xS(0)},${H-pB}Z`;
+  const nowX=xS(12);
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  [0,0.2,0.4,0.6,0.8].forEach(v=>{
+    if(v>vmax2)return;
+    const y=yS(v);
+    svg+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<text x="${pL-3}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v.toFixed(1)}</text>`;
+  });
+  svg+=`<path d="${fill}" fill="var(--cyan)" opacity=".12"/>`;
+  svg+=`<path d="${path}" fill="none" stroke="var(--cyan)" stroke-width="2"/>`;
+  svg+=`<line x1="${nowX}" y1="${pT}" x2="${nowX}" y2="${H-pB}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+  svg+=`<text x="${nowX}" y="${pT}" font-size="7" fill="var(--amber)" text-anchor="middle" dominant-baseline="hanging">zdaj</text>`;
+  [-12,-6,0,6,12].forEach(h=>{
+    const d=new Date(now+h*3600000);
+    svg+=`<text x="${xS(h+12)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${d.getHours().toString().padStart(2,'0')}:00</text>`;
+  });
+  svg+='</svg>';
+
+  const evHtml=events.slice(0,4).map(e=>`<div class="ocn-row"><span style="color:var(--muted)">${e.type==='V'?'🔺 Visoka voda':'🔻 Nizka voda'}</span><b>${e.lbl} &nbsp;·&nbsp; ${e.h.toFixed(2)} m</b></div>`).join('');
+  el.innerHTML=`${svg}<div style="margin-top:.5rem">${evHtml}
+    <div class="ocn-row"><span style="color:var(--muted)">Obseg plime</span><b>${range} m</b></div>
+    <div class="ocn-row"><span style="color:var(--muted)">Tip plime</span><b>${tidalType}</b></div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Koper ima mikroplimo (obseg do ~0.7 m). Prikaz temelji na harmonskem modelu (M2+S2+K1+O1) in je <em>informativne</em> narave. Za natančne napovedi: <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO — pomorska napoved</a>.</div>
+  </div>`;
+}
+
+function _buildOcnEcology(m){
+  const el=document.getElementById('ocn-ecology');if(!el)return;
+  const c=m.current||{};
+  const sst=c.sea_surface_temperature;
+  const wave=c.wave_height??0;
+  const mon=new Date().getMonth();
+  // Jellyfish (Pelagia noctiluca / Rhizostoma pulmo)
+  let jfRisk='nizko',jfCls='ocn-badge-ok',jfDesc='Meduze redke';
+  if(sst!=null){
+    if(sst>=24||(sst>=21&&mon>=6&&mon<=8)){jfRisk='visoko';jfCls='ocn-badge-bad';jfDesc='Sezona Pelagia noctiluca';}
+    else if(sst>=19||(mon>=5&&mon<=9)){jfRisk='zmerno';jfCls='ocn-badge-warn';jfDesc='Možne posamezne meduze';}
+  } else if(mon>=6&&mon<=8){jfRisk='zmerno';jfCls='ocn-badge-warn';jfDesc='Letna sezona';}
+  // HAB (Harmful Algal Bloom)
+  let habRisk='nizko',habCls='ocn-badge-ok',habDesc='Brez indikatorjev';
+  if(sst!=null&&sst>=24&&wave<0.3){habRisk='povišano';habCls='ocn-badge-warn';habDesc='Visoka SST + mirno = stratifikacija';}
+  else if(sst!=null&&sst>=26){habRisk='zmerno';habCls='ocn-badge-warn';habDesc='Visoka SST';}
+  // Secchi depth (water transparency estimate)
+  const secchi=wave<0.2?'6–10 m':wave<0.5?'4–7 m':wave<1.0?'2–4 m':'1–2 m';
+  const secchiDesc=wave<0.2?'mirno morje':wave<0.5?'rahlo valovito':wave<1.0?'zmerno valovito':'razburkano';
+  // Estimated salinity (seasonal Northern Adriatic)
+  const salEst=[37.5,37.3,37.0,37.2,37.5,38.0,38.3,38.4,38.2,37.9,37.6,37.5];
+  // Posidonia oceanica health (static contextual)
+  const posDesc=sst!=null&&sst>28?'stres (T > 28°C)':sst!=null&&sst<10?'mirovanje (T < 10°C)':'dobri pogoji';
+  const cards=[
+    {ic:'🪼',t:'Meduze (Pelagia)',v:`<span class="ocn-badge ${jfCls}">${jfRisk}</span>`,d:jfDesc},
+    {ic:'🌿',t:'Cvetenje alg (HAB)',v:`<span class="ocn-badge ${habCls}">${habRisk}</span>`,d:habDesc},
+    {ic:'👁',t:'Prosojnost (Secchi)',v:secchi,d:secchiDesc},
+    {ic:'🧂',t:'Slanost (ocena)',v:salEst[mon].toFixed(1)+' ‰',d:'Severni Jadran'},
+    {ic:'🌱',t:'Posidonia oceanica',v:posDesc,d:'morska trava'},
+    {ic:'⚗️',t:'pH morja',v:'~8.10',d:'povprečje (−0.002/leto)'},
+  ];
+  el.innerHTML=cards.map(cd=>`<div class="ocn-eco-card"><div class="ocn-eco-ttl">${cd.ic} ${cd.t}</div><div class="ocn-eco-val">${cd.v}</div><div class="ocn-eco-sub">${cd.d}</div></div>`).join('');
+}
+
+function _buildOcnClimate(m){
+  const el=document.getElementById('ocn-climate');if(!el)return;
+  const h=m.hourly||{};
+  const today=new Date().toISOString().slice(0,10);
+  // Current month SSTs for anomaly
+  const monthSsts=(h.sea_surface_temperature||[]).filter((v,i)=>v!=null&&(h.time||[])[i]?.startsWith(today.slice(0,7)));
+  const mon=new Date().getMonth();
+  const climAvg=OCN_SST_AVG[mon];
+  const curSST=monthSsts.length?+(monthSsts.reduce((a,b)=>a+b,0)/monthSsts.length).toFixed(1):null;
+  const anomaly=curSST!=null?+(curSST-climAvg).toFixed(1):null;
+  const months=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+
+  // Monthly SST bar chart
+  const W=880,H=55,pL=24,pR=8,pT=4,pB=14;
+  const cW=W-pL-pR,cH=H-pT-pB;
+  const minT=7,maxT=28;
+  const bW=Math.floor(cW/12)-2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;margin-bottom:.5rem">`;
+  OCN_SST_AVG.forEach((t,i)=>{
+    const x=pL+i*(cW/12)+1;
+    const bH=Math.max(2,(t-minT)/(maxT-minT)*cH);
+    const bY=pT+cH-bH;
+    const col=t<14?'var(--blue)':t<20?'var(--cyan)':t<24?'var(--green)':'var(--amber)';
+    svg+=`<rect x="${x}" y="${bY}" width="${bW}" height="${bH}" fill="${i===mon?'var(--amber)':col}" rx="1.5" opacity="${i===mon?1:.6}"/>`;
+    svg+=`<text x="${x+bW/2}" y="${H-1}" font-size="7" fill="var(--muted)" text-anchor="middle">${months[i]}</text>`;
+    svg+=`<text x="${x+bW/2}" y="${bY-2}" font-size="7" fill="${i===mon?'var(--text)':'var(--muted)'}" text-anchor="middle">${t}</text>`;
+  });
+  svg+='</svg>';
+
+  const anomCol=anomaly==null?'var(--muted)':anomaly>0.5?'var(--red)':anomaly>0?'var(--amber)':anomaly<-0.5?'var(--blue)':'var(--green)';
+  const anomStr=anomaly!=null?(anomaly>=0?'+':'')+anomaly+' °C':'—';
+  el.innerHTML=`${svg}
+    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Klimatol. povprečje (${months[mon]})</span><b>${climAvg} °C</b></div>
+    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Izmerjena SST (ta mesec, povprečje)</span><b>${curSST!=null?curSST+' °C':'—'}</b></div>
+    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Anomalija SST</span><b style="color:${anomCol}">${anomStr}</b></div>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:.65rem;line-height:1.6">
+      <b style="color:var(--text)">Zakisanost Jadrana:</b> Jadransko morje absorbira CO₂ iz atmosfere, kar zniža pH. Od predindrustrijske dobe se je pH znižal za ~0.1 enote (z 8.2 na ~8.1). Letni trend: −0.002 pH/leto. Vpliv na školjke, korale in ekosistem je znaten.
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;line-height:1.6">
+      <b style="color:var(--text)">Dvig morske gladine:</b> Severni Jadran narašča za ~3 mm/leto (Copernicus). Koper: relativni dvig je od leta 1900 znašal ~15 cm. Poplave tipa "acqua alta" vse pogostejše.
+    </div>`;
+}
+// ═══ end OCEANOLOGIJA ══════════════════════════════════════
 function _windDirLabel(deg){
   const dirs=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];
   return dirs[Math.round(deg/22.5)%16];

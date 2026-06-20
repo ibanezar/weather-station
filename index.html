@@ -1293,6 +1293,26 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .fly-legend span{display:flex;align-items:center;gap:.25rem}
 @media(max-width:520px){.fly-daily-row{grid-template-columns:repeat(4,1fr)}}
 /* ── end Padalci ──────────────────────────────────────────── */
+/* ── Oceanologija ───────────────────────────────────────── */
+.ocn-kpi-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.ocn-kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.55rem .75rem;min-width:88px;flex:1}
+.ocn-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text)}
+.ocn-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
+.ocn-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.06rem}
+.ocn-badge{display:inline-block;padding:.12rem .42rem;border-radius:5px;font-size:.65rem;font-weight:600}
+.ocn-badge-ok{background:rgba(74,222,128,.15);color:var(--green)}
+.ocn-badge-warn{background:rgba(251,191,36,.15);color:var(--amber)}
+.ocn-badge-bad{background:rgba(248,113,113,.15);color:var(--red)}
+.ocn-2col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.ocn-eco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-top:.6rem}
+.ocn-eco-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:8px;padding:.5rem .65rem}
+.ocn-eco-ttl{font-size:.63rem;color:var(--muted);margin-bottom:.25rem}
+.ocn-eco-val{font-size:.82rem;font-weight:700;color:var(--text)}
+.ocn-eco-sub{font-size:.6rem;color:var(--muted);margin-top:.12rem;line-height:1.4}
+.ocn-row{display:flex;justify-content:space-between;align-items:center;padding:.22rem 0;border-bottom:1px solid var(--border);font-size:.75rem}
+.ocn-row:last-child{border-bottom:none}
+@media(max-width:580px){.ocn-2col{grid-template-columns:1fr}}
+/* ── end Oceanologija ────────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -2218,6 +2238,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI napoved</button>
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
+    <button class="tab-btn"        id="tab-btn-oceanologija" onclick="switchTab('oceanologija')">🔬 Oceanologija</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
     <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
     <button class="tab-btn"        id="tab-btn-gallery"   onclick="switchTab('gallery')">📸 Galerija</button>
@@ -3965,6 +3986,71 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
   </div><!-- /tab-agro -->
+
+  <!-- ═══ OCEANOLOGIJA TAB ═══ -->
+  <div id="tab-oceanologija" class="tab-pane">
+    <div class="ocn-kpi-row" id="ocn-kpis">
+      <div class="ocn-kpi"><div class="ocn-kpi-val">…</div><div class="ocn-kpi-lbl">Nalagam</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌡 Temperatura morja (SST) — trend 30 dni + 7-dnevna napoved</div>
+      <div id="ocn-sst-wrap" style="height:110px;margin-top:.5rem;position:relative">
+        <div style="font-size:.75rem;color:var(--muted);padding-top:1rem">Nalagam…</div>
+      </div>
+      <div id="ocn-sst-leg" style="display:flex;gap:.75rem;font-size:.63rem;color:var(--muted);margin-top:.3rem;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌊 Analiza valovanja — 7-dnevna napoved</div>
+      <div id="ocn-wave-wrap" style="height:90px;margin-top:.5rem;position:relative">
+        <div style="font-size:.75rem;color:var(--muted);padding-top:1rem">Nalagam…</div>
+      </div>
+      <div id="ocn-wave-leg" style="display:flex;gap:.6rem;font-size:.62rem;color:var(--muted);margin-top:.3rem;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="ocn-2col">
+      <div class="card">
+        <div class="clabel">🧭 Valovna roža (7 dni)</div>
+        <div id="ocn-rose-wrap" style="display:flex;justify-content:center;margin-top:.3rem">
+          <div style="font-size:.75rem;color:var(--muted);padding:.5rem">Nalagam…</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="clabel">🌀 Morski tokovi — Portorož</div>
+        <div id="ocn-currents" style="margin-top:.4rem;font-size:.78rem;color:var(--muted)">Nalagam…</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌓 Plima in oseka — Koper <span style="font-size:.6rem;font-weight:400;color:var(--muted)">(aproks. harmonski model)</span></div>
+      <div id="ocn-tides" style="margin-top:.4rem">Nalagam…</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌿 Ekologija Jadrana</div>
+      <div class="ocn-eco-grid" id="ocn-ecology">
+        <div style="font-size:.75rem;color:var(--muted)">Nalagam…</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📊 Klimatologija morja — Slovensko primorje</div>
+      <div id="ocn-climate" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔗 Oceanografski viri</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://www.nib.si/mbp/sl/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 NIB — Morska biološka postaja Piran</a>
+        <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" rel="noopener" class="mtn-avk-link">⚓ ARSO — pomorska napoved</a>
+        <a href="https://www.seatemperature.org/europe/adriatic-sea/piran.htm" target="_blank" rel="noopener" class="mtn-avk-link">🌡 Temperatura morja — Piran</a>
+        <a href="https://www.windy.com/?waves,45.5,13.6,8" target="_blank" rel="noopener" class="mtn-avk-link">🌊 Windy — valovanje</a>
+        <a href="https://www.emodnet-physics.eu/map/" target="_blank" rel="noopener" class="mtn-avk-link">📡 EMODnet — fizika morja</a>
+        <a href="https://marine.copernicus.eu/" target="_blank" rel="noopener" class="mtn-avk-link">🛰 Copernicus Marine</a>
+      </div>
+    </div>
+  </div><!-- /tab-oceanologija -->
 
   <!-- ═══ METEO NERD TAB ═══ -->
   <div id="tab-nerd" class="tab-pane">
