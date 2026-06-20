@@ -1670,29 +1670,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .tri-section{margin-bottom:2rem}
 .tri-title{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding-bottom:.5rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
 .tri-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1rem;backdrop-filter:blur(12px)}
-/* ── Zabava tab ── */
-.zab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1rem}
-.zab-recipe-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:1.5rem;text-align:center;box-shadow:var(--card-shadow)}
-.zab-recipe-emoji{font-size:3.5rem;margin-bottom:.6rem;display:block}
-.zab-recipe-name{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
-.zab-recipe-drink{font-size:.78rem;color:var(--cyan);margin-bottom:.6rem}
-.zab-recipe-desc{font-size:.75rem;color:var(--muted);font-style:italic;line-height:1.55}
-.zab-lenoba-bar-wrap{background:var(--border);border-radius:99px;height:12px;margin:1rem 0;overflow:hidden}
-.zab-lenoba-bar{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
-.zab-lenoba-score{font-size:3rem;font-weight:800;font-family:'Space Grotesk',sans-serif;line-height:1}
-.zab-lenoba-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;margin:.2rem 0 .8rem;opacity:.7}
-.zab-lenoba-phrase{font-size:.85rem;color:var(--text);line-height:1.6;font-style:italic;margin-bottom:.75rem}
-.zab-factors{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
-.zab-factor{font-size:.67rem;background:var(--fc-bg);border:1px solid var(--border);border-radius:99px;padding:.2rem .65rem;color:var(--muted)}
-.zab-horo-card{background:linear-gradient(135deg,rgba(109,40,217,.12),rgba(6,95,70,.08));border:1px solid rgba(109,40,217,.25);border-radius:18px;padding:1.5rem;position:relative;overflow:hidden;box-shadow:var(--card-shadow)}
-.zab-horo-card::before{content:'✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦';position:absolute;top:.5rem;left:0;right:0;text-align:center;font-size:.6rem;letter-spacing:.3em;color:rgba(167,139,250,.35);pointer-events:none}
-.zab-horo-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--purple);margin-bottom:1.2rem;text-align:center}
-.zab-horo-pred{display:flex;gap:.75rem;margin-bottom:.85rem;align-items:flex-start;font-size:.8rem;line-height:1.6;color:var(--text)}
-.zab-horo-pred-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
-.zab-horo-lucky{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(109,40,217,.18)}
-.zab-horo-lucky-item{flex:1;min-width:120px;text-align:center}
-.zab-horo-lucky-val{font-size:.95rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--purple)}
-.zab-horo-lucky-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:.15rem}
+
 /* Records */
 .rec-compare{display:grid;grid-template-columns:1fr repeat(3,auto);gap:.5rem .75rem;font-size:.75rem;align-items:center}
 .rec-compare-hdr{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center}
@@ -2264,7 +2242,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
     <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
     <button class="tab-btn"        id="tab-btn-gallery"   onclick="switchTab('gallery')">📸 Galerija</button>
-    <button class="tab-btn"        id="tab-btn-zabava"    onclick="switchTab('zabava')">🎲 Zabava</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -2279,7 +2256,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
         <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
         <div class="tab-dd-divider"></div>
-        <div class="tab-dd-group-lbl">Zabava</div>
         <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
       </div>
     </div>
@@ -4690,46 +4666,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
 
   </div><!-- /tab-gallery -->
-
-  <!-- ═══ ZABAVA TAB ═══ -->
-  <div id="tab-zabava" class="tab-pane">
-    <div class="tri-section">
-      <div class="tri-title">🍲 Meteo-kuhinja — kaj skuhati glede na vreme</div>
-      <div id="zab-kuhinja">
-        <div class="zab-recipe-card" style="max-width:420px;margin:0 auto">
-          <span class="zab-recipe-emoji" id="zab-emoji">🍴</span>
-          <div class="zab-recipe-name" id="zab-recipe">Nalagam…</div>
-          <div class="zab-recipe-drink" id="zab-drink"></div>
-          <div class="zab-recipe-desc" id="zab-desc"></div>
-        </div>
-      </div>
-    </div>
-    <div class="tri-section">
-      <div class="tri-title">💤 Indeks lenobe — kako legitimno je danes nič ne narediti</div>
-      <div class="tri-card">
-        <div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">
-          <div>
-            <div class="zab-lenoba-score" id="zab-score">—</div>
-            <div class="zab-lenoba-label" id="zab-level">/ 100</div>
-          </div>
-          <div style="flex:1;min-width:160px">
-            <div class="zab-lenoba-bar-wrap"><div class="zab-lenoba-bar" id="zab-bar" style="width:0%;background:var(--muted)"></div></div>
-            <div class="zab-lenoba-phrase" id="zab-phrase"></div>
-          </div>
-          <div style="font-size:2rem" id="zab-stamp"></div>
-        </div>
-        <div class="zab-factors" id="zab-factors"></div>
-      </div>
-    </div>
-    <div class="tri-section">
-      <div class="tri-title">🔮 Vremenski horoskop — napoved zvezd (ki jih ni na nebu)</div>
-      <div class="zab-horo-card">
-        <div class="zab-horo-title" id="zab-horo-title">Horoskop za danes</div>
-        <div id="zab-horo-preds"></div>
-        <div class="zab-horo-lucky" id="zab-horo-lucky"></div>
-      </div>
-    </div>
-  </div><!-- /tab-zabava -->
 
   <!-- Upload modal -->
   <div class="gallery-modal-overlay" id="gallery-upload-modal">

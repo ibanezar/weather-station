@@ -2167,7 +2167,6 @@ function switchTab(tab){
   if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   if(tab==='gallery'){     initGallery(); }
-  if(tab==='zabava'){      initZabava(); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
 }
@@ -7372,121 +7371,6 @@ function artFrame(){
     for(let i=0;i<2;i++){const blobX=(t*12*(i+1)+i*W/2)%W,blobY=H*0.3+i*H*0.25;const bg2=ctx.createRadialGradient(blobX,blobY,0,blobX,blobY,80);bg2.addColorStop(0,dark?'rgba(51,65,85,0.4)':'rgba(148,163,184,0.25)');bg2.addColorStop(1,'rgba(148,163,184,0)');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(blobX,blobY,90,50,0,0,Math.PI*2);ctx.fill();}
   }
   _artAnim=requestAnimationFrame(artFrame);
-}
-
-// ══════════════════════════════════════════════════════════
-// ── Zabava tab ──────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════
-function _zabKuhinja(obs){
-  const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,hum=obs.humidity??60,wind=m.windSpeed??0,uv=obs.uv??0;
-  if(rain>7) return{e:'🌧️🍄',r:'Gobova juha z rženimi žganci',d:'Topli čaj z limonino kapo in medom',t:'Ko ste do kože mokri, potrebujete nujno pomoč. To je edino jed, ki jo je vreme nareklo.'};
-  if(rain>1) return{e:'🥣',r:'Mineštra z domačimi rezanci',d:'Kurkuma malca — topla, obvezno',t:'Dež zahteva juho. To je vremenski zakon, sprejet leta 1987.'};
-  if(rain>0) return{e:'🍵',r:'Kremna paradižnikova juha z bazilikno smetano',d:'Ingverjev čaj z limono',t:'Rahel dež čisti negativno energijo. Juha jo zadrži.'};
-  if(temp<-5) return{e:'🥘',r:'Telečji golaž s polento',d:'Grog z domačim žganjem (dvojna mera)',t:'Pod -5°C je grog zakonsko predpisan. Preverite § 14 Zakona o zimski prehrani.'};
-  if(temp<3) return{e:'🥔',r:'Pečen krompir z zaseko in kislim zeljem',d:'Toplo vino s cimetom in nageljnovo žbico',t:'Hlad zahteva hrano, ki ostane v telesu. Krompir ne razočara.'};
-  if(temp<10) return{e:'🍲',r:'Prekmurska bograča (po originalnem receptu)',d:'Domače rdeče vino, sobne temperature',t:'Temperatura '+temp.toFixed(1)+'°C zahteva resno hrano. Ne pa solato.'};
-  if(temp>32) return{e:'🥗',r:'Caprese solata z bufalino mocarelo',d:'Limonada z ledom (min. 3 kosi ledu)',t:'V tej vročini se meso samo kuha. Rešite zelenjavo, dokler je čas.'};
-  if(temp>26&&uv>5) return{e:'🌿',r:'Mediteranska grilovana zelenjava s humusom',d:'Hladna Radenska z limono in listki mete',t:'Sonce zahteva lahkotnost in vitamin D. Skupaj s humusom.'};
-  if(wind>45) return{e:'🌯',r:'Burrito (veter ga ne more odpihniti)',d:'Topel grog — za preden izstopite iz avta',t:'Ko piha '+wind.toFixed(0)+' km/h, je treba jesti kaj, kar drži skupaj. Burrito je edina opcija.'};
-  if(hum>90&&wind<5) return{e:'🎃',r:'Kremna bučna juha z bučnimi semeni',d:'Zeleni čaj z ingverjem in cimetom',t:'Vlaga '+hum+'% v zraku in vlaga v juhi. Ekosistem vlage.'};
-  if(temp>=16&&temp<=23&&rain<0.05) return{e:'🍗',r:'Žar: piščančji ražnji s paprikovim marinadom',d:'Lokalno pivo (Laško ali Union, po politični opredelitvi)',t:'Temperatura '+temp.toFixed(1)+'°C in brez dežja. To je poziv k žaru. Brez izgovora.'};
-  return{e:'🍝',r:'Testenine aglio e olio z robido in parmezan',d:'Kozarec domačega vina po lastni presoji',t:'Zmerno vreme, zmerna hrana. Testenine nikoli ne razočarajo.'};
-}
-
-function _zabLenoba(obs){
-  const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,pres=m.pressure??1013,hum=obs.humidity??60,wind=m.windSpeed??0,uv=obs.uv??0;
-  const h=new Date().getHours(),dow=new Date().getDay();
-  let s=44,facs=[];
-  if(rain>5){s+=26;facs.push('🌧 Naliv (+26)');}else if(rain>0){s+=18;facs.push('🌧 Dež (+18)');}
-  if(pres<1000){s+=16;facs.push('🔽 Nizek tlak (+16)');}else if(pres<1008){s+=8;facs.push('🔽 Padajoč tlak (+8)');}
-  if(pres>1025){s-=4;facs.push('🔼 Visok tlak (−4)');}
-  if(hum>92){s+=11;facs.push('💧 Zrak kot goba (+11)');}else if(hum>78){s+=5;facs.push('💧 Vlažno (+5)');}
-  if(h<6||h>22){s+=22;facs.push('🌙 Nočna ura (+22)');}else if(h<8||h>21){s+=10;facs.push('🌙 Jutro/večer (+10)');}
-  if(temp>31){s+=16;facs.push('🥵 Vročina '+temp.toFixed(0)+'°C (+16)');}else if(temp<0){s+=11;facs.push('🥶 Zmrzal '+temp.toFixed(0)+'°C (+11)');}
-  else if(temp>=16&&temp<=23&&rain<0.1&&uv>3){s-=22;facs.push('☀️ Idealno vreme (−22)');}
-  else if(temp>=13&&temp<=26&&rain<0.1){s-=10;facs.push('🌤 Prijetno (−10)');}
-  if(wind>50){s+=9;facs.push('🌀 Vihar '+wind.toFixed(0)+' km/h (+9)');}else if(wind>25){s-=5;facs.push('🌬 Osvežujoč veter (−5)');}
-  if(uv>7){s-=9;facs.push('☀️ Visok UV (−9)');}else if(uv<1&&h>8&&h<18){s+=6;facs.push('🌫 Somorno (+6)');}
-  if(dow===0||dow===6){s+=16;facs.push('📅 Vikend (+16)');}
-  s=Math.max(0,Math.min(100,Math.round(s)));
-  let lv,ph,st,col;
-  if(s>=96){lv='ZAKONSKA OBVEZNOST';ph='Sodišče te bo oprostilo. Zakonodajalec to predvideva v 94% vlagi in dežju.';st='⚖️';col='var(--purple)';}
-  else if(s>=85){lv='Ekstremno';ph='Popolnoma upravičeno. Ostani doma. Jedi direktno iz lonca.';st='🛌';col='var(--red)';}
-  else if(s>=70){lv='Visoko';ph='Legitimno se izogibaj odgovornostim. Vreme te podpira.';st='✅';col='var(--amber)';}
-  else if(s>=55){lv='Zmerno';ph='Danes bi šlo narediti kaj… ampak res ni nujno. Morda jutri.';st='🤷';col='var(--cyan)';}
-  else if(s>=38){lv='Nizko';ph='Priporočljivo je biti produktiven. Vreme ti ne daje alibi.';st='📋';col='var(--green)';}
-  else{lv='Alarmantno nizko';ph='Brez izgovora. Pojdi delat. Sonce te gleda.';st='😤';col='var(--blue)';}
-  return{s,lv,ph,st,col,facs};
-}
-
-function _zabHoroskop(obs){
-  const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,pres=m.pressure??1013,hum=obs.humidity??60,wind=m.windSpeed??0,wdir=obs.winddir??0,uv=obs.uv??0;
-  const h=new Date().getHours(),day=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'][new Date().getDay()];
-  // Pressure oracle
-  let presOracle;
-  if(pres>1025)presOracle='Merkur je fiksiran pri '+pres.toFixed(0)+' hPa. Idealno za podpisovanje pogodb in nakup nepremičnin.';
-  else if(pres>1012)presOracle='Barometer '+pres.toFixed(0)+' hPa nakazuje stabilnost. Kozmos se drži dogovora — za enkrat.';
-  else if(pres>1000)presOracle='Tlak '+ pres.toFixed(0)+' hPa pada. Kozmične sile se reorganizirajo. Izogibajte se koktejlov z dežniku.';
-  else presOracle='Nizek tlak '+pres.toFixed(0)+' hPa. Saturn vlada. Pričakujte presenečenja, ki si jih niste zaslužili.';
-  // Wind oracle
-  const dirs=['Sever','Severovzhod','Vzhod','Jugovzhod','Jug','Jugozahod','Zahod','Severozahod'];
-  const wStr=dirs[Math.round(wdir/45)%8];
-  let windOracle;
-  if(wind<2)windOracle='Brez vetra. Kozmos zadrži dih. Preveč mirno — bodite previdni.';
-  else if(wind<15)windOracle=wStr+'ni šepet ('+wind.toFixed(0)+' km/h) vam govori, da je čas za spremembo.';
-  else if(wind<35)windOracle=wStr+'ni kozmični veter ('+wind.toFixed(0)+' km/h) vas potiska v smer, ki si je niste izbrali.';
-  else windOracle='POZOR: '+wStr+'ni vetrni vihar ('+wind.toFixed(0)+' km/h) bo danes preveril vaš ego in pričesko.';
-  // Temperature prophecy
-  let tempProp;
-  if(temp<0)tempProp=temp.toFixed(1)+'°C — Hlad filtrira tiste brez zimske jakne. Vi ste med izbranci.';
-  else if(temp<10)tempProp=temp.toFixed(1)+'°C — Temperatura preizkuša odločnost. Le tisti z žepom polnim rokavic bodo zmagali.';
-  else if(temp>30)tempProp=temp.toFixed(1)+'°C — Vročina razkriva karakter. Izogibajte se podpisovanju pogodb in nakupa used cars.';
-  else if(temp>24)tempProp=temp.toFixed(1)+'°C — Toplina odpira srca in denarnice. Pazite na oboje.';
-  else tempProp=temp.toFixed(1)+'°C — Temperatura je v vaši coni udobja. Kozmos vam godi. Vsaj vremensko.';
-  // Rain prophecy
-  let rainProp=null;
-  if(rain>5)rainProp='Naliv je znak, da nebo joka namesto vas. Pokažite solidarnost — jočite skupaj.';
-  else if(rain>0)rainProp='Rahel dež čisti negativno energijo. Pralni stroj je danes samo sekundarna opcija.';
-  // Lucky
-  const luckyColors={naliv:'globoko modra',dež:'siva z modrim odtenkom',megla:'bela',noč:'temno vijolična',vroče:'oranžna',jasno:'zlato rumena',normalno:'nevtralna siva'};
-  const ck=rain>3?'naliv':rain>0?'dež':hum>90?'megla':h>21||h<5?'noč':temp>28?'vroče':uv>5?'jasno':'normalno';
-  const luckyCol=luckyColors[ck];
-  const bfStrs=['Beaufort 0 (nič se ne godi)','Beaufort 1 (komaj kaj)','Beaufort 2 (sapica)','Beaufort 3 (veter obstaja)','Beaufort 4 (pazi na šešir)','Beaufort 5 (resno piha)','Beaufort 6 (pusti dežnik doma)','Beaufort 7 (ne hodi ven)','Beaufort 8 (ostani v kleti)'];
-  const bfI=wind<1?0:wind<6?1:wind<12?2:wind<20?3:wind<29?4:wind<39?5:wind<50?6:wind<62?7:8;
-  const preds=[{i:'🪐',t:presOracle},{i:'🌬',t:windOracle},{i:'🌡',t:tempProp}];
-  if(rainProp)preds.push({i:'🌧',t:rainProp});
-  return{title:'Horoskop za '+day+', '+pres.toFixed(0)+' hPa',preds,luckyNum:pres.toFixed(0),luckyCol,compatSign:bfStrs[bfI]};
-}
-
-function initZabava(){
-  const obs=_lastBriefObs;
-  if(!obs){document.getElementById('zab-recipe').textContent='Čakam na podatke postaje…';return;}
-  // Kuhinja
-  const k=_zabKuhinja(obs);
-  document.getElementById('zab-emoji').textContent=k.e;
-  document.getElementById('zab-recipe').textContent=k.r;
-  document.getElementById('zab-drink').textContent='🥤 '+k.d;
-  document.getElementById('zab-desc').textContent=k.t;
-  // Lenoba
-  const l=_zabLenoba(obs);
-  const scoreEl=document.getElementById('zab-score');
-  scoreEl.textContent=l.s;scoreEl.style.color=l.col;
-  document.getElementById('zab-level').textContent=l.lv+' · '+l.s+' / 100';
-  document.getElementById('zab-phrase').textContent=l.ph;
-  document.getElementById('zab-stamp').textContent=l.st;
-  const bar=document.getElementById('zab-bar');
-  bar.style.background=l.col;
-  setTimeout(()=>{bar.style.width=l.s+'%';},80);
-  const facWrap=document.getElementById('zab-factors');
-  facWrap.innerHTML=l.facs.map(f=>`<span class="zab-factor">${f}</span>`).join('');
-  // Horoskop
-  const hr=_zabHoroskop(obs);
-  document.getElementById('zab-horo-title').textContent=hr.title;
-  document.getElementById('zab-horo-preds').innerHTML=hr.preds.map(p=>`<div class="zab-horo-pred"><span class="zab-horo-pred-icon">${p.i}</span><span>${p.t}</span></div>`).join('');
-  document.getElementById('zab-horo-lucky').innerHTML=`
-    <div class="zab-horo-lucky-item"><div class="zab-horo-lucky-val">${hr.luckyNum}</div><div class="zab-horo-lucky-lbl">Srečno število (hPa)</div></div>
-    <div class="zab-horo-lucky-item"><div class="zab-horo-lucky-val" style="font-size:.8rem">${hr.luckyCol}</div><div class="zab-horo-lucky-lbl">Srečna barva danes</div></div>
-    <div class="zab-horo-lucky-item"><div class="zab-horo-lucky-val" style="font-size:.72rem">${hr.compatSign}</div><div class="zab-horo-lucky-lbl">Kompatibilen znak</div></div>`;
 }
 
 // ══════════════════════════════════════════════════════════
