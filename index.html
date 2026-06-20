@@ -106,13 +106,10 @@
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://weatherireica1.filip-eremita.workers.dev" crossorigin>
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -2161,8 +2158,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sc-eq span:nth-child(1){height:4px;animation-delay:0s}.sc-eq span:nth-child(2){height:10px;animation-delay:.15s}.sc-eq span:nth-child(3){height:12px;animation-delay:.05s}.sc-eq span:nth-child(4){height:7px;animation-delay:.25s}.sc-eq span:nth-child(5){height:4px;animation-delay:.1s}
 @keyframes sc-bar-anim{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 .sc-desc{font-size:.63rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3;opacity:.85;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Cookie consent banner ── */
+#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--card-bg);border-top:1px solid var(--border);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -4px 24px rgba(0,0,0,.18);padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.78rem;line-height:1.5}
+#cookie-banner p{margin:0;color:var(--text);flex:1;min-width:200px}
+#cookie-banner p a{color:var(--blue);text-decoration:none}
+#cookie-banner p a:hover{text-decoration:underline}
+.cookie-actions{display:flex;gap:.5rem;flex-shrink:0}
+.cookie-btn{border:none;border-radius:8px;padding:.45rem .9rem;font-size:.78rem;cursor:pointer;font-weight:600;transition:opacity .15s}
+.cookie-btn-accept{background:var(--blue);color:#fff}
+.cookie-btn-decline{background:var(--fc-bg);color:var(--text);border:1px solid var(--border)}
+.cookie-btn:hover{opacity:.85}
+/* Windy consent placeholders */
+.windy-consent-placeholder{display:none;background:var(--fc-bg);border:1px solid var(--border);border-radius:12px;align-items:center;justify-content:center;min-height:200px;text-align:center;padding:2rem 1.5rem}
+.windy-consent-placeholder.visible{display:flex}
+.windy-consent-inner p{font-size:.82rem;color:var(--muted);margin-bottom:.85rem;line-height:1.5}
+.windy-consent-btn{border:none;border-radius:8px;padding:.5rem 1.1rem;background:var(--blue);color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .15s}
+.windy-consent-btn:hover{opacity:.85}
 </style>
-<script src="https://unpkg.com/tone@14/build/Tone.js" defer></script>
 </head>
 <body>
 
@@ -2779,8 +2792,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       <span class="chart-range">Windy · ECMWF</span>
     </div>
     <iframe class="windy-frame" id="windy-frame"
-      src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      data-src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
       allowfullscreen loading="lazy"></iframe>
+    <div class="windy-consent-placeholder" id="windy-placeholder-frame">
+      <div class="windy-consent-inner">
+        <p>Interaktivni vremenski radar (<strong>Windy.com</strong>) za delovanje potrebuje piškotke tretjih oseb.</p>
+        <button class="windy-consent-btn" onclick="loadSingleWindy('windy-frame','windy-placeholder-frame')">Prikaži radar</button>
+      </div>
+    </div>
   </div>
 
 
@@ -4105,9 +4124,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🗺 500 hPa — ECMWF model (Windy)</div>
       <div class="nerd-embed-wrap">
-        <iframe height="340"
-          src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=340&zoom=5&level=500h&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+        <iframe height="340" id="windy-frame-500"
+          data-src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=340&zoom=5&level=500h&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
           loading="lazy" allowfullscreen></iframe>
+        <div class="windy-consent-placeholder" id="windy-placeholder-500">
+          <div class="windy-consent-inner">
+            <p>Interaktivni 500 hPa zemljevid (<strong>Windy.com</strong>) za delovanje potrebuje piškotke tretjih oseb.</p>
+            <button class="windy-consent-btn" onclick="loadSingleWindy('windy-frame-500','windy-placeholder-500')">Prikaži zemljevid</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4775,7 +4800,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
         </div>
         <div class="ft-copy">
           Samodejno se posodablja vsakih 5 minut<br>
-          © <span id="ft-year"></span> IREICA1
+          © <span id="ft-year"></span> IREICA1 &nbsp;·&nbsp; <a href="/zasebnost.html" style="color:var(--muted);text-decoration:none;font-size:.72rem">Zasebnost</a>
         </div>
       </div>
     </div>
@@ -4808,6 +4833,51 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     </div>
   </div>
 </div>
+
+<!-- ── Cookie consent banner ── -->
+<div id="cookie-banner" style="display:none" role="dialog" aria-label="Obvestilo o piškotkih">
+  <p>Ta stran za nekatere funkcije (interaktivni vremenski zemljevidi Windy.com) uporablja piškotke tretjih oseb. Ostale funkcije (meritve, napoved, grafi) delujejo brez piškotkov. <a href="/zasebnost.html">Politika zasebnosti</a></p>
+  <div class="cookie-actions">
+    <button class="cookie-btn cookie-btn-decline" onclick="cookieConsent('declined')">Zavrni</button>
+    <button class="cookie-btn cookie-btn-accept" onclick="cookieConsent('accepted')">Sprejmi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var CKEY = 'wx-cookie-consent';
+  function applyConsent(choice, showBanner){
+    document.getElementById('cookie-banner').style.display = 'none';
+    var iframes = document.querySelectorAll('iframe[data-src]');
+    var placeholders = document.querySelectorAll('.windy-consent-placeholder');
+    if(choice === 'accepted'){
+      iframes.forEach(function(f){
+        if(!f.src || f.src === window.location.href) f.src = f.dataset.src;
+      });
+      placeholders.forEach(function(p){ p.classList.remove('visible'); });
+    } else {
+      placeholders.forEach(function(p){ p.classList.add('visible'); });
+    }
+  }
+  window.cookieConsent = function(choice){
+    try{ localStorage.setItem(CKEY, choice); }catch(e){}
+    applyConsent(choice, false);
+  };
+  window.loadSingleWindy = function(frameId, placeholderId){
+    var frame = document.getElementById(frameId);
+    var ph = document.getElementById(placeholderId);
+    if(frame && frame.dataset.src) frame.src = frame.dataset.src;
+    if(ph) ph.classList.remove('visible');
+  };
+  var stored;
+  try{ stored = localStorage.getItem(CKEY); }catch(e){}
+  if(stored){ applyConsent(stored, false); }
+  else{
+    document.getElementById('cookie-banner').style.display = 'flex';
+    document.querySelectorAll('.windy-consent-placeholder').forEach(function(p){ p.classList.add('visible'); });
+  }
+})();
+</script>
 
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

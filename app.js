@@ -7635,9 +7635,16 @@ async function toggleSoundscape(){
     lbl.textContent='Poslušaj vreme';
     if(desc)desc.textContent='';
   }else{
-    if(!window.Tone){if(desc)desc.textContent='Tone.js se nalaga…';return;}
     btn.classList.add('sc-on');
     lbl.textContent='Inicializiram…';
+    if(!window.Tone){
+      if(desc)desc.textContent='Tone.js se nalaga…';
+      try{ await _loadScript('https://unpkg.com/tone@14/build/Tone.js'); }catch(e){
+        btn.classList.remove('sc-on');lbl.textContent='Poslušaj vreme';
+        if(desc)desc.textContent='Napaka pri nalaganju Tone.js';
+        return;
+      }
+    }
     if(desc)desc.textContent='';
     try{
       await _soundscapeInit();
