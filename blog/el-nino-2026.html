@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Niño 2026: Pacifik se segreva – ali prihaja rekordni super El Niño? | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/el-nino-2026.html">
+<meta name="description" content="El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.">
+<meta name="keywords" content="El Niño 2026, super El Niño, ENSO, klimatske napovedi Slovenija, El Niño vpliv Evropa, NOAA, IRI CPC, klimatske spremembe">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/el-nino-2026.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="El Niño 2026: Pacifik se segreva – ali prihaja rekordni super El Niño?">
+<meta property="og:description" content="97–98 % verjetnost za super El Niño v zimi 2026/27. Pregled napovedi in posledic za Slovenijo.">
+<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-06-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="El Niño 2026: Pacifik se segreva – ali prihaja rekordni super El Niño?">
+<meta name="twitter:description" content="97–98 % verjetnost za super El Niño v zimi 2026/27. Pregled napovedi in posledic za Slovenijo.">
+<meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "El Niño 2026: Pacifik se segreva – ali prihaja rekordni super El Niño?",
+  "description": "El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev.",
+  "image": "https://meteorec.si/og-image.jpg",
+  "datePublished": "2026-06-20",
+  "dateModified": "2026-06-20",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/el-nino-2026.html" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "El Niño 2026" }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap">
+<link rel="stylesheet" href="blog.css">
+<style>
+/* stat card color overrides */
+.stat-card.c-nino  .sc-val { color: #f97316; }
+.stat-card.c-super .sc-val { color: #ef4444; }
+
+/* NOAA advisory banner */
+.advisory-banner {
+  background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(220,38,38,.1));
+  border: 1px solid rgba(239,68,68,.45);
+  border-radius: 16px;
+  padding: 1rem 1.3rem;
+  margin: 1.6rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+}
+.advisory-banner .ab-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; margin-top: .1rem; }
+.advisory-banner p { margin: 0; color: #fecaca; font-size: .96rem; line-height: 1.6; }
+.advisory-banner strong { color: #fff; }
+
+/* timeline */
+.tl-wrap { margin: 1.8rem 0; position: relative; }
+.tl-item {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 0 18px;
+  margin-bottom: 0;
+  position: relative;
+}
+.tl-item::after {
+  content: '';
+  position: absolute;
+  left: 87px;
+  top: 28px;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255,255,255,.08);
+}
+.tl-item:last-child::after { display: none; }
+.tl-date {
+  font-size: .72rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  text-align: right;
+  padding: 17px 0 0;
+  letter-spacing: .03em;
+  line-height: 1.3;
+}
+.tl-body {
+  padding: 12px 0 22px 20px;
+  border-left: 2px solid rgba(255,255,255,.1);
+  position: relative;
+}
+.tl-body::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 19px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 0 1px rgba(34,211,238,.3);
+}
+.tl-item.active .tl-body::before {
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239,68,68,.25);
+}
+.tl-item.future .tl-body::before {
+  background: var(--card-bg);
+  border-color: rgba(255,255,255,.2);
+  box-shadow: none;
+}
+.tl-item.future .tl-body { border-left-style: dashed; }
+.tl-title { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+.tl-desc { font-size: .87rem; color: var(--muted); line-height: 1.55; }
+.tl-item.active .tl-title { color: #fca5a5; }
+
+/* gauge / SST comparison bars */
+.gauge-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  margin: 1.2rem 0 1.8rem;
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+}
+.gauge-title {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .9rem;
+}
+.gauge-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .7rem; }
+.gauge-row:last-of-type { margin-bottom: .1rem; }
+.gr-label { min-width: 4.5rem; font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); font-weight: 700; }
+.gr-bar-wrap { flex: 1; height: 9px; background: rgba(255,255,255,.07); border-radius: 8px; overflow: hidden; }
+.gr-bar { height: 9px; border-radius: 8px; }
+.gr-val { min-width: 4.5rem; font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: #fff; text-align: right; font-weight: 600; }
+.gauge-note { font-size: .71rem; color: var(--muted); margin-top: .7rem; padding-top: .55rem; border-top: 1px solid rgba(255,255,255,.07); line-height: 1.5; }
+@keyframes nino-pulse { from { opacity: .75; } to { opacity: 1; } }
+.gr-bar.forecast { animation: nino-pulse 1.4s ease-in-out infinite alternate; }
+
+/* model pills */
+.model-pills { display: flex; flex-wrap: wrap; gap: .35rem; margin: .7rem 0 .3rem; }
+.mpill {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 3px 11px;
+  font-size: .72rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+.mpill.super { background: rgba(239,68,68,.2); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; }
+.mpill.strong { background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.35); color: #fdba74; }
+.mpill.mod { background: rgba(34,211,238,.1); border: 1px solid rgba(34,211,238,.25); color: var(--cyan); }
+
+/* impact grid */
+.impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 1rem 0 1.6rem; }
+@media (max-width: 520px) { .impact-grid { grid-template-columns: 1fr; } }
+.impact-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 13px;
+  padding: 1rem 1.1rem;
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+}
+.impact-season {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .7rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.impact-item {
+  font-size: .87rem;
+  color: #cfdbef;
+  padding: .35rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  display: flex;
+  gap: .55rem;
+  line-height: 1.45;
+}
+.impact-item:last-child { border-bottom: none; }
+.ii-icon { flex-shrink: 0; margin-top: .05rem; }
+.tag-warm { color: #f97316; font-weight: 600; }
+.tag-wet  { color: var(--blue); font-weight: 600; }
+
+/* sources box */
+.sources-box {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-top: 2rem;
+}
+.sources-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .65rem;
+}
+.sources-box ul { padding-left: 1.1rem; }
+.sources-box li { font-size: .84rem; color: var(--muted); margin-bottom: .35rem; line-height: 1.5; }
+
+/* blockquote */
+article blockquote {
+  border-left: 3px solid var(--cyan);
+  margin: 1.8rem 0;
+  padding: .7rem 1.3rem;
+  color: #cfdbef;
+  font-size: .98rem;
+  line-height: 1.65;
+  font-style: italic;
+}
+article blockquote cite {
+  display: block;
+  margin-top: .7rem;
+  font-style: normal;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › El Niño 2026
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · Klimatska analiza</div>
+    <h1>Pacifik se segreva — ali prihaja rekordni super El Niño?</h1>
+    <p class="post-meta">20. junija 2026 · Filip Eremita · ~7 min branja</p>
+
+    <p class="lead">Od šibke La Niñe do potencialnega zgodovinskega El Niña v manj kot enem letu. NOAA je junija 2026 uradno potrdil začetek El Niña, modeli pa kažejo na scenarij, ki bi bil morda brez primere v sodobnih meritvah. Pregled aktualnih napovedi, mehanizmov in posledic za Slovenijo.</p>
+
+    <!-- ── Ključne ugotovitve ── -->
+    <div class="callout">
+      <strong>Ključne ugotovitve:</strong>
+      <ul style="margin: .6rem 0 0 1.1rem; line-height: 1.7; font-size: .96rem;">
+        <li>El Niño je <strong>uradno aktiven</strong> — NOAA je junija 2026 izdal El Niño opozorilo (Advisory).</li>
+        <li>Verjetnost El Niña skozi vso zimo 2026/27 znaša <strong>97–98 %</strong> (IRI/CPC, maj 2026).</li>
+        <li>NOAA ocenjuje ~90 % možnost <strong>močnega</strong> in ~63 % možnost <strong>super El Niña</strong> do jeseni.</li>
+        <li>11 od 13 klimatskih modelov napoveduje super El Niño, nekateri celo vrednosti <strong>nad zgodovinskim maksimumom</strong> iz let 1982–83 in 1997–98.</li>
+        <li>Za Slovenijo: nadpovprečno toplo poletje in <strong>topla, mokra zima</strong> v osrednji ter južni Evropi.</li>
+      </ul>
+    </div>
+
+    <!-- ── 4 stat kartice ── -->
+    <div class="stat-grid">
+      <div class="stat-card c-nino">
+        <div class="sc-label">Verjetnost El Niña zima 26/27</div>
+        <div class="sc-val">97–98%</div>
+        <div class="sc-sub">IRI/CPC, maj 2026</div>
+      </div>
+      <div class="stat-card c-nino">
+        <div class="sc-label">Verjetnost močnega El Niña</div>
+        <div class="sc-val">~90%</div>
+        <div class="sc-sub">SST anomalija ≥ +1,5 °C · NOAA</div>
+      </div>
+      <div class="stat-card c-super">
+        <div class="sc-label">Verjetnost super El Niña</div>
+        <div class="sc-val">~63%</div>
+        <div class="sc-sub">SST anomalija ≥ +2,0 °C · NOAA</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Modeli za super El Niño</div>
+        <div class="sc-val">11/13</div>
+        <div class="sc-sub">večina meji na zgodovinski rekord · ECMWF</div>
+      </div>
+    </div>
+
+    <!-- ── Kaj je El Niño ── -->
+    <h2>Kaj je El Niño in zakaj ga spremljamo?</h2>
+
+    <p>El Niño je klimatski pojav v Tihem oceanu, ki nastane, ko se pasatni vetrovi oslabijo in topla površinska voda se pomakne iz zahodnega proti vzhodnem delu Tihega oceana. Posledica je abnormalno visoka temperatura morske površine (SST) v ekvatorialnem Pacifiku — zlasti v regiji <strong>Niño 3.4</strong>.</p>
+
+    <p>Skupaj s hladnim nasprotjem La Niño tvori cikel <strong>ENSO</strong> (<em>El Niño–Southern Oscillation</em>), ki se izmenjuje vsakih 2–7 let in je eden najpomembnejših dejavnikov medletne klimatske variabilnosti na planetu.</p>
+
+    <p>Ko SST anomalija v regiji Niño 3.4 preseže <strong>+2,0 °C</strong> nad dolgoletnim povprečjem, govorimo o <span class="hl">super El Niñu</span> — redkem dogodku, ki bistveno preuredi globalno cirkulacijo. Dosedanji primeri: 1982–83, 1997–98 in 2015–16.</p>
+
+    <!-- ── Stanje ── -->
+    <h2>Trenutno stanje: El Niño je tukaj</h2>
+
+    <p>Po dolgem obdobju nevtralnih razmer in šibki La Niñi, ki je zaznamovala konec leta 2025 in začetek 2026, se je Tihi ocean v rekordno kratkem času preobrazil.</p>
+
+    <div class="advisory-banner">
+      <div class="ab-icon">🔴</div>
+      <p><strong>NOAA El Niño Advisory — junij 2026:</strong> anomalija SST v regiji Niño 3.4 presega +2 °C v vzhodnem delu. Atmosferski odziv se krepi. <strong>El Niño je uradno aktiven.</strong></p>
+    </div>
+
+    <div class="tl-wrap">
+      <div class="tl-item">
+        <div class="tl-date">feb. 2026</div>
+        <div class="tl-body">
+          <div class="tl-title">La Niña se umika</div>
+          <div class="tl-desc">WMO poroča o slabljenju La Niñe. Verjetnost nevtralnih razmer za pomlad 60 %, El Niña le 10 %.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">apr. 2026</div>
+        <div class="tl-body">
+          <div class="tl-title">Nevtralna faza — a alarm iz globin</div>
+          <div class="tl-desc">WMO in NOAA potrjujeta ENSO nevtralnost, toda podpovršinska temperatura Tihega oceana hitro narašča. Kelvinov val se pomika proti vzhodnem Pacifiku.</div>
+        </div>
+      </div>
+      <div class="tl-item active">
+        <div class="tl-date">jun. 2026</div>
+        <div class="tl-body">
+          <div class="tl-title">🔴 El Niño uradno aktiven</div>
+          <div class="tl-desc">NOAA izda El Niño Advisory. Anomalija SST v regiji Niño 3.4 že presega +2 °C v vzhodnem delu. Atmosferski odziv se krepi.</div>
+        </div>
+      </div>
+      <div class="tl-item future">
+        <div class="tl-date">jesen 2026</div>
+        <div class="tl-body">
+          <div class="tl-title">Pričakovani vrh intenzivnosti</div>
+          <div class="tl-desc">Modeli napovedujejo vrh med septembrom in decembrom 2026. Možen super El Niño (+3 °C ali več).</div>
+        </div>
+      </div>
+      <div class="tl-item future">
+        <div class="tl-date">zima 26/27</div>
+        <div class="tl-body">
+          <div class="tl-title">Globalni klimatski vplivi</div>
+          <div class="tl-desc">Zgodnji obrati v temperaturnih in padavinskih vzorcih po vsem svetu. Za Slovenijo: topla, morebitno nestabilna zima.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modeli in verjetnosti ── -->
+    <h2>Kaj pravijo modeli? Verjetnosti in napovedi</h2>
+
+    <p>Napovedi klimatskih modelov so za letošnji El Niño nenavadno enotne — in nenavadno ambiciozne.</p>
+
+    <p>Posebej izstopa podatek IRI/CPC iz maja 2026: verjetnost nasprotne faze ENSO (La Niñe) je bila takrat praktično nič — zgolj <strong>2–3 %</strong>. To je izjemno redek primer klimatske gotovosti pri dolgih napovedih. Prav tako je treba omeniti, da so bile <strong>SST anomalije marca in aprila 2026 več kot dvakratnik vrednosti iz analognega obdobja leta 2023</strong> — tisto leto, ko je El Niño dosegel +1,5 °C in bil smatran za presenečenje.</p>
+
+    <!-- SST primerjalni grafikon -->
+    <div class="chart-card">
+      <h3>SST anomalija Niño 3.4 — primerjava super El Niñev z napovedjo 2026/27</h3>
+      <canvas id="sstChart"></canvas>
+    </div>
+
+    <p>Modeli po intenzivnosti napovedi:</p>
+    <div class="model-pills">
+      <span class="mpill super">ECMWF — super</span>
+      <span class="mpill super">CFS — super</span>
+      <span class="mpill super">CanSIPS — super</span>
+      <span class="mpill super">UKMET — super</span>
+      <span class="mpill strong">JMA — močan</span>
+      <span class="mpill strong">Météo France — močan</span>
+      <span class="mpill strong">BOM — močan</span>
+      <span class="mpill mod">Ostali — zmeren do močan</span>
+    </div>
+    <p style="font-size:.83rem;color:var(--muted);margin-top:.3rem;">Super El Niño = napoved SST anomalije ≥ +2,0 °C v regiji Niño 3.4.</p>
+
+    <blockquote>
+      "Po obdobju nevtralnih razmer na začetku leta so klimatski modeli zdaj zelo enotni in obstaja visoka stopnja zaupanja v razvoj El Niña, ki mu bo sledila nadaljnja okrepitev v prihodnjih mesecih."
+      <cite>— Wilfran Moufouma Okia, vodja klimatskih napovedi WMO, april 2026</cite>
+    </blockquote>
+
+    <div class="callout">
+      <strong>⚠️ Opozorilo glede negotovosti:</strong> junij leži blizu t. i. <em>pomladnega predikcijskega praga</em> (boreal spring predictability barrier) — tradicionalno najmanj zanesljivega dela leta za ENSO napovedi. Kljub visoki konsistentnosti modelov je treba k dolgim napovedim pristopati previdno. Vrh El Niña bo znan šele pozimi.
+    </div>
+
+    <!-- ── Mehanizem ── -->
+    <h2>Motor pojava: Kelvinov val in zahodni vetrovi</h2>
+
+    <p>Letošnji El Niño poganja <strong>masiven podpovršinski Kelvinov val</strong> — obsežno področje toplejše vode, ki se je v prvih mesecih leta 2026 pomikalo od zahodnega proti vzhodnem Pacifiku in tam doseglo površje.</p>
+
+    <p>Oslabitev pasatnih vetrov je dala začetni sunek. Do junija so SST anomalije v vzhodnem delu ENSO regije dosegle <strong>+2 °C</strong>, atmosferski odziv (tlak, padavine, vetrovi) pa je postal jasno viden. Hitrost tega razvoja je izjemna: že marca in aprila 2026 so bili signali izrazitejši kot v analognem obdobju leta 2023 — in takratni El Niño je na koncu dosegel +1,5 °C.</p>
+
+    <!-- ── Vplivi na Slovenijo ── -->
+    <h2>Kaj to pomeni za Evropo in Slovenijo?</h2>
+
+    <p>El Niño na Evropo vpliva posredno — prek sprememb v severnoatlantskem curku in globalnih tlačnih vzorcih. Čeprav je srčika pojava v Tihem oceanu, so posledice za nas zaznavne.</p>
+
+    <h2>Poletje 2026</h2>
+
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-season">🌡️ Temperature</div>
+        <div class="impact-item"><span class="ii-icon">▲</span><span><span class="tag-warm">Nad normalo</span> za osrednjo in severno Evropo, vključno s Slovenijo</span></div>
+        <div class="impact-item"><span class="ii-icon">↔</span><span>Zahodni del Evrope bliže normali — hlajenje z Atlantika</span></div>
+        <div class="impact-item"><span class="ii-icon">▲</span><span>Pospešen začetek vročinskih valov — vzorec poznan iz preteklih super El Niñev</span></div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-season">🌧️ Padavine</div>
+        <div class="impact-item"><span class="ii-icon">▲</span><span><span class="tag-wet">Več padavin</span> za osrednjo in južno Evropo — južni tok prinaša vlago</span></div>
+        <div class="impact-item"><span class="ii-icon">▼</span><span>Manj padavin na severu Evrope</span></div>
+        <div class="impact-item"><span class="ii-icon">⚡</span><span>Potencial za intenzivne nevihte tam, kjer se vroč in vlažen zrak sreča s frontalnimi sistemi</span></div>
+      </div>
+    </div>
+
+    <h2>Zima 2026/27</h2>
+
+    <p>Kombinacija <strong>zahodne faze QBO</strong> (kvazidvoletne oscilacije) in El Niña je za Evropo zgodovinsko pomenila milejšo zimo z okrepljenim zahodnim atlantskim tokom. Zahodni QBO omejuje prodor arktičnega zraka na jug in ojačuje nizek tlak nad severnim morjem.</p>
+
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-season">❄️ Zima 2026/27 — Slovenija</div>
+        <div class="impact-item"><span class="ii-icon">▲</span><span><span class="tag-warm">Nadpovprečne temperature</span> — milejša zima glede na zgodovinska povprečja</span></div>
+        <div class="impact-item"><span class="ii-icon">▲</span><span>Več snega <em>severno od Alp</em>, manj na alpskem južnem pobočju</span></div>
+        <div class="impact-item"><span class="ii-icon">↔</span><span>Manj hladnih vdorov s severa, redkejše krepke hladne epizode</span></div>
+        <div class="impact-item"><span class="ii-icon">🌊</span><span>Okrepljeni zahodni vetrovi, večja nestabilnost in padavinski ekstremi</span></div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-season">📊 Zgodovinski vzorci</div>
+        <div class="impact-item"><span class="ii-icon">→</span><span>El Niño zime 1982/83, 1997/98 in 2015/16 so bile vse <strong>nad normalo</strong> za Slovenijo</span></div>
+        <div class="impact-item"><span class="ii-icon">→</span><span>Razlika med zahodno in vzhodno fazo QBO je večja od samega El Niña</span></div>
+        <div class="impact-item"><span class="ii-icon">⚠️</span><span>Statistična povprečja ne zagotavljajo dejanske zime — vsako leto prinese presenečenja</span></div>
+      </div>
+    </div>
+
+    <!-- Primerjava SST anomalij s histogramom verjetnosti -->
+    <div class="chart-card">
+      <h3>Verjetnostni scenariji — ENSO zimska napoved 2026/27 (IRI/CPC)</h3>
+      <canvas id="probChart"></canvas>
+    </div>
+
+    <!-- ── Globalni kontekst ── -->
+    <h2>Globalna slika: zakaj je 2026 drugačen?</h2>
+
+    <p>Letošnji El Niño se razvija v edinstveni klimatski kulisi s <strong>tremi ključnimi dejavniki</strong>:</p>
+
+    <p><strong>1. Izhodišče La Niñe.</strong> El Niño je nastopil neposredno po La Niñi — kar je tipičen vzorec. Toda hitrost prehoda je bila izjemna: od negativnih anomalij do pozitivnih v zgolj 3–4 mesecih.</p>
+
+    <p><strong>2. Ozadje globalnega segrevanja.</strong> Splošno segrevanje oceanov in ozračja dviga osnovno temperaturo, na katero se dodajo anomalije El Niña. Modeli, ki uporabljajo »relativni indeks« (RONI), kažejo celo višje vrednosti od tistih, ki delajo le s surovimi anomalijami.</p>
+
+    <p><strong>3. Hiter dvig gladine vzhodnega Tihega oceana.</strong> NASA je v sredini junija 2026 poročala o hitrem dvigu morske gladine v vzhodnem Tihem oceanu — znak termalne ekspanzije, ki sovpada z izjemno hitrim zorenjem tega El Niña.</p>
+
+    <div class="callout">
+      <strong>🌍 Globalni učinki, ki jih pričakujemo:</strong> sušni pogoji v Avstraliji, Indoneziji in delih vzhodne Afrike; povečane padavine ob zahodni obali Južne Amerike; manj tropskih ciklonov v Atlantiku (a intenzivnejši v Tihem oceanu); spremembe v monsunu; posledice za kmetijstvo in preskrbo z vodo po vsem svetu.
+    </div>
+
+    <!-- ── Zaključek ── -->
+    <h2>Zaključek: treba je biti pozoren</h2>
+
+    <p>Letošnji El Niño je morda ena najpomembnejših klimatskih zgodb desetletja. Signali so jasni, modeli enotni, NOAA pa je uradno potrdil začetek pojava — njegovo nadaljnje krepitev pričakujemo skozi jesen in zimo.</p>
+
+    <p>Toda ena lekcija iz preteklosti ostaja veljavna: <strong>klimatski sistem je kaotičen</strong>. Kljub izjemno visokim verjetnostim (97–98 %) bo letnik 2026 v svoji konkretni manifestaciji še vedno vseboval presenečenja. Modeli napovedujejo scenarij — ne usodo.</p>
+
+    <p>Na postaji <strong>IREICA1</strong> (Rečica ob Savinji, 366 m) bomo skozi poletje in jesen 2026 primerjali izmerjene anomalije temperature, padavin in tlaka s klimatološkimi pričakovanji za El Niño leto. Podatki so dostopni v živo na Meteorec nadzorni plošči.</p>
+
+    <div class="sources-box">
+      <div class="sources-label">Viri</div>
+      <ul>
+        <li>IRI/LDEO Climate Prediction Center — ENSO Plume Forecast, maj 2026</li>
+        <li>NOAA Climate Prediction Center — ENSO Advisory in Diagnostic Discussion, junij 2026</li>
+        <li>WMO — El Niño/La Niña Update, februar in april 2026</li>
+        <li>ECMWF Science Blog — "How confident should we be in a prediction of El Niño?", april 2026</li>
+        <li>Severe Weather Europe — Summer 2026 super El Niño forecast series, maj–junij 2026</li>
+        <li>Weather West — "Rising odds of a strong-to-historic El Niño event in 2026", junij 2026</li>
+      </ul>
+    </div>
+
+    <a class="back-link" href="/blog/">← Vse objave</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a></span>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.color = '#adc0d8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+/* ── Graf 1: SST anomalije preteklih super El Niñev + napoved 2026 ── */
+(function(){
+  const ctx = document.getElementById('sstChart').getContext('2d');
+  const labels = ['1982/83', '1997/98', '2015/16', '2026/27 (napoved)'];
+  const vals   = [2.4, 2.6, 2.3, 3.0];
+  const colors = [
+    'rgba(249,115,22,0.75)',
+    'rgba(249,115,22,0.75)',
+    'rgba(249,115,22,0.75)',
+    'rgba(239,68,68,0.85)',
+  ];
+  const borders = [
+    'rgb(249,115,22)',
+    'rgb(249,115,22)',
+    'rgb(249,115,22)',
+    'rgb(239,68,68)',
+  ];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'SST anomalija Niño 3.4 (°C)',
+        data: vals,
+        backgroundColor: colors,
+        borderColor: borders,
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` +${ctx.parsed.x.toFixed(1)} °C`
+          }
+        },
+        annotation: undefined
+      },
+      scales: {
+        x: {
+          min: 0,
+          max: 3.5,
+          title: { display: true, text: 'Anomalija SST Niño 3.4 (°C)', font: { size: 11 } },
+          ticks: {
+            callback: v => '+' + v.toFixed(1) + ' °C'
+          },
+          grid: { color: 'rgba(255,255,255,0.06)' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            font: { family: "'JetBrains Mono', monospace", size: 12, weight: '600' },
+            color: ctx => ctx.index === 3 ? '#fca5a5' : '#adc0d8'
+          }
+        }
+      }
+    },
+    plugins: [{
+      id: 'refLine',
+      afterDraw(chart) {
+        const { ctx: c, scales: { x, y } } = chart;
+        const xPos = x.getPixelForValue(2.0);
+        c.save();
+        c.beginPath();
+        c.moveTo(xPos, y.top);
+        c.lineTo(xPos, y.bottom);
+        c.strokeStyle = 'rgba(34,211,238,0.4)';
+        c.setLineDash([4, 4]);
+        c.lineWidth = 1.5;
+        c.stroke();
+        c.fillStyle = 'rgba(34,211,238,0.7)';
+        c.font = '10px JetBrains Mono, monospace';
+        c.fillText('Meja super El Niña (+2,0 °C)', xPos + 5, y.top + 12);
+        c.restore();
+      }
+    }]
+  });
+})();
+
+/* ── Graf 2: Verjetnostni scenariji zima 2026/27 ── */
+(function(){
+  const ctx = document.getElementById('probChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['La Niña', 'Nevtralno', 'Šibek El Niño\n(+0,5–1,0 °C)', 'Zmeren\n(+1,0–1,5 °C)', 'Močan\n(+1,5–2,0 °C)', 'Super El Niño\n(≥ +2,0 °C)'],
+      datasets: [{
+        label: 'Verjetnost (%)',
+        data: [2, 1, 4, 8, 22, 63],
+        backgroundColor: [
+          'rgba(34,211,238,0.55)',
+          'rgba(167,139,250,0.5)',
+          'rgba(52,211,153,0.55)',
+          'rgba(245,158,11,0.55)',
+          'rgba(249,115,22,0.7)',
+          'rgba(239,68,68,0.82)',
+        ],
+        borderColor: [
+          'rgba(34,211,238,0.9)',
+          'rgba(167,139,250,0.9)',
+          'rgba(52,211,153,0.9)',
+          'rgba(245,158,11,0.9)',
+          'rgba(249,115,22,0.9)',
+          'rgba(239,68,68,0.9)',
+        ],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.y} %`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, maxRotation: 0, autoSkip: false }
+        },
+        y: {
+          min: 0,
+          max: 75,
+          title: { display: true, text: 'Verjetnost (%)', font: { size: 11 } },
+          ticks: { callback: v => v + ' %' },
+          grid: { color: 'rgba(255,255,255,0.06)' }
+        }
+      }
+    }
+  });
+})();
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
