@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kdaj dežuje v Savinjski dolini — padavinski vzorci in zakaj prav takrat | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/padavinski-vzorci-savinjske-doline.html">
+<meta name="description" content="Šest let meritev postaje IREICA1 razkrije padavinski portret Zgornje Savinjske doline: 1.377 mm na leto, dva povsem različna tipa dežja in gradient tisoč milimetrov na šestdeset kilometrov.">
+<meta name="keywords" content="padavine Savinjska dolina, vreme Rečica ob Savinji, padavinski vzorci Slovenija, dež Zgornja Savinjska dolina, klimatologija Mozirje, IREICA1">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/padavinski-vzorci-savinjske-doline.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Kdaj dežuje v Savinjski dolini — padavinski vzorci in zakaj prav takrat">
+<meta property="og:description" content="Šest let meritev postaje IREICA1: 1.377 mm letno, dva tipa dežja in gradient 1.000 mm na 60 km od Logarske do Celja.">
+<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-06-20">
+<meta property="article:author" content="Filip Eremita">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kdaj dežuje v Savinjski dolini — padavinski vzorci in zakaj prav takrat">
+<meta name="twitter:description" content="Šest let meritev IREICA1: 1.377 mm letno, 179 deževnih dni, dva tipa dežja in tisoč milimetrov razlike na 60 km.">
+<meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kdaj dežuje v Savinjski dolini — padavinski vzorci in zakaj prav takrat",
+  "description": "Šest let meritev postaje IREICA1 razkrije padavinski portret Zgornje Savinjske doline: 1.377 mm na leto, dva povsem različna tipa dežja in gradient tisoč milimetrov na šestdeset kilometrov.",
+  "image": "https://meteorec.si/og-image.jpg",
+  "datePublished": "2026-06-20",
+  "dateModified": "2026-06-20",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/padavinski-vzorci-savinjske-doline.html" },
+  "about": { "@type": "Place", "name": "Zgornja Savinjska dolina", "geo": { "@type": "GeoCoordinates", "latitude": 46.326, "longitude": 14.921 } },
+  "keywords": "padavine, Savinjska dolina, klimatologija, Rečica ob Savinji, IREICA1"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Padavinski vzorci Savinjske doline" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="blog.css">
+<style>
+.stat-card.c-rain .sc-val  { color: #60a5fa; }
+.stat-card.c-rain2 .sc-val { color: #38bdf8; }
+.stat-card.c-dry .sc-val   { color: #f59e0b; }
+.stat-card.c-green .sc-val { color: #34d399; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: .75;
+  margin: 2.8rem 0 .4rem;
+  display: block;
+}
+
+/* Dvobarven pas za letne padavine */
+.rain-band {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin: .5rem 0;
+}
+.rain-band-label {
+  min-width: 6.5rem;
+  font-size: .78rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.rain-band-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.rain-band-bar {
+  height: 100%;
+  border-radius: 10px;
+}
+.rain-band-val {
+  min-width: 4.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .8rem;
+  color: #fff;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Mrežica sezon */
+.season-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .65rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.season-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: .95rem 1rem;
+  text-align: center;
+}
+.season-icon { font-size: 1.6rem; display: block; margin-bottom: .35rem; }
+.season-name { font-size: .68rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.season-mm   { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.4rem; color: #fff; display: block; line-height: 1.1; margin: .15rem 0; }
+.season-pct  { font-size: .78rem; color: var(--muted); }
+@media (max-width: 500px) { .season-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Primerjalna lestvica (gradientna tabela) */
+.gradient-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.gradient-title {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .9rem;
+}
+.gr-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+.gr-row:last-of-type { margin-bottom: .2rem; }
+.gr-lbl { min-width: 11rem; font-size: .76rem; color: var(--muted); line-height: 1.35; }
+.gr-lbl strong { color: #fff; font-weight: 600; }
+.gr-bw { flex: 1; height: 9px; background: rgba(255,255,255,.06); border-radius: 10px; }
+.gr-b  { height: 9px; border-radius: 10px; }
+.gr-v  { min-width: 4.5rem; font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #fff; text-align: right; font-weight: 600; }
+.gradient-note { font-size: .72rem; color: var(--muted); margin-top: .65rem; padding-top: .5rem; border-top: 1px solid rgba(255,255,255,.06); }
+
+/* Polje z dvema tipoma dežja */
+.rain-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .8rem;
+  margin: 1rem 0 1.8rem;
+}
+.rt-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+}
+.rt-icon { font-size: 1.8rem; display: block; margin-bottom: .4rem; }
+.rt-title { font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: .35rem; }
+.rt-body  { font-size: .84rem; color: var(--muted); line-height: 1.6; }
+.rt-tag   { display: inline-block; margin-top: .55rem; font-family: 'JetBrains Mono', monospace; font-size: .68rem; border-radius: 8px; padding: .2rem .55rem; }
+.rt-tag.conv  { background: rgba(249,115,22,.12); border: 1px solid rgba(249,115,22,.3); color: #f97316; }
+.rt-tag.front { background: rgba(77,159,248,.1);  border: 1px solid rgba(77,159,248,.25); color: var(--blue); }
+@media (max-width: 500px) { .rain-type-grid { grid-template-columns: 1fr; } }
+
+/* Zanimivo dejstvo */
+.fact-box {
+  background: rgba(77,159,248,.07);
+  border: 1px solid rgba(77,159,248,.28);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin: 1.3rem 0 1.8rem;
+  font-size: .95rem;
+  color: #cfdbef;
+  line-height: 1.65;
+}
+.fact-box .fact-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .64rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--blue);
+  display: block;
+  margin-bottom: .4rem;
+}
+
+/* Suša / mokro polje */
+.streak-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .7rem;
+  margin: 1rem 0 1.8rem;
+}
+.streak-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+}
+.streak-card .sk-val   { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 2rem; line-height: 1; color: #fff; }
+.streak-card .sk-unit  { font-size: .75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.streak-card .sk-label { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+.streak-card.dry  .sk-val { color: #f59e0b; }
+.streak-card.wet  .sk-val { color: #60a5fa; }
+@media (max-width: 500px) { .streak-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Padavinski vzorci Savinjske doline
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · Klimatološka analiza</div>
+    <h1>Kdaj dežuje v Savinjski dolini — in zakaj prav takrat</h1>
+    <p class="post-meta">20. junija 2026 · Filip Eremita · ~8 min branja</p>
+
+    <p class="lead">Spomladi 2022 smo pri Rečici ob Savinji čakali na dež <strong>33 dni zapored</strong>. Naslednje leto, julija 2023, je padlo <strong>290 mm</strong> — dvakrat do trikrat povprečje. Med tema dvema skrajnostima leži padavinski portret Zgornje Savinjske doline: kraj, ki ga vsako leto namočijo <span class="hl">1.377 mm padavin</span> in okrog <span class="hl">179 deževnih dni</span>, toda razporeditev te vode skozi leto ima svojo logiko — in jo je vredno razumeti.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card c-rain">
+        <div class="sc-label">Letno povprečje (2020–25)</div>
+        <div class="sc-val">1.377</div>
+        <div class="sc-sub">mm · postaja IREICA1, Rečica ob Savinji</div>
+      </div>
+      <div class="stat-card c-rain2">
+        <div class="sc-label">Deževnih dni na leto</div>
+        <div class="sc-val">179</div>
+        <div class="sc-sub">dni z ≥ 0,2 mm · vsak drugi dan</div>
+      </div>
+      <div class="stat-card c-dry">
+        <div class="sc-label">Najdaljša suša v arhivu</div>
+        <div class="sc-val">33</div>
+        <div class="sc-sub">dni zapored brez dežja · feb.–mar. 2022</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="sc-label">Rekordno leto (2023)</div>
+        <div class="sc-val">1.711</div>
+        <div class="sc-sub">mm · najdežnejše leto v arhivu</div>
+      </div>
+    </div>
+
+    <!-- ════ 01: LETNI RITEM ════ -->
+    <span class="section-label">01 — Letni ritem padavin</span>
+    <h2>Mesec za mesecem: kje so viški in kje suša</h2>
+
+    <p>Podatki šestih let meritev (2020–2025) na postaji <strong>IREICA1</strong> razkrijejo jasen vzorec. Savinjska dolina nima klasičnega mediteranskega poletnega sušnega obdobja — dežuje celo leto — a znotraj tega splošnega vzorca se skrivata <strong>dva izrazita viška</strong>: poletni julij in jesenski september ter oktober.</p>
+
+    <div class="chart-card">
+      <h3>Mesečne padavine — povprečje 2020–2025 (mm)</h3>
+      <canvas id="chartMonthly"></canvas>
+    </div>
+
+    <table class="stats">
+      <thead>
+        <tr>
+          <th>Mesec</th>
+          <th>Povp. padavine (mm)</th>
+          <th>Deževnih dni</th>
+          <th>Delež dni (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Januar</td><td>80</td><td>15,0</td><td>48</td></tr>
+        <tr><td>Februar</td><td>62</td><td>10,4</td><td>37</td></tr>
+        <tr><td>Marec</td><td>78</td><td>12,1</td><td>39</td></tr>
+        <tr><td>April</td><td>74</td><td>10,7</td><td>36</td></tr>
+        <tr style="font-weight:600"><td>Maj</td><td>161</td><td>19,2</td><td>60</td></tr>
+        <tr><td>Junij</td><td>110</td><td>13,2</td><td>44</td></tr>
+        <tr style="font-weight:600"><td>Julij</td><td>176</td><td>16,0</td><td>52</td></tr>
+        <tr><td>Avgust</td><td>88</td><td>12,5</td><td>44</td></tr>
+        <tr style="font-weight:600"><td>September</td><td>168</td><td>14,5</td><td>48</td></tr>
+        <tr style="font-weight:600"><td>Oktober</td><td>144</td><td>18,8</td><td>61</td></tr>
+        <tr style="font-weight:600"><td>November</td><td>111</td><td>17,6</td><td>62</td></tr>
+        <tr><td>December</td><td>107</td><td>18,3</td><td>59</td></tr>
+        <tr style="font-weight:700;border-top:1px solid rgba(255,255,255,.12)"><td>Letno</td><td>~1.377</td><td>~179</td><td>~49</td></tr>
+      </tbody>
+    </table>
+
+    <p>Najdežnejši mesec je <strong>julij</strong> (176 mm), najsušnejši pa <strong>februar</strong> (62 mm) — a to razmerje 2,8 : 1 je precej skromno v primerjavi z mediteranskimi pokrajinami, kjer je poleti lahko petkrat manj dežja kot pozimi. Savinjska dolina ne pozna pravega sušnega meseca.</p>
+
+    <div class="fact-box">
+      <span class="fact-label">Zanimivo</span>
+      Oktober in november sta <strong>dežujeta vsak drugi dan</strong> — v 61 oziroma 62 % vseh dni. To je pogosteje kot katerikoli poletni mesec. Februar in april sta po pogostosti dežja najsušnejša: pri nas dežuje komaj v 36–37 % dni.
+    </div>
+
+    <!-- SEZONSKA PORAZDELITEV -->
+    <h3>Sezonska porazdelitev</h3>
+
+    <div class="season-grid">
+      <div class="season-card">
+        <span class="season-icon">❄️</span>
+        <span class="season-name">Zima (dec–feb)</span>
+        <span class="season-mm">249 mm</span>
+        <span class="season-pct">18 % letnih padavin</span>
+      </div>
+      <div class="season-card">
+        <span class="season-icon">🌷</span>
+        <span class="season-name">Pomlad (mar–maj)</span>
+        <span class="season-mm">314 mm</span>
+        <span class="season-pct">23 % letnih padavin</span>
+      </div>
+      <div class="season-card">
+        <span class="season-icon">☀️</span>
+        <span class="season-name">Poletje (jun–avg)</span>
+        <span class="season-mm">375 mm</span>
+        <span class="season-pct">28 % letnih padavin</span>
+      </div>
+      <div class="season-card" style="border-color:rgba(77,159,248,.4)">
+        <span class="season-icon">🍂</span>
+        <span class="season-name">Jesen (sep–nov)</span>
+        <span class="season-mm" style="color:#60a5fa">423 mm</span>
+        <span class="season-pct">31 % letnih padavin</span>
+      </div>
+    </div>
+
+    <p>Jesen je daleč najbolj deževen letni čas — na račun obsežnih vremenskih sistemov, ki od Sredozemlja prinašajo vlago v naše kraje. Zima je, presenetljivo, najsušnejša, čeprav tega pogosto ne opazimo, ker dežuje pogosto, le v manjših količinah.</p>
+
+    <!-- ════ 02: DVA TIPA DEŽJA ════ -->
+    <span class="section-label">02 — Dva tipa dežja</span>
+    <h2>Poletni naliv in jesenski dež: dve povsem različni stvari</h2>
+
+    <p>Ko rečemo »dežuje«, imamo v mislih povsem različne pojave. Savinjska dolina pozna dva temeljna tipa padavin, ki se razlikujeta tako v fizikalnem ozadju kot v posledicah za naravo in ljudi.</p>
+
+    <div class="rain-type-grid">
+      <div class="rt-card">
+        <span class="rt-icon">⛈️</span>
+        <div class="rt-title">Konvektivni nalivi</div>
+        <div class="rt-body">Nastanejo, ko se zemlja čez dan segreje in topli vlažni zrak hitro dvigne v višave. Ohlajevanje sproži kondenzacijo in intenzivne padavine. Trajo <strong>30 minut do 3 ure</strong>, padavinska jakost pa lahko preseže <strong>20–30 mm na uro</strong>. Tipično jih spremlja grmenje.</div>
+        <span class="rt-tag conv">maj · junij · julij · avgust</span>
+      </div>
+      <div class="rt-card">
+        <span class="rt-icon">🌧️</span>
+        <div class="rt-title">Frontalni in orografski dež</div>
+        <div class="rt-body">Nastane, ko obsežne hladne fronte od zahoda ali vlažne mediteranske mase z juga naletijo na pregrade Kamniško-Savinjskih Alp. Dež je enakomeren, traja <strong>24–72 ur</strong>, a manj intenziven — tipično <strong>2–5 mm na uro</strong>. Skupno pa se nabere 50–150 mm ali več.</div>
+        <span class="rt-tag front">september · oktober · november</span>
+      </div>
+    </div>
+
+    <p>Julij ima z 176 mm letno povprečje, ki ga drugemu mesecu ne uspe preseči — a to ni paradoks. V juliju se dogajata oba pojava hkrati: konvektivne nevihte <em>in</em> prehodi front. September in oktober sta frontalni meseci par excellence — tam padavinska bilanca temelji na dolgih deževnih epizodah, ne na posamičnih nevihtah.</p>
+
+    <div class="chart-card">
+      <h3>Primerjava: mesečne padavine (mm) in število deževnih dni</h3>
+      <canvas id="chartDualAxis"></canvas>
+    </div>
+
+    <p>Graf razkriva ključni vzorec: <strong>november</strong> ima le 111 mm padavin, a kar 62 % deževnih dni — to pomeni pogost, a skromen dež. <strong>September</strong> ima podobno število deževnih dni (48 %), a bistveno več milimetrov (168 mm), ker vsak deževen dan prinese več. <strong>Julij</strong> pa kljub 52 % deževnih dni nabere 176 mm — z intenzivnimi nevihtami, ki v eni uri zberejo, kar novembrski dež v celih dveh dneh.</p>
+
+    <!-- ════ 03: LETNA NIHANJA ════ -->
+    <span class="section-label">03 — Medletna nihanja</span>
+    <h2>Od 1.110 do 1.711 mm: razlika med posameznimi leti je ogromna</h2>
+
+    <p>Povprečje 1.377 mm je koristno izhodišče, a skriva precej dramatična letna nihanja. V šestih popolnih letih meritev je razlika med najsušnejšim in najdežnejšim letom znašala kar <strong>601 mm</strong>.</p>
+
+    <div class="chart-card">
+      <h3>Letne padavine na IREICA1 (2020–2025)</h3>
+      <canvas id="chartYearly"></canvas>
+    </div>
+
+    <div class="gradient-wrap" style="margin-top:0">
+      <div class="gradient-title">Letne padavine — IREICA1 (2020–2025)</div>
+      <div class="gr-row">
+        <div class="gr-lbl">2020</div>
+        <div class="gr-bw"><div class="gr-b" style="width:79%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.348 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2021</div>
+        <div class="gr-bw"><div class="gr-b" style="width:80%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.363 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl" style="color:#f59e0b">2022 <span style="font-size:.68rem">(najsušnejše)</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:65%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div>
+        <div class="gr-v" style="color:#f59e0b">1.110 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl" style="color:#60a5fa">2023 <span style="font-size:.68rem">(najdežnejše)</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:100%;background:linear-gradient(90deg,#1d4ed8,#60a5fa)"></div></div>
+        <div class="gr-v" style="color:#60a5fa">1.711 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2024</div>
+        <div class="gr-bw"><div class="gr-b" style="width:88%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.506 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2025</div>
+        <div class="gr-bw"><div class="gr-b" style="width:71%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.225 mm</div>
+      </div>
+      <div class="gradient-note">Razlika med letoma 2022 in 2023 znaša 601 mm — kot razlika med Celjem in Rečico ob Savinji v tipičnem letu.</div>
+    </div>
+
+    <p>Leto 2022 je bilo izjemno suho — z le 1.110 mm in kar <strong>33 zaporednimi dnevi brez dežja</strong> med februarjem in marcem je bilo to edino zaznavno sušno obdobje v celotnem arhivu. Leto 2023 je šlo v povsem nasprotno smer: 1.711 mm, 194 deževnih dni in julij, ki je s 290 mm pobral 2- do 3-kratnik dolgoletnega povprečja.</p>
+
+    <!-- ════ 04: SUŠA IN MOKRO ════ -->
+    <span class="section-label">04 — Suša in mokra zaporedja</span>
+    <h2>Kdaj je dolina res suha — in kdaj ne more presahniti</h2>
+
+    <p>Zaporedja suhih in deževnih dni povedo marsikaj o lokalnem podnebju. Savinjska dolina nima dolgih sušnih obdobij — toda zimske suše, ko sneg zamesti za deževnico, so presenečenje za marsikoga.</p>
+
+    <div class="streak-grid">
+      <div class="streak-card dry">
+        <div class="sk-val">33</div>
+        <div class="sk-unit">dni zapored</div>
+        <div class="sk-label">Najdaljša suša v arhivu<br>26. feb. – 30. mar. 2022</div>
+      </div>
+      <div class="streak-card wet">
+        <div class="sk-val">14</div>
+        <div class="sk-unit">dni zapored</div>
+        <div class="sk-label">Najdaljše mokro zaporedje<br>25. nov. – 8. dec. 2021</div>
+      </div>
+    </div>
+
+    <p>Zanimivo je, da sta <strong>druga</strong> in <strong>tretja</strong> najdaljša suha zaporedja prav tako padla v zimske mesece (januar–februar 2022: 18 dni; januar–februar 2026: 17 dni). Zima torej prinaša pogost dež, a ko nastopi suša, traja dlje. V poletnih mesecih je sicer manj deževnih dni, a vremenski sistemi so bolj dinamični — suša redko vztraja več kot 10 dni zapored.</p>
+
+    <div class="callout">
+      <p>Savinjska dolina torej nima <em>sušnega obdobja</em> v mediteranskem smislu. Ima pa <strong>zimske mikrosuše</strong> — fenomen, ki ga pogosteje povežemo s celinskim vzhod kot z vlažnim severozahodom.</p>
+    </div>
+
+    <!-- ════ 05: GEOGRAFSKI GRADIENT ════ -->
+    <span class="section-label">05 — Geografski gradient</span>
+    <h2>Od Logarske do Celja: 1.000 mm razlike na 60 kilometrih</h2>
+
+    <p>Rečica ob Savinji z 1.377 mm letno ni niti rekorderka niti povprečje — leži točno v sredini izjemnega padavinskega gradienta, ki ga ustvari dolina Savinje.</p>
+
+    <div class="chart-card">
+      <h3>Letne padavine vzdolž Savinjske doline (mm)</h3>
+      <canvas id="chartGradient"></canvas>
+    </div>
+
+    <div class="gradient-wrap">
+      <div class="gradient-title">Primerjava letnih padavin — od izvira do izliva Savinje</div>
+      <div class="gr-row">
+        <div class="gr-lbl">Logarska dolina<br><span style="font-size:.68rem">~700 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:100%;background:linear-gradient(90deg,#1d4ed8,#60a5fa)"></div></div>
+        <div class="gr-v">~2.400 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">Luče / Dreta<br><span style="font-size:.68rem">~450 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:69%;background:linear-gradient(90deg,#2563eb,#60a5fa)"></div></div>
+        <div class="gr-v">~1.600 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl"><strong>Rečica ob Savinji</strong><br><span style="font-size:.68rem">366 m n. m. · IREICA1</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:57%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v" style="color:#60a5fa">1.377 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">Mozirje<br><span style="font-size:.68rem">~330 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:55%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">~1.320 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">Ljubljana<br><span style="font-size:.68rem">~300 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:52%;background:linear-gradient(90deg,#6366f1,#a5b4fc)"></div></div>
+        <div class="gr-v">~1.241 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">Celje<br><span style="font-size:.68rem">~240 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:45%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div>
+        <div class="gr-v">~1.080 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">Maribor<br><span style="font-size:.68rem">~270 m n. m.</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:37%;background:linear-gradient(90deg,#9333ea,#c084fc)"></div></div>
+        <div class="gr-v">~895 mm</div>
+      </div>
+      <div class="gradient-note">Razlika med Logarsko dolino in Celjem: &gt; 1.300 mm na razdalji 60 km — povprečno 20 mm na kilometer.</div>
+    </div>
+
+    <p>Ta gradient je posledica <strong>orografskega učinka Kamniško-Savinjskih Alp</strong>. Vlažne mediteranske zračne mase prihajajo od jugozahoda in se zaletijo v gorske pregrade. Na privetrni strani (jugozahodna pobočja Alp) pride do intenzivnega dviga zraka in kondenzacije — tam pade največ dežja. V dolini sami se jakost zmanjša, dolvodno pa jo alpska zapora vse bolj zaščiti pred padavinami.</p>
+
+    <div class="fact-box">
+      <span class="fact-label">Orografija v praksi</span>
+      Rečica ob Savinji leži v <strong>tranzitni coni</strong>: dovolj blizu alpskemu zaledju, da še občuti orografsko ojačanje padavin pri južnih in jugozahodnih vremenskih sistemih, a vseeno globoko dovolj v dolini, da se vrednosti ne kosajo z gorskim zaledjem. Od tod naše 1.377 mm — <strong>23 % več kot Ljubljana, 30 % več kot Celje</strong>.
+    </div>
+
+    <!-- ════ 06: POPLAVE 2023 ════ -->
+    <span class="section-label">06 — Kontekst: poplave avgusta 2023</span>
+    <h2>Julij 2023: ko so bila tla nasičena že pred katastrofo</h2>
+
+    <p>Arhiv postaje IREICA1 ponuja eno ključnih dokazil za razumevanje avgustovske katastrofe leta 2023. Tisto poletje ni bil usoden le nalivni nočni dež — usodna je bila <strong>celomesečna prednamočenost</strong> tal.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card c-rain">
+        <div class="sc-label">Julij 2023 na IREICA1</div>
+        <div class="sc-val">290</div>
+        <div class="sc-sub">mm · 2–3× mesečno povprečje</div>
+      </div>
+      <div class="stat-card c-rain2">
+        <div class="sc-label">Dež v noči 3./4. avgusta</div>
+        <div class="sc-val">150–200</div>
+        <div class="sc-sub">mm v 6–12 urah · absolutni ekstrem</div>
+      </div>
+      <div class="stat-card c-danger" style="--danger-col:#f87171">
+        <div class="sc-label">Pretok Savinje pri Nazarju</div>
+        <div class="sc-val" style="color:#f87171">859</div>
+        <div class="sc-sub">m³/s · rekord od leta 1926</div>
+      </div>
+      <div class="stat-card c-dry">
+        <div class="sc-label">Skupna škoda</div>
+        <div class="sc-val">2,98</div>
+        <div class="sc-sub">mrd € · ~5 % slovenskega BDP</div>
+      </div>
+    </div>
+
+    <p>V juliju 2023 je na postaji IREICA1 padlo <strong>290 mm</strong> dežja — in to v <strong>21 deževnih dneh</strong>. Samo 25. julija je v enem dnevu padlo 62 mm, kar je rekord v arhivu za tisti mesec. Tla v zgornjem porečju Savinje so bila povsem nasičena, struge napolnjene do roba. Ko je prišel avgustovski nalivni sistem z 200 mm v 12 urah, je imela voda le en izhod: čez bregove.</p>
+
+    <p>Podrobno analizo poplav, kronologijo, hidrološke rekorde in stanje obnove najdete v ločeni objavi: <a href="/blog/poplave-2023.html" style="color:var(--blue)">Poplave avgusta 2023 v Zgornji Savinjski dolini</a>.</p>
+
+    <!-- ════ 07: PODNEBNE SPREMEMBE ════ -->
+    <span class="section-label">07 — Podnebne spremembe in padavine</span>
+    <h2>Kaj prinaša prihodnost: ne manj dežja, ampak bolj ekstremen</h2>
+
+    <p>Splošno prepričanje, da podnebne spremembe pomenijo le bolj vroča poletja, ne drži v celoti. Za alpski in predalpski prostor, kamor spada Savinjska dolina, klimatologi napovedujejo bolj zapleteno sliko.</p>
+
+    <div class="rain-type-grid">
+      <div class="rt-card">
+        <span class="rt-icon">📉</span>
+        <div class="rt-title">Skupna letna količina</div>
+        <div class="rt-body">V zahodni polovici Slovenije se letna količina padavin v preteklih desetletjih <strong>rahlo zmanjšuje</strong> (–2 do –4 % v obdobju 1961–2011). Trend ni dramatičen in je blizu meje statistične zanesljivosti.</div>
+        <span class="rt-tag front">dolgoletni trend</span>
+      </div>
+      <div class="rt-card">
+        <span class="rt-icon">📈</span>
+        <div class="rt-title">Intenzivnost ekstremov</div>
+        <div class="rt-body">Dnevni padavinski maksimumi naraščajo za <strong>~2 mm na desetletje</strong>. Do leta 2100 pričakujemo <strong>20–30 % bolj intenzivne</strong> ekstremne padavine v alpski regiji — več dežja v krajšem času.</div>
+        <span class="rt-tag conv">projekcija RCP4.5</span>
+      </div>
+    </div>
+
+    <p>Z drugimi besedami: pričakujemo si <em>nekoliko manj pogostih padavin</em>, a <em>bistveno intenzivnejše posamične dogodke</em>. Scenarij »suša in nato poplava v istem letu« — ki smo ga doživeli leta 2022 in 2023 — bo postajal vse pogostejši.</p>
+
+    <div class="callout">
+      <p>Slovenija je po podatkih Evropske agencije za okolje (EEA) <strong>prva v EU po ekonomski škodi ekstremnih vremenskih dogodkov na prebivalca</strong> v obdobju 1980–2024. Poplave avgusta 2023 so bile z 2,98 mrd € največ, a ne edino leto z rekordno škodo. To ni slučaj — to je geograf­ski in klimatski položaj, ki ga je treba razumeti.</p>
+    </div>
+
+    <p>Za Savinjsko dolino konkretno: modeli predvidevajo, da se bodo letni maksimalni pretoki Savinje do leta 2050 povečali za <strong>10–40 %</strong> v primerjavi z dolgoletnim povprečjem. Protipoplavni ukrepi, ki se gradijo po letu 2023, so zasnovani z upoštevanjem tega trenda — zadrževalnik Rjavec in nasipi vzdolž Savinje naj bi zagotovili zaščito pred <em>100-letnimi vodami</em> po podnebno prilagojenih standardih.</p>
+
+    <!-- ════ ZAKLJUČEK ════ -->
+    <span class="section-label">Zaključek</span>
+    <h2>Padavinski portret v eni sliki</h2>
+
+    <p>Zgornja Savinjska dolina je deževna, a ne kaotično. Ima jasen letni ritem — dva viška in eno razmeroma suho obdobje pozimi ter zgodaj spomladi — in dva povsem različna načina dežja: kratke, intenzivne poletne nevihte ter dolgotrajni jesenski dež. Razpeta je med gorskim zaledjem, ki letno prejme dvakrat toliko vode, in Celjem, ki jo prejme trikrat manj.</p>
+
+    <p>Postaja IREICA1 v Rečici ob Savinji beleži to raznolikost od novembra 2019 naprej. Šest let podatkov ni dovolj za zanesljive dolgoletne trende — a je dovolj za razumevanje vzorcev, ki določajo, kdaj bo sušno in kdaj mokro, kdaj bo dež prišel v nevihtah in kdaj kot dolgotrajno enakomerno deževje.</p>
+
+    <div class="callout">
+      <p>Enostavno pravilo za Savinjsko dolino: <strong>junij in julij</strong> prinašata intenzivne nevihte, ki jih je nemogoče predvideti teden vnaprej. <strong>Oktober in november</strong> prinašata pogost, dolgotrajni dež — vsak drugi dan, teden za tednom. In <strong>februar</strong> je paradoksalno najpogosteje sušen mesec v letu, kljub temu da je statistično »zimski«.</p>
+    </div>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir meritev: postaja IREICA1, Rečica ob Savinji (november 2019 – maj 2026). Primerjalne vrednosti: ARSO klimatološki podatki; weather-and-climate.com; visitsavinjska.com. Projekcije podnebnih sprememb: ARSO, EEA, scenarij RCP4.5. Meritve v živo na <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+const CD = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 900, easing: 'easeOutQuart' },
+  plugins: {
+    legend: {
+      display: true, position: 'top',
+      labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 }
+    },
+    tooltip: {
+      backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+      titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10
+    }
+  }
+};
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'];
+const MM     = [80, 62, 78, 74, 161, 110, 176, 88, 168, 144, 111, 107];
+const DAYS   = [15.0, 10.4, 12.1, 10.7, 19.2, 13.2, 16.0, 12.5, 14.5, 18.8, 17.6, 18.3];
+
+/* ── Grafikon 1: Mesečne padavine ── */
+new Chart(document.getElementById('chartMonthly'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'Padavine (mm)',
+      data: MM,
+      backgroundColor: MM.map(v =>
+        v >= 160 ? 'rgba(29,78,216,.85)' :
+        v >= 100 ? 'rgba(59,130,246,.75)' :
+                   'rgba(96,165,250,.55)'
+      ),
+      borderColor: MM.map(v =>
+        v >= 160 ? '#1d4ed8' :
+        v >= 100 ? '#3b82f6' :
+                   '#60a5fa'
+      ),
+      borderWidth: 1.5,
+      borderRadius: 5
+    }]
+  },
+  options: {
+    ...CD,
+    plugins: {
+      ...CD.plugins,
+      legend: { display: false },
+      tooltip: {
+        ...CD.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y} mm` }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: {
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' }
+      }
+    }
+  }
+});
+
+/* ── Grafikon 2: Dvojna os (mm + dnevi) ── */
+new Chart(document.getElementById('chartDualAxis'), {
+  data: {
+    labels: MONTHS,
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Padavine (mm)',
+        data: MM,
+        backgroundColor: 'rgba(59,130,246,.6)',
+        borderColor: '#3b82f6',
+        borderWidth: 1.5,
+        borderRadius: 4,
+        yAxisID: 'ymm',
+        order: 2
+      },
+      {
+        type: 'line',
+        label: 'Deževnih dni',
+        data: DAYS,
+        borderColor: '#34d399',
+        backgroundColor: 'rgba(52,211,153,.12)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: '#34d399',
+        tension: 0.3,
+        fill: false,
+        yAxisID: 'yday',
+        order: 1
+      }
+    ]
+  },
+  options: {
+    ...CD,
+    plugins: {
+      ...CD.plugins,
+      tooltip: {
+        ...CD.plugins.tooltip,
+        callbacks: {
+          label: ctx =>
+            ctx.dataset.yAxisID === 'ymm'
+              ? ` ${ctx.parsed.y} mm`
+              : ` ${ctx.parsed.y.toFixed(1)} dni`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      ymm: {
+        position: 'left',
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' }
+      },
+      yday: {
+        position: 'right',
+        grid: { display: false },
+        min: 0, max: 25,
+        ticks: { color: '#34d399', font: { size: 10 }, callback: v => v + ' dni' }
+      }
+    }
+  }
+});
+
+/* ── Grafikon 3: Letne padavine ── */
+new Chart(document.getElementById('chartYearly'), {
+  type: 'bar',
+  data: {
+    labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+    datasets: [
+      {
+        label: 'Padavine (mm)',
+        data: [1348, 1363, 1110, 1711, 1506, 1225],
+        backgroundColor: [
+          'rgba(59,130,246,.7)',
+          'rgba(59,130,246,.7)',
+          'rgba(245,158,11,.8)',
+          'rgba(29,78,216,.9)',
+          'rgba(59,130,246,.7)',
+          'rgba(59,130,246,.7)'
+        ],
+        borderColor: ['#3b82f6','#3b82f6','#f59e0b','#1d4ed8','#3b82f6','#3b82f6'],
+        borderWidth: 1.5,
+        borderRadius: 6
+      },
+      {
+        type: 'line',
+        label: 'Povprečje (1.377 mm)',
+        data: [1377, 1377, 1377, 1377, 1377, 1377],
+        borderColor: 'rgba(255,255,255,.3)',
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  },
+  options: {
+    ...CD,
+    plugins: {
+      ...CD.plugins,
+      tooltip: {
+        ...CD.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString('sl-SI')} mm` }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 11 } } },
+      y: {
+        min: 800, max: 1900,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v.toLocaleString('sl-SI') + ' mm' }
+      }
+    }
+  }
+});
+
+/* ── Grafikon 4: Gradient vzdolž doline ── */
+new Chart(document.getElementById('chartGradient'), {
+  type: 'bar',
+  data: {
+    labels: ['Logarska\ndolina', 'Luče /\nDreta', 'Rečica ob\nSavinji', 'Mozirje', 'Ljubljana', 'Celje', 'Maribor'],
+    datasets: [{
+      label: 'Letne padavine (mm)',
+      data: [2400, 1600, 1377, 1320, 1241, 1080, 895],
+      backgroundColor: [
+        'rgba(29,78,216,.9)',
+        'rgba(37,99,235,.85)',
+        'rgba(59,130,246,.85)',
+        'rgba(79,150,246,.75)',
+        'rgba(109,170,250,.65)',
+        'rgba(139,190,252,.55)',
+        'rgba(167,139,250,.55)'
+      ],
+      borderColor: ['#1d4ed8','#2563eb','#3b82f6','#4f96f6','#6daafa','#8bbffc','#a78bfa'],
+      borderWidth: 1.5,
+      borderRadius: 5
+    }]
+  },
+  options: {
+    ...CD,
+    indexAxis: 'y',
+    plugins: {
+      ...CD.plugins,
+      legend: { display: false },
+      tooltip: {
+        ...CD.plugins.tooltip,
+        callbacks: { label: ctx => ` ~${ctx.parsed.x.toLocaleString('sl-SI')} mm/leto` }
+      }
+    },
+    scales: {
+      x: {
+        min: 0, max: 2600,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v.toLocaleString('sl-SI') }
+      },
+      y: { grid: { display: false }, ticks: { color: '#e8edf8', font: { size: 10 } } }
+    }
+  }
+});
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
