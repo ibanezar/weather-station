@@ -2150,6 +2150,7 @@ function switchTab(tab){
   if(tab==='po-meri'){   initPoMeri(); }
   if(tab==='morje'){     initMorje(); }
   if(tab==='oceanologija'){ initOceanologija(); }
+  if(tab==='zrak'){      initZrak(); }
   if(tab==='gore'){      initGore(); }
   if(tab==='gobe'){      initGobe(); }
   if(tab==='padalci'){    initPadalci(); }
@@ -14101,6 +14102,274 @@ function _buildOcnClimate(m){
     </div>`;
 }
 // ═══ end OCEANOLOGIJA ══════════════════════════════════════
+
+// ═══ KAKOVOST ZRAKA ════════════════════════════════════════
+let _zrakInit=false,_zrakCache=null,_zrakCacheT=0;
+async function initZrak(){
+  if(_zrakInit)return; _zrakInit=true;
+  try{
+    const now=Date.now();
+    if(!_zrakCache||now-_zrakCacheT>3600000){
+      _zrakCache=await fetch(
+        `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}`+
+        `&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,`+
+        `european_aqi,european_aqi_pm2_5,european_aqi_pm10,european_aqi_nitrogen_dioxide,european_aqi_ozone,`+
+        `alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,dust,ammonia`+
+        `&timezone=Europe%2FLjubljana&past_days=1&forecast_days=5&domains=cams_europe`
+      ).then(r=>r.json());
+      _zrakCacheT=now;
+    }
+    _buildAqAQI(_zrakCache);
+    _buildAqKPIs(_zrakCache);
+    _buildAqChart(_zrakCache);
+    _buildAqPollutants(_zrakCache);
+    _buildAqPollen(_zrakCache);
+    _buildAqHealth(_zrakCache);
+  }catch(e){console.error('initZrak',e);}
+}
+
+function _aqNowIdx(times){
+  const nowStr=new Date().toISOString().slice(0,13);
+  const i=(times||[]).findIndex(t=>t.slice(0,13)===nowStr);
+  return i>=0?i:null;
+}
+function _aqClass(aqi){
+  if(aqi==null)return{cls:'suit-fair',lvl:'—',col:'var(--muted)',ic:'🌫️'};
+  if(aqi<=20)return{cls:'suit-excellent',lvl:'ODLIČNO',col:'#4ade80',ic:'😊'};
+  if(aqi<=40)return{cls:'suit-good',lvl:'DOBRO',col:'#a3e635',ic:'🙂'};
+  if(aqi<=60)return{cls:'suit-fair',lvl:'ZMERNO',col:'#fbbf24',ic:'😐'};
+  if(aqi<=80)return{cls:'suit-poor',lvl:'SLABO',col:'#fb923c',ic:'😷'};
+  if(aqi<=100)return{cls:'suit-bad',lvl:'ZELO SLABO',col:'#f87171',ic:'🤧'};
+  return{cls:'suit-bad',lvl:'NEVZDRŽNO',col:'#c084fc',ic:'⛔'};
+}
+function _aqLvl(aqi){
+  if(aqi==null)return'—';
+  if(aqi<=20)return'odlično';if(aqi<=40)return'dobro';if(aqi<=60)return'zmerno';
+  if(aqi<=80)return'slabo';if(aqi<=100)return'zelo slabo';return'nevzdržno';
+}
+
+function _buildAqAQI(d){
+  const card=document.getElementById('aq-aqi-card');if(!card)return;
+  const h=d.hourly||{};
+  const ni=_aqNowIdx(h.time);
+  const get=k=>ni!=null?h[k]?.[ni]:null;
+  const aqi=get('european_aqi');
+  const cls=_aqClass(aqi);
+  card.className=`card sc-risk-card ${cls.cls}`;
+  const pct=aqi!=null?Math.min(100,aqi):0;
+  const desc=aqi==null?'Nalagam podatke…':
+    aqi<=20?'Zrak je čist. Ni omejitev za dejavnosti na prostem.':
+    aqi<=40?'Zrak je sprejemljiv. Možne blage posledice za zelo občutljive posameznike.':
+    aqi<=60?'Občutljive skupine (astma, bolezni srca, otroci) naj omejijo daljšo aktivnost na prostem.':
+    aqi<=80?'Večina ljudi občuti zdravstvene učinke. Zmanjšajte napor na prostem.':
+    aqi<=100?'Resni zdravstveni učinki. Omejite čas na prostem.':
+    'Zdravstveni alarm — izogibajte se bivanju na prostem.';
+  const factors=[
+    {l:'PM2.5 AQI',v:get('european_aqi_pm2_5')??'—',d:_aqLvl(get('european_aqi_pm2_5'))},
+    {l:'PM10 AQI',v:get('european_aqi_pm10')??'—',d:_aqLvl(get('european_aqi_pm10'))},
+    {l:'NO₂ AQI',v:get('european_aqi_nitrogen_dioxide')??'—',d:_aqLvl(get('european_aqi_nitrogen_dioxide'))},
+    {l:'O₃ AQI',v:get('european_aqi_ozone')??'—',d:_aqLvl(get('european_aqi_ozone'))},
+  ];
+  card.innerHTML=`<div class="sc-risk-head">
+    <span class="sc-risk-icon">${cls.ic}</span>
+    <div class="sc-risk-text">
+      <div class="clabel" style="margin:0">🌫️ Kakovost zraka — Rečica ob Savinji (EU AQI)</div>
+      <div class="sc-risk-level" style="color:${cls.col}">${cls.lvl}</div>
+      <div class="sc-risk-desc">${desc}</div>
+    </div>
+    <div class="sc-risk-gauge">
+      <div class="sc-risk-pct">${aqi!=null?aqi:'—'}</div>
+      <div class="sc-risk-bar"><div class="sc-risk-fill" style="width:${pct}%;background:${cls.col}"></div></div>
+      <div class="sc-risk-gauge-lbl">EU AQI</div>
+    </div>
+  </div>
+  <div class="sc-risk-factors">${factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('')}</div>`;
+}
+
+function _buildAqKPIs(d){
+  const el=document.getElementById('aq-kpis');if(!el)return;
+  const h=d.hourly||{};
+  const ni=_aqNowIdx(h.time);
+  const get=k=>ni!=null?h[k]?.[ni]:null;
+  const pollenKeys=['grass_pollen','birch_pollen','alder_pollen','mugwort_pollen','ragweed_pollen'];
+  const pollenLbls={grass_pollen:'Trave',birch_pollen:'Breza',alder_pollen:'Jelša',mugwort_pollen:'Pelin',ragweed_pollen:'Ambrozija'};
+  let domPollen='—',domVal=0;
+  pollenKeys.forEach(k=>{const v=get(k);if(v!=null&&v>domVal){domVal=v;domPollen=pollenLbls[k];}});
+  const pm25=get('pm2_5'),pm10=get('pm10'),o3=get('ozone'),no2=get('nitrogen_dioxide');
+  const kpis=[
+    {val:pm25!=null?pm25.toFixed(1)+' µg':'—',lbl:'PM2.5',sub:pm25==null?'—':pm25<5?'odlično':pm25<15?'dobro':pm25<25?'zmerno':'slabo'},
+    {val:pm10!=null?pm10.toFixed(0)+' µg':'—',lbl:'PM10',sub:pm10==null?'—':pm10<20?'dobro':pm10<45?'zmerno':'slabo'},
+    {val:o3!=null?o3.toFixed(0)+' µg':'—',lbl:'Ozon O₃',sub:o3==null?'—':o3<60?'dobro':o3<100?'zmerno':'slabo'},
+    {val:no2!=null?no2.toFixed(0)+' µg':'—',lbl:'NO₂',sub:no2==null?'—':no2<20?'dobro':no2<40?'zmerno':'slabo'},
+    {val:domVal>0.5?Math.round(domVal)+' gr/m³':'nizko',lbl:'Cvetni prah',sub:domVal>0.5?domPollen:'—'},
+  ];
+  el.innerHTML=kpis.map(k=>`<div class="aq-kpi"><div class="aq-kpi-val">${k.val}</div><div class="aq-kpi-lbl">${k.lbl}</div><div class="aq-kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+function _buildAqChart(d){
+  const el=document.getElementById('aq-chart-wrap');if(!el)return;
+  const h=d.hourly||{};
+  const times=h.time||[];
+  const aqis=h.european_aqi||[];
+  if(!times.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
+  const now=Date.now();
+  const wStart=now-24*3600000,wEnd=now+24*3600000;
+  const pts=[];
+  times.forEach((t,i)=>{
+    const ms=new Date(t).getTime();
+    if(ms>=wStart&&ms<=wEnd)pts.push({ms,v:aqis[i]});
+  });
+  if(!pts.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov v oknu 48h</div>';return;}
+  const W=880,H=80,pL=28,pR=8,pT=8,pB=18;
+  const cW=W-pL-pR,cH=H-pT-pB;
+  const vmax=Math.max(100,...pts.map(p=>p.v??0));
+  const xS=ms=>pL+(ms-wStart)/(wEnd-wStart)*cW;
+  const yS=v=>pT+cH-(v/vmax)*cH;
+  const nowX=xS(now);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  // AQI zone backgrounds
+  [[0,20,'rgba(74,222,128,.09)'],[20,40,'rgba(163,230,53,.09)'],[40,60,'rgba(251,191,36,.10)'],[60,80,'rgba(249,115,22,.11)'],[80,Math.max(101,vmax),'rgba(248,113,113,.13)']].forEach(([a,b,col])=>{
+    if(a>=vmax)return;
+    const y1=yS(Math.min(b,vmax)),y2=yS(a);
+    svg+=`<rect x="${pL}" y="${y1}" width="${cW}" height="${y2-y1}" fill="${col}"/>`;
+  });
+  // Grid + labels
+  [20,40,60,80,100].forEach(v=>{
+    if(v>vmax)return;
+    const y=yS(v);
+    svg+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<text x="${pL-2}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v}</text>`;
+  });
+  // AQI line
+  let path='';
+  pts.forEach(p=>{if(p.v==null)return;path+=(path?'L':'M')+xS(p.ms)+','+yS(p.v);});
+  if(path)svg+=`<path d="${path}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round"/>`;
+  // Now marker
+  svg+=`<line x1="${nowX}" y1="${pT}" x2="${nowX}" y2="${H-pB}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+  svg+=`<text x="${nowX}" y="${pT}" font-size="7" fill="var(--amber)" text-anchor="middle" dominant-baseline="hanging">zdaj</text>`;
+  // X labels every 6h
+  for(let off=-24;off<=24;off+=6){
+    const dt=new Date(now+off*3600000);
+    svg+=`<text x="${xS(now+off*3600000)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${dt.getHours().toString().padStart(2,'0')}:00</text>`;
+  }
+  svg+='</svg>';
+  el.innerHTML=svg;
+}
+
+function _buildAqPollutants(d){
+  const el=document.getElementById('aq-pollutants');if(!el)return;
+  const h=d.hourly||{};
+  const ni=_aqNowIdx(h.time);
+  const get=k=>ni!=null?h[k]?.[ni]:null;
+  const co=get('carbon_monoxide');
+  const rows=[
+    {lbl:'PM2.5',val:get('pm2_5'),unit:'µg/m³',lim:25,note:'Dnevna meja: WHO 15 / EU 25 µg/m³'},
+    {lbl:'PM10',val:get('pm10'),unit:'µg/m³',lim:50,note:'Dnevna meja EU: 50 µg/m³'},
+    {lbl:'Ozon O₃',val:get('ozone'),unit:'µg/m³',lim:120,note:'8-urna meja EU: 120 µg/m³'},
+    {lbl:'NO₂',val:get('nitrogen_dioxide'),unit:'µg/m³',lim:200,note:'Urna meja EU: 200 µg/m³'},
+    {lbl:'SO₂',val:get('sulphur_dioxide'),unit:'µg/m³',lim:350,note:'Urna meja EU: 350 µg/m³'},
+    {lbl:'CO',val:co!=null?co/1000:null,unit:'mg/m³',lim:10,note:'8-urna meja EU: 10 mg/m³'},
+    {lbl:'Prah (dust)',val:get('dust'),unit:'µg/m³',lim:null,note:'Saharski prah + lokalni'},
+    {lbl:'NH₃',val:get('ammonia'),unit:'µg/m³',lim:null,note:'Kmetijsko onesnaževalo'},
+  ];
+  el.innerHTML=rows.map(r=>{
+    const v=r.val;
+    const disp=v!=null?(v<10?v.toFixed(1):v.toFixed(0))+' '+r.unit:'—';
+    const pct=v!=null&&r.lim?Math.min(100,(v/r.lim)*100):null;
+    const barCol=pct==null?'var(--muted)':pct<33?'var(--green)':pct<66?'var(--amber)':pct<100?'#fb923c':'var(--red)';
+    return `<div style="display:flex;gap:.5rem;align-items:center;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:.74rem;flex-wrap:wrap">
+      <span style="color:var(--muted);width:82px;flex-shrink:0">${r.lbl}</span>
+      <b style="width:78px;flex-shrink:0">${disp}</b>
+      <div style="flex:1;min-width:80px">${pct!=null?`<div class="aq-bar-wrap" style="margin:.1rem 0"><div class="aq-bar-fill" style="width:${pct.toFixed(0)}%;background:${barCol}"></div></div>`:''}</div>
+      <span style="font-size:.62rem;color:var(--muted);min-width:100px">${r.note}</span>
+    </div>`;
+  }).join('');
+}
+
+function _buildAqPollen(d){
+  const el=document.getElementById('aq-pollen-wrap');if(!el)return;
+  const h=d.hourly||{};
+  const times=h.time||[];
+  const today=new Date();
+  const days=Array.from({length:5},(_,i)=>{const dt=new Date(today);dt.setDate(dt.getDate()+i);return dt.toISOString().slice(0,10);});
+  const wdays=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  const dayLbls=days.map((d,i)=>i===0?'Danes':i===1?'Jutri':wdays[new Date(d).getDay()]);
+  const types=[
+    {key:'grass_pollen',   lbl:'🌾 Trave',     th:[10,50,200]},
+    {key:'birch_pollen',   lbl:'🌳 Breza',     th:[10,100,1000]},
+    {key:'alder_pollen',   lbl:'🌲 Jelša',     th:[10,100,1000]},
+    {key:'mugwort_pollen', lbl:'🌿 Pelin',     th:[10,100,300]},
+    {key:'ragweed_pollen', lbl:'🌺 Ambrozija', th:[10,50,200]},
+  ];
+  const dailyMax=(key,dateStr)=>{
+    let mx=null;
+    times.forEach((t,i)=>{if(t.startsWith(dateStr)){const v=h[key]?.[i];if(v!=null)mx=mx==null?v:Math.max(mx,v);}});
+    return mx;
+  };
+  const riskCls=(v,th)=>{
+    if(v==null||v<0.5)return'aq-poll-na';
+    if(v<th[0])return'aq-poll-good';
+    if(v<th[1])return'aq-poll-fair';
+    if(v<th[2])return'aq-poll-mod';
+    return'aq-poll-poor';
+  };
+  const riskTxt=(v,th)=>{
+    if(v==null||v<0.5)return'—';
+    if(v<th[0])return'nizko';
+    if(v<th[1])return'zmerno';
+    if(v<th[2])return'visoko';
+    return'zelo ↑';
+  };
+  // Grid: label col + 5 day cols
+  const cols=`repeat(${5+1},1fr)`;
+  let html=`<div class="aq-poll-grid" style="grid-template-columns:auto ${Array(5).fill('1fr').join(' ')}">`;
+  // Header
+  html+=`<div class="aq-poll-head" style="text-align:left">Vrsta</div>`;
+  dayLbls.forEach(l=>html+=`<div class="aq-poll-head">${l}</div>`);
+  // Rows
+  types.forEach(tp=>{
+    html+=`<div class="aq-poll-lbl">${tp.lbl}</div>`;
+    days.forEach(dt=>{
+      const v=dailyMax(tp.key,dt);
+      html+=`<div class="aq-poll-cell ${riskCls(v,tp.th)}">${riskTxt(v,tp.th)}</div>`;
+    });
+  });
+  html+='</div>';
+  html+=`<div style="font-size:.63rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Vrednosti so dnevni maksimumi v delcih/m³. Vir: Copernicus CAMS Europe. Sezonska dostopnost podatkov je odvisna od aktivnosti rastlin.</div>`;
+  el.innerHTML=html;
+}
+
+function _buildAqHealth(d){
+  const el=document.getElementById('aq-health');if(!el)return;
+  const h=d.hourly||{};
+  const ni=_aqNowIdx(h.time);
+  const get=k=>ni!=null?h[k]?.[ni]:null;
+  const aqi=get('european_aqi');
+  const maxPollen=Math.max(get('grass_pollen')??0,get('birch_pollen')??0,get('ragweed_pollen')??0,get('mugwort_pollen')??0);
+  const items=[];
+  if(aqi!=null){
+    if(aqi<=20)items.push({ic:'✅',txt:'Kakovost zraka je odlična. Ni omejitev za dejavnosti na prostem.'});
+    else if(aqi<=40)items.push({ic:'🟡',txt:'Sprejemljiva kakovost zraka. Zelo občutljivi (huda astma) naj ne pretiravajo z naporom.'});
+    else if(aqi<=60){
+      items.push({ic:'🟠',txt:'<b>Občutljive skupine</b> (astma, bolezni srca, starejši, otroci) — omejite daljšo fizično aktivnost na prostem.'});
+      items.push({ic:'💊',txt:'Astmatiki naj imajo pri sebi inhaler.'});
+    }else if(aqi<=80){
+      items.push({ic:'🔴',txt:'<b>Vsakdo</b> lahko začuti zdravstvene učinke. Zmanjšajte napor na prostem.'});
+      items.push({ic:'🚪',txt:'Zaprite okna in vrata — preprečite vstop onesnaženega zraka v prostore.'});
+    }else{
+      items.push({ic:'🚨',txt:'<b>Zdravstveni alarm.</b> Izogibajte se zunanjim aktivnostim. Nosite masko N95/FFP2 če morate ven.'});
+      items.push({ic:'🚪',txt:'Zaprite okna. Priporoča se čistilec zraka s HEPA filtrom.'});
+    }
+  }
+  if(maxPollen>200)items.push({ic:'🤧',txt:'<b>Zelo visok cvetni prah.</b> Alergiki: antihistaminiki, ostanite v zaprtih prostorih, filtrirajte zrak. Po bivanju zunaj se stuširajte in preoblecite.'});
+  else if(maxPollen>50)items.push({ic:'🤧',txt:'<b>Visok cvetni prah</b> — alergiki naj vzamejo antihistaminike. Izogibajte se travniškim območjem. Prezračujte zgodaj zjutraj ali po dežju.'});
+  else if(maxPollen>10)items.push({ic:'😤',txt:'<b>Zmeren cvetni prah</b> — bodite pozorni na simptome. Ob sunkovitem vetru je koncentracija višja.'});
+  if(!items.length)items.push({ic:'😊',txt:'Ni posebnih priporočil. Uživajte svežega zraka!'});
+  items.push({ic:'🪟',txt:'Prezračujte domov zjutraj po 6:00 (nižje koncentracije tal. ozona) in po dežju (ispiranje delcev). Med prometno konico (7–9h, 15–18h) raje ne prezračujte.'});
+  el.innerHTML=items.map(it=>`<div class="aq-health-item"><span style="font-size:1.05rem;flex-shrink:0;margin-top:.05rem">${it.ic}</span><span>${it.txt}</span></div>`).join('');
+}
+// ═══ end KAKOVOST ZRAKA ════════════════════════════════════
+
 function _windDirLabel(deg){
   const dirs=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];
   return dirs[Math.round(deg/22.5)%16];
