@@ -1313,6 +1313,27 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .ocn-row:last-child{border-bottom:none}
 @media(max-width:580px){.ocn-2col{grid-template-columns:1fr}}
 /* ── end Oceanologija ────────────────────────────────────── */
+/* ── Kakovost zraka ─────────────────────────────────────── */
+.aq-kpi-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.aq-kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.55rem .75rem;min-width:80px;flex:1}
+.aq-kpi-val{font-family:'JetBrains Mono',monospace;font-size:1.0rem;font-weight:600;color:var(--text)}
+.aq-kpi-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem}
+.aq-kpi-sub{font-size:.58rem;color:var(--muted);opacity:.7;margin-top:.06rem}
+.aq-bar-wrap{height:5px;border-radius:3px;background:var(--rain-track);margin:.25rem 0}
+.aq-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.aq-poll-grid{display:grid;gap:.25rem;margin-top:.5rem}
+.aq-poll-head{font-size:.6rem;color:var(--muted);text-align:center;padding:.15rem 0;font-weight:500}
+.aq-poll-lbl{font-size:.66rem;color:var(--muted);display:flex;align-items:center}
+.aq-poll-cell{border-radius:5px;padding:.28rem .2rem;text-align:center;font-size:.63rem;font-weight:600}
+.aq-poll-good{background:rgba(74,222,128,.18);color:var(--green)}
+.aq-poll-fair{background:rgba(163,230,53,.18);color:#65a30d}
+.aq-poll-mod{background:rgba(251,191,36,.18);color:var(--amber)}
+.aq-poll-poor{background:rgba(249,115,22,.18);color:#ea580c}
+.aq-poll-bad{background:rgba(248,113,113,.18);color:var(--red)}
+.aq-poll-na{background:var(--fc-bg);color:var(--muted);opacity:.5}
+.aq-health-item{display:flex;gap:.5rem;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.74rem;line-height:1.5;align-items:flex-start}
+.aq-health-item:last-child{border-bottom:none}
+/* ── end Kakovost zraka ─────────────────────────────────── */
 /* SVG icon animations */
 @keyframes spin      {from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ray-pulse {0%,100%{opacity:.9}50%{opacity:.45}}
@@ -2239,6 +2260,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
     <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
     <button class="tab-btn"        id="tab-btn-oceanologija" onclick="switchTab('oceanologija')">🔬 Oceanologija</button>
+    <button class="tab-btn"        id="tab-btn-zrak"      onclick="switchTab('zrak')">🌫️ Kakovost zraka</button>
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
     <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
     <button class="tab-btn"        id="tab-btn-gallery"   onclick="switchTab('gallery')">📸 Galerija</button>
@@ -4051,6 +4073,49 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
       </div>
     </div>
   </div><!-- /tab-oceanologija -->
+
+  <!-- ═══ KAKOVOST ZRAKA TAB ═══ -->
+  <div id="tab-zrak" class="tab-pane">
+    <div id="aq-aqi-card" class="card sc-risk-card suit-fair" style="margin-bottom:1rem">
+      <div style="font-size:.75rem;color:var(--muted)">Nalagam…</div>
+    </div>
+
+    <div class="aq-kpi-row" id="aq-kpis">
+      <div class="aq-kpi"><div class="aq-kpi-val">…</div><div class="aq-kpi-lbl">Nalagam</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">📈 Indeks kakovosti zraka (EU AQI) — trend 48 ur</div>
+      <div id="aq-chart-wrap" style="height:90px;margin-top:.5rem;position:relative">
+        <div style="font-size:.75rem;color:var(--muted);padding-top:1rem">Nalagam…</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🧪 Onesnaževala — trenutne vrednosti vs. mejne vrednosti</div>
+      <div id="aq-pollutants" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🌸 Cvetni prah — 5-dnevna napoved (delci/m³)</div>
+      <div id="aq-pollen-wrap" style="margin-top:.5rem">Nalagam…</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">💊 Zdravstvena priporočila</div>
+      <div id="aq-health" style="margin-top:.4rem">Nalagam…</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🔗 Viri kakovosti zraka</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
+        <a href="https://www.arso.gov.si/zrak/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 ARSO — kakovost zraka</a>
+        <a href="https://aqicn.org/city/celje/" target="_blank" rel="noopener" class="mtn-avk-link">🌍 AQICN — Celje</a>
+        <a href="https://atmosphere.copernicus.eu/" target="_blank" rel="noopener" class="mtn-avk-link">🛰 Copernicus CAMS</a>
+        <a href="https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health" target="_blank" rel="noopener" class="mtn-avk-link">🏥 WHO — smernice</a>
+      </div>
+    </div>
+  </div><!-- /tab-zrak -->
 
   <!-- ═══ METEO NERD TAB ═══ -->
   <div id="tab-nerd" class="tab-pane">
