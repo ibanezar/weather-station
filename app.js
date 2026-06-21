@@ -8378,7 +8378,7 @@ async function fetchHourly(){
 let _scData=null,_scFetchTime=0,_scInit=false,_scHourOffset=0;
 async function fetchStormChaser(){
   if(_scData&&Date.now()-_scFetchTime<15*60*1000){renderStormChaser();return;}
-  const setStatus=(msg)=>{const b=document.getElementById('sc-desc');if(b)b.textContent=msg;};
+  const setStatus=(msg)=>{const b=document.getElementById('sc-storm-desc');if(b)b.textContent=msg;};
   setStatus('Pridobivam podatke…');
   try{
     // Split into two smaller requests to avoid URL length issues and bad parameters
@@ -8415,7 +8415,7 @@ async function fetchStormChaser(){
     renderStormChaser();
   }catch(e){
     console.error('Storm render error:',e);
-    document.getElementById('sc-desc').textContent='Napaka pri prikazu: '+e.message;
+    document.getElementById('sc-storm-desc').textContent='Napaka pri prikazu: '+e.message;
   }
 }
 function scIdx(a,i){return(a&&i>=0&&i<a.length)?a[i]??null:null;}
@@ -8906,7 +8906,7 @@ function renderStormChaser(){
   const thr=calcStormThreat(cape,cin,li,tt,shear);
   const hero=g('sc-hero');if(hero)hero.className='sc-hero '+thr.cls;
   if(g('sc-level'))g('sc-level').textContent=thr.level;
-  if(g('sc-desc'))g('sc-desc').textContent=thr.desc;
+  if(g('sc-storm-desc'))g('sc-storm-desc').textContent=thr.desc;
   const _scIcons={none:'☁️',low:'🌩️',moderate:'⛈️',high:'⛈️',extreme:'🌪️'};
   const scIcon=g('sc-threat-icon');if(scIcon)scIcon.textContent=_scIcons[thr.cls.replace('sc-','')]||'☁️';
   const kpis=g('sc-hero-kpis');
