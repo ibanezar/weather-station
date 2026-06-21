@@ -803,7 +803,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 /* Local hazard cards (hail / hurricane-force wind) */
 .sc-hazards{margin-bottom:1rem}
 .sc-hazards-title{margin:0 0 .7rem}
-.sc-hazards-grid{margin-bottom:0;align-items:stretch;grid-template-columns:1fr}
+.sc-hazards-grid{display:grid;gap:1rem;margin-bottom:0;align-items:stretch;grid-template-columns:1fr}
 .sc-hazards-grid .sc-risk-card{margin-bottom:0;display:flex;flex-direction:column;padding:1rem 1.1rem}
 .sc-risk-card{border:1px solid;transition:all .5s}
 .sc-risk-card.sc-risk-none{background:rgba(71,85,105,.12);border-color:rgba(71,85,105,.3)}
@@ -3567,7 +3567,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <!-- Local hazard cards — Rečica ob Savinji -->
     <div class="sc-hazards">
       <div class="clabel sc-hazards-title">⚠️ Lokalna ogroženost — Rečica ob Savinji</div>
-      <div class="g2 sc-hazards-grid">
+      <div class="sc-hazards-grid">
 
         <!-- Hail risk -->
         <div class="card sc-risk-card sc-risk-none" id="sc-risk-card">
