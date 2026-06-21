@@ -123,3 +123,22 @@ article strong{color:#fff}
 .site-foot a{color:var(--cyan);text-decoration:none}
 .back-link{display:inline-block;margin-top:2rem;color:var(--cyan);text-decoration:none;font-weight:600}
 .back-link:hover{text-decoration:underline}
+
+/* ── Donacijski blok (Flik) ── */
+.donate-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
+  padding:1.5rem 1.6rem;margin:2.4rem 0 1.6rem;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:var(--card-shadow)}
+.donate-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.6rem;color:#fff}
+.donate-desc{font-size:.92rem;color:var(--muted);margin:0 0 1rem}
+.donate-flik{display:flex;align-items:center;gap:.7rem;background:rgba(0,191,174,.08);
+  border:1px solid rgba(0,191,174,.3);border-radius:12px;padding:.75rem 1rem;margin-bottom:.8rem;flex-wrap:wrap}
+.donate-flik-logo{display:flex;align-items:center;gap:.4rem;font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:.95rem;color:#00bfae}
+.donate-flik-num{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;
+  color:#fff;letter-spacing:.04em;flex:1;min-width:max-content}
+.donate-copy-btn{display:inline-flex;align-items:center;gap:.35rem;background:rgba(0,191,174,.15);
+  border:1px solid rgba(0,191,174,.35);border-radius:8px;padding:.35rem .8rem;
+  color:#00bfae;font-size:.78rem;cursor:pointer;transition:background .2s,border-color .2s;white-space:nowrap}
+.donate-copy-btn:hover{background:rgba(0,191,174,.28);border-color:rgba(0,191,174,.6)}
+.donate-hint{font-size:.82rem;color:var(--muted);margin:0}
