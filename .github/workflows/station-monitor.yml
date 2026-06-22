@@ -1,0 +1,107 @@
+name: Monitor IREICA1
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # vsako uro
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Preveri svežost podatkov postaje
+        id: check
+        run: |
+          python3 - <<'PYEOF'
+          import urllib.request, json, os
+          from datetime import datetime, timezone
+
+          WU_KEY = "619a8bb3ba4d42069a8bb3ba4d02061f"
+          url = (
+              "https://api.weather.com/v2/pws/observations/current"
+              "?stationId=IREICA1&format=json&units=m&apiKey=" + WU_KEY
+          )
+
+          def write_output(**kv):
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  for k, v in kv.items():
+                      f.write(f"{k}={v}\n")
+
+          try:
+              with urllib.request.urlopen(url, timeout=10) as r:
+                  data = json.loads(r.read())
+              obs = data["observations"][0]
+              obs_time = datetime.fromisoformat(obs["obsTimeUtc"].replace("Z", "+00:00"))
+              age = int((datetime.now(timezone.utc) - obs_time).total_seconds() / 60)
+              print(f"Postaja nazadnje videna {age} min nazaj ({obs['obsTimeUtc']})")
+              status = "offline" if age > 120 else "online"
+              write_output(status=status, age=age, detail=obs["obsTimeUtc"])
+          except Exception as e:
+              print(f"Napaka API: {e}")
+              write_output(status="error", age=0, detail=str(e))
+          PYEOF
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "station-offline" \
+            --repo ${{ github.repository }} \
+            --color "E11D48" \
+            --description "Postaja IREICA1 ne oddaja podatkov" \
+            --force
+
+      - name: Odpri opozorilo (postaja ne oddaja)
+        if: steps.check.outputs.status != 'online'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STATUS="${{ steps.check.outputs.status }}"
+          AGE="${{ steps.check.outputs.age }}"
+          DETAIL="${{ steps.check.outputs.detail }}"
+
+          OPEN=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --label "station-offline" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$OPEN" ]; then
+            if [ "$STATUS" = "offline" ]; then
+              TITLE="Postaja IREICA1 ne oddaja podatkov (${AGE} min)"
+              BODY="Zadnja zabeležena meritev: **${DETAIL}** (${AGE} min nazaj).\n\nPostaja ni oddajala podatkov več kot 2 uri. Preverite napajanje, omrežno povezavo in stanje naprave."
+            else
+              TITLE="Napaka pri pridobivanju podatkov IREICA1"
+              BODY="API Weather Underground ni vrnil veljavnih podatkov.\n\nPodrobnosti: \`${DETAIL}\`\n\nPreverite WU API ključ in dostopnost storitve."
+            fi
+            gh issue create \
+              --repo ${{ github.repository }} \
+              --title "$TITLE" \
+              --body "$(printf '%b' "$BODY")" \
+              --label "station-offline"
+          fi
+
+      - name: Zapri opozorilo (postaja spet oddaja)
+        if: steps.check.outputs.status == 'online'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AGE="${{ steps.check.outputs.age }}"
+
+          OPEN=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --label "station-offline" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" \
+              --repo ${{ github.repository }} \
+              --body "Postaja spet oddaja podatke. Zadnja meritev je bila **${AGE} min** nazaj."
+            gh issue close "$OPEN" --repo ${{ github.repository }}
+          fi
