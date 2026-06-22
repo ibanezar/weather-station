@@ -3300,7 +3300,23 @@ function installApp(){
   _installPrompt.userChoice.then(()=>{_installPrompt=null;const b=document.getElementById('install-btn');if(b)b.classList.remove('show');});
 }
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('load', async () => {
+    const reg = await navigator.serviceWorker.register('./sw.js').catch(()=>null);
+    if (!reg) return;
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'REFRESH_CACHE' });
+      }
+    });
+
+    if ('periodicSync' in reg) {
+      const status = await navigator.permissions.query({ name: 'periodic-background-sync' }).catch(()=>({state:'denied'}));
+      if (status.state === 'granted') {
+        reg.periodicSync.register('weather-refresh', { minInterval: 30 * 60 * 1000 }).catch(()=>{});
+      }
+    }
+  });
 }
 
 // Tab nav scroll-fade indicator + bounce arrow
