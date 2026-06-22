@@ -126,6 +126,14 @@ def build_html(s):
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title} | Meteorec, Rečica ob Savinji</title>
 <link rel="canonical" href="{url}">
