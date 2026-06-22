@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /zasebnost.html
+Disallow: /history.json
+Disallow: /blog.json
 
 Sitemap: https://meteorec.si/sitemap.xml
