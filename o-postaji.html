@@ -176,6 +176,23 @@
     <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin:1.6rem 0 .4rem">So podatki prosto dostopni?</h3>
     <p>Da, vse meritve in mesečni povzetki na meteorec.si so prosto dostopni in brezplačni za osebno rabo.</p>
 
+    <div class="donate-box" id="donate">
+      <div class="donate-title">☕ Podpri Meteorec</div>
+      <p class="donate-desc">Meteorec je zastonjski, brez reklam in teče na lastnem strežniku. Če ti je stran koristila, jo lahko podpreš z nakazilom prek <strong>Flika</strong> — hitro, brez provizij, neposredno.</p>
+      <div class="donate-flik">
+        <div class="donate-flik-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#00BFAE"/><path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Flik</span>
+        </div>
+        <div class="donate-flik-num" id="flik-num">+386 40 558 234</div>
+        <button class="donate-copy-btn" onclick="copyFlik()" title="Kopiraj številko">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="copy-label">Kopiraj</span>
+        </button>
+      </div>
+      <p class="donate-hint">Odpri Flik, izberi <em>Plačaj</em>, vnesi znesek po lastni presoji in poišči prejemnika po tej telefonski številki.</p>
+    </div>
+
     <a class="back-link" href="/">← Nazaj na vreme v živo</a>
   </article>
 
@@ -184,6 +201,15 @@
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/o-postaji.html">O postaji</a></span>
   </footer>
 </div>
+<script>
+function copyFlik(){
+  navigator.clipboard.writeText('+38640558234').then(function(){
+    var lbl=document.getElementById('copy-label');
+    lbl.textContent='Kopirano!';
+    setTimeout(function(){lbl.textContent='Kopiraj'},2000);
+  });
+}
+</script>
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
