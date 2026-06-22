@@ -1,0 +1,80 @@
+name: IndexNow — obvesti iskalnike ob spremembi strani
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'blog/*.html'
+      - 'sitemap.xml'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Zberi spremenjene URL-je in obvesti IndexNow
+        run: |
+          python3 - <<'PYEOF'
+          import json, subprocess, urllib.request, sys
+
+          SITE = "https://meteorec.si"
+          KEY  = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+
+          # Map changed files to their public URLs
+          result = subprocess.run(
+              ["git", "diff", "--name-only", "HEAD~1", "HEAD"],
+              capture_output=True, text=True
+          )
+          changed = result.stdout.splitlines()
+
+          urls = []
+          for path in changed:
+              if path == "sitemap.xml":
+                  urls.append(f"{SITE}/sitemap.xml")
+              elif path.endswith(".html"):
+                  if path == "index.html":
+                      urls.append(f"{SITE}/")
+                  elif path.startswith("blog/") and path != "blog/index.html":
+                      slug = path[len("blog/"):]
+                      urls.append(f"{SITE}/blog/{slug}")
+                  else:
+                      urls.append(f"{SITE}/{path}")
+
+          # Always include sitemap
+          sitemap_url = f"{SITE}/sitemap.xml"
+          if sitemap_url not in urls:
+              urls.append(sitemap_url)
+
+          if not urls:
+              print("Ni sprememb HTML — IndexNow preskočen.")
+              sys.exit(0)
+
+          print(f"Pošiljam {len(urls)} URL(jev) v IndexNow:")
+          for u in urls:
+              print(f"  {u}")
+
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"{SITE}/{KEY}.txt",
+              "urlList": urls,
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} OK")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:300]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF

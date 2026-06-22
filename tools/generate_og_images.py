@@ -52,6 +52,20 @@ ARTICLES = [
         'section': 'Analize',
         'accent': (245, 158, 11),
     },
+    {
+        'slug': 'blog',
+        'title': 'Blog Meteorec',
+        'subtitle': 'Vremenski povzetki in analize · IREICA1',
+        'section': 'Blog',
+        'accent': (34, 197, 94),
+    },
+    {
+        'slug': 'o-postaji',
+        'title': 'O postaji IREICA1',
+        'subtitle': 'Rečica ob Savinji · 366 m n.m.',
+        'section': 'O postaji',
+        'accent': (168, 85, 247),
+    },
 ]
 
 
