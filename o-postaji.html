@@ -107,8 +107,46 @@
   ]
 }
 </script>
-
-
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://meteorec.si/#dataset",
+  "name": "Meritve meteorološke postaje IREICA1, Rečica ob Savinji",
+  "description": "Urne in dnevne meritve temperature, padavin, vlažnosti, hitrosti in smeri vetra ter zračnega tlaka iz osebne meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n.m.), Zgornja Savinjska dolina, Slovenija.",
+  "url": "https://meteorec.si/",
+  "identifier": "IREICA1",
+  "inLanguage": "sl",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "isAccessibleForFree": true,
+  "temporalCoverage": "2020/..",
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Rečica ob Savinji, Zgornja Savinjska dolina, Slovenija",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 46.325779,
+      "longitude": 14.921137,
+      "elevation": 366
+    }
+  },
+  "creator": { "@id": "https://meteorec.si/#person" },
+  "publisher": { "@id": "https://meteorec.si/#org" },
+  "variableMeasured": [
+    { "@type": "PropertyValue", "name": "Temperatura zraka", "unitCode": "CEL" },
+    { "@type": "PropertyValue", "name": "Relativna vlažnost", "unitCode": "P1" },
+    { "@type": "PropertyValue", "name": "Padavine", "unitCode": "MMT" },
+    { "@type": "PropertyValue", "name": "Hitrost vetra", "unitCode": "KMH" },
+    { "@type": "PropertyValue", "name": "Smer vetra", "unitCode": "DD" },
+    { "@type": "PropertyValue", "name": "Zračni tlak", "unitCode": "HPA" }
+  ],
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "https://meteorec.si/history.json"
+  }
+}
+</script>
 
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/blog/blog.css">
