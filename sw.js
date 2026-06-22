@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vreme-static-v11';
-const CACHE_API    = 'vreme-api-v11';
+const CACHE_STATIC = 'vreme-static-v12';
+const CACHE_API    = 'vreme-api-v12';
 
 // Stale-while-revalidate TTLs per host (ms)
 const API_TTL = {
@@ -51,6 +51,44 @@ async function fetchAndCache(request, cacheName) {
   caches.open(cacheName).then(c => c.put(request, stamped));
   return res;
 }
+
+const LONG_LIVED_HOSTS = new Set([
+  'fonts.googleapis.com', 'fonts.gstatic.com',
+  'cdnjs.cloudflare.com', 'unpkg.com',
+]);
+
+async function refreshStaleCache() {
+  const cache = await caches.open(CACHE_API);
+  const requests = await cache.keys();
+  await Promise.allSettled(requests
+    .filter(req => {
+      try { return !LONG_LIVED_HOSTS.has(new URL(req.url).hostname); }
+      catch { return false; }
+    })
+    .map(async req => {
+      const cached = await cache.match(req);
+      if (!cached) return;
+      const fetchedAt = parseInt(cached.headers.get('sw-fetched-at') || '0', 10);
+      const ttl = ttlFor(req.url, cached.headers);
+      if (!ttl || !fetchedAt) return;
+      if ((Date.now() - fetchedAt) > ttl * 0.5) {
+        await fetchAndCache(req, CACHE_API).catch(() => {});
+      }
+    })
+  );
+}
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'REFRESH_CACHE') {
+    event.waitUntil(refreshStaleCache());
+  }
+});
+
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'weather-refresh') {
+    event.waitUntil(refreshStaleCache());
+  }
+});
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './app.js', './manifest.json'])));
