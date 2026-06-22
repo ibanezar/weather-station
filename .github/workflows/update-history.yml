@@ -1,0 +1,33 @@
+name: Posodobi history.json
+
+on:
+  schedule:
+    - cron: '15 1 * * *'   # vsak dan ob 02:15 CET (01:15 UTC)
+  workflow_dispatch:         # ročni zagon iz GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Posodobi tekoči mesec
+        run: |
+          MONTH=$(date -u +%Y-%m)
+          python3 tools/update_history.py "$MONTH"
+
+      - name: Commit in push (samo če so spremembe)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet history.json; then
+            echo "Ni novih podatkov."
+          else
+            MONTH=$(date -u +%Y-%m)
+            git add history.json
+            git commit -m "chore: posodobi history.json za $MONTH [skip ci]"
+            git push
+          fi
