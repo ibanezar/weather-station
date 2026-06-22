@@ -29,6 +29,9 @@ jobs:
           echo "month=$MONTH" >> $GITHUB_OUTPUT
           echo "Generiranje povzetka za: $MONTH"
 
+      - name: Namesti odvisnosti
+        run: pip install Pillow --quiet
+
       - name: Generiraj objavo
         run: python3 tools/generate_monthly_post.py "${{ steps.month.outputs.month }}" --wire
 
@@ -38,7 +41,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           MONTH="${{ steps.month.outputs.month }}"
-          git add blog/ blog.json sitemap.xml
+          git add blog/ blog.json sitemap.xml og/
           if git diff --cached --quiet; then
             echo "Ni sprememb — objava za $MONTH morda že obstaja."
             echo "published=false" >> $GITHUB_OUTPUT
