@@ -1,66 +1,92 @@
 #!/usr/bin/env python3
 """
-Osveži history.json z dnevnimi povzetki iz Cloudflare workerja.
+Osveži history.json z dnevnimi povzetki iz Open-Meteo Archive API.
+API ne zahteva ključa; vrne ERA5 reanalizo za koordinate postaje.
 
     python3 tools/update_history.py 2026-06
-
-Pokliče <WORKER_URL>/ecowitt-history?start=…&end=… (z Referer glavo, da
-prebije zaščito origin), zmerja vrnjene dni v history.json in zapiše
-nazaj v istem kompaktnem formatu (urejeno po datumu).
 """
-import json, os, sys, calendar, urllib.request
+import json, os, sys, calendar, urllib.request, urllib.parse
 
-WORKER = os.environ.get("WORKER_URL", "https://weatherireica1.filip-eremita.workers.dev")
+LAT  = 46.325779
+LON  = 14.921137
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-KEYS = ("tempHigh", "tempLow", "tempAvg", "precipTotal",
-        "windspeedHigh", "windspeedAvg", "humidityAvg")
 
 def fetch(start, end):
-    url = f"{WORKER}/ecowitt-history?start={start}&end={end}"
-    req = urllib.request.Request(url, headers={
-        "Referer": "https://meteorec.si/",
-        "Origin": "https://meteorec.si",
-        "Accept": "application/json",
-        # brskalniku podoben UA — privzeti Python-urllib UA Cloudflare blokira (403)
-        "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+    params = urllib.parse.urlencode({
+        "latitude":        LAT,
+        "longitude":       LON,
+        "start_date":      start,
+        "end_date":        end,
+        "daily":           "temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,windspeed_10m_max",
+        "hourly":          "relativehumidity_2m,windspeed_10m",
+        "timezone":        "Europe/Berlin",
+        "wind_speed_unit": "kmh",
     })
+    url = f"https://archive-api.open-meteo.com/v1/archive?{params}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=45) as r:
             return json.load(r)
     except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", "replace")[:500]
-        sys.exit(f"Worker {e.code} za {url}\nOdgovor: {body}")
+        body = e.read().decode("utf-8", "replace")[:400]
+        sys.exit(f"Open-Meteo {e.code}\nOdgovor: {body}")
+    except Exception as e:
+        sys.exit(f"Napaka pri klicu Open-Meteo: {e}")
+
+def hourly_means(data, key):
+    """Returns dict {date: mean_value} from hourly data."""
+    times  = data.get("hourly", {}).get("time", [])
+    values = data.get("hourly", {}).get(key, [])
+    by_day = {}
+    for t, v in zip(times, values):
+        if v is not None:
+            by_day.setdefault(t[:10], []).append(float(v))
+    return {d: round(sum(vs) / len(vs), 1) for d, vs in by_day.items()}
 
 def main():
     if len(sys.argv) < 2:
         sys.exit("Uporaba: update_history.py YYYY-MM")
     ym = sys.argv[1]
     y, m = int(ym[:4]), int(ym[5:7])
-    start, end = f"{ym}-01", f"{ym}-{calendar.monthrange(y, m)[1]:02d}"
-    data = fetch(start, end)
-    summ = data.get("summaries") if isinstance(data, dict) else None
-    if not summ:
-        sys.exit(f"Worker ni vrnil podatkov za {ym}: {json.dumps(data)[:200]}")
+    start = f"{ym}-01"
+    end   = f"{ym}-{calendar.monthrange(y, m)[1]:02d}"
 
-    hp = os.path.join(ROOT, "history.json")
+    data  = fetch(start, end)
+    daily = data.get("daily", {})
+    dates = daily.get("time", [])
+    if not dates:
+        sys.exit(f"Open-Meteo ni vrnil podatkov za {ym}")
+
+    hum_avg  = hourly_means(data, "relativehumidity_2m")
+    wind_avg = hourly_means(data, "windspeed_10m")
+
+    hp   = os.path.join(ROOT, "history.json")
     hist = json.load(open(hp, encoding="utf-8"))
+
+    def get(key, i):
+        lst = daily.get(key, [])
+        return lst[i] if i < len(lst) else None
+
     added = 0
-    for s in summ:
-        d = s.get("obsTimeLocal", "")[:10]
-        me = s.get("metric") or {}
-        if not d.startswith(ym) or me.get("tempAvg") is None:
+    for i, date in enumerate(dates):
+        if not date.startswith(ym):
             continue
-        hum = me.get("humidityAvg")
-        hist[d] = {
-            "tempHigh": me.get("tempHigh"), "tempLow": me.get("tempLow"),
-            "tempAvg": me.get("tempAvg"), "precipTotal": me.get("precipTotal", 0),
-            "windspeedHigh": me.get("windspeedHigh"), "windspeedAvg": me.get("windspeedAvg"),
-            "humidityAvg": float(hum) if hum is not None else None,
+        t_avg = get("temperature_2m_mean", i)
+        if t_avg is None:
+            continue
+        hist[date] = {
+            "tempHigh":      get("temperature_2m_max", i),
+            "tempLow":       get("temperature_2m_min", i),
+            "tempAvg":       t_avg,
+            "precipTotal":   get("precipitation_sum",  i) or 0,
+            "windspeedHigh": get("windspeed_10m_max",  i),
+            "windspeedAvg":  wind_avg.get(date),
+            "humidityAvg":   hum_avg.get(date),
         }
         added += 1
+
     if not added:
-        sys.exit(f"Za {ym} ni uporabnih dni v odgovoru workerja.")
+        sys.exit(f"Za {ym} ni uporabnih dni v odgovoru Open-Meteo.")
 
     out = {k: hist[k] for k in sorted(hist)}
     json.dump(out, open(hp, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
