@@ -82,15 +82,18 @@ article strong{color:#fff}
 /* seznam objav (index) */
 .page-intro{color:var(--muted);margin-bottom:1.6rem}
 .post-list{list-style:none;margin-top:1rem}
-.post-card{display:block;text-decoration:none;color:inherit;background:var(--card-bg);
-  border:1px solid var(--card-border);border-radius:18px;padding:1.4rem 1.6rem;margin-bottom:1.1rem;
+.post-card{display:flex;gap:1.2rem;align-items:flex-start;text-decoration:none;color:inherit;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:18px;padding:1.1rem 1.4rem;margin-bottom:1.1rem;
   box-shadow:var(--card-shadow);transition:border-color .25s,transform .25s;
   -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 .post-card:hover{border-color:rgba(34,211,238,.45);transform:translateY(-2px)}
+.post-thumb{width:148px;height:88px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.post-card-body{flex:1;min-width:0}
 .post-card h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;margin:0 0 .4rem;letter-spacing:-.01em}
 .post-card .date{color:var(--muted);font-size:.82rem;margin-bottom:.5rem;
   font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
 .post-card p{color:var(--muted);margin:0;font-size:.95rem;line-height:1.6}
+@media(max-width:520px){.post-card{flex-direction:column;padding:.9rem 1rem}.post-thumb{width:100%;height:160px}}
 
 /* ── stat kartice ── */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin:1.4rem 0 2rem}
