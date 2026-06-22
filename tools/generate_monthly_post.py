@@ -129,6 +129,8 @@ def build_html(s):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title} | Meteorec, Rečica ob Savinji</title>
 <link rel="canonical" href="{url}">
+<link rel="alternate" hreflang="sl" href="{url}">
+<link rel="alternate" hreflang="x-default" href="{url}">
 <meta name="description" content="{desc}">
 <meta name="keywords" content="vreme {nom} {y}, Rečica ob Savinji, vremenski povzetek, IREICA1, Savinjska dolina, padavine, temperatura">
 <meta name="robots" content="index, follow">
@@ -138,20 +140,25 @@ def build_html(s):
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="{title}, Rečica ob Savinji">
 <meta property="og:description" content="{short}">
-<meta property="og:image" content="{SITE}/og-image.jpg">
+<meta property="og:image" content="{SITE}/og/{slug}.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta property="article:published_time" content="{TODAY}">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Vremenski povzetki">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}, Rečica ob Savinji">
 <meta name="twitter:description" content="{short}">
-<meta name="twitter:image" content="{SITE}/og-image.jpg">
+<meta name="twitter:image" content="{SITE}/og/{slug}.jpg">
 <script type="application/ld+json">
 {{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "{title}, Rečica ob Savinji",
   "description": "{desc}",
-  "image": "{SITE}/og-image.jpg",
+  "image": {{ "@type": "ImageObject", "url": "{SITE}/og/{slug}.jpg", "width": 1200, "height": 630 }},
+  "wordCount": "__WC__",
   "datePublished": "{TODAY}",
   "dateModified": "{TODAY}",
   "inLanguage": "sl",
@@ -172,9 +179,7 @@ def build_html(s):
   ]
 }}
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700;800&display=swap">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="blog.css">
 </head>
 <body>
@@ -221,6 +226,9 @@ def main():
     wire = "--wire" in sys.argv
     s = compute(ym)
     slug, url, title, short, html = build_html(s)
+    plain = re.sub(r'<[^>]+>', ' ', html)
+    wc = len([w for w in plain.split() if re.search(r'[a-zA-ZšđčćžŠĐČĆŽ]', w)])
+    html = html.replace('"wordCount": "__WC__",', f'"wordCount": {wc},')
     out = os.path.join(ROOT, "blog", f"{slug}.html")
     open(out, "w", encoding="utf-8").write(html)
     print(f"✓ zapisano: blog/{slug}.html  ({s['n']}/{s['dim']} dni)")
@@ -229,14 +237,14 @@ def main():
              "date": TODAY, "summary": short,
              "tags": ["povzetek", MES_NOM[s["mon"]], str(s["year"])]}
     if wire:
-        wire_all(entry, url)
+        wire_all(entry, url, stats=s)
         print("✓ posodobljeno: blog.json, blog/index.html, sitemap.xml")
     else:
         print("\n— Za blog.json dodaj:\n" + json.dumps(entry, ensure_ascii=False, indent=2))
         print(f"\n— Za sitemap.xml dodaj <url><loc>{url}</loc>…")
         print("\n(ali poženi z --wire za samodejno vpisovanje)")
 
-def wire_all(entry, url):
+def wire_all(entry, url, stats=None):
     # blog.json — vstavi na vrh (najnovejše prvo), brez podvajanja
     bj = os.path.join(ROOT, "blog.json")
     posts = json.load(open(bj, encoding="utf-8"))
@@ -245,12 +253,16 @@ def wire_all(entry, url):
     json.dump(posts, open(bj, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(bj, "a", encoding="utf-8").write("\n")
     # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav
-    sm = [(f"{SITE}/", "hourly", "1.0"), (f"{SITE}/blog/", "weekly", "0.8")]
-    sm += [(f"{SITE}{p['url']}", "monthly", "0.7") for p in posts]
+    sm = [
+        (f"{SITE}/",               "hourly",  "1.0", TODAY),
+        (f"{SITE}/blog/",          "weekly",  "0.8", TODAY),
+        (f"{SITE}/o-postaji.html", "monthly", "0.6", "2026-06-19"),
+    ]
+    sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p["date"]) for p in posts]
     body = "\n".join(
-        f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{TODAY}</lastmod>\n"
+        f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lm}</lastmod>\n"
         f"    <changefreq>{cf}</changefreq>\n    <priority>{pr}</priority>\n  </url>"
-        for loc, cf, pr in sm)
+        for loc, cf, pr, lm in sm)
     open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8").write(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + "\n</urlset>\n")
@@ -265,6 +277,21 @@ def wire_all(entry, url):
     h = re.sub(r'(<ul class="post-list">).*?(</ul>)',
                r'\1\n' + items + r'\n  \2', h, flags=re.S)
     open(idx, "w", encoding="utf-8").write(h)
+    # Try to generate per-article OG image (requires Pillow)
+    if stats:
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from generate_og_images import make_og
+            make_og({
+                'slug': entry['slug'],
+                'title': f'Vremenski povzetek\n{MES_NOM[stats["mon"]]} {stats["year"]}',
+                'subtitle': 'Rečica ob Savinji · IREICA1',
+                'section': 'Vremenski povzetki',
+                'accent': (14, 165, 233),
+            })
+            print(f"✓ OG slika: og/{entry['slug']}.jpg")
+        except Exception as e:
+            print(f"⚠ OG slika preskočena: {e}")
 
 def fmtdate(iso):
     y, m, d = iso.split("-")
