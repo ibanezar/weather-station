@@ -1,0 +1,46 @@
+name: Objavi mesečni povzetek
+
+on:
+  schedule:
+    - cron: '0 3 1 * *'   # 1. v mesecu ob 03:00 UTC (po posodobitvi history.json)
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'Mesec za generiranje (YYYY-MM, privzeto: prejšnji mesec)'
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Določi mesec
+        id: month
+        run: |
+          if [ -n "${{ github.event.inputs.month }}" ]; then
+            MONTH="${{ github.event.inputs.month }}"
+          else
+            MONTH=$(date -d "1 month ago" +%Y-%m)
+          fi
+          echo "month=$MONTH" >> $GITHUB_OUTPUT
+          echo "Generiranje povzetka za: $MONTH"
+
+      - name: Generiraj objavo
+        run: python3 tools/generate_monthly_post.py "${{ steps.month.outputs.month }}" --wire
+
+      - name: Commit in push (samo če so spremembe)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          MONTH="${{ steps.month.outputs.month }}"
+          git add blog/ blog.json sitemap.xml
+          if git diff --cached --quiet; then
+            echo "Ni sprememb — objava za $MONTH morda že obstaja."
+          else
+            git commit -m "blog: mesečni povzetek $MONTH [skip ci]"
+            git push
+          fi
