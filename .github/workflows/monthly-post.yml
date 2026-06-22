@@ -33,6 +33,7 @@ jobs:
         run: python3 tools/generate_monthly_post.py "${{ steps.month.outputs.month }}" --wire
 
       - name: Commit in push (samo če so spremembe)
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -40,7 +41,48 @@ jobs:
           git add blog/ blog.json sitemap.xml
           if git diff --cached --quiet; then
             echo "Ni sprememb — objava za $MONTH morda že obstaja."
+            echo "published=false" >> $GITHUB_OUTPUT
           else
             git commit -m "blog: mesečni povzetek $MONTH [skip ci]"
             git push
+            echo "published=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: IndexNow — obvesti iskalnike o novi objavi
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, sys
+
+          MONTH = "${{ steps.month.outputs.month }}"
+          MONTH_NAMES = {
+              "01": "januar", "02": "februar", "03": "marec",  "04": "april",
+              "05": "maj",    "06": "junij",   "07": "julij",  "08": "avgust",
+              "09": "september", "10": "oktober", "11": "november", "12": "december",
+          }
+          year, mon = MONTH[:4], MONTH[5:7]
+          slug = f"vremenski-povzetek-{MONTH_NAMES[mon]}-{year}"
+          post_url = f"https://meteorec.si/blog/{slug}.html"
+
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"https://meteorec.si/{KEY}.txt",
+              "urlList": [post_url, "https://meteorec.si/sitemap.xml"],
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} — {post_url}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF
