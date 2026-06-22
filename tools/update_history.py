@@ -6,6 +6,7 @@ API ne zahteva ključa; vrne ERA5 reanalizo za koordinate postaje.
     python3 tools/update_history.py 2026-06
 """
 import json, os, sys, calendar, urllib.request, urllib.parse
+from datetime import date as _date
 
 LAT  = 46.325779
 LON  = 14.921137
@@ -48,8 +49,10 @@ def main():
         sys.exit("Uporaba: update_history.py YYYY-MM")
     ym = sys.argv[1]
     y, m = int(ym[:4]), int(ym[5:7])
-    start = f"{ym}-01"
-    end   = f"{ym}-{calendar.monthrange(y, m)[1]:02d}"
+    start    = f"{ym}-01"
+    month_end = f"{ym}-{calendar.monthrange(y, m)[1]:02d}"
+    today    = _date.today().isoformat()
+    end      = min(month_end, today)
 
     data  = fetch(start, end)
     daily = data.get("daily", {})
