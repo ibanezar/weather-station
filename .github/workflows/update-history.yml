@@ -14,10 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Shrani število dni pred posodobitvijo
+        id: before
+        run: |
+          COUNT=$(python3 -c "import json; print(len(json.load(open('history.json'))))")
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
       - name: Posodobi tekoči mesec
         run: |
           MONTH=$(date -u +%Y-%m)
           python3 tools/update_history.py "$MONTH"
+
+      - name: Preveri celovitost history.json
+        run: |
+          MONTH=$(date -u +%Y-%m)
+          python3 tools/validate_history.py "$MONTH" "${{ steps.before.outputs.count }}"
 
       - name: Commit in push (samo če so spremembe)
         run: |
