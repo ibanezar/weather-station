@@ -151,6 +151,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}
 .sskj-entry .sskj-gram{font-style:normal;opacity:.78}
 .sskj-entry .sskj-def{font-style:italic}
+.station-intro{font-size:.82rem;color:var(--muted);line-height:1.6;max-width:640px;margin:.9rem auto 0;opacity:.8}
 .sskj-toggle{background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--muted);line-height:1;padding:0 0 0 .35rem;vertical-align:middle;opacity:.55;transition:opacity .15s}
 .sskj-toggle:hover{opacity:1}
 .status{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.6rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);flex-wrap:wrap}

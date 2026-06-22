@@ -86,6 +86,32 @@
       "name": "Filip Eremita"
     },
     {
+      "@type": "LocalBusiness",
+      "@id": "https://meteorec.si/#localbusiness",
+      "name": "Meteorec — Meteorološka postaja Rečica ob Savinji",
+      "url": "https://meteorec.si/",
+      "description": "Osebna meteorološka postaja IREICA1 pri Rečici ob Savinji (366 m n.m.) — meritve in napoved vremena v živo za Zgornjo Savinjsko dolino.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Rečica ob Savinji",
+        "addressRegion": "Zgornja Savinjska dolina",
+        "postalCode": "3332",
+        "addressCountry": "SI"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 46.325779,
+        "longitude": 14.921137,
+        "elevation": 366
+      },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "Zgornja Savinjska dolina"
+      },
+      "founder": { "@id": "https://meteorec.si/#person" },
+      "sameAs": "https://meteorec.si/"
+    },
+    {
       "@type": "WebApplication",
       "@id": "https://meteorec.si/#app",
       "name": "Meteorec",
@@ -172,10 +198,12 @@
       <h1>Meteo<em>rec</em><button class="sskj-toggle" id="sskj-toggle" title="O imenu Meteorec" onclick="document.getElementById('sskj-entry').classList.toggle('open')">ℹ</button></h1>
     </div>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-    <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi v Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
+    <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi na Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
     <p class="header-blog-link" style="margin-top:.4rem;font-size:.9rem"><a href="/blog/" style="color:var(--blue);text-decoration:none">📖 Blog &middot; vremenski povzetki</a> &middot; <a href="/o-postaji.html" style="color:var(--blue);text-decoration:none">ℹ️ O postaji</a></p>
   </header>
+
+  <p class="station-intro">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje.</p>
 
   <div class="status">
     <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje …</span></span>
@@ -243,7 +271,7 @@
   <!-- ══ TAB: AKTUALNO ══ -->
 
   <div id="tab-current" class="tab-pane active">
-  <h2 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme v Rečici ob Savinji</h2>
+  <h2 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme na Rečici ob Savinji</h2>
   <div class="hero card">
     <canvas id="hero-canvas"></canvas>
     <div class="hero-top">
