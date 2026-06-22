@@ -365,6 +365,23 @@
     </div>
   </div>
 
+  <!-- Windy Radar -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
+      <span class="chart-range">Windy · ECMWF</span>
+    </div>
+    <iframe class="windy-frame" id="windy-frame"
+      data-src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+      allowfullscreen loading="lazy"></iframe>
+    <div class="windy-consent-placeholder" id="windy-placeholder-frame">
+      <div class="windy-consent-inner">
+        <p>Interaktivni vremenski radar (<strong>Windy.com</strong>) za delovanje potrebuje piškotke tretjih oseb.</p>
+        <button class="windy-consent-btn" onclick="loadSingleWindy('windy-frame','windy-placeholder-frame')">Prikaži radar</button>
+      </div>
+    </div>
+  </div>
+
     <!-- Wind + Pressure -->
   <div class="g2">
     <div class="card">
@@ -776,24 +793,6 @@
       <div class="ltg-list" id="ltg-list"><div style="color:var(--muted);font-size:.76rem">Čakam na podatke…</div></div>
     </div>
   </div>
-
-  <!-- Windy Radar -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
-      <span class="chart-range">Windy · ECMWF</span>
-    </div>
-    <iframe class="windy-frame" id="windy-frame"
-      data-src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
-      allowfullscreen loading="lazy"></iframe>
-    <div class="windy-consent-placeholder" id="windy-placeholder-frame">
-      <div class="windy-consent-inner">
-        <p>Interaktivni vremenski radar (<strong>Windy.com</strong>) za delovanje potrebuje piškotke tretjih oseb.</p>
-        <button class="windy-consent-btn" onclick="loadSingleWindy('windy-frame','windy-placeholder-frame')">Prikaži radar</button>
-      </div>
-    </div>
-  </div>
-
 
   <!-- ══ INSIGHTS ══ -->
 <div class="insights-row">
