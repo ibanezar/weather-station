@@ -1981,6 +1981,34 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .ds-item{flex:0 0 50%;box-sizing:border-box}
   .ds-item:nth-child(odd)::before,.ds-item:nth-child(3)::before,.ds-item:nth-child(4)::before{display:none}
 }
+/* ── Zadnjih 7 dni ───────────────────────────────────── */
+.past-days-hdr{display:flex;align-items:center;margin:.2rem 0 .6rem}
+.past-days-hdr-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);font-weight:700;font-family:'JetBrains Mono',monospace}
+.past-days-scroll{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-bottom:.5rem}
+.past-days-scroll::-webkit-scrollbar{height:3px}.past-days-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pd-card{flex:0 0 calc((100% - 3rem)/7);min-width:80px;max-width:108px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.7rem .6rem .65rem;cursor:pointer;scroll-snap-align:start;transition:border-color .2s,transform .15s;position:relative;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);box-shadow:var(--card-shadow)}
+.pd-card:hover{border-color:rgba(77,159,248,.5);transform:translateY(-2px)}
+.pd-card.active{border-color:var(--blue);background:rgba(77,159,248,.08)}
+.pd-card.pd-hot{border-color:rgba(251,146,60,.6)}
+.pd-card.pd-wet{border-color:rgba(96,165,250,.6)}
+.pd-card.pd-windy{border-color:rgba(167,139,250,.6)}
+.pd-day{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.1rem}
+.pd-date{font-size:.6rem;color:var(--muted);margin-bottom:.5rem}
+.pd-temp-high{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:300;color:var(--red);line-height:1}
+.pd-temp-low{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:300;color:var(--blue);margin-top:.08rem}
+.pd-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin:.5rem 0 .45rem;position:relative;overflow:hidden}
+.pd-bar{position:absolute;top:0;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--red))}
+.pd-meta{display:flex;flex-direction:column;gap:.18rem;font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.pd-badge{position:absolute;top:.35rem;right:.4rem;font-size:.55rem}
+.pd-detail-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;display:none;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);box-shadow:var(--card-shadow);animation:fadeUp .25s ease}
+.pd-detail-wrap.open{display:block}
+.pd-detail-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.pd-detail-title{font-size:.8rem;font-weight:600;color:var(--text)}
+.pd-detail-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:0 .2rem;line-height:1;transition:color .15s}.pd-detail-close:hover{color:var(--text)}
+.pd-detail-svg{width:100%;display:block;height:110px}
+.pd-detail-stats{display:flex;gap:1.1rem;flex-wrap:wrap;margin-top:.7rem;font-size:.72rem;color:var(--muted)}
+.pd-detail-stats b{color:var(--text)}
+.pd-detail-loading{text-align:center;color:var(--muted);font-size:.78rem;padding:1.5rem 0}
 @media(max-width:380px){
   .hero{grid-template-columns:1fr auto}
   .hero-icon svg{width:72px;height:72px}
@@ -2350,6 +2378,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
     <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
+
+  <!-- ── Zadnjih 7 dni ── -->
+  <div class="past-days-hdr">
+    <span class="past-days-hdr-lbl">📅 Zadnjih 7 dni</span>
+  </div>
+  <div class="past-days-scroll" id="past-days-scroll"></div>
+  <div class="pd-detail-wrap" id="pd-detail"></div>
 
   <!-- Kaj prihaja -->
   <div class="card cu-card" id="cu-wrap">

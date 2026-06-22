@@ -2446,12 +2446,144 @@ async function autoLoadHistoryFile(){
     if(added>0){
       localStorage.setItem(LS_KEY,JSON.stringify(stored));
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
-      applyMonthlySummary();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();
+      applyMonthlySummary();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
       if(histTabActive())switchPeriod(_currentPeriod);
       const t=document.getElementById('toast');
       if(t){t.textContent='📂 history.json: uvoženih '+added+' novih dni';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
     }
   }catch(e){console.warn('[history.json]',e.message);}
+}
+
+// ── Zadnjih 7 dni strip ──────────────────────────────────
+const _PD_LAT=46.325779, _PD_LON=14.921137;
+const _PD_DAYS=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+const _PD_DAYS_FULL=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
+let _pdActiveDate=null;
+
+function renderPastDays(){
+  const wrap=document.getElementById('past-days-scroll');
+  if(!wrap)return;
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const days=[];
+  for(let i=7;i>=1;i--){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    if(stored[key]) days.push({date:key,data:stored[key]});
+  }
+  if(!days.length){
+    wrap.innerHTML='<div style="color:var(--muted);font-size:.78rem;padding:.5rem 0">Ni zadostnih podatkov v zgodovini.</div>';
+    return;
+  }
+  const maxHigh=Math.max(...days.map(d=>d.data.tempHigh??-99));
+  const maxRain=Math.max(...days.map(d=>d.data.precipTotal??0));
+  const maxWind=Math.max(...days.map(d=>d.data.windspeedHigh??0));
+  const globalLow=Math.min(...days.map(d=>d.data.tempLow??99));
+  const globalHigh=Math.max(...days.map(d=>d.data.tempHigh??-99));
+  const tempRange=Math.max(1,globalHigh-globalLow);
+  wrap.innerHTML=days.map(d=>{
+    const dt=new Date(d.date+'T12:00:00');
+    const dn=_PD_DAYS[dt.getDay()];
+    const dm=dt.getDate()+'. '+(dt.getMonth()+1)+'.';
+    const{tempHigh:h,tempLow:l,precipTotal:r,windspeedHigh:w}=d.data;
+    const isHot=(h!=null&&h===maxHigh&&maxHigh>-99);
+    const isWet=(r!=null&&r===maxRain&&maxRain>0);
+    const isWindy=(w!=null&&w===maxWind&&maxWind>0&&!isHot&&!isWet);
+    const barLeft=Math.round(((l??globalLow)-globalLow)/tempRange*100);
+    const barW=Math.max(8,Math.round(((h??globalHigh)-(l??globalLow))/tempRange*100));
+    const badge=isHot?'🌡':isWet?'💧':isWindy?'💨':'';
+    return`<div class="pd-card${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}" data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)">
+      ${badge?`<span class="pd-badge">${badge}</span>`:''}
+      <div class="pd-day">${dn}</div>
+      <div class="pd-date">${dm}</div>
+      <div class="pd-temp-high">${h!=null?h.toFixed(1):'—'}°</div>
+      <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
+      <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
+      <div class="pd-meta">
+        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.3">💧 —</span>'}</span>
+        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.3">💨 —</span>'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function togglePdDetail(date,el){
+  const panel=document.getElementById('pd-detail');
+  if(_pdActiveDate===date){
+    panel.classList.remove('open');
+    document.querySelectorAll('.pd-card').forEach(c=>c.classList.remove('active'));
+    _pdActiveDate=null;
+    return;
+  }
+  _pdActiveDate=date;
+  document.querySelectorAll('.pd-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  panel.classList.add('open');
+  panel.innerHTML='<div class="pd-detail-loading">Nalaganje urnih podatkov…</div>';
+  const dt=new Date(date+'T12:00:00');
+  const title=`${_PD_DAYS_FULL[dt.getDay()]}, ${dt.getDate()}. ${dt.getMonth()+1}. ${dt.getFullYear()}`;
+  try{
+    const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${_PD_LAT}&longitude=${_PD_LON}&start_date=${date}&end_date=${date}&hourly=temperature_2m,precipitation,windspeed_10m&timezone=Europe%2FBerlin&wind_speed_unit=kmh`;
+    const res=await fetch(url);
+    const j=await res.json();
+    const hrs=j.hourly.time.map(t=>t.slice(11,16));
+    const temps=j.hourly.temperature_2m;
+    const prec=j.hourly.precipitation;
+    const wind=j.hourly.windspeed_10m;
+    const validTemps=temps.filter(x=>x!=null);
+    const tMin=Math.min(...validTemps), tMax=Math.max(...validTemps);
+    const tRange=Math.max(0.5,tMax-tMin);
+    const totalRain=prec.reduce((a,b)=>(a||0)+(b||0),0);
+    const maxWindVal=Math.max(...wind.filter(x=>x!=null));
+    // SVG
+    const W=400,H=100,px=8,py=10;
+    const n=hrs.length;
+    const pts=temps.map((t,i)=>t!=null?[px+(i/(n-1))*(W-px*2),H-py-((t-tMin)/tRange)*(H-py*2)]:null).filter(Boolean);
+    const polyline=pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const maxPrec=Math.max(...prec.filter(x=>x!=null),0.1);
+    const rainBars=prec.map((p,i)=>{
+      if(!p||p<=0)return'';
+      const bw=Math.max(3,(W-px*2)/n*0.7);
+      const x=px+(i/(n-1))*(W-px*2)-bw/2;
+      const bh=(p/maxPrec)*(H-py*2)*0.35;
+      return`<rect x="${x.toFixed(1)}" y="${(H-py-bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="rgba(96,165,250,.4)" rx="1"/>`;
+    }).join('');
+    // x labels every 6h
+    const xlbls=[0,6,12,18].map(h=>{
+      const idx=hrs.findIndex(t=>t===`${String(h).padStart(2,'0')}:00`);
+      if(idx<0)return'';
+      const x=px+(idx/(n-1))*(W-px*2);
+      return`<text x="${x.toFixed(1)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${hrs[idx]}</text>`;
+    }).join('');
+    // y labels
+    const ylbls=[tMin,tMax].map(t=>{
+      const y=H-py-((t-tMin)/tRange)*(H-py*2);
+      return`<text x="${(W-2).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="7" fill="var(--muted)" text-anchor="end">${t.toFixed(1)}°</text>`;
+    }).join('');
+    panel.innerHTML=`
+      <div class="pd-detail-hdr">
+        <span class="pd-detail-title">📅 ${title}</span>
+        <button class="pd-detail-close" onclick="closePdDetail()">✕</button>
+      </div>
+      <svg class="pd-detail-svg" viewBox="0 0 ${W} ${H}">
+        ${rainBars}
+        <polyline points="${polyline}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        ${xlbls}${ylbls}
+      </svg>
+      <div class="pd-detail-stats">
+        <span>🌡 Najvišja <b>${tMax.toFixed(1)} °C</b></span>
+        <span>❄ Najnižja <b>${tMin.toFixed(1)} °C</b></span>
+        <span>💧 Padavine <b>${totalRain.toFixed(1)} mm</b></span>
+        <span>💨 Max veter <b>${maxWindVal.toFixed(0)} km/h</b></span>
+      </div>`;
+  }catch(e){
+    panel.innerHTML='<div class="pd-detail-loading" style="color:var(--red)">Napaka pri nalaganju podatkov za ta dan.</div>';
+  }
+}
+function closePdDetail(){
+  document.getElementById('pd-detail').classList.remove('open');
+  document.querySelectorAll('.pd-card').forEach(c=>c.classList.remove('active'));
+  _pdActiveDate=null;
 }
 
 function parseHistoryJson(raw){
@@ -13033,6 +13165,7 @@ async function init(){
   applyMoon();
   applyMonthlySummary();
   applyYearRecords();
+  renderPastDays();
   applyPhotographyWidget(null);
   initBgCanvas();
   applyWeatherBg('night');
