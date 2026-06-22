@@ -1,0 +1,123 @@
+name: Monitor ARSO opozorila
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # vsakih 15 min
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Preveri aktivna opozorila
+        id: check
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+          from datetime import datetime, timezone
+
+          # Route through the Cloudflare Worker — ARSO blocks cloud IPs directly
+          req = urllib.request.Request(
+              "https://weatherireica1.filip-eremita.workers.dev/arso-warning?region=SLOVENIA_NORTH-EAST",
+              headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Monitor/1.0)"},
+          )
+
+          def set_output(**kv):
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  for k, v in kv.items():
+                      f.write(f"{k}={v}\n")
+
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  data = json.loads(r.read())
+          except Exception as e:
+              print(f"Napaka pri klicu Worker: {e}")
+              set_output(level="none")
+              raise SystemExit(0)
+
+          alerts = data.get("alerts", [])
+          now = datetime.now(timezone.utc)
+
+          # Filter to orange/red only; re-check validEnd in case Worker included expired entries
+          significant = []
+          for a in alerts:
+              if a.get("level") not in ("orange", "red"):
+                  continue
+              valid_end = a.get("validEnd", "")
+              if valid_end:
+                  try:
+                      ve = datetime.fromisoformat(valid_end.replace("Z", "+00:00"))
+                      if ve < now:
+                          continue
+                  except Exception:
+                      pass
+              significant.append(a)
+
+          if not significant:
+              print("Ni aktivnih opozoril (oranžna/rdeča).")
+              set_output(level="none")
+          else:
+              highest = "red" if any(a["level"] == "red" for a in significant) else "orange"
+              types = ", ".join(dict.fromkeys(a.get("type", "opozorilo") for a in significant))
+              lines = []
+              for a in significant:
+                  ve = a.get("validEnd", "")
+                  vs = a.get("validStart", "")
+                  lines.append(f"- **{a['level'].upper()}** — {a.get('type', 'opozorilo')}  \n  Veljavnost: {vs} → {ve}")
+              print(f"Aktivna opozorila ({highest}): {types}")
+              set_output(level=highest, summary=types)
+              with open("/tmp/arso-body.md", "w") as f:
+                  f.write("\n".join(lines))
+          PYEOF
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "arso-alert" \
+            --repo ${{ github.repository }} \
+            --color "F97316" \
+            --description "Aktivno ARSO vremensko opozorilo" \
+            --force
+
+      - name: Odpri opozorilo (novo oranžno/rdeče opozorilo)
+        if: steps.check.outputs.level != 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --label "arso-alert" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$OPEN" ]; then
+            gh issue create \
+              --repo ${{ github.repository }} \
+              --title "ARSO opozorilo (${{ steps.check.outputs.level }}): ${{ steps.check.outputs.summary }}" \
+              --body-file /tmp/arso-body.md \
+              --label "arso-alert"
+          fi
+
+      - name: Zapri opozorilo (opozorila potekla)
+        if: steps.check.outputs.level == 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --label "arso-alert" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" \
+              --repo ${{ github.repository }} \
+              --body "Vsa opozorila so potekla ali bila umaknjena."
+            gh issue close "$OPEN" --repo ${{ github.repository }}
+          fi
