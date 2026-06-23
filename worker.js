@@ -293,7 +293,7 @@ function renderCurrentMonthPage(yr, mo, days) {
   const monNom = MES_NOM_SL[m - 1];
   const monGen = MES_GEN_SL[m - 1];
   const url = `https://meteorec.si/vreme/${yr}/${mo}/`;
-  const title = `Vreme — ${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y}, Rečica ob Savinji`;
+  const title = `Vreme — ${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y} na Rečici ob Savinji`;
   const tavgs = days.map(([,v]) => v.tempAvg).filter(x => x != null);
   const precs = days.map(([,v]) => v.precipTotal ?? 0);
   const avg = tavgs.length ? (tavgs.reduce((a,b) => a+b,0)/tavgs.length) : null;
@@ -340,7 +340,7 @@ function renderCurrentMonthPage(yr, mo, days) {
     <a href="/">Meteorec</a> › <a href="/vreme/">Vremenski arhiv</a> › <a href="/vreme/${y}/">${y}</a> › <span aria-current="page">${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y}</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-  <h1 class="page-title">${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y} — Rečica ob Savinji</h1>
+  <h1 class="page-title">${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y} — Na Rečici ob Savinji</h1>
   <p class="post-meta">Tekoče meritve · postaja IREICA1 · 366 m n. m. · ${days.length} dni</p>
   <div class="partial-note">Mesec še ni zaključen — prikazani so podatki do danes.</div>
   <div class="stat-grid">
