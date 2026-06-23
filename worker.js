@@ -276,6 +276,97 @@ function normalize(data){
 let _memCount = 1000; // začetna vrednost — nastavi po želji
 
 // ── Glavni handler ─────────────────────────────────────────
+// ── Edge-rendered weather archive page helpers ─────────────────────────────
+
+const MES_NOM_SL = ["januar","februar","marec","april","maj","junij",
+                    "julij","avgust","september","oktober","november","december"];
+const MES_GEN_SL = ["januarja","februarja","marca","aprila","maja","junija",
+                    "julija","avgusta","septembra","oktobra","novembra","decembra"];
+
+function numSl(x, d=1) {
+  if (x == null) return "—";
+  return x.toFixed(d).replace(".", ",");
+}
+
+function renderCurrentMonthPage(yr, mo, days) {
+  const y = parseInt(yr), m = parseInt(mo);
+  const monNom = MES_NOM_SL[m - 1];
+  const monGen = MES_GEN_SL[m - 1];
+  const url = `https://meteorec.si/vreme/${yr}/${mo}/`;
+  const title = `Vreme — ${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y}, Rečica ob Savinji`;
+  const tavgs = days.map(([,v]) => v.tempAvg).filter(x => x != null);
+  const precs = days.map(([,v]) => v.precipTotal ?? 0);
+  const avg = tavgs.length ? (tavgs.reduce((a,b) => a+b,0)/tavgs.length) : null;
+  const totalPrec = precs.reduce((a,b) => a+b,0);
+  const desc = `${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y} v Rečici ob Savinji: povp. temperatura ${numSl(avg)} °C, padavine ${numSl(totalPrec)} mm. Tekoče meritve postaje IREICA1.`;
+
+  const rows = days.slice().reverse().map(([date, v]) => {
+    const dd = parseInt(date.slice(8));
+    return `<tr><td><a href="/vreme/${yr}/${mo}/${String(dd).padStart(2,'0')}/">${dd}.</a></td>`
+      + `<td>${numSl(v.tempAvg)} °C</td>`
+      + `<td>${numSl(v.tempLow)} °C / ${numSl(v.tempHigh)} °C</td>`
+      + `<td>${numSl(v.precipTotal ?? 0)} mm</td>`
+      + `<td>${numSl(v.windspeedHigh)} km/h</td></tr>`;
+  }).join("\n");
+
+  return `<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} | Meteorec</title>
+<link rel="canonical" href="${url}">
+<meta name="description" content="${desc}">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${desc}">
+<meta property="og:url" content="${url}">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:locale" content="sl_SI">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/blog/blog.css">
+<link rel="stylesheet" href="/vreme/vreme.css">
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/"><img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+    <span class="brand-name">Meteo<em>rec</em></span></a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/vreme/">Arhiv</a></nav>
+  </header>
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/vreme/">Vremenski arhiv</a> › <a href="/vreme/${y}/">${y}</a> › <span aria-current="page">${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y}</span>
+  </nav>
+  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+  <h1 class="page-title">${monNom.charAt(0).toUpperCase() + monNom.slice(1)} ${y} — Rečica ob Savinji</h1>
+  <p class="post-meta">Tekoče meritve · postaja IREICA1 · 366 m n. m. · ${days.length} dni</p>
+  <div class="partial-note">Mesec še ni zaključen — prikazani so podatki do danes.</div>
+  <div class="stat-grid">
+    <div class="stat-card c-temp"><div class="sc-label">Povp. temperatura</div><div class="sc-val">${numSl(avg)} °C</div></div>
+    <div class="stat-card c-rain"><div class="sc-label">Padavine skupaj</div><div class="sc-val">${numSl(totalPrec)} mm</div></div>
+  </div>
+  <h2>Dnevi v mesecu</h2>
+  <table class="stats day-table">
+    <thead><tr><th>Dan</th><th>Povp. T</th><th>Min / Max T</th><th>Padavine</th><th>Sunek</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina (366 m n. m.).</p>
+  <nav class="month-nav">
+    <a href="/vreme/${y}/">← ${y}</a>
+    <a href="/vreme/">Vsi arhivi</a>
+    <span></span>
+  </nav>
+  <footer class="site-foot">
+    <span>© ${y} Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a></span>
+  </footer>
+</div>
+</body>
+</html>`;
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
@@ -284,6 +375,41 @@ export default {
 
     const url  = new URL(request.url);
     const path = url.pathname;
+
+    // ── /vreme/YYYY/MM/ — edge-rendered current month archive page ─────────
+    // Only intercepts when Worker is deployed as a route on meteorec.si.
+    // Pass-through (fetch(request)) lets GitHub Pages serve historical months.
+    const vremeMonthMatch = path.match(/^\/vreme\/(\d{4})\/(\d{2})\/?$/);
+    if (vremeMonthMatch) {
+      const [, yr, mo] = vremeMonthMatch;
+      const now = new Date();
+      const isCurrentMonth = (parseInt(yr) === now.getUTCFullYear() &&
+                              parseInt(mo) === now.getUTCMonth() + 1);
+      if (!isCurrentMonth) {
+        return fetch(request);
+      }
+      try {
+        const histResp = await fetch("https://meteorec.si/history.json",
+          { cf: { cacheTtl: 3600, cacheEverything: true } });
+        if (!histResp.ok) return fetch(request);
+        const hist = await histResp.json();
+        const prefix = `${yr}-${mo}`;
+        const days = Object.entries(hist)
+          .filter(([d]) => d.startsWith(prefix))
+          .sort(([a], [b]) => a < b ? -1 : 1);
+        if (!days.length) return fetch(request);
+        const html = renderCurrentMonthPage(yr, mo, days);
+        return new Response(html, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "s-maxage=3600, stale-while-revalidate=86400",
+            "X-Rendered-By": "worker",
+          },
+        });
+      } catch (_) {
+        return fetch(request);
+      }
+    }
 
     // /ai-debug is openable directly in a browser for troubleshooting
     if (!isAllowedOrigin(request) && path !== "/ai-debug") {

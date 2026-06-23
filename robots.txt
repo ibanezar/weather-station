@@ -5,3 +5,4 @@ Disallow: /history.json
 Disallow: /blog.json
 
 Sitemap: https://meteorec.si/sitemap.xml
+Sitemap: https://meteorec.si/sitemap-weather.xml
