@@ -15753,31 +15753,34 @@ function generateWeatherCard() {
   ctx.beginPath(); ctx.moveTo(PAD, 102); ctx.lineTo(W - PAD, 102); ctx.stroke();
 
   // ── Temperature ──
+  // Vertically center the content block (temp + label + feels) between
+  // the divider (y=102) and the metrics strip (y=482)
+  const TEMP_BASE = 315;
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   ctx.font = "800 168px 'Space Grotesk', sans-serif";
   ctx.fillStyle = tColor;
-  ctx.fillText(temp, PAD, 370);
+  ctx.fillText(temp, PAD, TEMP_BASE);
   const tempW = ctx.measureText(temp).width;
-  // °C — superscript: top-aligned with cap height of the numeral
-  ctx.font = "700 52px 'Space Grotesk', sans-serif";
+  // °C superscript — cap-top aligned with numerals
+  ctx.font = "700 44px 'Space Grotesk', sans-serif";
   ctx.fillStyle = 'rgba(173,192,216,0.6)';
-  ctx.fillText('°C', PAD + tempW + 10, 370 - 168 * 0.72 + 52 * 0.72);
+  ctx.fillText('°C', PAD + tempW + 10, TEMP_BASE - 168 * 0.72 + 44 * 0.72);
 
-  // Condition label (text only — large emoji already shown on right)
+  // Condition label
   ctx.font = "700 30px 'Space Grotesk', sans-serif";
   ctx.fillStyle = '#c8daf0';
-  ctx.fillText(condLabel, PAD, 418);
+  ctx.fillText(condLabel, PAD, TEMP_BASE + 47);
 
   // Feels / dew
   ctx.font = "400 18px 'Inter', sans-serif";
   ctx.fillStyle = '#6a8eae';
-  ctx.fillText('Občutena: ' + feels + ' °C  ·  Rosišče: ' + dewpt + ' °C', PAD, 452);
+  ctx.fillText('Občutena: ' + feels + ' °C  ·  Rosišče: ' + dewpt + ' °C', PAD, TEMP_BASE + 81);
 
   // ── Large condition emoji (right) ──
   ctx.font = "128px 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',serif";
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.globalAlpha = 0.9;
-  ctx.fillText(condIcon, 960, 275);
+  ctx.fillText(condIcon, 960, 255);
   ctx.globalAlpha = 1;
 
   // ── Metrics strip ──
