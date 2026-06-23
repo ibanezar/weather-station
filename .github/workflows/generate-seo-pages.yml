@@ -1,0 +1,31 @@
+name: Generate SEO pages
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # 4:00 UTC daily (5:00 CET / 6:00 CEST)
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate SEO pages
+        run: python3 tools/generate_seo_pages.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add vreme/ rekord/ pojavi/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi programatske strani $(date -u +%Y-%m-%d) [skip ci]"
+          git push

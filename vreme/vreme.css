@@ -1,0 +1,87 @@
+/* Meteorec vremenski arhiv — dodatni slogi (gredo na vrh /blog/blog.css) */
+
+/* ── Dan-nav: prejšnji/naslednji dan ── */
+.day-nav{display:flex;justify-content:space-between;align-items:center;
+  margin:2rem 0 1rem;gap:.5rem;flex-wrap:wrap}
+.day-nav a,.day-nav span{color:var(--cyan);text-decoration:none;font-size:.9rem;font-weight:600;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;
+  padding:.45rem .9rem;min-width:90px;text-align:center;white-space:nowrap}
+.day-nav a:hover{border-color:rgba(34,211,238,.5)}
+.day-nav span{color:var(--muted);border-color:transparent;background:transparent}
+
+/* ── Mrežni prikaz let/mesecev ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:.75rem;margin:1.4rem 0 2rem}
+.year-card,.month-card,.phenom-card{display:block;text-decoration:none;color:inherit;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.2rem;transition:border-color .2s,transform .2s;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.year-card:hover,.month-card:hover,.phenom-card:hover{border-color:rgba(34,211,238,.45);transform:translateY(-2px)}
+.yc-year,.mc-month{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.6rem;
+  color:#fff;line-height:1.1;margin-bottom:.3rem}
+.yc-range,.mc-days{font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.04em;margin-bottom:.4rem}
+.yc-stats,.mc-stats{font-size:.85rem;color:var(--cyan);font-weight:600}
+.phenom-card{text-align:center;font-size:1.05rem;font-weight:600;color:var(--text);padding:1.3rem}
+.phenom-card .ph-icon{font-size:1.8rem;display:block;margin-bottom:.4rem}
+.phenom-card .ph-count{font-size:.78rem;color:var(--muted);margin-top:.3rem}
+
+/* ── Pojavi badge-i ── */
+.badges{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0 1.4rem}
+.badges a{text-decoration:none}
+.badge-frost,.badge-hot,.badge-rain{
+  display:inline-block;border-radius:20px;padding:3px 12px;
+  font-size:.75rem;font-weight:600;letter-spacing:.04em;
+  border:1px solid}
+.badge-frost{color:#93c5fd;background:rgba(147,197,253,.1);border-color:rgba(147,197,253,.35)}
+.badge-hot{color:#fb923c;background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.35)}
+.badge-rain{color:#60a5fa;background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.35)}
+
+/* ── Dnevna tabela na mesečni strani ── */
+.day-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:.82rem;white-space:nowrap}
+.day-table td:first-child a{color:var(--cyan);text-decoration:none}
+.day-table td:first-child a:hover{text-decoration:underline}
+.day-table .frost-row{background:rgba(147,197,253,.05)}
+.day-table .hot-row{background:rgba(251,146,60,.05)}
+.day-table .rain-row{background:rgba(96,165,250,.05)}
+
+/* ── Mesečni nav (prejšnji/naslednji) ── */
+.month-nav{display:flex;justify-content:space-between;align-items:center;
+  margin:1.8rem 0 .8rem;gap:.5rem}
+.month-nav a,.month-nav span{color:var(--cyan);text-decoration:none;font-size:.88rem;font-weight:600;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;
+  padding:.5rem 1rem;text-align:center}
+.month-nav a:hover{border-color:rgba(34,211,238,.5)}
+.month-nav span{color:var(--muted);border-color:transparent;background:transparent}
+
+/* ── Opomba pod tabelo ── */
+.muted-note{color:var(--muted);font-size:.82rem;margin:.4rem 0 1.4rem;line-height:1.5}
+
+/* ── Sezonski barvni poudarki ── */
+.season-pomlad{color:#86efac}.season-poletje{color:var(--amber)}
+.season-jesen{color:#fb923c}.season-zima{color:#93c5fd}
+
+/* ── Rekordi ── */
+.record-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.5rem;color:#fff}
+.record-date{font-size:.82rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* ── Kratka predstavitev arhiva (intro blok) ── */
+.archive-intro{color:var(--muted);font-size:.97rem;margin-bottom:1.6rem;line-height:1.7}
+.archive-intro a{color:var(--cyan);text-decoration:none}
+.archive-intro a:hover{text-decoration:underline}
+
+/* ── Vsi-časi povzetek (za arhivno stran) ── */
+.all-time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:.75rem;margin:1rem 0 2rem}
+.at-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1.1rem;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.at-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.1em;font-family:'JetBrains Mono',monospace}
+.at-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;
+  line-height:1.1;color:#fff;margin:.15rem 0 .1rem}
+.at-val.cold{color:#93c5fd}.at-val.hot{color:var(--amber)}.at-val.rain{color:#60a5fa}
+.at-sub{font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* ── partial-opomba (za tekoči mesec) ── */
+.partial-note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.28);
+  border-radius:12px;padding:.8rem 1rem;margin:1.2rem 0;font-size:.88rem;color:var(--amber)}
