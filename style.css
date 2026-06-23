@@ -2093,3 +2093,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .windy-consent-inner p{font-size:.82rem;color:var(--muted);margin-bottom:.85rem;line-height:1.5}
 .windy-consent-btn{border:none;border-radius:8px;padding:.5rem 1.1rem;background:var(--blue);color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .15s}
 .windy-consent-btn:hover{opacity:.85}
+/* Share card button */
+.share-card-btn{margin-left:auto}
+.share-card-btn:hover{border-color:var(--cyan);color:var(--cyan)}

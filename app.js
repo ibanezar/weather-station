@@ -15682,3 +15682,211 @@ ${mlbls}
 
 // ═══ end METEO NERD ════════════════════════════════════════
 
+// ═══ WEATHER CARD GENERATOR ════════════════════════════════
+
+function generateWeatherCard() {
+  const W = 1200, H = 630, PAD = 60;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#030812');
+  bg.addColorStop(0.55, '#080f1e');
+  bg.addColorStop(1, '#0c1a30');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Cyan glow top-left
+  const g1 = ctx.createRadialGradient(230, 290, 0, 230, 290, 520);
+  g1.addColorStop(0, 'rgba(56,189,248,0.13)'); g1.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+
+  // Indigo glow bottom-right
+  const g2 = ctx.createRadialGradient(W - 160, H - 80, 0, W - 160, H - 80, 380);
+  g2.addColorStop(0, 'rgba(99,102,241,0.10)'); g2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+
+  // ── Live data ──
+  const temp      = document.getElementById('temp-val')?.textContent?.trim() || '—';
+  const condIcon  = document.getElementById('cond-icon')?.textContent?.trim() || '';
+  const condLabel = document.getElementById('cond-label')?.textContent?.trim() || '—';
+  const feels     = document.getElementById('feels-val')?.textContent?.trim() || '—';
+  const dewpt     = document.getElementById('dewpt-hero')?.textContent?.trim() || '—';
+  const updated   = document.getElementById('updated')?.textContent?.trim() || '';
+
+  const numOf = id => {
+    const el = document.getElementById(id);
+    if (!el) return '—';
+    const t = el.firstChild?.nodeValue?.trim();
+    return t || el.textContent.trim();
+  };
+  const humidity = numOf('hs-humidity');
+  const pressure = numOf('hs-pressure');
+  const wind     = numOf('hs-wind');
+  const rain     = numOf('hs-rain-today');
+  const uv       = document.getElementById('hs-uv')?.textContent?.trim() || '—';
+
+  // Temperature colour (always dark-palette)
+  const t = parseFloat(temp);
+  const tColor = isNaN(t) ? '#e8edf8'
+    : t < 0  ? '#bae6fd' : t < 8  ? '#67e8f9' : t < 15 ? '#6ee7b7'
+    : t < 22 ? '#f1f5f9' : t < 28 ? '#fcd34d' : t < 35 ? '#fb923c' : '#f87171';
+
+  // ── Header ──
+  const LOGO = 52;
+  _cardLogo(ctx, PAD, 34, LOGO);
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.font = "800 34px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = '#e8edf8';
+  ctx.fillText('Meteo', PAD + LOGO + 12, 34 + LOGO / 2);
+  const mw = ctx.measureText('Meteo').width;
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('rec', PAD + LOGO + 12 + mw, 34 + LOGO / 2);
+  ctx.textAlign = 'right';
+  ctx.font = "400 18px 'Inter', sans-serif";
+  ctx.fillStyle = '#6a8eae';
+  ctx.fillText('📍 Rečica ob Savinji · 366 m n.m.', W - PAD, 34 + LOGO / 2);
+
+  // Divider
+  ctx.strokeStyle = 'rgba(56,189,248,0.18)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD, 102); ctx.lineTo(W - PAD, 102); ctx.stroke();
+
+  // ── Temperature ──
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.font = "800 168px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = tColor;
+  ctx.fillText(temp, PAD, 400);
+  const tempW = ctx.measureText(temp).width;
+  ctx.font = "700 54px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = 'rgba(173,192,216,0.55)';
+  ctx.fillText('°C', PAD + tempW + 8, 268);
+
+  // Condition label
+  ctx.font = "600 28px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = '#c4d8f0';
+  ctx.fillText(condIcon + '  ' + condLabel, PAD, 448);
+
+  // Feels / dew
+  ctx.font = "400 18px 'Inter', sans-serif";
+  ctx.fillStyle = '#6a8eae';
+  ctx.fillText('Občutena: ' + feels + ' °C  ·  Rosišče: ' + dewpt + ' °C', PAD, 484);
+
+  // ── Large condition emoji (right) ──
+  ctx.font = "134px 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',serif";
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = 0.88;
+  ctx.fillText(condIcon, 970, 290);
+  ctx.globalAlpha = 1;
+
+  // ── Metrics strip ──
+  const MX = PAD - 14, MY = H - 148, MW = W - (MX * 2), MH = 98;
+  ctx.fillStyle = 'rgba(56,189,248,0.055)';
+  _cardRRect(ctx, MX, MY, MW, MH, 16); ctx.fill();
+  ctx.strokeStyle = 'rgba(56,189,248,0.14)'; ctx.lineWidth = 1;
+  _cardRRect(ctx, MX, MY, MW, MH, 16); ctx.stroke();
+
+  const metrics = [
+    { label: 'Vlažnost',  value: humidity, unit: '%'    },
+    { label: 'Tlak',      value: pressure, unit: 'hPa'  },
+    { label: 'Veter',     value: wind,     unit: 'km/h' },
+    { label: 'Padavine',  value: rain,     unit: 'mm'   },
+    { label: 'UV indeks', value: uv,       unit: ''     },
+  ];
+  const colW = MW / metrics.length;
+  metrics.forEach((m, i) => {
+    const cx = MX + colW * i + colW / 2;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = "400 14px 'Inter', sans-serif";
+    ctx.fillStyle = '#6a8eae';
+    ctx.fillText(m.label, cx, MY + 26);
+    ctx.font = "700 26px 'Space Grotesk', sans-serif";
+    ctx.fillStyle = '#dde8f8';
+    ctx.fillText(m.value + (m.unit ? ' ' + m.unit : ''), cx, MY + 66);
+    if (i < metrics.length - 1) {
+      ctx.strokeStyle = 'rgba(56,189,248,0.13)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(MX + colW * (i + 1), MY + 10);
+      ctx.lineTo(MX + colW * (i + 1), MY + MH - 10);
+      ctx.stroke();
+    }
+  });
+
+  // ── Footer ──
+  ctx.textBaseline = 'middle';
+  ctx.font = "400 15px 'Inter', sans-serif";
+  ctx.fillStyle = 'rgba(106,142,174,0.55)';
+  ctx.textAlign = 'left';
+  ctx.fillText(updated, PAD, H - 24);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(56,189,248,0.65)';
+  ctx.font = "600 16px 'Inter', sans-serif";
+  ctx.fillText('meteorec.si', W - PAD, H - 24);
+
+  // ── Download ──
+  cvs.toBlob(blob => {
+    const a = document.createElement('a');
+    a.download = 'meteorec-karta.png';
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, 'image/png');
+}
+
+function _cardLogo(ctx, x, y, size) {
+  const s = size / 64;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+
+  // Sun
+  const sunG = ctx.createLinearGradient(0, 0, 64, 64);
+  sunG.addColorStop(0, '#fde68a'); sunG.addColorStop(1, '#f59e0b');
+  ctx.fillStyle = sunG;
+  ctx.beginPath(); ctx.arc(32, 24, 10, 0, Math.PI * 2); ctx.fill();
+
+  // Rays
+  ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  [[32,4,32,9],[46,10,42.5,13.5],[18,10,21.5,13.5]].forEach(([x1,y1,x2,y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  });
+
+  // Mountains
+  const mtnG = ctx.createLinearGradient(0, 0, 0, 64);
+  mtnG.addColorStop(0, '#38bdf8'); mtnG.addColorStop(1, '#6366f1');
+  ctx.fillStyle = mtnG;
+  ctx.beginPath();
+  ctx.moveTo(4,50); ctx.lineTo(22,30); ctx.lineTo(33,42);
+  ctx.lineTo(44,24); ctx.lineTo(60,50); ctx.closePath(); ctx.fill();
+
+  // Snow caps
+  ctx.fillStyle = 'rgba(224,242,254,0.85)';
+  ctx.beginPath(); ctx.moveTo(44,24); ctx.lineTo(50,38); ctx.lineTo(38,38); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(22,30); ctx.lineTo(28,39); ctx.lineTo(16,39); ctx.closePath(); ctx.fill();
+
+  // Wave
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(4,54);
+  ctx.quadraticCurveTo(12,50,18,54);
+  ctx.quadraticCurveTo(26,50,32,54);
+  ctx.quadraticCurveTo(40,50,46,54);
+  ctx.quadraticCurveTo(54,50,60,54);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function _cardRRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
