@@ -2876,5 +2876,16 @@
 </script>
 
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+<!-- Weather card preview modal -->
+<div id="card-modal" class="card-modal-overlay" onclick="closeCardModal(event)">
+  <div class="card-modal-box">
+    <button class="card-modal-close" onclick="closeCardModal()" title="Zapri">✕</button>
+    <img id="card-modal-img" class="card-modal-img" src="" alt="Meteorec karta">
+    <div class="card-modal-actions">
+      <button class="card-modal-dl" onclick="downloadWeatherCard()">⬇ Prenesi PNG</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -2096,3 +2096,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 /* Share card button */
 .share-card-btn{margin-left:auto}
 .share-card-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+/* Weather card modal */
+.card-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.card-modal-overlay.open{display:flex}
+.card-modal-box{position:relative;background:#080f1e;border:1px solid rgba(56,189,248,.2);border-radius:16px;padding:1.25rem;max-width:min(860px,calc(100vw - 2rem));width:100%;box-shadow:0 24px 64px rgba(0,0,0,.75)}
+.card-modal-close{position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:32px;height:32px;color:#adc0d8;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s}
+.card-modal-close:hover{background:rgba(255,255,255,.15)}
+.card-modal-img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid rgba(56,189,248,.1)}
+.card-modal-actions{display:flex;justify-content:center;margin-top:1rem;gap:.75rem}
+.card-modal-dl{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.5rem;background:#38bdf8;color:#030812;border:none;border-radius:50px;font-size:.84rem;font-weight:700;cursor:pointer;transition:opacity .18s;font-family:'Inter',sans-serif}
+.card-modal-dl:hover{opacity:.85}

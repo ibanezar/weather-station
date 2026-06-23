@@ -15823,17 +15823,34 @@ function generateWeatherCard() {
   ctx.font = "600 16px 'Inter', sans-serif";
   ctx.fillText('meteorec.si', W - PAD, H - 24);
 
-  // ── Download ──
+  // ── Show preview modal ──
   try {
-    const a = document.createElement('a');
-    a.download = 'meteorec-karta.png';
-    a.href = cvs.toDataURL('image/png');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const dataUrl = cvs.toDataURL('image/png');
+    _cardModalDataUrl = dataUrl;
+    document.getElementById('card-modal-img').src = dataUrl;
+    document.getElementById('card-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
   } catch(e) {
     console.error('Weather card error:', e);
   }
+}
+
+let _cardModalDataUrl = '';
+
+function closeCardModal(e) {
+  if (e && e.target !== document.getElementById('card-modal')) return;
+  document.getElementById('card-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function downloadWeatherCard() {
+  if (!_cardModalDataUrl) return;
+  const a = document.createElement('a');
+  a.download = 'meteorec-karta.png';
+  a.href = _cardModalDataUrl;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function _cardLogo(ctx, x, y, size) {
