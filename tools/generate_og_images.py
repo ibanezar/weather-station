@@ -53,6 +53,13 @@ ARTICLES = [
         'accent': (245, 158, 11),
     },
     {
+        'slug': 'junij-2026-dvoglavi-mesec',
+        'title': 'Junij 2026:\ndvoglavi mesec',
+        'subtitle': '162 mm dežja in 30,1 °C · IREICA1',
+        'section': 'Analize',
+        'accent': (77, 159, 248),
+    },
+    {
         'slug': 'blog',
         'title': 'Blog Meteorec',
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
