@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LE8PJ1HR8B');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vremenske trende — Rečica ob Savinji | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/trendi/">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/trendi/">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/trendi/">
+<meta name="description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://meteorec.si/trendi/">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Vremenske trende — Rečica ob Savinji">
+<meta property="og:description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vremenske trende — Rečica ob Savinji">
+<meta name="twitter:description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/trendi/","name":"Vremenske trende — Rečica ob Savinji","description":"Interaktivni grafi temperature, padavin in vetra za postajo IREICA1 v Rečici ob Savinji od novembra 2019.","url":"https://meteorec.si/trendi/","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Trende"}]}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/blog/blog.css">
+<style>
+.range-btns{display:flex;gap:.45rem;margin:.6rem 0 1.6rem;flex-wrap:wrap}
+.range-btn{background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;
+  padding:.3rem .85rem;color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+  transition:border-color .18s,color .18s;-webkit-appearance:none}
+.range-btn:hover{border-color:rgba(34,211,238,.4);color:var(--cyan)}
+.range-btn.active{border-color:rgba(34,211,238,.6);color:var(--cyan);background:rgba(34,211,238,.06)}
+.chart-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;
+  padding:1.2rem 1rem .6rem;margin:0 0 1.2rem;
+  -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.chart-label{font-size:.63rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.75rem}
+.chart-div{width:100%;height:200px}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.5rem}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.leg-dot{width:10px;height:3px;border-radius:2px}
+.loading{text-align:center;color:var(--muted);padding:3rem 0;font-size:.92rem}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Vreme v živo</a>
+      <a href="/blog/">Blog</a>
+      <a href="/vreme/">Arhiv</a>
+    </nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <span aria-current="page">Trende</span>
+  </nav>
+
+  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+  <h1 class="page-title">Vremenske trende</h1>
+  <p class="page-intro">Interaktivni grafi meritev postaje <strong>IREICA1</strong> od novembra 2019.
+  Povleci za pomik po času, kolešček miške za povečavo. Vsi trije grafi so usklajeni.</p>
+
+  <div class="range-btns" role="group" aria-label="Časovno obdobje">
+    <button class="range-btn" data-days="30">30 dni</button>
+    <button class="range-btn" data-days="90">90 dni</button>
+    <button class="range-btn" data-days="365">1 leto</button>
+    <button class="range-btn active" data-days="0">Vse</button>
+  </div>
+
+  <div id="loading" class="loading">Nalagam podatke…</div>
+
+  <div id="charts" hidden>
+    <div class="chart-wrap">
+      <div class="chart-label">Temperatura</div>
+      <div class="chart-div" id="chart-temp"></div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:#fb923c"></span>Maks.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#f59e0b;height:2px"></span>Povp.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#4d9ff8"></span>Min.</span>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">Padavine (mm/dan)</div>
+      <div class="chart-div" id="chart-rain"></div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">Veter — maks. sunki (km/h)</div>
+      <div class="chart-div" id="chart-wind"></div>
+    </div>
+  </div>
+
+  <footer class="site-foot">
+    <span>© 2025 Meteorec · Filip Eremita</span>
+    <a href="/o-postaji.html">O postaji</a>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+(async () => {
+  const fmt = n => n == null ? '—' : n.toFixed(1).replace('.', ',');
+
+  let raw;
+  try {
+    const resp = await fetch('/history.json');
+    raw = await resp.json();
+  } catch (e) {
+    document.getElementById('loading').textContent = 'Napaka pri nalaganju podatkov.';
+    return;
+  }
+
+  const entries = Object.entries(raw).sort(([a], [b]) => (a < b ? -1 : 1));
+  const dates     = entries.map(([d]) => d);
+  const tempHigh  = entries.map(([, v]) => v.tempHigh  ?? null);
+  const tempLow   = entries.map(([, v]) => v.tempLow   ?? null);
+  const tempAvg   = entries.map(([, v]) => v.tempAvg   ?? null);
+  const precip    = entries.map(([, v]) => v.precipTotal ?? null);
+  const windHigh  = entries.map(([, v]) => v.windspeedHigh ?? null);
+
+  document.getElementById('loading').hidden = true;
+  document.getElementById('charts').hidden = false;
+
+  const C = {
+    amber:  '#f59e0b',
+    blue:   '#4d9ff8',
+    hot:    '#fb923c',
+    rain:   '#60a5fa',
+    purple: '#a78bfa',
+    muted:  '#adc0d8',
+    grid:   'rgba(255,255,255,0.07)',
+    tooltip: { bg: 'rgba(4,7,14,0.94)', border: 'rgba(255,255,255,0.12)', text: '#e8edf8' },
+  };
+
+  function baseOption(series, yUnit) {
+    return {
+      backgroundColor: 'transparent',
+      animation: false,
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: C.tooltip.bg,
+        borderColor: C.tooltip.border,
+        textStyle: { color: C.tooltip.text, fontSize: 12, fontFamily: 'Inter, system-ui, sans-serif' },
+        axisPointer: { lineStyle: { color: 'rgba(255,255,255,0.15)', type: 'dashed' } },
+        formatter(params) {
+          const d = params[0].axisValue;
+          const rows = params.map(p => {
+            const val = p.value == null ? '—' : fmt(p.value) + ' ' + yUnit;
+            return `<span style="color:${p.color}">●</span> ${p.seriesName}: <b>${val}</b>`;
+          });
+          return `<div style="font-size:11px;color:${C.muted};margin-bottom:4px">${d}</div>` + rows.join('<br>');
+        },
+      },
+      grid: { top: 8, bottom: 56, left: 46, right: 12 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: C.grid } },
+        axisTick: { show: false },
+        axisLabel: { color: C.muted, fontSize: 10, hideOverlap: true,
+          formatter: v => v.slice(0, 7) },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: C.muted, fontSize: 10,
+          formatter: v => v.toFixed(0) },
+        splitLine: { lineStyle: { color: C.grid } },
+      },
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0, end: 100,
+          zoomOnMouseWheel: true,
+          moveOnMouseMove: true,
+          moveOnMouseWheel: false,
+        },
+        {
+          type: 'slider',
+          bottom: 2, height: 18,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(255,255,255,0.03)',
+          fillerColor: 'rgba(34,211,238,0.1)',
+          handleStyle: { color: '#22d3ee', borderColor: '#22d3ee' },
+          moveHandleStyle: { color: '#22d3ee' },
+          textStyle: { color: C.muted, fontSize: 9 },
+          emphasis: { handleStyle: { color: '#22d3ee' } },
+          showDetail: false,
+        },
+      ],
+      series,
+    };
+  }
+
+  function line(name, data, color, width = 1, opacity = 0.7) {
+    return {
+      name, type: 'line', data,
+      symbol: 'none',
+      lineStyle: { color, width, opacity },
+      itemStyle: { color },
+    };
+  }
+
+  function area(name, data, color, lineWidth = 1, areaOpacity = 0.08) {
+    return {
+      ...line(name, data, color, lineWidth),
+      areaStyle: { color, opacity: areaOpacity },
+    };
+  }
+
+  // ── Temperature ──
+  const cTemp = echarts.init(document.getElementById('chart-temp'));
+  cTemp.setOption(baseOption([
+    area('Min. T',  tempLow,  C.blue,  1,   0.07),
+    line('Povp. T', tempAvg,  C.amber, 1.5),
+    area('Maks. T', tempHigh, C.hot,   1,   0.06),
+  ], '°C'));
+
+  // ── Precipitation ──
+  const cRain = echarts.init(document.getElementById('chart-rain'));
+  const rainOpt = baseOption([{
+    name: 'Padavine', type: 'bar', data: precip,
+    itemStyle: { color: C.rain, borderRadius: [2, 2, 0, 0] },
+    barMaxWidth: 5,
+    large: true,
+  }], 'mm');
+  rainOpt.xAxis.boundaryGap = true;
+  cRain.setOption(rainOpt);
+
+  // ── Wind ──
+  const cWind = echarts.init(document.getElementById('chart-wind'));
+  cWind.setOption(baseOption([
+    area('Maks. sunek', windHigh, C.purple, 1, 0.09),
+  ], 'km/h'));
+
+  // ── Sync dataZoom across all three charts ──
+  const charts = [cTemp, cRain, cWind];
+  let syncing = false;
+  charts.forEach((c, i) => {
+    c.on('dataZoom', e => {
+      if (syncing) return;
+      syncing = true;
+      const src = e.batch ? e.batch[0] : e;
+      charts.filter((_, j) => j !== i).forEach(other => {
+        other.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start: src.start, end: src.end });
+        other.dispatchAction({ type: 'dataZoom', dataZoomIndex: 1, start: src.start, end: src.end });
+      });
+      syncing = false;
+    });
+  });
+
+  // ── Sync tooltip crosshair ──
+  echarts.connect(charts);
+
+  // ── Range buttons ──
+  document.querySelectorAll('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const days = +btn.dataset.days;
+      const start = days === 0 ? 0 : Math.max(0, 100 - (days / dates.length) * 100);
+      charts.forEach(c => {
+        c.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start, end: 100 });
+        c.dispatchAction({ type: 'dataZoom', dataZoomIndex: 1, start, end: 100 });
+      });
+    });
+  });
+
+  // ── Resize ──
+  window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+})();
+</script>
+</body>
+</html>
