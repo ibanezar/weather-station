@@ -1900,7 +1900,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia']};
+const DD_TABS={fc:['forecast2','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia','glossary']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -2146,6 +2146,7 @@ function switchTab(tab){
     else _runAnalysis();
   }
   if(tab==='trivia'){    initTrivia(); buildTriviaNature(); buildProverbStats(); }
+  if(tab==='glossary'){  initGlossary(); }
   if(tab==='forecast2'){ if(!_fc2Init){initForecast2();}else{drawDailySkyStrip();} }
   if(tab==='po-meri'){   initPoMeri(); }
   if(tab==='morje'){     initMorje(); }
@@ -15912,5 +15913,314 @@ function _cardRRect(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y+r);
   ctx.quadraticCurveTo(x, y, x+r, y);
   ctx.closePath();
+}
+
+// ── SLOVARČEK (Glossary) ─────────────────────────────────
+const GLOSSARY_TERMS=[
+  // VLAGA
+  {term:'Rosišče',icon:'💧',cat:'vlaga',
+   def:'Temperatura, pri kateri postane zrak nasičen z vodno paro in nastopi kondenzacija. Ko temperatura pade na rosišče, nastane rosa, megla ali oblaki.',
+   fun:'Ko sta temperatura in rosišče manj kot 2 °C narazen, je megla na pragu. Danes bližje — bolj vlažno!',
+   score:obs=>{const d=obs?.metric?.dewpt,t=obs?.metric?.temp;return(d!=null&&t!=null)?Math.max(0,10-Math.abs(t-d)):2;}},
+  {term:'Relativna vlažnost',icon:'💦',cat:'vlaga',
+   def:'Razmerje med dejansko vsebnostjo vodne pare in maksimalno možno pri isti temperaturi, izraženo v odstotkih (%).',
+   fun:'100 % pomeni nasičen zrak — na pragu so oblaki, megla ali padavine. Pod 30 % je zrak neprijetno suh.',
+   score:obs=>{const h=obs?.humidity??obs?.metric?.humidity;return h!=null?h/15:2;}},
+  {term:'Absolutna vlažnost',icon:'🫧',cat:'vlaga',
+   def:'Dejanska masa vodne pare v kilogramu zraka (g/kg). Za razliko od relativne vlažnosti ni odvisna od temperature.',
+   fun:'Poletni tropski zrak vsebuje do 20 g/kg vodne pare — štirikrat več kot hladen zimski zrak nad Slovenijo.',
+   score:obs=>2},
+  {term:'Nasičenost zraka',icon:'🌫',cat:'vlaga',
+   def:'Stanje, ko zrak vsebuje največjo možno količino vodne pare pri dani temperaturi. Vsaka nadaljnja vlaga se kondenzira.',
+   fun:'Nasičen zrak pri 30 °C vsebuje štirikrat več vlage kot nasičen zrak pri 10 °C — toplejši zrak "drži" več vode.',
+   score:obs=>{const h=obs?.humidity??0;return h>92?8:h>82?5:2;}},
+  {term:'Kondenzacija',icon:'🌊',cat:'vlaga',
+   def:'Prehod vodne pare v tekočo vodo. Nastane, ko zrak doseže rosišče ali ko se para dotakne hladne površine.',
+   fun:'Meglica na hladnem kozarcu poleti ni "potenje" kozarca — to je kondenzacija vlage iz zraka na površini.',
+   score:obs=>{const h=obs?.humidity??0;return h>87?7:3;}},
+  {term:'Evapotranspiracija',icon:'🌿',cat:'vlaga',
+   def:'Skupna količina vode, ki izhlapeva s tal in rastlin v ozračje. Ključna spremenljivka za vodni cikel in kmetijstvo.',
+   fun:'Goztar z enim hektarjem bukov gozda v poletnem dnevu "izhlapi" do 50.000 litrov vode v ozračje.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>400?6:2;}},
+
+  // PADAVINE
+  {term:'Intenziteta padavin',icon:'🌧',cat:'padavine',
+   def:'Količina padavin na enoto časa, izražena v milimetrih na uro (mm/h). Ključna za oceno jakosti dežja ali plohe.',
+   fun:'10 mm/h v eni uri pomeni 10 litrov vode na vsak kvadratni meter tal — dovolj za polno sod po eni uri.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return r>0?Math.min(10,r*1.8):0;}},
+  {term:'Konvekcija',icon:'⛈',cat:'padavine',
+   def:'Vertikalno gibanje zraka, ki nastane, ko se tla segrejejo in topel, lahek zrak dviga navzgor v hladnejše plasti.',
+   fun:'Kumulonimbus — nevihten oblak — je neposredna posledica intenzivne konvekcije. Vrh doseže do 15 km višine.',
+   score:obs=>{const r=obs?.metric?.precipRate??0,sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return r>2?9:sr>600?6:2;}},
+  {term:'Ploha',icon:'🚿',cat:'padavine',
+   def:'Kratek in intenziven dež, ki nastaja pri konvekciji. Za razliko od frontalnega dežja je prostorsko omejena in kratkotrajna.',
+   fun:'Večina poletnih ploh v Sloveniji nastane popoldne, ko sonce segreje ozračje in sproži vzgone toplega zraka.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return r>1&&r<12?8:r>0?4:0;}},
+  {term:'Rosenje',icon:'🫚',cat:'padavine',
+   def:'Drobne kapljice vode (premer pod 0,5 mm), ki padajo počasi in enakomerno. Tipično za meglo ali nizke slojevite oblake.',
+   fun:'Rosenje je tako subtilno, da ga barometer komaj zazna — a zadostuje za moker plašč po kratkem sprehodu.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return r>0&&r<0.5?9:0;}},
+  {term:'Toča',icon:'🧊',cat:'padavine',
+   def:'Ledeni delci s premerom nad 5 mm, ki nastanejo v kumulonimbusu. Kapljice se zamrznejo med vzponjem in padanjem.',
+   fun:'Rekordna toča v Sloveniji je bila velika kot jajce. V ZDA so izmerili točo s premerom 17 cm.',
+   score:obs=>0},
+  {term:'Žled',icon:'🌨',cat:'padavine',
+   def:'Poledica, ki nastane, ko dež pada v mrzli zrak in zamrzne ob dotiku s površinami pod 0 °C. Najnevarnejši zimski pojav.',
+   fun:'Januar 2014: žled je poškodoval 40 % slovenskih gozdov. Šele 2003 je bil zabeležen in poimenovan v geodetski bazi.',
+   score:obs=>{const t=obs?.metric?.temp??20,r=obs?.metric?.precipRate??0;return(t<2&&t>-6&&r>0)?10:0;}},
+  {term:'Nevihta',icon:'⚡',cat:'padavine',
+   def:'Atmosferski pojav z električno razelektritvijo (strelo) in grmljavino. Nastane pri razvitem kumulonimbusu.',
+   fun:'Strela doseže temperaturo 30.000 K — petkrat več od površine Sonca. Na Zemlji udari ~100 strel vsako sekundo.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return r>5?8:r>2?4:0;}},
+  {term:'Sneg',icon:'❄️',cat:'padavine',
+   def:'Kristali ledu, ki nastanejo pri kondenzaciji vodne pare pod 0 °C. Vsak kristal ima drugačno, simetrično obliko.',
+   fun:'Snežna odeja deluje kot izolator — pod 50 cm snega je temperatura tal blizu 0 °C, čeprav je zunaj −20 °C.',
+   score:obs=>{const t=obs?.metric?.temp??20,r=obs?.metric?.precipRate??0;return(t<1&&r>0)?9:(t<2)?3:0;}},
+  {term:'Frontalni dež',icon:'🌦',cat:'padavine',
+   def:'Dolgotrajne, enakomerne padavine ob vremenski fronti, ko topli zrak drsi navzgor nad hladnejšim in se kondenzira.',
+   fun:'Frontalni dež traja ure ali dni. Za razliko od konvekcijske plohe, ki mine v pol ure, prinaša stabilno mokrino.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return(r>0&&r<3)?7:0;}},
+
+  // OBLAKI
+  {term:'Kumulonimbus',icon:'🌩',cat:'oblaki',
+   def:'Nevihten oblak z vertikalnim razvojem do tropopavze (15 km). Vir neviht, toče in intenzivnih lokalnih padavin.',
+   fun:'Kumulonimbus vsebuje do milijarde litrov vode in ustvari električno napetost do 100 milijonov voltov.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return r>5?9:r>1?5:0;}},
+  {term:'Kumulus',icon:'⛅',cat:'oblaki',
+   def:'Lepi "kupičasti" beli oblaki z ravno osnovo in zaobljenimi vrhovi. Nastanejo pri konvekciji ob sončnem vremenu.',
+   fun:'Kumulus je "termalni balon" — nastane, ko se dviga topel vlažen zrak z ogretih tal, ki ga je sonce segrelo.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return(sr>300&&sr<700)?7:2;}},
+  {term:'Stratus',icon:'🌥',cat:'oblaki',
+   def:'Nizek, siv slojevit oblak brez izrazite strukture. Pokriva nebo kot odeja in prinaša oblačno, hladno vreme brez dežja.',
+   fun:'Stratus je "antipod" kumulusa — nastane pri stabilnem ozračju brez konvekcije, pogosto nad dolinama pozimi.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return(sr<80&&sr>5)?6:2;}},
+  {term:'Cirrus',icon:'🌤',cat:'oblaki',
+   def:'Visoki, tanki ledeni oblaki na višini 6–13 km. Videti so kot bele nitke ali perje in pogosto napovedo vremensko spremembo.',
+   fun:'Cirrus se pojavi do 48 ur pred toplo fronto. Ribičem in vinarjem je bil že od vekov znan napovedovalec dežja.',
+   score:obs=>2},
+  {term:'Nimbostratus',icon:'🌧',cat:'oblaki',
+   def:'Temnosiv slojevit oblak, ki pokriva celotno nebo in prinaša enakomerne padavine. Tipičen ob prehodu tople fronte.',
+   fun:'Nimbostratus je "sivi jok neba" — padec tlaka ga napoveduje vsaj 24 ur vnaprej.',
+   score:obs=>{const r=obs?.metric?.precipRate??0;return(r>0&&r<3)?8:r>0?5:0;}},
+  {term:'Megla',icon:'🌫',cat:'oblaki',
+   def:'Oblak tik nad tlemi. Nastane, ko temperatura zraka pade na rosišče. Vidljivost pade pod 1 km, pri gosti megli pod 100 m.',
+   fun:'Rečica ob Savinji leži v kotlini — megla je pozimi pogosta, ko hladen zrak ostane ujet pod toplejšim (inverzija).',
+   score:obs=>{const d=obs?.metric?.dewpt,t=obs?.metric?.temp;return(d!=null&&t!=null&&Math.abs(t-d)<2)?9:0;}},
+  {term:'Oblačnost',icon:'☁',cat:'oblaki',
+   def:'Delež neba, pokritega z oblaki, izražen v osminkah (oktas, 0–8) ali odstotkih (0–100 %). Ključna za insolacijo.',
+   fun:'Ena "okta" pomeni, da osmina neba prekrita. 8 oktov je 100 % oblačnost — nebo povsem sivo.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0,h=new Date().getHours();return(sr<200&&h>8&&h<18)?6:2;}},
+
+  // VETER
+  {term:'Beaufortova lestvica',icon:'💨',cat:'veter',
+   def:'Empirična lestvica od 0 (brezvetrje) do 12 (orkan), ki opisuje moč vetra na osnovi vidnih učinkov na morju in kopnem.',
+   fun:'Admiral Francis Beaufort jo je razvil leta 1806 za opis razmer na morju — preden so obstajali anemometri.',
+   score:obs=>{const w=obs?.metric?.windSpeed??0;return w>5?Math.min(9,w/4):2;}},
+  {term:'Sunek vetra',icon:'💥',cat:'veter',
+   def:'Kratkotrajno (pod 3 sekunde) povečanje hitrosti vetra nad povprečno vrednost. Sunki so 30–50 % hitrejši od povprečja.',
+   fun:'Postaja IREICA1 meri sunke na vsakih 5 minut. Rekordni sunek je bil zabeležen med nevihto v poletnih mesecih.',
+   score:obs=>{const g=obs?.metric?.windGust??0,w=obs?.metric?.windSpeed??0;return g>20?8:g>w*1.3?5:2;}},
+  {term:'Burja',icon:'🌬',cat:'veter',
+   def:'Močan, hladen severovzhodni veter vzdolž Jadrana. Nastane, ko hladen zrak z Balkana prereže Dinaride in pospešeno steče navzdol.',
+   fun:'Burja v Trstnem zalivu dosega 200 km/h in odnese avtomobile s cest. Soli morje in suši vso rastlinje ob obali.',
+   score:obs=>{const w=obs?.metric?.windGust??0,d=obs?.winddir??-1;return(w>35&&d>=0&&d<90)?9:w>30?4:0;}},
+  {term:'Fen',icon:'🌡',cat:'veter',
+   def:'Topel in suh veter, ki piha s planin navzdol na zavetrno stran. Nastane, ko zrak prehaja čez gore in se adiabatno segreje.',
+   fun:'Fen dvigne temperaturo za 10–20 °C v zgolj urah. Na Bledu so v zimskih dneh beležili do +20 °C med fenskim dogajanjem.',
+   score:obs=>{const t=obs?.metric?.temp??0,w=obs?.metric?.windSpeed??0,h=obs?.humidity??100;return(t>12&&w>15&&h<50)?7:2;}},
+  {term:'Termika',icon:'🦅',cat:'veter',
+   def:'Navzgornji tok segretega zraka, ki nastaja nad ogretimi tlemi. Osnova jadralnega letenja, padalstva in kroženja ptic ujed.',
+   fun:'Jastreb in kondor brez ednega mahljaja krila dosežeta 2000 m višine — zgolj z izkorišanjem termalnih vzgonov.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>500?8:sr>200?4:0;}},
+  {term:'Vetrna roža',icon:'🧭',cat:'veter',
+   def:'Grafični prikaz pogostosti smeri in jakosti vetra na določenem mestu v nekem časovnem obdobju.',
+   fun:'Vetrna roža pomaga urbanistom, vinarjem in ribičem pri načrtovanju mest, vinogradov in ribogojnic.',
+   score:obs=>2},
+
+  // TLAK
+  {term:'Atmosferski tlak',icon:'🔵',cat:'tlak',
+   def:'Sila, ki jo izvaja stolp zraka nad enim kvadratnim metrom površine. Meri se v hektopaskalih (hPa); standardni tlak je 1013,25 hPa.',
+   fun:'Vsak 10 m nadmorske višine zmanjša tlak za ~1,2 hPa. Na vrhu Everesta (8849 m) je tlak le 310 hPa.',
+   score:obs=>{const p=obs?.metric?.pressure??1013;return Math.abs(p-1013)>15?8:Math.abs(p-1013)>5?5:2;}},
+  {term:'Anticiklon',icon:'🔵',cat:'tlak',
+   def:'Območje visokega tlaka z navzdolnjim gibanjem zraka. Prinaša stabilno, suho in jasno vreme, pozimi pa pogosto meglo v dolinah.',
+   fun:'Anticikloni na severni polobli se vrtijo v smeri urinega kazalca. Zimski anticiklon je krivec za meglene dneve v kotlinah.',
+   score:obs=>{const p=obs?.metric?.pressure??1013;return p>1020?8:p>1015?5:1;}},
+  {term:'Ciklon',icon:'🌀',cat:'tlak',
+   def:'Območje nizkega tlaka z navzgornjim gibanjem zraka. Prinaša nestabilno, oblačno in padavinsko vreme z vetrom.',
+   fun:'Cikloni na severni polobli se vrtijo nasprotno urinega kazalca — to je posledica Coriolisovega pojava vrtenja Zemlje.',
+   score:obs=>{const p=obs?.metric?.pressure??1013;return p<1005?8:p<1010?5:1;}},
+  {term:'Topla fronta',icon:'🟠',cat:'tlak',
+   def:'Meja med napredujočim toplim in umikajočim se hladnim zrakom. Prinaša postopen oblačen zastor, dolgotrajne padavine in segrevanje.',
+   fun:'Cirrus se pojavi 48 ur pred toplo fronto, sledi nim. Tlak počasi pada, veter suka z juga.',
+   score:obs=>{const p=obs?.metric?.pressure??1013,r=obs?.metric?.precipRate??0;return(p<1010&&r>0)?7:2;}},
+  {term:'Hladna fronta',icon:'🔵',cat:'tlak',
+   def:'Meja, kjer hladni zrak izpodriva topli. Prinaša nenadne intenzivne padavine, grmljavino in hitro ohladitev v urah.',
+   fun:'Po prehodu hladne fronte temperatura pade za 5–10 °C v eni uri, veter suka v severozahod in presvetli se.',
+   score:obs=>{const r=obs?.metric?.precipRate??0,t=obs?.metric?.temp??20;return(r>3&&t<16)?7:2;}},
+  {term:'Barometer',icon:'📏',cat:'tlak',
+   def:'Instrument za merjenje atmosferskega tlaka. Živosrebrni barometri so bili standard do 20. stol., danes so elektronski.',
+   fun:'Naglo padanje tlaka (> 4 hPa/3h) napoveduje hitro poslabšanje. Ribiči in mornarji so to vedeli pred 300 leti.',
+   score:obs=>{const p=obs?.metric?.pressure,pm=obs?.metric?.pressureMax;return(p&&pm&&(pm-p)>3)?8:2;}},
+
+  // TEMPERATURA
+  {term:'Občutena temperatura',icon:'🤔',cat:'temperatura',
+   def:'Temperatura, ki jo čutimo na koži — kombinacija dejanske temperature, vlage in vetra. Poleti toplotni stres, pozimi mrazilni efekt.',
+   fun:'Pri −10 °C in vetru 30 km/h je občutena temperatura −20 °C. Temu pravimo "wind chill" ali mrazilni efekt vetra.',
+   score:obs=>{const t=obs?.metric?.temp,h=obs?.metric?.heatIndex,wc=obs?.metric?.windChill;return(t!=null&&(h!=null||wc!=null))?7:2;}},
+  {term:'Temperaturna inverzija',icon:'🔄',cat:'temperatura',
+   def:'Nenormalno stanje, ko temperatura z višino narašča namesto pada. Hladen zrak ostane ujet v dolini pod toplejšim.',
+   fun:'Rečica ob Savinji je v kotlini — inverzija je pozimi pogosta. Višje v hribih je jasno in toplo, spodaj megleno.',
+   score:obs=>{const t=obs?.metric?.temp??0,h=new Date().getHours();return(t<5&&(h<10||h>18))?8:2;}},
+  {term:'Adiabatski gradient',icon:'📉',cat:'temperatura',
+   def:'Stopnja znižanja temperature z višino za dvigajoče se parcele zraka: ~9,8 °C/1000 m (suhi) ali ~6 °C/1000 m (vlažni).',
+   fun:'Ko se zrak nasiti in nastane oblak, gradient pade — vlaga sprošča toploto pri kondenzaciji, ki upočasni hlajenje.',
+   score:obs=>2},
+  {term:'Toplotni val',icon:'🔥',cat:'temperatura',
+   def:'Vsaj 3 zaporedni dnevi z maksimalnimi temperaturami vsaj 5 °C nad dolgoletnim povprečjem za ta letni čas.',
+   fun:'Poletje 2003 je v Evropi zahtevalo 70.000 življenj. Bil je najhujši toplotni val v instrumentalni dobi meritev.',
+   score:obs=>{const t=obs?.metric?.temp??0;return t>32?9:t>28?5:0;}},
+  {term:'Hladni val',icon:'🥶',cat:'temperatura',
+   def:'Vsaj 3 zaporedni dnevi z minimalnimi temperaturami vsaj 5 °C pod dolgoletnim povprečjem za ta letni čas.',
+   fun:'Najnižja izmerjena temperatura v Sloveniji: −34,5 °C, Babno Polje, 13. februarja 1956.',
+   score:obs=>{const t=obs?.metric?.temp??0;return t<-5?9:t<0?5:0;}},
+  {term:'Dnevna amplituda',icon:'↕️',cat:'temperatura',
+   def:'Razlika med dnevno najvišjo in najnižjo temperaturo. Majhna ob morju (5 °C), velika v celinskem podnebju (do 20 °C).',
+   fun:'V puščavah dnevna amplituda doseže 40 °C. Na Rečici ob Savinji je poleti pogosto 15–18 °C.',
+   score:obs=>{const hi=obs?.metric?.tempHigh,lo=obs?.metric?.tempLow;return(hi!=null&&lo!=null)?Math.min(8,(hi-lo)/2):2;}},
+
+  // SEVANJE
+  {term:'Sončno sevanje',icon:'☀️',cat:'sevanje',
+   def:'Elektromagnetno valovanje, ki ga oddaja Sonce in pada na zemeljsko površje. Postaja meri kratkovalovni delež (W/m²).',
+   fun:'Ob jasnem poletnem dnevu doseže sevanje ~1000 W/m² — ekvivalent 10 žarnic na vsak kvadratni meter površine.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>100?Math.min(10,sr/100):0;}},
+  {term:'UV indeks',icon:'🕶',cat:'sevanje',
+   def:'Mednarodna lestvica intenzitete ultravijoličnega sevanja (0–11+). Višji indeks pomeni večjo nevarnost za kožo in oči.',
+   fun:'UV 3: priporočena krema SPF 30+. UV 8+: zaščita obvezna. Na snegu je UV indeks dvakrat višji!',
+   score:obs=>{const uv=obs?.uv??0;return uv>3?Math.min(10,uv*1.2):0;}},
+  {term:'Insolacija',icon:'🌅',cat:'sevanje',
+   def:'Skupna količina sončnega sevanja, prejeta na horizontalno površino v nekem obdobju. Odvisna od kotа Sonca in oblačnosti.',
+   fun:'Rečica ob Savinji prejme ~1600 sončnih ur letno. Jadranska obala dobi 2700 ur — 70 % več kot Savinjska dolina.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>300?7:sr>50?3:0;}},
+  {term:'Albedo',icon:'🪞',cat:'sevanje',
+   def:'Delež sončnega sevanja, ki ga površina odbije nazaj. Sveži sneg: 90 %, gozd: 15 %, temni asfalt: 5 %.',
+   fun:'Ko se sneg stali, albedo strmoglavI — zemlja absorbira več toplote in se hitreje segreje (pozitivna povratna zanka).',
+   score:obs=>2},
+  {term:'Toplotni otok',icon:'🏙',cat:'sevanje',
+   def:'Pojav, ko je urbano območje topleje od podeželske okolice, ker asfalt in zgradbe absorbirajo in zadržujejo toploto.',
+   fun:'Ljubljana je pozimi 2–5 °C toplejša od podeželja. To zmanjša verjetnost snega v centru mesta.',
+   score:obs=>{const t=obs?.metric?.temp??0;return t>25?6:t>15?3:1;}},
+  {term:'Fotosintezno aktivno sevanje',icon:'🌱',cat:'sevanje',
+   def:'Del sončnega spektra (400–700 nm), ki ga rastline absorbirajo za fotosintezo. Merimo ga v μmol fotonov/m²/s.',
+   fun:'Idealni pogoji za rastline so 1000–2000 μmol/m²/s — ob jasnem poletnem poldan jih je ravno toliko.',
+   score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>400?5:sr>100?2:0;}},
+];
+
+const _GLOSS_CAT_LABELS={vlaga:'Vlaga',padavine:'Padavine',oblaki:'Oblaki',veter:'Veter',tlak:'Tlak',temperatura:'Temperatura',sevanje:'Sevanje'};
+const _GLOSS_CATS=['vlaga','padavine','oblaki','veter','tlak','temperatura','sevanje'];
+
+let _glossaryInit=false;
+let _glossaryTimer=null;
+let _glossaryIdx=0;
+let _glossarySorted=[];
+let _glossaryCat='vse';
+
+function initGlossary(){
+  if(!_glossaryInit){
+    _glossaryInit=true;
+    _glossaryCat='vse';
+    _buildGlossaryFull();
+  }else{
+    _glossRefreshFeatured();
+  }
+}
+
+function _glossSort(){
+  const obs=_lastBriefObs;
+  return[...GLOSSARY_TERMS].sort((a,b)=>b.score(obs)-a.score(obs));
+}
+
+function _buildGlossaryFull(){
+  _glossarySorted=_glossSort();
+  _glossaryIdx=0;
+  _renderGlossFeatured();
+  _renderGlossFilters();
+  _renderGlossGrid();
+  _startGlossTimer();
+  // Update title with current condition
+  const obs=_lastBriefObs;
+  if(obs){
+    const cond=getCondition(obs);
+    const el=document.getElementById('gloss-title');
+    if(el)el.textContent=`📖 Strokovni izraz trenutka — ${cond.icon} ${cond.label}`;
+  }
+}
+
+function _glossRefreshFeatured(){
+  _glossarySorted=_glossSort();
+  _glossaryIdx=0;
+  _renderGlossFeatured();
+  _startGlossTimer();
+  const obs=_lastBriefObs;
+  if(obs){
+    const cond=getCondition(obs);
+    const el=document.getElementById('gloss-title');
+    if(el)el.textContent=`📖 Strokovni izraz trenutka — ${cond.icon} ${cond.label}`;
+  }
+}
+
+function _renderGlossFeatured(){
+  const wrap=document.getElementById('gloss-featured-wrap');
+  const dotsEl=document.getElementById('gloss-dots');
+  if(!wrap)return;
+  const MAX=6;
+  const terms=_glossarySorted.slice(0,MAX);
+  const t=terms[_glossaryIdx]||terms[0];
+  if(!t)return;
+  wrap.style.opacity='0';
+  wrap.style.transform='translateY(6px)';
+  setTimeout(()=>{
+    wrap.innerHTML=`<div class="gloss-feat-icon">${t.icon}</div><div class="gloss-feat-right"><div class="gloss-feat-head"><span class="gloss-feat-name">${t.term}</span><span class="gloss-badge gloss-${t.cat}">${_GLOSS_CAT_LABELS[t.cat]||t.cat}</span></div><div class="gloss-feat-def">${t.def}</div><div class="gloss-feat-fun">💡 ${t.fun}</div></div>`;
+    wrap.style.opacity='1';
+    wrap.style.transform='translateY(0)';
+  },180);
+  if(dotsEl){
+    dotsEl.innerHTML=terms.map((_,i)=>`<span class="gloss-dot${i===_glossaryIdx?' gloss-dot-active':''}" onclick="_glossJump(${i})" title="${terms[i].term}"></span>`).join('');
+  }
+}
+
+function _startGlossTimer(){
+  if(_glossaryTimer)clearInterval(_glossaryTimer);
+  _glossaryTimer=setInterval(()=>{
+    const MAX=Math.min(6,_glossarySorted.length);
+    _glossaryIdx=(_glossaryIdx+1)%MAX;
+    _renderGlossFeatured();
+  },8000);
+}
+
+function _glossJump(idx){
+  _glossaryIdx=idx;
+  _renderGlossFeatured();
+  _startGlossTimer();
+}
+
+function _renderGlossFilters(){
+  const el=document.getElementById('gloss-filters');
+  if(!el)return;
+  const all=[['vse','Vsi pojmi'],..._GLOSS_CATS.map(c=>[c,_GLOSS_CAT_LABELS[c]])];
+  el.innerHTML=all.map(([c,lbl])=>`<button class="gloss-chip${c===_glossaryCat?' gloss-chip-on':''}" onclick="_glossFilter('${c}')">${lbl}</button>`).join('');
+}
+
+function _glossFilter(cat){
+  _glossaryCat=cat;
+  _renderGlossFilters();
+  _renderGlossGrid();
+}
+
+function _renderGlossGrid(){
+  const el=document.getElementById('gloss-grid');
+  if(!el)return;
+  const list=_glossaryCat==='vse'?GLOSSARY_TERMS:GLOSSARY_TERMS.filter(t=>t.cat===_glossaryCat);
+  el.innerHTML=list.map(t=>`<div class="gloss-card" onclick="this.classList.toggle('gloss-card-open')"><div class="gloss-card-head"><span class="gloss-card-icon">${t.icon}</span><div class="gloss-card-info"><div class="gloss-card-name">${t.term}</div><span class="gloss-badge gloss-${t.cat}">${_GLOSS_CAT_LABELS[t.cat]||t.cat}</span></div></div><div class="gloss-card-body"><div class="gloss-card-def">${t.def}</div><div class="gloss-card-fun">💡 ${t.fun}</div></div></div>`).join('');
 }
 
