@@ -267,7 +267,8 @@
         <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
         <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
         <div class="tab-dd-divider"></div>
-        <button id="tab-btn-trivia"  onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
+        <button id="tab-btn-trivia"    onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
+        <button id="tab-btn-glossary"  onclick="switchTab('glossary');closeTabDDs()">📖 Slovarček</button>
       </div>
     </div>
   </div><button class="tab-nav-arrow" id="tab-nav-arrow" aria-label="Drsaj za več zavihkov" title="Drsaj za več">›</button></div>
@@ -1511,7 +1512,21 @@
     </div>
   </div>
 
-
+  <!-- ═══ SLOVARČEK ═══ -->
+  <div id="tab-glossary" class="tab-pane">
+    <div class="tri-section">
+      <div class="tri-title" id="gloss-title">📖 Strokovni izraz trenutka</div>
+      <div class="tri-card">
+        <div id="gloss-featured-wrap">Nalaganje…</div>
+      </div>
+      <div class="gloss-dots" id="gloss-dots"></div>
+    </div>
+    <div class="tri-section">
+      <div class="tri-title">📚 Celoten slovarček meteoroloških pojmov</div>
+      <div class="gloss-filters" id="gloss-filters"></div>
+      <div class="gloss-grid" id="gloss-grid"></div>
+    </div>
+  </div>
 
   <!-- ═══ FOTODNEVNIK ═══ -->
   <!-- ═══ STORM CHASER ═══ -->
