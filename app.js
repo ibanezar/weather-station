@@ -13622,10 +13622,10 @@ function _buildPadalciKPIs(d){
   const maxWind=windVals.length?Math.round(Math.max(...windVals)):null;
   const flyHours=todayIdxs.filter(i=>_flyScore(h.wind_speed_10m?.[i]??0,h.precipitation_probability?.[i]??0,h.cape?.[i]??0,h.boundary_layer_height?.[i]??0,h.is_day?.[i])>=70).length;
   const kpis=[
-    {val:maxBL!=null?maxBL+' m':'—',lbl:'Max BL višina',sub:'konvekcijski strop',col:maxBL!=null&&maxBL>1500?'var(--green)':maxBL!=null&&maxBL<400?'var(--muted)':null},
-    {val:flyHours>0?flyHours+'h':'0h',lbl:'Ure letenja',sub:'score ≥70, danes',col:flyHours>=4?'var(--green)':flyHours>=2?'var(--amber)':flyHours>0?'var(--muted)':'var(--red)'},
-    {val:maxCAPE!=null?maxCAPE+' J/kg':'—',lbl:'Max CAPE',sub:maxCAPE!=null&&maxCAPE>1000?'⚠️ nevihtno':maxCAPE!=null&&maxCAPE>500?'pozor':'ok',col:maxCAPE!=null&&maxCAPE>1000?'var(--red)':maxCAPE!=null&&maxCAPE>500?'var(--amber)':null},
-    {val:maxWind!=null?maxWind+' km/h':'—',lbl:'Max veter',sub:'površina danes',col:maxWind!=null&&maxWind>30?'var(--red)':maxWind!=null&&maxWind>20?'var(--amber)':null},
+    {val:maxBL!=null?maxBL+' m':'—',lbl:'Maks. višina BL',sub:'konvektivni strop',col:maxBL!=null&&maxBL>1500?'var(--green)':maxBL!=null&&maxBL<400?'var(--muted)':null},
+    {val:flyHours>0?flyHours+' h':'0 h',lbl:'Ure letenja',sub:'ocena ≥ 70, danes',col:flyHours>=4?'var(--green)':flyHours>=2?'var(--amber)':flyHours>0?'var(--muted)':'var(--red)'},
+    {val:maxCAPE!=null?maxCAPE+' J/kg':'—',lbl:'Maks. CAPE',sub:maxCAPE!=null&&maxCAPE>1000?'⚠️ nevihtno':maxCAPE!=null&&maxCAPE>500?'pozor':'ok',col:maxCAPE!=null&&maxCAPE>1000?'var(--red)':maxCAPE!=null&&maxCAPE>500?'var(--amber)':null},
+    {val:maxWind!=null?maxWind+' km/h':'—',lbl:'Maks. veter',sub:'površina danes',col:maxWind!=null&&maxWind>30?'var(--red)':maxWind!=null&&maxWind>20?'var(--amber)':null},
   ];
   el.innerHTML=kpis.map(k=>`<div class="fly-kpi"><div class="fly-kpi-val"${k.col?` style="color:${k.col}"`:''}>${k.val}</div><div class="fly-kpi-lbl">${k.lbl}</div><div class="fly-kpi-sub">${k.sub}</div></div>`).join('');
 }
@@ -13662,9 +13662,9 @@ function _buildPadalciFlyWindow(d){
   });
   const html=`<div class="fly-scroll"><div class="fly-slots">${slotsHtml}</div></div>
   <div style="display:flex;gap:1rem;margin-top:.6rem;font-size:.65rem;flex-wrap:wrap">
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(74,222,128,.65);margin-right:3px;vertical-align:middle"></span>FLY ≥70 · BL višina</span>
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(251,191,36,.6);margin-right:3px;vertical-align:middle"></span>Meja 40–69</span>
-    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(248,113,113,.35);margin-right:3px;vertical-align:middle"></span>Ne leti &lt;40</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(74,222,128,.65);margin-right:3px;vertical-align:middle"></span>LETENJE ≥ 70 · višina BL</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(251,191,36,.6);margin-right:3px;vertical-align:middle"></span>Mejno 40–69</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(248,113,113,.35);margin-right:3px;vertical-align:middle"></span>Brez letenja &lt; 40</span>
   </div>`;
   el.innerHTML=html;
 }
@@ -13696,7 +13696,7 @@ function _buildPadalciBLChart(d){
   let lineD=`M${xScale(0)},${yScale(pts[0].bl)}`;
   pts.forEach((p,i)=>{if(i>0)lineD+=` L${xScale(i)},${yScale(p.bl)}`;});
   // Ref lines
-  const refs=[{h:500,lbl:'500m · min',col:'#fbbf24'},{h:1500,lbl:'1500m · XC',col:'#4ade80'}];
+  const refs=[{h:500,lbl:'500 m · min',col:'#fbbf24'},{h:1500,lbl:'1500 m · XC',col:'#4ade80'}];
   let svg=`<svg viewBox="0 0 ${W} ${H}" class="fly-bl-svg">`;
   svg+=`<defs><linearGradient id="blGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity=".35"/><stop offset="100%" stop-color="var(--blue)" stop-opacity=".05"/></linearGradient></defs>`;
   svg+=`<path d="${pathD}" fill="url(#blGrad)"/>`;
@@ -14423,11 +14423,11 @@ function _buildMorjeKPIs({fc,marine}){
   const uv=fc.daily?.uv_index_max?.[0]??null;
   const kpis=[
     {val:wh!=null?wh.toFixed(1)+' m':'—',lbl:'Valovanje',sub:wh!=null?_seaStateLabel(wh):'—'},
-    {val:c.wave_period!=null?c.wave_period.toFixed(0)+' s':'—',lbl:'Period vala',sub:'sekund'},
+    {val:c.wave_period!=null?c.wave_period.toFixed(0)+' s':'—',lbl:'Obdobje vala',sub:'sekunde'},
     {val:sst!=null?sst.toFixed(1)+' °C':'—',lbl:'Temp. morja',sub:'površina'},
     {val:cf.wind_speed_10m!=null?Math.round(cf.wind_speed_10m)+' km/h':'—',lbl:'Veter',sub:cf.wind_direction_10m!=null?_windDirLabel(cf.wind_direction_10m):'—'},
-    {val:uv!=null?uv.toFixed(1):'—',lbl:'UV max',sub:uv!=null?(uv>7?'visok':uv>3?'zmeren':'nizek'):'—'},
-    {val:cf.temperature_2m!=null?cf.temperature_2m.toFixed(0)+' °C':'—',lbl:'T zrak',sub:'Portorož'},
+    {val:uv!=null?uv.toFixed(1):'—',lbl:'Maks. UV',sub:uv!=null?(uv>7?'visok':uv>3?'zmeren':'nizek'):'—'},
+    {val:cf.temperature_2m!=null?cf.temperature_2m.toFixed(0)+' °C':'—',lbl:'T zraka',sub:'Portorož'},
   ];
   el.innerHTML=kpis.map(k=>`<div class="sea-kpi"><div class="sea-kpi-val">${k.val}</div><div class="sea-kpi-lbl">${k.lbl}</div><div class="sea-kpi-sub">${k.sub}</div></div>`).join('');
 }
@@ -14439,8 +14439,8 @@ function _buildMorjeMarine({marine}){
     ['🌊 Skupna višina valov',c.wave_height!=null?c.wave_height.toFixed(2)+' m':'—'],
     ['🌊 Vetrni valovi',c.wind_wave_height!=null?c.wind_wave_height.toFixed(2)+' m':'—'],
     ['🌊 Valovanje (swell)',c.swell_wave_height!=null?c.swell_wave_height.toFixed(2)+' m':'—'],
-    ['⏱ Period vala',c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—'],
-    ['🧭 Smer valov',c.wave_direction!=null?c.wave_direction.toFixed(0)+'° ('+_windDirLabel(c.wave_direction)+')':'—'],
+    ['⏱ Obdobje vala',c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—'],
+    ['🧭 Smer valovanja',c.wave_direction!=null?c.wave_direction.toFixed(0)+'° ('+_windDirLabel(c.wave_direction)+')':'—'],
     ['🌡 Temp. morja',c.sea_surface_temperature!=null?c.sea_surface_temperature.toFixed(1)+' °C':'—'],
   ];
   // Wave height bar
@@ -14492,7 +14492,7 @@ function _buildMorjeWind({fc}){
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     const dir=d.wind_direction_10m_dominant?.[i];
     const dirLbl=dir!=null?_windDirLabel(dir):'—';
-    let type='ostalo',cls='sea-ostalo';
+    let type='ostali vetrovi',cls='sea-ostalo';
     if(dir!=null){
       if(dir>=30&&dir<=80){type='Burja';cls='sea-bora';}
       else if(dir>=110&&dir<=190){type='Jugo';cls='sea-jugo';}
@@ -14548,11 +14548,11 @@ function _buildMorjeSuit({fc,marine}){
   if(wind!=null){if(wind<12)s+=6;else if(wind<20)s-=2;else if(wind<30)s-=14;else s-=28;}
   if(wmo>=95)s-=40;else if(wmo>=80)s-=22;else if(wmo>=51)s-=14;else if(wmo>=45)s-=6;else if(wmo<=2)s+=6;
   const pct=Math.max(0,Math.min(100,Math.round(s)));
-  const desc=pct>=80?'Odlične razmere za kopanje in plažo — toplo morje, mirna gladina.'
+  const desc=pct>=80?'Odlične razmere za kopanje in plažo – toplo morje, mirna gladina.'
     :pct>=60?'Dobre razmere za morje, manjše omejitve.'
-    :pct>=40?'Zmerne razmere — morje hladnejše ali rahlo valovito.'
-    :pct>=20?'Slabe razmere za kopanje — mrzlo morje, veter ali valovi.'
-    :'Neprimerno za morje — slabo vreme ali razburkano morje.';
+    :pct>=40?'Zmerne razmere – morje hladnejše ali rahlo valovito.'
+    :pct>=20?'Slabe razmere za kopanje – mrzlo morje, veter ali valovi.'
+    :'Neprimerno za morje – slabo vreme ali razburkano morje.';
   const factors=[
     {l:'Temp. morja',v:sst!=null?sst.toFixed(1)+' °C':'—',d:sst==null?'—':sst>=22?'prijetno toplo':sst>=20?'sveže':'mrzlo'},
     {l:'Temp. zraka',v:tmax!=null?Math.round(tmax)+' °C':'—',d:tmax==null?'—':tmax>=28?'vroče':tmax>=24?'toplo':tmax>=20?'milo':'hladno'},
@@ -14576,17 +14576,17 @@ function _buildGoreSuit({triglav}){
   if(snow!=null&&snow>0){if(snow<2)s-=4;else if(snow<10)s-=16;else s-=30;}
   if(tTriglav!=null){if(tTriglav<-15)s-=18;else if(tTriglav<-8)s-=8;else if(tTriglav<0)s-=2;}
   const pct=Math.max(0,Math.min(100,Math.round(s)));
-  const desc=pct>=80?'Odlične razmere za turo — mirno vreme, šibek veter.'
-    :pct>=60?'Dobre razmere v gorah, a preveri lokalne pogoje.'
-    :pct>=40?'Zmerne razmere — veter, mraz ali padavine zahtevajo previdnost.'
-    :pct>=20?'Slabe razmere — močan veter ali padavine, le za izkušene.'
-    :'Neprimerno za turo — nevarne razmere v visokogorju.';
+  const desc=pct>=80?'Odlične razmere za turo – mirno vreme, šibek veter.'
+    :pct>=60?'Dobre razmere v gorah – preveri lokalne pogoje.'
+    :pct>=40?'Zmerne razmere – veter, mraz ali padavine zahtevajo previdnost.'
+    :pct>=20?'Slabe razmere – močan veter ali padavine; le za izkušene.'
+    :'Neprimerno za turo – nevarne razmere v visokogorju.';
   const factors=[
     {l:'T vrh (2864 m)',v:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',d:tTriglav==null?'—':tTriglav<-8?'hud mraz':tTriglav<0?'pod lediščem':'znosno'},
     {l:'Sunki vetra',v:gust!=null?Math.round(gust)+' km/h':'—',d:gust==null?'—':gust<25?'šibki':gust<40?'zmerni':gust<60?'močni':'nevarni'},
     {l:'Padavine',v:precip!=null?precip.toFixed(0)+' mm':'—',d:precip==null?'—':precip<1?'suho':precip<5?'malo':'mokro'},
-    {l:'Sneg danes',v:snow!=null&&snow>0?snow.toFixed(0)+' cm':'0 cm',d:snow>0?(snow>=10?'pozor plazovi':'sveži sneg'):'brez'},
-    {l:'Meja zmrzali',v:freeze!=null?Math.round(freeze)+' m':'—',d:freeze==null?'—':freeze<1500?'nizko':freeze<2500?'srednje':'visoko'}
+    {l:'Sneg danes',v:snow!=null&&snow>0?snow.toFixed(0)+' cm':'0 cm',d:snow>0?(snow>=10?'pozor, plazovi':'sveži sneg'):'brez'},
+    {l:'Meja ledišča',v:freeze!=null?Math.round(freeze)+' m':'—',d:freeze==null?'—':freeze<1500?'nizko':freeze<2500?'srednje':'visoko'}
   ];
   _renderSuitCard('mtn-suit','🥾',pct,desc,factors);
 }
@@ -14603,17 +14603,17 @@ function _buildPadalciSuit(d){
     if(bl>maxBL)maxBL=bl;if(wind>maxWind)maxWind=wind;if(cape>maxCAPE)maxCAPE=cape;
   });
   const pct=Math.max(0,Math.min(100,Math.round(best)));
-  const desc=pct>=80?`Odlični pogoji za letenje — okno kakovostne termike ~${flyHours} h.`
-    :pct>=60?`Dobri pogoji, okno letenja ~${flyHours} h.`
-    :pct>=40?'Zmerni pogoji — termika šibka ali veter mejni.'
-    :pct>=20?'Slabi pogoji — veter, dež ali premočna termika.'
-    :'Neprimerno za letenje danes.';
+  const desc=pct>=80?`Odlični pogoji za letenje – okno kakovostne termike predvidoma ${flyHours} h.`
+    :pct>=60?`Dobri pogoji – okno letenja predvidoma ${flyHours} h.`
+    :pct>=40?'Zmerni pogoji – termika šibka ali veter mejni.'
+    :pct>=20?'Slabi pogoji – veter, dež ali premočna termika.'
+    :'Neprimerno za letenje.';
   const factors=[
-    {l:'Vrhunec dneva',v:pct,d:'fly score 0–100'},
-    {l:'Ure letenja',v:flyHours+' h',d:'score ≥ 70'},
-    {l:'Max BL strop',v:Math.round(maxBL)+' m',d:maxBL>1500?'visok':maxBL<400?'nizek':'zmeren'},
-    {l:'Max veter',v:Math.round(maxWind)+' km/h',d:maxWind>30?'premočan':maxWind>20?'mejni':'ugoden'},
-    {l:'Max CAPE',v:Math.round(maxCAPE)+' J/kg',d:maxCAPE>1000?'⚠️ nevihtno':maxCAPE>500?'pozor':'mirno'}
+    {l:'Vrhunec dneva',v:pct,d:'ocena (score) 0–100'},
+    {l:'Ure letenja',v:flyHours+' h',d:'ocena ≥ 70'},
+    {l:'Maks. BL strop',v:Math.round(maxBL)+' m',d:maxBL>1500?'visok':maxBL<400?'nizek':'zmeren'},
+    {l:'Maks. veter',v:Math.round(maxWind)+' km/h',d:maxWind>30?'premočan':maxWind>20?'mejni':'ugoden'},
+    {l:'Maks. CAPE',v:Math.round(maxCAPE)+' J/kg',d:maxCAPE>1000?'⚠️ nevihtno':maxCAPE>500?'pozor':'mirno'}
   ];
   _renderSuitCard('fly-suit','🪂',pct,desc,factors);
 }
@@ -14672,10 +14672,10 @@ function _buildGoreKPIs({triglav}){
   const snowfall=d.snowfall_sum?.[0]??null;
   const gust=d.wind_gusts_10m_max?.[0]??null;
   const kpis=[
-    {val:freeze!=null?Math.round(freeze)+' m':'—',lbl:'Meja zmrzali',sub:'danes',col:freeze!=null&&freeze<1000?'var(--blue)':null},
-    {val:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',lbl:'T Triglav 2864m',sub:'modelska višina vrha',col:tTriglav!=null&&tTriglav<0?'var(--blue)':null},
+    {val:freeze!=null?Math.round(freeze)+' m':'—',lbl:'Meja ledišča',sub:'danes',col:freeze!=null&&freeze<1000?'var(--blue)':null},
+    {val:tTriglav!=null?tTriglav.toFixed(0)+' °C':'—',lbl:'T Triglav 2864 m n. v.',sub:'modelska višina vrha',col:tTriglav!=null&&tTriglav<0?'var(--blue)':null},
     {val:snowfall!=null&&snowfall>0?snowfall.toFixed(0)+' cm':'0 cm',lbl:'Sneg danes',sub:'cm novega snega'},
-    {val:gust!=null?Math.round(gust)+' km/h':'—',lbl:'Max sunki',sub:'triglav območje'},
+    {val:gust!=null?Math.round(gust)+' km/h':'—',lbl:'Maks. sunki',sub:'območje Triglava'},
   ];
   el.innerHTML=kpis.map(k=>`<div class="mtn-kpi"><div class="mtn-kpi-val"${k.col?` style="color:${k.col}"`:''}>${k.val}</div><div class="mtn-kpi-lbl">${k.lbl}</div><div class="mtn-kpi-sub">${k.sub}</div></div>`).join('');
 }
@@ -14724,7 +14724,7 @@ function _buildGoreFreeze({triglav}){
   svg+='</svg>';
   chartEl.innerHTML=svg;
   if(legEl) legEl.innerHTML=refs.map(r=>`<span><svg width="14" height="2"><line x1="0" y1="1" x2="14" y2="1" stroke="${r.col}" stroke-width="1.5" stroke-dasharray="4,2"/></svg>${r.lbl} ${r.h} m</span>`).join('')
-    +'<span style="opacity:.6">Stolpci = min–max meja zmrzali</span>';
+    +'<span style="opacity:.6">Stolpci = min–maks višina meje ledišča</span>';
 }
 
 function _buildGoreTriglav({triglav}){
@@ -14749,7 +14749,7 @@ function _buildGoreTriglav({triglav}){
   }
   html+='</div>';
   html+=`<div class="mtn-summit-info">
-    <b>Opomba:</b> temperature so modelsko prilagojene na višino vrha Triglava (2864 m) prek Open-Meteo statističnega zniževanja. Za operativno planinarjenje vedno preveri
+    <b>Opomba:</b> Temperature so modelsko prilagojene na višino vrha Triglava (2864 m) z metodo statističnega zniževanja (Open-Meteo). Za operativno planinarjenje vedno preveri
     <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
   </div>`;
   el.innerHTML=html;
@@ -14894,11 +14894,11 @@ function _buildGobeMain(loc,agg){
   const tEl=document.getElementById('gobe-day-time'),dt=d.time?.[i]?new Date(d.time[i]):null;
   if(tEl){const dl=['ned','pon','tor','sre','čet','pet','sob'];tEl.textContent=_gobeDayOffset===0?'danes':(dt?`${dl[dt.getDay()]} ${dt.getDate()}.${dt.getMonth()+1}.`:'')+` · +${_gobeDayOffset} d`;}
   const rng=document.getElementById('gobe-day-range');if(rng&&+rng.value!==_gobeDayOffset)rng.value=_gobeDayOffset;
-  const desc=pct>=75?'Odlične razmere — tla vlažna in topla, gobe so verjetno v polni rasti.'
+  const desc=pct>=75?'Odlične razmere – tla vlažna in topla, gobe so verjetno v polni rasti.'
     :pct>=55?'Dobre razmere za gobe. Po izdatnem dežju je smiselno na lov.'
-    :pct>=35?'Zmerne razmere — posamezne gobe možne, predvsem v vlažnih legah.'
-    :pct>=18?'Slabe razmere — pretežno suho ali prehladno za obrodnost.'
-    :'Brez obrodnosti — premalo vlage ali prenizke temperature.';
+    :pct>=35?'Zmerne razmere – posamezne gobe možne, predvsem v vlažnih legah.'
+    :pct>=18?'Slabe razmere – pretežno suho ali prehladno za obrodnost.'
+    :'Brez obrodnosti – premalo vlage ali prenizke temperature.';
   if(g('gobe-suit-icon'))g('gobe-suit-icon').textContent=pct>=55?'🍄':pct>=35?'🍄':'🌱';
   if(g('gobe-suit-level'))g('gobe-suit-level').textContent=lv.lvl;
   if(g('gobe-suit-desc'))g('gobe-suit-desc').textContent=desc;
@@ -14955,15 +14955,15 @@ function _buildGobeSpots(all,aggs){
 // Likely species for the current month (Savinjska / Slovenia)
 function _gobeSpeciesFor(month){
   const S={
-    boletus:{ic:'🍄',nm:'Jurček (goban)',nt:'Listnati in iglasti gozdovi; 2–3 tedne po dežju, tla 12–18 °C.'},
-    chant:{ic:'🟡',nm:'Lisička',nt:'Mahovita, vlažna tla pod smreko in bukvijo; prenese več dežja.'},
-    morel:{ic:'🟤',nm:'Smrček (marela)',nt:'Pomladanska goba; gajbe, jesenovi logi, ob potokih, 8–15 °C.'},
-    stmgeorge:{ic:'⚪',nm:'Majska goba',nt:'Travniki in robovi gozda v aprilu–maju.'},
-    chestnut:{ic:'🌰',nm:'Turek / kostanjevka',nt:'Pod kostanjem in hrastom v toplih jesenskih dneh.'},
-    parasol:{ic:'☂️',nm:'Orjaški dežnik',nt:'Travniki, poseke; pozno poletje in jesen.'},
-    winter:{ic:'❄️',nm:'Zimska panjevka',nt:'Na štorih listavcev; raste tudi ob blagi zmrzali.'},
-    oyster:{ic:'🦪',nm:'Bukov ostrigar',nt:'Na bukovih deblih; pozna jesen in zima.'},
-    warn:{ic:'☠️',nm:'Pozor: strupene dvojnice',nt:'Mušnice in druge strupene vrste rastejo sočasno — preveri vsako gobo!'},
+    boletus:{ic:'🍄',nm:'Jurček (goban)',nt:'Listnati in iglasti gozdovi; 2–3 tedne po dežju, tla 12–18 °C. Pogost v Savinjski dolini in Kamniško-Savinjskih Alpah.'},
+    chant:{ic:'🟡',nm:'Lisička',nt:'Mahovita, vlažna tla pod smreko in bukvijo; prenese več dežja kot jurček.'},
+    morel:{ic:'🟤',nm:'Smrček (mavrah)',nt:'Pomladanska goba; gaji, jesenovi logi, ob potokih; tla 8–15 °C. Sezona: marec–maj.'},
+    stmgeorge:{ic:'⚪',nm:'Majska goba (pripravljavnica)',nt:'Travniki in robovi gozda v aprilu in maju; raste v skupinah.'},
+    chestnut:{ic:'🌰',nm:'Turek / kostanjevka',nt:'Pod kostanjem in hrastom; topli jesenski dnevi, tla 10–16 °C.'},
+    parasol:{ic:'☂️',nm:'Orjaški dežnik',nt:'Travniki in poseke; pozno poletje in jesen. Zamenljiv s strupenim dežnikom – preveri!'},
+    winter:{ic:'❄️',nm:'Zimska panjevka',nt:'Na štorih listavcev; raste ob nizkih temperaturah in blagi zmrzali.'},
+    oyster:{ic:'🦪',nm:'Bukov ostrigar',nt:'Na bukovih in topolovih deblih; pozna jesen in zima.'},
+    warn:{ic:'☠️',nm:'Pozor: nevarne dvojnice!',nt:'Mušnice in druge nevarne vrste rastejo sočasno z jedilnimi – natančno preveri vsako gobo!'},
   };
   // 0=jan ... 11=dec
   const byMonth=[
@@ -14989,10 +14989,10 @@ function _buildGobeSpecies(loc,agg){
   const pct=_gobeScore(_gobeInputs(loc,agg,ti));
   const list=_gobeSpeciesFor(month);
   const mn=['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'][month];
-  const note=pct>=55?'Razmere so ugodne — spodaj naštete vrste so trenutno najbolj verjetne.'
-    :pct>=35?'Razmere so zmerne — verjetnost je manjša, a v vlažnih legah se splača pogledati.'
-    :'Trenutno je presuho/prehladno — kljub sezoni je obrodnost teh vrst malo verjetna.';
-  el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Tipično v ${mn} v Savinjski. ${note}</div>`+
+  const note=pct>=55?'Razmere so ugodne – spodaj naštete vrste so trenutno najbolj verjetne.'
+    :pct>=35?'Razmere so zmerne – verjetnost je manjša, a v vlažnih legah se splača pogledati.'
+    :'Trenutno je presuho ali prehladno – kljub sezoni je obrodnost teh vrst malo verjetna.';
+  el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Tipično v ${mn} v Savinjski dolini. ${note}</div>`+
     list.map(s=>`<div class="gobe-sp"><span class="gobe-sp-ic">${s.ic}</span><div><div class="gobe-sp-nm">${s.nm}</div><div class="gobe-sp-nt">${s.nt}</div></div></div>`).join('');
 }
 
@@ -15001,7 +15001,7 @@ const ACTIVITIES=[
   {key:'rekreacija',icon:'🏃',label:'Rekreacija',pane:'act-rekreacija'},
   {key:'cebelarji', icon:'🐝',label:'Čebelarji', pane:'act-cebelarji'},
   {key:'nebo',      icon:'🔭',label:'Nebo',      pane:'act-nebo'},
-  {key:'pv',        icon:'☀️',label:'Sončna e.', pane:'act-pv'},
+  {key:'pv',        icon:'☀️',label:'Sončna elektrarna', pane:'act-pv'},
   {key:'ribic',     icon:'🎣',label:'Ribiči',    pane:'act-ribic'},
   {key:'morje',     icon:'🌊',label:'Morje',     pane:'tab-morje',  init:()=>initMorje()},
   {key:'gore',      icon:'⛰',label:'Gore',       pane:'tab-gore',   init:()=>initGore()},
@@ -15097,7 +15097,7 @@ function _renderActivity(key){
   if(ACT_CFG[key].gran==='hour')_renderActHour(key);else _renderActDay(key);
 }
 function _actDesc(key,pct){
-  const noun={rekreacija:'za tek/kolo',cebelarji:'za čebeljo pašo',nebo:'za opazovanje neba',pv:'za proizvodnjo',ribic:'za ribolov'}[key]||'';
+  const noun={rekreacija:'za tek/kolesarjenje',cebelarji:'za čebeljo pašo',nebo:'za opazovanje neba',pv:'za proizvodnjo',ribic:'za ribolov'}[key]||'';
   if(pct>=80)return'Odlične razmere '+noun+'.';
   if(pct>=60)return'Dobre razmere '+noun+'.';
   if(pct>=40)return'Zmerne razmere '+noun+'.';
@@ -15217,10 +15217,10 @@ function _ribicScore(days,i){
 function _ribicFactors(days,i){
   const d=days[i],prev=days[i-1],trend=prev?d.pres-prev.pres:0;
   return[
-    {l:'Tlak (trend)',v:Math.round(d.pres)+' hPa',d:Math.abs(trend)<=0.7?'stabilen':trend>0?'raste':'pada'},
+    {l:'Zračni tlak',v:Math.round(d.pres)+' hPa',d:Math.abs(trend)<=0.7?'stabilen':trend>0?'raste':'pada'},
     {l:'Oblačnost',v:Math.round(d.cloud)+' %',d:d.cloud>=40&&d.cloud<=85?'ugodno':d.cloud<20?'jasno':'spremenljivo'},
     {l:'Veter',v:Math.round(d.wind)+' km/h',d:d.wind<12?'mirno':d.wind<22?'zmerno':'vetrovno'},
-    {l:'Padavine',v:Math.round(d.precip)+' mm',d:d.precip<1?'suho':d.precip<8?'malo':'mokro'},
+    {l:'Padavine',v:Math.round(d.precip)+' mm',d:d.precip<1?'suho':d.precip<8?'rahle':'mokro'},
     {l:'Luna',v:_moonName(new Date(d.date)),d:'faza'}];
 }
 function _renderActDay(key){
