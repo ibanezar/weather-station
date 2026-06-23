@@ -7174,7 +7174,7 @@ function generateWhyWeather(obs){
   } else if(hum>70){
     b2=`Reka Savinja in mokrotni travniki vzdržujejo <em>višjo vlažnost</em> (${hum}%) v dolini, kot jo poznajo okoliška višja območja. Tipično za zaprto dolino.`;
   } else if(wind>25){
-    b2=`Mocân veter (${wind} km/h) <em>intenzivno meša</em> zrak v dolini. Temperaturne razlike med dnom doline in pobočji so v takih razmerah minimalne.`;
+    b2=`Močan veter (${wind} km/h) <em>intenzivno meša</em> zrak v dolini. Temperaturne razlike med dnom doline in pobočji so v takih razmerah minimalne.`;
   } else {
     b2=`Razmerje med temperaturo (${T}°C) in rosiščem (${Td}°C) kaže na <em>relativno suh zrak</em> za savinjsko dolino — atipično za to področje.`;
   }
@@ -7389,15 +7389,15 @@ function renderDailyMicroclimateFingerprint(obs,h){
   const add=(type,icon,name,text,score=0)=>signals.push({type,icon,name,text,score});
   const coolingDrop=nightTemps.length?T-Math.min(...nightTemps):0;
   const calmNight=nightWinds.length&&Math.max(...nightWinds)<7&&((_mcfAvg(nightCloud)??100)<55)&&nightRain.reduce((a,b)=>a+b,0)<0.5;
-  if(coolingDrop>=5&&calmNight)add('info','🌡','Valley cooling likely tonight',`Miren nočni zrak in malo oblačnosti: dno doline se lahko ohladi za okoli ${coolingDrop.toFixed(1)}°C. Rečica bo verjetno hladnejša od pobočij.`,coolingDrop);
+  if(coolingDrop>=5&&calmNight)add('info','🌡','Nočno ohlajanje doline',`Miren nočni zrak in malo oblačnosti: dno doline se lahko ohladi za okoli ${coolingDrop.toFixed(1)}°C. Rečica bo verjetno hladnejša od pobočij.`,coolingDrop);
   const fogSetup=(dep<3&&hum>82&&wind<8)||((Math.min(...dawnDep,99)<2)&&((_mcfAvg(dawnWind)??99)<6)&&((_mcfAvg(dawnRh)??0)>86));
-  if(fogSetup)add('warn','🌫','Fog-prone setup',`Rosišče je blizu temperature, vlaga je ${Math.round(hum)}%, veter pa ${Math.round(wind)} km/h. Ob Savinji je povečana možnost megle ali nizke vlage pri tleh.`,80);
+  if(fogSetup)add('warn','🌫','Pogoji za meglo',`Rosišče je blizu temperature, vlaga je ${Math.round(hum)}%, veter pa ${Math.round(wind)} km/h. Ob Savinji je povečana možnost megle ali nizke vlage pri tleh.`,80);
   const southChannel=(_mcfDirIn(dir,120,220)&&wind>=10)||(_mcfDirIn(fcDir,120,220)&&fcWind>=10)||(gustMax>=35&&_mcfDirIn(fcDir,120,240));
-  if(southChannel)add(gustMax>=50?'alert':'info','💨','Southern valley wind channel active',`Južni do jugovzhodni tok se kanalizira po Savinjski dolini. Pričakovani sunki do ${Math.round(gustMax||wind)} km/h lahko lokalno premešajo dolinski zrak.`,gustMax);
+  if(southChannel)add(gustMax>=50?'alert':'info','💨','Aktiven južni dolinski tok',`Južni do jugovzhodni tok se kanalizira po Savinjski dolini. Pričakovani sunki do ${Math.round(gustMax||wind)} km/h lahko lokalno premešajo dolinski zrak.`,gustMax);
   const stormOutflow=wmoStorm||capeMax>=900&&gustMax>=45||pTrend<-1.5&&capeMax>=500;
-  if(stormOutflow)add(gustMax>=70||capeMax>=1500?'alert':'warn','⛈','Storm outflow risk from Savinja valley',`Nestabilnost CAPE ${Math.round(capeMax)} J/kg in sunki do ${Math.round(gustMax)} km/h nakazujejo možnost nevihtnega iztoka po dolini.`,capeMax/20+gustMax);
+  if(stormOutflow)add(gustMax>=70||capeMax>=1500?'alert':'warn','⛈','Nevihtni iztok iz Savinjske doline',`Nestabilnost CAPE ${Math.round(capeMax)} J/kg in sunki do ${Math.round(gustMax)} km/h nakazujejo možnost nevihtnega iztoka po dolini.`,capeMax/20+gustMax);
   if(rain12>=6&&_mcfDirIn(fcDir,180,260))add('warn','🌧','Orografsko ojačanje padavin',`Vlažen J/JZ tok in relief Savinjskih Alp lahko okrepita padavine; model v 12 urah kaže ${rain12.toFixed(1)} mm.`,rain12*5);
-  if(!signals.length)add('good','✓','Quiet valley day',`Ni izrazitega lokalnega signala: veter, vlaga in napoved ne kažejo posebne dolinske anomalije.`,1);
+  if(!signals.length)add('good','✓','Miren dolinski dan',`Ni izrazitega lokalnega signala: veter, vlaga in napoved ne kažejo posebne dolinske anomalije.`,1);
   signals.sort((a,b)=>(b.type==='alert')-(a.type==='alert')||b.score-a.score);
   const main=signals[0];
   const kpis=[['Dep.',dep.toFixed(1)+'°C'],['Nočni padec',coolingDrop>0?coolingDrop.toFixed(1)+'°C':'—'],['Sunki 12h',Math.round(gustMax)+' km/h'],['CAPE',Math.round(capeMax)]];
