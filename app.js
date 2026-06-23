@@ -15824,13 +15824,16 @@ function generateWeatherCard() {
   ctx.fillText('meteorec.si', W - PAD, H - 24);
 
   // ── Download ──
-  cvs.toBlob(blob => {
+  try {
     const a = document.createElement('a');
     a.download = 'meteorec-karta.png';
-    a.href = URL.createObjectURL(blob);
+    a.href = cvs.toDataURL('image/png');
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(a.href);
-  }, 'image/png');
+    document.body.removeChild(a);
+  } catch(e) {
+    console.error('Weather card error:', e);
+  }
 }
 
 function _cardLogo(ctx, x, y, size) {
