@@ -267,7 +267,7 @@
         other.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start: src.start, end: src.end });
         other.dispatchAction({ type: 'dataZoom', dataZoomIndex: 1, start: src.start, end: src.end });
       });
-      syncing = false;
+      setTimeout(() => { syncing = false; }, 0);
     });
   });
 
@@ -281,10 +281,12 @@
       btn.classList.add('active');
       const days = +btn.dataset.days;
       const start = days === 0 ? 0 : Math.max(0, 100 - (days / dates.length) * 100);
+      syncing = true;
       charts.forEach(c => {
         c.dispatchAction({ type: 'dataZoom', dataZoomIndex: 0, start, end: 100 });
         c.dispatchAction({ type: 'dataZoom', dataZoomIndex: 1, start, end: 100 });
       });
+      setTimeout(() => { syncing = false; }, 0);
     });
   });
 
