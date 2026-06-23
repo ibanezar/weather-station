@@ -2,14 +2,6 @@ name = "weatherireica1"
 main = "worker.js"
 compatibility_date = "2024-09-23"
 
-# Route for edge-rendering the current month's weather archive page.
-# Requires meteorec.si to be proxied through Cloudflare (orange cloud).
-# Enable in Cloudflare dashboard: Workers & Pages → weatherireica1 → Triggers → Routes
-# Add route: meteorec.si/vreme/*
-[[routes]]
-pattern = "meteorec.si/vreme/*"
-zone_name = "meteorec.si"
-
 [[r2_buckets]]
 binding = "PHOTOS_R2"
 bucket_name = "meteorec-photos"
