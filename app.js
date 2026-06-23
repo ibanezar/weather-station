@@ -7144,58 +7144,58 @@ function generateWhyWeather(obs){
   // ── Blok 1: Tlačni sistem ─────────────────────────────
   let b1='';
   if(pres>1022&&Math.abs(pTrend)<0.8){
-    b1=`Nad regijo vlada <em>anticiklon</em> — tlak je visok (${pres} hPa) in stabilen. Zrak v atmosferi počasi tone navzdol, kar zatre nastanek oblakov in padavin.`;
+    b1=`Nad regijo vlada <em>anticiklon</em> – zračni tlak je visok (${pres} hPa) in stabilen. Zrak se v ozračju počasi poseda, kar preprečuje nastajanje oblakov in padavin.`;
   } else if(pTrend<-2.5){
-    b1=`Tlak <em>hitro pada</em> (${pTrend} hPa/3h) — hladna fronta se hitro bliža. Pred nami je bistveno poslabšanje.`;
+    b1=`Zračni tlak <em>hitro pada</em> (${pTrend} hPa/3 h) – nezadržno se približuje hladna fronta. Pred nami je občutno poslabšanje vremena.`;
   } else if(pTrend<-1){
-    b1=`Tlak <em>postopno pada</em> (${pTrend} hPa/3h) — ciklon se počasi bliža z zahoda. Vreme bo v naslednjih urah nestabilnejše.`;
+    b1=`Zračni tlak <em>postopno pada</em> (${pTrend} hPa/3 h) – z zahoda se počasi približuje ciklon. Vreme bo v prihodnjih urah vse bolj nestanovitno.`;
   } else if(pTrend>1.5){
-    b1=`Tlak <em>narašča</em> (+${pTrend} hPa/3h) — anticiklon prevzema nadzor. Vreme se bo predvidoma izboljšalo.`;
+    b1=`Zračni tlak <em>narašča</em> (+${pTrend} hPa/3 h) – vpliv anticiklona se krepi. Vreme se bo predvidoma izboljšalo.`;
   } else if(pres<1005){
-    b1=`Nad območjem je <em>nizek tlak</em> (${pres} hPa) — ciklon. Zrak se dviga, kondenzira in ustvarja oblake ter padavine.`;
+    b1=`Nad regijo se zadržuje območje <em>nizkega zračnega tlaka</em> (${pres} hPa) – ciklon. Zrak se dviga in ohlaja, vlaga v njem pa kondenzira, kar povzroča nastanek oblakov in padavin.`;
   } else if(pres>1018){
-    b1=`Visok tlak (${pres} hPa) ohranja <em>stabilne razmere</em>. Brez večjih vertikalnih gibanj v atmosferi.`;
+    b1=`Visok zračni tlak (${pres} hPa) ohranja <em>stabilne vremenske razmere</em>. Ozračje je umirjeno, brez izrazitih vertikalnih gibanj.`;
   } else {
-    b1=`Tlak je <em>zmeren</em> (${pres} hPa) brez izrazitega trenda — prehodne razmere med anticiklonom in ciklonom.`;
+    b1=`Zračni tlak je v mejah povprečja (${pres} hPa) in brez izrazitih sprememb – prevladuje <em>prehodno stanje</em> med anticiklonom in ciklonom.`;
   }
 
   // ── Blok 2: Vlaga, zrak, dolinski efekt ──────────────
   let b2='';
   if(dep<1.5&&wind<5){
-    b2=`Ker je rosišče le <em>${dep}°C</em> pod temperaturo in je veter skoraj nič (${wind} km/h), se zrak v dolini ne meša. Vlažen nočni zrak ostaja pri tleh — megla je zelo verjetna, posebej ob reki Savinji.`;
+    b2=`Ker je rosišče le <em>${dep} °C</em> nižje od temperature zraka, veter pa je zelo šibek (${wind} km/h), se ozračje v dolini ne meša. Vlažen nočni zrak se zadržuje pri tleh – nastanek megle je zelo verjeten, še posebej ob reki Savinji.`;
   } else if(dep<3&&hum>80){
-    b2=`Zrak je <em>nasičen z vlago</em> (${hum}%, rosišče ${Td}°C). Dolina Savinje zadržuje vlago z reke in travnikov — kondenzacija na hladnih površinah je pričakovana.`;
+    b2=`Zrak je <em>nasičen z vlago</em> (${hum} %, rosišče ${Td} °C). Savinjska dolina zadržuje vlago z reke in travnikov – na hladnih površinah je pričakovati kondenzacijo.`;
   } else if(T<2&&dep<4){
-    b2=`Pri <em>${T}°C</em> in rosišču ${Td}°C so pogoji za <em>slano ali ivje</em>. Miren zrak v dolini ne meša temperaturnih plasti — nočno ohlajanje je intenzivnejše kot na pobočjih.`;
+    b2=`Pri temperaturi <em>${T} °C</em> in rosišču ${Td} °C so izpolnjeni pogoji za nastanek <em>slane ali ivja</em>. Mirno ozračje v dolini preprečuje mešanje temperaturnih plasti – nočno ohlajanje je zato izrazitejše kot na okoliških pobočjih.`;
   } else if(wind<5&&pres>1015&&(hour<9||hour>19)){
-    b2=`Miren zrak (${wind} km/h) in dolinska <em>lega Rečice (366 m)</em> pogosto ustvarita temperaturno inverzijo: hladen težji zrak se zbira v kotanji, medtem ko je na pobočjih Šoštanja ali Logarske doline toplejše.`;
+    b2=`Mirno ozračje (${wind} km/h) in dolinska <em>lega Rečice (366 m n. v.)</em> pogosto privedeta do nastanka <em>temperaturne inverzije</em>: hladnejši in težji zrak se steka v dno kotline, medtem ko je na višjeležečih pobočjih (npr. nad Šoštanjem ali nad Logarsko dolino) topleje.`;
   } else if(rain>0.5){
-    b2=`Savinjska dolina je s treh strani obkrožena z gorami — vlažni <em>jugozahodni tokovi</em> se ob pobočjih dvigajo, kondenzirajo in prinašajo več padavin kot na Štajerski ravnini (do 2× več).`;
+    b2=`Savinjska dolina je s treh strani obdana z gorami – vlažen zrak v <em>jugozahodnih tokovih</em> se ob pobočjih dviga in ohlaja, vlaga v njem pa kondenzira, kar prinaša tudi do dvakrat več padavin kot na štajerski ravnini.`;
   } else if(hum>70){
-    b2=`Reka Savinja in mokrotni travniki vzdržujejo <em>višjo vlažnost</em> (${hum}%) v dolini, kot jo poznajo okoliška višja območja. Tipično za zaprto dolino.`;
+    b2=`Reka Savinja in mokrotni travniki prispevajo k <em>višji zračni vlažnosti</em> (${hum} %) v dolini glede na okoliška višjeležeča območja, kar je značilno za zaprte doline.`;
   } else if(wind>25){
-    b2=`Mocân veter (${wind} km/h) <em>intenzivno meša</em> zrak v dolini. Temperaturne razlike med dnom doline in pobočji so v takih razmerah minimalne.`;
+    b2=`Močan veter (${wind} km/h) <em>intenzivno premeša</em> ozračje v dolini. Temperaturne razlike med dnom doline in okoliškimi pobočji so v takšnih razmerah minimalne.`;
   } else {
-    b2=`Razmerje med temperaturo (${T}°C) in rosiščem (${Td}°C) kaže na <em>relativno suh zrak</em> za savinjsko dolino — atipično za to področje.`;
+    b2=`Razmerje med temperaturo (${T} °C) in rosiščem (${Td} °C) kaže na <em>razmeroma suh zrak</em> za Savinjsko dolino – to je za omenjeno območje neznačilno.`;
   }
 
   // ── Blok 3: Napoved za preostanek dneva ──────────────
   let b3='';
   const isAM=hour<13, isPM=hour>=13&&hour<20, isEvening=hour>=20;
   if(dep<2&&wind<5&&pres>1015&&isAM){
-    b3=`Čez dan bo <em>sonce postopno razbilo</em> vlažno plast — megla se navadno dvigne med 9. in 11. uro. Popoldan bo sončno in prijetno.`;
+    b3=`Čez dan bo <em>sončna toplota postopno razkrojila</em> vlažno zračno plast – megla se navadno dvigne med 9. in 11. uro. Popoldne bo sončno in prijetno.`;
   } else if(pTrend<-2&&rain<0.5){
-    b3=`V naslednjih <em>urah pričakujemo poslabšanje</em> — oblačnost se bo povečala, možne so padavine in sunki vetra.`;
+    b3=`V prihodnjih urah pričakujemo <em>poslabšanje vremena</em> – oblačnost se bo gostila, pojavile se bodo padavine, lokalno pa so možni tudi močnejši sunki vetra.`;
   } else if(pres>1020&&hum<65&&wind<15&&rain<0.1){
-    b3=`<em>Stabilne razmere</em> se bodo nadaljevale do večera. Idealen dan za aktivnosti na prostem.`;
+    b3=`<em>Stabilne vremenske razmere</em> se bodo nadaljevale do večera. Pred nami je idealen dan za aktivnosti na prostem.`;
   } else if(isEvening&&T<10&&wind<5){
-    b3=`Noč bo <em>hladna in mirna</em> — idealni pogoji za temperaturno inverzijo do jutra. Pričakujte ${T-3>0?'roso':'slano'} na vegetaciji.`;
+    b3=`Noč bo <em>hladna in mirna</em> – to so idealni pogoji za nastanek <em>jutranje temperaturne inverzije</em>. Na vegetaciji lahko pričakujete ${T-3>0?'roso':'slano'}.`;
   } else if(rain>0.5){
-    b3=`Padavine <em>bodo postopno prehajale</em> — sledite radarskim slikam za natančen čas razjasnitve.`;
+    b3=`Padavine bodo <em>postopno slabele in ponehavale</em> – za natančnejši čas razjasnitve spremljajte radarske slike padavin.`;
   } else if(isPM&&T>22&&hum>60){
-    b3=`Popoldne je v dolini Savinje <em>možna termična konvekcija</em> — lokalne popoldanske plohe ali nevihte se razvijejo nad pobočji.`;
+    b3=`Popoldne je v Savinjski dolini <em>možna termična konvekcija</em> – nad okoliškimi pobočji se bodo razvile lokalne popoldanske plohe ali nevihte.`;
   } else {
-    b3=`Razmere se v naslednjih urah bistveno <em>ne bodo spremenile</em>.`;
+    b3=`Vreme se v prihodnjih urah ne bo bistveno spremenilo.`;
   }
 
   // Combine into flowing text
@@ -7229,7 +7229,7 @@ function analyzeLocalMicroclimate(obs){
     const prob=dep<0.8?'zelo verjetna':dep<1.5?'verjetna':'možna';
     conditions.push({
       type:'fog',cls:'mc-item-info',icon:'🌫',name:'Megleni kotel',
-      text:`Rosišče je le ${dep}°C pod temperaturo, veter pa ${wind.toFixed(0)} km/h. Vlažen zrak se zadržuje v dolini Savinje — megla je ${prob}, posebej ob reki in na nižjih legah.`,
+      text:`Rosišče je le ${dep} °C pod temperaturo zraka, hitrost vetra pa znaša ${wind.toFixed(0)} km/h. Vlažen zrak se zadržuje v Savinjski dolini – nastanek megle je ${prob}, še posebej ob reki in v nižjih legah.`,
       data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
     });
   }
@@ -7238,7 +7238,7 @@ function analyzeLocalMicroclimate(obs){
   if(wind<6&&pres>1018&&rain<0.1&&(hour<10||hour>19)){
     conditions.push({
       type:'inversion',cls:'mc-item-info',icon:'🔄',name:'Temperaturna inverzija',
-      text:`Visok tlak (${pres.toFixed(0)} hPa) in miren veter (${wind.toFixed(0)} km/h) ustvarjata pogoje za inverzijo. Rečica ob Savinji (366 m) je v takih situacijah pogosto 2–5°C hladnejša od Šoštanja ali Velenja na višjih legah.`,
+      text:`Visok zračni tlak (${pres.toFixed(0)} hPa) in mirno ozračje (${wind.toFixed(0)} km/h) ustvarjata idealne pogoje za nastanek temperaturne inverzije. Rečica ob Savinji (366 m n. v.) je v takšnih razmerah pogosto za 2–5 °C hladnejša od višjih leg v okolici Šoštanja ali Velenja.`,
       data:[`Tlak ${pres.toFixed(0)} hPa`,`V ${wind.toFixed(0)} km/h`,`Ura ${hour}:00`],
     });
   }
@@ -7248,13 +7248,13 @@ function analyzeLocalMicroclimate(obs){
     const speed=pTrend<-3?'hitro':'počasi';
     conditions.push({
       type:'front',cls:'mc-item-alert',icon:'⛈',name:'Prihaja fronta',
-      text:`Tlak pada ${Math.abs(pTrend).toFixed(1)} hPa v 3 urah — ${speed} pada. Savinjska dolina je pogosto tarča močnih neviht ob prehodu front. Možna povečana možnost toče in sunkov.`,
+      text:`Zračni tlak je v zadnjih treh urah ${speed} padel za ${Math.abs(pTrend).toFixed(1)} hPa. Savinjska dolina je ob prehodih hladnih front pogosto tarča močnejših neviht, zato je možna povečana nevarnost toče in močnih vetrovnih sunkov.`,
       data:[`Trend ${pTrend>0?'+':''}${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   } else if(pTrend>1.5){
     conditions.push({
       type:'clearing',cls:'mc-item-good',icon:'🌤',name:'Vremenska razjasnitev',
-      text:`Tlak narašča ${pTrend.toFixed(1)} hPa v 3 urah — anticiklon krepi. Vreme se bo predvidoma izboljšalo.`,
+      text:`Zračni tlak je v zadnjih treh urah narasel za ${pTrend.toFixed(1)} hPa – vpliv anticiklona se krepi. Vreme se bo predvidoma stabiliziralo in izboljšalo.`,
       data:[`Trend +${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
@@ -7263,16 +7263,16 @@ function analyzeLocalMicroclimate(obs){
   if(pres>1022&&wind<12&&hum<60&&rain<0.1&&Math.abs(pTrend)<0.5){
     conditions.push({
       type:'anticyclone',cls:'mc-item-good',icon:'☀️',name:'Anticiklonalno stabilno vreme',
-      text:`Tlak ${pres.toFixed(0)} hPa, vlaga ${hum}%, miren veter — klasičen anticiklon. Savinjska dolina ima v takih razmerah pogosto lepše vreme kot višje lege, ki so pogosto pod oblaki.`,
+      text:`Zračni tlak znaša ${pres.toFixed(0)} hPa, vlaga je ${hum} %, ozračje pa je mirno – tipične anticiklonalne razmere. Savinjska dolina ima v takšnem vremenu pogosto jasnejše vreme kot višje ležeči predeli, ki jih nerazpujena oblačnost lahko zavije v meglo.`,
       data:[`Tlak ${pres.toFixed(0)} hPa`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
     });
   }
 
   // ── 5. Rosa / slana / poledica
   if(T<4&&dep<3){
-    const risk=T<-1?{n:'Nevarnost poledice',t:`Temperatura ${T.toFixed(1)}°C z visoko vlago pomeni tveganje za poledico ali slano. Pozor na ceste in mostove ob Savinji.`,c:'mc-item-alert',i:'🧊'}:
-               T<1?{n:'Možna slana ali ivje',t:`Temperatura pri rosišču blizu 0°C. Slana je možna na travnikih in rastlinah — prečudovito za makro fotografijo rose in ledenih kristalov.`,c:'mc-item-warn',i:'🌨'}:
-                   {n:'Rosa bo padla',t:`Temperatura ${T.toFixed(1)}°C blizu rosišča ${Td.toFixed(1)}°C. Pred sončnim vzhodom bo rosa na rastlinah — idealni pogoji za makro fotografijo kapljic.`,c:'mc-item-info',i:'💧'};
+    const risk=T<-1?{n:'Nevarnost poledice',t:`Temperatura ${T.toFixed(1)} °C ob visoki zračni vlagi prinaša tveganje za nastanek poledice ali slane. Pozor na cestah in mostovih v bližini Savinje!`,c:'mc-item-alert',i:'🧊'}:
+               T<1?{n:'Možna slana ali ivje',t:`Temperatura je blizu rosišča, ki se giblje okoli 0 °C. Na travnikih in rastlinah se lahko pojavi slana – izjemna priložnost za makro fotografijo rose in ledenih kristalov.`,c:'mc-item-warn',i:'🌨'}:
+                   {n:'Rosa bo padla',t:`Temperatura zraka (${T.toFixed(1)} °C) je blizu rosišča (${Td.toFixed(1)} °C). Pred sončnim vzhodom bodo rastline prekrile rosne kapljice – idealni pogoji za makro fotografijo.`,c:'mc-item-info',i:'💧'};
     conditions.push({type:'dew',cls:risk.c,icon:risk.i,name:risk.n,text:risk.t,
       data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`]});
   }
@@ -7281,7 +7281,7 @@ function analyzeLocalMicroclimate(obs){
   if(hum>78&&dep<6&&!conditions.find(c=>c.type==='fog')){
     conditions.push({
       type:'moist',cls:'mc-item-info',icon:'💦',name:'Vlažen dolinski zrak',
-      text:`Vlaga ${hum}% je visoka — tipično za dolino Savinje. Reka in mokrotni travniki vzdržujejo visoko vlažnost, ki jo okoliška pobočja ne poznajo.`,
+      text:`Zračna vlaga je visoka (${hum} %), kar je značilno za dno Savinjske doline. Reka in mokrotni travniki stalno vzdržujejo visoko vlažnost, ki je na okoliških pobočjih običajno ne zaznamo.`,
       data:[`Vlaga ${hum}%`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`],
     });
   }
@@ -7290,7 +7290,7 @@ function analyzeLocalMicroclimate(obs){
   if(wind<4&&rain<0.1&&T<10&&pres>1015){
     conditions.push({
       type:'cold_pool',cls:'mc-item-info',icon:'🌡',name:'Mrzli dolinski žep',
-      text:`Miren zrak in dolinska lega (366 m) pogosto povzročita, da se hladen zrak zbira v dolini. Okoliška pobočja (Šoštanj, Logarska) so v takih razmerah 2–4°C toplejša.`,
+      text:`Zaradi mirnega ozračja in specifične dolinske lege (366 m n. v.) se hladen zrak steka in zbira na dnu doline. Okoliška pobočja in višje ležeči kraji (smeri proti Šoštanju ali Logarski dolini) so v takšnih razmerah praviloma za 2–4 °C toplejši.`,
       data:[`T ${T.toFixed(1)}°C`,`V ${wind.toFixed(0)} km/h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
@@ -7299,7 +7299,7 @@ function analyzeLocalMicroclimate(obs){
   if(rain>1&&pres<1010){
     conditions.push({
       type:'orographic',cls:'mc-item-warn',icon:'🌧',name:'Orografske padavine',
-      text:`Nizek tlak + padavine. Savinjska dolina je zaprta z vseh strani — vlažni jugozahodni tokovi prinašajo obilne padavine ob zahodnih pobočjih (do 2× več kot na Štajerskem).`,
+      text:`Območje nizkega zračnega tlaka prinaša padavine. Ker je Savinjska dolina izrazito zaprta, vlažni jugozahodni vetrovi trkajo ob gorske pregrade, se ob njih dvigajo in kondenzirajo, to pa ob zahodnih pobočjih prinaša obilne padavine (tudi do dvakrat več kot na štajerski ravnini).`,
       data:[`Dež ${rain.toFixed(1)} mm/h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
@@ -7311,7 +7311,7 @@ function analyzeLocalMicroclimate(obs){
   if(!list)return;
 
   if(!conditions.length){
-    list.innerHTML='<div class="mc-none">✓ Normalne razmere — ni posebnih mikroklimatskih pojavov.</div>';
+    list.innerHTML='<div class="mc-none">✓ Razmere so stabilne in v mejah normale – brez posebnosti ali izrazitih mikroklimatskih pojavov.</div>';
     return;
   }
 
@@ -7389,15 +7389,15 @@ function renderDailyMicroclimateFingerprint(obs,h){
   const add=(type,icon,name,text,score=0)=>signals.push({type,icon,name,text,score});
   const coolingDrop=nightTemps.length?T-Math.min(...nightTemps):0;
   const calmNight=nightWinds.length&&Math.max(...nightWinds)<7&&((_mcfAvg(nightCloud)??100)<55)&&nightRain.reduce((a,b)=>a+b,0)<0.5;
-  if(coolingDrop>=5&&calmNight)add('info','🌡','Valley cooling likely tonight',`Miren nočni zrak in malo oblačnosti: dno doline se lahko ohladi za okoli ${coolingDrop.toFixed(1)}°C. Rečica bo verjetno hladnejša od pobočij.`,coolingDrop);
+  if(coolingDrop>=5&&calmNight)add('info','🌡','Nočno ohlajanje doline',`Mirno ozračje in majhna oblačnost: dno doline se lahko ponoči ohladi za približno ${coolingDrop.toFixed(1)} °C. Rečica bo predvidoma hladnejša od okoliških višjeležečih pobočij.`,coolingDrop);
   const fogSetup=(dep<3&&hum>82&&wind<8)||((Math.min(...dawnDep,99)<2)&&((_mcfAvg(dawnWind)??99)<6)&&((_mcfAvg(dawnRh)??0)>86));
-  if(fogSetup)add('warn','🌫','Fog-prone setup',`Rosišče je blizu temperature, vlaga je ${Math.round(hum)}%, veter pa ${Math.round(wind)} km/h. Ob Savinji je povečana možnost megle ali nizke vlage pri tleh.`,80);
+  if(fogSetup)add('warn','🌫','Pogoji za meglo',`Rosišče je zelo blizu temperature zraka, zračna vlaga znaša ${Math.round(hum)} %, hitrost vetra pa le ${Math.round(wind)} km/h. Ob reki Savinji je zato močno povečana verjetnost nastanka megle ali zadrževanja vlage neposredno nad tlemi.`,80);
   const southChannel=(_mcfDirIn(dir,120,220)&&wind>=10)||(_mcfDirIn(fcDir,120,220)&&fcWind>=10)||(gustMax>=35&&_mcfDirIn(fcDir,120,240));
-  if(southChannel)add(gustMax>=50?'alert':'info','💨','Southern valley wind channel active',`Južni do jugovzhodni tok se kanalizira po Savinjski dolini. Pričakovani sunki do ${Math.round(gustMax||wind)} km/h lahko lokalno premešajo dolinski zrak.`,gustMax);
+  if(southChannel)add(gustMax>=50?'alert':'info','💨','Aktiven južni dolinski tok',`Zračni tok južnih do jugovzhodnih smeri se kanalizira po Savinjski dolini. Pričakovani sunki vetra do ${Math.round(gustMax||wind)} km/h lahko lokalno močno prevetrijo in premešajo ozračje v dolini.`,gustMax);
   const stormOutflow=wmoStorm||capeMax>=900&&gustMax>=45||pTrend<-1.5&&capeMax>=500;
-  if(stormOutflow)add(gustMax>=70||capeMax>=1500?'alert':'warn','⛈','Storm outflow risk from Savinja valley',`Nestabilnost CAPE ${Math.round(capeMax)} J/kg in sunki do ${Math.round(gustMax)} km/h nakazujejo možnost nevihtnega iztoka po dolini.`,capeMax/20+gustMax);
-  if(rain12>=6&&_mcfDirIn(fcDir,180,260))add('warn','🌧','Orografsko ojačanje padavin',`Vlažen J/JZ tok in relief Savinjskih Alp lahko okrepita padavine; model v 12 urah kaže ${rain12.toFixed(1)} mm.`,rain12*5);
-  if(!signals.length)add('good','✓','Quiet valley day',`Ni izrazitega lokalnega signala: veter, vlaga in napoved ne kažejo posebne dolinske anomalije.`,1);
+  if(stormOutflow)add(gustMax>=70||capeMax>=1500?'alert':'warn','⛈','Nevihtni iztok iz Savinjske doline',`Stopnja nestabilnosti ozračja (CAPE znaša ${Math.round(capeMax)} J/kg) in pričakovani sunki vetra do ${Math.round(gustMax)} km/h nakazujejo možnost močnega nevihtnega piša (iztoka hladnega zraka), ki bo prehodno zapihal po dolini.`,capeMax/20+gustMax);
+  if(rain12>=6&&_mcfDirIn(fcDir,180,260))add('warn','🌧','Orografsko ojačanje padavin',`Vlažen južni do jugozahodni zračni tok se bo ob reliefni pregradi Savinjskih Alp prisilno dvigal, kar bo orografsko okrepilo padavine – meteorološki modeli v 12 urah predvidevajo kar ${rain12.toFixed(1)} mm dežja.`,rain12*5);
+  if(!signals.length)add('good','✓','Miren dolinski dan',`Brez izrazitih lokalnih posebnosti: veter, zračna vlaga in splošna vremenska napoved ne kažejo na morebitna mikroklimatska odstopanja ali anomalije v dolini.`,1);
   signals.sort((a,b)=>(b.type==='alert')-(a.type==='alert')||b.score-a.score);
   const main=signals[0];
   const kpis=[['Dep.',dep.toFixed(1)+'°C'],['Nočni padec',coolingDrop>0?coolingDrop.toFixed(1)+'°C':'—'],['Sunki 12h',Math.round(gustMax)+' km/h'],['CAPE',Math.round(capeMax)]];
