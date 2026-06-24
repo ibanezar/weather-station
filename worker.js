@@ -1021,6 +1021,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
               return txt.includes("savinja") || txt.includes("mozirje") || txt.includes("letuš") || txt.includes("letus") || txt.includes("nazarje");
             });
             const out = (savinja.length ? savinja : nearby).slice(0, 6);
+            if (!out.length) continue; // brez rezultatov → poskusi naslednji URL
             return new Response(JSON.stringify({ stations: out, total: features.length, source: arsoUrl }), {
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
             });
