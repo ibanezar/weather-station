@@ -12160,15 +12160,19 @@ async function fetchWaterTemp(){
       if(temp!=null)stationTemps.push({name,temp:Number(temp)});
     }
     if(stationTemps.length){_renderWaterTemp(stationTemps,null,upd);return;}
-    // Fallback: Open-Meteo soil temperature 0–6 cm kot ocena temperature vode
+    // Fallback: ocena temperature vode iz trenutne temperature zraka
+    // T_voda ≈ 0.75 * T_zrak + 2 °C (empirična formula za alpske reke)
     const omUrl='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
-      +'&hourly=soil_temperature_0cm,soil_temperature_6cm&forecast_hours=1&timezone=Europe%2FLjubljana';
+      +'&current=temperature_2m&timezone=Europe%2FLjubljana';
     const om=await fetch(omUrl).then(r2=>r2.json());
-    const st6=om?.hourly?.soil_temperature_6cm?.[0];
-    const st0=om?.hourly?.soil_temperature_0cm?.[0];
-    const est=st6??st0;
-    if(est!=null){_renderWaterTemp([],est,upd);}
-    else{el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki o temperaturi vode trenutno niso dosegljivi</div>';if(upd)upd.textContent='ARSO · ni podatkov';}
+    const tAir=om?.current?.temperature_2m;
+    if(tAir!=null){
+      const est=Math.max(0.5,Math.min(28,tAir*0.75+2));
+      _renderWaterTemp([],est,upd);
+    }else{
+      el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki o temperaturi vode trenutno niso dosegljivi</div>';
+      if(upd)upd.textContent='ARSO · ni podatkov';
+    }
   }catch(e){
     if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Temperatura vode začasno nedostopna</div>';
   }
@@ -12199,7 +12203,7 @@ function _renderWaterTemp(stationTemps,fallbackTemp,upd){
     }
     if(upd)upd.textContent='ARSO · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }else{
-    html+=`<div style="font-size:.75rem;color:var(--muted);line-height:1.65">Direktni podatki ARSO o temperaturi vode niso bili dosegljivi.<br>Prikazana je temperatura tal (0–6 cm) kot okvirna ocena.</div>`;
+    html+=`<div style="font-size:.75rem;color:var(--muted);line-height:1.65">Direktni podatki ARSO o temperaturi vode niso dosegljivi.<br>Prikazana je ocena iz temperature zraka (T<sub>voda</sub> ≈ 0,75 · T<sub>zrak</sub> + 2 °C).</div>`;
     if(upd)upd.textContent='Open-Meteo (ocena) · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }
   const swim=temp>=18&&temp<=26,fish=temp>=8&&temp<=20;
