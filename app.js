@@ -8722,13 +8722,13 @@ function renderSoundingAnalysis(scData,ci){
   // CIN
   const cin_abs=Math.abs(cin_om);
   // Boundary layer category
-  const bl_cat=H_mix<300?'Stabilna':H_mix<800?'Nizka BL':H_mix<1500?'Zmerna BL':H_mix<2500?'Globoka BL':'Izjemno globoka BL';
-  const bl_use=H_mix<800?'Drone letenje priporočeno (nizka BL)':H_mix<1500?'Normalni pogoji za letenje':H_mix<2500?'Aktivna konvekcija verjetna':'Ekstremno konvektivni pogoji — previdno z droni';
+  const bl_cat=H_mix<300?'Stabilna mejna plast':H_mix<800?'Nizka mejna plast':H_mix<1500?'Zmerna mejna plast':H_mix<2500?'Debela mejna plast':'Izjemno debela mejna plast';
+  const bl_use=H_mix<800?'Letenje z droni je priporočljivo (nizka BL)':H_mix<1500?'Normalni pogoji za letenje':H_mix<2500?'Verjetna je aktivna konvekcija':'Ekstremni konvektivni pogoji – pri letenju z droni je potrebna skrajna previdnost';
   // SI labels
-  const siTxt=si>3?'Stabilno':si>1?'Malo nestabilno':si>-2?'Zmerna nestabilnost':si>-4?'Velika nestabilnost':'⚡ Ekstremna nestabilnost!';
+  const siTxt=si>3?'Stabilno':si>1?'Šibka nestabilnost':si>-2?'Zmerna nestabilnost':si>-4?'Velika nestabilnost':'⚡ Ekstremna nestabilnost!';
   const siCol=si>1?'var(--muted)':si>-2?'var(--amber)':si>-4?'var(--red)':'#f87171';
   // CIN labels
-  const cinTxt=cin_abs<10?'Brez pokrova — lahek preklop':cin_abs<50?'Šibak pokrov':cin_abs<100?'Zmeren pokrov — potreben trigger':cin_abs<200?'Močan pokrov — le nevihtni trigger':'Izredno močan pokrov — preklop malo verjeten';
+  const cinTxt=cin_abs<10?'Brez zaporne plasti – hiter in lahek razvoj neviht':cin_abs<50?'Šibka zaporna plast':cin_abs<100?'Zmerna zaporna plast – za razvoj je potreben sprožilec':cin_abs<200?'Močna zaporna plast – preboj možen le ob močnem sprožilcu':'Izredno močna zaporna plast – razvoj neviht je malo verjeten';
   const cinCol=cin_abs<10?'#4ade80':cin_abs<50?'var(--muted)':cin_abs<100?'var(--amber)':cin_abs<200?'var(--red)':'#f87171';
   // Fill DOM
   const setCard=(vid,bdId,v,max,col,desc)=>{
@@ -8745,7 +8745,7 @@ function renderSoundingAnalysis(scData,ci){
   if(g('snd-mix'))g('snd-mix').textContent=H_mix<1000?(H_mix+' m'):mixKm;
   if(g('snd-lcl'))g('snd-lcl').textContent=Math.round(H_lcl_m)+' m';
   if(g('snd-lcl-desc'))g('snd-lcl-desc').textContent=`T_LCL=${T_lcl.toFixed(1)}°C · Td_sfc=${Td_sfc}°C`;
-  const capeTxt=cape_disp<100?'Šibak':cape_disp<500?'Zmeren':cape_disp<1500?'Velik':'⚡ Ekstremno!';
+  const capeTxt=cape_disp<100?'Šibek':cape_disp<500?'Zmeren':cape_disp<1500?'Velik':'⚡ Ekstremen!';
   setCard('snd-cape2',null,Math.round(cape_disp)+' J/kg',null,`var(--red)`,capeTxt+' (parcel+OM blend)');
   if(g('snd-bl'))g('snd-bl').textContent=H_mix+' m';
   if(g('snd-bl-desc'))g('snd-bl-desc').textContent=bl_cat;
@@ -8825,11 +8825,11 @@ function scThreatScore(cape,cin,li,tt,shear){
 }
 function calcStormThreat(cape,cin,li,tt,shear){
   const s=scThreatScore(cape,cin,li,tt,shear);
-  if(s>=60)return{level:'EKSTREMNO',cls:'sc-extreme',score:s,desc:'Izjemne razmere za nevihte. Možne supercelice, toča in poplave.'};
-  if(s>=40)return{level:'VISOKO',cls:'sc-high',score:s,desc:'Ugodne razmere za nevihtni razvoj. Pričakovati sunkovit veter, intenzivne padavine, možna toča.'};
-  if(s>=22)return{level:'ZMERNO',cls:'sc-moderate',score:s,desc:'Zmeren potencial. Lokalne plohe in nevihte možne, zlasti v popoldanskih urah.'};
-  if(s>=8)return{level:'NIZKO',cls:'sc-low',score:s,desc:'Majhen potencial. Izolirane nevihte niso izključene pri dovolj triggerju.'};
-  return{level:'BREZ',cls:'sc-none',score:s,desc:'Atmosfera stabilna. Nevihten razvoj ni pričakovan.'};
+  if(s>=60)return{level:'EKSTREMNO',cls:'sc-extreme',score:s,desc:'Izjemni pogoji za razvoj neviht. Možne so supercelice, toča in poplave.'};
+  if(s>=40)return{level:'VISOKO',cls:'sc-high',score:s,desc:'Ugodni pogoji za nevihtni razvoj. Pričakujejo se sunkovit veter, intenzivne padavine in lokalna toča.'};
+  if(s>=22)return{level:'ZMERNO',cls:'sc-moderate',score:s,desc:'Zmeren potencial. Možne so lokalne plohe in nevihte, predvsem v popoldanskem času.'};
+  if(s>=8)return{level:'NIZKO',cls:'sc-low',score:s,desc:'Majhen potencial. Ob zadostnem sprožilcu (angl. trigger) posamezne nevihte niso povsem izključene.'};
+  return{level:'BREZ',cls:'sc-none',score:s,desc:'Ozračje je stabilno. Nastanek neviht ni pričakovan.'};
 }
 // ── Hail risk (heuristic) — needs strong updraft (CAPE), instability,
 //    shear for hail growth, and a freezing level low enough that hail
@@ -8855,10 +8855,10 @@ function calcHailRisk(cape,li,freeze,shear,tt){
   else if(pct>=25){level='ZMERNO';cls='sc-risk-moderate';icon='🧊';}
   else if(pct>=10){level='NIZKO';cls='sc-risk-low';icon='🌧';}
   else{level='BREZ';cls='sc-risk-none';icon='☁️';}
-  const desc=pct>=70?'Velika verjetnost toče — možna velika zrna (>2 cm). Zaščitite vozila, rastline in steklene površine.'
-    :pct>=45?'Povečana možnost toče v nevihtah. Možna srednje velika zrna — pazite na izpostavljene predmete.'
-    :pct>=25?'Lokalno možna toča v močnejših nevihtah, večinoma manjša zrna.'
-    :pct>=10?'Majhna možnost toče — izolirana zrna ob morebitnih nevihtah.'
+  const desc=pct>=70?'Velika verjetnost toče – možna so večja zrna (> 2 cm). Zaščitite vozila, posevke in steklene površine.'
+    :pct>=45?'Povečana verjetnost toče ob nevihtah. Možna so srednje velika zrna – zaščitite izpostavljene predmete.'
+    :pct>=25?'V močnejših nevihtah je lokalno možna toča, večinoma manjša zrna.'
+    :pct>=10?'Majhna verjetnost toče – ob morebitnih nevihtah je izolirano možna drobna toča.'
     :'Toča ni pričakovana.';
   return{pct,level,cls,icon,desc,melt};
 }
@@ -8874,10 +8874,10 @@ function renderHailRisk(cape,li,freeze,shear,tt){
   if(g('sc-risk-fill'))g('sc-risk-fill').style.width=r.pct+'%';
   const fz=(freeze/1000).toFixed(1);
   const factors=[
-    {l:'CAPE',v:Math.round(cape)+' J/kg',d:cape>=1200?'močan dvig — rast zrn':cape>=500?'zmeren dvig':'šibek dvig'},
-    {l:'Višina ledišča',v:fz+' km',d:freeze<2000?'nizko — manj taljenja':freeze<=3300?'ugodno za točo':freeze<=3900?'višje — delno taljenje':'visoko — toča se stali'},
-    {l:'Striženje 0–6 km',v:Math.round(shear)+' km/h',d:shear>=18?'organizirane nevihte':shear>=12?'zmerno':'šibko'},
-    {l:'Indeks dviga',v:li.toFixed(1)+' K',d:li<=-4?'velika nestabilnost':li<=-2?'zmerna':'stabilno'}
+    {l:'CAPE',v:Math.round(cape)+' J/kg',d:cape>=1200?'močan dvig – hitra debelitev zrn':cape>=500?'zmeren dvig':'šibek dvig'},
+    {l:'Višina ledišča',v:fz+' km',d:freeze<2000?'nizka – manj taljenja':freeze<=3300?'ugodna za točo':freeze<=3900?'višja – delno taljenje':'visoka – toča se stali pred padcem na tla'},
+    {l:'Striženje 0–6 km',v:Math.round(shear)+' km/h',d:shear>=18?'močno – organizirane nevihte':shear>=12?'zmerno':'šibko'},
+    {l:'Indeks dviga',v:li.toFixed(1)+' K',d:li<=-4?'velika nestabilnost':li<=-2?'zmerna nestabilnost':'stabilno ozračje'}
   ];
   if(g('sc-risk-factors'))g('sc-risk-factors').innerHTML=factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
 }
@@ -8944,8 +8944,8 @@ function scSetHailHour(v){
 function beaufort(g){
   if(g>=118)return{bf:12,name:'orkan'};if(g>=103)return{bf:11,name:'silovit vihar'};
   if(g>=89)return{bf:10,name:'vihar'};if(g>=75)return{bf:9,name:'viharni veter'};
-  if(g>=62)return{bf:8,name:'nevihtni veter'};if(g>=50)return{bf:7,name:'zelo močan veter'};
-  if(g>=39)return{bf:6,name:'močan veter'};return{bf:5,name:'svež veter'};
+  if(g>=62)return{bf:8,name:'hud veter'};if(g>=50)return{bf:7,name:'zelo močan veter'};
+  if(g>=39)return{bf:6,name:'močan veter'};return{bf:5,name:'precej močan veter'};
 }
 // Risk of damaging / hurricane-force gusts. Driven mainly by forecast gusts,
 // with a convective downburst enhancement (high CAPE + shear).
@@ -8967,10 +8967,10 @@ function calcWindRisk(gust,cape,shear){
   else if(pct>=35){level='ZMERNO';cls='sc-risk-moderate';icon='💨';}
   else if(pct>=15){level='NIZKO';cls='sc-risk-low';icon='🍃';}
   else{level='BREZ';cls='sc-risk-none';icon='☁️';}
-  const desc=pct>=80?'Možen orkanski veter (≥118 km/h, 12 Bf). Velika nevarnost padlega drevja, poškodb streh in daljnovodov.'
-    :pct>=58?'Pričakovani sunki viharne jakosti. Možne poškodbe dreves in izpostavljenih predmetov — zavarujte vrtno pohištvo.'
-    :pct>=35?'Zmerni do močni sunki vetra. Pazite pri vožnji in na izpostavljene predmete.'
-    :pct>=15?'Občasni močnejši sunki, večjih poškodb ni pričakovati.'
+  const desc=pct>=80?'Možen je orkanski veter (≥ 118 km/h, 12 Bf). Velika nevarnost podrtih dreves ter poškodb ostrešij in daljnovodov.'
+    :pct>=58?'Pričakovani so sunki viharne jakosti. Možne so poškodbe dreves in izpostavljenih predmetov – pospravite vrtno pohištvo.'
+    :pct>=35?'Zmerni do močni sunki vetra. Priporočamo previdnost pri vožnji in zavarovanje izpostavljenih predmetov.'
+    :pct>=15?'Možni so občasni močnejši sunki vetra, večjih poškodb ni pričakovati.'
     :'Močnejši veter ni pričakovan.';
   return{pct,level,cls,icon,desc};
 }
@@ -8986,9 +8986,9 @@ function renderWindRisk(gust,ws10,ws80,cape,shear){
   if(g('sc-gale-fill'))g('sc-gale-fill').style.width=r.pct+'%';
   const factors=[
     {l:'Sunki vetra',v:Math.round(gust)+' km/h',d:bf.bf+' Bf — '+bf.name},
-    {l:'Veter 10 m',v:Math.round(ws10)+' km/h',d:ws10>=62?'viharno':ws10>=39?'močan veter':'zmeren'},
-    {l:'Veter 80 m',v:Math.round(ws80)+' km/h',d:ws80>=75?'visoko viharno':ws80>=50?'močno':'zmerno'},
-    {l:'Konvekcija',v:Math.round(cape)+' J/kg',d:cape>=1500&&shear>=15?'možni rušilni piši':cape>=800?'možni sunki iz neviht':'šibka'}
+    {l:'Veter 10 m',v:Math.round(ws10)+' km/h',d:ws10>=62?'viharen':ws10>=39?'močan':'zmeren'},
+    {l:'Veter 80 m',v:Math.round(ws80)+' km/h',d:ws80>=75?'viharen':ws80>=50?'močan':'zmeren'},
+    {l:'Konvekcija',v:Math.round(cape)+' J/kg',d:cape>=1500&&shear>=15?'možen rušilen nevihtni piš (angl. downburst)':cape>=800?'možni nevihtni sunki':'šibka'}
   ];
   if(g('sc-gale-factors'))g('sc-gale-factors').innerHTML=factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${f.v}</b><span>${f.d}</span></div>`).join('');
 }
@@ -9064,20 +9064,20 @@ function renderStormChaser(){
   try{renderSoundingAnalysis(d,ci);}catch(e){console.warn('Sounding:',e);}
   // Index cards
   const si=(id,barId,val,max,txt)=>{if(g(id))g(id).textContent=val;if(barId&&g(barId))g(barId).style.width=Math.min(100,Math.abs(max?Number(val)/max*100:0))+'%';if(g(id+'-desc'))g(id+'-desc').textContent=txt;};
-  si('sc-cape','sc-cape-bar',''+Math.round(cape),3000,cape<100?'Šibka nestabilnost':cape<1000?'Zmerna–velika nestabilnost':cape<2500?'Ekstremna nestabilnost':'⚠️ Izjemna nestabilnost!');
-  si('sc-cin','sc-cin-bar',''+Math.round(cin),200,cin>-25?'Šibek pokrov':cin>-100?'Zmeren pokrov':cin>-200?'Močan pokrov':'Izredno močan pokrov');
+  si('sc-cape','sc-cape-bar',''+Math.round(cape),3000,cape<100?'Šibka nestabilnost':cape<1000?'Zmerna do velika nestabilnost':cape<2500?'Ekstremna nestabilnost':'⚠️ Izjemna nestabilnost!');
+  si('sc-cin','sc-cin-bar',''+Math.round(cin),200,cin>-25?'Šibka zaporna plast':cin>-100?'Zmerna zaporna plast':cin>-200?'Močna zaporna plast':'Izredno močna zaporna plast');
   si('sc-li','sc-li-bar',li.toFixed(1),8,li>0?'Stabilno':li>-2?'Šibka nestabilnost':li>-4?'Zmerna nestabilnost':li>-6?'Velika nestabilnost':'⚡ Izredno nestabilno!');
-  si('sc-tt','sc-tt-bar',''+Math.round(tt),60,tt<44?'Brez neviht':tt<50?'Nevihte verjetne':tt<55?'Močne nevihte':'⚠️ Izjemno nevihte verjetne!');
+  si('sc-tt','sc-tt-bar',''+Math.round(tt),60,tt<44?'Brez neviht':tt<50?'Nevihte so verjetne':tt<55?'Močne nevihte':'⚠️ Nevihte izjemno verjetne!');
   si('sc-ki','sc-ki-bar',''+Math.round(ki),40,ki<20?'Nevihte malo verjetne':ki<30?'Nevihte verjetne':'Izjemen potencial');
   if(g('sc-freeze'))g('sc-freeze').textContent=(freeze/1000).toFixed(1)+' km';
-  if(g('sc-freeze-desc'))g('sc-freeze-desc').textContent=freeze<1500?'Nizko — sneg/led v nižinah!':freeze<2500?'Možna toča':freeze<3500?'Normalna višina':'Visoko — toča manj verjetna';
+  if(g('sc-freeze-desc'))g('sc-freeze-desc').textContent=freeze<1500?'Nizka – sneg/led v nižinah!':freeze<2500?'Možna toča':freeze<3500?'Normalna višina':'Visoka – toča je manj verjetna';
   if(g('sc-pwat'))g('sc-pwat').textContent=pwat+' mm';
-  if(g('sc-pwat-desc'))g('sc-pwat-desc').textContent=pwat<20?'Suho':pwat<30?'Normalno':pwat<40?'Vlažno — intenzivne padavine':'Izredno vlažno!';
+  if(g('sc-pwat-desc'))g('sc-pwat-desc').textContent=pwat<20?'Suho':pwat<30?'Normalno':pwat<40?'Vlažno – intenzivne padavine':'Izredno vlažno!';
   if(g('sc-shear'))g('sc-shear').textContent=Math.round(shear)+' km/h';
-  if(g('sc-shear-desc'))g('sc-shear-desc').textContent=shear<10?'Šibek — nevihte se počasi premikajo':shear<20?'Zmeren':shear<30?'Močan — možne supercelice':'⚠️ Izjemen — tornadni potencial';
+  if(g('sc-shear-desc'))g('sc-shear-desc').textContent=shear<10?'Šibko – nevihte se premikajo počasi':shear<20?'Zmerno':shear<30?'Močno – možne supercelice':'⚠️ Izjemno – potencial za nastanek tornadov';
   // Wind table
   const tb=g('sc-wind-body');
-  if(tb)tb.innerHTML=[{lbl:'10 m (površje)',ws:ws10,wd:wd10,c:'#94a3b8'},{lbl:'80 m',ws:ws80,wd:wd80,c:'#60a5fa'},{lbl:'850 hPa (~1.5km)',ws:ws850,wd:wd850,c:'#4ade80'},{lbl:'700 hPa (~3km)',ws:ws700,wd:wd700,c:'#fbbf24'},{lbl:'500 hPa (~5.5km)',ws:ws500,wd:wd500,c:'#fb923c'},{lbl:'300 hPa (~9km)',ws:ws300,wd:wd300,c:'#f87171'}].map(r=>`<tr><td style="color:${r.c};font-weight:500">${r.lbl}</td><td>${Math.round(r.ws)} km/h</td><td>${Math.round(r.wd)}° ${scDirLbl(r.wd)}</td><td style="font-size:.85rem"><span style="transform:rotate(${r.wd}deg);display:inline-block">↑</span></td></tr>`).join('');
+  if(tb)tb.innerHTML=[{lbl:'10 m (pri tleh)',ws:ws10,wd:wd10,c:'#94a3b8'},{lbl:'80 m',ws:ws80,wd:wd80,c:'#60a5fa'},{lbl:'850 hPa (~1,5 km)',ws:ws850,wd:wd850,c:'#4ade80'},{lbl:'700 hPa (~3 km)',ws:ws700,wd:wd700,c:'#fbbf24'},{lbl:'500 hPa (~5,5 km)',ws:ws500,wd:wd500,c:'#fb923c'},{lbl:'300 hPa (~9 km)',ws:ws300,wd:wd300,c:'#f87171'}].map(r=>`<tr><td style="color:${r.c};font-weight:500">${r.lbl}</td><td>${Math.round(r.ws)} km/h</td><td>${Math.round(r.wd)}° ${scDirLbl(r.wd)}</td><td style="font-size:.85rem"><span style="transform:rotate(${r.wd}deg);display:inline-block">↑</span></td></tr>`).join('');
   // Hodograph
   const hs=g('sc-hodo');
   if(hs){
@@ -9109,13 +9109,13 @@ function renderStormChaser(){
   const rng=g('sc-timeline-range');if(rng)rng.textContent=`CAPE max ${Math.round(mC)} J/kg · sunki max ${Math.round(mG)} km/h`;
   // Moisture
   const md=g('sc-moisture');
-  if(md)md.innerHTML=[{v:Td2.toFixed(1)+'°C',l:'Rosišče površja'},{v:(T2-Td2).toFixed(1)+'°C',l:'T-Td razmik'},{v:rh2+'%',l:'Relativna vlaga'},{v:Td850.toFixed(1)+'°C',l:'Rosišče 850 hPa'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');
+  if(md)md.innerHTML=[{v:Td2.toFixed(1)+'°C',l:'Rosišče pri tleh'},{v:(T2-Td2).toFixed(1)+'°C',l:'Razlika T–Td'},{v:rh2+'%',l:'Relativna zračna vlaga'},{v:Td850.toFixed(1)+'°C',l:'Rosišče na 850 hPa'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');
   // Valley factors
   const vd=g('sc-valley');
-  if(vd){const flowAngle=Math.abs(((wd850-140+180)%360)-180);const oroF=Math.max(0,Math.round((1-flowAngle/90)*100));vd.innerHTML=[{v:oroF+'%',l:'Orografski faktor (850 hPa)'},{v:oroF>60?'Visok — ojačitev padavin':oroF>30?'Zmeren':'Nizek',l:'Vpliv reliefa'},{v:Math.round(wd850)+'° '+scDirLbl(wd850),l:'Tok 850 hPa'},{v:freeze<2500?'Možna':'Malo verjetna',l:'Toča — ocena'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');}
+  if(vd){const flowAngle=Math.abs(((wd850-140+180)%360)-180);const oroF=Math.max(0,Math.round((1-flowAngle/90)*100));vd.innerHTML=[{v:oroF+'%',l:'Orografski faktor (850 hPa)'},{v:oroF>60?'Visok – orografska ojačitev padavin':oroF>30?'Zmeren':'Nizek',l:'Vpliv reliefa'},{v:Math.round(wd850)+'° '+scDirLbl(wd850),l:'Tok 850 hPa'},{v:freeze<2500?'Možna':'Malo verjetna',l:'Toča – ocena'}].map(i=>`<div class="sc-valley-item"><div class="sc-valley-val">${i.v}</div><div class="sc-valley-lbl">${i.l}</div></div>`).join('');}
   // Pressure tendency
   const pd=g('sc-pressure-body');
-  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro padajoč':pt2<-1?'🟠 Padajoč':pt2>3?'🔵 Hitro rastoč':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek tlak':p>1020?'Visok tlak':'Normalen tlak'}</span>`;}else pd.textContent='Podatek o tlaku ni na voljo.';}
+  if(pd){const obs=_lastBriefObs||{},m2=obs?.metric||{};const p=m2.pressure??null;const pt2=typeof pressureTrend3h==='function'?pressureTrend3h():null;if(p!=null){const tr=pt2!=null?(pt2>0?`↑ +${pt2.toFixed(1)}`:` ↓ ${pt2.toFixed(1)}`)+'  hPa/3h':'';const cls=pt2!=null?(pt2<-3?'🔴 Hitro pada':pt2<-1?'🟠 Pada':pt2>3?'🔵 Hitro narašča':'🟢 Stabilen'):'';pd.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)">${p.toFixed(1)} hPa</span> &nbsp; ${cls} ${tr} &nbsp;<span style="color:var(--muted)">${p<1000?'Nizek zračni tlak':p>1020?'Visok zračni tlak':'Normalen zračni tlak'}</span>`;}else pd.textContent='Podatek o zračnem tlaku ni na voljo.';}
   // Advanced visualizations
   try{updateAdvViz(d,ci);}catch(e){console.warn('AdvViz:',e);}
 }
