@@ -29,6 +29,10 @@ const ALLOWED_ORIGINS = [
 function isAllowedOrigin(request) {
   const origin  = request.headers.get("Origin")  || "";
   const referer = request.headers.get("Referer") || "";
+  // Facebook's in-app browser and some other WebViews strip the Origin header.
+  // When both are absent the request is a direct browser navigation (not a
+  // cross-origin call from an untrusted page), so treat it as allowed.
+  if (!origin && !referer) return true;
   return ALLOWED_ORIGINS.some(o => origin.startsWith(o) || referer.startsWith(o));
 }
 
