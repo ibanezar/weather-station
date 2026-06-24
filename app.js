@@ -3601,19 +3601,19 @@ async function fetchAgrometeo(){
 
 // ── Agrometeo Tab ─────────────────────────────────────────
 const HOP_STAGES=[
-  {min:0,   max:50,   label:'Mirovanje',           emoji:'💤',col:'#6b7280'},
-  {min:50,  max:150,  label:'Vznova poganjkov',     emoji:'🌱',col:'#4ade80'},
-  {min:150, max:350,  label:'Rast brun',            emoji:'🌿',col:'#22c55e'},
-  {min:350, max:600,  label:'Stransko razvejanje',  emoji:'🌾',col:'#86efac'},
-  {min:600, max:850,  label:'Cvetenje / storžki',   emoji:'🌸',col:'#f59e0b'},
-  {min:850, max:1100, label:'Polnjenje storžkov',   emoji:'🍺',col:'#f97316'},
-  {min:1100,max:9999, label:'Zrelost / žetev',      emoji:'🎉',col:'#ef4444'},
+  {min:0,   max:50,   label:'Mirovanje',                    emoji:'💤',col:'#6b7280'},
+  {min:50,  max:150,  label:'Odganjanje poganjkov',         emoji:'🌱',col:'#4ade80'},
+  {min:150, max:350,  label:'Vzdolžna rast trt',            emoji:'🌿',col:'#22c55e'},
+  {min:350, max:600,  label:'Stransko razvejanje',          emoji:'🌾',col:'#86efac'},
+  {min:600, max:850,  label:'Cvetenje in razvoj storžkov',  emoji:'🌸',col:'#f59e0b'},
+  {min:850, max:1100, label:'Oblikovanje storžkov',         emoji:'🍺',col:'#f97316'},
+  {min:1100,max:9999, label:'Tehnološka zrelost / obiranje',emoji:'🎉',col:'#ef4444'},
 ];
 const CROP_GDD=[
-  {name:'Hmelj',     emoji:'🌿',base:5, milestones:[{v:50,l:'vznova'},{v:350,l:'razvejanje'},{v:850,l:'storžki'},{v:1100,l:'žetev'}],     col:'#22c55e'},
-  {name:'Koruza',    emoji:'🌽',base:10,milestones:[{v:100,l:'kalitev'},{v:600,l:'svila'},{v:1300,l:'metlica'},{v:2400,l:'žetev'}],        col:'#f59e0b'},
-  {name:'Krompir',   emoji:'🥔',base:7, milestones:[{v:200,l:'vznova'},{v:500,l:'gomolji'},{v:1000,l:'polnjenje'},{v:1500,l:'žetev'}],     col:'#a78bfa'},
-  {name:'Pšenica',   emoji:'🌾',base:5, milestones:[{v:200,l:'vznik'},{v:600,l:'vzravnanje'},{v:1200,l:'klasenje'},{v:2000,l:'žetev'}],    col:'#fbbf24'},
+  {name:'Hmelj',     emoji:'🌿',base:5, milestones:[{v:50,l:'odganjanje'},{v:350,l:'razvejanje'},{v:850,l:'storžki'},{v:1100,l:'obiranje'}],                              col:'#22c55e'},
+  {name:'Koruza',    emoji:'🌽',base:10,milestones:[{v:100,l:'kalitev'},{v:600,l:'svilanje'},{v:1300,l:'metličenje'},{v:2400,l:'spravilo'}],                         col:'#f59e0b'},
+  {name:'Krompir',   emoji:'🥔',base:7, milestones:[{v:200,l:'vznik'},{v:500,l:'nastavljanje gomoljev'},{v:1000,l:'debelitev gomoljev'},{v:1500,l:'spravilo'}],      col:'#a78bfa'},
+  {name:'Pšenica',   emoji:'🌾',base:5, milestones:[{v:200,l:'vznik'},{v:600,l:'kolenčenje'},{v:1200,l:'klasenje'},{v:2000,l:'žetev'}],                             col:'#fbbf24'},
   {name:'Trava',     emoji:'🌱',base:5, milestones:[{v:100,l:'1. porast'},{v:400,l:'1. košnja'},{v:800,l:'2. košnja'},{v:1200,l:'3. košnja'}],col:'#34d399'},
 ];
 
@@ -3669,13 +3669,13 @@ function _buildAgroHop(gdd5){
     '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem">'
     +'<div style="font-size:2rem">'+stage.emoji+'</div>'
     +'<div><div style="font-size:.95rem;font-weight:600;color:var(--text)">'+stage.label+'</div>'
-    +'<div style="font-size:.72rem;color:var(--muted)">GDD₅: '+gdd5+(nextStage?' · čez '+toNext+' GDD₅: '+nextStage.label:'')+'</div></div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">GDD₅: '+gdd5+(nextStage?' · do naslednje faze: '+toNext+' GDD₅ ('+nextStage.label+')':'')+'</div></div>'
     +'</div>'
     +'<div class="hop-phase-bar"><div class="hop-phase-fill" style="width:'+pct+'%;background:'+stage.col+'"></div></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.85rem">'
     +'<span>'+stage.min+' GDD₅</span><span>'+pct+'%</span>'+(stage.max<9999?'<span>'+stage.max+' GDD₅</span>':'')+'</div>'
     +'<div class="agro-risk-grid" id="agro-disease-grid">'
-    +'<div style="color:var(--muted);font-size:.75rem">Tveganje bolezni — nalaganje podatkov…</div>'
+    +'<div style="color:var(--muted);font-size:.75rem">Tveganje za bolezni – nalaganje podatkov …</div>'
     +'</div>';
 }
 
@@ -3686,9 +3686,9 @@ function _buildAgroHopDisease(rh,temp){
   const pm=Math.max(0,Math.min(100,((temp>15&&temp<28?40:0)+(rh>45&&rh<80?40:0)+(temp>18&&temp<26?20:0))));
   const bot=Math.max(0,Math.min(100,((rh>80?50:0)+(temp>15&&temp<22?30:0)+(rh>90?20:0))));
   const diseases=[
-    {name:'Peronospera (plesni)',risk:dm,note:'T>10°C + visoka vlaga'},
-    {name:'Pepelasta plesen',   risk:pm,note:'T 15–27°C + zmerna vlaga'},
-    {name:'Botrytis',          risk:bot,note:'T 15–22°C + vlaga >80%'},
+    {name:'Hmeljeva peronospora',risk:dm,note:'T > 10 °C + visoka vlaga'},
+    {name:'Hmeljeva pepelovka',  risk:pm,note:'T 15–27 °C + zmerna vlaga'},
+    {name:'Siva plesen (Botrytis)',risk:bot,note:'T 15–22 °C + vlaga > 80 %'},
   ];
   grid.innerHTML=diseases.map(d=>{
     const col=d.risk<30?'var(--green)':d.risk<60?'var(--amber)':'var(--red)';
@@ -3727,7 +3727,7 @@ function _buildAgroFrost(){
   const body=document.getElementById('agro-frost-body');
   if(!body)return;
   const fc=_fcDailyData;
-  if(!fc||!fc.time?.length){body.innerHTML='<div style="color:var(--muted);font-size:.8rem">Napoved temperature ni na voljo.</div>';return;}
+  if(!fc||!fc.time?.length){body.innerHTML='<div style="color:var(--muted);font-size:.8rem">Temperaturna napoved ni na voljo.</div>';return;}
   const days=Math.min(7,fc.time.length);
   let html='<div class="frost-row">';
   for(let i=0;i<days;i++){
@@ -3755,13 +3755,13 @@ function _buildAgroFrost(){
     const tmin=fc.temperature_2m_min?.[i]??null;
     if(tmin!=null&&tmin<0){
       const dateObj=new Date(fc.time[i]+'T12:00:00');
-      frostDays.push(dateObj.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'short'})+' ('+Math.round(tmin)+'°C)');
+      frostDays.push(dateObj.toLocaleDateString('sl',{weekday:'long',day:'numeric',month:'short'})+' ('+Math.round(tmin)+' °C)');
     }
   }
   if(frostDays.length){
-    html+='<div style="margin-top:.5rem;padding:.5rem .7rem;background:rgba(248,113,113,.08);border-radius:8px;font-size:.74rem;color:var(--red)">⚠️ Pozeba/zmrzal predvidena: '+frostDays.join(', ')+'</div>';
+    html+='<div style="margin-top:.5rem;padding:.5rem .7rem;background:rgba(248,113,113,.08);border-radius:8px;font-size:.74rem;color:var(--red)">⚠️ Predvidena je pozeba/zmrzal: '+frostDays.join(', ')+'</div>';
   }else{
-    html+='<div style="margin-top:.5rem;font-size:.74rem;color:var(--green)">✅ V naslednjih 7 dneh ni predvidene pozebe.</div>';
+    html+='<div style="margin-top:.5rem;font-size:.74rem;color:var(--green)">✅ V prihodnjih 7 dneh ni predvidene pozebe.</div>';
   }
   body.innerHTML=html;
 }
@@ -3850,12 +3850,12 @@ function _buildAgroSpray(d){
       +'</div>'
       +'<div class="spray-lbl-row">'+slots.map(s=>'<div class="spray-lbl">'+s.hr+'</div>').join('')+'</div>'
       +'<div class="spray-timeline">'+slots.map(s=>
-        '<div class="spray-slot '+(s.ok?'spray-ok':'spray-no')+'" title="'+s.hr+':00 · veter '+s.wind.toFixed(1)+'m/s · padavine '+s.precip.toFixed(1)+'mm · '+s.temp.toFixed(0)+'°C"></div>'
+        '<div class="spray-slot '+(s.ok?'spray-ok':'spray-no')+'" title="'+s.hr+':00 · veter '+s.wind.toFixed(1)+'m/s · padavine '+s.precip.toFixed(1)+'mm · '+s.temp.toFixed(0)+' °C"></div>'
       ).join('')+'</div>'
       +'</div>';
   }
   body.innerHTML=html
-    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.25rem">🟢 primerno (veter ≤4 m/s, brez dežja, T≥5°C) &nbsp;⬜ neprimerno</div>';
+    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.25rem">🟢 Primerno (veter ≤ 4 m/s, brez dežja, T ≥ 5 °C) &nbsp;⬜ Neprimerno</div>';
 }
 
 function _buildAgroHay(d){
@@ -3884,7 +3884,7 @@ function _buildAgroHay(d){
   }
   if(currentWin&&currentWin.hours>=4)windows.push(currentWin);
   if(!windows.length){
-    body.innerHTML='<div style="padding:.6rem;background:rgba(248,113,113,.07);border-radius:8px;font-size:.8rem;color:var(--muted)">⛅ V naslednjih 5 dneh ni ugodnih oken za sušenje sena (vlaga, dež ali mraz).</div>';
+    body.innerHTML='<div style="padding:.6rem;background:rgba(248,113,113,.07);border-radius:8px;font-size:.8rem;color:var(--muted)">⛅ V prihodnjih 5 dneh ni ugodnih oken za sušenje sena (vlaga, dež ali mraz).</div>';
     return;
   }
   body.innerHTML=windows.slice(0,4).map(w=>{
@@ -3892,13 +3892,13 @@ function _buildAgroHay(d){
     const sdl=s.toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'short'});
     const stl=s.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     const etl=e.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    const quality=w.hours>=8&&w.minRh<55?'Odlično':w.hours>=6&&w.minRh<60?'Dobro':'Zadostno';
-    const qualityCol=quality==='Odlično'?'var(--green)':quality==='Dobro'?'var(--amber)':'var(--muted)';
+    const quality=w.hours>=8&&w.minRh<55?'odlično':w.hours>=6&&w.minRh<60?'dobro':'zadostno';
+    const qualityCol=quality==='odlično'?'var(--green)':quality==='dobro'?'var(--amber)':'var(--muted)';
     return '<div class="hay-window">'
       +'<div style="font-size:1.5rem">🌾</div>'
       +'<div class="hay-window-info">'
       +'<div class="hay-window-dates">'+sdl+' '+stl+'–'+etl+'</div>'
-      +'<div class="hay-window-details">'+w.hours+'h sušenja · vlaga min '+Math.round(w.minRh)+'% · T max '+Math.round(w.maxTemp)+'°C · veter ~'+w.avgWind.toFixed(1)+' m/s</div>'
+      +'<div class="hay-window-details">'+w.hours+'h sušenja · min. vlaga '+Math.round(w.minRh)+' % · maks. T '+Math.round(w.maxTemp)+' °C · veter ~'+w.avgWind.toFixed(1)+' m/s</div>'
       +'</div>'
       +'<div class="hay-window-badge" style="color:'+qualityCol+';border-color:'+qualityCol+'">'+quality+'</div>'
       +'</div>';
@@ -3956,7 +3956,7 @@ function _buildAgroWaterBalance(d){
   html+='<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">'
     +'<span style="color:rgba(56,189,248,.9)">■</span> Padavine'
     +'&nbsp;&nbsp;<span style="background:rgba(251,191,36,.35);padding:0 3px">■</span> ET₀ (napoved)'
-    +'&nbsp;&nbsp;Skupaj 14d: <strong style="color:var(--text)">'+Math.round(totalRain)+' mm</strong>'
+    +'&nbsp;&nbsp;Skupaj v 14 dneh: <strong style="color:var(--text)">'+Math.round(totalRain)+' mm</strong>'
     +'</div>';
   body.innerHTML=html;
 }
