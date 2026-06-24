@@ -2199,28 +2199,28 @@
 
     <!-- Status hero -->
     <div class="ai-hero">
-      <div class="ai-status-label">🤖 Hiperlokalno napovedovanje — Holt-Winters statistični model</div>
-      <div class="ai-status-text" id="ai-status-text">Nalagam podatke…</div>
+      <div class="ai-status-label">🤖 Hiperlokalno napovedovanje – statistični model Holt-Winters</div>
+      <div class="ai-status-text" id="ai-status-text">Nalagam podatke …</div>
       <div class="ai-progress-wrap"><div class="ai-progress-bar" id="ai-progress-bar"></div></div>
-      <div class="ai-meta" id="ai-meta">Model se uči vzorcev lokalne mikroklime postaje IREICA1 — Rečica ob Savinji.</div>
+      <div class="ai-meta" id="ai-meta">Model se uči vzorcev lokalne mikroklime vremenske postaje IREICA1 – Rečica ob Savinji.</div>
       <button class="ai-train-btn" id="ai-train-btn" onclick="initAINowcast()">↻ Osveži napoved</button>
     </div>
 
     <!-- Forecast cards -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🌡 Statistična napoved temperature — naslednjih 6 ur</span>
+        <span class="clabel" style="margin:0">🌡 Statistična napoved temperature – naslednjih 6 ur</span>
         <span class="chart-range" id="ai-fc-range">—</span>
       </div>
       <div class="ai-forecast-grid" id="ai-forecast-grid">
-        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam…</div>
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam …</div>
       </div>
     </div>
 
     <!-- Comparison LSTM vs Open-Meteo vs Actual -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🔍 Napoved HW, Open-Meteo in postaja (zadnjih 24h)</span>
+        <span class="clabel" style="margin:0">🔍 Primerjava napovedi HW, Open-Meteo in postaje (zadnjih 24 ur)</span>
         <span class="chart-range" id="ai-compare-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-compare-svg" viewBox="0 0 880 160" style="display:block;width:100%;min-width:420px" height="160"></svg></div>
@@ -2234,7 +2234,7 @@
     <!-- Loss curve -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📊 Sezonski vzorec — temperaturni odklon po uri dneva</span>
+        <span class="clabel" style="margin:0">📊 Sezonski vzorec – temperaturni odklon glede na uro v dnevu</span>
         <span class="chart-range" id="ai-loss-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-loss-svg" viewBox="0 0 880 120" style="display:block;width:100%;min-width:420px" height="120"></svg></div>
@@ -2243,22 +2243,22 @@
     <!-- ⚡ Nowcast specifičnih dogodkov (megla / slana / nevihta) -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">⚡ Nowcast dogodkov — naslednjih 8 ur</span>
+        <span class="clabel" style="margin:0">⚡ Sprotna napoved dogodkov – naslednjih 8 ur</span>
         <span class="chart-range" id="ai-event-range">—</span>
       </div>
       <div class="ai-event-grid" id="ai-event-grid">
-        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Računam verjetnosti…</div>
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Računam verjetnosti …</div>
       </div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.55">
-        <strong style="color:var(--text)">Metoda:</strong> Hiperlokalni izpeljani indeksi iz senzorjev postaje in napovedi Open-Meteo —
-        rosiščna razlika (T−Td) za meglo, radiacijsko ohlajanje (jasno nebo + šibak veter) za slano, CAPE in koda vremena za nevihto.
+        <strong style="color:var(--text)">Metoda:</strong> Hiperlokalni izpeljani indeksi na podlagi senzorjev postaje in napovedi Open-Meteo –
+        rosiščna razlika (T – Td) za meglo, radiacijsko ohlajanje (jasno nebo in šibek veter) za slano ter CAPE in vremenska koda za nevihto.
       </div>
     </div>
 
     <!-- 📈 Verjetnostna pahljača + skill semafor -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📈 Verjetnostna pahljača temperature — ansambel</span>
+        <span class="clabel" style="margin:0">📈 Verjetnostna pahljača temperature – ansambel</span>
         <span class="chart-range" id="ai-fan-range">—</span>
       </div>
       <div class="ai-loss-wrap"><svg id="ai-fan-svg" viewBox="0 0 880 190" style="display:block;width:100%;min-width:420px" height="190"></svg></div>
@@ -2269,9 +2269,9 @@
         <span id="ai-fan-members" style="opacity:.8"></span>
       </div>
       <div class="ai-skill-wrap" id="ai-skill-wrap">
-        <div class="ai-skill-hdr">🏆 Točnost skozi čas — kdo zmaga?</div>
+        <div class="ai-skill-hdr">🏆 Natančnost skozi čas – kdo je boljši?</div>
         <div class="ai-skill-body" id="ai-skill-body">
-          <div style="color:var(--muted);font-size:.74rem">Zbiram dovolj preverjenih napovedi za primerjavo…</div>
+          <div style="color:var(--muted);font-size:.74rem">Zbiram dovolj preverjenih napovedi za primerjavo …</div>
         </div>
       </div>
     </div>
@@ -2279,40 +2279,40 @@
     <!-- 🔍 Analogni dnevi (k-NN) -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">🔍 Analogni dnevi — kaj se je zgodilo prej?</span>
+        <span class="clabel" style="margin:0">🔍 Analogni dnevi – kaj se je zgodilo v preteklosti?</span>
         <span class="chart-range" id="ai-analog-range">—</span>
       </div>
       <div class="ai-analog-summary" id="ai-analog-summary">
-        <div style="color:var(--muted);font-size:.78rem;padding:.5rem 0">Iščem zgodovinsko najbolj podobne dneve…</div>
+        <div style="color:var(--muted);font-size:.78rem;padding:.5rem 0">Iščem zgodovinsko najbolj podobne dneve …</div>
       </div>
       <div class="ai-analog-list" id="ai-analog-list"></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.55">
-        <strong style="color:var(--text)">Metoda:</strong> k-najbližjih sosedov (k-NN) nad sezonskim oknom (±30 dni) zadnjih treh let iz arhiva Open-Meteo.
-        Trenutno stanje (temperatura, tlak, vlaga, veter in 3-urni trendi) primerja s tisoči preteklih ur in projicira, kako se je vreme razvilo naprej.
+        <strong style="color:var(--text)">Metoda:</strong> Metoda k-najbližjih sosedov (k-NN) v sezonskem oknu (±30 dni) preteklih treh let iz arhiva Open-Meteo.
+        Trenutno stanje (temperatura, tlak, zračna vlaga, veter in 3-urni trendi) se primerja s tisočimi preteklimi urami in predvidi, kako se bo vreme razvijalo v prihodnje.
       </div>
     </div>
 
     <!-- Model architecture info -->
     <div class="card" style="margin-bottom:1rem">
-      <div class="clabel">ℹ️ Arhitektura in statistike modela</div>
+      <div class="clabel">ℹ️ Arhitektura in statistika modela</div>
       <div class="ai-arch-grid" id="ai-arch-grid">
         <div class="ai-arch-item"><div class="ai-arch-val">HW</div><div class="ai-arch-lbl">Tip modela</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">α β γ</div><div class="ai-arch-lbl">Parametri glajenja</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">12h</div><div class="ai-arch-lbl">Vhodno okno</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">α, β, γ</div><div class="ai-arch-lbl">Parametri glajenja</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">12 h</div><div class="ai-arch-lbl">Vhodno okno</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val">8</div><div class="ai-arch-lbl">Vhodni atributi</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val">6h</div><div class="ai-arch-lbl">Napoved</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val">6 h</div><div class="ai-arch-lbl">Napoved</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-train-samples">—</div><div class="ai-arch-lbl">Učni vzorci</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-final-loss">—</div><div class="ai-arch-lbl">Končni MSE</div></div>
         <div class="ai-arch-item"><div class="ai-arch-val" id="ai-trained-at">—</div><div class="ai-arch-lbl">Naučen ob</div></div>
-        <div class="ai-arch-item"><div class="ai-arch-val" id="ai-pred-acc">—</div><div class="ai-arch-lbl">Točnost ±1h</div></div>
+        <div class="ai-arch-item"><div class="ai-arch-val" id="ai-pred-acc">—</div><div class="ai-arch-lbl">Natančnost ±1 h</div></div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:.6rem">
         <button class="ai-brief-btn" onclick="aiResetModel()" style="color:var(--red);border-color:rgba(248,113,113,.3)">🗑 Izbriši model</button>
       </div>
       <div style="font-size:.7rem;color:var(--muted);margin-top:.85rem;line-height:1.6">
-        <strong style="color:var(--text)">Metoda:</strong> Holt-Winters aditivno eksponentno glajenje z dnevno sezonalnostjo (period=24h).<br>
-        <strong style="color:var(--text)">Parametri:</strong> α=0.35 (nivo), β=0.03 (trend), γ=0.15 (sezonalnost) — optimizirani za urne temperaturne serije.<br>
-        <strong style="color:var(--text)">Mikroklimatska korekcija:</strong> Napovedi je dodan odmik ARSO za lokalno kalibracijo postaje IREICA1.
+        <strong style="color:var(--text)">Metoda:</strong> Aditivno eksponentno glajenje Holt-Winters z dnevno sezonalnostjo (perioda = 24 h).<br>
+        <strong style="color:var(--text)">Parametri:</strong> α = 0.35 (nivo), β = 0.03 (trend), γ = 0.15 (sezonalnost) – optimizirano za urne temperaturne serije.<br>
+        <strong style="color:var(--text)">Mikroklimatska korekcija:</strong> Napovedi je prištet odmik na podlagi podatkov ARSO za lokalno kalibracijo postaje IREICA1.
       </div>
     </div>
 
@@ -2325,22 +2325,22 @@
     <!-- Sensor diagnostics section separator -->
     <div class="diag-section-hdr">
       <span style="font-size:1.1rem">🔬</span>
-      <h3>Diagnostika senzorjev in kalibracija — METAR LJLJ</h3>
+      <h3>Diagnostika senzorjev in kalibracija – METAR LJLJ</h3>
     </div>
 
     <!-- METAR comparison -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">✈️ METAR LJLJ v primerjavi s postajo IREICA1</span>
+        <span class="clabel" style="margin:0">✈️ Primerjava: METAR LJLJ in postaja IREICA1</span>
         <span class="chart-range" id="metar-updated">—</span>
       </div>
-      <div id="metar-body"><div class="clim-loading">Nalaganje METAR podatkov…</div></div>
+      <div id="metar-body"><div class="clim-loading">Nalaganje podatkov METAR …</div></div>
     </div>
 
     <!-- Anomaly scoring dashboard -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📊 Nadzorna plošča kakovosti podatkov — anomalije po senzorjih</span>
+        <span class="clabel" style="margin:0">📊 Nadzorna plošča kakovosti podatkov – anomalije po senzorjih</span>
         <span class="chart-range" id="aq-score-badge">—</span>
       </div>
       <div class="aq-sensor-list" id="aq-body"><div class="clim-loading">Nalaganje…</div></div>
@@ -2350,12 +2350,12 @@
     <!-- Auto-calibration suggestions -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">⚙️ Avtomatska kalibracija — statistični test korekcij</span>
+        <span class="clabel" style="margin:0">⚙️ Avtomatska kalibracija – statistični test korekcij</span>
         <span class="chart-range" id="cal-samples-badge">—</span>
       </div>
       <div class="cal-sensor-grid" id="cal-body"><div class="clim-loading">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.5">
-        <strong style="color:var(--text)">Metodologija:</strong> Enooddelčni t-test (H₀: srednja vrednost odmika = 0). Korekcija je predlagana, ko |t| > 2.0 (p ≈ 0.05, statistično signifikantno). Reference: METAR LJLJ + dnevnik odmikov ARSO.
+        <strong style="color:var(--text)">Metodologija:</strong> Enovzorčni t-test (angl. one-sample t-test, H₀: srednja vrednost odmika = 0). Korekcija se predlaga, ko je |t| > 2.0 (p ≈ 0.05, statistično značilno). Reference: METAR LJLJ + dnevnik odmikov ARSO.
       </div>
     </div>
 

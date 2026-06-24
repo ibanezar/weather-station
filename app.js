@@ -10677,14 +10677,14 @@ function loadTFJS(){
   return new Promise((res,rej)=>{
     // If already loaded and has Layers API, done
     if(typeof tf!=='undefined'&&typeof tf.sequential==='function'){res();return;}
-    aiSetStatus('Nalagam TF.js knjižnico…',5);
+    aiSetStatus('Nalagam knjižnico TF.js …',5);
     const tryLoad=(urls,idx=0)=>{
       if(idx>=urls.length){rej(new Error('TF.js ni dosegljiv na nobenem CDN-u'));return;}
       const s=document.createElement('script');
       s.src=urls[idx];
       s.onload=()=>{
         if(typeof tf!=='undefined'&&typeof tf.sequential==='function'){
-          aiSetStatus('TF.js naložen ('+urls[idx].split('/')[2]+')',10);res();
+          aiSetStatus('Knjižnica TF.js je naložena ('+urls[idx].split('/')[2]+')',10);res();
         }else{
           // Wrong bundle — try next URL
           console.warn('TF.js loaded but missing Layers API from',urls[idx],', trying next...');
@@ -10773,7 +10773,7 @@ function aiDrawComparison(actual,lstm,omPast){
   const nowX=mapX(Date.now()).toFixed(1);
   html+=`<line x1="${nowX}" x2="${nowX}" y1="${pt}" y2="${VH-pb}" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-dasharray="3,3"/><text x="${+nowX+4}" y="${pt+8}" font-size="8" fill="var(--muted)">zdaj</text>`;
   svg.innerHTML=html;
-  const r=document.getElementById('ai-compare-range');if(r)r.textContent='Zadnjih 24h + napoved 6h';
+  const r=document.getElementById('ai-compare-range');if(r)r.textContent='Zadnjih 24 ur + napoved za 6 ur';
 }
 
 // ── Fetch 92-day Open-Meteo history for LSTM training ────
@@ -10820,14 +10820,14 @@ async function aiFetchOMHistory(){
 // ── Main: train and predict ───────────────────────────────
 let _aiLstmPredictions=null;
 async function aiTrainAndPredict(){
-  if(_aiTraining){aiSetStatus('Učenje že poteka…');return;}
+  if(_aiTraining){aiSetStatus('Učenje že poteka …');return;}
   _aiTraining=true;
   const btn=document.getElementById('ai-train-btn');if(btn)btn.disabled=true;
   try{
     await loadTFJS();
-    aiSetStatus('Nalagam 92-dnevno zgodovino (Open-Meteo)…',10);
+    aiSetStatus('Nalagam 92-dnevno zgodovino (Open-Meteo) …',10);
     const omRaw=await aiFetchOMHistory();
-    aiSetStatus('Pripravljam podatke…',15);
+    aiSetStatus('Pripravljam podatke …',15);
     // WU station hourly obs + OM history combined for training
     const wuRaw=aiExtractFeatures(_hourlyObs||[]);
     const raw=[...omRaw,...wuRaw];
@@ -10841,7 +10841,7 @@ async function aiTrainAndPredict(){
     const norm=aiNormalize(raw,_aiNorm);
     const{xs,ys}=aiBuildSequences(norm,raw);
     if(nSamples)nSamples.textContent=xs.length+'';
-    aiSetStatus('Gradim LSTM model…',20);
+    aiSetStatus('Gradim model LSTM …',20);
     _aiModel=await aiBuildModel();
     // Try loading cached weights
     let _finalLoss=null;
@@ -10851,10 +10851,10 @@ async function aiTrainAndPredict(){
       if(cached.losses&&cached.losses.length){aiDrawLoss(cached.losses);_finalLoss=cached.losses[cached.losses.length-1];}
       const ageDays=Math.floor((Date.now()-cached.ts)/864e5);
       const ageStr=ageDays===0?'danes':ageDays===1?'včeraj':`pred ${ageDays} dnevi`;
-      const staleWarn=ageDays>=7?' ⚠️ Model je star — priporoča se ponoven trening.':'';
-      aiSetStatus('✅ Naložene shranjene uteži ('+new Date(cached.ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+', naučen '+ageStr+'). Osvežujem napoved…'+staleWarn,95);
+      const staleWarn=ageDays>=7?' ⚠️ Model je zastarel – priporočamo ponovno učenje.':'';
+      aiSetStatus('✅ Naložene so shranjene uteži ('+new Date(cached.ts).toLocaleString('sl',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})+', naučen '+ageStr+'). Osvežujem napoved …'+staleWarn,95);
     }else{
-      aiSetStatus('Učim LSTM… (0/80 epoch)',25);
+      aiSetStatus('Učim model LSTM … (0/80 epoh)',25);
       // Prepare tensors
       const xT=tf.tensor3d(xs,[xs.length,AI_SEQ_LEN,AI_N_FEAT]);
       const yRaw=ys.map(y=>y.map((v,i)=>{const norm_range=_aiNorm.maxs[0]-_aiNorm.mins[0];return norm_range>0?(v-_aiNorm.mins[0])/norm_range:0;}));
@@ -10865,18 +10865,18 @@ async function aiTrainAndPredict(){
         validationSplit:0.1,shuffle:true,
         callbacks:{onEpochEnd:(epoch,logs)=>{
           const pct=25+Math.round((epoch+1)/80*65);
-          aiSetStatus(`Učim LSTM… (${epoch+1}/80 epoch, MSE: ${(logs.loss).toFixed(5)})`,pct);
+          aiSetStatus(`Učim model LSTM … (${epoch+1}/80 epoh, MSE: ${(logs.loss).toFixed(5)})`,pct);
           lossHistory.push(logs.loss);
           if(lossHistory.length>=5)aiDrawLoss(lossHistory);
         }}
       });
       xT.dispose();yT.dispose();
-      aiSetStatus('Shranjujem uteži…',92);
+      aiSetStatus('Shranjujem uteži …',92);
       await aiSaveWeights(_aiModel,_aiNorm,lossHistory);
       if(lossHistory.length)_finalLoss=lossHistory[lossHistory.length-1];
     }
     // Predict next 6 hours using last AI_SEQ_LEN observations
-    aiSetStatus('Generiram napoved…',96);
+    aiSetStatus('Generiram napoved …',96);
     // Predict from last AI_SEQ_LEN WU obs (most recent local data)
     const wuNorm=aiNormalize(wuRaw,_aiNorm);
     const lastSeq=(wuNorm.length>=AI_SEQ_LEN?wuNorm:norm).slice(-AI_SEQ_LEN);
@@ -10899,10 +10899,10 @@ async function aiTrainAndPredict(){
     aiRenderForecastCards(predsCorrected);
     // Update meta
     const curT=_lastBriefObs?.metric?.temp??null;
-    aiSetMeta(`Model naučen na ${raw.length} urnih vzorcih — OM arhiv: ${omRaw.length}, WU postaja: ${wuRaw.length}, ${AI_N_FEAT} atributov. Mikroklimatska korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C.`);
+    aiSetMeta(`Model je naučen na ${raw.length} urnih vzorcih – arhiv OM: ${omRaw.length}, postaja WU: ${wuRaw.length}, ${AI_N_FEAT} atributov. Mikroklimatska korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)} °C.`);
     const ta=document.getElementById('ai-trained-at');if(ta)ta.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     const fl=document.getElementById('ai-final-loss');if(fl)fl.textContent=_finalLoss!=null?_finalLoss.toFixed(5):'—';
-    aiSetStatus('✅ Napoved pripravljena — IREICA1 lokalni LSTM model',100);
+    aiSetStatus('✅ Napoved je pripravljena – lokalni model LSTM IREICA1',100);
     // Draw comparison
     aiDrawComparisonChart();
     // Train autoencoder for anomaly detection
@@ -11014,7 +11014,7 @@ async function aiAutoLoad(){
     const obs=_hourlyObs||[];
     const tempsRaw=obs.map(o=>o.metric?.temp??o.metric?.tempAvg??null).filter(v=>v!=null);
     if(tempsRaw.length<48){
-      aiSetStatus(`Premalo podatkov (${tempsRaw.length}h) — potrebujem vsaj 48h urnih opazovanj.`);
+      aiSetStatus(`Premalo podatkov (${tempsRaw.length} h) – za izračun je potrebnih vsaj 48 ur meritev.`);
       return;
     }
     const temps=_hwFilterOutliers(tempsRaw);
@@ -11036,8 +11036,8 @@ async function aiAutoLoad(){
     if(nSamples)nSamples.textContent=temps.length+'';
     const ta=document.getElementById('ai-trained-at');
     if(ta)ta.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    aiSetMeta(`Holt-Winters: ${temps.length} urnih vzorcev · korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)}°C`);
-    aiSetStatus('✅ Napoved pripravljena — Holt-Winters eksponentno glajenje',100);
+    aiSetMeta(`Holt-Winters: ${temps.length} urnih vzorcev · korekcija: ${driftCorr>=0?'+':''}${driftCorr.toFixed(2)} °C`);
+    aiSetStatus('✅ Napoved je pripravljena – eksponentno glajenje Holt-Winters',100);
     // Draw seasonal pattern in loss-curve SVG
     _aiDrawSeasonal(hw.seasonal);
     aiDrawComparisonChart();
@@ -11067,7 +11067,7 @@ function _aiDrawSeasonal(seasonal){
   });
   svg.innerHTML=html;
   const r=document.getElementById('ai-loss-range');
-  if(r)r.textContent=`Odklon: ${minV.toFixed(1)}° — ${maxV>=0?'+':''}${maxV.toFixed(1)}°`;
+  if(r)r.textContent=`Odklon: ${minV.toFixed(1)} °C – ${maxV>=0?'+':''}${maxV.toFixed(1)} °C`;
 }
 function _autoInitAI(){
   if(_aiTraining)return;
@@ -11090,13 +11090,13 @@ function checkAIPredAccuracy(currentTemp){
 }
 
 function aiResetModel(){
-  if(!confirm('Izbrisati shranjeni model in zgodovino napovedi?'))return;
+  if(!confirm('Želite izbrisati shranjeni model in zgodovino napovedi?'))return;
   localStorage.removeItem(AI_WEIGHTS_KEY);
   localStorage.removeItem(AI_PRED_LOG_KEY);
   _aiModel=null;_aiNorm=null;_aiLstmPredictions=null;_aiInit=false;
   const btn=document.getElementById('ai-train-btn');
   if(btn){btn.textContent='↻ Osveži napoved';btn.disabled=false;}
-  aiSetStatus('Model izbrisan. Klikni za novo učenje.',0);
+  aiSetStatus('Model je izbrisan. Kliknite za novo učenje.',0);
   const fg=document.getElementById('ai-forecast-grid');
   if(fg)fg.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam…</div>';
   const ls=document.getElementById('ai-loss-svg');if(ls)ls.innerHTML='';
@@ -11196,7 +11196,7 @@ function aiEventNowcast(){
   grid.innerHTML=defs.map(d=>{
     const pk=peak(d.arr);const pct=Math.round(pk.p*100);const hot=pct>=55;
     const R=22,C=2*Math.PI*R,off=C*(1-pk.p);
-    const whenStr=pct>=15?`vrh ${fmtH(rows[pk.i].t)} (+${pk.i}h)`:'—';
+    const whenStr=pct>=15?`vrh ob ${fmtH(rows[pk.i].t)} (+${pk.i} h)`:'—';
     const level=pct>=70?'visoko':pct>=45?'zmerno':pct>=20?'nizko':'zanemarljivo';
     return `<div class="ai-event-card${hot?' hot':''}" style="--ev-col:${d.col}">
       <div class="ai-event-icon">${d.icon}</div>
@@ -11243,7 +11243,7 @@ function aiFanChart(hw,temps){
     if(h<=MODEL_H&&hwPreds[h-1]!=null){vals.push(hwPreds[h-1]);memberNames.add('HW');}
     const r=omRows.reduce((b,x)=>Math.abs(x.t-targetMs)<Math.abs((b?.t??Infinity)-targetMs)?x:b,null);
     if(r&&r.temp!=null){vals.push(r.temp);memberNames.add('Open-Meteo');}
-    if(seasonal){const pv=lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]);vals.push(pv);memberNames.add('Persist+klima');}
+    if(seasonal){const pv=lastT+(seasonal[(hourNow+h)%24]-seasonal[hourNow%24]);vals.push(pv);memberNames.add('Perzistenca + klima');}
     if(h<=MODEL_H&&analogOk){vals.push(_aiAnalogCache.projection[h-1]);memberNames.add('Analogni dnevi');}
     if(!vals.length){stats.push(null);continue;}
     const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
@@ -11307,7 +11307,7 @@ function aiFanChart(hw,temps){
 
   const rng=document.getElementById('ai-fan-range');
   const widest=validStats[validStats.length-1];
-  if(rng)rng.textContent=`Zadnjih ${PAST_H}h + napoved ${FAN_H}h · ±${(1.2816*widest.sigma).toFixed(1)}° pri +${FAN_H}h`;
+  if(rng)rng.textContent=`Zadnjih ${PAST_H} ur + napoved za ${FAN_H} ur · ±${(1.2816*widest.sigma).toFixed(1)} °C pri +${FAN_H} h`;
   const mem=document.getElementById('ai-fan-members');
   if(mem)mem.textContent=`${memberNames.size} članov: ${[...memberNames].join(' · ')}`;
 }
@@ -11346,7 +11346,7 @@ function aiRenderSkill(){
   const oMae=st.om.n?st.om.s/st.om.n:null;
   const minN=Math.min(st.local.n,st.om.n);
   if(minN<3||lMae==null||oMae==null){
-    body.innerHTML=`<div style="color:var(--muted);font-size:.74rem;line-height:1.5">Zbiram preverjene napovedi… (${minN}/3 ujemanj). Vsako uro se napoved samodejno primerja z dejansko izmerjeno temperaturo postaje.</div>`;
+    body.innerHTML=`<div style="color:var(--muted);font-size:.74rem;line-height:1.5">Zbiram preverjene napovedi … (${minN}/3 ujemanj). Vsako uro se napoved samodejno primerja z dejansko izmerjeno temperaturo na postaji.</div>`;
     return;
   }
   const worst=Math.max(lMae,oMae,0.1);
@@ -11357,10 +11357,10 @@ function aiRenderSkill(){
     bar('Lokalni (HW)','🤖',lMae,localWins?'#34d399':'#a78bfa')+
     bar('Open-Meteo','🌐',oMae,localWins?'#a78bfa':'#34d399')+
     `<div class="ai-skill-verdict">${pct<5
-      ? `⚖️ <b>Izenačeno</b> — modela sta praktično enako natančna (${minN} preverjenih napovedi).`
+      ? `⚖️ <b>Izenačeno</b> – modela sta praktično enako natančna (${minN} preverjenih napovedi).`
       : localWins
-      ? `🏆 <b>Hiperlokalni model vodi</b> — povprečna napaka ${pct}% nižja kot Open-Meteo (${minN} preverjenih napovedi).`
-      : `🌐 <b>Open-Meteo vodi</b> za ${pct}% (${minN} preverjenih napovedi). Lokalni model se z več podatki izboljšuje.`}</div>`;
+      ? `🏆 <b>Lokalni model vodi</b> – povprečna napaka je za ${pct} % manjša kot pri modelu Open-Meteo (${minN} preverjenih napovedi).`
+      : `🌐 <b>Open-Meteo vodi</b> za ${pct} % (${minN} preverjenih napovedi). Lokalni model se bo z več zbranimi podatki sčasoma izboljšal.`}</div>`;
 }
 
 // ══ 3) ANALOG DAYS (k-NN) ════════════════════════════════
@@ -11445,7 +11445,7 @@ async function aiAnalogDays(obs){
   const sim=dist=>Math.max(0,Math.round((1-Math.min(1,dist/3))*100));
   const bestSim=sim(knn[0].dist);
   const endT=projection[projection.length-1];
-  const trendTxt=endT!=null?(endT-curT>0.8?`ogrelo na ~${endT.toFixed(0)}°C`:endT-curT<-0.8?`ohladilo na ~${endT.toFixed(0)}°C`:`ostalo okrog ${endT.toFixed(0)}°C`):'—';
+  const trendTxt=endT!=null?(endT-curT>0.8?`ogrelo na ~${endT.toFixed(0)} °C`:endT-curT<-0.8?`ohladilo na ~${endT.toFixed(0)} °C`:`ostalo okrog ${endT.toFixed(0)} °C`):'—';
   const rainTxt=avgRain>=1.5?` z dežjem (povp. ~${avgRain.toFixed(1)} mm)`:avgRain>=0.3?' z rahlimi padavinami':' brez izrazitih padavin';
   sumEl.innerHTML=`<div class="ai-analog-match">${bestSim}%</div><div class="ai-analog-headline">Najboljše ujemanje s preteklostjo. V <b>${K}</b> najbolj podobnih primerih se je v naslednjih 6 urah vreme ${trendTxt}${rainTxt}.</div>`;
   const seen=new Set(),top=[];
@@ -11454,7 +11454,7 @@ async function aiAnalogDays(obs){
   if(listEl)listEl.innerHTML=top.map(c=>{
     let endFut=null,rainSum=0;
     for(let h=1;h<=AI_OUT_LEN;h++){const f=byTime.get(c.r.dt.getTime()+h*3600000);if(f){if(f.T!=null)endFut=f.T;rainSum+=f.r||0;}}
-    const dTxt=endFut!=null?`${c.r.T.toFixed(0)}° → <b>${endFut.toFixed(0)}°</b>`:`${c.r.T.toFixed(0)}°`;
+    const dTxt=endFut!=null?`${c.r.T.toFixed(0)} °C → <b>${endFut.toFixed(0)} °C</b>`:`${c.r.T.toFixed(0)} °C`;
     const rTxt=rainSum>=0.3?` · 🌧 ${rainSum.toFixed(1)}mm`:'';
     return `<div class="ai-analog-card"><div class="ai-analog-date">${fmtDay(c.r.dt)}</div><div class="ai-analog-sim">ujemanje ${sim(c.dist)}% · ${String(c.r.hour).padStart(2,'0')}:00</div><div class="ai-analog-then">Naslednjih 6 h: ${dTxt}${rTxt}</div></div>`;
   }).join('');
