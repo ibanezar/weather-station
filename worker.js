@@ -988,6 +988,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Poskusi GeoJSON feed z vsemi postajami, filtriraj za Savinjo v bližini
       if (path === "/arso-water") {
         const candidates = [
+          "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1&rb_Pq=Q%2CTW",
           "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1&rb_Pq=Q",
           "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1",
         ];

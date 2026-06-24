@@ -12091,6 +12091,7 @@ function initVodostaj(){
   fetchSavinjaRiver();
   fetchWaterBalance();
   fetchArsoStations();
+  fetchWaterTemp();
   fetchSoilDepths();
   renderFloodHistory();
 }
@@ -12114,6 +12115,7 @@ async function fetchArsoStations(){
       const name=(p.postaja||p.name||p.station||'ARSO').replace(/\s*\(.*?\)/g,'').trim();
       const h=p.vodostaj!=null?p.vodostaj:(p.h!=null?p.h:'—');
       const q=p.pretok!=null?p.pretok:(p.q!=null?p.q:null);
+      const tw=p.temperatura??p.TW??p.tw??p.T??null;
       const coords=st.geometry?.coordinates;
       const reka=(p.reka||p.river||'Savinja');
       let pillCls='normal',pillTxt='Normalen';
@@ -12122,10 +12124,12 @@ async function fetchArsoStations(){
         else if(q>=T.warning){pillCls='warning';pillTxt='Opozorilo';}
         else if(q>=T.raised){pillCls='raised';pillTxt='Povečan';}
       }
+      const twCol=tw!=null?(Number(tw)<10?'var(--blue)':Number(tw)<18?'#34d399':'#fbbf24'):'';
       html+=`<div class="arso-st">`+
         `<div class="arso-st-name" title="${name}">${name}</div>`+
         `<div class="arso-st-row"><span class="arso-st-val" style="color:var(--blue)">${h!=='—'?Number(h).toFixed(0):h}</span><span class="arso-st-unit">cm</span></div>`+
         (q!=null?`<div class="arso-st-row"><span class="arso-st-val" style="color:var(--cyan)">${Number(q).toFixed(1)}</span><span class="arso-st-unit">m³/s</span></div>`:'')+
+        (tw!=null?`<div class="arso-st-row"><span class="arso-st-val" style="color:${twCol}">${Number(tw).toFixed(1)}</span><span class="arso-st-unit">°C vode</span></div>`:'')+
         `<div><span class="arso-st-pill ${pillCls}">${pillTxt}</span></div>`+
         `</div>`;
     }
@@ -12135,6 +12139,79 @@ async function fetchArsoStations(){
   }catch(e){
     if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">ARSO postaje začasno nedostopne</div>';
   }
+}
+
+// ── Temperatura vode Savinje ──────────────────────────────
+async function fetchWaterTemp(){
+  const el=document.getElementById('water-temp-body');
+  const upd=document.getElementById('water-temp-updated');
+  if(!el)return;
+  try{
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);
+    const r=await fetch(PROXY+'/arso-water',{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const stations=d.stations||[];
+    const stationTemps=[];
+    for(const st of stations){
+      const p=st.properties||{};
+      const name=(p.postaja||p.name||p.station||'ARSO').replace(/\s*\(.*?\)/g,'').trim();
+      const temp=p.temperatura??p.TW??p.tw??p.T??null;
+      if(temp!=null)stationTemps.push({name,temp:Number(temp)});
+    }
+    if(stationTemps.length){_renderWaterTemp(stationTemps,null,upd);return;}
+    // Fallback: Open-Meteo soil temperature 0–6 cm kot ocena temperature vode
+    const omUrl='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
+      +'&hourly=soil_temperature_0cm,soil_temperature_6cm&forecast_hours=1&timezone=Europe%2FLjubljana';
+    const om=await fetch(omUrl).then(r2=>r2.json());
+    const st6=om?.hourly?.soil_temperature_6cm?.[0];
+    const st0=om?.hourly?.soil_temperature_0cm?.[0];
+    const est=st6??st0;
+    if(est!=null){_renderWaterTemp([],est,upd);}
+    else{el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki o temperaturi vode trenutno niso dosegljivi</div>';if(upd)upd.textContent='ARSO · ni podatkov';}
+  }catch(e){
+    if(el)el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Temperatura vode začasno nedostopna</div>';
+  }
+}
+
+function _renderWaterTemp(stationTemps,fallbackTemp,upd){
+  const el=document.getElementById('water-temp-body');if(!el)return;
+  const isArso=stationTemps.length>0;
+  const temp=isArso?stationTemps[0].temp:fallbackTemp;
+  const tempCol=temp<5?'#93c5fd':temp<10?'#60a5fa':temp<18?'#34d399':temp<24?'#fbbf24':'#f87171';
+  const statusLbl=temp<5?'Zelo hladna':temp<10?'Hladna':temp<18?'Prijetna':temp<24?'Topla':'Vroča';
+  const pillCls=temp<10?'normal':temp<18?'normal':temp<24?'raised':'alarm';
+  let html='<div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap">';
+  html+=`<div style="text-align:center;min-width:90px">`;
+  html+=`<div style="font-family:'JetBrains Mono',monospace;font-size:2.6rem;font-weight:500;color:${tempCol};line-height:1">${temp.toFixed(1)}</div>`;
+  html+=`<div style="font-size:.9rem;color:var(--muted);margin-top:.05rem">°C</div>`;
+  html+=`<div style="margin-top:.35rem"><span class="arso-st-pill ${pillCls}">${statusLbl}</span></div>`;
+  html+=`</div>`;
+  html+=`<div style="flex:1;min-width:200px">`;
+  if(isArso){
+    html+=`<div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Postaje vzdolž Savinje</div>`;
+    for(const {name,temp:t} of stationTemps){
+      const c=t<10?'#60a5fa':t<18?'#34d399':'#fbbf24';
+      html+=`<div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem">`;
+      html+=`<span style="color:var(--text)">${name}</span>`;
+      html+=`<span style="font-family:'JetBrains Mono',monospace;color:${c};font-weight:600">${t.toFixed(1)} °C</span>`;
+      html+=`</div>`;
+    }
+    if(upd)upd.textContent='ARSO · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }else{
+    html+=`<div style="font-size:.75rem;color:var(--muted);line-height:1.65">Direktni podatki ARSO o temperaturi vode niso bili dosegljivi.<br>Prikazana je temperatura tal (0–6 cm) kot okvirna ocena.</div>`;
+    if(upd)upd.textContent='Open-Meteo (ocena) · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }
+  const swim=temp>=18&&temp<=26,fish=temp>=8&&temp<=20;
+  if(swim||fish){
+    html+=`<div style="margin-top:.6rem;padding:.35rem .6rem;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:7px;font-size:.68rem;color:var(--muted)">`;
+    if(swim)html+=`🏊 Primerno za kopanje`;
+    if(swim&&fish)html+=' · ';
+    if(fish)html+=`🎣 Ugodne razmere za ribolov`;
+    html+=`</div>`;
+  }
+  html+=`</div></div>`;
+  el.innerHTML=html;
 }
 
 // ── Vlaga v tleh — 4 globine ─────────────────────────────
