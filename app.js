@@ -7932,78 +7932,78 @@ async function buildFingerprint(){
 
 // ── Data: Vremenski pregovori ──────────────────────────────
 const PROVERBS=[
-  {text:'Rdeče nebo zvečer, pastirjeva slast; rdeče nebo zjutraj, pastirjeva jeza.',valid:'true',expl:'Resnično! Rdeče nebo zvečer kaže na visok tlak in prah na zahodu — lepo vreme prihaja. Zjutraj rdeče nebo pomeni vlago in oblake na zahodu — dež se bliža.'},
-  {text:'Kadar mačka gobček umiva, bo kmalu dežuralo.',valid:'partial',expl:'Delno resnično. Mačke se pogosteje čistijo pri višji vlagi (dlaka postane lepljiva). Korelacija obstaja, a ni zanesljiva napoved.'},
-  {text:'Kadar dim gre navzgor, bo jutri lep dan.',valid:'true',expl:'Resnično! Visok tlak pritiska dim navzgor, nizek tlak pa ga tlači k tlom. Dim, ki se dviga, je zanesljiv znak stabilnega anticiklona.'},
-  {text:'Če se storžki borovih borov zapirajo, prihaja dež.',valid:'true',expl:'Resnično! Borovi storžki se odzivajo na vlago — pri visoki vlagi se luskine zaprejo. Naravni higrometer!'},
-  {text:'Kadar žabe regajo pri lepem vremenu, bo dež.',valid:'true',expl:'Resnično! Žabe so bolj aktivne pri padajočem tlaku in naraščajoči vlagi — zanesljiv bioindikator za prihod dežja.'},
-  {text:'Kadar so mravlje aktivne in nosijo jajčeca navzgor, prihaja dež.',valid:'true',expl:'Resnično! Mravlje so zelo občutljive na spremembe vlage in tlaka. Pred dežjem prenesejo zarod na višje nivoje rova.'},
-  {text:'Kdor se boji megle, se ne bo veselil lesa.',valid:'partial',expl:'Folklorni pregovor: kdor se izogiba neugodnim razmeram, ne bo doživel lepih plodov. Megla v Savinjski dolini je pogosta, a napoveduje pogosto sončen dan po razjasnitvi.'},
-  {text:'Sneg v aprilu, leto bogato.',valid:'partial',expl:'Delno resnično. Pozna snežna odeja poveča zalogo vode v tleh. A moderna kmetijska praksa je manj odvisna od tega.'},
-  {text:'Kadar luna ima venec, bo dež ali sneg.',valid:'true',expl:'Resnično! Lunin venec (halo) nastane, ko svetloba prehaja skozi ledene kristale visoko oblačje (cirrus) — ki so pogosto predhodnik fronte.'},
-  {text:'Kakršen je 7. januar, takšno bo zimo.',valid:'myth',expl:'Mit! Ni statistične zveze med enim datumom in celotno zimo. Vzorci cirkulacije so preveč kaotični za tovrstne napovedi.'},
-  {text:'Kadar lastovice nizko letijo, bo dež.',valid:'true',expl:'Resnično! Insekti se pred dežjem spustijo bliže tlom (nižji tlak otežuje let). Lastovice sledijo plenu — nižji insekti, nižji let.'},
-  {text:'Svečnica z jasnim nebom napoveduje hudo zimo.',valid:'myth',expl:'Mit! Ni zanesljive zveze. Podobno kot ameriški "Groundhog Day" — statistično ni potrjeno.'},
-  {text:'Kadar se rosa nabira na zelju, bo naslednji dan lep.',valid:'partial',expl:'Delno resnično. Obilen rosni izpad nakazuje jasno, mirno noč (brez oblakov) — kar je pogosto predhodnik lepega dne. A ne vedno.'},
+  {text:'Rdeče nebo zvečer, pastirjeva slast; rdeče nebo zjutraj, pastirjeva jeza.',valid:'true',expl:'Resnično! Rdeče nebo zvečer kaže na visok zračni tlak in prah na zahodu – obeta se lepo vreme. Rdeče nebo zjutraj pa pomeni vlago in oblačnost na zahodu – bliža se dež.'},
+  {text:'Kadar si mačka gobček umiva, bo kmalu deževalo.',valid:'partial',expl:'Delno resnično. Mačke se pogosteje čistijo pri višji zračni vlagi, saj dlaka postane lepljiva. Korelacija sicer obstaja, a kot napoved ni zelo zanesljiva.'},
+  {text:'Kadar gre dim naravnost navzgor, bo jutri lep dan.',valid:'true',expl:'Resnično! Visok zračni tlak omogoča, da se dim dviga, medtem ko ga nizek tlak tlači k tlom. Ravno dvigajoč se dim je zanesljiv znak stabilnega anticiklona.'},
+  {text:'Če se borovi storži zapirajo, prihaja dež.',valid:'true',expl:'Resnično! Borovi storži se močno odzivajo na zračno vlago – pri visoki vlagi se luskine zaprejo. Delujejo kot naravni higrometer!'},
+  {text:'Kadar žabe regajo pri lepem vremenu, bo dež.',valid:'true',expl:'Resnično! Žabe postanejo občutno bolj aktivne ob padajočem zračnem tlaku in naraščajoči vlagi – so zanesljiv bioindikator za prihod dežja.'},
+  {text:'Kadar so mravlje zelo aktivne in nosijo jajčeca navzgor, prihaja dež.',valid:'true',expl:'Resnično! Mravlje so izjemno občutljive na spremembe vlage in tlaka. Pred dežjem prenesejo svoj zarod v višje nivoje mravljišča.'},
+  {text:'Kdor se boji megle, se ne bo veselil lesa.',valid:'partial',expl:'Folklorni pregovor: kdor se izogiba neugodnim razmeram, ne bo užival sadov. Megla je v Savinjski dolini sicer pogosta, a po razjasnitvi večinoma napoveduje sončen dan.'},
+  {text:'Sneg v aprilu, bogato leto.',valid:'partial',expl:'Delno resnično. Pozna snežna odeja sicer res poveča zalogo vlage v tleh, vendar so sodobne kmetijske prakse od takšnih dogodkov manj odvisne.'},
+  {text:'Kadar ima luna venec, bo dež ali sneg.',valid:'true',expl:'Resnično! Lunin venec ali halo nastane, ko svetloba prehaja skozi ledene kristale visoke oblačnosti (cirusi) – ti oblaki pa so pogost predhodnik vremenske fronte.'},
+  {text:'Kakršen je 7. januar, takšna bo zima.',valid:'myth',expl:'Mit! Med posameznim datumom in celotno zimo ni prav nobene statistične povezave. Vzorci zračne cirkulacije so preveč kaotični za tovrstne napovedi.'},
+  {text:'Kadar lastovke nizko letijo, bo dež.',valid:'true',expl:'Resnično! Žuželke se pred dežjem zaradi nižjega zračnega tlaka, ki otežuje letenje, spustijo bližje tlom. Lastovke le sledijo svojemu plenu – nižje so žuželke, nižji je let.'},
+  {text:'Jasno nebo na svečnico napoveduje hudo zimo.',valid:'myth',expl:'Mit! Pravila ni. Pregovor deluje podobno kot ameriški »svizčev dan« (Groundhog Day) – nima statistične podlage.'},
+  {text:'Kadar se zjutraj rosa nabere na zelju, bo čez dan lepo.',valid:'partial',expl:'Delno resnično. Izdatna rosa nakazuje, da je bila noč jasna in mirna (brez oblačnosti), kar je pogost predpogoj za lep dan. Ne velja pa to vedno.'},
 ];
 
 // ── Data: Pojavi dneva ─────────────────────────────────────
 const PHENOMENA=[
-  {name:'Mavrnica',en:'Rainbow',icon:'🌈',
-   desc:'Nastane, ko sončna svetloba vstopi v kapljice dežja, se lomi, odbije od notranje stene in znova lomi ob izhodu. Vsaka barva se lomi pod različnim kotom (rdeča 42°, vijolična 40°). V Savinjski dolini jo vidimo najpogosteje ob popoldanskih plohah, ko sonce posije z zahoda.',
+  {name:'Mavrica',en:'Rainbow',icon:'🌈',
+   desc:'Nastane, ko sončna svetloba vstopi v dežno kapljico, se lomi, odbije od njene notranje stene in se ob izhodu znova lomi. Vsaka barva se lomi pod različnim kotom (rdeča 42°, vijolična 40°). V Savinjski dolini jo najpogosteje opazimo ob popoldanskih plohah, ko sonce posije z zahoda.',
    svg:'<svg viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="80" fill="#0ea5e9"/><rect y="60" width="140" height="20" fill="#16a34a" opacity=".7"/><path d="M5,75 Q70,-20 135,75" fill="none" stroke="#ef4444" stroke-width="4" opacity=".8"/><path d="M12,75 Q70,-5 128,75" fill="none" stroke="#f97316" stroke-width="4" opacity=".8"/><path d="M19,75 Q70,8 121,75" fill="none" stroke="#fbbf24" stroke-width="4" opacity=".8"/><path d="M26,75 Q70,18 114,75" fill="none" stroke="#22c55e" stroke-width="4" opacity=".8"/><path d="M33,75 Q70,26 107,75" fill="none" stroke="#3b82f6" stroke-width="4" opacity=".8"/><path d="M40,75 Q70,32 100,75" fill="none" stroke="#8b5cf6" stroke-width="4" opacity=".8"/></svg>'},
   {name:'Virga',en:'Virga',icon:'🌂',
-   desc:'Dež ali sneg, ki pada iz oblakov, a izhlapi preden doseže tla. Nastane, ko je zrak pod oblaki zelo suh. Vidimo jo kot navpične "proge" ali "repe" pod oblaki. V Savinjski dolini se pojavi poleti ob visokih poletnih nevihtah.',
+   desc:'Dež ali sneg, ki pada iz oblakov, a izhlapi, preden doseže tla. Nastane, ko je zrak pod oblačnim slojem zelo suh. Vidimo jo kot navpične »proge« ali »repe«, ki visijo izpod oblakov. V Savinjski dolini se pogosto pojavi poleti ob visoki nevihtni oblačnosti.',
    svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#1e3a5f"/><ellipse cx="70" cy="30" rx="45" ry="18" fill="#475569"/><line x1="55" y1="48" x2="45" y2="80" stroke="#60a5fa" stroke-width="1.5" opacity=".7"/><line x1="65" y1="48" x2="60" y2="85" stroke="#60a5fa" stroke-width="1.5" opacity=".7"/><line x1="75" y1="48" x2="72" y2="88" stroke="#60a5fa" stroke-width="1.5" opacity=".6"/><line x1="85" y1="48" x2="80" y2="78" stroke="#60a5fa" stroke-width="1.5" opacity=".5"/><text x="70" y="98" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="sans-serif">kapljice izhlapijo</text></svg>'},
-  {name:'Sončni kolobar',en:'Sun halo',icon:'🌟',
-   desc:'Svetlobni krog premera 22° okoli sonca ali lune. Nastane, ko svetloba prehaja skozi šesterokotne ledene kristale v visokih cirrus oblakih na 6–10 km višine. Pojav pogosto napoveduje fronto v naslednjih 12–24 urah.',
+  {name:'Sončev ali lunin halo (venec)',en:'Sun halo',icon:'🌟',
+   desc:'Svetlobni obroč s polmerom 22° okoli Sonca ali Lune. Nastane, ko svetloba prehaja skozi šesterokotne ledene kristale v visokih oblakih (cirusih) na višini od 6 do 10 km. Pojav pogosto napoveduje vremensko fronto v naslednjih 12 do 24 urah.',
    svg:'<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="140" fill="#0c1a33"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12"/><circle cx="70" cy="70" r="10" fill="#fbbf24"/><circle cx="70" cy="70" r="55" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="2"/><text x="70" y="128" text-anchor="middle" font-size="7" fill="#64748b" font-family="sans-serif">kolobar 22°</text></svg>'},
   {name:'Temperaturna inverzija',en:'Temperature inversion',icon:'🔄',
-   desc:'Normalno temperatura z višino pada. Pri inverziji je plast toplega zraka nad hladnim. V dolinah (kot Rečica) se hladen zrak zbira ponoči. Povzroča meglo, smog in "past" za onesnaženost. Pozimi pogosta.',
+   desc:'V normalnih razmerah temperatura z višino pada. Pri inverziji pa toplejši zrak obvisi nad hladnim. V dolinah (kot je Rečica) se težji, hladen zrak ponoči steka na dno. To povzroča meglo, smog in deluje kot »past« za onesnažen zrak. Zelo pogost pojav v zimskem času.',
    svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#0f172a"/><rect y="70" width="140" height="30" fill="#1e3a5f" opacity=".8"/><rect y="40" width="140" height="30" fill="#1e3a5f" opacity=".4"/><text x="8" y="90" font-size="8" fill="#94a3b8" font-family="JetBrains Mono,monospace">2°C (dno)</text><text x="8" y="60" font-size="8" fill="#f87171" font-family="JetBrains Mono,monospace">8°C (inv.)</text><text x="8" y="30" font-size="8" fill="#60a5fa" font-family="JetBrains Mono,monospace">3°C (vrh)</text><path d="M95,85 L105,55 L95,25" fill="none" stroke="#fbbf24" stroke-width="2"/><text x="110" y="58" font-size="7" fill="#fbbf24" font-family="sans-serif">↑ toplo</text></svg>'},
   {name:'Orografski oblaki',en:'Orographic clouds',icon:'⛰️',
-   desc:'Nastanejo, ko vlažen zrak naleti na gorski greben, se dvigne, ohladi in kondenzira. Savinjske Alpe ustvarjajo čudovite lečaste oblake (lenticularis), ki pogosto visijo nepremično nad Logарsko dolino.',
+   desc:'Nastanejo, ko vlažen zrak trči ob gorsko pregrado, se prisilno dvigne, ohladi in kondenzira. Savinjske Alpe redno ustvarjajo čudovite lečaste oblake (lentikularise), ki navidezno povsem nepremično visijo nad Logarsko dolino.',
    svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0ea5e9"/><polygon points="0,90 40,30 70,50 100,20 140,90" fill="#475569"/><ellipse cx="105" cy="22" rx="28" ry="12" fill="white" opacity=".8"/><ellipse cx="105" cy="22" rx="22" ry="8" fill="white" opacity=".9"/><path d="M50,30 Q70,10 90,22" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="3,2"/><text x="5" y="25" font-size="7" fill="white" opacity=".7" font-family="sans-serif">vlažen tok →</text></svg>'},
   {name:'Žled',en:'Glaze ice',icon:'🧊',
-   desc:'Dež zamrzne takoj ko zadane hladno površino. Nastane pri temperaturni inverziji: dež pade skozi topel sloj, a se zamrzne na tleh ali rastlinah (<0°C). Povzroča ogromno škodo v gozdovih in na elektrovodih.',
+   desc:'Pojav, pri katerem dež na hladni površini v trenutku zmrzne. Nastane ob močni temperaturni inverziji: dež pada skozi toplo zračno plast in pade na močno ohlajena tla ali rastline (kjer je temperatura &lt; 0 °C). V gozdovih in na daljnovodih povzroča ogromno škodo.',
    svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#1e3a5f"/><line x1="30" y1="10" x2="30" y2="60" stroke="#8b5cf6" stroke-width="2"/><line x1="30" y1="60" x2="10" y2="80" stroke="#8b5cf6" stroke-width="2"/><line x1="30" y1="60" x2="50" y2="80" stroke="#8b5cf6" stroke-width="2"/><ellipse cx="30" cy="10" rx="8" ry="5" fill="#e0f2fe" opacity=".7"/><ellipse cx="10" cy="80" rx="8" ry="4" fill="#bae6fd" opacity=".8"/><ellipse cx="50" cy="80" rx="8" ry="4" fill="#bae6fd" opacity=".8"/><text x="70" y="45" font-size="8" fill="#94a3b8" font-family="sans-serif">dež → led</text><line x1="80" y1="5" x2="80" y2="55" stroke="#93c5fd" stroke-width="1" opacity=".6" stroke-dasharray="3,2"/></svg>'},
-  {name:'Fen (Foehnski veter)',en:'Foehn wind',icon:'🌬️',
-   desc:'Topel, suh veter na vetrni strani gore. Ko vlažen zrak prestopi greben, izgubi vlago (kondenzacija → padavine), nato pa se spušča suho-adiabatno. Za vsak kilometer spusta se segreje za 10°C. Savinjska dolina leži v "fen coni" Julijskih Alp.',
+  {name:'Fen (Fenski veter)',en:'Foehn wind',icon:'🌬️',
+   desc:'Topel in suh veter na zavetrni strani gorske pregrade. Ko vlažen zrak prečka greben, z dvigovanjem izgublja vlago (kondenzacija prinaša padavine), pri spuščanju na drugi strani pa se suhoadiabatno segreva. Za vsak kilometer spusta se segreje za kar 10 °C. Savinjska dolina leži v izraziti »fenski coni« Julijskih in Kamniško-Savinjskih Alp.',
    svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0c1a33"/><polygon points="0,90 50,20 80,40 140,90" fill="#334155"/><path d="M0,40 Q30,30 50,20" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,2"/><path d="M50,20 Q80,55 140,50" fill="none" stroke="#f97316" stroke-width="2.5"/><text x="5" y="38" font-size="7" fill="#60a5fa" font-family="sans-serif">hladno vlažno</text><text x="95" y="45" font-size="7" fill="#f97316" font-family="sans-serif">toplo suho</text></svg>'},
-  {name:'Ivje (Hoarfrost)',en:'Hoarfrost',icon:'❄️',
-   desc:'Ledeni kristali, ki se neposredno odlagajo iz vodne pare na hladnih površinah (pod 0°C). Za razliko od slane (zamrznjena rosa) je ivje lepo kristalne strukture. Najpogosteje zjutraj pri jasnem vremenu in hladnih tleh.',
+  {name:'Ivje',en:'Hoarfrost',icon:'❄️',
+   desc:'Ledeni kristali, ki na zelo hladnih površinah (pod 0 °C) nastajajo z neposredno depozicijo vodne pare. Za razliko od slane (ki je v resnici zamrznjena rosa) ima ivje čudovito kristalno strukturo. Najpogosteje nastane zjutraj ob jasnem in mrzlem vremenu.',
    svg:'<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="90" fill="#0f172a"/><g stroke="#e0f2fe" stroke-width="1" opacity=".8"><line x1="70" y1="20" x2="70" y2="70"/><line x1="45" y1="32" x2="95" y2="58"/><line x1="95" y1="32" x2="45" y2="58"/><line x1="70" y1="20" x2="58" y2="35"/><line x1="70" y1="20" x2="82" y2="35"/><line x1="70" y1="70" x2="58" y2="55"/><line x1="70" y1="70" x2="82" y2="55"/></g><circle cx="70" cy="45" r="3" fill="#bae6fd"/></svg>'},
   {name:'Toča',en:'Hail',icon:'🌨️',
-   desc:'Nastane v kumulonimbus oblakih z intenzivnimi navpičnimi tokovi. Kapljice vode se dvignejo visoko, zamrznejo, naberejo nov sloj ledu, padejo, znova dvignejo... Plasti se vidijo na prerezanem zrnu. Savinjska dolina je ena ogroženih regij v Sloveniji.',
+   desc:'Nastaja v nevihtnih kumulonimbusih z intenzivnimi vertikalnimi zračnimi tokovi. Vodne kapljice se dvignejo visoko nad ledišče, zmrznejo, ob padanju dobijo nov sloj vode, se ponovno dvignejo in spet zmrznejo. Njene posamezne plasti so jasno vidne ob prerezu zrna. Savinjska dolina spada med najbolj ogrožene slovenske regije.',
    svg:'<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect width="140" height="100" fill="#1e1b4b"/><ellipse cx="70" cy="28" rx="50" ry="22" fill="#334155"/><ellipse cx="70" cy="22" rx="35" ry="16" fill="#475569"/><circle cx="45" cy="60" r="7" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="70" cy="70" r="6" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="95" cy="58" r="8" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="55" cy="82" r="5" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/><circle cx="85" cy="85" r="6" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/></svg>'},
 ];
 
 // ── Data: Naravni napovedovalci ────────────────────────────
 const NATURE_INDICATORS=[
-  {icon:'🐜',sign:'Mravlje nosijo jajčeca navzgor',pred:'Prihaja dež ali nevihta',check:obs=>obs?.metric?.precipRate>0||(obs?.humidity??0)>85},
-  {icon:'🕷️',sign:'Pajčevine zjutraj — vidne in suhe',pred:'Lep dan',check:obs=>(obs?.metric?.precipRate??0)<0.1&&(obs?.humidity??99)<80&&new Date().getHours()<11},
-  {icon:'🐸',sign:'Žabe regajo pri suhem vremenu',pred:'Dež se bliža (tlak pada)',check:obs=>((obs?.metric?.pressure??1013))<1010},
-  {icon:'🐄',sign:'Krave ležijo na pašniku',pred:'Dež prihaja',check:obs=>(obs?.metric?.precipRate??0)>0.2||(obs?.humidity??0)>88},
-  {icon:'🦅',sign:'Lastovice nizko letijo',pred:'Dež — insekti se spustijo',check:obs=>(obs?.metric?.precipRate??0)>0||(obs?.humidity??0)>85},
-  {icon:'🌲',sign:'Storžki bora se zapirajo',pred:'Visoka vlaga ali dež',check:obs=>(obs?.humidity??0)>80},
-  {icon:'💨',sign:'Dim iz dimnika gre navzgor',pred:'Visok tlak — lepo vreme',check:obs=>(obs?.metric?.pressure??1013)>1018&&(obs?.metric?.windSpeed??0)<8},
-  {icon:'💧',sign:'Rosa na travi zjutraj',pred:'Lep dan — brez dežja',check:obs=>(obs?.metric?.temp??15-obs?.metric?.dewpt??10)<2&&(obs?.metric?.precipRate??0)<0.1&&new Date().getHours()<10},
-  {icon:'🐝',sign:'Čebele so aktivne',pred:'Temp >15°C, lepo, ni vetra',check:obs=>(obs?.metric?.temp??0)>=15&&(obs?.metric?.windSpeed??99)<15&&(obs?.metric?.precipRate??0)<0.1},
-  {icon:'🌻',sign:'Cvetovi maslačka zaprti',pred:'Dež ali slabo vreme',check:obs=>(obs?.humidity??0)>80||(obs?.metric?.precipRate??0)>0},
+  {icon:'🐜',sign:'Mravlje nosijo zarod navzgor',pred:'Prihaja dež ali nevihta',check:obs=>obs?.metric?.precipRate>0||(obs?.humidity??0)>85},
+  {icon:'🕷️',sign:'Jutranje pajčevine so vidne in suhe',pred:'Obetaven in lep dan',check:obs=>(obs?.metric?.precipRate??0)<0.1&&(obs?.humidity??99)<80&&new Date().getHours()<11},
+  {icon:'🐸',sign:'Žabe regajo kljub suhemu vremenu',pred:'Bliža se dež (zračni tlak pada)',check:obs=>((obs?.metric?.pressure??1013))<1010},
+  {icon:'🐄',sign:'Krave ležijo na pašniku',pred:'Prihaja dež',check:obs=>(obs?.metric?.precipRate??0)>0.2||(obs?.humidity??0)>88},
+  {icon:'🦅',sign:'Lastovke letijo izrazito nizko',pred:'Dež – žuželke so se spustile k tlom',check:obs=>(obs?.metric?.precipRate??0)>0||(obs?.humidity??0)>85},
+  {icon:'🌲',sign:'Borovi storži se zapirajo',pred:'Visoka vlaga ali dež',check:obs=>(obs?.humidity??0)>80},
+  {icon:'💨',sign:'Dim iz dimnika se dviga naravnost',pred:'Visok zračni tlak – lepo vreme',check:obs=>(obs?.metric?.pressure??1013)>1018&&(obs?.metric?.windSpeed??0)<8},
+  {icon:'💧',sign:'Obilna jutranja rosa na travi',pred:'Lep in stabilen dan',check:obs=>(obs?.metric?.temp??15-obs?.metric?.dewpt??10)<2&&(obs?.metric?.precipRate??0)<0.1&&new Date().getHours()<10},
+  {icon:'🐝',sign:'Čebele so zelo aktivne',pred:'Temp. > 15 °C, mirno in lepo vreme',check:obs=>(obs?.metric?.temp??0)>=15&&(obs?.metric?.windSpeed??99)<15&&(obs?.metric?.precipRate??0)<0.1},
+  {icon:'🌻',sign:'Cvetovi regrata so zaprti',pred:'Dež ali slabo vreme',check:obs=>(obs?.humidity??0)>80||(obs?.metric?.precipRate??0)>0},
 ];
 
 // ── Data: Kviz vprašanja ───────────────────────────────────
 const QUIZ_QUESTIONS=[
-  {q:'Pri kateri relativni vlagi se tvori megla?',opts:['Pod 50%','Med 50-70%','Nad 80%','Točno pri 100%'],a:2,expl:'Megla nastane, ko relativna vlaga doseže ~100% in nastopi kondenzacija. V praksi se začne tvoriti pri vlagi nad 80-90%, ko je rosišče blizu temperature.'},
-  {q:'Kaj pomeni, ko tlak pada za več kot 3 hPa v 3 urah?',opts:['Lepo vreme','Huda nevihta prihaja','Anticiklon se krepi','Normalne razmere'],a:1,expl:'Hiter padec tlaka (>3 hPa/3h) je zanesljiv znak prihajajočega ciklona z nevihto ali močnimi padavinami. Mornarji temu pravijo "padajoči barometer".'},
-  {q:'Zakaj je temperatura v dolini Savinje (366 m) pogosto nižja od temperature na pobočjih?',opts:['Ker je bližje reki','Temperaturna inverzija','Višji UV indeks v dolini','Večja vlaga'],a:1,expl:'Temperaturna inverzija: hladen težki zrak se zbira na dnu doline. Pri mirnem, jasnem vremenu se dno doline ohladi hitreje kot pobočja.'},
-  {q:'Katera smer vetra je značilna za Savinjsko dolino pri previharnem vremenu z Jadrana?',opts:['Severni','Jugozahodni','Vzhodni','Severovzhodni'],a:1,expl:'Jugozahodni tok je najpogostejši v Savinjski dolini ob atlantskih in mediteranskih ciklonih. Prinaša vlago z Jadrana in je vzrok obilnih jesenskih padavin.'},
-  {q:'Kaj je "virga"?',opts:['Vrsta megle','Dež ki ne doseže tal','Sončni kolobar','Ledena igla'],a:1,expl:'Virga so padavine (dež ali sneg) iz oblakov, ki izparijo preden dosežejo tla. Vidne so kot "repi" pod oblaki, pogosto pri sušnem zraku poleti.'},
-  {q:'Na koliko metrov višine se temperatura normalno zniža za 1°C?',opts:['50 m','100 m','150 m','200 m'],a:2,expl:'Standardna temperatura lapse rate (suho adiabatno): 9.8°C/1000 m ≈ 1°C na 100 m. V vlažnem zraku je manjša (~6°C/1000 m). Za Rečico (366 m) to pomeni ~3.6°C razlike do morja.'},
-  {q:'Kateri pojav napoveduje lunin venec (halo)?',opts:['Lepo vreme','Dež ali sneg v 12-24h','Močna burja','Temperaturna inverzija'],a:1,expl:'Lunin halo nastane pri prehodu svetlobe skozi ledene kristale v cirrus oblakih (6-10 km). Cirrus oblaki so pogosto predhodnik fronte — dež ali sneg v 12-24 urah.'},
-  {q:'Kakšna je povprečna letna količina padavin v Savinjski dolini?',opts:['600-800 mm','900-1100 mm','1200-1600 mm','2000+ mm'],a:2,expl:'Savinjska dolina prejme 1200-1600 mm padavin letno — kar je nadpovprečno za Slovenijo. Orografski učinek Savinjskih Alp povzroča obilne padavine, posebej jeseni.'},
-  {q:'Kdaj nastane rosa?',opts:['Ko temperatura zraka doseže 0°C','Ko temperatura pade do rosišča','Ko vlaga preseže 60%','Pri vetru > 20 km/h'],a:1,expl:'Rosa nastane, ko se površine (trava, listi) ohladijo pod rosišče — temperaturo pri kateri zrak ne more zadržati vsa vlage. Nastane pri mirnem, jasnem vremenu.'},
-  {q:'Kateri faktor NAJMANJ vpliva na nastajanje megle v dolini Savinje?',opts:['Vlaga','Smer vetra','Moč vetra','Temperatura'],a:1,expl:'Smer vetra ima minimalen vpliv na nastanek radiacijsko megle v dolini — pomembnejša je hitrost vetra (mešanje zraka), vlaga in temperaturni gradient.'},
+  {q:'Pri kolikšni relativni zračni vlagi se tvori megla?',opts:['Pod 50 %','Med 50 in 70 %','Nad 80 %','Točno pri 100 %'],a:2,expl:'Megla sicer res nastane, ko relativna vlaga doseže ≈ 100 % in se začne kondenzacija. V naravi pa se v praksi začne tvoriti že ob vlagi nad 80–90 %, ko je temperatura zraka zelo blizu rosišča.'},
+  {q:'Kaj pomeni, če zračni tlak pade za več kot 3 hPa v zgolj 3 urah?',opts:['Lepo vreme','Prihaja huda nevihta','Krepi se anticiklon','Normalne razmere'],a:1,expl:'Hiter padec tlaka (> 3 hPa / 3 h) je zanesljiv znak bližajočega se globokega ciklona, ki prinaša nevihte ali močne padavine. Mornarji temu pojavu pravijo »padajoči barometer«.'},
+  {q:'Zakaj je temperatura v dolini ob Savinji (366 m n. v.) velikokrat nižja od tiste na okoliških pobočjih?',opts:['Ker je bližje reki','Temperaturna inverzija','Višji UV-indeks v dolini','Večja zračna vlaga'],a:1,expl:'Temperaturna inverzija – hladen in težak zrak se steka ter zbira na dnu doline. Pri mirnem in jasnem vremenu se dno kotline zaradi sevanja ohladja precej hitreje kot pobočja.'},
+  {q:'Katera smer vetra v Savinjski dolini je najznačilnejša ob previharnem vremenu, ki se bliža z Jadrana?',opts:['Severni','Jugozahodni','Vzhodni','Severovzhodni'],a:1,expl:'Jugozahodni (JZ) zračni tok je v Savinjski dolini najpogostejši ob atlantskih in sredozemskih ciklonih. Prinaša izdatno vlago z Jadranskega morja in je vzrok za zelo obilne padavine, zlasti v jesenskem času.'},
+  {q:'Kaj v meteorologiji pomeni izraz »virga«?',opts:['Vrsta megle','Dež, ki ne doseže tal','Sončev halo','Ledena iglica'],a:1,expl:'Virga so padavine (dež ali sneg), ki iz oblakov sicer padejo, a izhlapijo še preden dosežejo tla. Vidne so kot sivi »repi« pod oblačnim slojem, pogosto poleti ob zelo suhem zraku.'},
+  {q:'Koliko metrov moramo premagati v višino, da se temperatura v normalnih razmerah spusti za 1 °C?',opts:['50 m','100 m','150 m','200 m'],a:2,expl:'Normalni navpični temperaturni gradient (suhoadiabatni) znaša 9,8 °C na 1000 m, kar je zelo blizu 1 °C na 100 m. V zelo vlažnem zraku je ta upad manjši (pribl. 6 °C / 1000 m). To pomeni, da je v povprečju na Rečici (366 m) za okoli 3,6 °C hladneje kot ob morju.'},
+  {q:'Kateri vremenski pojav napoveduje lunin venec (halo)?',opts:['Lepo vreme','Dež ali sneg v 12 do 24 urah','Močna burja','Temperaturna inverzija'],a:1,expl:'Lunin halo nastane ob lomu svetlobe skozi ledene kristale v visokih oblakih vrste cirus (med 6 in 10 km visoko). Takšni oblaki pa so izrazit predhodnik vremenske fronte – kar pomeni dež ali sneg v naslednjih 12 do 24 urah.'},
+  {q:'Kakšna je povprečna letna količina padavin v Savinjski dolini?',opts:['600–800 mm','900–1100 mm','1200–1600 mm','2000+ mm'],a:2,expl:'Savinjska dolina letno prejme od 1200 do 1600 mm padavin, kar je močno nad slovenskim povprečjem. Močen orografski učinek bližnjih gorskih pregrad povzroča izdatne in obilne padavine.'},
+  {q:'Kateri pogoji morajo biti izpolnjeni za nastanek rose?',opts:['Zrak doseže 0 °C','Temperatura pade na rosišče','Vlaga preseže 60 %','Veter je močnejši od 20 km/h'],a:1,expl:'Rosa nastane takrat, ko se površine (npr. trava in listi) ponoči ohladijo pod temperaturo rosišča – torej temperaturo, pri kateri zrak ob tleh ne more več zadrževati vse vlage, ki jo vsebuje. Nujen pogoj so tudi mirne noči in jasno nebo.'},
+  {q:'Kateri izmed naštetih dejavnikov vpliva NAJMANJ na nastajanje megle v dolini Savinje?',opts:['Zračna vlaga','Smer vetra','Hitrost vetra','Temperatura'],a:1,expl:'Smer vetra nima praktično nobenega vpliva na nastanek radiacijske megle na dnu doline. Dosti pomembnejši so hitrost vetra (ki vpliva na premešanje ozračja), vlaga in nočni temperaturni padec.'},
 ];
 
 // ── Proverb accuracy stats ─────────────────────────────────
@@ -8014,7 +8014,7 @@ function buildProverbStats(){
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   const dayCount=Object.keys(stored).length;
   if(dayCount<100){
-    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni dovolj zgodovinskih podatkov. Uvozi XLSX datoteko v zavihku Zgodovina.</div>';
+    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Ni dovolj zgodovinskih podatkov. Uvozite datoteko XLSX v zavihku Zgodovina.</div>';
     return;
   }
 
@@ -8242,7 +8242,7 @@ function buildProverbStats(){
   }).filter(r=>r.tested>=3); // only show proverbs with enough data
 
   if(!results.length){
-    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Uvozi XLSX datoteko (zavihek Zgodovina) za prikaz analize.</div>';
+    wrap.innerHTML='<div style="color:var(--muted);font-size:.8rem">Za prikaz analize uvozite datoteko XLSX (zavihek Zgodovina).</div>';
     return;
   }
 
@@ -8333,18 +8333,18 @@ function buildProverbStats(){
   wsvg+=`</svg>`;
   // Legend
   const wlegend=`<div style="display:flex;justify-content:center;gap:.85rem;font-size:.67rem;color:var(--muted);margin-bottom:1.1rem;flex-wrap:wrap">
-    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);vertical-align:middle;margin-right:3px"></span>drži ≥65%</span>
-    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);vertical-align:middle;margin-right:3px"></span>delno 45–64%</span>
-    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:middle;margin-right:3px"></span>mit &lt;45%</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);vertical-align:middle;margin-right:3px"></span>drži ≥ 65 %</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);vertical-align:middle;margin-right:3px"></span>delno 45–64 %</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:middle;margin-right:3px"></span>mit &lt; 45 %</span>
     <span><span style="display:inline-block;width:18px;height:2px;background:var(--blue);vertical-align:middle;margin-right:3px;border-radius:1px"></span>danes</span>
   </div>`;
 
   let html=wsvg+wlegend+`<div style="font-size:.7rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
-    Analiza temelji na <b style="color:var(--text)">${dayCount} dneh</b> podatkov postaje IREICA1 (${years[0]}–${years[years.length-1]}).
-    Testiranje je bidirekcijsko — šteje pravilna napoved v obe smeri.
+    Analiza temelji na <b style="color:var(--text)">${dayCount} dneh</b> podatkov vremenske postaje IREICA1 (${years[0]}–${years[years.length-1]}).
+    Testiranje je dvosmerno – štejeta pravilni napovedi v obe smeri.
     &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;vertical-align:middle"></span> zadelo
     &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;vertical-align:middle"></span> zgrešilo
-    &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni podatka
+    &nbsp;<span style="width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block;vertical-align:middle"></span> ni podatkov
   </div>`;
 
   results.forEach(r=>{
@@ -8352,7 +8352,7 @@ function buildProverbStats(){
     const dots=years.map(y=>{
       const res=r.yr[y];
       const bg=res==='hit'?'var(--green)':res==='miss'?'var(--red)':'var(--border)';
-      const lbl=res==='hit'?`${y}: zadelo`:res==='miss'?`${y}: zgrešilo`:`${y}: ni podatka`;
+      const lbl=res==='hit'?`${y}: zadelo`:res==='miss'?`${y}: zgrešilo`:`${y}: ni podatkov`;
       return`<span class="prov-dot" title="${lbl}" style="background:${bg}"></span>`;
     }).join('');
     html+=`<div class="prov-row">
@@ -8401,10 +8401,10 @@ function buildTriviaRecords(){
   const maxR=withR.length?withR.reduce((m,e)=>e.v.precipTotal>m.v.precipTotal?e:m):{d:'—',v:{precipTotal:null}};
   const maxW=withW.length?withW.reduce((m,e)=>e.v.windspeedHigh>m.v.windspeedHigh?e:m):{d:'—',v:{windspeedHigh:null}};
   const rows=[
-    {lbl:'🌡 Maks. temp.',mine:maxT.v.tempAvg!=null?maxT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(maxT.d),slo:'41.0°C',sloD:'Črnomelj, 19.7.1950',world:'54.4°C',worldD:'Death Valley, CA, 2020'},
-    {lbl:'❄️ Min. temp.',mine:minT.v.tempAvg!=null?minT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(minT.d),slo:'−34.5°C',sloD:'Babno Polje, 13.2.1956',world:'−89.2°C',worldD:'Vostok, Antarktika, 1983'},
-    {lbl:'🌧 Max. padavine/dan',mine:FLOOD_2023.rainfall_mm+' mm',mineD:'3./4. avg 2023 (12h; ročno odčitano)',slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
-    {lbl:'💨 Max. sunek',mine:maxW.v.windspeedHigh!=null?maxW.v.windspeedHigh.toFixed(0)+' km/h':'—',mineD:fmtD(maxW.d),slo:'180 km/h',sloD:'Godič, 1989',world:'408 km/h',worldD:'Barrow Island, AUS, 1996'},
+    {lbl:'🌡 Maks. temp.',mine:maxT.v.tempAvg!=null?maxT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(maxT.d),slo:'41,0 °C',sloD:'Črnomelj, 19. 7. 1950',world:'54,4 °C',worldD:'Death Valley, ZDA, 2020'},
+    {lbl:'❄️ Min. temp.',mine:minT.v.tempAvg!=null?minT.v.tempAvg.toFixed(1)+'°C':'—',mineD:fmtD(minT.d),slo:'−34,5 °C',sloD:'Babno Polje, 13. 2. 1956',world:'−89,2 °C',worldD:'Vostok, Antarktika, 1983'},
+    {lbl:'🌧 Maks. padavine/dan',mine:FLOOD_2023.rainfall_mm+' mm',mineD:'3. in 4. avgust 2023 (12 h; ročno odčitano)',slo:'315 mm',sloD:'Kneške Ravne, 1990',world:'1825 mm',worldD:'Foc-Foc, Réunion, 1966'},
+    {lbl:'💨 Maks. sunek vetra',mine:maxW.v.windspeedHigh!=null?maxW.v.windspeedHigh.toFixed(0)+' km/h':'—',mineD:fmtD(maxW.d),slo:'180 km/h',sloD:'Godič, 1989',world:'408 km/h',worldD:'Barrow Island, Avstralija, 1996'},
   ];
   el.innerHTML='<div class="rec-compare">'+
     '<div></div><div class="rec-compare-hdr">📡 IREICA1</div><div class="rec-compare-hdr">🇸🇮 Slovenija</div><div class="rec-compare-hdr">🌍 Svet</div>'+
@@ -8435,7 +8435,7 @@ function buildTriviaNature(){
   NATURE_INDICATORS.forEach(ni=>{
     let active=false;try{active=ni.check(obs);}catch(_){}
     const div=document.createElement('div');div.className='nat-item'+(active?' nat-active':'');
-    div.innerHTML=`<div class="nat-icon">${ni.icon}</div><div><div class="nat-sign">${ni.sign}</div><div class="nat-pred">→ ${ni.pred}</div>${active?'<div style="font-size:.72rem;color:var(--green);margin-top:.1rem">✓ Aktivno zdaj</div>':''}</div>`;
+    div.innerHTML=`<div class="nat-icon">${ni.icon}</div><div><div class="nat-sign">${ni.sign}</div><div class="nat-pred">→ ${ni.pred}</div>${active?'<div style="font-size:.72rem;color:var(--green);margin-top:.1rem">✓ Aktivno trenutno</div>':''}</div>`;
     grid.appendChild(div);
   });
 }
@@ -8445,7 +8445,7 @@ async function buildTriviaWorldCompare(){
   const cards=document.getElementById('tri-world-cards');
   if(!cards)return;
   const myT=_lastBriefObs?.metric?.temp??null;
-  if(myT===null){if(sub)sub.textContent='Čakam na meritve postaje (naložite Aktualno tab najprej)…';return;}
+  if(myT===null){if(sub)sub.textContent='Čakam na podatke postaje (najprej osvežite zavihek Aktualno) …';return;}
   const cities=[
     {name:'Oslo',country:'🇳🇴 Norveška',lat:59.9,lon:10.7},
     {name:'Zürich',country:'🇨🇭 Švica',lat:47.4,lon:8.5},
@@ -8466,7 +8466,7 @@ async function buildTriviaWorldCompare(){
     }));
     const sorted=results.filter(r=>r.temp!=null).sort((a,b)=>Math.abs(a.temp-myT)-Math.abs(b.temp-myT));
     const top3=sorted.slice(0,3);
-    if(sub)sub.textContent=`Danes je na Rečici ${myT.toFixed(1)}°C. Najbližja mesta po temperaturi:`;
+    if(sub)sub.textContent=`Danes je na Rečici ${myT.toFixed(1)} °C. Najbližja mesta po svetu z enako temperaturo:`;
     cards.innerHTML='';
     // Add Rečica card first
     const myCard=document.createElement('div');myCard.className='world-card world-match';
@@ -8478,7 +8478,7 @@ async function buildTriviaWorldCompare(){
       card.innerHTML=`<div class="world-city">${c.name}</div><div class="world-country">${c.country}</div><div class="world-temp">${c.temp.toFixed(1)}°</div><div class="world-diff" style="color:${Math.abs(diff)<1?'var(--green)':diff>0?'var(--red)':'var(--blue)'}">${diff>0?'+':''}${diff}°C</div>`;
       cards.appendChild(card);
     });
-  }catch(e){if(sub)sub.textContent='Ni podatkov.';}
+  }catch(e){if(sub)sub.textContent='Ni ustreznih podatkov.';}
 }
 
 function buildTriviaQuiz(){
@@ -8490,7 +8490,7 @@ function buildTriviaQuiz(){
   const answered=stored[today];
   const streak=Object.values(stored).filter(v=>v.correct).length;
   const streakEl=document.getElementById('quiz-streak');
-  if(streakEl&&streak>0)streakEl.textContent='🔥 '+streak+' pravilnih';
+  if(streakEl&&streak>0)streakEl.textContent='🔥 '+streak+' pravilnih odgovorov';
   let optsHtml=q.opts.map((o,i)=>{
     let cls='quiz-opt';
     if(answered!=null){cls+=' '+(i===q.a?'correct':i===answered.chosen?'wrong':'')}
