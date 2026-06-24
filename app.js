@@ -9394,7 +9394,7 @@ let _wrapYear=null;
 function buildWrapped(){
   const store=_insStore();
   const years=_insYears(store);
-  if(!years.length){document.getElementById('wrap-grid').innerHTML='<div class="clim-loading">Ni podatkov. Uvozi XLSX zgodovino.</div>';return;}
+  if(!years.length){document.getElementById('wrap-grid').innerHTML='<div class="clim-loading">Ni podatkov. Uvozite zgodovino v formatu XLSX.</div>';return;}
   const sel=document.getElementById('wrap-year-sel');
   if(_wrapYear==null)_wrapYear=years[years.length-1];
   sel.innerHTML=years.map(y=>`<button class="wrap-year-btn${y===_wrapYear?' active':''}" onclick="_wrapYear=${y};buildWrapped()">${y}</button>`).join('');
@@ -9430,15 +9430,15 @@ function buildWrapped(){
   const stats=[
     {icon:'🔥',val:hot.t!=-99?hot.t.toFixed(1)+'°C':'—',lbl:'Najtoplejši dan',date:fmtK(hot.k)},
     {icon:'❄️',val:cold.t!=99?cold.t.toFixed(1)+'°C':'—',lbl:'Najhladnejši dan',date:fmtK(cold.k)},
-    {icon:'🌊',val:wet.p>=0?wet.p.toFixed(1)+' mm':'—',lbl:'Najbolj deževen dan',date:fmtK(wet.k)},
+    {icon:'🌊',val:wet.p>=0?wet.p.toFixed(1)+' mm':'—',lbl:'Najbolj moker dan',date:fmtK(wet.k)},
     {icon:'💨',val:windy.w>=0?Math.round(windy.w)+' km/h':'—',lbl:'Najmočnejši veter',date:fmtK(windy.k)},
     {icon:'🌡️',val:swing.d>=0?swing.d.toFixed(1)+'°C':'—',lbl:'Največji dnevni razpon',date:fmtK(swing.k)},
-    {icon:'☀️',val:summerDays,lbl:'Poletnih dni (≥25°C)'},
-    {icon:'🥶',val:frostNights,lbl:'Zmrzalnih noči (≤0°C)'},
-    {icon:'🧊',val:iceDays,lbl:'Ledenih dni (Tmax<0°C)'},
-    {icon:'🌴',val:tropicalNights,lbl:'Tropskih noči (≥20°C)'},
-    {icon:'☔',val:Math.round(totalRain)+' mm',lbl:'Skupaj padavin'},
-    {icon:'🌧️',val:rainyDays,lbl:'Deževnih dni (≥1mm)'},
+    {icon:'☀️',val:summerDays,lbl:'Poletni dnevi (≥ 25 °C)'},
+    {icon:'🥶',val:frostNights,lbl:'Dnevi z zmrzaljo (Tmin ≤ 0 °C)'},
+    {icon:'🧊',val:iceDays,lbl:'Ledeni dnevi (Tmax < 0 °C)'},
+    {icon:'🌴',val:tropicalNights,lbl:'Tropske noči (Tmin ≥ 20 °C)'},
+    {icon:'☔',val:Math.round(totalRain)+' mm',lbl:'Skupno padavin'},
+    {icon:'🌧️',val:rainyDays,lbl:'Deževni dnevi (≥ 1 mm)'},
     {icon:'🏜️',val:dryMax+' dni',lbl:'Najdaljši suhi niz'},
     {icon:'💧',val:wetMax+' dni',lbl:'Najdaljši mokri niz'},
   ];
@@ -9452,7 +9452,7 @@ function buildGrowingSeason(){
   const store=_insStore();
   const years=_insYears(store);
   const body=document.getElementById('gs-body');
-  if(years.length<2){body.innerHTML='<div class="clim-loading">Potrebujem vsaj 2 leti podatkov.</div>';return;}
+  if(years.length<2){body.innerHTML='<div class="clim-loading">Potrebnih je vsaj 2 leti podatkov.</div>';return;}
   const data=[];
   years.forEach(yr=>{
     // Last spring frost (before Jul) and first autumn frost (after Jul)
@@ -9471,7 +9471,7 @@ function buildGrowingSeason(){
       data.push({yr,lastSpring,firstAutumn,len,doyStart});
     }
   });
-  if(data.length<2){body.innerHTML='<div class="clim-loading">Premalo popolnih let za analizo rastne sezone.</div>';return;}
+  if(data.length<2){body.innerHTML='<div class="clim-loading">Premalo popolnih let za analizo rastne dobe.</div>';return;}
   const maxLen=Math.max(...data.map(d=>d.len));
   const fmtK=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
   let html=data.map(d=>{
@@ -9488,9 +9488,9 @@ function buildGrowingSeason(){
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
   const totalChange=slope*(data[data.length-1].yr-data[0].yr);
   let cls='stable',txt='';
-  if(totalChange>5){cls='warming';txt=`📈 Rastna sezona se je <b>podaljšala za ~${Math.round(totalChange)} dni</b>. Skladno s trendom globalnega segrevanja.`;}
-  else if(totalChange<-5){cls='cooling';txt=`📉 Rastna sezona se je skrajšala za ~${Math.round(Math.abs(totalChange))} dni. To je nenavadno – verjetno posledica kratkega niza podatkov ali lokalnih razmer.`;}
-  else{txt=`➖ Rastna sezona je razmeroma stabilna (sprememba ~${totalChange.toFixed(0)} dni v obdobju). Za zanesljiv trend bi potrebovali daljši niz.`;}
+  if(totalChange>5){cls='warming';txt=`📈 Rastna doba se je <b>podaljšala za ~${Math.round(totalChange)} dni</b>. Skladno s trendom globalnega segrevanja.`;}
+  else if(totalChange<-5){cls='cooling';txt=`📉 Rastna doba se je skrajšala za ~${Math.round(Math.abs(totalChange))} dni. To je nenavadno – verjetno gre za posledico kratkega niza podatkov ali lokalnih posebnosti.`;}
+  else{txt=`➖ Rastna doba je razmeroma stabilna (sprememba za ~${totalChange.toFixed(0)} dni v obdobju). Za zanesljivejši trend bi potrebovali daljši niz meritev.`;}
   html+=`<div class="gs-trend ${cls}">${txt}</div>`;
   body.innerHTML=html;
 }
@@ -9526,22 +9526,22 @@ function buildSpells(){
   heat.sort((a,b)=>b.len-a.len||b.peak-a.peak);
   cold.sort((a,b)=>b.len-a.len||a.peak-b.peak);
   const fmtRange=(s,e)=>{const ds=new Date(s+'T12:00:00'),de=new Date(e+'T12:00:00');return ds.toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'})+(s!==e?' → '+de.toLocaleDateString('sl',{day:'numeric',month:'short'}):'');};
-  let html='<div class="spell-section"><div style="font-size:.74rem;font-weight:600;color:var(--red);margin-bottom:.5rem">🔥 Toplotni valovi (≥3 dni nad 30°C)</div>';
+  let html='<div class="spell-section"><div style="font-size:.74rem;font-weight:600;color:var(--red);margin-bottom:.5rem">🔥 Vročinski valovi (≥ 3 dni s Tmax ≥ 30 °C)</div>';
   if(heat.length){
     html+=heat.slice(0,5).map((s,i)=>
-      `<div class="spell-item" style="--sp-accent:var(--red)"><span class="spell-rank">${i+1}</span><div class="spell-body"><div class="spell-dates">${fmtRange(s.start,s.end)}</div><div class="spell-detail">vrh ${s.peak.toFixed(1)}°C</div></div><span class="spell-dur">${s.len} dni</span></div>`
+      `<div class="spell-item" style="--sp-accent:var(--red)"><span class="spell-rank">${i+1}</span><div class="spell-body"><div class="spell-dates">${fmtRange(s.start,s.end)}</div><div class="spell-detail">vrhunec ${s.peak.toFixed(1).replace('.',',')} °C</div></div><span class="spell-dur">${s.len} dni</span></div>`
     ).join('');
-  }else html+='<div class="clim-loading">Ni zabeleženih toplotnih valov.</div>';
+  }else html+='<div class="clim-loading">Ni zabeleženih vročinskih valov.</div>';
   html+='</div>';
-  html+='<div class="spell-section"><div style="font-size:.74rem;font-weight:600;color:var(--blue);margin-bottom:.5rem">🧊 Mrzli vali (≥3 dni ledenih dni, Tmax<0°C)</div>';
+  html+='<div class="spell-section"><div style="font-size:.74rem;font-weight:600;color:var(--blue);margin-bottom:.5rem">🧊 Hladni valovi (≥ 3 ledeni dnevi, Tmax &lt; 0 °C)</div>';
   if(cold.length){
     html+=cold.slice(0,5).map((s,i)=>
-      `<div class="spell-item" style="--sp-accent:var(--blue)"><span class="spell-rank">${i+1}</span><div class="spell-body"><div class="spell-dates">${fmtRange(s.start,s.end)}</div><div class="spell-detail">najnižja ${s.peak.toFixed(1)}°C</div></div><span class="spell-dur">${s.len} dni</span></div>`
+      `<div class="spell-item" style="--sp-accent:var(--blue)"><span class="spell-rank">${i+1}</span><div class="spell-body"><div class="spell-dates">${fmtRange(s.start,s.end)}</div><div class="spell-detail">najnižja T: ${s.peak.toFixed(1).replace('.',',')} °C</div></div><span class="spell-dur">${s.len} dni</span></div>`
     ).join('');
-  }else html+='<div class="clim-loading">Ni zabeleženih mrzlih valov.</div>';
+  }else html+='<div class="clim-loading">Ni zabeleženih hladnih valov.</div>';
   html+='</div>';
   // Summary
-  html+=`<div style="font-size:.72rem;color:var(--muted);line-height:1.55;padding-top:.5rem;border-top:1px solid var(--day-divider)">Skupaj <b style="color:var(--text)">${heat.length}</b> toplotnih valov in <b style="color:var(--text)">${cold.length}</b> mrzlih valov v celotnem zapisu.</div>`;
+  html+=`<div style="font-size:.72rem;color:var(--muted);line-height:1.55;padding-top:.5rem;border-top:1px solid var(--day-divider)">Skupno <b style="color:var(--text)">${heat.length}</b> vročinskih in <b style="color:var(--text)">${cold.length}</b> hladnih valov v celotnem obdobju meritev.</div>`;
   body.innerHTML=html;
 }
 
@@ -10263,7 +10263,7 @@ function _cmip6Annual(data, modelSuffix){
 
 function renderCMIP6(d2050, d2100){
   const el=document.getElementById('cmip6-body');if(!el)return;
-  if(!d2050){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Projekcije začasno nedostopne</div>';return;}
+  if(!d2050){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Projekcije so začasno nedosegljive.</div>';return;}
   const N=ARSO_NORMALS;
   const baseT=(N.temp.reduce((s,v)=>s+v,0)/12);
   const baseP=N.precip.reduce((s,v)=>s+v,0);
@@ -10275,7 +10275,7 @@ function renderCMIP6(d2050, d2100){
 
   const renderBlock=(data, year, model)=>{
     const ann=_cmip6Annual(data, model.key);
-    if(!ann||ann.meanT==null)return `<div class="cmip6-block"><div class="cmip6-model">${model.label} · ${year}</div><div style="font-size:.75rem;color:var(--muted)">Ni podatkov za ${year}</div></div>`;
+    if(!ann||ann.meanT==null)return `<div class="cmip6-block"><div class="cmip6-model">${model.label} · ${year}</div><div style="font-size:.75rem;color:var(--muted)">Ni podatkov za leto ${year}.</div></div>`;
     const dT=ann.meanT-baseT;
     const dP=ann.totalP-baseP;
     const dPpct=(dP/baseP*100);
@@ -10286,9 +10286,9 @@ function renderCMIP6(d2050, d2100){
     return `<div class="cmip6-block">`+
       `<div class="cmip6-model">${model.label} · ${year} · <span style="color:var(--amber)">${model.ssp}</span></div>`+
       `<div class="cmip6-delta-row">`+
-        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${tCol}">${dT>=0?'+':''}${dT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Temp. vs 1991–2020</div></div>`+
-        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${pCol}">${dP>=0?'+':''}${dP.toFixed(0)} mm</div><div class="cmip6-delta-lbl">Padavine vs norma</div></div>`+
-        `<div class="cmip6-delta"><div class="cmip6-delta-val">${ann.meanT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Letna srednja T</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${tCol}">${dT>=0?'+':''}${dT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Temp. glede na 1991–2020</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val" style="color:${pCol}">${dP>=0?'+':''}${dP.toFixed(0)} mm</div><div class="cmip6-delta-lbl">Padavine glede na normalo</div></div>`+
+        `<div class="cmip6-delta"><div class="cmip6-delta-val">${ann.meanT.toFixed(1)}°C</div><div class="cmip6-delta-lbl">Povpr. letna T</div></div>`+
         `<div class="cmip6-delta"><div class="cmip6-delta-val">${ann.totalP.toFixed(0)} mm</div><div class="cmip6-delta-lbl">Letne padavine</div></div>`+
       `</div>`+
       `<div class="cmip6-bar-wrap"><div class="cmip6-bar-fill" style="width:${tBarW.toFixed(0)}%;background:${tCol}"></div></div>`+
@@ -10303,17 +10303,17 @@ function renderCMIP6(d2050, d2100){
   // 2100 grid if available
   let grid2100='';
   if(d2100){
-    grid2100='<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem;margin-top:.15rem">Konec stoletja (2099–2100)</div>';
+    grid2100='<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem;margin-top:.15rem">Konec stoletja (2080–2099)</div>';
     grid2100+='<div class="cmip6-scenarios">';
     models.forEach(m=>{ grid2100+=renderBlock(d2100,'2099–2100',m); });
     grid2100+='</div>';
   }
 
   el.innerHTML=
-    `<div class="cmip6-intro">Projekcije temperature in padavin za Rečico ob Savinji glede na referenčno obdobje ARSO 1991–2020 (Celje, popravljeno za višino). Modeli: CMIP6, scenarij SSP5-8.5 (visoke emisije).</div>`+
-    '<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem">Sredina stoletja (2049–2050)</div>'+
+    `<div class="cmip6-intro">Projekcije temperature in padavin za Rečico ob Savinji glede na referenčno obdobje ARSO 1991–2020 (Celje, vključen višinski popravek). Modeli: CMIP6, scenarij SSP5-8.5 (visoki izpusti).</div>`+
+    '<div style="font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.5rem">Sredina stoletja (2040–2059)</div>'+
     grid2050+grid2100+
-    `<div class="cmip6-baseline">Referenca 1991–2020 (ARSO Celje): <b>${baseT.toFixed(1)}°C</b> letna srednja T · <b>${baseP} mm</b> letne padavine · <a href="https://climate-api.open-meteo.com" target="_blank" rel="noopener" style="color:var(--blue)">Open-Meteo Climate API</a></div>`;
+    `<div class="cmip6-baseline">Referenca 1991–2020 (ARSO Celje): <b>${baseT.toFixed(1).replace('.',',')} °C</b> povpr. letna T · <b>${baseP} mm</b> letnih padavin · <a href="https://climate-api.open-meteo.com" target="_blank" rel="noopener" style="color:var(--blue)">Open-Meteo Climate API</a></div>`;
 }
 
 // ── iNaturalist nearby observations ───────────────────────
@@ -12301,9 +12301,9 @@ function buildArsoNormals(curMonthT, curMonthR){
   const annualSun=N.sun.reduce((s,v)=>s+v,0);
   const kpis=
     '<div class="norm-kpi-row">'+
-    `<div class="norm-kpi"><div class="norm-kpi-val">${annualT}°C</div><div class="norm-kpi-lbl">Let. srednja T</div></div>`+
-    `<div class="norm-kpi"><div class="norm-kpi-val">${annualP} mm</div><div class="norm-kpi-lbl">Let. padavine</div></div>`+
-    `<div class="norm-kpi"><div class="norm-kpi-val">${annualSun} h</div><div class="norm-kpi-lbl">Sončne ure/leto</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualT}°C</div><div class="norm-kpi-lbl">Povpr. letna T</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualP} mm</div><div class="norm-kpi-lbl">Letne padavine</div></div>`+
+    `<div class="norm-kpi"><div class="norm-kpi-val">${annualSun} h</div><div class="norm-kpi-lbl">Sončne ure / leto</div></div>`+
     `<div class="norm-kpi"><div class="norm-kpi-val">${N.elev} m</div><div class="norm-kpi-lbl">Nadmorska višina</div></div>`+
     '</div>';
 
@@ -12319,32 +12319,32 @@ function buildArsoNormals(curMonthT, curMonthR){
     const Pcls=dP==null?'neutral':Math.abs(dPpct)<8?'neutral':dP>0?'neg':'pos'; // more precip = blue
     anomHtml=
       '<div class="norm-anom">'+
-      `<div class="norm-anom-title">${mName} — anomalija vs. normala ${N.period}</div>`+
+      `<div class="norm-anom-title">${mName} – anomalija glede na normalo ${N.period}</div>`+
       '<div class="norm-anom-row">'+
       (curMonthT!=null?
-        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthT.toFixed(1)}°C<span class="norm-delta ${Tcls}">${dT>=0?'+':''}${dT.toFixed(1)}°</span></div><div class="norm-anom-lbl">Srednja T (norma ${normT.toFixed(1)}°)</div></div>`:'')  +
+        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthT.toFixed(1)}°C<span class="norm-delta ${Tcls}">${dT>=0?'+':''}${dT.toFixed(1)}°</span></div><div class="norm-anom-lbl">Srednja T (normala ${normT.toFixed(1).replace('.',',')} °C)</div></div>`:'')  +
       (curMonthR!=null?
-        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthR.toFixed(0)} mm<span class="norm-delta ${Pcls}">${dP>=0?'+':''}${dP.toFixed(0)} mm</span></div><div class="norm-anom-lbl">Padavine (norma ${normP} mm)</div></div>`:'')  +
+        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthR.toFixed(0)} mm<span class="norm-delta ${Pcls}">${dP>=0?'+':''}${dP.toFixed(0)} mm</span></div><div class="norm-anom-lbl">Padavine (normala ${normP} mm)</div></div>`:'')  +
       '</div>'+
       '</div>';
   } else {
-    anomHtml=`<div class="norm-anom"><div class="norm-anom-title">${mName} — norma ${N.period}</div>`+
+    anomHtml=`<div class="norm-anom"><div class="norm-anom-title">${mName} – normala ${N.period}</div>`+
       `<div class="norm-anom-row">`+
-      `<div class="norm-anom-item"><div class="norm-anom-val">${normT.toFixed(1)}°C</div><div class="norm-anom-lbl">Srednja T norma</div></div>`+
-      `<div class="norm-anom-item"><div class="norm-anom-val">${normP} mm</div><div class="norm-anom-lbl">Padavine norma</div></div>`+
+      `<div class="norm-anom-item"><div class="norm-anom-val">${normT.toFixed(1)}°C</div><div class="norm-anom-lbl">Srednja T (normala)</div></div>`+
+      `<div class="norm-anom-item"><div class="norm-anom-val">${normP} mm</div><div class="norm-anom-lbl">Padavine (normala)</div></div>`+
       `</div></div>`;
   }
 
   // ── Altitude note ───────────────────────────────────────────
   const elevDiff=366-N.elev; // Rečica 366m vs Celje 241m
   const tCorr=(elevDiff*0.0065).toFixed(1);
-  const altNote=`<div class="norm-alt-note">Rečica ob Savinji (366 m n. m.) je za ${elevDiff} m višja od Celje — termični popravek ≈ −${tCorr}°C. Normale so za Celje; lokalno pričakuj nekoliko hladnejše temperature in podoben padavinski režim. · <a href="https://meteo.arso.gov.si/met/sl/climate/tables/climate-normals/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO vir</a></div>`;
+  const altNote=`<div class="norm-alt-note">Rečica ob Savinji (366 m n. v.) leži ${elevDiff} m višje od Celja – termični popravek znaša ≈ −${tCorr.replace('.',',')} °C. Normale veljajo za Celje, zato lokalno pričakujte nekoliko nižje temperature in podoben padavinski režim. · <a href="https://meteo.arso.gov.si/met/sl/climate/tables/climate-normals/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO vir</a></div>`;
 
   el.innerHTML=
     '<div class="norm-chart-wrap">'+svg+'</div>'+
     '<div style="display:flex;gap:.5rem;flex-wrap:wrap;font-size:.65rem;color:var(--muted);margin-bottom:.75rem">'+
     '<span><span style="display:inline-block;width:14px;height:8px;background:rgba(96,165,250,.55);border-radius:2px;vertical-align:middle;margin-right:3px"></span>Padavine (mm) ↗ desna os</span>'+
-    '<span><span style="display:inline-block;width:16px;height:2.5px;background:#f97316;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Srednja T (°C) ↗ leva os</span>'+
+    '<span><span style="display:inline-block;width:16px;height:2.5px;background:#f97316;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Srednja T (°C) ↖ leva os</span>'+
     '<span style="background:rgba(249,115,22,.15);border-radius:50%;width:9px;height:9px;display:inline-block;vertical-align:middle;margin-right:3px;border:1.5px solid #f97316"></span><span>Ta mesec</span>'+
     '</div>'+
     kpis+anomHtml+altNote;
@@ -12370,7 +12370,7 @@ async function fetchPVGIS(){
     const src=document.getElementById('pvgis-src');
     if(src)src.textContent='PVGIS-SARAH3 · EU JRC · '+new Date().toLocaleDateString('sl');
   }catch(e){
-    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">PVGIS ni dosegljiv.</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki PVGIS niso dosegljivi.</div>';
     console.warn('PVGIS:',e);
   }
 }
@@ -12399,7 +12399,7 @@ function renderPVGIS(data){
   const bestM=MNF[vals.indexOf(Math.max(...vals))];
   el.innerHTML=
     '<div style="display:flex;gap:1.5rem;margin-bottom:.65rem;flex-wrap:wrap">'
-    +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Letno sevanje</div>'
+    +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Letno obsevanje</div>'
     +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem;color:var(--amber)">'+annTot+' <span style="font-size:.68rem;color:var(--muted)">kWh/m²</span></div></div>'
     +'<div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.1rem">Optimalni naklon</div>'
     +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem">'+optAng+'</div></div>'
@@ -12407,7 +12407,7 @@ function renderPVGIS(data){
     +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem">'+bestM+'</div></div>'
     +'</div>'
     +'<div style="display:flex;gap:2px;align-items:flex-end;height:80px">'+bars+'</div>'
-    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Globalno horizontalno sevanje H_h (kWh/m²/dan) · PVGIS-SARAH3 · EU Joint Research Centre</div>';
+    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Globalno horizontalno obsevanje H_h (kWh/m²/dan) · PVGIS-SARAH3 · EU Joint Research Centre</div>';
 }
 
 
@@ -12536,7 +12536,7 @@ function renderFireWeather(days){
     +'<div style="font-size:.7rem;color:var(--muted)">ISI: '+td.isi.toFixed(1)+' · BUI: '+td.bui.toFixed(0)+' · FFMC: '+td.ffmc.toFixed(0)+'</div>'
     +'</div></div>'
     +'<div style="display:flex;gap:3px;align-items:flex-end;height:74px">'+bars+'</div>'
-    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Kanadska FWI metodologija (EFFIS/GWIS) · Open-Meteo · 7 dni nazaj + 7-dnevna napoved</div>';
+    +'<div style="font-size:.63rem;color:var(--muted);margin-top:.45rem">Kanadska metodologija FWI (EFFIS/GWIS) · Open-Meteo · 7 dni nazaj + 7-dnevna napoved</div>';
 }
 
 // ══════════════════════════════════════════════════════════
@@ -12560,7 +12560,7 @@ async function fetchENSO(){
     const src=document.getElementById('enso-src');
     if(src)src.textContent='NOAA CPC · ONI · '+new Date().toLocaleDateString('sl');
   }catch(e){
-    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">ENSO podatki niso dosegljivi.</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki ENSO niso dosegljivi.</div>';
     console.warn('ENSO:',e);
   }
 }
@@ -12569,7 +12569,7 @@ function renderENSO(data){
   const el=document.getElementById('enso-body');if(!el||!data?.length)return;
   const last=data[data.length-1];
   const oni=last.a;
-  const phase=oni>=2?'Zelo močan El Niño':oni>=1.5?'Močan El Niño':oni>=1?'Zmeren El Niño':oni>=0.5?'Šibak El Niño':oni<=-2?'Zelo močna La Niña':oni<=-1.5?'Močna La Niña':oni<=-1?'Zmerna La Niña':oni<=-0.5?'Šibka La Niña':'Nevtralno';
+  const phase=oni>=2?'Zelo močen El Niño':oni>=1.5?'Močen El Niño':oni>=1?'Zmeren El Niño':oni>=0.5?'Šibek El Niño':oni<=-2?'Zelo močna La Niña':oni<=-1.5?'Močna La Niña':oni<=-1?'Zmerna La Niña':oni<=-0.5?'Šibka La Niña':'Nevtralna faza';
   const phaseCol=oni>=0.5?'var(--amber)':oni<=-0.5?'var(--blue)':'var(--muted)';
   const phaseEmoji=oni>=0.5?'🔴':oni<=-0.5?'🔵':'⚪';
   const latestSeas=last.s+' '+last.y;
@@ -12617,11 +12617,11 @@ function renderENSO(data){
 
   const svg=`<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%" xmlns="http://www.w3.org/2000/svg">
     ${gridLines}${bars}${labels}
-    <text x="${W-mR}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(251,146,60,.8)" font-family="Inter,sans-serif">🔴 El Niño ≥ +0.5</text>
-    <text x="${W-mR-110}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(96,165,250,.8)" font-family="Inter,sans-serif">🔵 La Niña ≤ −0.5</text>
+    <text x="${W-mR}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(251,146,60,.8)" font-family="Inter,sans-serif">🔴 El Niño ≥ +0,5</text>
+    <text x="${W-mR-110}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(96,165,250,.8)" font-family="Inter,sans-serif">🔵 La Niña ≤ −0,5</text>
   </svg>`;
 
-  el.innerHTML=kpi+svg+'<div style="font-size:.63rem;color:var(--muted);margin-top:.4rem;text-align:right">ONI = 3-mesečno drseče povprečje SST anomalije v regiji Niño 3.4 · Vir: NOAA Climate Prediction Center</div>';
+  el.innerHTML=kpi+svg+'<div style="font-size:.63rem;color:var(--muted);margin-top:.4rem;text-align:right">ONI = 3-mesečno drseče povprečje temperaturne anomalije morske gladine (SST) v regiji Niño 3.4 · Vir: NOAA Climate Prediction Center</div>';
 }
 
 function initClimate(){
@@ -12672,8 +12672,8 @@ function renderDriftEngine(){
   const cls=(v)=>v==null?'':v<-0.5?'drift-cold':v>0.5?'drift-warm':'';
   // Frost pocket analysis
   let frostPocketTxt='';
-  if(nightDT!=null&&nightDT<-1)frostPocketTxt=`<b style="color:var(--blue)">Mrazišče zaznan!</b> Ponoči ${nightDT.toFixed(1)}°C hladneje od referenčne postaje. Lokalna topografija ujame hladen zrak.`;
-  else if(nightDT!=null&&nightDT<-0.3)frostPocketTxt=`Šibak mrazišče efekt: ponoči ${nightDT.toFixed(1)}°C hladneje.`;
+  if(nightDT!=null&&nightDT<-1)frostPocketTxt=`<b style="color:var(--blue)">Zaznano mrazišče!</b> Ponoči je za ${nightDT.toFixed(1).replace('.',',')} °C hladneje kot na referenčni postaji. Lokalna topografija ujame hladen zrak.`;
+  else if(nightDT!=null&&nightDT<-0.3)frostPocketTxt=`Šibek učinek mrazišča: ponoči je za ${nightDT.toFixed(1).replace('.',',')} °C hladneje.`;
   // Hourly drift profile SVG (0-23h)
   const hourlyDT=Array.from({length:24},(_,h)=>{
     const pts=rich.filter(d=>d.hour===h&&d.t>Date.now()-30*864e5).map(d=>d.dT);
@@ -12710,14 +12710,14 @@ function renderDriftEngine(){
   svg+='</svg>';
   body.innerHTML=
     `<div class="drift-kpi-row">`+
-    `<div class="drift-kpi"><div class="drift-kpi-val ${cls(avgDT24)}">${fmtD(avgDT24)}</div><div class="drift-kpi-lbl">Drift T 24h</div></div>`+
-    `<div class="drift-kpi"><div class="drift-kpi-val ${cls(avgDT7)}">${fmtD(avgDT7)}</div><div class="drift-kpi-lbl">Drift T 7 dni</div></div>`+
-    (avgDH7!=null?`<div class="drift-kpi"><div class="drift-kpi-val ${avgDH7>3?'drift-humid':avgDH7<-3?'drift-dry':''}">${fmtD(avgDH7,'%')}</div><div class="drift-kpi-lbl">Drift vlage 7d</div></div>`+
-    `<div class="drift-kpi"><div class="drift-kpi-val drift-cold">${fmtD(nightDT)}</div><div class="drift-kpi-lbl">Nočni drift</div></div>`+
-    `<div class="drift-kpi"><div class="drift-kpi-val drift-warm">${fmtD(dayDT)}</div><div class="drift-kpi-lbl">Dnevni drift</div></div>`:'')+'</div>'+
+    `<div class="drift-kpi"><div class="drift-kpi-val ${cls(avgDT24)}">${fmtD(avgDT24)}</div><div class="drift-kpi-lbl">Odmik T (24 h)</div></div>`+
+    `<div class="drift-kpi"><div class="drift-kpi-val ${cls(avgDT7)}">${fmtD(avgDT7)}</div><div class="drift-kpi-lbl">Odmik T (7 d)</div></div>`+
+    (avgDH7!=null?`<div class="drift-kpi"><div class="drift-kpi-val ${avgDH7>3?'drift-humid':avgDH7<-3?'drift-dry':''}">${fmtD(avgDH7,'%')}</div><div class="drift-kpi-lbl">Odmik vlage (7 d)</div></div>`+
+    `<div class="drift-kpi"><div class="drift-kpi-val drift-cold">${fmtD(nightDT)}</div><div class="drift-kpi-lbl">Nočni odmik</div></div>`+
+    `<div class="drift-kpi"><div class="drift-kpi-val drift-warm">${fmtD(dayDT)}</div><div class="drift-kpi-lbl">Dnevni odmik</div></div>`:'')+'</div>'+
     `<div class="drift-chart-wrap">${svg}</div>`+
-    (frostPocketTxt?`<div class="csub" style="margin-top:.6rem">❄️ ${frostPocketTxt}</div>`:'<div class="csub" style="margin-top:.6rem">Nočni vs dnevni drift: ponoči <b style="color:var(--text)">${fmtD(nightDT)}</b>, podnevi <b style="color:var(--text)">${fmtD(dayDT)}</b>. Zbiranje podatkov za sezonski vzorec…</div>')+
-    `<div style="font-size:.67rem;color:var(--muted);margin-top:.4rem">${rich.length} meritev · ${Math.round((rich[rich.length-1].t-rich[0].t)/3600000)}h zajema · referenca: ARSO</div>`;
+    (frostPocketTxt?`<div class="csub" style="margin-top:.6rem">❄️ ${frostPocketTxt}</div>`:'<div class="csub" style="margin-top:.6rem">Nočni in dnevni odmik: ponoči <b style="color:var(--text)">${fmtD(nightDT)}</b>, podnevi <b style="color:var(--text)">${fmtD(dayDT)}</b>. Zbiranje podatkov za sezonski vzorec …</div>')+
+    `<div style="font-size:.67rem;color:var(--muted);margin-top:.4rem">${rich.length} meritev · ${Math.round((rich[rich.length-1].t-rich[0].t)/3600000)} h zajema · referenca: ARSO</div>`;
   if(range)range.textContent=`${rich.length} meritev · ${r7.length} zadnjih 7 dni`;
 }
 
@@ -12726,30 +12726,30 @@ function renderDriftEngine(){
 // ══════════════════════════════════════════════════════════
 // GDD events for Savinja valley — biologically meaningful thresholds
 const PULSE_EVENTS=[
-  {icon:'🦋',name:'Prve metulje',base:5,threshold:40,color:'var(--amber)',
-   note:'Topli dnevi vzbudijo prve dnevne metulje.',cond:null},
+  {icon:'🦋',name:'Prvi metulji',base:5,threshold:40,color:'var(--amber)',
+   note:'Topli dnevi prebudijo prve dnevne metulje.',cond:null},
   {icon:'🌸',name:'Regrat v cvetu',base:5,threshold:55,color:'#fb923c',
-   note:'Idealen čas za makro fotografijo cvetov.',cond:null},
-  {icon:'🍄',name:'Smrčki — vrh sezone',base:5,threshold:85,color:'var(--green)',
-   note:'Optimalno pri Tmin > 5°C + ≥ 15mm dežja v zadnjih 14 dneh.',
+   note:'Idealen čas za makrofotografijo cvetov.',cond:null},
+  {icon:'🍄',name:'Mavrahi (smrčki) – vrhunec sezone',base:5,threshold:85,color:'var(--green)',
+   note:'Optimalno pri Tmin > 5 °C in ≥ 15 mm dežja v zadnjih 14 dneh.',
    cond:s=>s.recentRain>=15&&s.tminOk},
   {icon:'🐝',name:'Čebelja aktivnost',base:5,threshold:100,color:'var(--amber)',
    note:'Čebele začnejo intenzivno zbirati cvetni prah.',cond:null},
   {icon:'🌺',name:'Cvetenje jablan',base:10,threshold:50,color:'#f9a8d4',
-   note:'Ključni fenofazni mejnik. Zaščita pred pozebo v tem oknu.',cond:null},
-  {icon:'🦗',name:'Kobilice & murni',base:5,threshold:300,color:'var(--green)',
-   note:'Začetek aktivnosti stridulantnih žuželk — ravnine v dolini.',cond:null},
-  {icon:'🐉',name:'Prve kačji pastirji',base:5,threshold:160,color:'var(--cyan)',
-   note:'Odrasle osebki se pojavijo ob vodah Savinjske doline.',cond:null},
-  {icon:'🔥',name:'Kresnice — vrh',base:10,threshold:420,color:'var(--amber)',
-   note:'Idealen čas za makro fotografijo kresnic. Potrebno: Tnoč > 15°C.',
+   note:'Ključni fenološki mejnik. V tem oknu je nujna zaščita pred pozebo.',cond:null},
+  {icon:'🦗',name:'Kobilice in murni',base:5,threshold:300,color:'var(--green)',
+   note:'Začetek aktivnosti pojočih žuželk (kobilic in murnov) – ravninski predeli v dolini.',cond:null},
+  {icon:'🐉',name:'Prvi kačji pastirji',base:5,threshold:160,color:'var(--cyan)',
+   note:'Odrasli osebki se pojavijo ob vodah v Savinjski dolini.',cond:null},
+  {icon:'🔥',name:'Kresnice – vrhunec',base:10,threshold:420,color:'var(--amber)',
+   note:'Idealen čas za makrofotografijo kresnic. Pogoj: nočna T > 15 °C.',
    cond:s=>s.nightTempOk},
   {icon:'🍇',name:'Zorenje grozdja',base:10,threshold:900,color:'var(--purple)',
-   note:'Veraison — sprememba barve jagod. Pomembno za vinogradnike.',cond:null},
-  {icon:'🕷️',name:'Pajčevine — vrh sezone',base:5,threshold:520,color:'var(--muted)',
-   note:'Jesenski vrh aktivnosti pajkov. Rosne jutranje pajčevine za makro!',cond:null},
+   note:'Veraison (začetek zorenja) – sprememba barve jagod. Pomembno za vinogradnike.',cond:null},
+  {icon:'🕷️',name:'Pajčevine – vrhunec sezone',base:5,threshold:520,color:'var(--muted)',
+   note:'Jesenski vrhunec aktivnosti pajkov. Rosne jutranje pajčevine so idealne za makrofotografijo!',cond:null},
   {icon:'🍂',name:'Jesenske gobe (jurčki)',base:10,threshold:800,color:'var(--amber)',
-   note:'Jurčki in lisičke po prvem dežju jeseni.',
+   note:'Rast jurčkov in lisičk po prvem jesenskem dežju.',
    cond:s=>s.recentRain>=20},
 ];
 
@@ -12809,7 +12809,7 @@ async function buildAgroPulse(){
         <span class="pulse-eta">${etaTxt}</span>
       </div>
       <div class="pulse-bar-bg"><div class="pulse-bar-fill" style="width:${pct}%;background:${ev.color}"></div></div>
-      <div class="pulse-note">${Math.round(gdd)} / ${ev.threshold} GDD${ev.base} (${pct}%)${done&&!condMet?' — ⚠️ pogoji niso optimalni':''} · ${ev.note}</div>
+      <div class="pulse-note">${Math.round(gdd)} / ${ev.threshold} GDD${ev.base} (${pct}%)${done&&!condMet?' – ⚠️ pogoji niso optimalni':''} · ${ev.note}</div>
     </div>`;
   }).join('')+'</div>';
 }
@@ -13270,7 +13270,7 @@ async function fetchNASASolar(){
     const src=document.getElementById('nasa-solar-src');
     if(src)src.textContent='NASA POWER · GEWEX SRB · '+new Date().toLocaleDateString('sl');
   }catch(e){
-    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER solar ni dosegljiv.</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki NASA POWER Solar niso dosegljivi.</div>';
     console.warn('nasa-solar:',e);
   }
 }
@@ -13309,8 +13309,8 @@ function renderNASASolar(data){
 
   const kpi=`<div class="nasa-kpi-row">
     <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(thisMonthVal)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²/dan</span></div><div class="nasa-kpi-lbl">Ta mesec</div></div>
-    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsClim==null?'var(--text)':vsClim>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsClim)}</div><div class="nasa-kpi-lbl">vs 30-letno avg</div></div>
-    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsPrev==null?'var(--text)':vsPrev>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsPrev)}</div><div class="nasa-kpi-lbl">vs lani</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsClim==null?'var(--text)':vsClim>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsClim)}</div><div class="nasa-kpi-lbl">glede na 30-letno povpr.</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsPrev==null?'var(--text)':vsPrev>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsPrev)}</div><div class="nasa-kpi-lbl">glede na lani</div></div>
     <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(annCur!=null&&annCur!==-999?annCur:null)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²</span></div><div class="nasa-kpi-lbl">Letno (${curY.slice(2)})</div></div>
   </div>`;
 
@@ -13365,7 +13365,7 @@ function renderNASASolar(data){
   // Legend
   const legend=`<rect x="${mL+4}" y="${H-mB-16}" width="10" height="8" fill="var(--muted)" opacity="0.45" rx="1"/><text x="${mL+17}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">lani (${prevY})</text>`+
     `<rect x="${mL+70}" y="${H-mB-16}" width="10" height="8" fill="var(--blue)" opacity="0.8" rx="1"/><text x="${mL+83}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">letos (${curY})</text>`+
-    `<line x1="${mL+138}" y1="${H-mB-12}" x2="${mL+148}" y2="${H-mB-12}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${mL+143}" cy="${H-mB-12}" r="2.5" fill="var(--amber)"/><text x="${mL+151}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">30-letno avg</text>`;
+    `<line x1="${mL+138}" y1="${H-mB-12}" x2="${mL+148}" y2="${H-mB-12}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${mL+143}" cy="${H-mB-12}" r="2.5" fill="var(--amber)"/><text x="${mL+151}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">30-letno povprečje</text>`;
 
   const svg=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${gridLines}${prevBars}${bars}${climLine}${climDots}${yLabel}${legend}</svg></div>`;
   const src=`<div class="nasa-src">NASA POWER · GEWEX SRB · satelitski podatki</div>`;
@@ -13392,7 +13392,7 @@ async function fetchNASABaselines(){
     const src=document.getElementById('nasa-clim-src');
     if(src)src.textContent='NASA POWER · MERRA-2 · '+new Date().toLocaleDateString('sl');
   }catch(e){
-    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER baselines ni dosegljiv.</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki NASA POWER Baselines niso dosegljivi.</div>';
     console.warn('nasa-clim:',e);
   }
 }
@@ -13471,8 +13471,8 @@ function renderNASABaselines(data){
   const pYLabel=`<text x="11" y="${(mT+cHP/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cHP/2).toFixed(0)})">mm/mesec</text>`;
   const svgP=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HP}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${pGrid}${pBars}${pYLabel}</svg></div>`;
 
-  const note=`<div style="font-size:.67rem;color:var(--muted);margin-top:.5rem">🛸 Satelitski podatki NASA POWER (1994–2023) · primerjaj z ARSO normalami 1991–2020 zgoraj</div>`;
-  const src=`<div class="nasa-src">NASA POWER · MERRA-2 reanaliza · kalibrirana za lokacijo</div>`;
+  const note=`<div style="font-size:.67rem;color:var(--muted);margin-top:.5rem">🛸 Satelitski podatki NASA POWER (1994–2023) · za primerjavo z normalami ARSO (1991–2020) zgoraj</div>`;
+  const src=`<div class="nasa-src">NASA POWER · Reanaliza MERRA-2 · kalibrirano za lokacijo</div>`;
   el.innerHTML=svgT+svgP+note+src;
 }
 
@@ -13497,7 +13497,7 @@ async function fetchNASAAgro(){
     const src=document.getElementById('nasa-agro-src');
     if(src)src.textContent='NASA POWER · AG · '+new Date().toLocaleDateString('sl');
   }catch(e){
-    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">NASA POWER agro ni dosegljiv.</div>';
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki NASA POWER Agro niso dosegljivi.</div>';
     console.warn('nasa-agro:',e);
   }
 }
@@ -13547,8 +13547,8 @@ function renderNASAAgro(data){
   }
 
   const s1=`<div class="nasa-section-lbl">Evapotranspiracija (ET₀)</div>`+miniChart(evpt,'var(--green)','mm',120);
-  const s2=`<div class="nasa-section-lbl">Dni s pozebo (Tmin&lt;0°C)</div>`+miniChart(frost,'var(--blue)','dni',120);
-  const s3=`<div class="nasa-section-lbl">Fotosintetsko aktivna radiacija (PAR)</div>`+miniChart(par,'var(--amber)','W/m²',120);
+  const s2=`<div class="nasa-section-lbl">Dni s pozebo (Tmin &lt; 0 °C)</div>`+miniChart(frost,'var(--blue)','dni',120);
+  const s3=`<div class="nasa-section-lbl">Fotosintetsko aktivno sevanje (PAR)</div>`+miniChart(par,'var(--amber)','W/m²',120);
   const src=`<div class="nasa-src">NASA POWER · satelitski + modelski podatki · klimatološko povprečje 1994–2023</div>`;
   el.innerHTML=kpi+s1+s2+s3+src;
 }
