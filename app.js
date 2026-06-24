@@ -13820,10 +13820,10 @@ function _buildOcnKPIs(m){
   const kpis=[
     {val:c.sea_surface_temperature!=null?c.sea_surface_temperature.toFixed(1)+' °C':'—',lbl:'Temp. morja',sub:'površinska (SST)'},
     {val:c.wave_height!=null?c.wave_height.toFixed(2)+' m':'—',lbl:'Valovanje',sub:c.wave_height!=null?_seaStateLabel(c.wave_height):'—'},
-    {val:c.swell_wave_height!=null?c.swell_wave_height.toFixed(2)+' m':'—',lbl:'Ondulacija',sub:'swell valovi'},
-    {val:c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—',lbl:'Period vala',sub:'sekund'},
-    {val:vel,lbl:'Tok morja',sub:c.ocean_current_direction!=null?_windDirLabel(c.ocean_current_direction):'—'},
-    {val:c.wave_direction!=null?_windDirLabel(c.wave_direction):'—',lbl:'Smer valov',sub:c.wave_direction!=null?c.wave_direction.toFixed(0)+'°':'—'},
+    {val:c.swell_wave_height!=null?c.swell_wave_height.toFixed(2)+' m':'—',lbl:'Mrtvo valovanje',sub:'mrtvi valovi (swell)'},
+    {val:c.wave_period!=null?c.wave_period.toFixed(1)+' s':'—',lbl:'Perioda valovanja',sub:'sekund'},
+    {val:vel,lbl:'Morski tok',sub:c.ocean_current_direction!=null?_windDirLabel(c.ocean_current_direction):'—'},
+    {val:c.wave_direction!=null?_windDirLabel(c.wave_direction):'—',lbl:'Smer valovanja',sub:c.wave_direction!=null?c.wave_direction.toFixed(0)+'°':'—'},
   ];
   el.innerHTML=kpis.map(k=>`<div class="ocn-kpi"><div class="ocn-kpi-val">${k.val}</div><div class="ocn-kpi-lbl">${k.lbl}</div><div class="ocn-kpi-sub">${k.sub}</div></div>`).join('');
 }
@@ -13883,7 +13883,7 @@ function _buildOcnSSTChart(m){
   }
   if(avgY>=pad.t&&avgY<=H-pad.b){
     svg+=`<line x1="${pad.l}" y1="${avgY}" x2="${W-pad.r}" y2="${avgY}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="5,3" opacity=".55"/>`;
-    svg+=`<text x="${W-pad.r}" y="${avgY-2}" font-size="7" fill="var(--amber)" text-anchor="end" opacity=".75">klima avg ${climAvg}°</text>`;
+    svg+=`<text x="${W-pad.r}" y="${avgY-2}" font-size="7" fill="var(--amber)" text-anchor="end" opacity=".75">klimatol. povp. ${climAvg} °C</text>`;
   }
   if(todayX!=null)svg+=`<line x1="${todayX}" y1="${pad.t}" x2="${todayX}" y2="${H-pad.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity=".45"/>`;
   if(pathPast)svg+=`<path d="${pathPast}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round"/>`;
@@ -13898,7 +13898,7 @@ function _buildOcnSSTChart(m){
   svg+='</svg>';
   el.innerHTML=svg;
   const leg=document.getElementById('ocn-sst-leg');
-  if(leg)leg.innerHTML='<span>—— izmerjena SST</span><span style="opacity:.6">- - - napoved</span><span style="color:var(--amber)">— — klimatol. avg</span>';
+  if(leg)leg.innerHTML='<span>—— izmerjena SST</span><span style="opacity:.6">- - - napoved</span><span style="color:var(--amber)">— — klimatol. povprečje</span>';
 }
 
 function _buildOcnWaveChart(m){
@@ -13937,7 +13937,7 @@ function _buildOcnWaveChart(m){
   svg+='</svg>';
   el.innerHTML=svg;
   const leg=document.getElementById('ocn-wave-leg');
-  if(leg)leg.innerHTML='<span style="color:var(--green)">▮ mirno &lt;0.3m</span><span style="color:var(--cyan)">▮ rahlo &lt;0.6m</span><span style="color:var(--amber)">▮ zmerno &lt;1m</span><span style="color:#fb923c">▮ razburkano &lt;1.5m</span><span style="color:var(--red)">▮ hudo</span>';
+  if(leg)leg.innerHTML='<span style="color:var(--green)">▮ mirno &lt; 0,3 m</span><span style="color:var(--cyan)">▮ rahlo &lt; 0,6 m</span><span style="color:var(--amber)">▮ zmerno &lt; 1 m</span><span style="color:#fb923c">▮ razburkano &lt; 1,5 m</span><span style="color:var(--red)">▮ hudo</span>';
 }
 
 function _buildOcnWaveRose(m){
@@ -13996,7 +13996,7 @@ function _buildOcnCurrents(m){
     <span class="ocn-badge ${bCls}">${velLbl}</span>
   </div>
   <div style="font-size:.68rem;color:var(--muted);line-height:1.55;margin-top:.55rem">
-    Jadransko morje ima šibke geostrofske tokove (5–20 cm/s). Ob burji drift JV, ob jugu SZ. Jadranski tok vzdolž obale redko preseže 50 cm/s.
+    V Jadranskem morju prevladujejo šibki geostrofski tokovi (5–20 cm/s). Ob burji nastane površinski odklon (drift) proti jugovzhodu, ob jugu pa proti severozahodu. Vzdolžni jadranski tok ob obali le redko preseže hitrost 50 cm/s.
   </div>`;
 }
 
@@ -14028,7 +14028,7 @@ function _buildOcnTides(m){
     else if(cur<prev&&cur<nxt){const d=new Date(next24[i].ms);events.push({type:'N',h:cur,lbl:d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')});}
   }
   const moonIllum=_moonIllum(new Date());
-  const tidalType=moonIllum<0.1||moonIllum>0.9?'Škovišna plima (polni mesec / mlaj)':moonIllum>0.4&&moonIllum<0.6?'Kvadraturna plima (četrt mesec)':'Vmesna plima';
+  const tidalType=moonIllum<0.1||moonIllum>0.9?'Živa plima (sizigijska plima – ščip / mlaj)':moonIllum>0.4&&moonIllum<0.6?'Mrtva plima (kvadraturna plima – prvi / zadnji krajec)':'Vmesna plima';
 
   // SVG chart
   const W=880,H=80,pL=30,pR=8,pT=8,pB=18;
@@ -14058,11 +14058,11 @@ function _buildOcnTides(m){
   });
   svg+='</svg>';
 
-  const evHtml=events.slice(0,4).map(e=>`<div class="ocn-row"><span style="color:var(--muted)">${e.type==='V'?'🔺 Visoka voda':'🔻 Nizka voda'}</span><b>${e.lbl} &nbsp;·&nbsp; ${e.h.toFixed(2)} m</b></div>`).join('');
+  const evHtml=events.slice(0,4).map(e=>`<div class="ocn-row"><span style="color:var(--muted)">${e.type==='V'?'🔺 Plima (visoka voda)':'🔻 Oseka (nizka voda)'}</span><b>${e.lbl} &nbsp;·&nbsp; ${e.h.toFixed(2)} m</b></div>`).join('');
   el.innerHTML=`${svg}<div style="margin-top:.5rem">${evHtml}
-    <div class="ocn-row"><span style="color:var(--muted)">Obseg plime</span><b>${range} m</b></div>
-    <div class="ocn-row"><span style="color:var(--muted)">Tip plime</span><b>${tidalType}</b></div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Koper ima mikroplimo (obseg do ~0.7 m). Prikaz temelji na harmonskem modelu (M2+S2+K1+O1) in je <em>informativne</em> narave. Za natančne napovedi: <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO — pomorska napoved</a>.</div>
+    <div class="ocn-row"><span style="color:var(--muted)">Amplituda plimovanja</span><b>${range} m</b></div>
+    <div class="ocn-row"><span style="color:var(--muted)">Tip plimovanja</span><b>${tidalType}</b></div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
   </div>`;
 }
 
@@ -14073,11 +14073,11 @@ function _buildOcnEcology(m){
   const wave=c.wave_height??0;
   const mon=new Date().getMonth();
   // Jellyfish (Pelagia noctiluca / Rhizostoma pulmo)
-  let jfRisk='nizko',jfCls='ocn-badge-ok',jfDesc='Meduze redke';
+  let jfRisk='nizka',jfCls='ocn-badge-ok',jfDesc='Meduz je malo (redke)';
   if(sst!=null){
-    if(sst>=24||(sst>=21&&mon>=6&&mon<=8)){jfRisk='visoko';jfCls='ocn-badge-bad';jfDesc='Sezona Pelagia noctiluca';}
-    else if(sst>=19||(mon>=5&&mon<=9)){jfRisk='zmerno';jfCls='ocn-badge-warn';jfDesc='Možne posamezne meduze';}
-  } else if(mon>=6&&mon<=8){jfRisk='zmerno';jfCls='ocn-badge-warn';jfDesc='Letna sezona';}
+    if(sst>=24||(sst>=21&&mon>=6&&mon<=8)){jfRisk='visoka';jfCls='ocn-badge-bad';jfDesc='Sezona mesečink (Pelagia noctiluca)';}
+    else if(sst>=19||(mon>=5&&mon<=9)){jfRisk='zmerna';jfCls='ocn-badge-warn';jfDesc='Možen pojav posameznih meduz';}
+  } else if(mon>=6&&mon<=8){jfRisk='zmerna';jfCls='ocn-badge-warn';jfDesc='Letna sezona meduz';}
   // HAB (Harmful Algal Bloom)
   let habRisk='nizko',habCls='ocn-badge-ok',habDesc='Brez indikatorjev';
   if(sst!=null&&sst>=24&&wave<0.3){habRisk='povišano';habCls='ocn-badge-warn';habDesc='Visoka SST + mirno = stratifikacija';}
@@ -14088,14 +14088,14 @@ function _buildOcnEcology(m){
   // Estimated salinity (seasonal Northern Adriatic)
   const salEst=[37.5,37.3,37.0,37.2,37.5,38.0,38.3,38.4,38.2,37.9,37.6,37.5];
   // Posidonia oceanica health (static contextual)
-  const posDesc=sst!=null&&sst>28?'stres (T > 28°C)':sst!=null&&sst<10?'mirovanje (T < 10°C)':'dobri pogoji';
+  const posDesc=sst!=null&&sst>28?'stres (T > 28 °C)':sst!=null&&sst<10?'mirovanje (T < 10 °C)':'dobri pogoji';
   const cards=[
     {ic:'🪼',t:'Meduze (Pelagia)',v:`<span class="ocn-badge ${jfCls}">${jfRisk}</span>`,d:jfDesc},
     {ic:'🌿',t:'Cvetenje alg (HAB)',v:`<span class="ocn-badge ${habCls}">${habRisk}</span>`,d:habDesc},
-    {ic:'👁',t:'Prosojnost (Secchi)',v:secchi,d:secchiDesc},
-    {ic:'🧂',t:'Slanost (ocena)',v:salEst[mon].toFixed(1)+' ‰',d:'Severni Jadran'},
-    {ic:'🌱',t:'Posidonia oceanica',v:posDesc,d:'morska trava'},
-    {ic:'⚗️',t:'pH morja',v:'~8.10',d:'povprečje (−0.002/leto)'},
+    {ic:'👁',t:'Prosojnost morja (Secchi)',v:secchi,d:secchiDesc},
+    {ic:'🧂',t:'Slanost (ocena)',v:salEst[mon].toFixed(1)+' ‰',d:'severni Jadran'},
+    {ic:'🌱',t:'Pozejdonka (Posidonia oceanica)',v:posDesc,d:'morska trava'},
+    {ic:'⚗️',t:'pH morja',v:'~8,10',d:'povprečje (−0,002/leto)'},
   ];
   el.innerHTML=cards.map(cd=>`<div class="ocn-eco-card"><div class="ocn-eco-ttl">${cd.ic} ${cd.t}</div><div class="ocn-eco-val">${cd.v}</div><div class="ocn-eco-sub">${cd.d}</div></div>`).join('');
 }
@@ -14132,14 +14132,14 @@ function _buildOcnClimate(m){
   const anomCol=anomaly==null?'var(--muted)':anomaly>0.5?'var(--red)':anomaly>0?'var(--amber)':anomaly<-0.5?'var(--blue)':'var(--green)';
   const anomStr=anomaly!=null?(anomaly>=0?'+':'')+anomaly+' °C':'—';
   el.innerHTML=`${svg}
-    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Klimatol. povprečje (${months[mon]})</span><b>${climAvg} °C</b></div>
-    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Izmerjena SST (ta mesec, povprečje)</span><b>${curSST!=null?curSST+' °C':'—'}</b></div>
+    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Klimatološko povprečje (${months[mon]})</span><b>${climAvg} °C</b></div>
+    <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Izmerjena SST (mesečno povprečje)</span><b>${curSST!=null?curSST+' °C':'—'}</b></div>
     <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Anomalija SST</span><b style="color:${anomCol}">${anomStr}</b></div>
     <div style="font-size:.7rem;color:var(--muted);margin-top:.65rem;line-height:1.6">
-      <b style="color:var(--text)">Zakisanost Jadrana:</b> Jadransko morje absorbira CO₂ iz atmosfere, kar zniža pH. Od predindrustrijske dobe se je pH znižal za ~0.1 enote (z 8.2 na ~8.1). Letni trend: −0.002 pH/leto. Vpliv na školjke, korale in ekosistem je znaten.
+      <b style="color:var(--text)">Zakisanost Jadranskega morja:</b> Morje absorbira CO₂ iz ozračja, kar znižuje njegov pH. Od predindustrijske dobe se je vrednost pH znižala za ~0,1 enote (z 8,2 na ~8,1). Letni trend upadanja znaša −0,002 enote pH/leto. Vpliv na školjke, korale in celoten morski ekosistem je znaten.
     </div>
     <div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;line-height:1.6">
-      <b style="color:var(--text)">Dvig morske gladine:</b> Severni Jadran narašča za ~3 mm/leto (Copernicus). Koper: relativni dvig je od leta 1900 znašal ~15 cm. Poplave tipa "acqua alta" vse pogostejše.
+      <b style="color:var(--text)">Dvig morske gladine:</b> Gladina severnega Jadrana se dviguje za ~3 mm/leto (vir: Copernicus). Koper: relativni dvig morske gladine od leta 1900 znaša ~15 cm. Poplavljanje morja (pojav »acqua alta«) je vse pogostejše.
     </div>`;
 }
 // ═══ end OCEANOLOGIJA ══════════════════════════════════════
