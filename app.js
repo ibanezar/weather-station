@@ -5302,7 +5302,7 @@ function buildClimateStripes(){
 function findWeatherTwin(){
   const el=document.getElementById('twin-content');if(!el)return;
   const obs=_lastBriefObs;
-  if(!obs?.metric){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Čakam na trenutne meritve…</div>';return;}
+  if(!obs?.metric){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Čakam na trenutne meritve …</div>';return;}
 
   const m=obs.metric;
   const today={T:m.temp,hum:obs.humidity,pres:m.pressure,wind:m.windSpeed};
@@ -5321,7 +5321,7 @@ function findWeatherTwin(){
     if(score<bestScore){bestScore=score;best={date,...v,score};}
   });
 
-  if(!best){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Premalo zgodovinskih podatkov za primerjavo.</div>';return;}
+  if(!best){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Premalo podatkov.</div>';return;}
 
   const bd=new Date(best.date+'T12:00:00');
   const daysAgo=Math.round((Date.now()-bd)/864e5);
@@ -5393,7 +5393,7 @@ function buildPhenologyCalendar(){
 
   if(growSeason){
     html+=`<div style="margin-top:.8rem;padding:.65rem .85rem;background:var(--fc-bg);border-radius:9px;font-size:.74rem;color:var(--muted);line-height:1.6">
-      🌿 <strong style="color:var(--text)">Rastna sezona ≈ ${growSeason} dni</strong> (med zadnjo in prvo zmrzaljo). Tipično za dolinsko lego 366 m z radiacijskim ohlajanjem.</div>`;
+      🌿 <strong style="color:var(--text)">Rastna sezona traja pribl. ${growSeason} dni</strong> (med zadnjo in prvo zmrzaljo). Tipično za dolinsko lego na 366 m z radiacijskim ohlajanjem.</div>`;
   }
 
   el.innerHTML=html;
@@ -6790,7 +6790,7 @@ async function fetchARSOComparison(){
     el.innerHTML=
       '<div style="font-size:.7rem;color:var(--muted);margin-bottom:.5rem">Primerjava z: <strong style="color:var(--text)">ARSO '+arsoName+'</strong></div>'+
       rows.map(r=>`<div class="arso-diff-row"><div class="arso-diff-param">${r.p}</div><div class="arso-diff-vals"><span class="arso-val-mine">${r.my}</span><span class="arso-val-ref">vs ${r.ref}</span>${r.d!=null?`<span class="arso-val-diff ${dc(r.d,r.w,r.b)}">${fd(r.d,r.u)}</span>`:''}</div></div>`).join('')+
-      `<div class="arso-drift-note">`+(avgDT!=null?`<strong>7-dnevni drift T:</strong> IREICA1 je v povprečju <strong style="color:${Math.abs(avgDT)<1?'var(--green)':Math.abs(avgDT)<2?'var(--amber)':'var(--red)'}">${avgDT>=0?'+':''}${avgDT}°C</strong> glede na ${arsoName}. `:'Zbiranje drift podatkov — vrni se jutri za trend.')+(avgDH!=null?`Vlaga: ${avgDH>=0?'+':''}${avgDH}%. `:'')+(r7.length?`(${r7.length} meritev)`:'')+'</div>';
+      `<div class="arso-drift-note">`+(avgDT!=null?`<strong>7-dnevni odmik temperature:</strong> IREICA1 je v povprečju za <strong style="color:${Math.abs(avgDT)<1?'var(--green)':Math.abs(avgDT)<2?'var(--amber)':'var(--red)'}">${avgDT>=0?'+':''}${avgDT} °C</strong> ${avgDT>=0?'toplejša':'hladnejša'} od ${arsoName}. `:'Zbiranje odmika temperature … vrni se jutri za trend.')+(avgDH!=null?`Vlaga: ${avgDH>=0?'+':''}${avgDH} %. `:'')+(r7.length?`(${r7.length} meritev)`:'')+'</div>';
     if(ts)ts.textContent=arsoName+' · '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){if(el)el.innerHTML='<div style="color:var(--muted);font-size:.78rem">ARSO primerjava ni dosegljiva.</div>';console.warn('ARSO:',e);}
 }
@@ -9383,7 +9383,7 @@ function renderClimateTwin(){
   const sim=Math.max(40,Math.round(100-best.dist*12));
   document.getElementById('twin-place').textContent=best.city+', '+best.country;
   document.getElementById('twin-sub').textContent=
-    `Mesečni temperaturni profil Rečice (${validMonths} mes.) in letne padavine (~${Math.round(myAnnualP)} mm) se najbolj ujemajo s tem krajem.`;
+    `Mesečni temperaturni profil Rečice (${validMonths} mesecev) in letne padavine (~${Math.round(myAnnualP)} mm) se najbolj ujemajo s tem krajem.`;
   document.getElementById('twin-match').textContent=`${sim}% ujemanje · ΔT povp. ${best.tRMSE.toFixed(1)}°C`;
   document.getElementById('twin-alts').innerHTML=
     'Ostali bližnji dvojčki: '+scored.slice(1,4).map(c=>`<b style="color:var(--text)">${c.city}</b>`).join(' · ');
@@ -9488,8 +9488,8 @@ function buildGrowingSeason(){
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
   const totalChange=slope*(data[data.length-1].yr-data[0].yr);
   let cls='stable',txt='';
-  if(totalChange>5){cls='warming';txt=`📈 Rastna sezona se je <b>podaljšala za ~${Math.round(totalChange)} dni</b> od ${data[0].yr} do ${data[data.length-1].yr} (${slope>0?'+':''}${slope.toFixed(1)} dni/leto). Skladno s trendom globalnega segrevanja.`;}
-  else if(totalChange<-5){cls='cooling';txt=`📉 Rastna sezona se je skrajšala za ~${Math.round(Math.abs(totalChange))} dni. To je nenavadno — verjetno posledica kratkega niza podatkov ali lokalnih razmer.`;}
+  if(totalChange>5){cls='warming';txt=`📈 Rastna sezona se je <b>podaljšala za ~${Math.round(totalChange)} dni</b>. Skladno s trendom globalnega segrevanja.`;}
+  else if(totalChange<-5){cls='cooling';txt=`📉 Rastna sezona se je skrajšala za ~${Math.round(Math.abs(totalChange))} dni. To je nenavadno – verjetno posledica kratkega niza podatkov ali lokalnih razmer.`;}
   else{txt=`➖ Rastna sezona je razmeroma stabilna (sprememba ~${totalChange.toFixed(0)} dni v obdobju). Za zanesljiv trend bi potrebovali daljši niz.`;}
   html+=`<div class="gs-trend ${cls}">${txt}</div>`;
   body.innerHTML=html;
@@ -11893,7 +11893,7 @@ async function buildThreeDVar(){
   const svg=document.getElementById('var3d-svg');
   const rng=document.getElementById('var3d-range');
   if(!svg)return;
-  svg.innerHTML='<text x="300" y="150" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Nalaganje ozadja...</text>';
+  svg.innerHTML='<text x="300" y="150" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Nalaganje ozadja …</text>';
 
   // Grid: 6×4 points over Slovenia approx.
   // Lat: 45.5, 46.0, 46.5, 47.0  Lon: 13.5, 14.5, 15.5, 16.0, 16.5
@@ -12015,7 +12015,7 @@ function renderOBTracking(){
   const ac1=n>5?+(obs.slice(0,-1).reduce((s,v,i)=>(s+(v-mean)*(obs[i+1]-mean)),0)/((n-1)*std**2||1)).toFixed(2):null;
   // Bias class
   const biasClass=Math.abs(mean)<0.3?'ob-bias-good':Math.abs(mean)<0.8?'ob-bias-warn':'ob-bias-bad';
-  const biasTxt=Math.abs(mean)<0.3?'Brez biasa':Math.abs(mean)<0.8?'Zmeren bias':'⚠️ Sistemat. bias';
+  const biasTxt=Math.abs(mean)<0.3?'Brez biasa':Math.abs(mean)<0.8?'Zmeren bias':'⚠️ Sistematičen bias';
 
   stats.innerHTML=[
     {v:mean+'°C',l:'Srednji O-B',c:biasClass},
