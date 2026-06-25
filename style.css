@@ -1308,7 +1308,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 /* Share & install buttons */
 .share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;justify-content:center}
 .share-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(77,159,248,.08)}
-.install-btn{display:none;align-items:center;justify-content:center;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif}
+.install-btn{display:none;align-items:center;justify-content:center;gap:.3rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:30px;height:30px;padding:0 .7rem;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .install-btn.show{display:inline-flex}
 
 /* Toast */
