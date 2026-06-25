@@ -301,18 +301,6 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:600}
 .hero-icon{display:flex;align-items:center;justify-content:center}
 .hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));transition:opacity .5s}
-/* Hero "Danes" — dnevni vrh/dno + povzetek (zapolni prazen prostor) */
-.hero-today{align-self:center;display:flex;flex-direction:column;gap:.55rem;flex:0 1 320px;min-width:210px;max-width:340px;text-align:center}
-.ht-lbl{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.ht-range{display:flex;align-items:center;gap:.55rem;font-family:'Inter',sans-serif}
-.ht-hi,.ht-lo{display:flex;align-items:center;gap:.18rem;font-weight:700;font-size:1.05rem;white-space:nowrap}
-.ht-hi{color:var(--amber,#f59e0b)}
-.ht-lo{color:var(--blue,#3b82f6)}
-.ht-arrow{font-size:.62rem;opacity:.75}
-.ht-bar{position:relative;flex:1;height:6px;min-width:54px;border-radius:3px;background:linear-gradient(to right,#f59e0b,#f7b733 32%,#60a5fa 72%,#3b82f6)}
-.ht-now{position:absolute;top:50%;left:0;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--hero-bg,#0c1220);box-shadow:0 1px 5px rgba(0,0,0,.45);transform:translate(-50%,-50%);transition:left .6s ease}
-.ht-summary{font-size:.8rem;line-height:1.35;color:var(--muted);font-style:italic}
-@media(max-width:840px){.hero-today{display:none}}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}

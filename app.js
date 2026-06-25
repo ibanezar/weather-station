@@ -213,7 +213,6 @@ function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox
 
 let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
-let _todayDaily=null;
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -1109,56 +1108,6 @@ function checkAlerts(obs){
   checkThresholdAlerts(obs);
 }
 
-// ── Hero "Danes" panel — dnevni vrh/dno + povzetek ───────
-function _skyAdj(wmo){
-  if(wmo==null)return'spremenljiv';
-  if(wmo===0)return'sončen';
-  if(wmo===1)return'pretežno sončen';
-  if(wmo===2)return'delno oblačen';
-  if(wmo===3)return'oblačen';
-  if(wmo===45||wmo===48)return'meglen';
-  if(wmo>=51&&wmo<=57)return'rosén';
-  if(wmo>=61&&wmo<=67)return'deževen';
-  if(wmo>=71&&wmo<=77)return'snežen';
-  if(wmo>=80&&wmo<=82)return'deževen';
-  if(wmo>=85&&wmo<=86)return'snežen';
-  if(wmo>=95)return'nevihten';
-  return'spremenljiv';
-}
-function _dayCharacter(max,min,wmo,rain,prob){
-  const heat = max>=33?'Vroč':max>=28?'Topel':max>=23?'Prijetno topel':max>=15?'Mil':max>=8?'Hladen':max>=0?'Mrzel':'Leden';
-  const sky=_skyAdj(wmo);
-  const wet=(wmo>=51&&wmo<=67)||(wmo>=71&&wmo<=86)||(wmo>=95);
-  let precip;
-  if(rain>=10)precip='z obilnimi padavinami';
-  else if(rain>=1)precip='z nekaj padavinami';
-  else if(wet||prob>=50)precip='z možnostjo padavin';
-  else precip='brez padavin';
-  return `${heat}, ${sky} dan ${precip}.`;
-}
-function updateHeroTodayMarker(){
-  const mk=document.getElementById('ht-now-marker');
-  if(!mk||!_todayDaily)return;
-  const{max,min}=_todayDaily,cur=_liveTemp;
-  if(cur==null||max==null||min==null||max<=min){mk.style.display='none';return;}
-  // Bar runs high (left) → low (right), so position from left = (max-cur)/(max-min)
-  const pct=Math.max(0,Math.min(1,(max-cur)/(max-min)))*100;
-  mk.style.display='';
-  mk.style.left=pct.toFixed(1)+'%';
-  mk.title='zdaj '+(+cur).toFixed(1)+'°';
-}
-function renderHeroToday(){
-  const el=document.getElementById('hero-today');
-  if(!el||!_todayDaily)return;
-  const{max,min,wmo,rain,prob}=_todayDaily;
-  if(max==null||min==null){el.hidden=true;return;}
-  const mx=document.getElementById('ht-max');if(mx){mx.textContent=max.toFixed(1);}
-  const mn=document.getElementById('ht-min');if(mn){mn.textContent=min.toFixed(1);}
-  const sum=document.getElementById('ht-summary');if(sum){sum.textContent='„'+_dayCharacter(max,min,wmo,rain,prob)+'"';}
-  el.hidden=false;
-  updateHeroTodayMarker();
-}
-
 // ── Kaj prihaja — urni strip + 3 dni ─────────────────────
 async function fetchComingUp(){
   try{
@@ -1170,10 +1119,6 @@ async function fetchComingUp(){
     const data=await _archFetch(url);
     const h=data.hourly,d=data.daily;
     if(!h||!d)return;
-
-    // Today's high/low + character for the hero "Danes" panel
-    _todayDaily={max:d.temperature_2m_max?.[0],min:d.temperature_2m_min?.[0],wmo:d.weather_code?.[0],rain:d.precipitation_sum?.[0]??0,prob:d.precipitation_probability_max?.[0]??0};
-    renderHeroToday();
 
     // Find current hour index
     const now=new Date(),nowMs=now.getTime();
@@ -1675,7 +1620,6 @@ function applyObs(obs){
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const tempEl=document.getElementById('temp-val');
   if(tempEl){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
-  updateHeroTodayMarker();
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
