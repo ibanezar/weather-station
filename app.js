@@ -2171,6 +2171,7 @@ function switchTab(tab){
   if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   if(tab==='gallery'){     initGallery(); }
+  if(tab==='community'){  initCommunity(); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
 }
@@ -16306,5 +16307,104 @@ function _renderGlossGrid(){
   if(!el)return;
   const list=_glossaryCat==='vse'?GLOSSARY_TERMS:GLOSSARY_TERMS.filter(t=>t.cat===_glossaryCat);
   el.innerHTML=list.map(t=>`<div class="gloss-card" onclick="this.classList.toggle('gloss-card-open')"><div class="gloss-card-head"><span class="gloss-card-icon">${t.icon}</span><div class="gloss-card-info"><div class="gloss-card-name">${t.term}</div><span class="gloss-badge gloss-${t.cat}">${_GLOSS_CAT_LABELS[t.cat]||t.cat}</span></div></div><div class="gloss-card-body"><div class="gloss-card-def">${t.def}</div><div class="gloss-card-fun">💡 ${t.fun}</div></div></div>`).join('');
+}
+
+// ── Community weather feedback ────────────────────────────────
+let _communityRating = 0;
+let _communityLoaded = false;
+
+const _RATING_LABELS = ['', 'Zelo netočna', 'Precej netočna', 'Srednje točna', 'Točna', 'Odlična'];
+const _RATING_ICONS  = ['', '⛈️', '🌧️', '⛅', '🌤️', '☀️'];
+
+function initCommunity() {
+  if (!_communityLoaded) { loadFeedback(); _communityLoaded = true; }
+  const todayKey = 'wx-feedback-' + new Date().toISOString().slice(0, 10);
+  const saved = localStorage.getItem(todayKey);
+  if (saved) {
+    communitySetRating(parseInt(saved), true);
+    const alr = document.getElementById('community-already');
+    if (alr) alr.style.display = '';
+  }
+}
+
+async function loadFeedback() {
+  try {
+    const res = await fetch(PROXY + '/feedback');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    renderFeedback(data.items, data.stats);
+  } catch (e) {
+    const list = document.getElementById('community-list');
+    if (list) list.innerHTML = '<div class="community-empty">Napaka pri nalaganju ocen.</div>';
+  }
+}
+
+function communitySetRating(n, silent) {
+  _communityRating = n;
+  document.querySelectorAll('.community-rating-btn').forEach(b => {
+    const r = parseInt(b.dataset.rating);
+    b.classList.toggle('community-rating-active', r === n);
+  });
+}
+
+async function submitFeedback() {
+  if (!_communityRating) { showToast('Prosimo izberi oceno pred oddajo.'); return; }
+  const btn = document.getElementById('community-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Pošiljam…'; }
+  const comment  = document.getElementById('community-comment')?.value?.trim() || '';
+  const author   = document.getElementById('community-author')?.value?.trim()  || 'Anonimno';
+  const forecast = document.getElementById('cond-label')?.textContent?.trim()  || '';
+  try {
+    const res = await fetch(PROXY + '/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: _communityRating, comment, author, forecast }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Napaka');
+    localStorage.setItem('wx-feedback-' + new Date().toISOString().slice(0, 10), String(_communityRating));
+    const alr = document.getElementById('community-already');
+    if (alr) alr.style.display = '';
+    showToast('Hvala za tvojo oceno! 🙏');
+    _communityLoaded = false;
+    loadFeedback();
+  } catch (e) {
+    showToast('Napaka: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Oddaj oceno'; }
+  }
+}
+
+function renderFeedback(items, stats) {
+  const avgEl   = document.getElementById('community-avg');
+  const countEl = document.getElementById('community-count');
+  const totalEl = document.getElementById('community-total');
+  if (avgEl)   avgEl.textContent   = stats?.today?.avg   != null ? stats.today.avg.toFixed(1) + ' / 5' : '—';
+  if (countEl) countEl.textContent = stats?.today?.count != null ? stats.today.count : '—';
+  if (totalEl) totalEl.textContent = stats?.total        != null ? stats.total : '—';
+
+  const list = document.getElementById('community-list');
+  if (!list) return;
+  if (!items?.length) {
+    list.innerHTML = '<div class="community-empty">Še ni ocen. Bodi prvi, ki oceni napoved!</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const date = item.ts
+      ? new Date(item.ts).toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
+    const author  = item.author && item.author !== 'Anonimno' ? item.author : 'Anonimno';
+    const icon    = _RATING_ICONS[item.rating]  || '—';
+    const label   = _RATING_LABELS[item.rating] || '';
+    const stars   = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+    return `<div class="community-item">
+      <div class="community-item-top">
+        <span class="community-item-rating">${icon} <span class="community-item-stars" data-r="${item.rating}">${stars}</span> <span class="community-item-label">${label}</span></span>
+        <span class="community-item-meta">${author} · ${date}</span>
+      </div>
+      ${item.comment  ? `<div class="community-item-comment">${item.comment.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+      ${item.forecast ? `<div class="community-item-forecast">Vreme ob oddaji: ${item.forecast.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
