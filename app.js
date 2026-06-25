@@ -1,3 +1,6 @@
+const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
+const LAT = 46.325779, LON = 14.921137;
+
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 function _loadScript(src) {
