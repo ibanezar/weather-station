@@ -530,6 +530,8 @@ function renderStreaks(){
   let dry=0;for(let i=recent.length-1;i>=0;i--){if(_rain(store[recent[i]])<0.2)dry++;else break;}
   // Warm streak (Tmax >= 25)
   let warm=0;for(let i=recent.length-1;i>=0;i--){const t=_tHi(store[recent[i]]);if(t!=null&&t>=25)warm++;else break;}
+  // Hot streak (Tmax >= 30)
+  let hot=0;for(let i=recent.length-1;i>=0;i--){const t=_tHi(store[recent[i]]);if(t!=null&&t>=30)hot++;else break;}
   // Cold nights (Tmin <= 0)
   let frost=0;for(let i=recent.length-1;i>=0;i--){const t=_tLo(store[recent[i]]);if(t!=null&&t<=0)frost++;else break;}
   // Wet streak
@@ -540,6 +542,7 @@ function renderStreaks(){
   recent.filter(k=>+k.slice(0,4)===yr).forEach(k=>{if(_rain(store[k])<0.2){cur++;maxDryYr=Math.max(maxDryYr,cur);}else cur=0;});
   if(dry>0)streaks.push({icon:'☀️',accent:'var(--amber)',count:dry,unit:'dni',desc:'zaporedoma brez dežja',rec:(dry>=maxDryYr&&dry>=5)?'najdaljši letos':null});
   if(warm>0)streaks.push({icon:'🌡️',accent:'var(--red)',count:warm,unit:'dni',desc:'zapored Tmax ≥ 25°C',rec:warm>=7?'vročinski val':null});
+  if(hot>0)streaks.push({icon:'🥵',accent:'var(--red)',count:hot,unit:'dni',desc:'zapored Tmax ≥ 30°C',rec:hot>=3?'vroči dnevi':null});
   if(wet>0)streaks.push({icon:'🌧️',accent:'var(--blue)',count:wet,unit:'dni',desc:'zaporedoma deževno',rec:wet>=5?'dolg moker niz':null});
   if(frost>0)streaks.push({icon:'❄️',accent:'var(--cyan)',count:frost,unit:'noči',desc:'zapored zmrzal',rec:frost>=5?'mrzlo obdobje':null});
   if(!streaks.length){body.innerHTML='<div class="streak-empty">Trenutno ni izrazitih nizov — vreme je raznoliko zadnje dni.</div>';badge.textContent='0';return;}
