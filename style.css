@@ -277,7 +277,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 #hero-canvas.active{animation:hero-breathe 4s ease-in-out infinite}
 /* Hero top row */
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1.5rem;margin-bottom:1.35rem}
-.hero-left{flex:1;min-width:0}
+.hero-left{flex:0 1 auto;min-width:0}
 /* Hero metrics strip */
 .hero-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
@@ -299,8 +299,11 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 #cond-icon{font-size:1rem}
 .temp-huge{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start}
 .temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:600}
-.hero-icon{display:flex;align-items:center;justify-content:center}
-.hero-icon svg{width:140px;height:140px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));transition:opacity .5s}
+/* Hero icon — večja, centrirana v praznem prostoru, rahlo "živa" */
+.hero-icon{display:flex;align-items:center;justify-content:center;flex:1 1 auto}
+.hero-icon svg,.hero-icon .wx-icon{width:clamp(120px,15vw,190px);height:auto;filter:drop-shadow(0 6px 22px rgba(0,0,0,.18));transition:opacity .5s}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:no-preference){.hero-icon svg,.hero-icon .wx-icon{animation:heroFloat 6s ease-in-out infinite}}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
@@ -1890,7 +1893,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .hero-top{gap:.9rem;margin-bottom:1rem}
   .hero-metrics{grid-template-columns:repeat(3,1fr);gap:.5rem;padding-top:.85rem}
   .hm-val{font-size:1.08rem}
-  .hero-icon svg{width:96px;height:96px}
+  .hero-icon svg,.hero-icon .wx-icon{width:104px;height:104px}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr}.span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
@@ -1900,7 +1903,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
   .temp-huge{font-size:clamp(3.8rem,16vw,5.5rem)}
-  .hero-icon svg{width:80px;height:80px}
+  .hero-icon svg,.hero-icon .wx-icon{width:88px;height:88px}
   .day-summary{flex-wrap:wrap}
   .ds-item{flex:0 0 50%;box-sizing:border-box}
   .ds-item:nth-child(odd)::before,.ds-item:nth-child(3)::before,.ds-item:nth-child(4)::before{display:none}
@@ -1935,7 +1938,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .pd-detail-loading{text-align:center;color:var(--muted);font-size:.78rem;padding:1.5rem 0}
 @media(max-width:380px){
   .hero{grid-template-columns:1fr auto}
-  .hero-icon svg{width:72px;height:72px}
+  .hero-icon svg,.hero-icon .wx-icon{width:76px;height:76px}
   .temp-huge{font-size:clamp(3.2rem,20vw,4.5rem)}
   .wind-body{flex-direction:column;align-items:flex-start;gap:.7rem}
   .g4{grid-template-columns:1fr 1fr}
