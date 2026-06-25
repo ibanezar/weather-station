@@ -29,10 +29,13 @@ const ALLOWED_ORIGINS = [
 function isAllowedOrigin(request) {
   const origin  = request.headers.get("Origin")  || "";
   const referer = request.headers.get("Referer") || "";
-  // Facebook's in-app browser and some other WebViews strip the Origin header.
-  // When both are absent the request is a direct browser navigation (not a
-  // cross-origin call from an untrusted page), so treat it as allowed.
-  if (!origin && !referer) return true;
+  // Facebook IAB and other embedded WebViews either strip Origin entirely or
+  // send the literal string "null" (opaque-origin sandboxed context).
+  // In both cases there is no cross-site caller to block, so allow through.
+  if (!origin || origin === "null") {
+    if (!referer) return true;
+    return ALLOWED_ORIGINS.some(o => referer.startsWith(o));
+  }
   return ALLOWED_ORIGINS.some(o => origin.startsWith(o) || referer.startsWith(o));
 }
 
@@ -413,6 +416,15 @@ export default {
       } catch (_) {
         return fetch(request);
       }
+    }
+
+    // /debug-headers — returns all incoming request headers as JSON (no auth required)
+    if (path === "/debug-headers") {
+      const headers = {};
+      for (const [k, v] of request.headers.entries()) headers[k] = v;
+      return new Response(JSON.stringify({ headers, origin: request.headers.get("Origin"), referer: request.headers.get("Referer"), allowed: isAllowedOrigin(request) }, null, 2), {
+        headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
+      });
     }
 
     // /ai-debug is openable directly in a browser for troubleshooting
