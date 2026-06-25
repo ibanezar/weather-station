@@ -26,16 +26,20 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1",
 ];
 
+const ALLOWED_REFERER_HOSTS = ["facebook.com", "fb.com", "fb.me", "instagram.com", "fbsbx.com"];
+
 function isAllowedOrigin(request) {
   const origin  = request.headers.get("Origin")  || "";
   const referer = request.headers.get("Referer") || "";
-  // Facebook IAB and other embedded WebViews either strip Origin entirely or
-  // send the literal string "null" (opaque-origin sandboxed context).
-  if (!origin || origin === "null") {
-    if (!referer) return true;
-    return ALLOWED_ORIGINS.some(o => referer.startsWith(o));
-  }
-  return ALLOWED_ORIGINS.some(o => origin.startsWith(o) || referer.startsWith(o));
+  if (!origin && !referer) return true;
+  if (ALLOWED_ORIGINS.some(o => origin.startsWith(o) || referer.startsWith(o))) return true;
+  // Facebook/Instagram in-app browsers strip Origin and route via shim domains
+  // (e.g. lm.facebook.com). Allow their referer hosts — this is public data.
+  try {
+    const h = new URL(referer).hostname;
+    if (ALLOWED_REFERER_HOSTS.some(d => h === d || h.endsWith("." + d))) return true;
+  } catch (_) {}
+  return false;
 }
 
 const CORS_ALLOWED = {
