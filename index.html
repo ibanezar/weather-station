@@ -175,6 +175,19 @@
 </head>
 <body>
 
+<script>
+if (location.search.includes('debug')) {
+  var dbg = document.createElement('div');
+  dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font:13px/1.5 monospace;padding:10px;white-space:pre-wrap;word-break:break-all;max-height:60vh;overflow:auto;border-bottom:2px solid #0f0';
+  dbg.textContent = 'Loading debug info...';
+  document.body.appendChild(dbg);
+  fetch('https://weatherireica1.filip-eremita.workers.dev/debug-headers')
+    .then(function(r){return r.json();})
+    .then(function(d){dbg.textContent=JSON.stringify(d,null,2);})
+    .catch(function(e){dbg.textContent='FETCH FAILED: '+e;});
+}
+</script>
+
 <div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><canvas id="starfield-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
 </div>
 <div id="chart-tip"></div>
