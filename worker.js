@@ -1121,6 +1121,57 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── /feedback ─────────────────────────────────────────
+      // GET  → { items, stats: { today: { avg, count }, total } }
+      // POST → { rating, comment, author, forecast } → { ok: true }
+      if (path === "/feedback") {
+        if (request.method === "GET") {
+          let items = [];
+          if (env?.COUNTER_KV) {
+            const stored = await env.COUNTER_KV.get("feedback:items");
+            if (stored) items = JSON.parse(stored);
+          }
+          const today = new Date().toISOString().slice(0, 10);
+          const todayItems = items.filter(i => i.date === today);
+          const todayAvg = todayItems.length
+            ? todayItems.reduce((s, i) => s + i.rating, 0) / todayItems.length
+            : null;
+          return new Response(JSON.stringify({
+            items: items.slice(0, 50),
+            stats: { today: { avg: todayAvg, count: todayItems.length }, total: items.length }
+          }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+        }
+
+        if (request.method === "POST") {
+          let body;
+          try { body = await request.json(); } catch (_) {
+            return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const rating = parseInt(body.rating);
+          if (!rating || rating < 1 || rating > 5) {
+            return new Response(JSON.stringify({ error: "Ocena mora biti med 1 in 5" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const entry = {
+            id: crypto.randomUUID().split("-")[0],
+            ts: new Date().toISOString(),
+            date: new Date().toISOString().slice(0, 10),
+            rating,
+            comment: (body.comment || "").slice(0, 300),
+            author: (body.author || "Anonimno").slice(0, 60),
+            forecast: (body.forecast || "").slice(0, 100),
+          };
+          if (env?.COUNTER_KV) {
+            const stored = await env.COUNTER_KV.get("feedback:items");
+            const items = stored ? JSON.parse(stored) : [];
+            items.unshift(entry);
+            await env.COUNTER_KV.put("feedback:items", JSON.stringify(items.slice(0, 200)));
+          }
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+      }
+
       // ── Gallery / photo endpoints ──────────────────────────
       if (path === "/gallery") {
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ photos: [], error: "R2 not bound" }), {

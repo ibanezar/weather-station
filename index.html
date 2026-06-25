@@ -253,6 +253,7 @@
     <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
     <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
     <button class="tab-btn"        id="tab-btn-gallery"   onclick="switchTab('gallery')">📸 Galerija</button>
+    <button class="tab-btn"        id="tab-btn-community" onclick="switchTab('community')">👥 Skupnost</button>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -2723,6 +2724,52 @@
     </div>
 
   </div><!-- /tab-gallery -->
+
+  <div id="tab-community" class="tab-pane">
+
+    <div class="card community-card">
+      <div class="community-header">
+        <div class="community-title">👥 Skupnostna ocena napovedi</div>
+        <div class="community-subtitle">Kako točna je bila današnja napoved za Rečico ob Savinji? Deli svojo izkušnjo in primerjaj z meritvami postaje IREICA1.</div>
+      </div>
+
+      <div class="community-stats" id="community-stats">
+        <div class="community-stat">
+          <div class="community-stat-val" id="community-avg">—</div>
+          <div class="community-stat-lbl">Povprečna ocena danes</div>
+        </div>
+        <div class="community-stat">
+          <div class="community-stat-val" id="community-count">—</div>
+          <div class="community-stat-lbl">Ocen danes</div>
+        </div>
+        <div class="community-stat">
+          <div class="community-stat-val" id="community-total">—</div>
+          <div class="community-stat-lbl">Skupaj ocen</div>
+        </div>
+      </div>
+
+      <div class="community-form" id="community-form">
+        <div class="community-form-label">Tvoja ocena točnosti napovedi:</div>
+        <div class="community-rating-btns" id="community-rating-btns">
+          <button class="community-rating-btn" data-rating="1" onclick="communitySetRating(1)" title="Zelo netočna">⛈️<span>1 — Zelo netočna</span></button>
+          <button class="community-rating-btn" data-rating="2" onclick="communitySetRating(2)" title="Precej netočna">🌧️<span>2 — Precej netočna</span></button>
+          <button class="community-rating-btn" data-rating="3" onclick="communitySetRating(3)" title="Srednje točna">⛅<span>3 — Srednje točna</span></button>
+          <button class="community-rating-btn" data-rating="4" onclick="communitySetRating(4)" title="Točna">🌤️<span>4 — Točna</span></button>
+          <button class="community-rating-btn" data-rating="5" onclick="communitySetRating(5)" title="Popolnoma točna">☀️<span>5 — Odlična</span></button>
+        </div>
+        <textarea id="community-comment" placeholder="Komentar (neobvezno) — npr. napovedali so dež, a je bil cel dan sončno…" maxlength="300" rows="3"></textarea>
+        <input type="text" id="community-author" placeholder="Tvoje ime (neobvezno)" maxlength="60">
+        <button class="community-submit-btn" id="community-submit-btn" onclick="submitFeedback()">Oddaj oceno</button>
+        <div class="community-already" id="community-already" style="display:none">Danes si že oddal/a oceno — hvala! Oceno lahko posodobiš z novim oddajanjem.</div>
+      </div>
+
+      <div class="community-list-hdr">Nedavne ocene skupnosti</div>
+      <div class="community-list" id="community-list">
+        <div class="community-loading">Nalagam ocene…</div>
+      </div>
+    </div>
+
+  </div><!-- /tab-community -->
 
   <!-- Upload modal -->
   <div class="gallery-modal-overlay" id="gallery-upload-modal">
