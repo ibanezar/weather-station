@@ -1,6 +1,3 @@
-const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
-const LAT = 46.325779, LON = 14.921137;
-
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 function _loadScript(src) {
@@ -13258,23 +13255,23 @@ async function initVisitorCounter(){
 }
 
 async function init(){
-  // ── Synchronous setup (no network) ──
-  applyStationOnThisDay();
-  applyMoon();
-  applyMonthlySummary();
-  applyYearRecords();
-  renderPastDays();
-  applyPhotographyWidget(null);
-  initBgCanvas();
-  applyWeatherBg('night');
-  initNotifBtn();
-  initMeshCanvas();
-  initHeroCanvas();
-  autoLoadHistoryFile();
-  setTimeout(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});},150);
-
-  loadThresholds(); // restore user alert thresholds from localStorage
-  _fcSliderInit();
+  // ── Synchronous setup (no network) — each call guarded so a crash in one
+  // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
+  try{applyStationOnThisDay();}catch(_){}
+  try{applyMoon();}catch(_){}
+  try{applyMonthlySummary();}catch(_){}
+  try{applyYearRecords();}catch(_){}
+  try{renderPastDays();}catch(_){}
+  try{applyPhotographyWidget(null);}catch(_){}
+  try{initBgCanvas();}catch(_){}
+  try{applyWeatherBg('night');}catch(_){}
+  try{initNotifBtn();}catch(_){}
+  try{initMeshCanvas();}catch(_){}
+  try{initHeroCanvas();}catch(_){}
+  try{autoLoadHistoryFile();}catch(_){}
+  setTimeout(()=>{try{initWeatherArt();setWeatherArt(_lastBriefObs||{});}catch(_){}},150);
+  try{loadThresholds();}catch(_){} // restore user alert thresholds from localStorage
+  try{_fcSliderInit();}catch(_){}
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
