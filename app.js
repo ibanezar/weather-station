@@ -477,7 +477,7 @@ function renderClimateAnomaly(){
   const body=document.getElementById('anom-body'),badge=document.getElementById('anom-badge');
   if(!body)return;
   const store=_insStore(),years=_insYears(store);
-  const todayKey=new Date().toISOString().slice(0,10);
+  const todayKey=_localDateStr(new Date());
   const mmdd=_mmdd(new Date());
   // ±3 day window, exclude current year's today to avoid self-comparison
   const sample=_insSameDate(store,mmdd,3).filter(r=>r.date!==todayKey);
@@ -523,7 +523,7 @@ function renderStreaks(){
   const keys=Object.keys(store).sort();
   if(keys.length<10){body.innerHTML='<div class="streak-empty">Premalo podatkov za nize.</div>';badge.textContent='—';return;}
   // Walk backwards from most recent day
-  const todayKey=new Date().toISOString().slice(0,10);
+  const todayKey=_localDateStr(new Date());
   const recent=keys.filter(k=>k<=todayKey);
   const streaks=[];
   // Dry streak
@@ -913,8 +913,8 @@ function refreshInsights(){
 function initInsights(){
   const dateInput=document.getElementById('analog-date');
   if(dateInput){
-    dateInput.value=new Date().toISOString().slice(0,10);
-    dateInput.max=new Date().toISOString().slice(0,10);
+    dateInput.value=_localDateStr(new Date());
+    dateInput.max=_localDateStr(new Date());
   }
   const btn=document.getElementById('analog-go');
   if(btn)btn.addEventListener('click',()=>{const v=document.getElementById('analog-date').value;if(v)runAnalogSearch(v);});
@@ -931,7 +931,7 @@ function renderWeatherMemory(obs){
     wind:m.windGust??m.windSpeed??0,
     hum:obs.humidity??null
   };
-  const hist=getLocalHistory('all').filter(d=>d.obsTimeLocal!==new Date().toISOString().slice(0,10)&&d.metric&&(d.metric.tempHigh!=null||d.metric.tempAvg!=null));
+  const hist=getLocalHistory('all').filter(d=>d.obsTimeLocal!==_localDateStr(new Date())&&d.metric&&(d.metric.tempHigh!=null||d.metric.tempAvg!=null));
   if(hist.length<20){
     el.innerHTML='<div class="intel-head"><div class="intel-label">Weather Memory Index</div><span class="intel-badge">'+hist.length+' dni</span></div><div class="intel-main"><div class="intel-icon">🧠</div><div><div class="intel-title">Spomin se še gradi</div><div class="intel-text">Za zanesljivo primerjavo potrebujem vsaj približno 20 shranjenih dnevnih povzetkov IREICA1. Trenutno jih je '+hist.length+'.</div></div></div>';
     return;
@@ -2216,7 +2216,7 @@ function getLocalHistory(period){
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     const now=new Date();
     let cutoff;
-    if(period==='30')    cutoff=new Date(now-30*864e5).toISOString().slice(0,10);
+    if(period==='30')    cutoff=_localDateStr(new Date(now-30*864e5));
     else if(period==='year')  cutoff=now.getFullYear()+'-01-01';
     else if(period==='5year') cutoff=(now.getFullYear()-5)+'-01-01';
     else cutoff='2000-01-01';
@@ -3634,8 +3634,8 @@ async function initAgro(){
 function _calcAgroAccum(){
   const store=_insStore();
   const yr=new Date().getFullYear();
-  const today=new Date().toISOString().slice(0,10);
-  const d30=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
+  const d30=_localDateStr(new Date(Date.now()-30*864e5));
   let gdd5=0,gdd10=0,rain30=0;
   for(const[k,v] of Object.entries(store)){
     const avg=(v.tempHigh!=null&&v.tempLow!=null)?(v.tempHigh+v.tempLow)/2:(v.tempAvg??null);
@@ -3820,10 +3820,10 @@ function _buildAgroSpray(d){
   // Group by day, show 7 days × 24h grid (day hours 6-19 only shown)
   const days=[];
   const now=new Date();
-  const todayStr=now.toISOString().slice(0,10);
+  const todayStr=_localDateStr(now);
   for(let i=0;i<7;i++){
     const d2=new Date(now);d2.setDate(d2.getDate()+i);
-    days.push(d2.toISOString().slice(0,10));
+    days.push(_localDateStr(d2));
   }
   let html='';
   for(const day of days){
@@ -3917,7 +3917,7 @@ function _buildAgroWaterBalance(d){
   // Last 14 days from localStorage
   for(let i=13;i>=0;i--){
     const dt=new Date(now);dt.setDate(dt.getDate()-i);
-    const k=dt.toISOString().slice(0,10);
+    const k=_localDateStr(dt);
     const v=store[k];
     rows.push({date:k,rain:v?.precipTotal??null,et0:null,isHist:true});
   }
@@ -4422,8 +4422,8 @@ async function fetchLocalDailyForecast(){
 }
 
 function _buildArsoDailyCards(arso){
-  const todayStr=new Date().toISOString().slice(0,10);
-  const targets=[0,1,2,3].map(i=>new Date(Date.now()+i*864e5).toISOString().slice(0,10));
+  const todayStr=_localDateStr(new Date());
+  const targets=[0,1,2,3].map(i=>_localDateStr(new Date(Date.now()+i*864e5)));
   const SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
   const days4=[];
   for(const t of targets){
@@ -4466,8 +4466,8 @@ function _arsoIcon(txt){
 function _renderArsoDailyForecast(arso,box,upd){
   const loc=arso.location||{};
   const locTitle=loc.title||loc.name||'Rečica ob Savinji';
-  const todayStr=new Date().toISOString().slice(0,10);
-  const targets=[0,1,2,3].map(i=>new Date(Date.now()+i*864e5).toISOString().slice(0,10));
+  const todayStr=_localDateStr(new Date());
+  const targets=[0,1,2,3].map(i=>_localDateStr(new Date(Date.now()+i*864e5)));
 
   const days4=[];
   for(const t of targets){
@@ -4564,7 +4564,7 @@ function _renderAIFC(data){
     }
   }
   if(daysEl&&data.summaries?.length){
-    const today=new Date().toISOString().slice(0,10);
+    const today=_localDateStr(new Date());
     daysEl.innerHTML=data.summaries.slice(0,7).map((s,i)=>{
       const dt=new Date(s.date+'T12:00:00');
       const lbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
@@ -4652,7 +4652,7 @@ async function fetchForecastExtras(){
 
 function _trustYesterdayKey(){
   const d=new Date();d.setDate(d.getDate()-1);
-  return d.toISOString().slice(0,10);
+  return _localDateStr(d);
 }
 function _trustActualFor(dateKey){
   const fromCache=(_histCache['7']||[]).find(d=>d.obsTimeLocal===dateKey);
@@ -5149,7 +5149,7 @@ async function applyPheno(){
       .sort(([a],[b])=>a.localeCompare(b));
     if(entries.length<5){
       const start=y+'-01-01';
-      const end=new Date().toISOString().slice(0,10);
+      const end=_localDateStr(new Date());
       const url='https://archive-api.open-meteo.com/v1/archive?latitude='+LAT+'&longitude='+LON+'&start_date='+start+'&end_date='+end+'&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLjubljana';
       const data=await _archFetch(url);
       entries=(data.daily?.time||[]).map((d,i)=>[d,{tempHigh:data.daily.temperature_2m_max?.[i],tempLow:data.daily.temperature_2m_min?.[i]}]);
@@ -5310,7 +5310,7 @@ function findWeatherTwin(){
   const m=obs.metric;
   const today={T:m.temp,hum:obs.humidity,pres:m.pressure,wind:m.windSpeed};
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=_localDateStr(new Date());
 
   let best=null,bestScore=Infinity;
   Object.entries(stored).forEach(([date,v])=>{
@@ -6303,7 +6303,7 @@ async function fetchWUHistory(){
 function _renderWUHRanking(stations){
   const el=document.getElementById('wuh-rank');
   if(!el)return;
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=_localDateStr(new Date());
   const ranked=stations
     .map(s=>({...s,todayMax:s.days.find(d=>d.date===todayStr)?.tmax??null}))
     .filter(s=>s.todayMax!=null)
@@ -6358,7 +6358,7 @@ function _renderWUHTable(stations){
   if(!el)return;
   const allDates=[...new Set(stations.flatMap(s=>s.days.map(d=>d.date)))].sort();
   const SL=['ned','pon','tor','sre','čet','pet','sob'];
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=_localDateStr(new Date());
   let t='<table class="wuh-table"><tr><th class="wuh-label">Postaja</th>';
   allDates.forEach(date=>{
     const d=new Date(date+'T12:00:00');
@@ -9691,13 +9691,13 @@ function buildGoldenWindow(){
       equip:'Makro objektiv 60–100 mm, stojalo, stranska osvetlitev',
       conditions:[T!=null&&T>10,H!=null&&H>70,rain<2],
       desc:()=>{
-        const store2=_insStore();let r72=0;for(let i=0;i<3;i++){const d2=new Date();d2.setDate(d2.getDate()-i);r72+=(store2[d2.toISOString().slice(0,10)]?.precipTotal||0);}
+        const store2=_insStore();let r72=0;for(let i=0;i<3;i++){const d2=new Date();d2.setDate(d2.getDate()-i);r72+=(store2[_localDateStr(d2)]?.precipTotal||0);}
         if(r72>20&&T>12&&T<20)return `🟢 Odlično za gozdni makro! ${r72.toFixed(0)} mm dežja v 72 h + T ${T.toFixed(1)} °C – gobe rastejo, mah nabrekel.`;
         if(H>80&&T>12)return `🔵 Visoka vlaga ${Math.round(H)} % – gozdni makro subjekti (mah, lišaji, kapljice na listih) so odlični.`;
         if(T<10)return `⚪ Prehladno (${T.toFixed(1)} °C) – gobe v mirovanju, mah suh.`;
         return `🟡 Delni pogoji – vlaga ${Math.round(H||0)} %. ${r72<5?'Potreben je dež za gobe.':'Preverite gozdni rob.'}`;
       },
-      rating:()=>{const st=_insStore();let r72=0;for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);r72+=(st[d.toISOString().slice(0,10)]?.precipTotal||0);}return r72>20&&T>12?'perfect':H>75&&T>10?'good':T>8&&H>65?'ok':'poor';}
+      rating:()=>{const st=_insStore();let r72=0;for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);r72+=(st[_localDateStr(d)]?.precipTotal||0);}return r72>20&&T>12?'perfect':H>75&&T>10?'good':T>8&&H>65?'ok':'poor';}
     },
   ];
   const ratingLabel={perfect:'POPOLNO',good:'DOBRO',ok:'SPREJEMLJIVO',poor:'SLABO'};
@@ -9801,7 +9801,7 @@ function buildMission(){
   const doy=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
   const seed=today.getFullYear()*1000+doy;
   const mission=pool[seed%pool.length];
-  const todayStr=today.toISOString().slice(0,10);
+  const todayStr=_localDateStr(today);
   let streak=0,completed=false;
   try{const d=JSON.parse(localStorage.getItem(_MISSION_STREAK_KEY)||'{}');completed=d.lastDate===todayStr;streak=d.streak||0;}catch(_){}
   const stars='🌟'.repeat(mission.stars)+'<span style="opacity:.25">🌟</span>'.repeat(3-mission.stars);
@@ -9829,11 +9829,11 @@ function buildMission(){
 }
 
 function completeMission(){
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=_localDateStr(new Date());
   let data={};
   try{data=JSON.parse(localStorage.getItem(_MISSION_STREAK_KEY)||'{}');}catch(_){}
   if(data.lastDate===todayStr)return;
-  const yd=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const yd=_localDateStr(new Date(Date.now()-86400000));
   const streak=(data.lastDate===yd?(data.streak||0)+1:1);
   try{localStorage.setItem(_MISSION_STREAK_KEY,JSON.stringify({lastDate:todayStr,streak}));}catch(_){}
   buildMission();
@@ -9946,12 +9946,12 @@ function buildForestPulse(){
   const curT=m.temp??null;
   // 72h rain from history
   let rain72=0;
-  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);rain72+=(store[k]?.precipTotal||0);}
+  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);const k=_localDateStr(d);rain72+=(store[k]?.precipTotal||0);}
   // Live rain rate
   rain72+=(m.precipRate||0)*3;
   // 7-day temp trend (proxy for soil warming)
   const temps7=[];
-  for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const r=store[d.toISOString().slice(0,10)];if(r?.tempAvg)temps7.push(r.tempAvg);}
+  for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const r=store[_localDateStr(d)];if(r?.tempAvg)temps7.push(r.tempAvg);}
   const tempRising=temps7.length>=4&&(temps7[temps7.length-1]-temps7[0])>1.5;
   const recentWarm=curT!=null&&curT>=14;
   const mo=new Date().getMonth()+1;
@@ -9995,7 +9995,7 @@ function buildTimeCapsule(){
   if(!body)return;
   const store=_insStore();
   const today=new Date();
-  const todayKey=today.toISOString().slice(0,10);
+  const todayKey=_localDateStr(today);
   const mmdd=todayKey.slice(5);
   if(dateEl)dateEl.textContent=today.toLocaleDateString('sl',{day:'numeric',month:'long'});
   // Current conditions
@@ -10124,7 +10124,7 @@ function renderSavinjaRiver(arsoData, floodData){
   // ── Parse Open-Meteo flood data ─────────────────────────
   const times=floodData?.daily?.time||[];
   const flows=floodData?.daily?.river_discharge||[];
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   const todayIdx=times.indexOf(today);
   const todayQ=todayIdx>=0?flows[todayIdx]:flows[7]||null; // 7=today if past_days=7
   const maxQ=Math.max(...flows.filter(v=>v!=null),0.01);
@@ -10434,7 +10434,7 @@ function buildFaunaRadar(){
   const mo=new Date().getMonth()+1;
   const store=_insStore();
   let rain72=0;
-  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);rain72+=(store[d.toISOString().slice(0,10)]?.precipTotal||0);}
+  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);rain72+=(store[_localDateStr(d)]?.precipTotal||0);}
   const fauna=[
     {icon:'🐌',name:'Polžji pohod',color:'var(--cyan)',
      pct:()=>{let s=0;if(rain72>5||rain3h>0.5)s+=40;if(H!=null&&H>80)s+=30;if(T!=null&&T>10&&T<23)s+=20;if(W<8)s+=10;return Math.min(100,s);},
@@ -11368,7 +11368,7 @@ function aiRenderSkill(){
 
 // ══ 3) ANALOG DAYS (k-NN) ════════════════════════════════
 async function aiFetchAnalogArchive(){
-  const dayKey=new Date().toISOString().slice(0,10);
+  const dayKey=_localDateStr(new Date());
   try{const c=JSON.parse(localStorage.getItem(AI_ANALOG_KEY));if(c&&c.day===dayKey&&c.rows?.length)return c.rows;}catch(e){}
   const today=new Date(),rows=[];
   for(const y of [1,2,3]){
@@ -11586,7 +11586,7 @@ function runAnomalyScoring(){
 
   // 3. Rain gauge
   let rScore=100,rIssues=[];
-  const storeToday=_insStore()[new Date().toISOString().slice(0,10)];
+  const storeToday=_insStore()[_localDateStr(new Date())];
   const todayRain=storeToday?.precipTotal??0;
   if(_metarData?.wxString?.match(/-RA|-SH|TS|DZ/)&&todayRain<0.2&&rain<0.1){
     rScore-=30;rIssues.push('METAR poroča padavine ('+(_metarData.wxString)+'), a postaja meri 0mm — možno zamašena/zamrznjena žlica');
@@ -12593,7 +12593,7 @@ async function fetchFireWeather(){
 
 function renderFireWeather(days){
   const el=document.getElementById('fwi-body');if(!el||!days?.length)return;
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   const ti=days.findIndex(d=>d.date===today);
   const td=ti>=0?days[ti]:days[Math.min(7,days.length-1)];
   const cls=_fwiClass(td.fwi);
@@ -12846,7 +12846,7 @@ async function buildAgroPulse(){
   const yr=new Date().getFullYear();
   // Calculate GDD5 and GDD10 from Jan 1 to today
   let gdd5=0,gdd10=0;
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   for(let d=new Date(`${yr}-01-01`);d.toISOString().slice(0,10)<=today;d.setDate(d.getDate()+1)){
     const k=d.toISOString().slice(0,10);
     const r=store[k];
@@ -12858,7 +12858,7 @@ async function buildAgroPulse(){
   if(badge)badge.textContent=`GDD5: ${Math.round(gdd5)} · GDD10: ${Math.round(gdd10)}`;
   // Recent rain (last 14 days) and night temp check
   let recentRain=0,nightTempOk=false,tminOk=false;
-  for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);const r=store[k];if(r){recentRain+=(r.precipTotal||0);if((r.tempLow??0)>5)tminOk=true;}}
+  for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const k=_localDateStr(d);const r=store[k];if(r){recentRain+=(r.precipTotal||0);if((r.tempLow??0)>5)tminOk=true;}}
   const curObs=_lastBriefObs?.metric||{};
   nightTempOk=(curObs.temp??0)>15;
   const state={recentRain,nightTempOk,tminOk};
@@ -12954,8 +12954,8 @@ function buildWindFingerprint(){
   // Compare with historical storm signatures
   if(avgSig){
     const recentStore=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-    const tod=new Date().toISOString().slice(0,10);
-    const yes=new Date(Date.now()-864e5).toISOString().slice(0,10);
+    const tod=_localDateStr(new Date());
+    const yes=_localDateStr(new Date(Date.now()-864e5));
     const todRec=recentStore[tod],yesRec=recentStore[yes];
     if(todRec&&yesRec){
       const tD=(todRec.tempAvg??0)-(yesRec.tempAvg??0);
@@ -13694,7 +13694,7 @@ function _flyLabel(score){
 function _buildPadalciKPIs(d){
   const el=document.getElementById('fly-kpis');if(!el)return;
   const h=d.hourly||{};
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   // Collect today's daytime hours
   const todayIdxs=[];
   (h.time||[]).forEach((t,i)=>{if(t.startsWith(today)&&h.is_day?.[i])todayIdxs.push(i);});
@@ -13717,7 +13717,7 @@ function _buildPadalciKPIs(d){
 function _buildPadalciFlyWindow(d){
   const el=document.getElementById('fly-window-body');if(!el)return;
   const h=d.hourly||{};
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   // 6:00–20:00 = 15 slots
   const slots=[];
   (h.time||[]).forEach((t,i)=>{
@@ -13758,7 +13758,7 @@ function _buildPadalciBLChart(d){
   const legEl=document.getElementById('fly-bl-legend');
   if(!chartEl)return;
   const h=d.hourly||{};
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   const pts=[];
   (h.time||[]).forEach((t,i)=>{
     if(!t.startsWith(today))return;
@@ -13929,7 +13929,7 @@ function _buildOcnSSTChart(m){
   const dates=Object.keys(dailyMap).sort();
   if(!dates.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
   const vals=dates.map(d=>dailyMap[d].sum/dailyMap[d].n);
-  const todayStr=new Date().toISOString().slice(0,10);
+  const todayStr=_localDateStr(new Date());
   const todayIdx=dates.indexOf(todayStr);
 
   const W=880,H=100,pad={l:30,r:8,t:10,b:18};
@@ -13990,7 +13990,7 @@ function _buildOcnWaveChart(m){
   const d=m.daily||{};
   const times=d.time||[];
   if(!times.length){el.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni podatkov</div>';return;}
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   let start=times.findIndex(t=>t>=today);
   if(start<0)start=Math.max(0,times.length-7);
   const n=Math.min(7,times.length-start);
@@ -14187,7 +14187,7 @@ function _buildOcnEcology(m){
 function _buildOcnClimate(m){
   const el=document.getElementById('ocn-climate');if(!el)return;
   const h=m.hourly||{};
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   // Current month SSTs for anomaly
   const monthSsts=(h.sea_surface_temperature||[]).filter((v,i)=>v!=null&&(h.time||[])[i]?.startsWith(today.slice(0,7)));
   const mon=new Date().getMonth();
@@ -14416,7 +14416,7 @@ function _buildAqPollen(d){
   const h=d.hourly||{};
   const times=h.time||[];
   const today=new Date();
-  const days=Array.from({length:5},(_,i)=>{const dt=new Date(today);dt.setDate(dt.getDate()+i);return dt.toISOString().slice(0,10);});
+  const days=Array.from({length:5},(_,i)=>{const dt=new Date(today);dt.setDate(dt.getDate()+i);return _localDateStr(dt);});
   const wdays=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
   const dayLbls=days.map((d,i)=>i===0?'Danes':i===1?'Jutri':wdays[new Date(d).getDay()]);
   const types=[
@@ -14677,7 +14677,7 @@ function _buildGoreSuit({triglav}){
 // Paragliding suitability for today (peak of daytime flyability)
 function _buildPadalciSuit(d){
   const h=d.hourly||{};
-  const today=new Date().toISOString().slice(0,10);
+  const today=_localDateStr(new Date());
   const idxs=[];(h.time||[]).forEach((t,i)=>{if(t.startsWith(today)&&h.is_day?.[i])idxs.push(i);});
   let best=0,flyHours=0,maxBL=0,maxWind=0,maxCAPE=0;
   idxs.forEach(i=>{
@@ -15377,7 +15377,7 @@ function _buildNerdKPIs(){
   let rain30=0;
   for(let d=0;d<30;d++){
     const dt=new Date(today); dt.setDate(dt.getDate()-d);
-    const k=dt.toISOString().slice(0,10);
+    const k=_localDateStr(dt);
     rain30+=(store[k]?.rain??0);
   }
   const rainAnom=Math.round(rain30-_PNORM[mo]);
