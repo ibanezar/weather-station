@@ -1122,9 +1122,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /feedback ─────────────────────────────────────────
-      // GET  → { items, stats: { today: { avg, count }, total } }
-      // POST → { rating, comment, author, forecast } → { ok: true }
-      // Storage: feedback/items.json in PHOTOS_R2 (already bound)
+      // GET  ?date=YYYY-MM-DD → { items, stats: { day: { avg, count }, total } }
+      // POST { rating, comment, author, forecast, date? } → { ok: true }
+      // Storage: feedback/items.json in PHOTOS_R2
       if (path === "/feedback") {
         const r2 = env?.PHOTOS_R2;
 
@@ -1146,14 +1146,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
         if (request.method === "GET") {
           const items = await _fbRead();
-          const today = new Date().toISOString().slice(0, 10);
-          const todayItems = items.filter(i => i.date === today);
-          const todayAvg = todayItems.length
-            ? todayItems.reduce((s, i) => s + i.rating, 0) / todayItems.length
+          const reqDate = url.searchParams.get("date") || new Date().toISOString().slice(0, 10);
+          const dayItems = items.filter(i => i.date === reqDate);
+          const dayAvg = dayItems.length
+            ? dayItems.reduce((s, i) => s + i.rating, 0) / dayItems.length
             : null;
           return new Response(JSON.stringify({
-            items: items.slice(0, 50),
-            stats: { today: { avg: todayAvg, count: todayItems.length }, total: items.length }
+            items: items.slice(0, 60),
+            stats: { day: { avg: dayAvg, count: dayItems.length, date: reqDate }, total: items.length }
           }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } });
         }
 
@@ -1169,10 +1169,16 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!rating || rating < 1 || rating > 5) {
             return new Response(JSON.stringify({ error: "Ocena mora biti med 1 in 5" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
+          // Allow rating for past 2 days; reject anything older
+          const nowDate = new Date().toISOString().slice(0, 10);
+          const minDate = new Date(); minDate.setDate(minDate.getDate() - 2);
+          const minStr  = minDate.toISOString().slice(0, 10);
+          const entryDate = (body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date) && body.date >= minStr)
+            ? body.date : nowDate;
           const entry = {
             id: crypto.randomUUID().split("-")[0],
             ts: new Date().toISOString(),
-            date: new Date().toISOString().slice(0, 10),
+            date: entryDate,
             rating,
             comment: (body.comment || "").slice(0, 300),
             author: (body.author || "Anonimno").slice(0, 60),
@@ -1181,6 +1187,60 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const items = await _fbRead();
           items.unshift(entry);
           await _fbWrite(items.slice(0, 200));
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+      }
+
+      // ── /observations ──────────────────────────────────────
+      // GET  → { counts: {soncno:3, dezuje:1, …}, total, updatedAt }
+      // POST { type } → { ok: true }
+      // Items expire after 3h; stored in R2 as feedback/observations.json
+      if (path === "/observations") {
+        const r2 = env?.PHOTOS_R2;
+        const OBS_TYPES = ['soncno','oblacno','dezuje','nevihta','megleno','snezi','vetrovno'];
+        const OBS_TTL   = 3 * 3600 * 1000;
+
+        async function _obsRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get("feedback/observations.json");
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+
+        if (request.method === "GET") {
+          const all   = await _obsRead();
+          const now   = Date.now();
+          const fresh = all.filter(i => now - new Date(i.ts).getTime() < OBS_TTL);
+          const counts = {};
+          OBS_TYPES.forEach(t => { counts[t] = 0; });
+          fresh.forEach(i => { if (counts[i.type] !== undefined) counts[i.type]++; });
+          return new Response(JSON.stringify({ counts, total: fresh.length, updatedAt: new Date().toISOString() }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
+        }
+
+        if (request.method === "POST") {
+          if (!r2) return new Response(JSON.stringify({ error: "Shramba ni dosegljiva" }), {
+            status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          let body;
+          try { body = await request.json(); } catch (_) {
+            return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          if (!OBS_TYPES.includes(body.type)) {
+            return new Response(JSON.stringify({ error: "Neznana vrsta opazovanja" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const all   = await _obsRead();
+          const now   = Date.now();
+          const fresh = all.filter(i => now - new Date(i.ts).getTime() < 6 * 3600 * 1000);
+          fresh.unshift({ type: body.type, ts: new Date().toISOString() });
+          await r2.put("feedback/observations.json", JSON.stringify(fresh.slice(0, 500)), {
+            httpMetadata: { contentType: "application/json" }
+          });
           return new Response(JSON.stringify({ ok: true }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
           });

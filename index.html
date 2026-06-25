@@ -2730,17 +2730,46 @@
     <div class="card community-card">
       <div class="community-header">
         <div class="community-title">👥 Skupnostna ocena napovedi</div>
-        <div class="community-subtitle">Kako točna je bila današnja napoved za Rečico ob Savinji? Deli svojo izkušnjo in primerjaj z meritvami postaje IREICA1.</div>
+        <div class="community-subtitle">Oceni točnost napovedi in poroči, kaj je pri tebi zdaj. Skupaj gradimo sliko vremenskih razmer v dolini.</div>
+      </div>
+
+      <!-- Opazovanje v živo -->
+      <div class="community-obs-wrap">
+        <div class="community-obs-hdr">
+          <span class="community-obs-title">🌍 Opazovanje v živo</span>
+          <span class="community-obs-sub">Zadnje 3 ure · <span id="obs-total">0</span> poročil</span>
+        </div>
+        <div class="community-obs-counts" id="obs-counts"></div>
+        <div class="community-obs-label">Kako je pri tebi zdaj?</div>
+        <div class="community-obs-btns" id="obs-btns">
+          <button class="community-obs-btn" onclick="submitObservation('soncno')">☀️ Sončno</button>
+          <button class="community-obs-btn" onclick="submitObservation('oblacno')">⛅ Oblačno</button>
+          <button class="community-obs-btn" onclick="submitObservation('dezuje')">🌧️ Dežuje</button>
+          <button class="community-obs-btn" onclick="submitObservation('nevihta')">⛈️ Nevihta</button>
+          <button class="community-obs-btn" onclick="submitObservation('megleno')">🌫️ Megleno</button>
+          <button class="community-obs-btn" onclick="submitObservation('snezi')">❄️ Sneži</button>
+          <button class="community-obs-btn" onclick="submitObservation('vetrovno')">💨 Vetrovno</button>
+        </div>
+        <div class="community-obs-rl" id="obs-rl" style="display:none">Naslednje poročanje možno čez <b id="obs-rl-min"></b> min.</div>
+      </div>
+
+      <!-- Izbirnik dni + statistika -->
+      <div class="community-day-row">
+        <div class="community-day-sel">
+          <button class="community-day-btn active" data-day="0" onclick="communitySelectDay(0)">Danes</button>
+          <button class="community-day-btn" data-day="1" onclick="communitySelectDay(1)">Včeraj</button>
+          <button class="community-day-btn" data-day="2" onclick="communitySelectDay(2)">Pred 2 dnema</button>
+        </div>
       </div>
 
       <div class="community-stats" id="community-stats">
         <div class="community-stat">
           <div class="community-stat-val" id="community-avg">—</div>
-          <div class="community-stat-lbl">Povprečna ocena danes</div>
+          <div class="community-stat-lbl" id="community-avg-lbl">Povprečna ocena danes</div>
         </div>
         <div class="community-stat">
           <div class="community-stat-val" id="community-count">—</div>
-          <div class="community-stat-lbl">Ocen danes</div>
+          <div class="community-stat-lbl" id="community-count-lbl">Ocen danes</div>
         </div>
         <div class="community-stat">
           <div class="community-stat-val" id="community-total">—</div>
@@ -2778,7 +2807,7 @@
         <div class="community-already" id="community-already" style="display:none">Danes si že oddal/a oceno — hvala! Oceno lahko posodobiš z novim oddajanjem.</div>
       </div>
 
-      <div class="community-list-hdr">Nedavne ocene skupnosti</div>
+      <div class="community-list-hdr"><span id="community-list-hdr-txt">Ocene skupnosti — danes</span></div>
       <div class="community-list" id="community-list">
         <div class="community-loading">Nalagam ocene…</div>
       </div>
