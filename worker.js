@@ -1124,13 +1124,28 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // ── /feedback ─────────────────────────────────────────
       // GET  → { items, stats: { today: { avg, count }, total } }
       // POST → { rating, comment, author, forecast } → { ok: true }
+      // Storage: feedback/items.json in PHOTOS_R2 (already bound)
       if (path === "/feedback") {
+        const r2 = env?.PHOTOS_R2;
+
+        async function _fbRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get("feedback/items.json");
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+
+        async function _fbWrite(items) {
+          if (!r2) return;
+          await r2.put("feedback/items.json", JSON.stringify(items), {
+            httpMetadata: { contentType: "application/json" }
+          });
+        }
+
         if (request.method === "GET") {
-          let items = [];
-          if (env?.COUNTER_KV) {
-            const stored = await env.COUNTER_KV.get("feedback:items");
-            if (stored) items = JSON.parse(stored);
-          }
+          const items = await _fbRead();
           const today = new Date().toISOString().slice(0, 10);
           const todayItems = items.filter(i => i.date === today);
           const todayAvg = todayItems.length
@@ -1143,6 +1158,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         if (request.method === "POST") {
+          if (!r2) return new Response(JSON.stringify({ error: "Shramba ni dosegljiva" }), {
+            status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
           let body;
           try { body = await request.json(); } catch (_) {
             return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
@@ -1160,12 +1178,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             author: (body.author || "Anonimno").slice(0, 60),
             forecast: (body.forecast || "").slice(0, 100),
           };
-          if (env?.COUNTER_KV) {
-            const stored = await env.COUNTER_KV.get("feedback:items");
-            const items = stored ? JSON.parse(stored) : [];
-            items.unshift(entry);
-            await env.COUNTER_KV.put("feedback:items", JSON.stringify(items.slice(0, 200)));
-          }
+          const items = await _fbRead();
+          items.unshift(entry);
+          await _fbWrite(items.slice(0, 200));
           return new Response(JSON.stringify({ ok: true }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
           });
