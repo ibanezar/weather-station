@@ -2472,7 +2472,7 @@ function renderPastDays(){
   const days=[];
   for(let i=7;i>=1;i--){
     const d=new Date(today); d.setDate(d.getDate()-i);
-    const key=d.toISOString().slice(0,10);
+    const key=_localDateStr(d); // local date — toISOString() would shift back a day in UTC+ timezones
     if(stored[key]) days.push({date:key,data:stored[key]});
   }
   if(!days.length){
