@@ -16342,16 +16342,33 @@ async function loadFeedback() {
 function communitySetRating(n, silent) {
   _communityRating = n;
   document.querySelectorAll('.community-rating-btn').forEach(b => {
-    const r = parseInt(b.dataset.rating);
-    b.classList.toggle('community-rating-active', r === n);
+    b.classList.toggle('community-rating-active', parseInt(b.dataset.rating) === n);
   });
+  // Show/hide chips and reset selection
+  const lbl   = document.getElementById('community-chips-label');
+  const chips = document.getElementById('community-chips');
+  if (lbl)   lbl.style.display   = '';
+  if (chips) chips.style.display = '';
+  if (!silent) {
+    document.querySelectorAll('.community-chip').forEach(c => c.classList.remove('community-chip-active'));
+    // Pre-select "Vreme se je ujemalo" for high ratings
+    if (n >= 4) {
+      chips?.querySelectorAll('[data-group="pos"]').forEach(c => c.classList.add('community-chip-active'));
+    }
+  }
+}
+
+function communityToggleChip(btn) {
+  btn.classList.toggle('community-chip-active');
 }
 
 async function submitFeedback() {
   if (!_communityRating) { showToast('Prosimo izberi oceno pred oddajo.'); return; }
   const btn = document.getElementById('community-submit-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Pošiljam…'; }
-  const comment  = document.getElementById('community-comment')?.value?.trim() || '';
+  const selected = [...document.querySelectorAll('.community-chip.community-chip-active')]
+    .map(c => c.textContent.trim());
+  const comment  = selected.join(', ');
   const author   = document.getElementById('community-author')?.value?.trim()  || 'Anonimno';
   const forecast = document.getElementById('cond-label')?.textContent?.trim()  || '';
   try {
@@ -16402,7 +16419,7 @@ function renderFeedback(items, stats) {
         <span class="community-item-rating">${icon} <span class="community-item-stars" data-r="${item.rating}">${stars}</span> <span class="community-item-label">${label}</span></span>
         <span class="community-item-meta">${author} · ${date}</span>
       </div>
-      ${item.comment  ? `<div class="community-item-comment">${item.comment.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+      ${item.comment  ? `<div class="community-item-chips">${item.comment.split(',').map(t=>t.trim()).filter(Boolean).map(t=>`<span class="community-item-chip">${t.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`).join('')}</div>` : ''}
       ${item.forecast ? `<div class="community-item-forecast">Vreme ob oddaji: ${item.forecast.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
     </div>`;
   }).join('');

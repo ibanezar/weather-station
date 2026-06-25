@@ -2757,7 +2757,22 @@
           <button class="community-rating-btn" data-rating="4" onclick="communitySetRating(4)" title="Točna">🌤️<span>4 — Točna</span></button>
           <button class="community-rating-btn" data-rating="5" onclick="communitySetRating(5)" title="Popolnoma točna">☀️<span>5 — Odlična</span></button>
         </div>
-        <textarea id="community-comment" placeholder="Komentar (neobvezno) — npr. napovedali so dež, a je bil cel dan sončno…" maxlength="300" rows="3"></textarea>
+        <div class="community-chips-label" id="community-chips-label" style="display:none">Kaj je bilo drugače? <span>Izberi kar se ujema (neobvezno)</span></div>
+        <div class="community-chips" id="community-chips" style="display:none">
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">🌡️ Temperatura previsoka</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">🌡️ Temperatura prenizka</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">🌧️ Dež ni bil napovedan</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">☀️ Napovedali dež, ni padalo</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">💨 Premočan/prešibak veter</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">🌫️ Megleno, ni napovedano</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">⛈️ Nevihta ni bila napovedana</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">❄️ Sneg ni bil napovedan</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">🌤️ Oblačnost napačna</button>
+          <button class="community-chip" data-group="neg" onclick="communityToggleChip(this)">⏰ Napoved zamudna za dan</button>
+          <button class="community-chip" data-group="pos" onclick="communityToggleChip(this)">✅ Temperatura točna</button>
+          <button class="community-chip" data-group="pos" onclick="communityToggleChip(this)">✅ Padavine točno napovedane</button>
+          <button class="community-chip" data-group="pos" onclick="communityToggleChip(this)">✅ Vreme se je ujemalo</button>
+        </div>
         <input type="text" id="community-author" placeholder="Tvoje ime (neobvezno)" maxlength="60">
         <button class="community-submit-btn" id="community-submit-btn" onclick="submitFeedback()">Oddaj oceno</button>
         <div class="community-already" id="community-already" style="display:none">Danes si že oddal/a oceno — hvala! Oceno lahko posodobiš z novim oddajanjem.</div>
