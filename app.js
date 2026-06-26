@@ -1518,7 +1518,7 @@ function buildTicker(){
 
 function triggerLivePulse(){
   // Hero metric cards
-  ['hm-humidity','hm-pressure','hm-wind','hm-rain'].forEach(id=>{
+  ['hm-humidity','hm-pressure','hm-wind','hm-gust','hm-rain'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     el.classList.remove('pulse-live');void el.offsetWidth;
     el.classList.add('pulse-live');
@@ -1626,6 +1626,7 @@ function applyObs(obs){
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
+  countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   // UV hero card — value + color
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
   const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;}
