@@ -13952,7 +13952,7 @@ function _buildOcnSSTChart(m){
   const todayStr=_localDateStr(new Date());
   const todayIdx=dates.indexOf(todayStr);
 
-  const W=880,H=100,pad={l:30,r:8,t:10,b:18};
+  const W=880,H=160,pad={l:38,r:10,t:14,b:24};
   const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
   const valid=vals.filter(v=>v!=null);
   const vmin=Math.floor(Math.min(...valid)-0.5),vmax=Math.ceil(Math.max(...valid)+0.5);
@@ -13979,30 +13979,35 @@ function _buildOcnSSTChart(m){
   const todayX=todayIdx>=0?xS(todayIdx):null;
   const step=vmax-vmin>8?2:1;
 
+  // Area fill under past line
+  const fillPath=pathPast?pathPast+' L'+xS(Math.min(todayIdx>=0?todayIdx:dates.length-1,dates.length-1))+','+yS(vmin)+' L'+xS(0)+','+yS(vmin)+' Z':'';
+
   let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">`;
+  svg+=`<defs><linearGradient id="sst-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.18"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.02"/></linearGradient></defs>`;
   for(let v=Math.ceil(vmin);v<=vmax;v+=step){
     const y=yS(v);
     svg+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
-    svg+=`<text x="${pad.l-3}" y="${y+3}" font-size="7.5" fill="var(--muted)" text-anchor="end">${v}°</text>`;
+    svg+=`<text x="${pad.l-4}" y="${y+4}" font-size="9.5" fill="var(--muted)" text-anchor="end" font-family="JetBrains Mono,monospace">${v}°</text>`;
   }
   if(avgY>=pad.t&&avgY<=H-pad.b){
-    svg+=`<line x1="${pad.l}" y1="${avgY}" x2="${W-pad.r}" y2="${avgY}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="5,3" opacity=".55"/>`;
-    svg+=`<text x="${W-pad.r}" y="${avgY-2}" font-size="7" fill="var(--amber)" text-anchor="end" opacity=".75">klimatol. povp. ${climAvg} °C</text>`;
+    svg+=`<line x1="${pad.l}" y1="${avgY}" x2="${W-pad.r}" y2="${avgY}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="5,3" opacity=".6"/>`;
+    svg+=`<text x="${W-pad.r}" y="${avgY-3}" font-size="8.5" fill="var(--amber)" text-anchor="end" opacity=".8">povp. ${climAvg} °C</text>`;
   }
   if(todayX!=null)svg+=`<line x1="${todayX}" y1="${pad.t}" x2="${todayX}" y2="${H-pad.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity=".45"/>`;
-  if(pathPast)svg+=`<path d="${pathPast}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round"/>`;
+  if(fillPath)svg+=`<path d="${fillPath}" fill="url(#sst-fill)"/>`;
+  if(pathPast)svg+=`<path d="${pathPast}" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
   if(pathFuture)svg+=`<path d="${pathFuture}" fill="none" stroke="var(--cyan)" stroke-width="1.5" stroke-dasharray="5,3" stroke-linejoin="round" opacity=".65"/>`;
   // Month labels
   let lastMon='';
   const monNames=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
   dates.forEach((d,i)=>{
     const mo=d.slice(5,7);
-    if(mo!==lastMon){lastMon=mo;svg+=`<text x="${xS(i)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${monNames[parseInt(mo,10)-1]}</text>`;}
+    if(mo!==lastMon){lastMon=mo;svg+=`<text x="${xS(i)}" y="${H-2}" font-size="9.5" fill="var(--muted)" text-anchor="middle" font-family="JetBrains Mono,monospace">${monNames[parseInt(mo,10)-1]}</text>`;}
   });
   // Crosshair elements (hidden until hover/touch)
   svg+=`<line id="ocn-sst-xline" x1="0" y1="${pad.t}" x2="0" y2="${H-pad.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity="0" style="pointer-events:none"/>`;
   svg+=`<line id="ocn-sst-yline" x1="${pad.l}" y1="0" x2="${W-pad.r}" y2="0" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity="0" style="pointer-events:none"/>`;
-  svg+=`<circle id="ocn-sst-dot" cx="0" cy="0" r="4" fill="var(--cyan)" stroke="white" stroke-width="1.5" opacity="0" style="pointer-events:none"/>`;
+  svg+=`<circle id="ocn-sst-dot" cx="0" cy="0" r="5" fill="var(--cyan)" stroke="white" stroke-width="2" opacity="0" style="pointer-events:none"/>`;
   svg+=`<rect id="ocn-sst-hit" x="${pad.l}" y="${pad.t}" width="${cW}" height="${cH}" fill="transparent"/>`;
   svg+='</svg>';
   el.innerHTML=svg;
