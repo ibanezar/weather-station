@@ -3324,6 +3324,16 @@ if('serviceWorker' in navigator){
   });
 }
 
+// Pause/resume all canvas animations when the tab is hidden (reduces battery/heat on mobile)
+document.addEventListener('visibilitychange',()=>{
+  _animPaused=document.hidden;
+  if(!document.hidden){
+    if(_meshCanvas&&!_meshAnimId)_meshDraw();
+    if(_heroCanvas&&!_heroAnimId)animateHero();
+    if(_sfActive&&!_sfAnim){_sfPrev=0;_sfAnim=requestAnimationFrame(_sfFrame);}
+  }
+});
+
 // Tab nav scroll-fade indicator + bounce arrow
 (function(){
   const nav=document.querySelector('.tab-nav');
@@ -6947,6 +6957,9 @@ function scheduleLightning(){
 }
 
 
+// ── Animation pause flag (set on visibilitychange) ───────
+let _animPaused=false;
+
 // ── Hero canvas particles ─────────────────────────────────
 let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='';
 function initHeroCanvas(){
@@ -6980,6 +6993,7 @@ function makeHeroP(cond,W,H,init=false){
   return{type:'wisp',x:r()*W,y:r()*H,vx:.08+r()*.12,w:20+r()*35,h:4+r()*8,op:.02+r()*.03};
 }
 function animateHero(){
+  if(_animPaused){_heroAnimId=null;return;}
   if(!_heroCtx||!_heroCanvas){return;}
   const ctx=_heroCtx,W=_heroCanvas.width,H=_heroCanvas.height,t=performance.now()/1000;
   ctx.clearRect(0,0,W,H);
@@ -7059,6 +7073,30 @@ function meshTimeOverride(t){
   return null;
 }
 
+function _meshDraw(){
+  if(_animPaused||!_meshCtx||!_meshCanvas){_meshAnimId=null;return;}
+  const ctx=_meshCtx,W=_meshCanvas.width,H=_meshCanvas.height;
+  // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
+  if(_meshFrame%3!==0&&navigator.maxTouchPoints>0){_meshFrame++;_meshAnimId=requestAnimationFrame(_meshDraw);return;}
+  ctx.clearRect(0,0,W,H);
+  _meshNodes.forEach(n=>{
+    const x=n.x*W,y=n.y*H,r=n.r*Math.max(W,H)*0.85;
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,n.color);g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  });
+  if(_meshFrame%3===0){
+    const spd=_meshWindSpeed*.00006,dx=Math.sin(_meshWindAngle)*spd,dy=-Math.cos(_meshWindAngle)*spd;
+    _meshNodes.forEach(n=>{
+      n.x+=dx+n.vx;n.y+=dy+n.vy;
+      if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
+      if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
+    });
+  }
+  _meshFrame++;
+  _meshAnimId=requestAnimationFrame(_meshDraw);
+}
+
 function initMeshCanvas(){
   const c=document.getElementById('mesh-canvas');
   if(!c)return;
@@ -7074,27 +7112,7 @@ function initMeshCanvas(){
     color:MESH_PALETTES.sunny[i]||'rgba(14,165,233,.2)',
     targetColor:null,
   }));
-  const draw=()=>{
-    const ctx=_meshCtx,W=c.width,H=c.height;
-    ctx.clearRect(0,0,W,H);
-    _meshNodes.forEach(n=>{
-      const x=n.x*W,y=n.y*H,r=n.r*Math.max(W,H)*0.85;
-      const g=ctx.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,n.color);g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    });
-    if(_meshFrame%3===0){
-      const spd=_meshWindSpeed*.00006,dx=Math.sin(_meshWindAngle)*spd,dy=-Math.cos(_meshWindAngle)*spd;
-      _meshNodes.forEach(n=>{
-        n.x+=dx+n.vx;n.y+=dy+n.vy;
-        if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
-        if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
-      });
-    }
-    _meshFrame++;
-    _meshAnimId=requestAnimationFrame(draw);
-  };
-  draw();
+  _meshDraw();
 }
 
 function updateMeshColors(cond,windDir,windSpeed){
@@ -7579,6 +7597,7 @@ function _sfMoon(ctx,W,H){
 }
 
 function _sfFrame(ts){
+  if(_animPaused){_sfAnim=null;return;}
   if(!_sfActive){_sfAnim=null;return;}
   const dt=_sfPrev?(ts-_sfPrev)/1000:0.016;_sfPrev=ts;
   const c=_sfCanvas,ctx=_sfCtx,W=c.width,H=c.height,t=ts/1000;
@@ -13980,10 +13999,40 @@ function _buildOcnSSTChart(m){
     const mo=d.slice(5,7);
     if(mo!==lastMon){lastMon=mo;svg+=`<text x="${xS(i)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${monNames[parseInt(mo,10)-1]}</text>`;}
   });
+  // Crosshair elements (hidden until hover/touch)
+  svg+=`<line id="ocn-sst-xline" x1="0" y1="${pad.t}" x2="0" y2="${H-pad.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity="0" style="pointer-events:none"/>`;
+  svg+=`<line id="ocn-sst-yline" x1="${pad.l}" y1="0" x2="${W-pad.r}" y2="0" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,2" opacity="0" style="pointer-events:none"/>`;
+  svg+=`<circle id="ocn-sst-dot" cx="0" cy="0" r="4" fill="var(--cyan)" stroke="white" stroke-width="1.5" opacity="0" style="pointer-events:none"/>`;
+  svg+=`<rect id="ocn-sst-hit" x="${pad.l}" y="${pad.t}" width="${cW}" height="${cH}" fill="transparent"/>`;
   svg+='</svg>';
   el.innerHTML=svg;
   const leg=document.getElementById('ocn-sst-leg');
   if(leg)leg.innerHTML='<span>—— izmerjena SST</span><span style="opacity:.6">- - - napoved</span><span style="color:var(--amber)">— — klimatol. povprečje</span>';
+
+  // Attach crosshair interaction
+  const svgEl=el.querySelector('svg');
+  const xLine=document.getElementById('ocn-sst-xline');
+  const yLine=document.getElementById('ocn-sst-yline');
+  const dot=document.getElementById('ocn-sst-dot');
+  const tip=document.getElementById('chart-tip');
+  function _sstPointer(clientX,clientY){
+    const r=svgEl.getBoundingClientRect(),vb=svgEl.viewBox.baseVal;
+    const svgX=(clientX-r.left)/r.width*vb.width;
+    const idx=Math.max(0,Math.min(dates.length-1,Math.round((svgX-pad.l)/cW*(dates.length-1))));
+    const v=vals[idx];if(v==null)return;
+    const px=xS(idx),py=yS(v);
+    xLine.setAttribute('x1',px);xLine.setAttribute('x2',px);xLine.setAttribute('opacity','0.6');
+    yLine.setAttribute('y1',py);yLine.setAttribute('y2',py);yLine.setAttribute('opacity','0.4');
+    dot.setAttribute('cx',px);dot.setAttribute('cy',py);dot.setAttribute('opacity','1');
+    const dt=new Date(dates[idx]);
+    tip.innerHTML='<span style="color:var(--cyan);font-weight:600">'+v.toFixed(1)+' °C</span>&ensp;'+dt.getDate()+'. '+monNames[dt.getMonth()]+' '+dt.getFullYear();
+    tip.style.opacity='1';tip.style.left=(clientX+14)+'px';tip.style.top=(clientY-28)+'px';
+  }
+  function _sstHide(){xLine.setAttribute('opacity','0');yLine.setAttribute('opacity','0');dot.setAttribute('opacity','0');tip.style.opacity='0';}
+  svgEl.addEventListener('mousemove',e=>_sstPointer(e.clientX,e.clientY));
+  svgEl.addEventListener('mouseleave',_sstHide);
+  svgEl.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];_sstPointer(t.clientX,t.clientY);},{passive:false});
+  svgEl.addEventListener('touchend',_sstHide);
 }
 
 function _buildOcnWaveChart(m){
