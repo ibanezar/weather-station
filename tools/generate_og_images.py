@@ -1,13 +1,29 @@
-"""Generate per-article OG images (1200x630) for Meteorec blog articles."""
+"""Generate per-article OG images (1200x630) for Meteorec blog articles.
+
+Background photos sourced from Unsplash (free to use, no attribution required).
+Source photos stored in og/bg/. Run this script to regenerate all OG images.
+"""
 from PIL import Image, ImageDraw, ImageFont
-import os, math
+import os
 
 FONT_BOLD    = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 FONT_REGULAR = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
 
 W, H = 1200, 630
-OUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'og')
+SCRIPT_DIR = os.path.dirname(__file__)
+BG_DIR  = os.path.join(SCRIPT_DIR, '..', 'og', 'bg')
+OUT_DIR = os.path.join(SCRIPT_DIR, '..', 'og')
 os.makedirs(OUT_DIR, exist_ok=True)
+
+# Background photos: og/bg/{key}.jpg — sourced from Unsplash (CC0)
+# storm-clouds:    unsplash.com/photos/98mac9dxVfM
+# misty-valley:    unsplash.com/photos/RFrA46eVE9A
+# flood-river:     unsplash.com/photos/dNIAzWFA7iQ
+# drought:         unsplash.com/photos/jKPU-Ph1irs
+# ocean-storm:     unsplash.com/photos/Cc9IPYJ_BSY
+# rain-overcast:   unsplash.com/photos/gih3eKh2cKA
+# spring:          unsplash.com/photos/premium_photo-1661878589476
+# weather-station: unsplash.com/photos/1598287504038
 
 ARTICLES = [
     {
@@ -16,6 +32,7 @@ ARTICLES = [
         'subtitle': 'Rečica ob Savinji · IREICA1',
         'section': 'Vremenski povzetki',
         'accent': (14, 165, 233),
+        'photo': 'spring',
     },
     {
         'slug': 'vremenski-povzetek-april-2026',
@@ -23,6 +40,7 @@ ARTICLES = [
         'subtitle': 'Rečica ob Savinji · IREICA1',
         'section': 'Vremenski povzetki',
         'accent': (14, 165, 233),
+        'photo': 'rain-overcast',
     },
     {
         'slug': 'padavinski-vzorci-savinjske-doline',
@@ -30,6 +48,7 @@ ARTICLES = [
         'subtitle': 'Analiza 6 let meritev · IREICA1',
         'section': 'Analize',
         'accent': (99, 102, 241),
+        'photo': 'misty-valley',
     },
     {
         'slug': 'el-nino-2026',
@@ -37,6 +56,7 @@ ARTICLES = [
         'subtitle': 'Super El Niño v zimi 2026/27?',
         'section': 'Analize',
         'accent': (239, 68, 68),
+        'photo': 'ocean-storm',
     },
     {
         'slug': 'poplave-2023',
@@ -44,6 +64,7 @@ ARTICLES = [
         'subtitle': 'Najhujša naravna nesreča v zgodovini',
         'section': 'Analize',
         'accent': (59, 130, 246),
+        'photo': 'flood-river',
     },
     {
         'slug': 'vrocinski-val-junij-2026',
@@ -51,6 +72,7 @@ ARTICLES = [
         'subtitle': 'Se obeta nov junijski rekord?',
         'section': 'Analize',
         'accent': (245, 158, 11),
+        'photo': 'drought',
     },
     {
         'slug': 'junij-2026-dvoglavi-mesec',
@@ -58,6 +80,7 @@ ARTICLES = [
         'subtitle': '162 mm dežja in 30,1 °C · IREICA1',
         'section': 'Analize',
         'accent': (77, 159, 248),
+        'photo': 'storm-clouds',
     },
     {
         'slug': 'blog',
@@ -65,6 +88,7 @@ ARTICLES = [
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
         'section': 'Blog',
         'accent': (34, 197, 94),
+        'photo': 'misty-valley',
     },
     {
         'slug': 'o-postaji',
@@ -72,103 +96,102 @@ ARTICLES = [
         'subtitle': 'Rečica ob Savinji · 366 m n.m.',
         'section': 'O postaji',
         'accent': (168, 85, 247),
+        'photo': 'weather-station',
     },
 ]
 
 
-def lerp_color(c1, c2, t):
-    return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
+def smart_crop(img, w, h):
+    ratio = img.width / img.height
+    target = w / h
+    if ratio > target:
+        new_h, new_w = h, int(ratio * h)
+    else:
+        new_w, new_h = w, int(w / ratio)
+    img = img.resize((new_w, new_h), Image.LANCZOS)
+    x = (new_w - w) // 2
+    y = (new_h - h) // 3  # crop slightly above center
+    return img.crop((x, y, x + w, y + h))
+
+
+def dark_overlay(img):
+    ov = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    for row in range(H):
+        t = row / H
+        center_dist = abs(t - 0.5) * 2
+        alpha = int(110 + center_dist * 100)
+        d.line([(0, row), (W, row)], fill=(0, 0, 0, alpha))
+    result = img.convert('RGBA')
+    result = Image.alpha_composite(result, ov)
+    return result.convert('RGB')
 
 
 def make_og(article):
-    img = Image.new('RGB', (W, H), (10, 22, 40))
+    photo_path = os.path.join(BG_DIR, article['photo'] + '.jpg')
+    bg = Image.open(photo_path).convert('RGB')
+    bg = smart_crop(bg, W, H)
+    img = dark_overlay(bg)
     draw = ImageDraw.Draw(img)
 
-    # Background gradient (dark navy → slightly lighter at bottom)
-    bg_top = (10, 22, 40)
-    bg_bot = (15, 33, 58)
-    for y in range(H):
-        t = y / H
-        color = lerp_color(bg_top, bg_bot, t)
-        draw.line([(0, y), (W, y)], fill=color)
-
-    # Accent bar — left edge
     accent = article['accent']
-    bar_w = 8
-    draw.rectangle([0, 0, bar_w, H], fill=accent)
+    pad = 52
 
-    # Subtle accent glow bottom-right
-    glow_r = 350
-    glow_cx, glow_cy = W - 80, H + 40
-    for r in range(glow_r, 0, -4):
-        alpha = int(18 * (1 - r / glow_r))
-        layer = Image.new('RGB', (W, H), (0, 0, 0))
-        ldraw = ImageDraw.Draw(layer)
-        ldraw.ellipse(
-            [glow_cx - r, glow_cy - r, glow_cx + r, glow_cy + r],
-            fill=tuple(min(255, c + 20) for c in accent)
-        )
-        img = Image.blend(img, layer, alpha / 255)
-        draw = ImageDraw.Draw(img)
+    # Accent bar left edge
+    draw.rectangle([0, 0, 6, H], fill=accent)
 
-    # ── Branding top-left ──
-    pad = 56
-    font_brand  = ImageFont.truetype(FONT_BOLD, 30)
-    font_domain = ImageFont.truetype(FONT_REGULAR, 22)
-    draw.text((pad + bar_w + 16, pad), 'Meteorec', font=font_brand,
+    # Branding top-left
+    font_brand  = ImageFont.truetype(FONT_BOLD, 28)
+    font_domain = ImageFont.truetype(FONT_REGULAR, 20)
+    draw.text((pad, pad), 'Meteorec', font=font_brand,
               fill=tuple(min(255, c + 60) for c in accent))
-    draw.text((pad + bar_w + 16, pad + 38), 'meteorec.si', font=font_domain,
-              fill=(120, 150, 180))
+    draw.text((pad, pad + 36), 'meteorec.si', font=font_domain,
+              fill=(210, 225, 245))
 
-    # ── Article title (centered vertically) ──
+    # Article title centered
     lines = article['title'].split('\n')
     n = len(lines)
-    if n == 1 or max(len(l) for l in lines) > 22:
-        font_title = ImageFont.truetype(FONT_BOLD, 72)
-    else:
-        font_title = ImageFont.truetype(FONT_BOLD, 80)
-
-    line_h = font_title.size + 14
+    font_size = 72 if (n == 1 or max(len(l) for l in lines) > 22) else 82
+    font_title = ImageFont.truetype(FONT_BOLD, font_size)
+    line_h = font_title.size + 12
     total_h = n * line_h
-    y_start = (H - total_h) // 2 + 10
+    y_start = (H - total_h) // 2 + 8
 
     for i, line in enumerate(lines):
         bbox = draw.textbbox((0, 0), line, font=font_title)
         tw = bbox[2] - bbox[0]
         x = (W - tw) // 2
         y = y_start + i * line_h
-        # subtle shadow
-        draw.text((x + 3, y + 3), line, font=font_title, fill=(0, 0, 0, 100))
-        draw.text((x, y), line, font=font_title, fill=(240, 248, 255))
+        for dx, dy in [(-2,-2),(2,-2),(-2,2),(2,2),(0,3),(3,0),(-3,0),(0,-3)]:
+            draw.text((x+dx, y+dy), line, font=font_title, fill=(0, 0, 0))
+        draw.text((x, y), line, font=font_title, fill=(255, 255, 255))
 
-    # ── Subtitle ──
+    # Subtitle
     font_sub = ImageFont.truetype(FONT_REGULAR, 28)
     sub = article['subtitle']
     bbox = draw.textbbox((0, 0), sub, font=font_sub)
     sw = bbox[2] - bbox[0]
-    draw.text(((W - sw) // 2, y_start + n * line_h + 20), sub,
-              font=font_sub, fill=(140, 170, 200))
+    draw.text(((W - sw) // 2, y_start + n * line_h + 18), sub,
+              font=font_sub, fill=(210, 230, 255))
 
-    # ── Section badge bottom-left ──
-    font_badge = ImageFont.truetype(FONT_BOLD, 22)
+    # Section badge bottom-left
+    font_badge = ImageFont.truetype(FONT_BOLD, 20)
     badge_text = article['section'].upper()
-    bx, by = pad + bar_w + 16, H - pad - 10
+    bx, by = pad, H - pad - 8
     bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
-    bw = bbox[2] - bbox[0] + 32
-    bh = bbox[3] - bbox[1] + 16
-    draw.rounded_rectangle([bx, by - bh, bx + bw, by],
-                           radius=6,
-                           fill=(*accent, 40),
-                           outline=(*accent, 120))
-    draw.text((bx + 16, by - bh + 8), badge_text, font=font_badge, fill=accent)
+    bw = bbox[2] - bbox[0] + 28
+    bh = bbox[3] - bbox[1] + 14
+    draw.rounded_rectangle([bx, by - bh, bx + bw, by], radius=6,
+                           fill=(*accent, 50), outline=(*accent, 210))
+    draw.text((bx + 14, by - bh + 7), badge_text, font=font_badge, fill=(255, 255, 255))
 
-    # ── Station badge bottom-right ──
-    font_stn = ImageFont.truetype(FONT_REGULAR, 22)
+    # Station badge bottom-right
+    font_stn = ImageFont.truetype(FONT_REGULAR, 20)
     stn_text = 'IREICA1 · 366 m n.m.'
     bbox = draw.textbbox((0, 0), stn_text, font=font_stn)
     sw2 = bbox[2] - bbox[0]
-    draw.text((W - pad - sw2, H - pad + 2), stn_text,
-              font=font_stn, fill=(80, 110, 140))
+    draw.text((W - pad - sw2, H - pad + 4), stn_text,
+              font=font_stn, fill=(190, 210, 230))
 
     out_path = os.path.join(OUT_DIR, f"{article['slug']}.jpg")
     img.save(out_path, 'JPEG', quality=92)
