@@ -205,9 +205,9 @@
     <p>Tukaj nam postaja IREICA1 ponudi nekaj, česar splošna državna napoved ne more: natančno lokalno padavinsko bilanco. Koliko dežja je v Rečici padlo v zadnjih 30 dneh v primerjavi z dolgoletnim povprečjem? Primanjkljaj je ključen del razlage, zakaj nas vročina tako "peče".</p>
 
     <div class="chart-card">
-      <h3>IREICA1 · Tedenske padavine vs. dolgoletno povprečje (zadnjih 30 dni)</h3>
+      <h3>IREICA1 · Dnevne padavine med vročinskim valom</h3>
       <canvas id="chartRain"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Modri stolpci: izmerjene padavine (IREICA1). Bela prekinjena črta: dolgoletno tedensko povprečje. Kljub mokri prvi polovici junija so zadnji dnevi vala potekali praktično brez padavin.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Dnevne padavine postaje IREICA1 med vročinskim valom. Zadnji dnevi vala so potekali praktično brez padavin.</p>
     </div>
 
     <h2>Nevihte: Kako se vročinski val lomi</h2>
@@ -268,12 +268,17 @@ const CHART_DEFAULTS = {
   }
 };
 
-// Primorska ocena (ARSO napovedi) — dejanski podatki niso dostopni
-const PRIMOR_OCENA = [33.4, 35.1, 36.2, 37.0, 36.4, 37.8, 38.1, 38.4, 38.8, 39.2];
+// Primorska ocena (ARSO napovedi za junij 2026, 20.–26. jun)
+const PRIMOR_OCENA = {
+  '2026-06-20': 37.0,
+  '2026-06-21': 36.4,
+  '2026-06-22': 37.8,
+  '2026-06-23': 38.1,
+  '2026-06-24': 38.4,
+  '2026-06-25': 38.8,
+  '2026-06-26': 39.2,
+};
 
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
-}
 function showChartError(id, msg) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
@@ -287,41 +292,55 @@ function showChartError(id, msg) {
 }
 
 async function loadAndDrawCharts() {
-  // Fetch wave data: June 17 → today (or June 30 max)
-  const waveStart = '2026-06-17';
-  const waveEnd   = fmtDate(new Date(Math.min(Date.now(), new Date('2026-06-30').getTime())));
-
-  // Fetch full-month data for precipitation chart
-  const monthStart = '2026-06-01';
-
-  let waveSummaries = [], monthSummaries = [];
+  // Fetch hourly WU data (last ~7 days)
+  let observations = [];
   try {
-    const [waveRes, monthRes] = await Promise.all([
-      fetch(`${PROXY}/ecowitt-history?start=${waveStart}&end=${waveEnd}`),
-      fetch(`${PROXY}/ecowitt-history?start=${monthStart}&end=${waveEnd}`),
-    ]);
-    if (waveRes.ok)  waveSummaries  = (await waveRes.json()).summaries  || [];
-    if (monthRes.ok) monthSummaries = (await monthRes.json()).summaries || [];
+    const res = await fetch(`${PROXY}/hourly`);
+    if (res.ok) observations = (await res.json()).observations || [];
   } catch (e) {
     console.warn('[blog charts]', e);
   }
 
-  // Helper: format label "17. jun"
-  const dayLabel = iso => {
-    const [, , d] = iso.split('-');
-    return `${parseInt(d)}. jun`;
-  };
+  if (!observations.length) {
+    ['chartDailyMax','chartComparison','chartNightMin','chartRain'].forEach(id =>
+      showChartError(id, 'Podatkov za ta graf trenutno ni mogoče naložiti.')
+    );
+    return;
+  }
+
+  // Group hourly observations by calendar day
+  const byDay = {};
+  for (const o of observations) {
+    const day = o.obsTimeLocal.slice(0, 10);
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(o.metric);
+  }
+
+  // Build sorted daily summaries
+  const days = Object.keys(byDay).sort().map(day => {
+    const hrs = byDay[day];
+    const tmaxArr = hrs.map(h => h.tempHigh).filter(v => v != null);
+    const tminArr = hrs.map(h => h.tempLow).filter(v => v != null);
+    // precipTotal in WU hourly is cumulative from midnight → take max per day
+    const precipArr = hrs.map(h => h.precipTotal).filter(v => v != null);
+    return {
+      day,
+      tmax: tmaxArr.length ? Math.max(...tmaxArr) : null,
+      tmin: tminArr.length ? Math.min(...tminArr) : null,
+      precip: precipArr.length ? Math.max(...precipArr) : 0,
+    };
+  });
+
+  const dayLabel = iso => `${parseInt(iso.slice(8))}. jun`;
 
   // ── Graf 1: Dnevni maksimumi med valom ──────────────────────
   (function() {
-    if (!waveSummaries.length) { showChartError('chartDailyMax', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
-
-    const labels = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
-    const tmax   = waveSummaries.map(s => s.metric.tempHigh);
-    const recIdx = tmax.indexOf(Math.max(...tmax.filter(Boolean)));
-
-    const barColors   = tmax.map(t => t >= 30 ? 'rgba(239,68,68,.8)' : 'rgba(249,115,22,.7)');
-    const borderColors = tmax.map(t => t >= 30 ? '#ef4444' : '#f97316');
+    const labels = days.map(d => dayLabel(d.day));
+    const tmax   = days.map(d => d.tmax);
+    const validTmax = tmax.filter(Boolean);
+    if (!validTmax.length) { showChartError('chartDailyMax', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
+    const recVal = Math.max(...validTmax);
+    const recIdx = tmax.indexOf(recVal);
 
     const starPlugin = {
       id: 'recordStar',
@@ -339,7 +358,6 @@ async function loadAndDrawCharts() {
       }
     };
 
-    const recVal = tmax[recIdx];
     new Chart(document.getElementById('chartDailyMax'), {
       type: 'bar',
       data: {
@@ -348,8 +366,8 @@ async function loadAndDrawCharts() {
           {
             label: 'Tmax IREICA1 (°C)',
             data: tmax,
-            backgroundColor: barColors,
-            borderColor: borderColors,
+            backgroundColor: tmax.map(t => t >= 30 ? 'rgba(239,68,68,.8)' : 'rgba(249,115,22,.7)'),
+            borderColor:     tmax.map(t => t >= 30 ? '#ef4444' : '#f97316'),
             borderWidth: 1.5,
             borderRadius: 5,
             order: 2,
@@ -395,19 +413,15 @@ async function loadAndDrawCharts() {
       plugins: [starPlugin]
     });
 
-    // Update caption dynamically
     const cap = document.getElementById('capDailyMax');
-    if (cap && recVal) cap.textContent = `Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje rekord postaje IREICA1 (${recVal.toFixed(1)} °C, ${dayLabel(waveSummaries[recIdx].obsTimeLocal)}).`;
+    if (cap) cap.textContent = `Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje najvišjo izmerjena vrednost v prikazanem obdobju (${recVal.toFixed(1)} °C, ${dayLabel(days[recIdx].day)}).`;
   })();
 
   // ── Graf 2: Primerjava IREICA1 vs. Primorska ────────────────
   (function() {
-    if (!waveSummaries.length) { showChartError('chartComparison', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
-
-    const labels   = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
-    const tmaxLocal = waveSummaries.map(s => s.metric.tempHigh);
-    // Primorska: ocena po ARSO napovedih — omeji na število dni ki jih imamo
-    const tmaxPrimor = PRIMOR_OCENA.slice(0, labels.length);
+    const labels    = days.map(d => dayLabel(d.day));
+    const tmaxLocal = days.map(d => d.tmax);
+    const tmaxPrimor = days.map(d => PRIMOR_OCENA[d.day] || null);
 
     new Chart(document.getElementById('chartComparison'), {
       type: 'line',
@@ -458,7 +472,8 @@ async function loadAndDrawCharts() {
             callbacks: {
               label: ctx => {
                 if (ctx.dataset.borderDash) return ` Rekord SLO: 38,4 °C`;
-                return ` ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) : '—'} °C`;
+                const v = ctx.parsed.y;
+                return ` ${v != null ? v.toFixed(1) : '—'} °C`;
               },
               afterBody: items => {
                 const loc = items.find(i => i.datasetIndex === 1);
@@ -483,14 +498,9 @@ async function loadAndDrawCharts() {
 
   // ── Graf 3: Nočni minimumi ──────────────────────────────────
   (function() {
-    if (!waveSummaries.length) { showChartError('chartNightMin', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
-
-    const labels = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
-    const tmin   = waveSummaries.map(s => s.metric.tempLow);
+    const labels = days.map(d => dayLabel(d.day));
+    const tmin   = days.map(d => d.tmin);
     const hasTropical = tmin.some(t => t != null && t >= 20);
-
-    const barColors   = tmin.map(t => t != null && t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)');
-    const borderColors = tmin.map(t => t != null && t >= 20 ? '#ef4444' : '#4d9ff8');
 
     new Chart(document.getElementById('chartNightMin'), {
       type: 'bar',
@@ -500,8 +510,8 @@ async function loadAndDrawCharts() {
           {
             label: 'Tmin (°C)',
             data: tmin,
-            backgroundColor: barColors,
-            borderColor: borderColors,
+            backgroundColor: tmin.map(t => t != null && t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)'),
+            borderColor:     tmin.map(t => t != null && t >= 20 ? '#ef4444' : '#4d9ff8'),
             borderWidth: 1.5,
             borderRadius: 5,
             order: 2,
@@ -546,70 +556,36 @@ async function loadAndDrawCharts() {
       }
     });
 
-    // Update caption dynamically
     const cap = document.getElementById('capNightMin');
     if (cap) {
       if (hasTropical) {
         cap.textContent = 'Rdeča prekinjena črta označuje prag tropske noči (20 °C). Rdeče obarvane noči so prebile prag.';
       } else {
-        const maxMin = Math.max(...tmin.filter(Boolean));
-        const maxMinDay = waveSummaries[tmin.indexOf(maxMin)];
-        cap.textContent = `Rdeča prekinjena črta označuje prag tropske noči (20 °C). V tem valu postaja ni zabeležila nobene tropske noči — najbližje ${maxMin.toFixed(1)} °C (${dayLabel(maxMinDay.obsTimeLocal)}).`;
+        const validTmin = tmin.filter(Boolean);
+        const maxMin = Math.max(...validTmin);
+        const maxMinDay = days[tmin.indexOf(maxMin)];
+        cap.textContent = `Rdeča prekinjena črta označuje prag tropske noči (20 °C). V tem obdobju postaja ni zabeležila nobene tropske noči — najbližje ${maxMin.toFixed(1)} °C (${dayLabel(maxMinDay.day)}).`;
       }
     }
   })();
 
-  // ── Graf 4: Tedenske padavine vs. povprečje ─────────────────
+  // ── Graf 4: Dnevne padavine med valom ──────────────────────
   (function() {
-    if (!monthSummaries.length) { showChartError('chartRain', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
-
-    // Razdelimo po tednih znotraj junija
-    const weekDefs = [
-      { label: '1.–7. jun',  start: '2026-06-01', end: '2026-06-07' },
-      { label: '8.–14. jun', start: '2026-06-08', end: '2026-06-14' },
-      { label: '15.–21. jun',start: '2026-06-15', end: '2026-06-21' },
-      { label: '22. jun +',  start: '2026-06-22', end: '9999-12-31' },
-    ];
-    const weekLabels = [];
-    const actual     = [];
-    // Dolgoletno tedensko povprečje za junij (~22 mm/teden)
-    const average    = [22.0, 22.0, 22.0, 15.5];
-
-    weekDefs.forEach((w, i) => {
-      const days = monthSummaries.filter(s => s.obsTimeLocal >= w.start && s.obsTimeLocal <= w.end);
-      if (!days.length) return;
-      weekLabels.push(w.label);
-      actual.push(parseFloat(days.reduce((sum, s) => sum + (s.metric.precipTotal || 0), 0).toFixed(1)));
-    });
-
-    const avg = average.slice(0, weekLabels.length);
+    const labels = days.map(d => dayLabel(d.day));
+    const precip = days.map(d => d.precip);
 
     new Chart(document.getElementById('chartRain'), {
       type: 'bar',
       data: {
-        labels: weekLabels,
+        labels,
         datasets: [
           {
-            label: 'Izmerjene padavine (mm)',
-            data: actual,
-            backgroundColor: actual.map((v, i) => v < (avg[i] || 22) ? 'rgba(249,115,22,.7)' : 'rgba(34,211,238,.65)'),
-            borderColor:     actual.map((v, i) => v < (avg[i] || 22) ? '#f97316' : '#22d3ee'),
+            label: 'Dnevne padavine IREICA1 (mm)',
+            data: precip,
+            backgroundColor: precip.map(v => v > 0 ? 'rgba(34,211,238,.65)' : 'rgba(249,115,22,.4)'),
+            borderColor:     precip.map(v => v > 0 ? '#22d3ee' : '#f97316'),
             borderWidth: 1.5,
             borderRadius: 5,
-            order: 2,
-          },
-          {
-            type: 'line',
-            label: 'Dolgoletno povprečje (mm)',
-            data: avg,
-            borderColor: 'rgba(255,255,255,.4)',
-            borderWidth: 1.5,
-            borderDash: [5, 4],
-            pointRadius: 4,
-            pointBackgroundColor: 'rgba(255,255,255,.6)',
-            fill: false,
-            tension: 0.2,
-            order: 1,
           }
         ]
       },
@@ -620,13 +596,7 @@ async function loadAndDrawCharts() {
           tooltip: {
             ...CHART_DEFAULTS.plugins.tooltip,
             callbacks: {
-              label: ctx => {
-                if (ctx.dataset.type === 'line') return ` Povprečje: ${ctx.parsed.y} mm`;
-                const v = ctx.parsed.y;
-                const a = avg[ctx.dataIndex] || 22;
-                const diff = v - a;
-                return ` ${v.toFixed(1)} mm (${diff >= 0 ? '+' : ''}${diff.toFixed(1)} mm)`;
-              }
+              label: ctx => ` ${ctx.parsed.y.toFixed(1)} mm`
             }
           }
         },
