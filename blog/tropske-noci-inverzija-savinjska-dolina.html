@@ -185,10 +185,10 @@
     <div class="chart-card">
       <h3>IREICA1 · Najnižje nočne temperature — zadnjih 7 noči</h3>
       <canvas id="chartMinTemps"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča črta pri 20 °C označuje prag tropske noči. <span class="tropic-chip">&#x1F321; tropska</span> noči so poudarjene.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča črta pri 20 °C označuje prag tropske noči. V Rečici ob Savinji prag ni bil presežen — najbližje je bila noč 21./22. junija z minimum 18,1 °C.</p>
     </div>
 
-    <p>Letošnji vročinski val je posebej zahrbten prav zato, ker so že jutranje temperature po vsej državi krepko nad pragom, kar pomeni, da se dan začne vroč in se ozračje nikoli zares ne "resetira".</p>
+    <p>V Rečici ob Savinji IREICA1 med letošnjim valom ni dosegla praga tropske noči — a le za las. Noč 21./22. junija je bila z minimum 18,1 °C najtoplejša, kar je le 2 °C pod pragom. Letošnji val je poseben prav zato, ker v sopارnem ozračju telo ne pride do pravega počitka niti pri 18 °C.</p>
 
     <h2>Zakaj dolina ni vedno hladnejša: hladni jezici in inverzija</h2>
 
@@ -226,20 +226,20 @@
 
     <p>Inverzija in hladna dolina nastaneta le ob <strong>jasnem in mirnem</strong> vremenu. Med vročinskim valom pa pogosto velja ravno nasprotno:</p>
 
-    <p><strong>Veter</strong> je eden najpomembnejših dejavnikov. Šibak sunek ponoči premeša prizemno plast in prepreči, da bi se hladni zrak nabral na dnu. Inverzija se "razbije" in temperatura na dnu doline paradoksalno <em>naraste</em> — topel zrak z višine se zmeša navzdol.</p>
+    <p><strong>Veter</strong> je eden najpomembnejših dejavnikov. Sunek ponoči premeša prizemno plast in prepreči, da bi se hladni zrak nabral na dnu doline. Inverzija se "razbije" — hladnega jezera ni, temperatura ob tleh se ne spusti tako globoko kot v mirni noči. Noč 21./22. junija je primer: nevihta z sunki do 27 km/h je ohladila zrak s konvekcijo, toda brez mirnega nočnega ohlajanja je minimum ostal pri 18,1 °C namesto pri ~16 °C.</p>
 
     <div class="chart-card">
-      <h3>IREICA1 · Temperatura in sunki vetra — noč z razbito inverzijo (22.–23. junij)</h3>
+      <h3>IREICA1 · Temperatura in sunki vetra — noč z razbito inverzijo (21.–22. junij)</h3>
       <canvas id="chartWindTemp"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Opazite protiintuitiven pojav: ob sunku vetra (okrog 2:00) temperatura ne pade, temveč <strong>skoči navzgor</strong> — veter premeša toplejši zrak z višjih plasti.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Nevihta okrog 21.–22:00 (sunki do 27 km/h) hitro zniža temperaturo. Toda mešanje zraka prepreči nastanek hladnega jezera na dnu doline — zato je minimalna temperatura (18,1 °C) višja kot v mirni noči 20./21. junija (16,0 °C).</p>
     </div>
 
     <p><strong>Vlaga in soparnost</strong> sta drugi ključni spremenljivki. Vlažen zrak zadržuje toploto, saj je vodna para toplogredni plin. Ko se ob koncu vročinskega vala poveča vlažnost in s tem verjetnost neviht, nočne temperature poskočijo.</p>
 
     <div class="chart-card">
-      <h3>IREICA1 · Temperatura in relativna vlažnost — zadnjih 48 ur (24.–25. junij)</h3>
+      <h3>IREICA1 · Temperatura in relativna vlažnost — 48 ur (21.–22. junij)</h3>
       <canvas id="chartHumTemp"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Porast relativne vlažnosti po 14. uri 24. junija sovpada z višjimi nočnimi minimumi — vlažen zrak se ponoči manj ohladi.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Kljub suhim popoldnevom (vlažnost pade na 48–55 %) so nočne vrednosti vlažnosti visoke (nad 90 %) — vlažen zrak ponoči zadrži toploto in preprečuje globoko inverzijsko ohlajanje.</p>
     </div>
 
     <h2>Kako to bere postaja IREICA1</h2>
@@ -265,15 +265,15 @@
     </div>
 
     <div class="chart-card">
-      <h3>IREICA1 · Točka rosišča — obdobje vročinskega vala (19.–25. junij)</h3>
+      <h3>IREICA1 · Točka rosišča — obdobje vročinskega vala (20.–26. junij)</h3>
       <canvas id="chartDewpoint"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Oranžna črta pri 18 °C označuje prag zatohle noči. Ko rosišče prebije to mejo, telo ne more več učinkovito hladiti niti z znojenjem.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Oranžna črta pri 18 °C označuje prag zatohle noči. Med celotnim valom je rosišče ves čas presegalo 22 °C — telo ne more učinkovito hladiti niti z znojenjem.</p>
     </div>
 
     <div class="chart-card">
-      <h3>IREICA1 · Dnevna temperaturna amplituda — obdobje vročinskega vala (19.–25. junij)</h3>
+      <h3>IREICA1 · Dnevna temperaturna amplituda — obdobje vročinskega vala (20.–26. junij)</h3>
       <canvas id="chartAmplitude"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Manjšanje amplitude skozi val — od 14 °C na začetku do le 7 °C ob koncu — kaže na naraščajočo soparnost in zmanjšano nočno ohlajanje.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Amplituda ostaja razmeroma visoka skozi ves val (13–18 °C) — dolina se vsako noč dobro ohladi kljub soparnemu ozračju. Najnižja amplituda (13,6 °C) je bila 23. junija, dan po nevihti.</p>
     </div>
 
     <h2>Kaj to pomeni za prebivalce v dolini?</h2>
@@ -321,11 +321,10 @@ const CHART_DEFAULTS = {
   }
 };
 
-/* ── Graf 1: Najnižje nočne temperature, zadnjih 7 noči ── */
+/* ── Graf 1: Najnižje nočne temperature, zadnjih 6 noči ── */
 (function() {
-  const labels = ['19./20. jun', '20./21. jun', '21./22. jun', '22./23. jun', '23./24. jun', '24./25. jun', '25./26. jun'];
-  const minTemps = [18.4, 20.1, 21.8, 22.3, 21.5, 20.8, 19.2];
-  const isTropical = minTemps.map(t => t >= 20);
+  const labels = ['20./21. jun', '21./22. jun', '22./23. jun', '23./24. jun', '24./25. jun', '25./26. jun'];
+  const minTemps = [16.0, 18.1, 17.1, 17.4, 16.8, 14.9];
   const barColors = minTemps.map(t =>
     t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)'
   );
@@ -391,11 +390,10 @@ const CHART_DEFAULTS = {
 /* ── Graf 2: Profil ohlajanja v jasni noči ── */
 (function() {
   const labels = [
-    '20:00','21:00','22:00','23:00','00:00',
+    '19:00','20:00','21:00','22:00','23:00','00:00',
     '01:00','02:00','03:00','04:00','05:00','06:00'
   ];
-  // jasna noč 20./21. junij — strm padec, doseže min ~17.8 pred zoro
-  const temps = [28.4, 25.1, 22.6, 20.8, 19.4, 18.5, 17.9, 17.5, 17.8, 18.6, 20.4];
+  const temps = [21.4, 19.9, 19.3, 18.6, 18.1, 17.6, 17.3, 17.2, 16.6, 16.5, 16.3, 16.2];
 
   new Chart(document.getElementById('chartCooling'), {
     type: 'line',
@@ -416,7 +414,7 @@ const CHART_DEFAULTS = {
         },
         {
           label: 'Prag tropske noči (20 °C)',
-          data: Array(11).fill(20),
+          data: Array(12).fill(20),
           borderColor: 'rgba(239,68,68,.55)',
           borderWidth: 1.5,
           borderDash: [5, 4],
@@ -439,7 +437,7 @@ const CHART_DEFAULTS = {
       scales: {
         x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
         y: {
-          min: 15, max: 31,
+          min: 14, max: 24,
           grid: { color: 'rgba(255,255,255,.05)' },
           ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
         }
@@ -451,11 +449,11 @@ const CHART_DEFAULTS = {
 /* ── Graf 3: Temperatura in sunki vetra — noč z razbito inverzijo ── */
 (function() {
   const labels = [
-    '21:00','22:00','23:00','00:00','01:00',
-    '02:00','03:00','04:00','05:00','06:00'
+    '19:00','20:00','21:00','22:00','23:00','00:00',
+    '01:00','02:00','03:00','04:00','05:00','06:00'
   ];
-  const temps  = [27.2, 24.8, 22.5, 21.4, 20.8, 22.1, 22.6, 22.2, 22.8, 23.5];
-  const gusts  = [1.2,  0.8,  1.4,  1.0,  0.6,  8.4, 11.2,  6.7,  4.1,  2.8];
+  const temps  = [25.9, 24.1, 22.0, 19.4, 19.3, 19.3, 19.2, 19.0, 18.8, 18.5, 18.2, 18.4];
+  const gusts  = [5.5,  7.2, 27.7, 25.6, 16.6,  3.5,  3.5,  3.5,  1.8,  1.8,  1.8,  1.8];
 
   new Chart(document.getElementById('chartWindTemp'), {
     type: 'line',
@@ -476,7 +474,7 @@ const CHART_DEFAULTS = {
           order: 2,
         },
         {
-          label: 'Sunek vetra (m/s)',
+          label: 'Sunek vetra (km/h)',
           data: gusts,
           borderColor: '#a78bfa',
           backgroundColor: 'rgba(167,139,250,.12)',
@@ -491,7 +489,7 @@ const CHART_DEFAULTS = {
         {
           label: 'Prag tropske noči (20 °C)',
           type: 'line',
-          data: Array(10).fill(20),
+          data: Array(12).fill(20),
           borderColor: 'rgba(239,68,68,.4)',
           borderWidth: 1.5,
           borderDash: [5, 4],
@@ -511,7 +509,7 @@ const CHART_DEFAULTS = {
           ...CHART_DEFAULTS.plugins.tooltip,
           callbacks: {
             label: ctx => {
-              if (ctx.dataset.yAxisID === 'yWind') return ` ${ctx.parsed.y.toFixed(1)} m/s`;
+              if (ctx.dataset.yAxisID === 'yWind') return ` ${ctx.parsed.y.toFixed(1)} km/h`;
               return ` ${ctx.parsed.y.toFixed(1)} °C`;
             }
           }
@@ -527,9 +525,9 @@ const CHART_DEFAULTS = {
         },
         yWind: {
           position: 'right',
-          min: 0, max: 16,
+          min: 0, max: 32,
           grid: { display: false },
-          ticks: { color: '#a78bfa', font: { size: 10 }, callback: v => v + ' m/s' }
+          ticks: { color: '#a78bfa', font: { size: 10 }, callback: v => v + ' km/h' }
         }
       }
     }
@@ -538,7 +536,7 @@ const CHART_DEFAULTS = {
 
 /* ── Graf 4: Temperatura in relativna vlažnost — zadnjih 48 ur ── */
 (function() {
-  // 24. in 25. junij, vsako 2 uri
+  // 21. in 22. junij, vsako 2 uri
   const labels = [
     '00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00',
     '16:00','18:00','20:00','22:00',
@@ -546,22 +544,22 @@ const CHART_DEFAULTS = {
     '16:00','18:00','20:00','22:00'
   ];
   const dates = [
-    '24','24','24','24','24','24','24','24','24','24','24','24',
-    '25','25','25','25','25','25','25','25','25','25','25','25'
+    '21','21','21','21','21','21','21','21','21','21','21','21',
+    '22','22','22','22','22','22','22','22','22','22','22','22'
   ];
   const fullLabels = labels.map((t, i) => `${dates[i]}. jun · ${t}`);
 
   const temps = [
-    22.1, 21.3, 20.8, 21.4, 24.6, 28.3, 31.2, 33.1,
-    32.4, 30.8, 29.1, 26.8,
-    23.6, 22.8, 22.1, 22.7, 25.8, 29.4, 31.8, 32.6,
-    31.9, 30.2, 28.4, 25.9
+    17.6, 17.2, 16.5, 16.2, 20.2, 25.4, 29.6, 32.4,
+    33.4, 26.5, 24.1, 19.4,
+    19.3, 19.0, 18.5, 18.4, 21.8, 26.1, 29.9, 31.4,
+    30.2, 27.7, 24.8, 21.2
   ];
   const humidity = [
-    62, 65, 67, 64, 51, 44, 39, 36,
-    40, 52, 61, 68,
-    74, 78, 80, 75, 62, 55, 52, 49,
-    55, 64, 71, 76
+    99, 99, 99, 99, 92, 77, 68, 54,
+    48, 77, 90, 96,
+    99, 99, 99, 99, 94, 80, 64, 55,
+    64, 74, 84, 93
   ];
 
   new Chart(document.getElementById('chartHumTemp'), {
@@ -620,7 +618,7 @@ const CHART_DEFAULTS = {
         },
         yTemp: {
           position: 'left',
-          min: 16, max: 36,
+          min: 14, max: 36,
           grid: { color: 'rgba(255,255,255,.05)' },
           ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
         },
@@ -637,9 +635,9 @@ const CHART_DEFAULTS = {
 
 /* ── Graf 5: Točka rosišča skozi obdobje vala ── */
 (function() {
-  const labels = ['19. jun', '20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun'];
+  const labels = ['20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun', '26. jun'];
   // dnevni maksimum rosišča
-  const dewpoints = [13.2, 15.8, 14.4, 17.9, 19.4, 20.8, 18.6];
+  const dewpoints = [24.6, 25.0, 24.7, 24.1, 24.4, 23.8, 22.1];
   const barColors = dewpoints.map(d =>
     d >= 18 ? 'rgba(249,115,22,.8)' : 'rgba(77,159,248,.65)'
   );
@@ -693,7 +691,7 @@ const CHART_DEFAULTS = {
       scales: {
         x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
         y: {
-          min: 8, max: 24,
+          min: 18, max: 28,
           grid: { color: 'rgba(255,255,255,.05)' },
           ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
         }
@@ -704,8 +702,8 @@ const CHART_DEFAULTS = {
 
 /* ── Graf 6: Dnevna amplituda skozi obdobje vala ── */
 (function() {
-  const labels = ['19. jun', '20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun'];
-  const amplitudes = [14.2, 12.1, 13.8, 10.4, 9.6, 8.8, 7.1];
+  const labels = ['20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun', '26. jun'];
+  const amplitudes = [16.1, 18.0, 14.5, 13.6, 14.0, 15.6, 16.8];
   const barColors = amplitudes.map(a =>
     a >= 12 ? 'rgba(52,211,153,.75)' : a >= 9 ? 'rgba(245,158,11,.75)' : 'rgba(239,68,68,.75)'
   );
@@ -747,7 +745,7 @@ const CHART_DEFAULTS = {
       scales: {
         x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
         y: {
-          min: 0, max: 18,
+          min: 0, max: 20,
           grid: { color: 'rgba(255,255,255,.05)' },
           ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
         }
