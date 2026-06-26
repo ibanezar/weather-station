@@ -75,6 +75,14 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'tropske-noci-inverzija-savinjska-dolina',
+        'title': 'Tropske noči in\ninverzija v Savinjski dolini',
+        'subtitle': 'Zakaj je tvoja noč topla · IREICA1',
+        'section': 'Analize',
+        'accent': (245, 158, 11),
+        'photo': 'night-fog-valley',
+    },
+    {
         'slug': 'junij-2026-dvoglavi-mesec',
         'title': 'Junij 2026:\ndvoglavi mesec',
         'subtitle': '162 mm dežja in 30,1 °C · IREICA1',
