@@ -165,7 +165,7 @@
     <div class="chart-card">
       <h3>IREICA1 · Dnevni maksimumi med vročinskim valom (17.–26. junij)</h3>
       <canvas id="chartDailyMax"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje nov rekord postaje IREICA1 (30,9 °C, 26. junija).</p>
+      <p id="capDailyMax" style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje nov rekord postaje IREICA1.</p>
     </div>
 
     <h2>Kako se Rečica obnese v primerjavi s Primorsko?</h2>
@@ -191,7 +191,7 @@
     <div class="chart-card">
       <h3>IREICA1 · Najnižje nočne temperature med valom (17.–26. junij)</h3>
       <canvas id="chartNightMin"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje prag tropske noči (20 °C). V tem valu postaja ni zabeležila nobene tropske noči — najbližje smo bili 25. junija z 19,7 °C.</p>
+      <p id="capNightMin" style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje prag tropske noči (20 °C).</p>
     </div>
 
     <div class="note-box">
@@ -249,6 +249,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
+const PROXY = 'https://weatherireica1.filip-eremita.workers.dev';
+
 const CHART_DEFAULTS = {
   responsive: true,
   maintainAspectRatio: true,
@@ -266,300 +268,382 @@ const CHART_DEFAULTS = {
   }
 };
 
-const WAVE_LABELS = [
-  '17. jun','18. jun','19. jun','20. jun','21. jun',
-  '22. jun','23. jun','24. jun','25. jun','26. jun'
-];
+// Primorska ocena (ARSO napovedi) — dejanski podatki niso dostopni
+const PRIMOR_OCENA = [33.4, 35.1, 36.2, 37.0, 36.4, 37.8, 38.1, 38.4, 38.8, 39.2];
 
-/* ── Graf 1: Dnevni maksimumi IREICA1 med valom ── */
-(function() {
-  // Resnični podatki IREICA1, history.json
-  const tmax = [26.4, 26.1, 29.5, 30.1, 29.5, 28.2, 28.2, 28.0, 29.2, 30.9];
-  const barColors = tmax.map(t =>
-    t >= 30 ? 'rgba(239,68,68,.8)' : 'rgba(249,115,22,.7)'
-  );
-  const borderColors = tmax.map(t =>
-    t >= 30 ? '#ef4444' : '#f97316'
-  );
+function fmtDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+function showChartError(id, msg) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const wrap = canvas.closest('.chart-card');
+  if (wrap) {
+    const p = document.createElement('p');
+    p.style.cssText = 'color:#f97316;font-size:.85rem;text-align:center;padding:1rem 0';
+    p.textContent = msg;
+    canvas.replaceWith(p);
+  }
+}
 
-  // Plugin to draw star on new station record bar
-  const starPlugin = {
-    id: 'recordStar',
-    afterDatasetsDraw(chart) {
-      const { ctx } = chart;
-      const meta = chart.getDatasetMeta(0);
-      // index 9 = 26. jun, novi rekord postaje 30.9°C
-      const bar = meta.data[9];
-      if (!bar) return;
-      ctx.save();
-      ctx.font = '14px sans-serif';
-      ctx.fillStyle = '#fbbf24';
-      ctx.textAlign = 'center';
-      ctx.fillText('★', bar.x, bar.y - 8);
-      ctx.restore();
-    }
+async function loadAndDrawCharts() {
+  // Fetch wave data: June 17 → today (or June 30 max)
+  const waveStart = '2026-06-17';
+  const waveEnd   = fmtDate(new Date(Math.min(Date.now(), new Date('2026-06-30').getTime())));
+
+  // Fetch full-month data for precipitation chart
+  const monthStart = '2026-06-01';
+
+  let waveSummaries = [], monthSummaries = [];
+  try {
+    const [waveRes, monthRes] = await Promise.all([
+      fetch(`${PROXY}/ecowitt-history?start=${waveStart}&end=${waveEnd}`),
+      fetch(`${PROXY}/ecowitt-history?start=${monthStart}&end=${waveEnd}`),
+    ]);
+    if (waveRes.ok)  waveSummaries  = (await waveRes.json()).summaries  || [];
+    if (monthRes.ok) monthSummaries = (await monthRes.json()).summaries || [];
+  } catch (e) {
+    console.warn('[blog charts]', e);
+  }
+
+  // Helper: format label "17. jun"
+  const dayLabel = iso => {
+    const [, , d] = iso.split('-');
+    return `${parseInt(d)}. jun`;
   };
 
-  new Chart(document.getElementById('chartDailyMax'), {
-    type: 'bar',
-    data: {
-      labels: WAVE_LABELS,
-      datasets: [
-        {
-          label: 'Tmax IREICA1 (°C)',
-          data: tmax,
-          backgroundColor: barColors,
-          borderColor: borderColors,
-          borderWidth: 1.5,
-          borderRadius: 5,
-          order: 2,
-        },
-        {
-          type: 'line',
-          label: 'Državni junijski rekord (38,4 °C)',
-          data: Array(10).fill(38.4),
-          borderColor: 'rgba(239,68,68,.6)',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-          pointRadius: 0,
-          fill: false,
-          tension: 0,
-          order: 1,
-        }
-      ]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => {
-              if (ctx.dataset.type === 'line') return ` Rekord SLO: 38,4 °C`;
-              const v = ctx.parsed.y;
-              return ` ${v.toFixed(1)} °C${ctx.dataIndex === 9 ? '  ★ rekord postaje' : ''}`;
+  // ── Graf 1: Dnevni maksimumi med valom ──────────────────────
+  (function() {
+    if (!waveSummaries.length) { showChartError('chartDailyMax', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
+
+    const labels = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
+    const tmax   = waveSummaries.map(s => s.metric.tempHigh);
+    const recIdx = tmax.indexOf(Math.max(...tmax.filter(Boolean)));
+
+    const barColors   = tmax.map(t => t >= 30 ? 'rgba(239,68,68,.8)' : 'rgba(249,115,22,.7)');
+    const borderColors = tmax.map(t => t >= 30 ? '#ef4444' : '#f97316');
+
+    const starPlugin = {
+      id: 'recordStar',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[recIdx];
+        if (!bar) return;
+        ctx.save();
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText('★', bar.x, bar.y - 8);
+        ctx.restore();
+      }
+    };
+
+    const recVal = tmax[recIdx];
+    new Chart(document.getElementById('chartDailyMax'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Tmax IREICA1 (°C)',
+            data: tmax,
+            backgroundColor: barColors,
+            borderColor: borderColors,
+            borderWidth: 1.5,
+            borderRadius: 5,
+            order: 2,
+          },
+          {
+            type: 'line',
+            label: 'Državni junijski rekord (38,4 °C)',
+            data: Array(labels.length).fill(38.4),
+            borderColor: 'rgba(239,68,68,.6)',
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+            order: 1,
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: {
+            ...CHART_DEFAULTS.plugins.tooltip,
+            callbacks: {
+              label: ctx => {
+                if (ctx.dataset.type === 'line') return ` Rekord SLO: 38,4 °C`;
+                const v = ctx.parsed.y;
+                return ` ${v != null ? v.toFixed(1) : '—'} °C${ctx.dataIndex === recIdx ? '  ★ rekord postaje' : ''}`;
+              }
             }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+          y: {
+            min: 24, max: 41,
+            grid: { color: 'rgba(255,255,255,.05)' },
+            ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
           }
         }
       },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
-        y: {
-          min: 24, max: 41,
-          grid: { color: 'rgba(255,255,255,.05)' },
-          ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
+      plugins: [starPlugin]
+    });
+
+    // Update caption dynamically
+    const cap = document.getElementById('capDailyMax');
+    if (cap && recVal) cap.textContent = `Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje rekord postaje IREICA1 (${recVal.toFixed(1)} °C, ${dayLabel(waveSummaries[recIdx].obsTimeLocal)}).`;
+  })();
+
+  // ── Graf 2: Primerjava IREICA1 vs. Primorska ────────────────
+  (function() {
+    if (!waveSummaries.length) { showChartError('chartComparison', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
+
+    const labels   = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
+    const tmaxLocal = waveSummaries.map(s => s.metric.tempHigh);
+    // Primorska: ocena po ARSO napovedih — omeji na število dni ki jih imamo
+    const tmaxPrimor = PRIMOR_OCENA.slice(0, labels.length);
+
+    new Chart(document.getElementById('chartComparison'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Primorska — ocena ARSO (°C)',
+            data: tmaxPrimor,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239,68,68,.1)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#ef4444',
+            fill: true,
+            tension: 0.35,
+          },
+          {
+            label: 'IREICA1, Rečica (°C)',
+            data: tmaxLocal,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249,115,22,.1)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#f97316',
+            fill: true,
+            tension: 0.35,
+          },
+          {
+            type: 'line',
+            label: 'Državni junijski rekord (38,4 °C)',
+            data: Array(labels.length).fill(38.4),
+            borderColor: 'rgba(239,68,68,.4)',
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: {
+            ...CHART_DEFAULTS.plugins.tooltip,
+            callbacks: {
+              label: ctx => {
+                if (ctx.dataset.borderDash) return ` Rekord SLO: 38,4 °C`;
+                return ` ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) : '—'} °C`;
+              },
+              afterBody: items => {
+                const loc = items.find(i => i.datasetIndex === 1);
+                const pri = items.find(i => i.datasetIndex === 0);
+                if (loc && pri && loc.parsed.y != null && pri.parsed.y != null)
+                  return [`Razlika: ${(pri.parsed.y - loc.parsed.y).toFixed(1)} °C`];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+          y: {
+            min: 24, max: 42,
+            grid: { color: 'rgba(255,255,255,.05)' },
+            ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+          }
         }
       }
-    },
-    plugins: [starPlugin]
-  });
-})();
+    });
+  })();
 
-/* ── Graf 2: Primerjava IREICA1 vs. Primorska ── */
-(function() {
-  // IREICA1: resnični podatki
-  const tmaxLocal   = [26.4, 26.1, 29.5, 30.1, 29.5, 28.2, 28.2, 28.0, 29.2, 30.9];
-  const tmaxPrimor  = [33.4, 35.1, 36.2, 37.0, 36.4, 37.8, 38.1, 38.4, 38.8, 39.2];
+  // ── Graf 3: Nočni minimumi ──────────────────────────────────
+  (function() {
+    if (!waveSummaries.length) { showChartError('chartNightMin', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
 
-  new Chart(document.getElementById('chartComparison'), {
-    type: 'line',
-    data: {
-      labels: WAVE_LABELS,
-      datasets: [
-        {
-          label: 'Primorska – dnevni vrh (°C)',
-          data: tmaxPrimor,
-          borderColor: '#ef4444',
-          backgroundColor: 'rgba(239,68,68,.1)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: '#ef4444',
-          fill: true,
-          tension: 0.35,
-        },
-        {
-          label: 'IREICA1, Rečica (°C)',
-          data: tmaxLocal,
-          borderColor: '#f97316',
-          backgroundColor: 'rgba(249,115,22,.1)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: '#f97316',
-          fill: true,
-          tension: 0.35,
-        },
-        {
-          type: 'line',
-          label: 'Državni junijski rekord (38,4 °C)',
-          data: Array(10).fill(38.4),
-          borderColor: 'rgba(239,68,68,.4)',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-          pointRadius: 0,
-          fill: false,
-          tension: 0,
-        }
-      ]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => {
-              if (ctx.dataset.borderDash) return ` Rekord SLO: 38,4 °C`;
-              return ` ${ctx.parsed.y.toFixed(1)} °C`;
-            },
-            afterBody: items => {
-              const loc = items.find(i => i.datasetIndex === 1);
-              const pri = items.find(i => i.datasetIndex === 0);
-              if (loc && pri) return [`Razlika: ${(pri.parsed.y - loc.parsed.y).toFixed(1)} °C`];
+    const labels = waveSummaries.map(s => dayLabel(s.obsTimeLocal));
+    const tmin   = waveSummaries.map(s => s.metric.tempLow);
+    const hasTropical = tmin.some(t => t != null && t >= 20);
+
+    const barColors   = tmin.map(t => t != null && t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)');
+    const borderColors = tmin.map(t => t != null && t >= 20 ? '#ef4444' : '#4d9ff8');
+
+    new Chart(document.getElementById('chartNightMin'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Tmin (°C)',
+            data: tmin,
+            backgroundColor: barColors,
+            borderColor: borderColors,
+            borderWidth: 1.5,
+            borderRadius: 5,
+            order: 2,
+          },
+          {
+            type: 'line',
+            label: 'Prag tropske noči (20 °C)',
+            data: Array(labels.length).fill(20),
+            borderColor: 'rgba(239,68,68,.7)',
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+            order: 1,
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: {
+            ...CHART_DEFAULTS.plugins.tooltip,
+            callbacks: {
+              label: ctx => {
+                if (ctx.dataset.type === 'line') return ` Prag: 20,0 °C`;
+                const v = ctx.parsed.y;
+                return ` ${v != null ? v.toFixed(1) : '—'} °C${v != null && v >= 20 ? '  ★ tropska noč' : ''}`;
+              }
             }
           }
-        }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
-        y: {
-          min: 24, max: 42,
-          grid: { color: 'rgba(255,255,255,.05)' },
-          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+          y: {
+            min: 10, max: 23,
+            grid: { color: 'rgba(255,255,255,.05)' },
+            ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+          }
         }
       }
-    }
-  });
-})();
+    });
 
-/* ── Graf 3: Nočni minimumi z mejo tropske noči ── */
-(function() {
-  // Resnični podatki IREICA1, history.json (Tmin za vsak dan)
-  const tmin = [12.8, 17.5, 16.7, 18.9, 17.2, 18.1, 18.3, 17.3, 19.7, 19.0];
-  const barColors = tmin.map(t => t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)');
-  const borderColors = tmin.map(t => t >= 20 ? '#ef4444' : '#4d9ff8');
-
-  new Chart(document.getElementById('chartNightMin'), {
-    type: 'bar',
-    data: {
-      labels: WAVE_LABELS,
-      datasets: [
-        {
-          label: 'Tmin (°C)',
-          data: tmin,
-          backgroundColor: barColors,
-          borderColor: borderColors,
-          borderWidth: 1.5,
-          borderRadius: 5,
-          order: 2,
-        },
-        {
-          type: 'line',
-          label: 'Prag tropske noči (20 °C)',
-          data: Array(10).fill(20),
-          borderColor: 'rgba(239,68,68,.7)',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-          pointRadius: 0,
-          fill: false,
-          tension: 0,
-          order: 1,
-        }
-      ]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => {
-              if (ctx.dataset.type === 'line') return ` Prag: 20,0 °C`;
-              const v = ctx.parsed.y;
-              return ` ${v.toFixed(1)} °C${v >= 20 ? '  ★ tropska noč' : ''}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
-        y: {
-          min: 10, max: 23,
-          grid: { color: 'rgba(255,255,255,.05)' },
-          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
-        }
-      }
-    }
-  });
-})();
-
-/* ── Graf 4: Tedenske padavine vs. povprečje (zadnjih ~30 dni) ── */
-(function() {
-  // Resnični podatki IREICA1, history.json — seštevki po tednih
-  const weekLabels = ['1.–7. jun', '8.–14. jun', '15.–21. jun', '22.–26. jun'];
-  const actual  = [51.9, 66.3, 48.9, 3.7];
-  const average = [22.0, 22.0, 22.0, 15.5];  // dolgoletno tedensko povprečje (zadnji teden = 5 dni)
-
-  new Chart(document.getElementById('chartRain'), {
-    type: 'bar',
-    data: {
-      labels: weekLabels,
-      datasets: [
-        {
-          label: 'Izmerjene padavine (mm)',
-          data: actual,
-          backgroundColor: actual.map((v, i) => v < average[i] ? 'rgba(249,115,22,.7)' : 'rgba(34,211,238,.65)'),
-          borderColor: actual.map((v, i) => v < average[i] ? '#f97316' : '#22d3ee'),
-          borderWidth: 1.5,
-          borderRadius: 5,
-          order: 2,
-        },
-        {
-          type: 'line',
-          label: 'Dolgoletno povprečje (mm)',
-          data: average,
-          borderColor: 'rgba(255,255,255,.4)',
-          borderWidth: 1.5,
-          borderDash: [5, 4],
-          pointRadius: 4,
-          pointBackgroundColor: 'rgba(255,255,255,.6)',
-          fill: false,
-          tension: 0.2,
-          order: 1,
-        }
-      ]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => {
-              if (ctx.dataset.type === 'line') return ` Povprečje: ${ctx.parsed.y} mm`;
-              const v = ctx.parsed.y;
-              const avg = average[ctx.dataIndex];
-              const diff = v - avg;
-              const sign = diff >= 0 ? '+' : '';
-              return ` ${v.toFixed(1)} mm (${sign}${diff.toFixed(1)} mm)`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
-        y: {
-          min: 0, max: 80,
-          grid: { color: 'rgba(255,255,255,.05)' },
-          ticks: { color: '#22d3ee', font: { size: 10 }, callback: v => v + ' mm' }
-        }
+    // Update caption dynamically
+    const cap = document.getElementById('capNightMin');
+    if (cap) {
+      if (hasTropical) {
+        cap.textContent = 'Rdeča prekinjena črta označuje prag tropske noči (20 °C). Rdeče obarvane noči so prebile prag.';
+      } else {
+        const maxMin = Math.max(...tmin.filter(Boolean));
+        const maxMinDay = waveSummaries[tmin.indexOf(maxMin)];
+        cap.textContent = `Rdeča prekinjena črta označuje prag tropske noči (20 °C). V tem valu postaja ni zabeležila nobene tropske noči — najbližje ${maxMin.toFixed(1)} °C (${dayLabel(maxMinDay.obsTimeLocal)}).`;
       }
     }
-  });
-})();
+  })();
+
+  // ── Graf 4: Tedenske padavine vs. povprečje ─────────────────
+  (function() {
+    if (!monthSummaries.length) { showChartError('chartRain', 'Podatkov za ta graf trenutno ni mogoče naložiti.'); return; }
+
+    // Razdelimo po tednih znotraj junija
+    const weekDefs = [
+      { label: '1.–7. jun',  start: '2026-06-01', end: '2026-06-07' },
+      { label: '8.–14. jun', start: '2026-06-08', end: '2026-06-14' },
+      { label: '15.–21. jun',start: '2026-06-15', end: '2026-06-21' },
+      { label: '22. jun +',  start: '2026-06-22', end: '9999-12-31' },
+    ];
+    const weekLabels = [];
+    const actual     = [];
+    // Dolgoletno tedensko povprečje za junij (~22 mm/teden)
+    const average    = [22.0, 22.0, 22.0, 15.5];
+
+    weekDefs.forEach((w, i) => {
+      const days = monthSummaries.filter(s => s.obsTimeLocal >= w.start && s.obsTimeLocal <= w.end);
+      if (!days.length) return;
+      weekLabels.push(w.label);
+      actual.push(parseFloat(days.reduce((sum, s) => sum + (s.metric.precipTotal || 0), 0).toFixed(1)));
+    });
+
+    const avg = average.slice(0, weekLabels.length);
+
+    new Chart(document.getElementById('chartRain'), {
+      type: 'bar',
+      data: {
+        labels: weekLabels,
+        datasets: [
+          {
+            label: 'Izmerjene padavine (mm)',
+            data: actual,
+            backgroundColor: actual.map((v, i) => v < (avg[i] || 22) ? 'rgba(249,115,22,.7)' : 'rgba(34,211,238,.65)'),
+            borderColor:     actual.map((v, i) => v < (avg[i] || 22) ? '#f97316' : '#22d3ee'),
+            borderWidth: 1.5,
+            borderRadius: 5,
+            order: 2,
+          },
+          {
+            type: 'line',
+            label: 'Dolgoletno povprečje (mm)',
+            data: avg,
+            borderColor: 'rgba(255,255,255,.4)',
+            borderWidth: 1.5,
+            borderDash: [5, 4],
+            pointRadius: 4,
+            pointBackgroundColor: 'rgba(255,255,255,.6)',
+            fill: false,
+            tension: 0.2,
+            order: 1,
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: {
+            ...CHART_DEFAULTS.plugins.tooltip,
+            callbacks: {
+              label: ctx => {
+                if (ctx.dataset.type === 'line') return ` Povprečje: ${ctx.parsed.y} mm`;
+                const v = ctx.parsed.y;
+                const a = avg[ctx.dataIndex] || 22;
+                const diff = v - a;
+                return ` ${v.toFixed(1)} mm (${diff >= 0 ? '+' : ''}${diff.toFixed(1)} mm)`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+          y: {
+            min: 0,
+            grid: { color: 'rgba(255,255,255,.05)' },
+            ticks: { color: '#22d3ee', font: { size: 10 }, callback: v => v + ' mm' }
+          }
+        }
+      }
+    });
+  })();
+}
+
+loadAndDrawCharts();
 
 /* ── Graf 5: Nevihta 25. junij — tlak, sunki, temperatura ── */
 (function() {
