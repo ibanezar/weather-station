@@ -5,7 +5,7 @@
 const STATION = "IREICA1";
 const WU_KEY  = "619a8bb3ba4d42069a8bb3ba4d02061f";
 const WU_BASE = "https://api.weather.com/v2/pws/";
-const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY;
+const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
 const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
