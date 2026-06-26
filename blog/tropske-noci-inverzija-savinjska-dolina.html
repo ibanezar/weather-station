@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zakaj je tvoja noč topla, čeprav živiš v dolini: Tropske noči in inverzija | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/tropske-noci-inverzija-savinjska-dolina.html">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/tropske-noci-inverzija-savinjska-dolina.html">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/tropske-noci-inverzija-savinjska-dolina.html">
+<meta name="description" content="Zakaj dolina med vročinskim valom ni vedno hladna? Razlaga temperaturne inverzije, tropskih noči in učinka vlage na podlagi meritev postaje IREICA1 v Rečici ob Savinji.">
+<meta name="keywords" content="tropska noč, temperaturna inverzija, Savinjska dolina, vročinski val 2026, IREICA1, Rečica ob Savinji, rosišče, nočno ohlajanje">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/tropske-noci-inverzija-savinjska-dolina.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Zakaj je tvoja noč topla, čeprav živiš v dolini">
+<meta property="og:description" content="Tropske noči, inverzija in vlaga — razlaga nenavadnega obnašanja doline med vročinskim valom. Postaja IREICA1, Rečica ob Savinji.">
+<meta property="og:image" content="https://meteorec.si/og/tropske-noci-inverzija.jpg">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-06-26">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Analize">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Zakaj je tvoja noč topla, čeprav živiš v dolini">
+<meta name="twitter:description" content="Tropske noči, inverzija in vlaga — postaja IREICA1, Rečica ob Savinji, junij 2026.">
+<meta name="twitter:image" content="https://meteorec.si/og/tropske-noci-inverzija.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zakaj je tvoja noč topla, čeprav živiš v dolini: Tropske noči in inverzija v Zgornji Savinjski dolini",
+  "description": "Zakaj dolina med vročinskim valom ni vedno hladna? Razlaga temperaturne inverzije, tropskih noči in učinka vlage na podlagi meritev postaje IREICA1 v Rečici ob Savinji.",
+  "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/tropske-noci-inverzija.jpg", "width": 1200, "height": 630 },
+  "wordCount": 1850,
+  "datePublished": "2026-06-26",
+  "dateModified": "2026-06-26",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/tropske-noci-inverzija-savinjska-dolina.html" },
+  "about": { "@type": "Place", "name": "Rečica ob Savinji", "geo": { "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 } }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Tropske noči in inverzija v Savinjski dolini" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="blog.css">
+<style>
+/* inversion table */
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2rem 0 1.8rem;
+  font-size: .88rem;
+}
+.inv-table thead th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .65rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  padding: .55rem .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  text-align: left;
+}
+.inv-table tbody td {
+  padding: .65rem .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  color: #cfdbef;
+  line-height: 1.4;
+  vertical-align: top;
+}
+.inv-table tbody tr:last-child td { border-bottom: none; }
+.inv-table .col-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .75rem;
+  color: var(--blue);
+  font-weight: 600;
+  min-width: 8rem;
+}
+.inv-table tbody tr:nth-child(odd) td { background: rgba(255,255,255,.02); }
+
+/* tip box */
+.tip-box {
+  background: rgba(52,211,153,.07);
+  border: 1px solid rgba(52,211,153,.28);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0 1.8rem;
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+}
+.tip-box .tb-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1.2; }
+.tip-box p { margin: 0; color: #a7f3d0; font-size: .93rem; line-height: 1.6; }
+.tip-box strong { color: #fff; }
+
+/* sensor row */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .7rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.sensor-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: .85rem .9rem;
+  text-align: center;
+}
+.sc-num { font-family: 'JetBrains Mono', monospace; font-size: .63rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
+.sc-icon { font-size: 1.5rem; line-height: 1; margin-bottom: .3rem; }
+.sc-desc { font-size: .8rem; color: #cfdbef; line-height: 1.45; }
+@media (max-width: 480px) { .sensor-grid { grid-template-columns: 1fr; } }
+
+/* tropical night chip */
+.tropic-chip {
+  display: inline-block;
+  background: rgba(239,68,68,.15);
+  border: 1px solid rgba(239,68,68,.4);
+  border-radius: 6px;
+  padding: .15rem .45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem;
+  color: #fca5a5;
+  vertical-align: middle;
+}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Tropske noči in inverzija v Savinjski dolini
+  </nav>
+
+  <article>
+    <h1>Zakaj je tvoja noč topla, čeprav živiš v dolini</h1>
+    <p class="post-meta">26. junija 2026 · Filip Eremita · ~7 min branja</p>
+
+    <div class="stn-badge" style="margin-bottom:1.4rem">
+      <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="currentColor"/></svg>
+      IREICA1 · Rečica ob Savinji · 366 m n. m.
+    </div>
+
+    <p class="lead">Junija 2026 je Slovenijo zajel prvi pravi vročinski val poletja. Podnevi temperature po nižinah dosegajo od 32 do 37 °C. To je glavna novica vseh medijev. Mene pa veliko bolj zanima nekaj, kar redko kdo izpostavi — <strong>noči</strong>.</p>
+
+    <p>Pri vročinskem valu nas namreč ne izčrpava toliko dnevna temperaturna konica, temveč dejstvo, da se zrak ponoči ne ohladi dovolj, da bi si telo opomoglo. Tu pa se zgodi nekaj izjemno zanimivega: alpska dolina, kakršna je naša, se obnaša drugače kot mesto v ravnini. Poglejmo, zakaj.</p>
+
+    <h2>Kaj sploh je "tropska noč"?</h2>
+
+    <p>Definicija je preprosta: <strong>tropska noč</strong> je tista, v kateri najnižja temperatura <strong>ne pade pod 20 °C</strong>.</p>
+
+    <p>Telo se ponoči ohlaja prek kože. Ko zunanji zrak ostane nad to mejo, se proces ohlajanja upočasni, obremenitev srčno-žilnega sistema pa vztraja tudi po sončnem zahodu. Zdravstvena stroka zato tropske noči obravnava kot pomemben dejavnik tveganja med vročinskimi valovi — pogosto bolj kot sam dnevni temperaturni vrh.</p>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Najnižje nočne temperature — zadnjih 7 noči</h3>
+      <canvas id="chartMinTemps"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča črta pri 20 °C označuje prag tropske noči. <span class="tropic-chip">&#x1F321; tropska</span> noči so poudarjene.</p>
+    </div>
+
+    <p>Letošnji vročinski val je posebej zahrbten prav zato, ker so že jutranje temperature po vsej državi krepko nad pragom, kar pomeni, da se dan začne vroč in se ozračje nikoli zares ne "resetira".</p>
+
+    <h2>Zakaj dolina ni vedno hladnejša: hladni jezici in inverzija</h2>
+
+    <p>Intuicija nam pravi: dolina = hladneje. Ponoči to pogosto drži, a iz razloga, ki ni povsem očiten.</p>
+
+    <p>Ponoči se tla ohlajajo s sevanjem toplote v jasno nebo. Zrak ob tleh se ohladi, postane gostejši in težji ter po pobočjih steče navzdol na dno doline kot nevidna reka hladnega zraka (t. i. <strong>katabatični veter</strong>). Na dnu doline se ta zrak nabira v "jezeru", nad njim pa ostane topla plast. To je <strong>temperaturna inverzija</strong> — obrnjeno stanje, kjer je zgoraj topleje kot spodaj.</p>
+
+    <table class="inv-table">
+      <thead>
+        <tr><th>Stanje</th><th>Zgoraj</th><th>Spodaj (dno doline)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-head">Običajno (dan)</td>
+          <td>Hladneje</td>
+          <td>Topleje</td>
+        </tr>
+        <tr>
+          <td class="col-head">Inverzija (jasna noč)</td>
+          <td>Topla inverzijska plast</td>
+          <td>Hladno jezero zraka</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>V jasni in mirni noči je lahko dno Savinjske doline bistveno hladnejše od pobočij nad njim — klasičen alpski pojav.</p>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Profil ohlajanja v jasni noči (20.–21. junij)</h3>
+      <canvas id="chartCooling"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Strmi padec temperature po sončnem zahodu kaže na jasno nebo in šibko mešanje zraka — idealni pogoji za nastanek inverzije.</p>
+    </div>
+
+    <h2>Kdaj se dolina ne ohladi: učinek toplotnega ujetnika</h2>
+
+    <p>Inverzija in hladna dolina nastaneta le ob <strong>jasnem in mirnem</strong> vremenu. Med vročinskim valom pa pogosto velja ravno nasprotno:</p>
+
+    <p><strong>Veter</strong> je eden najpomembnejših dejavnikov. Šibak sunek ponoči premeša prizemno plast in prepreči, da bi se hladni zrak nabral na dnu. Inverzija se "razbije" in temperatura na dnu doline paradoksalno <em>naraste</em> — topel zrak z višine se zmeša navzdol.</p>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Temperatura in sunki vetra — noč z razbito inverzijo (22.–23. junij)</h3>
+      <canvas id="chartWindTemp"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Opazite protiintuitiven pojav: ob sunku vetra (okrog 2:00) temperatura ne pade, temveč <strong>skoči navzgor</strong> — veter premeša toplejši zrak z višjih plasti.</p>
+    </div>
+
+    <p><strong>Vlaga in soparnost</strong> sta drugi ključni spremenljivki. Vlažen zrak zadržuje toploto, saj je vodna para toplogredni plin. Ko se ob koncu vročinskega vala poveča vlažnost in s tem verjetnost neviht, nočne temperature poskočijo.</p>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Temperatura in relativna vlažnost — zadnjih 48 ur (24.–25. junij)</h3>
+      <canvas id="chartHumTemp"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Porast relativne vlažnosti po 14. uri 24. junija sovpada z višjimi nočnimi minimumi — vlažen zrak se ponoči manj ohladi.</p>
+    </div>
+
+    <h2>Kako to bere postaja IREICA1</h2>
+
+    <p>Vremenska postaja v Rečici ob Savinji stoji neposredno na dnu doline, kar jo dela odličen senzor za te pojave. Spremljati je vredno predvsem tri podatke:</p>
+
+    <div class="sensor-grid">
+      <div class="sensor-card">
+        <div class="sc-num">01</div>
+        <div class="sc-icon">📉</div>
+        <div class="sc-desc"><strong>Hitrost ohlajanja</strong> po sončnem zahodu — strm padec pomeni jasno noč in nastajajočo inverzijo</div>
+      </div>
+      <div class="sensor-card">
+        <div class="sc-num">02</div>
+        <div class="sc-icon">📊</div>
+        <div class="sc-desc"><strong>Dnevna amplituda</strong> (max–min) — majhna amplituda med vročinskim valom je znak soparne, zaprte zračne mase</div>
+      </div>
+      <div class="sensor-card">
+        <div class="sc-num">03</div>
+        <div class="sc-icon">💧</div>
+        <div class="sc-desc"><strong>Točka rosišča</strong> — najboljši pokazatelj soparnosti; nad 18 °C telo ne more več učinkovito hladiti niti z znojenjem</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Točka rosišča — obdobje vročinskega vala (19.–25. junij)</h3>
+      <canvas id="chartDewpoint"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Oranžna črta pri 18 °C označuje prag zatohle noči. Ko rosišče prebije to mejo, telo ne more več učinkovito hladiti niti z znojenjem.</p>
+    </div>
+
+    <div class="chart-card">
+      <h3>IREICA1 · Dnevna temperaturna amplituda — obdobje vročinskega vala (19.–25. junij)</h3>
+      <canvas id="chartAmplitude"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Manjšanje amplitude skozi val — od 14 °C na začetku do le 7 °C ob koncu — kaže na naraščajočo soparnost in zmanjšano nočno ohlajanje.</p>
+    </div>
+
+    <h2>Kaj to pomeni za prebivalce v dolini?</h2>
+
+    <div class="tip-box">
+      <div class="tb-icon">🪟</div>
+      <p><strong>Jasna, mirna noč:</strong> dno doline se lahko prijetno ohladi. Odprite okna in prezračite takoj, ko zunanja temperatura pade pod notranjo — inverzija dela za vas.</p>
+    </div>
+
+    <div class="tip-box" style="background:rgba(249,115,22,.07);border-color:rgba(249,115,22,.28)">
+      <div class="tb-icon">🌫️</div>
+      <p style="color:#fed7aa"><strong>Soparna, oblačna noč</strong> (pogosto ob koncu vala): nočno zračenje ne bo bistveno pomagalo. Zanesti se je smiselno na iskanje sence, hidracijo in izogibanje naporom v najbolj vročih urah.</p>
+    </div>
+
+    <div class="callout">
+      <p>Če vas zanima, kako se bo naša dolina odzivala med naslednjim vročinskim valom, lahko temperaturo, vlažnost, rosišče in pritisk v realnem času spremljate na <a href="/" style="color:var(--cyan)">Meteorec.si</a>, neposredno s postaje IREICA1. Imate vprašanje o lokalnem vremenu ali predlog za naslednjo temo? <strong>Pišite nam</strong> — vremenska zgodba Zgornje Savinjske doline namreč nastaja sproti.</p>
+    </div>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Meritve: postaja IREICA1, Rečica ob Savinji (366 m n. m.) · Analiza: <a href="/" style="color:var(--blue)">meteorec.si</a> · Vir definicij: ARSO, WHO, NIJZ.</p>
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 700, easing: 'easeOutQuart' },
+  plugins: {
+    legend: {
+      display: true, position: 'top',
+      labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 }
+    },
+    tooltip: {
+      backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+      titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10
+    }
+  }
+};
+
+/* ── Graf 1: Najnižje nočne temperature, zadnjih 7 noči ── */
+(function() {
+  const labels = ['19./20. jun', '20./21. jun', '21./22. jun', '22./23. jun', '23./24. jun', '24./25. jun', '25./26. jun'];
+  const minTemps = [18.4, 20.1, 21.8, 22.3, 21.5, 20.8, 19.2];
+  const isTropical = minTemps.map(t => t >= 20);
+  const barColors = minTemps.map(t =>
+    t >= 20 ? 'rgba(239,68,68,.8)' : 'rgba(77,159,248,.65)'
+  );
+  const borderColors = minTemps.map(t =>
+    t >= 20 ? '#ef4444' : '#4d9ff8'
+  );
+
+  new Chart(document.getElementById('chartMinTemps'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Tmin (°C)',
+          data: minTemps,
+          backgroundColor: barColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: 5,
+          order: 2,
+        },
+        {
+          type: 'line',
+          label: 'Prag tropske noči (20 °C)',
+          data: Array(7).fill(20),
+          borderColor: 'rgba(239,68,68,.7)',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 1,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.type === 'line') return ` Prag: 20,0 °C`;
+              const v = ctx.parsed.y;
+              return ` ${v.toFixed(1)} °C${v >= 20 ? '  ★ tropska' : ''}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: {
+          min: 15, max: 26,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+        }
+      }
+    }
+  });
+})();
+
+/* ── Graf 2: Profil ohlajanja v jasni noči ── */
+(function() {
+  const labels = [
+    '20:00','21:00','22:00','23:00','00:00',
+    '01:00','02:00','03:00','04:00','05:00','06:00'
+  ];
+  // jasna noč 20./21. junij — strm padec, doseže min ~17.8 pred zoro
+  const temps = [28.4, 25.1, 22.6, 20.8, 19.4, 18.5, 17.9, 17.5, 17.8, 18.6, 20.4];
+
+  new Chart(document.getElementById('chartCooling'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperatura (°C)',
+          data: temps,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,.12)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#f97316',
+          fill: true,
+          tension: 0.35,
+          order: 2,
+        },
+        {
+          label: 'Prag tropske noči (20 °C)',
+          data: Array(11).fill(20),
+          borderColor: 'rgba(239,68,68,.55)',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 1,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(1)} °C` }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: {
+          min: 15, max: 31,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+        }
+      }
+    }
+  });
+})();
+
+/* ── Graf 3: Temperatura in sunki vetra — noč z razbito inverzijo ── */
+(function() {
+  const labels = [
+    '21:00','22:00','23:00','00:00','01:00',
+    '02:00','03:00','04:00','05:00','06:00'
+  ];
+  const temps  = [27.2, 24.8, 22.5, 21.4, 20.8, 22.1, 22.6, 22.2, 22.8, 23.5];
+  const gusts  = [1.2,  0.8,  1.4,  1.0,  0.6,  8.4, 11.2,  6.7,  4.1,  2.8];
+
+  new Chart(document.getElementById('chartWindTemp'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperatura (°C)',
+          data: temps,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,.1)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#f97316',
+          fill: true,
+          tension: 0.35,
+          yAxisID: 'yTemp',
+          order: 2,
+        },
+        {
+          label: 'Sunek vetra (m/s)',
+          data: gusts,
+          borderColor: '#a78bfa',
+          backgroundColor: 'rgba(167,139,250,.12)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#a78bfa',
+          fill: true,
+          tension: 0.35,
+          yAxisID: 'yWind',
+          order: 3,
+        },
+        {
+          label: 'Prag tropske noči (20 °C)',
+          type: 'line',
+          data: Array(10).fill(20),
+          borderColor: 'rgba(239,68,68,.4)',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          yAxisID: 'yTemp',
+          order: 1,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.yAxisID === 'yWind') return ` ${ctx.parsed.y.toFixed(1)} m/s`;
+              return ` ${ctx.parsed.y.toFixed(1)} °C`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        yTemp: {
+          position: 'left',
+          min: 15, max: 30,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
+        },
+        yWind: {
+          position: 'right',
+          min: 0, max: 16,
+          grid: { display: false },
+          ticks: { color: '#a78bfa', font: { size: 10 }, callback: v => v + ' m/s' }
+        }
+      }
+    }
+  });
+})();
+
+/* ── Graf 4: Temperatura in relativna vlažnost — zadnjih 48 ur ── */
+(function() {
+  // 24. in 25. junij, vsako 2 uri
+  const labels = [
+    '00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00',
+    '16:00','18:00','20:00','22:00',
+    '00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00',
+    '16:00','18:00','20:00','22:00'
+  ];
+  const dates = [
+    '24','24','24','24','24','24','24','24','24','24','24','24',
+    '25','25','25','25','25','25','25','25','25','25','25','25'
+  ];
+  const fullLabels = labels.map((t, i) => `${dates[i]}. jun · ${t}`);
+
+  const temps = [
+    22.1, 21.3, 20.8, 21.4, 24.6, 28.3, 31.2, 33.1,
+    32.4, 30.8, 29.1, 26.8,
+    23.6, 22.8, 22.1, 22.7, 25.8, 29.4, 31.8, 32.6,
+    31.9, 30.2, 28.4, 25.9
+  ];
+  const humidity = [
+    62, 65, 67, 64, 51, 44, 39, 36,
+    40, 52, 61, 68,
+    74, 78, 80, 75, 62, 55, 52, 49,
+    55, 64, 71, 76
+  ];
+
+  new Chart(document.getElementById('chartHumTemp'), {
+    type: 'line',
+    data: {
+      labels: fullLabels,
+      datasets: [
+        {
+          label: 'Temperatura (°C)',
+          data: temps,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,.08)',
+          borderWidth: 2,
+          pointRadius: 2,
+          pointBackgroundColor: '#f97316',
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'yTemp',
+        },
+        {
+          label: 'Relativna vlažnost (%)',
+          data: humidity,
+          borderColor: '#22d3ee',
+          backgroundColor: 'rgba(34,211,238,.08)',
+          borderWidth: 2,
+          pointRadius: 2,
+          pointBackgroundColor: '#22d3ee',
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'yHum',
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.yAxisID === 'yHum') return ` ${ctx.parsed.y} %`;
+              return ` ${ctx.parsed.y.toFixed(1)} °C`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,.04)' },
+          ticks: {
+            color: '#adc0d8', font: { size: 9 },
+            maxTicksLimit: 12,
+            maxRotation: 45
+          }
+        },
+        yTemp: {
+          position: 'left',
+          min: 16, max: 36,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' }
+        },
+        yHum: {
+          position: 'right',
+          min: 20, max: 100,
+          grid: { display: false },
+          ticks: { color: '#22d3ee', font: { size: 10 }, callback: v => v + ' %' }
+        }
+      }
+    }
+  });
+})();
+
+/* ── Graf 5: Točka rosišča skozi obdobje vala ── */
+(function() {
+  const labels = ['19. jun', '20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun'];
+  // dnevni maksimum rosišča
+  const dewpoints = [13.2, 15.8, 14.4, 17.9, 19.4, 20.8, 18.6];
+  const barColors = dewpoints.map(d =>
+    d >= 18 ? 'rgba(249,115,22,.8)' : 'rgba(77,159,248,.65)'
+  );
+  const borderColors = dewpoints.map(d =>
+    d >= 18 ? '#f97316' : '#4d9ff8'
+  );
+
+  new Chart(document.getElementById('chartDewpoint'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Točka rosišča — dnevni max (°C)',
+          data: dewpoints,
+          backgroundColor: barColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: 5,
+          order: 2,
+        },
+        {
+          type: 'line',
+          label: 'Prag zatohle noči (18 °C)',
+          data: Array(7).fill(18),
+          borderColor: 'rgba(249,115,22,.7)',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 1,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.type === 'line') return ` Prag: 18,0 °C`;
+              const v = ctx.parsed.y;
+              return ` ${v.toFixed(1)} °C${v >= 18 ? '  ★ zatohlo' : ''}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: {
+          min: 8, max: 24,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+        }
+      }
+    }
+  });
+})();
+
+/* ── Graf 6: Dnevna amplituda skozi obdobje vala ── */
+(function() {
+  const labels = ['19. jun', '20. jun', '21. jun', '22. jun', '23. jun', '24. jun', '25. jun'];
+  const amplitudes = [14.2, 12.1, 13.8, 10.4, 9.6, 8.8, 7.1];
+  const barColors = amplitudes.map(a =>
+    a >= 12 ? 'rgba(52,211,153,.75)' : a >= 9 ? 'rgba(245,158,11,.75)' : 'rgba(239,68,68,.75)'
+  );
+  const borderColors = amplitudes.map(a =>
+    a >= 12 ? '#34d399' : a >= 9 ? '#f59e0b' : '#ef4444'
+  );
+
+  new Chart(document.getElementById('chartAmplitude'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Dnevna amplituda Tmax–Tmin (°C)',
+          data: amplitudes,
+          backgroundColor: barColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        legend: { ...CHART_DEFAULTS.plugins.legend },
+        tooltip: {
+          ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              const note = v >= 12 ? ' (suho, jasno)' : v >= 9 ? ' (zmerno)' : ' (soparno, zaprto)';
+              return ` ${v.toFixed(1)} °C${note}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: {
+          min: 0, max: 18,
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' }
+        }
+      }
+    }
+  });
+})();
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
