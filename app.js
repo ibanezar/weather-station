@@ -13982,7 +13982,7 @@ function _buildOcnSSTChart(m){
   // Area fill under past line
   const fillPath=pathPast?pathPast+' L'+xS(Math.min(todayIdx>=0?todayIdx:dates.length-1,dates.length-1))+','+yS(vmin)+' L'+xS(0)+','+yS(vmin)+' Z':'';
 
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" height="${H}" style="width:100%;display:block;overflow:visible;cursor:crosshair">`;
   svg+=`<defs><linearGradient id="sst-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.18"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.02"/></linearGradient></defs>`;
   for(let v=Math.ceil(vmin);v<=vmax;v+=step){
     const y=yS(v);
