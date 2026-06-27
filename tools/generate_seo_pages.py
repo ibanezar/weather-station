@@ -1040,19 +1040,11 @@ def gen_seasonal_pages(hist, sitemap_urls):
     return written
 
 
-def gen_landing_page(hist, sitemap_urls):
-    """Hand-curated exact-match landing page: /vreme-recica-ob-savinji/."""
-    url = "/vreme-recica-ob-savinji/"
-    rel = "vreme-recica-ob-savinji/index.html"
-    lastmod = max(hist.keys())
-
-    # ── Compute climate facts from the archive ───────────────────────────────
+def climate_facts(hist):
+    """Compute the climate summary used by landing + nearby-town pages."""
     vals = list(hist.values())
     tavg_all = [v["tempAvg"] for v in vals if v.get("tempAvg") is not None]
     hum_all = [v["humidityAvg"] for v in vals if v.get("humidityAvg") is not None]
-    mean_t = st.mean(tavg_all) if tavg_all else None
-    mean_hum = st.mean(hum_all) if hum_all else None
-    frost_days = sum(1 for v in vals if v.get("tempLow") is not None and v["tempLow"] <= 0)
 
     tmax_d, tmax_v = max(((d, v["tempHigh"]) for d, v in hist.items()
                           if v.get("tempHigh") is not None), key=lambda x: x[1])
@@ -1063,7 +1055,6 @@ def gen_landing_page(hist, sitemap_urls):
     wind_d, wind_v = max(((d, v["windspeedHigh"]) for d, v in hist.items()
                           if v.get("windspeedHigh") is not None), key=lambda x: x[1])
 
-    # Warming trend: slope of yearly mean temperature over full years
     yr = defaultdict(list)
     for d, v in hist.items():
         if v.get("tempAvg") is not None:
@@ -1078,7 +1069,6 @@ def gen_landing_page(hist, sitemap_urls):
             trend = sum((full_years[i] - mx) * (ys[i] - my)
                         for i in range(len(full_years))) / denom
 
-    # Wettest month (climatological mean of monthly totals)
     ymp = defaultdict(float)
     for d, v in hist.items():
         ymp[d[:7]] += v.get("precipTotal", 0) or 0
@@ -1087,11 +1077,161 @@ def gen_landing_page(hist, sitemap_urls):
         permonth[int(ym[5:7])].append(t)
     wettest_m = max(permonth, key=lambda m: st.mean(permonth[m]))
 
-    first_date = min(hist.keys())
-    n_days = len(hist)
-    annual_precip = st.mean([sum(v.get("precipTotal", 0) or 0
-                             for d, v in hist.items() if d.startswith(str(y)))
-                             for y in full_years]) if full_years else None
+    return {
+        "mean_t": st.mean(tavg_all) if tavg_all else None,
+        "mean_hum": st.mean(hum_all) if hum_all else None,
+        "frost_days": sum(1 for v in vals if v.get("tempLow") is not None and v["tempLow"] <= 0),
+        "tmax_d": tmax_d, "tmax_v": tmax_v, "tmin_d": tmin_d, "tmin_v": tmin_v,
+        "prec_d": prec_d, "prec_v": prec_v, "wind_d": wind_d, "wind_v": wind_v,
+        "trend": trend, "full_years": full_years, "wettest_m": wettest_m,
+        "first_date": min(hist.keys()), "n_days": len(hist),
+        "annual_precip": st.mean([sum(v.get("precipTotal", 0) or 0
+                                  for d, v in hist.items() if d.startswith(str(y)))
+                                  for y in full_years]) if full_years else None,
+    }
+
+
+# Nearby towns without an official ARSO station. Distances are approximate
+# air-line km from the IREICA1 station in Rečica ob Savinji.
+NEARBY_TOWNS = [
+    {"slug": "vreme-mozirje", "town": "Mozirje", "loc": "Mozirju", "gen": "Mozirja",
+     "km": 4, "dir": "vzhodno", "short": "spodnji del doline",
+     "note": "največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline"},
+    {"slug": "vreme-nazarje", "town": "Nazarje", "loc": "Nazarjah", "gen": "Nazarij",
+     "km": 5, "dir": "jugozahodno", "short": "sotočje Drete in Savinje",
+     "note": "kraj ob sotočju Drete in Savinje v Zgornji Savinjski dolini"},
+    {"slug": "vreme-ljubno-ob-savinji", "town": "Ljubno ob Savinji", "loc": "Ljubnem ob Savinji",
+     "gen": "Ljubnega ob Savinji", "km": 9, "dir": "zahodno, gorvodno ob Savinji",
+     "short": "zgornji del doline",
+     "note": "kraj v ožjem, višje ležečem zahodnem delu Zgornje Savinjske doline"},
+]
+
+
+def gen_nearby_town_pages(hist, sitemap_urls):
+    """Honest 'nearest station' pages for neighbouring towns without a station."""
+    f = climate_facts(hist)
+    lastmod = max(hist.keys())
+
+    def dl(d):
+        y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
+        return f'<a href="/vreme/{y}/{m:02d}/{dd:02d}/">{dd}. {MES_GEN[m]} {y}</a>'
+
+    trend = f["trend"]
+    trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
+                 else f"{num(trend, 2)} °C na leto")
+
+    for t in NEARBY_TOWNS:
+        town, km, dirn = t["town"], t["km"], t["dir"]
+        url = f"/{t['slug']}/"
+        rel = f"{t['slug']}/index.html"
+
+        title = f"Vreme {town} — najbližja meritev (postaja IREICA1, {km} km)"
+        desc = (f"Vreme za {town} ({t['short']}): {town} nima lastne postaje ARSO. "
+                f"Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
+                f"približno {km} km {dirn}. Temperatura, padavine, megla in trend segrevanja.")
+
+        crumbs = [("Meteorec", "/"), (f"Vreme {town}", None)]
+
+        disclaimer = (f'  <div class="partial-note">Pomembno: {town} nima lastne uradne '
+                      f'meteorološke postaje. Spodnji podatki so dejanske meritve postaje '
+                      f'<strong>IREICA1 v Rečici ob Savinji</strong> — najbližje neprekinjene '
+                      f'meritve, približno <strong>{km} km {dirn}</strong> od {t["gen"]}. Zaradi '
+                      f'enake lege na dnu Zgornje Savinjske doline so razmere zelo primerljive, '
+                      f'a niso izmerjene v samem kraju.</div>'.replace("\n", " "))
+
+        intro = f'''  <p class="archive-intro">
+  <strong>{town}</strong> je {t["note"]}. Za napoved
+  in trenutno vreme v {t["loc"]} velja enak kotlinski vzorec kot v bližnji Rečici ob Savinji:
+  hladnejša jutra na dnu doline, pogosta jesenska in zimska megla ter razmeroma obilne padavine.
+  Postaja IREICA1 ({km} km {dirn}) ponuja {f["n_days"]} dni realnih meritev — za razliko od
+  splošnih napovedi, ki za to območje računajo le iz modela.</p>'''
+
+        facts = f'''  <h2>Podnebje v okolici {t["gen"]} (meritve IREICA1)</h2>
+  <table class="stats">
+    <tr><th>Povprečna letna temperatura</th><td>{num(f["mean_t"])} °C</td></tr>
+    <tr><th>Absolutni temperaturni razpon</th><td>{num(f["tmin_v"])} °C … {num(f["tmax_v"])} °C</td></tr>
+    <tr><th>Dni z zmrzaljo (od 2019)</th><td>{f["frost_days"]}</td></tr>
+    <tr><th>Povprečna relativna vlažnost</th><td>{num(f["mean_hum"], 0)} %</td></tr>
+    <tr><th>Povprečne letne padavine</th><td>{num(f["annual_precip"], 0)} mm</td></tr>
+    <tr><th>Dnevni rekord padavin</th><td>{num(f["prec_v"])} mm ({dl(f["prec_d"])})</td></tr>
+    <tr><th>Najmočnejši sunek vetra</th><td>{num(f["wind_v"])} km/h ({dl(f["wind_d"])})</td></tr>
+    <tr><th>Trend segrevanja</th><td>{trend_txt}</td></tr>
+  </table>'''
+
+        cta = f'''  <div class="stat-grid" style="margin-top:1.5rem">
+    <a class="stat-card c-temp" href="/" style="text-decoration:none">
+      <div class="sc-label">Trenutno vreme</div><div class="sc-val">V živo →</div>
+      <div class="sc-sub">Postaja IREICA1</div></a>
+    <a class="stat-card c-rain" href="/vreme-recica-ob-savinji/" style="text-decoration:none">
+      <div class="sc-label">Mikroklima doline</div><div class="sc-val">Več →</div>
+      <div class="sc-sub">Megla, inverzija, veter</div></a>
+    <a class="stat-card c-up" href="/vreme/" style="text-decoration:none">
+      <div class="sc-label">Vremenski arhiv</div><div class="sc-val">Po dnevih →</div>
+      <div class="sc-sub">Od 2019</div></a>
+  </div>'''
+
+        qa = [
+            (f"Ima {town} svojo vremensko postajo?",
+             f"{town} nima lastne uradne postaje ARSO. Najbližje neprekinjene meritve vremena "
+             f"prihajajo s postaje IREICA1 v Rečici ob Savinji, približno {km} km {dirn}."),
+            (f"Kako daleč je najbližja postaja od {t['gen']}?",
+             f"Postaja IREICA1 v Rečici ob Savinji je približno {km} km {dirn} od {t['gen']} "
+             f"in od leta 2019 neprekinjeno meri temperaturo, padavine, vlago in veter."),
+            (f"So meritve IREICA1 reprezentativne za {town}?",
+             f"Ker {town} leži v istem delu Zgornje Savinjske doline na podobni nadmorski višini, "
+             f"so temperature, megla in padavinski vzorci večinoma primerljivi. Lokalne razlike "
+             f"(npr. izpostavljenost soncu ali vetru) so vseeno mogoče."),
+        ]
+        faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+            f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+        ) + "\n  </div>"
+
+        place_about = (f'<script type="application/ld+json">\n'
+                       f'{{"@context":"https://schema.org","@type":"Place",'
+                       f'"name":{json.dumps(town)},"address":{{"@type":"PostalAddress",'
+                       f'"addressLocality":{json.dumps(town)},'
+                       f'"addressRegion":"Zgornja Savinjska dolina","addressCountry":"SI"}}}}\n</script>')
+        schema = "\n".join([
+            webpage_schema(url, title, desc),
+            crumbs_schema(crumbs),
+            faq_schema(qa),
+            place_about,
+        ])
+
+        body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme {town}</h1>
+  <p class="post-meta">Najbližja postaja IREICA1 · {km} km {dirn} · Zgornja Savinjska dolina</p>
+{disclaimer}
+{intro}
+{cta}
+{facts}
+{faq_html}
+  <p class="muted-note">Vir meritev: postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
+  Vrednosti niso izmerjene v {t["loc"]}, temveč na najbližji postaji.</p>
+  <a class="back-link" href="/vreme-recica-ob-savinji/">← Vreme Rečica ob Savinji</a>'''
+
+        html = page_shell(title, desc, url, schema, body)
+        write_page(rel, html, force=True)
+        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
+
+
+def gen_landing_page(hist, sitemap_urls):
+    """Hand-curated exact-match landing page: /vreme-recica-ob-savinji/."""
+    url = "/vreme-recica-ob-savinji/"
+    rel = "vreme-recica-ob-savinji/index.html"
+    lastmod = max(hist.keys())
+
+    # ── Climate facts (shared with nearby-town pages) ────────────────────────
+    f = climate_facts(hist)
+    mean_t, mean_hum, frost_days = f["mean_t"], f["mean_hum"], f["frost_days"]
+    tmax_d, tmax_v = f["tmax_d"], f["tmax_v"]
+    tmin_d, tmin_v = f["tmin_d"], f["tmin_v"]
+    prec_d, prec_v = f["prec_d"], f["prec_v"]
+    wind_d, wind_v = f["wind_d"], f["wind_v"]
+    trend, full_years = f["trend"], f["full_years"]
+    wettest_m, first_date = f["wettest_m"], f["first_date"]
+    n_days, annual_precip = f["n_days"], f["annual_precip"]
 
     def dl(d):
         y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
@@ -1179,6 +1319,14 @@ def gen_landing_page(hist, sitemap_urls):
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
 
+    # ── Nearby towns (internal-linking hub) ──────────────────────────────────
+    town_links = " · ".join(
+        f'<a href="/{t["slug"]}/">Vreme {t["town"]}</a>' for t in NEARBY_TOWNS
+    )
+    nearby_html = (f'  <h2>Vreme v bližnjih krajih</h2>\n'
+                   f'  <p>Sosednji kraji v Zgornji Savinjski dolini nimajo lastne postaje ARSO — '
+                   f'meritve IREICA1 so zanje najbližji realni vir: {town_links}.</p>')
+
     # ── Schema ───────────────────────────────────────────────────────────────
     latest = hist[lastmod]
     observations = [
@@ -1204,6 +1352,7 @@ def gen_landing_page(hist, sitemap_urls):
 {intro}
 {cta}
 {micro}
+{nearby_html}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
   Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.</p>
@@ -1281,6 +1430,10 @@ def main():
     print("Generiram pristajalno stran /vreme-recica-ob-savinji/ …")
     gen_landing_page(hist, sitemap_urls)
     print("  → /vreme-recica-ob-savinji/index.html")
+
+    print("Generiram strani za sosednje kraje …")
+    gen_nearby_town_pages(hist, sitemap_urls)
+    print(f"  → {len(NEARBY_TOWNS)} strani (Mozirje, Nazarje, Ljubno)")
 
     print("Generiram sitemap-weather.xml …")
     n = gen_sitemap(sitemap_urls)
