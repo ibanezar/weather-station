@@ -34,15 +34,18 @@ jobs:
           MONTH=$(date -u +%Y-%m)
           python3 tools/validate_history.py "$MONTH" "${{ steps.before.outputs.count }}"
 
+      - name: Pre-renderiraj zadnjo meritev v index.html
+        run: python3 tools/inject_current_weather.py
+
       - name: Commit in push (samo če so spremembe)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet history.json; then
+          if git diff --quiet history.json index.html; then
             echo "Ni novih podatkov."
           else
             MONTH=$(date -u +%Y-%m)
-            git add history.json
-            git commit -m "chore: posodobi history.json za $MONTH [skip ci]"
+            git add history.json index.html
+            git commit -m "chore: posodobi history.json + statično meritev za $MONTH [skip ci]"
             git push
           fi
