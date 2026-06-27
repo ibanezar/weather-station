@@ -1,0 +1,35 @@
+name: Pre-render trenutne meritve
+
+on:
+  schedule:
+    - cron: '30 * * * *'   # vsako uro ob :30 (zamaknjeno od station-monitor)
+  workflow_dispatch:
+
+# Prepreči prekrivanje zagonov
+concurrency:
+  group: prerender-current
+  cancel-in-progress: false
+
+jobs:
+  prerender:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vbrizgaj trenutno meritev v index.html
+        run: python3 tools/inject_current_weather.py --live
+
+      - name: Commit in push (samo če so spremembe)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet index.html; then
+            echo "Brez sprememb."
+          else
+            git add index.html
+            git commit -m "chore: pre-render trenutne meritve [skip ci]"
+            git push
+          fi
