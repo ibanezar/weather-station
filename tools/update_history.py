@@ -83,23 +83,22 @@ def fetch_ecowitt(start, end):
     """Vrne surov Ecowitt 'data' objekt ali None (ob napaki — sledi fallback)."""
     if not (EW_APP and EW_API and EW_MAC):
         return None
-    body = urllib.parse.urlencode({
+    # Ecowitt device/history zahteva GET s query parametri — POST vrne 40010.
+    params = urllib.parse.urlencode({
         "application_key":   EW_APP,
         "api_key":           EW_API,
         "mac":               EW_MAC,
         "start_date":        start + " 00:00:00",
         "end_date":          end + " 23:59:59",
-        "cycle_type":        "1",
+        "cycle_type":        "auto",
         "call_back":         "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily",
         "temp_unitid":       "1",   # °C
         "wind_speed_unitid": "7",   # km/h
         "rainfall_unitid":   "12",  # mm
-    }).encode()
+    })
     req = urllib.request.Request(
-        "https://api.ecowitt.net/api/v3/device/history",
-        data=body,
-        headers={"Content-Type": "application/x-www-form-urlencoded",
-                 "Accept": "application/json"},
+        "https://api.ecowitt.net/api/v3/device/history?" + params,
+        headers={"Accept": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
