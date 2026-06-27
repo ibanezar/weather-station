@@ -13,7 +13,7 @@ Vsak zapis dobi oznako "src": "station" (meritev) ali "src": "era5" (model).
 Ecowitt poverilnice se berejo iz okolja (EW_APP / EW_API / EW_MAC); če niso
 nastavljene, se uporabijo javne konstante iz Worker-ja (worker.js).
 """
-import json, os, sys, calendar, urllib.request, urllib.parse, urllib.error
+import json, os, sys, re, calendar, urllib.request, urllib.parse, urllib.error
 from datetime import date as _date, datetime, timezone
 
 try:
@@ -53,6 +53,31 @@ def _pick(v, keys):
 
 
 # ── PRIMARNI VIR: Ecowitt (prava postaja) ──────────────────────────────────
+_HEX32 = re.compile(r"^[0-9a-fA-F]{32}$")
+_UUID  = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+def _shape(name, v):
+    """Opiše obliko ključa BREZ razkritja vrednosti (za diagnostiko)."""
+    if not v:
+        return f"{name}: PRAZNO"
+    s = v.strip()
+    if _HEX32.match(s):
+        kind = "32-hex (Application-Key oblika)"
+    elif _UUID.match(s):
+        kind = "UUID (API-Key oblika)"
+    else:
+        kind = "neznana oblika"
+    extra = " ⚠ presledki/nova vrstica!" if s != v else ""
+    return f"{name}: dolžina={len(v)}, {kind}{extra}"
+
+def _diagnose_keys():
+    print("  Diagnostika ključev (brez razkritja vrednosti):")
+    print("   " + _shape("EW_APP", EW_APP))
+    print("   " + _shape("EW_API", EW_API))
+    a, i = (EW_APP or "").strip(), (EW_API or "").strip()
+    if _UUID.match(a) or (_HEX32.match(i) and not _HEX32.match(a)):
+        print("   → KLJUČA STA VERJETNO ZAMENJANA: EW_APP mora biti 32-hex, EW_API pa UUID.")
+
 def fetch_ecowitt(start, end):
     """Vrne surov Ecowitt 'data' objekt ali None (ob napaki — sledi fallback)."""
     if not (EW_APP and EW_API and EW_MAC):
@@ -83,6 +108,7 @@ def fetch_ecowitt(start, end):
         return None
     if j.get("code") != 0:
         print(f"⚠ Ecowitt napaka {j.get('code')}: {j.get('msg')}; uporabim Open-Meteo.")
+        _diagnose_keys()
         return None
     return j.get("data")
 
