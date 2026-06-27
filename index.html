@@ -162,6 +162,35 @@
           "name": "Zgornja Savinjska dolina, Slovenija"
         }
       }
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://meteorec.si/#dataset",
+      "name": "Vremenske meritve — Rečica ob Savinji (IREICA1)",
+      "description": "Dnevni arhiv temperature, padavin, relativne vlage in vetra meteorološke postaje IREICA1 v Rečici ob Savinji od novembra 2019.",
+      "url": "https://meteorec.si/vreme/",
+      "inLanguage": "sl",
+      "isAccessibleForFree": true,
+      "keywords": ["vreme Rečica ob Savinji", "vreme Zgornja Savinjska dolina", "vremenska postaja Savinjska dolina"],
+      "temporalCoverage": "2019-11-07/..",
+      "creator": { "@id": "https://meteorec.si/#person" },
+      "includedInDataCatalog": { "@id": "https://meteorec.si/#localbusiness" },
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Rečica ob Savinji",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 46.325779,
+          "longitude": 14.921137,
+          "elevation": 366
+        }
+      },
+      "variableMeasured": [
+        { "@type": "PropertyValue", "name": "Temperatura zraka", "unitText": "°C" },
+        { "@type": "PropertyValue", "name": "Padavine", "unitText": "mm" },
+        { "@type": "PropertyValue", "name": "Relativna vlažnost", "unitText": "%" },
+        { "@type": "PropertyValue", "name": "Hitrost vetra", "unitText": "km/h" }
+      ]
     }
   ]
 }
@@ -213,10 +242,10 @@
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <p class="sskj-entry" id="sskj-entry"><span class="sskj-hw">metéorec</span> <span class="sskj-gram">-rca m</span>, <span class="sskj-hw">meteorca</span> <span class="sskj-gram">-e ž</span>&ensp;▸&ensp;<em class="sskj-def">kdor živi na Rečici ob Savinji in ga zanimajo vremenski pojavi</em></p>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
-    <p class="header-blog-link" style="margin-top:.4rem;font-size:.9rem"><a href="/blog/" style="color:var(--blue);text-decoration:none">📖 Blog</a> &middot; <a href="/trendi/" style="color:var(--blue);text-decoration:none">📈 Trendi</a> &middot; <a href="/o-postaji.html" style="color:var(--blue);text-decoration:none">ℹ️ O postaji</a></p>
+    <p class="header-blog-link" style="margin-top:.4rem;font-size:.9rem"><a href="/blog/" style="color:var(--blue);text-decoration:none">📖 Blog</a> &middot; <a href="/trendi/" style="color:var(--blue);text-decoration:none">📈 Trendi</a> &middot; <a href="/o-postaji.html" style="color:var(--blue);text-decoration:none">ℹ️ O postaji</a> &middot; <a href="/vreme/" style="color:var(--blue);text-decoration:none">🗓️ Arhiv vremena</a></p>
   </header>
 
-  <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje.</p>
+  <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje. Več o <a href="/vreme-recica-ob-savinji/">vremenu in lokalni mikroklimi v Rečici ob Savinji</a>, ali pa preglejte <a href="/vreme/">vremenski arhiv od leta 2019</a> in <a href="/rekord/">vremenske rekorde Savinjske doline</a>.</p>
 
   <div class="status">
     <span><span class="dot loading" id="dot"></span><span id="status-text">Nalaganje …</span></span>
