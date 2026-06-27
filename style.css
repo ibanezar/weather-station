@@ -1514,6 +1514,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .title-row{display:flex;align-items:center;justify-content:center;gap:.7rem}
 .title-row h1{margin:0}
+.h1-kw{display:block;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.01em;color:var(--muted);margin-top:.2rem;opacity:.85}
 
 
 
