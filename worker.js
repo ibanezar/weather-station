@@ -255,26 +255,31 @@ async function fetchEcowitt(start, end, env) {
 
 const tsToDate = ts => new Date(parseInt(ts)*1000).toISOString().slice(0,10);
 const pf = v => v==null?null:typeof v==="object"?parseFloat(v.avg??v.max??Object.values(v)[0])||null:parseFloat(v)||null;
+// Ecowitt vrača vrednosti kot skalarje ("19.2") ALI objekte {max,min,avg};
+// num() ohrani tudi 0, pHi/pLo robustno izlušči high/low iz obeh oblik.
+const num = x => { const n = parseFloat(x); return Number.isFinite(n) ? n : null; };
+const pHi = v => (v && typeof v==="object") ? num(v.max??v.avg??v.value??Object.values(v)[0]) : num(v);
+const pLo = v => (v && typeof v==="object") ? num(v.min??v.avg??v.value??Object.values(v)[0]) : num(v);
 
 function normalize(data){
   const days={};
   const get=ts=>{const d=tsToDate(ts);if(!days[d])days[d]={obsTimeLocal:d,_h:[],_l:[],_a:[],_wH:[],_wA:[],_hum:[],_r:[]};return days[d];};
   const L=(...p)=>{let c=data;for(const k of p){c=c?.[k];if(c==null)return{};}return c?.list||{};};
   for(const[ts,v] of Object.entries(L("outdoor","temperature")||{})){
-    const b=get(ts);b._h.push(parseFloat(v.max??v.avg??0)||null);b._l.push(parseFloat(v.min??v.avg??0)||null);b._a.push(pf(v));
+    const b=get(ts);b._h.push(pHi(v));b._l.push(pLo(v));b._a.push(pf(v));
   }
   for(const[ts,v] of Object.entries(L("outdoor","humidity")||{})) get(ts)._hum.push(pf(v));
   for(const[ts,v] of Object.entries(L("wind","wind_speed")||{})){
-    const b=get(ts);b._wH.push(parseFloat(v.max??v.avg??0)||null);b._wA.push(pf(v));
+    const b=get(ts);b._wH.push(pHi(v));b._wA.push(pf(v));
   }
   const rList=L("rainfall","daily")||{};
   for(const[ts,v] of Object.entries(rList)) get(ts)._r.push(typeof v==="object"?parseFloat(v.total??v.max??0)||0:parseFloat(v)||0);
   const avg=a=>{const f=a.filter(x=>x!=null);return f.length?f.reduce((x,y)=>x+y,0)/f.length:null;};
   return Object.values(days).map(b=>({obsTimeLocal:b.obsTimeLocal,metric:{
-    tempHigh:     b._h.filter(x=>x).length?Math.max(...b._h.filter(x=>x)):null,
-    tempLow:      b._l.filter(x=>x).length?Math.min(...b._l.filter(x=>x)):null,
+    tempHigh:     b._h.filter(x=>x!=null).length?Math.max(...b._h.filter(x=>x!=null)):null,
+    tempLow:      b._l.filter(x=>x!=null).length?Math.min(...b._l.filter(x=>x!=null)):null,
     tempAvg:      avg(b._a),
-    windspeedHigh:b._wH.filter(x=>x).length?Math.max(...b._wH.filter(x=>x)):null,
+    windspeedHigh:b._wH.filter(x=>x!=null).length?Math.max(...b._wH.filter(x=>x!=null)):null,
     windspeedAvg: avg(b._wA),
     humidityAvg:  avg(b._hum)!=null?Math.round(avg(b._hum)):null,
     precipTotal:  b._r.length?Math.max(...b._r):0,
