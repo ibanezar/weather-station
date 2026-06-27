@@ -1003,9 +1003,75 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /arso-water ───────────────────────────────────────
-      // ARSO hidrološka postaja — vodostaj Savinje pri Mozirju/Letušu
-      // Poskusi GeoJSON feed z vsemi postajami, filtriraj za Savinjo v bližini
+      // ARSO hidrološke postaje vzdolž Savinje — vodostaj, pretok in
+      // temperatura vode (temp_vode). Primarni vir je uradni ARSO XML, ki
+      // dejansko vsebuje izmerjeno temperaturo vode; GeoJSON WebService je
+      // rezervni vir (pogosto vrača prazno).
       if (path === "/arso-water") {
+        // Referenčna lokacija (Rečica ob Savinji) za razvrščanje po bližini
+        const REF_LAT = 46.3258, REF_LON = 14.9211;
+        const dist2 = (lat, lon) => (lat - REF_LAT) ** 2 + (lon - REF_LON) ** 2;
+
+        // ── Primarni vir: ARSO XML ──────────────────────────
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 7000);
+          const r = await fetch("https://www.arso.gov.si/xml/vode/hidro_podatki_zadnji.xml", {
+            headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/xml,text/xml,*/*", "Referer": "https://www.arso.gov.si/" },
+            signal: ctrl.signal,
+          });
+          clearTimeout(tid);
+          if (r.ok) {
+            const xml = await r.text();
+            const decode = (s) => (s || "")
+              .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+              .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
+              .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+            const field = (block, tag) => {
+              const m = block.match(new RegExp("<" + tag + ">([\\s\\S]*?)</" + tag + ">"));
+              return m ? decode(m[1]).trim() : null;
+            };
+            const num = (v) => (v == null || v === "" ? null : Number(v));
+            const blocks = xml.match(/<postaja\b[\s\S]*?<\/postaja>/g) || [];
+            const features = [];
+            for (const b of blocks) {
+              const lat = num((b.match(/wgs84_sirina="([\d.]+)"/) || [])[1]);
+              const lon = num((b.match(/wgs84_dolzina="([\d.]+)"/) || [])[1]);
+              if (lat == null || lon == null) continue;
+              features.push({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: [lon, lat] },
+                properties: {
+                  sifra: (b.match(/sifra="(\d+)"/) || [])[1] || null,
+                  reka: field(b, "reka"),
+                  merilno_mesto: field(b, "merilno_mesto"),
+                  postaja: field(b, "ime_kratko") || field(b, "merilno_mesto"),
+                  vodostaj: num(field(b, "vodostaj")),
+                  pretok: num(field(b, "pretok")),
+                  temperatura: num(field(b, "temp_vode")),
+                  datum: field(b, "datum"),
+                },
+              });
+            }
+            // Filter: v bližini Rečice, prednost rekam Savinjske doline
+            const nearby = features.filter(f => {
+              const [lon, lat] = f.geometry.coordinates;
+              return lat > 46.0 && lat < 46.7 && lon > 14.3 && lon < 15.5;
+            });
+            const savinja = nearby.filter(f => /savinj/i.test(f.properties.reka || ""));
+            const out = (savinja.length ? savinja : nearby)
+              .sort((a, b) => dist2(a.geometry.coordinates[1], a.geometry.coordinates[0])
+                            - dist2(b.geometry.coordinates[1], b.geometry.coordinates[0]))
+              .slice(0, 6);
+            if (out.length) {
+              return new Response(JSON.stringify({ stations: out, total: features.length, source: "arso-xml" }), {
+                headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+              });
+            }
+          }
+        } catch (_) { /* pade na GeoJSON rezervo */ }
+
+        // ── Rezervni vir: GeoJSON WebService ────────────────
         const candidates = [
           "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1&rb_Pq=Q%2CTW",
           "https://vode.arso.gov.si/hidWebService.aspx?POST_IZMERJENI_PODATKI_VODOSTAJ_GEOJSON_T=1&rb_Pq=Q",
@@ -1021,7 +1087,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             });
             clearTimeout(tid);
             if (!r.ok) continue;
-            const ct = r.headers.get("Content-Type") || "";
             const text = await r.text();
             // Try JSON parse
             let geojson;
