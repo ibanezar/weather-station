@@ -236,17 +236,17 @@ async function fetchEcowitt(start, end, env) {
   const app = env?.EW_APP || EW_APP_FALLBACK;
   const api = env?.EW_API || EW_API_FALLBACK;
   if (!app || !api) return null;
-  const body = new URLSearchParams({
+  // Ecowitt device/history zahteva GET s query parametri — POST vrne 40010.
+  const qs = new URLSearchParams({
     application_key: app, api_key: api, mac: EW_MAC,
     start_date: start+" 00:00:00", end_date: end+" 23:59:59",
-    cycle_type: "1",
+    cycle_type: "auto",
     call_back: "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",
     temp_unitid:"1", pressure_unitid:"5", wind_speed_unitid:"7", rainfall_unitid:"12"
   });
-  const res = await fetch("https://api.ecowitt.net/api/v3/device/history", {
-    method: "POST",
-    headers: {"Content-Type":"application/x-www-form-urlencoded","Accept":"application/json"},
-    body: body.toString()
+  const res = await fetch("https://api.ecowitt.net/api/v3/device/history?"+qs.toString(), {
+    method: "GET",
+    headers: {"Accept":"application/json"}
   });
   const json = await res.json();
   if (json.code !== 0) throw new Error("Ecowitt "+json.code+": "+json.msg);
