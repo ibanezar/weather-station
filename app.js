@@ -210,6 +210,17 @@ function updatePressureArc(p){
 function smoothPath(pts){if(pts.length<2)return'';let d='M '+pts[0].x+' '+pts[0].y;for(let i=1;i<pts.length;i++){const p0=pts[i-2]||pts[0],p1=pts[i-1],p2=pts[i],p3=pts[i+1]||p2;const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6,c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);}return d;}
 function mkSVG(parent,tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.appendChild(el);return el;}
 function mouseToSVGX(svg,evt){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(evt.clientX-r.left)/r.width*vb.width;}
+// Attach mouse + touch scrubbing to a chart SVG. onMove(svgX,clientX,clientY) updates the
+// crosshair/tooltip; onLeave hides it. Touch drag scrubs values (preventDefault stops page scroll).
+function attachScrub(svg,onMove,onLeave){
+  const xFromClient=cx=>{const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return(cx-r.left)/r.width*vb.width;};
+  svg.addEventListener('mousemove',e=>onMove(xFromClient(e.clientX),e.clientX,e.clientY));
+  svg.addEventListener('mouseleave',onLeave);
+  svg.addEventListener('touchstart',e=>{const t=e.touches[0];onMove(xFromClient(t.clientX),t.clientX,t.clientY);},{passive:true});
+  svg.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];onMove(xFromClient(t.clientX),t.clientX,t.clientY);},{passive:false});
+  svg.addEventListener('touchend',onLeave);
+  svg.addEventListener('touchcancel',onLeave);
+}
 
 let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
@@ -274,8 +285,7 @@ function drawTempChart(data){
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
-  svg.addEventListener('mousemove',e=>{if(!_tempData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_tempData.length-1,Math.round((sx-pad.l)/cw*(_tempData.length-1))));const d=_tempData[idx];if(!d)return;const px=xS(idx),py=yS(d.temp);tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');tipDot.setAttribute('fill',tempColor(d.temp));tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+tempColor(d.temp)+';font-weight:600">'+d.temp.toFixed(1)+'°C</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
-  svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
+  attachScrub(svg,(sx,clientX,clientY)=>{if(!_tempData.length)return;const idx=Math.max(0,Math.min(_tempData.length-1,Math.round((sx-pad.l)/cw*(_tempData.length-1))));const d=_tempData[idx];if(!d)return;const px=xS(idx),py=yS(d.temp);tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');tipDot.setAttribute('fill',tempColor(d.temp));tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+tempColor(d.temp)+';font-weight:600">'+d.temp.toFixed(1)+'°C</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';tip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
   set('temp-range',fmt(mn,1)+'° – '+fmt(mx,1)+'°C');
 }
 function drawRainChart(data){
@@ -306,8 +316,7 @@ function drawRainChart(data){
   if(total<.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Inter,sans-serif'});t.textContent='Ni padavin v zadnjih 24 urah';}
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
-  svg.addEventListener('mousemove',e=>{if(!_rainData.length)return;const sx=mouseToSVGX(svg,e),idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+d.rain.toFixed(2)+' mm</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-28)+'px';});
-  svg.addEventListener('mouseleave',()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
+  attachScrub(svg,(sx,clientX,clientY)=>{if(!_rainData.length)return;const idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+d.rain.toFixed(2)+' mm</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';tip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
   set('rain-range','Skupaj: '+total.toFixed(1)+' mm');
 }
 
@@ -2857,6 +2866,14 @@ function drawHistTempChart(data){
 
   const highs=data.map(d=>d.metric.tempHigh??-999),lows=data.map(d=>d.metric.tempLow??999);
   set('hist-temp-range','Min '+fmt(Math.min(...lows),1)+'° / Maks '+fmt(Math.max(...highs),1)+'°C');
+
+  // Interactive crosshair
+  const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
+  const dotH=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:'#f87171',stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
+  const dotL=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:CC.tempLine,stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const tip=document.getElementById('chart-tip');
+  attachScrub(svg,(sx,clientX,clientY)=>{const idx=Math.max(0,Math.min(data.length-1,Math.round((sx-pad.l)/cw*(data.length-1))));const d=data[idx];if(!d)return;const hi=d.metric.tempHigh,lo=d.metric.tempLow,px=xS(idx);tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');if(hi!=null){dotH.setAttribute('cx',px);dotH.setAttribute('cy',yS(hi));dotH.setAttribute('opacity','1');}else dotH.setAttribute('opacity','0');if(lo!=null){dotL.setAttribute('cx',px);dotL.setAttribute('cy',yS(lo));dotL.setAttribute('opacity','1');}else dotL.setAttribute('opacity','0');tip.innerHTML='<span style="color:#f87171;font-weight:600">'+(hi!=null?hi.toFixed(1):'—')+'°</span> / <span style="color:'+CC.tempLine+';font-weight:600">'+(lo!=null?lo.toFixed(1):'—')+'°</span>&ensp;'+fmtHistDateShort(d.obsTimeLocal);tip.style.opacity='1';tip.style.left=Math.min(clientX+14,window.innerWidth-140)+'px';tip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipLine.setAttribute('opacity','0');dotH.setAttribute('opacity','0');dotL.setAttribute('opacity','0');tip.style.opacity='0';});
 }
 
 function drawHistRainChart(data){
@@ -2888,6 +2905,13 @@ function drawHistRainChart(data){
   });
   if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Inter,sans-serif'});t.textContent='Ni padavin v izbranem obdobju';}
   set('hist-rain-range','Skupaj: '+fmt(total,1)+' mm');
+
+  // Interactive crosshair
+  const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
+  const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:CC.rainBar,stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const tip=document.getElementById('chart-tip');
+  attachScrub(svg,(sx,clientX,clientY)=>{const idx=Math.max(0,Math.min(data.length-1,Math.round((sx-pad.l)/cw*(data.length-1))));const d=data[idx];if(!d)return;const r=d.metric.precipTotal??0,px=xS(idx),py=pad.t+ch-(r/maxR)*ch;tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+r.toFixed(1)+' mm</span>&ensp;'+fmtHistDateShort(d.obsTimeLocal);tip.style.opacity='1';tip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';tip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipLine.setAttribute('opacity','0');tipDot.setAttribute('opacity','0');tip.style.opacity='0';});
 }
 
 
@@ -5133,6 +5157,12 @@ function drawHourlyProfile(observations){
   mk('circle',{cx:xS(minA.h),cy:yS(minA.avg),r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2'});
   mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'JetBrains Mono,monospace'},maxA.avg.toFixed(1)+'°');
   mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'JetBrains Mono,monospace'},minA.avg.toFixed(1)+'°');
+  // Interactive crosshair — scrub through hourly averages with mouse or finger
+  const tipLine=mk('line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
+  const tipDot=mk('circle',{cx:0,cy:0,r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
+  mk('rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const htip=document.getElementById('chart-tip');
+  attachScrub(svg,(sx,clientX,clientY)=>{if(!htip)return;const h=Math.max(0,Math.min(23,Math.round((sx-pad.l)/cw*23)));const a=filled[h];if(!a)return;const px=xS(a.h),py=yS(a.avg);tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');htip.innerHTML='<span style="color:'+CC.tempLine+';font-weight:600">'+a.avg.toFixed(1)+'°C</span>&ensp;'+(a.h<10?'0':'')+a.h+':00';htip.style.opacity='1';htip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';htip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipLine.setAttribute('opacity','0');tipDot.setAttribute('opacity','0');if(htip)htip.style.opacity='0';});
   const peaks=document.getElementById('hourly-peaks');
   if(peaks)peaks.innerHTML='<div class="hourly-peak-item">🔴 Najtopleje ob <b>'+(maxA.h<10?'0':'')+maxA.h+':00 ('+maxA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">🔵 Najhladneje ob <b>'+(minA.h<10?'0':'')+minA.h+':00 ('+minA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">Amplituda: <b>'+(maxA.avg-minA.avg).toFixed(1)+'°C</b></div>';
 }

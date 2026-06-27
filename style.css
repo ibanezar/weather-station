@@ -1897,8 +1897,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr}.span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
-  .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .chart-svg{min-width:520px;width:520px}
+  /* Charts fit the viewport so the full range is visible and can be scrubbed by finger.
+     touch-action:pan-y lets vertical swipes scroll the page while horizontal drags scrub values. */
+  .chart-svg-wrap{overflow:hidden}
+  .chart-svg{min-width:0;width:100%;touch-action:pan-y}
 }
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
