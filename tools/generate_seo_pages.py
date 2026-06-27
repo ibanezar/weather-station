@@ -108,6 +108,45 @@ def webpage_schema(url, title, desc, date_published=None):
     s += "}"
     return f"<script type=\"application/ld+json\">\n{s}\n</script>"
 
+def faq_schema(qa):
+    items = []
+    for q, a in qa:
+        items.append(
+            '{"@type":"Question","name":' + json.dumps(q) +
+            ',"acceptedAnswer":{"@type":"Answer","text":' + json.dumps(a) + "}}"
+        )
+    return ('<script type="application/ld+json">\n'
+            '{"@context":"https://schema.org","@type":"FAQPage",'
+            '"inLanguage":"sl","mainEntity":[' + ",".join(items) + "]}\n</script>")
+
+
+def dataset_schema(url, observations):
+    """Dataset + nested WeatherObservation nodes for the latest measurements."""
+    full = f"{SITE}{url}"
+    obs = []
+    for o in observations:
+        obs.append(
+            '{"@type":"PropertyValue","name":' + json.dumps(o["name"]) +
+            ',"value":' + json.dumps(o["value"]) +
+            (',"unitText":' + json.dumps(o["unit"]) if o.get("unit") else "") + "}"
+        )
+    return ('<script type="application/ld+json">\n'
+            '{"@context":"https://schema.org","@type":"Dataset",'
+            f'"@id":"{full}#dataset",'
+            '"name":"Vremenske meritve — Rečica ob Savinji (IREICA1)",'
+            '"description":"Dnevni arhiv temperature, padavin, vlage in vetra meteorološke '
+            'postaje IREICA1 v Rečici ob Savinji od novembra 2019.",'
+            '"inLanguage":"sl","keywords":["vreme Rečica ob Savinji",'
+            '"vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],'
+            f'"url":"{full}",'
+            '"creator":{"@type":"Person","name":"Filip Eremita"},'
+            '"isAccessibleForFree":true,'
+            '"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji",'
+            f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}},'
+            f'"temporalCoverage":"2019-11-07/..",'
+            '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
+
+
 def stn_badge():
     return '  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>'
 
@@ -1001,6 +1040,180 @@ def gen_seasonal_pages(hist, sitemap_urls):
     return written
 
 
+def gen_landing_page(hist, sitemap_urls):
+    """Hand-curated exact-match landing page: /vreme-recica-ob-savinji/."""
+    url = "/vreme-recica-ob-savinji/"
+    rel = "vreme-recica-ob-savinji/index.html"
+    lastmod = max(hist.keys())
+
+    # ── Compute climate facts from the archive ───────────────────────────────
+    vals = list(hist.values())
+    tavg_all = [v["tempAvg"] for v in vals if v.get("tempAvg") is not None]
+    hum_all = [v["humidityAvg"] for v in vals if v.get("humidityAvg") is not None]
+    mean_t = st.mean(tavg_all) if tavg_all else None
+    mean_hum = st.mean(hum_all) if hum_all else None
+    frost_days = sum(1 for v in vals if v.get("tempLow") is not None and v["tempLow"] <= 0)
+
+    tmax_d, tmax_v = max(((d, v["tempHigh"]) for d, v in hist.items()
+                          if v.get("tempHigh") is not None), key=lambda x: x[1])
+    tmin_d, tmin_v = min(((d, v["tempLow"]) for d, v in hist.items()
+                          if v.get("tempLow") is not None), key=lambda x: x[1])
+    prec_d, prec_v = max(((d, v["precipTotal"]) for d, v in hist.items()
+                          if v.get("precipTotal") is not None), key=lambda x: x[1])
+    wind_d, wind_v = max(((d, v["windspeedHigh"]) for d, v in hist.items()
+                          if v.get("windspeedHigh") is not None), key=lambda x: x[1])
+
+    # Warming trend: slope of yearly mean temperature over full years
+    yr = defaultdict(list)
+    for d, v in hist.items():
+        if v.get("tempAvg") is not None:
+            yr[int(d[:4])].append(v["tempAvg"])
+    full_years = sorted(y for y in yr if len(yr[y]) >= 350)
+    trend = None
+    if len(full_years) >= 3:
+        ys = [st.mean(yr[y]) for y in full_years]
+        mx, my = st.mean(full_years), st.mean(ys)
+        denom = sum((x - mx) ** 2 for x in full_years)
+        if denom:
+            trend = sum((full_years[i] - mx) * (ys[i] - my)
+                        for i in range(len(full_years))) / denom
+
+    # Wettest month (climatological mean of monthly totals)
+    ymp = defaultdict(float)
+    for d, v in hist.items():
+        ymp[d[:7]] += v.get("precipTotal", 0) or 0
+    permonth = defaultdict(list)
+    for ym, t in ymp.items():
+        permonth[int(ym[5:7])].append(t)
+    wettest_m = max(permonth, key=lambda m: st.mean(permonth[m]))
+
+    first_date = min(hist.keys())
+    n_days = len(hist)
+    annual_precip = st.mean([sum(v.get("precipTotal", 0) or 0
+                             for d, v in hist.items() if d.startswith(str(y)))
+                             for y in full_years]) if full_years else None
+
+    def dl(d):
+        y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
+        return f'<a href="/vreme/{y}/{m:02d}/{dd:02d}/">{dd}. {MES_GEN[m]} {y}</a>'
+
+    trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
+                 else f"{num(trend, 2)} °C na leto")
+
+    title = "Vreme Rečica ob Savinji — meritve v živo in lokalna mikroklima"
+    desc = (f"Vreme v Rečici ob Savinji (Zgornja Savinjska dolina, {ELEV} m n. m.): meritve "
+            f"v živo in {n_days} dni arhiva postaje IREICA1. Mikroklima doline, megla, "
+            f"inverzija, veter in trend segrevanja {trend_txt}.")
+
+    crumbs = [("Meteorec", "/"), ("Vreme Rečica ob Savinji", None)]
+
+    # ── Curated prose (uses computed figures) ────────────────────────────────
+    intro = f'''  <p class="archive-intro">
+  <strong>Rečica ob Savinji</strong> leži na dnu <strong>Zgornje Savinjske doline</strong> na
+  približno {ELEV} m nadmorske višine. Meteorološka postaja <strong>IREICA1</strong> tu neprekinjeno
+  meri vreme od {fmtd(first_date)} — skupaj že <strong>{n_days} dni</strong> podatkov o temperaturi,
+  padavinah, vlagi in vetru. Za razliko od splošnih napovedi, ki za to območje ponujajo le model,
+  so spodnji podatki <strong>dejanske meritve</strong> z lokacije.</p>'''
+
+    micro = f'''  <h2>Mikroklima Rečice ob Savinji</h2>
+  <p>Dno alpske doline ima izrazito <strong>kotlinsko mikroklimo</strong>. Hladen zrak se ob jasnih
+  nočeh nabira na dnu doline, zato so jutra pogosto hladnejša od okoliških pobočij. Postaja IREICA1
+  je doslej zabeležila <strong>{frost_days} dni z zmrzaljo</strong> (najnižja dnevna temperatura ≤ 0 °C),
+  povprečna letna temperatura pa znaša <strong>{num(mean_t)} °C</strong>. Absolutni temperaturni razpon
+  sega od {num(tmin_v)} °C ({dl(tmin_d)}) do {num(tmax_v)} °C ({dl(tmax_d)}).</p>
+
+  <h2>Megla in temperaturna inverzija</h2>
+  <p>Visoka povprečna relativna vlažnost (<strong>{num(mean_hum, 0)} %</strong>) in zaprta lega doline
+  pomenita pogosto <strong>radiacijsko meglo</strong> ter <strong>temperaturne inverzije</strong>,
+  predvsem pozno jeseni in pozimi. V takih razmerah je na dnu doline mrzlo in megleno, nekaj sto metrov
+  višje pa sončno in toplo — klasičen savinjski inverzijski vzorec.</p>
+
+  <h2>Padavine in veter</h2>
+  <p>Območje je razmeroma namočeno: povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na leto</strong>,
+  z viškom v {MES_LOC[wettest_m]} zaradi poletnih neviht. Dnevni rekord padavin postaje znaša
+  <strong>{num(prec_v)} mm</strong> ({dl(prec_d)}). Vetrovi so večinoma šibki in kanalizirani po osi doline,
+  najmočnejši zabeleženi sunek pa je dosegel <strong>{num(wind_v)} km/h</strong> ({dl(wind_d)}).
+  Avgusta 2023 je širše območje Zgornje Savinjske doline prizadela <a href="/blog/poplave-2023.html">katastrofalna
+  poplava</a>.</p>
+
+  <h2>Podnebje se segreva</h2>
+  <p>Iz arhiva postaje je razviden jasen trend: povprečna letna temperatura v Rečici ob Savinji narašča za
+  približno <strong>{trend_txt}</strong> (obdobje {full_years[0]}–{full_years[-1]}). Najtoplejše leto doslej je
+  bilo 2024 s povprečjem nad 11 °C.</p>'''
+
+    cta = '''  <div class="stat-grid" style="margin-top:1.5rem">
+    <a class="stat-card c-temp" href="/" style="text-decoration:none">
+      <div class="sc-label">Trenutno vreme</div>
+      <div class="sc-val">V živo →</div>
+      <div class="sc-sub">Meritve postaje IREICA1</div>
+    </a>
+    <a class="stat-card c-rain" href="/vreme/" style="text-decoration:none">
+      <div class="sc-label">Vremenski arhiv</div>
+      <div class="sc-val">Po dnevih →</div>
+      <div class="sc-sub">Od novembra 2019</div>
+    </a>
+    <a class="stat-card c-up" href="/rekord/" style="text-decoration:none">
+      <div class="sc-label">Rekordi</div>
+      <div class="sc-val">Ekstremi →</div>
+      <div class="sc-sub">Temperatura, padavine, veter</div>
+    </a>
+  </div>'''
+
+    # ── FAQ (visible + schema) ───────────────────────────────────────────────
+    qa = [
+        ("Kakšno je trenutno vreme v Rečici ob Savinji?",
+         "Trenutne meritve temperature, padavin, vlage in vetra v živo objavlja meteorološka "
+         "postaja IREICA1 na naslovni strani Meteorec (meteorec.si). Podatki so dejanske meritve "
+         "z lokacije v Rečici ob Savinji, ne le napoved iz modela."),
+        ("Kje stoji vremenska postaja v Rečici ob Savinji?",
+         f"Postaja IREICA1 stoji v Rečici ob Savinji na dnu Zgornje Savinjske doline, na približno "
+         f"{ELEV} m nadmorske višine. Meritve so na voljo od novembra 2019."),
+        ("Zakaj je v Savinjski dolini tako pogosto megleno?",
+         "Zaradi zaprte lege doline in visoke vlažnosti se hladen zrak ob jasnih nočeh nabira na dnu "
+         "doline, kar povzroča radiacijsko meglo in temperaturne inverzije, zlasti jeseni in pozimi."),
+        ("Se podnebje v Rečici ob Savinji segreva?",
+         f"Da. Iz arhiva postaje IREICA1 je razviden trend naraščanja povprečne letne temperature za "
+         f"približno {num(trend, 2)} °C na leto v obdobju {full_years[0]}–{full_years[-1]}."),
+    ]
+    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+    ) + "\n  </div>"
+
+    # ── Schema ───────────────────────────────────────────────────────────────
+    latest = hist[lastmod]
+    observations = [
+        {"name": "Povprečna temperatura", "value": latest.get("tempAvg"), "unit": "°C"},
+        {"name": "Najvišja temperatura", "value": latest.get("tempHigh"), "unit": "°C"},
+        {"name": "Najnižja temperatura", "value": latest.get("tempLow"), "unit": "°C"},
+        {"name": "Padavine", "value": latest.get("precipTotal"), "unit": "mm"},
+        {"name": "Relativna vlažnost", "value": latest.get("humidityAvg"), "unit": "%"},
+        {"name": "Najmočnejši sunek vetra", "value": latest.get("windspeedHigh"), "unit": "km/h"},
+    ]
+    observations = [o for o in observations if o["value"] is not None]
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        faq_schema(qa),
+        dataset_schema(url, observations),
+    ])
+
+    body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme Rečica ob Savinji</h1>
+  <p class="post-meta">Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · {ELEV} m n. m.</p>
+{intro}
+{cta}
+{micro}
+{faq_html}
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
+  Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.</p>
+  <a class="back-link" href="/">← Trenutno vreme v živo</a>'''
+
+    html = page_shell(title, desc, url, schema, body)
+    write_page(rel, html, force=True)
+    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.9"))
+
+
 def gen_sitemap(sitemap_urls):
     entries = []
     for loc, lastmod, cf, priority in sitemap_urls:
@@ -1064,6 +1277,10 @@ def main():
     print("Generiram sezonske strani …")
     w = gen_seasonal_pages(hist, sitemap_urls)
     print(f"  → {w} sezonskih strani")
+
+    print("Generiram pristajalno stran /vreme-recica-ob-savinji/ …")
+    gen_landing_page(hist, sitemap_urls)
+    print("  → /vreme-recica-ob-savinji/index.html")
 
     print("Generiram sitemap-weather.xml …")
     n = gen_sitemap(sitemap_urls)
