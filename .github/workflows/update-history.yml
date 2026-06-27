@@ -21,6 +21,10 @@ jobs:
           echo "count=$COUNT" >> $GITHUB_OUTPUT
 
       - name: Posodobi tekoči mesec
+        env:
+          EW_APP: ${{ secrets.EW_APP }}
+          EW_API: ${{ secrets.EW_API }}
+          EW_MAC: ${{ secrets.EW_MAC }}
         run: |
           MONTH=$(date -u +%Y-%m)
           python3 tools/update_history.py "$MONTH"
