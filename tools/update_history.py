@@ -30,9 +30,10 @@ REQUIRED = ['tempHigh', 'tempLow', 'tempAvg', 'precipTotal',
             'windspeedHigh', 'windspeedAvg', 'humidityAvg']
 
 # Ecowitt poverilnice — okolje najprej, sicer javni fallback (enak kot v worker.js)
-EW_APP = os.environ.get("EW_APP") or "A7E5CAF73FCC9BF859CDE788D69A1C91"
-EW_API = os.environ.get("EW_API") or "0bd213c8-8e54-4bf6-b6da-127a1c605034"
-EW_MAC = os.environ.get("EW_MAC") or "BC:DD:C2:42:8D:56"
+# .strip() odstrani morebitne presledke/nove vrstice iz prilepljenih secrets.
+EW_APP = (os.environ.get("EW_APP") or "A7E5CAF73FCC9BF859CDE788D69A1C91").strip()
+EW_API = (os.environ.get("EW_API") or "0bd213c8-8e54-4bf6-b6da-127a1c605034").strip()
+EW_MAC = (os.environ.get("EW_MAC") or "BC:DD:C2:42:8D:56").strip()
 
 
 # ── Pomožne funkcije za vrednosti ──────────────────────────────────────────
