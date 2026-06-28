@@ -83,6 +83,14 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'nevihte-toca-hudourniki-julij-2026',
+        'title': 'Nevihte, toča in\nhudourniki',
+        'subtitle': 'Preobrat 1.–2. julija 2026 · IREICA1',
+        'section': 'Napoved',
+        'accent': (59, 130, 246),
+        'photo': 'storm-clouds',
+    },
+    {
         'slug': 'tropske-noci-inverzija-savinjska-dolina',
         'title': 'Tropske noči in\ninverzija v Savinjski dolini',
         'subtitle': 'Zakaj je tvoja noč topla · IREICA1',
