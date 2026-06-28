@@ -884,6 +884,24 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .analog-detail{font-size:.68rem;color:var(--muted);margin-top:.25rem;line-height:1.45}
 .analog-after{font-size:.68rem;color:var(--text);margin-top:.35rem;padding-top:.35rem;border-top:1px solid var(--day-divider);line-height:1.45}
 .analog-empty{font-size:.74rem;color:var(--muted);line-height:1.5}
+/* Rekordi na dosegu */
+.upc-intro{font-size:.74rem;color:var(--muted);line-height:1.55;margin-bottom:.75rem}
+.upc-btn{background:var(--blue);border:none;border-radius:9px;padding:.5rem 1rem;color:#fff;font-family:'Inter',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.upc-btn:hover{opacity:.88}
+.upc-empty{font-size:.74rem;color:var(--muted);line-height:1.5;margin-top:.75rem}
+#upc-body{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}
+#upc-body:empty{margin-top:0}
+.upc-horizon{padding:.7rem .8rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.upc-h-head{display:flex;align-items:baseline;gap:.45rem;margin-bottom:.6rem;flex-wrap:wrap}
+.upc-h-emoji{font-size:1rem}
+.upc-h-label{font-weight:700;font-size:.9rem;color:var(--text)}
+.upc-h-meta{font-size:.64rem;color:var(--muted);letter-spacing:.02em}
+.upc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem}
+.upc-cell{padding:.5rem .6rem;border-radius:9px;background:var(--card-bg);border:1px solid var(--card-border);border-left:3px solid var(--upc-col,var(--border))}
+.upc-cell-lbl{font-size:.64rem;color:var(--muted);margin-bottom:.2rem}
+.upc-cell-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text)}
+.upc-cell-sub{font-size:.6rem;color:var(--muted);margin-top:.2rem}
+.upc-cell-empty{opacity:.5;border-left-color:var(--border)}
 /* This week in history */
 .twh-grid-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .twh-grid{border-collapse:collapse;width:100%;font-size:.66rem}
