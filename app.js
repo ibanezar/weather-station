@@ -11521,6 +11521,8 @@ async function aiAnalogDays(obs){
 // ══════════════════════════════════════════════════════════
 const METAR_KEY='wx-metar-v1';
 let _metarData=null,_metarFetchTime=0,_aeModel=null,_aeNorm=null;
+// One-time cleanup: remove bogus dP entries caused by inHg→hPa double-conversion bug
+(()=>{try{const log=JSON.parse(localStorage.getItem(METAR_KEY)||'[]');const clean=log.filter(d=>d.dP==null||Math.abs(d.dP)<100);if(clean.length!==log.length)localStorage.setItem(METAR_KEY,JSON.stringify(clean));}catch(_){}})();
 
 // ── METAR fetch (LJLJ = Ljubljana/Brnik) ─────────────────
 async function fetchMETAR(){
@@ -11537,12 +11539,11 @@ async function fetchMETAR(){
       dewp_c:m.dewp,
       wind_kt:m.wspd,
       wind_dir:m.wdir,
-      altim:m.altim,  // inHg
+      altim:m.altim,  // hPa for ICAO/European airports (FAA API returns hPa for non-US stations)
       vis:m.visib,
       wxString:m.wxString||'',
       rawText:m.rawOb||'',
-      // Convert altimeter to hPa: hPa = inHg × 33.8639, then to station pressure
-      press_hpa:m.altim?+(m.altim*33.8639).toFixed(1):null,
+      press_hpa:m.altim?+(+m.altim).toFixed(1):null,
     };
     _metarFetchTime=Date.now();
     // Store for calibration log
