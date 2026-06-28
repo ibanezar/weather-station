@@ -75,6 +75,14 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'max-temperatura-28-junij-2026',
+        'title': '36,2 °C — nov\njunijski rekord',
+        'subtitle': '28. junij 2026 · IREICA1',
+        'section': 'Analize',
+        'accent': (239, 68, 68),
+        'photo': 'drought',
+    },
+    {
         'slug': 'tropske-noci-inverzija-savinjska-dolina',
         'title': 'Tropske noči in\ninverzija v Savinjski dolini',
         'subtitle': 'Zakaj je tvoja noč topla · IREICA1',
