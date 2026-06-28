@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/trendi/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/trendi/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/trendi/">
-<meta name="description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta name="description" content="Interaktivni grafi temperature, padavin, vetra, zračnega tlaka, rosišča, sončnega obsevanja in UV za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/trendi/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Vremenski trendi — Rečica ob Savinji">
-<meta property="og:description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta property="og:description" content="Interaktivni grafi temperature, padavin, vetra, zračnega tlaka, rosišča, sončnega obsevanja in UV za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
 <meta property="og:image" content="https://meteorec.si/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Vremenski trendi — Rečica ob Savinji">
-<meta name="twitter:description" content="Interaktivni grafi temperature, padavin in vetra za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
+<meta name="twitter:description" content="Interaktivni grafi temperature, padavin, vetra, zračnega tlaka, rosišča, sončnega obsevanja in UV za meteorološko postajo IREICA1 v Rečici ob Savinji — od novembra 2019 do danes.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/trendi/","name":"Vremenski trendi — Rečica ob Savinji","description":"Interaktivni grafi temperature, padavin in vetra za postajo IREICA1 v Rečici ob Savinji od novembra 2019.","url":"https://meteorec.si/trendi/","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/trendi/","name":"Vremenski trendi — Rečica ob Savinji","description":"Interaktivni grafi temperature, padavin, vetra, zračnega tlaka, rosišča, sončnega obsevanja in UV za postajo IREICA1 v Rečici ob Savinji od novembra 2019.","url":"https://meteorec.si/trendi/","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Trendi"}]}
@@ -76,7 +76,7 @@
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Vremenski trendi</h1>
   <p class="page-intro">Interaktivni grafi meritev postaje <strong>IREICA1</strong> od novembra 2019.
-  Povleci za pomik po času, kolešček miške za povečavo. Vsi trije grafi so usklajeni.</p>
+  Povleci za pomik po času, kolešček miške za povečavo. Vsi grafi so časovno usklajeni.</p>
 
   <div class="range-btns" role="group" aria-label="Časovno obdobje">
     <button class="range-btn" data-days="30">30 dni</button>
@@ -107,6 +107,36 @@
       <div class="chart-label">Veter — maks. sunki (km/h)</div>
       <div class="chart-div" id="chart-wind"></div>
     </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">Zračni tlak (hPa)</div>
+      <div class="chart-div" id="chart-pressure"></div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:#34d399"></span>Maks.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#10b981;height:2px"></span>Povp.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#6ee7b7"></span>Min.</span>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">Rosišče (°C)</div>
+      <div class="chart-div" id="chart-dewpt"></div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:#22d3ee"></span>Maks.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#06b6d4;height:2px"></span>Povp.</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#67e8f9"></span>Min.</span>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">Sončno obsevanje — dnevni vrh (W/m²)</div>
+      <div class="chart-div" id="chart-solar"></div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">UV indeks — dnevni vrh</div>
+      <div class="chart-div" id="chart-uvi"></div>
+    </div>
   </div>
 
   <footer class="site-foot">
@@ -136,6 +166,14 @@
   const tempAvg   = entries.map(([, v]) => v.tempAvg   ?? null);
   const precip    = entries.map(([, v]) => v.precipTotal ?? null);
   const windHigh  = entries.map(([, v]) => v.windspeedHigh ?? null);
+  const presHigh  = entries.map(([, v]) => v.pressureHigh ?? null);
+  const presLow   = entries.map(([, v]) => v.pressureLow  ?? null);
+  const presAvg   = entries.map(([, v]) => v.pressureAvg  ?? null);
+  const dewHigh   = entries.map(([, v]) => v.dewptHigh ?? null);
+  const dewLow    = entries.map(([, v]) => v.dewptLow  ?? null);
+  const dewAvg    = entries.map(([, v]) => v.dewptAvg  ?? null);
+  const solarHigh = entries.map(([, v]) => v.solarHigh ?? null);
+  const uviHigh   = entries.map(([, v]) => v.uviHigh   ?? null);
 
   document.getElementById('loading').hidden = true;
   document.getElementById('charts').hidden = false;
@@ -146,6 +184,10 @@
     hot:    '#fb923c',
     rain:   '#60a5fa',
     purple: '#a78bfa',
+    green:  '#10b981', greenHi: '#34d399', greenLo: '#6ee7b7',
+    cyan:   '#06b6d4', cyanHi:  '#22d3ee', cyanLo:  '#67e8f9',
+    solar:  '#fbbf24',
+    uv:     '#e879f9',
     muted:  '#adc0d8',
     grid:   'rgba(255,255,255,0.07)',
     tooltip: { bg: 'rgba(4,7,14,0.94)', border: 'rgba(255,255,255,0.12)', text: '#e8edf8' },
@@ -255,8 +297,38 @@
     area('Maks. sunek', windHigh, C.purple, 1, 0.09),
   ], 'km/h'));
 
-  // ── Sync dataZoom across all three charts ──
-  const charts = [cTemp, cRain, cWind];
+  // ── Pressure ──
+  const cPres = echarts.init(document.getElementById('chart-pressure'));
+  const presOpt = baseOption([
+    area('Min. tlak',  presLow,  C.greenLo, 1,   0.06),
+    line('Povp. tlak', presAvg,  C.green,   1.5),
+    area('Maks. tlak', presHigh, C.greenHi, 1,   0.05),
+  ], 'hPa');
+  presOpt.yAxis.scale = true;   // ozek razpon — ne sili osi na 0
+  cPres.setOption(presOpt);
+
+  // ── Dew point ──
+  const cDew = echarts.init(document.getElementById('chart-dewpt'));
+  cDew.setOption(baseOption([
+    area('Min. rosišče',  dewLow,  C.cyanLo, 1,   0.07),
+    line('Povp. rosišče', dewAvg,  C.cyan,   1.5),
+    area('Maks. rosišče', dewHigh, C.cyanHi, 1,   0.06),
+  ], '°C'));
+
+  // ── Solar radiation ──
+  const cSolar = echarts.init(document.getElementById('chart-solar'));
+  cSolar.setOption(baseOption([
+    area('Obsevanje', solarHigh, C.solar, 1, 0.1),
+  ], 'W/m²'));
+
+  // ── UV index ──
+  const cUvi = echarts.init(document.getElementById('chart-uvi'));
+  cUvi.setOption(baseOption([
+    area('UV vrh', uviHigh, C.uv, 1, 0.1),
+  ], ''));
+
+  // ── Sync dataZoom across all charts ──
+  const charts = [cTemp, cRain, cWind, cPres, cDew, cSolar, cUvi];
   let syncing = false;
   charts.forEach((c, i) => {
     c.on('dataZoom', e => {
