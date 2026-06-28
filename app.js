@@ -909,6 +909,81 @@ function renderMilestones(){
   badge.textContent=milestones.length+' mejnikov';
 }
 
+// ── 7. Rekordi na dosegu (records within reach) ──────────
+// Za vsako prihodnje okno (danes, 3, 7, 30 dni, 1 leto) izračunaj, katero
+// vrednost bi bilo treba preseči za nov rekord postaje na teh koledarskih dneh.
+const UPC_HORIZONS=[
+  {n:0,   label:'Danes',  emoji:'📍'},
+  {n:3,   label:'3 dni',  emoji:'🔭'},
+  {n:7,   label:'7 dni',  emoji:'📅'},
+  {n:30,  label:'30 dni', emoji:'🗓'},
+  {n:365, label:'1 leto', emoji:'🌍'},
+];
+// Set of MM-DD calendar days covered by [today .. today+n]
+function _upcWindowMMDD(n){
+  const set=new Set(), d=new Date();
+  for(let i=0;i<=n;i++){const x=new Date(d);x.setDate(d.getDate()+i);set.add(_mmdd(x));}
+  return set;
+}
+// Best (extreme) historical value on the calendar days in the window
+function _upcRecords(store, mmddSet){
+  let hot=null,cold=null,rain=null,gust=null;
+  Object.keys(store).forEach(k=>{
+    if(!mmddSet.has(k.slice(5)))return;
+    const m=store[k],hi=_tHi(m),lo=_tLo(m),rn=_rain(m),wd=m.windspeedHigh??null;
+    if(hi!=null&&(!hot ||hi>hot.val ))hot ={val:hi,date:k};
+    if(lo!=null&&(!cold||lo<cold.val))cold={val:lo,date:k};
+    if(rn!=null&&(!rain||rn>rain.val))rain={val:rn,date:k};
+    if(wd!=null&&(!gust||wd>gust.val))gust={val:wd,date:k};
+  });
+  return{hot,cold,rain,gust};
+}
+// Merge in absolute station records (from XLSX analysis) when their calendar
+// day falls in the window and the value beats what's in localStorage
+function _upcMergeStation(rec, mmddSet){
+  const sr=STATION_RECORDS;
+  const merge=(key,srKey,better)=>{
+    const s=sr[srKey];
+    if(!s||!s.date||!mmddSet.has(s.date.slice(5)))return;
+    if(!rec[key]||better(s.val,rec[key].val))rec[key]={val:s.val,date:s.date,abs:true};
+  };
+  merge('hot','Tmax', (a,b)=>a>b);
+  merge('cold','Tmin',(a,b)=>a<b);
+  merge('rain','rain1d',(a,b)=>a>b);
+  merge('gust','gust', (a,b)=>a>b);
+}
+function renderUpcomingRecords(){
+  const body=document.getElementById('upc-body'),badge=document.getElementById('upc-badge');
+  if(!body)return;
+  const store=_insStore();
+  if(Object.keys(store).length<30){
+    body.innerHTML='<div class="upc-empty">Za izračun potrebujem več zgodovinskih dni postaje. Uvozi XLSX v zavihku Zgodovina.</div>';
+    badge.textContent='—';return;
+  }
+  const fmt=(d)=>new Date(d+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short',year:'numeric'});
+  const metrics=[
+    {k:'hot', icon:'🔴', lbl:'Najvišja Tmax',   unit:'°C',    dec:1, col:'var(--red)'},
+    {k:'cold',icon:'🔵', lbl:'Najnižja Tmin',   unit:'°C',    dec:1, col:'var(--cyan)'},
+    {k:'rain',icon:'🌧️', lbl:'Dnevne padavine', unit:' mm',   dec:1, col:'var(--blue)'},
+    {k:'gust',icon:'💨', lbl:'Sunek vetra',     unit:' km/h', dec:0, col:'var(--amber)'},
+  ];
+  let html='';
+  UPC_HORIZONS.forEach(h=>{
+    const set=_upcWindowMMDD(h.n);
+    const rec=_upcRecords(store,set);
+    _upcMergeStation(rec,set);
+    const cells=metrics.map(mt=>{
+      const r=rec[mt.k];
+      if(!r)return'<div class="upc-cell upc-cell-empty"><div class="upc-cell-lbl">'+mt.icon+' '+mt.lbl+'</div><div class="upc-cell-val">—</div></div>';
+      return'<div class="upc-cell" style="--upc-col:'+mt.col+'"><div class="upc-cell-lbl">'+mt.icon+' '+mt.lbl+'</div><div class="upc-cell-val">'+r.val.toFixed(mt.dec)+mt.unit+'</div><div class="upc-cell-sub">'+fmt(r.date)+(r.abs?' · absolutni':'')+'</div></div>';
+    }).join('');
+    const meta=h.n===0?'samo današnji datum':(h.n===365?'celoletno okno · absolutni rekordi postaje':'naslednjih '+h.n+' dni · '+set.size+' koledarskih dni');
+    html+='<div class="upc-horizon"><div class="upc-h-head"><span class="upc-h-emoji">'+h.emoji+'</span><span class="upc-h-label">'+h.label+'</span><span class="upc-h-meta">'+meta+'</span></div><div class="upc-grid">'+cells+'</div></div>';
+  });
+  body.innerHTML=html;
+  badge.textContent='5 obdobij';
+}
+
 function refreshInsights(){
   try{renderClimateAnomaly();}catch(e){}
   try{renderStreaks();}catch(e){}
@@ -927,6 +1002,8 @@ function initInsights(){
   }
   const btn=document.getElementById('analog-go');
   if(btn)btn.addEventListener('click',()=>{const v=document.getElementById('analog-date').value;if(v)runAnalogSearch(v);});
+  const upcBtn=document.getElementById('upc-go');
+  if(upcBtn)upcBtn.addEventListener('click',()=>{try{renderUpcomingRecords();}catch(e){}});
   refreshInsights();
 }
 
