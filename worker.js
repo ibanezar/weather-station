@@ -835,6 +835,26 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /metar ────────────────────────────────────────────
+      if (path === "/metar") {
+        const station = url.searchParams.get("ids") || "LJLJ";
+        const hours   = url.searchParams.get("hours") || "2";
+        const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${encodeURIComponent(station)}&format=json&taf=false&hours=${hours}`;
+        const metarRes = await fetch(metarUrl, {
+          headers: { "Accept": "application/json", "User-Agent": "meteorec.si/1.0" },
+          cf: { cacheTtl: 600, cacheEverything: true },
+        });
+        if (!metarRes.ok) throw new Error("METAR HTTP " + metarRes.status);
+        const metarData = await metarRes.text();
+        return new Response(metarData, {
+          headers: {
+            ...CORS_ALLOWED,
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "public, max-age=600",
+          },
+        });
+      }
+
       // ── /arso-radar ───────────────────────────────────────
       if (path === "/arso-radar") {
         const radarRes = await fetch(
