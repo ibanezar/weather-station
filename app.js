@@ -11526,7 +11526,7 @@ let _metarData=null,_metarFetchTime=0,_aeModel=null,_aeNorm=null;
 async function fetchMETAR(){
   if(_metarData&&Date.now()-_metarFetchTime<30*60*1000)return _metarData;
   try{
-    const r=await fetch('https://aviationweather.gov/api/data/metar?ids=LJLJ&format=json&taf=false&hours=2');
+    const r=await fetch(PROXY+'/metar?ids=LJLJ&hours=2',{cache:'no-store'});
     const arr=await r.json();
     if(!arr||!arr.length)throw new Error('Empty METAR');
     const m=arr[0];
