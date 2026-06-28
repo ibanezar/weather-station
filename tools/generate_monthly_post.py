@@ -35,9 +35,9 @@ def compute(ym):
     m = {k: d[k] for k in days}
     dim = calendar.monthrange(year, mon)[1]
     tavg = st.mean(v["tempAvg"] for v in m.values())
-    # po dnevnem povprečju — dosledno za stare (high==low==avg) in nove podatke
-    hi = max(m.items(), key=lambda kv: kv[1]["tempAvg"])
-    lo = min(m.items(), key=lambda kv: kv[1]["tempAvg"])
+    # prave dnevne skrajnosti (po popravku min/max v history.json)
+    tmax = max(m.items(), key=lambda kv: kv[1]["tempHigh"])
+    tmin = min(m.items(), key=lambda kv: kv[1]["tempLow"])
     prec = sum(v["precipTotal"] for v in m.values())
     wettest = max(m.items(), key=lambda kv: kv[1]["precipTotal"])
     rainy = sum(1 for v in m.values() if v["precipTotal"] > 0.2)
@@ -57,7 +57,7 @@ def compute(ym):
     clim_tavg = st.mean(clim_t) if clim_t else None
     clim_pavg = st.mean(clim_p) if clim_p else None
     return dict(year=year, mon=mon, days=days, dim=dim, n=len(days),
-                tavg=tavg, hi=hi, lo=lo, prec=prec, wettest=wettest,
+                tavg=tavg, tmax=tmax, tmin=tmin, prec=prec, wettest=wettest,
                 rainy=rainy, wind=wind, hum=hum,
                 clim_tavg=clim_tavg, clim_pavg=clim_pavg, clim_years=len(clim_t))
 
@@ -106,15 +106,18 @@ def build_html(s):
             f'Postaja IREICA1 (366 m n. m.) je izmerila povprečno dnevno temperaturo '
             f'<strong>{num(s["tavg"])} °C</strong>'
             + (f' ({anom_str})' if anom_str else '')
-            + f' in <strong>{num(s["prec"])} mm</strong> padavin.')
+            + f' in <strong>{num(s["prec"])} mm</strong> padavin. '
+            + f'Najvišja izmerjena temperatura je bila <strong>{num(s["tmax"][1]["tempHigh"])} °C</strong> '
+            + f'({dayfmt(s["tmax"][0],mon)}), najnižja <strong>{num(s["tmin"][1]["tempLow"])} °C</strong> '
+            + f'({dayfmt(s["tmin"][0],mon)}).')
     rows = [
         ("Povprečna dnevna temperatura", f"{num(s['tavg'])} °C"),
     ]
     if anom is not None:
         rows.append(("Odstopanje od dolgoletnega povprečja", f"{'+' if anom>=0 else '−'}{num(abs(anom))} °C"))
     rows += [
-        ("Najtoplejši dan (po dnevnem povprečju)", f"{dayfmt(s['hi'][0],mon)} · {num(s['hi'][1]['tempAvg'])} °C"),
-        ("Najhladnejši dan (po dnevnem povprečju)", f"{dayfmt(s['lo'][0],mon)} · {num(s['lo'][1]['tempAvg'])} °C"),
+        ("Najvišja temperatura", f"{dayfmt(s['tmax'][0],mon)} · {num(s['tmax'][1]['tempHigh'])} °C"),
+        ("Najnižja temperatura", f"{dayfmt(s['tmin'][0],mon)} · {num(s['tmin'][1]['tempLow'])} °C"),
         ("Padavine skupaj", f"{num(s['prec'])} mm"),
         ("Deževnih dni", f"{s['rainy']}"),
         ("Najbolj moker dan", f"{dayfmt(s['wettest'][0],mon)} · {num(s['wettest'][1]['precipTotal'])} mm"),
@@ -130,7 +133,7 @@ def build_html(s):
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
@@ -213,7 +216,7 @@ def build_html(s):
     <table class="stats">
 {rows_html}
     </table>
-    <p style="color:var(--muted);font-size:.9rem">Vrednosti temperature so dnevna povprečja, ne najvišje oz. najnižje vrednosti v dnevu. Padavine in sunki vetra so dejanske dnevne vrednosti.</p>
+    <p style="color:var(--muted);font-size:.9rem">Povprečna temperatura je povprečje dnevnih vrednosti; najvišja in najnižja sta dejanski izmerjeni skrajnosti v mesecu.</p>
     <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.). Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
