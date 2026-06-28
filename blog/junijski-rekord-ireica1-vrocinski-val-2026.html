@@ -165,7 +165,7 @@
     <div class="chart-card">
       <h3>IREICA1 · Dnevni maksimumi med vročinskim valom (17.–26. junij)</h3>
       <canvas id="chartDailyMax"></canvas>
-      <p id="capDailyMax" style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje nov rekord postaje IREICA1.</p>
+      <p id="capDailyMax" style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Rdeča prekinjena črta označuje državni junijski rekord (38,4 °C). Rumena zvezda označuje najvišjo izmerjeno vrednost postaje v prikazanem obdobju.</p>
     </div>
 
     <h2>Kako se Rečica obnese v primerjavi s Primorsko?</h2>
@@ -396,7 +396,7 @@ async function loadAndDrawCharts() {
               label: ctx => {
                 if (ctx.dataset.type === 'line') return ` Rekord SLO: 38,4 °C`;
                 const v = ctx.parsed.y;
-                return ` ${v != null ? v.toFixed(1) : '—'} °C${ctx.dataIndex === recIdx ? '  ★ rekord postaje' : ''}`;
+                return ` ${v != null ? v.toFixed(1) : '—'} °C${ctx.dataIndex === recIdx ? '  ★ vrh obdobja' : ''}`;
               }
             }
           }
