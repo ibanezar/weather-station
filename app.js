@@ -11752,8 +11752,9 @@ async function buildAndTrainAE(){
 // ── Statistical t-test ────────────────────────────────────
 function tTest1Sample(samples){
   const n=samples.length;
-  if(n<5)return{t:0,p:1,sig:false,mean:0,se:0,n};
+  if(n<1)return{t:0,p:1,sig:false,mean:0,se:0,std:0,n};
   const mean=samples.reduce((a,b)=>a+b,0)/n;
+  if(n<2)return{t:0,p:1,sig:false,mean:+mean.toFixed(3),se:0,std:0,n};
   const std=Math.sqrt(samples.reduce((s,x)=>s+(x-mean)**2,0)/(n-1));
   const se=std/Math.sqrt(n);
   const t=se>0?mean/se:0;
@@ -11772,7 +11773,8 @@ function renderCalibration(){
   const metarDrifts=JSON.parse(localStorage.getItem(METAR_KEY)||'[]').filter(d=>d.t>Date.now()-14*864e5);
   const combined=[...arsoDrifts,...metarDrifts];
   if(badge)badge.textContent=combined.length+' meritev (14 dni)';
-  if(combined.length<5){body.innerHTML='<div class="clim-loading">Zbira se podatke za kalibracijo. Potrebno vsaj 5 primerjav ARSO/METAR (≈2-3 ure).</div>';return;}
+  if(combined.length<1){body.innerHTML='<div class="clim-loading">Zbira se podatke za kalibracijo. Odprite ta zavihek še nekajkrat čez dan.</div>';return;}
+  const lowData=combined.length<5;
   // Temperature calibration
   const tSamples=[...arsoDrifts.map(d=>d.dT),...metarDrifts.map(d=>d.dT)].filter(v=>v!=null);
   const hSamples=[...arsoDrifts.map(d=>d.dH),...metarDrifts.map(d=>d.dH)].filter(v=>v!=null);
@@ -11782,22 +11784,26 @@ function renderCalibration(){
   const pTest=tTest1Sample(pSamples);
   const fmtCard=(label,unit,test,icon,hint)=>{
     const sigClass=test.sig?'cal-card-sig':'';
-    const sigLabel=test.sig?'STATISTIČNO SIGNIFIKANTNO':'BREZ KOREKCIJE';
-    const sigCls=test.sig?'cal-sig-yes':'cal-sig-no';
-    const ci95=(test.se*1.96).toFixed(3);
-    const rec=test.sig?`Predlagana korekcija: <b style="color:var(--text)">${test.mean>=0?'+':''}${test.mean.toFixed(2)}${unit}</b> (95% CI: ±${ci95}${unit})`:`Odmik postaje ni statistično signifikanten. Senzor je v kalibraciji.`;
+    const sigLabel=test.n<2?'PREMALO PODATKOV':test.sig?'STATISTIČNO SIGNIFIKANTNO':'BREZ KOREKCIJE';
+    const sigCls=test.n<2?'cal-sig-no':test.sig?'cal-sig-yes':'cal-sig-no';
+    const ci95=test.se>0?(test.se*1.96).toFixed(3):null;
+    const rec=test.n<2
+      ?`Preliminarni odmik: <b style="color:var(--text)">${test.mean>=0?'+':''}${test.mean.toFixed(2)}${unit}</b>. Statistični test zahteva n≥2.`
+      :test.sig?`Predlagana korekcija: <b style="color:var(--text)">${test.mean>=0?'+':''}${test.mean.toFixed(2)}${unit}</b> (95% CI: ±${ci95}${unit})`:`Odmik postaje ni statistično signifikanten. Senzor je v kalibraciji.`;
+    const stat=test.n<2?`n=${test.n} · samo povprečje`:`n=${test.n} · t=${test.t.toFixed(2)} · p≈${test.p} · σ=${test.std}${unit}`;
     return`<div class="cal-card ${sigClass}">
       <div class="cal-label">${icon} ${label}</div>
       <div class="cal-offset">${test.mean>=0?'+':''}${test.mean.toFixed(2)}<span style="font-size:.8rem;color:var(--muted)">${unit}</span></div>
-      <div class="cal-stat">n=${test.n} · t=${test.t.toFixed(2)} · p≈${test.p} · σ=${test.std}${unit}</div>
+      <div class="cal-stat">${stat}</div>
       <span class="cal-sig-badge ${sigCls}">${sigLabel}</span>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.4rem;line-height:1.4">${rec}<br><span style="opacity:.7">${hint}</span></div>
     </div>`;
   };
-  body.innerHTML=
+  const lowDataNote=lowData?`<div style="font-size:.7rem;color:var(--warning,#f59e0b);margin-bottom:.75rem;padding:.4rem .6rem;border:1px solid currentColor;border-radius:6px;opacity:.85">⚠ Malo podatkov (n=${combined.length}/5) — rezultati so preliminarni. Natančnost se izboljša z več meritvami.</div>`:'';
+  body.innerHTML= lowDataNote+
     fmtCard('Temperatura','°C',tTest,'🌡️','Primerjano z ARSO + METAR LJLJ.')+
     fmtCard('Vlažnost','%',hTest,'💧','Vlaga METAR izračunana iz T in Td.')+
-    (pSamples.length>=3?fmtCard('Tlak','hPa',pTest,'📊','QNH → hPa + nadmorska korekcija.'):
+    (pSamples.length>=2?fmtCard('Tlak','hPa',pTest,'📊','QNH → hPa + nadmorska korekcija.'):
     '<div class="cal-card"><div class="cal-label">📊 Tlak</div><div class="cal-stat">Premalo METAR primerjav.</div></div>');
 }
 
