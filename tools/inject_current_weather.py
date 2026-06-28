@@ -57,7 +57,10 @@ def wrap(text):
 
 def build_block_history():
     hist = json.load(open(HIST, encoding="utf-8"))
-    last = max(hist.keys())
+    # Zadnji dan s PRAVO meritvijo: modelske (ERA5) ocene preskočimo, da uvod ne
+    # prikazuje rezervnih podatkov kot "meritev postaje IREICA1".
+    real = [k for k in hist if hist[k].get("src") != "era5"]
+    last = max(real) if real else max(hist)
     v = hist[last]
 
     parts = [f"povprečna temperatura {num(v.get('tempAvg'))} °C"]
