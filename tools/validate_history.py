@@ -24,6 +24,20 @@ RANGES = {
     'humidityAvg':   (0, 100),
 }
 
+# Neobvezna polja (samo dnevi s pravo postajo jih imajo). Preverijo se le,
+# če so v zapisu — odsotnost NI napaka.
+OPTIONAL_RANGES = {
+    'dewptHigh':    (-40, 40),
+    'dewptLow':     (-40, 40),
+    'dewptAvg':     (-40, 40),
+    'pressureHigh': (900, 1085),
+    'pressureLow':  (900, 1085),
+    'pressureAvg':  (900, 1085),
+    'windgustHigh': (0, 400),
+    'solarHigh':    (0, 1500),
+    'uviHigh':      (0, 20),
+}
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("Uporaba: validate_history.py YYYY-MM [MIN_COUNT]")
@@ -67,6 +81,11 @@ def main():
         lo_v = entry.get('tempLow')
         if hi_v is not None and lo_v is not None and hi_v < lo_v - 0.1:
             errors.append(f"{key}: tempHigh ({hi_v}) < tempLow ({lo_v})")
+        # Neobvezna polja — preveri obseg le, če so prisotna in niso null
+        for field, (lo, hi) in OPTIONAL_RANGES.items():
+            if field in entry and entry[field] is not None:
+                if not (lo <= float(entry[field]) <= hi):
+                    errors.append(f"{key}.{field}: {entry[field]} izven [{lo}, {hi}]")
 
     # 3. No entries were deleted (regression check)
     total = len(d)
