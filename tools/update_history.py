@@ -29,6 +29,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED = ['tempHigh', 'tempLow', 'tempAvg', 'precipTotal',
             'windspeedHigh', 'windspeedAvg', 'humidityAvg']
 
+# Fizikalna zgornja meja za globalno obsevanje (W/m²). Realne meritve — tudi z
+# ojačitvijo ob robovih oblakov — ne presežejo ~1500; višje so senzorske konice,
+# ki bi sicer napihnile dnevni maksimum (solarHigh). Take odčitke zavržemo.
+SOLAR_MAX_WM2 = 1500
+
 # Ecowitt poverilnice — okolje najprej, sicer javni fallback (enak kot v worker.js)
 # .strip() odstrani morebitne presledke/nove vrstice iz prilepljenih secrets.
 EW_APP = (os.environ.get("EW_APP") or "A7E5CAF73FCC9BF859CDE788D69A1C91").strip()
@@ -178,7 +183,8 @@ def normalize_ecowitt(data):
         rain        = clean(x["rain"])
         dpH, dpL, dpA = clean(x["dpH"]), clean(x["dpL"]), clean(x["dpA"])
         prH, prL, prA = clean(x["prH"]), clean(x["prL"]), clean(x["prA"])
-        wg, sol, uv   = clean(x["wg"]), clean(x["sol"]), clean(x["uv"])
+        wg, uv        = clean(x["wg"]), clean(x["uv"])
+        sol           = [s for s in clean(x["sol"]) if s <= SOLAR_MAX_WM2]
         rec = {
             "tempHigh":      round(max(hi), 1) if hi else None,
             "tempLow":       round(min(lo), 1) if lo else None,
