@@ -91,10 +91,14 @@ def fetch_ecowitt(start, end):
         "start_date":        start + " 00:00:00",
         "end_date":          end + " 23:59:59",
         "cycle_type":        "auto",
-        "call_back":         "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily",
-        "temp_unitid":       "1",   # °C
+        "call_back":         ("outdoor.temperature,outdoor.humidity,outdoor.dew_point,"
+                              "wind.wind_speed,wind.wind_gust,pressure.relative,"
+                              "rainfall.daily,solar_and_uvi.solar,solar_and_uvi.uvi"),
+        "temp_unitid":       "1",   # °C (velja tudi za rosišče)
+        "pressure_unitid":   "3",   # hPa
         "wind_speed_unitid": "7",   # km/h
         "rainfall_unitid":   "12",  # mm
+        "solar_irradiance_unitid": "16",  # W/m²
     })
     req = urllib.request.Request(
         "https://api.ecowitt.net/api/v3/device/history?" + params,
@@ -130,7 +134,9 @@ def normalize_ecowitt(data):
     days = {}
     def bucket(ts):
         return days.setdefault(_ew_day(ts), {
-            "hi": [], "lo": [], "av": [], "wH": [], "wA": [], "hum": [], "rain": []})
+            "hi": [], "lo": [], "av": [], "wH": [], "wA": [], "hum": [], "rain": [],
+            "dpH": [], "dpL": [], "dpA": [], "wg": [],
+            "prH": [], "prL": [], "prA": [], "sol": [], "uv": []})
 
     for ts, v in (_ew_list(data, "outdoor", "temperature") or {}).items():
         b = bucket(ts)
@@ -139,12 +145,28 @@ def normalize_ecowitt(data):
         b["av"].append(_pick(v, ["avg", "value", "max"]))
     for ts, v in (_ew_list(data, "outdoor", "humidity") or {}).items():
         bucket(ts)["hum"].append(_pick(v, ["avg", "value", "max"]))
+    for ts, v in (_ew_list(data, "outdoor", "dew_point") or {}).items():
+        b = bucket(ts)
+        b["dpH"].append(_pick(v, ["max", "avg", "value"]))
+        b["dpL"].append(_pick(v, ["min", "avg", "value"]))
+        b["dpA"].append(_pick(v, ["avg", "value", "max"]))
     for ts, v in (_ew_list(data, "wind", "wind_speed") or {}).items():
         b = bucket(ts)
         b["wH"].append(_pick(v, ["max", "avg", "value"]))
         b["wA"].append(_pick(v, ["avg", "value", "max"]))
+    for ts, v in (_ew_list(data, "wind", "wind_gust") or {}).items():
+        bucket(ts)["wg"].append(_pick(v, ["max", "avg", "value"]))
+    for ts, v in (_ew_list(data, "pressure", "relative") or {}).items():
+        b = bucket(ts)
+        b["prH"].append(_pick(v, ["max", "avg", "value"]))
+        b["prL"].append(_pick(v, ["min", "avg", "value"]))
+        b["prA"].append(_pick(v, ["avg", "value", "max"]))
     for ts, v in (_ew_list(data, "rainfall", "daily") or {}).items():
         bucket(ts)["rain"].append(_pick(v, ["total", "max", "value"]) or 0.0)
+    for ts, v in (_ew_list(data, "solar_and_uvi", "solar") or {}).items():
+        bucket(ts)["sol"].append(_pick(v, ["max", "avg", "value"]))
+    for ts, v in (_ew_list(data, "solar_and_uvi", "uvi") or {}).items():
+        bucket(ts)["uv"].append(_pick(v, ["max", "avg", "value"]))
 
     def clean(a):
         return [n for n in a if n is not None]
@@ -154,7 +176,10 @@ def normalize_ecowitt(data):
         hi, lo, av  = clean(x["hi"]), clean(x["lo"]), clean(x["av"])
         wH, wA, hum = clean(x["wH"]), clean(x["wA"]), clean(x["hum"])
         rain        = clean(x["rain"])
-        out[d] = {
+        dpH, dpL, dpA = clean(x["dpH"]), clean(x["dpL"]), clean(x["dpA"])
+        prH, prL, prA = clean(x["prH"]), clean(x["prL"]), clean(x["prA"])
+        wg, sol, uv   = clean(x["wg"]), clean(x["sol"]), clean(x["uv"])
+        rec = {
             "tempHigh":      round(max(hi), 1) if hi else None,
             "tempLow":       round(min(lo), 1) if lo else None,
             "tempAvg":       round(sum(av) / len(av), 1) if av else None,
@@ -163,6 +188,20 @@ def normalize_ecowitt(data):
             "windspeedAvg":  round(sum(wA) / len(wA), 1) if wA else None,
             "humidityAvg":   round(sum(hum) / len(hum), 1) if hum else None,
         }
+        # Neobvezna polja — dodamo le, če postaja za ta dan ima senzor/podatke.
+        opt = {
+            "dewptHigh":     round(max(dpH), 1) if dpH else None,
+            "dewptLow":      round(min(dpL), 1) if dpL else None,
+            "dewptAvg":      round(sum(dpA) / len(dpA), 1) if dpA else None,
+            "pressureHigh":  round(max(prH), 1) if prH else None,
+            "pressureLow":   round(min(prL), 1) if prL else None,
+            "pressureAvg":   round(sum(prA) / len(prA), 1) if prA else None,
+            "windgustHigh":  round(max(wg), 1) if wg else None,
+            "solarHigh":     round(max(sol), 1) if sol else None,
+            "uviHigh":       round(max(uv), 1) if uv else None,
+        }
+        rec.update({k: v for k, v in opt.items() if v is not None})
+        out[d] = rec
     return out
 
 
