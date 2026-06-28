@@ -6726,40 +6726,18 @@ function drawSkyStrip(hours){
 // ── 1. Ecowitt live data ───────────────────────────────────
 // ══════════════════════════════════════════════════════════
 async function fetchEcowittCurrent(){
-  const grid=document.getElementById('ecw-grid');
-  const upd=document.getElementById('ecw-updated');
-  if(!grid)return;
+  // Kartica "Notranje razmere" je odstranjena; ohranimo le napajanje strel
+  // (nevihtni način + plošča za strele).
   try{
     const res=await fetch(PROXY+'/ecowitt-current');
     const data=await res.json();
-    if(data.error==='no_key'){
-      grid.innerHTML='<div class="ecw-offline">⚙️ Dodaj Ecowitt app key v worker.js (ecowitt.net → Profile → Application Key)</div>';
-      return;
-    }
+    if(data.error==='no_key')return;
     const d=data.data||{};
-    const items=[];
-    const inT=d.indoor?.temperature?.value;
-    const inH=d.indoor?.humidity?.value;
-    if(inT!=null)items.push({icon:'🌡',val:parseFloat(inT).toFixed(1)+'°C',lbl:'Notranja T',col:'var(--text)'});
-    if(inH!=null)items.push({icon:'💧',val:parseFloat(inH).toFixed(0)+'%',lbl:'Notranja vlaga',col:'var(--blue)'});
-    const co2=d.co2?.co2?.value;
-    if(co2!=null){const ppm=Math.round(co2);items.push({icon:'🌬',val:ppm+' ppm',lbl:'CO₂',col:ppm<800?'var(--green)':ppm<1200?'var(--amber)':'var(--red)'});}
-    const pm=d.pm25?.pm25?.value??d.pm25_ch1?.pm25?.value;
-    if(pm!=null)items.push({icon:'🏭',val:parseFloat(pm).toFixed(0)+' µg',lbl:'PM2.5',col:pm<12?'var(--green)':pm<35?'var(--amber)':'var(--red)'});
     const ltCount=d.lightning?.count?.value??d.lightning_num?.value;
     const ltDist=d.lightning?.distance?.value??d.lightning_dis?.value;
-    if(ltCount!=null)items.push({icon:'⚡',val:Math.round(ltCount)+' udarov',lbl:'Strele danes',col:ltCount>0?'var(--amber)':'var(--green)'});
-    if(ltDist!=null&&parseFloat(ltDist)<100)items.push({icon:'📍',val:parseFloat(ltDist).toFixed(0)+' km',lbl:'Najbližja strela',col:parseFloat(ltDist)<20?'var(--red)':parseFloat(ltDist)<50?'var(--amber)':'var(--muted)'});
-    const soilT=d.soil_ch1?.soiltemp?.value;
-    const soilH=d.soil_ch1?.soilmoisture?.value??d.soil_ch1?.humidity?.value;
-    if(soilT!=null)items.push({icon:'🌱',val:parseFloat(soilT).toFixed(1)+'°C',lbl:'Temp. tal',col:'var(--green)'});
-    if(soilH!=null)items.push({icon:'💦',val:parseFloat(soilH).toFixed(0)+'%',lbl:'Vlaga tal',col:'var(--blue)'});
-    if(!items.length){grid.innerHTML='<div class="ecw-offline">Ecowitt: ni senzorjev ali napaka API.</div>';return;}
-    grid.innerHTML=items.map(it=>`<div class="ecw-item"><div class="ecw-val" style="color:${it.col}">${it.icon} ${it.val}</div><div class="ecw-lbl">${it.lbl}</div></div>`).join('');
-    if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     updateLightningFromEcowitt(ltCount,ltDist);
     if(ltCount>0){const mc=document.getElementById('mc-list');if(mc&&!mc.querySelector('.lightning-alert')){const div=document.createElement('div');div.className='mc-item mc-item-alert lightning-alert';div.innerHTML='<div class="mc-head"><span class="mc-icon">⚡</span><span class="mc-name">Aktivne strele v okolici</span></div><div class="mc-text">Danes '+Math.round(ltCount)+' udarov'+(ltDist?', najbližja '+parseFloat(ltDist).toFixed(0)+' km stran':'')+'.</div>';mc.prepend(div);}}
-  }catch(e){if(grid)grid.innerHTML='<div class="ecw-offline">Ecowitt ni dosegljiv.</div>';console.warn('Ecowitt:',e);}
+  }catch(e){console.warn('Ecowitt:',e);}
 }
 
 // ══════════════════════════════════════════════════════════
