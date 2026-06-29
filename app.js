@@ -2291,7 +2291,14 @@ const LS_KEY='wx-history-v1';
 function saveToLocalHistory(dailySummaries){
   try{
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-    dailySummaries.forEach(s=>{stored[s.obsTimeLocal]=s.metric;});
+    const today=_localDateStr(new Date());
+    dailySummaries.forEach(s=>{
+      const ex=stored[s.obsTimeLocal];
+      // Don't let provisional live readings overwrite a finalized station day
+      // (from history.json); only today's running values may still update.
+      if(ex&&ex.src==='station'&&s.obsTimeLocal!==today)return;
+      stored[s.obsTimeLocal]=s.metric;
+    });
     const cutoff=new Date(Date.now()-6*365*24*3600*1000).toISOString().slice(0,10);
     Object.keys(stored).forEach(k=>{if(k<cutoff)delete stored[k];});
     localStorage.setItem(LS_KEY,JSON.stringify(stored));
@@ -2534,7 +2541,15 @@ async function autoLoadHistoryFile(){
     if(!parsed.length)return;
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     let added=0;
-    parsed.forEach(d=>{if(d.obsTimeLocal&&!stored[d.obsTimeLocal]){stored[d.obsTimeLocal]=d.metric;added++;}});
+    parsed.forEach(d=>{
+      if(!d.obsTimeLocal)return;
+      const ex=stored[d.obsTimeLocal];
+      // Add missing days, and let authoritative station data correct any
+      // provisional (live) values already cached for that day.
+      if(!ex||(d.metric&&d.metric.src==='station'&&ex.src!=='station')){
+        stored[d.obsTimeLocal]=d.metric;added++;
+      }
+    });
     if(added>0){
       localStorage.setItem(LS_KEY,JSON.stringify(stored));
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
