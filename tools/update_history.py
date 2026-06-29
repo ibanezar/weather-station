@@ -13,8 +13,8 @@ Vsak zapis dobi oznako "src": "station" (meritev) ali "src": "era5" (model).
 Ecowitt poverilnice se berejo iz okolja (EW_APP / EW_API / EW_MAC); če niso
 nastavljene, se uporabijo javne konstante iz Worker-ja (worker.js).
 """
-import json, os, sys, re, calendar, urllib.request, urllib.parse, urllib.error
-from datetime import date as _date, datetime, timezone
+import json, os, sys, re, time, calendar, urllib.request, urllib.parse, urllib.error
+from datetime import date as _date, datetime, timezone, timedelta
 
 try:
     from zoneinfo import ZoneInfo
@@ -294,8 +294,22 @@ def main():
     today     = _date.today().isoformat()
     end       = min(month_end, today)
 
-    # 1) prava postaja (primarni vir)
-    station = normalize_ecowitt(fetch_ecowitt(start, end))
+    # 1) prava postaja (primarni vir) — beremo PO DNEVIH.
+    # Ecowitt cycle_type=auto vrne za enodnevni razpon najfinejšo (5-min)
+    # ločljivost; za večdnevni razpon pa zglajena povprečja po 30-min/4-urnih
+    # intervalih, kar podceni dnevni vrh (npr. 36,2 °C se zabeleži kot 35,0 °C).
+    # Dnevni MIN/MAX morajo izhajati iz finih meritev, sicer se konica zgladi.
+    station = {}
+    d0, d1 = _date.fromisoformat(start), _date.fromisoformat(end)
+    cur = d0
+    while cur <= d1:
+        day = cur.isoformat()
+        data = fetch_ecowitt(day, day)
+        if data:
+            station.update(normalize_ecowitt(data))
+        cur += timedelta(days=1)
+        if cur <= d1:
+            time.sleep(1)   # blag zamik — Ecowitt omejuje pogostost klicev
     # 2) Open-Meteo (rezerva)
     era5 = openmeteo_days(start, end, ym)
 
