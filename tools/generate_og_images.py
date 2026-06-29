@@ -91,6 +91,14 @@ ARTICLES = [
         'photo': 'storm-clouds',
     },
     {
+        'slug': 'topoklima-savinjska-dolina-ireica1',
+        'title': 'Topoklimatologija\nSavinjske doline',
+        'subtitle': 'Inverzije, vetrovi, vročina · IREICA1',
+        'section': 'Analize',
+        'accent': (99, 102, 241),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'tropske-noci-inverzija-savinjska-dolina',
         'title': 'Tropske noči in\ninverzija v Savinjski dolini',
         'subtitle': 'Zakaj je tvoja noč topla · IREICA1',
