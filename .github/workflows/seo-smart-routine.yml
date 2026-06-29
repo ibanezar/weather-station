@@ -1,0 +1,33 @@
+name: SEO smart routine — hub strani in dogodki
+
+on:
+  schedule:
+    # Vsak ponedeljek ob 05:30 UTC (6:30 CET / 7:30 CEST)
+    # Po update-history.yml (01:15) in generate-seo-pages.yml (04:00)
+    - cron: '30 5 * * 1'
+  workflow_dispatch:   # ročni zagon
+
+jobs:
+  seo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Zaženi SEO smart routine
+        run: python3 tools/seo_smart_routine.py
+
+      - name: Commit & push če je kaj novega
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add klima/ padavine/ temperatura/ teden/ novosti/ sitemap-seo.xml || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
+          git push
