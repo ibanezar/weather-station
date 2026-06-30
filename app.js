@@ -1996,7 +1996,7 @@ function applyOnThisDay(results){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','srednja','dolgorocna'],data:['history','analysis','climate','records','extremes','surroundings','trivia','glossary']};
+const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','records','extremes','surroundings','trivia','glossary']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -2256,6 +2256,7 @@ function switchTab(tab){
   if(tab==='extremes'){  initExtremes(); }
   if(tab==='records'){   initRecords(); }
   if(tab==='storm'){     initStormChaser(); }
+  if(tab==='stormmap'){  initStormMap(); }
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
   if(tab==='water'){     initVodostaj(); }
@@ -16741,3 +16742,198 @@ async function submitObservation(type) {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   NEVIHTNI ZEMLJEVID SLOVENIJE — storm risk map (levels 1-5)
+   Experimental convective-risk index over a grid of Slovenian towns.
+   Combines CAPE, thunderstorm weather codes, wind gusts and precip
+   from Open-Meteo into a 5-step threat scale, rendered on Leaflet.
+   ═══════════════════════════════════════════════════════════════ */
+const SM_LOCS=[
+  {n:'Ljubljana',la:46.056,lo:14.506},
+  {n:'Maribor',la:46.554,lo:15.646},
+  {n:'Celje',la:46.231,lo:15.260},
+  {n:'Kranj',la:46.239,lo:14.356},
+  {n:'Koper',la:45.548,lo:13.730},
+  {n:'Novo mesto',la:45.804,lo:15.170},
+  {n:'Velenje',la:46.359,lo:15.111},
+  {n:'Murska Sobota',la:46.658,lo:16.166},
+  {n:'Nova Gorica',la:45.955,lo:13.648},
+  {n:'Ptuj',la:46.420,lo:15.870},
+  {n:'Postojna',la:45.776,lo:14.214},
+  {n:'Kočevje',la:45.642,lo:14.862},
+  {n:'Slovenj Gradec',la:46.510,lo:15.080},
+  {n:'Brežice',la:45.904,lo:15.594},
+  {n:'Tolmin',la:46.183,lo:13.732},
+  {n:'Bovec',la:46.338,lo:13.553},
+  {n:'Kranjska Gora',la:46.485,lo:13.785},
+  {n:'Bled',la:46.369,lo:14.114},
+  {n:'Jesenice',la:46.430,lo:14.058},
+  {n:'Ilirska Bistrica',la:45.567,lo:14.244},
+  {n:'Črnomelj',la:45.570,lo:15.190},
+  {n:'Trbovlje',la:46.150,lo:15.053},
+  {n:'Idrija',la:46.001,lo:14.027},
+  {n:'Sežana',la:45.707,lo:13.873},
+  {n:'Cerknica',la:45.796,lo:14.362},
+  {n:'Lendava',la:46.565,lo:16.452},
+  {n:'Ormož',la:46.409,lo:16.150},
+  {n:'Rečica ob Savinji',la:LAT,lo:LON}
+];
+const SM_LEVELS=[
+  null,
+  {c:'#22c55e',t:'Zelo nizka',d:'Brez neviht ali le posamezne plohe'},
+  {c:'#eab308',t:'Nizka',     d:'Možne posamezne nevihte'},
+  {c:'#f97316',t:'Zmerna',    d:'Verjetne nevihte, krajevno močnejše'},
+  {c:'#ef4444',t:'Visoka',    d:'Močne nevihte, sunki vetra ali toča'},
+  {c:'#a21caf',t:'Zelo visoka',d:'Nevarna neurja — toča, naliv, vetrolom'}
+];
+let _smMap=null,_smData=null,_smDay=0,_smMarkers=[],_smDates=[];
+
+async function initStormMap(){
+  if(_smMap){ setTimeout(()=>_smMap.invalidateSize(),60); return; }
+  // Render static UI first so the tab is never blank, even if the map CDN is slow.
+  renderSmDaybar();
+  renderSmLegend();
+  const el=document.getElementById('storm-map'); if(!el)return;
+  // Fetch forecast in parallel — it must not be blocked behind the map CDN.
+  const dataP=loadSmData();
+  try{
+    if(typeof L==='undefined'){
+      _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+      await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+    }
+    _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:11}).setView([46.12,14.85],8);
+    const dark=isDark();
+    L.tileLayer(dark
+      ?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      :'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      {maxZoom:11,maxNativeZoom:19,subdomains:'abcd'}).addTo(_smMap);
+    setTimeout(()=>_smMap.invalidateSize(),60);
+    renderSmMarkers(); // draw markers if the forecast already arrived
+  }catch(e){
+    console.warn('storm map: Leaflet ni na voljo',e);
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;'+
+      'padding:1rem;text-align:center;opacity:.7;font-size:.9rem">Zemljevida trenutno ni mogoče '+
+      'naložiti. Razvrstitev krajev po ogroženosti je prikazana spodaj.</div>';
+  }
+  await dataP;
+}
+
+async function loadSmData(){
+  const upd=document.getElementById('sm-updated');
+  if(upd)upd.textContent='Pridobivam napoved…';
+  try{
+    const lats=SM_LOCS.map(l=>l.la).join(',');
+    const lons=SM_LOCS.map(l=>l.lo).join(',');
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+
+      '&hourly=cape,wind_gusts_10m,precipitation,precipitation_probability,weather_code'+
+      '&forecast_days=3&timezone=Europe%2FLjubljana';
+    const res=await fetch(url);
+    const json=await res.json();
+    const arr=Array.isArray(json)?json:[json];
+    _smData=arr.map((r,idx)=>{
+      const h=r.hourly||{}, t=h.time||[];
+      const days={};
+      for(let i=0;i<t.length;i++){
+        const d=t[i].slice(0,10);
+        if(!days[d])days[d]={cape:0,gust:0,precip:0,pp:0,thunder:false,hail:false};
+        const dd=days[d], w=h.weather_code?.[i];
+        dd.cape =Math.max(dd.cape,h.cape?.[i]||0);
+        dd.gust =Math.max(dd.gust,h.wind_gusts_10m?.[i]||0);
+        dd.precip+=h.precipitation?.[i]||0;
+        dd.pp   =Math.max(dd.pp,h.precipitation_probability?.[i]||0);
+        if(w===95||w===96||w===99)dd.thunder=true;
+        if(w===96||w===99)dd.hail=true;
+      }
+      return {loc:SM_LOCS[idx],days};
+    });
+    _smDates=Object.keys(_smData[0]?.days||{}).sort().slice(0,3);
+    renderSmDaybar();
+    renderSmMarkers();
+    if(upd)upd.textContent='Vir: Open-Meteo · osveženo '+
+      new Date().toLocaleString('sl',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    console.warn('storm map:',e);
+    if(upd)upd.textContent='Napoved trenutno ni dosegljiva.';
+  }
+}
+
+function smLevel(d){
+  const {cape,gust,precip,thunder,hail}=d;
+  let lvl=1;
+  if(cape>=300||thunder) lvl=2;
+  if((cape>=900&&thunder)||cape>=1400) lvl=3;
+  if(cape>=1500&&thunder&&(gust>=55||precip>=15)) lvl=4;
+  if(cape>=2200&&thunder&&(gust>=75||hail||precip>=30)) lvl=5;
+  if(gust>=90&&lvl<4) lvl=4;          // damaging gusts regardless of CAPE
+  if(hail&&lvl<4) lvl=4;             // hail signal escalates
+  return lvl;
+}
+
+function smSetDay(i){ _smDay=i; renderSmDaybar(); renderSmMarkers(); }
+
+function renderSmDaybar(){
+  const bar=document.getElementById('sm-daybar'); if(!bar)return;
+  const labels=['Danes','Jutri','Pojutrišnjem'];
+  let html='';
+  for(let i=0;i<3;i++){
+    const sub=_smDates[i]
+      ? new Date(_smDates[i]).toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'numeric'})
+      : '';
+    html+='<button class="sm-day'+(i===_smDay?' active':'')+'" onclick="smSetDay('+i+')">'+
+      labels[i]+(sub?'<span>'+sub+'</span>':'')+'</button>';
+  }
+  bar.innerHTML=html;
+}
+
+function renderSmLegend(){
+  const el=document.getElementById('sm-legend'); if(!el)return;
+  let html='';
+  for(let i=1;i<=5;i++){
+    const l=SM_LEVELS[i];
+    html+='<span class="sm-leg-item"><span class="sm-leg-dot" style="background:'+l.c+'">'+i+
+      '</span>'+l.t+'</span>';
+  }
+  el.innerHTML=html;
+}
+
+function renderSmMarkers(){
+  if(!_smData)return;
+  if(_smMap)_smMarkers.forEach(m=>_smMap.removeLayer(m));
+  _smMarkers=[];
+  const date=_smDates[_smDay];
+  const ranking=[];
+  _smData.forEach(entry=>{
+    const d=entry.days[date]; if(!d)return;
+    const lvl=smLevel(d), lc=SM_LEVELS[lvl];
+    if(_smMap){
+      const m=L.circleMarker([entry.loc.la,entry.loc.lo],{
+        radius:7+lvl*2.2, color:'#fff', weight:1.5, fillColor:lc.c, fillOpacity:.92
+      }).addTo(_smMap);
+      m.bindTooltip(String(lvl),{permanent:true,direction:'center',className:'sm-tip'});
+      m.bindPopup('<b>'+entry.loc.n+'</b><br>Stopnja '+lvl+' — '+lc.t+'<br>'+lc.d+'<br><br>'+
+        'CAPE '+Math.round(d.cape)+' J/kg · sunki '+Math.round(d.gust)+' km/h<br>'+
+        'padavine '+d.precip.toFixed(1)+' mm · verjetnost '+Math.round(d.pp)+' %<br>'+
+        (d.thunder?'⚡ nevihte':'brez neviht')+(d.hail?' · 🧊 toča':''));
+      _smMarkers.push(m);
+    }
+    ranking.push({n:entry.loc.n,lvl,d});
+  });
+  renderSmRanking(ranking);
+}
+
+function renderSmRanking(list){
+  const el=document.getElementById('sm-ranking'); if(!el)return;
+  const sorted=list.slice().sort((a,b)=> b.lvl-a.lvl || b.d.cape-a.d.cape).slice(0,10);
+  let html='<div class="sm-rank-list">';
+  sorted.forEach(r=>{
+    const l=SM_LEVELS[r.lvl];
+    html+='<div class="sm-rank-row"><span class="sm-rank-dot" style="background:'+l.c+'">'+r.lvl+
+      '</span><span class="sm-rank-name">'+r.n+'</span>'+
+      '<span class="sm-rank-meta">CAPE '+Math.round(r.d.cape)+' · '+Math.round(r.d.gust)+
+      ' km/h · '+r.d.precip.toFixed(0)+' mm'+(r.d.thunder?' ⚡':'')+(r.d.hail?' 🧊':'')+
+      '</span></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}

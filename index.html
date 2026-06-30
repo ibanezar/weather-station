@@ -326,6 +326,7 @@
         <button id="tab-btn-forecast2" onclick="switchTab('forecast2');closeTabDDs()">🔮 Lokalna napoved</button>
         <button id="tab-btn-srednja"    onclick="switchTab('srednja');closeTabDDs()">📅 Srednja (16 dni)</button>
         <button id="tab-btn-dolgorocna" onclick="switchTab('dolgorocna');closeTabDDs()">🗓 Dolgoročna</button>
+        <button id="tab-btn-stormmap"   onclick="switchTab('stormmap');closeTabDDs()">🗺️ Nevihtni zemljevid SLO</button>
       </div>
     </div>
     <button class="tab-btn"        id="tab-btn-po-meri"   onclick="switchTab('po-meri')">🎯 Po meri</button>
@@ -1920,6 +1921,27 @@
     </div>
 
   </div><!-- /tab-storm -->
+
+  <!-- ═══ NEVIHTNI ZEMLJEVID SLOVENIJE TAB ═══ -->
+  <div id="tab-stormmap" class="tab-pane">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel">🗺️ Nevihtni zemljevid Slovenije</div>
+      <p class="card-intro" style="margin:.2rem 0 .8rem;font-size:.86rem;opacity:.8">
+        Napoved nevihtne ogroženosti po Sloveniji v 5 stopnjah. Indeks združuje konvektivno
+        energijo (CAPE), nevihtne vremenske kode, sunke vetra in količino padavin iz modela
+        Open-Meteo. Izberi dan za pregled. <em>Eksperimentalni indeks — ne nadomešča uradnih
+        opozoril ARSO/Meteoalarm.</em>
+      </p>
+      <div class="sm-daybar" id="sm-daybar" role="tablist" aria-label="Izbira dneva"></div>
+      <div id="storm-map" style="height:460px;border-radius:14px;overflow:hidden;margin:.6rem 0;background:rgba(128,128,128,.08)"></div>
+      <div class="sm-legend" id="sm-legend"></div>
+      <div class="sm-updated" id="sm-updated" style="font-size:.78rem;opacity:.6;margin-top:.5rem"></div>
+    </div>
+    <div class="card" id="sm-ranking-card" style="margin-bottom:1rem">
+      <div class="clabel">📋 Najbolj ogroženi kraji</div>
+      <div id="sm-ranking"><div class="clim-loading">Nalaganje…</div></div>
+    </div>
+  </div><!-- /tab-stormmap -->
 
   <!-- ═══ VREME & ŽIVLJENJE TAB ═══ -->
   <div id="tab-life" class="tab-pane">
