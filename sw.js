@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vreme-static-v14';
-const CACHE_API    = 'vreme-api-v14';
+const CACHE_STATIC = 'vreme-static-v15';
+const CACHE_API    = 'vreme-api-v15';
 
 // Stale-while-revalidate TTLs per host (ms)
 const API_TTL = {
