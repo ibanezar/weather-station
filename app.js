@@ -3010,10 +3010,10 @@ function setFavicon(emoji){
 }
 
 // ── Toast ─────────────────────────────────────────────────
-function showToast(msg){
+function showToast(msg,dur){
   const t=document.getElementById('toast');if(!t)return;
   t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2600);
+  setTimeout(()=>t.classList.remove('show'),dur||2600);
 }
 
 // ── Share ─────────────────────────────────────────────────
@@ -3403,15 +3403,31 @@ async function fetchFlood(){
 
 
 let _installPrompt=null;
+// iOS Safari ne podpira beforeinstallprompt – namestitev poteka ročno prek Deli → »Na začetni zaslon«
+const _isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const _isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function _showInstallBtn(){const b=document.getElementById('install-btn');if(b)b.classList.add('show');}
+function _hideInstallBtn(){const b=document.getElementById('install-btn');if(b)b.classList.remove('show');}
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();_installPrompt=e;
-  const btn=document.getElementById('install-btn');if(btn)btn.classList.add('show');
+  _showInstallBtn();
 });
+window.addEventListener('appinstalled',()=>{_installPrompt=null;_hideInstallBtn();});
 function installApp(){
-  if(!_installPrompt)return;
-  _installPrompt.prompt();
-  _installPrompt.userChoice.then(()=>{_installPrompt=null;const b=document.getElementById('install-btn');if(b)b.classList.remove('show');});
+  if(_installPrompt){
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(()=>{_installPrompt=null;_hideInstallBtn();});
+    return;
+  }
+  if(_isIOS){
+    // iOS: programska namestitev ni mogoča – pokaži navodila
+    showToast('Za namestitev tapni ⬆️ (Deli) in izberi »Na začetni zaslon«',6000);
+    return;
+  }
+  showToast('Namestitev v tem brskalniku ni na voljo');
 }
+// Na iOS-u beforeinstallprompt ne obstaja, zato gumb prikažemo ročno (če app še ni nameščen)
+if(_isIOS&&!_isStandalone)_showInstallBtn();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async () => {
     const reg = await navigator.serviceWorker.register('./sw.js').catch(()=>null);
