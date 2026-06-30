@@ -44,7 +44,7 @@
   "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/nevihte-toca-hudourniki-julij-2026.jpg", "width": 1200, "height": 630 },
   "wordCount": 1180,
   "datePublished": "2026-06-28",
-  "dateModified": "2026-06-28",
+  "dateModified": "2026-06-30",
   "inLanguage": "sl",
   "author": { "@type": "Person", "name": "Filip Eremita" },
   "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
@@ -86,6 +86,15 @@
 .warn-banner.amber {
   background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(245,158,11,.1));
   border-color: rgba(249,115,22,.5);
+}
+.warn-banner.update {
+  background: linear-gradient(135deg, rgba(34,211,238,.14), rgba(77,159,248,.1));
+  border-color: rgba(34,211,238,.5);
+}
+.warn-banner.update p { color: #cffafe; }
+.warn-banner.update .wb-when {
+  display: block; font-family: 'JetBrains Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .08em; color: #67e8f9; margin-bottom: .35rem;
 }
 .warn-banner .wb-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
 .warn-banner p { margin: 0; color: #fecaca; font-size: .97rem; line-height: 1.6; }
@@ -210,7 +219,12 @@
     <h1>Po peklenski vročini prihaja preobrat: nevihte, toča in nevarnost hudournikov v Zgornji Savinjski dolini</h1>
     <p class="post-meta">28. junija 2026 · Filip Eremita · postaja IREICA1 · ~7 min branja</p>
 
-    <p class="lead">Dolgotrajni vročinski val, ki nas duši že dober teden, se bliža koncu – a poslovil se ne bo tiho. V sredo popoldne in v noči na četrtek bo Zgornjo Savinjsko dolino prešla <span class="hl">izrazita hladna fronta</span>, ki ob stiku s pregreto in z vlago nasičeno zračno maso prinaša pogoje za eksplozivne nevihte. Meteorološki modeli kažejo izjemno nestabilno ozračje z vrednostmi konvektivne energije (MLCAPE) do 4000 J/kg in močnim vetrovnim striženjem – kombinacijo, ki omogoča razvoj <strong>superceličnih neviht</strong>. Za naše kraje to pomeni resno tveganje za nastanek toče, silovitih sunkov vetra in intenzivnih nalivov, ki na izsušenih tleh hitro preidejo v hudourniške poplave.</p>
+    <div class="warn-banner update">
+      <div class="wb-icon">&#x23F1;</div>
+      <p><span class="wb-when">Posodobljeno 30. junija 2026</span>Najnovejše napovedi ARSO so prvotno sliko glede preobrata nekoliko korigirale. <strong>Vrhunec vročinskega vala je bil dosežen v nedeljo in ponedeljek (28.–29. 6.)</strong> — v soboto je ARSO na petih postajah izmeril junijske temperaturne rekorde (do 37,4 °C), naša postaja IREICA1 pa je 28. 6. zabeležila nov junijski rekord 36,2 °C. Prehod motnje in povečana verjetnost padavin se po zadnjih izračunih premikata na <strong>sredo, 1. julija</strong>, in dan ali dva po njem; časovnica se je v napovedih premikala (modelska negotovost). Ohladitev bo verjetno <strong>bolj postopna</strong>, kot je bilo prvotno nakazano: temperature naj bi se v prvem tednu julija znižale na okoli ali malce pod 30 °C, ne nujno z enkratnim padcem za 10–15 °C. Tveganje za nevihte, krajevne nalive in točo ostaja, a scenarij izrazitih supercelic z ekstremno točo je negotov in odvisen od časa prehoda fronte (nočni prehod znižuje verjetnost debele toče). Veljajo izključno aktualna <strong>opozorila ARSO</strong>.</p>
+    </div>
+
+    <p class="lead">Dolgotrajni vročinski val, ki nas duši že dober teden, se bliža koncu – a poslovil se ne bo tiho. V sredo popoldne in v noči na četrtek bo Zgornjo Savinjsko dolino prešla <span class="hl">izrazita hladna fronta</span>, ki ob stiku s pregreto in z vlago nasičeno zračno maso prinaša pogoje za eksplozivne nevihte. Nekateri meteorološki modeli kažejo izjemno nestabilno ozračje z vrednostmi konvektivne energije (MLCAPE) do okoli 3000–4000 J/kg, ob zadostnem vetrovnem striženju pa je možen razvoj <strong>superceličnih neviht</strong>. Pomembno pa je: visok CAPE sam po sebi še ne zagotavlja supercelic – te so odvisne predvsem od striženja in časa prehoda fronte (nočni prehod znižuje verjetnost debele toče). Za naše kraje vseeno ostaja resno tveganje za nastanek toče, silovitih sunkov vetra in intenzivnih nalivov, ki na izsušenih tleh hitro preidejo v hudourniške poplave.</p>
 
     <div class="warn-banner">
       <div class="wb-icon">&#x26A1;</div>
@@ -220,8 +234,8 @@
     <div class="stat-grid">
       <div class="stat-card c-cape">
         <div class="sc-label">Konvektivna energija</div>
-        <div class="sc-val">≈4000</div>
-        <div class="sc-sub">MLCAPE J/kg · izjemno nestabilno</div>
+        <div class="sc-val">3–4k</div>
+        <div class="sc-sub">MLCAPE J/kg · po nekaterih modelih</div>
       </div>
       <div class="stat-card c-rain">
         <div class="sc-label">Nalivi (krajevno)</div>
@@ -235,8 +249,8 @@
       </div>
       <div class="stat-card c-cool">
         <div class="sc-label">Ohladitev</div>
-        <div class="sc-val">−10–15°</div>
-        <div class="sc-sub">po prehodu fronte</div>
+        <div class="sc-val">~30 °C</div>
+        <div class="sc-sub">postopno v prvem tednu julija</div>
       </div>
     </div>
 
@@ -263,7 +277,7 @@
           <span class="phase-title">Glavni prehod fronte</span>
           <span class="phase-tag r-high">najvišje tveganje</span>
         </div>
-        <p>To je obdobje najvišjega tveganja. Ob izrazitem vetrovnem striženju so izpolnjeni pogoji za supercelične nevihte – najnevarnejšo obliko konvekcije. Glavne nevarnosti:</p>
+        <p>To je obdobje najvišjega tveganja. Ob zadostnem vetrovnem striženju so možni pogoji za supercelične nevihte – najnevarnejšo obliko konvekcije –, vendar njihov razvoj ni zagotovljen: ključna sta striženje in čas prehoda fronte. Če fronta prehaja ponoči, je verjetnost debele toče manjša. Glavne nevarnosti:</p>
         <ul>
           <li><strong>Intenzivni nalivi:</strong> krajevno lahko v kratkem času pade od 20 do 40 mm padavin, lokalno tudi do 60 mm.</li>
           <li><strong>Debela toča:</strong> močni vzgorniki omogočajo rast večjih zrn, ki lahko uničijo pridelke ter poškodujejo objekte in vozila.</li>
@@ -276,7 +290,7 @@
           <span class="phase-title">Postfrontalno umirjanje in ohladitev</span>
           <span class="phase-tag r-calm">umirjanje</span>
         </div>
-        <p>Po prehodu glavne nevihtne linije bodo nalivi prešli v dolgotrajnejše stratiformno deževje. Vdor hladnejšega zraka bo prinesel drastičen padec temperatur – za 10 do 15 °C. Jutro v Mozirju in na Ljubnem se bo začelo pri 17 do 18 °C, dnevni vrhovi v dolini pa ne bodo presegli 21 do 23 °C. Čez dan se bo od severozahoda začelo jasniti, padavine pa bodo ponehale.</p>
+        <p>Po prehodu glavne nevihtne linije bodo nalivi prešli v dolgotrajnejše stratiformno deževje. Vdor hladnejšega zraka bo prinesel ohladitev, ki bo po zadnjih napovedih verjetno <strong>bolj postopna</strong> kot prvotno nakazano: temperature naj bi se v prvem tednu julija znižale na okoli ali malce pod 30 °C, ne nujno z enkratnim padcem za 10–15 °C. Razlika med vrhom vročine (okrog 34 °C) in po ohladitvi (okrog 29 °C) v dolini znaša približno 5 °C. Čez dan se bo od severozahoda začelo jasniti, padavine pa bodo postopno ponehale.</p>
       </div>
     </div>
 
@@ -339,6 +353,8 @@
       </table>
     </div>
 
+    <p style="font-size:.82rem;color:var(--muted);margin-top:-.8rem">Vrednosti so iz napovedi ob objavi; čas prehoda fronte se je v modelih premikal, zato jih bomo po dogodku posodobili z dejanskimi meritvami postaje IREICA1.</p>
+
     <h2>Stopnja nevarnosti po pojavih</h2>
 
     <div class="gauge-wrap">
@@ -368,7 +384,7 @@
         <div class="gr-bar-wrap"><div class="gr-bar" style="width:80%;background:linear-gradient(90deg,#f97316,#ef4444)"></div></div>
         <div class="gr-val">Visoko</div>
       </div>
-      <div class="gauge-note">Kvalitativna ocena na podlagi parametrov nestabilnosti (MLCAPE ≈ 4000 J/kg), vetrovnega striženja in stanja tal. Ocena ni nadomestilo za uradna opozorila ARSO.</div>
+      <div class="gauge-note">Kvalitativna ocena na podlagi parametrov nestabilnosti (MLCAPE do okoli 3000–4000 J/kg po nekaterih modelih), vetrovnega striženja in stanja tal; visok CAPE sam po sebi ne zagotavlja supercelic. Ocena ni nadomestilo za uradna opozorila ARSO.</div>
     </div>
 
     <h2>Zakaj je nevarnost letos večja: izsušena tla</h2>
@@ -388,7 +404,7 @@
 
     <p><strong>Ključno:</strong> zaščitna infrastruktura, rečni bregovi in hudourniška zaledja še niso v celoti sanirani. Na poplavnih ravnicah ostajajo kupi lesne biomase in proda, ki se ob prvem močnejšem odtoku lahko mobilizirajo ter znova zamašijo prepuste in mostove. Posebej občutljiva ostaja mikrolokacija Struge pri Lučah pod Raduho, kjer plaz nad strugo Savinje ob obilnih padavinah grozi z reaktivacijo.</p>
 
-    <p style="font-size:.92rem;color:var(--muted)">Več o tem dogodku: <a href="/blog/poplave-2023.html" style="color:var(--cyan)">Poplave avgusta 2023 v Zgornji Savinjski dolini — celovit pregled</a>.</p>
+    <p style="font-size:.92rem;color:var(--muted)">Več o tem dogodku: <a href="/blog/poplave-2023.html" style="color:var(--cyan)">Poplave avgusta 2023 v Zgornji Savinjski dolini — celovit pregled</a>. Za kontekst skrajnih sunkov vetra (rekord postaje 115,6 km/h) glej tudi <a href="/rekord/" style="color:var(--cyan)">vremenske rekorde postaje IREICA1</a>.</p>
 
     <h2>Priporočila prebivalcem</h2>
 
@@ -421,12 +437,19 @@
       </div>
     </div>
 
+    <h2>Kako se je uresničilo (po dogodku)</h2>
+
+    <div class="warn-banner update">
+      <div class="wb-icon">&#x1F4CA;</div>
+      <p><span class="wb-when">Sledi posodobitev po prehodu fronte</span>To sekcijo bomo po dogodku dopolnili z dejanskimi meritvami postaje IREICA1 v Rečici ob Savinji: najvišji sunek vetra, skupna količina padavin in največja 10-minutna intenziteta, dejanski padec temperature ter morebitna toča. S tem postane napoved preverljiva — s podatki, ki jih agregatorji nimajo.</p>
+    </div>
+
     <h2>Sklep</h2>
 
     <p>Prehod fronte 1. in 2. julija ni le rutinsko poletno poslabšanje, temveč dogodek visokega tveganja, ki nastopa v času izjemne ranljivosti naše doline. Visoka toplotna energija, supercelične nevihte in izsušena tla skupaj ustvarjajo nevaren koktajl. Ohladitev bo dobrodošla – a do nje nas loči nekaj ur, ki zahtevajo treznost in pripravljenost.</p>
 
     <div class="callout">
-      <p>Prehod hladne fronte <strong>1. in 2. julija 2026</strong> prinaša v Zgornjo Savinjsko dolino supercelične nevihte, debelo točo, sunke vetra prek 90 km/h in <span class="hl">nevarnost hudourniških poplav</span> na izsušenih tleh. Sledi občutna ohladitev za 10–15 °C. Dogajanje bomo v živo spremljali prek podatkov postaje IREICA1 v Rečici ob Savinji. Ostanite varni in informirani — meritve v živo na <a href="/" style="color:inherit">meteorec.si</a>.</p>
+      <p>Prehod hladne fronte <strong>1. in 2. julija 2026</strong> prinaša v Zgornjo Savinjsko dolino pogoje za nevihte, točo, sunke vetra prek 90 km/h in <span class="hl">nevarnost hudourniških poplav</span> na izsušenih tleh. Sledi postopna ohladitev — v prvem tednu julija na okoli ali malce pod 30 °C. Dogajanje bomo v živo spremljali prek podatkov postaje IREICA1 v Rečici ob Savinji. Ostanite varni in informirani — meritve v živo na <a href="/" style="color:inherit">meteorec.si</a>.</p>
     </div>
 
     <!-- ── Share bar ─────────────────────────────────────────────── -->
