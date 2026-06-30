@@ -16777,7 +16777,17 @@ const SM_LOCS=[
   {n:'Cerknica',la:45.796,lo:14.362},
   {n:'Lendava',la:46.565,lo:16.452},
   {n:'Ormož',la:46.409,lo:16.150},
-  {n:'Rečica ob Savinji',la:LAT,lo:LON}
+  // ── Zgornja Savinjska dolina (naša regija) ──
+  {n:'Rečica ob Savinji',la:LAT,lo:LON,r:1},
+  {n:'Mozirje',la:46.3389,lo:14.9617,r:1},
+  {n:'Nazarje',la:46.3186,lo:14.9461,r:1},
+  {n:'Ljubno ob Savinji',la:46.3447,lo:14.8344,r:1},
+  {n:'Luče',la:46.3553,lo:14.7486,r:1},
+  {n:'Solčava',la:46.4194,lo:14.6914,r:1},
+  {n:'Logarska dolina',la:46.3917,lo:14.6250,r:1},
+  {n:'Gornji Grad',la:46.2961,lo:14.8064,r:1},
+  {n:'Radmirje',la:46.3389,lo:14.8714,r:1},
+  {n:'Šmartno ob Dreti',la:46.3008,lo:14.8758,r:1}
 ];
 const SM_LEVELS=[
   null,
@@ -16793,6 +16803,7 @@ async function initStormMap(){
   if(_smMap){ setTimeout(()=>_smMap.invalidateSize(),60); return; }
   // Render static UI first so the tab is never blank, even if the map CDN is slow.
   renderSmDaybar();
+  renderSmZoombar();
   renderSmLegend();
   const el=document.getElementById('storm-map'); if(!el)return;
   // Fetch forecast in parallel — it must not be blocked behind the map CDN.
@@ -16802,12 +16813,12 @@ async function initStormMap(){
       _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
       await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
     }
-    _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:11}).setView([46.12,14.85],8);
+    _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:13}).setView([46.12,14.85],8);
     const dark=isDark();
     L.tileLayer(dark
       ?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
       :'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      {maxZoom:11,maxNativeZoom:19,subdomains:'abcd'}).addTo(_smMap);
+      {maxZoom:13,maxNativeZoom:19,subdomains:'abcd'}).addTo(_smMap);
     setTimeout(()=>_smMap.invalidateSize(),60);
     renderSmMarkers(); // draw markers if the forecast already arrived
   }catch(e){
@@ -16871,6 +16882,22 @@ function smLevel(d){
 }
 
 function smSetDay(i){ _smDay=i; renderSmDaybar(); renderSmMarkers(); }
+
+// Predoglede pogledov: cela Slovenija / Zgornja Savinjska dolina (naša regija).
+const SM_VIEWS={
+  slo:   {c:[46.12,14.85],  z:8,  lbl:'🇸🇮 Vsa Slovenija'},
+  savinj:{c:[46.355,14.80], z:11, lbl:'⛰️ Zg. Savinjska'}
+};
+function smView(key){
+  const v=SM_VIEWS[key]; if(!v||!_smMap)return;
+  _smMap.flyTo(v.c,v.z,{duration:.8});
+}
+function renderSmZoombar(){
+  const bar=document.getElementById('sm-zoombar'); if(!bar)return;
+  bar.innerHTML=Object.entries(SM_VIEWS)
+    .map(([k,v])=>'<button class="sm-zoom" onclick="smView(\''+k+'\')">'+v.lbl+'</button>')
+    .join('');
+}
 
 function renderSmDaybar(){
   const bar=document.getElementById('sm-daybar'); if(!bar)return;
