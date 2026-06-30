@@ -446,6 +446,118 @@ def detect_events(history, lookback_days=14):
 
     return events
 
+
+def detect_heat_waves(history, lookback_days=30):
+    """
+    Poišče toplotne valove (3+ zaporedni dnevi z max ≥ 30 °C).
+    Upošteva valove, ki so se zaključili v zadnjih lookback_days dneh.
+    """
+    cutoff = TODAY - datetime.timedelta(days=lookback_days)
+    sorted_dates = sorted(history)
+    hot_days = [d for d in sorted_dates if (history[d].get("tempHigh") or 0) >= 30]
+
+    events = []
+    i = 0
+    while i < len(hot_days):
+        wave = [hot_days[i]]
+        j = i + 1
+        while j < len(hot_days):
+            prev = datetime.date.fromisoformat(hot_days[j - 1])
+            curr = datetime.date.fromisoformat(hot_days[j])
+            if (curr - prev).days == 1:
+                wave.append(hot_days[j])
+                j += 1
+            else:
+                break
+        if len(wave) >= 3:
+            wave_end = datetime.date.fromisoformat(wave[-1])
+            if wave_end >= cutoff:
+                max_temp = max(history[d].get("tempHigh", 0) for d in wave)
+                events.append({
+                    "type":     "toplotni-val",
+                    "date":     wave[0],
+                    "end_date": wave[-1],
+                    "value":    max_temp,
+                    "param":    "tempHigh",
+                    "label":    f"Toplotni val ({len(wave)} dni)",
+                    "slug":     f"toplotni-val-{wave[0]}",
+                    "duration": len(wave),
+                })
+            i = j
+        else:
+            i += 1
+    return events
+
+
+def detect_droughts(history, lookback_days=30):
+    """
+    Poišče sušna obdobja (7+ zaporednih dni z < 1 mm padavin).
+    Upošteva obdobja, ki so se zaključila v zadnjih lookback_days dneh.
+    """
+    cutoff = TODAY - datetime.timedelta(days=lookback_days)
+    sorted_dates = sorted(history)
+
+    events = []
+    i = 0
+    while i < len(sorted_dates):
+        d0 = sorted_dates[i]
+        if (history[d0].get("precipTotal") or 0) >= 1.0:
+            i += 1
+            continue
+        run = [d0]
+        j = i + 1
+        while j < len(sorted_dates):
+            prev = datetime.date.fromisoformat(sorted_dates[j - 1])
+            curr = datetime.date.fromisoformat(sorted_dates[j])
+            if (curr - prev).days == 1 and (history[sorted_dates[j]].get("precipTotal") or 0) < 1.0:
+                run.append(sorted_dates[j])
+                j += 1
+            else:
+                break
+        if len(run) >= 7:
+            run_end = datetime.date.fromisoformat(run[-1])
+            if run_end >= cutoff:
+                events.append({
+                    "type":     "susa",
+                    "date":     run[0],
+                    "end_date": run[-1],
+                    "value":    float(len(run)),
+                    "param":    "precipTotal",
+                    "label":    f"Sušno obdobje ({len(run)} dni)",
+                    "slug":     f"susa-{run[0]}",
+                    "duration": len(run),
+                })
+        i = j if j > i + 1 else i + 1
+    return events
+
+
+# ── Persistenca novosti ────────────────────────────────────────────────────
+
+NOVOSTI_CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "novosti.json")
+
+
+def load_novosti_catalog():
+    """Naloži shranjeni katalog vseh zaznanih dogodkov."""
+    if os.path.exists(NOVOSTI_CATALOG_PATH):
+        try:
+            return json.load(open(NOVOSTI_CATALOG_PATH, encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def save_novosti_catalog(events):
+    """Shrani katalog dogodkov v novosti.json (brez duplikatov, sortirano po datumu)."""
+    seen = set()
+    unique = []
+    for ev in sorted(events, key=lambda e: e["date"], reverse=True):
+        if ev["slug"] not in seen:
+            seen.add(ev["slug"])
+            unique.append(ev)
+    with open(NOVOSTI_CATALOG_PATH, "w", encoding="utf-8") as f:
+        json.dump(unique, f, ensure_ascii=False, indent=2)
+
+
 # ── Generatorji strani ─────────────────────────────────────────────────────
 
 def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitemap_urls):
@@ -1071,6 +1183,39 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         link_label = "→ Dnevni podatki za ta dan"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
 
+    elif ev_type == "toplotni-val":
+        end_d      = event.get("end_date", ds)
+        dur        = event.get("duration", 1)
+        year       = int(ds[:4])
+        title      = f"Toplotni val v Rečici ob Savinji — {dur} dni ({fmtd(ds)}–{fmtd(end_d)})"
+        desc       = (f"Postaja IREICA1 v Rečici ob Savinji je zabeležila {dur}-dnevni toplotni val "
+                      f"({fmtd(ds)}–{fmtd(end_d)}) z maksimalno temperaturo {num(val)} °C.")
+        val_class  = "hot"
+        val_unit   = "°C"
+        intro_text = (f"Od {fmtd(ds)} do {fmtd(end_d)} je meteorološka postaja IREICA1 v Rečici ob Savinji "
+                      f"zabeležila {dur} zaporednih vročih dni (maks. temperatura ≥ 30 °C). "
+                      f"Koničná temperatura vala je dosegla {num(val)} °C. "
+                      f"Toplotni valovi so za kotlino Zgornje Savinjske doline redek, a vedno pogostejši pojav "
+                      f"v kontekstu podnebnih sprememb.")
+        link_label = "→ Dnevni podatki za začetni dan"
+        link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:10]}/"
+
+    elif ev_type == "susa":
+        end_d      = event.get("end_date", ds)
+        dur        = int(event.get("duration", event.get("value", 7)))
+        title      = f"Sušno obdobje v Rečici ob Savinji — {dur} dni ({fmtd(ds)}–{fmtd(end_d)})"
+        desc       = (f"Postaja IREICA1 v Rečici ob Savinji je zabeležila sušno obdobje "
+                      f"{dur} zaporednih dni brez padavin ({fmtd(ds)}–{fmtd(end_d)}).")
+        val_class  = ""
+        val_unit   = "dni"
+        intro_text = (f"Od {fmtd(ds)} do {fmtd(end_d)} je Rečica ob Savinji doživela sušno obdobje: "
+                      f"{dur} zaporednih dni z manj kot 1 mm padavin. "
+                      f"Sušna obdobja poleti so v Zgornji Savinjski dolini redka, "
+                      f"saj območje pogosto dosežejo nevihte s Karavank. Daljša sušna obdobja so "
+                      f"navadno tesno povezana s toplotnimi valovi in anticiklonskim vremenom.")
+        link_label = "→ Dnevni podatki za začetni dan"
+        link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:10]}/"
+
     else:
         title      = f"{label} v Rečici ob Savinji ({fmtd(ds)})"
         desc       = f"Meteorološka postaja IREICA1 je {fmtd(ds)} zabeležila: {label}."
@@ -1080,11 +1225,14 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         link_label = "→ Dnevni podatki"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
 
+    _val_d = 0 if val_unit == "dni" else (1 if val_unit == "mm" else 1)
+    _hero_date = (f"{fmtd(ds)} – {fmtd(event.get('end_date', ds))}"
+                  if event.get("end_date") and event["end_date"] != ds else fmtd(ds))
     hero_html = (
         '  <div class="event-hero">\n'
         f'    <div class="ev-label">{label.upper()} · IREICA1 · REČICA OB SAVINJI</div>\n'
-        f'    <div class="ev-value {val_class}">{num(val, 1 if val_unit=="mm" else 1)} {val_unit}</div>\n'
-        f'    <div class="ev-date">{fmtd(ds)}</div>\n'
+        f'    <div class="ev-value {val_class}">{num(val, _val_d)} {val_unit}</div>\n'
+        f'    <div class="ev-date">{_hero_date}</div>\n'
         '  </div>'
     )
 
@@ -1123,21 +1271,34 @@ def gen_novosti_index(events_so_far, sitemap_urls):
     existing_slugs = set(ev["slug"] for ev in events_so_far)
 
     def _ev_unit(ev):
+        t = ev.get("type", "")
+        if t == "susa":
+            return "dni"
+        if t == "toplotni-val":
+            return "°C"
         if ev["param"] in ("tempHigh", "tempLow"):
             return "°C"
         if ev["param"] == "precipTotal":
             return "mm"
         return "km/h"
 
+    def _ev_val_d(ev):
+        unit = _ev_unit(ev)
+        return 0 if unit == "dni" else 1
+
     cards = []
     for ev in sorted(events_so_far, key=lambda e: e["date"], reverse=True):
         slug   = ev["slug"]
         ev_url = f"/novosti/{slug}/"
         unit   = _ev_unit(ev)
+        val_d = _ev_val_d(ev)
+        date_str = fmtd(ev["date"])
+        if ev.get("end_date") and ev["end_date"] != ev["date"]:
+            date_str = f'{fmtd(ev["date"])} – {fmtd(ev["end_date"])}'
         cards.append(
             f'  <a class="novosti-card" href="{ev_url}">\n'
-            f'    <div class="nc-title">{ev["label"]} — {num(ev["value"], 1)} {unit}</div>\n'
-            f'    <div class="nc-meta">{fmtd(ev["date"])} · IREICA1 · Rečica ob Savinji</div>\n'
+            f'    <div class="nc-title">{ev["label"]} — {num(ev["value"], val_d)} {unit}</div>\n'
+            f'    <div class="nc-meta">{date_str} · IREICA1 · Rečica ob Savinji</div>\n'
             f'  </a>'
         )
 
@@ -1252,22 +1413,49 @@ def main():
     gen_teden(history, normals, sitemap_urls)
     changed_urls.append(f"{SITE}/teden/")
 
-    print("\nIščem nedavne vremenske dogodke …")
-    events = detect_events(history, lookback_days=14)
-    print(f"  → {len(events)} novih dogodkov")
+    print("\nNalagam katalog novosti …")
+    catalog = load_novosti_catalog()
+    catalog_by_slug = {ev["slug"]: ev for ev in catalog}
 
-    for ev in events:
+    print("\nIščem nedavne vremenske dogodke …")
+    detected = detect_events(history, lookback_days=30)
+    detected += detect_heat_waves(history, lookback_days=30)
+    detected += detect_droughts(history, lookback_days=30)
+    print(f"  → {len(detected)} zaznanh dogodkov")
+
+    # Združi v katalog (brez duplikatov)
+    for ev in detected:
+        if ev["slug"] not in catalog_by_slug:
+            catalog.append(ev)
+            catalog_by_slug[ev["slug"]] = ev
+            print(f"  + nov dogodek: {ev['slug']}")
+
+    # Generiraj strani za vse zaznane dogodke (fix: os.path.exists namesto write_page)
+    for ev in detected:
         slug = ev["slug"]
-        existed = write_page(f"novosti/{slug}/index.html", "", force=False) is False
-        if not existed or args.force_events:
-            changed = gen_event_page(ev, history, sitemap_urls, force=args.force_events)
+        full_path = os.path.join(ROOT, f"novosti/{slug}/index.html")
+        if not os.path.exists(full_path) or args.force_events:
+            changed = gen_event_page(ev, history, sitemap_urls, force=True)
             if changed:
                 changed_urls.append(f"{SITE}/novosti/{slug}/")
                 print(f"  → /novosti/{slug}/index.html")
         else:
+            # Stran obstaja — dodaj le v sitemap
+            sitemap_urls.append((f"{SITE}/novosti/{slug}/", ev["date"], "never", "0.6"))
             print(f"  → /novosti/{slug}/ že obstaja, preskočena")
 
-    gen_novosti_index(events, sitemap_urls)
+    # Za vse kataložne dogodke (ne samo zadnjih 30 dni) dodaj sitemap vnose
+    detected_slugs = {ev["slug"] for ev in detected}
+    for ev in catalog:
+        if ev["slug"] not in detected_slugs:
+            full_path = os.path.join(ROOT, f"novosti/{ev['slug']}/index.html")
+            if os.path.exists(full_path):
+                sitemap_urls.append((f"{SITE}/novosti/{ev['slug']}/", ev["date"], "never", "0.6"))
+
+    # Shrani posodobljeni katalog
+    save_novosti_catalog(catalog)
+
+    gen_novosti_index(catalog, sitemap_urls)
     changed_urls.append(f"{SITE}/novosti/")
 
     print("\nPišem sitemap-seo.xml …")
