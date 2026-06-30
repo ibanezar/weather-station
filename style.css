@@ -2279,3 +2279,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sm-rank-name{font-weight:600;min-width:130px}
 .sm-rank-meta{font-size:.78rem;opacity:.65}
 @media(max-width:560px){.sm-rank-name{min-width:90px;font-size:.85rem}.sm-rank-meta{font-size:.72rem}}
+
+/* ── Nevihtni zemljevid: gumbi za pogled (regija/Slovenija) ── */
+.sm-zoombar{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.sm-zoom{padding:.35rem .7rem;border:1px solid var(--border,rgba(128,128,128,.3));
+  border-radius:999px;background:transparent;color:inherit;cursor:pointer;
+  font-size:.8rem;font-weight:600;transition:.15s}
+.sm-zoom:hover{border-color:#3b82f6;color:#3b82f6}
