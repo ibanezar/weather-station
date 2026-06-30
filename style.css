@@ -1557,6 +1557,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sky-strip-wrap{position:relative;border-radius:14px;overflow:hidden;margin-top:.25rem}
 .sky-strip-svg{display:block;width:100%;cursor:crosshair}
 .sky-tooltip{position:absolute;background:rgba(15,23,42,.88);border:1px solid rgba(56,189,248,.35);border-radius:8px;padding:.4rem .7rem;font-size:.76rem;font-family:'JetBrains Mono',monospace;color:#e2e8f0;pointer-events:none;white-space:nowrap;transition:opacity .15s;z-index:10}
+/* On mobile the strip's wide aspect ratio collapses its height to ~60px, making
+   icons/labels unreadable. Keep it at a usable size and scroll horizontally instead. */
+@media(max-width:640px){
+  .sky-strip-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .sky-strip-wrap::-webkit-scrollbar{display:none}
+  .sky-strip-svg{width:760px;min-width:760px}
+}
 
 
 /* Sky strip */
