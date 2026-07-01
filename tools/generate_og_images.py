@@ -131,6 +131,14 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'ekoloska-tveganja-pozarna-ogrozenost-vetrolomi',
+        'title': 'Požarna ogroženost\nin vetrolomi',
+        'subtitle': 'Ekološka in okoljska tveganja · IREICA1',
+        'section': 'Analize',
+        'accent': (249, 115, 22),
+        'photo': 'drought',
+    },
+    {
         'slug': 'blog',
         'title': 'Blog Meteorec',
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
