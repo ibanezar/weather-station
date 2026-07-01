@@ -110,6 +110,28 @@
 .tip-card p strong { color: #fff; }
 @media (max-width: 500px) { .tip-grid { grid-template-columns: 1fr; } }
 
+.gauge-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.gauge-title {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: .9rem;
+}
+.gauge-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .75rem; }
+.gauge-row:last-of-type { margin-bottom: .2rem; }
+.gr-label { min-width: 12rem; font-size: .8rem; color: #cfdbef; line-height: 1.35; }
+.gr-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,.07); border-radius: 8px; }
+.gr-bar { height: 8px; border-radius: 8px; }
+.gr-val {
+  min-width: 6.5rem; font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+  color: #fff; text-align: right; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+.gauge-note { font-size: .7rem; color: var(--muted); margin-top: .65rem; padding-top: .5rem; border-top: 1px solid rgba(255,255,255,.06); }
+
 .share-bar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 2rem 0 1.4rem; padding: 1rem 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
 .share-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-right: .3rem; flex-shrink: 0; }
 .share-btn { display: inline-flex; align-items: center; gap: .38rem; padding: .42rem .85rem; border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: opacity .15s, transform .1s; line-height: 1; }
@@ -205,6 +227,33 @@
         <div class="h-title">Po prehodu fronte</div>
         <p>Hladen in izjemno suh zrak, ki se spušča čez grebene, hitro razblini predfrontno soparo in očisti ozračje. Čeprav vreme ostaja vetrovno, suha zračna masa prinaša odlično vidljivost in bister zrak. Fizikalne lastnosti zraka nad Zgornjo Savinjsko dolino se sunkovito spremenijo, kar za večino vremensko občutljivih ljudi pomeni izrazito olajšanje. Biometeorološka obremenitev hitro popusti, simptomi nemira in utrujenosti pa izzvenijo.</p>
       </div>
+    </div>
+
+    <h2>Stopnja tveganja po kategorijah</h2>
+
+    <div class="gauge-wrap">
+      <div class="gauge-title">Kvalitativna ocena resnosti ob prehodu suhe hladne fronte s severnim fenom</div>
+      <div class="gauge-row">
+        <div class="gr-label">Požarna ogroženost gozdov</div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:85%;background:linear-gradient(90deg,#f97316,#ef4444)"></div></div>
+        <div class="gr-val">Visoko</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Vetrolomi (smrekovi sestoji)</div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:80%;background:linear-gradient(90deg,#a78bfa,#7c3aed)"></div></div>
+        <div class="gr-val">Visoko</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Erozija in plazovi po vetrolomu</div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:55%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div>
+        <div class="gr-val">Zmerno</div>
+      </div>
+      <div class="gauge-row">
+        <div class="gr-label">Biovremenska obremenitev (predfrontno)</div>
+        <div class="gr-bar-wrap"><div class="gr-bar" style="width:60%;background:linear-gradient(90deg,#22d3ee,#0891b2)"></div></div>
+        <div class="gr-val">Zmerno–visoko</div>
+      </div>
+      <div class="gauge-note">Ocena je kvalitativna in temelji na splošnih pragovih (vetrovni sunki nad 20 m/s, odsotnost padavin, plitvo koreninjenje smreke), ne na konkretni napovedi za določen datum. Za aktualno stanje spremljajte opozorila ARSO in Zavoda za gozdove.</div>
     </div>
 
     <h2>Priporočila za ukrepanje</h2>
