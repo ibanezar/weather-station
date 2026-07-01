@@ -1070,7 +1070,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .ticker-inner{display:flex;align-items:center;white-space:nowrap;font-size:.72rem;color:var(--muted);padding-left:1.5rem;animation:ticker-scroll 45s linear infinite;will-change:transform}
 .ticker-inner:hover{animation-play-state:paused}
 .ticker-item{display:inline-flex;align-items:center;gap:.3rem}
-.ticker-item-blog{background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);color:var(--blue);padding:.15rem .65rem;border-radius:20px;font-weight:600}
+.ticker-item-blog{background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);color:var(--blue);padding:.15rem .65rem;border-radius:20px;font-weight:600;text-decoration:none;cursor:pointer;transition:background .2s}
+.ticker-item-blog:hover{background:rgba(56,189,248,.28)}
 .ticker-item-blog strong{color:inherit;font-weight:700}
 .ticker-dot{color:var(--fc-border);margin:0 .8rem;opacity:.6;font-size:.6rem}
 @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}

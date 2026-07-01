@@ -1594,7 +1594,7 @@ function buildTicker(){
   // ── Blog: nov/posodobljen prispevek — vizualno izstopa med ostalimi ──
   let blogHtml='';
   if(_latestBlogPost){
-    blogHtml=`<span class="ticker-item ticker-item-blog">${_latestBlogPost.icon} ${_latestBlogPost.label}: <strong>${_latestBlogPost.title}</strong></span>`;
+    blogHtml=`<a class="ticker-item ticker-item-blog" href="${_latestBlogPost.url}">${_latestBlogPost.icon} ${_latestBlogPost.label}: <strong>${_latestBlogPost.title}</strong></a>`;
   }
 
   if(!items.length&&!blogHtml)return;
@@ -4222,7 +4222,8 @@ function loadBlogTicker(){
     _latestBlogPost={
       icon: isUpdated?'☁️':'✨',
       label: isUpdated?'Posodobljen prispevek':'Nov prispevek na blogu',
-      title: esc(top.title)
+      title: esc(top.title),
+      url: esc(top.url)
     };
     buildTicker();
   }).catch(()=>{});
