@@ -1,17 +1,5 @@
 [
   {
-    "title": "Vremenski povzetek — junij 2026",
-    "slug": "vremenski-povzetek-junij-2026",
-    "url": "/blog/vremenski-povzetek-junij-2026.html",
-    "date": "2026-07-01",
-    "summary": "Povprečno 20,3 °C (0,3 °C nad dolgoletnim povprečjem) in 164,8 mm padavin.",
-    "tags": [
-      "povzetek",
-      "junij",
-      "2026"
-    ]
-  },
-  {
     "title": "Po peklenski vročini preobrat: nevihte, toča in hudourniki v Zgornji Savinjski dolini (1.–2. julij 2026)",
     "slug": "nevihte-toca-hudourniki-julij-2026",
     "url": "/blog/nevihte-toca-hudourniki-julij-2026.html",
@@ -28,6 +16,18 @@
       "IREICA1"
     ],
     "updated": "2026-07-01"
+  },
+  {
+    "title": "Vremenski povzetek — junij 2026",
+    "slug": "vremenski-povzetek-junij-2026",
+    "url": "/blog/vremenski-povzetek-junij-2026.html",
+    "date": "2026-07-01",
+    "summary": "Povprečno 20,3 °C (0,3 °C nad dolgoletnim povprečjem) in 164,8 mm padavin.",
+    "tags": [
+      "povzetek",
+      "junij",
+      "2026"
+    ]
   },
   {
     "title": "Topoklimatologija Zgornje Savinjske doline: postaja IREICA1",
