@@ -4201,6 +4201,33 @@ async function fetchClimateComparison(){
   }catch(e){console.warn('Klima:',e);const c=document.getElementById('clim-content');if(c)c.innerHTML='<span style="color:var(--muted);font-size:.8rem">Napaka pri nalaganju klimatskih podatkov</span>';}
 }
 
+// ── Blog widget (novi/posodobljeni prispevki na naslovnici) ──
+function loadBlogWidget(){
+  fetch('/blog.json').then(r=>r.json()).then(posts=>{
+    if(!Array.isArray(posts)||!posts.length)return;
+    const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const fmt=iso=>new Date(iso+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+    const dayMs=86400000,now=Date.now();
+    const top=[...posts].sort((a,b)=>(b.updated||b.date).localeCompare(a.updated||a.date)).slice(0,3);
+    const html=top.map(p=>{
+      const eff=p.updated||p.date;
+      const isUpdated=!!p.updated&&p.updated!==p.date;
+      const freshDays=(now-new Date(eff+'T12:00:00').getTime())/dayMs;
+      const badge=freshDays<=3
+        ?(isUpdated?'<span class="bw-badge bw-badge-upd">POSODOBLJENO</span>':'<span class="bw-badge bw-badge-new">NOVO</span>')
+        :'';
+      return '<a class="bw-item" href="'+esc(p.url)+'">'
+        +'<span class="bw-item-top"><span class="bw-date">'+fmt(eff)+'</span>'+badge+'</span>'
+        +'<span class="bw-title">'+esc(p.title)+'</span></a>';
+    }).join('');
+    const list=document.getElementById('blog-widget-list');
+    if(!list)return;
+    list.innerHTML=html;
+    const wrap=document.getElementById('blog-widget');
+    if(wrap)wrap.style.display='';
+  }).catch(()=>{});
+}
+
 // ── Monthly summary ───────────────────────────────────────
 function applyMonthlySummary(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
@@ -13460,6 +13487,7 @@ async function init(){
     initInsights();
     initVisitorCounter();
     checkSmartNotifications();
+    loadBlogWidget();
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──
