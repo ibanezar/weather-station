@@ -1,11 +1,30 @@
 [
   {
+    "title": "Vremenski povzetek — junij 2026",
+    "slug": "vremenski-povzetek-junij-2026",
+    "url": "/blog/vremenski-povzetek-junij-2026.html",
+    "date": "2026-07-01",
+    "summary": "Povprečno 20,3 °C (0,3 °C nad dolgoletnim povprečjem) in 164,8 mm padavin.",
+    "tags": [
+      "povzetek",
+      "junij",
+      "2026"
+    ]
+  },
+  {
     "title": "Topoklimatologija Zgornje Savinjske doline: postaja IREICA1",
     "slug": "topoklima-savinjska-dolina-ireica1",
     "url": "/blog/topoklima-savinjska-dolina-ireica1.html",
     "date": "2026-06-28",
     "summary": "Jezero hladnega zraka, temperaturna inverzija, dolinski vetrovi (gornik in dolnik) in vročinski val junija 2026 — celovita mikroklimatska, topoklimatska in javnozdravstvena analiza na podlagi meritev postaje IREICA1.",
-    "tags": ["analiza", "topoklimatologija", "inverzija", "vrocina", "2026", "IREICA1"]
+    "tags": [
+      "analiza",
+      "topoklimatologija",
+      "inverzija",
+      "vrocina",
+      "2026",
+      "IREICA1"
+    ]
   },
   {
     "title": "Po peklenski vročini preobrat: nevihte, toča in hudourniki v Zgornji Savinjski dolini (1.–2. julij 2026)",
@@ -13,7 +32,16 @@
     "url": "/blog/nevihte-toca-hudourniki-julij-2026.html",
     "date": "2026-06-28",
     "summary": "Hladna fronta 1. in 2. julija ob stiku s pregreto zračno maso prinaša supercelične nevihte, debelo točo, sunke vetra prek 90 km/h in nevarnost hudournikov na izsušenih tleh. Časovnica, napoved po postajah in priporočila.",
-    "tags": ["napoved", "julij", "2026", "nevihte", "toca", "poplave", "hudourniki", "IREICA1"]
+    "tags": [
+      "napoved",
+      "julij",
+      "2026",
+      "nevihte",
+      "toca",
+      "poplave",
+      "hudourniki",
+      "IREICA1"
+    ]
   },
   {
     "title": "36,2 °C: nov junijski rekord postaje IREICA1 — 28. junij 2026",
@@ -21,7 +49,13 @@
     "url": "/blog/max-temperatura-28-junij-2026.html",
     "date": "2026-06-28",
     "summary": "Postaja IREICA1 izmerila 36,2 °C — nov junijski rekord (+0,6 °C nad prejšnjim, 35,6 °C iz 2025). Vročinski indeks 43,7 °C. Sedmi sušen dan zapored.",
-    "tags": ["rekord", "junij", "2026", "vrocina", "analiza"]
+    "tags": [
+      "rekord",
+      "junij",
+      "2026",
+      "vrocina",
+      "analiza"
+    ]
   },
   {
     "title": "Junijski rekord pod drobnogledom: Kaj je izmerila postaja IREICA1 med vročinskim valom 2026",
@@ -29,7 +63,14 @@
     "url": "/blog/junijski-rekord-ireica1-vrocinski-val-2026.html",
     "date": "2026-06-26",
     "summary": "Lokalni rekordi, tropske noči, padavinski primanjkljaj in anatomija nevihtne fronte — podatki postaje IREICA1 v primerjavi z državnimi rekordi.",
-    "tags": ["analiza", "junij", "2026", "vrocina", "rekord", "IREICA1"]
+    "tags": [
+      "analiza",
+      "junij",
+      "2026",
+      "vrocina",
+      "rekord",
+      "IREICA1"
+    ]
   },
   {
     "title": "Zakaj je tvoja noč topla, čeprav živiš v dolini: Tropske noči in inverzija",
