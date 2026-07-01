@@ -265,6 +265,31 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .alert-meta{font-size:.68rem;opacity:.85;margin-top:.25rem;font-family:'JetBrains Mono',monospace}
 .alert-official{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 7px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.5rem;vertical-align:middle}
 
+/* Dogodek v živo — samodejni časovni potek */
+.live-event-wrap{background:var(--card-bg);border:1px solid rgba(248,113,113,.4);border-radius:14px;
+  padding:.85rem 1rem 1rem;margin:0 0 1rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  animation:alert-in .35s ease}
+.live-event-wrap.live-event-ended{border-color:var(--card-border)}
+.live-event-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.live-badge{display:inline-flex;align-items:center;gap:.35rem;font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;font-weight:700;letter-spacing:.08em;color:var(--red);
+  background:rgba(220,38,38,.14);border-radius:8px;padding:.22rem .5rem}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;
+  animation:live-pulse 1.4s ease-in-out infinite}
+.live-event-ended .live-badge{color:var(--muted);background:rgba(255,255,255,.06)}
+.live-event-ended .live-dot{animation:none}
+.live-event-title{font-size:.85rem;font-weight:600;color:#fff;flex:1}
+.live-event-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;
+  padding:0;line-height:1}
+.live-event-close:hover{color:var(--text)}
+.live-timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem;
+  max-height:220px;overflow-y:auto}
+.live-timeline li{display:flex;align-items:baseline;gap:.5rem;font-size:.82rem;color:var(--text)}
+.live-timeline time{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  flex-shrink:0;min-width:38px}
+.live-timeline .lt-icon{flex-shrink:0}
+.live-timeline .lt-text{flex:1}
+
 img.wx-icon{display:inline-block;vertical-align:middle}
 .cu-he .wx-icon{filter:drop-shadow(0 1px 5px rgba(0,0,0,.35))}
 [data-theme="dark"] .cu-he .wx-icon{filter:drop-shadow(0 1px 6px rgba(0,0,0,.6)) brightness(1.55) saturate(1.15)}
