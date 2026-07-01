@@ -1162,30 +1162,37 @@ function renderLiveTimeline(){
     '<li><time>'+new Date(e.t).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+'</time><span class="lt-icon">'+e.icon+'</span><span class="lt-text">'+e.text+'</span></li>'
   ).join('');
 }
-// Zazna začetek/potek/konec vremenskega dogodka iz trenutnih meritev + ARSO opozoril
+// Kratek povzetek dejanskih meritev za vsebinske vnose na časovnici
+function _liveEventSummary(m,gust,rr){
+  return m.temp.toFixed(1)+'°C · veter '+(m.windSpeed??0).toFixed(0)+' km/h (sunki '+gust.toFixed(0)+') · dež '+rr.toFixed(1)+' mm/h';
+}
+// Zazna začetek/potek/konec vremenskega dogodka iz DEJANSKIH meritev postaje.
+// Aktivno ARSO opozorilo samo zniža prag (isti dogodek je bolj verjeten), ne sproži pa
+// spremljanja samo od sebe — brez lokalnega učinka bi bil panel prazna ponovitev ARSO traku.
 function evaluateLiveEvent(obs){
   const m=obs?.metric;if(!m)return;
   const gust=m.windGust??m.windSpeed??0;
   const rr=m.precipRate??0;
   const officialAlert=_meteoalarmAlerts.find(a=>a.official);
   const alertLevel=officialAlert?(officialAlert.cls.includes('red')?'red':officialAlert.cls.includes('orange')?'orange':'yellow'):null;
-  const heatNow=m.temp>=33,frostNow=m.temp<=0,rainNow=rr>=1,gustNow=gust>=45;
+  const alertBoost=alertLevel==='red'||alertLevel==='orange';
+  const rainThr=alertBoost?0.3:1, gustThr=alertBoost?30:45;
+  const heatNow=m.temp>=33,frostNow=m.temp<=0,rainNow=rr>=rainThr,gustNow=gust>=gustThr;
   const wasActive=_liveEventState.active;
-  const isActive=!!alertLevel||heatNow||frostNow||rainNow||gustNow;
+  const isActive=heatNow||frostNow||rainNow||gustNow;
 
   if(isActive&&!wasActive){
-    _liveEventState={active:true,startedAt:Date.now(),maxGust:gust,alertLevel:null,heat:false,frost:false,rainStreak:false};
+    _liveEventState={active:true,startedAt:Date.now(),maxGust:gust,alertLevel:null,heat:false,frost:false,rainStreak:false,rainStart:m.precipTotal??0,lastSnapshot:Date.now()};
     _liveTimelineEntries=[];
     _liveTimelineDismissed=false;
-    pushLiveEntry('🔴','Spremljanje dogodka se je začelo.');
+    pushLiveEntry('🔴','Spremljanje dogodka se je začelo — '+_liveEventSummary(m,gust,rr)+'.');
   }
   if(isActive){
     if(alertLevel&&alertLevel!==_liveEventState.alertLevel){
       const names={yellow:'Rumeno',orange:'Oranžno',red:'Rdeče'};
-      pushLiveEntry('⚠️',names[alertLevel]+' ARSO opozorilo je aktivno.');
+      pushLiveEntry('⚠️',names[alertLevel]+' ARSO opozorilo velja v tem času.');
       _liveEventState.alertLevel=alertLevel;
     }else if(!alertLevel&&_liveEventState.alertLevel){
-      pushLiveEntry('✅','ARSO opozorilo je preklicano.');
       _liveEventState.alertLevel=null;
     }
     if(rainNow&&!_liveEventState.rainStreak){pushLiveEntry('🌧','Začetek intenzivnejših padavin — '+rr.toFixed(1)+' mm/h.');_liveEventState.rainStreak=true;}
@@ -1193,9 +1200,16 @@ function evaluateLiveEvent(obs){
     if(gust>_liveEventState.maxGust+5){pushLiveEntry('💨','Nov sunek vetra — '+gust.toFixed(0)+' km/h.');_liveEventState.maxGust=gust;}
     if(heatNow&&!_liveEventState.heat){pushLiveEntry('🌡️','Temperatura je presegla '+m.temp.toFixed(1)+'°C.');_liveEventState.heat=true;}
     if(frostNow&&!_liveEventState.frost){pushLiveEntry('🧊','Temperatura je padla na '+m.temp.toFixed(1)+'°C — zmrzal.');_liveEventState.frost=true;}
+    // Periodičen "utrip" z dejanskimi vrednostmi, da časovnica ostane vsebinska tudi brez pragovnih preskokov
+    if(Date.now()-(_liveEventState.lastSnapshot||0)>14*60*1000){
+      const rainSince=Math.max(0,(m.precipTotal??0)-(_liveEventState.rainStart??0));
+      pushLiveEntry('📍',_liveEventSummary(m,gust,rr)+(rainSince>0.1?' · od začetka '+rainSince.toFixed(1)+' mm':'')+'.');
+      _liveEventState.lastSnapshot=Date.now();
+    }
   }else if(wasActive){
     _liveEventState.active=false;
-    pushLiveEntry('🏁','Dogodek se je zaključil.');
+    const rainSince=Math.max(0,(m.precipTotal??0)-(_liveEventState.rainStart??0));
+    pushLiveEntry('🏁','Dogodek se je zaključil — najvišji sunek '+_liveEventState.maxGust.toFixed(0)+' km/h'+(rainSince>0.1?', skupaj '+rainSince.toFixed(1)+' mm dežja':'')+'.');
   }
   _saveLiveTimeline();
   renderLiveTimeline();
