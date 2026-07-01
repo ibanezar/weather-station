@@ -1423,34 +1423,49 @@ def main():
     detected += detect_droughts(history, lookback_days=30)
     print(f"  → {len(detected)} zaznanh dogodkov")
 
-    # Združi v katalog (brez duplikatov)
+    # Združi v katalog (brez duplikatov in brez prekrivajočih se valov/suš).
+    # Toplotni val in suša imata datumski razpon — če na novo zaznan razpon
+    # prekriva že objavljen dogodek istega tipa, gre za isti pojav: obstoječi
+    # zapis (in njegov URL) samo posodobimo na daljše trajanje, namesto da
+    # objavimo drugo stran z istovrstno vsebino (podvojena/kanibalizirana SEO).
+    RANGE_TYPES = ("toplotni-val", "susa")
+    updated_slugs = set()
     for ev in detected:
-        if ev["slug"] not in catalog_by_slug:
-            catalog.append(ev)
-            catalog_by_slug[ev["slug"]] = ev
-            print(f"  + nov dogodek: {ev['slug']}")
+        if ev["slug"] in catalog_by_slug:
+            continue
+        overlap = None
+        if ev["type"] in RANGE_TYPES and ev.get("end_date"):
+            overlap = next(
+                (c for c in catalog
+                 if c["type"] == ev["type"] and c.get("end_date")
+                 and ev["date"] <= c["end_date"] and c["date"] <= ev["end_date"]),
+                None
+            )
+        if overlap:
+            if ev["duration"] > overlap.get("duration", 0):
+                overlap.update(date=ev["date"], end_date=ev["end_date"],
+                                value=ev["value"], label=ev["label"],
+                                duration=ev["duration"])
+                updated_slugs.add(overlap["slug"])
+                print(f"  ~ podaljšan dogodek: {overlap['slug']} (zdaj {overlap['duration']} dni)")
+            continue
+        catalog.append(ev)
+        catalog_by_slug[ev["slug"]] = ev
+        print(f"  + nov dogodek: {ev['slug']}")
 
-    # Generiraj strani za vse zaznane dogodke (fix: os.path.exists namesto write_page)
-    for ev in detected:
+    # Generiraj strani za vse dogodke v katalogu (nove, podaljšane ali obstoječe)
+    for ev in catalog:
         slug = ev["slug"]
         full_path = os.path.join(ROOT, f"novosti/{slug}/index.html")
-        if not os.path.exists(full_path) or args.force_events:
+        if not os.path.exists(full_path) or slug in updated_slugs or args.force_events:
             changed = gen_event_page(ev, history, sitemap_urls, force=True)
             if changed:
                 changed_urls.append(f"{SITE}/novosti/{slug}/")
                 print(f"  → /novosti/{slug}/index.html")
         else:
-            # Stran obstaja — dodaj le v sitemap
+            # Stran obstaja in se ni spremenila — dodaj le v sitemap
             sitemap_urls.append((f"{SITE}/novosti/{slug}/", ev["date"], "never", "0.6"))
             print(f"  → /novosti/{slug}/ že obstaja, preskočena")
-
-    # Za vse kataložne dogodke (ne samo zadnjih 30 dni) dodaj sitemap vnose
-    detected_slugs = {ev["slug"] for ev in detected}
-    for ev in catalog:
-        if ev["slug"] not in detected_slugs:
-            full_path = os.path.join(ROOT, f"novosti/{ev['slug']}/index.html")
-            if os.path.exists(full_path):
-                sitemap_urls.append((f"{SITE}/novosti/{ev['slug']}/", ev["date"], "never", "0.6"))
 
     # Shrani posodobljeni katalog
     save_novosti_catalog(catalog)
