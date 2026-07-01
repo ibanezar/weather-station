@@ -12,8 +12,10 @@
   <circle cx="32" cy="24" r="10" fill="url(#logoSunG)"/>
   <g stroke="#fbbf24" stroke-width="2.4" stroke-linecap="round">
     <line x1="32" y1="4" x2="32" y2="9"/>
-    <line x1="46" y1="10" x2="42.5" y2="13.5"/>
-    <line x1="18" y1="10" x2="21.5" y2="13.5"/>
+    <line x1="42" y1="6.7" x2="39.5" y2="11"/>
+    <line x1="49.3" y1="14" x2="45" y2="16.5"/>
+    <line x1="22" y1="6.7" x2="24.5" y2="11"/>
+    <line x1="14.7" y1="14" x2="19" y2="16.5"/>
   </g>
   <path d="M4 50 L22 30 L33 42 L44 24 L60 50 Z" fill="url(#logoMtnG)"/>
   <path d="M44 24 L50 38 L38 38 Z" fill="#e0f2fe" opacity=".85"/>
