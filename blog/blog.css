@@ -92,6 +92,7 @@ article strong{color:#fff}
 .post-card h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;margin:0 0 .4rem;letter-spacing:-.01em}
 .post-card .date{color:var(--muted);font-size:.82rem;margin-bottom:.5rem;
   font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.post-card .post-updated{color:#22d3ee;opacity:.85}
 .post-card p{color:var(--muted);margin:0;font-size:.95rem;line-height:1.6}
 @media(max-width:520px){.post-card{flex-direction:column;padding:.9rem 1rem}.post-thumb{width:100%;height:160px}}
 

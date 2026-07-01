@@ -232,7 +232,14 @@ def build_html(s):
 
 def main():
     if len(sys.argv) < 2:
-        sys.exit("Uporaba: python3 tools/generate_monthly_post.py YYYY-MM [--wire]")
+        sys.exit("Uporaba: python3 tools/generate_monthly_post.py YYYY-MM [--wire]\n"
+                  "       python3 tools/generate_monthly_post.py --touch <slug> [--wire]")
+    if "--touch" in sys.argv:
+        i = sys.argv.index("--touch")
+        if i + 1 >= len(sys.argv):
+            sys.exit("Uporaba: python3 tools/generate_monthly_post.py --touch <slug> [--wire]")
+        touch_existing(sys.argv[i + 1], wire="--wire" in sys.argv)
+        return
     ym = sys.argv[1]
     wire = "--wire" in sys.argv
     s = compute(ym)
@@ -255,21 +262,37 @@ def main():
         print(f"\n— Za sitemap.xml dodaj <url><loc>{url}</loc>…")
         print("\n(ali poženi z --wire za samodejno vpisovanje)")
 
-def wire_all(entry, url, stats=None):
-    # blog.json — vstavi na vrh (najnovejše prvo), brez podvajanja
+def touch_existing(slug, wire=True):
+    """Označi obstoječ blog vnos kot posodobljen danes (polje 'updated'),
+    za primere ko ročno urediš vsebino starejše objave (blog/<slug>.html)
+    brez da bi spreminjal njen izvirni datum objave."""
     bj = os.path.join(ROOT, "blog.json")
     posts = json.load(open(bj, encoding="utf-8"))
-    posts = [p for p in posts if p.get("slug") != entry["slug"]]
-    posts.insert(0, entry)
+    entry = next((p for p in posts if p.get("slug") == slug), None)
+    if entry is None:
+        sys.exit(f"Ni najdenega vnosa z slugom '{slug}' v blog.json.")
+    if entry["date"] == TODAY:
+        print(f"⚠ '{slug}' je bil objavljen danes ({TODAY}) — polje 'updated' ni potrebno.")
+        return
+    entry["updated"] = TODAY
+    posts.sort(key=lambda p: p.get("updated") or p["date"], reverse=True)
+    if not wire:
+        print(json.dumps(entry, ensure_ascii=False, indent=2))
+        print("\n(poženi z --wire za samodejno vpisovanje v blog.json, blog/index.html in sitemap.xml)")
+        return
     json.dump(posts, open(bj, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(bj, "a", encoding="utf-8").write("\n")
-    # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav
+    rewrite_sitemap_and_index(posts)
+    print(f"✓ '{slug}' označen kot posodobljen ({TODAY}); blog.json, blog/index.html in sitemap.xml osveženi.")
+
+def rewrite_sitemap_and_index(posts):
+    # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav (lastmod = zadnja sprememba)
     sm = [
         (f"{SITE}/",               "hourly",  "1.0", TODAY),
         (f"{SITE}/blog/",          "weekly",  "0.8", TODAY),
         (f"{SITE}/o-postaji.html", "monthly", "0.6", "2026-06-19"),
     ]
-    sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p["date"]) for p in posts]
+    sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
     body = "\n".join(
         f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lm}</lastmod>\n"
         f"    <changefreq>{cf}</changefreq>\n    <priority>{pr}</priority>\n  </url>"
@@ -280,14 +303,35 @@ def wire_all(entry, url, stats=None):
     # blog/index.html — pregeneriraj seznam objav med markerjema
     idx = os.path.join(ROOT, "blog", "index.html")
     h = open(idx, encoding="utf-8").read()
-    items = "\n".join(
-        f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
-        f'        <div class="date">{fmtdate(p["date"])}</div>\n'
-        f'        <h2>{p["title"]}</h2>\n        <p>{p["summary"]}</p>\n      </a>\n    </li>'
-        for p in posts)
+    def li(p):
+        date_html = fmtdate(p["date"])
+        if p.get("updated"):
+            date_html += f' <span class="post-updated">· posodobljeno {fmtdate(p["updated"])}</span>'
+        return (f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
+                f'        <div class="date">{date_html}</div>\n'
+                f'        <h2>{p["title"]}</h2>\n        <p>{p["summary"]}</p>\n      </a>\n    </li>')
+    items = "\n".join(li(p) for p in posts)
     h = re.sub(r'(<ul class="post-list">).*?(</ul>)',
                r'\1\n' + items + r'\n  \2', h, flags=re.S)
     open(idx, "w", encoding="utf-8").write(h)
+
+def wire_all(entry, url, stats=None):
+    # blog.json — vstavi/posodobi (najnovejše prvo po datumu objave/posodobitve)
+    bj = os.path.join(ROOT, "blog.json")
+    posts = json.load(open(bj, encoding="utf-8"))
+    existing = next((p for p in posts if p.get("slug") == entry["slug"]), None)
+    if existing is not None:
+        # ista objava se pregenerira (npr. dopolnjen mesec) — ohrani izvirni
+        # datum objave in namesto tega označi kot posodobljeno
+        entry["date"] = existing["date"]
+        if entry["date"] != TODAY:
+            entry["updated"] = TODAY
+    posts = [p for p in posts if p.get("slug") != entry["slug"]]
+    posts.insert(0, entry)
+    posts.sort(key=lambda p: p.get("updated") or p["date"], reverse=True)
+    json.dump(posts, open(bj, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    open(bj, "a", encoding="utf-8").write("\n")
+    rewrite_sitemap_and_index(posts)
     # Try to generate per-article OG image (requires Pillow)
     if stats:
         try:
