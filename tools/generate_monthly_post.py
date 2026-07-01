@@ -275,6 +275,10 @@ def touch_existing(slug, wire=True):
         print(f"⚠ '{slug}' je bil objavljen danes ({TODAY}) — polje 'updated' ni potrebno.")
         return
     entry["updated"] = TODAY
+    # premakni na vrh pred (stabilnim) razvrščanjem, da zmaga tudi ob
+    # izenačenju datuma z drugo objavo istega dne (npr. mesečni povzetek)
+    posts.remove(entry)
+    posts.insert(0, entry)
     posts.sort(key=lambda p: p.get("updated") or p["date"], reverse=True)
     if not wire:
         print(json.dumps(entry, ensure_ascii=False, indent=2))
