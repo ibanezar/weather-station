@@ -1591,10 +1591,17 @@ function buildTicker(){
     }
   }
 
-  if(!items.length)return;
+  // ── Blog: nov/posodobljen prispevek — vizualno izstopa med ostalimi ──
+  let blogHtml='';
+  if(_latestBlogPost){
+    blogHtml=`<span class="ticker-item ticker-item-blog">${_latestBlogPost.icon} ${_latestBlogPost.label}: <strong>${_latestBlogPost.title}</strong></span>`;
+  }
+
+  if(!items.length&&!blogHtml)return;
 
   const dot='<span class="ticker-dot">●</span>';
-  const content=items.map(i=>`<span class="ticker-item">${i}</span>`).join(dot);
+  const regular=items.map(i=>`<span class="ticker-item">${i}</span>`).join(dot);
+  const content=blogHtml?(regular?blogHtml+dot+regular:blogHtml):regular;
   // Duplicate for seamless infinite loop
   inner.innerHTML=content+dot+content;
   // Scale duration to content length
@@ -4201,30 +4208,23 @@ async function fetchClimateComparison(){
   }catch(e){console.warn('Klima:',e);const c=document.getElementById('clim-content');if(c)c.innerHTML='<span style="color:var(--muted);font-size:.8rem">Napaka pri nalaganju klimatskih podatkov</span>';}
 }
 
-// ── Blog widget (novi/posodobljeni prispevki na naslovnici) ──
-function loadBlogWidget(){
+// ── Blog: nov/posodobljen prispevek kot poudarjena postavka v tickerju ──
+let _latestBlogPost=null;
+function loadBlogTicker(){
   fetch('/blog.json').then(r=>r.json()).then(posts=>{
     if(!Array.isArray(posts)||!posts.length)return;
     const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    const fmt=iso=>new Date(iso+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-    const dayMs=86400000,now=Date.now();
-    const top=[...posts].sort((a,b)=>(b.updated||b.date).localeCompare(a.updated||a.date)).slice(0,3);
-    const html=top.map(p=>{
-      const eff=p.updated||p.date;
-      const isUpdated=!!p.updated&&p.updated!==p.date;
-      const freshDays=(now-new Date(eff+'T12:00:00').getTime())/dayMs;
-      const badge=freshDays<=3
-        ?(isUpdated?'<span class="bw-badge bw-badge-upd" title="Posodobljeno '+fmt(p.updated)+'">☁️</span>':'<span class="bw-badge bw-badge-new" title="Novo objavljeno">✨</span>')
-        :'';
-      return '<a class="bw-item" href="'+esc(p.url)+'">'
-        +'<span class="bw-item-top"><span class="bw-date">'+fmt(eff)+'</span>'+badge+'</span>'
-        +'<span class="bw-title">'+esc(p.title)+'</span></a>';
-    }).join('');
-    const list=document.getElementById('blog-widget-list');
-    if(!list)return;
-    list.innerHTML=html;
-    const wrap=document.getElementById('blog-widget');
-    if(wrap)wrap.style.display='';
+    const top=[...posts].sort((a,b)=>(b.updated||b.date).localeCompare(a.updated||a.date))[0];
+    const eff=top.updated||top.date;
+    const freshDays=(Date.now()-new Date(eff+'T12:00:00').getTime())/86400000;
+    if(freshDays>3)return; // ni več "svež" — v tickerju se ne prikaže
+    const isUpdated=!!top.updated&&top.updated!==top.date;
+    _latestBlogPost={
+      icon: isUpdated?'☁️':'✨',
+      label: isUpdated?'Posodobljen prispevek':'Nov prispevek na blogu',
+      title: esc(top.title)
+    };
+    buildTicker();
   }).catch(()=>{});
 }
 
@@ -13487,7 +13487,7 @@ async function init(){
     initInsights();
     initVisitorCounter();
     checkSmartNotifications();
-    loadBlogWidget();
+    loadBlogTicker();
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──
