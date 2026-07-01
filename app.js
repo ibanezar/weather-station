@@ -16803,7 +16803,44 @@ async function loadObservations() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     renderObservations(data.counts, data.total);
+    renderObsMap(data.reports || []);
   } catch (_) {}
+}
+
+// ── Zemljevid poročil s krajevno oznako (Leaflet, nalaganje na zahtevo) ──
+let _obsMap = null, _obsMapLayer = null;
+async function renderObsMap(reports) {
+  const wrap = document.getElementById('obs-map-wrap');
+  if (!wrap) return;
+  if (!reports.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  try {
+    if (typeof L === 'undefined') {
+      _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+      await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+    }
+    if (!_obsMap) {
+      _obsMap = L.map('obs-map', { zoomControl: true, attributionControl: false, minZoom: 8, maxZoom: 14 })
+        .setView([LAT, LON], 10);
+      L.tileLayer(isDark()
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        { maxZoom: 14, maxNativeZoom: 19, subdomains: 'abcd' }).addTo(_obsMap);
+      _obsMapLayer = L.layerGroup().addTo(_obsMap);
+      setTimeout(() => _obsMap.invalidateSize(), 60);
+    }
+    _obsMapLayer.clearLayers();
+    reports.forEach(r => {
+      const m = _OBS_META[r.type] || { icon: '🌡️', label: r.type };
+      const age = Math.max(0, Math.round((Date.now() - new Date(r.ts).getTime()) / 60000));
+      L.marker([r.lat, r.lon], {
+        icon: L.divIcon({ html: '<span style="font-size:1.3rem">' + m.icon + '</span>', className: 'obs-map-icon', iconSize: [26, 26], iconAnchor: [13, 13] })
+      }).bindPopup(m.label + ' · pred ' + age + ' min').addTo(_obsMapLayer);
+    });
+  } catch (e) {
+    console.warn('obs map:', e);
+    wrap.style.display = 'none';
+  }
 }
 
 function renderObservations(counts, total) {
@@ -16823,6 +16860,18 @@ function renderObservations(counts, total) {
   }).join('');
 }
 
+// Best-effort geolokacija: ne blokira poročila, če uporabnik zavrne/ni na voljo
+function _getObsLocation() {
+  return new Promise(resolve => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+    );
+  });
+}
+
 async function submitObservation(type) {
   const last = parseInt(localStorage.getItem(_OBS_RL_KEY) || '0');
   if (Date.now() - last < _OBS_RL_MS) { showToast('Počakaj malo pred naslednjim poročilom.'); return; }
@@ -16831,10 +16880,11 @@ async function submitObservation(type) {
     .find(b => b.onclick?.toString().includes(type));
   if (btn) { btn.classList.add('community-obs-btn-sent'); btn.disabled = true; }
   try {
+    const loc = await _getObsLocation();
     const res  = await fetch(PROXY + '/observations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type }),
+      body: JSON.stringify({ type, ...(loc || {}) }),
     });
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.error || 'Napaka');
