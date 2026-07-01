@@ -4214,7 +4214,7 @@ function loadBlogWidget(){
       const isUpdated=!!p.updated&&p.updated!==p.date;
       const freshDays=(now-new Date(eff+'T12:00:00').getTime())/dayMs;
       const badge=freshDays<=3
-        ?(isUpdated?'<span class="bw-badge bw-badge-upd">POSODOBLJENO</span>':'<span class="bw-badge bw-badge-new">NOVO</span>')
+        ?(isUpdated?'<span class="bw-badge bw-badge-upd" title="Posodobljeno '+fmt(p.updated)+'">☁️</span>':'<span class="bw-badge bw-badge-new" title="Novo objavljeno">✨</span>')
         :'';
       return '<a class="bw-item" href="'+esc(p.url)+'">'
         +'<span class="bw-item-top"><span class="bw-date">'+fmt(eff)+'</span>'+badge+'</span>'

@@ -284,9 +284,9 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .bw-item-top{display:flex;align-items:center;gap:.5rem}
 .bw-date{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);letter-spacing:.03em}
 .bw-title{font-size:.86rem;color:var(--text);line-height:1.35}
-.bw-badge{font-size:.6rem;font-weight:700;padding:.1rem .5rem;border-radius:9px;letter-spacing:.04em}
-.bw-badge-new{background:rgba(74,222,128,.18);color:#4ade80;border:1px solid rgba(74,222,128,.35)}
-.bw-badge-upd{background:rgba(56,189,248,.18);color:var(--blue);border:1px solid rgba(56,189,248,.35)}
+.bw-badge{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;font-size:.68rem;line-height:1;border-radius:50%;cursor:help}
+.bw-badge-new{background:rgba(74,222,128,.18);border:1px solid rgba(74,222,128,.35)}
+.bw-badge-upd{background:rgba(56,189,248,.18);border:1px solid rgba(56,189,248,.35)}
 .cval{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
 .unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
 .csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
