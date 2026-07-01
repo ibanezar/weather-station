@@ -307,9 +307,13 @@ def rewrite_sitemap_and_index(posts):
         date_html = fmtdate(p["date"])
         if p.get("updated"):
             date_html += f' <span class="post-updated" title="Posodobljeno {fmtdate(p["updated"])}">☁️</span>'
+        alt = p["title"].replace('"', "&quot;")
         return (f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
-                f'        <div class="date">{date_html}</div>\n'
-                f'        <h2>{p["title"]}</h2>\n        <p>{p["summary"]}</p>\n      </a>\n    </li>')
+                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="280" height="147" loading="lazy">\n'
+                f'        <div class="post-card-body">\n'
+                f'          <div class="date">{date_html}</div>\n'
+                f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
+                f'        </div>\n      </a>\n    </li>')
     items = "\n".join(li(p) for p in posts)
     h = re.sub(r'(<ul class="post-list">).*?(</ul>)',
                r'\1\n' + items + r'\n  \2', h, flags=re.S)
