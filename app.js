@@ -1126,6 +1126,81 @@ function renderAllAlerts(){
   requestAnimationFrame(_syncAlertBarHeight);
 }
 
+// ── Dogodek v živo — samodejni časovni potek ─────────────
+const LIVE_EVENT_KEY='wx-live-timeline-v1';
+let _liveEventState={active:false,startedAt:null,maxGust:0,rainStreak:false,alertLevel:null,heat:false,frost:false};
+let _liveTimelineDismissed=false;
+function _loadLiveTimeline(){
+  try{const d=JSON.parse(sessionStorage.getItem(LIVE_EVENT_KEY)||'null');
+    if(d){_liveEventState=d.state||_liveEventState;_liveTimelineEntries=d.entries||[];}
+  }catch{}
+}
+let _liveTimelineEntries=[];
+_loadLiveTimeline();
+function _saveLiveTimeline(){
+  try{sessionStorage.setItem(LIVE_EVENT_KEY,JSON.stringify({state:_liveEventState,entries:_liveTimelineEntries}));}catch{}
+}
+function pushLiveEntry(icon,text){
+  _liveTimelineEntries.unshift({t:Date.now(),icon,text});
+  if(_liveTimelineEntries.length>25)_liveTimelineEntries.length=25;
+  renderLiveTimeline();
+}
+function dismissLiveEvent(){
+  _liveTimelineDismissed=true;
+  document.getElementById('live-event-wrap')?.setAttribute('hidden','');
+}
+function renderLiveTimeline(){
+  const wrap=document.getElementById('live-event-wrap');if(!wrap)return;
+  const list=document.getElementById('live-timeline');
+  if(!_liveEventState.active&&!_liveTimelineEntries.length){wrap.hidden=true;return;}
+  if(_liveTimelineDismissed)return;
+  wrap.hidden=false;
+  const title=document.getElementById('live-event-title');
+  if(title)title.textContent=_liveEventState.active?'Vremenski dogodek v teku':'Dogodek zaključen';
+  wrap.classList.toggle('live-event-ended',!_liveEventState.active);
+  if(list)list.innerHTML=_liveTimelineEntries.map(e=>
+    '<li><time>'+new Date(e.t).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+'</time><span class="lt-icon">'+e.icon+'</span><span class="lt-text">'+e.text+'</span></li>'
+  ).join('');
+}
+// Zazna začetek/potek/konec vremenskega dogodka iz trenutnih meritev + ARSO opozoril
+function evaluateLiveEvent(obs){
+  const m=obs?.metric;if(!m)return;
+  const gust=m.windGust??m.windSpeed??0;
+  const rr=m.precipRate??0;
+  const officialAlert=_meteoalarmAlerts.find(a=>a.official);
+  const alertLevel=officialAlert?(officialAlert.cls.includes('red')?'red':officialAlert.cls.includes('orange')?'orange':'yellow'):null;
+  const heatNow=m.temp>=33,frostNow=m.temp<=0,rainNow=rr>=1,gustNow=gust>=45;
+  const wasActive=_liveEventState.active;
+  const isActive=!!alertLevel||heatNow||frostNow||rainNow||gustNow;
+
+  if(isActive&&!wasActive){
+    _liveEventState={active:true,startedAt:Date.now(),maxGust:gust,alertLevel:null,heat:false,frost:false,rainStreak:false};
+    _liveTimelineEntries=[];
+    _liveTimelineDismissed=false;
+    pushLiveEntry('🔴','Spremljanje dogodka se je začelo.');
+  }
+  if(isActive){
+    if(alertLevel&&alertLevel!==_liveEventState.alertLevel){
+      const names={yellow:'Rumeno',orange:'Oranžno',red:'Rdeče'};
+      pushLiveEntry('⚠️',names[alertLevel]+' ARSO opozorilo je aktivno.');
+      _liveEventState.alertLevel=alertLevel;
+    }else if(!alertLevel&&_liveEventState.alertLevel){
+      pushLiveEntry('✅','ARSO opozorilo je preklicano.');
+      _liveEventState.alertLevel=null;
+    }
+    if(rainNow&&!_liveEventState.rainStreak){pushLiveEntry('🌧','Začetek intenzivnejših padavin — '+rr.toFixed(1)+' mm/h.');_liveEventState.rainStreak=true;}
+    else if(!rainNow&&_liveEventState.rainStreak){pushLiveEntry('🌤','Padavine so pojenjale.');_liveEventState.rainStreak=false;}
+    if(gust>_liveEventState.maxGust+5){pushLiveEntry('💨','Nov sunek vetra — '+gust.toFixed(0)+' km/h.');_liveEventState.maxGust=gust;}
+    if(heatNow&&!_liveEventState.heat){pushLiveEntry('🌡️','Temperatura je presegla '+m.temp.toFixed(1)+'°C.');_liveEventState.heat=true;}
+    if(frostNow&&!_liveEventState.frost){pushLiveEntry('🧊','Temperatura je padla na '+m.temp.toFixed(1)+'°C — zmrzal.');_liveEventState.frost=true;}
+  }else if(wasActive){
+    _liveEventState.active=false;
+    pushLiveEntry('🏁','Dogodek se je zaključil.');
+  }
+  _saveLiveTimeline();
+  renderLiveTimeline();
+}
+
 // ── Moja opozorila (osebni pragovi) ──────────────────────
 const THRESHOLD_KEY='wx-thresholds-v1';
 const _thr={tempMin:null,tempMax:null,wind:null,rain:null};
@@ -1431,6 +1506,7 @@ async function fetchMeteoalarm(){
         _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
       }
       renderAllAlerts();
+      if(_lastBriefObs)evaluateLiveEvent(_lastBriefObs);
       return; // ARSO source succeeded
     }
   }catch(e){console.warn('ARSO warning:',e.name==='AbortError'?'timeout':e.message);}
@@ -1467,6 +1543,7 @@ async function fetchMeteoalarm(){
     });
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
     renderAllAlerts();
+    if(_lastBriefObs)evaluateLiveEvent(_lastBriefObs);
   }catch(e){console.warn('Meteoalarm:',e.name==='AbortError'?'timeout':e.message);}
 }
 
@@ -1752,7 +1829,7 @@ function applyObs(obs){
   document.getElementById('dot').className='dot';set('status-text','V živo');set('updated',fmtTime(new Date(obs.obsTimeUtc)));
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
   showStarfield((h<5||h>22)&&rr<0.05&&(m.solarRadiation??obs.solarRadiation??0)<15);
-  updateSunArc(obs.lat,obs.lon);checkAlerts(obs);
+  updateSunArc(obs.lat,obs.lon);checkAlerts(obs);evaluateLiveEvent(obs);
   applyScore(obs);
   applyBiometeo(obs);
   updatePhotoBackground(obs);

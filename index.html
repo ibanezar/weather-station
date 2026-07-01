@@ -317,6 +317,14 @@
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
+  <div id="live-event-wrap" class="live-event-wrap" hidden>
+    <div class="live-event-head">
+      <span class="live-badge"><span class="live-dot"></span>V ŽIVO</span>
+      <span class="live-event-title" id="live-event-title">Vremenski dogodek v teku</span>
+      <button class="live-event-close" onclick="dismissLiveEvent()" title="Skrij">×</button>
+    </div>
+    <ul class="live-timeline" id="live-timeline"></ul>
+  </div>
   <!-- Tab navigation -->
   <div class="tab-nav-wrap"><div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-current"    onclick="switchTab('current')">🌡 Zdaj</button>
