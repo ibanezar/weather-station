@@ -2274,6 +2274,10 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .community-obs-btn:hover{border-color:var(--blue);background:rgba(33,150,243,.08);transform:scale(1.04)}
 .community-obs-btn.community-obs-btn-sent{border-color:var(--blue);background:rgba(33,150,243,.15);color:var(--blue)}
 .community-obs-rl{font-size:.78rem;color:var(--muted);margin-top:.55rem}
+.obs-map-wrap{margin-bottom:.8rem}
+#obs-map{height:200px;border-radius:12px;overflow:hidden;background:rgba(128,128,128,.08)}
+.obs-map-note{font-size:.68rem;color:var(--muted);margin-top:.35rem}
+.obs-map-icon{filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));text-align:center;line-height:26px}
 .community-chips-label{font-size:.85rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
 .community-chips-label span{font-weight:400;color:var(--muted)}
 .community-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem}

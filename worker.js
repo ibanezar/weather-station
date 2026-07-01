@@ -1301,6 +1301,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           } catch (_) { return []; }
         }
 
+        // Groba lokacija (za zasebnost zaokrožena na ~1.1 km) — samo znotraj Zgornje Savinjske / Slovenije
+        const SI_BOUNDS = { latMin: 45.3, latMax: 47.0, lonMin: 13.2, lonMax: 16.7 };
+        function _obsCoord(body) {
+          const lat = Number(body?.lat), lon = Number(body?.lon);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+          if (lat < SI_BOUNDS.latMin || lat > SI_BOUNDS.latMax || lon < SI_BOUNDS.lonMin || lon > SI_BOUNDS.lonMax) return null;
+          return { lat: Math.round(lat * 100) / 100, lon: Math.round(lon * 100) / 100 };
+        }
+
         if (request.method === "GET") {
           const all   = await _obsRead();
           const now   = Date.now();
@@ -1308,7 +1317,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const counts = {};
           OBS_TYPES.forEach(t => { counts[t] = 0; });
           fresh.forEach(i => { if (counts[i.type] !== undefined) counts[i.type]++; });
-          return new Response(JSON.stringify({ counts, total: fresh.length, updatedAt: new Date().toISOString() }), {
+          const reports = fresh
+            .filter(i => i.lat != null && i.lon != null)
+            .map(i => ({ type: i.type, lat: i.lat, lon: i.lon, ts: i.ts }));
+          return new Response(JSON.stringify({ counts, total: fresh.length, reports, updatedAt: new Date().toISOString() }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
           });
         }
@@ -1324,10 +1336,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!OBS_TYPES.includes(body.type)) {
             return new Response(JSON.stringify({ error: "Neznana vrsta opazovanja" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
+          const coord = _obsCoord(body);
           const all   = await _obsRead();
           const now   = Date.now();
           const fresh = all.filter(i => now - new Date(i.ts).getTime() < 6 * 3600 * 1000);
-          fresh.unshift({ type: body.type, ts: new Date().toISOString() });
+          fresh.unshift({ type: body.type, ts: new Date().toISOString(), ...(coord || {}) });
           await r2.put("feedback/observations.json", JSON.stringify(fresh.slice(0, 500)), {
             httpMetadata: { contentType: "application/json" }
           });
