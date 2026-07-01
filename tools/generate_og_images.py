@@ -115,6 +115,22 @@ ARTICLES = [
         'photo': 'storm-clouds',
     },
     {
+        'slug': 'vremenski-povzetek-junij-2026',
+        'title': 'Vremenski povzetek\njunij 2026',
+        'subtitle': 'Rečica ob Savinji · IREICA1',
+        'section': 'Vremenski povzetki',
+        'accent': (14, 165, 233),
+        'photo': 'rain-overcast',
+    },
+    {
+        'slug': 'junijski-rekord-ireica1-vrocinski-val-2026',
+        'title': 'Junijski rekord\nIREICA1',
+        'subtitle': 'Vročinski val junija 2026',
+        'section': 'Analize',
+        'accent': (239, 68, 68),
+        'photo': 'drought',
+    },
+    {
         'slug': 'blog',
         'title': 'Blog Meteorec',
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
