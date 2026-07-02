@@ -292,9 +292,10 @@ def touch_existing(slug, wire=True):
 def rewrite_sitemap_and_index(posts):
     # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav (lastmod = zadnja sprememba)
     sm = [
-        (f"{SITE}/",               "hourly",  "1.0", TODAY),
-        (f"{SITE}/blog/",          "weekly",  "0.8", TODAY),
-        (f"{SITE}/o-postaji.html", "monthly", "0.6", "2026-06-19"),
+        (f"{SITE}/",                    "hourly",  "1.0", TODAY),
+        (f"{SITE}/blog/",               "weekly",  "0.8", TODAY),
+        (f"{SITE}/o-postaji.html",      "monthly", "0.6", "2026-06-19"),
+        (f"{SITE}/gobarska-napoved/",   "daily",   "0.8", TODAY),
     ]
     sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
     body = "\n".join(
