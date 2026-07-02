@@ -1066,8 +1066,30 @@ def gen_teden(history, normals, sitemap_urls):
              f"temp. {num(week_min)}–{num(week_max)} °C, padavine {num(week_prec, 1)} mm "
              f"({fmtd_short(start_date)} – {fmtd_short(end_date)}).")
 
+    faq_qa = [
+        (
+            "Kakšno je bilo vreme ta teden v Rečici ob Savinji?",
+            f"Med {fmtd(start_date)} in {fmtd(end_date)} je temperatura na postaji IREICA1 nihala med "
+            f"{num(week_min)} in {num(week_max)} °C, padavin je skupaj padlo {num(week_prec, 1)} mm."
+        ),
+    ]
+    if anom:
+        faq_qa.append((
+            "Je bil ta teden toplejši ali hladnejši od povprečja?",
+            f"Povprečna temperatura tega tedna je od klimatološke normale za ta del leta odstopala za {anom}."
+        ))
+    faq_qa.append((
+        "Kako pogosto se ta stran posodobi?",
+        "Tedenski povzetek se samodejno osveži vsak ponedeljek na podlagi meritev postaje IREICA1."
+    ))
+
+    faq_html = "  <h2>Pogosta vprašanja</h2>\n" + "\n".join(
+        f'    <h3>{q}</h3>\n    <p class="hub-intro">{a}</p>' for q, a in faq_qa
+    )
+
     schema = (crumbs_schema([("Meteorec", "/"), ("Ta teden", None)])
-              + webpage_schema(url, title, desc, lastmod))
+              + webpage_schema(url, title, desc, lastmod)
+              + faq_schema(faq_qa))
 
     body = f'''{crumbs_html([("Meteorec", "/"), ("Ta teden", None)])}
   <h1 class="page-title">Vreme ta teden v Rečici ob Savinji</h1>
@@ -1075,6 +1097,7 @@ def gen_teden(history, normals, sitemap_urls):
 
 {summary_html}
 {table_html}
+{faq_html}
 
   <p class="muted-note">Povzetek se osveži vsak ponedeljek. Vse dnevne meritve so dostopne v
   <a href="/vreme/">arhivu vremena</a>. Klimatološka norma za primerjavo: <a href="/klima/">klima Rečice ob Savinji</a>.</p>
