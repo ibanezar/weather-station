@@ -9,6 +9,7 @@ Data is original station measurement, not a forecast model. Reuse is free under 
 - [Gobarska napoved](https://meteorec.si/gobarska-napoved/): daily mushroom-foraging fruiting index for five Zgornja Savinjska dolina forest locations, a 7-day outlook, and a month-by-month species calendar.
 - [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/): Savinja river flow/level status combining a GloFAS 7-day forecast with live ARSO gauge readings, plus the historical flood timeline through August 2023.
 - [Nevihtna napoved](https://meteorec.si/nevihte/): atmospheric-instability snapshot (CAPE, CIN, Lifted Index, Total Totals, K-index, wind shear) with 12-hour hail-risk and damaging-wind-risk outlooks for Rečica ob Savinji.
+- [Agrometeo](https://meteorec.si/agrometeo/): growing-degree-day accumulation, hop phenology and disease risk, per-crop GDD milestones, 7-day frost alarm, spray-window and hay-drying outlooks, and water balance for Zgornja Savinjska dolina.
 - [Vremenski arhiv](https://meteorec.si/vreme/): full daily/monthly/yearly measurement archive since 2019-11-07, the primary dataset page.
 - [Vremenski rekordi](https://meteorec.si/rekord/): all-time station extremes (temperature, precipitation, wind).
 - [Vremenski pojavi](https://meteorec.si/pojavi/): archives of frost days, hot days and heavy-rain days.
