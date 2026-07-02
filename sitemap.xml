@@ -19,6 +19,24 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/gobarska-napoved/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/vodostaj-savinje/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/cvetni-prah/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
     <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>

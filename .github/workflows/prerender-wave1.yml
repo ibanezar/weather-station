@@ -1,0 +1,39 @@
+name: Pre-render Wave 1 SEO strani (gobe/vodostaj/pelod)
+
+on:
+  schedule:
+    - cron: '15 */3 * * *'   # vsake 3 ure ob :15
+  workflow_dispatch:
+
+# Prepreči prekrivanje zagonov
+concurrency:
+  group: prerender-wave1
+  cancel-in-progress: false
+
+jobs:
+  prerender:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Vbrizgaj gobarski indeks, vodostaj in pelod v spoke strani
+        run: python3 tools/prerender_wave1.py
+
+      - name: Commit in push (samo če so spremembe)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet gobarska-napoved/ vodostaj-savinje/ cvetni-prah/; then
+            echo "Brez sprememb."
+          else
+            git add gobarska-napoved/ vodostaj-savinje/ cvetni-prah/
+            git commit -m "chore: pre-render wave 1 SEO strani (gobe/vodostaj/pelod) [skip ci]"
+            git push
+          fi
