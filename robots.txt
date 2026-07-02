@@ -6,3 +6,4 @@ Disallow: /blog.json
 
 Sitemap: https://meteorec.si/sitemap.xml
 Sitemap: https://meteorec.si/sitemap-weather.xml
+Sitemap: https://meteorec.si/sitemap-seo.xml
