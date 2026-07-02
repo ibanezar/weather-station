@@ -10,6 +10,8 @@ Data is original station measurement, not a forecast model. Reuse is free under 
 - [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/): Savinja river flow/level status combining a GloFAS 7-day forecast with live ARSO gauge readings, plus the historical flood timeline through August 2023.
 - [Nevihtna napoved](https://meteorec.si/nevihte/): atmospheric-instability snapshot (CAPE, CIN, Lifted Index, Total Totals, K-index, wind shear) with 12-hour hail-risk and damaging-wind-risk outlooks for Rečica ob Savinji.
 - [Agrometeo](https://meteorec.si/agrometeo/): growing-degree-day accumulation, hop phenology and disease risk, per-crop GDD milestones, 7-day frost alarm, spray-window and hay-drying outlooks, and water balance for Zgornja Savinjska dolina.
+- [Kakovost zraka](https://meteorec.si/kakovost-zraka/): current EU AQI, pollutant levels (PM2.5, PM10, ozone, NO2, SO2, CO) against EU limits, a 5-day pollen forecast, and health recommendations for Rečica ob Savinji.
+- [Vreme za padalce](https://meteorec.si/vreme-za-padalce/): paragliding flyability score, hour-by-hour flying window (boundary layer height, wind, CAPE), and a 7-day outlook for Zgornja Savinjska dolina.
 - [Vremenski arhiv](https://meteorec.si/vreme/): full daily/monthly/yearly measurement archive since 2019-11-07, the primary dataset page.
 - [Vremenski rekordi](https://meteorec.si/rekord/): all-time station extremes (temperature, precipitation, wind).
 - [Vremenski pojavi](https://meteorec.si/pojavi/): archives of frost days, hot days and heavy-rain days.
