@@ -147,6 +147,48 @@ def dataset_schema(url, observations):
             '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
 
 
+def archive_dataset_schema(first_date, last_date):
+    """Full Dataset node for the /vreme/ archive — same @id used on the homepage
+    and /o-postaji.html so Google resolves them as one entity, colocated here
+    with the page whose url the other instances already point to."""
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "@id": f"{SITE}/#dataset",
+        "name": "Vremenske meritve — Rečica ob Savinji (IREICA1)",
+        "description": ("Dnevni arhiv temperature, padavin, relativne vlage in vetra "
+                         f"meteorološke postaje {STATION_ID} v Rečici ob Savinji od {fmtd(first_date)}."),
+        "url": f"{SITE}/vreme/",
+        "identifier": STATION_ID,
+        "inLanguage": "sl",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": True,
+        "keywords": ["vreme Rečica ob Savinji", "vreme Zgornja Savinjska dolina",
+                     "vremenska postaja Savinjska dolina"],
+        "temporalCoverage": f"{first_date}/..",
+        "creator": {"@type": "Person", "name": "Filip Eremita"},
+        "publisher": {"@type": "Organization", "name": "Meteorec", "url": SITE + "/"},
+        "spatialCoverage": {
+            "@type": "Place",
+            "name": "Rečica ob Savinji",
+            "geo": {"@type": "GeoCoordinates", "latitude": LAT, "longitude": LON, "elevation": ELEV},
+        },
+        "variableMeasured": [
+            {"@type": "PropertyValue", "name": "Temperatura zraka", "unitText": "°C"},
+            {"@type": "PropertyValue", "name": "Padavine", "unitText": "mm"},
+            {"@type": "PropertyValue", "name": "Relativna vlažnost", "unitText": "%"},
+            {"@type": "PropertyValue", "name": "Hitrost vetra", "unitText": "km/h"},
+        ],
+        "distribution": {
+            "@type": "DataDownload",
+            "encodingFormat": "application/json",
+            "contentUrl": f"{SITE}/history.json",
+        },
+    }
+    return (f'<script type="application/ld+json">\n'
+            f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
+
+
 def stn_badge():
     return '  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>'
 
@@ -685,7 +727,11 @@ def gen_archive_index(hist, sitemap_urls):
         )
 
     crumbs_schema_html = crumbs_schema(crumbs)
-    schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema_html])
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema_html,
+        archive_dataset_schema(first_date, last_date),
+    ])
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vremenski arhiv</h1>

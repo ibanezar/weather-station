@@ -1,0 +1,28 @@
+# Meteorec
+
+> Meteorec (meteorec.si) is a personal weather station's website in Rečica ob Savinji, Zgornja Savinjska dolina, Slovenia (station ID IREICA1, 366 m elevation, 46.325779, 14.921137). It publishes live conditions and a continuous daily measurement archive since 7 November 2019 — temperature, precipitation, humidity, wind and pressure — for a valley with no official ARSO station of its own. Content, data and analysis are in Slovenian.
+
+Data is original station measurement, not a forecast model. Reuse is free under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — attribute "Meteorec (meteorec.si), postaja IREICA1" and link back to https://meteorec.si/.
+
+## Live conditions & data
+- [Domača stran / trenutno vreme](https://meteorec.si/): current live readings plus interactive widgets (storms, agrometeo, air quality, pollen, sea/mountain conditions, paragliding).
+- [Vremenski arhiv](https://meteorec.si/vreme/): full daily/monthly/yearly measurement archive since 2019-11-07, the primary dataset page.
+- [Vremenski rekordi](https://meteorec.si/rekord/): all-time station extremes (temperature, precipitation, wind).
+- [Vremenski pojavi](https://meteorec.si/pojavi/): archives of frost days, hot days and heavy-rain days.
+- [Vreme ta teden](https://meteorec.si/teden/): rolling 7-day summary.
+- [Vremenski trendi](https://meteorec.si/trendi/): interactive long-run charts (temperature, precipitation, wind, pressure, dew point, solar, UV).
+- [Klima](https://meteorec.si/klima/), [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): monthly climate normals for Rečica ob Savinji.
+- [history.json](https://meteorec.si/history.json): raw daily-summary JSON backing the archive.
+
+## Nearby-location pages
+- [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/)
+- [Vreme Mozirje](https://meteorec.si/vreme-mozirje/)
+- [Vreme Nazarje](https://meteorec.si/vreme-nazarje/)
+- [Vreme Ljubno ob Savinji](https://meteorec.si/vreme-ljubno-ob-savinji/)
+
+## Writing
+- [Blog](https://meteorec.si/blog/): monthly weather summaries and event analyses for Savinjska dolina.
+- [Vremenski dogodki](https://meteorec.si/novosti/): logged notable events (heat waves, droughts, records).
+
+## About
+- [O postaji](https://meteorec.si/o-postaji.html): station equipment, location and FAQ.
