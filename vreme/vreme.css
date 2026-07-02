@@ -85,3 +85,20 @@
 /* ── partial-opomba (za tekoči mesec) ── */
 .partial-note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.28);
   border-radius:12px;padding:.8rem 1rem;margin:1.2rem 0;font-size:.88rem;color:var(--amber)}
+
+/* ── Generični card + oznaka razdelka (gobarska napoved in sorodne strani) ── */
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
+  padding:1.4rem 1.6rem;box-shadow:var(--card-shadow)}
+.clabel{font-size:.72rem;letter-spacing:.10em;text-transform:uppercase;color:var(--text);
+  margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;font-weight:600;opacity:.85}
+.mtn-avk-link{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .7rem;
+  border-radius:7px;border:1px solid var(--border);background:var(--card-bg);
+  font-size:.72rem;font-weight:600;text-decoration:none;color:var(--text);transition:border-color .18s,color .18s}
+.mtn-avk-link:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ── Vrste gob po sezoni (gobarska napoved) ── */
+.gobe-sp{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .2rem;border-bottom:1px solid var(--border)}
+.gobe-sp:last-child{border-bottom:none}
+.gobe-sp-ic{font-size:1.3rem;line-height:1.2;flex-shrink:0}
+.gobe-sp-nm{font-size:.85rem;font-weight:600}
+.gobe-sp-nt{font-size:.75rem;color:var(--muted);line-height:1.5}
