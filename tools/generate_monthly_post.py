@@ -297,6 +297,7 @@ def rewrite_sitemap_and_index(posts):
         (f"{SITE}/o-postaji.html",         "monthly", "0.6", "2026-06-19"),
         (f"{SITE}/gobarska-napoved/",      "daily",   "0.8", TODAY),
         (f"{SITE}/vodostaj-savinje/",      "daily",   "0.8", TODAY),
+        (f"{SITE}/nevihte/",               "daily",   "0.8", TODAY),
         (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-06-30"),
     ]
     sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
