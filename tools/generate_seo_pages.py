@@ -108,6 +108,41 @@ def webpage_schema(url, title, desc, date_published=None):
     s += "}"
     return f"<script type=\"application/ld+json\">\n{s}\n</script>"
 
+def defined_term_schema(name, description, url, term_set_url):
+    full = f"{SITE}{url}"
+    data = {
+        "@context": "https://schema.org",
+        "@type": "DefinedTerm",
+        "@id": f"{full}#term",
+        "name": name,
+        "description": description,
+        "url": full,
+        "inDefinedTermSet": f"{SITE}{term_set_url}#terms",
+        "inLanguage": "sl",
+    }
+    return (f'<script type="application/ld+json">\n'
+            f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
+
+
+def defined_term_set_schema(name, url, terms):
+    """terms: list of (name, description, term_url)"""
+    full = f"{SITE}{url}"
+    data = {
+        "@context": "https://schema.org",
+        "@type": "DefinedTermSet",
+        "@id": f"{full}#terms",
+        "name": name,
+        "url": full,
+        "inLanguage": "sl",
+        "hasDefinedTerm": [
+            {"@type": "DefinedTerm", "@id": f"{SITE}{turl}#term", "name": tname, "url": f"{SITE}{turl}"}
+            for tname, _, turl in terms
+        ],
+    }
+    return (f'<script type="application/ld+json">\n'
+            f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
+
+
 def faq_schema(qa):
     items = []
     for q, a in qa:
@@ -877,7 +912,7 @@ def gen_phenomena_pages(hist, sitemap_urls):
     hot_days = [(d, v) for d, v in sorted(hist.items()) if is_hot(v)]
     rain_days = [(d, v) for d, v in sorted(hist.items()) if is_heavy_rain(v)]
 
-    def phenomenon_page(url, rel, title, desc, intro, icon, days, value_fn, value_label, crumbs):
+    def phenomenon_page(url, rel, title, desc, intro, term_name, definition, icon, days, value_fn, value_label, crumbs):
         rows = []
         for date, v in sorted(days, reverse=True):
             y, m, d = int(date[:4]), int(date[5:7]), int(date[8:10])
@@ -896,7 +931,11 @@ def gen_phenomena_pages(hist, sitemap_urls):
             f'<th>{value_label}</th></tr></thead>\n'
             '    <tbody>\n' + "\n".join(rows[:500]) + '\n    </tbody>\n  </table>'
         )
-        schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs)])
+        schema = "\n".join([
+            webpage_schema(url, title, desc),
+            crumbs_schema(crumbs),
+            defined_term_schema(term_name, definition, url, "/pojavi/"),
+        ])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">{icon} {title.split(" —")[0]}</h1>
@@ -914,6 +953,8 @@ def gen_phenomena_pages(hist, sitemap_urls):
         "Zmrzal — Rečica ob Savinji",
         f"Dnevi z najnižjo temperaturo ≤ 0 °C v Rečici ob Savinji. Postaja IREICA1 je zabeležila {len(frost_days)} zmrzalnih dni od novembra 2019.",
         f"Zmrzal nastopi, ko dnevna najnižja temperatura pade na 0 °C ali nižje. Postaja IREICA1 je od novembra 2019 zabeležila skupaj <strong>{len(frost_days)} dni z zmrzaljo</strong> v Rečici ob Savinji.",
+        "Zmrzal",
+        "Zmrzal je vremenski pojav, pri katerem dnevna najnižja temperatura zraka pade na 0 °C ali manj.",
         "❄",
         frost_days,
         lambda v: f"{num(v.get('tempLow'))} °C",
@@ -928,6 +969,8 @@ def gen_phenomena_pages(hist, sitemap_urls):
         "Vroč dan — Rečica ob Savinji",
         f"Dnevi z najvišjo temperaturo ≥ 30 °C v Rečici ob Savinji. Postaja IREICA1 je zabeležila {len(hot_days)} vročih dni od novembra 2019.",
         f"Vroč dan nastopi, ko dnevna najvišja temperatura doseže ali preseže 30 °C. Postaja IREICA1 je od novembra 2019 zabeležila skupaj <strong>{len(hot_days)} vročih dni</strong> v Rečici ob Savinji.",
+        "Vroč dan",
+        "Vroč dan je dan, na katerega dnevna najvišja temperatura zraka doseže ali preseže 30 °C.",
         "☀",
         hot_days,
         lambda v: f"{num(v.get('tempHigh') or v.get('tempAvg'))} °C",
@@ -942,6 +985,8 @@ def gen_phenomena_pages(hist, sitemap_urls):
         "Nalivi — Rečica ob Savinji",
         f"Dnevi z dnevno količino padavin ≥ 20 mm v Rečici ob Savinji. Postaja IREICA1 je zabeležila {len(rain_days)} nalivov od novembra 2019.",
         f"Naliv opredelimo kot dan z vsaj 20 mm padavin. Postaja IREICA1 je od novembra 2019 zabeležila skupaj <strong>{len(rain_days)} nalivov</strong> v Rečici ob Savinji.",
+        "Naliv",
+        "Naliv je dan z vsaj 20 mm padavin v 24 urah.",
         "🌧",
         rain_days,
         lambda v: f"{num(v.get('precipTotal'))} mm",
@@ -958,7 +1003,16 @@ def gen_phenomena_pages(hist, sitemap_urls):
             "Meritve postaje IREICA1 od novembra 2019.")
     crumbs = [("Meteorec", "/"), ("Vremenski arhiv", "/vreme/"), ("Pojavi", None)]
 
-    schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs)])
+    terms = [
+        ("Zmrzal", "Zmrzal je vremenski pojav, pri katerem dnevna najnižja temperatura zraka pade na 0 °C ali manj.", "/pojavi/zmrzal/"),
+        ("Vroč dan", "Vroč dan je dan, na katerega dnevna najvišja temperatura zraka doseže ali preseže 30 °C.", "/pojavi/vroč-dan/"),
+        ("Naliv", "Naliv je dan z vsaj 20 mm padavin v 24 urah.", "/pojavi/naliv/"),
+    ]
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        defined_term_set_schema(title, url, terms),
+    ])
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vremenski pojavi</h1>
