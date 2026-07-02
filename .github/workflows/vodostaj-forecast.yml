@@ -1,0 +1,31 @@
+name: Vodostaj Savinje
+
+on:
+  schedule:
+    - cron: '15 5 * * *'   # 5:15 UTC daily, po gobe-forecast.yml
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate vodostaj-savinje stran
+        run: python3 tools/generate_vodostaj_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add vodostaj-savinje/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi vodostaj Savinje $(date -u +%Y-%m-%d) [skip ci]"
+          git push
