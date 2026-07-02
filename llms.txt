@@ -19,6 +19,7 @@ Data is original station measurement, not a forecast model. Reuse is free under 
 - [Vremenski trendi](https://meteorec.si/trendi/): interactive long-run charts (temperature, precipitation, wind, pressure, dew point, solar, UV).
 - [Klima](https://meteorec.si/klima/), [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): monthly climate normals for Rečica ob Savinji.
 - [history.json](https://meteorec.si/history.json): raw daily-summary JSON backing the archive.
+- [Vremenski slovar](https://meteorec.si/slovar/): 46 meteorological terms (dew point, hail, CAPE-adjacent instability concepts, temperature inversion, etc.), each on its own page with a definition and a fact, several tied to Zgornja Savinjska dolina specifically.
 
 ## Nearby-location pages
 - [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/)

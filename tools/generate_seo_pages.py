@@ -15,10 +15,14 @@ Generates from history.json:
   /pomlad-YYYY/, /poletje-YYYY/ ...     — seasonal summaries
   sitemap-weather.xml                   — sitemap for all generated pages
 
+Generates from app.js (GLOSSARY_TERMS, parsed — not hand-duplicated):
+  /slovar/index.html                    — glossary index, grouped by category
+  /slovar/<slug>/index.html             — one page per meteorological term
+
 Usage:
   python3 tools/generate_seo_pages.py [--force]
 """
-import json, os, sys, calendar, datetime, statistics as st, argparse
+import json, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1463,6 +1467,132 @@ def gen_landing_page(hist, sitemap_urls):
     sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.9"))
 
 
+GLOSS_CAT_LABELS = {
+    "vlaga": "Vlaga", "padavine": "Padavine", "oblaki": "Oblaki", "veter": "Veter",
+    "tlak": "Zračni tlak", "temperatura": "Temperatura", "sevanje": "Sevanje",
+}
+GLOSS_CATS = ["vlaga", "padavine", "oblaki", "veter", "tlak", "temperatura", "sevanje"]
+
+
+def slovar_slug(term):
+    """URL slug from a glossary term name — strips a trailing parenthetical
+    synonym/translation (e.g. 'Fen (Föhn)' -> 'fen') and transliterates
+    Slovenian diacritics."""
+    base = re.sub(r"\s*\([^)]*\)\s*$", "", term).strip() or term
+    base = base.replace("(", "").replace(")", "")
+    base = base.translate(str.maketrans("čšžćđČŠŽĆĐ", "cszcdCSZCD"))
+    base = base.lower()
+    return re.sub(r"[^a-z0-9]+", "-", base).strip("-")
+
+
+def load_glossary_terms():
+    """Parse GLOSSARY_TERMS straight out of app.js so the slovarček pages
+    can never drift from the live glossary tab — this is the one source of
+    truth for term text."""
+    src = open(os.path.join(ROOT, "app.js"), encoding="utf-8").read()
+    m = re.search(r"const GLOSSARY_TERMS=\[(.*?)\n\];", src, re.S)
+    block = m.group(1)
+    raw = re.findall(
+        r"\{term:'((?:[^'\\]|\\.)*)',icon:'([^']*)',cat:'([^']*)',\s*"
+        r"def:'((?:[^'\\]|\\.)*)',\s*"
+        r"fun:'((?:[^'\\]|\\.)*)',",
+        block,
+    )
+    def unescape(s):
+        return s.replace("\\'", "'").replace('\\"', '"')
+
+    terms = []
+    for term, icon, cat, definition, fun in raw:
+        terms.append({
+            "term": unescape(term), "icon": icon, "cat": cat,
+            "def": unescape(definition), "fun": unescape(fun),
+            "slug": slovar_slug(unescape(term)),
+        })
+    return terms
+
+
+def gen_slovar_pages(sitemap_urls):
+    terms = load_glossary_terms()
+    lastmod = TODAY.isoformat()
+
+    for t in terms:
+        url = f"/slovar/{t['slug']}/"
+        rel = f"slovar/{t['slug']}/index.html"
+        short_name = re.sub(r"\s*\([^)]*\)\s*$", "", t["term"]).strip() or t["term"]
+        title = f"Kaj je {short_name.lower()}? — Vremenski slovar"
+        desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
+        crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
+
+        qa = [(f"Kaj je {short_name.lower()}?", t["def"])]
+        schema = "\n".join([
+            webpage_schema(url, title, desc),
+            crumbs_schema(crumbs),
+            defined_term_schema(t["term"], t["def"], url, "/slovar/"),
+            faq_schema(qa),
+        ])
+        cat_label = GLOSS_CAT_LABELS.get(t["cat"], t["cat"])
+        body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">{t["icon"]} {t["term"]}</h1>
+  <p class="post-meta">Vremenski slovar · <a href="/slovar/#{t["cat"]}">{cat_label}</a></p>
+  <p class="archive-intro">{t["def"]}</p>
+  <div class="card" style="margin-bottom:1rem">
+    <div class="clabel">💡 Zanimivost</div>
+    <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
+  </div>
+  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+  <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
+  <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
+
+        html = page_shell(title, desc, url, schema, body)
+        write_page(rel, html, force=True)
+        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.5"))
+
+    # ── /slovar/ index ────────────────────────────────────────────────────
+    url = "/slovar/"
+    rel = "slovar/index.html"
+    title = "Vremenski slovar — meteorološki pojmi razloženi"
+    desc = (f"Slovar {len(terms)} meteoroloških pojmov (rosišče, CAPE, burja, temperaturna inverzija …) "
+            "z razlago in zanimivostjo za vsak izraz.")
+    crumbs = [("Meteorec", "/"), ("Slovar", None)]
+
+    by_cat = {}
+    for t in terms:
+        by_cat.setdefault(t["cat"], []).append(t)
+
+    sections = []
+    for cat in GLOSS_CATS:
+        cat_terms = by_cat.get(cat, [])
+        if not cat_terms:
+            continue
+        cards = "\n".join(
+            f'    <a class="phenom-card" href="/slovar/{t["slug"]}/">\n'
+            f'      <span class="ph-icon">{t["icon"]}</span>\n'
+            f'      {t["term"]}\n'
+            f'    </a>' for t in cat_terms
+        )
+        sections.append(f'  <h2 id="{cat}">{GLOSS_CAT_LABELS[cat]}</h2>\n  <div class="card-grid">\n{cards}\n  </div>')
+
+    term_set = [(t["term"], t["def"], f"/slovar/{t['slug']}/") for t in terms]
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        defined_term_set_schema(title, url, term_set),
+    ])
+    body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vremenski slovar</h1>
+  <p class="archive-intro">Razlaga {len(terms)} meteoroloških pojmov, od osnovnih (rosišče, vlažnost) do
+  naprednejših (CAPE-sorodni indeksi nestabilnosti, adiabatski gradient). Vsak pojem ima kratko razlago in
+  zanimivost, pogosto vezano na Zgornjo Savinjsko dolino.</p>
+{chr(10).join(sections)}
+  <a class="back-link" href="/">← Trenutno vreme v živo</a>'''
+
+    html = page_shell(title, desc, url, schema, body)
+    write_page(rel, html, force=True)
+    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
+
+
 def gen_sitemap(sitemap_urls):
     entries = []
     for loc, lastmod, cf, priority in sitemap_urls:
@@ -1534,6 +1664,11 @@ def main():
     print("Generiram strani za sosednje kraje …")
     gen_nearby_town_pages(hist, sitemap_urls)
     print(f"  → {len(NEARBY_TOWNS)} strani (Mozirje, Nazarje, Ljubno)")
+
+    print("Generiram vremenski slovar …")
+    n_terms = len(load_glossary_terms())
+    gen_slovar_pages(sitemap_urls)
+    print(f"  → /slovar/ + {n_terms} pojmov")
 
     print("Generiram sitemap-weather.xml …")
     n = gen_sitemap(sitemap_urls)
