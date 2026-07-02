@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomija poletne nevihte: od sopare do "vesoljnega potopa" v Rečici ob Savinji | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html">
+<meta name="description" content="Kako vremenska postaja IREICA1 'čuti' poletno nevihto, preden ta udari? Anatomija resničnega dogodka iz 28. julija 2024 — od naraščajoče sopare, prek sunka vetra 48 km/h, do 16,5 mm dežja v urah.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Anatomija poletne nevihte: od sopare do 'vesoljnega potopa' v Rečici ob Savinji">
+<meta property="og:description" content="Podatki postaje IREICA1 razkrivajo, kako se poletna nevihta gradi in udari: naraščajoče rosišče, sunek vetra 48 km/h in 16,5 mm dežja v urah — študija primera 28. julija 2024.">
+<meta property="og:image" content="https://meteorec.si/og/blog.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-07-02">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Analiza">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Anatomija poletne nevihte: od sopare do 'vesoljnega potopa'">
+<meta name="twitter:description" content="Kako naprava zazna nevihto, preden ta udari? Naraščajoče rosišče, sunek vetra 48 km/h in 16,5 mm dežja — resničen dogodek, izmerjen na postaji IREICA1.">
+<meta name="twitter:image" content="https://meteorec.si/og/blog.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Anatomija poletne nevihte: od sopare do 'vesoljnega potopa' v Rečici ob Savinji",
+  "description": "Študija primera resnične poletne nevihte (28. julij 2024): naraščajoče rosišče pred udarom, sunek vetra 48 km/h in 16,5 mm dežja — vse izmerjeno na postaji IREICA1.",
+  "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/blog.jpg", "width": 1200, "height": 630 },
+  "wordCount": 1350,
+  "datePublished": "2026-07-02",
+  "dateModified": "2026-07-02",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html" },
+  "about": { "@type": "Place", "name": "Rečica ob Savinji", "geo": { "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 } },
+  "keywords": "poletna nevihta, downburst, mikroizbruh, rosišče, CAPE, sunek vetra, Savinjska dolina, IREICA1"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Anatomija poletne nevihte" }
+  ]
+}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="blog.css">
+<style>
+.stat-card.c-hot .sc-val   { color: #f97316; }
+.stat-card.c-rain .sc-val  { color: #60a5fa; }
+.stat-card.c-wind .sc-val  { color: #a78bfa; }
+.stat-card.c-cool .sc-val  { color: #22d3ee; }
+
+/* ── Photo slot (placeholder za fotografije) ───────────────────── */
+.photo-slot {
+  border: 1.5px dashed rgba(255,255,255,.22);
+  border-radius: 16px;
+  padding: 1.7rem 1.5rem;
+  margin: 1.4rem 0 1.9rem;
+  text-align: center;
+  background: rgba(255,255,255,.02);
+}
+.photo-slot .ps-ico { font-size: 1.7rem; margin-bottom: .5rem; line-height: 1; }
+.photo-slot .ps-label {
+  font-family: 'JetBrains Mono', monospace; font-size: .64rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .45rem;
+}
+.photo-slot p { margin: 0; color: #cfdbef; font-size: .89rem; line-height: 1.6; }
+
+/* ── Phase timeline (anatomija dogodka) ─────────────────────────── */
+.phase-list { margin: 1.2rem 0 1.8rem; display: flex; flex-direction: column; gap: .8rem; }
+.phase {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-left: 4px solid var(--muted); border-radius: 0 14px 14px 0; padding: 1rem 1.2rem;
+}
+.phase.p-build { border-left-color: #f59e0b; }
+.phase.p-hit   { border-left-color: #ef4444; }
+.phase.p-calm  { border-left-color: #22d3ee; }
+.phase-head { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-bottom: .5rem; }
+.phase-when {
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+  text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
+}
+.phase-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02rem; color: #fff; }
+.phase p { margin: 0; font-size: .92rem; line-height: 1.6; color: #cfdbef; }
+
+/* ── Definicijski okvir ──────────────────────────────────────────── */
+.def-box {
+  background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.3);
+  border-radius: 14px; padding: 1.1rem 1.3rem; margin: 1.2rem 0 1.8rem;
+}
+.def-title {
+  font-family: 'JetBrains Mono', monospace; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--purple); margin-bottom: .5rem;
+}
+.def-box p { margin: 0; font-size: .9rem; line-height: 1.6; color: #cfdbef; }
+
+/* ── Share bar ──────────────────────────────────────────────────── */
+.share-bar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 2rem 0 1.4rem; padding: 1rem 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+.share-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-right: .3rem; flex-shrink: 0; }
+.share-btn { display: inline-flex; align-items: center; gap: .38rem; padding: .42rem .85rem; border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: opacity .15s, transform .1s; line-height: 1; }
+.share-btn:hover { opacity: .85; transform: translateY(-1px); }
+.share-btn:active { transform: translateY(0); }
+.share-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.share-btn.wa  { background: #25d366; color: #fff; }
+.share-btn.x   { background: #000;    color: #fff; }
+.share-btn.fb  { background: #1877f2; color: #fff; }
+.share-btn.copy { background: rgba(77,159,248,.15); color: var(--blue); border: 1px solid rgba(77,159,248,.3); }
+.share-btn.native { background: rgba(255,255,255,.08); color: #e8edf8; border: 1px solid rgba(255,255,255,.12); }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Anatomija poletne nevihte
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+    <h1>Anatomija poletne nevihte: od sopare do "vesoljnega potopa" v Rečici ob Savinji</h1>
+    <p class="post-meta">2. julija 2026 · Filip Eremita · študija primera: 28. julij 2024 · postaja IREICA1 · ~7 min branja</p>
+
+    <p class="lead">Vsi poznamo ta občutek. Zrak stoji, temperatura presega 30 °C, vlaga pa je tako visoka, da jo skoraj lahko tipamo. Nato pa se izza hribov zasliši prvo grmenje. Poletne nevihte pri nas niso zgolj dež – so hiter in silovit trk zračnih mas. Namesto da bi govorili na splošno, smo v arhivu postaje IREICA1 poiskali <span class="hl">resničen primer</span> takšnega preobrata – nevihto, ki je 28. julija 2024 prekinila teden vročine v dolini – in pogledali, kaj so ob tem dogodku dejansko zabeležili senzorji.</p>
+
+    <div class="photo-slot">
+      <div class="ps-ico">&#x1F4F7;</div>
+      <div class="ps-label">Prostor za fotografijo</div>
+      <p>Širokokotni posnetek temnih kumulonimbusov nad dolino — idealno z ostrim kontrastom med s soncem obsijanimi tlemi v ospredju in temnim nebom v ozadju.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card c-hot">
+        <div class="sc-label">Vrh vročine</div>
+        <div class="sc-val">33,6°C</div>
+        <div class="sc-sub">tik pred udarom nevihte</div>
+      </div>
+      <div class="stat-card c-rain">
+        <div class="sc-label">Padavine</div>
+        <div class="sc-val">16,5mm</div>
+        <div class="sc-sub">v urah tistega dne</div>
+      </div>
+      <div class="stat-card c-wind">
+        <div class="sc-label">Sunek vetra</div>
+        <div class="sc-val">48km/h</div>
+        <div class="sc-sub">najmočnejši izmerjeni</div>
+      </div>
+      <div class="stat-card c-cool">
+        <div class="sc-label">Ohladitev</div>
+        <div class="sc-val">-7,1°C</div>
+        <div class="sc-sub">naslednji dan (33,6→26,5 °C)</div>
+      </div>
+    </div>
+
+    <h2>1. Zatišje pred viharjem: kako naprava "čuti" nevihto</h2>
+
+    <p>Preden nevihta sploh udari, jo postaja že napove – ne s slutnjo, temveč s številkami. Dva dneva pred dogodkom se je dolina segrevala: 26. julija je temperatura dosegla 30,1 °C, 27. julija 31,7 °C, dan nevihte pa vrh 33,6 °C. Vzporedno je naraščalo <strong>rosišče</strong> – merilo, koliko vodne pare je dejansko v zraku – z 19,8 °C prek 21,3 °C do 22,5 °C. To ni bila zgolj vročina, temveč vročina z vse več "goriva" zanjo.</p>
+
+    <div class="chart-card">
+      <h3>Naraščanje rosišča v dneh pred nevihto (26.–29. julij 2024)</h3>
+      <canvas id="chartDewpoint"></canvas>
+    </div>
+
+    <p>Rosišče nad 20 °C v naših krajih velja za izrazito soparno in je klasičen predpogoj za močno konvekcijo: topel, vlažen zrak ob tleh je "gorivo", ki se ob pravem sprožilcu (segreto pobočje, prehajajoča fronta) silovito dvigne v višino in tam sprosti energijo v obliki nevihtnega oblaka. Dan nevihte je hkrati zabeležil tudi najširši dnevni razpon zračnega tlaka v tem oknu (razlika med dnevnim vrhom in dnom 6,0 hPa) – znak, da je čez dolino dejansko prešla motnja, ne le lokalna ploha.</p>
+
+    <div class="photo-slot">
+      <div class="ps-ico">&#x1F4F7;</div>
+      <div class="ps-label">Prostor za fotografijo</div>
+      <p>Makro posnetek narave, ki "čaka" na dež — na primer pajek skakač, skrit v zavetju lista, ali žuželka, ki miruje na vejici tik pred prvimi kapljami.</p>
+    </div>
+
+    <h2>2. Udarec: veter in nenaden temperaturni obrat</h2>
+
+    <p>Ko je nevihta dosegla postajo, je najmočnejši sunek vetra tistega dne dosegel <strong>48,0 km/h</strong> – v ostrem nasprotju z 14,8–16,6 km/h v dneh pred njo. Ta vrsta sunka je tipičen podpis <strong>downburst efekta</strong> (mikroizbruha): ko hladen zrak in dež znotraj nevihtnega oblaka postaneta težja od okoliškega zraka, dobesedno "padeta" proti tlom in se ob udarcu vanje razpihata v vse smeri. Prav ta vodoravni piš, ne vrtinčast veter kot pri tornadu, je tisti nenaden, močan sunek, ki ga v dolini začutimo tik pred prvimi debelimi kapljami dežja.</p>
+
+    <div class="chart-card">
+      <h3>Vrhunec vročine in sunek vetra po dnevih (27.–29. julij 2024)</h3>
+      <canvas id="chartWind"></canvas>
+    </div>
+
+    <div class="def-box">
+      <div class="def-title">Kako nastane downburst</div>
+      <p>Znotraj nevihtnega oblaka dež delno izhlapeva v suhem zraku pod oblakom, kar ta zrak ohladi in mu poveča gostoto. Ta hladnejši, težji zrak nato pospešeno pada proti tlom – ob stiku z njimi se razlije vodoravno in ustvari kratkotrajen, a silovit sunek vetra, ki lahko prehiti tudi glavni nalivni del nevihte.</p>
+    </div>
+
+    <p>Posledica tega dogajanja se pokaže tudi v naslednjih urah: temperatura je z vrha 33,6 °C tisti dan padla na le 26,5 °C naslednji dan – padec za <strong>7,1 °C</strong> v manj kot 24 urah, brez postopnega prehoda. Hladen zrak, ki ga nevihta "izpiha" iz oblaka proti tlom, dolino v nekaj urah temeljito prevetri.</p>
+
+    <h2>3. "Vesoljni potop": koliko dežja pade v poletni nevihti</h2>
+
+    <p>Najbolj oprijemljiv del zgodbe je količina vode. Ta konkreten dan je padlo <strong>16,5 mm</strong> dežja – v dolini, ki je bila v dneh pred tem povsem suha (26. in 27. julija ni padla niti kapljica). To je razlika, ki jo teden dni brez dežja naredi še bolj opazno: iz nič na skoraj celotedensko normo padavin v nekaj urah enega samega popoldneva ali večera.</p>
+
+    <div class="chart-card">
+      <h3>Dnevne padavine v tednu okoli nevihte (24.–30. julij 2024)</h3>
+      <canvas id="chartRain"></canvas>
+    </div>
+
+    <p style="font-size:.86rem;color:var(--muted);margin-top:-.6rem">Postaja beleži dnevne vsote padavin; za ta primer nimamo arhivirane minutne krivulje intenzitete dežja (mm/h), zato graf prikazuje uradno dnevno vsoto namesto trenutne hitrosti padavin.</p>
+
+    <div class="photo-slot">
+      <div class="ps-ico">&#x1F4F7;</div>
+      <div class="ps-label">Prostor za fotografijo</div>
+      <p>Makro posnetek debelih dežnih kapljic, ki se raztreščijo ob tla. Če je bila prisotna toča, dodaj makro fotografijo zrn toče z majhnim, prepoznavnim predmetom (npr. igračko avtomobilčkom) zraven za jasen občutek merila. <em>Opomba: za ta konkreten dan v arhivu ni zabeleženega podatka o toči, zato slednje ne navajamo kot dejstvo.</em></p>
+    </div>
+
+    <h2>4. Kako hitro si narava opomore</h2>
+
+    <div class="phase-list">
+      <div class="phase p-build">
+        <div class="phase-head">
+          <span class="phase-when">26.–28. julij</span>
+          <span class="phase-title">Gradnja: sopara narašča</span>
+        </div>
+        <p>Temperatura in rosišče vzporedno rasteta (30,1 → 31,7 → 33,6 °C; 19,8 → 21,3 → 22,5 °C) — dolina kopiči energijo za nevihto.</p>
+      </div>
+      <div class="phase p-hit">
+        <div class="phase-head">
+          <span class="phase-when">28. julij, popoldne/večer</span>
+          <span class="phase-title">Udarec: veter, dež, padec tlaka</span>
+        </div>
+        <p>Sunek vetra 48,0 km/h, 16,5 mm dežja in najširši dnevni razpon zračnega tlaka (6,0 hPa) tistega tedna.</p>
+      </div>
+      <div class="phase p-calm">
+        <div class="phase-head">
+          <span class="phase-when">29. julij</span>
+          <span class="phase-title">Umiritev: čist in svež zrak</span>
+        </div>
+        <p>Najvišja dnevna temperatura pade na 26,5 °C, povprečna vlažnost se zniža, sončno obsevanje pa naslednji dan doseže 940 W/m² — višje kot na sam dan nevihte (787 W/m²), kar kaže na bistveno čistejši, manj sopar zrak.</p>
+      </div>
+    </div>
+
+    <p>To je bistvo poletne nevihte v naši dolini: narava v urah sprosti energijo, ki se je kopičila dneve, nato pa se ozračje presenetljivo hitro prečisti. Že naslednje jutro je zrak svež, nebo bolj bistro, sončno obsevanje pa doseže višje vrednosti kot v soparnih dneh pred nevihto.</p>
+
+    <div class="callout">
+      <p>Poletna nevihta ni naključen dogodek, temveč <strong>merljiv proces</strong> — od naraščajočega rosišča, prek sunka vetra in naliva, do naglega osvežitvenega obrata. Naslednjič, ko bo nad Kamniško-Savinjskimi Alpami zrasel prvi temen oblak, <span class="hl">spremljaj podatke v živo</span> na nadzorni plošči postaje IREICA1 in poglej, kako se zgodba razpleta v realnem času.</p>
+    </div>
+
+    <p style="text-align:center;margin:1.6rem 0">
+      <a href="/" style="display:inline-block;background:linear-gradient(135deg,#4d9ff8,#22d3ee);color:#04070e;font-weight:700;text-decoration:none;padding:.75rem 1.6rem;border-radius:10px;font-family:'Space Grotesk',sans-serif">Spremljaj vreme v živo →</a>
+    </p>
+
+    <!-- ── Share bar ─────────────────────────────────────────────── -->
+    <div class="share-bar" id="share-bar">
+      <span class="share-label">Deli</span>
+
+      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+        WhatsApp
+      </a>
+
+      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </a>
+
+      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+        Facebook
+      </a>
+
+      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="copy-label">Kopiraj</span>
+      </button>
+
+      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Deli
+      </button>
+    </div>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: meritve vremenske postaje IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.), arhiv 24.–30. julija 2024. Meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Poglej tudi: <a href="/nevihte/" style="color:var(--blue)">nevihtno napoved</a> in <a href="/vreme/" style="color:var(--blue)">vremenski arhiv</a> postaje.</p>
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 800, easing: 'easeOutQuart' },
+  plugins: {
+    legend: {
+      display: true, position: 'top',
+      labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 }
+    },
+    tooltip: {
+      backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+      titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10
+    }
+  }
+};
+
+/* Graf 1 — Rosišče in razpon tlaka pred nevihto */
+new Chart(document.getElementById('chartDewpoint'), {
+  data: {
+    labels: ['26. 7.', '27. 7.', '28. 7.\n(nevihta)', '29. 7.'],
+    datasets: [
+      {
+        type: 'line',
+        label: 'Najvišje rosišče (°C)',
+        data: [19.8, 21.3, 22.5, 18.1],
+        borderColor: '#22d3ee',
+        backgroundColor: 'rgba(34,211,238,.15)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#22d3ee',
+        tension: .25,
+        fill: true,
+        yAxisID: 'y',
+      },
+      {
+        type: 'bar',
+        label: 'Dnevni razpon tlaka (hPa)',
+        data: [2.3, 1.5, 6.0, 3.9],
+        backgroundColor: 'rgba(167,139,250,.55)',
+        borderColor: '#a78bfa',
+        borderWidth: 1.5,
+        borderRadius: 6,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: {
+          label: ctx => ctx.dataset.yAxisID === 'y'
+            ? ` Rosišče: ${ctx.parsed.y.toFixed(1)} °C`
+            : ` Razpon tlaka: ${ctx.parsed.y.toFixed(1)} hPa`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: {
+        position: 'left', min: 15, max: 25,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#22d3ee', font: { size: 10 }, callback: v => v + '°C' }
+      },
+      y1: {
+        position: 'right', min: 0, max: 8,
+        grid: { display: false },
+        ticks: { color: '#a78bfa', font: { size: 10 }, callback: v => v + ' hPa' }
+      }
+    }
+  }
+});
+
+/* Graf 2 — Temperatura in sunek vetra */
+new Chart(document.getElementById('chartWind'), {
+  data: {
+    labels: ['27. 7.', '28. 7.\n(nevihta)', '29. 7.'],
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Najmočnejši sunek vetra (km/h)',
+        data: [16.6, 48.0, 14.8],
+        backgroundColor: ['rgba(96,165,250,.6)', 'rgba(239,68,68,.85)', 'rgba(96,165,250,.6)'],
+        borderColor: ['#60a5fa', '#ef4444', '#60a5fa'],
+        borderWidth: 1.5,
+        borderRadius: 6,
+        yAxisID: 'y1',
+        order: 2,
+      },
+      {
+        type: 'line',
+        label: 'Najvišja dnevna temperatura (°C)',
+        data: [31.7, 33.6, 26.5],
+        borderColor: '#f97316',
+        backgroundColor: 'rgba(249,115,22,.15)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#f97316',
+        tension: .25,
+        fill: false,
+        yAxisID: 'y',
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: {
+          label: ctx => ctx.dataset.yAxisID === 'y'
+            ? ` Temp.: ${ctx.parsed.y.toFixed(1)} °C`
+            : ` Sunek: ${ctx.parsed.y.toFixed(1)} km/h`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: {
+        position: 'left', min: 20, max: 38,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + '°C' }
+      },
+      y1: {
+        position: 'right', min: 0, max: 55,
+        grid: { display: false },
+        ticks: { color: '#ef4444', font: { size: 10 }, callback: v => v + ' km/h' }
+      }
+    }
+  }
+});
+
+/* Graf 3 — Dnevne padavine */
+new Chart(document.getElementById('chartRain'), {
+  type: 'bar',
+  data: {
+    labels: ['24. 7.', '25. 7.', '26. 7.', '27. 7.', '28. 7.\n(nevihta)', '29. 7.', '30. 7.'],
+    datasets: [{
+      label: 'Dnevne padavine (mm)',
+      data: [4.1, 0.3, 0.0, 0.0, 16.5, 0.0, 0.0],
+      backgroundColor: ['rgba(96,165,250,.35)','rgba(96,165,250,.35)','rgba(96,165,250,.35)','rgba(96,165,250,.35)','rgba(59,130,246,.9)','rgba(96,165,250,.35)','rgba(96,165,250,.35)'],
+      borderColor: ['#60a5fa','#60a5fa','#60a5fa','#60a5fa','#3b82f6','#60a5fa','#60a5fa'],
+      borderWidth: 1.5,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    ...CHART_DEFAULTS,
+    plugins: {
+      ...CHART_DEFAULTS.plugins,
+      legend: { display: false },
+      tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(1)} mm` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: {
+        min: 0, max: 20,
+        grid: { color: 'rgba(255,255,255,.05)' },
+        ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' }
+      }
+    }
+  }
+});
+</script>
+<script>
+(function () {
+  const PAGE_URL   = 'https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html';
+  const PAGE_TITLE = 'Anatomija poletne nevihte: od sopare do "vesoljnega potopa" v Rečici ob Savinji | Meteorec';
+  const PAGE_TEXT  = 'Kako naprava zazna poletno nevihto, preden ta udari? Naraščajoče rosišče, sunek vetra 48 km/h in 16,5 mm dežja — resničen dogodek postaje IREICA1. ⛈️';
+
+  const enc = encodeURIComponent;
+
+  document.getElementById('btn-wa').href =
+    'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
+
+  document.getElementById('btn-x').href =
+    'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
+
+  document.getElementById('btn-fb').href =
+    'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var label = document.getElementById('copy-label');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(PAGE_URL).then(function () {
+        label.textContent = 'Kopirano!';
+        setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = PAGE_URL;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      label.textContent = 'Kopirano!';
+      setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+    }
+  });
+
+  if (navigator.share) {
+    var nativeBtn = document.getElementById('btn-native');
+    nativeBtn.style.display = 'inline-flex';
+    nativeBtn.addEventListener('click', function () {
+      navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {});
+    });
+  }
+})();
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
