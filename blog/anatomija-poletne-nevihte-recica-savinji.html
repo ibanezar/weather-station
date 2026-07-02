@@ -87,6 +87,16 @@
 }
 .photo-slot p { margin: 0; color: #cfdbef; font-size: .89rem; line-height: 1.6; }
 
+/* ── Post photo (dejanska fotografija) ──────────────────────────── */
+.post-photo { margin: 1.4rem 0 1.9rem; }
+.post-photo img {
+  width: 100%; height: auto; display: block; border-radius: 16px;
+  border: 1px solid var(--card-border); box-shadow: var(--card-shadow);
+}
+.post-photo figcaption {
+  margin-top: .55rem; font-size: .82rem; color: var(--muted); line-height: 1.5;
+}
+
 /* ── Phase timeline (anatomija dogodka) ─────────────────────────── */
 .phase-list { margin: 1.2rem 0 1.8rem; display: flex; flex-direction: column; gap: .8rem; }
 .phase {
@@ -152,11 +162,10 @@
 
     <p class="lead">Vsi poznamo ta občutek. Zrak popolnoma obmiruje, temperatura preseže 30 °C, vlaga pa je tako visoka, da bi jo skoraj lahko tipali. Nato pa se izza hribov zasliši prvo zamolklo grmenje. Poletne nevihte v naši dolini niso zgolj dež – so hiter in silovit trk zračnih mas. Namesto splošnega teoretiziranja smo v arhivu postaje IREICA1 poiskali <span class="hl">resničen primer</span> takšnega preobrata. Vzeli smo pod drobnogled nevihto, ki je 28. julija 2024 prekinila teden neizprosne vročine v dolini, in preverili, kaj so ob tem surovem dogodku dejansko zabeležili senzorji.</p>
 
-    <div class="photo-slot">
-      <div class="ps-ico">&#x1F4F7;</div>
-      <div class="ps-label">Prostor za fotografijo</div>
-      <p>Širokokotni posnetek temnih kumulonimbusov nad dolino — idealno z ostrim kontrastom med s soncem obsijanimi tlemi v ospredju in temnim nebom v ozadju.</p>
-    </div>
+    <figure class="post-photo">
+      <img src="/img/blog/anatomija-poletne-nevihte/nevihtni-oblaki.jpg" alt="Temni nevihtni oblaki nad Zgornjo Savinjsko dolino tik pred nevihto" width="1600" height="1200" loading="lazy">
+      <figcaption>Nevihtni oblaki se zgrinjajo nad dolino tik pred udarom fronte.</figcaption>
+    </figure>
 
     <p style="font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:1.8rem 0 .8rem">&#x1F4CA; Statistični pregled nevihte</p>
     <div class="stat-grid">
@@ -193,11 +202,10 @@
 
     <p>Rosišče nad 20 °C v naših krajih velja za izrazito soparno in je klasičen predpogoj za močno konvekcijo. Topel in vlažen zrak ob tleh predstavlja gorivo, ki se ob pravem sprožilcu (močno pregreto pobočje ali prehajajoča fronta) silovito dvigne v višino, kjer svojo energijo sprosti v obliki nevihtnega oblaka. Na dan nevihte smo hkrati zabeležili tudi največji dnevni razpon zračnega tlaka v tistem tednu (razlika med dnevnim vrhom in dnom je znašala 6,0 hPa). To je bil jasen znak, da je dolino prešla izrazita vremenska motnja in ne le lokalna ploha.</p>
 
-    <div class="photo-slot">
-      <div class="ps-ico">&#x1F4F7;</div>
-      <div class="ps-label">Prostor za fotografijo</div>
-      <p>Makro posnetek narave v pričakovanju dežja – na primer detajlna fotografija pajka skakača, ki je zatočišče poiskal v zavetju lista, ali pa žuželke, ki nepremično čaka na vejici tik pred prvimi kapljami.</p>
-    </div>
+    <figure class="post-photo">
+      <img src="/img/blog/anatomija-poletne-nevihte/pajek-v-mrezi.jpg" alt="Pajek v mreži z ujetim plenom, fotografirano na večer nevihte 28. julija 2024" width="1600" height="1068" loading="lazy">
+      <figcaption>Pajek v svoji mreži — posnetek z istega večera, 28. julija 2024, tik pred udarom nevihte.</figcaption>
+    </figure>
 
     <h2>2. Udarec: Veter in nenaden temperaturni obrat</h2>
 
