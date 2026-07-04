@@ -155,6 +155,14 @@ ARTICLES = [
         'photo': 'misty-valley',
     },
     {
+        'slug': 'najbolj-suha-pomlad-2026-ireica1',
+        'title': 'Najbolj suha\npomlad doslej',
+        'subtitle': 'Pomlad 2026: 179 mm, −46 % · IREICA1',
+        'section': 'Analize',
+        'accent': (245, 158, 11),
+        'photo': 'drought',
+    },
+    {
         'slug': 'polletni-pregled-2026-ireica1',
         'title': 'Prvo polletje 2026\nna postaji IREICA1',
         'subtitle': 'Pol leta v dveh obrazih · IREICA1',
