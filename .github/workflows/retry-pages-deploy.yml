@@ -1,0 +1,34 @@
+name: Auto-retry failed Pages deploy
+
+# GitHub Pages občasno spodleti z izmuzljivo napako "Deployment failed, try
+# again later." (build uspe, deploy korak pade). Ta workflow posluša zaključek
+# objave "pages build and deployment" in ob neuspehu samodejno znova požene
+# spodletele posle, tako da ni potrebno ročno posredovanje.
+
+on:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  rerun:
+    # Znova poženi le, če je objava na main spodletela in še nismo poskusili
+    # prevečkrat (varovalka proti neskončni zanki pri trajni napaki).
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.run_attempt < 3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-run failed Pages deployment jobs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          echo "Pages deploy (run $RUN_ID, poskus $ATTEMPT) je spodletel — ponovno poganjam spodletele posle."
+          gh api --method POST -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/actions/runs/${RUN_ID}/rerun-failed-jobs"
