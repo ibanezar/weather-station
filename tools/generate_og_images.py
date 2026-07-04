@@ -139,6 +139,22 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'anatomija-poletne-nevihte-recica-savinji',
+        'title': 'Anatomija\npoletne nevihte',
+        'subtitle': 'Downburst, rosišče, 16,5 mm dežja · IREICA1',
+        'section': 'Analize',
+        'accent': (59, 130, 246),
+        'photo': 'storm-clouds',
+    },
+    {
+        'slug': 'najhladnejsa-julijska-jutra-recica',
+        'title': 'Najhladnejša\njulijska jutra',
+        'subtitle': 'Rekord 7,5 °C (14. jul. 2020) · IREICA1',
+        'section': 'Analize',
+        'accent': (34, 211, 238),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'blog',
         'title': 'Blog Meteorec',
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
