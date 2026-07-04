@@ -61,6 +61,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/polletni-pregled-2026-ireica1.html</loc>
+    <lastmod>2026-07-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/najhladnejsa-julijska-jutra-recica.html</loc>
     <lastmod>2026-07-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -122,7 +128,7 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-maj-2026.html</loc>
-    <lastmod>2026-06-19</lastmod>
+    <lastmod>2026-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
