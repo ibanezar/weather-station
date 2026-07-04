@@ -15,7 +15,7 @@
 <link rel="canonical" href="https://meteorec.si/blog/polletni-pregled-2026-ireica1.html">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/polletni-pregled-2026-ireica1.html">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/polletni-pregled-2026-ireica1.html">
-<meta name="description" content="Prvo polletje 2026 v Rečici ob Savinji: povprečno 9,5 °C (0,4 °C nad dolgoletnim povprečjem) in 504,7 mm padavin. Suha pomlad, moker in rekordno vroč junij – pregled postaje IREICA1.">
+<meta name="description" content="Prvo polletje 2026 v Rečici ob Savinji: povprečno 9,5 °C (0,4 °C nad dolgoletnim povprečjem) in 504,7 mm padavin. Suha pomlad, moker in rekordno vroč junij – pregled postaje IREICA1 z grafi.">
 <meta name="keywords" content="polletje 2026, prvo polletje 2026, vreme 2026, Rečica ob Savinji, IREICA1, Savinjska dolina, padavine, temperatura, suša, vročinski val">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Filip Eremita">
@@ -40,9 +40,9 @@
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Prvo polletje 2026 na postaji IREICA1: pol leta v dveh obrazih",
-  "description": "Prvo polletje 2026 v Rečici ob Savinji: povprečno 9,5 °C (0,4 °C nad dolgoletnim povprečjem) in 504,7 mm padavin. Suha pomlad, moker in rekordno vroč junij – pregled postaje IREICA1.",
+  "description": "Prvo polletje 2026 v Rečici ob Savinji: povprečno 9,5 °C (0,4 °C nad dolgoletnim povprečjem) in 504,7 mm padavin. Suha pomlad, moker in rekordno vroč junij – pregled postaje IREICA1 z grafi.",
   "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/polletni-pregled-2026-ireica1.jpg", "width": 1200, "height": 630 },
-  "wordCount": 760,
+  "wordCount": 820,
   "datePublished": "2026-07-04",
   "dateModified": "2026-07-04",
   "inLanguage": "sl",
@@ -65,6 +65,28 @@
 </script>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="blog.css">
+<style>
+.mini-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem; margin: 1.4rem 0 2rem; }
+.mini-stat { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: .9rem .8rem; text-align: center; }
+.ms-label { font-size: .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-family: 'JetBrains Mono', monospace; }
+.ms-val { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.55rem; line-height: 1.1; margin: .18rem 0 .1rem; }
+.ms-sub { font-size: .72rem; color: var(--muted); }
+.ms-warm { color: #f97316; } .ms-cool { color: #4d9ff8; } .ms-cyan { color: var(--cyan); }
+@media (max-width: 520px) { .mini-stat-grid { grid-template-columns: 1fr 1fr; } }
+
+.half-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 1.2rem 0 1.8rem; }
+.half-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.1rem 1.2rem; position: relative; overflow: hidden; }
+.half-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.half-cold::before { background: #4d9ff8; } .half-warm::before { background: #f97316; }
+.half-card .hc-label { font-size: .82rem; font-weight: 700; letter-spacing: .01em; margin-bottom: .7rem; }
+.half-cold .hc-label { color: #4d9ff8; } .half-warm .hc-label { color: #f97316; }
+.half-card .hc-stat { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .28rem; }
+.half-card .hc-key { font-size: .82rem; color: #adc0d8; }
+.half-card .hc-val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02rem; color: var(--text); }
+@media (max-width: 500px) { .half-grid { grid-template-columns: 1fr; } }
+
+.chart-note { color: var(--muted); font-size: .85rem; margin: -.6rem 0 1.6rem; }
+</style>
 </head>
 <body>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
@@ -82,12 +104,46 @@
   <article>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>Prvo polletje 2026 na postaji IREICA1: pol leta v dveh obrazih</h1>
-    <p class="post-meta">4. julija 2026 · Filip Eremita · postaja IREICA1 · ~5 min branja</p>
+    <p class="post-meta">4. julija 2026 · Filip Eremita · postaja IREICA1 · ~7 min branja</p>
     <p class="lead">Prvih šest mesecev leta 2026 je bilo v <strong>Rečici ob Savinji</strong> <span class="hl">za odtenek toplejših</span> od dolgoletnega povprečja in <span class="hl">opazno bolj suhih</span> – vsaj do junija. Postaja IREICA1 (366 m n. v.) je od 1. januarja do 30. junija izmerila povprečno dnevno temperaturo <strong>9,5 °C</strong> (0,4 °C nad dolgoletnim povprečjem) in <strong>504,7 mm</strong> padavin, kar je približno <strong>75 mm pod pričakovanim</strong>. Polletje se je začelo z ostrim januarjem (−16,5 °C), sredino je zaznamovala izrazita pomladanska suša, konec pa vročinski rekord <strong>36,1 °C</strong> (28. junija).</p>
+
+    <div class="mini-stat-grid">
+      <div class="mini-stat"><div class="ms-label">Povpr. temp.</div><div class="ms-val">9,5 °C</div><div class="ms-sub">+0,4 °C nad povpr.</div></div>
+      <div class="mini-stat"><div class="ms-label">Padavine</div><div class="ms-val ms-cyan">504,7 mm</div><div class="ms-sub">≈ 75 mm pod povpr.</div></div>
+      <div class="mini-stat"><div class="ms-label">Vrhunec</div><div class="ms-val ms-warm">36,1 °C</div><div class="ms-sub">28. junija</div></div>
+      <div class="mini-stat"><div class="ms-label">Dno</div><div class="ms-val ms-cool">−16,5 °C</div><div class="ms-sub">8. januarja</div></div>
+    </div>
 
     <h2>Polletje na kratko</h2>
     <p>Če bi morali prvo polovico leta 2026 opisati z eno besedo, bi bila to <em>dvojnost</em>. Zima in zgodnja pomlad sta bili suhi in ponekod mrzli, pozna pomlad in začetek poletja pa nenadoma mokra, nevihtna in vroča. Povprečna temperatura polletja se je z <strong>9,5 °C</strong> uvrstila v zgornjo polovico obdobja meritev – bila je toplejša od let 2020–2023, a hladnejša od rekordnih 2024 (10,1 °C) in 2025 (10,0 °C).</p>
     <p>Padavinska bilanca je bila drugačna zgodba. S <strong>504,7 mm</strong> je bilo polletje med bolj suhimi v nizu meritev; dolgoletno povprečje za prvo polovico leta je okoli <strong>580 mm</strong>. Skoraj ves primanjkljaj se je nabral med marcem in majem, ko so se padavine tako rekoč ustavile, medtem ko sta februar in junij dolinsko bilanco reševala z izdatnimi nalivi.</p>
+
+    <h2>Pol leta v enem grafu</h2>
+    <p>Spodnji graf prikazuje <strong>dnevni temperaturni razpon</strong> – od jutranjega minimuma do dnevnega maksimuma za vsakega od 181 dni. Lepo je viden vzpon iz globokega januarskega mraza proti junijski vročini, pa tudi posamezni hladni vdori, ki so vmes prekinili otoplitev.</p>
+    <div class="chart-card">
+      <h3>Dnevni razpon temperature (°C) · 1. januar – 30. junij 2026</h3>
+      <canvas id="chartSweep"></canvas>
+    </div>
+    <p class="chart-note">Zgornja (oranžna) krivulja je najvišja dnevna temperatura, spodnja (modra) najnižja; osenčeni pas med njima je dnevni razpon.</p>
+
+    <h2>Dve obdobji, dva obraza</h2>
+    <p>Če polletje prelomimo na pol, dobimo skoraj dve nasprotni podnebni zgodbi. Prve štiri mesece so zaznamovali mraz in suha tla, zadnja dva pa vlaga in vročina:</p>
+    <div class="half-grid">
+      <div class="half-card half-cold">
+        <div class="hc-label">❄ Januar–april · mrzla, suha polovica</div>
+        <div class="hc-stat"><span class="hc-key">Povp. temperatura</span><span class="hc-val">5,4 °C</span></div>
+        <div class="hc-stat"><span class="hc-key">Padavine (4 mesece)</span><span class="hc-val">214,9 mm</span></div>
+        <div class="hc-stat"><span class="hc-key">Najnižja temperatura</span><span class="hc-val">−16,5 °C</span></div>
+        <div class="hc-stat"><span class="hc-key">Najbolj suh mesec</span><span class="hc-val">marec, 19,9 mm</span></div>
+      </div>
+      <div class="half-card half-warm">
+        <div class="hc-label">☀ Maj–junij · topla, mokra polovica</div>
+        <div class="hc-stat"><span class="hc-key">Povp. temperatura</span><span class="hc-val">17,6 °C</span></div>
+        <div class="hc-stat"><span class="hc-key">Padavine (2 meseca)</span><span class="hc-val">289,8 mm</span></div>
+        <div class="hc-stat"><span class="hc-key">Najvišja temperatura</span><span class="hc-val">36,1 °C</span></div>
+        <div class="hc-stat"><span class="hc-key">Najbolj moker mesec</span><span class="hc-val">junij, 164,8 mm</span></div>
+      </div>
+    </div>
 
     <h2>Ključne številke polletja</h2>
     <table class="stats">
@@ -104,6 +160,16 @@
     <p style="color:var(--muted);font-size:.9rem">Povprečna temperatura je povprečje dnevnih vrednosti, najvišja in najnižja pa sta dejanski izmerjeni skrajnosti polletja. Termični razpon med obema je znašal kar 52,6 °C.</p>
 
     <h2>Mesec za mesecem</h2>
+    <p>Mesečna slika najbolje pokaže, kje je polletje odstopalo. Po temperaturi je bilo vseh šest mesecev blizu ali rahlo nad dolgoletnim povprečjem – januar je bil edina izrazita izjema navzdol:</p>
+    <div class="chart-card">
+      <h3>Povprečna mesečna temperatura (°C) · 2026 proti dolgoletnemu povprečju</h3>
+      <canvas id="chartTemp"></canvas>
+    </div>
+    <p>Pri padavinah je zgodba dramatičnejša. Marec in april sta padla globoko pod povprečje (pomladanska suša), februar in junij pa sta ga izrazito presegla:</p>
+    <div class="chart-card">
+      <h3>Mesečne padavine (mm) · 2026 proti dolgoletnemu povprečju</h3>
+      <canvas id="chartPrecip"></canvas>
+    </div>
     <table class="stats">
       <tr><th>Mesec</th><th>Povpr. temp.</th><th>Odstopanje</th><th>Padavine</th><th>Poudarek</th></tr>
       <tr><td>Januar</td><td>−0,3 °C</td><td>−1,5 °C</td><td>63,0 mm</td><td>Najhladnejši mesec; −16,5 °C (8. 1.)</td></tr>
@@ -138,7 +204,7 @@
       <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Deli</button>
     </div>
 
-    <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. v.). Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. v.). Dolgoletna povprečja so izračunana iz obdobja 2020–2025. Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
     <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Poglej tudi mesečne povzetke: <a href="/blog/vremenski-povzetek-april-2026.html" style="color:var(--blue)">april</a>, <a href="/blog/vremenski-povzetek-maj-2026.html" style="color:var(--blue)">maj</a> in <a href="/blog/vremenski-povzetek-junij-2026.html" style="color:var(--blue)">junij 2026</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
@@ -147,6 +213,94 @@
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
   </footer>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+const MONTHS = ['Januar','Februar','Marec','April','Maj','Junij'];
+const T_2026 = [-0.3, 4.4, 6.9, 10.8, 15.0, 20.3];
+const T_LT   = [1.2, 3.7, 6.1, 9.7, 14.0, 20.0];
+const P_2026 = [63.0, 97.8, 19.9, 34.2, 125.0, 164.8];
+const P_LT   = [83, 56, 88, 81, 161, 110];
+
+const HIGH = [5.6,6.4,1.2,3.4,-1.1,-2.5,-3.1,2.5,0.7,2.1,3.5,3.4,8.5,11.1,11.7,6.7,2.0,4.3,1.6,0.0,-3.9,2.3,2.7,7.2,2.6,6.6,10.1,8.1,6.2,6.1,5.1,3.4,3.0,4.3,4.0,3.4,9.3,10.6,10.7,6.0,10.7,11.1,11.5,15.6,9.8,9.2,6.8,11.1,11.0,3.3,2.1,8.0,10.1,15.2,12.7,17.6,15.9,17.9,18.5,16.1,16.0,16.5,17.8,17.9,18.5,19.7,18.4,15.7,15.9,16.0,18.1,16.6,14.1,17.5,15.5,9.7,11.7,12.5,14.3,12.4,11.8,12.8,17.0,16.9,7.9,9.1,14.0,13.6,12.2,10.2,12.2,12.2,18.9,19.7,24.6,24.9,24.0,17.2,16.3,15.1,17.0,19.8,16.4,13.6,17.7,21.1,22.0,22.8,23.1,12.6,15.0,14.9,20.8,25.1,26.2,25.8,21.8,21.0,11.1,15.1,18.2,23.7,25.0,24.1,18.4,15.6,20.7,21.9,23.8,22.3,17.1,9.6,16.6,14.4,10.7,14.9,17.8,17.9,16.9,21.3,22.4,24.3,25.5,28.0,29.8,30.8,29.5,24.2,25.8,28.0,26.3,22.8,25.6,19.8,24.4,17.9,22.4,28.0,28.6,28.3,19.5,19.3,23.9,27.6,28.5,20.8,27.5,29.4,30.3,32.0,32.9,33.8,32.2,30.6,31.2,32.4,33.4,34.6,36.1,35.7,22.0];
+const LOW = [-8.1,1.3,-1.3,-5.6,-5.4,-4.7,-11.9,-16.5,-10.3,-1.1,-12.3,-14.2,-3.1,-1.1,-2.6,-2.2,-0.3,-2.8,-3.5,-6.6,-6.6,-7.9,-6.6,-0.1,0.6,-0.5,-0.7,4.4,3.1,2.8,2.3,0.7,-0.1,0.5,2.3,2.2,1.7,3.7,2.1,4.3,4.1,3.4,2.3,0.7,1.3,-1.2,-3.6,-3.5,-5.3,-0.2,0.0,0.3,-0.7,1.3,1.9,0.9,-0.8,-0.9,-0.8,-0.8,2.1,0.8,-1.4,-1.5,-1.8,-1.6,-1.9,-1.2,-0.5,1.3,2.3,1.9,1.0,2.4,0.5,1.8,2.8,-0.4,-2.5,0.2,-0.6,-0.6,0.3,-1.6,3.4,1.3,3.5,3.6,-0.6,-2.1,5.8,7.1,1.1,-0.9,0.7,4.2,3.7,1.8,-1.6,-0.8,3.4,3.1,7.0,8.1,6.3,5.8,5.9,3.6,3.3,6.9,4.6,-0.6,-1.7,-0.3,1.5,4.3,3.3,3.9,4.5,-0.5,-1.0,2.7,5.0,6.3,13.5,14.0,10.1,5.4,7.8,9.7,11.1,3.8,2.4,2.8,7.1,6.7,4.6,5.9,6.6,6.2,10.6,7.2,10.2,10.2,14.4,14.0,15.5,14.2,10.6,9.9,12.9,12.9,9.6,10.8,8.3,12.5,12.2,10.7,13.8,13.4,14.3,9.0,6.7,9.2,11.1,13.1,11.3,13.9,16.4,15.5,16.9,16.1,18.1,17.1,17.4,16.8,14.9,15.0,16.1,17.8,18.5];
+
+const MON_ABBR = ['jan.','feb.','mar.','apr.','maj','jun.'];
+const SWEEP_LABELS = [];
+for (let i = 0; i < HIGH.length; i++) {
+  const d = new Date(2026, 0, 1 + i);
+  SWEEP_LABELS.push(d.getDate() === 1 ? MON_ABBR[d.getMonth()] : '');
+}
+
+const BASE = {
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  animation: { duration: 800, easing: 'easeOutQuart' },
+  plugins: {
+    legend: { display: true, position: 'top', labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 } },
+    tooltip: { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10 }
+  }
+};
+
+/* Chart — daily temperature range sweep */
+new Chart(document.getElementById('chartSweep'), {
+  type: 'line',
+  data: {
+    labels: SWEEP_LABELS,
+    datasets: [
+      { label: 'Najvišja (°C)', data: HIGH, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,.14)', borderWidth: 1.5, pointRadius: 0, tension: 0.25, fill: '+1' },
+      { label: 'Najnižja (°C)', data: LOW, borderColor: '#4d9ff8', backgroundColor: 'rgba(77,159,248,.05)', borderWidth: 1.5, pointRadius: 0, tension: 0.25, fill: false }
+    ]
+  },
+  options: {
+    ...BASE,
+    plugins: { ...BASE.plugins, tooltip: { ...BASE.plugins.tooltip, callbacks: { title: items => 'Dan ' + (items[0].dataIndex + 1), label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} °C` } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, autoSkip: false, maxRotation: 0 } },
+      y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + '°' } }
+    }
+  }
+});
+
+/* Chart — monthly mean temperature vs long-term */
+new Chart(document.getElementById('chartTemp'), {
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { type: 'bar', label: 'Temperatura 2026', data: T_2026, order: 2, backgroundColor: T_2026.map(v => v < 0 ? 'rgba(77,159,248,.7)' : v >= 18 ? 'rgba(249,115,22,.8)' : 'rgba(34,211,238,.55)'), borderRadius: 4 },
+      { type: 'line', label: 'Dolgoletno povprečje', data: T_LT, order: 1, borderColor: '#adc0d8', borderDash: [5,4], backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#adc0d8', tension: 0.2 }
+    ]
+  },
+  options: {
+    ...BASE,
+    plugins: { ...BASE.plugins, tooltip: { ...BASE.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} °C` } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + '°' } }
+    }
+  }
+});
+
+/* Chart — monthly precipitation vs long-term */
+new Chart(document.getElementById('chartPrecip'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Padavine 2026', data: P_2026, backgroundColor: 'rgba(77,159,248,.8)', borderRadius: 4 },
+      { label: 'Dolgoletno povprečje', data: P_LT, backgroundColor: 'rgba(173,192,216,.28)', borderRadius: 4 }
+    ]
+  },
+  options: {
+    ...BASE,
+    plugins: { ...BASE.plugins, tooltip: { ...BASE.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} mm` } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } }
+    }
+  }
+});
+</script>
 <script>
 (function () {
   const PAGE_URL   = "https://meteorec.si/blog/polletni-pregled-2026-ireica1.html";
