@@ -146,3 +146,16 @@ article strong{color:#fff}
   color:#00bfae;font-size:.78rem;cursor:pointer;transition:background .2s,border-color .2s;white-space:nowrap}
 .donate-copy-btn:hover{background:rgba(0,191,174,.28);border-color:rgba(0,191,174,.6)}
 .donate-hint{font-size:.82rem;color:var(--muted);margin:0}
+
+/* ── Share bar (deljeno za vse blog objave) ── */
+.share-bar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 2rem 0 1.4rem; padding: 1rem 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+.share-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-right: .3rem; flex-shrink: 0; }
+.share-btn { display: inline-flex; align-items: center; gap: .38rem; padding: .42rem .85rem; border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: opacity .15s, transform .1s; line-height: 1; }
+.share-btn:hover { opacity: .85; transform: translateY(-1px); }
+.share-btn:active { transform: translateY(0); }
+.share-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.share-btn.wa  { background: #25d366; color: #fff; }
+.share-btn.x   { background: #000;    color: #fff; }
+.share-btn.fb  { background: #1877f2; color: #fff; }
+.share-btn.copy { background: rgba(77,159,248,.15); color: var(--blue); border: 1px solid rgba(77,159,248,.3); }
+.share-btn.native { background: rgba(255,255,255,.08); color: #e8edf8; border: 1px solid rgba(255,255,255,.12); }
