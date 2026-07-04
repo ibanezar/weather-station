@@ -97,6 +97,15 @@
       <tr><th>Povprečna vlažnost</th><td>78 %</td></tr>
     </table>
     <p style="color:var(--muted);font-size:.9rem">Povprečna temperatura je povprečje dnevnih vrednosti; najvišja in najnižja sta dejanski izmerjeni skrajnosti v mesecu.</p>
+    <div class="share-bar" id="share-bar">
+      <span class="share-label">Deli</span>
+      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg> WhatsApp</a>
+      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X</a>
+      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg> Facebook</a>
+      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> <span id="copy-label">Kopiraj</span></button>
+      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Deli</button>
+    </div>
+
     <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.). Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
     <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Poglej tudi: <a href="/vodostaj-savinje/" style="color:var(--blue)">vodostaj Savinje</a> za tekoče stanje pretoka po tem deževnem mesecu.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
@@ -106,5 +115,30 @@
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
   </footer>
 </div>
+<script>
+(function () {
+  const PAGE_URL   = "https://meteorec.si/blog/vremenski-povzetek-maj-2026.html";
+  const PAGE_TITLE = "Vremenski povzetek \u2014 maj 2026 | Meteorec, Re\u010dica ob Savinji";
+  const PAGE_TEXT  = "Povpre\u010dno 13,0 \u00b0C (0,8 \u00b0C pod dolgoletnim povpre\u010djem) in 121,7 mm padavin.";
+  const enc = encodeURIComponent;
+  document.getElementById('btn-wa').href = 'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
+  document.getElementById('btn-x').href = 'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
+  document.getElementById('btn-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var label = document.getElementById('copy-label');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(PAGE_URL).then(function () { label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000); });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = PAGE_URL; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+    }
+  });
+  if (navigator.share) {
+    var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
+    nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
+  }
+})();
+</script>
 </body>
 </html>
