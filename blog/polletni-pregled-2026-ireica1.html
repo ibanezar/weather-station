@@ -86,6 +86,11 @@
 @media (max-width: 500px) { .half-grid { grid-template-columns: 1fr; } }
 
 .chart-note { color: var(--muted); font-size: .85rem; margin: -.6rem 0 1.6rem; }
+
+.month-stats { table-layout: fixed; }
+.month-stats th, .month-stats td { white-space: nowrap; text-align: right; }
+.month-stats th:first-child, .month-stats td:first-child { text-align: left; }
+@media (max-width: 520px) { .month-stats th, .month-stats td { padding: .55rem .5rem; font-size: .88rem; } }
 </style>
 </head>
 <body>
@@ -170,15 +175,16 @@
       <h3>Mesečne padavine (mm) · 2026 proti dolgoletnemu povprečju</h3>
       <canvas id="chartPrecip"></canvas>
     </div>
-    <table class="stats">
-      <tr><th>Mesec</th><th>Povpr. temp.</th><th>Odstopanje</th><th>Padavine</th><th>Poudarek</th></tr>
-      <tr><td>Januar</td><td>−0,3 °C</td><td>−1,5 °C</td><td>63,0 mm</td><td>Najhladnejši mesec; −16,5 °C (8. 1.)</td></tr>
-      <tr><td>Februar</td><td>4,4 °C</td><td>+0,7 °C</td><td>97,8 mm</td><td>Milo in namočeno; do 18,5 °C (28. 2.)</td></tr>
-      <tr><td>Marec</td><td>6,9 °C</td><td>+0,8 °C</td><td>19,9 mm</td><td>Izjemno suh; do 19,7 °C (7. 3.)</td></tr>
-      <tr><td>April</td><td>10,8 °C</td><td>+1,1 °C</td><td>34,2 mm</td><td>Topel in suh</td></tr>
-      <tr><td>Maj</td><td>15,0 °C</td><td>+1,0 °C</td><td>125,0 mm</td><td>Prehod v mokro obdobje</td></tr>
-      <tr><td>Junij</td><td>20,3 °C</td><td>+0,3 °C</td><td>164,8 mm</td><td>Namočen; rekordnih 36,1 °C (28. 6.)</td></tr>
+    <table class="stats month-stats">
+      <tr><th>Mesec</th><th>Povpr. temp.</th><th>Odstopanje</th><th>Padavine</th></tr>
+      <tr><td>Januar</td><td>−0,3 °C</td><td>−1,5 °C</td><td>63,0 mm</td></tr>
+      <tr><td>Februar</td><td>4,4 °C</td><td>+0,7 °C</td><td>97,8 mm</td></tr>
+      <tr><td>Marec</td><td>6,9 °C</td><td>+0,8 °C</td><td>19,9 mm</td></tr>
+      <tr><td>April</td><td>10,8 °C</td><td>+1,1 °C</td><td>34,2 mm</td></tr>
+      <tr><td>Maj</td><td>15,0 °C</td><td>+1,0 °C</td><td>125,0 mm</td></tr>
+      <tr><td>Junij</td><td>20,3 °C</td><td>+0,3 °C</td><td>164,8 mm</td></tr>
     </table>
+    <p class="chart-note">Poudarki posameznih mesecev so opisani v nadaljevanju.</p>
 
     <h3>Mrzel začetek: januar</h3>
     <p>Leto se je začelo povsem zimsko. Januar je bil s povprečjem <strong>−0,3 °C</strong> edini mesec v polletju s povprečno temperaturo pod lediščem in kar 1,5 °C hladnejši od dolgoletnega povprečja. V dolini se je 8. januarja živo srebro spustilo na <strong>−16,5 °C</strong> – najnižjo vrednost celotnega polletja, kar je učbeniški primer nočnega ohlajanja in nabiranja hladnega zraka v kotanji Zgornje Savinjske doline. Kljub mrazu je bil mesec razmeroma suh (63 mm).</p>
