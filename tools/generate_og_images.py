@@ -155,6 +155,14 @@ ARTICLES = [
         'photo': 'misty-valley',
     },
     {
+        'slug': 'temperaturni-trend-ireica1-2020-2025',
+        'title': 'Se dolina segreva?',
+        'subtitle': 'Šest let temperatur · IREICA1 · 2020–2025',
+        'section': 'Analize',
+        'accent': (239, 68, 68),
+        'photo': 'weather-station',
+    },
+    {
         'slug': 'najbolj-suha-pomlad-2026-ireica1',
         'title': 'Najbolj suha\npomlad doslej',
         'subtitle': 'Pomlad 2026: 179 mm, −46 % · IREICA1',
