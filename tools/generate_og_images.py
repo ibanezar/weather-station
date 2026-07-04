@@ -155,6 +155,14 @@ ARTICLES = [
         'photo': 'misty-valley',
     },
     {
+        'slug': 'polletni-pregled-2026-ireica1',
+        'title': 'Prvo polletje 2026\nna postaji IREICA1',
+        'subtitle': 'Pol leta v dveh obrazih · IREICA1',
+        'section': 'Analize',
+        'accent': (99, 102, 241),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'blog',
         'title': 'Blog Meteorec',
         'subtitle': 'Vremenski povzetki in analize · IREICA1',
