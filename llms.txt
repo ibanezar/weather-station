@@ -30,6 +30,7 @@ Data is original station measurement, not a forecast model. Reuse is free under 
 ## Writing
 - [Blog](https://meteorec.si/blog/): monthly weather summaries and event analyses for Savinjska dolina.
 - [Vremenski dogodki](https://meteorec.si/novosti/): logged notable events (heat waves, droughts, records).
+- [Napoved za julij 2026](https://meteorec.si/blog/napoved-julij-2026.html): 16-day Open-Meteo forecast for Rečica ob Savinji (warm start, thundery mid-month, renewed heat to ~35 °C) plus honest climatological outlook for the rest of the month, with an explanation of forecast skill limits.
 - [Julij skozi zgodovino](https://meteorec.si/blog/julij-skozi-zgodovino-recica-savinji.html): July across 75 years (Open-Meteo ERA5, 1950–2025) at Rečica ob Savinji — the warmest month warmed ~2 °C; station IREICA1 shows the valley paradox: record 36.5 °C days yet zero tropical nights and mornings down to 7.5 °C.
 - [Podnebna zgodovina Rečice ob Savinji 1950–2025](https://meteorec.si/blog/podnebna-zgodovina-recica-savinji-1950-2025.html): 75-year Open-Meteo (ERA5) record shows ~2 °C valley warming since 1950; six years of station IREICA1 reveal the valley floor is ~0.5 °C cooler and ~20 % wetter than the model.
 - [Poplave avgusta 2023](https://meteorec.si/blog/poplave-2023.html): in-depth account of the August 2023 Zgornja Savinjska dolina floods — causes, hydrological records, damage and recovery.

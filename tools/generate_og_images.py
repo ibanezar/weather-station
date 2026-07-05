@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'napoved-julij-2026',
+        'title': 'Kakšen bo\njulij 2026?',
+        'subtitle': 'Napoved za 2 tedna + obeti · IREICA1',
+        'section': 'Napoved',
+        'accent': (59, 130, 246),
+        'photo': 'storm-clouds',
+    },
+    {
         'slug': 'julij-skozi-zgodovino-recica-savinji',
         'title': 'Julij skozi\nzgodovino',
         'subtitle': '75 let najtoplejšega meseca · IREICA1',
