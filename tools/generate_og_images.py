@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'julij-skozi-zgodovino-recica-savinji',
+        'title': 'Julij skozi\nzgodovino',
+        'subtitle': '75 let najtoplejšega meseca · IREICA1',
+        'section': 'Analize',
+        'accent': (245, 158, 11),
+        'photo': 'drought',
+    },
+    {
         'slug': 'podnebna-zgodovina-recica-savinji-1950-2025',
         'title': 'Rečica ob Savinji\nod leta 1950',
         'subtitle': '75 let podnebja + 6 let postaje · IREICA1',
