@@ -225,6 +225,7 @@ def build_html(s):
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
   </footer>
 </div>
+<script src="likes.js" defer></script>
 </body>
 </html>
 '''

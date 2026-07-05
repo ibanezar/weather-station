@@ -289,6 +289,7 @@ function normalize(data){
 // ── Visitor counter (in-memory, resets on Worker restart) ─
 // Za pravi persistentni counter potrebuješ Cloudflare KV binding "COUNTER_KV"
 let _memCount = 1000; // začetna vrednost — nastavi po želji
+const _memLikes = {}; // fallback za všečke, kadar KV ni na voljo (resetira se ob restartu)
 
 // ── Glavni handler ─────────────────────────────────────────
 // ── Edge-rendered weather archive page helpers ─────────────────────────────
@@ -575,6 +576,43 @@ export default {
         }
         return new Response(
           JSON.stringify({ count }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
+        );
+      }
+
+      // ── /like ─────────────────────────────────────────────
+      // Všečki na blog posta. Ključ v KV: "like:<slug>".
+      // GET  /like?slug=xxx            → { slug, count }
+      // POST /like?slug=xxx&delta=1|-1 → poveča/zmanjša in vrne { slug, count }
+      // Persistenca zahteva KV binding COUNTER_KV; brez njega vrne in-memory vrednost.
+      if (path === "/like") {
+        const slug = (url.searchParams.get("slug") || "").toLowerCase();
+        // dovolimo le varne sluge (mala črka, številka, vezaj) do 120 znakov
+        if (!/^[a-z0-9-]{1,120}$/.test(slug)) {
+          return new Response(
+            JSON.stringify({ error: "neveljaven slug" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
+        const key = "like:" + slug;
+        let count;
+        if (env?.COUNTER_KV) {
+          count = parseInt((await env.COUNTER_KV.get(key)) || "0") || 0;
+          if (request.method === "POST") {
+            const delta = url.searchParams.get("delta") === "-1" ? -1 : 1;
+            count = Math.max(0, count + delta);
+            await env.COUNTER_KV.put(key, String(count));
+          }
+        } else {
+          _memLikes[key] = _memLikes[key] || 0;
+          if (request.method === "POST") {
+            const delta = url.searchParams.get("delta") === "-1" ? -1 : 1;
+            _memLikes[key] = Math.max(0, _memLikes[key] + delta);
+          }
+          count = _memLikes[key];
+        }
+        return new Response(
+          JSON.stringify({ slug, count }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
         );
       }
