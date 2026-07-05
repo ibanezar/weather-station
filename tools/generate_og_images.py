@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'podnebna-zgodovina-recica-savinji-1950-2025',
+        'title': 'Rečica ob Savinji\nod leta 1950',
+        'subtitle': '75 let podnebja + 6 let postaje · IREICA1',
+        'section': 'Analize',
+        'accent': (239, 68, 68),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'vremenski-povzetek-maj-2026',
         'title': 'Vremenski povzetek\nmaj 2026',
         'subtitle': 'Rečica ob Savinji · IREICA1',
