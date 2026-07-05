@@ -4,9 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - '*.html'
-      - 'blog/*.html'
+      - '**.html'
       - 'sitemap.xml'
+      - 'sitemap-seo.xml'
+      - 'sitemap-weather.xml'
 
 jobs:
   notify:
@@ -33,18 +34,22 @@ jobs:
 
           urls = []
           for path in changed:
-              if path == "sitemap.xml":
-                  urls.append(f"{SITE}/sitemap.xml")
+              if path in ("sitemap.xml", "sitemap-seo.xml", "sitemap-weather.xml"):
+                  urls.append(f"{SITE}/{path}")
               elif path.endswith(".html"):
                   if path == "index.html":
                       urls.append(f"{SITE}/")
                   elif path.startswith("blog/") and path != "blog/index.html":
+                      # blog posts are flat files: blog/slug.html
                       slug = path[len("blog/"):]
                       urls.append(f"{SITE}/blog/{slug}")
+                  elif path.endswith("/index.html"):
+                      # everything else uses directory-style clean URLs
+                      urls.append(f"{SITE}/{path[:-len('index.html')]}")
                   else:
                       urls.append(f"{SITE}/{path}")
 
-          # Always include sitemap
+          # Always include the main sitemap
           sitemap_url = f"{SITE}/sitemap.xml"
           if sitemap_url not in urls:
               urls.append(sitemap_url)
