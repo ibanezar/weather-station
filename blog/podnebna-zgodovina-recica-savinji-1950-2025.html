@@ -185,7 +185,13 @@
       <tr><th>20.</th><td style="background:rgb(123,170,242);color:#0a1020">1,7</td><td style="background:rgb(154,190,240);color:#0a1020">3,8</td><td style="background:rgb(191,214,238);color:#0a1020">6,4</td><td style="background:rgb(241,246,235);color:#0a1020">9,9</td><td style="background:rgb(241,198,183);color:#0a1020">14,2</td><td style="background:rgb(227,117,106);color:#fff">19,9</td><td style="background:rgb(223,96,85);color:#fff">21,5</td><td style="background:rgb(224,100,89);color:#fff">21,1</td><td style="background:rgb(235,164,150);color:#0a1020">16,7</td><td style="background:rgb(246,230,214);color:#0a1020">12,0</td><td style="background:rgb(182,208,238);color:#0a1020">5,8</td><td style="background:rgb(133,177,241);color:#0a1020">2,4</td></tr>
       </table>
     </div>
-    <p>Najbolj so se ogreli <strong>zimski meseci in vrhunec poletja</strong>. Januar je od šestdesetih let (−3,1 °C v povprečju desetletja) do danes pridobil skoraj tri stopinje, julij in avgust pa sta se z okoli 19–20 °C prebila čez 21 °C. Zadnja leta hkrati razkrivajo zanimivo posebnost: <strong>zastalo pomlad</strong>. April in maj sta v obdobju 2020–2025 celo nekoliko hladnejša od normale 1991–2020 (april za −0,7 °C, maj za −0,8 °C). Gre za vzorec, ki ga zaznava tudi naša postaja in ki je denimo botroval izjemno suhi ter pozni pomladi leta 2026.</p>
+    <p>Najbolj so se ogreli <strong>zimski meseci in vrhunec poletja</strong>. Januar je od šestdesetih let (−3,1 °C v povprečju desetletja) do danes pridobil skoraj tri stopinje, julij in avgust pa sta se z okoli 19–20 °C prebila čez 21 °C. Zadnja leta hkrati razkrivajo zanimivo posebnost: <strong>zastalo pomlad</strong>. Če primerjamo zadnjih šest let neposredno z veljavno normalo 1991–2020, to lepo izstopi:</p>
+    <div class="chart-card">
+      <h3>Mesečni premik temperature · 2020–2025 proti normali 1991–2020 (°C)</h3>
+      <canvas id="chartMonthShift"></canvas>
+    </div>
+    <p class="chart-note">Rdeči stolpci pomenijo toplejši, modri hladnejši mesec od normale. Februar (+1,9 °C) in zimski meseci vodijo, april in maj pa sta celo nekoliko pod normalo.</p>
+    <p>April in maj sta v obdobju 2020–2025 celo nekoliko hladnejša od normale 1991–2020 (april za −0,7 °C, maj za −0,8 °C). Gre za vzorec, ki ga zaznava tudi naša postaja in ki je denimo botroval izjemno suhi ter pozni pomladi leta 2026.</p>
 
     <h2>In zdaj postaja: resnica z dna doline</h2>
     <p>Na tej točki se dolgi niz reanalize in šest let lokalnih meritev srečata. Za obdobje 2020–2025 imamo na voljo <strong>obe</strong> vrsti podatkov za isto lokacijo – model in senzor –, zato ju lahko postavimo drugega ob drugega. Razlika med njima pa je sistematična:</p>
@@ -213,7 +219,13 @@
     </div>
 
     <h2>Padavine: model je presuh</h2>
-    <p>Pri dežju je odstopanje v obratno smer – in to še izrazitejše. V istih šestih letih je postaja namerila <strong>povprečno 1.377 mm</strong> padavin na leto, model ERA5 pa le okoli <strong>1.135 mm</strong>. Postaja torej ujame za približno <strong>petino več padavin</strong>. Vzrok je enak kot pri temperaturi: gladka mreža modela ne zajame <strong>orografskega ojačanja</strong> – procesa dviganja vlažnega zraka ob okoliških pobočjih, ki nad samo dolino iztisne obilnejše padavine. Dolgoletne desetletne vsote ERA5 (okoli 1.050–1.150 mm) so zato skoraj zagotovo <strong>podcenjene</strong>; resnične vrednosti na dnu doline se verjetno gibljejo bližje 1.300–1.400 mm.</p>
+    <p>Pri dežju je odstopanje v obratno smer – in to še izrazitejše. V istih šestih letih je postaja namerila <strong>povprečno 1.377 mm</strong> padavin na leto, model ERA5 pa le okoli <strong>1.135 mm</strong>. Postaja torej ujame za približno <strong>petino več padavin</strong>. Vzrok je enak kot pri temperaturi: gladka mreža modela ne zajame <strong>orografskega ojačanja</strong> – procesa dviganja vlažnega zraka ob okoliških pobočjih, ki nad samo dolino iztisne obilnejše padavine.</p>
+    <div class="chart-card">
+      <h3>Letne padavine · postaja IREICA1 proti modelu ERA5 · 2020–2025 (mm)</h3>
+      <canvas id="chartPrecip"></canvas>
+    </div>
+    <p class="chart-note">V vseh šestih letih postaja izmeri več padavin kot model – razlika sega od ~180 mm (2025) do prek 250 mm (2024).</p>
+    <p>Dolgoletne desetletne vsote ERA5 (okoli 1.050–1.150 mm) so zato skoraj zagotovo <strong>podcenjene</strong>; resnične vrednosti na dnu doline se verjetno gibljejo bližje 1.300–1.400 mm.</p>
     <p>To je pomembno opozorilo pri vsakršnem branju »zgodovinskih padavin« iz modela. Podatki so zelo uporabni za določanje <strong>dolgoročnih trendov in razporeditve čez leto</strong>, niso pa zanesljivi za določanje absolutne količine padavin na naši mikrolokaciji. Prav zato ima lokalna vremenska postaja pri meritvah padavin še precej večjo dodano vrednost kot pri temperaturah.</p>
 
     <h2>Najtoplejša in najhladnejša leta niza</h2>
@@ -263,6 +275,10 @@ const DEC_T = [9.86,9.52,9.58,9.75,10.44,10.85,11.27,11.33];
 const VS_YEARS = ['2020','2021','2022','2023','2024','2025'];
 const VS_STATION = [10.2,9.8,11.0,11.1,11.5,11.2];
 const VS_ERA = [11.0,10.5,11.7,11.5,12.0,11.1];
+const MONTHS = ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+const MONTH_SHIFT = [1.0,1.9,0.5,-0.7,-0.8,1.0,0.6,0.4,0.7,0.7,-0.6,1.0];
+const PRECIP_STATION = [1348,1363,1110,1711,1506,1224];
+const PRECIP_ERA = [1171,1125,894,1394,1256,976];
 
 const BASE = {
   responsive: true, maintainAspectRatio: true,
@@ -307,6 +323,43 @@ new Chart(document.getElementById('chartDecade'), {
     scales: {
       x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } },
       y: { grid: { color: 'rgba(255,255,255,.05)' }, min: 9, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + '°' } }
+    }
+  }
+});
+
+/* Chart — monthly shift 2020-2025 vs normal 1991-2020 (diverging) */
+new Chart(document.getElementById('chartMonthShift'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{ label: 'Premik (°C)', data: MONTH_SHIFT, backgroundColor: MONTH_SHIFT.map(v => v < 0 ? 'rgba(77,159,248,.8)' : v >= 1.5 ? 'rgba(239,68,68,.9)' : 'rgba(249,115,22,.7)'), borderRadius: 3 }]
+  },
+  options: {
+    ...BASE,
+    plugins: { ...BASE.plugins, legend: { display: false }, tooltip: { ...BASE.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.parsed.y > 0 ? '+' : ''}${ctx.parsed.y.toFixed(1)} °C` } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+      y: { grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => (v > 0 ? '+' : '') + v + '°' } }
+    }
+  }
+});
+
+/* Chart — precipitation station vs ERA5 */
+new Chart(document.getElementById('chartPrecip'), {
+  type: 'bar',
+  data: {
+    labels: VS_YEARS,
+    datasets: [
+      { label: 'Postaja IREICA1', data: PRECIP_STATION, backgroundColor: 'rgba(77,159,248,.85)', borderRadius: 3 },
+      { label: 'Model ERA5', data: PRECIP_ERA, backgroundColor: 'rgba(120,150,200,.5)', borderRadius: 3 }
+    ]
+  },
+  options: {
+    ...BASE,
+    plugins: { ...BASE.plugins, tooltip: { ...BASE.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y)} mm` } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,.05)' }, min: 0, ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } }
     }
   }
 });
