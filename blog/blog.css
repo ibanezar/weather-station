@@ -254,3 +254,37 @@ article strong{color:#fff}
 /* značka priljubljenosti (visoka povprečna ocena) */
 .post-pop{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600;color:var(--amber);
   background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:999px;padding:.12rem .5rem;margin-top:.5rem}
+
+/* ── Bralni napredek ──────────────────────────────────────── */
+.read-progress{position:fixed;top:0;left:0;right:0;height:3px;background:transparent;z-index:100;pointer-events:none}
+.read-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));
+  box-shadow:0 0 8px rgba(77,159,248,.6);transition:width .1s linear}
+
+/* ── Bralni čas ───────────────────────────────────────────── */
+.post-readtime{white-space:nowrap}
+
+/* ── Kazalo (TOC) ─────────────────────────────────────────── */
+.post-toc{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.5rem 1.1rem;margin:1.4rem 0;box-shadow:var(--card-shadow)}
+.post-toc summary{cursor:pointer;font-weight:600;font-size:.82rem;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);padding:.4rem 0;list-style:none;font-family:'JetBrains Mono',monospace}
+.post-toc summary::-webkit-details-marker{display:none}
+.post-toc summary::before{content:"▸ ";color:var(--blue)}
+.post-toc[open] summary::before{content:"▾ "}
+.post-toc ul{margin:.3rem 0 .6rem;padding-left:1.1rem;columns:2;column-gap:1.6rem}
+.post-toc li{margin:.25rem 0;break-inside:avoid}
+.post-toc a{color:var(--muted);text-decoration:none;font-size:.9rem;line-height:1.4}
+.post-toc a:hover{color:var(--blue)}
+@media(max-width:640px){.post-toc ul{columns:1}}
+
+/* ── Sorodni članki ───────────────────────────────────────── */
+.related-posts{margin:2.6rem 0 1rem}
+.related-title{font-size:1.25rem;margin:0 0 1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.related-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}
+.related-card{display:flex;flex-direction:column;gap:.35rem;text-decoration:none;color:inherit;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem 1.05rem;
+  box-shadow:var(--card-shadow);transition:border-color .2s,transform .2s}
+.related-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.related-date{font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.related-h{font-weight:600;font-size:.98rem;line-height:1.35}
+.related-sum{font-size:.85rem;color:var(--muted);line-height:1.5}
