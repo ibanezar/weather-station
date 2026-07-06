@@ -112,6 +112,10 @@
     var aside = document.createElement("aside");
     aside.className = "blog-sidebar";
     aside.innerHTML =
+      '<div class="side-block side-live" hidden>' +
+        '<div class="side-title">Trenutno · IREICA1</div>' +
+        '<div class="side-live-body"></div>' +
+      '</div>' +
       '<div class="side-block">' +
         '<div class="side-title">Na tej strani</div>' +
         '<nav class="side-toc">' +
@@ -126,7 +130,13 @@
         '<div class="side-list"></div>' +
       '</div>' +
       '<div class="side-block side-actions">' +
-        '<button type="button" class="side-sub" id="side-sub">📬 Prijava na novičke</button>' +
+        '<div class="side-title">Prijava na novičke</div>' +
+        '<form class="side-sub-form" id="side-sub-form" autocomplete="off">' +
+          '<input class="side-sub-input" id="side-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">' +
+          '<input class="sub-hp" type="text" name="website" id="side-sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+          '<button class="side-sub" id="side-sub-btn" type="submit">📬 Prijava</button>' +
+        '</form>' +
+        '<p class="side-sub-msg" id="side-sub-msg" aria-live="polite"></p>' +
         '<a class="side-back" href="/blog/">← Vsi članki</a>' +
         '<a class="side-back" href="/blog/rss.xml">📡 RSS</a>' +
       '</div>';
@@ -145,12 +155,63 @@
       window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 12, behavior: "smooth" });
       history.replaceState(null, "", a.getAttribute("href"));
     });
-    // gumb za prijavo → skoči na obstoječo prijavno škatlo
-    aside.querySelector("#side-sub").addEventListener("click", function () {
-      var box = document.querySelector(".subscribe-box");
-      if (box) { box.scrollIntoView({ behavior: "smooth", block: "center" });
-        var inp = box.querySelector("input"); if (inp) setTimeout(function () { inp.focus(); }, 500); }
-    });
+    // vgrajen obrazec za prijavo (isti Cloudflare Worker kot .subscribe-box)
+    (function () {
+      var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+      var form  = aside.querySelector("#side-sub-form");
+      var email = aside.querySelector("#side-sub-email");
+      var btn   = aside.querySelector("#side-sub-btn");
+      var msg   = aside.querySelector("#side-sub-msg");
+      function setMsg(t, err) { msg.textContent = t || ""; msg.className = "side-sub-msg" + (err ? " err" : " ok"); }
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (aside.querySelector("#side-sub-hp").value) return; // bot
+        var val = email.value.trim();
+        if (!val) { setMsg("Vpiši e-naslov.", true); return; }
+        btn.disabled = true; btn.textContent = "Pošiljam…"; setMsg("");
+        fetch(PROXY + "/blog-subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: val, website: "" })
+        })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            if (!res.ok || res.j.error) { setMsg(res.j.error || "Napaka pri prijavi.", true); return; }
+            if (res.j.already) { setMsg("Ta e-naslov je že naročen. 🙂"); }
+            else { setMsg("Skoraj gotovo! Preveri e-pošto in potrdi naročnino."); form.reset(); }
+          })
+          .catch(function () { setMsg("Napaka v povezavi. Poskusi znova.", true); })
+          .then(function () { btn.disabled = false; btn.textContent = "📬 Prijava"; });
+      });
+    })();
+
+    // trenutne meritve postaje IREICA1 (isti proxy kot ostale žive kartice)
+    (function () {
+      var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+      var block = aside.querySelector(".side-live");
+      var body  = aside.querySelector(".side-live-body");
+      function num(x, d) { return x == null ? "—" : x.toFixed(d == null ? 1 : d).replace(".", ","); }
+      fetch(PROXY + "/wu-station?id=IREICA1")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var obs = data.observations && data.observations[0];
+          if (!obs) return;
+          var m = obs.metric || {};
+          var local = obs.obsTimeLocal || "";
+          var hhmm = local.slice(11, 16);
+          body.innerHTML =
+            '<div class="side-live-temp">' + num(m.temp, 1) + '<span>°C</span></div>' +
+            '<div class="side-live-grid">' +
+              '<span>💧 ' + num(obs.humidity, 0) + ' %</span>' +
+              '<span>💨 ' + num(m.windSpeed, 0) + ' km/h</span>' +
+              (m.precipTotal != null ? '<span>🌧 ' + num(m.precipTotal, 1) + ' mm</span>' : '') +
+              (m.pressure != null ? '<span>⏱ ' + num(m.pressure, 0) + ' hPa</span>' : '') +
+            '</div>' +
+            (hhmm ? '<div class="side-live-time">ob ' + hhmm + '</div>' : '');
+          block.hidden = false;
+        })
+        .catch(function () { /* žive meritve so postranske, brez napake na strani */ });
+    })();
 
     // scrollspy — poudari trenutni razdelek
     var spyLinks = Array.prototype.slice.call(aside.querySelectorAll(".side-toc a"));
