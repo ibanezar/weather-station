@@ -4494,19 +4494,47 @@ function applyLightning(){
 }
 
 // ── Push notifications ────────────────────────────────────
-function toggleNotifications(){
-  if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
+// VAPID javni ključ (par zasebnega je skrivnost na Cloudflare Workerju)
+const VAPID_PUBLIC="BCKBiX8AvTSRv98CufvMl51rpizfpg_LHm9K0rSCQYNJzfxV88tP60_n8mJ7bUEQo02zS02_l-FvTCtkSvfx3iY";
+function _urlB64ToU8(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const base=(b64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base),out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+async function toggleNotifications(){
+  const btn=document.getElementById('notif-btn');
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+    alert('Tvoj brskalnik ne podpira potisnih obvestil.');return;
+  }
+  let reg; try{reg=await navigator.serviceWorker.ready;}catch(_){return;}
+  const existing=await reg.pushManager.getSubscription();
+
+  // Izklop: če je naročnina aktivna → odjava
+  if(existing&&localStorage.getItem('wx-notif')==='on'){
+    try{await fetch(PROXY+'/push/unsubscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:existing.endpoint})});}catch(_){}
+    try{await existing.unsubscribe();}catch(_){}
     localStorage.setItem('wx-notif','off');
-    document.getElementById('notif-btn')?.classList.remove('on');
+    btn?.classList.remove('on');
     return;
   }
-  Notification.requestPermission().then(p=>{
-    if(p==='granted'){
-      localStorage.setItem('wx-notif','on');
-      document.getElementById('notif-btn')?.classList.add('on');
-      new Notification('Vreme IREICA1',{body:'Obvestila so vklopljena. Obvestili te bomo ob nevihti, zmrzali in UV alarmih.',icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🌤</text></svg>'});
-    }
-  });
+
+  // Vklop
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){return;}
+  try{
+    const sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_urlB64ToU8(VAPID_PUBLIC)});
+    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
+    if(!r.ok)throw new Error('subscribe failed');
+    localStorage.setItem('wx-notif','on');
+    btn?.classList.add('on');
+    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih: močni sunki, nalivi, nevihte, zmrzal.',icon:'/icon-192.png',badge:'/icon-192.png'});
+  }catch(e){
+    localStorage.setItem('wx-notif','off');
+    btn?.classList.remove('on');
+    alert('Obvestil ni bilo mogoče vklopiti. Poskusi znova.');
+  }
 }
 function initNotifBtn(){
   const btn=document.getElementById('notif-btn');
