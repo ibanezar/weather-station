@@ -383,6 +383,77 @@ function renderCurrentMonthPage(yr, mo, days) {
 </html>`;
 }
 
+// ═══════════════════════════════════════════════════════════
+// Web Push (VAPID + RFC 8291 aes128gcm) — brez zunanjih knjižnic
+// ═══════════════════════════════════════════════════════════
+const VAPID_PUBLIC = "BCKBiX8AvTSRv98CufvMl51rpizfpg_LHm9K0rSCQYNJzfxV88tP60_n8mJ7bUEQo02zS02_l-FvTCtkSvfx3iY";
+const VAPID_SUBJECT = "mailto:filip.eremita@gmail.com";
+
+const _enc = new TextEncoder();
+function _b64u(buf) {
+  let s = ""; const b = new Uint8Array(buf);
+  for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function _unb64u(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "=";
+  const bin = atob(str), out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function _cat() {
+  let n = 0; for (const a of arguments) n += a.length;
+  const out = new Uint8Array(n); let o = 0;
+  for (const a of arguments) { out.set(a, o); o += a.length; }
+  return out;
+}
+async function _hkdf(salt, ikm, info, len) {
+  const key = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, key, len * 8));
+}
+async function _vapidJWT(aud, d) {
+  const pub = _unb64u(VAPID_PUBLIC);
+  const jwk = { kty: "EC", crv: "P-256", d, x: _b64u(pub.subarray(1, 33)), y: _b64u(pub.subarray(33, 65)), ext: true };
+  const key = await crypto.subtle.importKey("jwk", jwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const head = _b64u(_enc.encode(JSON.stringify({ typ: "JWT", alg: "ES256" })));
+  const body = _b64u(_enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 43200, sub: VAPID_SUBJECT })));
+  const si = head + "." + body;
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, _enc.encode(si)));
+  return si + "." + _b64u(sig);
+}
+async function _encryptPush(payload, p256dhB64, authB64) {
+  const ua_pub = _unb64u(p256dhB64), ua_auth = _unb64u(authB64);
+  const asKey = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const as_pub = new Uint8Array(await crypto.subtle.exportKey("raw", asKey.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", ua_pub, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, asKey.privateKey, 256));
+  const prk = await _hkdf(ua_auth, ecdh, _cat(_enc.encode("WebPush: info\0"), ua_pub, as_pub), 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await _hkdf(salt, prk, _enc.encode("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = await _hkdf(salt, prk, _enc.encode("Content-Encoding: nonce\0"), 12);
+  const content = _cat(_enc.encode(payload), new Uint8Array([0x02]));
+  const aes = await crypto.subtle.importKey("raw", cek, { name: "AES-GCM" }, false, ["encrypt"]);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aes, content));
+  const header = _cat(salt, new Uint8Array([0, 0, 0x10, 0x00]), new Uint8Array([65]), as_pub);
+  return _cat(header, ct);
+}
+async function _sendPush(env, sub, payloadObj) {
+  const url = new URL(sub.endpoint);
+  const jwt = await _vapidJWT(url.origin, env.VAPID_PRIVATE);  // env.VAPID_PRIVATE = skrivnost (d)
+  const body = await _encryptPush(JSON.stringify(payloadObj), sub.keys.p256dh, sub.keys.auth);
+  const res = await fetch(sub.endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": "vapid t=" + jwt + ", k=" + VAPID_PUBLIC,
+      "Content-Encoding": "aes128gcm",
+      "Content-Type": "application/octet-stream",
+      "TTL": "86400"
+    },
+    body
+  });
+  return res.status;
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -1779,6 +1850,62 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         return _json({ error: "Nedovoljena metoda ali pot" }, 405);
+      }
+
+      // ── /push (web push obvestila) ──────────────────────────
+      //   GET  /push/vapid                       → { publicKey }
+      //   POST /push/subscribe   { subscription } → shrani naročnino
+      //   POST /push/unsubscribe { endpoint }     → odstrani
+      //   POST /push/send        { secret, title, body, url? } → pošlji vsem
+      // Naročnine v R2: push/subs.json
+      if (path === "/push/vapid" && request.method === "GET") {
+        return new Response(JSON.stringify({ publicKey: VAPID_PUBLIC }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" }
+        });
+      }
+      if (path === "/push/subscribe" || path === "/push/unsubscribe" || path === "/push/send") {
+        const r2 = env?.PHOTOS_R2;
+        const KEY = "push/subs.json";
+        const pj = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        async function pRead() { if (!r2) return []; try { const o = await r2.get(KEY); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; } }
+        async function pWrite(a) { if (r2) await r2.put(KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } }); }
+
+        if (request.method !== "POST") return pj({ error: "Nedovoljena metoda" }, 405);
+        let body; try { body = await request.json(); } catch (_) { return pj({ error: "Napačni podatki" }, 400); }
+
+        if (path === "/push/subscribe") {
+          if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+          const s = body.subscription || body;
+          if (!s || !s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+          const subs = await pRead();
+          if (!subs.some(x => x.endpoint === s.endpoint)) {
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, ts: new Date().toISOString() });
+            await pWrite(subs.slice(0, 5000));
+          }
+          return pj({ ok: true, count: subs.length });
+        }
+        if (path === "/push/unsubscribe") {
+          if (!r2) return pj({ ok: true });
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const subs = await pRead();
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (next.length !== subs.length) await pWrite(next);
+          return pj({ ok: true });
+        }
+        if (path === "/push/send") {
+          const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
+          if (!secret || body.secret !== secret) return pj({ error: "Nedovoljeno" }, 401);
+          if (!env.VAPID_PRIVATE) return pj({ error: "VAPID_PRIVATE ni nastavljen" }, 503);
+          const subs = await pRead();
+          const payload = { title: (body.title || "Meteorec").slice(0, 100), body: (body.body || "").slice(0, 300), url: body.url || "/", tag: body.tag || "meteorec" };
+          const dead = [];
+          await Promise.all(subs.map(async s => {
+            try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
+            catch (_) { /* pusti naročnino */ }
+          }));
+          if (dead.length) await pWrite(subs.filter(x => dead.indexOf(x.endpoint) === -1));
+          return pj({ ok: true, sent: subs.length - dead.length, pruned: dead.length });
+        }
       }
 
       // ── /current ali /hourly ──────────────────────────────
