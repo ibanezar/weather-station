@@ -1481,6 +1481,112 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /blog-comments ─────────────────────────────────────
+      // Komentarji + ocene pod blog članki, shranjeni v R2 po slug-u
+      // (blog-comments/{slug}.json).
+      //   GET  ?slug=…  → { comments:[…], rating:{avg,count} }
+      //   POST { slug, comment, author?, rating? } → { ok:true }
+      if (path === "/blog-comments") {
+        const r2 = env?.PHOTOS_R2;
+        const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,80}$/;
+
+        const _key = slug => `blog-comments/${slug}.json`;
+
+        async function _cRead(slug) {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get(_key(slug));
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+        async function _cWrite(slug, items) {
+          if (!r2) return;
+          await r2.put(_key(slug), JSON.stringify(items), {
+            httpMetadata: { contentType: "application/json" }
+          });
+        }
+        function _stats(items) {
+          const rated = items.filter(i => i.rating);
+          const avg = rated.length
+            ? rated.reduce((s, i) => s + i.rating, 0) / rated.length
+            : null;
+          return { avg, count: rated.length };
+        }
+
+        if (request.method === "GET") {
+          const slug = url.searchParams.get("slug") || "";
+          if (!SLUG_RE.test(slug)) {
+            return new Response(JSON.stringify({ comments: [], rating: { avg: null, count: 0 } }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+            });
+          }
+          const items = await _cRead(slug);
+          // Ne razkrivamo honeypota/skritih polj — vrni le javne dele
+          const pub = items.map(i => ({
+            id: i.id, ts: i.ts, author: i.author, comment: i.comment, rating: i.rating || null
+          }));
+          return new Response(JSON.stringify({ comments: pub.slice(0, 200), rating: _stats(items) }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
+        }
+
+        if (request.method === "POST") {
+          if (!r2) return new Response(JSON.stringify({ error: "Shramba ni dosegljiva" }), {
+            status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+          let body;
+          try { body = await request.json(); } catch (_) {
+            return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const slug = (body.slug || "").trim();
+          if (!SLUG_RE.test(slug)) {
+            return new Response(JSON.stringify({ error: "Neznan članek" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          // Honeypot — boti izpolnijo skrito polje "website"
+          if (body.website) {
+            return new Response(JSON.stringify({ ok: true }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const comment = (body.comment || "").trim();
+          const rating  = body.rating ? parseInt(body.rating) : null;
+          if (!comment && !rating) {
+            return new Response(JSON.stringify({ error: "Napiši komentar ali oddaj oceno" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          if (comment.length > 1500) {
+            return new Response(JSON.stringify({ error: "Komentar je predolg (največ 1500 znakov)" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          if (rating !== null && (rating < 1 || rating > 5)) {
+            return new Response(JSON.stringify({ error: "Ocena mora biti med 1 in 5" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const items = await _cRead(slug);
+          // Preprosta zaščita pred podvajanjem: isti komentar v zadnji minuti
+          const now = Date.now();
+          const dup = items.some(i =>
+            i.comment === comment && (now - new Date(i.ts).getTime()) < 60000);
+          if (dup) {
+            return new Response(JSON.stringify({ ok: true }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const entry = {
+            id: crypto.randomUUID().split("-")[0],
+            ts: new Date().toISOString(),
+            author: (body.author || "Anonimno").slice(0, 60).trim() || "Anonimno",
+            comment: comment.slice(0, 1500),
+            rating: rating,
+          };
+          items.unshift(entry);
+          await _cWrite(slug, items.slice(0, 500));
+          return new Response(JSON.stringify({ ok: true, comment: {
+            id: entry.id, ts: entry.ts, author: entry.author, comment: entry.comment, rating: entry.rating
+          }, rating: _stats(items) }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+
+        return new Response(JSON.stringify({ error: "Nedovoljena metoda" }), {
+          status: 405, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
