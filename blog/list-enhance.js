@@ -190,5 +190,56 @@
       b.addEventListener("click", function () { setTag(t); });
       tagWrap.appendChild(b);
     });
+
+    buildSidebar(top, freq);
   });
+
+  function tslug(t) {
+    return String(t).toLowerCase().replace(/č/g, "c").replace(/š/g, "s").replace(/ž/g, "z")
+      .replace(/ć/g, "c").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function buildSidebar(top, freq) {
+    var aside = document.createElement("aside");
+    aside.className = "blog-sidebar";
+    var html = "";
+
+    // Kategorije (tagi z lastno stranjo = ≥2 objavama)
+    if (top.length) {
+      html += '<div class="side-block"><div class="side-title">Kategorije</div><div class="side-cats">' +
+        top.slice(0, 12).map(function (t) {
+          return '<a class="side-cat" href="/blog/tema/' + tslug(t) + '/">' + esc(t) + ' <span>' + freq[t] + '</span></a>';
+        }).join("") + '</div></div>';
+    }
+
+    // Najbolje ocenjeni
+    var rated = slugs.filter(function (s) { return data[s].ratingCount > 0; })
+      .sort(function (a, b) { return data[b].avg - data[a].avg || data[b].ratingCount - data[a].ratingCount; })
+      .slice(0, 4);
+    if (rated.length) {
+      html += '<div class="side-block"><div class="side-title">Najbolje ocenjeni</div><div class="side-list">' +
+        rated.map(function (s) {
+          var title = (data[s].a.querySelector("h2") || {}).textContent || s;
+          return '<a class="side-post" href="' + data[s].a.getAttribute("href") + '"><span class="side-post-t">' + esc(title) + '</span>' +
+            '<span class="side-post-r">★ ' + data[s].avg.toFixed(1) + '</span></a>';
+        }).join("") + '</div></div>';
+    }
+
+    // Prijava + RSS
+    html += '<div class="side-block side-actions">' +
+      '<button type="button" class="side-sub" id="side-sub">📬 Prijava na novičke</button>' +
+      '<a class="side-back" href="/blog/rss.xml">📡 RSS vir</a>' +
+    '</div>';
+
+    aside.innerHTML = html;
+    document.body.appendChild(aside);
+
+    var sb = aside.querySelector("#side-sub");
+    if (sb) sb.addEventListener("click", function () {
+      var box = document.querySelector(".subscribe-box");
+      if (box) { box.scrollIntoView({ behavior: "smooth", block: "center" });
+        var inp = box.querySelector("input"); if (inp) setTimeout(function () { inp.focus(); }, 500); }
+    });
+  }
 })();

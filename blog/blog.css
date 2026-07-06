@@ -396,3 +396,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .side-sub:hover{opacity:.9}
 .side-back{text-align:center;color:var(--muted);text-decoration:none;font-size:.85rem;padding:.3rem}
 .side-back:hover{color:var(--blue)}
+
+/* ── Sidebar na seznamu: kategorije + najbolje ocenjeni ───── */
+.side-cats{display:flex;flex-wrap:wrap;gap:.4rem}
+.side-cat{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;text-decoration:none;
+  color:var(--blue);background:var(--stn-bg);border:1px solid var(--stn-border);border-radius:999px;padding:.22rem .6rem}
+.side-cat:hover{background:rgba(77,159,248,.22)}
+.side-cat span{font-size:.68rem;opacity:.7;font-family:'JetBrains Mono',monospace}
+.side-list{display:flex;flex-direction:column;gap:.5rem}
+.side-post{display:flex;align-items:flex-start;gap:.5rem;justify-content:space-between;text-decoration:none;color:var(--text)}
+.side-post-t{font-size:.85rem;line-height:1.35}
+.side-post:hover .side-post-t{color:var(--blue)}
+.side-post-r{flex-shrink:0;font-size:.78rem;color:var(--amber);font-weight:600;white-space:nowrap}
