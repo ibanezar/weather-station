@@ -414,6 +414,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .side-back{text-align:center;color:var(--muted);text-decoration:none;font-size:.85rem;padding:.3rem}
 .side-back:hover{color:var(--blue)}
 
+/* ── Sidebar: vgrajen obrazec za prijavo ──────────────────── */
+.side-sub-form{display:flex;flex-direction:column;gap:.5rem}
+.side-sub-input{box-sizing:border-box;width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:9px;padding:.55rem .7rem;color:var(--text);font:inherit;font-size:.86rem}
+.side-sub-input:focus{outline:none;border-color:var(--blue)}
+.side-sub-msg{font-size:.8rem;margin:0;min-height:1em}
+.side-sub-msg.ok{color:var(--green)}
+.side-sub-msg.err{color:#f87171}
+
+/* ── Sidebar: trenutne meritve IREICA1 ────────────────────── */
+.side-live-temp{font-size:2rem;font-weight:700;line-height:1;color:var(--text)}
+.side-live-temp span{font-size:1rem;font-weight:500;color:var(--muted);margin-left:.15rem}
+.side-live-grid{display:flex;flex-wrap:wrap;gap:.4rem .7rem;margin-top:.55rem;font-size:.82rem;color:var(--muted)}
+.side-live-time{margin-top:.5rem;font-size:.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
 /* ── Sidebar na seznamu: kategorije + najbolje ocenjeni ───── */
 .side-cats{display:flex;flex-wrap:wrap;gap:.4rem}
 .side-cat{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;text-decoration:none;
