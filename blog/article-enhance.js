@@ -147,6 +147,24 @@
       var myTags = (me.tags || []).map(function (t) { return String(t).toLowerCase(); });
       if (!myTags.length) return;
 
+      // "Teme:" — povezave na kategorijske strani (le tagi z ≥2 objavama = imajo stran)
+      var freq = {};
+      posts.forEach(function (p) {
+        (p.tags || []).forEach(function (t) { t = String(t).toLowerCase(); freq[t] = (freq[t] || 0) + 1; });
+      });
+      var linkable = (me.tags || []).filter(function (t) { return freq[String(t).toLowerCase()] >= 2; });
+      if (linkable.length) {
+        var trow = document.createElement("div");
+        trow.className = "post-topics";
+        trow.innerHTML = '<span class="pt-label">Teme:</span> ' + linkable.map(function (t) {
+          return '<a class="pt-tag" href="/blog/tema/' + slugify(String(t)) + '/">' + String(t).toLowerCase() + '</a>';
+        }).join("");
+        var ab = article.querySelector(".author-box"), bl = article.querySelector(".back-link");
+        if (ab) article.insertBefore(trow, ab);
+        else if (bl) article.insertBefore(trow, bl);
+        else article.appendChild(trow);
+      }
+
       var scored = posts
         .filter(function (p) { return (p.slug || "").toLowerCase() !== SLUG; })
         .map(function (p) {
