@@ -179,6 +179,7 @@ def dataset_schema(url, observations):
             '"vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],'
             f'"url":"{full}",'
             '"creator":{"@type":"Person","name":"Filip Eremita"},'
+            '"license":"https://creativecommons.org/licenses/by/4.0/",'
             '"isAccessibleForFree":true,'
             '"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji",'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}},'
