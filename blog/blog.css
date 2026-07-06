@@ -231,3 +231,26 @@ article strong{color:#fff}
 .post-rating .pr-star{color:rgba(255,255,255,.2)}
 .post-rating .pr-star.on{color:var(--amber)}
 .post-rating .pr-count{color:var(--muted)}
+
+/* ── Seznam bloga: iskalnik + tag filtri ──────────────────── */
+.blog-filter{margin:0 0 1.6rem}
+.bf-search{position:relative;margin-bottom:.9rem}
+.bf-search svg{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none}
+.bf-search input{width:100%;box-sizing:border-box;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:12px;color:var(--text);font:inherit;font-size:.98rem;padding:.7rem .9rem .7rem 2.5rem;box-shadow:var(--card-shadow)}
+.bf-search input:focus{outline:none;border-color:var(--blue)}
+.bf-tags{display:flex;flex-wrap:wrap;gap:.45rem}
+.bf-tag{background:var(--card-bg);border:1px solid var(--card-border);color:var(--muted);
+  border-radius:999px;font:inherit;font-size:.82rem;padding:.32rem .8rem;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.35rem}
+.bf-tag:hover{border-color:var(--blue);color:var(--text)}
+.bf-tag.on{background:var(--stn-bg);border-color:var(--stn-border);color:var(--blue)}
+.bf-count{font-size:.7rem;opacity:.7;font-family:'JetBrains Mono',monospace}
+.bf-empty{color:var(--muted);text-align:center;padding:1.5rem 0;font-size:.95rem}
+
+.card-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
+.card-tag{font-size:.72rem;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:6px;padding:.1rem .45rem;font-family:'JetBrains Mono',monospace}
+
+/* značka priljubljenosti (visoka povprečna ocena) */
+.post-pop{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600;color:var(--amber);
+  background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:999px;padding:.12rem .5rem;margin-top:.5rem}

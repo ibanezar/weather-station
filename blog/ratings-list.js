@@ -49,6 +49,13 @@
           '<span class="pr-stars">' + stars(Math.round(r.avg)) + '</span>' +
           '<span class="pr-count">' + r.count + ' ' + plural(r.count) + '</span>';
         body.appendChild(el);
+
+        // "priljubljeno" za članke z visoko in dovolj številčno oceno
+        if (r.avg >= 4.5 && r.count >= 3) {
+          var pop = document.createElement("div");
+          pop.innerHTML = '<span class="post-pop">★ Priljubljeno</span>';
+          body.appendChild(pop.firstChild);
+        }
       });
     })
     .catch(function () { /* tiho — ocene so postranske */ });
