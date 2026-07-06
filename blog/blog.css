@@ -327,3 +327,37 @@ article strong{color:#fff}
 .post-new{display:inline-block;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
   color:var(--green);background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);
   border-radius:999px;padding:.06rem .45rem;margin-right:.5rem;vertical-align:middle}
+
+/* ── Deljive povezave do naslovov ─────────────────────────── */
+article h2{position:relative}
+.h-anchor{background:none;border:none;cursor:pointer;color:var(--muted);opacity:0;padding:0 .25rem;
+  vertical-align:middle;transition:opacity .15s,color .15s;line-height:1}
+.h-anchor svg{width:16px;height:16px;vertical-align:middle}
+article h2:hover .h-anchor,.h-anchor:focus-visible{opacity:.65}
+.h-anchor:hover{color:var(--blue);opacity:1}
+.h-anchor.copied{color:var(--green);opacity:1}
+.h-anchor.copied::after{content:" kopirano";font-size:.6rem;font-family:'JetBrains Mono',monospace;vertical-align:middle}
+@media(hover:none){.h-anchor{opacity:.5}}
+
+/* ── Gumb "na vrh" ────────────────────────────────────────── */
+.to-top{position:fixed;right:1.1rem;bottom:1.1rem;z-index:90;width:44px;height:44px;border-radius:50%;
+  background:var(--card-bg);border:1px solid var(--card-border);color:var(--text);cursor:pointer;
+  box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s,border-color .2s}
+.to-top.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.to-top:hover{border-color:var(--blue);color:var(--blue)}
+.to-top svg{width:22px;height:22px}
+
+/* ── Avtorjev okvirček ────────────────────────────────────── */
+.author-box{display:flex;align-items:center;gap:1rem;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:16px;padding:1.1rem 1.3rem;margin:2rem 0 1.4rem;box-shadow:var(--card-shadow)}
+.author-avatar{flex-shrink:0;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:1.05rem;color:#04070e;background:linear-gradient(135deg,var(--blue),var(--cyan));font-family:'JetBrains Mono',monospace}
+.author-info{display:flex;flex-direction:column;gap:.15rem}
+.author-name{font-weight:600}
+.author-bio{font-size:.88rem;color:var(--muted);line-height:1.5}
+.author-bio a{color:var(--blue);text-decoration:none}
+
+/* ── Polirke: fokus-obrobe ────────────────────────────────── */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{
+  outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
