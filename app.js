@@ -8167,8 +8167,8 @@ function generateRuleBasedBrief(p){
   const gdd=p.gdd||0,T=parseFloat(p.temp||15),rain=parseFloat(p.rain||0);
   const h=new Date().getHours();
   const mo=new Date().getMonth();
-  const lateFlowers=(mo>=8&&mo<=10)?'jesenske cvetlice':'pozne poletne cvetlice';
-  const subjects=gdd<120?'lesko in teloh':gdd<300?'spomladanske cvetlice in prve čebele':gdd<500?'metulje in hrošče':gdd<700?'kačje pastirje in kobilice':`pajke in ${lateFlowers}`;
+  const seasonFlowers=(mo>=8&&mo<=10)?'jesenske cvetlice':mo===7?'pozne poletne cvetlice':'poletne cvetlice';
+  const subjects=gdd<120?'lesko in teloh':gdd<300?'spomladanske cvetlice in prve čebele':gdd<500?'metulje in hrošče':gdd<700?'kačje pastirje in kobilice':`pajke in ${seasonFlowers}`;
   const time=h<9?p.goldAM?`Danes je zlata ura ob ${p.goldAM} — izvrsten čas za makro!`:'Jutranjo roso ujemi zgodaj.':h>18&&p.goldPM?`Večerna zlata ura ob ${p.goldPM} se bliža.`:'';
   const loc=gdd<300?'gozdnem robu nad Rečico ali ob potoku':gdd<600?'mokrotnih travnikih ob Savinji':'bregovih Savinje ali visokem travišču';
   const cond=rain>0?'Po dežju so rastline mokre — idealno za kapljice.':`Pri ${T}°C je aktivnost ${T>=18?'žuželk odlična':'žuželk zmerna — išči zavetišče'}.`;
