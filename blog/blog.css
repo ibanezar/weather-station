@@ -288,3 +288,8 @@ article strong{color:#fff}
 .related-date{font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .related-h{font-weight:600;font-size:.98rem;line-height:1.35}
 .related-sum{font-size:.85rem;color:var(--muted);line-height:1.5}
+
+/* ── RSS povezava v nogi ──────────────────────────────────── */
+.rss-link{display:inline-flex;align-items:center;gap:.3rem;color:var(--amber);text-decoration:none}
+.rss-link:hover{opacity:.85}
+.rss-link svg{flex-shrink:0}
