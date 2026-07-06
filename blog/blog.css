@@ -361,3 +361,10 @@ article h2:hover .h-anchor,.h-anchor:focus-visible{opacity:.65}
 /* ── Polirke: fokus-obrobe ────────────────────────────────── */
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{
   outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+
+/* ── "Teme" vrstica na članku ─────────────────────────────── */
+.post-topics{margin:1.8rem 0 .4rem;font-size:.9rem}
+.post-topics .pt-label{color:var(--muted);margin-right:.4rem}
+.pt-tag{display:inline-block;margin:.2rem .3rem .2rem 0;padding:.2rem .6rem;border-radius:999px;
+  font-size:.82rem;text-decoration:none;color:var(--blue);background:var(--stn-bg);border:1px solid var(--stn-border)}
+.pt-tag:hover{background:rgba(77,159,248,.22)}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stran ne obstaja (404) | Meteorec, Rečica ob Savinji</title>
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://meteorec.si/404.html">
+<style>
+:root{
+  --bg:#04070e; --text:#e8edf8; --muted:#adc0d8; --blue:#4d9ff8; --cyan:#22d3ee;
+  --card-bg:rgba(10,15,28,.94); --card-border:rgba(255,255,255,.11);
+  --card-shadow:0 4px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.1); --stn-bg:rgba(77,159,248,.14); --stn-border:rgba(77,159,248,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);color:var(--text);line-height:1.6;padding:1.5rem;
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;text-align:center}
+#bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(130px)}
+.b1{width:40vw;height:40vw;background:rgba(77,159,248,.22);top:-10%;left:-5%}
+.b2{width:35vw;height:35vw;background:rgba(167,139,250,.18);bottom:-10%;right:-5%}
+.b3{width:30vw;height:30vw;background:rgba(34,211,238,.14);top:40%;left:50%}
+.card{max-width:520px;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:20px;padding:2.4rem 2rem;box-shadow:var(--card-shadow)}
+.code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:3.4rem;font-weight:700;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:.4rem}
+h1{font-size:1.35rem;margin:.2rem 0 .6rem}
+p{color:var(--muted);margin:.4rem 0 1.4rem}
+form{display:flex;gap:.5rem;margin:0 auto 1.4rem;max-width:380px}
+input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font:inherit;font-size:.95rem;padding:.6rem .8rem}
+input:focus{outline:none;border-color:var(--blue)}
+button{background:var(--blue);color:#04070e;border:none;border-radius:10px;font:inherit;
+  font-weight:600;padding:.6rem 1.1rem;cursor:pointer}
+button:hover{opacity:.9}
+.links{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+.links a{display:inline-block;padding:.5rem 1rem;border-radius:999px;text-decoration:none;
+  color:var(--blue);background:var(--stn-bg);border:1px solid var(--stn-border);font-size:.9rem}
+.links a:hover{background:rgba(77,159,248,.22)}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="card">
+  <div class="code">404</div>
+  <h1>Te strani ni … kot sonca sredi megle 🌫️</h1>
+  <p>Stran, ki jo iščeš, ne obstaja ali se je preselila. Poskusi z iskanjem ali pa se vrni na eno od spodnjih strani.</p>
+  <form action="/blog/" method="get" onsubmit="var q=this.q.value.trim();location.href='/blog/'+(q?('?q='+encodeURIComponent(q)):'');return false;">
+    <input type="search" name="q" placeholder="Išči po blogu…" aria-label="Iskanje">
+    <button type="submit">Išči</button>
+  </form>
+  <div class="links">
+    <a href="/">🌡️ Vreme v živo</a>
+    <a href="/blog/">📝 Blog</a>
+    <a href="/o-postaji.html">📍 O postaji</a>
+  </div>
+</div>
+</body>
+</html>

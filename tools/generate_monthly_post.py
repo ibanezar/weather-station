@@ -305,6 +305,9 @@ def rewrite_sitemap_and_index(posts):
         (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-06-30"),
     ]
     sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
+    # kategorijske (tag) strani
+    tag_slugs = build_tag_pages(posts)
+    sm += [(f"{SITE}/blog/tema/{t}/", "weekly", "0.5", TODAY) for t in tag_slugs]
     body = "\n".join(
         f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lm}</lastmod>\n"
         f"    <changefreq>{cf}</changefreq>\n    <priority>{pr}</priority>\n  </url>"
@@ -332,6 +335,101 @@ def rewrite_sitemap_and_index(posts):
     open(idx, "w", encoding="utf-8").write(h)
     # RSS feed — ostane v sinhronu z blog.json
     build_rss(posts)
+
+
+def tagslug(t):
+    t = str(t).lower()
+    for a, b in (("č", "c"), ("š", "s"), ("ž", "z"), ("ć", "c"), ("đ", "d")):
+        t = t.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+
+
+def build_tag_pages(posts):
+    """Ustvari pristajalne strani /blog/tema/<tag>/ za tage z ≥2 objavama.
+    Vrne seznam (slug) za sitemap."""
+    # zberi objave po tagu
+    by_tag = {}
+    for p in posts:
+        for t in p.get("tags", []):
+            by_tag.setdefault(str(t).lower(), []).append(p)
+    made = []
+    for tag, plist in by_tag.items():
+        if len(plist) < 2:
+            continue
+        slug = tagslug(tag)
+        if not slug:
+            continue
+        plist = sorted(plist, key=lambda p: p.get("updated") or p["date"], reverse=True)
+        cards = "\n".join(
+            f'    <li>\n      <a class="post-card" href="/blog/{p["slug"]}.html">\n'
+            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="280" height="147" loading="lazy">\n'
+            f'        <div class="post-card-body">\n'
+            f'          <div class="date">{fmtdate(p["date"])}</div>\n'
+            f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
+            f'        </div>\n      </a>\n    </li>'
+            for p in plist)
+        canon = f"{SITE}/blog/tema/{slug}/"
+        desc = f"Vsi članki bloga Meteorec na temo „{tag}“ — vremenske analize, povzetki in rekordi z meritvami postaje IREICA1 v Rečici ob Savinji."
+        html = f'''<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema: {tag} — članki | Meteorec, Rečica ob Savinji</title>
+<link rel="canonical" href="{canon}">
+<meta name="description" content="{desc}">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{canon}">
+<meta property="og:title" content="Tema: {tag} — blog Meteorec">
+<meta property="og:description" content="{desc}">
+<meta property="og:image" content="{SITE}/og/blog.jpg">
+<link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
+<script type="application/ld+json">
+{{"@context":"https://schema.org","@type":"CollectionPage","name":"Tema: {tag}","url":"{canon}","isPartOf":{{"@type":"Blog","name":"Blog Meteorec","url":"{SITE}/blog/"}}}}
+</script>
+<script type="application/ld+json">
+{{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{{"@type":"ListItem","position":1,"name":"Meteorec","item":"{SITE}/"}},
+{{"@type":"ListItem","position":2,"name":"Blog","item":"{SITE}/blog/"}},
+{{"@type":"ListItem","position":3,"name":"{tag}"}}]}}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/blog/blog.css">
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Vreme v živo</a>
+      <a href="/blog/">Blog</a>
+      <a href="/o-postaji.html">O postaji</a>
+    </nav>
+  </header>
+  <nav class="crumbs" aria-label="Drobtine"><a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Tema: {tag}</nav>
+  <h1 class="page-title">Tema: {tag}</h1>
+  <p class="page-intro">{len(plist)} člankov na temo „{tag}“. <a href="/blog/" style="color:var(--blue)">← Vsi članki</a></p>
+  <ul class="post-list">
+{cards}
+  </ul>
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+</div>
+</body>
+</html>
+'''
+        d = os.path.join(ROOT, "blog", "tema", slug)
+        os.makedirs(d, exist_ok=True)
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(html)
+        made.append(slug)
+    return sorted(made)
 
 
 def build_rss(posts):

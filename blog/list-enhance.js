@@ -103,6 +103,12 @@
   input.addEventListener("input", function () { query = input.value; apply(); });
   sortSel.addEventListener("change", function () { sortBy(sortSel.value); });
 
+  // predizpolni iskanje iz ?q= (npr. s 404 strani)
+  try {
+    var pq = new URLSearchParams(location.search).get("q");
+    if (pq) { input.value = pq; query = pq; apply(); input.focus(); }
+  } catch (_) {}
+
   function renderMeta(slug) {
     var d = data[slug], parts = [];
     if (d.ratingCount) {
