@@ -107,6 +107,60 @@
     });
   }
 
+  // ── 3a) Lepljivi sidebar (samo širok zaslon; CSS skrije na mobilcu) ──
+  if (heads.length >= 3) {
+    var aside = document.createElement("aside");
+    aside.className = "blog-sidebar";
+    aside.innerHTML =
+      '<div class="side-block">' +
+        '<div class="side-title">Na tej strani</div>' +
+        '<nav class="side-toc">' +
+          heads.map(function (h) {
+            var txt = (h.childNodes[0] && h.childNodes[0].nodeType === 3) ? h.textContent.replace(/\s*$/, "") : h.textContent;
+            return '<a href="#' + h.id + '" data-id="' + h.id + '">' + txt + '</a>';
+          }).join("") +
+        '</nav>' +
+      '</div>' +
+      '<div class="side-block side-actions">' +
+        '<button type="button" class="side-sub" id="side-sub">📬 Prijava na novičke</button>' +
+        '<a class="side-back" href="/blog/">← Vsi članki</a>' +
+      '</div>';
+    document.body.appendChild(aside);
+
+    // mehko drsenje iz sidebara
+    aside.querySelector(".side-toc").addEventListener("click", function (e) {
+      var a = e.target.closest("a[href^='#']");
+      if (!a) return;
+      var el = document.getElementById(a.getAttribute("href").slice(1));
+      if (!el) return;
+      e.preventDefault();
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 12, behavior: "smooth" });
+      history.replaceState(null, "", a.getAttribute("href"));
+    });
+    // gumb za prijavo → skoči na obstoječo prijavno škatlo
+    aside.querySelector("#side-sub").addEventListener("click", function () {
+      var box = document.querySelector(".subscribe-box");
+      if (box) { box.scrollIntoView({ behavior: "smooth", block: "center" });
+        var inp = box.querySelector("input"); if (inp) setTimeout(function () { inp.focus(); }, 500); }
+    });
+
+    // scrollspy — poudari trenutni razdelek
+    var spyLinks = Array.prototype.slice.call(aside.querySelectorAll(".side-toc a"));
+    var spyTicking = false;
+    function spy() {
+      var y = window.pageYOffset + 130, cur = heads[0].id;
+      for (var i = 0; i < heads.length; i++) {
+        if (heads[i].getBoundingClientRect().top + window.pageYOffset <= y) cur = heads[i].id;
+      }
+      spyLinks.forEach(function (a) { a.classList.toggle("active", a.getAttribute("data-id") === cur); });
+      spyTicking = false;
+    }
+    window.addEventListener("scroll", function () {
+      if (!spyTicking) { window.requestAnimationFrame(spy); spyTicking = true; }
+    }, { passive: true });
+    spy();
+  }
+
   // ── 3b) Gumb "na vrh" ──────────────────────────────────────
   var toTop = document.createElement("button");
   toTop.type = "button";

@@ -368,3 +368,31 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .pt-tag{display:inline-block;margin:.2rem .3rem .2rem 0;padding:.2rem .6rem;border-radius:999px;
   font-size:.82rem;text-decoration:none;color:var(--blue);background:var(--stn-bg);border:1px solid var(--stn-border)}
 .pt-tag:hover{background:rgba(77,159,248,.22)}
+
+/* ── Blog sidebar (lepljiv, samo širok zaslon) ────────────── */
+.blog-sidebar{display:none}
+@media(min-width:1300px){
+  .blog-sidebar{
+    display:flex;flex-direction:column;gap:1rem;
+    position:fixed;top:90px;left:calc(50% + 384px);width:250px;
+    max-height:calc(100vh - 120px);overflow-y:auto;z-index:20;
+    padding-right:.3rem;
+  }
+  /* na desktopu je kazalo v sidebaru → skrij vgnezdenega */
+  .post-toc{display:none}
+}
+.side-block{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1rem;box-shadow:var(--card-shadow)}
+.side-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.6rem}
+.side-toc{display:flex;flex-direction:column;gap:.1rem}
+.side-toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;line-height:1.4;
+  padding:.28rem .55rem;border-left:2px solid transparent;border-radius:0 6px 6px 0;transition:all .15s}
+.side-toc a:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.side-toc a.active{color:var(--blue);border-left-color:var(--blue);background:rgba(77,159,248,.08);font-weight:600}
+.side-actions{display:flex;flex-direction:column;gap:.55rem}
+.side-sub{background:var(--blue);color:#04070e;border:none;border-radius:10px;font:inherit;font-weight:600;
+  font-size:.88rem;padding:.55rem;cursor:pointer;transition:opacity .15s}
+.side-sub:hover{opacity:.9}
+.side-back{text-align:center;color:var(--muted);text-decoration:none;font-size:.85rem;padding:.3rem}
+.side-back:hover{color:var(--blue)}
