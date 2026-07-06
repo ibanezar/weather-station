@@ -293,3 +293,22 @@ article strong{color:#fff}
 .rss-link{display:inline-flex;align-items:center;gap:.3rem;color:var(--amber);text-decoration:none}
 .rss-link:hover{opacity:.85}
 .rss-link svg{flex-shrink:0}
+
+/* ── Prijava na nove članke ───────────────────────────────── */
+.subscribe-box{background:linear-gradient(135deg,rgba(77,159,248,.1),rgba(167,139,250,.08));
+  border:1px solid var(--card-border);border-radius:18px;padding:1.6rem 1.5rem;margin:2.6rem 0 1.5rem;
+  box-shadow:var(--card-shadow)}
+.sub-title{font-size:1.2rem;margin:0 0 .4rem}
+.sub-desc{color:var(--muted);font-size:.92rem;line-height:1.6;margin:0 0 1rem}
+.sub-form{display:flex;gap:.6rem;flex-wrap:wrap}
+.sub-input{flex:1;min-width:200px;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font:inherit;font-size:.98rem;padding:.65rem .85rem}
+.sub-input:focus{outline:none;border-color:var(--blue)}
+.sub-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.sub-btn{background:var(--blue);color:#04070e;border:none;border-radius:10px;font:inherit;font-weight:600;
+  padding:.65rem 1.5rem;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.sub-btn:hover{opacity:.9}
+.sub-btn:disabled{opacity:.55;cursor:default}
+.sub-msg{font-size:.88rem;margin:.7rem 0 0;min-height:1em}
+.sub-msg.ok{color:var(--green)}
+.sub-msg.err{color:#f87171}
