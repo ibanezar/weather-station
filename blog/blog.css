@@ -128,6 +128,29 @@ article strong{color:#fff}
 .back-link{display:inline-block;margin-top:2rem;color:var(--cyan);text-decoration:none;font-weight:600}
 .back-link:hover{text-decoration:underline}
 
+/* ── Všečki (srčki) na začetku in koncu posta ── */
+.like-box{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.like-box[data-place="top"]{margin:1.4rem 0 1.8rem}
+.like-box[data-place="bottom"]{margin:2.2rem 0 1rem}
+.like-btn{display:inline-flex;align-items:center;gap:.5rem;
+  padding:.5rem 1rem;border-radius:999px;cursor:pointer;line-height:1;
+  font-family:inherit;font-size:.9rem;font-weight:600;color:var(--muted);
+  background:var(--card-bg);border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);
+  transition:color .18s,border-color .18s,transform .1s,background .18s}
+.like-btn:hover{color:var(--text);border-color:rgba(244,63,94,.45);transform:translateY(-1px)}
+.like-btn:active{transform:translateY(0)}
+.like-btn svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;
+  transition:fill .18s,stroke .18s,transform .18s}
+.like-btn.is-liked{color:#f43f5e;border-color:rgba(244,63,94,.5);background:rgba(244,63,94,.1)}
+.like-btn.is-liked svg{fill:#f43f5e;stroke:#f43f5e}
+.like-count{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text);
+  min-width:1ch;padding-left:.15rem}
+.like-hint{font-size:.82rem;color:var(--muted)}
+.like-btn.pop svg{animation:like-pop .35s ease}
+@keyframes like-pop{0%{transform:scale(1)}35%{transform:scale(1.35)}70%{transform:scale(.9)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.like-btn.pop svg{animation:none}}
+
 /* ── Donacijski blok (Flik) ── */
 .donate-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
   padding:1.5rem 1.6rem;margin:2.4rem 0 1.6rem;
