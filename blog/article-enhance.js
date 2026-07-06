@@ -59,28 +59,43 @@
   window.addEventListener("resize", onScroll, { passive: true });
   updateProgress();
 
-  // ── 3) Kazalo (TOC) ────────────────────────────────────────
+  // ── 3) Naslovi: id-ji + deljive 🔗 povezave + kazalo (TOC) ──
   var heads = Array.prototype.slice.call(article.querySelectorAll("h2"));
-  if (heads.length >= 3) {
-    var used = {};
-    var items = heads.map(function (h) {
-      var id = h.id || slugify(h.textContent);
-      if (!id) return null;
-      if (used[id]) id = id + "-" + (used[id]++); else used[id] = 1;
-      h.id = id;
-      return '<li><a href="#' + id + '">' + h.textContent + '</a></li>';
-    }).filter(Boolean);
+  var used = {};
+  heads.forEach(function (h) {
+    var id = h.id || slugify(h.textContent);
+    if (!id) return;
+    if (used[id]) id = id + "-" + (used[id]++); else used[id] = 1;
+    h.id = id;
+    // deljiva povezava do razdelka
+    var link = document.createElement("button");
+    link.type = "button";
+    link.className = "h-anchor";
+    link.setAttribute("aria-label", "Kopiraj povezavo do razdelka");
+    link.title = "Kopiraj povezavo do razdelka";
+    link.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>';
+    link.addEventListener("click", function () {
+      var u = location.origin + location.pathname + "#" + h.id;
+      history.replaceState(null, "", "#" + h.id);
+      var done = function () { link.classList.add("copied"); setTimeout(function () { link.classList.remove("copied"); }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, done); else done();
+    });
+    h.appendChild(link);
+  });
 
+  if (heads.length >= 3) {
+    var items = heads.map(function (h) {
+      // besedilo naslova brez gumba
+      var txt = (h.childNodes[0] && h.childNodes[0].nodeType === 3) ? h.textContent.replace(/\s*$/, "") : h.textContent;
+      return '<li><a href="#' + h.id + '">' + txt + '</a></li>';
+    });
     var toc = document.createElement("details");
     toc.className = "post-toc";
     toc.open = true;
     toc.innerHTML = '<summary>Kazalo</summary><ul>' + items.join("") + '</ul>';
-
     var anchor = article.querySelector(".lead") || article.querySelector(".post-meta");
     if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(toc, anchor.nextSibling);
     else article.insertBefore(toc, article.firstChild);
-
-    // mehko drsenje z odmikom za fiksno progres črto
     toc.addEventListener("click", function (e) {
       var a = e.target.closest("a[href^='#']");
       if (!a) return;
@@ -91,6 +106,35 @@
       history.replaceState(null, "", a.getAttribute("href"));
     });
   }
+
+  // ── 3b) Gumb "na vrh" ──────────────────────────────────────
+  var toTop = document.createElement("button");
+  toTop.type = "button";
+  toTop.className = "to-top";
+  toTop.setAttribute("aria-label", "Nazaj na vrh");
+  toTop.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>';
+  toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+  document.body.appendChild(toTop);
+  window.addEventListener("scroll", function () {
+    toTop.classList.toggle("show", window.pageYOffset > 700);
+  }, { passive: true });
+
+  // ── 3c) Avtorjev okvirček (na koncu članka) ────────────────
+  var authorBox = document.createElement("div");
+  authorBox.className = "author-box";
+  authorBox.innerHTML =
+    '<div class="author-avatar">FE</div>' +
+    '<div class="author-info">' +
+      '<span class="author-name">Filip Eremita</span>' +
+      '<span class="author-bio">Upravljalec meteorološke postaje IREICA1 v Rečici ob Savinji. ' +
+      '<a href="/o-postaji.html">Več o postaji →</a></span>' +
+    '</div>';
+  var backLink = article.querySelector(".back-link");
+  if (backLink && backLink.parentNode) backLink.parentNode.insertBefore(authorBox, backLink);
+  else article.appendChild(authorBox);
+
+  // ── 4) Sorodni članki ──────────────────────────────────────
+  if (!SLUG) return;
 
   // ── 4) Sorodni članki ──────────────────────────────────────
   if (!SLUG) return;

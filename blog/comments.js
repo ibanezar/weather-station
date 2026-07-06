@@ -119,9 +119,40 @@
         '<span class="cmt-avg-stars">' + stars(Math.round(rating.avg)) + '</span>' +
         '<span class="cmt-avg-count">' + rating.count + ' ' + plural(rating.count, "ocena", "oceni", "ocene", "ocen") + '</span>';
       summaryEl.style.display = "";
+      injectRatingSchema(rating);
     } else {
       summaryEl.style.display = "none";
     }
+  }
+
+  // Strukturirani podatki (schema.org aggregateRating) — vidni tudi
+  // iskalnikom/orodjem; ocene so na strani dejansko prikazane.
+  function injectRatingSchema(rating) {
+    var old = document.getElementById("cmt-rating-schema");
+    if (old) old.remove();
+    var canon = document.querySelector('link[rel="canonical"]');
+    var url = (canon && canon.href) || location.href;
+    var title = (document.querySelector('meta[property="og:title"]') || {}).content
+      || document.title.replace(/\s*\|.*$/, "");
+    var data = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "@id": url + "#article",
+      "headline": title,
+      "url": url,
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": Number(rating.avg.toFixed(2)),
+        "ratingCount": rating.count,
+        "bestRating": 5,
+        "worstRating": 1
+      }
+    };
+    var s = document.createElement("script");
+    s.type = "application/ld+json";
+    s.id = "cmt-rating-schema";
+    s.textContent = JSON.stringify(data);
+    document.head.appendChild(s);
   }
 
   function plural(n, one, two, few, many) {
