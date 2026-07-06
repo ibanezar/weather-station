@@ -330,6 +330,48 @@ def rewrite_sitemap_and_index(posts):
     h = re.sub(r'(<ul class="post-list">).*?(</ul>)',
                r'\1\n' + items + r'\n  \2', h, flags=re.S)
     open(idx, "w", encoding="utf-8").write(h)
+    # RSS feed — ostane v sinhronu z blog.json
+    build_rss(posts)
+
+
+def build_rss(posts):
+    """Zapiše blog/rss.xml (RSS 2.0) iz seznama objav (blog.json)."""
+    def rfc822(iso):
+        try:
+            d = datetime.datetime.strptime(iso, "%Y-%m-%d")
+            return d.strftime("%a, %d %b %Y 08:00:00 +0000")
+        except Exception:
+            return ""
+    def esc(s):
+        return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    items = []
+    for p in posts:
+        url = p.get("url") or ("/blog/" + p["slug"] + ".html")
+        link = SITE + (url if url.startswith("/") else "/" + url)
+        cats = "".join(f"      <category>{esc(t)}</category>\n" for t in p.get("tags", []))
+        items.append(
+            "    <item>\n"
+            f"      <title>{esc(p['title'])}</title>\n"
+            f"      <link>{link}</link>\n"
+            f'      <guid isPermaLink="true">{link}</guid>\n'
+            f"      <pubDate>{rfc822(p.get('updated') or p['date'])}</pubDate>\n"
+            f"      <description>{esc(p.get('summary', ''))}</description>\n"
+            f"{cats}"
+            "    </item>")
+    now = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S +0000")
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+        '  <channel>\n'
+        '    <title>Meteorec — blog</title>\n'
+        f'    <link>{SITE}/blog/</link>\n'
+        '    <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>\n'
+        '    <language>sl</language>\n'
+        f'    <lastBuildDate>{now}</lastBuildDate>\n'
+        f'    <atom:link href="{SITE}/blog/rss.xml" rel="self" type="application/rss+xml"/>\n'
+        + "\n".join(items) + "\n"
+        '  </channel>\n</rss>\n')
+    open(os.path.join(ROOT, "blog", "rss.xml"), "w", encoding="utf-8").write(xml)
 
 def wire_all(entry, url, stats=None):
     # blog.json — vstavi/posodobi (najnovejše prvo po datumu objave/posodobitve)
