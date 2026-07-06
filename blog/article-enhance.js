@@ -121,11 +121,18 @@
           }).join("") +
         '</nav>' +
       '</div>' +
+      '<div class="side-block side-recent" hidden>' +
+        '<div class="side-title">Novejši članki</div>' +
+        '<div class="side-list"></div>' +
+      '</div>' +
       '<div class="side-block side-actions">' +
         '<button type="button" class="side-sub" id="side-sub">📬 Prijava na novičke</button>' +
         '<a class="side-back" href="/blog/">← Vsi članki</a>' +
+        '<a class="side-back" href="/blog/rss.xml">📡 RSS</a>' +
       '</div>';
-    document.body.appendChild(aside);
+    var wrap = document.querySelector(".wrap");
+    if (wrap) wrap.insertBefore(aside, article.nextSibling);
+    else document.body.appendChild(aside);
     document.body.classList.add("has-blog-sidebar");
 
     // mehko drsenje iz sidebara
@@ -196,6 +203,23 @@
   fetch("/blog.json", { cache: "force-cache" })
     .then(function (r) { return r.json(); })
     .then(function (posts) {
+      // Sidebar: "Novejši članki" (neodvisno od tagov)
+      var recentBlock = document.querySelector(".blog-sidebar .side-recent");
+      if (recentBlock) {
+        var recent = posts
+          .filter(function (p) { return (p.slug || "").toLowerCase() !== SLUG; })
+          .sort(function (a, b) { return a.date < b.date ? 1 : -1; })
+          .slice(0, 4);
+        if (recent.length) {
+          recentBlock.querySelector(".side-list").innerHTML = recent.map(function (p) {
+            return '<a class="side-post" href="' + (p.url || ("/blog/" + p.slug + ".html")) + '">' +
+              '<span class="side-post-t">' + p.title + '</span>' +
+              '<span class="side-post-d">' + fmtDate(p.date) + '</span></a>';
+          }).join("");
+          recentBlock.hidden = false;
+        }
+      }
+
       var me = null;
       posts.forEach(function (p) { if ((p.slug || "").toLowerCase() === SLUG) me = p; });
       if (!me) return;
