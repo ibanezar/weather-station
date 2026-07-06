@@ -1522,10 +1522,13 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             const wanted = slugsParam.split(",").map(s => s.trim())
               .filter(s => SLUG_RE.test(s)).slice(0, 60);
             const ratings = {};
+            const comments = {};
             await Promise.all(wanted.map(async s => {
-              ratings[s] = _stats(await _cRead(s));
+              const items = await _cRead(s);
+              ratings[s] = _stats(items);
+              comments[s] = items.filter(i => i.comment && i.comment.length).length;
             }));
-            return new Response(JSON.stringify({ ratings }), {
+            return new Response(JSON.stringify({ ratings, comments }), {
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" }
             });
           }
