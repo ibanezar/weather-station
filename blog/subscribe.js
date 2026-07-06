@@ -10,7 +10,7 @@
   var box = document.createElement("section");
   box.className = "subscribe-box";
   box.innerHTML =
-    '<h2 class="sub-title">📬 Nič ne zamudi</h2>' +
+    '<h2 class="sub-title">📬 Prijava na novičke</h2>' +
     '<p class="sub-desc">Prijavi se in ob vsakem novem članku (vremenski povzetki, rekordi, analize) dobiš e-obvestilo. Brez spama, odjava z enim klikom.</p>' +
     '<form class="sub-form" id="sub-form" autocomplete="off">' +
       '<input class="sub-input" id="sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">' +
