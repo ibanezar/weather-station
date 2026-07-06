@@ -371,17 +371,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 
 /* ── Blog sidebar (lepljiv, samo širok zaslon) ────────────── */
 .blog-sidebar{display:none}
-/* Na širokih zaslonih .wrap postane širši (1024) in ostane centriran:
-   glava/noga se raztezata čez celotno širino, vsebinski elementi so omejeni
-   na ~730 px in levo poravnani, sidebar (fiksen) pa sedi v desni tretjini.
-   Tako je postavitev uravnotežena in se prikaže že pri ~1080 px. */
+/* Na širokih zaslonih .wrap postane mreža z dvema stolpcema:
+   glava in noga se raztezata čez obe koloni, članek zasede levo (main),
+   sidebar pa desno (side). Sidebar je `sticky` — teče skupaj z vsebino in
+   se prilepi pod glavo. Postavitev je vezana na dejanski stolpec vsebine
+   (ne na fiksni odmik), zato ostane poravnana pri vseh širinah ≥1080 px. */
 @media(min-width:1080px){
-  body.has-blog-sidebar .wrap{ max-width:1024px; }
-  body.has-blog-sidebar .wrap > *:not(.site-head):not(.site-foot){ max-width:730px; }
+  body.has-blog-sidebar .wrap{
+    max-width:1100px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 270px;
+    grid-template-areas:"head head" "main side" "foot foot";
+    column-gap:3rem;
+    align-items:start;
+  }
+  body.has-blog-sidebar .wrap > .site-head{grid-area:head}
+  body.has-blog-sidebar .wrap > .site-foot{grid-area:foot}
+  body.has-blog-sidebar .wrap > article{grid-area:main;max-width:730px;width:100%}
   body.has-blog-sidebar .blog-sidebar{
+    grid-area:side;align-self:start;
+    position:sticky;top:90px;
     display:flex;flex-direction:column;gap:1rem;
-    position:fixed;top:90px;left:calc(50% + 262px);width:250px;
-    max-height:calc(100vh - 120px);overflow-y:auto;z-index:20;
+    max-height:calc(100vh - 110px);overflow-y:auto;
     padding-right:.3rem;
   }
   /* na desktopu je kazalo v sidebaru → skrij vgnezdenega */
@@ -414,3 +425,4 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .side-post-t{font-size:.85rem;line-height:1.35}
 .side-post:hover .side-post-t{color:var(--blue)}
 .side-post-r{flex-shrink:0;font-size:.78rem;color:var(--amber);font-weight:600;white-space:nowrap}
+.side-post-d{flex-shrink:0;font-size:.72rem;color:var(--muted);white-space:nowrap;font-family:'JetBrains Mono',monospace}
