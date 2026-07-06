@@ -223,3 +223,11 @@ article strong{color:#fff}
 .cmt-author{font-weight:600;font-size:.92rem}
 .cmt-time{font-size:.78rem;color:var(--muted);margin-left:auto}
 .cmt-body{color:var(--text);font-size:.95rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+
+/* ── Povprečna ocena na seznamu blogov ────────────────────── */
+.post-rating{display:flex;align-items:center;gap:.4rem;margin-top:.6rem;font-size:.82rem}
+.post-rating .pr-avg{font-weight:700;color:var(--amber)}
+.post-rating .pr-stars{letter-spacing:.5px;font-size:.8rem}
+.post-rating .pr-star{color:rgba(255,255,255,.2)}
+.post-rating .pr-star.on{color:var(--amber)}
+.post-rating .pr-count{color:var(--muted)}

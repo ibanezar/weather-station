@@ -384,7 +384,7 @@ function renderCurrentMonthPage(yr, mo, days) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_ALLOWED });
     }
@@ -1515,6 +1515,20 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         if (request.method === "GET") {
+          // Bulk povprečne ocene za več člankov naenkrat (za seznam blogov):
+          //   ?slugs=a,b,c → { ratings: { a:{avg,count}, … } }
+          const slugsParam = url.searchParams.get("slugs");
+          if (slugsParam !== null) {
+            const wanted = slugsParam.split(",").map(s => s.trim())
+              .filter(s => SLUG_RE.test(s)).slice(0, 60);
+            const ratings = {};
+            await Promise.all(wanted.map(async s => {
+              ratings[s] = _stats(await _cRead(s));
+            }));
+            return new Response(JSON.stringify({ ratings }), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" }
+            });
+          }
           const slug = url.searchParams.get("slug") || "";
           if (!SLUG_RE.test(slug)) {
             return new Response(JSON.stringify({ comments: [], rating: { avg: null, count: 0 } }), {
@@ -1575,6 +1589,34 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           };
           items.unshift(entry);
           await _cWrite(slug, items.slice(0, 500));
+
+          // E-obvestilo lastniku ob novem komentarju (v ozadju).
+          // Zahteva skrivnost RESEND_API_KEY (Cloudflare → Settings → Variables).
+          // Neobvezno: NOTIFY_EMAIL (prejemnik), NOTIFY_FROM (pošiljatelj).
+          if (env?.RESEND_API_KEY) {
+            const to   = env.NOTIFY_EMAIL || "filip.eremita@gmail.com";
+            const from = env.NOTIFY_FROM  || "Meteorec komentarji <onboarding@resend.dev>";
+            const artUrl = `https://meteorec.si/blog/${slug}.html#komentarji`;
+            const esc = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const ratingLine = entry.rating ? `<p>Ocena: ${"★".repeat(entry.rating)}${"☆".repeat(5 - entry.rating)} (${entry.rating}/5)</p>` : "";
+            const html =
+              `<p><strong>${esc(entry.author)}</strong> je komentiral članek <a href="${artUrl}">${esc(slug)}</a>:</p>` +
+              ratingLine +
+              (entry.comment ? `<blockquote style="border-left:3px solid #4d9ff8;margin:0;padding:.2rem 0 .2rem 1rem;color:#333">${esc(entry.comment)}</blockquote>` : "") +
+              `<p><a href="${artUrl}">Odpri komentarje →</a></p>`;
+            ctx.waitUntil(
+              fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  from, to,
+                  subject: `Nov komentar na blogu: ${slug}`,
+                  html,
+                }),
+              }).catch(() => {})
+            );
+          }
+
           return new Response(JSON.stringify({ ok: true, comment: {
             id: entry.id, ts: entry.ts, author: entry.author, comment: entry.comment, rating: entry.rating
           }, rating: _stats(items) }), {
