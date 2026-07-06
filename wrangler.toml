@@ -5,3 +5,7 @@ compatibility_date = "2024-09-23"
 [[r2_buckets]]
 binding = "PHOTOS_R2"
 bucket_name = "meteorec-photos"
+
+[[kv_namespaces]]
+binding = "COUNTER_KV"
+id = "ad19629f12a042dd8cd90c64a68662b4"
