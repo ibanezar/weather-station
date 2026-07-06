@@ -1,8 +1,8 @@
 name: Nastavi KV namespace (COUNTER_KV)
 
-# Enkratni pomožni workflow: ustvari (ali najde) KV namespace COUNTER_KV,
-# vpiše binding v wrangler.toml in ga commita. Commit sproži deploy workerja.
-# Po uspešni nastavitvi lahko to datoteko mirno izbrišeš.
+# Enkratni pomozni workflow: ustvari (ali najde) KV namespace COUNTER_KV,
+# vpise binding v wrangler.toml in ga commita. Commit sprozi deploy workerja.
+# Po uspesni nastavitvi lahko to datoteko mirno izbrises.
 
 on:
   workflow_dispatch:
@@ -20,12 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Preveri, ali je binding že v wrangler.toml
+      - name: Preveri, ali je binding ze v wrangler.toml
         id: check
         run: |
           if grep -q 'binding = "COUNTER_KV"' wrangler.toml; then
             echo "already=true" >> "$GITHUB_OUTPUT"
-            echo "Binding COUNTER_KV je že prisoten — nič za storiti."
+            echo "Binding COUNTER_KV je ze prisoten - nic za storiti."
           else
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi
@@ -35,20 +35,16 @@ jobs:
         id: kv
         run: |
           set -euo pipefail
-          # wrangler doda predpono "<worker-name>-" k naslovu namespace-a
           TITLE="weatherireica1-${BINDING}"
-
-          echo "Iščem obstoječi namespace z naslovom: $TITLE"
+          echo "Iscem obstojeci namespace z naslovom: $TITLE"
           LIST=$(npx --yes wrangler@3 kv namespace list 2>/dev/null || echo '[]')
           ID=$(echo "$LIST" | jq -r --arg t "$TITLE" '.[] | select(.title==$t) | .id' | head -n1)
-
           if [ -z "$ID" ] || [ "$ID" = "null" ]; then
-            echo "Ne obstaja — ustvarjam nov namespace."
+            echo "Ne obstaja - ustvarjam nov namespace."
             OUT=$(npx --yes wrangler@3 kv namespace create "$BINDING")
             echo "$OUT"
             ID=$(echo "$OUT" | grep -oE '[0-9a-f]{32}' | head -n1)
           fi
-
           if [ -z "$ID" ]; then
             echo "::error::Nisem uspel pridobiti ID-ja KV namespace-a. Preveri, da ima CLOUDFLARE_API_TOKEN pravico Workers KV Storage: Edit."
             exit 1
@@ -56,20 +52,22 @@ jobs:
           echo "KV namespace ID: $ID"
           echo "id=$ID" >> "$GITHUB_OUTPUT"
 
-      - name: Vpiši binding v wrangler.toml in commitaj
+      - name: Vpisi binding v wrangler.toml in commitaj
         if: steps.check.outputs.already == 'false'
         env:
           KV_ID: ${{ steps.kv.outputs.id }}
         run: |
           set -euo pipefail
-          cat >> wrangler.toml <<EOF
-
-[[kv_namespaces]]
-binding = "COUNTER_KV"
-id = "${KV_ID}"
-EOF
+          {
+            echo ""
+            echo "[[kv_namespaces]]"
+            echo 'binding = "COUNTER_KV"'
+            echo "id = \"${KV_ID}\""
+          } >> wrangler.toml
+          echo "--- wrangler.toml ---"
+          cat wrangler.toml
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add wrangler.toml
-          git commit -m "worker: veži KV namespace COUNTER_KV za globalne obiske in všečke"
+          git commit -m "worker: vezi KV namespace COUNTER_KV za globalne obiske in vsecke"
           git push
