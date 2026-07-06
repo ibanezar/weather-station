@@ -9,3 +9,7 @@ bucket_name = "meteorec-photos"
 [[kv_namespaces]]
 binding = "COUNTER_KV"
 id = "ad19629f12a042dd8cd90c64a68662b4"
+
+[vars]
+# Pošiljatelj e-obvestil o komentarjih (domena meteorec.si verificirana v Resend).
+NOTIFY_FROM = "Meteorec <komentarji@meteorec.si>"
