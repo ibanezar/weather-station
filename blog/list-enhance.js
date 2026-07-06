@@ -234,6 +234,7 @@
 
     aside.innerHTML = html;
     document.body.appendChild(aside);
+    document.body.classList.add("has-blog-sidebar");
 
     var sb = aside.querySelector("#side-sub");
     if (sb) sb.addEventListener("click", function () {
