@@ -1747,10 +1747,17 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
           if (!secret || body.secret !== secret) return _json({ error: "Nedovoljeno" }, 401);
 
-          let posts = [];
-          try { posts = await (await fetch("https://meteorec.si/blog.json", { cf: { cacheTtl: 60 } })).json(); }
-          catch (_) { return _json({ error: "blog.json ni dosegljiv" }, 502); }
-          const post = body.slug ? posts.find(p => p.slug === body.slug) : posts[0];
+          // Metapodatke lahko podamo neposredno (body.post) — tako ni odvisnosti
+          // od že objavljenega blog.json (npr. tik po objavi, pred osvežitvijo Pages).
+          let post = null;
+          if (body.post && body.post.slug && body.post.title) {
+            post = body.post;
+          } else {
+            let posts = [];
+            try { posts = await (await fetch("https://meteorec.si/blog.json", { cf: { cacheTtl: 60 } })).json(); }
+            catch (_) { return _json({ error: "blog.json ni dosegljiv" }, 502); }
+            post = body.slug ? posts.find(p => p.slug === body.slug) : posts[0];
+          }
           if (!post) return _json({ error: "Članek ni najden" }, 404);
 
           const confirmed = await _read("subscribers/confirmed.json");

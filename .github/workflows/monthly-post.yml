@@ -89,3 +89,52 @@ jobs:
               print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
               sys.exit(1)
           PYEOF
+
+      - name: Obvesti e-naročnike o novi objavi
+        if: steps.commit.outputs.published == 'true' && env.NOTIFY_SECRET != ''
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error, sys
+
+          MONTH = "${{ steps.month.outputs.month }}"
+          MONTH_NAMES = {
+              "01": "januar", "02": "februar", "03": "marec",  "04": "april",
+              "05": "maj",    "06": "junij",   "07": "julij",  "08": "avgust",
+              "09": "september", "10": "oktober", "11": "november", "12": "december",
+          }
+          year, mon = MONTH[:4], MONTH[5:7]
+          slug = f"vremenski-povzetek-{MONTH_NAMES[mon]}-{year}"
+
+          # Metapodatke preberi iz sveže zapisanega blog.json (ni odvisno od Pages).
+          posts = json.load(open("blog.json", encoding="utf-8"))
+          post = next((p for p in posts if p.get("slug") == slug), None)
+          if not post:
+              print(f"Ni vnosa '{slug}' v blog.json — razpošiljanje preskočeno.")
+              sys.exit(0)
+
+          payload = json.dumps({
+              "secret": os.environ["NOTIFY_SECRET"],
+              "post": {
+                  "slug": post["slug"],
+                  "title": post["title"],
+                  "summary": post.get("summary", ""),
+                  "url": post.get("url", f"/blog/{slug}.html"),
+              },
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://weatherireica1.filip-eremita.workers.dev/blog-subscribe/notify",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  print(f"Razpošiljanje naročnikom: {r.status} — {r.read().decode()[:200]}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"Napaka pri razpošiljanju {e.code}: {body}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF
