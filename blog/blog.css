@@ -312,3 +312,18 @@ article strong{color:#fff}
 .sub-msg{font-size:.88rem;margin:.7rem 0 0;min-height:1em}
 .sub-msg.ok{color:var(--green)}
 .sub-msg.err{color:#f87171}
+
+/* ── Seznam: razvrščanje + meta značke ────────────────────── */
+.bf-top{display:flex;gap:.9rem;align-items:center;margin-bottom:.9rem;flex-wrap:wrap}
+.bf-top .bf-search{flex:1;min-width:200px;margin-bottom:0}
+.bf-sort{display:inline-flex;align-items:center;gap:.45rem;font-size:.85rem;color:var(--muted)}
+.bf-sort select{background:var(--card-bg);border:1px solid var(--card-border);color:var(--text);
+  border-radius:10px;font:inherit;font-size:.88rem;padding:.5rem .7rem;cursor:pointer}
+.bf-sort select:focus{outline:none;border-color:var(--blue)}
+
+.post-meta-row{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin-top:.6rem}
+.post-meta-row .post-rating{margin-top:0}
+.post-comments{display:inline-flex;align-items:center;gap:.3rem;font-size:.82rem;color:var(--muted)}
+.post-new{display:inline-block;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--green);background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);
+  border-radius:999px;padding:.06rem .45rem;margin-right:.5rem;vertical-align:middle}
