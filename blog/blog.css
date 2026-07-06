@@ -371,15 +371,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 
 /* ── Blog sidebar (lepljiv, samo širok zaslon) ────────────── */
 .blog-sidebar{display:none}
-@media(min-width:1300px){
-  .blog-sidebar{
+/* Na širokih zaslonih se vsebina (720) + sidebar (250) centrirata skupaj:
+   vsebino zamaknemo levo za pol širine (sidebar+razmik)/2 = 137px, sidebar
+   pa postavimo desno od nje. Tako se prikaže že pri ~1080 px in ne prekriva. */
+@media(min-width:1080px){
+  body.has-blog-sidebar .wrap{ transform: translateX(-137px); }
+  body.has-blog-sidebar .blog-sidebar{
     display:flex;flex-direction:column;gap:1rem;
-    position:fixed;top:90px;left:calc(50% + 384px);width:250px;
+    position:fixed;top:90px;left:calc(50% + 247px);width:250px;
     max-height:calc(100vh - 120px);overflow-y:auto;z-index:20;
     padding-right:.3rem;
   }
   /* na desktopu je kazalo v sidebaru → skrij vgnezdenega */
-  .post-toc{display:none}
+  body.has-blog-sidebar .post-toc{display:none}
 }
 .side-block{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
   padding:.9rem 1rem;box-shadow:var(--card-shadow)}

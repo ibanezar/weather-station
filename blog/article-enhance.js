@@ -126,6 +126,7 @@
         '<a class="side-back" href="/blog/">← Vsi članki</a>' +
       '</div>';
     document.body.appendChild(aside);
+    document.body.classList.add("has-blog-sidebar");
 
     // mehko drsenje iz sidebara
     aside.querySelector(".side-toc").addEventListener("click", function (e) {
