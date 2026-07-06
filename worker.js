@@ -453,8 +453,53 @@ async function _sendPush(env, sub, payloadObj) {
   });
   return res.status;
 }
+// Pošlji obvestilo VSEM naročnikom (počisti potekle). Vrne {sent, pruned}.
+async function _pushAll(env, payload) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const dead = [];
+  await Promise.all(subs.map(async s => {
+    try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
+    catch (_) {}
+  }));
+  if (dead.length) await r2.put("push/subs.json", JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  return { sent: subs.length - dead.length, pruned: dead.length };
+}
+
+// ── Samodejni pragovni alarm (cron) ────────────────────────
+// Pragovi (po dogovoru): sunek >40 km/h, naliv >18 mm/h, vročina ≥30 °C, zmrzal ≤−1 °C.
+const PUSH_THRESHOLDS = [
+  { key: "gust",  test: m => (m.windGust ?? m.windSpeed ?? 0) > 40, msg: m => "💨 Močan sunek vetra: " + Math.round(m.windGust ?? m.windSpeed) + " km/h v Rečici ob Savinji — prav zdaj." },
+  { key: "rain",  test: m => (m.precipRate ?? 0) > 18,             msg: m => "🌧️ Intenziven naliv: " + (m.precipRate).toFixed(1) + " mm/h v Rečici ob Savinji — prav zdaj." },
+  { key: "heat",  test: m => (m.temp ?? -99) >= 30,                msg: m => "🌡️ Vročina: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
+  { key: "frost", test: m => (m.temp ?? 99) <= -1,                 msg: m => "🧊 Zmrzal: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
+];
+const PUSH_COOLDOWN_MS = 3 * 3600 * 1000;
+async function _cronCheckThresholds(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let obs; try { obs = (await (await fetch(CURRENT_URL, { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
+  const m = obs?.observations?.[0]?.metric; if (!m) return;
+  let state = {}; try { const o = await r2.get("push/state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  let changed = false;
+  for (const t of PUSH_THRESHOLDS) {
+    const over = t.test(m);
+    const st = state[t.key] || { over: false, lastSent: 0 };
+    if (over && !st.over && (now - (st.lastSent || 0) > PUSH_COOLDOWN_MS)) {
+      await _pushAll(env, { title: "Meteorec — opozorilo", body: t.msg(m), url: "/", tag: "wx-" + t.key });
+      st.lastSent = now;
+    }
+    st.over = over;
+    state[t.key] = st;
+    changed = true;
+  }
+  if (changed) await r2.put("push/state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+}
 
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(_cronCheckThresholds(env));
+  },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_ALLOWED });
@@ -1896,15 +1941,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
           if (!secret || body.secret !== secret) return pj({ error: "Nedovoljeno" }, 401);
           if (!env.VAPID_PRIVATE) return pj({ error: "VAPID_PRIVATE ni nastavljen" }, 503);
-          const subs = await pRead();
           const payload = { title: (body.title || "Meteorec").slice(0, 100), body: (body.body || "").slice(0, 300), url: body.url || "/", tag: body.tag || "meteorec" };
-          const dead = [];
-          await Promise.all(subs.map(async s => {
-            try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
-            catch (_) { /* pusti naročnino */ }
-          }));
-          if (dead.length) await pWrite(subs.filter(x => dead.indexOf(x.endpoint) === -1));
-          return pj({ ok: true, sent: subs.length - dead.length, pruned: dead.length });
+          const res = await _pushAll(env, payload);
+          return pj({ ok: true, ...res });
         }
       }
 
