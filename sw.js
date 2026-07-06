@@ -94,7 +94,7 @@ self.addEventListener('push', event => {
   const options = {
     body: data.body || '',
     icon: data.icon || '/icon-192.png',
-    badge: '/icon-192.png',
+    badge: '/icons/badge-96.png',
     tag: data.tag || 'meteorec',
     renotify: true,
     data: { url: data.url || '/' },

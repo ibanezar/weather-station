@@ -4529,7 +4529,7 @@ async function toggleNotifications(){
     if(!r.ok)throw new Error('subscribe failed');
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
-    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih: močni sunki, nalivi, nevihte, zmrzal.',icon:'/icon-192.png',badge:'/icon-192.png'});
+    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih: močni sunki, nalivi, nevihte, zmrzal.',icon:'/icon-192.png',badge:'/icons/badge-96.png'});
   }catch(e){
     localStorage.setItem('wx-notif','off');
     btn?.classList.remove('on');
