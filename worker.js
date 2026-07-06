@@ -1629,6 +1629,148 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /blog-subscribe (+ /confirm, /unsubscribe, /notify) ─────
+      // E-prijava na nove blog članke z dvojnim opt-in.
+      //   POST /blog-subscribe               { email }         → pošlje potrditveno e-pošto
+      //   GET  /blog-subscribe/confirm?token=…                 → potrdi naročnino (HTML)
+      //   GET  /blog-subscribe/unsubscribe?token=…             → odjava (HTML)
+      //   POST /blog-subscribe/notify        { secret, slug? } → obvesti vse naročnike
+      // Shramba v R2: subscribers/pending.json + subscribers/confirmed.json
+      if (path === "/blog-subscribe" || path.startsWith("/blog-subscribe/")) {
+        const r2 = env?.PHOTOS_R2;
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        const base = url.origin;
+
+        async function _read(key) {
+          if (!r2) return [];
+          try { const o = await r2.get(key); return o ? JSON.parse(await o.text()) : []; }
+          catch (_) { return []; }
+        }
+        async function _write(key, arr) {
+          if (!r2) return;
+          await r2.put(key, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } });
+        }
+        function _esc(s) {
+          return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function _page(title, body) {
+          return `<!doctype html><html lang="sl"><head><meta charset="utf-8">` +
+            `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+            `<title>${_esc(title)} · Meteorec</title>` +
+            `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;` +
+            `background:#04070e;color:#e8edf8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:1.5rem}` +
+            `.card{max-width:440px;background:rgba(10,15,28,.94);border:1px solid rgba(255,255,255,.11);` +
+            `border-radius:16px;padding:2rem;text-align:center;box-shadow:0 4px 28px rgba(0,0,0,.3)}` +
+            `h1{font-size:1.3rem;margin:0 0 .6rem}p{color:#adc0d8;line-height:1.6;margin:.4rem 0}` +
+            `a{color:#4d9ff8;text-decoration:none}</style></head>` +
+            `<body><div class="card">${body}<p style="margin-top:1.2rem"><a href="https://meteorec.si/blog/">← Na blog</a></p></div></body></html>`;
+        }
+        function _htmlResp(html, status) {
+          return new Response(html, { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "text/html; charset=utf-8" } });
+        }
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        function _sendMail(to, subject, html) {
+          if (!env?.RESEND_API_KEY) return Promise.resolve();
+          const from = env.SUBSCRIBE_FROM || env.NOTIFY_FROM || "Meteorec <onboarding@resend.dev>";
+          return fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ from, to, subject, html }),
+          }).catch(() => {});
+        }
+
+        // ── POST /blog-subscribe → nova prijava (pending + potrditvena e-pošta)
+        if (path === "/blog-subscribe" && request.method === "POST") {
+          if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (body.website) return _json({ ok: true }); // honeypot
+          const email = (body.email || "").trim().toLowerCase();
+          if (!EMAIL_RE.test(email) || email.length > 120) return _json({ error: "Neveljaven e-naslov" }, 400);
+
+          const confirmed = await _read("subscribers/confirmed.json");
+          if (confirmed.some(s => s.email === email)) return _json({ ok: true, already: true });
+
+          const pending = await _read("subscribers/pending.json");
+          let rec = pending.find(s => s.email === email);
+          if (!rec) {
+            rec = { email, token: crypto.randomUUID().replace(/-/g, ""), ts: new Date().toISOString() };
+            pending.unshift(rec);
+            await _write("subscribers/pending.json", pending.slice(0, 2000));
+          }
+          const link = `${base}/blog-subscribe/confirm?token=${rec.token}`;
+          ctx.waitUntil(_sendMail(email, "Potrdi naročnino na Meteorec blog",
+            `<p>Pozdravljen!</p><p>Za dokončanje naročnine na nove članke bloga <strong>Meteorec</strong> potrdi svoj e-naslov:</p>` +
+            `<p><a href="${link}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Potrdi naročnino</a></p>` +
+            `<p style="color:#888;font-size:.85rem">Če se nisi prijavil, to sporočilo preprosto prezri.</p>`));
+          return _json({ ok: true });
+        }
+
+        // ── GET /blog-subscribe/confirm?token=…
+        if (path === "/blog-subscribe/confirm" && request.method === "GET") {
+          const token = url.searchParams.get("token") || "";
+          if (!token) return _htmlResp(_page("Napaka", "<h1>Neveljavna povezava</h1><p>Manjka žeton za potrditev.</p>"), 400);
+          const pending = await _read("subscribers/pending.json");
+          const idx = pending.findIndex(s => s.token === token);
+          if (idx === -1) {
+            // morda že potrjeno
+            const confirmed0 = await _read("subscribers/confirmed.json");
+            if (confirmed0.some(s => s.token === token))
+              return _htmlResp(_page("Že potrjeno", "<h1>Naročnina je že aktivna ✅</h1><p>Hvala, tvoj e-naslov je že potrjen.</p>"));
+            return _htmlResp(_page("Napaka", "<h1>Povezava ni veljavna</h1><p>Žeton ne obstaja ali je potekel.</p>"), 404);
+          }
+          const rec = pending.splice(idx, 1)[0];
+          await _write("subscribers/pending.json", pending);
+          const confirmed = await _read("subscribers/confirmed.json");
+          if (!confirmed.some(s => s.email === rec.email)) {
+            confirmed.unshift({ email: rec.email, token: rec.token, ts: new Date().toISOString() });
+            await _write("subscribers/confirmed.json", confirmed);
+          }
+          return _htmlResp(_page("Potrjeno", "<h1>Naročnina potrjena 🎉</h1><p>Odslej boš ob vsakem novem članku prejel e-obvestilo. Hvala!</p>"));
+        }
+
+        // ── GET /blog-subscribe/unsubscribe?token=…
+        if (path === "/blog-subscribe/unsubscribe" && request.method === "GET") {
+          const token = url.searchParams.get("token") || "";
+          const confirmed = await _read("subscribers/confirmed.json");
+          const next = confirmed.filter(s => s.token !== token);
+          if (next.length !== confirmed.length) await _write("subscribers/confirmed.json", next);
+          return _htmlResp(_page("Odjava", "<h1>Odjavljen 👋</h1><p>Ne bomo ti več pošiljali obvestil o novih člankih. Kadarkoli se lahko znova prijaviš.</p>"));
+        }
+
+        // ── POST /blog-subscribe/notify { secret, slug? } → obvesti naročnike
+        if (path === "/blog-subscribe/notify" && request.method === "POST") {
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
+          if (!secret || body.secret !== secret) return _json({ error: "Nedovoljeno" }, 401);
+
+          let posts = [];
+          try { posts = await (await fetch("https://meteorec.si/blog.json", { cf: { cacheTtl: 60 } })).json(); }
+          catch (_) { return _json({ error: "blog.json ni dosegljiv" }, 502); }
+          const post = body.slug ? posts.find(p => p.slug === body.slug) : posts[0];
+          if (!post) return _json({ error: "Članek ni najden" }, 404);
+
+          const confirmed = await _read("subscribers/confirmed.json");
+          const artUrl = "https://meteorec.si" + (post.url && post.url.startsWith("/") ? post.url : "/blog/" + post.slug + ".html");
+          ctx.waitUntil((async () => {
+            for (const s of confirmed) {
+              const unsub = `${base}/blog-subscribe/unsubscribe?token=${s.token}`;
+              await _sendMail(s.email, "Nov članek na Meteorec blogu: " + post.title,
+                `<h2 style="margin:0 0 .5rem">${_esc(post.title)}</h2>` +
+                (post.summary ? `<p style="color:#444">${_esc(post.summary)}</p>` : "") +
+                `<p><a href="${artUrl}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Preberi članek →</a></p>` +
+                `<hr style="border:none;border-top:1px solid #eee;margin:1.5rem 0"><p style="color:#999;font-size:.8rem">Prejemaš, ker si naročen na Meteorec blog. <a href="${unsub}" style="color:#999">Odjava</a></p>`);
+            }
+          })());
+          return _json({ ok: true, sent: confirmed.length, post: post.slug });
+        }
+
+        return _json({ error: "Nedovoljena metoda ali pot" }, 405);
+      }
+
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
