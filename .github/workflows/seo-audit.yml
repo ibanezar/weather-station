@@ -1,0 +1,65 @@
+name: SEO audit — pokritost sitemapa in on-page pregled
+
+on:
+  schedule:
+    # Vsako nedeljo ob 04:40 UTC — pred ponedeljkovo seo-smart-routine (05:30)
+    - cron: '40 4 * * 0'
+  workflow_dispatch:   # ročni zagon
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Popravi sitemap in zaženi pregled
+        run: python3 tools/seo_audit.py --fix
+
+      - name: Commit & push če je sitemap spremenjen
+        id: commit
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add sitemap.xml || true
+          if git diff --cached --quiet; then
+            echo "Ni sprememb v sitemapu."
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "seo: sinhroniziraj sitemap.xml (audit) $(date -u +%Y-%m-%d) [skip ci]"
+            git push
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: IndexNow — obvesti iskalnike o posodobljenem sitemapu
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, sys
+          SITE = "https://meteorec.si"
+          KEY  = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"{SITE}/{KEY}.txt",
+              "urlList": [f"{SITE}/sitemap.xml"],
+          }).encode()
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} OK")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:300]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+          PYEOF
