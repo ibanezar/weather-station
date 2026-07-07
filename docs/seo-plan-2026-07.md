@@ -64,7 +64,7 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
   - [ ] Ročni sprožilec `seo-audit.yml` (workflow_dispatch), potrdi zelen tek in commit.
   - [x] Interna povezanost: povezava na `/trendi/` dodana v skupni footer (`seo_smart_routine.py`) → pojavi se na vseh generiranih hub straneh ob naslednjem tedenskem teku (pon 13.7.). `/trendi/` ni več "siroti".
 - **Vsebina (blog)**
-  - [ ] *"Ozon v vročini: kakovost zraka v dolini med vročinskim valom"* — poveži `/kakovost-zraka/` z lastnimi meritvami T; keyword: **ozon Savinjska dolina**, **kakovost zraka Mozirje**.
+  - [x] **Objavljeno 7.7.**: [*Poletni ozon v Zgornji Savinjski dolini*](/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html) — podatkovni razlagalec (meritve UV/sonce/veter s postaje), povezan na `/kakovost-zraka/` in 3 pojme v `/slovar/`; keyword: **kakovost zraka Savinjska dolina**, **prizemni ozon**.
   - [ ] Samodejno: `seo-smart-routine` (pon 13.7.) osveži hub + morebiten dogodek v `/novosti/`.
 
 ### Teden 2 — 14.–20. julij · Nevihte, toča, hudourniki
@@ -150,6 +150,6 @@ Klimatske / evergreen (grade avtoriteto):
 - [x] Sitemap vrzel `/trendi/` odpravljena
 - [x] Samodejni tedenski SEO audit postavljen (`seo-audit.yml`)
 - [x] Interna povezava na `/trendi/` dodana v skupni footer generatorja (aktivira se pon 13.7.)
-- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih
+- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **1/8** (poletni ozon, 7.7.)
 - [ ] Julijski mesečni povzetek (1.8.) potrjen kot objavljen + indeksiran
 - [ ] GSC pregled na koncu cikla + osnutek avgustovskega plana
