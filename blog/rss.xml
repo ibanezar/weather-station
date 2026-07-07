@@ -5,8 +5,22 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 07 Jul 2026 08:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jul 2026 11:38:17 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Poletni ozon v Zgornji Savinjski dolini: kaj o kakovosti zraka pove postaja IREICA1</title>
+      <link>https://meteorec.si/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html</guid>
+      <pubDate>Tue, 07 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Vroči, sončni in brezvetrni poletni dnevi so recept za prizemni ozon. Postaja IREICA1 ne meri onesnaževal, meri pa vse meteorološke sestavine — vročino, močno sončno sevanje in šibak veter. Kaj kažejo podatki in kje kakovost zraka za dolino spremljate v živo.</description>
+      <category>analiza</category>
+      <category>kakovost-zraka</category>
+      <category>ozon</category>
+      <category>vrocina</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>IREICA1</category>
+    </item>
     <item>
       <title>Med dvema vročinskima valoma: kaj kažejo podatki postaje IREICA1</title>
       <link>https://meteorec.si/blog/med-dvema-vrocinskima-valoma-ireica1.html</link>
@@ -163,7 +177,7 @@
       <link>https://meteorec.si/blog/vremenski-povzetek-junij-2026.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/vremenski-povzetek-junij-2026.html</guid>
       <pubDate>Wed, 01 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Povprečno 20,3 °C (0,3 °C nad dolgoletnim povprečjem) in 164,8 mm padavin.</description>
+      <description>Povprečno 20,5 °C (0,5 °C nad dolgoletnim povprečjem) in 164,8 mm padavin.</description>
       <category>povzetek</category>
       <category>junij</category>
       <category>2026</category>

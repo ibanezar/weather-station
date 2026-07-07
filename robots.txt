@@ -3,6 +3,7 @@ Allow: /
 Disallow: /zasebnost.html
 Disallow: /history.json
 Disallow: /blog.json
+Disallow: /docs/
 
 Sitemap: https://meteorec.si/sitemap.xml
 Sitemap: https://meteorec.si/sitemap-weather.xml

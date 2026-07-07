@@ -206,7 +206,7 @@ def footer_html():
     return (f'  <footer class="site-foot">\n'
             f'    <span>© {TODAY.year} Meteorec · Rečica ob Savinji</span>\n'
             f'    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a>'
-            f' · <a href="/vreme/">Arhiv</a></span>\n  </footer>')
+            f' · <a href="/vreme/">Arhiv</a> · <a href="/trendi/">Trendi</a></span>\n  </footer>')
 
 def page_shell(title, desc, canonical, head_extras, body_content):
     full_url = f"{SITE}{canonical}"
