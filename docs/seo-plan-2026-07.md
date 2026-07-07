@@ -81,10 +81,10 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
 **Tema:** agrometeo. Savinjska dolina = hmeljarstvo. Iskanja: "hmelj vreme", "suša Savinjska dolina", "GDD".
 
 - **Tehnika**
-  - [ ] Preveri `agrometeo` napoved (GDD, škropilna okna, vodna bilanca) — točnost feno faz hmelja.
+  - [x] Preveri `agrometeo` napoved (GDD, škropilna okna, vodna bilanca) — **odkrita in odpravljena napaka**: fenologija hmelja je bila vezana na GDD₅ in je hmelj 7.7. napačno postavljala v »obiranje«; prekalibrirano na GDD₁₀ (baza 10 °C), umerjeno na večletno akumulacijo postaje → zdaj pravilno »cvetenje«, obiranje ~september. Živa stran `/agrometeo/` regenerirana.
   - [ ] Audit (ned 26.7.).
 - **Vsebina (blog)**
-  - [ ] *"Hmelj in vreme julija: rastne stopinje in vodna bilanca v dolini"* — iz `/agrometeo/`; keyword: **hmelj vreme Savinjska dolina**, **rastni dnevi hmelj**.
+  - [x] **Objavljeno 7.7. (predčasno)**: [*Hmelj in vreme julija: rastne stopinje in vodna bilanca*](/blog/hmelj-vreme-julij-rastne-stopinje-vodna-bilanca.html) — iz `/agrometeo/` (GDD₁₀ 610 → cvetenje, obiranje ~september, vodna bilanca); keyword: **hmelj vreme**, **GDD hmelj**, **rastne stopinje**.
   - [ ] *"Suša 2026: koliko dni brez dežja in kaj pravi arhiv"* — iz `history.json`/`/pojavi/`; keyword: **suša 2026 Slovenija**.
 
 ### Teden 4 — 28. julij–3. avgust · Mesečni prehod + gobe/paglajivci
@@ -150,6 +150,6 @@ Klimatske / evergreen (grade avtoriteto):
 - [x] Sitemap vrzel `/trendi/` odpravljena
 - [x] Samodejni tedenski SEO audit postavljen (`seo-audit.yml`)
 - [x] Interna povezava na `/trendi/` dodana v skupni footer generatorja (aktivira se pon 13.7.)
-- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **2/8** (poletni ozon 7.7.; nevihtni indeksi 7.7.)
+- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **3/8** (poletni ozon; nevihtni indeksi; hmelj/agrometeo — vse 7.7.)
 - [ ] Julijski mesečni povzetek (1.8.) potrjen kot objavljen + indeksiran
 - [ ] GSC pregled na koncu cikla + osnutek avgustovskega plana
