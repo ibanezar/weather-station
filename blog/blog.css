@@ -387,7 +387,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
   }
   body.has-blog-sidebar .wrap > .site-head{grid-area:head}
   body.has-blog-sidebar .wrap > .site-foot{grid-area:foot}
-  body.has-blog-sidebar .wrap > article{grid-area:main;max-width:730px;width:100%}
+  body.has-blog-sidebar .wrap > article,
+  body.has-blog-sidebar .wrap > main{grid-area:main;max-width:730px;width:100%}
   body.has-blog-sidebar .blog-sidebar{
     grid-area:side;align-self:start;
     position:sticky;top:90px;
