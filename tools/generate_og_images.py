@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'med-dvema-vrocinskima-valoma-ireica1',
+        'title': 'Med dvema\nvročinskima valoma',
+        'subtitle': 'Podatki postaje IREICA1',
+        'section': 'Analize',
+        'accent': (239, 68, 68),
+        'photo': 'drought',
+    },
+    {
         'slug': 'napoved-julij-2026',
         'title': 'Kakšen bo\njulij 2026?',
         'subtitle': 'Napoved za 2 tedna + obeti · IREICA1',
