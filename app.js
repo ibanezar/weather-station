@@ -6528,6 +6528,49 @@ let _surInit=false;
 const WU_NEARBY_IDS=['IMOZIR4','IMARTN16','IBRASL105','IMOZIR5','INAZAR37','IGORNJ48','IGORNJ53','IKAMNI50'];
 const WUH_PALETTE=['#38bdf8','#4ade80','#fbbf24','#f87171','#a78bfa','#67e8f9','#fb923c','#34d399','#e879f9'];
 
+// ── Micro-climate map (Okolica): live temp deltas of nearby WU stations ──
+let _microMap=null;
+function _microMapColor(diff){
+  if(diff==null)return isDark()?'#94a3b8':'#64748b';
+  if(diff<=-2)return'#1d4ed8';
+  if(diff<0)return'#60a5fa';
+  if(diff===0)return'#e2e8f0';
+  if(diff<2)return'#fca5a5';
+  return'#dc2626';
+}
+async function renderMicroMap(myTemp,stations){
+  const mapEl=document.getElementById('micro-map');
+  if(!mapEl)return;
+  if(typeof L==='undefined'){
+    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+  }
+  if(!_microMap){
+    _microMap=L.map('micro-map',{zoomControl:true,attributionControl:false,minZoom:8,maxZoom:14}).setView([LAT,LON],11);
+    const baseUrl=isDark()
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    L.tileLayer(baseUrl,{maxZoom:14,maxNativeZoom:19,subdomains:'abcd'}).addTo(_microMap);
+  }
+  L.circleMarker([LAT,LON],{radius:9,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.95,weight:2}).addTo(_microMap)
+    .bindPopup('<div class="micromap-pop"><b>📡 IREICA1 · Rečica ob Savinji</b><br>'+(myTemp!=null?myTemp.toFixed(1)+'°C':'—')+'</div>');
+  stations.forEach(s=>{
+    const o=s.obs||{};
+    if(o.lat==null||o.lon==null)return;
+    const T=o.metric?.temp??null;
+    const diff=myTemp!=null&&T!=null?T-myTemp:null;
+    L.circleMarker([o.lat,o.lon],{
+      radius:7,weight:2,color:_microMapColor(diff),fillColor:_microMapColor(diff),fillOpacity:.85
+    }).addTo(_microMap).bindPopup(
+      '<div class="micromap-pop"><b>'+s.name+'</b><br>'+
+      (T!=null?T.toFixed(1)+'°C':'—')+
+      (diff!=null?' <span style="color:'+(diff>0?'#dc2626':'#1d4ed8')+'">('+(diff>0?'+':'')+diff.toFixed(1)+'° vs. IREICA1)</span>':'')+
+      (s.distKm!=null?'<br><span style="color:var(--muted)">'+(+s.distKm).toFixed(1)+' km stran</span>':'')+
+      '</div>'
+    );
+  });
+}
+
 async function fetchWUHistory(){
   const section=document.getElementById('wuh-section');
   const rankEl=document.getElementById('wuh-rank');
@@ -6720,6 +6763,7 @@ async function fetchWUNearby(){
         (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1)+'° glede na IREICA1</div>':'');
       grid.appendChild(card);
     });
+    renderMicroMap(myTemp,valid).catch(e=>console.warn('MicroMap:',e));
   }catch(e){
     if(grid)grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">WU postaje nedostopne: '+e.message+'</div>';
   }
