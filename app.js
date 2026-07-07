@@ -3,12 +3,13 @@ const LAT = 46.325779, LON = 14.921137;
 
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
+const _resLoaded = new Set();
 function _loadScript(src) {
-  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+  if (_resLoaded.has(src)) return Promise.resolve();
   if (_resLoading[src]) return _resLoading[src];
   _resLoading[src] = new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = src;
-    s.onload = () => { delete _resLoading[src]; res(); };
+    s.onload = () => { _resLoaded.add(src); delete _resLoading[src]; res(); };
     s.onerror = () => { delete _resLoading[src]; rej(new Error('Failed: ' + src)); };
     document.head.appendChild(s);
   });
