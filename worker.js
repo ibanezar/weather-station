@@ -735,7 +735,7 @@ export default {
       }
 
       // ── /poll ─────────────────────────────────────────────
-      // Dnevni "kako se počuti vreme" mikro-poll skupnosti.
+      // Dnevna mikroanketa skupnosti o počutju vremena.
       // Ključ v KV: "poll:YYYY-MM-DD". Vrednost: JSON { perfect, sticky, chilly, raw }.
       // GET  /poll               → { date, counts }
       // POST /poll?option=perfect|sticky|chilly|raw → { date, counts }
@@ -751,7 +751,7 @@ export default {
             const option = url.searchParams.get("option") || "";
             if (!POLL_OPTIONS.includes(option)) {
               return new Response(
-                JSON.stringify({ error: "neveljavna opcija" }),
+                JSON.stringify({ error: "neveljavna možnost" }),
                 { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
               );
             }
@@ -764,7 +764,7 @@ export default {
             const option = url.searchParams.get("option") || "";
             if (!POLL_OPTIONS.includes(option)) {
               return new Response(
-                JSON.stringify({ error: "neveljavna opcija" }),
+                JSON.stringify({ error: "neveljavna možnost" }),
                 { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
               );
             }

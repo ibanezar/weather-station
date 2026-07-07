@@ -6554,7 +6554,7 @@ async function renderMicroMap(myTemp,stations){
     L.tileLayer(baseUrl,{maxZoom:14,maxNativeZoom:19,subdomains:'abcd'}).addTo(_microMap);
   }
   L.circleMarker([LAT,LON],{radius:9,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.95,weight:2}).addTo(_microMap)
-    .bindPopup('<div class="micromap-pop"><b>📡 IREICA1 · Rečica ob Savinji</b><br>'+(myTemp!=null?myTemp.toFixed(1)+'°C':'—')+'</div>');
+    .bindPopup('<div class="micromap-pop"><b>📡 IREICA1 · Rečica ob Savinji'+(myTemp!=null?' ('+myTemp.toFixed(1).replace('.',',')+' °C)':'')+'</b></div>');
   stations.forEach(s=>{
     const o=s.obs||{};
     if(o.lat==null||o.lon==null)return;
@@ -6563,10 +6563,10 @@ async function renderMicroMap(myTemp,stations){
     L.circleMarker([o.lat,o.lon],{
       radius:7,weight:2,color:_microMapColor(diff),fillColor:_microMapColor(diff),fillOpacity:.85
     }).addTo(_microMap).bindPopup(
-      '<div class="micromap-pop"><b>'+s.name+'</b><br>'+
-      (T!=null?T.toFixed(1)+'°C':'—')+
-      (diff!=null?' <span style="color:'+(diff>0?'#dc2626':'#1d4ed8')+'">('+(diff>0?'+':'')+diff.toFixed(1)+'° vs. IREICA1)</span>':'')+
-      (s.distKm!=null?'<br><span style="color:var(--muted)">'+(+s.distKm).toFixed(1)+' km stran</span>':'')+
+      '<div class="micromap-pop"><b>'+s.name+'</b>'+
+      (T!=null?' · '+T.toFixed(1).replace('.',',')+' °C':'')+
+      (diff!=null?' <span style="color:'+(diff>0?'#dc2626':'#1d4ed8')+'">('+(diff>0?'+':'')+diff.toFixed(1).replace('.',',')+' °C glede na IREICA1)</span>':'')+
+      (s.distKm!=null?' · <span style="color:var(--muted)">'+(+s.distKm).toFixed(1).replace('.',',')+' km stran</span>':'')+
       '</div>'
     );
   });
@@ -6761,7 +6761,7 @@ async function fetchWUNearby(){
           (wind!=null?'💨 '+wind.toFixed(0)+' km/h  ':'')+
           (rain!=null&&rain>0?'🌧 '+rain.toFixed(1)+' mm/h':'')+
         '</div>'+
-        (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1)+'° glede na IREICA1</div>':'');
+        (diff!=null?'<div class="sur-diff" style="color:'+diffCol+'">'+(diff>0?'+':'')+diff.toFixed(1).replace('.',',')+' °C glede na IREICA1</div>':'');
       grid.appendChild(card);
     });
     renderMicroMap(myTemp,valid).catch(e=>console.warn('MicroMap:',e));
@@ -6805,7 +6805,7 @@ async function initSurroundings(){
             (c.wind_speed_10m!=null?'💨 '+c.wind_speed_10m.toFixed(0)+' km/h':'')+
           '</div>'+
           (diff!=null?'<div class="sur-diff" style="color:'+(diff>0?'var(--red)':'var(--blue)')+'">'+
-            (diff>0?'+':'')+diff.toFixed(1)+'° glede na IREICA1</div>':'');
+            (diff>0?'+':'')+diff.toFixed(1).replace('.',',')+' °C glede na IREICA1</div>':'');
         grid.appendChild(card);
       });
     }
@@ -7168,7 +7168,7 @@ function buildPrecipNormals(){
     const cls=pct==null?'':pct>120?'pn-above':pct<80?'pn-below':'pn-normal';
     const barCol=pct>120?'var(--blue)':pct<80?'var(--amber)':'var(--green)';
     const div=document.createElement('div');div.className='pn-item';
-    div.innerHTML=`<div class="pn-label">${p.lbl}</div><div class="pn-val ${cls}">${Math.round(p.val)} mm</div><div class="pn-norm">${pct!=null?pct+'% norme ('+Math.round(p.norm)+' mm)':p.norm?'norm. '+Math.round(p.norm)+' mm':'—'}</div><div class="pn-bar-wrap"><div class="pn-bar" style="width:${Math.min(100,pct||0)}%;background:${barCol}"></div></div><div class="pn-caption">${_goalCaption(p,pct,'mm padavin')}</div>`;
+    div.innerHTML=`<div class="pn-label">${p.lbl}</div><div class="pn-val ${cls}">${Math.round(p.val)} mm</div><div class="pn-norm">${pct!=null?pct+' % norme ('+Math.round(p.norm)+' mm)':p.norm?'norm. '+Math.round(p.norm)+' mm':'—'}</div><div class="pn-bar-wrap"><div class="pn-bar" style="width:${Math.min(100,pct||0)}%;background:${barCol}"></div></div><div class="pn-caption">${_goalCaption(p,pct,'mm padavin')}</div>`;
     grid.appendChild(div);
   });
   if(upd)upd.textContent=years.length?years[0]+'–'+(curYear-1)+' ('+years.length+' let)':'—';
@@ -7176,10 +7176,10 @@ function buildPrecipNormals(){
 
 // Human-readable "goal tracker" caption shared by precip + sunshine accumulators
 function _goalCaption(p,pct,unit){
-  if(pct==null)return'Zbiranje podatkov za primerjavo z normo …';
-  if(pct>=100)return`Cilj dosežen — ${pct}% dolgoletnega povprečja (${Math.round(p.norm)} ${unit}) za to obdobje.`;
+  if(pct==null)return'Zbiranje podatkov za primerjavo s podnebno normalo …';
+  if(pct>=100)return`Cilj dosežen — ${pct} % dolgoletnega povprečja (${Math.round(p.norm)} ${unit}) za to obdobje.`;
   const missing=Math.max(0,p.norm-p.val);
-  return`Trenutno smo pri ${pct}% dolgoletnega povprečja — manjka še ${missing.toFixed(0)} ${unit} do cilja.`;
+  return`Trenutno smo pri ${pct} % dolgoletnega povprečja — do cilja manjka še ${missing.toFixed(0)} ${unit}.`;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -7233,13 +7233,13 @@ async function buildSunshineNormals(){
       const cls=pct==null?'':pct>110?'pn-above':pct<70?'pn-below':'pn-normal';
       const barCol=pct>110?'var(--amber)':pct<70?'var(--muted)':'var(--green)';
       const div=document.createElement('div');div.className='pn-item';
-      div.innerHTML=`<div class="pn-label">${p.lbl}</div><div class="pn-val ${cls}">${Math.round(p.val)} h</div><div class="pn-norm">${pct!=null?pct+'% norme ('+Math.round(p.norm)+' h)':'—'}</div><div class="pn-bar-wrap"><div class="pn-bar" style="width:${Math.min(100,pct||0)}%;background:${barCol}"></div></div><div class="pn-caption">${_goalCaption(p,pct,'ur sonca')}</div>`;
+      div.innerHTML=`<div class="pn-label">${p.lbl}</div><div class="pn-val ${cls}">${Math.round(p.val)} h</div><div class="pn-norm">${pct!=null?pct+' % norme ('+Math.round(p.norm)+' h)':'—'}</div><div class="pn-bar-wrap"><div class="pn-bar" style="width:${Math.min(100,pct||0)}%;background:${barCol}"></div></div><div class="pn-caption">${_goalCaption(p,pct,'ur sonca')}</div>`;
       grid.appendChild(div);
     });
-    if(upd)upd.textContent='ARSO norm. 1991–2020 (Celje)';
+    if(upd)upd.textContent='ARSO podnebna normala 1991–2020 (Celje)';
   }catch(e){
     console.warn('Sunshine normals:',e);
-    grid.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki o sončnih urah trenutno niso dosegljivi.</div>';
+    grid.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki o sončnih urah trenutno niso na voljo.</div>';
   }
 }
 
@@ -16855,7 +16855,7 @@ function _renderFeelPollResults(counts) {
     });
   }
   svg.innerHTML = markup;
-  if (totalEl) totalEl.innerHTML = `<b>${total}</b><span>glasov danes</span>`;
+  if (totalEl) totalEl.innerHTML = `<b>${total}</b><span>današnjih glasov</span>`;
   if (legendEl) {
     legendEl.innerHTML = order.map(k => {
       const val = counts[k] || 0;
