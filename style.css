@@ -1781,6 +1781,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .pn-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:.45rem;overflow:hidden}
 .pn-bar{height:100%;border-radius:2px;transition:width 1s ease}
 .pn-above{color:var(--blue)} .pn-below{color:var(--amber)} .pn-normal{color:var(--green)}
+.pn-caption{font-size:.7rem;color:var(--muted);line-height:1.45;margin-top:.5rem}
 
 /* Photography widget */
 .photo-timeline{display:flex;height:18px;border-radius:9px;overflow:hidden;margin:.65rem 0 .3rem;position:relative}
