@@ -233,7 +233,7 @@
     '</div>';
 
     aside.innerHTML = html;
-    document.body.appendChild(aside);
+    (document.querySelector(".wrap") || document.body).appendChild(aside);
     document.body.classList.add("has-blog-sidebar");
 
     var sb = aside.querySelector("#side-sub");
