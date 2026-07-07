@@ -832,6 +832,17 @@
     </div>
   </div>
 
+  <!-- Sončne ure -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.25rem">
+      <span class="clabel" style="margin:0">☀️ Tekoči seštevek sončnih ur glede na dolgoletno povprečje</span>
+      <span class="chart-range" id="sn-updated">—</span>
+    </div>
+    <div class="precip-norm-grid" id="sn-grid">
+      <div style="color:var(--muted);font-size:.78rem">Nalaganje…</div>
+    </div>
+  </div>
+
   <!-- Weather Score + Moon -->
   <div class="g2" style="margin-bottom:1rem">
     <div class="card">
@@ -2903,7 +2914,7 @@
       <div class="feel-poll-flip" id="feel-poll-flip">
         <div class="feel-poll-face feel-poll-front">
           <div class="feel-poll-title">🌡️ Kako se ti zdi zdaj zunaj?</div>
-          <div class="feel-poll-sub">En klik — takoj vidiš, kaj pravijo drugi v dolini.</div>
+          <div class="feel-poll-sub">Z enim klikom preveri, kaj pravijo drugi v dolini.</div>
           <div class="feel-poll-btns">
             <button class="feel-poll-btn" onclick="submitFeelPoll('perfect')"><span class="feel-poll-emoji">😎</span>Popolno</button>
             <button class="feel-poll-btn" onclick="submitFeelPoll('sticky')"><span class="feel-poll-emoji">🥵</span>Soparno</button>
