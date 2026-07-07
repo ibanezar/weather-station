@@ -131,6 +131,14 @@ ARTICLES = [
         'photo': 'misty-valley',
     },
     {
+        'slug': 'prva-tropska-noc-recica-julij-2026',
+        'title': 'Prva tropska noč\nv Rečici?',
+        'subtitle': '26,0 °C ob 23.20 · IREICA1',
+        'section': 'Analize',
+        'accent': (245, 158, 11),
+        'photo': 'night-fog-valley',
+    },
+    {
         'slug': 'tropske-noci-inverzija-savinjska-dolina',
         'title': 'Tropske noči in\ninverzija v Savinjski dolini',
         'subtitle': 'Zakaj je tvoja noč topla · IREICA1',
