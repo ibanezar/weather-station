@@ -2218,6 +2218,29 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .card-modal-dl{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.5rem;background:#38bdf8;color:#030812;border:none;border-radius:50px;font-size:.84rem;font-weight:700;cursor:pointer;transition:opacity .18s;font-family:'Inter',sans-serif}
 .card-modal-dl:hover{opacity:.85}
 
+/* ── "Real-Feel" micro-poll (flip card) ──────────────────────── */
+.feel-poll-card{padding:0;overflow:hidden;perspective:1400px;margin-bottom:1.25rem}
+.feel-poll-flip{position:relative;width:100%;min-height:230px;transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+.feel-poll-flip.flipped{transform:rotateY(180deg)}
+.feel-poll-face{position:absolute;inset:0;backface-visibility:hidden;padding:1.5rem;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center}
+.feel-poll-front{position:relative}
+.feel-poll-back{transform:rotateY(180deg)}
+.feel-poll-title{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
+.feel-poll-sub{font-size:.83rem;color:var(--muted);margin-bottom:1.1rem}
+.feel-poll-btns{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;width:100%}
+.feel-poll-btn{flex:1;min-width:110px;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:1rem .6rem;border:2px solid var(--border);border-radius:1rem;background:var(--card-bg);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s,transform .15s;font-family:inherit}
+.feel-poll-btn:hover{border-color:var(--blue);background:rgba(33,150,243,.07);transform:translateY(-2px)}
+.feel-poll-btn:disabled{opacity:.6;cursor:default;transform:none}
+.feel-poll-emoji{font-size:1.9rem;line-height:1}
+.feel-poll-pie-wrap{position:relative;width:140px;height:140px;margin:.25rem auto .9rem}
+#feel-poll-pie{width:100%;height:100%;transform:rotate(-90deg)}
+.feel-poll-pie-total{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace}
+.feel-poll-pie-total b{font-size:1.3rem;line-height:1}
+.feel-poll-pie-total span{font-size:.62rem;color:var(--muted)}
+.feel-poll-legend{display:flex;flex-wrap:wrap;gap:.5rem 1rem;justify-content:center;font-size:.78rem}
+.feel-poll-legend-item{display:flex;align-items:center;gap:.35rem}
+.feel-poll-legend-dot{width:10px;height:10px;border-radius:50%;flex:none}
+
 /* ── Community feedback card ─────────────────────────────────── */
 .community-card{padding:1.5rem}
 .community-header{margin-bottom:1.25rem}

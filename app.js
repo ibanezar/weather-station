@@ -16720,6 +16720,82 @@ function _communityDayLabel(n) {
   return ['danes', 'včeraj', 'pred 2 dnema'][n] || 'danes';
 }
 
+// ── "Real-Feel" micro-poll: 1-click, flips to live community pie ──
+const FEEL_POLL_OPTIONS = {
+  perfect: { icon: '😎', label: 'Popolno', color: '#4ade80' },
+  sticky:  { icon: '🥵', label: 'Soparno', color: '#f87171' },
+  chilly:  { icon: '🥶', label: 'Mrzlo',   color: '#60a5fa' },
+  raw:     { icon: '💨', label: 'Rezko',   color: '#a78bfa' },
+};
+let _feelPollInit = false;
+
+function _feelPollVoteKey() { return 'wx-feel-poll-' + _localDateStr(new Date()); }
+
+async function initFeelPoll() {
+  if (_feelPollInit) return;
+  _feelPollInit = true;
+  const voted = localStorage.getItem(_feelPollVoteKey());
+  if (voted) {
+    try {
+      const res = await fetch(PROXY + '/poll');
+      const data = await res.json();
+      _renderFeelPollResults(data.counts || {});
+      document.getElementById('feel-poll-flip')?.classList.add('flipped');
+    } catch (_) {}
+  }
+}
+
+async function submitFeelPoll(option) {
+  if (!FEEL_POLL_OPTIONS[option]) return;
+  document.querySelectorAll('.feel-poll-btn').forEach(b => b.disabled = true);
+  try {
+    const res = await fetch(PROXY + '/poll?option=' + option, { method: 'POST' });
+    const data = await res.json();
+    localStorage.setItem(_feelPollVoteKey(), option);
+    _renderFeelPollResults(data.counts || {});
+    document.getElementById('feel-poll-flip')?.classList.add('flipped');
+  } catch (e) {
+    showToast('Glasovanje trenutno ni mogoče.');
+  } finally {
+    document.querySelectorAll('.feel-poll-btn').forEach(b => b.disabled = false);
+  }
+}
+
+function _renderFeelPollResults(counts) {
+  const order = Object.keys(FEEL_POLL_OPTIONS);
+  const total = order.reduce((s, k) => s + (counts[k] || 0), 0);
+  const svg = document.getElementById('feel-poll-pie');
+  const totalEl = document.getElementById('feel-poll-pie-total');
+  const legendEl = document.getElementById('feel-poll-legend');
+  if (!svg) return;
+  const r = 50, cx = 60, cy = 60, sw = 18, circ = 2 * Math.PI * r;
+  let markup = '';
+  if (total === 0) {
+    markup = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${sw}"/>`;
+  } else {
+    let acc = 0;
+    order.forEach(k => {
+      const val = counts[k] || 0;
+      if (!val) return;
+      const frac = val / total;
+      const dash = frac * circ;
+      const offset = -acc * circ;
+      markup += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${FEEL_POLL_OPTIONS[k].color}" stroke-width="${sw}" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${offset}"/>`;
+      acc += frac;
+    });
+  }
+  svg.innerHTML = markup;
+  if (totalEl) totalEl.innerHTML = `<b>${total}</b><span>glasov danes</span>`;
+  if (legendEl) {
+    legendEl.innerHTML = order.map(k => {
+      const val = counts[k] || 0;
+      const pct = total ? Math.round(val / total * 100) : 0;
+      const o = FEEL_POLL_OPTIONS[k];
+      return `<div class="feel-poll-legend-item"><span class="feel-poll-legend-dot" style="background:${o.color}"></span>${o.icon} ${o.label} — ${pct}% (${val})</div>`;
+    }).join('');
+  }
+}
+
 function initCommunity() {
   if (!_communityLoaded) {
     loadFeedback();
@@ -16728,6 +16804,7 @@ function initCommunity() {
   }
   _communityRestoreRating(_communityDay);
   _obsCheckRateLimit();
+  initFeelPoll();
 }
 
 function _communityRestoreRating(day) {
