@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html">
+<meta name="description" content="CAPE, CIN, indeks dviga, striženje vetra, višina ledišča — kaj pomenijo številke na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti in mejnih vrednostih, ki jih uporablja naša stran za Zgornjo Savinjsko dolino.">
+<meta name="keywords" content="CAPE nevihta, kako brati nevihtno napoved, indeks dviga, striženje vetra, indeksi nestabilnosti, napoved neviht Savinjska dolina, IREICA1">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače">
+<meta property="og:description" content="Kaj pomenijo CAPE, CIN, indeks dviga in striženje vetra na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti.">
+<meta property="og:image" content="https://meteorec.si/og/kako-brati-nevihtno-napoved-cape-striz-vetra.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-07-07">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Razlage">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače">
+<meta name="twitter:description" content="Kaj pomenijo CAPE, CIN, indeks dviga in striženje vetra na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti.">
+<meta name="twitter:image" content="https://meteorec.si/og/kako-brati-nevihtno-napoved-cape-striz-vetra.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače",
+  "description": "CAPE, CIN, indeks dviga, striženje vetra in višina ledišča — kaj pomenijo številke na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti in mejnih vrednostih, ki jih uporablja naša stran za Zgornjo Savinjsko dolino.",
+  "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/kako-brati-nevihtno-napoved-cape-striz-vetra.jpg", "width": 1200, "height": 630 },
+  "wordCount": 1650,
+  "datePublished": "2026-07-07",
+  "dateModified": "2026-07-07",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html" },
+  "about": { "@type": "Place", "name": "Rečica ob Savinji", "geo": { "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 } }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Kako brati nevihtno napoved" }
+  ]
+}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
+<link rel="stylesheet" href="blog.css">
+<style>
+.idx-lead { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; margin: 1.4rem 0 2rem; }
+.idx-chip { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: .8rem .7rem; text-align: center; }
+.idx-chip .ic-abbr { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.15rem; color: #a78bfa; }
+.idx-chip .ic-name { font-size: .68rem; color: var(--muted); margin-top: .2rem; line-height: 1.3; }
+@media (max-width: 520px) { .idx-lead { grid-template-columns: 1fr 1fr; } }
+
+.table-scroll { overflow-x: auto; margin: 1.2rem 0 1.8rem; -webkit-overflow-scrolling: touch; }
+.idx-table { border-collapse: collapse; width: 100%; min-width: 420px; font-size: .9rem; }
+.idx-table th { text-align: left; color: var(--muted); font-weight: 500; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; padding: .45rem .6rem; border-bottom: 1px solid var(--card-border); }
+.idx-table td { padding: .5rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.idx-table td.val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; white-space: nowrap; }
+.idx-table .lo { color: #4d9ff8; } .idx-table .mid { color: #f59e0b; } .idx-table .hi { color: #ef4444; } .idx-table .xhi { color: #a78bfa; }
+
+.callout { background: var(--card-bg); border: 1px solid var(--card-border); border-left: 3px solid #a78bfa; border-radius: 10px; padding: 1rem 1.1rem; margin: 1.4rem 0; font-size: .95rem; }
+.callout h3 { font-family: 'Space Grotesk', sans-serif; font-size: .95rem; margin: 0 0 .5rem; color: #a78bfa; }
+.callout p { margin: .4rem 0 0; }
+
+.note-box { background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.28); border-radius: 12px; padding: .75rem 1.1rem; margin: 1rem 0 1.6rem; font-size: .87rem; color: #adc0d8; line-height: 1.6; }
+.disclaimer { background: rgba(239,68,68,.06); border: 1px solid var(--card-border); border-radius: 10px; padding: .8rem 1rem; margin: 1.2rem 0; font-size: .85rem; color: var(--muted); }
+.sources { font-size: .82rem; color: var(--muted); border-top: 1px solid rgba(255,255,255,.07); margin-top: 2.2rem; padding-top: 1rem; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a></nav>
+  </header>
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Kako brati nevihtno napoved
+  </nav>
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · 366 m n. m.</div>
+    <h1>Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače</h1>
+    <p class="post-meta">7. julija 2026 · Filip Eremita · postaja IREICA1 · ~7 min branja</p>
+
+    <p class="lead">Naša <a href="/nevihte/" style="color:#a78bfa">nevihtna napoved</a> za Zgornjo Savinjsko dolino postreže z vrsto številk: CAPE, CIN, indeks dviga, Total Totals, K-indeks, striženje vetra, višina ledišča. Za marsikoga so to skrivnostne kratice in izrazi — a v resnici gre za nekaj preprostih vprašanj: <em>koliko goriva ima ozračje, kaj ga zadržuje, kako organizirane bodo nevihte in ali bo toča preživela pot do tal</em>. Tale zapis je vodnik, s katerim boste te indekse brali brez slovarja — z mejnimi vrednostmi, kakršne uporablja tudi naša stran.</p>
+
+    <div class="idx-lead">
+      <div class="idx-chip"><div class="ic-abbr">CAPE</div><div class="ic-name">gorivo za vzgornike</div></div>
+      <div class="idx-chip"><div class="ic-abbr">CIN</div><div class="ic-name">pokrov, ki drži</div></div>
+      <div class="idx-chip"><div class="ic-abbr">LI</div><div class="ic-name">indeks dviga</div></div>
+      <div class="idx-chip"><div class="ic-abbr">striž</div><div class="ic-name">organizacija nevihte</div></div>
+      <div class="idx-chip"><div class="ic-abbr">TT / K</div><div class="ic-name">druga merila nestabilnosti</div></div>
+      <div class="idx-chip"><div class="ic-abbr">ledišče</div><div class="ic-name">ali toča doseže tla</div></div>
+    </div>
+
+    <h2>CAPE: koliko goriva ima ozračje</h2>
+    <p>CAPE (konvektivna razpoložljiva potencialna energija, v J/kg) je najpomembnejša številka. Pove, koliko energije je na voljo za dviganje zraka — z drugimi besedami, kako močni bodo lahko <a href="/slovar/termika/" style="color:#a78bfa">vzgorniki</a>, ki gradijo <a href="/slovar/kumulonimbus/" style="color:#a78bfa">nevihtni oblak</a>. Predstavljajte si CAPE kot količino bencina v rezervoarju: sam po sebi še ne zažene motorja, določa pa, kako silovita je lahko <a href="/slovar/konvekcija/" style="color:#a78bfa">konvekcija</a>, ko se sproži.</p>
+
+    <div class="table-scroll">
+      <table class="idx-table">
+        <tr><th>CAPE (J/kg)</th><th>Pomen</th></tr>
+        <tr><td class="val lo">pod 100</td><td>šibka nestabilnost — nevihte malo verjetne</td></tr>
+        <tr><td class="val mid">100–1000</td><td>zmerna do velika nestabilnost — mogoče plohe in nevihte</td></tr>
+        <tr><td class="val hi">1000–2500</td><td>ekstremna nestabilnost — pogoji za močne nevihte</td></tr>
+        <tr><td class="val xhi">nad 2500</td><td>izjemna nestabilnost — potencial za neurja</td></tr>
+      </table>
+    </div>
+    <p>Pomembna omejitev: visok CAPE <strong>napoveduje potencial, ne dogodka</strong>. Ozračje ima lahko poln rezervoar, pa vse popoldne ostane jasno — če manjka sprožilec (fronta, gorski dvig, dnevno segrevanje) ali če dviganje nekaj zadržuje. In prav to zadržuje CIN.</p>
+
+    <h2>CIN: pokrov, ki drži — dokler ne popusti</h2>
+    <p>CIN (konvektivna inhibicija) je nasprotje CAPE: je »pokrov« toplejšega zraka v višini, ki zadržuje dviganje, dokler se ozračje spodaj dovolj ne segreje ali dokler ga kaj na silo ne prebije. Malo CIN pomeni, da nevihte lahko vzniknejo zlahka. Nekoliko protislovno pa lahko <em>zmeren</em> CIN nevihte celo okrepi: pokrov čez dan zadržuje energijo, ta se kopiči, ko pa pokrov popoldne popusti, se sprosti naenkrat — pogosto v obliki nenadnih, silovitih neviht. Zato CAPE in CIN vedno beremo skupaj.</p>
+
+    <h2>Indeks dviga, Total Totals in K-indeks</h2>
+    <p>Ti trije indeksi merijo nestabilnost na drugačen način kot CAPE in se z njim dopolnjujejo. Najbolj znan je <strong>indeks dviga</strong> (Lifted Index, LI): pove, kako bi se počutil zračni mehurček, dvignjen v višino. Negativne vrednosti pomenijo nestabilno ozračje — bolj ko je LI negativen, močnejše so lahko nevihte.</p>
+    <div class="table-scroll">
+      <table class="idx-table">
+        <tr><th>Indeks dviga (LI)</th><th>Pomen</th></tr>
+        <tr><td class="val lo">nad 0</td><td>stabilno — nevihte malo verjetne</td></tr>
+        <tr><td class="val mid">0 do −3</td><td>rahlo nestabilno — mogoče posamezne nevihte</td></tr>
+        <tr><td class="val hi">−3 do −6</td><td>zmerno do močno nestabilno — nevihte verjetne</td></tr>
+        <tr><td class="val xhi">pod −6</td><td>zelo nestabilno — potencial za huda neurja</td></tr>
+      </table>
+    </div>
+    <p><strong>Total Totals</strong> in <strong>K-indeks</strong> sta starejši, a še vedno uporabni meri; slonita na temperaturi in vlagi na različnih višinah. Ker vsak indeks »gleda« ozračje pod svojim kotom, je napoved najzanesljivejša takrat, kadar več indeksov kaže v isto smer.</p>
+
+    <h2>Striženje vetra: kaj loči ploho od neurja</h2>
+    <p>Nestabilnost pove, <em>ali</em> bo nevihta; striženje vetra (razlika v hitrosti in smeri vetra med tlemi in višino okoli 5,5 km) pa pove, <em>kako organizirana</em> bo. Ob šibkem striženju nevihta hitro »zaduši« lasten dotok in mine v pol ure — poletna <a href="/slovar/ploha/" style="color:#a78bfa">ploha</a>. Ob močnem striženju se vzgornik in padavine ločijo, nevihta se organizira in lahko traja ure, s tem pa raste tudi možnost <a href="/slovar/toca/" style="color:#a78bfa">toče</a> in močnih <a href="/slovar/sunek-vetra/" style="color:#a78bfa">sunkov vetra</a>.</p>
+    <div class="table-scroll">
+      <table class="idx-table">
+        <tr><th>Striženje 0–5,5 km (km/h)</th><th>Pomen</th></tr>
+        <tr><td class="val lo">pod 10</td><td>šibko — nevihte se premikajo počasi, kratkotrajne</td></tr>
+        <tr><td class="val mid">10–20</td><td>zmerno — bolje organizirane nevihte</td></tr>
+        <tr><td class="val hi">20–30</td><td>močno — možne supercelice</td></tr>
+        <tr><td class="val xhi">nad 30</td><td>izjemno — potencial tudi za tornado</td></tr>
+      </table>
+    </div>
+
+    <h2>Višina ledišča: ali toča preživi pot do tal</h2>
+    <p>Toča nastaja visoko v nevihtnem oblaku, a mora do tal prepotovati topel spodnji sloj zraka, ki jo tali. Nižja ko je <strong>višina ledišča</strong> (raven, kjer temperatura pade pod 0 °C), krajšo pot ima led skozi topel zrak in večja je verjetnost, da zrna dosežejo tla. V grobem: pod približno <strong>2,5 km</strong> se možnost toče na tleh opazno poveča. Zato se nekatere najhujše epizode toče zgodijo pozno spomladi ali ob hladnih vdorih, ne nujno v najbolj vročih dneh.</p>
+
+    <div class="callout">
+      <h3>Kako to sestaviti skupaj</h3>
+      <p>Recept za nevaren dan je preprost: <strong>veliko CAPE</strong> (gorivo), <strong>malo CIN</strong> ali pokrov, ki popusti (sprožilec), <strong>močno striženje</strong> (organizacija) in <strong>nizka višina ledišča</strong> (toča). Naša <a href="/nevihte/" style="color:#a78bfa">nevihtna napoved</a> te sestavine samodejno združi v oceno verjetnosti toče in močnih sunkov vetra za naslednjih 12 ur — tako vam ni treba ročno tehtati vsake številke.</p>
+    </div>
+
+    <h2>Zakaj je dolina poseben primer</h2>
+    <p>Modeli računajo za mrežno točko in ne poznajo vsake grape. V Zgornji Savinjski dolini pogosto velja, da je nevihta nad grebeni videti močnejša kot pri nas na dnu doline, kjer je postaja IREICA1 zavetna — po drugi strani pa lahko hribi nevihto »zbudijo« prav nad nami. Zato indekse berimo kot oceno <em>potenciala za širše območje</em>, konkreten razplet pa spremljajmo na radarju in z meritvami v živo. Kako se prav takšna nevihta bere v podatkih postaje, si lahko preberete v analizi <a href="/blog/anatomija-poletne-nevihte-recica-savinji.html" style="color:#a78bfa">Anatomija poletne nevihte</a>.</p>
+
+    <div class="note-box">
+      Uporabno naprej: trenutne vrednosti indeksov za dolino so vedno sveže na strani <a href="/nevihte/" style="color:#a78bfa">Nevihtna napoved</a>, razlage posameznih pojmov (<a href="/slovar/kumulonimbus/" style="color:#a78bfa">kumulonimbus</a>, <a href="/slovar/konvekcija/" style="color:#a78bfa">konvekcija</a>, <a href="/slovar/toca/" style="color:#a78bfa">toča</a>) pa v <a href="/slovar/" style="color:#a78bfa">vremenskem slovarju</a>.
+    </div>
+
+    <div class="disclaimer">Opozorilo: Indeksi nestabilnosti so <strong>model potenciala</strong>, ne uradna napoved. Ob dejanski nevihtni nevarnosti vedno upoštevajte uradna opozorila <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO</a> in navodila Uprave RS za zaščito in reševanje.</div>
+
+    <div class="sources">
+      <strong>Viri:</strong><br>
+      Mejne vrednosti indeksov: interni model nevihtne napovedi Meteorec (podatki Open-Meteo / modeli konvektivnih parametrov).<br>
+      Uradna opozorila: <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO</a>.<br>
+      Lokalne meritve: Vremenska postaja IREICA1, Rečica ob Savinji (366 m n. m.) · <a href="/" style="color:var(--blue)">meteorec.si</a>
+    </div>
+
+    <div class="share-bar" id="share-bar">
+      <span class="share-label">Deli</span>
+      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg> WhatsApp</a>
+      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X</a>
+      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg> Facebook</a>
+      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> <span id="copy-label">Kopiraj</span></button>
+      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Deli</button>
+    </div>
+
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/nevihte/">Nevihtna napoved</a></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const PAGE_URL   = "https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html";
+  const PAGE_TITLE = "Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače | Meteorec";
+  const PAGE_TEXT  = "Kaj pomenijo CAPE, CIN, indeks dviga in striženje vetra na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti.";
+  const enc = encodeURIComponent;
+  document.getElementById('btn-wa').href = 'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
+  document.getElementById('btn-x').href = 'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
+  document.getElementById('btn-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var label = document.getElementById('copy-label');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(PAGE_URL).then(function () { label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000); });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = PAGE_URL; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+    }
+  });
+  if (navigator.share) {
+    var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
+    nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
+  }
+})();
+</script>
+<script src="likes.js" defer></script>
+<script src="/blog/comments.js" defer></script>
+<script src="/blog/article-enhance.js" defer></script>
+<script src="/blog/subscribe.js" defer></script>
+</body>
+</html>

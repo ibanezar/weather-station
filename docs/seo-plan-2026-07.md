@@ -74,7 +74,7 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
   - [ ] Potrdi, da `nevihte-forecast` in `arso-alerts` tečeta med nevihtami; preveri OG slike (`og/`).
   - [ ] Audit (ned 19.7.) — potrdi 0 napak.
 - **Vsebina (blog)**
-  - [ ] *"Nevihtni radar doline: kako beremo CAPE, LI in strižni veter"* — evergreen razlaga, poveži na `/nevihte/` in ustrezne pojme v `/slovar/`; keyword: **CAPE nevihta**, **napoved neviht Slovenija dolina**.
+  - [x] **Objavljeno 7.7. (predčasno)**: [*Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra*](/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html) — evergreen razlaga z mejnimi vrednostmi, usklajenimi z modelom `/nevihte/`; povezana na `/nevihte/`, 6 pojmov v `/slovar/` in objavo »Anatomija poletne nevihte«; keyword: **CAPE nevihta**, **kako brati nevihtno napoved**.
   - [ ] Event-driven: če nastopi neurje/toča, hitri podatkovni zapis (glej `/novosti/`) + IndexNow (avtomatsko ob push).
 
 ### Teden 3 — 21.–27. julij · Kmetijstvo, hmelj, suša, voda
@@ -150,6 +150,6 @@ Klimatske / evergreen (grade avtoriteto):
 - [x] Sitemap vrzel `/trendi/` odpravljena
 - [x] Samodejni tedenski SEO audit postavljen (`seo-audit.yml`)
 - [x] Interna povezava na `/trendi/` dodana v skupni footer generatorja (aktivira se pon 13.7.)
-- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **1/8** (poletni ozon, 7.7.)
+- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **2/8** (poletni ozon 7.7.; nevihtni indeksi 7.7.)
 - [ ] Julijski mesečni povzetek (1.8.) potrjen kot objavljen + indeksiran
 - [ ] GSC pregled na koncu cikla + osnutek avgustovskega plana

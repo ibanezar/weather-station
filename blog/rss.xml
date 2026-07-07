@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 07 Jul 2026 11:38:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jul 2026 11:55:05 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače</title>
+      <link>https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html</guid>
+      <pubDate>Tue, 07 Jul 2026 08:00:00 +0000</pubDate>
+      <description>CAPE, CIN, indeks dviga, striženje vetra in višina ledišča — kaj pomenijo številke na nevihtni napovedi? Preprost vodnik po indeksih nestabilnosti in mejnih vrednostih, ki jih uporablja naša stran za Zgornjo Savinjsko dolino.</description>
+      <category>nevihte</category>
+      <category>razlaga</category>
+      <category>napoved</category>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Poletni ozon v Zgornji Savinjski dolini: kaj o kakovosti zraka pove postaja IREICA1</title>
       <link>https://meteorec.si/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html</link>
