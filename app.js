@@ -3838,17 +3838,19 @@ async function fetchAgrometeo(){
 }
 
 // ── Agrometeo Tab ─────────────────────────────────────────
+// Fenološki pragovi hmelja so vezani na GDD₁₀ (baza 10 °C — agronomski standard za
+// hmelj), umerjeni na večletno akumulacijo postaje IREICA1 (glej tools/generate_agrometeo_page.py).
 const HOP_STAGES=[
-  {min:0,   max:50,   label:'Mirovanje',                    emoji:'💤',col:'#6b7280'},
-  {min:50,  max:150,  label:'Odganjanje poganjkov',         emoji:'🌱',col:'#4ade80'},
-  {min:150, max:350,  label:'Vzdolžna rast trt',            emoji:'🌿',col:'#22c55e'},
-  {min:350, max:600,  label:'Stransko razvejanje',          emoji:'🌾',col:'#86efac'},
-  {min:600, max:850,  label:'Cvetenje in razvoj storžkov',  emoji:'🌸',col:'#f59e0b'},
-  {min:850, max:1100, label:'Oblikovanje storžkov',         emoji:'🍺',col:'#f97316'},
-  {min:1100,max:9999, label:'Tehnološka zrelost / obiranje',emoji:'🎉',col:'#ef4444'},
+  {min:0,   max:60,   label:'Mirovanje',                    emoji:'💤',col:'#6b7280'},
+  {min:60,  max:150,  label:'Odganjanje poganjkov',         emoji:'🌱',col:'#4ade80'},
+  {min:150, max:400,  label:'Vzdolžna rast trt',            emoji:'🌿',col:'#22c55e'},
+  {min:400, max:600,  label:'Stransko razvejanje',          emoji:'🌾',col:'#86efac'},
+  {min:600, max:950,  label:'Cvetenje in razvoj storžkov',  emoji:'🌸',col:'#f59e0b'},
+  {min:950, max:1250, label:'Oblikovanje storžkov',         emoji:'🍺',col:'#f97316'},
+  {min:1250,max:9999, label:'Tehnološka zrelost / obiranje',emoji:'🎉',col:'#ef4444'},
 ];
 const CROP_GDD=[
-  {name:'Hmelj',     emoji:'🌿',base:5, milestones:[{v:50,l:'odganjanje'},{v:350,l:'razvejanje'},{v:850,l:'storžki'},{v:1100,l:'obiranje'}],                              col:'#22c55e'},
+  {name:'Hmelj',     emoji:'🌿',base:10,milestones:[{v:150,l:'odganjanje'},{v:400,l:'razvejanje'},{v:600,l:'cvetenje'},{v:950,l:'storžki'},{v:1250,l:'obiranje'}],        col:'#22c55e'},
   {name:'Koruza',    emoji:'🌽',base:10,milestones:[{v:100,l:'kalitev'},{v:600,l:'svilanje'},{v:1300,l:'metličenje'},{v:2400,l:'spravilo'}],                         col:'#f59e0b'},
   {name:'Krompir',   emoji:'🥔',base:7, milestones:[{v:200,l:'vznik'},{v:500,l:'nastavljanje gomoljev'},{v:1000,l:'debelitev gomoljev'},{v:1500,l:'spravilo'}],      col:'#a78bfa'},
   {name:'Pšenica',   emoji:'🌾',base:5, milestones:[{v:200,l:'vznik'},{v:600,l:'kolenčenje'},{v:1200,l:'klasenje'},{v:2000,l:'žetev'}],                             col:'#fbbf24'},
@@ -3860,7 +3862,7 @@ let _agroFcCache=null,_agroFcTime=0;
 async function initAgro(){
   const [gdd5,gdd10,rain30]=_calcAgroAccum();
   _buildAgroKPIs(gdd5,gdd10,rain30);
-  _buildAgroHop(gdd5);
+  _buildAgroHop(gdd10);
   _buildAgroGDD(gdd5,gdd10);
   _buildAgroFrost();
   await _fetchAgroFc(gdd5);
@@ -3896,22 +3898,22 @@ function _buildAgroKPIs(gdd5,gdd10,rain30){
   if(wbalEl&&wbalEl.textContent==='—'){wbalEl.textContent='…';}
 }
 
-function _buildAgroHop(gdd5){
+function _buildAgroHop(gdd10){
   const body=document.getElementById('agro-hop-body');
   if(!body)return;
-  const stage=HOP_STAGES.find(s=>gdd5>=s.min&&gdd5<s.max)||HOP_STAGES[HOP_STAGES.length-1];
-  const nextStage=HOP_STAGES.find(s=>s.min>gdd5);
-  const pct=Math.min(100,Math.round((gdd5-stage.min)/(stage.max-stage.min)*100));
-  const toNext=nextStage?nextStage.min-gdd5:0;
+  const stage=HOP_STAGES.find(s=>gdd10>=s.min&&gdd10<s.max)||HOP_STAGES[HOP_STAGES.length-1];
+  const nextStage=HOP_STAGES.find(s=>s.min>gdd10);
+  const pct=Math.min(100,Math.round((gdd10-stage.min)/(stage.max-stage.min)*100));
+  const toNext=nextStage?nextStage.min-gdd10:0;
   body.innerHTML=
     '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem">'
     +'<div style="font-size:2rem">'+stage.emoji+'</div>'
     +'<div><div style="font-size:.95rem;font-weight:600;color:var(--text)">'+stage.label+'</div>'
-    +'<div style="font-size:.72rem;color:var(--muted)">GDD₅: '+gdd5+(nextStage?' · do naslednje faze: '+toNext+' GDD₅ ('+nextStage.label+')':'')+'</div></div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">GDD₁₀: '+gdd10+(nextStage?' · do naslednje faze: '+toNext+' GDD₁₀ ('+nextStage.label+')':'')+'</div></div>'
     +'</div>'
     +'<div class="hop-phase-bar"><div class="hop-phase-fill" style="width:'+pct+'%;background:'+stage.col+'"></div></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.85rem">'
-    +'<span>'+stage.min+' GDD₅</span><span>'+pct+'%</span>'+(stage.max<9999?'<span>'+stage.max+' GDD₅</span>':'')+'</div>'
+    +'<span>'+stage.min+' GDD₁₀</span><span>'+pct+'%</span>'+(stage.max<9999?'<span>'+stage.max+' GDD₁₀</span>':'')+'</div>'
     +'<div class="agro-risk-grid" id="agro-disease-grid">'
     +'<div style="color:var(--muted);font-size:.75rem">Tveganje za bolezni – nalaganje podatkov …</div>'
     +'</div>';
