@@ -96,7 +96,7 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
   - [ ] Osveži `llms.txt`, če so nove pomembne strani (npr. novi evergreen blogi).
 - **Vsebina (blog)**
   - [ ] *"Julij 2026 v številkah"* — ročni highlight ob samodejnem povzetku (deli na social).
-  - [ ] *"Začetek gobarske sezone: kaj pravi napoved plodnosti"* — iz `/gobarska-napoved/`; keyword: **gobe Savinjska dolina napoved**.
+  - [x] **Objavljeno 7.7. (predčasno)**: [*Kje v Zgornji Savinjski dolini rastejo gobe zdaj*](/blog/gobarska-sezona-julij-2026-kje-nabirati.html) — pošten podatkovni pogled: dno doline zaostaja (indeks 7 %) zaradi vročine/suše, Logarska dolina vodi (39 %); primerjava petih območij, model in 7-dnevna napoved; keyword: **gobe Savinjska dolina**, **kje nabirati gobe**.
 
 ### Zaključni dnevi — 4.–6. avgust · Pregled + priprava naslednjega cikla
 - [ ] Search Console: primerjaj impresije/CTR z začetkom cikla; zabeleži zmagovalne poizvedbe.
@@ -150,6 +150,6 @@ Klimatske / evergreen (grade avtoriteto):
 - [x] Sitemap vrzel `/trendi/` odpravljena
 - [x] Samodejni tedenski SEO audit postavljen (`seo-audit.yml`)
 - [x] Interna povezava na `/trendi/` dodana v skupni footer generatorja (aktivira se pon 13.7.)
-- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **3/8** (poletni ozon; nevihtni indeksi; hmelj/agrometeo — vse 7.7.)
+- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **4/8** (poletni ozon; nevihtni indeksi; hmelj/agrometeo; gobarska sezona — vse 7.7.)
 - [ ] Julijski mesečni povzetek (1.8.) potrjen kot objavljen + indeksiran
 - [ ] GSC pregled na koncu cikla + osnutek avgustovskega plana
