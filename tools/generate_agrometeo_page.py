@@ -26,18 +26,21 @@ LAT, LON = seo.LAT, seo.LON
 
 DAN_KRATKO = ["ned", "pon", "tor", "sre", "čet", "pet", "sob"]
 
+# Fenološki pragovi hmelja so vezani na GDD₁₀ (baza 10 °C — agronomski standard za
+# hmelj), umerjeni na večletno akumulacijo postaje IREICA1: cvetenje se pri ~600
+# začne v začetku julija, obiranje pri ~1250 pade v začetek septembra.
 HOP_STAGES = [
-    (0, 50, "Mirovanje", "💤"),
-    (50, 150, "Odganjanje poganjkov", "🌱"),
-    (150, 350, "Vzdolžna rast trt", "🌿"),
-    (350, 600, "Stransko razvejanje", "🌾"),
-    (600, 850, "Cvetenje in razvoj storžkov", "🌸"),
-    (850, 1100, "Oblikovanje storžkov", "🍺"),
-    (1100, float("inf"), "Tehnološka zrelost / obiranje", "🎉"),
+    (0, 60, "Mirovanje", "💤"),
+    (60, 150, "Odganjanje poganjkov", "🌱"),
+    (150, 400, "Vzdolžna rast trt", "🌿"),
+    (400, 600, "Stransko razvejanje", "🌾"),
+    (600, 950, "Cvetenje in razvoj storžkov", "🌸"),
+    (950, 1250, "Oblikovanje storžkov", "🍺"),
+    (1250, float("inf"), "Tehnološka zrelost / obiranje", "🎉"),
 ]
 
 CROP_GDD = [
-    ("Hmelj", "🌿", 5, [(50, "odganjanje"), (350, "razvejanje"), (850, "storžki"), (1100, "obiranje")]),
+    ("Hmelj", "🌿", 10, [(150, "odganjanje"), (400, "razvejanje"), (600, "cvetenje"), (950, "storžki"), (1250, "obiranje")]),
     ("Koruza", "🌽", 10, [(100, "kalitev"), (600, "svilanje"), (1300, "metličenje"), (2400, "spravilo")]),
     ("Krompir", "🥔", 7, [(200, "vznik"), (500, "nastavljanje gomoljev"), (1000, "debelitev gomoljev"), (1500, "spravilo")]),
     ("Pšenica", "🌾", 5, [(200, "vznik"), (600, "kolenčenje"), (1200, "klasenje"), (2000, "žetev")]),
@@ -85,9 +88,9 @@ def fetch_forecast():
         return json.load(r)
 
 
-def hop_stage(gdd5):
+def hop_stage(gdd10):
     for lo, hi, label, emoji in HOP_STAGES:
-        if lo <= gdd5 < hi:
+        if lo <= gdd10 < hi:
             return lo, hi, label, emoji
     return HOP_STAGES[-1]
 
@@ -118,7 +121,7 @@ def build_body(hist, fc):
     wbal_today = today_rain - et0
 
     # ── hop phenology + disease risk (current hour) ─────────────────────────
-    lo, hi, stage_label, stage_emoji = hop_stage(gdd5)
+    lo, hi, stage_label, stage_emoji = hop_stage(gdd10)
     now_hour = datetime.datetime.now().hour
     rh_now = (hourly.get("relative_humidity_2m") or [70] * 24)[now_hour] if hourly.get("relative_humidity_2m") else 70
     t_now = (hourly.get("temperature_2m") or [15] * 24)[now_hour] if hourly.get("temperature_2m") else 15
@@ -127,7 +130,7 @@ def build_body(hist, fc):
     # ── answer block ─────────────────────────────────────────────────────────
     answer = (f'  <p class="archive-intro">Vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes '
               f'<strong>GDD₅ {gdd5}</strong> in <strong>GDD₁₀ {gdd10}</strong> (od 1. januarja {TODAY.year}). '
-              f'Hmelj je po tej vsoti v fazi <strong>{stage_label.lower()}</strong>. Danes: ET₀ {seo.num(et0, 1)} mm, '
+              f'Hmelj je po vsoti GDD₁₀ v fazi <strong>{stage_label.lower()}</strong>. Danes: ET₀ {seo.num(et0, 1)} mm, '
               f'sonce {seo.num(sun_h, 1)} h, vodna bilanca {"+" if wbal_today >= 0 else ""}{seo.num(wbal_today, 1)} mm '
               f'— nazadnje posodobljeno {TODAY.isoformat()}.</p>')
 
@@ -155,14 +158,14 @@ def build_body(hist, fc):
   </div>'''
 
     # ── hop section ────────────────────────────────────────────────────────
-    to_next = f' · do naslednje faze: {round(hi - gdd5)} GDD₅' if hi != float("inf") else ""
+    to_next = f' · do naslednje faze: {round(hi - gdd10)} GDD₁₀' if hi != float("inf") else ""
     disease_rows = "\n".join(
         f'      <tr><th>{name}</th><td>{round(pct)} % — {risk_label(pct)} <span class="muted-note" style="margin:0;display:inline">({note})</span></td></tr>'
         for name, pct, note in diseases
     )
     hop_html = f'''  <div class="card" style="margin-bottom:1rem">
     <div class="clabel">{stage_emoji} Fenologija hmelja</div>
-    <p class="archive-intro" style="margin:.4rem 0 .8rem">Trenutna faza: <strong>{stage_label}</strong> (GDD₅ {gdd5}{to_next}).</p>
+    <p class="archive-intro" style="margin:.4rem 0 .8rem">Trenutna faza: <strong>{stage_label}</strong> (GDD₁₀ {gdd10}{to_next}).</p>
     <table class="stats">
 {disease_rows}
     </table>
@@ -280,7 +283,7 @@ def build_body(hist, fc):
          "10 °C), seštetih od začetka leta. Uporablja se za napovedovanje razvojnih faz rastlin — višja vsota "
          "pomeni naprednejšo rastno fazo."),
         ("V kateri fazi je hmelj trenutno v Zgornji Savinjski dolini?",
-         f"Po vsoti GDD₅ ({gdd5} od 1. januarja {TODAY.year}) je hmelj trenutno v fazi: {stage_label.lower()}."),
+         f"Po vsoti GDD₁₀ ({gdd10} od 1. januarja {TODAY.year}) je hmelj trenutno v fazi: {stage_label.lower()}."),
         ("Kdaj je okno za škropljenje primerno?",
          "Škropljenje je primerno, ko je hitrost vetra do 4 km/h, ni padavin in je temperatura vsaj 5 °C — "
          "praviloma zgodaj dopoldan ali pozno popoldan, ko je veter najšibkejši."),

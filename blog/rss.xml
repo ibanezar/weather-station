@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 07 Jul 2026 11:55:05 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jul 2026 12:30:30 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Hmelj in vreme julija: rastne stopinje in vodna bilanca v Zgornji Savinjski dolini</title>
+      <link>https://meteorec.si/blog/hmelj-vreme-julij-rastne-stopinje-vodna-bilanca.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/hmelj-vreme-julij-rastne-stopinje-vodna-bilanca.html</guid>
+      <pubDate>Tue, 07 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Kako vreme poganja hmelj v slovenski hmeljarski dolini? Vsota rastnih stopinj (GDD₁₀ 610 na postaji IREICA1) julija postavlja hmelj v cvetenje, do obiranja pa je še okoli 640 stopinj — nekako do začetka septembra. Plus: kaj pomeni vodna bilanca za pridelek.</description>
+      <category>agrometeo</category>
+      <category>hmelj</category>
+      <category>analiza</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>IREICA1</category>
+    </item>
     <item>
       <title>Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra po domače</title>
       <link>https://meteorec.si/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html</link>
