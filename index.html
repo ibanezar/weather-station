@@ -2899,6 +2899,29 @@
 
   <div id="tab-community" class="tab-pane">
 
+    <div class="card feel-poll-card">
+      <div class="feel-poll-flip" id="feel-poll-flip">
+        <div class="feel-poll-face feel-poll-front">
+          <div class="feel-poll-title">🌡️ Kako se ti zdi zdaj zunaj?</div>
+          <div class="feel-poll-sub">En klik — takoj vidiš, kaj pravijo drugi v dolini.</div>
+          <div class="feel-poll-btns">
+            <button class="feel-poll-btn" onclick="submitFeelPoll('perfect')"><span class="feel-poll-emoji">😎</span>Popolno</button>
+            <button class="feel-poll-btn" onclick="submitFeelPoll('sticky')"><span class="feel-poll-emoji">🥵</span>Soparno</button>
+            <button class="feel-poll-btn" onclick="submitFeelPoll('chilly')"><span class="feel-poll-emoji">🥶</span>Mrzlo</button>
+            <button class="feel-poll-btn" onclick="submitFeelPoll('raw')"><span class="feel-poll-emoji">💨</span>Rezko</button>
+          </div>
+        </div>
+        <div class="feel-poll-face feel-poll-back">
+          <div class="feel-poll-title">Glasovi skupnosti danes</div>
+          <div class="feel-poll-pie-wrap">
+            <svg id="feel-poll-pie" viewBox="0 0 120 120"></svg>
+            <div class="feel-poll-pie-total" id="feel-poll-pie-total"></div>
+          </div>
+          <div class="feel-poll-legend" id="feel-poll-legend"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="card community-card">
       <div class="community-header">
         <div class="community-title">👥 Skupnostna ocena napovedi</div>

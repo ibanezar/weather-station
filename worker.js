@@ -290,6 +290,7 @@ function normalize(data){
 // Za pravi persistentni counter potrebuješ Cloudflare KV binding "COUNTER_KV"
 let _memCount = 1000; // začetna vrednost — nastavi po želji
 const _memLikes = {}; // fallback za všečke, kadar KV ni na voljo (resetira se ob restartu)
+const _memPoll = {}; // fallback za dnevni poll, kadar KV ni na voljo (resetira se ob restartu)
 
 // ── Glavni handler ─────────────────────────────────────────
 // ── Edge-rendered weather archive page helpers ─────────────────────────────
@@ -729,6 +730,52 @@ export default {
         }
         return new Response(
           JSON.stringify({ slug, count }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
+        );
+      }
+
+      // ── /poll ─────────────────────────────────────────────
+      // Dnevni "kako se počuti vreme" mikro-poll skupnosti.
+      // Ključ v KV: "poll:YYYY-MM-DD". Vrednost: JSON { perfect, sticky, chilly, raw }.
+      // GET  /poll               → { date, counts }
+      // POST /poll?option=perfect|sticky|chilly|raw → { date, counts }
+      // Persistenca zahteva KV binding COUNTER_KV; brez njega vrne in-memory vrednost.
+      if (path === "/poll") {
+        const POLL_OPTIONS = ["perfect", "sticky", "chilly", "raw"];
+        const today = fmtDate(new Date());
+        const key = "poll:" + today;
+        let counts;
+        if (env?.COUNTER_KV) {
+          try { counts = JSON.parse(await env.COUNTER_KV.get(key)) || {}; } catch (_) { counts = {}; }
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!POLL_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna opcija" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            counts[option] = (counts[option] || 0) + 1;
+            await env.COUNTER_KV.put(key, JSON.stringify(counts), { expirationTtl: 3 * 86400 });
+          }
+        } else {
+          _memPoll[key] = _memPoll[key] || {};
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!POLL_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna opcija" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            _memPoll[key][option] = (_memPoll[key][option] || 0) + 1;
+          }
+          counts = _memPoll[key];
+        }
+        const full = {};
+        POLL_OPTIONS.forEach(o => full[o] = counts[o] || 0);
+        return new Response(
+          JSON.stringify({ date: today, counts: full }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
         );
       }
