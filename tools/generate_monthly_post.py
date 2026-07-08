@@ -303,7 +303,7 @@ def rewrite_sitemap_and_index(posts):
         (f"{SITE}/kakovost-zraka/",        "daily",   "0.7", TODAY),
         (f"{SITE}/vreme-za-padalce/",      "daily",   "0.6", TODAY),
         (f"{SITE}/trendi/",                "weekly",  "0.7", TODAY),
-        (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-06-30"),
+        (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-07-08"),
     ]
     sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
     # kategorijske (tag) strani

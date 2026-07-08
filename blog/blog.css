@@ -79,6 +79,13 @@ article strong{color:#fff}
   -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 .callout strong{color:var(--cyan)}
 
+/* ── Pogosta vprašanja (FAQPage) ───────────────────────────── */
+.faq-block{margin:2rem 0}
+.faq-item{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.2rem;margin:.8rem 0}
+.faq-item h3{font-size:1rem;margin:0 0 .4rem;color:var(--text)}
+.faq-item p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.6}
+
 /* seznam objav (index) */
 .page-intro{color:var(--muted);margin-bottom:1.6rem}
 .post-list{list-style:none;margin-top:1rem}
