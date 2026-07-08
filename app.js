@@ -218,7 +218,7 @@ function attachScrub(svg,onMove,onLeave){
   svg.addEventListener('mousemove',e=>onMove(xFromClient(e.clientX),e.clientX,e.clientY));
   svg.addEventListener('mouseleave',onLeave);
   svg.addEventListener('touchstart',e=>{const t=e.touches[0];onMove(xFromClient(t.clientX),t.clientX,t.clientY);},{passive:true});
-  svg.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];onMove(xFromClient(t.clientX),t.clientX,t.clientY);},{passive:false});
+  svg.addEventListener('touchmove',e=>{const t=e.touches[0];onMove(xFromClient(t.clientX),t.clientX,t.clientY);},{passive:true});
   svg.addEventListener('touchend',onLeave);
   svg.addEventListener('touchcancel',onLeave);
 }
