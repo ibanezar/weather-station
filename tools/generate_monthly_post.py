@@ -176,7 +176,7 @@ def build_html(s):
   "author": {{ "@type": "Person", "name": "Filip Eremita" }},
   "publisher": {{ "@type": "Organization", "name": "Meteorec", "logo": {{ "@type": "ImageObject", "url": "{SITE}/icon-512.png" }} }},
   "mainEntityOfPage": {{ "@type": "WebPage", "@id": "{url}" }},
-  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
+  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": ["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"], "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
 }}
 </script>
 <script type="application/ld+json">
