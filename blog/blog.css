@@ -381,14 +381,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
     max-width:1100px;
     display:grid;
     grid-template-columns:minmax(0,1fr) 270px;
-    grid-template-areas:"head head" "main side" "foot foot";
+    grid-template-areas:"head head" "crumbs crumbs" "main side" "related related" "comments comments" "subscribe subscribe" "foot foot";
     column-gap:3rem;
     align-items:start;
   }
   body.has-blog-sidebar .wrap > .site-head{grid-area:head}
+  body.has-blog-sidebar .wrap > .crumbs{grid-area:crumbs}
   body.has-blog-sidebar .wrap > .site-foot{grid-area:foot}
   body.has-blog-sidebar .wrap > article,
   body.has-blog-sidebar .wrap > main{grid-area:main;max-width:730px;width:100%}
+  /* JS vstavi te razdelke (sorodni članki, komentarji, prijava na novičke)
+     kot dodatne otroke .wrap — brez eksplicitnega grid-area bi jih
+     samodejno postavljanje mreže potisnilo v napačen stolpec/vrstico. */
+  body.has-blog-sidebar .wrap > .related-posts{grid-area:related;max-width:730px;width:100%}
+  body.has-blog-sidebar .wrap > .cmt-section{grid-area:comments;max-width:730px;width:100%}
+  body.has-blog-sidebar .wrap > .subscribe-box{grid-area:subscribe;max-width:730px;width:100%}
   body.has-blog-sidebar .blog-sidebar{
     grid-area:side;align-self:start;
     position:sticky;top:90px;
