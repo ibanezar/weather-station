@@ -3069,11 +3069,13 @@ function applyHistory(summaries){
 
   const u='<span style="font-size:.74rem;color:var(--muted);margin-left:1px">';
   const tbody=document.getElementById('history-tbody');
-  if(!tbody)return;tbody.innerHTML='';
-  [...sorted].reverse().forEach(s=>{
+  if(!tbody)return;
+  // Batch all rows into one HTML string + single innerHTML set instead of
+  // one createElement+appendChild per row — on the 5-year view that's
+  // 1800+ individual DOM insertions, each triggering incremental reflow.
+  const rowsHtml=[...sorted].reverse().map(s=>{
     const m=s.metric;
-    const tr=document.createElement('tr');
-    tr.innerHTML=
+    return '<tr>'+
       '<td>'+fmtHistDate(s.obsTimeLocal)+'</td>'+
       '<td class="td-high">'+fmt(m.tempHigh,1)+u+'°C</span></td>'+
       '<td class="td-low">'+fmt(m.tempLow,1)+u+'°C</span></td>'+
@@ -3081,9 +3083,10 @@ function applyHistory(summaries){
       '<td class="td-rain">'+fmt(m.precipTotal,1)+u+'mm</span></td>'+
       '<td>'+fmt(m.windspeedAvg,1)+u+'km/h</span></td>'+
       '<td style="color:var(--purple)">'+fmt(m.windspeedHigh,1)+u+'km/h</span></td>'+
-      '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>';
-    tbody.appendChild(tr);
-  });
+      '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>'+
+    '</tr>';
+  }).join('');
+  tbody.innerHTML=rowsHtml;
 }
 
 function showHistErr(msg){
@@ -3106,12 +3109,17 @@ function drawHistTempChart(data){
     const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t.textContent=val.toFixed(0)+'°';
   }
+  // Batch per-point date labels into a fragment — on the 5-year view this
+  // is ~360 elements; appending each straight to the live svg one at a
+  // time triggers incremental reflow (same fix as the history table).
+  const dateLabelFrag=document.createDocumentFragment();
   data.forEach((d,i)=>{
     if(i%5===0||i===data.length-1){
-      const t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+      const t=mkSVG(dateLabelFrag,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
       t.textContent=fmtHistDateShort(d.obsTimeLocal);
     }
   });
+  svg.appendChild(dateLabelFrag);
 
   const defs=mkSVG(svg,'defs',{});
   defs.innerHTML=
@@ -3166,14 +3174,19 @@ function drawHistRainChart(data){
 
   const bw=Math.max(1.5,(cw/data.length)*0.7);
   const xS=i=>pad.l+i/data.length*cw;
+  // Batch bars + date labels into a fragment — on the 5-year view this is
+  // up to ~1800 rects; appending each straight to the live svg one at a
+  // time triggers incremental reflow (same fix as the history table).
+  const barFrag=document.createDocumentFragment();
   data.forEach((d,i)=>{
     const r=d.metric.precipTotal??0,x=xS(i),h=(r/maxR)*ch;
-    if(r>0)mkSVG(svg,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#hrg)',rx:'2'});
+    if(r>0)mkSVG(barFrag,'rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:'url(#hrg)',rx:'2'});
     if(i%5===0||i===data.length-1){
-      const t=mkSVG(svg,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+      const t=mkSVG(barFrag,'text',{x:x,y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
       t.textContent=fmtHistDateShort(d.obsTimeLocal);
     }
   });
+  svg.appendChild(barFrag);
   if(total<0.1){const t=mkSVG(svg,'text',{x:VW/2,y:VH/2,'text-anchor':'middle','font-size':'12',fill:CC.noData,'font-family':'Inter,sans-serif'});t.textContent='Ni padavin v izbranem obdobju';}
   set('hist-rain-range','Skupaj: '+fmt(total,1)+' mm');
 
