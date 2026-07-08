@@ -3119,6 +3119,17 @@
 
 
 
+  <section class="subscribe-box" aria-labelledby="home-sub-title">
+    <h2 class="sub-title" id="home-sub-title">📬 Prijava na novičke</h2>
+    <p class="sub-desc">Prijavi se in ob vsakem novem članku (vremenski povzetki, rekordi, analize) dobiš e-obvestilo. Brez spama, odjava z enim klikom.</p>
+    <form class="sub-form" id="home-sub-form" autocomplete="off">
+      <input class="sub-input" id="home-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">
+      <input class="sub-hp" type="text" name="website" id="home-sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="sub-btn" id="home-sub-btn" type="submit">Prijava</button>
+    </form>
+    <p class="sub-msg" id="home-sub-msg" aria-live="polite"></p>
+  </section>
+
   <footer>
     <div class="ft-inner">
       <div>
@@ -3222,6 +3233,39 @@
     document.getElementById('cookie-banner').style.display = 'flex';
     document.querySelectorAll('.windy-consent-placeholder').forEach(function(p){ p.classList.add('visible'); });
   }
+})();
+</script>
+
+<script>
+(function(){
+  var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+  var form  = document.getElementById('home-sub-form');
+  if(!form) return;
+  var email = document.getElementById('home-sub-email');
+  var hp    = document.getElementById('home-sub-hp');
+  var btn   = document.getElementById('home-sub-btn');
+  var msg   = document.getElementById('home-sub-msg');
+  function setMsg(t, err){ msg.textContent = t || ''; msg.className = 'sub-msg' + (err ? ' err' : ' ok'); }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(hp.value) return; // bot
+    var val = email.value.trim();
+    if(!val){ setMsg('Vpiši e-naslov.', true); return; }
+    btn.disabled = true; btn.textContent = 'Pošiljam…'; setMsg('');
+    fetch(PROXY + '/blog-subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: val, website: '' })
+    })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        if(!res.ok || res.j.error){ setMsg(res.j.error || 'Napaka pri prijavi.', true); return; }
+        if(res.j.already){ setMsg('Ta e-naslov je že naročen. 🙂'); }
+        else{ setMsg('Skoraj gotovo! Preveri e-pošto in potrdi naročnino.'); form.reset(); }
+      })
+      .catch(function(){ setMsg('Napaka v povezavi. Poskusi znova.', true); })
+      .then(function(){ btn.disabled = false; btn.textContent = 'Prijava'; });
+  });
 })();
 </script>
 
