@@ -29,6 +29,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
 STATION_ID = "IREICA1"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
+# Entity-linking za Place-shemo: verjeta Wikidata/Wikipedia stran (preverjeno,
+# ne domnevano -- Q969326 je naselje samo, ne občina).
+RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
+                 "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
+RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
@@ -105,14 +110,20 @@ def webpage_schema(url, title, desc, date_published=None):
          f'"@id":{json.dumps(full)},"name":{json.dumps(title)},'
          f'"description":{json.dumps(desc)},"url":{json.dumps(full)},'
          f'"inLanguage":"sl","isPartOf":{{"@id":"{SITE}/#website"}},'
-         f'"about":{{"@type":"Place","name":"Rečica ob Savinji",'
+         f'"about":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
     if date_published:
         s += f',"datePublished":{json.dumps(date_published)}'
     s += "}"
     return f"<script type=\"application/ld+json\">\n{s}\n</script>"
 
-def defined_term_schema(name, description, url, term_set_url):
+# Overja slovarskih pojmov na preverjene (ne domnevane) slovenske Wikipedia
+# članke -- dodajaj sem šele, ko posamezno povezavo dejansko preveriš.
+TERM_SAMEAS = {
+    "fen": "https://sl.wikipedia.org/wiki/Fen_(veter)",
+}
+
+def defined_term_schema(name, description, url, term_set_url, slug=None):
     full = f"{SITE}{url}"
     data = {
         "@context": "https://schema.org",
@@ -124,6 +135,8 @@ def defined_term_schema(name, description, url, term_set_url):
         "inDefinedTermSet": f"{SITE}{term_set_url}#terms",
         "inLanguage": "sl",
     }
+    if slug and slug in TERM_SAMEAS:
+        data["sameAs"] = TERM_SAMEAS[slug]
     return (f'<script type="application/ld+json">\n'
             f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
 
@@ -181,7 +194,7 @@ def dataset_schema(url, observations):
             '"creator":{"@type":"Person","name":"Filip Eremita"},'
             '"license":"https://creativecommons.org/licenses/by/4.0/",'
             '"isAccessibleForFree":true,'
-            '"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji",'
+            f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}},'
             f'"temporalCoverage":"2019-11-07/..",'
             '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
@@ -211,6 +224,7 @@ def archive_dataset_schema(first_date, last_date):
         "spatialCoverage": {
             "@type": "Place",
             "name": "Rečica ob Savinji",
+            "sameAs": RECICA_SAMEAS,
             "geo": {"@type": "GeoCoordinates", "latitude": LAT, "longitude": LON, "elevation": ELEV},
         },
         "variableMeasured": [
@@ -1547,7 +1561,7 @@ def gen_slovar_pages(sitemap_urls):
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
-            defined_term_schema(t["term"], t["def"], url, "/slovar/"),
+            defined_term_schema(t["term"], t["def"], url, "/slovar/", slug=t["slug"]),
             faq_schema(qa),
         ])
         cat_label = GLOSS_CAT_LABELS.get(t["cat"], t["cat"])

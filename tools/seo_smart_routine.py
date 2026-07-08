@@ -22,6 +22,10 @@ SITE = "https://meteorec.si"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
 TODAY = datetime.date.today()
 INDEXNOW_KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+# Entity-linking za Place-shemo (preverjeno: Q969326 je naselje samo, ne občina).
+RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
+                 "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
+RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
@@ -150,7 +154,7 @@ def webpage_schema(url, title, desc, date_mod=None):
          f'"@id":{json.dumps(full)},"name":{json.dumps(title)},'
          f'"description":{json.dumps(desc)},"url":{json.dumps(full)},'
          f'"inLanguage":"sl","isPartOf":{{"@id":"{SITE}/#website"}},'
-         f'"about":{{"@type":"Place","name":"Rečica ob Savinji",'
+         f'"about":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
     if date_mod:
         s += f',"dateModified":{json.dumps(date_mod)}'
@@ -182,7 +186,7 @@ def dataset_schema(url, name, desc, keywords):
             f'"url":{jd(full)},'
             f'"creator":{{"@type":"Person","name":"Filip Eremita"}},'
             f'"isAccessibleForFree":true,'
-            f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji",'
+            f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON}}}}},'
             f'"temporalCoverage":"2019-11-07/..",'
             f'"variableMeasured":[]}}\n</script>')
@@ -199,7 +203,7 @@ def article_schema(url, title, desc, date_pub, date_mod=None):
             f'"author":{{"@type":"Person","name":"Filip Eremita"}},'
             f'"publisher":{{"@type":"Organization","name":"Meteorec",'
             f'"url":"{SITE}"}},'
-            f'"about":{{"@type":"Place","name":"Rečica ob Savinji",'
+            f'"about":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON}}}}}}}\n</script>')
 
 def footer_html():
