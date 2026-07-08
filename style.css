@@ -2365,3 +2365,20 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sub-msg.ok{color:var(--green)}
 .sub-msg.err{color:#f87171}
 .sm-zoom:hover{border-color:#3b82f6;color:#3b82f6}
+
+/* ── Vremenska pogojna vsebina: banner nad "trenutno" ─────── */
+.wf-banner{position:relative;display:flex;align-items:center;gap:.9rem;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:16px;padding:1rem 1.2rem;
+  margin:0 0 1rem;box-shadow:var(--card-shadow)}
+.wf-banner-icon{font-size:1.6rem;flex-shrink:0}
+.wf-banner-body{flex:1;min-width:0;display:block}
+.wf-banner-kicker{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--amber);margin-bottom:.15rem}
+.wf-banner-title{font-size:.98rem;font-weight:600}
+.wf-banner-title a{color:var(--text);text-decoration:none}
+.wf-banner-title a:hover{text-decoration:underline}
+.wf-banner-title a::after{content:'';position:absolute;inset:0} /* raztegnjena povezava čez celoten banner */
+.wf-banner-sub{display:block;font-size:.82rem;color:var(--muted);margin-top:.15rem}
+.wf-banner-close{position:relative;z-index:1;flex-shrink:0;background:none;border:none;color:var(--muted);
+  font-size:1.1rem;cursor:pointer;padding:.2rem .4rem;line-height:1;border-radius:6px}
+.wf-banner-close:hover{background:var(--border);color:var(--text)}
