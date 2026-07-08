@@ -1603,6 +1603,28 @@ function applyDayStats(observations){
   const totalRain=todayObs.reduce((mx,o)=>Math.max(mx,o.metric.precipTotal??0),0);
   set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/todayObs.length,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
+  updateTodayPercentile(maxT);
+}
+
+// ── Zgodovinski kontekst: kje se današnji vrh uvršča med vsemi
+//    istimi koledarskimi dnevi (mesec+dan) v celotni zgodovini postaje ──
+function updateTodayPercentile(maxT){
+  const el=document.getElementById('day-high-percentile');
+  if(!el)return;
+  if(maxT==null||!isFinite(maxT)){el.textContent='';return;}
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const today=new Date();
+  const suffix='-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  const todayKey=_localDateStr(today);
+  const highs=Object.entries(stored)
+    .filter(([k])=>k.endsWith(suffix)&&k!==todayKey)
+    .map(([,v])=>v.tempHigh)
+    .filter(h=>h!=null);
+  if(highs.length<5){el.textContent='';return;} // premalo let za smiselno statistiko
+  const below=highs.filter(h=>h<maxT).length;
+  const percentile=Math.round((below/highs.length)*100);
+  const mnPl=['januarjev','februarjev','marcev','aprilov','majev','junijev','julijev','avgustov','septembrov','oktobrov','novembrov','decembrov'][today.getMonth()];
+  el.textContent='· toplejši od '+percentile+' % vseh '+today.getDate()+'. '+mnPl+' na postaji (n='+highs.length+')';
 }
 
 // ── Pressure trend ────────────────────────────────────────
