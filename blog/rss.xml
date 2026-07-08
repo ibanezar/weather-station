@@ -5,38 +5,8 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 08 Jul 2026 10:33:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 08 Jul 2026 11:50:17 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
-    <item>
-      <title>Po peklenski vročini preobrat: nevihte, toča in hudourniki v Zgornji Savinjski dolini (1.–2. julij 2026)</title>
-      <link>https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</guid>
-      <pubDate>Wed, 08 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Hladna fronta 1. in 2. julija ob stiku s pregreto zračno maso prinaša supercelične nevihte, debelo točo, sunke vetra prek 90 km/h in nevarnost hudournikov na izsušenih tleh. Časovnica, napoved po postajah in priporočila.</description>
-      <category>napoved</category>
-      <category>julij</category>
-      <category>2026</category>
-      <category>nevihte</category>
-      <category>toca</category>
-      <category>poplave</category>
-      <category>hudourniki</category>
-      <category>IREICA1</category>
-    </item>
-    <item>
-      <title>Ekološka in okoljska tveganja: požarna ogroženost in vetrolomi</title>
-      <link>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</guid>
-      <pubDate>Wed, 08 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Fenska fronta s suhim severnim vetrom poveča požarno ogroženost gozdov, ruši plitvo koreninjene smreke z vetrolomi in sproža izrazita biovremenska nihanja pri prebivalcih Zgornje Savinjske doline.</description>
-      <category>analiza</category>
-      <category>julij</category>
-      <category>2026</category>
-      <category>pozari</category>
-      <category>veter</category>
-      <category>gozd</category>
-      <category>biovreme</category>
-      <category>IREICA1</category>
-    </item>
     <item>
       <title>Vročinski val v štirih krajih doline: Rečica, Mozirje, Nazarje, Ljubno</title>
       <link>https://meteorec.si/blog/primerjava-krajev-vrocinski-val-julij-2026.html</link>
@@ -238,6 +208,21 @@
       <category>IREICA1</category>
     </item>
     <item>
+      <title>Ekološka in okoljska tveganja: požarna ogroženost in vetrolomi</title>
+      <link>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</guid>
+      <pubDate>Wed, 01 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Fenska fronta s suhim severnim vetrom poveča požarno ogroženost gozdov, ruši plitvo koreninjene smreke z vetrolomi in sproža izrazita biovremenska nihanja pri prebivalcih Zgornje Savinjske doline.</description>
+      <category>analiza</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>pozari</category>
+      <category>veter</category>
+      <category>gozd</category>
+      <category>biovreme</category>
+      <category>IREICA1</category>
+    </item>
+    <item>
       <title>Vremenski povzetek — junij 2026</title>
       <link>https://meteorec.si/blog/vremenski-povzetek-junij-2026.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/vremenski-povzetek-junij-2026.html</guid>
@@ -246,6 +231,21 @@
       <category>povzetek</category>
       <category>junij</category>
       <category>2026</category>
+    </item>
+    <item>
+      <title>Po peklenski vročini preobrat: nevihte, toča in hudourniki v Zgornji Savinjski dolini (1.–2. julij 2026)</title>
+      <link>https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</guid>
+      <pubDate>Sun, 28 Jun 2026 08:00:00 +0000</pubDate>
+      <description>Hladna fronta 1. in 2. julija ob stiku s pregreto zračno maso prinaša supercelične nevihte, debelo točo, sunke vetra prek 90 km/h in nevarnost hudournikov na izsušenih tleh. Časovnica, napoved po postajah in priporočila.</description>
+      <category>napoved</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>nevihte</category>
+      <category>toca</category>
+      <category>poplave</category>
+      <category>hudourniki</category>
+      <category>IREICA1</category>
     </item>
     <item>
       <title>Topoklimatologija Zgornje Savinjske doline: postaja IREICA1</title>
