@@ -61,7 +61,7 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
 - **Tehnika**
   - [x] `/trendi/` v sitemap; audit workflow postavljen.
   - [ ] V Search Console preveri **Coverage/Pages** — potrdi indeksiranost `/trendi/`, `/vreme-recica-ob-savinji/`, `/slovar/`.
-  - [ ] Ročni sprožilec `seo-audit.yml` (workflow_dispatch), potrdi zelen tek in commit.
+  - [x] Ročni sprožilec `seo-audit.yml` (workflow_dispatch), potrdi zelen tek in commit — **8.7. zagnano ročno, uspešno (run #1), 0 vrzeli v sitemapu, IndexNow ping ni bil potreben** (ni sprememb).
   - [x] Interna povezanost: povezava na `/trendi/` dodana v skupni footer (`seo_smart_routine.py`) → pojavi se na vseh generiranih hub straneh ob naslednjem tedenskem teku (pon 13.7.). `/trendi/` ni več "siroti".
 - **Vsebina (blog)**
   - [x] **Objavljeno 7.7.**: [*Poletni ozon v Zgornji Savinjski dolini*](/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html) — podatkovni razlagalec (meritve UV/sonce/veter s postaje), povezan na `/kakovost-zraka/` in 3 pojme v `/slovar/`; keyword: **kakovost zraka Savinjska dolina**, **prizemni ozon**.
