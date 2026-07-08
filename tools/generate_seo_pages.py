@@ -702,7 +702,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
     return written
 
 
-def gen_archive_index(hist, sitemap_urls):
+def gen_archive_index(hist, sitemap_urls, seasons=None):
     years = sorted({d[:4] for d in hist}, reverse=True)
     url = "/vreme/"
     rel = "vreme/index.html"
@@ -766,6 +766,22 @@ def gen_archive_index(hist, sitemap_urls):
             f'    </a>'
         )
 
+    # Sezonski pregledi (pomlad/poletje/jesen/zima po letih) — generirani v gen_seasonal_pages,
+    # tu jih le izlistamo, da /vreme/ nanje kaže vsaj en notranji vhod (drugače so brez povezav).
+    season_section = ""
+    if seasons:
+        season_cards = "\n".join(
+            f'    <a class="year-card" href="{url_str}">\n'
+            f'      <div class="yc-year">{label}</div>\n'
+            f'    </a>'
+            for _, label, url_str in seasons
+        )
+        season_section = f'''  <h2>Po letnih časih</h2>
+  <div class="card-grid">
+{season_cards}
+  </div>
+'''
+
     crumbs_schema_html = crumbs_schema(crumbs)
     schema = "\n".join([
         webpage_schema(url, title, desc),
@@ -783,7 +799,7 @@ def gen_archive_index(hist, sitemap_urls):
   <div class="card-grid">
 {chr(10).join(year_cards)}
   </div>
-  <p class="muted-note">Za vse rekorde: <a href="/rekord/">→ Vremenski rekordi</a> ·
+{season_section}  <p class="muted-note">Za vse rekorde: <a href="/rekord/">→ Vremenski rekordi</a> ·
   Vremenski pojavi: <a href="/pojavi/">→ Zmrzal, vroči dnevi, nalivi</a></p>'''
 
     html = page_shell(title, desc, url, schema, body)
@@ -1063,6 +1079,7 @@ def gen_seasonal_pages(hist, sitemap_urls):
     # Find all years with data
     years_with_data = sorted({int(d[:4]) for d in hist})
     written = 0
+    generated = []  # (season_key, sort_key, season_label, url_str) for gen_archive_index cross-links
 
     for season_key, sinfo in seasons.items():
         for y in years_with_data:
@@ -1140,9 +1157,11 @@ def gen_seasonal_pages(hist, sitemap_urls):
             html = page_shell(title, desc, url_str, schema, body)
             write_page(rel, html, force=True)
             written += 1
+            generated.append((lastmod, season_label, url_str))
             sitemap_urls.append(sitemap_entry(SITE + url_str, lastmod, "yearly" if is_past else "monthly", "0.6"))
 
-    return written
+    generated.sort(reverse=True)  # najnovejše sezone najprej
+    return written, generated
 
 
 def climate_facts(hist):
@@ -1642,8 +1661,12 @@ def main():
     w = gen_yearly_pages(hist, args.force, sitemap_urls)
     print(f"  → {w} strani")
 
+    print("Generiram sezonske strani …")
+    w, season_list = gen_seasonal_pages(hist, sitemap_urls)
+    print(f"  → {w} sezonskih strani")
+
     print("Generiram arhivski indeks …")
-    gen_archive_index(hist, sitemap_urls)
+    gen_archive_index(hist, sitemap_urls, seasons=season_list)
     print("  → /vreme/index.html")
 
     print("Generiram stran rekordov …")
@@ -1653,10 +1676,6 @@ def main():
     print("Generiram strani pojavov …")
     gen_phenomena_pages(hist, sitemap_urls)
     print("  → /pojavi/ + 3 podstrani")
-
-    print("Generiram sezonske strani …")
-    w = gen_seasonal_pages(hist, sitemap_urls)
-    print(f"  → {w} sezonskih strani")
 
     print("Generiram pristajalno stran /vreme-recica-ob-savinji/ …")
     gen_landing_page(hist, sitemap_urls)
