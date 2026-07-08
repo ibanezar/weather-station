@@ -711,6 +711,8 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Zgornja Savinjska dolina.
   Vrednosti so izračunane iz meritev od 7. 11. 2019 do {fmtd(last_date)}.
   Strani se osvežujejo samodejno ob novih podatkih.</p>
+  <p class="muted-note">Podrobneje: <a href="/padavine/">padavine po mesecih</a> ·
+  <a href="/temperatura/">temperatura po mesecih</a> · <a href="/teden/">vreme ta teden</a>.</p>
   <a class="back-link" href="/rekord/">→ Vsi absolutni rekordi postaje IREICA1</a>'''
 
     html = page_shell(title, desc, url, schema, body)
