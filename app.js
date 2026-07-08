@@ -10698,8 +10698,9 @@ function renderSavinjaRiver(arsoData, floodData){
               q>=T.alarm?'#f87171':q>=T.warning?'#fb923c':q>=T.raised?'#fbbf24':'#60a5fa';
     bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" fill="${col}" rx="2"><title>${t} · ${q.toFixed(1)} m³/s</title></rect>`;
     if(isToday)bars+=`<line x1="${(x+barW/2).toFixed(1)}" y1="${PT}" x2="${(x+barW/2).toFixed(1)}" y2="${PT+CH}" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="3,2"/>`;
-    // X labels every 4 days
-    if(i%4===0||isToday){
+    // X labels every 4 days, grid anchored on "today" so its label never lands
+    // right next to (and overlaps) a neighbouring date label
+    if((i-tIdx)%4===0||isToday){
       const d=new Date(t);
       const lbl=isToday?'Danes':(d.getDate()+'.'+(d.getMonth()+1)+'.');
       xLabels+=`<text x="${(x+barW/2).toFixed(1)}" y="${H-5}" font-size="${isToday?9:8}" fill="${isToday?'var(--text)':'rgba(128,128,128,.55)'}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="${isToday?700:400}">${lbl}</text>`;
