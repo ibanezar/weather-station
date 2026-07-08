@@ -1,0 +1,118 @@
+name: Nevihtni opazovalec (samodejni mikro-zapisi)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # vsakih 15 min
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Prezri hlajenje med objavami (--force)'
+        required: false
+        default: 'false'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Namesti odvisnosti
+        run: pip install Pillow --quiet
+
+      - name: Preveri prag (tlak/veter) in po potrebi pripravi objavo
+        run: |
+          ARGS="--wire"
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+          python3 tools/generate_storm_watch_post.py $ARGS
+
+      - name: Commit & push (samo če je bilo kaj objavljeno)
+        id: commit
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add blog/ blog.json sitemap.xml og/ tools/.storm_watch_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb — prag ni presežen ali velja hlajenje."
+            echo "published=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "blog: nevihtni opazovalec $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+            git push
+            echo "published=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: IndexNow — obvesti iskalnike o novi objavi
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, urllib.error, sys
+
+          posts = json.load(open("blog.json", encoding="utf-8"))
+          post = posts[0]
+          post_url = f"https://meteorec.si{post['url']}"
+
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"https://meteorec.si/{KEY}.txt",
+              "urlList": [post_url, "https://meteorec.si/sitemap.xml"],
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} — {post_url}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+          PYEOF
+
+      - name: Obvesti e-naročnike o novi objavi
+        if: steps.commit.outputs.published == 'true' && env.NOTIFY_SECRET != ''
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error, sys
+
+          posts = json.load(open("blog.json", encoding="utf-8"))
+          post = posts[0]
+
+          payload = json.dumps({
+              "secret": os.environ["NOTIFY_SECRET"],
+              "post": {
+                  "slug": post["slug"],
+                  "title": post["title"],
+                  "summary": post.get("summary", ""),
+                  "url": post.get("url"),
+              },
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://weatherireica1.filip-eremita.workers.dev/blog-subscribe/notify",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  print(f"Razpošiljanje naročnikom: {r.status} — {r.read().decode()[:200]}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"Napaka pri razpošiljanju {e.code}: {body}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF
