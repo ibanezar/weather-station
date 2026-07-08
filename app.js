@@ -1800,6 +1800,71 @@ function _fcSliderInit(){
   if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
 }
 
+// ── Vremensko pogojna vsebina: banner nad "trenutno" ──────
+const WF_FEN_GUST_KMH=40; // sunek vetra iz severnega sektorja, ki šteje za "severni fen"
+const WF_HEAT_C=30;       // dnevni maksimum, ki šteje za vroč dan pri zaznavi vročinskega vala
+const WF_TRIGGERS={
+  fen:{icon:'💨',kicker:'Trenutno dogajanje',
+    title:'Sunki severnega vetra — kaj to pomeni za dolino',
+    sub:'Tveganja vetroloma in požarne ogroženosti v Zgornji Savinjski dolini.',
+    url:'/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html'},
+  heat:{icon:'🌡️',kicker:'Trenutno dogajanje',
+    title:'Že tretji vroč dan zapored — kako je s sušo?',
+    sub:'Vodna bilanca in namakanje v Zgornji Savinjski dolini.',
+    url:'/blog/najbolj-suha-pomlad-2026-ireica1.html'}
+};
+
+function _wfRecentDayHighs(n){
+  const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  const today=new Date();today.setHours(0,0,0,0);
+  const highs=[];
+  for(let i=1;i<=n;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const rec=stored[_localDateStr(d)];
+    highs.push(rec?rec.tempHigh:null);
+  }
+  return highs;
+}
+
+function checkWeatherFeaturedBanner(obs){
+  const el=document.getElementById('wf-banner');
+  if(!el)return;
+  const m=obs.metric||{};
+  const dir=obs.winddir;
+  const gust=m.windGust??m.windSpeed??0;
+  const isNorth=dir!=null&&(dir>=337.5||dir<=22.5);
+  const windTrigger=isNorth&&gust>=WF_FEN_GUST_KMH;
+
+  const curTemp=m.temp;
+  const priorHighs=_wfRecentDayHighs(2); // včeraj, predvčerajšnjim
+  const heatTrigger=curTemp!=null&&curTemp>=WF_HEAT_C&&priorHighs.every(h=>h!=null&&h>=WF_HEAT_C);
+
+  const activeKey=windTrigger?'fen':heatTrigger?'heat':null;
+  if(!activeKey){el.style.display='none';return;}
+  const active=WF_TRIGGERS[activeKey];
+
+  const dismissKey='wf-dismissed-'+activeKey+'-'+_localDateStr(new Date());
+  try{if(sessionStorage.getItem(dismissKey)){el.style.display='none';return;}}catch(e){}
+
+  el.innerHTML=
+    '<div class="wf-banner">'+
+      '<span class="wf-banner-icon">'+active.icon+'</span>'+
+      '<span class="wf-banner-body">'+
+        '<span class="wf-banner-kicker">'+active.kicker+'</span>'+
+        '<span class="wf-banner-title"><a href="'+active.url+'">'+active.title+'</a></span>'+
+        '<span class="wf-banner-sub">'+active.sub+'</span>'+
+      '</span>'+
+      '<button class="wf-banner-close" onclick="dismissWeatherBanner(\''+dismissKey+'\')" aria-label="Zapri" title="Zapri">✕</button>'+
+    '</div>';
+  el.style.display='block';
+}
+
+window.dismissWeatherBanner=function(key){
+  try{sessionStorage.setItem(key,'1');}catch(e){}
+  const el=document.getElementById('wf-banner');
+  if(el)el.style.display='none';
+};
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
@@ -1853,6 +1918,7 @@ function applyObs(obs){
   generateWhyWeather(obs);
   fetchDailyMicroclimateFingerprint(obs);
   _lastBriefObs=obs;
+  checkWeatherFeaturedBanner(obs);
   buildTicker();
   checkAIPredAccuracy(m.temp);
   renderDailyAlmanac(obs);
