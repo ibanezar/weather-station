@@ -67,7 +67,7 @@
   --t-fl-bg:rgba(148,163,184,.08); --t-fl-c:var(--muted);
 }
 
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
@@ -729,8 +729,8 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 /* Local hazard cards (hail / hurricane-force wind) */
 .sc-hazards{margin-bottom:1rem}
 .sc-hazards-title{margin:0 0 .7rem}
-.sc-hazards-grid{display:grid;gap:1rem;margin-bottom:0;align-items:stretch;grid-template-columns:1fr}
-.sc-hazards-grid .sc-risk-card{margin-bottom:0;display:flex;flex-direction:column;padding:1rem 1.1rem}
+.sc-hazards-grid{display:grid;gap:1rem;margin-bottom:0;align-items:stretch;grid-template-columns:minmax(0,1fr)}
+.sc-hazards-grid .sc-risk-card{margin-bottom:0;display:flex;flex-direction:column;padding:1rem 1.1rem;min-width:0;max-width:100%;overflow-x:hidden}
 .sc-risk-card{border:1px solid;transition:all .5s}
 .sc-risk-card.sc-risk-none{background:rgba(71,85,105,.12);border-color:rgba(71,85,105,.3)}
 .sc-risk-card.sc-risk-low{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35)}
