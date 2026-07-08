@@ -996,6 +996,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
 .ds-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 .ds-time{font-family:'JetBrains Mono',monospace;font-weight:300}
+.ds-percentile{display:block;font-size:.72rem;color:var(--amber)}
 .ds-high .ds-arrow{color:var(--red)}.ds-low .ds-arrow{color:var(--blue)}
 .ds-rain .ds-arrow{color:var(--rain-col)}.ds-avg .ds-arrow{color:var(--green)}
 
