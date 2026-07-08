@@ -13221,11 +13221,11 @@ function renderENSO(data){
     }
   });
 
-  const svg=`<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%" xmlns="http://www.w3.org/2000/svg">
+  const svg=`<div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
     ${gridLines}${bars}${labels}
     <text x="${W-mR}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(251,146,60,.8)" font-family="Inter,sans-serif">🔴 El Niño ≥ +0,5</text>
     <text x="${W-mR-110}" y="${mT-4}" font-size="8" text-anchor="end" fill="rgba(96,165,250,.8)" font-family="Inter,sans-serif">🔵 La Niña ≤ −0,5</text>
-  </svg>`;
+  </svg></div>`;
 
   el.innerHTML=kpi+svg+'<div style="font-size:.63rem;color:var(--muted);margin-top:.4rem;text-align:right">ONI = 3-mesečno drseče povprečje temperaturne anomalije morske gladine (SST) v regiji Niño 3.4 · Vir: NOAA Climate Prediction Center</div>';
 }
@@ -13291,7 +13291,7 @@ function renderDriftEngine(){
   const W=840,H=80,pl=30,pr=10,pt=8,pb=24;
   const yw=H-pt-pb,xw=W-pl-pr;
   const mapY=v=>pt+(1-(v-minDT)/(maxDT-minDT))*yw;
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:400px" xmlns="http://www.w3.org/2000/svg">`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">`;
   // Zero line
   const zy=mapY(0).toFixed(1);
   svg+=`<line x1="${pl}" x2="${W-pr}" y1="${zy}" y2="${zy}" stroke="var(--border)" stroke-width="0.8" stroke-dasharray="4,3"/>`;
@@ -13975,7 +13975,7 @@ function renderNASASolar(data){
     `<rect x="${mL+70}" y="${H-mB-16}" width="10" height="8" fill="var(--blue)" opacity="0.8" rx="1"/><text x="${mL+83}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">letos (${curY})</text>`+
     `<line x1="${mL+138}" y1="${H-mB-12}" x2="${mL+148}" y2="${H-mB-12}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${mL+143}" cy="${H-mB-12}" r="2.5" fill="var(--amber)"/><text x="${mL+151}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">30-letno povprečje</text>`;
 
-  const svg=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${gridLines}${prevBars}${bars}${climLine}${climDots}${yLabel}${legend}</svg></div>`;
+  const svg=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">${gridLines}${prevBars}${bars}${climLine}${climDots}${yLabel}${legend}</svg></div>`;
   const src=`<div class="nasa-src">NASA POWER · GEWEX SRB · satelitski podatki</div>`;
   el.innerHTML=kpi+svg+src;
 }
@@ -14053,7 +14053,7 @@ function renderNASABaselines(data){
   const tLegend=`<line x1="${mL+4}" y1="${HT-mB-12}" x2="${mL+16}" y2="${HT-mB-12}" stroke="var(--red)" stroke-width="2"/><text x="${mL+19}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tmax</text>`+
     `<line x1="${mL+58}" y1="${HT-mB-12}" x2="${mL+70}" y2="${HT-mB-12}" stroke="var(--muted)" stroke-width="1.5"/><text x="${mL+73}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tsred</text>`+
     `<line x1="${mL+116}" y1="${HT-mB-12}" x2="${mL+128}" y2="${HT-mB-12}" stroke="var(--blue)" stroke-width="2"/><text x="${mL+131}" y="${HT-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">Tmin</text>`;
-  const svgT=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HT}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${tGrid}${tmaxArea}<polyline points="${tmaxPts.join(' ')}" fill="none" stroke="var(--red)" stroke-width="1.8"/><polyline points="${t2mPts.join(' ')}" fill="none" stroke="var(--muted)" stroke-width="1.5"/><polyline points="${tminPts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="1.8"/>${yLabel}${tLegend}</svg></div>`;
+  const svgT=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HT}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">${tGrid}${tmaxArea}<polyline points="${tmaxPts.join(' ')}" fill="none" stroke="var(--red)" stroke-width="1.8"/><polyline points="${t2mPts.join(' ')}" fill="none" stroke="var(--muted)" stroke-width="1.5"/><polyline points="${tminPts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="1.8"/>${yLabel}${tLegend}</svg></div>`;
 
   // Precipitation chart
   const HP=140,cHP=HP-mT-mB;
@@ -14077,7 +14077,7 @@ function renderNASABaselines(data){
     pGrid+=`<text x="${cx.toFixed(1)}" y="${(HP-mB+14).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
   }
   const pYLabel=`<text x="11" y="${(mT+cHP/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cHP/2).toFixed(0)})">mm/mesec</text>`;
-  const svgP=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HP}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${pGrid}${pBars}${pYLabel}</svg></div>`;
+  const svgP=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${HP}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">${pGrid}${pBars}${pYLabel}</svg></div>`;
 
   const note=`<div style="font-size:.67rem;color:var(--muted);margin-top:.5rem">🛸 Satelitski podatki NASA POWER (1994–2023) · za primerjavo z normalami ARSO (1991–2020) zgoraj</div>`;
   const src=`<div class="nasa-src">NASA POWER · Reanaliza MERRA-2 · kalibrirano za lokacijo</div>`;
@@ -14151,7 +14151,7 @@ function renderNASAAgro(data){
       inner+=`<text x="${cx.toFixed(1)}" y="${(H-mB+12).toFixed(0)}" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif">${SL_MON[i]}</text>`;
     }
     inner+=`<text x="10" y="${(mT+cH/2).toFixed(0)}" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,10,${(mT+cH/2).toFixed(0)})">${yLabel}</text>`;
-    return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:500px" xmlns="http://www.w3.org/2000/svg">${inner}</svg></div>`;
+    return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">${inner}</svg></div>`;
   }
 
   const s1=`<div class="nasa-section-lbl">Evapotranspiracija (ET₀)</div>`+miniChart(evpt,'var(--green)','mm',120);
@@ -14760,7 +14760,7 @@ function _buildOcnClimate(m){
   const cW=W-pL-pR,cH=H-pT-pB;
   const minT=7,maxT=28;
   const bW=Math.floor(cW/12)-2;
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;margin-bottom:.5rem">`;
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" style="margin-bottom:.5rem">`;
   OCN_SST_AVG.forEach((t,i)=>{
     const x=pL+i*(cW/12)+1;
     const bH=Math.max(2,(t-minT)/(maxT-minT)*cH);
@@ -14774,7 +14774,7 @@ function _buildOcnClimate(m){
 
   const anomCol=anomaly==null?'var(--muted)':anomaly>0.5?'var(--red)':anomaly>0?'var(--amber)':anomaly<-0.5?'var(--blue)':'var(--green)';
   const anomStr=anomaly!=null?(anomaly>=0?'+':'')+anomaly+' °C':'—';
-  el.innerHTML=`${svg}
+  el.innerHTML=`<div class="chart-svg-wrap">${svg}</div>
     <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Klimatološko povprečje (${months[mon]})</span><b>${climAvg} °C</b></div>
     <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Izmerjena SST (mesečno povprečje)</span><b>${curSST!=null?curSST+' °C':'—'}</b></div>
     <div class="ocn-row" style="font-size:.75rem"><span style="color:var(--muted)">Anomalija SST</span><b style="color:${anomCol}">${anomStr}</b></div>
@@ -14910,7 +14910,7 @@ function _buildAqChart(d){
   const xS=ms=>pL+(ms-wStart)/(wEnd-wStart)*cW;
   const yS=v=>pT+cH-(v/vmax)*cH;
   const nowX=xS(now);
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}">`;
   // AQI zone backgrounds
   [[0,20,'rgba(74,222,128,.09)'],[20,40,'rgba(163,230,53,.09)'],[40,60,'rgba(251,191,36,.10)'],[60,80,'rgba(249,115,22,.11)'],[80,Math.max(101,vmax),'rgba(248,113,113,.13)']].forEach(([a,b,col])=>{
     if(a>=vmax)return;
@@ -14937,7 +14937,7 @@ function _buildAqChart(d){
     svg+=`<text x="${xS(now+off*3600000)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${dt.getHours().toString().padStart(2,'0')}:00</text>`;
   }
   svg+='</svg>';
-  el.innerHTML=svg;
+  el.innerHTML='<div class="chart-svg-wrap">'+svg+'</div>';
 }
 
 function _buildAqPollutants(d){
@@ -16309,7 +16309,7 @@ function _buildLtfChart(){
   const sepY=PT+TEMPH+5;
   el.innerHTML=`<div class="ltf-annual-title">📊 Letni klimatogram — Rečica ob Savinji (normale 1991–2020)</div>
 <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto;min-width:280px">
+<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;height:auto;min-width:${W}px">
 <defs><linearGradient id="ltfband" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(251,146,60,.38)"/><stop offset="100%" stop-color="rgba(96,165,250,.25)"/></linearGradient></defs>
 <rect x="${PL+curM*bw}" y="${PT}" width="${bw}" height="${CH}" fill="rgba(96,165,250,.07)" rx="2"/>
 ${grid}${glbl}
