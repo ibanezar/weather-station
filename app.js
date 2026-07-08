@@ -3069,11 +3069,13 @@ function applyHistory(summaries){
 
   const u='<span style="font-size:.74rem;color:var(--muted);margin-left:1px">';
   const tbody=document.getElementById('history-tbody');
-  if(!tbody)return;tbody.innerHTML='';
-  [...sorted].reverse().forEach(s=>{
+  if(!tbody)return;
+  // Batch all rows into one HTML string + single innerHTML set instead of
+  // one createElement+appendChild per row — on the 5-year view that's
+  // 1800+ individual DOM insertions, each triggering incremental reflow.
+  const rowsHtml=[...sorted].reverse().map(s=>{
     const m=s.metric;
-    const tr=document.createElement('tr');
-    tr.innerHTML=
+    return '<tr>'+
       '<td>'+fmtHistDate(s.obsTimeLocal)+'</td>'+
       '<td class="td-high">'+fmt(m.tempHigh,1)+u+'°C</span></td>'+
       '<td class="td-low">'+fmt(m.tempLow,1)+u+'°C</span></td>'+
@@ -3081,9 +3083,10 @@ function applyHistory(summaries){
       '<td class="td-rain">'+fmt(m.precipTotal,1)+u+'mm</span></td>'+
       '<td>'+fmt(m.windspeedAvg,1)+u+'km/h</span></td>'+
       '<td style="color:var(--purple)">'+fmt(m.windspeedHigh,1)+u+'km/h</span></td>'+
-      '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>';
-    tbody.appendChild(tr);
-  });
+      '<td>'+fmt(m.humidityAvg,0)+u+'%</span></td>'+
+    '</tr>';
+  }).join('');
+  tbody.innerHTML=rowsHtml;
 }
 
 function showHistErr(msg){
