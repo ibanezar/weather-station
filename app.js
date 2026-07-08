@@ -14486,7 +14486,7 @@ function _buildOcnSSTChart(m){
   // Area fill under past line
   const fillPath=pathPast?pathPast+' L'+xS(Math.min(todayIdx>=0?todayIdx:dates.length-1,dates.length-1))+','+yS(vmin)+' L'+xS(0)+','+yS(vmin)+' Z':'';
 
-  let svg=`<svg viewBox="0 0 ${W} ${H}" height="${H}" style="width:100%;display:block;overflow:visible;cursor:crosshair">`;
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" height="${H}" style="overflow:visible">`;
   svg+=`<defs><linearGradient id="sst-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.18"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.02"/></linearGradient></defs>`;
   for(let v=Math.ceil(vmin);v<=vmax;v+=step){
     const y=yS(v);
@@ -14514,7 +14514,7 @@ function _buildOcnSSTChart(m){
   svg+=`<circle id="ocn-sst-dot" cx="0" cy="0" r="5" fill="var(--cyan)" stroke="white" stroke-width="2" opacity="0" style="pointer-events:none"/>`;
   svg+=`<rect id="ocn-sst-hit" x="${pad.l}" y="${pad.t}" width="${cW}" height="${cH}" fill="transparent"/>`;
   svg+='</svg>';
-  el.innerHTML=svg;
+  el.innerHTML='<div class="chart-svg-wrap">'+svg+'</div>';
   const leg=document.getElementById('ocn-sst-leg');
   if(leg)leg.innerHTML='<span>—— izmerjena SST</span><span style="opacity:.6">- - - napoved</span><span style="color:var(--amber)">— — klimatol. povprečje</span>';
 
@@ -14540,7 +14540,7 @@ function _buildOcnSSTChart(m){
   function _sstHide(){xLine.setAttribute('opacity','0');yLine.setAttribute('opacity','0');dot.setAttribute('opacity','0');tip.style.opacity='0';}
   svgEl.addEventListener('mousemove',e=>_sstPointer(e.clientX,e.clientY));
   svgEl.addEventListener('mouseleave',_sstHide);
-  svgEl.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];_sstPointer(t.clientX,t.clientY);},{passive:false});
+  svgEl.addEventListener('touchmove',e=>{const t=e.touches[0];_sstPointer(t.clientX,t.clientY);},{passive:true});
   svgEl.addEventListener('touchend',_sstHide);
 }
 
@@ -14562,7 +14562,7 @@ function _buildOcnWaveChart(m){
   const maxW=Math.max(0.5,...wh.filter(v=>v!=null))*1.15;
   const bW=Math.floor(cW/n)-4;
 
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}">`;
   [0,maxW/2,maxW].forEach(v=>{
     const y=pT+cH-(v/maxW)*cH;
     svg+=`<text x="${pL-3}" y="${y+3}" font-size="7" fill="var(--muted)" text-anchor="end">${v.toFixed(1)}</text>`;
@@ -14578,7 +14578,7 @@ function _buildOcnWaveChart(m){
     if(v>0)svg+=`<text x="${x+bW/2}" y="${bY-2}" font-size="7" fill="var(--text)" text-anchor="middle">${v.toFixed(1)}</text>`;
   });
   svg+='</svg>';
-  el.innerHTML=svg;
+  el.innerHTML='<div class="chart-svg-wrap">'+svg+'</div>';
   const leg=document.getElementById('ocn-wave-leg');
   if(leg)leg.innerHTML='<span style="color:var(--green)">▮ mirno &lt; 0,3 m</span><span style="color:var(--cyan)">▮ rahlo &lt; 0,6 m</span><span style="color:var(--amber)">▮ zmerno &lt; 1 m</span><span style="color:#fb923c">▮ razburkano &lt; 1,5 m</span><span style="color:var(--red)">▮ hudo</span>';
 }
@@ -14684,7 +14684,7 @@ function _buildOcnTides(m){
   const fill=path+`L${xS(pts.length-1)},${H-pB}L${xS(0)},${H-pB}Z`;
   const nowX=xS(12);
 
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block">`;
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}">`;
   [0,0.2,0.4,0.6,0.8].forEach(v=>{
     if(v>vmax2)return;
     const y=yS(v);
@@ -14702,7 +14702,7 @@ function _buildOcnTides(m){
   svg+='</svg>';
 
   const evHtml=events.slice(0,4).map(e=>`<div class="ocn-row"><span style="color:var(--muted)">${e.type==='V'?'🔺 Plima (visoka voda)':'🔻 Oseka (nizka voda)'}</span><b>${e.lbl} &nbsp;·&nbsp; ${e.h.toFixed(2)} m</b></div>`).join('');
-  el.innerHTML=`${svg}<div style="margin-top:.5rem">${evHtml}
+  el.innerHTML=`<div class="chart-svg-wrap">${svg}</div><div style="margin-top:.5rem">${evHtml}
     <div class="ocn-row"><span style="color:var(--muted)">Amplituda plimovanja</span><b>${range} m</b></div>
     <div class="ocn-row"><span style="color:var(--muted)">Tip plimovanja</span><b>${tidalType}</b></div>
     <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
