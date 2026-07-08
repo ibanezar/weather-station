@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 08 Jul 2026 06:05:08 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 08 Jul 2026 06:22:53 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vročinski val v štirih krajih doline: Rečica, Mozirje, Nazarje, Ljubno</title>
+      <link>https://meteorec.si/blog/primerjava-krajev-vrocinski-val-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/primerjava-krajev-vrocinski-val-julij-2026.html</guid>
+      <pubDate>Wed, 08 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Modelska primerjava Rečice, Mozirja, Nazarij in Ljubnega med vročinskim valom pokaže majhne, elevacijsko pogojene razlike — a dejanske meritve IREICA1 razkrijejo, da model dolinske skrajnosti podcenjuje za ±3–5 °C.</description>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>vrocina</category>
+      <category>topoklimatologija</category>
+    </item>
     <item>
       <title>Ali bo nocoj prva tropska noč v Rečici ob Savinji?</title>
       <link>https://meteorec.si/blog/prva-tropska-noc-recica-julij-2026.html</link>

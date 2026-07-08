@@ -131,6 +131,14 @@ ARTICLES = [
         'photo': 'misty-valley',
     },
     {
+        'slug': 'primerjava-krajev-vrocinski-val-julij-2026',
+        'title': 'Vročinski val v\nštirih krajih doline',
+        'subtitle': 'Rečica, Mozirje, Nazarje, Ljubno · IREICA1',
+        'section': 'Analize',
+        'accent': (99, 102, 241),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'prva-tropska-noc-recica-julij-2026',
         'title': 'Prva tropska noč\nv Rečici?',
         'subtitle': '26,0 °C ob 23.20 · IREICA1',
