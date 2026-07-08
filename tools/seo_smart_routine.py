@@ -225,7 +225,7 @@ def page_shell(title, desc, canonical, head_extras, body_content):
 <link rel="alternate" hreflang="sl" href="{full_url}">
 <link rel="alternate" hreflang="x-default" href="{full_url}">
 <meta name="description" content="{desc}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{full_url}">
@@ -592,7 +592,7 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
 
     table_html = (
         '  <div class="hub-section">\n'
-        f'    <h2>Mesečna klimatološka norma ({years_span} let meritev)</h2>\n'
+        f'    <h2 id="mesecna-klimatoloska-norma">Mesečna klimatološka norma ({years_span} let meritev)</h2>\n'
         '    <table class="hub-table">\n'
         '      <thead><tr>'
         '<th>Mesec</th><th>Min °C</th><th>Povp. °C</th><th>Max °C</th>'
@@ -621,7 +621,7 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
 
     records_html = (
         '  <div class="hub-section">\n'
-        '    <h2>Absolutni mesečni rekordi</h2>\n'
+        '    <h2 id="absolutni-mesecni-rekordi">Absolutni mesečni rekordi</h2>\n'
         '    <table class="hub-table">\n'
         '      <thead><tr><th>Mesec</th><th>Rekordni maks.</th><th>Rekordni min.</th></tr></thead>\n'
         '      <tbody>\n' + "\n".join(rec_rows) + '\n      </tbody>\n'
@@ -708,7 +708,7 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
 {records_html}
 
   <div class="hub-section">
-    <h2>Pogosta vprašanja o klimi Rečice ob Savinji</h2>
+    <h2 id="pogosta-vprasanja-klima">Pogosta vprašanja o klimi Rečice ob Savinji</h2>
 {faq_html}
   </div>
 
@@ -758,7 +758,7 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
 
     bars_html = (
         '  <div class="hub-section">\n'
-        f'    <h2>Letna skupna količina padavin</h2>\n'
+        f'    <h2 id="letna-kolicina-padavin">Letna skupna količina padavin</h2>\n'
         f'    <p class="hub-intro">Povprečje: <strong>{num(avg_ann, 0)} mm/leto</strong></p>\n'
         '    <div class="bar-chart">\n'
         + "\n".join(bar_rows) + '\n    </div>\n  </div>'
@@ -780,7 +780,7 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
 
     month_bars_html = (
         '  <div class="hub-section">\n'
-        '    <h2>Povprečne mesečne padavine</h2>\n'
+        '    <h2 id="povprecne-mesecne-padavine">Povprečne mesečne padavine</h2>\n'
         '    <div class="bar-chart">\n'
         + "\n".join(month_bars) + '\n    </div>\n  </div>'
     )
@@ -837,7 +837,7 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
 {month_bars_html}
 
   <div class="hub-section">
-    <h2>Pogosta vprašanja o padavinah v Rečici ob Savinji</h2>
+    <h2 id="pogosta-vprasanja-padavine">Pogosta vprašanja o padavinah v Rečici ob Savinji</h2>
 {faq_html}
   </div>
 
@@ -877,7 +877,7 @@ def gen_temperatura(normals, annual_frost, annual_hot, last_date, sitemap_urls):
 
     profile_html = (
         '  <div class="hub-section">\n'
-        '    <h2>Mesečni temperaturni profil</h2>\n'
+        '    <h2 id="mesecni-temperaturni-profil">Mesečni temperaturni profil</h2>\n'
         '    <table class="hub-table">\n'
         '      <thead><tr>'
         '<th>Mesec</th><th>Avg min °C</th><th>Avg povp. °C</th>'
@@ -918,10 +918,10 @@ def gen_temperatura(normals, annual_frost, annual_hot, last_date, sitemap_urls):
 
     trends_html = (
         '  <div class="hub-section">\n'
-        f'    <h2>Mrzli dnevi (min. ≤ 0 °C) po letih</h2>\n'
+        f'    <h2 id="mrzli-dnevi-po-letih">Mrzli dnevi (min. ≤ 0 °C) po letih</h2>\n'
         f'    <p class="hub-intro">Povprečje: <strong>{num(avg_ann_frost, 0)} dni/leto</strong></p>\n'
         '    <div class="bar-chart">\n' + "\n".join(frost_bars) + '\n    </div>\n\n'
-        f'    <h2>Vroči dnevi (maks. ≥ 30 °C) po letih</h2>\n'
+        f'    <h2 id="vroci-dnevi-po-letih">Vroči dnevi (maks. ≥ 30 °C) po letih</h2>\n'
         f'    <p class="hub-intro">Povprečje: <strong>{num(avg_ann_hot, 0)} dni/leto</strong></p>\n'
         '    <div class="bar-chart">\n' + "\n".join(hot_bars) + '\n    </div>\n  </div>'
     )
@@ -980,7 +980,7 @@ def gen_temperatura(normals, annual_frost, annual_hot, last_date, sitemap_urls):
 {trends_html}
 
   <div class="hub-section">
-    <h2>Pogosta vprašanja o temperaturi v Rečici ob Savinji</h2>
+    <h2 id="pogosta-vprasanja-temperatura">Pogosta vprašanja o temperaturi v Rečici ob Savinji</h2>
 {faq_html}
   </div>
 

@@ -260,10 +260,17 @@
   if (!SLUG) return;
 
   // ── 4) Sorodni članki ──────────────────────────────────────
+  // Prednostni vir: blog/related.json (TF-IDF podobnost dejanskega besedila,
+  // izračunana ob objavi — glej tools/compute_related_posts.py). Če datoteka
+  // manjka ali nima vnosa za ta članek, se uporabi obstoječe ujemanje po
+  // skupnih tagih kot rezerva.
   if (!SLUG) return;
-  fetch("/blog.json", { cache: "force-cache" })
-    .then(function (r) { return r.json(); })
-    .then(function (posts) {
+  Promise.all([
+    fetch("/blog.json", { cache: "force-cache" }).then(function (r) { return r.json(); }),
+    fetch("/blog/related.json", { cache: "force-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+  ])
+    .then(function (results) {
+      var posts = results[0], relatedMap = results[1] || {};
       // Sidebar: "Novejši članki" (neodvisno od tagov)
       var recentBlock = document.querySelector(".blog-sidebar .side-recent");
       if (recentBlock) {
@@ -285,38 +292,52 @@
       posts.forEach(function (p) { if ((p.slug || "").toLowerCase() === SLUG) me = p; });
       if (!me) return;
       var myTags = (me.tags || []).map(function (t) { return String(t).toLowerCase(); });
-      if (!myTags.length) return;
 
       // "Teme:" — povezave na kategorijske strani (le tagi z ≥2 objavama = imajo stran)
-      var freq = {};
-      posts.forEach(function (p) {
-        (p.tags || []).forEach(function (t) { t = String(t).toLowerCase(); freq[t] = (freq[t] || 0) + 1; });
-      });
-      var linkable = (me.tags || []).filter(function (t) { return freq[String(t).toLowerCase()] >= 2; });
-      if (linkable.length) {
-        var trow = document.createElement("div");
-        trow.className = "post-topics";
-        trow.innerHTML = '<span class="pt-label">Teme:</span> ' + linkable.map(function (t) {
-          return '<a class="pt-tag" href="/blog/tema/' + slugify(String(t)) + '/">' + String(t).toLowerCase() + '</a>';
-        }).join("");
-        var ab = article.querySelector(".author-box"), bl = article.querySelector(".back-link");
-        if (ab) article.insertBefore(trow, ab);
-        else if (bl) article.insertBefore(trow, bl);
-        else article.appendChild(trow);
+      if (myTags.length) {
+        var freq = {};
+        posts.forEach(function (p) {
+          (p.tags || []).forEach(function (t) { t = String(t).toLowerCase(); freq[t] = (freq[t] || 0) + 1; });
+        });
+        var linkable = (me.tags || []).filter(function (t) { return freq[String(t).toLowerCase()] >= 2; });
+        if (linkable.length) {
+          var trow = document.createElement("div");
+          trow.className = "post-topics";
+          trow.innerHTML = '<span class="pt-label">Teme:</span> ' + linkable.map(function (t) {
+            return '<a class="pt-tag" href="/blog/tema/' + slugify(String(t)) + '/">' + String(t).toLowerCase() + '</a>';
+          }).join("");
+          var ab = article.querySelector(".author-box"), bl = article.querySelector(".back-link");
+          if (ab) article.insertBefore(trow, ab);
+          else if (bl) article.insertBefore(trow, bl);
+          else article.appendChild(trow);
+        }
       }
 
-      var scored = posts
-        .filter(function (p) { return (p.slug || "").toLowerCase() !== SLUG; })
-        .map(function (p) {
-          var tags = (p.tags || []).map(function (t) { return String(t).toLowerCase(); });
-          var shared = tags.filter(function (t) { return myTags.indexOf(t) !== -1; }).length;
-          return { p: p, shared: shared };
-        })
-        .filter(function (x) { return x.shared > 0; })
-        .sort(function (a, b) {
-          return b.shared - a.shared || (a.p.date < b.p.date ? 1 : -1);
-        })
-        .slice(0, 3);
+      var byslug = {};
+      posts.forEach(function (p) { byslug[(p.slug || "").toLowerCase()] = p; });
+
+      var scored = [];
+      var relSlugs = relatedMap[SLUG] || [];
+      relSlugs.forEach(function (s) {
+        var p = byslug[String(s).toLowerCase()];
+        if (p) scored.push({ p: p });
+      });
+
+      if (!scored.length) {
+        // rezerva: ujemanje po skupnih tagih (če related.json manjka/prazen)
+        scored = posts
+          .filter(function (p) { return (p.slug || "").toLowerCase() !== SLUG; })
+          .map(function (p) {
+            var tags = (p.tags || []).map(function (t) { return String(t).toLowerCase(); });
+            var shared = tags.filter(function (t) { return myTags.indexOf(t) !== -1; }).length;
+            return { p: p, shared: shared };
+          })
+          .filter(function (x) { return x.shared > 0; })
+          .sort(function (a, b) {
+            return b.shared - a.shared || (a.p.date < b.p.date ? 1 : -1);
+          })
+          .slice(0, 3);
+      }
 
       if (!scored.length) return;
 
