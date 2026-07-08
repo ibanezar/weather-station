@@ -54,13 +54,27 @@ def save_state(state):
 
 
 def ensure_og_fallback(slug):
-    """blog/index.html vedno prikaže sličico na /og/{slug}.jpg — mikro-zapisi
-    nimajo posebej oblikovane OG slike, zato uporabimo splošno og-image.jpg,
-    da sličica na seznamu objav ne manjka."""
+    """Rezerva, če generate_custom_og spodaj ne uspe (npr. Pillow ni na voljo):
+    blog/index.html vedno prikaže sličico na /og/{slug}.jpg, zato brez tega
+    sličica na seznamu objav manjka."""
     src = os.path.join(ROOT, "og-image.jpg")
     dst = os.path.join(ROOT, "og", f"{slug}.jpg")
     if os.path.exists(src) and not os.path.exists(dst):
         shutil.copyfile(src, dst)
+
+
+def generate_custom_og(slug, og_meta):
+    """Ustvari OG sliko s pravimi številkami dogodka (ne generično og-image.jpg),
+    da ima deljena povezava med nevihto takoj berljivo vsebino v predogledu na
+    Facebooku/WhatsAppu. Enak Pillow-vzorec kot tools/generate_og_images.py."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from generate_og_images import make_og
+        make_og({"slug": slug, **og_meta})
+        print(f"✓ OG slika: og/{slug}.jpg")
+    except Exception as e:
+        print(f"⚠ OG slika (Pillow) preskočena, uporabljam splošno: {e}")
+        ensure_og_fallback(slug)
 
 
 def detect_trigger(observations):
@@ -107,6 +121,13 @@ def build_html(trigger, now_utc):
         ]
         related_url, related_title = "/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html", "Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra"
         tags = ["nevihtni-opazovalec", "samodejno", "pritisk", str(now_utc.year)]
+        og_meta = {
+            "title": f"Padec tlaka\n{num(trigger['delta'])} hPa / 3 h",
+            "subtitle": f"Rečica ob Savinji · {date_str}",
+            "section": "Nevihtni opazovalec",
+            "accent": (59, 130, 246),
+            "photo": "rain-overcast",
+        }
     else:
         title = f"Nevihtni opazovalec, {date_str} ob {time_local}: močan sunek vetra"
         lead = (
@@ -116,6 +137,13 @@ def build_html(trigger, now_utc):
         rows = [("Sunek vetra", f"{num(trigger['gust'],0)} km/h")]
         related_url, related_title = "/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html", "Ekološka in okoljska tveganja: požarna ogroženost in vetrolomi"
         tags = ["nevihtni-opazovalec", "samodejno", "veter", str(now_utc.year)]
+        og_meta = {
+            "title": f"Sunek vetra\n{num(trigger['gust'],0)} km/h",
+            "subtitle": f"Rečica ob Savinji · {date_str}",
+            "section": "Nevihtni opazovalec",
+            "accent": (239, 68, 68),
+            "photo": "storm-clouds",
+        }
 
     if temp is not None:
         rows.append(("Temperatura ob meritvi", f"{num(temp)} °C"))
@@ -150,7 +178,7 @@ def build_html(trigger, now_utc):
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{short}">
-<meta property="og:image" content="{SITE}/og-image.jpg">
+<meta property="og:image" content="{SITE}/og/{slug}.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
@@ -160,14 +188,14 @@ def build_html(trigger, now_utc):
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{short}">
-<meta name="twitter:image" content="{SITE}/og-image.jpg">
+<meta name="twitter:image" content="{SITE}/og/{slug}.jpg">
 <script type="application/ld+json">
 {{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "{title}",
   "description": "{desc}",
-  "image": {{ "@type": "ImageObject", "url": "{SITE}/og-image.jpg", "width": 1200, "height": 630 }},
+  "image": {{ "@type": "ImageObject", "url": "{SITE}/og/{slug}.jpg", "width": 1200, "height": 630 }},
   "datePublished": "{now_utc.isoformat()}",
   "dateModified": "{now_utc.isoformat()}",
   "inLanguage": "sl",
@@ -218,7 +246,7 @@ def build_html(trigger, now_utc):
         "title": title, "slug": slug, "url": f"/blog/{slug}.html",
         "date": today_iso, "summary": short, "tags": tags,
     }
-    return slug, url, html, entry
+    return slug, url, html, entry, og_meta
 
 
 def main():
@@ -241,13 +269,13 @@ def main():
         print("Ni preseženega praga (tlak/veter). Nič za objaviti.")
         return
 
-    slug, url, html, entry = build_html(trigger, now)
+    slug, url, html, entry, og_meta = build_html(trigger, now)
     out = os.path.join(ROOT, "blog", f"{slug}.html")
     open(out, "w", encoding="utf-8").write(html)
     print(f"✓ zapisano: blog/{slug}.html ({trigger['type']})")
 
     if wire:
-        ensure_og_fallback(slug)
+        generate_custom_og(slug, og_meta)
         wire_all(entry, url)
         print("✓ posodobljeno: blog.json, blog/index.html, sitemap.xml")
         state["lastPublished"] = now.isoformat()
