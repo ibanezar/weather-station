@@ -1964,6 +1964,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr}.span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
+  /* Value+unit (e.g. "150 km/h") wraps to 2 lines at the desktop size in a 2-col mobile
+     grid, stretching the whole row taller than its neighbours — shrink it so it stays on one line. */
+  .sc-idx-val{font-size:1.3rem}
+  /* Hazard cards (Možnost toče / orkanskega vetra): the icon+text+gauge row and the
+     factor grid were tight enough to clip on some mobile browsers — give them more
+     room to shrink/wrap instead of holding a fixed minimum width. */
+  .sc-risk-text{min-width:0}
+  .sc-risk-gauge{min-width:64px;width:100%;margin-top:.4rem}
+  .sc-risk-gauge .sc-risk-bar{max-width:220px;margin-left:auto;margin-right:auto}
+  .sc-risk-factors{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
   /* Charts keep their native size on mobile and scroll horizontally instead of shrinking,
      so labels and values stay legible; finger drag both scrolls and scrubs the tooltip. */
   .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
