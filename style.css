@@ -1029,6 +1029,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .chart-range{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted)}
 .chart-svg-wrap{width:100%;overflow:hidden}
 .chart-svg{width:100%;display:block;cursor:crosshair}
+.chart-scroll-hint{display:none;font-size:.72rem;opacity:.55;text-align:right;margin-top:.4rem}
 #chart-tip{position:fixed;pointer-events:none;z-index:200;background:var(--tip-bg);border:1px solid var(--tip-border);border-radius:8px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:var(--tip-shadow)}
 
 /* Small cards */
@@ -1963,10 +1964,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr}.span2{grid-column:span 1}
   .g4{grid-template-columns:1fr 1fr}
-  /* Charts fit the viewport so the full range is visible and can be scrubbed by finger.
-     touch-action:pan-y lets vertical swipes scroll the page while horizontal drags scrub values. */
-  .chart-svg-wrap{overflow:hidden}
-  .chart-svg{min-width:0;width:100%;touch-action:pan-y}
+  /* Charts keep their native size on mobile and scroll horizontally instead of shrinking,
+     so labels and values stay legible; finger drag both scrolls and scrubs the tooltip. */
+  .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .chart-svg{min-width:880px;width:880px;touch-action:pan-x pan-y}
+  .chart-scroll-hint{display:block}
 }
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
