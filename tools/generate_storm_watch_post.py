@@ -143,7 +143,7 @@ def build_html(trigger, now_utc):
 <link rel="alternate" hreflang="x-default" href="{url}">
 <meta name="description" content="{desc}">
 <meta name="keywords" content="nevihtni opazovalec, Rečica ob Savinji, IREICA1, Savinjska dolina, vreme v živo">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="article">
 <meta property="og:url" content="{url}">

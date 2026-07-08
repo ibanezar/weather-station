@@ -144,7 +144,7 @@ def build_html(s):
 <link rel="alternate" hreflang="x-default" href="{url}">
 <meta name="description" content="{desc}">
 <meta name="keywords" content="vreme {nom} {y}, Rečica ob Savinji, vremenski povzetek, IREICA1, Savinjska dolina, padavine, temperatura">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="article">
 <meta property="og:url" content="{url}">
@@ -288,6 +288,12 @@ def touch_existing(slug, wire=True):
     json.dump(posts, open(bj, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(bj, "a", encoding="utf-8").write("\n")
     rewrite_sitemap_and_index(posts)
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from compute_related_posts import compute_and_write
+        compute_and_write(posts)
+    except Exception as e:
+        print(f"⚠ blog/related.json preskočen: {e}")
     print(f"✓ '{slug}' označen kot posodobljen ({TODAY}); blog.json, blog/index.html in sitemap.xml osveženi.")
 
 def rewrite_sitemap_and_index(posts):
@@ -379,7 +385,7 @@ def build_tag_pages(posts):
 <title>Tema: {tag} — članki | Meteorec, Rečica ob Savinji</title>
 <link rel="canonical" href="{canon}">
 <meta name="description" content="{desc}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{canon}">
 <meta property="og:title" content="Tema: {tag} — blog Meteorec">
@@ -489,6 +495,13 @@ def wire_all(entry, url, stats=None):
     json.dump(posts, open(bj, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(bj, "a", encoding="utf-8").write("\n")
     rewrite_sitemap_and_index(posts)
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from compute_related_posts import compute_and_write
+        compute_and_write(posts)
+        print("✓ blog/related.json posodobljen")
+    except Exception as e:
+        print(f"⚠ blog/related.json preskočen: {e}")
     # Try to generate per-article OG image (requires Pillow)
     if stats:
         try:

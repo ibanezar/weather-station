@@ -267,7 +267,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None):
 <link rel="alternate" hreflang="sl" href="{full_url}">
 <link rel="alternate" hreflang="x-default" href="{full_url}">
 <meta name="description" content="{desc}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{full_url}">
