@@ -62,9 +62,21 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/poplave-2023.html</loc>
-    <lastmod>2026-06-30</lastmod>
+    <lastmod>2026-07-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/primerjava-krajev-vrocinski-val-julij-2026.html</loc>
@@ -153,18 +165,6 @@
   <url>
     <loc>https://meteorec.si/blog/anatomija-poletne-nevihte-recica-savinji.html</loc>
     <lastmod>2026-07-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
-    <lastmod>2026-07-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/nevihte-toca-hudourniki-julij-2026.html</loc>
-    <lastmod>2026-07-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
