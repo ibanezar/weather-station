@@ -876,15 +876,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Besedilo: poskusi uradno ARSO napoved, sicer sestavi popoln opis
       // iz yr.no podatkov (brez AI, brez omejitve dolžine).
       if (path === "/ai-forecast") {
-        // Poljubna lokacija v dolini (privzeto: postaja IREICA1, Rečica ob Savinji)
-        const qLat = parseFloat(url.searchParams.get("lat"));
-        const qLon = parseFloat(url.searchParams.get("lon"));
-        const qAlt = parseFloat(url.searchParams.get("alt"));
-        const fcLat = Number.isFinite(qLat) ? qLat : 46.3258;
-        const fcLon = Number.isFinite(qLon) ? qLon : 14.9211;
-        const fcAlt = Number.isFinite(qAlt) ? qAlt : 366;
-        const fcLoc = url.searchParams.get("loc") || "na Rečici ob Savinji";
-
         // Ljubljana UTC offset (UTC+1 winter, UTC+2 summer)
         const ljOff = (() => {
           const d = new Date();
@@ -899,7 +890,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         setTimeout(() => ctrl.abort(), 8000);
         const [yrRes, arsoTry] = await Promise.allSettled([
           fetch(
-            `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${fcLat}&lon=${fcLon}&altitude=${fcAlt}`,
+            "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=46.3258&lon=14.9211&altitude=366",
             { signal: ctrl.signal, headers: {
               "User-Agent": "Meteorec/1.0 github.com/ibanezar/weather-station filip.eremita@gmail.com",
               "Accept": "application/json",
@@ -981,7 +972,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const parts = [];
           const s0 = summaries[0];
           if (s0) {
-            let p = `Danes bo ${fcLoc} ${symLabel(s0.symbol)}, s temperaturo med ${s0.tmin} in ${s0.tmax} °C`;
+            let p = `Danes bo na Rečici ob Savinji ${symLabel(s0.symbol)}, s temperaturo med ${s0.tmin} in ${s0.tmax} °C`;
             if (s0.rain >= 0.5) p += `, skupaj okoli ${s0.rain} mm padavin`;
             if (s0.windMax >= 30) p += `, veter v sunkih do ${s0.windMax} km/h`;
             parts.push(p + ".");
