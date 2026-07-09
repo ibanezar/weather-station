@@ -2106,81 +2106,6 @@ function wmoInfo(code){
   return{emoji:'❓',desc:'Neznano'};
 }
 
-async function fetchOnThisDay(){
-  const today=new Date();
-  const mm=String(today.getMonth()+1).padStart(2,'0');
-  const dd=String(today.getDate()).padStart(2,'0');
-  const yy=today.getFullYear();
-
-  // Update title with today's date
-  const titleEl=document.getElementById('otd-title');
-  if(titleEl) titleEl.textContent='📅 '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' skozi leta';
-
-  // Fetch 5 years in parallel
-  const years=[1,2,3,4,5].map(n=>yy-n);
-  const results=await Promise.all(years.map(async yr=>{
-    const date=yr+'-'+mm+'-'+dd;
-    try{
-      const url='https://archive-api.open-meteo.com/v1/archive'
-        +'?latitude='+LAT+'&longitude='+LON
-        +'&start_date='+date+'&end_date='+date
-        +'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode'
-        +'&timezone=Europe%2FLjubljana';
-      const data=await _archFetch(url);
-      return{
-        year:yr, date,
-        tMax: data.daily?.temperature_2m_max?.[0],
-        tMin: data.daily?.temperature_2m_min?.[0],
-        rain: data.daily?.precipitation_sum?.[0],
-        wind: data.daily?.windspeed_10m_max?.[0],
-        code: data.daily?.weathercode?.[0],
-      };
-    }catch(e){return{year:yr,date,error:true};}
-  }));
-
-  applyOnThisDay(results);
-}
-
-function applyOnThisDay(results){
-  const grid=document.getElementById('otd-grid');
-  if(!grid)return;
-  grid.innerHTML='';
-
-  // Check if today is near Aug 3-4 — show flood note
-  const now=new Date();
-  const isFloodAnniversary=(now.getMonth()===7&&(now.getDate()===3||now.getDate()===4));
-  if(isFloodAnniversary){
-    const note=document.createElement('div');
-    note.style.cssText='grid-column:1/-1;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.35);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.5rem';
-    note.innerHTML='<div style="font-size:.82rem;font-weight:600;color:#38bdf8;margin-bottom:.3rem">🌊 '+FLOOD_2023.dateSl+' — Katastrofalne poplave</div>'
-      +'<div style="font-size:.74rem;color:var(--muted);line-height:1.7">Postaja je v '+FLOOD_2023.duration_h+' urah zabeležila <strong style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm</strong> padavin (podatki popolni — ročno odčitano). '+FLOOD_2023.context+'</div>';
-    grid.appendChild(note);
-  }
-
-  results.forEach(r=>{
-    // Inject flood note for 2023
-    if(r.year===2023&&isFloodAnniversary) return; // already shown above
-    const info=wmoInfo(r.error?null:r.code);
-    const item=document.createElement('div');
-    item.className='otd-item';
-    const hasData=!r.error&&r.tMax!=null;
-    // Special flag for 2023 data gap
-    const is2023aug=(r.year===2023&&now.getMonth()===7&&(now.getDate()===3||now.getDate()===4));
-    item.innerHTML=
-      '<div class="otd-year">'+r.year+(is2023aug?' 🌊':'')+'</div>'+
-      '<div class="otd-emoji">'+(hasData?info.emoji:is2023aug?'🌊':'—')+'</div>'+
-      '<div class="otd-desc">'+(is2023aug?'Katastrofalne poplave':hasData?info.desc:'Ni podatkov')+'</div>'+
-      (hasData
-        ? '<div class="otd-temps"><span class="th">'+r.tMax.toFixed(1)+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+r.tMin.toFixed(1)+'°</span></div>'
-          +(r.rain>0?'<div class="otd-rain">🌧 '+r.rain.toFixed(1)+' mm</div>':'')
-          +'<div class="otd-wind">💨 '+(r.wind!=null?r.wind.toFixed(1)+' km/h':'—')+'</div>'
-        : is2023aug?'<div class="otd-rain" style="color:#38bdf8">'+FLOOD_2023.rainfall_mm+' mm/12h</div>':''
-      );
-    grid.appendChild(item);
-  });
-}
-
-
 let _historyLoaded=false;
 // Tabs in each dropdown group
 const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','records','extremes','surroundings','trivia','glossary']};
@@ -13811,7 +13736,6 @@ async function init(){
     fetchForecastExtras();
     fetchAndDrawSkyStrip();
     fetchComingUp();
-    fetchOnThisDay();
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
