@@ -7243,7 +7243,7 @@ async function buildSunshineNormals(){
       :sumWhere(d=>+d.slice(0,4)===curYear&&seasonMonths.includes(+d.slice(5,7)));
     const curYtd=sumWhere(d=>+d.slice(0,4)===curYear);
 
-    const N=ARSO_NORMALS.sun; // index 0=jan … 11=dec
+    const N=OM_SUN_NORMAL; // index 0=jan … 11=dec — Open-Meteo normala (ista metoda kot tekoči podatki, glej definicijo)
     const histMon=N[curMonth-1];
     const histSea=seasonMonths.reduce((s,m)=>s+N[m-1],0);
     const daysInCurMonth=new Date(curYear,curMonth,0).getDate();
@@ -7264,7 +7264,7 @@ async function buildSunshineNormals(){
       div.innerHTML=`<div class="pn-label">${p.lbl}</div><div class="pn-val ${cls}">${Math.round(p.val)} h</div><div class="pn-norm">${pct!=null?pct+' % norme ('+Math.round(p.norm)+' h)':'—'}</div><div class="pn-bar-wrap"><div class="pn-bar" style="width:${Math.min(100,pct||0)}%;background:${barCol}"></div></div><div class="pn-caption">${_goalCaption(p,pct,'ur sonca')}</div>`;
       grid.appendChild(div);
     });
-    if(upd)upd.textContent='ARSO podnebna normala 1991–2020 (Celje)';
+    if(upd)upd.textContent='Open-Meteo normala 1991–2020 (ista metoda)';
   }catch(e){
     console.warn('Sunshine normals:',e);
     grid.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki o sončnih urah trenutno niso na voljo.</div>';
@@ -12753,6 +12753,16 @@ const ARSO_NORMALS={
   precip:[56,51,77,93,102,120,107,108,103,111,106,77],               // mesečne padavine (mm)
   sun:   [68,95,145,171,208,229,253,236,185,125,67,54],              // sončne ure
 };
+
+// ── Open-Meteo referenčna normala sončnih ur 1991–2020 (Rečica, ista lokacija) ──
+// Open-Meteov "sunshine_duration" (prag 120 W/m² na modelirani/reanalizirani
+// kratkovalovni sevalnosti) sistematično prešteje več sonca kot ARSO-jeva
+// heliografska meritev (razlika je tu ~70 % — letni seštevek te normale je
+// 3102 h proti ARSO-jevih 1836 h za Celje). Ker "letos do danes" prihaja iz
+// istega Open-Meteo vira/metode, ga primerjamo s to normalo (izračunano iz
+// istih 30 let arhiva za iste koordinate) — ne z ARSO normalo — da odstotek
+// odraža resnično odstopanje od povprečja in ne razlike med metodama meritve.
+const OM_SUN_NORMAL=[165.3,187.4,255.4,297.5,341.6,351.0,373.3,346.2,266.6,214.2,153.0,150.2];
 const SL_MON_SHORT=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
 
 function buildArsoNormals(curMonthT, curMonthR){
