@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 08 Jul 2026 11:50:17 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 09 Jul 2026 09:15:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Velika požarna ogroženost od 8. julija: Kaj pravijo podatki iz Rečice ob Savinji</title>
+      <link>https://meteorec.si/blog/velika-pozarna-ogrozenost-8-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/velika-pozarna-ogrozenost-8-julij-2026.html</guid>
+      <pubDate>Thu, 09 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Od 8. julija 2026 po vsej Sloveniji velja velika požarna ogroženost naravnega okolja. Podatki postaje IREICA1 pokažejo zakaj: 17 dni in le 1,3 mm dežja, vročinski val do 36,2 °C in vlaga, ki je padla pod 68 %.</description>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>pozarna-ogrozenost</category>
+      <category>susa</category>
+    </item>
     <item>
       <title>Vročinski val v štirih krajih doline: Rečica, Mozirje, Nazarje, Ljubno</title>
       <link>https://meteorec.si/blog/primerjava-krajev-vrocinski-val-julij-2026.html</link>

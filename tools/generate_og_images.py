@@ -91,6 +91,14 @@ ARTICLES = [
         'photo': 'ocean-storm',
     },
     {
+        'slug': 'velika-pozarna-ogrozenost-8-julij-2026',
+        'title': 'Velika požarna\nogroženost',
+        'subtitle': 'Od 8. julija 2026 · IREICA1',
+        'section': 'Analize',
+        'accent': (249, 115, 22),
+        'photo': 'drought',
+    },
+    {
         'slug': 'poplave-2023',
         'title': 'Poplave avgusta 2023\nv Savinjski dolini',
         'subtitle': 'Najhujša naravna nesreča v zgodovini',
