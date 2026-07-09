@@ -1,6 +1,48 @@
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// ── Kraji v Zgornji Savinjski dolini (izbirnik za modelno napoved) ──
+// Trenutne meritve (temperatura, veter …) ostajajo vezane na postajo IREICA1;
+// ta seznam se uporablja samo za modelno napoved (Open-Meteo / yr.no / ARSO).
+const TOWNS = [
+  { id:'recica',      name:'Rečica ob Savinji', lat:46.325779, lon:14.921137, alt:366, loc:'na Rečici ob Savinji' },
+  { id:'gornji-grad', name:'Gornji Grad',       lat:46.2936,   lon:14.8113,   alt:410, loc:'v Gornjem Gradu' },
+  { id:'mozirje',     name:'Mozirje',           lat:46.3419,   lon:14.9589,   alt:341, loc:'v Mozirju' },
+  { id:'nazarje',     name:'Nazarje',           lat:46.3222,   lon:14.9414,   alt:356, loc:'v Nazarjah' },
+  { id:'ljubno',      name:'Ljubno ob Savinji', lat:46.3389,   lon:14.8358,   alt:392, loc:'v Ljubnem ob Savinji' },
+  { id:'luce',        name:'Luče',              lat:46.3536,   lon:14.7469,   alt:512, loc:'v Lučah' },
+  { id:'solcava',     name:'Solčava',           lat:46.4231,   lon:14.6942,   alt:638, loc:'v Solčavi' },
+];
+const TOWN_STORAGE_KEY='meteorec-town';
+function getActiveTown(){
+  const id=localStorage.getItem(TOWN_STORAGE_KEY);
+  return TOWNS.find(t=>t.id===id) || TOWNS[0];
+}
+function setActiveTown(id){
+  try{localStorage.setItem(TOWN_STORAGE_KEY,id);}catch(_){}
+}
+function updateTownLabels(){
+  const t=getActiveTown();
+  const aifcTitle=document.getElementById('aifc-title');
+  if(aifcTitle)aifcTitle.textContent='🔮 Napoved – '+t.name;
+  const txfcSrc=document.getElementById('txfc-source');
+  if(txfcSrc)txfcSrc.textContent='Open-Meteo · ECMWF · '+t.name;
+}
+function onTownChange(id){
+  setActiveTown(id);
+  updateTownLabels();
+  fetchTextForecast();
+  fetchAIForecast(true);
+}
+function initTownPicker(){
+  const sel=document.getElementById('town-picker');
+  if(!sel)return;
+  sel.innerHTML=TOWNS.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  sel.value=getActiveTown().id;
+  sel.addEventListener('change',()=>onTownChange(sel.value));
+  updateTownLabels();
+}
+
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 const _resLoaded = new Set();
@@ -4829,7 +4871,8 @@ function _yrIcon(sym){
 }
 
 async function fetchAIForecast(force=false){
-  const CACHE_KEY='aifc-v8',CACHE_TTL=30*60*1000;
+  const _town=getActiveTown();
+  const CACHE_KEY='aifc-v8-'+_town.id,CACHE_TTL=30*60*1000;
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -4843,7 +4886,8 @@ async function fetchAIForecast(force=false){
   textEl.className='aifc-text loading';textEl.textContent='Generiram napoved…';
   if(daysEl)daysEl.innerHTML='';if(metaEl)metaEl.textContent='';
   try{
-    const res=await fetch(PROXY+'/ai-forecast?_='+Date.now(),{cache:'no-store'});
+    const qs='lat='+_town.lat+'&lon='+_town.lon+'&alt='+_town.alt+'&loc='+encodeURIComponent(_town.loc)+'&_='+Date.now();
+    const res=await fetch(PROXY+'/ai-forecast?'+qs,{cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const payload={...data,ts:Date.now()};
@@ -4868,8 +4912,9 @@ function _renderAIFC(data){
       textEl.textContent=data.text;
     }else if(data.summaries?.length){
       const s=data.summaries;
+      const tName=getActiveTown().loc;
       const lines=[];
-      if(s[0])lines.push(`Danes bo na Rečici ob Savinji temperatura med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
+      if(s[0])lines.push(`Danes bo ${tName} temperatura med ${s[0].tmin}°C in ${s[0].tmax}°C${s[0].rain>0.5?`, pričakuje se ${s[0].rain} mm padavin`:''}.`);
       if(s[1])lines.push(`Jutri ${s[1].tmax!=null?s[1].tmin+'–'+s[1].tmax+'°C':''}.`);
       textEl.className='aifc-text';
       textEl.textContent=lines.join(' ');
@@ -4896,8 +4941,9 @@ ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 
 async function fetchTextForecast(){
   try{
+    const _town=getActiveTown();
     const url='https://api.open-meteo.com/v1/forecast'
-      +'?latitude='+LAT+'&longitude='+LON
+      +'?latitude='+_town.lat+'&longitude='+_town.lon
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,'
       +'wind_speed_10m_max,wind_direction_10m_dominant,precipitation_probability_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=7';
@@ -13725,6 +13771,7 @@ async function init(){
   setTimeout(()=>{try{initWeatherArt();setWeatherArt(_lastBriefObs||{});}catch(_){}},150);
   try{loadThresholds();}catch(_){} // restore user alert thresholds from localStorage
   try{_fcSliderInit();}catch(_){}
+  try{initTownPicker();}catch(_){}
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
