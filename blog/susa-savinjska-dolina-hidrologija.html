@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suša kljub dežju: hidrologija Zgornje Savinjske doline | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html">
+<meta name="description" content="Zgornja Savinjska dolina vsako leto prejme okrog 1.300 do 1.500 mm padavin, a suše so vse pogostejše in intenzivnejše. Podatki postaje IREICA1 in ARSO razkrijejo, zakaj obilje dežja ne zadošča več.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Suša kljub dežju: hidrologija Zgornje Savinjske doline">
+<meta property="og:description" content="1.300–1.500 mm dežja na leto, a suše so vse pogostejše. Zakaj se podtalnica in pretok Savinje kljub obilju padavin vse hitreje praznita.">
+<meta property="og:image" content="https://meteorec.si/og/susa-savinjska-dolina-hidrologija.jpg">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-07-10">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Analize">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Suša kljub dežju: hidrologija Zgornje Savinjske doline">
+<meta name="twitter:description" content="1.300–1.500 mm dežja na leto, a suše so vse pogostejše. Zakaj se podtalnica in pretok Savinje kljub obilju padavin vse hitreje praznita.">
+<meta name="twitter:image" content="https://meteorec.si/og/susa-savinjska-dolina-hidrologija.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Suša kljub dežju: hidrologija Zgornje Savinjske doline",
+  "description": "Zgornja Savinjska dolina vsako leto prejme okrog 1.300 do 1.500 mm padavin, a suše so vse pogostejše in intenzivnejše. Podatki postaje IREICA1 in ARSO razkrijejo, zakaj obilje dežja ne zadošča več.",
+  "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/susa-savinjska-dolina-hidrologija.jpg", "width": 1200, "height": 630 },
+  "wordCount": 2450,
+  "datePublished": "2026-07-10",
+  "dateModified": "2026-07-10",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html" },
+  "about": { "@type": "Place", "name": "Zgornja Savinjska dolina", "sameAs": ["https://www.wikidata.org/wiki/Q12806664", "https://sl.wikipedia.org/wiki/Zgornja_Savinjska_dolina"], "geo": { "@type": "GeoCoordinates", "latitude": 46.326, "longitude": 14.921 } },
+  "keywords": "suša, Savinjska dolina, podtalnica, Savinja, IREICA1, podnebne spremembe, hidrologija"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Suša kljub dežju: hidrologija Zgornje Savinjske doline" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
+<link rel="stylesheet" href="blog.css">
+<style>
+.stat-card.c-rain .sc-val  { color: #60a5fa; }
+.stat-card.c-dry .sc-val   { color: #f59e0b; }
+.stat-card.c-danger .sc-val{ color: #f87171; }
+.stat-card.c-green .sc-val { color: #34d399; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: .75;
+  margin: 2.8rem 0 .4rem;
+  display: block;
+}
+
+/* Primerjalna lestvica (gradientna tabela) */
+.gradient-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  margin: 1.2rem 0 1.8rem;
+}
+.gradient-title {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: .9rem;
+}
+.gr-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+.gr-row:last-of-type { margin-bottom: .2rem; }
+.gr-lbl { min-width: 11rem; font-size: .76rem; color: var(--muted); line-height: 1.35; }
+.gr-lbl strong { color: #fff; font-weight: 600; }
+.gr-bw { flex: 1; height: 9px; background: rgba(255,255,255,.06); border-radius: 10px; }
+.gr-b  { height: 9px; border-radius: 10px; }
+.gr-v  { min-width: 4.5rem; font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #fff; text-align: right; font-weight: 600; }
+.gradient-note { font-size: .72rem; color: var(--muted); margin-top: .65rem; padding-top: .5rem; border-top: 1px solid rgba(255,255,255,.06); }
+
+/* Zanimivo dejstvo */
+.fact-box {
+  background: rgba(77,159,248,.07);
+  border: 1px solid rgba(77,159,248,.28);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin: 1.3rem 0 1.8rem;
+  font-size: .95rem;
+  color: #cfdbef;
+  line-height: 1.65;
+}
+.fact-box .fact-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .64rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--blue);
+  display: block;
+  margin-bottom: .4rem;
+}
+
+/* Suša / mokro polje */
+.streak-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .7rem;
+  margin: 1rem 0 1.8rem;
+}
+.streak-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+}
+.streak-card .sk-val   { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 2rem; line-height: 1; color: #fff; }
+.streak-card .sk-unit  { font-size: .75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.streak-card .sk-label { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+.streak-card.dry  .sk-val { color: #f59e0b; }
+.streak-card.wet  .sk-val { color: #60a5fa; }
+@media (max-width: 500px) { .streak-grid { grid-template-columns: 1fr; } }
+
+/* Zgodovinska sušna leta */
+.era-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .7rem;
+  margin: 1rem 0 1.8rem;
+}
+.era-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: .95rem 1rem;
+}
+.era-card .era-yr   { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.35rem; color: #f59e0b; line-height: 1.1; }
+.era-card .era-name { font-size: .78rem; font-weight: 700; color: #fff; margin: .3rem 0 .3rem; }
+.era-card .era-body { font-size: .78rem; color: var(--muted); line-height: 1.55; }
+@media (max-width: 700px) { .era-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 420px) { .era-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Suša kljub dežju
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · Klimatološka analiza</div>
+    <h1>Suša kljub dežju: hidrologija Zgornje Savinjske doline</h1>
+    <p class="post-meta">10. julija 2026 · Filip Eremita · ~7 min branja</p>
+
+    <p class="lead">Zgornja Savinjska dolina vsako leto prejme <span class="hl">1.300 do 1.500 mm padavin</span> — bistveno več od slovenskega povprečja in dvakrat več kot marsikatera evropska pokrajina. In vendarle dolina vse pogosteje čuti posledice suše. Leta 2022 v njej dež ni padel <strong>33 do 40 dni zapored</strong>, pretoki Savinje pa so bili tako nizki, da je hidrološka suša trajala vse do jeseni. Paradoks obilja je razložljiv: ne gre za to, koliko dežja pade, temveč za to, <em>kdaj</em> pade in koliko od njega sploh doseže tla, preden ga posrka vročina.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card c-rain">
+        <div class="sc-label">Letno povprečje regije</div>
+        <div class="sc-val">1.300–1.500</div>
+        <div class="sc-sub">mm · nadpovprečno za Slovenijo</div>
+      </div>
+      <div class="stat-card c-dry">
+        <div class="sc-label">Najdaljša suša 2022</div>
+        <div class="sc-val">33–40</div>
+        <div class="sc-sub">dni brez dežja · feb.–mar., odvisno od lokacije</div>
+      </div>
+      <div class="stat-card c-danger">
+        <div class="sc-label">Leto 2022 (Rečica ob Savinji)</div>
+        <div class="sc-val">1.110</div>
+        <div class="sc-sub">mm · najsušnejše leto v arhivu IREICA1</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="sc-label">Za primerjavo: leto 2023</div>
+        <div class="sc-val">1.711</div>
+        <div class="sc-sub">mm · rekordno mokro leto na isti postaji</div>
+      </div>
+    </div>
+
+    <!-- ════ 01: PARADOKS OBILJA ════ -->
+    <span class="section-label">01 — Paradoks obilja</span>
+    <h2 id="dez-pade-a-manj-ga-ostane">Dežja pade dovolj — a manj ga ostane tam, kjer ga potrebujemo</h2>
+
+    <p>Zgornja Savinjska dolina nima izrazito sušnega poletja, kakršnega poznajo sredozemske pokrajine. Padavinski vzorec je razmeroma enakomerno razporejen čez vse leto, z viški julija ter septembra in oktobra <a href="/blog/padavinski-vzorci-savinjske-doline.html" style="color:var(--blue)">(podrobno smo ga analizirali v ločenem članku)</a>. Toda dejstvo, da dolgoletno povprečje ostaja visoko, ne pomeni, da je voda vsako leto enako dostopna – niti da je razporejena takrat, ko jo tla in rastline najbolj potrebujejo.</p>
+
+    <p>Zaradi višanja povprečnih temperatur se namreč spreminja <strong>učinkovitost</strong> teh padavin. Toplejši zrak veže več vlage in jo hitreje vrača v ozračje (evapotranspiracija), toplejše zime pomenijo manj snežne odeje in s tem manjšo pomladno zalogo vode, poletni vročinski valovi pa vodo iz tal posušijo v dneh, ne tednih. Rezultat je pojav, ki mu hidrologi pravijo <strong>»rapidna suša«</strong> (angl. flash drought) – stanje, ko se tla iz normalno vlažnih v izrazito suha spremenijo v le nekaj tednih, brez dolgega opozorilnega obdobja brez dežja.</p>
+
+    <div class="fact-box">
+      <span class="fact-label">Zanimivo</span>
+      Na postaji IREICA1 je bilo v obdobju 2020–2025 povprečno 1.377 mm padavin na leto in okrog 179 deževnih dni. A razlika med najsušnejšim (2022: 1.110 mm) in najbolj mokrim letom (2023: 1.711 mm) znaša kar <strong>601 mm</strong> – to je približno toliko, kolikor v povprečnem letu pade v Celjski kotlini.
+    </div>
+
+    <!-- ════ 02: EKSTREMNO LETO 2022 ════ -->
+    <span class="section-label">02 — Študija primera</span>
+    <h2 id="ekstremno-leto-2022">Ekstremno leto 2022</h2>
+
+    <p>Leto 2022 velja za hidrološko eno najbolj sušnih let v novejši zgodovini doline. Zgodaj spomladi v dolini ni padla niti kaplja dežja od <strong>33 do 40 dni zapored</strong>, odvisno od mikrolokacije – na postaji IREICA1 v Rečici ob Savinji je niz trajal 33 dni, med 26. februarjem in 30. marcem. Marca je po vsej Sloveniji padlo v povprečju le okrog <strong>10 % običajnih padavin</strong>, kar uvršča marec 2022 med tri najbolj suhe marce od leta 1961 (vir: ARSO, Podnebne značilnosti leta 2022).</p>
+
+    <div class="gradient-wrap">
+      <div class="gradient-title">Letne padavine — IREICA1, Rečica ob Savinji</div>
+      <div class="gr-row">
+        <div class="gr-lbl">2020</div>
+        <div class="gr-bw"><div class="gr-b" style="width:79%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.348 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2021</div>
+        <div class="gr-bw"><div class="gr-b" style="width:80%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.363 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl" style="color:#f59e0b">2022 <span style="font-size:.68rem">(najsušnejše)</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:65%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div>
+        <div class="gr-v" style="color:#f59e0b">1.110 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl" style="color:#60a5fa">2023 <span style="font-size:.68rem">(najdežnejše)</span></div>
+        <div class="gr-bw"><div class="gr-b" style="width:100%;background:linear-gradient(90deg,#1d4ed8,#60a5fa)"></div></div>
+        <div class="gr-v" style="color:#60a5fa">1.711 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2024</div>
+        <div class="gr-bw"><div class="gr-b" style="width:88%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.506 mm</div>
+      </div>
+      <div class="gr-row">
+        <div class="gr-lbl">2025</div>
+        <div class="gr-bw"><div class="gr-b" style="width:71%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        <div class="gr-v">1.225 mm</div>
+      </div>
+      <div class="gradient-note">Vir: postaja IREICA1. Razlika med letoma 2022 in 2023 (601 mm) je največja medletna razlika v celotnem šestletnem arhivu postaje.</div>
+    </div>
+
+    <p>Posledice na vodotokih so bile drastične: pretoki Savinje in njenih pritokov so upadli, hidrološka suša površinskih voda pa je neprekinjeno trajala vse do prve polovice septembra 2022, ko so jo končno prekinile jesenske fronte. Po podatkih ARSO je bilo leto 2022 – skupaj z letoma 2003 in 2012 – eno od treh let z najbolj intenzivno sušo podzemnih voda v obdobju 1981–2023, po prostorski razsežnosti pa je bila suša leta 2022 ena od treh najobsežnejših v zadnjih šestih desetletjih.</p>
+
+    <!-- ════ 03: ZGODOVINSKA SUŠNA LETA ════ -->
+    <span class="section-label">03 — Dolgi spomin doline</span>
+    <h2 id="najbolj-izrazita-susna-leta">Najbolj izrazita sušna leta po letu 2000</h2>
+
+    <p>Podatki Agencije RS za okolje (ARSO) kažejo jasno koncentracijo ekstremnih sušnih let po prelomu tisočletja. Od leta 2000 je bila v Sloveniji zaradi suše sedemkrat razglašena naravna nesreča, najhujše pa so bile prav v letih, ki so zaznamovala tudi Zgornjo Savinjsko dolino.</p>
+
+    <div class="era-grid">
+      <div class="era-card">
+        <div class="era-yr">2003</div>
+        <div class="era-name">Prelomno leto</div>
+        <div class="era-body">Edino leto v obdobju 1961–2024, ki je bilo sušno v vseh štirih letnih časih hkrati. Vroče in suho poletje je močno oklestilo pretok Savinje in zaznamovalo prehod v obdobje pogostejših toplotnih ekstremov.</div>
+      </div>
+      <div class="era-card">
+        <div class="era-yr">2012–13</div>
+        <div class="era-name">Zaporedni udarec</div>
+        <div class="era-body">Dve zaporedni sušni leti, ki sta po intenzivnosti podzemne suše (SGI-indeks) med tremi najhujšimi v zadnjih štirih desetletjih in sta globoko izsušili vodonosnike regije.</div>
+      </div>
+      <div class="era-card">
+        <div class="era-yr">2017</div>
+        <div class="era-name">Poletna rapidna suša</div>
+        <div class="era-body">Kombinacija izjemno močnih vročinskih valov in izrazitega pomanjkanja padavin med ključno rastno dobo je pripeljala do razglasitve naravne nesreče zaradi suše.</div>
+      </div>
+      <div class="era-card">
+        <div class="era-yr">2022</div>
+        <div class="era-name">Rekordni sušni niz</div>
+        <div class="era-body">Zimska suša brez snežne odeje se je prelila v hudo poletno pomanjkanje vode – po prostorski razsežnosti ena od treh najobsežnejših suš v zadnjih 60 letih.</div>
+      </div>
+    </div>
+
+    <div class="fact-box">
+      <span class="fact-label">Podnebni trend</span>
+      Meritve postaje IREICA1 kažejo hitro segrevanje – povprečna letna temperatura je iz najhladnejšega leta niza (9,8 °C, 2021) v najtoplejše (11,5 °C, 2024) narasla za <strong>1,7 °C</strong> v samo treh letih. Najhitreje se segrevata prav pomlad (marec +2,6 °C, april +2,3 °C v primerjavi obdobij 2020–21 in 2024–25), hkrati pa upada tudi število dni s slano: s povprečnih 118 v letih 2020–21 na okrog 92 v letih 2024–25 – to je približno <strong>petina manj</strong>. Toplejša in krajša zima ter zgodnejša pomlad dolgoročno povečujeta pritisk na poletne vodne zaloge.
+    </div>
+
+    <!-- ════ 04: ALPSKI REČNI REŽIM ════ -->
+    <span class="section-label">04 — Zakaj se to dogaja: reka</span>
+    <h2 id="preobrazba-alpskega-rezima-savinje">Preobrazba alpskega rečnega režima Savinje</h2>
+
+    <p>Savinja ima v zgornjem toku izrazit snežno-dežni (alpski) režim. V preteklosti je taljenje debele zimske snežne odeje v Kamniško-Savinjskih Alpah vzdrževalo močan in stabilen pretok vse do zgodnjega poletja. Ta cikel se zaradi toplejših zim in tanjše snežne odeje spreminja: sneg se stopi hitreje in prej v letu, zato reka v poletje vstopi z bistveno manjšo »zalogo« vode iz gorskega zaledja.</p>
+
+    <p>Posledica je, da se manj zimske snežne odeje neposredno prevede v hitrejši pomladni padec podtalnice in pretoka Savinje. Ko nato nastopijo poletni vročinski valovi, voda iz tal hitreje izhlapeva – in ravno kombinacija zgodaj izpraznjene zaloge ter poletne vročine je tisto, kar dolino vse pogosteje pahne v rapidno sušo, čeprav letno število milimetrov dežja ostaja visoko.</p>
+
+    <p>(Za podrobno kronologijo nasprotnega ekstrema – ko je isti hidrološki sistem po zaporedju namočenih mesecev prenesel rekordne poplave – glejte <a href="/blog/poplave-2023.html" style="color:var(--blue)">Poplave avgusta 2023 v Zgornji Savinjski dolini</a>.)</p>
+
+    <!-- ════ 05: PODTALNICA ════ -->
+    <span class="section-label">05 — Zakaj se to dogaja: podtalnica</span>
+    <h2 id="podtalnica-v-savinjski-kotlini">Podtalnica v Savinjski kotlini</h2>
+
+    <p>Savinjska kotlina leži na obsežnem kvartarnem peščeno-prodnem zasipu (aluvialnem vodonosniku). Ta vrsta tal ima izjemno visoko medzrnsko poroznost in prepustnost, kar pomeni, da je podtalnica zelo odzivna na dogajanje na površju. Savinja in njeni pritoki so glavni vir napajanja te podtalnice – ko poleti močno upade pretok reke in se zaradi vročine poveča izhlapevanje iz tal, nivo podtalnice temu padcu sledi skoraj sočasno.</p>
+
+    <p>Padec gladine podtalnice prinaša dodatno težavo: Savinjska kotlina, predvsem Spodnjesavinjsko polje, je močno kmetijsko obremenjena (hmeljišča, poljedelstvo). Po podatkih ARSO je podzemna voda v Savinjski kotlini – podobno kot v Dravski in Murski – prekomerno obremenjena z nitrati, standard kakovosti pa je še vedno presežen na nekaterih merilnih mestih (npr. Levec, Šempeter, črpališče Medlog). Dolgoročno se stanje sicer izboljšuje: padajoč trend nitratov je bil za obdobje 1998–2024 ugotovljen na 7 od 8 merilnih mest v regiji, atrazin pa je v Spodnjesavinjskem polju že padel pod mejo zaznave. Ob nizkem vodostaju pa se koncentracija preostalih onesnaževal v manjši količini vode relativno poveča, zato ostaja vodno telo ob hudih sušah še vedno ranljivo.</p>
+
+    <div class="callout">
+      <p><strong>Hidrološko pravilo:</strong> vodni primanjkljaj se v takšnih prepustnih sistemih ne popravi z eno ali dvema poletnima nevihtama. Suha zemlja na površju veliko vode vpije, še preden ta doseže globoke vodonosnike, zato se gladina podtalnice običajno normalizira šele po dolgotrajnejšem jesenskem deževju.</p>
+    </div>
+
+    <!-- ════ ZAKLJUČEK ════ -->
+    <span class="section-label">Zaključek</span>
+    <h2 id="vec-dezja-a-manj-zanesljivega">Več dežja na papirju, manj zanesljivega v praksi</h2>
+
+    <p>Zgornja Savinjska dolina ostaja ena od najbolj namočenih pokrajin v Sloveniji, a letno povprečje 1.300 do 1.500 mm je vse manj zanesljivo jamstvo za enakomerno preskrbo z vodo. Manj snega pozimi, hitrejše taljenje spomladi in intenzivnejši poletni vročinski valovi pomenijo, da se lahko dolina znajde v hudi suši tudi v letu, ko na koncu pade skoraj povprečna količina dežja – kot se je zgodilo leta 2022, ko je bila kljub 1.110 mm padavin večina teh skoncentrirana zunaj kritičnega pomladno-poletnega obdobja.</p>
+
+    <p>Dinamika reke in podtalnice je tesno povezana, saj gre za enovit hidrološki sistem: kar prizadene pretok Savinje, se z zamikom pozna tudi na gladini podtalnice v dolini. Scenarij »suša in nato poplava v istem letu ali zaporedju let«, kot smo ga videli med letoma 2022 in 2023, po ocenah ARSO in EEA v prihodnje ne bo izjema, temveč vse pogostejše pravilo.</p>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir meritev: postaja IREICA1, Rečica ob Savinji (november 2019 – 2026). Zgodovinski in regionalni podatki: ARSO (Kazalci okolja, Podnebne značilnosti leta 2022, poročila o kemijskem stanju podzemne vode). Meritve v živo na <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Poglej tudi: <a href="/vodostaj-savinje/" style="color:var(--blue)">vodostaj Savinje</a>, <a href="/agrometeo/" style="color:var(--blue)">vodno bilanco</a> za tekoče stanje ter <a href="/blog/padavinski-vzorci-savinjske-doline.html" style="color:var(--blue)">padavinske vzorce doline</a> in <a href="/blog/temperaturni-trend-ireica1-2020-2025.html" style="color:var(--blue)">temperaturni trend</a> za širši kontekst.</p>
+
+    <div class="share-bar" id="share-bar">
+      <span class="share-label">Deli</span>
+      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg> WhatsApp</a>
+      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X</a>
+      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg> Facebook</a>
+      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> <span id="copy-label">Kopiraj</span></button>
+      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Deli</button>
+    </div>
+
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+
+</div>
+
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+(function () {
+  const PAGE_URL   = "https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html";
+  const PAGE_TITLE = "Suša kljub dežju: hidrologija Zgornje Savinjske doline | Meteorec";
+  const PAGE_TEXT  = "1.300–1.500 mm dežja na leto, a suše so vse pogostejše. Zakaj se podtalnica in pretok Savinje kljub obilju padavin vse hitreje praznita.";
+  const enc = encodeURIComponent;
+  document.getElementById('btn-wa').href = 'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
+  document.getElementById('btn-x').href = 'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
+  document.getElementById('btn-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var label = document.getElementById('copy-label');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(PAGE_URL).then(function () { label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000); });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = PAGE_URL; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      label.textContent = 'Kopirano!'; setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+    }
+  });
+  if (navigator.share) {
+    var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
+    nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
+  }
+})();
+</script>
+<script src="likes.js" defer></script>
+<script src="/blog/comments.js" defer></script>
+<script src="/blog/article-enhance.js" defer></script>
+<script src="/blog/subscribe.js" defer></script>
+</body>
+</html>
