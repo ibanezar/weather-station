@@ -322,7 +322,7 @@ def build_body(hist, fc):
   pripomoček na <a href="/">naslovni strani Meteorec</a> (zavihek »Agrometeo«).</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
-    return body, gdd5, gdd10, stage_label
+    return body, gdd5, gdd10, stage_label, qa
 
 
 def main():
@@ -334,7 +334,7 @@ def main():
         print(f"✗ Napaka pri pridobivanju napovedi: {e}", file=sys.stderr)
         sys.exit(1)
 
-    body, gdd5, gdd10, stage_label = build_body(hist, fc)
+    body, gdd5, gdd10, stage_label, qa = build_body(hist, fc)
 
     url = "/agrometeo/"
     title = "Agrometeo — Zgornja Savinjska dolina"
@@ -344,6 +344,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Agrometeo", None)]),
+        seo.faq_schema(qa),
     ])
 
     html = seo.page_shell(title, desc, url, schema, body)

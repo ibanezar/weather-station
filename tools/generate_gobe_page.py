@@ -360,7 +360,7 @@ def build_body(locs):
   na <a href="/">naslovni strani Meteorec</a> (zavihek »Gobarji«), kjer lahko premikaš napoved po dnevih naprej.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
-    return body, pct_today, lvl_today, desc_today
+    return body, pct_today, lvl_today, desc_today, qa
 
 
 def main():
@@ -374,7 +374,7 @@ def main():
         print(f"✗ Nepričakovano število lokacij v odgovoru ({len(locs)} namesto {len(GOBE_SPOTS)})", file=sys.stderr)
         sys.exit(1)
 
-    body, pct_today, lvl_today, desc_today = build_body(locs)
+    body, pct_today, lvl_today, desc_today, qa = build_body(locs)
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"
@@ -384,6 +384,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
+        seo.faq_schema(qa),
     ])
 
     html = seo.page_shell(title, desc, url, schema, body)

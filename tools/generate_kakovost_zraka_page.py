@@ -252,7 +252,7 @@ def build_body(data):
   pripomoček na <a href="/">naslovni strani Meteorec</a> (zavihek »Zrak«).</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
-    return body, aqi, level
+    return body, aqi, level, qa
 
 
 def main():
@@ -264,7 +264,7 @@ def main():
         sys.exit(1)
 
     try:
-        body, aqi, level = build_body(data)
+        body, aqi, level, qa = build_body(data)
     except ValueError as e:
         print(f"✗ {e}", file=sys.stderr)
         sys.exit(1)
@@ -277,6 +277,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Kakovost zraka", None)]),
+        seo.faq_schema(qa),
     ])
 
     html = seo.page_shell(title, desc, url, schema, body)
