@@ -166,6 +166,33 @@
 .era-card .era-body { font-size: .78rem; color: var(--muted); line-height: 1.55; }
 @media (max-width: 700px) { .era-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 420px) { .era-grid { grid-template-columns: 1fr; } }
+
+/* Simulator suše (interaktivni slider) */
+.ds-days-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .3rem; }
+.ds-days-label { font-size: .78rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.ds-days-val { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.7rem; color: #fff; line-height: 1; }
+.ds-slider {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 6px;
+  background: linear-gradient(90deg, #3b82f6, #34d399 28%, #f59e0b 62%, #f87171 100%);
+  outline: none; margin: .5rem 0 .4rem; cursor: pointer;
+}
+.ds-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; border: 3px solid #05070d; box-shadow: 0 1px 4px rgba(0,0,0,.5); cursor: pointer;
+}
+.ds-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid #05070d; cursor: pointer;
+}
+.ds-marker-row { display: flex; justify-content: space-between; font-size: .64rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 1.1rem; }
+.ds-marker-mid { color: #f59e0b; }
+.ds-readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-bottom: 1rem; }
+.ds-stat .ds-label { font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: .4rem; }
+.ds-bar-wrap { height: 10px; background: rgba(255,255,255,.06); border-radius: 10px; overflow: hidden; margin-bottom: .35rem; }
+.ds-bar-fill { height: 100%; border-radius: 10px; transition: width .2s ease, background-color .2s ease; }
+.ds-val { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .88rem; color: #fff; }
+.ds-status { text-align: center; padding: .6rem; border-radius: 10px; font-weight: 700; font-size: .85rem; transition: background-color .2s ease, color .2s ease; }
+.ds-note { font-size: .72rem; color: var(--muted); margin-top: .8rem; line-height: 1.55; }
+@media (max-width: 500px) { .ds-readouts { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -225,6 +252,34 @@
     <div class="fact-box">
       <span class="fact-label">Zanimivo</span>
       Na postaji IREICA1 je bilo v obdobju 2020–2025 povprečno 1.377 mm padavin na leto in okrog 179 deževnih dni. A razlika med najsušnejšim (2022: 1.110 mm) in najbolj mokrim letom (2023: 1.711 mm) znaša kar <strong>601 mm</strong> – to je približno toliko, kolikor v povprečnem letu pade v Celjski kotlini.
+    </div>
+
+    <div class="chart-card ds-card">
+      <h3>Simulacija: kaj se zgodi, če ne dežuje?</h3>
+      <div class="ds-days-row">
+        <span class="ds-days-label">Dni brez dežja</span>
+        <span class="ds-days-val"><span id="dsDays">0</span> dni</span>
+      </div>
+      <input type="range" class="ds-slider" id="dsSlider" min="0" max="40" value="0" step="1" aria-label="Dni brez dežja">
+      <div class="ds-marker-row">
+        <span>0</span>
+        <span class="ds-marker-mid">33–40 dni · leto 2022</span>
+        <span>40</span>
+      </div>
+      <div class="ds-readouts">
+        <div class="ds-stat">
+          <div class="ds-label">Vlažnost tal</div>
+          <div class="ds-bar-wrap"><div class="ds-bar-fill" id="dsSoilFill" style="width:100%;background:#3b82f6"></div></div>
+          <div class="ds-val" id="dsSoilVal">100 %</div>
+        </div>
+        <div class="ds-stat">
+          <div class="ds-label">Gladina podtalnice</div>
+          <div class="ds-bar-wrap"><div class="ds-bar-fill" id="dsGwFill" style="width:100%;background:#3b82f6"></div></div>
+          <div class="ds-val" id="dsGwVal">100 %</div>
+        </div>
+      </div>
+      <div class="ds-status" id="dsStatus" style="background:rgba(52,211,153,.13);color:#34d399">Normalno stanje</div>
+      <p class="ds-note">Poenostavljena ponazoritev dinamike, opisane zgoraj: vlažnost tal (zgornjih ~30 cm) upade v dneh, gladina podtalnice pa se odzove šele z zamikom tednov. Gre za ilustracijo načela, ne za dejansko meritev postaje IREICA1.</p>
     </div>
 
     <!-- ════ 02: EKSTREMNO LETO 2022 ════ -->
@@ -356,6 +411,54 @@
 
 </div>
 
+<script>
+(function () {
+  var slider   = document.getElementById('dsSlider');
+  if (!slider) return;
+  var daysEl   = document.getElementById('dsDays');
+  var soilFill = document.getElementById('dsSoilFill');
+  var soilVal  = document.getElementById('dsSoilVal');
+  var gwFill   = document.getElementById('dsGwFill');
+  var gwVal    = document.getElementById('dsGwVal');
+  var status   = document.getElementById('dsStatus');
+
+  function barColor(pct) {
+    if (pct >= 60) return '#3b82f6';
+    if (pct >= 30) return '#f59e0b';
+    return '#f87171';
+  }
+
+  function update() {
+    var d = parseInt(slider.value, 10);
+    daysEl.textContent = d;
+
+    var soil = Math.max(6, Math.round(100 * Math.exp(-d / 14)));
+    var gw   = Math.max(35, Math.round(100 * Math.exp(-d / 32)));
+
+    soilFill.style.width = soil + '%';
+    soilFill.style.background = barColor(soil);
+    soilVal.textContent = soil + ' %';
+
+    gwFill.style.width = gw + '%';
+    gwFill.style.background = barColor(gw);
+    gwVal.textContent = gw + ' %';
+
+    var color, label;
+    if (d < 7)       { color = '#34d399'; label = 'Normalno stanje'; }
+    else if (d < 15) { color = '#60a5fa'; label = 'Tla se pričenjajo sušiti'; }
+    else if (d < 25) { color = '#f59e0b'; label = 'Zmerna suša'; }
+    else if (d < 33) { color = '#f97316'; label = 'Huda suša'; }
+    else             { color = '#f87171'; label = 'Rapidna suša — kot leto 2022'; }
+
+    status.textContent = label;
+    status.style.background = color + '22';
+    status.style.color = color;
+  }
+
+  slider.addEventListener('input', update);
+  update();
+})();
+</script>
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script>
 (function () {
