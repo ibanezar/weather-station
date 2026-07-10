@@ -91,6 +91,14 @@ ARTICLES = [
         'photo': 'ocean-storm',
     },
     {
+        'slug': '300-let-poplav-na-savinji',
+        'title': '300 let poplav\nna Savinji',
+        'subtitle': 'Od 1231 do 2023 · zgodovina',
+        'section': 'Analize',
+        'accent': (59, 130, 246),
+        'photo': 'flood-river',
+    },
+    {
         'slug': 'velika-pozarna-ogrozenost-8-julij-2026',
         'title': 'Velika požarna\nogroženost',
         'subtitle': 'Od 8. julija 2026 · IREICA1',
