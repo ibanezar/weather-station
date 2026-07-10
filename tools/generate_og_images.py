@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'susa-savinjska-dolina-hidrologija',
+        'title': 'Suša kljub\ndežju',
+        'subtitle': 'Hidrologija Zgornje Savinjske doline',
+        'section': 'Analize',
+        'accent': (245, 158, 11),
+        'photo': 'drought',
+    },
+    {
         'slug': 'med-dvema-vrocinskima-valoma-ireica1',
         'title': 'Med dvema\nvročinskima valoma',
         'subtitle': 'Podatki postaje IREICA1',

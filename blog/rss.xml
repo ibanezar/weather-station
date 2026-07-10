@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 10 Jul 2026 09:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 10 Jul 2026 10:00:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Suša kljub dežju: hidrologija Zgornje Savinjske doline</title>
+      <link>https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html</guid>
+      <pubDate>Fri, 10 Jul 2026 09:30:00 +0000</pubDate>
+      <description>Zgornja Savinjska dolina vsako leto prejme okrog 1.300 do 1.500 mm padavin, a suše so vse pogostejše in intenzivnejše. Zakaj obilje dežja ne zadošča več.</description>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>susa</category>
+      <category>podtalnica</category>
+      <category>Savinja</category>
+      <category>podnebne-spremembe</category>
+    </item>
     <item>
       <title>300 let poplav na Savinji: Kaj vemo o vremenu pred meteorološkimi postajami</title>
       <link>https://meteorec.si/blog/300-let-poplav-na-savinji.html</link>
