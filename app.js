@@ -4570,17 +4570,27 @@ async function toggleNotifications(){
     alert('Obvestila niso bila vklopljena — dovoljenje ni bilo odobreno.');
     return;
   }
+  let sub;
   try{
-    const sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_urlB64ToU8(VAPID_PUBLIC)});
+    sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_urlB64ToU8(VAPID_PUBLIC)});
+  }catch(e){
+    console.error('pushManager.subscribe:',e);
+    localStorage.setItem('wx-notif','off');
+    btn?.classList.remove('on');
+    alert('Obvestil ni bilo mogoče vklopiti — brskalnik ni uspel ustvariti naročnine ('+(e?.name||e?.message||'neznana napaka')+'). Poskusi v drugem brskalniku ali brez VPN/blokatorja oglasov.');
+    return;
+  }
+  try{
     const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
-    if(!r.ok)throw new Error('subscribe failed');
+    if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
     reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih (močni sunki, nalivi, zmrzal) in vnaprej, ko se dež ali nevihta pričakuje v naslednjih ~45 minutah.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
   }catch(e){
+    console.error('push/subscribe:',e);
     localStorage.setItem('wx-notif','off');
     btn?.classList.remove('on');
-    alert('Obvestil ni bilo mogoče vklopiti. Poskusi znova.');
+    alert('Obvestil ni bilo mogoče vklopiti — strežnika ni bilo mogoče doseči ('+(e?.message||'neznana napaka')+'). Poskusi znova čez nekaj trenutkov.');
   }
 }
 function initNotifBtn(){
