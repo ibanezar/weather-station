@@ -1,18 +1,23 @@
 {
-  "nevihtni-obeti-11-julij-2026": [
-    "kako-brati-nevihtno-napoved-cape-striz-vetra",
+  "vreme-golte-sneg-razmere": [
     "anatomija-poletne-nevihte-recica-savinji",
+    "vremenski-povzetek-junij-2026",
     "nevihte-toca-hudourniki-julij-2026"
   ],
+  "nevihtni-obeti-11-julij-2026": [
+    "kako-brati-nevihtno-napoved-cape-striz-vetra",
+    "nevihte-toca-hudourniki-julij-2026",
+    "napoved-julij-2026"
+  ],
   "susa-savinjska-dolina-hidrologija": [
-    "padavinski-vzorci-savinjske-doline",
+    "temperaturni-trend-ireica1-2020-2025",
     "najbolj-suha-pomlad-2026-ireica1",
-    "poplave-2023"
+    "podnebna-zgodovina-recica-savinji-1950-2025"
   ],
   "300-let-poplav-na-savinji": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
-    "julij-skozi-zgodovino-recica-savinji",
-    "temperaturni-trend-ireica1-2020-2025"
+    "susa-savinjska-dolina-hidrologija",
+    "julij-skozi-zgodovino-recica-savinji"
   ],
   "velika-pozarna-ogrozenost-8-julij-2026": [
     "najbolj-suha-pomlad-2026-ireica1",
@@ -36,13 +41,13 @@
   ],
   "hmelj-vreme-julij-rastne-stopinje-vodna-bilanca": [
     "med-dvema-vrocinskima-valoma-ireica1",
-    "napoved-julij-2026",
-    "vremenski-povzetek-april-2026"
+    "vremenski-povzetek-april-2026",
+    "napoved-julij-2026"
   ],
   "kako-brati-nevihtno-napoved-cape-striz-vetra": [
+    "nevihtni-obeti-11-julij-2026",
     "nevihte-toca-hudourniki-julij-2026",
-    "anatomija-poletne-nevihte-recica-savinji",
-    "napoved-julij-2026"
+    "anatomija-poletne-nevihte-recica-savinji"
   ],
   "poletni-ozon-kakovost-zraka-savinjska-dolina": [
     "med-dvema-vrocinskima-valoma-ireica1",
@@ -57,7 +62,7 @@
   "napoved-julij-2026": [
     "med-dvema-vrocinskima-valoma-ireica1",
     "julij-skozi-zgodovino-recica-savinji",
-    "anatomija-poletne-nevihte-recica-savinji"
+    "nevihtni-obeti-11-julij-2026"
   ],
   "julij-skozi-zgodovino-recica-savinji": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
@@ -67,12 +72,12 @@
   "podnebna-zgodovina-recica-savinji-1950-2025": [
     "julij-skozi-zgodovino-recica-savinji",
     "temperaturni-trend-ireica1-2020-2025",
-    "najbolj-suha-pomlad-2026-ireica1"
+    "susa-savinjska-dolina-hidrologija"
   ],
   "temperaturni-trend-ireica1-2020-2025": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
-    "julij-skozi-zgodovino-recica-savinji",
-    "najhladnejsa-julijska-jutra-recica"
+    "susa-savinjska-dolina-hidrologija",
+    "julij-skozi-zgodovino-recica-savinji"
   ],
   "najbolj-suha-pomlad-2026-ireica1": [
     "polletni-pregled-2026-ireica1",
@@ -87,7 +92,7 @@
   "najhladnejsa-julijska-jutra-recica": [
     "julij-skozi-zgodovino-recica-savinji",
     "temperaturni-trend-ireica1-2020-2025",
-    "prva-tropska-noc-recica-julij-2026"
+    "med-dvema-vrocinskima-valoma-ireica1"
   ],
   "anatomija-poletne-nevihte-recica-savinji": [
     "nevihte-toca-hudourniki-julij-2026",
@@ -105,9 +110,9 @@
     "junij-2026-dvoglavi-mesec"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
+    "nevihtni-obeti-11-julij-2026",
     "med-dvema-vrocinskima-valoma-ireica1",
-    "anatomija-poletne-nevihte-recica-savinji",
-    "kako-brati-nevihtno-napoved-cape-striz-vetra"
+    "anatomija-poletne-nevihte-recica-savinji"
   ],
   "topoklima-savinjska-dolina-ireica1": [
     "tropske-noci-inverzija-savinjska-dolina",
@@ -122,11 +127,11 @@
   "junijski-rekord-ireica1-vrocinski-val-2026": [
     "max-temperatura-28-junij-2026",
     "tropske-noci-inverzija-savinjska-dolina",
-    "topoklima-savinjska-dolina-ireica1"
+    "med-dvema-vrocinskima-valoma-ireica1"
   ],
   "tropske-noci-inverzija-savinjska-dolina": [
-    "topoklima-savinjska-dolina-ireica1",
     "prva-tropska-noc-recica-julij-2026",
+    "topoklima-savinjska-dolina-ireica1",
     "junijski-rekord-ireica1-vrocinski-val-2026"
   ],
   "junij-2026-dvoglavi-mesec": [

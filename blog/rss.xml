@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 11 Jul 2026 06:30:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 11 Jul 2026 10:00:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vreme na Golteh: sneg, razmere in kdaj je pravi čas za obisk</title>
+      <link>https://meteorec.si/blog/vreme-golte-sneg-razmere.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vreme-golte-sneg-razmere.html</guid>
+      <pubDate>Sat, 11 Jul 2026 10:00:00 +0000</pubDate>
+      <description>Vreme na Golteh se lahko od tistega v dolini razlikuje za cel razred. Kaj preveriti pred odhodom na 1.600 metrov: sneg, veter na grebenu in vidljivost.</description>
+      <category>golte</category>
+      <category>sneg</category>
+      <category>smucisce</category>
+      <category>vreme</category>
+      <category>Savinjska dolina</category>
+    </item>
     <item>
       <title>Ali bo danes grmelo? Nevihtni obeti za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</link>
