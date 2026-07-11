@@ -318,6 +318,29 @@
     </nav>
   </header>
 
+  <!-- ── Donacijski trak (pokrivanje mesečnih stroškov) ── -->
+  <section class="donate-bar" id="donate-bar" aria-label="Podpri Meteorec" hidden>
+    <button class="donate-bar-head" id="donate-bar-toggle" type="button" aria-expanded="false" aria-controls="donate-bar-panel">
+      <span class="db-emoji" aria-hidden="true">☕</span>
+      <span class="db-label">Podpri delovanje postaje</span>
+      <span class="db-track"><span class="db-fill" id="db-fill"></span></span>
+      <span class="db-amount" id="db-amount">…</span>
+      <span class="db-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="donate-bar-panel" id="donate-bar-panel" hidden>
+      <p class="db-desc">Meteorec je brezplačen, brez reklam in teče na lastnem strežniku. Mesečni strošek je <strong>50&nbsp;€</strong> — če ti je stran koristila, lahko pomagaš pokriti stroške. Hvala! 🙏</p>
+      <p class="db-progress-note"><span id="db-month">—</span>: zbranih <strong id="db-collected">0&nbsp;€</strong> od <strong id="db-goal">50&nbsp;€</strong></p>
+      <div class="db-methods">
+        <a class="db-btn db-btn-card" id="db-revolut" href="https://revolut.me/filipgp3" target="_blank" rel="noopener">💳 Kartica · Google&nbsp;Pay</a>
+        <div class="db-flik">
+          <span class="db-flik-logo">Flik</span>
+          <span class="db-flik-num" id="db-flik-num">+386 40 558 234</span>
+          <button class="db-copy" id="db-flik-copy" type="button" title="Kopiraj številko">Kopiraj</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje. Več o <a href="/vreme-recica-ob-savinji/">vremenu in lokalni mikroklimi v Rečici ob Savinji</a>, ali pa preglejte <a href="/vreme/">vremenski arhiv od leta 2019</a> in <a href="/rekord/">vremenske rekorde Savinjske doline</a>.</p>
 
   <div class="status">
@@ -3161,7 +3184,7 @@
           Samodejno se posodablja vsakih 5 minut<br>
           © <span id="ft-year"></span> IREICA1 &nbsp;·&nbsp; <a href="/zasebnost.html" style="color:var(--muted);text-decoration:none;font-size:.72rem">Zasebnost</a>
         </div>
-        <a href="/o-postaji.html#donate" class="ft-donate-link" title="Podpri Meteorec prek Flika">☕ Podpri z Flikom</a>
+        <a href="/o-postaji.html#donate" class="ft-donate-link" title="Podpri Meteorec">☕ Podpri Meteorec</a>
       </div>
     </div>
   </footer>
@@ -3169,6 +3192,62 @@
 
 <script src="app.js" defer></script>
 
+<!-- ── Donacijski trak: naloži stanje iz /donacije.json ── -->
+<script>
+(function(){
+  var bar = document.getElementById('donate-bar');
+  if(!bar) return;
+
+  var toggle = document.getElementById('donate-bar-toggle');
+  var panel  = document.getElementById('donate-bar-panel');
+  toggle.addEventListener('click', function(){
+    var open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    panel.hidden = open;
+  });
+
+  var copyBtn = document.getElementById('db-flik-copy');
+  copyBtn.addEventListener('click', function(){
+    var num = (document.getElementById('db-flik-num').textContent || '').replace(/\s+/g,'');
+    if(!navigator.clipboard) return;
+    navigator.clipboard.writeText(num).then(function(){
+      copyBtn.textContent = 'Kopirano!';
+      setTimeout(function(){ copyBtn.textContent = 'Kopiraj'; }, 2000);
+    });
+  });
+
+  fetch('donacije.json?v=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(d){
+      var cilj   = Number(d.cilj)   > 0 ? Number(d.cilj) : 50;
+      var zbrano = Math.max(0, Number(d.zbrano) || 0);
+      var pct    = Math.max(0, Math.min(100, Math.round(zbrano / cilj * 100)));
+
+      document.getElementById('db-amount').textContent    = zbrano + ' / ' + cilj + ' €';
+      document.getElementById('db-collected').innerHTML   = zbrano + '&nbsp;€';
+      document.getElementById('db-goal').innerHTML        = cilj + '&nbsp;€';
+      if(d.mesec) document.getElementById('db-month').textContent = d.mesec;
+
+      var rev = document.getElementById('db-revolut');
+      if(d.revolut){ rev.href = d.revolut; } else { rev.style.display = 'none'; }
+      if(d.flik){ document.getElementById('db-flik-num').textContent = d.flik; }
+
+      if(pct >= 100){
+        bar.classList.add('db-full');
+        document.getElementById('db-amount').textContent = 'Pokrito! 🎉';
+      }
+
+      bar.hidden = false;
+      // sproži animacijo polnjenja po prikazu
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          document.getElementById('db-fill').style.width = pct + '%';
+        });
+      });
+    })
+    .catch(function(){ /* ob napaki trak ostane skrit; footer povezava je rezerva */ });
+})();
+</script>
 
 <div id="toast"></div>
 <div class="photo-credit" id="photo-credit"></div>

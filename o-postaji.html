@@ -229,7 +229,15 @@
 
     <div class="donate-box" id="donate">
       <div class="donate-title">☕ Podpri Meteorec</div>
-      <p class="donate-desc">Meteorec je zastonjski, brez reklam in teče na lastnem strežniku. Če ti je stran koristila, jo lahko podpreš z nakazilom prek <strong>Flika</strong> — hitro, brez provizij, neposredno.</p>
+      <p class="donate-desc">Meteorec je zastonjski, brez reklam in teče na lastnem strežniku. Mesečni strošek delovanja je <strong>50&nbsp;€</strong>. Če ti je stran koristila, lahko pomagaš pokriti stroške — prek kartice oz. Google Pay, ali z nakazilom prek Flika.</p>
+
+      <div class="donate-progress" id="donate-progress" hidden>
+        <div class="dp-bar"><div class="dp-fill" id="dp-fill"></div></div>
+        <div class="dp-meta"><span id="dp-month">—</span><span id="dp-amount">0 / 50 €</span></div>
+      </div>
+
+      <a class="donate-card-btn" id="donate-revolut" href="https://revolut.me/filipgp3" target="_blank" rel="noopener">💳 Podpri s kartico · Google&nbsp;Pay</a>
+
       <div class="donate-flik">
         <div class="donate-flik-logo">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#00BFAE"/><path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -254,12 +262,33 @@
 </div>
 <script>
 function copyFlik(){
-  navigator.clipboard.writeText('+38640558234').then(function(){
+  var num=(document.getElementById('flik-num').textContent||'').replace(/\s+/g,'');
+  navigator.clipboard.writeText(num).then(function(){
     var lbl=document.getElementById('copy-label');
     lbl.textContent='Kopirano!';
     setTimeout(function(){lbl.textContent='Kopiraj'},2000);
   });
 }
+(function(){
+  fetch('/donacije.json?v=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(d){
+      var cilj   = Number(d.cilj)   > 0 ? Number(d.cilj) : 50;
+      var zbrano = Math.max(0, Number(d.zbrano) || 0);
+      var pct    = Math.max(0, Math.min(100, Math.round(zbrano / cilj * 100)));
+      var box    = document.getElementById('donate-progress');
+      document.getElementById('dp-amount').textContent = zbrano + ' / ' + cilj + ' €';
+      if(d.mesec) document.getElementById('dp-month').textContent = d.mesec;
+      if(d.revolut) document.getElementById('donate-revolut').href = d.revolut;
+      if(d.flik) document.getElementById('flik-num').textContent = d.flik;
+      if(pct >= 100){ box.classList.add('dp-full'); document.getElementById('dp-amount').textContent = 'Pokrito! 🎉 ' + zbrano + ' / ' + cilj + ' €'; }
+      box.hidden = false;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        document.getElementById('dp-fill').style.width = pct + '%';
+      }); });
+    })
+    .catch(function(){ /* progress ostane skrit, gumbi delujejo z vgrajenimi vrednostmi */ });
+})();
 </script>
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
