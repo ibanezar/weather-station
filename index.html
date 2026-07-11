@@ -326,8 +326,14 @@
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()" title="Deli">⬆</button>
     <button class="install-btn" id="install-btn" onclick="installApp()" title="Namesti aplikacijo">📲 Namesti</button>
-    <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Obvestila">🔔</button>
-    <button class="notif-btn" id="threshold-btn" onclick="openThresholdModal()" title="Moja opozorila">⚙</button>
+    <span class="notif-group">
+      <button class="notif-btn labeled" id="notif-btn" onclick="toggleNotifications()" title="Vklopi/izklopi potisna obvestila ob izrazitih vremenskih dogodkih">🔔 Obvestila</button>
+      <button class="notif-btn labeled" id="threshold-btn" onclick="openThresholdModal()" title="Nastavi svoje pragove za opozorila">⚙ Moja opozorila</button>
+      <div class="notif-hint" id="notif-hint" role="status">
+        <button class="notif-hint-close" onclick="dismissNotifHint()" aria-label="Zapri">×</button>
+        Tukaj vklopiš vremenska obvestila 👆
+      </div>
+    </span>
   </div>
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
@@ -3174,7 +3180,7 @@
       <span>🔔 Moja opozorila</span>
       <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
     </div>
-    <p class="tp-hint">Ko vrednost preseže prag, se pojavi opozorilo. Pusti prazno za brez omejitve.</p>
+    <p class="tp-hint">Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
     <div class="tp-body">
       <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
