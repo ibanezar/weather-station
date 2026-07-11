@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   Meteorec blog — sistem všečkov (srčki) na začetku in koncu posta
+   Meteorec blog — sistem všečkov (sončki) na začetku in koncu posta
    • Skupni globalni števec preko Cloudflare Workerja (/like).
    • Stanje "všečkano" se hrani lokalno (localStorage), da posamezna
      naprava všečka samo enkrat; klik znova odvzame všeček.
@@ -21,8 +21,12 @@
   var liked = false;
   try { liked = localStorage.getItem(storeKey) === "1"; } catch (e) {}
 
-  var HEART =
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  var SUN =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/>' +
+    '<line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>' +
+    '<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>' +
+    '<line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>' +
+    '<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 
   var widgets = []; // { root, btn, countEl }
 
@@ -36,7 +40,7 @@
     btn.className = "like-btn";
     btn.setAttribute("aria-pressed", liked ? "true" : "false");
     btn.setAttribute("aria-label", "Všeč mi je ta članek");
-    btn.innerHTML = HEART +
+    btn.innerHTML = SUN +
       '<span class="like-text">Všeč mi je</span>' +
       '<span class="like-count" aria-hidden="true">·</span>';
 
@@ -60,7 +64,7 @@
       }
       w.btn.classList.toggle("is-liked", liked);
       w.btn.setAttribute("aria-pressed", liked ? "true" : "false");
-      w.hint.textContent = liked ? "Hvala! 💙" : "";
+      w.hint.textContent = liked ? "Hvala! ☀️" : "";
     });
   }
 
@@ -71,7 +75,7 @@
     liked = !liked;
     try { localStorage.setItem(storeKey, liked ? "1" : "0"); } catch (e) {}
 
-    // optimistična posodobitev + animacija srčka
+    // optimistična posodobitev + animacija sončka
     if (typeof current === "number") {
       current = Math.max(0, current + (liked ? 1 : -1));
     }

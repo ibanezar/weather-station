@@ -135,7 +135,7 @@ article strong{color:#fff}
 .back-link{display:inline-block;margin-top:2rem;color:var(--cyan);text-decoration:none;font-weight:600}
 .back-link:hover{text-decoration:underline}
 
-/* ── Všečki (srčki) na začetku in koncu posta ── */
+/* ── Všečki (sončki) na začetku in koncu posta ── */
 /* Vrhnji vrstični ovoj: "Všeč mi je" + povprečna ocena, takoj pod meta vrstico */
 .top-engage{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin:1.4rem 0 1.8rem}
 .top-engage .top-rating{margin-top:0;text-decoration:none;padding:.5rem 1rem;
@@ -151,12 +151,12 @@ article strong{color:#fff}
   background:var(--card-bg);border:1px solid var(--card-border);
   box-shadow:var(--card-shadow);
   transition:color .18s,border-color .18s,transform .1s,background .18s}
-.like-btn:hover{color:var(--text);border-color:rgba(244,63,94,.45);transform:translateY(-1px)}
+.like-btn:hover{color:var(--text);border-color:rgba(245,158,11,.45);transform:translateY(-1px)}
 .like-btn:active{transform:translateY(0)}
 .like-btn svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;
-  transition:fill .18s,stroke .18s,transform .18s}
-.like-btn.is-liked{color:#f43f5e;border-color:rgba(244,63,94,.5);background:rgba(244,63,94,.1)}
-.like-btn.is-liked svg{fill:#f43f5e;stroke:#f43f5e}
+  stroke-linecap:round;transition:fill .18s,stroke .18s,transform .18s}
+.like-btn.is-liked{color:var(--amber);border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.1)}
+.like-btn.is-liked svg{fill:var(--amber);stroke:var(--amber)}
 .like-count{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text);
   min-width:1ch;padding-left:.15rem}
 .like-hint{font-size:.82rem;color:var(--muted)}
