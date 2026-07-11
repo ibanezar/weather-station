@@ -3,20 +3,25 @@
 tools/seo_audit.py — SEO health check + sitemap vzdrževanje za meteorec.si
 
 Dva načina delovanja:
-  (privzeto)  samo pregled — poroča o vrzelih v pokritosti sitemapa in
-              o manjkajočih on-page elementih; vrne izhodni status 1, če najde napake.
+  (privzeto)  samo pregled — poroča o vrzelih v pokritosti sitemapa,
+              o manjkajočih on-page elementih ter o predolgih/podvojenih
+              naslovih in opisih; vrne izhodni status 1, če najde napake.
   --fix       aditivno popravi sitemap.xml — doda manjkajoče ključne strani in
               blog objave ter osveži <lastmod> za domačo stran in /blog/.
               Nikoli ne odstrani ali prerazporedi obstoječih vnosov.
 
 Namen: samodejno ujeti napake tipa "stran obstaja, a je ni v nobenem sitemapu"
-(npr. /trendi/), in odpraviti ročno delo pri dodajanju novih blog objav v sitemap.
+(npr. /trendi/), odpraviti ročno delo pri dodajanju novih blog objav v sitemap,
+ter opozoriti, kadar samodejno generirane strani (hub/novosti/mesečni blog)
+dobijo naslov ali opis, ki ga Google v rezultatih obreže, ali podvojen
+naslov/opis kot druga stran na strani.
 
 Zaženi:
   python3 tools/seo_audit.py            # pregled; ne-nič izhod ob napakah
   python3 tools/seo_audit.py --fix      # popravi sitemap.xml na mestu
 """
 import json, os, re, sys, datetime
+from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -65,6 +70,14 @@ ONPAGE_CHECKS = {
     "og:image":         re.compile(r'<meta[^>]+property=["\']og:image["\']', re.I),
     "JSON-LD":          re.compile(r'application/ld\+json', re.I),
 }
+
+# Priporočene dolžine za SERP prikaz (Google praviloma obreže naslov okrog
+# 60 znakov in opis okrog 160 znakov; prekratek opis pomeni izgubljen prostor).
+TITLE_MAX = 65
+DESC_MIN, DESC_MAX = 50, 165
+TITLE_RE = re.compile(r"<title>(.*?)</title>", re.I | re.S)
+DESC_RE = re.compile(r'<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']', re.I | re.S)
+MAX_LISTED = 15  # omeji dolžino poročila; skupno število je vedno navedeno
 
 
 def local_path(page):
@@ -159,6 +172,54 @@ def audit(fix=False):
         for name, pat in ONPAGE_CHECKS.items():
             if not pat.search(html):
                 notes.append(f"ON-PAGE: /{rel} nima elementa '{name}'")
+
+    # 5) Naslovi in opisi — dolžina in podvajanje po celotnem spletnem mestu --
+    titles, descs = defaultdict(list), defaultdict(list)
+    long_titles, bad_descs = [], []
+    for loc in sorted(union):
+        if not loc.startswith(SITE):
+            continue
+        page = loc[len(SITE) + 1:]
+        p = local_path(page)
+        if not os.path.exists(p):
+            continue
+        html = read(p)
+        tm = TITLE_RE.search(html)
+        if tm:
+            title = re.sub(r"\s+", " ", tm.group(1)).strip()
+            titles[title].append(page)
+            if len(title) > TITLE_MAX:
+                long_titles.append((len(title), page))
+        dm = DESC_RE.search(html)
+        if dm:
+            desc = re.sub(r"\s+", " ", dm.group(1)).strip()
+            descs[desc].append(page)
+            if not (DESC_MIN <= len(desc) <= DESC_MAX):
+                bad_descs.append((len(desc), page))
+
+    dup_titles = {t: pages for t, pages in titles.items() if len(pages) > 1}
+    dup_descs = {d: pages for d, pages in descs.items() if len(pages) > 1}
+
+    for length, page in sorted(long_titles, reverse=True)[:MAX_LISTED]:
+        notes.append(f"DOLG NASLOV ({length} zn., meja {TITLE_MAX}): /{page}")
+    if len(long_titles) > MAX_LISTED:
+        notes.append(f"... in še {len(long_titles) - MAX_LISTED} strani s predolgim naslovom")
+
+    for length, page in sorted(bad_descs, reverse=True)[:MAX_LISTED]:
+        why = "predolg" if length > DESC_MAX else "prekratek"
+        notes.append(f"OPIS {why} ({length} zn., priporočeno {DESC_MIN}-{DESC_MAX}): /{page}")
+    if len(bad_descs) > MAX_LISTED:
+        notes.append(f"... in še {len(bad_descs) - MAX_LISTED} strani z neustrezno dolžino opisa")
+
+    for title, pages in list(dup_titles.items())[:MAX_LISTED]:
+        problems.append(f"PODVOJEN NASLOV na {len(pages)} straneh: \"{title}\" — {', '.join('/' + p for p in pages[:4])}")
+    if len(dup_titles) > MAX_LISTED:
+        problems.append(f"... in še {len(dup_titles) - MAX_LISTED} skupin podvojenih naslovov")
+
+    for desc, pages in list(dup_descs.items())[:MAX_LISTED]:
+        problems.append(f"PODVOJEN OPIS na {len(pages)} straneh: \"{desc[:70]}...\" — {', '.join('/' + p for p in pages[:4])}")
+    if len(dup_descs) > MAX_LISTED:
+        problems.append(f"... in še {len(dup_descs) - MAX_LISTED} skupin podvojenih opisov")
 
     # ── FIX -----------------------------------------------------------------
     if fix:
