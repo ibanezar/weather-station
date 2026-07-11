@@ -1089,41 +1089,37 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .ft-donate-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.69rem;color:rgba(0,191,174,.75);text-decoration:none;transition:color .2s}
 .ft-donate-link:hover{color:#00bfae}
 
-/* ── Donacijski trak (pod glavo) ── */
-.donate-bar{margin:.1rem 0 1.15rem;border:1px solid rgba(0,191,174,.28);border-radius:14px;
-  background:linear-gradient(180deg,rgba(0,191,174,.09),rgba(0,191,174,.03));
-  box-shadow:var(--card-shadow);overflow:hidden}
-.donate-bar-head{display:flex;align-items:center;gap:.75rem;width:100%;
-  padding:.6rem 1rem;background:none;border:0;cursor:pointer;text-align:left;color:var(--text);font:inherit}
-.db-emoji{font-size:1.05rem;line-height:1;flex-shrink:0}
-.db-label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.88rem;white-space:nowrap;flex-shrink:0}
-.db-track{position:relative;flex:1;min-width:56px;height:9px;border-radius:6px;background:rgba(0,0,0,.12);overflow:hidden}
-[data-theme="dark"] .db-track{background:rgba(255,255,255,.13)}
-.db-fill{position:absolute;top:0;left:0;bottom:0;width:0;border-radius:6px;
-  background:linear-gradient(90deg,#00bfae,#22d3ee);transition:width 1.1s cubic-bezier(.22,1,.36,1)}
-.donate-bar.db-full .db-fill{background:linear-gradient(90deg,#22c55e,#00bfae)}
-.db-amount{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:#00bfae;white-space:nowrap;flex-shrink:0}
-.db-caret{color:var(--muted);font-size:.72rem;flex-shrink:0;transition:transform .25s}
-.donate-bar-head[aria-expanded="true"] .db-caret{transform:rotate(180deg)}
-.donate-bar-panel{padding:.2rem 1rem 1rem;border-top:1px solid rgba(0,191,174,.16)}
-.db-desc{font-size:.85rem;color:var(--muted);margin:.8rem 0 .4rem;line-height:1.6}
-.db-progress-note{font-size:.8rem;color:var(--muted);margin:0 0 .9rem}
-.db-progress-note strong{color:#00bfae}
-.db-methods{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
-.db-btn{display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;border-radius:10px;
-  padding:.5rem .95rem;font-size:.85rem;font-weight:600;white-space:nowrap}
-.db-btn-card{background:#00bfae;color:#04211f;border:1px solid #00bfae;transition:filter .2s,transform .15s}
-.db-btn-card:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.db-flik{display:flex;align-items:center;gap:.55rem;background:rgba(0,191,174,.08);
-  border:1px solid rgba(0,191,174,.3);border-radius:10px;padding:.4rem .5rem .4rem .8rem;flex-wrap:wrap}
-.db-flik-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.82rem;color:#00bfae}
-.db-flik-num{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--text);letter-spacing:.03em}
-.db-copy{background:rgba(0,191,174,.15);border:1px solid rgba(0,191,174,.35);border-radius:7px;
-  padding:.28rem .62rem;color:#00bfae;font-size:.74rem;cursor:pointer;transition:background .2s,border-color .2s;white-space:nowrap}
-.db-copy:hover{background:rgba(0,191,174,.28);border-color:rgba(0,191,174,.6)}
-@media(max-width:560px){
-  .db-label{display:none}
-  .donate-bar-head{gap:.6rem}
+/* ── Donacijski trak (fiksno na vrhu, nad ARSO opozorili) ── */
+.donate-ribbon{position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+  padding:.5rem 1rem;color:#04211f;
+  background:linear-gradient(180deg,#00cbb8,#0aa294);
+  box-shadow:0 3px 16px rgba(0,0,0,.24);
+  transform:translateY(-100%);transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.donate-ribbon.dr-show{transform:translateY(0)}
+.dr-emoji{font-size:1.05rem;line-height:1;flex-shrink:0}
+.dr-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;flex-shrink:0}
+.dr-track{position:relative;flex:1 1 90px;min-width:70px;max-width:300px;height:8px;border-radius:5px;
+  background:rgba(4,33,31,.22);overflow:hidden}
+.dr-fill{position:absolute;top:0;left:0;bottom:0;width:0;border-radius:5px;
+  background:#04211f;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.donate-ribbon.dr-full .dr-fill{background:#065f46}
+.dr-amount{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;white-space:nowrap;flex-shrink:0}
+.dr-btn{display:inline-flex;align-items:center;gap:.3rem;border-radius:8px;padding:.34rem .72rem;
+  font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:700;text-decoration:none;
+  cursor:pointer;white-space:nowrap;border:1px solid transparent;transition:background .2s,transform .15s}
+.dr-card{background:#04211f;color:#5eead4}
+.dr-card:hover{background:#0a322d;transform:translateY(-1px)}
+.dr-flik{background:rgba(4,33,31,.1);color:#04211f;border-color:rgba(4,33,31,.28)}
+.dr-flik:hover{background:rgba(4,33,31,.2)}
+.dr-flik span{font-family:'JetBrains Mono',monospace;font-weight:600}
+.dr-close{margin-left:auto;background:none;border:0;color:#04211f;font-size:1.25rem;line-height:1;
+  cursor:pointer;padding:.05rem .35rem;opacity:.65;transition:opacity .2s;flex-shrink:0}
+.dr-close:hover{opacity:1}
+@media(max-width:640px){
+  .dr-text{display:none}
+  .dr-track{flex:1 1 60px;max-width:none}
+  .dr-btn{padding:.32rem .6rem;font-size:.74rem}
 }
 
 /* News ticker */

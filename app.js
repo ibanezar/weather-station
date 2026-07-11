@@ -1069,7 +1069,12 @@ function renderStormAutopsy(){
 function _syncAlertBarHeight(){
   const wrap=document.querySelector('.wrap');
   if(!wrap)return;
-  const h=document.getElementById('alerts-wrap')?.offsetHeight||0;
+  const ribbon=document.getElementById('donate-ribbon');
+  const rh=(ribbon && !ribbon.hidden)?ribbon.offsetHeight:0;
+  const aw=document.getElementById('alerts-wrap');
+  if(aw) aw.style.top=rh?rh+'px':'';           // ARSO opozorila zamakni pod donacijski trak
+  const ah=aw?.offsetHeight||0;
+  const h=rh+ah;
   wrap.style.paddingTop=h?h+'px':'';
 }
 function dismissAlert(btn){
