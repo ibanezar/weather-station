@@ -123,6 +123,29 @@
     } else {
       summaryEl.style.display = "none";
     }
+    renderTopRating(rating);
+  }
+
+  // Kompaktna značka s povprečno oceno na vrhu članka, zraven "Všeč mi je"
+  // (isti vzorec kot .post-rating na seznamu bloga).
+  var topRatingEl = null;
+  function renderTopRating(rating) {
+    if (!rating || !rating.count) {
+      if (topRatingEl) { topRatingEl.remove(); topRatingEl = null; }
+      return;
+    }
+    if (!topRatingEl) {
+      var wrap = document.getElementById("top-engage");
+      if (!wrap) return;
+      topRatingEl = document.createElement("a");
+      topRatingEl.className = "post-rating top-rating";
+      topRatingEl.href = "#komentarji";
+      wrap.appendChild(topRatingEl);
+    }
+    topRatingEl.innerHTML =
+      '<span class="pr-avg">' + rating.avg.toFixed(1) + '</span>' +
+      '<span class="pr-stars">' + stars(Math.round(rating.avg)) + '</span>' +
+      '<span class="pr-count">' + rating.count + ' ' + plural(rating.count, "ocena", "oceni", "ocene", "ocen") + '</span>';
   }
 
   // Strukturirani podatki (schema.org aggregateRating) — vidni tudi
