@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 10 Jul 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 11 Jul 2026 06:30:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Ali bo danes grmelo? Nevihtni obeti za Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</guid>
+      <pubDate>Sat, 11 Jul 2026 06:30:00 +0000</pubDate>
+      <description>Danes je ozračje nad dolino nabito z vlago: rosišče 18,7 °C, padajoči tlak, CAPE do 1.800 J/kg opoldne. Postaja IREICA1, ARSO in modeli kažejo na popoldanske plohe in nevihte med 16. in 19. uro.</description>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>nevihta</category>
+      <category>CAPE</category>
+      <category>nestabilnost</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Suša kljub dežju: hidrologija Zgornje Savinjske doline</title>
       <link>https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html</link>

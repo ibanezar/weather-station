@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'nevihtni-obeti-11-julij-2026',
+        'title': 'Ali bo\ndanes grmelo?',
+        'subtitle': 'Nevihtni obeti · 11. julij 2026 · IREICA1',
+        'section': 'Napoved',
+        'accent': (139, 92, 246),
+        'photo': 'storm-clouds',
+    },
+    {
         'slug': 'susa-savinjska-dolina-hidrologija',
         'title': 'Suša kljub\ndežju',
         'subtitle': 'Hidrologija Zgornje Savinjske doline',
