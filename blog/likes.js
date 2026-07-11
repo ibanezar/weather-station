@@ -96,12 +96,17 @@
   }
 
   // ── vrivanje widgetov ──────────────────────────────────────
-  // Zgoraj: takoj za uvodnim odstavkom (.lead) ali za .post-meta.
-  var topAnchor = article.querySelector(".lead") || article.querySelector(".post-meta");
+  // Zgoraj: takoj za .post-meta (nad uvodnim odstavkom), v skupnem
+  // vrstičnem ovoju, kamor comments.js dopiše še povprečno oceno.
+  var topAnchor = article.querySelector(".post-meta") || article.querySelector(".lead");
+  var topWrap = document.createElement("div");
+  topWrap.className = "top-engage";
+  topWrap.id = "top-engage";
+  topWrap.appendChild(makeWidget("top"));
   if (topAnchor && topAnchor.parentNode) {
-    topAnchor.parentNode.insertBefore(makeWidget("top"), topAnchor.nextSibling);
+    topAnchor.parentNode.insertBefore(topWrap, topAnchor.nextSibling);
   } else {
-    article.insertBefore(makeWidget("top"), article.firstChild);
+    article.insertBefore(topWrap, article.firstChild);
   }
 
   // Spodaj: tik pred povezavo "Nazaj na blog", sicer na konec članka.

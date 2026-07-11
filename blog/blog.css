@@ -136,8 +136,14 @@ article strong{color:#fff}
 .back-link:hover{text-decoration:underline}
 
 /* ── Všečki (srčki) na začetku in koncu posta ── */
+/* Vrhnji vrstični ovoj: "Všeč mi je" + povprečna ocena, takoj pod meta vrstico */
+.top-engage{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin:1.4rem 0 1.8rem}
+.top-engage .top-rating{margin-top:0;text-decoration:none;padding:.5rem 1rem;
+  border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);transition:border-color .18s,color .18s}
+.top-engage .top-rating:hover{color:var(--text);border-color:rgba(245,158,11,.45)}
 .like-box{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
-.like-box[data-place="top"]{margin:1.4rem 0 1.8rem}
+.like-box[data-place="top"]{margin:0}
 .like-box[data-place="bottom"]{margin:2.2rem 0 1rem}
 .like-btn{display:inline-flex;align-items:center;gap:.5rem;
   padding:.5rem 1rem;border-radius:999px;cursor:pointer;line-height:1;
