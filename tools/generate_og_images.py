@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'vreme-golte-sneg-razmere',
+        'title': 'Vreme na\nGolteh',
+        'subtitle': 'Sneg, razmere in kdaj na obisk',
+        'section': 'Vodnik',
+        'accent': (96, 165, 250),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'nevihtni-obeti-11-julij-2026',
         'title': 'Ali bo\ndanes grmelo?',
         'subtitle': 'Nevihtni obeti · 11. julij 2026 · IREICA1',
