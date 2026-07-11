@@ -4533,14 +4533,26 @@ function _urlB64ToU8(b64){
   for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
   return out;
 }
+function _withTimeout(promise,ms){
+  return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+}
 async function toggleNotifications(){
   dismissNotifHint();
   const btn=document.getElementById('notif-btn');
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){
-    alert('Tvoj brskalnik ne podpira potisnih obvestil.');return;
+    alert('Tvoj brskalnik ne podpira potisnih obvestil. Na iPhonu/iPadu najprej namesti aplikacijo (Deli → Na začetni zaslon), nato poskusi znova.');return;
   }
-  let reg; try{reg=await navigator.serviceWorker.ready;}catch(_){return;}
-  const existing=await reg.pushManager.getSubscription();
+  // Že prej blokirano v brskalniku — requestPermission spodaj ne bo niti vprašal
+  if(Notification.permission==='denied'){
+    alert('Obvestila so blokirana v nastavitvah brskalnika za to stran. Odblokiraj jih v nastavitvah spletnega mesta (ikona ključavnice/i poleg naslova) in poskusi znova.');
+    return;
+  }
+  let reg;
+  try{reg=await _withTimeout(navigator.serviceWorker.ready,8000);}
+  catch(_){alert('Obvestil ni bilo mogoče vklopiti — stran se še ni v celoti pripravila. Osveži stran in poskusi znova.');return;}
+  let existing;
+  try{existing=await reg.pushManager.getSubscription();}
+  catch(e){alert('Obvestil ni bilo mogoče vklopiti. Poskusi znova.');return;}
 
   // Izklop: če je naročnina aktivna → odjava
   if(existing&&localStorage.getItem('wx-notif')==='on'){
@@ -4552,8 +4564,12 @@ async function toggleNotifications(){
   }
 
   // Vklop
-  const perm=await Notification.requestPermission();
-  if(perm!=='granted'){return;}
+  let perm;
+  try{perm=await Notification.requestPermission();}catch(_){perm='denied';}
+  if(perm!=='granted'){
+    alert('Obvestila niso bila vklopljena — dovoljenje ni bilo odobreno.');
+    return;
+  }
   try{
     const sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_urlB64ToU8(VAPID_PUBLIC)});
     const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
