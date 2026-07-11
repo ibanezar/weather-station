@@ -497,9 +497,54 @@ async function _cronCheckThresholds(env) {
   if (changed) await r2.put("push/state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ── Napovedni alarm — dež/nevihta v naslednjih ~10–45 min (Open-Meteo minutely_15) ──
+// Ločeno od PUSH_THRESHOLDS: tisti opozarjajo na trenutne razmere, ta pa na napoved.
+const NOWCAST_COOLDOWN_MS = 90 * 60 * 1000; // isti prihajajoči dogodek naznani le enkrat
+async function _cronCheckPrecipNowcast(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let data;
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211"
+      + "&minutely_15=precipitation,weather_code&forecast_minutely_15=8&timezone=UTC";
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 8000);
+    data = await (await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid))).json();
+  } catch (_) { return; }
+  const m = data?.minutely_15; if (!m?.time?.length) return;
+
+  const now = Date.now();
+  const slots = m.time.map((t, i) => ({
+    minAway: Math.round((new Date(t).getTime() - now) / 60000),
+    precip: m.precipitation?.[i] || 0,
+    wmo: m.weather_code?.[i] ?? 0,
+  }));
+  const nowSlot = slots.find(s => s.minAway >= -7 && s.minAway <= 7);
+  const isWetNow = (nowSlot?.precip || 0) >= 0.1;
+  const upcoming = slots.filter(s => s.minAway > 7 && s.minAway <= 45);
+  const firstWet = upcoming.find(s => s.precip >= 0.1);
+  const firstStorm = upcoming.find(s => [95, 96, 99].includes(s.wmo));
+
+  let state = {}; try { const o = await r2.get("push/nowcast_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  let changed = false;
+  const maybeFire = async (key, hit, msgFn) => {
+    const st = state[key] || { over: false, lastSent: 0 };
+    const over = !!hit;
+    if (over && !st.over && (now - (st.lastSent || 0) > NOWCAST_COOLDOWN_MS)) {
+      await _pushAll(env, { title: "Meteorec — napoved", body: msgFn(hit), url: "/", tag: "wx-" + key });
+      st.lastSent = now;
+    }
+    st.over = over;
+    state[key] = st;
+    changed = true;
+  };
+  await maybeFire("rain_soon", !isWetNow && firstWet, s => "🌧️ Dež pričakovan čez ~" + s.minAway + " min v Rečici ob Savinji.");
+  await maybeFire("storm_soon", firstStorm, s => "⛈️ Nevihta pričakovana čez ~" + s.minAway + " min v Rečici ob Savinji.");
+  if (changed) await r2.put("push/nowcast_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+}
+
 export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(_cronCheckThresholds(env));
+    ctx.waitUntil(_cronCheckPrecipNowcast(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {

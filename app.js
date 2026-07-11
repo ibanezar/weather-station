@@ -1230,6 +1230,7 @@ function loadThresholds(){
 }
 
 function openThresholdModal(){
+  dismissNotifHint();
   loadThresholds();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??'';};
   sv('thr-temp-min',_thr.tempMin);sv('thr-temp-max',_thr.tempMax);
@@ -4533,6 +4534,7 @@ function _urlB64ToU8(b64){
   return out;
 }
 async function toggleNotifications(){
+  dismissNotifHint();
   const btn=document.getElementById('notif-btn');
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){
     alert('Tvoj brskalnik ne podpira potisnih obvestil.');return;
@@ -4558,7 +4560,7 @@ async function toggleNotifications(){
     if(!r.ok)throw new Error('subscribe failed');
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
-    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih: močni sunki, nalivi, nevihte, zmrzal.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
+    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih (močni sunki, nalivi, zmrzal) in vnaprej, ko se dež ali nevihta pričakuje v naslednjih ~45 minutah.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
   }catch(e){
     localStorage.setItem('wx-notif','off');
     btn?.classList.remove('on');
@@ -4569,6 +4571,24 @@ function initNotifBtn(){
   const btn=document.getElementById('notif-btn');
   if(btn&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on')btn.classList.add('on');
   if(!('Notification' in window)&&btn)btn.style.display='none';
+}
+// ── Prvi obisk: opozori na gumbe za obvestila, da jih uporabnik takoj opazi ──
+const NOTIF_HINT_KEY='wx-notif-hint-seen';
+function dismissNotifHint(){
+  const hint=document.getElementById('notif-hint');
+  if(hint)hint.classList.remove('show');
+  try{localStorage.setItem(NOTIF_HINT_KEY,'1');}catch(_){}
+}
+function initNotifHint(){
+  if(!('Notification' in window))return;
+  let seen=false; try{seen=!!localStorage.getItem(NOTIF_HINT_KEY);}catch(_){}
+  // Ne kaži več, če je uporabnik obvestila že vklopil/izklopil ali jih brskalnik blokira
+  if(seen||Notification.permission!=='default')return;
+  setTimeout(()=>{
+    const hint=document.getElementById('notif-hint');
+    if(hint)hint.classList.add('show');
+    setTimeout(dismissNotifHint,9000);
+  },1800);
 }
 function maybePushAlert(title,body){
   if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
@@ -13729,6 +13749,7 @@ async function init(){
   try{initBgCanvas();}catch(_){}
   try{applyWeatherBg('night');}catch(_){}
   try{initNotifBtn();}catch(_){}
+  try{initNotifHint();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
   try{autoLoadHistoryFile();}catch(_){}
