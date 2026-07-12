@@ -221,7 +221,47 @@ STROGA PRAVILA:
 Naj bo 3-5 odsekov v sections."""
 
 
-def call_claude(topic, current, hourly, forecast, stat_cards):
+def stream_claude(payload, api_key, timeout=180):
+    """Kliče Claude API s stream=True. Rešuje problem, ko GitHub Actions
+    (ali kak vmesni proxy) prekine navidez 'tiho' povezavo pri dolgih
+    ne-streaming klicih -- pri streamingu prvi žetoni pridejo v nekaj
+    sekundah, zato povezava nikoli ni tiha dovolj dolgo, da bi jo kdo prekinil.
+    Timeout velja per-branje (idle timeout), ne za skupno trajanje klica."""
+    payload = dict(payload, stream=True)
+    body = json.dumps(payload).encode()
+    req = urllib.request.Request(
+        "https://api.anthropic.com/v1/messages",
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+        },
+        method="POST",
+    )
+    text_parts = []
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        for raw_line in r:
+            line = raw_line.decode("utf-8", "replace").strip()
+            if not line.startswith("data:"):
+                continue
+            chunk = line[len("data:"):].strip()
+            if not chunk:
+                continue
+            try:
+                evt = json.loads(chunk)
+            except json.JSONDecodeError:
+                continue
+            if evt.get("type") == "content_block_delta":
+                delta = evt.get("delta", {})
+                if delta.get("type") == "text_delta":
+                    text_parts.append(delta.get("text", ""))
+            elif evt.get("type") == "error":
+                raise RuntimeError(f"Claude stream napaka: {evt.get('error')}")
+    return "".join(text_parts)
+
+
+
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ANTHROPIC_API_KEY manjka.")
@@ -236,32 +276,21 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
     user_prompt = "Podatki za današnji članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)
     user_prompt += "\n\nNapiši današnji članek za meteorec.si po sistemskih navodilih."
 
-    body = json.dumps({
+    payload = {
         "model": ANTHROPIC_MODEL,
         "max_tokens": 4000,
         "system": SYSTEM_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
-    }).encode()
-
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        method="POST",
-    )
+    }
     try:
-        with urllib.request.urlopen(req, timeout=180) as r:
-            data = json.load(r)
+        text = stream_claude(payload, api_key)
     except urllib.error.HTTPError as e:
         sys.exit(f"Claude API napaka {e.code}: {e.read().decode('utf-8','replace')[:500]}")
     except (TimeoutError, urllib.error.URLError) as e:
         sys.exit(f"Claude API klic ni uspel (timeout/omrežje): {e}")
+    except RuntimeError as e:
+        sys.exit(str(e))
 
-    text = next((b["text"] for b in data.get("content", []) if b.get("type") == "text"), None)
     if not text:
         sys.exit("Claude ni vrnil besedila.")
     cleaned = re.sub(r"^```json|```$", "", text.strip(), flags=re.M).strip()
@@ -313,33 +342,24 @@ def call_lektor(article, context):
         "Surovi podatki, uporabljeni za članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)
         + "\n\nOsnutek članka za lekturo:\n" + json.dumps(article, ensure_ascii=False, indent=2)
     )
-    body = json.dumps({
+    payload = {
         "model": ANTHROPIC_MODEL,
         "max_tokens": 4000,
         "system": LEKTOR_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
-    }).encode()
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        method="POST",
-    )
+    }
     try:
-        with urllib.request.urlopen(req, timeout=180) as r:
-            data = json.load(r)
+        text = stream_claude(payload, api_key)
     except urllib.error.HTTPError as e:
         print(f"⚠ Lektor API napaka {e.code}, nadaljujem brez lekture: {e.read().decode('utf-8','replace')[:300]}")
         return {"ok": True, "issues": ["lektura preskočena -- API napaka"], "blocking": False, "corrected": article}
     except (TimeoutError, urllib.error.URLError) as e:
         print(f"⚠ Lektor API timeout/omrežje, nadaljujem brez lekture: {e}")
         return {"ok": True, "issues": ["lektura preskočena -- timeout"], "blocking": False, "corrected": article}
+    except RuntimeError as e:
+        print(f"⚠ Lektor API stream napaka, nadaljujem brez lekture: {e}")
+        return {"ok": True, "issues": ["lektura preskočena -- stream napaka"], "blocking": False, "corrected": article}
 
-    text = next((b["text"] for b in data.get("content", []) if b.get("type") == "text"), None)
     if not text:
         return {"ok": True, "issues": ["lektura preskočena -- prazen odgovor"], "blocking": False, "corrected": article}
     cleaned = re.sub(r"^```json|```$", "", text.strip(), flags=re.M).strip()
