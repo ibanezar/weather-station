@@ -46,22 +46,70 @@ PHOTO_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 # rotacija ne ponavlja prehitro.
 IDEAS = [
     {"id": "gobarska-sezona", "sezona": [6, 7, 8, 9, 10], "tag": "gobe",
-     "brief": "Gobarska sezona -- kaj kažejo trenutna vlažnost tal, temperature in padavine za rast gob v dolini."},
+     "brief": "Gobarska sezona -- kaj kažejo trenutna vlažnost tal, temperature in padavine za rast gob v dolini.",
+     "seo_keywords": ["gobarska napoved Zgornja Savinjska dolina", "kdaj rastejo gobe", "gobarjenje Rečica ob Savinji"]},
     {"id": "vodna-bilanca", "sezona": list(range(1, 13)), "tag": "vodna-bilanca",
-     "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok)."},
+     "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok).",
+     "seo_keywords": ["vodna bilanca tal", "evapotranspiracija Savinjska dolina", "koliko dežja koristi rastlinam"]},
     {"id": "primerjava-krajev", "sezona": list(range(1, 13)), "tag": "primerjava",
-     "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami."},
+     "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami.",
+     "seo_keywords": ["vreme Zgornja Savinjska dolina", "primerjava vremena Rečica ob Savinji", "mikroklima Savinjska dolina"]},
     {"id": "nevihtni-obeti", "sezona": [4, 5, 6, 7, 8, 9], "tag": "nevihta",
-     "brief": "Nevihtni obeti za danes/jutri na podlagi CAPE, striženja vetra in vlage."},
+     "brief": "Nevihtni obeti za danes/jutri na podlagi CAPE, striženja vetra in vlage.",
+     "seo_keywords": ["nevihtna napoved Savinjska dolina", "bo danes grmelo Rečica ob Savinji", "CAPE nestabilnost vreme"]},
     {"id": "susa-vlaga-tal", "sezona": list(range(1, 13)), "tag": "susa",
-     "brief": "Trenutno stanje suše/vlage tal glede na zadnje padavine in evapotranspiracijo."},
+     "brief": "Trenutno stanje suše/vlage tal glede na zadnje padavine in evapotranspiracijo.",
+     "seo_keywords": ["suša Zgornja Savinjska dolina", "vlaga tal Rečica ob Savinji", "koliko časa brez dežja"]},
     {"id": "temperaturni-trend", "sezona": list(range(1, 13)), "tag": "trend",
-     "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem."},
+     "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
+     "seo_keywords": ["temperaturni trend Savinjska dolina", "vreme Rečica ob Savinji", "postaja IREICA1"]},
     {"id": "veter-in-tlak", "sezona": list(range(1, 13)), "tag": "pritisk",
-     "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni."},
+     "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
+     "seo_keywords": ["zračni tlak napoved vreme", "veter Zgornja Savinjska dolina", "sprememba vremena znaki"]},
+]
+
+# Statične hub/spoke strani (glej meteorec.si) -- kandidati za interno linkanje
+# glede na temo. Vsak vnos: (ujemajoči tag/i teme, url, anchor besedilo).
+SPOKE_PAGES = [
+    (("gobe",), "/gobarska-napoved/", "gobarsko napoved"),
+    (("susa", "vodna-bilanca"), "/agrometeo/", "agrometeo stran"),
+    (("nevihta",), "/nevihte/", "nevihtno napoved"),
+    (("padavine", "poplave"), "/vodostaj-savinje/", "vodostaj Savinje"),
+    (("zrak", "ozon"), "/kakovost-zraka/", "kakovost zraka"),
+    (("padalci", "veter"), "/vreme-za-padalce/", "vreme za padalce"),
+    (("trend",), "/trendi/", "dolgoročne trende"),
+    (("rekord",), "/rekord/", "vremenske rekorde postaje"),
 ]
 
 HEAT_C, COLD_C, RAIN_MM, WIND_KMH = 30, -5, 20, 50
+
+
+def find_related_links(topic, max_posts=4):
+    """Kandidati za interno linkanje: pretekli članki z ujemajočimi tagi
+    (blog.json) + statične hub/spoke strani. Claude dobi SAMO te URL-je in
+    jih ne sme izmišljavati -- prepreči pokvarjene/neobstoječe povezave."""
+    tag = topic.get("tag", "")
+    links = []
+
+    try:
+        posts = json.load(open(os.path.join(ROOT, "blog.json"), encoding="utf-8"))
+    except Exception:
+        posts = []
+    scored = []
+    for p in posts:
+        p_tags = {str(t).lower() for t in p.get("tags", [])}
+        score = sum(1 for t in p_tags if tag.lower() in t or t in tag.lower())
+        if score > 0:
+            scored.append((score, p))
+    scored.sort(key=lambda x: (-x[0], x[1].get("date", "")), reverse=False)
+    for score, p in scored[:max_posts]:
+        links.append({"title": p["title"], "url": p["url"]})
+
+    for tags_match, url, anchor in SPOKE_PAGES:
+        if any(t in tag.lower() or tag.lower() in t for t in tags_match):
+            links.append({"title": anchor, "url": url})
+
+    return links[:6]
 
 
 def num(x, d=1):
@@ -206,7 +254,22 @@ STROGA PRAVILA:
 - Naravni uredniški slovenski ton, ne pretirano formalen, tak kot ga uporabljajo obstoječi
   članki (kratke, jasne povedi, občasno "mi"/nagovor bralca, brez klišejev).
 - 700-900 besed skupaj v paragraphs poljih.
-- Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej shemi:
+
+SEO / KLJUČNE BESEDE:
+- Dobiš seznam "seo_keywords" (ciljne fraze za to temo). Vpleti glavno frazo naravno v naslov,
+  v prvi odstavek (lead) in v vsaj en H2 naslov -- brez keyword-stuffinga, mora zveneti naravno.
+  Če fraza ne zveni naravno na danem mestu, jo preoblikuj ali izpusti raje kot da jo na silo vtakneš.
+- Uporabi tudi 1-2 sorodni dolgi rep (long-tail) fraze skozi telo besedila, kjer se organsko prilegajo.
+
+INTERNO LINKANJE:
+- Dobiš seznam "interni_linki" (naslov + URL obstoječih strani na meteorec.si). Vpleti 2-4 od njih
+  kot naravne inline povezave znotraj odstavkov (NE kot seznam na koncu), v obliki:
+  <a href="URL" style="color:var(--blue)">smiselno sidrno besedilo</a>
+- Uporabi SAMO URL-je iz podanega seznama "interni_linki" -- nikoli si ne izmišljuj lastnih URL-jev
+  ali povezav na strani, ki jih nisi dobil. Če seznam nima primernih povezav za neko poved, je
+  brez povezave popolnoma v redu -- ne silimo povezav tja, kjer ne sodijo vsebinsko.
+
+Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej shemi:
 {
   "title": "...",
   "meta_description": "150-160 znakov",
@@ -218,7 +281,7 @@ STROGA PRAVILA:
   "lead": "uvodni odstavek (2-4 povedi), lahko <strong>poudarki</strong>",
   "sections": [
     {"label": "01 — kratek naslov odseka", "heading": "H2 naslov", "id": "kebab-case-id",
-     "paragraphs": ["odstavek 1", "odstavek 2"]}
+     "paragraphs": ["odstavek 1 (lahko vsebuje <a href='...'>...</a> iz interni_linki)", "odstavek 2"]}
   ],
   "callout": {"label": "...", "text": "..."} ali null,
   "sources_note": "en stavek, viri ki so bili DEJANSKO uporabljeni (postaja IREICA1, ARSO, Open-Meteo ...)"
@@ -281,6 +344,8 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
 
     context = {
         "tema": topic["brief"],
+        "seo_keywords": topic.get("seo_keywords", []),
+        "interni_linki": find_related_links(topic),
         "trenutne_razmere": current,
         "napoved_4dni": (forecast or {}).get("daily"),
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
