@@ -421,7 +421,88 @@ def slugify(title):
     return t[:60].rstrip("-")
 
 
-def build_html(article, stat_cards, slug, now_utc):
+EXTRA_STYLE = """
+.section-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--cyan);opacity:.75}
+.stat-card.c-cool .sc-val{color:#22d3ee}
+.stat-card.c-green .sc-val{color:#34d399}
+.stat-card.c-dry .sc-val{color:#f59e0b}
+.stat-card.c-rain .sc-val{color:#60a5fa}
+"""
+
+
+def build_forecast_chart(forecast):
+    """Zgradi chart-card + Chart.js kodo iz DEJANSKIH napovednih podatkov
+    (Open-Meteo daily), ne iz LLM-ja -- isti CHART_DEFAULTS vzorec in
+    temna paleta kot obstoječi članki (glej npr. junijski-rekord-*.html)."""
+    d = (forecast or {}).get("daily")
+    if not d or not d.get("time"):
+        return "", ""
+
+    labels = d["time"]
+    tmax = d.get("temperature_2m_max", [])
+    tmin = d.get("temperature_2m_min", [])
+    rain = d.get("precipitation_sum", [])
+    if not tmax or not tmin:
+        return "", ""
+
+    day_labels_js = json.dumps([f"{x[8:10]}.{x[5:7]}." for x in labels], ensure_ascii=False)
+    tmax_js = json.dumps(tmax)
+    tmin_js = json.dumps(tmin)
+    rain_js = json.dumps(rain)
+
+    card = (
+        '\n    <div class="chart-card">\n'
+        '      <h3>IREICA1 · napoved naslednjih dni (Open-Meteo)</h3>\n'
+        '      <canvas id="chartForecast"></canvas>\n'
+        '      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">'
+        'Najvišje/najnižje dnevne temperature in pričakovane padavine za Rečico ob Savinji.</p>\n'
+        '    </div>\n'
+    )
+
+    js = f'''
+  const CHART_DEFAULTS = {{
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: {{ mode: 'index', intersect: false }},
+    animation: {{ duration: 700, easing: 'easeOutQuart' }},
+    plugins: {{
+      legend: {{ display: true, position: 'top',
+        labels: {{ color: '#adc0d8', font: {{ size: 11, family: 'JetBrains Mono' }}, boxWidth: 10, padding: 14 }} }},
+      tooltip: {{ backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+        titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10 }}
+    }}
+  }};
+  new Chart(document.getElementById('chartForecast'), {{
+    data: {{
+      labels: {day_labels_js},
+      datasets: [
+        {{ type: 'bar', label: 'Padavine (mm)', data: {rain_js}, backgroundColor: 'rgba(96,165,250,.55)',
+           borderRadius: 5, yAxisID: 'y1', order: 3 }},
+        {{ type: 'line', label: 'Tmax (°C)', data: {tmax_js}, borderColor: '#f97316',
+           backgroundColor: 'rgba(249,115,22,.12)', borderWidth: 2, pointRadius: 3,
+           pointBackgroundColor: '#f97316', fill: true, tension: .35, order: 1 }},
+        {{ type: 'line', label: 'Tmin (°C)', data: {tmin_js}, borderColor: '#22d3ee',
+           backgroundColor: 'rgba(34,211,238,.08)', borderWidth: 2, pointRadius: 3,
+           pointBackgroundColor: '#22d3ee', fill: true, tension: .35, order: 2 }}
+      ]
+    }},
+    options: {{
+      ...CHART_DEFAULTS,
+      scales: {{
+        x: {{ grid: {{ color: 'rgba(255,255,255,.04)' }}, ticks: {{ color: '#adc0d8', font: {{ size: 10 }} }} }},
+        y: {{ position: 'left', grid: {{ color: 'rgba(255,255,255,.05)' }},
+             ticks: {{ color: '#f97316', font: {{ size: 10 }}, callback: v => v + ' °C' }} }},
+        y1: {{ position: 'right', min: 0, grid: {{ display: false }},
+              ticks: {{ color: '#60a5fa', font: {{ size: 10 }}, callback: v => v + ' mm' }} }}
+      }}
+    }}
+  }});
+'''
+    return card, js
+
+
+def build_html(article, stat_cards, slug, now_utc, forecast=None):
     date_str = fmtdate(TODAY)
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
@@ -434,6 +515,14 @@ def build_html(article, stat_cards, slug, now_utc):
         f'        <div class="sc-sub">{sub}</div>\n'
         f'      </div>' for cls, label, val, sub in stat_cards
     )
+
+    chart_card_html, chart_js = build_forecast_chart(forecast)
+    chart_scripts_html = ""
+    if chart_js:
+        chart_scripts_html = (
+            '<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>\n'
+            f'<script>\n{chart_js}\n</script>'
+        )
 
     sec_parts = []
     for s in article["sections"]:
@@ -522,6 +611,7 @@ def build_html(article, stat_cards, slug, now_utc):
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
 <link rel="stylesheet" href="blog.css">
+<style>{EXTRA_STYLE}</style>
 </head>
 <body>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
@@ -549,7 +639,7 @@ def build_html(article, stat_cards, slug, now_utc):
     <div class="stat-grid">
 {cards_html}
     </div>
-
+{chart_card_html}
 {sections_html}
 {callout_html}
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">{article["sources_note"]}</p>
@@ -599,6 +689,7 @@ def build_html(article, stat_cards, slug, now_utc):
 <script src="/blog/comments.js" defer></script>
 <script src="/blog/article-enhance.js" defer></script>
 <script src="/blog/subscribe.js" defer></script>
+{chart_scripts_html}
 </body>
 </html>
 '''
@@ -664,7 +755,7 @@ def main():
         return
 
     print("5/6 Sestavljam HTML...")
-    html, entry, og_meta = build_html(article, stat_cards, slug, now)
+    html, entry, og_meta = build_html(article, stat_cards, slug, now, forecast)
 
     out = os.path.join(ROOT, "blog", f"{slug}.html")
     open(out, "w", encoding="utf-8").write(html)
