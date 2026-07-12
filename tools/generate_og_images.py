@@ -27,6 +27,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'dve-nevihte-hladno-jutro',
+        'title': 'Dve nevihti,\nnato hladno jutro',
+        'subtitle': 'Fronta ohladila Zgornjo Savinjsko dolino · IREICA1',
+        'section': 'Napoved',
+        'accent': (34, 211, 238),
+        'photo': 'dusk-storm',
+    },
+    {
         'slug': 'vreme-golte-sneg-razmere',
         'title': 'Vreme na\nGolteh',
         'subtitle': 'Sneg, razmere in kdaj na obisk',

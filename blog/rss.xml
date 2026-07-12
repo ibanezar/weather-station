@@ -5,8 +5,22 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 11 Jul 2026 06:30:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 Jul 2026 07:30:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Dve nevihti, nato hladno jutro: fronta ohladila Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/dve-nevihte-hladno-jutro.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/dve-nevihte-hladno-jutro.html</guid>
+      <pubDate>Sun, 12 Jul 2026 07:30:00 +0000</pubDate>
+      <description>Po dveh včerajšnjih nevihtah — druga je bila vizualno bolj dramatična, a padavinsko šibkejša — je za hladno fronto v dolino pritekel svež zrak. Jutro z meglo in 99 % vlage, nato jasnina. Se dolina danes sploh razgreje in ali spet grmi?</description>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>hladna-fronta</category>
+      <category>nevihta</category>
+      <category>arcus</category>
+      <category>megla</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Ali bo danes grmelo? Nevihtni obeti za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</link>
