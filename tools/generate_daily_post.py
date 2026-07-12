@@ -254,10 +254,12 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=180) as r:
             data = json.load(r)
     except urllib.error.HTTPError as e:
         sys.exit(f"Claude API napaka {e.code}: {e.read().decode('utf-8','replace')[:500]}")
+    except (TimeoutError, urllib.error.URLError) as e:
+        sys.exit(f"Claude API klic ni uspel (timeout/omrežje): {e}")
 
     text = next((b["text"] for b in data.get("content", []) if b.get("type") == "text"), None)
     if not text:
@@ -328,11 +330,14 @@ def call_lektor(article, context):
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=180) as r:
             data = json.load(r)
     except urllib.error.HTTPError as e:
         print(f"⚠ Lektor API napaka {e.code}, nadaljujem brez lekture: {e.read().decode('utf-8','replace')[:300]}")
         return {"ok": True, "issues": ["lektura preskočena -- API napaka"], "blocking": False, "corrected": article}
+    except (TimeoutError, urllib.error.URLError) as e:
+        print(f"⚠ Lektor API timeout/omrežje, nadaljujem brez lekture: {e}")
+        return {"ok": True, "issues": ["lektura preskočena -- timeout"], "blocking": False, "corrected": article}
 
     text = next((b["text"] for b in data.get("content", []) if b.get("type") == "text"), None)
     if not text:
