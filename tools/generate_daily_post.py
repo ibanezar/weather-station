@@ -26,7 +26,7 @@ Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, datetime, urllib.request, urllib.error
+import json, os, sys, re, shutil, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY
@@ -35,6 +35,11 @@ PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 LAT, LON = 46.325779, 14.921137
 STATE_FILE = os.path.join(ROOT, "tools", ".daily_post_state.json")
 ANTHROPIC_MODEL = "claude-sonnet-5"
+# Sem (kadarkoli, pred jutranjim zagonom) vržeš svoje fotografije za naslednji
+# članek -- ker se slug generira šele iz naslova, ki ga napiše Claude, ne moreš
+# vnaprej vedeti pravo mapo. Skripta jih ob zagonu premakne v img/blog/<slug>/.
+PENDING_PHOTOS_DIR = os.path.join(ROOT, "img", "blog-pending")
+PHOTO_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
 # Evergreen rotacija -- ideje, ki niso vezane na trenutni dogodek. "tag" mora
 # ustrezati enemu izmed tagov, ki jih Claude lahko doda v blog.json, da se
@@ -431,6 +436,85 @@ EXTRA_STYLE = """
 """
 
 
+def collect_local_photos(slug):
+    """Če so v img/blog-pending/ kake fotografije (Filip jih je ročno naložil
+    pred zagonom), jih premakne v img/blog/<slug>/ in vrne seznam za galerijo.
+    Prazen nabiralnik -> prazen seznam (brez napake)."""
+    if not os.path.isdir(PENDING_PHOTOS_DIR):
+        return []
+    files = sorted(f for f in os.listdir(PENDING_PHOTOS_DIR) if f.lower().endswith(PHOTO_EXTS))
+    if not files:
+        return []
+    dest_dir = os.path.join(ROOT, "img", "blog", slug)
+    os.makedirs(dest_dir, exist_ok=True)
+    photos = []
+    for i, fname in enumerate(files, 1):
+        ext = os.path.splitext(fname)[1].lower()
+        new_name = f"foto-{i}{ext}"
+        shutil.move(os.path.join(PENDING_PHOTOS_DIR, fname), os.path.join(dest_dir, new_name))
+        photos.append({
+            "filename": new_name,
+            "caption": f"Rečica ob Savinji, {fmtdate(TODAY)}. Foto: Filip Eremita.",
+        })
+    print(f"✓ {len(photos)} fotografij iz nabiralnika premaknjenih v img/blog/{slug}/")
+    return photos
+
+
+def fetch_stock_photo(query, slug):
+    """Poišče prosto licenčno fotografijo prek Openverse (CC0/CC-BY/CC-BY-SA,
+    filtrirano na dovoljeno komercialno rabo, brez potrebnega API ključa) in
+    jo prenese lokalno z ustrezno navedbo avtorja. Vrne [] če nič ne najde --
+    članek se v tem primeru objavi brez fotografij, brez napake."""
+    try:
+        q = urllib.parse.quote(query)
+        url = f"https://api.openverse.org/v1/images/?q={q}&license_type=commercial,modification&page_size=5&mature=false"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-DailyPost/1.0)"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            data = json.load(r)
+    except Exception as e:
+        print(f"⚠ Openverse iskanje ni uspelo, nadaljujem brez fotografij: {e}")
+        return []
+
+    for result in data.get("results", []):
+        img_url = result.get("url")
+        if not img_url:
+            continue
+        try:
+            req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-DailyPost/1.0)"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                content = resp.read()
+            dest_dir = os.path.join(ROOT, "img", "blog", slug)
+            os.makedirs(dest_dir, exist_ok=True)
+            filename = "stock-1.jpg"
+            with open(os.path.join(dest_dir, filename), "wb") as f:
+                f.write(content)
+            creator = result.get("creator") or "neznan avtor"
+            license_name = (result.get("license") or "").upper()
+            caption = f"Ilustrativna fotografija. Foto: {creator} (Openverse, licenca {license_name})."
+            print(f"✓ Prosto licenčna fotografija najdena in prenesena (licenca {license_name}, avtor {creator})")
+            return [{"filename": filename, "caption": caption}]
+        except Exception as e:
+            print(f"⚠ Prenos fotografije ni uspel, poskušam naslednjo: {e}")
+            continue
+    print("   Openverse ni vrnil uporabne fotografije -- članek brez fotografij.")
+    return []
+
+
+def build_photos_html(photos, slug):
+    if not photos:
+        return ""
+    parts = []
+    for p in photos:
+        cap = p["caption"]
+        parts.append(
+            f'    <figure class="post-photo">\n'
+            f'      <img src="/img/blog/{slug}/{p["filename"]}" alt="{cap[:120]}" loading="lazy">\n'
+            f'      <figcaption>{cap}</figcaption>\n'
+            f'    </figure>'
+        )
+    return "\n" + "\n".join(parts) + "\n"
+
+
 def build_forecast_chart(forecast):
     """Zgradi chart-card + Chart.js kodo iz DEJANSKIH napovednih podatkov
     (Open-Meteo daily), ne iz LLM-ja -- isti CHART_DEFAULTS vzorec in
@@ -502,7 +586,7 @@ def build_forecast_chart(forecast):
     return card, js
 
 
-def build_html(article, stat_cards, slug, now_utc, forecast=None):
+def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
     date_str = fmtdate(TODAY)
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
@@ -517,6 +601,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None):
     )
 
     chart_card_html, chart_js = build_forecast_chart(forecast)
+    photos_html = build_photos_html(photos, slug)
     chart_scripts_html = ""
     if chart_js:
         chart_scripts_html = (
@@ -640,6 +725,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None):
 {cards_html}
     </div>
 {chart_card_html}
+{photos_html}
 {sections_html}
 {callout_html}
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">{article["sources_note"]}</p>
@@ -755,7 +841,10 @@ def main():
         return
 
     print("5/6 Sestavljam HTML...")
-    html, entry, og_meta = build_html(article, stat_cards, slug, now, forecast)
+    photos = collect_local_photos(slug)
+    if not photos:
+        photos = fetch_stock_photo(article.get("og_photo", "weather station"), slug)
+    html, entry, og_meta = build_html(article, stat_cards, slug, now, forecast, photos)
 
     out = os.path.join(ROOT, "blog", f"{slug}.html")
     open(out, "w", encoding="utf-8").write(html)
