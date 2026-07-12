@@ -1399,6 +1399,12 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .otd-station .otd-item:hover{border-color:rgba(167,139,250,.3)}
 .otd-station .otd-year{color:var(--purple)}
 .otd-nodata{font-size:.7rem;color:var(--muted);font-style:italic;padding:.25rem 0}
+.otd-clim{margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--fc-border);display:flex;flex-direction:column;gap:.3rem}
+.otd-clim-row{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;font-size:.78rem;flex-wrap:wrap}
+.otd-clim-lbl{color:var(--muted);white-space:nowrap}
+.otd-clim-val{font-family:'JetBrains Mono',monospace;text-align:right}
+.otd-clim-n{color:var(--muted);font-size:.7rem}
+.otd-clim-anom{margin-top:.15rem}
 .period-nav{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
 .period-btn{padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);font-family:'Inter',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.5}
 .period-btn.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 2px 10px rgba(37,99,235,.3)}

@@ -2057,9 +2057,74 @@ function getStationOnThisDay(){
   }catch(e){return[];}
 }
 
+// Klimatologija za današnji koledarski datum (±okno dni) iz celotne shrambe.
+function getDayClimatology(){
+  try{
+    const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    const doy=d=>Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);
+    const target=doy(new Date());
+    const WIN=3;
+    let sumHi=0,nHi=0,sumLo=0,nLo=0,sumAvg=0,nAvg=0;
+    let recHi=null,recLo=null,wettest=null;
+    const years=new Set();
+    for(const k in stored){
+      const p=k.split('-');
+      if(p.length!==3)continue;
+      const dt=new Date(+p[0],+p[1]-1,+p[2]);
+      if(isNaN(dt))continue;
+      let diff=Math.abs(doy(dt)-target);
+      if(diff>182)diff=365-diff;           // ovoj čez konec leta
+      if(diff>WIN)continue;
+      const m=stored[k];if(!m)continue;
+      const yr=+p[0];
+      if(m.tempHigh!=null){sumHi+=m.tempHigh;nHi++;years.add(yr);if(!recHi||m.tempHigh>recHi.v)recHi={v:m.tempHigh,year:yr};}
+      if(m.tempLow!=null){sumLo+=m.tempLow;nLo++;if(!recLo||m.tempLow<recLo.v)recLo={v:m.tempLow,year:yr};}
+      if(m.tempAvg!=null){sumAvg+=m.tempAvg;nAvg++;}
+      if(m.precipTotal>0&&(!wettest||m.precipTotal>wettest.v))wettest={v:m.precipTotal,year:yr};
+    }
+    if(nHi<3&&nLo<3)return null;
+    return{
+      meanHigh:nHi?sumHi/nHi:null,
+      meanLow:nLo?sumLo/nLo:null,
+      meanAvg:nAvg?sumAvg/nAvg:null,
+      years:years.size,
+      recHigh:recHi,recLow:recLo,wettest,window:WIN
+    };
+  }catch(e){return null;}
+}
+
+function applyDayClimatology(){
+  const el=document.getElementById('otd-station-clim');
+  if(!el)return;
+  const clim=getDayClimatology();
+  if(!clim){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  const dstr=new Date().toLocaleDateString('sl',{day:'numeric',month:'short'});
+  const f1=v=>v==null?'—':v.toFixed(1).replace('.',',');
+  let html='';
+  html+='<div class="otd-clim-row"><span class="otd-clim-lbl">Normala za '+dstr+'</span>'+
+        '<span class="otd-clim-val"><strong style="color:#f87171">'+f1(clim.meanHigh)+'°</strong> / <strong style="color:var(--blue)">'+f1(clim.meanLow)+'°</strong>'+
+        ' <span class="otd-clim-n">('+clim.years+' let)</span></span></div>';
+  if(clim.recHigh||clim.recLow){
+    html+='<div class="otd-clim-row"><span class="otd-clim-lbl">Rekord</span><span class="otd-clim-val">';
+    if(clim.recHigh)html+='🔥 <strong style="color:var(--red)">'+f1(clim.recHigh.v)+'°</strong> ('+clim.recHigh.year+')';
+    if(clim.recHigh&&clim.recLow)html+=' · ';
+    if(clim.recLow)html+='❄️ <strong style="color:var(--blue)">'+f1(clim.recLow.v)+'°</strong> ('+clim.recLow.year+')';
+    html+='</span></div>';
+  }
+  if(typeof _liveTemp==='number'&&isFinite(_liveTemp)&&clim.meanAvg!=null){
+    const an=_liveTemp-clim.meanAvg;
+    const col=Math.abs(an)<1?'var(--muted)':an>0?'var(--red)':'var(--blue)';
+    const word=Math.abs(an)<1?'blizu dnevnega povprečja':an>0?'nad dnevnim povprečjem':'pod dnevnim povprečjem';
+    html+='<div class="otd-clim-row otd-clim-anom"><span class="otd-clim-lbl">Zdaj '+f1(_liveTemp)+'°</span>'+
+          '<span class="otd-clim-val" style="color:'+col+'"><strong>'+(an>=0?'+':'−')+f1(Math.abs(an))+'°</strong> '+word+' za ta datum</span></div>';
+  }
+  el.innerHTML=html;
+}
+
 function applyStationOnThisDay(){
   const grid=document.getElementById('otd-station-grid');
-  if(!grid)return;
+  if(!grid){applyDayClimatology();return;}
   const today=new Date();
   const titleEl=document.getElementById('otd-station-title');
   if(titleEl)titleEl.textContent='📡 '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' — postaja IREICA1';
@@ -2084,6 +2149,7 @@ function applyStationOnThisDay(){
   const filled=results.filter(r=>r.metric).length;
   const src=document.getElementById('otd-station-source');
   if(src)src.textContent=filled>0?filled+'/5 let podatkov':'Shramba prazna — zbira se z obiski';
+  applyDayClimatology();
 }
 
 // ── Clock + fetch ─────────────────────────────────────────
