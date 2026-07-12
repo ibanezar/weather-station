@@ -813,7 +813,10 @@ def gen_archive_index(hist, sitemap_urls, seasons=None):
   <div class="card-grid">
 {chr(10).join(year_cards)}
   </div>
-{season_section}  <p class="muted-note">Za vse rekorde: <a href="/rekord/">→ Vremenski rekordi</a> ·
+{season_section}  <h2>Po mesecih</h2>
+  <p class="archive-intro">Dolgoletno povprečje in rekordi za posamezni mesec:
+  <a href="/vreme/mesec/">→ Vreme po mesecih</a>.</p>
+  <p class="muted-note">Za vse rekorde: <a href="/rekord/">→ Vremenski rekordi</a> ·
   Vremenski pojavi: <a href="/pojavi/">→ Zmrzal, vroči dnevi, nalivi</a></p>'''
 
     html = page_shell(title, desc, url, schema, body)
@@ -1354,6 +1357,219 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
 
 
+def gen_month_climatology(hist, sitemap_urls):
+    """12 zimzelenih klimatoloških strani po koledarskem mesecu: /vreme/mesec/<ime>/.
+
+    Zapolni vrzel v programatičnem SEO-ju: generator doslej pokriva posamezna
+    leta/mesece/dneve, ne pa dolgoletnega povprečja za mesec (npr. "vreme julija").
+    To so iskane, zimzelene poizvedbe (ime meseca + vreme), podprte z meritvami.
+    """
+    lastmod = max(hist.keys())
+    by_month = defaultdict(list)          # m -> [(date, v)]
+    for d, v in hist.items():
+        by_month[int(d[5:7])].append((d, v))
+
+    def dl(d):
+        y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
+        return f'<a href="/vreme/{y}/{m:02d}/{dd:02d}/">{fmtd(d)}</a>'
+
+    index_cards = []
+    written = 0
+    for m in range(1, 13):
+        entries = sorted(by_month.get(m, []))
+        if len(entries) < 20:             # premalo podatkov za smiselno klimatologijo
+            continue
+        slug = MES_NOM[m]                  # samo ASCII: januar … december
+        url = f"/vreme/mesec/{slug}/"
+        rel = f"vreme/mesec/{slug}/index.html"
+
+        years = sorted({int(d[:4]) for d, _ in entries})
+        per_year = {}
+        for y in years:
+            ye = [(d, v) for d, v in entries if int(d[:4]) == y]
+            per_year[y] = month_stats(ye)
+
+        yr_tavg = [s["tavg"] for s in per_year.values() if s and s["tavg"] is not None]
+        yr_prec = [s["prec_total"] for s in per_year.values() if s]
+        yr_tmax = [s["tmax"] for s in per_year.values() if s and s["tmax"] is not None]
+        yr_tmin = [s["tmin"] for s in per_year.values() if s and s["tmin"] is not None]
+        norm_tavg = st.mean(yr_tavg) if yr_tavg else None
+        norm_prec = st.mean(yr_prec) if yr_prec else None
+        norm_tmax = st.mean(yr_tmax) if yr_tmax else None
+        norm_tmin = st.mean(yr_tmin) if yr_tmin else None
+
+        rec_hi_v, rec_hi_d = max(((v["tempHigh"], d) for d, v in entries
+                                  if v.get("tempHigh") is not None), default=(None, None))
+        rec_lo_v, rec_lo_d = min(((v["tempLow"], d) for d, v in entries
+                                  if v.get("tempLow") is not None), default=(None, None))
+        rec_rain_v, rec_rain_d = max(((v.get("precipTotal", 0) or 0, d) for d, v in entries),
+                                     default=(0, None))
+
+        def _ykey(kv, field, worst):
+            return kv[1][field] if kv[1] and kv[1].get(field) is not None else worst
+        warm_y = max(per_year.items(), key=lambda kv: _ykey(kv, "tavg", -999))
+        cold_y = min(per_year.items(), key=lambda kv: _ykey(kv, "tavg", 999))
+        wet_y = max(per_year.items(), key=lambda kv: _ykey(kv, "prec_total", -1))
+        dry_y = min(per_year.items(), key=lambda kv: _ykey(kv, "prec_total", 1e9))
+
+        nyears = len(years)
+        avg_frost = sum(1 for _, v in entries if is_frost(v)) / nyears
+        avg_hot = sum(1 for _, v in entries if is_hot(v)) / nyears
+
+        title = f"Vreme {MES_GEN[m]} v Rečici ob Savinji — povprečje in rekordi"
+        desc = (f"Kakšno je vreme {MES_GEN[m]} v Zgornji Savinjski dolini? Dolgoletno povprečje "
+                f"temperature ({num(norm_tavg)} °C) in padavin ({num(norm_prec, 0)} mm) ter rekordi "
+                f"za {MES_NOM[m]} iz meritev postaje IREICA1 ({years[0]}–{years[-1]}).")
+        crumbs = [("Meteorec", "/"), ("Vremenski arhiv", "/vreme/"),
+                  (f"Vreme {MES_GEN[m]}", None)]
+
+        prev_m = m - 1 or 12
+        next_m = m + 1 if m < 12 else 1
+
+        cards = f'''  <div class="stat-grid" style="margin-top:1rem">
+    <div class="stat-card c-temp">
+      <div class="sc-label">Povpr. temperatura</div>
+      <div class="sc-val">{num(norm_tavg)} °C</div>
+      <div class="sc-sub">dnevni razpon ~{num(norm_tmin, 0)}–{num(norm_tmax, 0)} °C</div>
+    </div>
+    <div class="stat-card c-rain">
+      <div class="sc-label">Povpr. padavine</div>
+      <div class="sc-val">{num(norm_prec, 0)} mm</div>
+      <div class="sc-sub">na mesec ({nyears} let)</div>
+    </div>
+    <div class="stat-card c-up">
+      <div class="sc-label">Rekord toplote</div>
+      <div class="sc-val">{num(rec_hi_v)} °C</div>
+      <div class="sc-sub">{fmtd(rec_hi_d) if rec_hi_d else "—"}</div>
+    </div>
+    <div class="stat-card c-down">
+      <div class="sc-label">Rekord mraza</div>
+      <div class="sc-val">{num(rec_lo_v)} °C</div>
+      <div class="sc-sub">{fmtd(rec_lo_d) if rec_lo_d else "—"}</div>
+    </div>
+  </div>'''
+
+        rows = []
+        for y in sorted(years, reverse=True):
+            s = per_year[y]
+            if not s:
+                continue
+            rows.append(
+                f'      <tr><td><a href="/vreme/{y}/{m:02d}/">{y}</a></td>'
+                f'<td>{num(s["tavg"])}</td><td class="hot">{num(s["tmax"])}</td>'
+                f'<td class="cold">{num(s["tmin"])}</td><td>{num(s["prec_total"], 0)}</td>'
+                f'<td>{s["prec_days"]}</td></tr>'
+            )
+        table = f'''  <h2>{MES_NOM[m].capitalize()} po letih</h2>
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead><tr><th>Leto</th><th>Povpr. T (°C)</th><th>Najvišja (°C)</th>
+    <th>Najnižja (°C)</th><th>Padavine (mm)</th><th>Dni s padavinami</th></tr></thead>
+    <tbody>
+{chr(10).join(rows)}
+    </tbody>
+  </table>
+  </div>'''
+
+        frost_line = (f" Povprečno je v tem mesecu <strong>{avg_frost:.1f} dni z zmrzaljo</strong>."
+                      if avg_frost >= 0.3 else "")
+        hot_line = (f" Vročih dni (nad 30 °C) je povprečno <strong>{avg_hot:.1f}</strong>."
+                    if avg_hot >= 0.3 else "")
+
+        intro = f'''  <p class="archive-intro"><strong>{MES_NOM[m].capitalize()}</strong> v
+  <strong>Rečici ob Savinji</strong> (Zgornja Savinjska dolina, {ELEV} m n. m.) ima po meritvah
+  postaje <strong>IREICA1</strong> za obdobje {years[0]}–{years[-1]} povprečno temperaturo
+  <strong>{num(norm_tavg)} °C</strong> in približno <strong>{num(norm_prec, 0)} mm padavin</strong>.
+  Spodnji podatki so <strong>dejanske meritve</strong> z dna doline, ne napoved iz modela.</p>'''
+
+        prose = f'''  <h2>Temperatura {MES_GEN[m]}</h2>
+  <p>Povprečna temperatura {MES_GEN[m]} znaša <strong>{num(norm_tavg)} °C</strong>, tipičen dnevni
+  razpon pa sega od okoli {num(norm_tmin, 0)} °C zjutraj do {num(norm_tmax, 0)} °C popoldne. Najtoplejši
+  {MES_NOM[m]} doslej je bil <strong>{warm_y[0]}</strong> (povpr. {num(warm_y[1]["tavg"])} °C),
+  najhladnejši pa <strong>{cold_y[0]}</strong> ({num(cold_y[1]["tavg"])} °C). Absolutni rekord toplote
+  za ta mesec je <strong>{num(rec_hi_v)} °C</strong> ({dl(rec_hi_d)}), rekord mraza pa
+  <strong>{num(rec_lo_v)} °C</strong> ({dl(rec_lo_d)}).{frost_line}{hot_line}</p>
+
+  <h2>Padavine {MES_GEN[m]}</h2>
+  <p>V povprečju pade {MES_GEN[m]} okrog <strong>{num(norm_prec, 0)} mm</strong> padavin. Najbolj moker
+  je bil <strong>{wet_y[0]}</strong> ({num(wet_y[1]["prec_total"], 0)} mm), najbolj suh pa
+  <strong>{dry_y[0]}</strong> ({num(dry_y[1]["prec_total"], 0)} mm). Največ dežja v enem dnevu tega meseca
+  je postaja izmerila <strong>{num(rec_rain_v, 0)} mm</strong> ({dl(rec_rain_d)}).</p>'''
+
+        qa = [
+            (f"Kakšno je povprečno vreme {MES_GEN[m]} v Rečici ob Savinji?",
+             f"Po meritvah postaje IREICA1 ({years[0]}–{years[-1]}) je povprečna temperatura {MES_GEN[m]} "
+             f"{num(norm_tavg)} °C, mesečne padavine pa okrog {num(norm_prec, 0)} mm. Tipičen dnevni "
+             f"razpon je od {num(norm_tmin, 0)} do {num(norm_tmax, 0)} °C."),
+            (f"Kakšna sta temperaturna rekorda za {MES_NOM[m]}?",
+             f"Najvišja izmerjena temperatura {MES_GEN[m]} je {num(rec_hi_v)} °C ({fmtd(rec_hi_d)}), "
+             f"najnižja pa {num(rec_lo_v)} °C ({fmtd(rec_lo_d)})."),
+            (f"Koliko dežja pade {MES_GEN[m]}?",
+             f"V povprečju okrog {num(norm_prec, 0)} mm na mesec. Najbolj moker je bil {wet_y[0]} "
+             f"({num(wet_y[1]['prec_total'], 0)} mm), najbolj suh {dry_y[0]} ({num(dry_y[1]['prec_total'], 0)} mm)."),
+        ]
+        faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+            f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+        ) + "\n  </div>"
+
+        nav = f'''  <nav class="crumbs" aria-label="Meseci" style="margin-top:1.5rem">
+    <a href="/vreme/mesec/{MES_NOM[prev_m]}/">← Vreme {MES_GEN[prev_m]}</a> ·
+    <a href="/vreme/mesec/">Vsi meseci</a> ·
+    <a href="/vreme/mesec/{MES_NOM[next_m]}/">Vreme {MES_GEN[next_m]} →</a>
+  </nav>'''
+        links = ('  <p class="muted-note">Glej tudi: <a href="/klima/">→ Podnebne normale</a> · '
+                 '<a href="/rekord/">→ Vsi rekordi</a> · '
+                 '<a href="/vreme/">→ Vremenski arhiv po dnevih</a></p>')
+
+        schema = "\n".join([
+            webpage_schema(url, title, desc),
+            crumbs_schema(crumbs),
+            faq_schema(qa),
+        ])
+        body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme {MES_GEN[m]} v Rečici ob Savinji</h1>
+{intro}
+{cards}
+{prose}
+{table}
+{faq_html}
+{nav}
+{links}'''
+        html = page_shell(title, desc, url, schema, body)
+        write_page(rel, html, force=True)
+        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
+        written += 1
+        index_cards.append(
+            f'    <a class="year-card" href="{url}">\n'
+            f'      <div class="yc-year">{MES_NOM[m].capitalize()}</div>\n'
+            f'      <div class="yc-stats">{num(norm_tavg)} °C · {num(norm_prec, 0)} mm</div>\n'
+            f'    </a>'
+        )
+
+    # Kazalo /vreme/mesec/ — notranji vhod do vseh 12 mesecev.
+    idx_url, idx_rel = "/vreme/mesec/", "vreme/mesec/index.html"
+    idx_title = "Vreme po mesecih — Rečica ob Savinji in Zgornja Savinjska dolina"
+    idx_desc = ("Dolgoletno povprečje temperature in padavin ter rekordi za vsak mesec v letu "
+                "v Rečici ob Savinji, po meritvah postaje IREICA1.")
+    idx_crumbs = [("Meteorec", "/"), ("Vremenski arhiv", "/vreme/"), ("Po mesecih", None)]
+    idx_body = f'''{crumbs_html(idx_crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme po mesecih</h1>
+  <p class="archive-intro">Kakšno je vreme v posameznem mesecu v <strong>Rečici ob Savinji</strong>?
+  Za vsak mesec dolgoletno povprečje temperature in padavin ter rekordi, izračunani iz meritev
+  postaje <strong>IREICA1</strong>.</p>
+  <div class="card-grid">
+{chr(10).join(index_cards)}
+  </div>
+  <p class="muted-note"><a href="/vreme/">→ Vremenski arhiv po dnevih</a> ·
+  <a href="/klima/">→ Podnebne normale</a> · <a href="/rekord/">→ Rekordi</a></p>'''
+    idx_schema = "\n".join([webpage_schema(idx_url, idx_title, idx_desc), crumbs_schema(idx_crumbs)])
+    write_page(idx_rel, page_shell(idx_title, idx_desc, idx_url, idx_schema, idx_body), force=True)
+    sitemap_urls.append(sitemap_entry(SITE + idx_url, lastmod, "monthly", "0.7"))
+    return written
+
+
 def gen_landing_page(hist, sitemap_urls):
     """Hand-curated exact-match landing page: /vreme-recica-ob-savinji/."""
     url = "/vreme-recica-ob-savinji/"
@@ -1690,6 +1906,10 @@ def main():
     print("Generiram strani pojavov …")
     gen_phenomena_pages(hist, sitemap_urls)
     print("  → /pojavi/ + 3 podstrani")
+
+    print("Generiram klimatološke strani po mesecih …")
+    w = gen_month_climatology(hist, sitemap_urls)
+    print(f"  → {w} mesečnih strani + /vreme/mesec/")
 
     print("Generiram pristajalno stran /vreme-recica-ob-savinji/ …")
     gen_landing_page(hist, sitemap_urls)
