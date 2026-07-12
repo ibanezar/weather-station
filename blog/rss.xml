@@ -5,14 +5,27 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 12 Jul 2026 07:30:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 Jul 2026 11:49:32 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vodna bilanca: koliko od dežja zadnjih dni je dejansko ostalo v tleh?</title>
+      <link>https://meteorec.si/blog/vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712.html</guid>
+      <pubDate>Sun, 12 Jul 2026 08:00:00 +0000</pubDate>
+      <description>13,9 mm dežja, potem sonce in 777 W/m² sevanja. Analiziramo, koliko vode je šlo v tla in koliko je izhlapelo že prvi dan.</description>
+      <category>vodna bilanca</category>
+      <category>evapotranspiracija</category>
+      <category>suša</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Rečica ob Savinji</category>
+    </item>
     <item>
       <title>Dve nevihti, nato hladno jutro: fronta ohladila Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/dve-nevihte-hladno-jutro.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/dve-nevihte-hladno-jutro.html</guid>
-      <pubDate>Sun, 12 Jul 2026 07:30:00 +0000</pubDate>
-      <description>Po dveh včerajšnjih nevihtah — druga je bila vizualno bolj dramatična, a padavinsko šibkejša — je za hladno fronto v dolino pritekel svež zrak. Jutro z meglo in 99 % vlage, nato jasnina. Se dolina danes sploh razgreje in ali spet grmi?</description>
+      <pubDate>Sun, 12 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Po dveh včerajšnjih nevihtah — druga je bila vizualno bolj dramatična, a padavinsko šibkejša — je za hladno fronto v dolino pritekel svež zrak. Jutro z meglo in 99 % vlage, nato jasnina. Se dolina danes sploh razgreje in ali spet grmi? Podatki postaje IREICA1.</description>
       <category>napoved</category>
       <category>IREICA1</category>
       <category>hladna-fronta</category>
@@ -22,10 +35,24 @@
       <category>Savinja</category>
     </item>
     <item>
+      <title>Koliko je danes v resnici »zalilo«? Nevihta 11. julija 2026 pod drobnogledom</title>
+      <link>https://meteorec.si/blog/koliko-je-zalilo-nevihta-11-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-je-zalilo-nevihta-11-julij-2026.html</guid>
+      <pubDate>Sat, 11 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Popoldanska nevihta je odložila 8,9 mm dežja z vrhom 24,6 mm/h. A ko upoštevamo evapotranspiracijo, odtok in globino navlaženja tal, je neto namočenost le +3,3 mm — nekaj je namočilo, a premalo. Vodna bilanca dneva iz podatkov postaje IREICA1.</description>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>padavine</category>
+      <category>evapotranspiracija</category>
+      <category>vodna bilanca</category>
+      <category>suša</category>
+      <category>Savinja</category>
+    </item>
+    <item>
       <title>Ali bo danes grmelo? Nevihtni obeti za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/nevihtni-obeti-11-julij-2026.html</guid>
-      <pubDate>Sat, 11 Jul 2026 06:30:00 +0000</pubDate>
+      <pubDate>Sat, 11 Jul 2026 08:00:00 +0000</pubDate>
       <description>Danes je ozračje nad dolino nabito z vlago: rosišče 18,7 °C, padajoči tlak, CAPE do 1.800 J/kg opoldne. Postaja IREICA1, ARSO in modeli kažejo na popoldanske plohe in nevihte med 16. in 19. uro.</description>
       <category>napoved</category>
       <category>IREICA1</category>
@@ -35,11 +62,23 @@
       <category>Savinja</category>
     </item>
     <item>
+      <title>Vreme na Golteh: sneg, razmere in kdaj je pravi čas za obisk</title>
+      <link>https://meteorec.si/blog/vreme-golte-sneg-razmere.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vreme-golte-sneg-razmere.html</guid>
+      <pubDate>Sat, 11 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Vreme na Golteh se lahko od tistega v dolini razlikuje za cel razred. Kaj preveriti pred odhodom na 1.600 metrov: sneg, veter na grebenu in vidljivost.</description>
+      <category>golte</category>
+      <category>sneg</category>
+      <category>smucisce</category>
+      <category>vreme</category>
+      <category>Savinjska dolina</category>
+    </item>
+    <item>
       <title>Suša kljub dežju: hidrologija Zgornje Savinjske doline</title>
       <link>https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/susa-savinjska-dolina-hidrologija.html</guid>
-      <pubDate>Fri, 10 Jul 2026 09:30:00 +0000</pubDate>
-      <description>Zgornja Savinjska dolina vsako leto prejme okrog 1.300 do 1.500 mm padavin, a suše so vse pogostejše in intenzivnejše. Zakaj obilje dežja ne zadošča več.</description>
+      <pubDate>Fri, 10 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Zgornja Savinjska dolina vsako leto prejme okrog 1.300 do 1.500 mm padavin, a suše so vse pogostejše in intenzivnejše. Podatki postaje IREICA1 in ARSO razkrijejo, zakaj obilje dežja ne zadošča več.</description>
       <category>analiza</category>
       <category>IREICA1</category>
       <category>susa</category>
@@ -52,7 +91,7 @@
       <link>https://meteorec.si/blog/300-let-poplav-na-savinji.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/300-let-poplav-na-savinji.html</guid>
       <pubDate>Fri, 10 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Od prve pisne omembe Rečice ob Savinji leta 1231 do poplav 2023: arhivski viri razkrijejo gost niz poplav na Savinji skozi 19. in 20. stoletje.</description>
+      <description>Od prve pisne omembe Rečice ob Savinji leta 1231 do poplav 2023: arhivski viri razkrijejo gost niz poplav na Savinji skozi 19. in 20. stoletje – kaj so o vremenu vedeli, preden so obstajale meteorološke postaje.</description>
       <category>analiza</category>
       <category>IREICA1</category>
       <category>zgodovina</category>
@@ -72,18 +111,6 @@
       <category>2026</category>
       <category>pozarna-ogrozenost</category>
       <category>susa</category>
-    </item>
-    <item>
-      <title>Vreme na Golteh: sneg, razmere in kdaj je pravi čas za obisk</title>
-      <link>https://meteorec.si/blog/vreme-golte-sneg-razmere.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/vreme-golte-sneg-razmere.html</guid>
-      <pubDate>Thu, 09 Jul 2026 12:00:00 +0000</pubDate>
-      <description>Vreme na Golteh se lahko od tistega v dolini razlikuje za cel razred. Kaj preveriti pred odhodom na 1.600 metrov: sneg, veter na grebenu in vidljivost.</description>
-      <category>golte</category>
-      <category>sneg</category>
-      <category>smucisce</category>
-      <category>vreme</category>
-      <category>Savinjska dolina</category>
     </item>
     <item>
       <title>Vročinski val v štirih krajih doline: Rečica, Mozirje, Nazarje, Ljubno</title>
