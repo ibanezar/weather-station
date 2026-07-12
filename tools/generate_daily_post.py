@@ -261,7 +261,7 @@ def stream_claude(payload, api_key, timeout=180):
     return "".join(text_parts)
 
 
-
+def call_claude(topic, current, hourly, forecast, stat_cards):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ANTHROPIC_API_KEY manjka.")
@@ -408,7 +408,7 @@ def open_review_issue(article, slug, issues):
         print(f"⚠ Issue ni bil odprt: {e.code} {e.read().decode('utf-8','replace')[:300]}")
 
 
-
+def hexrgb(h):
     h = h.lstrip("#")
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
