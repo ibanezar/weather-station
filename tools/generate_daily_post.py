@@ -245,6 +245,7 @@ def stream_claude(payload, api_key, timeout=180):
         method="POST",
     )
     text_parts = []
+    stop_reason = None
     with urllib.request.urlopen(req, timeout=timeout) as r:
         for raw_line in r:
             line = raw_line.decode("utf-8", "replace").strip()
@@ -261,8 +262,15 @@ def stream_claude(payload, api_key, timeout=180):
                 delta = evt.get("delta", {})
                 if delta.get("type") == "text_delta":
                     text_parts.append(delta.get("text", ""))
+            elif evt.get("type") == "message_delta":
+                stop_reason = (evt.get("delta") or {}).get("stop_reason") or stop_reason
             elif evt.get("type") == "error":
                 raise RuntimeError(f"Claude stream napaka: {evt.get('error')}")
+    if stop_reason == "max_tokens":
+        raise RuntimeError(
+            "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
+            "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka."
+        )
     return "".join(text_parts)
 
 
@@ -283,7 +291,7 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
 
     payload = {
         "model": ANTHROPIC_MODEL,
-        "max_tokens": 4000,
+        "max_tokens": 8000,
         "system": SYSTEM_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
@@ -349,7 +357,7 @@ def call_lektor(article, context):
     )
     payload = {
         "model": ANTHROPIC_MODEL,
-        "max_tokens": 4000,
+        "max_tokens": 8000,
         "system": LEKTOR_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
