@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 12 Jul 2026 12:31:43 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 Jul 2026 12:50:44 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kaj gibanje zračnega tlaka in vetra pove o vremenu, ki prihaja v Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712.html</guid>
+      <pubDate>Sun, 12 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Zračni tlak napoved vreme: kaj nam trenutne razmere na postaji IREICA1 in šibek veter povedo o naslednjih dneh v Zgornji Savinjski dolini.</description>
+      <category>zračni tlak</category>
+      <category>veter</category>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Rečica ob Savinji</category>
+    </item>
     <item>
       <title>Vroč julijski dan v Zgornji Savinjski dolini: kaj pravijo številke s postaje IREICA1</title>
       <link>https://meteorec.si/blog/vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712.html</link>
