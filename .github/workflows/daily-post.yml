@@ -2,6 +2,8 @@ name: Dnevni članek
 
 on:
   schedule:
+    # 05:15 UTC -- po update-history.yml (01:15) in generate-seo-pages.yml (04:00),
+    # pred prvim jutranjim obiskom. Poleti = 7:15 CEST, pozimi = 6:15 CET.
     - cron: '15 5 * * *'
   workflow_dispatch: {}
 
@@ -34,7 +36,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add blog/ blog.json sitemap.xml og/ tools/.daily_post_state.json
+          git add blog/ blog.json sitemap.xml og/ img/ tools/.daily_post_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT
@@ -100,7 +102,10 @@ jobs:
           req = urllib.request.Request(
               "https://weatherireica1.filip-eremita.workers.dev/blog-subscribe/notify",
               data=payload,
-              headers={"Content-Type": "application/json"},
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "Mozilla/5.0 (compatible; Meteorec-DailyPost/1.0; +https://meteorec.si)",
+              },
               method="POST",
           )
           try:
