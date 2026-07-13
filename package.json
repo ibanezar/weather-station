@@ -1,0 +1,12 @@
+{
+  "name": "meteorec-assets",
+  "private": true,
+  "description": "Minifikacija app.js/style.css za meteorec.si (statični site brez build koraka — minificirani izhodi se commitajo v repo).",
+  "scripts": {
+    "minify": "node tools/minify_assets.mjs"
+  },
+  "devDependencies": {
+    "terser": "5.49.0",
+    "clean-css": "5.3.3"
+  }
+}

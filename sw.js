@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'vreme-static-v16';
-const CACHE_API    = 'vreme-api-v16';
+const CACHE_STATIC = 'vreme-static-v17';
+const CACHE_API    = 'vreme-api-v17';
 
 // Stale-while-revalidate TTLs per host (ms)
 const API_TTL = {
@@ -123,7 +123,7 @@ self.addEventListener('periodicsync', event => {
 });
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './app.js', './manifest.json'])));
+  e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(['./', './app.min.js', './manifest.json'])));
   self.skipWaiting();
 });
 
