@@ -40,11 +40,24 @@ jobs:
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT
-          else
-            git commit -m "blog: dnevni članek $(date -u +%Y-%m-%d) [skip ci]"
-            git push
-            echo "published=true" >> $GITHUB_OUTPUT
+            exit 0
           fi
+          git commit -m "blog: dnevni članek $(date -u +%Y-%m-%d) [skip ci]"
+          # Druge avtomatizacije (SEO strani, zgodovina, ...) pogosto commitajo na
+          # main sočasno -- brez rebase+retry non-fast-forward push redno pade
+          # (opaženo: 7/9 zadnjih zagonov), izgubi generiran članek.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "published=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
 
       - name: IndexNow — obvesti iskalnike o novi objavi
         if: steps.commit.outputs.published == 'true'
