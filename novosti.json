@@ -1,5 +1,15 @@
 [
   {
+    "type": "susa",
+    "date": "2026-07-02",
+    "end_date": "2026-07-09",
+    "value": 8.0,
+    "param": "precipTotal",
+    "label": "Sušno obdobje (8 dni)",
+    "slug": "susa-2026-07-02",
+    "duration": 8
+  },
+  {
     "type": "toplotni-val",
     "date": "2026-06-25",
     "end_date": "2026-06-28",
@@ -18,5 +28,15 @@
     "label": "Sušno obdobje (9 dni)",
     "slug": "susa-2026-06-22",
     "duration": 9
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-06-18",
+    "end_date": "2026-07-01",
+    "value": 36.2,
+    "param": "tempHigh",
+    "label": "Toplotni val (14 dni)",
+    "slug": "toplotni-val-2026-06-18",
+    "duration": 14
   }
 ]

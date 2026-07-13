@@ -61,11 +61,12 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
 - **Tehnika**
   - [x] `/trendi/` v sitemap; audit workflow postavljen.
   - [ ] V Search Console preveri **Coverage/Pages** — potrdi indeksiranost `/trendi/`, `/vreme-recica-ob-savinji/`, `/slovar/`.
-  - [ ] Ročni sprožilec `seo-audit.yml` (workflow_dispatch), potrdi zelen tek in commit.
-  - [x] Interna povezanost: povezava na `/trendi/` dodana v skupni footer (`seo_smart_routine.py`) → pojavi se na vseh generiranih hub straneh ob naslednjem tedenskem teku (pon 13.7.). `/trendi/` ni več "siroti".
+  - [x] Ročni sprožilec `seo-audit.yml` (13.7., lokalni tek `tools/seo_audit.py`) — **0 napak**: 2696 URL-jev v sitemapih, 23 ključnih strani, 35 blog objav, vse pokrite.
+  - [x] Interna povezanost: povezava na `/trendi/` dodana v skupni footer (`seo_smart_routine.py`) → **aktivirano 13.7.** s tedenskim tekom (`/klima/`, `/padavine/`, `/temperatura/`, `/teden/` regenerirani). `/trendi/` ni več "siroti".
+  - [x] Tedenski `seo-smart-routine` (13.7.): osvežene klimatološke norme (zadnji dan 12.7.), zaznano novo sušno obdobje **2.–9.7. (8 dni)** → `/novosti/susa-2026-07-02/`, `sitemap-seo.xml` posodobljen.
 - **Vsebina (blog)**
   - [x] **Objavljeno 7.7.**: [*Poletni ozon v Zgornji Savinjski dolini*](/blog/poletni-ozon-kakovost-zraka-savinjska-dolina.html) — podatkovni razlagalec (meritve UV/sonce/veter s postaje), povezan na `/kakovost-zraka/` in 3 pojme v `/slovar/`; keyword: **kakovost zraka Savinjska dolina**, **prizemni ozon**.
-  - [ ] Samodejno: `seo-smart-routine` (pon 13.7.) osveži hub + morebiten dogodek v `/novosti/`.
+  - [x] Samodejno: `seo-smart-routine` (pon 13.7.) osvežil hub + zaznal nov dogodek v `/novosti/` (sušno obdobje 2.–9.7.).
 
 ### Teden 2 — 14.–20. julij · Nevihte, toča, hudourniki
 **Tema:** nevihtna sezona. Iskanja: "nevihta napoved Savinjska dolina", "toča", "hudournik Rečica".
