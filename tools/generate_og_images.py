@@ -4,13 +4,14 @@ Background photos sourced from Unsplash (free to use, no attribution required).
 Source photos stored in og/bg/. Run this script to regenerate all OG images.
 """
 from PIL import Image, ImageDraw, ImageFont
-import os
+import json, os, statistics as st
 
 FONT_BOLD    = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 FONT_REGULAR = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
 
 W, H = 1200, 630
 SCRIPT_DIR = os.path.dirname(__file__)
+ROOT    = os.path.join(SCRIPT_DIR, '..')
 BG_DIR  = os.path.join(SCRIPT_DIR, '..', 'og', 'bg')
 OUT_DIR = os.path.join(SCRIPT_DIR, '..', 'og')
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -293,6 +294,113 @@ ARTICLES = [
 ]
 
 
+# ── /vreme/mesec/<mesec>/ climatology OG images ──────────────────────────────
+# slug/naslov morata ustrezati MES_NOM v tools/generate_seo_pages.py.
+MONTHS = [
+    {'m': 1,  'slug': 'januar',    'title': 'Vreme\njanuarja',    'accent': (96, 165, 250),  'photo': 'night-fog-valley'},
+    {'m': 2,  'slug': 'februar',   'title': 'Vreme\nfebruarja',   'accent': (96, 165, 250),  'photo': 'misty-valley'},
+    {'m': 3,  'slug': 'marec',     'title': 'Vreme\nmarca',       'accent': (34, 197, 94),   'photo': 'spring'},
+    {'m': 4,  'slug': 'april',     'title': 'Vreme\naprila',      'accent': (34, 197, 94),   'photo': 'spring'},
+    {'m': 5,  'slug': 'maj',       'title': 'Vreme\nmaja',        'accent': (34, 197, 94),   'photo': 'spring'},
+    {'m': 6,  'slug': 'junij',     'title': 'Vreme\njunija',      'accent': (245, 158, 11),  'photo': 'storm-clouds'},
+    {'m': 7,  'slug': 'julij',     'title': 'Vreme\njulija',      'accent': (239, 68, 68),   'photo': 'drought'},
+    {'m': 8,  'slug': 'avgust',    'title': 'Vreme\navgusta',     'accent': (239, 68, 68),   'photo': 'drought'},
+    {'m': 9,  'slug': 'september', 'title': 'Vreme\nseptembra',   'accent': (245, 158, 11),  'photo': 'misty-valley'},
+    {'m': 10, 'slug': 'oktober',   'title': 'Vreme\noktobra',     'accent': (249, 115, 22),  'photo': 'rain-overcast'},
+    {'m': 11, 'slug': 'november',  'title': 'Vreme\nnovembra',    'accent': (99, 102, 241),  'photo': 'night-fog-valley'},
+    {'m': 12, 'slug': 'december',  'title': 'Vreme\ndecembra',    'accent': (99, 102, 241),  'photo': 'night-fog-valley'},
+]
+
+
+def load_month_climatology():
+    """Povprečna T in padavine po koledarskem mesecu iz history.json (self-contained,
+    ne uvaža tools/generate_seo_pages.py — namenoma podvojena majhna agregacija)."""
+    with open(os.path.join(ROOT, 'history.json'), encoding='utf-8') as f:
+        hist = json.load(f)
+    by_month = {m: [] for m in range(1, 13)}
+    for d, v in hist.items():
+        by_month[int(d[5:7])].append(v)
+    stats = {}
+    for m, vals in by_month.items():
+        tavg = [v['tempAvg'] for v in vals if v.get('tempAvg') is not None]
+        years = {int(d[:4]) for d in hist if int(d[5:7]) == m}
+        prec_by_year = {}
+        for d, v in hist.items():
+            if int(d[5:7]) == m:
+                prec_by_year[int(d[:4])] = prec_by_year.get(int(d[:4]), 0) + (v.get('precipTotal') or 0)
+        stats[m] = {
+            'tavg': st.mean(tavg) if tavg else None,
+            'prec': st.mean(prec_by_year.values()) if prec_by_year else None,
+        }
+    return stats
+
+
+def make_month_og(month, stats):
+    photo_path = os.path.join(BG_DIR, month['photo'] + '.jpg')
+    bg = Image.open(photo_path).convert('RGB')
+    bg = smart_crop(bg, W, H)
+    img = dark_overlay(bg)
+    draw = ImageDraw.Draw(img)
+
+    accent = month['accent']
+    pad = 52
+
+    draw.rectangle([0, 0, 6, H], fill=accent)
+
+    font_brand  = ImageFont.truetype(FONT_BOLD, 28)
+    font_domain = ImageFont.truetype(FONT_REGULAR, 20)
+    draw.text((pad, pad), 'Meteorec', font=font_brand,
+              fill=tuple(min(255, c + 60) for c in accent))
+    draw.text((pad, pad + 36), 'meteorec.si', font=font_domain,
+              fill=(210, 225, 245))
+
+    lines = month['title'].split('\n')
+    n = len(lines)
+    font_title = ImageFont.truetype(FONT_BOLD, 82)
+    line_h = font_title.size + 12
+    total_h = n * line_h
+    y_start = (H - total_h) // 2 - 6
+
+    for i, line in enumerate(lines):
+        bbox = draw.textbbox((0, 0), line, font=font_title)
+        tw = bbox[2] - bbox[0]
+        x = (W - tw) // 2
+        y = y_start + i * line_h
+        for dx, dy in [(-2,-2),(2,-2),(-2,2),(2,2),(0,3),(3,0),(-3,0),(0,-3)]:
+            draw.text((x+dx, y+dy), line, font=font_title, fill=(0, 0, 0))
+        draw.text((x, y), line, font=font_title, fill=(255, 255, 255))
+
+    tavg, prec = stats.get('tavg'), stats.get('prec')
+    sub = (f"Ø {tavg:.1f} °C · {prec:.0f} mm padavin".replace('.', ',')
+           if tavg is not None and prec is not None else 'Rečica ob Savinji')
+    font_sub = ImageFont.truetype(FONT_REGULAR, 30)
+    bbox = draw.textbbox((0, 0), sub, font=font_sub)
+    sw = bbox[2] - bbox[0]
+    draw.text(((W - sw) // 2, y_start + n * line_h + 20), sub,
+              font=font_sub, fill=(210, 230, 255))
+
+    font_badge = ImageFont.truetype(FONT_BOLD, 20)
+    badge_text = 'PODNEBNA NORMALA'
+    bx, by = pad, H - pad - 8
+    bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
+    bw = bbox[2] - bbox[0] + 28
+    bh = bbox[3] - bbox[1] + 14
+    draw.rounded_rectangle([bx, by - bh, bx + bw, by], radius=6,
+                           fill=(*accent, 50), outline=(*accent, 210))
+    draw.text((bx + 14, by - bh + 7), badge_text, font=font_badge, fill=(255, 255, 255))
+
+    font_stn = ImageFont.truetype(FONT_REGULAR, 20)
+    stn_text = 'IREICA1 · Rečica ob Savinji'
+    bbox = draw.textbbox((0, 0), stn_text, font=font_stn)
+    sw2 = bbox[2] - bbox[0]
+    draw.text((W - pad - sw2, H - pad + 4), stn_text,
+              font=font_stn, fill=(190, 210, 230))
+
+    out_path = os.path.join(OUT_DIR, f"mesec-{month['slug']}.jpg")
+    img.save(out_path, 'JPEG', quality=92)
+    print(f'  ✓ {out_path}')
+
+
 def smart_crop(img, w, h):
     ratio = img.width / img.height
     target = w / h
@@ -394,4 +502,8 @@ if __name__ == '__main__':
     print('Generating OG images...')
     for a in ARTICLES:
         make_og(a)
+    print('Generating monthly climatology OG images...')
+    month_stats = load_month_climatology()
+    for mo in MONTHS:
+        make_month_og(mo, month_stats[mo['m']])
     print('Done.')

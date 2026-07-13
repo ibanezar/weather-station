@@ -251,11 +251,12 @@ def footer_html(year=None):
     return (f'  <footer class="site-foot">\n'
             f'    <span>© {y} Meteorec · Rečica ob Savinji</span>\n'
             f'    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a>'
-            f' · <a href="/vreme/">Arhiv</a></span>\n  </footer>')
+            f' · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a></span>\n  </footer>')
 
-def page_shell(title, desc, canonical, head_extras, body_content, year=None):
+def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_image=None):
     full_url = f"{SITE}{canonical}"
     y = year or TODAY.year
+    img = og_image or f"{SITE}/og-image.jpg"
     return f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
@@ -274,14 +275,14 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None):
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="{SITE}/og-image.jpg">
+<meta property="og:image" content="{img}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
-<meta name="twitter:image" content="{SITE}/og-image.jpg">
+<meta name="twitter:image" content="{img}">
 {head_extras}
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/blog/blog.css">
@@ -1536,7 +1537,7 @@ def gen_month_climatology(hist, sitemap_urls):
 {faq_html}
 {nav}
 {links}'''
-        html = page_shell(title, desc, url, schema, body)
+        html = page_shell(title, desc, url, schema, body, og_image=f"{SITE}/og/mesec-{slug}.jpg")
         write_page(rel, html, force=True)
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
         written += 1
