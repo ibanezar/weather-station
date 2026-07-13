@@ -745,9 +745,25 @@ export default {
       // ── /like ─────────────────────────────────────────────
       // Všečki na blog posta. Ključ v KV: "like:<slug>".
       // GET  /like?slug=xxx            → { slug, count }
+      // GET  /like?slugs=a,b,c         → { likes: { a:N, b:N, … } }  (bulk, za seznam bloga)
       // POST /like?slug=xxx&delta=1|-1 → poveča/zmanjša in vrne { slug, count }
       // Persistenca zahteva KV binding COUNTER_KV; brez njega vrne in-memory vrednost.
       if (path === "/like") {
+        if (request.method === "GET" && url.searchParams.get("slugs") !== null) {
+          const wanted = url.searchParams.get("slugs").split(",").map(s => s.trim().toLowerCase())
+            .filter(s => /^[a-z0-9-]{1,120}$/.test(s)).slice(0, 60);
+          const likes = {};
+          if (env?.COUNTER_KV) {
+            await Promise.all(wanted.map(async s => {
+              likes[s] = parseInt((await env.COUNTER_KV.get("like:" + s)) || "0") || 0;
+            }));
+          } else {
+            wanted.forEach(s => { likes[s] = _memLikes["like:" + s] || 0; });
+          }
+          return new Response(JSON.stringify({ likes }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" }
+          });
+        }
         const slug = (url.searchParams.get("slug") || "").toLowerCase();
         // dovolimo le varne sluge (mala črka, številka, vezaj) do 120 znakov
         if (!/^[a-z0-9-]{1,120}$/.test(slug)) {

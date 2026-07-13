@@ -1,15 +1,42 @@
 /* ═══════════════════════════════════════════════════════════
    Seznam bloga — vse nadgradnje kartic na enem mestu:
-   • iskalnik + filtriranje po tagih (iz blog.json)
+   • iskalnik + filtriranje po tagih (iz blog.json, skrčeno na top N + "več")
    • povprečna ocena + značka "Priljubljeno" (bulk /blog-comments)
-   • število komentarjev + značka "novo" (zadnjih 14 dni)
-   • razvrščanje: najnovejše / najbolje ocenjeno / največ komentarjev
+   • število komentarjev, število všečkov (bulk /like) + značka "novo"
+   • tematska emoji značka na vsaki kartici (iz tagov, brez odvisnosti od
+     angažma-podatkov, da seznam ni prazen/bogi tudi brez ocen/komentarjev)
+   • razvrščanje: najnovejše / najbolje ocenjeno / največ komentarjev / všečkov
    Progresivna nadgradnja — statične kartice ostanejo (SEO).
    ═══════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
   var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
   var NEW_DAYS = 14;
+  var TAGS_VISIBLE = 8;
+
+  // Tematska emoji značka na kartici — prvi ujemajoč se tag zmaga (vrstni
+  // red spodaj = prioriteta). Ne zahteva zunanjih podatkov, zato je na
+  // seznamu vedno nekaj vizualnega, tudi brez ocen/komentarjev/všečkov.
+  var TOPIC_EMOJI = [
+    ["rekord", "🏆"], ["poplav", "🌊"], ["vodostaj", "🌊"], ["sneg", "❄️"], ["smucisce", "❄️"],
+    ["golte", "🏔️"], ["megla", "🌫️"], ["inverzij", "🌫️"], ["neviht", "⛈️"], ["toca", "⛈️"],
+    ["hudournik", "⛈️"], ["arcus", "⛈️"], ["mraz", "🥶"], ["hladn", "🥶"], ["susa", "🏜️"],
+    ["vrocin", "🔥"], ["pozar", "🔥"], ["dez", "🌧️"], ["padavin", "🌧️"], ["naliv", "🌧️"],
+    ["veter", "💨"], ["pritisk", "💨"], ["zracni-tlak", "💨"], ["gobe", "🍄"], ["hmelj", "🌾"],
+    ["agrometeo", "🌾"], ["kakovost-zraka", "🌬️"], ["ozon", "🌬️"], ["padalci", "🪂"],
+    ["vodna-bilanca", "💧"], ["evapotranspiracij", "💧"], ["zgodovina", "📜"], ["arhiv", "📜"],
+    ["trend", "📈"], ["ogrevanj", "📈"], ["podnebj", "📈"], ["klima", "📈"], ["temperatur", "🌡️"],
+    ["tropska-noc", "🌡️"], ["pomlad", "🌱"], ["povzetek", "📋"]
+  ];
+  function topicEmoji(tags) {
+    var normed = tags.map(norm);
+    for (var i = 0; i < TOPIC_EMOJI.length; i++) {
+      for (var j = 0; j < normed.length; j++) {
+        if (normed[j].indexOf(TOPIC_EMOJI[i][0]) !== -1) return TOPIC_EMOJI[i][1];
+      }
+    }
+    return "🌤️";
+  }
 
   var list = document.querySelector(".post-list");
   if (!list) return;
@@ -32,14 +59,15 @@
   }
 
   // per-card podatki
-  var data = {}; // slug → { li, body, date, tags, avg, ratingCount, commentCount, order }
+  var data = {}; // slug → { li, body, date, tags, avg, ratingCount, commentCount, likes, order }
   cards.forEach(function (a, i) {
     var slug = slugOf(a); if (!slug) return;
     var li = a.closest("li") || a;
     var title = (a.querySelector("h2") || {}).textContent || "";
     var summary = (a.querySelector("p") || {}).textContent || "";
     data[slug] = { a: a, li: li, body: a.querySelector(".post-card-body") || a,
-      hay: norm(title + " " + summary), tags: [], date: "", avg: null, ratingCount: 0, commentCount: 0, order: i };
+      hay: norm(title + " " + summary), tags: [], date: "", avg: null, ratingCount: 0,
+      commentCount: 0, likes: 0, order: i };
   });
   var slugs = Object.keys(data);
   if (!slugs.length) return;
@@ -58,6 +86,7 @@
           '<option value="new">Najnovejše</option>' +
           '<option value="rating">Najbolje ocenjeno</option>' +
           '<option value="comments">Največ komentarjev</option>' +
+          '<option value="likes">Največ všečkov</option>' +
         '</select>' +
       '</label>' +
     '</div>' +
@@ -89,6 +118,7 @@
       var x = data[a], y = data[b];
       if (mode === "rating") return (y.avg || -1) - (x.avg || -1) || y.ratingCount - x.ratingCount || x.order - y.order;
       if (mode === "comments") return y.commentCount - x.commentCount || x.order - y.order;
+      if (mode === "likes") return y.likes - x.likes || x.order - y.order;
       return x.order - y.order; // new = izvirni vrstni red (najnovejše prvo)
     });
     arr.forEach(function (s) { list.appendChild(data[s].li); });
@@ -120,6 +150,9 @@
       parts.push('<span class="post-comments">💬 ' + d.commentCount + ' ' +
         pl(d.commentCount, "komentar", "komentarja", "komentarji", "komentarjev") + '</span>');
     }
+    if (d.likes) {
+      parts.push('<span class="post-likes">☀️ ' + d.likes + '</span>');
+    }
     if (parts.length) {
       var row = document.createElement("div");
       row.className = "post-meta-row";
@@ -141,13 +174,14 @@
     }
   }
 
-  // ── podatki: blog.json (tagi+datumi) + bulk ocene/komentarji ──
+  // ── podatki: blog.json (tagi+datumi) + bulk ocene/komentarji/všečki ──
   Promise.all([
     fetch("/blog.json", { cache: "force-cache" }).then(function (r) { return r.json(); }).catch(function () { return []; }),
-    fetch(PROXY + "/blog-comments?slugs=" + encodeURIComponent(slugs.join(","))).then(function (r) { return r.json(); }).catch(function () { return {}; })
+    fetch(PROXY + "/blog-comments?slugs=" + encodeURIComponent(slugs.join(","))).then(function (r) { return r.json(); }).catch(function () { return {}; }),
+    fetch(PROXY + "/like?slugs=" + encodeURIComponent(slugs.join(","))).then(function (r) { return r.json(); }).catch(function () { return {}; })
   ]).then(function (res) {
-    var posts = res[0] || [], bulk = res[1] || {};
-    var ratings = bulk.ratings || {}, comments = bulk.comments || {};
+    var posts = res[0] || [], bulk = res[1] || {}, likeBulk = res[2] || {};
+    var ratings = bulk.ratings || {}, comments = bulk.comments || {}, likes = likeBulk.likes || {};
     var freq = {};
     posts.forEach(function (p) {
       var slug = (p.slug || "").toLowerCase();
@@ -161,35 +195,57 @@
       var r = ratings[s];
       if (r) { data[s].avg = r.avg; data[s].ratingCount = r.count || 0; }
       data[s].commentCount = comments[s] || 0;
+      data[s].likes = likes[s] || 0;
     });
 
-    // tag-značke + meta + novo
+    // tag-značke + emoji tema + meta + novo
     slugs.forEach(function (s) {
-      var tags = data[s].tags;
+      var d = data[s], tags = d.tags;
       if (tags.length) {
         var wrap = document.createElement("div");
         wrap.className = "card-tags";
         wrap.innerHTML = tags.slice(0, 4).map(function (t) { return '<span class="card-tag">' + t + '</span>'; }).join("");
-        data[s].body.appendChild(wrap);
+        d.body.appendChild(wrap);
       }
+      var emoji = document.createElement("span");
+      emoji.className = "card-emoji";
+      emoji.setAttribute("aria-hidden", "true");
+      emoji.textContent = topicEmoji(tags);
+      var thumb = d.a.querySelector(".post-thumb");
+      if (thumb) thumb.insertAdjacentElement("afterend", emoji); else d.a.insertBefore(emoji, d.a.firstChild);
       renderMeta(s);
       markNew(s);
     });
 
-    // filtrska vrstica z najpogostejšimi tagi
+    // filtrska vrstica z najpogostejšimi tagi — skrčena na TAGS_VISIBLE + "Več"
     var top = Object.keys(freq).filter(function (t) { return freq[t] >= 2; })
       .sort(function (a, b) { return freq[b] - freq[a] || a.localeCompare(b); });
     var allBtn = document.createElement("button");
     allBtn.type = "button"; allBtn.className = "bf-tag on"; allBtn.dataset.tag = ""; allBtn.textContent = "Vse";
     allBtn.addEventListener("click", function () { setTag(null); });
     tagWrap.appendChild(allBtn);
-    top.forEach(function (t) {
+    top.forEach(function (t, i) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "bf-tag"; b.dataset.tag = t;
+      if (i >= TAGS_VISIBLE) b.hidden = true;
       b.innerHTML = t + ' <span class="bf-count">' + freq[t] + '</span>';
       b.addEventListener("click", function () { setTag(t); });
       tagWrap.appendChild(b);
     });
+    if (top.length > TAGS_VISIBLE) {
+      var moreBtn = document.createElement("button");
+      moreBtn.type = "button"; moreBtn.className = "bf-tag bf-more";
+      moreBtn.textContent = "+" + (top.length - TAGS_VISIBLE) + " več";
+      moreBtn.addEventListener("click", function () {
+        var expanded = moreBtn.dataset.expanded === "1";
+        Array.prototype.slice.call(tagWrap.querySelectorAll('.bf-tag[data-tag]:not([data-tag=""])')).slice(TAGS_VISIBLE).forEach(function (b) {
+          b.hidden = expanded;
+        });
+        moreBtn.dataset.expanded = expanded ? "0" : "1";
+        moreBtn.textContent = expanded ? "+" + (top.length - TAGS_VISIBLE) + " več" : "Manj ▲";
+      });
+      tagWrap.appendChild(moreBtn);
+    }
 
     buildSidebar(top, freq);
   });
