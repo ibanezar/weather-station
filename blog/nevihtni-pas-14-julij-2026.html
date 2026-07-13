@@ -105,7 +105,7 @@
 
 /* Urni graf sunkov vetra (stolpci) */
 .hbars-wrap { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.2rem 1.3rem 1rem; margin: 1.2rem 0 1.8rem; }
-.hbars-title { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; }
+.hbars-title { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; text-align: center; }
 .hbars { display: flex; align-items: flex-end; gap: 3px; height: 130px; }
 .hbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
 .hbar { width: 100%; max-width: 20px; border-radius: 4px 4px 0 0; background: #3b82f6; transition: height .3s ease; position: relative; }
@@ -190,12 +190,14 @@
       <div class="hbars-note">Vir: Open-Meteo (spoj modelov ECMWF in DWD ICON), točka postaje IREICA1. Gre za lokalni model za našo dolino — širša ocena za nevihtni pas kot celoto dopušča tudi bistveno višje, silovite sunke.</div>
     </div>
 
-    <p>Poleg vetra so krajevno mogoči še:</p>
-    <ul>
-      <li>debela toča,</li>
-      <li>siloviti, kratkotrajni nalivi, ki lahko hitro dvignejo gladino hudournikov,</li>
-      <li>številni udari strel.</li>
-    </ul>
+    <div class="callout">
+      <p>Poleg vetra so krajevno mogoči še:</p>
+      <ul>
+        <li>debela toča,</li>
+        <li>siloviti, kratkotrajni nalivi, ki lahko hitro dvignejo gladino hudournikov,</li>
+        <li>številni udari strel.</li>
+      </ul>
+    </div>
 
     <!-- ════ 04: PRIPOROČILA ════ -->
     <span class="section-label">04 — Priporočila</span>
