@@ -1,0 +1,37 @@
+name: Minify assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - app.js
+      - style.css
+  workflow_dispatch:
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Namesti odvisnosti
+        run: npm ci
+
+      - name: Minificiraj app.js in style.css
+        run: npm run minify
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add app.min.js style.min.css
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: posodobi minificirane datoteke [skip ci]"
+          git push
