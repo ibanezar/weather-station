@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://meteorec.si/vreme/2019/11/07/</loc>
     <lastmod>2019-11-07</lastmod>
@@ -15293,72 +15293,84 @@
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-januar.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/februar/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-februar.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/marec/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-marec.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/april/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-april.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/maj/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-maj.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/junij/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-junij.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/julij/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-julij.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/avgust/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-avgust.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/september/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-september.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/oktober/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-oktober.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/november/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-november.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/december/</loc>
     <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <image:image><image:loc>https://meteorec.si/og/mesec-december.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/vreme/mesec/</loc>

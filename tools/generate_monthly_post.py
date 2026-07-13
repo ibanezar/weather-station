@@ -298,30 +298,37 @@ def touch_existing(slug, wire=True):
 
 def rewrite_sitemap_and_index(posts):
     # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav (lastmod = zadnja sprememba)
+    # image: samo za strani z resnično lastno (ne generično) sliko -- domača
+    # stran in posamezni članki bloga, vsak s svojim og/<slug>.jpg.
     sm = [
-        (f"{SITE}/",                       "hourly",  "1.0", TODAY),
-        (f"{SITE}/blog/",                  "weekly",  "0.8", TODAY),
-        (f"{SITE}/o-postaji.html",         "monthly", "0.6", "2026-06-19"),
-        (f"{SITE}/gobarska-napoved/",      "daily",   "0.8", TODAY),
-        (f"{SITE}/vodostaj-savinje/",      "daily",   "0.8", TODAY),
-        (f"{SITE}/nevihte/",               "daily",   "0.8", TODAY),
-        (f"{SITE}/agrometeo/",             "daily",   "0.7", TODAY),
-        (f"{SITE}/kakovost-zraka/",        "daily",   "0.7", TODAY),
-        (f"{SITE}/vreme-za-padalce/",      "daily",   "0.6", TODAY),
-        (f"{SITE}/trendi/",                "weekly",  "0.7", TODAY),
-        (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-07-08"),
+        (f"{SITE}/",                       "hourly",  "1.0", TODAY, f"{SITE}/og-image.jpg"),
+        (f"{SITE}/blog/",                  "weekly",  "0.8", TODAY, None),
+        (f"{SITE}/o-postaji.html",         "monthly", "0.6", "2026-06-19", None),
+        (f"{SITE}/gobarska-napoved/",      "daily",   "0.8", TODAY, None),
+        (f"{SITE}/vodostaj-savinje/",      "daily",   "0.8", TODAY, None),
+        (f"{SITE}/nevihte/",               "daily",   "0.8", TODAY, None),
+        (f"{SITE}/agrometeo/",             "daily",   "0.7", TODAY, None),
+        (f"{SITE}/kakovost-zraka/",        "daily",   "0.7", TODAY, None),
+        (f"{SITE}/vreme-za-padalce/",      "daily",   "0.6", TODAY, None),
+        (f"{SITE}/trendi/",                "weekly",  "0.7", TODAY, None),
+        (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-07-08", f"{SITE}/og/poplave-2023.jpg"),
     ]
-    sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"]) for p in posts]
+    sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"],
+            f"{SITE}/og/{p['slug']}.jpg") for p in posts]
     # kategorijske (tag) strani
     tag_slugs = build_tag_pages(posts)
-    sm += [(f"{SITE}/blog/tema/{t}/", "weekly", "0.5", TODAY) for t in tag_slugs]
+    sm += [(f"{SITE}/blog/tema/{t}/", "weekly", "0.5", TODAY, None) for t in tag_slugs]
     body = "\n".join(
         f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lm}</lastmod>\n"
-        f"    <changefreq>{cf}</changefreq>\n    <priority>{pr}</priority>\n  </url>"
-        for loc, cf, pr, lm in sm)
+        f"    <changefreq>{cf}</changefreq>\n    <priority>{pr}</priority>"
+        + (f"\n    <image:image><image:loc>{img}</image:loc></image:image>" if img else "")
+        + "\n  </url>"
+        for loc, cf, pr, lm, img in sm)
     open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8").write(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + "\n</urlset>\n")
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
+        + body + "\n</urlset>\n")
     # blog/index.html — pregeneriraj seznam objav med markerjema
     idx = os.path.join(ROOT, "blog", "index.html")
     h = open(idx, encoding="utf-8").read()

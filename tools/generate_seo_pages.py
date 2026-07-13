@@ -375,8 +375,8 @@ def year_stats(hist, year):
 
 # ── Sitemap accumulator ──────────────────────────────────────────────────────
 
-def sitemap_entry(loc, lastmod, changefreq, priority):
-    return (loc, lastmod, changefreq, priority)
+def sitemap_entry(loc, lastmod, changefreq, priority, image=None):
+    return (loc, lastmod, changefreq, priority, image)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE GENERATORS
@@ -1542,7 +1542,7 @@ def gen_month_climatology(hist, sitemap_urls):
 {links}'''
         html = page_shell(title, desc, url, schema, body, og_image=month_img)
         write_page(rel, html, force=True)
-        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
+        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6", image=month_img))
         written += 1
         index_cards.append(
             f'    <a class="year-card" href="{url}">\n'
@@ -1849,17 +1849,20 @@ def gen_slovar_pages(sitemap_urls):
 
 def gen_sitemap(sitemap_urls):
     entries = []
-    for loc, lastmod, cf, priority in sitemap_urls:
+    for loc, lastmod, cf, priority, *rest in sitemap_urls:
+        image = rest[0] if rest else None
+        image_xml = f"\n    <image:image><image:loc>{image}</image:loc></image:image>" if image else ""
         entries.append(
             f"  <url>\n"
             f"    <loc>{loc}</loc>\n"
             f"    <lastmod>{lastmod}</lastmod>\n"
             f"    <changefreq>{cf}</changefreq>\n"
-            f"    <priority>{priority}</priority>\n"
+            f"    <priority>{priority}</priority>{image_xml}\n"
             f"  </url>"
         )
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
-           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+           'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
            + "\n".join(entries) + "\n</urlset>\n")
     out = os.path.join(ROOT, "sitemap-weather.xml")
     with open(out, "w", encoding="utf-8") as f:
