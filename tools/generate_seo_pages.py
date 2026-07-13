@@ -104,11 +104,13 @@ def crumbs_schema(crumbs):
             f'{{"@context":"https://schema.org","@type":"BreadcrumbList",'
             f'"itemListElement":[{",".join(items)}]}}\n</script>')
 
-def webpage_schema(url, title, desc, date_published=None):
+def webpage_schema(url, title, desc, date_published=None, image=None):
     full = f"{SITE}{url}"
+    img = image or f"{SITE}/og-image.jpg"
     s = (f'{{"@context":"https://schema.org","@type":"WebPage",'
          f'"@id":{json.dumps(full)},"name":{json.dumps(title)},'
          f'"description":{json.dumps(desc)},"url":{json.dumps(full)},'
+         f'"image":{json.dumps(img)},'
          f'"inLanguage":"sl","isPartOf":{{"@id":"{SITE}/#website"}},'
          f'"about":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
@@ -1522,8 +1524,9 @@ def gen_month_climatology(hist, sitemap_urls):
                  '<a href="/rekord/">→ Vsi rekordi</a> · '
                  '<a href="/vreme/">→ Vremenski arhiv po dnevih</a></p>')
 
+        month_img = f"{SITE}/og/mesec-{slug}.jpg"
         schema = "\n".join([
-            webpage_schema(url, title, desc),
+            webpage_schema(url, title, desc, image=month_img),
             crumbs_schema(crumbs),
             faq_schema(qa),
         ])
@@ -1537,7 +1540,7 @@ def gen_month_climatology(hist, sitemap_urls):
 {faq_html}
 {nav}
 {links}'''
-        html = page_shell(title, desc, url, schema, body, og_image=f"{SITE}/og/mesec-{slug}.jpg")
+        html = page_shell(title, desc, url, schema, body, og_image=month_img)
         write_page(rel, html, force=True)
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
         written += 1
