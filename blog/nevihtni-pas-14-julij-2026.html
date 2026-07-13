@@ -113,6 +113,23 @@
 .hbar-hr { font-size: .56rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: .35rem; }
 .hbars-note { font-size: .72rem; color: var(--muted); margin-top: .8rem; padding-top: .55rem; border-top: 1px solid rgba(255,255,255,.06); }
 @media (max-width: 560px) { .hbars { height: 110px; } .hbar-hr { font-size: .5rem; } .hbar .hbar-pct { font-size: .5rem; } }
+
+/* Nevihtni zemljevid — Zg. Savinjska (vgrajen pripomoček) */
+.sm-daybar{display:flex;gap:.5rem;flex-wrap:wrap}
+.sm-day{display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.45rem .8rem;
+  border:1px solid var(--border,rgba(128,128,128,.3));border-radius:10px;background:transparent;
+  color:inherit;cursor:pointer;font-size:.85rem;font-weight:600;line-height:1.1;transition:.15s}
+.sm-day span{font-size:.68rem;font-weight:400;opacity:.65}
+.sm-day:hover{border-color:#f97316}
+.sm-day.active{background:#f97316;border-color:#f97316;color:#fff}
+.sm-day.active span{opacity:.9}
+.sm-legend{display:flex;flex-wrap:wrap;gap:.7rem 1.1rem;margin-top:.6rem}
+.sm-leg-item{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;opacity:.85}
+.sm-leg-dot{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:50%;color:#fff;font-weight:700;font-size:.78rem;flex-shrink:0}
+.leaflet-tooltip.sm-tip{background:transparent;border:none;box-shadow:none;color:#fff;
+  font-weight:700;font-size:.8rem;padding:0;text-shadow:0 0 3px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.9)}
+.leaflet-tooltip.sm-tip::before{display:none}
 </style>
 </head>
 <body>
@@ -166,6 +183,11 @@
       </div>
     </div>
 
+    <figure class="post-photo">
+      <img src="/img/blog/nevihtni-pas-14-julij-2026/foto-1.jpg" alt="Nevihtni oblak s poudarjenim nalivom nad Savinjsko dolino, pogled s ceste." loading="lazy">
+      <figcaption>Približevanje nevihtnega oblaka. Foto: Filip Eremita.</figcaption>
+    </figure>
+
     <!-- ════ 01: OZRAČJE ════ -->
     <span class="section-label">01 — Kaj se dogaja v ozračju</span>
     <h2 id="ozracje">Vroč zrak spredaj, hladen zrak zadaj — recept za organizirano linijo</h2>
@@ -188,6 +210,15 @@
       <div class="hbars-title">Modelski sunki vetra po urah — 14. 7. 2026, Rečica ob Savinji (IREICA1)</div>
       <div class="hbars" id="hbars"></div>
       <div class="hbars-note">Vir: Open-Meteo (spoj modelov ECMWF in DWD ICON), točka postaje IREICA1. Gre za lokalni model za našo dolino — širša ocena za nevihtni pas kot celoto dopušča tudi bistveno višje, silovite sunke.</div>
+    </div>
+
+    <div class="callout" id="pm-card">
+      <span class="section-label" style="margin:0 0 .6rem">🗺️ Nevihtni zemljevid — Zgornja Savinjska dolina</span>
+      <div class="sm-daybar" id="pm-daybar" role="tablist" aria-label="Izbira dneva"></div>
+      <div id="pm-map" style="height:380px;border-radius:14px;overflow:hidden;margin:.8rem 0 .6rem;background:rgba(128,128,128,.08)"></div>
+      <div class="sm-legend" id="pm-legend"></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem" id="pm-updated"></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">Nevihtni potencial (CAPE, sunki vetra, padavine) po krajih v dolini, iz modela Open-Meteo. Klikni kraj za podrobnosti. Privzeto prikazan jutrišnji dan.</div>
     </div>
 
     <div class="callout">
@@ -258,6 +289,169 @@
         '<span class="hbar-hr">' + r[0] + '</span>';
       hbars.appendChild(col);
     });
+  }
+})();
+</script>
+<script>
+// Nevihtni zemljevid — Zgornja Savinjska dolina (isti izračun kot na naslovni strani, /nevihte/)
+(function () {
+  var PM_LOCS = [
+    { n: 'Rečica ob Savinji', la: 46.325779, lo: 14.921137 },
+    { n: 'Mozirje',           la: 46.3389,   lo: 14.9617 },
+    { n: 'Nazarje',           la: 46.3186,   lo: 14.9461 },
+    { n: 'Ljubno ob Savinji', la: 46.3447,   lo: 14.8344 },
+    { n: 'Luče',              la: 46.3553,   lo: 14.7486 },
+    { n: 'Solčava',           la: 46.4194,   lo: 14.6914 },
+    { n: 'Logarska dolina',   la: 46.3917,   lo: 14.6250 },
+    { n: 'Gornji Grad',       la: 46.2961,   lo: 14.8064 },
+    { n: 'Radmirje',          la: 46.3389,   lo: 14.8714 },
+    { n: 'Šmartno ob Dreti',  la: 46.3008,   lo: 14.8758 }
+  ];
+  var PM_LEVELS = [null,
+    { c: '#22c55e', t: 'Zelo nizka' },
+    { c: '#eab308', t: 'Nizka' },
+    { c: '#f97316', t: 'Zmerna' },
+    { c: '#ef4444', t: 'Visoka' },
+    { c: '#a21caf', t: 'Zelo visoka' }
+  ];
+  var pmMap = null, pmData = null, pmDay = 1, pmDates = [], pmMarkers = [];
+
+  function pmLevel(d) {
+    var cape = d.cape, gust = d.gust, precip = d.precip, thunder = d.thunder, hail = d.hail;
+    var lvl = 1;
+    if (cape >= 300 || thunder) lvl = 2;
+    if ((cape >= 900 && thunder) || cape >= 1400) lvl = 3;
+    if (cape >= 1500 && thunder && (gust >= 55 || precip >= 15)) lvl = 4;
+    if (cape >= 2200 && thunder && (gust >= 75 || hail || precip >= 30)) lvl = 5;
+    if (gust >= 90 && lvl < 4) lvl = 4;
+    if (hail && lvl < 4) lvl = 4;
+    return lvl;
+  }
+
+  function pmRenderDaybar() {
+    var bar = document.getElementById('pm-daybar'); if (!bar) return;
+    var labels = ['Danes', 'Jutri', 'Pojutrišnjem'];
+    var html = '';
+    for (var i = 0; i < 3; i++) {
+      var sub = pmDates[i] ? new Date(pmDates[i]).toLocaleDateString('sl', { weekday: 'short', day: 'numeric', month: 'numeric' }) : '';
+      html += '<button type="button" class="sm-day' + (i === pmDay ? ' active' : '') + '" data-i="' + i + '">' +
+        labels[i] + (sub ? '<span>' + sub + '</span>' : '') + '</button>';
+    }
+    bar.innerHTML = html;
+    Array.prototype.forEach.call(bar.querySelectorAll('.sm-day'), function (btn) {
+      btn.addEventListener('click', function () {
+        pmDay = parseInt(btn.getAttribute('data-i'), 10);
+        pmRenderDaybar();
+        pmRenderMarkers();
+      });
+    });
+  }
+
+  function pmRenderLegend() {
+    var el = document.getElementById('pm-legend'); if (!el) return;
+    var html = '';
+    for (var i = 1; i <= 5; i++) {
+      var l = PM_LEVELS[i];
+      html += '<span class="sm-leg-item"><span class="sm-leg-dot" style="background:' + l.c + '">' + i + '</span>' + l.t + '</span>';
+    }
+    el.innerHTML = html;
+  }
+
+  function pmRenderMarkers() {
+    if (!pmData || !pmMap) return;
+    pmMarkers.forEach(function (m) { pmMap.removeLayer(m); });
+    pmMarkers = [];
+    var date = pmDates[pmDay];
+    pmData.forEach(function (entry) {
+      var d = entry.days[date]; if (!d) return;
+      var lvl = pmLevel(d), lc = PM_LEVELS[lvl];
+      var m = L.circleMarker([entry.loc.la, entry.loc.lo], {
+        radius: 9 + lvl * 2.4, color: '#fff', weight: 1.5, fillColor: lc.c, fillOpacity: .92
+      }).addTo(pmMap);
+      m.bindTooltip(String(lvl), { permanent: true, direction: 'center', className: 'sm-tip' });
+      m.bindPopup('<b>' + entry.loc.n + '</b><br>Stopnja ' + lvl + ' — ' + lc.t + '<br>' +
+        'CAPE ' + Math.round(d.cape) + ' J/kg · sunki ' + Math.round(d.gust) + ' km/h<br>' +
+        'padavine ' + d.precip.toFixed(1) + ' mm · verjetnost ' + Math.round(d.pp) + ' %<br>' +
+        (d.thunder ? '⚡ nevihte' : 'brez neviht') + (d.hail ? ' · 🧊 toča' : ''));
+      pmMarkers.push(m);
+    });
+  }
+
+  function pmLoadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  function pmLoadCss(href) {
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href;
+    document.head.appendChild(l);
+  }
+
+  async function pmLoadData() {
+    var upd = document.getElementById('pm-updated');
+    if (upd) upd.textContent = 'Pridobivam napoved…';
+    try {
+      var lats = PM_LOCS.map(function (l) { return l.la; }).join(',');
+      var lons = PM_LOCS.map(function (l) { return l.lo; }).join(',');
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lats + '&longitude=' + lons +
+        '&hourly=cape,wind_gusts_10m,precipitation,precipitation_probability,weather_code&forecast_days=3&timezone=Europe%2FLjubljana';
+      var res = await fetch(url);
+      var json = await res.json();
+      var arr = Array.isArray(json) ? json : [json];
+      pmData = arr.map(function (r, idx) {
+        var h = r.hourly || {}, t = h.time || [];
+        var days = {};
+        for (var i = 0; i < t.length; i++) {
+          var dstr = t[i].slice(0, 10);
+          if (!days[dstr]) days[dstr] = { cape: 0, gust: 0, precip: 0, pp: 0, thunder: false, hail: false };
+          var dd = days[dstr], w = h.weather_code ? h.weather_code[i] : null;
+          dd.cape = Math.max(dd.cape, (h.cape && h.cape[i]) || 0);
+          dd.gust = Math.max(dd.gust, (h.wind_gusts_10m && h.wind_gusts_10m[i]) || 0);
+          dd.precip += (h.precipitation && h.precipitation[i]) || 0;
+          dd.pp = Math.max(dd.pp, (h.precipitation_probability && h.precipitation_probability[i]) || 0);
+          if (w === 95 || w === 96 || w === 99) dd.thunder = true;
+          if (w === 96 || w === 99) dd.hail = true;
+        }
+        return { loc: PM_LOCS[idx], days: days };
+      });
+      pmDates = Object.keys((pmData[0] && pmData[0].days) || {}).sort().slice(0, 3);
+      pmRenderDaybar();
+      pmRenderMarkers();
+      if (upd) upd.textContent = 'Vir: Open-Meteo · osveženo ' +
+        new Date().toLocaleString('sl', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      console.warn('storm map:', e);
+      if (upd) upd.textContent = 'Napoved trenutno ni dosegljiva.';
+    }
+  }
+
+  async function pmInit() {
+    pmRenderDaybar();
+    pmRenderLegend();
+    var el = document.getElementById('pm-map'); if (!el) return;
+    var dataP = pmLoadData();
+    try {
+      if (typeof L === 'undefined') {
+        pmLoadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+        await pmLoadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+      }
+      pmMap = L.map('pm-map', { zoomControl: true, attributionControl: false, minZoom: 9, maxZoom: 13 }).setView([46.355, 14.80], 11);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        { maxZoom: 13, maxNativeZoom: 19, subdomains: 'abcd' }).addTo(pmMap);
+      setTimeout(function () { pmMap.invalidateSize(); }, 60);
+    } catch (e) {
+      console.warn('storm map: Leaflet ni na voljo', e);
+      el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;' +
+        'padding:1rem;text-align:center;opacity:.7;font-size:.9rem">Zemljevida trenutno ni mogoče naložiti.</div>';
+    }
+    await dataP;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', pmInit);
+  } else {
+    pmInit();
   }
 })();
 </script>
