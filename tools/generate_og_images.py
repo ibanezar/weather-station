@@ -448,11 +448,20 @@ def make_og(article):
     draw.text((pad, pad + 36), 'meteorec.si', font=font_domain,
               fill=(210, 225, 245))
 
-    # Article title centered
+    # Article title centered -- auto-shrink to fit width (dolgi enovrstični
+    # naslovi, npr. avtomatski izsek iz generate_daily_post.py, sicer segajo
+    # čez oba robova slike, ker se prej ni preverjala dejanska širina).
     lines = article['title'].split('\n')
     n = len(lines)
     font_size = 72 if (n == 1 or max(len(l) for l in lines) > 22) else 82
+    max_line_w = W - 2 * pad
     font_title = ImageFont.truetype(FONT_BOLD, font_size)
+    while font_size > 36:
+        widest = max(draw.textbbox((0, 0), l, font=font_title)[2] for l in lines)
+        if widest <= max_line_w:
+            break
+        font_size -= 4
+        font_title = ImageFont.truetype(FONT_BOLD, font_size)
     line_h = font_title.size + 12
     total_h = n * line_h
     y_start = (H - total_h) // 2 + 8
