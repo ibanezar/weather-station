@@ -94,7 +94,7 @@
     <h1>Zakaj napovedanih neurij 14. julija ni bilo? Anatomija »busta«</h1>
     <p class="post-meta">14. julij 2026 · Filip Eremita · Analiza dogodka · Postaja IREICA1</p>
 
-    <p class="lead">Oranžno opozorilo za skoraj vso Slovenijo. Napovedi o organiziranih multiceličnih sistemih, linijskih nevihtah in posameznih supercelicah. Opozorila pred debelejšo točo in silovitimi sunki vetra. In potem? Nad Zgornjo Savinjsko dolino je popoldne 14. julija prišlo le nekaj oblačnosti — na postaji IREICA1 smo namerili vsega <span class="hl">4,3 mm dežja</span>, najmočnejši sunek vetra pa je dosegel le <strong>20,1 km/h</strong>.</p>
+    <p class="lead">Oranžno opozorilo za skoraj vso Slovenijo. Napovedi o organiziranih multiceličnih sistemih, linijskih nevihtah in posameznih supercelicah. Opozorila pred debelejšo točo in silovitimi sunki vetra. In potem? Nad Zgornjo Savinjsko dolino je popoldne 14. julija prišlo le nekaj oblačnosti — na postaji IREICA1 smo namerili vsega <span class="hl">4,3 mm dežja</span>, najmočnejši sunek vetra pa je dosegel le <strong>34,9 km/h</strong>.</p>
 
     <p>Kaj se je zgodilo? Zakaj se napoved ni uresničila? Poglejmo v ozadje — ker je »bust« pogosto bolj poučen kot zadeto neurje.</p>
 
@@ -107,7 +107,7 @@
       </div>
       <div class="stat-card c-wind">
         <div class="sc-label">Najmočnejši sunek</div>
-        <div class="sc-val">20,1km/h</div>
+        <div class="sc-val">34,9km/h</div>
         <div class="sc-sub">ob prehodu šibkega iztoka (17h)</div>
       </div>
       <div class="stat-card c-cool">
@@ -132,7 +132,7 @@
 
     <p>Nevihte so res nastale — a njihov vrhunec je ostal severno od nas. Najmočneje je klestilo na Koroškem in ob Karavankah; postaja Mežica je v dobri uri (med 16.10 in 17.20) namerila kar 47 mm padavin. Nato pa se je zgodilo tisto, kar je za našo dolino značilno: nevihtna aktivnost je nad Koroško začela slabeti, ravno ko se je pomikala proti Savinjski in Podravski regiji. Do nas so celice prišle že v fazi razpadanja.</p>
 
-    <p>Na postaji IREICA1 se to lepo vidi v poteku tlaka in temperature čez dan. Zračni tlak je od jutranjih <strong>1019,2 hPa</strong> do sredine popoldneva (okoli 15. ure) upadel na <strong>1015,3 hPa</strong> — komaj kake 4 hPa v skoraj enem dnevu, kar je bistveno manj od klasičnega, ostrega predfrontalnega padca. Okoli 17. ure je temperatura v treh urah padla z <strong>29,9 °C</strong> (14h) na <strong>21,7 °C</strong> (17h), sunki vetra pa so kratkotrajno poskočili na 20,1 km/h — znak šibkega iztoka (outflow) razpadajoče celice, ne organizirane linije neviht. Dež je padal kratko, med 17. in 19. uro, skupno 4,3 mm, nato je tlak spet hitro narasel na 1018,4 hPa (18h) — ozračje se je umirilo skoraj tako hitro, kot je vzvalovilo.</p>
+    <p>Na postaji IREICA1 se to lepo vidi v poteku tlaka in temperature čez dan. Zračni tlak je od jutranjih <strong>1019,2 hPa</strong> do sredine popoldneva (okoli 15. ure) upadel na <strong>1015,3 hPa</strong> — komaj kake 4 hPa v skoraj enem dnevu, kar je bistveno manj od klasičnega, ostrega predfrontalnega padca. Okoli 17. ure je temperatura v treh urah padla z <strong>29,9 °C</strong> (14h) na <strong>21,7 °C</strong> (17h), sunki vetra pa so kratkotrajno poskočili na 34,9 km/h — znak šibkega iztoka (outflow) razpadajoče celice, ne organizirane linije neviht. Dež je padal kratko, med 17. in 19. uro, skupno 4,3 mm, nato je tlak spet hitro narasel na 1018,4 hPa (18h) — ozračje se je umirilo skoraj tako hitro, kot je vzvalovilo.</p>
 
     <div class="chart-card">
       <h3>Urni potek 14. julija: temperatura in zračni tlak (postaja IREICA1)</h3>
@@ -298,7 +298,7 @@ new Chart(document.getElementById('chartTempPress'), {
 
 /* Graf 2 — Sunki vetra in padavine po urah (14. julij 2026) */
 const grLabels = tpLabels;
-const grGust   = [2.1,2.6,2.1,1.8,4.3,3.2,3.5,1.8,2.9,3.5,2.9,6.4,8.2,14.8,11.6,10.5,10.1,20.1,6.9,4.7,3.5];
+const grGust   = [3.5,3.5,3.5,1.8,5.5,3.5,3.5,1.8,3.5,3.5,3.5,7.2,11.1,21.9,18.3,13.0,14.8,34.9,7.2,5.5,3.5];
 const grRain   = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3.61,0.68,0,0];
 new Chart(document.getElementById('chartGustRain'), {
   data: {
@@ -347,7 +347,7 @@ new Chart(document.getElementById('chartGustRain'), {
     scales: {
       x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 9 }, maxTicksLimit: 12 } },
       y: {
-        position: 'left', min: 0, max: 24,
+        position: 'left', min: 0, max: 40,
         grid: { color: 'rgba(255,255,255,.05)' },
         ticks: { color: '#a78bfa', font: { size: 10 }, callback: v => v + ' km/h' }
       },
