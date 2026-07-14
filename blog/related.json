@@ -1,18 +1,23 @@
 {
-  "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e": [
+  "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f": [
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
     "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
-    "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
-    "nevihtni-pas-14-julij-2026"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
+  ],
+  "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e": [
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
+    "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
   ],
   "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee": [
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
-    "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
-    "velika-pozarna-ogrozenost-8-julij-2026"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
   ],
   "arso-opozorilo-warningts-2026-07-14-1304-e1db70": [
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
-    "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
-    "nevihtni-pas-14-julij-2026"
+    "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee"
   ],
   "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714": [
     "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713",
@@ -76,8 +81,8 @@
   ],
   "velika-pozarna-ogrozenost-8-julij-2026": [
     "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
-    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
-    "najbolj-suha-pomlad-2026-ireica1"
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e"
   ],
   "primerjava-krajev-vrocinski-val-julij-2026": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
@@ -157,7 +162,7 @@
   "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi": [
     "nevihte-toca-hudourniki-julij-2026",
     "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
-    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e"
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f"
   ],
   "vremenski-povzetek-junij-2026": [
     "vremenski-povzetek-maj-2026",

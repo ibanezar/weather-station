@@ -33,6 +33,26 @@
       "validEnd": "2026-07-15T21:59:00+00:00",
       "resolved": false,
       "publishedAt": "2026-07-14T15:01:37.253006+00:00"
+    },
+    "cfe170f1754cd26b": {
+      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
+      "types": [
+        "WarningTS",
+        "WarningForestFire"
+      ],
+      "validEnd": "2026-07-15T21:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-07-14T16:36:29.414907+00:00"
+    },
+    "cf77808c4a5f8965": {
+      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
+      "types": [
+        "WarningTS",
+        "WarningForestFire"
+      ],
+      "validEnd": "2026-07-15T21:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-07-14T16:36:29.414907+00:00"
     }
   }
 }
