@@ -216,6 +216,9 @@ async function fetchArsoWarnings() {
             desc: wt?.desc || typeDesc,
             more: wt?.more || "",
             timeStr: timeStr.replace(/^ · /, ""),
+            type: node.parameter || "",
+            validStart: node.validStart || "",
+            validEnd: node.validEnd || "",
           });
         }
       }

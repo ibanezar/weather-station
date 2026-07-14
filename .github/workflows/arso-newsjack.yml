@@ -1,0 +1,84 @@
+name: ARSO newsjacking protokol
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # vsakih 15 min — hitrost je bistvo (idea #9)
+  workflow_dispatch: {}
+
+# Prepreči prekrivanje zagonov
+concurrency:
+  group: arso-newsjack
+  cancel-in-progress: false
+
+jobs:
+  newsjack:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri ARSO opozorila, objavi/posodobi zapise
+        run: python3 tools/generate_arso_newsjack_post.py --wire
+
+      - name: Commit & push (samo če je kaj novega)
+        id: commit
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add blog/ blog.json sitemap.xml og/ tools/.arso_newsjack_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            echo "published=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "blog: ARSO newsjack $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+            for i in 1 2 3 4 5; do
+              if git push; then
+                echo "published=true" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+              echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+              git fetch origin main
+              git rebase origin/main
+              sleep $((i * 3))
+            done
+            echo "Push ni uspel po 5 poskusih." >&2
+            exit 1
+          fi
+
+      - name: IndexNow — obvesti iskalnike takoj (hitrost je bistvo)
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, urllib.error, sys
+
+          posts = json.load(open("blog.json", encoding="utf-8"))
+          post = posts[0]
+          post_url = f"https://meteorec.si{post['url']}"
+
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"https://meteorec.si/{KEY}.txt",
+              "urlList": [post_url, "https://meteorec.si/sitemap.xml"],
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} — {post_url}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+          PYEOF
