@@ -200,24 +200,43 @@ def generate_custom_og(slug, og_meta):
         ensure_og_fallback(slug)
 
 
-def build_post(alert, current, now_utc):
-    cat = classify(alert)
-    level_sl = {"orange": "oranžno", "red": "rdeče"}.get(alert.get("level"), alert.get("level", "oranžno"))
+def build_post(alerts, current, now_utc):
+    """alerts: seznam 1+ hkrati aktivnih, še neobjavljenih opozoril. Če jih je
+    več (npr. nevihte + požarna ogroženost izdani v istem teku), se združijo
+    v en sam zapis namesto v skoraj identične ločene objave po eno na
+    opozorilo."""
+    cats = [classify(a) for a in alerts]
+    level_rank = {"red": 2, "orange": 1}
+    worst_level = max((a.get("level") for a in alerts), key=lambda l: level_rank.get(l, 0))
+    level_sl = {"orange": "oranžno", "red": "rdeče"}.get(worst_level, worst_level or "oranžno")
     date_str = fmtdate(now_utc.date().isoformat())
     time_local = now_utc.strftime("%H:%M")
-    # Sufiks iz signature zagotovi unikaten slug tudi, če je alert.get("type")
-    # prazen/None (npr. dokler worker.js s tem poljem še ni deployan) — brez
-    # njega bi dve različni hkratni opozorili (npr. nevihte + požarna
-    # ogroženost) v istem teku dobili enak slug in druga bi prepisala prvo.
-    slug = (f"arso-opozorilo-{(alert.get('type') or 'opozorilo').lower()}"
-            f"-{now_utc:%Y-%m-%d-%H%M}-{alert_signature(alert)[:6]}")
+    labels = [c["label"] for c in cats]
+    label_txt = labels[0] if len(labels) == 1 else ", ".join(labels[:-1]) + " in " + labels[-1]
+    # primarna kategorija za OG sliko/naslovno ikono: tista z najhujšo stopnjo
+    primary_idx = max(range(len(alerts)), key=lambda i: level_rank.get(alerts[i].get("level"), 0))
+    primary_cat = cats[primary_idx]
+    icons = "".join(dict.fromkeys(c["icon"] for c in cats))  # brez podvojenih, v izvirnem vrstnem redu
+
+    # Sufiks iz kombinirane signature zagotovi unikaten slug tudi, če je
+    # alert.get("type") prazen/None (npr. dokler worker.js s tem poljem še ni
+    # deployan) — brez njega bi dve različni hkratni opozorili (npr. nevihte +
+    # požarna ogroženost) v istem teku dobili enak slug in druga bi prepisala prvo.
+    types_for_slug = sorted({(a.get("type") or "opozorilo").lower() for a in alerts})
+    combo_sig = hashlib.sha1("|".join(sorted(alert_signature(a) for a in alerts)).encode()).hexdigest()[:6]
+    slug = f"arso-opozorilo-{'-'.join(types_for_slug)}-{now_utc:%Y-%m-%d-%H%M}-{combo_sig}"
     url = f"{SITE}/blog/{slug}.html"
 
-    title = f"ARSO {level_sl} opozorilo — {cat['label']}: kaj to pomeni za Zgornjo Savinjsko dolino"
-    valid_txt = f', veljavno {alert.get("timeStr")}' if alert.get("timeStr") else ""
-    lead = (f'Agencija RS za okolje (ARSO) je izdala <strong>{level_sl} opozorilo</strong> '
-            f'({cat["label"]}){valid_txt}. '
-            f'{alert.get("desc","")}'.strip())
+    title = f"ARSO {level_sl} opozorilo — {label_txt}: kaj to pomeni za Zgornjo Savinjsko dolino"
+
+    lead_parts = []
+    for a, cat in zip(alerts, cats):
+        lvl = {"orange": "oranžno", "red": "rdeče"}.get(a.get("level"), a.get("level", "oranžno"))
+        valid_txt = f' (veljavno {a.get("timeStr")})' if a.get("timeStr") else ""
+        lead_parts.append(f'{lvl} opozorilo ({cat["label"]}){valid_txt}')
+    lead_joined = lead_parts[0] if len(lead_parts) == 1 else "; ".join(lead_parts[:-1]) + " ter " + lead_parts[-1]
+    descs = " ".join(a.get("desc", "").strip() for a in alerts if a.get("desc", "").strip())
+    lead = f'Agencija RS za okolje (ARSO) je izdala <strong>{lead_joined}</strong>. {descs}'.strip()
 
     now_parts = []
     if current.get("temp") is not None:
@@ -232,7 +251,20 @@ def build_post(alert, current, now_utc):
 
     desc = re.sub("<[^>]+>", "", lead)
     short = desc if len(desc) <= 200 else desc[:197] + "…"
-    tags = ["ARSO opozorilo", cat["label"], "IREICA1", str(now_utc.year)]
+    tags = ["ARSO opozorilo"] + labels + ["IREICA1", str(now_utc.year)]
+
+    if len(alerts) == 1:
+        sections = (f"<h2>Kaj to pomeni za Zgornjo Savinjsko dolino</h2>\n"
+                    f'    <p>{cats[0]["practical"]}</p>\n'
+                    f'    <p><a href="{cats[0]["link_url"]}" style="color:var(--blue)">{cats[0]["link_label"]} →</a></p>')
+    else:
+        blocks = []
+        for a, cat in zip(alerts, cats):
+            lvl = {"orange": "oranžno", "red": "rdeče"}.get(a.get("level"), a.get("level", "oranžno"))
+            blocks.append(f'    <h3>{cat["icon"]} {cat["label"].capitalize()} — {lvl} opozorilo</h3>\n'
+                          f'    <p>{cat["practical"]}</p>\n'
+                          f'    <p><a href="{cat["link_url"]}" style="color:var(--blue)">{cat["link_label"]} →</a></p>')
+        sections = "<h2>Kaj to pomeni za Zgornjo Savinjsko dolino</h2>\n" + "\n".join(blocks)
 
     body_html = f'''<!DOCTYPE html>
 <html lang="sl">
@@ -251,7 +283,7 @@ def build_post(alert, current, now_utc):
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">
 <meta name="description" content="{desc}">
-<meta name="keywords" content="ARSO opozorilo, {cat['label']}, Zgornja Savinjska dolina, IREICA1">
+<meta name="keywords" content="ARSO opozorilo, {', '.join(labels)}, Zgornja Savinjska dolina, IREICA1">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="article">
@@ -259,7 +291,7 @@ def build_post(alert, current, now_utc):
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{short}">
-<meta property="og:image" content="{SITE}/og-image.jpg">
+<meta property="og:image" content="{SITE}/og/{slug}.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
@@ -269,14 +301,14 @@ def build_post(alert, current, now_utc):
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{short}">
-<meta name="twitter:image" content="{SITE}/og-image.jpg">
+<meta name="twitter:image" content="{SITE}/og/{slug}.jpg">
 <script type="application/ld+json">
 {{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "{title}",
   "description": "{desc}",
-  "image": {{ "@type": "ImageObject", "url": "{SITE}/og-image.jpg", "width": 1200, "height": 630 }},
+  "image": {{ "@type": "ImageObject", "url": "{SITE}/og/{slug}.jpg", "width": 1200, "height": 630 }},
   "datePublished": "{now_utc.isoformat()}",
   "dateModified": "{now_utc.isoformat()}",
   "inLanguage": "sl",
@@ -304,17 +336,15 @@ def build_post(alert, current, now_utc):
   </nav>
   <article>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-    <h1>{cat['icon']} {title}</h1>
+    <h1>{icons} {title}</h1>
     <p class="post-meta">{date_str} ob {time_local} · Filip Eremita · postaja IREICA1 · samodejni zapis ob ARSO opozorilu</p>
     <p class="lead">{lead}</p>
     {MARK_START}{MARK_END}
     <p>{now_txt}</p>
-    <h2>Kaj to pomeni za Zgornjo Savinjsko dolino</h2>
-    <p>{cat['practical']}</p>
+    {sections}
     <p>Za Zgornjo Savinjsko dolino ločeno uradno opozorilo pogosto ni izdano — regijska opozorila ARSO
     (severovzhodna Slovenija) le okvirno zajemajo tudi naš del države. Dogajanje pri nas se lahko razlikuje
     po času in intenzivnosti od tega, kar je navedeno za širšo regijo.</p>
-    <p><a href="{cat['link_url']}" style="color:var(--blue)">{cat['link_label']} →</a></p>
     <p style="color:var(--muted);font-size:.9rem">To je hiter, samodejno ustvarjen zapis ob izdaji ARSO opozorila.
     Ko opozorilo preteče, ta stran dobi posodobitev z dejanskimi meritvami postaje za to obdobje.</p>
     <p style="color:var(--muted);font-size:.9rem">Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.
@@ -335,11 +365,11 @@ def build_post(alert, current, now_utc):
         "date": now_utc.date().isoformat(), "summary": short, "tags": tags,
     }
     og_meta = {
-        "title": f"ARSO {level_sl} opozorilo\n{cat['label']}",
+        "title": f"ARSO {level_sl} opozorilo\n{label_txt}",
         "subtitle": f"Zgornja Savinjska dolina · {date_str}",
         "section": "ARSO opozorilo",
-        "accent": cat["accent"],
-        "photo": cat["photo"],
+        "accent": primary_cat["accent"],
+        "photo": primary_cat["photo"],
     }
     return slug, url, body_html, entry, og_meta
 
@@ -371,12 +401,15 @@ def resolve_pending(state, hist):
             parts.append(f'{num(v["precipTotal"])} mm padavin')
         if not parts:
             continue
+        # "types" je seznam (od PR-a z združenimi hkratnimi opozorili); starejši
+        # zapisi v .arso_newsjack_state.json imajo še en sam niz "type".
+        rec_types = rec.get("types") or ([rec["type"]] if rec.get("type") else [])
         update_html = (f'  <div class="partial-note">📊 <strong>Posodobljeno:</strong> na dan opozorila '
                         f'({fmtdate(end_date)}) je postaja IREICA1 izmerila {", ".join(parts)}. '
                         f'Poglej <a href="/vreme/{end_date[:4]}/{end_date[5:7]}/{end_date[8:10]}/" '
                         f'style="color:var(--blue)">poln dnevni podatek</a>'
                         + (f' ali <a href="/toca/" style="color:var(--blue)">prijave toče v dolini</a>'
-                           if rec.get("type") == "WarningTS" else "") + '.</div>')
+                           if "WarningTS" in rec_types else "") + '.</div>')
 
         path = os.path.join(ROOT, "blog", f"{rec['slug']}.html")
         if not os.path.exists(path):
@@ -415,29 +448,35 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc)
     published = 0
 
-    for alert in significant:
-        sig = alert_signature(alert)
-        if sig in state["posted"] and not force:
-            continue
+    # Vsa nova (še neobjavljena) opozorila iz tega teka gredo v EN zapis, ne
+    # enega na opozorilo — če ARSO hkrati izda npr. nevihte + požarno
+    # ogroženost, bi ločeni objavi delili skoraj ves predlog (isto stanje
+    # postaje, isto uvod/zaključek) in bi bili na blogu skoraj identični.
+    new_alerts = [a for a in significant if force or alert_signature(a) not in state["posted"]]
 
+    if new_alerts:
+        types_txt = ", ".join(a.get("type") or "?" for a in new_alerts)
         current = fetch_current()
-        slug, url, html, entry, og_meta = build_post(alert, current, now)
+        slug, url, html, entry, og_meta = build_post(new_alerts, current, now)
 
         if not wire:
-            print(f"[preview] {slug} — {alert.get('level')} {alert.get('type')}")
-            continue
-
-        out = os.path.join(ROOT, "blog", f"{slug}.html")
-        open(out, "w", encoding="utf-8").write(html)
-        generate_custom_og(slug, og_meta)
-        wire_all(entry, url)
-        state["posted"][sig] = {
-            "slug": slug, "type": alert.get("type", ""),
-            "validEnd": alert.get("validEnd", ""), "resolved": False,
-            "publishedAt": now.isoformat(),
-        }
-        published += 1
-        print(f"✓ objavljeno: blog/{slug}.html ({alert.get('level')} {alert.get('type')})")
+            print(f"[preview] {slug} — {len(new_alerts)} opozoril: {types_txt}")
+        else:
+            out = os.path.join(ROOT, "blog", f"{slug}.html")
+            open(out, "w", encoding="utf-8").write(html)
+            generate_custom_og(slug, og_meta)
+            wire_all(entry, url)
+            rec = {
+                "slug": slug,
+                "types": [a.get("type", "") for a in new_alerts],
+                "validEnd": max((a.get("validEnd", "") for a in new_alerts), default=""),
+                "resolved": False,
+                "publishedAt": now.isoformat(),
+            }
+            for a in new_alerts:
+                state["posted"][alert_signature(a)] = rec
+            published = len(new_alerts)
+            print(f"✓ objavljeno: blog/{slug}.html ({len(new_alerts)} opozoril: {types_txt})")
 
     if not significant:
         print("Ni aktivnih oranžnih/rdečih opozoril.")
