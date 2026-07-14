@@ -22,7 +22,7 @@ Wired into: .github/workflows/arso-newsjack.yml (every 15 min).
 Usage:
   python3 tools/generate_arso_newsjack_post.py [--wire] [--force]
 """
-import datetime, hashlib, json, os, re, sys, urllib.error, urllib.parse, urllib.request
+import datetime, hashlib, json, os, re, shutil, sys, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate  # noqa: E402
@@ -42,12 +42,14 @@ CATEGORY = {
                       f'<a href="/toca/">našem toča-trackerju</a> — to je edini kraj, kjer '
                       "nastaja skupen pregled po krajih doline."),
         "link_url": "/toca/", "link_label": "📷 Toča-tracker — arhiv in prijava toče v dolini",
+        "photo": "storm-clouds", "accent": (139, 92, 246),
     },
     "WarningWind": {
         "label": "veter", "icon": "💨",
         "practical": ("Pospravi ali pritrdi vse, kar veter lahko odnese (mize, senčnike, tramponline). "
                       "Izogibaj se gozdu in vožnji skozi gozdnate odseke, dokler ne mine."),
         "link_url": "/#tab-storm", "link_label": "💨 Napoved sunkov vetra v živo",
+        "photo": "storm-clouds", "accent": (96, 165, 250),
     },
     "WarningRA": {
         "label": "obilne padavine", "icon": "🌧",
@@ -55,31 +57,37 @@ CATEGORY = {
                       "Mozirnica, Dreta) — na izsušenih ali že namočenih tleh lahko odtok naraste zelo hitro. "
                       "Izogibaj se nižinam ob vodotokih."),
         "link_url": "/vodostaj-savinje/", "link_label": "🌊 Vodostaj in napoved pretoka Savinje",
+        "photo": "flood-river", "accent": (59, 130, 246),
     },
     "WarningSN": {
         "label": "sneženje", "icon": "🌨",
         "practical": "Prilagodi hitrost vožnje, uporabi zimsko opremo in računaj na daljši čas na cesti.",
         "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+        "photo": "night-fog-valley", "accent": (96, 165, 250),
     },
     "WarningFG": {
         "label": "megla", "icon": "🌫",
         "practical": "Prižgi meglenke, zmanjšaj hitrost in poveč varnostno razdaljo — v dolini se megla rada zadržuje dlje kot drugod.",
         "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+        "photo": "misty-valley", "accent": (148, 163, 184),
     },
     "WarningIC": {
         "label": "poledica/žled", "icon": "🧊",
         "practical": "Previdno na cestah, pločnikih in pod drevesi (nevarnost padajočih vej). Odloži nenujne poti.",
         "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+        "photo": "night-fog-valley", "accent": (56, 189, 248),
     },
     "WarningHT": {
         "label": "vročina", "icon": "🌡",
         "practical": "Pij dovolj tekočine, izogibaj se naporu med 12. in 17. uro in poskrbi za starejše in bolne v okolici.",
         "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+        "photo": "drought", "accent": (239, 68, 68),
     },
     "WarningLT": {
         "label": "mraz", "icon": "❄",
         "practical": "Zaščiti občutljive rastline in poskrbi, da imajo domače živali dostop do zavetja.",
         "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+        "photo": "night-fog-valley", "accent": (99, 102, 241),
     },
 }
 CATEGORY["WarningFire"] = {
@@ -88,9 +96,11 @@ CATEGORY["WarningFire"] = {
                   "dolgotrajni vročini in brez padavin hitro postanejo vnetljivi — v Zgornji Savinjski "
                   "dolini je tveganje večje na osončenih, strmih pobočjih."),
     "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+    "photo": "drought", "accent": (249, 115, 22),
 }
 DEFAULT_CAT = {"label": "vreme", "icon": "⚠️", "practical": "Spremljaj uradna opozorila ARSO in razmere v živo.",
-               "link_url": "/", "link_label": "🌡 Trenutne razmere v živo"}
+               "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
+               "photo": "storm-clouds", "accent": (234, 179, 8)}
 
 # Ključne besede kot rezerva, če ARSO-jeva koda parametra (node.parameter) ni
 # med zgoraj poimenovanimi ali je prazna — klasifikacija po besedilu opozorila.
@@ -164,6 +174,30 @@ def fetch_current():
 def alert_signature(a):
     key = f"{a.get('level')}|{a.get('type')}|{a.get('validStart')}|{a.get('validEnd')}|{a.get('text','')[:80]}"
     return hashlib.sha1(key.encode()).hexdigest()[:16]
+
+
+def ensure_og_fallback(slug):
+    """Rezerva, če generate_custom_og spodaj ne uspe (npr. Pillow ni na voljo):
+    blog/index.html vedno prikaže sličico na /og/{slug}.jpg, zato brez tega
+    sličica na seznamu objav manjka."""
+    src = os.path.join(ROOT, "og-image.jpg")
+    dst = os.path.join(ROOT, "og", f"{slug}.jpg")
+    if os.path.exists(src) and not os.path.exists(dst):
+        shutil.copyfile(src, dst)
+
+
+def generate_custom_og(slug, og_meta):
+    """Ustvari OG sliko z dejansko kategorijo opozorila (ne generično og-image.jpg),
+    da ima deljena povezava takoj berljivo vsebino v predogledu. Enak Pillow-vzorec
+    kot tools/generate_og_images.py in tools/generate_storm_watch_post.py."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from generate_og_images import make_og
+        make_og({"slug": slug, **og_meta})
+        print(f"✓ OG slika: og/{slug}.jpg")
+    except Exception as e:
+        print(f"⚠ OG slika (Pillow) preskočena, uporabljam splošno: {e}")
+        ensure_og_fallback(slug)
 
 
 def build_post(alert, current, now_utc):
@@ -300,7 +334,14 @@ def build_post(alert, current, now_utc):
         "title": title, "slug": slug, "url": f"/blog/{slug}.html",
         "date": now_utc.date().isoformat(), "summary": short, "tags": tags,
     }
-    return slug, url, body_html, entry
+    og_meta = {
+        "title": f"ARSO {level_sl} opozorilo\n{cat['label']}",
+        "subtitle": f"Zgornja Savinjska dolina · {date_str}",
+        "section": "ARSO opozorilo",
+        "accent": cat["accent"],
+        "photo": cat["photo"],
+    }
+    return slug, url, body_html, entry, og_meta
 
 
 def resolve_pending(state, hist):
@@ -380,7 +421,7 @@ def main():
             continue
 
         current = fetch_current()
-        slug, url, html, entry = build_post(alert, current, now)
+        slug, url, html, entry, og_meta = build_post(alert, current, now)
 
         if not wire:
             print(f"[preview] {slug} — {alert.get('level')} {alert.get('type')}")
@@ -388,6 +429,7 @@ def main():
 
         out = os.path.join(ROOT, "blog", f"{slug}.html")
         open(out, "w", encoding="utf-8").write(html)
+        generate_custom_og(slug, og_meta)
         wire_all(entry, url)
         state["posted"][sig] = {
             "slug": slug, "type": alert.get("type", ""),
