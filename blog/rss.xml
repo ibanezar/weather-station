@@ -5,8 +5,30 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 14 Jul 2026 07:23:15 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 14 Jul 2026 13:04:41 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>ARSO oranžno opozorilo — požarna ogroženost: kaj to pomeni za Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee.html</guid>
+      <pubDate>Tue, 14 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (požarna ogroženost), veljavno tor., 14. 7. 14:00 – sre., 15. 7. 23:59. Požarna ogroženost</description>
+      <category>ARSO opozorilo</category>
+      <category>požarna ogroženost</category>
+      <category>IREICA1</category>
+      <category>2026</category>
+    </item>
+    <item>
+      <title>ARSO oranžno opozorilo — nevihte: kaj to pomeni za Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</guid>
+      <pubDate>Tue, 14 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (nevihte), veljavno tor., 14. 7. 14:00–20:59. Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.</description>
+      <category>ARSO opozorilo</category>
+      <category>nevihte</category>
+      <category>IREICA1</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>31,1 °C danes na Rečici: vročina se vrača, a le za kratek čas</title>
       <link>https://meteorec.si/blog/31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714.html</link>

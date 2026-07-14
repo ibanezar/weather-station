@@ -38,24 +38,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://meteorec.si/toca/</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/tocnost-napovedi/</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/podatki/</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://meteorec.si/agrometeo/</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>daily</changefreq>
@@ -85,6 +67,20 @@
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningts-2026-07-14-1304-e1db70.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714.html</loc>
@@ -366,6 +362,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/analiza/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/arso-opozorilo/</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

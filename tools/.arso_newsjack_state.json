@@ -1,0 +1,18 @@
+{
+  "posted": {
+    "e1db708adaa5c686": {
+      "slug": "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
+      "type": "WarningTS",
+      "validEnd": "2026-07-14T18:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-07-14T13:04:40.632856+00:00"
+    },
+    "2005eec936908c14": {
+      "slug": "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
+      "type": "WarningForestFire",
+      "validEnd": "2026-07-15T21:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-07-14T13:04:40.632856+00:00"
+    }
+  }
+}
