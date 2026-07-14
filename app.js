@@ -2217,7 +2217,7 @@ async function loadGallery(){
   const grid = document.getElementById('gallery-grid');
   const cnt = document.getElementById('gallery-count');
   try {
-    const res = await fetch(PROXY+'/gallery', { cache:'no-cache' });
+    const res = await fetch(PROXY+'/gallery?category=general', { cache:'no-cache' });
     const data = await res.json();
     _galleryPhotos = data.photos || [];
     if(cnt) cnt.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';

@@ -96,6 +96,43 @@
   font-size:.72rem;font-weight:600;text-decoration:none;color:var(--text);transition:border-color .18s,color .18s}
 .mtn-avk-link:hover{border-color:var(--cyan);color:var(--cyan)}
 
+/* ── Toča-tracker: opozorilni pas ── */
+.warn-banner{border-radius:14px;padding:1rem 1.2rem;margin:1.2rem 0 1.6rem;font-size:.92rem;line-height:1.6}
+.warn-banner.lvl-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+.warn-banner.lvl-orange{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.32);color:var(--amber)}
+.warn-banner.lvl-none{background:var(--card-bg);border:1px solid var(--card-border);color:var(--muted)}
+.warn-banner strong{color:inherit}
+
+/* ── Toča-tracker: UGC fotogalerija ── */
+.toca-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:.85rem;margin:1rem 0 1.6rem}
+.toca-photo-card{position:relative;border-radius:14px;overflow:hidden;background:var(--card-bg);
+  border:1px solid var(--card-border);aspect-ratio:4/3}
+.toca-photo-card img{width:100%;height:100%;object-fit:cover;display:block}
+.toca-photo-card .tp-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.78) 0%,transparent 60%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:.6rem .75rem}
+.toca-photo-card .tp-loc{font-size:.76rem;font-weight:700;color:#fff}
+.toca-photo-card .tp-meta{font-size:.64rem;color:rgba(255,255,255,.75);margin-top:.15rem}
+.toca-photo-empty{color:var(--muted);font-size:.9rem;padding:1.5rem 1rem;text-align:center;
+  border:1px dashed var(--card-border);border-radius:14px;margin:1rem 0 1.6rem}
+
+/* ── Toča-tracker: prijavni obrazec ── */
+.toca-form{display:grid;gap:.7rem;max-width:480px}
+.toca-form label{font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem}
+.toca-form input[type=text],.toca-form textarea{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--card-border);border-radius:10px;
+  padding:.6rem .75rem;color:var(--text);font-size:.88rem;font-family:inherit}
+.toca-form input[type=text]:focus,.toca-form textarea:focus{outline:none;border-color:var(--cyan)}
+.toca-form textarea{resize:vertical;min-height:64px}
+.toca-form input[type=file]{font-size:.82rem;color:var(--muted)}
+.toca-form-btn{justify-self:start;background:var(--blue);color:#04070e;border:none;border-radius:10px;
+  padding:.65rem 1.3rem;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.toca-form-btn:hover{opacity:.88}
+.toca-form-btn:disabled{opacity:.5;cursor:default}
+.toca-form-msg{font-size:.82rem;margin-top:.2rem}
+.toca-form-msg.ok{color:var(--green)}
+.toca-form-msg.err{color:#fca5a5}
+
 /* ── Vrste gob po sezoni (gobarska napoved) ── */
 .gobe-sp{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .2rem;border-bottom:1px solid var(--border)}
 .gobe-sp:last-child{border-bottom:none}
