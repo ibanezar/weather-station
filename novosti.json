@@ -1,5 +1,85 @@
 [
   {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-13",
+    "value": 32.8,
+    "prev_value": 30.6,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-13",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-05",
+    "value": 30.2,
+    "prev_value": 29.8,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-05",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-04",
+    "value": 9.3,
+    "prev_value": 12.4,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-04",
+    "years_covered": 6
+  },
+  {
+    "type": "susa",
+    "date": "2026-07-02",
+    "end_date": "2026-07-09",
+    "value": 8.0,
+    "param": "precipTotal",
+    "label": "Sušno obdobje (8 dni)",
+    "slug": "susa-2026-07-02",
+    "duration": 8
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-06-30",
+    "value": 34.7,
+    "prev_value": 34.4,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-06-30",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-06-29",
+    "value": 35.7,
+    "prev_value": 33.8,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-06-29",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-06-28",
+    "value": 36.2,
+    "prev_value": 33.0,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-06-28",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-06-27",
+    "value": 34.6,
+    "prev_value": 33.1,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-06-27",
+    "years_covered": 6
+  },
+  {
     "type": "toplotni-val",
     "date": "2026-06-25",
     "end_date": "2026-06-28",
@@ -18,5 +98,25 @@
     "label": "Sušno obdobje (9 dni)",
     "slug": "susa-2026-06-22",
     "duration": 9
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-06-20",
+    "value": 32.9,
+    "prev_value": 32.0,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-06-20",
+    "years_covered": 6
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-06-18",
+    "end_date": "2026-07-01",
+    "value": 36.2,
+    "param": "tempHigh",
+    "label": "Toplotni val (14 dni)",
+    "slug": "toplotni-val-2026-06-18",
+    "duration": 14
   }
 ]

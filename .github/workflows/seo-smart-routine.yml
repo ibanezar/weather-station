@@ -2,9 +2,11 @@ name: SEO smart routine — hub strani in dogodki
 
 on:
   schedule:
-    # Vsak ponedeljek ob 05:30 UTC (6:30 CET / 7:30 CEST)
-    # Po update-history.yml (01:15) in generate-seo-pages.yml (04:00)
-    - cron: '30 5 * * 1'
+    # Dnevno ob 01:45 UTC — po update-history.yml (01:15), pred
+    # generate-seo-pages.yml (04:00). Prej teklo le ob ponedeljkih, kar je
+    # rekordom (idea #7 "Rekord watch") dajalo do 6 dni zamika pred
+    # samodejno objavo — dnevni tek to popravi.
+    - cron: '45 1 * * *'
   workflow_dispatch:   # ročni zagon
 
 jobs:
