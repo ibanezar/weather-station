@@ -15409,6 +15409,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/vreme-gornji-grad/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/vreme-luce/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/vreme-solcava/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/slovar/rosisce/</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>

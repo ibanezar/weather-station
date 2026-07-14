@@ -399,6 +399,41 @@ def detect_events(history, lookback_days=14):
                 })
                 prev_rec = v
 
+    # ── Rekord za koledarski dan (npr. "najtoplejši 14. julij doslej") ──────
+    # Ožji, pogosteje sprožen pojem kot absolutni rekord: primerja vrednost z
+    # vsemi preteklimi leti na isti koledarski dan (mesec-dan), ne s celotno
+    # zgodovino. Preskoči, če je datum že zajet kot absolutni rekord zgoraj
+    # (da ne objavimo dveh skoraj identičnih novic za isti dan).
+    all_time_hits = {(ev["date"], ev["param"]) for ev in events}
+    for param, direction, slug_prefix, label in [
+        ("tempHigh", "max", "rekord-dneva-vrocina", "Rekord za ta koledarski dan — vročina"),
+        ("tempLow",  "min", "rekord-dneva-mraz",     "Rekord za ta koledarski dan — mraz"),
+    ]:
+        for ds in recent_dates:
+            if (ds, param) in all_time_hits:
+                continue
+            v = history[ds].get(param)
+            if v is None:
+                continue
+            mmdd = ds[5:]
+            same_day_prior = [history[d][param] for d in pre_dates + recent_dates
+                               if d != ds and d[5:] == mmdd and history[d].get(param) is not None]
+            if len(same_day_prior) < 2:  # premalo predhodnih let za smiseln "rekord dneva"
+                continue
+            prev_best = max(same_day_prior) if direction == "max" else min(same_day_prior)
+            is_new = (direction == "max" and v > prev_best) or (direction == "min" and v < prev_best)
+            if is_new:
+                events.append({
+                    "type":         slug_prefix,
+                    "date":         ds,
+                    "value":        v,
+                    "prev_value":   prev_best,
+                    "param":        param,
+                    "label":        label,
+                    "slug":         f"{slug_prefix}-{ds}",
+                    "years_covered": len({d[:4] for d in pre_dates + recent_dates if d[5:] == mmdd and d != ds}),
+                })
+
     # ── Sezonska prva ──────────────────────────────────────────────────────
     year = TODAY.year
 
@@ -1171,6 +1206,24 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         intro_text = (f"Postaja IREICA1 v Rečici ob Savinji je {fmtd(ds)} "
                       f"zabeležila rekordni sunek vetra {num(val, 1)} km/h — "
                       f"nov absolutni vetrovni rekord v zgodovini meritev.")
+        link_label = "→ Dnevni podatki za ta dan"
+        link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
+
+    elif ev_type in ("rekord-dneva-vrocina", "rekord-dneva-mraz"):
+        prev_val   = event.get("prev_value")
+        years      = event.get("years_covered", 0)
+        dm_label   = f"{int(ds[8:10])}. {MES_NOM[int(ds[5:7])]}"
+        hot        = ev_type == "rekord-dneva-vrocina"
+        word       = "najtoplejši" if hot else "najhladnejši"
+        title      = f"Rekord za {dm_label} — {'vročina' if hot else 'mraz'} v Rečici ob Savinji, {num(val)} °C ({fmtd(ds)})"
+        desc       = (f"Postaja IREICA1 je {fmtd(ds)} zabeležila {num(val)} °C — {word} {dm_label} "
+                      f"v {years}-letni zgodovini meritev na tem koledarskem dnevu.")
+        val_class  = "hot" if hot else "cold"
+        val_unit   = "°C"
+        intro_text = (f"Postaja IREICA1 v Rečici ob Savinji je {fmtd(ds)} izmerila {num(val)} °C — "
+                      f"{word} {dm_label} v {years} letih meritev na ta koledarski dan doslej "
+                      f"(prejšnji rekord: {num(prev_val)} °C). To ni nujno absolutni rekord postaje, "
+                      f"temveč rekord za ta konkretni dan v koledarskem letu.")
         link_label = "→ Dnevni podatki za ta dan"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
 

@@ -22,7 +22,7 @@ Generates from app.js (GLOSSARY_TERMS, parsed — not hand-duplicated):
 Usage:
   python3 tools/generate_seo_pages.py [--force]
 """
-import json, os, sys, re, calendar, datetime, statistics as st, argparse
+import json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1297,24 +1297,95 @@ def climate_facts(hist):
     }
 
 
-# Nearby towns without an official ARSO station. Distances are approximate
-# air-line km from the IREICA1 station in Rečica ob Savinji.
+# Nearby towns without an official ARSO station. Coordinates and elevations
+# are sourced from Slovenian Wikipedia infoboxes (verified individually —
+# NOT estimated); km/bearing from IREICA1 are computed (haversine), not
+# hand-typed, so they stay correct if the station's own coordinates ever
+# change. Each town also gets a lapse-rate-adjusted temperature estimate
+# (standard 0.65 °C/100 m environmental lapse rate applied to the station's
+# own measured stats) and a geography-grounded microclimate note — real
+# differentiation per page, not a template with the name swapped.
 NEARBY_TOWNS = [
     {"slug": "vreme-mozirje", "town": "Mozirje", "loc": "Mozirju", "gen": "Mozirja",
-     "km": 4, "dir": "vzhodno", "short": "spodnji del doline",
-     "note": "največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline"},
+     "lat": 46.338050, "lon": 14.957203, "elev": 340,
+     "short": "spodnji del doline",
+     "note": ("največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline, "
+              "na najširšem in najbolj odprtem delu dolinskega dna (Mozirsko polje)"),
+     "microclimate": ("Mozirje leži nekoliko niže in na širšem, bolj odprtem delu doline kot "
+                       "postaja IREICA1, zato je manj podvrženo nočnemu zbiranju hladnega zraka "
+                       "kot ožji, više ležeči kraji gorvodno — jutranje temperaturne inverzije so "
+                       "tu praviloma šibkejše.")},
     {"slug": "vreme-nazarje", "town": "Nazarje", "loc": "Nazarjah", "gen": "Nazarij",
-     "km": 5, "dir": "jugozahodno", "short": "sotočje Drete in Savinje",
-     "note": "kraj ob sotočju Drete in Savinje v Zgornji Savinjski dolini"},
+     "lat": 46.320208, "lon": 14.953128, "elev": 387,
+     "short": "sotočje Drete in Savinje",
+     "note": "kraj ob sotočju Drete in Savinje, na vhodu v Zadrečko dolino",
+     "microclimate": ("Nazarje leži na sotočju dveh rek (Drete in Savinje), kjer se stikata dve "
+                       "dolinski veji — to lokalno poveča vlažnost zraka in pogostost jutranje "
+                       "megle glede na bolj enodolinsko lego postaje IREICA1.")},
     {"slug": "vreme-ljubno-ob-savinji", "town": "Ljubno ob Savinji", "loc": "Ljubnem ob Savinji",
-     "gen": "Ljubnega ob Savinji", "km": 9, "dir": "zahodno, gorvodno ob Savinji",
+     "gen": "Ljubnega ob Savinji", "lat": 46.349700, "lon": 14.834347, "elev": 434,
      "short": "zgornji del doline",
-     "note": "kraj v ožjem, višje ležečem zahodnem delu Zgornje Savinjske doline"},
+     "note": "kraj v ožjem, više ležečem zahodnem delu Zgornje Savinjske doline, gorvodno ob Savinji",
+     "microclimate": ("Dolina se pri Ljubnem opazno zoži in strmi pobočji senčita dno doline dlje "
+                       "v jutro kot pri postaji — v kombinaciji z višjo nadmorsko višino to pomeni "
+                       "hladnejša zimska jutra in izrazitejšo temperaturno inverzijo.")},
+    {"slug": "vreme-gornji-grad", "town": "Gornji Grad", "loc": "Gornjem Gradu", "gen": "Gornjega Grada",
+     "lat": 46.296042, "lon": 14.807663, "elev": 431,
+     "short": "Zadrečka dolina",
+     "note": "središče Zadrečke doline — stranske, bolj zaprte rečne doline reke Drete, ločene od glavne Savinjske doline",
+     "microclimate": ("Gornji Grad leži v Zadrečki dolini, ki je ožja in bolj zaprta stranska dolina "
+                       "kot glavna dolina Savinje pri postaji IREICA1. Take zaprte stranske doline "
+                       "so klasično bolj nagnjene k nabiranju hladnega zraka — pričakuj izrazitejše "
+                       "in dlje trajajoče jutranje temperaturne inverzije, zlasti pozimi.")},
+    {"slug": "vreme-luce", "town": "Luče", "loc": "Lučah", "gen": "Luč",
+     "lat": 46.356461, "lon": 14.743625, "elev": 522,
+     "short": "sotočje Savinje in Lučnice, vznožje Raduhe",
+     "note": "kraj na sotočju Savinje in Lučnice, med Raduho (2062 m) in Dleskovško planoto",
+     "microclimate": ("Luče ležijo bistveno više in globlje v dolini kot postaja IREICA1, tik pod "
+                       "visokogorjem (Raduha, Dleskovška planota). Bližina visokih gora praviloma "
+                       "pomeni več orografskih padavin in hladnejše razmere, kot jih kaže postaja — "
+                       "glej temperaturno oceno spodaj.")},
+    {"slug": "vreme-solcava", "town": "Solčava", "loc": "Solčavi", "gen": "Solčave",
+     "lat": 46.420125, "lon": 14.691811, "elev": 644,
+     "short": "vhod v Logarsko dolino, Kamniško-Savinjske Alpe",
+     "note": "najvišje ležeč in najbolj alpski kraj v Zgornji Savinjski dolini, na vhodu v Logarsko dolino",
+     "microclimate": ("Solčava leži skoraj 280 m više kot postaja IREICA1, globoko v ozki alpski "
+                       "dolini na robu Kamniško-Savinjskih Alp. To je klimatsko najbolj različen kraj "
+                       "v tem pregledu: pričakuj precej hladnejše in bolj namočeno vreme ter močne, "
+                       "dolgotrajne zimske inverzije — v mrzlih jasnih nočeh se lahko dno doline "
+                       "ohladi bistveno bolj kot pri postaji.")},
 ]
 
 
+def _haversine_km(lat1, lon1, lat2, lon2):
+    r = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlmb = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
+    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _bearing_compass(lat1, lon1, lat2, lon2):
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dlmb = math.radians(lon2 - lon1)
+    x = math.sin(dlmb) * math.cos(p2)
+    y = math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(dlmb)
+    deg = (math.degrees(math.atan2(x, y)) + 360) % 360
+    dirs = ["severno", "severovzhodno", "vzhodno", "jugovzhodno",
+            "južno", "jugozahodno", "zahodno", "severozahodno"]
+    return dirs[int((deg + 22.5) // 45) % 8]
+
+
+LAPSE_RATE_C_PER_100M = 0.65  # standard environmental lapse rate
+
+
 def gen_nearby_town_pages(hist, sitemap_urls):
-    """Honest 'nearest station' pages for neighbouring towns without a station."""
+    """Honest 'nearest station' pages for neighbouring towns without a station —
+    each with a real distance/bearing/elevation computed from its own
+    coordinates, a lapse-rate-adjusted temperature estimate, and a
+    geography-specific microclimate note, so pages are genuinely
+    differentiated rather than a template with the town name swapped."""
     f = climate_facts(hist)
     lastmod = max(hist.keys())
 
@@ -1327,41 +1398,58 @@ def gen_nearby_town_pages(hist, sitemap_urls):
                  else f"{num(trend, 2)} °C na leto")
 
     for t in NEARBY_TOWNS:
-        town, km, dirn = t["town"], t["km"], t["dir"]
+        town = t["town"]
+        km = _haversine_km(LAT, LON, t["lat"], t["lon"])
+        dirn = _bearing_compass(LAT, LON, t["lat"], t["lon"])
+        elev_diff = t["elev"] - ELEV
+        lapse_corr = -LAPSE_RATE_C_PER_100M * elev_diff / 100
+        est_mean_t = f["mean_t"] + lapse_corr if f["mean_t"] is not None else None
+
         url = f"/{t['slug']}/"
         rel = f"{t['slug']}/index.html"
 
-        title = f"Vreme {town} — najbližja meritev (postaja IREICA1, {km} km)"
+        title = f"Vreme {town} — najbližja meritev (postaja IREICA1, {num(km,0)} km)"
         desc = (f"Vreme za {town} ({t['short']}): {town} nima lastne postaje ARSO. "
                 f"Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
-                f"približno {km} km {dirn}. Temperatura, padavine, megla in trend segrevanja.")
+                f"približno {num(km,0)} km {dirn}, {abs(elev_diff):.0f} m {'više' if elev_diff > 0 else 'niže'}. "
+                f"Ocena temperature, lokalna mikroklima in trend segrevanja.")
 
         crumbs = [("Meteorec", "/"), (f"Vreme {town}", None)]
 
         disclaimer = (f'  <div class="partial-note">Pomembno: {town} nima lastne uradne '
                       f'meteorološke postaje. Spodnji podatki so dejanske meritve postaje '
-                      f'<strong>IREICA1 v Rečici ob Savinji</strong> — najbližje neprekinjene '
-                      f'meritve, približno <strong>{km} km {dirn}</strong> od {t["gen"]}. Zaradi '
-                      f'enake lege na dnu Zgornje Savinjske doline so razmere zelo primerljive, '
-                      f'a niso izmerjene v samem kraju.</div>'.replace("\n", " "))
+                      f'<strong>IREICA1 v Rečici ob Savinji</strong> ({ELEV} m n. m.) — najbližje '
+                      f'neprekinjene meritve, približno <strong>{num(km,0)} km {dirn}</strong> od {t["gen"]}. '
+                      f'{town} leži na {t["elev"]} m n. m., '
+                      f'kar je <strong>{abs(elev_diff):.0f} m {"više" if elev_diff > 0 else "niže"}</strong> '
+                      f'od postaje — ocene spodaj to upoštevajo, a niso izmerjene v samem kraju.</div>'
+                      .replace("\n", " "))
 
         intro = f'''  <p class="archive-intro">
-  <strong>{town}</strong> je {t["note"]}. Za napoved
-  in trenutno vreme v {t["loc"]} velja enak kotlinski vzorec kot v bližnji Rečici ob Savinji:
-  hladnejša jutra na dnu doline, pogosta jesenska in zimska megla ter razmeroma obilne padavine.
-  Postaja IREICA1 ({km} km {dirn}) ponuja {f["n_days"]} dni realnih meritev — za razliko od
-  splošnih napovedi, ki za to območje računajo le iz modela.</p>'''
+  <strong>{town}</strong> je {t["note"]}. Postaja IREICA1 ({num(km,0)} km {dirn}, {t["elev"]} m n. m. v {t["loc"]}
+  proti {ELEV} m pri postaji) ponuja {f["n_days"]} dni realnih meritev — za razliko od splošnih napovedi,
+  ki za to območje računajo le iz modela. {t["microclimate"]}</p>'''
 
-        facts = f'''  <h2>Podnebje v okolici {t["gen"]} (meritve IREICA1)</h2>
+        est_row = (f'    <tr><th>Ocenjena povprečna letna temperatura</th>'
+                   f'<td>{num(est_mean_t)} °C <span class="muted-note" style="display:inline">'
+                   f'(postaja {num(f["mean_t"])} °C {"−" if lapse_corr < 0 else "+"}{num(abs(lapse_corr),2)} °C '
+                   f'zaradi {abs(elev_diff):.0f} m višinske razlike)</span></td></tr>'
+                   if est_mean_t is not None else "")
+
+        facts = f'''  <h2>Ocenjeno podnebje v {t["loc"]} (izpeljano iz meritev IREICA1)</h2>
+  <p class="muted-note">Temperaturna ocena uporablja standardni vertikalni temperaturni gradient
+  ({num(LAPSE_RATE_C_PER_100M,2)} °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini
+  {t["gen"]}. To je fizikalno utemeljena ocena, ne meritev na kraju samem.</p>
   <table class="stats">
-    <tr><th>Povprečna letna temperatura</th><td>{num(f["mean_t"])} °C</td></tr>
-    <tr><th>Absolutni temperaturni razpon</th><td>{num(f["tmin_v"])} °C … {num(f["tmax_v"])} °C</td></tr>
-    <tr><th>Dni z zmrzaljo (od 2019)</th><td>{f["frost_days"]}</td></tr>
-    <tr><th>Povprečna relativna vlažnost</th><td>{num(f["mean_hum"], 0)} %</td></tr>
-    <tr><th>Povprečne letne padavine</th><td>{num(f["annual_precip"], 0)} mm</td></tr>
-    <tr><th>Dnevni rekord padavin</th><td>{num(f["prec_v"])} mm ({dl(f["prec_d"])})</td></tr>
-    <tr><th>Najmočnejši sunek vetra</th><td>{num(f["wind_v"])} km/h ({dl(f["wind_d"])})</td></tr>
-    <tr><th>Trend segrevanja</th><td>{trend_txt}</td></tr>
+{est_row}
+    <tr><th>Nadmorska višina</th><td>{t["elev"]} m ({"+" if elev_diff >= 0 else ""}{elev_diff:.0f} m glede na postajo)</td></tr>
+    <tr><th>Razdalja in smer od postaje</th><td>{num(km,1)} km {dirn}</td></tr>
+    <tr><th>Absolutni temperaturni razpon (postaja)</th><td>{num(f["tmin_v"])} °C … {num(f["tmax_v"])} °C</td></tr>
+    <tr><th>Dni z zmrzaljo pri postaji (od 2019)</th><td>{f["frost_days"]}</td></tr>
+    <tr><th>Povprečna relativna vlažnost (postaja)</th><td>{num(f["mean_hum"], 0)} %</td></tr>
+    <tr><th>Povprečne letne padavine (postaja)</th><td>{num(f["annual_precip"], 0)} mm</td></tr>
+    <tr><th>Dnevni rekord padavin (postaja)</th><td>{num(f["prec_v"])} mm ({dl(f["prec_d"])})</td></tr>
+    <tr><th>Trend segrevanja (postaja)</th><td>{trend_txt}</td></tr>
   </table>'''
 
         cta = f'''  <div class="stat-grid" style="margin-top:1.5rem">
@@ -1376,17 +1464,25 @@ def gen_nearby_town_pages(hist, sitemap_urls):
       <div class="sc-sub">Od 2019</div></a>
   </div>'''
 
+        others = [o for o in NEARBY_TOWNS if o["slug"] != t["slug"]]
+        nearby_links = ('  <h2>Vreme po krajih v dolini</h2>\n'
+                         '  <div class="card-grid">\n' + "\n".join(
+            f'    <a class="phenom-card" href="/{o["slug"]}/">{o["town"]}<div class="ph-count">'
+            f'{num(_haversine_km(LAT, LON, o["lat"], o["lon"]), 0)} km, {o["elev"]} m n. m.</div></a>'
+            for o in others
+        ) + "\n  </div>")
+
         qa = [
             (f"Ima {town} svojo vremensko postajo?",
              f"{town} nima lastne uradne postaje ARSO. Najbližje neprekinjene meritve vremena "
-             f"prihajajo s postaje IREICA1 v Rečici ob Savinji, približno {km} km {dirn}."),
-            (f"Kako daleč je najbližja postaja od {t['gen']}?",
-             f"Postaja IREICA1 v Rečici ob Savinji je približno {km} km {dirn} od {t['gen']} "
-             f"in od leta 2019 neprekinjeno meri temperaturo, padavine, vlago in veter."),
+             f"prihajajo s postaje IREICA1 v Rečici ob Savinji, približno {num(km,0)} km {dirn}."),
+            (f"Kako daleč in koliko više je {t['gen']} od postaje IREICA1?",
+             f"Postaja IREICA1 v Rečici ob Savinji je približno {num(km,0)} km {dirn} od {t['gen']}, "
+             f"{t['gen']} pa leži na {t['elev']} m n. m. — {abs(elev_diff):.0f} m "
+             f"{'više' if elev_diff > 0 else 'niže'} od postaje ({ELEV} m)."),
             (f"So meritve IREICA1 reprezentativne za {town}?",
-             f"Ker {town} leži v istem delu Zgornje Savinjske doline na podobni nadmorski višini, "
-             f"so temperature, megla in padavinski vzorci večinoma primerljivi. Lokalne razlike "
-             f"(npr. izpostavljenost soncu ali vetru) so vseeno mogoče."),
+             f"{t['microclimate']} Temperaturna ocena zgoraj upošteva višinsko razliko, a ostaja ocena, "
+             f"ne meritev na kraju samem — dejanske lokalne razlike (osončenost, veter, megla) so mogoče."),
         ]
         faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
             f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
@@ -1396,7 +1492,9 @@ def gen_nearby_town_pages(hist, sitemap_urls):
                        f'{{"@context":"https://schema.org","@type":"Place",'
                        f'"name":{json.dumps(town)},"address":{{"@type":"PostalAddress",'
                        f'"addressLocality":{json.dumps(town)},'
-                       f'"addressRegion":"Zgornja Savinjska dolina","addressCountry":"SI"}}}}\n</script>')
+                       f'"addressRegion":"Zgornja Savinjska dolina","addressCountry":"SI"}},'
+                       f'"geo":{{"@type":"GeoCoordinates","latitude":{t["lat"]},"longitude":{t["lon"]},'
+                       f'"elevation":{t["elev"]}}}}}\n</script>')
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
@@ -1407,14 +1505,15 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {town}</h1>
-  <p class="post-meta">Najbližja postaja IREICA1 · {km} km {dirn} · Zgornja Savinjska dolina</p>
+  <p class="post-meta">Najbližja postaja IREICA1 · {num(km,1)} km {dirn} · {t["elev"]} m n. m. · Zgornja Savinjska dolina</p>
 {disclaimer}
 {intro}
 {cta}
 {facts}
+{nearby_links}
 {faq_html}
   <p class="muted-note">Vir meritev: postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
-  Vrednosti niso izmerjene v {t["loc"]}, temveč na najbližji postaji.</p>
+  Vrednosti niso izmerjene v {t["loc"]}, temveč na najbližji postaji in po potrebi višinsko prilagojene.</p>
   <a class="back-link" href="/vreme-recica-ob-savinji/">← Vreme Rečica ob Savinji</a>'''
 
         html = page_shell(title, desc, url, schema, body)
@@ -1986,7 +2085,7 @@ def main():
 
     print("Generiram strani za sosednje kraje …")
     gen_nearby_town_pages(hist, sitemap_urls)
-    print(f"  → {len(NEARBY_TOWNS)} strani (Mozirje, Nazarje, Ljubno)")
+    print(f"  → {len(NEARBY_TOWNS)} strani ({', '.join(t['town'] for t in NEARBY_TOWNS)})")
 
     print("Generiram vremenski slovar …")
     n_terms = len(load_glossary_terms())

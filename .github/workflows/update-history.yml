@@ -37,6 +37,9 @@ jobs:
       - name: Pre-renderiraj zadnjo meritev v index.html
         run: python3 tools/inject_current_weather.py
 
+      - name: Pre-renderiraj "record watch" (rekord za ta koledarski dan)
+        run: python3 tools/inject_record_watch.py
+
       - name: Commit in push (samo če so spremembe)
         run: |
           git config user.name  "github-actions[bot]"
