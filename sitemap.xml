@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee.html</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
@@ -464,6 +471,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/povzetek/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/pozarna-ogrozenost/</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
