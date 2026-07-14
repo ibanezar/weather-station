@@ -268,6 +268,14 @@ ARTICLES = [
         'photo': 'drought',
     },
     {
+        'slug': 'zakaj-ni-bilo-neurja-14-julij-2026',
+        'title': 'Zakaj neurja\nniso prišla?',
+        'subtitle': 'Anatomija »busta« · 14. julij 2026',
+        'section': 'Analiza',
+        'accent': (167, 139, 250),
+        'photo': 'storm-clouds',
+    },
+    {
         'slug': 'polletni-pregled-2026-ireica1',
         'title': 'Prvo polletje 2026\nna postaji IREICA1',
         'subtitle': 'Pol leta v dveh obrazih · IREICA1',
