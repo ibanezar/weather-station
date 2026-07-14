@@ -202,6 +202,38 @@ def dataset_schema(url, observations):
             '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
 
 
+def named_dataset_schema(url, name, description, variable_measured=None, temporal_coverage=None):
+    """Compact Dataset node for a derived archive page (records, phenomena …).
+    Links back to the Person/DataCatalog entities defined once on the homepage
+    via @id reference rather than redefining them, so Google resolves the
+    whole site as one connected entity graph (see index.html #person /
+    #localbusiness) — feeds Google Dataset Search with minimal duplication."""
+    full = f"{SITE}{url}"
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "@id": f"{full}#dataset",
+        "name": name,
+        "description": description,
+        "url": full,
+        "inLanguage": "sl",
+        "isAccessibleForFree": True,
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "creator": {"@id": f"{SITE}/#person"},
+        "includedInDataCatalog": {"@id": f"{SITE}/#localbusiness"},
+        "spatialCoverage": {
+            "@type": "Place", "name": "Rečica ob Savinji", "sameAs": RECICA_SAMEAS,
+            "geo": {"@type": "GeoCoordinates", "latitude": LAT, "longitude": LON, "elevation": ELEV},
+        },
+    }
+    if temporal_coverage:
+        data["temporalCoverage"] = temporal_coverage
+    if variable_measured:
+        data["variableMeasured"] = variable_measured
+    return (f'<script type="application/ld+json">\n'
+            f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
+
+
 def archive_dataset_schema(first_date, last_date):
     """Full Dataset node for the /vreme/ archive — same @id used on the homepage
     and /o-postaji.html so Google resolves them as one entity, colocated here
@@ -253,7 +285,8 @@ def footer_html(year=None):
     return (f'  <footer class="site-foot">\n'
             f'    <span>© {y} Meteorec · Rečica ob Savinji</span>\n'
             f'    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a>'
-            f' · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a></span>\n  </footer>')
+            f' · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a>'
+            f' · <a href="/podatki/">Podatki</a></span>\n  </footer>')
 
 def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_image=None):
     full_url = f"{SITE}{canonical}"
@@ -914,7 +947,21 @@ def gen_records_page(hist, sitemap_urls):
         f'<td class="record-val">{wind_str}</td><td class="record-date">{wind_link}</td></tr>'
     )
 
-    schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs)])
+    first_date = min(hist.keys())
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        named_dataset_schema(
+            url, "Vremenski rekordi — Rečica ob Savinji (IREICA1)", desc,
+            variable_measured=[
+                {"@type": "PropertyValue", "name": "Absolutno najvišja temperatura", "value": tmax_v, "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Absolutno najnižja temperatura", "value": tmin_v, "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Dnevni rekord padavin", "value": prec_v, "unitText": "mm"},
+                {"@type": "PropertyValue", "name": "Najmočnejši sunek vetra", "value": wind_v, "unitText": "km/h"},
+            ],
+            temporal_coverage=f"{first_date}/..",
+        ),
+    ])
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vremenski rekordi</h1>
@@ -972,10 +1019,16 @@ def gen_phenomena_pages(hist, sitemap_urls):
             f'<th>{value_label}</th></tr></thead>\n'
             '    <tbody>\n' + "\n".join(rows[:500]) + '\n    </tbody>\n  </table>'
         )
+        first_date = min(d for d, _ in days) if days else min(hist.keys())
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
             defined_term_schema(term_name, definition, url, "/pojavi/"),
+            named_dataset_schema(
+                url, title, desc,
+                variable_measured=[{"@type": "PropertyValue", "name": value_label, "value": len(days), "unitText": "dni"}],
+                temporal_coverage=f"{first_date}/..",
+            ),
         ])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
@@ -1053,6 +1106,15 @@ def gen_phenomena_pages(hist, sitemap_urls):
         webpage_schema(url, title, desc),
         crumbs_schema(crumbs),
         defined_term_set_schema(title, url, terms),
+        named_dataset_schema(
+            url, title, desc,
+            variable_measured=[
+                {"@type": "PropertyValue", "name": "Zmrzal", "value": len(frost_days), "unitText": "dni"},
+                {"@type": "PropertyValue", "name": "Vroč dan", "value": len(hot_days), "unitText": "dni"},
+                {"@type": "PropertyValue", "name": "Naliv", "value": len(rain_days), "unitText": "dni"},
+            ],
+            temporal_coverage=f"{min(hist.keys())}/..",
+        ),
     ])
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}

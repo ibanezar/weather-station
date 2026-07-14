@@ -344,6 +344,14 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-14"),
         seo.crumbs_schema([("Meteorec", "/"), ("Toča", None)]),
+        seo.named_dataset_schema(
+            url, "Prijave toče — Zgornja Savinjska dolina (skupnostni arhiv)",
+            "Crowdsourced arhiv prijav toče s fotografijo in lokacijo, ki ga sproti dopolnjujejo "
+            "prebivalci Zgornje Savinjske doline.",
+            variable_measured=[
+                {"@type": "PropertyValue", "name": "Prijave skupnosti", "value": len(reports), "unitText": "prijav"},
+            ],
+        ),
     ])
 
     html_out = seo.page_shell(title, desc, url, schema, body)
