@@ -38,6 +38,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/toca/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/tocnost-napovedi/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/podatki/</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/agrometeo/</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>daily</changefreq>

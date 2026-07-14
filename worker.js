@@ -1617,16 +1617,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ photos: [], error: "R2 not bound" }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
+        const categoryFilter = url.searchParams.get("category");
         const listed = await env.PHOTOS_R2.list({ include: ["customMetadata", "httpMetadata"] });
-        const photos = listed.objects
+        let photos = listed.objects
           .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
           .map(obj => ({
             key: obj.key,
             size: obj.size,
             uploaded: obj.uploaded,
             contentType: obj.httpMetadata?.contentType || "image/jpeg",
+            category: obj.customMetadata?.category || "general",
             ...(obj.customMetadata || {})
           }));
+        if (categoryFilter) photos = photos.filter(p => p.category === categoryFilter);
         return new Response(JSON.stringify({ photos, truncated: listed.truncated }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
         });
@@ -1654,6 +1657,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
         const uuid = crypto.randomUUID().split("-")[0];
         const key = `photos/${Date.now()}-${uuid}.${ext}`;
+        const category = (fd.get("category") || "general").slice(0, 30);
         await env.PHOTOS_R2.put(key, file.stream(), {
           httpMetadata: { contentType: file.type },
           customMetadata: {
@@ -1661,6 +1665,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             caption:    (fd.get("caption") || "").slice(0, 500),
             author:     (fd.get("author")  || "Anonimno").slice(0, 60),
             weather:    (fd.get("weather") || "").slice(0, 200),
+            category,
+            location:   (fd.get("location") || "").slice(0, 120),
             uploadedAt: new Date().toISOString()
           }
         });

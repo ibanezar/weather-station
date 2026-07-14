@@ -21,11 +21,14 @@ jobs:
       - name: Generate SEO pages
         run: python3 tools/generate_seo_pages.py
 
+      - name: Generate /podatki/ (HTML-first data digest)
+        run: python3 tools/generate_podatki_page.py
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add vreme/ rekord/ pojavi/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml || true
+          git add vreme/ rekord/ pojavi/ podatki/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi programatske strani $(date -u +%Y-%m-%d) [skip ci]"
           git push

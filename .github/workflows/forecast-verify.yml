@@ -1,0 +1,46 @@
+name: Verifikacija napovedi
+
+on:
+  schedule:
+    # 01:35 UTC — po update-history.yml (01:15), ko je včerajšnja dnevna
+    # meritev že v history.json.
+    - cron: '35 1 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Razreši pretekle napovedi in zabeleži novo
+        run: python3 tools/verify_forecasts.py
+
+      - name: Generiraj stran /tocnost-napovedi/
+        run: python3 tools/generate_tocnost_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add forecast_verification.json tools/.forecast_pending.json tocnost-napovedi/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: posodobi verifikacijo napovedi $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

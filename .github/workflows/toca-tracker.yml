@@ -1,0 +1,46 @@
+name: Toča-tracker
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # vsakih 15 min — enako pogosto kot ARSO monitor/nevihtni opazovalec
+  workflow_dispatch:
+
+# Prepreči prekrivanje zagonov
+concurrency:
+  group: toca-tracker
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generiraj stran /toca/
+        run: python3 tools/generate_toca_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add toca/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi toča-tracker $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
