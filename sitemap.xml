@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zakaj-ni-bilo-neurja-14-julij-2026.html</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-ni-bilo-neurja-14-julij-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-warningts-2026-07-14-1745-3272e9.html</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
