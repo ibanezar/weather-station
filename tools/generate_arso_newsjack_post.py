@@ -176,6 +176,31 @@ def alert_signature(a):
     return hashlib.sha1(key.encode()).hexdigest()[:16]
 
 
+def parse_dt(iso):
+    try:
+        return datetime.datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return None
+
+
+def find_covering_post(alert, state):
+    """Že objavljena, še neuveljena objava za isti tip opozorila (če obstaja).
+    ARSO vsakih nekaj minut znova postreže "isto" tekoče opozorilo z rahlo
+    zamaknjenim besedilom/validStart, zato dedup po natančnem hashu (stara
+    alert_signature) skoraj vsak tek zazna "novo" opozorilo. Namesto tega
+    preverimo, ali za ta tip opozorila že obstaja objava, katere veljavnost
+    (validEnd) še ni potekla — če da, gre za isto tekoče opozorilo."""
+    t = alert.get("type")
+    for rec in state.get("posted", {}).values():
+        if t not in (rec.get("types") or []):
+            continue
+        end_dt = parse_dt(rec.get("validEnd"))
+        if end_dt is None or end_dt <= datetime.datetime.now(datetime.timezone.utc):
+            continue  # ta objava je za preteklo/že končano opozorilo -- ne šteje kot pokritje
+        return rec
+    return None
+
+
 def ensure_og_fallback(slug):
     """Rezerva, če generate_custom_og spodaj ne uspe (npr. Pillow ni na voljo):
     blog/index.html vedno prikaže sličico na /og/{slug}.jpg, zato brez tega
@@ -378,7 +403,7 @@ def resolve_pending(state, hist):
     """Fill in the ARSO-UPDATE marker on already-published posts whose alert
     window has ended and whose day is now finalized in history.json."""
     resolved = 0
-    for sig, rec in state.get("posted", {}).items():
+    for rec in state.get("posted", {}).values():
         if rec.get("resolved"):
             continue
         valid_end = rec.get("validEnd")
@@ -452,7 +477,20 @@ def main():
     # enega na opozorilo — če ARSO hkrati izda npr. nevihte + požarno
     # ogroženost, bi ločeni objavi delili skoraj ves predlog (isto stanje
     # postaje, isto uvod/zaključek) in bi bili na blogu skoraj identični.
-    new_alerts = [a for a in significant if force or alert_signature(a) not in state["posted"]]
+    #
+    # "Novo" pomeni: za ta tip opozorila še ni žive (nepotekle) objave. Če ena
+    # obstaja, samo raztegnemo njen zabeleženi validEnd, če ga je ARSO medtem
+    # podaljšal, namesto da bi objavili skoraj identičen nov zapis.
+    new_alerts = []
+    for a in significant:
+        if force:
+            new_alerts.append(a)
+            continue
+        covering = find_covering_post(a, state)
+        if covering is None:
+            new_alerts.append(a)
+        elif a.get("validEnd", "") > covering.get("validEnd", ""):
+            covering["validEnd"] = a["validEnd"]
 
     if new_alerts:
         types_txt = ", ".join(a.get("type") or "?" for a in new_alerts)
@@ -473,8 +511,7 @@ def main():
                 "resolved": False,
                 "publishedAt": now.isoformat(),
             }
-            for a in new_alerts:
-                state["posted"][alert_signature(a)] = rec
+            state["posted"][slug] = rec
             published = len(new_alerts)
             print(f"✓ objavljeno: blog/{slug}.html ({len(new_alerts)} opozoril: {types_txt})")
 
