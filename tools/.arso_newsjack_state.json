@@ -1,89 +1,13 @@
 {
   "posted": {
-    "e1db708adaa5c686": {
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70": {
       "slug": "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
       "type": "WarningTS",
       "validEnd": "2026-07-14T18:59:00+00:00",
       "resolved": true,
       "publishedAt": "2026-07-14T13:04:40.632856+00:00"
     },
-    "2005eec936908c14": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-14-1304-2005ee",
-      "type": "WarningForestFire",
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T13:04:40.632856+00:00"
-    },
-    "9d76cfe57781e5de": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T15:01:37.253006+00:00"
-    },
-    "58380a6705ebb8b9": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1501-b4e10e",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T15:01:37.253006+00:00"
-    },
-    "cfe170f1754cd26b": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T16:36:29.414907+00:00"
-    },
-    "cf77808c4a5f8965": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1636-56d84f",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T16:36:29.414907+00:00"
-    },
-    "03e2ad331937f888": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1745-3272e9",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T17:45:28.132130+00:00"
-    },
-    "cf5e1a32927da897": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-1745-3272e9",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T17:45:28.132130+00:00"
-    },
-    "d17c423c3aff5822": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-14-1900-70d120",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T19:00:15.065217+00:00"
-    },
-    "6bb712be3fd8f95c": {
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423": {
       "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
       "types": [
         "WarningTS",
@@ -93,71 +17,7 @@
       "resolved": true,
       "publishedAt": "2026-07-14T20:21:00.825408+00:00"
     },
-    "ac0d5588f8886345": {
-      "slug": "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
-      "types": [
-        "WarningTS",
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T20:21:00.825408+00:00"
-    },
-    "5338f228d4e18fbd": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-14-2127-5e407d",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T21:27:57.596968+00:00"
-    },
-    "7b2a5f7b00d83538": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-14-2229-af3968",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T22:29:14.245805+00:00"
-    },
-    "cb0d29704bb13651": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-14-2325-c8f6ea",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-15T21:59:00+00:00",
-      "resolved": true,
-      "publishedAt": "2026-07-14T23:25:08.664056+00:00"
-    },
-    "72ec47cdc9556d85": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-15-0011-ffcdea",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-16T21:59:00+00:00",
-      "resolved": false,
-      "publishedAt": "2026-07-15T00:11:10.708053+00:00"
-    },
-    "65aa0b72e0da3a45": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-15-0330-7bbbfc",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-16T21:59:00+00:00",
-      "resolved": false,
-      "publishedAt": "2026-07-15T03:30:25.388185+00:00"
-    },
-    "506958383cf81ee1": {
-      "slug": "arso-opozorilo-warningforestfire-2026-07-15-0557-af0e50",
-      "types": [
-        "WarningForestFire"
-      ],
-      "validEnd": "2026-07-16T21:59:00+00:00",
-      "resolved": false,
-      "publishedAt": "2026-07-15T05:57:45.049864+00:00"
-    },
-    "40a51683babbb959": {
+    "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8": {
       "slug": "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
       "types": [
         "WarningForestFire"
