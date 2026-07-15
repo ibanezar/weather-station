@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 15 Jul 2026 05:57:45 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 15 Jul 2026 07:26:48 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Gobarska napoved za Zgornjo Savinjsko dolino: kaj pravita vlaga in dež</title>
+      <link>https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</guid>
+      <pubDate>Wed, 15 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Gobarska napoved Zgornja Savinjska dolina: trenutna vlažnost, temperature in napovedan dež povedo, kdaj rastejo gobe in kdaj na teren.</description>
+      <category>gobarska napoved</category>
+      <category>Savinjska dolina</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>gobarjenje</category>
+    </item>
     <item>
       <title>ARSO oranžno opozorilo — požarna ogroženost: kaj to pomeni za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-15-0557-af0e50.html</link>

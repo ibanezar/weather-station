@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</loc>
+    <lastmod>2026-07-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-15-0557-af0e50.html</loc>
     <lastmod>2026-07-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -572,6 +579,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/savinja/</loc>
+    <lastmod>2026-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/savinjska-dolina/</loc>
     <lastmod>2026-07-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
