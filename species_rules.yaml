@@ -1,0 +1,110 @@
+# species_rules.yaml — pravila gobarskega modela po vrstah
+#
+# Vse pragove s "# TODO: kalibriraj" je treba preveriti/umeriti na lokalne
+# razmere (Zgornja Savinjska dolina) — trenutne vrednosti so literaturni
+# privzetki, NE kalibrirane vrednosti.
+#
+# Datoteko bere tools/gobe_model.py. V kodi ni nobenega vsebinskega praga —
+# vse, kar vpliva na indeks, je tukaj.
+
+# Globalne uteži za izračun indeksa (0–100)
+weights:
+  soil_temp: 0.35        # ujemanje talne temp. z optimalnim oknom vrste
+  rain_7d: 0.25          # kumulativne padavine 7 dni
+  rain_14d: 0.15         # kumulativne padavine 14 dni
+  soil_moisture: 0.10
+  humidity: 0.08
+  temp_drop: 0.07        # nočna ohladitev kot sprožilec
+
+# Globalni kalibracijski parametri točkovanja (veljajo za vse vrste).
+# Vsi so namerno v configu in ne v kodi.
+scoring:
+  rain:
+    # Padavinski prispevek = f(kumulativa / *_min prag), omejen navzgor.
+    # ratio < 1  → linearno (pod pragom, delni prispevek)
+    # 1 ≤ ratio ≤ oversat_ratio → polni prispevek (1.0)
+    # ratio > oversat_ratio → linearni upad proti oversat_factor (prenamočenost)
+    oversat_ratio: 3.0       # TODO: kalibriraj — večkratnik praga, kjer se začne prenamočenost
+    oversat_max_ratio: 6.0   # TODO: kalibriraj — večkratnik praga, kjer je upad največji
+    oversat_factor: 0.5      # TODO: kalibriraj — minimalni prispevek ob ekstremni namočenosti
+  soil_moisture:
+    # Linearna rampa vlage tal (m³/m³, Open-Meteo soil_moisture_3_to_9cm)
+    dry: 0.12                # TODO: kalibriraj — pod tem prispevek 0
+    full: 0.28               # TODO: kalibriraj — nad tem polni prispevek
+  humidity:
+    # Linearna rampa relativne zračne vlage (%)
+    rh_low: 60               # TODO: kalibriraj — pod tem prispevek 0
+    rh_full: 85              # TODO: kalibriraj — nad tem polni prispevek
+    # Če je razmik med temperaturo in rosiščem pod tem pragom (°C), štejemo
+    # zrak za nasičen (rosa/megla) in humidity prispevek dvignemo na 1.0.
+    dewpoint_spread_full: 2.0  # TODO: kalibriraj
+  temp_drop:
+    # Nočna ohladitev kot sprožilec: primerjamo T_min dneva s povprečjem
+    # T_min prejšnjih window_days dni; padec ≥ min_drop_c šteje kot sprožilec,
+    # ki "velja" še persist_days dni po dogodku.
+    window_days: 5           # TODO: kalibriraj
+    min_drop_c: 3.0          # TODO: kalibriraj
+    persist_days: 4          # TODO: kalibriraj
+  elevation:
+    # Mehki dušilec: če je nadm. višina lokacije izven elevation_pref_m vrste,
+    # se končni indeks pomnoži s tem faktorjem (ne gre na 0 — preferenca, ne pravilo).
+    out_of_range_factor: 0.7  # TODO: kalibriraj
+
+species:
+  - id: boletus_edulis
+    name_sl: "Jurček"
+    name_lat: "Boletus edulis"
+    # Sezonsko okno (mesec.dan) — izven njega je indeks 0
+    season: { start: "07.15", end: "11.10" }
+    # Optimalno okno talne temp. (°C) — trapezasta funkcija:
+    # pod min in nad max = 0, med opt_low in opt_high = polni prispevek
+    soil_temp: { min: 10, opt_low: 14, opt_high: 18, max: 24 }  # TODO: kalibriraj za lokalno mikroklimo
+    # Minimalne kumulativne padavine (mm) za sprožitev
+    rain_7d_min: 20        # TODO: kalibriraj
+    rain_14d_min: 40       # TODO: kalibriraj
+    # Zamik med dežjem in rastjo (dni) — za "napovedno okno"
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    # Preferirani habitat / drevesne združbe (za prihodnjo lokacijsko plast)
+    habitat: ["smreka", "bukev", "hrast"]
+    elevation_pref_m: { min: 300, max: 1400 }  # TODO: kalibriraj
+    requires_temp_drop: true   # potrebuje nočno ohladitev kot sprožilec
+    notes: "Privzetki iz literature. Lokalno: preveri, ali gredo šele po prvi resni ohladitvi konec avgusta."
+
+  - id: cantharellus_cibarius
+    name_sl: "Lisička"
+    name_lat: "Cantharellus cibarius"
+    season: { start: "06.01", end: "10.31" }
+    soil_temp: { min: 12, opt_low: 15, opt_high: 20, max: 25 }  # TODO: kalibriraj
+    rain_7d_min: 15        # TODO: kalibriraj
+    rain_14d_min: 30       # TODO: kalibriraj
+    fruiting_lag_days: { min: 5, max: 12 }  # TODO: kalibriraj
+    habitat: ["smreka", "bukev"]
+    elevation_pref_m: { min: 300, max: 1500 }  # TODO: kalibriraj
+    requires_temp_drop: false
+    notes: "Bolj tolerantna, daljša sezona. Privzetki iz literature."
+
+  - id: macrolepiota_procera
+    name_sl: "Marela (dežnikarica)"
+    name_lat: "Macrolepiota procera"
+    season: { start: "08.01", end: "11.15" }
+    soil_temp: { min: 10, opt_low: 13, opt_high: 18, max: 22 }  # TODO: kalibriraj
+    rain_7d_min: 15        # TODO: kalibriraj
+    rain_14d_min: 30       # TODO: kalibriraj
+    fruiting_lag_days: { min: 5, max: 10 }  # TODO: kalibriraj
+    habitat: ["travnik", "gozdni rob", "jasa"]
+    elevation_pref_m: { min: 300, max: 1200 }  # TODO: kalibriraj
+    requires_temp_drop: true
+    notes: "Raste na odprtem, ne v sklenjenem gozdu. Privzetki iz literature."
+
+  - id: armillaria_mellea
+    name_sl: "Jesenska štorovka"
+    name_lat: "Armillaria mellea"
+    season: { start: "09.01", end: "11.20" }
+    soil_temp: { min: 8, opt_low: 11, opt_high: 15, max: 19 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj
+    rain_14d_min: 35       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    habitat: ["štori", "listavci", "iglavci"]
+    elevation_pref_m: { min: 300, max: 1300 }  # TODO: kalibriraj
+    requires_temp_drop: true
+    notes: "Pozna vrsta, vezana na les/štore. Privzetki iz literature."
