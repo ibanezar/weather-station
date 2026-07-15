@@ -129,6 +129,15 @@
       "validEnd": "2026-07-15T21:59:00+00:00",
       "resolved": false,
       "publishedAt": "2026-07-14T23:25:08.664056+00:00"
+    },
+    "72ec47cdc9556d85": {
+      "slug": "arso-opozorilo-warningforestfire-2026-07-15-0011-ffcdea",
+      "types": [
+        "WarningForestFire"
+      ],
+      "validEnd": "2026-07-16T21:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-07-15T00:11:10.708053+00:00"
     }
   }
 }
