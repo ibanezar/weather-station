@@ -1,1 +1,19 @@
-{}
+{
+  "2026-07-15": {
+    "date": "2026-07-15",
+    "made_at": "2026-07-14",
+    "actual": {
+      "tmax": 17.8,
+      "tmin": 17.1,
+      "precip": 0.0
+    },
+    "open_meteo": {
+      "tmax": 30.7,
+      "tmin": 18.1,
+      "precip": 6.8,
+      "err_tmax": 12.9,
+      "err_tmin": 1.0,
+      "err_precip": 6.8
+    }
+  }
+}
