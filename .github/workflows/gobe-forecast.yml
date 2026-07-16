@@ -18,6 +18,29 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Izračunaj gobarski model (free + premium)
+        run: python3 tools/gobe_model.py --out-premium /tmp/premium.json
+
+      - name: Push premium JSON v Worker KV
+        env:
+          PREMIUM_SYNC_KEY: ${{ secrets.PREMIUM_SYNC_KEY }}
+        run: |
+          if [ -z "$PREMIUM_SYNC_KEY" ]; then
+            echo "PREMIUM_SYNC_KEY ni nastavljen — preskočim KV push."
+            exit 0
+          fi
+          for i in 1 2 3; do
+            curl -sf -X POST "https://weatherireica1.filip-eremita.workers.dev/premium/data" \
+              -H "Authorization: Bearer $PREMIUM_SYNC_KEY" \
+              -H "Content-Type: application/json" \
+              --data-binary @/tmp/premium.json && exit 0
+            echo "Poskus $i ni uspel, čakam …"; sleep $((i * 5))
+          done
+          echo "::warning::Premium JSON ni bil naložen v KV (worker nedosegljiv?)"
+
       - name: Generate gobarska-napoved stran
         run: python3 tools/generate_gobe_page.py
 

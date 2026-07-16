@@ -2014,6 +2014,196 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         return _json({ error: "Nedovoljena metoda ali pot" }, 405);
       }
 
+      // ── /premium (gobarska napoved — plačljivi dostop) ──────
+      //   POST /premium/data      Bearer PREMIUM_SYNC_KEY → store forecast JSON (from GitHub Action)
+      //   POST /premium/webhook   Paddle Billing notification (signature-verified)
+      //   POST /premium/login     { email } → magic link via Resend
+      //   GET  /premium/verify    Bearer token → { ok, plan, expires }
+      //   GET  /premium/forecast  Bearer token → premium forecast JSON
+      // Storage (COUNTER_KV):
+      //   premium:data        — latest premium forecast JSON
+      //   premium:sub:<email> — { email, plan, expires, customer_id, updated }
+      //   premium:tok:<token> — { email, ts }  (TTL 90 days; sub expiry re-checked on every read)
+      if (path.startsWith("/premium/")) {
+        const kv = env?.COUNTER_KV;
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        const PAGE_URL = "https://meteorec.si/gobarska-napoved/";
+        const TOKEN_TTL_S = 60 * 60 * 24 * 90;
+
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), {
+            status: status || 200,
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
+          });
+        }
+        function _sendMail(to, subject, html) {
+          if (!env?.RESEND_API_KEY) return Promise.resolve();
+          const from = env.PREMIUM_FROM || env.NOTIFY_FROM || "Meteorec <onboarding@resend.dev>";
+          return fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ from, to, subject, html }),
+          }).catch(() => {});
+        }
+        async function _hmacHex(secret, msg) {
+          const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret),
+            { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+          const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
+          return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+        function _tsEqual(a, b) {
+          // constant-time string comparison
+          if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+          let r = 0;
+          for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+          return r === 0;
+        }
+        function _bearer() {
+          const h = request.headers.get("Authorization") || "";
+          if (h.startsWith("Bearer ")) return h.slice(7).trim();
+          return (url.searchParams.get("token") || "").trim();
+        }
+        async function _subFor(email) {
+          try { return JSON.parse(await kv.get(`premium:sub:${email}`)); } catch (_) { return null; }
+        }
+        async function _newToken(email) {
+          const tok = (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, "");
+          await kv.put(`premium:tok:${tok}`, JSON.stringify({ email, ts: new Date().toISOString() }),
+            { expirationTtl: TOKEN_TTL_S });
+          return tok;
+        }
+        async function _authedSub() {
+          // token → subscriber record, or null when token/subscription invalid
+          const tok = _bearer();
+          if (!tok) return null;
+          let rec; try { rec = JSON.parse(await kv.get(`premium:tok:${tok}`)); } catch (_) { return null; }
+          if (!rec?.email) return null;
+          const sub = await _subFor(rec.email);
+          if (!sub?.expires || new Date(sub.expires) < new Date()) return null;
+          return sub;
+        }
+        function _magicLinkMail(link) {
+          return `<p>Pozdravljen, gobar!</p>` +
+            `<p>Tvoj dostop do <strong>gobarske napovedi Premium</strong> (7-dnevna napoved po vrstah in lokacijah):</p>` +
+            `<p><a href="${link}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Odpri gobarsko napoved 🍄</a></p>` +
+            `<p style="color:#888;font-size:.85rem">Povezava velja 90 dni in deluje na vseh tvojih napravah. ` +
+            `Nov dostop lahko kadarkoli zahtevaš na ${PAGE_URL} z istim e-naslovom.</p>` +
+            `<p style="color:#888;font-size:.85rem">Napoved je indeks ugodnosti pogojev, ne obljuba najdbe — gozd ima vedno zadnjo besedo.</p>`;
+        }
+
+        if (!kv) return _json({ error: "Shramba ni dosegljiva" }, 503);
+
+        // ── POST /premium/data — GitHub Action pushes the daily premium JSON
+        if (path === "/premium/data" && request.method === "POST") {
+          const syncKey = env?.PREMIUM_SYNC_KEY;
+          const auth = request.headers.get("Authorization") || "";
+          if (!syncKey || !_tsEqual(auth, `Bearer ${syncKey}`)) return _json({ error: "Nedovoljeno" }, 401);
+          const raw = await request.text();
+          if (raw.length > 512 * 1024) return _json({ error: "Preveliko" }, 413);
+          let parsed;
+          try { parsed = JSON.parse(raw); } catch (_) { return _json({ error: "Neveljaven JSON" }, 400); }
+          if (!Array.isArray(parsed?.locations) || !parsed.locations.length)
+            return _json({ error: "Manjkajo lokacije" }, 422);
+          await kv.put("premium:data", raw);
+          return _json({ ok: true, bytes: raw.length, generated: parsed.generated || null });
+        }
+
+        // ── POST /premium/webhook — Paddle Billing notifications
+        if (path === "/premium/webhook" && request.method === "POST") {
+          const secret = env?.PADDLE_WEBHOOK_SECRET;
+          if (!secret) return _json({ error: "Webhook ni konfiguriran" }, 503);
+          const raw = await request.text();
+          // Paddle-Signature: ts=<unix>;h1=<hmac-sha256 of "<ts>:<raw body>">
+          const sig = Object.fromEntries((request.headers.get("Paddle-Signature") || "")
+            .split(";").map(p => p.split("=")));
+          if (!sig.ts || !sig.h1) return _json({ error: "Manjka podpis" }, 401);
+          const expected = await _hmacHex(secret, `${sig.ts}:${raw}`);
+          if (!_tsEqual(expected, sig.h1)) return _json({ error: "Neveljaven podpis" }, 401);
+
+          let evt; try { evt = JSON.parse(raw); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          // transaction.completed covers both the first purchase and every
+          // subscription renewal; expiry-based access makes cancel events moot.
+          if (evt.event_type !== "transaction.completed")
+            return _json({ ok: true, ignored: evt.event_type || "?" });
+
+          const data = evt.data || {};
+          let email = (data.custom_data?.email || "").toLowerCase().trim();
+          if (!EMAIL_RE.test(email)) {
+            // Fall back to the Paddle customer record
+            email = "";
+            if (env?.PADDLE_API_KEY && data.customer_id) {
+              try {
+                const base = env.PADDLE_API_BASE || "https://api.paddle.com";
+                const r = await fetch(`${base}/customers/${data.customer_id}`,
+                  { headers: { "Authorization": `Bearer ${env.PADDLE_API_KEY}` } });
+                if (r.ok) email = ((await r.json())?.data?.email || "").toLowerCase().trim();
+              } catch (_) {}
+            }
+          }
+          if (!EMAIL_RE.test(email)) return _json({ error: "E-naslova ni bilo mogoče ugotoviti" }, 422);
+
+          const isSeason = (data.items || []).some(it => it?.price?.id && it.price.id === env.PADDLE_PRICE_SEASON);
+          const plan = isSeason ? "sezona" : "mesecna";
+          const now = new Date();
+          let expires;
+          if (isSeason) {
+            const [mm, dd] = (env.PREMIUM_SEASON_END || "11-30").split("-").map(Number);
+            expires = new Date(Date.UTC(now.getUTCFullYear(), mm - 1, dd, 23, 59, 59));
+            if (expires < now) expires = new Date(Date.UTC(now.getUTCFullYear() + 1, mm - 1, dd, 23, 59, 59));
+          } else {
+            expires = new Date(now.getTime() + 33 * 864e5); // 30 days + grace for renewal lag
+          }
+          const prev = await _subFor(email);
+          if (prev?.expires && new Date(prev.expires) > expires) expires = new Date(prev.expires);
+          await kv.put(`premium:sub:${email}`, JSON.stringify({
+            email, plan, expires: expires.toISOString(),
+            customer_id: data.customer_id || null, updated: now.toISOString(),
+          }));
+          // Send the access link right away — no separate login step after payment
+          const tok = await _newToken(email);
+          ctx.waitUntil(_sendMail(email, "Tvoj dostop do gobarske napovedi Premium 🍄",
+            _magicLinkMail(`${PAGE_URL}?token=${tok}`)));
+          return _json({ ok: true, plan });
+        }
+
+        // ── POST /premium/login { email } — (re)send magic link
+        if (path === "/premium/login" && request.method === "POST") {
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (body.website) return _json({ ok: true }); // honeypot
+          const email = (body.email || "").trim().toLowerCase();
+          if (!EMAIL_RE.test(email) || email.length > 120) return _json({ error: "Neveljaven e-naslov" }, 400);
+          const sub = await _subFor(email);
+          if (sub?.expires && new Date(sub.expires) > new Date()) {
+            const tok = await _newToken(email);
+            ctx.waitUntil(_sendMail(email, "Povezava do gobarske napovedi Premium 🍄",
+              _magicLinkMail(`${PAGE_URL}?token=${tok}`)));
+          }
+          // Same answer either way — don't reveal who is subscribed
+          return _json({ ok: true, msg: "Če je e-naslov naročen, smo nanj poslali povezavo za dostop." });
+        }
+
+        // ── GET /premium/verify — is this token still good?
+        if (path === "/premium/verify" && request.method === "GET") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ ok: false }, 401);
+          return _json({ ok: true, plan: sub.plan, expires: sub.expires });
+        }
+
+        // ── GET /premium/forecast — the paid payload
+        if (path === "/premium/forecast" && request.method === "GET") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          const data = await kv.get("premium:data");
+          if (!data) return _json({ error: "Napoved še ni pripravljena" }, 503);
+          return new Response(data, {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
+          });
+        }
+
+        return _json({ error: "Nedovoljena metoda ali pot" }, 405);
+      }
+
       // ── /push (web push obvestila) ──────────────────────────
       //   GET  /push/vapid                       → { publicKey }
       //   POST /push/subscribe   { subscription } → shrani naročnino

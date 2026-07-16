@@ -14,6 +14,20 @@ id = "ad19629f12a042dd8cd90c64a68662b4"
 # Pošiljatelj e-obvestil o komentarjih (domena meteorec.si verificirana v Resend).
 NOTIFY_FROM = "Meteorec <komentarji@meteorec.si>"
 
+# ── Gobarska napoved Premium (Paddle Billing) ──
+# Pošiljatelj magic-link e-pošte za premium dostop.
+PREMIUM_FROM = "Meteorec gobarska napoved <gobe@meteorec.si>"
+# Paddle API (za branje e-naslova kupca iz customer_id).
+# Sandbox testiranje: "https://sandbox-api.paddle.com"
+PADDLE_API_BASE = "https://api.paddle.com"
+# Price ID-ja iz Paddle kataloga — nastavi po kreiranju produktov (pri_...).
+PADDLE_PRICE_MONTHLY = "pri_REPLACE_MONTHLY"
+PADDLE_PRICE_SEASON = "pri_REPLACE_SEASON"
+# Konec gobarske sezone (MM-DD) — do takrat velja sezonska naročnina.
+PREMIUM_SEASON_END = "11-30"
+# Skrivnosti (wrangler secret put …): PREMIUM_SYNC_KEY, PADDLE_WEBHOOK_SECRET,
+# PADDLE_API_KEY (RESEND_API_KEY že obstaja).
+
 # Samodejni pragovni push alarm — preveri meritve vsakih 5 minut.
 [triggers]
 crons = ["*/5 * * * *"]
