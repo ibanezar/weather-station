@@ -87,27 +87,48 @@ def season_months(sp):
 # ── page CSS (scoped, appended in <head>) ─────────────────────────────────────
 
 PAGE_CSS = """<style>
-.gp-hero{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
-  padding:1.4rem 1.5rem;margin:.6rem 0 1.2rem;box-shadow:var(--card-shadow)}
-.gp-hero-top{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
-.gp-gauge{font-size:3.2rem;font-weight:800;line-height:1;color:var(--green)}
-.gp-gauge small{font-size:1.1rem;color:var(--muted);font-weight:600}
-.gp-hero-lvl{font-size:1.05rem;font-weight:700;letter-spacing:.02em}
+.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
+  padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
+  background:linear-gradient(135deg,rgba(4,7,14,.80),rgba(4,7,14,.93)),url('/og/bg/misty-valley.jpg') center/cover}
+.gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
+.gp-ring{display:block}
+.gp-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:11}
+.gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
+.gp-gauge-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:2.7rem;font-weight:800;color:var(--text)}
+.gp-gauge-num small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:2px}
+.gp-hero-body{flex:1;min-width:250px}
+.gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
+.gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
+  border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+.gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
+  border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
-.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;font:inherit;
+.gp-h2{margin-top:1.7rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
+.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font:inherit;
   font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
   border:0;cursor:pointer;line-height:1.2}
+.gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
-.gp-forests{display:grid;gap:.5rem;margin:.6rem 0 1rem}
-.gp-forest{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
-  background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .8rem}
-.gp-forest b{font-variant-numeric:tabular-nums}
+.gp-forests{display:grid;gap:.6rem;margin:.6rem 0 1.2rem}
+.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
+.gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
+.gp-forest-nm{font-weight:700;font-size:.95rem}
+.gp-meter{position:relative;height:22px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
+.gp-meter-fill{position:absolute;left:0;top:0;bottom:0;border-radius:7px;transition:width .6s ease}
+.gp-meter-val{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;
+  font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
+.gp-forest-sp{font-size:.82rem;color:var(--muted);margin-top:.45rem}
+.gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
-.gp-skel{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0}
-.gp-skel .gp-forest{background:var(--badge-bg)}
+.gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+.gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
 .gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
@@ -132,18 +153,28 @@ PAGE_CSS = """<style>
 .e-death{background:rgba(248,113,113,.28);color:#fecaca;font-weight:800}
 .e-prot{background:rgba(167,139,250,.18);color:var(--purple)}
 .gp-sptable{width:100%;border-collapse:collapse;font-size:.86rem}
-.gp-sptable th,.gp-sptable td{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--border);vertical-align:top}
+.gp-sptable th,.gp-sptable td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
 .gp-sptable th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--bg)}
+.gp-sptable tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+.gp-sptable tbody tr:hover{background:rgba(77,159,248,.06)}
 .gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
 .gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 .gp-dbl{color:var(--muted);font-size:.8rem}
-.gp-terrmap{display:grid;gap:.6rem;margin:.6rem 0}
-.gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.8rem 1rem}
-.gp-terrmap .t b{color:var(--text)}
+.gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
+.gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
+  border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
+.gp-terrmap .t-h{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.gp-terrmap .t-ic{display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;
+  border-radius:8px;font-size:1.05rem}
+.gp-terrmap .t b{color:var(--text);font-size:1rem}
 .gp-matrix{width:100%;border-collapse:collapse;font-size:.8rem}
 .gp-matrix th,.gp-matrix td{padding:.3rem .35rem;text-align:center;border-bottom:1px solid var(--border)}
 .gp-matrix td.nm{text-align:left;white-space:nowrap}
-.gp-cell{display:inline-block;min-width:2.1em;border-radius:5px;padding:.1rem .2rem;font-variant-numeric:tabular-nums}
+.gp-cell{display:inline-block;min-width:2.3em;border-radius:6px;padding:.15rem .3rem;
+  font-variant-numeric:tabular-nums;font-weight:700;text-align:center}
+.gp-legend{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.78rem;color:var(--muted);margin:.5rem 0 .9rem}
+.gp-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 </style>"""
 
@@ -165,32 +196,42 @@ PAGE_JS = """<script>
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
-  function color(v){
-    if(v>=75)return"rgba(52,211,153,.28)";if(v>=55)return"rgba(52,211,153,.16)";
-    if(v>=35)return"rgba(245,158,11,.16)";if(v>=18)return"rgba(248,113,113,.14)";
-    return"var(--badge-bg)";
+  var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
+  function levelColor(v){
+    if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
   }
+  function hexToRgb(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   function render(d){
     var meta=d.species_meta||{};
     var home=(d.locations||[]).filter(function(l){return l.home;})[0]||d.locations[0];
     var html="";
-    // today per forest
+    // today per forest — same bar-meter cards as the free section
     html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
     (d.locations||[]).slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
-      .forEach(function(l){var o=l.days[0];var top=o.species[0];
-        html+='<div class="gp-forest"><span>'+l.name+' <span class="gp-terr">'+(l.terrain||'')+
-          ' · '+l.elev_m+' m</span></span><b>'+o.overall+'% '+o.level+
-          (top?' · '+(meta[top.id]?meta[top.id].name_sl:''):'')+'</b></div>';});
+      .forEach(function(l){var o=l.days[0];var top=o.species[0];var col=levelColor(o.overall);
+        html+='<div class="gp-forest"><div class="gp-forest-head"><span class="gp-forest-nm">'+
+          (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
+          ' · '+l.elev_m+' m</span></div><div class="gp-meter"><div class="gp-meter-fill" style="width:'+
+          Math.max(3,o.overall)+'%;background:'+col+'"></div><span class="gp-meter-val">'+o.overall+' % · '+
+          o.level+'</span></div><div class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
+          '</div></div>';});
     html+='</div>';
     // 7-day matrix for home, top 8 species by today's index
     var top=home.days[0].species.slice(0,8).map(function(s){return s.id;});
-    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3><div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
+    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3>';
+    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
+      '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
+      '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
+      '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
+    html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
     home.days.forEach(function(day){var dt=new Date(day.date);
       html+='<th>'+(day===home.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
     html+='</tr></thead><tbody>';
     top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
       home.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
-        var v=s?s.index:0;html+='<td><span class="gp-cell" style="background:'+color(v)+'">'+v+'</span></td>';});
+        var v=s?s.index:0;var c=levelColor(v);var rgb=hexToRgb(c);
+        var alpha=(0.12+0.55*Math.min(100,v)/100).toFixed(2);
+        html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
       html+='</tr>';});
     html+='</tbody></table></div>';
     // today's carriers with explanation
@@ -279,6 +320,35 @@ def paddle_head():
             f"<script>window.MR_PADDLE={cfg};</script>")
 
 
+# Status ramp tied to the forecast level — green (good) → amber (moderate) → red.
+# The level word is always shown alongside, so colour is never the sole signal.
+def level_color(pct):
+    if pct >= 55: return "#34d399"   # DOBRA / ODLIČNA
+    if pct >= 35: return "#f59e0b"   # ZMERNA
+    if pct >= 18: return "#fb923c"   # SLABA
+    return "#f87171"                  # BREZ
+
+# Terrain accent colour + icon (also used for the terrain cards).
+TERRAIN_STYLE = {
+    "kisla":   ("#34d399", "🌲"),
+    "bazicna": ("#f59e0b", "⛰️"),
+    "vlazna":  ("#60a5fa", "💧"),
+}
+
+
+def gauge_svg(pct):
+    """Radial progress ring for the headline index."""
+    import math
+    r = 54
+    circ = 2 * math.pi * r
+    off = circ * (1 - max(0, min(100, pct)) / 100)
+    color = level_color(pct)
+    return (f'<svg viewBox="0 0 128 128" class="gp-ring" width="132" height="132" aria-hidden="true">'
+            f'<circle cx="64" cy="64" r="{r}" class="gp-ring-bg"/>'
+            f'<circle cx="64" cy="64" r="{r}" class="gp-ring-fg" stroke="{color}" '
+            f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
+
+
 def build_body(rules, premium, free):
     home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
     pct = free["index"]
@@ -294,33 +364,47 @@ def build_body(rules, premium, free):
     # ── HERO (free teaser) ────────────────────────────────────────────────────
     hero = f'''  <div class="gp-hero">
     <div class="gp-hero-top">
-      <div class="gp-gauge">{pct}<small> %</small></div>
-      <div>
-        <div class="gp-hero-lvl">Gobarski indeks danes — <strong>{lvl}</strong></div>
-        <div class="gp-hero-sub">Rečica ob Savinji · nosilna vrsta danes: <strong>{_esc(top_sl)}</strong>.<br>
-        Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong> ({best_o["overall"]} % — {best_o["level"]}).</div>
-        <a class="gp-cta" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
+      <div class="gp-gauge-wrap">
+        {gauge_svg(pct)}
+        <div class="gp-gauge-num">{pct}<small>%</small></div>
+      </div>
+      <div class="gp-hero-body">
+        <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
+        <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
+        <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
+          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} % · {best_o["level"]}</span></div>
+        <a class="gp-cta gp-cta-lg" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
-    <div class="gp-hero-sub" style="margin-top:.9rem">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast,
-    ne obljuba najdbe. Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1),
-    zračno vlago in nočno ohladitev — po vrstah in po geologiji terena.</div>
+    <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
+    Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
+    nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>'''
 
-    # ── today per forest (free) ───────────────────────────────────────────────
+    # ── today per forest (free) — horizontal bar meters ───────────────────────
     forests = ['  <div class="gp-forests">']
     for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
         o = loc["days"][0]
         top = o["species"][0]
         top_nm = premium["species_meta"][top["id"]]["name_sl"] if top else "—"
+        terr = loc.get("terrain", "")
+        t_icon = TERRAIN_STYLE.get(terr, ("", "🌲"))[1]
+        col = level_color(o["overall"])
         forests.append(
-            f'    <div class="gp-forest"><span>{_esc(loc["name"])} '
-            f'<span class="gp-terr">{loc.get("terrain","")} · {loc["elev_m"]} m</span></span>'
-            f'<b>{o["overall"]} % {o["level"]} · {_esc(top_nm)}</b></div>')
+            f'''    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>
+        <span class="gp-terr">{terr} · {loc["elev_m"]} m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:{max(3, o["overall"])}%;background:{col}"></div>
+        <span class="gp-meter-val">{o["overall"]} % · {o["level"]}</span></div>
+      <div class="gp-forest-sp">🍄 {_esc(top_nm)}</div>
+    </div>''')
     if premium.get("protected_areas"):
         forests.append(
-            f'    <div class="gp-forest" style="opacity:.7"><span>{_esc(", ".join(premium["protected_areas"]))} '
-            f'<span class="gp-terr">zaščiteno</span></span><b>nabiranje prepovedano</b></div>')
+            f'''    <div class="gp-forest gp-forest-prot">
+      <div class="gp-forest-head"><span class="gp-forest-nm">🚫 {_esc(", ".join(premium["protected_areas"]))}</span>
+        <span class="gp-terr">zaščiteno</span></div>
+      <div class="gp-forest-sp">Nabiranje prepovedano</div>
+    </div>''')
     forests.append("  </div>")
     forests_html = "\n".join(forests)
 
@@ -351,7 +435,7 @@ def build_body(rules, premium, free):
   </div>'''
 
     # ── pricing ───────────────────────────────────────────────────────────────
-    pricing = f'''  <h2 id="pricing">Naročnina</h2>
+    pricing = f'''  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
   <div class="gp-pricing">
     <div class="gp-plan">
       <span class="gp-tag">MESEČNO</span>
@@ -413,8 +497,11 @@ def build_body(rules, premium, free):
     for t in rules.get("terrains", []):
         locs_here = [l["name"] for l in rules["locations"]
                      if l.get("terrain") == t["id"] and not l.get("protected")]
+        col, icon = TERRAIN_STYLE.get(t["id"], ("#60a5fa", "🌲"))
         terr_items.append(
-            f'    <div class="t"><b>{_esc(t["name_sl"])}</b><br>'
+            f'    <div class="t" style="border-left-color:{col}">'
+            f'<div class="t-h"><span class="t-ic" style="background:{col}22">{icon}</span>'
+            f'<b>{_esc(t["name_sl"])}</b></div>'
             f'<span class="gp-hero-sub">{_esc(t.get("note",""))}</span><br>'
             f'<span class="gp-terr">Napovedne točke: {_esc(", ".join(locs_here) or "—")}</span></div>')
     terrain_html = '  <div class="gp-terrmap">\n' + "\n".join(terr_items) + "\n  </div>"
@@ -442,7 +529,7 @@ def build_body(rules, premium, free):
          "Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob "
          "Savinji. Ni uradna napoved ARSO."),
     ]
-    faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+    faq_html = ("  <h2 class=\"gp-h2\">❓ Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
     ) + "\n  </div>")
 
@@ -451,21 +538,21 @@ def build_body(rules, premium, free):
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {hero}
-  <h2>Danes po gozdovih</h2>
+  <h2 class="gp-h2">🌲 Danes po gozdovih</h2>
   <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
 {forests_html}
-  <h2>Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
 {pricing}
-  <h2>Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
+  <h2 class="gp-h2">📅 Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
   <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
 {calendar_html}
-  <h2>Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
+  <h2 class="gp-h2">📖 Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
 {species_table}
-  <h2>Geološki tereni doline</h2>
+  <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
   <div class="card" style="margin:1rem 0">

@@ -35,27 +35,48 @@
 {"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Je gobarski indeks napoved najdbe?","acceptedAnswer":{"@type":"Answer","text":"Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."}},{"@type":"Question","name":"Katere vrste zajema premium napoved?","acceptedAnswer":{"@type":"Answer","text":"U\u017eitne in pogojno u\u017eitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."}},{"@type":"Question","name":"Ali je to uradna napoved ARSO?","acceptedAnswer":{"@type":"Answer","text":"Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."}}]}
 </script>
 <style>
-.gp-hero{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
-  padding:1.4rem 1.5rem;margin:.6rem 0 1.2rem;box-shadow:var(--card-shadow)}
-.gp-hero-top{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
-.gp-gauge{font-size:3.2rem;font-weight:800;line-height:1;color:var(--green)}
-.gp-gauge small{font-size:1.1rem;color:var(--muted);font-weight:600}
-.gp-hero-lvl{font-size:1.05rem;font-weight:700;letter-spacing:.02em}
+.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
+  padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
+  background:linear-gradient(135deg,rgba(4,7,14,.80),rgba(4,7,14,.93)),url('/og/bg/misty-valley.jpg') center/cover}
+.gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
+.gp-ring{display:block}
+.gp-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:11}
+.gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
+.gp-gauge-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:2.7rem;font-weight:800;color:var(--text)}
+.gp-gauge-num small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:2px}
+.gp-hero-body{flex:1;min-width:250px}
+.gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
+.gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
+  border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+.gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
+  border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
-.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;font:inherit;
+.gp-h2{margin-top:1.7rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
+.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font:inherit;
   font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
   border:0;cursor:pointer;line-height:1.2}
+.gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
-.gp-forests{display:grid;gap:.5rem;margin:.6rem 0 1rem}
-.gp-forest{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
-  background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .8rem}
-.gp-forest b{font-variant-numeric:tabular-nums}
+.gp-forests{display:grid;gap:.6rem;margin:.6rem 0 1.2rem}
+.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
+.gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
+.gp-forest-nm{font-weight:700;font-size:.95rem}
+.gp-meter{position:relative;height:22px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
+.gp-meter-fill{position:absolute;left:0;top:0;bottom:0;border-radius:7px;transition:width .6s ease}
+.gp-meter-val{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;
+  font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
+.gp-forest-sp{font-size:.82rem;color:var(--muted);margin-top:.45rem}
+.gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
-.gp-skel{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0}
-.gp-skel .gp-forest{background:var(--badge-bg)}
+.gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+.gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
 .gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
@@ -80,18 +101,28 @@
 .e-death{background:rgba(248,113,113,.28);color:#fecaca;font-weight:800}
 .e-prot{background:rgba(167,139,250,.18);color:var(--purple)}
 .gp-sptable{width:100%;border-collapse:collapse;font-size:.86rem}
-.gp-sptable th,.gp-sptable td{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--border);vertical-align:top}
+.gp-sptable th,.gp-sptable td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
 .gp-sptable th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--bg)}
+.gp-sptable tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+.gp-sptable tbody tr:hover{background:rgba(77,159,248,.06)}
 .gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
 .gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 .gp-dbl{color:var(--muted);font-size:.8rem}
-.gp-terrmap{display:grid;gap:.6rem;margin:.6rem 0}
-.gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.8rem 1rem}
-.gp-terrmap .t b{color:var(--text)}
+.gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
+.gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
+  border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
+.gp-terrmap .t-h{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem}
+.gp-terrmap .t-ic{display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;
+  border-radius:8px;font-size:1.05rem}
+.gp-terrmap .t b{color:var(--text);font-size:1rem}
 .gp-matrix{width:100%;border-collapse:collapse;font-size:.8rem}
 .gp-matrix th,.gp-matrix td{padding:.3rem .35rem;text-align:center;border-bottom:1px solid var(--border)}
 .gp-matrix td.nm{text-align:left;white-space:nowrap}
-.gp-cell{display:inline-block;min-width:2.1em;border-radius:5px;padding:.1rem .2rem;font-variant-numeric:tabular-nums}
+.gp-cell{display:inline-block;min-width:2.3em;border-radius:6px;padding:.15rem .3rem;
+  font-variant-numeric:tabular-nums;font-weight:700;text-align:center}
+.gp-legend{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.78rem;color:var(--muted);margin:.5rem 0 .9rem}
+.gp-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 </style>
 <script>window.MR_PADDLE=null;</script>
@@ -121,30 +152,68 @@
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza 51 vrst · osvežuje se dnevno · 2026-07-16</p>
   <div class="gp-hero">
     <div class="gp-hero-top">
-      <div class="gp-gauge">51<small> %</small></div>
-      <div>
-        <div class="gp-hero-lvl">Gobarski indeks danes — <strong>ZMERNA</strong></div>
-        <div class="gp-hero-sub">Rečica ob Savinji · nosilna vrsta danes: <strong>Bezgova uhljevka</strong>.<br>
-        Najugodnejši gozd danes: <strong>Smrekovško pogorje</strong> (100 % — ODLIČNA).</div>
-        <a class="gp-cta" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
+      <div class="gp-gauge-wrap">
+        <svg viewBox="0 0 128 128" class="gp-ring" width="132" height="132" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#f59e0b" stroke-dasharray="339.3" stroke-dashoffset="166.3"/></svg>
+        <div class="gp-gauge-num">51<small>%</small></div>
+      </div>
+      <div class="gp-hero-body">
+        <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
+        <div class="gp-hero-lvl" style="color:#f59e0b">ZMERNA</div>
+        <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>Smrekovško pogorje</strong>
+          <span class="gp-hero-best-pct" style="background:#34d39922;color:#34d399">100 % · ODLIČNA</span></div>
+        <a class="gp-cta gp-cta-lg" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
-    <div class="gp-hero-sub" style="margin-top:.9rem">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast,
-    ne obljuba najdbe. Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1),
-    zračno vlago in nočno ohladitev — po vrstah in po geologiji terena.</div>
+    <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
+    Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
+    nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>
-  <h2>Danes po gozdovih</h2>
+  <h2 class="gp-h2">🌲 Danes po gozdovih</h2>
   <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
   <div class="gp-forests">
-    <div class="gp-forest"><span>Smrekovško pogorje <span class="gp-terr">kisla · 1300 m</span></span><b>100 % ODLIČNA · Žametasti goban</b></div>
-    <div class="gp-forest"><span>Gozdovi nad Ljubnim <span class="gp-terr">kisla · 700 m</span></span><b>82 % ODLIČNA · Rdečkasta mušnica (Bisernica)</b></div>
-    <div class="gp-forest"><span>Golte <span class="gp-terr">bazicna · 1300 m</span></span><b>79 % ODLIČNA · Zelena golobica</b></div>
-    <div class="gp-forest"><span>Dobrovlje – Čreta <span class="gp-terr">bazicna · 900 m</span></span><b>67 % DOBRA · Zelena golobica</b></div>
-    <div class="gp-forest"><span>Rečica ob Savinji <span class="gp-terr">vlazna · 400 m</span></span><b>51 % ZMERNA · Bezgova uhljevka</b></div>
-    <div class="gp-forest" style="opacity:.7"><span>Logarska dolina <span class="gp-terr">zaščiteno</span></span><b>nabiranje prepovedano</b></div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Smrekovško pogorje</span>
+        <span class="gp-terr">kisla · 1300 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:100%;background:#34d399"></div>
+        <span class="gp-meter-val">100 % · ODLIČNA</span></div>
+      <div class="gp-forest-sp">🍄 Žametasti goban</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
+        <span class="gp-terr">kisla · 700 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:82%;background:#34d399"></div>
+        <span class="gp-meter-val">82 % · ODLIČNA</span></div>
+      <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Golte</span>
+        <span class="gp-terr">bazicna · 1300 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:79%;background:#34d399"></div>
+        <span class="gp-meter-val">79 % · ODLIČNA</span></div>
+      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
+        <span class="gp-terr">bazicna · 900 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:67%;background:#34d399"></div>
+        <span class="gp-meter-val">67 % · DOBRA</span></div>
+      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">💧 Rečica ob Savinji</span>
+        <span class="gp-terr">vlazna · 400 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:51%;background:#f59e0b"></div>
+        <span class="gp-meter-val">51 % · ZMERNA</span></div>
+      <div class="gp-forest-sp">🍄 Bezgova uhljevka</div>
+    </div>
+    <div class="gp-forest gp-forest-prot">
+      <div class="gp-forest-head"><span class="gp-forest-nm">🚫 Logarska dolina</span>
+        <span class="gp-terr">zaščiteno</span></div>
+      <div class="gp-forest-sp">Nabiranje prepovedano</div>
+    </div>
   </div>
-  <h2>Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
   <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
   <div id="gp-lock" class="gp-lock">
@@ -170,7 +239,7 @@
     </form>
     <div id="gp-login-msg" class="gp-msg"></div>
   </div>
-  <h2 id="pricing">Naročnina</h2>
+  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
   <div class="gp-pricing">
     <div class="gp-plan">
       <span class="gp-tag">MESEČNO</span>
@@ -198,7 +267,7 @@
   <div id="gp-checkout-msg" class="gp-msg"></div>
   <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
   računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
-  <h2>Kaj utegne rasti v juliju</h2>
+  <h2 class="gp-h2">📅 Kaj utegne rasti v juliju</h2>
   <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
   <table class="stats">
       <tr><th>Januar</th><td style="text-align:left">Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
@@ -214,7 +283,7 @@
       <tr><th>November</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna sirovka, Smrekova sirovka, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Sivorumena mraznica (Štorovka), Zimska panjevka, Bukov ostrigar, Vijoličasta bledivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar</td></tr>
       <tr><th>December</th><td style="text-align:left">Lijasta lisička, Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
   </table>
-  <h2>Baza 51 vrst — užitnost in nevarne dvojnice</h2>
+  <h2 class="gp-h2">📖 Baza 51 vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
   <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>
@@ -270,12 +339,12 @@
       <tr><td><b>Vražji goban</b><br><span class="lat">Rubroboletus satanas</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>07.01–09.30</td><td class="gp-dbl">Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</td></tr>
       <tr><td><b>Zelena mušnica</b><br><span class="lat">Amanita phalloides</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</td></tr>
   </tbody></table></div>
-  <h2>Geološki tereni doline</h2>
+  <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
   <div class="gp-terrmap">
-    <div class="t"><b>Kislo/vulkansko pogorje (Smrekovec)</b><br><span class="gp-hero-sub">Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana.</span><br><span class="gp-terr">Napovedne točke: Gozdovi nad Ljubnim, Smrekovško pogorje</span></div>
-    <div class="t"><b>Karbonatni masivi (Golte, Menina, Raduha)</b><br><span class="gp-hero-sub">Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana.</span><br><span class="gp-terr">Napovedne točke: Golte, Dobrovlje – Čreta</span></div>
-    <div class="t"><b>Rečni logi in dolinske terase</b><br><span class="gp-hero-sub">Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk.</span><br><span class="gp-terr">Napovedne točke: Rečica ob Savinji</span></div>
+    <div class="t" style="border-left-color:#34d399"><div class="t-h"><span class="t-ic" style="background:#34d39922">🌲</span><b>Kislo/vulkansko pogorje (Smrekovec)</b></div><span class="gp-hero-sub">Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana.</span><br><span class="gp-terr">Napovedne točke: Gozdovi nad Ljubnim, Smrekovško pogorje</span></div>
+    <div class="t" style="border-left-color:#f59e0b"><div class="t-h"><span class="t-ic" style="background:#f59e0b22">⛰️</span><b>Karbonatni masivi (Golte, Menina, Raduha)</b></div><span class="gp-hero-sub">Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana.</span><br><span class="gp-terr">Napovedne točke: Golte, Dobrovlje – Čreta</span></div>
+    <div class="t" style="border-left-color:#60a5fa"><div class="t-h"><span class="t-ic" style="background:#60a5fa22">💧</span><b>Rečni logi in dolinske terase</b></div><span class="gp-hero-sub">Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk.</span><br><span class="gp-terr">Napovedne točke: Rečica ob Savinji</span></div>
   </div>
   <div class="card" style="margin:1rem 0">
     <div class="clabel">📋 Nasveti in pravila</div>
@@ -292,7 +361,7 @@
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
-  <h2>Pogosta vprašanja</h2>
+  <h2 class="gp-h2">❓ Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Je gobarski indeks napoved najdbe?</summary><p>Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe.</p></details>
     <details><summary>Katere vrste zajema premium napoved?</summary><p>Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti.</p></details>
@@ -320,32 +389,42 @@
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
-  function color(v){
-    if(v>=75)return"rgba(52,211,153,.28)";if(v>=55)return"rgba(52,211,153,.16)";
-    if(v>=35)return"rgba(245,158,11,.16)";if(v>=18)return"rgba(248,113,113,.14)";
-    return"var(--badge-bg)";
+  var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
+  function levelColor(v){
+    if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
   }
+  function hexToRgb(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   function render(d){
     var meta=d.species_meta||{};
     var home=(d.locations||[]).filter(function(l){return l.home;})[0]||d.locations[0];
     var html="";
-    // today per forest
+    // today per forest — same bar-meter cards as the free section
     html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
     (d.locations||[]).slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
-      .forEach(function(l){var o=l.days[0];var top=o.species[0];
-        html+='<div class="gp-forest"><span>'+l.name+' <span class="gp-terr">'+(l.terrain||'')+
-          ' · '+l.elev_m+' m</span></span><b>'+o.overall+'% '+o.level+
-          (top?' · '+(meta[top.id]?meta[top.id].name_sl:''):'')+'</b></div>';});
+      .forEach(function(l){var o=l.days[0];var top=o.species[0];var col=levelColor(o.overall);
+        html+='<div class="gp-forest"><div class="gp-forest-head"><span class="gp-forest-nm">'+
+          (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
+          ' · '+l.elev_m+' m</span></div><div class="gp-meter"><div class="gp-meter-fill" style="width:'+
+          Math.max(3,o.overall)+'%;background:'+col+'"></div><span class="gp-meter-val">'+o.overall+' % · '+
+          o.level+'</span></div><div class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
+          '</div></div>';});
     html+='</div>';
     // 7-day matrix for home, top 8 species by today's index
     var top=home.days[0].species.slice(0,8).map(function(s){return s.id;});
-    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3><div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
+    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3>';
+    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
+      '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
+      '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
+      '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
+    html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
     home.days.forEach(function(day){var dt=new Date(day.date);
       html+='<th>'+(day===home.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
     html+='</tr></thead><tbody>';
     top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
       home.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
-        var v=s?s.index:0;html+='<td><span class="gp-cell" style="background:'+color(v)+'">'+v+'</span></td>';});
+        var v=s?s.index:0;var c=levelColor(v);var rgb=hexToRgb(c);
+        var alpha=(0.12+0.55*Math.min(100,v)/100).toFixed(2);
+        html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
       html+='</tr>';});
     html+='</tbody></table></div>';
     // today's carriers with explanation
