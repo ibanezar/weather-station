@@ -39,7 +39,21 @@
    leaks into the shared header/footer markup used by other generated pages.
    CSS custom properties resolve by inheritance (nearest ancestor that sets
    them), so this wins regardless of stylesheet load order. */
-.wrap{--blue:#6fae55;--cyan:#c17f3e;--muted:#a9a08c}
+/* Set on body (the shared ancestor of both #bg's ambient blobs and .wrap's
+   content) so the whole page — including the drifting background glows,
+   which were still blue/purple/cyan — moves to a warm brown/green earthy
+   palette. Complementary pairing: warm amber-brown base + forest-green
+   accent sit roughly opposite on the wheel, so they read as "forest at
+   dusk" instead of clashing. */
+body{
+  --blue:#6fae55; --cyan:#c17f3e; --muted:#a9a08c;
+  --bg:#0b0906;
+  --card-bg:rgba(19,15,11,.94);
+  --stn-bg:rgba(111,174,85,.16); --stn-border:rgba(111,174,85,.45);
+  --fc-today-bg:rgba(193,127,62,.14); --fc-today-border:rgba(193,127,62,.35);
+  --blob-1:rgba(201,150,80,.20); --blob-2:rgba(111,174,85,.16);
+  --blob-3:rgba(140,168,90,.13); --blob-4:rgba(180,110,70,.11);
+}
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
   background:linear-gradient(135deg,rgba(8,14,7,.82),rgba(6,10,6,.94)),url('/og/bg/misty-valley.jpg') center/cover}
