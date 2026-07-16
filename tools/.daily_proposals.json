@@ -1,0 +1,87 @@
+{
+  "date": "2026-07-16",
+  "created": "2026-07-16T07:59:22.650235+00:00",
+  "proposals": [
+    {
+      "id": "primerjava-krajev",
+      "title": "Kako se Rečica ob Savinji danes razlikuje od sosednjih krajev",
+      "teaser": "Pogledamo, kaj trenutne razmere na postaji IREICA1 – 22,1 °C, 97-odstotna vlažnost in tlak 1020 hPa – povedo o mikroklimi Zgornje Savinjske doline v primerjavi z okoliškimi ARSO postajami. Dolina zna zaradi lege in vlage zadržati svojevrstne razmere, ki jih velja osvetliti.",
+      "topic": {
+        "id": "primerjava-krajev",
+        "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tag": "primerjava",
+        "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami.",
+        "seo_keywords": [
+          "vreme Zgornja Savinjska dolina",
+          "primerjava vremena Rečica ob Savinji",
+          "mikroklima Savinjska dolina"
+        ]
+      }
+    },
+    {
+      "id": "nevihtni-obeti",
+      "title": "Bo danes in jutri v Savinjski dolini grmelo? Kaj kažejo napovedi",
+      "teaser": "Zrak je že zdaj skoraj nasičen z vlago – rosišče 21,6 °C ob temperaturi 22,1 °C – kar je odlična podlaga za nevihtni razvoj. Jutrišnji vročinski vrh pri 34,8 °C in okrepljen veter do 18,5 km/h nakazujeta, da bo napetost v ozračju popustila šele v obliki padavin 18. in 19. julija, ko napoved kaže 8,4 in 6,8 mm dežja.",
+      "topic": {
+        "id": "nevihtni-obeti",
+        "sezona": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "tag": "nevihta",
+        "brief": "Nevihtni obeti za danes/jutri na podlagi CAPE, striženja vetra in vlage.",
+        "seo_keywords": [
+          "nevihtna napoved Savinjska dolina",
+          "bo danes grmelo Rečica ob Savinji",
+          "CAPE nestabilnost vreme"
+        ]
+      }
+    },
+    {
+      "id": "susa-vlaga-tal",
+      "title": "Suša ali dovolj vlage? Stanje tal v Zgornji Savinjski dolini po zadnjem dežju",
+      "teaser": "Kljub temu, da je danes že padlo 5,6 mm dežja, ob 15 mm v zadnjem dogodku in 19,5 mm v tem tednu, mesečna vsota ostaja skromnih 34,8 mm. Preverimo, ali te padavine zadostujejo za sprostitev tal ali dolino še vedno čaka primanjkljaj vlage.",
+      "topic": {
+        "id": "susa-vlaga-tal",
+        "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tag": "susa",
+        "brief": "Trenutno stanje suše/vlage tal glede na zadnje padavine in evapotranspiracijo.",
+        "seo_keywords": [
+          "suša Zgornja Savinjska dolina",
+          "vlaga tal Rečica ob Savinji",
+          "koliko časa brez dežja"
+        ]
+      }
+    }
+  ]
+}
