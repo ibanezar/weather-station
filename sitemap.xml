@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/nevihte-od-cetrtka-do-nedelje-16-19-julij-2026.html</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/nevihte-od-cetrtka-do-nedelje-16-19-julij-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.html</loc>
     <lastmod>2026-07-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -396,6 +403,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/arso-opozorilo/</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/cape/</loc>
     <lastmod>2026-07-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
