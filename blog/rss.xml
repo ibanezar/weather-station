@@ -5,8 +5,22 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 16 Jul 2026 07:56:49 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 16 Jul 2026 09:54:27 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Nevihte od četrtka do nedelje: koliko energije se zbira nad Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/nevihte-od-cetrtka-do-nedelje-16-19-julij-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nevihte-od-cetrtka-do-nedelje-16-19-julij-2026.html</guid>
+      <pubDate>Thu, 16 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Nevihtna napoved za Zgornjo Savinjsko dolino od 16. do 19. julija: ARSO opozorila, CAPE do 2490 J/kg in primerjava modelov ICON, GFS in ECMWF.</description>
+      <category>nevihta</category>
+      <category>napoved</category>
+      <category>CAPE</category>
+      <category>ARSO opozorilo</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Vodna bilanca tal: koliko od zadnjega dežja je res prišlo do korenin</title>
       <link>https://meteorec.si/blog/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.html</link>
