@@ -216,11 +216,38 @@ def pick_topic(event, state):
     if event:
         return {"id": "dogodek", "brief": f"Analiza dogodka: {event['type']} ({num(event['value'],1)} {event['unit']})",
                 "tag": event["type"], "event": event}
-    taken = recent_tags(12) | set(state.get("recentTopics", [])[-6:])
-    candidates = [i for i in IDEAS if datetime.date.today().month in i["sezona"] and i["tag"] not in taken]
+    recent = state.get("recentTopics", [])
+    taken = recent_tags(12) | set(recent[-6:])
+    seasonal = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
+    candidates = [i for i in seasonal if i["tag"] not in taken]
     if not candidates:
-        candidates = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
+        # Vse sezonske teme so bile nedavno uporabljene -- vzemi najdlje
+        # neuporabljeno, ne vedno prve s seznama (ta fallback je povzročal,
+        # da se je poleti gobarska tema ponavljala dan za dnem).
+        def last_used(idea):
+            try:
+                return len(recent) - 1 - recent[::-1].index(idea["tag"])
+            except ValueError:
+                return -1
+        candidates = sorted(seasonal, key=last_used)
     return candidates[0]
+
+
+def load_chosen_proposal(choice):
+    """Prebere tools/.daily_proposals.json (commitan ob jutranjem zagonu) in
+    vrne predlog z danim id -- za objavo članka, ki ga je Filip izbral po e-pošti."""
+    path = os.path.join(ROOT, "tools", ".daily_proposals.json")
+    try:
+        data = json.load(open(path, encoding="utf-8"))
+    except Exception as e:
+        sys.exit(f"--choice {choice}: tools/.daily_proposals.json ni berljiv: {e}")
+    if data.get("date") != TODAY:
+        print(f"⚠ Predlogi so z dne {data.get('date')}, danes je {TODAY} -- nadaljujem vseeno.")
+    for p in data.get("proposals", []):
+        if p.get("id") == choice:
+            return p
+    ids = ", ".join(p.get("id", "?") for p in data.get("proposals", []))
+    sys.exit(f"Predlog z id '{choice}' ne obstaja (na voljo: {ids}).")
 
 
 def build_stat_cards(current, hourly):
@@ -337,7 +364,7 @@ def stream_claude(payload, api_key, timeout=180):
     return "".join(text_parts)
 
 
-def call_claude(topic, current, hourly, forecast, stat_cards):
+def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ANTHROPIC_API_KEY manjka.")
@@ -351,7 +378,15 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
         "datum": TODAY,
     }
+    if desired_title:
+        context["izbrani_naslov"] = desired_title
     user_prompt = "Podatki za današnji članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)
+    if desired_title:
+        user_prompt += (
+            f'\n\nFilip je iz jutranjih predlogov izbral naslov: "{desired_title}". '
+            "Uporabi TOČNO ta naslov (dovoljeni so le minimalni pravopisni popravki) "
+            "in napiši članek, ki naslovu vsebinsko ustreza."
+        )
     user_prompt += "\n\nNapiši današnji članek za meteorec.si po sistemskih navodilih."
 
     payload = {
@@ -869,6 +904,12 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 def main():
     wire = "--wire" in sys.argv
     dry_run = "--dry-run" in sys.argv
+    choice = None
+    if "--choice" in sys.argv:
+        i = sys.argv.index("--choice")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--choice zahteva ID predloga.")
+        choice = sys.argv[i + 1]
 
     print("1/6 Pridobivam podatke...")
     current = fetch_current()
@@ -877,9 +918,18 @@ def main():
 
     print("2/6 Izbiram temo...")
     state = load_state()
-    event = detect_event(current, hourly, forecast)
-    topic = pick_topic(event, state)
-    print(f"   tema: {topic['id']} ({topic['brief'][:70]}...)")
+    desired_title = None
+    if choice:
+        if (state.get("lastPublished") or "").startswith(TODAY):
+            sys.exit("Današnji dnevni članek je že objavljen -- ne objavljam drugič.")
+        prop = load_chosen_proposal(choice)
+        topic = prop["topic"]
+        desired_title = prop.get("title")
+        print(f"   izbran predlog: {choice} ({desired_title})")
+    else:
+        event = detect_event(current, hourly, forecast)
+        topic = pick_topic(event, state)
+        print(f"   tema: {topic['id']} ({topic['brief'][:70]}...)")
 
     stat_cards = build_stat_cards(current, hourly)
 
@@ -887,7 +937,7 @@ def main():
     if dry_run:
         print("   (--dry-run: preskačem klic Claude API)")
         return
-    article = call_claude(topic, current, hourly, forecast, stat_cards)
+    article = call_claude(topic, current, hourly, forecast, stat_cards, desired_title)
 
     print("4/6 Lektura...")
     lektor_context = {
