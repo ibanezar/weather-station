@@ -20,13 +20,17 @@ Vsako jutro:
      blog/rss.xml, blog/tema/*, blog/related.json + generira OG sliko.
 
 Uporaba:
-    python3 tools/generate_daily_post.py [--wire] [--dry-run]
+    python3 tools/generate_daily_post.py [--wire] [--dry-run] [--preview] [--choice ID]
+
+    --preview   pokliče Claude (osnutek + lektura), izpiše obe verziji
+                (pred/po lekturi) na stdout in ne zapiše/objavi ničesar --
+                za preverjanje kakovosti jezika brez posega v blog.
 
 Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, shutil, datetime, urllib.request, urllib.error, urllib.parse
+import json, os, sys, re, shutil, time, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY
@@ -216,11 +220,38 @@ def pick_topic(event, state):
     if event:
         return {"id": "dogodek", "brief": f"Analiza dogodka: {event['type']} ({num(event['value'],1)} {event['unit']})",
                 "tag": event["type"], "event": event}
-    taken = recent_tags(12) | set(state.get("recentTopics", [])[-6:])
-    candidates = [i for i in IDEAS if datetime.date.today().month in i["sezona"] and i["tag"] not in taken]
+    recent = state.get("recentTopics", [])
+    taken = recent_tags(12) | set(recent[-6:])
+    seasonal = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
+    candidates = [i for i in seasonal if i["tag"] not in taken]
     if not candidates:
-        candidates = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
+        # Vse sezonske teme so bile nedavno uporabljene -- vzemi najdlje
+        # neuporabljeno, ne vedno prve s seznama (ta fallback je povzročal,
+        # da se je poleti gobarska tema ponavljala dan za dnem).
+        def last_used(idea):
+            try:
+                return len(recent) - 1 - recent[::-1].index(idea["tag"])
+            except ValueError:
+                return -1
+        candidates = sorted(seasonal, key=last_used)
     return candidates[0]
+
+
+def load_chosen_proposal(choice):
+    """Prebere tools/.daily_proposals.json (commitan ob jutranjem zagonu) in
+    vrne predlog z danim id -- za objavo članka, ki ga je Filip izbral po e-pošti."""
+    path = os.path.join(ROOT, "tools", ".daily_proposals.json")
+    try:
+        data = json.load(open(path, encoding="utf-8"))
+    except Exception as e:
+        sys.exit(f"--choice {choice}: tools/.daily_proposals.json ni berljiv: {e}")
+    if data.get("date") != TODAY:
+        print(f"⚠ Predlogi so z dne {data.get('date')}, danes je {TODAY} -- nadaljujem vseeno.")
+    for p in data.get("proposals", []):
+        if p.get("id") == choice:
+            return p
+    ids = ", ".join(p.get("id", "?") for p in data.get("proposals", []))
+    sys.exit(f"Predlog z id '{choice}' ne obstaja (na voljo: {ids}).")
 
 
 def build_stat_cards(current, hourly):
@@ -289,55 +320,94 @@ Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej she
 Naj bo 3-5 odsekov v sections."""
 
 
+class _TransientAPIError(RuntimeError):
+    """Znano prehodno stanje Anthropic API-ja (preobremenjenost, rate limit) --
+    vredno ponovnega poskusa, za razliko od pravih napak (npr. max_tokens)."""
+
+
+_RETRYABLE_STREAM_ERRORS = {"overloaded_error", "rate_limit_error", "api_error"}
+_RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 529}
+_RETRY_DELAYS = [5, 15, 35, 75]  # sekund; skupno do ~2 min čakanja
+
+
 def stream_claude(payload, api_key, timeout=180):
     """Kliče Claude API s stream=True. Rešuje problem, ko GitHub Actions
     (ali kak vmesni proxy) prekine navidez 'tiho' povezavo pri dolgih
     ne-streaming klicih -- pri streamingu prvi žetoni pridejo v nekaj
     sekundah, zato povezava nikoli ni tiha dovolj dolgo, da bi jo kdo prekinil.
-    Timeout velja per-branje (idle timeout), ne za skupno trajanje klica."""
+    Timeout velja per-branje (idle timeout), ne za skupno trajanje klica.
+
+    Ob znanih prehodnih napakah (overloaded_error, rate_limit_error, HTTP
+    429/5xx/529) klic samodejno ponovi z naraščajočim zamikom -- to ni redka
+    posebnost, Anthropic API se občasno preobremeni tudi sredi streama."""
     payload = dict(payload, stream=True)
     body = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        method="POST",
-    )
-    text_parts = []
-    stop_reason = None
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        for raw_line in r:
-            line = raw_line.decode("utf-8", "replace").strip()
-            if not line.startswith("data:"):
-                continue
-            chunk = line[len("data:"):].strip()
-            if not chunk:
-                continue
-            try:
-                evt = json.loads(chunk)
-            except json.JSONDecodeError:
-                continue
-            if evt.get("type") == "content_block_delta":
-                delta = evt.get("delta", {})
-                if delta.get("type") == "text_delta":
-                    text_parts.append(delta.get("text", ""))
-            elif evt.get("type") == "message_delta":
-                stop_reason = (evt.get("delta") or {}).get("stop_reason") or stop_reason
-            elif evt.get("type") == "error":
-                raise RuntimeError(f"Claude stream napaka: {evt.get('error')}")
-    if stop_reason == "max_tokens":
-        raise RuntimeError(
-            "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
-            "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka."
+
+    def attempt():
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+            },
+            method="POST",
         )
-    return "".join(text_parts)
+        text_parts = []
+        stop_reason = None
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            for raw_line in r:
+                line = raw_line.decode("utf-8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue
+                chunk = line[len("data:"):].strip()
+                if not chunk:
+                    continue
+                try:
+                    evt = json.loads(chunk)
+                except json.JSONDecodeError:
+                    continue
+                if evt.get("type") == "content_block_delta":
+                    delta = evt.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        text_parts.append(delta.get("text", ""))
+                elif evt.get("type") == "message_delta":
+                    stop_reason = (evt.get("delta") or {}).get("stop_reason") or stop_reason
+                elif evt.get("type") == "error":
+                    err = evt.get("error") or {}
+                    msg = f"Claude stream napaka: {err}"
+                    if err.get("type") in _RETRYABLE_STREAM_ERRORS:
+                        raise _TransientAPIError(msg)
+                    raise RuntimeError(msg)
+        if stop_reason == "max_tokens":
+            partial = "".join(text_parts)
+            raise RuntimeError(
+                "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
+                "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka. "
+                f"[diagnostika: {len(partial)} znakov prejetih, zadnjih 400: ...{partial[-400:]!r}]"
+            )
+        return "".join(text_parts)
+
+    last_err = None
+    for i, delay in enumerate([*_RETRY_DELAYS, None]):
+        try:
+            return attempt()
+        except _TransientAPIError as e:
+            last_err = e
+        except urllib.error.HTTPError as e:
+            if e.code not in _RETRYABLE_HTTP_CODES:
+                raise
+            last_err = e
+        if delay is None:
+            break
+        print(f"⚠ Claude API prehodno ni na voljo ({last_err}) -- ponovni poskus čez {delay}s "
+              f"({i + 1}/{len(_RETRY_DELAYS)})...")
+        time.sleep(delay)
+    raise RuntimeError(f"Claude API po {len(_RETRY_DELAYS) + 1} poskusih še vedno ni na voljo: {last_err}")
 
 
-def call_claude(topic, current, hourly, forecast, stat_cards):
+def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ANTHROPIC_API_KEY manjka.")
@@ -351,12 +421,25 @@ def call_claude(topic, current, hourly, forecast, stat_cards):
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
         "datum": TODAY,
     }
+    if desired_title:
+        context["izbrani_naslov"] = desired_title
     user_prompt = "Podatki za današnji članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)
+    if desired_title:
+        user_prompt += (
+            f'\n\nFilip je iz jutranjih predlogov izbral naslov: "{desired_title}". '
+            "Uporabi TOČNO ta naslov (dovoljeni so le minimalni pravopisni popravki) "
+            "in napiši članek, ki naslovu vsebinsko ustreza."
+        )
     user_prompt += "\n\nNapiši današnji članek za meteorec.si po sistemskih navodilih."
 
     payload = {
         "model": ANTHROPIC_MODEL,
         "max_tokens": 8000,
+        # claude-sonnet-5 privzeto razmišlja (adaptive thinking) -- ti žetoni gredo v
+        # breme max_tokens, tudi če jih stream_claude ne lovi (samo text_delta). Za to
+        # nalogo (pisanje po strogi shemi, brez več-koračnega sklepanja) razmišljanje
+        # ne pomaga in samo tvega, da zmanjka prostora za dejanski izpis.
+        "thinking": {"type": "disabled"},
         "system": SYSTEM_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
@@ -391,6 +474,20 @@ Preveri:
    pretirane formalnosti). Ponavljajoče se fraze med odseki popravi.
 4. INTERNA KONSISTENTNOST -- naslov, meta_description in lead se morajo ujemati
    z vsebino odsekov.
+5. ANGLICIZMI IN KALKI -- besedilo piše jezikovni model, zato rado "diši" po
+   prevodu iz angleščine, tudi če je slovnično pravilno. Poišči in popravi:
+   - dobesedne prevode angleških fraz, ki v slovenščini ne zvenijo naravno
+     (npr. "narediti smisel" namesto "biti smiseln", "na koncu dneva" namesto
+     "navsezadnje/skratka", "igra vlogo" namesto "je pomemben/vpliva");
+   - prekomerno rabo trpnika ("je bilo izmerjeno", "je bilo opaženo") tam, kjer
+     bi naravna slovenščina uporabila tvornik ali povratno obliko s "se"
+     ("izmerili smo", "opazili smo", "temperatura se je dvignila");
+   - angleške dvojne narekovaje " " namesto slovenskih „ " (spodaj-zgoraj) in
+     vezaj "-" namesto pomišljaja "–", kjer gre za pomišljaj, ne vezaj;
+   - angleški besedni red (npr. prislov pred glagolom po angleškem vzorcu, ko
+     bi naraven slovenski vrstni red dal drugačen poudarek).
+   Ne popravljaj stavkov, ki so že naravni, le zato ker si "aktiven" -- cilj je
+   odpraviti prevodni prizvok, ne preoblikovati vsak stavek.
 
 Manjše napake (slovnica, slog, drobne nedoslednosti) POPRAVI SAM in vrni popravljen
 članek. Če najdeš izmišljen/neutemeljen podatek, ki ga ne moreš preprosto
@@ -422,7 +519,16 @@ def call_lektor(article, context):
     )
     payload = {
         "model": ANTHROPIC_MODEL,
-        "max_tokens": 8000,
+        # Lektor vrne CEL popravljen članek (isto velik kot osnutek) + seznam
+        # najdenih težav, zato nekoliko višji limit kot pri osnutku.
+        "max_tokens": 10000,
+        # Pravi vzrok, da je klic prej padal na max_tokens že pri ~2000 znakih
+        # vidnega besedila, NI bil premajhen limit -- claude-sonnet-5 privzeto
+        # razmišlja (adaptive thinking), ti žetoni gredo v breme max_tokens in
+        # jih stream_claude ne lovi (samo text_delta, ne thinking_delta). Za
+        # nalogo preverjanja po fiksnem kontrolnem seznamu razmišljanje ne
+        # pomaga, zato ga izklopimo -- to je pravi popravek, ne višji limit.
+        "thinking": {"type": "disabled"},
         "system": LEKTOR_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
@@ -869,6 +975,13 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 def main():
     wire = "--wire" in sys.argv
     dry_run = "--dry-run" in sys.argv
+    preview = "--preview" in sys.argv
+    choice = None
+    if "--choice" in sys.argv:
+        i = sys.argv.index("--choice")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--choice zahteva ID predloga.")
+        choice = sys.argv[i + 1]
 
     print("1/6 Pridobivam podatke...")
     current = fetch_current()
@@ -877,9 +990,18 @@ def main():
 
     print("2/6 Izbiram temo...")
     state = load_state()
-    event = detect_event(current, hourly, forecast)
-    topic = pick_topic(event, state)
-    print(f"   tema: {topic['id']} ({topic['brief'][:70]}...)")
+    desired_title = None
+    if choice:
+        if not preview and (state.get("lastPublished") or "").startswith(TODAY):
+            sys.exit("Današnji dnevni članek je že objavljen -- ne objavljam drugič.")
+        prop = load_chosen_proposal(choice)
+        topic = prop["topic"]
+        desired_title = prop.get("title")
+        print(f"   izbran predlog: {choice} ({desired_title})")
+    else:
+        event = detect_event(current, hourly, forecast)
+        topic = pick_topic(event, state)
+        print(f"   tema: {topic['id']} ({topic['brief'][:70]}...)")
 
     stat_cards = build_stat_cards(current, hourly)
 
@@ -887,7 +1009,7 @@ def main():
     if dry_run:
         print("   (--dry-run: preskačem klic Claude API)")
         return
-    article = call_claude(topic, current, hourly, forecast, stat_cards)
+    draft = call_claude(topic, current, hourly, forecast, stat_cards, desired_title)
 
     print("4/6 Lektura...")
     lektor_context = {
@@ -895,12 +1017,36 @@ def main():
         "napoved_4dni": (forecast or {}).get("daily"),
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
     }
-    review = call_lektor(article, lektor_context)
+    review = call_lektor(draft, lektor_context)
     if review.get("issues"):
         print("   popravki/opombe lektorja:")
         for i in review["issues"]:
             print(f"   - {i}")
-    article = review.get("corrected") or article
+    article = review.get("corrected") or draft
+
+    if preview:
+        def render(a):
+            out = [f"NASLOV: {a['title']}", f"META: {a.get('meta_description','')}",
+                   f"TAGI: {', '.join(a.get('tags', []))}", "", "LEAD:", a.get("lead", "")]
+            for s in a.get("sections", []):
+                out.append(f"\n## {s.get('heading','')}")
+                out.extend(s.get("paragraphs", []))
+            if a.get("callout"):
+                out.append(f"\nCALLOUT ({a['callout'].get('label','')}): {a['callout'].get('text','')}")
+            out.append(f"\nVIRI: {a.get('sources_note','')}")
+            return "\n".join(out)
+
+        print("\n" + "=" * 70)
+        print("PREVIEW -- OSNUTEK (pred lekturo)")
+        print("=" * 70)
+        print(render(draft))
+        print("\n" + "=" * 70)
+        print("PREVIEW -- PO LEKTURI (to bi bilo objavljeno)")
+        print("=" * 70)
+        print(render(article))
+        print(f"\nlektor blocking: {review.get('blocking', False)}")
+        print("\n(--preview: nič ni zapisano na disk, nič ni objavljeno)")
+        return
 
     slug = slugify(article["title"]) + f"-{TODAY[-5:].replace('-','')}"
     now = datetime.datetime.now(datetime.timezone.utc)

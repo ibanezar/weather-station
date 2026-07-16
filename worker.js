@@ -601,8 +601,10 @@ export default {
       });
     }
 
-    // /ai-debug is openable directly in a browser for troubleshooting
-    if (!isAllowedOrigin(request) && path !== "/ai-debug") {
+    // /ai-debug is openable directly in a browser for troubleshooting.
+    // /daily-post/* is opened from e-mail clients (Gmail pošlje tuj Referer)
+    // in zavarovan s skrivnostjo oz. HMAC podpisom, ne z Origin kontrolo.
+    if (!isAllowedOrigin(request) && path !== "/ai-debug" && !path.startsWith("/daily-post/")) {
       return new Response(
         JSON.stringify({ error: "Nepooblaščen dostop", code: 403 }),
         { status: 403, headers: { ...CORS_DENY, "Content-Type": "application/json" } }
@@ -2286,6 +2288,137 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         return _json({ error: "Nedovoljena metoda ali pot" }, 405);
+      }
+
+      // ── /daily-post (jutranji predlogi članka + izbira po e-pošti) ─────
+      //   POST /daily-post/proposals { secret, date, proposals:[{id,title,teaser}] }
+      //        → shrani v KV in Filipu pošlje e-mail s povezavami za izbiro
+      //   GET  /daily-post/pick?date=…&id=…&sig=…
+      //        → preveri HMAC podpis in sproži GitHub workflow za objavo izbranega
+      if (path === "/daily-post/proposals" || path === "/daily-post/pick") {
+        const GH_REPO = "ibanezar/weather-station";
+        const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
+        const _esc = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const _json = (obj, status) => new Response(JSON.stringify(obj), {
+          status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const _page = (title, body, status) => new Response(
+          `<!doctype html><html lang="sl"><head><meta charset="utf-8">` +
+          `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+          `<title>${_esc(title)} · Meteorec</title>` +
+          `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;` +
+          `background:#04070e;color:#e8edf8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:1.5rem}` +
+          `.card{max-width:440px;background:rgba(10,15,28,.94);border:1px solid rgba(255,255,255,.11);` +
+          `border-radius:16px;padding:2rem;text-align:center;box-shadow:0 4px 28px rgba(0,0,0,.3)}` +
+          `h1{font-size:1.3rem;margin:0 0 .6rem}p{color:#adc0d8;line-height:1.6;margin:.4rem 0}` +
+          `a{color:#4d9ff8;text-decoration:none}</style></head>` +
+          `<body><div class="card">${body}<p style="margin-top:1.2rem"><a href="https://meteorec.si/blog/">← Na blog</a></p></div></body></html>`,
+          { status: status || 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
+        const _hmacHex = async (msg) => {
+          const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret),
+            { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+          const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
+          return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+        };
+        const _kvKey = d => "dailypost:" + d;
+
+        if (path === "/daily-post/proposals" && request.method === "POST") {
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!secret || body.secret !== secret) return _json({ error: "Nedovoljeno" }, 401);
+          const date = String(body.date || "");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return _json({ error: "Neveljaven datum" }, 400);
+          const proposals = (Array.isArray(body.proposals) ? body.proposals : [])
+            .slice(0, 5)
+            .map(p => ({
+              id: String(p.id || "").slice(0, 60),
+              title: String(p.title || "").slice(0, 200),
+              teaser: String(p.teaser || "").slice(0, 600),
+            }))
+            .filter(p => p.id && p.title);
+          if (!proposals.length) return _json({ error: "Ni predlogov" }, 400);
+          await env.COUNTER_KV.put(_kvKey(date), JSON.stringify({ proposals, picked: null }),
+            { expirationTtl: 3 * 86400 });
+
+          const items = [];
+          for (let i = 0; i < proposals.length; i++) {
+            const p = proposals[i];
+            const sig = await _hmacHex(date + "|" + p.id);
+            const link = `${url.origin}/daily-post/pick?date=${encodeURIComponent(date)}&id=${encodeURIComponent(p.id)}&sig=${sig}`;
+            items.push(
+              `<div style="margin:0 0 1.6rem">` +
+              `<p style="margin:0 0 .3rem;font-size:.8rem;color:#999">Predlog ${i + 1}</p>` +
+              `<h3 style="margin:0 0 .4rem">${_esc(p.title)}</h3>` +
+              (p.teaser ? `<p style="margin:0 0 .6rem;color:#444">${_esc(p.teaser)}</p>` : "") +
+              `<a href="${link}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.5rem 1.1rem;border-radius:8px;text-decoration:none;font-weight:600">Objavi ta članek →</a>` +
+              `</div>`);
+          }
+          const html =
+            `<h2 style="margin:0 0 1rem">Predlogi za današnji članek (${_esc(date)})</h2>` + items.join("") +
+            `<hr style="border:none;border-top:1px solid #eee;margin:1.5rem 0">` +
+            `<p style="color:#999;font-size:.8rem">Klik na gumb sproži pisanje in objavo izbranega članka ` +
+            `(na blogu je čez ~5 minut). Izbereš lahko samo enega. Če ne izbereš nobenega, danes ne bo objave.</p>`;
+          if (env.RESEND_API_KEY) {
+            const from = env.NOTIFY_FROM || "Meteorec <onboarding@resend.dev>";
+            const to = env.DAILY_POST_EMAIL || "filip.eremita@gmail.com";
+            ctx.waitUntil(fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ from, to, subject: `Meteorec: 3 predlogi za dnevni članek (${date})`, html }),
+            }).catch(() => {}));
+          }
+          return _json({ ok: true, proposals: proposals.length, emailed: Boolean(env.RESEND_API_KEY) });
+        }
+
+        if (path === "/daily-post/pick" && request.method === "GET") {
+          if (!secret) return _page("Napaka", "<h1>Strežnik ni pravilno nastavljen</h1><p>Manjka skrivnost za preverjanje povezave.</p>", 503);
+          const date = url.searchParams.get("date") || "";
+          const id = url.searchParams.get("id") || "";
+          const sig = url.searchParams.get("sig") || "";
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !id || (await _hmacHex(date + "|" + id)) !== sig) {
+            return _page("Neveljavna povezava", "<h1>Povezava ni veljavna</h1><p>Podpis se ne ujema ali pa je povezava okrnjena.</p>", 403);
+          }
+          let rec = null;
+          try { rec = JSON.parse(await env.COUNTER_KV.get(_kvKey(date))); } catch (_) {}
+          if (!rec) return _page("Poteklo", "<h1>Predlogi niso več na voljo</h1><p>Za ta dan ni shranjenih predlogov (povezave veljajo 3 dni).</p>", 404);
+          const chosen = (rec.proposals || []).find(p => p.id === id);
+          if (!chosen) return _page("Napaka", "<h1>Predlog ne obstaja</h1><p>Ta predlog ni med shranjenimi za izbrani dan.</p>", 404);
+          if (rec.picked) {
+            const prev = (rec.proposals || []).find(p => p.id === rec.picked);
+            return _page("Že izbrano", `<h1>Izbira je že opravljena ✅</h1><p>Za ta dan je izbran: <strong>${_esc(prev ? prev.title : rec.picked)}</strong>.</p>`);
+          }
+          if (!env.GH_WORKFLOW_TOKEN) {
+            return _page("Ročni korak", `<h1>Worker nima GH_WORKFLOW_TOKEN</h1>` +
+              `<p>Objave ne morem sprožiti samodejno. Odpri <a href="https://github.com/${GH_REPO}/actions/workflows/daily-post.yml">workflow »Dnevni članek«</a>, ` +
+              `klikni »Run workflow« in v polje choice vpiši: <strong>${_esc(id)}</strong>.</p>`, 503);
+          }
+          // Označi izbiro PRED sprožitvijo (zaščita pred dvojnim klikom); ob
+          // neuspehu sprožitve izbiro povrni, da je ponovni poskus mogoč.
+          rec.picked = id;
+          await env.COUNTER_KV.put(_kvKey(date), JSON.stringify(rec), { expirationTtl: 3 * 86400 });
+          const ghRes = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/daily-post.yml/dispatches`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${env.GH_WORKFLOW_TOKEN}`,
+              "Accept": "application/vnd.github+json",
+              "Content-Type": "application/json",
+              "User-Agent": "Meteorec-Worker/1.0 (+https://meteorec.si)",
+            },
+            body: JSON.stringify({ ref: "main", inputs: { choice: id } }),
+          });
+          if (ghRes.status !== 204) {
+            rec.picked = null;
+            await env.COUNTER_KV.put(_kvKey(date), JSON.stringify(rec), { expirationTtl: 3 * 86400 });
+            const detail = (await ghRes.text()).slice(0, 200);
+            return _page("Napaka", `<h1>Objave ni bilo mogoče sprožiti</h1><p>GitHub je vrnil ${ghRes.status}.</p>` +
+              `<p style="font-size:.8rem;color:#8a97ad">${_esc(detail)}</p>` +
+              `<p>Poskusi znova čez minuto ali sproži workflow ročno (choice: <strong>${_esc(id)}</strong>).</p>`, 502);
+          }
+          return _page("Izbrano", `<h1>Članek je v izdelavi ✅</h1><p><strong>${_esc(chosen.title)}</strong></p>` +
+            `<p>Pisanje, lektura in objava trajajo približno 5 minut, nato bo članek na blogu.</p>`);
+        }
+
+        return _json({ error: "Nedovoljena metoda" }, 405);
       }
 
       // ── /push (web push obvestila) ──────────────────────────
