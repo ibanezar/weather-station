@@ -426,6 +426,20 @@ Preveri:
    pretirane formalnosti). Ponavljajoče se fraze med odseki popravi.
 4. INTERNA KONSISTENTNOST -- naslov, meta_description in lead se morajo ujemati
    z vsebino odsekov.
+5. ANGLICIZMI IN KALKI -- besedilo piše jezikovni model, zato rado "diši" po
+   prevodu iz angleščine, tudi če je slovnično pravilno. Poišči in popravi:
+   - dobesedne prevode angleških fraz, ki v slovenščini ne zvenijo naravno
+     (npr. "narediti smisel" namesto "biti smiseln", "na koncu dneva" namesto
+     "navsezadnje/skratka", "igra vlogo" namesto "je pomemben/vpliva");
+   - prekomerno rabo trpnika ("je bilo izmerjeno", "je bilo opaženo") tam, kjer
+     bi naravna slovenščina uporabila tvornik ali povratno obliko s "se"
+     ("izmerili smo", "opazili smo", "temperatura se je dvignila");
+   - angleške dvojne narekovaje " " namesto slovenskih „ " (spodaj-zgoraj) in
+     vezaj "-" namesto pomišljaja "–", kjer gre za pomišljaj, ne vezaj;
+   - angleški besedni red (npr. prislov pred glagolom po angleškem vzorcu, ko
+     bi naraven slovenski vrstni red dal drugačen poudarek).
+   Ne popravljaj stavkov, ki so že naravni, le zato ker si "aktiven" -- cilj je
+   odpraviti prevodni prizvok, ne preoblikovati vsak stavek.
 
 Manjše napake (slovnica, slog, drobne nedoslednosti) POPRAVI SAM in vrni popravljen
 članek. Če najdeš izmišljen/neutemeljen podatek, ki ga ne moreš preprosto
