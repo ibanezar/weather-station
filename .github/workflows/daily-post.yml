@@ -2,13 +2,64 @@ name: Dnevni članek
 
 on:
   schedule:
-    # 05:15 UTC -- po update-history.yml (01:15) in generate-seo-pages.yml (04:00),
-    # pred prvim jutranjim obiskom. Poleti = 7:15 CEST, pozimi = 6:15 CET.
-    - cron: '15 5 * * *'
-  workflow_dispatch: {}
+    # Jutranji predlogi: 03:45 UTC. GitHubov cron redno zamuja 1-2 uri, zato je
+    # nastavljen zgodaj -- e-mail s predlogi tako pride okoli 6:00-7:30 po naši uri.
+    - cron: '45 3 * * *'
+  workflow_dispatch:
+    inputs:
+      choice:
+        description: 'ID izbranega predloga iz jutranjega e-maila (prazno = takojšnja samodejna objava brez izbire)'
+        required: false
+        default: ''
 
 jobs:
+  # ── 1. faza (cron): pripravi tri predloge in jih pošlje Filipu po e-pošti.
+  # Objavi se nič -- objava se zgodi šele, ko Filip v e-mailu klikne predlog
+  # (worker /daily-post/pick sproži ta workflow z inputom choice).
+  predlogi:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pripravi tri predloge in pošlji e-mail
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: python3 tools/generate_daily_proposals.py
+
+      - name: Commit & push predlogov
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add tools/.daily_proposals.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            exit 0
+          fi
+          git commit -m "blog: predlogi dnevnega članka $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
+
+  # ── 2. faza (workflow_dispatch): napiše in objavi članek. Z inputom choice
+  # objavi predlog, ki ga je Filip izbral v e-mailu; brez inputa deluje po
+  # starem (takojšnja samodejna izbira teme in objava).
   publish:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,7 +80,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: python3 tools/generate_daily_post.py --wire
+          CHOICE: ${{ inputs.choice }}
+        run: python3 tools/generate_daily_post.py --wire ${CHOICE:+--choice "$CHOICE"}
 
       - name: Commit & push
         id: commit
