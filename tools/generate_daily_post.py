@@ -435,6 +435,11 @@ def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None
     payload = {
         "model": ANTHROPIC_MODEL,
         "max_tokens": 8000,
+        # claude-sonnet-5 privzeto razmišlja (adaptive thinking) -- ti žetoni gredo v
+        # breme max_tokens, tudi če jih stream_claude ne lovi (samo text_delta). Za to
+        # nalogo (pisanje po strogi shemi, brez več-koračnega sklepanja) razmišljanje
+        # ne pomaga in samo tvega, da zmanjka prostora za dejanski izpis.
+        "thinking": {"type": "disabled"},
         "system": SYSTEM_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
@@ -515,10 +520,15 @@ def call_lektor(article, context):
     payload = {
         "model": ANTHROPIC_MODEL,
         # Lektor vrne CEL popravljen članek (isto velik kot osnutek) + seznam
-        # najdenih težav -- z dodatnim preverjanjem anglicizmov/kalkov ta
-        # seznam zna biti daljši, zato 8000 (enako kot pri osnutku) ni bilo
-        # dovolj in je odgovor padel sredi JSON-a (stop_reason=max_tokens).
-        "max_tokens": 12000,
+        # najdenih težav, zato nekoliko višji limit kot pri osnutku.
+        "max_tokens": 10000,
+        # Pravi vzrok, da je klic prej padal na max_tokens že pri ~2000 znakih
+        # vidnega besedila, NI bil premajhen limit -- claude-sonnet-5 privzeto
+        # razmišlja (adaptive thinking), ti žetoni gredo v breme max_tokens in
+        # jih stream_claude ne lovi (samo text_delta, ne thinking_delta). Za
+        # nalogo preverjanja po fiksnem kontrolnem seznamu razmišljanje ne
+        # pomaga, zato ga izklopimo -- to je pravi popravek, ne višji limit.
+        "thinking": {"type": "disabled"},
         "system": LEKTOR_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
