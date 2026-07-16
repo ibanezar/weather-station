@@ -1,353 +1,419 @@
 #!/usr/bin/env python3
 """
-tools/generate_gobe_page.py — Gobarska napoved pillar page
+tools/generate_gobe_page.py — Gobarska napoved: freemium sales + forecast page
 
-Generates /gobarska-napoved/index.html: a server-rendered mushroom-foraging
-forecast for Zgornja Savinjska dolina. Mirrors the fruiting-score model used
-by the live "Gobarji" tab on the homepage (app.js: initGobe/_gobeScore) so
-the two never disagree, but renders everything as static HTML/text — no
-client-side fetch — so the content is crawlable and citable.
+Renders /gobarska-napoved/index.html: a server-rendered mushroom-foraging
+landing page for Zgornja Savinjska dolina built on the species-level model
+(tools/gobe_model.py) and the 50-species local database (species_rules.yaml).
 
-Data source: Open-Meteo forecast API (daily precipitation/temperature +
-hourly soil moisture/temperature/humidity), same as the homepage widget.
+Layout:
+  * FREE (public, crawlable): today's overall index, today's index per forest,
+    the 50-species reference table with edibility + dangerous doubles, the
+    monthly calendar, the terrain map and FAQ. Strong SEO + mycological
+    credibility, all static HTML.
+  * PREMIUM (gated): the forward-looking 7-day, per-species, per-location
+    forecast with plain-language explanations. Rendered as a locked placeholder;
+    the real content is fetched client-side from the Worker /premium/forecast
+    endpoint only when a valid access token is present.
+
+Positioning: the index is an "indeks ugodnosti pogojev" (favourability index),
+never a promise of finds — scientifically honest and it protects against angry
+subscribers.
 
 Usage:
   python3 tools/generate_gobe_page.py
 """
-import json, os, sys, urllib.request, urllib.parse, urllib.error
+import datetime as _dt
+import os
+import sys
+import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
+import gobe_model as gm           # noqa: E402 — species model + DB loader
 
 ROOT = seo.ROOT
-SITE = seo.SITE
 TODAY = seo.TODAY
 
-GOBE_SPOTS = [
-    {"name": "Rečica ob Savinji", "lat": 46.326, "lon": 14.921, "elev": "≈400 m"},
-    {"name": "Dobrovlje – Čreta",  "lat": 46.300, "lon": 14.860, "elev": "≈900 m"},
-    {"name": "Logarska dolina",    "lat": 46.392, "lon": 14.628, "elev": "≈750 m"},
-    {"name": "Golte",              "lat": 46.348, "lon": 14.840, "elev": "≈1300 m"},
-    {"name": "Smrekovško pogorje", "lat": 46.430, "lon": 14.860, "elev": "≈1300 m"},
-]
+# Cloudflare Worker base (paywall API). Same host as the rest of the site proxy.
+WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
 
-SPECIES = {
-    "boletus":    {"ic": "🍄", "nm": "Jurček (goban)", "nt": "Listnati in iglasti gozdovi; 2–3 tedne po dežju, tla 12–18 °C. Pogost v Savinjski dolini in Kamniško-Savinjskih Alpah."},
-    "chant":      {"ic": "🟡", "nm": "Lisička", "nt": "Mahovita, vlažna tla pod smreko in bukvijo; prenese več dežja kot jurček."},
-    "morel":      {"ic": "🟤", "nm": "Smrček (mavrah)", "nt": "Pomladanska goba; gaji, jesenovi logi, ob potokih; tla 8–15 °C. Sezona: marec–maj."},
-    "stmgeorge":  {"ic": "⚪", "nm": "Majska goba (pripravljavnica)", "nt": "Travniki in robovi gozda v aprilu in maju; raste v skupinah."},
-    "chestnut":   {"ic": "🌰", "nm": "Turek / kostanjevka", "nt": "Pod kostanjem in hrastom; topli jesenski dnevi, tla 10–16 °C."},
-    "parasol":    {"ic": "☂️", "nm": "Orjaški dežnik", "nt": "Travniki in poseke; pozno poletje in jesen. Zamenljiv s strupenim dežnikom – preveri!"},
-    "winter":     {"ic": "❄️", "nm": "Zimska panjevka", "nt": "Na štorih listavcev; raste ob nizkih temperaturah in blagi zmrzali."},
-    "oyster":     {"ic": "🦪", "nm": "Bukov ostrigar", "nt": "Na bukovih in topolovih deblih; pozna jesen in zima."},
-    "warn":       {"ic": "☠️", "nm": "Pozor: nevarne dvojnice!", "nt": "Mušnice in druge nevarne vrste rastejo sočasno z jedilnimi – natančno preveri vsako gobo!"},
-}
-BY_MONTH = [
-    ["winter", "oyster"],
-    ["winter", "oyster"],
-    ["morel"],
-    ["morel", "stmgeorge"],
-    ["stmgeorge", "morel", "boletus"],
-    ["boletus", "chant", "warn"],
-    ["boletus", "chant", "warn"],
-    ["boletus", "chant", "parasol", "warn"],
-    ["boletus", "chant", "chestnut", "parasol", "warn"],
-    ["boletus", "chant", "chestnut", "parasol", "warn"],
-    ["chant", "winter", "oyster"],
-    ["winter", "oyster"],
-]
+# Paddle hosted-checkout links — fill in after creating the products (docs/premium-setup.md).
+# TODO: nastavi pravi Paddle checkout povezavi (za zdaj vodita na kontakt).
+PADDLE_CHECKOUT_MONTHLY = "https://meteorec.si/gobarska-napoved/#pricing"
+PADDLE_CHECKOUT_SEASON = "https://meteorec.si/gobarska-napoved/#pricing"
+
+PRICE_MONTHLY = "3,99 €"
+PRICE_SEASON = "24,99 €"
+
 MES_FULL = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju",
             "juliju", "avgustu", "septembru", "oktobru", "novembru", "decembru"]
 DAN_KRATKO = ["pon", "tor", "sre", "čet", "pet", "sob", "ned"]
 
-PAST_DAYS = 14
-FORECAST_DAYS = 7
+# Edibility → (badge label, CSS colour class)
+EDIB_STYLE = {
+    "užitna":          ("Užitna", "e-ok"),
+    "pogojno užitna":  ("Pogojno užitna", "e-cond"),
+    "neužitna":        ("Neužitna", "e-none"),
+    "strupena":        ("Strupena", "e-tox"),
+    "zelo strupena":   ("Zelo strupena", "e-tox2"),
+    "smrtno strupena": ("Smrtno strupena", "e-death"),
+    "zaščitena":       ("Zaščitena", "e-prot"),
+}
 
 
-def fetch_forecast():
-    lats = ",".join(str(s["lat"]) for s in GOBE_SPOTS)
-    lons = ",".join(str(s["lon"]) for s in GOBE_SPOTS)
-    params = urllib.parse.urlencode({
-        "latitude": lats,
-        "longitude": lons,
-        "daily": "precipitation_sum,temperature_2m_max,temperature_2m_min",
-        "hourly": "soil_moisture_3_to_9cm,soil_temperature_6cm,relative_humidity_2m",
-        "past_days": PAST_DAYS,
-        "forecast_days": FORECAST_DAYS,
-        "timezone": "Europe/Ljubljana",
-    }, safe=",")
-    url = f"https://api.open-meteo.com/v1/forecast?{params}"
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = json.load(r)
-    return data if isinstance(data, list) else [data]
+def edib_badge(edibility):
+    label, cls = EDIB_STYLE.get((edibility or "").lower().strip(), (edibility or "?", "e-none"))
+    return f'<span class="gp-badge {cls}">{seo.esc(label) if hasattr(seo, "esc") else label}</span>'
 
 
-def daily_agg(loc):
-    """Aggregate hourly soil/RH to daily means, keyed by ISO date."""
-    h = loc.get("hourly") or {}
-    times = h.get("time") or []
-    buckets = {}
-    for i, t in enumerate(times):
-        d = t[:10]
-        o = buckets.setdefault(d, {"sm": 0.0, "smn": 0, "st": 0.0, "stn": 0, "rh": 0.0, "rhn": 0})
-        sm = (h.get("soil_moisture_3_to_9cm") or [None] * len(times))[i]
-        st = (h.get("soil_temperature_6cm") or [None] * len(times))[i]
-        rh = (h.get("relative_humidity_2m") or [None] * len(times))[i]
-        if sm is not None:
-            o["sm"] += sm; o["smn"] += 1
-        if st is not None:
-            o["st"] += st; o["stn"] += 1
-        if rh is not None:
-            o["rh"] += rh; o["rhn"] += 1
-    out = {}
-    for d, o in buckets.items():
-        out[d] = {
-            "sm": (o["sm"] / o["smn"]) if o["smn"] else None,
-            "st": (o["st"] / o["stn"]) if o["stn"] else None,
-            "rh": (o["rh"] / o["rhn"]) if o["rhn"] else None,
-        }
+def _esc(s):
+    return (str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def season_months(sp):
+    """Set of 1-12 month numbers the species' season window covers."""
+    out = set()
+    for m in range(1, 13):
+        # 15th of the month as representative day
+        if gm.in_season(_dt.date(2025, m, 15), sp["season"]):
+            out.add(m)
     return out
 
 
-def today_idx(loc):
-    times = (loc.get("daily") or {}).get("time") or []
-    iso = TODAY.isoformat()
-    return times.index(iso) if iso in times else PAST_DAYS
+# ── page CSS (scoped, appended in <head>) ─────────────────────────────────────
+
+PAGE_CSS = """<style>
+.gp-hero{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
+  padding:1.4rem 1.5rem;margin:.6rem 0 1.2rem;box-shadow:var(--card-shadow)}
+.gp-hero-top{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.gp-gauge{font-size:3.2rem;font-weight:800;line-height:1;color:var(--green)}
+.gp-gauge small{font-size:1.1rem;color:var(--muted);font-weight:600}
+.gp-hero-lvl{font-size:1.05rem;font-weight:700;letter-spacing:.02em}
+.gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
+.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;
+  padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem}
+.gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+.gp-forests{display:grid;gap:.5rem;margin:.6rem 0 1rem}
+.gp-forest{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .8rem}
+.gp-forest b{font-variant-numeric:tabular-nums}
+.gp-terr{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
+  padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
+.gp-lock h3{margin:.1rem 0 .3rem}
+.gp-skel{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0}
+.gp-skel .gp-forest{background:var(--badge-bg)}
+.gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
+.gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
+  border-radius:9px;padding:.5rem .7rem;color:var(--text);font-size:.9rem}
+.gp-login button{background:var(--blue);color:#04070e;border:0;border-radius:9px;
+  padding:.5rem 1rem;font-weight:700;cursor:pointer}
+.gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
+.gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
+.gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.1rem;
+  display:flex;flex-direction:column;gap:.5rem;box-shadow:var(--card-shadow)}
+.gp-plan.best{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),var(--card-shadow)}
+.gp-plan .p-price{font-size:1.9rem;font-weight:800}
+.gp-plan .p-price small{font-size:.85rem;color:var(--muted);font-weight:600}
+.gp-plan ul{margin:.2rem 0;padding-left:1.1rem;color:var(--muted);font-size:.88rem;line-height:1.7}
+.gp-tag{display:inline-block;font-size:.7rem;font-weight:700;color:var(--blue);
+  border:1px solid var(--blue);border-radius:6px;padding:.05rem .4rem;align-self:flex-start}
+.gp-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:.08rem .45rem;border-radius:6px;white-space:nowrap}
+.e-ok{background:rgba(52,211,153,.15);color:var(--green)}
+.e-cond{background:rgba(245,158,11,.15);color:var(--amber)}
+.e-none{background:var(--badge-bg);color:var(--muted)}
+.e-tox,.e-tox2{background:rgba(248,113,113,.16);color:#f87171}
+.e-death{background:rgba(248,113,113,.28);color:#fecaca;font-weight:800}
+.e-prot{background:rgba(167,139,250,.18);color:var(--purple)}
+.gp-sptable{width:100%;border-collapse:collapse;font-size:.86rem}
+.gp-sptable th,.gp-sptable td{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--border);vertical-align:top}
+.gp-sptable th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--bg)}
+.gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
+.gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
+.gp-dbl{color:var(--muted);font-size:.8rem}
+.gp-terrmap{display:grid;gap:.6rem;margin:.6rem 0}
+.gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.8rem 1rem}
+.gp-terrmap .t b{color:var(--text)}
+.gp-matrix{width:100%;border-collapse:collapse;font-size:.8rem}
+.gp-matrix th,.gp-matrix td{padding:.3rem .35rem;text-align:center;border-bottom:1px solid var(--border)}
+.gp-matrix td.nm{text-align:left;white-space:nowrap}
+.gp-cell{display:inline-block;min-width:2.1em;border-radius:5px;padding:.1rem .2rem;font-variant-numeric:tabular-nums}
+.gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
+</style>"""
+
+# ── client-side paywall JS ────────────────────────────────────────────────────
+
+PAGE_JS = """<script>
+(function(){
+  var API=""" + '"' + WORKER_BASE + '"' + """;
+  var LS="mr_gobe_token";
+  function tok(){
+    try{
+      var u=new URL(location.href);
+      var t=u.searchParams.get("token");
+      if(t){localStorage.setItem(LS,t);u.searchParams.delete("token");
+        history.replaceState({},"",u.pathname+u.search+u.hash);}
+      return localStorage.getItem(LS);
+    }catch(e){return null;}
+  }
+  var lock=document.getElementById("gp-lock");
+  var content=document.getElementById("gp-content");
+  var statusEl=document.getElementById("gp-premium-status");
+  function color(v){
+    if(v>=75)return"rgba(52,211,153,.28)";if(v>=55)return"rgba(52,211,153,.16)";
+    if(v>=35)return"rgba(245,158,11,.16)";if(v>=18)return"rgba(248,113,113,.14)";
+    return"var(--badge-bg)";
+  }
+  function render(d){
+    var meta=d.species_meta||{};
+    var home=(d.locations||[]).filter(function(l){return l.home;})[0]||d.locations[0];
+    var html="";
+    // today per forest
+    html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
+    (d.locations||[]).slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
+      .forEach(function(l){var o=l.days[0];var top=o.species[0];
+        html+='<div class="gp-forest"><span>'+l.name+' <span class="gp-terr">'+(l.terrain||'')+
+          ' · '+l.elev_m+' m</span></span><b>'+o.overall+'% '+o.level+
+          (top?' · '+(meta[top.id]?meta[top.id].name_sl:''):'')+'</b></div>';});
+    html+='</div>';
+    // 7-day matrix for home, top 8 species by today's index
+    var top=home.days[0].species.slice(0,8).map(function(s){return s.id;});
+    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3><div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
+    home.days.forEach(function(day){var dt=new Date(day.date);
+      html+='<th>'+(day===home.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
+    html+='</tr></thead><tbody>';
+    top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
+      home.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
+        var v=s?s.index:0;html+='<td><span class="gp-cell" style="background:'+color(v)+'">'+v+'</span></td>';});
+      html+='</tr>';});
+    html+='</tbody></table></div>';
+    // today's carriers with explanation
+    html+='<h3>Danes — zakaj (razlage)</h3><ul style="color:var(--muted);font-size:.88rem;line-height:1.7">';
+    home.days[0].species.slice(0,6).forEach(function(s){var m=meta[s.id]||{};
+      html+='<li><b style="color:var(--text)">'+(m.name_sl||s.id)+' — '+s.index+'%</b>: '+s.explanation+
+        (m.doubles?' <span class="gp-dbl">⚠ dvojnica: '+m.doubles+'</span>':'')+'</li>';});
+    html+='</ul>';
+    content.innerHTML=html;
+    content.hidden=false;lock.hidden=true;
+  }
+  var t=tok();
+  if(t){
+    fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(d){render(d);
+        if(statusEl){statusEl.hidden=false;statusEl.textContent="✓ Premium dostop aktiven.";}})
+      .catch(function(){localStorage.removeItem(LS);});
+  }
+  var f=document.getElementById("gp-login");
+  if(f){f.addEventListener("submit",function(e){e.preventDefault();
+    var msg=document.getElementById("gp-login-msg");var em=(f.email.value||"").trim();
+    if(!em){return;}msg.textContent="Pošiljam …";
+    fetch(API+"/premium/login",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:em})}).then(function(r){return r.json();})
+      .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
+      .catch(function(){msg.textContent="Napaka pri pošiljanju. Poskusi znova.";});});}
+})();
+</script>"""
 
 
-def gobe_inputs(loc, agg, i):
-    d = loc.get("daily") or {}
-    precip = d.get("precipitation_sum") or []
-    def rain_at(k):
-        return precip[k] if 0 <= k < len(precip) and precip[k] is not None else 0
-    ar = sum(rain_at(k) for k in range(i - 12, i - 3))  # inclusive i-12..i-4
-    times = d.get("time") or []
-    date = times[i] if 0 <= i < len(times) else None
-    a = agg.get(date) if date else None
-    tmax_l = d.get("temperature_2m_max") or []
-    tmin_l = d.get("temperature_2m_min") or []
-    tmax = tmax_l[i] if 0 <= i < len(tmax_l) else None
-    tmin = tmin_l[i] if 0 <= i < len(tmin_l) else None
-    if tmax is not None and tmin is not None:
-        tmean = (tmax + tmin) / 2
-    else:
-        tmean = tmax if tmax is not None else tmin
-    return {"ar": ar, "sm": a["sm"] if a else None, "st": a["st"] if a else None,
-            "rh": a["rh"] if a else None, "tmean": tmean}
+def build_body(rules, premium, free):
+    home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
+    pct = free["index"]
+    lvl = free["level"]
+    top_sl = free["top_species_sl"] or "—"
+    best_loc = max(premium["locations"], key=lambda l: l["days"][0]["overall"])
+    best_o = best_loc["days"][0]
 
+    species = rules["species"]
+    indexed = [s for s in species if s.get("gets_index")]
+    month = TODAY.month
 
-def gobe_score(inp):
-    s = 0
-    ar = inp["ar"]
-    if ar >= 60: s += 34
-    elif ar >= 35: s += 27
-    elif ar >= 20: s += 18
-    elif ar >= 10: s += 9
-    elif ar >= 4: s += 3
-    sm = inp["sm"]
-    if sm is not None:
-        if sm >= 0.32: s += 24
-        elif sm >= 0.26: s += 18
-        elif sm >= 0.20: s += 11
-        elif sm >= 0.15: s += 4
-    st = inp["st"]
-    if st is not None:
-        if 10 <= st <= 18: s += 18
-        elif (7 <= st < 10) or (18 < st <= 21): s += 10
-        elif 4 <= st <= 24: s += 4
-    rh = inp["rh"]
-    if rh is not None:
-        if rh >= 85: s += 12
-        elif rh >= 75: s += 8
-        elif rh >= 65: s += 4
-    tmean = inp["tmean"]
-    if tmean is not None:
-        if tmean < 2: s -= 22
-        elif tmean < 5: s -= 8
-        elif tmean > 26: s -= 10
-    return max(0, min(100, round(s)))
-
-
-def gobe_level(p):
-    if p >= 75: return "ODLIČNA"
-    if p >= 55: return "DOBRA"
-    if p >= 35: return "ZMERNA"
-    if p >= 18: return "SLABA"
-    return "BREZ"
-
-
-def gobe_desc(p):
-    if p >= 75: return "Odlične razmere – tla vlažna in topla, gobe so verjetno v polni rasti."
-    if p >= 55: return "Dobre razmere za gobe. Po izdatnem dežju je smiselno na lov."
-    if p >= 35: return "Zmerne razmere – posamezne gobe možne, predvsem v vlažnih legah."
-    if p >= 18: return "Slabe razmere – pretežno suho ali prehladno za obrodnost."
-    return "Brez obrodnosti – premalo vlage ali prenizke temperature."
-
-
-def build_body(locs):
-    aggs = [daily_agg(loc) for loc in locs]
-    primary, primary_agg = locs[0], aggs[0]
-    ti = today_idx(primary)
-
-    inp_today = gobe_inputs(primary, primary_agg, ti)
-    pct_today = gobe_score(inp_today)
-    lvl_today = gobe_level(pct_today)
-    desc_today = gobe_desc(pct_today)
-
-    d = primary.get("daily") or {}
-    precip = d.get("precipitation_sum") or []
-    rain14 = sum((precip[k] or 0) for k in range(max(0, ti - 13), ti + 1))
-    dsr = None
-    for k in range(ti, -1, -1):
-        if k < len(precip) and (precip[k] or 0) >= 5:
-            dsr = ti - k
-            break
-    if dsr is None:
-        dsr_txt = "> 14 dni"
-    elif dsr == 0:
-        dsr_txt = "danes"
-    elif dsr == 1:
-        dsr_txt = "1 dan"
-    else:
-        dsr_txt = f"{dsr} dni"
-
-    month = TODAY.month - 1  # 0-indexed
-    species_now = [SPECIES[k] for k in BY_MONTH[month]]
-    species_note = ("Razmere so ugodne – spodaj naštete vrste so trenutno najbolj verjetne."
-                     if pct_today >= 55 else
-                     "Razmere so zmerne – verjetnost je manjša, a v vlažnih legah se splača pogledati."
-                     if pct_today >= 35 else
-                     "Trenutno je presuho ali prehladno – kljub sezoni je obrodnost teh vrst malo verjetna.")
-
-    # ── Answer block (AI-Overview-style summary) ─────────────────────────────
-    answer = (f'  <p class="archive-intro">Danes je <strong>gobarski indeks</strong> za Rečico ob Savinji in okoliške '
-              f'gozdove Zgornje Savinjske doline <strong>{pct_today} % ({lvl_today})</strong>. {desc_today} '
-              f'Ocena upošteva padavine zadnjih 12 dni ({seo.num(rain14, 0)} mm v zadnjih 14 dneh), vlago in temperaturo '
-              f'tal ter zračno vlago — nazadnje posodobljeno {TODAY.isoformat()}.</p>')
-
-    quick = f'''  <div class="stat-grid">
-    <div class="stat-card c-rain">
-      <div class="sc-label">Gobarski indeks danes</div>
-      <div class="sc-val">{pct_today} %</div>
-      <div class="sc-sub">{lvl_today} · Rečica ob Savinji</div>
+    # ── HERO (free teaser) ────────────────────────────────────────────────────
+    hero = f'''  <div class="gp-hero">
+    <div class="gp-hero-top">
+      <div class="gp-gauge">{pct}<small> %</small></div>
+      <div>
+        <div class="gp-hero-lvl">Gobarski indeks danes — <strong>{lvl}</strong></div>
+        <div class="gp-hero-sub">Rečica ob Savinji · nosilna vrsta danes: <strong>{_esc(top_sl)}</strong>.<br>
+        Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong> ({best_o["overall"]} % — {best_o["level"]}).</div>
+        <a class="gp-cta" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
+      </div>
     </div>
-    <div class="stat-card c-temp">
-      <div class="sc-label">Padavine (14 dni)</div>
-      <div class="sc-val">{seo.num(rain14, 0)} mm</div>
-      <div class="sc-sub">sprožilec obrodnosti je dež izpred 5–12 dni</div>
-    </div>
-    <div class="stat-card c-down">
-      <div class="sc-label">Dni od zadnjega dežja ≥ 5 mm</div>
-      <div class="sc-val">{dsr_txt}</div>
-      <div class="sc-sub">Rečica ob Savinji</div>
-    </div>
+    <div class="gp-hero-sub" style="margin-top:.9rem">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast,
+    ne obljuba najdbe. Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1),
+    zračno vlago in nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>'''
 
-    # ── Nearby forests comparison ─────────────────────────────────────────────
-    rows = []
-    for loc, agg, spot in zip(locs, aggs, GOBE_SPOTS):
-        ti_s = today_idx(loc)
-        pct = gobe_score(gobe_inputs(loc, agg, ti_s))
-        rows.append((spot["name"], spot["elev"], pct, gobe_level(pct)))
-    rows.sort(key=lambda r: r[2], reverse=True)
-    spots_table = '  <table class="stats">\n' + "\n".join(
-        f'      <tr><th>{name} <span class="muted-note" style="margin:0;display:inline">({elev})</span></th>'
-        f'<td>{pct} % — {lvl}</td></tr>'
-        for name, elev, pct, lvl in rows
-    ) + "\n  </table>"
+    # ── today per forest (free) ───────────────────────────────────────────────
+    forests = ['  <div class="gp-forests">']
+    for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
+        o = loc["days"][0]
+        top = o["species"][0]
+        top_nm = premium["species_meta"][top["id"]]["name_sl"] if top else "—"
+        forests.append(
+            f'    <div class="gp-forest"><span>{_esc(loc["name"])} '
+            f'<span class="gp-terr">{loc.get("terrain","")} · {loc["elev_m"]} m</span></span>'
+            f'<b>{o["overall"]} % {o["level"]} · {_esc(top_nm)}</b></div>')
+    if premium.get("protected_areas"):
+        forests.append(
+            f'    <div class="gp-forest" style="opacity:.7"><span>{_esc(", ".join(premium["protected_areas"]))} '
+            f'<span class="gp-terr">zaščiteno</span></span><b>nabiranje prepovedano</b></div>')
+    forests.append("  </div>")
+    forests_html = "\n".join(forests)
 
-    # ── 7-day outlook for the primary spot ────────────────────────────────────
-    times = d.get("time") or []
-    out_rows = []
-    for k in range(ti, min(ti + FORECAST_DAYS, len(times))):
-        inp = gobe_inputs(primary, primary_agg, k)
-        pct = gobe_score(inp)
-        lvl = gobe_level(pct)
-        import datetime as _dt
-        dt = _dt.date.fromisoformat(times[k])
-        lbl = "danes" if k == ti else DAN_KRATKO[dt.weekday()] + f" {dt.day}. {dt.month}."
-        rain = precip[k] if k < len(precip) and precip[k] is not None else 0
-        out_rows.append((lbl, rain, pct, lvl))
-    outlook_table = '  <table class="stats">\n' + "\n".join(
-        f'      <tr><th>{lbl}</th><td>{seo.num(rain, 0)} mm · {pct} % ({lvl})</td></tr>'
-        for lbl, rain, pct, lvl in out_rows
-    ) + "\n  </table>"
+    # ── PREMIUM locked block ──────────────────────────────────────────────────
+    skel_rows = "\n".join(
+        f'      <div class="gp-forest"><span>{_esc(premium["species_meta"][s["id"]]["name_sl"])}</span><b>•• % ······</b></div>'
+        for s in home["days"][0]["species"][:5])
+    premium_block = f'''  <div id="gp-premium-status" class="gp-msg" hidden></div>
+  <div id="gp-content" hidden></div>
+  <div id="gp-lock" class="gp-lock">
+    <span class="gp-tag">🔒 PREMIUM</span>
+    <h3>7-dnevna napoved po vrstah in gozdovih</h3>
+    <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
+    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, padavine pod pragom, nočna ohladitev zaznana«)
+    in opozorila na nevarne dvojnice.</p>
+    <div class="gp-skel">
+{skel_rows}
+    </div>
+    <div class="gp-lockbar">
+      <a class="gp-cta" href="#pricing">Naroči se ({PRICE_MONTHLY}/mes)</a>
+      <a class="gp-cta alt" href="#pricing">Sezonski dostop ({PRICE_SEASON})</a>
+    </div>
+    <form id="gp-login" class="gp-login" autocomplete="email">
+      <input type="email" name="email" placeholder="Že plačano? Vpiši e-naslov za povezavo" required>
+      <button type="submit">Pošlji povezavo</button>
+    </form>
+    <div id="gp-login-msg" class="gp-msg"></div>
+  </div>'''
 
-    # ── Species this month + full calendar ────────────────────────────────────
-    species_now_html = "\n".join(
-        f'    <div class="gobe-sp"><span class="gobe-sp-ic">{s["ic"]}</span>'
-        f'<div><div class="gobe-sp-nm">{s["nm"]}</div><div class="gobe-sp-nt">{s["nt"]}</div></div></div>'
-        for s in species_now
-    )
-    calendar_rows = []
-    for m in range(12):
-        names = ", ".join(SPECIES[k]["nm"] for k in BY_MONTH[m] if k != "warn")
-        warn = " ☠️" if "warn" in BY_MONTH[m] else ""
-        calendar_rows.append((seo.MES_NOM[m + 1].capitalize(), names + warn))
-    calendar_table = '  <table class="stats">\n' + "\n".join(
-        f'      <tr><th>{mn}</th><td style="text-align:left">{sp}</td></tr>' for mn, sp in calendar_rows
-    ) + "\n  </table>"
+    # ── pricing ───────────────────────────────────────────────────────────────
+    pricing = f'''  <h2 id="pricing">Naročnina</h2>
+  <div class="gp-pricing">
+    <div class="gp-plan">
+      <span class="gp-tag">MESEČNO</span>
+      <div class="p-price">{PRICE_MONTHLY}<small> / mesec</small></div>
+      <ul>
+        <li>7-dnevna napoved po vrstah</li>
+        <li>Indeks za vsa nabiralna območja</li>
+        <li>Razlage in opozorila na dvojnice</li>
+        <li>Prekliči kadarkoli</li>
+      </ul>
+      <a class="gp-cta" href="{PADDLE_CHECKOUT_MONTHLY}" data-plan="monthly">Naroči se</a>
+    </div>
+    <div class="gp-plan best">
+      <span class="gp-tag">CELA SEZONA · najugodneje</span>
+      <div class="p-price">{PRICE_SEASON}<small> / sezona</small></div>
+      <ul>
+        <li>Vse iz mesečnega paketa</li>
+        <li>Dostop do konca sezone (30. 11.)</li>
+        <li>Enkratno plačilo, brez obnavljanja</li>
+        <li>Podpora lokalnemu projektu</li>
+      </ul>
+      <a class="gp-cta" href="{PADDLE_CHECKOUT_SEASON}" data-plan="season">Kupi sezono</a>
+    </div>
+  </div>
+  <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
+  računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>'''
 
-    # ── FAQ ─────────────────────────────────────────────────────────────────
+    # ── monthly calendar (free) ───────────────────────────────────────────────
+    cal_rows = []
+    for m in range(1, 13):
+        names = [s["name_sl"] for s in indexed if m in season_months(s)]
+        mark = " ←" if m == month else ""
+        hi = ' style="background:var(--fc-today-bg)"' if m == month else ""
+        joined = ", ".join(names) or "—"
+        cal_rows.append(
+            f'      <tr{hi}>'
+            f'<th>{seo.MES_NOM[m].capitalize()}{mark}</th>'
+            f'<td style="text-align:left">{_esc(joined)}</td></tr>')
+    calendar_html = ('  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+
+    # ── 50-species reference table (free, SEO + credibility) ──────────────────
+    sp_rows = []
+    for s in sorted(species, key=lambda x: (not x.get("gets_index"), x["name_sl"])):
+        se = s["season"]
+        season_txt = f'{se["start"]}–{se["end"]}'
+        sp_rows.append(
+            f'      <tr><td><b>{_esc(s["name_sl"])}</b><br><span class="lat">{_esc(s["name_lat"])}</span></td>'
+            f'<td>{edib_badge(s.get("edibility"))}</td>'
+            f'<td>{season_txt}</td>'
+            f'<td class="gp-dbl">{_esc(s.get("doubles") or "—")}</td></tr>')
+    species_table = (
+        '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr>'
+        '<th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>\n'
+        + "\n".join(sp_rows) + "\n  </tbody></table></div>")
+
+    # ── terrain map (free) ────────────────────────────────────────────────────
+    terr_items = []
+    for t in rules.get("terrains", []):
+        locs_here = [l["name"] for l in rules["locations"]
+                     if l.get("terrain") == t["id"] and not l.get("protected")]
+        terr_items.append(
+            f'    <div class="t"><b>{_esc(t["name_sl"])}</b><br>'
+            f'<span class="gp-hero-sub">{_esc(t.get("note",""))}</span><br>'
+            f'<span class="gp-terr">Napovedne točke: {_esc(", ".join(locs_here) or "—")}</span></div>')
+    terrain_html = '  <div class="gp-terrmap">\n' + "\n".join(terr_items) + "\n  </div>"
+
+    # ── FAQ (free) ────────────────────────────────────────────────────────────
     qa = [
-        ("Kdaj rastejo jurčki v Savinjski dolini?",
-         "Jurčki (gobani) v Zgornji Savinjski dolini najpogosteje rastejo od maja do oktobra, "
-         "2–3 tedne po izdatnem dežju, ko je temperatura tal med 12 in 18 °C. Najboljša meseca sta "
-         "praviloma junij in september."),
-        ("Koliko dni po dežju zrastejo gobe?",
-         "Večina gozdnih vrst (jurček, lisička) potrebuje 5–12 dni po izdatnejšem dežju (vsaj 20–30 mm), "
-         "da se sproži obrodnost — to je t. i. zamik rasti, ki ga upošteva tudi gobarski indeks na tej strani."),
-        (f"Katere gobe trenutno (v {MES_FULL[month]}) rastejo v Zgornji Savinjski dolini?",
-         "Trenutno so v sezoni: " + ", ".join(s["nm"] for s in species_now if s is not SPECIES["warn"]) + "."),
-        ("Koliko gob smem nabrati na dan?",
-         "V Sloveniji je dovoljeno nabrati do 2 kg gob na osebo na dan (Uredba o varstvu samoniklih gliv)."),
-        ("Ali je gobarski indeks na tej strani napoved ali meritev?",
-         "Gre za model, izračunan iz napovedi Open-Meteo (padavine, vlaga in temperatura tal, zračna vlaga) "
-         "po istem algoritmu kot živi pripomoček na naslovni strani Meteorec — ni uradna napoved ARSO."),
+        ("Je gobarski indeks napoved najdbe?",
+         "Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — "
+         "temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in "
+         "geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe."),
+        ("Katere vrste zajema premium napoved?",
+         "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
+         "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
+        ("Zakaj se indeks razlikuje med gozdovi?",
+         "Model upošteva geologijo: kislo vulkansko pogorje Smrekovca ustreza jurčkom in žametastemu gobanu, "
+         "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
+         "verjetna povsod."),
+        ("Kako plačam in dostopam?",
+         "Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — "
+         "brez ustvarjanja računa in gesla. Če izgubiš povezavo, jo z istim e-naslovom kadarkoli zahtevaš znova."),
+        ("Koliko gob smem nabrati?",
+         "V Sloveniji je dovoljeno nabrati do 2 kg gob na osebo na dan (Uredba o varstvu samoniklih gliv). "
+         "Logarska dolina, Robanov in Matkov kot so zaščitena območja — nabiranje je tam prepovedano."),
+        ("Ali je to uradna napoved ARSO?",
+         "Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob "
+         "Savinji. Ni uradna napoved ARSO."),
     ]
-    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
-        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
-    ) + "\n  </div>"
+    faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
+    ) + "\n  </div>")
 
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Model rasti gob iz podatkov Open-Meteo · osvežuje se dnevno · {TODAY.isoformat()}</p>
-{answer}
-{quick}
-  <h2>Okoliški gozdovi — primerjava danes</h2>
-  <p class="archive-intro">Gobarski indeks za pet znanih nabiralnih območij Zgornje Savinjske doline, izračunan iz istih vhodnih podatkov (vlaga in temperatura tal, padavine, zračna vlaga).</p>
-{spots_table}
-  <h2>Napoved obrodnosti — naslednjih {FORECAST_DAYS} dni</h2>
-  <p class="archive-intro">Okno obrodnosti za Rečico ob Savinji. Višja padavinska vsota 5–12 dni nazaj praviloma dvigne indeks z zamikom.</p>
-{outlook_table}
-  <h2>Kaj utegne rasti v {MES_FULL[month]}</h2>
-  <p class="archive-intro">{species_note}</p>
-  <div class="card" style="margin-bottom:1rem">
-{species_now_html}
-  </div>
-  <h2>Gobarski koledar — Zgornja Savinjska dolina po mesecih</h2>
-{calendar_table}
-  <h2>Kako izračunamo gobarski indeks</h2>
-  <p class="archive-intro">Indeks (0–100 %) sešteje pet dejavnikov: <strong>predhodne padavine</strong> (vsota dežja
-  5–12 dni pred izbranim dnem — jurčki in lisičke fruktificirajo z zamikom, ne takoj po dežju), <strong>vlago tal</strong>
-  na globini 3–9 cm, <strong>temperaturo tal</strong> na 6 cm (optimalno 10–18 °C), <strong>relativno zračno vlago</strong>
-  in <strong>povprečno dnevno temperaturo zraka</strong> (pod 2 °C ali nad 26 °C obrodnost zavira). Vhodni podatki so
-  napoved Open-Meteo za pet točk v dolini; model je enak tistemu, ki poganja živi pripomoček na naslovni strani.</p>
-  <h2>Kje nabirati v Zgornji Savinjski dolini</h2>
-  <p class="archive-intro"><strong>Dobrovlje – Čreta</strong> (≈900 m) je mešan gozd nad Rečico z dobro vlago v spodnjem
-  sloju. <strong>Logarska dolina</strong> (≈750 m) ponuja hladnejšo, bolj zasenčeno klimo pod Kamniško-Savinjskimi Alpami
-  — kasnejša, a daljša sezona. <strong>Golte</strong> in <strong>Smrekovško pogorje</strong> (obe ≈1300 m) sta iglasta
-  gozdova na višji nadmorski višini, kjer sezona jurčkov in lisičk pogosto traja dlje v jesen kot na dnu doline.</p>
-  <div class="card" style="margin-bottom:1rem">
+  <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
+{hero}
+  <h2>Danes po gozdovih</h2>
+  <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
+  podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
+{forests_html}
+  <h2>Premium: 7-dnevna napoved po vrstah</h2>
+{premium_block}
+{pricing}
+  <h2>Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
+  <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
+{calendar_html}
+  <h2>Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
+  <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
+  nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
+{species_table}
+  <h2>Geološki tereni doline</h2>
+  <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
+{terrain_html}
+  <div class="card" style="margin:1rem 0">
     <div class="clabel">📋 Nasveti in pravila</div>
     <div style="font-size:.85rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
-      ⚖️ V Sloveniji je dovoljeno nabrati <b>do 2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
+      ⚖️ Do <b>2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
       🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
       🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
-      ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu se posvetuj z gobarskim društvom ali mikologom.<br>
-      🌡 Najboljše razmere: vlažna tla, temperatura tal 10–18 °C, nekaj dni po izdatnem dežju.
+      ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu vprašaj gobarsko društvo ali mikologa.<br>
+      🚫 Logarska dolina, Robanov in Matkov kot: <b>zaščiteno — nabiranje prepovedano.</b>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
       <a href="https://www.gobe.si/" target="_blank" rel="noopener" class="mtn-avk-link">🍄 Gobe.si</a>
@@ -356,39 +422,56 @@ def build_body(locs):
     </div>
   </div>
 {faq_html}
-  <p class="muted-note">Model gobarskega indeksa uporablja iste vhodne podatke in isti algoritem kot živi pripomoček
-  na <a href="/">naslovni strani Meteorec</a> (zavihek »Gobarji«), kjer lahko premikaš napoved po dnevih naprej.</p>
-  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
-
-    return body, pct_today, lvl_today, desc_today
+  <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
+  (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
+  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+{PAGE_JS}'''
+    return body
 
 
 def main():
-    print(f"[{TODAY}] Pridobivam napoved Open-Meteo za {len(GOBE_SPOTS)} lokacij …")
+    print(f"[{TODAY}] Gradim gobarsko prodajno stran …")
+    rules = gm.load_rules()
+    spots, protected = gm.load_locations(rules)
     try:
-        locs = fetch_forecast()
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
-        print(f"✗ Napaka pri pridobivanju napovedi: {e}", file=sys.stderr)
+        locs = gm.fetch_forecast(spots)
+    except (urllib.error.URLError, TimeoutError) as e:
+        print(f"✗ Open-Meteo: {e}", file=sys.stderr)
         sys.exit(1)
-    if len(locs) != len(GOBE_SPOTS):
-        print(f"✗ Nepričakovano število lokacij v odgovoru ({len(locs)} namesto {len(GOBE_SPOTS)})", file=sys.stderr)
+    if len(locs) != len(spots):
+        print(f"✗ Pričakoval {len(spots)} lokacij, dobil {len(locs)}", file=sys.stderr)
         sys.exit(1)
 
-    body, pct_today, lvl_today, desc_today = build_body(locs)
+    station_precip = gm.load_station_precip()
+    premium = gm.compute_forecast(rules, spots, locs, station_precip, protected)
+    free = gm.free_payload(premium)
+
+    body = build_body(rules, premium, free)
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"
-    desc = (f"Gobarski indeks danes: {pct_today} % ({lvl_today}). {desc_today} Napoved za pet gozdov "
-            f"Zgornje Savinjske doline, gobarski koledar po mesecih in razlaga modela.")
+    desc = (f"Gobarski indeks danes: {free['index']} % ({free['level']}). Napoved rasti gob po vrstah za "
+            f"Zgornjo Savinjsko dolino — 7-dnevni premium model, baza {len(rules['species'])} vrst, "
+            f"nevarne dvojnice in gobarski koledar.")
 
+    qa_for_schema = [
+        ("Je gobarski indeks napoved najdbe?",
+         "Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."),
+        ("Katere vrste zajema premium napoved?",
+         "Užitne in pogojno užitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."),
+        ("Ali je to uradna napoved ARSO?",
+         "Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."),
+    ]
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
+        seo.faq_schema(qa_for_schema),
     ])
+    head_extras = schema + "\n" + PAGE_CSS
 
-    html = seo.page_shell(title, desc, url, schema, body)
+    html = seo.page_shell(title, desc, url, head_extras, body)
     seo.write_page("gobarska-napoved/index.html", html, force=True)
-    print(f"  → gobarska-napoved/index.html ({pct_today} %, {lvl_today})")
+    print(f"  → gobarska-napoved/index.html ({free['index']} %, {free['level']})")
 
 
 if __name__ == "__main__":
