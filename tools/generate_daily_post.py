@@ -512,7 +512,11 @@ def call_lektor(article, context):
     )
     payload = {
         "model": ANTHROPIC_MODEL,
-        "max_tokens": 8000,
+        # Lektor vrne CEL popravljen članek (isto velik kot osnutek) + seznam
+        # najdenih težav -- z dodatnim preverjanjem anglicizmov/kalkov ta
+        # seznam zna biti daljši, zato 8000 (enako kot pri osnutku) ni bilo
+        # dovolj in je odgovor padel sredi JSON-a (stop_reason=max_tokens).
+        "max_tokens": 12000,
         "system": LEKTOR_PROMPT,
         "messages": [{"role": "user", "content": user_prompt}],
     }
