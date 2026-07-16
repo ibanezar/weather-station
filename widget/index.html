@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Vreme v živo — Rečica ob Savinji | Meteorec</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{
+  --bg:#f0f9ff; --card:#ffffff; --text:#0a1628; --muted:#5b7290;
+  --border:rgba(10,22,40,.08); --blue:#0284c7; --green:#059669;
+  --amber:#b45309; --red:#dc2626; --accent:#0ea5e9;
+}
+html[data-theme="dark"]{
+  --bg:#04070e; --card:#0d1526; --text:#e8edf8; --muted:#9fb3cc;
+  --border:rgba(255,255,255,.09); --blue:#4d9ff8; --green:#34d399;
+  --amber:#f59e0b; --red:#f87171; --accent:#38bdf8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:transparent;
+  color:var(--text);
+  display:flex;
+  align-items:flex-start;
+  padding:6px;
+}
+a{color:inherit}
+.card{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(10,40,80,.08);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.head{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 14px;
+  background:linear-gradient(135deg,var(--accent),var(--blue));
+  color:#fff;
+}
+.head img{width:20px;height:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
+.head .brand{font-weight:700;font-size:.86rem;letter-spacing:.01em}
+.head .brand em{font-style:normal;opacity:.85}
+.head .loc{margin-left:auto;font-size:.68rem;opacity:.92;text-align:right;line-height:1.25}
+.body{padding:14px 16px 6px}
+.main-row{display:flex;align-items:center;gap:12px}
+.icon{font-size:2.6rem;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.temp{font-size:2.5rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.temp .unit{font-size:1.2rem;font-weight:600;opacity:.7}
+.cond-col{display:flex;flex-direction:column;gap:1px}
+.cond-label{font-size:.86rem;font-weight:600;color:var(--muted)}
+.feels{font-size:.74rem;color:var(--muted)}
+.stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:6px;margin:13px 0 4px;
+}
+.stat{
+  background:rgba(2,132,199,.06);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px 4px 7px;
+  text-align:center;
+}
+html[data-theme="dark"] .stat{background:rgba(77,159,248,.08)}
+.stat .v{font-size:.92rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .l{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:1px}
+.foot{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+  padding:8px 14px;
+  border-top:1px solid var(--border);
+  font-size:.65rem;color:var(--muted);
+}
+.foot a{text-decoration:none;font-weight:600;color:var(--blue)}
+.live{display:inline-flex;align-items:center;gap:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(5,150,105,.5);animation:pulse 2s infinite}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(5,150,105,.5)}
+  70%{box-shadow:0 0 0 6px rgba(5,150,105,0)}
+  100%{box-shadow:0 0 0 0 rgba(5,150,105,0)}
+}
+.err{padding:22px 14px;text-align:center;font-size:.78rem;color:var(--muted)}
+/* compact mode */
+body.compact .stats{display:none}
+body.compact .body{padding:12px 14px 4px}
+body.compact .icon{font-size:2rem}
+body.compact .temp{font-size:1.9rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <img src="/logo.svg" alt="">
+    <span class="brand">Meteo<em>rec</em></span>
+    <span class="loc">Rečica ob Savinji<br>postaja IREICA1</span>
+  </div>
+  <div class="body" id="body">
+    <div class="err">Nalagam vreme…</div>
+  </div>
+  <div class="foot">
+    <span class="live"><span class="dot" id="dot"></span><span id="updated">—</span></span>
+    <a href="https://meteorec.si/" target="_blank" rel="noopener">meteorec.si ↗</a>
+  </div>
+</div>
+<script>
+(function(){
+  var params = new URLSearchParams(location.search);
+  if (params.get('theme') === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  if (params.get('compact') === '1') document.body.classList.add('compact');
+
+  var PROXY = 'https://weatherireica1.filip-eremita.workers.dev';
+  var body = document.getElementById('body');
+  var dot = document.getElementById('dot');
+  var updated = document.getElementById('updated');
+
+  function windDir(deg){
+    var d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];
+    return d[Math.round(deg/22.5)%16];
+  }
+  function condition(m, obs){
+    var pr = m.precipRate || 0, sr = m.solarRadiation || obs.solarRadiation || 0;
+    var h = new Date().getHours(), night = (h<5||h>22);
+    if (pr>7)   return {icon:'⛈️', label:'Močan dež'};
+    if (pr>2.5) return {icon:'🌧️', label:'Dež'};
+    if (pr>0)   return {icon:'🌦️', label:'Rahel dež'};
+    if (night && sr<10) return {icon:'🌙', label:'Jasna noč'};
+    if (night)  return {icon:'☁️', label:'Oblačna noč'};
+    if (sr>700) return {icon:'☀️', label:'Jasno sončno'};
+    if (sr>300) return {icon:'🌤️', label:'Pretežno sončno'};
+    if (sr>80)  return {icon:'⛅', label:'Delno oblačno'};
+    if (sr>10)  return {icon:'🌥️', label:'Pretežno oblačno'};
+    return {icon:'☁️', label:'Oblačno'};
+  }
+  function fmt(n, d){ return (n==null || isNaN(n)) ? '—' : n.toFixed(d).replace('.', ','); }
+
+  function render(obs){
+    var m = obs.metric, cond = condition(m, obs);
+    var feels = m.heatIndex != null ? m.heatIndex : (m.windChill != null ? m.windChill : m.temp);
+    body.innerHTML =
+      '<div class="main-row">' +
+        '<div class="icon">' + cond.icon + '</div>' +
+        '<div>' +
+          '<div class="temp">' + fmt(m.temp,1) + '<span class="unit">°C</span></div>' +
+        '</div>' +
+        '<div class="cond-col">' +
+          '<div class="cond-label">' + cond.label + '</div>' +
+          '<div class="feels">Občutek ' + fmt(feels,1) + '°C</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="stats">' +
+        '<div class="stat"><div class="v">' + fmt(obs.humidity,0) + '%</div><div class="l">Vlaga</div></div>' +
+        '<div class="stat"><div class="v">' + fmt(m.windSpeed,0) + ' km/h</div><div class="l">' + windDir(obs.winddir) + '</div></div>' +
+        '<div class="stat"><div class="v">' + fmt(m.precipTotal,1) + ' mm</div><div class="l">Dež danes</div></div>' +
+      '</div>';
+    var t = new Date(obs.obsTimeUtc);
+    updated.textContent = 'Posodobljeno ' + t.toLocaleTimeString('sl-SI',{hour:'2-digit',minute:'2-digit'});
+    dot.style.background = 'var(--green)';
+  }
+
+  function fail(msg){
+    body.innerHTML = '<div class="err">Vreme trenutno ni na voljo.<br>' + msg + '</div>';
+    dot.style.background = 'var(--red)';
+  }
+
+  function load(){
+    fetch(PROXY + '/', {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(data){
+        var obs = data.observations && data.observations[0];
+        if (!obs) throw new Error('ni podatkov');
+        render(obs);
+      })
+      .catch(function(e){ fail('Poskusi znova kasneje.'); console.warn('Meteorec widget:', e); });
+  }
+
+  load();
+  setInterval(load, 5*60*1000);
+})();
+</script>
+</body>
+</html>
