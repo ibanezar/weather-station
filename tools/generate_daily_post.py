@@ -30,7 +30,7 @@ Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, shutil, datetime, urllib.request, urllib.error, urllib.parse
+import json, os, sys, re, shutil, time, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY
@@ -320,52 +320,89 @@ Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej she
 Naj bo 3-5 odsekov v sections."""
 
 
+class _TransientAPIError(RuntimeError):
+    """Znano prehodno stanje Anthropic API-ja (preobremenjenost, rate limit) --
+    vredno ponovnega poskusa, za razliko od pravih napak (npr. max_tokens)."""
+
+
+_RETRYABLE_STREAM_ERRORS = {"overloaded_error", "rate_limit_error", "api_error"}
+_RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 529}
+_RETRY_DELAYS = [5, 15, 35, 75]  # sekund; skupno do ~2 min čakanja
+
+
 def stream_claude(payload, api_key, timeout=180):
     """Kliče Claude API s stream=True. Rešuje problem, ko GitHub Actions
     (ali kak vmesni proxy) prekine navidez 'tiho' povezavo pri dolgih
     ne-streaming klicih -- pri streamingu prvi žetoni pridejo v nekaj
     sekundah, zato povezava nikoli ni tiha dovolj dolgo, da bi jo kdo prekinil.
-    Timeout velja per-branje (idle timeout), ne za skupno trajanje klica."""
+    Timeout velja per-branje (idle timeout), ne za skupno trajanje klica.
+
+    Ob znanih prehodnih napakah (overloaded_error, rate_limit_error, HTTP
+    429/5xx/529) klic samodejno ponovi z naraščajočim zamikom -- to ni redka
+    posebnost, Anthropic API se občasno preobremeni tudi sredi streama."""
     payload = dict(payload, stream=True)
     body = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        method="POST",
-    )
-    text_parts = []
-    stop_reason = None
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        for raw_line in r:
-            line = raw_line.decode("utf-8", "replace").strip()
-            if not line.startswith("data:"):
-                continue
-            chunk = line[len("data:"):].strip()
-            if not chunk:
-                continue
-            try:
-                evt = json.loads(chunk)
-            except json.JSONDecodeError:
-                continue
-            if evt.get("type") == "content_block_delta":
-                delta = evt.get("delta", {})
-                if delta.get("type") == "text_delta":
-                    text_parts.append(delta.get("text", ""))
-            elif evt.get("type") == "message_delta":
-                stop_reason = (evt.get("delta") or {}).get("stop_reason") or stop_reason
-            elif evt.get("type") == "error":
-                raise RuntimeError(f"Claude stream napaka: {evt.get('error')}")
-    if stop_reason == "max_tokens":
-        raise RuntimeError(
-            "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
-            "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka."
+
+    def attempt():
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+            },
+            method="POST",
         )
-    return "".join(text_parts)
+        text_parts = []
+        stop_reason = None
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            for raw_line in r:
+                line = raw_line.decode("utf-8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue
+                chunk = line[len("data:"):].strip()
+                if not chunk:
+                    continue
+                try:
+                    evt = json.loads(chunk)
+                except json.JSONDecodeError:
+                    continue
+                if evt.get("type") == "content_block_delta":
+                    delta = evt.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        text_parts.append(delta.get("text", ""))
+                elif evt.get("type") == "message_delta":
+                    stop_reason = (evt.get("delta") or {}).get("stop_reason") or stop_reason
+                elif evt.get("type") == "error":
+                    err = evt.get("error") or {}
+                    msg = f"Claude stream napaka: {err}"
+                    if err.get("type") in _RETRYABLE_STREAM_ERRORS:
+                        raise _TransientAPIError(msg)
+                    raise RuntimeError(msg)
+        if stop_reason == "max_tokens":
+            raise RuntimeError(
+                "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
+                "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka."
+            )
+        return "".join(text_parts)
+
+    last_err = None
+    for i, delay in enumerate([*_RETRY_DELAYS, None]):
+        try:
+            return attempt()
+        except _TransientAPIError as e:
+            last_err = e
+        except urllib.error.HTTPError as e:
+            if e.code not in _RETRYABLE_HTTP_CODES:
+                raise
+            last_err = e
+        if delay is None:
+            break
+        print(f"⚠ Claude API prehodno ni na voljo ({last_err}) -- ponovni poskus čez {delay}s "
+              f"({i + 1}/{len(_RETRY_DELAYS)})...")
+        time.sleep(delay)
+    raise RuntimeError(f"Claude API po {len(_RETRY_DELAYS) + 1} poskusih še vedno ni na voljo: {last_err}")
 
 
 def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None):
