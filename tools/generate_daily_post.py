@@ -20,7 +20,11 @@ Vsako jutro:
      blog/rss.xml, blog/tema/*, blog/related.json + generira OG sliko.
 
 Uporaba:
-    python3 tools/generate_daily_post.py [--wire] [--dry-run]
+    python3 tools/generate_daily_post.py [--wire] [--dry-run] [--preview] [--choice ID]
+
+    --preview   pokliče Claude (osnutek + lektura), izpiše obe verziji
+                (pred/po lekturi) na stdout in ne zapiše/objavi ničesar --
+                za preverjanje kakovosti jezika brez posega v blog.
 
 Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
@@ -918,6 +922,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 def main():
     wire = "--wire" in sys.argv
     dry_run = "--dry-run" in sys.argv
+    preview = "--preview" in sys.argv
     choice = None
     if "--choice" in sys.argv:
         i = sys.argv.index("--choice")
@@ -934,7 +939,7 @@ def main():
     state = load_state()
     desired_title = None
     if choice:
-        if (state.get("lastPublished") or "").startswith(TODAY):
+        if not preview and (state.get("lastPublished") or "").startswith(TODAY):
             sys.exit("Današnji dnevni članek je že objavljen -- ne objavljam drugič.")
         prop = load_chosen_proposal(choice)
         topic = prop["topic"]
@@ -951,7 +956,7 @@ def main():
     if dry_run:
         print("   (--dry-run: preskačem klic Claude API)")
         return
-    article = call_claude(topic, current, hourly, forecast, stat_cards, desired_title)
+    draft = call_claude(topic, current, hourly, forecast, stat_cards, desired_title)
 
     print("4/6 Lektura...")
     lektor_context = {
@@ -959,12 +964,36 @@ def main():
         "napoved_4dni": (forecast or {}).get("daily"),
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
     }
-    review = call_lektor(article, lektor_context)
+    review = call_lektor(draft, lektor_context)
     if review.get("issues"):
         print("   popravki/opombe lektorja:")
         for i in review["issues"]:
             print(f"   - {i}")
-    article = review.get("corrected") or article
+    article = review.get("corrected") or draft
+
+    if preview:
+        def render(a):
+            out = [f"NASLOV: {a['title']}", f"META: {a.get('meta_description','')}",
+                   f"TAGI: {', '.join(a.get('tags', []))}", "", "LEAD:", a.get("lead", "")]
+            for s in a.get("sections", []):
+                out.append(f"\n## {s.get('heading','')}")
+                out.extend(s.get("paragraphs", []))
+            if a.get("callout"):
+                out.append(f"\nCALLOUT ({a['callout'].get('label','')}): {a['callout'].get('text','')}")
+            out.append(f"\nVIRI: {a.get('sources_note','')}")
+            return "\n".join(out)
+
+        print("\n" + "=" * 70)
+        print("PREVIEW -- OSNUTEK (pred lekturo)")
+        print("=" * 70)
+        print(render(draft))
+        print("\n" + "=" * 70)
+        print("PREVIEW -- PO LEKTURI (to bi bilo objavljeno)")
+        print("=" * 70)
+        print(render(article))
+        print(f"\nlektor blocking: {review.get('blocking', False)}")
+        print("\n(--preview: nič ni zapisano na disk, nič ni objavljeno)")
+        return
 
     slug = slugify(article["title"]) + f"-{TODAY[-5:].replace('-','')}"
     now = datetime.datetime.now(datetime.timezone.utc)

@@ -15,6 +15,10 @@ on:
         description: 'true = samo pripravi in pošlji jutranje predloge (namesto objave)'
         required: false
         default: 'false'
+      preview:
+        description: 'true = generiraj in izpiši en testni članek (osnutek + po lekturi) v log, brez zapisa/objave'
+        required: false
+        default: 'false'
 
 jobs:
   # ── 1. faza (cron): pripravi tri predloge in jih pošlje Filipu po e-pošti.
@@ -59,11 +63,29 @@ jobs:
           echo "Push ni uspel po 5 poskusih." >&2
           exit 1
 
+  # ── faza za testiranje: napiše en članek (osnutek + lektura) in ga izpiše
+  # v log te naloge -- nič se ne zapiše na disk in nič se ne objavi/commita.
+  preview:
+    if: github.event_name == 'workflow_dispatch' && inputs.preview == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Testni članek (brez zapisa/objave)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 tools/generate_daily_post.py --preview
+
   # ── 2. faza (workflow_dispatch): napiše in objavi članek. Z inputom choice
   # objavi predlog, ki ga je Filip izbral v e-mailu; brez inputa deluje po
   # starem (takojšnja samodejna izbira teme in objava).
   publish:
-    if: github.event_name == 'workflow_dispatch' && inputs.predlogi != 'true'
+    if: github.event_name == 'workflow_dispatch' && inputs.predlogi != 'true' && inputs.preview != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
