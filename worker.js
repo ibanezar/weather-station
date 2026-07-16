@@ -2099,7 +2099,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const auth = request.headers.get("Authorization") || "";
           if (!syncKey || !_tsEqual(auth, `Bearer ${syncKey}`)) return _json({ error: "Nedovoljeno" }, 401);
           const raw = await request.text();
-          if (raw.length > 512 * 1024) return _json({ error: "Preveliko" }, 413);
+          if (raw.length > 1024 * 1024) return _json({ error: "Preveliko" }, 413);
           let parsed;
           try { parsed = JSON.parse(raw); } catch (_) { return _json({ error: "Neveljaven JSON" }, 400); }
           if (!Array.isArray(parsed?.locations) || !parsed.locations.length)

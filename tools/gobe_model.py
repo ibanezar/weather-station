@@ -42,19 +42,11 @@ RULES_PATH = os.path.join(ROOT, "species_rules.yaml")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 FREE_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "index.json")
 
-MODEL_VERSION = "1.0"
+MODEL_VERSION = "1.1"
 PAST_DAYS = 14
 FORECAST_DAYS = 7
 
-# Same locations as tools/generate_gobe_page.py; elev_m numeric so the
-# species elevation preference can be applied.
-SPOTS = [
-    {"name": "Rečica ob Savinji", "lat": 46.326, "lon": 14.921, "elev_m": 400, "home": True},
-    {"name": "Dobrovlje – Čreta",  "lat": 46.300, "lon": 14.860, "elev_m": 900},
-    {"name": "Logarska dolina",    "lat": 46.392, "lon": 14.628, "elev_m": 750},
-    {"name": "Golte",              "lat": 46.348, "lon": 14.840, "elev_m": 1300},
-    {"name": "Smrekovško pogorje", "lat": 46.430, "lon": 14.860, "elev_m": 1300},
-]
+# Locations come from species_rules.yaml (`locations:`); see load_locations().
 
 HOURLY_VARS = [
     "soil_temperature_6cm",
@@ -72,6 +64,15 @@ DAILY_VARS = ["precipitation_sum", "temperature_2m_max", "temperature_2m_min"]
 def load_rules(path=RULES_PATH):
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def load_locations(rules):
+    """Forecast spots from the config. Protected areas are returned separately —
+    they are never ranked as picking spots."""
+    spots, protected = [], []
+    for loc in rules.get("locations", []):
+        (protected if loc.get("protected") else spots).append(loc)
+    return spots, protected
 
 
 def fetch_forecast(spots):
@@ -334,6 +335,27 @@ def eval_species(sp, series, i, date, spot, rules):
         score *= float(scoring["elevation"]["out_of_range_factor"])
         parts.append("lokacija izven višinske preference vrste")
 
+    # Local-presence prior: a weather-favourable but locally rare/absent species
+    # must not top the list (scientific honesty — see species 'frequency' text).
+    ff = float(sp.get("frequency_factor", 1.0))
+    if ff < 1.0:
+        score *= ff
+        if ff <= 0.4:
+            parts.append("lokalno redka/odsotna vrsta")
+
+    # Geological terrain affinity — match/mismatch multiplier
+    gcfg = scoring.get("geology") or {}
+    affinity = sp.get("geology_affinity", "nevtralna")
+    terrain = spot.get("terrain")
+    if affinity == "nevtralna" or not terrain:
+        pass
+    elif affinity == terrain:
+        score *= float(gcfg.get("match_factor", 1.0))
+        parts.append(f"geološko ugodno ({terrain})")
+    else:
+        score *= float(gcfg.get("mismatch_factor", 1.0))
+        parts.append(f"geološko manj ugodno (vrsta preferira {affinity})")
+
     explanation = ", ".join(parts[:4])
     explanation = explanation[0].upper() + explanation[1:] + "."
     return {"index": max(0, min(100, round(score))), "explanation": explanation}
@@ -349,10 +371,22 @@ def level(p):
 
 # ── forecast assembly ────────────────────────────────────────────────────────
 
-def compute_forecast(rules, locs, station_precip):
+def compute_forecast(rules, spots, locs, station_precip, protected=None):
     today = dt.date.today()
+    # Only edible / conditionally-edible species get a foraging index; the rest
+    # (poisonous, protected, inedible) live in the config solely as reference and
+    # as each edible species' dangerous-double note.
+    indexed = [sp for sp in rules["species"] if sp.get("gets_index")]
+    # Static per-species metadata is emitted once, keyed by id; the per-day
+    # entries below carry only {id, index, explanation} to keep the payload small.
+    species_meta = {sp["id"]: {
+        "name_sl": sp["name_sl"],
+        "name_lat": sp["name_lat"],
+        "edibility": sp.get("edibility"),
+        "doubles": sp.get("doubles") or None,
+    } for sp in indexed}
     out_locations = []
-    for spot, loc in zip(SPOTS, locs):
+    for spot, loc in zip(spots, locs):
         series = build_series(loc, station_precip if spot.get("home") else None)
         dates = series["dates"]
         iso = today.isoformat()
@@ -362,15 +396,14 @@ def compute_forecast(rules, locs, station_precip):
         for i in range(ti, min(ti + FORECAST_DAYS, len(dates))):
             date = dt.date.fromisoformat(dates[i])
             species_out = []
-            for sp in rules["species"]:
+            for sp in indexed:
                 r = eval_species(sp, series, i, date, spot, rules)
                 species_out.append({
                     "id": sp["id"],
-                    "name_sl": sp["name_sl"],
-                    "name_lat": sp["name_lat"],
                     "index": r["index"],
                     "explanation": r["explanation"],
                 })
+            species_out.sort(key=lambda s: s["index"], reverse=True)
             overall = max((s["index"] for s in species_out), default=0)
             days.append({
                 "date": dates[i],
@@ -383,21 +416,27 @@ def compute_forecast(rules, locs, station_precip):
             "lat": spot["lat"],
             "lon": spot["lon"],
             "elev_m": spot["elev_m"],
+            "terrain": spot.get("terrain"),
             "home": bool(spot.get("home")),
             "days": days,
         })
     return {
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "model_version": MODEL_VERSION,
+        "species_indexed": len(indexed),
+        "species_meta": species_meta,
+        "terrains": {t["id"]: t["name_sl"] for t in rules.get("terrains", [])},
+        "protected_areas": [p["name"] for p in (protected or [])],
         "locations": out_locations,
     }
 
 
 def free_payload(premium):
     """Public teaser: today's overall index at the home location only."""
+    meta = premium["species_meta"]
     home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
     today = home["days"][0]
-    best = max(today["species"], key=lambda s: s["index"])
+    best = today["species"][0] if today["species"] else {"index": 0, "id": None}
     return {
         "generated": premium["generated"],
         "model_version": premium["model_version"],
@@ -405,7 +444,7 @@ def free_payload(premium):
         "location": home["name"],
         "index": today["overall"],
         "level": today["level"],
-        "top_species_sl": best["name_sl"] if best["index"] > 0 else None,
+        "top_species_sl": meta[best["id"]]["name_sl"] if best["index"] > 0 else None,
         "species_count": len(today["species"]),
         "locations_count": len(premium["locations"]),
         "forecast_days": FORECAST_DAYS,
@@ -414,17 +453,26 @@ def free_payload(premium):
 
 # ── CLI ──────────────────────────────────────────────────────────────────────
 
-def print_summary(premium):
+def print_summary(premium, top=8):
+    meta = premium["species_meta"]
+    nm = lambda sid: meta[sid]["name_sl"]
     home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
-    print(f"\n=== {home['name']} — 7 dni po vrstah ===")
+    print(f"\n=== {home['name']} ({home.get('terrain')}) — danes, top {top} vrst (od {premium['species_indexed']}) ===")
+    for s in home["days"][0]["species"][:top]:
+        dbl = meta[s["id"]].get("doubles")
+        dbl = f"  ⚠ {dbl[:60]}" if dbl else ""
+        print(f"  {s['index']:3d} %  {nm(s['id']):<28} {s['explanation']}{dbl}")
+    print(f"\n=== {home['name']} — 7-dnevni skupni indeks ===")
     for day in home["days"]:
-        print(f"\n{day['date']}  skupno {day['overall']:3d} % ({day['level']})")
-        for s in day["species"]:
-            print(f"  {s['index']:3d} %  {s['name_sl']:<22} {s['explanation']}")
-    print("\n=== Danes po lokacijah (skupni indeks) ===")
+        best = nm(day["species"][0]["id"]) if day["species"] else "-"
+        print(f"  {day['date']}  {day['overall']:3d} % ({day['level']:<7}) nosilka: {best}")
+    print("\n=== Danes po lokacijah (geo-afiniteta) ===")
     for loc in premium["locations"]:
         d0 = loc["days"][0]
-        print(f"  {d0['overall']:3d} % ({d0['level']:<7}) {loc['name']} ({loc['elev_m']} m)")
+        best = nm(d0["species"][0]["id"]) if d0["species"] else "-"
+        print(f"  {d0['overall']:3d} % ({d0['level']:<7}) {loc['name']:<22} {loc.get('terrain','-'):<8} ({loc['elev_m']} m) — {best}")
+    if premium.get("protected_areas"):
+        print(f"\n  Zaščitena območja (nabiranje prepovedano): {', '.join(premium['protected_areas'])}")
 
 
 def main():
@@ -437,20 +485,21 @@ def main():
     args = ap.parse_args()
 
     rules = load_rules()
-    print(f"Pridobivam Open-Meteo napoved za {len(SPOTS)} lokacij …")
+    spots, protected = load_locations(rules)
+    print(f"Pridobivam Open-Meteo napoved za {len(spots)} lokacij (+ {len(protected)} zaščitenih) …")
     try:
-        locs = fetch_forecast(SPOTS)
+        locs = fetch_forecast(spots)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
         print(f"✗ Open-Meteo: {e}", file=sys.stderr)
         sys.exit(1)
-    if len(locs) != len(SPOTS):
-        print(f"✗ Pričakoval {len(SPOTS)} lokacij, dobil {len(locs)}", file=sys.stderr)
+    if len(locs) != len(spots):
+        print(f"✗ Pričakoval {len(spots)} lokacij, dobil {len(locs)}", file=sys.stderr)
         sys.exit(1)
 
     station_precip = load_station_precip()
     print(f"IREICA1 padavine: {len(station_precip)} dni iz history.json")
 
-    premium = compute_forecast(rules, locs, station_precip)
+    premium = compute_forecast(rules, spots, locs, station_precip, protected)
     free = free_payload(premium)
     print_summary(premium)
 
