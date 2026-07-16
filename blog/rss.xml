@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 16 Jul 2026 06:56:19 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 16 Jul 2026 07:34:22 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vodna bilanca tal: koliko od zadnjega dežja je res prišlo do korenin</title>
+      <link>https://meteorec.si/blog/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.html</guid>
+      <pubDate>Thu, 16 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Koliko dežja je dejansko koristilo tlom v Zgornji Savinjski dolini? Pogled na vodno bilanco tal, evapotranspiracijo in odtok po podatkih IREICA1.</description>
+      <category>vodna bilanca</category>
+      <category>evapotranspiracija</category>
+      <category>agrometeorologija</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Gobarska napoved za Zgornjo Savinjsko dolino: vlaga je tu, zdaj čakamo še na pravo kombinacijo</title>
       <link>https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-vlaga-je-tu-zda-0716.html</link>
