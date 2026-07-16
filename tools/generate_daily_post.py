@@ -381,9 +381,11 @@ def stream_claude(payload, api_key, timeout=180):
                         raise _TransientAPIError(msg)
                     raise RuntimeError(msg)
         if stop_reason == "max_tokens":
+            partial = "".join(text_parts)
             raise RuntimeError(
                 "Claude je dosegel max_tokens limit in odgovor je bil prekinjen sredi JSON-a "
-                "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka."
+                "-- dvigni 'max_tokens' v generate_daily_post.py ali skrajšaj zahtevano dolžino članka. "
+                f"[diagnostika: {len(partial)} znakov prejetih, zadnjih 400: ...{partial[-400:]!r}]"
             )
         return "".join(text_parts)
 
