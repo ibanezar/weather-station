@@ -41,6 +41,19 @@ jobs:
           done
           echo "::warning::Premium JSON ni bil naložen v KV (worker nedosegljiv?)"
 
+      - name: Alarm premium naročnikom (pogoji optimalni)
+        env:
+          PREMIUM_SYNC_KEY: ${{ secrets.PREMIUM_SYNC_KEY }}
+        run: |
+          if [ -z "$PREMIUM_SYNC_KEY" ]; then
+            echo "PREMIUM_SYNC_KEY ni nastavljen — preskočim alarm."
+            exit 0
+          fi
+          # Worker sam odloči (prag + cooldown), ali dejansko pošlje.
+          curl -sf -X POST "https://weatherireica1.filip-eremita.workers.dev/premium/notify" \
+            -H "Authorization: Bearer $PREMIUM_SYNC_KEY" || \
+            echo "::warning::Klic /premium/notify ni uspel."
+
       - name: Generate gobarska-napoved stran
         run: python3 tools/generate_gobe_page.py
 

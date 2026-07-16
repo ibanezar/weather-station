@@ -25,6 +25,9 @@ PADDLE_PRICE_MONTHLY = "pri_REPLACE_MONTHLY"
 PADDLE_PRICE_SEASON = "pri_REPLACE_SEASON"
 # Konec gobarske sezone (MM-DD) — do takrat velja sezonska naročnina.
 PREMIUM_SEASON_END = "11-30"
+# Alarm "pogoji optimalni": prag indeksa in najmanjši razmik med obvestili (dni).
+PREMIUM_ALERT_THRESHOLD = "70"
+PREMIUM_ALERT_COOLDOWN_DAYS = "5"
 # Skrivnosti (wrangler secret put …): PREMIUM_SYNC_KEY, PADDLE_WEBHOOK_SECRET,
 # PADDLE_API_KEY (RESEND_API_KEY že obstaja).
 

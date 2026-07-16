@@ -2201,6 +2201,90 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           });
         }
 
+        // ── POST /premium/notify — daily "conditions optimal" alert (from CI)
+        // Threshold + cooldown live here so the workflow can call it unconditionally.
+        if (path === "/premium/notify" && request.method === "POST") {
+          const secret = env.PREMIUM_SYNC_KEY;
+          const auth = request.headers.get("Authorization") || "";
+          if (!secret || !_tsEqual(auth, `Bearer ${secret}`)) return _json({ error: "Nedovoljeno" }, 401);
+
+          const raw = await kv.get("premium:data");
+          if (!raw) return _json({ error: "Ni podatkov" }, 503);
+          let data; try { data = JSON.parse(raw); } catch (_) { return _json({ error: "Pokvarjeni podatki" }, 500); }
+
+          // Best forest today + its leading species.
+          const meta = data.species_meta || {};
+          let best = { overall: -1, forest: null, species: null };
+          for (const loc of data.locations || []) {
+            const d0 = (loc.days || [])[0];
+            if (d0 && d0.overall > best.overall) {
+              const top = (d0.species || [])[0];
+              best = { overall: d0.overall, level: d0.level, forest: loc.name,
+                       species: top && meta[top.id] ? meta[top.id].name_sl : null };
+            }
+          }
+          const threshold = parseInt(env.PREMIUM_ALERT_THRESHOLD || "70", 10);
+          const cooldownD = parseInt(env.PREMIUM_ALERT_COOLDOWN_DAYS || "5", 10);
+          const today = new Date().toISOString().slice(0, 10);
+
+          if (best.overall < threshold)
+            return _json({ ok: true, sent: 0, skipped: "pod pragom", best: best.overall, threshold });
+
+          let state; try { state = JSON.parse(await kv.get("premium:alert_state")); } catch (_) { state = null; }
+          if (state?.date) {
+            const days = (Date.parse(today) - Date.parse(state.date)) / 864e5;
+            if (days < cooldownD)
+              return _json({ ok: true, sent: 0, skipped: "cooldown", last: state.date, best: best.overall });
+          }
+
+          // Enumerate active, alert-enabled subscribers.
+          const recipients = [];
+          let cursor;
+          do {
+            const page = await kv.list({ prefix: "premium:sub:", cursor });
+            for (const k of page.keys) {
+              let s; try { s = JSON.parse(await kv.get(k.name)); } catch (_) { continue; }
+              if (!s?.email || s.alerts === false) continue;
+              if (!s.expires || new Date(s.expires) < new Date()) continue;
+              recipients.push(s.email);
+            }
+            cursor = page.list_complete ? null : page.cursor;
+          } while (cursor);
+
+          const subj = `🍄 Gobarski pogoji optimalni — ${best.forest} ${best.overall}%`;
+          ctx.waitUntil((async () => {
+            for (const email of recipients) {
+              const tok = await _newToken(email);
+              const off = `${url.origin}/premium/alerts/off?token=${tok}`;
+              await _sendMail(email, subj,
+                `<p>Pozdravljen, gobar!</p>` +
+                `<p>Danes so pogoji za rast <strong>optimalni</strong>. Najugodnejši gozd je ` +
+                `<strong>${best.forest}</strong> z indeksom <strong>${best.overall}% (${best.level})</strong>` +
+                (best.species ? `, nosilna vrsta <strong>${best.species}</strong>` : "") + `.</p>` +
+                `<p><a href="${PAGE_URL}?token=${tok}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Odpri 7-dnevno napoved po vrstah 🍄</a></p>` +
+                `<p style="color:#888;font-size:.85rem">Indeks je ocena ugodnosti pogojev, ne obljuba najdbe — gozd ima zadnjo besedo.</p>` +
+                `<hr style="border:none;border-top:1px solid #eee;margin:1.2rem 0"><p style="color:#999;font-size:.8rem"><a href="${off}" style="color:#999">Ne želim več obvestil o pogojih</a></p>`);
+            }
+          })());
+          await kv.put("premium:alert_state", JSON.stringify({ date: today, best: best.overall, forest: best.forest }));
+          return _json({ ok: true, sent: recipients.length, best: best.overall, forest: best.forest });
+        }
+
+        // ── GET /premium/alerts/off?token=… — opt out of the optimal-conditions email
+        if (path === "/premium/alerts/off" && request.method === "GET") {
+          const tok = _bearer();
+          let rec; try { rec = JSON.parse(await kv.get(`premium:tok:${tok}`)); } catch (_) { rec = null; }
+          if (rec?.email) {
+            const sub = await _subFor(rec.email);
+            if (sub) { sub.alerts = false; await kv.put(`premium:sub:${rec.email}`, JSON.stringify(sub)); }
+          }
+          return new Response(
+            "<!doctype html><meta charset=utf-8><body style='font-family:system-ui;background:#04070e;color:#e8edf8;text-align:center;padding:3rem'>" +
+            "<h1>Odjavljen 👋</h1><p>Ne bomo ti več pošiljali obvestil o optimalnih pogojih. Dostop do napovedi ostane aktiven.</p>" +
+            "<p><a href='" + PAGE_URL + "' style='color:#4d9ff8'>← Na gobarsko napoved</a></p></body>",
+            { headers: { ...CORS_ALLOWED, "Content-Type": "text/html; charset=utf-8" } });
+        }
+
         return _json({ error: "Nedovoljena metoda ali pot" }, 405);
       }
 

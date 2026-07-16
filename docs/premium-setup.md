@@ -78,6 +78,22 @@ curl -X POST https://weatherireica1.filip-eremita.workers.dev/premium/login \
   -H "Content-Type: application/json" -d '{"email":"kupec@example.com"}'
 ```
 
+## 4b. E-mail alarm "pogoji optimalni" (faza 4)
+
+Dnevni workflow po pushu podatkov pokliče `POST /premium/notify` (Bearer
+`PREMIUM_SYNC_KEY`). Worker sam odloči, ali dejansko pošlje:
+
+- pošlje samo, če je najvišji indeks med gozdovi ≥ `PREMIUM_ALERT_THRESHOLD` (70),
+- ne pogosteje kot vsakih `PREMIUM_ALERT_COOLDOWN_DAYS` (5) dni (proti spamu),
+- samo aktivnim naročnikom, ki niso izklopili obvestil.
+
+Vsak alarm vsebuje magic link (takojšen dostop) in povezavo za odjavo od
+obvestil (`/premium/alerts/off?token=…`) — dostop do napovedi ob tem ostane.
+Prag in razmik nastaviš v `wrangler.toml` ([vars]); pošiljanje uporablja
+obstoječi `RESEND_API_KEY`. Ročni test: `curl -X POST …/premium/notify -H
+"Authorization: Bearer $PREMIUM_SYNC_KEY"` → odgovor pove `sent` ali razlog
+(`pod pragom` / `cooldown`).
+
 ## 5. Ročno upravljanje naročnikov (brez UI)
 
 KV ključ `premium:sub:<email>` v Cloudflare dashboardu (Workers → KV →
