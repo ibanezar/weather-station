@@ -1,0 +1,48 @@
+name: Lektura obstoječih objav
+
+on:
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: 'Slugi objav, ločeni s presledki (prazno = zadnje 3 objave iz blog.json)'
+        required: false
+        default: ''
+
+jobs:
+  lektura:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lektoriraj objave
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLUGS: ${{ inputs.slugs }}
+        run: python3 tools/lektor_existing_posts.py $SLUGS
+
+      - name: Commit & push
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add blog/
+          if git diff --cached --quiet; then
+            echo "Lektor ni naredil sprememb."
+            exit 0
+          fi
+          git commit -m "blog: lektura obstoječih objav $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
