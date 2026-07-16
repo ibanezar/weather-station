@@ -38,10 +38,13 @@ TODAY = seo.TODAY
 # Cloudflare Worker base (paywall API). Same host as the rest of the site proxy.
 WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
 
-# Paddle hosted-checkout links — fill in after creating the products (docs/premium-setup.md).
-# TODO: nastavi pravi Paddle checkout povezavi (za zdaj vodita na kontakt).
-PADDLE_CHECKOUT_MONTHLY = "https://meteorec.si/gobarska-napoved/#pricing"
-PADDLE_CHECKOUT_SEASON = "https://meteorec.si/gobarska-napoved/#pricing"
+# Paddle.js overlay checkout — fill in after creating the products (docs/premium-setup.md).
+# The client-side token is safe to expose publicly. Price IDs must match wrangler.toml.
+# TODO: nastavi Paddle vrednosti; dokler je token prazen, gumbi varno padejo na #pricing.
+PADDLE_ENV = "production"            # "sandbox" za testiranje, "production" za v živo
+PADDLE_CLIENT_TOKEN = ""             # TODO: odjemalski žeton iz Paddle (Developer Tools → Authentication)
+PADDLE_PRICE_MONTHLY = "pri_REPLACE_MONTHLY"  # TODO: enako kot v wrangler.toml
+PADDLE_PRICE_SEASON = "pri_REPLACE_SEASON"    # TODO: enako kot v wrangler.toml
 
 PRICE_MONTHLY = "3,99 €"
 PRICE_SEASON = "24,99 €"
@@ -91,8 +94,9 @@ PAGE_CSS = """<style>
 .gp-gauge small{font-size:1.1rem;color:var(--muted);font-weight:600}
 .gp-hero-lvl{font-size:1.05rem;font-weight:700;letter-spacing:.02em}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
-.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;
-  padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem}
+.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;font:inherit;
+  font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
+  border:0;cursor:pointer;line-height:1.2}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
 .gp-forests{display:grid;gap:.5rem;margin:.6rem 0 1rem}
 .gp-forest{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
@@ -214,8 +218,65 @@ PAGE_JS = """<script>
       body:JSON.stringify({email:em})}).then(function(r){return r.json();})
       .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
       .catch(function(){msg.textContent="Napaka pri pošiljanju. Poskusi znova.";});});}
+
+  // ── Paddle.js overlay checkout ──────────────────────────────────────────
+  // Config comes from window.MR_PADDLE (injected in <head>); when it or the
+  // token is missing, buttons fall back to scrolling to #pricing.
+  var cfg=window.MR_PADDLE||null;
+  var ready=false;
+  if(cfg&&cfg.token&&window.Paddle){
+    try{
+      if(cfg.env==="sandbox"){Paddle.Environment.set("sandbox");}
+      Paddle.Initialize({token:cfg.token});
+      ready=true;
+    }catch(e){ready=false;}
+  }
+  function checkoutMsg(txt){
+    var el=document.getElementById("gp-checkout-msg");
+    if(el){el.textContent=txt;}
+  }
+  document.querySelectorAll("[data-paddle]").forEach(function(btn){
+    btn.addEventListener("click",function(e){
+      var plan=btn.getAttribute("data-paddle");
+      var priceId=cfg?cfg.prices[plan]:null;
+      if(!ready||!priceId){
+        // Fallback: not configured yet — go to pricing, don't break the page.
+        var p=document.getElementById("pricing");
+        if(p){e.preventDefault();p.scrollIntoView({behavior:"smooth"});
+          checkoutMsg("Spletno plačilo bo kmalu na voljo. Za dostop lahko medtem pišeš na filip.eremita@gmail.com.");}
+        return;
+      }
+      e.preventDefault();
+      Paddle.Checkout.open({
+        items:[{priceId:priceId,quantity:1}],
+        customData:{plan:plan},
+        settings:{displayMode:"overlay",theme:"dark",locale:"sl"},
+        eventCallback:function(ev){
+          if(ev&&ev.name==="checkout.completed"){
+            checkoutMsg("✅ Hvala! Na tvoj e-naslov smo poslali povezavo za dostop — preveri tudi vsiljeno pošto.");
+          }
+        }
+      });
+    });
+  });
 })();
 </script>"""
+
+
+def paddle_head():
+    """Paddle.js loader + client config injected into <head>. When the client
+    token is not configured yet, injects window.MR_PADDLE=null so the buttons
+    fall back to #pricing instead of breaking."""
+    if not PADDLE_CLIENT_TOKEN:
+        return "<script>window.MR_PADDLE=null;</script>"
+    import json as _json
+    cfg = _json.dumps({
+        "env": PADDLE_ENV,
+        "token": PADDLE_CLIENT_TOKEN,
+        "prices": {"monthly": PADDLE_PRICE_MONTHLY, "season": PADDLE_PRICE_SEASON},
+    })
+    return ('<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>\n'
+            f"<script>window.MR_PADDLE={cfg};</script>")
 
 
 def build_body(rules, premium, free):
@@ -279,8 +340,8 @@ def build_body(rules, premium, free):
 {skel_rows}
     </div>
     <div class="gp-lockbar">
-      <a class="gp-cta" href="#pricing">Naroči se ({PRICE_MONTHLY}/mes)</a>
-      <a class="gp-cta alt" href="#pricing">Sezonski dostop ({PRICE_SEASON})</a>
+      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se ({PRICE_MONTHLY}/mes)</button>
+      <button type="button" class="gp-cta alt" data-paddle="season">Sezonski dostop ({PRICE_SEASON})</button>
     </div>
     <form id="gp-login" class="gp-login" autocomplete="email">
       <input type="email" name="email" placeholder="Že plačano? Vpiši e-naslov za povezavo" required>
@@ -301,7 +362,7 @@ def build_body(rules, premium, free):
         <li>Razlage in opozorila na dvojnice</li>
         <li>Prekliči kadarkoli</li>
       </ul>
-      <a class="gp-cta" href="{PADDLE_CHECKOUT_MONTHLY}" data-plan="monthly">Naroči se</a>
+      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
     </div>
     <div class="gp-plan best">
       <span class="gp-tag">CELA SEZONA · najugodneje</span>
@@ -312,9 +373,10 @@ def build_body(rules, premium, free):
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
       </ul>
-      <a class="gp-cta" href="{PADDLE_CHECKOUT_SEASON}" data-plan="season">Kupi sezono</a>
+      <button type="button" class="gp-cta" data-paddle="season">Kupi sezono</button>
     </div>
   </div>
+  <div id="gp-checkout-msg" class="gp-msg"></div>
   <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
   računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>'''
 
@@ -467,9 +529,10 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
         seo.faq_schema(qa_for_schema),
     ])
-    head_extras = schema + "\n" + PAGE_CSS
+    head_extras = schema + "\n" + PAGE_CSS + "\n" + paddle_head()
 
-    html = seo.page_shell(title, desc, url, head_extras, body)
+    og_image = f"{seo.SITE}/og/gobarska-napoved.jpg"
+    html = seo.page_shell(title, desc, url, head_extras, body, og_image=og_image)
     seo.write_page("gobarska-napoved/index.html", html, force=True)
     print(f"  → gobarska-napoved/index.html ({free['index']} %, {free['level']})")
 

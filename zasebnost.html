@@ -37,9 +37,9 @@
   <article>
     <span class="stn-badge"><span></span>METEOREC · ZASEBNOST</span>
     <h1>Politika zasebnosti</h1>
-    <p class="post-meta">Zadnja posodobitev: junij 2026</p>
+    <p class="post-meta">Zadnja posodobitev: julij 2026</p>
 
-    <p class="lead">Stran Meteorec (<strong>meteorec.si</strong>) je osebna meteorološka postaja in ne zbira osebnih podatkov obiskovalcev. Ta stran pojasnjuje, katera tehnična orodja in storitve tretjih oseb se uporabljajo ter kako so vaši podatki obravnavani.</p>
+    <p class="lead">Stran Meteorec (<strong>meteorec.si</strong>) je osebna meteorološka postaja. Osnovno brskanje po strani ne zahteva osebnih podatkov. Osebne podatke (e-naslov) obdelujemo le, kadar se sami odločite za <strong>naročnino na gobarsko napoved Premium</strong> ali za <strong>brezplačna obvestila o novih člankih bloga</strong>. Ta stran pojasnjuje, kateri podatki se zbirajo, s kakšnim namenom in katere storitve tretjih oseb pri tem sodelujejo.</p>
 
     <h2>Upravljavec</h2>
     <p>Upravljavec spletnega mesta je:</p>
@@ -50,7 +50,26 @@
     </table>
 
     <h2>Kateri podatki se zbirajo?</h2>
-    <p><strong>Meteorec sam po sebi ne zbira, ne shranjuje in ne obdeluje osebnih podatkov obiskovalcev.</strong> Spletna stran ne vsebuje registracij, prijav, obrazcev za zbiranje podatkov ali oglaševalskih skriptov.</p>
+    <p>Med običajnim brskanjem Meteorec <strong>ne zbira osebnih podatkov</strong> — ni registracij, prijav ali oglaševalskih skriptov. Osebne podatke obdelujemo <strong>le na vašo izrecno pobudo</strong> v dveh primerih:</p>
+    <ul>
+      <li><strong>Naročnina na gobarsko napoved Premium</strong> — vaš e-naslov in stanje naročnine (za dostop do plačljive vsebine in plačilo).</li>
+      <li><strong>Obvestila o novih člankih bloga</strong> — vaš e-naslov (za pošiljanje obvestil, z dvojno potrditvijo).</li>
+    </ul>
+    <p>Oboje je opisano v nadaljevanju.</p>
+
+    <h2>Naročnina na gobarsko napoved (Premium)</h2>
+    <p>Ob nakupu naročnine na plačljivo <a href="/gobarska-napoved/">gobarsko napoved</a> obdelujemo naslednje podatke:</p>
+    <ul>
+      <li><strong>E-naslov</strong> — za pošiljanje povezave za dostop in za nadzor dostopa do plačljive vsebine.</li>
+      <li><strong>Stanje naročnine</strong> — izbrani paket, datum poteka in identifikator kupca pri ponudniku plačil (Paddle).</li>
+      <li><strong>Dostopni žeton</strong> — naključni niz, ki vam omogoča dostop brez gesla (»magična povezava«).</li>
+    </ul>
+    <p>Ti podatki so shranjeni v shrambi Cloudflare Workers KV (znotraj EU/globalne infrastrukture Cloudflare). <strong>Ne ustvarjamo uporabniških računov in ne hranimo gesel.</strong> Podatki o plačilni kartici <strong>nikoli ne pridejo do nas</strong> — obdeluje jih izključno Paddle.</p>
+    <p><strong>Namen in pravna podlaga:</strong> obdelava je potrebna za izvajanje pogodbe (zagotavljanje naročene storitve; člen 6(1)(b) GDPR). Če ste naročeni, vam lahko pošljemo tudi <strong>obvestilo o optimalnih pogojih za rast gob</strong>; od teh obvestil se lahko kadarkoli odjavite prek povezave v vsakem sporočilu, dostop do napovedi pa ostane aktiven.</p>
+    <p><strong>Hramba:</strong> podatke hranimo za čas trajanja naročnine in razumno obdobje po njej za računovodske in podporne namene. Ob zahtevi za izbris podatke odstranimo, kolikor to dopuščajo zakonske obveznosti hrambe.</p>
+
+    <h2>Obvestila o novih člankih (blog)</h2>
+    <p>Če se prijavite na obvestila o novih člankih, shranimo vaš <strong>e-naslov</strong> izključno za pošiljanje teh obvestil. Prijava poteka z <strong>dvojno potrditvijo</strong> (potrditveno sporočilo na vaš e-naslov). Od obvestil se lahko kadarkoli odjavite prek povezave v vsakem sporočilu, kar vaš e-naslov trajno odstrani s seznama. Pravna podlaga je vaše soglasje (člen 6(1)(a) GDPR).</p>
 
     <h2>Lokalno shranjevanje (localStorage)</h2>
     <p>Stran za lastne funkcije shranjuje nekatere nastavitve neposredno v vaš brskalnik (<em>localStorage</em>). Ti podatki ostanejo le pri vas, nikoli niso poslani na strežnik in se izbrišejo, ko počistite podatke brskalnika. Shranjevanje zajema:</p>
@@ -58,8 +77,18 @@
       <li><strong>Tema vmesnika</strong> (svetla / temna) — vaša vizualna nastavitev</li>
       <li><strong>Opozorila</strong> — pragovi za obvestila o temperaturi, vetru in dežju</li>
       <li><strong>Vremenski arhiv</strong> — dnevne meritve vaše postaje, zbrane med obiski (za funkcijo »Na ta dan«)</li>
+      <li><strong>Dostopni žeton za gobarsko napoved</strong> (<em>mr_gobe_token</em>) — če ste naročnik Premium, se žeton iz vaše dostopne povezave shrani v brskalnik, da vam ob vsakem obisku ni treba znova odpirati povezave. Odstranite ga s čiščenjem podatkov brskalnika.</li>
     </ul>
     <p>Vse te podatke lahko kadarkoli izbrišete v nastavitvah brskalnika (razdelek »Piškotki in podatki strani«).</p>
+
+    <h2>Obdelovalci osebnih podatkov</h2>
+    <p>Za obdelavo e-naslovov naročnikov in dostavo e-pošte sodelujejo naslednji obdelovalci, vsak s svojo politiko zasebnosti:</p>
+    <table class="stats">
+      <tr><th>Paddle</th><td>Obdelava plačil kot <em>prodajalec od zapisa</em> (merchant of record) — izstavlja račune in ureja DDV za EU. Prejme podatke o plačilu in vaš e-naslov. <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener">paddle.com/legal/privacy</a></td></tr>
+      <tr><th>Resend</th><td>Dostava transakcijske in obveščevalne e-pošte (povezave za dostop, obvestila). Prejme vaš e-naslov in vsebino sporočila. <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener">resend.com/legal/privacy-policy</a></td></tr>
+      <tr><th>Cloudflare</th><td>Shramba naročniških podatkov (Workers KV) in izvajanje strežniške logike (Workers). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></td></tr>
+    </table>
+    <p>Na strani <a href="/gobarska-napoved/">gobarska napoved</a> se ob odprtju plačilnega okna naloži skripta <strong>Paddle.js</strong> (s strežnika <em>cdn.paddle.com</em>), ki omogoča varno plačilo brez zapustitve strani.</p>
 
     <h2>Storitve tretjih oseb</h2>
 
@@ -92,16 +121,19 @@
     <p>Spletna stran je gostovana pri storitvi <a href="https://pages.cloudflare.com" target="_blank" rel="noopener">Cloudflare Pages</a>. Cloudflare kot ponudnik infrastrukture samodejno beleži nekatere tehnične informacije (IP naslovi, čas zahtev) za namene varnosti in zanesljivosti omrežja. Za podrobnosti glejte <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare politiko zasebnosti</a>.</p>
 
     <h2>Piškotki</h2>
-    <p>Meteorec <strong>ne nastavi lastnih piškotkov</strong>. Piškotki tretjih oseb so možni le ob nalaganju prikazov Windy.com, kar se zgodi samo po vašem soglasju. GoatCounter in ostale vremensko-podatkovne storitve piškotkov ne nastavljajo.</p>
+    <p>Meteorec <strong>ne nastavi lastnih piškotkov</strong>. Piškotki tretjih oseb so možni le ob nalaganju prikazov Windy.com (po vašem soglasju) ali ob odprtju plačilnega okna Paddle med postopkom nakupa naročnine. GoatCounter in ostale vremensko-podatkovne storitve piškotkov ne nastavljajo.</p>
 
     <h2>Vaše pravice (GDPR)</h2>
-    <p>Ker Meteorec ne zbira osebnih podatkov, večina pravic iz GDPR v praksi nima predmeta. Kljub temu imate vedno pravico do:</p>
+    <p>Če ste naročnik Premium ali prejemate obvestila bloga, obdelujemo vaš e-naslov. V zvezi s svojimi osebnimi podatki imate pravico do:</p>
     <ul>
-      <li>vpogleda v morebitne shranjene osebne podatke</li>
-      <li>izbrisa podatkov, shranjenih v vašem brskalniku (localStorage) — to storite sami v nastavitvah brskalnika</li>
-      <li>pritožbe pri nadzornem organu (<a href="https://www.ip-rs.si" target="_blank" rel="noopener">Informacijski pooblaščenec RS</a>)</li>
+      <li><strong>vpogleda</strong> v podatke, ki jih hranimo o vas (e-naslov, stanje naročnine);</li>
+      <li><strong>popravka</strong> netočnih podatkov;</li>
+      <li><strong>izbrisa</strong> (»pravica do pozabe«) — na zahtevo odstranimo vaš e-naslov in naročniške podatke, kolikor to dopuščajo zakonske obveznosti hrambe;</li>
+      <li><strong>preklica soglasja</strong> in odjave od obvestil — prek povezave v vsakem e-sporočilu ali na spodnji kontakt;</li>
+      <li>izbrisa podatkov, shranjenih v vašem brskalniku (localStorage) — to storite sami v nastavitvah brskalnika;</li>
+      <li><strong>pritožbe</strong> pri nadzornem organu (<a href="https://www.ip-rs.si" target="_blank" rel="noopener">Informacijski pooblaščenec RS</a>).</li>
     </ul>
-    <p>Za morebitna vprašanja v zvezi z zasebnostjo nas kontaktirajte na <strong>filip.eremita@gmail.com</strong>.</p>
+    <p>Za uveljavljanje pravic ali vprašanja v zvezi z zasebnostjo nas kontaktirajte na <strong>filip.eremita@gmail.com</strong>. Zahtevo obravnavamo brez nepotrebnega odlašanja.</p>
 
     <h2>Spremembe politike</h2>
     <p>Morebitne spremembe te politike bodo objavljene na tej strani z novo datumom posodobitve.</p>

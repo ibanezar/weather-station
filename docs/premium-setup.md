@@ -27,13 +27,18 @@ z naročnino (`expires` v KV), žetona ni treba preklicevati.
    `https://weatherireica1.filip-eremita.workers.dev/premium/webhook`,
    naročena samo na dogodek **`transaction.completed`**. Zapiši **webhook secret**.
 5. **Developer tools → Authentication**: ustvari **API key** (za branje
-   e-naslova kupca iz `customer_id`).
-6. Checkout: v Paddle ustvari **checkout/payment link** za vsako ceno — gumba na
-   strani /gobarska-napoved/ kažeta nanju (faza 3). Priporočeno: v checkout
-   nastavitvah vključi zahtevo po e-naslovu (privzeto je).
+   e-naslova kupca iz `customer_id`) in **client-side token** (za Paddle.js na strani).
+6. Checkout poteka prek **Paddle.js overlay** neposredno na strani /gobarska-napoved/
+   (brez preusmeritve). V `tools/generate_gobe_page.py` (vrh datoteke) nastavi:
+   - `PADDLE_CLIENT_TOKEN` — client-side token iz koraka 5,
+   - `PADDLE_PRICE_MONTHLY` / `PADDLE_PRICE_SEASON` — ista price ID-ja kot v `wrangler.toml`,
+   - `PADDLE_ENV` — `"sandbox"` za test, `"production"` za v živo.
+   Dokler je `PADDLE_CLIENT_TOKEN` prazen, gumbi varno padejo na `#pricing` (stran deluje).
+   Email kupca webhook dobi iz Paddla (customer_id), zato posebni checkout link ni potreben.
 
 Za sandbox test nastavi v `wrangler.toml` še
-`PADDLE_API_BASE = "https://sandbox-api.paddle.com"` (pred produkcijo vrni).
+`PADDLE_API_BASE = "https://sandbox-api.paddle.com"` (pred produkcijo vrni), v
+`generate_gobe_page.py` pa `PADDLE_ENV = "sandbox"`.
 
 ## 2. Cloudflare Worker — skrivnosti
 

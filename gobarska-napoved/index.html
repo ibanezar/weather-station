@@ -17,14 +17,14 @@
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
 <meta property="og:description" content="Gobarski indeks danes: 51 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
-<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
 <meta name="twitter:description" content="Gobarski indeks danes: 51 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
-<meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 51 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
 </script>
@@ -42,8 +42,9 @@
 .gp-gauge small{font-size:1.1rem;color:var(--muted);font-weight:600}
 .gp-hero-lvl{font-size:1.05rem;font-weight:700;letter-spacing:.02em}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
-.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;
-  padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem}
+.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font-weight:700;font:inherit;
+  font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
+  border:0;cursor:pointer;line-height:1.2}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
 .gp-forests{display:grid;gap:.5rem;margin:.6rem 0 1rem}
 .gp-forest{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
@@ -93,6 +94,7 @@
 .gp-cell{display:inline-block;min-width:2.1em;border-radius:5px;padding:.1rem .2rem;font-variant-numeric:tabular-nums}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 </style>
+<script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/blog/blog.css">
 <link rel="stylesheet" href="/vreme/vreme.css">
@@ -159,8 +161,8 @@
       <div class="gp-forest"><span>Kravja mlečnica</span><b>•• % ······</b></div>
     </div>
     <div class="gp-lockbar">
-      <a class="gp-cta" href="#pricing">Naroči se (3,99 €/mes)</a>
-      <a class="gp-cta alt" href="#pricing">Sezonski dostop (24,99 €)</a>
+      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se (3,99 €/mes)</button>
+      <button type="button" class="gp-cta alt" data-paddle="season">Sezonski dostop (24,99 €)</button>
     </div>
     <form id="gp-login" class="gp-login" autocomplete="email">
       <input type="email" name="email" placeholder="Že plačano? Vpiši e-naslov za povezavo" required>
@@ -179,7 +181,7 @@
         <li>Razlage in opozorila na dvojnice</li>
         <li>Prekliči kadarkoli</li>
       </ul>
-      <a class="gp-cta" href="https://meteorec.si/gobarska-napoved/#pricing" data-plan="monthly">Naroči se</a>
+      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
     </div>
     <div class="gp-plan best">
       <span class="gp-tag">CELA SEZONA · najugodneje</span>
@@ -190,9 +192,10 @@
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
       </ul>
-      <a class="gp-cta" href="https://meteorec.si/gobarska-napoved/#pricing" data-plan="season">Kupi sezono</a>
+      <button type="button" class="gp-cta" data-paddle="season">Kupi sezono</button>
     </div>
   </div>
+  <div id="gp-checkout-msg" class="gp-msg"></div>
   <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
   računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
   <h2>Kaj utegne rasti v juliju</h2>
@@ -370,6 +373,47 @@
       body:JSON.stringify({email:em})}).then(function(r){return r.json();})
       .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
       .catch(function(){msg.textContent="Napaka pri pošiljanju. Poskusi znova.";});});}
+
+  // ── Paddle.js overlay checkout ──────────────────────────────────────────
+  // Config comes from window.MR_PADDLE (injected in <head>); when it or the
+  // token is missing, buttons fall back to scrolling to #pricing.
+  var cfg=window.MR_PADDLE||null;
+  var ready=false;
+  if(cfg&&cfg.token&&window.Paddle){
+    try{
+      if(cfg.env==="sandbox"){Paddle.Environment.set("sandbox");}
+      Paddle.Initialize({token:cfg.token});
+      ready=true;
+    }catch(e){ready=false;}
+  }
+  function checkoutMsg(txt){
+    var el=document.getElementById("gp-checkout-msg");
+    if(el){el.textContent=txt;}
+  }
+  document.querySelectorAll("[data-paddle]").forEach(function(btn){
+    btn.addEventListener("click",function(e){
+      var plan=btn.getAttribute("data-paddle");
+      var priceId=cfg?cfg.prices[plan]:null;
+      if(!ready||!priceId){
+        // Fallback: not configured yet — go to pricing, don't break the page.
+        var p=document.getElementById("pricing");
+        if(p){e.preventDefault();p.scrollIntoView({behavior:"smooth"});
+          checkoutMsg("Spletno plačilo bo kmalu na voljo. Za dostop lahko medtem pišeš na filip.eremita@gmail.com.");}
+        return;
+      }
+      e.preventDefault();
+      Paddle.Checkout.open({
+        items:[{priceId:priceId,quantity:1}],
+        customData:{plan:plan},
+        settings:{displayMode:"overlay",theme:"dark",locale:"sl"},
+        eventCallback:function(ev){
+          if(ev&&ev.name==="checkout.completed"){
+            checkoutMsg("✅ Hvala! Na tvoj e-naslov smo poslali povezavo za dostop — preveri tudi vsiljeno pošto.");
+          }
+        }
+      });
+    });
+  });
 })();
 </script>
   <footer class="site-foot">

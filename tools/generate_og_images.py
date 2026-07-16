@@ -515,9 +515,21 @@ def make_og(article):
     print(f'  ✓ {out_path}')
 
 
+# Standalone pillar-page cards (not blog articles).
+PAGES = [
+    {
+        'slug': 'gobarska-napoved',
+        'title': 'Gobarska\nnapoved',
+        'subtitle': 'Indeks ugodnosti pogojev po vrstah · Zgornja Savinjska',
+        'section': 'Gobarji',
+        'accent': (52, 211, 153),
+        'photo': 'misty-valley',
+    },
+]
+
 if __name__ == '__main__':
     print('Generating OG images...')
-    for a in ARTICLES:
+    for a in ARTICLES + PAGES:
         make_og(a)
     print('Generating monthly climatology OG images...')
     month_stats = load_month_climatology()
