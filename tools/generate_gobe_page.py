@@ -87,9 +87,14 @@ def season_months(sp):
 # ── page CSS (scoped, appended in <head>) ─────────────────────────────────────
 
 PAGE_CSS = """<style>
+/* Earthy sub-theme for this landing page only — scoped to .wrap so it never
+   leaks into the shared header/footer markup used by other generated pages.
+   CSS custom properties resolve by inheritance (nearest ancestor that sets
+   them), so this wins regardless of stylesheet load order. */
+.wrap{--blue:#6fae55;--cyan:#c17f3e;--muted:#a9a08c}
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(135deg,rgba(4,7,14,.80),rgba(4,7,14,.93)),url('/og/bg/misty-valley.jpg') center/cover}
+  background:linear-gradient(135deg,rgba(8,14,7,.82),rgba(6,10,6,.94)),url('/og/bg/misty-valley.jpg') center/cover}
 .gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 .gp-ring{display:block}
@@ -329,10 +334,12 @@ def level_color(pct):
     return "#f87171"                  # BREZ
 
 # Terrain accent colour + icon (also used for the terrain cards).
+# Earthy palette for this page — greens/browns, no blue (vlazna reads as
+# "moist riverbank" via a mossy teal-brown + the water-drop icon, not hue).
 TERRAIN_STYLE = {
-    "kisla":   ("#34d399", "🌲"),
-    "bazicna": ("#f59e0b", "⛰️"),
-    "vlazna":  ("#60a5fa", "💧"),
+    "kisla":   ("#5a8f3f", "🌲"),
+    "bazicna": ("#c17f3e", "⛰️"),
+    "vlazna":  ("#5c8374", "💧"),
 }
 
 
@@ -497,7 +504,7 @@ def build_body(rules, premium, free):
     for t in rules.get("terrains", []):
         locs_here = [l["name"] for l in rules["locations"]
                      if l.get("terrain") == t["id"] and not l.get("protected")]
-        col, icon = TERRAIN_STYLE.get(t["id"], ("#60a5fa", "🌲"))
+        col, icon = TERRAIN_STYLE.get(t["id"], ("#5a8f3f", "🌲"))
         terr_items.append(
             f'    <div class="t" style="border-left-color:{col}">'
             f'<div class="t-h"><span class="t-ic" style="background:{col}22">{icon}</span>'
@@ -533,7 +540,20 @@ def build_body(rules, premium, free):
         f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
     ) + "\n  </div>")
 
-    body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
+    # Sub-brand swap: this page shows "MeteoGobar" with its own mushroom mark
+    # instead of the site-wide Meteorec logo/name. Done via a tiny synchronous
+    # script (runs immediately after the shared header markup is parsed)
+    # rather than touching generate_seo_pages.py's shared HEADER template —
+    # every other generated page keeps the plain Meteorec header untouched.
+    brand_swap = '''<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/gobarska-napoved/logo-gobar.svg";img.alt="MeteoGobar";}
+  if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
+})();</script>'''
+
+    body = f'''{brand_swap}
+{seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>

@@ -35,9 +35,14 @@
 {"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Je gobarski indeks napoved najdbe?","acceptedAnswer":{"@type":"Answer","text":"Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."}},{"@type":"Question","name":"Katere vrste zajema premium napoved?","acceptedAnswer":{"@type":"Answer","text":"U\u017eitne in pogojno u\u017eitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."}},{"@type":"Question","name":"Ali je to uradna napoved ARSO?","acceptedAnswer":{"@type":"Answer","text":"Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."}}]}
 </script>
 <style>
+/* Earthy sub-theme for this landing page only — scoped to .wrap so it never
+   leaks into the shared header/footer markup used by other generated pages.
+   CSS custom properties resolve by inheritance (nearest ancestor that sets
+   them), so this wins regardless of stylesheet load order. */
+.wrap{--blue:#6fae55;--cyan:#c17f3e;--muted:#a9a08c}
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(135deg,rgba(4,7,14,.80),rgba(4,7,14,.93)),url('/og/bg/misty-valley.jpg') center/cover}
+  background:linear-gradient(135deg,rgba(8,14,7,.82),rgba(6,10,6,.94)),url('/og/bg/misty-valley.jpg') center/cover}
 .gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 .gp-ring{display:block}
@@ -144,6 +149,12 @@
       <a href="/vreme/">Arhiv</a>
     </nav>
   </header>
+<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/gobarska-napoved/logo-gobar.svg";img.alt="MeteoGobar";}
+  if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
+})();</script>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <span aria-current="page">Gobarska napoved</span>
   </nav>
@@ -342,9 +353,9 @@
   <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
   <div class="gp-terrmap">
-    <div class="t" style="border-left-color:#34d399"><div class="t-h"><span class="t-ic" style="background:#34d39922">🌲</span><b>Kislo/vulkansko pogorje (Smrekovec)</b></div><span class="gp-hero-sub">Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana.</span><br><span class="gp-terr">Napovedne točke: Gozdovi nad Ljubnim, Smrekovško pogorje</span></div>
-    <div class="t" style="border-left-color:#f59e0b"><div class="t-h"><span class="t-ic" style="background:#f59e0b22">⛰️</span><b>Karbonatni masivi (Golte, Menina, Raduha)</b></div><span class="gp-hero-sub">Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana.</span><br><span class="gp-terr">Napovedne točke: Golte, Dobrovlje – Čreta</span></div>
-    <div class="t" style="border-left-color:#60a5fa"><div class="t-h"><span class="t-ic" style="background:#60a5fa22">💧</span><b>Rečni logi in dolinske terase</b></div><span class="gp-hero-sub">Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk.</span><br><span class="gp-terr">Napovedne točke: Rečica ob Savinji</span></div>
+    <div class="t" style="border-left-color:#5a8f3f"><div class="t-h"><span class="t-ic" style="background:#5a8f3f22">🌲</span><b>Kislo/vulkansko pogorje (Smrekovec)</b></div><span class="gp-hero-sub">Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana.</span><br><span class="gp-terr">Napovedne točke: Gozdovi nad Ljubnim, Smrekovško pogorje</span></div>
+    <div class="t" style="border-left-color:#c17f3e"><div class="t-h"><span class="t-ic" style="background:#c17f3e22">⛰️</span><b>Karbonatni masivi (Golte, Menina, Raduha)</b></div><span class="gp-hero-sub">Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana.</span><br><span class="gp-terr">Napovedne točke: Golte, Dobrovlje – Čreta</span></div>
+    <div class="t" style="border-left-color:#5c8374"><div class="t-h"><span class="t-ic" style="background:#5c837422">💧</span><b>Rečni logi in dolinske terase</b></div><span class="gp-hero-sub">Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk.</span><br><span class="gp-terr">Napovedne točke: Rečica ob Savinji</span></div>
   </div>
   <div class="card" style="margin:1rem 0">
     <div class="clabel">📋 Nasveti in pravila</div>

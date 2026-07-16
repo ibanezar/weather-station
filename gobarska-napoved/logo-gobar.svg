@@ -1,0 +1,23 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MeteoGobar">
+  <defs>
+    <linearGradient id="capG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d9a066"/>
+      <stop offset="100%" stop-color="#7a4a24"/>
+    </linearGradient>
+    <linearGradient id="stemG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f3e7cc"/>
+      <stop offset="100%" stop-color="#d8c39e"/>
+    </linearGradient>
+    <linearGradient id="grassG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7fae52"/>
+      <stop offset="100%" stop-color="#446b2e"/>
+    </linearGradient>
+  </defs>
+  <path d="M20 46 q1.5 8 12 8 t12 -8 Z" fill="url(#stemG)"/>
+  <path d="M10 32 Q10 12 32 12 Q54 12 54 32 Q54 40 44 40.5 Q32 42 20 40.5 Q10 40 10 32 Z" fill="url(#capG)"/>
+  <path d="M12 34 Q32 43 52 34 Q52 38.5 44 39.5 Q32 41 20 39.5 Q12 38.5 12 34 Z" fill="#5c3417" opacity=".55"/>
+  <circle cx="24" cy="24" r="2.6" fill="#8a5a2e" opacity=".5"/>
+  <circle cx="38" cy="20" r="2" fill="#8a5a2e" opacity=".45"/>
+  <circle cx="43" cy="29" r="1.7" fill="#8a5a2e" opacity=".4"/>
+  <path d="M4 56 q8 -5 14 0 t14 0 t14 0 t14 0" fill="none" stroke="url(#grassG)" stroke-width="3" stroke-linecap="round"/>
+</svg>
