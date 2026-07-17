@@ -271,6 +271,29 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
+.gp-map-shell{position:relative;margin:.6rem 0 1rem}
+.gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
+  background:var(--card-bg)}
+.gp-map-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.5rem;text-align:center;cursor:pointer;border-radius:14px;
+  background:linear-gradient(180deg,rgba(19,15,11,.6),rgba(6,10,6,.85))}
+.gp-map-hint b{font-size:1.05rem}
+.gp-map-hint span{font-size:.85rem;color:var(--muted)}
+.gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
+.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted)}
+.gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
+.gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gp-map-attr a{color:var(--muted)}
+.gp-map-pop{font-family:inherit;min-width:150px}
+.gp-map-pop b{font-size:.92rem}
+.gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
+.gp-map-pop .idx{font-weight:800;font-size:1.1rem}
+.gp-map-pop .sp{font-size:.82rem;margin-top:.2rem}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
+.leaflet-popup-content{margin:.6rem .8rem}
+
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno). */
 .wrap{padding-bottom:5.5rem}
 
