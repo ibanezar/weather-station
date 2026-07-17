@@ -78,16 +78,25 @@
       <li><strong>Opozorila</strong> — pragovi za obvestila o temperaturi, vetru in dežju</li>
       <li><strong>Vremenski arhiv</strong> — dnevne meritve vaše postaje, zbrane med obiski (za funkcijo »Na ta dan«)</li>
       <li><strong>Dostopni žeton za gobarsko napoved</strong> (<em>mr_gobe_token</em>) — če ste naročnik Premium, se žeton iz vaše dostopne povezave shrani v brskalnik, da vam ob vsakem obisku ni treba znova odpirati povezave. Odstranite ga s čiščenjem podatkov brskalnika.</li>
-      <li><strong>Gobarjev dnevnik</strong> (<em>mr_gobe_dnevnik</em>) — če na strani <a href="/gobarska-napoved/">gobarska napoved</a> uporabljate osebni dnevnik najdb, se vrsta, datum, opombe, GPS lokacija (če jo dovolite brskalniku) in fotografija (zmanjšana, shranjena kot slika v besedilni obliki) shranijo <strong>izključno v vaš brskalnik</strong>. Ti podatki se nikoli ne pošljejo na noben strežnik in jih ne vidimo. Izbrišete jih posamično v dnevniku ali s čiščenjem podatkov brskalnika.</li>
+      <li><strong>Gobarjev dnevnik</strong> (<em>mr_gobe_dnevnik</em>) — če na strani <a href="/gobarska-napoved/">gobarska napoved</a> uporabljate osebni dnevnik najdb, se vrsta, datum, opombe, GPS lokacija (če jo dovolite brskalniku) in fotografija (zmanjšana, shranjena kot slika v besedilni obliki) privzeto shranijo <strong>izključno v vaš brskalnik</strong> in se nikoli ne pošljejo na noben strežnik. Izjema je aktivna Premium naročnina — glej spodaj.</li>
     </ul>
     <p>Vse te podatke lahko kadarkoli izbrišete v nastavitvah brskalnika (razdelek »Piškotki in podatki strani«).</p>
+
+    <h2>Sinhronizacija dnevnika in AI prepoznava (samo Premium)</h2>
+    <p>Če ste naročnik Premium, sta na strani <a href="/gobarska-napoved/">gobarska napoved</a> na voljo dve dodatni funkciji, ki podatke pošljeta na strežnik:</p>
+    <ul>
+      <li><strong>Sinhronizacija dnevnika med napravami</strong> — vsebina dnevnika (vrsta, datum, opombe, GPS lokacija) in fotografije se shranijo v Cloudflare Workers KV/R2, povezano z vašim e-naslovom, da so najdbe na voljo na vseh vaših napravah. Dostop do vaših fotografij je omejen na vaš dostopni žeton.</li>
+      <li><strong>AI prepoznava gobe iz fotografije</strong> — če naložite fotografijo za prepoznavo, se ta pošlje ponudniku Anthropic (Claude API) za analizo. Fotografija se ne uporablja za treniranje modelov in ni trajno shranjena pri Anthropicu izven časa obdelave zahteve.</li>
+    </ul>
+    <p>Obe funkciji sta na voljo <strong>izključno naročnikom</strong> in se aktivirata šele, ko na strani uporabite veljaven dostopni žeton. Brez aktivne naročnine dnevnik ostane popolnoma lokalen, kot je opisano zgoraj.</p>
 
     <h2>Obdelovalci osebnih podatkov</h2>
     <p>Za obdelavo e-naslovov naročnikov in dostavo e-pošte sodelujejo naslednji obdelovalci, vsak s svojo politiko zasebnosti:</p>
     <table class="stats">
       <tr><th>Paddle</th><td>Obdelava plačil kot <em>prodajalec od zapisa</em> (merchant of record) — izstavlja račune in ureja DDV za EU. Prejme podatke o plačilu in vaš e-naslov. <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener">paddle.com/legal/privacy</a></td></tr>
       <tr><th>Resend</th><td>Dostava transakcijske in obveščevalne e-pošte (povezave za dostop, obvestila). Prejme vaš e-naslov in vsebino sporočila. <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener">resend.com/legal/privacy-policy</a></td></tr>
-      <tr><th>Cloudflare</th><td>Shramba naročniških podatkov (Workers KV) in izvajanje strežniške logike (Workers). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></td></tr>
+      <tr><th>Cloudflare</th><td>Shramba naročniških podatkov in dnevnika Premium naročnikov (Workers KV/R2) ter izvajanje strežniške logike (Workers). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></td></tr>
+      <tr><th>Anthropic</th><td>Analiza fotografij pri funkciji AI prepoznave gobe (samo Premium, samo ob ročnem nalaganju fotografije). <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">anthropic.com/legal/privacy</a></td></tr>
     </table>
     <p>Na strani <a href="/gobarska-napoved/">gobarska napoved</a> se ob odprtju plačilnega okna naloži skripta <strong>Paddle.js</strong> (s strežnika <em>cdn.paddle.com</em>), ki omogoča varno plačilo brez zapustitve strani.</p>
 
