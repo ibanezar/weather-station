@@ -2248,7 +2248,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
                 "anthropic-version": "2023-06-01",
               },
               body: JSON.stringify({
-                model: "claude-sonnet-4-20250514",
+                model: "claude-sonnet-5",
                 max_tokens: 800,
                 messages: [{
                   role: "user",
@@ -2259,8 +2259,12 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
                 }],
               }),
             });
-          } catch (_) { return _json({ error: "AI storitev ni dosegljiva" }, 502); }
-          if (!aiRes.ok) return _json({ error: "AI storitev ni dosegljiva" }, 502);
+          } catch (_) { return _json({ error: "AI storitev ni dosegljiva (omrežje)" }, 502); }
+          if (!aiRes.ok) {
+            let detail = "";
+            try { detail = (await aiRes.json())?.error?.message || ""; } catch (_) {}
+            return _json({ error: "AI storitev ni dosegljiva", upstream_status: aiRes.status, upstream_detail: detail }, 502);
+          }
           const aiData = await aiRes.json();
           let text = (aiData.content?.[0]?.text || "").trim()
             .replace(/^```json\s*/i, "").replace(/```\s*$/,"").trim();
