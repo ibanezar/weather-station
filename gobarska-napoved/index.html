@@ -80,7 +80,7 @@ body{
   border:0;cursor:pointer;line-height:1.2}
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
-.gp-forests{display:grid;gap:.6rem;margin:.6rem 0 1.2rem}
+.gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
 .gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
 .gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
 .gp-forest-nm{font-weight:700;font-size:.95rem}
@@ -230,6 +230,23 @@ body{
 .gp-trend-legend i{width:1.1rem;height:3px;border-radius:2px;display:inline-block}
 .gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
 .gp-trend-best b{color:var(--text)}
+
+/* ── Hitri meni (sticky) + zložljive (details) sekcije ── */
+.gp-quicknav{position:sticky;top:0;z-index:20;display:flex;gap:.4rem;overflow-x:auto;
+  padding:.6rem 0;margin:.2rem 0 1rem;background:var(--bg);border-bottom:1px solid var(--border)}
+.gp-quicknav::-webkit-scrollbar{height:5px}
+.gp-quicknav a{flex:0 0 auto;background:var(--badge-bg);border:1px solid var(--card-border);
+  color:var(--text);text-decoration:none;font-size:.8rem;padding:.35rem .75rem;border-radius:20px;white-space:nowrap}
+.gp-quicknav a:hover{border-color:var(--blue);color:var(--blue)}
+.gp-collapse{border:1px solid var(--card-border);border-radius:14px;margin:.6rem 0 1rem;overflow:hidden}
+.gp-collapse summary{cursor:pointer;list-style:none;padding:.8rem 1rem;font-weight:700;
+  display:flex;align-items:center;justify-content:space-between;background:var(--card-bg)}
+.gp-collapse summary::-webkit-details-marker{display:none}
+.gp-collapse summary::after{content:"▾";color:var(--muted);transition:transform .2s ease;margin-left:.6rem}
+.gp-collapse[open] summary::after{transform:rotate(180deg)}
+.gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
+.gp-collapse > :not(summary){padding:0 1rem 1rem}
+.gp-collapse[open] > :not(summary){padding-top:.3rem}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -280,7 +297,19 @@ body{
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
     nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>
-  <h2 class="gp-h2">🌲 Danes po gozdovih</h2>
+  <nav class="gp-quicknav" aria-label="Hitri meni">
+    <a href="#gozdovi">🌲 Gozdovi</a>
+    <a href="#premium">🔓 Premium</a>
+    <a href="#pricing">🎟️ Cenik</a>
+    <a href="#koledar">📅 Koledar</a>
+    <a href="#trend">📊 Trend</a>
+    <a href="#baza-vrst">📖 Baza vrst</a>
+    <a href="#dvojnice">⚠️ Dvojnice</a>
+    <a href="#tereni">🗺️ Tereni</a>
+    <a href="#dnevnik">📔 Dnevnik</a>
+    <a href="#faq">❓ FAQ</a>
+  </nav>
+  <h2 class="gp-h2" id="gozdovi">🌲 Danes po gozdovih</h2>
   <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
   <div class="gp-forests">
@@ -402,7 +431,7 @@ body{
       <div class="gp-forest-sp">Nabiranje prepovedano</div>
     </div>
   </div>
-  <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
   <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
   <div id="gp-identify" class="gp-diary" hidden>
@@ -472,8 +501,10 @@ body{
   <div id="gp-checkout-msg" class="gp-msg"></div>
   <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
   računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
-  <h2 class="gp-h2">📅 Kaj utegne rasti v juliju</h2>
+  <h2 class="gp-h2" id="koledar">📅 Kaj utegne rasti v juliju</h2>
   <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
+  <details class="gp-collapse">
+    <summary>Koledar po mesecih <small>(12 vrstic)</small></summary>
   <table class="stats">
       <tr><th>Januar</th><td style="text-align:left">Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
       <tr><th>Februar</th><td style="text-align:left">Zimska panjevka, Bezgova uhljevka</td></tr>
@@ -488,16 +519,19 @@ body{
       <tr><th>November</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna sirovka, Smrekova sirovka, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Sivorumena mraznica (Štorovka), Zimska panjevka, Bukov ostrigar, Vijoličasta bledivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar</td></tr>
       <tr><th>December</th><td style="text-align:left">Lijasta lisička, Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
   </table>
-  <h2 class="gp-h2">📊 Sezona v primerjavi s preteklimi leti</h2>
+  </details>
+  <h2 class="gp-h2" id="trend">📊 Sezona v primerjavi s preteklimi leti</h2>
   <p class="archive-intro">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj (backtest)
   z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je poudarjena.
   Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo razlikuje od dnevne napovedi.</p>
   <div id="gp-trend" class="gp-trend-wrap">
     <div class="gp-msg">Nalagam …</div>
   </div>
-  <h2 class="gp-h2">📖 Baza 51 vrst — užitnost in nevarne dvojnice</h2>
+  <h2 class="gp-h2" id="baza-vrst">📖 Baza 51 vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
+  <details class="gp-collapse">
+    <summary>Prikaži celotno bazo <small>(51 vrst)</small></summary>
   <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>
       <tr><td><b>Betičasta prašnica</b><br><span class="lat">Lycoperdon perlatum</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Navadna smrdljivka (Scleroderma citrinum) – strupena; zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni.</td></tr>
       <tr><td><b>Bezgova uhljevka</b><br><span class="lat">Auricularia auricula-judae</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>01.01–12.31</td><td class="gp-dbl">Vijoličasta zvedavka (Auricularia mesenterica) – neužitna; nima oblike ušesa in je bolj usnjata.</td></tr>
@@ -551,10 +585,13 @@ body{
       <tr><td><b>Vražji goban</b><br><span class="lat">Rubroboletus satanas</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>07.01–09.30</td><td class="gp-dbl">Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</td></tr>
       <tr><td><b>Zelena mušnica</b><br><span class="lat">Amanita phalloides</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</td></tr>
   </tbody></table></div>
-  <h2 class="gp-h2">⚠️ Nevarne dvojnice — primerjava</h2>
+  </details>
+  <h2 class="gp-h2" id="dvojnice">⚠️ Nevarne dvojnice — primerjava</h2>
   <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
   Fotografije se bodo dodale sproti — do takrat vsaka kartica prikaže ime in besedilno razlago.
   <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
+  <details class="gp-collapse">
+    <summary>Prikaži primerjave <small>(26 parov)</small></summary>
   <div class="gp-vs-grid">
     <div class="gp-vs-card">
       <div class="gp-vs-pair">
@@ -1061,7 +1098,8 @@ body{
     <div class="gp-vs-note"><b>Bukov ostrigar:</b> V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</div>
     <div class="gp-vs-note"><b>Orjaška plešivka:</b> Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</div>
     <div class="gp-vs-note"><b>Hrastov turek:</b> Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</div>
-  <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
+  </details>
+  <h2 class="gp-h2" id="tereni">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
   <div class="gp-terrmap">
     <div class="t" style="border-left-color:#5a8f3f"><div class="t-h"><span class="t-ic" style="background:#5a8f3f22">🌲</span><b>Kislo/vulkansko pogorje (Smrekovec)</b></div><span class="gp-hero-sub">Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana.</span><br><span class="gp-terr">Napovedne točke: Gozdovi nad Ljubnim, Smrekovško pogorje, Komen (Smrekovec), Primož pri Ljubnem</span></div>
@@ -1083,7 +1121,7 @@ body{
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
-  <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
+  <h2 class="gp-h2" id="dnevnik">📔 Gobarjev dnevnik</h2>
   <div class="gp-diary">
     <p class="gp-diary-priv" id="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
     pošljejo, nihče drug jih ne vidi. Če počistiš podatke brskalnika, se izgubijo.</p>
@@ -1111,7 +1149,7 @@ body{
     </form>
     <div id="gp-diary-list" class="gp-diary-list"></div>
   </div>
-  <h2 class="gp-h2">❓ Pogosta vprašanja</h2>
+  <h2 class="gp-h2" id="faq">❓ Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Je gobarski indeks napoved najdbe?</summary><p>Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe.</p></details>
     <details><summary>Katere vrste zajema premium napoved?</summary><p>Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti.</p></details>
