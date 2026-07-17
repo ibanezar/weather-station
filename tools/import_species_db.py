@@ -45,6 +45,18 @@ MONTH_LAST = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30,
 # dangerous-double material only).
 INDEXED_EDIBILITY = {"užitna", "pogojno užitna"}
 
+# Air→soil derivation calibration (2026-07-17, per uporabnikova opomba v
+# UI_Arhitektura_in_Logika: "nižji prag 6-8 °C, višji prag 18-22 °C").
+# Tuned so a mid-range species (air_temp ~12-20 °C, the most common band in
+# the workbook) lands with trapezoid min≈7-8 °C and max≈20-22 °C. Genuinely
+# cold-fruiting (e.g. Jurček, air 8-15) or warm-fruiting (e.g. Poletni goban,
+# air 18-24) species still land outside this band on one side — that's
+# correct, not a bug: their real air-temp ecology differs from the "typical"
+# mid-season species this note was calibrated against.
+# TODO: kalibriraj — prej: offset=-2.0, shoulder=4.0
+SOIL_TEMP_OFFSET_C = -1.5
+SOIL_TEMP_SHOULDER_C = 3.0
+
 # Terrain definitions — three productive geological terrains of the valley,
 # plus the strictly-protected zones (no foraging).
 TERRAINS = [
@@ -247,8 +259,8 @@ def build_yaml(species):
     L.append("    out_of_range_factor: 0.7  # TODO: kalibriraj")
     L.append("  # Izpeljava talno-temp. okna iz zračnega praga (soil hladnejši/dušen od zraka).")
     L.append("  soil_temp_from_air:")
-    L.append("    offset_c: -2.0           # TODO: kalibriraj — zamik zrak→tla")
-    L.append("    shoulder_c: 4.0          # TODO: kalibriraj — širina ramen trapeza")
+    L.append(f"    offset_c: {SOIL_TEMP_OFFSET_C}           # TODO: kalibriraj — zamik zrak→tla")
+    L.append(f"    shoulder_c: {SOIL_TEMP_SHOULDER_C}          # TODO: kalibriraj — širina ramen trapeza")
     L.append("  # Ujemanje geološke afinitete vrste s terenom lokacije.")
     L.append("  geology:")
     L.append("    match_factor: 1.15       # TODO: kalibriraj — afiniteta se ujema s terenom")
@@ -327,7 +339,7 @@ def read_species():
         air_lo, air_hi = parse_temp_range(r[C_AIRTEMP])
         if air_lo is None:
             air_lo, air_hi = 10, 18  # fallback, unlikely
-        soil = derive_soil_temp(air_lo, air_hi, offset=-2.0, shoulder=4.0)
+        soil = derive_soil_temp(air_lo, air_hi, offset=SOIL_TEMP_OFFSET_C, shoulder=SOIL_TEMP_SHOULDER_C)
         rain7 = parse_moisture(r[C_MOIST7])
         elev_min, elev_max = derive_elevation(r[C_ELEV])
         out.append({

@@ -39,8 +39,8 @@ scoring:
     out_of_range_factor: 0.7  # TODO: kalibriraj
   # Izpeljava talno-temp. okna iz zračnega praga (soil hladnejši/dušen od zraka).
   soil_temp_from_air:
-    offset_c: -2.0           # TODO: kalibriraj — zamik zrak→tla
-    shoulder_c: 4.0          # TODO: kalibriraj — širina ramen trapeza
+    offset_c: -1.5           # TODO: kalibriraj — zamik zrak→tla
+    shoulder_c: 3.0          # TODO: kalibriraj — širina ramen trapeza
   # Ujemanje geološke afinitete vrste s terenom lokacije.
   geology:
     match_factor: 1.15       # TODO: kalibriraj — afiniteta se ujema s terenom
@@ -136,7 +136,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 50       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -157,7 +157,7 @@ species:
     frequency_factor: 0.7   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "09.30" }
     air_temp: { min: 18, max: 24 }  # zračni prag iz baze
-    soil_temp: { min: 12.0, opt_low: 16.0, opt_high: 22.0, max: 26.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 50       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -178,7 +178,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 12.0, max: 16.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 50       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -199,7 +199,7 @@ species:
     frequency_factor: 0.2   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 20, max: 26 }  # zračni prag iz baze
-    soil_temp: { min: 14.0, opt_low: 18.0, opt_high: 24.0, max: 28.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 15.5, opt_low: 18.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 50       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -220,7 +220,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -241,7 +241,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 17 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 15.0, max: 19.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 15.5, max: 18.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -262,7 +262,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -283,7 +283,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -304,7 +304,7 @@ species:
     frequency_factor: 0.2   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "09.30" }
     air_temp: { min: 18, max: 25 }  # zračni prag iz baze
-    soil_temp: { min: 12.0, opt_low: 16.0, opt_high: 23.0, max: 27.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 23.5, max: 26.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -325,7 +325,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 14.0, max: 18.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -346,7 +346,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 60       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -367,7 +367,7 @@ species:
     frequency_factor: 0.8   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 5, max: 12 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 3.0, opt_high: 10.0, max: 14.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -388,7 +388,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 12, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -409,7 +409,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -430,7 +430,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -451,7 +451,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 8.0, opt_low: 12.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -472,7 +472,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 9.0, opt_low: 13.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -493,7 +493,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -514,7 +514,7 @@ species:
     frequency_factor: 0.7   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -535,7 +535,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -556,7 +556,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 9.0, opt_low: 13.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -577,7 +577,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 9.0, opt_low: 13.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -598,7 +598,7 @@ species:
     frequency_factor: 0.2   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 18, max: 26 }  # zračni prag iz baze
-    soil_temp: { min: 12.0, opt_low: 16.0, opt_high: 24.0, max: 28.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -619,7 +619,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -640,7 +640,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -661,7 +661,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 8.0, opt_low: 12.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -682,7 +682,7 @@ species:
     frequency_factor: 0.7   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -703,7 +703,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 14.0, max: 18.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -724,7 +724,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -745,7 +745,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -766,7 +766,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 8.0, opt_low: 12.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -787,7 +787,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 14.0, max: 18.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -808,7 +808,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 12.0, max: 16.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -829,7 +829,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "11.01", end: "03.31" }
     air_temp: { min: -2, max: 8 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 0.0, opt_high: 6.0, max: 10.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.0, opt_low: 0.0, opt_high: 6.5, max: 9.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -850,7 +850,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "10.01", end: "01.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 2.0, opt_high: 10.0, max: 14.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -871,7 +871,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "12.31" }
     air_temp: { min: 8, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -892,7 +892,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -913,7 +913,7 @@ species:
     frequency_factor: 0.8   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "04.01", end: "05.31" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -934,7 +934,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "03.01", end: "05.31" }
     air_temp: { min: 6, max: 13 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 4.0, opt_high: 11.0, max: 15.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 11.5, max: 14.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -955,7 +955,7 @@ species:
     frequency_factor: 0.4   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "03.01", end: "05.31" }
     air_temp: { min: 5, max: 12 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 3.0, opt_high: 10.0, max: 14.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -976,7 +976,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 12.0, max: 16.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -997,7 +997,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
-    soil_temp: { min: 4.0, opt_low: 8.0, opt_high: 16.0, max: 20.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1018,7 +1018,7 @@ species:
     frequency_factor: 0.4   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 8.0, opt_low: 12.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1039,7 +1039,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1060,7 +1060,7 @@ species:
     frequency_factor: 1.0   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "01.01", end: "12.31" }
     air_temp: { min: 5, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 3.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1081,7 +1081,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1102,7 +1102,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
-    soil_temp: { min: 2.0, opt_low: 6.0, opt_high: 13.0, max: 17.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1123,7 +1123,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1144,7 +1144,7 @@ species:
     frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 6.0, opt_low: 10.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1165,7 +1165,7 @@ species:
     frequency_factor: 0.4   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
-    soil_temp: { min: 8.0, opt_low: 12.0, opt_high: 20.0, max: 24.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
@@ -1186,7 +1186,7 @@ species:
     frequency_factor: 0.8   # TODO: kalibriraj (lokalna prisotnost)
     season: { start: "01.01", end: "12.31" }
     air_temp: { min: 5, max: 20 }  # zračni prag iz baze
-    soil_temp: { min: 0.0, opt_low: 3.0, opt_high: 18.0, max: 22.0 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
     rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
     rain_14d_min: 40       # TODO: kalibriraj
     fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj

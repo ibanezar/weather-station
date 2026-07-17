@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/">
-<meta name="description" content="Gobarski indeks danes: 52 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="description" content="Gobarski indeks danes: 54 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta property="og:description" content="Gobarski indeks danes: 52 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta property="og:description" content="Gobarski indeks danes: 54 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta name="twitter:description" content="Gobarski indeks danes: 52 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="twitter:description" content="Gobarski indeks danes: 54 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 52 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 54 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved"}]}
@@ -143,6 +143,68 @@ body{
 .gp-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
+
+/* ── SOS floating action button ── */
+.gp-sos-fab{position:fixed;right:1.1rem;bottom:1.1rem;z-index:60;width:3.1rem;height:3.1rem;border-radius:50%;
+  background:#dc2626;color:#fff;border:2px solid rgba(255,255,255,.25);font-size:1.4rem;cursor:pointer;
+  box-shadow:0 4px 18px rgba(220,38,38,.45);display:flex;align-items:center;justify-content:center;line-height:1}
+.gp-sos-fab:hover{background:#b91c1c}
+.gp-sos-panel{position:fixed;right:1.1rem;bottom:4.6rem;z-index:60;width:min(300px,calc(100vw - 2.2rem));
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1rem;
+  box-shadow:var(--card-shadow);display:none}
+.gp-sos-panel.open{display:block}
+.gp-sos-panel h4{margin:0 0 .5rem;font-size:.95rem}
+.gp-sos-panel p{font-size:.8rem;color:var(--muted);margin:0 0 .7rem;line-height:1.5}
+.gp-sos-call{display:flex;align-items:center;gap:.6rem;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);
+  border-radius:10px;padding:.55rem .8rem;text-decoration:none;color:var(--text);font-weight:700;margin-bottom:.5rem}
+.gp-sos-call small{display:block;font-weight:500;color:var(--muted);font-size:.72rem}
+.gp-sos-call.alt{background:var(--badge-bg);border-color:var(--card-border)}
+
+/* ── Dvojnik: edible-vs-double comparison cards ── */
+.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem}
+.gp-vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem;
+  box-shadow:var(--card-shadow)}
+.gp-vs-pair{display:flex;align-items:center;gap:.5rem}
+.gp-vs-side{flex:1;min-width:0;text-align:center}
+.gp-vs-photo{width:100%;aspect-ratio:1/1;border-radius:10px;background:var(--badge-bg);
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;overflow:hidden;margin-bottom:.35rem}
+.gp-vs-photo img{width:100%;height:100%;object-fit:cover}
+.gp-vs-name{font-size:.82rem;font-weight:700;line-height:1.25}
+.gp-vs-lat{font-size:.68rem;color:var(--muted);font-style:italic}
+.gp-vs-x{flex:0 0 auto;font-weight:800;color:var(--muted);font-size:.8rem;padding:0 .2rem}
+.gp-vs-diff{margin:.6rem 0 0;padding-left:1.1rem;font-size:.8rem;color:var(--muted);line-height:1.55}
+.gp-vs-note{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .8rem;
+  font-size:.83rem;color:var(--muted);margin-bottom:.5rem}
+.gp-vs-note b{color:var(--text)}
+
+/* ── Gobarjev dnevnik (local-only GPS+photo log) ── */
+.gp-diary{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-diary-priv{font-size:.78rem;color:var(--muted);margin-bottom:.7rem}
+.gp-diary-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.55rem;align-items:center}
+.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary textarea{
+  background:var(--badge-bg);border:1px solid var(--card-border);border-radius:9px;
+  padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit}
+.gp-diary-row input[type=text]{flex:1;min-width:160px}
+.gp-diary textarea{width:100%;min-height:4.5rem;resize:vertical;box-sizing:border-box}
+.gp-diary-btn{background:var(--badge-bg);border:1px solid var(--card-border);color:var(--text);
+  border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
+.gp-diary-photobtn{display:inline-block}
+.gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
+.gp-diary-submit{margin-top:.2rem}
+.gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
+.gp-diary-entry{display:flex;gap:.7rem;background:var(--fc-bg);border:1px solid var(--fc-border);
+  border-radius:10px;padding:.6rem .7rem}
+.gp-diary-thumb{width:3.6rem;height:3.6rem;border-radius:8px;object-fit:cover;flex:0 0 auto;background:var(--badge-bg)}
+.gp-diary-thumb-ph{width:3.6rem;height:3.6rem;border-radius:8px;flex:0 0 auto;background:var(--badge-bg);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.gp-diary-body{flex:1;min-width:0}
+.gp-diary-sp{font-weight:700;font-size:.9rem}
+.gp-diary-meta{font-size:.76rem;color:var(--muted)}
+.gp-diary-meta a{color:var(--cyan)}
+.gp-diary-notes{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+.gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
+.gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -178,8 +240,8 @@ body{
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
-        <svg viewBox="0 0 128 128" class="gp-ring" width="132" height="132" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#f59e0b" stroke-dasharray="339.3" stroke-dashoffset="162.9"/></svg>
-        <div class="gp-gauge-num">52<small>%</small></div>
+        <svg viewBox="0 0 128 128" class="gp-ring" width="132" height="132" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#f59e0b" stroke-dasharray="339.3" stroke-dashoffset="156.1"/></svg>
+        <div class="gp-gauge-num">54<small>%</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
@@ -202,7 +264,7 @@ body{
         <span class="gp-terr">kisla · 1300 m</span></div>
       <div class="gp-meter"><div class="gp-meter-fill" style="width:100%;background:#34d399"></div>
         <span class="gp-meter-val">100 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
+      <div class="gp-forest-sp">🍄 Žametasti goban</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Komen (Smrekovec)</span>
@@ -214,43 +276,43 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dleskovška planota</span>
         <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:94%;background:#34d399"></div>
-        <span class="gp-meter-val">94 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:96%;background:#34d399"></div>
+        <span class="gp-meter-val">96 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Velika tintnica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Menina planina</span>
         <span class="gp-terr">bazicna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:75%;background:#34d399"></div>
-        <span class="gp-meter-val">75 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:76%;background:#34d399"></div>
+        <span class="gp-meter-val">76 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
         <span class="gp-terr">kisla · 700 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:73%;background:#34d399"></div>
-        <span class="gp-meter-val">73 % · DOBRA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:72%;background:#34d399"></div>
+        <span class="gp-meter-val">72 % · DOBRA</span></div>
       <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Golte</span>
         <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:71%;background:#34d399"></div>
-        <span class="gp-meter-val">71 % · DOBRA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:72%;background:#34d399"></div>
+        <span class="gp-meter-val">72 % · DOBRA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
         <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:60%;background:#34d399"></div>
-        <span class="gp-meter-val">60 % · DOBRA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:61%;background:#34d399"></div>
+        <span class="gp-meter-val">61 % · DOBRA</span></div>
+      <div class="gp-forest-sp">🍄 Poletni goban</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">💧 Rečica ob Savinji</span>
         <span class="gp-terr">vlazna · 400 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:52%;background:#f59e0b"></div>
-        <span class="gp-meter-val">52 % · ZMERNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:54%;background:#f59e0b"></div>
+        <span class="gp-meter-val">54 % · ZMERNA</span></div>
       <div class="gp-forest-sp">🍄 Bezgova uhljevka</div>
     </div>
     <div class="gp-forest gp-forest-prot">
@@ -385,6 +447,516 @@ body{
       <tr><td><b>Vražji goban</b><br><span class="lat">Rubroboletus satanas</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>07.01–09.30</td><td class="gp-dbl">Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</td></tr>
       <tr><td><b>Zelena mušnica</b><br><span class="lat">Amanita phalloides</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</td></tr>
   </tbody></table></div>
+  <h2 class="gp-h2">⚠️ Nevarne dvojnice — primerjava</h2>
+  <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
+  Fotografije se bodo dodale sproti — do takrat vsaka kartica prikaže ime in besedilno razlago.
+  <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
+  <div class="gp-vs-grid">
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/russula_cyanoxantha.jpg" alt="Modrikasta golobica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Modrikasta golobica</div>
+          <div class="gp-vs-lat">Russula cyanoxantha</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zelena-musnica.jpg" alt="Zelena mušnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Zelena mušnica</div>
+          <div class="gp-vs-lat">Amanita phalloides</div>
+          <span class="gp-badge e-death">Smrtno strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>smrtno strupena</li><li>mušnica ima obroček na betu in lupino v dnu beta, golobica ne</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/russula_virescens.jpg" alt="Zelena golobica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Zelena golobica</div>
+          <div class="gp-vs-lat">Russula virescens</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zelena-musnica.jpg" alt="Zelena mušnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Zelena mušnica</div>
+          <div class="gp-vs-lat">Amanita phalloides</div>
+          <span class="gp-badge e-death">Smrtno strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>smrtno strupena! Mušnica ima kožnat obroček in lupino (vrečko) v dnu beta</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/flammulina_velutipes.jpg" alt="Zimska panjevka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Zimska panjevka</div>
+          <div class="gp-vs-lat">Flammulina velutipes</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/strupena-galerina.jpg" alt="Strupena galerina" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Strupena galerina</div>
+          <div class="gp-vs-lat">Galerina marginata</div>
+          <span class="gp-badge e-death">Smrtno strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>smrtno strupena</li><li>galerina raste na iglavcih, ima obroček in nima žametnega beta</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/amanita_rubescens.jpg" alt="Rdečkasta mušnica (Bisernica)" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Rdečkasta mušnica (Bisernica)</div>
+          <div class="gp-vs-lat">Amanita rubescens</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/panterjeva-musnica.jpg" alt="Panterjeva mušnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Panterjeva mušnica</div>
+          <div class="gp-vs-lat">Amanita pantherina</div>
+          <span class="gp-badge e-tox2">Zelo strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>zelo strupena! Bisernica vedno rdeči na zraku/poškodbah in ima narebren obroček</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/morchella_esculenta.jpg" alt="Užitni smrček (Mavrah)" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Užitni smrček (Mavrah)</div>
+          <div class="gp-vs-lat">Morchella esculenta</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/pomladanski-hrcek.jpg" alt="Pomladanski hrček" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Pomladanski hrček</div>
+          <div class="gp-vs-lat">Gyromitra esculenta</div>
+          <span class="gp-badge e-tox2">Zelo strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>zelo strupen</li><li>hrček ima možgansko naguban klobuk in ni votel</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/morchella_elata.jpg" alt="Koničasti smrček" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Koničasti smrček</div>
+          <div class="gp-vs-lat">Morchella elata</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/pomladanski-hrcek.jpg" alt="Pomladanski hrček" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Pomladanski hrček</div>
+          <div class="gp-vs-lat">Gyromitra esculenta</div>
+          <span class="gp-badge e-tox2">Zelo strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>zelo strupen</li><li>hrček ima klobuk podoben možganom in nima pravilnih navpičnih jamic</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/neoboletus_erythropus.jpg" alt="Žametasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Žametasti goban</div>
+          <div class="gp-vs-lat">Neoboletus erythropus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/vrazji-goban.jpg" alt="Vražji goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Vražji goban</div>
+          <div class="gp-vs-lat">Rubroboletus satanas</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupen</li><li>loči se po zelo svetlem (sivem) klobuku in rasti na apnencu</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/cantharellus_cibarius.jpg" alt="Navadna lisička" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Navadna lisička</div>
+          <div class="gp-vs-lat">Cantharellus cibarius</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/oljkov-livkar.jpg" alt="Oljkov livkar" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Oljkov livkar</div>
+          <div class="gp-vs-lat">Omphalotus olearius</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupen</li><li>raste v šopih na lesu (predvsem na Primorskem pod oljkami/hrasti)</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lactarius_deliciosus.jpg" alt="Užitna sirovka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Užitna sirovka</div>
+          <div class="gp-vs-lat">Lactarius deliciosus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/navadna-tura.jpg" alt="Navadna tura" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Navadna tura</div>
+          <div class="gp-vs-lat">Lactarius torminosus</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupena</li><li>raste pod brezami in izloča bel, zelo pekoč mleček</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/macrolepiota_procera.jpg" alt="Orjaški dežnik (Marela)" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Orjaški dežnik (Marela)</div>
+          <div class="gp-vs-lat">Macrolepiota procera</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/strupena-rdececa-deznica.jpg" alt="Strupena rdečeča dežnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Strupena rdečeča dežnica</div>
+          <div class="gp-vs-lat">Chlorophyllum brunneum</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupena</li><li>meso ob poškodbi močno pordeči, bet nima marogastega vzorca</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/agaricus_campestris.jpg" alt="Poljski kukmak" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Poljski kukmak</div>
+          <div class="gp-vs-lat">Agaricus campestris</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/karbolni-kukmak.jpg" alt="Karbolni kukmak" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Karbolni kukmak</div>
+          <div class="gp-vs-lat">Agaricus xanthodermus</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupen</li><li>v dnu beta ob prerezu močno porumeni in smrdi po črnilu</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/armillaria_mellea.jpg" alt="Sivorumena mraznica (Štorovka)" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Sivorumena mraznica (Štorovka)</div>
+          <div class="gp-vs-lat">Armillaria mellea</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/navadna-zveplenjaca.jpg" alt="Navadna žveplenjača" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Navadna žveplenjača</div>
+          <div class="gp-vs-lat">Hypholoma fasciculare</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupena</li><li>nima obročka na betu, klobuk je žvepleno rumen in zelo grenak</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/laccaria_amethystina.jpg" alt="Vijoličasta bledivka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Vijoličasta bledivka</div>
+          <div class="gp-vs-lat">Laccaria amethystina</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/vijolicasta-celadica.jpg" alt="Vijoličasta čeladica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Vijoličasta čeladica</div>
+          <div class="gp-vs-lat">Mycena pura</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupena</li><li>loči se po izrazitem vonju po redkvici in tanjših, gostejših lističih</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/coprinus_comatus.jpg" alt="Velika tintnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Velika tintnica</div>
+          <div class="gp-vs-lat">Coprinus comatus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/gola-tintnica.jpg" alt="Gola tintnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Gola tintnica</div>
+          <div class="gp-vs-lat">Coprinopsis atramentaria</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>pogojno strupena z alkoholom</li><li>nima luskastega in visokega valjastega klobuka</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lycoperdon_perlatum.jpg" alt="Betičasta prašnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Betičasta prašnica</div>
+          <div class="gp-vs-lat">Lycoperdon perlatum</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/navadna-smrdljivka.jpg" alt="Navadna smrdljivka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Navadna smrdljivka</div>
+          <div class="gp-vs-lat">Scleroderma citrinum</div>
+          <span class="gp-badge e-tox">Strupena</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>strupena</li><li>zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/boletus_edulis.jpg" alt="Jesenski goban (Jurček)" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Jesenski goban (Jurček)</div>
+          <div class="gp-vs-lat">Boletus edulis</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zolcasti-goban.jpg" alt="Žolčasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Žolčasti goban</div>
+          <div class="gp-vs-lat">Tylopilus felleus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten</li><li>loči se po izrazito grenkem okusu in rožnati trosovnici</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/boletus_reticulatus.jpg" alt="Poletni goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Poletni goban</div>
+          <div class="gp-vs-lat">Boletus reticulatus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zolcasti-goban.jpg" alt="Žolčasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Žolčasti goban</div>
+          <div class="gp-vs-lat">Tylopilus felleus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten</li><li>loči se po izrazito grenkem okusu in mrežici na betu</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/boletus_pinophilus.jpg" alt="Borov goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Borov goban</div>
+          <div class="gp-vs-lat">Boletus pinophilus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zolcasti-goban.jpg" alt="Žolčasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Žolčasti goban</div>
+          <div class="gp-vs-lat">Tylopilus felleus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten, grenak okus. Druge vrste užitnih gobanov</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/imleria_badia.jpg" alt="Kostanjevka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Kostanjevka</div>
+          <div class="gp-vs-lat">Imleria badia</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zolcasti-goban.jpg" alt="Žolčasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Žolčasti goban</div>
+          <div class="gp-vs-lat">Tylopilus felleus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten, grenak. Kostanjevka močno pomodri na cevkatem delu ob pritisku</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/craterellus_tubaeformis.jpg" alt="Lijasta lisička" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Lijasta lisička</div>
+          <div class="gp-vs-lat">Craterellus tubaeformis</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zlatorumena-lisicka.jpg" alt="Zlatorumena lisička" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Zlatorumena lisička</div>
+          <div class="gp-vs-lat">Cantharellus lutescens</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna, nima tako izrazitih letvic</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/hydnum_repandum.jpg" alt="Rumeni ježek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Rumeni ježek</div>
+          <div class="gp-vs-lat">Hydnum repandum</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/rdecerjavi-jezek.jpg" alt="Rdečerjavi ježek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Rdečerjavi ježek</div>
+          <div class="gp-vs-lat">Hydnum rufescens</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>manjši, bolj oranžen, prav tako užiten (odstranijo se bodičke)</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lactifluus_piperatus.jpg" alt="Kravja mlečnica" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Kravja mlečnica</div>
+          <div class="gp-vs-lat">Lactifluus piperatus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/polsteni-mlecnik.jpg" alt="Polsteni mlečnik" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Polsteni mlečnik</div>
+          <div class="gp-vs-lat">Lactifluus vellereus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten</li><li>ima žametno dlako na klobuku in bolj razmaknjene lističe</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/auricularia_auricula_judae.jpg" alt="Bezgova uhljevka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Bezgova uhljevka</div>
+          <div class="gp-vs-lat">Auricularia auricula-judae</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/vijolicasta-zvedavka.jpg" alt="Vijoličasta zvedavka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Vijoličasta zvedavka</div>
+          <div class="gp-vs-lat">Auricularia mesenterica</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužitna</li><li>nima oblike ušesa in je bolj usnjata</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/gomphidius_glutinosus.jpg" alt="Veliki slinar" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Veliki slinar</div>
+          <div class="gp-vs-lat">Gomphidius glutinosus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/bakerasti-polzar.jpg" alt="Bakerasti polžar" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Bakerasti polžar</div>
+          <div class="gp-vs-lat">Chroogomphus rutilus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>užiten</li><li>nima prozorne debele sluzi in je ves rdečkasto-bakerne barve</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/leccinum_scabrum.jpg" alt="Brezov ded" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Brezov ded</div>
+          <div class="gp-vs-lat">Leccinum scabrum</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/zolcasti-goban.jpg" alt="Žolčasti goban" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Žolčasti goban</div>
+          <div class="gp-vs-lat">Tylopilus felleus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>neužiten, izredno grenak</li><li>loči se po rožnati trosovnici (cevke pod klobukom)</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/leccinum_versipelle.jpg" alt="Brezov turek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Brezov turek</div>
+          <div class="gp-vs-lat">Leccinum versipelle</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/trepetlikov-turek.jpg" alt="Trepetlikov turek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Trepetlikov turek</div>
+          <div class="gp-vs-lat">Leccinum aurantiacum</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užiten in odličen, raste pod trepetlikami/topoli</li></ul>
+    </div>
+  </div>
+    <div class="gp-vs-note"><b>Užitna golobica:</b> Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika).</div>
+    <div class="gp-vs-note"><b>Pšenična koprenka:</b> Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom.</div>
+    <div class="gp-vs-note"><b>Črni goban:</b> Ni nevarnih neposrednih dvojnic zaradi zelo temnega klobuka in čvrstega, nespremenljivega belega mesa.</div>
+    <div class="gp-vs-note"><b>Rdečebetka:</b> Sorodni polstenci (npr. rdečeči polstenec), ki so prav tako večinoma užitni.</div>
+    <div class="gp-vs-note"><b>Macesnova lupljivka:</b> Druge maslenke in lupljivke pod iglavci, ki pa so vse užitne in nekatere prav tako sluzaste.</div>
+    <div class="gp-vs-note"><b>Črna trobenta:</b> Ni nevarnih dvojnic zaradi specifične trobentaste oblike in povsem črne/sive barve.</div>
+    <div class="gp-vs-note"><b>Smrekova sirovka:</b> Druge sirovke z oranžnim mlečkom – vse so užitne (smrekova hitro pozeleni na mestih poškodb).</div>
+    <div class="gp-vs-note"><b>Bukov ostrigar:</b> V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</div>
+    <div class="gp-vs-note"><b>Orjaška plešivka:</b> Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</div>
+    <div class="gp-vs-note"><b>Hrastov turek:</b> Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</div>
   <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
   <div class="gp-terrmap">
@@ -407,6 +979,33 @@ body{
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
+  <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
+  <div class="gp-diary">
+    <p class="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
+    pošljejo, nihče drug jih ne vidi. Če počistiš podatke brskalnika, se izgubijo.</p>
+    <form id="gp-diary-form">
+      <div class="gp-diary-row">
+        <input type="date" id="gp-d-date" required>
+        <input type="text" id="gp-d-species" list="gp-d-species-list" placeholder="Vrsta (neobvezno)">
+        <datalist id="gp-d-species-list"><option value="Jesenski goban (Jurček)"><option value="Poletni goban"><option value="Borov goban"><option value="Črni goban"><option value="Žametasti goban"><option value="Kostanjevka"><option value="Rdečebetka"><option value="Macesnova lupljivka"><option value="Navadna lisička"><option value="Lijasta lisička"><option value="Črna trobenta"><option value="Rumeni ježek"><option value="Modrikasta golobica"><option value="Užitna golobica"><option value="Zelena golobica"><option value="Užitna sirovka"><option value="Smrekova sirovka"><option value="Kravja mlečnica"><option value="Rdečkasta mušnica (Bisernica)"><option value="Orjaški dežnik (Marela)"><option value="Poljski kukmak"><option value="Pšenična koprenka"><option value="Sivorumena mraznica (Štorovka)"><option value="Zimska panjevka"><option value="Bukov ostrigar"><option value="Vijoličasta bledivka"><option value="Užitni smrček (Mavrah)"><option value="Koničasti smrček"><option value="Orjaška plešivka"><option value="Velika tintnica"><option value="Bezgova uhljevka"><option value="Betičasta prašnica"><option value="Veliki slinar"><option value="Brezov ded"><option value="Brezov turek"><option value="Hrastov turek"></datalist>
+      </div>
+      <div class="gp-diary-row">
+        <button type="button" class="gp-diary-btn" id="gp-d-geo">📍 Zabeleži lokacijo</button>
+        <span id="gp-d-geo-status" class="gp-msg" style="margin:0"></span>
+      </div>
+      <div class="gp-diary-row">
+        <label class="gp-diary-btn gp-diary-photobtn">📷 Fotografija
+          <input type="file" accept="image/*" capture="environment" id="gp-d-photo" hidden>
+        </label>
+        <img id="gp-d-photo-preview" class="gp-d-photo-preview" alt="">
+      </div>
+      <div class="gp-diary-row">
+        <textarea id="gp-d-notes" placeholder="Opombe — količina, mesto, opažanja …"></textarea>
+      </div>
+      <button type="submit" class="gp-cta gp-diary-submit">💾 Shrani najdbo</button>
+    </form>
+    <div id="gp-diary-list" class="gp-diary-list"></div>
+  </div>
   <h2 class="gp-h2">❓ Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Je gobarski indeks napoved najdbe?</summary><p>Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe.</p></details>
@@ -419,6 +1018,15 @@ body{
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+  <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
+  <div class="gp-sos-panel" id="gp-sos-panel">
+    <h4>Sum zastrupitve z gobami?</h4>
+    <p>Ob težavah z dihanjem, hudi omotici ali izgubi zavesti pokliči takoj <b>112</b>. Za posvet o zaužiti gobi
+    (tudi če se počutiš še dobro — nekateri simptomi pridejo z zamikom) pokliči Center za zastrupitve.</p>
+    <a class="gp-sos-call" href="tel:112">🚨 112 <small>Nujna medicinska pomoč</small></a>
+    <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
+    <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
+  </div>
 <script>
 (function(){
   var API="https://weatherireica1.filip-eremita.workers.dev";
@@ -539,6 +1147,109 @@ body{
       });
     });
   });
+
+  // SOS panel toggle
+  var sosBtn=document.getElementById("gp-sos-btn"), sosPanel=document.getElementById("gp-sos-panel");
+  if(sosBtn&&sosPanel){
+    sosBtn.addEventListener("click",function(e){e.stopPropagation();sosPanel.classList.toggle("open");});
+    document.addEventListener("click",function(e){
+      if(sosPanel.classList.contains("open")&&!sosPanel.contains(e.target)&&e.target!==sosBtn)sosPanel.classList.remove("open");
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var LS="mr_gobe_dnevnik";
+  var form=document.getElementById("gp-diary-form");
+  if(!form)return;
+  var listEl=document.getElementById("gp-diary-list");
+  var dateEl=document.getElementById("gp-d-date");
+  var spEl=document.getElementById("gp-d-species");
+  var notesEl=document.getElementById("gp-d-notes");
+  var geoBtn=document.getElementById("gp-d-geo");
+  var geoStatus=document.getElementById("gp-d-geo-status");
+  var photoInput=document.getElementById("gp-d-photo");
+  var photoPreview=document.getElementById("gp-d-photo-preview");
+  var pendingGeo=null, pendingPhoto=null;
+  dateEl.valueAsDate=new Date();
+
+  function load(){ try{return JSON.parse(localStorage.getItem(LS))||[];}catch(e){return [];} }
+  function save(arr){
+    try{ localStorage.setItem(LS, JSON.stringify(arr)); return true; }
+    catch(e){ geoStatus.textContent="Shramba brskalnika je polna — izbriši kakšno starejšo najdbo (morda ima veliko fotografijo)."; return false; }
+  }
+
+  geoBtn.addEventListener("click",function(){
+    if(!navigator.geolocation){ geoStatus.textContent="Brskalnik ne podpira lokacije."; return; }
+    geoStatus.textContent="Iščem lokacijo …";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      pendingGeo={lat:pos.coords.latitude, lon:pos.coords.longitude};
+      geoStatus.textContent="📍 "+pendingGeo.lat.toFixed(4)+", "+pendingGeo.lon.toFixed(4)+" zabeleženo";
+    },function(err){
+      geoStatus.textContent="Lokacije ni bilo mogoče pridobiti ("+(err&&err.message?err.message:"zavrnjeno")+").";
+    },{enableHighAccuracy:true,timeout:10000});
+  });
+
+  photoInput.addEventListener("change",function(){
+    var f=photoInput.files&&photoInput.files[0];
+    if(!f)return;
+    var img=new Image();
+    var reader=new FileReader();
+    reader.onload=function(e){
+      img.onload=function(){
+        var maxW=700, scale=Math.min(1,maxW/img.width);
+        var w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        var c=document.createElement("canvas"); c.width=w; c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        pendingPhoto=c.toDataURL("image/jpeg",0.72);
+        photoPreview.src=pendingPhoto; photoPreview.style.display="inline-block";
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  function mapLink(g){ return g?("https://www.google.com/maps?q="+g.lat+","+g.lon):null; }
+  function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function render(){
+    var arr=load();
+    if(!arr.length){ listEl.innerHTML='<div class="gp-diary-empty">Tvoj dnevnik je prazen — dodaj prvo najdbo zgoraj.</div>'; return; }
+    listEl.innerHTML=arr.map(function(e,i){
+      var thumb=e.photo?('<img class="gp-diary-thumb" src="'+e.photo+'" alt="">')
+                        :'<div class="gp-diary-thumb-ph">🍄</div>';
+      var loc=e.lat!=null?('<a href="'+mapLink(e)+'" target="_blank" rel="noopener">📍 '+e.lat.toFixed(4)+', '+e.lon.toFixed(4)+'</a>'):'';
+      return '<div class="gp-diary-entry">'+thumb+
+        '<div class="gp-diary-body"><div class="gp-diary-sp">'+esc(e.species||"Neznana vrsta")+'</div>'+
+        '<div class="gp-diary-meta">'+esc(e.date||"")+(loc?' · '+loc:'')+'</div>'+
+        (e.notes?('<div class="gp-diary-notes">'+esc(e.notes)+'</div>'):'')+'</div>'+
+        '<button type="button" class="gp-diary-del" data-i="'+i+'" aria-label="Izbriši">🗑</button></div>';
+    }).join("");
+    listEl.querySelectorAll(".gp-diary-del").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var arr2=load(); arr2.splice(parseInt(btn.getAttribute("data-i"),10),1); save(arr2); render();
+      });
+    });
+  }
+
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    var arr=load();
+    arr.unshift({
+      date:dateEl.value, species:spEl.value.trim(), notes:notesEl.value.trim(),
+      lat:pendingGeo?pendingGeo.lat:null, lon:pendingGeo?pendingGeo.lon:null,
+      photo:pendingPhoto, ts:new Date().toISOString()
+    });
+    if(save(arr)){
+      spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
+      pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
+      photoPreview.style.display="none"; photoPreview.src="";
+      render();
+    }
+  });
+
+  render();
 })();
 </script>
   <footer class="site-foot">
