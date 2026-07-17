@@ -124,6 +124,76 @@ locations:
     terrain: vlazna
     home: false
     protected: true
+  - name: "Vivodnik (Menina planina)"
+    lat: 46.255
+    lon: 14.735
+    elev_m: 1500
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Nova Štifta – Tirosek"
+    lat: 46.255
+    lon: 14.783
+    elev_m: 700
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Črnivec – Bočna"
+    lat: 46.225
+    lon: 14.715
+    elev_m: 850
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Podvolovljek"
+    lat: 46.4
+    lon: 14.73
+    elev_m: 900
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Rastke (Ljubenske Rastke)"
+    lat: 46.365
+    lon: 14.865
+    elev_m: 850
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Primož pri Ljubnem"
+    lat: 46.32
+    lon: 14.83
+    elev_m: 750
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Obronki Raduhe (Loka)"
+    lat: 46.4
+    lon: 14.71
+    elev_m: 900
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Bele Vode – Šentjanž"
+    lat: 46.31
+    lon: 15.02
+    elev_m: 1000
+    terrain: vlazna
+    home: false
+    protected: false
+  - name: "Matkov kot"
+    lat: 46.4
+    lon: 14.62
+    elev_m: 900
+    terrain: vlazna
+    home: false
+    protected: true
+  - name: "Robanov kot"
+    lat: 46.4
+    lon: 14.66
+    elev_m: 850
+    terrain: vlazna
+    home: false
+    protected: true
 
 # Vrste. gets_index=true dobijo gobarski indeks; ostale so referenca / dvojnice.
 species:
