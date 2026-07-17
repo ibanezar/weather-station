@@ -392,13 +392,40 @@ PAGE_JS = """<script>
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
   }
   function hexToRgb(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  function locDetailHtml(loc, meta){
+    var html="";
+    var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
+    html+='<h3>'+loc.name+' — 7-dnevni indeks po vrstah</h3>';
+    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
+      '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
+      '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
+      '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
+    html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
+    loc.days.forEach(function(day){var dt=new Date(day.date);
+      html+='<th>'+(day===loc.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
+    html+='</tr></thead><tbody>';
+    top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
+      loc.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
+        var v=s?s.index:0;var c=levelColor(v);var rgb=hexToRgb(c);
+        var alpha=(0.12+0.55*Math.min(100,v)/100).toFixed(2);
+        html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
+      html+='</tr>';});
+    html+='</tbody></table></div>';
+    html+='<h3>Danes — zakaj (razlage)</h3><ul style="color:var(--muted);font-size:.88rem;line-height:1.7">';
+    loc.days[0].species.slice(0,6).forEach(function(s){var m=meta[s.id]||{};
+      html+='<li><b style="color:var(--text)">'+(m.name_sl||s.id)+' — '+s.index+'%</b>: '+s.explanation+
+        (m.doubles?' <span class="gp-dbl">⚠ dvojnica: '+m.doubles+'</span>':'')+'</li>';});
+    html+='</ul>';
+    return html;
+  }
   function render(d){
     var meta=d.species_meta||{};
-    var home=(d.locations||[]).filter(function(l){return l.home;})[0]||d.locations[0];
+    var locs=d.locations||[];
+    var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";
     // today per forest — same bar-meter cards as the free section
     html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
-    (d.locations||[]).slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
+    locs.slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
       .forEach(function(l){var o=l.days[0];var top=o.species[0];var col=levelColor(o.overall);
         html+='<div class="gp-forest"><div class="gp-forest-head"><span class="gp-forest-nm">'+
           (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
@@ -407,32 +434,21 @@ PAGE_JS = """<script>
           o.level+'</span></div><div class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
           '</div></div>';});
     html+='</div>';
-    // 7-day matrix for home, top 8 species by today's index
-    var top=home.days[0].species.slice(0,8).map(function(s){return s.id;});
-    html+='<h3>'+home.name+' — 7-dnevni indeks po vrstah</h3>';
-    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
-      '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
-      '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
-      '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
-    html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
-    home.days.forEach(function(day){var dt=new Date(day.date);
-      html+='<th>'+(day===home.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
-    html+='</tr></thead><tbody>';
-    top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
-      home.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
-        var v=s?s.index:0;var c=levelColor(v);var rgb=hexToRgb(c);
-        var alpha=(0.12+0.55*Math.min(100,v)/100).toFixed(2);
-        html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
-      html+='</tr>';});
-    html+='</tbody></table></div>';
-    // today's carriers with explanation
-    html+='<h3>Danes — zakaj (razlage)</h3><ul style="color:var(--muted);font-size:.88rem;line-height:1.7">';
-    home.days[0].species.slice(0,6).forEach(function(s){var m=meta[s.id]||{};
-      html+='<li><b style="color:var(--text)">'+(m.name_sl||s.id)+' — '+s.index+'%</b>: '+s.explanation+
-        (m.doubles?' <span class="gp-dbl">⚠ dvojnica: '+m.doubles+'</span>':'')+'</li>';});
-    html+='</ul>';
+    // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
+    html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
+    html+='<select id="gp-loc-select" class="gp-diary-btn" style="font-size:.9rem">';
+    locs.forEach(function(l,i){
+      html+='<option value="'+i+'"'+(l===home?' selected':'')+'>'+l.name+' ('+l.days[0].overall+' %)</option>';
+    });
+    html+='</select>';
+    html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
     content.hidden=false;lock.hidden=true;
+    var sel=document.getElementById("gp-loc-select");
+    var detail=document.getElementById("gp-loc-detail");
+    if(sel){sel.addEventListener("change",function(){
+      detail.innerHTML=locDetailHtml(locs[parseInt(sel.value,10)], meta);
+    });}
   }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
