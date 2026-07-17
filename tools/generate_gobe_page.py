@@ -168,7 +168,13 @@ body{
     url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
 .gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
-.gp-ring{display:block}
+/* No width/height attrs on the <svg> itself — those are fixed pixel values
+   that ignore .gp-gauge-wrap's own size, so the ring silently overflowed its
+   104px mobile box (still rendering at its old 132px intrinsic size) while
+   the number, correctly scoped via inset:0, stayed centered on the real
+   (smaller) box. Filling 100% here keeps the ring locked to whatever size
+   the wrapper actually is at every breakpoint. */
+.gp-ring{display:block;width:100%;height:100%}
 .gp-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:11}
 .gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
 /* % stacked under the number (not beside it) — any side-by-side arrangement
@@ -1033,7 +1039,7 @@ def gauge_svg(pct):
     circ = 2 * math.pi * r
     off = circ * (1 - max(0, min(100, pct)) / 100)
     color = level_color(pct)
-    return (f'<svg viewBox="0 0 128 128" class="gp-ring" width="132" height="132" aria-hidden="true">'
+    return (f'<svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true">'
             f'<circle cx="64" cy="64" r="{r}" class="gp-ring-bg"/>'
             f'<circle cx="64" cy="64" r="{r}" class="gp-ring-fg" stroke="{color}" '
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
