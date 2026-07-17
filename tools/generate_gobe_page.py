@@ -24,6 +24,7 @@ Usage:
   python3 tools/generate_gobe_page.py
 """
 import datetime as _dt
+import json as _json_mod
 import os
 import sys
 import urllib.error
@@ -1045,6 +1046,32 @@ def build_body(rules, premium, free):
     vs_html = ('  <div class="gp-vs-grid">\n' + "\n".join(vs_cards) + "\n  </div>\n"
                + ("\n".join(vs_notes) if vs_notes else ""))
 
+    # ── photo credits (CC BY / CC BY-SA / GFDL require visible attribution) ───
+    credits_path = os.path.join(ROOT, "gobarska-napoved", "img", "dvojnice", "CREDITS.json")
+    try:
+        with open(credits_path, encoding="utf-8") as f:
+            photo_credits = _json_mod.load(f)
+    except (OSError, ValueError):
+        photo_credits = {}
+    credit_rows = []
+    for fn in sorted(photo_credits, key=lambda k: photo_credits[k]["sl"]):
+        c = photo_credits[fn]
+        credit_rows.append(
+            f'      <tr><td>{_esc(c["sl"])}<br><span class="lat">{_esc(c["latin"])}</span></td>'
+            f'<td>{_esc(c["artist"])}</td>'
+            f'<td>{_esc(c["license"])}</td>'
+            f'<td><a href="{_esc(c["source_url"])}" target="_blank" rel="noopener">Wikimedia Commons</a></td></tr>')
+    credits_html = (
+        '  <details class="gp-collapse">\n'
+        f'    <summary>Viri fotografij <small>({len(credit_rows)})</small></summary>\n'
+        '    <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami '
+        '(CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>\n'
+        '    <div class="gp-scroll" style="max-height:320px"><table class="gp-sptable"><thead><tr>'
+        '<th>Vrsta</th><th>Avtor/ica</th><th>Licenca</th><th>Vir</th></tr></thead><tbody>\n'
+        + "\n".join(credit_rows) + "\n    </tbody></table></div>\n"
+        '  </details>'
+    ) if credit_rows else ""
+
     # ── terrain map (free) ────────────────────────────────────────────────────
     terr_items = []
     for t in rules.get("terrains", []):
@@ -1177,12 +1204,12 @@ def build_body(rules, premium, free):
   </details>
   <h2 class="gp-h2" id="dvojnice">⚠️ Nevarne dvojnice — primerjava</h2>
   <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
-  Fotografije se bodo dodale sproti — do takrat vsaka kartica prikaže ime in besedilno razlago.
   <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
   <details class="gp-collapse">
     <summary>Prikaži primerjave <small>({len(vs_cards)} parov)</small></summary>
 {vs_html}
   </details>
+{credits_html}
   <h2 class="gp-h2" id="tereni">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
