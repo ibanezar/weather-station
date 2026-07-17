@@ -330,7 +330,7 @@ body{
 .gp-sos-call.alt{background:var(--badge-bg);border-color:var(--card-border)}
 
 /* ── Dvojnik: edible-vs-double comparison cards ── */
-.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem}
+.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem;clear:both}
 .gp-vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem;
   box-shadow:var(--card-shadow)}
 .gp-vs-pair{display:flex;align-items:center;gap:.5rem}
@@ -448,12 +448,15 @@ body{
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;gap:.3rem;background:var(--card-bg);
-  border:1px solid var(--card-border);border-radius:14px;padding:1.1rem 1.2rem;
+.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
+  border:1px solid var(--card-border);border-radius:14px;
   text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
   transition:border-color .15s ease,transform .15s ease}
 .gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-ic{font-size:1.6rem}
+.gp-hub-photo{height:84px}
+.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
+.gp-hub-ic{font-size:1.3rem}
 .gp-hub-title{font-weight:700;font-size:1.02rem}
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
@@ -1097,21 +1100,27 @@ def gauge_svg(pct):
 
 
 GOBE_HUB = [
-    # (url slug, icon, title, one-line teaser, quicknav label)
-    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid"),
-    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar"),
-    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend"),
-    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst"),
-    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice"),
+    # (url slug, icon, title, one-line teaser, quicknav label, thumbnail)
+    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid",
+     "gozdna-pot-dron.jpg"),
+    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar",
+     "gozd-mah-banner.jpg"),
+    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend",
+     "sluzavke-banner.jpg"),
+    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst",
+     "megla-jutro-banner.jpg"),
+    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice",
+     "sluzavka-portret.jpg"),
 ]
 
 
 def hub_cards_html():
     cards = "\n".join(
         f'    <a class="gp-hub-card" href="/gobarska-napoved/{slug}/">'
-        f'<span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
-        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></a>'
-        for slug, ic, title, sub, _ in GOBE_HUB
+        f'<div class="gp-hub-photo"><img src="/gobarska-napoved/img/foto/{thumb}" loading="lazy" alt=""></div>'
+        f'<div class="gp-hub-body"><span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
+        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></div></a>'
+        for slug, ic, title, sub, _, thumb in GOBE_HUB
     )
     return f'  <div class="gp-hub">\n{cards}\n  </div>'
 
@@ -1162,8 +1171,14 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
 
 
 def build_koledar_page(cal_rows, month):
-    body = (f'  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
-            f'  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+    body = ('''  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Dve gobi v mahu, avtorski makro posnetek">
+    <figcaption>📷 Avtorski makro posnetek — jesenska rast v mahu</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
+            '  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
     return subpage_shell(
         "koledar", "Koledar gobarske sezone po mesecih",
         "Kateri užitni gobi so po mesecih v sezoni v Zgornji Savinjski dolini — pregled po lokalni bazi vrst.",
@@ -1171,7 +1186,13 @@ def build_koledar_page(cal_rows, month):
 
 
 def build_trend_page():
-    body = ('  <p class="post-meta">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj '
+    body = ('''  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/sluzavke-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Makro posnetek sluzavk na odmrlem lesu">
+    <figcaption>📷 Avtorski makro posnetek — sluzavke (Myxomycetes) na odmrli veji</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj '
             '(backtest) z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je '
             'poudarjena. Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo '
             'razlikuje od dnevne napovedi.</p>\n'
@@ -1198,7 +1219,13 @@ def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
 
 
 def build_dvojnice_page(vs_html, vs_count, credits_html):
-    body = ('  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
+    body = ('''  <figure class="gp-photo-card">
+    <img src="/gobarska-napoved/img/foto/sluzavka-portret.jpg" loading="lazy" width="640" height="853"
+      alt="Avtorski makro posnetek sluzavke v gozdu">
+    <figcaption>📷 Avtorski makro posnetek — tudi navidez podobne gobe znajo biti povsem različne vrste</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
             'ločevanje. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
             + vs_html + "\n" + credits_html)
     return subpage_shell(

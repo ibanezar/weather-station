@@ -223,7 +223,7 @@ body{
 .gp-sos-call.alt{background:var(--badge-bg);border-color:var(--card-border)}
 
 /* ── Dvojnik: edible-vs-double comparison cards ── */
-.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem}
+.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem;clear:both}
 .gp-vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem;
   box-shadow:var(--card-shadow)}
 .gp-vs-pair{display:flex;align-items:center;gap:.5rem}
@@ -341,12 +341,15 @@ body{
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;gap:.3rem;background:var(--card-bg);
-  border:1px solid var(--card-border);border-radius:14px;padding:1.1rem 1.2rem;
+.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
+  border:1px solid var(--card-border);border-radius:14px;
   text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
   transition:border-color .15s ease,transform .15s ease}
 .gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-ic{font-size:1.6rem}
+.gp-hub-photo{height:84px}
+.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
+.gp-hub-ic{font-size:1.3rem}
 .gp-hub-title{font-weight:700;font-size:1.02rem}
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
@@ -465,6 +468,11 @@ body{
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Koledar gobarske sezone po mesecih</h1>
+  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Dve gobi v mahu, avtorski makro posnetek">
+    <figcaption>📷 Avtorski makro posnetek — jesenska rast v mahu</figcaption>
+  </figure>
   <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>
   <table class="stats">
       <tr><th>Januar</th><td style="text-align:left">Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
