@@ -216,6 +216,16 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+
+/* ── Loading skeleton — shown to premium users the instant a token is
+   found, while /premium/forecast is still in flight, so they never see
+   the "Naroči se" upsell for content they already own. ── */
+.gp-loadskel-group{display:grid;gap:.6rem;margin:.6rem 0}
+.gp-loadskel{border-radius:12px;background:linear-gradient(90deg,var(--card-bg) 25%,
+    rgba(255,255,255,.07) 37%,var(--card-bg) 63%);background-size:400% 100%;
+  animation:gp-shimmer 1.4s ease infinite}
+@keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+@media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
@@ -755,14 +765,23 @@ PAGE_JS = """<script>
     if(navPricing)navPricing.hidden=true;
     if(heroUnlock)heroUnlock.hidden=true;
   }
+  function skeletonHtml(){
+    var block=function(h){return '<div class="gp-loadskel" style="height:'+h+'"></div>';};
+    return '<div class="gp-loadskel-group">'+block('1.4rem')+block('5.2rem')+block('5.2rem')+
+      block('2.6rem')+block('9rem')+block('9rem')+'</div>';
+  }
   var t=tok();
   if(t){
+    // A paying user shouldn't see the "Naroči se" upsell while their own
+    // data is still in flight — swap straight to a skeleton instead of
+    // flashing the paywall first.
+    if(lock)lock.hidden=true;
+    if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
       .then(function(v){
         if(!v||!v.ok)return;
         hidePricing();
-        if(lock)lock.hidden=true;
         if(statusEl){
           var planTxt=v.plan==="sezona"?"sezonska naročnina":"mesečna naročnina";
           statusEl.hidden=false;
@@ -773,7 +792,13 @@ PAGE_JS = """<script>
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
       .then(function(d){render(d);initIdentify(t);})
-      .catch(function(){});
+      .catch(function(){
+        // Token turned out to be invalid/expired or the fetch genuinely
+        // failed — fall back to the real paywall instead of leaving the
+        // skeleton spinning forever.
+        if(content){content.hidden=true;content.innerHTML="";}
+        if(lock)lock.hidden=false;
+      });
   }
   var f=document.getElementById("gp-login");
   if(f){f.addEventListener("submit",function(e){e.preventDefault();

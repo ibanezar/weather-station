@@ -109,6 +109,16 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+
+/* ── Loading skeleton — shown to premium users the instant a token is
+   found, while /premium/forecast is still in flight, so they never see
+   the "Naroči se" upsell for content they already own. ── */
+.gp-loadskel-group{display:grid;gap:.6rem;margin:.6rem 0}
+.gp-loadskel{border-radius:12px;background:linear-gradient(90deg,var(--card-bg) 25%,
+    rgba(255,255,255,.07) 37%,var(--card-bg) 63%);background-size:400% 100%;
+  animation:gp-shimmer 1.4s ease infinite}
+@keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+@media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
