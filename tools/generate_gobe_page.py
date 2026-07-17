@@ -171,7 +171,7 @@ body{
   border:0;cursor:pointer;line-height:1.2}
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
-.gp-forests{display:grid;gap:.6rem;margin:.6rem 0 1.2rem}
+.gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
 .gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
 .gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
 .gp-forest-nm{font-weight:700;font-size:.95rem}
@@ -321,6 +321,23 @@ body{
 .gp-trend-legend i{width:1.1rem;height:3px;border-radius:2px;display:inline-block}
 .gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
 .gp-trend-best b{color:var(--text)}
+
+/* ── Hitri meni (sticky) + zložljive (details) sekcije ── */
+.gp-quicknav{position:sticky;top:0;z-index:20;display:flex;gap:.4rem;overflow-x:auto;
+  padding:.6rem 0;margin:.2rem 0 1rem;background:var(--bg);border-bottom:1px solid var(--border)}
+.gp-quicknav::-webkit-scrollbar{height:5px}
+.gp-quicknav a{flex:0 0 auto;background:var(--badge-bg);border:1px solid var(--card-border);
+  color:var(--text);text-decoration:none;font-size:.8rem;padding:.35rem .75rem;border-radius:20px;white-space:nowrap}
+.gp-quicknav a:hover{border-color:var(--blue);color:var(--blue)}
+.gp-collapse{border:1px solid var(--card-border);border-radius:14px;margin:.6rem 0 1rem;overflow:hidden}
+.gp-collapse summary{cursor:pointer;list-style:none;padding:.8rem 1rem;font-weight:700;
+  display:flex;align-items:center;justify-content:space-between;background:var(--card-bg)}
+.gp-collapse summary::-webkit-details-marker{display:none}
+.gp-collapse summary::after{content:"▾";color:var(--muted);transition:transform .2s ease;margin-left:.6rem}
+.gp-collapse[open] summary::after{transform:rotate(180deg)}
+.gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
+.gp-collapse > :not(summary){padding:0 1rem 1rem}
+.gp-collapse[open] > :not(summary){padding-top:.3rem}
 </style>"""
 
 # ── client-side paywall JS ────────────────────────────────────────────────────
@@ -1065,7 +1082,7 @@ def build_body(rules, premium, free):
          "Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob "
          "Savinji. Ni uradna napoved ARSO."),
     ]
-    faq_html = ("  <h2 class=\"gp-h2\">❓ Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+    faq_html = ("  <h2 class=\"gp-h2\" id=\"faq\">❓ Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
     ) + "\n  </div>")
 
@@ -1119,33 +1136,54 @@ def build_body(rules, premium, free):
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {hero}
-  <h2 class="gp-h2">🌲 Danes po gozdovih</h2>
+  <nav class="gp-quicknav" aria-label="Hitri meni">
+    <a href="#gozdovi">🌲 Gozdovi</a>
+    <a href="#premium">🔓 Premium</a>
+    <a href="#pricing">🎟️ Cenik</a>
+    <a href="#koledar">📅 Koledar</a>
+    <a href="#trend">📊 Trend</a>
+    <a href="#baza-vrst">📖 Baza vrst</a>
+    <a href="#dvojnice">⚠️ Dvojnice</a>
+    <a href="#tereni">🗺️ Tereni</a>
+    <a href="#dnevnik">📔 Dnevnik</a>
+    <a href="#faq">❓ FAQ</a>
+  </nav>
+  <h2 class="gp-h2" id="gozdovi">🌲 Danes po gozdovih</h2>
   <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
 {forests_html}
-  <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
 {pricing}
-  <h2 class="gp-h2">📅 Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
+  <h2 class="gp-h2" id="koledar">📅 Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
   <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
+  <details class="gp-collapse">
+    <summary>Koledar po mesecih <small>(12 vrstic)</small></summary>
 {calendar_html}
-  <h2 class="gp-h2">📊 Sezona v primerjavi s preteklimi leti</h2>
+  </details>
+  <h2 class="gp-h2" id="trend">📊 Sezona v primerjavi s preteklimi leti</h2>
   <p class="archive-intro">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj (backtest)
   z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je poudarjena.
   Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo razlikuje od dnevne napovedi.</p>
   <div id="gp-trend" class="gp-trend-wrap">
     <div class="gp-msg">Nalagam …</div>
   </div>
-  <h2 class="gp-h2">📖 Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
+  <h2 class="gp-h2" id="baza-vrst">📖 Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
+  <details class="gp-collapse">
+    <summary>Prikaži celotno bazo <small>({len(species)} vrst)</small></summary>
 {species_table}
-  <h2 class="gp-h2">⚠️ Nevarne dvojnice — primerjava</h2>
+  </details>
+  <h2 class="gp-h2" id="dvojnice">⚠️ Nevarne dvojnice — primerjava</h2>
   <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
   Fotografije se bodo dodale sproti — do takrat vsaka kartica prikaže ime in besedilno razlago.
   <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
+  <details class="gp-collapse">
+    <summary>Prikaži primerjave <small>({len(vs_cards)} parov)</small></summary>
 {vs_html}
-  <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
+  </details>
+  <h2 class="gp-h2" id="tereni">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
   <div class="card" style="margin:1rem 0">
@@ -1163,7 +1201,7 @@ def build_body(rules, premium, free):
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
-  <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
+  <h2 class="gp-h2" id="dnevnik">📔 Gobarjev dnevnik</h2>
 {diary_html}
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
