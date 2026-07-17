@@ -164,7 +164,8 @@ body{
 }
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(135deg,rgba(8,14,7,.82),rgba(6,10,6,.94)),url('/og/bg/misty-valley.jpg') center/cover}
+  background:linear-gradient(200deg,rgba(8,14,7,.45) 0%,rgba(6,10,6,.72) 55%,rgba(6,10,6,.92) 100%),
+    url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
 .gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 .gp-ring{display:block}
@@ -388,11 +389,16 @@ body{
 .gp-map-hint b{font-size:1.05rem}
 .gp-map-hint span{font-size:.85rem;color:var(--muted)}
 .gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
-.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted)}
+.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted);clear:both}
 .gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
+.gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
+  border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
+.gp-photo-card img{display:block;width:100%;height:auto}
+.gp-photo-card figcaption{padding:.5rem .7rem;font-size:.72rem;color:var(--muted);background:var(--card-bg)}
+@media (max-width:760px){.gp-photo-card{float:none;width:100%;margin:0 0 1rem}}
 .gp-map-pop{font-family:inherit;min-width:150px}
 .gp-map-pop b{font-size:.92rem}
 .gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
@@ -1078,7 +1084,12 @@ def build_zemljevid_page(premium, rules):
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
 
-    inner = f'''  <p class="post-meta">Vseh {pick_count} nabiralnih območij Zgornje Savinjske doline na eni karti,
+    inner = f'''  <figure class="gp-photo-card">
+    <img src="/gobarska-napoved/img/foto/gozdna-pot-dron.jpg" loading="lazy" width="640" height="853"
+      alt="Dronski posnetek gozdne poti v Zgornji Savinjski dolini">
+    <figcaption>📷 Avtorski dronski posnetek — gozdna pot skozi eno od nabiralnih območij</figcaption>
+  </figure>
+  <p class="post-meta">Vseh {pick_count} nabiralnih območij Zgornje Savinjske doline na eni karti,
   obarvanih po <strong>današnjem gobarskem indeksu</strong>. Klikni oznako za podrobnosti. Zaščitena območja
   (nabiranje prepovedano) so označena posebej. Oznake so <strong>širša območja</strong>, ne točne najdbe.</p>
   <div class="gp-map-legend">
