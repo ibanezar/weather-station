@@ -464,6 +464,7 @@ body{
 .gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
 .gp-map-pop .idx{font-weight:800;font-size:1.1rem}
 .gp-map-pop .sp{font-size:.82rem;margin-top:.2rem}
+.gp-map-pop .sp-list{list-style:none;margin:.3rem 0 0;padding:0;font-size:.8rem;line-height:1.5}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
 .leaflet-popup-content{margin:.6rem .8rem}
 
@@ -1118,7 +1119,7 @@ def build_trend_page():
         "Sezonski trend", body, extra_js=TREND_JS)
 
 
-def build_baza_vrst_page(species_table, species_count):
+def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
     body = ('''  <figure class="gp-banner">
     <img src="/gobarska-napoved/img/foto/megla-jutro-banner.jpg" loading="lazy" width="1400" height="600"
       alt="Jutranja megla nad gozdovi Zgornje Savinjske doline">
@@ -1126,7 +1127,7 @@ def build_baza_vrst_page(species_table, species_count):
   </figure>
   <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '''
             'do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>\n'
-            + species_table)
+            + species_table + "\n" + vrste_credits_html)
     return subpage_shell(
         "baza-vrst", f"Baza {species_count} vrst gob — užitnost in nevarne dvojnice",
         f"Referenčna baza {species_count} vrst gob Zgornje Savinjske doline: užitnost, sezona in nevarne dvojnice.",
@@ -1152,12 +1153,12 @@ def build_zemljevid_page(premium, rules):
     pts = []
     for loc in premium["locations"]:
         d0 = loc["days"][0]
-        top = d0["species"][0] if d0.get("species") else None
+        top3 = d0.get("species", [])[:3]
         pts.append({
             "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
             "elev": loc["elev_m"], "terrain": loc.get("terrain"),
             "idx": d0["overall"], "lvl": d0["level"],
-            "sp": meta[top["id"]]["name_sl"] if top and top["id"] in meta else None,
+            "sp": [meta[s["id"]]["name_sl"] for s in top3 if s["id"] in meta],
             "prot": False,
         })
     for loc in rules.get("locations", []):
@@ -1165,7 +1166,7 @@ def build_zemljevid_page(premium, rules):
             pts.append({
                 "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
                 "elev": loc.get("elev_m"), "terrain": loc.get("terrain"),
-                "idx": None, "lvl": None, "sp": None, "prot": True,
+                "idx": None, "lvl": None, "sp": [], "prot": True,
             })
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
@@ -1218,7 +1219,7 @@ def build_zemljevid_page(premium, rules):
       h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🚫 Zaščiteno — nabiranje prepovedano</div>';
     }else{
       h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
-      if(p.sp)h+='<div class="sp">🍄 '+esc(p.sp)+'</div>';
+      if(p.sp&&p.sp.length)h+='<ul class="sp-list">'+p.sp.map(function(s){return'<li>🍄 '+esc(s)+'</li>';}).join('')+'</ul>';
     }
     h+='</div>';
     return h;
@@ -1265,6 +1266,37 @@ def build_zemljevid_page(premium, rules):
         f"Interaktivni zemljevid {pick_count} nabiralnih območij Zgornje Savinjske doline, obarvanih po današnjem "
         "gobarskem indeksu. Vključuje zaščitena območja, kjer je nabiranje prepovedano.",
         "Zemljevid", inner, extra_js=map_js)
+
+
+def photo_credits_html(img_dir):
+    """CC BY / CC BY-SA / GFDL all require visible attribution — render the
+    CREDITS.json sitting next to gobarska-napoved/img/<img_dir>/*.jpg as a
+    collapsible source table."""
+    credits_path = os.path.join(ROOT, "gobarska-napoved", "img", img_dir, "CREDITS.json")
+    try:
+        with open(credits_path, encoding="utf-8") as f:
+            photo_credits = _json_mod.load(f)
+    except (OSError, ValueError):
+        photo_credits = {}
+    credit_rows = []
+    for fn in sorted(photo_credits, key=lambda k: photo_credits[k]["sl"]):
+        c = photo_credits[fn]
+        credit_rows.append(
+            f'      <tr><td>{_esc(c["sl"])}<br><span class="lat">{_esc(c["latin"])}</span></td>'
+            f'<td>{_esc(c["artist"])}</td>'
+            f'<td>{_esc(c["license"])}</td>'
+            f'<td><a href="{_esc(c["source_url"])}" target="_blank" rel="noopener">Wikimedia Commons</a></td></tr>')
+    if not credit_rows:
+        return ""
+    return (
+        '  <details class="gp-collapse">\n'
+        f'    <summary>Viri fotografij <small>({len(credit_rows)})</small></summary>\n'
+        '    <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami '
+        '(CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>\n'
+        '    <div class="gp-scroll" style="max-height:320px"><table class="gp-sptable"><thead><tr>'
+        '<th>Vrsta</th><th>Avtor/ica</th><th>Licenca</th><th>Vir</th></tr></thead><tbody>\n'
+        + "\n".join(credit_rows) + "\n    </tbody></table></div>\n"
+        '  </details>')
 
 
 def build_body(rules, premium, free):
@@ -1484,30 +1516,8 @@ def build_body(rules, premium, free):
                + ("\n".join(vs_notes) if vs_notes else ""))
 
     # ── photo credits (CC BY / CC BY-SA / GFDL require visible attribution) ───
-    credits_path = os.path.join(ROOT, "gobarska-napoved", "img", "dvojnice", "CREDITS.json")
-    try:
-        with open(credits_path, encoding="utf-8") as f:
-            photo_credits = _json_mod.load(f)
-    except (OSError, ValueError):
-        photo_credits = {}
-    credit_rows = []
-    for fn in sorted(photo_credits, key=lambda k: photo_credits[k]["sl"]):
-        c = photo_credits[fn]
-        credit_rows.append(
-            f'      <tr><td>{_esc(c["sl"])}<br><span class="lat">{_esc(c["latin"])}</span></td>'
-            f'<td>{_esc(c["artist"])}</td>'
-            f'<td>{_esc(c["license"])}</td>'
-            f'<td><a href="{_esc(c["source_url"])}" target="_blank" rel="noopener">Wikimedia Commons</a></td></tr>')
-    credits_html = (
-        '  <details class="gp-collapse">\n'
-        f'    <summary>Viri fotografij <small>({len(credit_rows)})</small></summary>\n'
-        '    <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami '
-        '(CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>\n'
-        '    <div class="gp-scroll" style="max-height:320px"><table class="gp-sptable"><thead><tr>'
-        '<th>Vrsta</th><th>Avtor/ica</th><th>Licenca</th><th>Vir</th></tr></thead><tbody>\n'
-        + "\n".join(credit_rows) + "\n    </tbody></table></div>\n"
-        '  </details>'
-    ) if credit_rows else ""
+    credits_html = photo_credits_html("dvojnice")
+    vrste_credits_html = photo_credits_html("vrste")
 
     # ── terrain map (free) ────────────────────────────────────────────────────
     terr_items = []
@@ -1664,7 +1674,7 @@ def build_body(rules, premium, free):
         "cal_rows": cal_rows, "month": month,
         "species_table": species_table, "species_count": len(species),
         "vs_html": vs_html, "vs_count": len(vs_cards),
-        "credits_html": credits_html,
+        "credits_html": credits_html, "vrste_credits_html": vrste_credits_html,
     }
     return body, subpages
 
@@ -1691,7 +1701,7 @@ def main():
     build_zemljevid_page(premium, rules)
     build_koledar_page(sub["cal_rows"], sub["month"])
     build_trend_page()
-    build_baza_vrst_page(sub["species_table"], sub["species_count"])
+    build_baza_vrst_page(sub["species_table"], sub["species_count"], sub["vrste_credits_html"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
     print(f"  → 5 podstrani (zemljevid, koledar, trend, baza-vrst, dvojnice)")
 
