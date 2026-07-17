@@ -74,6 +74,45 @@ def _esc(s):
     return (str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
+import re as _re
+import unicodedata as _ud
+
+_DOUBLE_PAT = _re.compile(r"^(.+?)\s*\(([^)]+)\)\s*[–-]\s*(.+)$")
+
+
+def _slug(name):
+    s = _ud.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    return _re.sub(r"[^a-zA-Z0-9]+", "-", s).strip("-").lower()
+
+
+def parse_double(text):
+    """'<Ime> (<Latin>) – <opis>' -> (name, latin, [bullets]); None if the
+    text doesn't follow that pattern (still shown as a plain info line)."""
+    m = _DOUBLE_PAT.match(text or "")
+    if not m:
+        return None
+    name, latin, desc = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
+    bullets = [b.strip().rstrip(".") for b in _re.split(r";", desc) if b.strip()][:3]
+    return name, latin, bullets
+
+
+def double_danger(text):
+    """Danger tier of the *double* (not the edible species itself), for
+    sorting/badging — worst-case wording wins if multiple appear."""
+    t = (text or "").lower()
+    if "smrtno strupen" in t:
+        return "smrtno strupena"
+    if "zelo strupen" in t:
+        return "zelo strupena"
+    if "strupen" in t:
+        return "strupena"
+    if "zaščiten" in t:
+        return "zaščitena"
+    if "neužit" in t:
+        return "neužitna"
+    return "neužitna"
+
+
 def season_months(sp):
     """Set of 1-12 month numbers the species' season window covers."""
     out = set()
@@ -195,6 +234,68 @@ body{
 .gp-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
+
+/* ── SOS floating action button ── */
+.gp-sos-fab{position:fixed;right:1.1rem;bottom:1.1rem;z-index:60;width:3.1rem;height:3.1rem;border-radius:50%;
+  background:#dc2626;color:#fff;border:2px solid rgba(255,255,255,.25);font-size:1.4rem;cursor:pointer;
+  box-shadow:0 4px 18px rgba(220,38,38,.45);display:flex;align-items:center;justify-content:center;line-height:1}
+.gp-sos-fab:hover{background:#b91c1c}
+.gp-sos-panel{position:fixed;right:1.1rem;bottom:4.6rem;z-index:60;width:min(300px,calc(100vw - 2.2rem));
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1rem;
+  box-shadow:var(--card-shadow);display:none}
+.gp-sos-panel.open{display:block}
+.gp-sos-panel h4{margin:0 0 .5rem;font-size:.95rem}
+.gp-sos-panel p{font-size:.8rem;color:var(--muted);margin:0 0 .7rem;line-height:1.5}
+.gp-sos-call{display:flex;align-items:center;gap:.6rem;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);
+  border-radius:10px;padding:.55rem .8rem;text-decoration:none;color:var(--text);font-weight:700;margin-bottom:.5rem}
+.gp-sos-call small{display:block;font-weight:500;color:var(--muted);font-size:.72rem}
+.gp-sos-call.alt{background:var(--badge-bg);border-color:var(--card-border)}
+
+/* ── Dvojnik: edible-vs-double comparison cards ── */
+.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem}
+.gp-vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem;
+  box-shadow:var(--card-shadow)}
+.gp-vs-pair{display:flex;align-items:center;gap:.5rem}
+.gp-vs-side{flex:1;min-width:0;text-align:center}
+.gp-vs-photo{width:100%;aspect-ratio:1/1;border-radius:10px;background:var(--badge-bg);
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;overflow:hidden;margin-bottom:.35rem}
+.gp-vs-photo img{width:100%;height:100%;object-fit:cover}
+.gp-vs-name{font-size:.82rem;font-weight:700;line-height:1.25}
+.gp-vs-lat{font-size:.68rem;color:var(--muted);font-style:italic}
+.gp-vs-x{flex:0 0 auto;font-weight:800;color:var(--muted);font-size:.8rem;padding:0 .2rem}
+.gp-vs-diff{margin:.6rem 0 0;padding-left:1.1rem;font-size:.8rem;color:var(--muted);line-height:1.55}
+.gp-vs-note{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.6rem .8rem;
+  font-size:.83rem;color:var(--muted);margin-bottom:.5rem}
+.gp-vs-note b{color:var(--text)}
+
+/* ── Gobarjev dnevnik (local-only GPS+photo log) ── */
+.gp-diary{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-diary-priv{font-size:.78rem;color:var(--muted);margin-bottom:.7rem}
+.gp-diary-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.55rem;align-items:center}
+.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary textarea{
+  background:var(--badge-bg);border:1px solid var(--card-border);border-radius:9px;
+  padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit}
+.gp-diary-row input[type=text]{flex:1;min-width:160px}
+.gp-diary textarea{width:100%;min-height:4.5rem;resize:vertical;box-sizing:border-box}
+.gp-diary-btn{background:var(--badge-bg);border:1px solid var(--card-border);color:var(--text);
+  border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
+.gp-diary-photobtn{display:inline-block}
+.gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
+.gp-diary-submit{margin-top:.2rem}
+.gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
+.gp-diary-entry{display:flex;gap:.7rem;background:var(--fc-bg);border:1px solid var(--fc-border);
+  border-radius:10px;padding:.6rem .7rem}
+.gp-diary-thumb{width:3.6rem;height:3.6rem;border-radius:8px;object-fit:cover;flex:0 0 auto;background:var(--badge-bg)}
+.gp-diary-thumb-ph{width:3.6rem;height:3.6rem;border-radius:8px;flex:0 0 auto;background:var(--badge-bg);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.gp-diary-body{flex:1;min-width:0}
+.gp-diary-sp{font-weight:700;font-size:.9rem}
+.gp-diary-meta{font-size:.76rem;color:var(--muted)}
+.gp-diary-meta a{color:var(--cyan)}
+.gp-diary-notes{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+.gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
+.gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
 </style>"""
 
 # ── client-side paywall JS ────────────────────────────────────────────────────
@@ -319,6 +420,111 @@ PAGE_JS = """<script>
       });
     });
   });
+
+  // SOS panel toggle
+  var sosBtn=document.getElementById("gp-sos-btn"), sosPanel=document.getElementById("gp-sos-panel");
+  if(sosBtn&&sosPanel){
+    sosBtn.addEventListener("click",function(e){e.stopPropagation();sosPanel.classList.toggle("open");});
+    document.addEventListener("click",function(e){
+      if(sosPanel.classList.contains("open")&&!sosPanel.contains(e.target)&&e.target!==sosBtn)sosPanel.classList.remove("open");
+    });
+  }
+})();
+</script>"""
+
+# ── Gobarjev dnevnik: local-only GPS+photo diary (no server involved) ────────
+DIARY_JS = """<script>
+(function(){
+  var LS="mr_gobe_dnevnik";
+  var form=document.getElementById("gp-diary-form");
+  if(!form)return;
+  var listEl=document.getElementById("gp-diary-list");
+  var dateEl=document.getElementById("gp-d-date");
+  var spEl=document.getElementById("gp-d-species");
+  var notesEl=document.getElementById("gp-d-notes");
+  var geoBtn=document.getElementById("gp-d-geo");
+  var geoStatus=document.getElementById("gp-d-geo-status");
+  var photoInput=document.getElementById("gp-d-photo");
+  var photoPreview=document.getElementById("gp-d-photo-preview");
+  var pendingGeo=null, pendingPhoto=null;
+  dateEl.valueAsDate=new Date();
+
+  function load(){ try{return JSON.parse(localStorage.getItem(LS))||[];}catch(e){return [];} }
+  function save(arr){
+    try{ localStorage.setItem(LS, JSON.stringify(arr)); return true; }
+    catch(e){ geoStatus.textContent="Shramba brskalnika je polna — izbriši kakšno starejšo najdbo (morda ima veliko fotografijo)."; return false; }
+  }
+
+  geoBtn.addEventListener("click",function(){
+    if(!navigator.geolocation){ geoStatus.textContent="Brskalnik ne podpira lokacije."; return; }
+    geoStatus.textContent="Iščem lokacijo …";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      pendingGeo={lat:pos.coords.latitude, lon:pos.coords.longitude};
+      geoStatus.textContent="📍 "+pendingGeo.lat.toFixed(4)+", "+pendingGeo.lon.toFixed(4)+" zabeleženo";
+    },function(err){
+      geoStatus.textContent="Lokacije ni bilo mogoče pridobiti ("+(err&&err.message?err.message:"zavrnjeno")+").";
+    },{enableHighAccuracy:true,timeout:10000});
+  });
+
+  photoInput.addEventListener("change",function(){
+    var f=photoInput.files&&photoInput.files[0];
+    if(!f)return;
+    var img=new Image();
+    var reader=new FileReader();
+    reader.onload=function(e){
+      img.onload=function(){
+        var maxW=700, scale=Math.min(1,maxW/img.width);
+        var w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        var c=document.createElement("canvas"); c.width=w; c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        pendingPhoto=c.toDataURL("image/jpeg",0.72);
+        photoPreview.src=pendingPhoto; photoPreview.style.display="inline-block";
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  function mapLink(g){ return g?("https://www.google.com/maps?q="+g.lat+","+g.lon):null; }
+  function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function render(){
+    var arr=load();
+    if(!arr.length){ listEl.innerHTML='<div class="gp-diary-empty">Tvoj dnevnik je prazen — dodaj prvo najdbo zgoraj.</div>'; return; }
+    listEl.innerHTML=arr.map(function(e,i){
+      var thumb=e.photo?('<img class="gp-diary-thumb" src="'+e.photo+'" alt="">')
+                        :'<div class="gp-diary-thumb-ph">🍄</div>';
+      var loc=e.lat!=null?('<a href="'+mapLink(e)+'" target="_blank" rel="noopener">📍 '+e.lat.toFixed(4)+', '+e.lon.toFixed(4)+'</a>'):'';
+      return '<div class="gp-diary-entry">'+thumb+
+        '<div class="gp-diary-body"><div class="gp-diary-sp">'+esc(e.species||"Neznana vrsta")+'</div>'+
+        '<div class="gp-diary-meta">'+esc(e.date||"")+(loc?' · '+loc:'')+'</div>'+
+        (e.notes?('<div class="gp-diary-notes">'+esc(e.notes)+'</div>'):'')+'</div>'+
+        '<button type="button" class="gp-diary-del" data-i="'+i+'" aria-label="Izbriši">🗑</button></div>';
+    }).join("");
+    listEl.querySelectorAll(".gp-diary-del").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var arr2=load(); arr2.splice(parseInt(btn.getAttribute("data-i"),10),1); save(arr2); render();
+      });
+    });
+  }
+
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    var arr=load();
+    arr.unshift({
+      date:dateEl.value, species:spEl.value.trim(), notes:notesEl.value.trim(),
+      lat:pendingGeo?pendingGeo.lat:null, lon:pendingGeo?pendingGeo.lon:null,
+      photo:pendingPhoto, ts:new Date().toISOString()
+    });
+    if(save(arr)){
+      spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
+      pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
+      photoPreview.style.display="none"; photoPreview.src="";
+      render();
+    }
+  });
+
+  render();
 })();
 </script>"""
 
@@ -513,6 +719,48 @@ def build_body(rules, premium, free):
         '<th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>\n'
         + "\n".join(sp_rows) + "\n  </tbody></table></div>")
 
+    # ── dvojnik: side-by-side edible vs. dangerous-double comparison ──────────
+    # Photos: drop matching files into gobarska-napoved/img/dvojnice/<slug>.jpg
+    # (slug = species id / _slug(double name)) — the <img> quietly falls back
+    # to a placeholder icon via onerror until a real photo exists, so this
+    # activates automatically without further code changes.
+    vs_cards, vs_notes = [], []
+    danger_order = {"smrtno strupena": 0, "zelo strupena": 1, "strupena": 2, "zaščitena": 3, "neužitna": 4}
+    vs_species = [s for s in indexed if s.get("doubles")]
+    vs_species.sort(key=lambda s: danger_order.get(double_danger(s["doubles"]), 9))
+    for s in vs_species:
+        parsed = parse_double(s["doubles"])
+        if not parsed:
+            vs_notes.append(f'    <div class="gp-vs-note"><b>{_esc(s["name_sl"])}:</b> {_esc(s["doubles"])}</div>')
+            continue
+        dname, dlatin, bullets = parsed
+        danger = double_danger(s["doubles"])
+        badge = edib_badge(danger)
+        e_img = f"/gobarska-napoved/img/dvojnice/{s['id']}.jpg"
+        d_img = f"/gobarska-napoved/img/dvojnice/{_slug(dname)}.jpg"
+        bullets_html = "".join(f"<li>{_esc(b)}</li>" for b in bullets)
+        vs_cards.append(f'''    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="{e_img}" alt="{_esc(s["name_sl"])}" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{{textContent:'🍄'}}))"></div>
+          <div class="gp-vs-name">✅ {_esc(s["name_sl"])}</div>
+          <div class="gp-vs-lat">{_esc(s["name_lat"])}</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="{d_img}" alt="{_esc(dname)}" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{{textContent:'☠️'}}))"></div>
+          <div class="gp-vs-name">{_esc(dname)}</div>
+          <div class="gp-vs-lat">{_esc(dlatin)}</div>
+          {badge}
+        </div>
+      </div>
+      <ul class="gp-vs-diff">{bullets_html}</ul>
+    </div>''')
+    vs_html = ('  <div class="gp-vs-grid">\n' + "\n".join(vs_cards) + "\n  </div>\n"
+               + ("\n".join(vs_notes) if vs_notes else ""))
+
     # ── terrain map (free) ────────────────────────────────────────────────────
     terr_items = []
     for t in rules.get("terrains", []):
@@ -566,6 +814,37 @@ def build_body(rules, premium, free):
   if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
 })();</script>'''
 
+    # ── Gobarjev dnevnik: GPS + photo diary, 100% local (localStorage only,
+    # nothing sent to any server — see zasebnost.html). Species datalist for
+    # the free-text input, built from the edible species already in scope.
+    species_options = "".join(f'<option value="{_esc(s["name_sl"])}">' for s in indexed)
+    diary_html = f'''  <div class="gp-diary">
+    <p class="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
+    pošljejo, nihče drug jih ne vidi. Če počistiš podatke brskalnika, se izgubijo.</p>
+    <form id="gp-diary-form">
+      <div class="gp-diary-row">
+        <input type="date" id="gp-d-date" required>
+        <input type="text" id="gp-d-species" list="gp-d-species-list" placeholder="Vrsta (neobvezno)">
+        <datalist id="gp-d-species-list">{species_options}</datalist>
+      </div>
+      <div class="gp-diary-row">
+        <button type="button" class="gp-diary-btn" id="gp-d-geo">📍 Zabeleži lokacijo</button>
+        <span id="gp-d-geo-status" class="gp-msg" style="margin:0"></span>
+      </div>
+      <div class="gp-diary-row">
+        <label class="gp-diary-btn gp-diary-photobtn">📷 Fotografija
+          <input type="file" accept="image/*" capture="environment" id="gp-d-photo" hidden>
+        </label>
+        <img id="gp-d-photo-preview" class="gp-d-photo-preview" alt="">
+      </div>
+      <div class="gp-diary-row">
+        <textarea id="gp-d-notes" placeholder="Opombe — količina, mesto, opažanja …"></textarea>
+      </div>
+      <button type="submit" class="gp-cta gp-diary-submit">💾 Shrani najdbo</button>
+    </form>
+    <div id="gp-diary-list" class="gp-diary-list"></div>
+  </div>'''
+
     body = f'''{brand_swap}
 {seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
@@ -586,6 +865,11 @@ def build_body(rules, premium, free):
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
 {species_table}
+  <h2 class="gp-h2">⚠️ Nevarne dvojnice — primerjava</h2>
+  <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
+  Fotografije se bodo dodale sproti — do takrat vsaka kartica prikaže ime in besedilno razlago.
+  <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
+{vs_html}
   <h2 class="gp-h2">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
@@ -604,11 +888,23 @@ def build_body(rules, premium, free):
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
+  <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
+{diary_html}
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
-{PAGE_JS}'''
+  <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
+  <div class="gp-sos-panel" id="gp-sos-panel">
+    <h4>Sum zastrupitve z gobami?</h4>
+    <p>Ob težavah z dihanjem, hudi omotici ali izgubi zavesti pokliči takoj <b>112</b>. Za posvet o zaužiti gobi
+    (tudi če se počutiš še dobro — nekateri simptomi pridejo z zamikom) pokliči Center za zastrupitve.</p>
+    <a class="gp-sos-call" href="tel:112">🚨 112 <small>Nujna medicinska pomoč</small></a>
+    <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
+    <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
+  </div>
+{PAGE_JS}
+{DIARY_JS}'''
     return body
 
 
