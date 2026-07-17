@@ -378,6 +378,29 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
+.gp-map-shell{position:relative;margin:.6rem 0 1rem}
+.gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
+  background:var(--card-bg)}
+.gp-map-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.5rem;text-align:center;cursor:pointer;border-radius:14px;
+  background:linear-gradient(180deg,rgba(19,15,11,.6),rgba(6,10,6,.85))}
+.gp-map-hint b{font-size:1.05rem}
+.gp-map-hint span{font-size:.85rem;color:var(--muted)}
+.gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
+.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted)}
+.gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
+.gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gp-map-attr a{color:var(--muted)}
+.gp-map-pop{font-family:inherit;min-width:150px}
+.gp-map-pop b{font-size:.92rem}
+.gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
+.gp-map-pop .idx{font-weight:800;font-size:1.1rem}
+.gp-map-pop .sp{font-size:.82rem;margin-top:.2rem}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
+.leaflet-popup-content{margin:.6rem .8rem}
+
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno). */
 .wrap{padding-bottom:5.5rem}
 
@@ -947,6 +970,7 @@ def gauge_svg(pct):
 
 GOBE_HUB = [
     # (url slug, icon, title, one-line teaser, quicknav label)
+    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid"),
     ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar"),
     ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend"),
     ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst"),
@@ -1026,6 +1050,124 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
         f"{vs_count} primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno "
         "ločevanje.",
         "Nevarne dvojnice", body)
+
+
+def build_zemljevid_page(premium, rules):
+    """Interactive Leaflet map of all foraging + protected areas, coloured by
+    today's index. Data is baked in (no client fetch) — Leaflet itself loads
+    lazily on first click, mirroring the site's storm-map pattern."""
+    meta = premium["species_meta"]
+    pts = []
+    for loc in premium["locations"]:
+        d0 = loc["days"][0]
+        top = d0["species"][0] if d0.get("species") else None
+        pts.append({
+            "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
+            "elev": loc["elev_m"], "terrain": loc.get("terrain"),
+            "idx": d0["overall"], "lvl": d0["level"],
+            "sp": meta[top["id"]]["name_sl"] if top and top["id"] in meta else None,
+            "prot": False,
+        })
+    for loc in rules.get("locations", []):
+        if loc.get("protected"):
+            pts.append({
+                "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
+                "elev": loc.get("elev_m"), "terrain": loc.get("terrain"),
+                "idx": None, "lvl": None, "sp": None, "prot": True,
+            })
+    data_js = _json_mod.dumps(pts, ensure_ascii=False)
+    pick_count = sum(1 for p in pts if not p["prot"])
+
+    inner = f'''  <p class="post-meta">Vseh {pick_count} nabiralnih območij Zgornje Savinjske doline na eni karti,
+  obarvanih po <strong>današnjem gobarskem indeksu</strong>. Klikni oznako za podrobnosti. Zaščitena območja
+  (nabiranje prepovedano) so označena posebej. Oznake so <strong>širša območja</strong>, ne točne najdbe.</p>
+  <div class="gp-map-legend">
+    <span><i style="background:#34d399"></i>Dobra/odlična (≥55 %)</span>
+    <span><i style="background:#f59e0b"></i>Zmerna (35–54 %)</span>
+    <span><i style="background:#fb923c"></i>Slaba (18–34 %)</span>
+    <span><i style="background:#f87171"></i>Brez (&lt;18 %)</span>
+    <span><i style="background:#a78bfa"></i>Zaščiteno</span>
+  </div>
+  <div class="gp-map-shell">
+    <div id="gp-map" class="gp-map" role="application" aria-label="Zemljevid nabiralnih območij"></div>
+    <div id="gp-map-hint" class="gp-map-hint">
+      <b>🗺️ Interaktivni zemljevid</b>
+      <span>Klikni za nalaganje karte (Leaflet · OpenStreetMap / CARTO)</span>
+      <span class="gp-map-load">Naloži zemljevid</span>
+    </div>
+  </div>
+  <p class="gp-map-attr">Karta: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
+  contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
+  Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>'''
+
+    map_js = '''<script>
+(function(){
+  var PTS=''' + data_js + ''';
+  var hint=document.getElementById("gp-map-hint");
+  var mapEl=document.getElementById("gp-map");
+  if(!mapEl||!hint)return;
+  var loaded=false;
+  function levelColor(v){
+    if(v==null)return"#a78bfa";
+    if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
+  }
+  function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function loadCss(href){var l=document.createElement("link");l.rel="stylesheet";l.href=href;document.head.appendChild(l);}
+  function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+  function popupHtml(p){
+    var h='<div class="gp-map-pop"><b>'+esc(p.name)+'</b><br>';
+    h+='<span class="terr">'+esc(p.terrain||"")+(p.elev?" · "+p.elev+" m":"")+'</span>';
+    if(p.prot){
+      h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🚫 Zaščiteno — nabiranje prepovedano</div>';
+    }else{
+      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
+      if(p.sp)h+='<div class="sp">🍄 '+esc(p.sp)+'</div>';
+    }
+    h+='</div>';
+    return h;
+  }
+  async function init(){
+    if(loaded)return; loaded=true;
+    hint.innerHTML='<span>Nalagam zemljevid …</span>';
+    try{
+      if(typeof L==="undefined"){
+        loadCss("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+        await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
+      }
+      hint.style.display="none";
+      var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false}).setView([46.35,14.80],10);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {maxZoom:15,subdomains:"abcd"}).addTo(map);
+      var group=[];
+      PTS.forEach(function(p){
+        var m=L.circleMarker([p.lat,p.lon],{
+          radius:p.prot?7:9,color:"#0b0906",weight:1.5,
+          fillColor:levelColor(p.idx),fillOpacity:p.prot?.55:.9
+        }).addTo(map);
+        m.bindPopup(popupHtml(p));
+        m.bindTooltip(p.name,{direction:"top",offset:[0,-6]});
+        group.push(m);
+      });
+      if(group.length){
+        var fg=L.featureGroup(group);
+        map.fitBounds(fg.getBounds().pad(0.15));
+      }
+      setTimeout(function(){map.invalidateSize();},60);
+    }catch(e){
+      hint.style.display="flex";
+      hint.innerHTML='<span>Zemljevida trenutno ni mogoče naložiti.</span>';
+      loaded=false;
+    }
+  }
+  hint.addEventListener("click",init);
+})();
+</script>'''
+
+    return subpage_shell(
+        "zemljevid", "Zemljevid nabiralnih območij — Zgornja Savinjska dolina",
+        f"Interaktivni zemljevid {pick_count} nabiralnih območij Zgornje Savinjske doline, obarvanih po današnjem "
+        "gobarskem indeksu. Vključuje zaščitena območja, kjer je nabiranje prepovedano.",
+        "Zemljevid", inner, extra_js=map_js)
 
 
 def build_body(rules, premium, free):
@@ -1424,11 +1566,12 @@ def main():
 
     body, sub = build_body(rules, premium, free)
 
+    build_zemljevid_page(premium, rules)
     build_koledar_page(sub["cal_rows"], sub["month"])
     build_trend_page()
     build_baza_vrst_page(sub["species_table"], sub["species_count"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
-    print(f"  → 4 podstrani (koledar, trend, baza-vrst, dvojnice)")
+    print(f"  → 5 podstrani (zemljevid, koledar, trend, baza-vrst, dvojnice)")
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"

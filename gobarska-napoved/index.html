@@ -274,6 +274,29 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
+.gp-map-shell{position:relative;margin:.6rem 0 1rem}
+.gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
+  background:var(--card-bg)}
+.gp-map-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.5rem;text-align:center;cursor:pointer;border-radius:14px;
+  background:linear-gradient(180deg,rgba(19,15,11,.6),rgba(6,10,6,.85))}
+.gp-map-hint b{font-size:1.05rem}
+.gp-map-hint span{font-size:.85rem;color:var(--muted)}
+.gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
+.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted)}
+.gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
+.gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gp-map-attr a{color:var(--muted)}
+.gp-map-pop{font-family:inherit;min-width:150px}
+.gp-map-pop b{font-size:.92rem}
+.gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
+.gp-map-pop .idx{font-weight:800;font-size:1.1rem}
+.gp-map-pop .sp{font-size:.82rem;margin-top:.2rem}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
+.leaflet-popup-content{margin:.6rem .8rem}
+
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno). */
 .wrap{padding-bottom:5.5rem}
 
@@ -556,6 +579,7 @@ body{
   <p class="archive-intro">Koledar sezone, večletni trend, celotna baza vrst in primerjava nevarnih dvojnic —
   vsaka na svoji strani, da glavna stran ostane pregledna.</p>
   <div class="gp-hub">
+    <a class="gp-hub-card" href="/gobarska-napoved/zemljevid/"><span class="gp-hub-ic">🗺️</span><span class="gp-hub-title">Zemljevid območij</span><span class="gp-hub-sub">16 nabiralnih območij na interaktivni karti doline.</span><span class="gp-hub-arrow">Odpri →</span></a>
     <a class="gp-hub-card" href="/gobarska-napoved/koledar/"><span class="gp-hub-ic">📅</span><span class="gp-hub-title">Koledar po mesecih</span><span class="gp-hub-sub">Katere užitne vrste so v sezoni — mesec za mesecem.</span><span class="gp-hub-arrow">Odpri →</span></a>
     <a class="gp-hub-card" href="/gobarska-napoved/trend/"><span class="gp-hub-ic">📊</span><span class="gp-hub-title">Sezonski trend</span><span class="gp-hub-sub">Letos vs. pretekla leta — backtest zadnjih 5 sezon.</span><span class="gp-hub-arrow">Odpri →</span></a>
     <a class="gp-hub-card" href="/gobarska-napoved/baza-vrst/"><span class="gp-hub-ic">📖</span><span class="gp-hub-title">Baza 51 vrst</span><span class="gp-hub-sub">Užitnost, sezona in nevarne dvojnice za vsako vrsto.</span><span class="gp-hub-arrow">Odpri →</span></a>
