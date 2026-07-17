@@ -78,7 +78,9 @@ body{
 .gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
-.gp-h2{margin-top:1.7rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
+.gp-h2{margin-top:2.6rem;margin-bottom:.9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);
+  font-size:1.35rem;scroll-margin-top:4rem}
+.gp-h2 + .archive-intro,.gp-h2 + .post-meta{margin-top:-.3rem}
 .gp-cta{display:inline-block;background:var(--blue);color:#04070e;font:inherit;
   font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
   border:0;cursor:pointer;line-height:1.2}
@@ -236,11 +238,19 @@ body{
 .gp-trend-best b{color:var(--text)}
 
 /* ── Hitri meni (sticky) + zložljive (details) sekcije ── */
-.gp-quicknav{position:sticky;top:0;z-index:20;display:flex;gap:.4rem;overflow-x:auto;
-  padding:.6rem 0;margin:.2rem 0 1rem;background:var(--bg);border-bottom:1px solid var(--border)}
-.gp-quicknav::-webkit-scrollbar{height:5px}
+/* Wrapper omogoča fade namig na desni, da je jasno, da se meni scrolla vodoravno. */
+.gp-quicknav-wrap{position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--border);margin:.2rem 0 1.4rem}
+.gp-quicknav-wrap::after{content:"";position:absolute;top:0;right:0;bottom:1px;width:2.4rem;
+  pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg))}
+.gp-quicknav{display:flex;gap:.45rem;overflow-x:auto;padding:.65rem 0;
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.gp-quicknav::-webkit-scrollbar{height:4px}
+.gp-quicknav::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px}
 .gp-quicknav a{flex:0 0 auto;background:var(--badge-bg);border:1px solid var(--card-border);
-  color:var(--text);text-decoration:none;font-size:.8rem;padding:.35rem .75rem;border-radius:20px;white-space:nowrap}
+  color:var(--text);text-decoration:none;font-size:.82rem;padding:.4rem .8rem;border-radius:20px;
+  white-space:nowrap;transition:border-color .15s ease,color .15s ease}
+.gp-quicknav a:last-child{margin-right:2.4rem}
 .gp-quicknav a:hover{border-color:var(--blue);color:var(--blue)}
 .gp-collapse{border:1px solid var(--card-border);border-radius:14px;margin:.6rem 0 1rem;overflow:hidden}
 .gp-collapse summary{cursor:pointer;list-style:none;padding:.8rem 1rem;font-weight:700;
@@ -263,6 +273,27 @@ body{
 .gp-hub-title{font-weight:700;font-size:1.02rem}
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
+
+/* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno). */
+.wrap{padding-bottom:5.5rem}
+
+/* ── Mobilne prilagoditve ── */
+@media (max-width:560px){
+  .gp-h2{margin-top:2rem;font-size:1.18rem}
+  /* Hero: gauge in besedilo naj bosta poravnana levo, ne razpotegnjena. */
+  .gp-hero{padding:1.2rem}
+  .gp-hero-top{gap:1rem}
+  .gp-gauge-wrap{width:104px;height:104px}
+  .gp-gauge-num{font-size:2.1rem}
+  .gp-hero-lvl{font-size:1.55rem}
+  /* Kartice v enem stolpcu z malenkost večjim razmikom, da "dihajo". */
+  .gp-forests,.gp-hub,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
+  .gp-hero-note{font-size:.82rem}
+  .gp-pricing{grid-template-columns:1fr}
+  /* CTA gumbi naj bodo polne širine za lažji dotik. */
+  .gp-lockbar .gp-cta,.gp-plan .gp-cta{width:100%;text-align:center}
+  .gp-cta-lg{display:block;text-align:center}
+}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -313,6 +344,7 @@ body{
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
     nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>
+  <div class="gp-quicknav-wrap">
   <nav class="gp-quicknav" aria-label="Hitri meni">
     <a href="#gozdovi">🌲 Gozdovi</a>
     <a href="#premium">🔓 Premium</a>
@@ -325,6 +357,7 @@ body{
     <a href="#dnevnik">📔 Dnevnik</a>
     <a href="#faq">❓ FAQ</a>
   </nav>
+  </div>
   <h2 class="gp-h2" id="gozdovi">🌲 Danes po gozdovih</h2>
   <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
