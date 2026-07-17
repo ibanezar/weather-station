@@ -2269,6 +2269,73 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           return _json({ ok: true, candidates: parsed.candidates || [], unclear: !!parsed.unclear, note: parsed.note || "" });
         }
 
+        // ── Gobarjev dnevnik: sinhronizacija med napravami (premium) ──────────
+        // Fotografije gredo v R2 (ločeno od metapodatkov, da KV zapis ostane majhen).
+        async function _diaryPhotoHash(email) {
+          const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+          return [...new Uint8Array(digest)].slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        // ── POST /premium/diary/photo { image: dataURL } → { ok, url }
+        if (path === "/premium/diary/photo" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          if (!env.PHOTOS_R2) return _json({ error: "Shramba slik ni na voljo" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          const raw = String(body.image || "");
+          const m = raw.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/s);
+          if (!m) return _json({ error: "Manjka slika (jpeg/png/webp)" }, 400);
+          const [, mediaType, imgB64] = m;
+          if (imgB64.length > 4_000_000) return _json({ error: "Slika je prevelika" }, 413);
+          const ext = mediaType === "image/png" ? "png" : mediaType === "image/webp" ? "webp" : "jpg";
+          const owner = await _diaryPhotoHash(sub.email);
+          const uuid = crypto.randomUUID().split("-")[0];
+          const key = `diary/${owner}/${Date.now()}-${uuid}.${ext}`;
+          const bytes = Uint8Array.from(atob(imgB64), c => c.charCodeAt(0));
+          await env.PHOTOS_R2.put(key, bytes, { httpMetadata: { contentType: mediaType } });
+          return _json({ ok: true, url: `/premium/diary/img/${key}` });
+        }
+
+        // ── GET /premium/diary/img/<key> — serve a diary photo (own photos only)
+        if (path.startsWith("/premium/diary/img/")) {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          if (!env.PHOTOS_R2) return _json({ error: "Shramba slik ni na voljo" }, 503);
+          const key = path.slice("/premium/diary/img/".length);
+          const owner = await _diaryPhotoHash(sub.email);
+          if (!key.startsWith(`diary/${owner}/`)) return _json({ error: "Ni dovoljeno" }, 403);
+          const obj = await env.PHOTOS_R2.get(key);
+          if (!obj) return new Response("Not found", { status: 404, headers: CORS_ALLOWED });
+          return new Response(obj.body, {
+            headers: { ...CORS_ALLOWED, "Content-Type": obj.httpMetadata?.contentType || "image/jpeg",
+              "Cache-Control": "private, max-age=86400" },
+          });
+        }
+
+        // ── GET /premium/diary — vrni celoten dnevnik za napravo/e
+        if (path === "/premium/diary" && request.method === "GET") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let entries = [];
+          try { entries = JSON.parse(await kv.get(`premium:diary:${sub.email}`)) || []; } catch (_) {}
+          return _json({ ok: true, entries });
+        }
+
+        // ── POST /premium/diary { entries:[...] } — zamenjaj celoten dnevnik
+        if (path === "/premium/diary" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!Array.isArray(body.entries)) return _json({ error: "Manjka seznam najdb" }, 422);
+          if (body.entries.length > 2000) return _json({ error: "Predolg dnevnik" }, 413);
+          const raw = JSON.stringify(body.entries);
+          if (raw.length > 1024 * 1024) return _json({ error: "Dnevnik je prevelik" }, 413);
+          await kv.put(`premium:diary:${sub.email}`, raw);
+          return _json({ ok: true, count: body.entries.length });
+        }
+
         // ── POST /premium/notify — daily "conditions optimal" alert (from CI)
         // Threshold + cooldown live here so the workflow can call it unconditionally.
         if (path === "/premium/notify" && request.method === "POST") {

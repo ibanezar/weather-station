@@ -1012,8 +1012,9 @@ body{
   </div>
   <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
   <div class="gp-diary">
-    <p class="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
+    <p class="gp-diary-priv" id="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
     pošljejo, nihče drug jih ne vidi. Če počistiš podatke brskalnika, se izgubijo.</p>
+    <div id="gp-diary-sync" class="gp-msg" hidden></div>
     <form id="gp-diary-form">
       <div class="gp-diary-row">
         <input type="date" id="gp-d-date" required>
@@ -1251,6 +1252,8 @@ body{
 <script>
 (function(){
   var LS="mr_gobe_dnevnik";
+  var API="https://weatherireica1.filip-eremita.workers.dev";
+  var TOKKEY="mr_gobe_token";
   var form=document.getElementById("gp-diary-form");
   if(!form)return;
   var listEl=document.getElementById("gp-diary-list");
@@ -1261,13 +1264,35 @@ body{
   var geoStatus=document.getElementById("gp-d-geo-status");
   var photoInput=document.getElementById("gp-d-photo");
   var photoPreview=document.getElementById("gp-d-photo-preview");
+  var privEl=document.getElementById("gp-diary-priv");
+  var syncEl=document.getElementById("gp-diary-sync");
   var pendingGeo=null, pendingPhoto=null;
   dateEl.valueAsDate=new Date();
 
+  function token(){ try{return localStorage.getItem(TOKKEY);}catch(e){return null;} }
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[];}catch(e){return [];} }
   function save(arr){
     try{ localStorage.setItem(LS, JSON.stringify(arr)); return true; }
     catch(e){ geoStatus.textContent="Shramba brskalnika je polna — izbriši kakšno starejšo najdbo (morda ima veliko fotografijo)."; return false; }
+  }
+
+  // ── Sinhronizacija z oblakom (samo premium — token v localStorage) ──
+  function syncPush(arr){
+    var t=token();
+    if(!t)return Promise.resolve();
+    return fetch(API+"/premium/diary",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},
+      body:JSON.stringify({entries:arr})}).catch(function(){});
+  }
+  function uploadPhoto(dataUrl){
+    var t=token();
+    if(!t||!dataUrl||dataUrl.indexOf("data:")!==0)return Promise.resolve(dataUrl);
+    return fetch(API+"/premium/diary/photo",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},
+      body:JSON.stringify({image:dataUrl})})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){return j&&j.url?j.url:dataUrl;})
+      .catch(function(){return dataUrl;});
   }
 
   geoBtn.addEventListener("click",function(){
@@ -1302,12 +1327,21 @@ body{
 
   function mapLink(g){ return g?("https://www.google.com/maps?q="+g.lat+","+g.lon):null; }
   function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function photoSrc(p){
+    if(!p)return null;
+    if(p.indexOf("/premium/diary/img/")===0){
+      var t=token();
+      return API+p+(t?"?token="+encodeURIComponent(t):"");
+    }
+    return p;
+  }
 
   function render(){
     var arr=load();
     if(!arr.length){ listEl.innerHTML='<div class="gp-diary-empty">Tvoj dnevnik je prazen — dodaj prvo najdbo zgoraj.</div>'; return; }
     listEl.innerHTML=arr.map(function(e,i){
-      var thumb=e.photo?('<img class="gp-diary-thumb" src="'+e.photo+'" alt="">')
+      var src=photoSrc(e.photo);
+      var thumb=src?('<img class="gp-diary-thumb" src="'+src+'" alt="">')
                         :'<div class="gp-diary-thumb-ph">🍄</div>';
       var loc=e.lat!=null?('<a href="'+mapLink(e)+'" target="_blank" rel="noopener">📍 '+e.lat.toFixed(4)+', '+e.lon.toFixed(4)+'</a>'):'';
       return '<div class="gp-diary-entry">'+thumb+
@@ -1319,27 +1353,62 @@ body{
     listEl.querySelectorAll(".gp-diary-del").forEach(function(btn){
       btn.addEventListener("click",function(){
         var arr2=load(); arr2.splice(parseInt(btn.getAttribute("data-i"),10),1); save(arr2); render();
+        syncPush(arr2);
       });
     });
   }
 
   form.addEventListener("submit",function(e){
     e.preventDefault();
-    var arr=load();
-    arr.unshift({
-      date:dateEl.value, species:spEl.value.trim(), notes:notesEl.value.trim(),
-      lat:pendingGeo?pendingGeo.lat:null, lon:pendingGeo?pendingGeo.lon:null,
-      photo:pendingPhoto, ts:new Date().toISOString()
+    var species=spEl.value.trim(), notes=notesEl.value.trim(), date=dateEl.value;
+    var geo=pendingGeo, photo=pendingPhoto;
+    spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
+    pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
+    photoPreview.style.display="none"; photoPreview.src="";
+    uploadPhoto(photo).then(function(photoRef){
+      var arr=load();
+      arr.unshift({
+        date:date, species:species, notes:notes,
+        lat:geo?geo.lat:null, lon:geo?geo.lon:null,
+        photo:photoRef, ts:new Date().toISOString()
+      });
+      if(save(arr)){ render(); syncPush(arr); }
     });
-    if(save(arr)){
-      spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
-      pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
-      photoPreview.style.display="none"; photoPreview.src="";
-      render();
-    }
   });
 
   render();
+
+  // ── Ob nalaganju: premium naročniki dobijo dnevnik iz oblaka (vse naprave) ──
+  var t=token();
+  if(t){
+    if(privEl)privEl.innerHTML='☁️ Najdbe se sinhronizirajo med tvojimi napravami (premium) — fotografije vidiš samo ti.';
+    if(syncEl){syncEl.hidden=false; syncEl.textContent="Sinhroniziram …";}
+    fetch(API+"/premium/diary?token="+encodeURIComponent(t))
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        var remote=j&&Array.isArray(j.entries)?j.entries:null;
+        if(remote===null){ if(syncEl)syncEl.hidden=true; return; }
+        if(remote.length){
+          save(remote); render();
+          if(syncEl){syncEl.textContent="✓ Sinhronizirano."; setTimeout(function(){syncEl.hidden=true;},4000);}
+          return;
+        }
+        var local=load();
+        if(!local.length){ if(syncEl)syncEl.hidden=true; return; }
+        // Prvi sync po naročnini — prenesi obstoječe lokalne najdbe v oblak.
+        Promise.all(local.map(function(e){
+          return uploadPhoto(e.photo).then(function(ref){
+            return {date:e.date,species:e.species,notes:e.notes,lat:e.lat,lon:e.lon,photo:ref,ts:e.ts};
+          });
+        })).then(function(migrated){
+          save(migrated); render();
+          syncPush(migrated).then(function(){
+            if(syncEl){syncEl.textContent="✓ Sinhronizirano."; setTimeout(function(){syncEl.hidden=true;},4000);}
+          });
+        });
+      })
+      .catch(function(){ if(syncEl)syncEl.textContent="Sinhronizacija ni uspela — najdbe ostajajo lokalno."; });
+  }
 })();
 </script>
   <footer class="site-foot">
