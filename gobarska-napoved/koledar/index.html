@@ -239,6 +239,27 @@ body{
   font-size:.83rem;color:var(--muted);margin-bottom:.5rem}
 .gp-vs-note b{color:var(--text)}
 
+/* ── AI prepoznava — photo-banner card so this flagship feature actually
+   stands out instead of blending into the same plain box as every other
+   form on the page. Purple/violet reads as "smart/AI" against the site's
+   green-and-ochre forest palette without fighting it. ── */
+.gp-ai-card{border-radius:16px;overflow:hidden;border:1px solid var(--card-border);
+  margin:.6rem 0 1rem;box-shadow:var(--card-shadow);background:var(--card-bg)}
+.gp-ai-banner{position:relative;height:104px;display:flex;align-items:center;gap:.7rem;
+  padding:0 1.1rem;background:linear-gradient(120deg,rgba(109,40,217,.6),rgba(30,16,56,.88)),
+    url('/gobarska-napoved/img/vrste/boletus_edulis.jpg') center 35%/cover}
+.gp-ai-badge{position:absolute;top:.65rem;right:.85rem;background:rgba(255,255,255,.16);
+  backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.68rem;
+  font-weight:800;letter-spacing:.04em;padding:.22rem .55rem;border-radius:999px}
+.gp-ai-icon{position:relative;font-size:2.5rem;line-height:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
+.gp-ai-icon-mush{position:absolute;right:-.55rem;bottom:-.25rem;font-size:1.2rem}
+.gp-ai-banner-title{color:#fff;font-weight:800;font-size:1.15rem;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.gp-ai-body{padding:1rem 1.1rem}
+@media (prefers-reduced-motion:no-preference){
+  .gp-ai-icon{animation:gp-ai-pulse 2.6s ease-in-out infinite}
+}
+@keyframes gp-ai-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
 /* ── Gobarjev dnevnik (local-only GPS+photo log) ── */
 .gp-diary{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
   padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
@@ -332,7 +353,7 @@ body{
 
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
    quicknav/hub cards already cover cross-page navigation ── */
-.gp-bottomnav,.gp-id-fab{display:none}
+.gp-bottomnav{display:none}
 @media (max-width:760px){
   .wrap{padding-bottom:9.7rem}
   .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
@@ -344,20 +365,20 @@ body{
   .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
   .gp-bottomnav a.active{color:var(--blue)}
   .gp-bottomnav a.active .ic{transform:translateY(-1px)}
+  /* Center "Prepoznaj" (AI) item rides above the bar as a raised, badged
+     button — the same visual language camera/scan actions use in bottom
+     navs, so the flagship AI feature reads as a primary action, not just
+     another tab. */
+  .gp-bottomnav a.hl{color:var(--text);font-weight:700}
+  .gp-bottomnav a.hl .ic{width:2.5rem;height:2.5rem;border-radius:50%;
+    background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;
+    justify-content:center;font-size:1.15rem;margin-top:-1.15rem;
+    box-shadow:0 3px 12px rgba(109,40,217,.55);border:3px solid var(--bg)}
+  .gp-bottomnav a.hl.active .ic{transform:none}
   /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
      way rather than shrink its tap target to squeeze both in. */
   .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
   .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
-  /* Primary action FAB (hub page only) — freed-up bottom-right now that
-     SOS moved to the header corner and the bottom nav owns the strip below. */
-  .gp-id-fab{position:fixed;right:1rem;bottom:calc(4.6rem + .7rem);z-index:55;display:flex;
-    align-items:center;gap:.4rem;background:var(--blue);color:#04070e;font-weight:700;
-    font-size:.82rem;padding:.7rem 1.05rem;border-radius:999px;text-decoration:none;
-    box-shadow:0 4px 18px rgba(111,174,85,.4);border:2px solid rgba(255,255,255,.15);
-    opacity:0;pointer-events:none;transform:translateY(8px);
-    transition:opacity .2s ease,transform .2s ease}
-  .gp-id-fab.show{opacity:1;pointer-events:auto;transform:translateY(0)}
-  .gp-id-fab .ic{font-size:1.15rem;line-height:1}
 }
 
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
@@ -463,6 +484,7 @@ body{
   <nav class="gp-bottomnav" aria-label="Glavna navigacija">
     <a href="/gobarska-napoved/"><span class="ic">🍄</span>Napoved</a>
     <a href="/gobarska-napoved/zemljevid/"><span class="ic">🗺️</span>Zemljevid</a>
+    <a href="/gobarska-napoved/#premium" class="hl"><span class="ic">🔍</span>Prepoznaj</a>
     <a href="/gobarska-napoved/baza-vrst/"><span class="ic">📖</span>Baza vrst</a>
     <a href="/gobarska-napoved/dvojnice/"><span class="ic">⚠️</span>Dvojnice</a>
   </nav>
