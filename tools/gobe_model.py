@@ -377,6 +377,10 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
     # (poisonous, protected, inedible) live in the config solely as reference and
     # as each edible species' dangerous-double note.
     indexed = [sp for sp in rules["species"] if sp.get("gets_index")]
+    # Same dry/full normalisation the per-species scorer uses (ramp()), so the
+    # exposed "soil moisture fullness %" reads consistently with why species
+    # scored the way they did — not a second, differently-calibrated number.
+    smc = rules["scoring"]["soil_moisture"]
     # Static per-species metadata is emitted once, keyed by id; the per-day
     # entries below carry only {id, index, explanation} to keep the payload small.
     species_meta = {sp["id"]: {
@@ -405,10 +409,12 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
                 })
             species_out.sort(key=lambda s: s["index"], reverse=True)
             overall = max((s["index"] for s in species_out), default=0)
+            sm_full = ramp(series["soil_moisture"][i], float(smc["dry"]), float(smc["full"]))
             days.append({
                 "date": dates[i],
                 "overall": overall,
                 "level": level(overall),
+                "soil_moisture_pct": None if sm_full is None else round(100 * sm_full),
                 "species": species_out,
             })
         out_locations.append({
