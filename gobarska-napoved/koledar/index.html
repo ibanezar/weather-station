@@ -341,12 +341,15 @@ body{
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;gap:.3rem;background:var(--card-bg);
-  border:1px solid var(--card-border);border-radius:14px;padding:1.1rem 1.2rem;
+.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
+  border:1px solid var(--card-border);border-radius:14px;
   text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
   transition:border-color .15s ease,transform .15s ease}
 .gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-ic{font-size:1.6rem}
+.gp-hub-photo{height:84px}
+.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
+.gp-hub-ic{font-size:1.3rem}
 .gp-hub-title{font-weight:700;font-size:1.02rem}
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}

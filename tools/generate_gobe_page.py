@@ -448,12 +448,15 @@ body{
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;gap:.3rem;background:var(--card-bg);
-  border:1px solid var(--card-border);border-radius:14px;padding:1.1rem 1.2rem;
+.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
+  border:1px solid var(--card-border);border-radius:14px;
   text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
   transition:border-color .15s ease,transform .15s ease}
 .gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-ic{font-size:1.6rem}
+.gp-hub-photo{height:84px}
+.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
+.gp-hub-ic{font-size:1.3rem}
 .gp-hub-title{font-weight:700;font-size:1.02rem}
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
@@ -1097,21 +1100,27 @@ def gauge_svg(pct):
 
 
 GOBE_HUB = [
-    # (url slug, icon, title, one-line teaser, quicknav label)
-    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid"),
-    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar"),
-    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend"),
-    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst"),
-    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice"),
+    # (url slug, icon, title, one-line teaser, quicknav label, thumbnail)
+    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid",
+     "gozdna-pot-dron.jpg"),
+    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar",
+     "gozd-mah-banner.jpg"),
+    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend",
+     "sluzavke-banner.jpg"),
+    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst",
+     "megla-jutro-banner.jpg"),
+    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice",
+     "sluzavka-portret.jpg"),
 ]
 
 
 def hub_cards_html():
     cards = "\n".join(
         f'    <a class="gp-hub-card" href="/gobarska-napoved/{slug}/">'
-        f'<span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
-        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></a>'
-        for slug, ic, title, sub, _ in GOBE_HUB
+        f'<div class="gp-hub-photo"><img src="/gobarska-napoved/img/foto/{thumb}" loading="lazy" alt=""></div>'
+        f'<div class="gp-hub-body"><span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
+        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></div></a>'
+        for slug, ic, title, sub, _, thumb in GOBE_HUB
     )
     return f'  <div class="gp-hub">\n{cards}\n  </div>'
 
