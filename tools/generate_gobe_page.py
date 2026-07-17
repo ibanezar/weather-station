@@ -173,7 +173,12 @@ body{
 .gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
 .gp-gauge-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:2.7rem;font-weight:800;color:var(--text)}
-.gp-gauge-num small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:2px}
+.gp-gauge-num .num{position:relative}
+/* % rides as an absolutely-positioned sibling of .num so it doesn't add to
+   the flex row's width — otherwise centering the whole "54%" run visually
+   shoves the big, heavy "54" left of the ring's true center. */
+.gp-gauge-num small{position:absolute;left:100%;top:45%;transform:translateY(-50%);
+  white-space:nowrap;margin-left:2px;font-size:1rem;color:var(--muted);font-weight:600}
 .gp-hero-body{flex:1;min-width:250px}
 .gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
@@ -1316,7 +1321,7 @@ def build_body(rules, premium, free):
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
         {gauge_svg(pct)}
-        <div class="gp-gauge-num">{pct}<small>%</small></div>
+        <div class="gp-gauge-num"><span class="num">{pct}<small>%</small></span></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
