@@ -288,6 +288,29 @@ body{
 .gp-legend{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.78rem;color:var(--muted);margin:.5rem 0 .9rem}
 .gp-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
+
+/* Sub-headings in the JS-rendered premium block (#gp-content) are bare <h3>
+   with no built-in spacing, so they sit flush against whatever scrolled
+   above them — most visibly right under the sticky quicknav. Force room. */
+#gp-content h3{margin:1.7rem 0 .6rem;font-size:1.05rem}
+#gp-content h3:first-child{margin-top:.4rem}
+.gp-explain-h{margin-top:1.6rem}
+.gp-explain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.7rem;margin-top:.7rem}
+.gp-explain-card{display:flex;gap:.7rem;align-items:flex-start;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:12px;padding:.7rem .8rem;box-shadow:var(--card-shadow)}
+.gp-explain-photo{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:0 0 auto;
+  background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.gp-explain-photo img{width:100%;height:100%;object-fit:cover}
+.gp-explain-body{flex:1;min-width:0}
+.gp-explain-name{font-weight:700;font-size:.88rem;line-height:1.25}
+.gp-explain-idx{font-weight:800;font-size:.82rem;margin-top:.1rem;font-variant-numeric:tabular-nums}
+.gp-explain-more{margin-top:.35rem}
+.gp-explain-more summary{font-size:.74rem;color:var(--blue);cursor:pointer;list-style:none}
+.gp-explain-more summary::-webkit-details-marker{display:none}
+.gp-explain-more summary::before{content:"Zakaj? ▾"}
+.gp-explain-more[open] summary::before{content:"Skrij ▴"}
+.gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
+.gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 
 /* ── SOS floating action button ── */
@@ -542,11 +565,18 @@ PAGE_JS = """<script>
         html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
       html+='</tr>';});
     html+='</tbody></table></div>';
-    html+='<h3>Danes — zakaj (razlage)</h3><ul style="color:var(--muted);font-size:.88rem;line-height:1.7">';
+    html+='<h3 class="gp-explain-h">Danes — zakaj</h3><div class="gp-explain-grid">';
     loc.days[0].species.slice(0,6).forEach(function(s){var m=meta[s.id]||{};
-      html+='<li><b style="color:var(--text)">'+(m.name_sl||s.id)+' — '+s.index+'%</b>: '+s.explanation+
-        (m.doubles?' <span class="gp-dbl">⚠ dvojnica: '+m.doubles+'</span>':'')+'</li>';});
-    html+='</ul>';
+      var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
+      html+=`<div class="gp-explain-card">
+        <div class="gp-explain-photo"><img src="/gobarska-napoved/img/vrste/${s.id}.jpg" loading="lazy" alt=""
+          onerror="this.replaceWith(document.createTextNode('🍄'))"></div>
+        <div class="gp-explain-body">
+        <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
+        <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p></details>
+        </div></div>`;});
+    html+='</div>';
     return html;
   }
   function render(d){
