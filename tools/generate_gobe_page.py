@@ -330,7 +330,7 @@ body{
 .gp-sos-call.alt{background:var(--badge-bg);border-color:var(--card-border)}
 
 /* ── Dvojnik: edible-vs-double comparison cards ── */
-.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem}
+.gp-vs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.7rem 0 1rem;clear:both}
 .gp-vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem;
   box-shadow:var(--card-shadow)}
 .gp-vs-pair{display:flex;align-items:center;gap:.5rem}
@@ -1162,8 +1162,14 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
 
 
 def build_koledar_page(cal_rows, month):
-    body = (f'  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
-            f'  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+    body = ('''  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Dve gobi v mahu, avtorski makro posnetek">
+    <figcaption>📷 Avtorski makro posnetek — jesenska rast v mahu</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
+            '  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
     return subpage_shell(
         "koledar", "Koledar gobarske sezone po mesecih",
         "Kateri užitni gobi so po mesecih v sezoni v Zgornji Savinjski dolini — pregled po lokalni bazi vrst.",
@@ -1171,7 +1177,13 @@ def build_koledar_page(cal_rows, month):
 
 
 def build_trend_page():
-    body = ('  <p class="post-meta">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj '
+    body = ('''  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/sluzavke-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Makro posnetek sluzavk na odmrlem lesu">
+    <figcaption>📷 Avtorski makro posnetek — sluzavke (Myxomycetes) na odmrli veji</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj '
             '(backtest) z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je '
             'poudarjena. Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo '
             'razlikuje od dnevne napovedi.</p>\n'
@@ -1198,7 +1210,13 @@ def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
 
 
 def build_dvojnice_page(vs_html, vs_count, credits_html):
-    body = ('  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
+    body = ('''  <figure class="gp-photo-card">
+    <img src="/gobarska-napoved/img/foto/sluzavka-portret.jpg" loading="lazy" width="640" height="853"
+      alt="Avtorski makro posnetek sluzavke v gozdu">
+    <figcaption>📷 Avtorski makro posnetek — tudi navidez podobne gobe znajo biti povsem različne vrste</figcaption>
+  </figure>
+'''
+            '  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
             'ločevanje. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
             + vs_html + "\n" + credits_html)
     return subpage_shell(
