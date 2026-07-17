@@ -126,6 +126,18 @@ def season_months(sp):
 
 # ── page CSS (scoped, appended in <head>) ─────────────────────────────────────
 
+# Sub-brand swap: gobarska-napoved/ and its subpages show "MeteoGobar" with its
+# own mushroom mark instead of the site-wide Meteorec logo/name. Done via a tiny
+# synchronous script (runs immediately after the shared header markup is
+# parsed) rather than touching generate_seo_pages.py's shared HEADER template —
+# every other generated page keeps the plain Meteorec header untouched.
+BRAND_SWAP = '''<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/gobarska-napoved/logo-gobar.svg";img.alt="MeteoGobar";}
+  if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
+})();</script>'''
+
 PAGE_CSS = """<style>
 /* Earthy sub-theme for this landing page only — scoped to .wrap so it never
    leaks into the shared header/footer markup used by other generated pages.
@@ -339,6 +351,18 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
+
+/* ── Navigacijski hub (kartice na podstrani) ── */
+.gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
+.gp-hub-card{display:flex;flex-direction:column;gap:.3rem;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:14px;padding:1.1rem 1.2rem;
+  text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
+  transition:border-color .15s ease,transform .15s ease}
+.gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.gp-hub-ic{font-size:1.6rem}
+.gp-hub-title{font-weight:700;font-size:1.02rem}
+.gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
+.gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 </style>"""
 
 # ── client-side paywall JS ────────────────────────────────────────────────────
@@ -845,6 +869,89 @@ def gauge_svg(pct):
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
 
 
+GOBE_HUB = [
+    # (url slug, icon, title, one-line teaser, quicknav label)
+    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar"),
+    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend"),
+    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst"),
+    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice"),
+]
+
+
+def hub_cards_html():
+    cards = "\n".join(
+        f'    <a class="gp-hub-card" href="/gobarska-napoved/{slug}/">'
+        f'<span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
+        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></a>'
+        for slug, ic, title, sub, _ in GOBE_HUB
+    )
+    return f'  <div class="gp-hub">\n{cards}\n  </div>'
+
+
+def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
+    """Shared chrome for the 4 gobarska-napoved/<slug>/ reference subpages —
+    same header/footer/brand/back-link as the main page, own URL + meta."""
+    url = f"/gobarska-napoved/{slug}/"
+    schema = "\n".join([
+        seo.webpage_schema(url, title, desc),
+        seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", "/gobarska-napoved/"), (crumb_label, None)]),
+    ])
+    head_extras = schema + "\n" + PAGE_CSS
+    body = f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", "/gobarska-napoved/"), (crumb_label, None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">{title}</h1>
+{inner_html}
+  <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
+{extra_js}'''
+    html = seo.page_shell(f"{title} — Gobarska napoved", desc, url, head_extras, body,
+                           og_image=f"{seo.SITE}/og/gobarska-napoved.jpg")
+    seo.write_page(f"gobarska-napoved/{slug}/index.html", html, force=True)
+    return url
+
+
+def build_koledar_page(cal_rows, month):
+    body = (f'  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
+            f'  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+    return subpage_shell(
+        "koledar", "Koledar gobarske sezone po mesecih",
+        "Kateri užitni gobi so po mesecih v sezoni v Zgornji Savinjski dolini — pregled po lokalni bazi vrst.",
+        "Koledar", body)
+
+
+def build_trend_page():
+    body = ('  <p class="post-meta">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj '
+            '(backtest) z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je '
+            'poudarjena. Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo '
+            'razlikuje od dnevne napovedi.</p>\n'
+            '  <div id="gp-trend" class="gp-trend-wrap">\n    <div class="gp-msg">Nalagam …</div>\n  </div>')
+    return subpage_shell(
+        "trend", "Sezonski trend gobarskega indeksa",
+        "Letošnja gobarska sezona v primerjavi s preteklimi 5 leti za Rečico ob Savinji — backtest iz ERA5-Land arhiva.",
+        "Sezonski trend", body, extra_js=TREND_JS)
+
+
+def build_baza_vrst_page(species_table, species_count):
+    body = ('  <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '
+            'do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>\n'
+            + species_table)
+    return subpage_shell(
+        "baza-vrst", f"Baza {species_count} vrst gob — užitnost in nevarne dvojnice",
+        f"Referenčna baza {species_count} vrst gob Zgornje Savinjske doline: užitnost, sezona in nevarne dvojnice.",
+        "Baza vrst", body)
+
+
+def build_dvojnice_page(vs_html, vs_count, credits_html):
+    body = ('  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
+            'ločevanje. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
+            + vs_html + "\n" + credits_html)
+    return subpage_shell(
+        "dvojnice", "Nevarne dvojnice gob — primerjava s fotografijami",
+        f"{vs_count} primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno "
+        "ločevanje.",
+        "Nevarne dvojnice", body)
+
+
 def build_body(rules, premium, free):
     home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
     pct = free["index"]
@@ -1113,18 +1220,6 @@ def build_body(rules, premium, free):
         f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
     ) + "\n  </div>")
 
-    # Sub-brand swap: this page shows "MeteoGobar" with its own mushroom mark
-    # instead of the site-wide Meteorec logo/name. Done via a tiny synchronous
-    # script (runs immediately after the shared header markup is parsed)
-    # rather than touching generate_seo_pages.py's shared HEADER template —
-    # every other generated page keeps the plain Meteorec header untouched.
-    brand_swap = '''<script>(function(){
-  var img=document.querySelector(".site-head .brand-logo");
-  var nm=document.querySelector(".site-head .brand-name");
-  if(img){img.src="/gobarska-napoved/logo-gobar.svg";img.alt="MeteoGobar";}
-  if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
-})();</script>'''
-
     # ── Gobarjev dnevnik: GPS + photo diary, 100% local (localStorage only,
     # nothing sent to any server — see zasebnost.html). Species datalist for
     # the free-text input, built from the edible species already in scope.
@@ -1157,7 +1252,7 @@ def build_body(rules, premium, free):
     <div id="gp-diary-list" class="gp-diary-list"></div>
   </div>'''
 
-    body = f'''{brand_swap}
+    body = f'''{BRAND_SWAP}
 {seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
@@ -1167,10 +1262,10 @@ def build_body(rules, premium, free):
     <a href="#gozdovi">🌲 Gozdovi</a>
     <a href="#premium">🔓 Premium</a>
     <a href="#pricing">🎟️ Cenik</a>
-    <a href="#koledar">📅 Koledar</a>
-    <a href="#trend">📊 Trend</a>
-    <a href="#baza-vrst">📖 Baza vrst</a>
-    <a href="#dvojnice">⚠️ Dvojnice</a>
+    <a href="/gobarska-napoved/koledar/">📅 Koledar</a>
+    <a href="/gobarska-napoved/trend/">📊 Trend</a>
+    <a href="/gobarska-napoved/baza-vrst/">📖 Baza vrst</a>
+    <a href="/gobarska-napoved/dvojnice/">⚠️ Dvojnice</a>
     <a href="#tereni">🗺️ Tereni</a>
     <a href="#dnevnik">📔 Dnevnik</a>
     <a href="#faq">❓ FAQ</a>
@@ -1182,34 +1277,10 @@ def build_body(rules, premium, free):
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
 {pricing}
-  <h2 class="gp-h2" id="koledar">📅 Kaj utegne rasti v {MES_FULL[month - 1]}</h2>
-  <p class="archive-intro">Užitne in pogojno užitne vrste, ki so ta mesec v sezoni (iz lokalne baze).</p>
-  <details class="gp-collapse">
-    <summary>Koledar po mesecih <small>(12 vrstic)</small></summary>
-{calendar_html}
-  </details>
-  <h2 class="gp-h2" id="trend">📊 Sezona v primerjavi s preteklimi leti</h2>
-  <p class="archive-intro">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj (backtest)
-  z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je poudarjena.
-  Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo razlikuje od dnevne napovedi.</p>
-  <div id="gp-trend" class="gp-trend-wrap">
-    <div class="gp-msg">Nalagam …</div>
-  </div>
-  <h2 class="gp-h2" id="baza-vrst">📖 Baza {len(species)} vrst — užitnost in nevarne dvojnice</h2>
-  <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
-  nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
-  <details class="gp-collapse">
-    <summary>Prikaži celotno bazo <small>({len(species)} vrst)</small></summary>
-{species_table}
-  </details>
-  <h2 class="gp-h2" id="dvojnice">⚠️ Nevarne dvojnice — primerjava</h2>
-  <p class="archive-intro">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno ločevanje.
-  <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
-  <details class="gp-collapse">
-    <summary>Prikaži primerjave <small>({len(vs_cards)} parov)</small></summary>
-{vs_html}
-  </details>
-{credits_html}
+  <h2 class="gp-h2">🗂️ Več o dolini in gobah</h2>
+  <p class="archive-intro">Koledar sezone, večletni trend, celotna baza vrst in primerjava nevarnih dvojnic —
+  vsaka na svoji strani, da glavna stran ostane pregledna.</p>
+{hub_cards_html()}
   <h2 class="gp-h2" id="tereni">🗺️ Geološki tereni doline</h2>
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
@@ -1244,9 +1315,14 @@ def build_body(rules, premium, free):
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
 {PAGE_JS}
-{DIARY_JS}
-{TREND_JS}'''
-    return body
+{DIARY_JS}'''
+    subpages = {
+        "cal_rows": cal_rows, "month": month,
+        "species_table": species_table, "species_count": len(species),
+        "vs_html": vs_html, "vs_count": len(vs_cards),
+        "credits_html": credits_html,
+    }
+    return body, subpages
 
 
 def main():
@@ -1266,7 +1342,13 @@ def main():
     premium = gm.compute_forecast(rules, spots, locs, station_precip, protected)
     free = gm.free_payload(premium)
 
-    body = build_body(rules, premium, free)
+    body, sub = build_body(rules, premium, free)
+
+    build_koledar_page(sub["cal_rows"], sub["month"])
+    build_trend_page()
+    build_baza_vrst_page(sub["species_table"], sub["species_count"])
+    build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
+    print(f"  → 4 podstrani (koledar, trend, baza-vrst, dvojnice)")
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"
