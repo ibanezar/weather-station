@@ -36,6 +36,22 @@
    (author CSS always beats the UA stylesheet) — e.g. .gp-cta{display:inline-block}
    would otherwise keep a `hidden`-toggled CTA button visible. Force it. */
 [hidden]{display:none!important}
+/* ── Cross-page transitions (View Transitions API) — opts these 6
+   gobarska-napoved/ pages into a native crossfade+slide when navigating
+   between them (hub ↔ zemljevid/koledar/trend/baza-vrst/dvojnice). Purely
+   progressive enhancement: unsupported browsers (or prefers-reduced-motion)
+   just navigate normally, no JS involved either way. Named so the top bar
+   and bottom nav — present on every one of these pages — morph in place
+   instead of cross-fading with the rest of the content. */
+@view-transition{navigation:auto}
+@media (prefers-reduced-motion:no-preference){
+  ::view-transition-old(root){animation:gp-vt-out .18s ease-out both}
+  ::view-transition-new(root){animation:gp-vt-in .22s ease-out both}
+  @keyframes gp-vt-out{to{opacity:0;transform:translateY(-6px)}}
+  @keyframes gp-vt-in{from{opacity:0;transform:translateY(6px)}}
+}
+.gp-topbar{view-transition-name:gp-topbar}
+.gp-bottomnav{view-transition-name:gp-bottomnav}
 /* Earthy sub-theme for this landing page only — scoped to .wrap so it never
    leaks into the shared header/footer markup used by other generated pages.
    CSS custom properties resolve by inheritance (nearest ancestor that sets
@@ -216,6 +232,26 @@ body{
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 
+/* ── Soil-moisture gauge + 7-day mini graphs (premium forecast, per gozd) ── */
+.gp-soil-card{display:flex;gap:1rem;align-items:center;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:12px;padding:.8rem .9rem;margin-top:.8rem;
+  box-shadow:var(--card-shadow);flex-wrap:wrap}
+.gp-soil-gauge{position:relative;width:56px;height:56px;flex:0 0 auto}
+.gp-soil-ring{display:block;width:100%;height:100%}
+.gp-soil-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:6}
+.gp-soil-ring-fg{fill:none;stroke:#5c8374;stroke-width:6;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:28px 28px}
+.gp-soil-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:800;color:var(--text)}
+.gp-soil-body{flex:1;min-width:200px}
+.gp-soil-label{font-size:.85rem;font-weight:700}
+.gp-soil-label small{font-weight:500;color:var(--muted)}
+.gp-soil-trends{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.5rem}
+.gp-soil-trend{display:flex;flex-direction:column;gap:.2rem}
+.gp-soil-trend-lbl{font-size:.7rem;color:var(--muted)}
+.gp-spark{display:block;width:140px;height:32px}
+.gp-spark-empty{font-size:.75rem;color:var(--muted)}
+
 /* ── SOS floating action button ── */
 .gp-sos-fab{position:fixed;right:1.1rem;bottom:1.1rem;z-index:60;width:3.1rem;height:3.1rem;border-radius:50%;
   background:#dc2626;color:#fff;border:2px solid rgba(255,255,255,.25);font-size:1.4rem;cursor:pointer;
@@ -378,11 +414,42 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno).
+   body .wrap (not .wrap) so this reliably beats blog.css's own unconditional
+   .wrap{padding:2rem 0 4rem}, which loads after this inline stylesheet and
+   would otherwise win the tie on source order alone. Declared here, right
+   before the mobile media query below, so the narrower 9.7rem/3.5rem
+   mobile override (same specificity) still wins on small screens — a rule
+   after this one in source order would otherwise beat it regardless of
+   which media query is narrower. */
+body .wrap{padding-bottom:5.5rem}
+
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
    quicknav/hub cards already cover cross-page navigation ── */
 .gp-bottomnav{display:none}
+/* ── Top App Bar (mobile, Material 3 "small top app bar") — a NEW element
+   scoped to this page only, not a rework of the shared .site-head used by
+   every other generated page. It sits above the sticky quicknav so a user
+   mid-scroll always knows which of the 6 gobarska-napoved/ pages they're on
+   and has a 1-tap way back, without us touching the site-wide header. ── */
+.gp-topbar{display:none}
 @media (max-width:760px){
-  .wrap{padding-bottom:9.7rem}
+  /* body .wrap (not .wrap) — blog.css's own unconditional .wrap{padding:2rem 0 4rem}
+     loads after this inline stylesheet and would otherwise win the tie on
+     source order alone; the extra ancestor selector outranks it regardless
+     of load order without touching blog.css. */
+  body .wrap{padding-bottom:9.7rem;padding-top:3.5rem}
+  .gp-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:55;height:3rem;
+    align-items:center;gap:.5rem;padding:0 .5rem;background:var(--card-bg);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--card-border)}
+  .gp-topbar-back{flex:0 0 auto;width:2.2rem;height:2.2rem;display:flex;align-items:center;
+    justify-content:center;font-size:1.4rem;color:var(--text);text-decoration:none;border-radius:50%}
+  .gp-topbar-back:active{background:var(--badge-bg)}
+  .gp-topbar-brand{font-size:1.2rem}
+  .gp-topbar-title{flex:1;font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gp-topbar-action{flex:0 0 auto;width:2.2rem;height:2.2rem;display:flex;align-items:center;
+    justify-content:center;font-size:1.1rem;text-decoration:none;border-radius:50%;background:var(--badge-bg)}
+  .gp-quicknav-wrap{top:3rem}
   .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
     background:var(--card-bg);backdrop-filter:blur(10px);border-top:1px solid var(--card-border);
     padding:.35rem .2rem calc(.35rem + env(safe-area-inset-bottom))}
@@ -403,9 +470,10 @@ body{
     box-shadow:0 3px 12px rgba(109,40,217,.55);border:3px solid var(--bg)}
   .gp-bottomnav a.hl.active .ic{transform:none}
   /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
-     way rather than shrink its tap target to squeeze both in. */
-  .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
-  .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
+     way rather than shrink its tap target to squeeze both in. Shifted a
+     further 3.5rem down from its old top:5.7rem to clear the new top bar. */
+  .gp-sos-fab{top:9.2rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
+  .gp-sos-panel{top:12.3rem;bottom:auto;right:.8rem}
 }
 
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
@@ -441,9 +509,6 @@ body{
 .gp-map-pop .sp-list{list-style:none;margin:.3rem 0 0;padding:0;font-size:.8rem;line-height:1.5}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
 .leaflet-popup-content{margin:.6rem .8rem}
-
-/* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno). */
-.wrap{padding-bottom:5.5rem}
 
 /* ── Mobilne prilagoditve ── */
 @media (max-width:560px){
@@ -487,6 +552,7 @@ body{
   if(img){img.src="/gobarska-napoved/logo-gobar.svg";img.alt="MeteoGobar";}
   if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
 })();</script>
+  <div class="gp-topbar"><a class="gp-topbar-back" href="/gobarska-napoved/" aria-label="Nazaj">‹</a><span class="gp-topbar-title">Sezonski trend</span><a class="gp-topbar-action" href="/gobarska-napoved/#premium" aria-label="AI prepoznava gobe">🔍</a></div>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/gobarska-napoved/">Gobarska napoved</a> › <span aria-current="page">Sezonski trend</span>
   </nav>
