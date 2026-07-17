@@ -399,6 +399,11 @@ body{
 .gp-photo-card img{display:block;width:100%;height:auto}
 .gp-photo-card figcaption{padding:.5rem .7rem;font-size:.72rem;color:var(--muted);background:var(--card-bg)}
 @media (max-width:760px){.gp-photo-card{float:none;width:100%;margin:0 0 1rem}}
+.gp-banner{position:relative;border-radius:16px;overflow:hidden;margin:.6rem 0 1.2rem;
+  border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
+.gp-banner img{display:block;width:100%;height:min(34vw,280px);object-fit:cover}
+.gp-banner figcaption{position:absolute;left:0;right:0;bottom:0;padding:.5rem .9rem;font-size:.74rem;
+  color:#e9e9e9;background:linear-gradient(0deg,rgba(6,10,6,.75),transparent)}
 .gp-map-pop{font-family:inherit;min-width:150px}
 .gp-map-pop b{font-size:.92rem}
 .gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
@@ -1038,7 +1043,12 @@ def build_trend_page():
 
 
 def build_baza_vrst_page(species_table, species_count):
-    body = ('  <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '
+    body = ('''  <figure class="gp-banner">
+    <img src="/gobarska-napoved/img/foto/megla-jutro-banner.jpg" loading="lazy" width="1400" height="600"
+      alt="Jutranja megla nad gozdovi Zgornje Savinjske doline">
+    <figcaption>📷 Avtorski posnetek — jutranja inverzija nad gozdovi doline</figcaption>
+  </figure>
+  <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '''
             'do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>\n'
             + species_table)
     return subpage_shell(
