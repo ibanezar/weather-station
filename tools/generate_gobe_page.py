@@ -139,6 +139,10 @@ BRAND_SWAP = '''<script>(function(){
 })();</script>'''
 
 PAGE_CSS = """<style>
+/* [hidden] loses to any class setting its own `display` at equal specificity
+   (author CSS always beats the UA stylesheet) — e.g. .gp-cta{display:inline-block}
+   would otherwise keep a `hidden`-toggled CTA button visible. Force it. */
+[hidden]{display:none!important}
 /* Earthy sub-theme for this landing page only — scoped to .wrap so it never
    leaks into the shared header/footer markup used by other generated pages.
    CSS custom properties resolve by inheritance (nearest ancestor that sets
@@ -489,13 +493,38 @@ PAGE_JS = """<script>
     });
   }
   function esc2(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  var SL_MON=["","januarja","februarja","marca","aprila","maja","junija","julija","avgusta","septembra","oktobra","novembra","decembra"];
+  function fmtExpires(iso){
+    try{ var d=new Date(iso); return d.getDate()+". "+SL_MON[d.getMonth()+1]+" "+d.getFullYear(); }
+    catch(e){ return iso; }
+  }
+  var pricingWrap=document.getElementById("gp-pricing-wrap");
+  var navPricing=document.getElementById("gp-nav-pricing");
+  var heroUnlock=document.getElementById("gp-hero-unlock");
+  function hidePricing(){
+    if(pricingWrap)pricingWrap.hidden=true;
+    if(navPricing)navPricing.hidden=true;
+    if(heroUnlock)heroUnlock.hidden=true;
+  }
   var t=tok();
   if(t){
+    fetch(API+"/premium/verify?token="+encodeURIComponent(t))
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(v){
+        if(!v||!v.ok)return;
+        hidePricing();
+        if(lock)lock.hidden=true;
+        if(statusEl){
+          var planTxt=v.plan==="sezona"?"sezonska naročnina":"mesečna naročnina";
+          statusEl.hidden=false;
+          statusEl.textContent="✓ Premium aktiven ("+planTxt+(v.expires?", velja do "+fmtExpires(v.expires):"")+").";
+        }
+      })
+      .catch(function(){});
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){render(d);initIdentify(t);
-        if(statusEl){statusEl.hidden=false;statusEl.textContent="✓ Premium dostop aktiven.";}})
-      .catch(function(){localStorage.removeItem(LS);});
+      .then(function(d){render(d);initIdentify(t);})
+      .catch(function(){});
   }
   var f=document.getElementById("gp-login");
   if(f){f.addEventListener("submit",function(e){e.preventDefault();
@@ -976,7 +1005,7 @@ def build_body(rules, premium, free):
         <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
           <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} % · {best_o["level"]}</span></div>
-        <a class="gp-cta gp-cta-lg" href="#pricing">Odkleni 7-dnevno napoved po vrstah →</a>
+        <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
@@ -1053,7 +1082,8 @@ def build_body(rules, premium, free):
   </div>'''
 
     # ── pricing ───────────────────────────────────────────────────────────────
-    pricing = f'''  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
+    pricing = f'''  <div id="gp-pricing-wrap">
+  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
   <div class="gp-pricing">
     <div class="gp-plan">
       <span class="gp-tag">MESEČNO</span>
@@ -1081,7 +1111,8 @@ def build_body(rules, premium, free):
   </div>
   <div id="gp-checkout-msg" class="gp-msg"></div>
   <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
-  računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>'''
+  računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
+  </div>'''
 
     # ── monthly calendar (free) ───────────────────────────────────────────────
     cal_rows = []
@@ -1261,7 +1292,7 @@ def build_body(rules, premium, free):
   <nav class="gp-quicknav" aria-label="Hitri meni">
     <a href="#gozdovi">🌲 Gozdovi</a>
     <a href="#premium">🔓 Premium</a>
-    <a href="#pricing">🎟️ Cenik</a>
+    <a href="#pricing" id="gp-nav-pricing">🎟️ Cenik</a>
     <a href="/gobarska-napoved/koledar/">📅 Koledar</a>
     <a href="/gobarska-napoved/trend/">📊 Trend</a>
     <a href="/gobarska-napoved/baza-vrst/">📖 Baza vrst</a>

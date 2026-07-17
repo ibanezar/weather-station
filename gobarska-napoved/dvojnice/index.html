@@ -32,6 +32,10 @@
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved","item":"https://meteorec.si/gobarska-napoved/"},{"@type":"ListItem","position":3,"name":"Nevarne dvojnice"}]}
 </script>
 <style>
+/* [hidden] loses to any class setting its own `display` at equal specificity
+   (author CSS always beats the UA stylesheet) — e.g. .gp-cta{display:inline-block}
+   would otherwise keep a `hidden`-toggled CTA button visible. Force it. */
+[hidden]{display:none!important}
 /* Earthy sub-theme for this landing page only — scoped to .wrap so it never
    leaks into the shared header/footer markup used by other generated pages.
    CSS custom properties resolve by inheritance (nearest ancestor that sets
