@@ -109,6 +109,16 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+
+/* ── Loading skeleton — shown to premium users the instant a token is
+   found, while /premium/forecast is still in flight, so they never see
+   the "Naroči se" upsell for content they already own. ── */
+.gp-loadskel-group{display:grid;gap:.6rem;margin:.6rem 0}
+.gp-loadskel{border-radius:12px;background:linear-gradient(90deg,var(--card-bg) 25%,
+    rgba(255,255,255,.07) 37%,var(--card-bg) 63%);background-size:400% 100%;
+  animation:gp-shimmer 1.4s ease infinite}
+@keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+@media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
@@ -273,6 +283,20 @@ body{
 .gp-diary-btn{background:var(--badge-bg);border:1px solid var(--card-border);color:var(--text);
   border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
 .gp-diary-photobtn{display:inline-block}
+
+/* ── Filter chips (Material 3 pattern) — swap the old <select> for a
+   horizontally-scrollable pill row so switching locations feels like a
+   native app control, not a form field. ── */
+.gp-chip-row{display:flex;gap:.5rem;overflow-x:auto;padding:.15rem .05rem .6rem;margin:.5rem 0 .3rem;
+  scrollbar-width:none}
+.gp-chip-row::-webkit-scrollbar{display:none}
+.gp-chip{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--badge-bg);
+  border:1.5px solid var(--card-border);color:var(--text);border-radius:999px;padding:.5rem .9rem;
+  font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;
+  min-height:2.5rem;transition:border-color .15s ease,background .15s ease}
+.gp-chip:hover{border-color:var(--blue)}
+.gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
+.gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
 .gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
 .gp-diary-submit{margin-top:.2rem}
 .gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}

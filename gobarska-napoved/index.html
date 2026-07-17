@@ -112,6 +112,16 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+
+/* ── Loading skeleton — shown to premium users the instant a token is
+   found, while /premium/forecast is still in flight, so they never see
+   the "Naroči se" upsell for content they already own. ── */
+.gp-loadskel-group{display:grid;gap:.6rem;margin:.6rem 0}
+.gp-loadskel{border-radius:12px;background:linear-gradient(90deg,var(--card-bg) 25%,
+    rgba(255,255,255,.07) 37%,var(--card-bg) 63%);background-size:400% 100%;
+  animation:gp-shimmer 1.4s ease infinite}
+@keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+@media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
@@ -276,6 +286,20 @@ body{
 .gp-diary-btn{background:var(--badge-bg);border:1px solid var(--card-border);color:var(--text);
   border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
 .gp-diary-photobtn{display:inline-block}
+
+/* ── Filter chips (Material 3 pattern) — swap the old <select> for a
+   horizontally-scrollable pill row so switching locations feels like a
+   native app control, not a form field. ── */
+.gp-chip-row{display:flex;gap:.5rem;overflow-x:auto;padding:.15rem .05rem .6rem;margin:.5rem 0 .3rem;
+  scrollbar-width:none}
+.gp-chip-row::-webkit-scrollbar{display:none}
+.gp-chip{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--badge-bg);
+  border:1.5px solid var(--card-border);color:var(--text);border-radius:999px;padding:.5rem .9rem;
+  font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;
+  min-height:2.5rem;transition:border-color .15s ease,background .15s ease}
+.gp-chip:hover{border-color:var(--blue)}
+.gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
+.gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
 .gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
 .gp-diary-submit{margin-top:.2rem}
 .gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
@@ -533,8 +557,8 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dleskovška planota</span>
         <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:95%;background:#34d399"></div>
-        <span class="gp-meter-val">95 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:96%;background:#34d399"></div>
+        <span class="gp-meter-val">96 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Velika tintnica</div>
     </div>
     <div class="gp-forest">
@@ -566,18 +590,18 @@ body{
       <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Menina planina</span>
-        <span class="gp-terr">bazicna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:83%;background:#34d399"></div>
-        <span class="gp-meter-val">83 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
-    </div>
-    <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Vivodnik (Menina planina)</span>
         <span class="gp-terr">bazicna · 1500 m</span></div>
       <div class="gp-meter"><div class="gp-meter-fill" style="width:83%;background:#34d399"></div>
         <span class="gp-meter-val">83 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Macesnova lupljivka</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Menina planina</span>
+        <span class="gp-terr">bazicna · 1000 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:82%;background:#34d399"></div>
+        <span class="gp-meter-val">82 % · ODLIČNA</span></div>
+      <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
@@ -596,16 +620,16 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Črnivec – Bočna</span>
         <span class="gp-terr">bazicna · 850 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:69%;background:#34d399"></div>
-        <span class="gp-meter-val">69 % · DOBRA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:68%;background:#34d399"></div>
+        <span class="gp-meter-val">68 % · DOBRA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
         <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:65%;background:#34d399"></div>
-        <span class="gp-meter-val">65 % · DOBRA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:64%;background:#34d399"></div>
+        <span class="gp-meter-val">64 % · DOBRA</span></div>
+      <div class="gp-forest-sp">🍄 Poletni goban</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">💧 Rečica ob Savinji</span>
@@ -814,17 +838,41 @@ body{
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
   }
   function hexToRgb(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  function explainCardsHtml(day, meta){
+    return day.species.slice(0,6).map(function(s){var m=meta[s.id]||{};
+      var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
+      return `<div class="gp-explain-card">
+        <div class="gp-explain-photo"><img src="/gobarska-napoved/img/vrste/${s.id}.jpg" loading="lazy" alt=""
+          onerror="this.replaceWith(document.createTextNode('🍄'))"></div>
+        <div class="gp-explain-body">
+        <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
+        <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p></details>
+        </div></div>`;}).join('');
+  }
+  function dayLabel(day, isFirst){
+    if(isFirst)return"Danes";
+    var dt=new Date(day.date);
+    return dt.getDate()+'.'+(dt.getMonth()+1)+'.';
+  }
   function locDetailHtml(loc, meta){
     var html="";
     var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
-    html+='<h3>'+loc.name+' — 7-dnevni indeks po vrstah</h3>';
+    html+='<h3>'+esc2(loc.name)+' — 7-dnevna napoved</h3>';
+    html+='<div class="gp-chip-row gp-day-chips">';
+    loc.days.forEach(function(day,i){
+      html+='<button type="button" class="gp-chip'+(i===0?' active':'')+'" data-day="'+i+'">'+
+        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(day.overall)+'">'+day.overall+' %</span></button>';
+    });
+    html+='</div>';
+    html+='<div class="gp-explain-grid" id="gp-explain-grid">'+explainCardsHtml(loc.days[0], meta)+'</div>';
+    html+='<details class="gp-collapse gp-matrix-toggle"><summary>Podrobna tabela vseh dni <small>(vseh 8 vrst)</small></summary>';
     html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
       '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
       '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
       '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
     html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
-    loc.days.forEach(function(day){var dt=new Date(day.date);
-      html+='<th>'+(day===loc.days[0]?'danes':(dt.getDate()+'.'+(dt.getMonth()+1)+'.'))+'</th>';});
+    loc.days.forEach(function(day,i){html+='<th>'+dayLabel(day,i===0)+'</th>';});
     html+='</tr></thead><tbody>';
     top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
       loc.days.forEach(function(day){var s=day.species.filter(function(x){return x.id===id;})[0];
@@ -832,20 +880,20 @@ body{
         var alpha=(0.12+0.55*Math.min(100,v)/100).toFixed(2);
         html+='<td><span class="gp-cell" style="background:rgba('+rgb.join(',')+','+alpha+');color:'+c+'">'+v+'</span></td>';});
       html+='</tr>';});
-    html+='</tbody></table></div>';
-    html+='<h3 class="gp-explain-h">Danes — zakaj</h3><div class="gp-explain-grid">';
-    loc.days[0].species.slice(0,6).forEach(function(s){var m=meta[s.id]||{};
-      var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
-      html+=`<div class="gp-explain-card">
-        <div class="gp-explain-photo"><img src="/gobarska-napoved/img/vrste/${s.id}.jpg" loading="lazy" alt=""
-          onerror="this.replaceWith(document.createTextNode('🍄'))"></div>
-        <div class="gp-explain-body">
-        <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
-        <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
-        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p></details>
-        </div></div>`;});
-    html+='</div>';
+    html+='</tbody></table></div></details>';
     return html;
+  }
+  function wireDayChips(root, loc, meta){
+    var row=root.querySelector(".gp-day-chips");
+    var grid=root.querySelector("#gp-explain-grid");
+    if(!row||!grid)return;
+    row.addEventListener("click",function(e){
+      var btn=e.target.closest(".gp-chip");
+      if(!btn)return;
+      row.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
+      btn.classList.add("active");
+      grid.innerHTML=explainCardsHtml(loc.days[parseInt(btn.dataset.day,10)], meta);
+    });
   }
   function render(d){
     var meta=d.species_meta||{};
@@ -865,18 +913,28 @@ body{
     html+='</div>';
     // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
-    html+='<select id="gp-loc-select" class="gp-diary-btn" style="font-size:.9rem">';
+    html+='<div class="gp-chip-row" id="gp-loc-chips">';
     locs.forEach(function(l,i){
-      html+='<option value="'+i+'"'+(l===home?' selected':'')+'>'+l.name+' ('+l.days[0].overall+' %)</option>';
+      var o=l.days[0];
+      html+='<button type="button" class="gp-chip'+(l===home?' active':'')+'" data-i="'+i+'">'+
+        esc2(l.name)+'<span class="gp-chip-pct" style="color:'+levelColor(o.overall)+'">'+o.overall+' %</span></button>';
     });
-    html+='</select>';
+    html+='</div>';
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
     content.hidden=false;lock.hidden=true;
-    var sel=document.getElementById("gp-loc-select");
+    var chipRow=document.getElementById("gp-loc-chips");
     var detail=document.getElementById("gp-loc-detail");
-    if(sel){sel.addEventListener("change",function(){
-      detail.innerHTML=locDetailHtml(locs[parseInt(sel.value,10)], meta);
+    wireDayChips(detail, home, meta);
+    if(chipRow){chipRow.addEventListener("click",function(e){
+      var btn=e.target.closest(".gp-chip");
+      if(!btn)return;
+      chipRow.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
+      btn.classList.add("active");
+      btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+      var newLoc=locs[parseInt(btn.dataset.i,10)];
+      detail.innerHTML=locDetailHtml(newLoc, meta);
+      wireDayChips(detail, newLoc, meta);
     });}
   }
   function initIdentify(token){
@@ -951,14 +1009,23 @@ body{
     if(navPricing)navPricing.hidden=true;
     if(heroUnlock)heroUnlock.hidden=true;
   }
+  function skeletonHtml(){
+    var block=function(h){return '<div class="gp-loadskel" style="height:'+h+'"></div>';};
+    return '<div class="gp-loadskel-group">'+block('1.4rem')+block('5.2rem')+block('5.2rem')+
+      block('2.6rem')+block('9rem')+block('9rem')+'</div>';
+  }
   var t=tok();
   if(t){
+    // A paying user shouldn't see the "Naroči se" upsell while their own
+    // data is still in flight — swap straight to a skeleton instead of
+    // flashing the paywall first.
+    if(lock)lock.hidden=true;
+    if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
       .then(function(v){
         if(!v||!v.ok)return;
         hidePricing();
-        if(lock)lock.hidden=true;
         if(statusEl){
           var planTxt=v.plan==="sezona"?"sezonska naročnina":"mesečna naročnina";
           statusEl.hidden=false;
@@ -969,7 +1036,13 @@ body{
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
       .then(function(d){render(d);initIdentify(t);})
-      .catch(function(){});
+      .catch(function(){
+        // Token turned out to be invalid/expired or the fetch genuinely
+        // failed — fall back to the real paywall instead of leaving the
+        // skeleton spinning forever.
+        if(content){content.hidden=true;content.innerHTML="";}
+        if(lock)lock.hidden=false;
+      });
   }
   var f=document.getElementById("gp-login");
   if(f){f.addEventListener("submit",function(e){e.preventDefault();
