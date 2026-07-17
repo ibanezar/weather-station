@@ -99,6 +99,13 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+/* Thumb-friendly action row right under the gauge — "glanceable" actions
+   (share, map, notify) instead of making the user read/scroll for them. */
+.gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.gp-chip-action{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;
+  padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
+  color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
+.gp-chip-action:hover{border-color:var(--blue)}
 .gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
@@ -333,6 +340,15 @@ body{
 .gp-chip:hover{border-color:var(--blue)}
 .gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
 .gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
+/* ── /koledar/ — month chips + one card panel each (chip-click swap, no
+   fetch — all 12 panels are pre-rendered, only visibility toggles). ── */
+.gp-cal-panel{display:none;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--card-shadow)}
+.gp-cal-panel.active{display:block}
+.gp-cal-sp{display:flex;flex-wrap:wrap;gap:.5rem}
+.gp-cal-tag{background:var(--badge-bg);border:1px solid var(--card-border);border-radius:999px;
+  padding:.35rem .8rem;font-size:.85rem}
+.gp-cal-empty{color:var(--muted);font-size:.88rem;margin:0}
 .gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
 .gp-diary-submit{margin-top:.2rem}
 .gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
@@ -398,6 +414,16 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
+/* ── Section-level accordions (Geološki tereni / Nasveti / Dnevnik) — same
+   collapse mechanics as .gp-collapse, but the summary reads like a .gp-h2
+   heading rather than a small card toggle, so a closed section still looks
+   like a normal page section, just one the user has to tap to open. Default
+   closed (no `open` attribute) keeps the "active" data above the fold. ── */
+.gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
+.gp-collapse-section summary{padding:0 0 .4rem;border-bottom:1px solid var(--border);
+  background:transparent;font-size:1.35rem;font-weight:700}
+.gp-collapse-section summary::after{font-size:1rem}
+.gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
@@ -563,21 +589,33 @@ body .wrap{padding-bottom:5.5rem}
       alt="Dve gobi v mahu, avtorski makro posnetek">
     <figcaption>📷 Avtorski makro posnetek — jesenska rast v mahu</figcaption>
   </figure>
-  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>
-  <table class="stats">
-      <tr><th>Januar</th><td style="text-align:left">Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
-      <tr><th>Februar</th><td style="text-align:left">Zimska panjevka, Bezgova uhljevka</td></tr>
-      <tr><th>Marec</th><td style="text-align:left">Zimska panjevka, Koničasti smrček, Bezgova uhljevka</td></tr>
-      <tr><th>April</th><td style="text-align:left">Užitni smrček (Mavrah), Koničasti smrček, Bezgova uhljevka</td></tr>
-      <tr><th>Maj</th><td style="text-align:left">Poletni goban, Borov goban, Žametasti goban, Navadna lisička, Rdečkasta mušnica (Bisernica), Poljski kukmak, Užitni smrček (Mavrah), Koničasti smrček, Velika tintnica, Bezgova uhljevka</td></tr>
-      <tr><th>Junij</th><td style="text-align:left">Poletni goban, Borov goban, Črni goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Modrikasta golobica, Užitna golobica, Zelena golobica, Rdečkasta mušnica (Bisernica), Poljski kukmak, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Brezov ded, Brezov turek, Hrastov turek</td></tr>
-      <tr style="background:var(--fc-today-bg)"><th>Julij ←</th><td style="text-align:left">Poletni goban, Borov goban, Črni goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Rumeni ježek, Modrikasta golobica, Užitna golobica, Zelena golobica, Smrekova sirovka, Kravja mlečnica, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Poljski kukmak, Pšenična koprenka, Vijoličasta bledivka, Orjaška plešivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Brezov ded, Brezov turek, Hrastov turek</td></tr>
-      <tr><th>Avgust</th><td style="text-align:left">Poletni goban, Borov goban, Črni goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna golobica, Zelena golobica, Užitna sirovka, Smrekova sirovka, Kravja mlečnica, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Poljski kukmak, Pšenična koprenka, Vijoličasta bledivka, Orjaška plešivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar, Brezov ded, Brezov turek, Hrastov turek</td></tr>
-      <tr><th>September</th><td style="text-align:left">Jesenski goban (Jurček), Poletni goban, Borov goban, Črni goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna golobica, Zelena golobica, Užitna sirovka, Smrekova sirovka, Kravja mlečnica, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Poljski kukmak, Pšenična koprenka, Sivorumena mraznica (Štorovka), Vijoličasta bledivka, Orjaška plešivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar, Brezov ded, Brezov turek, Hrastov turek</td></tr>
-      <tr><th>Oktober</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Črni goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna golobica, Zelena golobica, Užitna sirovka, Smrekova sirovka, Kravja mlečnica, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Poljski kukmak, Pšenična koprenka, Sivorumena mraznica (Štorovka), Bukov ostrigar, Vijoličasta bledivka, Orjaška plešivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar, Brezov ded, Brezov turek, Hrastov turek</td></tr>
-      <tr><th>November</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna sirovka, Smrekova sirovka, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Sivorumena mraznica (Štorovka), Zimska panjevka, Bukov ostrigar, Vijoličasta bledivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar</td></tr>
-      <tr><th>December</th><td style="text-align:left">Lijasta lisička, Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
-  </table>
+  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze). Izberi mesec.</p>
+  <div class="gp-chip-row gp-cal-chips">
+    <button type="button" class="gp-chip" data-m="1">Januar</button>
+    <button type="button" class="gp-chip" data-m="2">Februar</button>
+    <button type="button" class="gp-chip" data-m="3">Marec</button>
+    <button type="button" class="gp-chip" data-m="4">April</button>
+    <button type="button" class="gp-chip" data-m="5">Maj</button>
+    <button type="button" class="gp-chip" data-m="6">Junij</button>
+    <button type="button" class="gp-chip active" data-m="7">Julij</button>
+    <button type="button" class="gp-chip" data-m="8">Avgust</button>
+    <button type="button" class="gp-chip" data-m="9">September</button>
+    <button type="button" class="gp-chip" data-m="10">Oktober</button>
+    <button type="button" class="gp-chip" data-m="11">November</button>
+    <button type="button" class="gp-chip" data-m="12">December</button>
+  </div>
+  <div class="gp-cal-panel" data-m="1"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Zimska panjevka</span><span class="gp-cal-tag">🍄 Bukov ostrigar</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
+  <div class="gp-cal-panel" data-m="2"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Zimska panjevka</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
+  <div class="gp-cal-panel" data-m="3"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Zimska panjevka</span><span class="gp-cal-tag">🍄 Koničasti smrček</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
+  <div class="gp-cal-panel" data-m="4"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Užitni smrček (Mavrah)</span><span class="gp-cal-tag">🍄 Koničasti smrček</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
+  <div class="gp-cal-panel" data-m="5"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Poletni goban</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Užitni smrček (Mavrah)</span><span class="gp-cal-tag">🍄 Koničasti smrček</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
+  <div class="gp-cal-panel" data-m="6"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Poletni goban</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Črni goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna golobica</span><span class="gp-cal-tag">🍄 Zelena golobica</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Brezov ded</span><span class="gp-cal-tag">🍄 Brezov turek</span><span class="gp-cal-tag">🍄 Hrastov turek</span></div></div>
+  <div class="gp-cal-panel active" data-m="7"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Poletni goban</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Črni goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Rumeni ježek</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna golobica</span><span class="gp-cal-tag">🍄 Zelena golobica</span><span class="gp-cal-tag">🍄 Smrekova sirovka</span><span class="gp-cal-tag">🍄 Kravja mlečnica</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Orjaški dežnik (Marela)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Pšenična koprenka</span><span class="gp-cal-tag">🍄 Vijoličasta bledivka</span><span class="gp-cal-tag">🍄 Orjaška plešivka</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Brezov ded</span><span class="gp-cal-tag">🍄 Brezov turek</span><span class="gp-cal-tag">🍄 Hrastov turek</span></div></div>
+  <div class="gp-cal-panel" data-m="8"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Poletni goban</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Črni goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Črna trobenta</span><span class="gp-cal-tag">🍄 Rumeni ježek</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna golobica</span><span class="gp-cal-tag">🍄 Zelena golobica</span><span class="gp-cal-tag">🍄 Užitna sirovka</span><span class="gp-cal-tag">🍄 Smrekova sirovka</span><span class="gp-cal-tag">🍄 Kravja mlečnica</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Orjaški dežnik (Marela)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Pšenična koprenka</span><span class="gp-cal-tag">🍄 Vijoličasta bledivka</span><span class="gp-cal-tag">🍄 Orjaška plešivka</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Veliki slinar</span><span class="gp-cal-tag">🍄 Brezov ded</span><span class="gp-cal-tag">🍄 Brezov turek</span><span class="gp-cal-tag">🍄 Hrastov turek</span></div></div>
+  <div class="gp-cal-panel" data-m="9"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Jesenski goban (Jurček)</span><span class="gp-cal-tag">🍄 Poletni goban</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Črni goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Lijasta lisička</span><span class="gp-cal-tag">🍄 Črna trobenta</span><span class="gp-cal-tag">🍄 Rumeni ježek</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna golobica</span><span class="gp-cal-tag">🍄 Zelena golobica</span><span class="gp-cal-tag">🍄 Užitna sirovka</span><span class="gp-cal-tag">🍄 Smrekova sirovka</span><span class="gp-cal-tag">🍄 Kravja mlečnica</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Orjaški dežnik (Marela)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Pšenična koprenka</span><span class="gp-cal-tag">🍄 Sivorumena mraznica (Štorovka)</span><span class="gp-cal-tag">🍄 Vijoličasta bledivka</span><span class="gp-cal-tag">🍄 Orjaška plešivka</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Veliki slinar</span><span class="gp-cal-tag">🍄 Brezov ded</span><span class="gp-cal-tag">🍄 Brezov turek</span><span class="gp-cal-tag">🍄 Hrastov turek</span></div></div>
+  <div class="gp-cal-panel" data-m="10"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Jesenski goban (Jurček)</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Črni goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Lijasta lisička</span><span class="gp-cal-tag">🍄 Črna trobenta</span><span class="gp-cal-tag">🍄 Rumeni ježek</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna golobica</span><span class="gp-cal-tag">🍄 Zelena golobica</span><span class="gp-cal-tag">🍄 Užitna sirovka</span><span class="gp-cal-tag">🍄 Smrekova sirovka</span><span class="gp-cal-tag">🍄 Kravja mlečnica</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Orjaški dežnik (Marela)</span><span class="gp-cal-tag">🍄 Poljski kukmak</span><span class="gp-cal-tag">🍄 Pšenična koprenka</span><span class="gp-cal-tag">🍄 Sivorumena mraznica (Štorovka)</span><span class="gp-cal-tag">🍄 Bukov ostrigar</span><span class="gp-cal-tag">🍄 Vijoličasta bledivka</span><span class="gp-cal-tag">🍄 Orjaška plešivka</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Veliki slinar</span><span class="gp-cal-tag">🍄 Brezov ded</span><span class="gp-cal-tag">🍄 Brezov turek</span><span class="gp-cal-tag">🍄 Hrastov turek</span></div></div>
+  <div class="gp-cal-panel" data-m="11"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Jesenski goban (Jurček)</span><span class="gp-cal-tag">🍄 Borov goban</span><span class="gp-cal-tag">🍄 Žametasti goban</span><span class="gp-cal-tag">🍄 Kostanjevka</span><span class="gp-cal-tag">🍄 Rdečebetka</span><span class="gp-cal-tag">🍄 Macesnova lupljivka</span><span class="gp-cal-tag">🍄 Navadna lisička</span><span class="gp-cal-tag">🍄 Lijasta lisička</span><span class="gp-cal-tag">🍄 Črna trobenta</span><span class="gp-cal-tag">🍄 Rumeni ježek</span><span class="gp-cal-tag">🍄 Modrikasta golobica</span><span class="gp-cal-tag">🍄 Užitna sirovka</span><span class="gp-cal-tag">🍄 Smrekova sirovka</span><span class="gp-cal-tag">🍄 Rdečkasta mušnica (Bisernica)</span><span class="gp-cal-tag">🍄 Orjaški dežnik (Marela)</span><span class="gp-cal-tag">🍄 Sivorumena mraznica (Štorovka)</span><span class="gp-cal-tag">🍄 Zimska panjevka</span><span class="gp-cal-tag">🍄 Bukov ostrigar</span><span class="gp-cal-tag">🍄 Vijoličasta bledivka</span><span class="gp-cal-tag">🍄 Velika tintnica</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span><span class="gp-cal-tag">🍄 Betičasta prašnica</span><span class="gp-cal-tag">🍄 Veliki slinar</span></div></div>
+  <div class="gp-cal-panel" data-m="12"><div class="gp-cal-sp"><span class="gp-cal-tag">🍄 Lijasta lisička</span><span class="gp-cal-tag">🍄 Zimska panjevka</span><span class="gp-cal-tag">🍄 Bukov ostrigar</span><span class="gp-cal-tag">🍄 Bezgova uhljevka</span></div></div>
   <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
   <nav class="gp-bottomnav" aria-label="Glavna navigacija">
     <a href="/gobarska-napoved/"><span class="ic">🍄</span>Napoved</a>
@@ -586,7 +624,22 @@ body .wrap{padding-bottom:5.5rem}
     <a href="/gobarska-napoved/baza-vrst/"><span class="ic">📖</span>Baza vrst</a>
     <a href="/gobarska-napoved/dvojnice/"><span class="ic">⚠️</span>Dvojnice</a>
   </nav>
-
+<script>(function(){
+  var chips=document.querySelectorAll(".gp-cal-chips .gp-chip");
+  var panels=document.querySelectorAll(".gp-cal-panel");
+  chips.forEach(function(c){
+    c.addEventListener("click",function(){
+      chips.forEach(function(x){x.classList.remove("active");});
+      panels.forEach(function(p){p.classList.remove("active");});
+      c.classList.add("active");
+      var p=document.querySelector('.gp-cal-panel[data-m="'+c.dataset.m+'"]');
+      if(p)p.classList.add("active");
+      c.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+    });
+  });
+  var active=document.querySelector(".gp-cal-chips .gp-chip.active");
+  if(active)active.scrollIntoView({inline:"center",block:"nearest"});
+})();</script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a></span>

@@ -206,6 +206,13 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+/* Thumb-friendly action row right under the gauge — "glanceable" actions
+   (share, map, notify) instead of making the user read/scroll for them. */
+.gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.gp-chip-action{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;
+  padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
+  color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
+.gp-chip-action:hover{border-color:var(--blue)}
 .gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
@@ -440,6 +447,15 @@ body{
 .gp-chip:hover{border-color:var(--blue)}
 .gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
 .gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
+/* ── /koledar/ — month chips + one card panel each (chip-click swap, no
+   fetch — all 12 panels are pre-rendered, only visibility toggles). ── */
+.gp-cal-panel{display:none;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--card-shadow)}
+.gp-cal-panel.active{display:block}
+.gp-cal-sp{display:flex;flex-wrap:wrap;gap:.5rem}
+.gp-cal-tag{background:var(--badge-bg);border:1px solid var(--card-border);border-radius:999px;
+  padding:.35rem .8rem;font-size:.85rem}
+.gp-cal-empty{color:var(--muted);font-size:.88rem;margin:0}
 .gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
 .gp-diary-submit{margin-top:.2rem}
 .gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
@@ -505,6 +521,16 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
+/* ── Section-level accordions (Geološki tereni / Nasveti / Dnevnik) — same
+   collapse mechanics as .gp-collapse, but the summary reads like a .gp-h2
+   heading rather than a small card toggle, so a closed section still looks
+   like a normal page section, just one the user has to tap to open. Default
+   closed (no `open` attribute) keeps the "active" data above the fold. ── */
+.gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
+.gp-collapse-section summary{padding:0 0 .4rem;border-bottom:1px solid var(--border);
+  background:transparent;font-size:1.35rem;font-weight:700}
+.gp-collapse-section summary::after{font-size:1rem}
+.gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
@@ -966,6 +992,34 @@ PAGE_JS = """<script>
       if(sosPanel.classList.contains("open")&&!sosPanel.contains(e.target)&&e.target!==sosBtn)sosPanel.classList.remove("open");
     });
   }
+
+  // Share chip — native share sheet where available, clipboard fallback
+  var shareBtn=document.getElementById("gp-share-btn"), shareMsg=document.getElementById("gp-share-msg");
+  if(shareBtn){
+    shareBtn.addEventListener("click",function(){
+      var pct=shareBtn.dataset.pct, lvl=shareBtn.dataset.lvl;
+      var data={title:"Gobarska napoved",
+        text:"Gobarski indeks danes: "+pct+" % ("+lvl+") — Zgornja Savinjska dolina",
+        url:location.href};
+      if(navigator.share){navigator.share(data).catch(function(){});return;}
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(data.url).then(function(){
+          if(shareMsg){shareMsg.textContent="Povezava kopirana.";setTimeout(function(){shareMsg.textContent="";},2500);}
+        }).catch(function(){});
+      }
+    });
+  }
+
+  // Section accordions (Geološki tereni / Nasveti / Dnevnik) default closed;
+  // auto-open + jump when the quicknav links straight to one via #hash.
+  function openHashSection(){
+    var id=location.hash.slice(1);
+    if(!id)return;
+    var el=document.getElementById(id);
+    if(el&&el.tagName==="DETAILS")el.open=true;
+  }
+  openHashSection();
+  window.addEventListener("hashchange",openHashSection);
 })();
 </script>"""
 
@@ -1364,19 +1418,53 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
     return url
 
 
-def build_koledar_page(cal_rows, month):
+def build_koledar_page(cal_data, month):
+    """Chip row of 12 months + one card panel each (current month open by
+    default) — replaces the old 12-row static table with a tap-to-glance
+    format, consistent with the day-chips pattern used in the premium
+    forecast (locDetailHtml in PAGE_JS)."""
+    chips = "\n".join(
+        f'    <button type="button" class="gp-chip{" active" if d["current"] else ""}" '
+        f'data-m="{d["m"]}">{d["name"]}</button>'
+        for d in cal_data)
+    panels = "\n".join(
+        f'  <div class="gp-cal-panel{" active" if d["current"] else ""}" data-m="{d["m"]}">' + (
+            '<div class="gp-cal-sp">' + "".join(
+                f'<span class="gp-cal-tag">🍄 {_esc(n)}</span>' for n in d["species"]) + '</div>'
+            if d["species"] else
+            '<p class="gp-cal-empty">Nobena od spremljanih vrst ni v sezoni ta mesec.</p>'
+        ) + '</div>'
+        for d in cal_data)
+    cal_js = '''<script>(function(){
+  var chips=document.querySelectorAll(".gp-cal-chips .gp-chip");
+  var panels=document.querySelectorAll(".gp-cal-panel");
+  chips.forEach(function(c){
+    c.addEventListener("click",function(){
+      chips.forEach(function(x){x.classList.remove("active");});
+      panels.forEach(function(p){p.classList.remove("active");});
+      c.classList.add("active");
+      var p=document.querySelector('.gp-cal-panel[data-m="'+c.dataset.m+'"]');
+      if(p)p.classList.add("active");
+      c.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+    });
+  });
+  var active=document.querySelector(".gp-cal-chips .gp-chip.active");
+  if(active)active.scrollIntoView({inline:"center",block:"nearest"});
+})();</script>'''
     body = ('''  <figure class="gp-banner">
     <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
       alt="Dve gobi v mahu, avtorski makro posnetek">
     <figcaption>📷 Avtorski makro posnetek — jesenska rast v mahu</figcaption>
   </figure>
 '''
-            '  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze).</p>\n'
-            '  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+            '  <p class="post-meta">Katere užitne in pogojno užitne vrste so ta mesec v sezoni (iz lokalne baze). '
+            'Izberi mesec.</p>\n'
+            '  <div class="gp-chip-row gp-cal-chips">\n' + chips + '\n  </div>\n'
+            + panels)
     return subpage_shell(
         "koledar", "Koledar gobarske sezone po mesecih",
         "Kateri užitni gobi so po mesecih v sezoni v Zgornji Savinjski dolini — pregled po lokalni bazi vrst.",
-        "Koledar", body)
+        "Koledar", body, extra_js=cal_js)
 
 
 def build_trend_page():
@@ -1610,6 +1698,13 @@ def build_body(rules, premium, free):
         <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
+    <div class="gp-action-chips">
+      <button type="button" class="gp-chip-action" id="gp-share-btn"
+        data-pct="{pct}" data-lvl="{_esc(lvl)}">📤 Deli</button>
+      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
+      <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
+    </div>
+    <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
     nočno ohladitev — po vrstah in po geologiji terena.</div>
@@ -1722,18 +1817,14 @@ def build_body(rules, premium, free):
   računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
   </div>'''
 
-    # ── monthly calendar (free) ───────────────────────────────────────────────
-    cal_rows = []
-    for m in range(1, 13):
-        names = [s["name_sl"] for s in indexed if m in season_months(s)]
-        mark = " ←" if m == month else ""
-        hi = ' style="background:var(--fc-today-bg)"' if m == month else ""
-        joined = ", ".join(names) or "—"
-        cal_rows.append(
-            f'      <tr{hi}>'
-            f'<th>{seo.MES_NOM[m].capitalize()}{mark}</th>'
-            f'<td style="text-align:left">{_esc(joined)}</td></tr>')
-    calendar_html = ('  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
+    # ── monthly calendar (free) — structured data for the chip+card /koledar/
+    # page (build_koledar_page); nothing on the hub page itself reads this.
+    cal_data = [
+        {"m": m, "name": seo.MES_NOM[m].capitalize(),
+         "species": [s["name_sl"] for s in indexed if m in season_months(s)],
+         "current": m == month}
+        for m in range(1, 13)
+    ]
 
     # ── 50-species reference cards (free, SEO + credibility) ──────────────────
     # Card top-half shows a real photo once one exists at img/vrste/<id>.jpg;
@@ -1899,6 +1990,7 @@ def build_body(rules, premium, free):
     <a href="/gobarska-napoved/baza-vrst/">📖 Baza vrst</a>
     <a href="/gobarska-napoved/dvojnice/">⚠️ Dvojnice</a>
     <a href="#tereni">🗺️ Tereni</a>
+    <a href="#nasveti">📋 Nasveti</a>
     <a href="#dnevnik">📔 Dnevnik</a>
     <a href="#faq">❓ FAQ</a>
   </nav>
@@ -1914,12 +2006,18 @@ def build_body(rules, premium, free):
   <p class="archive-intro">Koledar sezone, večletni trend, celotna baza vrst in primerjava nevarnih dvojnic —
   vsaka na svoji strani, da glavna stran ostane pregledna.</p>
 {hub_cards_html()}
-  <h2 class="gp-h2" id="tereni">🗺️ Geološki tereni doline</h2>
+  <details class="gp-collapse gp-collapse-section" id="tereni">
+  <summary>🗺️ Geološki tereni doline</summary>
+  <div class="gp-collapse-body">
   <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
 {terrain_html}
+  </div>
+  </details>
+  <details class="gp-collapse gp-collapse-section" id="nasveti">
+  <summary>📋 Nasveti in pravila</summary>
+  <div class="gp-collapse-body">
   <div class="card" style="margin:1rem 0">
-    <div class="clabel">📋 Nasveti in pravila</div>
-    <div style="font-size:.85rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
+    <div style="font-size:.85rem;color:var(--muted);line-height:1.7">
       ⚖️ Do <b>2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
       🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
       🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
@@ -1932,8 +2030,14 @@ def build_body(rules, premium, free):
       <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
     </div>
   </div>
-  <h2 class="gp-h2" id="dnevnik">📔 Gobarjev dnevnik</h2>
+  </div>
+  </details>
+  <details class="gp-collapse gp-collapse-section" id="dnevnik">
+  <summary>📔 Gobarjev dnevnik</summary>
+  <div class="gp-collapse-body">
 {diary_html}
+  </div>
+  </details>
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
@@ -1951,7 +2055,7 @@ def build_body(rules, premium, free):
 {PAGE_JS}
 {DIARY_JS}'''
     subpages = {
-        "cal_rows": cal_rows, "month": month,
+        "cal_data": cal_data, "month": month,
         "species_table": species_table, "species_count": len(species),
         "vs_html": vs_html, "vs_count": len(vs_cards),
         "credits_html": credits_html, "vrste_credits_html": vrste_credits_html,
@@ -1979,7 +2083,7 @@ def main():
     body, sub = build_body(rules, premium, free)
 
     build_zemljevid_page(premium, rules)
-    build_koledar_page(sub["cal_rows"], sub["month"])
+    build_koledar_page(sub["cal_data"], sub["month"])
     build_trend_page()
     build_baza_vrst_page(sub["species_table"], sub["species_count"], sub["vrste_credits_html"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
