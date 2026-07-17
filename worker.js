@@ -2233,10 +2233,37 @@ Naloga:
 3. Če obstaja nevarna dvojnica, jo IZRECNO navedi z opozorilom.
 4. Če fotografija ni dovolj jasna, ali gre morda za mušnico (Amanita) ali drug nevaren rod, bodi še posebej previden in to jasno povej.
 
-Odgovori SAMO z JSON (brez markdown ograd), natanko v tej obliki:
-{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"kratka splošna opomba"}
+Rezultat sporoči IZKLJUČNO s klicem orodja "report_identification" — ne piši nobenega besedila izven tega klica.
 
 POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
+
+          const tool = {
+            name: "report_identification",
+            description: "Poroča o prepoznanih kandidatih za vrsto gobe na fotografiji.",
+            input_schema: {
+              type: "object",
+              properties: {
+                candidates: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name_sl: { type: "string" },
+                      name_lat: { type: "string" },
+                      confidence: { type: "string", enum: ["nizka", "srednja", "visoka"] },
+                      reasoning: { type: "string" },
+                      edibility: { type: "string" },
+                      warning: { type: "string" },
+                    },
+                    required: ["name_sl", "confidence", "reasoning", "edibility"],
+                  },
+                },
+                unclear: { type: "boolean" },
+                note: { type: "string" },
+              },
+              required: ["candidates", "unclear", "note"],
+            },
+          };
 
           let aiRes;
           try {
@@ -2249,7 +2276,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
               },
               body: JSON.stringify({
                 model: "claude-sonnet-5",
-                max_tokens: 800,
+                max_tokens: 1024,
+                tools: [tool],
+                tool_choice: { type: "tool", name: "report_identification" },
                 messages: [{
                   role: "user",
                   content: [
@@ -2266,10 +2295,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
             return _json({ error: "AI storitev ni dosegljiva", upstream_status: aiRes.status, upstream_detail: detail }, 502);
           }
           const aiData = await aiRes.json();
-          let text = (aiData.content?.[0]?.text || "").trim()
-            .replace(/^```json\s*/i, "").replace(/```\s*$/,"").trim();
-          let parsed;
-          try { parsed = JSON.parse(text); } catch (_) { return _json({ error: "Napaka pri obdelavi odgovora" }, 500); }
+          const toolUse = (aiData.content || []).find(c => c.type === "tool_use" && c.name === "report_identification");
+          if (!toolUse || !toolUse.input) {
+            return _json({ error: "Napaka pri obdelavi odgovora", stop_reason: aiData.stop_reason || null }, 500);
+          }
+          const parsed = toolUse.input;
           return _json({ ok: true, candidates: parsed.candidates || [], unclear: !!parsed.unclear, note: parsed.note || "" });
         }
 
