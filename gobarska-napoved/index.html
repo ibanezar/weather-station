@@ -205,6 +205,21 @@ body{
 .gp-diary-notes{font-size:.82rem;color:var(--muted);margin-top:.2rem}
 .gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
 .gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
+
+/* ── AI prepoznava gobe (identify) ── */
+.gp-id-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;
+  padding:.8rem .9rem;margin-top:.7rem}
+.gp-id-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.gp-id-name{font-weight:700;font-size:.98rem}
+.gp-id-lat{font-size:.78rem;color:var(--muted);font-style:italic;margin-left:.3rem}
+.gp-id-conf{font-size:.7rem;font-weight:700;padding:.08rem .45rem;border-radius:6px;white-space:nowrap}
+.gp-id-conf.hi{background:rgba(52,211,153,.15);color:var(--green)}
+.gp-id-conf.mid{background:rgba(245,158,11,.15);color:var(--amber)}
+.gp-id-conf.lo{background:rgba(248,113,113,.16);color:#f87171}
+.gp-id-reason{font-size:.85rem;color:var(--muted);margin-top:.4rem;line-height:1.55}
+.gp-id-warn{font-size:.83rem;color:#fecaca;background:rgba(248,113,113,.12);border-left:3px solid #f87171;
+  padding:.4rem .7rem;margin-top:.5rem;border-radius:0 8px 8px 0}
+.gp-id-note{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin-top:.8rem}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -324,12 +339,27 @@ body{
   <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
   <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
+  <div id="gp-identify" class="gp-diary" hidden>
+    <h3 style="margin-top:0">🔍 AI prepoznava gobe iz fotografije</h3>
+    <p class="gp-diary-priv">Naloži fotografijo najdene gobe — AI predlaga najverjetnejšo vrsto iz lokalne baze
+    51 vrst, oceni zanesljivost in opozori na nevarne dvojnice. <b>To ni zamenjava za mikologa</b> — ob
+    najmanjšem dvomu gobe nikoli ne uživaj.</p>
+    <div class="gp-diary-row">
+      <label class="gp-diary-btn gp-diary-photobtn">📷 Izberi fotografijo
+        <input type="file" accept="image/*" capture="environment" id="gp-id-photo" hidden>
+      </label>
+      <img id="gp-id-preview" class="gp-d-photo-preview" alt="">
+      <button type="button" class="gp-cta" id="gp-id-btn" disabled>Prepoznaj gobo</button>
+    </div>
+    <div id="gp-id-status" class="gp-msg"></div>
+    <div id="gp-id-result"></div>
+  </div>
   <div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od 8 nabiralnih območij:
     indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, padavine pod pragom, nočna ohladitev zaznana«)
-    in opozorila na nevarne dvojnice.</p>
+    in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
     <div class="gp-skel">
       <div class="gp-forest"><span>Bezgova uhljevka</span><b>•• % ······</b></div>
       <div class="gp-forest"><span>Rdečkasta mušnica (Bisernica)</span><b>•• % ······</b></div>
@@ -356,6 +386,7 @@ body{
         <li>7-dnevna napoved po vrstah</li>
         <li>Indeks za vsa nabiralna območja</li>
         <li>Razlage in opozorila na dvojnice</li>
+        <li>🔍 AI prepoznava gobe iz fotografije</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
@@ -364,7 +395,7 @@ body{
       <span class="gp-tag">CELA SEZONA · najugodneje</span>
       <div class="p-price">24,99 €<small> / sezona</small></div>
       <ul>
-        <li>Vse iz mesečnega paketa</li>
+        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo)</li>
         <li>Dostop do konca sezone (30. 11.)</li>
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
@@ -1090,11 +1121,70 @@ body{
     content.innerHTML=html;
     content.hidden=false;lock.hidden=true;
   }
+  function initIdentify(token){
+    var card=document.getElementById("gp-identify");
+    var fileInput=document.getElementById("gp-id-photo");
+    var preview=document.getElementById("gp-id-preview");
+    var btn=document.getElementById("gp-id-btn");
+    var statusEl2=document.getElementById("gp-id-status");
+    var resultEl=document.getElementById("gp-id-result");
+    if(!card||!fileInput||!btn)return;
+    card.hidden=false;
+    var pendingImg=null;
+    var CONF_CLS={visoka:"hi",srednja:"mid",nizka:"lo"};
+    fileInput.addEventListener("change",function(){
+      var f=fileInput.files&&fileInput.files[0];
+      if(!f)return;
+      var img=new Image();
+      var reader=new FileReader();
+      reader.onload=function(e){
+        img.onload=function(){
+          var maxW=900,scale=Math.min(1,maxW/img.width);
+          var w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+          var c=document.createElement("canvas");c.width=w;c.height=h;
+          c.getContext("2d").drawImage(img,0,0,w,h);
+          pendingImg=c.toDataURL("image/jpeg",0.78);
+          preview.src=pendingImg;preview.style.display="inline-block";
+          btn.disabled=false;resultEl.innerHTML="";statusEl2.textContent="";
+        };
+        img.src=e.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+    btn.addEventListener("click",function(){
+      if(!pendingImg)return;
+      btn.disabled=true;statusEl2.textContent="Analiziram fotografijo …";resultEl.innerHTML="";
+      fetch(API+"/premium/identify",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body:JSON.stringify({image:pendingImg})})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
+        .then(function(res){
+          btn.disabled=false;
+          if(!res.ok){statusEl2.textContent=res.body&&res.body.error?res.body.error:"Napaka pri prepoznavi.";return;}
+          statusEl2.textContent="";
+          var d=res.body;
+          var html=(d.candidates||[]).map(function(c){
+            var confCls=CONF_CLS[c.confidence]||"mid";
+            return '<div class="gp-id-card"><div class="gp-id-head"><span><span class="gp-id-name">'+
+              esc2(c.name_sl||"?")+'</span><span class="gp-id-lat">'+esc2(c.name_lat||"")+'</span></span>'+
+              '<span class="gp-id-conf '+confCls+'">zanesljivost: '+esc2(c.confidence||"?")+'</span></div>'+
+              (c.edibility?'<div class="gp-id-reason"><b style="color:var(--text)">'+esc2(c.edibility)+'</b></div>':'')+
+              (c.reasoning?'<div class="gp-id-reason">'+esc2(c.reasoning)+'</div>':'')+
+              (c.warning?'<div class="gp-id-warn">⚠ '+esc2(c.warning)+'</div>':'')+'</div>';
+          }).join("");
+          if(d.note)html+='<div class="gp-id-note">'+esc2(d.note)+'</div>';
+          if(!html)html='<div class="gp-id-note">AI ni prepoznal gobe na fotografiji. Poskusi z bolj ostro sliko klobuka in trosovnice.</div>';
+          resultEl.innerHTML=html;
+        })
+        .catch(function(){btn.disabled=false;statusEl2.textContent="Napaka pri povezavi. Poskusi znova.";});
+    });
+  }
+  function esc2(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   var t=tok();
   if(t){
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){render(d);
+      .then(function(d){render(d);initIdentify(t);
         if(statusEl){statusEl.hidden=false;statusEl.textContent="✓ Premium dostop aktiven.";}})
       .catch(function(){localStorage.removeItem(LS);});
   }
