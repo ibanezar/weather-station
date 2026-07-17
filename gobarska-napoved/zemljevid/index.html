@@ -131,6 +131,31 @@ body{
 .gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
 .gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 .gp-dbl{color:var(--muted);font-size:.8rem}
+
+/* ── Species cards (/baza-vrst/) — Material-style: photo (or tinted
+   placeholder until one exists) on top, clean metrics below. ── */
+.gp-sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;margin:.6rem 0 1rem}
+.gp-sp-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;
+  box-shadow:var(--card-shadow);display:flex;flex-direction:column}
+.gp-sp-top{position:relative;height:108px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.03)}
+.gp-sp-top img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gp-sp-top .gp-sp-emoji{display:none;font-size:2.1rem;opacity:.55}
+.gp-sp-top.ph .gp-sp-emoji{display:block}
+.gp-sp-top.ph.e-ok{background:linear-gradient(135deg,rgba(52,211,153,.32),rgba(52,211,153,.06))}
+.gp-sp-top.ph.e-cond{background:linear-gradient(135deg,rgba(245,158,11,.32),rgba(245,158,11,.06))}
+.gp-sp-top.ph.e-none{background:linear-gradient(135deg,rgba(169,160,140,.28),rgba(169,160,140,.05))}
+.gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
+.gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
+.gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
+.gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
+.gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
+.gp-sp-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.1rem}
+.gp-sp-season{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
+  border-top:1px dashed var(--card-border);line-height:1.4}
+.gp-sp-dbl b{color:var(--text)}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}

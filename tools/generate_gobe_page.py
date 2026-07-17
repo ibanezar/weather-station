@@ -238,6 +238,31 @@ body{
 .gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
 .gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 .gp-dbl{color:var(--muted);font-size:.8rem}
+
+/* ── Species cards (/baza-vrst/) — Material-style: photo (or tinted
+   placeholder until one exists) on top, clean metrics below. ── */
+.gp-sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;margin:.6rem 0 1rem}
+.gp-sp-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;
+  box-shadow:var(--card-shadow);display:flex;flex-direction:column}
+.gp-sp-top{position:relative;height:108px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.03)}
+.gp-sp-top img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gp-sp-top .gp-sp-emoji{display:none;font-size:2.1rem;opacity:.55}
+.gp-sp-top.ph .gp-sp-emoji{display:block}
+.gp-sp-top.ph.e-ok{background:linear-gradient(135deg,rgba(52,211,153,.32),rgba(52,211,153,.06))}
+.gp-sp-top.ph.e-cond{background:linear-gradient(135deg,rgba(245,158,11,.32),rgba(245,158,11,.06))}
+.gp-sp-top.ph.e-none{background:linear-gradient(135deg,rgba(169,160,140,.28),rgba(169,160,140,.05))}
+.gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
+.gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
+.gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
+.gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
+.gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
+.gp-sp-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.1rem}
+.gp-sp-season{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
+  border-top:1px dashed var(--card-border);line-height:1.4}
+.gp-sp-dbl b{color:var(--text)}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -1378,20 +1403,33 @@ def build_body(rules, premium, free):
             f'<td style="text-align:left">{_esc(joined)}</td></tr>')
     calendar_html = ('  <table class="stats">\n' + "\n".join(cal_rows) + "\n  </table>")
 
-    # ── 50-species reference table (free, SEO + credibility) ──────────────────
-    sp_rows = []
+    # ── 50-species reference cards (free, SEO + credibility) ──────────────────
+    # Card top-half shows a real photo once one exists at img/vrste/<id>.jpg;
+    # until then onerror swaps it for an edibility-tinted placeholder, so
+    # photos can be dropped in later species-by-species with no code change
+    # (same graceful-fallback trick as the /dvojnice/ comparison cards).
+    sp_cards = []
     for s in sorted(species, key=lambda x: (not x.get("gets_index"), x["name_sl"])):
         se = s["season"]
         season_txt = f'{se["start"]}–{se["end"]}'
-        sp_rows.append(
-            f'      <tr><td><b>{_esc(s["name_sl"])}</b><br><span class="lat">{_esc(s["name_lat"])}</span></td>'
-            f'<td>{edib_badge(s.get("edibility"))}</td>'
-            f'<td>{season_txt}</td>'
-            f'<td class="gp-dbl">{_esc(s.get("doubles") or "—")}</td></tr>')
-    species_table = (
-        '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr>'
-        '<th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>\n'
-        + "\n".join(sp_rows) + "\n  </tbody></table></div>")
+        edib = (s.get("edibility") or "").lower().strip()
+        cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
+        dbl = s.get("doubles")
+        dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
+        sp_cards.append(f'''    <div class="gp-sp-card">
+      <div class="gp-sp-top {cls}">
+        <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
+        <div class="gp-sp-lat">{_esc(s["name_lat"])}</div>
+        <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {season_txt}</span></div>
+        {dbl_html}
+      </div>
+    </div>''')
+    species_table = '  <div class="gp-sp-grid">\n' + "\n".join(sp_cards) + "\n  </div>"
 
     # ── dvojnik: side-by-side edible vs. dangerous-double comparison ──────────
     # Photos: drop matching files into gobarska-napoved/img/dvojnice/<slug>.jpg
