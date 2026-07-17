@@ -131,6 +131,31 @@ body{
 .gp-sptable .lat{color:var(--muted);font-style:italic;font-size:.8rem}
 .gp-scroll{max-height:560px;overflow:auto;border:1px solid var(--card-border);border-radius:12px}
 .gp-dbl{color:var(--muted);font-size:.8rem}
+
+/* ── Species cards (/baza-vrst/) — Material-style: photo (or tinted
+   placeholder until one exists) on top, clean metrics below. ── */
+.gp-sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;margin:.6rem 0 1rem}
+.gp-sp-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;
+  box-shadow:var(--card-shadow);display:flex;flex-direction:column}
+.gp-sp-top{position:relative;height:108px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.03)}
+.gp-sp-top img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gp-sp-top .gp-sp-emoji{display:none;font-size:2.1rem;opacity:.55}
+.gp-sp-top.ph .gp-sp-emoji{display:block}
+.gp-sp-top.ph.e-ok{background:linear-gradient(135deg,rgba(52,211,153,.32),rgba(52,211,153,.06))}
+.gp-sp-top.ph.e-cond{background:linear-gradient(135deg,rgba(245,158,11,.32),rgba(245,158,11,.06))}
+.gp-sp-top.ph.e-none{background:linear-gradient(135deg,rgba(169,160,140,.28),rgba(169,160,140,.05))}
+.gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
+.gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
+.gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
+.gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
+.gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
+.gp-sp-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.1rem}
+.gp-sp-season{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
+  border-top:1px dashed var(--card-border);line-height:1.4}
+.gp-sp-dbl b{color:var(--text)}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -272,6 +297,36 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
+   quicknav/hub cards already cover cross-page navigation ── */
+.gp-bottomnav,.gp-id-fab{display:none}
+@media (max-width:760px){
+  .wrap{padding-bottom:9.7rem}
+  .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--card-bg);backdrop-filter:blur(10px);border-top:1px solid var(--card-border);
+    padding:.35rem .2rem calc(.35rem + env(safe-area-inset-bottom))}
+  .gp-bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;
+    padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
+    border-radius:10px}
+  .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
+  .gp-bottomnav a.active{color:var(--blue)}
+  .gp-bottomnav a.active .ic{transform:translateY(-1px)}
+  /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
+     way rather than shrink its tap target to squeeze both in. */
+  .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
+  .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
+  /* Primary action FAB (hub page only) — freed-up bottom-right now that
+     SOS moved to the header corner and the bottom nav owns the strip below. */
+  .gp-id-fab{position:fixed;right:1rem;bottom:calc(4.6rem + .7rem);z-index:55;display:flex;
+    align-items:center;gap:.4rem;background:var(--blue);color:#04070e;font-weight:700;
+    font-size:.82rem;padding:.7rem 1.05rem;border-radius:999px;text-decoration:none;
+    box-shadow:0 4px 18px rgba(111,174,85,.4);border:2px solid rgba(255,255,255,.15);
+    opacity:0;pointer-events:none;transform:translateY(8px);
+    transition:opacity .2s ease,transform .2s ease}
+  .gp-id-fab.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+  .gp-id-fab .ic{font-size:1.15rem;line-height:1}
+}
+
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
 .gp-map-shell{position:relative;margin:.6rem 0 1rem}
 .gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
@@ -361,60 +416,678 @@ body{
     <figcaption>📷 Avtorski posnetek — jutranja inverzija nad gozdovi doline</figcaption>
   </figure>
   <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
-  <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Vrsta</th><th>Užitnost</th><th>Sezona</th><th>Nevarne dvojnice</th></tr></thead><tbody>
-      <tr><td><b>Betičasta prašnica</b><br><span class="lat">Lycoperdon perlatum</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Navadna smrdljivka (Scleroderma citrinum) – strupena; zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni.</td></tr>
-      <tr><td><b>Bezgova uhljevka</b><br><span class="lat">Auricularia auricula-judae</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>01.01–12.31</td><td class="gp-dbl">Vijoličasta zvedavka (Auricularia mesenterica) – neužitna; nima oblike ušesa in je bolj usnjata.</td></tr>
-      <tr><td><b>Borov goban</b><br><span class="lat">Boletus pinophilus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>05.01–11.30</td><td class="gp-dbl">Žolčasti goban (Tylopilus felleus) – neužiten, grenak okus. Druge vrste užitnih gobanov.</td></tr>
-      <tr><td><b>Brezov ded</b><br><span class="lat">Leccinum scabrum</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Žolčasti goban (Tylopilus felleus) – neužiten, izredno grenak; loči se po rožnati trosovnici (cevke pod klobukom).</td></tr>
-      <tr><td><b>Brezov turek</b><br><span class="lat">Leccinum versipelle</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Trepetlikov turek (Leccinum aurantiacum) – prav tako užiten in odličen, raste pod trepetlikami/topoli.</td></tr>
-      <tr><td><b>Bukov ostrigar</b><br><span class="lat">Pleurotus ostreatus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>10.01–01.31</td><td class="gp-dbl">V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</td></tr>
-      <tr><td><b>Hrastov turek</b><br><span class="lat">Leccinum aurantiacum</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</td></tr>
-      <tr><td><b>Jesenski goban (Jurček)</b><br><span class="lat">Boletus edulis</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>09.01–11.30</td><td class="gp-dbl">Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in rožnati trosovnici.</td></tr>
-      <tr><td><b>Koničasti smrček</b><br><span class="lat">Morchella elata</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>03.01–05.31</td><td class="gp-dbl">Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima klobuk podoben možganom in nima pravilnih navpičnih jamic.</td></tr>
-      <tr><td><b>Kostanjevka</b><br><span class="lat">Imleria badia</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Žolčasti goban (Tylopilus felleus) – neužiten, grenak. Kostanjevka močno pomodri na cevkatem delu ob pritisku.</td></tr>
-      <tr><td><b>Kravja mlečnica</b><br><span class="lat">Lactifluus piperatus</span></td><td><span class="gp-badge e-cond">Pogojno užitna</span></td><td>07.01–10.31</td><td class="gp-dbl">Polsteni mlečnik (Lactifluus vellereus) – neužiten; ima žametno dlako na klobuku in bolj razmaknjene lističe.</td></tr>
-      <tr><td><b>Lijasta lisička</b><br><span class="lat">Craterellus tubaeformis</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>09.01–12.31</td><td class="gp-dbl">Zlatorumena lisička (Cantharellus lutescens) – prav tako užitna, nima tako izrazitih letvic.</td></tr>
-      <tr><td><b>Macesnova lupljivka</b><br><span class="lat">Suillus grevillei</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Druge maslenke in lupljivke pod iglavci, ki pa so vse užitne in nekatere prav tako sluzaste.</td></tr>
-      <tr><td><b>Modrikasta golobica</b><br><span class="lat">Russula cyanoxantha</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Zelena mušnica (Amanita phalloides) – smrtno strupena; mušnica ima obroček na betu in lupino v dnu beta, golobica ne.</td></tr>
-      <tr><td><b>Navadna lisička</b><br><span class="lat">Cantharellus cibarius</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>05.01–11.30</td><td class="gp-dbl">Oljkov livkar (Omphalotus olearius) – strupen; raste v šopih na lesu (predvsem na Primorskem pod oljkami/hrasti).</td></tr>
-      <tr><td><b>Orjaška plešivka</b><br><span class="lat">Calvatia gigantea</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–10.31</td><td class="gp-dbl">Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</td></tr>
-      <tr><td><b>Orjaški dežnik (Marela)</b><br><span class="lat">Macrolepiota procera</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–11.30</td><td class="gp-dbl">Strupena rdečeča dežnica (Chlorophyllum brunneum) – strupena; meso ob poškodbi močno pordeči, bet nima marogastega vzorca.</td></tr>
-      <tr><td><b>Poletni goban</b><br><span class="lat">Boletus reticulatus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>05.01–09.30</td><td class="gp-dbl">Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in mrežici na betu.</td></tr>
-      <tr><td><b>Poljski kukmak</b><br><span class="lat">Agaricus campestris</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>05.01–10.31</td><td class="gp-dbl">Karbolni kukmak (Agaricus xanthodermus) – strupen; v dnu beta ob prerezu močno porumeni in smrdi po črnilu.</td></tr>
-      <tr><td><b>Pšenična koprenka</b><br><span class="lat">Cortinarius caperatus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–10.31</td><td class="gp-dbl">Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom.</td></tr>
-      <tr><td><b>Rdečebetka</b><br><span class="lat">Xerocomellus chrysenteron</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–11.30</td><td class="gp-dbl">Sorodni polstenci (npr. rdečeči polstenec), ki so prav tako večinoma užitni.</td></tr>
-      <tr><td><b>Rdečkasta mušnica (Bisernica)</b><br><span class="lat">Amanita rubescens</span></td><td><span class="gp-badge e-cond">Pogojno užitna</span></td><td>05.01–11.30</td><td class="gp-dbl">Panterjeva mušnica (Amanita pantherina) – zelo strupena! Bisernica vedno rdeči na zraku/poškodbah in ima narebren obroček.</td></tr>
-      <tr><td><b>Rumeni ježek</b><br><span class="lat">Hydnum repandum</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–11.30</td><td class="gp-dbl">Rdečerjavi ježek (Hydnum rufescens) – manjši, bolj oranžen, prav tako užiten (odstranijo se bodičke).</td></tr>
-      <tr><td><b>Sivorumena mraznica (Štorovka)</b><br><span class="lat">Armillaria mellea</span></td><td><span class="gp-badge e-cond">Pogojno užitna</span></td><td>09.01–11.30</td><td class="gp-dbl">Navadna žveplenjača (Hypholoma fasciculare) – strupena; nima obročka na betu, klobuk je žvepleno rumen in zelo grenak.</td></tr>
-      <tr><td><b>Smrekova sirovka</b><br><span class="lat">Lactarius deterrimus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–11.30</td><td class="gp-dbl">Druge sirovke z oranžnim mlečkom – vse so užitne (smrekova hitro pozeleni na mestih poškodb).</td></tr>
-      <tr><td><b>Užitna golobica</b><br><span class="lat">Russula vesca</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika).</td></tr>
-      <tr><td><b>Užitna sirovka</b><br><span class="lat">Lactarius deliciosus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>08.01–11.30</td><td class="gp-dbl">Navadna tura (Lactarius torminosus) – strupena; raste pod brezami in izloča bel, zelo pekoč mleček.</td></tr>
-      <tr><td><b>Užitni smrček (Mavrah)</b><br><span class="lat">Morchella esculenta</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>04.01–05.31</td><td class="gp-dbl">Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima možgansko naguban klobuk in ni votel.</td></tr>
-      <tr><td><b>Velika tintnica</b><br><span class="lat">Coprinus comatus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>05.01–11.30</td><td class="gp-dbl">Gola tintnica (Coprinopsis atramentaria) – pogojno strupena z alkoholom; nima luskastega in visokega valjastega klobuka.</td></tr>
-      <tr><td><b>Veliki slinar</b><br><span class="lat">Gomphidius glutinosus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>08.01–11.30</td><td class="gp-dbl">Bakerasti polžar (Chroogomphus rutilus) – užiten; nima prozorne debele sluzi in je ves rdečkasto-bakerne barve.</td></tr>
-      <tr><td><b>Vijoličasta bledivka</b><br><span class="lat">Laccaria amethystina</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>07.01–11.30</td><td class="gp-dbl">Vijoličasta čeladica (Mycena pura) – strupena; loči se po izrazitem vonju po redkvici in tanjših, gostejših lističih.</td></tr>
-      <tr><td><b>Zelena golobica</b><br><span class="lat">Russula virescens</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Zelena mušnica (Amanita phalloides) – smrtno strupena! Mušnica ima kožnat obroček in lupino (vrečko) v dnu beta.</td></tr>
-      <tr><td><b>Zimska panjevka</b><br><span class="lat">Flammulina velutipes</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>11.01–03.31</td><td class="gp-dbl">Strupena galerina (Galerina marginata) – smrtno strupena; galerina raste na iglavcih, ima obroček in nima žametnega beta.</td></tr>
-      <tr><td><b>Črna trobenta</b><br><span class="lat">Craterellus cornucopioides</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>08.01–11.30</td><td class="gp-dbl">Ni nevarnih dvojnic zaradi specifične trobentaste oblike in povsem črne/sive barve.</td></tr>
-      <tr><td><b>Črni goban</b><br><span class="lat">Boletus aereus</span></td><td><span class="gp-badge e-ok">Užitna</span></td><td>06.01–10.31</td><td class="gp-dbl">Ni nevarnih neposrednih dvojnic zaradi zelo temnega klobuka in čvrstega, nespremenljivega belega mesa.</td></tr>
-      <tr><td><b>Žametasti goban</b><br><span class="lat">Neoboletus erythropus</span></td><td><span class="gp-badge e-cond">Pogojno užitna</span></td><td>05.01–11.30</td><td class="gp-dbl">Vražji goban (Rubroboletus satanas) – strupen; loči se po zelo svetlem (sivem) klobuku in rasti na apnencu.</td></tr>
-      <tr><td><b>Bljuvna golobica</b><br><span class="lat">Russula emetica</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Užitne rdeče golobice – bljuvna je izjemno pekoča in povzroča hude prebavne motnje.</td></tr>
-      <tr><td><b>Jesenski hrček</b><br><span class="lat">Gyromitra infula</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>09.01–11.30</td><td class="gp-dbl">Rogati hrček (Gyromitra gigas) ali drugi jesenski hrčki, ki so vsi sumljivi in potencialno nevarni.</td></tr>
-      <tr><td><b>Karbolni kukmak</b><br><span class="lat">Agaricus xanthodermus</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>06.01–10.31</td><td class="gp-dbl">Poljski kukmak (Agaricus campestris) – užiten; poljski kukmak prijetno diši po mandljih in v dnu beta ne rumeni.</td></tr>
-      <tr><td><b>Knežja mušnica (Karželj)</b><br><span class="lat">Amanita caesarea</span></td><td><span class="gp-badge e-prot">Zaščitena</span></td><td>07.01–10.31</td><td class="gp-dbl">Rdeča mušnica (Amanita muscaria) – strupena; rdeča mušnica ima bele lističe in bet ter luskice, karželj pa je živo rumen.</td></tr>
-      <tr><td><b>Koničasta mušnica</b><br><span class="lat">Amanita virosa</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Poljski kukmaki (Agaricus campestris) – užitni; kukmaki nimajo lupine v dnu beta, njihovi lističi pa hitro pordečijo ali rjavijo.</td></tr>
-      <tr><td><b>Leponogi postavnež</b><br><span class="lat">Caloboletus calopus</span></td><td><span class="gp-badge e-none">Neužitna</span></td><td>07.01–10.31</td><td class="gp-dbl">Grenki goban (Caloboletus radicans) – neužiten in grenak. Leponogi ima izrazito rdeč spodnji del beta.</td></tr>
-      <tr><td><b>Navadna podvihanka</b><br><span class="lat">Paxillus involutus</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>06.01–11.30</td><td class="gp-dbl">Velike rjave livke – podvihanka se prepozna po močno spodvihanem žametnem robu klobuka in rjavenju ob dotiku.</td></tr>
-      <tr><td><b>Navadna žveplenjača</b><br><span class="lat">Hypholoma fasciculare</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>05.01–12.31</td><td class="gp-dbl">Sivorumena mraznica (Armillaria mellea) – užitna po kuhanju; mraznica ima nežen obroček, luskice in bel trosni prah.</td></tr>
-      <tr><td><b>Panterjeva mušnica</b><br><span class="lat">Amanita pantherina</span></td><td><span class="gp-badge e-tox2">Zelo strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Rdečkasta mušnica (Amanita rubescens) – užitna; rdečkasta rdeči ob poškodbi, panterjeva pa ne spreminja barve mesa.</td></tr>
-      <tr><td><b>Pisana ploskocevka</b><br><span class="lat">Trametes versicolor</span></td><td><span class="gp-badge e-none">Neužitna</span></td><td>01.01–12.31</td><td class="gp-dbl">Bližnje sorodne ploskocevke – nobena ni strupena, so pa vse preveč lesene za neposredno prehrano.</td></tr>
-      <tr><td><b>Polsteni mlečnik</b><br><span class="lat">Lactifluus vellereus</span></td><td><span class="gp-badge e-none">Neužitna</span></td><td>07.01–10.31</td><td class="gp-dbl">Kravja mlečnica (Lactifluus piperatus) – pogojno užitna; ima popolnoma gladko kožico klobuka.</td></tr>
-      <tr><td><b>Pomladanski hrček</b><br><span class="lat">Gyromitra esculenta</span></td><td><span class="gp-badge e-tox2">Zelo strupena</span></td><td>03.01–05.31</td><td class="gp-dbl">Užitni smrček (Morchella esculenta) – užiten; smrček ima satast klobuk (kot panj) in je v celoti votel.</td></tr>
-      <tr><td><b>Rdeča mušnica</b><br><span class="lat">Amanita muscaria</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>08.01–11.30</td><td class="gp-dbl">Knežja mušnica (Amanita caesarea) – užitna/zaščitena; karželj ima rumene lističe, bet in obroček.</td></tr>
-      <tr><td><b>Vražji goban</b><br><span class="lat">Rubroboletus satanas</span></td><td><span class="gp-badge e-tox">Strupena</span></td><td>07.01–09.30</td><td class="gp-dbl">Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</td></tr>
-      <tr><td><b>Zelena mušnica</b><br><span class="lat">Amanita phalloides</span></td><td><span class="gp-badge e-death">Smrtno strupena</span></td><td>07.01–10.31</td><td class="gp-dbl">Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</td></tr>
-  </tbody></table></div>
+  <div class="gp-sp-grid">
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/lycoperdon_perlatum.jpg" alt="Betičasta prašnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Betičasta prašnica</div>
+        <div class="gp-sp-lat">Lycoperdon perlatum</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna smrdljivka (Scleroderma citrinum) – strupena; zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/auricularia_auricula_judae.jpg" alt="Bezgova uhljevka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Bezgova uhljevka</div>
+        <div class="gp-sp-lat">Auricularia auricula-judae</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 01.01–12.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta zvedavka (Auricularia mesenterica) – neužitna; nima oblike ušesa in je bolj usnjata.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/boletus_pinophilus.jpg" alt="Borov goban" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Borov goban</div>
+        <div class="gp-sp-lat">Boletus pinophilus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 05.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, grenak okus. Druge vrste užitnih gobanov.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/leccinum_scabrum.jpg" alt="Brezov ded" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Brezov ded</div>
+        <div class="gp-sp-lat">Leccinum scabrum</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, izredno grenak; loči se po rožnati trosovnici (cevke pod klobukom).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/leccinum_versipelle.jpg" alt="Brezov turek" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Brezov turek</div>
+        <div class="gp-sp-lat">Leccinum versipelle</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Trepetlikov turek (Leccinum aurantiacum) – prav tako užiten in odličen, raste pod trepetlikami/topoli.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/pleurotus_ostreatus.jpg" alt="Bukov ostrigar" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Bukov ostrigar</div>
+        <div class="gp-sp-lat">Pleurotus ostreatus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 10.01–01.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/leccinum_aurantiacum.jpg" alt="Hrastov turek" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Hrastov turek</div>
+        <div class="gp-sp-lat">Leccinum aurantiacum</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/boletus_edulis.jpg" alt="Jesenski goban (Jurček)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Jesenski goban (Jurček)</div>
+        <div class="gp-sp-lat">Boletus edulis</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 09.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in rožnati trosovnici.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/morchella_elata.jpg" alt="Koničasti smrček" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Koničasti smrček</div>
+        <div class="gp-sp-lat">Morchella elata</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 03.01–05.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima klobuk podoben možganom in nima pravilnih navpičnih jamic.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/imleria_badia.jpg" alt="Kostanjevka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Kostanjevka</div>
+        <div class="gp-sp-lat">Imleria badia</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, grenak. Kostanjevka močno pomodri na cevkatem delu ob pritisku.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-cond">
+        <img src="/gobarska-napoved/img/vrste/lactifluus_piperatus.jpg" alt="Kravja mlečnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Kravja mlečnica</div>
+        <div class="gp-sp-lat">Lactifluus piperatus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-cond">Pogojno užitna</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Polsteni mlečnik (Lactifluus vellereus) – neužiten; ima žametno dlako na klobuku in bolj razmaknjene lističe.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/craterellus_tubaeformis.jpg" alt="Lijasta lisička" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Lijasta lisička</div>
+        <div class="gp-sp-lat">Craterellus tubaeformis</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 09.01–12.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Zlatorumena lisička (Cantharellus lutescens) – prav tako užitna, nima tako izrazitih letvic.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/suillus_grevillei.jpg" alt="Macesnova lupljivka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Macesnova lupljivka</div>
+        <div class="gp-sp-lat">Suillus grevillei</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge maslenke in lupljivke pod iglavci, ki pa so vse užitne in nekatere prav tako sluzaste.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/russula_cyanoxantha.jpg" alt="Modrikasta golobica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Modrikasta golobica</div>
+        <div class="gp-sp-lat">Russula cyanoxantha</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena mušnica (Amanita phalloides) – smrtno strupena; mušnica ima obroček na betu in lupino v dnu beta, golobica ne.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="Navadna lisička" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Navadna lisička</div>
+        <div class="gp-sp-lat">Cantharellus cibarius</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 05.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Oljkov livkar (Omphalotus olearius) – strupen; raste v šopih na lesu (predvsem na Primorskem pod oljkami/hrasti).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/calvatia_gigantea.jpg" alt="Orjaška plešivka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Orjaška plešivka</div>
+        <div class="gp-sp-lat">Calvatia gigantea</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/macrolepiota_procera.jpg" alt="Orjaški dežnik (Marela)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Orjaški dežnik (Marela)</div>
+        <div class="gp-sp-lat">Macrolepiota procera</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena rdečeča dežnica (Chlorophyllum brunneum) – strupena; meso ob poškodbi močno pordeči, bet nima marogastega vzorca.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/boletus_reticulatus.jpg" alt="Poletni goban" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Poletni goban</div>
+        <div class="gp-sp-lat">Boletus reticulatus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 05.01–09.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in mrežici na betu.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/agaricus_campestris.jpg" alt="Poljski kukmak" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Poljski kukmak</div>
+        <div class="gp-sp-lat">Agaricus campestris</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 05.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Karbolni kukmak (Agaricus xanthodermus) – strupen; v dnu beta ob prerezu močno porumeni in smrdi po črnilu.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/cortinarius_caperatus.jpg" alt="Pšenična koprenka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Pšenična koprenka</div>
+        <div class="gp-sp-lat">Cortinarius caperatus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/xerocomellus_chrysenteron.jpg" alt="Rdečebetka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Rdečebetka</div>
+        <div class="gp-sp-lat">Xerocomellus chrysenteron</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Sorodni polstenci (npr. rdečeči polstenec), ki so prav tako večinoma užitni.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-cond">
+        <img src="/gobarska-napoved/img/vrste/amanita_rubescens.jpg" alt="Rdečkasta mušnica (Bisernica)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Rdečkasta mušnica (Bisernica)</div>
+        <div class="gp-sp-lat">Amanita rubescens</div>
+        <div class="gp-sp-row"><span class="gp-badge e-cond">Pogojno užitna</span><span class="gp-sp-season">📅 05.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Panterjeva mušnica (Amanita pantherina) – zelo strupena! Bisernica vedno rdeči na zraku/poškodbah in ima narebren obroček.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/hydnum_repandum.jpg" alt="Rumeni ježek" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Rumeni ježek</div>
+        <div class="gp-sp-lat">Hydnum repandum</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečerjavi ježek (Hydnum rufescens) – manjši, bolj oranžen, prav tako užiten (odstranijo se bodičke).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-cond">
+        <img src="/gobarska-napoved/img/vrste/armillaria_mellea.jpg" alt="Sivorumena mraznica (Štorovka)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Sivorumena mraznica (Štorovka)</div>
+        <div class="gp-sp-lat">Armillaria mellea</div>
+        <div class="gp-sp-row"><span class="gp-badge e-cond">Pogojno užitna</span><span class="gp-sp-season">📅 09.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna žveplenjača (Hypholoma fasciculare) – strupena; nima obročka na betu, klobuk je žvepleno rumen in zelo grenak.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/lactarius_deterrimus.jpg" alt="Smrekova sirovka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Smrekova sirovka</div>
+        <div class="gp-sp-lat">Lactarius deterrimus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge sirovke z oranžnim mlečkom – vse so užitne (smrekova hitro pozeleni na mestih poškodb).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/russula_vesca.jpg" alt="Užitna golobica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Užitna golobica</div>
+        <div class="gp-sp-lat">Russula vesca</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/lactarius_deliciosus.jpg" alt="Užitna sirovka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Užitna sirovka</div>
+        <div class="gp-sp-lat">Lactarius deliciosus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 08.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna tura (Lactarius torminosus) – strupena; raste pod brezami in izloča bel, zelo pekoč mleček.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/morchella_esculenta.jpg" alt="Užitni smrček (Mavrah)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Užitni smrček (Mavrah)</div>
+        <div class="gp-sp-lat">Morchella esculenta</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 04.01–05.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima možgansko naguban klobuk in ni votel.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="Velika tintnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Velika tintnica</div>
+        <div class="gp-sp-lat">Coprinus comatus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 05.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Gola tintnica (Coprinopsis atramentaria) – pogojno strupena z alkoholom; nima luskastega in visokega valjastega klobuka.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/gomphidius_glutinosus.jpg" alt="Veliki slinar" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Veliki slinar</div>
+        <div class="gp-sp-lat">Gomphidius glutinosus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 08.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Bakerasti polžar (Chroogomphus rutilus) – užiten; nima prozorne debele sluzi in je ves rdečkasto-bakerne barve.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/laccaria_amethystina.jpg" alt="Vijoličasta bledivka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Vijoličasta bledivka</div>
+        <div class="gp-sp-lat">Laccaria amethystina</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 07.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta čeladica (Mycena pura) – strupena; loči se po izrazitem vonju po redkvici in tanjših, gostejših lističih.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="Zelena golobica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Zelena golobica</div>
+        <div class="gp-sp-lat">Russula virescens</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena mušnica (Amanita phalloides) – smrtno strupena! Mušnica ima kožnat obroček in lupino (vrečko) v dnu beta.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/flammulina_velutipes.jpg" alt="Zimska panjevka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Zimska panjevka</div>
+        <div class="gp-sp-lat">Flammulina velutipes</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 11.01–03.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena galerina (Galerina marginata) – smrtno strupena; galerina raste na iglavcih, ima obroček in nima žametnega beta.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/craterellus_cornucopioides.jpg" alt="Črna trobenta" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Črna trobenta</div>
+        <div class="gp-sp-lat">Craterellus cornucopioides</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 08.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Ni nevarnih dvojnic zaradi specifične trobentaste oblike in povsem črne/sive barve.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-ok">
+        <img src="/gobarska-napoved/img/vrste/boletus_aereus.jpg" alt="Črni goban" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Črni goban</div>
+        <div class="gp-sp-lat">Boletus aereus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-ok">Užitna</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Ni nevarnih neposrednih dvojnic zaradi zelo temnega klobuka in čvrstega, nespremenljivega belega mesa.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-cond">
+        <img src="/gobarska-napoved/img/vrste/neoboletus_erythropus.jpg" alt="Žametasti goban" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Žametasti goban</div>
+        <div class="gp-sp-lat">Neoboletus erythropus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-cond">Pogojno užitna</span><span class="gp-sp-season">📅 05.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Vražji goban (Rubroboletus satanas) – strupen; loči se po zelo svetlem (sivem) klobuku in rasti na apnencu.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/russula_emetica.jpg" alt="Bljuvna golobica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Bljuvna golobica</div>
+        <div class="gp-sp-lat">Russula emetica</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne rdeče golobice – bljuvna je izjemno pekoča in povzroča hude prebavne motnje.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/gyromitra_infula.jpg" alt="Jesenski hrček" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Jesenski hrček</div>
+        <div class="gp-sp-lat">Gyromitra infula</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 09.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Rogati hrček (Gyromitra gigas) ali drugi jesenski hrčki, ki so vsi sumljivi in potencialno nevarni.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/agaricus_xanthodermus.jpg" alt="Karbolni kukmak" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Karbolni kukmak</div>
+        <div class="gp-sp-lat">Agaricus xanthodermus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 06.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmak (Agaricus campestris) – užiten; poljski kukmak prijetno diši po mandljih in v dnu beta ne rumeni.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-prot">
+        <img src="/gobarska-napoved/img/vrste/amanita_caesarea.jpg" alt="Knežja mušnica (Karželj)" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Knežja mušnica (Karželj)</div>
+        <div class="gp-sp-lat">Amanita caesarea</div>
+        <div class="gp-sp-row"><span class="gp-badge e-prot">Zaščitena</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdeča mušnica (Amanita muscaria) – strupena; rdeča mušnica ima bele lističe in bet ter luskice, karželj pa je živo rumen.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-death">
+        <img src="/gobarska-napoved/img/vrste/amanita_virosa.jpg" alt="Koničasta mušnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Koničasta mušnica</div>
+        <div class="gp-sp-lat">Amanita virosa</div>
+        <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmaki (Agaricus campestris) – užitni; kukmaki nimajo lupine v dnu beta, njihovi lističi pa hitro pordečijo ali rjavijo.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-none">
+        <img src="/gobarska-napoved/img/vrste/caloboletus_calopus.jpg" alt="Leponogi postavnež" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Leponogi postavnež</div>
+        <div class="gp-sp-lat">Caloboletus calopus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-none">Neužitna</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Grenki goban (Caloboletus radicans) – neužiten in grenak. Leponogi ima izrazito rdeč spodnji del beta.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-death">
+        <img src="/gobarska-napoved/img/vrste/paxillus_involutus.jpg" alt="Navadna podvihanka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Navadna podvihanka</div>
+        <div class="gp-sp-lat">Paxillus involutus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 06.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Velike rjave livke – podvihanka se prepozna po močno spodvihanem žametnem robu klobuka in rjavenju ob dotiku.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/hypholoma_fasciculare.jpg" alt="Navadna žveplenjača" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Navadna žveplenjača</div>
+        <div class="gp-sp-lat">Hypholoma fasciculare</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 05.01–12.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Sivorumena mraznica (Armillaria mellea) – užitna po kuhanju; mraznica ima nežen obroček, luskice in bel trosni prah.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox2">
+        <img src="/gobarska-napoved/img/vrste/amanita_pantherina.jpg" alt="Panterjeva mušnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Panterjeva mušnica</div>
+        <div class="gp-sp-lat">Amanita pantherina</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečkasta mušnica (Amanita rubescens) – užitna; rdečkasta rdeči ob poškodbi, panterjeva pa ne spreminja barve mesa.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-none">
+        <img src="/gobarska-napoved/img/vrste/trametes_versicolor.jpg" alt="Pisana ploskocevka" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Pisana ploskocevka</div>
+        <div class="gp-sp-lat">Trametes versicolor</div>
+        <div class="gp-sp-row"><span class="gp-badge e-none">Neužitna</span><span class="gp-sp-season">📅 01.01–12.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Bližnje sorodne ploskocevke – nobena ni strupena, so pa vse preveč lesene za neposredno prehrano.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-none">
+        <img src="/gobarska-napoved/img/vrste/lactifluus_vellereus.jpg" alt="Polsteni mlečnik" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Polsteni mlečnik</div>
+        <div class="gp-sp-lat">Lactifluus vellereus</div>
+        <div class="gp-sp-row"><span class="gp-badge e-none">Neužitna</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Kravja mlečnica (Lactifluus piperatus) – pogojno užitna; ima popolnoma gladko kožico klobuka.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox2">
+        <img src="/gobarska-napoved/img/vrste/gyromitra_esculenta.jpg" alt="Pomladanski hrček" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Pomladanski hrček</div>
+        <div class="gp-sp-lat">Gyromitra esculenta</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 03.01–05.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitni smrček (Morchella esculenta) – užiten; smrček ima satast klobuk (kot panj) in je v celoti votel.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/amanita_muscaria.jpg" alt="Rdeča mušnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Rdeča mušnica</div>
+        <div class="gp-sp-lat">Amanita muscaria</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 08.01–11.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Knežja mušnica (Amanita caesarea) – užitna/zaščitena; karželj ima rumene lističe, bet in obroček.</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-tox">
+        <img src="/gobarska-napoved/img/vrste/rubroboletus_satanas.jpg" alt="Vražji goban" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Vražji goban</div>
+        <div class="gp-sp-lat">Rubroboletus satanas</div>
+        <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 07.01–09.30</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</div>
+      </div>
+    </div>
+    <div class="gp-sp-card">
+      <div class="gp-sp-top e-death">
+        <img src="/gobarska-napoved/img/vrste/amanita_phalloides.jpg" alt="Zelena mušnica" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">
+        <span class="gp-sp-emoji">🍄</span>
+      </div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">Zelena mušnica</div>
+        <div class="gp-sp-lat">Amanita phalloides</div>
+        <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 07.01–10.31</span></div>
+        <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</div>
+      </div>
+    </div>
+  </div>
   <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
+  <nav class="gp-bottomnav" aria-label="Glavna navigacija">
+    <a href="/gobarska-napoved/"><span class="ic">🍄</span>Napoved</a>
+    <a href="/gobarska-napoved/zemljevid/"><span class="ic">🗺️</span>Zemljevid</a>
+    <a href="/gobarska-napoved/baza-vrst/" class="active"><span class="ic">📖</span>Baza vrst</a>
+    <a href="/gobarska-napoved/dvojnice/"><span class="ic">⚠️</span>Dvojnice</a>
+  </nav>
 
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
