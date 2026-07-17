@@ -406,7 +406,7 @@ body{
 
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
    quicknav/hub cards already cover cross-page navigation ── */
-.gp-bottomnav{display:none}
+.gp-bottomnav,.gp-id-fab{display:none}
 @media (max-width:760px){
   .wrap{padding-bottom:9.7rem}
   .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
@@ -422,6 +422,16 @@ body{
      way rather than shrink its tap target to squeeze both in. */
   .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
   .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
+  /* Primary action FAB (hub page only) — freed-up bottom-right now that
+     SOS moved to the header corner and the bottom nav owns the strip below. */
+  .gp-id-fab{position:fixed;right:1rem;bottom:calc(4.6rem + .7rem);z-index:55;display:flex;
+    align-items:center;gap:.4rem;background:var(--blue);color:#04070e;font-weight:700;
+    font-size:.82rem;padding:.7rem 1.05rem;border-radius:999px;text-decoration:none;
+    box-shadow:0 4px 18px rgba(111,174,85,.4);border:2px solid rgba(255,255,255,.15);
+    opacity:0;pointer-events:none;transform:translateY(8px);
+    transition:opacity .2s ease,transform .2s ease}
+  .gp-id-fab.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+  .gp-id-fab .ic{font-size:1.15rem;line-height:1}
 }
 
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
@@ -1636,6 +1646,17 @@ def build_body(rules, premium, free):
     <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
+  <a href="#premium" class="gp-id-fab" id="gp-id-fab" aria-label="AI prepoznava gobe iz fotografije">
+    <span class="ic">🔍</span>Prepoznaj gobo</a>
+  <script>(function()  {{
+    var fab=document.getElementById("gp-id-fab"),hero=document.querySelector(".gp-hero");
+    if(!fab||!hero)return;
+    function tick() {{
+      var past=hero.getBoundingClientRect().bottom<0;
+      fab.classList.toggle("show",past);
+    }}
+    addEventListener("scroll",tick,{{passive:true}});tick();
+  }})();</script>
 {bottom_nav_html("")}
 {PAGE_JS}
 {DIARY_JS}'''
