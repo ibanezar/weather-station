@@ -99,6 +99,13 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+/* Thumb-friendly action row right under the gauge — "glanceable" actions
+   (share, map, notify) instead of making the user read/scroll for them. */
+.gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.gp-chip-action{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;
+  padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
+  color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
+.gp-chip-action:hover{border-color:var(--blue)}
 .gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
@@ -333,6 +340,15 @@ body{
 .gp-chip:hover{border-color:var(--blue)}
 .gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
 .gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
+/* ── /koledar/ — month chips + one card panel each (chip-click swap, no
+   fetch — all 12 panels are pre-rendered, only visibility toggles). ── */
+.gp-cal-panel{display:none;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:14px;padding:1rem 1.1rem;box-shadow:var(--card-shadow)}
+.gp-cal-panel.active{display:block}
+.gp-cal-sp{display:flex;flex-wrap:wrap;gap:.5rem}
+.gp-cal-tag{background:var(--badge-bg);border:1px solid var(--card-border);border-radius:999px;
+  padding:.35rem .8rem;font-size:.85rem}
+.gp-cal-empty{color:var(--muted);font-size:.88rem;margin:0}
 .gp-d-photo-preview{width:2.6rem;height:2.6rem;border-radius:8px;object-fit:cover;display:none;vertical-align:middle}
 .gp-diary-submit{margin-top:.2rem}
 .gp-diary-list{display:grid;gap:.6rem;margin-top:1rem}
@@ -398,6 +414,16 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
+/* ── Section-level accordions (Geološki tereni / Nasveti / Dnevnik) — same
+   collapse mechanics as .gp-collapse, but the summary reads like a .gp-h2
+   heading rather than a small card toggle, so a closed section still looks
+   like a normal page section, just one the user has to tap to open. Default
+   closed (no `open` attribute) keeps the "active" data above the fold. ── */
+.gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
+.gp-collapse-section summary{padding:0 0 .4rem;border-bottom:1px solid var(--border);
+  background:transparent;font-size:1.35rem;font-weight:700}
+.gp-collapse-section summary::after{font-size:1rem}
+.gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
