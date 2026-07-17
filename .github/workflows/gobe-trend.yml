@@ -1,0 +1,34 @@
+name: Gobarski trend (pretekla leta)
+
+on:
+  schedule:
+    - cron: '30 5 * * 1'   # ob ponedeljkih 5:30 UTC — sezonski trend se ne spreminja dnevno
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Izračunaj sezonski trend (backtest zadnjih 5 let)
+        run: python3 tools/gobe_trend.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add gobarska-napoved/trend.json
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi gobarski trend $(date -u +%Y-%m-%d) [skip ci]"
+          git push

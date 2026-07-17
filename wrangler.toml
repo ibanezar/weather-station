@@ -30,6 +30,8 @@ PREMIUM_ALERT_THRESHOLD = "70"
 PREMIUM_ALERT_COOLDOWN_DAYS = "5"
 # Skrivnosti (wrangler secret put …): PREMIUM_SYNC_KEY, PADDLE_WEBHOOK_SECRET,
 # PADDLE_API_KEY (RESEND_API_KEY že obstaja).
+# ANTHROPIC_KEY (wrangler secret put ANTHROPIC_KEY) — potreben za POST /premium/identify
+# (AI prepoznava gobe iz fotografije, Claude vision). Brez njega endpoint vrne 503.
 
 # Samodejni pragovni push alarm — preveri meritve vsakih 5 minut.
 [triggers]

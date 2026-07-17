@@ -14,6 +14,9 @@ const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 // Google Maps Weather API key — pridobi na console.cloud.google.com → Weather API
 const GOOGLE_WEATHER_KEY = "REPLACE_WITH_GOOGLE_MAPS_API_KEY";
 
+// Kompaktna baza 51 vrst (iz species_rules.yaml) — kontekst za AI prepoznavo fotografij.
+const GOBE_SPECIES_DB = [{"id":"boletus_edulis","sl":"Jesenski goban (Jurček)","lat":"Boletus edulis","ed":"Užitna","dbl":"Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in rožnati trosovnici."},{"id":"boletus_reticulatus","sl":"Poletni goban","lat":"Boletus reticulatus","ed":"Užitna","dbl":"Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in mrežici na betu."},{"id":"boletus_pinophilus","sl":"Borov goban","lat":"Boletus pinophilus","ed":"Užitna","dbl":"Žolčasti goban (Tylopilus felleus) – neužiten, grenak okus. Druge vrste užitnih gobanov."},{"id":"boletus_aereus","sl":"Črni goban","lat":"Boletus aereus","ed":"Užitna","dbl":"Ni nevarnih neposrednih dvojnic zaradi zelo temnega klobuka in čvrstega, nespremenljivega belega mesa."},{"id":"neoboletus_erythropus","sl":"Žametasti goban","lat":"Neoboletus erythropus","ed":"Pogojno užitna","dbl":"Vražji goban (Rubroboletus satanas) – strupen; loči se po zelo svetlem (sivem) klobuku in rasti na apnencu."},{"id":"imleria_badia","sl":"Kostanjevka","lat":"Imleria badia","ed":"Užitna","dbl":"Žolčasti goban (Tylopilus felleus) – neužiten, grenak. Kostanjevka močno pomodri na cevkatem delu ob pritisku."},{"id":"xerocomellus_chrysenteron","sl":"Rdečebetka","lat":"Xerocomellus chrysenteron","ed":"Užitna","dbl":"Sorodni polstenci (npr. rdečeči polstenec), ki so prav tako večinoma užitni."},{"id":"suillus_grevillei","sl":"Macesnova lupljivka","lat":"Suillus grevillei","ed":"Užitna","dbl":"Druge maslenke in lupljivke pod iglavci, ki pa so vse užitne in nekatere prav tako sluzaste."},{"id":"rubroboletus_satanas","sl":"Vražji goban","lat":"Rubroboletus satanas","ed":"Strupena","dbl":"Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel)."},{"id":"caloboletus_calopus","sl":"Leponogi postavnež","lat":"Caloboletus calopus","ed":"Neužitna","dbl":"Grenki goban (Caloboletus radicans) – neužiten in grenak. Leponogi ima izrazito rdeč spodnji del beta."},{"id":"cantharellus_cibarius","sl":"Navadna lisička","lat":"Cantharellus cibarius","ed":"Užitna","dbl":"Oljkov livkar (Omphalotus olearius) – strupen; raste v šopih na lesu (predvsem na Primorskem pod oljkami/hrasti)."},{"id":"craterellus_tubaeformis","sl":"Lijasta lisička","lat":"Craterellus tubaeformis","ed":"Užitna","dbl":"Zlatorumena lisička (Cantharellus lutescens) – prav tako užitna, nima tako izrazitih letvic."},{"id":"craterellus_cornucopioides","sl":"Črna trobenta","lat":"Craterellus cornucopioides","ed":"Užitna","dbl":"Ni nevarnih dvojnic zaradi specifične trobentaste oblike in povsem črne/sive barve."},{"id":"hydnum_repandum","sl":"Rumeni ježek","lat":"Hydnum repandum","ed":"Užitna","dbl":"Rdečerjavi ježek (Hydnum rufescens) – manjši, bolj oranžen, prav tako užiten (odstranijo se bodičke)."},{"id":"russula_cyanoxantha","sl":"Modrikasta golobica","lat":"Russula cyanoxantha","ed":"Užitna","dbl":"Zelena mušnica (Amanita phalloides) – smrtno strupena; mušnica ima obroček na betu in lupino v dnu beta, golobica ne."},{"id":"russula_vesca","sl":"Užitna golobica","lat":"Russula vesca","ed":"Užitna","dbl":"Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika)."},{"id":"russula_virescens","sl":"Zelena golobica","lat":"Russula virescens","ed":"Užitna","dbl":"Zelena mušnica (Amanita phalloides) – smrtno strupena! Mušnica ima kožnat obroček in lupino (vrečko) v dnu beta."},{"id":"russula_emetica","sl":"Bljuvna golobica","lat":"Russula emetica","ed":"Strupena","dbl":"Užitne rdeče golobice – bljuvna je izjemno pekoča in povzroča hude prebavne motnje."},{"id":"lactarius_deliciosus","sl":"Užitna sirovka","lat":"Lactarius deliciosus","ed":"Užitna","dbl":"Navadna tura (Lactarius torminosus) – strupena; raste pod brezami in izloča bel, zelo pekoč mleček."},{"id":"lactarius_deterrimus","sl":"Smrekova sirovka","lat":"Lactarius deterrimus","ed":"Užitna","dbl":"Druge sirovke z oranžnim mlečkom – vse so užitne (smrekova hitro pozeleni na mestih poškodb)."},{"id":"lactifluus_piperatus","sl":"Kravja mlečnica","lat":"Lactifluus piperatus","ed":"Pogojno užitna","dbl":"Polsteni mlečnik (Lactifluus vellereus) – neužiten; ima žametno dlako na klobuku in bolj razmaknjene lističe."},{"id":"lactifluus_vellereus","sl":"Polsteni mlečnik","lat":"Lactifluus vellereus","ed":"Neužitna","dbl":"Kravja mlečnica (Lactifluus piperatus) – pogojno užitna; ima popolnoma gladko kožico klobuka."},{"id":"amanita_caesarea","sl":"Knežja mušnica (Karželj)","lat":"Amanita caesarea","ed":"ZAŠČITENA","dbl":"Rdeča mušnica (Amanita muscaria) – strupena; rdeča mušnica ima bele lističe in bet ter luskice, karželj pa je živo rumen."},{"id":"amanita_rubescens","sl":"Rdečkasta mušnica (Bisernica)","lat":"Amanita rubescens","ed":"Pogojno užitna","dbl":"Panterjeva mušnica (Amanita pantherina) – zelo strupena! Bisernica vedno rdeči na zraku/poškodbah in ima narebren obroček."},{"id":"amanita_muscaria","sl":"Rdeča mušnica","lat":"Amanita muscaria","ed":"Strupena","dbl":"Knežja mušnica (Amanita caesarea) – užitna/zaščitena; karželj ima rumene lističe, bet in obroček."},{"id":"amanita_phalloides","sl":"Zelena mušnica","lat":"Amanita phalloides","ed":"Smrtno strupena","dbl":"Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta."},{"id":"amanita_pantherina","sl":"Panterjeva mušnica","lat":"Amanita pantherina","ed":"Zelo strupena","dbl":"Rdečkasta mušnica (Amanita rubescens) – užitna; rdečkasta rdeči ob poškodbi, panterjeva pa ne spreminja barve mesa."},{"id":"amanita_virosa","sl":"Koničasta mušnica","lat":"Amanita virosa","ed":"Smrtno strupena","dbl":"Poljski kukmaki (Agaricus campestris) – užitni; kukmaki nimajo lupine v dnu beta, njihovi lističi pa hitro pordečijo ali rjavijo."},{"id":"macrolepiota_procera","sl":"Orjaški dežnik (Marela)","lat":"Macrolepiota procera","ed":"Užitna","dbl":"Strupena rdečeča dežnica (Chlorophyllum brunneum) – strupena; meso ob poškodbi močno pordeči, bet nima marogastega vzorca."},{"id":"agaricus_campestris","sl":"Poljski kukmak","lat":"Agaricus campestris","ed":"Užitna","dbl":"Karbolni kukmak (Agaricus xanthodermus) – strupen; v dnu beta ob prerezu močno porumeni in smrdi po črnilu."},{"id":"agaricus_xanthodermus","sl":"Karbolni kukmak","lat":"Agaricus xanthodermus","ed":"Strupena","dbl":"Poljski kukmak (Agaricus campestris) – užiten; poljski kukmak prijetno diši po mandljih in v dnu beta ne rumeni."},{"id":"cortinarius_caperatus","sl":"Pšenična koprenka","lat":"Cortinarius caperatus","ed":"Užitna","dbl":"Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom."},{"id":"armillaria_mellea","sl":"Sivorumena mraznica (Štorovka)","lat":"Armillaria mellea","ed":"Pogojno užitna","dbl":"Navadna žveplenjača (Hypholoma fasciculare) – strupena; nima obročka na betu, klobuk je žvepleno rumen in zelo grenak."},{"id":"flammulina_velutipes","sl":"Zimska panjevka","lat":"Flammulina velutipes","ed":"Užitna","dbl":"Strupena galerina (Galerina marginata) – smrtno strupena; galerina raste na iglavcih, ima obroček in nima žametnega beta."},{"id":"pleurotus_ostreatus","sl":"Bukov ostrigar","lat":"Pleurotus ostreatus","ed":"Užitna","dbl":"V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu."},{"id":"hypholoma_fasciculare","sl":"Navadna žveplenjača","lat":"Hypholoma fasciculare","ed":"Strupena","dbl":"Sivorumena mraznica (Armillaria mellea) – užitna po kuhanju; mraznica ima nežen obroček, luskice in bel trosni prah."},{"id":"laccaria_amethystina","sl":"Vijoličasta bledivka","lat":"Laccaria amethystina","ed":"Užitna","dbl":"Vijoličasta čeladica (Mycena pura) – strupena; loči se po izrazitem vonju po redkvici in tanjših, gostejših lističih."},{"id":"morchella_esculenta","sl":"Užitni smrček (Mavrah)","lat":"Morchella esculenta","ed":"Užitna","dbl":"Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima možgansko naguban klobuk in ni votel."},{"id":"morchella_elata","sl":"Koničasti smrček","lat":"Morchella elata","ed":"Užitna","dbl":"Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima klobuk podoben možganom in nima pravilnih navpičnih jamic."},{"id":"gyromitra_esculenta","sl":"Pomladanski hrček","lat":"Gyromitra esculenta","ed":"Zelo strupena","dbl":"Užitni smrček (Morchella esculenta) – užiten; smrček ima satast klobuk (kot panj) in je v celoti votel."},{"id":"gyromitra_infula","sl":"Jesenski hrček","lat":"Gyromitra infula","ed":"Strupena","dbl":"Rogati hrček (Gyromitra gigas) ali drugi jesenski hrčki, ki so vsi sumljivi in potencialno nevarni."},{"id":"paxillus_involutus","sl":"Navadna podvihanka","lat":"Paxillus involutus","ed":"Smrtno strupena","dbl":"Velike rjave livke – podvihanka se prepozna po močno spodvihanem žametnem robu klobuka in rjavenju ob dotiku."},{"id":"calvatia_gigantea","sl":"Orjaška plešivka","lat":"Calvatia gigantea","ed":"Užitna","dbl":"Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva."},{"id":"coprinus_comatus","sl":"Velika tintnica","lat":"Coprinus comatus","ed":"Užitna","dbl":"Gola tintnica (Coprinopsis atramentaria) – pogojno strupena z alkoholom; nima luskastega in visokega valjastega klobuka."},{"id":"auricularia_auricula_judae","sl":"Bezgova uhljevka","lat":"Auricularia auricula-judae","ed":"Užitna","dbl":"Vijoličasta zvedavka (Auricularia mesenterica) – neužitna; nima oblike ušesa in je bolj usnjata."},{"id":"lycoperdon_perlatum","sl":"Betičasta prašnica","lat":"Lycoperdon perlatum","ed":"Užitna","dbl":"Navadna smrdljivka (Scleroderma citrinum) – strupena; zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni."},{"id":"gomphidius_glutinosus","sl":"Veliki slinar","lat":"Gomphidius glutinosus","ed":"Užitna","dbl":"Bakerasti polžar (Chroogomphus rutilus) – užiten; nima prozorne debele sluzi in je ves rdečkasto-bakerne barve."},{"id":"leccinum_scabrum","sl":"Brezov ded","lat":"Leccinum scabrum","ed":"Užitna","dbl":"Žolčasti goban (Tylopilus felleus) – neužiten, izredno grenak; loči se po rožnati trosovnici (cevke pod klobukom)."},{"id":"leccinum_versipelle","sl":"Brezov turek","lat":"Leccinum versipelle","ed":"Užitna","dbl":"Trepetlikov turek (Leccinum aurantiacum) – prav tako užiten in odličen, raste pod trepetlikami/topoli."},{"id":"leccinum_aurantiacum","sl":"Hrastov turek","lat":"Leccinum aurantiacum","ed":"Užitna","dbl":"Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano."},{"id":"trametes_versicolor","sl":"Pisana ploskocevka","lat":"Trametes versicolor","ed":"Neužitna","dbl":"Bližnje sorodne ploskocevke – nobena ni strupena, so pa vse preveč lesene za neposredno prehrano."}];
+
 const EW_APP_FALLBACK = "A7E5CAF73FCC9BF859CDE788D69A1C91";
 const EW_API_FALLBACK = "0bd213c8-8e54-4bf6-b6da-127a1c605034";
 const EW_MAC = "BC:DD:C2:42:8D:56";
@@ -2201,6 +2204,136 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           return new Response(data, {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
           });
+        }
+
+        // ── POST /premium/identify — AI prepoznava gobe iz fotografije (Claude vision)
+        if (path === "/premium/identify" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          if (!env.ANTHROPIC_KEY) return _json({ error: "AI prepoznava trenutno ni na voljo" }, 503);
+
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          const raw = String(body.image || "");
+          const m = raw.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/s);
+          if (!m) return _json({ error: "Manjka slika (jpeg/png/webp)" }, 400);
+          const [, mediaType, imgB64] = m;
+          if (imgB64.length > 6_000_000) return _json({ error: "Slika je prevelika" }, 413);
+
+          const dbLines = GOBE_SPECIES_DB.map(s =>
+            `- ${s.sl} (${s.lat}) — ${s.ed}${s.dbl ? "; dvojnica: " + s.dbl : ""}`).join("\n");
+          const prompt = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
+
+Referenčna baza vrst te doline (uporabi ta slovenska imena, kadar gre za isto vrsto):
+${dbLines}
+
+Naloga:
+1. Predlagaj 1–3 najverjetnejše vrste (najprej najbolj verjetna), po možnosti iz zgornje baze.
+2. Za vsak predlog: slovensko in latinsko ime, zanesljivost (nizka/srednja/visoka), kratko utemeljitev (barva, oblika, rast, habitat) in užitnost.
+3. Če obstaja nevarna dvojnica, jo IZRECNO navedi z opozorilom.
+4. Če fotografija ni dovolj jasna, ali gre morda za mušnico (Amanita) ali drug nevaren rod, bodi še posebej previden in to jasno povej.
+
+Odgovori SAMO z JSON (brez markdown ograd), natanko v tej obliki:
+{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"kratka splošna opomba"}
+
+POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
+
+          let aiRes;
+          try {
+            aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": env.ANTHROPIC_KEY,
+                "anthropic-version": "2023-06-01",
+              },
+              body: JSON.stringify({
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 800,
+                messages: [{
+                  role: "user",
+                  content: [
+                    { type: "image", source: { type: "base64", media_type: mediaType, data: imgB64 } },
+                    { type: "text", text: prompt },
+                  ],
+                }],
+              }),
+            });
+          } catch (_) { return _json({ error: "AI storitev ni dosegljiva" }, 502); }
+          if (!aiRes.ok) return _json({ error: "AI storitev ni dosegljiva" }, 502);
+          const aiData = await aiRes.json();
+          let text = (aiData.content?.[0]?.text || "").trim()
+            .replace(/^```json\s*/i, "").replace(/```\s*$/,"").trim();
+          let parsed;
+          try { parsed = JSON.parse(text); } catch (_) { return _json({ error: "Napaka pri obdelavi odgovora" }, 500); }
+          return _json({ ok: true, candidates: parsed.candidates || [], unclear: !!parsed.unclear, note: parsed.note || "" });
+        }
+
+        // ── Gobarjev dnevnik: sinhronizacija med napravami (premium) ──────────
+        // Fotografije gredo v R2 (ločeno od metapodatkov, da KV zapis ostane majhen).
+        async function _diaryPhotoHash(email) {
+          const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+          return [...new Uint8Array(digest)].slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        // ── POST /premium/diary/photo { image: dataURL } → { ok, url }
+        if (path === "/premium/diary/photo" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          if (!env.PHOTOS_R2) return _json({ error: "Shramba slik ni na voljo" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          const raw = String(body.image || "");
+          const m = raw.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/s);
+          if (!m) return _json({ error: "Manjka slika (jpeg/png/webp)" }, 400);
+          const [, mediaType, imgB64] = m;
+          if (imgB64.length > 4_000_000) return _json({ error: "Slika je prevelika" }, 413);
+          const ext = mediaType === "image/png" ? "png" : mediaType === "image/webp" ? "webp" : "jpg";
+          const owner = await _diaryPhotoHash(sub.email);
+          const uuid = crypto.randomUUID().split("-")[0];
+          const key = `diary/${owner}/${Date.now()}-${uuid}.${ext}`;
+          const bytes = Uint8Array.from(atob(imgB64), c => c.charCodeAt(0));
+          await env.PHOTOS_R2.put(key, bytes, { httpMetadata: { contentType: mediaType } });
+          return _json({ ok: true, url: `/premium/diary/img/${key}` });
+        }
+
+        // ── GET /premium/diary/img/<key> — serve a diary photo (own photos only)
+        if (path.startsWith("/premium/diary/img/")) {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          if (!env.PHOTOS_R2) return _json({ error: "Shramba slik ni na voljo" }, 503);
+          const key = path.slice("/premium/diary/img/".length);
+          const owner = await _diaryPhotoHash(sub.email);
+          if (!key.startsWith(`diary/${owner}/`)) return _json({ error: "Ni dovoljeno" }, 403);
+          const obj = await env.PHOTOS_R2.get(key);
+          if (!obj) return new Response("Not found", { status: 404, headers: CORS_ALLOWED });
+          return new Response(obj.body, {
+            headers: { ...CORS_ALLOWED, "Content-Type": obj.httpMetadata?.contentType || "image/jpeg",
+              "Cache-Control": "private, max-age=86400" },
+          });
+        }
+
+        // ── GET /premium/diary — vrni celoten dnevnik za napravo/e
+        if (path === "/premium/diary" && request.method === "GET") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let entries = [];
+          try { entries = JSON.parse(await kv.get(`premium:diary:${sub.email}`)) || []; } catch (_) {}
+          return _json({ ok: true, entries });
+        }
+
+        // ── POST /premium/diary { entries:[...] } — zamenjaj celoten dnevnik
+        if (path === "/premium/diary" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!Array.isArray(body.entries)) return _json({ error: "Manjka seznam najdb" }, 422);
+          if (body.entries.length > 2000) return _json({ error: "Predolg dnevnik" }, 413);
+          const raw = JSON.stringify(body.entries);
+          if (raw.length > 1024 * 1024) return _json({ error: "Dnevnik je prevelik" }, 413);
+          await kv.put(`premium:diary:${sub.email}`, raw);
+          return _json({ ok: true, count: body.entries.length });
         }
 
         // ── POST /premium/notify — daily "conditions optimal" alert (from CI)

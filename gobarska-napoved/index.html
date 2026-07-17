@@ -205,6 +205,31 @@ body{
 .gp-diary-notes{font-size:.82rem;color:var(--muted);margin-top:.2rem}
 .gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
 .gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
+
+/* ── AI prepoznava gobe (identify) ── */
+.gp-id-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;
+  padding:.8rem .9rem;margin-top:.7rem}
+.gp-id-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.gp-id-name{font-weight:700;font-size:.98rem}
+.gp-id-lat{font-size:.78rem;color:var(--muted);font-style:italic;margin-left:.3rem}
+.gp-id-conf{font-size:.7rem;font-weight:700;padding:.08rem .45rem;border-radius:6px;white-space:nowrap}
+.gp-id-conf.hi{background:rgba(52,211,153,.15);color:var(--green)}
+.gp-id-conf.mid{background:rgba(245,158,11,.15);color:var(--amber)}
+.gp-id-conf.lo{background:rgba(248,113,113,.16);color:#f87171}
+.gp-id-reason{font-size:.85rem;color:var(--muted);margin-top:.4rem;line-height:1.55}
+.gp-id-warn{font-size:.83rem;color:#fecaca;background:rgba(248,113,113,.12);border-left:3px solid #f87171;
+  padding:.4rem .7rem;margin-top:.5rem;border-radius:0 8px 8px 0}
+.gp-id-note{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin-top:.8rem}
+
+/* ── Sezonski trend (pretekla leta) ── */
+.gp-trend-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem 1.2rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-trend-svg{width:100%;height:auto;display:block}
+.gp-trend-legend{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin-top:.6rem;font-size:.8rem;color:var(--muted)}
+.gp-trend-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-trend-legend i{width:1.1rem;height:3px;border-radius:2px;display:inline-block}
+.gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
+.gp-trend-best b{color:var(--text)}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -324,12 +349,27 @@ body{
   <h2 class="gp-h2">🔓 Premium: 7-dnevna napoved po vrstah</h2>
   <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
+  <div id="gp-identify" class="gp-diary" hidden>
+    <h3 style="margin-top:0">🔍 AI prepoznava gobe iz fotografije</h3>
+    <p class="gp-diary-priv">Naloži fotografijo najdene gobe — AI predlaga najverjetnejšo vrsto iz lokalne baze
+    51 vrst, oceni zanesljivost in opozori na nevarne dvojnice. <b>To ni zamenjava za mikologa</b> — ob
+    najmanjšem dvomu gobe nikoli ne uživaj.</p>
+    <div class="gp-diary-row">
+      <label class="gp-diary-btn gp-diary-photobtn">📷 Izberi fotografijo
+        <input type="file" accept="image/*" capture="environment" id="gp-id-photo" hidden>
+      </label>
+      <img id="gp-id-preview" class="gp-d-photo-preview" alt="">
+      <button type="button" class="gp-cta" id="gp-id-btn" disabled>Prepoznaj gobo</button>
+    </div>
+    <div id="gp-id-status" class="gp-msg"></div>
+    <div id="gp-id-result"></div>
+  </div>
   <div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od 8 nabiralnih območij:
     indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, padavine pod pragom, nočna ohladitev zaznana«)
-    in opozorila na nevarne dvojnice.</p>
+    in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
     <div class="gp-skel">
       <div class="gp-forest"><span>Bezgova uhljevka</span><b>•• % ······</b></div>
       <div class="gp-forest"><span>Rdečkasta mušnica (Bisernica)</span><b>•• % ······</b></div>
@@ -356,6 +396,7 @@ body{
         <li>7-dnevna napoved po vrstah</li>
         <li>Indeks za vsa nabiralna območja</li>
         <li>Razlage in opozorila na dvojnice</li>
+        <li>🔍 AI prepoznava gobe iz fotografije</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
@@ -364,7 +405,7 @@ body{
       <span class="gp-tag">CELA SEZONA · najugodneje</span>
       <div class="p-price">24,99 €<small> / sezona</small></div>
       <ul>
-        <li>Vse iz mesečnega paketa</li>
+        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo)</li>
         <li>Dostop do konca sezone (30. 11.)</li>
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
@@ -391,6 +432,13 @@ body{
       <tr><th>November</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna sirovka, Smrekova sirovka, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Sivorumena mraznica (Štorovka), Zimska panjevka, Bukov ostrigar, Vijoličasta bledivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar</td></tr>
       <tr><th>December</th><td style="text-align:left">Lijasta lisička, Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
   </table>
+  <h2 class="gp-h2">📊 Sezona v primerjavi s preteklimi leti</h2>
+  <p class="archive-intro">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj (backtest)
+  z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je poudarjena.
+  Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo razlikuje od dnevne napovedi.</p>
+  <div id="gp-trend" class="gp-trend-wrap">
+    <div class="gp-msg">Nalagam …</div>
+  </div>
   <h2 class="gp-h2">📖 Baza 51 vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
@@ -981,8 +1029,9 @@ body{
   </div>
   <h2 class="gp-h2">📔 Gobarjev dnevnik</h2>
   <div class="gp-diary">
-    <p class="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
+    <p class="gp-diary-priv" id="gp-diary-priv">📱 Najdbe se shranijo <b>samo v tvojem brskalniku</b> (localStorage) — nikamor se ne
     pošljejo, nihče drug jih ne vidi. Če počistiš podatke brskalnika, se izgubijo.</p>
+    <div id="gp-diary-sync" class="gp-msg" hidden></div>
     <form id="gp-diary-form">
       <div class="gp-diary-row">
         <input type="date" id="gp-d-date" required>
@@ -1090,11 +1139,70 @@ body{
     content.innerHTML=html;
     content.hidden=false;lock.hidden=true;
   }
+  function initIdentify(token){
+    var card=document.getElementById("gp-identify");
+    var fileInput=document.getElementById("gp-id-photo");
+    var preview=document.getElementById("gp-id-preview");
+    var btn=document.getElementById("gp-id-btn");
+    var statusEl2=document.getElementById("gp-id-status");
+    var resultEl=document.getElementById("gp-id-result");
+    if(!card||!fileInput||!btn)return;
+    card.hidden=false;
+    var pendingImg=null;
+    var CONF_CLS={visoka:"hi",srednja:"mid",nizka:"lo"};
+    fileInput.addEventListener("change",function(){
+      var f=fileInput.files&&fileInput.files[0];
+      if(!f)return;
+      var img=new Image();
+      var reader=new FileReader();
+      reader.onload=function(e){
+        img.onload=function(){
+          var maxW=900,scale=Math.min(1,maxW/img.width);
+          var w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+          var c=document.createElement("canvas");c.width=w;c.height=h;
+          c.getContext("2d").drawImage(img,0,0,w,h);
+          pendingImg=c.toDataURL("image/jpeg",0.78);
+          preview.src=pendingImg;preview.style.display="inline-block";
+          btn.disabled=false;resultEl.innerHTML="";statusEl2.textContent="";
+        };
+        img.src=e.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+    btn.addEventListener("click",function(){
+      if(!pendingImg)return;
+      btn.disabled=true;statusEl2.textContent="Analiziram fotografijo …";resultEl.innerHTML="";
+      fetch(API+"/premium/identify",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body:JSON.stringify({image:pendingImg})})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
+        .then(function(res){
+          btn.disabled=false;
+          if(!res.ok){statusEl2.textContent=res.body&&res.body.error?res.body.error:"Napaka pri prepoznavi.";return;}
+          statusEl2.textContent="";
+          var d=res.body;
+          var html=(d.candidates||[]).map(function(c){
+            var confCls=CONF_CLS[c.confidence]||"mid";
+            return '<div class="gp-id-card"><div class="gp-id-head"><span><span class="gp-id-name">'+
+              esc2(c.name_sl||"?")+'</span><span class="gp-id-lat">'+esc2(c.name_lat||"")+'</span></span>'+
+              '<span class="gp-id-conf '+confCls+'">zanesljivost: '+esc2(c.confidence||"?")+'</span></div>'+
+              (c.edibility?'<div class="gp-id-reason"><b style="color:var(--text)">'+esc2(c.edibility)+'</b></div>':'')+
+              (c.reasoning?'<div class="gp-id-reason">'+esc2(c.reasoning)+'</div>':'')+
+              (c.warning?'<div class="gp-id-warn">⚠ '+esc2(c.warning)+'</div>':'')+'</div>';
+          }).join("");
+          if(d.note)html+='<div class="gp-id-note">'+esc2(d.note)+'</div>';
+          if(!html)html='<div class="gp-id-note">AI ni prepoznal gobe na fotografiji. Poskusi z bolj ostro sliko klobuka in trosovnice.</div>';
+          resultEl.innerHTML=html;
+        })
+        .catch(function(){btn.disabled=false;statusEl2.textContent="Napaka pri povezavi. Poskusi znova.";});
+    });
+  }
+  function esc2(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   var t=tok();
   if(t){
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){render(d);
+      .then(function(d){render(d);initIdentify(t);
         if(statusEl){statusEl.hidden=false;statusEl.textContent="✓ Premium dostop aktiven.";}})
       .catch(function(){localStorage.removeItem(LS);});
   }
@@ -1161,6 +1269,8 @@ body{
 <script>
 (function(){
   var LS="mr_gobe_dnevnik";
+  var API="https://weatherireica1.filip-eremita.workers.dev";
+  var TOKKEY="mr_gobe_token";
   var form=document.getElementById("gp-diary-form");
   if(!form)return;
   var listEl=document.getElementById("gp-diary-list");
@@ -1171,13 +1281,35 @@ body{
   var geoStatus=document.getElementById("gp-d-geo-status");
   var photoInput=document.getElementById("gp-d-photo");
   var photoPreview=document.getElementById("gp-d-photo-preview");
+  var privEl=document.getElementById("gp-diary-priv");
+  var syncEl=document.getElementById("gp-diary-sync");
   var pendingGeo=null, pendingPhoto=null;
   dateEl.valueAsDate=new Date();
 
+  function token(){ try{return localStorage.getItem(TOKKEY);}catch(e){return null;} }
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[];}catch(e){return [];} }
   function save(arr){
     try{ localStorage.setItem(LS, JSON.stringify(arr)); return true; }
     catch(e){ geoStatus.textContent="Shramba brskalnika je polna — izbriši kakšno starejšo najdbo (morda ima veliko fotografijo)."; return false; }
+  }
+
+  // ── Sinhronizacija z oblakom (samo premium — token v localStorage) ──
+  function syncPush(arr){
+    var t=token();
+    if(!t)return Promise.resolve();
+    return fetch(API+"/premium/diary",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},
+      body:JSON.stringify({entries:arr})}).catch(function(){});
+  }
+  function uploadPhoto(dataUrl){
+    var t=token();
+    if(!t||!dataUrl||dataUrl.indexOf("data:")!==0)return Promise.resolve(dataUrl);
+    return fetch(API+"/premium/diary/photo",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+t},
+      body:JSON.stringify({image:dataUrl})})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){return j&&j.url?j.url:dataUrl;})
+      .catch(function(){return dataUrl;});
   }
 
   geoBtn.addEventListener("click",function(){
@@ -1212,12 +1344,21 @@ body{
 
   function mapLink(g){ return g?("https://www.google.com/maps?q="+g.lat+","+g.lon):null; }
   function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function photoSrc(p){
+    if(!p)return null;
+    if(p.indexOf("/premium/diary/img/")===0){
+      var t=token();
+      return API+p+(t?"?token="+encodeURIComponent(t):"");
+    }
+    return p;
+  }
 
   function render(){
     var arr=load();
     if(!arr.length){ listEl.innerHTML='<div class="gp-diary-empty">Tvoj dnevnik je prazen — dodaj prvo najdbo zgoraj.</div>'; return; }
     listEl.innerHTML=arr.map(function(e,i){
-      var thumb=e.photo?('<img class="gp-diary-thumb" src="'+e.photo+'" alt="">')
+      var src=photoSrc(e.photo);
+      var thumb=src?('<img class="gp-diary-thumb" src="'+src+'" alt="">')
                         :'<div class="gp-diary-thumb-ph">🍄</div>';
       var loc=e.lat!=null?('<a href="'+mapLink(e)+'" target="_blank" rel="noopener">📍 '+e.lat.toFixed(4)+', '+e.lon.toFixed(4)+'</a>'):'';
       return '<div class="gp-diary-entry">'+thumb+
@@ -1229,27 +1370,157 @@ body{
     listEl.querySelectorAll(".gp-diary-del").forEach(function(btn){
       btn.addEventListener("click",function(){
         var arr2=load(); arr2.splice(parseInt(btn.getAttribute("data-i"),10),1); save(arr2); render();
+        syncPush(arr2);
       });
     });
   }
 
   form.addEventListener("submit",function(e){
     e.preventDefault();
-    var arr=load();
-    arr.unshift({
-      date:dateEl.value, species:spEl.value.trim(), notes:notesEl.value.trim(),
-      lat:pendingGeo?pendingGeo.lat:null, lon:pendingGeo?pendingGeo.lon:null,
-      photo:pendingPhoto, ts:new Date().toISOString()
+    var species=spEl.value.trim(), notes=notesEl.value.trim(), date=dateEl.value;
+    var geo=pendingGeo, photo=pendingPhoto;
+    spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
+    pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
+    photoPreview.style.display="none"; photoPreview.src="";
+    uploadPhoto(photo).then(function(photoRef){
+      var arr=load();
+      arr.unshift({
+        date:date, species:species, notes:notes,
+        lat:geo?geo.lat:null, lon:geo?geo.lon:null,
+        photo:photoRef, ts:new Date().toISOString()
+      });
+      if(save(arr)){ render(); syncPush(arr); }
     });
-    if(save(arr)){
-      spEl.value=""; notesEl.value=""; dateEl.valueAsDate=new Date();
-      pendingGeo=null; pendingPhoto=null; geoStatus.textContent=""; photoInput.value="";
-      photoPreview.style.display="none"; photoPreview.src="";
-      render();
-    }
   });
 
   render();
+
+  // ── Ob nalaganju: premium naročniki dobijo dnevnik iz oblaka (vse naprave) ──
+  var t=token();
+  if(t){
+    if(privEl)privEl.innerHTML='☁️ Najdbe se sinhronizirajo med tvojimi napravami (premium) — fotografije vidiš samo ti.';
+    if(syncEl){syncEl.hidden=false; syncEl.textContent="Sinhroniziram …";}
+    fetch(API+"/premium/diary?token="+encodeURIComponent(t))
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        var remote=j&&Array.isArray(j.entries)?j.entries:null;
+        if(remote===null){ if(syncEl)syncEl.hidden=true; return; }
+        if(remote.length){
+          save(remote); render();
+          if(syncEl){syncEl.textContent="✓ Sinhronizirano."; setTimeout(function(){syncEl.hidden=true;},4000);}
+          return;
+        }
+        var local=load();
+        if(!local.length){ if(syncEl)syncEl.hidden=true; return; }
+        // Prvi sync po naročnini — prenesi obstoječe lokalne najdbe v oblak.
+        Promise.all(local.map(function(e){
+          return uploadPhoto(e.photo).then(function(ref){
+            return {date:e.date,species:e.species,notes:e.notes,lat:e.lat,lon:e.lon,photo:ref,ts:e.ts};
+          });
+        })).then(function(migrated){
+          save(migrated); render();
+          syncPush(migrated).then(function(){
+            if(syncEl){syncEl.textContent="✓ Sinhronizirano."; setTimeout(function(){syncEl.hidden=true;},4000);}
+          });
+        });
+      })
+      .catch(function(){ if(syncEl)syncEl.textContent="Sinhronizacija ni uspela — najdbe ostajajo lokalno."; });
+  }
+})();
+</script>
+<script>
+(function(){
+  var wrap=document.getElementById("gp-trend");
+  if(!wrap)return;
+  var MONTHS=["04","05","06","07","08","09","10","11"];
+  var MLBL={"04":"Apr","05":"Maj","06":"Jun","07":"Jul","08":"Avg","09":"Sep","10":"Okt","11":"Nov"};
+  var SL_MONTH=["","januar","februar","marec","april","maj","junij","julij","avgust","september","oktober","november","december"];
+  var PAST_COLORS=["#8c8574","#a9a08c","#7a8a72","#9c8f6e"];
+
+  function fmtDate(iso){
+    var p=iso.split("-"); var d=parseInt(p[2],10); var m=SL_MONTH[parseInt(p[1],10)];
+    return d+". "+m+" "+p[0]+".";
+  }
+
+  function render(data){
+    var years=Object.keys(data.years||{}).sort();
+    if(!years.length){wrap.innerHTML='<div class="gp-msg">Trend še ni na voljo.</div>';return;}
+    var curYear=String(new Date().getFullYear());
+    var W=640,H=220,padL=32,padR=12,padT=10,padB=26;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    function x(mi){return padL+plotW*(mi/(MONTHS.length-1));}
+    function y(v){return padT+plotH*(1-Math.max(0,Math.min(100,v))/100);}
+
+    var svg='<svg class="gp-trend-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+    // gridlines + y labels
+    [0,25,50,75,100].forEach(function(v){
+      svg+='<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)" stroke-width="1"/>';
+      svg+='<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v+'</text>';
+    });
+    // month labels
+    MONTHS.forEach(function(m,i){
+      svg+='<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+MLBL[m]+'</text>';
+    });
+    // past years first (so current year draws on top), then current year
+    var pastIdx=0;
+    years.forEach(function(yr){
+      if(yr===curYear)return;
+      drawLine(yr, PAST_COLORS[pastIdx%PAST_COLORS.length], 1.6, .75);
+      pastIdx++;
+    });
+    if(years.indexOf(curYear)!==-1) drawLine(curYear, "#f59e0b", 3, 1);
+    svg+='</svg>';
+
+    function drawLine(yr, color, width, opacity){
+      var ma=data.years[yr].monthly_avg||{};
+      var pts=[];
+      MONTHS.forEach(function(m,i){
+        if(ma[m]!=null) pts.push(x(i)+","+y(ma[m]));
+      });
+      if(pts.length<2)return;
+      svg+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+color+'" stroke-width="'+width+
+        '" stroke-opacity="'+opacity+'" stroke-linecap="round" stroke-linejoin="round"/>';
+      MONTHS.forEach(function(m,i){
+        if(ma[m]!=null) svg+='<circle cx="'+x(i)+'" cy="'+y(ma[m])+'" r="'+(yr===curYear?3:1.8)+'" fill="'+color+'" fill-opacity="'+opacity+'"/>';
+      });
+    }
+
+    var legend='<div class="gp-trend-legend">';
+    var pastIdx2=0;
+    years.forEach(function(yr){
+      var isCur=(yr===curYear);
+      var col=isCur?"#f59e0b":PAST_COLORS[pastIdx2%PAST_COLORS.length];
+      if(!isCur)pastIdx2++;
+      legend+='<span><i style="background:'+col+'"></i>'+yr+(isCur?' (letos)':'')+'</span>';
+    });
+    legend+='</div>';
+
+    // best-day highlight: overall best across all years + this year's own best (if different)
+    var allBest=null;
+    years.forEach(function(yr){
+      var b=data.years[yr].best_day;
+      if(b&&(!allBest||b.overall>allBest.overall))allBest={yr:yr,b:b};
+    });
+    var thisBest=data.years[curYear]&&data.years[curYear].best_day;
+    var bestHtml='';
+    if(allBest){
+      bestHtml+='<div class="gp-trend-best">🏆 Najboljši dan v zadnjih '+years.length+' letih: <b>'+
+        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+' % ('+esc3(allBest.b.top||'')+')';
+      if(thisBest&&allBest.yr!==curYear){
+        bestHtml+='<br>🍄 Letošnji vrh do zdaj: <b>'+fmtDate(thisBest.date)+'</b> — '+thisBest.overall+
+          ' % ('+esc3(thisBest.top||'')+')';
+      }
+      bestHtml+='</div>';
+    }
+
+    wrap.innerHTML=svg+legend+bestHtml;
+  }
+  function esc3(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+  fetch("/gobarska-napoved/trend.json")
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(render)
+    .catch(function(){wrap.innerHTML='<div class="gp-msg">Trend trenutno ni na voljo.</div>';});
 })();
 </script>
   <footer class="site-foot">
