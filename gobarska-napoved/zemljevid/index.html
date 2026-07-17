@@ -272,6 +272,26 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
+   quicknav/hub cards already cover cross-page navigation ── */
+.gp-bottomnav{display:none}
+@media (max-width:760px){
+  .wrap{padding-bottom:9.7rem}
+  .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--card-bg);backdrop-filter:blur(10px);border-top:1px solid var(--card-border);
+    padding:.35rem .2rem calc(.35rem + env(safe-area-inset-bottom))}
+  .gp-bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;
+    padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
+    border-radius:10px}
+  .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
+  .gp-bottomnav a.active{color:var(--blue)}
+  .gp-bottomnav a.active .ic{transform:translateY(-1px)}
+  /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
+     way rather than shrink its tap target to squeeze both in. */
+  .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
+  .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
+}
+
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
 .gp-map-shell{position:relative;margin:.6rem 0 1rem}
 .gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
@@ -382,6 +402,12 @@ body{
   contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
   Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>
   <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
+  <nav class="gp-bottomnav" aria-label="Glavna navigacija">
+    <a href="/gobarska-napoved/"><span class="ic">🍄</span>Napoved</a>
+    <a href="/gobarska-napoved/zemljevid/" class="active"><span class="ic">🗺️</span>Zemljevid</a>
+    <a href="/gobarska-napoved/baza-vrst/"><span class="ic">📖</span>Baza vrst</a>
+    <a href="/gobarska-napoved/dvojnice/"><span class="ic">⚠️</span>Dvojnice</a>
+  </nav>
 <script>
 (function(){
   var PTS=[{"name": "Rečica ob Savinji", "lat": 46.326, "lon": 14.921, "elev": 400, "terrain": "vlazna", "idx": 54, "lvl": "ZMERNA", "sp": "Bezgova uhljevka", "prot": false}, {"name": "Gozdovi nad Ljubnim", "lat": 46.348, "lon": 14.834, "elev": 700, "terrain": "kisla", "idx": 77, "lvl": "ODLIČNA", "sp": "Rdečkasta mušnica (Bisernica)", "prot": false}, {"name": "Smrekovško pogorje", "lat": 46.43, "lon": 14.86, "elev": 1300, "terrain": "kisla", "idx": 100, "lvl": "ODLIČNA", "sp": "Žametasti goban", "prot": false}, {"name": "Komen (Smrekovec)", "lat": 46.415, "lon": 14.845, "elev": 1150, "terrain": "kisla", "idx": 100, "lvl": "ODLIČNA", "sp": "Žametasti goban", "prot": false}, {"name": "Golte", "lat": 46.348, "lon": 14.84, "elev": 1300, "terrain": "bazicna", "idx": 76, "lvl": "ODLIČNA", "sp": "Zelena golobica", "prot": false}, {"name": "Dobrovlje – Čreta", "lat": 46.3, "lon": 14.86, "elev": 900, "terrain": "bazicna", "idx": 66, "lvl": "DOBRA", "sp": "Zelena golobica", "prot": false}, {"name": "Menina planina", "lat": 46.28, "lon": 14.78, "elev": 1000, "terrain": "bazicna", "idx": 85, "lvl": "ODLIČNA", "sp": "Zelena golobica", "prot": false}, {"name": "Dleskovška planota", "lat": 46.4, "lon": 14.68, "elev": 1300, "terrain": "bazicna", "idx": 95, "lvl": "ODLIČNA", "sp": "Velika tintnica", "prot": false}, {"name": "Vivodnik (Menina planina)", "lat": 46.255, "lon": 14.735, "elev": 1500, "terrain": "bazicna", "idx": 85, "lvl": "ODLIČNA", "sp": "Macesnova lupljivka", "prot": false}, {"name": "Nova Štifta – Tirosek", "lat": 46.255, "lon": 14.783, "elev": 700, "terrain": "bazicna", "idx": 100, "lvl": "ODLIČNA", "sp": "Velika tintnica", "prot": false}, {"name": "Črnivec – Bočna", "lat": 46.225, "lon": 14.715, "elev": 850, "terrain": "bazicna", "idx": 71, "lvl": "DOBRA", "sp": "Zelena golobica", "prot": false}, {"name": "Podvolovljek", "lat": 46.4, "lon": 14.73, "elev": 900, "terrain": "bazicna", "idx": 94, "lvl": "ODLIČNA", "sp": "Macesnova lupljivka", "prot": false}, {"name": "Rastke (Ljubenske Rastke)", "lat": 46.365, "lon": 14.865, "elev": 850, "terrain": "bazicna", "idx": 96, "lvl": "ODLIČNA", "sp": "Zelena golobica", "prot": false}, {"name": "Primož pri Ljubnem", "lat": 46.32, "lon": 14.83, "elev": 750, "terrain": "kisla", "idx": 89, "lvl": "ODLIČNA", "sp": "Rdečkasta mušnica (Bisernica)", "prot": false}, {"name": "Obronki Raduhe (Loka)", "lat": 46.4, "lon": 14.71, "elev": 900, "terrain": "bazicna", "idx": 91, "lvl": "ODLIČNA", "sp": "Zelena golobica", "prot": false}, {"name": "Bele Vode – Šentjanž", "lat": 46.31, "lon": 15.02, "elev": 1000, "terrain": "vlazna", "idx": 46, "lvl": "ZMERNA", "sp": "Rdečkasta mušnica (Bisernica)", "prot": false}, {"name": "Logarska dolina", "lat": 46.392, "lon": 14.628, "elev": 750, "terrain": "vlazna", "idx": null, "lvl": null, "sp": null, "prot": true}, {"name": "Matkov kot", "lat": 46.4, "lon": 14.62, "elev": 900, "terrain": "vlazna", "idx": null, "lvl": null, "sp": null, "prot": true}, {"name": "Robanov kot", "lat": 46.4, "lon": 14.66, "elev": 850, "terrain": "vlazna", "idx": null, "lvl": null, "sp": null, "prot": true}];

@@ -379,6 +379,26 @@ body{
 .gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
 .gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
 
+/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
+   quicknav/hub cards already cover cross-page navigation ── */
+.gp-bottomnav{display:none}
+@media (max-width:760px){
+  .wrap{padding-bottom:9.7rem}
+  .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--card-bg);backdrop-filter:blur(10px);border-top:1px solid var(--card-border);
+    padding:.35rem .2rem calc(.35rem + env(safe-area-inset-bottom))}
+  .gp-bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;
+    padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
+    border-radius:10px}
+  .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
+  .gp-bottomnav a.active{color:var(--blue)}
+  .gp-bottomnav a.active .ic{transform:translateY(-1px)}
+  /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
+     way rather than shrink its tap target to squeeze both in. */
+  .gp-sos-fab{top:5.7rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
+  .gp-sos-panel{top:8.8rem;bottom:auto;right:.8rem}
+}
+
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
 .gp-map-shell{position:relative;margin:.6rem 0 1rem}
 .gp-map{height:min(64vh,480px);border-radius:14px;overflow:hidden;border:1px solid var(--card-border);
@@ -999,6 +1019,26 @@ def hub_cards_html():
     return f'  <div class="gp-hub">\n{cards}\n  </div>'
 
 
+# App-style bottom nav (mobile only, see .gp-bottomnav) — 4 destinations max,
+# thumb-reachable, mirroring what the eventual Android app's bottom bar will
+# show. Kept separate from the top gp-quicknav (in-page section jumps).
+BOTTOM_NAV = [
+    ("",           "🍄", "Napoved"),
+    ("zemljevid",  "🗺️", "Zemljevid"),
+    ("baza-vrst",  "📖", "Baza vrst"),
+    ("dvojnice",   "⚠️", "Dvojnice"),
+]
+
+
+def bottom_nav_html(active_slug):
+    rows = []
+    for slug, ic, label in BOTTOM_NAV:
+        href = f"/gobarska-napoved/{slug}/" if slug else "/gobarska-napoved/"
+        cls = ' class="active"' if slug == active_slug else ""
+        rows.append(f'    <a href="{href}"{cls}><span class="ic">{ic}</span>{_esc(label)}</a>')
+    return '  <nav class="gp-bottomnav" aria-label="Glavna navigacija">\n' + "\n".join(rows) + "\n  </nav>"
+
+
 def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
     """Shared chrome for the 4 gobarska-napoved/<slug>/ reference subpages —
     same header/footer/brand/back-link as the main page, own URL + meta."""
@@ -1014,6 +1054,7 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js=""):
   <h1 class="page-title">{title}</h1>
 {inner_html}
   <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
+{bottom_nav_html(slug)}
 {extra_js}'''
     html = seo.page_shell(f"{title} — Gobarska napoved", desc, url, head_extras, body,
                            og_image=f"{seo.SITE}/og/gobarska-napoved.jpg")
@@ -1557,6 +1598,7 @@ def build_body(rules, premium, free):
     <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
+{bottom_nav_html("")}
 {PAGE_JS}
 {DIARY_JS}'''
     subpages = {
