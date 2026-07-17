@@ -63,10 +63,16 @@ LOCATIONS = [
     ("Rečica ob Savinji",   46.326, 14.921, 400,  "vlazna",  True,  False),
     ("Gozdovi nad Ljubnim", 46.348, 14.834, 700,  "kisla",   False, False),
     ("Smrekovško pogorje",  46.430, 14.860, 1300, "kisla",   False, False),
+    ("Komen (Smrekovec)",   46.415, 14.845, 1150, "kisla",   False, False),
     ("Golte",               46.348, 14.840, 1300, "bazicna", False, False),
     ("Dobrovlje – Čreta",   46.300, 14.860, 900,  "bazicna", False, False),
+    ("Menina planina",      46.280, 14.780, 1000, "bazicna", False, False),
+    ("Dleskovška planota",  46.400, 14.680, 1300, "bazicna", False, False),
     ("Logarska dolina",     46.392, 14.628, 750,  "vlazna",  False, True),
 ]
+# NOTE: Komen/Menina planina/Dleskovška planota coordinates are estimates —
+# no lat/lon in data/baza_gob.xlsx, only place names. Verify on a map before
+# treating them as precise. # TODO: kalibriraj (potrdi koordinate)
 
 
 # ── parsing helpers ──────────────────────────────────────────────────────────

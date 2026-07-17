@@ -7,7 +7,7 @@
 # Izpeljane vrednosti (talno-temp. okno, padavinski pragovi, višina, geološka
 # afiniteta, nočna ohladitev) so označene '# TODO: kalibriraj'. Neposredno iz
 # baze (sezona, zračni prag, mikoriza, dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-07-16 · 51 vrst.
+# Zadnja regeneracija: 2026-07-17 · 51 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
@@ -82,6 +82,13 @@ locations:
     terrain: kisla
     home: false
     protected: false
+  - name: "Komen (Smrekovec)"
+    lat: 46.415
+    lon: 14.845
+    elev_m: 1150
+    terrain: kisla
+    home: false
+    protected: false
   - name: "Golte"
     lat: 46.348
     lon: 14.84
@@ -93,6 +100,20 @@ locations:
     lat: 46.3
     lon: 14.86
     elev_m: 900
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Menina planina"
+    lat: 46.28
+    lon: 14.78
+    elev_m: 1000
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Dleskovška planota"
+    lat: 46.4
+    lon: 14.68
+    elev_m: 1300
     terrain: bazicna
     home: false
     protected: false
