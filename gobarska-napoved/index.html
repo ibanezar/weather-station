@@ -60,7 +60,8 @@ body{
 }
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(135deg,rgba(8,14,7,.82),rgba(6,10,6,.94)),url('/og/bg/misty-valley.jpg') center/cover}
+  background:linear-gradient(200deg,rgba(8,14,7,.45) 0%,rgba(6,10,6,.72) 55%,rgba(6,10,6,.92) 100%),
+    url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
 .gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 .gp-ring{display:block}
@@ -284,11 +285,21 @@ body{
 .gp-map-hint b{font-size:1.05rem}
 .gp-map-hint span{font-size:.85rem;color:var(--muted)}
 .gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
-.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted)}
+.gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted);clear:both}
 .gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
+.gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
+  border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
+.gp-photo-card img{display:block;width:100%;height:auto}
+.gp-photo-card figcaption{padding:.5rem .7rem;font-size:.72rem;color:var(--muted);background:var(--card-bg)}
+@media (max-width:760px){.gp-photo-card{float:none;width:100%;margin:0 0 1rem}}
+.gp-banner{position:relative;border-radius:16px;overflow:hidden;margin:.6rem 0 1.2rem;
+  border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
+.gp-banner img{display:block;width:100%;height:min(34vw,280px);object-fit:cover}
+.gp-banner figcaption{position:absolute;left:0;right:0;bottom:0;padding:.5rem .9rem;font-size:.74rem;
+  color:#e9e9e9;background:linear-gradient(0deg,rgba(6,10,6,.75),transparent)}
 .gp-map-pop{font-family:inherit;min-width:150px}
 .gp-map-pop b{font-size:.92rem}
 .gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
@@ -402,23 +413,23 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Nova Štifta – Tirosek</span>
         <span class="gp-terr">bazicna · 700 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:99%;background:#34d399"></div>
-        <span class="gp-meter-val">99 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Velika tintnica</div>
-    </div>
-    <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dleskovška planota</span>
-        <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:96%;background:#34d399"></div>
-        <span class="gp-meter-val">96 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:100%;background:#34d399"></div>
+        <span class="gp-meter-val">100 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Velika tintnica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Rastke (Ljubenske Rastke)</span>
         <span class="gp-terr">bazicna · 850 m</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:96%;background:#34d399"></div>
+        <span class="gp-meter-val">96 % · ODLIČNA</span></div>
+      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dleskovška planota</span>
+        <span class="gp-terr">bazicna · 1300 m</span></div>
       <div class="gp-meter"><div class="gp-meter-fill" style="width:95%;background:#34d399"></div>
         <span class="gp-meter-val">95 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-sp">🍄 Velika tintnica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Podvolovljek</span>
@@ -437,51 +448,51 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Primož pri Ljubnem</span>
         <span class="gp-terr">kisla · 750 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:87%;background:#34d399"></div>
-        <span class="gp-meter-val">87 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:89%;background:#34d399"></div>
+        <span class="gp-meter-val">89 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Menina planina</span>
         <span class="gp-terr">bazicna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:83%;background:#34d399"></div>
-        <span class="gp-meter-val">83 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:85%;background:#34d399"></div>
+        <span class="gp-meter-val">85 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Vivodnik (Menina planina)</span>
         <span class="gp-terr">bazicna · 1500 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:83%;background:#34d399"></div>
-        <span class="gp-meter-val">83 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:85%;background:#34d399"></div>
+        <span class="gp-meter-val">85 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Macesnova lupljivka</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
         <span class="gp-terr">kisla · 700 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:76%;background:#34d399"></div>
-        <span class="gp-meter-val">76 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:77%;background:#34d399"></div>
+        <span class="gp-meter-val">77 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Golte</span>
         <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:75%;background:#34d399"></div>
-        <span class="gp-meter-val">75 % · ODLIČNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:76%;background:#34d399"></div>
+        <span class="gp-meter-val">76 % · ODLIČNA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Črnivec – Bočna</span>
         <span class="gp-terr">bazicna · 850 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:69%;background:#34d399"></div>
-        <span class="gp-meter-val">69 % · DOBRA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:71%;background:#34d399"></div>
+        <span class="gp-meter-val">71 % · DOBRA</span></div>
       <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
         <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:64%;background:#34d399"></div>
-        <span class="gp-meter-val">64 % · DOBRA</span></div>
-      <div class="gp-forest-sp">🍄 Poletni goban</div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:66%;background:#34d399"></div>
+        <span class="gp-meter-val">66 % · DOBRA</span></div>
+      <div class="gp-forest-sp">🍄 Zelena golobica</div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">💧 Rečica ob Savinji</span>
@@ -493,8 +504,8 @@ body{
     <div class="gp-forest">
       <div class="gp-forest-head"><span class="gp-forest-nm">💧 Bele Vode – Šentjanž</span>
         <span class="gp-terr">vlazna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:45%;background:#f59e0b"></div>
-        <span class="gp-meter-val">45 % · ZMERNA</span></div>
+      <div class="gp-meter"><div class="gp-meter-fill" style="width:46%;background:#f59e0b"></div>
+        <span class="gp-meter-val">46 % · ZMERNA</span></div>
       <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
     </div>
     <div class="gp-forest gp-forest-prot">
