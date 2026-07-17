@@ -220,6 +220,16 @@ body{
 .gp-id-warn{font-size:.83rem;color:#fecaca;background:rgba(248,113,113,.12);border-left:3px solid #f87171;
   padding:.4rem .7rem;margin-top:.5rem;border-radius:0 8px 8px 0}
 .gp-id-note{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin-top:.8rem}
+
+/* ── Sezonski trend (pretekla leta) ── */
+.gp-trend-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem 1.2rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-trend-svg{width:100%;height:auto;display:block}
+.gp-trend-legend{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin-top:.6rem;font-size:.8rem;color:var(--muted)}
+.gp-trend-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gp-trend-legend i{width:1.1rem;height:3px;border-radius:2px;display:inline-block}
+.gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
+.gp-trend-best b{color:var(--text)}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -422,6 +432,13 @@ body{
       <tr><th>November</th><td style="text-align:left">Jesenski goban (Jurček), Borov goban, Žametasti goban, Kostanjevka, Rdečebetka, Macesnova lupljivka, Navadna lisička, Lijasta lisička, Črna trobenta, Rumeni ježek, Modrikasta golobica, Užitna sirovka, Smrekova sirovka, Rdečkasta mušnica (Bisernica), Orjaški dežnik (Marela), Sivorumena mraznica (Štorovka), Zimska panjevka, Bukov ostrigar, Vijoličasta bledivka, Velika tintnica, Bezgova uhljevka, Betičasta prašnica, Veliki slinar</td></tr>
       <tr><th>December</th><td style="text-align:left">Lijasta lisička, Zimska panjevka, Bukov ostrigar, Bezgova uhljevka</td></tr>
   </table>
+  <h2 class="gp-h2">📊 Sezona v primerjavi s preteklimi leti</h2>
+  <p class="archive-intro">Mesečno povprečje gobarskega indeksa za Rečico ob Savinji, izračunano nazaj (backtest)
+  z zgodovinskimi vremenskimi podatki (ERA5-Land) — zadnjih do 5 let. Letošnja sezona je poudarjena.
+  Približek: uporablja podnebni arhiv namesto postajnih meritev, zato se lahko rahlo razlikuje od dnevne napovedi.</p>
+  <div id="gp-trend" class="gp-trend-wrap">
+    <div class="gp-msg">Nalagam …</div>
+  </div>
   <h2 class="gp-h2">📖 Baza 51 vrst — užitnost in nevarne dvojnice</h2>
   <p class="archive-intro">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do
   nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
@@ -1409,6 +1426,101 @@ body{
       })
       .catch(function(){ if(syncEl)syncEl.textContent="Sinhronizacija ni uspela — najdbe ostajajo lokalno."; });
   }
+})();
+</script>
+<script>
+(function(){
+  var wrap=document.getElementById("gp-trend");
+  if(!wrap)return;
+  var MONTHS=["04","05","06","07","08","09","10","11"];
+  var MLBL={"04":"Apr","05":"Maj","06":"Jun","07":"Jul","08":"Avg","09":"Sep","10":"Okt","11":"Nov"};
+  var SL_MONTH=["","januar","februar","marec","april","maj","junij","julij","avgust","september","oktober","november","december"];
+  var PAST_COLORS=["#8c8574","#a9a08c","#7a8a72","#9c8f6e"];
+
+  function fmtDate(iso){
+    var p=iso.split("-"); var d=parseInt(p[2],10); var m=SL_MONTH[parseInt(p[1],10)];
+    return d+". "+m+" "+p[0]+".";
+  }
+
+  function render(data){
+    var years=Object.keys(data.years||{}).sort();
+    if(!years.length){wrap.innerHTML='<div class="gp-msg">Trend še ni na voljo.</div>';return;}
+    var curYear=String(new Date().getFullYear());
+    var W=640,H=220,padL=32,padR=12,padT=10,padB=26;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    function x(mi){return padL+plotW*(mi/(MONTHS.length-1));}
+    function y(v){return padT+plotH*(1-Math.max(0,Math.min(100,v))/100);}
+
+    var svg='<svg class="gp-trend-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+    // gridlines + y labels
+    [0,25,50,75,100].forEach(function(v){
+      svg+='<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)" stroke-width="1"/>';
+      svg+='<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v+'</text>';
+    });
+    // month labels
+    MONTHS.forEach(function(m,i){
+      svg+='<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+MLBL[m]+'</text>';
+    });
+    // past years first (so current year draws on top), then current year
+    var pastIdx=0;
+    years.forEach(function(yr){
+      if(yr===curYear)return;
+      drawLine(yr, PAST_COLORS[pastIdx%PAST_COLORS.length], 1.6, .75);
+      pastIdx++;
+    });
+    if(years.indexOf(curYear)!==-1) drawLine(curYear, "#f59e0b", 3, 1);
+    svg+='</svg>';
+
+    function drawLine(yr, color, width, opacity){
+      var ma=data.years[yr].monthly_avg||{};
+      var pts=[];
+      MONTHS.forEach(function(m,i){
+        if(ma[m]!=null) pts.push(x(i)+","+y(ma[m]));
+      });
+      if(pts.length<2)return;
+      svg+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+color+'" stroke-width="'+width+
+        '" stroke-opacity="'+opacity+'" stroke-linecap="round" stroke-linejoin="round"/>';
+      MONTHS.forEach(function(m,i){
+        if(ma[m]!=null) svg+='<circle cx="'+x(i)+'" cy="'+y(ma[m])+'" r="'+(yr===curYear?3:1.8)+'" fill="'+color+'" fill-opacity="'+opacity+'"/>';
+      });
+    }
+
+    var legend='<div class="gp-trend-legend">';
+    var pastIdx2=0;
+    years.forEach(function(yr){
+      var isCur=(yr===curYear);
+      var col=isCur?"#f59e0b":PAST_COLORS[pastIdx2%PAST_COLORS.length];
+      if(!isCur)pastIdx2++;
+      legend+='<span><i style="background:'+col+'"></i>'+yr+(isCur?' (letos)':'')+'</span>';
+    });
+    legend+='</div>';
+
+    // best-day highlight: overall best across all years + this year's own best (if different)
+    var allBest=null;
+    years.forEach(function(yr){
+      var b=data.years[yr].best_day;
+      if(b&&(!allBest||b.overall>allBest.overall))allBest={yr:yr,b:b};
+    });
+    var thisBest=data.years[curYear]&&data.years[curYear].best_day;
+    var bestHtml='';
+    if(allBest){
+      bestHtml+='<div class="gp-trend-best">🏆 Najboljši dan v zadnjih '+years.length+' letih: <b>'+
+        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+' % ('+esc3(allBest.b.top||'')+')';
+      if(thisBest&&allBest.yr!==curYear){
+        bestHtml+='<br>🍄 Letošnji vrh do zdaj: <b>'+fmtDate(thisBest.date)+'</b> — '+thisBest.overall+
+          ' % ('+esc3(thisBest.top||'')+')';
+      }
+      bestHtml+='</div>';
+    }
+
+    wrap.innerHTML=svg+legend+bestHtml;
+  }
+  function esc3(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+  fetch("/gobarska-napoved/trend.json")
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(render)
+    .catch(function(){wrap.innerHTML='<div class="gp-msg">Trend trenutno ni na voljo.</div>';});
 })();
 </script>
   <footer class="site-foot">
