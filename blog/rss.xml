@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 17 Jul 2026 06:07:25 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 17 Jul 2026 12:05:51 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Nevihtni opazovalec, 17. julija 2026 ob 14:04: hiter padec zračnega tlaka</title>
+      <link>https://meteorec.si/blog/nevihtni-opazovalec-2026-07-17-1205.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nevihtni-opazovalec-2026-07-17-1205.html</guid>
+      <pubDate>Fri, 17 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Zračni tlak na postaji IREICA1 je v zadnjih treh urah padel za 3,7 hPa (zdaj 1013 hPa) — znak hitre spremembe vremena, pogosto pred frontalnim prehodom ali nevihto.</description>
+      <category>nevihtni-opazovalec</category>
+      <category>samodejno</category>
+      <category>pritisk</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Danes vrh vročine: 32,4 °C v Zgornji Savinjski dolini, nato ohladitev z dežjem</title>
       <link>https://meteorec.si/blog/danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717.html</link>

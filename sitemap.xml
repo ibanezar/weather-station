@@ -26,30 +26,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://meteorec.si/gobarska-napoved/koledar/</loc>
-    <lastmod>2026-07-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/gobarska-napoved/trend/</loc>
-    <lastmod>2026-07-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/gobarska-napoved/baza-vrst/</loc>
-    <lastmod>2026-07-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/gobarska-napoved/dvojnice/</loc>
-    <lastmod>2026-07-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://meteorec.si/vodostaj-savinje/</loc>
     <lastmod>2026-07-17</lastmod>
     <changefreq>daily</changefreq>
@@ -91,6 +67,13 @@
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/nevihtni-opazovalec-2026-07-17-1205.html</loc>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/nevihtni-opazovalec-2026-07-17-1205.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717.html</loc>
