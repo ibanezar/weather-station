@@ -277,10 +277,17 @@
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/style.min.css">
+<style>
+/* Domača stran nima .app-topbar -- na mobilnem style.css sicer rezervira
+   3rem prostora zanj (body .wrap padding-top), zato tu ta presežni prostor
+   odštejemo, ostane le višina ARSO ticker-ja (--ticker-h, glej
+   app.js:_syncAlertBarHeight). */
+@media (max-width:760px){
+  body .wrap{padding-top:calc(var(--ticker-h,0px) + env(safe-area-inset-top))!important}
+}
+</style>
 </head>
 <body>
-
-<div class="app-topbar"><span class="app-topbar-brand" aria-hidden="true">🏔️</span><span class="app-topbar-title">Meteorec · Živo</span></div>
 
 <div id="bg" class="no-photo"><canvas id="mesh-canvas"></canvas><canvas id="bg-wx-canvas"></canvas><canvas id="starfield-canvas"></canvas><div id="pba" class="photo-layer" style="opacity:0"></div><div id="pbb" class="photo-layer" style="opacity:0"></div><div id="photo-overlay"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div>
 </div>
