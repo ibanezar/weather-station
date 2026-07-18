@@ -3623,8 +3623,9 @@ function installApp(){
   }
   showToast('Namestitev v tem brskalniku ni na voljo');
 }
-// Na iOS-u beforeinstallprompt ne obstaja, zato gumb prikažemo ročno (če app še ni nameščen)
-if(_isIOS&&!_isStandalone)_showInstallBtn();
+// Na iOS-u beforeinstallprompt ne obstaja, zato gumb prikažemo ročno (če app še ni nameščen).
+// Počakamo do 2. obiska, da se namestitveni poziv ne nakopiči s piškotnim bannerjem ob prvem obisku.
+if(_isIOS&&!_isStandalone&&(window._wxVisitCount||1)>=2)_showInstallBtn();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async () => {
     const reg = await navigator.serviceWorker.register('./sw.js').catch(()=>null);
@@ -4695,6 +4696,10 @@ function initNotifHint(){
   let seen=false; try{seen=!!localStorage.getItem(NOTIF_HINT_KEY);}catch(_){}
   // Ne kaži več, če je uporabnik obvestila že vklopil/izklopil ali jih brskalnik blokira
   if(seen||Notification.permission!=='default')return;
+  // Ne kaži na prvem obisku in ne, dokler čaka piškotni banner — izogibamo se
+  // kopičenju pozivov (piškotki + obvestila + namestitev) ob prvem nalaganju.
+  let consentPending=true; try{consentPending=!localStorage.getItem('wx-cookie-consent');}catch(_){}
+  if((window._wxVisitCount||1)<2||consentPending)return;
   setTimeout(()=>{
     const hint=document.getElementById('notif-hint');
     if(hint)hint.classList.add('show');
@@ -13848,6 +13853,12 @@ async function initVisitorCounter(){
   if(wrap)wrap.style.display='none';
 }
 
+// Sproži fn, ko je glavna nit prosta (ali najkasneje po `timeout` ms) — tako
+// ozadnje nalaganje skritih tabov ne blokira scrolla/tapa na vidnem tabu.
+function _idle(fn,timeout){
+  if('requestIdleCallback' in window) requestIdleCallback(fn,{timeout});
+  else setTimeout(fn,timeout);
+}
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
@@ -13872,8 +13883,8 @@ async function init(){
   autoAccentCards();
   fetchAIForecast(); // non-blocking — populates forecast tab card
 
-  // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
-  setTimeout(()=>{
+  // ── Wave 2: forecast tab content (~0.8 s after wave 1, ali prej če je nit prosta) ──
+  _idle(()=>{
     fetchTextForecast();
     fetchForecastExtras();
     fetchAndDrawSkyStrip();
@@ -13881,7 +13892,7 @@ async function init(){
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
-  setTimeout(()=>{
+  _idle(()=>{
     fetchAirQuality();
     fetchAgrometeo();
     fetchClimateComparison();
@@ -13894,10 +13905,10 @@ async function init(){
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──
-  setTimeout(fetchPrecipNowcast,4000);
+  _idle(fetchPrecipNowcast,4000);
 
   // ── Wave 4: lowest priority (6 s) ──
-  setTimeout(()=>{
+  _idle(()=>{
     fetchSevereWeather();
     fetchMeteoalarm();
     fetchGoogleAlerts();

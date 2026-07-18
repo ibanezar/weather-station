@@ -68,11 +68,15 @@
 }
 
 html{scroll-behavior:smooth;overflow-x:hidden}
+/* Native-feeling touch feedback: brez sivega tap-highlighta, kratek "press" na gumbih */
+button,a{-webkit-tap-highlight-color:transparent}
+button{transition:transform .08s ease}
+button:active{transform:scale(.96)}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
    obeh stanjih URL vrstice -> body višina konstantna -> ni povratne zanke. */
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;overscroll-behavior-y:none;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
@@ -665,7 +669,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .spell-dates{font-size:.78rem;font-weight:600}
 .spell-detail{font-size:.66rem;color:var(--muted);line-height:1.4}
 .spell-dur{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--sp-accent);white-space:nowrap}
-.clim-loading{color:var(--muted);font-size:.8rem;padding:1rem 0;text-align:center}
+.clim-loading{color:var(--muted);font-size:.8rem;padding:1rem 0;text-align:center;min-height:3.5rem;display:flex;align-items:center;justify-content:center}
 @media(max-width:680px){.gs-dates{display:none}.clim-twin-place{font-size:1.25rem}}
 /* Drift engine */
 .drift-chart-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -1340,7 +1344,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* History table */
-.history-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:500px}
+.history-table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:500px;min-height:280px}
 .history-table th{text-align:right;padding:.55rem .85rem;color:var(--muted);font-weight:500;font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
 .history-table th:first-child{text-align:left}
 .history-table td{padding:.55rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
@@ -1926,7 +1930,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 /* Text forecast — compact cards */
-.txfc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:.25rem}
+.txfc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:.25rem;min-height:112px}
 .txfc-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.7rem .5rem .65rem;display:flex;flex-direction:column;align-items:center;gap:.18rem;text-align:center;transition:background .2s,box-shadow .2s;cursor:default}
 .txfc-card:hover{background:var(--card-bg);box-shadow:var(--card-shadow-h)}
 .txfc-card.today{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06)}

@@ -690,7 +690,7 @@
       <span class="chart-range" id="hourly-range">Zadnjih 7 dni</span>
     </div>
     <div class="chart-svg-wrap">
-      <svg class="chart-svg" viewBox="0 0 880 160" id="hourly-svg" preserveAspectRatio="xMidYMid meet">
+      <svg class="chart-svg" viewBox="0 0 880 160" width="880" height="160" id="hourly-svg" preserveAspectRatio="xMidYMid meet">
         <text x="440" y="80" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
       </svg>
     </div>
@@ -701,14 +701,14 @@
   <!-- Temp chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌡 Temperatura — zadnjih 24 ur</span><span class="chart-range" id="temp-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 200" width="880" height="200" id="temp-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
     <div class="chart-scroll-hint">↔ povlecite za cel potek</div>
   </div>
 
   <!-- Rain chart -->
   <div class="card chart-card">
     <div class="chart-hdr"><span class="clabel" style="margin:0">🌧 Padavine — zadnjih 24 ur</span><span class="chart-range" id="rain-range">—</span></div>
-    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
+    <div class="chart-svg-wrap"><svg class="chart-svg" viewBox="0 0 880 150" width="880" height="150" id="rain-svg" preserveAspectRatio="xMidYMid meet"><text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text></svg></div>
     <div class="chart-scroll-hint">↔ povlecite za cel potek</div>
   </div>
 
@@ -1169,7 +1169,7 @@
         <span class="chart-range" id="hist-temp-range">—</span>
       </div>
       <div class="chart-svg-wrap">
-        <svg class="chart-svg" viewBox="0 0 880 200" id="hist-temp-svg" preserveAspectRatio="xMidYMid meet">
+        <svg class="chart-svg" viewBox="0 0 880 200" width="880" height="200" id="hist-temp-svg" preserveAspectRatio="xMidYMid meet">
           <text x="440" y="100" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
         </svg>
       </div>
@@ -1183,7 +1183,7 @@
         <span class="chart-range" id="hist-rain-range">—</span>
       </div>
       <div class="chart-svg-wrap">
-        <svg class="chart-svg" viewBox="0 0 880 150" id="hist-rain-svg" preserveAspectRatio="xMidYMid meet">
+        <svg class="chart-svg" viewBox="0 0 880 150" width="880" height="150" id="hist-rain-svg" preserveAspectRatio="xMidYMid meet">
           <text x="440" y="75" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.4)" font-family="Inter,sans-serif">Nalaganje…</text>
         </svg>
       </div>
@@ -1844,7 +1844,7 @@
       </div>
       <div class="card">
         <div class="clabel">🔄 Hodograf vetra</div>
-        <svg id="sc-hodo" class="sc-hodo" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <svg id="sc-hodo" class="sc-hodo" viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
           <text x="110" y="115" text-anchor="middle" fill="var(--muted)" font-size="11">Nalaganje…</text>
         </svg>
         <div style="display:flex;gap:.75rem;font-size:.64rem;color:var(--muted);margin-top:.5rem;justify-content:center;flex-wrap:wrap">
@@ -3146,7 +3146,7 @@
     <h2 class="sub-title" id="home-sub-title">📬 Prijava na novičke</h2>
     <p class="sub-desc">Prijavi se in ob vsakem novem članku (vremenski povzetki, rekordi, analize) dobiš e-obvestilo. Brez spama, odjava z enim klikom.</p>
     <form class="sub-form" id="home-sub-form" autocomplete="off">
-      <input class="sub-input" id="home-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">
+      <input class="sub-input" id="home-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov" autocomplete="email" autocapitalize="off" enterkeyhint="done">
       <input class="sub-hp" type="text" name="website" id="home-sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="sub-btn" id="home-sub-btn" type="submit">Prijava</button>
     </form>
@@ -3202,10 +3202,10 @@
     </div>
     <p class="tp-hint">Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
     <div class="tp-body">
-      <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
-      <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
-      <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0"><span class="tp-unit">km/h</span></div></div>
-      <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
+      <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">mm/h</span></div></div>
     </div>
     <div class="tp-footer">
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>
@@ -3226,6 +3226,15 @@
 <script>
 (function(){
   var CKEY = 'wx-cookie-consent';
+  // Štej obiske, da lahko notifikacijski namig in install poziv počakata do 2. obiska
+  // namesto da se vsi trije pozivi (piškotki/obvestila/namestitev) nakopičijo ob prvem nalaganju.
+  var VKEY = 'wx-visit-count';
+  var visitCount = 1;
+  try{
+    visitCount = (parseInt(localStorage.getItem(VKEY), 10) || 0) + 1;
+    localStorage.setItem(VKEY, String(visitCount));
+  }catch(e){}
+  window._wxVisitCount = visitCount;
   function applyConsent(choice, showBanner){
     document.getElementById('cookie-banner').style.display = 'none';
     var iframes = document.querySelectorAll('iframe[data-src]');
