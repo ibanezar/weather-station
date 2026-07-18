@@ -547,10 +547,33 @@ async function _cronCheckPrecipNowcast(env) {
   if (changed) await r2.put("push/nowcast_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ── Začetek/konec dejanskih padavin na postaji ──────────────
+// Ločeno od PUSH_THRESHOLDS (tisti javi šele pri intenzivnem nalivu >18 mm/h).
+// Tu: dogodek se šteje za začetega pri ≥1 mm/h, konča pa se šele, ko stopnja pade na 0.
+const RAIN_START_THR = 1; // mm/h
+async function _cronCheckRainStartStop(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let obs; try { obs = (await (await fetch(CURRENT_URL, { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
+  const m = obs?.observations?.[0]?.metric; if (!m) return;
+  const rate = m.precipRate ?? 0;
+  let state = {}; try { const o = await r2.get("push/rain_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const wasRaining = !!state.raining;
+  let raining = wasRaining;
+  if (!wasRaining && rate >= RAIN_START_THR) {
+    await _pushAll(env, { title: "Meteorec — opozorilo", body: "🌧️ Začelo je deževati: " + rate.toFixed(1) + " mm/h v Rečici ob Savinji.", url: "/", tag: "wx-rain-start" });
+    raining = true;
+  } else if (wasRaining && rate <= 0) {
+    await _pushAll(env, { title: "Meteorec — opozorilo", body: "☀️ Dež je ponehal v Rečici ob Savinji.", url: "/", tag: "wx-rain-stop" });
+    raining = false;
+  }
+  if (raining !== wasRaining) await r2.put("push/rain_state.json", JSON.stringify({ raining }), { httpMetadata: { contentType: "application/json" } });
+}
+
 export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(_cronCheckThresholds(env));
     ctx.waitUntil(_cronCheckPrecipNowcast(env));
+    ctx.waitUntil(_cronCheckRainStartStop(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
