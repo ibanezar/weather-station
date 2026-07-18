@@ -71,8 +71,9 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
 **Tema:** nevihtna sezona. Iskanja: "nevihta napoved Savinjska dolina", "toča", "hudournik Rečica".
 
 - **Tehnika**
-  - [ ] Potrdi, da `nevihte-forecast` in `arso-alerts` tečeta med nevihtami; preveri OG slike (`og/`).
-  - [ ] Audit (ned 19.7.) — potrdi 0 napak.
+  - [x] Potrjeno 18.7.: `nevihte-forecast`, `arso-alerts` in `storm-watch` tečejo skozi teden (newsjack objave 14.–17.7.); OG slike (`og/`) se generirajo za vsako novo objavo brez vrzeli.
+  - [x] Ad-hoc audit 18.7. (`tools/seo_audit.py`): 0 napak, 2737 URL-jev v sitemapih, 23/23 ključnih strani, 47/47 blog objav pokritih. Reden tedenski tek ostaja ned 19.7.
+  - [x] Popravljena vrzel 18.7.: 4 evergreen objave s 7.7. (ozon/kakovost zraka, CAPE-vodič, hmelj/GDD, gobarska sezona julij) niso bile v `llms.txt` kljub pravilu v razdelku 6 — dodane.
 - **Vsebina (blog)**
   - [x] **Objavljeno 7.7. (predčasno)**: [*Kako brati nevihtno napoved: CAPE, indeks dviga in striženje vetra*](/blog/kako-brati-nevihtno-napoved-cape-striz-vetra.html) — evergreen razlaga z mejnimi vrednostmi, usklajenimi z modelom `/nevihte/`; povezana na `/nevihte/`, 6 pojmov v `/slovar/` in objavo »Anatomija poletne nevihte«; keyword: **CAPE nevihta**, **kako brati nevihtno napoved**.
   - [ ] Event-driven: če nastopi neurje/toča, hitri podatkovni zapis (glej `/novosti/`) + IndexNow (avtomatsko ob push).
@@ -150,6 +151,6 @@ Klimatske / evergreen (grade avtoriteto):
 - [x] Sitemap vrzel `/trendi/` odpravljena
 - [x] Samodejni tedenski SEO audit postavljen (`seo-audit.yml`)
 - [x] Interna povezava na `/trendi/` dodana v skupni footer generatorja (aktivira se pon 13.7.)
-- [ ] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **4/8** (poletni ozon; nevihtni indeksi; hmelj/agrometeo; gobarska sezona — vse 7.7.)
+- [x] ≥ 8 blog objav (podatkovno utemeljenih) objavljenih — **29 od 7.7. do 18.7.** (evergreen razlagalci + dnevne meritve, newsjack opozorila, nevihtni opazovalec); cilj daleč presežen prek samodejnih dnevnih/event-driven objav
 - [ ] Julijski mesečni povzetek (1.8.) potrjen kot objavljen + indeksiran
 - [ ] GSC pregled na koncu cikla + osnutek avgustovskega plana
