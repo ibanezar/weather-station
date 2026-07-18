@@ -265,14 +265,31 @@ body{
    Own grid (single column, not the free auto-fill card grid) since each row
    is now much taller. ── */
 .gp-forests-premium{display:grid;grid-template-columns:1fr;gap:.6rem;margin:.6rem 0 1.2rem}
-.gp-forest-premium{align-items:flex-start}
-.gp-forest-sp3{display:flex;flex-direction:column;gap:.15rem;margin-top:.35rem}
-.gp-sp-chip{font-size:.78rem;color:var(--muted)}
-.gp-sp-chip b{color:var(--text);font-weight:700;margin-left:.3rem;font-variant-numeric:tabular-nums}
-.gp-sp-warn{cursor:help}
-.gp-forest-meta{display:flex;flex-wrap:wrap;gap:.15rem 1rem;margin-top:.45rem;font-size:.72rem;color:var(--muted)}
-.gp-forest-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:.4rem}
-.gp-forest-spark{width:5.5rem}
+/* Column layout (overrides the base .gp-forest row-flex): header split
+   (name/terrain left, big % badge right), then one full-width split row per
+   species (photo+name left, warning+% right, both edge-anchored), then a
+   bottom split row (soil/best-day left, trend spark right). padding-right
+   leaves a permanent empty channel on the right so the floating SOS button
+   (fixed near the top-right on mobile) never lands on top of a number —
+   it only ever passes over blank card padding as the page scrolls. */
+.gp-forest-premium{display:flex;flex-direction:column;justify-content:flex-start;
+  align-items:stretch;gap:.7rem;padding-right:3.4rem}
+.gp-forest-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem}
+.gp-forest-namewrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.gp-forest-sp3{display:flex;flex-direction:column;gap:.65rem}
+.gp-sp-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.gp-sp-left{display:flex;align-items:center;gap:.6rem;min-width:0;flex:1}
+/* Squircle, not a circle — a round crop throws away too much of the photo;
+   40-48px (2.75rem) keeps the mushroom recognisable. */
+.gp-sp-avatar{width:2.75rem;height:2.75rem;border-radius:12px;object-fit:cover;
+  flex:0 0 auto;background:var(--badge-bg)}
+.gp-sp-name{font-size:.85rem;color:var(--text);line-height:1.3;overflow-wrap:break-word}
+.gp-sp-right{flex:0 0 4.6rem;white-space:nowrap;font-size:.85rem;font-weight:700;
+  color:var(--text);text-align:right}
+.gp-sp-warn{cursor:help;margin-right:.1rem}
+.gp-forest-bottom{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.gp-forest-meta{display:flex;flex-wrap:wrap;gap:.15rem 1rem;font-size:.72rem;color:var(--muted)}
+.gp-forest-spark{flex:0 0 auto;width:5.5rem}
 .gp-forest-spark .gp-spark{width:100%;height:1.6rem}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
@@ -825,22 +842,25 @@ PAGE_JS = """<script>
     var pctCls=levelClass(o.overall);
     var spHtml=o.species.slice(0,3).map(function(s){
       var m=meta[s.id]||{};
-      var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
-      var ic=`<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/${s.id}.jpg" alt="" loading="lazy" `+
-        `onerror="this.replaceWith(document.createTextNode('🍄 '))">`;
-      return '<span class="gp-sp-chip">'+ic+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
+      var warn=m.doubles?'<span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span> ':'';
+      var ic=`<img class="gp-sp-avatar" src="/gobarska-napoved/img/vrste/${s.id}.jpg" alt="" loading="lazy" `+
+        `onerror="this.replaceWith(document.createTextNode('🍄'))">`;
+      return '<div class="gp-sp-row"><div class="gp-sp-left">'+ic+
+        '<span class="gp-sp-name">'+esc2(m.name_sl||s.id)+'</span></div>'+
+        '<div class="gp-sp-right">'+warn+s.index+' %</div></div>';
     }).join('');
     var peak=bestDayText(l,dayIdx);
     var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
       :(dayIdx===0?'<span>🔝 danes je vrh tedna</span>':'<span>🔝 vrh tedna</span>');
     var metaHtml=(o.soil_moisture_pct==null?'':'<span>💧 vlaga tal '+o.soil_moisture_pct+' %</span>')+peakHtml;
-    return '<div class="gp-forest gp-forest-premium"><div class="gp-forest-info">'+
+    return '<div class="gp-forest gp-forest-premium">'+
+      '<div class="gp-forest-top"><div class="gp-forest-namewrap">'+
       '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
-      '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span>'+
+      '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span></div>'+
+      '<div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+'%</span><span class="lvl">'+o.level+'</span></div>'+
+      '</div>'+
       '<div class="gp-forest-sp3">'+spHtml+'</div>'+
-      '<div class="gp-forest-meta">'+metaHtml+'</div>'+
-      '</div><div class="gp-forest-side"><div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+
-      '%</span><span class="lvl">'+o.level+'</span></div>'+
+      '<div class="gp-forest-bottom"><div class="gp-forest-meta">'+metaHtml+'</div>'+
       '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
       '</div></div>';
   }
