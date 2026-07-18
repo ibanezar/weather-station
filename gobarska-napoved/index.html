@@ -309,6 +309,19 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Per-factor "why" breakdown — the model already scores each species on 6
+   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   humidity, night-cooling trigger) and blends them into the single index;
+   previously only the blended number + a prose summary were ever shown.
+   Surfacing the actual bars is the real "not a black box" version of the
+   same "Zakaj?" disclosure, not a new claim. */
+.gp-factors{display:flex;flex-direction:column;gap:.3rem;margin-top:.55rem}
+.gp-factor-row{display:flex;align-items:center;gap:.5rem}
+.gp-factor-lbl{flex:0 0 6.4rem;font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-factor-bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.gp-factor-fill{height:100%;border-radius:3px}
+.gp-factor-val{flex:0 0 2.6rem;text-align:right;font-size:.7rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 
 /* ── Soil-moisture gauge + 7-day mini graphs (premium forecast, per gozd) ── */
@@ -1051,16 +1064,34 @@ body .wrap{padding-bottom:5.5rem}
       sparklineSvg(loc.days.map(function(d){return d.overall;}),"#c17f3e")+'</div>'+
       '</div></div></div>';
   }
+  // The blended index is 6 independently-scored 0-100 signals; this renders
+  // those actual bars instead of just the prose summary, inside the same
+  // "Zakaj?" disclosure — the model was already computing all of this.
+  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_7d:"Padavine 7d",rain_14d:"Padavine 14d",
+    soil_moisture:"Vlaga tal",humidity:"Zračna vlaga",temp_drop:"Nočna ohladitev"};
+  var FACTOR_ORDER=["soil_temp","rain_7d","rain_14d","soil_moisture","humidity","temp_drop"];
+  function factorBarsHtml(components){
+    if(!components)return"";
+    var rows=FACTOR_ORDER.filter(function(k){return components[k]!=null;});
+    if(!rows.length)return"";
+    return '<div class="gp-factors">'+rows.map(function(k){
+      var v=components[k];
+      return '<div class="gp-factor-row"><span class="gp-factor-lbl">'+FACTOR_LABELS[k]+'</span>'+
+        '<div class="gp-factor-bar"><div class="gp-factor-fill" style="width:'+v+'%;background:'+levelColor(v)+'"></div></div>'+
+        '<span class="gp-factor-val">'+v+' %</span></div>';
+    }).join('')+'</div>';
+  }
   function explainCardsHtml(day, meta){
     return day.species.slice(0,6).map(function(s){var m=meta[s.id]||{};
       var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
+      var factorsHtml=factorBarsHtml(s.components);
       return `<div class="gp-explain-card">
         <div class="gp-explain-photo"><img src="/gobarska-napoved/img/vrste/${s.id}.jpg" loading="lazy" alt=""
           onerror="this.replaceWith(document.createTextNode('🍄'))"></div>
         <div class="gp-explain-body">
         <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
         <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
-        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p></details>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${factorsHtml}</details>
         </div></div>`;}).join('');
   }
   function dayLabel(day, isFirst){
