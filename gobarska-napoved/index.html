@@ -1085,13 +1085,44 @@ body .wrap{padding-bottom:5.5rem}
     var dt=new Date(day.date);
     return dt.getDate()+'.'+(dt.getMonth()+1)+'.';
   }
-  // Best index anywhere in the 7-day window for this forest — null if today
-  // (index 0) already is the peak, so the row doesn't state the obvious.
-  function bestDayText(loc){
+  // Best index anywhere in the 7-day window for this forest — null if the
+  // day currently being shown (dayIdx) already is the peak, so the row
+  // doesn't state the obvious.
+  function bestDayText(loc, dayIdx){
     var days=loc.days,bi=0;
     for(var i=1;i<days.length;i++){if(days[i].overall>days[bi].overall)bi=i;}
-    if(bi===0)return null;
-    return dayLabel(days[bi],false)+' · '+days[bi].overall+' %';
+    if(bi===dayIdx)return null;
+    return dayLabel(days[bi],bi===0)+' · '+days[bi].overall+' %';
+  }
+  // Single "today per forest" row for an arbitrary day index — used both for
+  // the initial render and for the day-chip re-render below, so picking a
+  // different day re-ranks/re-labels every forest instead of only the one
+  // location detail underneath.
+  function forestRowHtml(l, dayIdx, meta){
+    var o=l.days[dayIdx];
+    var pctCls=levelClass(o.overall);
+    var spHtml=o.species.slice(0,3).map(function(s){
+      var m=meta[s.id]||{};
+      var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
+      return '<span class="gp-sp-chip">🍄 '+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
+    }).join('');
+    var peak=bestDayText(l,dayIdx);
+    var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
+      :(dayIdx===0?'<span>🔝 danes je vrh tedna</span>':'<span>🔝 vrh tedna</span>');
+    var metaHtml=(o.soil_moisture_pct==null?'':'<span>💧 vlaga tal '+o.soil_moisture_pct+' %</span>')+peakHtml;
+    return '<div class="gp-forest gp-forest-premium"><div class="gp-forest-info">'+
+      '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
+      '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span>'+
+      '<div class="gp-forest-sp3">'+spHtml+'</div>'+
+      '<div class="gp-forest-meta">'+metaHtml+'</div>'+
+      '</div><div class="gp-forest-side"><div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+
+      '%</span><span class="lvl">'+o.level+'</span></div>'+
+      '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
+      '</div></div>';
+  }
+  function forestsListHtml(locs, dayIdx, meta){
+    return locs.slice().sort(function(a,b){return b.days[dayIdx].overall-a.days[dayIdx].overall;})
+      .map(function(l){return forestRowHtml(l,dayIdx,meta);}).join('');
   }
   function locDetailHtml(loc, meta){
     var html="";
@@ -1139,33 +1170,21 @@ body .wrap{padding-bottom:5.5rem}
     var locs=d.locations||[];
     var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";
-    // today per forest — richer than the free list: top-3 species (not just
+    // per-forest rows — richer than the free list: top-3 species (not just
     // the winner), soil moisture, a best-day-this-week hint and a 7-day
     // trend line, all already computed per location — this is the one part
     // of the page a paying user should see more in than the free teaser.
-    html+='<h3>Danes po gozdovih</h3><div class="gp-forests-premium">';
-    locs.slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
-      .forEach(function(l){
-        var o=l.days[0];
-        var pctCls=levelClass(o.overall);
-        var spHtml=o.species.slice(0,3).map(function(s){
-          var m=meta[s.id]||{};
-          var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
-          return '<span class="gp-sp-chip">🍄 '+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
-        }).join('');
-        var metaHtml=(o.soil_moisture_pct==null?'':'<span>💧 vlaga tal '+o.soil_moisture_pct+' %</span>')+
-          (bestDayText(l)?'<span>📈 najboljši dan: '+bestDayText(l)+'</span>':'<span>🔝 danes je vrh tedna</span>');
-        html+='<div class="gp-forest gp-forest-premium"><div class="gp-forest-info">'+
-          '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
-          '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span>'+
-          '<div class="gp-forest-sp3">'+spHtml+'</div>'+
-          '<div class="gp-forest-meta">'+metaHtml+'</div>'+
-          '</div><div class="gp-forest-side"><div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+
-          '%</span><span class="lvl">'+o.level+'</span></div>'+
-          '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
-          '</div></div>';
-      });
+    // A day-chip row lets that whole ranked list be re-drawn for any of the
+    // 7 days, not just today, without touching the per-location detail below.
+    html+='<h3>Napoved po gozdovih</h3>';
+    html+='<div class="gp-chip-row" id="gp-today-day-chips">';
+    home.days.forEach(function(day,i){
+      var peak=Math.max.apply(null,locs.map(function(l){return l.days[i].overall;}));
+      html+='<button type="button" class="gp-chip'+(i===0?' active':'')+'" data-day="'+i+'">'+
+        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(peak)+'">'+peak+' %</span></button>';
+    });
     html+='</div>';
+    html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
     // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
     html+='<div class="gp-chip-row" id="gp-loc-chips">';
@@ -1178,6 +1197,16 @@ body .wrap{padding-bottom:5.5rem}
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
     content.hidden=false;lock.hidden=true;
+    var todayDayChips=document.getElementById("gp-today-day-chips");
+    var todayForests=document.getElementById("gp-today-forests");
+    if(todayDayChips&&todayForests){todayDayChips.addEventListener("click",function(e){
+      var btn=e.target.closest(".gp-chip");
+      if(!btn)return;
+      todayDayChips.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
+      btn.classList.add("active");
+      btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+      todayForests.innerHTML=forestsListHtml(locs, parseInt(btn.dataset.day,10), meta);
+    });}
     var chipRow=document.getElementById("gp-loc-chips");
     var detail=document.getElementById("gp-loc-detail");
     wireDayChips(detail, home, meta);
