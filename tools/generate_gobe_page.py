@@ -674,6 +674,11 @@ body .wrap{padding-bottom:5.5rem}
     padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
     border-radius:10px}
   .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
+  /* Custom two-tone SVG icons (see BOTTOM_NAV): stroke="currentColor" so the
+     line art itself picks up the active/inactive tab colour exactly like the
+     text label already did, plus a fixed var(--cyan) accent fill for the
+     "duotone" half — one consistent two-colour look across the whole set. */
+  .gp-bottomnav a .ic svg{width:1.35rem;height:1.35rem;display:block}
   .gp-bottomnav a.active{color:var(--blue)}
   .gp-bottomnav a.active .ic{transform:translateY(-1px)}
   /* Center "Prepoznaj" (AI) item rides above the bar as a raised, badged
@@ -685,6 +690,7 @@ body .wrap{padding-bottom:5.5rem}
     background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;
     justify-content:center;font-size:1.15rem;margin-top:-1.15rem;
     box-shadow:0 3px 12px rgba(109,40,217,.55);border:3px solid var(--bg)}
+  .gp-bottomnav a.hl .ic svg{width:1.45rem;height:1.45rem}
   .gp-bottomnav a.hl.active .ic{transform:none}
   /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
      way rather than shrink its tap target to squeeze both in. Shifted a
@@ -1513,15 +1519,47 @@ def hub_cards_html():
     return f'  <div class="gp-hub">\n{cards}\n  </div>'
 
 
+# Custom two-tone (duotone) SVG icon set for the bottom nav — replaces the
+# emoji glyphs, which render inconsistently across platforms/fonts and can't
+# be recoloured for the active/inactive tab state. Each icon: an outline in
+# stroke="currentColor" (so it inherits the same colour swap the text label
+# already gets via .active) plus a fixed var(--cyan) accent fill — one
+# consistent two-colour look across the whole set. 24x24 viewBox throughout.
+_IC_NAPOVED = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8H4Z" fill="var(--cyan)" fill-opacity=".35"/>'
+    '<path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8" stroke="currentColor" stroke-width="1.8" '
+    'stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M9 11v5a3 3 0 0 0 6 0v-5" stroke="currentColor" stroke-width="1.8" '
+    'stroke-linecap="round" stroke-linejoin="round"/>'
+    '<line x1="4" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>')
+_IC_ZEMLJEVID = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M3 6.5 9 4l6 2.5 6-2.5v13L15 19.5 9 17l-6 2.5v-13Z" fill="var(--cyan)" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>'
+    '<path d="M9 4v13M15 6.5v13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>')
+_IC_AI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<circle cx="10.5" cy="10.5" r="6" fill="currentColor" fill-opacity=".2"/>'
+    '<circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="1.8"/>'
+    '<path d="m15 15 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>')
+_IC_BAZA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 5.5C10.3 4 7.8 3.5 4 4v14c3.8-.5 6.3 0 8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>'
+    '<path d="M12 5.5C13.7 4 16.2 3.5 20 4v14c-3.8-.5-6.3 0-8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".15" '
+    'stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>')
+_IC_DVOJNICE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.5 21.5 20h-19L12 3.5Z" fill="var(--cyan)" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+    '<line x1="12" y1="10" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>'
+    '<circle cx="12" cy="17.2" r="1" fill="currentColor"/></svg>')
+
 # App-style bottom nav (mobile only, see .gp-bottomnav) — 4 destinations max,
 # thumb-reachable, mirroring what the eventual Android app's bottom bar will
 # show. Kept separate from the top gp-quicknav (in-page section jumps).
 BOTTOM_NAV = [
-    ("",           "🍄", "Napoved",   None),
-    ("zemljevid",  "🗺️", "Zemljevid", None),
-    ("ai",         "🔍", "Prepoznaj", "/gobarska-napoved/#premium"),
-    ("baza-vrst",  "📖", "Baza vrst", None),
-    ("dvojnice",   "⚠️", "Dvojnice",  None),
+    ("",           _IC_NAPOVED,    "Napoved",   None),
+    ("zemljevid",  _IC_ZEMLJEVID,  "Zemljevid", None),
+    ("ai",         _IC_AI,         "Prepoznaj", "/gobarska-napoved/#premium"),
+    ("baza-vrst",  _IC_BAZA,       "Baza vrst", None),
+    ("dvojnice",   _IC_DVOJNICE,   "Dvojnice",  None),
 ]
 
 
