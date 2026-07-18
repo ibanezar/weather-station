@@ -697,6 +697,13 @@ body .wrap{padding-bottom:5.5rem}
      further 3.5rem down from its old top:5.7rem to clear the new top bar. */
   .gp-sos-fab{top:9.2rem;bottom:auto;right:.8rem;width:2.75rem;height:2.75rem;font-size:1.15rem}
   .gp-sos-panel{top:12.3rem;bottom:auto;right:.8rem}
+  /* The free forest list is single-column here too (see the 560px rule
+     below), so its % badge sits in that same right-hand strip the fixed
+     SOS button occupies while scrolling past — same channel the premium
+     rows already reserve, just scoped to mobile since the free list's
+     multi-column desktop grid shouldn't lose width to a badge SOS never
+     overlaps there. */
+  .gp-forest{padding-right:3.4rem}
 }
 
 /* ── Interaktivni zemljevid (Leaflet, lazy-load ob kliku) ── */
