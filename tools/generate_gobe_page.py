@@ -225,16 +225,22 @@ body{
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
 .gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
-.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
-.gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
-.gp-forest-nm{font-weight:700;font-size:.95rem}
-.gp-meter{position:relative;height:22px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
-.gp-meter-fill{position:absolute;left:0;top:0;bottom:0;border-radius:7px;transition:width .6s ease}
-.gp-meter-val{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;
-  font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
-.gp-forest-sp{font-size:.82rem;color:var(--muted);margin-top:.45rem}
+/* Compact two-column row: name/terrain/species stack on the left, a single
+   glanceable colour-coded percentage disc on the right — so scanning the
+   whole list for "where's it worth going" doesn't require reading every
+   line, the disc colour + number says it at a glance. */
+.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.6rem .8rem;
+  display:flex;align-items:center;justify-content:space-between;gap:.7rem}
+.gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.gp-forest-nm{font-weight:700;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-prot{opacity:.6}
-.gp-terr{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-forest-pct{flex:0 0 auto;width:3.5rem;height:3.5rem;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#04070e;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
+  text-align:center;text-transform:uppercase;opacity:.85}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
@@ -249,7 +255,7 @@ body{
   animation:gp-shimmer 1.4s ease infinite}
 @keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 @media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
-.gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
+.gp-skel .gp-forest{background:var(--badge-bg)}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
 .gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
@@ -790,16 +796,15 @@ PAGE_JS = """<script>
     var locs=d.locations||[];
     var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";
-    // today per forest — same bar-meter cards as the free section
+    // today per forest — same compact info+disc rows as the free section
     html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
     locs.slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
       .forEach(function(l){var o=l.days[0];var top=o.species[0];var col=levelColor(o.overall);
-        html+='<div class="gp-forest"><div class="gp-forest-head"><span class="gp-forest-nm">'+
+        html+='<div class="gp-forest"><div class="gp-forest-info"><span class="gp-forest-nm">'+
           (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
-          ' · '+l.elev_m+' m</span></div><div class="gp-meter"><div class="gp-meter-fill" style="width:'+
-          Math.max(3,o.overall)+'%;background:'+col+'"></div><span class="gp-meter-val">'+o.overall+' % · '+
-          o.level+'</span></div><div class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
-          '</div></div>';});
+          ' · '+l.elev_m+' m</span><span class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
+          '</span></div><div class="gp-forest-pct" style="background:'+col+'"><span class="n">'+o.overall+
+          '%</span><span class="lvl">'+o.level+'</span></div></div>';});
     html+='</div>';
     // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
@@ -1710,7 +1715,7 @@ def build_body(rules, premium, free):
     nočno ohladitev — po vrstah in po geologiji terena.</div>
   </div>'''
 
-    # ── today per forest (free) — horizontal bar meters ───────────────────────
+    # ── today per forest (free) — compact row: info left, % disc right ────────
     forests = ['  <div class="gp-forests">']
     for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
         o = loc["days"][0]
@@ -1721,18 +1726,21 @@ def build_body(rules, premium, free):
         col = level_color(o["overall"])
         forests.append(
             f'''    <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>
-        <span class="gp-terr">{terr} · {loc["elev_m"]} m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:{max(3, o["overall"])}%;background:{col}"></div>
-        <span class="gp-meter-val">{o["overall"]} % · {o["level"]}</span></div>
-      <div class="gp-forest-sp">🍄 {_esc(top_nm)}</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>
+        <span class="gp-terr">{terr} · {loc["elev_m"]} m</span>
+        <span class="gp-forest-sp">🍄 {_esc(top_nm)}</span>
+      </div>
+      <div class="gp-forest-pct" style="background:{col}"><span class="n">{o["overall"]}%</span><span class="lvl">{o["level"]}</span></div>
     </div>''')
     if premium.get("protected_areas"):
         forests.append(
             f'''    <div class="gp-forest gp-forest-prot">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🚫 {_esc(", ".join(premium["protected_areas"]))}</span>
-        <span class="gp-terr">zaščiteno</span></div>
-      <div class="gp-forest-sp">Nabiranje prepovedano</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🚫 {_esc(", ".join(premium["protected_areas"]))}</span>
+        <span class="gp-terr">zaščiteno</span>
+        <span class="gp-forest-sp">Nabiranje prepovedano</span>
+      </div>
     </div>''')
     forests.append("  </div>")
     forests_html = "\n".join(forests)

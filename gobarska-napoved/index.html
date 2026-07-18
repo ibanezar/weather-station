@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/">
-<meta name="description" content="Gobarski indeks danes: 53 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="description" content="Gobarski indeks danes: 60 % (DOBRA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta property="og:description" content="Gobarski indeks danes: 53 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta property="og:description" content="Gobarski indeks danes: 60 % (DOBRA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta name="twitter:description" content="Gobarski indeks danes: 53 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="twitter:description" content="Gobarski indeks danes: 60 % (DOBRA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 53 % (ZMERNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 60 % (DOBRA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 51 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved"}]}
@@ -121,16 +121,22 @@ body{
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
 .gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
-.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.7rem .9rem}
-.gp-forest-head{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.45rem}
-.gp-forest-nm{font-weight:700;font-size:.95rem}
-.gp-meter{position:relative;height:22px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
-.gp-meter-fill{position:absolute;left:0;top:0;bottom:0;border-radius:7px;transition:width .6s ease}
-.gp-meter-val{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;
-  font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
-.gp-forest-sp{font-size:.82rem;color:var(--muted);margin-top:.45rem}
+/* Compact two-column row: name/terrain/species stack on the left, a single
+   glanceable colour-coded percentage disc on the right — so scanning the
+   whole list for "where's it worth going" doesn't require reading every
+   line, the disc colour + number says it at a glance. */
+.gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.6rem .8rem;
+  display:flex;align-items:center;justify-content:space-between;gap:.7rem}
+.gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.gp-forest-nm{font-weight:700;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-prot{opacity:.6}
-.gp-terr{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-forest-pct{flex:0 0 auto;width:3.5rem;height:3.5rem;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#04070e;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
+  text-align:center;text-transform:uppercase;opacity:.85}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
@@ -145,7 +151,7 @@ body{
   animation:gp-shimmer 1.4s ease infinite}
 @keyframes gp-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 @media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
-.gp-skel .gp-forest{background:var(--badge-bg);display:flex;justify-content:space-between}
+.gp-skel .gp-forest{background:var(--badge-bg)}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
 .gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
@@ -588,16 +594,16 @@ body .wrap{padding-bottom:5.5rem}
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 51 vrst · osvežuje se dnevno · 2026-07-17</p>
+  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 51 vrst · osvežuje se dnevno · 2026-07-18</p>
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
-        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#f59e0b" stroke-dasharray="339.3" stroke-dashoffset="159.5"/></svg>
-        <div class="gp-gauge-num"><span class="num">53</span><small>%</small></div>
+        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="135.7"/></svg>
+        <div class="gp-gauge-num"><span class="num">60</span><small>%</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
-        <div class="gp-hero-lvl" style="color:#f59e0b">ZMERNA</div>
+        <div class="gp-hero-lvl" style="color:#34d399">DOBRA</div>
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>Smrekovško pogorje</strong>
           <span class="gp-hero-best-pct" style="background:#34d39922;color:#34d399">100 % · ODLIČNA</span></div>
         <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
@@ -605,7 +611,7 @@ body .wrap{padding-bottom:5.5rem}
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
-        data-pct="53" data-lvl="ZMERNA">📤 Deli</button>
+        data-pct="60" data-lvl="DOBRA">📤 Deli</button>
       <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
       <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
     </div>
@@ -634,121 +640,139 @@ body .wrap{padding-bottom:5.5rem}
   podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
   <div class="gp-forests">
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Smrekovško pogorje</span>
-        <span class="gp-terr">kisla · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:100%;background:#34d399"></div>
-        <span class="gp-meter-val">100 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Žametasti goban</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🌲 Smrekovško pogorje</span>
+        <span class="gp-terr">kisla · 1300 m</span>
+        <span class="gp-forest-sp">🍄 Žametasti goban</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Komen (Smrekovec)</span>
-        <span class="gp-terr">kisla · 1150 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:100%;background:#34d399"></div>
-        <span class="gp-meter-val">100 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Žametasti goban</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🌲 Komen (Smrekovec)</span>
+        <span class="gp-terr">kisla · 1150 m</span>
+        <span class="gp-forest-sp">🍄 Žametasti goban</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Nova Štifta – Tirosek</span>
-        <span class="gp-terr">bazicna · 700 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:99%;background:#34d399"></div>
-        <span class="gp-meter-val">99 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Velika tintnica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Rastke (Ljubenske Rastke)</span>
+        <span class="gp-terr">bazicna · 850 m</span>
+        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dleskovška planota</span>
-        <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:96%;background:#34d399"></div>
-        <span class="gp-meter-val">96 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Velika tintnica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Dleskovška planota</span>
+        <span class="gp-terr">bazicna · 1300 m</span>
+        <span class="gp-forest-sp">🍄 Velika tintnica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Rastke (Ljubenske Rastke)</span>
-        <span class="gp-terr">bazicna · 850 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:95%;background:#34d399"></div>
-        <span class="gp-meter-val">95 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Podvolovljek</span>
+        <span class="gp-terr">bazicna · 900 m</span>
+        <span class="gp-forest-sp">🍄 Macesnova lupljivka</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Podvolovljek</span>
-        <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:94%;background:#34d399"></div>
-        <span class="gp-meter-val">94 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Macesnova lupljivka</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Obronki Raduhe (Loka)</span>
+        <span class="gp-terr">bazicna · 900 m</span>
+        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Obronki Raduhe (Loka)</span>
-        <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:91%;background:#34d399"></div>
-        <span class="gp-meter-val">91 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🌲 Primož pri Ljubnem</span>
+        <span class="gp-terr">kisla · 750 m</span>
+        <span class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">95%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Primož pri Ljubnem</span>
-        <span class="gp-terr">kisla · 750 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:87%;background:#34d399"></div>
-        <span class="gp-meter-val">87 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
+        <span class="gp-terr">kisla · 700 m</span>
+        <span class="gp-forest-sp">🍄 Navadna lisička</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">83%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Vivodnik (Menina planina)</span>
-        <span class="gp-terr">bazicna · 1500 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:83%;background:#34d399"></div>
-        <span class="gp-meter-val">83 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Macesnova lupljivka</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Golte</span>
+        <span class="gp-terr">bazicna · 1300 m</span>
+        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Menina planina</span>
-        <span class="gp-terr">bazicna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:82%;background:#34d399"></div>
-        <span class="gp-meter-val">82 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Nova Štifta – Tirosek</span>
+        <span class="gp-terr">bazicna · 700 m</span>
+        <span class="gp-forest-sp">🍄 Velika tintnica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
-        <span class="gp-terr">kisla · 700 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:76%;background:#34d399"></div>
-        <span class="gp-meter-val">76 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
+        <span class="gp-terr">bazicna · 900 m</span>
+        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">72%</span><span class="lvl">DOBRA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Golte</span>
-        <span class="gp-terr">bazicna · 1300 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:75%;background:#34d399"></div>
-        <span class="gp-meter-val">75 % · ODLIČNA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Menina planina</span>
+        <span class="gp-terr">bazicna · 1000 m</span>
+        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">62%</span><span class="lvl">DOBRA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Črnivec – Bočna</span>
-        <span class="gp-terr">bazicna · 850 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:68%;background:#34d399"></div>
-        <span class="gp-meter-val">68 % · DOBRA</span></div>
-      <div class="gp-forest-sp">🍄 Zelena golobica</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Vivodnik (Menina planina)</span>
+        <span class="gp-terr">bazicna · 1500 m</span>
+        <span class="gp-forest-sp">🍄 Macesnova lupljivka</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">61%</span><span class="lvl">DOBRA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
-        <span class="gp-terr">bazicna · 900 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:64%;background:#34d399"></div>
-        <span class="gp-meter-val">64 % · DOBRA</span></div>
-      <div class="gp-forest-sp">🍄 Poletni goban</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">💧 Rečica ob Savinji</span>
+        <span class="gp-terr">vlazna · 400 m</span>
+        <span class="gp-forest-sp">🍄 Bezgova uhljevka</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#34d399"><span class="n">60%</span><span class="lvl">DOBRA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">💧 Rečica ob Savinji</span>
-        <span class="gp-terr">vlazna · 400 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:53%;background:#f59e0b"></div>
-        <span class="gp-meter-val">53 % · ZMERNA</span></div>
-      <div class="gp-forest-sp">🍄 Bezgova uhljevka</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">💧 Bele Vode – Šentjanž</span>
+        <span class="gp-terr">vlazna · 1000 m</span>
+        <span class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#f59e0b"><span class="n">48%</span><span class="lvl">ZMERNA</span></div>
     </div>
     <div class="gp-forest">
-      <div class="gp-forest-head"><span class="gp-forest-nm">💧 Bele Vode – Šentjanž</span>
-        <span class="gp-terr">vlazna · 1000 m</span></div>
-      <div class="gp-meter"><div class="gp-meter-fill" style="width:46%;background:#f59e0b"></div>
-        <span class="gp-meter-val">46 % · ZMERNA</span></div>
-      <div class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Črnivec – Bočna</span>
+        <span class="gp-terr">bazicna · 850 m</span>
+        <span class="gp-forest-sp">🍄 Poletni goban</span>
+      </div>
+      <div class="gp-forest-pct" style="background:#f59e0b"><span class="n">45%</span><span class="lvl">ZMERNA</span></div>
     </div>
     <div class="gp-forest gp-forest-prot">
-      <div class="gp-forest-head"><span class="gp-forest-nm">🚫 Logarska dolina, Matkov kot, Robanov kot</span>
-        <span class="gp-terr">zaščiteno</span></div>
-      <div class="gp-forest-sp">Nabiranje prepovedano</div>
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🚫 Logarska dolina, Matkov kot, Robanov kot</span>
+        <span class="gp-terr">zaščiteno</span>
+        <span class="gp-forest-sp">Nabiranje prepovedano</span>
+      </div>
     </div>
   </div>
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
@@ -785,8 +809,8 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest"><span>Bezgova uhljevka</span><b>•• % ······</b></div>
       <div class="gp-forest"><span>Rdečkasta mušnica (Bisernica)</span><b>•• % ······</b></div>
       <div class="gp-forest"><span>Orjaški dežnik (Marela)</span><b>•• % ······</b></div>
-      <div class="gp-forest"><span>Poletni goban</span><b>•• % ······</b></div>
       <div class="gp-forest"><span>Navadna lisička</span><b>•• % ······</b></div>
+      <div class="gp-forest"><span>Zelena golobica</span><b>•• % ······</b></div>
     </div>
     <div class="gp-lockbar">
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se (3,99 €/mes)</button>
@@ -1055,16 +1079,15 @@ body .wrap{padding-bottom:5.5rem}
     var locs=d.locations||[];
     var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";
-    // today per forest — same bar-meter cards as the free section
+    // today per forest — same compact info+disc rows as the free section
     html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
     locs.slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
       .forEach(function(l){var o=l.days[0];var top=o.species[0];var col=levelColor(o.overall);
-        html+='<div class="gp-forest"><div class="gp-forest-head"><span class="gp-forest-nm">'+
+        html+='<div class="gp-forest"><div class="gp-forest-info"><span class="gp-forest-nm">'+
           (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
-          ' · '+l.elev_m+' m</span></div><div class="gp-meter"><div class="gp-meter-fill" style="width:'+
-          Math.max(3,o.overall)+'%;background:'+col+'"></div><span class="gp-meter-val">'+o.overall+' % · '+
-          o.level+'</span></div><div class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
-          '</div></div>';});
+          ' · '+l.elev_m+' m</span><span class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
+          '</span></div><div class="gp-forest-pct" style="background:'+col+'"><span class="n">'+o.overall+
+          '%</span><span class="lvl">'+o.level+'</span></div></div>';});
     html+='</div>';
     // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
