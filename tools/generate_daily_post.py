@@ -765,6 +765,35 @@ def build_forecast_chart(forecast):
     return card, js
 
 
+APP_TOPBAR = '<div class="app-topbar"><span class="app-topbar-brand" aria-hidden="true">🏔️</span><span class="app-topbar-title">Meteorec · {title}</span></div>'
+
+# Mobile fixed bottom tab bar — same markup as index.html's / the SEO page
+# generators', kept in sync by hand (see blog/blog.css, which this shell
+# also loads). Blog posts always land on the "Blog" tab.
+def app_bottomnav(active='blog'):
+    def a(key, href, icon, label):
+        cls = ' class="active"' if key == active else ''
+        return f'<a href="{href}"{cls}><span class="ic">{icon}</span>{label}</a>'
+    ic_home = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11 12 4l8 7v7a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-7Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+    ic_klima = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a1.5 1.5 0 0 0-3 0v9.6a3.5 3.5 0 1 0 3 0V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"/></svg>'
+    ic_rekord = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13.5v2.5h4v-2.5M8.5 20h7l-1-2.5h-5L8.5 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+    ic_trend = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16.5 10 10l3.5 3.5L20 6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 6.5H20v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    ic_blog = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+    ic_arhiv = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+    ic_info = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    items = (
+        a('domov', '/', ic_home, 'Domov')
+        + a('klima', '/klima/', ic_klima, 'Klima')
+        + a('rekord', '/rekord/', ic_rekord, 'Rekordi')
+        + a('trendi', '/trendi/', ic_trend, 'Trendi')
+        + a('blog', '/blog/', ic_blog, 'Blog')
+        + a('arhiv', '/vreme/', ic_arhiv, 'Arhiv')
+        + '<a href="/gobarska-napoved/"><span class="ic">🍄</span>Gobe</a>'
+        + a('o-postaji', '/o-postaji.html', ic_info, 'O postaji')
+    )
+    return f'<nav class="app-bottomnav" aria-label="Glavna navigacija">{items}</nav>'
+
+
 def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
     date_str = fmtdate(TODAY)
     url = f"{SITE}/blog/{slug}.html"
@@ -878,6 +907,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 <style>{EXTRA_STYLE}</style>
 </head>
 <body>
+{APP_TOPBAR.format(title=title)}
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
 
@@ -955,6 +985,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 <script src="/blog/article-enhance.js" defer></script>
 <script src="/blog/subscribe.js" defer></script>
 {chart_scripts_html}
+{app_bottomnav()}
 </body>
 </html>
 '''
