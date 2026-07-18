@@ -2025,10 +2025,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       //   POST /premium/login     { email } → magic link via Resend
       //   GET  /premium/verify    Bearer token → { ok, plan, expires }
       //   GET  /premium/forecast  Bearer token → premium forecast JSON
+      //   GET  /premium/alerts    Bearer token → saved custom alert rules
+      //   POST /premium/alerts    Bearer token → replace custom alert rules
+      //   POST /premium/notify    Bearer PREMIUM_SYNC_KEY → per-subscriber rule check + email (from CI, daily)
       // Storage (COUNTER_KV):
-      //   premium:data        — latest premium forecast JSON
-      //   premium:sub:<email> — { email, plan, expires, customer_id, updated }
-      //   premium:tok:<token> — { email, ts }  (TTL 90 days; sub expiry re-checked on every read)
+      //   premium:data              — latest premium forecast JSON
+      //   premium:sub:<email>       — { email, plan, expires, customer_id, updated }
+      //   premium:tok:<token>       — { email, ts }  (TTL 90 days; sub expiry re-checked on every read)
+      //   premium:alertrules:<email> — [{ species_id, location, min_elev_m, threshold }, …] (max 5)
+      //   premium:alertstate:<email> — { date } — last day this subscriber's alert fired (cooldown)
       if (path.startsWith("/premium/")) {
         const kv = env?.COUNTER_KV;
         const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -2370,8 +2375,60 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           return _json({ ok: true, count: body.entries.length });
         }
 
-        // ── POST /premium/notify — daily "conditions optimal" alert (from CI)
-        // Threshold + cooldown live here so the workflow can call it unconditionally.
+        // ── GET /premium/alerts — vrni lastna pravila za "moje alarme"
+        if (path === "/premium/alerts" && request.method === "GET") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let rules = [];
+          try { rules = JSON.parse(await kv.get(`premium:alertrules:${sub.email}`)) || []; } catch (_) {}
+          return _json({ ok: true, rules });
+        }
+
+        // ── POST /premium/alerts { rules:[{species_id,location,min_elev_m,threshold}] }
+        // Vsako pravilo se preveri ob dnevnem /premium/notify: species_id/location
+        // null = katerakoli vrsta/območje (isto kot stari privzeti globalni alarm).
+        if (path === "/premium/alerts" && request.method === "POST") {
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!Array.isArray(body.rules)) return _json({ error: "Manjka seznam pravil" }, 422);
+          const MAX_RULES = 5;
+          if (body.rules.length > MAX_RULES) return _json({ error: `Največ ${MAX_RULES} alarmov` }, 413);
+
+          let knownSpecies = null, knownLocations = null;
+          try {
+            const raw = await kv.get("premium:data");
+            if (raw) {
+              const data = JSON.parse(raw);
+              knownSpecies = new Set(Object.keys(data.species_meta || {}));
+              knownLocations = new Set((data.locations || []).map(l => l.name));
+            }
+          } catch (_) {}
+
+          const clean = [];
+          for (const r of body.rules) {
+            if (!r || typeof r !== "object") continue;
+            const species_id = r.species_id ? String(r.species_id).slice(0, 80) : null;
+            if (species_id && knownSpecies && !knownSpecies.has(species_id))
+              return _json({ error: "Neznana vrsta v pravilu" }, 422);
+            const location = r.location ? String(r.location).slice(0, 80) : null;
+            if (location && knownLocations && !knownLocations.has(location))
+              return _json({ error: "Neznano območje v pravilu" }, 422);
+            const min_elev_m = (r.min_elev_m === null || r.min_elev_m === undefined || r.min_elev_m === "")
+              ? null : Math.max(0, Math.min(3000, parseInt(r.min_elev_m, 10) || 0));
+            const threshold = Math.max(1, Math.min(100, parseInt(r.threshold, 10) || 70));
+            clean.push({ species_id, location, min_elev_m, threshold });
+          }
+          await kv.put(`premium:alertrules:${sub.email}`, JSON.stringify(clean));
+          return _json({ ok: true, count: clean.length });
+        }
+
+        // ── POST /premium/notify — daily per-user "my conditions match" alert (from CI)
+        // Each subscriber has up to 5 rules (premium:alertrules:<email>); a
+        // subscriber with none saved yet falls back to the original single
+        // "any species, any forest, ≥ PREMIUM_ALERT_THRESHOLD" behaviour, so
+        // existing subscribers keep getting alerts without any action.
         if (path === "/premium/notify" && request.method === "POST") {
           const secret = env.PREMIUM_SYNC_KEY;
           const auth = request.headers.get("Authorization") || "";
@@ -2380,34 +2437,37 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           const raw = await kv.get("premium:data");
           if (!raw) return _json({ error: "Ni podatkov" }, 503);
           let data; try { data = JSON.parse(raw); } catch (_) { return _json({ error: "Pokvarjeni podatki" }, 500); }
-
-          // Best forest today + its leading species.
           const meta = data.species_meta || {};
-          let best = { overall: -1, forest: null, species: null };
-          for (const loc of data.locations || []) {
-            const d0 = (loc.days || [])[0];
-            if (d0 && d0.overall > best.overall) {
-              const top = (d0.species || [])[0];
-              best = { overall: d0.overall, level: d0.level, forest: loc.name,
-                       species: top && meta[top.id] ? meta[top.id].name_sl : null };
-            }
-          }
-          const threshold = parseInt(env.PREMIUM_ALERT_THRESHOLD || "70", 10);
+          const defaultThreshold = parseInt(env.PREMIUM_ALERT_THRESHOLD || "70", 10);
           const cooldownD = parseInt(env.PREMIUM_ALERT_COOLDOWN_DAYS || "5", 10);
           const today = new Date().toISOString().slice(0, 10);
 
-          if (best.overall < threshold)
-            return _json({ ok: true, sent: 0, skipped: "pod pragom", best: best.overall, threshold });
-
-          let state; try { state = JSON.parse(await kv.get("premium:alert_state")); } catch (_) { state = null; }
-          if (state?.date) {
-            const days = (Date.parse(today) - Date.parse(state.date)) / 864e5;
-            if (days < cooldownD)
-              return _json({ ok: true, sent: 0, skipped: "cooldown", last: state.date, best: best.overall });
+          // Best (forest, species) match for one rule among today's data, or
+          // null if nothing in scope reaches the rule's own threshold.
+          function evalRule(rule) {
+            let best = null;
+            for (const loc of data.locations || []) {
+              if (rule.location && loc.name !== rule.location) continue;
+              if (rule.min_elev_m != null && (loc.elev_m == null || loc.elev_m < rule.min_elev_m)) continue;
+              const d0 = (loc.days || [])[0];
+              if (!d0) continue;
+              let index, species;
+              if (rule.species_id) {
+                const s = (d0.species || []).find(x => x.id === rule.species_id);
+                if (!s) continue;
+                index = s.index; species = meta[rule.species_id]?.name_sl || rule.species_id;
+              } else {
+                index = d0.overall;
+                const top = (d0.species || [])[0];
+                species = top ? (meta[top.id]?.name_sl || null) : null;
+              }
+              if (!best || index > best.index) best = { index, level: d0.level, forest: loc.name, species };
+            }
+            return (best && best.index >= (rule.threshold || defaultThreshold)) ? best : null;
           }
 
-          // Enumerate active, alert-enabled subscribers.
-          const recipients = [];
+          const toNotify = []; // { email, hits }
+          let checked = 0;
           let cursor;
           do {
             const page = await kv.list({ prefix: "premium:sub:", cursor });
@@ -2415,28 +2475,45 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
               let s; try { s = JSON.parse(await kv.get(k.name)); } catch (_) { continue; }
               if (!s?.email || s.alerts === false) continue;
               if (!s.expires || new Date(s.expires) < new Date()) continue;
-              recipients.push(s.email);
+              checked++;
+
+              let rules;
+              try { rules = JSON.parse(await kv.get(`premium:alertrules:${s.email}`)); } catch (_) { rules = null; }
+              if (!Array.isArray(rules) || !rules.length)
+                rules = [{ species_id: null, location: null, min_elev_m: null, threshold: defaultThreshold }];
+
+              const hits = rules.map(evalRule).filter(Boolean);
+              if (!hits.length) continue;
+
+              const stateKey = `premium:alertstate:${s.email}`;
+              let state; try { state = JSON.parse(await kv.get(stateKey)); } catch (_) { state = null; }
+              if (state?.date) {
+                const days = (Date.parse(today) - Date.parse(state.date)) / 864e5;
+                if (days < cooldownD) continue;
+              }
+              hits.sort((a, b) => b.index - a.index);
+              toNotify.push({ email: s.email, hits });
+              await kv.put(stateKey, JSON.stringify({ date: today }));
             }
             cursor = page.list_complete ? null : page.cursor;
           } while (cursor);
 
-          const subj = `🍄 Gobarski pogoji optimalni — ${best.forest} ${best.overall}%`;
           ctx.waitUntil((async () => {
-            for (const email of recipients) {
+            for (const { email, hits } of toNotify) {
+              const best = hits[0];
+              const rows = hits.map(h => `<li><strong>${h.forest}</strong>` +
+                (h.species ? ` — ${h.species}` : "") + `: <strong>${h.index}% (${h.level})</strong></li>`).join("");
               const tok = await _newToken(email);
               const off = `${url.origin}/premium/alerts/off?token=${tok}`;
-              await _sendMail(email, subj,
+              await _sendMail(email, `🍄 Gobarski pogoji ustrezajo tvojemu alarmu — ${best.forest} ${best.index}%`,
                 `<p>Pozdravljen, gobar!</p>` +
-                `<p>Danes so pogoji za rast <strong>optimalni</strong>. Najugodnejši gozd je ` +
-                `<strong>${best.forest}</strong> z indeksom <strong>${best.overall}% (${best.level})</strong>` +
-                (best.species ? `, nosilna vrsta <strong>${best.species}</strong>` : "") + `.</p>` +
+                `<p>Tvoji pogoji za alarm so danes izpolnjeni:</p><ul>${rows}</ul>` +
                 `<p><a href="${PAGE_URL}?token=${tok}" style="display:inline-block;background:#4d9ff8;color:#04070e;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Odpri 7-dnevno napoved po vrstah 🍄</a></p>` +
                 `<p style="color:#888;font-size:.85rem">Indeks je ocena ugodnosti pogojev, ne obljuba najdbe — gozd ima zadnjo besedo.</p>` +
                 `<hr style="border:none;border-top:1px solid #eee;margin:1.2rem 0"><p style="color:#999;font-size:.8rem"><a href="${off}" style="color:#999">Ne želim več obvestil o pogojih</a></p>`);
             }
           })());
-          await kv.put("premium:alert_state", JSON.stringify({ date: today, best: best.overall, forest: best.forest }));
-          return _json({ ok: true, sent: recipients.length, best: best.overall, forest: best.forest });
+          return _json({ ok: true, checked, notified: toNotify.length });
         }
 
         // ── GET /premium/alerts/off?token=… — opt out of the optimal-conditions email
