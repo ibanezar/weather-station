@@ -83,21 +83,32 @@ curl -X POST https://weatherireica1.filip-eremita.workers.dev/premium/login \
   -H "Content-Type: application/json" -d '{"email":"kupec@example.com"}'
 ```
 
-## 4b. E-mail alarm "pogoji optimalni" (faza 4)
+## 4b. E-mail alarm "moji pogoji" (faza 4 + lastna pravila)
+
+Vsak naročnik si na strani (razdelek 🔔 Moji alarmi) lahko nastavi do 5 lastnih
+pravil: vrsta (ali katerakoli), nabiralno območje (ali katerokoli), najnižja
+nadmorska višina (neobvezno) in prag v %. Pravila se shranijo prek
+`GET`/`POST /premium/alerts` (Bearer token naročnika) v KV kot
+`premium:alertrules:<email>`.
 
 Dnevni workflow po pushu podatkov pokliče `POST /premium/notify` (Bearer
-`PREMIUM_SYNC_KEY`). Worker sam odloči, ali dejansko pošlje:
+`PREMIUM_SYNC_KEY`). Worker za vsakega aktivnega naročnika, ki ni izklopil
+obvestil:
 
-- pošlje samo, če je najvišji indeks med gozdovi ≥ `PREMIUM_ALERT_THRESHOLD` (70),
-- ne pogosteje kot vsakih `PREMIUM_ALERT_COOLDOWN_DAYS` (5) dni (proti spamu),
-- samo aktivnim naročnikom, ki niso izklopili obvestil.
+- prebere njegova shranjena pravila; če jih naročnik še ni nastavil, uporabi
+  privzeto pravilo "katerakoli vrsta, katerokoli območje, prag
+  `PREMIUM_ALERT_THRESHOLD`" (70) — obstoječi naročniki torej alarme dobivajo
+  naprej brez kakršnekoli akcije,
+- pošlje samo, če vsaj eno pravilo doseže svoj prag,
+- ne pogosteje kot vsakih `PREMIUM_ALERT_COOLDOWN_DAYS` (5) dni **na naročnika**
+  (KV `premium:alertstate:<email>`, proti spamu).
 
 Vsak alarm vsebuje magic link (takojšen dostop) in povezavo za odjavo od
 obvestil (`/premium/alerts/off?token=…`) — dostop do napovedi ob tem ostane.
-Prag in razmik nastaviš v `wrangler.toml` ([vars]); pošiljanje uporablja
-obstoječi `RESEND_API_KEY`. Ročni test: `curl -X POST …/premium/notify -H
-"Authorization: Bearer $PREMIUM_SYNC_KEY"` → odgovor pove `sent` ali razlog
-(`pod pragom` / `cooldown`).
+Privzeti prag in razmik nastaviš v `wrangler.toml` ([vars]); pošiljanje
+uporablja obstoječi `RESEND_API_KEY`. Ročni test: `curl -X POST
+…/premium/notify -H "Authorization: Bearer $PREMIUM_SYNC_KEY"` → odgovor pove
+`checked` (aktivni naročniki) in `notified` (dejansko poslano).
 
 ## 5. Ročno upravljanje naročnikov (brez UI)
 

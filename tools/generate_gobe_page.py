@@ -555,6 +555,24 @@ body{
 .gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
 .gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
 
+/* ── Moji alarmi (per-user custom push/email trigger rules) ── */
+.gp-alert-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-alert-rows{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.7rem}
+.gp-alert-row{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;background:var(--fc-bg);
+  border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .6rem}
+.gp-alert-row select,.gp-alert-row input{background:var(--badge-bg);border:1px solid var(--card-border);
+  border-radius:9px;padding:.45rem .6rem;color:var(--text);font-size:.83rem;font-family:inherit}
+.gp-alert-row select.gp-alert-sp{flex:1 1 160px;min-width:140px}
+.gp-alert-row select.gp-alert-loc{flex:1 1 140px;min-width:130px}
+.gp-alert-elev{width:6.5rem}
+.gp-alert-thr{display:flex;align-items:center;gap:.3rem}
+.gp-alert-thr input{width:4rem}
+.gp-alert-thr span{font-size:.8rem;color:var(--muted)}
+.gp-alert-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;
+  padding:.3rem;margin-left:auto}
+.gp-alert-actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+
 /* ── AI prepoznava gobe (identify) ── */
 .gp-id-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;
   padding:.8rem .9rem;margin-top:.7rem}
@@ -1021,6 +1039,87 @@ PAGE_JS = """<script>
       wireDayChips(detail, newLoc, meta);
     });}
   }
+  // ── Moji alarmi: per-user rule editor (species/location/elevation/threshold),
+  // synced via /premium/alerts. A rule with no species/location picked means
+  // "katerakoli vrsta" / "katerokoli območje" — same semantics the daily
+  // /premium/notify check uses server-side.
+  function initAlerts(token, d){
+    var wrap=document.getElementById("gp-alerts");
+    var rowsEl=document.getElementById("gp-alert-rows");
+    var addBtn=document.getElementById("gp-alert-add");
+    var saveBtn=document.getElementById("gp-alert-save");
+    var msgEl=document.getElementById("gp-alert-msg");
+    if(!wrap||!rowsEl)return;
+    wrap.hidden=false;
+    var MAX_RULES=5;
+    var speciesList=Object.keys(d.species_meta||{}).map(function(id){
+      return {id:id,name:(d.species_meta[id]||{}).name_sl||id};
+    }).sort(function(a,b){return a.name.localeCompare(b.name,"sl");});
+    var locs=d.locations||[];
+    function speciesSelectHtml(sel){
+      return '<select class="gp-alert-sp"><option value=""'+(sel?"":" selected")+'>Katerakoli vrsta</option>'+
+        speciesList.map(function(s){return '<option value="'+s.id+'"'+(sel===s.id?" selected":"")+'>'+esc2(s.name)+'</option>';}).join('')+
+        '</select>';
+    }
+    function locSelectHtml(sel){
+      return '<select class="gp-alert-loc"><option value=""'+(sel?"":" selected")+'>Katerokoli območje</option>'+
+        locs.map(function(l){return '<option value="'+esc2(l.name)+'"'+(sel===l.name?" selected":"")+'>'+esc2(l.name)+' ('+l.elev_m+' m)</option>';}).join('')+
+        '</select>';
+    }
+    function rowHtml(rule){
+      rule=rule||{};
+      return '<div class="gp-alert-row">'+speciesSelectHtml(rule.species_id||"")+locSelectHtml(rule.location||"")+
+        '<input type="number" class="gp-alert-elev" placeholder="nad m n.v. (neobv.)" min="0" max="3000" value="'+
+        (rule.min_elev_m!=null?rule.min_elev_m:"")+'">'+
+        '<div class="gp-alert-thr"><input type="number" class="gp-alert-th" min="1" max="100" value="'+
+        (rule.threshold!=null?rule.threshold:70)+'"><span>%</span></div>'+
+        '<button type="button" class="gp-alert-del" aria-label="Odstrani alarm">🗑</button></div>';
+    }
+    function wireDeletes(){
+      rowsEl.querySelectorAll(".gp-alert-del").forEach(function(btn){
+        btn.onclick=function(){
+          var row=btn.closest(".gp-alert-row");
+          if(rowsEl.children.length>1)row.remove();
+          else row.outerHTML=rowHtml(null);
+          wireDeletes();
+        };
+      });
+    }
+    function renderRows(rules){
+      rowsEl.innerHTML=(rules&&rules.length?rules:[{}]).map(rowHtml).join("");
+      wireDeletes();
+    }
+    addBtn.addEventListener("click",function(){
+      if(rowsEl.children.length>=MAX_RULES){msgEl.textContent="Največ "+MAX_RULES+" alarmov.";return;}
+      rowsEl.insertAdjacentHTML("beforeend",rowHtml(null));
+      wireDeletes();
+    });
+    saveBtn.addEventListener("click",function(){
+      var rules=[].slice.call(rowsEl.querySelectorAll(".gp-alert-row")).map(function(row){
+        var elevRaw=row.querySelector(".gp-alert-elev").value;
+        var thrRaw=row.querySelector(".gp-alert-th").value;
+        return {
+          species_id: row.querySelector(".gp-alert-sp").value||null,
+          location: row.querySelector(".gp-alert-loc").value||null,
+          min_elev_m: elevRaw===""?null:Math.max(0,parseInt(elevRaw,10)||0),
+          threshold: Math.max(1,Math.min(100,parseInt(thrRaw,10)||70)),
+        };
+      });
+      msgEl.textContent="Shranjujem …";
+      fetch(API+"/premium/alerts",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body:JSON.stringify({rules:rules})})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
+        .then(function(res){
+          msgEl.textContent=res.ok?"✓ Alarmi shranjeni.":(res.body&&res.body.error?res.body.error:"Napaka pri shranjevanju.");
+        })
+        .catch(function(){msgEl.textContent="Napaka pri povezavi. Poskusi znova.";});
+    });
+    fetch(API+"/premium/alerts?token="+encodeURIComponent(token))
+      .then(function(r){return r.json();})
+      .then(function(res){renderRows(res&&res.rules);})
+      .catch(function(){renderRows(null);});
+  }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
     var fileInput=document.getElementById("gp-id-photo");
@@ -1119,7 +1218,7 @@ PAGE_JS = """<script>
       .catch(function(){});
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){render(d);initIdentify(t);})
+      .then(function(d){render(d);initIdentify(t);initAlerts(t,d);})
       .catch(function(){
         // Token turned out to be invalid/expired or the fetch genuinely
         // failed — fall back to the real paywall instead of leaving the
@@ -2009,6 +2108,17 @@ def build_body(rules, premium, free):
     <div id="gp-id-result"></div>
     </div>
   </div>
+  <div id="gp-alerts" class="gp-alert-card" hidden>
+    <h3 style="margin-top:0">🔔 Moji alarmi</h3>
+    <p class="gp-diary-priv">Nastavi lastne pogoje (vrsta, območje, nadmorska višina, prag) — pošljemo e-mail, ko jih
+    napoved doseže. Preverjeno enkrat dnevno, ob jutranji objavi nove napovedi.</p>
+    <div id="gp-alert-rows" class="gp-alert-rows"></div>
+    <div class="gp-alert-actions">
+      <button type="button" class="gp-diary-btn" id="gp-alert-add">+ Dodaj alarm</button>
+      <button type="button" class="gp-cta" id="gp-alert-save">Shrani alarme</button>
+    </div>
+    <div id="gp-alert-msg" class="gp-msg"></div>
+  </div>
   <div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
@@ -2041,6 +2151,7 @@ def build_body(rules, premium, free):
         <li>Indeks za vsa nabiralna območja</li>
         <li>Razlage in opozorila na dvojnice</li>
         <li>🔍 AI prepoznava gobe iz fotografije</li>
+        <li>🔔 Lastni alarmi po vrsti, območju in nadmorski višini</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
