@@ -1,27 +1,11 @@
 {
-  "date": "2026-07-17",
-  "created": "2026-07-17T06:04:51.759594+00:00",
+  "date": "2026-07-18",
+  "created": "2026-07-18T05:52:34.375417+00:00",
   "proposals": [
     {
-      "id": "dogodek",
-      "title": "Danes vrh vročine: 32,4 °C v Zgornji Savinjski dolini, nato ohladitev z dežjem",
-      "teaser": "Napoved za postajo IREICA1 kaže današnji vročinski vrh pri 32,4 °C, medtem ko trenutno na postaji beležimo 21,8 °C ob visoki vlažnosti 90 %. Že jutri sledi padec na 29,8 °C, v naslednjih dneh pa se ohladi na 24,5 in 23,5 °C ob obilnejših padavinah (17,6 mm in 7,4 mm).",
-      "topic": {
-        "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (32,4 °C)",
-        "tag": "vročina-napoved",
-        "event": {
-          "type": "vročina-napoved",
-          "value": 32.4,
-          "unit": "°C"
-        },
-        "seo_keywords": []
-      }
-    },
-    {
       "id": "primerjava-krajev",
-      "title": "Kako se razmere v Rečici ob Savinji razlikujejo od okoliških ARSO postaj",
-      "teaser": "Trenutno postaja IREICA1 beleži 21,8 °C ob 90-odstotni vlažnosti, subjektivni občutek pa se zaradi vlage dviguje do 25,6 °C. Pogledali bomo, kako te vrednosti, skupaj s tlakom 1016 hPa in brezvetrjem, izstopajo v primerjavi z drugimi kraji Zgornje Savinjske doline.",
+      "title": "Kakšno je vreme v Rečici ob Savinji v primerjavi z okoliškimi kraji",
+      "teaser": "Postaja IREICA1 trenutno beleži 21,4 °C ob 87 % vlažnosti in tlaku 1014 hPa - pogledali bomo, kako se te vrednosti ujemajo z razmerami v sosednjih krajih Zgornje Savinjske doline. Šibek jugozahodni veteric (1,8 km/h) in visoka vlaga nakazujeta na tipično dolinsko mikroklimo, ki jo bomo razložili v primerjavi z bližnjimi ARSO postajami.",
       "topic": {
         "id": "primerjava-krajev",
         "sezona": [
@@ -49,8 +33,8 @@
     },
     {
       "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Savinjski dolini: od vročinskega vrha do ohladitve v štirih dneh",
-      "teaser": "Analiziramo, kako se bo temperatura pri postaji IREICA1 gibala od današnjega maksimuma 32,4 °C proti postopnemu upadu na 23,5 °C do 20. julija. Pogledali bomo tudi jutranje minimume med 16,3 in 18,6 °C ter kaj to pomeni za nadaljevanje poletja v dolini.",
+      "title": "Temperaturni trend v Savinjski dolini: po vročini sledi občutno ohladitev",
+      "teaser": "Napoved za postajo IREICA1 kaže padec najvišjih dnevnih temperatur z 29,7 °C danes na le 19,3 °C do torka, pri čemer se bodo tudi jutranje minimalne temperature spustile z 18,2 °C na 13,5-14 °C. V članku razčlenimo, kako hiter je ta preobrat in kaj lahko pričakujemo v prihodnjih dneh.",
       "topic": {
         "id": "temperaturni-trend",
         "sezona": [
@@ -73,6 +57,29 @@
           "temperaturni trend Savinjska dolina",
           "vreme Rečica ob Savinji",
           "postaja IREICA1"
+        ]
+      }
+    },
+    {
+      "id": "nevihtni-obeti",
+      "title": "Bo danes v Zgornji Savinjski dolini grmelo? Nevihtni obeti za Rečico ob Savinji",
+      "teaser": "Visoka vlažnost zraka (87 %) in rosišče pri 19,1 °C skupaj z napovedanimi padavinami 9,9 mm danes in 7,0 mm jutri kažejo na povečano nestabilnost ozračja. Pogledali bomo, kaj to pomeni za razvoj neviht ob okrepljenem vetru, ki naj bi jutri dosegel sunke do 19 km/h.",
+      "topic": {
+        "id": "nevihtni-obeti",
+        "sezona": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "tag": "nevihta",
+        "brief": "Nevihtni obeti za danes/jutri na podlagi CAPE, striženja vetra in vlage.",
+        "seo_keywords": [
+          "nevihtna napoved Savinjska dolina",
+          "bo danes grmelo Rečica ob Savinji",
+          "CAPE nestabilnost vreme"
         ]
       }
     }
