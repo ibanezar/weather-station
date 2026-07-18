@@ -2424,15 +2424,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
    than a scrolling web page. Scoped to <=760px; desktop keeps the existing
    .hero header + .quick-nav untouched. `body .wrap` (extra ancestor
    selector) outranks the plain `.wrap{padding:...}` mobile rules earlier
-   in this file on specificity alone, regardless of source order. */
+   in this file on specificity alone, regardless of source order.
+
+   --ticker-h: live height of #alerts-wrap (the fixed ARSO/Meteoalarm
+   ticker at top:0), kept in sync by _syncAlertBarHeight() in app.js.
+   .app-topbar reads it to slide below the ticker instead of covering it
+   (both are position:fixed;top:*, so without this they'd stack exactly on
+   top of each other); the !important on .wrap's padding-top is needed
+   because that same JS function also writes an inline padding-top for the
+   ticker alone, which would otherwise always beat this stylesheet rule and
+   wipe out the extra space reserved for the top bar. */
 .app-topbar{display:none}
 .app-bottomnav{display:none}
 @media (max-width:760px){
-  body .wrap{padding-top:calc(3rem + env(safe-area-inset-top));padding-bottom:calc(4rem + env(safe-area-inset-bottom) + 1rem)}
-  .app-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:150;height:3rem;
+  body .wrap{padding-top:calc(3rem + var(--ticker-h,0px) + env(safe-area-inset-top))!important;padding-bottom:calc(4rem + env(safe-area-inset-bottom) + 1rem)}
+  .app-topbar{display:flex;position:fixed;left:0;right:0;top:var(--ticker-h,0px);z-index:150;height:3rem;
     align-items:center;gap:.5rem;padding:0 3rem 0 .9rem;background:var(--card-bg);
     backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
-    border-bottom:1px solid var(--card-border)}
+    border-bottom:1px solid var(--card-border);transition:top .2s ease}
   .app-topbar-brand{font-size:1.15rem;line-height:1}
   .app-topbar-title{font-weight:700;font-size:.92rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* Nudge the existing floating theme toggle up so it sits centred inside
@@ -2448,12 +2457,4 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .app-bottomnav a .ic svg{width:1.3rem;height:1.3rem;display:block}
   .app-bottomnav a.active{color:var(--blue)}
   .app-bottomnav a.active .ic{transform:translateY(-1px)}
-  /* "Gobe" (MeteoGobar) rides above the bar as a raised, badged button —
-     cross-promotes the site's other flagship product the same way the AI
-     "Prepoznaj" tab does on /gobarska-napoved/ itself. */
-  .app-bottomnav a.hl{color:var(--text);font-weight:700}
-  .app-bottomnav a.hl .ic{width:2.5rem;height:2.5rem;border-radius:50%;
-    background:linear-gradient(135deg,#84cc16,#166534);display:flex;align-items:center;justify-content:center;
-    font-size:1.2rem;margin-top:-1.15rem;box-shadow:0 3px 12px rgba(22,101,52,.5);border:3px solid var(--bg)}
-  .app-bottomnav a.hl.active .ic{transform:none}
 }
