@@ -3146,7 +3146,7 @@
     <h2 class="sub-title" id="home-sub-title">📬 Prijava na novičke</h2>
     <p class="sub-desc">Prijavi se in ob vsakem novem članku (vremenski povzetki, rekordi, analize) dobiš e-obvestilo. Brez spama, odjava z enim klikom.</p>
     <form class="sub-form" id="home-sub-form" autocomplete="off">
-      <input class="sub-input" id="home-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">
+      <input class="sub-input" id="home-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov" autocomplete="email" autocapitalize="off" enterkeyhint="done">
       <input class="sub-hp" type="text" name="website" id="home-sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="sub-btn" id="home-sub-btn" type="submit">Prijava</button>
     </form>
@@ -3202,10 +3202,10 @@
     </div>
     <p class="tp-hint">Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
     <div class="tp-body">
-      <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
-      <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5"><span class="tp-unit">°C</span></div></div>
-      <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0"><span class="tp-unit">km/h</span></div></div>
-      <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
+      <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
+      <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">mm/h</span></div></div>
     </div>
     <div class="tp-footer">
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>

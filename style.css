@@ -68,11 +68,15 @@
 }
 
 html{scroll-behavior:smooth;overflow-x:hidden}
+/* Native-feeling touch feedback: brez sivega tap-highlighta, kratek "press" na gumbih */
+button,a{-webkit-tap-highlight-color:transparent}
+button{transition:transform .08s ease}
+button:active{transform:scale(.96)}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
    obeh stanjih URL vrstice -> body višina konstantna -> ni povratne zanke. */
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;overscroll-behavior-y:none;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
