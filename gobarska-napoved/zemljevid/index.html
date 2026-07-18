@@ -306,6 +306,19 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Per-factor "why" breakdown — the model already scores each species on 6
+   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   humidity, night-cooling trigger) and blends them into the single index;
+   previously only the blended number + a prose summary were ever shown.
+   Surfacing the actual bars is the real "not a black box" version of the
+   same "Zakaj?" disclosure, not a new claim. */
+.gp-factors{display:flex;flex-direction:column;gap:.3rem;margin-top:.55rem}
+.gp-factor-row{display:flex;align-items:center;gap:.5rem}
+.gp-factor-lbl{flex:0 0 6.4rem;font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-factor-bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.gp-factor-fill{height:100%;border-radius:3px}
+.gp-factor-val{flex:0 0 2.6rem;text-align:right;font-size:.7rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-disc{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:.3rem .8rem;margin:1rem 0}
 
 /* ── Soil-moisture gauge + 7-day mini graphs (premium forecast, per gozd) ── */

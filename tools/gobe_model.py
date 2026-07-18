@@ -259,6 +259,7 @@ def eval_species(sp, series, i, date, spot, rules):
         return {
             "index": 0,
             "explanation": f"Izven sezone ({sp['season']['start']}–{sp['season']['end']}).",
+            "components": {},
         }
 
     parts = []       # explanation fragments, most important first
@@ -327,6 +328,13 @@ def eval_species(sp, series, i, date, spot, rules):
     if lag_rain >= float(sp["rain_7d_min"]):
         parts.append(f"sprožilni dež pred {lag['min']}–{lag['max']} dnevi ({lag_rain:.0f} mm)")
 
+    # Display copy of components — drops temp_drop for species that don't use
+    # it (there it's a fixed 1.0 bypass for the score sum below, not a real
+    # per-day signal, so showing it in a "why" breakdown would be misleading).
+    display_components = dict(components)
+    if not sp.get("requires_temp_drop"):
+        display_components.pop("temp_drop", None)
+
     score = 100.0 * sum(float(weights[k]) * components[k] for k in weights)
 
     # Soft elevation preference dampener
@@ -358,7 +366,11 @@ def eval_species(sp, series, i, date, spot, rules):
 
     explanation = ", ".join(parts[:4])
     explanation = explanation[0].upper() + explanation[1:] + "."
-    return {"index": max(0, min(100, round(score))), "explanation": explanation}
+    return {
+        "index": max(0, min(100, round(score))),
+        "explanation": explanation,
+        "components": {k: round(100 * v) for k, v in display_components.items()},
+    }
 
 
 def level(p):
@@ -406,6 +418,7 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
                     "id": sp["id"],
                     "index": r["index"],
                     "explanation": r["explanation"],
+                    "components": r["components"],
                 })
             species_out.sort(key=lambda s: s["index"], reverse=True)
             overall = max((s["index"] for s in species_out), default=0)
