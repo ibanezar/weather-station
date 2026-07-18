@@ -240,6 +240,11 @@ body{
 .gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-nm{font-weight:700;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Small per-species photo instead of a generic 🍄 in front of every name —
+   same graceful onerror→emoji fallback as the bigger photo spots (baza-vrst
+   cards, "Zakaj?" explain cards) for species without a photo yet. */
+.gp-sp-ic{width:1.15rem;height:1.15rem;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  vertical-align:-.2rem;margin-right:.3rem;background:var(--badge-bg)}
 .gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
@@ -821,7 +826,9 @@ PAGE_JS = """<script>
     var spHtml=o.species.slice(0,3).map(function(s){
       var m=meta[s.id]||{};
       var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
-      return '<span class="gp-sp-chip">🍄 '+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
+      var ic=`<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/${s.id}.jpg" alt="" loading="lazy" `+
+        `onerror="this.replaceWith(document.createTextNode('🍄 '))">`;
+      return '<span class="gp-sp-chip">'+ic+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
     }).join('');
     var peak=bestDayText(l,dayIdx);
     var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
@@ -1835,6 +1842,8 @@ def build_body(rules, premium, free):
         o = loc["days"][0]
         top = o["species"][0]
         top_nm = premium["species_meta"][top["id"]]["name_sl"] if top else "—"
+        top_ic = (f'<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/{top["id"]}.jpg" alt="" loading="lazy" '
+                  'onerror="this.replaceWith(document.createTextNode(\'🍄 \'))">') if top else "🍄 "
         terr = loc.get("terrain", "")
         t_icon = TERRAIN_STYLE.get(terr, ("", "🌲"))[1]
         pct_cls = level_class(o["overall"])
@@ -1843,7 +1852,7 @@ def build_body(rules, premium, free):
       <div class="gp-forest-info">
         <span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>
         <span class="gp-terr">{terr} · {loc["elev_m"]} m</span>
-        <span class="gp-forest-sp">🍄 {_esc(top_nm)}</span>
+        <span class="gp-forest-sp">{top_ic}{_esc(top_nm)}</span>
       </div>
       <div class="gp-forest-pct {pct_cls}"><span class="n">{o["overall"]}%</span><span class="lvl">{o["level"]}</span></div>
     </div>''')

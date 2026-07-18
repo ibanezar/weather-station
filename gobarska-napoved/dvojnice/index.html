@@ -133,6 +133,11 @@ body{
 .gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-nm{font-weight:700;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Small per-species photo instead of a generic 🍄 in front of every name —
+   same graceful onerror→emoji fallback as the bigger photo spots (baza-vrst
+   cards, "Zakaj?" explain cards) for species without a photo yet. */
+.gp-sp-ic{width:1.15rem;height:1.15rem;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  vertical-align:-.2rem;margin-right:.3rem;background:var(--badge-bg)}
 .gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
