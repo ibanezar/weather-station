@@ -4527,19 +4527,34 @@ function haversine(lat1,lon1,lat2,lon2){
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+// Blitzortung streams LZW-compressed strings, not plain JSON — must decode() first.
+// See https://www.blitzortung.org/en/JS/lbr.js (encode/decode pair).
+function _ltgDecode(b){
+  var a,e={},d=b.split(""),c=d[0],f=c,g=[c],h=256,o=h;
+  for(let i=1;i<d.length;i++){
+    a=d[i].charCodeAt(0);
+    a=h>a?d[i]:(e[a]?e[a]:f+c);
+    g.push(a);c=a.charAt(0);e[o]=f+c;o++;f=a;
+  }
+  return g.join("");
+}
 function connectLightning(){
   if(_ltgWs&&_ltgWs.readyState<2)return;
   try{
-    const wsUrls=['wss://live.blitzortung.org/','wss://ws.blitzortung.org/'];
-    const wsUrl=wsUrls[(_ltgRetry||0)%wsUrls.length];
+    // live.blitzortung.org / ws.blitzortung.org have an expired TLS cert — use the
+    // actual load-balanced pool the official live map connects to instead.
+    const wsHosts=['ws1.blitzortung.org','ws2.blitzortung.org','ws7.blitzortung.org','ws8.blitzortung.org'];
+    const wsHost=wsHosts[(_ltgRetry||0)%wsHosts.length];
     _ltgRetry=(_ltgRetry||0)+1;
-    _ltgWs=new WebSocket(wsUrl);
-    _ltgWs.onopen=()=>{_ltgWs.send(JSON.stringify({west:10,east:20,north:50,south:43}));applyLightning();};
+    _ltgWs=new WebSocket('wss://'+wsHost);
+    _ltgWs.onopen=()=>{_ltgWs.send('{"a":111}');applyLightning();};
     _ltgWs.onmessage=e=>{
       try{
-        const d=JSON.parse(e.data);
-        const lat=Number(d.lat??d.latitude??d[1]);
-        const lon=Number(d.lon??d.lng??d.longitude??d[2]);
+        const d=JSON.parse(_ltgDecode(e.data));
+        if(!('lat' in d)||!('lon' in d))return;
+        let lat=Number(d.lat),lon=Number(d.lon);
+        if(d.latc!=null)lat+=Number(d.latc);
+        if(d.lonc!=null)lon+=Number(d.lonc);
         if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
         const dist=haversine(LAT,LON,lat,lon);
         if(dist>200)return;
