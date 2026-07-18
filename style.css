@@ -1368,9 +1368,9 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .yesterday-delta .dv{font-family:'JetBrains Mono',monospace;font-weight:400}
 
 /* Share & install buttons */
-.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;justify-content:center}
+.share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:44px;height:44px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;justify-content:center}
 .share-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(77,159,248,.08)}
-.install-btn{display:none;align-items:center;justify-content:center;gap:.3rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:30px;height:30px;padding:0 .7rem;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.install-btn{display:none;align-items:center;justify-content:center;gap:.3rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:30px;height:44px;padding:0 .7rem;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .install-btn.show{display:inline-flex}
 
 /* Toast */
@@ -1509,12 +1509,12 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .clim-lbl{font-size:.76rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 /* Notification button */
 .notif-group{position:relative;display:inline-flex;gap:.4rem;align-items:center}
-.notif-btn{background:none;border:1px solid var(--border);border-radius:50%;width:30px;height:30px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;color:var(--muted);display:inline-flex;align-items:center;justify-content:center}
+.notif-btn{background:none;border:1px solid var(--border);border-radius:50%;width:44px;height:44px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;color:var(--muted);display:inline-flex;align-items:center;justify-content:center}
 .notif-btn:hover{background:rgba(77,159,248,.08);border-color:var(--border)}
 .notif-btn.on{border-color:var(--green);color:var(--green)}
 /* Labeled variant — visible text instead of icon-only, so notification
    settings are recognizable at a glance rather than hidden behind a tooltip */
-.notif-btn.labeled{width:auto;height:30px;border-radius:30px;padding:0 .7rem;gap:.35rem;white-space:nowrap;background:var(--badge-bg);border-color:var(--badge-border);color:var(--blue)}
+.notif-btn.labeled{width:auto;height:44px;border-radius:30px;padding:0 .7rem;gap:.35rem;white-space:nowrap;background:var(--badge-bg);border-color:var(--badge-border);color:var(--blue)}
 .notif-btn.labeled:hover{background:rgba(77,159,248,.14)}
 .notif-btn.labeled.on{background:rgba(74,222,128,.12);border-color:var(--green);color:var(--green)}
 @media(max-width:520px){.notif-btn.labeled{padding:0 .55rem;font-size:.72rem}}
