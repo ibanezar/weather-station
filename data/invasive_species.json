@@ -1,0 +1,49 @@
+{
+  "region": {
+    "name": "Zgornja Savinjska dolina",
+    "bbox": { "swlat": 46.28, "swlng": 14.55, "nelat": 46.45, "nelng": 15.00 }
+  },
+  "grid_size_deg": 0.01,
+  "species": [
+    {
+      "slug": "japonski-dresnik", "sci": "Reynoutria japonica", "sl": "Japonski dresnik", "severity": "high",
+      "desc_sl": "Invazivna rastlina iz vzhodne Azije, ki tvori goste sestoje in izpodrine domorodno obrežno vegetacijo. Njegove korenine lahko poškodujejo nasipe, temelje in asfalt, odstranjevanje pa je izjemno zahtevno, ker požene iz najmanjšega koščka korenike."
+    },
+    {
+      "slug": "zlezava-nedotika", "sci": "Impatiens glandulifera", "sl": "Žlezava nedotika", "severity": "high",
+      "desc_sl": "Enoletnica z Himalaje, ki se ob vodotokih širi izjemno hitro in v gostih sestojih zasenči domorodne obrežne rastline. Plitve korenine slabo vežejo breg, zato po odmrtju jeseni pospešuje erozijo."
+    },
+    {
+      "slug": "orjaski-dezen", "sci": "Heracleum mantegazzianum", "sl": "Orjaški dežen", "severity": "critical",
+      "desc_sl": "Rastlina lahko zraste tudi čez 3 metre visoko, njen sok pa v stiku s kožo in sončno svetlobo povzroči hude fotokemične opekline in dolgotrajne brazgotine. Ob najdbi se je NE dotikaj — prijavi lokacijo in obvesti pristojno občino."
+    },
+    {
+      "slug": "ambrozija", "sci": "Ambrosia artemisiifolia", "sl": "Pelinolistna ambrozija", "severity": "high",
+      "desc_sl": "Severnoameriška plevelna vrsta, katere cvetni prah je eden najmočnejših znanih sprožilcev alergij in astme, tudi pri zelo nizkih koncentracijah v zraku. Širi se predvsem po nasipih, njivah in gradbiščih."
+    },
+    {
+      "slug": "veliki-pajesen", "sci": "Ailanthus altissima", "sl": "Veliki pajesen", "severity": "medium",
+      "desc_sl": "Hitro rastoče drevo iz vzhodne Azije, ki iz korenin in semen agresivno poganja poganjke ter izloča snovi, ki zavirajo rast sosednjih rastlin (alelopatija). V naseljih pogosto poškoduje zidove in kanalizacijo."
+    },
+    {
+      "slug": "kanadska-zlata-rozga", "sci": "Solidago canadensis", "sl": "Kanadska zlata rozga", "severity": "medium",
+      "desc_sl": "Severnoameriška trajnica, ki s podzemnimi koreninami tvori goste, monokulturne sestoje na opuščenih travnikih in ob robovih gozdov, s čimer izpodriva domorodne vrste in zmanjšuje pestrost opraševalcev."
+    },
+    {
+      "slug": "harlekinska-polonica", "sci": "Harmonia axyridis", "sl": "Harlekinska polonica", "severity": "low",
+      "desc_sl": "Azijska polonica, vnesena v Evropo za biotično zatiranje uši, ki danes izpodriva domorodne vrste polonic in se jeseni v velikem številu zateka v stanovanjske hiše."
+    },
+    {
+      "slug": "tigrasti-komar", "sci": "Aedes albopictus", "sl": "Tigrasti komar", "severity": "high",
+      "desc_sl": "Invazivni komar, ki lahko prenaša viruse denga mrzlice, čikungunje in zike. Razmnožuje se v še tako majhnih zbiralnikih stoječe vode (posode, žlebovi, pnevmatike), zato je preprečevanje vezano predvsem na odstranjevanje takih mest."
+    },
+    {
+      "slug": "spanski-lazar", "sci": "Arion vulgaris", "sl": "Španski lazar", "severity": "low",
+      "desc_sl": "Polž brez hišice, ki v vlažnih letih povzroča veliko škodo na vrtovih in v poljedelstvu, saj se hitro razmnožuje in nima naravnih sovražnikov v takem obsegu kot domorodni polži."
+    },
+    {
+      "slug": "nutrija", "sci": "Myocastor coypus", "sl": "Nutrija", "severity": "medium",
+      "desc_sl": "Južnoameriški glodavec, ki z izkopavanjem rovov spodkopava brežine vodotokov in nasipe, s prekomerno pašo pa uničuje obrežno rastlinje in trstičja, pomembna za druge vrste."
+    }
+  ]
+}

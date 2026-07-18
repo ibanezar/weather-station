@@ -1,0 +1,90 @@
+name: Invazivke-alarm
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 3:30 UTC, po monthly-post/seo-smart-routine, pred daily-post predlogi (3:45 UTC)
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Namesti odvisnosti
+        run: pip install Pillow --quiet
+
+      - name: Preveri nova opazovanja invazivnih vrst (iNaturalist)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 tools/invasive_watch.py --wire
+
+      - name: Posodobi spoke stran /invazivke/
+        run: python3 tools/generate_invazivke_page.py
+
+      - name: Commit & push
+        id: commit
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/invasive_state.json data/invazivke.json blog/ blog.json sitemap.xml og/ invazivke/
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            echo "published=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          git commit -m "invazivke: nočni pregled $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "published=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
+
+      - name: IndexNow — obvesti iskalnike o novi objavi
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, urllib.error, sys
+
+          posts = json.load(open("blog.json", encoding="utf-8"))
+          today_posts = [p for p in posts if p.get("slug", "").startswith("invazivka")]
+          if not today_posts:
+              print("Brez novih invazivke objav za IndexNow.")
+              sys.exit(0)
+
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          url_list = [f"https://meteorec.si{p['url']}" for p in today_posts[:5]] + ["https://meteorec.si/invazivke/"]
+          payload = json.dumps({
+              "host": "meteorec.si",
+              "key": KEY,
+              "keyLocation": f"https://meteorec.si/{KEY}.txt",
+              "urlList": url_list,
+          }).encode()
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  print(f"IndexNow: {r.status} — {len(url_list)} URL-jev")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:200]
+              print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
+          PYEOF

@@ -1,0 +1,159 @@
+{
+  "updated": "2026-07-18T21:39:43.216042+00:00",
+  "region": {
+    "name": "Zgornja Savinjska dolina",
+    "bbox": {
+      "swlat": 46.28,
+      "swlng": 14.55,
+      "nelat": 46.45,
+      "nelng": 15.0
+    }
+  },
+  "species": [
+    {
+      "slug": "japonski-dresnik",
+      "sl": "Japonski dresnik",
+      "sci": "Reynoutria japonica",
+      "severity": "high",
+      "total_cells": 1,
+      "new_cells_30d": 0,
+      "last_observed": "2025-07-06",
+      "recent": [
+        {
+          "date": "2025-07-06",
+          "place": "Bad Eisenkappel, 9135, Österreich",
+          "lat_approx": 46.44,
+          "lng_approx": 14.56,
+          "url": "https://www.inaturalist.org/observations/295735721",
+          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/532861537/medium.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "zlezava-nedotika",
+      "sl": "Žlezava nedotika",
+      "sci": "Impatiens glandulifera",
+      "severity": "high",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    },
+    {
+      "slug": "orjaski-dezen",
+      "sl": "Orjaški dežen",
+      "sci": "Heracleum mantegazzianum",
+      "severity": "critical",
+      "total_cells": 1,
+      "new_cells_30d": 0,
+      "last_observed": "2026-05-31",
+      "recent": [
+        {
+          "date": "2026-05-31",
+          "place": "Savinja, Solčava, Solčava, SI",
+          "lat_approx": 46.42,
+          "lng_approx": 14.69,
+          "url": "https://www.inaturalist.org/observations/367058415",
+          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/670292157/medium.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ambrozija",
+      "sl": "Pelinolistna ambrozija",
+      "sci": "Ambrosia artemisiifolia",
+      "severity": "high",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    },
+    {
+      "slug": "veliki-pajesen",
+      "sl": "Veliki pajesen",
+      "sci": "Ailanthus altissima",
+      "severity": "medium",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    },
+    {
+      "slug": "kanadska-zlata-rozga",
+      "sl": "Kanadska zlata rozga",
+      "sci": "Solidago canadensis",
+      "severity": "medium",
+      "total_cells": 1,
+      "new_cells_30d": 0,
+      "last_observed": "2025-06-21",
+      "recent": [
+        {
+          "date": "2025-06-21",
+          "place": "1242 Kamniška Bistrica, Slovenija",
+          "lat_approx": 46.31,
+          "lng_approx": 14.6,
+          "url": "https://www.inaturalist.org/observations/291574882",
+          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/524597716/medium.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "harlekinska-polonica",
+      "sl": "Harlekinska polonica",
+      "sci": "Harmonia axyridis",
+      "severity": "low",
+      "total_cells": 2,
+      "new_cells_30d": 0,
+      "last_observed": "2025-06-19",
+      "recent": [
+        {
+          "date": "2025-06-19",
+          "place": "Mozirje, SI-SA, SI",
+          "lat_approx": 46.33,
+          "lng_approx": 14.92,
+          "url": "https://www.inaturalist.org/observations/293368242",
+          "photo": "https://static.inaturalist.org/photos/528022490/medium.jpg"
+        },
+        {
+          "date": "2022-06-05",
+          "place": "Solcava, SI-SA, SI",
+          "lat_approx": 46.4,
+          "lng_approx": 14.63,
+          "url": "https://www.inaturalist.org/observations/120311408",
+          "photo": "https://static.inaturalist.org/photos/203473775/medium.jpeg"
+        }
+      ]
+    },
+    {
+      "slug": "tigrasti-komar",
+      "sl": "Tigrasti komar",
+      "sci": "Aedes albopictus",
+      "severity": "high",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    },
+    {
+      "slug": "spanski-lazar",
+      "sl": "Španski lazar",
+      "sci": "Arion vulgaris",
+      "severity": "low",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    },
+    {
+      "slug": "nutrija",
+      "sl": "Nutrija",
+      "sci": "Myocastor coypus",
+      "severity": "medium",
+      "total_cells": 0,
+      "new_cells_30d": 0,
+      "last_observed": null,
+      "recent": []
+    }
+  ],
+  "alerts": []
+}
