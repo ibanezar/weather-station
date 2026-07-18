@@ -136,6 +136,11 @@ body{
 .gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-nm{font-weight:700;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Small per-species photo instead of a generic 🍄 in front of every name —
+   same graceful onerror→emoji fallback as the bigger photo spots (baza-vrst
+   cards, "Zakaj?" explain cards) for species without a photo yet. */
+.gp-sp-ic{width:1.15rem;height:1.15rem;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  vertical-align:-.2rem;margin-right:.3rem;background:var(--badge-bg)}
 .gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
@@ -692,7 +697,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Smrekovško pogorje</span>
         <span class="gp-terr">kisla · 1300 m</span>
-        <span class="gp-forest-sp">🍄 Žametasti goban</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/neoboletus_erythropus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Žametasti goban</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -700,7 +705,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Komen (Smrekovec)</span>
         <span class="gp-terr">kisla · 1150 m</span>
-        <span class="gp-forest-sp">🍄 Žametasti goban</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/neoboletus_erythropus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Žametasti goban</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -708,7 +713,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Rastke (Ljubenske Rastke)</span>
         <span class="gp-terr">bazicna · 850 m</span>
-        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -716,7 +721,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Dleskovška planota</span>
         <span class="gp-terr">bazicna · 1300 m</span>
-        <span class="gp-forest-sp">🍄 Velika tintnica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -724,7 +729,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Podvolovljek</span>
         <span class="gp-terr">bazicna · 900 m</span>
-        <span class="gp-forest-sp">🍄 Macesnova lupljivka</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/suillus_grevillei.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Macesnova lupljivka</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -732,7 +737,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Obronki Raduhe (Loka)</span>
         <span class="gp-terr">bazicna · 900 m</span>
-        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -740,7 +745,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Primož pri Ljubnem</span>
         <span class="gp-terr">kisla · 750 m</span>
-        <span class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/amanita_rubescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Rdečkasta mušnica (Bisernica)</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">95%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -748,7 +753,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
         <span class="gp-terr">kisla · 700 m</span>
-        <span class="gp-forest-sp">🍄 Navadna lisička</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Navadna lisička</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">83%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -756,7 +761,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Golte</span>
         <span class="gp-terr">bazicna · 1300 m</span>
-        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -764,7 +769,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Nova Štifta – Tirosek</span>
         <span class="gp-terr">bazicna · 700 m</span>
-        <span class="gp-forest-sp">🍄 Velika tintnica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
     </div>
@@ -772,7 +777,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
         <span class="gp-terr">bazicna · 900 m</span>
-        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">72%</span><span class="lvl">DOBRA</span></div>
     </div>
@@ -780,7 +785,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Menina planina</span>
         <span class="gp-terr">bazicna · 1000 m</span>
-        <span class="gp-forest-sp">🍄 Zelena golobica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">62%</span><span class="lvl">DOBRA</span></div>
     </div>
@@ -788,7 +793,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Vivodnik (Menina planina)</span>
         <span class="gp-terr">bazicna · 1500 m</span>
-        <span class="gp-forest-sp">🍄 Macesnova lupljivka</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/suillus_grevillei.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Macesnova lupljivka</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">61%</span><span class="lvl">DOBRA</span></div>
     </div>
@@ -796,7 +801,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">💧 Rečica ob Savinji</span>
         <span class="gp-terr">vlazna · 400 m</span>
-        <span class="gp-forest-sp">🍄 Bezgova uhljevka</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/auricularia_auricula_judae.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Bezgova uhljevka</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">60%</span><span class="lvl">DOBRA</span></div>
     </div>
@@ -804,7 +809,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">💧 Bele Vode – Šentjanž</span>
         <span class="gp-terr">vlazna · 1000 m</span>
-        <span class="gp-forest-sp">🍄 Rdečkasta mušnica (Bisernica)</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/amanita_rubescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Rdečkasta mušnica (Bisernica)</span>
       </div>
       <div class="gp-forest-pct gp-pct-mid"><span class="n">48%</span><span class="lvl">ZMERNA</span></div>
     </div>
@@ -812,7 +817,7 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Črnivec – Bočna</span>
         <span class="gp-terr">bazicna · 850 m</span>
-        <span class="gp-forest-sp">🍄 Poletni goban</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/boletus_reticulatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Poletni goban</span>
       </div>
       <div class="gp-forest-pct gp-pct-mid"><span class="n">45%</span><span class="lvl">ZMERNA</span></div>
     </div>
@@ -1104,7 +1109,9 @@ body .wrap{padding-bottom:5.5rem}
     var spHtml=o.species.slice(0,3).map(function(s){
       var m=meta[s.id]||{};
       var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
-      return '<span class="gp-sp-chip">🍄 '+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
+      var ic=`<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/${s.id}.jpg" alt="" loading="lazy" `+
+        `onerror="this.replaceWith(document.createTextNode('🍄 '))">`;
+      return '<span class="gp-sp-chip">'+ic+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
     }).join('');
     var peak=bestDayText(l,dayIdx);
     var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
