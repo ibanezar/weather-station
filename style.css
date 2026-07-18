@@ -2447,12 +2447,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   /* Nudge the existing floating theme toggle up so it sits centred inside
      the new top bar instead of straddling its bottom edge. */
   .theme-btn{top:.4rem}
+  /* Scrollable, not flex-equal: with 8 destinations a 320px phone can't fit
+     them all at readable width, so tabs get a fixed min-width and the bar
+     scrolls horizontally instead of squeezing every label unreadably thin. */
   .app-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:150;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
     background:var(--card-bg);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
     border-top:1px solid var(--card-border);padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom))}
-  .app-bottomnav a{flex:1;min-height:2.75rem;display:flex;flex-direction:column;align-items:center;
+  .app-bottomnav::-webkit-scrollbar{display:none}
+  .app-bottomnav a{flex:0 0 auto;width:4.2rem;min-height:2.75rem;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:.15rem;padding:.3rem .2rem;color:var(--muted);text-decoration:none;
-    font-size:.64rem;line-height:1.2;border-radius:10px}
+    font-size:.62rem;line-height:1.2;border-radius:10px;white-space:nowrap}
   .app-bottomnav a .ic{display:block;font-size:1.2rem;line-height:1}
   .app-bottomnav a .ic svg{width:1.3rem;height:1.3rem;display:block}
   .app-bottomnav a.active{color:var(--blue)}

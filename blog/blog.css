@@ -473,3 +473,39 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .side-post:hover .side-post-t{color:var(--blue)}
 .side-post-r{flex-shrink:0;font-size:.78rem;color:var(--amber);font-weight:600;white-space:nowrap}
 .side-post-d{flex-shrink:0;font-size:.72rem;color:var(--muted);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+
+/* ── Mobile app shell (fixed top bar + bottom tab nav) ──────────────────
+   Same pattern as style.css's copy for index.html — kept in sync by hand
+   since this file has no build step. Shared by every page that loads
+   blog.css: /blog/, blog posts, /klima/, /rekord/, /vreme/ archive,
+   /pojavi/, /slovar/, seasonal pages, /padavine/, /temperatura/, /teden/,
+   /novosti/, o-postaji.html. Unlike style.css there's no #alerts-wrap/
+   --ticker-h concept here (that's only wired up on the live index.html via
+   app.js), so the top bar just sits at a plain top:0. */
+.app-topbar{display:none}
+.app-bottomnav{display:none}
+@media (max-width:760px){
+  body .wrap{padding-top:calc(3rem + env(safe-area-inset-top))!important;padding-bottom:calc(4rem + env(safe-area-inset-bottom) + 1rem)}
+  .app-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:150;height:3rem;
+    align-items:center;gap:.5rem;padding:0 3rem 0 .9rem;background:var(--card-bg);
+    backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
+    border-bottom:1px solid var(--card-border)}
+  .app-topbar-brand{font-size:1.15rem;line-height:1}
+  .app-topbar-title{font-weight:700;font-size:.92rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .app-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:150;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    background:var(--card-bg);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
+    border-top:1px solid var(--card-border);padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom))}
+  .app-bottomnav::-webkit-scrollbar{display:none}
+  .app-bottomnav a{flex:0 0 auto;width:4.2rem;min-height:2.75rem;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:.15rem;padding:.3rem .2rem;color:var(--muted);text-decoration:none;
+    font-size:.62rem;line-height:1.2;border-radius:10px;white-space:nowrap}
+  .app-bottomnav a .ic{display:block;font-size:1.2rem;line-height:1}
+  .app-bottomnav a .ic svg{width:1.3rem;height:1.3rem;display:block}
+  .app-bottomnav a.active{color:var(--blue)}
+  .app-bottomnav a.active .ic{transform:translateY(-1px)}
+  /* Blog-post-only fixed elements — nudge them clear of the new bars so
+     they don't end up hidden underneath. */
+  .read-progress{top:3rem}
+  .to-top{bottom:calc(4rem + env(safe-area-inset-bottom) + 1.1rem)}
+}
