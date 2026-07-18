@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/">
-<meta name="description" content="Gobarski indeks danes: 78 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta property="og:description" content="Gobarski indeks danes: 78 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta property="og:description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta name="twitter:description" content="Gobarski indeks danes: 78 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="twitter:description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 78 % (ODLI\u010cNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 77 % (ODLI\u010cNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved"}]}
@@ -131,8 +131,13 @@ body{
    glanceable colour-coded percentage disc on the right — so scanning the
    whole list for "where's it worth going" doesn't require reading every
    line, the disc colour + number says it at a glance. */
+/* min-width:0 overrides the grid item's default min-width:auto — without it,
+   a grid track sizing itself off #content still respects this item's
+   intrinsic content width (the nowrap name/species text), which silently
+   blows the row past its column/viewport instead of letting the ellipsis
+   truncation below actually engage. */
 .gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.6rem .8rem;
-  display:flex;align-items:center;justify-content:space-between;gap:.7rem}
+  display:flex;align-items:center;justify-content:space-between;gap:.7rem;min-width:0}
 .gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-nm{font-weight:700;font-size:1.02rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -689,8 +694,8 @@ body .wrap{padding-bottom:5.5rem}
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
-        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="74.6"/></svg>
-        <div class="gp-gauge-num"><span class="num">78</span><small>%</small></div>
+        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="78.0"/></svg>
+        <div class="gp-gauge-num"><span class="num">77</span><small>%</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
@@ -702,7 +707,7 @@ body .wrap{padding-bottom:5.5rem}
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
-        data-pct="78" data-lvl="ODLIČNA">📤 Deli</button>
+        data-pct="77" data-lvl="ODLIČNA">📤 Deli</button>
       <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
       <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
     </div>
@@ -756,14 +761,6 @@ body .wrap{padding-bottom:5.5rem}
     </div>
     <div class="gp-forest">
       <div class="gp-forest-info">
-        <span class="gp-forest-nm">⛰️ Menina planina</span>
-        <span class="gp-terr">bazicna · 1000 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/leccinum_pseudoscabrum.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Gabrov ded</span>
-      </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">82%</span><span class="lvl">ODLIČNA</span></div>
-    </div>
-    <div class="gp-forest">
-      <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
         <span class="gp-terr">kisla · 700 m</span>
         <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Navadna lisička</span>
@@ -776,15 +773,7 @@ body .wrap{padding-bottom:5.5rem}
         <span class="gp-terr">bazicna · 1300 m</span>
         <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/leccinum_pseudoscabrum.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Gabrov ded</span>
       </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
-    </div>
-    <div class="gp-forest">
-      <div class="gp-forest-info">
-        <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
-        <span class="gp-terr">bazicna · 900 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/leccinum_pseudoscabrum.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Gabrov ded</span>
-      </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">79%</span><span class="lvl">ODLIČNA</span></div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">80%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-info">
@@ -792,7 +781,23 @@ body .wrap{padding-bottom:5.5rem}
         <span class="gp-terr">vlazna · 400 m</span>
         <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
       </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">78%</span><span class="lvl">ODLIČNA</span></div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
+        <span class="gp-terr">bazicna · 900 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
+      </div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Menina planina</span>
+        <span class="gp-terr">bazicna · 1000 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
+      </div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest gp-forest-prot">
       <div class="gp-forest-info">

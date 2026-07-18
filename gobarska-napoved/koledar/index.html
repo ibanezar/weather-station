@@ -128,8 +128,13 @@ body{
    glanceable colour-coded percentage disc on the right — so scanning the
    whole list for "where's it worth going" doesn't require reading every
    line, the disc colour + number says it at a glance. */
+/* min-width:0 overrides the grid item's default min-width:auto — without it,
+   a grid track sizing itself off #content still respects this item's
+   intrinsic content width (the nowrap name/species text), which silently
+   blows the row past its column/viewport instead of letting the ellipsis
+   truncation below actually engage. */
 .gp-forest{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;padding:.6rem .8rem;
-  display:flex;align-items:center;justify-content:space-between;gap:.7rem}
+  display:flex;align-items:center;justify-content:space-between;gap:.7rem;min-width:0}
 .gp-forest-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-nm{font-weight:700;font-size:1.02rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
