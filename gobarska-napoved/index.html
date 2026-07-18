@@ -150,6 +150,21 @@ body{
 .gp-pct-mid{background:#ffedd5;color:#7c2d12}
 .gp-pct-low{background:#fed7aa;color:#7c2d12}
 .gp-pct-none{background:#fee2e2;color:#7f1d1d}
+/* ── Premium "today per forest" rows (render() in PAGE_JS) — richer than the
+   free list: top-3 species (not 1), soil moisture, best-day-this-week and a
+   7-day trend line, all from data the model already computes per location.
+   Own grid (single column, not the free auto-fill card grid) since each row
+   is now much taller. ── */
+.gp-forests-premium{display:grid;grid-template-columns:1fr;gap:.6rem;margin:.6rem 0 1.2rem}
+.gp-forest-premium{align-items:flex-start}
+.gp-forest-sp3{display:flex;flex-direction:column;gap:.15rem;margin-top:.35rem}
+.gp-sp-chip{font-size:.78rem;color:var(--muted)}
+.gp-sp-chip b{color:var(--text);font-weight:700;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.gp-sp-warn{cursor:help}
+.gp-forest-meta{display:flex;flex-wrap:wrap;gap:.15rem 1rem;margin-top:.45rem;font-size:.72rem;color:var(--muted)}
+.gp-forest-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.gp-forest-spark{width:5.5rem}
+.gp-forest-spark .gp-spark{width:100%;height:1.6rem}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
@@ -1070,6 +1085,14 @@ body .wrap{padding-bottom:5.5rem}
     var dt=new Date(day.date);
     return dt.getDate()+'.'+(dt.getMonth()+1)+'.';
   }
+  // Best index anywhere in the 7-day window for this forest — null if today
+  // (index 0) already is the peak, so the row doesn't state the obvious.
+  function bestDayText(loc){
+    var days=loc.days,bi=0;
+    for(var i=1;i<days.length;i++){if(days[i].overall>days[bi].overall)bi=i;}
+    if(bi===0)return null;
+    return dayLabel(days[bi],false)+' · '+days[bi].overall+' %';
+  }
   function locDetailHtml(loc, meta){
     var html="";
     var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
@@ -1116,15 +1139,32 @@ body .wrap{padding-bottom:5.5rem}
     var locs=d.locations||[];
     var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";
-    // today per forest — same compact info+disc rows as the free section
-    html+='<h3>Danes po gozdovih</h3><div class="gp-forests">';
+    // today per forest — richer than the free list: top-3 species (not just
+    // the winner), soil moisture, a best-day-this-week hint and a 7-day
+    // trend line, all already computed per location — this is the one part
+    // of the page a paying user should see more in than the free teaser.
+    html+='<h3>Danes po gozdovih</h3><div class="gp-forests-premium">';
     locs.slice().sort(function(a,b){return b.days[0].overall-a.days[0].overall;})
-      .forEach(function(l){var o=l.days[0];var top=o.species[0];var pctCls=levelClass(o.overall);
-        html+='<div class="gp-forest"><div class="gp-forest-info"><span class="gp-forest-nm">'+
-          (TERR_ICON[l.terrain]||"🌲")+' '+l.name+'</span><span class="gp-terr">'+(l.terrain||'')+
-          ' · '+l.elev_m+' m</span><span class="gp-forest-sp">🍄 '+(top&&meta[top.id]?meta[top.id].name_sl:'—')+
-          '</span></div><div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+
-          '%</span><span class="lvl">'+o.level+'</span></div></div>';});
+      .forEach(function(l){
+        var o=l.days[0];
+        var pctCls=levelClass(o.overall);
+        var spHtml=o.species.slice(0,3).map(function(s){
+          var m=meta[s.id]||{};
+          var warn=m.doubles?' <span class="gp-sp-warn" title="Nevarna dvojnica: '+esc2(m.doubles)+'">⚠️</span>':'';
+          return '<span class="gp-sp-chip">🍄 '+esc2(m.name_sl||s.id)+warn+'<b>'+s.index+' %</b></span>';
+        }).join('');
+        var metaHtml=(o.soil_moisture_pct==null?'':'<span>💧 vlaga tal '+o.soil_moisture_pct+' %</span>')+
+          (bestDayText(l)?'<span>📈 najboljši dan: '+bestDayText(l)+'</span>':'<span>🔝 danes je vrh tedna</span>');
+        html+='<div class="gp-forest gp-forest-premium"><div class="gp-forest-info">'+
+          '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
+          '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span>'+
+          '<div class="gp-forest-sp3">'+spHtml+'</div>'+
+          '<div class="gp-forest-meta">'+metaHtml+'</div>'+
+          '</div><div class="gp-forest-side"><div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+
+          '%</span><span class="lvl">'+o.level+'</span></div>'+
+          '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
+          '</div></div>';
+      });
     html+='</div>';
     // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
