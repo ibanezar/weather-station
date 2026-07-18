@@ -83,6 +83,7 @@ SPOKE_PAGES = [
     (("padalci", "veter"), "/vreme-za-padalce/", "vreme za padalce"),
     (("trend",), "/trendi/", "dolgoročne trende"),
     (("rekord",), "/rekord/", "vremenske rekorde postaje"),
+    (("invazivke", "invazivne"), "/invazivke/", "spremljanje invazivnih vrst"),
 ]
 
 HEAT_C, COLD_C, RAIN_MM, WIND_KMH = 30, -5, 20, 50

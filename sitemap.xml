@@ -62,6 +62,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/invazivke/</loc>
+    <lastmod>2026-07-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/poplave-2023.html</loc>
     <lastmod>2026-07-08</lastmod>
     <changefreq>yearly</changefreq>
