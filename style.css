@@ -1899,7 +1899,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .an-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1.25rem;margin-bottom:1.25rem}
 .an-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-bottom:1.25rem}
 .an-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.25rem;backdrop-filter:blur(12px)}
-.an-chart-wrap{position:relative;height:180px;margin-top:.75rem}
+.an-chart-wrap{position:relative;height:180px;margin-top:.75rem}.an-chart-wrap-sm{height:150px}
 .an-finding{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:10px;padding:.75rem .9rem;margin-top:.85rem;font-size:.75rem;line-height:1.7;color:var(--text)}
 .an-finding strong{color:var(--blue)}
 .an-tag{display:inline-block;padding:1px 9px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-right:.25rem;vertical-align:middle}
@@ -1922,7 +1922,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .hm-yr-lbl{color:var(--muted);text-align:left!important;padding-right:.6rem;white-space:nowrap}
 .an-insight-list{display:flex;flex-direction:column;gap:.7rem;font-size:.78rem;line-height:1.65;color:var(--text)}
 .an-insight-list li{list-style:none;padding:.5rem .75rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
-@media(max-width:640px){.an-grid2,.an-grid3,.nt-grid2,.nt-grid3{grid-template-columns:1fr}}@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}.an-card,.nt-card{padding:.85rem .9rem}.an-chart-wrap{height:155px}.candle-wrap svg{min-width:300px}.wind-rose-card{grid-template-columns:1fr}}
+@media(max-width:640px){.an-grid2,.an-grid3,.nt-grid2,.nt-grid3{grid-template-columns:1fr}.an-chart-wrap{height:230px}.nt-chart:has(>canvas){position:relative;height:230px}.nt-chart>canvas{max-height:100%}}@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}.an-card,.nt-card{padding:.85rem .9rem}.an-chart-wrap{height:225px}.candle-wrap svg{min-width:300px}.wind-rose-card{grid-template-columns:1fr}}
 
 
 /* Text forecast — compact cards */
