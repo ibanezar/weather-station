@@ -670,6 +670,19 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .spell-detail{font-size:.66rem;color:var(--muted);line-height:1.4}
 .spell-dur{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--sp-accent);white-space:nowrap}
 .clim-loading{color:var(--muted);font-size:.8rem;padding:1rem 0;text-align:center;min-height:3.5rem;display:flex;align-items:center;justify-content:center}
+/* Shimmer only on the initial "Nalaganje…" placeholder (marked with .skel-shimmer in
+   the markup) — .clim-loading itself is reused for permanent empty/error states too
+   (e.g. "Podatki trenutno nedostopni"), which must stay static, not looped-animated. */
+@media (prefers-reduced-motion: no-preference){
+  @supports ((background-clip:text) or (-webkit-background-clip:text)){
+    .skel-shimmer{
+      background:linear-gradient(90deg,var(--muted) 20%,var(--text) 50%,var(--muted) 80%);
+      background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+      animation:skel-shimmer 1.6s ease-in-out infinite;
+    }
+  }
+}
+@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media(max-width:680px){.gs-dates{display:none}.clim-twin-place{font-size:1.25rem}}
 /* Drift engine */
 .drift-chart-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}

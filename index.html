@@ -1469,7 +1469,7 @@
         <div class="kf-var" style="--kf-col:var(--blue)"><div class="kf-label">💧 Vlažnost</div><div class="kf-value"><span id="kf-h">—</span><span class="kf-unit">%</span></div><div class="kf-uncertainty">±<b id="kf-h-unc">—</b>% (1σ)</div><div class="kf-gain-bar"><div class="kf-gain-fill" id="kf-h-gain" style="--kf-col:var(--blue);width:0%"></div></div></div>
         <div class="kf-var" style="--kf-col:var(--purple)"><div class="kf-label">📊 Tlak</div><div class="kf-value"><span id="kf-p">—</span><span class="kf-unit"> hPa</span></div><div class="kf-uncertainty">±<b id="kf-p-unc">—</b> hPa (1σ)</div><div class="kf-gain-bar"><div class="kf-gain-fill" id="kf-p-gain" style="--kf-col:var(--purple);width:0%"></div></div></div>
       </div>
-      <div id="kf-sources" class="kf-sources"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="kf-sources" class="kf-sources"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.65rem;line-height:1.5">
         <strong style="color:var(--text)">Metodologija:</strong> Skalarni Kalmanov filter na vsaki spremenljivki. Napoved = prejšnja ocena + procesni šum Q. Posodobitev: K = P/(P+R), x_new = x + K·(obs-x). Zaupanje viru je obratno sorazmerno z varianco napake (R). Stanje se shrani v localStorage.
       </div>
@@ -1516,7 +1516,7 @@
         <span class="norm-title">📊 ARSO podnebne normale 1991–2020</span>
         <span class="norm-src" id="norm-src">Celje · 241 m n. v. · referenčna postaja</span>
       </div>
-      <div id="norm-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="norm-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- CMIP6 klimatske projekcije 2050/2100 -->
@@ -1525,7 +1525,7 @@
         <span class="clabel" style="margin:0">🌍 Rečica 2050 – podnebne projekcije CMIP6</span>
         <span class="chart-range" id="cmip6-src">Open-Meteo · —</span>
       </div>
-      <div id="cmip6-body"><div class="clim-loading">Nalaganje projekcij…</div></div>
+      <div id="cmip6-body"><div class="clim-loading skel-shimmer">Nalaganje projekcij…</div></div>
     </div>
 
     <!-- PVGIS solar potential -->
@@ -1534,7 +1534,7 @@
         <span class="clabel" style="margin:0">☀️ Solarni potencial – PVGIS EU JRC</span>
         <span class="chart-range" id="pvgis-src">re.jrc.ec.europa.eu · —</span>
       </div>
-      <div id="pvgis-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="pvgis-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- NASA POWER Solar Monitor -->
@@ -1543,7 +1543,7 @@
         <span class="clabel" style="margin:0">☀️ Solarni nadzor – NASA POWER</span>
         <span class="chart-range" id="nasa-solar-src">NASA POWER · —</span>
       </div>
-      <div id="nasa-solar-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="nasa-solar-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- NASA POWER Climate Baselines -->
@@ -1552,7 +1552,7 @@
         <span class="clabel" style="margin:0">🌍 Satelitske referenčne vrednosti – NASA POWER</span>
         <span class="chart-range" id="nasa-clim-src">NASA POWER · —</span>
       </div>
-      <div id="nasa-clim-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="nasa-clim-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- ENSO / El Niño monitor -->
@@ -1561,7 +1561,7 @@
         <span class="clabel" style="margin:0">🌊 Spremljanje ENSO – El Niño in La Niña</span>
         <span class="chart-range" id="enso-src">NOAA CPC · ONI</span>
       </div>
-      <div id="enso-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="enso-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 1. Global climate twin -->
@@ -1591,7 +1591,7 @@
         <span class="clabel" style="margin:0">🔬 Agrometeorološki utrip — napovedovalnik</span>
         <span class="chart-range" id="pulse-gdd-badge">GDD5: — · GDD10: —</span>
       </div>
-      <div id="agro-pulse-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="agro-pulse-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 2. Weather Wrapped -->
@@ -1600,7 +1600,7 @@
         <span class="clabel" style="margin:0">🎁 Letni vremenski pregled</span>
       </div>
       <div class="wrap-year-sel" id="wrap-year-sel"></div>
-      <div class="wrap-grid" id="wrap-grid"><div class="clim-loading">Nalaganje…</div></div>
+      <div class="wrap-grid" id="wrap-grid"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 3. Growing season -->
@@ -1609,7 +1609,7 @@
         <span class="clabel" style="margin:0">🌱 Rastna doba in pozeba – trend</span>
         <span class="chart-range">obdobje brez zmrzali</span>
       </div>
-      <div id="gs-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="gs-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 4. Heat waves / cold spells -->
@@ -1618,7 +1618,7 @@
         <span class="clabel" style="margin:0">🔥 Vročinski in hladni valovi</span>
         <span class="chart-range">2019–danes</span>
       </div>
-      <div id="spell-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="spell-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
   </div><!-- /tab-climate -->
@@ -1858,7 +1858,7 @@
     <!-- Wind Turbulence Index -->
     <div class="card ca-amber" style="margin-bottom:1rem">
       <div class="clabel">🌀 Savinjski vetrovni lijak — turbulenca doline</div>
-      <div id="turb-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="turb-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 12h CAPE/shear timeline -->
@@ -1890,7 +1890,7 @@
     <!-- Wind fingerprint alert -->
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🔍 Vetrovni odtis — prepoznava vzorcev</div>
-      <div id="fp-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="fp-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Station pressure tendency from station -->
@@ -2003,7 +2003,7 @@
     </div>
     <div class="card" id="sm-ranking-card" style="margin-bottom:1rem">
       <div class="clabel">📋 Najbolj ogroženi kraji</div>
-      <div id="sm-ranking"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="sm-ranking"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
   </div><!-- /tab-stormmap -->
 
@@ -2013,12 +2013,12 @@
     <!-- Dew matrix -->
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🌿 Makrorosiščna matrika</div>
-      <div id="dew-matrix-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="dew-matrix-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
     <!-- Fauna radar -->
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🔍 Radar za živali (polži, kuščarji, …)</div>
-      <div class="fauna-grid" id="fauna-grid"><div class="clim-loading">Nalaganje…</div></div>
+      <div class="fauna-grid" id="fauna-grid"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- iNaturalist live sightings -->
@@ -2037,7 +2037,7 @@
         <button class="inat-filter" onclick="inatSetFilter('Fungi')">🍄 Glive</button>
         <button class="inat-filter" onclick="inatSetFilter('Arachnida')">🕷 Pajkovci</button>
       </div>
-      <div id="inat-list"><div class="clim-loading">Nalaganje opazitev…</div></div>
+      <div id="inat-list"><div class="clim-loading skel-shimmer">Nalaganje opazitev…</div></div>
     </div>
 
     <!-- Fire Weather Index -->
@@ -2046,7 +2046,7 @@
         <span class="clabel" style="margin:0">🔥 Požarna nevarnost – indeks FWI</span>
         <span class="chart-range" id="fwi-updated">EFFIS metodologija · —</span>
       </div>
-      <div id="fwi-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="fwi-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- NASA POWER Agro Atlas -->
@@ -2055,7 +2055,7 @@
         <span class="clabel" style="margin:0">🌾 Agrometeorološki atlas – NASA POWER</span>
         <span class="chart-range" id="nasa-agro-src">NASA POWER · —</span>
       </div>
-      <div id="nasa-agro-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="nasa-agro-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 1. Golden Window -->
@@ -2064,7 +2064,7 @@
         <span class="clabel" style="margin:0">📸 Naravoslovno in fotografsko zlato okno</span>
         <span class="chart-range" id="gw-updated">—</span>
       </div>
-      <div class="gw-grid" id="gw-grid"><div class="clim-loading">Nalaganje…</div></div>
+      <div class="gw-grid" id="gw-grid"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Vremenska misija dneva -->
@@ -2073,7 +2073,7 @@
         <span class="clabel" style="margin:0">🎯 Vremenska misija dneva</span>
         <span class="chart-range" id="mission-weather-lbl">—</span>
       </div>
-      <div id="mission-body"><div class="clim-loading">Nalaganje misije…</div></div>
+      <div id="mission-body"><div class="clim-loading skel-shimmer">Nalaganje misije…</div></div>
     </div>
 
     <!-- 2. Kids activity -->
@@ -2082,7 +2082,7 @@
         <span class="clabel" style="margin:0">👧 Kaj početi danes? – za otroke</span>
         <span class="chart-range" id="kids-updated">—</span>
       </div>
-      <div id="kids-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="kids-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 3. Forest pulse -->
@@ -2090,7 +2090,7 @@
       <div class="chart-hdr">
         <span class="clabel" style="margin:0">🍄 Gobarski in nabiralski gozdni utrip</span>
       </div>
-      <div id="forest-pulse-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="forest-pulse-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- 4. Time capsule -->
@@ -2099,7 +2099,7 @@
         <span class="clabel" style="margin:0">⏳ Vremenska časovna kapsula</span>
         <span class="chart-range" id="capsule-date">—</span>
       </div>
-      <div id="capsule-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="capsule-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
   </div><!-- /tab-life -->
@@ -2113,7 +2113,7 @@
         <span class="clabel" style="margin:0">🌊 Savinja — vodostaj in napoved pretoka</span>
         <span class="chart-range" id="river-updated">Open-Meteo GloFAS · ARSO · —</span>
       </div>
-      <div id="river-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="river-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Temperatura vode -->
@@ -2122,7 +2122,7 @@
         <span class="clabel" style="margin:0">🌡 Temperatura vode — Savinja</span>
         <span class="chart-range" id="water-temp-updated">Nalaganje…</span>
       </div>
-      <div id="water-temp-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="water-temp-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Water balance -->
@@ -2149,7 +2149,7 @@
         <span class="clabel" style="margin:0">📍 ARSO postaje — Savinja</span>
         <span class="chart-range" id="arso-stations-updated">Nalaganje…</span>
       </div>
-      <div id="arso-stations-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="arso-stations-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Vlaga v tleh -->
@@ -2158,7 +2158,7 @@
         <span class="clabel" style="margin:0">🌱 Vlaga v tleh — globine</span>
         <span class="chart-range" id="soil-water-status">Open-Meteo</span>
       </div>
-      <div id="soil-depths-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div id="soil-depths-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
     </div>
 
     <!-- Zgodovinski poplavni dogodki Savinje -->
@@ -2543,7 +2543,7 @@
         <span class="clabel" style="margin:0">✈️ Primerjava: METAR LJLJ in postaja IREICA1</span>
         <span class="chart-range" id="metar-updated">—</span>
       </div>
-      <div id="metar-body"><div class="clim-loading">Nalaganje podatkov METAR …</div></div>
+      <div id="metar-body"><div class="clim-loading skel-shimmer">Nalaganje podatkov METAR …</div></div>
     </div>
 
     <!-- Anomaly scoring dashboard -->
@@ -2552,7 +2552,7 @@
         <span class="clabel" style="margin:0">📊 Nadzorna plošča kakovosti podatkov – anomalije po senzorjih</span>
         <span class="chart-range" id="aq-score-badge">—</span>
       </div>
-      <div class="aq-sensor-list" id="aq-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div class="aq-sensor-list" id="aq-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.5" id="aq-ae-note"></div>
     </div>
 
@@ -2562,7 +2562,7 @@
         <span class="clabel" style="margin:0">⚙️ Avtomatska kalibracija – statistični test korekcij</span>
         <span class="chart-range" id="cal-samples-badge">—</span>
       </div>
-      <div class="cal-sensor-grid" id="cal-body"><div class="clim-loading">Nalaganje…</div></div>
+      <div class="cal-sensor-grid" id="cal-body"><div class="clim-loading skel-shimmer">Nalaganje…</div></div>
       <div style="font-size:.67rem;color:var(--muted);margin-top:.75rem;line-height:1.5">
         <strong style="color:var(--text)">Metodologija:</strong> Enovzorčni t-test (angl. one-sample t-test, H₀: srednja vrednost odmika = 0). Korekcija se predlaga, ko je |t| > 2.0 (p ≈ 0.05, statistično značilno). Reference: METAR LJLJ + dnevnik odmikov ARSO.
       </div>

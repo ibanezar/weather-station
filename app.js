@@ -7471,7 +7471,11 @@ function applyWeatherBg(cond){
   const bgEl=document.getElementById('bg');if(!bgEl)return;
 
   // Base background colour
-  bgEl.style.background=dark?t.bg:(WX_LIGHT_BG[cond]||t.bg);
+  const bgColor=dark?t.bg:(WX_LIGHT_BG[cond]||t.bg);
+  bgEl.style.background=bgColor;
+  // Match the Android/iOS status bar to the current weather mood
+  const themeMeta=document.getElementById('theme-color-meta');
+  if(themeMeta)themeMeta.setAttribute('content',bgColor);
 
   // Blob colours
   ['b1','b2','b3','b4'].forEach((cls,i)=>{
