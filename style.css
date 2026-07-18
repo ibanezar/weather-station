@@ -68,10 +68,6 @@
 }
 
 html{scroll-behavior:smooth;overflow-x:hidden}
-/* Native-feeling touch feedback: brez sivega tap-highlighta, kratek "press" na gumbih */
-button,a{-webkit-tap-highlight-color:transparent}
-button{transition:transform .08s ease}
-button:active{transform:scale(.96)}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
