@@ -13857,12 +13857,6 @@ async function initVisitorCounter(){
   if(wrap)wrap.style.display='none';
 }
 
-// Sproži fn, ko je glavna nit prosta (ali najkasneje po `timeout` ms) — tako
-// ozadnje nalaganje skritih tabov ne blokira scrolla/tapa na vidnem tabu.
-function _idle(fn,timeout){
-  if('requestIdleCallback' in window) requestIdleCallback(fn,{timeout});
-  else setTimeout(fn,timeout);
-}
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
@@ -13887,8 +13881,8 @@ async function init(){
   autoAccentCards();
   fetchAIForecast(); // non-blocking — populates forecast tab card
 
-  // ── Wave 2: forecast tab content (~0.8 s after wave 1, ali prej če je nit prosta) ──
-  _idle(()=>{
+  // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
+  setTimeout(()=>{
     fetchTextForecast();
     fetchForecastExtras();
     fetchAndDrawSkyStrip();
@@ -13896,7 +13890,7 @@ async function init(){
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
-  _idle(()=>{
+  setTimeout(()=>{
     fetchAirQuality();
     fetchAgrometeo();
     fetchClimateComparison();
@@ -13909,10 +13903,10 @@ async function init(){
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──
-  _idle(fetchPrecipNowcast,4000);
+  setTimeout(fetchPrecipNowcast,4000);
 
   // ── Wave 4: lowest priority (6 s) ──
-  _idle(()=>{
+  setTimeout(()=>{
     fetchSevereWeather();
     fetchMeteoalarm();
     fetchGoogleAlerts();
