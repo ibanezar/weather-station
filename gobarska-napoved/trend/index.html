@@ -70,6 +70,11 @@ body{
   --fc-today-bg:rgba(193,127,62,.14); --fc-today-border:rgba(193,127,62,.35);
   --blob-1:rgba(201,150,80,.20); --blob-2:rgba(111,174,85,.16);
   --blob-3:rgba(140,168,90,.13); --blob-4:rgba(180,110,70,.11);
+  /* Bottom nav's own rendered height (icon+label+padding, measured ~3.65rem)
+     with a little headroom — single source of truth shared by the nav's
+     own box and the page's bottom padding compensation below, so the two
+     can't drift apart. */
+  --gp-bnh:4rem;
 }
 .gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
@@ -112,7 +117,8 @@ body{
 .gp-h2{margin-top:2.6rem;margin-bottom:.9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);
   font-size:1.35rem;scroll-margin-top:4rem}
 .gp-h2 + .archive-intro,.gp-h2 + .post-meta{margin-top:-.3rem}
-.gp-cta{display:inline-block;background:var(--blue);color:#04070e;font:inherit;
+.gp-cta{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
+  background:var(--blue);color:#04070e;font:inherit;
   font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
   border:0;cursor:pointer;line-height:1.2}
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
@@ -129,11 +135,18 @@ body{
 .gp-forest-sp{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-forest-prot{opacity:.6}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.gp-forest-pct{flex:0 0 auto;width:3.5rem;height:3.5rem;border-radius:50%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;color:#04070e;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 .gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
-  text-align:center;text-transform:uppercase;opacity:.85}
+  text-align:center;text-transform:uppercase;opacity:.9}
+/* Dynamic badge tiers — separate classes (not inline colour) so each growth
+   level reads as light tinted background + a darker, same-hue text, matching
+   the site's other tier badges (.e-ok etc.) instead of a solid disc. */
+.gp-pct-hi{background:#d1fae5;color:#065f46}
+.gp-pct-mid{background:#ffedd5;color:#7c2d12}
+.gp-pct-low{background:#fed7aa;color:#7c2d12}
+.gp-pct-none{background:#fee2e2;color:#7f1d1d}
 .gp-lock{position:relative;border:1px dashed var(--card-border);border-radius:16px;
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
@@ -153,7 +166,8 @@ body{
 .gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
 .gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
   border-radius:9px;padding:.5rem .7rem;color:var(--text);font-size:.9rem}
-.gp-login button{background:var(--blue);color:#04070e;border:0;border-radius:9px;
+.gp-login button{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
+  background:var(--blue);color:#04070e;border:0;border-radius:9px;
   padding:.5rem 1rem;font-weight:700;cursor:pointer}
 .gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
 .gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
@@ -329,7 +343,8 @@ body{
   padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit}
 .gp-diary-row input[type=text]{flex:1;min-width:160px}
 .gp-diary textarea{width:100%;min-height:4.5rem;resize:vertical;box-sizing:border-box}
-.gp-diary-btn{background:var(--badge-bg);border:1px solid var(--card-border);color:var(--text);
+.gp-diary-btn{display:inline-flex;align-items:center;min-height:2.75rem;background:var(--badge-bg);
+  border:1px solid var(--card-border);color:var(--text);
   border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
 .gp-diary-photobtn{display:inline-block}
 
@@ -342,7 +357,7 @@ body{
 .gp-chip{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--badge-bg);
   border:1.5px solid var(--card-border);color:var(--text);border-radius:999px;padding:.5rem .9rem;
   font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;
-  min-height:2.5rem;transition:border-color .15s ease,background .15s ease}
+  min-height:2.75rem;transition:border-color .15s ease,background .15s ease}
 .gp-chip:hover{border-color:var(--blue)}
 .gp-chip.active{background:rgba(111,174,85,.16);border-color:var(--blue);color:var(--blue)}
 .gp-chip-pct{font-variant-numeric:tabular-nums;opacity:.85}
@@ -402,11 +417,15 @@ body{
   border-bottom:1px solid var(--border);margin:.2rem 0 1.4rem}
 .gp-quicknav-wrap::after{content:"";position:absolute;top:0;right:0;bottom:1px;width:2.4rem;
   pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg))}
-.gp-quicknav{display:flex;gap:.45rem;overflow-x:auto;padding:.65rem 0;
-  scrollbar-width:thin;-webkit-overflow-scrolling:touch}
-.gp-quicknav::-webkit-scrollbar{height:4px}
-.gp-quicknav::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px}
-.gp-quicknav a{flex:0 0 auto;background:var(--badge-bg);border:1px solid var(--card-border);
+/* flex-wrap intentionally omitted (default nowrap) so the row never breaks
+   onto a second line; overflow-x:auto turns the overflow into a touch/scroll
+   swipe instead. Scrollbar hidden per-engine (Firefox/WebKit/legacy Edge)
+   since the horizontal swipe is already obvious from the chip row itself. */
+.gp-quicknav{display:flex;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding:.65rem 0;
+  scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+.gp-quicknav::-webkit-scrollbar{display:none}
+.gp-quicknav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:2.75rem;
+  background:var(--badge-bg);border:1px solid var(--card-border);
   color:var(--text);text-decoration:none;font-size:.82rem;padding:.4rem .8rem;border-radius:20px;
   white-space:nowrap;transition:border-color .15s ease,color .15s ease}
 .gp-quicknav a:last-child{margin-right:2.4rem}
@@ -426,10 +445,18 @@ body{
    like a normal page section, just one the user has to tap to open. Default
    closed (no `open` attribute) keeps the "active" data above the fold. ── */
 .gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
-.gp-collapse-section summary{padding:0 0 .4rem;border-bottom:1px solid var(--border);
+.gp-collapse-section summary{padding:0 0 .4rem;min-height:2.75rem;border-bottom:1px solid var(--border);
   background:transparent;font-size:1.35rem;font-weight:700}
 .gp-collapse-section summary::after{font-size:1rem}
 .gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
+/* FAQ <details> otherwise rely on bare UA defaults — too short a tap target
+   on mobile. Padding (not margin) grows the hit area without widening the
+   row's footprint or spacing against its neighbours. */
+.faq details{border-bottom:1px solid var(--border)}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;min-height:2.75rem;display:flex;align-items:center;
+  padding:.7rem .2rem;font-weight:600}
+.faq p{margin:0 .2rem .8rem;color:var(--muted);font-size:.9rem;line-height:1.6}
 
 /* ── Navigacijski hub (kartice na podstrani) ── */
 .gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
@@ -469,8 +496,11 @@ body .wrap{padding-bottom:5.5rem}
   /* body .wrap (not .wrap) — blog.css's own unconditional .wrap{padding:2rem 0 4rem}
      loads after this inline stylesheet and would otherwise win the tie on
      source order alone; the extra ancestor selector outranks it regardless
-     of load order without touching blog.css. */
-  body .wrap{padding-bottom:9.7rem;padding-top:3.5rem}
+     of load order without touching blog.css.
+     Bottom compensation = the nav's own height (--gp-bnh) + the device's
+     safe-area inset, so content can always be scrolled clear of the fixed
+     bar regardless of how tall that inset actually is on a given phone. */
+  body .wrap{padding-bottom:calc(var(--gp-bnh) + env(safe-area-inset-bottom) + 1rem);padding-top:3.5rem}
   .gp-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:55;height:3rem;
     align-items:center;gap:.5rem;padding:0 .5rem;background:var(--card-bg);
     backdrop-filter:blur(10px);border-bottom:1px solid var(--card-border)}
@@ -482,10 +512,14 @@ body .wrap{padding-bottom:5.5rem}
   .gp-topbar-action{flex:0 0 auto;width:2.2rem;height:2.2rem;display:flex;align-items:center;
     justify-content:center;font-size:1.1rem;text-decoration:none;border-radius:50%;background:var(--badge-bg)}
   .gp-quicknav-wrap{top:3rem}
-  .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+  /* z-index:70 — the highest layer on the page (topbar 55, SOS FAB/panel 60)
+     so the bottom nav always stays on top of everything else, never gets
+     covered by other fixed/sticky elements. */
+  .gp-bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;
     background:var(--card-bg);backdrop-filter:blur(10px);border-top:1px solid var(--card-border);
     padding:.35rem .2rem calc(.35rem + env(safe-area-inset-bottom))}
-  .gp-bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;
+  .gp-bottomnav a{flex:1;min-height:2.75rem;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:.15rem;
     padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
     border-radius:10px}
   .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
@@ -504,7 +538,7 @@ body .wrap{padding-bottom:5.5rem}
   /* Bottom-right is now owned by the bottom nav; move SOS out of the hero's
      way rather than shrink its tap target to squeeze both in. Shifted a
      further 3.5rem down from its old top:5.7rem to clear the new top bar. */
-  .gp-sos-fab{top:9.2rem;bottom:auto;right:.8rem;width:2.6rem;height:2.6rem;font-size:1.15rem}
+  .gp-sos-fab{top:9.2rem;bottom:auto;right:.8rem;width:2.75rem;height:2.75rem;font-size:1.15rem}
   .gp-sos-panel{top:12.3rem;bottom:auto;right:.8rem}
 }
 
