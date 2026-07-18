@@ -1,10 +1,38 @@
 {
+ "agaricus_bisporus.jpg": {
+  "artist": "chris_73",
+  "latin": "Agaricus bisporus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Dvotrosni kukmak",
+  "source_url": "https://commons.wikimedia.org/wiki/File:ChampignonMushroom.jpg"
+ },
  "agaricus_campestris.jpg": {
   "artist": "neznan avtor",
   "latin": "Agaricus campestris",
   "license": "CC BY-SA 3.0",
   "sl": "Poljski kukmak",
   "source_url": "https://commons.wikimedia.org/wiki/File:Agaricus campestris.jpg"
+ },
+ "agaricus_langei.jpg": {
+  "artist": "Irene Andersson (irenea)",
+  "latin": "Agaricus langei",
+  "license": "CC BY-SA 3.0",
+  "sl": "Gozdni kukmak",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Agaricus_langei_(F.H._M%C3%B8ller)_F.H._M%C3%B8ller_(231468).jpg"
+ },
+ "agaricus_silvicola.jpg": {
+  "artist": "Luridiformis at English Wikipedia",
+  "latin": "Agaricus silvicola",
+  "license": "CC BY 3.0",
+  "sl": "Hostni kukmak",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Agaricus_silvicola_father_and_son.jpg"
+ },
+ "agaricus_sylvaticus.jpg": {
+  "artist": "Holger Krisp",
+  "latin": "Agaricus sylvaticus",
+  "license": "CC BY 3.0",
+  "sl": "Rjavoluski kukmak",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Kleiner_Waldchampignon_Agaricus_silvaticus.jpg"
  },
  "agaricus_xanthodermus.jpg": {
   "artist": "Velella",
@@ -19,6 +47,41 @@
   "license": "CC BY-SA 3.0",
   "sl": "Knežja mušnica (Karželj)",
   "source_url": "https://commons.wikimedia.org/wiki/File:Oronges.jpg"
+ },
+ "amanita_citrina.jpg": {
+  "artist": "Jean-Marc Pascolo",
+  "latin": "Amanita citrina",
+  "license": "CC BY-SA 4.0",
+  "sl": "Bleda mušnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_citrina_%C3%A0_Carling.jpg"
+ },
+ "amanita_crocea.jpg": {
+  "artist": "James Lindsey",
+  "latin": "Amanita crocea",
+  "license": "CC BY-SA 3.0",
+  "sl": "Oranžna lupinarica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_crocea_-_Lindsey.jpg"
+ },
+ "amanita_excelsa.jpg": {
+  "artist": "A.excelsa.jpg: Original uploader was Luridiformis at en.wikipedia derivative work: Ak ccm (talk)",
+  "latin": "Amanita excelsa",
+  "license": "CC BY 3.0",
+  "sl": "Čokata mušnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2008-07-07_Amanita_excelsa_colors_corrected.jpg"
+ },
+ "amanita_franchetii.jpg": {
+  "artist": "This image was created by user Andreas Gminder (mollisia) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Amanita franchetii",
+  "license": "CC BY-SA 3.0",
+  "sl": "Hrapava mušnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_franchetii_(Boud.)_Fayod.jpg"
+ },
+ "amanita_fulva.jpg": {
+  "artist": "Hankwang",
+  "latin": "Amanita fulva",
+  "license": "CC BY 1.0",
+  "sl": "Rjava lupinarica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_fulva_lowpx.jpg"
  },
  "amanita_muscaria.jpg": {
   "artist": "Onderwijsgek",
@@ -41,12 +104,26 @@
   "sl": "Zelena mušnica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Amanita phalloides 1.JPG"
  },
+ "amanita_porphyria.jpg": {
+  "artist": "Tomasz Sobczak",
+  "latin": "Amanita porphyria",
+  "license": "CC BY-SA 4.0",
+  "sl": "Porfirasta mušnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_porphyria_ts1.jpg"
+ },
  "amanita_rubescens.jpg": {
   "artist": "No machine-readable author provided. Archenzo assumed (based on copyright claims).",
   "latin": "Amanita rubescens",
   "license": "CC BY-SA 3.0",
   "sl": "Rdečkasta mušnica (Bisernica)",
   "source_url": "https://commons.wikimedia.org/wiki/File:Amanita rubescens.JPG"
+ },
+ "amanita_vaginata.jpg": {
+  "artist": "Stu's Images",
+  "latin": "Amanita vaginata",
+  "license": "CC BY-SA 3.0",
+  "sl": "Siva lupinarica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Amanita_vaginata,_Grisette,_UK.jpg"
  },
  "amanita_virosa.jpg": {
   "artist": "en:User:Ben DeRoy",
@@ -61,6 +138,13 @@
   "license": "CC BY-SA 3.0",
   "sl": "Sivorumena mraznica (Štorovka)",
   "source_url": "https://commons.wikimedia.org/wiki/File:Armillaria mellea, Honey Fungus, UK 1.jpg"
+ },
+ "armillaria_tabescens.jpg": {
+  "artist": "Antonio Abbatiello",
+  "latin": "Armillaria tabescens",
+  "license": "Public domain",
+  "sl": "Lisičja mraznica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Armillaria_tabescens.JPG"
  },
  "auricularia_auricula_judae.jpg": {
   "artist": "No machine-readable author provided. Svdmolen assumed (based on copyright claims).",
@@ -118,6 +202,55 @@
   "sl": "Navadna lisička",
   "source_url": "https://commons.wikimedia.org/wiki/File:Chanterelle Cantharellus cibarius.jpg"
  },
+ "chlorophyllum_rhacodes.jpg": {
+  "artist": "Dominicus Johannes Bergsma",
+  "latin": "Chlorophyllum rhacodes",
+  "license": "CC0",
+  "sl": "Rdečeča dežnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Knolparasolzwammen._09-11-2023._(d.j.b).jpg"
+ },
+ "clitocybe_dealbata.jpg": {
+  "artist": "Archenzo",
+  "latin": "Clitocybe dealbata",
+  "license": "CC BY 3.0",
+  "sl": "Bela livka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Clitocybe_dealbata_1.jpg"
+ },
+ "clitocybe_gibba.jpg": {
+  "artist": "Ermell",
+  "latin": "Clitocybe gibba",
+  "license": "CC BY-SA 4.0",
+  "sl": "Rjavkasta livka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:M%C3%B6nchskopf_(Infundibulicybe_geotropa)-20191017-RM-155028.jpg"
+ },
+ "clitocybe_nebularis.jpg": {
+  "artist": "Archenzo",
+  "latin": "Clitocybe nebularis",
+  "license": "CC BY-SA 3.0",
+  "sl": "Meglenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Clitocybe_Nebularis.JPG"
+ },
+ "clitocybe_odora.jpg": {
+  "artist": "Holger Krisp",
+  "latin": "Clitocybe odora",
+  "license": "CC BY 3.0",
+  "sl": "Janeževa livka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Clitocybe-odora.jpg"
+ },
+ "coprinellus_micaceus.jpg": {
+  "artist": "Achim Lammerts (Syntaxys)",
+  "latin": "Coprinellus micaceus",
+  "license": "CC BY-SA 4.0",
+  "sl": "Sljudnata tintnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2026-03-04_Z5-1520_Achim-Lammerts_Coprinellus-micaceus.jpg"
+ },
+ "coprinopsis_atramentaria.jpg": {
+  "artist": "James Lindsey",
+  "latin": "Coprinopsis atramentaria",
+  "license": "CC BY-SA 3.0",
+  "sl": "Gola tintnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Coprinopsis_atramentaria_3_-_Lindsey.jpg"
+ },
  "coprinus_comatus.jpg": {
   "artist": "A. Uciechowska",
   "latin": "Coprinus comatus",
@@ -125,12 +258,82 @@
   "sl": "Velika tintnica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Coprinus comatus.jpg"
  },
+ "cortinarius_bolaris.jpg": {
+  "artist": "Dragonòt *derivative work: Andreas Kunze",
+  "latin": "Cortinarius bolaris",
+  "license": "CC BY 3.0",
+  "sl": "Rjava koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_bolaris_crop.jpg"
+ },
+ "cortinarius_camphoratus.jpg": {
+  "artist": "amadej trnkoczy (amadej)",
+  "latin": "Cortinarius camphoratus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Smrdljiva koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_camphoratus_114071.jpg"
+ },
  "cortinarius_caperatus.jpg": {
   "artist": "Strobilomyces",
   "latin": "Cortinarius caperatus",
   "license": "CC BY-SA 3.0",
   "sl": "Pšenična koprenka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Rozites caperata 20100919w.JPG"
+ },
+ "cortinarius_cinnamomeus.jpg": {
+  "artist": "James K. Lindsey",
+  "latin": "Cortinarius cinnamomeus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Cimetasta koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_cinnamomeus_-_Lindsey.jpg"
+ },
+ "cortinarius_collinitus.jpg": {
+  "artist": "The original uploader was Cresus22 at English Wikipedia.",
+  "latin": "Cortinarius collinitus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Sluzava koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_collinitus.jpg"
+ },
+ "cortinarius_mucosus.jpg": {
+  "artist": "This image was created by user Nathan Wilson (nathan) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Cortinarius mucosus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Lepljiva koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_mucosus.jpg"
+ },
+ "cortinarius_odorifer.jpg": {
+  "artist": "This image was created by user Irene Andersson (irenea) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Cortinarius odorifer",
+  "license": "CC BY-SA 3.0",
+  "sl": "Anisova koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_odorifer,_Gotland_2.jpg"
+ },
+ "cortinarius_orellanus.jpg": {
+  "artist": "Andreas Kunze",
+  "latin": "Cortinarius orellanus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Poljska koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2013-10-16_Cortinarius_orellanus_1a.jpg"
+ },
+ "cortinarius_sanguineus.jpg": {
+  "artist": "Jerzy Opioła",
+  "latin": "Cortinarius sanguineus",
+  "license": "CC BY-SA 4.0",
+  "sl": "Krvavordeča koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cortinarius_sanguineus_BS11.JPG"
+ },
+ "cortinarius_traganus.jpg": {
+  "artist": "This image was created by user Ron Pastorino (Ronpast) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Cortinarius traganus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Zvončasta koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2012-10-19_Cortinarius_traganus_(Fr.)_Fr_273917.jpg"
+ },
+ "cortinarius_violaceus.jpg": {
+  "artist": "This image was created by user Dan Molter (shroomydan) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Cortinarius violaceus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Modrikasta koprenka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2008-08-22_Cortinarius_violaceus_(L.)_Gray_18241_crop.jpg"
  },
  "craterellus_cornucopioides.jpg": {
   "artist": "Jean-Pol GRANDMONT",
@@ -146,12 +349,47 @@
   "sl": "Lijasta lisička",
   "source_url": "https://commons.wikimedia.org/wiki/File:Cantharellus tubaeformis G28.JPG"
  },
+ "entoloma_clypeatum.jpg": {
+  "artist": "Alan Rockefeller",
+  "latin": "Entoloma clypeatum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Ščitasta rdečelistka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Entoloma_clypeatum.jpg"
+ },
+ "entoloma_sinuatum.jpg": {
+  "artist": "Eugene Popov",
+  "latin": "Entoloma sinuatum",
+  "license": "CC BY 4.0",
+  "sl": "Velika rdečelistka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Entoloma_sinuatum_54291818.jpg"
+ },
+ "entoloma_vernum.jpg": {
+  "artist": "This image was created by user Dan Molter (shroomydan) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Entoloma vernum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Pomladanska rdečelistka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-03-22_Entoloma_vernum_S._Lundell_138183.jpg"
+ },
  "flammulina_velutipes.jpg": {
   "artist": "Eric Steinert",
   "latin": "Flammulina velutipes",
   "license": "CC BY-SA 3.0",
   "sl": "Zimska panjevka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Flammulina velutipes 04.jpg"
+ },
+ "fomes_fomentarius.jpg": {
+  "artist": "Dr. Hans-Günter Wagner",
+  "latin": "Fomes fomentarius",
+  "license": "CC BY-SA 2.0",
+  "sl": "Bukova kresilka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Fomes_fomentarius_(46906865784).jpg"
+ },
+ "fomitopsis_officinalis.jpg": {
+  "artist": "Walter Siegmund (talk)",
+  "latin": "Fomitopsis officinalis",
+  "license": "CC BY 2.5",
+  "sl": "Macesnova goba",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Fomitopsis_officinalis_32014.JPG"
  },
  "gomphidius_glutinosus.jpg": {
   "artist": "Bernd Haynold",
@@ -174,12 +412,47 @@
   "sl": "Jesenski hrček",
   "source_url": "https://commons.wikimedia.org/wiki/File:Gyromitra infula Sasata.jpg"
  },
+ "hemileccinum_impolitum.jpg": {
+  "artist": "George Chernilevsky",
+  "latin": "Hemileccinum impolitum",
+  "license": "Public domain",
+  "sl": "Sivi goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Boletus_impolitus_2009_G2.jpg"
+ },
+ "hortiboletus_rubellus.jpg": {
+  "artist": "Luridiformis at English Wikipedia",
+  "latin": "Hortiboletus rubellus",
+  "license": "CC BY 3.0",
+  "sl": "Rdeči goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Bol.rub.jpg"
+ },
  "hydnum_repandum.jpg": {
   "artist": "D J Kelly",
   "latin": "Hydnum repandum",
   "license": "Public domain",
   "sl": "Rumeni ježek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Hedgehog fungi2.jpg"
+ },
+ "hygrophorus_hypothejus.jpg": {
+  "artist": "Ripa",
+  "latin": "Hygrophorus hypothejus",
+  "license": "Public domain",
+  "sl": "Zimska polževka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Hygrophorus_hypothejus_1.jpg"
+ },
+ "hygrophorus_marzuolus.jpg": {
+  "artist": "GLJIVARSKO DRUSTVO NIS from Serbia",
+  "latin": "Hygrophorus marzuolus",
+  "license": "CC BY 2.0",
+  "sl": "Marčna polževka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:HYGROPHORUS_MARZUOLUS_(F._Fr.)Bresadola_(5731129003).jpg"
+ },
+ "hygrophorus_russula.jpg": {
+  "artist": "This image was created by user Matt Sherman (Shermanii) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Hygrophorus russula",
+  "license": "CC BY-SA 3.0",
+  "sl": "Medena polževka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-10-09_Hygrophorus_russula_(Schaeff.)_Kauffman_175022.jpg"
  },
  "hypholoma_fasciculare.jpg": {
   "artist": "Jörg Hempel",
@@ -195,12 +468,33 @@
   "sl": "Kostanjevka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Boletus badius JPG1.jpg"
  },
+ "infundibulicybe_geotropa.jpg": {
+  "artist": "Achim Lammerts (Syntaxys)",
+  "latin": "Infundibulicybe geotropa",
+  "license": "CC BY-SA 4.0",
+  "sl": "Pozna livka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2025-10-26_D500-1240_Achim-Lammerts_Infundibulicybe-geotropa.jpg"
+ },
  "laccaria_amethystina.jpg": {
   "artist": "Luridiformis at en.wikipedia",
   "latin": "Laccaria amethystina",
   "license": "CC BY 3.0",
   "sl": "Vijoličasta bledivka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Laccaria amethystina 2.jpg"
+ },
+ "lactarius_chrysorrheus.jpg": {
+  "artist": "Zonda Grattus, aka Luridiformis at en.wikipedia (the sole owner and copyright holder of this image)",
+  "latin": "Lactarius chrysorrheus",
+  "license": "CC BY 3.0",
+  "sl": "Zlata sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lact.chry.jpg"
+ },
+ "lactarius_croceus.jpg": {
+  "artist": "Dan Molter (shroomydan)",
+  "latin": "Lactarius croceus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Žafranasta mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_croceus_90994.jpg"
  },
  "lactarius_deliciosus.jpg": {
   "artist": "neznan avtor",
@@ -216,6 +510,48 @@
   "sl": "Smrekova sirovka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius-deterrimus-Fichten-Reizker.jpg"
  },
+ "lactarius_lignyotus.jpg": {
+  "artist": "This image was created by user Gerhard Koller (Gerhard) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lactarius lignyotus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Črna mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_lignyotus_41556_crop.jpg"
+ },
+ "lactarius_obscuratus.jpg": {
+  "artist": "Irene Andersson (irenea)",
+  "latin": "Lactarius obscuratus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Jelševa mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_obscuratus_25467.jpg"
+ },
+ "lactarius_omphaliformis.jpg": {
+  "artist": "J.E.Lange",
+  "latin": "Lactarius omphaliformis",
+  "license": "Public domain",
+  "sl": "Mahova mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius-omphaliformis-Lange-Tab-175-C.jpg"
+ },
+ "lactarius_rufus.jpg": {
+  "artist": "Zonda Grattus, aka Luridiformis at en.wikipedia (the sole owner and copyright holder of this image)",
+  "latin": "Lactarius rufus",
+  "license": "CC BY 3.0",
+  "sl": "Rdečerjava mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lact.ruf.jpg"
+ },
+ "lactarius_sanguifluus.jpg": {
+  "artist": "This image was created by user Irene Andersson (irenea) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lactarius sanguifluus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Krvavosočna sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_sanguifluus_64507.jpg"
+ },
+ "lactarius_serifluus.jpg": {
+  "artist": "Mordecai Cubitt Cooke",
+  "latin": "Lactarius serifluus",
+  "license": "Public domain",
+  "sl": "Vodena mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_serifluus-Cooke.jpg"
+ },
  "lactifluus_piperatus.jpg": {
   "artist": "This image was created by user Copyright ©2010 Hamilton at Mushroom Observer, a source…",
   "latin": "Lactifluus piperatus",
@@ -230,12 +566,54 @@
   "sl": "Polsteni mlečnik",
   "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius vellereus.jpg"
  },
+ "lactifluus_volemus.jpg": {
+  "artist": "This image was created by user Dan Molter (shroomydan) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lactifluus volemus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Sočna mlečnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_volemus_90024_cropped.jpg"
+ },
+ "laetiporus_sulphureus.jpg": {
+  "artist": "Rror",
+  "latin": "Laetiporus sulphureus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Žvepleni lešič",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Laetiporus_sulphureus_big.jpg"
+ },
  "leccinum_aurantiacum.jpg": {
   "artist": "Jerzy Opioła",
   "latin": "Leccinum aurantiacum",
   "license": "CC BY-SA 3.0",
   "sl": "Hrastov turek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum aurantiacum G3 (1).jpg"
+ },
+ "leccinum_crocipodium.jpg": {
+  "artist": "This image was created by user walt sturgeon (Mycowalt) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Leccinum crocipodium",
+  "license": "CC BY-SA 3.0",
+  "sl": "Žafranasti ded",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Leccinellum_crocipodium_(Letell.)_Bresinsky_%26_Manfr._Binder_533003_2015-06-29.jpg"
+ },
+ "leccinum_duriusculum.jpg": {
+  "artist": "Gerhard Koller (Gerhard)",
+  "latin": "Leccinum duriusculum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rjavi turek",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum_duriusculum_254194.jpg"
+ },
+ "leccinum_melaneum.jpg": {
+  "artist": "Daniel Ullrich from Dorsten, Germany",
+  "latin": "Leccinum melaneum",
+  "license": "CC BY-SA 2.0",
+  "sl": "Črni ded",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum_melaneum.jpg"
+ },
+ "leccinum_pseudoscabrum.jpg": {
+  "artist": "Andreas Kunze",
+  "latin": "Leccinum pseudoscabrum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Gabrov ded",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2009-07-04_Leccinum_pseudoscabrum_2.jpg"
  },
  "leccinum_scabrum.jpg": {
   "artist": "neznan avtor",
@@ -251,6 +629,41 @@
   "sl": "Brezov turek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum versipelle, Kozlarz pomaranczowy.jpg"
  },
+ "lepista_glaucocana.jpg": {
+  "artist": "Strobilomyces",
+  "latin": "Lepista glaucocana",
+  "license": "CC BY-SA 3.0",
+  "sl": "Gola kolesnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lepista_nuda_041022.jpg"
+ },
+ "lepista_irina.jpg": {
+  "artist": "This image was created by user Gerhard Koller at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lepista irina",
+  "license": "CC BY-SA 3.0",
+  "sl": "Dišeča kolesnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lepista_irina_41650.jpg"
+ },
+ "lepista_luscina.jpg": {
+  "artist": "This image was created by user Gerhard Koller (Gerhard) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lepista luscina",
+  "license": "CC BY-SA 3.0",
+  "sl": "Sivkasta kolesnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2009-04-22_Lepista_luscina_(Fr.)_Singer_41661_crop.jpg"
+ },
+ "lepista_nuda.jpg": {
+  "artist": "Archenzo, Italy",
+  "latin": "Lepista nuda",
+  "license": "CC BY-SA 3.0",
+  "sl": "Vijoličasta kolesnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lepista_nuda.jpg"
+ },
+ "lepista_personata.jpg": {
+  "artist": "This image was created by user Gerhard Koller (Gerhard) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Lepista personata",
+  "license": "CC BY-SA 3.0",
+  "sl": "Dvobarvna kolesnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2009-04-22_Lepista_saeva_(Fr.)_P.D._Orton_41666.jpg"
+ },
  "lycoperdon_perlatum.jpg": {
   "artist": "Daniel Ullrich, Threedots",
   "latin": "Lycoperdon perlatum",
@@ -264,6 +677,13 @@
   "license": "CC BY-SA 4.0",
   "sl": "Orjaški dežnik (Marela)",
   "source_url": "https://commons.wikimedia.org/wiki/File:Macrolepiota-procera.jpg"
+ },
+ "macrolepiota_puellaris.jpg": {
+  "artist": "Ervinpospisil at Czech Wikipedia",
+  "latin": "Macrolepiota puellaris",
+  "license": "Public domain",
+  "sl": "Dekliški dežnik",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Leucoagaricus_nympharum.jpg"
  },
  "morchella_elata.jpg": {
   "artist": "Holger Krisp",
@@ -286,6 +706,13 @@
   "sl": "Žametasti goban",
   "source_url": "https://commons.wikimedia.org/wiki/File:Boletus erythropus 01.jpg"
  },
+ "neoboletus_pseudosulphureus.jpg": {
+  "artist": "This image was created by user walt sturgeon (Mycowalt) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Neoboletus pseudosulphureus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rumeni goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Neoboletus_pseudosulphureus_(Kallenb.)_Klofac_318857.jpg"
+ },
  "paxillus_involutus.jpg": {
   "artist": "Karelj",
   "latin": "Paxillus involutus",
@@ -300,12 +727,40 @@
   "sl": "Bukov ostrigar",
   "source_url": "https://commons.wikimedia.org/wiki/File:Pleurotus ostreatus JPG7.jpg"
  },
+ "ramaria_aurea.jpg": {
+  "artist": "Ramaria_aurea1.JPG: böhringer friedrich derivative work: Ak ccm",
+  "latin": "Ramaria aurea",
+  "license": "CC BY-SA 2.5",
+  "sl": "Zlata griva",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2012-09-03_Ramaria_aurea_crop.jpg"
+ },
+ "ramaria_botrytis.jpg": {
+  "artist": "2010-09-17_Ramaria_botrytis.jpg: Jason Hollinger derivative work: Ak ccm",
+  "latin": "Ramaria botrytis",
+  "license": "CC BY 2.0",
+  "sl": "Rdeča griva",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2010-09-17_Ramaria_botrytis_crop.jpg"
+ },
+ "ramaria_pallida.jpg": {
+  "artist": "Bernie",
+  "latin": "Ramaria pallida",
+  "license": "Public domain",
+  "sl": "Bleda griva",
+  "source_url": "https://commons.wikimedia.org/wiki/File:AD2009Sep13_Ramaria_formosa_04.jpg"
+ },
  "rubroboletus_satanas.jpg": {
   "artist": "Photo by Archenzo. Northern Apennine Mountains (Appennino piacentino).",
   "latin": "Rubroboletus satanas",
   "license": "CC BY-SA 3.0",
   "sl": "Vražji goban",
   "source_url": "https://commons.wikimedia.org/wiki/File:Boletus satanas.JPG"
+ },
+ "russula_aurea.jpg": {
+  "artist": "archenzo",
+  "latin": "Russula aurea",
+  "license": "CC BY-SA 3.0",
+  "sl": "Zlatolistna golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Russula_Aurea.JPG"
  },
  "russula_cyanoxantha.jpg": {
   "artist": "Björn S...",
@@ -321,6 +776,62 @@
   "sl": "Bljuvna golobica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Russula emetica 117475.jpg"
  },
+ "russula_foetens.jpg": {
+  "artist": "Szabi237",
+  "latin": "Russula foetens",
+  "license": "CC BY 3.0",
+  "sl": "Smrdljiva golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Russula_foetens.JPG"
+ },
+ "russula_fragilis.jpg": {
+  "artist": "Zonda Grattus",
+  "latin": "Russula fragilis",
+  "license": "CC BY 3.0",
+  "sl": "Krhka golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Russula_fragilis.jpg"
+ },
+ "russula_heterophylla.jpg": {
+  "artist": "James K. Lindsey",
+  "latin": "Russula heterophylla",
+  "license": "CC BY-SA 3.0",
+  "sl": "Lešnikova golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Russula.heterophylla.-.lindsey.jpg"
+ },
+ "russula_lepida.jpg": {
+  "artist": "This image was created by user zaca at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Russula lepida",
+  "license": "CC BY-SA 3.0",
+  "sl": "Trda golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-05-14_Russula_lepida_146790.jpg"
+ },
+ "russula_mustelina.jpg": {
+  "artist": "This image was created by user Irene Andersson (irenea) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Russula mustelina",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rjavkasta golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2005-08-08_Russula_mustelina_31414_mod.jpg"
+ },
+ "russula_nigricans.jpg": {
+  "artist": "Holger Krisp",
+  "latin": "Russula nigricans",
+  "license": "CC BY 3.0",
+  "sl": "Črnikasta golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Dickbl%C3%A4ttrige_Schw%C3%A4rz-T%C3%A4ubling_Russula_nigricans.jpg"
+ },
+ "russula_romellii.jpg": {
+  "artist": "Svencapoeira",
+  "latin": "Russula romellii",
+  "license": "CC BY-SA 4.0",
+  "sl": "Malinova golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Romelli_pilvik.jpg"
+ },
+ "russula_sanguinaria.jpg": {
+  "artist": "Luridiformis at English Wikipedia",
+  "latin": "Russula sanguinaria",
+  "license": "CC BY 3.0",
+  "sl": "Češnjeva golobica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Russ.sang.jpg"
+ },
  "russula_vesca.jpg": {
   "artist": "MichalPL",
   "latin": "Russula vesca",
@@ -335,6 +846,41 @@
   "sl": "Zelena golobica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Russula virescens3.JPG"
  },
+ "sparassis_crispa.jpg": {
+  "artist": "Gerda Arendt",
+  "latin": "Sparassis crispa",
+  "license": "CC BY-SA 4.0",
+  "sl": "Borova gliva",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Cauliflower_fungus,_Ehrenbach.jpg"
+ },
+ "suillellus_luridus.jpg": {
+  "artist": "This image was created by user Steinpilz at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Suillellus luridus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Preprosti goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2010-09-13_Boletus_luridus_Schaeff_104527_crop.jpg"
+ },
+ "suillellus_queletii.jpg": {
+  "artist": "Vincent Schwellnus on naturgucker.de",
+  "latin": "Suillellus queletii",
+  "license": "CC BY 4.0",
+  "sl": "Svinjski goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Suillellus_queletii_7.jpg"
+ },
+ "suillus_bovinus.jpg": {
+  "artist": "Alberto Vázquez",
+  "latin": "Suillus bovinus",
+  "license": "CC BY-SA 2.5",
+  "sl": "Kravja lupljivka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Suillus_bovinus_Alberto_V%C3%A1zquez.jpg"
+ },
+ "suillus_granulatus.jpg": {
+  "artist": "Holger Krisp",
+  "latin": "Suillus granulatus",
+  "license": "CC BY 3.0",
+  "sl": "Ovčja lupljivka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:K%C3%B6rnchen-R%C3%B6hrling_Suillus_granulatus_1.jpg"
+ },
  "suillus_grevillei.jpg": {
   "artist": "Dezidor",
   "latin": "Suillus grevillei",
@@ -342,12 +888,96 @@
   "sl": "Macesnova lupljivka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Suillus grevillei.jpg"
  },
+ "suillus_variegatus.jpg": {
+  "artist": "This image was created by user Irene Andersson (irenea) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Suillus variegatus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Peščena lupljivka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2008-11-05_Suillus_variegatus_(Sw.)_Kuntze_27971.jpg"
+ },
  "trametes_versicolor.jpg": {
   "artist": "Ecornerdropshop at en.wikipedia",
   "latin": "Trametes versicolor",
   "license": "Public domain",
   "sl": "Pisana ploskocevka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Stumpfungus.jpg"
+ },
+ "tricholoma_atrosquamosum.jpg": {
+  "artist": "Zaca",
+  "latin": "Tricholoma atrosquamosum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Črnomekinasta kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_atrosquamosum_186463.jpg"
+ },
+ "tricholoma_equestre.jpg": {
+  "artist": "neznan avtor",
+  "latin": "Tricholoma equestre",
+  "license": "CC BY-SA 3.0",
+  "sl": "Zelenkasta kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_equestre.jpg"
+ },
+ "tricholoma_pardinum.jpg": {
+  "artist": "This image was created by user Ryane Snow (snowman) at Mushroom Observer, a source for mycological images.You can contact this user here.",
+  "latin": "Tricholoma pardinum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Pegasta kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2008-11-26_Tricholoma_pardinum_Qu%C3%A9l_30173.jpg"
+ },
+ "tricholoma_portentosum.jpg": {
+  "artist": "Aorg1961",
+  "latin": "Tricholoma portentosum",
+  "license": "CC BY-SA 4.0",
+  "sl": "Zimska kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:G%C4%85ska_niekszta%C5%82tna_1.jpg"
+ },
+ "tricholoma_saponaceum.jpg": {
+  "artist": "Archenzo",
+  "latin": "Tricholoma saponaceum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Milnata kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_saponaceum.jpg"
+ },
+ "tricholoma_scalpturatum.jpg": {
+  "artist": "User:Strobilomyces",
+  "latin": "Tricholoma scalpturatum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Miška",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_scalpuratum_20061014wa.jpg"
+ },
+ "tricholoma_sejunctum.jpg": {
+  "artist": "Karelj",
+  "latin": "Tricholoma sejunctum",
+  "license": "Public domain",
+  "sl": "Žolta kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_sejunctum_1.jpg"
+ },
+ "tricholoma_sulphureum.jpg": {
+  "artist": "Strobilomyces",
+  "latin": "Tricholoma sulphureum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Žveplena kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_sulphureum_031123w.jpg"
+ },
+ "tricholoma_terreum.jpg": {
+  "artist": "User:Strobilomyces",
+  "latin": "Tricholoma terreum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Prstena kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma_terreum_20061105wa.jpg"
+ },
+ "tricholoma_ustale.jpg": {
+  "artist": "James Lindsey",
+  "latin": "Tricholoma ustale",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rjava kolobarnica",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tricholoma.ustale.-.lindsey.jpg"
+ },
+ "tylopilus_felleus.jpg": {
+  "artist": "Björn S...",
+  "latin": "Tylopilus felleus",
+  "license": "CC BY-SA 2.0",
+  "sl": "Žolčasti goban",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tylopilus_felleus_(36878337253)_(2).jpg"
  },
  "xerocomellus_chrysenteron.jpg": {
   "artist": "EmillimeS",

@@ -7,7 +7,7 @@
 # Izpeljane vrednosti (talno-temp. okno, padavinski pragovi, višina, geološka
 # afiniteta, nočna ohladitev) so označene '# TODO: kalibriraj'. Neposredno iz
 # baze (sezona, zračni prag, mikoriza, dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-07-17 · 51 vrst.
+# Zadnja regeneracija: 2026-07-18 · 145 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
@@ -121,76 +121,6 @@ locations:
     lat: 46.392
     lon: 14.628
     elev_m: 750
-    terrain: vlazna
-    home: false
-    protected: true
-  - name: "Vivodnik (Menina planina)"
-    lat: 46.255
-    lon: 14.735
-    elev_m: 1500
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Nova Štifta – Tirosek"
-    lat: 46.255
-    lon: 14.783
-    elev_m: 700
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Črnivec – Bočna"
-    lat: 46.225
-    lon: 14.715
-    elev_m: 850
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Podvolovljek"
-    lat: 46.4
-    lon: 14.73
-    elev_m: 900
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Rastke (Ljubenske Rastke)"
-    lat: 46.365
-    lon: 14.865
-    elev_m: 850
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Primož pri Ljubnem"
-    lat: 46.32
-    lon: 14.83
-    elev_m: 750
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Obronki Raduhe (Loka)"
-    lat: 46.4
-    lon: 14.71
-    elev_m: 900
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Bele Vode – Šentjanž"
-    lat: 46.31
-    lon: 15.02
-    elev_m: 1000
-    terrain: vlazna
-    home: false
-    protected: false
-  - name: "Matkov kot"
-    lat: 46.4
-    lon: 14.62
-    elev_m: 900
-    terrain: vlazna
-    home: false
-    protected: true
-  - name: "Robanov kot"
-    lat: 46.4
-    lon: 14.66
-    elev_m: 850
     terrain: vlazna
     home: false
     protected: true
@@ -1268,3 +1198,1977 @@ species:
     elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
     requires_temp_drop: false   # TODO: kalibriraj
     doubles: "Bližnje sorodne ploskocevke – nobena ni strupena, so pa vse preveč lesene za neposredno prehrano."
+  - id: amanita_spissa
+    name_sl: "Siva mušnica"
+    name_lat: "Amanita spissa"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_excelsa
+    name_sl: "Čokata mušnica"
+    name_lat: "Amanita excelsa"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_citrina
+    name_sl: "Bleda mušnica"
+    name_lat: "Amanita citrina"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_crocea
+    name_sl: "Oranžna lupinarica"
+    name_lat: "Amanita crocea"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "11.30" }
+    air_temp: { min: 12, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_vaginata
+    name_sl: "Siva lupinarica"
+    name_lat: "Amanita vaginata"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "11.30" }
+    air_temp: { min: 12, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_fulva
+    name_sl: "Rjava lupinarica"
+    name_lat: "Amanita fulva"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "11.30" }
+    air_temp: { min: 12, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: amanita_porphyria
+    name_sl: "Porfirasta mušnica"
+    name_lat: "Amanita porphyria"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zamenljiva z užitnimi vrstami! Previdno!"
+  - id: amanita_franchetii
+    name_sl: "Hrapava mušnica"
+    name_lat: "Amanita franchetii"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: suillellus_queletii
+    name_sl: "Svinjski goban"
+    name_lat: "Suillellus queletii"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: hemileccinum_impolitum
+    name_sl: "Sivi goban"
+    name_lat: "Hemileccinum impolitum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: suillellus_luridus
+    name_sl: "Preprosti goban"
+    name_lat: "Suillellus luridus"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: hortiboletus_rubellus
+    name_sl: "Rdeči goban"
+    name_lat: "Hortiboletus rubellus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: neoboletus_pseudosulphureus
+    name_sl: "Rumeni goban"
+    name_lat: "Neoboletus pseudosulphureus"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: suillus_variegatus
+    name_sl: "Peščena lupljivka"
+    name_lat: "Suillus variegatus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["iglavci (bor", "macesen)"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
+    geology_affinity: kisla   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: suillus_granulatus
+    name_sl: "Ovčja lupljivka"
+    name_lat: "Suillus granulatus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "11.30" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["iglavci (bor", "macesen)"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
+    geology_affinity: kisla   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: suillus_bovinus
+    name_sl: "Kravja lupljivka"
+    name_lat: "Suillus bovinus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "11.30" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["iglavci (bor", "macesen)"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
+    geology_affinity: kisla   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: tylopilus_felleus
+    name_sl: "Žolčasti goban"
+    name_lat: "Tylopilus felleus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: leccinum_pseudoscabrum
+    name_sl: "Gabrov ded"
+    name_lat: "Leccinum pseudoscabrum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "10.31" }
+    air_temp: { min: 15, max: 24 }  # zračni prag iz baze
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["breza", "gaber", "trepetlika"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: leccinum_melaneum
+    name_sl: "Črni ded"
+    name_lat: "Leccinum melaneum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["breza", "gaber", "trepetlika"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: leccinum_crocipodium
+    name_sl: "Žafranasti ded"
+    name_lat: "Leccinum crocipodium"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "06.01", end: "10.31" }
+    air_temp: { min: 15, max: 24 }  # zračni prag iz baze
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["breza", "gaber", "trepetlika"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: leccinum_duriusculum
+    name_sl: "Rjavi turek"
+    name_lat: "Leccinum duriusculum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["breza", "gaber", "trepetlika"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: leccinum_populinum
+    name_sl: "Topolov turek"
+    name_lat: "Leccinum populinum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["breza", "gaber", "trepetlika"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: armillaria_tabescens
+    name_sl: "Lisičja mraznica"
+    name_lat: "Armillaria tabescens"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: sparassis_crispa
+    name_sl: "Borova gliva"
+    name_lat: "Sparassis crispa"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 35        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 70       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: russula_mustelina
+    name_sl: "Rjavkasta golobica"
+    name_lat: "Russula mustelina"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_nigricans
+    name_sl: "Črnikasta golobica"
+    name_lat: "Russula nigricans"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 24 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_foetens
+    name_sl: "Smrdljiva golobica"
+    name_lat: "Russula foetens"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "11.30" }
+    air_temp: { min: 15, max: 25 }  # zračni prag iz baze
+    soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 23.5, max: 26.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_aurea
+    name_sl: "Zlatolistna golobica"
+    name_lat: "Russula aurea"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "09.30" }
+    air_temp: { min: 16, max: 26 }  # zračni prag iz baze
+    soil_temp: { min: 11.5, opt_low: 14.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_heterophylla
+    name_sl: "Lešnikova golobica"
+    name_lat: "Russula heterophylla"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_lepida
+    name_sl: "Trda golobica"
+    name_lat: "Russula lepida"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_fragilis
+    name_sl: "Krhka golobica"
+    name_lat: "Russula fragilis"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_aeruginea
+    name_sl: "Sivozelena golobica"
+    name_lat: "Russula aeruginea"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_romellii
+    name_sl: "Malinova golobica"
+    name_lat: "Russula romellii"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "09.30" }
+    air_temp: { min: 16, max: 26 }  # zračni prag iz baze
+    soil_temp: { min: 11.5, opt_low: 14.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: russula_sanguinaria
+    name_sl: "Češnjeva golobica"
+    name_lat: "Russula sanguinaria"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Druge golobice (pekoče so strupene)"
+  - id: lactifluus_volemus
+    name_sl: "Sočna mlečnica"
+    name_lat: "Lactifluus volemus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_rufus
+    name_sl: "Rdečerjava mlečnica"
+    name_lat: "Lactarius rufus"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
+    geology_affinity: kisla   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_obscuratus
+    name_sl: "Jelševa mlečnica"
+    name_lat: "Lactarius obscuratus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 6, max: 15 }  # zračni prag iz baze
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_serifluus
+    name_sl: "Vodena mlečnica"
+    name_lat: "Lactarius serifluus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 6, max: 15 }  # zračni prag iz baze
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_croceus
+    name_sl: "Žafranasta mlečnica"
+    name_lat: "Lactarius croceus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_omphaliformis
+    name_sl: "Mahova mlečnica"
+    name_lat: "Lactarius omphaliformis"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 6, max: 15 }  # zračni prag iz baze
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_chrysorrheus
+    name_sl: "Zlata sirovka"
+    name_lat: "Lactarius chrysorrheus"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_sanguifluus
+    name_sl: "Krvavosočna sirovka"
+    name_lat: "Lactarius sanguifluus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_persicinus
+    name_sl: "Breskova mlečnica"
+    name_lat: "Lactarius persicinus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lactarius_lignyotus
+    name_sl: "Črna mlečnica"
+    name_lat: "Lactarius lignyotus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_portentosum
+    name_sl: "Zimska kolobarnica"
+    name_lat: "Tricholoma portentosum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "12.31" }
+    air_temp: { min: 4, max: 12 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_equestre
+    name_sl: "Zelenkasta kolobarnica"
+    name_lat: "Tricholoma equestre"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_pardinum
+    name_sl: "Pegasta kolobarnica"
+    name_lat: "Tricholoma pardinum"
+    edibility: "Zelo strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_saponaceum
+    name_sl: "Milnata kolobarnica"
+    name_lat: "Tricholoma saponaceum"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_sulphureum
+    name_sl: "Žveplena kolobarnica"
+    name_lat: "Tricholoma sulphureum"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 10, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_terreum
+    name_sl: "Prstena kolobarnica"
+    name_lat: "Tricholoma terreum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "12.31" }
+    air_temp: { min: 4, max: 12 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_ustale
+    name_sl: "Rjava kolobarnica"
+    name_lat: "Tricholoma ustale"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_scalpturatum
+    name_sl: "Miška"
+    name_lat: "Tricholoma scalpturatum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "12.31" }
+    air_temp: { min: 4, max: 12 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_atrosquamosum
+    name_sl: "Črnomekinasta kolobarnica"
+    name_lat: "Tricholoma atrosquamosum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "12.31" }
+    air_temp: { min: 4, max: 12 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: tricholoma_sejunctum
+    name_sl: "Žolta kolobarnica"
+    name_lat: "Tricholoma sejunctum"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: clitocybe_nebularis
+    name_sl: "Meglenka"
+    name_lat: "Clitocybe nebularis"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "10.01", end: "12.31" }
+    air_temp: { min: 4, max: 12 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: infundibulicybe_geotropa
+    name_sl: "Pozna livka"
+    name_lat: "Infundibulicybe geotropa"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: clitocybe_odora
+    name_sl: "Janeževa livka"
+    name_lat: "Clitocybe odora"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: clitocybe_dealbata
+    name_sl: "Bela livka"
+    name_lat: "Clitocybe dealbata"
+    edibility: "Smrtno strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "11.30" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: clitocybe_gibba
+    name_sl: "Rjavkasta livka"
+    name_lat: "Clitocybe gibba"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lepista_nuda
+    name_sl: "Vijoličasta kolesnica"
+    name_lat: "Lepista nuda"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "10.01", end: "12.31" }
+    air_temp: { min: 2, max: 10 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lepista_personata
+    name_sl: "Dvobarvna kolesnica"
+    name_lat: "Lepista personata"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "10.01", end: "12.31" }
+    air_temp: { min: 2, max: 10 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lepista_irina
+    name_sl: "Dišeča kolesnica"
+    name_lat: "Lepista irina"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: lepista_glaucocana
+    name_sl: "Gola kolesnica"
+    name_lat: "Lepista glaucocana"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "10.01", end: "12.31" }
+    air_temp: { min: 2, max: 10 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: lepista_luscina
+    name_sl: "Sivkasta kolesnica"
+    name_lat: "Lepista luscina"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: cortinarius_sanguineus
+    name_sl: "Krvavordeča koprenka"
+    name_lat: "Cortinarius sanguineus"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_cinnamomeus
+    name_sl: "Cimetasta koprenka"
+    name_lat: "Cortinarius cinnamomeus"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_orellanus
+    name_sl: "Poljska koprenka"
+    name_lat: "Cortinarius orellanus"
+    edibility: "Smrtno strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_mucosus
+    name_sl: "Lepljiva koprenka"
+    name_lat: "Cortinarius mucosus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 6, max: 14 }  # zračni prag iz baze
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_traganus
+    name_sl: "Zvončasta koprenka"
+    name_lat: "Cortinarius traganus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_collinitus
+    name_sl: "Sluzava koprenka"
+    name_lat: "Cortinarius collinitus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "09.01", end: "11.30" }
+    air_temp: { min: 6, max: 14 }  # zračni prag iz baze
+    soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_violaceus
+    name_sl: "Modrikasta koprenka"
+    name_lat: "Cortinarius violaceus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_odorifer
+    name_sl: "Anisova koprenka"
+    name_lat: "Cortinarius odorifer"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_camphoratus
+    name_sl: "Smrdljiva koprenka"
+    name_lat: "Cortinarius camphoratus"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 10, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: cortinarius_bolaris
+    name_sl: "Rjava koprenka"
+    name_lat: "Cortinarius bolaris"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "11.30" }
+    air_temp: { min: 8, max: 16 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 60       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: "Zelo nevarna zamenjava s strupenimi koprenkami!"
+  - id: hygrophorus_marzuolus
+    name_sl: "Marčna polževka"
+    name_lat: "Hygrophorus marzuolus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "03.01", end: "05.31" }
+    air_temp: { min: 4, max: 10 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: hygrophorus_hypothejus
+    name_sl: "Zimska polževka"
+    name_lat: "Hygrophorus hypothejus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "10.01", end: "12.31" }
+    air_temp: { min: 2, max: 8 }  # zračni prag iz baze
+    soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 6.5, max: 9.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: hygrophorus_russula
+    name_sl: "Medena polževka"
+    name_lat: "Hygrophorus russula"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: entoloma_sinuatum
+    name_sl: "Velika rdečelistka"
+    name_lat: "Entoloma sinuatum"
+    edibility: "Zelo strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 24 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: entoloma_clypeatum
+    name_sl: "Ščitasta rdečelistka"
+    name_lat: "Entoloma clypeatum"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "04.01", end: "06.30" }
+    air_temp: { min: 8, max: 18 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: entoloma_vernum
+    name_sl: "Pomladanska rdečelistka"
+    name_lat: "Entoloma vernum"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "04.01", end: "06.30" }
+    air_temp: { min: 8, max: 14 }  # zračni prag iz baze
+    soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: agaricus_sylvaticus
+    name_sl: "Rjavoluski kukmak"
+    name_lat: "Agaricus sylvaticus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit na travnikih/gozdovih"
+    soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
+    geology_affinity: bazicna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: agaricus_silvicola
+    name_sl: "Hostni kukmak"
+    name_lat: "Agaricus silvicola"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 14, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit na travnikih/gozdovih"
+    soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
+    geology_affinity: bazicna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: agaricus_bisporus
+    name_sl: "Dvotrosni kukmak"
+    name_lat: "Agaricus bisporus"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit na travnikih/gozdovih"
+    soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
+    geology_affinity: bazicna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: agaricus_langei
+    name_sl: "Gozdni kukmak"
+    name_lat: "Agaricus langei"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 40       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit na travnikih/gozdovih"
+    soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
+    geology_affinity: bazicna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: ramaria_aurea
+    name_sl: "Zlata griva"
+    name_lat: "Ramaria aurea"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: ramaria_botrytis
+    name_sl: "Rdeča griva"
+    name_lat: "Ramaria botrytis"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: ramaria_pallida
+    name_sl: "Bleda griva"
+    name_lat: "Ramaria pallida"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "08.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: true   # TODO: kalibriraj
+    doubles: ""
+  - id: fomes_fomentarius
+    name_sl: "Bukova kresilka"
+    name_lat: "Fomes fomentarius"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit/Parazit na lesu"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: laetiporus_sulphureus
+    name_sl: "Žvepleni lešič"
+    name_lat: "Laetiporus sulphureus"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit/Parazit na lesu"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: fomitopsis_officinalis
+    name_sl: "Macesnova goba"
+    name_lat: "Fomitopsis officinalis"
+    edibility: "Neužitna"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Saprofit/Parazit na lesu"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: coprinellus_micaceus
+    name_sl: "Sljudnata tintnica"
+    name_lat: "Coprinellus micaceus"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "05.01", end: "11.30" }
+    air_temp: { min: 10, max: 22 }  # zračni prag iz baze
+    soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: coprinopsis_atramentaria
+    name_sl: "Gola tintnica"
+    name_lat: "Coprinopsis atramentaria"
+    edibility: "Strupena"
+    gets_index: false
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: chlorophyllum_rhacodes
+    name_sl: "Rdečeča dežnica"
+    name_lat: "Chlorophyllum rhacodes"
+    edibility: "Pogojno užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
+    geology_affinity: nevtralna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
+  - id: macrolepiota_puellaris
+    name_sl: "Dekliški dežnik"
+    name_lat: "Macrolepiota puellaris"
+    edibility: "Užitna"
+    gets_index: true
+    frequency: "Prisotna po celotni dolini"
+    frequency_factor: 0.9   # TODO: kalibriraj (lokalna prisotnost)
+    season: { start: "07.01", end: "10.31" }
+    air_temp: { min: 12, max: 20 }  # zračni prag iz baze
+    soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
+    rain_14d_min: 50       # TODO: kalibriraj
+    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    mycorrhiza: ["mešani gozdovi"]
+    substrate: "Mikoriza; v tleh"
+    soil_ph: "Z dušikom bogata (nitrofilna) antropogena tla (travniki, pašniki)"
+    geology_affinity: bazicna   # TODO: kalibriraj
+    elevation_zone: "Vse višine"
+    elevation_pref_m: { min: 300, max: 1600 }  # TODO: kalibriraj
+    requires_temp_drop: false   # TODO: kalibriraj
+    doubles: ""
