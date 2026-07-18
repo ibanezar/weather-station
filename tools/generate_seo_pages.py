@@ -322,7 +322,8 @@ def footer_html(year=None):
             f'    <span>© {y} Meteorec · Rečica ob Savinji</span>\n'
             f'    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a>'
             f' · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a>'
-            f' · <a href="/podatki/">Podatki</a></span>\n  </footer>')
+            f' · <a href="/podatki/">Podatki</a>'
+            f' · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a></span>\n  </footer>')
 
 def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_image=None):
     full_url = f"{SITE}{canonical}"
@@ -951,7 +952,7 @@ def gen_records_page(hist, sitemap_urls):
     prec_link, prec_str = d_link(prec_d, f"{num(prec_v)} mm")
     wind_link, wind_str = d_link(wind_d, f"{num(wind_v)} km/h")
 
-    title = "Vremenski rekordi — Rečica ob Savinji"
+    title = f"Rekordi: {tmax_str} / {tmin_str} — Rečica ob Savinji"
     desc = (f"Vremenski rekordi meteorološke postaje IREICA1 v Rečici ob Savinji. "
             f"Absolutni temperaturni ekstrem: max {num(tmax_v)} °C, min {num(tmin_v)} °C. "
             f"Dnevni rekord padavin: {num(prec_v)} mm.")
