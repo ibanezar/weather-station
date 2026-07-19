@@ -28,6 +28,8 @@ import json as _json_mod
 import os
 import sys
 import urllib.error
+import urllib.parse
+import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
@@ -767,6 +769,7 @@ body .wrap{padding-bottom:5.5rem}
 .gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted);clear:both}
 .gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
+.gp-species-legend-title{flex-basis:100%}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
@@ -1877,6 +1880,97 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
         "Nevarne dvojnice", body)
 
 
+# ZGS (Zavod za gozdove Slovenije) javna WFS storitev — sloj "sestoji" (gozdni
+# sestoji) nosi dejansko drevesno sestavo vsakega sestoja kot delež lesne
+# zaloge po skupinah drevesnih vrst (polja lzskdv11..lzskdv80, glej uradni
+# šifrant ZGS "Priloge in šifranti" k Navodilom za izdelavo GGN). Uporabljeno
+# samo za prikaz — brez ključa, brez omejitev (Fees/AccessConstraints: NONE).
+ZGS_WFS_URL = "https://prostor.zgs.gov.si/geoserver/wfs"
+ZGS_SPECIES_GROUPS = {
+    "lzskdv11": ("smreka", "#2f6b3a"),
+    "lzskdv21": ("jelka", "#1f7a5c"),
+    "lzskdv30": ("bor", "#d97b29"),
+    "lzskdv34": ("macesen", "#c9a227"),
+    "lzskdv39": ("drugi iglavci", "#6b8f71"),
+    "lzskdv41": ("bukev", "#a13d2c"),
+    "lzskdv50": ("hrast", "#7a5230"),
+    "lzskdv60": ("plemeniti listavci", "#4a7fc1"),
+    "lzskdv70": ("drugi trdi listavci", "#8a6bbf"),
+    "lzskdv80": ("mehki listavci", "#5fb0c9"),
+}
+
+
+def _simplify_ring(ring, max_points=9):
+    """Decimate a polygon ring to at most max_points vertices and round
+    coordinates — keeps the embedded page size sane for what is purely a
+    visual composition layer, not a survey-grade boundary."""
+    step = max(1, len(ring) // max_points)
+    pts = ring[::step]
+    if pts[0] != pts[-1]:
+        pts.append(pts[0])
+    return [[round(lat, 4), round(lon, 4)] for lon, lat in pts]
+
+
+def fetch_sestoji_near(lat, lon, delta=0.012, max_count=80, keep=25):
+    """Fetch nearby ZGS forest-stand polygons and reduce each to its
+    dominant tree-species group (by share of standing timber volume), for
+    a real-composition overlay on the location map. Keeps only the largest
+    `keep` stands (by area) simplified to a handful of vertices each — a
+    public, SEO-relevant page, so embedded weight is kept in check.
+    Best-effort: any network/parsing failure yields an empty list rather
+    than failing the whole site build — this layer is a bonus, not
+    load-bearing."""
+    bbox = f"{lon - delta},{lat - delta},{lon + delta},{lat + delta},urn:ogc:def:crs:CRS:84"
+    params = urllib.parse.urlencode({
+        "service": "WFS", "version": "2.0.0", "request": "GetFeature",
+        "typeName": "pregledovalnik:sestoji", "outputFormat": "application/json",
+        "srsName": "urn:ogc:def:crs:EPSG::4326",
+        "bbox": bbox, "count": str(max_count),
+    })
+    url = f"{ZGS_WFS_URL}?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = _json_mod.loads(r.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError) as e:
+        print(f"  ⚠ ZGS sestoji nedosegljivi ({lat},{lon}): {e}", file=sys.stderr)
+        return []
+
+    out = []
+    for feat in data.get("features", []):
+        props = feat.get("properties") or {}
+        geom = feat.get("geometry") or {}
+        best_key, best_val = None, 0.0
+        for key in ZGS_SPECIES_GROUPS:
+            try:
+                val = float(props.get(key) or 0)
+            except (TypeError, ValueError):
+                val = 0.0
+            if val > best_val:
+                best_key, best_val = key, val
+        if not best_key:
+            continue
+        name, color = ZGS_SPECIES_GROUPS[best_key]
+        coords = geom.get("coordinates") or []
+        if geom.get("type") == "Polygon" and coords:
+            ring = coords[0]
+        elif geom.get("type") == "MultiPolygon" and coords and coords[0]:
+            ring = coords[0][0]
+        else:
+            continue
+        if len(ring) < 4:
+            continue
+        try:
+            area = float(props.get("povrsina") or 0)
+        except (TypeError, ValueError):
+            area = 0.0
+        out.append({"sp": name, "c": color, "pts": _simplify_ring(ring), "_a": area})
+    out.sort(key=lambda s: s["_a"], reverse=True)
+    for s in out:
+        del s["_a"]
+    return out[:keep]
+
+
 def build_zemljevid_page(premium, rules):
     """Interactive Leaflet map of all foraging + protected areas, coloured by
     today's index. Data is baked in (no client fetch) — Leaflet itself loads
@@ -1903,6 +1997,21 @@ def build_zemljevid_page(premium, rules):
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
 
+    # Real forest-stand composition (ZGS) per pickable location — only drawn
+    # when a visitor arrives via ?loc= deep link (see focusName in map_js),
+    # so it's fetched for all locations up front but stays inert weight
+    # otherwise. Best-effort: a down/slow WFS just yields an empty list.
+    sestoji_by_loc = {}
+    for loc in premium["locations"]:
+        stands = fetch_sestoji_near(loc["lat"], loc["lon"])
+        if stands:
+            sestoji_by_loc[loc["name"]] = stands
+    sestoji_js = _json_mod.dumps(sestoji_by_loc, ensure_ascii=False)
+    species_legend_html = "".join(
+        f'<span><i style="background:{color}"></i>{name}</span>'
+        for name, color in dict(ZGS_SPECIES_GROUPS.values()).items()
+    )
+
     inner = f'''  <figure class="gp-photo-card">
     <img src="/gobarska-napoved/img/foto/gozdna-pot-dron.jpg" loading="lazy" width="640" height="853"
       alt="Dronski posnetek gozdne poti v Zgornji Savinjski dolini">
@@ -1918,6 +2027,10 @@ def build_zemljevid_page(premium, rules):
     <span><i style="background:#f87171"></i>Brez (&lt;18 %)</span>
     <span><i style="background:#a78bfa"></i>Zaščiteno</span>
   </div>
+  <div id="gp-species-legend" class="gp-map-legend" hidden>
+    <b class="gp-species-legend-title">Drevesna sestava sestojev (ZGS):</b>
+    {species_legend_html}
+  </div>
   <div class="gp-map-shell">
     <div id="gp-map" class="gp-map" role="application" aria-label="Zemljevid nabiralnih območij"></div>
     <div id="gp-map-hint" class="gp-map-hint">
@@ -1928,13 +2041,16 @@ def build_zemljevid_page(premium, rules):
   </div>
   <p class="gp-map-attr">Karta: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
   contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
+  Sestava sestojev: <a href="https://www.zgs.si/" target="_blank" rel="noopener">© Zavod za gozdove Slovenije</a>.
   Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>'''
 
     map_js = '''<script>
 (function(){
   var PTS=''' + data_js + ''';
+  var SESTOJI=''' + sestoji_js + ''';
   var hint=document.getElementById("gp-map-hint");
   var mapEl=document.getElementById("gp-map");
+  var speciesLegend=document.getElementById("gp-species-legend");
   if(!mapEl||!hint)return;
   var loaded=false;
   function levelColor(v){
@@ -1988,6 +2104,14 @@ def build_zemljevid_page(premium, rules):
       if(focusMarker){
         map.setView(focusMarker.getLatLng(),13);
         focusMarker.openPopup();
+        var stands=SESTOJI[focusName]||[];
+        if(stands.length&&speciesLegend){
+          stands.forEach(function(s){
+            L.polygon(s.pts,{color:s.c,weight:1,fillColor:s.c,fillOpacity:.35}).addTo(map)
+              .bindTooltip(s.sp,{sticky:true});
+          });
+          speciesLegend.hidden=false;
+        }
       }else if(group.length){
         var fg=L.featureGroup(group);
         map.fitBounds(fg.getBounds().pad(0.15));
