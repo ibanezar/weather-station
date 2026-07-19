@@ -308,7 +308,7 @@ Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej she
   "tags": ["...", "IREICA1", "Savinja"],
   "section_label": "Napoved" | "Analiza" | "Rekord" | "Sezona",
   "og_photo": eno izmed: drought, dusk-storm, flood-river, misty-valley, night-fog-valley,
-              ocean-storm, rain-overcast, spring, spring-landscape, storm-clouds, weather-station,
+              ocean-storm, rain-overcast, spring, storm-clouds, weather-station,
   "og_accent_hex": "#rrggbb",
   "lead": "uvodni odstavek (2-4 povedi), lahko <strong>poudarki</strong>",
   "sections": [
