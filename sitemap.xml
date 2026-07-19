@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd.html</loc>
     <lastmod>2026-07-19</lastmod>
     <changefreq>monthly</changefreq>
