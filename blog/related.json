@@ -1,4 +1,9 @@
 {
+  "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf": [
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
+    "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
+    "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd"
+  ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713",
@@ -7,7 +12,7 @@
   "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd": [
     "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
-    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
+    "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf"
   ],
   "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -21,8 +26,8 @@
   ],
   "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717": [
     "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713",
-    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714",
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
+    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
   ],
   "nevihte-od-cetrtka-do-nedelje-16-19-julij-2026": [
     "nevihtni-obeti-11-julij-2026",
@@ -32,7 +37,7 @@
   "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716": [
     "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712",
     "koliko-je-zalilo-nevihta-11-julij-2026",
-    "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8": [
     "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd",
@@ -55,9 +60,9 @@
     "nevihte-toca-hudourniki-julij-2026"
   ],
   "arso-opozorilo-warningts-2026-07-14-1304-e1db70": [
+    "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
-    "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
-    "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd"
+    "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8"
   ],
   "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -67,7 +72,7 @@
   "nevihtni-pas-14-julij-2026": [
     "nevihtni-obeti-11-julij-2026",
     "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
-    "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423"
+    "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf"
   ],
   "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -82,7 +87,7 @@
   "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712": [
     "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
@@ -107,7 +112,7 @@
   "vreme-golte-sneg-razmere": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718",
-    "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "susa-savinjska-dolina-hidrologija": [
     "temperaturni-trend-ireica1-2020-2025",
@@ -162,7 +167,7 @@
   "napoved-julij-2026": [
     "med-dvema-vrocinskima-valoma-ireica1",
     "julij-skozi-zgodovino-recica-savinji",
-    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "julij-skozi-zgodovino-recica-savinji": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
@@ -200,8 +205,8 @@
     "med-dvema-vrocinskima-valoma-ireica1"
   ],
   "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi": [
-    "nevihte-toca-hudourniki-julij-2026",
     "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
+    "nevihte-toca-hudourniki-julij-2026",
     "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd"
   ],
   "vremenski-povzetek-junij-2026": [
