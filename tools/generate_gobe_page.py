@@ -307,6 +307,17 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+/* ── Pre-launch gate: everything below the header is blurred/disabled for
+   anyone without a verified access token — the "coming soon" cover above it
+   is the only interactive thing a non-subscriber sees. Lifted client-side
+   (PAGE_JS) the moment /premium/verify succeeds, same trigger the existing
+   paywall reveal already uses. ── */
+.gp-cs-card{position:relative;border:1px solid var(--card-border);border-radius:16px;
+  padding:1.4rem 1.5rem;margin:1rem 0 1.6rem;background:var(--card-bg);text-align:center}
+.gp-cs-card h2{margin:.3rem 0 .5rem;font-size:1.35rem}
+.gp-cs-card p{color:var(--muted);font-size:.92rem;line-height:1.6;max-width:36rem;margin:0 auto .9rem}
+.gp-cs-card .gp-login{justify-content:center;max-width:24rem;margin:0 auto}
+.gp-cs-blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
 
 /* ── Loading skeleton — shown to premium users the instant a token is
    found, while /premium/forecast is still in flight, so they never see
@@ -813,6 +824,16 @@ PAGE_JS = """<script>
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
+  var csWrap=document.getElementById("gp-cs-wrap");
+  var csCover=document.getElementById("gp-cs-cover");
+  function revealPage(){
+    if(csWrap)csWrap.classList.remove("gp-cs-blur");
+    if(csCover)csCover.hidden=true;
+  }
+  function reblurPage(){
+    if(csWrap)csWrap.classList.add("gp-cs-blur");
+    if(csCover)csCover.hidden=false;
+  }
   var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
   function levelColor(v){
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
@@ -1199,9 +1220,10 @@ PAGE_JS = """<script>
   }
   var t=tok();
   if(t){
-    // A paying user shouldn't see the "Naroči se" upsell while their own
-    // data is still in flight — swap straight to a skeleton instead of
-    // flashing the paywall first.
+    // A paying user shouldn't see the pre-launch cover or the "Naroči se"
+    // upsell while their own data is still in flight — reveal the page and
+    // swap straight to a skeleton instead of flashing either first.
+    revealPage();
     if(lock)lock.hidden=true;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
@@ -1221,10 +1243,11 @@ PAGE_JS = """<script>
       .then(function(d){render(d);initIdentify(t);initAlerts(t,d);})
       .catch(function(){
         // Token turned out to be invalid/expired or the fetch genuinely
-        // failed — fall back to the real paywall instead of leaving the
+        // failed — fall back to the pre-launch cover instead of leaving the
         // skeleton spinning forever.
         if(content){content.hidden=true;content.innerHTML="";}
         if(lock)lock.hidden=false;
+        reblurPage();
       });
   }
   var f=document.getElementById("gp-login");
@@ -2132,11 +2155,6 @@ def build_body(rules, premium, free):
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se ({PRICE_MONTHLY}/mes)</button>
       <button type="button" class="gp-cta alt" data-paddle="season">Sezonski dostop ({PRICE_SEASON})</button>
     </div>
-    <form id="gp-login" class="gp-login" autocomplete="email">
-      <input type="email" name="email" placeholder="Že plačano? Vpiši e-naslov za povezavo" required>
-      <button type="submit">Pošlji povezavo</button>
-    </form>
-    <div id="gp-login-msg" class="gp-msg"></div>
   </div>'''
 
     # ── pricing ───────────────────────────────────────────────────────────────
@@ -2329,12 +2347,26 @@ def build_body(rules, premium, free):
     <div id="gp-diary-list" class="gp-diary-list"></div>
   </div>'''
 
+    coming_soon = '''  <div id="gp-cs-cover" class="gp-cs-card">
+    <span class="gp-tag">🍄 KMALU</span>
+    <h2>MeteoGobar prihaja kmalu</h2>
+    <p>Gobarska napoved za Zgornjo Savinjsko dolino se še pripravlja — brezplačni in premium del bosta na voljo
+    v kratkem. Že imaš dostop (zgodnji naročniki)? Vpiši e-naslov spodaj za povezavo.</p>
+    <form id="gp-login" class="gp-login" autocomplete="email">
+      <input type="email" name="email" placeholder="e-naslov" required>
+      <button type="submit">Pošlji povezavo</button>
+    </form>
+    <div id="gp-login-msg" class="gp-msg"></div>
+  </div>'''
+
     body = f'''{BRAND_SWAP}
 {top_bar_html("Gobarska napoved", None)}
 {seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
+{coming_soon}
+  <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
   <div class="gp-quicknav-wrap">
   <nav class="gp-quicknav" aria-label="Hitri meni">
@@ -2398,6 +2430,8 @@ def build_body(rules, premium, free):
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+{bottom_nav_html("")}
+  </div>
   <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
   <div class="gp-sos-panel" id="gp-sos-panel">
     <h4>Sum zastrupitve z gobami?</h4>
@@ -2407,7 +2441,6 @@ def build_body(rules, premium, free):
     <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
-{bottom_nav_html("")}
 {PAGE_JS}
 {DIARY_JS}'''
     subpages = {

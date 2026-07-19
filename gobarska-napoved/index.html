@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/">
-<meta name="description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="description" content="Gobarski indeks danes: 84 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta property="og:description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta property="og:description" content="Gobarski indeks danes: 84 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta name="twitter:description" content="Gobarski indeks danes: 77 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
+<meta name="twitter:description" content="Gobarski indeks danes: 84 % (ODLIČNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino — 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 77 % (ODLI\u010cNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 84 % (ODLI\u010cNA). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino \u2014 7-dnevni premium model, baza 145 vrst, nevarne dvojnice in gobarski koledar.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved"}]}
@@ -203,6 +203,17 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
+/* ── Pre-launch gate: everything below the header is blurred/disabled for
+   anyone without a verified access token — the "coming soon" cover above it
+   is the only interactive thing a non-subscriber sees. Lifted client-side
+   (PAGE_JS) the moment /premium/verify succeeds, same trigger the existing
+   paywall reveal already uses. ── */
+.gp-cs-card{position:relative;border:1px solid var(--card-border);border-radius:16px;
+  padding:1.4rem 1.5rem;margin:1rem 0 1.6rem;background:var(--card-bg);text-align:center}
+.gp-cs-card h2{margin:.3rem 0 .5rem;font-size:1.35rem}
+.gp-cs-card p{color:var(--muted);font-size:.92rem;line-height:1.6;max-width:36rem;margin:0 auto .9rem}
+.gp-cs-card .gp-login{justify-content:center;max-width:24rem;margin:0 auto}
+.gp-cs-blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
 
 /* ── Loading skeleton — shown to premium users the instant a token is
    found, while /premium/forecast is still in flight, so they never see
@@ -451,6 +462,24 @@ body{
 .gp-diary-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem}
 .gp-diary-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:.8rem}
 
+/* ── Moji alarmi (per-user custom push/email trigger rules) ── */
+.gp-alert-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
+.gp-alert-rows{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.7rem}
+.gp-alert-row{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;background:var(--fc-bg);
+  border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .6rem}
+.gp-alert-row select,.gp-alert-row input{background:var(--badge-bg);border:1px solid var(--card-border);
+  border-radius:9px;padding:.45rem .6rem;color:var(--text);font-size:.83rem;font-family:inherit}
+.gp-alert-row select.gp-alert-sp{flex:1 1 160px;min-width:140px}
+.gp-alert-row select.gp-alert-loc{flex:1 1 140px;min-width:130px}
+.gp-alert-elev{width:6.5rem}
+.gp-alert-thr{display:flex;align-items:center;gap:.3rem}
+.gp-alert-thr input{width:4rem}
+.gp-alert-thr span{font-size:.8rem;color:var(--muted)}
+.gp-alert-del{flex:0 0 auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;
+  padding:.3rem;margin-left:auto}
+.gp-alert-actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+
 /* ── AI prepoznava gobe (identify) ── */
 .gp-id-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:12px;
   padding:.8rem .9rem;margin-top:.7rem}
@@ -678,6 +707,7 @@ body .wrap{padding-bottom:5.5rem}
 <link rel="stylesheet" href="/vreme/vreme.css">
 </head>
 <body>
+<div class="app-topbar"><span class="app-topbar-brand" aria-hidden="true">🏔️</span><span class="app-topbar-title">Meteorec · Gobarska napoved — Zgornja Savinjska dolina</span></div>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
   <header class="site-head">
@@ -703,24 +733,36 @@ body .wrap{padding-bottom:5.5rem}
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 145 vrst · osvežuje se dnevno · 2026-07-18</p>
+  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 145 vrst · osvežuje se dnevno · 2026-07-19</p>
+  <div id="gp-cs-cover" class="gp-cs-card">
+    <span class="gp-tag">🍄 KMALU</span>
+    <h2>MeteoGobar prihaja kmalu</h2>
+    <p>Gobarska napoved za Zgornjo Savinjsko dolino se še pripravlja — brezplačni in premium del bosta na voljo
+    v kratkem. Že imaš dostop (zgodnji naročniki)? Vpiši e-naslov spodaj za povezavo.</p>
+    <form id="gp-login" class="gp-login" autocomplete="email">
+      <input type="email" name="email" placeholder="e-naslov" required>
+      <button type="submit">Pošlji povezavo</button>
+    </form>
+    <div id="gp-login-msg" class="gp-msg"></div>
+  </div>
+  <div id="gp-cs-wrap" class="gp-cs-blur">
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
-        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="78.0"/></svg>
-        <div class="gp-gauge-num"><span class="num">77</span><small>%</small></div>
+        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="54.3"/></svg>
+        <div class="gp-gauge-num"><span class="num">84</span><small>%</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
         <div class="gp-hero-lvl" style="color:#34d399">ODLIČNA</div>
-        <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>Smrekovško pogorje</strong>
+        <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>Gozdovi nad Ljubnim</strong>
           <span class="gp-hero-best-pct" style="background:#34d39922;color:#34d399">100 % · ODLIČNA</span></div>
         <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
-        data-pct="77" data-lvl="ODLIČNA">📤 Deli</button>
+        data-pct="84" data-lvl="ODLIČNA">📤 Deli</button>
       <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
       <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
     </div>
@@ -750,6 +792,14 @@ body .wrap{padding-bottom:5.5rem}
   <div class="gp-forests">
     <div class="gp-forest">
       <div class="gp-forest-info">
+        <span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
+        <span class="gp-terr">kisla · 700 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Navadna lisička</span>
+      </div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-info">
         <span class="gp-forest-nm">🌲 Smrekovško pogorje</span>
         <span class="gp-terr">kisla · 1300 m</span>
         <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/neoboletus_erythropus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Žametasti goban</span>
@@ -768,25 +818,33 @@ body .wrap{padding-bottom:5.5rem}
       <div class="gp-forest-info">
         <span class="gp-forest-nm">⛰️ Dleskovška planota</span>
         <span class="gp-terr">bazicna · 1300 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/suillus_grevillei.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Macesnova lupljivka</span>
       </div>
       <div class="gp-forest-pct gp-pct-hi"><span class="n">100%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-info">
-        <span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span>
-        <span class="gp-terr">kisla · 700 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Navadna lisička</span>
+        <span class="gp-forest-nm">⛰️ Golte</span>
+        <span class="gp-terr">bazicna · 1300 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">81%</span><span class="lvl">ODLIČNA</span></div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">99%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-info">
-        <span class="gp-forest-nm">⛰️ Golte</span>
-        <span class="gp-terr">bazicna · 1300 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/leccinum_pseudoscabrum.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Gabrov ded</span>
+        <span class="gp-forest-nm">⛰️ Menina planina</span>
+        <span class="gp-terr">bazicna · 1000 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
       </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">80%</span><span class="lvl">ODLIČNA</span></div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">95%</span><span class="lvl">ODLIČNA</span></div>
+    </div>
+    <div class="gp-forest">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
+        <span class="gp-terr">bazicna · 900 m</span>
+        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Zelena golobica</span>
+      </div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">94%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest">
       <div class="gp-forest-info">
@@ -794,23 +852,7 @@ body .wrap{padding-bottom:5.5rem}
         <span class="gp-terr">vlazna · 400 m</span>
         <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
       </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
-    </div>
-    <div class="gp-forest">
-      <div class="gp-forest-info">
-        <span class="gp-forest-nm">⛰️ Dobrovlje – Čreta</span>
-        <span class="gp-terr">bazicna · 900 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
-      </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
-    </div>
-    <div class="gp-forest">
-      <div class="gp-forest-info">
-        <span class="gp-forest-nm">⛰️ Menina planina</span>
-        <span class="gp-terr">bazicna · 1000 m</span>
-        <span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Črnikasta golobica</span>
-      </div>
-      <div class="gp-forest-pct gp-pct-hi"><span class="n">77%</span><span class="lvl">ODLIČNA</span></div>
+      <div class="gp-forest-pct gp-pct-hi"><span class="n">84%</span><span class="lvl">ODLIČNA</span></div>
     </div>
     <div class="gp-forest gp-forest-prot">
       <div class="gp-forest-info">
@@ -844,6 +886,17 @@ body .wrap{padding-bottom:5.5rem}
     <div id="gp-id-result"></div>
     </div>
   </div>
+  <div id="gp-alerts" class="gp-alert-card" hidden>
+    <h3 style="margin-top:0">🔔 Moji alarmi</h3>
+    <p class="gp-diary-priv">Nastavi lastne pogoje (vrsta, območje, nadmorska višina, prag) — pošljemo e-mail, ko jih
+    napoved doseže. Preverjeno enkrat dnevno, ob jutranji objavi nove napovedi.</p>
+    <div id="gp-alert-rows" class="gp-alert-rows"></div>
+    <div class="gp-alert-actions">
+      <button type="button" class="gp-diary-btn" id="gp-alert-add">+ Dodaj alarm</button>
+      <button type="button" class="gp-cta" id="gp-alert-save">Shrani alarme</button>
+    </div>
+    <div id="gp-alert-msg" class="gp-msg"></div>
+  </div>
   <div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
@@ -861,11 +914,6 @@ body .wrap{padding-bottom:5.5rem}
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se (3,99 €/mes)</button>
       <button type="button" class="gp-cta alt" data-paddle="season">Sezonski dostop (24,99 €)</button>
     </div>
-    <form id="gp-login" class="gp-login" autocomplete="email">
-      <input type="email" name="email" placeholder="Že plačano? Vpiši e-naslov za povezavo" required>
-      <button type="submit">Pošlji povezavo</button>
-    </form>
-    <div id="gp-login-msg" class="gp-msg"></div>
   </div>
   <div id="gp-pricing-wrap">
   <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
@@ -878,6 +926,7 @@ body .wrap{padding-bottom:5.5rem}
         <li>Indeks za vsa nabiralna območja</li>
         <li>Razlage in opozorila na dvojnice</li>
         <li>🔍 AI prepoznava gobe iz fotografije</li>
+        <li>🔔 Lastni alarmi po vrsti, območju in nadmorski višini</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
@@ -982,6 +1031,14 @@ body .wrap{padding-bottom:5.5rem}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+  <nav class="gp-bottomnav" aria-label="Glavna navigacija">
+    <a href="/gobarska-napoved/" class="active"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8H4Z" fill="var(--cyan)" fill-opacity=".35"/><path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11v5a3 3 0 0 0 6 0v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Napoved</a>
+    <a href="/gobarska-napoved/zemljevid/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5 9 4l6 2.5 6-2.5v13L15 19.5 9 17l-6 2.5v-13Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Zemljevid</a>
+    <a href="/gobarska-napoved/#premium" class="hl"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10.5" cy="10.5" r="6" fill="currentColor" fill-opacity=".2"/><circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="1.8"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Prepoznaj</a>
+    <a href="/gobarska-napoved/baza-vrst/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5.5C10.3 4 7.8 3.5 4 4v14c3.8-.5 6.3 0 8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 5.5C13.7 4 16.2 3.5 20 4v14c-3.8-.5-6.3 0-8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Baza vrst</a>
+    <a href="/gobarska-napoved/dvojnice/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.5 21.5 20h-19L12 3.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><line x1="12" y1="10" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="currentColor"/></svg></span>Dvojnice</a>
+  </nav>
+  </div>
   <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
   <div class="gp-sos-panel" id="gp-sos-panel">
     <h4>Sum zastrupitve z gobami?</h4>
@@ -991,13 +1048,6 @@ body .wrap{padding-bottom:5.5rem}
     <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
-  <nav class="gp-bottomnav" aria-label="Glavna navigacija">
-    <a href="/gobarska-napoved/" class="active"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8H4Z" fill="var(--cyan)" fill-opacity=".35"/><path d="M4 11C4 6.5 7.6 3 12 3s8 3.5 8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11v5a3 3 0 0 0 6 0v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Napoved</a>
-    <a href="/gobarska-napoved/zemljevid/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5 9 4l6 2.5 6-2.5v13L15 19.5 9 17l-6 2.5v-13Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Zemljevid</a>
-    <a href="/gobarska-napoved/#premium" class="hl"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10.5" cy="10.5" r="6" fill="currentColor" fill-opacity=".2"/><circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="1.8"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Prepoznaj</a>
-    <a href="/gobarska-napoved/baza-vrst/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5.5C10.3 4 7.8 3.5 4 4v14c3.8-.5 6.3 0 8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 5.5C13.7 4 16.2 3.5 20 4v14c-3.8-.5-6.3 0-8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Baza vrst</a>
-    <a href="/gobarska-napoved/dvojnice/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.5 21.5 20h-19L12 3.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><line x1="12" y1="10" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="currentColor"/></svg></span>Dvojnice</a>
-  </nav>
 <script>
 (function(){
   var API="https://weatherireica1.filip-eremita.workers.dev";
@@ -1014,6 +1064,16 @@ body .wrap{padding-bottom:5.5rem}
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
+  var csWrap=document.getElementById("gp-cs-wrap");
+  var csCover=document.getElementById("gp-cs-cover");
+  function revealPage(){
+    if(csWrap)csWrap.classList.remove("gp-cs-blur");
+    if(csCover)csCover.hidden=true;
+  }
+  function reblurPage(){
+    if(csWrap)csWrap.classList.add("gp-cs-blur");
+    if(csCover)csCover.hidden=false;
+  }
   var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
   function levelColor(v){
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
@@ -1240,6 +1300,87 @@ body .wrap{padding-bottom:5.5rem}
       wireDayChips(detail, newLoc, meta);
     });}
   }
+  // ── Moji alarmi: per-user rule editor (species/location/elevation/threshold),
+  // synced via /premium/alerts. A rule with no species/location picked means
+  // "katerakoli vrsta" / "katerokoli območje" — same semantics the daily
+  // /premium/notify check uses server-side.
+  function initAlerts(token, d){
+    var wrap=document.getElementById("gp-alerts");
+    var rowsEl=document.getElementById("gp-alert-rows");
+    var addBtn=document.getElementById("gp-alert-add");
+    var saveBtn=document.getElementById("gp-alert-save");
+    var msgEl=document.getElementById("gp-alert-msg");
+    if(!wrap||!rowsEl)return;
+    wrap.hidden=false;
+    var MAX_RULES=5;
+    var speciesList=Object.keys(d.species_meta||{}).map(function(id){
+      return {id:id,name:(d.species_meta[id]||{}).name_sl||id};
+    }).sort(function(a,b){return a.name.localeCompare(b.name,"sl");});
+    var locs=d.locations||[];
+    function speciesSelectHtml(sel){
+      return '<select class="gp-alert-sp"><option value=""'+(sel?"":" selected")+'>Katerakoli vrsta</option>'+
+        speciesList.map(function(s){return '<option value="'+s.id+'"'+(sel===s.id?" selected":"")+'>'+esc2(s.name)+'</option>';}).join('')+
+        '</select>';
+    }
+    function locSelectHtml(sel){
+      return '<select class="gp-alert-loc"><option value=""'+(sel?"":" selected")+'>Katerokoli območje</option>'+
+        locs.map(function(l){return '<option value="'+esc2(l.name)+'"'+(sel===l.name?" selected":"")+'>'+esc2(l.name)+' ('+l.elev_m+' m)</option>';}).join('')+
+        '</select>';
+    }
+    function rowHtml(rule){
+      rule=rule||{};
+      return '<div class="gp-alert-row">'+speciesSelectHtml(rule.species_id||"")+locSelectHtml(rule.location||"")+
+        '<input type="number" class="gp-alert-elev" placeholder="nad m n.v. (neobv.)" min="0" max="3000" value="'+
+        (rule.min_elev_m!=null?rule.min_elev_m:"")+'">'+
+        '<div class="gp-alert-thr"><input type="number" class="gp-alert-th" min="1" max="100" value="'+
+        (rule.threshold!=null?rule.threshold:70)+'"><span>%</span></div>'+
+        '<button type="button" class="gp-alert-del" aria-label="Odstrani alarm">🗑</button></div>';
+    }
+    function wireDeletes(){
+      rowsEl.querySelectorAll(".gp-alert-del").forEach(function(btn){
+        btn.onclick=function(){
+          var row=btn.closest(".gp-alert-row");
+          if(rowsEl.children.length>1)row.remove();
+          else row.outerHTML=rowHtml(null);
+          wireDeletes();
+        };
+      });
+    }
+    function renderRows(rules){
+      rowsEl.innerHTML=(rules&&rules.length?rules:[{}]).map(rowHtml).join("");
+      wireDeletes();
+    }
+    addBtn.addEventListener("click",function(){
+      if(rowsEl.children.length>=MAX_RULES){msgEl.textContent="Največ "+MAX_RULES+" alarmov.";return;}
+      rowsEl.insertAdjacentHTML("beforeend",rowHtml(null));
+      wireDeletes();
+    });
+    saveBtn.addEventListener("click",function(){
+      var rules=[].slice.call(rowsEl.querySelectorAll(".gp-alert-row")).map(function(row){
+        var elevRaw=row.querySelector(".gp-alert-elev").value;
+        var thrRaw=row.querySelector(".gp-alert-th").value;
+        return {
+          species_id: row.querySelector(".gp-alert-sp").value||null,
+          location: row.querySelector(".gp-alert-loc").value||null,
+          min_elev_m: elevRaw===""?null:Math.max(0,parseInt(elevRaw,10)||0),
+          threshold: Math.max(1,Math.min(100,parseInt(thrRaw,10)||70)),
+        };
+      });
+      msgEl.textContent="Shranjujem …";
+      fetch(API+"/premium/alerts",{method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body:JSON.stringify({rules:rules})})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
+        .then(function(res){
+          msgEl.textContent=res.ok?"✓ Alarmi shranjeni.":(res.body&&res.body.error?res.body.error:"Napaka pri shranjevanju.");
+        })
+        .catch(function(){msgEl.textContent="Napaka pri povezavi. Poskusi znova.";});
+    });
+    fetch(API+"/premium/alerts?token="+encodeURIComponent(token))
+      .then(function(r){return r.json();})
+      .then(function(res){renderRows(res&&res.rules);})
+      .catch(function(){renderRows(null);});
+  }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
     var fileInput=document.getElementById("gp-id-photo");
@@ -1319,9 +1460,10 @@ body .wrap{padding-bottom:5.5rem}
   }
   var t=tok();
   if(t){
-    // A paying user shouldn't see the "Naroči se" upsell while their own
-    // data is still in flight — swap straight to a skeleton instead of
-    // flashing the paywall first.
+    // A paying user shouldn't see the pre-launch cover or the "Naroči se"
+    // upsell while their own data is still in flight — reveal the page and
+    // swap straight to a skeleton instead of flashing either first.
+    revealPage();
     if(lock)lock.hidden=true;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
@@ -1338,13 +1480,14 @@ body .wrap{padding-bottom:5.5rem}
       .catch(function(){});
     fetch(API+"/premium/forecast?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){render(d);initIdentify(t);})
+      .then(function(d){render(d);initIdentify(t);initAlerts(t,d);})
       .catch(function(){
         // Token turned out to be invalid/expired or the fetch genuinely
-        // failed — fall back to the real paywall instead of leaving the
+        // failed — fall back to the pre-launch cover instead of leaving the
         // skeleton spinning forever.
         if(content){content.hidden=true;content.innerHTML="";}
         if(lock)lock.hidden=false;
+        reblurPage();
       });
   }
   var f=document.getElementById("gp-login");
@@ -1602,5 +1745,6 @@ body .wrap{padding-bottom:5.5rem}
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a></span>
   </footer>
 </div>
+<nav class="app-bottomnav" aria-label="Glavna navigacija"><a href="/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11 12 4l8 7v7a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-7Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Domov</a><a href="/klima/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a1.5 1.5 0 0 0-3 0v9.6a3.5 3.5 0 1 0 3 0V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"/></svg></span>Klima</a><a href="/rekord/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13.5v2.5h4v-2.5M8.5 20h7l-1-2.5h-5L8.5 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>Rekordi</a><a href="/trendi/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16.5 10 10l3.5 3.5L20 6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 6.5H20v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Trendi</a><a href="/blog/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>Blog</a><a href="/vreme/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Arhiv</a><a href="/gobarska-napoved/"><span class="ic">🍄</span>Gobe</a><a href="/o-postaji.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>O postaji</a></nav>
 </body>
 </html>
