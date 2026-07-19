@@ -230,6 +230,7 @@ body{
   border:0;cursor:pointer;line-height:1.2}
 .gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+.gp-map-open-link{display:inline-flex;margin-bottom:.7rem;font-size:.85rem;min-height:2.3rem;padding:.45rem 1rem}
 .gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
 /* Compact two-column row: name/terrain/species stack on the left, a single
    glanceable colour-coded percentage disc on the right — so scanning the
@@ -946,6 +947,9 @@ PAGE_JS = """<script>
     var html="";
     var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
     html+='<h3>'+esc2(loc.name)+' — 7-dnevna napoved</h3>';
+    html+='<a class="gp-cta alt gp-map-open-link" target="_blank" rel="noopener" '+
+      'href="/gobarska-napoved/zemljevid/?loc='+encodeURIComponent(loc.name)+
+      '">🗺️ Odpri lokacijo na zemljevidu</a>';
     html+='<div class="gp-chip-row gp-day-chips">';
     loc.days.forEach(function(day,i){
       html+='<button type="button" class="gp-chip'+(i===0?' active':'')+'" data-day="'+i+'">'+
@@ -1929,6 +1933,11 @@ def build_zemljevid_page(premium, rules):
     h+='</div>';
     return h;
   }
+  // Deep link from a location's forecast detail (?loc=<ime>) — zoom straight to
+  // that point and open its popup instead of the default all-areas overview,
+  // and skip the click-to-load gate since arriving here already is the intent.
+  var focusName=null;
+  try{focusName=new URLSearchParams(location.search).get("loc");}catch(e){}
   async function init(){
     if(loaded)return; loaded=true;
     hint.innerHTML='<span>Nalagam zemljevid …</span>';
@@ -1941,17 +1950,22 @@ def build_zemljevid_page(premium, rules):
       var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false}).setView([46.35,14.80],10);
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         {maxZoom:15,subdomains:"abcd"}).addTo(map);
-      var group=[];
+      var group=[],focusMarker=null;
       PTS.forEach(function(p){
+        var isFocus=focusName&&p.name===focusName;
         var m=L.circleMarker([p.lat,p.lon],{
-          radius:p.prot?7:9,color:"#0b0906",weight:1.5,
+          radius:p.prot?7:(isFocus?12:9),color:isFocus?"#fff":"#0b0906",weight:isFocus?2.5:1.5,
           fillColor:levelColor(p.idx),fillOpacity:p.prot?.55:.9
         }).addTo(map);
         m.bindPopup(popupHtml(p));
         m.bindTooltip(p.name,{direction:"top",offset:[0,-6]});
+        if(isFocus)focusMarker=m;
         group.push(m);
       });
-      if(group.length){
+      if(focusMarker){
+        map.setView(focusMarker.getLatLng(),13);
+        focusMarker.openPopup();
+      }else if(group.length){
         var fg=L.featureGroup(group);
         map.fitBounds(fg.getBounds().pad(0.15));
       }
@@ -1963,6 +1977,7 @@ def build_zemljevid_page(premium, rules):
     }
   }
   hint.addEventListener("click",init);
+  if(focusName)init();
 })();
 </script>'''
 
