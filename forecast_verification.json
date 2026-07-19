@@ -66,5 +66,22 @@
       "err_tmin": 0.7,
       "err_precip": 17.6
     }
+  },
+  "2026-07-19": {
+    "date": "2026-07-19",
+    "made_at": "2026-07-18",
+    "actual": {
+      "tmax": 17.8,
+      "tmin": 14.8,
+      "precip": 0.0
+    },
+    "open_meteo": {
+      "tmax": 29.1,
+      "tmin": 16.2,
+      "precip": 7.0,
+      "err_tmax": 11.3,
+      "err_tmin": 1.4,
+      "err_precip": 7.0
+    }
   }
 }
