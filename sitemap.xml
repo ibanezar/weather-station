@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>

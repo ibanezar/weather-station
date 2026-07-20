@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 20 Jul 2026 06:32:36 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 20 Jul 2026 06:39:59 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Suša v Zgornji Savinjski dolini: kaj pove ničelna dnevna količina dežja</title>
+      <link>https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</guid>
+      <pubDate>Mon, 20 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Analiza trenutne suše in vlage tal v Rečici ob Savinji glede na podatke postaje IREICA1 in napoved za prihodnje dni.</description>
+      <category>suša</category>
+      <category>vlaga tal</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Napoved za ta teden v Savinjski dolini: vroča sobota, dež se vrne v nedeljo</title>
       <link>https://meteorec.si/blog/napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720.html</link>
