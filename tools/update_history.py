@@ -291,8 +291,14 @@ def main():
     y, m = int(ym[:4]), int(ym[5:7])
     start     = f"{ym}-01"
     month_end = f"{ym}-{calendar.monthrange(y, m)[1]:02d}"
-    today     = _date.today().isoformat()
-    end       = min(month_end, today)
+    # Tekoči (nedokončan) dan namenoma izpustimo: cron teče ob 02:15 CET, ko bi
+    # imela postaja za "danes" komaj ~2h podatkov — dovolj za _complete(), a
+    # tempHigh bi bil samo jutranji, kar zavaja inject_record_watch.py.
+    yesterday = (datetime.now(TZ).date() - timedelta(days=1)).isoformat()
+    end       = min(month_end, yesterday)
+    if end < start:
+        print(f"Za {ym} še ni preteklega (dokončanega) dne — nič za osvežiti.")
+        return
 
     # 1) prava postaja (primarni vir) — beremo PO DNEVIH.
     # Ecowitt cycle_type=auto vrne za enodnevni razpon najfinejšo (5-min)
