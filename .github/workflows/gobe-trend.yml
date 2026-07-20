@@ -31,4 +31,8 @@ jobs:
           git add gobarska-napoved/trend.json
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi gobarski trend $(date -u +%Y-%m-%d) [skip ci]"
-          git push
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && break
+            echo "Push zavrnjen, poskus $i, ponavljam po rebase..."
+            sleep $((i * 5))
+          done
