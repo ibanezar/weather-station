@@ -1,12 +1,12 @@
 {
- "generated": "2026-07-18T07:03:32+00:00",
+ "generated": "2026-07-20T08:12:41+00:00",
  "model_version": "1.1",
- "date": "2026-07-18",
+ "date": "2026-07-20",
  "location": "Rečica ob Savinji",
- "index": 60,
- "level": "DOBRA",
- "top_species_sl": "Bezgova uhljevka",
- "species_count": 36,
- "locations_count": 16,
+ "index": 83,
+ "level": "ODLIČNA",
+ "top_species_sl": "Siva mušnica",
+ "species_count": 98,
+ "locations_count": 8,
  "forecast_days": 7
 }
