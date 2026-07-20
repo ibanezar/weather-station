@@ -1,11 +1,11 @@
 {
-  "date": "2026-07-19",
-  "created": "2026-07-19T06:16:10.504662+00:00",
+  "date": "2026-07-20",
+  "created": "2026-07-20T06:35:07.583004+00:00",
   "proposals": [
     {
       "id": "primerjava-krajev",
-      "title": "Kako se vreme v Rečici ob Savinji razlikuje od sosednjih krajev Zgornje Savinjske doline",
-      "teaser": "Postaja IREICA1 trenutno beleži 17,3 °C ob 97 % vlažnosti in rosišču 16,8 °C, kar kaže na precej vlažen zrak v dolini. Pogledali bomo, kako se te razmere ujemajo ali razlikujejo od bližnjih krajev in kaj to pove o mikroklimi Zgornje Savinjske doline.",
+      "title": "Kako se Rečica ob Savinji razlikuje od sosednjih krajev: pogled na mikroklimo Savinjske doline",
+      "teaser": "Postaja IREICA1 danes kaže 17,0 °C ob 87 % vlažnosti in tlaku 1019 hPa - zanimivo izhodišče za primerjavo z bližnjimi kraji v Zgornji Savinjski dolini. Pogledali bomo, zakaj lahko dolina ob podobnih sinoptičnih razmerah pokaže drugačne temperature in vlago kot okoliške ARSO postaje.",
       "topic": {
         "id": "primerjava-krajev",
         "sezona": [
@@ -32,38 +32,9 @@
       }
     },
     {
-      "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Savinjski dolini: od 28,9 °C danes do hladnejšega konca tedna",
-      "teaser": "Napoved za postajo IREICA1 kaže padec najvišjih dnevnih temperatur z današnjih 28,9 °C na 21,6 °C v torek, medtem ko bo v sredo minimalna temperatura padla že na 10,4 °C. Analiziramo, kam se obrača temperaturni trend v Rečici ob Savinji v naslednjih štirih dneh.",
-      "topic": {
-        "id": "temperaturni-trend",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "trend",
-        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
-        "seo_keywords": [
-          "temperaturni trend Savinjska dolina",
-          "vreme Rečica ob Savinji",
-          "postaja IREICA1"
-        ]
-      }
-    },
-    {
       "id": "susa-vlaga-tal",
-      "title": "Suša ali vlaga tal? Kaj povedo padavinski podatki iz Rečice ob Savinji",
-      "teaser": "Kljub temu da danes na postaji IREICA1 ni zabeleženih padavin, mesečna vsota že znaša 46,5 mm, zadnji padavinski dogodek pa je prinesel 11,4 mm dežja ob visoki vlažnosti zraka 97 %. Pogledamo, kaj napovedani padavine prihodnjih dni (2,5 do 6,5 mm) povedo o stanju vlage tal v Zgornji Savinjski dolini.",
+      "title": "Suša v Zgornji Savinjski dolini: kaj pove ničelna dnevna količina dežja",
+      "teaser": "Danes na postaji IREICA1 ni zabeleženih padavin, mesečna vsota pa znaša 46,5 mm, kar je izhodišče za oceno trenutne vlage tal. Preverili bomo tudi, kaj napoved za prihodnje dni - z le 0,6 do 5,1 mm padavin - pomeni za stanje tal v Rečici ob Savinji.",
       "topic": {
         "id": "susa-vlaga-tal",
         "sezona": [
@@ -86,6 +57,35 @@
           "suša Zgornja Savinjska dolina",
           "vlaga tal Rečica ob Savinji",
           "koliko časa brez dežja"
+        ]
+      }
+    },
+    {
+      "id": "veter-in-tlak",
+      "title": "Kaj visok zračni tlak in brezvetrje napovedujeta za vreme v Savinjski dolini",
+      "teaser": "Zračni tlak na postaji IREICA1 je 1019 hPa, veter pa trenutno miruje pri 0,0 km/h iz smeri 199°, kar so tipični znaki stabilnega vremena. Analizirali bomo, kaj takšne razmere pomenijo glede na napoved naslednjih štirih dni, ko se pričakuje rahlo ohladitev in več padavin proti sredi tedna.",
+      "topic": {
+        "id": "veter-in-tlak",
+        "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tag": "pritisk",
+        "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
+        "seo_keywords": [
+          "zračni tlak napoved vreme",
+          "veter Zgornja Savinjska dolina",
+          "sprememba vremena znaki"
         ]
       }
     }
