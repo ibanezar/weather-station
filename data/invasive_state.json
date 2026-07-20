@@ -12,6 +12,9 @@
     "harlekinska-polonica": [
       "46.32_14.92",
       "46.39_14.63"
+    ],
+    "zlezava-nedotika": [
+      "46.32_14.86"
     ]
   },
   "seen_obs_ids": [
@@ -19,7 +22,8 @@
     295735721,
     367058415,
     120311408,
-    293368242
+    293368242,
+    382947762
   ],
   "taxon_ids": {
     "japonski-dresnik": 914922,
@@ -37,7 +41,8 @@
     "orjaski-dezen": "2026-05-31",
     "japonski-dresnik": "2025-07-06",
     "kanadska-zlata-rozga": "2025-06-21",
-    "harlekinska-polonica": "2025-06-19"
+    "harlekinska-polonica": "2025-06-19",
+    "zlezava-nedotika": "2026-07-19"
   },
-  "last_run": "2026-07-19T06:12:54.784005+00:00"
+  "last_run": "2026-07-20T06:32:15.893333+00:00"
 }

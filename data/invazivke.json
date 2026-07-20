@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-19T06:12:54.784296+00:00",
+  "updated": "2026-07-20T06:32:15.893536+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -34,10 +34,19 @@
       "sl": "Žlezava nedotika",
       "sci": "Impatiens glandulifera",
       "severity": "high",
-      "total_cells": 0,
-      "new_cells_30d": 0,
-      "last_observed": null,
-      "recent": []
+      "total_cells": 1,
+      "new_cells_30d": 1,
+      "last_observed": "2026-07-19",
+      "recent": [
+        {
+          "date": "2026-07-19",
+          "place": "Okonina, 3333 Ljubno ob Savinji, Slovenija",
+          "lat_approx": 46.32,
+          "lng_approx": 14.87,
+          "url": "https://www.inaturalist.org/observations/382947762",
+          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/700851263/medium.jpg"
+        }
+      ]
     },
     {
       "slug": "orjaski-dezen",
@@ -155,5 +164,20 @@
       "recent": []
     }
   ],
-  "alerts": []
+  "alerts": [
+    {
+      "slug": "zlezava-nedotika",
+      "sci": "Impatiens glandulifera",
+      "sl": "Žlezava nedotika",
+      "severity": "high",
+      "desc_sl": "Enoletnica z Himalaje, ki se ob vodotokih širi izjemno hitro in v gostih sestojih zasenči domorodne obrežne rastline. Plitve korenine slabo vežejo breg, zato po odmrtju jeseni pospešuje erozijo.",
+      "date": "2026-07-19",
+      "cell": "46.32_14.86",
+      "place": "Okonina, 3333 Ljubno ob Savinji, Slovenija",
+      "lat_approx": 46.32,
+      "lng_approx": 14.87,
+      "url": "https://www.inaturalist.org/observations/382947762",
+      "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/700851263/medium.jpg"
+    }
+  ]
 }

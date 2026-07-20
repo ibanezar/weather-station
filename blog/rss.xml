@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 20 Jul 2026 06:16:21 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 20 Jul 2026 06:32:36 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Napoved za ta teden v Savinjski dolini: vroča sobota, dež se vrne v nedeljo</title>
@@ -18,6 +18,17 @@
       <category>2026</category>
       <category>IREICA1</category>
       <category>Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Invazivka na novi lokaciji: Žlezava nedotika pri Okonina, 3333 Ljubno ob Savinji, Slovenija</title>
+      <link>https://meteorec.si/blog/invazivka-zlezava-nedotika-20260719-4632-1486.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-zlezava-nedotika-20260719-4632-1486.html</guid>
+      <pubDate>Sun, 19 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Žlezava nedotika (Impatiens glandulifera) je bila opažena na novi lokaciji pri Okonina, 3333 Ljubno ob Savinji, Slovenija (19. julija 2026). Resnost: visoka.</description>
+      <category>invazivke</category>
+      <category>zlezava-nedotika</category>
+      <category>high</category>
+      <category>2026</category>
     </item>
     <item>
       <title>ARSO oranžno opozorilo — nevihte: kaj to pomeni za Zgornjo Savinjsko dolino</title>
