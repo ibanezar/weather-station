@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-21-0915-995891.html</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningts-2026-07-21-0915-995891.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
