@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 20 Jul 2026 06:39:59 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 21 Jul 2026 06:39:25 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Zakaj po dežju gobe ne zrastejo takoj</title>
+      <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
+      <pubDate>Tue, 21 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>agrometeo</category>
+      <category>vlaga tal</category>
+    </item>
     <item>
       <title>Suša v Zgornji Savinjski dolini: kaj pove ničelna dnevna količina dežja</title>
       <link>https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</link>
