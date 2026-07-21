@@ -1,12 +1,12 @@
 [
   {
-    "target_date": "2026-07-21",
-    "made_at": "2026-07-20",
+    "target_date": "2026-07-22",
+    "made_at": "2026-07-21",
     "arso": null,
     "open_meteo": {
-      "tmax": 22.8,
-      "tmin": 14.6,
-      "precip": 0.4
+      "tmax": 23.7,
+      "tmin": 10.5,
+      "precip": 0.0
     }
   }
 ]
