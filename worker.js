@@ -259,6 +259,56 @@ async function fetchEcowitt(start, end, env) {
   return json.data;
 }
 
+// Rezerva za /current: postaja→Ecowitt oblak deluje, a WU (Weather Underground)
+// upload iz Ecowitt konzole je lahko ugasnjen/zastal. Zgradi WU-oblikovan
+// observations[0] iz Ecowitt real_time, da ostane fetchCurrent()/applyObs() v
+// app.js nespremenjen.
+async function fetchEcowittAsWuObs(env) {
+  const app = env?.EW_APP || EW_APP_FALLBACK;
+  const api = env?.EW_API || EW_API_FALLBACK;
+  if (!app || !api) return null;
+  const qs = new URLSearchParams({
+    application_key: app, api_key: api, mac: EW_MAC,
+    call_back: "outdoor,wind,pressure,rainfall,solar_and_uvi",
+    temp_unitid: "1", pressure_unitid: "3", wind_speed_unitid: "7",
+    rainfall_unitid: "12", solar_irradiance_unitid: "16",
+  });
+  let json;
+  try {
+    const res = await fetch("https://api.ecowitt.net/api/v3/device/real_time?" + qs.toString(), {
+      headers: { "Accept": "application/json" }
+    });
+    json = await res.json();
+  } catch (_) { return null; }
+  if (json?.code !== 0) return null;
+  const d = json.data || {};
+  const v = x => num(x?.value);
+  const temp = v(d.outdoor?.temperature);
+  if (temp == null) return null;
+  const now = new Date();
+  return {
+    stationID: STATION,
+    obsTimeUtc: now.toISOString(),
+    obsTimeLocal: fmtDate(now) + " " + now.toTimeString().slice(0, 8),
+    lat: 46.3258, lon: 14.9211,
+    humidity: v(d.outdoor?.humidity),
+    winddir: v(d.wind?.wind_direction) ?? 0,
+    uv: v(d.solar_and_uvi?.uvi),
+    softwareType: "Ecowitt (WU rezerva)",
+    qcStatus: 1,
+    metric: {
+      temp,
+      dewpt: v(d.outdoor?.dew_point),
+      windSpeed: v(d.wind?.wind_speed),
+      windGust: v(d.wind?.wind_gust),
+      pressure: v(d.pressure?.relative),
+      precipRate: v(d.rainfall?.rain_rate),
+      precipTotal: v(d.rainfall?.daily),
+      solarRadiation: v(d.solar_and_uvi?.solar),
+    }
+  };
+}
+
 const tsToDate = ts => new Date(parseInt(ts)*1000).toISOString().slice(0,10);
 const pf = v => v==null?null:typeof v==="object"?parseFloat(v.avg??v.max??Object.values(v)[0])||null:parseFloat(v)||null;
 // Ecowitt vrača vrednosti kot skalarje ("19.2") ALI objekte {max,min,avg};
@@ -2741,7 +2791,32 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
       // ── /current ali /hourly ──────────────────────────────
       const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
-      return new Response(await res.text(), {
+      const bodyText = await res.text();
+
+      // Weather Underground se polni prek Ecowitt-konzolinega WU-uploada; ta
+      // lahko odpove (npr. ugasnjen upload), medtem ko postaja sama še naprej
+      // normalno poroča v Ecowitt oblak. V takem primeru je WU odgovor prazen
+      // ali zastarel (obsTimeUtc star >30 min) — za "/current" zato preverimo
+      // svežino in po potrebi preklopimo na Ecowitt real_time kot rezervo, da
+      // se osrednji prikaz na strani ne "zamrzne".
+      if (path !== "/hourly") {
+        let obs = null;
+        try { obs = JSON.parse(bodyText)?.observations?.[0]; } catch (_) { /* ignore */ }
+        const ageMin = obs?.obsTimeUtc
+          ? (Date.now() - new Date(obs.obsTimeUtc).getTime()) / 60000
+          : Infinity;
+        if (!obs || ageMin > 30) {
+          const fallback = await fetchEcowittAsWuObs(env);
+          if (fallback) {
+            return new Response(JSON.stringify({ observations: [fallback] }), {
+              status: 200,
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+            });
+          }
+        }
+      }
+
+      return new Response(bodyText, {
         status: res.status,
         headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
       });
