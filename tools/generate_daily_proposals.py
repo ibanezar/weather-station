@@ -23,7 +23,7 @@ Potrebne env spremenljivke:
     NOTIFY_SECRET       -- ista skrivnost kot za /blog-subscribe/notify
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, datetime, urllib.request, urllib.error
+import json, os, sys, re, random, datetime, urllib.request, urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, TODAY
@@ -53,6 +53,7 @@ def pick_candidates(event, state, n=N_PROPOSALS):
             return -1
 
     fresh = [i for i in seasonal if i["tag"] not in taken]
+    random.shuffle(fresh)
     stale = sorted((i for i in seasonal if i["tag"] in taken), key=last_used)
 
     candidates = []
