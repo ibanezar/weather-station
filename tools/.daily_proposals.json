@@ -1,11 +1,34 @@
 {
   "date": "2026-07-22",
-  "created": "2026-07-22T06:14:57.319644+00:00",
+  "created": "2026-07-22T06:39:19.150821+00:00",
   "proposals": [
     {
+      "id": "planinski-izlet",
+      "title": "Vreme za pohod v Savinjske Alpe: jutranja megla, popoldan mirneje",
+      "teaser": "Veter je danes zjutraj praktično zamrl (le 1,4 km/h), a visoka vlažnost zraka (97 %) in rosišče tik pod temperaturo zraka napovedujeta meglo ali nizko oblačnost po dolinah. Pogledamo, kako se razmere obetajo za naslednje dni, ko naj bi veter na Savinjskih Alpah okrepil do 15,8 km/h jutri in celo 20 km/h v soboto, medtem ko dežja v prvih dneh napovedi ne pričakujemo.",
+      "topic": {
+        "id": "planinski-izlet",
+        "sezona": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tag": "planine",
+        "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
+        "seo_keywords": [
+          "vreme za pohod Savinjske Alpe",
+          "razmere v hribih Zgornja Savinjska dolina",
+          "planinarjenje vreme"
+        ]
+      }
+    },
+    {
       "id": "primerjava-krajev",
-      "title": "Vreme v Zgornji Savinjski dolini danes: kako se Rečica ob Savinji razlikuje od sosednjih krajev",
-      "teaser": "Postaja IREICA1 trenutno kaže 13,0 °C ob kar 99 % vlažnosti in brezvetrju, kar je tipično za jutranje razmere v dolinski kotlini. Pogledali bomo, kako se te razmere razlikujejo od bližnjih ARSO postaj in zakaj mikroklima Savinjske doline pogosto odstopa od okoliških krajev.",
+      "title": "Mikroklima Zgornje Savinjske doline: kaj kaže postaja IREICA1 v Rečici ob Savinji",
+      "teaser": "Postaja IREICA1 trenutno beleži 14,7 °C ob visoki vlažnosti 97 % in zračnem tlaku 1020 hPa, kar je tipično za jutranje ure v ozki alpski dolini. V članku razložimo, zakaj se lahko take vrednosti v Rečici ob Savinji razlikujejo od bližnjih krajev in kaj to pove o lokalni mikroklimi doline.",
       "topic": {
         "id": "primerjava-krajev",
         "sezona": [
@@ -32,11 +55,11 @@
       }
     },
     {
-      "id": "veter-in-tlak",
-      "title": "Zračni tlak 1021 hPa in brezvetrje -- kaj to pomeni za vreme v prihodnjih dneh",
-      "teaser": "Trenutni zračni tlak na postaji IREICA1 znaša 1020,9 hPa, veter pa je popolnoma miren, kar nakazuje stabilno vremensko situacijo. V članku razložimo, kaj takšne razmere skupaj z napovedjo naraščajočih temperatur (do 27,7 °C v petek) in okrepljenim vetrom v prihodnjih dneh povedo o spremembi vremena.",
+      "id": "dolzina-dneva",
+      "title": "Koliko sonca smo dejansko ujeli v Zgornji Savinjski dolini ta teden",
+      "teaser": "Sredi julija so dnevi najdaljši v letu, a trenutna sončno obsevanje 398,6 W/m² in UV indeks 3 kažeta na precej oblačno oz. meglen dopoldan v Rečici ob Savinji. Preverimo, koliko efektivnega sonca smo v resnici izkoristili glede na razpoložljivo dnevno svetlobo in kakšne razlike prinaša tudi mesečna količina padavin (49,6 mm).",
       "topic": {
-        "id": "veter-in-tlak",
+        "id": "dolzina-dneva",
         "sezona": [
           1,
           2,
@@ -51,34 +74,12 @@
           11,
           12
         ],
-        "tag": "pritisk",
-        "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
+        "tag": "sonce",
+        "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
         "seo_keywords": [
-          "zračni tlak napoved vreme",
-          "veter Zgornja Savinjska dolina",
-          "sprememba vremena znaki"
-        ]
-      }
-    },
-    {
-      "id": "gobarska-sezona",
-      "title": "Gobarska napoved za Zgornjo Savinjsko dolino: kaj kaže visoka vlažnost po dežju",
-      "teaser": "Visoka zračna vlažnost (99 %) in nedavne padavine (3,1 mm ob zadnjem dogodku, 49,6 mm v tem mesecu) ustvarjajo ugodne pogoje za rast gob v gozdovih doline. Preverimo, kako bodo na gobarsko sezono vplivale napovedane temperature med 10 in 28 °C ter minimalne padavine v prihodnjih dneh.",
-      "topic": {
-        "id": "gobarska-sezona",
-        "sezona": [
-          6,
-          7,
-          8,
-          9,
-          10
-        ],
-        "tag": "gobe",
-        "brief": "Gobarska sezona -- kaj kažejo trenutna vlažnost tal, temperature in padavine za rast gob v dolini.",
-        "seo_keywords": [
-          "gobarska napoved Zgornja Savinjska dolina",
-          "kdaj rastejo gobe",
-          "gobarjenje Rečica ob Savinji"
+          "ure sonca Zgornja Savinjska dolina",
+          "dolžina dneva vreme",
+          "sončno vreme Rečica ob Savinji"
         ]
       }
     }
