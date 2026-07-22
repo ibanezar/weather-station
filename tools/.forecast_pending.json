@@ -8,5 +8,15 @@
       "tmin": 10.5,
       "precip": 0.0
     }
+  },
+  {
+    "target_date": "2026-07-23",
+    "made_at": "2026-07-22",
+    "arso": null,
+    "open_meteo": {
+      "tmax": 24.8,
+      "tmin": 11.8,
+      "precip": 1.6
+    }
   }
 ]
