@@ -50,7 +50,7 @@
         "WarningTS"
       ],
       "validEnd": "2026-07-21T18:59:00+00:00",
-      "resolved": false,
+      "resolved": true,
       "publishedAt": "2026-07-21T09:15:36.591403+00:00"
     }
   }
