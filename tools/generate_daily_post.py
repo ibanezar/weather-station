@@ -30,7 +30,7 @@ Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, shutil, time, datetime, urllib.request, urllib.error, urllib.parse
+import json, os, sys, re, shutil, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY
@@ -70,6 +70,42 @@ IDEAS = [
     {"id": "veter-in-tlak", "sezona": list(range(1, 13)), "tag": "pritisk",
      "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
      "seo_keywords": ["zračni tlak napoved vreme", "veter Zgornja Savinjska dolina", "sprememba vremena znaki"]},
+    {"id": "pozarna-ogrozenost", "sezona": [3, 4, 5, 6, 7, 8, 9, 10], "tag": "pozarna-ogrozenost",
+     "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
+     "seo_keywords": ["požarna ogroženost Zgornja Savinjska dolina", "nevarnost požara v naravi", "suša in gozdni požari"]},
+    {"id": "temperaturni-obrat", "sezona": [10, 11, 12, 1, 2, 3], "tag": "inverzija",
+     "brief": "Temperaturni obrat (inverzija) v dolini: zakaj je v Rečici hladneje kot na okoliških vrhovih.",
+     "seo_keywords": ["temperaturni obrat Savinjska dolina", "inverzija Rečica ob Savinji", "megla v dolini"]},
+    {"id": "tropske-noci", "sezona": [6, 7, 8], "tag": "tropska-noc",
+     "brief": "Tropske noči zadnjih dni: ali temperatura ponoči pade pod 20 °C in kaj to pomeni za spanje/zdravje.",
+     "seo_keywords": ["tropska noč Savinjska dolina", "vroče noči poletje", "kdaj se ohladi ponoči"]},
+    {"id": "prva-slana", "sezona": [9, 10, 11], "tag": "slana",
+     "brief": "Ali in kdaj lahko v dolini pričakujemo prvo slano glede na trenutne nočne minimume.",
+     "seo_keywords": ["prva slana Zgornja Savinjska dolina", "kdaj pride slana", "nočni mraz jesen"]},
+    {"id": "prvi-sneg", "sezona": [10, 11, 12, 1, 2, 3], "tag": "sneg",
+     "brief": "Obeti za (prvi) sneg glede na temperaturni profil in napoved padavin.",
+     "seo_keywords": ["prvi sneg Zgornja Savinjska dolina", "napoved snega Rečica ob Savinji", "kdaj bo zapadel sneg"]},
+    {"id": "cvetni-prah", "sezona": [2, 3, 4, 5, 6], "tag": "cvetni-prah",
+     "brief": "Razmere za cvetni prah/alergike: veter, vlaga in temperatura zadnjih dni.",
+     "seo_keywords": ["cvetni prah Savinjska dolina", "alergije pomlad vreme", "koncentracija peloda"]},
+    {"id": "dolzina-dneva", "sezona": list(range(1, 13)), "tag": "sonce",
+     "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
+     "seo_keywords": ["ure sonca Zgornja Savinjska dolina", "dolžina dneva vreme", "sončno vreme Rečica ob Savinji"]},
+    {"id": "dusljivost-zraka", "sezona": [5, 6, 7, 8, 9], "tag": "dusljivost",
+     "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+     "seo_keywords": ["rosišče Savinjska dolina", "dušljivo vreme", "občutek vročine vlaga"]},
+    {"id": "poplavna-ogrozenost", "sezona": [3, 4, 5, 9, 10, 11], "tag": "poplave",
+     "brief": "Vodostaj Savinje in poplavna ogroženost glede na zadnje padavine in nasičenost tal.",
+     "seo_keywords": ["poplave Savinjska dolina", "vodostaj Savinje danes", "nevarnost poplav Rečica"]},
+    {"id": "zgodovinska-primerjava", "sezona": list(range(1, 13)), "tag": "zgodovina",
+     "brief": "Kako se zadnji dnevi primerjajo z večletnim (ERA5) povprečjem za ta del leta.",
+     "seo_keywords": ["podnebno povprečje Savinjska dolina", "primerjava z lansko letom vreme", "zgodovinski podatki ERA5"]},
+    {"id": "planinski-izlet", "sezona": [5, 6, 7, 8, 9, 10], "tag": "planine",
+     "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
+     "seo_keywords": ["vreme za pohod Savinjske Alpe", "razmere v hribih Zgornja Savinjska dolina", "planinarjenje vreme"]},
+    {"id": "nocno-ohlajanje", "sezona": [3, 4, 5, 9, 10, 11], "tag": "nocno-ohlajanje",
+     "brief": "Zakaj se dolina ponoči tako hitro ohladi -- jasno nebo, radiacijsko ohlajanje in mraz v kotlini.",
+     "seo_keywords": ["radiacijsko ohlajanje dolina", "nočni mraz Rečica ob Savinji", "zakaj je ponoči tako mrzlo"]},
 ]
 
 # Statične hub/spoke strani (glej meteorec.si) -- kandidati za interno linkanje
@@ -84,6 +120,11 @@ SPOKE_PAGES = [
     (("trend",), "/trendi/", "dolgoročne trende"),
     (("rekord",), "/rekord/", "vremenske rekorde postaje"),
     (("invazivke", "invazivne"), "/invazivke/", "spremljanje invazivnih vrst"),
+    (("toca",), "/toca/", "statistiko toče"),
+    (("zgodovina",), "/klima/", "podnebno klimatologijo doline"),
+    (("planine",), "/vreme-za-padalce/", "vreme za padalce"),
+    (("sonce", "dusljivost", "tropska-noc"), "/temperatura/", "temperaturno statistiko"),
+    (("napoved", "tocnost"), "/tocnost-napovedi/", "točnost napovedi"),
 ]
 
 HEAT_C, COLD_C, RAIN_MM, WIND_KMH = 30, -5, 20, 50
@@ -225,6 +266,7 @@ def pick_topic(event, state):
     taken = recent_tags(12) | set(recent[-6:])
     seasonal = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
     candidates = [i for i in seasonal if i["tag"] not in taken]
+    random.shuffle(candidates)
     if not candidates:
         # Vse sezonske teme so bile nedavno uporabljene -- vzemi najdlje
         # neuporabljeno, ne vedno prve s seznama (ta fallback je povzročal,
