@@ -1,11 +1,11 @@
 {
-  "date": "2026-07-21",
-  "created": "2026-07-21T06:16:40.626661+00:00",
+  "date": "2026-07-22",
+  "created": "2026-07-22T06:14:57.319644+00:00",
   "proposals": [
     {
       "id": "primerjava-krajev",
-      "title": "Vreme v Zgornji Savinjski dolini: kako se Rečica ob Savinji razlikuje od sosednjih krajev",
-      "teaser": "Na postaji IREICA1 trenutno merimo 17,2 °C ob kar 98 % vlažnosti in tlaku okoli 1020 hPa - pogledali bomo, kako se te razmere ujemajo ali razlikujejo od bližnjih ARSO postaj. Mikroklima Savinjske doline zna presenetiti tudi ob navidez enotnem vremenu v regiji.",
+      "title": "Vreme v Zgornji Savinjski dolini danes: kako se Rečica ob Savinji razlikuje od sosednjih krajev",
+      "teaser": "Postaja IREICA1 trenutno kaže 13,0 °C ob kar 99 % vlažnosti in brezvetrju, kar je tipično za jutranje razmere v dolinski kotlini. Pogledali bomo, kako se te razmere razlikujejo od bližnjih ARSO postaj in zakaj mikroklima Savinjske doline pogosto odstopa od okoliških krajev.",
       "topic": {
         "id": "primerjava-krajev",
         "sezona": [
@@ -33,8 +33,8 @@
     },
     {
       "id": "veter-in-tlak",
-      "title": "Zračni tlak 1020 hPa in brezvetrje: kaj to pove o vremenu v prihodnjih dneh",
-      "teaser": "Trenutno je veter na postaji popolnoma mirujoč, tlak pa se giblje okoli 1019,7 hPa - razložimo, kaj tak zračni tlak brez vetra običajno napoveduje. Ob tem preverimo, kako se ta signal ujema z napovedjo naslednjih štirih dni, ko temperature postopoma naraščajo proti 24-25 °C.",
+      "title": "Zračni tlak 1021 hPa in brezvetrje -- kaj to pomeni za vreme v prihodnjih dneh",
+      "teaser": "Trenutni zračni tlak na postaji IREICA1 znaša 1020,9 hPa, veter pa je popolnoma miren, kar nakazuje stabilno vremensko situacijo. V članku razložimo, kaj takšne razmere skupaj z napovedjo naraščajočih temperatur (do 27,7 °C v petek) in okrepljenim vetrom v prihodnjih dneh povedo o spremembi vremena.",
       "topic": {
         "id": "veter-in-tlak",
         "sezona": [
@@ -62,8 +62,8 @@
     },
     {
       "id": "gobarska-sezona",
-      "title": "Gobarska napoved za Zgornjo Savinjsko dolino: kaj kažejo vlaga in padavine",
-      "teaser": "Zračna vlažnost je trenutno kar 98-odstotna, danes pa je padlo 1,3 mm dežja, mesečno pa že 47,8 mm - idealni pogoji za gobe se počasi izrisujejo. Pogledamo tudi napoved padavin za naslednje dni, ki bo pokazala, ali gre res za začetek gobarske sezone v dolini.",
+      "title": "Gobarska napoved za Zgornjo Savinjsko dolino: kaj kaže visoka vlažnost po dežju",
+      "teaser": "Visoka zračna vlažnost (99 %) in nedavne padavine (3,1 mm ob zadnjem dogodku, 49,6 mm v tem mesecu) ustvarjajo ugodne pogoje za rast gob v gozdovih doline. Preverimo, kako bodo na gobarsko sezono vplivale napovedane temperature med 10 in 28 °C ter minimalne padavine v prihodnjih dneh.",
       "topic": {
         "id": "gobarska-sezona",
         "sezona": [
