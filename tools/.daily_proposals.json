@@ -1,34 +1,11 @@
 {
-  "date": "2026-07-22",
-  "created": "2026-07-22T06:39:19.150821+00:00",
+  "date": "2026-07-23",
+  "created": "2026-07-23T06:18:54.282527+00:00",
   "proposals": [
     {
-      "id": "planinski-izlet",
-      "title": "Vreme za pohod v Savinjske Alpe: jutranja megla, popoldan mirneje",
-      "teaser": "Veter je danes zjutraj praktično zamrl (le 1,4 km/h), a visoka vlažnost zraka (97 %) in rosišče tik pod temperaturo zraka napovedujeta meglo ali nizko oblačnost po dolinah. Pogledamo, kako se razmere obetajo za naslednje dni, ko naj bi veter na Savinjskih Alpah okrepil do 15,8 km/h jutri in celo 20 km/h v soboto, medtem ko dežja v prvih dneh napovedi ne pričakujemo.",
-      "topic": {
-        "id": "planinski-izlet",
-        "sezona": [
-          5,
-          6,
-          7,
-          8,
-          9,
-          10
-        ],
-        "tag": "planine",
-        "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
-        "seo_keywords": [
-          "vreme za pohod Savinjske Alpe",
-          "razmere v hribih Zgornja Savinjska dolina",
-          "planinarjenje vreme"
-        ]
-      }
-    },
-    {
       "id": "primerjava-krajev",
-      "title": "Mikroklima Zgornje Savinjske doline: kaj kaže postaja IREICA1 v Rečici ob Savinji",
-      "teaser": "Postaja IREICA1 trenutno beleži 14,7 °C ob visoki vlažnosti 97 % in zračnem tlaku 1020 hPa, kar je tipično za jutranje ure v ozki alpski dolini. V članku razložimo, zakaj se lahko take vrednosti v Rečici ob Savinji razlikujejo od bližnjih krajev in kaj to pove o lokalni mikroklimi doline.",
+      "title": "Kako se jutranja mikroklima v Rečici ob Savinji razlikuje od okoliških krajev",
+      "teaser": "Postaja IREICA1 trenutno beleži 14,9 °C ob visoki vlažnosti 91 % in skoraj brez vetra (1,4 km/h iz smeri JJZ), kar je tipično za dolinsko lego Zgornje Savinjske doline. Pogledali bomo, zakaj lahko sosednji kraji in ARSO postaje v istem trenutku kažejo občutno drugačne vrednosti temperature in vlage.",
       "topic": {
         "id": "primerjava-krajev",
         "sezona": [
@@ -55,11 +32,34 @@
       }
     },
     {
-      "id": "dolzina-dneva",
-      "title": "Koliko sonca smo dejansko ujeli v Zgornji Savinjski dolini ta teden",
-      "teaser": "Sredi julija so dnevi najdaljši v letu, a trenutna sončno obsevanje 398,6 W/m² in UV indeks 3 kažeta na precej oblačno oz. meglen dopoldan v Rečici ob Savinji. Preverimo, koliko efektivnega sonca smo v resnici izkoristili glede na razpoložljivo dnevno svetlobo in kakšne razlike prinaša tudi mesečna količina padavin (49,6 mm).",
+      "id": "planinski-izlet",
+      "title": "Razmere za pohod v Savinjske Alpe: kdaj je okno med 24. in 25. julijem najbolj obetavno",
+      "teaser": "Trenutno je v dolini veter praktično zanemarljiv, a napoved kaže, da bo 25. julija veter v sunkih dosegel do 19,6 km/h ob dnevni temperaturi do 27,6 °C, medtem ko 26. julij prinaša kar 17,3 mm padavin. Razčlenimo, kateri dan ponuja najbolj stabilne razmere za varen izlet v hribe.",
       "topic": {
-        "id": "dolzina-dneva",
+        "id": "planinski-izlet",
+        "sezona": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tag": "planine",
+        "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
+        "seo_keywords": [
+          "vreme za pohod Savinjske Alpe",
+          "razmere v hribih Zgornja Savinjska dolina",
+          "planinarjenje vreme"
+        ]
+      }
+    },
+    {
+      "id": "zgodovinska-primerjava",
+      "title": "Julij 2026 v Zgornji Savinjski dolini: je letošnje vreme res drugačno od dolgoletnega povprečja?",
+      "teaser": "Trenutne razmere z visoko vlago in blago temperaturo primerjamo s tem, kaj za ta del julija običajno kaže večletno (ERA5) povprečje za območje. Pogled v pretekle podatke pomaga oceniti, ali gre za tipično poletno obdobje ali za odstopanje od običajnega vzorca.",
+      "topic": {
+        "id": "zgodovinska-primerjava",
         "sezona": [
           1,
           2,
@@ -74,12 +74,12 @@
           11,
           12
         ],
-        "tag": "sonce",
-        "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
+        "tag": "zgodovina",
+        "brief": "Kako se zadnji dnevi primerjajo z večletnim (ERA5) povprečjem za ta del leta.",
         "seo_keywords": [
-          "ure sonca Zgornja Savinjska dolina",
-          "dolžina dneva vreme",
-          "sončno vreme Rečica ob Savinji"
+          "podnebno povprečje Savinjska dolina",
+          "primerjava z lansko letom vreme",
+          "zgodovinski podatki ERA5"
         ]
       }
     }
