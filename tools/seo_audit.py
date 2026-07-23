@@ -16,7 +16,7 @@ Zaženi:
   python3 tools/seo_audit.py            # pregled; ne-nič izhod ob napakah
   python3 tools/seo_audit.py --fix      # popravi sitemap.xml na mestu
 """
-import json, os, re, sys, datetime
+import glob, json, os, re, sys, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -65,6 +65,36 @@ ONPAGE_CHECKS = {
     "og:image":         re.compile(r'<meta[^>]+property=["\']og:image["\']', re.I),
     "JSON-LD":          re.compile(r'application/ld\+json', re.I),
 }
+
+# Osiroteli hub-i (glej docs/seo-plan-2026-07.md #6): vsaka hub stran iz CORE
+# (razen domače in /blog/, ki sta vedno naravno povezani od povsod) naj ima
+# vsaj eno vhodno interno povezavo iz vsebine ali skupnega footerja hub strani.
+ORPHAN_CHECK_EXCLUDE = {"", "blog/"}
+LINK_SOURCE_GLOBS = [
+    "index.html", "o-postaji.html",
+    "blog/index.html", "blog/*.html",
+    "novosti/index.html", "novosti/*/index.html",
+    "slovar/index.html",
+]
+HREF_RE = re.compile(r'href="(/[^"#?]*)"')
+
+
+def internal_link_targets():
+    """Zberi ciljne poti (brez vodilne '/'), na katere kaže vsaj en href v
+    vsebinskih straneh (blog, domača, novosti, slovar) ali v hub footerjih."""
+    sources = set()
+    for pattern in LINK_SOURCE_GLOBS:
+        sources |= set(glob.glob(os.path.join(ROOT, pattern)))
+    for page in CORE:
+        if page.endswith("/"):
+            p = local_path(page)
+            if os.path.exists(p):
+                sources.add(p)
+    targets = set()
+    for src in sources:
+        for href in HREF_RE.findall(read(src)):
+            targets.add(href.lstrip("/"))
+    return targets
 
 
 def local_path(page):
@@ -160,6 +190,16 @@ def audit(fix=False):
             if not pat.search(html):
                 notes.append(f"ON-PAGE: /{rel} nima elementa '{name}'")
 
+    # 5) Osiroteli hub-i — vsaj ena vhodna interna povezava iz vsebine ------
+    link_targets = internal_link_targets()
+    orphans = []
+    for page in CORE:
+        if page in ORPHAN_CHECK_EXCLUDE:
+            continue
+        if page not in link_targets and (page + "index.html") not in link_targets:
+            orphans.append(page)
+            notes.append(f"OSIROTELA STRAN (brez vhodnih povezav iz vsebine): /{page}")
+
     # ── FIX -----------------------------------------------------------------
     if fix:
         changed = main
@@ -189,6 +229,8 @@ def audit(fix=False):
     lines.append(f"- Sitemap URL-ov skupaj: **{len(union)}**")
     lines.append(f"- Ključnih strani (CORE): **{len(CORE)}**")
     lines.append(f"- Blog objav: **{len(blog_urls)}**")
+    checked_hubs = len(CORE) - len(ORPHAN_CHECK_EXCLUDE)
+    lines.append(f"- Hub strani preverjenih glede osirotelosti: **{checked_hubs}** ({len(orphans)} osirotelih)")
     if fix and additions:
         lines.append("")
         lines.append(f"## Dodano v sitemap.xml ({len(additions)})")

@@ -31,7 +31,7 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
 | Dnevno | `agrometeo`, `nevihte`, `kakovost-zraka`, `padalci`, `gobe`, `vodostaj` forecast | Osveži napovedne hub strani |
 | Dnevno | `prerender-current.yml` | Predrenderira trenutne meritve za SEO/social |
 | Tedensko (pon 05:30 UTC) | `seo-smart-routine.yml` | Hub strani (`/klima/`, `/padavine/`, `/temperatura/`, `/teden/`), zaznava dogodkov → `/novosti/`, `sitemap-seo.xml` |
-| **Tedensko (ned 04:40 UTC)** | **`seo-audit.yml` (NOVO)** | Sinhronizira `sitemap.xml` (blog + ključne strani), on-page pregled, IndexNow |
+| **Tedensko (ned 04:40 UTC)** | **`seo-audit.yml`** | Sinhronizira `sitemap.xml` (blog + ključne strani), on-page pregled, osirotele hub strani, IndexNow |
 | Mesečno (1. ob 03:00 UTC) | `monthly-post.yml` | Blog: mesečni povzetek + IndexNow + obvestilo naročnikom |
 | Ob push (main) | `indexnow.yml` | IndexNow ping za spremenjene HTML/sitemap |
 | Nadzor | `arso-alerts.yml`, `station-monitor.yml`, `update-history.yml`, `lighthouse.yml` | Opozorila, monitoring postaje, arhiv, kakovost |
@@ -50,6 +50,11 @@ in na **tehnični brezhibnosti** (pokritost sitemapa, hitro indeksiranje).
    - preveri, da **ni mrtvih povezav** v `sitemap.xml`,
    - on-page pregled ključnih strani (title, meta description, canonical, og:image, JSON-LD),
    - `--fix` aditivno popravi sitemap in osveži lastmod; nato IndexNow ping.
+4. **(23.7.) Samodejno zaznavanje osirotelih hub strani** — `seo_audit.py` zdaj vsak teden
+   preveri, da ima vsaka hub stran iz `CORE` (razen domače in `/blog/`) vsaj eno vhodno
+   interno povezavo iz vsebine (blog, `/novosti/`, `/slovar/`) ali skupnega hub footerja;
+   trenutno stanje: 0 osirotelih od 21 preverjenih. Odpravlja ročno preverjanje, omenjeno
+   spodaj v razdelku 6 ("Osiroteli hub-i").
 
 ---
 
@@ -130,7 +135,7 @@ Klimatske / evergreen (grade avtoriteto):
 - **Vsaka nova stran** → v ustrezen sitemap (blog gre samodejno prek `seo-audit`), canonical, meta description, JSON-LD, og:image.
 - **Interno povezovanje**: nova objava naj bo povezana iz ≥ 1 obstoječe relevantne strani (ne le iz seznama blogov).
 - **IndexNow**: samodejno ob push (`indexnow.yml`) — ni ročnega dela.
-- **Osiroteli hub-i**: `/trendi/` je bil siroti; redno preverjaj, da imajo vse hub strani vsaj eno vhodno interno povezavo iz vsebine.
+- **Osiroteli hub-i**: `/trendi/` je bil siroti; od 23.7. `seo-audit.yml` samodejno tedensko preveri, da imajo vse hub strani vsaj eno vhodno interno povezavo iz vsebine (ni več ročno delo).
 - **llms.txt**: posodobi ob dodajanju pomembnih evergreen strani (za LLM/AI iskalnike).
 
 ---
