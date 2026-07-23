@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 23 Jul 2026 06:04:01 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 23 Jul 2026 07:12:38 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Julij 2026 v Zgornji Savinjski dolini: je letošnje vreme res drugačno od dolgoletnega povprečja?</title>
+      <link>https://meteorec.si/blog/julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723.html</guid>
+      <pubDate>Thu, 23 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Kako se julij 2026 v Rečici ob Savinji obnaša glede na podnebno povprečje doline? Primerjava trenutnih razmer IREICA1 z večletnimi vzorci.</description>
+      <category>julij 2026</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>podnebno povprečje</category>
+      <category>ERA5</category>
+    </item>
     <item>
       <title>Poslabšanje vremena danes popoldne v Zgornji Savinjski dolini: veter, nevihta in oster padec temperature</title>
       <link>https://meteorec.si/blog/poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723.html</link>
