@@ -160,7 +160,20 @@
     <p>Veter je pomemben varnostni dejavnik tudi zato, ker lahko nenaden sunek premakne težišče pohodnika. Če so skale mokre, se nevarnost zdrsa še poveča.</p>
     <p>Tveganje za nevihte je večje, ko se visoke temperature v dolini, velika količina vlage in nestabilno ozračje pojavijo hkrati. V gorah se lahko nevihte razvijejo hitro, zato je sobotno popoldne del konca tedna, ko je priporočljivo že sestopati, ne pa se šele približevati vrhu.</p>
 
-    <span class="section-label">04 — priporočilo</span>
+    <span class="section-label">04 — napoved za gore</span>
+    <h2 id="napoved-za-gore">Splošna napoved za gore, ne le za veter</h2>
+    <p>Veter ni edini dejavnik, ki se z višino spreminja. Tudi temperatura, oblačnost in meja ničte izoterme se nad Zgornjo Savinjsko dolino iz dneva v dan precej razlikujejo, kar dodatno vpliva na izbiro ture. Ocene spodaj veljajo za nadmorsko višino okoli 2350 m, torej približno za vrh Ojstrice.</p>
+    <p><strong>Petek</strong> bo na vrhu najhladnejši dan, s temperaturo med 2 in 9 °C. Meja ničte izoterme bo razmeroma nizko, okoli 2800 m, nebo pa bo večinoma jasno, kar skupaj z mirnim vetrom pomeni najboljšo vidljivost in najstabilnejše razmere za daljši prehod po grebenih.</p>
+    <p><strong>V soboto</strong> se na vrhu segreje do približno 12 °C, meja ničte izoterme pa se dvigne krepko čez 4000 m. Že dopoldne se začne nabirati več oblakov, kar je še en znak, da se popoldne obeta razvoj konvekcijskih neviht, na katere opozarja tudi napoved vetra.</p>
+    <p><strong>Nedelja</strong> prinese ozek temperaturni razpon med 7 in 11 °C, saj dež in gosta oblačnost (tudi do 100-odstotna pokritost neba) preprečujeta večje segrevanje. Meja ničte izoterme ostaja visoko, zato sneg tudi na najvišjih vrhovih ni pričakovan, ostaja pa slaba vidljivost.</p>
+
+    <div class="chart-card">
+      <h3>Ojstrica, okoli 2350 m: temperatura in oblačnost</h3>
+      <canvas id="chartMountain"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Okvirna napoved za nadmorsko višino okoli 2350 m (Open-Meteo, koordinate Ojstrice); dejanske razmere na terenu lahko odstopajo.</p>
+    </div>
+
+    <span class="section-label">05 — priporočilo</span>
     <h2 id="priporocilo">Kaj razmere pomenijo za izbiro dneva</h2>
     <p>Če primerjamo vse tri dni, je <strong>petek</strong> najmirnejša in najbolj predvidljiva izbira za zahtevnejše ture ali daljše prehode po grebenih. Napovedi glede vetra, temperature in stabilnosti ozračja so takrat najbolj ugodne.</p>
     <p><strong>Sobota</strong> je primernejša za zgodnje jutranje ture. Cilj naj bo, da se z izpostavljenih grebenov umaknete pred močnejšim segrevanjem in morebitnim razvojem popoldanskih neviht.</p>
@@ -275,6 +288,32 @@
         x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } },
         y: { position: 'left', min: 0, grid: { color: 'rgba(255,255,255,.05)' },
              ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' km/h' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartMountain'), {
+    data: {
+      labels: ["Petek", "Sobota", "Nedelja"],
+      datasets: [
+        { type: 'bar', label: 'Oblačnost (%)', data: [34, 52, 83], backgroundColor: 'rgba(148,163,184,.45)',
+           borderRadius: 5, yAxisID: 'y1', order: 3 },
+        { type: 'line', label: 'Tmax na vrhu (°C)', data: [9.1, 12.3, 11.3], borderColor: '#f97316',
+           backgroundColor: 'rgba(249,115,22,.12)', borderWidth: 2, pointRadius: 3,
+           pointBackgroundColor: '#f97316', fill: true, tension: .35, order: 1 },
+        { type: 'line', label: 'Tmin na vrhu (°C)', data: [2.0, 3.4, 7.1], borderColor: '#22d3ee',
+           backgroundColor: 'rgba(34,211,238,.08)', borderWidth: 2, pointRadius: 3,
+           pointBackgroundColor: '#22d3ee', fill: true, tension: .35, order: 2 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: { position: 'left', grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' } },
+        y1: { position: 'right', min: 0, max: 100, grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => v + ' %' } }
       }
     }
   });
