@@ -175,7 +175,10 @@ body{
    (fixed near the top-right on mobile) never lands on top of a number —
    it only ever passes over blank card padding as the page scrolls. */
 .gp-forest-premium{display:flex;flex-direction:column;justify-content:flex-start;
-  align-items:stretch;gap:.7rem;padding-right:3.4rem}
+  align-items:stretch;gap:.7rem;padding-right:3.4rem;cursor:pointer;transition:border-color .15s,transform .15s}
+.gp-forest-premium:hover,.gp-forest-premium:focus-visible{border-color:var(--blue);transform:translateY(-1px)}
+.gp-forest-more{display:flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:600;
+  color:var(--blue);margin-top:-.2rem}
 .gp-forest-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem}
 .gp-forest-namewrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
 .gp-forest-sp3{display:flex;flex-direction:column;gap:.65rem}
@@ -1174,7 +1177,7 @@ body .wrap{padding-bottom:5.5rem}
   // the initial render and for the day-chip re-render below, so picking a
   // different day re-ranks/re-labels every forest instead of only the one
   // location detail underneath.
-  function forestRowHtml(l, dayIdx, meta){
+  function forestRowHtml(l, dayIdx, meta, locIdx){
     var o=l.days[dayIdx];
     var pctCls=levelClass(o.overall);
     var spHtml=o.species.slice(0,3).map(function(s){
@@ -1190,7 +1193,8 @@ body .wrap{padding-bottom:5.5rem}
     var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
       :(dayIdx===0?'<span>🔝 danes je vrh tedna</span>':'<span>🔝 vrh tedna</span>');
     var metaHtml=(o.soil_moisture_pct==null?'':'<span>💧 vlaga tal '+o.soil_moisture_pct+' %</span>')+peakHtml;
-    return '<div class="gp-forest gp-forest-premium">'+
+    return '<div class="gp-forest gp-forest-premium" data-loc-i="'+locIdx+'" tabindex="0" role="button" '+
+      'aria-label="Odpri polno napoved za '+esc2(l.name)+'">'+
       '<div class="gp-forest-top"><div class="gp-forest-namewrap">'+
       '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
       '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span></div>'+
@@ -1199,11 +1203,14 @@ body .wrap{padding-bottom:5.5rem}
       '<div class="gp-forest-sp3">'+spHtml+'</div>'+
       '<div class="gp-forest-bottom"><div class="gp-forest-meta">'+metaHtml+'</div>'+
       '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
-      '</div></div>';
+      '</div>'+
+      '<div class="gp-forest-more">🍄 vseh '+o.species.length+' vrst · 🗺️ zemljevid · 7-dnevna napoved →</div>'+
+      '</div>';
   }
   function forestsListHtml(locs, dayIdx, meta){
-    return locs.slice().sort(function(a,b){return b.days[dayIdx].overall-a.days[dayIdx].overall;})
-      .map(function(l){return forestRowHtml(l,dayIdx,meta);}).join('');
+    return locs.map(function(l,i){return {l:l,i:i};})
+      .sort(function(a,b){return b.l.days[dayIdx].overall-a.l.days[dayIdx].overall;})
+      .map(function(o){return forestRowHtml(o.l,dayIdx,meta,o.i);}).join('');
   }
   function locDetailHtml(loc, meta){
     var html="";
@@ -1294,15 +1301,41 @@ body .wrap{padding-bottom:5.5rem}
     var chipRow=document.getElementById("gp-loc-chips");
     var detail=document.getElementById("gp-loc-detail");
     wireDayChips(detail, home, meta);
+    // Shared by the region-chip row and the forest-card click below, so
+    // clicking a forest card up top and picking its chip lower down land on
+    // exactly the same detail view (species matrix, map link, day picker).
+    function selectLoc(i, scrollTarget){
+      var newLoc=locs[i];
+      if(chipRow){
+        chipRow.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
+        var btn=chipRow.querySelector('.gp-chip[data-i="'+i+'"]');
+        if(btn)btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+        if(btn)btn.classList.add("active");
+      }
+      detail.innerHTML=locDetailHtml(newLoc, meta);
+      wireDayChips(detail, newLoc, meta);
+      (scrollTarget||detail).scrollIntoView({block:"start",behavior:"smooth"});
+    }
     if(chipRow){chipRow.addEventListener("click",function(e){
       var btn=e.target.closest(".gp-chip");
       if(!btn)return;
-      chipRow.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
-      btn.classList.add("active");
-      btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-      var newLoc=locs[parseInt(btn.dataset.i,10)];
-      detail.innerHTML=locDetailHtml(newLoc, meta);
-      wireDayChips(detail, newLoc, meta);
+      selectLoc(parseInt(btn.dataset.i,10));
+    });}
+    // Forest cards up top (the compact "Napoved po gozdovih" summary) are
+    // clickable too — jumping straight to that area's full species/day
+    // picker and map link below, instead of leaving the top section a
+    // dead-end list and the region picker undiscovered further down.
+    if(todayForests){todayForests.addEventListener("click",function(e){
+      var card=e.target.closest(".gp-forest-premium");
+      if(!card)return;
+      selectLoc(parseInt(card.dataset.locI,10), document.getElementById("gp-loc-chips"));
+    });
+    todayForests.addEventListener("keydown",function(e){
+      if(e.key!=="Enter"&&e.key!==" ")return;
+      var card=e.target.closest(".gp-forest-premium");
+      if(!card)return;
+      e.preventDefault();
+      selectLoc(parseInt(card.dataset.locI,10), document.getElementById("gp-loc-chips"));
     });}
   }
   // ── Moji alarmi: per-user rule editor (species/location/elevation/threshold),
