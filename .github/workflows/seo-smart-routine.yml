@@ -23,6 +23,8 @@ jobs:
           python-version: '3.12'
 
       - name: Zaženi SEO smart routine
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
         run: python3 tools/seo_smart_routine.py
 
       - name: Commit & push če je kaj novega

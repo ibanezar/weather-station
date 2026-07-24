@@ -3,10 +3,10 @@
 // ═══════════════════════════════════════════════════════════
 
 const STATION = "IREICA1";
-const WU_KEY  = "619a8bb3ba4d42069a8bb3ba4d02061f";
 const WU_BASE = "https://api.weather.com/v2/pws/";
-const CURRENT_URL = WU_BASE+"observations/current?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
-const HOURLY_URL  = WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+WU_KEY+"&numericPrecision=decimal";
+// WU_API_KEY: skrivnost (wrangler secret put WU_API_KEY)
+const currentUrl = (env) => WU_BASE+"observations/current?stationId="+STATION+"&format=json&units=m&apiKey="+env.WU_API_KEY+"&numericPrecision=decimal";
+const hourlyUrl  = (env) => WU_BASE+"observations/hourly/7day?stationId="+STATION+"&format=json&units=m&apiKey="+env.WU_API_KEY+"&numericPrecision=decimal";
 
 const ANTHROPIC_KEY = "REPLACE_WITH_ANTHROPIC_API_KEY";
 // GEMINI_KEY: add as Secret in Cloudflare Workers dashboard → Settings → Variables → Secret variables
@@ -534,7 +534,7 @@ const PUSH_THRESHOLDS = [
 const PUSH_COOLDOWN_MS = 3 * 3600 * 1000;
 async function _cronCheckThresholds(env) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
-  let obs; try { obs = (await (await fetch(CURRENT_URL, { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
+  let obs; try { obs = (await (await fetch(currentUrl(env), { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
   const m = obs?.observations?.[0]?.metric; if (!m) return;
   let state = {}; try { const o = await r2.get("push/state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
   const now = Date.now();
@@ -603,7 +603,7 @@ async function _cronCheckPrecipNowcast(env) {
 const RAIN_START_THR = 1; // mm/h
 async function _cronCheckRainStartStop(env) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
-  let obs; try { obs = (await (await fetch(CURRENT_URL, { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
+  let obs; try { obs = (await (await fetch(currentUrl(env), { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
   const m = obs?.observations?.[0]?.metric; if (!m) return;
   const rate = m.precipRate ?? 0;
   let state = {}; try { const o = await r2.get("push/rain_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
@@ -1490,8 +1490,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const lon = url.searchParams.get("lon") || "14.9211";
         // Try v3 first (more reliable), then v2 fallback
         const urls = [
-          `https://api.weather.com/v3/location/near?geocode=${lat},${lon}&product=pws&format=json&language=en-US&apiKey=${WU_KEY}`,
-          `https://api.weather.com/v2/pws/nearby?geocode=${lat},${lon}&format=json&units=m&apiKey=${WU_KEY}`,
+          `https://api.weather.com/v3/location/near?geocode=${lat},${lon}&product=pws&format=json&language=en-US&apiKey=${env.WU_API_KEY}`,
+          `https://api.weather.com/v2/pws/nearby?geocode=${lat},${lon}&format=json&units=m&apiKey=${env.WU_API_KEY}`,
         ];
         for (const nearUrl of urls) {
           const ctrl = new AbortController();
@@ -1518,7 +1518,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       if (path === "/wu-station-history") {
         const stationId = url.searchParams.get("id");
         if (!stationId) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
-        const histUrl = `https://api.weather.com/v2/pws/observations/daily/7day?stationId=${stationId}&format=json&units=m&apiKey=${WU_KEY}&numericPrecision=decimal`;
+        const histUrl = `https://api.weather.com/v2/pws/observations/daily/7day?stationId=${stationId}&format=json&units=m&apiKey=${env.WU_API_KEY}&numericPrecision=decimal`;
         const ctrl = new AbortController();
         const tid = setTimeout(() => ctrl.abort(), 8000);
         try {
@@ -1538,7 +1538,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       if (path === "/wu-station") {
         const stationId = url.searchParams.get("id");
         if (!stationId) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
-        const stUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=m&apiKey=${WU_KEY}&numericPrecision=decimal`;
+        const stUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=m&apiKey=${env.WU_API_KEY}&numericPrecision=decimal`;
         const ctrl = new AbortController();
         const tid = setTimeout(() => ctrl.abort(), 8000);
         try {
@@ -2789,7 +2789,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
       }
 
       // ── /current ali /hourly ──────────────────────────────
-      const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
+      const apiUrl = path === "/hourly" ? hourlyUrl(env) : currentUrl(env);
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
       const bodyText = await res.text();
 

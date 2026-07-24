@@ -19,7 +19,7 @@ import json, os, sys, time, urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DRY = "--dry-run" in sys.argv
 
-WU_KEY = "619a8bb3ba4d42069a8bb3ba4d02061f"
+WU_KEY = os.environ.get("WU_API_KEY", "")
 STATION = "IREICA1"
 START, END = "2019-11-07", "2021-03-16"   # zgodnji blok brez min/max v Ecowitt
 

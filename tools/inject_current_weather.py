@@ -48,7 +48,7 @@ def fmtd(iso):
 
 
 WU_URL = ("https://api.weather.com/v2/pws/observations/current"
-          "?stationId=IREICA1&format=json&units=m&apiKey=619a8bb3ba4d42069a8bb3ba4d02061f")
+          "?stationId=IREICA1&format=json&units=m&apiKey=" + os.environ.get("WU_API_KEY", ""))
 
 
 def wrap(text):

@@ -14,12 +14,14 @@ jobs:
     steps:
       - name: Preveri svežost podatkov postaje
         id: check
+        env:
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
         run: |
           python3 - <<'PYEOF'
           import urllib.request, json, os
           from datetime import datetime, timezone
 
-          WU_KEY = "619a8bb3ba4d42069a8bb3ba4d02061f"
+          WU_KEY = os.environ["WU_API_KEY"]
           url = (
               "https://api.weather.com/v2/pws/observations/current"
               "?stationId=IREICA1&format=json&units=m&apiKey=" + WU_KEY

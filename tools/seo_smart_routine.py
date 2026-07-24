@@ -21,7 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
 TODAY = datetime.date.today()
-INDEXNOW_KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+INDEXNOW_KEY = os.environ.get("INDEXNOW_KEY", "")
 # Entity-linking za Place-shemo (preverjeno: Q969326 je naselje samo, ne občina).
 RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
                  "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
