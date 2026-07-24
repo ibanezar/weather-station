@@ -1,13 +1,35 @@
 {
-  "date": "2026-07-23",
-  "created": "2026-07-23T06:18:54.282527+00:00",
+  "date": "2026-07-24",
+  "created": "2026-07-24T06:14:00.156694+00:00",
   "proposals": [
     {
-      "id": "primerjava-krajev",
-      "title": "Kako se jutranja mikroklima v Rečici ob Savinji razlikuje od okoliških krajev",
-      "teaser": "Postaja IREICA1 trenutno beleži 14,9 °C ob visoki vlažnosti 91 % in skoraj brez vetra (1,4 km/h iz smeri JJZ), kar je tipično za dolinsko lego Zgornje Savinjske doline. Pogledali bomo, zakaj lahko sosednji kraji in ARSO postaje v istem trenutku kažejo občutno drugačne vrednosti temperature in vlage.",
+      "id": "dusljivost-zraka",
+      "title": "Zakaj se 14 stopinj v Zgornji Savinjski dolini čuti bolj dušljivo, kot kaže termometer",
+      "teaser": "Rosišče se trenutno giblje pri 13,2 °C ob 92-odstotni vlažnosti, kar pomeni, da je zrak skoraj nasičen z vlago in se počuti težje, kot pove sam termometer. Pogledali bomo, zakaj je razlika med izmerjeno in občuteno temperaturo pomembnejša od golega Celzija, še posebej ko se popoldne temperature povzpnejo proti napovedanim 24-28 °C.",
       "topic": {
-        "id": "primerjava-krajev",
+        "id": "dusljivost-zraka",
+        "sezona": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "tag": "dusljivost",
+        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+        "seo_keywords": [
+          "rosišče Savinjska dolina",
+          "dušljivo vreme",
+          "občutek vročine vlaga"
+        ]
+      }
+    },
+    {
+      "id": "vodna-bilanca",
+      "title": "Vodna bilanca tal v Savinjski dolini: koliko od tedenskih 3,3 mm dežja je sploh prišlo do korenin",
+      "teaser": "Zadnji teden je padlo le 3,3 mm dežja, mesečno pa 49,8 mm, kar ob poletni vročini hitro izgine z evapotranspiracijo. Pogledali bomo, kaj to pomeni za vlago v tleh in ali napovedanih 5,2 mm padavin v nedeljo prinese kakšno pravo olajšanje rastlinam.",
+      "topic": {
+        "id": "vodna-bilanca",
         "sezona": [
           1,
           2,
@@ -22,19 +44,19 @@
           11,
           12
         ],
-        "tag": "primerjava",
-        "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami.",
+        "tag": "vodna-bilanca",
+        "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok).",
         "seo_keywords": [
-          "vreme Zgornja Savinjska dolina",
-          "primerjava vremena Rečica ob Savinji",
-          "mikroklima Savinjska dolina"
+          "vodna bilanca tal",
+          "evapotranspiracija Savinjska dolina",
+          "koliko dežja koristi rastlinam"
         ]
       }
     },
     {
       "id": "planinski-izlet",
-      "title": "Razmere za pohod v Savinjske Alpe: kdaj je okno med 24. in 25. julijem najbolj obetavno",
-      "teaser": "Trenutno je v dolini veter praktično zanemarljiv, a napoved kaže, da bo 25. julija veter v sunkih dosegel do 19,6 km/h ob dnevni temperaturi do 27,6 °C, medtem ko 26. julij prinaša kar 17,3 mm padavin. Razčlenimo, kateri dan ponuja najbolj stabilne razmere za varen izlet v hribe.",
+      "title": "Razmere za pohod v Savinjske Alpe ta konec tedna: kdaj veter postane ovira",
+      "teaser": "Trenutno je v dolini veter komaj zaznaven (2,1 km/h), a napoved kaže, da bo v petek zapihalo že do 16,7 km/h, kar velja upoštevati pri načrtovanju tur na grebenih. Preverili bomo tudi tveganje za padavine, saj se v nedeljo obeta 5,2 mm dežja, kar lahko pomeni popoldansko nevihtno tveganje v hribih.",
       "topic": {
         "id": "planinski-izlet",
         "sezona": [
@@ -51,35 +73,6 @@
           "vreme za pohod Savinjske Alpe",
           "razmere v hribih Zgornja Savinjska dolina",
           "planinarjenje vreme"
-        ]
-      }
-    },
-    {
-      "id": "zgodovinska-primerjava",
-      "title": "Julij 2026 v Zgornji Savinjski dolini: je letošnje vreme res drugačno od dolgoletnega povprečja?",
-      "teaser": "Trenutne razmere z visoko vlago in blago temperaturo primerjamo s tem, kaj za ta del julija običajno kaže večletno (ERA5) povprečje za območje. Pogled v pretekle podatke pomaga oceniti, ali gre za tipično poletno obdobje ali za odstopanje od običajnega vzorca.",
-      "topic": {
-        "id": "zgodovinska-primerjava",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "zgodovina",
-        "brief": "Kako se zadnji dnevi primerjajo z večletnim (ERA5) povprečjem za ta del leta.",
-        "seo_keywords": [
-          "podnebno povprečje Savinjska dolina",
-          "primerjava z lansko letom vreme",
-          "zgodovinski podatki ERA5"
         ]
       }
     }
