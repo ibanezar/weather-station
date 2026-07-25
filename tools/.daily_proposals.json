@@ -1,11 +1,11 @@
 {
-  "date": "2026-07-24",
-  "created": "2026-07-24T06:14:00.156694+00:00",
+  "date": "2026-07-25",
+  "created": "2026-07-25T06:06:22.859530+00:00",
   "proposals": [
     {
       "id": "dusljivost-zraka",
-      "title": "Zakaj se 14 stopinj v Zgornji Savinjski dolini čuti bolj dušljivo, kot kaže termometer",
-      "teaser": "Rosišče se trenutno giblje pri 13,2 °C ob 92-odstotni vlažnosti, kar pomeni, da je zrak skoraj nasičen z vlago in se počuti težje, kot pove sam termometer. Pogledali bomo, zakaj je razlika med izmerjeno in občuteno temperaturo pomembnejša od golega Celzija, še posebej ko se popoldne temperature povzpnejo proti napovedanim 24-28 °C.",
+      "title": "Rosišče nad 10 stopinj: zakaj bo popoldan kljub 28 °C dušljiv",
+      "teaser": "Trenutno rosišče v Rečici ob Savinji znaša 10,9 °C ob 83-odstotni vlažnosti zraka, kar že zjutraj napoveduje težko popoldne. Ko bo temperatura popoldne poskočila proti napovedanim 28,2 °C, bo prav ta vlaga poskrbela, da se bo vročina počutila precej huje, kot kaže termometer. Pogledali bomo, kaj rosišče pravzaprav pomeni in kdaj postane zrak resnično neprijeten.",
       "topic": {
         "id": "dusljivost-zraka",
         "sezona": [
@@ -26,8 +26,8 @@
     },
     {
       "id": "vodna-bilanca",
-      "title": "Vodna bilanca tal v Savinjski dolini: koliko od tedenskih 3,3 mm dežja je sploh prišlo do korenin",
-      "teaser": "Zadnji teden je padlo le 3,3 mm dežja, mesečno pa 49,8 mm, kar ob poletni vročini hitro izgine z evapotranspiracijo. Pogledali bomo, kaj to pomeni za vlago v tleh in ali napovedanih 5,2 mm padavin v nedeljo prinese kakšno pravo olajšanje rastlinam.",
+      "title": "Suha zemlja kljub dežju: vodna bilanca tal v Zgornji Savinjski dolini",
+      "teaser": "Kljub temu, da je v zadnjem tednu padlo 3,3 mm dežja in v tem mesecu skupaj 49,8 mm, danes na postaji IREICA1 ni zabeleženega niti mm padavin. Ob napovedanih temperaturah do 30,1 °C in le enem namočenem dnevu (4,1 mm v sredo) se sprašujemo, koliko od te vode dejansko ostane v tleh in koliko izhlapi ali odteče. Razložimo, zakaj številka na dežemeru ne pove cele zgodbe o stanju tal.",
       "topic": {
         "id": "vodna-bilanca",
         "sezona": [
@@ -54,25 +54,31 @@
       }
     },
     {
-      "id": "planinski-izlet",
-      "title": "Razmere za pohod v Savinjske Alpe ta konec tedna: kdaj veter postane ovira",
-      "teaser": "Trenutno je v dolini veter komaj zaznaven (2,1 km/h), a napoved kaže, da bo v petek zapihalo že do 16,7 km/h, kar velja upoštevati pri načrtovanju tur na grebenih. Preverili bomo tudi tveganje za padavine, saj se v nedeljo obeta 5,2 mm dežja, kar lahko pomeni popoldansko nevihtno tveganje v hribih.",
+      "id": "primerjava-krajev",
+      "title": "Kako se vreme v Rečici ob Savinji razlikuje od sosednjih krajev",
+      "teaser": "Trenutne razmere na postaji IREICA1 -- 13,7 °C, 83 % vlage in tlak 1015 hPa -- postavimo ob bok bližnjim ARSO postajam v Zgornji Savinjski dolini. Pogledali bomo, kako lokalna lega Rečice ob Savinji vpliva na temperaturne razlike, veter (trenutno brez vetra, smer 185°) in nastanek mikroklimatskih posebnosti doline.",
       "topic": {
-        "id": "planinski-izlet",
+        "id": "primerjava-krajev",
         "sezona": [
+          1,
+          2,
+          3,
+          4,
           5,
           6,
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "tag": "planine",
-        "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
+        "tag": "primerjava",
+        "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami.",
         "seo_keywords": [
-          "vreme za pohod Savinjske Alpe",
-          "razmere v hribih Zgornja Savinjska dolina",
-          "planinarjenje vreme"
+          "vreme Zgornja Savinjska dolina",
+          "primerjava vremena Rečica ob Savinji",
+          "mikroklima Savinjska dolina"
         ]
       }
     }
