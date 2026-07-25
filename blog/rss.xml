@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 24 Jul 2026 06:31:21 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jul 2026 08:44:26 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kako se vreme v Rečici ob Savinji razlikuje od sosednjih krajev</title>
+      <link>https://meteorec.si/blog/kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725.html</guid>
+      <pubDate>Sat, 25 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Vreme Zgornja Savinjska dolina danes: 23,7°C v Rečici ob Savinji, kaj kaže postaja IREICA1 in zakaj mikroklima Savinjske doline vedno malo odstopa.</description>
+      <category>vreme</category>
+      <category>Savinjska dolina</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>mikroklima</category>
+    </item>
     <item>
       <title>Razmere za pohod v Savinjske Alpe ta konec tedna: kdaj veter postane ovira</title>
       <link>https://meteorec.si/blog/razmere-za-pohod-v-savinjske-alpe-ta-konec-tedna-kdaj-veter-0724.html</link>
