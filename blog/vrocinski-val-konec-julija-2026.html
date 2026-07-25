@@ -108,6 +108,39 @@ table.dtable td.night { color: var(--cyan); font-weight: 600; }
 table.dtable tr:last-child td { border-bottom: none; }
 .dtable-cap { font-size: .74rem; color: var(--muted); margin-top: .5rem; line-height: 1.5; }
 
+/* Simulator noči (interaktivni slider) */
+.ntc-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .3rem; }
+.ntc-row-label { font-size: .78rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.ntc-row-val { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.7rem; color: #fff; line-height: 1; }
+.ntc-slider {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 6px;
+  background: linear-gradient(90deg, #22d3ee, #34d399 40%, #f59e0b 75%, #f87171 100%);
+  outline: none; margin: .5rem 0 .4rem; cursor: pointer;
+}
+.ntc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; border: 3px solid #05070d; box-shadow: 0 1px 4px rgba(0,0,0,.5); cursor: pointer;
+}
+.ntc-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid #05070d; cursor: pointer;
+}
+.ntc-marker-row { display: flex; justify-content: space-between; font-size: .64rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 1.1rem; }
+.ntc-marker-mid { color: #f59e0b; }
+.ntc-readout { margin-bottom: 1rem; }
+.ntc-readout-label { font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: .45rem; }
+.ntc-bar-wrap { position: relative; height: 12px; background: rgba(255,255,255,.06); border-radius: 10px; overflow: visible; margin-bottom: .4rem; }
+.ntc-bar-fill { height: 100%; border-radius: 10px; transition: width .2s ease, background-color .2s ease; }
+.ntc-threshold {
+  position: absolute; top: -4px; bottom: -4px; width: 2px; background: rgba(239,68,68,.8);
+}
+.ntc-threshold::after {
+  content: 'prag 20 °C'; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+  font-size: .6rem; font-family: 'JetBrains Mono', monospace; color: #f87171; white-space: nowrap;
+}
+.ntc-val2 { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .9rem; color: #fff; }
+.ntc-status { text-align: center; padding: .6rem; border-radius: 10px; font-weight: 700; font-size: .85rem; transition: background-color .2s ease, color .2s ease; }
+.ntc-note { font-size: .72rem; color: var(--muted); margin-top: .8rem; line-height: 1.55; }
+
 /* sources box */
 .sources-box { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 1rem 1.2rem; margin-top: 2rem; }
 .sources-label { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: .65rem; }
@@ -232,6 +265,11 @@ article blockquote cite { display: block; margin-top: .7rem; font-style: normal;
 
     <p>Ko se sonce dvigne, sevanje hitro segreva dno doline. Okoliške gore blokirajo regionalne vetrove, ki bi toploto sicer razpihali, zato se energija kopiči. Ker je konvekcija pod inverzijo zavrta, ni osvežilnih popoldanskih neviht, ki v običajnem slovenskem poletju znižajo temperaturo. Namesto tega se kumulativna toplotna obremenitev iz dneva v dan veča — dolina se „napolni” z vročino.</p>
 
+    <figure class="post-photo">
+      <img src="/img/blog/vrocinski-val-konec-julija-2026/somrak-nad-dolino.jpg" alt="Somrak nad Zgornjo Savinjsko dolino z osamljenim drevesom v ospredju" width="1600" height="1068" loading="lazy">
+      <figcaption>Ko sonce zaide za grebeni, se začne katabatično ohlajanje — mehanizem, ki bo dolino reševal skozi ves val. Foto: Filip Eremita.</figcaption>
+    </figure>
+
     <!-- ── Adut doline: noč ── -->
     <h2 id="adut-doline-noc">Adut doline: noč</h2>
 
@@ -265,14 +303,48 @@ article blockquote cite { display: block; margin-top: .7rem; font-style: normal;
 
     <p>In prav tu je edina resnično anomalična poteza napovedi. Med samim vrhom vročine (30.–31. julija) modeli še vedno kažejo hladne noči okoli 16–18 °C — katabatični mehanizem naj bi zdržal. Šele 1. in 2. avgusta nočni minimumi po napovedi poskočijo proti 22–23 °C. Če se to zgodi, ne bo šlo le za neprijetno noč: pomenilo bi, da se je nočni odtok hladnega zraka na dnu doline zlomil — resen znak anomalije v mejni plasti. To bo številka, ki jo je vredno spremljati v živo na <a href="/" style="color:var(--blue)">nadzorni plošči</a>.</p>
 
+    <div class="chart-card">
+      <h3>Preizkusi sam: kako vroč dan pretvorimo v nočni minimum?</h3>
+      <div class="ntc-row">
+        <span class="ntc-row-label">Dnevni vrh</span>
+        <span class="ntc-row-val"><span id="ntcHi">35</span> °C</span>
+      </div>
+      <input type="range" class="ntc-slider" id="ntcSlider" min="25" max="40" value="35" step="1" aria-label="Dnevni vrh">
+      <div class="ntc-marker-row">
+        <span>25 °C</span>
+        <span class="ntc-marker-mid">36,5 °C · rekord postaje</span>
+        <span>40 °C</span>
+      </div>
+      <div class="ntc-readout">
+        <div class="ntc-readout-label">Pričakovan nočni minimum</div>
+        <div class="ntc-bar-wrap">
+          <div class="ntc-bar-fill" id="ntcFill" style="width:0%;background:#22d3ee"></div>
+          <div class="ntc-threshold" id="ntcThreshold"></div>
+        </div>
+        <div class="ntc-val2" id="ntcLowVal">— °C</div>
+      </div>
+      <div class="ntc-status" id="ntcStatus">—</div>
+      <p class="ntc-note">Simulacija temelji na razmerju med dnevnim vrhom in nočnim minimumom v 313 suhih poletnih dneh (2019–2026) na postaji IREICA1. Opazi paradoks: tudi pri dosedanjem rekordu 36,5 °C se je noč ohladila na 16 °C — vročina podnevi sama po sebi le počasi dviguje nočno temperaturo. Nad 36,5 °C gre za ekstrapolacijo brez zgodovinske reference. Prav zato napoved 22–23 °C za 1.–2. avgust ne bi bila posledica bolj vroče popoldnevne konice, temveč spremembe zračne mase čez noč — drugačnega mehanizma, ne le višje temperature.</p>
+    </div>
+
     <!-- ── Ekologija ── -->
     <h2 id="ko-se-micelij-umakne">Ko se micelij umakne: ekologija vročine</h2>
 
     <p>Dolgotrajna suha vročina ne obremeni le ljudi. Pod zaporno inverzijo se vrhnja plast tal hitro izsuši; brez vlage, ki bi blažila sevanje, se zgornjih 5–10 cm profila močno segreje — pogosto bolj kot zrak nad njim. In prav v tej plitvi plasti poteka večina biološkega življenja gozda.</p>
 
+    <figure class="post-photo">
+      <img src="/img/blog/vrocinski-val-konec-julija-2026/gozdna-pot-v-senci.jpg" alt="Senčna gozdna pot v Zgornji Savinjski dolini" width="1067" height="1600" loading="lazy">
+      <figcaption>V senci sklenjenega gozda so razmere v tleh videti mirne — a prav tu, tik pod površino, se odloča usoda micelija. Foto: Filip Eremita.</figcaption>
+    </figure>
+
     <p>Gozdovi okoli doline gostijo bogata omrežja gliv — saprotrofnih (razgrajujejo odmrlo snov) in ektomikoriznih (živijo v simbiozi s koreninami dreves). Obe obstajata predvsem kot občutljiv splet micelija tik pod listnim opadom. Ko se tla presušijo in pregrejejo, micelij izgubi turgorski (vodni) tlak, rast hif se ustavi, poletni cikli zorenja gob pa se prekinejo — zato po vročinskem valu gobe ne zrastejo takoj (o čemer smo <a href="/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html" style="color:var(--blue)">že pisali</a>). Micelij se umakne v globlje, hladnejše plasti ali pade v mirovanje do jesenskega dežja.</p>
 
     <p>Umik ima kaskadne posledice. Ektomikorizne glive delujejo kot razširjen koreninski sistem in drevesom dovajajo vodo ter minerale iz mikropor v tleh, ki jih korenine same ne dosežejo. Ko se micelij umakne, so drevesa nenadoma odrezana od te rešilne bilke. Da preprečijo hidravlično odpoved (kavitacijo), smreka (<em>Picea abies</em>) in bukev (<em>Fagus sylvatica</em>) zaprejo listne reže — s tem sicer zaustavijo izgubo vode, a hkrati ustavijo fotosintezo in dvignejo temperaturo lista. Če vročina traja več kot teden, to vodi v prezgodnje rjavenje listja, odmiranje drobnih korenin in večjo dovzetnost za škodljivce, kot je smrekov lubadar.</p>
+
+    <figure class="post-photo">
+      <img src="/img/blog/vrocinski-val-konec-julija-2026/srnjak-v-gozdu.jpg" alt="Srnjak v gozdu ob robu Zgornje Savinjske doline" width="1600" height="1067" loading="lazy">
+      <figcaption>Stres zaradi vročine ne prizadene le dreves in gliv — tudi divjad v teh dneh potrebuje več sence in dostopne vode. Foto: Filip Eremita.</figcaption>
+    </figure>
 
     <!-- ── Praktično ── -->
     <h2 id="kaj-to-pomeni-za-dolino">Kaj to pomeni za dolino — praktično</h2>
@@ -375,6 +447,66 @@ Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
       }
     }
   });
+})();
+</script>
+<script>
+(function () {
+  var slider = document.getElementById('ntcSlider');
+  if (!slider) return;
+  var hiEl     = document.getElementById('ntcHi');
+  var fill     = document.getElementById('ntcFill');
+  var thresh   = document.getElementById('ntcThreshold');
+  var lowVal   = document.getElementById('ntcLowVal');
+  var status   = document.getElementById('ntcStatus');
+
+  /* Empirične točke: dnevni vrh -> povprečen nočni minimum, suhi poletni dnevi
+     (padavine < 0.5 mm) 2019-2026, postaja IREICA1. Nad 36 °C (zadnja opazovana
+     točka je 36,5 °C rekord) ni zgodovinske reference -- ekstrapolacija po
+     naklonu zadnjega odseka. */
+  var PTS = [[25,12.2],[26,12.5],[28,13.1],[30,14.3],[32,15.1],[34,15.4],[36,16.0]];
+  var MAX_OBSERVED = 36;
+  var TAIL_SLOPE = 0.3; // °C nočnega minimuma na °C dnevnega vrha, nad 36 °C
+
+  var BAR_MIN = 10, BAR_MAX = 24, THRESH = 20;
+  thresh.style.left = (100 * (THRESH - BAR_MIN) / (BAR_MAX - BAR_MIN)) + '%';
+
+  function predict(hi) {
+    if (hi <= PTS[0][0]) return PTS[0][1];
+    if (hi >= MAX_OBSERVED) {
+      var last = PTS[PTS.length - 1];
+      return last[1] + TAIL_SLOPE * (hi - last[0]);
+    }
+    for (var i = 0; i < PTS.length - 1; i++) {
+      var a = PTS[i], b = PTS[i + 1];
+      if (hi >= a[0] && hi <= b[0]) {
+        var t = (hi - a[0]) / (b[0] - a[0]);
+        return a[1] + t * (b[1] - a[1]);
+      }
+    }
+    return PTS[PTS.length - 1][1];
+  }
+
+  function update() {
+    var hi = parseInt(slider.value, 10);
+    hiEl.textContent = hi;
+    var lo = predict(hi);
+    var pct = Math.max(0, Math.min(100, 100 * (lo - BAR_MIN) / (BAR_MAX - BAR_MIN)));
+
+    var color, label;
+    if (lo < 16)      { color = '#22d3ee'; label = 'Varno pod pragom — kot doslej vsako leto'; }
+    else if (lo < 20) { color = '#f59e0b'; label = 'Blizu praga, a še pod tropsko nočjo'; }
+    else              { color = '#f87171'; label = 'Prek praga tropske noči — brez precedensa v zapisu'; }
+
+    fill.style.width = pct + '%';
+    fill.style.background = color;
+    lowVal.textContent = lo.toFixed(1).replace('.', ',') + ' °C' + (hi > MAX_OBSERVED ? ' (ekstrapolacija)' : '');
+    status.textContent = label;
+    status.style.background = color + '22';
+    status.style.color = color;
+  }
+
+  slider.addEventListener('input', update);
+  update();
 })();
 </script>
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
