@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/vrocinski-val-konec-julija-2026.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/vrocinski-val-konec-julija-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725.html</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
@@ -587,6 +594,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/tema/mikroklima/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/tema/napoved/</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>weekly</changefreq>
@@ -696,6 +709,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/tropska-noc/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/tropske-noci/</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

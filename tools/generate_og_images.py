@@ -28,6 +28,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'vrocinski-val-konec-julija-2026',
+        'title': 'Bo dolina spet\nohladila noč?',
+        'subtitle': 'Vročinski val konec julija 2026 · IREICA1',
+        'section': 'Analize',
+        'accent': (249, 115, 22),
+        'photo': 'night-fog-valley',
+    },
+    {
         'slug': 'dve-nevihte-hladno-jutro',
         'title': 'Dve nevihti,\nnato hladno jutro',
         'subtitle': 'Fronta ohladila Zgornjo Savinjsko dolino · IREICA1',
