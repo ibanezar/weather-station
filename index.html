@@ -3246,8 +3246,11 @@
       <span>🔔 Moja opozorila</span>
       <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
     </div>
-    <p class="tp-hint">Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
+    <p class="tp-hint">Izbrana vas določa, za kateri kraj računamo nowcast in za katerega pošljemo opozorilo o nevihti ali toči. Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
     <div class="tp-body">
+      <!-- Vas za nowcast in potisna obvestila. Tu zato, ker se plošča
+           "Naslednjih 45 minut" skrije, kadar ni padavin na vidiku. -->
+      <div class="tp-row"><label>📍 Moja vas</label><div class="tp-inp tp-inp-sel"><select id="thr-vas" aria-label="Izberi vas za nowcast in obvestila"></select></div></div>
       <div class="tp-row"><label>🌡 Temperatura pod</label><div class="tp-inp"><input type="number" id="thr-temp-min" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
