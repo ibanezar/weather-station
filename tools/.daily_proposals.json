@@ -1,33 +1,11 @@
 {
-  "date": "2026-07-25",
-  "created": "2026-07-25T06:06:22.859530+00:00",
+  "date": "2026-07-26",
+  "created": "2026-07-26T06:24:15.844867+00:00",
   "proposals": [
     {
-      "id": "dusljivost-zraka",
-      "title": "Rosišče nad 10 stopinj: zakaj bo popoldan kljub 28 °C dušljiv",
-      "teaser": "Trenutno rosišče v Rečici ob Savinji znaša 10,9 °C ob 83-odstotni vlažnosti zraka, kar že zjutraj napoveduje težko popoldne. Ko bo temperatura popoldne poskočila proti napovedanim 28,2 °C, bo prav ta vlaga poskrbela, da se bo vročina počutila precej huje, kot kaže termometer. Pogledali bomo, kaj rosišče pravzaprav pomeni in kdaj postane zrak resnično neprijeten.",
-      "topic": {
-        "id": "dusljivost-zraka",
-        "sezona": [
-          5,
-          6,
-          7,
-          8,
-          9
-        ],
-        "tag": "dusljivost",
-        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
-        "seo_keywords": [
-          "rosišče Savinjska dolina",
-          "dušljivo vreme",
-          "občutek vročine vlaga"
-        ]
-      }
-    },
-    {
       "id": "vodna-bilanca",
-      "title": "Suha zemlja kljub dežju: vodna bilanca tal v Zgornji Savinjski dolini",
-      "teaser": "Kljub temu, da je v zadnjem tednu padlo 3,3 mm dežja in v tem mesecu skupaj 49,8 mm, danes na postaji IREICA1 ni zabeleženega niti mm padavin. Ob napovedanih temperaturah do 30,1 °C in le enem namočenem dnevu (4,1 mm v sredo) se sprašujemo, koliko od te vode dejansko ostane v tleh in koliko izhlapi ali odteče. Razložimo, zakaj številka na dežemeru ne pove cele zgodbe o stanju tal.",
+      "title": "Vodna bilanca tal v Zgornji Savinjski dolini: koliko od 49,8 mm julijskega dežja je sploh prišlo do korenin",
+      "teaser": "Postaja IREICA1 danes ne beleži dežja, mesečna vsota pa znaša 49,8 mm - v članku pogledamo, koliko te vlage je dejansko ostalo v tleh in koliko je izhlapelo ob vlažnosti okoli 62 % in VPD 0,300 inHg. Pojasnimo tudi, zakaj napovedanih 13,8 mm jutri (27. julij) ne pomeni nujno konca sušnega stresa za rastline.",
       "topic": {
         "id": "vodna-bilanca",
         "sezona": [
@@ -54,11 +32,11 @@
       }
     },
     {
-      "id": "primerjava-krajev",
-      "title": "Kako se vreme v Rečici ob Savinji razlikuje od sosednjih krajev",
-      "teaser": "Trenutne razmere na postaji IREICA1 -- 13,7 °C, 83 % vlage in tlak 1015 hPa -- postavimo ob bok bližnjim ARSO postajam v Zgornji Savinjski dolini. Pogledali bomo, kako lokalna lega Rečice ob Savinji vpliva na temperaturne razlike, veter (trenutno brez vetra, smer 185°) in nastanek mikroklimatskih posebnosti doline.",
+      "id": "temperaturni-trend",
+      "title": "Temperaturni trend v Rečici ob Savinji: od 27 do 32 stopinj v štirih dneh",
+      "teaser": "Trenutnih 22,2 °C na postaji IREICA1 je šele uvod - napoved za prihodnje dni kaže postopno segrevanje z 27,7 °C danes na kar 32,0 °C do 29. julija, medtem ko minimalne temperature ostajajo stabilne okoli 17 °C. Pogledamo, kaj ta razpon pomeni za občutek vročine v dolini in kako se giblje glede na sezonsko povprečje.",
       "topic": {
-        "id": "primerjava-krajev",
+        "id": "temperaturni-trend",
         "sezona": [
           1,
           2,
@@ -73,12 +51,37 @@
           11,
           12
         ],
-        "tag": "primerjava",
-        "brief": "Primerjava trenutnih razmer v Zgornji Savinjski dolini z bližnjimi kraji/ARSO postajami.",
+        "tag": "trend",
+        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
         "seo_keywords": [
-          "vreme Zgornja Savinjska dolina",
-          "primerjava vremena Rečica ob Savinji",
-          "mikroklima Savinjska dolina"
+          "temperaturni trend Savinjska dolina",
+          "vreme Rečica ob Savinji",
+          "postaja IREICA1"
+        ]
+      }
+    },
+    {
+      "id": "pozarna-ogrozenost",
+      "title": "Požarna ogroženost v Zgornji Savinjski dolini: suha tla in šibek veter kot tiho opozorilo",
+      "teaser": "Kljub trenutno mirnemu vetru (1,4 km/h) napoved za danes kaže sunke do 18 km/h, dežja pa praktično ni bilo - le 0,1 mm je pričakovanih danes, preden bo jutri padlo 13,8 mm. Analiziramo, kako ta kombinacija suhih tal, zmerne vlažnosti zraka (62 %) in vetrovnih sunkov vpliva na požarno ogroženost v naravi na območju Zgornje Savinjske doline.",
+      "topic": {
+        "id": "pozarna-ogrozenost",
+        "sezona": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tag": "pozarna-ogrozenost",
+        "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
+        "seo_keywords": [
+          "požarna ogroženost Zgornja Savinjska dolina",
+          "nevarnost požara v naravi",
+          "suša in gozdni požari"
         ]
       }
     }
