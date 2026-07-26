@@ -914,6 +914,9 @@ function _radVillage(levels, w, h, motion, vas) {
     dez: first(s => s.level >= RADAR_L_RAIN, RADAR_HORIZON_RAIN),
     nevihta: first(s => s.level >= RADAR_L_STORM, RADAR_HORIZON_STORM),
     jedro: first(s => s.core >= RADAR_CORE_MIN_PX, RADAR_HORIZON_STORM),
+    // Potek po petminutnih korakih — stran iz njega nariše trak približevanja.
+    // `l` je stopnja lestvice, `mmh` pripadajoča jakost.
+    potek: track.map(s => ({ t: s.t, l: s.level, mmh: s.level ? RADAR_LEVEL_MMH[s.level - 1] : 0 })),
   };
 }
 

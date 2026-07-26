@@ -360,18 +360,6 @@
   <div class="countdown-wrap"><div class="countdown-fill" id="countdown-fill"></div></div>
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
-
-  <!-- Nowcasting: kaj pride nad izbrano vas v naslednjih ~45 minutah.
-       Vir je radarska slika ARSO, ne modelska napoved. -->
-  <div id="nowcast-wrap" class="nowcast-wrap" hidden>
-    <div class="nowcast-head">
-      <span class="nowcast-title">⛈️ Naslednjih 45 minut</span>
-      <label class="nowcast-vas-lbl" for="nowcast-vas">Tvoja vas:</label>
-      <select id="nowcast-vas" class="nowcast-vas" aria-label="Izberi vas za nowcast"></select>
-    </div>
-    <div class="nowcast-body" id="nowcast-body">Nalaganje …</div>
-    <div class="nowcast-foot" id="nowcast-foot"></div>
-  </div>
   <div id="live-event-wrap" class="live-event-wrap" hidden>
     <div class="live-event-head">
       <span class="live-badge"><span class="live-dot"></span>V ŽIVO</span>
@@ -433,6 +421,43 @@
       </div>
     </div>
   </div>
+
+  <!-- Nowcasting: kaj pride nad izbrano vas v naslednjih 45 minutah. Vir je
+       radarska slika ARSO (premik celic), ne modelska napoved. Stoji zunaj
+       zavihkov, da ostane viden ne glede na izbrani zavihek. -->
+  <section id="nowcast-wrap" class="nowcast" aria-labelledby="nowcast-title" hidden>
+    <div class="nowcast-head">
+      <h2 class="nowcast-title" id="nowcast-title">Naslednjih 45 minut</h2>
+      <div class="nowcast-pick">
+        <label for="nowcast-vas">Tvoja vas</label>
+        <select id="nowcast-vas" aria-label="Izberi vas za nowcast"></select>
+      </div>
+    </div>
+
+    <div class="nowcast-lead" id="nowcast-lead">
+      <span class="nc-badge nc-badge-idle" id="nowcast-badge">
+        <span class="nc-badge-ic" aria-hidden="true">⏳</span><span id="nowcast-badge-txt">Nalaganje</span>
+      </span>
+      <span class="nc-hero" id="nowcast-hero"></span>
+    </div>
+    <p class="nowcast-sub" id="nowcast-sub">Berem radarsko sliko …</p>
+
+    <figure class="nowcast-fig" id="nowcast-fig" hidden>
+      <figcaption class="nc-fig-cap">Jakost padavin na poti proti vasi</figcaption>
+      <ol class="nc-strip" id="nowcast-strip"></ol>
+      <div class="nc-axis" aria-hidden="true">
+        <span class="nc-t1">čez 5 min</span><span class="nc-t4">20</span><span class="nc-t7">35</span><span class="nc-t9">45 min</span>
+      </div>
+      <div class="nc-scale" aria-hidden="true">
+        <span class="nc-scale-lbl">šibko</span>
+        <span class="nc-sw nc-b1"></span><span class="nc-sw nc-b2"></span><span class="nc-sw nc-b3"></span>
+        <span class="nc-sw nc-b4"></span><span class="nc-sw nc-b5"></span>
+        <span class="nc-scale-lbl">močno</span>
+      </div>
+    </figure>
+
+    <p class="nowcast-foot" id="nowcast-foot"></p>
+  </section>
 
   <!-- ══ TAB: AKTUALNO ══ -->
 
