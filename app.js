@@ -4648,9 +4648,29 @@ async function initNowcast(){
   if(_nowcastTimer)clearInterval(_nowcastTimer);
   _nowcastTimer=setInterval(loadNowcast,5*60*1000);   // radar se osveži vsakih 5 min
 }
+// Stopnja lestvice (1–15) -> eno od petih polj zaporedne modre lestvice.
+function _ncBand(l){
+  if(!l)return 0;
+  if(l<=5)return 1;     // do ~1,4 mm/h
+  if(l<=9)return 2;     // do ~8,7 mm/h
+  if(l<=11)return 3;    // do ~27 mm/h
+  if(l<=13)return 4;    // do ~71 mm/h
+  return 5;             // 100 mm/h in več
+}
+function _ncSetBadge(vrsta,ikona,beseda){
+  const b=document.getElementById('nowcast-badge'),t=document.getElementById('nowcast-badge-txt');
+  if(!b||!t)return;
+  b.className='nc-badge nc-badge-'+vrsta;
+  b.querySelector('.nc-badge-ic').textContent=ikona;
+  t.textContent=beseda;
+}
 async function loadNowcast(){
-  const body=document.getElementById('nowcast-body'),foot=document.getElementById('nowcast-foot');
-  if(!body)return;
+  const wrap=document.getElementById('nowcast-wrap');
+  const hero=document.getElementById('nowcast-hero'),sub=document.getElementById('nowcast-sub');
+  const foot=document.getElementById('nowcast-foot'),fig=document.getElementById('nowcast-fig');
+  const strip=document.getElementById('nowcast-strip');
+  if(!wrap||!hero||!sub)return;
+  wrap.classList.add('is-refreshing');           // zadrži prejšnji izris, brez preskoka
   const vas=getNowcastVas();
   let d;
   try{
@@ -4658,24 +4678,60 @@ async function loadNowcast(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     d=await r.json();
   }catch(_){
-    body.innerHTML='<span class="nc-mirno">Radarska slika trenutno ni dosegljiva.</span>';
+    wrap.classList.remove('is-refreshing');
+    _ncSetBadge('idle','📡','Ni signala');
+    hero.textContent='';
+    sub.textContent='Radarska slika trenutno ni dosegljiva. Poskusimo znova čez nekaj minut.';
+    if(fig)fig.hidden=true;
     if(foot)foot.textContent='';
     return;
   }
   const v=(d.vasi||[])[0];
-  if(!v){body.textContent='Za to vas ni podatka.';return;}
-  const kosi=[];
-  if(v.zdaj>0)kosi.push('Trenutno pada nad vasjo (~'+v.zdajMmh+' mm/h).');
-  if(v.toca)kosi.push('<span class="nc-toca">Možnost toče</span> — močno jedro čez <span class="nc-eta">~'+v.jedro+' min</span>.');
-  else if(v.nevihta!=null)kosi.push('<span class="nc-nevihta">Nevihta</span> čez <span class="nc-eta">~'+v.nevihta+' min</span>.');
-  else if(v.dez!=null)kosi.push('<span class="nc-dez">Dež</span> čez <span class="nc-eta">~'+v.dez+' min</span>.');
-  if(!kosi.length)kosi.push('<span class="nc-mirno">V naslednjih 45 minutah radar nad vasjo ne kaže padavin.</span>');
-  body.innerHTML=kosi.join(' ');
+  wrap.classList.remove('is-refreshing');
+  if(!v){_ncSetBadge('idle','—','Ni podatka');hero.textContent='';sub.textContent='Za to vas ni podatka.';if(fig)fig.hidden=true;return;}
+
+  // Junak je čas do dogodka; resnost nosi značka, ne barva besedila.
+  const eta=(min)=>{hero.innerHTML='čez ~'+min+'<span class="nc-unit">min</span>';};
+  if(v.toca){
+    _ncSetBadge('hail','🧊','Možnost toče'); eta(v.jedro);
+    sub.textContent='Radar kaže močno jedro na poti proti vasi. Toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.';
+  }else if(v.nevihta!=null){
+    _ncSetBadge('storm','⛈️','Nevihta'); eta(v.nevihta);
+    sub.textContent=v.zdaj>0?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h), jakost pa naj bi še narasla.'
+                            :'Radar kaže nevihtno celico na poti proti vasi.';
+  }else if(v.dez!=null){
+    _ncSetBadge('rain','🌧️','Dež'); eta(v.dez);
+    sub.textContent=v.zdaj>0?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h).':'Padavine se približujejo z radarske slike.';
+  }else{
+    _ncSetBadge('calm','☀️','Mirno'); hero.textContent='';
+    sub.textContent=v.zdaj>0?'Nad vasjo rahlo dežuje (~'+v.zdajMmh+' mm/h), novih celic pa radar ne kaže.'
+                            :'V naslednjih 45 minutah radar nad vasjo ne kaže padavin.';
+  }
+
+  // Trak približevanja. Vsako polje ima besedilno ustreznico (aria-label),
+  // da vrednost ni dosegljiva samo prek namiga ob prehodu miške.
+  const potek=v.potek||[];
+  if(fig&&strip){
+    if(!potek.length){fig.hidden=true;}
+    else{
+      fig.hidden=false;
+      strip.innerHTML=potek.map(s=>{
+        const b=_ncBand(s.l);
+        const opis=s.l?('~'+s.mmh+' mm/h'):'brez padavin';
+        const cez=(s.t>30?' (izven zanesljivega obsega)':'');
+        // Šrafura označi manj zanesljiv del obzorja, zato ima smisel le tam,
+        // kjer polje sploh kaj kaže — prazna polja pustimo pri miru.
+        return '<li class="nc-cell'+(b?' nc-b'+b:'')+(b&&s.t>30?' nc-beyond':'')+'" tabindex="0"'+
+          ' title="čez '+s.t+' min: '+opis+'"'+
+          ' aria-label="Čez '+s.t+' minut: '+opis+cez+'"></li>';
+      }).join('');
+    }
+  }
   if(foot){
     const p=d.premik||{};
     foot.textContent='Radar ARSO, star '+(d.starost_min??'?')+' min · celice se premikajo '+
       (p.kmh!=null?p.kmh+' km/h':'—')+' proti '+_smerIme(p.smer)+
-      ' · nowcast, ne napoved — zanesljivost pada po ~30 minutah.';
+      ' · nowcast iz radarske slike, ne napoved — po ~30 minutah zanesljivost opazno pade.';
   }
 }
 function _smerIme(deg){
