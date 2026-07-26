@@ -2478,3 +2478,20 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .app-bottomnav a.active{color:var(--blue)}
   .app-bottomnav a.active .ic{transform:translateY(-1px)}
 }
+
+/* ── Nowcasting toče in neviht (radar ARSO) ───────────────── */
+.nowcast-wrap{max-width:1400px;margin:0 auto .8rem;padding:.7rem .9rem;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  box-shadow:var(--card-shadow)}
+.nowcast-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem}
+.nowcast-title{font-weight:700;color:var(--text);font-size:.95rem}
+.nowcast-vas-lbl{margin-left:auto;color:var(--muted);font-size:.8rem}
+.nowcast-vas{font:inherit;font-size:.85rem;padding:.25rem .5rem;border-radius:8px;
+  border:1px solid var(--card-border-h);background:var(--card-bg);color:var(--text);cursor:pointer}
+.nowcast-body{font-size:1rem;color:var(--text);line-height:1.5}
+.nowcast-body .nc-eta{font-weight:700}
+.nowcast-body .nc-toca{color:var(--red);font-weight:700}
+.nowcast-body .nc-nevihta{color:var(--purple);font-weight:700}
+.nowcast-body .nc-dez{color:var(--rain-col);font-weight:700}
+.nowcast-body .nc-mirno{color:var(--green)}
+.nowcast-foot{margin-top:.35rem;color:var(--muted);font-size:.72rem;line-height:1.4}

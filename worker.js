@@ -510,17 +510,21 @@ async function _sendPush(env, sub, payloadObj) {
   });
   return res.status;
 }
-// Pošlji obvestilo VSEM naročnikom (počisti potekle). Vrne {sent, pruned}.
-async function _pushAll(env, payload) {
+// Pošlji obvestilo naročnikom (počisti potekle). Vrne {sent, pruned}.
+// Brez `filter` gre vsem; z njim samo tistim, ki mu ustrezajo — tako gredo
+// obvestila za posamezno vas res le naročnikom te vasi. Potekle naročnine
+// počistimo iz celotnega seznama, ne le iz izbranega podniza.
+async function _pushAll(env, payload, filter) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
   let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const target = filter ? subs.filter(filter) : subs;
   const dead = [];
-  await Promise.all(subs.map(async s => {
+  await Promise.all(target.map(async s => {
     try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
     catch (_) {}
   }));
   if (dead.length) await r2.put("push/subs.json", JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
-  return { sent: subs.length - dead.length, pruned: dead.length };
+  return { sent: target.length - dead.length, pruned: dead.length };
 }
 
 // ── Samodejni pragovni alarm (cron) ────────────────────────
@@ -619,10 +623,422 @@ async function _cronCheckRainStartStop(env) {
   if (raining !== wasRaining) await r2.put("push/rain_state.json", JSON.stringify({ raining }), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ═══════════════════════════════════════════════════════════
+//  Nowcasting neviht in toče iz radarske slike ARSO
+// ═══════════════════════════════════════════════════════════
+// Za razliko od _cronCheckPrecipNowcast (ki bere Open-Meteo, torej model na
+// mreži nekaj kilometrov z urno osvežitvijo) tu beremo dejansko radarsko
+// sliko, ocenimo premik celic in izračunamo, kdaj celica doseže posamezno vas.
+//
+// Vir: si0-rm-anim.gif — animacija zadnjih 90 minut, nov posnetek vsakih 5 min,
+// 821×660 px, 32-barvna paleta, lestvica "MAX RAINFALL RATE" v mm/h.
+//
+// Preverjeno na primeru 26. 7. 2026 (hindcast na 10-km okolici vasi):
+//   dež ≥2 mm/h,   30 min: POD 0,73  FAR 0,20
+//   nevihta ≥15,   30 min: POD 0,61  FAR 0,33
+//   jedro ≥50,     30 min: POD 0,42  FAR 0,40
+//   pri 45 minutah vse troje opazno pade (jedro FAR 0,60) — zato je obzorje
+//   za nevihto in točo omejeno na 30 minut, za dež na 45.
+// To je en dan in ena vremenska situacija; številke jemlji kot red velikosti.
+
+const RADAR_URL = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif";
+const RADAR_MAX_AGE_MIN = 20;      // starejše slike ne uporabimo za nowcast
+
+// Barvna lestvica z legende, od najšibkejše proti najmočnejši.
+const RADAR_LEVEL_RGB = [
+  [8, 90, 254], [0, 140, 254], [0, 174, 253], [0, 200, 254], [4, 216, 131],
+  [66, 235, 66], [108, 249, 0], [184, 250, 0], [249, 250, 0], [254, 198, 0],
+  [254, 132, 0], [255, 62, 1], [211, 0, 0], [181, 3, 3], [203, 0, 204],
+];
+// Legenda označuje vsako drugo polje (.5 1 2 5 15 50 100 mm/h); vmesna polja
+// so geometrijska sredina sosedov.
+const RADAR_LEVEL_MMH = [0.35, 0.5, 0.7, 1, 1.4, 2, 3.2, 5, 8.7, 15, 27, 50, 71, 100, 140];
+
+// Pragovi v stopnjah lestvice zgoraj.
+const RADAR_L_RAIN = 6;            // ≥2 mm/h
+const RADAR_L_STORM = 10;          // ≥15 mm/h
+const RADAR_L_CORE = 12;           // ≥50 mm/h — jedro, ki zmore točo
+const RADAR_CORE_MIN_PX = 6;       // ~1,5 km² — odreže posamezne šumne piksle
+const RADAR_HORIZON_RAIN = 45;
+const RADAR_HORIZON_STORM = 30;
+const RADAR_NEAR_PX = 6;           // ~3 km okoli vasi — dopusti napako lege
+
+// Georeferenca: navadna enakopravokotna projekcija. Umerjeno na 14 mest
+// (Ljubljana, Maribor, Celovec, Videm, Bovec …), RMS 1,7 px ≈ 0,85 km.
+const RAD_AX = 153.013374, RAD_BX = -1849.035845;
+const RAD_AY = -222.729262, RAD_BY = 10607.713236;
+const RAD_KM_X = 0.5026, RAD_KM_Y = 0.4964;
+const RAD_HEADER_PX = 44;          // naslovna vrstica z legendo — ni padavin
+const RAD_STEP_MIN = 5;
+
+function _radLonLat2Px(lon, lat) { return [RAD_AX * lon + RAD_BX, RAD_AY * lat + RAD_BY]; }
+
+// Vasi, med katerimi uporabnik izbira. Koordinate so središča naselij —
+// za 40-minutno napoved na 0,5-kilometrski mreži je to dovolj natančno.
+// `loc` je mestnik, da so obvestila slovnično pravilna ("v Mozirju", "na Polzeli").
+const NOWCAST_VASI = [
+  { id: "recica",      name: "Rečica ob Savinji", loc: "v Rečici ob Savinji", lat: 46.3258, lon: 14.9211 },
+  { id: "mozirje",     name: "Mozirje",           loc: "v Mozirju",           lat: 46.3389, lon: 14.9603 },
+  { id: "nazarje",     name: "Nazarje",           loc: "v Nazarjah",          lat: 46.2903, lon: 14.9481 },
+  { id: "ljubno",      name: "Ljubno ob Savinji", loc: "na Ljubnem ob Savinji", lat: 46.3439, lon: 14.8342 },
+  { id: "luce",        name: "Luče",              loc: "v Lučah",             lat: 46.3547, lon: 14.7480 },
+  { id: "solcava",     name: "Solčava",           loc: "v Solčavi",           lat: 46.4192, lon: 14.6931 },
+  { id: "logarska",    name: "Logarska dolina",   loc: "v Logarski dolini",   lat: 46.3925, lon: 14.6289 },
+  { id: "gornjigrad",  name: "Gornji Grad",       loc: "v Gornjem Gradu",     lat: 46.2958, lon: 14.8064 },
+  { id: "smartnopaka", name: "Šmartno ob Paki",   loc: "v Šmartnem ob Paki",  lat: 46.3308, lon: 15.0339 },
+  { id: "sostanj",     name: "Šoštanj",           loc: "v Šoštanju",          lat: 46.3789, lon: 15.0475 },
+  { id: "velenje",     name: "Velenje",           loc: "v Velenju",           lat: 46.3592, lon: 15.1103 },
+  { id: "braslovce",   name: "Braslovče",         loc: "v Braslovčah",        lat: 46.2872, lon: 15.0403 },
+  { id: "polzela",     name: "Polzela",           loc: "na Polzeli",          lat: 46.2811, lon: 15.0722 },
+  { id: "prebold",     name: "Prebold",           loc: "v Preboldu",          lat: 46.2364, lon: 15.0919 },
+  { id: "zalec",       name: "Žalec",             loc: "v Žalcu",             lat: 46.2519, lon: 15.1647 },
+  { id: "vransko",     name: "Vransko",           loc: "na Vranskem",         lat: 46.2450, lon: 14.9508 },
+  { id: "celje",       name: "Celje",             loc: "v Celju",             lat: 46.2311, lon: 15.2683 },
+];
+
+// ── Dekodirnik GIF ─────────────────────────────────────────
+// Delegates/canvas v Workerju ni, zato dekodiramo sami. ARSO uporablja eno
+// samo globalno paleto, disposal 1 (okvirji se seštevajo) in prosojni indeks,
+// ki se med okvirji spreminja — tudi na barve padavin, zato ga je nujno brati
+// iz vsakega GCE posebej, sicer bi si pokvarili prav najmočnejša jedra.
+function _gifDecodeFrames(bytes) {
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (u8[0] !== 0x47 || u8[1] !== 0x49 || u8[2] !== 0x46) throw new Error("ni GIF");
+  const w = u8[6] | (u8[7] << 8), h = u8[8] | (u8[9] << 8);
+  const flags = u8[10];
+  let p = 13, gct = null;
+  if (flags & 0x80) { const n = 1 << ((flags & 7) + 1); gct = u8.subarray(p, p + 3 * n); p += 3 * n; }
+
+  const canvas = new Uint8Array(w * h);
+  const frames = [];
+  let tIndex = -1;
+  const skipSub = (i) => { while (u8[i]) i += u8[i] + 1; return i + 1; };
+
+  while (p < u8.length) {
+    const b = u8[p];
+    if (b === 0x21) {
+      if (u8[p + 1] === 0xF9) tIndex = (u8[p + 3] & 1) ? u8[p + 6] : -1;
+      p = skipSub(p + 2);
+      continue;
+    }
+    if (b === 0x2C) {
+      const left = u8[p + 1] | (u8[p + 2] << 8), top = u8[p + 3] | (u8[p + 4] << 8);
+      const fw = u8[p + 5] | (u8[p + 6] << 8), fh = u8[p + 7] | (u8[p + 8] << 8);
+      const f = u8[p + 9], interlaced = !!(f & 0x40);
+      p += 10;
+      if (f & 0x80) p += 3 * (1 << ((f & 7) + 1));
+      const minCode = u8[p++];
+      let total = 0;
+      for (let q = p; u8[q]; q += u8[q] + 1) total += u8[q];
+      const data = new Uint8Array(total);
+      let dp = 0;
+      for (let q = p; u8[q]; q += u8[q] + 1) { data.set(u8.subarray(q + 1, q + 1 + u8[q]), dp); dp += u8[q]; }
+      p = skipSub(p);
+      const px = _gifLzw(data, minCode, fw * fh);
+      if (interlaced) {
+        let src = 0;
+        for (const [start, step] of [[0, 8], [4, 8], [2, 4], [1, 2]]) {
+          for (let y = start; y < fh; y += step) { _gifBlit(canvas, w, h, px, src * fw, left, top + y, fw, tIndex); src++; }
+        }
+      } else {
+        for (let y = 0; y < fh; y++) _gifBlit(canvas, w, h, px, y * fw, left, top + y, fw, tIndex);
+      }
+      frames.push(canvas.slice());
+      continue;
+    }
+    break;                                   // 0x3B (konec) ali neznan blok
+  }
+  return { width: w, height: h, palette: gct, frames };
+}
+
+function _gifBlit(canvas, cw, ch, px, srcOff, left, y, fw, tIndex) {
+  if (y < 0 || y >= ch) return;
+  const dst = y * cw + left, n = Math.min(fw, cw - left);
+  for (let x = 0; x < n; x++) { const v = px[srcOff + x]; if (v !== tIndex) canvas[dst + x] = v; }
+}
+
+function _gifLzw(data, minCodeSize, expected) {
+  const out = new Uint8Array(expected);
+  const clear = 1 << minCodeSize, eoi = clear + 1;
+  const prefix = new Int32Array(4096), suffix = new Uint8Array(4096), stack = new Uint8Array(4096);
+  let codeSize = minCodeSize + 1, mask = (1 << codeSize) - 1, next = clear + 2;
+  let bitBuf = 0, bitCnt = 0, pos = 0, op = 0, prev = -1, prevFirst = 0;
+  for (let i = 0; i < clear; i++) { prefix[i] = -1; suffix[i] = i; }
+
+  while (op < expected) {
+    while (bitCnt < codeSize) {
+      if (pos >= data.length) return out;    // okrnjen tok — vrni, kar imamo
+      bitBuf |= data[pos++] << bitCnt; bitCnt += 8;
+    }
+    const code = bitBuf & mask;
+    bitBuf >>>= codeSize; bitCnt -= codeSize;
+    if (code === clear) { codeSize = minCodeSize + 1; mask = (1 << codeSize) - 1; next = clear + 2; prev = -1; continue; }
+    if (code === eoi) break;
+    let sp = 0, cur = code;
+    if (code >= next) { if (prev < 0) break; stack[sp++] = prevFirst; cur = prev; }
+    while (cur >= clear) { stack[sp++] = suffix[cur]; cur = prefix[cur]; }
+    const first = cur;
+    stack[sp++] = first;
+    while (sp > 0 && op < expected) out[op++] = stack[--sp];
+    if (prev >= 0 && next < 4096) {
+      prefix[next] = prev; suffix[next] = first; next++;
+      if (next === (1 << codeSize) && codeSize < 12) { codeSize++; mask = (1 << codeSize) - 1; }
+    }
+    prev = code; prevFirst = first;
+  }
+  return out;
+}
+
+// ── Radarsko polje ─────────────────────────────────────────
+// Paleto preslikamo prek RGB in ne prek fiksnih indeksov, da preživimo
+// morebitno prerazporeditev barvne tabele pri ARSO.
+function _radLut(palette) {
+  const lut = new Uint8Array(256);
+  for (let i = 0; i < palette.length / 3; i++) {
+    const r = palette[i * 3], g = palette[i * 3 + 1], b = palette[i * 3 + 2];
+    for (let L = 0; L < RADAR_LEVEL_RGB.length; L++) {
+      const c = RADAR_LEVEL_RGB[L];
+      if (c[0] === r && c[1] === g && c[2] === b) { lut[i] = L + 1; break; }
+    }
+  }
+  return lut;
+}
+
+function _radLevels(frame, lut, w) {
+  const out = new Uint8Array(frame.length);
+  for (let i = 0; i < frame.length; i++) out[i] = lut[frame[i]];
+  out.fill(0, 0, RAD_HEADER_PX * w);
+  return out;
+}
+
+// Zadnji okvirji so podvojeni (animacija se na koncu ustavi). Ločimo jih po
+// vžganem časovnem žigu — padavine se med posnetkoma lahko slučajno ne
+// spremenijo, žig pa se vedno.
+function _radDistinct(frames, w) {
+  const seen = new Set(), keep = [];
+  for (const f of frames) {
+    let k = "";
+    for (let y = 28; y < 38; y++) for (let x = 5; x < 165; x += 2) k += String.fromCharCode(f[y * w + x]);
+    if (seen.has(k)) continue;
+    seen.add(k); keep.push(f);
+  }
+  return keep;
+}
+
+function _radDownsample(src, w, x0, x1, y0, y1, k) {
+  const dw = Math.floor((x1 - x0) / k), dh = Math.floor((y1 - y0) / k);
+  const out = new Float32Array(dw * dh);
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    let s = 0;
+    for (let j = 0; j < k; j++) { const row = (y0 + y * k + j) * w + x0 + x * k; for (let i = 0; i < k; i++) s += src[row + i]; }
+    out[y * dw + x] = s / (k * k);
+  }
+  return { data: out, w: dw, h: dh };
+}
+
+// Ničelno-povprečna navzkrižna korelacija: odporna na rast in upadanje
+// odbojnosti, česar vsota kvadratov razlik ni (tam rast celic potisne
+// najboljši zadetek na ničelni zamik).
+function _radNcc(A, B, w, h, rad, cx, cy) {
+  let best = null;
+  for (let dy = cy - rad; dy <= cy + rad; dy++) for (let dx = cx - rad; dx <= cx + rad; dx++) {
+    const ax0 = Math.max(0, -dx), ax1 = Math.min(w, w - dx);
+    const ay0 = Math.max(0, -dy), ay1 = Math.min(h, h - dy);
+    const nw = ax1 - ax0, nh = ay1 - ay0;
+    if (nw < 20 || nh < 20) continue;
+    let sa = 0, sb = 0; const n = nw * nh;
+    for (let y = ay0; y < ay1; y++) { const ra = y * w, rb = (y + dy) * w + dx; for (let x = ax0; x < ax1; x++) { sa += A[ra + x]; sb += B[rb + x]; } }
+    const ma = sa / n, mb = sb / n;
+    let num = 0, da = 0, db = 0;
+    for (let y = ay0; y < ay1; y++) {
+      const ra = y * w, rb = (y + dy) * w + dx;
+      for (let x = ax0; x < ax1; x++) { const va = A[ra + x] - ma, vb = B[rb + x] - mb; num += va * vb; da += va * va; db += vb * vb; }
+    }
+    const den = Math.sqrt(da * db);
+    if (den <= 0) continue;
+    const r = num / den;
+    if (!best || r > best.r) best = { r, dx, dy };
+  }
+  return best;
+}
+
+// Premik ocenimo na 15-minutni osnovi: v 5 minutah se celica premakne le
+// dober piksel, kar je pod ločljivostjo mreže in vrne ničelni zamik.
+function _radMotion(older, newer, w, minutes, roi) {
+  const { x0, x1, y0, y1 } = roi, K = 4;
+  const A = _radDownsample(older, w, x0, x1, y0, y1, K);
+  const B = _radDownsample(newer, w, x0, x1, y0, y1, K);
+  const coarse = _radNcc(A.data, B.data, A.w, A.h, 10, 0, 0);
+  if (!coarse) return null;
+  const sub = (src) => {
+    const sw = x1 - x0, sh = y1 - y0, o = new Float32Array(sw * sh);
+    for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) o[y * sw + x] = src[(y0 + y) * w + x0 + x];
+    return o;
+  };
+  const fine = _radNcc(sub(older), sub(newer), x1 - x0, y1 - y0, 3, coarse.dx * K, coarse.dy * K);
+  const best = fine || { dx: coarse.dx * K, dy: coarse.dy * K, r: coarse.r };
+  return {
+    dxPerMin: best.dx / minutes, dyPerMin: best.dy / minutes, r: best.r,
+    kmh: Math.hypot(best.dx * RAD_KM_X, best.dy * RAD_KM_Y) / (minutes / 60),
+    smer: (Math.atan2(best.dx * RAD_KM_X, -best.dy * RAD_KM_Y) * 180 / Math.PI + 360) % 360,
+  };
+}
+
+// Najvišja stopnja in velikost jedra v okencu okoli točke.
+function _radProbe(levels, w, h, cx, cy, rad) {
+  let max = 0, core = 0;
+  const x0 = Math.max(0, Math.round(cx) - rad), x1 = Math.min(w - 1, Math.round(cx) + rad);
+  const y0 = Math.max(RAD_HEADER_PX, Math.round(cy) - rad), y1 = Math.min(h - 1, Math.round(cy) + rad);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const v = levels[y * w + x];
+    if (v > max) max = v;
+    if (v >= RADAR_L_CORE) core++;
+  }
+  return { max, core };
+}
+
+// Kar bo ob času t nad vasjo, je zdaj na legi (vas − hitrost·t).
+function _radVillage(levels, w, h, motion, vas) {
+  const [vx, vy] = _radLonLat2Px(vas.lon, vas.lat);
+  const zdaj = _radProbe(levels, w, h, vx, vy, RADAR_NEAR_PX);
+  const track = [];
+  for (let t = RAD_STEP_MIN; t <= RADAR_HORIZON_RAIN; t += RAD_STEP_MIN) {
+    const s = _radProbe(levels, w, h, vx - motion.dxPerMin * t, vy - motion.dyPerMin * t, RADAR_NEAR_PX);
+    track.push({ t, level: s.max, core: s.core });
+  }
+  const first = (test, horizon) => { const hit = track.find(s => s.t <= horizon && test(s)); return hit ? hit.t : null; };
+  return {
+    id: vas.id, ime: vas.name,
+    zdaj: zdaj.max,
+    zdajMmh: zdaj.max ? RADAR_LEVEL_MMH[zdaj.max - 1] : 0,
+    dez: first(s => s.level >= RADAR_L_RAIN, RADAR_HORIZON_RAIN),
+    nevihta: first(s => s.level >= RADAR_L_STORM, RADAR_HORIZON_STORM),
+    jedro: first(s => s.core >= RADAR_CORE_MIN_PX, RADAR_HORIZON_STORM),
+  };
+}
+
+// Okolje za točo — en klic za celotno dolino, saj je zračna masa na 30 km
+// praktično enaka. Radarsko jedro samo po sebi ne loči toče od močnega
+// naliva, zato ga pogojujemo s CAPE in indeksom dviga.
+const HAIL_CAPE_MIN = 700, HAIL_LI_MAX = -3;
+async function _radOkolje() {
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211"
+      + "&minutely_15=cape,lifted_index&forecast_minutely_15=4&timezone=UTC";
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 8000);
+    const d = await (await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid))).json();
+    const cape = Math.max(...(d?.minutely_15?.cape || [0]).filter(v => v != null));
+    const li = Math.min(...(d?.minutely_15?.lifted_index || [99]).filter(v => v != null));
+    return { cape, li, ugodno: cape >= HAIL_CAPE_MIN && li <= HAIL_LI_MAX };
+  } catch (_) { return { cape: null, li: null, ugodno: false }; }
+}
+
+// Prenesi in razčleni radar; vrne null, če je slika prestara ali nedosegljiva.
+async function _radFetch() {
+  let res;
+  try {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 12000);
+    res = await fetch(RADAR_URL, { signal: ctrl.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid));
+  } catch (_) { return null; }
+  if (!res.ok) return null;
+  const lm = res.headers.get("last-modified");
+  const ageMin = lm ? (Date.now() - new Date(lm).getTime()) / 60000 : 0;
+  if (ageMin > RADAR_MAX_AGE_MIN) return null;      // zastarela slika — rajši nič kot narobe
+  const g = _gifDecodeFrames(new Uint8Array(await res.arrayBuffer()));
+  if (!g.palette || g.frames.length < 4) return null;
+  const lut = _radLut(g.palette);
+  const lv = _radDistinct(g.frames, g.width).map(f => _radLevels(f, lut, g.width));
+  if (lv.length < 4) return null;
+  const [x0, y0] = _radLonLat2Px(12.6, 47.1), [x1, y1] = _radLonLat2Px(16.5, 45.3);
+  const roi = { x0: Math.round(x0), x1: Math.round(x1), y0: Math.round(y0), y1: Math.round(y1) };
+  const motion = _radMotion(lv[lv.length - 4], lv[lv.length - 1], g.width, 3 * RAD_STEP_MIN, roi);
+  if (!motion) return null;
+  return { w: g.width, h: g.height, levels: lv[lv.length - 1], motion, ageMin };
+}
+
+// Izračunaj stanje za vse vasi in ga shrani v R2, da ga /nowcast le prebere.
+async function _radNowcastAll(env) {
+  const rad = await _radFetch();
+  if (!rad) return null;
+  const okolje = await _radOkolje();
+  const vasi = NOWCAST_VASI.map(v => {
+    const n = _radVillage(rad.levels, rad.w, rad.h, rad.motion, v);
+    n.toca = n.jedro != null && okolje.ugodno;     // jedro + ugodno okolje
+    return n;
+  });
+  const out = {
+    ts: new Date().toISOString(),
+    starost_min: Math.round(rad.ageMin),
+    premik: { kmh: Math.round(rad.motion.kmh), smer: Math.round(rad.motion.smer), r: Number(rad.motion.r.toFixed(2)) },
+    okolje, vasi,
+  };
+  try { await env?.PHOTOS_R2?.put("nowcast/latest.json", JSON.stringify(out), { httpMetadata: { contentType: "application/json" } }); } catch (_) {}
+  return out;
+}
+
+// Obvesti samo naročnike izbrane vasi. Ločena hladilna doba po vasi in vrsti
+// dogodka, da isti prihod celice ne pošlje več obvestil zapored.
+const RADAR_COOLDOWN_MS = 60 * 60 * 1000;
+async function _cronCheckRadarNowcast(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return false;
+  const nc = await _radNowcastAll(env);
+  if (!nc) return false;
+
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  // Naročnine od prej vasi nimajo — dokler je uporabnik ne izbere, veljajo za
+  // postajo v Rečici. Brez tega bi obstoječi naročniki po tej spremembi tiho
+  // nehali dobivati napovedna obvestila.
+  const vasZaSub = (s) => (NOWCAST_VASI.some(v => v.id === s.vas) ? s.vas : NOWCAST_VASI[0].id);
+  const vasiZNarocniki = new Set(subs.map(vasZaSub));
+  if (!vasiZNarocniki.size) return true;              // radar deluje, le nihče ni naročen
+
+  let state = {}; try { const o = await r2.get("push/radar_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  let changed = false;
+
+  for (const v of nc.vasi) {
+    if (!vasiZNarocniki.has(v.id)) continue;
+    const vas = NOWCAST_VASI.find(x => x.id === v.id);
+    // Najresnejši dogodek najprej — o isti celici ne pošiljamo dveh obvestil.
+    // Vsakič zahtevamo, da dogodek še ni v teku: opozorilo o toči, ki že pada,
+    // je le nadloga.
+    let key = null, body = null;
+    // Vse stavke gradimo z mestnikom (`loc`), ker se le ta ujema z vsemi
+    // imeni na seznamu — "se približuje Mozirju" bi zahtevalo še dajalnik.
+    if (v.toca && v.zdaj < RADAR_L_CORE) {
+      key = "toca";
+      body = "🧊 Možnost toče " + vas.loc + ": močno jedro prihaja čez ~" + v.jedro + " min. Radar toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.";
+    } else if (v.nevihta != null && v.zdaj < RADAR_L_STORM) {
+      key = "nevihta";
+      body = "⛈️ Nevihta " + vas.loc + " čez ~" + v.nevihta + " min.";
+    } else if (v.dez != null && v.zdaj < RADAR_L_RAIN) {
+      key = "dez";
+      body = "🌧️ Dež " + vas.loc + " čez ~" + v.dez + " min.";
+    }
+    if (!key) continue;
+    const sKey = v.id + ":" + key;
+    const st = state[sKey] || { lastSent: 0 };
+    if (now - (st.lastSent || 0) < RADAR_COOLDOWN_MS) continue;
+    await _pushAll(env, {
+      title: "Meteorec — " + vas.name,
+      body, url: "/", tag: "wx-nc-" + v.id + "-" + key,
+    }, s => vasZaSub(s) === v.id);
+    state[sKey] = { lastSent: now };
+    changed = true;
+  }
+  if (changed) await r2.put("push/radar_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+  return true;
+}
+
 export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(_cronCheckThresholds(env));
-    ctx.waitUntil(_cronCheckPrecipNowcast(env));
+    // Radarski nowcast nadomesti modelski; na model pademo le, če radar odpove,
+    // sicer bi za isti dogodek poslali dve obvestili.
+    ctx.waitUntil((async () => {
+      const ok = await _cronCheckRadarNowcast(env).catch(() => false);
+      if (!ok) await _cronCheckPrecipNowcast(env);
+    })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
   },
   async fetch(request, env, ctx) {
@@ -2744,6 +3160,32 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
       //   POST /push/unsubscribe { endpoint }     → odstrani
       //   POST /push/send        { secret, title, body, url? } → pošlji vsem
       // Naročnine v R2: push/subs.json
+      // ── /nowcast — stanje po vaseh + seznam vasi za izbirnik ──
+      //   GET /nowcast/vasi   → seznam vasi (za spustni seznam na strani)
+      //   GET /nowcast        → zadnji izračun za vse vasi
+      //   GET /nowcast?vas=id → samo ena vas
+      if (path === "/nowcast/vasi" && request.method === "GET") {
+        return new Response(JSON.stringify({ vasi: NOWCAST_VASI.map(v => ({ id: v.id, ime: v.name })) }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" }
+        });
+      }
+      if (path === "/nowcast" && request.method === "GET") {
+        let data = null;
+        try { const o = await env?.PHOTOS_R2?.get("nowcast/latest.json"); data = o ? JSON.parse(await o.text()) : null; } catch (_) {}
+        // Predpomnjeni izračun je star največ en cron (5 min); če ga (še) ni,
+        // ga izračunamo sproti, da stran ni prazna ob prvem obisku.
+        const starost = data ? (Date.now() - new Date(data.ts).getTime()) / 60000 : Infinity;
+        if (!data || starost > 12) data = (await _radNowcastAll(env).catch(() => null)) || data;
+        if (!data) return new Response(JSON.stringify({ error: "Radarska slika ni dosegljiva" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const vas = url.searchParams.get("vas");
+        const body = vas ? { ...data, vasi: data.vasi.filter(v => v.id === vas) } : data;
+        return new Response(JSON.stringify(body), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=120" }
+        });
+      }
+
       if (path === "/push/vapid" && request.method === "GET") {
         return new Response(JSON.stringify({ publicKey: VAPID_PUBLIC }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" }
@@ -2763,12 +3205,18 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
           const s = body.subscription || body;
           if (!s || !s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+          // Vas je edini podatek o lokaciji, ki ga hranimo — izbrana s seznama,
+          // ne iz GPS. Neznan id zavržemo, da v shrambo ne pride poljuben niz.
+          const vas = NOWCAST_VASI.some(v => v.id === body.vas) ? body.vas : null;
           const subs = await pRead();
-          if (!subs.some(x => x.endpoint === s.endpoint)) {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, ts: new Date().toISOString() });
+          const obstoječa = subs.find(x => x.endpoint === s.endpoint);
+          if (obstoječa) {
+            if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; await pWrite(subs); }
+          } else {
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
-          return pj({ ok: true, count: subs.length });
+          return pj({ ok: true, count: subs.length, vas });
         }
         if (path === "/push/unsubscribe") {
           if (!r2) return pj({ ok: true });
