@@ -4609,6 +4609,81 @@ function applyLightning(){
   _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
 }
 
+// ── Nowcasting toče in neviht ─────────────────────────────
+// Kaj pride nad izbrano vas v naslednjih ~45 minutah. Vir je radarska slika
+// ARSO (premik celic), ne modelska napoved — zato "nowcast" in ne "napoved".
+// Vas hranimo samo lokalno; na strežnik gre šele, ko uporabnik vklopi obvestila.
+const NOWCAST_VAS_KEY='wx-nowcast-vas';
+let _nowcastTimer=null;
+function getNowcastVas(){
+  try{return localStorage.getItem(NOWCAST_VAS_KEY)||'recica';}catch(_){return 'recica';}
+}
+async function initNowcast(){
+  const wrap=document.getElementById('nowcast-wrap'),sel=document.getElementById('nowcast-vas');
+  if(!wrap||!sel)return;
+  let vasi=[];
+  try{
+    const r=await fetch(PROXY+'/nowcast/vasi');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    vasi=(await r.json()).vasi||[];
+  }catch(_){wrap.hidden=true;return;}
+  if(!vasi.length){wrap.hidden=true;return;}
+  const izbrana=getNowcastVas();
+  sel.innerHTML=vasi.map(v=>'<option value="'+v.id+'"'+(v.id===izbrana?' selected':'')+'>'+v.ime+'</option>').join('');
+  sel.addEventListener('change',async()=>{
+    try{localStorage.setItem(NOWCAST_VAS_KEY,sel.value);}catch(_){}
+    loadNowcast();
+    // Če so obvestila že vklopljena, strežniku javi novo vas.
+    try{
+      if(localStorage.getItem('wx-notif')==='on'&&'serviceWorker' in navigator){
+        const reg=await navigator.serviceWorker.ready;
+        const sub=await reg.pushManager.getSubscription();
+        if(sub)await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({subscription:sub.toJSON(),vas:sel.value})});
+      }
+    }catch(_){}
+  });
+  wrap.hidden=false;
+  loadNowcast();
+  if(_nowcastTimer)clearInterval(_nowcastTimer);
+  _nowcastTimer=setInterval(loadNowcast,5*60*1000);   // radar se osveži vsakih 5 min
+}
+async function loadNowcast(){
+  const body=document.getElementById('nowcast-body'),foot=document.getElementById('nowcast-foot');
+  if(!body)return;
+  const vas=getNowcastVas();
+  let d;
+  try{
+    const r=await fetch(PROXY+'/nowcast?vas='+encodeURIComponent(vas));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    d=await r.json();
+  }catch(_){
+    body.innerHTML='<span class="nc-mirno">Radarska slika trenutno ni dosegljiva.</span>';
+    if(foot)foot.textContent='';
+    return;
+  }
+  const v=(d.vasi||[])[0];
+  if(!v){body.textContent='Za to vas ni podatka.';return;}
+  const kosi=[];
+  if(v.zdaj>0)kosi.push('Trenutno pada nad vasjo (~'+v.zdajMmh+' mm/h).');
+  if(v.toca)kosi.push('<span class="nc-toca">Možnost toče</span> — močno jedro čez <span class="nc-eta">~'+v.jedro+' min</span>.');
+  else if(v.nevihta!=null)kosi.push('<span class="nc-nevihta">Nevihta</span> čez <span class="nc-eta">~'+v.nevihta+' min</span>.');
+  else if(v.dez!=null)kosi.push('<span class="nc-dez">Dež</span> čez <span class="nc-eta">~'+v.dez+' min</span>.');
+  if(!kosi.length)kosi.push('<span class="nc-mirno">V naslednjih 45 minutah radar nad vasjo ne kaže padavin.</span>');
+  body.innerHTML=kosi.join(' ');
+  if(foot){
+    const p=d.premik||{};
+    foot.textContent='Radar ARSO, star '+(d.starost_min??'?')+' min · celice se premikajo '+
+      (p.kmh!=null?p.kmh+' km/h':'—')+' proti '+_smerIme(p.smer)+
+      ' · nowcast, ne napoved — zanesljivost pada po ~30 minutah.';
+  }
+}
+function _smerIme(deg){
+  if(deg==null)return '—';
+  const s=['S','SV','V','JV','J','JZ','Z','SZ'];
+  return s[Math.round(deg/45)%8];
+}
+
 // ── Push notifications ────────────────────────────────────
 // VAPID javni ključ (par zasebnega je skrivnost na Cloudflare Workerju)
 const VAPID_PUBLIC="BCKBiX8AvTSRv98CufvMl51rpizfpg_LHm9K0rSCQYNJzfxV88tP60_n8mJ7bUEQo02zS02_l-FvTCtkSvfx3iY";
@@ -4667,11 +4742,13 @@ async function toggleNotifications(){
     return;
   }
   try{
-    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON()})});
+    const vas=getNowcastVas();
+    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas})});
     if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
-    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih (močni sunki, nalivi, zmrzal) in vnaprej, ko se dež ali nevihta pričakuje v naslednjih ~45 minutah.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
+    const imeVasi=document.getElementById('nowcast-vas')?.selectedOptions?.[0]?.textContent||'Rečico ob Savinji';
+    reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih (močni sunki, nalivi, zmrzal) in vnaprej, ko se z radarja proti kraju '+imeVasi+' pomika dež, nevihta ali močno jedro s točo.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
   }catch(e){
     console.error('push/subscribe:',e);
     localStorage.setItem('wx-notif','off');
@@ -13870,6 +13947,7 @@ async function init(){
   try{applyWeatherBg('night');}catch(_){}
   try{initNotifBtn();}catch(_){}
   try{initNotifHint();}catch(_){}
+  try{initNowcast();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
   try{autoLoadHistoryFile();}catch(_){}

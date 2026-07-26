@@ -71,11 +71,17 @@
     <h2>Obvestila o novih člankih (blog)</h2>
     <p>Če se prijavite na obvestila o novih člankih, shranimo vaš <strong>e-naslov</strong> izključno za pošiljanje teh obvestil. Prijava poteka z <strong>dvojno potrditvijo</strong> (potrditveno sporočilo na vaš e-naslov). Od obvestil se lahko kadarkoli odjavite prek povezave v vsakem sporočilu, kar vaš e-naslov trajno odstrani s seznama. Pravna podlaga je vaše soglasje (člen 6(1)(a) GDPR).</p>
 
+    <h2>Potisna obvestila in izbrana vas (nowcasting)</h2>
+    <p>Če v brskalniku vklopite <strong>potisna obvestila</strong>, shranimo <strong>naslovnico naročnine</strong> (tehnični naslov, ki ga ustvari vaš brskalnik, skupaj s šifrirnima ključema) in <strong>vas, ki ste jo izbrali s seznama</strong>. Vas potrebujemo zato, da vam ob približevanju nevihte ali močnega jedra s točo pošljemo opozorilo prav za vaš kraj in ne za celotno dolino.</p>
+    <p>Pri tem <strong>ne uporabljamo GPS in ne beremo vaše dejanske lokacije</strong>. Shranjeno je le ime kraja, ki ste ga sami izbrali v spustnem seznamu — torej podatek natančnosti nekaj kilometrov, ne vaš naslov. Dokler obvestil ne vklopite, izbrana vas ostane samo v vašem brskalniku in se na strežnik sploh ne pošlje.</p>
+    <p>Naročnino lahko kadarkoli izklopite z istim gumbom, s katerim ste jo vklopili; s tem se naslovnica in izbrana vas izbrišeta s strežnika. Naročnine, ki jih brskalnik zavrne kot potekle, samodejno odstranimo. Pravna podlaga je vaše soglasje (člen 6(1)(a) GDPR).</p>
+
     <h2>Lokalno shranjevanje (localStorage)</h2>
     <p>Stran za lastne funkcije shranjuje nekatere nastavitve neposredno v vaš brskalnik (<em>localStorage</em>). Ti podatki ostanejo le pri vas, nikoli niso poslani na strežnik in se izbrišejo, ko počistite podatke brskalnika. Shranjevanje zajema:</p>
     <ul>
       <li><strong>Tema vmesnika</strong> (svetla / temna) — vaša vizualna nastavitev</li>
       <li><strong>Opozorila</strong> — pragovi za obvestila o temperaturi, vetru in dežju</li>
+      <li><strong>Izbrana vas za nowcast</strong> (<em>wx-nowcast-vas</em>) — kraj, za katerega prikazujemo, kaj prihaja v naslednjih 45 minutah. Na strežnik se pošlje šele, če vklopite potisna obvestila.</li>
       <li><strong>Vremenski arhiv</strong> — dnevne meritve vaše postaje, zbrane med obiski (za funkcijo »Na ta dan«)</li>
       <li><strong>Dostopni žeton za gobarsko napoved</strong> (<em>mr_gobe_token</em>) — če ste naročnik Premium, se žeton iz vaše dostopne povezave shrani v brskalnik, da vam ob vsakem obisku ni treba znova odpirati povezave. Odstranite ga s čiščenjem podatkov brskalnika.</li>
       <li><strong>Gobarjev dnevnik</strong> (<em>mr_gobe_dnevnik</em>) — če na strani <a href="/gobarska-napoved/">gobarska napoved</a> uporabljate osebni dnevnik najdb, se vrsta, datum, opombe, GPS lokacija (če jo dovolite brskalniku) in fotografija (zmanjšana, shranjena kot slika v besedilni obliki) privzeto shranijo <strong>izključno v vaš brskalnik</strong> in se nikoli ne pošljejo na noben strežnik. Izjema je aktivna Premium naročnina — glej spodaj.</li>
