@@ -2561,6 +2561,11 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 .nowcast-foot{margin:.75rem 0 0;padding-top:.6rem;border-top:1px solid var(--nc-hair);
   color:var(--muted);font-size:.72rem;line-height:1.5}
+/* Izbirnik vasi v "Moja opozorila" — plošča se skrije ob mirnem vremenu,
+   zato mora vas ostati nastavljiva tudi od tam. */
+.tp-inp-sel select{background:var(--fc-bg);border:1px solid var(--border);border-radius:8px;
+  padding:.38rem .55rem;font:inherit;font-size:.82rem;color:var(--text);cursor:pointer;max-width:190px}
+.tp-inp-sel select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2)}
 /* Ob osveževanju zadržimo prejšnji izris pri manjši motnosti — brez poskoka. */
 .nowcast.is-refreshing .nowcast-lead,.nowcast.is-refreshing .nowcast-sub,
 .nowcast.is-refreshing .nowcast-fig{opacity:.55;transition:opacity .2s ease}

@@ -4618,9 +4618,29 @@ let _nowcastTimer=null;
 function getNowcastVas(){
   try{return localStorage.getItem(NOWCAST_VAS_KEY)||'recica';}catch(_){return 'recica';}
 }
+// Vas se izbira na dveh mestih: v sami plošči (kadar je ta vidna) in v
+// "Moja opozorila". Drugo je nujno — plošča se skrije, kadar ni padavin na
+// vidiku, in to je večino časa; brez izbirnika v nastavitvah vasi ne bi bilo
+// mogoče več spremeniti, potisna obvestila pa bi za vedno ostala na privzeti.
+async function _ncApplyVas(id){
+  try{localStorage.setItem(NOWCAST_VAS_KEY,id);}catch(_){}
+  for(const el of [document.getElementById('nowcast-vas'),document.getElementById('thr-vas')]){
+    if(el&&el.value!==id)el.value=id;
+  }
+  loadNowcast();
+  // Če so obvestila že vklopljena, strežniku javi novo vas.
+  try{
+    if(localStorage.getItem('wx-notif')==='on'&&'serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      const sub=await reg.pushManager.getSubscription();
+      if(sub)await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({subscription:sub.toJSON(),vas:id})});
+    }
+  }catch(_){}
+}
 async function initNowcast(){
-  const wrap=document.getElementById('nowcast-wrap'),sel=document.getElementById('nowcast-vas');
-  if(!wrap||!sel)return;
+  const wrap=document.getElementById('nowcast-wrap');
+  if(!wrap)return;
   let vasi=[];
   try{
     const r=await fetch(PROXY+'/nowcast/vasi');
@@ -4629,22 +4649,14 @@ async function initNowcast(){
   }catch(_){wrap.hidden=true;return;}
   if(!vasi.length){wrap.hidden=true;return;}
   const izbrana=getNowcastVas();
-  sel.innerHTML=vasi.map(v=>'<option value="'+v.id+'"'+(v.id===izbrana?' selected':'')+'>'+v.ime+'</option>').join('');
-  sel.addEventListener('change',async()=>{
-    try{localStorage.setItem(NOWCAST_VAS_KEY,sel.value);}catch(_){}
-    loadNowcast();
-    // Če so obvestila že vklopljena, strežniku javi novo vas.
-    try{
-      if(localStorage.getItem('wx-notif')==='on'&&'serviceWorker' in navigator){
-        const reg=await navigator.serviceWorker.ready;
-        const sub=await reg.pushManager.getSubscription();
-        if(sub)await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({subscription:sub.toJSON(),vas:sel.value})});
-      }
-    }catch(_){}
-  });
-  wrap.hidden=false;
-  loadNowcast();
+  const opcije=vasi.map(v=>'<option value="'+v.id+'"'+(v.id===izbrana?' selected':'')+'>'+v.ime+'</option>').join('');
+  for(const el of [document.getElementById('nowcast-vas'),document.getElementById('thr-vas')]){
+    if(!el)continue;
+    el.innerHTML=opcije;
+    el.value=izbrana;
+    el.addEventListener('change',()=>_ncApplyVas(el.value));
+  }
+  loadNowcast();                                     // vidnost določi loadNowcast
   if(_nowcastTimer)clearInterval(_nowcastTimer);
   _nowcastTimer=setInterval(loadNowcast,5*60*1000);   // radar se osveži vsakih 5 min
 }
@@ -4678,34 +4690,43 @@ async function loadNowcast(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     d=await r.json();
   }catch(_){
+    // Brez radarja ni kaj povedati — plošče ne kažemo prazne.
     wrap.classList.remove('is-refreshing');
-    _ncSetBadge('idle','📡','Ni signala');
-    hero.textContent='';
-    sub.textContent='Radarska slika trenutno ni dosegljiva. Poskusimo znova čez nekaj minut.';
-    if(fig)fig.hidden=true;
-    if(foot)foot.textContent='';
+    wrap.hidden=true;
     return;
   }
   const v=(d.vasi||[])[0];
   wrap.classList.remove('is-refreshing');
-  if(!v){_ncSetBadge('idle','—','Ni podatka');hero.textContent='';sub.textContent='Za to vas ni podatka.';if(fig)fig.hidden=true;return;}
+  if(!v){wrap.hidden=true;return;}
+
+  // Plošča se pokaže samo, kadar je kaj povedati: nekaj že pada nad vasjo ali
+  // pa se v obzorju približuje. Ob mirnem vremenu — kar je večina časa —
+  // ostane skrita, da stran ne nosi prazne kartice.
+  const nicNaVidiku = !v.toca && v.nevihta==null && v.dez==null && !(v.zdaj>0);
+  if(nicNaVidiku){wrap.hidden=true;return;}
+  wrap.hidden=false;
 
   // Junak je čas do dogodka; resnost nosi značka, ne barva besedila.
+  // Dogodek štejemo za prihajajoč le, če vas te jakosti še nima nad sabo —
+  // sicer bi ob dežju pisalo "dež čez ~5 min", medtem ko že lije.
   const eta=(min)=>{hero.innerHTML='čez ~'+min+'<span class="nc-unit">min</span>';};
-  if(v.toca){
+  const zeDez=v.zdaj>=6, zeNevihta=v.zdaj>=10, zeJedro=v.zdaj>=12;
+  if(v.toca&&!zeJedro){
     _ncSetBadge('hail','🧊','Možnost toče'); eta(v.jedro);
     sub.textContent='Radar kaže močno jedro na poti proti vasi. Toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.';
-  }else if(v.nevihta!=null){
+  }else if(v.nevihta!=null&&!zeNevihta){
     _ncSetBadge('storm','⛈️','Nevihta'); eta(v.nevihta);
-    sub.textContent=v.zdaj>0?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h), jakost pa naj bi še narasla.'
-                            :'Radar kaže nevihtno celico na poti proti vasi.';
-  }else if(v.dez!=null){
+    sub.textContent=zeDez?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h), jakost pa naj bi še narasla.'
+                         :'Radar kaže nevihtno celico na poti proti vasi.';
+  }else if(zeNevihta){
+    _ncSetBadge('storm','⛈️','Nevihta nad vasjo'); hero.textContent='';
+    sub.textContent='Nevihta je nad vasjo (~'+v.zdajMmh+' mm/h).';
+  }else if(v.dez!=null&&!zeDez){
     _ncSetBadge('rain','🌧️','Dež'); eta(v.dez);
-    sub.textContent=v.zdaj>0?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h).':'Padavine se približujejo z radarske slike.';
+    sub.textContent='Padavine se približujejo z radarske slike.';
   }else{
-    _ncSetBadge('calm','☀️','Mirno'); hero.textContent='';
-    sub.textContent=v.zdaj>0?'Nad vasjo rahlo dežuje (~'+v.zdajMmh+' mm/h), novih celic pa radar ne kaže.'
-                            :'V naslednjih 45 minutah radar nad vasjo ne kaže padavin.';
+    _ncSetBadge('rain','🌧️','Dež nad vasjo'); hero.textContent='';
+    sub.textContent='Nad vasjo dežuje (~'+v.zdajMmh+' mm/h).';
   }
 
   // Trak približevanja. Vsako polje ima besedilno ustreznico (aria-label),
