@@ -13297,7 +13297,7 @@ function buildArsoNormals(curMonthT, curMonthR){
 // ══════════════════════════════════════════════════════════
 // ── PVGIS Solar Potential — EU JRC ────────────────────────
 // ══════════════════════════════════════════════════════════
-const _PVGIS_CACHE_KEY='wx-pvgis-v1';
+const _PVGIS_CACHE_KEY='wx-pvgis-v2';
 
 async function fetchPVGIS(){
   const el=document.getElementById('pvgis-body');if(!el)return;
@@ -14198,7 +14198,7 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 // ══════════════════════════════════════════════════════════
 // ── NASA POWER — Solar Monitor ─────────────────────────────
 // ══════════════════════════════════════════════════════════
-const _NASA_SOLAR_CACHE_KEY='wx-nasa-solar-v1';
+const _NASA_SOLAR_CACHE_KEY='wx-nasa-solar-v2';
 const SL_MON=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
 const CLIM_KEYS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -14324,37 +14324,53 @@ function renderNASASolar(data){
   const monthly=data[0]?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
   const clim30=data[1]?.properties?.parameter?.ALLSKY_SFC_SW_DWN||null;
   if(!monthly){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
-  const now=new Date();
-  const curY=String(now.getFullYear());
-  const prevY=String(now.getFullYear()-1);
-  const curMon=now.getMonth(); // 0-based
+  // POWER vrača mesece kot sploščene ključe "YYYYMM" (in "YYYY13" za letno
+  // vrednost), ne kot gnezdeno { YYYY: { MM: v } }. Bralec podpre obe obliki,
+  // da kartica preživi morebitno vrnitev na staro shemo.
+  const mval=(y,mm)=>{
+    const v=monthly[String(y)+mm] ?? monthly[String(y)]?.[mm];
+    return (v==null||v===-999)?null:v;
+  };
+  const years=[...new Set(Object.keys(monthly)
+    .map(k=>/^(\d{4})(\d{2})$/.test(k)?k.slice(0,4):(/^\d{4}$/.test(k)?k:null))
+    .filter(Boolean))].sort();
+  // POWER mesečne agregate objavlja z zamikom več mesecev, zato koledarsko
+  // leto pogosto še ne obstaja. Namesto trdo vpisanega "letos/lani" vzamemo
+  // zadnji dve leti, ki sta v odgovoru res prisotni — sicer bi bil graf prazen.
+  const curY=years[years.length-1]||String(new Date().getFullYear());
+  const prevY=years[years.length-2]||String(Number(curY)-1);
+  const isCurrentCalYear=curY===String(new Date().getFullYear());
+  // Mesece po današnjem odrežemo samo, kadar gre res za tekoče koledarsko leto.
+  const curMon=isCurrentCalYear
+    ? new Date().getMonth()
+    : (()=>{let last=-1;
+            for(let i=0;i<12;i++) if(mval(curY,String(i+1).padStart(2,'0'))!=null) last=i;
+            return last<0?11:last;})();
 
   const curVals=Array.from({length:12},(_,i)=>{
-    const k=String(i+1).padStart(2,'0');
-    const v=monthly[curY]?.[k];
-    return (v==null||v===-999||i>curMon)?null:v;
+    const v=mval(curY,String(i+1).padStart(2,'0'));
+    return (v==null||i>curMon)?null:v;
   });
-  const prevVals=Array.from({length:12},(_,i)=>{
-    const k=String(i+1).padStart(2,'0');
-    const v=monthly[prevY]?.[k];
-    return (v==null||v===-999)?null:v;
-  });
+  const prevVals=Array.from({length:12},(_,i)=>mval(prevY,String(i+1).padStart(2,'0')));
   const climVals=CLIM_KEYS.map(k=>{const v=clim30?clim30[k]:null;return(v==null||v===-999)?null:v;});
 
   const thisMonthVal=curVals[curMon];
   const climThisMonth=climVals[curMon];
   const prevThisMonth=prevVals[curMon];
-  const annCur=monthly[curY]?.['13'];
+  const annCur=mval(curY,'13');
   const vsClim=thisMonthVal!=null&&climThisMonth?((thisMonthVal-climThisMonth)/climThisMonth*100):null;
   const vsPrev=thisMonthVal!=null&&prevThisMonth?((thisMonthVal-prevThisMonth)/prevThisMonth*100):null;
 
+  // Ker podatki zaostajajo, oznaka pove dejanski mesec in leto namesto "Ta mesec".
+  const _MES=['jan.','feb.','mar.','apr.','maj','jun.','jul.','avg.','sep.','okt.','nov.','dec.'];
+  const lastLbl=isCurrentCalYear?'Ta mesec':(_MES[curMon]+' '+curY);
   const fmt=(v,d=2)=>v==null?'—':v.toFixed(d);
   const fmtPct=(v)=>v==null?'—':(v>=0?'+':'')+v.toFixed(0)+'%';
 
   const kpi=`<div class="nasa-kpi-row">
-    <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(thisMonthVal)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²/dan</span></div><div class="nasa-kpi-lbl">Ta mesec</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(thisMonthVal)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²/dan</span></div><div class="nasa-kpi-lbl">${lastLbl}</div></div>
     <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsClim==null?'var(--text)':vsClim>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsClim)}</div><div class="nasa-kpi-lbl">glede na 30-letno povpr.</div></div>
-    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsPrev==null?'var(--text)':vsPrev>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsPrev)}</div><div class="nasa-kpi-lbl">glede na lani</div></div>
+    <div class="nasa-kpi"><div class="nasa-kpi-val" style="color:${vsPrev==null?'var(--text)':vsPrev>=0?'var(--amber)':'var(--blue)'}">${fmtPct(vsPrev)}</div><div class="nasa-kpi-lbl">isti mesec ${prevY}</div></div>
     <div class="nasa-kpi"><div class="nasa-kpi-val">${fmt(annCur!=null&&annCur!==-999?annCur:null)} <span style="font-size:.7rem;color:var(--muted)">kWh/m²</span></div><div class="nasa-kpi-lbl">Letno (${curY.slice(2)})</div></div>
   </div>`;
 
@@ -14407,8 +14423,8 @@ function renderNASASolar(data){
   // Y-axis label
   const yLabel=`<text x="11" y="${(mT+cH/2).toFixed(0)}" font-size="9" text-anchor="middle" fill="var(--muted)" font-family="Inter,sans-serif" transform="rotate(-90,11,${(mT+cH/2).toFixed(0)})">kWh/m²/dan</text>`;
   // Legend
-  const legend=`<rect x="${mL+4}" y="${H-mB-16}" width="10" height="8" fill="var(--muted)" opacity="0.45" rx="1"/><text x="${mL+17}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">lani (${prevY})</text>`+
-    `<rect x="${mL+70}" y="${H-mB-16}" width="10" height="8" fill="var(--blue)" opacity="0.8" rx="1"/><text x="${mL+83}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">letos (${curY})</text>`+
+  const legend=`<rect x="${mL+4}" y="${H-mB-16}" width="10" height="8" fill="var(--muted)" opacity="0.45" rx="1"/><text x="${mL+17}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">prej (${prevY})</text>`+
+    `<rect x="${mL+70}" y="${H-mB-16}" width="10" height="8" fill="var(--blue)" opacity="0.8" rx="1"/><text x="${mL+83}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">${isCurrentCalYear?"letos":"zadnje"} (${curY})</text>`+
     `<line x1="${mL+138}" y1="${H-mB-12}" x2="${mL+148}" y2="${H-mB-12}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${mL+143}" cy="${H-mB-12}" r="2.5" fill="var(--amber)"/><text x="${mL+151}" y="${H-mB-8}" font-size="9" fill="var(--muted)" font-family="Inter,sans-serif">30-letno povprečje</text>`;
 
   const svg=`<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:${W}px" xmlns="http://www.w3.org/2000/svg">${gridLines}${prevBars}${bars}${climLine}${climDots}${yLabel}${legend}</svg></div>`;
