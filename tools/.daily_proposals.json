@@ -1,11 +1,11 @@
 {
   "date": "2026-07-27",
-  "created": "2026-07-27T06:42:59.726724+00:00",
+  "created": "2026-07-27T06:52:05.265210+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročina se stopnjuje: do 34 °C že v četrtek",
-      "teaser": "Napoved za Rečico ob Savinji kaže postopno segrevanje – od 30,2 °C danes do 34 °C v naslednjih dneh, brez omembe vrednega dežja. Pogledamo, kako se bo vročinski val razvijal iz dneva v dan in kaj to pomeni za Zgornjo Savinjsko dolino.",
+      "title": "Vročina se vrača v Zgornjo Savinjsko dolino: do 34 °C do konca tedna",
+      "teaser": "Napoved za Rečico ob Savinji kaže postopno segrevanje – od 30,2 °C danes do 34,0 °C v sredo, medtem ko dežja praktično ne bo. Pogledamo, kako se bo vročinski val stopnjeval iz dneva v dan in kaj to pomeni za občutek vročine ob visoki vlažnosti.",
       "topic": {
         "id": "dogodek",
         "brief": "Analiza dogodka: vročina-napoved (30,2 °C)",
@@ -19,38 +19,9 @@
       }
     },
     {
-      "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Savinjski dolini: vsak dan bolj vroče",
-      "teaser": "Podatki postaje IREICA1 kažejo jasen vzpon maksimalnih temperatur – od 30,2 °C danes do 34 °C do konca napovedanega obdobja, medtem ko minimalne temperature ostajajo razmeroma visoke. Analiziramo, kam se ta trend giblje glede na sezonsko pričakovano stanje v Rečici ob Savinji.",
-      "topic": {
-        "id": "temperaturni-trend",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "trend",
-        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
-        "seo_keywords": [
-          "temperaturni trend Savinjska dolina",
-          "vreme Rečica ob Savinji",
-          "postaja IREICA1"
-        ]
-      }
-    },
-    {
       "id": "vodna-bilanca",
-      "title": "Vodna bilanca tal: ko vročina prehiti padavine",
-      "teaser": "Kljub 49,8 mm dežja v tem mesecu je dnevna količina padavin trenutno ničelna, napoved pa za prihodnje dni obeta le 0,2 mm ob naraščajočih temperaturah do 34 °C. Poglejmo, kaj to pomeni za evapotranspiracijo in dejansko razpoložljivost vode za rastline v Savinjski dolini.",
+      "title": "Vodna bilanca tal v Savinjski dolini: ko dež izgine hitreje, kot pade",
+      "teaser": "Kljub 49,8 mm dežja ta mesec so tla ob napovedanih temperaturah do 34 °C in ničelnih padavinah v prihodnjih dneh pod vse večjim izhlapevalnim pritiskom. Analiziramo, koliko vlage dejansko ostane rastlinam, ko evapotranspiracija prevzame primat nad občasnimi nalivi.",
       "topic": {
         "id": "vodna-bilanca",
         "sezona": [
@@ -73,6 +44,35 @@
           "vodna bilanca tal",
           "evapotranspiracija Savinjska dolina",
           "koliko dežja koristi rastlinam"
+        ]
+      }
+    },
+    {
+      "id": "temperaturni-trend",
+      "title": "Temperaturni trend na postaji IREICA1: dolina se segreva iz dneva v dan",
+      "teaser": "Podatki postaje IREICA1 kažejo jasen vzorec naraščanja – najvišje dnevne temperature se v štirih dneh dvignejo od 30,2 na 34,0 °C, najnižje pa ostajajo nad 16 °C. Pogledamo, kaj ta trend pomeni za Zgornjo Savinjsko dolino in kako se giblje glede na pričakovano sezonsko povprečje.",
+      "topic": {
+        "id": "temperaturni-trend",
+        "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tag": "trend",
+        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
+        "seo_keywords": [
+          "temperaturni trend Savinjska dolina",
+          "vreme Rečica ob Savinji",
+          "postaja IREICA1"
         ]
       }
     }
