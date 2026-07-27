@@ -1,40 +1,27 @@
 {
-  "date": "2026-07-26",
-  "created": "2026-07-26T06:24:15.844867+00:00",
+  "date": "2026-07-27",
+  "created": "2026-07-27T06:42:59.726724+00:00",
   "proposals": [
     {
-      "id": "vodna-bilanca",
-      "title": "Vodna bilanca tal v Zgornji Savinjski dolini: koliko od 49,8 mm julijskega dežja je sploh prišlo do korenin",
-      "teaser": "Postaja IREICA1 danes ne beleži dežja, mesečna vsota pa znaša 49,8 mm - v članku pogledamo, koliko te vlage je dejansko ostalo v tleh in koliko je izhlapelo ob vlažnosti okoli 62 % in VPD 0,300 inHg. Pojasnimo tudi, zakaj napovedanih 13,8 mm jutri (27. julij) ne pomeni nujno konca sušnega stresa za rastline.",
+      "id": "dogodek",
+      "title": "Vročina se stopnjuje: do 34 °C že v četrtek",
+      "teaser": "Napoved za Rečico ob Savinji kaže postopno segrevanje – od 30,2 °C danes do 34 °C v naslednjih dneh, brez omembe vrednega dežja. Pogledamo, kako se bo vročinski val razvijal iz dneva v dan in kaj to pomeni za Zgornjo Savinjsko dolino.",
       "topic": {
-        "id": "vodna-bilanca",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "vodna-bilanca",
-        "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok).",
-        "seo_keywords": [
-          "vodna bilanca tal",
-          "evapotranspiracija Savinjska dolina",
-          "koliko dežja koristi rastlinam"
-        ]
+        "id": "dogodek",
+        "brief": "Analiza dogodka: vročina-napoved (30,2 °C)",
+        "tag": "vročina-napoved",
+        "event": {
+          "type": "vročina-napoved",
+          "value": 30.2,
+          "unit": "°C"
+        },
+        "seo_keywords": []
       }
     },
     {
       "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Rečici ob Savinji: od 27 do 32 stopinj v štirih dneh",
-      "teaser": "Trenutnih 22,2 °C na postaji IREICA1 je šele uvod - napoved za prihodnje dni kaže postopno segrevanje z 27,7 °C danes na kar 32,0 °C do 29. julija, medtem ko minimalne temperature ostajajo stabilne okoli 17 °C. Pogledamo, kaj ta razpon pomeni za občutek vročine v dolini in kako se giblje glede na sezonsko povprečje.",
+      "title": "Temperaturni trend v Savinjski dolini: vsak dan bolj vroče",
+      "teaser": "Podatki postaje IREICA1 kažejo jasen vzpon maksimalnih temperatur – od 30,2 °C danes do 34 °C do konca napovedanega obdobja, medtem ko minimalne temperature ostajajo razmeroma visoke. Analiziramo, kam se ta trend giblje glede na sezonsko pričakovano stanje v Rečici ob Savinji.",
       "topic": {
         "id": "temperaturni-trend",
         "sezona": [
@@ -61,12 +48,14 @@
       }
     },
     {
-      "id": "pozarna-ogrozenost",
-      "title": "Požarna ogroženost v Zgornji Savinjski dolini: suha tla in šibek veter kot tiho opozorilo",
-      "teaser": "Kljub trenutno mirnemu vetru (1,4 km/h) napoved za danes kaže sunke do 18 km/h, dežja pa praktično ni bilo - le 0,1 mm je pričakovanih danes, preden bo jutri padlo 13,8 mm. Analiziramo, kako ta kombinacija suhih tal, zmerne vlažnosti zraka (62 %) in vetrovnih sunkov vpliva na požarno ogroženost v naravi na območju Zgornje Savinjske doline.",
+      "id": "vodna-bilanca",
+      "title": "Vodna bilanca tal: ko vročina prehiti padavine",
+      "teaser": "Kljub 49,8 mm dežja v tem mesecu je dnevna količina padavin trenutno ničelna, napoved pa za prihodnje dni obeta le 0,2 mm ob naraščajočih temperaturah do 34 °C. Poglejmo, kaj to pomeni za evapotranspiracijo in dejansko razpoložljivost vode za rastline v Savinjski dolini.",
       "topic": {
-        "id": "pozarna-ogrozenost",
+        "id": "vodna-bilanca",
         "sezona": [
+          1,
+          2,
           3,
           4,
           5,
@@ -74,14 +63,16 @@
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "tag": "pozarna-ogrozenost",
-        "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
+        "tag": "vodna-bilanca",
+        "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok).",
         "seo_keywords": [
-          "požarna ogroženost Zgornja Savinjska dolina",
-          "nevarnost požara v naravi",
-          "suša in gozdni požari"
+          "vodna bilanca tal",
+          "evapotranspiracija Savinjska dolina",
+          "koliko dežja koristi rastlinam"
         ]
       }
     }
