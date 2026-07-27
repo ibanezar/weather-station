@@ -13518,6 +13518,7 @@ function initClimate(){
   fetchPVGIS();
   fetchENSO();
   try{fetchNASASolar();}catch(e){console.error('nasa-solar',e);}
+  try{fetchSatSun();}catch(e){console.error('satsun',e);}
   try{fetchNASABaselines();}catch(e){console.error('nasa-baselines',e);}
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
@@ -14144,6 +14145,103 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 const _NASA_SOLAR_CACHE_KEY='wx-nasa-solar-v1';
 const SL_MON=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
 const CLIM_KEYS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+// ── Satelitsko izmerjeno obsevanje (Open-Meteo Satellite Radiation) ──
+// Za razliko od modelske napovedi je to *izmerjeno* s satelita (EUMETSAT
+// SARAH-3/MSG, DWD MTG). Indeks jasnine = dejansko/ob jasnem nebu; pove,
+// kolikšen delež teoretično možnega sonca je dolina res dobila.
+const _SATSUN_CACHE_KEY='wx-satsun-v1';
+async function fetchSatSun(){
+  const el=document.getElementById('satsun-body');if(!el)return;
+  try{
+    const c=JSON.parse(localStorage.getItem(_SATSUN_CACHE_KEY)||'null');
+    if(c&&Date.now()-c.ts<3600000){renderSatSun(c.data);return;}
+  }catch(_){}
+  try{
+    const r=await fetch(PROXY+'/satelit-sonce');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    try{localStorage.setItem(_SATSUN_CACHE_KEY,JSON.stringify({ts:Date.now(),data}));}catch(_){}
+    renderSatSun(data);
+    const src=document.getElementById('satsun-src');
+    if(src)src.textContent='Open-Meteo Satellite · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Satelitski podatki o obsevanju niso dosegljivi.</div>';
+    console.warn('satsun:',e);
+  }
+}
+
+function _satSunIdxColor(i){
+  if(i==null)return 'var(--muted)';
+  if(i>=.85)return '#fbbf24';
+  if(i>=.6) return '#60a5fa';
+  return '#94a3b8';
+}
+function renderSatSun(data){
+  const el=document.getElementById('satsun-body');if(!el)return;
+  const daily=data?.daily||[];
+  if(!daily.length){el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Ni podatkov.</div>';return;}
+  const last=daily[daily.length-1];
+  const best=daily.reduce((a,b)=>(b.index??0)>(a.index??0)?b:a,daily[0]);
+  const dn=d=>new Date(d+'T12:00').toLocaleDateString('sl',{day:'numeric',month:'numeric'});
+  const maxK=Math.max(...daily.map(d=>d.kwh||0),1);
+
+  // Stolpci: dnevna energija, barva pove indeks jasnine.
+  const bars=daily.map(d=>{
+    const h=Math.round((d.kwh/maxK)*100);
+    // Tekoči dan je nujno krajši od polnih dni; brez oznake bi njegov nizek
+    // stolpec izgledal kot oblačen dan, čeprav se energija še nabira.
+    return '<div class="ssun-bar-col" title="'+dn(d.date)+': '+d.kwh.toFixed(2).replace('.',',')+
+      ' kWh/m²'+(d.partial?' (doslej, dan še traja)':'')+', indeks '+
+      (d.index!=null?d.index.toFixed(2).replace('.',','):'—')+'">'+
+      '<div class="ssun-bar-wrap"><div class="ssun-bar'+(d.partial?' partial':'')+
+        '" style="height:'+h+'%;background:'+_satSunIdxColor(d.index)+'"></div></div>'+
+      '<div class="ssun-bar-lbl">'+dn(d.date)+(d.partial?'*':'')+'</div>'+
+      '<div class="ssun-bar-val">'+d.kwh.toFixed(1).replace('.',',')+'</div>'+
+    '</div>';
+  }).join('');
+  const hasPartial=daily.some(d=>d.partial);
+
+  // Današnja urna krivulja: satelit proti ovojnici jasnega neba.
+  const th=(data.today||[]).filter(x=>x.clear>0);
+  let curve='';
+  if(th.length>2){
+    const maxV=Math.max(...th.map(x=>Math.max(x.clear,x.ghi,x.station||0)),1);
+    const W=100,Hh=42;
+    const px=(i)=>(i/(th.length-1))*W;
+    const py=(v)=>Hh-(v/maxV)*Hh;
+    const path=(key)=>th.map((x,i)=>(i?'L':'M')+px(i).toFixed(1)+' '+py(x[key]||0).toFixed(1)).join(' ');
+    const stPts=th.filter(x=>x.station!=null);
+    const stPath=stPts.length>2
+      ? stPts.map((x,i)=>(i?'L':'M')+px(th.indexOf(x)).toFixed(1)+' '+py(x.station).toFixed(1)).join(' ')
+      : '';
+    curve='<div class="ssun-curve"><svg viewBox="0 0 100 42" preserveAspectRatio="none" aria-hidden="true">'+
+      '<path d="'+path('clear')+'" fill="none" stroke="rgba(251,191,36,.35)" stroke-width="1" stroke-dasharray="2 2"/>'+
+      '<path d="'+path('ghi')+'" fill="none" stroke="#fbbf24" stroke-width="1.6"/>'+
+      (stPath?'<path d="'+stPath+'" fill="none" stroke="#38bdf8" stroke-width="1.2"/>':'')+
+      '</svg></div>'+
+      '<div class="ssun-legend">'+
+        '<span><i style="background:#fbbf24"></i>satelit (urno povprečje)</span>'+
+        '<span><i style="background:rgba(251,191,36,.45)"></i>ob jasnem nebu</span>'+
+        (stPath?'<span><i style="background:#38bdf8"></i>postaja (urni <b>maksimum</b>)</span>':'')+
+      '</div>'+
+      // Brez te opombe bi krivulji delovali kot umerjanje senzorja, kar nista.
+      '<div class="ssun-note">Postaja poroča najvišjo vrednost v uri, satelit pa povprečje čez uro, zato je modra krivulja ob spremenljivi oblačnosti sistematično višja. Krivulji sta namenjeni primerjavi poteka, ne umerjanju senzorja.</div>';
+  }
+
+  el.innerHTML=
+    '<div class="ssun-kpis">'+
+      '<div class="ssun-kpi"><b>'+last.kwh.toFixed(2).replace('.',',')+'</b><span>kWh/m² '+(last.partial?'doslej':'danes')+'</span></div>'+
+      '<div class="ssun-kpi"><b style="color:'+_satSunIdxColor(last.index)+'">'+
+        (last.index!=null?Math.round(last.index*100)+' %':'—')+'</b><span>možnega sonca</span></div>'+
+      '<div class="ssun-kpi"><b>'+last.sunHours.toFixed(1).replace('.',',')+'</b><span>ur sonca '+(last.partial?'doslej':'')+'</span></div>'+
+      '<div class="ssun-kpi"><b>'+dn(best.date)+'</b><span>najjasnejši dan</span></div>'+
+    '</div>'+
+    '<div class="ssun-bars">'+bars+'</div>'+
+    curve+
+    '<div class="ssun-foot">'+(hasPartial?'* Današnji dan še traja, zato je njegov stolpec nujno nižji od polnih dni; odstotek možnega sonca je razmerje in velja tudi za nedokončan dan. ':'')+
+    'Izmerjeno s satelita (EUMETSAT SARAH-3/MSG, DWD MTG) — ne modelska napoved. Indeks jasnine je razmerje med prejetim in teoretično možnim obsevanjem ob povsem jasnem nebu.</div>';
+}
 
 async function fetchNASASolar(){
   const el=document.getElementById('nasa-solar-body');if(!el)return;
