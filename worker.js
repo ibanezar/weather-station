@@ -2165,13 +2165,23 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         };
         const urls = urlMap[qtype] || urlMap.solar;
         try {
-          const results = await Promise.all(
-            urls.map(u => fetch(u, { headers: { "User-Agent": "Mozilla/5.0" } })
-              .then(r => r.ok ? r.json() : null)
-              .catch(() => null))
-          );
-          const filtered = results.filter(Boolean);
-          return new Response(JSON.stringify(filtered), {
+          const grab = u => fetch(u, { headers: { "User-Agent": "Mozilla/5.0" } })
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
+          const results = await Promise.all(urls.map(grab));
+          // POWER mesečne agregate objavlja z zamikom več mesecev. Če zahtevamo
+          // končno leto, ki ga še ni, zavrne CELOTNO zahtevo (422), ne le
+          // manjkajočega dela — zato ob neuspehu poskusimo še z letom prej.
+          if (qtype === "solar" && !results[0]) {
+            // Cel par premaknemo leto nazaj, ne le konca — sicer bi ostalo eno
+            // samo leto in primerjava "isti mesec lani" ne bi imela s čim.
+            results[0] = await grab(urls[0].replace(`start=${yr - 1}`, `start=${yr - 2}`)
+                                           .replace(`end=${yr}`, `end=${yr - 1}`));
+          }
+          // Namenoma NE uporabimo filter(Boolean): ta ob neuspehu prvega klica
+          // premakne indekse, ospredje pa bi klimatologijo prebralo kot mesečni
+          // niz in tiho narisalo prazen graf. Mesta zato ohranimo.
+          return new Response(JSON.stringify(results.map(r => r ?? null)), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=14400" },
           });
         } catch(e) {
@@ -2183,11 +2193,42 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
       // ── /pvgis ───────────────────────────────────────────
       if (path === "/pvgis") {
-        const pvgisUrl = `https://re.jrc.ec.europa.eu/api/v5_2/MRcalc?lat=46.3258&lon=14.9211&outputformat=json&raddatabase=PVGIS-SARAH3&browser=0`;
+        // API v5_2 baze PVGIS-SARAH3 ne pozna (dovoli le NSRDB/ERA5/SARAH2) in
+        // vrne 400; SARAH3 je na voljo šele od v5_3 naprej.
+        // Brez horirrad=1 MRcalc vrne zapise samo z letnico in mesecem, brez
+        // vrednosti obsevanja.
+        const pvgisUrl = `https://re.jrc.ec.europa.eu/api/v5_3/MRcalc?lat=46.3258&lon=14.9211&outputformat=json&raddatabase=PVGIS-SARAH3&horirrad=1&browser=0`;
         try {
           const r = await fetch(pvgisUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
           if (!r.ok) throw new Error("HTTP " + r.status);
-          const data = await r.json();
+          const raw = await r.json();
+          // MRcalc vrne ~19 let posameznih mesecev v kWh/m² na MESEC, ospredje
+          // pa riše 12-mesečno klimatologijo v kWh/m² na DAN. Povprečimo čez
+          // leta in delimo z dolžino meseca, ter oddamo v obliki, ki jo
+          // ospredje že zna izrisati.
+          const DPM = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+          const sums = Array.from({ length: 12 }, () => ({ s: 0, n: 0 }));
+          for (const rec of (raw?.outputs?.monthly || [])) {
+            const mo = Number(rec?.month), v = Number(rec?.["H(h)_m"]);
+            if (!(mo >= 1 && mo <= 12) || !isFinite(v)) continue;
+            sums[mo - 1].s += v; sums[mo - 1].n++;
+          }
+          const fixed = sums.map((o, i) => ({
+            month: i + 1,
+            H_h: o.n ? Math.round((o.s / o.n / DPM[i]) * 1000) / 1000 : null,
+          }));
+          const withData = fixed.filter(m => m.H_h != null);
+          // Letno povprečje dnevnega obsevanja: vsota mesečnih vsot / 365.
+          const annualDaily = withData.length === 12
+            ? Math.round(fixed.reduce((a, m, i) => a + m.H_h * DPM[i], 0) / 365.25 * 1000) / 1000
+            : null;
+          const data = {
+            outputs: {
+              monthly: { fixed },
+              totals: { fixed: annualDaily != null ? { H_h: annualDaily } : {} },
+            },
+            meta: { years: raw?.inputs?.meteo_data, database: "PVGIS-SARAH3", api: "v5_3" },
+          };
           return new Response(JSON.stringify(data), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=604800" },
           });
