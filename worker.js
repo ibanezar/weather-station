@@ -624,6 +624,40 @@ async function _cronCheckRainStartStop(env) {
   if (raining !== wasRaining) await r2.put("push/rain_state.json", JSON.stringify({ raining }), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ── Polarni sij: obvestilo ob hudi geomagnetni nevihti ─────
+// S 46° s. š. je sij izjemen dogodek, zato je prag namerno visok (Kp ≥ 7).
+// Nižje vrednosti bi pomenile obvestila brez pokritja: oval je takrat še nad
+// Skandinavijo. Pri Kp ≥ 7 se splača pogledati proti severu, kot maja 2024.
+const AURORA_KP_THR = 7;
+const AURORA_COOLDOWN_MS = 6 * 3600 * 1000;
+async function _cronCheckAurora(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  // Sij je viden le v temi. Obvestilo podnevi bi bilo neuporabno, nevihta pa
+  // tipično traja več ur, zato ga cron ujame zvečer, če še traja.
+  // % 24, ker nekatere izvedbe ICU za polnoč vrnejo "24" namesto "00".
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI >= 6 && hourSI < 20) return;
+
+  let kp = null;
+  try {
+    const rows = await (await fetch("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json")).json();
+    const obs = (Array.isArray(rows) ? rows : []).filter(r => r?.observed === "observed" && r.kp != null);
+    if (obs.length) kp = Number(obs[obs.length - 1].kp);
+  } catch (_) { return; }
+  if (kp == null || kp < AURORA_KP_THR) return;
+
+  let state = {}; try { const o = await r2.get("push/aurora_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  if (now - (state.lastSent || 0) < AURORA_COOLDOWN_MS) return;
+
+  await _pushAll(env, {
+    title: "Meteorec — polarni sij?",
+    body: "🌌 Huda geomagnetna nevihta (Kp " + kp.toFixed(1).replace(".", ",") + "). Poglej proti severu — ob jasnem nebu je mogoč rdeč sij nizko nad obzorjem.",
+    url: "/", tag: "wx-aurora",
+  });
+  await r2.put("push/aurora_state.json", JSON.stringify({ lastSent: now, kp }), { httpMetadata: { contentType: "application/json" } });
+}
+
 // ═══════════════════════════════════════════════════════════
 //  Nowcasting neviht in toče iz radarske slike ARSO
 // ═══════════════════════════════════════════════════════════
@@ -1044,6 +1078,7 @@ export default {
       if (!ok) await _cronCheckPrecipNowcast(env);
     })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
+    ctx.waitUntil(_cronCheckAurora(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -1659,6 +1694,68 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             "Content-Type": "application/json; charset=utf-8",
             "Cache-Control": "public, max-age=600",
           },
+        });
+      }
+
+      // ── /vesoljsko-vreme ──────────────────────────────────
+      // NOAA SWPC — planetarni indeks Kp in verjetnost polarnega sija.
+      // Brez ključa. Kp forecast vsebuje tako izmerjene kot napovedane
+      // tritourne vrednosti, zato zadošča en klic.
+      //
+      // Verjetnosti sija NE računamo iz lastne tabele Kp→širina, ampak jo
+      // preberemo iz OVATION modela za točko nad Slovenijo. Datoteka je ~900 kB,
+      // zato jo obdela worker, brskalniku pa pošlje samo izvleček.
+      if (path === "/vesoljsko-vreme") {
+        const SI_LAT = 46, SI_LON = 15;
+        const [kpRes, ovRes] = await Promise.all([
+          fetch("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json",
+            { cf: { cacheTtl: 900, cacheEverything: true } }),
+          fetch("https://services.swpc.noaa.gov/json/ovation_aurora_latest.json",
+            { cf: { cacheTtl: 900, cacheEverything: true } }).catch(() => null),
+        ]);
+        if (!kpRes.ok) throw new Error("SWPC Kp HTTP " + kpRes.status);
+        const kpRaw = await kpRes.json();
+        const rows = (Array.isArray(kpRaw) ? kpRaw : []).filter(r => r && r.time_tag && r.kp != null);
+        const observed  = rows.filter(r => r.observed === "observed");
+        const predicted = rows.filter(r => r.observed !== "observed");
+        const now = observed.length ? observed[observed.length - 1] : null;
+        // Najvišja napovedana vrednost pove, ali se sploh splača spremljati.
+        let peak = null;
+        for (const r of predicted) if (!peak || Number(r.kp) > Number(peak.kp)) peak = r;
+
+        let auroraProb = null, ovTime = null;
+        try {
+          if (ovRes && ovRes.ok) {
+            const ov = await ovRes.json();
+            ovTime = ov["Forecast Time"] || ov["Observation Time"] || null;
+            for (const p of (ov.coordinates || [])) {
+              if (p[1] === SI_LAT && p[0] === SI_LON) { auroraProb = p[2]; break; }
+            }
+          }
+        } catch (_) { /* Kp je uporaben tudi brez OVATION */ }
+
+        // Kp je logaritemska lestvica; pragovi so postavljeni po tem, kaj je
+        // s 46° s. š. res vidno. Sij nad Slovenijo je izjemen dogodek —
+        // maja 2024 (Kp 9) je bil viden kot rdeč sij nizko nad severnim obzorjem.
+        const kpNow = now ? Number(now.kp) : null;
+        const kpPeak = peak ? Number(peak.kp) : null;
+        const level = k =>
+          k == null ? { key: "unknown", label: "ni podatka",        si: "—" } :
+          k >= 8    ? { key: "extreme", label: "huda nevihta",      si: "Rdeč sij nizko nad severnim obzorjem je mogoč — kot maja 2024." } :
+          k >= 7    ? { key: "strong",  label: "močna nevihta",     si: "Zelo majhna možnost šibkega sija nizko na severu." } :
+          k >= 5    ? { key: "storm",   label: "geomagnetna nevihta", si: "S Slovenije sij še ni viden; oval je nad Skandinavijo." } :
+          k >= 4    ? { key: "active",  label: "aktivno",           si: "Sij ni viden pri nas." } :
+                      { key: "quiet",   label: "mirno",             si: "Sij ni viden pri nas." };
+        return new Response(JSON.stringify({
+          kpNow, kpNowTime: now?.time_tag || null,
+          kpPeak, kpPeakTime: peak?.time_tag || null,
+          nowLevel: level(kpNow), peakLevel: level(kpPeak),
+          auroraProb, auroraTime: ovTime,
+          history: observed.slice(-16).map(r => ({ t: r.time_tag, kp: Number(r.kp) })),
+          forecast: predicted.slice(0, 24).map(r => ({ t: r.time_tag, kp: Number(r.kp) })),
+          source: "NOAA SWPC · planetarni Kp + OVATION",
+        }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=900" }
         });
       }
 
