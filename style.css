@@ -1897,6 +1897,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+/* NASA FIRMS — zaznane toplotne anomalije */
+.firms-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:.5rem;margin-bottom:.8rem}
+.firms-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}
+.firms-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:400;color:var(--text)}
+.firms-kpi span{font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.firms-tbl{width:100%;border-collapse:collapse;font-size:.72rem}
+.firms-tbl th{text-align:left;font-weight:500;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .4rem;border-bottom:1px solid var(--fc-border)}
+.firms-tbl td{padding:.32rem .4rem;border-bottom:1px solid var(--fc-border);color:var(--text);font-family:'JetBrains Mono',monospace}
+.firms-none{font-size:.78rem;color:var(--text);line-height:1.55;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.6rem .75rem}
+.firms-foot{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--fc-border)}
 /* Radiosondaža — izpeljane količine */
 .snd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem}
 .snd-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .6rem;text-align:center}

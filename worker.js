@@ -1697,6 +1697,91 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /pozari ───────────────────────────────────────────
+      // NASA FIRMS — dejansko zaznana požarišča (MODIS/VIIRS).
+      // Stran indeks FWI že računa po metodologiji EFFIS iz modelskih
+      // podatkov; to je torej ocena *nevarnosti*. FIRMS pove, ali kaj v resnici
+      // gori — torej modelirano tveganje in resnično stanje eno ob drugem.
+      //
+      // Zahteva brezplačen MAP_KEY (skrivnost FIRMS_MAP_KEY v Cloudflare).
+      // Brez njega vrnemo { configured: false } s statusom 200, da ospredje
+      // kartico preprosto skrije, namesto da bi kazalo napako.
+      if (path === "/pozari") {
+        const KEY = env?.FIRMS_MAP_KEY;
+        if (!KEY) {
+          return new Response(JSON.stringify({ configured: false }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" }
+          });
+        }
+        const BBOX = "13.3,45.4,16.7,46.9";   // zahod,jug,vzhod,sever — Slovenija
+        const DAYS = 3;                        // FIRMS dovoli 1–5
+        const SOURCES = ["VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT"];
+
+        const rows = [];
+        const seen = new Set();
+        for (const src of SOURCES) {
+          const u = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${KEY}/${src}/${BBOX}/${DAYS}`;
+          let txt;
+          try {
+            const r = await fetch(u, { cf: { cacheTtl: 1800, cacheEverything: true } });
+            if (!r.ok) continue;
+            txt = await r.text();
+          } catch (_) { continue; }
+          // Ob neveljavnem ključu FIRMS vrne navadno besedilo, ne CSV.
+          if (!txt || !/^latitude,/i.test(txt.trim())) continue;
+          const lines = txt.trim().split("\n");
+          const head = lines[0].split(",").map(s => s.trim());
+          const ix = name => head.indexOf(name);
+          const iLat = ix("latitude"), iLon = ix("longitude"), iDate = ix("acq_date"),
+                iTime = ix("acq_time"), iConf = ix("confidence"), iFrp = ix("frp"),
+                iDn = ix("daynight");
+          if (iLat < 0 || iLon < 0) continue;
+          for (let i = 1; i < lines.length; i++) {
+            const c = lines[i].split(",");
+            const lat = parseFloat(c[iLat]), lon = parseFloat(c[iLon]);
+            if (!isFinite(lat) || !isFinite(lon)) continue;
+            // Isti požar zaznata oba satelita; združimo po grobi celici in času.
+            const k = lat.toFixed(3) + "," + lon.toFixed(3) + "," + (c[iDate] || "") + "," + (c[iTime] || "");
+            if (seen.has(k)) continue;
+            seen.add(k);
+            rows.push({
+              lat, lon,
+              date: c[iDate] || null,
+              time: c[iTime] || null,
+              conf: iConf >= 0 ? (c[iConf] || "").trim() : null,
+              frp: iFrp >= 0 ? parseFloat(c[iFrp]) : null,
+              night: iDn >= 0 ? (c[iDn] || "").trim().toUpperCase() === "N" : null,
+            });
+          }
+        }
+
+        // Razdalja od postaje (haversine) — bralca zanima predvsem, kaj je blizu.
+        const LAT0 = 46.325779, LON0 = 14.921137;
+        const rad = d => d * Math.PI / 180;
+        for (const f of rows) {
+          const dLat = rad(f.lat - LAT0), dLon = rad(f.lon - LON0);
+          const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(LAT0)) * Math.cos(rad(f.lat)) * Math.sin(dLon / 2) ** 2;
+          f.dist = Math.round(2 * 6371 * Math.asin(Math.sqrt(a)));
+        }
+        rows.sort((a, b) => a.dist - b.dist);
+        // VIIRS označuje zaupanje s črkami l/n/h, MODIS s številko 0–100.
+        const isLow = f => f.conf === "l" || (/^\d+$/.test(f.conf || "") && Number(f.conf) < 30);
+        const solid = rows.filter(f => !isLow(f));
+
+        return new Response(JSON.stringify({
+          configured: true,
+          total: rows.length,
+          confident: solid.length,
+          nearest: solid[0] || rows[0] || null,
+          within50: solid.filter(f => f.dist <= 50).length,
+          fires: rows.slice(0, 40),
+          days: DAYS,
+          source: "NASA FIRMS · VIIRS S-NPP + NOAA-20",
+        }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=1800" }
+        });
+      }
+
       // ── /sondaza ──────────────────────────────────────────
       // Radiosondaža: izmerjen navpični profil ozračja.
       //
