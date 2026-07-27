@@ -10465,7 +10465,9 @@ function buildGoldenWindow(){
       desc:()=>{
         if(T>12&&rain>0.5)return `🟢 Aktivno gibanje dvoživk! Topel dež (T ${T.toFixed(1)} °C) aktivira selitvene pohode žab in pupkov.`;
         if(T>8&&H>85&&(hour<=8||hour>=19))return `🔵 Dobri pogoji – vlažna ${hour>=19?'noč':'jutro'} spodbuja aktivnost.`;
-        if(T<8)return `⚪ Prehladno (${T.toFixed(1)} °C) – dvoživke mirujejo pod kamenjem.`;
+        // T!=null je nujen: null<8 je resnično (null se pretvori v 0), zato bi
+        // ob manjkajoči meritvi trdili "prehladno" in vrgli napako na toFixed.
+        if(T!=null&&T<8)return `⚪ Prehladno (${T.toFixed(1)} °C) – dvoživke mirujejo pod kamenjem.`;
         return `🟡 Delni pogoji. ${rain<0.5?'Potreben je dež ali visoka vlaga.':'Temperatura mejna.'}`;
       },
       rating:()=>T>12&&rain>0.5?'perfect':T>8&&H>85&&(hour<=8||hour>=19)?'good':T>8?'ok':'poor'
@@ -10479,7 +10481,7 @@ function buildGoldenWindow(){
         const store2=_insStore();let r72=0;for(let i=0;i<3;i++){const d2=new Date();d2.setDate(d2.getDate()-i);r72+=(store2[_localDateStr(d2)]?.precipTotal||0);}
         if(r72>20&&T>12&&T<20)return `🟢 Odlično za gozdni makro! ${r72.toFixed(0)} mm dežja v 72 h + T ${T.toFixed(1)} °C – gobe rastejo, mah nabrekel.`;
         if(H>80&&T>12)return `🔵 Visoka vlaga ${Math.round(H)} % – gozdni makro subjekti (mah, lišaji, kapljice na listih) so odlični.`;
-        if(T<10)return `⚪ Prehladno (${T.toFixed(1)} °C) – gobe v mirovanju, mah suh.`;
+        if(T!=null&&T<10)return `⚪ Prehladno (${T.toFixed(1)} °C) – gobe v mirovanju, mah suh.`;
         return `🟡 Delni pogoji – vlaga ${Math.round(H||0)} %. ${r72<5?'Potreben je dež za gobe.':'Preverite gozdni rob.'}`;
       },
       rating:()=>{const st=_insStore();let r72=0;for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);r72+=(st[_localDateStr(d)]?.precipTotal||0);}return r72>20&&T>12?'perfect':H>75&&T>10?'good':T>8&&H>65?'ok':'poor';}
@@ -12864,12 +12866,66 @@ async function initDA(){
   renderOBTracking();
 }
 
+// ── NASA FIRMS: zaznane toplotne anomalije ────────────────
+// Pomembno pri ubeseditvi: VIIRS zaznava toplotne anomalije, ne "požarov".
+// Med zadetke sodijo tudi kmetijsko sežiganje in industrijski viri toplote,
+// zato jih ne smemo predstavljati kot potrjene gozdne požare.
+// Kartica se skrije, dokler v Cloudflare ni nastavljena skrivnost FIRMS_MAP_KEY.
+async function fetchFirms(){
+  const card=document.getElementById('firms-card');
+  const el=document.getElementById('firms-body');
+  if(!card||!el)return;
+  try{
+    const r=await fetch(PROXY+'/pozari');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d.configured){card.style.display='none';return;}
+    card.style.display='';
+    renderFirms(d);
+    const src=document.getElementById('firms-src');
+    if(src)src.textContent='VIIRS · zadnji '+d.days+' dni';
+  }catch(e){
+    card.style.display='none';
+    console.warn('firms:',e);
+  }
+}
+function _firmsConf(c){
+  if(c==='h')return'visoko';
+  if(c==='n')return'srednje';
+  if(c==='l')return'nizko';
+  if(/^\d+$/.test(c||''))return c+' %';
+  return'—';
+}
+function renderFirms(d){
+  const el=document.getElementById('firms-body');if(!el)return;
+  if(!d.total){
+    el.innerHTML='<div class="firms-none">✅ V zadnjih '+d.days+' dneh nad Slovenijo ni zaznanih toplotnih anomalij. To je običajno stanje — sateliti zaznajo šele razmeroma močan vir toplote.</div>'+
+      '<div class="firms-foot">Vir: '+(d.source||'NASA FIRMS')+'.</div>';
+    return;
+  }
+  const n=d.nearest;
+  const rows=(d.fires||[]).slice(0,8).map(f=>
+    '<tr><td>'+f.dist+' km</td><td>'+(f.date||'—')+
+    (f.time?' '+String(f.time).padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2')+' UTC':'')+
+    '</td><td>'+_firmsConf(f.conf)+'</td><td>'+(f.frp!=null&&isFinite(f.frp)?f.frp.toFixed(1).replace('.',','):'—')+'</td></tr>').join('');
+  el.innerHTML=
+    '<div class="firms-kpis">'+
+      '<div class="firms-kpi"><b>'+d.total+'</b><span>zaznav skupaj</span></div>'+
+      '<div class="firms-kpi"><b>'+d.confident+'</b><span>brez nizkega zaupanja</span></div>'+
+      '<div class="firms-kpi"><b>'+d.within50+'</b><span>v 50 km</span></div>'+
+      '<div class="firms-kpi"><b>'+(n?n.dist+' km':'—')+'</b><span>najbližja</span></div>'+
+    '</div>'+
+    '<table class="firms-tbl"><thead><tr><th>Razdalja</th><th>Čas</th><th>Zaupanje</th><th>FRP (MW)</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="firms-foot">FRP je moč sevanja požarišča — višja vrednost pomeni močnejši vir. Sateliti zaznavajo <b>toplotne anomalije</b>, med katere sodijo tudi kmetijsko sežiganje in industrijski viri, zato zaznava sama po sebi ni potrjen gozdni požar. Vir: '+(d.source||'NASA FIRMS')+'.</div>';
+}
+
 function initLife(){
   if(_lifeInit)return;_lifeInit=true;
   try{buildDewMatrix();}catch(e){console.error('dew',e);}
   try{buildFaunaRadar();}catch(e){console.error('fauna',e);}
   fetchINatObservations();
   fetchFireWeather();
+  fetchFirms();
   try{buildGoldenWindow();}catch(e){console.error('gw',e);}
   buildMission();
   try{buildKidsActivity();}catch(e){console.error('kids',e);}
