@@ -16269,6 +16269,59 @@ function initNerd(){
   _buildNerdSoundingLinks();
   _buildNerdIndexCards();
   _buildNerdLinks();
+  fetchSpaceWeather();
+}
+
+// ── Vesoljsko vreme: NOAA SWPC (Kp + OVATION) ─────────────
+// Kp je logaritemski indeks geomagnetne motenosti (0–9). S 46° s. š. je
+// polarni sij izjemen dogodek, zato so barve in besedilo namerno zadržani —
+// kartica naj ne obljublja sija ob vsaki manjši nevihti.
+const _KP_COLORS={quiet:'#4ade80',active:'#fbbf24',storm:'#fb923c',strong:'#f87171',extreme:'#e11d48',unknown:'var(--muted)'};
+function _kpColor(k){
+  if(k==null)return _KP_COLORS.unknown;
+  if(k>=8)return _KP_COLORS.extreme;
+  if(k>=7)return _KP_COLORS.strong;
+  if(k>=5)return _KP_COLORS.storm;
+  if(k>=4)return _KP_COLORS.active;
+  return _KP_COLORS.quiet;
+}
+async function fetchSpaceWeather(){
+  const el=document.getElementById('swpc-body');if(!el)return;
+  try{
+    const r=await fetch(PROXY+'/vesoljsko-vreme');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderSpaceWeather(await r.json());
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Podatki NOAA SWPC niso dosegljivi.</div>';
+    console.warn('swpc:',e);
+  }
+}
+function renderSpaceWeather(d){
+  const el=document.getElementById('swpc-body');if(!el)return;
+  const fmtKp=k=>k==null?'—':k.toFixed(2).replace(/\.?0+$/,'').replace('.',',');
+  const series=[...(d.history||[]),...(d.forecast||[])];
+  const nHist=(d.history||[]).length;
+  const bars=series.map((p,i)=>{
+    const h=Math.max(4,Math.round((p.kp/9)*100));
+    const t=new Date(p.t);
+    return '<div class="swx-bar-col" title="'+t.toLocaleString('sl',{day:'numeric',month:'numeric',hour:'2-digit'})+
+      ' · Kp '+fmtKp(p.kp)+(i<nHist?' (izmerjeno)':' (napoved)')+'">'+
+      '<div class="swx-bar" style="height:'+h+'%;background:'+_kpColor(p.kp)+';opacity:'+(i<nHist?1:.5)+'"></div>'+
+    '</div>';
+  }).join('');
+  // Prag 5 je uradni začetek geomagnetne nevihte (G1) — vredno je označiti.
+  const g1=Math.round((5/9)*100);
+  el.innerHTML=
+    '<div class="swx-kpis">'+
+      '<div class="swx-kpi"><b style="color:'+_kpColor(d.kpNow)+'">'+fmtKp(d.kpNow)+'</b><span>Kp zdaj</span></div>'+
+      '<div class="swx-kpi"><b style="color:'+_kpColor(d.kpPeak)+'">'+fmtKp(d.kpPeak)+'</b><span>vrh napovedi</span></div>'+
+      '<div class="swx-kpi"><b>'+(d.auroraProb!=null?d.auroraProb+' %':'—')+'</b><span>sij nad SI</span></div>'+
+      '<div class="swx-kpi"><b style="font-size:.8rem;color:'+_kpColor(d.kpNow)+'">'+(d.nowLevel?.label||'—')+'</b><span>stanje</span></div>'+
+    '</div>'+
+    '<div class="swx-chart"><div class="swx-g1" style="bottom:'+g1+'%"><span>G1 · nevihta</span></div>'+bars+'</div>'+
+    '<div class="swx-scale"><span>izmerjeno</span><span>napoved →</span></div>'+
+    '<div class="swx-verdict">'+(d.nowLevel?.si||'')+'</div>'+
+    '<div class="swx-foot">Kp meri geomagnetno motenost po svetu (0–9, logaritemsko); od 5 naprej gre za geomagnetno nevihto. Odstotek je verjetnost sija iz modela NOAA OVATION za točko nad Slovenijo. Vir: '+(d.source||'NOAA SWPC')+'.</div>';
 }
 
 // Monthly temperature normals for Rečica ob Savinji (366m, 1991–2020 proxy)

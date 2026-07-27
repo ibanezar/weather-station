@@ -1897,6 +1897,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+/* Vesoljsko vreme — Kp indeks */
+.swx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:.5rem;margin-bottom:.9rem}
+.swx-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}
+.swx-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:400;color:var(--text)}
+.swx-kpi span{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.swx-chart{position:relative;display:flex;align-items:flex-end;gap:2px;height:88px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.4rem}
+.swx-bar-col{flex:1;height:100%;display:flex;align-items:flex-end;min-width:0}
+.swx-bar{width:100%;border-radius:3px 3px 0 0;transition:height .4s ease}
+.swx-g1{position:absolute;left:.4rem;right:.4rem;border-top:1px dashed rgba(251,146,60,.5);pointer-events:none}
+.swx-g1 span{position:absolute;right:0;top:-1.05em;font-size:.56rem;color:#fb923c;letter-spacing:.04em}
+.swx-scale{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:.3rem}
+.swx-verdict{font-size:.76rem;color:var(--text);line-height:1.55;margin-top:.7rem}
+.swx-foot{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--fc-border)}
 /* Satelitsko izmerjeno obsevanje */
 .ssun-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:.5rem;margin-bottom:.9rem}
 .ssun-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}
