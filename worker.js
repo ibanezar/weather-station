@@ -1662,6 +1662,65 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /cezmejno ─────────────────────────────────────────
+      // GeoSphere Austria (TAWES, 10-min) — čezmejni "gorvodni" signal.
+      // Rečica leži južno od Karavank/Kamniško-Savinjskih Alp; ob severnem
+      // dotoku zrak pride čez greben. Postaje severno od grebena zato
+      // povedo, kaj prihaja, uro ali dve preden to izmerimo doma.
+      // Ključ ni potreben. GET /cezmejno → { stations: [...], updatedAt }
+      if (path === "/cezmejno") {
+        // loc = sklanjano ime za stavke, dist = zračna razdalja od IREICA1,
+        // role pojasni, zakaj je postaja na seznamu.
+        const AT_STATIONS = [
+          { id: "11234", name: "Železna Kapla",  at: "Bad Eisenkappel", alt: 623,  dist: 31, role: "greben" },
+          { id: "11232", name: "Pliberk",        at: "Feistritz o. Bleiburg", alt: 522, dist: 29, role: "dolina" },
+          { id: "11217", name: "Ljubelj",        at: "Loibl/Tunnel",   alt: 1097, dist: 53, role: "prelaz" },
+          { id: "11331", name: "Celovec",        at: "Klagenfurt",     alt: 450,  dist: 58, role: "kotlina" },
+          { id: "11214", name: "Preitenegg",     at: "Preitenegg",     alt: 1059, dist: 68, role: "greben" },
+        ];
+        const PARAMS = "TL,RF,FF,FFX,DD,P,RR,SO";
+        const gsUrl = "https://dataset.api.hub.geosphere.at/v1/station/current/tawes-v1-10min"
+          + "?station_ids=" + AT_STATIONS.map(s => s.id).join(",")
+          + "&parameters=" + PARAMS;
+        const gsRes = await fetch(gsUrl, {
+          headers: { "Accept": "application/json", "User-Agent": "meteorec.si/1.0" },
+          cf: { cacheTtl: 300, cacheEverything: true },
+        });
+        if (!gsRes.ok) throw new Error("GeoSphere HTTP " + gsRes.status);
+        const gs = await gsRes.json();
+        // Zadnji časovni korak je pogosto še nepopoln (null), zato za vsak
+        // parameter vzamemo zadnjo vrednost, ki ni null.
+        const lastVal = p => {
+          const arr = p?.data || [];
+          for (let i = arr.length - 1; i >= 0; i--) if (arr[i] !== null) return arr[i];
+          return null;
+        };
+        const byId = {};
+        for (const f of (gs.features || [])) byId[String(f.properties?.station)] = f.properties?.parameters || {};
+        const stations = AT_STATIONS.map(s => {
+          const p = byId[s.id] || {};
+          const ms = lastVal(p.FF), gust = lastVal(p.FFX);
+          return {
+            ...s,
+            temp:     lastVal(p.TL),
+            humidity: lastVal(p.RF),
+            // TAWES poroča veter v m/s; doma povsod uporabljamo km/h.
+            wind:     ms   != null ? Math.round(ms   * 3.6 * 10) / 10 : null,
+            gust:     gust != null ? Math.round(gust * 3.6 * 10) / 10 : null,
+            dir:      lastVal(p.DD),
+            pressure: lastVal(p.P),
+            rain10:   lastVal(p.RR),
+          };
+        });
+        return new Response(JSON.stringify({
+          stations,
+          updatedAt: (gs.timestamps || []).slice(-1)[0] || null,
+          source: "GeoSphere Austria · TAWES",
+        }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
+        });
+      }
+
       // ── /arso-radar ───────────────────────────────────────
       if (path === "/arso-radar") {
         const radarRes = await fetch(

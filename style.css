@@ -1897,6 +1897,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+/* Čezmejni signal — avstrijske postaje čez greben */
+.xb-intro{font-size:.76rem;color:var(--muted);line-height:1.55;margin:.1rem 0 .8rem}
+.xb-foot{font-size:.74rem;color:var(--text);line-height:1.55;margin-top:.85rem;padding:.6rem .8rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px}
 .wuh-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .wuh-table{width:100%;border-collapse:collapse;font-size:.73rem}
 .wuh-table th{padding:.4rem .4rem;font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;text-align:center}
