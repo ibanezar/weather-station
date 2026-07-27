@@ -3317,6 +3317,72 @@
 })();
 </script>
 
+<!-- ── Android app survey popup ── -->
+<div id="android-poll-overlay" role="dialog" aria-label="Anketa: Android aplikacija" onclick="if(event.target===this)androidPollDismiss()">
+  <div class="ap-panel">
+    <button class="ap-close" onclick="androidPollDismiss()" aria-label="Zapri">×</button>
+    <div id="android-poll-ask">
+      <div class="ap-icon">📱</div>
+      <h3>Android aplikacija za Meteorec?</h3>
+      <p>Trenutno Meteorec deluje kot spletna stran, ki jo lahko namestiš na začetni zaslon. Bi si namesto tega raje namestil/a pravo Android aplikacijo iz Google Play?</p>
+      <div class="ap-actions">
+        <button class="ap-btn ap-btn-yes" onclick="androidPollVote('da')">👍 Da, bi jo</button>
+        <button class="ap-btn ap-btn-no" onclick="androidPollVote('ne')">👎 Ne, hvala</button>
+      </div>
+    </div>
+    <div id="android-poll-thanks" style="display:none">
+      <div class="ap-icon">🙏</div>
+      <p class="ap-thanks">Hvala za odgovor! Tvoje mnenje pomaga pri odločitvi.</p>
+      <div class="ap-result" id="android-poll-result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
+  var KEY   = 'wx-android-poll-v1';
+  var overlay = document.getElementById('android-poll-overlay');
+  if(!overlay) return;
+
+  function stored(){
+    var v; try{ v = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){ v = null; }
+    return v;
+  }
+  function save(v){ try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} }
+
+  window.androidPollDismiss = function(){
+    overlay.classList.remove('open');
+    var s = stored();
+    if(!s || !s.choice) save({ closedAt: Date.now() });
+  };
+
+  window.androidPollVote = function(choice){
+    document.getElementById('android-poll-ask').style.display = 'none';
+    document.getElementById('android-poll-thanks').style.display = '';
+    save({ choice: choice, votedAt: Date.now() });
+    fetch(PROXY + '/android-poll?option=' + choice, { method: 'POST' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var c = (data && data.counts) || {};
+        var da = c.da || 0, ne = c.ne || 0, total = da + ne;
+        var pct = total ? Math.round(da / total * 100) : 0;
+        document.getElementById('android-poll-result').innerHTML =
+          'Do zdaj si Android aplikacijo želi <b>' + pct + '%</b> (' + total + ' glasov).' +
+          '<div class="ap-bar"><div class="ap-bar-fill" style="width:' + pct + '%"></div></div>';
+      })
+      .catch(function(){});
+    setTimeout(function(){ overlay.classList.remove('open'); }, 3500);
+  };
+
+  var s = stored();
+  var closedRecently = s && s.closedAt && (Date.now() - s.closedAt) < 30 * 86400000;
+  if(!s || (!s.choice && !closedRecently)){
+    setTimeout(function(){ overlay.classList.add('open'); }, 600);
+  }
+})();
+</script>
+
 <script>
 (function(){
   var PROXY = "https://weatherireica1.filip-eremita.workers.dev";
