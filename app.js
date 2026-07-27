@@ -1233,26 +1233,114 @@ function loadThresholds(){
   document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
 }
 
+// ── Vrste push obvestil (kateri kategoriji strežnik pošilja) ─────
+const TYPES_KEY='wx-notif-types-v1';
+const _thrTypes={temp:true,wind:true,rain:true,storm:true,aurora:true};
+function loadThrTypes(){
+  try{const t=JSON.parse(localStorage.getItem(TYPES_KEY)||'{}');
+    for(const k of Object.keys(_thrTypes))if(typeof t[k]==='boolean')_thrTypes[k]=t[k];
+  }catch{}
+}
+async function _pushEndpoint(){
+  try{
+    if(!('serviceWorker' in navigator))return null;
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription();
+    return sub?.endpoint||null;
+  }catch(_){return null;}
+}
+function updateTpStatus(){
+  const el=document.getElementById('tp-status');if(!el)return;
+  const on='Notification' in window&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on';
+  const imeVasi=document.getElementById('thr-vas')?.selectedOptions?.[0]?.textContent;
+  el.innerHTML=on
+    ?'🔔 Potisna obvestila so <b style="color:var(--green)">vklopljena</b>'+(imeVasi?' za vas <b>'+imeVasi+'</b>':'')
+    :'🔕 Potisna obvestila so <b>izklopljena</b> — vklopi jih z gumbom 🔔 Obvestila zgoraj.';
+}
+const SNOOZE_KEY='wx-notif-snooze-until';
+function updateSnoozeUI(){
+  const sel=document.getElementById('thr-snooze-sel'),st=document.getElementById('tp-snooze-status');
+  if(!sel||!st)return;
+  let until=0;try{until=parseInt(localStorage.getItem(SNOOZE_KEY)||'0',10)||0;}catch(_){}
+  if(until>Date.now()){
+    sel.value='0';
+    const mins=Math.round((until-Date.now())/60000),h=Math.floor(mins/60),mm=mins%60;
+    st.textContent='😴 Obvestila so utišana še '+(h>0?h+' h ':'')+mm+' min.';
+  }else{
+    st.textContent='';
+    try{localStorage.removeItem(SNOOZE_KEY);}catch(_){}
+  }
+}
+async function setNotifSnooze(hours){
+  hours=parseFloat(hours)||0;
+  const ep=await _pushEndpoint();
+  if(!ep){
+    if(hours>0)alert('Za "Ne moti" morajo biti vklopljena potisna obvestila (🔔 Obvestila zgoraj).');
+    const sel=document.getElementById('thr-snooze-sel');if(sel)sel.value='0';
+    return;
+  }
+  try{
+    await fetch(PROXY+'/push/snooze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:ep,hours})});
+    const until=hours>0?Date.now()+hours*3600000:0;
+    if(until)localStorage.setItem(SNOOZE_KEY,String(until));else localStorage.removeItem(SNOOZE_KEY);
+    updateSnoozeUI();
+    showToast(hours>0?'Obvestila utišana za '+hours+' h':'Utišanje preklicano');
+  }catch(_){alert('Nastavitve ni bilo mogoče shraniti. Poskusi znova.');}
+}
+async function sendTestNotification(){
+  const ep=await _pushEndpoint();
+  if(!ep){alert('Najprej vklopi potisna obvestila (🔔 Obvestila zgoraj).');return;}
+  const btn=document.getElementById('tp-btn-test');
+  if(btn){btn.disabled=true;btn.textContent='Pošiljam …';}
+  try{
+    const r=await fetch(PROXY+'/push/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:ep})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    showToast('Testno obvestilo poslano — počakaj nekaj sekund.');
+  }catch(_){alert('Testnega obvestila ni bilo mogoče poslati. Poskusi znova.');}
+  finally{if(btn){btn.disabled=false;btn.textContent='🔔 Testno obvestilo';}}
+}
+
+// Anketa za Android aplikacijo je celozaslonski overlay z zelo visokim
+// z-index — brez umika bi blokirala klike na ta modal in na zgodovino obvestil.
+function _dismissAndroidPollIfOpen(){
+  document.getElementById('android-poll-overlay')?.classList.remove('open');
+}
 function openThresholdModal(){
   dismissNotifHint();
+  _dismissAndroidPollIfOpen();
   loadThresholds();
+  loadThrTypes();
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??'';};
   sv('thr-temp-min',_thr.tempMin);sv('thr-temp-max',_thr.tempMax);
   sv('thr-wind',_thr.wind);sv('thr-rain',_thr.rain);
+  for(const k of Object.keys(_thrTypes)){
+    const el=document.getElementById('thr-type-'+k);if(el)el.checked=_thrTypes[k];
+  }
   const m=document.getElementById('threshold-modal');if(m){m.style.display='flex';}
+  updateTpStatus();
+  updateSnoozeUI();
 }
 function closeThresholdModal(){
   const m=document.getElementById('threshold-modal');if(m)m.style.display='none';
 }
-function saveThresholdSettings(){
+async function saveThresholdSettings(){
   const gv=(id)=>{const v=parseFloat(document.getElementById(id)?.value);return isNaN(v)?null:v;};
   _thr.tempMin=gv('thr-temp-min');_thr.tempMax=gv('thr-temp-max');
   _thr.wind=gv('thr-wind');_thr.rain=gv('thr-rain');
   try{localStorage.setItem(THRESHOLD_KEY,JSON.stringify(_thr));}catch{}
+  for(const k of Object.keys(_thrTypes)){
+    const el=document.getElementById('thr-type-'+k);if(el)_thrTypes[k]=el.checked;
+  }
+  try{localStorage.setItem(TYPES_KEY,JSON.stringify(_thrTypes));}catch{}
   const hasAny=Object.values(_thr).some(v=>v!==null);
   document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
   closeThresholdModal();
   if(_lastBriefObs)checkThresholdAlerts(_lastBriefObs);
+  showToast('Pragovi shranjeni ✓');
+  const ep=await _pushEndpoint();
+  if(ep){
+    try{await fetch(PROXY+'/push/prefs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:ep,thr:_thr,types:_thrTypes})});}catch(_){}
+  }
 }
 function clearThresholdSettings(){
   _thr.tempMin=_thr.tempMax=_thr.wind=_thr.rain=null;
@@ -4820,7 +4908,8 @@ async function toggleNotifications(){
   }
   try{
     const vas=getNowcastVas();
-    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas})});
+    loadThresholds();loadThrTypes();
+    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,thr:_thr,types:_thrTypes})});
     if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
@@ -4854,11 +4943,55 @@ function initNotifHint(){
   // kopičenju pozivov (piškotki + obvestila + namestitev) ob prvem nalaganju.
   let consentPending=true; try{consentPending=!localStorage.getItem('wx-cookie-consent');}catch(_){}
   if((window._wxVisitCount||1)<2||consentPending)return;
-  setTimeout(()=>{
+  // Android-anketa je celozaslonski overlay — če je ravno odprt, počakaj, da
+  // se zapre, sicer se namig prikaže "pod" njim in ga uporabnik nikoli ne vidi.
+  const tryShow=attemptsLeft=>{
+    const overlayOpen=document.getElementById('android-poll-overlay')?.classList.contains('open');
+    if(overlayOpen&&attemptsLeft>0){setTimeout(()=>tryShow(attemptsLeft-1),2500);return;}
     const hint=document.getElementById('notif-hint');
     if(hint)hint.classList.add('show');
     setTimeout(dismissNotifHint,9000);
-  },1800);
+  };
+  setTimeout(()=>tryShow(6),1800);
+}
+
+// ── Zgodovina obvestil (kaj je Meteorec nazadnje poslal) ──
+function openNotifHistory(){
+  _dismissAndroidPollIfOpen();
+  const m=document.getElementById('notif-history-modal');if(m)m.style.display='flex';
+  loadNotifHistory();
+}
+function closeNotifHistory(){
+  const m=document.getElementById('notif-history-modal');if(m)m.style.display='none';
+}
+function _timeAgo(ts){
+  const min=Math.round(Math.max(0,Date.now()-ts)/60000);
+  if(min<1)return'zdaj';
+  if(min<60)return'pred '+min+' min';
+  const h=Math.round(min/60);
+  if(h<24)return'pred '+h+' h';
+  return'pred '+Math.round(h/24)+' dnevi';
+}
+async function loadNotifHistory(){
+  const list=document.getElementById('nh-list');if(!list)return;
+  list.innerHTML='<p class="nh-empty">Nalaganje …</p>';
+  try{
+    const r=await fetch(PROXY+'/push/log');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const items=(await r.json()).items||[];
+    if(!items.length){list.innerHTML='<p class="nh-empty">Ni še bilo poslanih obvestil.</p>';return;}
+    list.innerHTML='';
+    items.forEach(it=>{
+      const row=document.createElement('div');row.className='nh-item';
+      const top=document.createElement('div');top.className='nh-item-top';
+      const b=document.createElement('b');b.textContent=it.title||'Meteorec';
+      const time=document.createElement('span');time.className='nh-time';time.textContent=_timeAgo(it.ts);
+      top.append(b,time);
+      const body=document.createElement('div');body.className='nh-body';body.textContent=it.body||'';
+      row.append(top,body);
+      list.appendChild(row);
+    });
+  }catch(_){list.innerHTML='<p class="nh-empty">Zgodovine ni bilo mogoče naložiti.</p>';}
 }
 function maybePushAlert(title,body){
   if(Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on'){
@@ -14151,6 +14284,7 @@ async function init(){
   try{autoLoadHistoryFile();}catch(_){}
   setTimeout(()=>{try{initWeatherArt();setWeatherArt(_lastBriefObs||{});}catch(_){}},150);
   try{loadThresholds();}catch(_){} // restore user alert thresholds from localStorage
+  try{loadThrTypes();}catch(_){} // restore which push categories the user wants
   try{_fcSliderInit();}catch(_){}
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);

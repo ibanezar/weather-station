@@ -240,6 +240,26 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .tp-btn-clear:hover{color:var(--text);border-color:var(--text)}
 .tp-btn-save{padding:.42rem 1.2rem;border-radius:9px;border:none;background:var(--blue);color:#fff;font-size:.78rem;cursor:pointer;font-weight:500}
 .tp-btn-save:hover{opacity:.9}
+.tp-status{font-size:.74rem;color:var(--muted);background:var(--fc-bg);border:1px solid var(--border);border-radius:9px;padding:.5rem .65rem;margin-bottom:1.1rem;line-height:1.4}
+.tp-row-types{align-items:flex-start}
+.tp-row-types>label{padding-top:.15rem}
+.tp-types{display:flex;flex-direction:column;gap:.35rem;flex:2}
+.tp-chk{display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--text);cursor:pointer}
+.tp-chk input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;flex:none}
+.tp-snooze select{background:var(--fc-bg);border:1px solid var(--border);border-radius:8px;padding:.38rem .5rem;font-size:.78rem;color:var(--text)}
+.tp-snooze-status{font-size:.72rem;color:var(--muted);margin:-.35rem 0 0}
+.tp-hist-link{display:block;width:100%;background:none;border:none;color:var(--blue);font-size:.74rem;cursor:pointer;padding:0;margin:1rem 0 0;text-align:left}
+.tp-hist-link:hover{text-decoration:underline}
+.tp-btn-test{padding:.42rem 1rem;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--blue);font-size:.78rem;cursor:pointer;margin-right:auto}
+.tp-btn-test:hover{border-color:var(--blue)}
+.tp-btn-test:disabled{opacity:.6;cursor:default}
+.nh-panel{width:min(95vw,400px);max-height:80vh;display:flex;flex-direction:column}
+.nh-list{overflow-y:auto;display:flex;flex-direction:column;gap:.55rem;margin-top:.5rem}
+.nh-item{background:var(--fc-bg);border:1px solid var(--border);border-radius:10px;padding:.55rem .7rem}
+.nh-item-top{display:flex;justify-content:space-between;gap:.6rem;font-size:.78rem;margin-bottom:.2rem}
+.nh-time{color:var(--muted);white-space:nowrap;font-size:.7rem}
+.nh-body{font-size:.75rem;color:var(--muted);line-height:1.4}
+.nh-empty{font-size:.78rem;color:var(--muted);text-align:center;padding:1rem 0}
 /* Active threshold indicator on button */
 #threshold-btn.has-thresholds::after{content:'●';font-size:.55rem;vertical-align:super;margin-left:.15rem;color:var(--amber)}
 .a-level-yellow{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.45);color:var(--amber)}

@@ -514,48 +514,118 @@ async function _sendPush(env, sub, payloadObj) {
 // Pošlji obvestilo naročnikom (počisti potekle). Vrne {sent, pruned}.
 // Brez `filter` gre vsem; z njim samo tistim, ki mu ustrezajo — tako gredo
 // obvestila za posamezno vas res le naročnikom te vasi. Potekle naročnine
-// počistimo iz celotnega seznama, ne le iz izbranega podniza.
+// počistimo iz celotnega seznama, ne le iz izbranega podniza. Naročnike, ki
+// so si vklopili "Ne moti" (snoozeUntil v prihodnosti), vedno izpustimo —
+// ne glede na `filter`, ker gre za izrecno uporabnikovo željo.
 async function _pushAll(env, payload, filter) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
   let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
-  const target = filter ? subs.filter(filter) : subs;
+  const now = Date.now();
+  const target = subs.filter(s => !(s.snoozeUntil && s.snoozeUntil > now) && (!filter || filter(s)));
   const dead = [];
   await Promise.all(target.map(async s => {
     try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
     catch (_) {}
   }));
   if (dead.length) await r2.put("push/subs.json", JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
-  return { sent: target.length - dead.length, pruned: dead.length };
+  const sent = target.length - dead.length;
+  if (sent > 0) await _logPush(env, payload);
+  return { sent, pruned: dead.length };
+}
+
+// Dnevnik zadnjih poslanih obvestil (za javni pregled "kaj smo zamudili").
+// Ne beleži osebnih podatkov — samo naslov/besedilo, kar je bilo poslano.
+const PUSH_LOG_MAX = 30;
+async function _logPush(env, payload) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return;
+  try {
+    const o = await r2.get("push/log.json");
+    let log = o ? JSON.parse(await o.text()) : [];
+    log.unshift({ ts: Date.now(), title: payload.title, body: payload.body, tag: payload.tag });
+    if (log.length > PUSH_LOG_MAX) log = log.slice(0, PUSH_LOG_MAX);
+    await r2.put("push/log.json", JSON.stringify(log), { httpMetadata: { contentType: "application/json" } });
+  } catch (_) {}
+}
+
+// Uporabniško nastavljivi pragovi (namesto fiksnih PUSH_THRESHOLDS.def) in
+// vrste obvestil, ki jih posamezen naročnik želi prejemati. Oboje pošlje
+// brskalnik prek /push/subscribe (ob vklopu) ali /push/prefs (ob spremembi
+// nastavitev, ko so obvestila že vklopljena).
+function _sanitizeThr(t) {
+  if (!t || typeof t !== "object") return null;
+  const out = {};
+  for (const k of ["tempMin", "tempMax", "wind", "rain"]) {
+    const v = Number(t[k]);
+    if (t[k] != null && t[k] !== "" && !isNaN(v)) out[k] = v;
+  }
+  return out;
+}
+function _sanitizeTypes(t) {
+  if (!t || typeof t !== "object") return null;
+  const out = {};
+  for (const k of ["temp", "wind", "rain", "storm", "aurora"]) if (typeof t[k] === "boolean") out[k] = t[k];
+  return out;
 }
 
 // ── Samodejni pragovni alarm (cron) ────────────────────────
-// Pragovi (po dogovoru): sunek >40 km/h, naliv >18 mm/h, vročina ≥30 °C, zmrzal ≤−1 °C.
+// Privzeti pragovi (če naročnik svojega ni nastavil): sunek >40 km/h,
+// naliv >18 mm/h, vročina ≥30 °C, zmrzal ≤−1 °C. `type` določa, katero
+// vrsto obvestil (checkbox v "Moja opozorila") mora imeti naročnik vklopljeno,
+// `dir` pa smer primerjave s pragom.
 const PUSH_THRESHOLDS = [
-  { key: "gust",  test: m => (m.windGust ?? m.windSpeed ?? 0) > 40, msg: m => "💨 Močan sunek vetra: " + Math.round(m.windGust ?? m.windSpeed) + " km/h v Rečici ob Savinji — prav zdaj." },
-  { key: "rain",  test: m => (m.precipRate ?? 0) > 18,             msg: m => "🌧️ Intenziven naliv: " + (m.precipRate).toFixed(1) + " mm/h v Rečici ob Savinji — prav zdaj." },
-  { key: "heat",  test: m => (m.temp ?? -99) >= 30,                msg: m => "🌡️ Vročina: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
-  { key: "frost", test: m => (m.temp ?? 99) <= -1,                 msg: m => "🧊 Zmrzal: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
+  { key: "gust",  type: "wind", def: 40, dir: "gt",  val: m => m.windGust ?? m.windSpeed ?? 0, msg: m => "💨 Močan sunek vetra: " + Math.round(m.windGust ?? m.windSpeed) + " km/h v Rečici ob Savinji — prav zdaj." },
+  { key: "rain",  type: "rain", def: 18, dir: "gt",  val: m => m.precipRate ?? 0,               msg: m => "🌧️ Intenziven naliv: " + (m.precipRate).toFixed(1) + " mm/h v Rečici ob Savinji — prav zdaj." },
+  { key: "heat",  type: "temp", def: 30, dir: "gte", val: m => m.temp ?? -99,                    msg: m => "🌡️ Vročina: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
+  { key: "frost", type: "temp", def: -1, dir: "lte", val: m => m.temp ?? 99,                     msg: m => "🧊 Zmrzal: " + (m.temp).toFixed(1) + " °C v Rečici ob Savinji." },
 ];
+// Ime polja v naročnikovem `thr` za posamezen prag (isto poimenovanje kot
+// pri lokalnih "Moja opozorila" na strani — gust→wind, heat→tempMax, frost→tempMin).
+const THR_FIELD = { gust: "wind", rain: "rain", heat: "tempMax", frost: "tempMin" };
+function _effThr(sub, key, def) {
+  const v = sub.thr && sub.thr[THR_FIELD[key]];
+  return typeof v === "number" && !isNaN(v) ? v : def;
+}
+function _isOver(dir, v, t) { return dir === "gte" ? v >= t : dir === "lte" ? v <= t : v > t; }
 const PUSH_COOLDOWN_MS = 3 * 3600 * 1000;
 async function _cronCheckThresholds(env) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
   let obs; try { obs = (await (await fetch(CURRENT_URL, { headers: { "Accept": "application/json" } })).json()); } catch (_) { return; }
   const m = obs?.observations?.[0]?.metric; if (!m) return;
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;
   let state = {}; try { const o = await r2.get("push/state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
   const now = Date.now();
-  let changed = false;
-  for (const t of PUSH_THRESHOLDS) {
-    const over = t.test(m);
-    const st = state[t.key] || { over: false, lastSent: 0 };
-    if (over && !st.over && (now - (st.lastSent || 0) > PUSH_COOLDOWN_MS)) {
-      await _pushAll(env, { title: "Meteorec — opozorilo", body: t.msg(m), url: "/", tag: "wx-" + t.key });
-      st.lastSent = now;
+  const dead = [];
+  const nextState = {};
+  const logged = new Set(); // isti prag v istem teku prijavimo v dnevnik le enkrat
+  await Promise.all(subs.map(async s => {
+    const snoozed = !!(s.snoozeUntil && s.snoozeUntil > now);
+    const sSt = state[s.endpoint] || {};
+    const nSt = {};
+    for (const t of PUSH_THRESHOLDS) {
+      if (s.types && s.types[t.type] === false) continue;
+      const thrVal = _effThr(s, t.key, t.def);
+      const over = _isOver(t.dir, t.val(m), thrVal);
+      const st = sSt[t.key] || { over: false, lastSent: 0 };
+      if (over && !st.over && !snoozed && (now - (st.lastSent || 0) > PUSH_COOLDOWN_MS)) {
+        const payload = { title: "Meteorec — opozorilo", body: t.msg(m), url: "/", tag: "wx-" + t.key };
+        try { const code = await _sendPush(env, s, payload); if (code === 404 || code === 410) dead.push(s.endpoint); }
+        catch (_) {}
+        st.lastSent = now;
+        if (!logged.has(t.key)) { logged.add(t.key); await _logPush(env, payload); }
+      }
+      st.over = over;
+      nSt[t.key] = st;
     }
-    st.over = over;
-    state[t.key] = st;
-    changed = true;
+    nextState[s.endpoint] = nSt;
+  }));
+  if (dead.length) {
+    subs = subs.filter(x => dead.indexOf(x.endpoint) === -1);
+    await r2.put("push/subs.json", JSON.stringify(subs), { httpMetadata: { contentType: "application/json" } });
   }
-  if (changed) await r2.put("push/state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+  const live = new Set(subs.map(s => s.endpoint));
+  for (const k of Object.keys(nextState)) if (!live.has(k)) delete nextState[k];
+  await r2.put("push/state.json", JSON.stringify(nextState), { httpMetadata: { contentType: "application/json" } });
 }
 
 // ── Napovedni alarm — dež/nevihta v naslednjih ~10–45 min (Open-Meteo minutely_15) ──
@@ -590,7 +660,7 @@ async function _cronCheckPrecipNowcast(env) {
     const st = state[key] || { over: false, lastSent: 0 };
     const over = !!hit;
     if (over && !st.over && (now - (st.lastSent || 0) > NOWCAST_COOLDOWN_MS)) {
-      await _pushAll(env, { title: "Meteorec — napoved", body: msgFn(hit), url: "/", tag: "wx-" + key });
+      await _pushAll(env, { title: "Meteorec — napoved", body: msgFn(hit), url: "/", tag: "wx-" + key }, s => s.types?.storm !== false);
       st.lastSent = now;
     }
     st.over = over;
@@ -615,10 +685,10 @@ async function _cronCheckRainStartStop(env) {
   const wasRaining = !!state.raining;
   let raining = wasRaining;
   if (!wasRaining && rate >= RAIN_START_THR) {
-    await _pushAll(env, { title: "Meteorec — opozorilo", body: "🌧️ Začelo je deževati: " + rate.toFixed(1) + " mm/h v Rečici ob Savinji.", url: "/", tag: "wx-rain-start" });
+    await _pushAll(env, { title: "Meteorec — opozorilo", body: "🌧️ Začelo je deževati: " + rate.toFixed(1) + " mm/h v Rečici ob Savinji.", url: "/", tag: "wx-rain-start" }, s => s.types?.rain !== false);
     raining = true;
   } else if (wasRaining && rate <= 0) {
-    await _pushAll(env, { title: "Meteorec — opozorilo", body: "☀️ Dež je ponehal v Rečici ob Savinji.", url: "/", tag: "wx-rain-stop" });
+    await _pushAll(env, { title: "Meteorec — opozorilo", body: "☀️ Dež je ponehal v Rečici ob Savinji.", url: "/", tag: "wx-rain-stop" }, s => s.types?.rain !== false);
     raining = false;
   }
   if (raining !== wasRaining) await r2.put("push/rain_state.json", JSON.stringify({ raining }), { httpMetadata: { contentType: "application/json" } });
@@ -654,7 +724,7 @@ async function _cronCheckAurora(env) {
     title: "Meteorec — polarni sij?",
     body: "🌌 Huda geomagnetna nevihta (Kp " + kp.toFixed(1).replace(".", ",") + "). Poglej proti severu — ob jasnem nebu je mogoč rdeč sij nizko nad obzorjem.",
     url: "/", tag: "wx-aurora",
-  });
+  }, s => s.types?.aurora !== false);
   await r2.put("push/aurora_state.json", JSON.stringify({ lastSent: now, kp }), { httpMetadata: { contentType: "application/json" } });
 }
 
@@ -1060,7 +1130,7 @@ async function _cronCheckRadarNowcast(env) {
     await _pushAll(env, {
       title: "Meteorec — " + vas.name,
       body, url: "/", tag: "wx-nc-" + v.id + "-" + key,
-    }, s => vasZaSub(s) === v.id);
+    }, s => vasZaSub(s) === v.id && s.types?.storm !== false);
     state[sKey] = { lastSent: now };
     changed = true;
   }
@@ -3793,9 +3863,13 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
 
       // ── /push (web push obvestila) ──────────────────────────
       //   GET  /push/vapid                       → { publicKey }
-      //   POST /push/subscribe   { subscription } → shrani naročnino
+      //   POST /push/subscribe   { subscription, vas?, thr?, types? } → shrani naročnino
       //   POST /push/unsubscribe { endpoint }     → odstrani
+      //   POST /push/prefs       { endpoint, thr?, types? } → posodobi nastavitve obstoječe naročnine
+      //   POST /push/snooze      { endpoint, hours } → "ne moti" za X ur (0 = prekliči)
+      //   POST /push/test        { endpoint } → pošlji testno obvestilo tej naročnini
       //   POST /push/send        { secret, title, body, url? } → pošlji vsem
+      //   GET  /push/log                         → zadnja poslana obvestila (javni pregled)
       // Naročnine v R2: push/subs.json
       // ── /nowcast — stanje po vaseh + seznam vasi za izbirnik ──
       //   GET /nowcast/vasi   → seznam vasi (za spustni seznam na strani)
@@ -3828,7 +3902,13 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" }
         });
       }
-      if (path === "/push/subscribe" || path === "/push/unsubscribe" || path === "/push/send") {
+      if (path === "/push/log" && request.method === "GET") {
+        let log = []; try { const o = await env?.PHOTOS_R2?.get("push/log.json"); log = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+        return new Response(JSON.stringify({ items: log }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=60" }
+        });
+      }
+      if (path === "/push/subscribe" || path === "/push/unsubscribe" || path === "/push/prefs" || path === "/push/snooze" || path === "/push/test" || path === "/push/send") {
         const r2 = env?.PHOTOS_R2;
         const KEY = "push/subs.json";
         const pj = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
@@ -3845,12 +3925,17 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           // Vas je edini podatek o lokaciji, ki ga hranimo — izbrana s seznama,
           // ne iz GPS. Neznan id zavržemo, da v shrambo ne pride poljuben niz.
           const vas = NOWCAST_VASI.some(v => v.id === body.vas) ? body.vas : null;
+          const thr = _sanitizeThr(body.thr);
+          const types = _sanitizeTypes(body.types);
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
           if (obstoječa) {
-            if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; await pWrite(subs); }
+            if (vas) obstoječa.vas = vas;
+            if (thr) obstoječa.thr = thr;
+            if (types) obstoječa.types = types;
+            await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, thr: thr || {}, types: types || {}, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });
@@ -3861,6 +3946,40 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           const subs = await pRead();
           const next = subs.filter(x => x.endpoint !== ep);
           if (next.length !== subs.length) await pWrite(next);
+          return pj({ ok: true });
+        }
+        if (path === "/push/prefs") {
+          if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+          const ep = body.endpoint; if (!ep) return pj({ error: "Manjka endpoint" }, 400);
+          const subs = await pRead();
+          const sub = subs.find(x => x.endpoint === ep);
+          if (!sub) return pj({ error: "Naročnina ni najdena" }, 404);
+          const thr = _sanitizeThr(body.thr); if (thr) sub.thr = thr;
+          const types = _sanitizeTypes(body.types); if (types) sub.types = { ...sub.types, ...types };
+          await pWrite(subs);
+          return pj({ ok: true });
+        }
+        if (path === "/push/snooze") {
+          if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+          const ep = body.endpoint; if (!ep) return pj({ error: "Manjka endpoint" }, 400);
+          const hours = Number(body.hours) || 0;
+          const subs = await pRead();
+          const sub = subs.find(x => x.endpoint === ep);
+          if (!sub) return pj({ error: "Naročnina ni najdena" }, 404);
+          sub.snoozeUntil = hours > 0 ? Date.now() + hours * 3600000 : 0;
+          await pWrite(subs);
+          return pj({ ok: true, snoozeUntil: sub.snoozeUntil });
+        }
+        if (path === "/push/test") {
+          if (!env.VAPID_PRIVATE) return pj({ error: "VAPID_PRIVATE ni nastavljen" }, 503);
+          const ep = body.endpoint; if (!ep) return pj({ error: "Manjka endpoint" }, 400);
+          const subs = await pRead();
+          const sub = subs.find(x => x.endpoint === ep);
+          if (!sub) return pj({ error: "Naročnina ni najdena" }, 404);
+          try {
+            const code = await _sendPush(env, sub, { title: "Meteorec — testno obvestilo", body: "Če to vidiš, potisna obvestila delujejo. 🎉", url: "/", tag: "wx-test" });
+            if (code >= 400) return pj({ error: "Brskalnik je zavrnil obvestilo (HTTP " + code + ")" }, 502);
+          } catch (_) { return pj({ error: "Pošiljanje ni uspelo" }, 500); }
           return pj({ ok: true });
         }
         if (path === "/push/send") {

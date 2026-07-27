@@ -3296,6 +3296,7 @@
       <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
     </div>
     <p class="tp-hint">Izbrana vas določa, za kateri kraj računamo nowcast in za katerega pošljemo opozorilo o nevihti ali toči. Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
+    <div class="tp-status" id="tp-status"></div>
     <div class="tp-body">
       <!-- Vas za nowcast in potisna obvestila. Tu zato, ker se plošča
            "Naslednjih 45 minut" skrije, kadar ni padavin na vidiku. -->
@@ -3304,11 +3305,46 @@
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
       <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row tp-row-types">
+        <label>Vrste obvestil</label>
+        <div class="tp-types">
+          <label class="tp-chk"><input type="checkbox" id="thr-type-temp"> 🌡️ Vročina/zmrzal</label>
+          <label class="tp-chk"><input type="checkbox" id="thr-type-wind"> 💨 Veter</label>
+          <label class="tp-chk"><input type="checkbox" id="thr-type-rain"> 🌧️ Nalivi in dež</label>
+          <label class="tp-chk"><input type="checkbox" id="thr-type-storm"> ⛈️ Nevihte in napoved</label>
+          <label class="tp-chk"><input type="checkbox" id="thr-type-aurora"> 🌌 Polarni sij</label>
+        </div>
+      </div>
+      <div class="tp-row tp-row-snooze">
+        <label>😴 Ne moti</label>
+        <div class="tp-snooze"><select id="thr-snooze-sel" onchange="setNotifSnooze(this.value)">
+          <option value="0">Izklopljeno</option>
+          <option value="1">1 uro</option>
+          <option value="3">3 ure</option>
+          <option value="8">8 ur</option>
+          <option value="24">24 ur</option>
+        </select></div>
+      </div>
+      <div class="tp-snooze-status" id="tp-snooze-status"></div>
     </div>
+    <button class="tp-hist-link" onclick="openNotifHistory()">🕘 Zgodovina obvestil</button>
     <div class="tp-footer">
+      <button class="tp-btn-test" id="tp-btn-test" onclick="sendTestNotification()">🔔 Testno obvestilo</button>
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>
       <button class="tp-btn-save" onclick="saveThresholdSettings()">Shrani</button>
     </div>
+  </div>
+</div>
+
+<!-- ── Notification history modal ───────────────────────── -->
+<div id="notif-history-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);align-items:center;justify-content:center" onclick="if(event.target===this)closeNotifHistory()">
+  <div class="tp-panel nh-panel">
+    <div class="tp-header">
+      <span>🕘 Zgodovina obvestil</span>
+      <button onclick="closeNotifHistory()" aria-label="Zapri">×</button>
+    </div>
+    <p class="tp-hint">Zadnja opozorila, ki jih je Meteorec poslal — ne glede na to, ali si jih ti prejel (odvisno od tvojih nastavitev v "Moja opozorila").</p>
+    <div class="nh-list" id="nh-list"><p class="nh-empty">Nalaganje …</p></div>
   </div>
 </div>
 
@@ -3426,8 +3462,18 @@
 
   var s = stored();
   var closedRecently = s && s.closedAt && (Date.now() - s.closedAt) < 30 * 86400000;
+  function tryOpen(){
+    // Ne prekrivaj piškotnega bannerja ali modala za obvestila — anketa ima
+    // najvišji z-index in bi ju sicer nevidno prekrila (uporabnik obtiči).
+    var cb = document.getElementById('cookie-banner');
+    var tm = document.getElementById('threshold-modal');
+    var nh = document.getElementById('notif-history-modal');
+    var blocked = (cb && cb.style.display === 'flex') || (tm && tm.style.display === 'flex') || (nh && nh.style.display === 'flex');
+    if(blocked){ setTimeout(tryOpen, 1500); return; }
+    overlay.classList.add('open');
+  }
   if(!s || (!s.choice && !closedRecently)){
-    setTimeout(function(){ overlay.classList.add('open'); }, 600);
+    setTimeout(tryOpen, 600);
   }
 })();
 </script>
