@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 25 Jul 2026 13:53:28 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 27 Jul 2026 06:51:39 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vročina se stopnjuje: do 34 °C že v četrtek</title>
+      <link>https://meteorec.si/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727.html</guid>
+      <pubDate>Mon, 27 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Danes 30,2 °C v Rečici ob Savinji, a to je šele začetek. Do četrtka se ozračje segreje na 34 °C, brez dežja na vidnem obzorju.</description>
+      <category>vročina</category>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Vročinski val konec julija: bo dolina spet ohladila noč?</title>
       <link>https://meteorec.si/blog/vrocinski-val-konec-julija-2026.html</link>
