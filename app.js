@@ -7087,10 +7087,62 @@ async function fetchWUNearby(){
     if(grid)grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">WU postaje nedostopne: '+e.message+'</div>';
   }
 }
+// ── Čezmejni signal: GeoSphere Austria (TAWES) ────────────
+// Postaje severno od Karavank/Kamniško-Savinjskih Alp so gorvodne za
+// severni dotok — pokažejo, kaj prihaja čez greben, preden to izmerimo doma.
+const _XB_ROLE={greben:'⛰ ob grebenu',prelaz:'🏔 prelaz',dolina:'🏞 dolina',kotlina:'🏙 kotlina'};
+function _xbDir(deg){
+  if(deg==null)return '';
+  const s=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];
+  return s[Math.round(deg/22.5)%16];
+}
+async function fetchCrossBorder(){
+  const grid=document.getElementById('xborder-grid');
+  const foot=document.getElementById('xborder-foot');
+  if(!grid)return;
+  try{
+    const res=await fetch(PROXY+'/cezmejno');
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const home=_lastTemp;
+    grid.innerHTML='';
+    (data.stations||[]).forEach(s=>{
+      const diff=(home!=null&&s.temp!=null)?(s.temp-home):null;
+      const card=document.createElement('div');card.className='sur-card';
+      card.innerHTML=
+        '<div class="sur-name">'+s.name+' <span style="color:var(--muted);font-weight:400">('+s.at+')</span></div>'+
+        '<div class="sur-dist">'+(_XB_ROLE[s.role]||'')+' · '+s.alt+' m · '+s.dist+' km</div>'+
+        '<div class="sur-temp">'+(s.temp!=null?s.temp.toFixed(1).replace('.',',')+'°C':'—')+'</div>'+
+        '<div class="sur-meta">'+
+          (s.humidity!=null?'💧 '+Math.round(s.humidity)+'%  ':'')+
+          (s.gust!=null?'💨 '+Math.round(s.gust)+' km/h':'')+
+          (s.dir!=null?' '+_xbDir(s.dir):'')+
+          (s.rain10>0?'<br>🌧 '+s.rain10.toFixed(1).replace('.',',')+' mm/10 min':'')+
+        '</div>'+
+        (diff!=null?'<div class="sur-diff" style="color:'+(diff>0?'var(--red)':'var(--blue)')+'">'+
+          (diff>0?'+':'')+diff.toFixed(1).replace('.',',')+' °C glede na IREICA1</div>':'');
+      grid.appendChild(card);
+    });
+    if(foot){
+      // Dež ob grebenu je edini res predikcijski signal, zato ga izpostavimo.
+      const wet=(data.stations||[]).filter(s=>s.rain10>0);
+      const t=data.updatedAt?new Date(data.updatedAt).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'—';
+      foot.innerHTML=(wet.length
+        ?'<b style="color:var(--blue)">🌧 Padavine čez greben:</b> '+wet.map(s=>s.name).join(', ')+'. Ob severnem dotoku lahko v nekaj urah dosežejo dolino. '
+        :'Trenutno čez greben ni padavin. ')+
+        '<span style="color:var(--muted)">Vir: '+(data.source||'GeoSphere Austria')+' · osveženo '+t+'</span>';
+    }
+  }catch(e){
+    grid.innerHTML='<div style="color:var(--muted);font-size:.8rem">Avstrijske postaje trenutno niso dosegljive.</div>';
+    console.warn('Cross-border:',e);
+  }
+}
+
 async function initSurroundings(){
   if(_surInit)return;_surInit=true;
   fetchWUNearby();
   fetchWUHistory();
+  fetchCrossBorder();
   try{
     const grid=document.getElementById('sur-grid');
     // Fetch current conditions for all nearby locations in parallel
