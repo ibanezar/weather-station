@@ -1897,6 +1897,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+/* Radiosondaža — izpeljane količine */
+.snd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem}
+.snd-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.55rem .6rem;text-align:center}
+.snd-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--text)}
+.snd-kpi span{display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:.1rem}
+.snd-kpi i{display:block;font-style:normal;font-size:.62rem;color:var(--cyan);margin-top:.2rem;min-height:.9em}
+.snd-hail{margin-top:.7rem;font-size:.74rem;color:var(--text);line-height:1.55;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.55rem .7rem}
+.snd-foot{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.6rem}
 /* Vesoljsko vreme — Kp indeks */
 .swx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:.5rem;margin-bottom:.9rem}
 .swx-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}

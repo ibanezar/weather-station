@@ -1697,6 +1697,149 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /sondaza ──────────────────────────────────────────
+      // Radiosondaža: izmerjen navpični profil ozračja.
+      //
+      // Slovenija nima operativne radiosondaže — Ljubljana (WMO 14015) pri
+      // UWYO vrne "Unable to retrieve the data" — zato beremo Zagreb (najbližja,
+      // ~100 km JV), z Videmom/Rivolto kot rezervo (~150 km Z, gorvodno ob
+      // jugozahodnem dotoku).
+      //
+      // UWYO je vmes prenovil naslove (stari /cgi-bin/sounding vrača 404, nov
+      // je /wsgi/sounding) in v besedilnem izpisu ne vrača več izračunanih
+      // indeksov, ampak samo profil. CAPE stran že ima iz modela Open-Meteo,
+      // zato tu računamo tisto, česar drugje ni in je neposredno berljivo iz
+      // meritve: vsebnost vode v stolpcu, temperaturni gradient, višine izoterm
+      // (cona rasti toče) in strižni veter.
+      if (path === "/sondaza") {
+        const STATIONS = [
+          { id: "14240", name: "Zagreb", full: "Zagreb/Maksimir", dist: 100, dir: "JV" },
+          { id: "16045", name: "Videm",  full: "Udine/Rivolto",   dist: 150, dir: "Z"  },
+        ];
+        // Sondaže ob 00 in 12 UTC so dosegljive približno dve uri po spustu.
+        const now = new Date();
+        const cands = [];
+        for (let back = 0; back < 3; back++) {
+          const d = new Date(now.getTime() - back * 12 * 3600 * 1000);
+          const hh = d.getUTCHours() >= 14 ? 12 : d.getUTCHours() >= 2 ? 0 : 12;
+          const day = new Date(d);
+          if (d.getUTCHours() < 2) day.setUTCDate(day.getUTCDate() - 1);
+          const ds = day.toISOString().slice(0, 10);
+          const key = ds + " " + String(hh).padStart(2, "0") + ":00:00";
+          if (!cands.includes(key)) cands.push(key);
+        }
+
+        const parseRows = (html) => {
+          const m = html.match(/<PRE>([\s\S]*?)<\/PRE>/i);
+          if (!m) return [];
+          const rows = [];
+          for (const line of m[1].replace(/&[a-z]+;/g, " ").split("\n")) {
+            if (!/^\s*\d/.test(line)) continue;
+            // Izpis ima fiksne širine 7 znakov; prazno polje pomeni manjkajočo meritev.
+            const col = i => { const s = line.slice(i * 7, i * 7 + 7).trim(); return s === "" ? null : parseFloat(s); };
+            const r = { p: col(0), z: col(1), t: col(2), td: col(3), mixr: col(5), dir: col(6), spd: col(7) };
+            if (r.p == null || r.z == null || !isFinite(r.p) || !isFinite(r.z)) continue;
+            rows.push(r);
+          }
+          return rows;
+        };
+        const atP = (rows, p, key) => {
+          for (let i = 1; i < rows.length; i++) {
+            const a = rows[i - 1], b = rows[i];
+            if (a[key] == null || b[key] == null) continue;
+            if (a.p >= p && b.p <= p) {
+              const f = (Math.log(a.p) - Math.log(p)) / (Math.log(a.p) - Math.log(b.p));
+              return a[key] + f * (b[key] - a[key]);
+            }
+          }
+          return null;
+        };
+        const levelOfT = (rows, target) => {
+          for (let i = 1; i < rows.length; i++) {
+            const a = rows[i - 1], b = rows[i];
+            if (a.t == null || b.t == null) continue;
+            if (a.t >= target && b.t <= target) {
+              const f = (a.t - target) / (a.t - b.t);
+              return a.z + f * (b.z - a.z);
+            }
+          }
+          return null;
+        };
+        // PWAT = (1/(g·ρw))·∫w dp; z mixr v g/kg in dp v hPa se to skrči na Σ(mixr·dp)/98,1 [mm].
+        const pwat = (rows) => {
+          let s = 0;
+          for (let i = 1; i < rows.length; i++) {
+            const a = rows[i - 1], b = rows[i];
+            if (a.mixr == null || b.mixr == null) continue;
+            const dp = a.p - b.p;
+            if (dp <= 0) continue;
+            s += ((a.mixr + b.mixr) / 2) * dp;
+          }
+          return s / 98.1;
+        };
+        const windAt = (rows, z) => {
+          let best = null, bd = 1e9;
+          for (const r of rows) {
+            if (r.spd == null || r.dir == null) continue;
+            const d = Math.abs(r.z - z);
+            if (d < bd) { bd = d; best = r; }
+          }
+          if (!best || bd > 600) return null;
+          const rad = best.dir * Math.PI / 180;
+          return { u: -best.spd * Math.sin(rad), v: -best.spd * Math.cos(rad) };
+        };
+
+        let used = null, rows = [];
+        outer:
+        for (const st of STATIONS) {
+          for (const when of cands) {
+            const u = "https://weather.uwyo.edu/wsgi/sounding?datetime=" + encodeURIComponent(when)
+                    + "&id=" + st.id + "&type=TEXT:LIST&src=UNKNOWN";
+            let r;
+            try { r = await fetch(u, { headers: { "User-Agent": "meteorec.si/1.0" }, cf: { cacheTtl: 3600, cacheEverything: true } }); }
+            catch (_) { continue; }
+            if (!r.ok) continue;
+            const html = await r.text();
+            const parsed = parseRows(html);
+            // Kratek profil pomeni okrnjen spust; tak ni uporaben za višinske izoterme.
+            if (parsed.length < 200) continue;
+            rows = parsed; used = { ...st, when };
+            break outer;
+          }
+        }
+        if (!used) {
+          return new Response(JSON.stringify({ error: "Sondaža trenutno ni dosegljiva" }), {
+            status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+          });
+        }
+
+        const sfc = rows[0];
+        const t850 = atP(rows, 850, "t"), t500 = atP(rows, 500, "t");
+        const z850 = atP(rows, 850, "z"), z500 = atP(rows, 500, "z");
+        const lapse = (t850 != null && t500 != null && z850 != null && z500 != null && z500 > z850)
+          ? (t850 - t500) / ((z500 - z850) / 1000) : null;
+        const fz = levelOfT(rows, 0), m10 = levelOfT(rows, -10), m30 = levelOfT(rows, -30);
+        const w0 = windAt(rows, sfc.z), w6 = windAt(rows, sfc.z + 6000);
+        const shear = (w0 && w6) ? Math.hypot(w6.u - w0.u, w6.v - w0.v) : null;
+        const r1 = v => v == null ? null : Math.round(v * 10) / 10;
+
+        return new Response(JSON.stringify({
+          station: used.name, stationFull: used.full, dist: used.dist, dirFrom: used.dir,
+          time: used.when, levels: rows.length,
+          sfcTemp: r1(sfc.t), sfcDew: r1(sfc.td),
+          t850: r1(t850), t500: r1(t500),
+          lapse: r1(lapse),
+          pwat: r1(pwat(rows)),
+          freezing: fz == null ? null : Math.round(fz),
+          hailFrom: m10 == null ? null : Math.round(m10),
+          hailTo:   m30 == null ? null : Math.round(m30),
+          shear: r1(shear), shearKmh: shear == null ? null : Math.round(shear * 3.6),
+          source: "University of Wyoming · radiosondaža",
+        }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" }
+        });
+      }
+
       // ── /vesoljsko-vreme ──────────────────────────────────
       // NOAA SWPC — planetarni indeks Kp in verjetnost polarnega sija.
       // Brez ključa. Kp forecast vsebuje tako izmerjene kot napovedane
