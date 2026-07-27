@@ -16270,6 +16270,7 @@ function initNerd(){
   _buildNerdIndexCards();
   _buildNerdLinks();
   fetchSpaceWeather();
+  fetchSounding();
 }
 
 // ── Vesoljsko vreme: NOAA SWPC (Kp + OVATION) ─────────────
@@ -16424,19 +16425,67 @@ function _buildNerdKPIs(){
 }
 
 function _buildNerdSoundingLinks(){
-  // Build dynamic UWYO URLs with today's date (latest 12z sounding)
+  // UWYO je prenovil naslove: stari /upperair/sounding.html in bufrraob.shtml
+  // vračata 404, nov vmesnik je /wsgi/sounding s parametrom datetime.
+  // Postaja je Zagreb (14240) — Ljubljana (14015) sondaž ne oddaja.
   const now=new Date();
-  const y=now.getUTCFullYear();
-  const mo=String(now.getUTCMonth()+1).padStart(2,'0');
-  const d=String(now.getUTCDate()).padStart(2,'0');
-  const time=now.getUTCHours()>=12?'1212':'0000';
-  const base='https://weather.uwyo.edu/upperair/';
-  const params=`sounding.html?region=europe&TYPE=GIF%3ASKEWT&YEAR=${y}&MONTH=${mo}&FROM=${d}${time.slice(0,2)}&TO=${d}${time.slice(0,2)}&STNM=14015`;
-  const textP=`bufrraob.shtml?region=europe&TYPE=TEXT%3ALIST&YEAR=${y}&MONTH=${mo}&FROM=${d}${time.slice(0,2)}&TO=${d}${time.slice(0,2)}&STNM=14015`;
+  const h=now.getUTCHours();
+  const d=new Date(now);
+  let hh;
+  if(h>=14){hh=12;} else if(h>=2){hh=0;} else {hh=12;d.setUTCDate(d.getUTCDate()-1);}
+  const when=d.toISOString().slice(0,10)+' '+String(hh).padStart(2,'0')+':00:00';
+  const mk=type=>'https://weather.uwyo.edu/wsgi/sounding?datetime='+encodeURIComponent(when)+
+    '&id=14240&type='+encodeURIComponent(type)+'&src=UNKNOWN';
   const sk=document.getElementById('nerd-snd-skewt');
   const tx=document.getElementById('nerd-snd-text');
-  if(sk) sk.href=base+params;
-  if(tx) tx.href=base+textP;
+  if(sk) sk.href=mk('PNG:SKEWT');
+  if(tx) tx.href=mk('TEXT:LIST');
+}
+
+// ── Radiosondaža: izmerjen navpični profil ────────────────
+// CAPE stran že ima iz modela, zato tu prikazujemo tisto, česar drugje ni:
+// vsebnost vode v stolpcu, temperaturni gradient, višine izoterm (cona rasti
+// toče) in strižni veter — vse neposredno iz izmerjenega profila.
+async function fetchSounding(){
+  const el=document.getElementById('snd-body');if(!el)return;
+  try{
+    const r=await fetch(PROXY+'/sondaza');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    renderSounding(d);
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Sondaža trenutno ni dosegljiva.</div>';
+    console.warn('sondaza:',e);
+  }
+}
+function renderSounding(d){
+  const el=document.getElementById('snd-body');if(!el)return;
+  const n=(v,dec)=>v==null?'—':v.toFixed(dec??1).replace('.',',');
+  // Pragovi so orientacijski in veljajo za poletno konvekcijo v srednji Evropi.
+  const lapseTag=d.lapse==null?'':d.lapse>=7?'strm':d.lapse>=6?'zmeren':'položen';
+  const pwatTag=d.pwat==null?'':d.pwat>=35?'zelo vlažno':d.pwat>=25?'vlažno':'suho';
+  const shearTag=d.shearKmh==null?'':d.shear>=15?'organizirane nevihte mogoče':d.shear>=10?'zmeren':'šibek';
+  const hail=(d.hailFrom!=null&&d.hailTo!=null)?(d.hailTo-d.hailFrom):null;
+  // Sondaže se navajajo po UTC (00Z/12Z); pretvorba v lokalni čas bi bralca,
+  // ki pozna oznako "00Z", samo zmedla.
+  const when=d.time
+    ? new Date(d.time.replace(' ','T')+'Z').toLocaleDateString('sl',{day:'numeric',month:'numeric',timeZone:'UTC'})
+      +' ob '+d.time.slice(11,13)+' UTC'
+    : '—';
+  el.innerHTML=
+    '<div class="snd-kpis">'+
+      '<div class="snd-kpi"><b>'+n(d.pwat)+'</b><span>mm vode v stolpcu</span><i>'+pwatTag+'</i></div>'+
+      '<div class="snd-kpi"><b>'+n(d.lapse,1)+'</b><span>°C/km 850–500 hPa</span><i>'+lapseTag+'</i></div>'+
+      '<div class="snd-kpi"><b>'+(d.freezing!=null?d.freezing:'—')+'</b><span>m ničta izoterma</span><i></i></div>'+
+      '<div class="snd-kpi"><b>'+(d.shearKmh!=null?d.shearKmh:'—')+'</b><span>km/h striž 0–6 km</span><i>'+shearTag+'</i></div>'+
+    '</div>'+
+    (hail!=null?'<div class="snd-hail">🧊 <b>Cona rasti toče</b> (−10 do −30 °C): '+
+      d.hailFrom+'–'+d.hailTo+' m, debeline '+(hail/1000).toFixed(1).replace('.',',')+' km. '+
+      'Debelejša ko je in nižje ko sega, dlje ima zrno časa za rast.</div>':'')+
+    '<div class="snd-foot">Izmerjeno s sondo ob '+when+' · '+(d.stationFull||'')+
+      ' ('+d.dist+' km '+d.dirFrom+', '+d.levels+' nivojev). Prizemno T '+n(d.sfcTemp)+' °C, Td '+n(d.sfcDew)+' °C; '+
+      'T850 '+n(d.t850)+' °C, T500 '+n(d.t500)+' °C. Vir: '+(d.source||'UWYO')+'.</div>';
 }
 
 const _NERD_INDICES=[
