@@ -129,8 +129,8 @@
 
 
     <figure class="post-photo">
-      <img src="/img/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727/stock-1.jpg" alt="Ilustrativna fotografija. Foto: bartoszjanusz (Openverse, licenca CC0)." loading="lazy">
-      <figcaption>Ilustrativna fotografija. Foto: bartoszjanusz (Openverse, licenca CC0).</figcaption>
+      <img src="/img/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727/suha-polja-iz-zraka.jpg" alt="Posušena kmetijska polja iz zraka med poletno vročino v Zgornji Savinjski dolini." loading="lazy">
+      <figcaption>Brez dežja tla hitro izsušijo — pogled na polja iz zraka. Foto: Filip Eremita.</figcaption>
     </figure>
 
     <span class="section-label">01 — Trenutne razmere</span>
@@ -151,7 +151,19 @@
     <span class="section-label">04 — Kontekst poletja</span>
     <h2 id="kontekst-poletja">Še eno vroče obdobje v vrsti letošnjega poletja</h2>
     <p>Letošnje poletje v Zgornji Savinjski dolini je bilo doslej precej vroče – spomnimo se dni z <a href='/blog/31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713.html' style='color:var(--blue)'>31,5 °C</a> in <a href='/blog/31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714.html' style='color:var(--blue)'>31,1 °C</a>, ki so se vsakič hitro umaknili ohladitvi. Tokrat pa napoved kaže drugačen vzorec – namesto kratkega vročinskega sunka gre za postopno stopnjevanje brez vidnega konca v štiridnevnem obzorju.</p>
+
+    <div class="chart-card">
+      <h3>Vroči dnevi poletja 2026 v Rečici ob Savinji</h3>
+      <canvas id="chartHeatDays"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Najvišje dnevne temperature na postaji IREICA1 skozi poletje 2026; zadnja dva stolpca sta napoved za sredo in četrtek.</p>
+    </div>
+
     <p>Če se bo napoved uresničila, bo četrtek z 34 °C eden od vročejših dni letošnjega poletja v dolini. Kot vedno velja, da so temperature nekaj dni vnaprej podvržene spremembam, zato velja spremljati posodobitve – o tem, kako zanesljive so naše napovedi v praksi, lahko preberete tudi na strani o <a href='/tocnost-napovedi/' style='color:var(--blue)'>točnosti napovedi</a>.</p>
+
+    <figure class="post-photo">
+      <img src="/img/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727/meglena-dolina-ob-zahodu.jpg" alt="Meglena inverzija nad Zgornjo Savinjsko dolino ob zahodu sonca (arhivska fotografija)." loading="lazy">
+      <figcaption>Ista dolina zna biti tudi povsem drugačna – ob jasnih nočeh vanjo pogosto zdrsne meglena inverzija (arhivska fotografija). Foto: Filip Eremita.</figcaption>
+    </figure>
 
     <div class="callout">
       <p><strong>Nasvet:</strong> Ob napovedanih 33–34 °C v sredo in četrtek poskrbite za senco, tekočino in izogibanje naporu med 12. in 17. uro – vlažnost dodatno poslabša občutek vročine.</p>
@@ -241,6 +253,30 @@
              ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' } },
         y1: { position: 'right', min: 0, grid: { display: false },
               ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartHeatDays'), {
+    type: 'bar',
+    data: {
+      labels: ["13.07.", "14.07.", "17.07.", "27.07.", "29.07.*", "30.07.*"],
+      datasets: [
+        { label: 'Tmax (°C)', data: [31.5, 31.1, 32.4, 30.2, 33.0, 34.0],
+          backgroundColor: ctx => {
+            const v = ctx.raw;
+            return v >= 33 ? 'rgba(248,113,113,.75)' : v >= 31.5 ? 'rgba(249,115,22,.7)' : 'rgba(96,165,250,.6)';
+          },
+          borderRadius: 5 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, suggestedMin: 28,
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' } }
       }
     }
   });
