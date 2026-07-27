@@ -1681,7 +1681,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       if (path === "/metar") {
         const station = url.searchParams.get("ids") || "LJLJ";
         const hours   = url.searchParams.get("hours") || "2";
-        const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${encodeURIComponent(station)}&format=json&taf=false&hours=${hours}`;
+        // taf=true doda polje rawTaf: uradno letališko napoved za naslednjih
+        // 24-30 ur. Stran je doslej brala samo trenutno stanje (rawOb).
+        const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${encodeURIComponent(station)}&format=json&taf=true&hours=${hours}`;
         const metarRes = await fetch(metarUrl, {
           headers: { "Accept": "application/json", "User-Agent": "meteorec.si/1.0" },
           cf: { cacheTtl: 600, cacheEverything: true },
@@ -2240,6 +2242,97 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /enso ────────────────────────────────────────────
+      // ── /nao ──────────────────────────────────────────────
+      // Severnoatlantska oscilacija. Za srednjeevropske zime pomeni bistveno
+      // več kot ENSO, ki ga stran že prikazuje: pozitivna faza prinaša
+      // zahodnik in milejše, vlažnejše zime, negativna pa blokade in vdore
+      // celinskega mraza. Datoteka je v enaki obliki kot oni.ascii.txt
+      // (leto, mesec, vrednost), le brez glave.
+      if (path === "/nao") {
+        const naoUrl = "https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii";
+        try {
+          const r = await fetch(naoUrl, { headers: { "User-Agent": "Mozilla/5.0" }, cf: { cacheTtl: 86400, cacheEverything: true } });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const text = await r.text();
+          const records = [];
+          for (const line of text.trim().split("\n")) {
+            const p = line.trim().split(/\s+/);
+            if (p.length < 3) continue;
+            const y = parseInt(p[0], 10), m = parseInt(p[1], 10), v = parseFloat(p[2]);
+            if (!isFinite(y) || !(m >= 1 && m <= 12) || !isFinite(v) || v === -99.9) continue;
+            records.push({ y, m, v: Math.round(v * 100) / 100 });
+          }
+          return new Response(JSON.stringify(records.slice(-36)), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=86400" },
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      // ── /senzorji ─────────────────────────────────────────
+      // Sensor.Community — občanski senzorji delcev. Kakovost zraka ima stran
+      // iz modela Open-Meteo; to so dejanske meritve v okolici, torej isto
+      // razmerje kot pri WU postajah proti modelu.
+      // Brez ključa; zahteva pa lasten User-Agent.
+      if (path === "/senzorji") {
+        const RADIUS = 40; // km — širše zajame dolino, ožje ostane brez senzorjev
+        const scUrl = `https://data.sensor.community/airrohr/v1/filter/area=46.3258,14.9211,${RADIUS}`;
+        try {
+          const r = await fetch(scUrl, {
+            headers: { "User-Agent": "meteorec.si/1.0", "Accept": "application/json" },
+            cf: { cacheTtl: 600, cacheEverything: true },
+          });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const raw = await r.json();
+          // Ena lokacija ima več senzorjev (delci, temperatura, tlak), vsak s
+          // svojim zapisom, zato jih združimo po lokaciji.
+          const byLoc = {};
+          for (const rec of (Array.isArray(raw) ? raw : [])) {
+            const L = rec?.location; if (!L) continue;
+            if (Number(L.indoor) === 1) continue;   // notranji senzorji niso primerljivi
+            const lat = parseFloat(L.latitude), lon = parseFloat(L.longitude);
+            if (!isFinite(lat) || !isFinite(lon)) continue;
+            const id = String(L.id);
+            const o = byLoc[id] || (byLoc[id] = { id, lat, lon, country: L.country || null, ts: rec.timestamp || null });
+            if (rec.timestamp && (!o.ts || rec.timestamp > o.ts)) o.ts = rec.timestamp;
+            for (const v of (rec.sensordatavalues || [])) {
+              const val = parseFloat(v.value);
+              if (!isFinite(val)) continue;
+              if (v.value_type === "P1") o.pm10 = val;
+              else if (v.value_type === "P2") o.pm25 = val;
+              else if (v.value_type === "temperature") o.temp = val;
+              else if (v.value_type === "humidity") o.hum = val;
+            }
+          }
+          const LAT0 = 46.325779, LON0 = 14.921137, rad = d => d * Math.PI / 180;
+          const list = Object.values(byLoc).map(o => {
+            const dLat = rad(o.lat - LAT0), dLon = rad(o.lon - LON0);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(LAT0)) * Math.cos(rad(o.lat)) * Math.sin(dLon / 2) ** 2;
+            return { ...o, dist: Math.round(2 * 6371 * Math.asin(Math.sqrt(a))) };
+          }).filter(o => o.pm10 != null || o.pm25 != null)
+            .sort((a, b) => a.dist - b.dist);
+          const pm25 = list.map(o => o.pm25).filter(v => v != null);
+          const pm10 = list.map(o => o.pm10).filter(v => v != null);
+          const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length * 10) / 10 : null;
+          return new Response(JSON.stringify({
+            radius: RADIUS,
+            count: list.length,
+            avgPm25: avg(pm25), avgPm10: avg(pm10),
+            sensors: list.slice(0, 12),
+            source: "Sensor.Community",
+          }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=600" },
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       if (path === "/enso") {
         const oniUrl = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt";
         try {
