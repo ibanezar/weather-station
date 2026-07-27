@@ -1662,6 +1662,77 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // ── /satelit-sonce ────────────────────────────────────
+      // Open-Meteo Satellite Radiation API (EUMETSAT SARAH-3 / MSG, DWD MTG).
+      // Za razliko od napovednega obsevanja je to *izmerjeno* s satelita.
+      // Vrne dnevno energijo in indeks jasnine (dejansko/ob jasnem nebu) ter
+      // današnjo urno krivuljo, poravnano s postajnim senzorjem.
+      //
+      // POZOR pri primerjavi s postajo: WU poroča solarRadiationHigh, torej
+      // urni MAKSIMUM, satelit pa urno POVPREČJE. Ti dve količini nista
+      // primerljivi: ob spremenljivi oblačnosti je maksimum znotraj ure lahko
+      // 30–40 % nad povprečjem, ob jasnem nebu pa le nekaj odstotkov. Razlika
+      // torej meri variabilnost oblačnosti, ne razlike med satelitom in tlemi,
+      // zato iz nje NE računamo nobenega kazalnika. Postajno vrsto vrnemo samo
+      // za vizualno primerjavo v grafu, izrecno označeno kot urni maksimum.
+      if (path === "/satelit-sonce") {
+        const satUrl = "https://satellite-api.open-meteo.com/v1/archive"
+          + "?latitude=46.325779&longitude=14.921137"
+          + "&hourly=shortwave_radiation,shortwave_radiation_clear_sky,sunshine_duration"
+          + "&models=satellite_radiation_seamless&past_days=7&forecast_days=1"
+          + "&timezone=Europe%2FLjubljana";
+        const [satRes, wuRes] = await Promise.all([
+          fetch(satUrl, { cf: { cacheTtl: 1800, cacheEverything: true } }),
+          fetch(HOURLY_URL, { headers: { "Accept": "application/json" } }).catch(() => null),
+        ]);
+        if (!satRes.ok) throw new Error("Satellite API HTTP " + satRes.status);
+        const sat = await satRes.json();
+        const H = sat.hourly || {};
+        const times = H.time || [], ghi = H.shortwave_radiation || [],
+              clr = H.shortwave_radiation_clear_sky || [], sun = H.sunshine_duration || [];
+
+        // Postajni senzor po urah: ključ "YYYY-MM-DDTHH:00". WU žigosa meritev
+        // na koncu ure (HH:59), zato jo pripišemo uri, ki se takrat izteka.
+        const stByHour = {};
+        try {
+          const wu = wuRes && wuRes.ok ? await wuRes.json() : null;
+          for (const o of (wu?.observations || [])) {
+            const v = o?.solarRadiationHigh;
+            if (v == null || !o.obsTimeLocal) continue;
+            stByHour[o.obsTimeLocal.slice(0, 13).replace(" ", "T") + ":00"] = v;
+          }
+        } catch (_) { /* postaja ni nujna — satelit deluje sam zase */ }
+
+        const days = {};
+        const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+        const todayHours = [];
+        for (let i = 0; i < times.length; i++) {
+          const t = times[i], d = t.slice(0, 10), hr = parseInt(t.slice(11, 13), 10);
+          const g = ghi[i], c = clr[i];
+          if (g == null || c == null) continue;
+          const st = stByHour[t] ?? null;
+          if (!days[d]) days[d] = { date: d, ghi: 0, clear: 0, sunSec: 0 };
+          const D = days[d];
+          D.ghi += g; D.clear += c; D.sunSec += (sun[i] || 0);
+          if (d === todayStr) todayHours.push({ h: hr, ghi: Math.round(g), clear: Math.round(c), station: st != null ? Math.round(st) : null });
+        }
+        const daily = Object.values(days).sort((a, b) => a.date < b.date ? -1 : 1).map(D => ({
+          date: D.date,
+          kwh:   Math.round(D.ghi) / 1000,           // Wh/m² → kWh/m²
+          // Indeks jasnine je razmerje, zato je smiseln tudi za tekoči dan;
+          // energija in ure sonca pa se do konca dneva še naberejo.
+          index: D.clear > 0 ? Math.round(D.ghi / D.clear * 100) / 100 : null,
+          sunHours: Math.round(D.sunSec / 360) / 10,
+          partial: D.date === todayStr,
+        }));
+        return new Response(JSON.stringify({
+          daily, today: todayHours,
+          source: "Open-Meteo Satellite Radiation · EUMETSAT/DWD",
+        }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=1800" }
+        });
+      }
+
       // ── /cezmejno ─────────────────────────────────────────
       // GeoSphere Austria (TAWES, 10-min) — čezmejni "gorvodni" signal.
       // Rečica leži južno od Karavank/Kamniško-Savinjskih Alp; ob severnem
