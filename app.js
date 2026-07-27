@@ -12280,6 +12280,7 @@ async function fetchMETAR(){
       vis:m.visib,
       wxString:m.wxString||'',
       rawText:m.rawOb||'',
+      rawTaf:m.rawTaf||'',
       press_hpa:m.altim?+(+m.altim).toFixed(1):null,
     };
     _metarFetchTime=Date.now();
@@ -12325,7 +12326,17 @@ function renderMETAR(){
       <div class="metar-cell"><div class="metar-cell-val">${metarKmh!=null?metarKmh+' km/h':'—'}</div><div class="metar-cell-lbl">Veter LJLJ</div></div>
       <div class="metar-cell"><div class="metar-cell-val">${md.wxString||'CAVOK'}</div><div class="metar-cell-lbl">Vreme LJLJ</div></div>
     </div>`+
-    `<div style="font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.35rem;line-height:1.5">RAW: ${md.rawText||'—'}</div>`;
+    `<div style="font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.35rem;line-height:1.5">RAW: ${md.rawText||'—'}</div>`+
+    // TAF je uradna letališka napoved za naslednjih ~24-30 ur; doslej smo
+    // brali samo trenutno stanje. Razbijemo po skupinah spremembe
+    // (BECMG/TEMPO/FM/PROB), sicer je ena sama dolga vrstica neberljiva.
+    (md.rawTaf
+      ? `<div class="metar-taf"><div class="metar-taf-hd">TAF — uradna napoved za LJLJ</div>`+
+        md.rawTaf.replace(/\s+/g,' ').trim()
+          .split(/\s(?=BECMG|TEMPO|FM\d|PROB\d)/)
+          .map(g=>`<div class="metar-taf-ln">${g}</div>`).join('')+
+        `</div>`
+      : '');
   if(upd)upd.textContent=md.time?new Date(md.time*1000||md.time).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+'h LJLJ':'LJLJ';
 }
 
@@ -13575,6 +13586,7 @@ function initClimate(){
   fetchENSO();
   try{fetchNASASolar();}catch(e){console.error('nasa-solar',e);}
   try{fetchSatSun();}catch(e){console.error('satsun',e);}
+  try{fetchNAO();}catch(e){console.error('nao',e);}
   try{fetchNASABaselines();}catch(e){console.error('nasa-baselines',e);}
   try{renderClimateTwin();}catch(e){console.error('twin',e);}
   try{buildWrapped();}catch(e){console.error('wrapped',e);}
@@ -14196,6 +14208,101 @@ setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.clas
 
 
 // ══════════════════════════════════════════════════════════
+// ── NAO: severnoatlantska oscilacija ──────────────────────
+// Za srednjeevropske zime pomeni bistveno več kot ENSO: pozitivna faza
+// prinaša zahodnik ter milejše in vlažnejše zime, negativna pa blokade in
+// vdore celinskega mraza. Poletni vpliv je bistveno šibkejši, zato ga
+// kartica ne razlaga kot napoved.
+const _MES_KR=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
+async function fetchNAO(){
+  const el=document.getElementById('nao-body');if(!el)return;
+  try{
+    const r=await fetch(PROXY+'/nao');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error||!Array.isArray(d)||!d.length)throw new Error('brez podatkov');
+    renderNAO(d);
+    const src=document.getElementById('nao-src');
+    if(src)src.textContent='NOAA CPC · '+new Date().toLocaleDateString('sl');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Indeks NAO ni dosegljiv.</div>';
+    console.warn('nao:',e);
+  }
+}
+function renderNAO(rec){
+  const el=document.getElementById('nao-body');if(!el)return;
+  const last=rec[rec.length-1];
+  const winter=rec.filter(r=>r.m===12||r.m<=2);
+  const phase=v=>v>=0.5?{t:'pozitivna',c:'#4ade80'}:v<=-0.5?{t:'negativna',c:'#60a5fa'}:{t:'nevtralna',c:'var(--muted)'};
+  const ph=phase(last.v);
+  const maxAbs=Math.max(...rec.map(r=>Math.abs(r.v)),1);
+  const bars=rec.map(r=>{
+    const h=Math.abs(r.v)/maxAbs*50;
+    const pos=r.v>=0;
+    return '<div class="nao-col" title="'+_MES_KR[r.m-1]+' '+r.y+': '+r.v.toFixed(2).replace('.',',')+'">'+
+      '<div class="nao-half top">'+(pos?'<div class="nao-bar pos" style="height:'+h+'%"></div>':'')+'</div>'+
+      '<div class="nao-half bot">'+(!pos?'<div class="nao-bar neg" style="height:'+h+'%"></div>':'')+'</div>'+
+    '</div>';
+  }).join('');
+  el.innerHTML=
+    '<div class="nao-head">'+
+      '<div><b style="color:'+ph.c+'">'+last.v.toFixed(2).replace('.',',')+'</b> '+
+        '<span>'+_MES_KR[last.m-1]+' '+last.y+' — '+ph.t+' faza</span></div>'+
+    '</div>'+
+    '<div class="nao-chart"><div class="nao-zero"></div>'+bars+'</div>'+
+    '<div class="nao-scale"><span>'+_MES_KR[rec[0].m-1]+' '+rec[0].y+'</span><span>'+_MES_KR[last.m-1]+' '+last.y+'</span></div>'+
+    '<div class="nao-foot">Pozitivna faza pomeni močnejši zahodnik: milejše in vlažnejše zime v srednji Evropi. Negativna oslabi zahodnik in odpre pot celinskemu mrazu ter blokadam. Vpliv je najmočnejši pozimi, poleti pa šibek, zato indeks poleti ni napoved.'+
+      (winter.length?' Zadnjih '+winter.length+' zimskih mesecev v nizu.':'')+'</div>';
+}
+
+// ── Sensor.Community: občanski senzorji delcev ────────────
+// Kakovost zraka ima stran iz modela; to so dejanske meritve v okolici.
+// Zavestno ne trdimo, da veljajo za Rečico — najbližji senzor je več kot
+// 20 km stran, zato je razdalja pri vsakem izpisana.
+async function fetchSensorCommunity(){
+  const el=document.getElementById('sc-body');if(!el)return;
+  try{
+    const r=await fetch(PROXY+'/senzorji');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    renderSensorCommunity(d);
+    const src=document.getElementById('sc-src');
+    if(src)src.textContent='Sensor.Community · '+d.count+' lokacij';
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Občanski senzorji trenutno niso dosegljivi.</div>';
+    console.warn('sensor.community:',e);
+  }
+}
+function _pmColor(v){
+  if(v==null)return'var(--muted)';
+  if(v<=10)return'#4ade80';
+  if(v<=25)return'#fbbf24';
+  if(v<=50)return'#fb923c';
+  return'#f87171';
+}
+function renderSensorCommunity(d){
+  const el=document.getElementById('sc-body');if(!el)return;
+  if(!d.count){
+    el.innerHTML='<div style="color:var(--muted);font-size:.78rem">V '+d.radius+' km ni dejavnih občanskih senzorjev.</div>';
+    return;
+  }
+  const n1=v=>v==null?'—':v.toFixed(1).replace('.',',');
+  const rows=(d.sensors||[]).map(s=>
+    '<tr><td>'+s.dist+' km</td>'+
+    '<td style="color:'+_pmColor(s.pm25)+'">'+n1(s.pm25)+'</td>'+
+    '<td style="color:'+_pmColor(s.pm10)+'">'+n1(s.pm10)+'</td>'+
+    '<td>'+(s.temp!=null?n1(s.temp)+' °C':'—')+'</td></tr>').join('');
+  el.innerHTML=
+    '<div class="sc-kpis">'+
+      '<div class="sc-kpi"><b style="color:'+_pmColor(d.avgPm25)+'">'+n1(d.avgPm25)+'</b><span>PM2.5 µg/m³ povpr.</span></div>'+
+      '<div class="sc-kpi"><b style="color:'+_pmColor(d.avgPm10)+'">'+n1(d.avgPm10)+'</b><span>PM10 µg/m³ povpr.</span></div>'+
+      '<div class="sc-kpi"><b>'+d.count+'</b><span>lokacij v '+d.radius+' km</span></div>'+
+    '</div>'+
+    '<table class="sc-tbl"><thead><tr><th>Oddaljenost</th><th>PM2.5</th><th>PM10</th><th>T</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="sc-foot">Meritve občanskih senzorjev (Sensor.Community), ne uradne merilne mreže: naprave niso umerjene, senzorji delcev ob visoki vlagi praviloma kažejo previsoko, temperatura na soncu pa ni primerljiva z zaklonom. Najbližja lokacija je '+((d.sensors||[])[0]?.dist ?? '—')+' km stran, zato vrednosti ne veljajo neposredno za Rečico. Za uradne podatke glej <a href="https://www.arso.gov.si/zrak/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">ARSO</a>.</div>';
+}
+
 // ── NASA POWER — Solar Monitor ─────────────────────────────
 // ══════════════════════════════════════════════════════════
 const _NASA_SOLAR_CACHE_KEY='wx-nasa-solar-v2';
@@ -15243,6 +15350,7 @@ function _buildOcnClimate(m){
 let _zrakInit=false,_zrakCache=null,_zrakCacheT=0;
 async function initZrak(){
   if(_zrakInit)return; _zrakInit=true;
+  fetchSensorCommunity();
   try{
     const now=Date.now();
     if(!_zrakCache||now-_zrakCacheT>3600000){

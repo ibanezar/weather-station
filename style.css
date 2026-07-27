@@ -1897,6 +1897,33 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sur-temp{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:300;margin:.4rem 0 .1rem}
 .sur-meta{font-size:.74rem;color:var(--muted);line-height:1.6}
 .sur-diff{font-size:.76rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+/* NAO — severnoatlantska oscilacija */
+.nao-head{font-size:.8rem;color:var(--muted);margin-bottom:.7rem}
+.nao-head b{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:400}
+.nao-chart{position:relative;display:flex;gap:2px;align-items:stretch;height:104px;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.35rem}
+.nao-col{flex:1;display:flex;flex-direction:column;min-width:0}
+.nao-half{flex:1;display:flex}
+.nao-half.top{align-items:flex-end}
+.nao-half.bot{align-items:flex-start}
+.nao-bar{width:100%;border-radius:2px}
+.nao-bar.pos{background:#4ade80;align-self:flex-end}
+.nao-bar.neg{background:#60a5fa}
+.nao-zero{position:absolute;left:.35rem;right:.35rem;top:50%;border-top:1px dashed var(--fc-border);pointer-events:none}
+.nao-scale{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:.3rem}
+.nao-foot{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--fc-border)}
+/* Sensor.Community — občanski senzorji */
+.sc-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:.5rem;margin-bottom:.8rem}
+.sc-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}
+.sc-kpi b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:400}
+.sc-kpi span{font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.sc-tbl{width:100%;border-collapse:collapse;font-size:.72rem}
+.sc-tbl th{text-align:left;font-weight:500;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .4rem;border-bottom:1px solid var(--fc-border)}
+.sc-tbl td{padding:.32rem .4rem;border-bottom:1px solid var(--fc-border);color:var(--text);font-family:'JetBrains Mono',monospace}
+.sc-foot{font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--fc-border)}
+/* TAF — letaliska napoved */
+.metar-taf{margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--fc-border)}
+.metar-taf-hd{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--cyan);margin-bottom:.3rem}
+.metar-taf-ln{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);line-height:1.55;padding-left:.7rem;text-indent:-.7rem}
 /* NASA FIRMS — zaznane toplotne anomalije */
 .firms-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:.5rem;margin-bottom:.8rem}
 .firms-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;padding:.5rem .6rem;text-align:center}
