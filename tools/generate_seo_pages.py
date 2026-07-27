@@ -243,7 +243,14 @@ def named_dataset_schema(url, name, description, variable_measured=None, tempora
     Links back to the Person/DataCatalog entities defined once on the homepage
     via @id reference rather than redefining them, so Google resolves the
     whole site as one connected entity graph (see index.html #person /
-    #localbusiness) — feeds Google Dataset Search with minimal duplication."""
+    #localbusiness) — feeds Google Dataset Search with minimal duplication.
+
+    includedInDataCatalog carries name+url inline alongside the @id: Google's
+    Dataset validator reads each page's JSON-LD on its own and doesn't follow
+    an @id back to index.html to find them, so a bare {"@id": ...} reference
+    was flagged in Search Console ("Either 'name' or 'url' should be
+    specified"). creator doesn't need the same treatment — Person isn't
+    checked for required name/url the way DataCatalog is."""
     full = f"{SITE}{url}"
     data = {
         "@context": "https://schema.org",
@@ -256,7 +263,11 @@ def named_dataset_schema(url, name, description, variable_measured=None, tempora
         "isAccessibleForFree": True,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "creator": {"@id": f"{SITE}/#person"},
-        "includedInDataCatalog": {"@id": f"{SITE}/#localbusiness"},
+        "includedInDataCatalog": {
+            "@id": f"{SITE}/#localbusiness",
+            "name": "Meteorec — Meteorološka postaja Rečica ob Savinji",
+            "url": f"{SITE}/",
+        },
         "spatialCoverage": {
             "@type": "Place", "name": "Rečica ob Savinji", "sameAs": RECICA_SAMEAS,
             "geo": {"@type": "GeoCoordinates", "latitude": LAT, "longitude": LON, "elevation": ELEV},
