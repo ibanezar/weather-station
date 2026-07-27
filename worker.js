@@ -347,6 +347,7 @@ function normalize(data){
 let _memCount = 1000; // začetna vrednost — nastavi po želji
 const _memLikes = {}; // fallback za všečke, kadar KV ni na voljo (resetira se ob restartu)
 const _memPoll = {}; // fallback za dnevni poll, kadar KV ni na voljo (resetira se ob restartu)
+let _memAndroidPoll = { da: 0, ne: 0 }; // fallback za android-poll, kadar KV ni na voljo
 
 // ── Glavni handler ─────────────────────────────────────────
 // ── Edge-rendered weather archive page helpers ─────────────────────────────
@@ -1337,6 +1338,50 @@ export default {
         POLL_OPTIONS.forEach(o => full[o] = counts[o] || 0);
         return new Response(
           JSON.stringify({ date: today, counts: full }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
+        );
+      }
+
+      // ── /android-poll ───────────────────────────────────────
+      // Anketa: "Bi si namestil/a pravo Android aplikacijo za Meteorec?"
+      // Ključ v KV: "poll:android-app" (trajen, brez izteka). Vrednost: { da, ne }.
+      // GET  /android-poll                     → { counts }
+      // POST /android-poll?option=da|ne        → { counts }
+      // Persistenca zahteva KV binding COUNTER_KV; brez njega vrne in-memory vrednost.
+      if (path === "/android-poll") {
+        const ANDROID_POLL_OPTIONS = ["da", "ne"];
+        const key = "poll:android-app";
+        let counts;
+        if (env?.COUNTER_KV) {
+          try { counts = JSON.parse(await env.COUNTER_KV.get(key)) || {}; } catch (_) { counts = {}; }
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!ANDROID_POLL_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna možnost" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            counts[option] = (counts[option] || 0) + 1;
+            await env.COUNTER_KV.put(key, JSON.stringify(counts));
+          }
+        } else {
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!ANDROID_POLL_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna možnost" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            _memAndroidPoll[option] = (_memAndroidPoll[option] || 0) + 1;
+          }
+          counts = _memAndroidPoll;
+        }
+        const full = {};
+        ANDROID_POLL_OPTIONS.forEach(o => full[o] = counts[o] || 0);
+        return new Response(
+          JSON.stringify({ counts: full }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
         );
       }
