@@ -1,6 +1,6 @@
 {
-  "name": "Vreme Rečica ob Savinji",
-  "short_name": "Vreme IREICA1",
+  "name": "Meteorec",
+  "short_name": "Meteorec",
   "description": "Osebna meteorološka postaja IREICA1 – Rečica ob Savinji",
   "start_url": "./",
   "scope": "./",
