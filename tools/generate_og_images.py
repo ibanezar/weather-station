@@ -28,6 +28,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'napoved-avgust-2026-zgornja-savinjska-dolina',
+        'title': 'Napoved za\navgust 2026',
+        'subtitle': 'Bo najbolj vroč in suh mesec poletja? · IREICA1',
+        'section': 'Napoved',
+        'accent': (245, 158, 11),
+        'photo': 'drought',
+    },
+    {
         'slug': 'reke-megle-temperaturna-inverzija-recica-savinji',
         'title': 'Reke megle\nnad dolino',
         'subtitle': 'Temperaturna inverzija v Zgornji Savinjski dolini · IREICA1',

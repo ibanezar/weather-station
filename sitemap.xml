@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/napoved-avgust-2026-zgornja-savinjska-dolina.html</loc>
+    <lastmod>2026-07-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/napoved-avgust-2026-zgornja-savinjska-dolina.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/reke-megle-temperaturna-inverzija-recica-savinji.html</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
