@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 27 Jul 2026 15:37:22 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 28 Jul 2026 06:01:35 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Reke megle nad dolino: Anatomija temperaturne inverzije v Zgornji Savinjski dolini</title>
+      <link>https://meteorec.si/blog/reke-megle-temperaturna-inverzija-recica-savinji.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/reke-megle-temperaturna-inverzija-recica-savinji.html</guid>
+      <pubDate>Tue, 28 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Zakaj megla v Zgornji Savinjski dolini včasih teče po pobočjih kot reka? Resničen primer temperaturne inverzije iz arhiva: mirna noč, vlažen zrak in −1,7 °C na dnu doline.</description>
+      <category>temperaturna inverzija</category>
+      <category>megla</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>IREICA1</category>
+      <category>mikroklima</category>
+      <category>analiza</category>
+    </item>
     <item>
       <title>Vročina se stopnjuje: do 34 °C že v četrtek</title>
       <link>https://meteorec.si/blog/vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727.html</link>
