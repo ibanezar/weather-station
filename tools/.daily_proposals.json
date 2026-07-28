@@ -1,56 +1,49 @@
 {
-  "date": "2026-07-27",
-  "created": "2026-07-27T06:52:05.265210+00:00",
+  "date": "2026-07-28",
+  "created": "2026-07-28T06:14:41.340078+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročina se vrača v Zgornjo Savinjsko dolino: do 34 °C do konca tedna",
-      "teaser": "Napoved za Rečico ob Savinji kaže postopno segrevanje – od 30,2 °C danes do 34,0 °C v sredo, medtem ko dežja praktično ne bo. Pogledamo, kako se bo vročinski val stopnjeval iz dneva v dan in kaj to pomeni za občutek vročine ob visoki vlažnosti.",
+      "title": "Vročina se vrača: danes do 30,1 °C v Zgornji Savinjski dolini",
+      "teaser": "Napoved za postajo IREICA1 kaže vrh dneva pri 30,1 °C, medtem ko jutranje ure ostajajo sveže z minimalno okoli 17,7 °C. Padavin ni pričakovati, veter pa bo šibak do zmeren, kar bo poletno vročino le še podkrepilo.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (30,2 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (30,1 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 30.2,
+          "value": 30.1,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "vodna-bilanca",
-      "title": "Vodna bilanca tal v Savinjski dolini: ko dež izgine hitreje, kot pade",
-      "teaser": "Kljub 49,8 mm dežja ta mesec so tla ob napovedanih temperaturah do 34 °C in ničelnih padavinah v prihodnjih dneh pod vse večjim izhlapevalnim pritiskom. Analiziramo, koliko vlage dejansko ostane rastlinam, ko evapotranspiracija prevzame primat nad občasnimi nalivi.",
+      "id": "dusljivost-zraka",
+      "title": "Rosišče 17,8 °C in 85 % vlage: zakaj se danes zdi bolj soparno kot vroče",
+      "teaser": "Čeprav termometer v Rečici ob Savinji kaže 20,4 °C, navidezna temperatura zaradi visoke vlažnosti (85 %) plazi navzgor proti 22,7 °C. Pogledali bomo, kaj rosišče blizu 18 °C pomeni za občutek dušljivosti in kdaj se ta učinek najbolj pozna.",
       "topic": {
-        "id": "vodna-bilanca",
+        "id": "dusljivost-zraka",
         "sezona": [
-          1,
-          2,
-          3,
-          4,
           5,
           6,
           7,
           8,
-          9,
-          10,
-          11,
-          12
+          9
         ],
-        "tag": "vodna-bilanca",
-        "brief": "Vodna bilanca zadnjih dni: koliko dežja je dejansko koristilo tlom (evapotranspiracija, odtok).",
+        "tag": "dusljivost",
+        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
         "seo_keywords": [
-          "vodna bilanca tal",
-          "evapotranspiracija Savinjska dolina",
-          "koliko dežja koristi rastlinam"
+          "rosišče Savinjska dolina",
+          "dušljivo vreme",
+          "občutek vročine vlaga"
         ]
       }
     },
     {
       "id": "temperaturni-trend",
-      "title": "Temperaturni trend na postaji IREICA1: dolina se segreva iz dneva v dan",
-      "teaser": "Podatki postaje IREICA1 kažejo jasen vzorec naraščanja – najvišje dnevne temperature se v štirih dneh dvignejo od 30,2 na 34,0 °C, najnižje pa ostajajo nad 16 °C. Pogledamo, kaj ta trend pomeni za Zgornjo Savinjsko dolino in kako se giblje glede na pričakovano sezonsko povprečje.",
+      "title": "Temperaturni trend v Savinjski dolini: od 30 do 36 stopinj v štirih dneh",
+      "teaser": "Podatki postaje IREICA1 in štiridnevna napoved kažejo jasen vzpon najvišjih dnevnih temperatur -- od 30,1 °C danes do 36,1 °C do konca tedna. Analiziramo, kako se ta trend ujema s sezonskim vzorcem in kaj to pomeni za prebivalce Zgornje Savinjske doline.",
       "topic": {
         "id": "temperaturni-trend",
         "sezona": [
