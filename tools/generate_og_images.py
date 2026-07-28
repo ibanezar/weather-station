@@ -28,6 +28,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'reke-megle-temperaturna-inverzija-recica-savinji',
+        'title': 'Reke megle\nnad dolino',
+        'subtitle': 'Temperaturna inverzija v Zgornji Savinjski dolini · IREICA1',
+        'section': 'Analiza',
+        'accent': (34, 211, 238),
+        'photo': 'megla-recica-lastna',
+    },
+    {
         'slug': 'vrocinski-val-konec-julija-2026',
         'title': 'Bo dolina spet\nohladila noč?',
         'subtitle': 'Vročinski val konec julija 2026 · IREICA1',
