@@ -2347,23 +2347,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cookie-btn-decline{background:var(--fc-bg);color:var(--text);border:1px solid var(--border)}
 .cookie-btn:hover{opacity:.85}
 /* Android app survey popup */
-#android-poll-overlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
-#android-poll-overlay.open{display:flex}
-.ap-panel{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:1.5rem;width:min(94vw,380px);box-shadow:0 8px 40px rgba(0,0,0,.5);text-align:center;position:relative}
-.ap-close{position:absolute;top:.6rem;right:.7rem;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:0;line-height:1}
-.ap-close:hover{color:var(--text)}
-.ap-icon{font-size:2.2rem;margin-bottom:.5rem}
-.ap-panel h3{margin:0 0 .5rem;font-size:1.02rem;color:var(--text)}
-.ap-panel p{margin:0 0 1.1rem;font-size:.82rem;color:var(--muted);line-height:1.5}
-.ap-actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
-.ap-btn{border:none;border-radius:9px;padding:.55rem 1.2rem;font-size:.84rem;font-weight:600;cursor:pointer;transition:opacity .15s}
-.ap-btn-yes{background:var(--blue);color:#fff}
-.ap-btn-no{background:var(--fc-bg);color:var(--text);border:1px solid var(--border)}
-.ap-btn:hover{opacity:.85}
-.ap-thanks{font-size:.85rem;color:var(--text)}
-.ap-result{margin-top:.8rem;font-size:.78rem;color:var(--muted)}
-.ap-bar{height:8px;border-radius:4px;background:var(--fc-bg);overflow:hidden;margin-top:.5rem}
-.ap-bar-fill{height:100%;background:var(--blue);border-radius:4px}
 /* Windy consent placeholders */
 .windy-consent-placeholder{display:none;background:var(--fc-bg);border:1px solid var(--border);border-radius:12px;align-items:center;justify-content:center;min-height:200px;text-align:center;padding:2rem 1.5rem}
 .windy-consent-placeholder.visible{display:flex}
