@@ -40,6 +40,9 @@ function _archDrain(){
 
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
+// Mrežna plast je risana v temnih odtenkih — v svetli temi jo močno zbledimo,
+// sicer barvo ozadja potegne v blatno sivino.
+const meshOpacity = () => isDark() ? '1' : '0.18';
 let _lastTemp = null; // remember temp so theme toggle can re-colour it
 function setTheme(t){
   document.documentElement.dataset.theme = t;
@@ -54,7 +57,7 @@ function setTheme(t){
   if(_tempData.length) drawTempChart(_tempData);
   if(_rainData.length) drawRainChart(_rainData);
   const mc = document.getElementById('mesh-canvas');
-  if(mc) mc.style.opacity = t === 'dark' ? '1' : '0.35';
+  if(mc) mc.style.opacity = meshOpacity();
 }
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
@@ -7643,7 +7646,21 @@ const WX_THEMES={
   storm:      {bg:'#04040e',b:['rgba(49,46,129,.8)','rgba(30,27,75,.9)','rgba(67,56,202,.5)','rgba(15,23,42,.95)'],    p:'storm',n:90},
   snow:       {bg:'#060f1c',b:['rgba(30,58,95,.6)','rgba(186,230,253,.25)','rgba(56,189,248,.4)','rgba(14,165,233,.38)'],p:'snow',n:40},
 };
-const WX_LIGHT_BG={night:'#0f172a',sunny:'#0c3a5e',hot:'#2d1208',cloudy:'#1e293b',fog:'#2d3748',rain:'#0f1a2e',heavy_rain:'#09111f',storm:'#0a0a1f',snow:'#0d1a30'};
+// Svetla tema: ozadje mora ostati svetlo tudi ob "temnem" vremenu, zato ima
+// vsak pogoj svojo posvetljeno različico istega razpoloženja — barvo ozadja in
+// štiri pastelne blobe. Prej so se uporabljale temne barve iz WX_THEMES, zaradi
+// česar je bila svetla tema videti kot pokvarjena temna.
+const WX_LIGHT={
+  night:      {bg:'#b7c5e2',b:['rgba(255,255,255,.75)','rgba(199,210,254,.55)','rgba(224,231,255,.62)','rgba(165,180,252,.42)']},
+  sunny:      {bg:'#8fc9f2',b:['rgba(255,255,255,.82)','rgba(186,230,253,.66)','rgba(224,242,254,.72)','rgba(125,211,252,.46)']},
+  hot:        {bg:'#f7cfa0',b:['rgba(255,255,255,.72)','rgba(254,215,170,.66)','rgba(253,230,138,.56)','rgba(251,191,36,.36)']},
+  cloudy:     {bg:'#c4d0de',b:['rgba(255,255,255,.72)','rgba(226,232,240,.62)','rgba(203,213,225,.56)','rgba(241,245,249,.62)']},
+  fog:        {bg:'#d9dee4',b:['rgba(255,255,255,.82)','rgba(241,245,249,.72)','rgba(226,232,240,.62)','rgba(248,250,252,.72)']},
+  rain:       {bg:'#aec1d4',b:['rgba(255,255,255,.62)','rgba(219,234,254,.62)','rgba(191,219,254,.52)','rgba(226,232,240,.56)']},
+  heavy_rain: {bg:'#aec0d2',b:['rgba(255,255,255,.56)','rgba(219,234,254,.56)','rgba(147,197,253,.46)','rgba(203,213,225,.52)']},
+  storm:      {bg:'#babed6',b:['rgba(255,255,255,.56)','rgba(221,214,254,.56)','rgba(196,181,253,.46)','rgba(224,231,255,.52)']},
+  snow:       {bg:'#dbe9f6',b:['rgba(255,255,255,.86)','rgba(224,242,254,.72)','rgba(186,230,253,.56)','rgba(241,245,249,.72)']},
+};
 
 let _wxParticles=[],_wxCond='',_lightningTimer=null;
 
@@ -7690,24 +7707,26 @@ function applyWeatherBg(cond){
   _wxCond=cond;
   const dark=isDark();
   const t=WX_THEMES[cond]||WX_THEMES.cloudy;
+  const lt=WX_LIGHT[cond]||WX_LIGHT.cloudy;
   const bgEl=document.getElementById('bg');if(!bgEl)return;
 
   // Base background colour
-  const bgColor=dark?t.bg:(WX_LIGHT_BG[cond]||t.bg);
+  const bgColor=dark?t.bg:lt.bg;
   bgEl.style.background=bgColor;
   // Match the Android/iOS status bar to the current weather mood
   const themeMeta=document.getElementById('theme-color-meta');
   if(themeMeta)themeMeta.setAttribute('content',bgColor);
 
   // Blob colours
+  const blobs=dark?t.b:lt.b;
   ['b1','b2','b3','b4'].forEach((cls,i)=>{
     const el=bgEl.querySelector('.'+cls);
-    if(el)el.style.background=`radial-gradient(circle,${t.b[i]},transparent 70%)`;
+    if(el)el.style.background=`radial-gradient(circle,${blobs[i]},transparent 70%)`;
   });
 
-  // Particles
+  // Particles — zvezde so bele, zato jih v svetli temi ne rišemo (nevidne)
   clearWxParticles();
-  if(t.p&&t.n>0)spawnWxParticles(t.p,t.n);
+  if(t.p&&t.n>0&&!(!dark&&t.p==='star'))spawnWxParticles(t.p,t.n);
 
   // Storm lightning
   clearTimeout(_lightningTimer);
@@ -7883,7 +7902,7 @@ function initMeshCanvas(){
   if(!c)return;
   _meshCanvas=c;
   _meshCtx=c.getContext('2d');
-  c.style.opacity = isDark() ? '1' : '0.35';
+  c.style.opacity = meshOpacity();
   const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
   resize();
   window.addEventListener('resize',resize);
@@ -7922,7 +7941,7 @@ function updateBgFromObs(obs){
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}
   applyWeatherBg(cond);
   // Reduce mesh visibility in light mode so cards stay readable
-  if(_meshCanvas) _meshCanvas.style.opacity = isDark() ? '1' : '0.35';
+  if(_meshCanvas) _meshCanvas.style.opacity = meshOpacity();
   updateMeshColors(cond,obs?.winddir,wind);
   setHeroCond(cond);
 }
@@ -8447,6 +8466,7 @@ function _sfFrame(ts){
 }
 
 function showStarfield(show){
+  if(!isDark())show=false;   // bele zvezde na svetlem ozadju niso vidne
   if(!_sfCanvas){
     _sfCanvas=document.getElementById('starfield-canvas');
     if(!_sfCanvas)return;
