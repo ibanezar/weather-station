@@ -2044,7 +2044,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .hm-yr-lbl{color:var(--muted);text-align:left!important;padding-right:.6rem;white-space:nowrap}
 .an-insight-list{display:flex;flex-direction:column;gap:.7rem;font-size:.78rem;line-height:1.65;color:var(--text)}
 .an-insight-list li{list-style:none;padding:.5rem .75rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px}
-@media(max-width:640px){.an-grid2,.an-grid3,.nt-grid2,.nt-grid3{grid-template-columns:1fr}.an-chart-wrap{height:230px}.nt-chart:has(>canvas){position:relative;height:230px}.nt-chart>canvas{max-height:100%}}@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}.an-card,.nt-card{padding:.85rem .9rem}.an-chart-wrap{height:225px}.candle-wrap svg{min-width:300px}.wind-rose-card{grid-template-columns:1fr}}
+@media(max-width:640px){.an-grid2,.an-grid3,.nt-grid2,.nt-grid3{grid-template-columns:1fr}.an-chart-wrap{height:230px}.nt-chart:has(>canvas){position:relative;height:230px}.nt-chart>canvas{max-height:100%}}@media(max-width:520px){.an-grid2{grid-template-columns:1fr}.an-grid3{grid-template-columns:1fr}.an-kpi{min-width:calc(50% - .375rem)}.an-card,.nt-card{padding:.85rem .9rem}.an-chart-wrap{height:225px}.candle-wrap svg{min-width:880px}.wind-rose-card{grid-template-columns:1fr}}
 
 
 /* Text forecast — compact cards */
@@ -2128,6 +2128,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .sky-strip-svg{min-width:1000px;touch-action:pan-x pan-y}
   .nt-chart{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .nt-chart>svg{min-width:900px;touch-action:pan-x pan-y}
+  /* Preostali grafi, ki so se še stiskali (merilo 0,34x-0,83x). min-width je
+     povsod poravnan s širino viewBox, da je pisava prave velikosti. */
+  .candle-wrap svg{min-width:880px}
+  .ob-wrap svg{min-width:880px}
+  .sc-timeline svg{min-width:880px}
+  .elev-chart svg{min-width:700px}
+  .var3d-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .var3d-wrap svg{min-width:600px}
 }
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
