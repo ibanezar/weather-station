@@ -4843,6 +4843,29 @@ function initNotifBtn(){
   if(btn&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on')btn.classList.add('on');
   if(!('Notification' in window)&&btn)btn.style.display='none';
 }
+// ── Vodoravno drsenje grafov: nakaži, da se graf nadaljuje čez rob ──────────
+// Grafi na telefonu ohranijo naravno širino in drsijo vstran (glej .chart-svg-wrap
+// v style.css). Zabrisan desni rob pove, da vsebina še ni pri koncu; ko je graf
+// odrsan do konca ali sploh ni drsljiv, zabris odpade.
+function syncChartScrollEdge(wrap){
+  if(!wrap)return;
+  const more = wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft;
+  wrap.classList.toggle('at-end', more <= 2);
+  if(wrap.scrollLeft > 8) wrap.classList.add('scrolled');
+}
+function initChartScrollHints(){
+  document.querySelectorAll('.chart-svg-wrap').forEach(syncChartScrollEdge);
+  // scroll se ne prenaša navzgor, zato poslušamo v fazi zajemanja — tako zajamemo
+  // tudi grafe, ki so izrisani šele kasneje
+  document.addEventListener('scroll', e => {
+    const w = e.target;
+    if(w && w.classList && w.classList.contains('chart-svg-wrap')) syncChartScrollEdge(w);
+  }, true);
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.chart-svg-wrap').forEach(syncChartScrollEdge);
+  }, {passive:true});
+}
+
 // ── Dnevna kartica: skrij za danes, jutri se spet pokaže z novo vsebino ──
 const DAILY_FACT_KEY='wx-daily-fact-dismissed';
 function dismissDailyFact(){
@@ -14182,6 +14205,7 @@ async function init(){
   try{initNotifBtn();}catch(_){}
   try{initNotifHint();}catch(_){}
   try{initDailyFact();}catch(_){}
+  try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
