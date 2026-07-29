@@ -1,51 +1,54 @@
 {
-  "date": "2026-07-28",
-  "created": "2026-07-28T06:14:41.340078+00:00",
+  "date": "2026-07-29",
+  "created": "2026-07-29T06:18:43.148169+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročina se vrača: danes do 30,1 °C v Zgornji Savinjski dolini",
-      "teaser": "Napoved za postajo IREICA1 kaže vrh dneva pri 30,1 °C, medtem ko jutranje ure ostajajo sveže z minimalno okoli 17,7 °C. Padavin ni pričakovati, veter pa bo šibak do zmeren, kar bo poletno vročino le še podkrepilo.",
+      "title": "Vročinski val se stopnjuje: danes 34,1 °C, do petka že 36,7 °C",
+      "teaser": "Napoved za Zgornjo Savinjsko dolino kaže naraščanje vročine iz dneva v dan – od 34,1 °C danes do 36,7 °C v petek. Padavin v naslednjih štirih dneh ni na vidiku, kar bo vročino le še stopnjevalo.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (30,1 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (34,1 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 30.1,
+          "value": 34.1,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "dusljivost-zraka",
-      "title": "Rosišče 17,8 °C in 85 % vlage: zakaj se danes zdi bolj soparno kot vroče",
-      "teaser": "Čeprav termometer v Rečici ob Savinji kaže 20,4 °C, navidezna temperatura zaradi visoke vlažnosti (85 %) plazi navzgor proti 22,7 °C. Pogledali bomo, kaj rosišče blizu 18 °C pomeni za občutek dušljivosti in kdaj se ta učinek najbolj pozna.",
+      "id": "pozarna-ogrozenost",
+      "title": "Požarna ogroženost v Zgornji Savinjski dolini narašča brez dežja na vidiku",
+      "teaser": "Postaja IREICA1 zadnjih dni ne beleži padavin, napoved za prihodnje štiri dni pa prav tako ne prinaša dežja ob temperaturah do 36,7 °C. Poglejmo, kaj taka kombinacija suhih tal, vročine in šibkega vetra pomeni za nevarnost požara v naravi.",
       "topic": {
-        "id": "dusljivost-zraka",
+        "id": "pozarna-ogrozenost",
         "sezona": [
+          3,
+          4,
           5,
           6,
           7,
           8,
-          9
+          9,
+          10
         ],
-        "tag": "dusljivost",
-        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+        "tag": "pozarna-ogrozenost",
+        "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
         "seo_keywords": [
-          "rosišče Savinjska dolina",
-          "dušljivo vreme",
-          "občutek vročine vlaga"
+          "požarna ogroženost Zgornja Savinjska dolina",
+          "nevarnost požara v naravi",
+          "suša in gozdni požari"
         ]
       }
     },
     {
-      "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Savinjski dolini: od 30 do 36 stopinj v štirih dneh",
-      "teaser": "Podatki postaje IREICA1 in štiridnevna napoved kažejo jasen vzpon najvišjih dnevnih temperatur -- od 30,1 °C danes do 36,1 °C do konca tedna. Analiziramo, kako se ta trend ujema s sezonskim vzorcem in kaj to pomeni za prebivalce Zgornje Savinjske doline.",
+      "id": "susa-vlaga-tal",
+      "title": "Suša v Zgornji Savinjski dolini: koliko časa že brez dežja pri Rečici ob Savinji",
+      "teaser": "Trenutna vlažnost zraka je sicer 85-odstotna, a dnevne padavine so ničelne, mesečna vsota pa znaša 49,8 mm. Ob napovedanih temperaturah do skoraj 37 °C in brez dežja v naslednjih štirih dneh se vlaga tal le še dodatno znižuje.",
       "topic": {
-        "id": "temperaturni-trend",
+        "id": "susa-vlaga-tal",
         "sezona": [
           1,
           2,
@@ -60,12 +63,12 @@
           11,
           12
         ],
-        "tag": "trend",
-        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
+        "tag": "susa",
+        "brief": "Trenutno stanje suše/vlage tal glede na zadnje padavine in evapotranspiracijo.",
         "seo_keywords": [
-          "temperaturni trend Savinjska dolina",
-          "vreme Rečica ob Savinji",
-          "postaja IREICA1"
+          "suša Zgornja Savinjska dolina",
+          "vlaga tal Rečica ob Savinji",
+          "koliko časa brez dežja"
         ]
       }
     }
