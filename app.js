@@ -4844,26 +4844,55 @@ function initNotifBtn(){
   if(!('Notification' in window)&&btn)btn.style.display='none';
 }
 // ── Vodoravno drsenje grafov: nakaži, da se graf nadaljuje čez rob ──────────
-// Grafi na telefonu ohranijo naravno širino in drsijo vstran (glej .chart-svg-wrap
-// v style.css). Zabrisan desni rob pove, da vsebina še ni pri koncu; ko je graf
-// odrsan do konca ali sploh ni drsljiv, zabris odpade.
+// Del grafov na ozkih zaslonih ohrani naravno širino in drsi vstran, da pisava
+// ostane berljiva. Zabrisan desni rob pove, da vsebina še ni pri koncu.
+// Okvirjev ne iščemo po imenu razreda (grafi jih imajo več različnih), ampak po
+// tem, ali so dejansko vodoravno drsljivi.
 function syncChartScrollEdge(wrap){
   if(!wrap)return;
-  const more = wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft;
-  wrap.classList.toggle('at-end', more <= 2);
+  // Skrit zavihek ima širino 0 — takrat ne sklepaj ničesar, sicer bi graf
+  // obtičal označen kot "na koncu" in zabrisa ne bi nikoli dobil.
+  if(wrap.clientWidth===0)return;
+  const scrollable = wrap.scrollWidth - wrap.clientWidth > 4;
+  wrap.classList.toggle('chart-xscroll', scrollable);
+  if(!scrollable){wrap.classList.remove('at-end');return;}
+  wrap.classList.toggle('at-end', wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft <= 2);
   if(wrap.scrollLeft > 8) wrap.classList.add('scrolled');
 }
+function chartScrollWraps(){
+  const set=new Set();
+  document.querySelectorAll('svg[id]').forEach(s=>{
+    let el=s.parentElement;
+    for(let i=0; el && i<2; i++, el=el.parentElement){
+      const ox=getComputedStyle(el).overflowX;
+      if(ox==='auto'||ox==='scroll'){set.add(el);break;}
+    }
+  });
+  return [...set];
+}
 function initChartScrollHints(){
-  document.querySelectorAll('.chart-svg-wrap').forEach(syncChartScrollEdge);
-  // scroll se ne prenaša navzgor, zato poslušamo v fazi zajemanja — tako zajamemo
-  // tudi grafe, ki so izrisani šele kasneje
-  document.addEventListener('scroll', e => {
-    const w = e.target;
-    if(w && w.classList && w.classList.contains('chart-svg-wrap')) syncChartScrollEdge(w);
+  const wraps=chartScrollWraps();
+  wraps.forEach(syncChartScrollEdge);
+  // scroll se ne prenaša navzgor, zato poslušamo v fazi zajemanja
+  document.addEventListener('scroll', e=>{
+    const w=e.target;
+    if(w&&w.nodeType===1&&w.classList.contains('chart-xscroll')) syncChartScrollEdge(w);
   }, true);
-  window.addEventListener('resize', () => {
-    document.querySelectorAll('.chart-svg-wrap').forEach(syncChartScrollEdge);
-  }, {passive:true});
+  // Širine se spremenijo ob preklopu zavihka in ob vsakem ponovnem izrisu grafa —
+  // ResizeObserver to ujame, brez rednega poizvedovanja.
+  if(typeof ResizeObserver==='function'){
+    const ro=new ResizeObserver(ents=>{
+      const seen=new Set();
+      ents.forEach(en=>{
+        const w=en.target.tagName==='svg'?en.target.parentElement:en.target;
+        for(let el=w,i=0; el&&i<2; i++, el=el.parentElement){
+          if(wraps.includes(el)){ if(!seen.has(el)){seen.add(el);syncChartScrollEdge(el);} break; }
+        }
+      });
+    });
+    wraps.forEach(w=>{ro.observe(w);w.querySelectorAll('svg').forEach(s=>ro.observe(s));});
+  }
+  window.addEventListener('resize', ()=>wraps.forEach(syncChartScrollEdge), {passive:true});
 }
 
 // ── Dnevna kartica: skrij za danes, jutri se spet pokaže z novo vsebino ──
