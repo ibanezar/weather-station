@@ -4838,6 +4838,20 @@ function initNotifBtn(){
   if(btn&&Notification.permission==='granted'&&localStorage.getItem('wx-notif')==='on')btn.classList.add('on');
   if(!('Notification' in window)&&btn)btn.style.display='none';
 }
+// ── Dnevna kartica: skrij za danes, jutri se spet pokaže z novo vsebino ──
+const DAILY_FACT_KEY='wx-daily-fact-dismissed';
+function dismissDailyFact(){
+  const card=document.getElementById('daily-fact-card');
+  if(!card)return;
+  card.setAttribute('hidden','');
+  try{localStorage.setItem(DAILY_FACT_KEY,card.dataset.date||'');}catch(_){}
+}
+function initDailyFact(){
+  const card=document.getElementById('daily-fact-card');
+  if(!card)return;
+  let dismissed=''; try{dismissed=localStorage.getItem(DAILY_FACT_KEY)||'';}catch(_){}
+  if(dismissed&&dismissed===card.dataset.date)card.setAttribute('hidden','');
+}
 // ── Prvi obisk: opozori na gumbe za obvestila, da jih uporabnik takoj opazi ──
 const NOTIF_HINT_KEY='wx-notif-hint-seen';
 function dismissNotifHint(){
@@ -14145,6 +14159,7 @@ async function init(){
   try{applyWeatherBg('night');}catch(_){}
   try{initNotifBtn();}catch(_){}
   try{initNotifHint();}catch(_){}
+  try{initDailyFact();}catch(_){}
   try{initNowcast();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
