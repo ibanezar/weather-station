@@ -45,6 +45,7 @@ function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
   try { localStorage.setItem('wx-theme', t); } catch(e){}
+  const _prevWxCond = _wxCond; _wxCond = ''; applyWeatherBg(_prevWxCond || 'cloudy');
   updatePhotoBackground(null);
   if(_lastTemp !== null){
     const el = document.getElementById('temp-val');
@@ -58,8 +59,9 @@ function setTheme(t){
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 (function initTheme(){
-  document.documentElement.dataset.theme='dark';
-  try{localStorage.removeItem('wx-theme');}catch(e){}
+  // data-theme je že nastavljen sinhrono v <head> (glej inline script pred CSS-jem),
+  // tu le uskladimo ikono gumba, brez ponovnega nastavljanja teme.
+  document.getElementById('theme-btn').textContent = isDark() ? '☀️' : '🌙';
 })();
 
 // ── Chart colour helpers ──────────────────────────────────
