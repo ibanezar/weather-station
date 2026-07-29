@@ -78,14 +78,15 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
 
     if is_new:
         score = 100
-        text = (f'Danes ({dm_label(last)}) je bil na Rečici ob Savinji nov rekord za ta koledarski dan — '
-                 f'{label}: <strong>{num(today_v)}{unit}</strong> (prejšnji rekord {num(rec_val)}{unit}, {rec_date[:4]}), '
-                 f'v {years}-letni zgodovini meritev postaje IREICA1.')
+        text = (f'Danes, {dm_label(last)}, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — '
+                 f'{label} <strong>{num(today_v)}{unit}</strong>. S tem je padel dosedanji rekord '
+                 f'{num(rec_val)}{unit} iz leta {rec_date[:4]}, v {years}-letni zgodovini meritev postaje IREICA1.')
         icon = "🏆"
     elif diff < 1.0:
         score = 80
-        text = (f'Danes ({dm_label(last)}) smo bili na Rečici ob Savinji le <strong>{num(diff)}{unit}</strong> od rekorda '
-                 f'za ta koledarski dan — {label} {num(today_v)}{unit}, rekord {num(rec_val)}{unit} ({rec_date[:4]}).')
+        text = (f'Danes, {dm_label(last)}, nas je na Rečici ob Savinji od rekorda za ta koledarski dan ločilo le '
+                 f'<strong>{num(diff)}{unit}</strong> — {label} smo izmerili {num(today_v)}{unit}, rekord je '
+                 f'{num(rec_val)}{unit} iz leta {rec_date[:4]}.')
         icon = "📈"
     else:
         return None
@@ -113,13 +114,13 @@ def fact_streak(hist, last):
         return None
     if wet_today:
         score = 60 + min(streak, 20)
-        text = (f'Na Rečici ob Savinji dežuje že <strong>{streak}. zaporedni dan</strong> '
-                 f'({dm_label(last)}) — nazadnje tako dolgo mokro obdobje.')
+        text = (f'Na Rečici ob Savinji dežuje že <strong>{streak}. zaporedni dan</strong> — '
+                 f'nenavadno dolgo mokro obdobje za {dm_label(last)}.')
         icon = "🌧️"
     else:
         score = 60 + min(streak, 20)
-        text = (f'Na Rečici ob Savinji že <strong>{streak} dni zapored</strong> ni deževalo '
-                 f'({dm_label(last)}) — suh niz se nadaljuje.')
+        text = (f'Na Rečici ob Savinji dežja ni bilo že <strong>{streak} dni zapored</strong> — '
+                 f'sušni niz se tako nadaljuje.')
         icon = "☀️"
     return (score, icon, text)
 
@@ -141,14 +142,14 @@ def fact_percentile(hist, last, mmdd):
 
     if rank <= 3:
         score = 50
-        text = (f'{dm_label(last)} je bil letos <strong>{rank}. najtoplejši</strong> ta koledarski dan '
-                 f'v {years}-letni zgodovini meritev postaje IREICA1 ({num(today_v)} °C).')
+        text = (f'{dm_label(last)} se letos uvršča med najtoplejše koledarske dni v {years}-letni zgodovini '
+                 f'meritev postaje IREICA1 — na <strong>{rank}. mesto</strong> z {num(today_v)} °C.')
         icon = "🌡️"
     else:
         rank_from_bottom = years - rank + 1
         score = 50
-        text = (f'{dm_label(last)} je bil letos <strong>{rank_from_bottom}. najhladnejši</strong> ta koledarski dan '
-                 f'v {years}-letni zgodovini meritev postaje IREICA1 ({num(today_v)} °C).')
+        text = (f'{dm_label(last)} se letos uvršča med najhladnejše koledarske dni v {years}-letni zgodovini '
+                 f'meritev postaje IREICA1 — na <strong>{rank_from_bottom}. mesto</strong> z {num(today_v)} °C.')
         icon = "❄️"
     return (score, icon, text)
 
@@ -165,16 +166,16 @@ def fact_year_ago(hist, last):
 
     diff = today_v - prev_temp
     if abs(diff) < 0.2:
-        text = (f'{dm_label(last)} je bilo letos skoraj enako toplo kot lani: '
-                 f'<strong>{num(today_v)} °C</strong> (lani {num(prev_temp)} °C).')
+        text = (f'{dm_label(last)} je bilo letos skoraj enako toplo kot lani — '
+                 f'<strong>{num(today_v)} °C</strong> letos in {num(prev_temp)} °C lani.')
         icon = "🔁"
     elif diff > 0:
-        text = (f'{dm_label(last)} je bilo letos za <strong>{num(diff)} °C topleje</strong> kot na isti dan lani '
-                 f'({num(today_v)} °C proti {num(prev_temp)} °C).')
+        text = (f'{dm_label(last)} je bilo letos za <strong>{num(diff)} °C topleje</strong> kot na isti dan lani — '
+                 f'{num(today_v)} °C letos proti {num(prev_temp)} °C lani.')
         icon = "📊"
     else:
-        text = (f'{dm_label(last)} je bilo letos za <strong>{num(-diff)} °C hladneje</strong> kot na isti dan lani '
-                 f'({num(today_v)} °C proti {num(prev_temp)} °C).')
+        text = (f'{dm_label(last)} je bilo letos za <strong>{num(-diff)} °C hladneje</strong> kot na isti dan lani — '
+                 f'{num(today_v)} °C letos proti {num(prev_temp)} °C lani.')
         icon = "📊"
     return (10, icon, text)
 
