@@ -28,6 +28,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'anketa-android-aplikacija-meteorec',
+        'title': 'Anketa:\n10 proti 9',
+        'subtitle': 'Bi si res naložili aplikacijo Meteorec? · IREICA1',
+        'section': 'Skupnost',
+        'accent': (77, 159, 248),
+        'photo': 'weather-station',
+    },
+    {
         'slug': 'napoved-avgust-2026-zgornja-savinjska-dolina',
         'title': 'Napoved za\navgust 2026',
         'subtitle': 'Bo najbolj vroč in suh mesec poletja? · IREICA1',

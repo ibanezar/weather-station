@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LE8PJ1HR8B');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html">
+<meta name="description" content="Dva dni je na Meteorcu tekla anketa o pravi aplikaciji za Android. Odgovorilo je 19 bralcev, izid je 10 proti 9. Zakaj tak rezultat ne odloči ničesar – in kaj sledi.">
+<meta name="keywords" content="anketa, Android aplikacija, PWA, Meteorec, interval zaupanja, velikost vzorca, IREICA1">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor">
+<meta property="og:description" content="Dva dni, 19 glasov, razlika enega samega. Kaj taka anketa pove, česa ne izmeri in zakaj Meteorec za zdaj ostaja spletna stran.">
+<meta property="og:image" content="https://meteorec.si/og/anketa-android-aplikacija-meteorec.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta property="article:published_time" content="2026-07-29">
+<meta property="article:author" content="Filip Eremita">
+<meta property="article:section" content="Skupnost">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Anketa o aplikaciji Meteorec: 10 proti 9">
+<meta name="twitter:description" content="Dva dni, 19 glasov, razlika enega samega. Zakaj tak izid ne odloči ničesar – in kaj sledi.">
+<meta name="twitter:image" content="https://meteorec.si/og/anketa-android-aplikacija-meteorec.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor",
+  "description": "Rezultati dvodnevne ankete o pravi aplikaciji za Android na strani Meteorec: 19 glasov, 10 proti 9, in razlaga, zakaj tak vzorec ne omogoča sklepa.",
+  "image": { "@type": "ImageObject", "url": "https://meteorec.si/og/anketa-android-aplikacija-meteorec.jpg", "width": 1200, "height": 630 },
+  "wordCount": 1150,
+  "datePublished": "2026-07-29",
+  "dateModified": "2026-07-29",
+  "inLanguage": "sl",
+  "author": { "@type": "Person", "name": "Filip Eremita" },
+  "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html" },
+  "keywords": "anketa, Android aplikacija, PWA, velikost vzorca, interval zaupanja, Meteorec"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Meteorec", "item": "https://meteorec.si/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://meteorec.si/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Anketa o aplikaciji" }
+  ]
+}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
+<link rel="stylesheet" href="blog.css">
+<style>
+.stat-card.c-yes  .sc-val { color: #34d399; }
+.stat-card.c-time .sc-val { color: #22d3ee; }
+.stat-card.c-err  .sc-val { color: #f59e0b; }
+.stat-card.c-more .sc-val { color: #4d9ff8; }
+
+/* ── Izid: dve strani in delilni trak ── */
+.poll-hero {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px;
+  box-shadow: var(--card-shadow); padding: 1.5rem 1.4rem 1.3rem; margin: 1.5rem 0 .75rem;
+}
+.ph-side { text-align: center; min-width: 0; }
+.ph-emoji { font-size: 1.7rem; line-height: 1; }
+.ph-num {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 3.4rem;
+  line-height: 1.05; margin: .15rem 0 .1rem;
+}
+.ph-yes .ph-num { color: #34d399; }
+.ph-no  .ph-num { color: #f87171; }
+.ph-lbl { font-size: .92rem; color: #cfdbef; font-weight: 600; }
+.ph-pct {
+  font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); margin-top: .2rem;
+}
+.ph-vs {
+  font-family: 'JetBrains Mono', monospace; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted); padding: 0 .2rem;
+}
+.ph-bar {
+  display: flex; height: 12px; border-radius: 999px; overflow: hidden;
+  border: 1px solid var(--card-border); margin-bottom: .5rem;
+}
+.ph-bar i { display: block; height: 100%; }
+.ph-bar .b-yes { background: linear-gradient(90deg, #34d399, #22d3ee); }
+.ph-bar .b-no  { background: rgba(248,113,113,.55); }
+.ph-caption { font-size: .8rem; color: var(--muted); text-align: center; margin-bottom: 1.9rem; }
+
+/* ── Vsak glas posebej ── */
+.votes-box {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+  padding: 1.2rem 1.3rem; margin: 1.4rem 0 1.9rem; box-shadow: var(--card-shadow);
+}
+.votes-title {
+  font-family: 'JetBrains Mono', monospace; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: .85rem;
+}
+.votes-dots { display: flex; flex-wrap: wrap; gap: .42rem; }
+.votes-dots i {
+  width: 26px; height: 26px; border-radius: 50%; display: block;
+}
+.votes-dots i.v-yes { background: rgba(52,211,153,.22); border: 1.5px solid #34d399; }
+.votes-dots i.v-no  { background: rgba(248,113,113,.16); border: 1.5px solid rgba(248,113,113,.75); }
+.votes-legend {
+  display: flex; flex-wrap: wrap; gap: 1.1rem; margin-top: .95rem;
+  font-size: .8rem; color: var(--muted);
+}
+.votes-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.votes-legend b { display: block; width: 12px; height: 12px; border-radius: 50%; }
+.votes-legend .k-yes { background: rgba(52,211,153,.22); border: 1.5px solid #34d399; }
+.votes-legend .k-no  { background: rgba(248,113,113,.16); border: 1.5px solid rgba(248,113,113,.75); }
+
+/* ── Interval zaupanja ── */
+.ci-box {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+  padding: 1.2rem 1.3rem 1rem; margin: 1.4rem 0 1.9rem; box-shadow: var(--card-shadow);
+}
+.ci-note { font-size: .8rem; color: var(--muted); line-height: 1.55; margin-top: .9rem; }
+/* Interval zaupanja: postavitev v odstotkih, da se pisave pri ozkih zaslonih
+   ne skrčijo skupaj z grafiko (kar bi se zgodilo pri SVG z viewBox). */
+.ci-chart { position: relative; padding: .2rem .2rem 0; }
+.ci-tags { position: relative; height: 1.2rem; }
+.ci-tags span {
+  position: absolute; transform: translateX(-50%); white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+}
+.ci-tags .t-edge { color: var(--blue); }
+.ci-tags .t-mid  { color: var(--muted); }
+.ci-tags .t-est  { color: #34d399; }
+.ci-tags-est { height: 1.35rem; padding-top: .2rem; }
+.ci-track { position: relative; height: 34px; }
+.ci-band {
+  position: absolute; top: 3px; bottom: 3px; border-radius: 999px;
+  background: rgba(77,159,248,.22);
+  border: 1px solid rgba(77,159,248,.55);
+  border-left: 3px solid #4d9ff8; border-right: 3px solid #4d9ff8;
+}
+.ci-mid { position: absolute; top: -3px; bottom: -3px; border-left: 1px dashed rgba(255,255,255,.4); }
+.ci-dot {
+  position: absolute; top: 50%; width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px;
+  border-radius: 50%; background: #34d399; box-shadow: 0 0 0 2px var(--bg);
+}
+.ci-axis {
+  position: relative; height: 1.1rem; margin-top: .1rem; padding-top: .45rem;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+.ci-axis span {
+  position: absolute; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: .66rem; color: var(--muted);
+  white-space: nowrap;
+}
+.ci-axis span:first-child { transform: none; }
+.ci-axis-last { left: auto; right: 0; transform: none; }
+
+/* ── Vprašanje, kot so ga videli bralci ── */
+.q-box {
+  background: rgba(77,159,248,.08); border: 1px solid rgba(77,159,248,.3);
+  border-radius: 14px; padding: 1.1rem 1.3rem; margin: 1.3rem 0 1.8rem;
+}
+.q-title {
+  font-family: 'JetBrains Mono', monospace; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--blue); margin-bottom: .55rem;
+}
+.q-box p { margin: 0 0 .8rem; font-size: .95rem; line-height: 1.65; color: #cfdbef; }
+.q-btns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.q-btn {
+  font-size: .85rem; font-weight: 600; padding: .42rem .9rem; border-radius: 9px;
+  border: 1px solid var(--card-border); background: rgba(255,255,255,.05); color: #e8edf8;
+}
+.q-btn.y { border-color: rgba(52,211,153,.5);  color: #34d399; }
+.q-btn.n { border-color: rgba(248,113,113,.45); color: #f87171; }
+
+/* ── Primerjava: kaj že imamo in česa nimamo ── */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 1.3rem 0 1.9rem; }
+.cmp-col {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
+  padding: 1rem 1.15rem;
+}
+.cmp-col.has { border-left: 4px solid #34d399; border-radius: 0 14px 14px 0; }
+.cmp-col.not { border-left: 4px solid var(--amber); border-radius: 0 14px 14px 0; }
+.cmp-head {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: .95rem;
+  color: #fff; margin-bottom: .6rem;
+}
+.cmp-col ul { margin: 0; padding-left: 1.1rem; }
+.cmp-col li { font-size: .88rem; line-height: 1.55; color: #cfdbef; margin: .3rem 0; }
+@media (max-width: 560px) {
+  .cmp-grid { grid-template-columns: 1fr; }
+  .poll-hero { padding: 1.2rem 1rem 1rem; gap: .6rem; }
+  .ph-num { font-size: 2.6rem; }
+  .votes-dots i { width: 22px; height: 22px; }
+}
+
+.share-bar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 2rem 0 1.4rem; padding: 1rem 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+.share-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-right: .3rem; flex-shrink: 0; }
+.share-btn { display: inline-flex; align-items: center; gap: .38rem; padding: .42rem .85rem; border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: opacity .15s, transform .1s; line-height: 1; }
+.share-btn:hover { opacity: .85; transform: translateY(-1px); }
+.share-btn:active { transform: translateY(0); }
+.share-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.share-btn.wa  { background: #25d366; color: #fff; }
+.share-btn.x   { background: #000;    color: #fff; }
+.share-btn.fb  { background: #1877f2; color: #fff; }
+.share-btn.copy { background: rgba(77,159,248,.15); color: var(--blue); border: 1px solid rgba(77,159,248,.3); }
+.share-btn.native { background: rgba(255,255,255,.08); color: #e8edf8; border: 1px solid rgba(255,255,255,.12); }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/o-postaji.html">O postaji</a></nav>
+  </header>
+
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Anketa o aplikaciji
+  </nav>
+
+  <article>
+    <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji · Skupnost</div>
+    <h1>Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor</h1>
+    <p class="post-meta">29. julija 2026 · Filip Eremita</p>
+
+    <p class="lead">Dva dni je na Meteorcu ob prvem obisku izskočilo eno samo vprašanje: bi si namesto spletne strani raje naložili pravo aplikacijo iz trgovine Google Play? Odgovorilo je 19 bralcev. Deset jih je izbralo da, devet ne. Če pričakujete članek, ki bo iz tega izpeljal jasen sklep, vas moram razočarati – razlika enega glasu ne pove ničesar. Pove pa nekaj drugega, kar je bolj koristno od izida samega: koliko ljudi je sploh pripravljenih klikniti in kje so meje takega spraševanja.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card c-time">
+        <div class="sc-label">Glasov skupaj</div>
+        <div class="sc-val">19</div>
+        <div class="sc-sub">v 47 urah in pol</div>
+      </div>
+      <div class="stat-card c-yes">
+        <div class="sc-label">Za aplikacijo</div>
+        <div class="sc-val">52,6%</div>
+        <div class="sc-sub">10 od 19 glasov</div>
+      </div>
+      <div class="stat-card c-err">
+        <div class="sc-label">Negotovost izida</div>
+        <div class="sc-val">±20</div>
+        <div class="sc-sub">odstotnih točk · 95-odstotni interval zaupanja</div>
+      </div>
+      <div class="stat-card c-more">
+        <div class="sc-label">Za sklep bi potrebovali</div>
+        <div class="sc-val">~100</div>
+        <div class="sc-sub">glasov za natančnost ±10 odstotnih točk</div>
+      </div>
+    </div>
+
+    <h2 id="kaj-smo-vprasali">1. Kaj smo vprašali in kdaj</h2>
+
+    <p>Anketa je tekla od <strong>27. julija ob 9.19</strong> do <strong>29. julija ob 8.47</strong>, torej natanko 47 ur in pol. Pojavno okno se je prikazalo pol sekunde po nalaganju domače strani, in sicer samo ob prvem obisku. Kdor je glasoval, ga ni videl nikoli več; kdor ga je zaprl brez odgovora, bi ga znova zagledal šele čez trideset dni.</p>
+
+    <div class="q-box">
+      <div class="q-title">Vprašanje, kot so ga videli bralci</div>
+      <p>Trenutno Meteorec deluje kot spletna stran, ki jo lahko namestiš na začetni zaslon. Bi si namesto tega raje namestil/a pravo Android aplikacijo iz Google Play?</p>
+      <div class="q-btns">
+        <span class="q-btn y">👍 Da, bi jo</span>
+        <span class="q-btn n">👎 Ne, hvala</span>
+      </div>
+    </div>
+
+    <p>Devetnajst glasov v dobrih dveh dneh pomeni približno deset odgovorov na dan. Za stran, ki pokriva eno dolino in eno vremensko postajo, to niti ni slabo – a je premalo za odločitev, ki bi zahtevala mesece dela.</p>
+
+    <h2 id="rezultat">2. Rezultat: deset proti devet</h2>
+
+    <div class="poll-hero">
+      <div class="ph-side ph-yes">
+        <div class="ph-emoji">👍</div>
+        <div class="ph-num">10</div>
+        <div class="ph-lbl">Da, bi jo</div>
+        <div class="ph-pct">52,6 %</div>
+      </div>
+      <div class="ph-vs">proti</div>
+      <div class="ph-side ph-no">
+        <div class="ph-emoji">👎</div>
+        <div class="ph-num">9</div>
+        <div class="ph-lbl">Ne, hvala</div>
+        <div class="ph-pct">47,4 %</div>
+      </div>
+    </div>
+    <div class="ph-bar">
+      <i class="b-yes" style="width:52.6%"></i>
+      <i class="b-no" style="width:47.4%"></i>
+    </div>
+    <p class="ph-caption">Razmerje 10 : 9 – prevaga enega samega glasu.</p>
+
+    <p>Ker je glasov malo, jih lahko pokažemo vse hkrati. Vsak krogec spodaj je en oddani glas:</p>
+
+    <div class="votes-box">
+      <div class="votes-title">📊 Vseh 19 glasov, vsak posebej</div>
+      <div class="votes-dots" role="img" aria-label="Devetnajst glasov: deset za aplikacijo, devet proti">
+        <i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i>
+        <i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i><i class="v-yes"></i>
+        <i class="v-no"></i><i class="v-no"></i><i class="v-no"></i><i class="v-no"></i><i class="v-no"></i>
+        <i class="v-no"></i><i class="v-no"></i><i class="v-no"></i><i class="v-no"></i>
+      </div>
+      <div class="votes-legend">
+        <span><b class="k-yes"></b> 10 × da, bi jo</span>
+        <span><b class="k-no"></b> 9 × ne, hvala</span>
+      </div>
+    </div>
+
+    <p>Če bi en sam bralec kliknil drugače, bi bil izid izenačen. Če bi kliknila dva, bi se prevaga obrnila. Prav ta občutljivost je bistvo naslednjega poglavja.</p>
+
+    <h2 id="zakaj-ni-odgovor">3. Zakaj 19 glasov ni odgovor</h2>
+
+    <p>Pri majhnih vzorcih ne merimo mnenja skupnosti, temveč predvsem naključje. Iz devetnajstih glasov lahko izračunamo razpon, v katerem se z 95-odstotno zanesljivostjo skriva pravi delež naklonjenih. Ta razpon je neusmiljeno širok:</p>
+
+    <div class="ci-box">
+      <div class="ci-chart" role="img" aria-label="Interval zaupanja sega od 32 do 73 odstotkov, ocena je 52,6 odstotka, kar vključuje tudi mejo 50 odstotkov">
+        <div class="ci-tags">
+          <span class="t-edge" style="left:31.7%">32 %</span>
+          <span class="t-mid"  style="left:50%">neodločeno</span>
+          <span class="t-edge" style="left:72.7%">73 %</span>
+        </div>
+        <div class="ci-track">
+          <div class="ci-band" style="left:31.7%;right:27.3%"></div>
+          <span class="ci-mid" style="left:50%"></span>
+          <span class="ci-dot" style="left:52.6%"></span>
+        </div>
+        <div class="ci-tags ci-tags-est">
+          <span class="t-est" style="left:52.6%">52,6 %</span>
+        </div>
+        <div class="ci-axis">
+          <span style="left:0">0 %</span>
+          <span style="left:25%">25 %</span>
+          <span style="left:50%">50 %</span>
+          <span style="left:75%">75 %</span>
+          <span class="ci-axis-last">100 %</span>
+        </div>
+      </div>
+      <p class="ci-note">Pri 19 glasovih in razmerju 10 : 9 se pravi delež naklonjenih z 95-odstotno zanesljivostjo skriva nekje med 32 in 73 odstotki (Wilsonov interval). Ker razpon vsebuje tudi mejo 50 odstotkov, anketa ne zna ločiti med „večina si aplikacijo želi“ in „večina si je ne želi“.</p>
+    </div>
+
+    <p>Isto lahko povemo brez statistike. Vrzite pošteno kovanco devetnajstkrat: v približno 35 odstotkih poskusov boste dobili prav tako tesen izid, torej devet ali deset grbov. Naša anketa je torej povsem združljiva s tem, da je skupnost razdeljena natanko na pol – in tudi s tem, da si aplikacijo želita dve tretjini bralcev.</p>
+
+    <p>Koliko glasov bi potrebovali? Za natančnost približno ±10 odstotnih točk okoli sto, za ±5 odstotnih točk pa slabih štiristo. Devetnajst je torej red velikosti premalo, in nobena analiza tega ne more popraviti za nazaj.</p>
+
+    <h2 id="cesa-anketa-ne-ve">4. Česa anketa sploh ni izmerila</h2>
+
+    <p>Poleg premajhnega vzorca ima tak način spraševanja še nekaj slepih peg, ki jih je pošteno našteti:</p>
+
+    <ul>
+      <li><strong>Zavrnitev ni bila zabeležena.</strong> Ko je nekdo okno zaprl brez odgovora, se to nikamor ni poslalo – shranilo se je le v njegov brskalnik. Zato ne vemo, ali je glasoval vsak drugi obiskovalec ali vsak dvajseti.</li>
+      <li><strong>Glasovali so tisti, ki jim ni bilo odveč.</strong> Kdor takoj zapre vsako pojavno okno, v vzorcu ni. Naklonjenost aplikaciji smo torej merili med ljudmi, ki so pripravljeni sodelovati z motečim oknom – to ni ista skupina kot vsi bralci.</li>
+      <li><strong>En glas na brskalnik, ne na človeka.</strong> Isti bralec je lahko glasoval na telefonu in pozneje še na računalniku.</li>
+      <li><strong>Vprašanje je bilo hipotetično.</strong> „Bi si jo naložil“ in „bi jo res uporabljal“ sta dve različni stvari. Namere v anketah so praviloma bolj optimistične od dejanj.</li>
+      <li><strong>Nismo zabeležili naprave.</strong> Vprašanje je govorilo o Androidu, okno pa se je prikazalo tudi bralcem na iPhonu in na računalniku, kjer je odgovor precej manj smiseln.</li>
+    </ul>
+
+    <h2 id="kaj-to-pomeni">5. Kaj to pomeni za Meteorec</h2>
+
+    <p>Za zdaj ne pomeni nobene spremembe – in prav to je najbolj pošten sklep, ki ga rezultat dopušča. Meteorec ostaja spletna stran, ki jo lahko namestite na začetni zaslon. Vredno pa je razložiti, kaj to v praksi že zdaj omogoča in česa ne:</p>
+
+    <div class="cmp-grid">
+      <div class="cmp-col has">
+        <div class="cmp-head">Kar stran že zna</div>
+        <ul>
+          <li>namestitev na začetni zaslon z gumbom <strong>Namesti</strong> in lastno ikono</li>
+          <li>zagon čez cel zaslon, brez naslovne vrstice brskalnika</li>
+          <li>delovanje brez omrežja, saj se zadnji podatki shranijo lokalno</li>
+          <li>potisna obvestila ob prekoračitvi nastavljenih pragov</li>
+          <li>posodobitve takoj, brez čakanja na pregled v trgovini</li>
+        </ul>
+      </div>
+      <div class="cmp-col not">
+        <div class="cmp-head">Kar bi prinesla prava aplikacija</div>
+        <ul>
+          <li>najdljivost v trgovini Google Play</li>
+          <li>pripomočke na domačem zaslonu (npr. temperatura na plošči)</li>
+          <li>zanesljivejše delovanje v ozadju na nekaterih telefonih</li>
+          <li>v zameno: ločena izdaja, pregled v trgovini in vzdrževanje dveh različic</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>Razlika je torej resnična, a ne dramatična. Ob izidu 10 proti 9 ni razloga, da bi si naložil vzdrževanje druge različice – niti razloga, da bi zamisel dokončno zavrgel.</p>
+
+    <h2 id="kako-naprej">6. Kako naprej</h2>
+
+    <p>Pojavno okno je 29. julija zjutraj odšlo s strani; svoje je opravilo in ne bi bilo lepo, da bi bralce nagovarjalo v nedogled. Če se bomo k vprašanju kdaj vrnili, bo anketa tekla dlje in bo ločevala vsaj napravo, s katere prihaja glas.</p>
+
+    <p>Do takrat je vsak drug način sporočanja mnenja bolj poveden od klika v pojavnem oknu: komentar pod člankom, ocena točnosti napovedi na domači strani ali preprosto elektronsko sporočilo. Iz treh stavkov o tem, česa na strani pogrešate, izvem več kot iz devetnajstih klikov.</p>
+
+    <p>In če ste med tistimi desetimi: aplikacijo nekako že lahko dobite. Na domači strani pritisnite <strong>Namesti</strong> in Meteorec bo dobil svojo ikono na začetnem zaslonu – brez trgovine in brez čakanja.</p>
+
+    <p style="text-align:center;margin:1.6rem 0">
+      <a href="/" style="display:inline-block;background:linear-gradient(135deg,#4d9ff8,#22d3ee);color:#04070e;font-weight:700;text-decoration:none;padding:.75rem 1.6rem;border-radius:10px;font-family:'Space Grotesk',sans-serif">Namesti Meteorec na začetni zaslon →</a>
+    </p>
+
+    <!-- ── Share bar ─────────────────────────────────────────────── -->
+    <div class="share-bar" id="share-bar">
+      <span class="share-label">Deli</span>
+
+      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+        WhatsApp
+      </a>
+
+      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </a>
+
+      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+        Facebook
+      </a>
+
+      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="copy-label">Kopiraj</span>
+      </button>
+
+      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Deli
+      </button>
+    </div>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: števci ankete na strežniku Meteorca, odčitani 29. julija 2026. Anketa je tekla od 27. julija 2026 ob 9.19 do 29. julija 2026 ob 8.47. Interval zaupanja je izračunan po Wilsonovi metodi za delež (95 %, n = 19).</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Poglej tudi: <a href="/o-postaji.html" style="color:var(--blue)">o postaji IREICA1</a> in <a href="/tocnost-napovedi/" style="color:var(--blue)">točnost napovedi</a>.</p>
+    <a class="back-link" href="/blog/">← Nazaj na blog</a>
+  </article>
+
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const PAGE_URL   = 'https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html';
+  const PAGE_TITLE = 'Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor | Meteorec';
+  const PAGE_TEXT  = 'Dva dni, 19 glasov, razlika enega samega. Zakaj taka anketa ne odloči ničesar 📊';
+
+  const enc = encodeURIComponent;
+
+  document.getElementById('btn-wa').href =
+    'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
+
+  document.getElementById('btn-x').href =
+    'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
+
+  document.getElementById('btn-fb').href =
+    'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var label = document.getElementById('copy-label');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(PAGE_URL).then(function () {
+        label.textContent = 'Kopirano!';
+        setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = PAGE_URL;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      label.textContent = 'Kopirano!';
+      setTimeout(function () { label.textContent = 'Kopiraj'; }, 2000);
+    }
+  });
+
+  if (navigator.share) {
+    var nativeBtn = document.getElementById('btn-native');
+    nativeBtn.style.display = 'inline-flex';
+    nativeBtn.addEventListener('click', function () {
+      navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {});
+    });
+  }
+})();
+</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script src="likes.js" defer></script>
+<script src="/blog/comments.js" defer></script>
+<script src="/blog/article-enhance.js" defer></script>
+<script src="/blog/subscribe.js" defer></script>
+</body>
+</html>
