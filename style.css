@@ -292,6 +292,18 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .live-timeline .lt-icon{flex-shrink:0}
 .live-timeline .lt-text{flex:1}
 
+/* Dnevno dejstvo — vidna kartica, nova vsebina vsak dan */
+.daily-fact-card{display:flex;align-items:center;gap:.7rem;background:var(--card-bg);
+  border:1px solid rgba(34,211,238,.35);border-radius:14px;padding:.7rem .9rem;
+  margin:0 0 1rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  animation:alert-in .35s ease}
+.dfc-icon{font-size:1.2rem;flex-shrink:0;line-height:1}
+.dfc-text{flex:1;font-size:.85rem;line-height:1.4;color:var(--text)}
+.dfc-text strong{color:var(--cyan)}
+.dfc-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;
+  padding:0;line-height:1;flex-shrink:0}
+.dfc-close:hover{color:var(--text)}
+
 img.wx-icon{display:inline-block;vertical-align:middle}
 .cu-he .wx-icon{filter:drop-shadow(0 1px 5px rgba(0,0,0,.35))}
 [data-theme="dark"] .cu-he .wx-icon{filter:drop-shadow(0 1px 6px rgba(0,0,0,.6)) brightness(1.55) saturate(1.15)}
