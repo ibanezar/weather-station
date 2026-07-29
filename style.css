@@ -1063,7 +1063,9 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .chart-range{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted)}
 .chart-svg-wrap{width:100%;overflow:hidden}
 .chart-svg{width:100%;display:block;cursor:crosshair}
-.chart-scroll-hint{display:none;font-size:.72rem;opacity:.55;text-align:right;margin-top:.4rem}
+.chart-scroll-hint{display:none;font-size:.72rem;opacity:.55;text-align:right;margin-top:.4rem;transition:opacity .4s}
+/* Ko uporabnik graf enkrat povleče, namig ni več potreben */
+.chart-svg-wrap.scrolled+.chart-scroll-hint{opacity:0}
 #chart-tip{position:fixed;pointer-events:none;z-index:200;background:var(--tip-bg);border:1px solid var(--tip-border);border-radius:8px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);backdrop-filter:blur(8px);opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:var(--tip-shadow)}
 
 /* Small cards */
@@ -2110,7 +2112,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .sc-risk-factors{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}
   /* Charts keep their native size on mobile and scroll horizontally instead of shrinking,
      so labels and values stay legible; finger drag both scrolls and scrubs the tooltip. */
-  .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* Zabrisan desni rob nakaže, da se graf nadaljuje čez rob zaslona.
+     Odpade, ko je graf odrsan do konca (.at-end) ali sploh ni drsljiv. */
+  .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;
+    -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 46px),transparent);
+            mask-image:linear-gradient(to right,#000 calc(100% - 46px),transparent)}
+  .chart-svg-wrap.at-end{-webkit-mask-image:none;mask-image:none}
   .chart-svg{min-width:880px;width:880px;touch-action:pan-x pan-y}
   .chart-scroll-hint{display:block}
 }
