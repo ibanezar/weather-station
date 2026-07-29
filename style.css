@@ -2122,6 +2122,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   .chart-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .chart-svg{min-width:880px;width:880px;touch-action:pan-x pan-y}
   .chart-scroll-hint{display:block}
+  /* Lokalna napoved: brez tega se trak neba stisne na 0,31x in graf 48 ur na
+     0,37x, s čimer pisava pade na 3 px. Ovoja sta na namizju nedotaknjena. */
+  .sky-strip-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .sky-strip-svg{min-width:1000px;touch-action:pan-x pan-y}
+  .nt-chart{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .nt-chart>svg{min-width:900px;touch-action:pan-x pan-y}
 }
 @media(max-width:520px){
   .g2{grid-template-columns:1fr}
