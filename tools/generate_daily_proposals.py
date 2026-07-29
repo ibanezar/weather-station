@@ -28,42 +28,51 @@ import json, os, sys, re, random, datetime, urllib.request, urllib.error
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, TODAY
 from generate_daily_post import (
-    IDEAS, PROXY, ANTHROPIC_MODEL, num,
+    IDEAS, PROXY, ANTHROPIC_MODEL, num, STATE_FILE,
     fetch_current, fetch_hourly, fetch_forecast,
-    detect_event, load_state, recent_tags, build_stat_cards, stream_claude,
+    detect_event, load_state, save_state, recent_tags, recent_titles,
+    build_stat_cards, stream_claude,
+    norm_tag, tag_used, last_used_index, event_is_newsworthy, event_topic,
+    remember_event,
 )
 
 PROPOSALS_FILE = os.path.join(ROOT, "tools", ".daily_proposals.json")
 N_PROPOSALS = 3
+# Ideja, ki je bila ponujena v zadnjih toliko zagonih, gre na konec vrste --
+# brez tega se v e-pošti isti trije predlogi vrtijo iz dneva v dan.
+PROPOSED_COOLDOWN = 6
 
 
 def pick_candidates(event, state, n=N_PROPOSALS):
-    """Vrne do n raznolikih kandidatnih tem. Dogodek (če je) je vedno prvi,
-    ostale so evergreen ideje: najprej tiste, ki v zadnjih 12 dneh niso bile
-    uporabljene, nato po vrsti od najdlje neuporabljene."""
+    """Vrne do n raznolikih kandidatnih tem.
+
+    Vrstni red: (1) dogodek, a SAMO če je nov ali izrazito hujši od zadnjega
+    (drugače je poleti vsak dan prvi predlog "vročina"), (2) ideje, ki niso
+    bile ne objavljene ne ponujene v zadnjih dneh, (3) najdlje neuporabljene."""
     month = datetime.date.today().month
     recent = state.get("recentTopics", [])
-    taken = recent_tags(12) | set(recent[-6:])
+    proposed = state.get("recentProposed", [])[-PROPOSED_COOLDOWN * N_PROPOSALS:]
+    taken = recent_tags(12) | {norm_tag(t) for t in recent[-6:]}
     seasonal = [i for i in IDEAS if month in i["sezona"]] or list(IDEAS)
 
-    def last_used(idea):
-        try:
-            return len(recent) - 1 - recent[::-1].index(idea["tag"])
-        except ValueError:
-            return -1
-
-    fresh = [i for i in seasonal if i["tag"] not in taken]
+    fresh, warm, stale = [], [], []
+    for idea in seasonal:
+        if tag_used(idea["tag"], taken):
+            stale.append(idea)
+        elif idea["id"] in proposed:
+            warm.append(idea)
+        else:
+            fresh.append(idea)
     random.shuffle(fresh)
-    stale = sorted((i for i in seasonal if i["tag"] in taken), key=last_used)
+    random.shuffle(warm)
+    stale.sort(key=lambda i: last_used_index(i["tag"], recent))
 
     candidates = []
-    if event:
-        candidates.append({
-            "id": "dogodek",
-            "brief": f"Analiza dogodka: {event['type']} ({num(event['value'], 1)} {event['unit']})",
-            "tag": event["type"], "event": event, "seo_keywords": [],
-        })
-    for idea in fresh + stale:
+    if event_is_newsworthy(event, state):
+        candidates.append(event_topic(event, state))
+    elif event:
+        print(f"   (dogodek '{event['type']}' izpuščen -- enak kot nedavno in ne hujši)")
+    for idea in fresh + warm + stale:
         if len(candidates) >= n:
             break
         candidates.append(idea)
@@ -73,18 +82,37 @@ def pick_candidates(event, state, n=N_PROPOSALS):
 PROPOSALS_PROMPT = """Si urednik vremenskega bloga meteorec.si (osebna meteorološka postaja IREICA1,
 Rečica ob Savinji, Zgornja Savinjska dolina, Slovenija).
 
-Dobiš surove vremenske podatke in seznam kandidatnih tem za današnji članek.
-Za VSAKO temo predlagaj:
-- "title": konkreten, privlačen naslov članka v slovenščini (ustaljeni ton bloga,
-  brez klišejev in clickbaita; glavno SEO frazo teme vpleti naravno, če zveni dobro),
+Dobiš surove vremenske podatke, seznam kandidatnih tem za današnji članek in
+naslove nazadnje objavljenih člankov. Za VSAKO temo predlagaj:
+- "title": konkreten naslov članka v slovenščini,
 - "teaser": 2-3 povedi o tem, kaj bo članek pokril, utemeljeno na DEJANSKIH
   podanih podatkih. Ne izmišljuj številk -- uporabi samo vrednosti iz podatkov,
-  lahko pa jih izpustiš in ostaneš splošen.
+  lahko pa jih izpustiš in ostaneš splošen,
+- "oblika": katera od spodnjih oblik članka je to (ena beseda s seznama).
 
-Predlogi naj se med sabo jasno razlikujejo po kotu/vsebini, da je izbira smiselna.
+RAZNOLIKOST -- to je najpomembnejše. Bralec dobi članek vsak dan, zato se
+predlogi ne smejo brati kot včerajšnji:
+- Vsak predlog mora biti DRUGA oblika članka. Izbiraj med: "analiza"
+  (kaj se je zgodilo in zakaj), "razlaga" (kako neki pojav sploh deluje),
+  "preverba" (ali neka trditev/napoved/pregovor drži glede na meritve),
+  "primerjava" (z rekordi, s povprečjem, s sosednjimi kraji, z lani),
+  "vodic" (kaj to konkretno pomeni za bralca in kaj naj naredi),
+  "pregled" (več dni/tednov v številkah).
+- Ne ponovi teme ali kota nobenega od nazadnje objavljenih člankov. Če se
+  kandidatna tema prekriva z že objavljenim, jo obrni v drug kot.
+
+NASLOVI -- nazadnje objavljeni članki imajo skoraj vsi isto obliko naslova
+("Kraj ali pojav: pojasnilo za dvopičjem"). Prekini to:
+- največ EN od predlaganih naslovov sme imeti dvopičje,
+- največ EN sme vsebovati "Zgornja Savinjska dolina" / "Rečica ob Savinji"
+  (kraj naj bo v drugih naslovih razviden posredno ali pa ga ni),
+- uporabi različne oblike: vprašanje, naslov s številko na začetku, kratka
+  trditev, presenetljiva ugotovitev,
+- brez clickbaita, brez klišejev ("kaj se skriva za", "vse, kar morate vedeti"),
+- glavno SEO frazo teme vpleti naravno, le če naslov zaradi tega ne postane okoren.
 
 Vrni SAMO veljaven JSON (brez markdown fence) v tej shemi:
-{"proposals": [{"id": "id-teme-iz-vhoda", "title": "...", "teaser": "..."}]}
+{"proposals": [{"id": "id-teme-iz-vhoda", "title": "...", "teaser": "...", "oblika": "..."}]}
 Ohrani vrstni red in "id" vrednosti natanko take, kot so v vhodu."""
 
 
@@ -101,6 +129,7 @@ def call_claude_proposals(candidates, current, forecast, stat_cards):
         "trenutne_razmere": current,
         "napoved_4dni": (forecast or {}).get("daily"),
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
+        "nazadnje_objavljeni_clanki": recent_titles(12),
     }
     payload = {
         "model": ANTHROPIC_MODEL,
@@ -129,7 +158,8 @@ def call_claude_proposals(candidates, current, forecast, stat_cards):
         if not p or not p.get("title"):
             sys.exit(f"Claude ni vrnil predloga za temo '{c['id']}'.")
         out.append({"id": c["id"], "title": p["title"].strip(),
-                    "teaser": (p.get("teaser") or "").strip(), "topic": c})
+                    "teaser": (p.get("teaser") or "").strip(),
+                    "oblika": (p.get("oblika") or "").strip(), "topic": c})
     return out
 
 
@@ -188,7 +218,17 @@ def main():
     print("3/4 Kličem Claude API (naslovi + teaserji)...")
     proposals = call_claude_proposals(candidates, current, forecast, stat_cards)
     for p in proposals:
-        print(f"   [{p['id']}] {p['title']}")
+        print(f"   [{p['id']}] ({p.get('oblika') or '?'}) {p['title']}")
+
+    # Kaj smo ponudili, si zapomnimo tudi če Filip ne izbere ničesar -- sicer
+    # naslednje jutro pride e-pošta z istimi tremi predlogi.
+    for c in candidates:
+        if c["id"] == "dogodek":
+            remember_event(state, c)
+    state.setdefault("recentProposed", []).extend(c["id"] for c in candidates)
+    state["recentProposed"] = state["recentProposed"][-PROPOSED_COOLDOWN * N_PROPOSALS:]
+    save_state(state)
+    print(f"✓ posodobljeno: {os.path.relpath(STATE_FILE, ROOT)}")
 
     data = {
         "date": TODAY,

@@ -23,6 +23,15 @@ vezaj namesto pomišljaja).
 - Po objavi na `main` pošlji IndexNow ping (glej korak v `daily-post.yml`).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
+- Predlogi se ne smejo ponavljati iz dneva v dan. Za to skrbita
+  `generate_daily_proposals.py` in stanje v `tools/.daily_post_state.json`:
+  zaznani dogodek (vročina, mraz, veter …) pride med predloge le, če je nov
+  ali izrazito hujši od zadnjega (`EVENT_REPEAT_DAYS`, `EVENT_ESCALATION`),
+  ponovljeni dogodek pa vsakič dobi drug kot (`EVENT_ANGLES`). Ponujene ideje
+  se beležijo v `recentProposed`, tudi če Filip ne izbere nobene.
+- Ko dodajaš novo temo v `IDEAS`, dodaj njen tag še v `TAG_ALIASES` (tage v
+  blog.json piše model, zato ista tema nastopa v več zapisih) in po potrebi v
+  `SPOKE_PAGES` za interno linkanje.
 
 ## Razvoj
 

@@ -47,7 +47,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add tools/.daily_proposals.json
+          git add tools/.daily_proposals.json tools/.daily_post_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

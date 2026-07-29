@@ -106,7 +106,96 @@ IDEAS = [
     {"id": "nocno-ohlajanje", "sezona": [3, 4, 5, 9, 10, 11], "tag": "nocno-ohlajanje",
      "brief": "Zakaj se dolina ponoči tako hitro ohladi -- jasno nebo, radiacijsko ohlajanje in mraz v kotlini.",
      "seo_keywords": ["radiacijsko ohlajanje dolina", "nočni mraz Rečica ob Savinji", "zakaj je ponoči tako mrzlo"]},
+    # ── Teme, ki NISO vezane na vreme tistega dne. Brez njih se rotacija ob
+    # dolgotrajni vročini/suši vrti v krogu (vročina -> suša -> požar -> vročina),
+    # ker so vse "vremenske" ideje hkrati sprožene z istimi razmerami.
+    {"id": "tocnost-napovedi", "sezona": list(range(1, 13)), "tag": "tocnost",
+     "brief": "Kako točne so bile napovedi zadnjih dni -- primerjava napovedanih in izmerjenih vrednosti na postaji.",
+     "seo_keywords": ["točnost vremenske napovedi", "ali se napoved uresniči", "verifikacija napovedi Slovenija"]},
+    {"id": "rekordi-postaje", "sezona": list(range(1, 13)), "tag": "rekord",
+     "brief": "Kje so današnje vrednosti glede na rekorde postaje IREICA1 -- kako daleč smo od najvišje/najnižje izmerjene.",
+     "seo_keywords": ["vremenski rekordi Zgornja Savinjska dolina", "najvišja temperatura Rečica ob Savinji", "postaja IREICA1 rekordi"]},
+    {"id": "teden-v-stevilkah", "sezona": list(range(1, 13)), "tag": "teden",
+     "brief": "Pregled zadnjih sedmih dni v številkah: kaj je izstopalo, kje je bil teden nad ali pod povprečjem.",
+     "seo_keywords": ["vreme zadnji teden Savinjska dolina", "tedenski pregled vremena", "koliko dežja ta teden"]},
+    {"id": "mikroklima-vasi", "sezona": list(range(1, 13)), "tag": "vasi",
+     "brief": "Zakaj isto vreme ni isto povsod: razlike med vasmi v dolini (Luče, Mozirje, Solčava, Rečica).",
+     "seo_keywords": ["mikroklima Zgornja Savinjska dolina", "razlike vreme po vaseh", "vreme Luče Mozirje Solčava"]},
+    {"id": "kako-meri-postaja", "sezona": list(range(1, 13)), "tag": "postaja",
+     "brief": "Kako postaja sploh meri: senzorji, postavitev, tipične napake in zakaj se meritve razlikujejo od ARSO.",
+     "seo_keywords": ["kako deluje vremenska postaja", "Ecowitt senzorji meritve", "zakaj se vremenski podatki razlikujejo"]},
+    {"id": "vremenski-pregovori", "sezona": list(range(1, 13)), "tag": "pregovori",
+     "brief": "Ali ljudski vremenski pregovor za ta del leta drži -- preverjeno na izmerjenih podatkih postaje.",
+     "seo_keywords": ["vremenski pregovori", "ali pregovori o vremenu držijo", "ljudsko vremenoslovje Slovenija"]},
+    {"id": "kakovost-zraka-vreme", "sezona": list(range(1, 13)), "tag": "zrak",
+     "brief": "Kako trenutne razmere (vročina, mirno vreme, inverzija) vplivajo na ozon in delce v zraku doline.",
+     "seo_keywords": ["kakovost zraka Savinjska dolina", "ozon poletje Slovenija", "delci PM10 dolina"]},
+    {"id": "vodostaj-savinje", "sezona": list(range(1, 13)), "tag": "vodostaj",
+     "brief": "Kaj se dogaja s Savinjo: vodostaj glede na padavine zadnjih tednov in kaj to pomeni za dolino.",
+     "seo_keywords": ["vodostaj Savinje danes", "pretok Savinje", "nizke vode Savinjska dolina"]},
+    {"id": "toca-sezona", "sezona": [4, 5, 6, 7, 8, 9], "tag": "toca",
+     "brief": "Koliko toče je dolina letos dejansko dobila in kaj kaže senzor toče na postaji.",
+     "seo_keywords": ["toča Zgornja Savinjska dolina", "statistika toče Slovenija", "senzor toče postaja"]},
+    {"id": "invazivke-vreme", "sezona": [4, 5, 6, 7, 8, 9, 10], "tag": "invazivke",
+     "brief": "Kako toplo in vlažno vreme pospešuje širjenje invazivnih rastlin ob Savinji.",
+     "seo_keywords": ["invazivne rastline Savinjska dolina", "žlezava nedotika", "japonski dresnik širjenje"]},
+    {"id": "padalci-termika", "sezona": [3, 4, 5, 6, 7, 8, 9, 10], "tag": "padalci",
+     "brief": "Razmere za padalce in jadralce: termika, veter po višinah in kdaj je okno najboljše.",
+     "seo_keywords": ["vreme za padalce Slovenija", "termika napoved", "jadralno padalstvo Savinjska dolina"]},
+    {"id": "sezonski-obeti", "sezona": list(range(1, 13)), "tag": "sezona",
+     "brief": "Kaj kažejo dolgoročni modeli za prihodnje tedne -- in kako (ne)zanesljive so take napovedi.",
+     "seo_keywords": ["dolgoročna vremenska napoved Slovenija", "napoved za prihodnji mesec", "zanesljivost sezonske napovedi"]},
 ]
+
+# Normalizacija tagov za primerjavo. Tage v blog.json piše model, zato se ista
+# tema pojavi kot "vročina", "vrocina", "vročinski val" ... -- brez tega
+# rotacija misli, da tema še ni bila uporabljena, in jo ponudi znova.
+TAG_ALIASES = {
+    "gobe": ("gob",),
+    "susa": ("susa", "suha-tla", "vlaga-tal"),
+    "nevihta": ("neviht", "cape"),
+    "vrocina": ("vrocin", "toplotni-val", "vrocinski-val"),
+    "vrocina-napoved": ("vrocin", "toplotni-val", "vrocinski-val"),
+    "tropska-noc": ("tropsk",),
+    "trend": ("temperaturni-trend",),
+    "pritisk": ("zracni-tlak",),
+    "sneg": ("sneg", "snez"),
+    "inverzija": ("inverzij", "temperaturni-obrat", "megla"),
+    "poplave": ("poplav",),
+    "vodostaj": ("vodostaj", "savinja-pretok", "pretok"),
+    "pozarna-ogrozenost": ("pozarn",),
+    "zgodovina": ("era5", "podnebno-povprecje", "klimatologij"),
+    "sonce": ("ure-sonca", "soncno", "obsevanje"),
+    "dusljivost": ("rosisce", "sopar"),
+    "planine": ("pohod", "planinarjenje", "savinjske-alpe"),
+    "slana": ("slana", "nocni-mraz"),
+    "cvetni-prah": ("pelod", "alergij"),
+    "nocno-ohlajanje": ("radiacijsko",),
+    "tocnost": ("tocnost-napovedi", "verifikacij"),
+    "zrak": ("kakovost-zraka", "ozon", "pm10"),
+    "invazivke": ("invaziv",),
+    "padalci": ("padalstvo", "termika"),
+    "vasi": ("mikroklima",),
+    "vodna-bilanca": ("evapotranspiracij",),
+    "primerjava": ("primerjava-krajev",),
+}
+
+
+def norm_tag(s):
+    """Male črke, brez šumnikov, ločila -> vezaj (za primerjavo tagov)."""
+    s = str(s).lower().strip()
+    for a, b in (("č", "c"), ("ć", "c"), ("š", "s"), ("ž", "z"), ("đ", "d")):
+        s = s.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def tag_used(tag, used):
+    """True, če je tema `tag` že pokrita v množici normaliziranih tagov `used`.
+    Ujemanje je enosmerno (ključ teme mora biti vsebovan v uporabljenem tagu),
+    da splošni tagi ("vreme", "2026") ne pobijejo vseh idej naenkrat."""
+    n = norm_tag(tag)
+    keys = {n} | {norm_tag(a) for a in TAG_ALIASES.get(n, ())}
+    return any(len(k) >= 4 and k in u for k in keys for u in used)
 
 # Statične hub/spoke strani (glej meteorec.si) -- kandidati za interno linkanje
 # glede na temo. Vsak vnos: (ujemajoči tag/i teme, url, anchor besedilo).
@@ -125,9 +214,114 @@ SPOKE_PAGES = [
     (("planine",), "/vreme-za-padalce/", "vreme za padalce"),
     (("sonce", "dusljivost", "tropska-noc"), "/temperatura/", "temperaturno statistiko"),
     (("napoved", "tocnost"), "/tocnost-napovedi/", "točnost napovedi"),
+    (("vodostaj",), "/vodostaj-savinje/", "vodostaj Savinje"),
+    (("teden",), "/teden/", "tedenski pregled"),
+    (("vasi", "mikroklima"), "/vreme/", "vreme po vaseh"),
+    (("postaja", "pregovori"), "/slovar/", "vremenski slovar"),
+    (("sezona",), "/trendi/", "dolgoročne trende"),
 ]
 
 HEAT_C, COLD_C, RAIN_MM, WIND_KMH = 30, -5, 20, 50
+
+# ── Dogodki ───────────────────────────────────────────────────────────────
+# Prag za dogodek je absoluten (30 °C), zato je poleti izpolnjen skoraj vsak
+# dan -- brez spodnjih omejitev bi bil prvi predlog mesec dni zapored "vročina".
+EVENT_REPEAT_DAYS = 4          # isti tip dogodka sme nazaj šele po toliko dneh ...
+EVENT_ESCALATION = {           # ... ali če je za toliko hujši od zadnjega
+    "vročina": 1.5, "vročina-napoved": 1.5, "mraz": 1.5,
+    "padavine": 8.0, "veter": 10.0,
+}
+
+# Kadar dogodek res pride na vrsto, dobi vsakič drug kot -- isti "analiza
+# vročine" članek drugič zapored je bralcu neločljiv od prvega.
+EVENT_ANGLES = {
+    "vročina": [
+        {"id": "rekord", "brief": "kako se ta vročina primerja z rekordi postaje in prejšnjimi vročinskimi valovi"},
+        {"id": "noc", "brief": "kaj vročina pomeni za noči -- ali dolina sploh še odda toploto in koliko tropskih noči smo že imeli"},
+        {"id": "obcutek", "brief": "razkorak med termometrom in občutkom: rosišče, vlaga in kje v dolini je najhuje"},
+        {"id": "posledice", "brief": "praktične posledice za vrtove, živino in porabo vode -- kaj konkretno narediti"},
+        {"id": "konec", "brief": "kdaj in kako se vročina konča: kaj kažejo modeli za razbremenitev"},
+    ],
+    "mraz": [
+        {"id": "rekord", "brief": "kako se ta mraz primerja z rekordi postaje in mrzlimi obdobji prejšnjih zim"},
+        {"id": "kotlina", "brief": "zakaj je v dolini mraz hujši kot na okoliških pobočjih (jezero hladnega zraka)"},
+        {"id": "posledice", "brief": "kaj mraz pomeni za cevi, rastline in ogrevanje -- praktični nasveti"},
+    ],
+    "padavine": [
+        {"id": "bilanca", "brief": "koliko tega dežja je tlom dejansko koristilo in koliko je odteklo"},
+        {"id": "reka", "brief": "kaj padavine pomenijo za Savinjo in poplavno ogroženost doline"},
+        {"id": "primerjava", "brief": "kako se ta količina primerja z mesečnim povprečjem in z rekordi postaje"},
+    ],
+    "veter": [
+        {"id": "smer", "brief": "od kod je veter pihal in kaj smer pove o vremenski situaciji nad dolino"},
+        {"id": "skoda", "brief": "kdaj sunki postanejo nevarni -- pragovi za drevesa, strehe in promet"},
+        {"id": "rekord", "brief": "kako se ti sunki primerjajo z najmočnejšimi, kar jih je postaja izmerila"},
+    ],
+}
+EVENT_ANGLES["vročina-napoved"] = EVENT_ANGLES["vročina"]
+
+
+def event_is_newsworthy(event, state):
+    """Dogodek dobi svoje mesto med temami le, če je nov ali izrazito hujši od
+    zadnjega enakega. Sicer se med predlogi vsak dan pojavi ista vročina."""
+    if not event:
+        return False
+    last = state.get("lastEvent") or {}
+    if norm_tag(last.get("type", "")) != norm_tag(event.get("type", "")):
+        return True
+    try:
+        days = (datetime.date.fromisoformat(TODAY)
+                - datetime.date.fromisoformat(last["date"])).days
+    except Exception:
+        return True
+    if days >= EVENT_REPEAT_DAYS:
+        return True
+    step = EVENT_ESCALATION.get(event["type"], 1.5)
+    try:
+        return float(event.get("value")) >= float(last.get("value")) + step
+    except (TypeError, ValueError):
+        return True
+
+
+def event_angle(event, state):
+    """Najdlje neuporabljen kot za ta tip dogodka (ali None, če kotov ni)."""
+    angles = EVENT_ANGLES.get(event.get("type")) or []
+    if not angles:
+        return None
+    recent = state.get("recentAngles", [])
+
+    def last_used(a):
+        key = f"{norm_tag(event['type'])}:{a['id']}"
+        try:
+            return len(recent) - 1 - recent[::-1].index(key)
+        except ValueError:
+            return -1
+
+    return sorted(angles, key=last_used)[0]
+
+
+def event_topic(event, state):
+    """Tema za zaznani dogodek, z rotirajočim kotom v briefu."""
+    angle = event_angle(event, state)
+    brief = f"Analiza dogodka: {event['type']} ({num(event['value'], 1)} {event['unit']})"
+    if angle:
+        brief += f" -- kot: {angle['brief']}"
+    return {
+        "id": "dogodek", "brief": brief, "tag": event["type"], "event": event,
+        "angle": (angle or {}).get("id"), "seo_keywords": [],
+    }
+
+
+def remember_event(state, topic):
+    """Zapomni si dogodek in uporabljen kot (za obe -- objavo in predloge)."""
+    ev = (topic or {}).get("event")
+    if not ev:
+        return
+    state["lastEvent"] = {"type": ev.get("type"), "value": ev.get("value"), "date": TODAY}
+    if topic.get("angle"):
+        angles = state.setdefault("recentAngles", [])
+        angles.append(f"{norm_tag(ev['type'])}:{topic['angle']}")
+        state["recentAngles"] = angles[-12:]
 
 
 def find_related_links(topic, max_posts=4):
@@ -215,7 +409,9 @@ def save_state(state):
 
 
 def recent_tags(days=12):
-    """Tagi objav iz zadnjih N dni (blog.json), da rotacija idej ne ponavlja."""
+    """Normalizirani tagi objav iz zadnjih N dni (blog.json), da rotacija idej
+    ne ponavlja. Zajame VSE objave -- tudi ARSO newsjack, nevihtni opazovalec
+    in mesečni povzetek -- ker jih bralec dobi v istem seznamu."""
     try:
         posts = json.load(open(os.path.join(ROOT, "blog.json"), encoding="utf-8"))
     except Exception:
@@ -224,8 +420,17 @@ def recent_tags(days=12):
     tags = set()
     for p in posts:
         if p.get("date", "") >= cutoff:
-            tags.update(str(t).lower() for t in p.get("tags", []))
+            tags.update(norm_tag(t) for t in p.get("tags", []))
     return tags
+
+
+def recent_titles(n=12):
+    """Zadnji naslovi objav -- modelu jih podamo, da ne ponovi iste formulacije."""
+    try:
+        posts = json.load(open(os.path.join(ROOT, "blog.json"), encoding="utf-8"))
+    except Exception:
+        return []
+    return [{"datum": p.get("date", ""), "naslov": p.get("title", "")} for p in posts[:n]]
 
 
 def detect_event(current, hourly, forecast):
@@ -259,25 +464,27 @@ def detect_event(current, hourly, forecast):
 
 
 def pick_topic(event, state):
-    if event:
-        return {"id": "dogodek", "brief": f"Analiza dogodka: {event['type']} ({num(event['value'],1)} {event['unit']})",
-                "tag": event["type"], "event": event}
+    if event_is_newsworthy(event, state):
+        return event_topic(event, state)
     recent = state.get("recentTopics", [])
-    taken = recent_tags(12) | set(recent[-6:])
+    taken = recent_tags(12) | {norm_tag(t) for t in recent[-6:]}
     seasonal = [i for i in IDEAS if datetime.date.today().month in i["sezona"]] or IDEAS
-    candidates = [i for i in seasonal if i["tag"] not in taken]
+    candidates = [i for i in seasonal if not tag_used(i["tag"], taken)]
     random.shuffle(candidates)
     if not candidates:
         # Vse sezonske teme so bile nedavno uporabljene -- vzemi najdlje
         # neuporabljeno, ne vedno prve s seznama (ta fallback je povzročal,
         # da se je poleti gobarska tema ponavljala dan za dnem).
-        def last_used(idea):
-            try:
-                return len(recent) - 1 - recent[::-1].index(idea["tag"])
-            except ValueError:
-                return -1
-        candidates = sorted(seasonal, key=last_used)
+        candidates = sorted(seasonal, key=lambda i: last_used_index(i["tag"], recent))
     return candidates[0]
+
+
+def last_used_index(tag, recent):
+    """Položaj zadnje uporabe teme v recentTopics (-1 = še nikoli).
+    Primerjava je normalizirana, sicer 'vročina' in 'vrocina' nista ista tema."""
+    n = norm_tag(tag)
+    hits = [i for i, t in enumerate(recent) if norm_tag(t) == n]
+    return hits[-1] if hits else -1
 
 
 def load_chosen_proposal(choice):
@@ -1145,6 +1352,7 @@ def main():
 
     state.setdefault("recentTopics", []).append(topic.get("tag", topic["id"]))
     state["recentTopics"] = state["recentTopics"][-20:]
+    remember_event(state, topic)
     state["lastPublished"] = now.isoformat()
     save_state(state)
 
