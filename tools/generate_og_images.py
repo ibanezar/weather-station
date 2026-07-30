@@ -3,7 +3,7 @@
 Background photos sourced from Unsplash (free to use, no attribution required).
 Source photos stored in og/bg/. Run this script to regenerate all OG images.
 """
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import json, os, statistics as st
 
 FONT_BOLD    = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
@@ -472,12 +472,18 @@ def make_og(article):
     # prednost pred fiksnim katalogom og/bg/*.jpg -- nastavi jo prejšnji korak workflowa
     # prek DRIVE_PHOTO_PATH, da vsaka objava dobi pravo, ne generično fotografijo.
     drive_photo = os.environ.get('DRIVE_PHOTO_PATH')
-    if drive_photo and os.path.isfile(drive_photo):
-        photo_path = drive_photo
-    else:
-        photo_path = os.path.join(BG_DIR, article['photo'] + '.jpg')
+    is_drive_photo = bool(drive_photo and os.path.isfile(drive_photo))
+    photo_path = drive_photo if is_drive_photo else os.path.join(BG_DIR, article['photo'] + '.jpg')
     bg = Image.open(photo_path).convert('RGB')
     bg = smart_crop(bg, W, H)
+    if is_drive_photo:
+        # Filipove surove fotografije so v primerjavi s kuriranim og/bg/ katalogom
+        # bolj temačne/nizko-kontrastne -- pri sličici 148x88 na /blog/ postanejo
+        # neberljiva meglica. Rahlo popravimo kontrast/nasičenost/svetlost, preden
+        # gre čez temno prevleko.
+        bg = ImageEnhance.Contrast(bg).enhance(1.25)
+        bg = ImageEnhance.Color(bg).enhance(1.2)
+        bg = ImageEnhance.Brightness(bg).enhance(1.15)
     img = dark_overlay(bg)
     draw = ImageDraw.Draw(img)
 
