@@ -94,7 +94,7 @@ article strong{color:#fff}
   box-shadow:var(--card-shadow);transition:border-color .25s,transform .25s;
   -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 .post-card:hover{border-color:rgba(34,211,238,.45);transform:translateY(-2px)}
-.post-thumb{width:148px;height:88px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.post-thumb{width:130px;height:130px;object-fit:cover;border-radius:10px;flex-shrink:0}
 .card-emoji{position:absolute;top:1.35rem;left:1.65rem;font-size:1.35rem;line-height:1;
   filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));pointer-events:none}
 .post-card-body{flex:1;min-width:0}

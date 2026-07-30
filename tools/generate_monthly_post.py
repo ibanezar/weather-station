@@ -338,7 +338,7 @@ def rewrite_sitemap_and_index(posts):
             date_html += f' <span class="post-updated" title="Posodobljeno {fmtdate(p["updated"])}">☁️</span>'
         alt = p["title"].replace('"', "&quot;")
         return (f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
-                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="280" height="147" loading="lazy">\n'
+                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="260" height="260" loading="lazy">\n'
                 f'        <div class="post-card-body">\n'
                 f'          <div class="date">{date_html}</div>\n'
                 f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
@@ -376,7 +376,7 @@ def build_tag_pages(posts):
         plist = sorted(plist, key=lambda p: p.get("updated") or p["date"], reverse=True)
         cards = "\n".join(
             f'    <li>\n      <a class="post-card" href="/blog/{p["slug"]}.html">\n'
-            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="280" height="147" loading="lazy">\n'
+            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="260" height="260" loading="lazy">\n'
             f'        <div class="post-card-body">\n'
             f'          <div class="date">{fmtdate(p["date"])}</div>\n'
             f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
