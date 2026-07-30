@@ -2180,6 +2180,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           }), { status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
 
+        // ?format=json vrne le opis posnetka. Stran ga potrebuje za podnapis
+        // (kdaj je bil posnet), sliko pa naloži z <img> na isti endpoint —
+        // brskalnik custom glav navzkrižno tako ali tako ne sme brati.
+        if (url.searchParams.get("format") === "json") {
+          return new Response(JSON.stringify({
+            kamera: cam.properties.title,
+            obmocje: cam.properties.parent_title || "",
+            smer: dir,
+            posnet: last.valid || null,
+            slika: `/arso-cam?kamera=${encodeURIComponent(cam.properties.title)}&smer=${dir}`,
+          }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
+          });
+        }
+
         const camRes = await fetch("https://vreme.arso.gov.si" + last.path, {
           headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://vreme.arso.gov.si/" },
         });

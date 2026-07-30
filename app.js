@@ -4643,6 +4643,41 @@ async function _ncApplyVas(id){
     }
   }catch(_){}
 }
+// ── Spletna kamera ARSO ─────────────────────────────────────────────
+// Logarska dolina je edina ARSO kamera v Zgornji Savinjski dolini. Sliko
+// vedno vlečemo prek Workerja: ARSO objavlja posnetke na časovno žigosanih
+// naslovih, ki jih brez seznama webcam_list ni mogoče uganiti, hkrati pa
+// tako brskalnik nikoli ne trka naravnost na njihov strežnik.
+// Kartica je skrita, dokler slike ni — brez kamere ni prazne luknje.
+async function initValleyCam(){
+  const card=document.getElementById('valcam-card');
+  if(!card)return;
+  const img=document.getElementById('valcam-img');
+  const cap=document.getElementById('valcam-cap');
+  const src=document.getElementById('valcam-src');
+  try{
+    const r=await fetch(PROXY+'/arso-cam?format=json');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const m=await r.json();
+    if(!m.slika)throw new Error('brez posnetka');
+
+    const SMERI={n:'proti severu',ne:'proti severovzhodu',e:'proti vzhodu',se:'proti jugovzhodu',
+                 s:'proti jugu',sw:'proti jugozahodu',w:'proti zahodu',nw:'proti severozahodu'};
+    const smer=SMERI[m.smer]||'';
+    const dt=m.posnet?new Date(m.posnet):null;
+    const cas=dt&&!isNaN(dt)?dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
+
+    // Cache-buster na žig posnetka: brez njega bi brskalnik ob vrnitvi na
+    // stran kazal staro sliko iz predpomnilnika, podnapis pa nov čas.
+    img.src=PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):'');
+    img.alt='Spletna kamera ARSO: '+m.kamera+(smer?', pogled '+smer:'')+(cas?', posneto ob '+cas:'');
+    if(cap)cap.textContent=m.kamera+(smer?' · pogled '+smer:'')+(cas?' · posneto ob '+cas:'');
+    if(src)src.textContent='ARSO'+(m.obmocje?' · '+m.obmocje:'');
+    img.addEventListener('error',()=>{card.hidden=true},{once:true});
+    card.hidden=false;
+  }catch(_){card.hidden=true;}
+}
+
 async function initNowcast(){
   const wrap=document.getElementById('nowcast-wrap');
   if(!wrap)return;
@@ -14236,6 +14271,7 @@ async function init(){
   try{initDailyFact();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
+  try{initValleyCam();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
   try{autoLoadHistoryFile();}catch(_){}
