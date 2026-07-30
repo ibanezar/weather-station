@@ -2133,17 +2133,66 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /arso-cam ─────────────────────────────────────────
+      // ARSO ne objavlja več slike na stalnem naslovu. Posnetki so zdaj
+      // časovno žigosani (siwc_YYYYMMDD-HHMM_POSTAJA_smer.jpg) in edini način,
+      // da dobiš zadnjega, je seznam webcam_list — ta pove tudi, katera
+      // postajna oznaka trenutno velja (CELJE je npr. postal CELJE_MEDLOG).
+      //
+      // ?kamera= sprejme ime kraja ali ARSO oznako, ?smer= stran neba.
+      // Privzeta je Logarska dolina — edina kamera v naši dolini.
       if (path === "/arso-cam") {
-        const station = url.searchParams.get("station") || "CELJE";
-        const dir     = url.searchParams.get("dir")     || "sw";
-        const s = station.replace(/[^A-Z0-9_-]/gi, "");
-        const d = dir.replace(/[^a-z]/g, "");
-        const camUrl = `https://meteo.arso.gov.si/uploads/probase/www/observ/webcam/${s}_dir/siwc_${s}_${d}.jpg`;
-        const camRes = await fetch(camUrl, { headers: { "Referer": "https://meteo.arso.gov.si/" } });
+        const wanted = (url.searchParams.get("kamera") || url.searchParams.get("station") || "Logarska dolina").toLowerCase();
+        const wantDir = (url.searchParams.get("smer") || url.searchParams.get("dir") || "").replace(/[^a-z]/gi, "").toLowerCase();
+
+        const listRes = await fetch("https://vreme.arso.gov.si/api/1.0/webcam_list/?lang=sl", {
+          headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://vreme.arso.gov.si/" },
+          cf: { cacheTtl: 300, cacheEverything: true },
+        });
+        if (!listRes.ok) throw new Error("Seznam kamer ni dostopen: HTTP " + listRes.status);
+        const list = await listRes.json();
+
+        const cams = list?.webcam_list?.features ?? [];
+        const cam = cams.find((f) => (f.properties?.title || "").toLowerCase() === wanted)
+          || cams.find((f) => (f.properties?.id || "").toLowerCase() === wanted)
+          || cams.find((f) => (f.properties?.title || "").toLowerCase().includes(wanted));
+        if (!cam) {
+          return new Response(JSON.stringify({
+            error: "Kamera ni najdena",
+            nakamere: cams.map((f) => f.properties?.title).filter(Boolean),
+          }), { status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+
+        // directions našteje vse smeri, ki jih kamera premore, webcam_list pa
+        // skoraj vedno nosi posnetke le za eno od njih (48 od 51 kamer).
+        // Zato zahtevano smer upoštevamo le, če posnetke res ima.
+        const dirs = cam.properties?.directions ?? [];
+        const framesFor = (dd) => list[`webcam_${cam.properties.id}${dd}_data.json`] ?? [];
+        const dir = (dirs.includes(wantDir) && framesFor(wantDir).length)
+          ? wantDir
+          : dirs.find((dd) => framesFor(dd).length);
+        const frames = dir ? framesFor(dir) : [];
+        const last = frames[frames.length - 1];
+        if (!last?.path) {
+          // Nekaj kamer (npr. Ptuj, Bovec) je v seznamu, a brez posnetkov.
+          return new Response(JSON.stringify({
+            error: "Kamera trenutno nima posnetkov",
+            kamera: cam.properties.title,
+          }), { status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+
+        const camRes = await fetch("https://vreme.arso.gov.si" + last.path, {
+          headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://vreme.arso.gov.si/" },
+        });
         if (!camRes.ok) throw new Error("Kamera ni dostopna: HTTP " + camRes.status);
-        const buf = await camRes.arrayBuffer();
-        return new Response(buf, {
-          headers: { ...CORS_ALLOWED, "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=120" }
+        return new Response(await camRes.arrayBuffer(), {
+          headers: {
+            ...CORS_ALLOWED,
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "public, max-age=300",
+            "X-Kamera": cam.properties.title,
+            "X-Smer": dir || "",
+            "X-Posnet": last.valid || "",
+          }
         });
       }
 
