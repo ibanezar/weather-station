@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
 """
-tools/post_to_facebook.py — objavi povezavo do novega članka na Facebook strani.
+tools/post_to_facebook.py — objavi nov članek na Facebook strani.
 
-Kliče Graph API POST /{page-id}/feed z "message" (naslov + povzetek) in "link"
-(URL članka) — Facebook sam potegne OG sliko/naslov s ciljne strani, zato ni
-treba ročno nalagati slike.
+Naloži OG sliko članka neposredno prek Graph API POST /{page-id}/photos
+(caption = besedilo + link) namesto da bi se zanašal na to, da Facebook sam
+pravočasno prebere OG meta podatke s ciljne strani (ta cache je nezanesljiv
+v prvih minutah po objavi). Če nalaganje slike iz kakršnegakoli razloga
+spodleti, se skript vrne na preprost POST /{page-id}/feed z linkom.
+
+Besedilo objave je prilagojeno tipu članka (razpoznan po predponi sluga):
+  vremenski-povzetek-   → mesečni povzetek
+  nevihtni-opazovalec-  → nevihtni opazovalec (storm-watch)
+  arso-opozorilo-       → ARSO opozorilo (newsjacking)
+  invazivk(a|e)-        → invazivke-alarm
+  (drugo)               → dnevni/ročni članek
 
 Rabi okoljski spremenljivki FB_PAGE_ID in FB_PAGE_TOKEN (trajni Page Access
 Token za stran Meteorec, shranjen kot GitHub secret).
 
-Wired into: .github/workflows/daily-post.yml, .github/workflows/monthly-post.yml
+Wired into: .github/workflows/daily-post.yml, monthly-post.yml,
+storm-watch.yml, arso-newsjack.yml, invasive-watch.yml
 (po uspešnem push-u novega članka na main).
 
 Usage:
@@ -19,8 +29,56 @@ import json, os, sys, urllib.request, urllib.error, urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BLOG_JSON = os.path.join(ROOT, "blog.json")
+SITE = "https://meteorec.si"
+GRAPH = "https://graph.facebook.com/v21.0"
 
-GRAPH_URL = "https://graph.facebook.com/v21.0/{page_id}/feed"
+PREFIXES = (
+    ("vremenski-povzetek-", "📊 Mesečni povzetek"),
+    ("nevihtni-opazovalec-", "⛈️ Nevihtni opazovalec"),
+    ("arso-opozorilo-", "🚨 ARSO opozorilo"),
+    ("invazivka-", "🌿 Invazivke-alarm"),
+    ("invazivke-", "🌿 Invazivke-alarm"),
+)
+
+
+def label_for(slug):
+    for prefix, label in PREFIXES:
+        if slug.startswith(prefix):
+            return label
+    return None
+
+
+def build_message(post):
+    label = label_for(post["slug"])
+    lines = [f"{label}: {post['title']}"] if label else [post["title"]]
+    if post.get("summary"):
+        lines.append(post["summary"])
+    post_url = f"{SITE}{post['url']}"
+    lines.append(post_url)
+    return "\n\n".join(lines), post_url
+
+
+def post_with_photo(page_id, token, post, message, post_url):
+    photo_url = f"{SITE}/og/{post['slug']}.jpg"
+    payload = urllib.parse.urlencode({
+        "url": photo_url,
+        "caption": message,
+        "access_token": token,
+    }).encode()
+    req = urllib.request.Request(f"{GRAPH}/{page_id}/photos", data=payload, method="POST")
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.read().decode()
+
+
+def post_link_only(page_id, token, message, post_url):
+    payload = urllib.parse.urlencode({
+        "message": message,
+        "link": post_url,
+        "access_token": token,
+    }).encode()
+    req = urllib.request.Request(f"{GRAPH}/{page_id}/feed", data=payload, method="POST")
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.read().decode()
 
 
 def main():
@@ -37,26 +95,20 @@ def main():
         print(f"Ni najdenega članka za objavo na Facebook (slug={slug!r}).", file=sys.stderr)
         return 1
 
-    post_url = f"https://meteorec.si{post['url']}"
-    message = post["title"]
-    if post.get("summary"):
-        message += "\n\n" + post["summary"]
+    message, post_url = build_message(post)
 
-    payload = urllib.parse.urlencode({
-        "message": message,
-        "link": post_url,
-        "access_token": token,
-    }).encode()
-
-    req = urllib.request.Request(
-        GRAPH_URL.format(page_id=page_id),
-        data=payload,
-        method="POST",
-    )
     try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            print(f"Facebook: objavljeno — {r.read().decode()}")
-            return 0
+        body = post_with_photo(page_id, token, post, message, post_url)
+        print(f"Facebook: objavljeno (s sliko) — {body}")
+        return 0
+    except urllib.error.HTTPError as e:
+        photo_err = e.read().decode("utf-8", "replace")[:300]
+        print(f"Facebook: nalaganje slike spodletelo ({e.code}: {photo_err}), poskušam z navadnim linkom …", file=sys.stderr)
+
+    try:
+        body = post_link_only(page_id, token, message, post_url)
+        print(f"Facebook: objavljeno (link) — {body}")
+        return 0
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace")[:500]
         print(f"Facebook napaka {e.code}: {body}", file=sys.stderr)
