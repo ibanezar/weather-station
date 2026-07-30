@@ -88,3 +88,24 @@ jobs:
               body = e.read().decode("utf-8", "replace")[:200]
               print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
           PYEOF
+
+      - name: Objavi na Facebook strani
+        if: steps.commit.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          SLUGS=$(python3 -c "
+          import json
+          posts = json.load(open('blog.json', encoding='utf-8'))
+          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
+          print('\n'.join(today[:5]))
+          ")
+          if [ -z "$SLUGS" ]; then
+            echo "Brez novih invazivke objav za Facebook."
+          else
+            echo "$SLUGS" | while read -r slug; do
+              python3 tools/post_to_facebook.py "$slug"
+            done
+          fi

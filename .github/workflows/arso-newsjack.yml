@@ -82,3 +82,11 @@ jobs:
               body = e.read().decode("utf-8", "replace")[:200]
               print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
           PYEOF
+
+      - name: Objavi na Facebook strani
+        if: steps.commit.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_to_facebook.py
