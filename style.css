@@ -1529,13 +1529,18 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 /* Windy */
 .windy-frame{width:100%;height:420px;border:0;border-radius:14px;display:block}
-/* Spletna kamera ARSO (Logarska dolina) */
-.valcam-fig{margin:0}
+/* Spletne kamere ARSO — mreža 2×2 (Savinjska regija) */
+.valcam-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+/* Ena sama kamera naj ne visi v pol širine. */
+.valcam-grid-1{grid-template-columns:1fr}
+.valcam-fig{margin:0;min-width:0}
 /* aspect-ratio drži višino že pred nalaganjem slike, da se kartica pod njo
    ne premakne; width/height na <img> sta rezerva za stare brskalnike. */
 .valcam-img{width:100%;height:auto;aspect-ratio:1023/520;object-fit:cover;
   border-radius:14px;display:block;background:var(--nc-track)}
-.valcam-cap{font-size:.72rem;color:var(--muted);margin-top:.5rem}
+.valcam-cap{font-size:.72rem;color:var(--muted);margin-top:.4rem}
+/* Na telefonu sta dva stolpca preozka, da bi se na sliki še kaj razločilo. */
+@media(max-width:640px){.valcam-grid{grid-template-columns:1fr;gap:1.1rem}}
 /* Heatmap */
 .hm-outer{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.5rem}
 .hm-svg{display:block}
