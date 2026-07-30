@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 30 Jul 2026 05:42:41 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 30 Jul 2026 09:40:00 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vročinski val se stopnjuje: v Zgornji Savinjski dolini jutri do 36,4 °C</title>
+      <link>https://meteorec.si/blog/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.html</guid>
+      <pubDate>Thu, 30 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Vročina v Zgornji Savinjski dolini ta teden še narašča. Danes 34,9 °C, jutri že do 36,4 °C. Analiza razmer na postaji IREICA1 v Rečici ob Savinji.</description>
+      <category>vročina</category>
+      <category>vročinski val</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Koliko manj dežja je letos padlo do 29. julija? Primerjava s preteklimi leti</title>
       <link>https://meteorec.si/blog/letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730.html</link>

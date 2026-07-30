@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.html</loc>
+    <lastmod>2026-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730.html</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
@@ -792,6 +799,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vrocina/</loc>
+    <lastmod>2026-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/vrocinski-val/</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
