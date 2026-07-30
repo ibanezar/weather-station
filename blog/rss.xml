@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 30 Jul 2026 10:37:35 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 30 Jul 2026 17:00:26 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Poplave avgusta 2023: 257 mm, ki jih postaja ni zapisala</title>
+      <link>https://meteorec.si/blog/poplave-2023-kaj-je-izmerila-postaja.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/poplave-2023-kaj-je-izmerila-postaja.html</guid>
+      <pubDate>Thu, 30 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Med ujmo 3.–6. avgusta 2023 je postaja IREICA1 štiri dni molčala, dežemer pa je tekel naprej. Iz kumulativnih števcev sem obnovil 257,0 mm padavin – in to primerjal z izrazito suhim poletjem 2026.</description>
+      <category>poplave</category>
+      <category>padavine</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>suša</category>
+    </item>
     <item>
       <title>Vročinski val se stopnjuje: v Zgornji Savinjski dolini jutri do 36,4 °C</title>
       <link>https://meteorec.si/blog/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.html</link>

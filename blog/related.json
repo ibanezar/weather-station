@@ -1,4 +1,9 @@
 {
+  "poplave-2023-kaj-je-izmerila-postaja": [
+    "napoved-avgust-2026-zgornja-savinjska-dolina",
+    "letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730",
+    "podnebna-zgodovina-recica-savinji-1950-2025"
+  ],
   "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727",
@@ -12,12 +17,12 @@
   "anketa-android-aplikacija-meteorec": [
     "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "vrocinski-val-konec-julija-2026",
-    "hmelj-vreme-julij-rastne-stopinje-vodna-bilanca"
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "napoved-avgust-2026-zgornja-savinjska-dolina": [
+    "poplave-2023-kaj-je-izmerila-postaja",
     "letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730",
-    "temperaturni-trend-ireica1-2020-2025",
-    "susa-savinjska-dolina-hidrologija"
+    "temperaturni-trend-ireica1-2020-2025"
   ],
   "reke-megle-temperaturna-inverzija-recica-savinji": [
     "tropske-noci-inverzija-savinjska-dolina",
@@ -36,7 +41,7 @@
   ],
   "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725": [
     "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712",
-    "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712",
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
     "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723"
   ],
   "razmere-za-pohod-v-savinjske-alpe-ta-konec-tedna-kdaj-veter-0724": [
@@ -45,9 +50,9 @@
     "nevihtni-obeti-11-julij-2026"
   ],
   "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723": [
-    "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
     "napoved-julij-2026",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
+    "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
+    "julij-skozi-zgodovino-recica-savinji"
   ],
   "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -176,8 +181,8 @@
   ],
   "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727",
-    "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713"
+    "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713",
+    "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727"
   ],
   "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
@@ -211,8 +216,8 @@
   ],
   "300-let-poplav-na-savinji": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
-    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
-    "susa-savinjska-dolina-hidrologija"
+    "poplave-2023-kaj-je-izmerila-postaja",
+    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723"
   ],
   "velika-pozarna-ogrozenost-8-julij-2026": [
     "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
@@ -300,8 +305,8 @@
     "nevihte-toca-hudourniki-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
-    "vremenski-povzetek-maj-2026",
     "vremenski-povzetek-april-2026",
+    "vremenski-povzetek-maj-2026",
     "junij-2026-dvoglavi-mesec"
   ],
   "nevihte-toca-hudourniki-julij-2026": [

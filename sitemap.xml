@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/poplave-2023-kaj-je-izmerila-postaja.html</loc>
+    <lastmod>2026-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/poplave-2023-kaj-je-izmerila-postaja.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730.html</loc>
     <lastmod>2026-07-30</lastmod>
     <changefreq>monthly</changefreq>
