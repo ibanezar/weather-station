@@ -1454,6 +1454,10 @@ export default {
         });
         const ewRes = await fetch(ewUrl);
         const ewData = await ewRes.json();
+        // Postaja meri tudi v hiši. To je zasebno in ne sodi ven — niti na
+        // stran, niti v članke, niti komurkoli, ki ta endpoint pokliče.
+        // Režemo tu, pri viru, da noben odjemalec tega sploh ne more videti.
+        if (ewData && ewData.data) delete ewData.data.indoor;
         return new Response(JSON.stringify(ewData), {
           headers: {...CORS_ALLOWED, "Content-Type":"application/json", "Cache-Control":"max-age=120"}
         });

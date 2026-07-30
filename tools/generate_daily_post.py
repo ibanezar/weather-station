@@ -169,11 +169,22 @@ def fetch_json(url, timeout=15):
 
 
 def fetch_current():
+    """Trenutne razmere postaje, brez meritev iz hiše.
+
+    Postaja meri tudi notranjo temperaturo in vlago. To je Filipova zasebna
+    stvar in ne sme v članek — celoten odgovor gre v `call_claude` kot
+    `trenutne_razmere`, zato bi model o njej pisal, če bi jo videl (30. 7.
+    2026 se je to tudi zgodilo). Worker blok že reže pri viru; tu ga režemo
+    še enkrat, da to ne visi na eni sami obrambi.
+    """
     try:
-        return fetch_json(PROXY + "/ecowitt-current")
+        current = fetch_json(PROXY + "/ecowitt-current")
     except Exception as e:
         print(f"⚠ /ecowitt-current ni uspel: {e}")
         return None
+    if isinstance(current, dict) and isinstance(current.get("data"), dict):
+        current["data"].pop("indoor", None)
+    return current
 
 
 def fetch_hourly():
@@ -982,14 +993,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 {callout_html}
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">{article["sources_note"]}</p>
 
-    <div class="share-bar" id="share-bar">
-      <span class="share-label">Deli</span>
-      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp">WhatsApp</a>
-      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X">X</a>
-      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku">Facebook</a>
-      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo"><span id="copy-label">Kopiraj</span></button>
-      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none">Deli</button>
-    </div>
+    <!-- Vrstico za deljenje izriše /blog/share-bar.js (edini vir za vse generatorje). -->
 
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
@@ -1002,29 +1006,9 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 </div>
 
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script>
-(function () {{
-  const PAGE_URL   = "{url}";
-  const PAGE_TITLE = "{title} | Meteorec";
-  const PAGE_TEXT  = "{desc}";
-  const enc = encodeURIComponent;
-  document.getElementById('btn-wa').href = 'https://wa.me/?text=' + enc(PAGE_TEXT + ' ' + PAGE_URL);
-  document.getElementById('btn-x').href = 'https://x.com/intent/tweet?text=' + enc(PAGE_TEXT) + '&url=' + enc(PAGE_URL);
-  document.getElementById('btn-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc(PAGE_URL);
-  document.getElementById('btn-copy').addEventListener('click', function () {{
-    var label = document.getElementById('copy-label');
-    if (navigator.clipboard) {{
-      navigator.clipboard.writeText(PAGE_URL).then(function () {{ label.textContent = 'Kopirano!'; setTimeout(function () {{ label.textContent = 'Kopiraj'; }}, 2000); }});
-    }}
-  }});
-  if (navigator.share) {{
-    var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
-    nb.addEventListener('click', function () {{ navigator.share({{ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }}).catch(function () {{}}); }});
-  }}
-}})();
-</script>
 <script src="likes.js" defer></script>
 <script src="/blog/comments.js" defer></script>
+<script src="/blog/share-bar.js" defer></script>
 <script src="/blog/article-enhance.js" defer></script>
 <script src="/blog/subscribe.js" defer></script>
 {chart_scripts_html}
