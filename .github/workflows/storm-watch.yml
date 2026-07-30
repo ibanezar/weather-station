@@ -117,6 +117,10 @@ jobs:
               sys.exit(1)
           PYEOF
 
+      - name: Počakaj, da GitHub Pages postreže objavo
+        if: steps.commit.outputs.published == 'true'
+        run: python3 tools/wait_for_deploy.py
+
       - name: Objavi na Facebook strani
         if: steps.commit.outputs.published == 'true'
         continue-on-error: true

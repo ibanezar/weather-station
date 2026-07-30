@@ -139,6 +139,17 @@ jobs:
               sys.exit(1)
           PYEOF
 
+      - name: Počakaj, da GitHub Pages postreže objavo
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          MONTH="${{ steps.month.outputs.month }}"
+          SLUG=$(python3 -c "
+          MONTH_NAMES = {'01':'januar','02':'februar','03':'marec','04':'april','05':'maj','06':'junij','07':'julij','08':'avgust','09':'september','10':'oktober','11':'november','12':'december'}
+          year, mon = '$MONTH'[:4], '$MONTH'[5:7]
+          print(f'vremenski-povzetek-{MONTH_NAMES[mon]}-{year}')
+          ")
+          python3 tools/wait_for_deploy.py "$SLUG"
+
       - name: Objavi na Facebook strani
         if: steps.commit.outputs.published == 'true'
         continue-on-error: true

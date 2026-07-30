@@ -89,6 +89,19 @@ jobs:
               print(f"IndexNow napaka {e.code}: {body}", file=sys.stderr)
           PYEOF
 
+      - name: Počakaj, da GitHub Pages postreže objave
+        if: steps.commit.outputs.published == 'true'
+        run: |
+          SLUGS=$(python3 -c "
+          import json
+          posts = json.load(open('blog.json', encoding='utf-8'))
+          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
+          print('\n'.join(today[:5]))
+          ")
+          if [ -n "$SLUGS" ]; then
+            python3 tools/wait_for_deploy.py $SLUGS
+          fi
+
       - name: Objavi na Facebook strani
         if: steps.commit.outputs.published == 'true'
         continue-on-error: true
