@@ -200,6 +200,8 @@ article strong{color:#fff}
 .share-btn.wa  { background: #25d366; color: #fff; }
 .share-btn.x   { background: #000;    color: #fff; }
 .share-btn.fb  { background: #1877f2; color: #fff; }
+/* Instagram nima ene znamčne barve — uradni preliv gre iz rumene v vijolično. */
+.share-btn.ig  { background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 55%,#6228d7 100%); color: #fff; }
 .share-btn.copy { background: rgba(77,159,248,.15); color: var(--blue); border: 1px solid rgba(77,159,248,.3); }
 .share-btn.native { background: rgba(255,255,255,.08); color: #e8edf8; border: 1px solid rgba(255,255,255,.12); }
 
