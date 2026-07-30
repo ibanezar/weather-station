@@ -124,3 +124,11 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
         run: python3 tools/post_to_facebook.py
+
+      - name: Objavi na Instagramu
+        if: steps.commit.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_to_instagram.py

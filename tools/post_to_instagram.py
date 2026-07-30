@@ -49,7 +49,8 @@ def build_caption(post):
     lines.append(f"Cel članek: {SITE}{post['url']}")
     lines.append("(povezava je tudi v bio)")
     if post.get("tags"):
-        lines.append(" ".join(f"#{t}" for t in ("meteorec", "vreme", *post["tags"]) if t.replace("-", "").isalnum()))
+        cleaned = (t.replace("-", "") for t in ("meteorec", "vreme", *post["tags"]))
+        lines.append(" ".join(f"#{t}" for t in cleaned if t.isalnum()))
     return "\n\n".join(lines)
 
 

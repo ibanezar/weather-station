@@ -109,3 +109,24 @@ jobs:
               python3 tools/post_to_facebook.py "$slug"
             done
           fi
+
+      - name: Objavi na Instagramu
+        if: steps.commit.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          SLUGS=$(python3 -c "
+          import json
+          posts = json.load(open('blog.json', encoding='utf-8'))
+          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
+          print('\n'.join(today[:5]))
+          ")
+          if [ -z "$SLUGS" ]; then
+            echo "Brez novih invazivke objav za Instagram."
+          else
+            echo "$SLUGS" | while read -r slug; do
+              python3 tools/post_to_instagram.py "$slug"
+            done
+          fi
