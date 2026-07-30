@@ -1,5 +1,24 @@
 # Meteorec — navodila za delo z blogom
 
+## NIKOLI ne objavljaj meritev iz hiše
+
+Postaja poleg zunanjih meri tudi **notranjo temperaturo in vlago**. To je
+Filipova zasebna stvar in ne gre ven — ne v članek, ne na stran, ne v
+objavo na FB/IG. Nobene izjeme.
+
+Kje je to zarezano (če dodajaš nov vir ali odjemalca, zareži tudi tam):
+
+- `worker.js`, `/ecowitt-current` — blok `indoor` se izbriše pri viru, tako
+  da ga noben odjemalec sploh ne dobi.
+- `tools/generate_daily_post.py`, `fetch_current()` — blok se izbriše še
+  enkrat, ker gre cel odgovor v `call_claude()` kot `trenutne_razmere` in bi
+  model o njem pisal, če bi ga videl.
+- `app.js`, Ecowitt kartica — notranjih meritev ne prikazuje.
+
+Zgodilo se je 30. 7. 2026: dnevni članek je objavil notranjo temperaturo in
+občuteno temperaturo v hiši, ker je surov Ecowitt odgovor romal naravnost v
+model. Odstavek je odstranjen, obe zarezi sta postavljeni.
+
 ## Lektura je OBVEZNA za vsak članek
 
 Vsak blog članek — ne glede na to, ali ga generira avtomatika ali je napisan

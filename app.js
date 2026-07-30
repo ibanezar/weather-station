@@ -7561,10 +7561,8 @@ async function fetchEcowittCurrent(){
     }
     const d=data.data||{};
     const items=[];
-    const inT=d.indoor?.temperature?.value;
-    const inH=d.indoor?.humidity?.value;
-    if(inT!=null)items.push({icon:'🌡',val:parseFloat(inT).toFixed(1)+'°C',lbl:'Notranja T',col:'var(--text)'});
-    if(inH!=null)items.push({icon:'💧',val:parseFloat(inH).toFixed(0)+'%',lbl:'Notranja vlaga',col:'var(--blue)'});
+    // Notranje temperature in vlage tu namenoma ni: postaja ju meri, a sta
+    // zasebni in ne gresta ven. Worker ju reže že pri viru (/ecowitt-current).
     const co2=d.co2?.co2?.value;
     if(co2!=null){const ppm=Math.round(co2);items.push({icon:'🌬',val:ppm+' ppm',lbl:'CO₂',col:ppm<800?'var(--green)':ppm<1200?'var(--amber)':'var(--red)'});}
     const pm=d.pm25?.pm25?.value??d.pm25_ch1?.pm25?.value;
