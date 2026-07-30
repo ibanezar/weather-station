@@ -12,7 +12,9 @@ ni live, naj FB/IG koraka vseeno poskusita (continue-on-error itak ne podre
 workflowa).
 
 Usage:
-  python3 tools/wait_for_deploy.py [slug ...]   # brez sluga: zadnji članek (blog.json[0])
+  python3 tools/wait_for_deploy.py [slug ...]     # brez sluga: zadnji članek (blog.json[0])
+  python3 tools/wait_for_deploy.py --url <URL>    # poljuben URL (npr. kartica za FB/IG objavo,
+                                                  # ki ni članek -- glej daily_fact_social.py)
 """
 import json, os, sys, time, urllib.request, urllib.error
 
@@ -47,7 +49,23 @@ def wait_for(post):
     return False
 
 
+def wait_for_url(url):
+    deadline = time.time() + MAX_WAIT_SECONDS
+    while time.time() < deadline:
+        if url_is_live(url):
+            print(f"Live: {url}")
+            return True
+        time.sleep(POLL_INTERVAL)
+    print(f"Po {MAX_WAIT_SECONDS}s še ni live — nadaljujem vseeno: {url}", file=sys.stderr)
+    return False
+
+
 def main():
+    if sys.argv[1:2] == ["--url"]:
+        for url in sys.argv[2:]:
+            wait_for_url(url)
+        return 0
+
     posts = json.load(open(BLOG_JSON, encoding="utf-8"))
     slugs = sys.argv[1:] or [None]
     for slug in slugs:

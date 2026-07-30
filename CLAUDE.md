@@ -67,6 +67,35 @@ FB/IG ne podre objave članka).
   (re)objavo poljubnega članka po slugu (prazno = zadnji), uporaben tudi za
   end-to-end test secretov.
 
+### Dnevna objava, ki ni članek (dnevno dejstvo)
+
+Dnevni članek nastane samo, če Filip zjutraj izbere predlog — ob dnevih brez
+izbire prej ni šlo ven nič. Zato gre enkrat dnevno na FB/IG tudi **dnevno
+dejstvo**, isto, ki ga `generate_daily_fact.py` postavi na naslovnico.
+
+- **`tools/daily_fact_social.py`** — pripravi objavo: izbere dejstvo prek
+  `pick_fact()` (skupno z naslovnico, brez podvojene logike), nariše kartico
+  in sestavi besedilo za FB in IG. Preskoči, če je **danes že izšel članek**
+  (ta ima svojo objavo — dve na dan sta preveč) ali je isto dejstvo že
+  obdelano (`tools/.daily_fact_social_state.json`).
+- **`tools/make_social_card.py`** — kvadratna kartica 1080×1080 (`og/social/`).
+  OG slike člankov so 1200×630 in jih IG obreže čez naslov; samostojne objave
+  zato dobijo svojo kvadratno kartico. Hrani se zadnjih 14 — FB in IG si sliko
+  ob objavi prekopirata na svoj strežnik, zato starejših ne rabimo.
+- **`tools/post_social.py`** — splošen objavljalnik (slika + besedilo), za
+  razliko od `post_to_facebook.py`/`post_to_instagram.py` ni vezan na
+  `blog.json`. Po istem tiru lahko kasneje tečejo še pragovi/rekordi,
+  gobarski indeks, nevihtna napoved …
+- **`.github/workflows/daily-fact-social.yml`** — 7:00 UTC (9:00 po naši uri),
+  torej po jutranjem e-mailu s predlogi. Kartico najprej potisne na `main` in
+  počaka na deploy (`wait_for_deploy.py --url`), ker FB in IG sliko prenašata
+  po javnem URL-ju; šele nato objavi.
+
+Vir dejstva je izključno `history.json` (dnevni zunanji agregati) — brez
+modela in brez `/ecowitt-current`, zato po tej poti notranje meritve ne morejo
+uiti. Besedilo sestavljajo predloge, ne model, zato lektura tu ne teče; če bo
+kdaj katero od teh objav pisal model, mora skozi `call_lektor`.
+
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
 Token — Meta app "Meteorec", App ID 4757580174464018), `IG_ACCOUNT_ID`,
 `IG_ACCESS_TOKEN` (Instagram Business Login token, ~60 dni, ročno se osveži

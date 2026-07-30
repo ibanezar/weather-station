@@ -1,0 +1,99 @@
+name: Dnevno dejstvo na FB/IG
+
+on:
+  schedule:
+    # 7:00 UTC (9:00 po naši uri). Namenoma po jutranjem e-mailu s predlogi
+    # članka: če je Filip do takrat članek že objavil, ima ta svojo objavo na
+    # FB/IG in dejstvo odpade (preverja tools/daily_fact_social.py).
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = objavi tudi, če je dan že obdelan ali je danes izšel članek'
+        required: false
+        default: 'false'
+
+jobs:
+  objava:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Namesti odvisnosti
+        run: pip install Pillow --quiet
+
+      - name: Pridobi naključno fotko z Google Drive
+        continue-on-error: true
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          GDRIVE_FOLDER_RESOURCE_KEY: ${{ secrets.GDRIVE_FOLDER_RESOURCE_KEY }}
+        run: |
+          PHOTO_PATH=$(python3 tools/fetch_drive_photo.py)
+          if [ -n "$PHOTO_PATH" ]; then
+            echo "DRIVE_PHOTO_PATH=$PHOTO_PATH" >> "$GITHUB_ENV"
+          fi
+
+      - name: Pripravi kartico in besedilo objave
+        id: prep
+        run: |
+          python3 tools/daily_fact_social.py \
+            --caption-dir "$RUNNER_TEMP" \
+            ${{ inputs.force == 'true' && '--force' || '' }}
+
+      - name: Commit & push kartice
+        if: steps.prep.outputs.skip == 'false'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add og/social tools/.daily_fact_social_state.json tools/.photo_rotation_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            exit 0
+          fi
+          git commit -m "social: kartica dnevnega dejstva $(date -u +%Y-%m-%d) [skip ci]"
+          # Druge avtomatizacije commitajo na main sočasno -- brez rebase+retry
+          # push redno pade (enak vzorec kot v daily-post.yml).
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
+
+      - name: Počakaj, da je kartica live
+        if: steps.prep.outputs.skip == 'false'
+        run: python3 tools/wait_for_deploy.py --url "${{ steps.prep.outputs.image_url }}"
+
+      - name: Objavi na Facebook
+        if: steps.prep.outputs.skip == 'false'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          python3 tools/post_social.py --only fb \
+            --image-url "${{ steps.prep.outputs.image_url }}" \
+            --text-file "${{ steps.prep.outputs.caption_fb }}" \
+            --link "https://meteorec.si/"
+
+      - name: Objavi na Instagram
+        if: steps.prep.outputs.skip == 'false'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          python3 tools/post_social.py --only ig \
+            --image-url "${{ steps.prep.outputs.image_url }}" \
+            --text-file "${{ steps.prep.outputs.caption_ig }}"

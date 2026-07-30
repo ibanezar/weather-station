@@ -16,6 +16,13 @@ zanimivosti, izbere se prvi, ki velja):
   4. percentilna uvrstitev tega koledarskega dne med vsemi leti meritev
   5. primerjava z istim datumom lani (fallback — velja skoraj vedno)
 
+Izbirnik (`pick_fact()`) je ločen od HTML ovoja, ker isto dejstvo uporabi
+tudi tools/daily_fact_social.py za dnevno objavo na FB/IG — ista številka
+na strani in v objavi, brez podvojene logike.
+
+Vir je izključno history.json (dnevni zunanji agregati postaje) — notranjih
+meritev ne vsebuje, zato tu ni česa rezati.
+
 Wired into: .github/workflows/update-history.yml (dnevno, po posodobitvi
 history.json).
 
@@ -100,15 +107,17 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
                  f'{label} <strong>{num(today_v)}{unit}</strong>. S tem je padel dosedanji rekord '
                  f'{num(rec_val)}{unit} iz leta {rec_date[:4]}, v {years}-letni zgodovini meritev postaje IREICA1.')
         icon = "🏆"
+        kind = "rekord"
     elif diff < 1.0:
         score = 80
         text = (f'{word}, {dm_label(last)}, nas je na Rečici ob Savinji od rekorda za ta koledarski dan ločilo le '
                  f'<strong>{num(diff)}{unit}</strong> — {label} smo izmerili {num(today_v)}{unit}, rekord je '
                  f'{num(rec_val)}{unit} iz leta {rec_date[:4]}.')
         icon = "📈"
+        kind = "blizu-rekorda"
     else:
         return None
-    return (score, icon, text)
+    return (score, icon, text, kind)
 
 
 def fact_streak(hist, last):
@@ -135,12 +144,14 @@ def fact_streak(hist, last):
         text = (f'Na Rečici ob Savinji dežuje že <strong>{streak}. zaporedni dan</strong> — '
                  f'nenavadno dolgo mokro obdobje za {dm_label(last)}.')
         icon = "🌧️"
+        kind = "niz-moker"
     else:
         score = 60 + min(streak, 20)
         text = (f'Na Rečici ob Savinji dežja ni bilo že <strong>{streak} dni zapored</strong> — '
                  f'sušni niz se tako nadaljuje.')
         icon = "☀️"
-    return (score, icon, text)
+        kind = "niz-suh"
+    return (score, icon, text, kind)
 
 
 def fact_percentile(hist, last, mmdd):
@@ -163,13 +174,15 @@ def fact_percentile(hist, last, mmdd):
         text = (f'{dm_label(last)} se letos uvršča med najtoplejše koledarske dni v {years}-letni zgodovini '
                  f'meritev postaje IREICA1 — na <strong>{rank}. mesto</strong> z {num(today_v)} °C.')
         icon = "🌡️"
+        kind = "vroc-dan"
     else:
         rank_from_bottom = years - rank + 1
         score = 50
         text = (f'{dm_label(last)} se letos uvršča med najhladnejše koledarske dni v {years}-letni zgodovini '
                  f'meritev postaje IREICA1 — na <strong>{rank_from_bottom}. mesto</strong> z {num(today_v)} °C.')
         icon = "❄️"
-    return (score, icon, text)
+        kind = "hladen-dan"
+    return (score, icon, text, kind)
 
 
 def fact_year_ago(hist, last):
@@ -195,11 +208,17 @@ def fact_year_ago(hist, last):
         text = (f'{dm_label(last)} je bilo letos za <strong>{num(-diff)} °C hladneje</strong> kot na isti dan lani — '
                  f'{num(today_v)} °C letos proti {num(prev_temp)} °C lani.')
         icon = "📊"
-    return (10, icon, text)
+    return (10, icon, text, "lani")
 
 
-def build_block():
-    hist = json.load(open(HIST, encoding="utf-8"))
+def pick_fact(hist=None):
+    """Izbere najzanimivejše veljavno dejstvo za zadnji izmerjeni dan.
+
+    Vrne slovar {date, icon, text, kind, day} ali None, če je podatkov premalo.
+    `text` je HTML (vsebuje <strong>) — za golo besedilo uporabi plain().
+    """
+    if hist is None:
+        hist = json.load(open(HIST, encoding="utf-8"))
     real = [k for k in hist if hist[k].get("src") != "era5"]
     if not real:
         return None
@@ -223,8 +242,21 @@ def build_block():
     if not candidates:
         return None
 
-    _, icon, text = max(candidates, key=lambda c: c[0])
-    return wrap(icon, text, last)
+    _, icon, text, kind = max(candidates, key=lambda c: c[0])
+    return {"date": last, "icon": icon, "text": text, "kind": kind,
+            "day": hist[last]}
+
+
+def plain(text):
+    """HTML dejstva -> golo besedilo (za podnapis objave na FB/IG)."""
+    return re.sub(r"<[^>]+>", "", text)
+
+
+def build_block():
+    fact = pick_fact()
+    if fact is None:
+        return None
+    return wrap(fact["icon"], fact["text"], fact["date"])
 
 
 def main():
