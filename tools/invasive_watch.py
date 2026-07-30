@@ -541,6 +541,10 @@ def publish_alert(alert, now_utc, wire):
     if wire:
         try:
             from generate_og_images import make_og
+            from fetch_drive_photo import fetch_random_photo
+            photo = fetch_random_photo()
+            if photo:
+                os.environ["DRIVE_PHOTO_PATH"] = photo
             make_og({"slug": slug, **og_meta})
         except Exception as e:
             print(f"⚠ OG slika preskočena: {e}")
@@ -666,6 +670,10 @@ def publish_monthly_digest(config, state, output, wire):
     if wire:
         try:
             from generate_og_images import make_og
+            from fetch_drive_photo import fetch_random_photo
+            photo = fetch_random_photo()
+            if photo:
+                os.environ["DRIVE_PHOTO_PATH"] = photo
             make_og({"slug": slug, "title": "Mesečni pregled\ninvazivnih vrst", "subtitle": "Zgornja Savinjska dolina",
                      "section": "Invazivke", "accent": (34, 197, 94), "photo": "misty-valley"})
         except Exception as e:

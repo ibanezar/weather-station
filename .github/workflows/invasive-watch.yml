@@ -24,6 +24,9 @@ jobs:
       - name: Preveri nova opazovanja invazivnih vrst (iNaturalist)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          GDRIVE_FOLDER_RESOURCE_KEY: ${{ secrets.GDRIVE_FOLDER_RESOURCE_KEY }}
         run: python3 tools/invasive_watch.py --wire
 
       - name: Posodobi spoke stran /invazivke/
@@ -34,7 +37,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/invasive_state.json data/invazivke.json blog/ blog.json sitemap.xml og/ invazivke/
+          git add data/invasive_state.json data/invazivke.json blog/ blog.json sitemap.xml og/ invazivke/ tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT

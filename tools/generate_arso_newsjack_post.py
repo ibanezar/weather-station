@@ -218,6 +218,10 @@ def generate_custom_og(slug, og_meta):
     try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from generate_og_images import make_og
+        from fetch_drive_photo import fetch_random_photo
+        photo = fetch_random_photo()
+        if photo:
+            os.environ["DRIVE_PHOTO_PATH"] = photo
         make_og({"slug": slug, **og_meta})
         print(f"✓ OG slika: og/{slug}.jpg")
     except Exception as e:

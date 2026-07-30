@@ -101,6 +101,17 @@ jobs:
       - name: Namesti odvisnosti
         run: pip install Pillow --quiet
 
+      - name: Pridobi naključno fotko z Google Drive
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          GDRIVE_FOLDER_RESOURCE_KEY: ${{ secrets.GDRIVE_FOLDER_RESOURCE_KEY }}
+        run: |
+          PHOTO_PATH=$(python3 tools/fetch_drive_photo.py)
+          if [ -n "$PHOTO_PATH" ]; then
+            echo "DRIVE_PHOTO_PATH=$PHOTO_PATH" >> "$GITHUB_ENV"
+          fi
+
       - name: Generiraj dnevni članek (z lekturo)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -114,7 +125,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add blog/ blog.json sitemap.xml og/ img/ tools/.daily_post_state.json
+          git add blog/ blog.json sitemap.xml og/ img/ tools/.daily_post_state.json tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT

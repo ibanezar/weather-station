@@ -27,6 +27,10 @@ jobs:
         run: pip install Pillow --quiet
 
       - name: Preveri prag (tlak/veter) in po potrebi pripravi objavo
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          GDRIVE_FOLDER_RESOURCE_KEY: ${{ secrets.GDRIVE_FOLDER_RESOURCE_KEY }}
         run: |
           ARGS="--wire"
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
@@ -39,7 +43,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add blog/ blog.json sitemap.xml og/ tools/.storm_watch_state.json
+          git add blog/ blog.json sitemap.xml og/ tools/.storm_watch_state.json tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb — prag ni presežen ali velja hlajenje."
             echo "published=false" >> $GITHUB_OUTPUT

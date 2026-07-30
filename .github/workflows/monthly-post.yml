@@ -32,6 +32,17 @@ jobs:
       - name: Namesti odvisnosti
         run: pip install Pillow --quiet
 
+      - name: Pridobi naključno fotko z Google Drive
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_API_KEY: ${{ secrets.GDRIVE_API_KEY }}
+          GDRIVE_FOLDER_RESOURCE_KEY: ${{ secrets.GDRIVE_FOLDER_RESOURCE_KEY }}
+        run: |
+          PHOTO_PATH=$(python3 tools/fetch_drive_photo.py)
+          if [ -n "$PHOTO_PATH" ]; then
+            echo "DRIVE_PHOTO_PATH=$PHOTO_PATH" >> "$GITHUB_ENV"
+          fi
+
       - name: Generiraj objavo
         run: python3 tools/generate_monthly_post.py "${{ steps.month.outputs.month }}" --wire
 
@@ -41,7 +52,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           MONTH="${{ steps.month.outputs.month }}"
-          git add blog/ blog.json sitemap.xml og/
+          git add blog/ blog.json sitemap.xml og/ tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb — objava za $MONTH morda že obstaja."
             echo "published=false" >> $GITHUB_OUTPUT

@@ -468,7 +468,14 @@ def dark_overlay(img):
 
 
 def make_og(article):
-    photo_path = os.path.join(BG_DIR, article['photo'] + '.jpg')
+    # Fotka Filipa Eremite iz rotacije na Google Drive (glej fetch_drive_photo.py) ima
+    # prednost pred fiksnim katalogom og/bg/*.jpg -- nastavi jo prejšnji korak workflowa
+    # prek DRIVE_PHOTO_PATH, da vsaka objava dobi pravo, ne generično fotografijo.
+    drive_photo = os.environ.get('DRIVE_PHOTO_PATH')
+    if drive_photo and os.path.isfile(drive_photo):
+        photo_path = drive_photo
+    else:
+        photo_path = os.path.join(BG_DIR, article['photo'] + '.jpg')
     bg = Image.open(photo_path).convert('RGB')
     bg = smart_crop(bg, W, H)
     img = dark_overlay(bg)
