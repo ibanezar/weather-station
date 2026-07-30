@@ -369,4 +369,76 @@
       else article.appendChild(sec);
     })
     .catch(function () { /* sorodni članki so postranski */ });
+
+  // ── 5) Gumb za deljenje na Instagram ───────────────────────
+  // Instagram kot edino od omrežij v tej vrstici NIMA naslova za deljenje
+  // povezave (Facebook ima sharer.php, X intent/tweet, WhatsApp wa.me).
+  // Njihova platforma deljenja s spleta ne podpira, zato tu ni mogoče
+  // odpreti okna s pripravljeno objavo. Delujeta samo dve poti:
+  //   • na telefonu sistemski delilnik, kjer je Instagram med cilji,
+  //   • drugje kopiranje povezave, ki jo uporabnik prilepi v zgodbo,
+  //     opis profila ali sporočilo (v objavo Instagram povezav ne vzame).
+  // Gumb se vstavi tu in ne v predloge, ker sta v obtoku dve različici
+  // vrstice (z ikonami in brez) iz različnih generatorjev — to datoteko
+  // pa nalagajo vse objave, tako stare kot prihodnje.
+  (function () {
+    var bar = document.querySelector(".share-bar");
+    if (!bar || bar.querySelector(".share-btn.ig")) return;
+
+    var canon = document.querySelector('link[rel="canonical"]');
+    var ogTitle = document.querySelector('meta[property="og:title"]');
+    var ogDesc = document.querySelector('meta[property="og:description"]')
+      || document.querySelector('meta[name="description"]');
+    var PAGE_URL = (canon && canon.href) || location.href;
+    var PAGE_TITLE = (ogTitle && ogTitle.content) || document.title;
+    var PAGE_TEXT = (ogDesc && ogDesc.content) || "";
+
+    var btn = document.createElement("button");
+    btn.className = "share-btn ig";
+    btn.setAttribute("aria-label", "Deli na Instagramu");
+    btn.title = navigator.share
+      ? "Odpre sistemski delilnik, kjer je Instagram med cilji"
+      : "Instagram deljenja povezav s spleta ne podpira — povezavo kopiraj in prilepi";
+
+    // Ikono dodamo le, kadar jo imajo sosednji gumbi; starejša predloga jih
+    // je brez in bi osamljena ikona izstopala.
+    if (bar.querySelector(".share-btn svg")) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
+        + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>'
+        + '<circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> ';
+    }
+    var label = document.createElement("span");
+    label.textContent = "Instagram";
+    btn.appendChild(label);
+
+    var vrni = null;
+    btn.addEventListener("click", function () {
+      if (navigator.share) {
+        navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {});
+        return;
+      }
+      clearTimeout(vrni);
+      var povej = function (t) {
+        label.textContent = t;
+        vrni = setTimeout(function () { label.textContent = "Instagram"; }, 2600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PAGE_URL)
+          .then(function () { povej("Povezava kopirana"); })
+          .catch(function () { povej("Kopiranje ni uspelo"); });
+      } else {
+        povej("Kopiraj iz naslovne vrstice");
+      }
+    });
+
+    // Za Facebookom, da so omrežja skupaj, ločena od gumbov Kopiraj/Deli.
+    var fb = bar.querySelector(".share-btn.fb");
+    if (fb && fb.parentNode === bar) bar.insertBefore(btn, fb.nextSibling);
+    else {
+      var copy = bar.querySelector(".share-btn.copy");
+      if (copy && copy.parentNode === bar) bar.insertBefore(btn, copy);
+      else bar.appendChild(btn);
+    }
+  })();
 })();
