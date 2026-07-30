@@ -2357,39 +2357,61 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /arso-forecast ───────────────────────────────────
-      // ARSO krajevna napoved — Rečica ob Savinji
+      // ARSO krajevna napoved za dolino. Rečice ob Savinji na ARSO seznamu
+      // krajev ni (API vrne 404), zato jemljemo najbližje kraje, ki na njem
+      // so — Ljubno je ~9 km po dolini navzgor in v isti kotlini.
       if (path === "/arso-forecast") {
-        // Aggregate ARSO hourly/3-hourly metric slots into daily summaries
-        const aggregateArsoDaily = (metric) => {
-          if (!metric || !metric.length) return [];
-          const map = {};
-          for (const slot of metric) {
-            const valid = slot.valid || '';
-            const d = valid.slice(0, 10); // "YYYY-MM-DD" from ISO with offset
-            if (!d.match(/^\d{4}-\d{2}-\d{2}$/)) continue;
-            if (!map[d]) map[d] = { temps: [], slots: [] };
-            if (slot.t != null) map[d].temps.push(slot.t);
-            map[d].slots.push(slot);
-          }
-          return Object.entries(map).sort((a,b) => a[0] < b[0] ? -1 : 1).map(([date, {temps, slots}]) => {
-            const tmax = temps.length ? Math.max(...temps) : null;
-            const tmin = temps.length ? Math.min(...temps) : null;
-            // Pick midday slot for the most representative description
-            const noon = slots.find(s => (s.valid||'').includes('T12:00'))
-              || slots.find(s => (s.valid||'').includes('T11:00'))
-              || slots.find(s => (s.valid||'').includes('T13:00'))
-              || slots[Math.floor(slots.length / 2)]
-              || slots[0];
-            const desc = noon.nn || noon.clouds_lowAlt_shortText || noon.weather_shortText_sl || '';
-            return { valid_date: date, tmax, tmin, shortFcst_sl: desc };
-          });
-        }
+        const num = (v) => {
+          if (v == null || v === "") return null;
+          const n = Number(v);
+          return Number.isFinite(n) ? n : null;
+        };
 
-        const arsoUrls = [
-          "https://vreme.arso.gov.si/api/1.0/location/?location=Re%C4%8Dica+ob+Savinji&lang=sl",
-          "https://vreme.arso.gov.si/api/1.0/forecast_geo/?lat=46.3258&lon=14.9211&lang=sl",
-        ];
-        for (const arsoUrl of arsoUrls) {
+        // forecast24h ima txsyn/tnsyn — dnevni maksimum in minimum naravnost
+        // od ARSO, brez sklepanja iz vmesnih terminov.
+        const daysFrom24h = (props) => (props?.days ?? []).map((day) => {
+          const t = (day.timeline || [])[0] || {};
+          return {
+            valid_date: day.date,
+            tmax: num(t.txsyn),
+            tmin: num(t.tnsyn),
+            precip: num(t.tp_24h_acc),
+            shortFcst_sl: t.clouds_shortText_wwsyn_shortText || t.clouds_shortText || t.wwsyn_shortText || "",
+          };
+        }).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.valid_date || ""));
+
+        // Rezerva, če bi ARSO kdaj nehal pošiljati forecast24h: dnevni
+        // ekstrem sestavimo iz 3- oz. 6-urnih terminov.
+        const daysFromSlots = (props) => {
+          const map = {};
+          for (const day of props?.days ?? []) {
+            for (const slot of day.timeline || []) {
+              const d = day.date;
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(d || "")) continue;
+              if (!map[d]) map[d] = { temps: [], slots: [] };
+              const t = num(slot.t);
+              if (t != null) map[d].temps.push(t);
+              map[d].slots.push(slot);
+            }
+          }
+          return Object.entries(map).sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([date, { temps, slots }]) => {
+            // Opoldanski termin je najbolj reprezentativen za opis dneva.
+            const noon = slots.find((s) => (s.valid || "").includes("T12:00"))
+              || slots[Math.floor(slots.length / 2)] || slots[0] || {};
+            return {
+              valid_date: date,
+              tmax: temps.length ? Math.max(...temps) : null,
+              tmin: temps.length ? Math.min(...temps) : null,
+              precip: null,
+              shortFcst_sl: noon.clouds_shortText_wwsyn_shortText || noon.clouds_shortText || "",
+            };
+          });
+        };
+
+        const arsoLocations = ["Ljubno ob Savinji", "Gornji Grad", "Luče", "Celje"];
+        for (const locName of arsoLocations) {
+          const arsoUrl = "https://vreme.arso.gov.si/api/1.0/location/?location="
+            + encodeURIComponent(locName) + "&lang=sl";
           try {
             const ctrl = new AbortController();
             const tid = setTimeout(() => ctrl.abort(), 8000);
@@ -2404,15 +2426,16 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             clearTimeout(tid);
             if (!r.ok) continue;
             const json = await r.json();
-            // Normalize — ARSO returns {forecast:{location:{},metric:[]}} or {forecast:{...}}
-            const fc = json?.forecast ?? json;
-            const loc = fc?.location ?? {};
-            // If ARSO provides already-daily data, use it; otherwise aggregate hourly metric slots
-            let days = fc?.days ?? [];
-            if (!days.length && fc?.metric?.length) {
-              days = aggregateArsoDaily(fc.metric);
+            const props24 = json?.forecast24h?.features?.[0]?.properties;
+            let days = daysFrom24h(props24);
+            let props = props24;
+            if (!days.length) {
+              props = json?.forecast6h?.features?.[0]?.properties
+                || json?.forecast3h?.features?.[0]?.properties;
+              days = daysFromSlots(props);
             }
             if (!days.length) continue;
+            const loc = { title: props?.title || locName, name: props?.title || locName, id: props?.id };
             return new Response(JSON.stringify({ location: loc, days, source: arsoUrl }), {
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=1800" }
             });

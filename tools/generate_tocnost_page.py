@@ -57,6 +57,17 @@ def build_body(verification):
     arso_stats = source_stats(records, "arso")
     om_stats = source_stats(records, "open_meteo")
 
+    # ARSO nima napovedne točke za Rečico, zato njegova napoved prihaja iz
+    # najbližjega kraja na njihovem seznamu. Kateri je to, povemo naravnost —
+    # sicer bi številka izpadla kot napoved za Rečico, kar ni.
+    arso_loc = next((r["arso"].get("loc") for r in reversed(records)
+                     if r.get("arso") and r["arso"].get("loc")), None)
+    arso_note = ""
+    if arso_loc and arso_loc != "Rečica ob Savinji":
+        arso_note = (f' ARSO za Rečico ob Savinji ne objavlja krajevne napovedi, zato jemljemo '
+                     f'najbližji kraj z njihovega seznama — {arso_loc}. Open-Meteo je vezan '
+                     f'neposredno na koordinate postaje.')
+
     if n_days == 0:
         status = ('  <div class="warn-banner lvl-none">Zbiranje podatkov se je začelo danes, '
                    f'{TODAY.isoformat()}. Napovedi ARSO in Open-Meteo za jutri se dnevno beležijo, '
@@ -73,8 +84,10 @@ def build_body(verification):
 
     intro = ('  <p class="archive-intro">Vsak dan zabeležimo, kaj ARSO in Open-Meteo napovesta za jutrišnjo '
              'najvišjo/najnižjo temperaturo v Rečici ob Savinji, naslednji dan pa to primerjamo z dejansko '
-             'meritvijo postaje IREICA1. Nič se ne popravlja za nazaj — to je surova, tekoča ocena '
-             'napovedne uspešnosti za to konkretno dolino, ne za Slovenijo na splošno.</p>')
+             'meritvijo postaje IREICA1. Nobene napovedi ne popravimo ali izbrišemo za nazaj; '
+             'popravi se lahko le meritev, s katero jo primerjamo, in sicer takrat, ko arhiv postaje '
+             'naknadno dopolni nepopoln dan. To je surova, tekoča ocena napovedne uspešnosti za to '
+             'konkretno dolino, ne za Slovenijo na splošno.</p>')
 
     # ── Scoreboard kartice ──────────────────────────────────────────────
     def stat_card(label, stats, cls):
@@ -129,7 +142,7 @@ def build_body(verification):
         ("Kako točna je vremenska napoved za Zgornjo Savinjsko dolino?",
          "Ta stran dnevno meri, za koliko stopinj se napovedi ARSO in Open-Meteo za naslednji dan povprečno "
          "zmotijo glede na dejansko meritev postaje IREICA1 v Rečici ob Savinji. Trenutna povprečna napaka "
-         "je prikazana zgoraj in se dnevno posodablja — brez popravljanja za nazaj."),
+         "je prikazana zgoraj in se dnevno posodablja — nobene napovedi ne popravljamo za nazaj."),
         ("Je ARSO napoved zanesljiva?",
          "Odvisno od obdobja in spremenljivke — glej mesečni pregled spodaj. Ta stran meri samo dan vnaprej "
          "napovedano najvišjo/najnižjo temperaturo za eno konkretno lokacijo (Rečica ob Savinji), ne "
@@ -159,7 +172,8 @@ def build_body(verification):
 {faq_html}
   <p class="muted-note">Metodologija: vsak dan zabeležimo napoved ARSO in Open-Meteo za jutrišnjo najvišjo/
   najnižjo temperaturo v Rečici ob Savinji; ko dan mine, ju primerjamo z dejansko dnevno meritvijo postaje
-  IREICA1. Napaka je absolutna razlika v °C. Nobena pretekla napoved se ne popravlja ali briše.</p>
+  IREICA1. Napaka je absolutna razlika v °C. Nobena pretekla napoved se ne popravlja ali briše; kadar
+  arhiv postaje naknadno dopolni meritev za pretekli dan, napako preračunamo na dopolnjeno meritev.{arso_note}</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
     return body

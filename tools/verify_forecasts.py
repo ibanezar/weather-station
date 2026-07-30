@@ -13,6 +13,11 @@ actual measurement):
      measurement in history.json gets its error computed (|predicted -
      actual| for tmax/tmin, and precip for Open-Meteo) and is appended to
      forecast_verification.json (permanent, append-only scoreboard log).
+  1b. REFRESH — re-score already-resolved days against the current archive.
+     Predictions are never touched; only the measurement they are compared
+     against follows history.json, which keeps correcting partial days after
+     the fact. Without this the scoreboard freezes whatever the archive
+     happened to say the morning after, and publishes errors nobody made.
   2. PREDICT — fetch tomorrow's ARSO forecast (via the Cloudflare Worker,
      which proxies vreme.arso.gov.si — ARSO blocks cloud IPs) and Open-Meteo
      forecast, and log both as a new pending prediction to be resolved
@@ -58,12 +63,20 @@ def save_json(path, data):
 
 
 def fetch_arso_tomorrow(target_date):
+    """ARSO day-ahead tmax/tmin, plus the place the forecast is actually for.
+
+    ARSO has no forecast point for Rečica ob Savinji, so the Worker falls back
+    to the nearest place on its list (Ljubno ob Savinji, ~9 km up the same
+    valley). We record which one answered so the public page can say so
+    instead of implying the forecast was issued for Rečica itself.
+    """
     req = urllib.request.Request(f"{WORKER}/arso-forecast", headers=UA)
     with urllib.request.urlopen(req, timeout=20) as r:
         data = json.load(r)
+    loc = (data.get("location") or {}).get("title")
     for day in data.get("days", []):
         if day.get("valid_date") == target_date:
-            return {"tmax": day.get("tmax"), "tmin": day.get("tmin")}
+            return {"tmax": day.get("tmax"), "tmin": day.get("tmin"), "loc": loc}
     return None
 
 
@@ -94,6 +107,61 @@ def err(pred, actual):
     return round(abs(pred - actual), 1)
 
 
+def build_record(target, made_at, actual, arso, om):
+    """Assemble one verification record from a prediction + the measurement."""
+    actual_tmax = actual.get("tempHigh")
+    actual_tmin = actual.get("tempLow")
+    actual_precip = actual.get("precipTotal")
+
+    record = {
+        "date": target,
+        "made_at": made_at,
+        "actual": {"tmax": actual_tmax, "tmin": actual_tmin, "precip": actual_precip},
+    }
+    if arso:
+        record["arso"] = {
+            "tmax": arso.get("tmax"), "tmin": arso.get("tmin"),
+            "loc": arso.get("loc"),
+            "err_tmax": err(arso.get("tmax"), actual_tmax),
+            "err_tmin": err(arso.get("tmin"), actual_tmin),
+        }
+    if om:
+        record["open_meteo"] = {
+            "tmax": om.get("tmax"), "tmin": om.get("tmin"), "precip": om.get("precip"),
+            "err_tmax": err(om.get("tmax"), actual_tmax),
+            "err_tmin": err(om.get("tmin"), actual_tmin),
+            "err_precip": err(om.get("precip"), actual_precip),
+        }
+    return record
+
+
+def refresh_actuals(verification, hist):
+    """Re-sync resolved records against the station archive.
+
+    A record is resolved the morning after its target date, but history.json
+    keeps filling in: a day whose measurement was still partial when we read
+    it gets corrected later by update_history.py. The prediction is frozen —
+    that is the whole point of the scoreboard — but the measurement it is
+    scored against must track the archive, or we publish an error that was
+    never made. Missing archive days are left untouched.
+    """
+    changed = []
+    for date, record in verification.items():
+        actual = hist.get(date)
+        if actual is None:
+            continue
+        fresh = build_record(
+            date, record.get("made_at"), actual,
+            record.get("arso"), record.get("open_meteo"),
+        )
+        if fresh != record:
+            old = (record.get("actual") or {}).get("tmax")
+            new = (fresh.get("actual") or {}).get("tmax")
+            verification[date] = fresh
+            changed.append((date, old, new))
+    return changed
+
+
 def resolve_pending(pending, hist, verification):
     still_pending = []
     resolved = 0
@@ -112,31 +180,10 @@ def resolve_pending(pending, hist, verification):
                 still_pending.append(entry)
             continue
 
-        actual_tmax = actual.get("tempHigh")
-        actual_tmin = actual.get("tempLow")
-        actual_precip = actual.get("precipTotal")
-
-        record = {
-            "date": target,
-            "made_at": entry.get("made_at"),
-            "actual": {"tmax": actual_tmax, "tmin": actual_tmin, "precip": actual_precip},
-        }
-        arso = entry.get("arso")
-        if arso:
-            record["arso"] = {
-                "tmax": arso.get("tmax"), "tmin": arso.get("tmin"),
-                "err_tmax": err(arso.get("tmax"), actual_tmax),
-                "err_tmin": err(arso.get("tmin"), actual_tmin),
-            }
-        om = entry.get("open_meteo")
-        if om:
-            record["open_meteo"] = {
-                "tmax": om.get("tmax"), "tmin": om.get("tmin"), "precip": om.get("precip"),
-                "err_tmax": err(om.get("tmax"), actual_tmax),
-                "err_tmin": err(om.get("tmin"), actual_tmin),
-                "err_precip": err(om.get("precip"), actual_precip),
-            }
-        verification[target] = record
+        verification[target] = build_record(
+            target, entry.get("made_at"), actual,
+            entry.get("arso"), entry.get("open_meteo"),
+        )
         resolved += 1
     return still_pending, resolved
 
@@ -151,6 +198,12 @@ def main():
 
     still_pending, resolved = resolve_pending(pending, hist, verification)
     print(f"[{today}] Razrešenih napovedi: {resolved}, v čakalni vrsti: {len(still_pending)}")
+
+    changed = refresh_actuals(verification, hist)
+    if changed:
+        print(f"  Uskladitev z arhivom: popravljenih dni {len(changed)}")
+        for date, old, new in changed:
+            print(f"    {date}: dejanski maks. {old} → {new} °C")
 
     if any(e["target_date"] == tomorrow for e in still_pending):
         print(f"  Napoved za {tomorrow} je že zabeležena, preskačem.")
