@@ -1,0 +1,32 @@
+name: Ročna (re)objava na Facebook/Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Slug članka za objavo (prazno = zadnji članek v blog.json)'
+        required: false
+        default: ''
+
+jobs:
+  repost:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Objavi na Facebook strani
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_to_facebook.py ${{ inputs.slug }}
+
+      - name: Objavi na Instagramu
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_to_instagram.py ${{ inputs.slug }}
