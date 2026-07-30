@@ -315,6 +315,11 @@ article strong{color:#fff}
 .rss-link:hover{opacity:.85}
 .rss-link svg{flex-shrink:0}
 
+/* ── Družbena omrežja v nogi ──────────────────────────────── */
+.social-link{display:inline-flex;align-items:center;gap:.3rem;color:var(--cyan);text-decoration:none}
+.social-link:hover{opacity:.85}
+.social-link svg{flex-shrink:0}
+
 /* ── Prijava na nove članke ───────────────────────────────── */
 .subscribe-box{background:linear-gradient(135deg,rgba(77,159,248,.1),rgba(167,139,250,.08));
   border:1px solid var(--card-border);border-radius:18px;padding:1.6rem 1.5rem;margin:2.6rem 0 1.5rem;

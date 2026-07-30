@@ -235,7 +235,7 @@ def build_html(trigger, now_utc):
   </article>
   <footer class="site-foot">
     <span>© {now_utc.year} Meteorec · Rečica ob Savinji</span>
-    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a></span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a class="social-link" href="https://www.facebook.com/meteorec.si" target="_blank" rel="noopener" aria-label="Meteorec na Facebooku"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46H15.2c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z"/></svg></a> · <a class="social-link" href="https://www.instagram.com/meteorec.si" target="_blank" rel="noopener" aria-label="Meteorec na Instagramu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></span>
   </footer>
 </div>
 <script src="likes.js" defer></script>
