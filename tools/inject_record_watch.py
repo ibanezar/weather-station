@@ -19,10 +19,13 @@ Usage:
   python3 tools/inject_record_watch.py
 """
 import json, os, re, sys
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "index.html")
 HIST = os.path.join(ROOT, "history.json")
+TZ = ZoneInfo("Europe/Berlin")
 
 START = "<!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->"
 END = "<!-- WX-RECORD-WATCH:END -->"
@@ -40,6 +43,20 @@ def num(x, d=1):
 
 def wrap(text):
     return f'{START}\n  <p class="wx-static" id="wx-record-watch">{text}</p>\n  {END}'
+
+
+def day_word(last):
+    """'Danes'/'Včeraj' glede na to, kateremu koledarskemu dnevu (Europe/Berlin)
+    dejansko pripada zadnja meritev v history.json — ne glede na to, kdaj se
+    ta skript požene."""
+    now = datetime.now(TZ)
+    today_str = now.strftime("%Y-%m-%d")
+    yesterday_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    if last == today_str:
+        return "Danes"
+    if last == yesterday_str:
+        return "Včeraj"
+    return "Nazadnje"
 
 
 def build_block():
@@ -62,13 +79,14 @@ def build_block():
     rec_date, rec_val = max(prior, key=lambda dv: dv[1])
     years = len({d[:4] for d, _ in prior})
 
+    word = day_word(last)
     if today_v > rec_val:
-        text = (f'Danes ({dm_label}) smo na Rečici ob Savinji postavili nov rekord za ta koledarski dan: '
+        text = (f'{word} ({dm_label}) smo na Rečici ob Savinji postavili nov rekord za ta koledarski dan: '
                  f'<strong>{num(today_v)} °C</strong> — prejšnji rekord je bil {num(rec_val)} °C '
                  f'({rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1 na ta dan.')
     else:
         diff = rec_val - today_v
-        text = (f'Danes ({dm_label}) je bilo na Rečici ob Savinji {num(today_v)} °C — '
+        text = (f'{word} ({dm_label}) je bilo na Rečici ob Savinji {num(today_v)} °C — '
                  f'<strong>{num(diff)} °C</strong> od rekorda za ta koledarski dan '
                  f'({num(rec_val)} °C, {rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1.')
 

@@ -23,10 +23,13 @@ Usage:
   python3 tools/generate_daily_fact.py
 """
 import json, os, re, sys
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "index.html")
 HIST = os.path.join(ROOT, "history.json")
+TZ = ZoneInfo("Europe/Berlin")
 
 START = "<!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->"
 END = "<!-- WX-DAILY-FACT:END -->"
@@ -44,6 +47,20 @@ def num(x, d=1):
 
 def dm_label(iso):
     return f"{int(iso[8:10])}. {MES_NOM[int(iso[5:7])]}"
+
+
+def day_word(last):
+    """'Danes'/'Včeraj' glede na to, kateremu koledarskemu dnevu (Europe/Berlin)
+    dejansko pripada zadnja meritev v history.json — ne glede na to, kdaj se
+    ta skript požene."""
+    now = datetime.now(TZ)
+    today_str = now.strftime("%Y-%m-%d")
+    yesterday_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    if last == today_str:
+        return "Danes"
+    if last == yesterday_str:
+        return "Včeraj"
+    return "Nazadnje"
 
 
 def wrap(icon, text, date):
@@ -76,15 +93,16 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
         is_new = today_v < rec_val
         diff = rec_val - today_v if is_new else today_v - rec_val
 
+    word = day_word(last)
     if is_new:
         score = 100
-        text = (f'Danes, {dm_label(last)}, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — '
+        text = (f'{word}, {dm_label(last)}, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — '
                  f'{label} <strong>{num(today_v)}{unit}</strong>. S tem je padel dosedanji rekord '
                  f'{num(rec_val)}{unit} iz leta {rec_date[:4]}, v {years}-letni zgodovini meritev postaje IREICA1.')
         icon = "🏆"
     elif diff < 1.0:
         score = 80
-        text = (f'Danes, {dm_label(last)}, nas je na Rečici ob Savinji od rekorda za ta koledarski dan ločilo le '
+        text = (f'{word}, {dm_label(last)}, nas je na Rečici ob Savinji od rekorda za ta koledarski dan ločilo le '
                  f'<strong>{num(diff)}{unit}</strong> — {label} smo izmerili {num(today_v)}{unit}, rekord je '
                  f'{num(rec_val)}{unit} iz leta {rec_date[:4]}.')
         icon = "📈"
