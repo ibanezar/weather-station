@@ -82,6 +82,11 @@ dejstvo**, isto, ki ga `generate_daily_fact.py` postavi na naslovnico.
   OG slike člankov so 1200×630 in jih IG obreže čez naslov; samostojne objave
   zato dobijo svojo kvadratno kartico. Hrani se zadnjih 14 — FB in IG si sliko
   ob objavi prekopirata na svoj strežnik, zato starejših ne rabimo.
+  **Ozadje je vedno Filipova fotografija**: najprej rotacija z Google Drive
+  (`fetch_drive_photo.py`), ob odpovedi prenosa pa njegov arhiv iz `og/bg/`
+  (`OWN_PHOTOS`). Osem Unsplash stock fotk v `og/bg/` je za FB/IG prepovedanih
+  in `load_background()` jih zavrne z napako — objava gre ven pod njegovim
+  imenom. Ko dodaš novo lastno fotko v `og/bg/`, jo dopiši v `OWN_PHOTOS`.
 - **`tools/post_social.py`** — splošen objavljalnik (slika + besedilo), za
   razliko od `post_to_facebook.py`/`post_to_instagram.py` ni vezan na
   `blog.json`. Po istem tiru lahko kasneje tečejo še pragovi/rekordi,

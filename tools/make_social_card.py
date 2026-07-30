@@ -8,9 +8,11 @@ obreže na kvadrat in pri tem odreže naslov. Samostojne dnevne objave (dnevno
 dejstvo, kasneje lahko še pragovi/gobe/nevihte) zato dobijo svojo kvadratno
 kartico, ki je zasnovana za obrez na kvadrat od začetka.
 
-Ozadje: ista knjižnica fotografij kot OG kartice (og/bg/*.jpg), z isto
-prednostjo Filipove fotke z Google Drive prek DRIVE_PHOTO_PATH (glej
-tools/fetch_drive_photo.py). Obrez `smart_crop` je skupen z OG generatorjem.
+Ozadje je VEDNO Filipova fotografija: najprej rotacija z Google Drive prek
+DRIVE_PHOTO_PATH (tools/fetch_drive_photo.py, ~144 fotografij), ob odpovedi
+prenosa pa njegov arhiv v og/bg/ (OWN_PHOTOS). Unsplash stock fotke, ki so
+prav tako v og/bg/, so tu prepovedane — objava na FB/IG gre pod njegovim
+imenom in mora biti njegova. Obrez `smart_crop` je skupen z OG generatorjem.
 
 Uporaba kot modul:
   from make_social_card import make_card
@@ -42,6 +44,18 @@ S = 1080          # stranica kvadrata
 PAD = 72
 STATION = "IREICA1 · Rečica ob Savinji · 366 m n. m."
 
+# Filipove fotografije v og/bg/ — SAMO te smejo na kartico za FB/IG.
+# og/bg/ vsebuje tudi osem Unsplash stock fotk (seznam z URL-ji je na vrhu
+# tools/generate_og_images.py); tu so prepovedane, ker gre objava ven pod
+# Filipovim imenom. Če dodaš novo lastno fotko v og/bg/, jo dopiši sem.
+OWN_PHOTOS = {
+    "gobe-inverzija",        # jutranja inverzija nad dolino, oranžen vzhod
+    "gobe-lastna",           # gozdna tla
+    "istra-nevihta-lastna",  # kopasti oblak nad vasjo, modro nebo
+    "megla-recica-lastna",   # reke megle nad Rečico
+    "nevihta-2019",          # strela nad dolino
+}
+
 
 def font(path, size):
     return ImageFont.truetype(path, size)
@@ -61,7 +75,12 @@ def dark_overlay(img):
 
 def load_background(photo):
     """Filipova fotka z Drive, če jo je prejšnji korak workflowa naložil,
-    sicer kurirana fotka iz og/bg/."""
+    sicer njegova arhivska fotka iz og/bg/ (nikoli stock)."""
+    if photo not in OWN_PHOTOS:
+        raise ValueError(
+            f"{photo!r} ni Filipova fotografija — na kartico za FB/IG smejo samo "
+            f"{sorted(OWN_PHOTOS)} ali fotka z Drive rotacije."
+        )
     drive_photo = os.environ.get("DRIVE_PHOTO_PATH")
     is_drive = bool(drive_photo and os.path.isfile(drive_photo))
     path = drive_photo if is_drive else os.path.join(BG_DIR, f"{photo}.jpg")
@@ -177,4 +196,4 @@ if __name__ == "__main__":
     lab = sys.argv[3] if len(sys.argv) > 3 else "TEST"
     make_card(out, headline=head, badge=lab,
               stats=[("Najvišja", "34,5 °C"), ("Najnižja", "14,1 °C"), ("Padavine", "0,0 mm")],
-              accent=(245, 158, 11), photo="drought")
+              accent=(245, 158, 11), photo="gobe-inverzija")

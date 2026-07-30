@@ -52,16 +52,18 @@ TZ = ZoneInfo("Europe/Berlin")
 KEEP_CARDS = 14
 
 # Poudarek in fotka ozadja glede na tip dejstva (tools/generate_daily_fact.py).
+# Fotke so rezerva za primer, ko prenos z Drive odpove — takrat se vzame
+# Filipova arhivska iz og/bg/ (make_social_card.OWN_PHOTOS), nikoli stock.
 STYLE = {
-    "rekord":        ((245, 158, 11), "drought",          "🏆", "NOV REKORD"),
-    "blizu-rekorda": ((249, 115, 22), "dusk-storm",       "📈", "BLIZU REKORDA"),
-    "niz-moker":     ((56, 189, 248), "rain-overcast",    "🌧️", "DNEVNO DEJSTVO"),
-    "niz-suh":       ((245, 158, 11), "drought",          "☀️", "DNEVNO DEJSTVO"),
-    "vroc-dan":      ((239, 68, 68),  "drought",          "🌡️", "DNEVNO DEJSTVO"),
-    "hladen-dan":    ((34, 211, 238), "night-fog-valley", "❄️", "DNEVNO DEJSTVO"),
-    "lani":          ((77, 159, 248), "weather-station",  "📊", "DNEVNO DEJSTVO"),
+    "rekord":        ((245, 158, 11), "gobe-inverzija",       "🏆", "NOV REKORD"),
+    "blizu-rekorda": ((249, 115, 22), "istra-nevihta-lastna", "📈", "BLIZU REKORDA"),
+    "niz-moker":     ((56, 189, 248), "nevihta-2019",         "🌧️", "DNEVNO DEJSTVO"),
+    "niz-suh":       ((245, 158, 11), "istra-nevihta-lastna", "☀️", "DNEVNO DEJSTVO"),
+    "vroc-dan":      ((239, 68, 68),  "gobe-inverzija",       "🌡️", "DNEVNO DEJSTVO"),
+    "hladen-dan":    ((34, 211, 238), "megla-recica-lastna",  "❄️", "DNEVNO DEJSTVO"),
+    "lani":          ((77, 159, 248), "megla-recica-lastna",  "📊", "DNEVNO DEJSTVO"),
 }
-DEFAULT_STYLE = ((77, 159, 248), "weather-station", "📊", "DNEVNO DEJSTVO")
+DEFAULT_STYLE = ((77, 159, 248), "megla-recica-lastna", "📊", "DNEVNO DEJSTVO")
 
 HASHTAGS = {
     "rekord":        "#rekord #vreme",

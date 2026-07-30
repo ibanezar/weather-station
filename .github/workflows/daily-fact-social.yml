@@ -29,6 +29,9 @@ jobs:
       - name: Namesti odvisnosti
         run: pip install Pillow --quiet
 
+      # Ozadje kartice je vedno Filipova fotografija. Če prenos odpove, se
+      # uporabi njegova arhivska iz og/bg/ (make_social_card.OWN_PHOTOS) --
+      # stock fotke na FB/IG ne gredo, zato je continue-on-error tu varen.
       - name: Pridobi naključno fotko z Google Drive
         continue-on-error: true
         env:
