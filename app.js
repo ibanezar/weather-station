@@ -4643,37 +4643,62 @@ async function _ncApplyVas(id){
     }
   }catch(_){}
 }
-// ── Spletna kamera ARSO ─────────────────────────────────────────────
-// Logarska dolina je edina ARSO kamera v Zgornji Savinjski dolini. Sliko
-// vedno vlečemo prek Workerja: ARSO objavlja posnetke na časovno žigosanih
-// naslovih, ki jih brez seznama webcam_list ni mogoče uganiti, hkrati pa
-// tako brskalnik nikoli ne trka naravnost na njihov strežnik.
-// Kartica je skrita, dokler slike ni — brez kamere ni prazne luknje.
+// ── Spletne kamere ARSO ─────────────────────────────────────────────
+// Mreža kamer Savinjske regije. Slike vedno vlečemo prek Workerja: ARSO
+// objavlja posnetke na časovno žigosanih naslovih, ki jih brez seznama
+// webcam_list ni mogoče uganiti, hkrati pa tako brskalnik nikoli ne trka
+// naravnost na njihov strežnik.
+// Kartica je skrita, dokler slik ni — brez kamer ni prazne luknje.
+const VALCAM_SMERI={n:'proti severu',ne:'proti severovzhodu',e:'proti vzhodu',se:'proti jugovzhodu',
+                    s:'proti jugu',sw:'proti jugozahodu',w:'proti zahodu',nw:'proti severozahodu'};
+// Najprej naša dolina, Celje (spodaj ob Savinji) na koncu. Kamere, ki jih
+// tu ni, se pripnejo za temi — seznam je vrstni red, ne filter.
+const VALCAM_VRSTNI_RED=['Logarska dolina','Pavličevo sedlo','Radegunda','Celje'];
+const VALCAM_MAX=4;
+
 async function initValleyCam(){
   const card=document.getElementById('valcam-card');
-  if(!card)return;
-  const img=document.getElementById('valcam-img');
-  const cap=document.getElementById('valcam-cap');
-  const src=document.getElementById('valcam-src');
+  const grid=document.getElementById('valcam-grid');
+  if(!card||!grid)return;
   try{
-    const r=await fetch(PROXY+'/arso-cam?format=json');
+    const r=await fetch(PROXY+'/arso-cam?format=json&obmocje=Savinjska');
     if(!r.ok)throw new Error('HTTP '+r.status);
-    const m=await r.json();
-    if(!m.slika)throw new Error('brez posnetka');
+    const kamere=(await r.json()).kamere||[];
+    if(!kamere.length)throw new Error('brez kamer');
 
-    const SMERI={n:'proti severu',ne:'proti severovzhodu',e:'proti vzhodu',se:'proti jugovzhodu',
-                 s:'proti jugu',sw:'proti jugozahodu',w:'proti zahodu',nw:'proti severozahodu'};
-    const smer=SMERI[m.smer]||'';
-    const dt=m.posnet?new Date(m.posnet):null;
-    const cas=dt&&!isNaN(dt)?dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
+    const rang=k=>{const i=VALCAM_VRSTNI_RED.indexOf(k.kamera);return i<0?VALCAM_VRSTNI_RED.length:i};
+    const izbrane=kamere.slice().sort((a,b)=>rang(a)-rang(b)).slice(0,VALCAM_MAX);
 
-    // Cache-buster na žig posnetka: brez njega bi brskalnik ob vrnitvi na
-    // stran kazal staro sliko iz predpomnilnika, podnapis pa nov čas.
-    img.src=PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):'');
-    img.alt='Spletna kamera ARSO: '+m.kamera+(smer?', pogled '+smer:'')+(cas?', posneto ob '+cas:'');
-    if(cap)cap.textContent=m.kamera+(smer?' · pogled '+smer:'')+(cas?' · posneto ob '+cas:'');
-    if(src)src.textContent='ARSO'+(m.obmocje?' · '+m.obmocje:'');
-    img.addEventListener('error',()=>{card.hidden=true},{once:true});
+    grid.textContent='';
+    let zivih=izbrane.length;
+    for(const m of izbrane){
+      const smer=VALCAM_SMERI[m.smer]||'';
+      const dt=m.posnet?new Date(m.posnet):null;
+      const cas=dt&&!isNaN(dt)?dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
+      const opis=m.kamera+(smer?' · pogled '+smer:'')+(cas?' · posneto ob '+cas:'');
+
+      const fig=document.createElement('figure');
+      fig.className='valcam-fig';
+      const img=document.createElement('img');
+      img.className='valcam-img';
+      img.width=1023;img.height=520;
+      img.loading='lazy';img.decoding='async';
+      // Cache-buster na žig posnetka: brez njega bi brskalnik ob vrnitvi na
+      // stran kazal staro sliko iz predpomnilnika, podnapis pa nov čas.
+      img.src=PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):'');
+      img.alt='Spletna kamera ARSO: '+opis;
+      // Posamezna kamera lahko odpove, ne da bi z njo padle ostale; ko
+      // odpadejo vse, skrijemo še kartico, da ne ostane prazen okvir.
+      img.addEventListener('error',()=>{fig.remove();if(--zivih<=0)card.hidden=true},{once:true});
+      const cap=document.createElement('figcaption');
+      cap.className='valcam-cap';
+      cap.textContent=opis;
+      fig.appendChild(img);fig.appendChild(cap);
+      grid.appendChild(fig);
+    }
+    grid.classList.toggle('valcam-grid-1',izbrane.length===1);
+    const src=document.getElementById('valcam-src');
+    if(src)src.textContent='ARSO · '+izbrane.length+(izbrane.length===1?' kamera':izbrane.length===2?' kameri':izbrane.length<=4?' kamere':' kamer');
     card.hidden=false;
   }catch(_){card.hidden=true;}
 }

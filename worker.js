@@ -2152,6 +2152,45 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const list = await listRes.json();
 
         const cams = list?.webcam_list?.features ?? [];
+
+        // Zadnji posnetek kamere; vrne null, če jih nima nobenih. directions
+        // našteje vse smeri, ki jih kamera premore, webcam_list pa skoraj
+        // vedno nosi posnetke le za eno od njih (48 od 51 kamer), zato se
+        // zahtevana smer upošteva le, kadar posnetke res ima.
+        const zadnji = (f, prefDir) => {
+          const dirs = f.properties?.directions ?? [];
+          const framesFor = (dd) => list[`webcam_${f.properties.id}${dd}_data.json`] ?? [];
+          const dd = (dirs.includes(prefDir) && framesFor(prefDir).length)
+            ? prefDir
+            : dirs.find((x) => framesFor(x).length);
+          if (!dd) return null;
+          const fr = framesFor(dd);
+          const l = fr[fr.length - 1];
+          return l?.path ? { smer: dd, ...l } : null;
+        };
+
+        const opis = (f, z) => ({
+          kamera: f.properties.title,
+          obmocje: f.properties.parent_title || "",
+          smer: z.smer,
+          posnet: z.valid || null,
+          slika: `/arso-cam?kamera=${encodeURIComponent(f.properties.title)}&smer=${z.smer}`,
+        });
+
+        // ?obmocje= vrne vse kamere regije, ki posnetek res imajo — stran tako
+        // z eno zahtevo dobi celotno mrežo, namesto po ena na kamero.
+        const obmocje = url.searchParams.get("obmocje");
+        if (obmocje) {
+          const o = obmocje.toLowerCase();
+          const kamere = cams
+            .filter((f) => (f.properties?.parent_title || "").toLowerCase() === o)
+            .map((f) => { const z = zadnji(f, wantDir); return z ? opis(f, z) : null; })
+            .filter(Boolean);
+          return new Response(JSON.stringify({ obmocje, kamere }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
+          });
+        }
+
         const cam = cams.find((f) => (f.properties?.title || "").toLowerCase() === wanted)
           || cams.find((f) => (f.properties?.id || "").toLowerCase() === wanted)
           || cams.find((f) => (f.properties?.title || "").toLowerCase().includes(wanted));
@@ -2162,35 +2201,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           }), { status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
 
-        // directions našteje vse smeri, ki jih kamera premore, webcam_list pa
-        // skoraj vedno nosi posnetke le za eno od njih (48 od 51 kamer).
-        // Zato zahtevano smer upoštevamo le, če posnetke res ima.
-        const dirs = cam.properties?.directions ?? [];
-        const framesFor = (dd) => list[`webcam_${cam.properties.id}${dd}_data.json`] ?? [];
-        const dir = (dirs.includes(wantDir) && framesFor(wantDir).length)
-          ? wantDir
-          : dirs.find((dd) => framesFor(dd).length);
-        const frames = dir ? framesFor(dir) : [];
-        const last = frames[frames.length - 1];
-        if (!last?.path) {
+        const last = zadnji(cam, wantDir);
+        if (!last) {
           // Nekaj kamer (npr. Ptuj, Bovec) je v seznamu, a brez posnetkov.
           return new Response(JSON.stringify({
             error: "Kamera trenutno nima posnetkov",
             kamera: cam.properties.title,
           }), { status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
+        const dir = last.smer;
 
         // ?format=json vrne le opis posnetka. Stran ga potrebuje za podnapis
         // (kdaj je bil posnet), sliko pa naloži z <img> na isti endpoint —
         // brskalnik custom glav navzkrižno tako ali tako ne sme brati.
         if (url.searchParams.get("format") === "json") {
-          return new Response(JSON.stringify({
-            kamera: cam.properties.title,
-            obmocje: cam.properties.parent_title || "",
-            smer: dir,
-            posnet: last.valid || null,
-            slika: `/arso-cam?kamera=${encodeURIComponent(cam.properties.title)}&smer=${dir}`,
-          }), {
+          return new Response(JSON.stringify(opis(cam, last)), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
           });
         }
