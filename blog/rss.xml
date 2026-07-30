@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 29 Jul 2026 10:08:21 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 30 Jul 2026 05:42:41 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko manj dežja je letos padlo do 29. julija? Primerjava s preteklimi leti</title>
+      <link>https://meteorec.si/blog/letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730.html</guid>
+      <pubDate>Thu, 30 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Do 29. julija je v Rečici ob Savinji letos padlo 554,5 mm dežja – 26 % manj kot v povprečju zadnjih šestih let. Kako se 2026 uvršča v 7-letni zgodovini postaje IREICA1?</description>
+      <category>padavine</category>
+      <category>suša</category>
+      <category>primerjava</category>
+      <category>IREICA1</category>
+      <category>vodna-bilanca</category>
+    </item>
     <item>
       <title>Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor</title>
       <link>https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html</link>
