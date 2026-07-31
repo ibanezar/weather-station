@@ -370,7 +370,10 @@ function renderStormMode(){
   if(!active){el.className='storm-mode';el.innerHTML='';return;}
   const level=_stormMode.level||(_stormMode.lightningDist!=null&&_stormMode.lightningDist<30?'orange':'yellow');
   el.className='storm-mode show '+level;
-  const levelTxt=level==='red'?'Rdeča stopnja':level==='orange'?'Oranžna stopnja':'Rumena stopnja';
+  // Opisne oznake namesto barvne lestvice -- ta stopnja je lasten kazalnik
+  // (nowcast + strele + model), ne uradno opozorilo ARSO. Glej poziv ARSO
+  // z 29. 7. 2026: lastne stopnje nevarnosti ne smejo dajati videza uradnih.
+  const levelTxt=level==='red'?'Zelo močne nevihte':level==='orange'?'Močne nevihte':'Zmerne nevihte';
   const timing=_stormMode.nowcast?.message||(_stormMode.window?'Nevihte '+_stormMode.window:'Spremljaj razvoj v naslednjih urah');
   const safety=level==='red'?'Ostani v zavetju, odmakni se od oken in ne prečkajte hudourniških voda.':level==='orange'?'Umakni lažje predmete, zaščiti vozila in spremljaj radar ter strele.':'Spremljaj nebo, radar in opozorila; možni so krajevni nalivi in sunki.';
   el.innerHTML=
@@ -1404,7 +1407,11 @@ async function fetchSevereWeather(){
         :(hail||maxGust>=70||maxCape>=1500||maxPrecip>=12)?'orange':'yellow';
       const severe=alarmLevel!=='yellow';
       const stormWindow=fmtWindow(stormHours);
-      const stormRisk=alarmLevel==='red'?'Rdeča stopnja':alarmLevel==='orange'?'Oranžna stopnja':'Rumena stopnja';
+      // Opisne oznake namesto barvne lestvice (rumena/oranžna/rdeča stopnja):
+      // to je lasten modelski kazalnik iz Open-Meteo, barvno izrazje pa pripada
+      // uradnim opozorilom ARSO/Meteoalarm. Glej poziv ARSO z 29. 7. 2026 --
+      // lastne stopnje nevarnosti ne smejo dajati videza uradnega opozorila.
+      const stormRisk=alarmLevel==='red'?'Zelo močne nevihte':alarmLevel==='orange'?'Močne nevihte':'Zmerne nevihte';
       const stormMore='<div class="alert-more-grid">'
         +'<div class="alert-more-item"><strong>Časovni okvir</strong>'+stormWindow+'</div>'
         +'<div class="alert-more-item"><strong>Intenziteta</strong>'+stormRisk+'</div>'
@@ -1560,11 +1567,18 @@ async function fetchMeteoalarm(){
       const lvl=levelMap[lvlKey];if(!lvl)return;
       const expires=en.querySelector('expires, cap\\:expires')?.textContent;
       if(expires&&new Date(expires).getTime()<now)return;
+      // 15. člen ZDMHS: pri povzetem opozorilu je treba poleg vira navesti tudi
+      // čas, ko ga je pristojni organ izdal (CAP <sent>, sicer Atom <updated>).
+      const sent=en.querySelector('sent, cap\\:sent, updated, published')?.textContent;
       const evt=en.querySelector('event, cap\\:event')?.textContent||'';
       let icon='⚠️';
       for(const[k,v]of Object.entries(typeIcon)){if(content.toLowerCase().includes(k.toLowerCase())||evt.toLowerCase().includes(k.toLowerCase())){icon=v;break;}}
       const rawTitle=(en.querySelector('title')?.textContent||'Vremensko opozorilo').replace(/\s+/g,' ').trim();
-      _meteoalarmAlerts.push({cls:lvl.cls,severe:lvl.sev,official:true,icon,title:lvl.name+' opozorilo (MeteoAlarm)',desc:rawTitle.slice(0,160),meta:expires?'Velja do '+new Date(expires).toLocaleString('sl',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''});
+      const tf={day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'};
+      const metaBits=[];
+      if(sent&&!isNaN(new Date(sent)))metaBits.push('Izdano '+new Date(sent).toLocaleString('sl',tf));
+      if(expires)metaBits.push('velja do '+new Date(expires).toLocaleString('sl',tf));
+      _meteoalarmAlerts.push({cls:lvl.cls,severe:lvl.sev,official:true,icon,title:lvl.name+' opozorilo (MeteoAlarm)',desc:rawTitle.slice(0,160),meta:metaBits.join(' · ')});
     });
     _meteoalarmAlerts.sort((a,b)=>(b.severe?1:0)-(a.severe?1:0));
     renderAllAlerts();

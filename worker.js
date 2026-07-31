@@ -179,7 +179,11 @@ async function fetchArsoWarnings() {
 
   // Field is warning_si (not warnings.summary as initially assumed)
   const wsi = data?.warning_si;
-  if (!wsi) return [];
+  // `updated` je čas, ko je ARSO opozorilo izdal oz. nazadnje posodobil.
+  // 15. člen ZDMHS zahteva, da vsak, ki opozorilo povzame, navede vir IN ta
+  // čas -- zato ga vračamo odjemalcem skupaj z opozorili.
+  const issued = wsi?.updated || null;
+  if (!wsi) return { alerts: [], issued: null };
 
   const now = Date.now();
   const alerts = [];
@@ -231,7 +235,7 @@ async function fetchArsoWarnings() {
   };
 
   walkEvents(wsi);
-  return alerts;
+  return { alerts, issued };
 }
 
 // ── Ecowitt helpers ────────────────────────────────────────
@@ -1150,8 +1154,8 @@ export default {
       if (path === "/arso-warning") {
         // Primary: vreme.arso.gov.si JSON API — same host as text forecast, reliable from CF Workers
         try {
-          const alerts = await fetchArsoWarnings();
-          return new Response(JSON.stringify({ alerts, source: "arso-api" }), {
+          const { alerts, issued } = await fetchArsoWarnings();
+          return new Response(JSON.stringify({ alerts, issued, source: "arso-api" }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
           });
         } catch (e) {
@@ -1169,6 +1173,10 @@ export default {
             if (!r.ok) throw new Error("ATOM HTTP " + r.status);
             const text = await r.text();
             const alerts = [];
+            // Čas izdaje opozorila (15. člen ZDMHS) -- prvi <updated> pred
+            // prvim <entry> je datum vira, ne posameznega opozorila.
+            const feedHead = text.split(/<entry[\s>]/i)[0];
+            const issued = (feedHead.match(/<updated[^>]*>([\s\S]*?)<\/updated>/i)?.[1] || '').trim() || null;
             const entryRx = /<entry[\s>]([\s\S]*?)<\/entry>/gi;
             let m;
             while ((m = entryRx.exec(text)) !== null) {
@@ -1188,7 +1196,7 @@ export default {
               }
               if (level) alerts.push({ level, text: (summary || title).slice(0, 600) });
             }
-            return new Response(JSON.stringify({ alerts, source: "arso-atom" }), {
+            return new Response(JSON.stringify({ alerts, issued, source: "arso-atom" }), {
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
             });
           } catch (e2) {
