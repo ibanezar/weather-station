@@ -1,0 +1,41 @@
+name: Napolni števce ogledov iz GoatCounterja
+
+# Enkratno (po potrebi ponovljivo) polnjenje KV ključev "views:<slug>" iz
+# zgodovine GoatCounterja. Skripta je idempotentna — zapiše samo tam, kjer bi
+# se vrednost povečala, zato ponovni zagon ničesar ne pokvari.
+#
+# Privzeto teče na suho. Za dejanski zapis nastavi apply na true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Dejansko zapiši v KV (sicer samo suhi tek)'
+        type: boolean
+        required: false
+        default: false
+      start:
+        description: 'Začetni datum (YYYY-MM-DD)'
+        required: false
+        default: '2019-01-01'
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Napolni števce
+        env:
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          python3 tools/seed_view_counts.py \
+            --start "${{ inputs.start }}" \
+            ${{ inputs.apply && '--apply' || '' }}
