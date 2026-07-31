@@ -2569,36 +2569,19 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   font-size:1.1rem;cursor:pointer;padding:.2rem .4rem;line-height:1;border-radius:6px}
 .wf-banner-close:hover{background:var(--border);color:var(--text)}
 
-/* ── Mobile app shell (fixed top bar + bottom tab nav) ──────────────────
+/* ── Mobile app shell (fixed bottom tab nav) ───────────────────────────
    Mirrors the app-style pattern already shipped on /gobarska-napoved/
-   (MeteoGobar): a slim fixed top bar plus a fixed bottom tab bar, so the
-   flagship live-weather page reads as an installed app on a phone rather
-   than a scrolling web page. Scoped to <=760px; desktop keeps the existing
-   .hero header + .quick-nav untouched. `body .wrap` (extra ancestor
-   selector) outranks the plain `.wrap{padding:...}` mobile rules earlier
-   in this file on specificity alone, regardless of source order.
-
-   --ticker-h: live height of #alerts-wrap (the fixed ARSO/Meteoalarm
-   ticker at top:0), kept in sync by _syncAlertBarHeight() in app.js.
-   .app-topbar reads it to slide below the ticker instead of covering it
-   (both are position:fixed;top:*, so without this they'd stack exactly on
-   top of each other); the !important on .wrap's padding-top is needed
-   because that same JS function also writes an inline padding-top for the
-   ticker alone, which would otherwise always beat this stylesheet rule and
-   wipe out the extra space reserved for the top bar. */
-.app-topbar{display:none}
+   (MeteoGobar): a fixed bottom tab bar, so the flagship live-weather page
+   reads as an installed app on a phone rather than a scrolling web page.
+   Scoped to <=760px; desktop keeps the existing .hero header + .quick-nav
+   untouched. `body .wrap` (extra ancestor selector) outranks the plain
+   `.wrap{padding:...}` mobile rules earlier in this file on specificity
+   alone, regardless of source order. Top padding is deliberately left
+   alone so the inline padding-top that _syncAlertBarHeight() in app.js
+   writes for the ARSO ticker still applies. */
 .app-bottomnav{display:none}
 @media (max-width:760px){
-  body .wrap{padding-top:calc(3rem + var(--ticker-h,0px) + env(safe-area-inset-top))!important;padding-bottom:calc(4rem + env(safe-area-inset-bottom) + 1rem)}
-  .app-topbar{display:flex;position:fixed;left:0;right:0;top:var(--ticker-h,0px);z-index:150;height:3rem;
-    align-items:center;gap:.5rem;padding:0 3rem 0 .9rem;background:var(--card-bg);
-    backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);
-    border-bottom:1px solid var(--card-border);transition:top .2s ease}
-  .app-topbar-brand{font-size:1.15rem;line-height:1}
-  .app-topbar-title{font-weight:700;font-size:.92rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* Nudge the existing floating theme toggle up so it sits centred inside
-     the new top bar instead of straddling its bottom edge. */
-  .theme-btn{top:.4rem}
+  body .wrap{padding-bottom:calc(4rem + env(safe-area-inset-bottom) + 1rem)}
   /* Scrollable, not flex-equal: with 8 destinations a 320px phone can't fit
      them all at readable width, so tabs get a fixed min-width and the bar
      scrolls horizontally instead of squeezing every label unreadably thin. */

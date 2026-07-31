@@ -1078,9 +1078,8 @@ function _syncAlertBarHeight(){
   const wrap=document.querySelector('.wrap');
   if(!wrap)return;
   const h=document.getElementById('alerts-wrap')?.offsetHeight||0;
-  // Exposed as a custom property (not just inline padding-top below) so the
-  // fixed mobile .app-topbar can slide down below the ARSO ticker instead of
-  // sitting on top of it at the same z-index.
+  // Also exposed as a custom property so other fixed elements can position
+  // themselves below the ARSO ticker instead of underneath it.
   document.documentElement.style.setProperty('--ticker-h',h+'px');
   wrap.style.paddingTop=h?h+'px':'';
 }
