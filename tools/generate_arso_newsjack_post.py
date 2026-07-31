@@ -27,6 +27,12 @@ import datetime, hashlib, json, os, re, shutil, sys, urllib.error, urllib.parse,
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate  # noqa: E402
 
+try:
+    from zoneinfo import ZoneInfo
+    LOCAL_TZ = ZoneInfo("Europe/Ljubljana")
+except Exception:  # brez baze časovnih pasov ostane UTC — raje zamik kot padec
+    LOCAL_TZ = datetime.timezone.utc
+
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; Meteorec-ArsoNewsjack/1.0; +https://meteorec.si)"}
 STATE_FILE = os.path.join(ROOT, "tools", ".arso_newsjack_state.json")
@@ -153,9 +159,34 @@ def save_json(path, data):
 
 
 def fetch_alerts():
+    """Vrne (alerts, issued). `issued` je čas, ko je ARSO opozorilo izdal oz.
+    nazadnje posodobil — 15. člen ZDMHS zahteva, da ga navede vsak, ki
+    opozorilo povzame. Lahko je None, dokler nova različica workerja ni
+    razporejena; v tem primeru zapis pade nazaj na čas zajema."""
     req = urllib.request.Request(f"{WORKER}/arso-warning?region=SLOVENIA_NORTH-EAST", headers=UA)
     with urllib.request.urlopen(req, timeout=15) as r:
-        return json.load(r).get("alerts", [])
+        data = json.load(r)
+    return data.get("alerts", []), data.get("issued")
+
+
+def fmt_issued(issued, now_utc):
+    """Čas izdaje opozorila v lokalnem času, kot ga zahteva 15. člen ZDMHS.
+    Brez podatka o izdaji povemo, da gre za čas zajema, in ne trdimo, da je
+    to čas izdaje."""
+    dt = parse_dt(issued) if issued else None
+    if dt is None:
+        return f"zajeto {now_utc.astimezone(LOCAL_TZ):%-d. %-m. %Y ob %H:%M}", False
+    return f"izdano {dt.astimezone(LOCAL_TZ):%-d. %-m. %Y ob %H:%M}", True
+
+
+def issued_sentence(issued, now_utc):
+    """Stavek o viru in času izdaje za uvod objave (15. člen ZDMHS)."""
+    dt = parse_dt(issued) if issued else None
+    if dt is None:
+        stamp = f"{now_utc.astimezone(LOCAL_TZ):%-d. %-m. %Y ob %H:%M}"
+        return f"Podatek o opozorilu je z ARSO zajet {stamp}."
+    stamp = f"{dt.astimezone(LOCAL_TZ):%-d. %-m. %Y ob %H:%M}"
+    return f"ARSO ga je izdal {stamp}."
 
 
 def fetch_current():
@@ -229,7 +260,7 @@ def generate_custom_og(slug, og_meta):
         ensure_og_fallback(slug)
 
 
-def build_post(alerts, current, now_utc):
+def build_post(alerts, current, now_utc, issued=None):
     """alerts: seznam 1+ hkrati aktivnih, še neobjavljenih opozoril. Če jih je
     več (npr. nevihte + požarna ogroženost izdani v istem teku), se združijo
     v en sam zapis namesto v skoraj identične ločene objave po eno na
@@ -239,7 +270,8 @@ def build_post(alerts, current, now_utc):
     worst_level = max((a.get("level") for a in alerts), key=lambda l: level_rank.get(l, 0))
     level_sl = {"orange": "oranžno", "red": "rdeče"}.get(worst_level, worst_level or "oranžno")
     date_str = fmtdate(now_utc.date().isoformat())
-    time_local = now_utc.strftime("%H:%M")
+    time_local = now_utc.astimezone(LOCAL_TZ).strftime("%H:%M")
+    issued_txt, issued_known = fmt_issued(issued, now_utc)
     labels = [c["label"] for c in cats]
     label_txt = labels[0] if len(labels) == 1 else ", ".join(labels[:-1]) + " in " + labels[-1]
     # primarna kategorija za OG sliko/naslovno ikono: tista z najhujšo stopnjo
@@ -265,7 +297,12 @@ def build_post(alerts, current, now_utc):
         lead_parts.append(f'{lvl} opozorilo ({cat["label"]}){valid_txt}')
     lead_joined = lead_parts[0] if len(lead_parts) == 1 else "; ".join(lead_parts[:-1]) + " ter " + lead_parts[-1]
     descs = " ".join(a.get("desc", "").strip() for a in alerts if a.get("desc", "").strip())
-    lead = f'Agencija RS za okolje (ARSO) je izdala <strong>{lead_joined}</strong>. {descs}'.strip()
+    # 15. člen ZDMHS: kdor opozorilo pristojnega organa povzame, mora navesti,
+    # da gre za opozorilo pristojnega organa, IN čas, ko ga je ta izdal. Oboje
+    # mora biti v uvodu, ne šele v nogi — uvod je tudi to, kar gre v povzetek
+    # objave na Facebooku in Instagramu.
+    lead = (f'Agencija RS za okolje (ARSO) je izdala <strong>{lead_joined}</strong>. '
+            f'{issued_sentence(issued, now_utc)} {descs}').strip()
 
     now_parts = []
     if current.get("temp") is not None:
@@ -366,7 +403,7 @@ def build_post(alerts, current, now_utc):
   <article>
     <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
     <h1>{icons} {title}</h1>
-    <p class="post-meta">{date_str} ob {time_local} · Filip Eremita · postaja IREICA1 · samodejni zapis ob ARSO opozorilu</p>
+    <p class="post-meta">{date_str} ob {time_local} · Filip Eremita · postaja IREICA1 · samodejni zapis ob ARSO opozorilu · vir opozorila: ARSO, {issued_txt}</p>
     <p class="lead">{lead}</p>
     {MARK_START}{MARK_END}
     <p>{now_txt}</p>
@@ -469,10 +506,10 @@ def main():
         print(f"✓ Posodobljenih {resolved} preteklih objav z dejanskimi meritvami.")
 
     try:
-        alerts = fetch_alerts()
+        alerts, issued = fetch_alerts()
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
         print(f"⚠ ARSO opozorila nedosegljiva: {e}", file=sys.stderr)
-        alerts = []
+        alerts, issued = [], None
 
     significant = [a for a in alerts if a.get("level") in ("orange", "red")]
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -500,7 +537,7 @@ def main():
     if new_alerts:
         types_txt = ", ".join(a.get("type") or "?" for a in new_alerts)
         current = fetch_current()
-        slug, url, html, entry, og_meta = build_post(new_alerts, current, now)
+        slug, url, html, entry, og_meta = build_post(new_alerts, current, now, issued)
 
         if not wire:
             print(f"[preview] {slug} — {len(new_alerts)} opozoril: {types_txt}")

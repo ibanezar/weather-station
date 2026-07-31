@@ -33,6 +33,13 @@ PREFIXES = (
     ("invazivke-", "🌿 Invazivke-alarm"),
 )
 
+# 15. člen ZDMHS: kdor opozorilo pristojnega organa povzame ali objavi, mora
+# navesti, da gre za opozorilo pristojnega organa, in čas njegove izdaje. Čas
+# izdaje je v povzetku članka (glej generate_arso_newsjack_post.py); tu je še
+# izrecna navedba vira, ker je na družbenih omrežjih konteksta strani ni.
+ARSO_SOURCE_NOTE = ("Vir opozorila: Agencija RS za okolje (ARSO). To ni opozorilo "
+                    "Meteorca — uradna opozorila so na meteo.arso.gov.si/met/sl/warning/.")
+
 
 def label_for(slug):
     for prefix, label in PREFIXES:
@@ -46,6 +53,8 @@ def build_caption(post):
     lines = [f"{label}: {post['title']}"] if label else [post["title"]]
     if post.get("summary"):
         lines.append(post["summary"])
+    if post["slug"].startswith("arso-opozorilo-"):
+        lines.append(ARSO_SOURCE_NOTE)
     lines.append(f"Cel članek: {SITE}{post['url']}")
     lines.append("(povezava je tudi v bio)")
     if post.get("tags"):
