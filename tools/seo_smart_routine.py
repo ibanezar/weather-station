@@ -57,7 +57,6 @@ HEADER = '''  <header class="site-head">
     </nav>
   </header>'''
 
-APP_TOPBAR = '<div class="app-topbar"><span class="app-topbar-brand" aria-hidden="true">🏔️</span><span class="app-topbar-title">Meteorec · {title}</span></div>'
 
 # Mobile fixed bottom tab bar — same markup as index.html's / generate_seo_pages.py's,
 # kept in sync by hand (see blog/blog.css, which this shell also loads).
@@ -281,7 +280,6 @@ def page_shell(title, desc, canonical, head_extras, body_content):
 <link rel="stylesheet" href="/vreme/vreme.css">
 </head>
 <body>
-{APP_TOPBAR.format(title=title)}
 {BLOBS}
 <div class="wrap">
 {HEADER}

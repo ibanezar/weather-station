@@ -280,15 +280,6 @@
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/style.min.css">
-<style>
-/* Domača stran nima .app-topbar -- na mobilnem style.css sicer rezervira
-   3rem prostora zanj (body .wrap padding-top), zato tu ta presežni prostor
-   odštejemo, ostane le višina ARSO ticker-ja (--ticker-h, glej
-   app.js:_syncAlertBarHeight). */
-@media (max-width:760px){
-  body .wrap{padding-top:calc(var(--ticker-h,0px) + env(safe-area-inset-top))!important}
-}
-</style>
 </head>
 <body>
 

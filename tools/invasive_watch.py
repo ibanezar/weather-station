@@ -28,7 +28,7 @@ import datetime, json, math, os, sys, time, urllib.error, urllib.parse, urllib.r
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate  # noqa: E402
-from generate_daily_post import APP_TOPBAR, app_bottomnav, hexrgb, call_lektor  # noqa: E402
+from generate_daily_post import app_bottomnav, hexrgb, call_lektor  # noqa: E402
 
 BASE = "https://api.inaturalist.org/v1"
 UA = {"User-Agent": "Meteorec-InvasiveWatch/1.0 (https://meteorec.si; kontakt: filip.eremita@gmail.com)"}
@@ -464,7 +464,6 @@ def build_alert_html(article, alert, now_utc):
 <style>.section-label{{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);opacity:.75}}</style>
 </head>
 <body>
-{APP_TOPBAR.format(title=title)}
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
 
@@ -626,7 +625,6 @@ def build_monthly_digest(config, state, output):
 <link rel="stylesheet" href="blog.css">
 </head>
 <body>
-{APP_TOPBAR.format(title=title)}
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
   <header class="site-head">
