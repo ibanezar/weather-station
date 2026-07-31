@@ -5,6 +5,10 @@ name: Napolni števce ogledov iz GoatCounterja
 # se vrednost povečala, zato ponovni zagon ničesar ne pokvari.
 #
 # Privzeto teče na suho. Za dejanski zapis nastavi apply na true.
+#
+# Vir zgodovine: če je nastavljen secret GOATCOUNTER_TOKEN, gre prek API-ja,
+# sicer prek javnih števcev (ti zahtevajo vklopljeno »Allow adding visitor
+# counts on your website« v nastavitvah GoatCounterja). Dovolj je eno od obojega.
 
 on:
   workflow_dispatch:

@@ -8,8 +8,15 @@ teče od začetka, to zgodovino ima — samo javno dostopna ni (javni števci so
 izklopljeni, /counter/<pot>.json vrne 403), zato jo je treba prenesti z API
 žetonom.
 
+Zgodovino zna dobiti po dveh poteh; uporabi tisto, ki je na voljo:
+  • GOATCOUNTER_TOKEN je nastavljen → API /api/v0/stats/hits. En klic za vse
+    poti in poljubno časovno okno prek --start.
+  • žetona ni → javni števci /counter/<pot>.json. Brez žetona, a zahteva
+    vklopljeno »Allow adding visitor counts on your website« v nastavitvah,
+    en klic na članek in samo skupni seštevek brez časovnega okna.
+
 Kaj naredi:
-  1. Iz GoatCounter API-ja prebere število obiskovalcev po poteh.
+  1. Prebere število obiskovalcev po poteh (na enega od zgornjih načinov).
   2. Poti /blog/<slug>.html preslika v sluge in obdrži samo tiste, ki so
      dejansko v blog.json.
   3. Trenutne vrednosti prebere prek Workerjevega /views?slugs=… (en klic,
@@ -27,8 +34,9 @@ zato sta vrstici primerljivi; nista pa isto kot skupno število prikazov.
 Privzeto teče na suho (izpiše, kaj bi naredil). Zapiše šele z --apply.
 
 Okoljske spremenljivke:
-    GOATCOUNTER_TOKEN       API žeton z dovoljenjem za branje statistike
-                            (GoatCounter → Settings → API tokens)
+    GOATCOUNTER_TOKEN       neobvezno: API žeton z dovoljenjem za branje
+                            statistike (GoatCounter → Settings → API tokens).
+                            Brez njega se berejo javni števci.
     CLOUDFLARE_API_TOKEN    žeton z dovoljenjem za pisanje v KV
     CLOUDFLARE_ACCOUNT_ID   ID računa
     GOATCOUNTER_SITE        neobvezno, privzeto ibanezar.goatcounter.com
@@ -128,6 +136,40 @@ def known_slugs():
     return {s for s in slugs if re.fullmatch(r"[a-z0-9-]{1,120}", s)}
 
 
+def fetch_public_counts(site, slugs):
+    """Brez API žetona: prebere javne števce /counter/<pot>.json.
+
+    Deluje samo, če je v GoatCounterju vklopljeno »Allow adding visitor counts
+    on your website«. En klic na članek (za ~80 člankov je to sprejemljivo,
+    ker gre za enkratno opravilo), `count` pa je oblikovan niz s tisočicami
+    (»1,234«), zato iz njega poberemo same števke."""
+    base = site_base(site)
+    counts, denied = {}, 0
+    for i, slug in enumerate(sorted(slugs), 1):
+        path = urllib.parse.quote(f"/blog/{slug}.html", safe="")
+        try:
+            data = http(f"{base}/counter/{path}.json", timeout=15)
+        except SystemExit as e:
+            if "HTTP 403" in str(e):
+                denied += 1
+                continue          # javni števci izklopljeni
+            if "HTTP 404" in str(e):
+                continue          # te poti GoatCounter ne pozna (ni bila obiskana)
+            raise
+        n = re.sub(r"\D", "", str(data.get("count") or ""))
+        if n and int(n):
+            counts[f"/blog/{slug}.html"] = int(n)
+        if i % 20 == 0:
+            print(f"  … {i}/{len(slugs)}")
+    if denied and not counts:
+        raise SystemExit(
+            "✗ GoatCounter vrača 403 za javne števce.\n"
+            "  Vklopi »Allow adding visitor counts on your website« v nastavitvah,\n"
+            "  ali pa nastavi GOATCOUNTER_TOKEN in bo šlo prek API-ja."
+        )
+    return counts
+
+
 def path_to_slug(path):
     """/blog/foo.html?utm=x → foo ; karkoli drugega → None"""
     p = urllib.parse.urlsplit(path).path
@@ -188,8 +230,6 @@ def main():
     args = ap.parse_args()
 
     gc_token = os.environ.get("GOATCOUNTER_TOKEN")
-    if not gc_token:
-        raise SystemExit("✗ GOATCOUNTER_TOKEN ni nastavljen.")
     site = os.environ.get("GOATCOUNTER_SITE") or DEFAULT_SITE
     ns_id = os.environ.get("KV_NAMESPACE_ID") or DEFAULT_KV_ID
 
@@ -203,8 +243,17 @@ def main():
     known = known_slugs()
     print(f"Člankov s števcem: {len(known)}")
 
-    print(f"\n1) Berem GoatCounter ({site}, od {args.start}) …")
-    hits = fetch_goatcounter(site, gc_token, args.start, args.end)
+    # Dve enakovredni poti do iste številke: API žeton (en klic za vse poti,
+    # poljubno časovno okno) ali javni števci (brez žetona, a en klic na
+    # članek in samo skupni seštevek). Vzamemo, kar je na voljo.
+    if gc_token:
+        print(f"\n1) Berem GoatCounter API ({site}, od {args.start}) …")
+        hits = fetch_goatcounter(site, gc_token, args.start, args.end)
+    else:
+        print(f"\n1) Berem javne števce GoatCounterja ({site}) …")
+        print("   (GOATCOUNTER_TOKEN ni nastavljen — za časovno omejitev "
+              "z --start bi bil potreben žeton)")
+        hits = fetch_public_counts(site, known)
     historic, skipped = map_to_slugs(hits, known)
     print(f"   → {len(historic)} člankov z zgodovino, "
           f"{sum(historic.values())} obiskovalcev skupaj")
