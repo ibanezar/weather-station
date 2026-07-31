@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '15 1 * * *'   # vsak dan ob 02:15 CET (01:15 UTC)
   workflow_dispatch:         # ročni zagon iz GitHub UI
+    inputs:
+      month:
+        description: 'Mesec za osvežitev (YYYY-MM, privzeto: mesec zadnjega dokončanega dne)'
+        required: false
 
 jobs:
   update:
@@ -20,19 +24,33 @@ jobs:
           COUNT=$(python3 -c "import json; print(len(json.load(open('history.json'))))")
           echo "count=$COUNT" >> $GITHUB_OUTPUT
 
-      - name: Posodobi tekoči mesec
+      # Mesec določimo iz VČERAJŠNJEGA dne, ne iz današnjega. update_history.py
+      # namreč nikoli ne zapiše tekočega (nedokončanega) dne, zato bi ob zagonu
+      # 1. v mesecu z MONTH=$(date -u +%Y-%m) računal nov mesec, v katerem še ni
+      # nobenega dokončanega dne — skript bi se končal z "nič za osvežiti" in
+      # ZADNJI DAN PREJŠNJEGA MESECA ne bi bil nikoli zapisan (npr. 31. 7. 2026,
+      # ko je padel absolutni temperaturni rekord postaje).
+      - name: Določi mesec
+        id: month
+        run: |
+          if [ -n "${{ github.event.inputs.month }}" ]; then
+            MONTH="${{ github.event.inputs.month }}"
+          else
+            MONTH=$(date -u -d 'yesterday' +%Y-%m)
+          fi
+          echo "month=$MONTH" >> $GITHUB_OUTPUT
+          echo "Osvežujem mesec: $MONTH"
+
+      - name: Posodobi mesec
         env:
           EW_APP: ${{ secrets.EW_APP }}
           EW_API: ${{ secrets.EW_API }}
           EW_MAC: ${{ secrets.EW_MAC }}
-        run: |
-          MONTH=$(date -u +%Y-%m)
-          python3 tools/update_history.py "$MONTH"
+        run: python3 tools/update_history.py "${{ steps.month.outputs.month }}"
 
       - name: Preveri celovitost history.json
         run: |
-          MONTH=$(date -u +%Y-%m)
-          python3 tools/validate_history.py "$MONTH" "${{ steps.before.outputs.count }}"
+          python3 tools/validate_history.py "${{ steps.month.outputs.month }}" "${{ steps.before.outputs.count }}"
 
       - name: Pre-renderiraj zadnjo meritev v index.html
         run: python3 tools/inject_current_weather.py
@@ -50,7 +68,7 @@ jobs:
           if git diff --quiet history.json index.html; then
             echo "Ni novih podatkov."
           else
-            MONTH=$(date -u +%Y-%m)
+            MONTH="${{ steps.month.outputs.month }}"
             git add history.json index.html
             git commit -m "chore: posodobi history.json + statično meritev za $MONTH [skip ci]"
             git push
