@@ -504,6 +504,7 @@ def build_alert_html(article, alert, now_utc):
 
 </div>
 <script src="likes.js" defer></script>
+<script src="views.js" defer></script>
 <script src="/blog/share-bar.js" defer></script>
 <script src="/blog/comments.js" defer></script>
 {app_bottomnav()}
@@ -654,6 +655,7 @@ def build_monthly_digest(config, state, output):
   </footer>
 </div>
 <script src="likes.js" defer></script>
+<script src="views.js" defer></script>
 <script src="/blog/share-bar.js" defer></script>
 {app_bottomnav()}
 </body>

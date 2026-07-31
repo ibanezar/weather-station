@@ -149,6 +149,17 @@ article strong{color:#fff}
   border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);
   box-shadow:var(--card-shadow);transition:border-color .18s,color .18s}
 .top-engage .top-rating:hover{color:var(--text);border-color:rgba(245,158,11,.45)}
+/* Okence s številom ogledov (blog/views.js) — isti obris kot ocena in všeček,
+   a brez interakcije: je podatek, ne gumb. */
+.view-chip{display:inline-flex;align-items:center;gap:.45rem;
+  padding:.5rem 1rem;border-radius:999px;line-height:1;
+  font-size:.9rem;color:var(--muted);
+  background:var(--card-bg);border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);cursor:default}
+.view-chip svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.view-chip .vc-num{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text)}
+.view-chip .vc-label{font-size:.82rem}
 .like-box{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
 .like-box[data-place="top"]{margin:0}
 .like-box[data-place="bottom"]{margin:2.2rem 0 1rem}
