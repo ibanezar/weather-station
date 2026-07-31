@@ -350,6 +350,7 @@ function normalize(data){
 // Za pravi persistentni counter potrebuješ Cloudflare KV binding "COUNTER_KV"
 let _memCount = 1000; // začetna vrednost — nastavi po želji
 const _memLikes = {}; // fallback za všečke, kadar KV ni na voljo (resetira se ob restartu)
+const _memViews = {}; // fallback za oglede člankov, kadar KV ni na voljo
 const _memPoll = {}; // fallback za dnevni poll, kadar KV ni na voljo (resetira se ob restartu)
 let _memAndroidPoll = { da: 0, ne: 0 }; // fallback za android-poll, kadar KV ni na voljo
 
@@ -1336,6 +1337,66 @@ export default {
         return new Response(
           JSON.stringify({ slug, count }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
+        );
+      }
+
+      // ── /views ────────────────────────────────────────────
+      // Ogledi blog člankov. Ključ v KV: "views:<slug>".
+      // GET  /views?slug=xxx     → { slug, count }
+      // GET  /views?slugs=a,b,c  → { views: { a:N, b:N, … } }  (bulk, za seznam bloga)
+      // POST /views?slug=xxx     → poveča za 1 in vrne { slug, count }
+      //
+      // Ponavljajoče se štetje istega bralca prepreči odjemalec (blog/views.js
+      // pošlje POST samo enkrat na 12 ur na napravo in slug, sicer bere z GET).
+      // To hkrati drži število KV zapisov nizko — vsak POST je en zapis.
+      // Persistenca zahteva KV binding COUNTER_KV; brez njega vrne in-memory vrednost.
+      if (path === "/views") {
+        if (request.method === "GET" && url.searchParams.get("slugs") !== null) {
+          const wanted = url.searchParams.get("slugs").split(",").map(s => s.trim().toLowerCase())
+            .filter(s => /^[a-z0-9-]{1,120}$/.test(s)).slice(0, 60);
+          const views = {};
+          if (env?.COUNTER_KV) {
+            await Promise.all(wanted.map(async s => {
+              views[s] = parseInt((await env.COUNTER_KV.get("views:" + s)) || "0") || 0;
+            }));
+          } else {
+            wanted.forEach(s => { views[s] = _memViews["views:" + s] || 0; });
+          }
+          return new Response(JSON.stringify({ views }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" }
+          });
+        }
+        const slug = (url.searchParams.get("slug") || "").toLowerCase();
+        if (!/^[a-z0-9-]{1,120}$/.test(slug)) {
+          return new Response(
+            JSON.stringify({ error: "neveljaven slug" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
+        const key = "views:" + slug;
+        const bump = request.method === "POST";
+        let count;
+        if (env?.COUNTER_KV) {
+          count = parseInt((await env.COUNTER_KV.get(key)) || "0") || 0;
+          if (bump) {
+            count += 1;
+            await env.COUNTER_KV.put(key, String(count));
+          }
+        } else {
+          _memViews[key] = _memViews[key] || 0;
+          if (bump) _memViews[key] += 1;
+          count = _memViews[key];
+        }
+        return new Response(
+          JSON.stringify({ slug, count }),
+          {
+            headers: {
+              ...CORS_ALLOWED, "Content-Type": "application/json",
+              // Branje sme biti kratko predpomnjeno na robu (števec ogledov ne
+              // rabi biti na sekundo točen), odgovor na POST pa nikoli.
+              "Cache-Control": bump ? "no-store" : "s-maxage=60"
+            }
+          }
         );
       }
 

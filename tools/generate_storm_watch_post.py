@@ -243,6 +243,7 @@ def build_html(trigger, now_utc):
   </footer>
 </div>
 <script src="likes.js" defer></script>
+<script src="views.js" defer></script>
 <script src="/blog/share-bar.js" defer></script>
 </body>
 </html>

@@ -1007,6 +1007,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script src="likes.js" defer></script>
+<script src="views.js" defer></script>
 <script src="/blog/comments.js" defer></script>
 <script src="/blog/share-bar.js" defer></script>
 <script src="/blog/article-enhance.js" defer></script>
