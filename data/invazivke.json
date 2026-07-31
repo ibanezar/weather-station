@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30T06:05:50.066772+00:00",
+  "updated": "2026-07-31T06:28:42.994379+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -15,17 +15,17 @@
       "sl": "Japonski dresnik",
       "sci": "Reynoutria japonica",
       "severity": "high",
-      "total_cells": 1,
-      "new_cells_30d": 0,
-      "last_observed": "2025-07-06",
+      "total_cells": 2,
+      "new_cells_30d": 1,
+      "last_observed": "2026-07-29",
       "recent": [
         {
-          "date": "2025-07-06",
-          "place": "Bad Eisenkappel, 9135, Österreich",
-          "lat_approx": 46.44,
-          "lng_approx": 14.56,
-          "url": "https://www.inaturalist.org/observations/295735721",
-          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/532861537/medium.jpg"
+          "date": "2026-07-29",
+          "place": "Luče ob Savinji, 3334 Luče, Slovénie",
+          "lat_approx": 46.36,
+          "lng_approx": 14.74,
+          "url": "https://www.inaturalist.org/observations/386621289",
+          "photo": "https://static.inaturalist.org/photos/707899299/medium.jpg"
         }
       ]
     },
@@ -165,6 +165,20 @@
     }
   ],
   "alerts": [
+    {
+      "slug": "japonski-dresnik",
+      "sci": "Reynoutria japonica",
+      "sl": "Japonski dresnik",
+      "severity": "high",
+      "desc_sl": "Invazivna rastlina iz vzhodne Azije, ki tvori goste sestoje in izpodrine domorodno obrežno vegetacijo. Njegove korenine lahko poškodujejo nasipe, temelje in asfalt, odstranjevanje pa je izjemno zahtevno, ker požene iz najmanjšega koščka korenike.",
+      "date": "2026-07-29",
+      "cell": "46.35_14.74",
+      "place": "Luče ob Savinji, 3334 Luče, Slovénie",
+      "lat_approx": 46.36,
+      "lng_approx": 14.74,
+      "url": "https://www.inaturalist.org/observations/386621289",
+      "photo": "https://static.inaturalist.org/photos/707899299/medium.jpg"
+    },
     {
       "slug": "zlezava-nedotika",
       "sci": "Impatiens glandulifera",

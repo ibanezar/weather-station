@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 30 Jul 2026 17:00:26 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 31 Jul 2026 06:31:01 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Poplave avgusta 2023: 257 mm, ki jih postaja ni zapisala</title>
@@ -43,6 +43,17 @@
       <category>primerjava</category>
       <category>IREICA1</category>
       <category>vodna-bilanca</category>
+    </item>
+    <item>
+      <title>Invazivka na novi lokaciji: Japonski dresnik pri Luče ob Savinji, 3334 Luče, Slovénie</title>
+      <link>https://meteorec.si/blog/invazivka-japonski-dresnik-20260729-4635-1474.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-japonski-dresnik-20260729-4635-1474.html</guid>
+      <pubDate>Wed, 29 Jul 2026 08:00:00 +0000</pubDate>
+      <description>Japonski dresnik (Reynoutria japonica) je bila opažena na novi lokaciji pri Luče ob Savinji, 3334 Luče, Slovénie (29. julija 2026). Resnost: visoka.</description>
+      <category>invazivke</category>
+      <category>japonski-dresnik</category>
+      <category>high</category>
+      <category>2026</category>
     </item>
     <item>
       <title>Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor</title>
