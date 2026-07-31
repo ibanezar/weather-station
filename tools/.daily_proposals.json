@@ -1,27 +1,49 @@
 {
-  "date": "2026-07-30",
-  "created": "2026-07-30T06:13:14.517074+00:00",
+  "date": "2026-07-31",
+  "created": "2026-07-31T06:33:10.984854+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročinski val se stopnjuje: v Zgornji Savinjski dolini jutri do 36,5 °C",
-      "teaser": "Napoved za Rečico ob Savinji kaže danes vrh pri 34,9 °C, jutri pa se pričakuje še višjih 36,5 °C. Preverimo, kako dolgo bo vročina vztrajala in kdaj lahko pričakujemo rahlo osvežitev z minimalnimi 19,1 °C do konca tedna.",
+      "title": "Vročinski val nad Zgornjo Savinjsko dolino: danes tudi do 36,2 °C",
+      "teaser": "Napoved za Rečico ob Savinji kaže vrh vročinskega vala z dnevno najvišjo temperaturo 36,2 °C, ob jutranji minimalni okoli 17,4 °C. V naslednjih dneh se vrednosti komaj kaj znižajo, saj napoved za 3. avgust spet napoveduje 36,5 °C ob popolni odsotnosti padavin.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (34,9 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (36,2 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 34.9,
+          "value": 36.2,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
+      "id": "dusljivost-zraka",
+      "title": "Rosišče 18,7 °C: zakaj se danešnja vročina počuti hujše, kot kaže termometer",
+      "teaser": "Postaja IREICA1 trenutno beleži 23,4 °C, a ob 75-odstotni vlažnosti in rosišču 18,7 °C se občutek vročine (app_temp) povzpne na 26,5 °C. V članku razložimo, kaj to pomeni za dušljivost zraka v Savinjski dolini in kako brati te podatke.",
+      "topic": {
+        "id": "dusljivost-zraka",
+        "sezona": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "tag": "dusljivost",
+        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+        "seo_keywords": [
+          "rosišče Savinjska dolina",
+          "dušljivo vreme",
+          "občutek vročine vlaga"
+        ]
+      }
+    },
+    {
       "id": "veter-in-tlak",
-      "title": "Zračni tlak 1020 hPa in brezvetrje - kaj to pomeni za vreme v Zgornji Savinjski dolini",
-      "teaser": "Postaja IREICA1 beleži razmeroma visok zračni tlak (1020,3 hPa) ob praktično ničelnem vetru, kar je tipično za stabilno poletno vreme. Analiziramo, ali takšna kombinacija napoveduje nadaljevanje vročine ali nakazuje spremembo v prihodnjih dneh.",
+      "title": "Zračni tlak 1019 hPa in brezvetrje -- kaj to napoveduje za Zgornjo Savinjsko dolino",
+      "teaser": "Trenutni relativni zračni tlak znaša 1018,7 hPa, veter pa je praktično zamrl (0,0 km/h), kar so tipični znaki stabilnega vremena brez padavin. Pogledamo, kako se to sklada z napovedjo vetra do 17,8 km/h za danes in kaj to pomeni za prihodnje dni brez dežja.",
       "topic": {
         "id": "veter-in-tlak",
         "sezona": [
@@ -44,35 +66,6 @@
           "zračni tlak napoved vreme",
           "veter Zgornja Savinjska dolina",
           "sprememba vremena znaki"
-        ]
-      }
-    },
-    {
-      "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Rečici ob Savinji: dnevi nad 34 stopinjami se kopičijo",
-      "teaser": "Podatki postaje IREICA1 kažejo trenutnih 21,1 °C v jutranjih urah, medtem ko štiridnevna napoved obeta maksimume med 34 in 36,5 °C. Pogledamo, kako se ti vrhovi in nočne minimalne temperature okoli 17-20 °C umeščajo v širši poletni vzorec Zgornje Savinjske doline.",
-      "topic": {
-        "id": "temperaturni-trend",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "trend",
-        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
-        "seo_keywords": [
-          "temperaturni trend Savinjska dolina",
-          "vreme Rečica ob Savinji",
-          "postaja IREICA1"
         ]
       }
     }
