@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/invazivke-mesecni-pregled-2026-07.html</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/invazivke-mesecni-pregled-2026-07.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-julij-2026.html</loc>
     <lastmod>2026-08-01</lastmod>
     <changefreq>monthly</changefreq>

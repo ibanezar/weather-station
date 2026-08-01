@@ -5,8 +5,18 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 01 Aug 2026 05:46:05 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 01 Aug 2026 06:14:46 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Mesečni pregled invazivnih vrst — julij 2026</title>
+      <link>https://meteorec.si/blog/invazivke-mesecni-pregled-2026-07.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivke-mesecni-pregled-2026-07.html</guid>
+      <pubDate>Sat, 01 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Pregled opazovanj invazivnih vrst v Zgornji Savinjski dolini za julij 2026: 2 opazovanj (lani istega meseca 1), po vrstah in novih lokacijah.</description>
+      <category>invazivke</category>
+      <category>mesecni-pregled</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Vremenski povzetek — julij 2026</title>
       <link>https://meteorec.si/blog/vremenski-povzetek-julij-2026.html</link>
