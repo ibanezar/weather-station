@@ -577,10 +577,15 @@
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🗺 Radar padavin</span>
-      <span class="chart-range" id="mrad-stamp">—</span>
+      <span class="chart-range">zadnja ura</span>
     </div>
     <div class="radar-map-wrap">
       <div id="mrad-map"></div>
+    </div>
+    <div class="radar-controls">
+      <button class="radar-btn" id="mrad-play" onclick="toggleMeteorecRadarPlay()">⏸ Pavza</button>
+      <span class="radar-time" id="mrad-time">—</span>
+      <div class="radar-track" id="mrad-track" onclick="meteorecRadarSeek(event)"><div class="radar-track-fill" id="mrad-track-fill"></div></div>
     </div>
     <div class="radar-legend">
       <div class="mrad-legend">

@@ -3416,11 +3416,14 @@ function drawWindRose(observations){
 // ══════════════════════════════════════════════════════════
 // ── Lasten radar padavin (ARSO jedro + EUMETNET OPERA) ────
 // ══════════════════════════════════════════════════════════
-// Kompozit sestavi worker; sem pride kot en sam PNG v Web Mercatorju, zato
-// ga Leaflet položi naravnost na pravokotnik iz /radar-composite.json.
+// Kompozit sestavi worker; sem pride kot niz PNG-jev v Web Mercatorju, zato
+// jih Leaflet položi naravnost na pravokotnik iz /radar-composite.json.
+// Animacija pokriva zadnjo uro s korakom 5 minut.
 // Zemljevida ne gradimo, dokler kartica ne pride na zaslon — Leaflet je
 // večji od vsega ostalega na strani skupaj.
-let _mradMap=null,_mradImg=null,_mradStamp='',_mradTimer=null;
+let _mradMap=null,_mradFrames=[],_mradIdx=-1,_mradTimer=null,_mradPoll=null,
+    _mradPlaying=true,_mradBounds=null,_mradLast='';
+const MRAD_OPACITY=.82;
 
 async function initMeteorecRadar(){
   if(_mradMap)return;
@@ -3438,40 +3441,114 @@ async function initMeteorecRadar(){
     .addTo(_mradMap).bindPopup('IREICA1 · Rečica ob Savinji');
 
   await refreshMeteorecRadar();
-  clearInterval(_mradTimer);
-  _mradTimer=setInterval(()=>{if(!document.hidden)refreshMeteorecRadar();},5*60*1000);
+  // Nov posnetek je vsakih 5 minut; ko je zavihek skrit, ne osvežujemo.
+  clearInterval(_mradPoll);
+  _mradPoll=setInterval(()=>{if(!document.hidden)refreshMeteorecRadar();},5*60*1000);
 }
 
+// Uskladi seznam okvirjev s tistim, kar ponuja worker: doda nove, odstrani
+// tiste, ki so padli iz zadnje ure.
 async function refreshMeteorecRadar(){
-  const tEl=document.getElementById('mrad-stamp');
+  const tEl=document.getElementById('mrad-time');
   try{
     const m=await(await fetch(PROXY+'/radar-composite.json')).json();
-    if(!m.cas)throw new Error('ni posnetka');
-    if(m.cas!==_mradStamp){
-      // Nov okvir najprej naložimo prosojnega in šele ob 'load' zamenjamo
-      // starega — sicer med prenosom za hip ni ničesar.
-      const prev=_mradImg;
-      const img=L.imageOverlay(PROXY+'/radar-composite?v='+encodeURIComponent(m.cas),
-        m.meje,{opacity:0,interactive:false});
-      img.addTo(_mradMap);
-      img.once('load',()=>{img.setOpacity(.82);if(prev)_mradMap.removeLayer(prev);});
-      img.once('error',()=>{
-        _mradMap.removeLayer(img);
-        if(!prev&&tEl)tEl.textContent='Radar ni dosegljiv';
-      });
-      _mradImg=img;
-      _mradStamp=m.cas;
-      renderMeteorecRadarLegend(m.legenda);
+    const list=(m.okvirji||[]).filter(f=>f&&f.zig);
+    if(!list.length)throw new Error('ni okvirjev');
+    _mradBounds=m.meje;
+    renderMeteorecRadarLegend(m.legenda);
+    if(list[list.length-1].zig===_mradLast)return;   // nič novega
+    _mradLast=list[list.length-1].zig;
+
+    const zivi=new Set(list.map(f=>f.zig));
+    _mradFrames.filter(f=>!zivi.has(f.zig)&&f.layer).forEach(f=>_mradMap.removeLayer(f.layer));
+    const stari=new Map(_mradFrames.map(f=>[f.zig,f]));
+    _mradFrames=list.map(f=>stari.get(f.zig)||{zig:f.zig,cas:f.cas,layer:null,ready:false});
+
+    // Najprej zadnji okvir, da uporabnik takoj nekaj vidi; ostale zatem po
+    // vrsti, da workerja ne zasujemo s trinajstimi izrisi hkrati.
+    await mradLoadFrame(_mradFrames.length-1);
+    showMeteorecRadarFrame(_mradFrames.length-1);
+    for(let i=0;i<_mradFrames.length-1;i++){
+      await mradLoadFrame(i);
+      if(_mradPlaying&&!_mradTimer&&mradReady().length>2)startMeteorecRadarAnim();
     }
-    if(tEl){
-      const dt=new Date(m.cas);
-      tEl.textContent=dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})
-        +(m.starost_min!=null?' · pred '+m.starost_min+' min':'');
-    }
+    if(_mradPlaying)startMeteorecRadarAnim();
   }catch(e){
     console.warn('Radar padavin:',e);
-    if(tEl&&!_mradStamp)tEl.textContent='Radar ni dosegljiv';
+    if(tEl&&_mradIdx<0)tEl.textContent='Radar ni dosegljiv';
   }
+}
+
+function mradLoadFrame(i){
+  const f=_mradFrames[i];
+  if(!f||f.layer)return Promise.resolve();
+  return new Promise(res=>{
+    const layer=L.imageOverlay(PROXY+'/radar-composite?t='+encodeURIComponent(f.zig),
+      _mradBounds,{opacity:0,interactive:false});
+    layer.once('load',()=>{f.ready=true;res();});
+    layer.once('error',()=>{f.err=true;res();});
+    layer.addTo(_mradMap);
+    f.layer=layer;
+  });
+}
+
+const mradReady=()=>_mradFrames.filter(f=>f.ready);
+
+function showMeteorecRadarFrame(i){
+  const f=_mradFrames[i];
+  if(!f||!f.ready)return;
+  _mradFrames.forEach(x=>{if(x.layer)x.layer.setOpacity(x===f?MRAD_OPACITY:0);});
+  _mradIdx=i;
+  const tEl=document.getElementById('mrad-time');
+  if(tEl){
+    const zdaj=i===_mradFrames.length-1;
+    tEl.innerHTML=new Date(f.cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})
+      +(zdaj?' <span class="radar-now-badge">zdaj</span>':'');
+  }
+  const fill=document.getElementById('mrad-track-fill');
+  if(fill)fill.style.width=((i+1)/_mradFrames.length*100)+'%';
+}
+
+function startMeteorecRadarAnim(){
+  clearInterval(_mradTimer);
+  // Na zadnjem okvirju se za hip ustavimo, sicer se zanka ne da prebrati.
+  let hold=0;
+  _mradTimer=setInterval(()=>{
+    if(hold>0){hold--;return;}
+    const r=mradReady();
+    if(r.length<2)return;
+    let i=_mradIdx;
+    for(let k=0;k<_mradFrames.length;k++){
+      i=(i+1)%_mradFrames.length;
+      if(_mradFrames[i].ready)break;
+    }
+    showMeteorecRadarFrame(i);
+    if(i===_mradFrames.length-1)hold=3;
+  },450);
+}
+
+function toggleMeteorecRadarPlay(){
+  _mradPlaying=!_mradPlaying;
+  const btn=document.getElementById('mrad-play');
+  if(_mradPlaying){startMeteorecRadarAnim();if(btn)btn.textContent='⏸ Pavza';}
+  else{clearInterval(_mradTimer);_mradTimer=null;if(btn)btn.textContent='▶ Predvajaj';}
+}
+
+function meteorecRadarSeek(e){
+  const track=document.getElementById('mrad-track');
+  if(!track||!_mradFrames.length)return;
+  const rect=track.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  let i=Math.max(0,Math.min(_mradFrames.length-1,Math.floor(pct*_mradFrames.length)));
+  // Če izbrani okvir še ni naložen, poiščemo najbližjega, ki je.
+  if(!_mradFrames[i].ready){
+    let best=-1,bd=1e9;
+    _mradFrames.forEach((f,k)=>{if(f.ready&&Math.abs(k-i)<bd){bd=Math.abs(k-i);best=k;}});
+    if(best<0)return; i=best;
+  }
+  showMeteorecRadarFrame(i);
+  _mradPlaying=false;clearInterval(_mradTimer);_mradTimer=null;
+  const btn=document.getElementById('mrad-play');if(btn)btn.textContent='▶ Predvajaj';
 }
 
 // Legendo rišemo iz odgovora in ne iz prepisane lestvice, da se ob spremembi
