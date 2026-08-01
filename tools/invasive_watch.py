@@ -2,14 +2,16 @@
 """
 tools/invasive_watch.py — Invazivke-alarm za meteorec.si
 ----------------------------------------------------------
-Vsako noč:
+Vsak teden (ponedeljek):
   1. Potegne sveža iNaturalist opazovanja ciljnih invazivnih vrst
      (data/invasive_species.json) za Zgornjo Savinjsko dolino.
   2. Zazna, kdaj se vrsta prvič pojavi v novi mrežni celici (~1 km,
      glej data/invasive_state.json -- cache taxon ID-jev + videnih celic).
-  3. Ob novi lokaciji zgradi kratek samodejni blog zapis (isti vzorec kot
-     tools/generate_storm_watch_post.py / generate_arso_newsjack_post.py --
-     predloga + podatki, brez LLM osnutka -- in ga pred objavo pošlje skozi
+  3. Vse nove lokacije, zaznane od zadnjega (tedenskega) zagona, zbere v EN
+     sam tedenski zbirni članek (ne enega članka na najdbo -- prej je to
+     povzročalo po več objav na dan, glej pogovor s Filipom 1. 8. 2026).
+     Isti vzorec kot tools/generate_storm_watch_post.py --
+     predloga + podatki, brez LLM osnutka -- in gre pred objavo skozi
      isti lektor kot dnevni članek, glej generate_daily_post.call_lektor).
   4. Posodobi data/invazivke.json (podatki za spoke stran /invazivke/).
   5. Ob prvem dnevu v mesecu doda še mesečni pregled (brez alertov).
@@ -317,8 +319,13 @@ def build_output_json(config, state, new_alerts, recent_by_slug):
     return output
 
 
-# ── Blog: kratki samodejni alert-zapisi (isti vzorec kot storm-watch/ARSO
-# newsjack -- predloga + podatki, brez LLM osnutka, a z lektor prehodom) ──────
+# ── Blog: EN tedenski zbirni zapis za vse nove lokacije (isti vzorec kot
+# storm-watch/ARSO newsjack -- predloga + podatki, brez LLM osnutka, a z
+# lektor prehodom). Prej je vsaka nova lokacija dobila svoj članek (in FB/IG
+# objavo) -- preveč objav na dan, glej pogovor s Filipom 1. 8. 2026. ────────
+
+SEVERITY_ORDER = ["critical", "high", "medium", "low"]
+
 
 def slugify_simple(text):
     import re
@@ -328,65 +335,79 @@ def slugify_simple(text):
     return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
 
 
-def build_alert_article(alert):
-    sev = alert["severity"]
-    sev_label = SEVERITY_LABEL[sev]
-    warn = ""
-    if sev == "critical":
-        warn = (f'<strong>Pozor:</strong> {alert["sl"]} je zdravju nevarna rastlina — stik s sokom in sončna '
-                 f'svetloba lahko povzročita hude opekline. Rastline se ne dotikaj, o najdbi obvesti pristojno občino.')
+def build_weekly_article(alerts):
+    by_species = {}
+    for a in sorted(alerts, key=lambda a: SEVERITY_ORDER.index(a["severity"])):
+        by_species.setdefault(a["slug"], []).append(a)
 
-    lead = (f'Na iNaturalistu je bilo pri kraju <strong>{alert["place"]}</strong> prvič zabeleženo opazovanje '
-             f'vrste <strong>{alert["sl"]}</strong> ({alert["sci"]}) na tem delu Zgornje Savinjske doline — '
-             f'nova mrežna celica v našem spremljanju invazivnih vrst.')
+    dates = [a["date"] for a in alerts if a.get("date")]
+    date_from, date_to = (min(dates), max(dates)) if dates else (TODAY, TODAY)
+    n = len(alerts)
+    species_names = [items[0]["sl"] for items in by_species.values()]
+    species_txt = species_names[0] if len(species_names) == 1 \
+        else ", ".join(species_names[:-1]) + " in " + species_names[-1]
+    worst_severity = min((a["severity"] for a in alerts), key=SEVERITY_ORDER.index)
 
-    paragraphs_intro = [alert["desc_sl"]]
-    if warn:
-        paragraphs_intro.append(warn)
+    lead = (f'V zadnjem tednu ({fmtdate(date_from)}–{fmtdate(date_to)}) smo na iNaturalistu zabeležili '
+             f'{sl_opazovanj(n)} invazivnih vrst na novih lokacijah v Zgornji Savinjski dolini: {species_txt}.')
 
-    article = {
-        "title": (f'{"⚠ " if sev == "critical" else ""}Invazivka na novi lokaciji: {alert["sl"]} pri {alert["place"]}'),
-        "meta_description": (f'{alert["sl"]} ({alert["sci"]}) je bila opažena na novi lokaciji pri {alert["place"]} '
-                               f'({fmtdate(alert["date"]) if alert["date"] else "neznan datum"}). Resnost: {sev_label}.'),
-        "tags": ["invazivke", alert["slug"], sev, str(TODAY_DATE.year)],
-        "section_label": "Invazivke",
-        "og_photo": SEVERITY_OG_PHOTO[sev],
-        "og_accent_hex": SEVERITY_ACCENT[sev],
-        "lead": lead,
-        "sections": [
-            {"label": "01 — o vrsti", "heading": f'Zakaj spremljamo {alert["sl"].lower()}', "id": "o-vrsti",
-             "paragraphs": paragraphs_intro},
-            {"label": "02 — opazovanje", "heading": "Podatki o opazovanju", "id": "opazovanje",
-             "paragraphs": [
-                 (f'Opazovanje je bilo zabeleženo {fmtdate(alert["date"]) if alert["date"] else "pred kratkim"} '
-                  f'in ga je na <a href="{alert["url"]}" style="color:var(--blue)">iNaturalist</a> mogoče videti '
-                  f'v izvirniku (natančna koordinata na strani ni objavljena — prikazujemo jo zaokroženo na '
-                  f'približno 1 km, glej <a href="/invazivke/" style="color:var(--blue)">/invazivke/</a>).'),
-             ]},
-        ],
-        "callout": {"label": "Prijavi tudi ti", "text": ('Če opaziš invazivno vrsto v naravi, jo prijavi na '
+    critical_species = [items[0]["sl"] for items in by_species.values() if items[0]["severity"] == "critical"]
+    callout_text = ('Če opaziš invazivno vrsto v naravi, jo prijavi na '
                      '<a href="https://www.inaturalist.org" style="color:var(--blue)">iNaturalist</a> — s fotografijo '
-                     'in lokacijo. Prijave se samodejno pretakajo v naš pregled na /invazivke/.')},
+                     'in lokacijo. Prijave se samodejno pretakajo v naš pregled na /invazivke/.')
+    if critical_species:
+        callout_text = (f'<strong>Pozor:</strong> med tedenskimi najdbami je {", ".join(critical_species)} — '
+                          f'zdravju nevarna rastlina; stik s sokom in sončna svetloba lahko povzročita hude opekline. '
+                          f'Rastline se ne dotikaj, o najdbi obvesti pristojno občino.<br><br>' + callout_text)
+
+    sections = []
+    for i, (slug, items) in enumerate(by_species.items(), 1):
+        sp = items[0]
+        locations_html = "<ul style='margin:.4rem 0 0;padding-left:1.2rem'>" + "".join(
+            f'<li>{a["place"]} — {fmtdate(a["date"]) if a["date"] else "pred kratkim"} '
+            f'(<a href="{a["url"]}" style="color:var(--blue)">iNaturalist</a>)</li>'
+            for a in items
+        ) + "</ul>"
+        sections.append({
+            "label": f"{i:02d} — vrsta",
+            "heading": f'{sp["sl"]} — {sl_opazovanj(len(items))} na novih lokacijah',
+            "id": f"vrsta-{slugify_simple(slug)}",
+            "paragraphs": [sp["desc_sl"], f'Resnost: {SEVERITY_LABEL[sp["severity"]]}. Nove lokacije ta teden:',
+                            locations_html],
+        })
+
+    return {
+        "title": f'Invazivke ta teden: {sl_opazovanj(n)} na novih lokacijah',
+        "meta_description": (f'Tedenski pregled invazivnih vrst v Zgornji Savinjski dolini '
+                               f'({fmtdate(date_from)}–{fmtdate(date_to)}): {sl_opazovanj(n)} na novih lokacijah — '
+                               f'{species_txt}.'),
+        "tags": ["invazivke", "tedenski-pregled", str(TODAY_DATE.year)] + list(by_species.keys()),
+        "section_label": "Invazivke",
+        "og_photo": SEVERITY_OG_PHOTO[worst_severity],
+        "og_accent_hex": SEVERITY_ACCENT[worst_severity],
+        "lead": lead,
+        "sections": sections,
+        "callout": {"label": "Prijavi tudi ti", "text": callout_text},
         "sources_note": "Vir: iNaturalist (opazovanja skupnosti, licenca CC), analiza lokacij Meteorec.",
     }
-    return article
 
 
-def build_alert_html(article, alert, now_utc):
-    date_compact = (alert["date"] or TODAY).replace("-", "")
-    cell_slug = alert["cell"].replace(".", "").replace("_", "-")
-    slug = f'invazivka-{alert["slug"]}-{date_compact}-{cell_slug}'
+def build_weekly_html(article, alerts, now_utc):
+    dates = [a["date"] for a in alerts if a.get("date")]
+    date_to = max(dates) if dates else TODAY
+    slug = f"invazivka-tedenski-pregled-{date_to.replace('-', '')}"
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
     desc = article["meta_description"]
-    date_str = fmtdate(alert["date"]) if alert["date"] else fmtdate(TODAY)
+    date_str = fmtdate(date_to)
+    n = len(alerts)
 
+    by_species = {}
+    for a in alerts:
+        by_species.setdefault(a["slug"], []).append(a)
     rows = [
-        ("Vrsta", f'{alert["sl"]} <em>({alert["sci"]})</em>'),
-        ("Resnost", SEVERITY_LABEL[alert["severity"]].capitalize()),
-        ("Približna lokacija", alert["place"]),
-        ("Koordinate (≈1 km)", f'{alert["lat_approx"]}, {alert["lng_approx"]}'),
-        ("Datum opazovanja", date_str),
+        (items[0]["sl"], f'{sl_opazovanj(len(items))} · {SEVERITY_LABEL[items[0]["severity"]].capitalize()}')
+        for items in by_species.values()
     ]
     rows_html = "\n".join(f"      <tr><th>{k}</th><td>{v}</td></tr>" for k, v in rows)
 
@@ -480,7 +501,7 @@ def build_alert_html(article, alert, now_utc):
   </nav>
 
   <article>
-    <div class="stn-badge"><span></span> Invazivke · {alert["place"]} · {section_label}</div>
+    <div class="stn-badge"><span></span> Invazivke · Tedenski pregled · {section_label}</div>
     <h1>{title}</h1>
     <p class="post-meta">{date_str} · Filip Eremita · samodejni zapis (iNaturalist)</p>
 
@@ -510,11 +531,11 @@ def build_alert_html(article, alert, now_utc):
 </body>
 </html>
 '''
-    entry = {"title": title, "slug": slug, "url": f"/blog/{slug}.html", "date": alert["date"] or TODAY,
+    entry = {"title": title, "slug": slug, "url": f"/blog/{slug}.html", "date": date_to,
               "summary": desc, "tags": tags}
     og_meta = {
-        "title": article["title"].split(":")[0][:40],
-        "subtitle": f'{alert["place"]} · {date_str}',
+        "title": "Invazivke ta teden",
+        "subtitle": f'{sl_opazovanj(n)} na novih lokacijah · {date_str}',
         "section": section_label,
         "accent": hexrgb(article["og_accent_hex"]),
         "photo": article["og_photo"],
@@ -522,10 +543,10 @@ def build_alert_html(article, alert, now_utc):
     return slug, html, entry, og_meta
 
 
-def publish_alert(alert, now_utc, wire):
-    article = build_alert_article(alert)
+def publish_weekly_alerts(alerts, now_utc, wire):
+    article = build_weekly_article(alerts)
     if os.environ.get("ANTHROPIC_API_KEY"):
-        lektor_context = {"opazovanje": alert}
+        lektor_context = {"opazovanja_ta_teden": alerts}
         review = call_lektor(article, lektor_context)
         if review.get("issues"):
             print("   lektor:")
@@ -535,10 +556,10 @@ def publish_alert(alert, now_utc, wire):
     else:
         print("   ⚠ ANTHROPIC_API_KEY ni nastavljen -- lektura preskočena.")
         final = article
-    slug, html, entry, og_meta = build_alert_html(final, alert, now_utc)
+    slug, html, entry, og_meta = build_weekly_html(final, alerts, now_utc)
     out = os.path.join(ROOT, "blog", f"{slug}.html")
     open(out, "w", encoding="utf-8").write(html)
-    print(f"✓ zapisano: blog/{slug}.html ({alert['sl']} @ {alert['place']})")
+    print(f"✓ zapisano: blog/{slug}.html (tedenski pregled, {len(alerts)} novih lokacij)")
     if wire:
         try:
             from generate_og_images import make_og
@@ -719,8 +740,8 @@ def main():
     print(f"✓ data/invazivke.json posodobljen ({len(new_alerts)} novih alertov)")
 
     now_utc = datetime.datetime.now(datetime.timezone.utc)
-    for alert in new_alerts:
-        publish_alert(alert, now_utc, wire)
+    if new_alerts:
+        publish_weekly_alerts(new_alerts, now_utc, wire)
 
     if TODAY_DATE.day == 1:
         try:

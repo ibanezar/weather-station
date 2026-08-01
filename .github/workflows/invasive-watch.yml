@@ -2,7 +2,7 @@ name: Invazivke-alarm
 
 on:
   schedule:
-    - cron: '30 3 * * *'   # 3:30 UTC, po monthly-post/seo-smart-routine, pred daily-post predlogi (3:45 UTC)
+    - cron: '30 3 * * 1'   # ponedeljek 3:30 UTC, po monthly-post/seo-smart-routine, pred daily-post predlogi (3:45 UTC)
   workflow_dispatch:
 
 jobs:
