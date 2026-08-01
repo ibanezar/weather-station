@@ -573,20 +573,25 @@
     </div>
   </div>
 
-  <!-- Windy Radar -->
+  <!-- Lasten radar padavin — kompozit ARSO + EUMETNET OPERA (worker /radar-composite) -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
-      <span class="clabel" style="margin:0">🗺 Vremenski radar</span>
-      <span class="chart-range">Windy · ECMWF</span>
+      <span class="clabel" style="margin:0">🗺 Radar padavin</span>
+      <span class="chart-range" id="mrad-stamp">—</span>
     </div>
-    <iframe class="windy-frame" id="windy-frame"
-      data-src="https://embed.windy.com/embed2.html?lat=46.326&lon=14.921&detailLat=46.326&detailLon=14.921&width=650&height=420&zoom=8&level=surface&overlay=radar&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
-      allowfullscreen loading="lazy"></iframe>
-    <div class="windy-consent-placeholder" id="windy-placeholder-frame">
-      <div class="windy-consent-inner">
-        <p>Interaktivni vremenski radar (<strong>Windy.com</strong>) za delovanje potrebuje piškotke tretjih oseb.</p>
-        <button class="windy-consent-btn" onclick="loadSingleWindy('windy-frame','windy-placeholder-frame')">Prikaži radar</button>
+    <div class="radar-map-wrap">
+      <div id="mrad-map"></div>
+    </div>
+    <div class="radar-legend">
+      <div class="mrad-legend">
+        <div class="mrad-bar" id="mrad-scale"></div>
+        <div class="mrad-ticks" id="mrad-ticks"></div>
       </div>
+      <span>mm/h</span>
+      <span style="margin-left:auto">Vira:
+        <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">ARSO</a> in
+        <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">EUMETNET OPERA</a>
+        (CC BY 4.0)</span>
     </div>
   </div>
 

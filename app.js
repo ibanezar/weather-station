@@ -3414,6 +3414,89 @@ function drawWindRose(observations){
 }
 
 // ══════════════════════════════════════════════════════════
+// ── Lasten radar padavin (ARSO jedro + EUMETNET OPERA) ────
+// ══════════════════════════════════════════════════════════
+// Kompozit sestavi worker; sem pride kot en sam PNG v Web Mercatorju, zato
+// ga Leaflet položi naravnost na pravokotnik iz /radar-composite.json.
+// Zemljevida ne gradimo, dokler kartica ne pride na zaslon — Leaflet je
+// večji od vsega ostalega na strani skupaj.
+let _mradMap=null,_mradImg=null,_mradStamp='',_mradTimer=null;
+
+async function initMeteorecRadar(){
+  if(_mradMap)return;
+  const el=document.getElementById('mrad-map');if(!el)return;
+  if(typeof L==='undefined'){
+    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+  }
+  _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10}).setView([LAT,LON],7);
+  L.tileLayer(isDark()
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd'}).addTo(_mradMap);
+  L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2})
+    .addTo(_mradMap).bindPopup('IREICA1 · Rečica ob Savinji');
+
+  await refreshMeteorecRadar();
+  clearInterval(_mradTimer);
+  _mradTimer=setInterval(()=>{if(!document.hidden)refreshMeteorecRadar();},5*60*1000);
+}
+
+async function refreshMeteorecRadar(){
+  const tEl=document.getElementById('mrad-stamp');
+  try{
+    const m=await(await fetch(PROXY+'/radar-composite.json')).json();
+    if(!m.cas)throw new Error('ni posnetka');
+    if(m.cas!==_mradStamp){
+      // Nov okvir najprej naložimo prosojnega in šele ob 'load' zamenjamo
+      // starega — sicer med prenosom za hip ni ničesar.
+      const prev=_mradImg;
+      const img=L.imageOverlay(PROXY+'/radar-composite?v='+encodeURIComponent(m.cas),
+        m.meje,{opacity:0,interactive:false});
+      img.addTo(_mradMap);
+      img.once('load',()=>{img.setOpacity(.82);if(prev)_mradMap.removeLayer(prev);});
+      img.once('error',()=>{
+        _mradMap.removeLayer(img);
+        if(!prev&&tEl)tEl.textContent='Radar ni dosegljiv';
+      });
+      _mradImg=img;
+      _mradStamp=m.cas;
+      renderMeteorecRadarLegend(m.legenda);
+    }
+    if(tEl){
+      const dt=new Date(m.cas);
+      tEl.textContent=dt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})
+        +(m.starost_min!=null?' · pred '+m.starost_min+' min':'');
+    }
+  }catch(e){
+    console.warn('Radar padavin:',e);
+    if(tEl&&!_mradStamp)tEl.textContent='Radar ni dosegljiv';
+  }
+}
+
+// Legendo rišemo iz odgovora in ne iz prepisane lestvice, da se ob spremembi
+// barv v workerju ne razideta.
+function renderMeteorecRadarLegend(leg){
+  const bar=document.getElementById('mrad-scale'),ticks=document.getElementById('mrad-ticks');
+  if(!bar||!ticks||!leg||!leg.length||bar.childElementCount)return;
+  bar.innerHTML=leg.map(l=>'<i style="background:'+l.barva+'"></i>').join('');
+  bar.style.gridTemplateColumns='repeat('+leg.length+',1fr)';
+  // Vsako drugo stopnjo označimo — vse skupaj se na telefonu ne bi prebrale.
+  const lab=leg.filter((_,i)=>i%2===0);
+  ticks.innerHTML=lab.map(l=>'<span>'+String(l.mmh).replace('.',',')+'</span>').join('');
+  ticks.style.gridTemplateColumns='repeat('+lab.length+',1fr)';
+}
+
+(function(){
+  const el=document.getElementById('mrad-map');if(!el)return;
+  if(!('IntersectionObserver' in window)){initMeteorecRadar();return;}
+  const io=new IntersectionObserver(es=>{
+    if(es.some(e=>e.isIntersecting)){io.disconnect();initMeteorecRadar();}
+  },{rootMargin:'200px'});
+  io.observe(el);
+})();
+
+// ══════════════════════════════════════════════════════════
 // ── RainViewer animirani radar ────────────────────────────
 // ══════════════════════════════════════════════════════════
 let _radarMap=null,_radarFrames=[],_radarIdx=0,_radarTimer=null,_radarLayers={},_radarPlaying=true,_radarHost='';
