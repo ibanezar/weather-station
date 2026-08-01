@@ -1,49 +1,56 @@
 {
-  "date": "2026-07-31",
-  "created": "2026-07-31T06:33:10.984854+00:00",
+  "date": "2026-08-01",
+  "created": "2026-08-01T06:16:46.385328+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročinski val nad Zgornjo Savinjsko dolino: danes tudi do 36,2 °C",
-      "teaser": "Napoved za Rečico ob Savinji kaže vrh vročinskega vala z dnevno najvišjo temperaturo 36,2 °C, ob jutranji minimalni okoli 17,4 °C. V naslednjih dneh se vrednosti komaj kaj znižajo, saj napoved za 3. avgust spet napoveduje 36,5 °C ob popolni odsotnosti padavin.",
+      "title": "Vročinski val nad Zgornjo Savinjsko dolino: danes do 34,9 °C, konec tedna še više",
+      "teaser": "Postaja IREICA1 v Rečici ob Savinji napoveduje za današnji dan vrhunec pri 34,9 °C, jutri pa se ohladi le rahlo na 34,0 °C. Podatki kažejo, da se vročina v naslednjih dneh še stopnjuje, saj napoved za 3. in 4. avgust kaže že 36,1 in 36,9 °C, ob tem pa dežja ni na vidiku.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (36,2 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (34,9 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 36.2,
+          "value": 34.9,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "dusljivost-zraka",
-      "title": "Rosišče 18,7 °C: zakaj se danešnja vročina počuti hujše, kot kaže termometer",
-      "teaser": "Postaja IREICA1 trenutno beleži 23,4 °C, a ob 75-odstotni vlažnosti in rosišču 18,7 °C se občutek vročine (app_temp) povzpne na 26,5 °C. V članku razložimo, kaj to pomeni za dušljivost zraka v Savinjski dolini in kako brati te podatke.",
+      "id": "temperaturni-trend",
+      "title": "Temperaturni trend v Savinjski dolini: proti novim vrhuncem brez padavin",
+      "teaser": "Štiridnevna napoved za postajo IREICA1 kaže jasen naraščajoč trend najvišjih dnevnih temperatur, od 34,9 °C danes do 36,9 °C v ponedeljek, medtem ko jutranje minimalne temperature ostajajo med 17,9 in 19,5 °C. Analiziramo, kaj to pomeni za občutek vročine v Zgornji Savinjski dolini in zakaj padavin v tem obdobju ni pričakovati.",
       "topic": {
-        "id": "dusljivost-zraka",
+        "id": "temperaturni-trend",
         "sezona": [
+          1,
+          2,
+          3,
+          4,
           5,
           6,
           7,
           8,
-          9
+          9,
+          10,
+          11,
+          12
         ],
-        "tag": "dusljivost",
-        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+        "tag": "trend",
+        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
         "seo_keywords": [
-          "rosišče Savinjska dolina",
-          "dušljivo vreme",
-          "občutek vročine vlaga"
+          "temperaturni trend Savinjska dolina",
+          "vreme Rečica ob Savinji",
+          "postaja IREICA1"
         ]
       }
     },
     {
       "id": "veter-in-tlak",
-      "title": "Zračni tlak 1019 hPa in brezvetrje -- kaj to napoveduje za Zgornjo Savinjsko dolino",
-      "teaser": "Trenutni relativni zračni tlak znaša 1018,7 hPa, veter pa je praktično zamrl (0,0 km/h), kar so tipični znaki stabilnega vremena brez padavin. Pogledamo, kako se to sklada z napovedjo vetra do 17,8 km/h za danes in kaj to pomeni za prihodnje dni brez dežja.",
+      "title": "Zračni tlak 1015 hPa in brezvetrje: kaj to pove o vremenu v Zgornji Savinjski dolini",
+      "teaser": "Na postaji IREICA1 trenutno beležimo relativni zračni tlak 1015,4 hPa in popolno brezvetrje, kar je tipičen znak stabilnega vremena. Pogledamo, kako se bo veter po napovedi krepil proti koncu tedna, ko naj bi sunki dosegli tudi 12,3 km/h, in kaj to sporoča o obstojnosti trenutnega vročinskega vzorca.",
       "topic": {
         "id": "veter-in-tlak",
         "sezona": [
