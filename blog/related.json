@@ -1,8 +1,13 @@
 {
+  "vremenski-povzetek-julij-2026": [
+    "vremenski-povzetek-junij-2026",
+    "vremenski-povzetek-april-2026",
+    "vremenski-povzetek-maj-2026"
+  ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
     "max-temperatura-28-junij-2026",
-    "med-dvema-vrocinskima-valoma-ireica1",
-    "julij-skozi-zgodovino-recica-savinji"
+    "vremenski-povzetek-julij-2026",
+    "med-dvema-vrocinskima-valoma-ireica1"
   ],
   "arso-poziv-odgovorno-obvescanje-kaj-pomeni-za-meteorec": [
     "arso-opozorilo-warningts-2026-07-21-0915-995891",
@@ -26,8 +31,8 @@
   ],
   "invazivka-japonski-dresnik-20260729-4635-1474": [
     "invazivka-zlezava-nedotika-20260719-4632-1486",
-    "arso-opozorilo-warningts-2026-07-21-0915-995891",
-    "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf"
+    "vremenski-povzetek-julij-2026",
+    "arso-opozorilo-warningts-2026-07-21-0915-995891"
   ],
   "anketa-android-aplikacija-meteorec": [
     "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
@@ -65,9 +70,9 @@
     "nevihtni-obeti-11-julij-2026"
   ],
   "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723": [
+    "vremenski-povzetek-julij-2026",
     "napoved-julij-2026",
-    "julij-skozi-zgodovino-recica-savinji",
-    "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730"
+    "julij-skozi-zgodovino-recica-savinji"
   ],
   "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -131,8 +136,8 @@
   ],
   "nevihtni-opazovalec-2026-07-17-1205": [
     "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712",
-    "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723",
-    "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718"
+    "vremenski-povzetek-julij-2026",
+    "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723"
   ],
   "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717": [
     "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
@@ -196,8 +201,8 @@
   ],
   "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725",
-    "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727"
+    "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727",
+    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725"
   ],
   "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
@@ -320,9 +325,9 @@
     "nevihte-toca-hudourniki-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
+    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-april-2026",
-    "vremenski-povzetek-maj-2026",
-    "junij-2026-dvoglavi-mesec"
+    "vremenski-povzetek-maj-2026"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
     "nevihtni-pas-14-julij-2026",
@@ -355,13 +360,13 @@
     "polletni-pregled-2026-ireica1"
   ],
   "vremenski-povzetek-maj-2026": [
+    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-april-2026",
-    "najbolj-suha-pomlad-2026-ireica1"
+    "vremenski-povzetek-april-2026"
   ],
   "vremenski-povzetek-april-2026": [
+    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-maj-2026",
-    "polletni-pregled-2026-ireica1"
+    "vremenski-povzetek-maj-2026"
   ]
 }
