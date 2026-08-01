@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-proti-novim-vrhuncem-b-0801.html</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/temperaturni-trend-v-savinjski-dolini-proti-novim-vrhuncem-b-0801.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/invazivke-mesecni-pregled-2026-07.html</loc>
     <lastmod>2026-08-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -805,6 +812,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/temperatura/</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/temperaturni-trend/</loc>
     <lastmod>2026-08-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
