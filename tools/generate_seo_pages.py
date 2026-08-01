@@ -960,11 +960,13 @@ def gen_records_page(hist, sitemap_urls):
     tmin_link, tmin_str = d_link(tmin_d, f"{num(tmin_v)} °C")
     prec_link, prec_str = d_link(prec_d, f"{num(prec_v)} mm")
     wind_link, wind_str = d_link(wind_d, f"{num(wind_v)} km/h")
+    first_year = min(hist.keys())[:4]
 
-    title = f"Rekordi: {tmax_str} / {tmin_str} — Rečica ob Savinji"
-    desc = (f"Vremenski rekordi meteorološke postaje IREICA1 v Rečici ob Savinji. "
-            f"Absolutni temperaturni ekstrem: max {num(tmax_v)} °C, min {num(tmin_v)} °C. "
-            f"Dnevni rekord padavin: {num(prec_v)} mm.")
+    # Naslov/opis oblikovana za CTR (poziciji 2-3, a nizek CTR v GSC): vprašanje +
+    # konkretne vrednosti + "od <leto>" kot signal globine/svežine podatkov.
+    title = f"Rekordi Rečice ob Savinji: {tmax_str} / {tmin_str}"
+    desc = (f"Kdaj je bilo v Rečici ob Savinji najbolj vroče in mrzlo? Rekordi IREICA1 od "
+            f"{first_year}: {tmax_str} / {tmin_str}, dež {prec_str}/dan, veter {wind_str}.")
 
     crumbs = [("Meteorec", "/"), ("Vremenski arhiv", "/vreme/"), ("Rekordi", None)]
 
