@@ -1175,17 +1175,31 @@ function _operaPrefix(d) {
   return `${Y}/${M}/${D}/OPERA/COMP/OPERA@${Y}${M}${D}T${p(d.getUTCHours())}`;
 }
 
-async function _operaLatestKey() {
-  for (const back of [0, 3600e3]) {
+// Ključi zadnjih dveh ur, urejeni od najstarejšega. Dve uri, ker mora seznam
+// pokriti celotno animacijo tudi tik po prehodu polne ure.
+async function _operaKeys() {
+  const out = [];
+  for (const back of [3600e3, 0]) {
     try {
       const pfx = _operaPrefix(new Date(Date.now() - back));
       const r = await fetch(`${OPERA_S3}?list-type=2&prefix=${encodeURIComponent(pfx)}&max-keys=200`, { cf: { cacheTtl: 60 } });
       if (!r.ok) continue;
-      const keys = [...(await r.text()).matchAll(/<Key>([^<]+@DBZH\.tiff)<\/Key>/g)].map(m => m[1]).sort();
-      if (keys.length) return keys[keys.length - 1];
+      out.push(...[...(await r.text()).matchAll(/<Key>([^<]+@DBZH\.tiff)<\/Key>/g)].map(m => m[1]));
     } catch (_) {}
   }
-  return null;
+  return out.sort();
+}
+
+async function _operaLatestKey() {
+  const keys = await _operaKeys();
+  return keys.length ? keys[keys.length - 1] : null;
+}
+
+// Ključ posnetka po časovnem žigu — brez seznama, saj je pot znana.
+function _operaKeyForStamp(stamp) {
+  const m = stamp.match(/^(\d{4})(\d{2})(\d{2})T(\d{4})$/);
+  if (!m) return null;
+  return `${m[1]}/${m[2]}/${m[3]}/OPERA/COMP/OPERA@${stamp}@0@DBZH.tiff`;
 }
 
 const _compStamp = (key) => (key.match(/@(\d{8}T\d{4})@/) || [])[1] || null;
@@ -1278,21 +1292,34 @@ async function _pngIndexed(idx, w, h, rgb, alpha) {
 }
 
 // ── Sestavljanje ───────────────────────────────────────────
-// Zadnji ločeni okvir ARSO animacije; brez ocene premika, ker je tu ne rabimo.
-async function _compArso() {
+// Iz ARSO animacije (90 minut, korak 5 minut) vzamemo okvir, ki časovno
+// pripada danemu posnetku OPERA, in ne kar zadnjega — sicer bi bilo jedro
+// animacije za uro nazaj povsod isto in bi se razhajalo z obročem.
+//
+// Nacionalni kompozit je hitrejši od evropskega: najnovejši ARSO okvir je
+// tipično 5–10 minut pred najnovejšim posnetkom OPERA. Izmerjeno na dveh
+// vremenskih situacijah 1. 8. 2026 z navzkrižno korelacijo mask padavin —
+// zamik po tej formuli ostane pod pol okvirja (~1 km pri običajni hitrosti
+// celic), medtem ko bi parjenje "najnovejši z najnovejšim" zgrešilo za 3 km.
+const ARSO_STEP_MS = 5 * 60000;
+async function _compArso(stampMs) {
   try {
     const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 12000);
     const res = await fetch(RADAR_URL, { signal: ctrl.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid));
     if (!res.ok) return null;
     const lm = res.headers.get("last-modified");
-    const ageMin = lm ? (Date.now() - new Date(lm).getTime()) / 60000 : 0;
-    if (ageMin > RADAR_MAX_AGE_MIN) return null;
+    const lmMs = lm ? new Date(lm).getTime() : Date.now();
+    if ((Date.now() - lmMs) / 60000 > RADAR_MAX_AGE_MIN) return null;   // animacija stoji
     const g = _gifDecodeFrames(new Uint8Array(await res.arrayBuffer()));
     if (!g.palette || !g.frames.length) return null;
-    const lut = _radLut(g.palette);
-    const lv = _radDistinct(g.frames, g.width);
-    if (!lv.length) return null;
-    return { levels: _radLevels(lv[lv.length - 1], lut, g.width), w: g.width, h: g.height, ageMin };
+    const frames = _radDistinct(g.frames, g.width);
+    if (!frames.length) return null;
+
+    const newestMs = Math.floor(lmMs / ARSO_STEP_MS) * ARSO_STEP_MS;
+    const k = Math.round((newestMs - stampMs) / ARSO_STEP_MS);
+    const i = frames.length - 1 - k;
+    if (i < 0 || i >= frames.length) return null;      // zunaj 90-minutne animacije
+    return { levels: _radLevels(frames[i], _radLut(g.palette), g.width), w: g.width, h: g.height, zamikMin: k * 5 };
   } catch (_) { return null; }
 }
 
@@ -1304,7 +1331,7 @@ function _compLevel(mmh) {
 
 // Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
 // jedro — nepopolna slika je še vedno boljša od napake.
-async function _radarComposite(key) {
+async function _radarComposite(key, stampMs) {
   const H = Math.round(COMP_W * (_mercY(COMP_LAT1) - _mercY(COMP_LAT0)) / ((COMP_LON1 - COMP_LON0) * Math.PI / 180));
   const y0 = _mercY(COMP_LAT1), y1 = _mercY(COMP_LAT0);
 
@@ -1323,7 +1350,7 @@ async function _radarComposite(key) {
 
   const [win, arso] = await Promise.all([
     _operaWindow(key, bb).catch(() => null),
-    _compArso(),
+    _compArso(stampMs),
   ]);
   if (!win && !arso) throw new Error("noben radarski vir ni dosegljiv");
 
@@ -1395,24 +1422,32 @@ async function _radarComposite(key) {
   return { png, w: COMP_W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (COMP_W * H) };
 }
 
-// Zadnji izris hranimo v R2 pod stalnim ključem; nov posnetek ga povozi, zato
-// poraba ne raste. Brez R2 se slika izriše ob vsakem zahtevku.
-async function _radarCompositeCached(env) {
-  const key = await _operaLatestKey();
-  const stamp = key ? _compStamp(key) : null;
-  const r2 = env?.PHOTOS_R2;
+// Vsak izrisan okvir hranimo v R2 pod svojim ključem, ker jih animacija
+// potrebuje več hkrati. Za uro nazaj je to ~13 slik po 20 KB; starejše
+// pobriše _radarCompositePrune. Brez R2 se slika izriše ob vsakem zahtevku.
+const COMP_R2_PREFIX = "radar/comp-";
+const COMP_ANIM_MIN = 60;                       // dolžina animacije
+const COMP_KEEP_MS = (COMP_ANIM_MIN + 20) * 60000;
 
-  if (r2 && stamp) {
+async function _radarCompositeCached(env, stamp) {
+  const r2 = env?.PHOTOS_R2;
+  if (!stamp) {
+    const key = await _operaLatestKey();
+    stamp = key ? _compStamp(key) : null;
+    if (!stamp) throw new Error("ni posnetka OPERA");
+  }
+  const r2key = COMP_R2_PREFIX + stamp + ".png";
+
+  if (r2) {
     try {
-      const o = await r2.get("radar/comp-latest.png");
-      if (o && o.customMetadata?.stamp === stamp) {
-        return { body: await o.arrayBuffer(), stamp, meta: o.customMetadata, cached: true };
-      }
+      const o = await r2.get(r2key);
+      if (o) return { body: await o.arrayBuffer(), stamp, meta: o.customMetadata || {}, cached: true };
     } catch (_) {}
   }
-  if (!key) throw new Error("ni posnetka OPERA");
 
-  const c = await _radarComposite(key);
+  const key = _operaKeyForStamp(stamp);
+  if (!key) throw new Error("neveljaven časovni žig");
+  const c = await _radarComposite(key, _compStampMs(stamp));
   const meta = {
     stamp,
     opera: String(c.opera), arso: String(c.arso),
@@ -1421,12 +1456,37 @@ async function _radarCompositeCached(env) {
   };
   if (r2) {
     try {
-      await r2.put("radar/comp-latest.png", c.png, {
-        httpMetadata: { contentType: "image/png" }, customMetadata: meta,
-      });
+      await r2.put(r2key, c.png, { httpMetadata: { contentType: "image/png" }, customMetadata: meta });
     } catch (_) {}
   }
   return { body: c.png, stamp, meta, cached: false };
+}
+
+// Pobriši izrise, ki so padli iz animacije. Teče iz crona, da zahtevki po
+// slikah ne plačujejo naštevanja vedra.
+async function _radarCompositePrune(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return 0;
+  const cutoff = Date.now() - COMP_KEEP_MS;
+  let n = 0;
+  try {
+    const list = await r2.list({ prefix: COMP_R2_PREFIX, limit: 200 });
+    for (const o of list.objects || []) {
+      const s = (o.key.match(/comp-(\d{8}T\d{4})\.png$/) || [])[1];
+      const ms = s ? _compStampMs(s) : NaN;
+      if (Number.isNaN(ms) || ms < cutoff) { await r2.delete(o.key); n++; }
+    }
+  } catch (_) {}
+  return n;
+}
+
+// Cron vsakih 5 minut izriše najnovejši okvir, da je animacija za obiskovalca
+// že topla; sproti počisti stare.
+async function _cronRenderRadarComposite(env) {
+  try {
+    await _radarCompositeCached(env, null);
+    await _radarCompositePrune(env);
+    return true;
+  } catch (_) { return false; }
 }
 
 export default {
@@ -1440,6 +1500,7 @@ export default {
     })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
+    ctx.waitUntil(_cronRenderRadarComposite(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -2553,13 +2614,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Web Mercatorju; .json vrne meje, legendo in čas posnetka.
       if (path === "/radar-composite" || path === "/radar-composite.json") {
         if (path.endsWith(".json")) {
-          const key = await _operaLatestKey();
-          const stamp = key ? _compStamp(key) : null;
+          const keys = await _operaKeys();
+          const stamps = keys.map(_compStamp).filter(Boolean);
+          const stamp = stamps.length ? stamps[stamps.length - 1] : null;
           const ms = stamp ? _compStampMs(stamp) : NaN;
+          // Okvirji animacije: zadnja ura, od najstarejšega proti zdaj.
+          const od = ms - COMP_ANIM_MIN * 60000;
+          const okvirji = stamps.filter(s => _compStampMs(s) >= od).map(s => ({
+            zig: s, cas: new Date(_compStampMs(s)).toISOString(),
+          }));
           return new Response(JSON.stringify({
             slika: "/radar-composite",
             cas: Number.isNaN(ms) ? null : new Date(ms).toISOString(),
             starost_min: Number.isNaN(ms) ? null : Math.round((Date.now() - ms) / 60000),
+            okvirji,
+            korak_min: 5,
             meje: [[COMP_LAT0, COMP_LON0], [COMP_LAT1, COMP_LON1]],
             projekcija: "EPSG:3857",
             sirina: COMP_W,
@@ -2573,12 +2642,30 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             ],
           }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=120" } });
         }
-        const c = await _radarCompositeCached(env);
+        // ?t=YYYYMMDDThhmm izriše določen okvir animacije; brez njega zadnjega.
+        // Starih okvirjev ne dovolimo poljubno daleč nazaj, ker bi vsak zgrešen
+        // ključ pomenil nov izris.
+        const tParam = url.searchParams.get("t");
+        if (tParam && !/^\d{8}T\d{4}$/.test(tParam)) {
+          return new Response(JSON.stringify({ error: "neveljaven t" }), {
+            status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+        if (tParam) {
+          const ms = _compStampMs(tParam);
+          if (Number.isNaN(ms) || Date.now() - ms > COMP_KEEP_MS || ms > Date.now() + 6e5) {
+            return new Response(JSON.stringify({ error: "t je zunaj animacije" }), {
+              status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+            });
+          }
+        }
+        const c = await _radarCompositeCached(env, tParam);
         return new Response(c.body, {
           headers: {
             ...CORS_ALLOWED,
             "Content-Type": "image/png",
-            "Cache-Control": "public, max-age=120",
+            // Star okvir se ne spremeni več, zato ga sme brskalnik hraniti dolgo.
+            "Cache-Control": tParam ? "public, max-age=86400, immutable" : "public, max-age=120",
             "X-Radar-Stamp": c.stamp || "",
             "X-Radar-Viri": `arso=${c.meta?.arso ?? "?"} opera=${c.meta?.opera ?? "?"}`,
             "X-Radar-Cache": c.cached ? "hit" : "miss",
