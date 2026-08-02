@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-08-02T18:09:24Z",
+  "model_version": "1.0",
+  "trained_at": "2026-08-02T18:02:24Z",
+  "train_range": {
+    "from": "2024-01-01",
+    "to": "2026-08-01"
+  },
+  "station": {
+    "lat": 46.325779,
+    "lon": 14.921137,
+    "name": "Rečica ob Savinji (IREICA1)"
+  },
+  "note": "Poskusni lokalni model (MOS): Open-Meteo kot vhod, popravek za dno doline naučen na meritvah postaje. Količina padavin je surova vrednost Open-Meteo — te model ne popravlja.",
+  "days": [
+    {
+      "tmax": 36.9,
+      "tmax_sd": 1.39,
+      "tmax_mae": 1.1,
+      "tmin": 15.1,
+      "tmin_sd": 1.57,
+      "tmin_mae": 1.24,
+      "pop": 0.15,
+      "om_tmax": 36.4,
+      "om_tmin": 17.6,
+      "om_precip": 0.0,
+      "d_tmax": 0.5,
+      "d_tmin": -2.5,
+      "date": "2026-08-03",
+      "lead": 1
+    },
+    {
+      "tmax": 36.5,
+      "tmax_sd": 1.59,
+      "tmax_mae": 1.26,
+      "tmin": 12.6,
+      "tmin_sd": 1.65,
+      "tmin_mae": 1.33,
+      "pop": 0.14,
+      "om_tmax": 36.7,
+      "om_tmin": 16.4,
+      "om_precip": 0.0,
+      "d_tmax": -0.2,
+      "d_tmin": -3.8,
+      "date": "2026-08-04",
+      "lead": 2
+    },
+    {
+      "tmax": 36.9,
+      "tmax_sd": 1.87,
+      "tmax_mae": 1.45,
+      "tmin": 15.8,
+      "tmin_sd": 1.76,
+      "tmin_mae": 1.44,
+      "pop": 0.26,
+      "om_tmax": 36.5,
+      "om_tmin": 18.8,
+      "om_precip": 0.2,
+      "d_tmax": 0.4,
+      "d_tmin": -3.0,
+      "date": "2026-08-05",
+      "lead": 3
+    }
+  ]
+}

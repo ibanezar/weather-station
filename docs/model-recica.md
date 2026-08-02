@@ -86,24 +86,39 @@ množici.
 
 Trenutne številke so v `model/recica-mos.json` pod `leads.<N>.skill`; izpiše jih
 tudi `python3 tools/train_recica_mos.py --report`. Ob uvedbi (učna množica
-2024-01-20 → 2026-07-31, 918 dni):
+2024-01 → 2026-08, ~920 dni):
 
 | | Open-Meteo | naš model | izboljšanje |
 |---|---|---|---|
 | Tmax D+1 | 1,38 °C | 1,10 °C | 20 % |
-| Tmin D+1 | 1,57 °C | 1,24 °C | 21 % |
-| Tmax D+2 | 1,68 °C | 1,25 °C | 25 % |
-| Tmin D+2 | 2,47 °C | 1,32 °C | 47 % |
+| Tmin D+1 | 1,58 °C | 1,24 °C | 21 % |
+| Tmax D+2 | 1,68 °C | 1,26 °C | 25 % |
+| Tmin D+2 | 2,47 °C | 1,33 °C | 46 % |
+| Tmax D+3 | 1,84 °C | 1,45 °C | 21 % |
+| Tmin D+3 | 2,47 °C | 1,44 °C | 42 % |
+
+Verjetnost padavin, Brierjeva ocena (manjše je bolje, klimatologija 0,254):
+0,159 pri D+1, 0,172 pri D+2, 0,179 pri D+3.
+
+Popravki, ki jih model dela, so omejeni in ne bežijo: Tmax od −1,7 do +2,3 °C
+(povprečno +0,82), Tmin od −4,4 do +1,5 °C (povprečno −0,93). To je približno
+tisto, kar pove tabela pristranskosti zgoraj — model ni iznašel ničesar novega,
+le sistematično uporabi znano razliko.
 
 Pomembna opozorila k tem številkam:
 
 - To je **hindcast**, ne obljuba. Živo oceno daje `/tocnost-napovedi/`, kjer se
   model meri po istem pravilu kot ARSO in Open-Meteo in kjer lahko tudi izgubi.
   Šele ~30 razrešenih dni pove, ali se hindcast potrjuje.
-- **Izboljšanje pri Tmin D+2 je sumljivo veliko.** Ali je res, ali pa je v
-  pomenu `previous_day2` zamik za dan. Preveri tako, da `om_tmin` iz
-  `previous_day2` primerjaš z zabeleženo napovedjo Open-Meteo za iste datume v
-  `forecast_verification.json`. Vodilni čas, ki testa ne prestane, ne sodi ven.
+- **Skok napake Open-Meteo pri Tmin z D+1 na D+2 (1,58 → 2,47 °C) je bil
+  preverjen** — na videz je prevelik za en dan razlike. Dve razlagi sta bili
+  izključeni: (1) zamik serije `previous_day2` za dan — navzkrižna korelacija z
+  analizo ima vrh pri zamiku 0 (0,965), sosednja vrhova sta pri ±24 h bistveno
+  nižja (0,83); (2) manjkajoče jutranje ure, ki bi minimum pobrale iz toplejšega
+  dela dneva — pokritost je enaka, 365/365 dni s polnimi 24 urami in polnimi
+  urami 00–05. Skok je torej resničen: nočni minimum v dolini je odvisen od
+  tega, ali bo sevalna noč, in ta pogoj model na dva dni ujame slabše.
+  Če se `previous_dayN` kdaj obnaša drugače, ponovi ta dva testa.
 - Model je **poskusen** in tako tudi označen povsod, kjer se prikaže.
 
 ## Vzdrževanje
