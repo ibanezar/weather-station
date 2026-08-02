@@ -400,6 +400,144 @@ def tagslug(t):
     return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
 
 
+# ── Statične notranje povezave v člankih ────────────────────────────────
+# "Teme:" in "Sorodni članki" je prej izrisoval samo blog/article-enhance.js
+# iz blog.json + related.json. Pajki brez JS (tudi Semrushev audit) teh
+# povezav niso videli, zato je imela večina člankov eno samo dohodno
+# notranjo povezavo -- iz blog/index.html. Zato jih ob objavi vpišemo
+# naravnost v HTML; JS blok preskoči, če je statični že tam.
+REL_START = "<!-- sorodni:start — samodejno, wire_all(); ne urejaj ročno -->"
+REL_END = "<!-- sorodni:end -->"
+TOPICS_START = "<!-- teme:start — samodejno, wire_all(); ne urejaj ročno -->"
+TOPICS_END = "<!-- teme:end -->"
+
+
+def esc_attr(s):
+    return (str(s or "").replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def _post_url(p):
+    return p.get("url") or ("/blog/" + p["slug"] + ".html")
+
+
+def render_topics_html(post, freq):
+    """Povezave na tematske strani -- samo tagi, ki stran dejansko imajo (>=2 objavi)."""
+    linkable = [t for t in post.get("tags", []) if freq.get(str(t).lower(), 0) >= 2]
+    if not linkable:
+        return ""
+    links = "".join(
+        f'<a class="pt-tag" href="/blog/tema/{tagslug(t)}/">{esc_attr(str(t).lower())}</a>'
+        for t in linkable)
+    return (f'    {TOPICS_START}\n'
+            f'    <div class="post-topics"><span class="pt-label">Teme:</span> {links}</div>\n'
+            f'    {TOPICS_END}\n')
+
+
+def render_related_html(related_posts):
+    """Sekcija 'Sorodni članki'. Mora biti neposredni otrok .wrap --
+    blog.css (.wrap > .related-posts) jo postavi v mrežo ob stranski stolpec."""
+    if not related_posts:
+        return ""
+    cards = []
+    for p in related_posts:
+        summary = (p.get("summary") or "").strip()
+        if len(summary) > 120:
+            summary = summary[:120] + "…"
+        sum_html = f'<span class="related-sum">{esc_attr(summary)}</span>' if summary else ""
+        cards.append(
+            f'<a class="related-card" href="{esc_attr(_post_url(p))}">'
+            f'<span class="related-date">{fmtdate(p["date"])}</span>'
+            f'<span class="related-h">{esc_attr(p["title"])}</span>'
+            f'{sum_html}</a>')
+    return (f'  {REL_START}\n'
+            f'  <section class="related-posts">\n'
+            f'    <h2 class="related-title">Sorodni članki</h2>\n'
+            f'    <div class="related-grid">{"".join(cards)}</div>\n'
+            f'  </section>\n'
+            f'  {REL_END}\n')
+
+
+def _replace_block(html, start, end, new_block):
+    """Zamenja obstoječi označeni blok; vrne (html, ali_je_bil_ze_tam)."""
+    i = html.find(start)
+    if i == -1:
+        return html, False
+    j = html.find(end, i)
+    if j == -1:
+        return html, False
+    j += len(end)
+    # Razširi nazaj na začetek vrstice: zamik nosi že sam blok, sicer bi se
+    # ob vsakem zagonu naložil še obstoječi in bi se vrstica zamikala v desno.
+    line_start = html.rfind("\n", 0, i) + 1
+    if not html[line_start:i].strip():
+        i = line_start
+    # poberi še morebitni prelom vrstice za zaključno oznako
+    if html[j:j + 1] == "\n":
+        j += 1
+    return html[:i] + new_block + html[j:], True
+
+
+def inject_related_links(posts, quiet=False):
+    """Vpiše 'Teme:' in 'Sorodni članki' v HTML vseh objav iz blog.json.
+
+    Idempotentno: bloka sta omejena z oznakama in se ob vsakem klicu
+    prepišeta, tako da se sorodni članki osvežijo, ko izide nova objava.
+    """
+    try:
+        with open(os.path.join(ROOT, "blog", "related.json"), encoding="utf-8") as f:
+            related_map = json.load(f)
+    except Exception as e:
+        if not quiet:
+            print(f"⚠ statične notranje povezave preskočene (related.json): {e}")
+        return 0
+
+    by_slug = {p["slug"].lower(): p for p in posts}
+    freq = {}
+    for p in posts:
+        for t in p.get("tags", []):
+            t = str(t).lower()
+            freq[t] = freq.get(t, 0) + 1
+
+    changed = 0
+    for p in posts:
+        slug = p["slug"]
+        path = os.path.join(ROOT, "blog", f"{slug}.html")
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        orig = html
+
+        rel = [by_slug[s.lower()] for s in related_map.get(slug, [])
+               if s.lower() in by_slug and s.lower() != slug.lower()]
+        topics_block = render_topics_html(p, freq)
+        related_block = render_related_html(rel)
+
+        html, had = _replace_block(html, TOPICS_START, TOPICS_END, topics_block)
+        if not had and topics_block:
+            # pred povezavo "Nazaj na blog", tako kot jih je vstavljal JS
+            m = re.search(r'^[ \t]*<a class="back-link"', html, re.M)
+            if m:
+                html = html[:m.start()] + topics_block + html[m.start():]
+
+        html, had = _replace_block(html, REL_START, REL_END, related_block)
+        if not had and related_block:
+            # za </article>, kot neposredni otrok .wrap (zahteva blog.css)
+            m = re.search(r"^[ \t]*</article>[ \t]*\n", html, re.M)
+            if m:
+                html = html[:m.end()] + "\n" + related_block + html[m.end():]
+
+        if html != orig:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html)
+            changed += 1
+
+    if not quiet:
+        print(f"✓ statične notranje povezave osvežene v {changed} člankih")
+    return changed
+
+
 def build_tag_pages(posts):
     """Ustvari pristajalne strani /blog/tema/<tag>/ za tage z ≥2 objavama.
     Vrne seznam (slug) za sitemap."""
@@ -551,6 +689,12 @@ def wire_all(entry, url, stats=None):
         print("✓ blog/related.json posodobljen")
     except Exception as e:
         print(f"⚠ blog/related.json preskočen: {e}")
+    # Statične notranje povezave (Teme + Sorodni članki) v HTML člankov, da so
+    # vidne tudi pajkom brez JS. Mora teči po compute_and_write().
+    try:
+        inject_related_links(posts)
+    except Exception as e:
+        print(f"⚠ statične notranje povezave preskočene: {e}")
     # Try to generate per-article OG image (requires Pillow)
     if stats:
         try:
