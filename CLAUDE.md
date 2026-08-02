@@ -125,11 +125,16 @@ Kako je narejeno:
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
 
-## Lastni napovedni model (MOS)
+## MTR — lastni napovedni model (MOS)
 
-Poskusni statistični model za Rečico: vzame Open-Meteo kot vhod in mu doda
-popravek za dno doline, naučen na meritvah postaje. Podrobno v
-`docs/model-recica.md`.
+**MTR (Meteorec)** je poskusni statistični model za Rečico: vzame Open-Meteo
+kot vhod in mu doda popravek za dno doline, naučen na meritvah postaje.
+Prikazana različica (»MTR v1« ipd.) se izpelje iz `model_version` — nikjer je
+ne zapisuj trdo. Podrobno v `docs/model-recica.md`.
+
+Interni identifikatorji (`meteorec` ključ v `forecast_verification.json`,
+imena datotek/funkcij) ostajajo nespremenjeni — MTR je prikazna znamka nad
+tem stikom, ne preimenovanje kode.
 
 - `tools/train_recica_mos.py` → `model/recica-mos.json` (koeficienti + izmerjena
   veščina). **Datoteke ne ureja nihče ročno** — nastane samo iz učenja, mesečno
@@ -137,7 +142,8 @@ popravek za dno doline, naučen na meritvah postaje. Podrobno v
 - `tools/predict_recica_mos.py` → `napoved-modela.json`, teče v
   `forecast-verify.yml` **pred** `verify_forecasts.py`, ki napoved zabeleži kot
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
-  merilu. Kartica v `app.js` je `fetchMosForecast()`.
+  merilu. Kartica v `app.js` je `fetchMosForecast()` (+ sparkline
+  `drawMosSpark()`).
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.

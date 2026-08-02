@@ -1,9 +1,14 @@
-# Lastni napovedni model za Rečico (MOS)
+# MTR — lastni napovedni model za Rečico (MOS)
 
-Napoved za dno doline, izračunana iz Open-Meteo in **popravka, naučenega na
-meritvah te postaje**. Zato "MOS" (Model Output Statistics) in ne "svoj model
-vremena": sinoptiko — kje je fronta, kakšna zračna masa priteka — prispeva
-Open-Meteo, mi popravimo tisto, česar globalna mreža za to lego ne zna.
+**MTR (Meteorec)** je ime tega modela: napoved za dno doline, izračunana iz
+Open-Meteo in **popravka, naučenega na meritvah te postaje**. Zato "MOS"
+(Model Output Statistics) in ne "svoj model vremena": sinoptiko — kje je
+fronta, kakšna zračna masa priteka — prispeva Open-Meteo, MTR popravi tisto,
+česar globalna mreža za to lego ne zna.
+
+Prikazana različica (»MTR v1« ipd.) je izpeljana iz `model_version` v
+`model/recica-mos.json` — glavna števika pred piko. Nikjer je ne zapisujemo
+trdo, da se sama dvigne, ko se model kdaj znova nauči pod novo verzijo.
 
 ```
 historical-forecast-api (*_previous_day1..3) ─┐
@@ -88,7 +93,7 @@ Trenutne številke so v `model/recica-mos.json` pod `leads.<N>.skill`; izpiše j
 tudi `python3 tools/train_recica_mos.py --report`. Ob uvedbi (učna množica
 2024-01 → 2026-08, ~920 dni):
 
-| | Open-Meteo | naš model | izboljšanje |
+| | Open-Meteo | MTR | izboljšanje |
 |---|---|---|---|
 | Tmax D+1 | 1,38 °C | 1,10 °C | 20 % |
 | Tmin D+1 | 1,58 °C | 1,24 °C | 21 % |

@@ -2750,12 +2750,16 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="aifc-meta" id="aifc-meta"></div>
     </div>
 
-    <!-- Lastni model (MOS) — poskusna napoved za dno doline -->
+    <!-- MTR — lastni model (MOS), poskusna napoved za dno doline -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
-        <span class="clabel" style="margin:0">📊 Naš model — poskusna napoved</span>
+        <span style="display:flex;align-items:center;gap:.4rem">
+          <span class="clabel" style="margin:0">📊 MTR — poskusna napoved</span>
+          <span class="aifc-badge mtr" id="mos-badge"></span>
+        </span>
         <span class="chart-range" id="mos-updated">Nalaganje…</span>
       </div>
+      <div class="mos-spark-row" id="mos-spark-row"></div>
       <div id="mos-grid" class="mos-grid">
         <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
       </div>
