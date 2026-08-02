@@ -1,14 +1,14 @@
-name: Verifikacija napovedi
+name: Učenje lastnega modela (MOS)
 
 on:
   schedule:
-    # 01:35 UTC — po update-history.yml (01:15), ko je včerajšnja dnevna
-    # meritev že v history.json.
-    - cron: '35 1 * * *'
+    # 1. v mesecu ob 02:00 UTC. Pogosteje nima smisla: mesec dni novih meritev
+    # premakne koeficiente komaj zaznavno, zajem arhiva napovedi pa je težak.
+    - cron: '0 2 1 * *'
   workflow_dispatch: {}
 
 jobs:
-  verify:
+  train:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,24 +20,17 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Mora teči PRED verify_forecasts.py: ta prebere napoved-modela.json in jo
-      # zabeleži kot čakajočo napoved našega modela za jutri.
-      - name: Napoved lastnega modela (MOS)
-        run: python3 tools/predict_recica_mos.py
-
-      - name: Razreši pretekle napovedi in zabeleži novo
-        run: python3 tools/verify_forecasts.py
-
-      - name: Generiraj stran /tocnost-napovedi/
-        run: python3 tools/generate_tocnost_page.py
+      # Brez predpomnilnika: v CI ga tako ali tako ni, zajem pa je nekaj minut.
+      - name: Nauči model in izmeri veščino
+        run: python3 tools/train_recica_mos.py --no-cache
 
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add forecast_verification.json tools/.forecast_pending.json tocnost-napovedi/ napoved-modela.json || true
+          git add model/recica-mos.json || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
-          git commit -m "chore: posodobi verifikacijo napovedi $(date -u +%Y-%m-%d) [skip ci]"
+          git commit -m "chore: znova nauči lokalni MOS model $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do
             if git push; then
               exit 0

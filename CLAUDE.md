@@ -125,6 +125,26 @@ Kako je narejeno:
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
 
+## Lastni napovedni model (MOS)
+
+Poskusni statistični model za Rečico: vzame Open-Meteo kot vhod in mu doda
+popravek za dno doline, naučen na meritvah postaje. Podrobno v
+`docs/model-recica.md`.
+
+- `tools/train_recica_mos.py` → `model/recica-mos.json` (koeficienti + izmerjena
+  veščina). **Datoteke ne ureja nihče ročno** — nastane samo iz učenja, mesečno
+  prek `mos-train.yml` ali ročno.
+- `tools/predict_recica_mos.py` → `napoved-modela.json`, teče v
+  `forecast-verify.yml` **pred** `verify_forecasts.py`, ki napoved zabeleži kot
+  tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
+  merilu. Kartica v `app.js` je `fetchMosForecast()`.
+- Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
+  napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
+  tiho dobiva druge vhode, kot jih pozna.
+- Model se uči **samo** iz `history.json` in Open-Meteo. Nobenih notranjih
+  meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
+  tem cevovodu ne uporablja.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
