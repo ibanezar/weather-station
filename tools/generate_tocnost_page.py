@@ -48,6 +48,20 @@ def source_stats(records, source):
     }
 
 
+def pred_txt(src):
+    """»28,4 °C (±1,1)« za posamezno napoved v tabeli zadnjih dni."""
+    if not src or src.get("tmax") is None:
+        return "—"
+    return f'{seo.num(src.get("tmax"))} °C (±{seo.num(src.get("err_tmax"))})'
+
+
+def mae_txt(stats):
+    """»±1,2 °C« ali pomišljaj, kadar vir tisti mesec ni napovedoval."""
+    if stats["mae_tmax"] is None:
+        return "—"
+    return f'±{seo.num(stats["mae_tmax"])} °C'
+
+
 def build_body(verification):
     dates = sorted(verification.keys())
     records = [verification[d] for d in dates]
@@ -56,6 +70,8 @@ def build_body(verification):
 
     arso_stats = source_stats(records, "arso")
     om_stats = source_stats(records, "open_meteo")
+    mos_stats = source_stats(records, "meteorec")
+    has_mos = mos_stats["n"] > 0
 
     # ARSO nima napovedne točke za Rečico, zato njegova napoved prihaja iz
     # najbližjega kraja na njihovem seznamu. Kateri je to, povemo naravnost —
@@ -79,8 +95,17 @@ def build_body(verification):
             parts.append(f'Open-Meteo: povprečna napaka najvišje temperature ±{seo.num(om_stats["mae_tmax"])} °C')
         if arso_stats["mae_tmax"] is not None:
             parts.append(f'ARSO: ±{seo.num(arso_stats["mae_tmax"])} °C')
-        status = (f'  <p class="archive-intro"><strong>{n_days} razrešenih dni</strong> od {seo.fmtd(first_date)}. '
+        if mos_stats["mae_tmax"] is not None:
+            parts.append(f'naš model: ±{seo.num(mos_stats["mae_tmax"])} °C')
+        status =(f'  <p class="archive-intro"><strong>{n_days} razrešenih dni</strong> od {seo.fmtd(first_date)}. '
                    f'{"; ".join(parts)}.</p>')
+
+    mos_intro = ('  <p class="archive-intro"><strong>Tretji tekmovalec je naš lastni model.</strong> Ne napoveduje '
+                 'vremena iz nič — vzame Open-Meteo kot vhod in ga popravi s tem, česar globalni model za dno '
+                 'te doline ne zna: postaja je podnevi toplejša, ponoči pa hladnejša od modelske mreže, ob '
+                 'jasnih in mirnih nočeh se na dnu doline nabere hladen zrak. Popravek je naučen na meritvah te '
+                 'postaje. Meri se z istim merilom kot ARSO in Open-Meteo, na isti tabeli — tudi kadar '
+                 'izgubi.</p>') if has_mos else ""
 
     intro = ('  <p class="archive-intro">Vsak dan zabeležimo, kaj ARSO in Open-Meteo napovesta za jutrišnjo '
              'najvišjo/najnižjo temperaturo v Rečici ob Savinji, naslednji dan pa to primerjamo z dejansko '
@@ -98,6 +123,7 @@ def build_body(verification):
     cards = ('  <div class="stat-grid">\n'
               + stat_card("ARSO", arso_stats, "c-temp") + "\n"
               + stat_card("Open-Meteo", om_stats, "c-rain") + "\n"
+              + (stat_card("Naš model", mos_stats, "c-up") + "\n" if has_mos else "")
               + '  </div>') if n_days else ""
 
     # ── Mesečni scoreboard ──────────────────────────────────────────────
@@ -109,12 +135,16 @@ def build_body(verification):
         recs = by_month[ym]
         a = source_stats(recs, "arso")
         o = source_stats(recs, "open_meteo")
+        mm = source_stats(recs, "meteorec")
         y, m = int(ym[:4]), int(ym[5:7])
-        a_txt = f'±{seo.num(a["mae_tmax"])} °C' if a["mae_tmax"] is not None else "—"
-        o_txt = f'±{seo.num(o["mae_tmax"])} °C' if o["mae_tmax"] is not None else "—"
-        month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td><td>{len(recs)}</td></tr>')
+        a_txt = mae_txt(a)
+        o_txt = mae_txt(o)
+        m_col = f'<td>{mae_txt(mm)}</td>' if has_mos else ""
+        month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td>{m_col}<td>{len(recs)}</td></tr>')
+    month_head = ('    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th>'
+                  + ('<th>Naš model</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
     month_table = ('  <table class="stats">\n'
-                    '    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th><th>Dni</th></tr>\n'
+                    + month_head
                     + "\n".join(month_rows) + '\n  </table>') if month_rows else \
         '  <p class="muted-note">Še ni dovolj podatkov za mesečni pregled.</p>'
 
@@ -126,16 +156,23 @@ def build_body(verification):
         act = r.get("actual", {})
         a = r.get("arso") or {}
         o = r.get("open_meteo") or {}
-        a_txt = f'{seo.num(a.get("tmax"))} °C (±{seo.num(a.get("err_tmax"))})' if a.get("tmax") is not None else "—"
-        o_txt = f'{seo.num(o.get("tmax"))} °C (±{seo.num(o.get("err_tmax"))})' if o.get("tmax") is not None else "—"
+        mm = r.get("meteorec") or {}
+        a_txt = pred_txt(a)
+        o_txt = pred_txt(o)
+        m_col = f'<td>{pred_txt(mm)}</td>' if has_mos else ""
         recent_rows.append(
             f'    <tr><th><a href="/vreme/{d[:4]}/{d[5:7]}/{d[8:10]}/">{seo.fmtd(d)}</a></th>'
-            f'<td>{seo.num(act.get("tmax"))} °C</td><td>{a_txt}</td><td>{o_txt}</td></tr>'
+            f'<td>{seo.num(act.get("tmax"))} °C</td><td>{a_txt}</td><td>{o_txt}</td>{m_col}</tr>'
         )
+    recent_head = ('    <tr><th>Datum</th><th>Dejanska maks. T</th><th>ARSO je napovedal</th>'
+                   '<th>Open-Meteo je napovedal</th>'
+                   + ('<th>Naš model je napovedal</th>' if has_mos else '') + '</tr>\n')
     recent_table = ('  <table class="stats">\n'
-                     '    <tr><th>Datum</th><th>Dejanska maks. T</th><th>ARSO je napovedal</th><th>Open-Meteo je napovedal</th></tr>\n'
+                     + recent_head
                      + "\n".join(recent_rows) + '\n  </table>') if recent_rows else \
         '  <p class="muted-note">Še ni razrešenih dni.</p>'
+
+    intro_block = intro + ("\n" + mos_intro if mos_intro else "")
 
     # ── FAQ ─────────────────────────────────────────────────────────────
     qa = [
@@ -154,6 +191,17 @@ def build_body(verification):
          "Uro-natančno primerjavo lastnega statističnega modela (Holt-Winters), Open-Meteo in postaje za "
          "zadnjih 24 ur najdeš na naslovni strani v razdelku »AI napoved«."),
     ]
+    # Vprašanje o lastnem modelu se pojavi šele, ko ima model kaj pokazati —
+    # dokler ni razrešenih dni, bi bilo obljuba brez številk.
+    if has_mos:
+        qa.insert(3, (
+            "Kaj je »naš model«?",
+            "Lastni statistični model za Rečico ob Savinji. Vzame napoved Open-Meteo in ji doda popravek, "
+            "naučen na meritvah postaje IREICA1 — kako se dno doline sistematično razlikuje od modelske "
+            "mreže. Napoveduje najvišjo in najnižjo temperaturo ter verjetnost padavin za en do tri dni "
+            "vnaprej. Količine padavin ne popravlja, ker se je pri preizkusu izkazalo, da tega ne zna bolje "
+            "od Open-Meteo. Model je poskusen in se meri javno, na tej tabeli — tudi kadar izgubi."))
+
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -161,8 +209,8 @@ def build_body(verification):
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Točnost napovedi", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Točnost vremenske napovedi — Rečica ob Savinji</h1>
-  <p class="post-meta">ARSO vs. Open-Meteo vs. dejanska meritev · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
-{intro}
+  <p class="post-meta">{"ARSO vs. Open-Meteo vs. naš model vs. dejanska meritev" if has_mos else "ARSO vs. Open-Meteo vs. dejanska meritev"} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
+{intro_block}
 {status}
 {cards}
   <h2>Mesečni pregled</h2>

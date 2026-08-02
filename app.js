@@ -5636,6 +5636,67 @@ async function fetchTextForecast(){
   }
 }
 
+/* ── Naš model (MOS) ────────────────────────────────────────────────────────
+   Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
+   Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
+   kar je model prispeval, in edino, po čemer se loči od že prikazanih napovedi.
+   Kartica ni simple-keep, zato gre klic skozi runAdvancedOnly(). */
+async function fetchMosForecast(){
+  const grid=document.getElementById('mos-grid');
+  if(!grid)return;
+  try{
+    const res=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const days=data.days||[];
+    if(!days.length)throw new Error('brez dni');
+
+    const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
+    grid.innerHTML='';
+    days.forEach(d=>{
+      const date=new Date(d.date+'T12:00:00');
+      const lbl=d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
+      const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+      const dmax=Number.isFinite(d.d_tmax)?d.d_tmax:null;
+      const dmin=Number.isFinite(d.d_tmin)?d.d_tmin:null;
+      const diff=v=>v===null?'':(v>0?'+':'')+v.toFixed(1).replace('.',',');
+
+      const card=document.createElement('div');
+      card.className='mos-card';
+      const dec=v=>fmt(v).replace('.',',');
+      card.title='Open-Meteo napoveduje '+dec(d.om_tmax)+' / '+dec(d.om_tmin)+' °C'
+        +(dmax!==null?' · naš popravek '+diff(dmax)+' / '+diff(dmin)+' °C':'');
+      card.innerHTML=
+        '<div class="mos-lbl">'+lbl+'</div>'+
+        '<div class="mos-temp"><span class="mos-th">'+Math.round(d.tmax)+'°</span>'+
+        '<span style="color:var(--muted);font-size:.74rem">/</span>'+
+        '<span class="mos-tl">'+Math.round(d.tmin)+'°</span></div>'+
+        (dmax!==null?'<div class="mos-diff">proti modelu '+diff(dmax)+' / '+diff(dmin)+' °C</div>':'')+
+        (pop!==null?'<div class="mos-pop">🌧 '+pop+' % verj. dežja</div>':'');
+      grid.appendChild(card);
+    });
+
+    const note=document.getElementById('mos-note');
+    if(note){
+      const r=data.train_range||{};
+      note.textContent='Popravek je naučen na meritvah postaje'
+        +(r.from&&r.to?' ('+r.from+' → '+r.to+')':'')
+        +'. Količine padavin model ne popravlja — za to ostaja Open-Meteo.';
+    }
+    const upd=document.getElementById('mos-updated');
+    if(upd&&data.generated_at){
+      const t=new Date(data.generated_at);
+      upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
+        +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    }
+  }catch(e){
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved našega modela trenutno ni na voljo.</div>';
+    const upd=document.getElementById('mos-updated');
+    if(upd)upd.textContent='ni na voljo';
+    console.warn('MOS:',e);
+  }
+}
+
 function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}
 function _omxPct(arr,p){
   const a=_omxNums(arr).sort((x,y)=>x-y);if(!a.length)return null;
@@ -14581,6 +14642,7 @@ async function init(){
     fetchForecastExtras();
     fetchAndDrawSkyStrip();
     fetchComingUp();
+    runAdvancedOnly(()=>fetchMosForecast());
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──

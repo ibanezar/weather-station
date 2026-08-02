@@ -21,7 +21,9 @@ actual measurement):
   2. PREDICT — fetch tomorrow's ARSO forecast (via the Cloudflare Worker,
      which proxies vreme.arso.gov.si — ARSO blocks cloud IPs) and Open-Meteo
      forecast, and log both as a new pending prediction to be resolved
-     tomorrow.
+     tomorrow. Our own local MOS model (tools/predict_recica_mos.py, read from
+     napoved-modela.json) is logged as a third contestant and scored by exactly
+     the same rule — the whole point is that it can lose in public.
 
 There is no way to backfill history: ARSO/Open-Meteo don't publish
 retroactive forecast archives, so the scoreboard only starts accumulating
@@ -46,6 +48,9 @@ UA = {"User-Agent": "Mozilla/5.0 (compatible; Meteorec-ForecastVerify/1.0; +http
 
 PENDING_PATH = os.path.join(ROOT, "tools", ".forecast_pending.json")
 VERIFICATION_PATH = os.path.join(ROOT, "forecast_verification.json")
+MODEL_FORECAST_PATH = os.path.join(ROOT, "napoved-modela.json")
+
+WET_DAY_MM = 0.2  # isti prag kot pri učenju modela (train_recica_mos.py)
 
 
 def load_json(path, default):
@@ -107,7 +112,35 @@ def err(pred, actual):
     return round(abs(pred - actual), 1)
 
 
-def build_record(target, made_at, actual, arso, om):
+def fetch_model_tomorrow(target_date):
+    """Napoved lastnega modela za `target_date` iz napoved-modela.json.
+
+    Datoteko zapiše tools/predict_recica_mos.py v istem zagonu workflowa, malo
+    pred tem skriptom. Če je ni (model še ni naučen, Open-Meteo je odpovedal),
+    se preprosto ne zabeleži nič — semafor teče naprej z ostalima dvema viroma.
+    """
+    data = load_json(MODEL_FORECAST_PATH, None)
+    if not data:
+        return None
+
+    # Datoteka mora biti od danes. Če je predvčerajšnja, je jutrišnji datum v njej
+    # še vedno — a kot napoved za dva dni vnaprej. Zabeležili bi jo kot enodnevno
+    # in model bi na semaforju tekmoval pod napačnim pogojem.
+    stamp = (data.get("generated_at") or "")[:10]
+    if stamp != datetime.date.today().isoformat():
+        print(f"  ⚠ napoved-modela.json je z dne {stamp or '?'}, ne od danes — preskočeno.",
+              file=sys.stderr)
+        return None
+
+    for day in data.get("days", []):
+        if day.get("date") == target_date and day.get("lead") == 1:
+            return {"tmax": day.get("tmax"), "tmin": day.get("tmin"),
+                    "pop": day.get("pop"), "lead": day.get("lead"),
+                    "model_version": data.get("model_version")}
+    return None
+
+
+def build_record(target, made_at, actual, arso, om, meteorec=None):
     """Assemble one verification record from a prediction + the measurement."""
     actual_tmax = actual.get("tempHigh")
     actual_tmin = actual.get("tempLow")
@@ -132,6 +165,20 @@ def build_record(target, made_at, actual, arso, om):
             "err_tmin": err(om.get("tmin"), actual_tmin),
             "err_precip": err(om.get("precip"), actual_precip),
         }
+    if meteorec:
+        wet = None if actual_precip is None else (1.0 if actual_precip >= WET_DAY_MM else 0.0)
+        pop = meteorec.get("pop")
+        record["meteorec"] = {
+            "tmax": meteorec.get("tmax"), "tmin": meteorec.get("tmin"),
+            "pop": pop, "lead": meteorec.get("lead"),
+            "model_version": meteorec.get("model_version"),
+            "err_tmax": err(meteorec.get("tmax"), actual_tmax),
+            "err_tmin": err(meteorec.get("tmin"), actual_tmin),
+            "wet": wet,
+            # Brierjeva ocena za verjetnostno napoved padavin: (p − dejansko)².
+            # Manjše je bolje; klimatologija doline je ~0,25.
+            "brier": None if (pop is None or wet is None) else round((pop - wet) ** 2, 3),
+        }
     return record
 
 
@@ -152,7 +199,7 @@ def refresh_actuals(verification, hist):
             continue
         fresh = build_record(
             date, record.get("made_at"), actual,
-            record.get("arso"), record.get("open_meteo"),
+            record.get("arso"), record.get("open_meteo"), record.get("meteorec"),
         )
         if fresh != record:
             old = (record.get("actual") or {}).get("tmax")
@@ -182,7 +229,7 @@ def resolve_pending(pending, hist, verification):
 
         verification[target] = build_record(
             target, entry.get("made_at"), actual,
-            entry.get("arso"), entry.get("open_meteo"),
+            entry.get("arso"), entry.get("open_meteo"), entry.get("meteorec"),
         )
         resolved += 1
     return still_pending, resolved
@@ -217,15 +264,21 @@ def main():
             om = fetch_open_meteo_tomorrow(tomorrow)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
             print(f"  ⚠ Open-Meteo napoved nedosegljiva: {e}", file=sys.stderr)
+        meteorec = fetch_model_tomorrow(tomorrow)
+        if meteorec is None:
+            print("  ⚠ Napovedi lastnega modela ni — napoved-modela.json manjka ali je stara.",
+                  file=sys.stderr)
 
-        if arso or om:
+        if arso or om or meteorec:
             still_pending.append({
                 "target_date": tomorrow,
                 "made_at": today.isoformat(),
                 "arso": arso,
                 "open_meteo": om,
+                "meteorec": meteorec,
             })
-            print(f"  Zabeležena napoved za {tomorrow}: ARSO={'da' if arso else 'ne'}, Open-Meteo={'da' if om else 'ne'}")
+            print(f"  Zabeležena napoved za {tomorrow}: ARSO={'da' if arso else 'ne'}, "
+                  f"Open-Meteo={'da' if om else 'ne'}, naš model={'da' if meteorec else 'ne'}")
         else:
             print("  ✗ Nobenega vira napovedi ni bilo mogoče pridobiti.", file=sys.stderr)
 
