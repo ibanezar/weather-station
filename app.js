@@ -60,6 +60,70 @@ function setTheme(t){
   if(mc) mc.style.opacity = meshOpacity();
 }
 function toggleTheme(){ setTheme(isDark() ? 'light' : 'dark'); }
+
+/* ── Preprost ⇄ napredni pogled ───────────────────────────────────────────
+   Preprosti pogled pusti na strani samo trenutno vreme, obete, radar in
+   7-dnevno napoved (allowlist .simple-keep v style.css), napredni pa vse,
+   kot doslej. Privzeto je napredni — brez izbire, brez JS in za pajke se
+   torej ne skrije nič. Izbira se hrani v localStorage ('wx-mode'), postavi
+   pa jo že inline skripta v <head>, da ob nalaganju ni preskoka.
+
+   Ob prvem obisku (ni shranjene izbire) initModeUI() pokaže kartico z
+   vprašanjem — inline, ne prekrije strani; dokler obiskovalec ne izbere,
+   se stran prikazuje v naprednem pogledu. */
+const MODE_KEY='wx-mode', MODE_INTRO_KEY='wx-mode-intro';
+function wxMode(){ return document.documentElement.dataset.mode==='simple' ? 'simple' : 'advanced'; }
+function isSimpleMode(){ return wxMode()==='simple'; }
+
+/* Delo, ki v preprostem pogledu polni skrite kartice (ali celo drži odprto
+   povezavo/animacijo) — v vrsto, poženemo ga šele ob preklopu na napredno. */
+const _advQueue=[];
+function runAdvancedOnly(fn){
+  if(isSimpleMode()){ _advQueue.push(fn); return; }
+  try{ fn(); }catch(_){}
+}
+function flushAdvancedOnly(){
+  while(_advQueue.length){ const fn=_advQueue.shift(); try{ fn(); }catch(_){} }
+}
+
+function setWxMode(mode,opts){
+  const m = mode==='simple' ? 'simple' : 'advanced';
+  const persist = !opts || opts.persist!==false;
+  if(m==='simple') document.documentElement.dataset.mode='simple';
+  else             delete document.documentElement.dataset.mode;
+  if(persist){ try{ localStorage.setItem(MODE_KEY,m); }catch(e){} }
+  syncModeButtons();
+  if(m==='simple'){
+    // Zavihkov v preprostem pogledu ni — če je bil odprt kateri drugi,
+    // se vrnemo na "Zdaj", sicer bi ostal prazen zaslon.
+    if(!document.getElementById('tab-current')?.classList.contains('active')) switchTab('current');
+  }else{
+    flushAdvancedOnly();
+  }
+  try{ autoAccentCards(); }catch(_){}
+}
+function chooseWxMode(m){
+  try{ localStorage.setItem(MODE_INTRO_KEY,'chosen'); }catch(e){}
+  hideModeIntro();
+  setWxMode(m);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function dismissModeIntro(){
+  try{ localStorage.setItem(MODE_INTRO_KEY,'dismissed'); }catch(e){}
+  hideModeIntro();
+}
+function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; }
+function syncModeButtons(){
+  const simple=isSimpleMode();
+  document.getElementById('mode-btn-simple')?.setAttribute('aria-pressed',  simple?'true':'false');
+  document.getElementById('mode-btn-advanced')?.setAttribute('aria-pressed',simple?'false':'true');
+}
+function initModeUI(){
+  syncModeButtons();
+  let stored=null,intro=null;
+  try{ stored=localStorage.getItem(MODE_KEY); intro=localStorage.getItem(MODE_INTRO_KEY); }catch(e){}
+  if(!stored && !intro){ const el=document.getElementById('mode-intro'); if(el) el.hidden=false; }
+}
 document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 (function initTheme(){
   // data-theme je že nastavljen sinhrono v <head> (glej inline script pred CSS-jem),
@@ -2422,6 +2486,10 @@ function _lbKeyHandler(e){
 }
 
 function switchTab(tab){
+  // V preprostem pogledu zavihkov ni. Če kaka notranja povezava vseeno
+  // zahteva drug zavihek, preklopimo v napredni pogled — sicer bi obiskovalec
+  // pristal na skriti plošči in videl prazno stran.
+  if(tab!=='current' && isSimpleMode()) setWxMode('advanced');
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn, .tab-dd-menu button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-dd-trigger').forEach(b=>b.classList.remove('dd-active'));
@@ -14454,6 +14522,7 @@ async function initVisitorCounter(){
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
+  try{initModeUI();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
   try{applyMoon();}catch(_){}
   try{applyMonthlySummary();}catch(_){}
@@ -14467,11 +14536,11 @@ async function init(){
   try{initDailyFact();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
-  try{initValleyCam();}catch(_){}
+  runAdvancedOnly(()=>initValleyCam());
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
   try{autoLoadHistoryFile();}catch(_){}
-  setTimeout(()=>{try{initWeatherArt();setWeatherArt(_lastBriefObs||{});}catch(_){}},150);
+  setTimeout(()=>runAdvancedOnly(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});}),150);
   try{loadThresholds();}catch(_){} // restore user alert thresholds from localStorage
   try{_fcSliderInit();}catch(_){}
   // ── Wave 1: critical for the initial visible tab ──
@@ -14494,10 +14563,10 @@ async function init(){
     fetchClimateComparison();
     fetchFogForecast();
     fetchEcowittCurrent();
-    initInsights();
+    runAdvancedOnly(()=>initInsights());
     initVisitorCounter();
     checkSmartNotifications();
-    loadBlogTicker();
+    runAdvancedOnly(()=>loadBlogTicker());
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──
@@ -14508,12 +14577,12 @@ async function init(){
     fetchSevereWeather();
     fetchMeteoalarm();
     fetchGoogleAlerts();
-    fetchPollen();
+    runAdvancedOnly(()=>fetchPollen());
     fetchAIBrief();
-    connectLightning();
-    buildPrecipNormals();
-    buildSunshineNormals();
-    applyPheno();
+    runAdvancedOnly(()=>connectLightning());
+    runAdvancedOnly(()=>buildPrecipNormals());
+    runAdvancedOnly(()=>buildSunshineNormals());
+    runAdvancedOnly(()=>applyPheno());
   },6000);
 }
 
