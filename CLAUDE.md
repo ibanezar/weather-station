@@ -80,6 +80,33 @@ varnostno ponastavitev seje (npr. prijave v nova zasebna okna/naprave). Če
 ponovno generirati prek Graph API Explorerja (isti postopek kot za prvotno
 nastavitev — glej git zgodovino za natančen tok).
 
+## Preprost ⇄ napredni pogled domače strani
+
+Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom
+**Prikaz** na vrhu (in s ponudbo na dnu strani):
+
+- **preprosto** — samo trenutno vreme, dnevni povzetek, obeti, radar in
+  7-dnevna napoved, večja pisava, brez zavihkov;
+- **napredno** — vse, kot doslej.
+
+Kako je narejeno:
+
+- Izbira se hrani v `localStorage` pod `wx-mode`, postavi jo inline skripta v
+  `<head>` (kot tema), tako da ob nalaganju ni preskoka. Deljive povezave:
+  `?pogled=preprosto` / `?pogled=napredno`.
+- **Privzeto je napredno** — brez izbire, brez JS in za pajke se torej ne
+  skrije nič. Tega ne obračaj: preprosti pogled skriva večino vsebine in bi
+  kot privzetek stran osiromašil tudi za iskalnike.
+- Skrivanje je v `style.css` (razdelek »PREPROST ⇄ NAPREDNI POGLED«) po načelu
+  **allowlist**: v `#tab-current` ostane vidno samo tisto, kar ima razred
+  `simple-keep`. **Nova kartica na domači strani je torej v preprostem pogledu
+  samodejno skrita** — če sodi med bistvene, ji dopiši `simple-keep`.
+- V `app.js` je logika pri `setWxMode()` / `chooseWxMode()`. Delo, ki polni
+  skrite kartice ali drži odprto povezavo (strele, pelod, vremenska umetnost,
+  kamere, normale …), je v `init()` ovito v `runAdvancedOnly()` — v vrsto gre
+  in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
+  enako.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

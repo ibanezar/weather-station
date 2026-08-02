@@ -2707,3 +2707,96 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media (prefers-reduced-motion:reduce){
   .nc-cell{transition:none}.nc-cell:hover,.nc-cell:focus-visible{transform:none}
 }
+
+/* ══ PREPROST ⇄ NAPREDNI POGLED ═══════════════════════════════════════════
+   Domača stran ima dve različici: "preprosto" (samo trenutno vreme, obeti,
+   radar in 7-dnevna napoved, večja pisava — za tiste, ki hočejo hitro
+   informacijo) in "napredno" (vse, kot doslej).
+
+   Privzeto je NAPREDNO — brez izbire, brez JS in za pajke se prikaže cela
+   stran, zato preklop ne more skriti vsebine iskalnikom. Preprosti pogled
+   vklopi data-mode="simple" na <html> (inline skripta v <head>).
+
+   Skrivanje deluje po načelu allowlist: v #tab-current ostane vidno samo
+   tisto, kar ima razred .simple-keep — nove kartice so torej samodejno
+   skrite in jih ni treba posebej dopisovati sem. Izjema so .wx-static
+   odstavki (statično besedilo za iskalnike, vizualno itak skrito). */
+
+.mode-switch-wrap{display:flex;justify-content:center;margin:1.1rem 0 .2rem}
+.mode-switch{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem;border-radius:999px;
+  background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
+  backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+.mode-switch-lbl{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);padding:0 .5rem 0 .65rem}
+.mode-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.44rem .95rem;border-radius:999px;
+  border:1px solid transparent;background:none;color:var(--muted);font-family:'Inter',sans-serif;
+  cursor:pointer;line-height:1.2;transition:background .15s,color .15s,border-color .15s,box-shadow .15s}
+.mode-btn-ico{font-size:1.05rem;line-height:1}
+.mode-btn-txt{display:flex;flex-direction:column;align-items:flex-start;font-size:.78rem;font-weight:700}
+.mode-btn-txt small{font-size:.62rem;font-weight:500;opacity:.75;letter-spacing:.01em}
+.mode-btn:hover{background:var(--border);color:var(--text)}
+.mode-btn[aria-pressed="true"]{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;
+  border-color:transparent;box-shadow:0 4px 14px rgba(29,78,216,.4),0 1px 3px rgba(0,0,0,.15)}
+.mode-btn[aria-pressed="true"] .mode-btn-txt small{opacity:.85}
+.mode-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* Vprašanje ob prvem obisku — inline kartica, ne prekriva strani */
+.mode-intro{position:relative;margin:1rem auto 0;max-width:720px;padding:1.3rem 1.5rem 1.4rem;
+  border-radius:18px;background:var(--card-bg);border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);backdrop-filter:blur(18px) saturate(180%);
+  -webkit-backdrop-filter:blur(18px) saturate(180%);animation:mode-intro-in .3s ease}
+@keyframes mode-intro-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.mode-intro-title{font-size:1.05rem;font-weight:700;text-align:center;margin-bottom:.35rem}
+.mode-intro-sub{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.55;margin-bottom:1rem}
+.mode-intro-btns{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.mode-intro-btn{display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;
+  padding:.9rem 1.05rem;border-radius:14px;border:1px solid var(--card-border);background:var(--fc-bg);
+  color:var(--text);font-family:'Inter',sans-serif;text-align:left;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .12s,box-shadow .15s}
+.mode-intro-btn:hover{border-color:var(--blue);background:rgba(37,99,235,.07);transform:translateY(-1px);
+  box-shadow:var(--card-shadow)}
+.mode-intro-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.mode-intro-btn .mi-ico{font-size:1.3rem;line-height:1}
+.mode-intro-btn .mi-ttl{font-size:.95rem;font-weight:700}
+.mode-intro-btn small{font-size:.72rem;color:var(--muted);line-height:1.5}
+.mode-intro-close{position:absolute;top:.5rem;right:.6rem;background:none;border:none;color:var(--muted);
+  font-size:1.2rem;line-height:1;padding:.25rem .4rem;cursor:pointer;border-radius:8px;transition:color .15s}
+.mode-intro-close:hover{color:var(--text)}
+@media (max-width:560px){
+  .mode-intro-btns{grid-template-columns:1fr}
+  .mode-switch-lbl{display:none}
+  .mode-btn{padding:.42rem .7rem}
+}
+
+/* ── Kaj je v preprostem pogledu skrito ── */
+html[data-mode="simple"] .ticker-wrap,
+html[data-mode="simple"] .tab-nav-wrap{display:none !important}
+html[data-mode="simple"] .tab-pane:not(#tab-current){display:none !important}
+html[data-mode="simple"] #tab-current>*:not(.simple-keep):not(.wx-static){display:none !important}
+/* V junaški kartici odpadeta drsnik napovedi in vrstica z zvokom/deljenjem */
+html[data-mode="simple"] .hero .fc-slider-wrap,
+html[data-mode="simple"] .hero .sc-bar{display:none !important}
+
+/* ── Berljivost: vse mere so v rem, zato zadošča osnovna velikost pisave ── */
+html[data-mode="simple"]{font-size:110%}
+html[data-mode="simple"] .wrap{max-width:860px}
+html[data-mode="simple"] .hero-metrics{grid-template-columns:repeat(3,1fr);gap:.8rem}
+@media (max-width:560px){
+  html[data-mode="simple"] .hero-metrics{grid-template-columns:repeat(2,1fr)}
+}
+
+/* Ponudba za preklop na dnu strani. .mca-in-simple je vidno samo v preprostem
+   pogledu, .mca-in-advanced samo v naprednem. */
+.mode-cta{display:flex;flex-direction:column;align-items:center;gap:.7rem;margin:2rem 0 1.5rem;
+  padding:1.2rem 1.4rem;border-radius:16px;border:1px dashed var(--card-border);background:var(--fc-bg);text-align:center}
+.mode-cta p{font-size:.85rem;color:var(--muted);line-height:1.55;margin:0}
+.mode-cta-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.6rem 1.25rem;border-radius:999px;
+  border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);
+  font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .12s}
+.mode-cta-btn:hover{border-color:var(--blue);background:rgba(37,99,235,.09);transform:translateY(-1px)}
+.mode-cta-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.mca-in-simple{display:none}
+html[data-mode="simple"] .mca-in-simple{display:block}
+html[data-mode="simple"] button.mca-in-simple{display:inline-flex}
+html[data-mode="simple"] .mca-in-advanced{display:none}

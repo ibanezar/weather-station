@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('wx-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<!-- Preprost / napredni pogled: nastavimo še pred prvim izrisom, da ni preskoka.
+     Privzeto (brez izbire, brez JS, za pajke) je NAPREDNI pogled — torej vse,
+     kot doslej. ?pogled=preprosto|napredno izbiro tudi shrani (deljive povezave). -->
+<script>(function(){try{var p=new URLSearchParams(location.search).get('pogled'),m=null;
+if(p==='preprosto'||p==='simple')m='simple';else if(p==='napredno'||p==='advanced')m='advanced';
+if(m){localStorage.setItem('wx-mode',m);}else{m=localStorage.getItem('wx-mode');}
+if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>
@@ -332,6 +339,44 @@
     </nav>
   </header>
 
+  <!-- ══ PREKLOP POGLEDA (preprosto ⇄ napredno) ══
+       Vedno viden, v obeh načinih. Stanje bere/nastavlja app.js (setWxMode),
+       hrani se v localStorage 'wx-mode'. -->
+  <div class="mode-switch-wrap">
+    <div class="mode-switch" role="group" aria-label="Način prikaza strani">
+      <span class="mode-switch-lbl" aria-hidden="true">Prikaz</span>
+      <button type="button" class="mode-btn" id="mode-btn-simple" aria-pressed="false" onclick="chooseWxMode('simple')">
+        <span class="mode-btn-ico" aria-hidden="true">🌤</span>
+        <span class="mode-btn-txt">Preprosto<small>samo bistveno</small></span>
+      </button>
+      <button type="button" class="mode-btn" id="mode-btn-advanced" aria-pressed="true" onclick="chooseWxMode('advanced')">
+        <span class="mode-btn-ico" aria-hidden="true">📊</span>
+        <span class="mode-btn-txt">Napredno<small>vsi podatki</small></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Vprašanje ob prvem obisku. Ne blokira strani — dokler obiskovalec ne
+       izbere, se stran prikazuje v naprednem pogledu. Pokaže ga initModeUI(),
+       samo če izbira še ni shranjena in kartica ni bila zaprta. -->
+  <div class="mode-intro" id="mode-intro" role="region" aria-labelledby="mode-intro-title" hidden>
+    <button class="mode-intro-close" onclick="dismissModeIntro()" aria-label="Zapri vprašanje">×</button>
+    <h2 class="mode-intro-title" id="mode-intro-title">Kakšen pogled želite?</h2>
+    <p class="mode-intro-sub">Meteorec zna prikazati samo bistveno ali čisto vse podatke. Izbiro si zapomnimo, spremenite pa jo lahko kadar koli z gumbom <strong>Prikaz</strong> na vrhu strani.</p>
+    <div class="mode-intro-btns">
+      <button type="button" class="mode-intro-btn" onclick="chooseWxMode('simple')">
+        <span class="mi-ico" aria-hidden="true">🌤</span>
+        <span class="mi-ttl">Preprosto</span>
+        <small>Trenutno vreme, radar in napoved za teden naprej — večja pisava, brez podrobnosti.</small>
+      </button>
+      <button type="button" class="mode-intro-btn mi-adv" onclick="chooseWxMode('advanced')">
+        <span class="mi-ico" aria-hidden="true">📊</span>
+        <span class="mi-ttl">Napredno</span>
+        <small>Vse meritve, grafi, analize, klimatologija, nevihtni modeli in arhiv.</small>
+      </button>
+    </div>
+  </div>
+
   <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje. Več o <a href="/vreme-recica-ob-savinji/">vremenu in lokalni mikroklimi v Rečici ob Savinji</a>, ali pa preglejte <a href="/vreme/">vremenski arhiv od leta 2019</a>, <a href="/vreme/mesec/">povprečno vreme po mesecih</a>, <a href="/rekord/">vremenske rekorde Savinjske doline</a> ali strnjen pregled na strani <a href="/podatki/">/podatki/</a>.</p>
 
   <div class="status">
@@ -463,9 +508,9 @@
   <!-- ══ TAB: AKTUALNO ══ -->
 
   <div id="tab-current" class="tab-pane active">
-  <h2 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme na Rečici ob Savinji</h2>
-  <div id="wf-banner" style="display:none" role="region" aria-live="polite"></div>
-  <div class="hero card">
+  <h2 class="simple-keep" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme na Rečici ob Savinji</h2>
+  <div id="wf-banner" class="simple-keep" style="display:none" role="region" aria-live="polite"></div>
+  <div class="hero card simple-keep">
     <canvas id="hero-canvas"></canvas>
     <div class="hero-top">
       <div class="hero-left">
@@ -535,7 +580,7 @@
   <!-- WX-RECORD-WATCH:END -->
 
   <!-- Day summary -->
-  <div class="day-summary">
+  <div class="day-summary simple-keep">
     <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">—</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
     <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">—</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
@@ -550,7 +595,7 @@
   <div class="pd-detail-wrap" id="pd-detail"></div>
 
   <!-- Kaj prihaja -->
-  <div class="card cu-card" id="cu-wrap">
+  <div class="card cu-card simple-keep" id="cu-wrap">
     <div class="cu-hdr">
       <span class="clabel" style="margin:0">🔮 Vremenski obeti</span>
       <span class="cu-time" id="cu-updated">—</span>
@@ -574,7 +619,7 @@
   </div>
 
   <!-- Lasten radar padavin — kompozit ARSO + EUMETNET OPERA (worker /radar-composite) -->
-  <div class="card chart-card" style="margin-bottom:1rem">
+  <div class="card chart-card simple-keep" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">🗺 Radar padavin</span>
       <span class="chart-range">zadnja ura</span>
@@ -779,7 +824,7 @@
   </div>
 
   <!-- Text forecast -->
-  <div class="card chart-card" style="margin-bottom:1rem">
+  <div class="card chart-card simple-keep" style="margin-bottom:1rem">
     <div class="chart-hdr">
       <span class="clabel" style="margin:0">📝 7-dnevna napoved</span>
       <span class="chart-range" id="txfc-updated"></span>
@@ -3256,6 +3301,14 @@
 
 
 
+
+  <!-- Ponudba za preklop na dnu strani — da preklop ni viden samo na vrhu. -->
+  <div class="mode-cta">
+    <p class="mca-in-simple">Želite še grafe, analize, klimatologijo in arhiv meritev?</p>
+    <p class="mca-in-advanced">Je podatkov preveč? Meteorec zna prikazati tudi samo bistveno.</p>
+    <button type="button" class="mode-cta-btn mca-in-simple" onclick="chooseWxMode('advanced')">📊 Preklopi na napredni pogled</button>
+    <button type="button" class="mode-cta-btn mca-in-advanced" onclick="chooseWxMode('simple')">🌤 Preklopi na preprost pogled</button>
+  </div>
 
   <section class="subscribe-box" aria-labelledby="home-sub-title">
     <h2 class="sub-title" id="home-sub-title">📬 Prijava na novičke</h2>
