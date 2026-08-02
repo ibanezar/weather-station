@@ -1514,6 +1514,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .mrad-bar i{display:block;height:100%}
 .mrad-ticks{display:grid;font-size:.58rem;color:var(--muted);line-height:1}
 .mrad-ticks span{text-align:left}
+.mrad-views{display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap}
+.radar-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(37,99,235,.1)}
 /* Podlaga v temni temi: pridušena, da ne žari izpod padavin. */
 :root[data-theme="dark"] .mrad-tiles{filter:brightness(.78) saturate(.85) contrast(1.05)}
 /* Leafletov list se naloži za našim, zato je za oznako potrebna višja

@@ -1091,8 +1091,22 @@ const OPERA_S3 = "https://s3.waw3-1.cloudferro.com/openradar-24h";
 const OPERA_MAX_AGE_MIN = 30;
 
 // Izsek, ki ga rišemo: Slovenija s celotnim alpsko-jadranskim zaledjem.
-const COMP_LON0 = 11.5, COMP_LON1 = 17.8, COMP_LAT0 = 44.4, COMP_LAT1 = 47.9;
-const COMP_W = 1024;               // ~0,47 km/px pri 46 °N — ustreza ARSO jedru
+// Dva izseka. Široki pokriva alpsko-jadransko zaledje, ozki pa dolino, kjer
+// stoji postaja: ta je v celoti znotraj 120 km od Lisce in Pasje ravni, torej
+// je čisto ARSO jedro. Ker ga rišemo trikrat finejše od izvornih 0,5 km, ga
+// vzorčimo gladko — pri širokem to ne pride v poštev, ker je izris tam
+// praktično 1 : 1 z virom in bi glajenje detajl le razmazalo.
+const COMP_VIEWS = {
+  sirok: {
+    lon0: 11.5, lon1: 17.8, lat0: 44.4, lat1: 47.9, w: 1024,
+    ime: "Slovenija in širša okolica", gladkoArso: false,
+  },
+  savinja: {
+    lon0: 14.25, lon1: 15.55, lat0: 46.0, lat1: 46.65, w: 640,
+    ime: "Zgornja Savinjska dolina", gladkoArso: true,
+  },
+};
+const COMP_VIEW_DEFAULT = "sirok";
 
 // Lambertova azimutalna ploskovno enaka projekcija mreže OPERA (iz GeoTIFF-a).
 const LAEA = { lat0: 55, lon0: 10, fe: 1950000, fn: -2100000, a: 6378137, f: 1 / 298.257223563 };
@@ -1379,19 +1393,35 @@ function _operaSample(win, fx, fy) {
        + (_dbzMmh(c) * (1 - tx) + _dbzMmh(d) * tx) * ty;
 }
 
+// Vzorčenje ARSO jedra. Pri gladkem načinu interpoliramo v mm/h in ne po
+// stopnjah, ker je lestvica geometrijska in bi vmesne stopnje sicer preskakovale.
+function _arsoSample(arso, fx, fy, gladko) {
+  const g = (x, y) => { const L = arso.levels[y * arso.w + x]; return L ? RADAR_LEVEL_MMH[L - 1] : 0; };
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  if (!gladko || x0 < 0 || y0 < 0 || x0 + 1 >= arso.w || y0 + 1 >= arso.h) {
+    const x = Math.round(fx), y = Math.round(fy);
+    return (x < 0 || y < 0 || x >= arso.w || y >= arso.h) ? null : g(x, y);
+  }
+  const tx = fx - x0, ty = fy - y0;
+  return (g(x0, y0) * (1 - tx) + g(x0 + 1, y0) * tx) * (1 - ty)
+       + (g(x0, y0 + 1) * (1 - tx) + g(x0 + 1, y0 + 1) * tx) * ty;
+}
+
 // Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
 // jedro — nepopolna slika je še vedno boljša od napake.
-async function _radarComposite(key, stampMs) {
-  const H = Math.round(COMP_W * (_mercY(COMP_LAT1) - _mercY(COMP_LAT0)) / ((COMP_LON1 - COMP_LON0) * Math.PI / 180));
-  const y0 = _mercY(COMP_LAT1), y1 = _mercY(COMP_LAT0);
+async function _radarComposite(key, stampMs, view) {
+  const V = view || COMP_VIEWS[COMP_VIEW_DEFAULT];
+  const W = V.w;
+  const H = Math.round(W * (_mercY(V.lat1) - _mercY(V.lat0)) / ((V.lon1 - V.lon0) * Math.PI / 180));
+  const y0 = _mercY(V.lat1), y1 = _mercY(V.lat0);
 
   // Okno v koordinatah mreže: projekcija ni poravnana z mrežo poldnevnikov,
   // zato robove okna vzorčimo in vzamemo očrtani pravokotnik.
   const bb = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
   for (let i = 0; i <= 40; i++) {
     const t = i / 40;
-    const la = COMP_LAT0 + (COMP_LAT1 - COMP_LAT0) * t, lo = COMP_LON0 + (COMP_LON1 - COMP_LON0) * t;
-    for (const [a, b] of [[la, COMP_LON0], [la, COMP_LON1], [COMP_LAT0, lo], [COMP_LAT1, lo]]) {
+    const la = V.lat0 + (V.lat1 - V.lat0) * t, lo = V.lon0 + (V.lon1 - V.lon0) * t;
+    for (const [a, b] of [[la, V.lon0], [la, V.lon1], [V.lat0, lo], [V.lat1, lo]]) {
       const [x, y] = _laeaXY(a, b);
       bb.x0 = Math.min(bb.x0, x); bb.x1 = Math.max(bb.x1, x);
       bb.y0 = Math.min(bb.y0, y); bb.y1 = Math.max(bb.y1, y);
@@ -1404,31 +1434,31 @@ async function _radarComposite(key, stampMs) {
   ]);
   if (!win && !arso) throw new Error("noben radarski vir ni dosegljiv");
 
-  const idx = new Uint8Array(COMP_W * H);
+  const idx = new Uint8Array(W * H);
   const NODATA = _COMP_SCALE.rgb.length + 1;
   const R2_JEDRO = COMP_R_JEDRO * COMP_R_JEDRO, R2_ROB = COMP_R_ROB * COMP_R_ROB;
 
   // Kar je odvisno samo od stolpca, izračunamo vnaprej — sicer bi sinus in
-  // kosinus tekla 840.000-krat.
-  const sinDl = new Float64Array(COMP_W), cosDl = new Float64Array(COMP_W);
-  const arsoX = new Int32Array(COMP_W), dxKm = new Float64Array(COMP_W * COMP_SI_RADARJI.length);
-  for (let x = 0; x < COMP_W; x++) {
-    const lo = COMP_LON0 + (COMP_LON1 - COMP_LON0) * (x + 0.5) / COMP_W;
+  // kosinus tekla stotisočkrat.
+  const sinDl = new Float64Array(W), cosDl = new Float64Array(W);
+  const arsoX = new Float64Array(W), dxKm = new Float64Array(W * COMP_SI_RADARJI.length);
+  for (let x = 0; x < W; x++) {
+    const lo = V.lon0 + (V.lon1 - V.lon0) * (x + 0.5) / W;
     const dl = (lo - LAEA.lon0) * Math.PI / 180;
     sinDl[x] = Math.sin(dl); cosDl[x] = Math.cos(dl);
-    arsoX[x] = Math.round(RAD_AX * lo + RAD_BX);
-    COMP_SI_RADARJI.forEach(([, rlo], k) => { dxKm[k * COMP_W + x] = (lo - rlo) * COMP_KM_LON; });
+    arsoX[x] = RAD_AX * lo + RAD_BX;
+    COMP_SI_RADARJI.forEach(([, rlo], k) => { dxKm[k * W + x] = (lo - rlo) * COMP_KM_LON; });
   }
 
   let nBlind = 0;
   for (let y = 0; y < H; y++) {
     const la = _mercLat(y0 - (y0 - y1) * (y + 0.5) / H);
     const b = Math.asin(_LAEA.q(la * Math.PI / 180) / _LAEA.qp), sb = Math.sin(b), cb = Math.cos(b);
-    const arsoY = Math.round(RAD_AY * la + RAD_BY);
+    const arsoY = RAD_AY * la + RAD_BY;
     const dyKm = COMP_SI_RADARJI.map(([rla]) => (la - rla) * COMP_KM_LAT);
-    const row = y * COMP_W;
+    const row = y * W;
 
-    for (let x = 0; x < COMP_W; x++) {
+    for (let x = 0; x < W; x++) {
       let mmh = -1;                                  // -1 = nihče ne vidi
 
       if (win) {
@@ -1441,19 +1471,19 @@ async function _radarComposite(key, stampMs) {
       if (arso) {
         let d2 = Infinity;
         for (let k = 0; k < COMP_SI_RADARJI.length; k++) {
-          const dx = dxKm[k * COMP_W + x], dy = dyKm[k];
+          const dx = dxKm[k * W + x], dy = dyKm[k];
           const s = dx * dx + dy * dy;
           if (s < d2) d2 = s;
         }
-        const ax = arsoX[x];
-        if (d2 < R2_ROB && ax >= 0 && ax < arso.w && arsoY >= 0 && arsoY < arso.h) {
-          const L = arso.levels[arsoY * arso.w + ax];
-          const a = L ? RADAR_LEVEL_MMH[L - 1] : 0;
+        if (d2 < R2_ROB) {
+          const a = _arsoSample(arso, arsoX[x], arsoY, V.gladkoArso);
           // Znotraj dosega naših radarjev ima ARSO prednost (štirikrat boljša
           // ločljivost istih meritev), v prehodnem pasu vzamemo močnejšega od
           // obeh, da na šivu ne nastane luknja.
-          if (d2 <= R2_JEDRO) mmh = a;
-          else mmh = Math.max(mmh, a);
+          if (a != null) {
+            if (d2 <= R2_JEDRO) mmh = a;
+            else mmh = Math.max(mmh, a);
+          }
         }
       }
 
@@ -1462,10 +1492,10 @@ async function _radarComposite(key, stampMs) {
     }
   }
 
-  const png = await _pngIndexed(idx, COMP_W, H,
+  const png = await _pngIndexed(idx, W, H,
     [[0, 0, 0], ..._COMP_SCALE.rgb, [120, 125, 135]],
     [0, ..._COMP_SCALE.alpha, 45]);
-  return { png, w: COMP_W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (COMP_W * H) };
+  return { png, w: W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (W * H) };
 }
 
 // Vsak izrisan okvir hranimo v R2 pod svojim ključem, ker jih animacija
@@ -1475,14 +1505,15 @@ const COMP_R2_PREFIX = "radar/comp-";
 const COMP_ANIM_MIN = 60;                       // dolžina animacije
 const COMP_KEEP_MS = (COMP_ANIM_MIN + 20) * 60000;
 
-async function _radarCompositeCached(env, stamp) {
+async function _radarCompositeCached(env, stamp, viewId) {
   const r2 = env?.PHOTOS_R2;
+  const vid = COMP_VIEWS[viewId] ? viewId : COMP_VIEW_DEFAULT;
   if (!stamp) {
     const key = await _operaLatestKey();
     stamp = key ? _compStamp(key) : null;
     if (!stamp) throw new Error("ni posnetka OPERA");
   }
-  const r2key = COMP_R2_PREFIX + stamp + ".png";
+  const r2key = `${COMP_R2_PREFIX}${vid}-${stamp}.png`;
 
   if (r2) {
     try {
@@ -1493,9 +1524,9 @@ async function _radarCompositeCached(env, stamp) {
 
   const key = _operaKeyForStamp(stamp);
   if (!key) throw new Error("neveljaven časovni žig");
-  const c = await _radarComposite(key, _compStampMs(stamp));
+  const c = await _radarComposite(key, _compStampMs(stamp), COMP_VIEWS[vid]);
   const meta = {
-    stamp,
+    stamp, pogled: vid,
     opera: String(c.opera), arso: String(c.arso),
     brezPodatkov: c.brezPodatkov.toFixed(4),
     w: String(c.w), h: String(c.h),
@@ -1517,7 +1548,9 @@ async function _radarCompositePrune(env) {
   try {
     const list = await r2.list({ prefix: COMP_R2_PREFIX, limit: 200 });
     for (const o of list.objects || []) {
-      const s = (o.key.match(/comp-(\d{8}T\d{4})\.png$/) || [])[1];
+      // Ključ je comp-<pogled>-<žig>.png; brez imena pogleda so ostanki
+      // prejšnje sheme in gredo prav tako proč.
+      const s = (o.key.match(/comp-[a-z]+-(\d{8}T\d{4})\.png$/) || [])[1];
       const ms = s ? _compStampMs(s) : NaN;
       if (Number.isNaN(ms) || ms < cutoff) { await r2.delete(o.key); n++; }
     }
@@ -1529,7 +1562,9 @@ async function _radarCompositePrune(env) {
 // že topla; sproti počisti stare.
 async function _cronRenderRadarComposite(env) {
   try {
-    await _radarCompositeCached(env, null);
+    for (const vid of Object.keys(COMP_VIEWS)) {
+      await _radarCompositeCached(env, null, vid).catch(() => null);
+    }
     await _radarCompositePrune(env);
     return true;
   } catch (_) { return false; }
@@ -2659,6 +2694,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Lasten kompozit padavin (ARSO jedro + OPERA obroč) kot paletni PNG v
       // Web Mercatorju; .json vrne meje, legendo in čas posnetka.
       if (path === "/radar-composite" || path === "/radar-composite.json") {
+        const vid = COMP_VIEWS[url.searchParams.get("pogled")] ? url.searchParams.get("pogled") : COMP_VIEW_DEFAULT;
+        const V = COMP_VIEWS[vid];
         if (path.endsWith(".json")) {
           const keys = await _operaKeys();
           const stamps = keys.map(_compStamp).filter(Boolean);
@@ -2675,9 +2712,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             starost_min: Number.isNaN(ms) ? null : Math.round((Date.now() - ms) / 60000),
             okvirji,
             korak_min: 5,
-            meje: [[COMP_LAT0, COMP_LON0], [COMP_LAT1, COMP_LON1]],
+            pogled: vid,
+            pogledi: Object.entries(COMP_VIEWS).map(([id, v]) => ({
+              id, ime: v.ime,
+              meje: [[v.lat0, v.lon0], [v.lat1, v.lon1]],
+              km_px: Number(((v.lon1 - v.lon0) * COMP_KM_LON / v.w).toFixed(3)),
+            })),
+            meje: [[V.lat0, V.lon0], [V.lat1, V.lon1]],
             projekcija: "EPSG:3857",
-            sirina: COMP_W,
+            sirina: V.w,
             legenda: COMP_MMH.map((mmh, i) => ({
               mmh,
               barva: "#" + COMP_RGB[i].map(v => v.toString(16).padStart(2, "0")).join(""),
@@ -2705,7 +2748,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             });
           }
         }
-        const c = await _radarCompositeCached(env, tParam);
+        const c = await _radarCompositeCached(env, tParam, vid);
         return new Response(c.body, {
           headers: {
             ...CORS_ALLOWED,
@@ -2714,6 +2757,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             "Cache-Control": tParam ? "public, max-age=86400, immutable" : "public, max-age=120",
             "X-Radar-Stamp": c.stamp || "",
             "X-Radar-Viri": `arso=${c.meta?.arso ?? "?"} opera=${c.meta?.opera ?? "?"}`,
+            "X-Radar-Pogled": vid,
             "X-Radar-Cache": c.cached ? "hit" : "miss",
           },
         });
