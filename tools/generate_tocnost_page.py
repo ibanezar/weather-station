@@ -73,6 +73,13 @@ def build_body(verification):
     mos_stats = source_stats(records, "meteorec")
     has_mos = mos_stats["n"] > 0
 
+    # MTR — ime lastnega modela. Različica se izpelje iz zadnjega zapisa, ki jo
+    # nosi (meteorec.model_version), da se oznaka sama dvigne, ko se model kdaj
+    # znova nauči pod novo verzijo — nikjer je ne zapisujemo trdo.
+    mtr_ver = next((r["meteorec"].get("model_version") for r in reversed(records)
+                    if r.get("meteorec") and r["meteorec"].get("model_version")), None)
+    mtr_label = f"MTR v{mtr_ver.split('.')[0]}" if mtr_ver else "MTR"
+
     # ARSO nima napovedne točke za Rečico, zato njegova napoved prihaja iz
     # najbližjega kraja na njihovem seznamu. Kateri je to, povemo naravnost —
     # sicer bi številka izpadla kot napoved za Rečico, kar ni.
@@ -96,16 +103,16 @@ def build_body(verification):
         if arso_stats["mae_tmax"] is not None:
             parts.append(f'ARSO: ±{seo.num(arso_stats["mae_tmax"])} °C')
         if mos_stats["mae_tmax"] is not None:
-            parts.append(f'naš model: ±{seo.num(mos_stats["mae_tmax"])} °C')
+            parts.append(f'{mtr_label}: ±{seo.num(mos_stats["mae_tmax"])} °C')
         status =(f'  <p class="archive-intro"><strong>{n_days} razrešenih dni</strong> od {seo.fmtd(first_date)}. '
                    f'{"; ".join(parts)}.</p>')
 
-    mos_intro = ('  <p class="archive-intro"><strong>Tretji tekmovalec je naš lastni model.</strong> Ne napoveduje '
-                 'vremena iz nič — vzame Open-Meteo kot vhod in ga popravi s tem, česar globalni model za dno '
-                 'te doline ne zna: postaja je podnevi toplejša, ponoči pa hladnejša od modelske mreže, ob '
-                 'jasnih in mirnih nočeh se na dnu doline nabere hladen zrak. Popravek je naučen na meritvah te '
-                 'postaje. Meri se z istim merilom kot ARSO in Open-Meteo, na isti tabeli — tudi kadar '
-                 'izgubi.</p>') if has_mos else ""
+    mos_intro = (f'  <p class="archive-intro"><strong>Tretji tekmovalec je {mtr_label} (Meteorec)</strong> — '
+                 'naš lastni model za to dolino. Ne napoveduje vremena iz nič — vzame Open-Meteo kot vhod in '
+                 'ga popravi s tem, česar globalni model za dno te doline ne zna: postaja je podnevi toplejša, '
+                 'ponoči pa hladnejša od modelske mreže, ob jasnih in mirnih nočeh se na dnu doline nabere '
+                 'hladen zrak. Popravek je naučen na meritvah te postaje. Meri se z istim merilom kot ARSO in '
+                 'Open-Meteo, na isti tabeli — tudi kadar izgubi.</p>') if has_mos else ""
 
     intro = ('  <p class="archive-intro">Vsak dan zabeležimo, kaj ARSO in Open-Meteo napovesta za jutrišnjo '
              'najvišjo/najnižjo temperaturo v Rečici ob Savinji, naslednji dan pa to primerjamo z dejansko '
@@ -123,7 +130,7 @@ def build_body(verification):
     cards = ('  <div class="stat-grid">\n'
               + stat_card("ARSO", arso_stats, "c-temp") + "\n"
               + stat_card("Open-Meteo", om_stats, "c-rain") + "\n"
-              + (stat_card("Naš model", mos_stats, "c-up") + "\n" if has_mos else "")
+              + (stat_card(mtr_label, mos_stats, "c-up") + "\n" if has_mos else "")
               + '  </div>') if n_days else ""
 
     # ── Mesečni scoreboard ──────────────────────────────────────────────
@@ -142,7 +149,7 @@ def build_body(verification):
         m_col = f'<td>{mae_txt(mm)}</td>' if has_mos else ""
         month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td>{m_col}<td>{len(recs)}</td></tr>')
     month_head = ('    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th>'
-                  + ('<th>Naš model</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
+                  + (f'<th>{mtr_label}</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
     month_table = ('  <table class="stats">\n'
                     + month_head
                     + "\n".join(month_rows) + '\n  </table>') if month_rows else \
@@ -166,7 +173,7 @@ def build_body(verification):
         )
     recent_head = ('    <tr><th>Datum</th><th>Dejanska maks. T</th><th>ARSO je napovedal</th>'
                    '<th>Open-Meteo je napovedal</th>'
-                   + ('<th>Naš model je napovedal</th>' if has_mos else '') + '</tr>\n')
+                   + (f'<th>{mtr_label} je napovedal</th>' if has_mos else '') + '</tr>\n')
     recent_table = ('  <table class="stats">\n'
                      + recent_head
                      + "\n".join(recent_rows) + '\n  </table>') if recent_rows else \
@@ -195,12 +202,12 @@ def build_body(verification):
     # dokler ni razrešenih dni, bi bilo obljuba brez številk.
     if has_mos:
         qa.insert(3, (
-            "Kaj je »naš model«?",
-            "Lastni statistični model za Rečico ob Savinji. Vzame napoved Open-Meteo in ji doda popravek, "
-            "naučen na meritvah postaje IREICA1 — kako se dno doline sistematično razlikuje od modelske "
-            "mreže. Napoveduje najvišjo in najnižjo temperaturo ter verjetnost padavin za en do tri dni "
-            "vnaprej. Količine padavin ne popravlja, ker se je pri preizkusu izkazalo, da tega ne zna bolje "
-            "od Open-Meteo. Model je poskusen in se meri javno, na tej tabeli — tudi kadar izgubi."))
+            f"Kaj je {mtr_label}?",
+            "MTR (Meteorec) je lastni statistični model za Rečico ob Savinji. Vzame napoved Open-Meteo in ji "
+            "doda popravek, naučen na meritvah postaje IREICA1 — kako se dno doline sistematično razlikuje od "
+            "modelske mreže. Napoveduje najvišjo in najnižjo temperaturo ter verjetnost padavin za en do tri "
+            "dni vnaprej. Količine padavin ne popravlja, ker se je pri preizkusu izkazalo, da tega ne zna "
+            "bolje od Open-Meteo. Model je poskusen in se meri javno, na tej tabeli — tudi kadar izgubi."))
 
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
@@ -209,7 +216,7 @@ def build_body(verification):
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Točnost napovedi", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Točnost vremenske napovedi — Rečica ob Savinji</h1>
-  <p class="post-meta">{"ARSO vs. Open-Meteo vs. naš model vs. dejanska meritev" if has_mos else "ARSO vs. Open-Meteo vs. dejanska meritev"} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
+  <p class="post-meta">{f"ARSO vs. Open-Meteo vs. {mtr_label} vs. dejanska meritev" if has_mos else "ARSO vs. Open-Meteo vs. dejanska meritev"} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
 {intro_block}
 {status}
 {cards}

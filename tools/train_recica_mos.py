@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/train_recica_mos.py — uči lastni napovedni model za Rečico (MOS).
+tools/train_recica_mos.py — uči MTR, lastni napovedni model za Rečico (MOS).
 
 MOS = Model Output Statistics: model ne napoveduje vremena iz nič, ampak se iz
 meritev te postaje nauči, kako se dno doline sistematično razlikuje od tega, kar
