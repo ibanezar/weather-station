@@ -1112,6 +1112,26 @@ const COMP_SI_RADARJI = [[46.068, 15.285], [46.099, 14.234]];  // Lisca, Pasja r
 const COMP_R_JEDRO = 120, COMP_R_ROB = 170;                    // km
 const COMP_KM_LAT = 111.32, COMP_KM_LON = 77.2;                // 1° pri ~46,2 °N
 
+// Barvna lestvica zgoraj je lestvica *legende*. Za izris jo podrobimo, ker
+// ima obroč zvezne vrednosti in bi ga 14 stopenj razrezalo v vidne pasove.
+// Paletni PNG prenese 256 vnosov, zato je to zastonj.
+const COMP_SUB = 3;
+const _COMP_SCALE = (() => {
+  const mmh = [], rgb = [], alpha = [];
+  for (let i = 0; i < COMP_MMH.length; i++) {
+    const m0 = COMP_MMH[i], m1 = i + 1 < COMP_MMH.length ? COMP_MMH[i + 1] : COMP_MMH[i] * 1.5;
+    const c0 = COMP_RGB[i], c1 = i + 1 < COMP_RGB.length ? COMP_RGB[i + 1] : COMP_RGB[i];
+    const a0 = COMP_ALPHA[i], a1 = i + 1 < COMP_ALPHA.length ? COMP_ALPHA[i + 1] : COMP_ALPHA[i];
+    for (let k = 0; k < COMP_SUB; k++) {
+      const t = k / COMP_SUB;
+      mmh.push(m0 * Math.pow(m1 / m0, t));                       // geometrično, kot je lestvica
+      rgb.push(c0.map((v, j) => Math.round(v + (c1[j] - v) * t)));
+      alpha.push(Math.round(a0 + (a1 - a0) * t));
+    }
+  }
+  return { mmh, rgb, alpha };
+})();
+
 // ── Projekcije ─────────────────────────────────────────────
 // Avtalična širina zahteva logaritem, zato jo računamo enkrat na vrstico.
 const _LAEA = (() => {
@@ -1324,9 +1344,39 @@ async function _compArso(stampMs) {
 }
 
 function _compLevel(mmh) {
+  const s = _COMP_SCALE.mmh;
   let L = 0;
-  for (let i = 0; i < COMP_MMH.length; i++) if (mmh >= COMP_MMH[i]) L = i + 1;
+  for (let i = 0; i < s.length; i++) if (mmh >= s[i]) L = i + 1;
   return L;
+}
+
+// Odbojnost v mm/h. NaN pomeni izmerjeno brez padavin, vrednost pod -1e5
+// pa da radar tja ne vidi — to dvoje je treba ločiti, sicer bi luknje v
+// pokritju zgladili v suho.
+const _dbzMmh = (v) => Number.isNaN(v) ? 0 : Math.pow(Math.pow(10, v / 10) / 200, 1 / 1.6);
+
+// Dvolinearno vzorčenje obroča. Mreža OPERA je 1 km, izris pa pol tega, zato
+// najbližji sosed nariše vidne kvadratke; glajenje ne doda podatka, odstrani
+// pa stopnice. Če je katerikoli od štirih sosedov zunaj pokritja, se vrnemo
+// na najbližjega — drugače bi rob pokritja razmazali v padavine.
+function _operaSample(win, fx, fy) {
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const x1 = x0 + 1, y1 = y0 + 1;
+  if (x0 < 0 || y0 < 0 || x1 >= win.w || y1 >= win.h) {
+    const cx = Math.round(fx), cy = Math.round(fy);
+    if (cx < 0 || cy < 0 || cx >= win.w || cy >= win.h) return -1;
+    const v = win.data[cy * win.w + cx];
+    return v < -1e5 ? -1 : _dbzMmh(v);
+  }
+  const a = win.data[y0 * win.w + x0], b = win.data[y0 * win.w + x1];
+  const c = win.data[y1 * win.w + x0], d = win.data[y1 * win.w + x1];
+  if (a < -1e5 || b < -1e5 || c < -1e5 || d < -1e5) {
+    const v = win.data[Math.round(fy) * win.w + Math.round(fx)];
+    return v < -1e5 ? -1 : _dbzMmh(v);
+  }
+  const tx = fx - x0, ty = fy - y0;
+  return (_dbzMmh(a) * (1 - tx) + _dbzMmh(b) * tx) * (1 - ty)
+       + (_dbzMmh(c) * (1 - tx) + _dbzMmh(d) * tx) * ty;
 }
 
 // Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
@@ -1355,7 +1405,7 @@ async function _radarComposite(key, stampMs) {
   if (!win && !arso) throw new Error("noben radarski vir ni dosegljiv");
 
   const idx = new Uint8Array(COMP_W * H);
-  const NODATA = COMP_RGB.length + 1;
+  const NODATA = _COMP_SCALE.rgb.length + 1;
   const R2_JEDRO = COMP_R_JEDRO * COMP_R_JEDRO, R2_ROB = COMP_R_ROB * COMP_R_ROB;
 
   // Kar je odvisno samo od stolpca, izračunamo vnaprej — sicer bi sinus in
@@ -1383,13 +1433,9 @@ async function _radarComposite(key, stampMs) {
 
       if (win) {
         const B = _LAEA.Rq * Math.sqrt(2 / (1 + _LAEA.sinb0 * sb + _LAEA.cosb0 * cb * cosDl[x]));
-        const gx = Math.round(((B * _LAEA.D * cb * sinDl[x] + LAEA.fe) - win.ox) / win.px) - win.c0;
-        const gy = Math.round((win.oy - ((B / _LAEA.D) * (_LAEA.cosb0 * sb - _LAEA.sinb0 * cb * cosDl[x]) + LAEA.fn)) / win.py) - win.r0;
-        if (gx >= 0 && gx < win.w && gy >= 0 && gy < win.h) {
-          const v = win.data[gy * win.w + gx];
-          if (Number.isNaN(v)) mmh = 0;              // izmerjeno, a brez padavin
-          else if (v > -1e5) mmh = Math.pow(Math.pow(10, v / 10) / 200, 1 / 1.6);   // Marshall-Palmer
-        }
+        const fx = ((B * _LAEA.D * cb * sinDl[x] + LAEA.fe) - win.ox) / win.px - win.c0;
+        const fy = (win.oy - ((B / _LAEA.D) * (_LAEA.cosb0 * sb - _LAEA.sinb0 * cb * cosDl[x]) + LAEA.fn)) / win.py - win.r0;
+        mmh = _operaSample(win, fx, fy);             // Marshall-Palmer je v _dbzMmh
       }
 
       if (arso) {
@@ -1417,8 +1463,8 @@ async function _radarComposite(key, stampMs) {
   }
 
   const png = await _pngIndexed(idx, COMP_W, H,
-    [[0, 0, 0], ...COMP_RGB, [120, 125, 135]],
-    [0, ...COMP_ALPHA, 45]);
+    [[0, 0, 0], ..._COMP_SCALE.rgb, [120, 125, 135]],
+    [0, ..._COMP_SCALE.alpha, 45]);
   return { png, w: COMP_W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (COMP_W * H) };
 }
 

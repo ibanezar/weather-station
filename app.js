@@ -3501,12 +3501,14 @@ async function initMeteorecRadar(){
     await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
   }
   _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10}).setView([LAT,LON],7);
-  L.tileLayer(isDark()
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd'}).addTo(_mradMap);
-  L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2})
-    .addTo(_mradMap).bindPopup('IREICA1 · Rečica ob Savinji');
+  // Voyager namesto temne podlage: reliefno obarvan, z imeni krajev, in dovolj
+  // svetel, da se pod padavinami še vidi, kje si. V temni temi ga po CSS malo
+  // pridušimo, sicer v temni kartici žari.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd',className:'mrad-tiles'}).addTo(_mradMap);
+  L.circleMarker([LAT,LON],{radius:6,color:'#fff',fillColor:'#2563eb',fillOpacity:1,weight:2})
+    .addTo(_mradMap)
+    .bindTooltip('Rečica ob Savinji',{permanent:true,direction:'right',offset:[8,0],className:'mrad-label'});
 
   await refreshMeteorecRadar();
   // Nov posnetek je vsakih 5 minut; ko je zavihek skrit, ne osvežujemo.
