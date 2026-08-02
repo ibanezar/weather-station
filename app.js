@@ -5518,7 +5518,7 @@ function _yrIcon(sym){
 }
 
 async function fetchAIForecast(force=false){
-  const CACHE_KEY='aifc-v8',CACHE_TTL=30*60*1000;
+  const CACHE_KEY='aifc-v9',CACHE_TTL=30*60*1000;
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -5550,11 +5550,14 @@ function _renderAIFC(data){
   const metaEl=document.getElementById('aifc-meta');
   const srcBadge=document.getElementById('aifc-src-badge');
   const SL_DS=['ned','pon','tor','sre','čet','pet','sob'];
-  if(srcBadge&&data.source){srcBadge.textContent=data.source;}
+  // Značka opisuje vir vodilnega odstavka — ta je zdaj vedno lokalni yr.no.
+  // ARSO napoved za Slovenijo ima svojo oznako v #aifc-arso.
+  if(srcBadge){srcBadge.textContent=data.source||'yr.no';srcBadge.className='aifc-badge yr';}
   if(textEl){
-    if(data.text){
+    const lead=data.local||data.text;
+    if(lead){
       textEl.className='aifc-text';
-      textEl.textContent=data.text;
+      textEl.textContent=lead;
     }else if(data.summaries?.length){
       const s=data.summaries;
       const lines=[];
@@ -5566,20 +5569,41 @@ function _renderAIFC(data){
   }
   if(daysEl&&data.summaries?.length){
     const today=_localDateStr(new Date());
-    daysEl.innerHTML=data.summaries.slice(0,7).map((s,i)=>{
+    const tomorrow=_localDateStr(new Date(Date.now()+864e5));
+    daysEl.innerHTML=data.summaries.slice(0,7).map(s=>{
       const dt=new Date(s.date+'T12:00:00');
-      const lbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
+      // Oznaka iz datuma, ne iz indeksa: tik pred polnočjo yr.no vrne kot prvi
+      // dan že jutrišnjega, in "Danes" bi pristalo na napačni ploščici.
+      // s.partial = dnevni vrh je že mimo, zato max ni več smiseln in
+      // ploščica pokaže samo nocojšnji minimum.
+      const lbl=s.partial?'Nocoj':s.date===today?'Danes':s.date===tomorrow?'Jutri':SL_DS[dt.getDay()];
+      const temps=s.partial
+        ?`<span class="aifc-day-tlo">${s.tmin!=null?Math.round(s.tmin)+'°':'—'}</span>`
+        :`${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span>`;
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
 <div class="aifc-day-icon">${_yrImg(s.symbol,28)}</div>
-<div class="aifc-day-t">${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span></div>
+<div class="aifc-day-t">${temps}</div>
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 </div>`;
     }).join('');
   }
+  const arsoEl=document.getElementById('aifc-arso');
+  if(arsoEl){
+    const txtEl=document.getElementById('aifc-arso-txt');
+    const lblEl=document.getElementById('aifc-arso-lbl');
+    if(data.arso){
+      if(lblEl)lblEl.textContent=data.arsoTitle||'ARSO';
+      if(txtEl)txtEl.textContent=data.arso;
+      arsoEl.hidden=false;
+    }else{
+      arsoEl.hidden=true;
+    }
+  }
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
-    metaEl.textContent=(data.source||'yr.no')+(t?' · '+t:'');
+    const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
+    metaEl.textContent=src+(t?' · '+t:'');
   }
 }
 

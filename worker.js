@@ -60,24 +60,71 @@ const ARSO_TEXT_ENDPOINTS = [
   "https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_SI_SAVINJSKA_latest.xml",
 ];
 
+// Sekcije, ki NISO napoved in ne smejo nikoli v napovedno kartico.
+// "OPOZORILO" (oz. warning_si) je isto besedilo, kot že teče v traku na vrhu
+// strani — če pride sem, kartica "Napoved za Rečico" podvaja opozorilo.
+const ARSO_SKIP_SECTIONS = /^(OPOZORILO|WARNING)/i;
+
+const _arsoClean = s => (s || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const _arsoIsProse = s => s.length > 45 && /\s/.test(s) && /[a-zčšžćđA-ZČŠŽ]/.test(s);
+
+// `para` je pri ARSO enkrat niz, enkrat seznam nizov, enkrat seznam objektov
+// z lastnim `para` (glej fcast_si_hint) — vse zvedi na seznam čistih nizov.
+function _arsoParas(para) {
+  const out = [];
+  const take = v => {
+    if (typeof v === "string") { const s = _arsoClean(v); if (s) out.push(s); }
+    else if (Array.isArray(v)) v.forEach(take);
+    else if (v && typeof v === "object" && v.para !== undefined) take(v.para);
+  };
+  take(para);
+  return out;
+}
+
+// Namensko branje fcast_si_text.section[] iz /api/1.0/nonlocation/.
+// Sekcije z nepraznim `title` začnejo novo skupino, sekcije s praznim `title`
+// so nadaljevanje prejšnje — tako je "NAPOVED ZA SLOVENIJO" sestavljena iz
+// section[0] (nocoj) in section[1] (jutri).
+function _arsoFcastSections(parsed) {
+  const sections = parsed?.fcast_si_text?.section;
+  if (!Array.isArray(sections)) return {};
+  const groups = {};
+  let current = null;
+  for (const sec of sections) {
+    const title = _arsoClean(sec?.title).toUpperCase();
+    if (title) { current = title; if (!groups[current]) groups[current] = []; }
+    if (!current) continue;
+    groups[current].push(..._arsoParas(sec?.para).filter(_arsoIsProse));
+  }
+  for (const k of Object.keys(groups)) if (!groups[k].length) delete groups[k];
+  return groups;
+}
+
 function _arsoExtractProse(body, ct) {
   const proses = [];
-  const isProse = s => s.length > 45 && /\s/.test(s) && /[a-zčšžćđA-ZČŠŽ]/.test(s);
   const push = s => {
-    s = (s || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    if (isProse(s)) proses.push(s);
+    s = _arsoClean(s);
+    if (_arsoIsProse(s)) proses.push(s);
   };
   let parsed = null;
   if (/json/i.test(ct) || /^\s*[\{\[]/.test(body)) {
     try { parsed = JSON.parse(body); } catch (_) {}
   }
   if (parsed) {
-    const walk = v => {
+    // Varovalka: warning_si stoji v odgovoru PRED fcast_si_text, zato bi ga
+    // slepi obhod vedno pobral prvega. Napovedi ne sme izriniti opozorilo.
+    const walk = (v, key) => {
+      if (key === "warning_si") return;
       if (typeof v === "string") push(v);
-      else if (Array.isArray(v)) v.forEach(walk);
-      else if (v && typeof v === "object") Object.values(v).forEach(walk);
+      else if (Array.isArray(v)) v.forEach(x => walk(x, key));
+      else if (v && typeof v === "object") {
+        for (const [k, x] of Object.entries(v)) {
+          if (k === "title" && ARSO_SKIP_SECTIONS.test(_arsoClean(x))) return;
+        }
+        for (const [k, x] of Object.entries(v)) walk(x, k);
+      }
     };
-    walk(parsed);
+    walk(parsed, null);
   } else {
     body.replace(/<[^>]+>/g, "\n").split(/\n+/).forEach(push);
   }
@@ -100,21 +147,46 @@ async function _arsoFetch(url) {
   } finally { clearTimeout(to); }
 }
 
+const ARSO_TEXT_LIMIT = 600;
+
+function _arsoTrim(t) {
+  return t.length > ARSO_TEXT_LIMIT ? t.slice(0, ARSO_TEXT_LIMIT - 20).replace(/\s+\S*$/, "") + "…" : t;
+}
+
 async function fetchArsoText() {
   for (const url of ARSO_TEXT_ENDPOINTS) {
     try {
       const r = await _arsoFetch(url);
       if (!r.ok) continue;
       const ct = r.headers.get("content-type") || "";
-      const proses = _arsoExtractProse(await r.text(), ct);
+      const body = await r.text();
+
+      // 1) Strukturirana pot: iz JSON vira preberi točno napovedne sekcije.
+      if (/json/i.test(ct) || /^\s*[\{\[]/.test(body)) {
+        let parsed = null;
+        try { parsed = JSON.parse(body); } catch (_) {}
+        const groups = _arsoFcastSections(parsed);
+        const fcast = groups["NAPOVED ZA SLOVENIJO"] || [];
+        if (fcast.length) {
+          let t = fcast.join(" ");
+          // Obete pripni le, če se skupaj še prilegajo — sicer raje sama napoved.
+          const outlook = groups["OBETI"] || [];
+          if (outlook.length) {
+            const withOutlook = t + " " + outlook.join(" ");
+            if (withOutlook.length <= ARSO_TEXT_LIMIT) t = withOutlook;
+          }
+          return { text: _arsoTrim(t), title: "Napoved za Slovenijo", source: "ARSO", url };
+        }
+      }
+
+      // 2) Rezerva za XML vire brez sekcijske sheme.
+      const proses = _arsoExtractProse(body, ct);
       if (proses.length) {
-        let t = proses.slice(0, 2).join(" ");
-        if (t.length > 600) t = t.slice(0, 580).replace(/\s+\S*$/, "") + "…";
-        return { text: t, source: "ARSO", url };
+        return { text: _arsoTrim(proses.slice(0, 2).join(" ")), title: "ARSO", source: "ARSO", url };
       }
     } catch (_) {}
   }
-  return { text: null, source: null, url: null };
+  return { text: null, title: null, source: null, url: null };
 }
 
 // Standard ARSO warning descriptions per type + severity
@@ -2121,7 +2193,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const local = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
           const date = local.toISOString().slice(0, 10);
           const hour = local.getUTCHours();
-          if (!days[date]) days[date] = { temps: [], winds: [], rain: 0, syms: [], noonSym: null };
+          if (!days[date]) days[date] = { temps: [], winds: [], rain: 0, syms: [], noonSym: null, firstHour: hour };
           const det = ts.data.instant.details;
           days[date].temps.push(det.air_temperature);
           days[date].winds.push(det.wind_speed * 3.6);
@@ -2149,6 +2221,29 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         };
 
         const todayKey = new Date(Date.now() + ljOff * 3600000).toISOString().slice(0, 10);
+        const tomorrowKey = new Date(Date.now() + ljOff * 3600000 + 86400000).toISOString().slice(0, 10);
+
+        // yr.no vrne časovno vrsto od TRENUTNE ure naprej, zato je "današnji"
+        // max zvečer le max preostalih ur dneva (ob 22h npr. 26 °C na dan, ko
+        // je postaja izmerila 36,8 °C). Ko je dnevni vrh mimo, ploščice ne
+        // označimo več kot "danes", ampak kot "nocoj" — in takrat potrebujemo
+        // pravi nočni minimum, ki sega čez polnoč do jutranjih ur.
+        const todayFirstHour = days[todayKey]?.firstHour ?? 0;
+        const partialToday = todayFirstHour >= 16;
+        let nightMin = null;
+        if (partialToday) {
+          const nightTemps = [];
+          for (const ts of timeseries) {
+            const local = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
+            const date = local.toISOString().slice(0, 10);
+            const hour = local.getUTCHours();
+            if (date === todayKey || (date === tomorrowKey && hour <= 8)) {
+              nightTemps.push(ts.data.instant.details.air_temperature);
+            }
+          }
+          if (nightTemps.length) nightMin = Math.round(Math.min(...nightTemps));
+        }
+
         const summaries = Object.entries(days)
           .filter(([d]) => d >= todayKey)
           .sort(([a],[b]) => a < b ? -1 : 1)
@@ -2157,11 +2252,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             const dt = new Date(date + 'T12:00:00');
             const rawSym = d.noonSym || d.syms[Math.floor(d.syms.length/2)] || 'partlycloudy_day';
             const isToday = date === todayKey;
+            const isPartial = isToday && partialToday;
             return {
               date,
-              dayName: isToday ? 'danes' : SL_DAYS[dt.getDay()],
-              tmax: d.temps.length ? Math.round(Math.max(...d.temps)) : null,
-              tmin: d.temps.length ? Math.round(Math.min(...d.temps)) : null,
+              dayName: isPartial ? 'nocoj' : isToday ? 'danes' : SL_DAYS[dt.getDay()],
+              // Pri nepopolnem dnevu je max zavajajoč — vrh je že mimo.
+              tmax: isPartial ? null : d.temps.length ? Math.round(Math.max(...d.temps)) : null,
+              tmin: isPartial ? nightMin : d.temps.length ? Math.round(Math.min(...d.temps)) : null,
+              partial: isPartial || undefined,
               windMax: d.winds.length ? Math.round(Math.max(...d.winds)) : null,
               rain: Math.round(d.rain * 10) / 10,
               symbol: rawSym,        // raw yr.no code (frontend maps to emoji)
@@ -2171,41 +2269,51 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
         if (!summaries.length) throw new Error("yr.no: no data");
 
-        // 1) ARSO official Slovenian text forecast (tried via fetchArsoText)
-        let text = null, source = "yr.no";
-        if (arsoTry.status === "fulfilled" && arsoTry.value?.text) {
-          text = arsoTry.value.text;
-          source = "ARSO";
-        }
-
-        // 2) Fallback: build a complete description from yr.no summaries
-        if (!text) {
-          const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-          const parts = [];
-          const s0 = summaries[0];
-          if (s0) {
+        // 1) Lokalno besedilo za Rečico iz yr.no — to je vodilni odstavek
+        // kartice. Zavihek se imenuje "Lokalna napoved", zato mora obiskovalec
+        // najprej prebrati nekaj o Rečici, ne o Sloveniji.
+        const parts = [];
+        const s0 = summaries[0];
+        if (s0) {
+          if (s0.partial) {
+            let p = `Nocoj bo na Rečici ob Savinji ${symLabel(s0.symbol)}`;
+            if (s0.tmin != null) p += `, najnižja temperatura okoli ${s0.tmin} °C`;
+            if (s0.rain >= 0.5) p += `, skupaj okoli ${s0.rain} mm padavin`;
+            parts.push(p + ".");
+          } else {
             let p = `Danes bo na Rečici ob Savinji ${symLabel(s0.symbol)}, s temperaturo med ${s0.tmin} in ${s0.tmax} °C`;
             if (s0.rain >= 0.5) p += `, skupaj okoli ${s0.rain} mm padavin`;
             if (s0.windMax >= 30) p += `, veter v sunkih do ${s0.windMax} km/h`;
             parts.push(p + ".");
           }
-          const s1 = summaries[1];
-          if (s1) {
-            let p = `Jutri ${symLabel(s1.symbol)}, ${s1.tmin}–${s1.tmax} °C`;
-            if (s1.rain >= 0.5) p += `, dež ${s1.rain} mm`;
-            parts.push(p + ".");
-          }
-          // Brief outlook for the rest of the period
-          const rest = summaries.slice(2, 5);
-          if (rest.length) {
-            const trend = rest.map(s => `${s.dayName} ${symLabel(s.symbol)} (${s.tmax}°)`).join(", ");
-            parts.push(`V nadaljevanju: ${trend}.`);
-          }
-          text = parts.join(" ");
-          source = "yr.no";
+        }
+        const s1 = summaries[1];
+        if (s1) {
+          let p = `Jutri ${symLabel(s1.symbol)}, ${s1.tmin}–${s1.tmax} °C`;
+          if (s1.rain >= 0.5) p += `, dež ${s1.rain} mm`;
+          parts.push(p + ".");
+        }
+        // Brief outlook for the rest of the period
+        const rest = summaries.slice(2, 5);
+        if (rest.length) {
+          const trend = rest.map(s => `${s.dayName} ${symLabel(s.symbol)} (${s.tmax}°)`).join(", ");
+          parts.push(`V nadaljevanju: ${trend}.`);
+        }
+        const local = parts.join(" ");
+
+        // 2) Uradna ARSO napoved za Slovenijo — ločeno polje, da ne izrine
+        // lokalnega besedila. Opozorila fetchArsoText() ne vrača; ta so v
+        // traku na vrhu strani.
+        let arso = null, arsoTitle = null;
+        if (arsoTry.status === "fulfilled" && arsoTry.value?.text) {
+          arso = arsoTry.value.text;
+          arsoTitle = arsoTry.value.title || "ARSO";
         }
 
-        return new Response(JSON.stringify({ summaries, text, source }), {
+        return new Response(JSON.stringify({
+          summaries, local, arso, arsoTitle, source: "yr.no",
+          text: local,   // združljivost s starimi predpomnjenimi odjemalci
+        }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
         });
       }
@@ -2224,6 +2332,17 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             rec.bodyLength = body.length;
             rec.bodyHead = body.slice(0, 700);
             rec.extracted = _arsoExtractProse(body, rec.contentType).slice(0, 3);
+            // Naslovi sekcij, ki jih vidi _arsoFcastSections(). Če ARSO
+            // preimenuje "NAPOVED ZA SLOVENIJO", se tu takoj vidi, zakaj je
+            // napovedna kartica ostala prazna.
+            if (/json/i.test(rec.contentType) || /^\s*[\{\[]/.test(body)) {
+              try {
+                const groups = _arsoFcastSections(JSON.parse(body));
+                rec.sections = Object.fromEntries(
+                  Object.entries(groups).map(([k, v]) => [k, { paras: v.length, head: (v[0] || "").slice(0, 120) }])
+                );
+              } catch (e) { rec.sectionsError = String(e); }
+            }
           } catch (e) { rec.error = String(e); }
           out.push(rec);
         }
