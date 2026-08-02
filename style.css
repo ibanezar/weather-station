@@ -2113,6 +2113,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mos-pop{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
 .mos-note{font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
 @media(max-width:380px){.mos-grid{grid-template-columns:repeat(2,1fr)}.mos-card:nth-child(n+3){display:none}}
+
+/* MTR sparkline: dva majhna grafa (Tmax/Tmin), polna črta = MTR, črtkana = Open-Meteo */
+.mos-spark-row{display:flex;gap:.9rem;margin-bottom:.7rem}
+.mos-spark-col{flex:1;min-width:0}
+.mos-spark-lbl{font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+.mos-spark-col svg{width:100%;height:auto;display:block}
+@media(max-width:420px){.mos-spark-row{gap:.5rem}}
 .daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
 .daily-fc-main{display:flex;gap:1rem;align-items:center}
 .daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}
@@ -2265,6 +2272,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .aifc-badge{font-size:.58rem;font-weight:700;padding:.16rem .4rem;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
 .aifc-badge.yr{background:rgba(96,165,250,.15);color:#60a5fa}
 .aifc-badge.ai{background:rgba(167,139,250,.15);color:#a78bfa}
+.aifc-badge.mtr{background:rgba(52,211,153,.15);color:#34d399}
 .aifc-text{font-size:.88rem;line-height:1.78;color:var(--text);min-height:2.5rem}
 .aifc-text.italic{font-style:italic}
 .aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}

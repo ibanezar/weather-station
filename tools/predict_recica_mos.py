@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/predict_recica_mos.py — dnevna napoved lastnega modela za Rečico.
+tools/predict_recica_mos.py — dnevna napoved MTR, lastnega modela za Rečico.
 
 Vzame koeficiente iz model/recica-mos.json (nauči jih tools/train_recica_mos.py),
 pobere živo napoved Open-Meteo in jo prevede v napoved za dno doline: Tmax, Tmin
@@ -146,9 +146,9 @@ def main():
         "trained_at": model.get("trained_at"),
         "train_range": model.get("train_range"),
         "station": model.get("station"),
-        "note": ("Poskusni lokalni model (MOS): Open-Meteo kot vhod, popravek za dno "
-                 "doline naučen na meritvah postaje. Količina padavin je surova "
-                 "vrednost Open-Meteo — te model ne popravlja."),
+        "note": ("MTR (Meteorec) — poskusni lokalni model (MOS): Open-Meteo kot vhod, "
+                 "popravek za dno doline naučen na meritvah postaje. Količina padavin je "
+                 "surova vrednost Open-Meteo — te MTR ne popravlja."),
         "days": days,
     }
 

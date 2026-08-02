@@ -5676,10 +5676,13 @@ async function fetchMosForecast(){
     if(!days.length)throw new Error('brez dni');
 
     const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
+    const dayLabel=d=>{
+      const date=new Date(d.date+'T12:00:00');
+      return d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
+    };
     grid.innerHTML='';
     days.forEach(d=>{
-      const date=new Date(d.date+'T12:00:00');
-      const lbl=d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
+      const lbl=dayLabel(d);
       const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
       const dmax=Number.isFinite(d.d_tmax)?d.d_tmax:null;
       const dmin=Number.isFinite(d.d_tmin)?d.d_tmin:null;
@@ -5689,23 +5692,30 @@ async function fetchMosForecast(){
       card.className='mos-card';
       const dec=v=>fmt(v).replace('.',',');
       card.title='Open-Meteo napoveduje '+dec(d.om_tmax)+' / '+dec(d.om_tmin)+' °C'
-        +(dmax!==null?' · naš popravek '+diff(dmax)+' / '+diff(dmin)+' °C':'');
+        +(dmax!==null?' · popravek MTR '+diff(dmax)+' / '+diff(dmin)+' °C':'');
       card.innerHTML=
         '<div class="mos-lbl">'+lbl+'</div>'+
         '<div class="mos-temp"><span class="mos-th">'+Math.round(d.tmax)+'°</span>'+
         '<span style="color:var(--muted);font-size:.74rem">/</span>'+
         '<span class="mos-tl">'+Math.round(d.tmin)+'°</span></div>'+
-        (dmax!==null?'<div class="mos-diff">proti modelu '+diff(dmax)+' / '+diff(dmin)+' °C</div>':'')+
+        (dmax!==null?'<div class="mos-diff">proti Open-Meteu '+diff(dmax)+' / '+diff(dmin)+' °C</div>':'')+
         (pop!==null?'<div class="mos-pop">🌧 '+pop+' % verj. dežja</div>':'');
       grid.appendChild(card);
     });
 
+    drawMosSpark(days,days.map(dayLabel));
+
+    const badge=document.getElementById('mos-badge');
+    if(badge){
+      const major=(data.model_version||'').split('.')[0];
+      badge.textContent=major?'v'+major:'';
+    }
     const note=document.getElementById('mos-note');
     if(note){
       const r=data.train_range||{};
-      note.textContent='Popravek je naučen na meritvah postaje'
+      note.textContent='MTR (Meteorec) je poskusni model za to dolino: Open-Meteo kot vhod, popravek naučen na meritvah postaje'
         +(r.from&&r.to?' ('+r.from+' → '+r.to+')':'')
-        +'. Količine padavin model ne popravlja — za to ostaja Open-Meteo.';
+        +'. Količine padavin MTR ne popravlja — za to ostaja Open-Meteo.';
     }
     const upd=document.getElementById('mos-updated');
     if(upd&&data.generated_at){
@@ -5714,11 +5724,61 @@ async function fetchMosForecast(){
         +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     }
   }catch(e){
-    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved našega modela trenutno ni na voljo.</div>';
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved MTR trenutno ni na voljo.</div>';
+    const spark=document.getElementById('mos-spark-row');
+    if(spark)spark.innerHTML='';
     const upd=document.getElementById('mos-updated');
     if(upd)upd.textContent='ni na voljo';
     console.warn('MOS:',e);
   }
+}
+
+/* Dva majhna sparkline grafa (Tmax, Tmin): polna črta MTR, črtkana Open-Meteo.
+   Samo 3 točke — smoothPath ni potreben, navadna lomljena črta je jasnejša. */
+function drawMosSpark(days,labels){
+  const row=document.getElementById('mos-spark-row');
+  if(!row)return;
+  row.innerHTML='';
+  if(days.length<2)return; // ena sama točka ni graf
+
+  const VW=140,VH=54,pad={t:6,r:4,b:14,l:4};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const xS=i=>pad.l+(days.length===1?cw/2:i/(days.length-1)*cw);
+
+  [{key:'tmax',omKey:'om_tmax',lbl:'Tmax',color:'#f87171'},
+   {key:'tmin',omKey:'om_tmin',lbl:'Tmin',color:CC.tempLine}].forEach(spec=>{
+    const vals=days.map(d=>d[spec.key]).concat(days.map(d=>d[spec.omKey])).filter(Number.isFinite);
+    if(!vals.length)return;
+    const lo=Math.min(...vals),hi=Math.max(...vals);
+    const span=Math.max(hi-lo,1);
+    const yS=v=>pad.t+(1-(v-lo)/span)*ch;
+
+    const col=document.createElement('div');
+    col.className='mos-spark-col';
+    col.innerHTML='<div class="mos-spark-lbl">'+spec.lbl+'</div>';
+
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+    const mtrPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.key])}));
+    const omPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.omKey])}));
+    const toLine=pts=>'M '+pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ');
+
+    mkSVG(svg,'path',{d:toLine(omPts),fill:'none',stroke:spec.color,'stroke-width':'1.5',
+      'stroke-dasharray':'3,2',opacity:'.45'});
+    mkSVG(svg,'path',{d:toLine(mtrPts),fill:'none',stroke:spec.color,'stroke-width':'2',
+      'stroke-linecap':'round'});
+    mtrPts.forEach(p=>mkSVG(svg,'circle',{cx:p.x,cy:p.y,r:'2',fill:spec.color}));
+    labels.forEach((lbl,i)=>{
+      const t=mkSVG(svg,'text',{x:xS(i),y:VH-2,'text-anchor':i===0?'start':(i===labels.length-1?'end':'middle'),
+        'font-size':'7','font-family':'JetBrains Mono,monospace',fill:CC.label});
+      t.textContent=lbl.replace('Jutri','jut').split(' ')[0];
+    });
+
+    col.appendChild(svg);
+    row.appendChild(col);
+  });
 }
 
 function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}
