@@ -1,61 +1,50 @@
 {
-  "date": "2026-08-01",
-  "created": "2026-08-01T06:16:46.385328+00:00",
+  "date": "2026-08-02",
+  "created": "2026-08-02T06:20:50.719083+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročinski val nad Zgornjo Savinjsko dolino: danes do 34,9 °C, konec tedna še više",
-      "teaser": "Postaja IREICA1 v Rečici ob Savinji napoveduje za današnji dan vrhunec pri 34,9 °C, jutri pa se ohladi le rahlo na 34,0 °C. Podatki kažejo, da se vročina v naslednjih dneh še stopnjuje, saj napoved za 3. in 4. avgust kaže že 36,1 in 36,9 °C, ob tem pa dežja ni na vidiku.",
+      "title": "Vročinski val se krepi: danes 33,8 °C, do torka že 37,1 °C",
+      "teaser": "Napoved za Zgornjo Savinjsko dolino kaže postopno stopnjevanje vročine – od 33,8 °C danes do 37,1 °C v torek, 5. avgusta. Padavin ni na vidiku niti en dan, kar pomeni, da se bo vročina le še kopičila. Poglejmo, kako se bodo razmere razvijale dan za dnem.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (34,9 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (33,8 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 34.9,
+          "value": 33.8,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "temperaturni-trend",
-      "title": "Temperaturni trend v Savinjski dolini: proti novim vrhuncem brez padavin",
-      "teaser": "Štiridnevna napoved za postajo IREICA1 kaže jasen naraščajoč trend najvišjih dnevnih temperatur, od 34,9 °C danes do 36,9 °C v ponedeljek, medtem ko jutranje minimalne temperature ostajajo med 17,9 in 19,5 °C. Analiziramo, kaj to pomeni za občutek vročine v Zgornji Savinjski dolini in zakaj padavin v tem obdobju ni pričakovati.",
+      "id": "tropske-noci",
+      "title": "Kdaj pade temperatura pod 20 °C? Nočno ohlajanje kljub vročinskemu valu",
+      "teaser": "Kljub visokim dnevnim vrednostim minimalne temperature v prihodnjih dneh ostajajo med 17,8 in 18,9 °C, kar pomeni, da tropskih noči (nad 20 °C) po napovedi za zdaj ne bo. Preverimo, zakaj je nočno ohlajanje pod 20 °C pomembno za spanje in počutje ter kako dolgo bo to še veljalo.",
       "topic": {
-        "id": "temperaturni-trend",
+        "id": "tropske-noci",
         "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
           6,
           7,
-          8,
-          9,
-          10,
-          11,
-          12
+          8
         ],
-        "tag": "trend",
-        "brief": "Kam gre temperaturni trend zadnjih dni v primerjavi s sezonskim povprečjem.",
+        "tag": "tropska-noc",
+        "brief": "Tropske noči zadnjih dni: ali temperatura ponoči pade pod 20 °C in kaj to pomeni za spanje/zdravje.",
         "seo_keywords": [
-          "temperaturni trend Savinjska dolina",
-          "vreme Rečica ob Savinji",
-          "postaja IREICA1"
+          "tropska noč Savinjska dolina",
+          "vroče noči poletje",
+          "kdaj se ohladi ponoči"
         ]
       }
     },
     {
-      "id": "veter-in-tlak",
-      "title": "Zračni tlak 1015 hPa in brezvetrje: kaj to pove o vremenu v Zgornji Savinjski dolini",
-      "teaser": "Na postaji IREICA1 trenutno beležimo relativni zračni tlak 1015,4 hPa in popolno brezvetrje, kar je tipičen znak stabilnega vremena. Pogledamo, kako se bo veter po napovedi krepil proti koncu tedna, ko naj bi sunki dosegli tudi 12,3 km/h, in kaj to sporoča o obstojnosti trenutnega vročinskega vzorca.",
+      "id": "pozarna-ogrozenost",
+      "title": "Suša brez konca: kakšna je požarna ogroženost v Zgornji Savinjski dolini",
+      "teaser": "Štiridnevna napoved ne prinaša niti kapljice dežja, temperature pa se bodo vzpenjale proti 37 °C, kar dodatno suši tla in vegetacijo. Ob trenutni vlažnosti zraka 78 % in šibkem vetru analiziramo, kako se razmere odražajo na tveganju za požare v naravi.",
       "topic": {
-        "id": "veter-in-tlak",
+        "id": "pozarna-ogrozenost",
         "sezona": [
-          1,
-          2,
           3,
           4,
           5,
@@ -63,16 +52,14 @@
           7,
           8,
           9,
-          10,
-          11,
-          12
+          10
         ],
-        "tag": "pritisk",
-        "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
+        "tag": "pozarna-ogrozenost",
+        "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
         "seo_keywords": [
-          "zračni tlak napoved vreme",
-          "veter Zgornja Savinjska dolina",
-          "sprememba vremena znaki"
+          "požarna ogroženost Zgornja Savinjska dolina",
+          "nevarnost požara v naravi",
+          "suša in gozdni požari"
         ]
       }
     }
