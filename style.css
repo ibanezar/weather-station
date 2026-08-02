@@ -140,7 +140,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   transition:opacity .5s;
   max-width:300px;line-height:1.4;
 }
-.theme-btn{position:fixed;top:1rem;right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s;line-height:1}
+/* --ticker-h nastavlja _syncAlertBarHeight() v app.js; brez tega gumb sedi
+   čez gumb za zapiranje ARSO traku (.alerts-wrap ima nižji z-index). */
+.theme-btn{position:fixed;top:calc(1rem + var(--ticker-h,0px));right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s,top .2s;line-height:1}
 .theme-btn:hover{box-shadow:var(--card-shadow-h);transform:scale(1.08)}
 .theme-btn:active{transform:scale(.93)}
 
@@ -2268,15 +2270,27 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}
 @keyframes aifc-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:1rem}
-@media(max-width:620px){.aifc-days{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:380px){.aifc-days{grid-template-columns:repeat(3,1fr)}}
-.aifc-day{background:var(--bg);border-radius:11px;padding:.7rem .35rem;text-align:center}
-.aifc-day.today{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3)}
+.aifc-day{background:var(--bg);border-radius:11px;padding:.7rem .35rem;text-align:center;border:1px solid transparent}
+.aifc-day.today{background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3)}
 .aifc-day-name{font-size:.66rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.28rem}
 .aifc-day-icon{font-size:1.65rem;line-height:1.25}
 .aifc-day-t{font-size:.86rem;font-weight:800;white-space:nowrap;margin-top:.14rem}
 .aifc-day-tlo{font-weight:400;color:var(--muted)}
 .aifc-day-rain{font-size:.64rem;color:#60a5fa;margin-top:.14rem}
+/* 7 dni se v mrežo na telefonu ne izide — pri 3 stolpcih ostane zadnja
+   ploščica sama v vrsti. Zato vodoravni drsni trak. Drsi samo trak: telo
+   strani se vodoravno ne premika (overscroll-behavior-x:contain). */
+@media(max-width:620px){
+  .aifc-days{display:flex;grid-template-columns:none;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.2rem}
+  .aifc-days::-webkit-scrollbar{display:none}
+  .aifc-day{flex:0 0 calc((100% - 1.5rem)/4.2);min-width:74px;scroll-snap-align:start}
+}
+/* Uradna ARSO napoved za Slovenijo — vizualno podrejena lokalnemu besedilu
+   nad njo, da je jasno, kaj velja za Rečico in kaj za državo. */
+.aifc-arso{margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--card-border)}
+.aifc-arso[hidden]{display:none}
+.aifc-arso-lbl{display:inline-block;font-size:.58rem;font-weight:700;padding:.16rem .4rem;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;background:rgba(148,163,184,.16);color:var(--muted);margin-bottom:.4rem}
+.aifc-arso-txt{font-size:.78rem;line-height:1.7;color:var(--muted)}
 .aifc-meta{font-size:.58rem;color:var(--muted);margin-top:.6rem;text-align:right}
 .aifc-refresh{background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--muted);padding:.15rem .3rem;border-radius:4px;transition:color .15s}
 .aifc-refresh:hover{color:var(--text)}
