@@ -18,6 +18,46 @@ SITE = "https://meteorec.si"
 # datum objave: privzeto današnji (UTC), z možnostjo prepisa prek POST_DATE
 TODAY = os.environ.get("POST_DATE") or datetime.date.today().isoformat()
 
+# Zgornja meja za <title>: nad ~60 znaki ga Google odreže, Semrush pa javi
+# opozorilo "too much text within the title tags".
+TITLE_MAX = 60
+
+def seo_title(title, suffix=" | Meteorec"):
+    """Zgradi vsebino <title> tako, da ostane znotraj TITLE_MAX znakov.
+
+    Naslov članka (h1, og:title, JSON-LD) pusti pri miru -- krajša se samo
+    title tag. Vzame najbogatejšo različico naslova, ki se še prilega, in ji
+    doda pripono le, če po tem ostane znotraj meje. Vsebina naslova ima torej
+    prednost pred blagovno pripono.
+    """
+    title = " ".join(title.split())
+
+    # Naslovi so pogosto "Glavni del: podnaslov" ali "Glavni del — podnaslov",
+    # pogosto s pojasnilom v oklepaju na koncu. Oboje je smiselno odrezati.
+    variants = [title]
+    no_paren = re.sub(r"\s*\([^()]*\)\s*$", "", title)
+    if no_paren and no_paren != title:
+        variants.append(no_paren)
+    for base in list(variants):
+        for sep in (": ", " — ", " – "):
+            head = base.split(sep)[0]
+            if head != base:
+                variants.append(head)
+
+    # Od najbogatejše (najdaljše) proti najkrajši -- prva, ki se prilega.
+    for v in sorted(set(variants), key=len, reverse=True):
+        if len(v) <= TITLE_MAX:
+            return v + suffix if len(v + suffix) <= TITLE_MAX else v
+
+    # Nobena naravna različica ne gre skozi -- odreži na besedni meji.
+    # Če bi odrez pustil odprt oklepaj, ga odrežemo vred.
+    cut = title[:TITLE_MAX - 1]
+    if " " in cut:
+        cut = cut[:cut.rindex(" ")]
+    if cut.count("(") > cut.count(")"):
+        cut = cut[:cut.rindex("(")]
+    return cut.rstrip(" ,;:-—–") + "…"
+
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
 MES_GEN = {1:"januarja",2:"februarja",3:"marca",4:"aprila",5:"maja",6:"junija",
@@ -138,7 +178,7 @@ def build_html(s):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec, Rečica ob Savinji</title>
+<title>{seo_title(title, " | Meteorec, Rečica ob Savinji")}</title>
 <link rel="canonical" href="{url}">
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">

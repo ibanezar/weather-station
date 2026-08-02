@@ -18,7 +18,7 @@ Uporaba:
 import json, os, shutil, sys, datetime, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title
 
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 STATE_FILE = os.path.join(ROOT, "tools", ".storm_watch_state.json")
@@ -169,7 +169,7 @@ def build_html(trigger, now_utc):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec, Rečica ob Savinji</title>
+<title>{seo_title(title, " | Meteorec, Rečica ob Savinji")}</title>
 <link rel="canonical" href="{url}">
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">

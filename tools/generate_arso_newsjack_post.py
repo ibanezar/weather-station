@@ -25,7 +25,7 @@ Usage:
 import datetime, hashlib, json, os, re, shutil, sys, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate  # noqa: E402
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title  # noqa: E402
 
 try:
     from zoneinfo import ZoneInfo
@@ -344,7 +344,7 @@ def build_post(alerts, current, now_utc, issued=None):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec, Rečica ob Savinji</title>
+<title>{seo_title(title, " | Meteorec, Rečica ob Savinji")}</title>
 <link rel="canonical" href="{url}">
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">
