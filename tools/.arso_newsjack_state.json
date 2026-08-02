@@ -31,7 +31,7 @@
       "types": [
         "WarningForestFire"
       ],
-      "validEnd": "2026-08-02T21:59:00+00:00",
+      "validEnd": "2026-08-03T21:59:00+00:00",
       "resolved": false,
       "publishedAt": "2026-07-19T06:21:54.851639+00:00"
     },
@@ -58,7 +58,7 @@
       "types": [
         "WarningTx"
       ],
-      "validEnd": "2026-08-02T22:59:00+00:00",
+      "validEnd": "2026-08-03T21:59:00+00:00",
       "resolved": true,
       "publishedAt": "2026-07-27T07:30:47.755377+00:00"
     }
