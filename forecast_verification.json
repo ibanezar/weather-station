@@ -287,5 +287,29 @@
       "err_tmin": 1.1,
       "err_precip": 0.0
     }
+  },
+  "2026-08-01": {
+    "date": "2026-08-01",
+    "made_at": "2026-07-31",
+    "actual": {
+      "tmax": 36.8,
+      "tmin": 15.8,
+      "precip": 0.0
+    },
+    "arso": {
+      "tmax": 32,
+      "tmin": 22,
+      "loc": "Ljubno ob Savinji",
+      "err_tmax": 4.8,
+      "err_tmin": 6.2
+    },
+    "open_meteo": {
+      "tmax": 35.7,
+      "tmin": 17.6,
+      "precip": 0.0,
+      "err_tmax": 1.1,
+      "err_tmin": 1.8,
+      "err_precip": 0.0
+    }
   }
 }
