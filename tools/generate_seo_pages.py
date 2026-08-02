@@ -24,6 +24,7 @@ Usage:
 """
 import json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
+from generate_monthly_post import seo_title
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -345,7 +346,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
 <meta charset="UTF-8">
 {GA}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec</title>
+<title>{seo_title(title)}</title>
 <link rel="canonical" href="{full_url}">
 <link rel="alternate" hreflang="sl" href="{full_url}">
 <link rel="alternate" hreflang="x-default" href="{full_url}">

@@ -43,6 +43,24 @@ vezaj namesto pomišljaja).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
 
+### `<title>` ne sme čez 60 znakov
+
+Google daljše naslove odreže, Semrush javi »too much text within the title
+tags«. Zato gre vsak `<title>` skozi `seo_title()` iz
+`tools/generate_monthly_post.py` — **novi predlogi in generatorji naj ga
+uporabijo enako** (`<title>{seo_title(title)}</title>`, drugi argument je
+pripona, npr. `" | Meteorec, Rečica ob Savinji"`).
+
+Funkcija skrajša **samo title tag** — naslov članka (h1, `og:title`, JSON-LD,
+`blog.json`) pusti nedotaknjen, ker se ta objavlja tudi na FB/IG in ga lektor
+po pravilu ne spreminja. Vzame najbogatejšo različico naslova, ki se še
+prilega (cel naslov → brez oklepajskega dodatka → do dvopičja/pomišljaja), in
+pripono doda le, če po tem ostane pod mejo.
+
+Modelu je meja 60 znakov povedana že v pozivu (`generate_daily_post.py` in
+`generate_daily_proposals.py`), tako da so naslovi praviloma dovolj kratki že
+ob nastanku; `seo_title()` je varovalka za ostalo.
+
 ## Objava na Facebook in Instagram
 
 Vsak nov članek, ki ga `wire_all()` zapiše v `blog.json`, se samodejno objavi

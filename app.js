@@ -15657,7 +15657,7 @@ function _buildOcnTides(m){
   el.innerHTML=`<div class="chart-svg-wrap">${svg}</div><div style="margin-top:.5rem">${evHtml}
     <div class="ocn-row"><span style="color:var(--muted)">Amplituda plimovanja</span><b>${range} m</b></div>
     <div class="ocn-row"><span style="color:var(--muted)">Tip plimovanja</span><b>${tidalType}</b></div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/coast/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
   </div>`;
 }
 
@@ -16346,7 +16346,7 @@ function _buildGoreTriglav({triglav}){
   html+='</div>';
   html+=`<div class="mtn-summit-info">
     <b>Opomba:</b> Temperature so modelsko prilagojene na višino vrha Triglava (2864 m) z metodo statističnega zniževanja (Open-Meteo). Za operativno planinarjenje vedno preveri
-    <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
+    <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
   </div>`;
   el.innerHTML=html;
 }

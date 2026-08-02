@@ -215,7 +215,7 @@ def build_body(data):
       <a href="https://www.xcskies.com/" target="_blank" rel="noopener" class="mtn-avk-link">☁️ XCSkies</a>
       <a href="https://www.burnair.ch/" target="_blank" rel="noopener" class="mtn-avk-link">🔥 Burnair</a>
       <a href="https://www.paraglidingmap.com/" target="_blank" rel="noopener" class="mtn-avk-link">🗺 ParaglidingMap</a>
-      <a href="https://www.xcontest.org/world/sl/" target="_blank" rel="noopener" class="mtn-avk-link">🏆 XContest SI</a>
+      <a href="https://www.xcontest.org/world/en/flights/#filter[country]=SI" target="_blank" rel="noopener" class="mtn-avk-link">🏆 XContest SI</a>
       <a href="https://skysight.io/" target="_blank" rel="noopener" class="mtn-avk-link">🔭 SkySight</a>
     </div>
   </div>
