@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 01 Aug 2026 08:00:15 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 02 Aug 2026 08:44:59 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kdaj pade temperatura pod 20 °C? Nočno ohlajanje kljub vročinskemu valu</title>
+      <link>https://meteorec.si/blog/kdaj-pade-temperatura-pod-20-c-nocno-ohlajanje-kljub-vrocins-0802.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-pade-temperatura-pod-20-c-nocno-ohlajanje-kljub-vrocins-0802.html</guid>
+      <pubDate>Sun, 02 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Napovednik za prihajajoče dni kaže minimalne nočne temperature tik nad 20 °C. Kdaj se bo Savinjska dolina res ohladila in kaj to pomeni za spanje?</description>
+      <category>tropske noči</category>
+      <category>vročinski val</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>spanje</category>
+    </item>
     <item>
       <title>Temperaturni trend v Savinjski dolini: proti novim vrhuncem brez padavin</title>
       <link>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-proti-novim-vrhuncem-b-0801.html</link>
