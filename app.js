@@ -3490,7 +3490,8 @@ function drawWindRose(observations){
 // Zemljevida ne gradimo, dokler kartica ne pride na zaslon — Leaflet je
 // večji od vsega ostalega na strani skupaj.
 let _mradMap=null,_mradFrames=[],_mradIdx=-1,_mradTimer=null,_mradPoll=null,
-    _mradPlaying=true,_mradBounds=null,_mradLast='';
+    _mradPlaying=true,_mradBounds=null,_mradLast='',
+    _mradView='sirok',_mradViewApplied='';
 const MRAD_OPACITY=.82;
 
 async function initMeteorecRadar(){
@@ -3521,11 +3522,21 @@ async function initMeteorecRadar(){
 async function refreshMeteorecRadar(){
   const tEl=document.getElementById('mrad-time');
   try{
-    const m=await(await fetch(PROXY+'/radar-composite.json')).json();
+    const m=await(await fetch(PROXY+'/radar-composite.json?pogled='+_mradView)).json();
     const list=(m.okvirji||[]).filter(f=>f&&f.zig);
     if(!list.length)throw new Error('ni okvirjev');
     _mradBounds=m.meje;
     renderMeteorecRadarLegend(m.legenda);
+    // Ob prvem prikazu in ob vsaki menjavi pogleda zemljevid poravnamo na
+    // izsek; ozki pogled prenese večji približek, ker je risan finejše.
+    // Približek je izbran tako, da izsek napolni kartico; fitBounds bi se
+    // poravnal po nižji stranici in ob strani pokazal zemljevid, kamor slika
+    // ne sega, kar je videti kot da se je radar ustavil sredi ničesar.
+    if(_mradViewApplied!==_mradView){
+      _mradMap.setMaxZoom(_mradView==='sirok'?10:11);
+      _mradMap.setView([LAT,LON],_mradView==='sirok'?7:10);
+      _mradViewApplied=_mradView;
+    }
     if(list[list.length-1].zig===_mradLast)return;   // nič novega
     _mradLast=list[list.length-1].zig;
 
@@ -3553,7 +3564,7 @@ function mradLoadFrame(i){
   const f=_mradFrames[i];
   if(!f||f.layer)return Promise.resolve();
   return new Promise(res=>{
-    const layer=L.imageOverlay(PROXY+'/radar-composite?t='+encodeURIComponent(f.zig),
+    const layer=L.imageOverlay(PROXY+'/radar-composite?pogled='+_mradView+'&t='+encodeURIComponent(f.zig),
       _mradBounds,{opacity:0,interactive:false});
     layer.once('load',()=>{f.ready=true;res();});
     layer.once('error',()=>{f.err=true;res();});
@@ -3595,6 +3606,20 @@ function startMeteorecRadarAnim(){
     showMeteorecRadarFrame(i);
     if(i===_mradFrames.length-1)hold=3;
   },450);
+}
+
+// Preklop med širokim in dolinskim izsekom. Okvirji so za oba isti posnetki,
+// a druge slike, zato plasti pobrišemo in naložimo znova.
+function switchMeteorecRadarView(id){
+  if(id===_mradView||!_mradMap)return;
+  _mradView=id;
+  document.querySelectorAll('[data-mrad-view]').forEach(b=>
+    b.classList.toggle('active',b.dataset.mradView===id));
+  clearInterval(_mradTimer);_mradTimer=null;
+  _mradFrames.forEach(f=>{if(f.layer)_mradMap.removeLayer(f.layer);});
+  _mradFrames=[];_mradIdx=-1;_mradLast='';
+  const t=document.getElementById('mrad-time');if(t)t.textContent='—';
+  refreshMeteorecRadar();
 }
 
 function toggleMeteorecRadarPlay(){

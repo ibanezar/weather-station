@@ -632,6 +632,10 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <span class="radar-time" id="mrad-time">—</span>
       <div class="radar-track" id="mrad-track" onclick="meteorecRadarSeek(event)"><div class="radar-track-fill" id="mrad-track-fill"></div></div>
     </div>
+    <div class="mrad-views">
+      <button class="radar-btn active" data-mrad-view="sirok" onclick="switchMeteorecRadarView('sirok')">Širše</button>
+      <button class="radar-btn" data-mrad-view="savinja" onclick="switchMeteorecRadarView('savinja')">Zgornja Savinjska</button>
+    </div>
     <div class="radar-legend">
       <div class="mrad-legend">
         <div class="mrad-bar" id="mrad-scale"></div>
