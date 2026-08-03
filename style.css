@@ -2432,6 +2432,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   /* Na mobilnem backdrop-filter:blur povzroča stalno re-rasterizacijo (flicker)
      zaradi neprekinjene ticker animacije — onemogočeno na touch napravah */
   *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+  /* .blob elementi (#bg ozadje) imajo velik blur() + neskončno transform
+     animacijo, ki teče ves čas na vsaki strani — sumljivo za Android Chrome
+     hardware-overlay (SurfaceControl) flicker ob DOM spremembah drugje na
+     strani (npr. preklop zavihka). Na dotik-napravah jih ustavimo (ostanejo
+     vidni, statični) namesto da bi ves čas animirali blur v ozadju. */
+  .blob{animation:none !important}
   /* Večji touch target za sliderje */
   .fc-slider{height:6px}
   .fc-slider::-webkit-slider-thumb{width:26px;height:26px}
