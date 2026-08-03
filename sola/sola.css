@@ -1,0 +1,152 @@
+/* Meteorec Šola — samostojen slog za /sola/*, ločen od glavnega style.css.
+   Ista pisava, logotip in barvna paleta kot glavni sajt, a svetlejša,
+   bolj zračna postavitev z večjo tipografijo za starše/učitelje na telefonu. */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+:root{
+  --bg:#f4f9ff; --bg-2:#eaf4ff;
+  --text:#0a1628; --muted:#3d5570;
+  --card-bg:#ffffff; --card-border:rgba(10,22,40,.08);
+  --card-shadow:0 6px 28px rgba(10,60,110,.08);
+  --border:rgba(10,22,40,.10);
+  --blue:#0284c7; --cyan:#0e7490; --green:#059669; --amber:#b45309;
+  --chip-bg:rgba(2,132,199,.08); --chip-border:rgba(2,132,199,.22);
+  --hero-overlay:linear-gradient(180deg,rgba(4,10,20,.15) 0%,rgba(4,10,20,.55) 100%);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0a121f; --bg-2:#0d1728;
+    --text:#e8edf8; --muted:#a9bcd4;
+    --card-bg:#101b30; --card-border:rgba(255,255,255,.09);
+    --card-shadow:0 6px 28px rgba(0,0,0,.35);
+    --border:rgba(255,255,255,.10);
+    --blue:#4d9ff8; --cyan:#38bdf8; --green:#34d399; --amber:#f59e0b;
+    --chip-bg:rgba(77,159,248,.12); --chip-border:rgba(77,159,248,.3);
+    --hero-overlay:linear-gradient(180deg,rgba(4,10,20,.25) 0%,rgba(4,10,20,.75) 100%);
+  }
+}
+
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%);
+  color:var(--text);
+  font-size:1.125rem; /* 18px izhodišče, večje kot na glavnem sajtu */
+  line-height:1.75;
+  min-height:100vh;
+}
+
+.sola-wrap{max-width:760px;margin:0 auto;padding:1.4rem 1.2rem 4rem}
+
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;line-height:1.25;letter-spacing:-.01em}
+h1{font-size:2.1rem;font-weight:800;margin-bottom:.6rem}
+h2{font-size:1.5rem;font-weight:700;margin:2.6rem 0 1rem}
+h3{font-size:1.15rem;font-weight:700;margin:1.4rem 0 .5rem}
+p{margin:0 0 1.1rem}
+a{color:var(--blue)}
+strong{font-weight:700}
+ul,ol{margin:0 0 1.1rem 1.4rem}
+li{margin-bottom:.5rem}
+
+/* ── glava ── */
+.sola-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  flex-wrap:wrap;padding:1.2rem 0;margin-bottom:.6rem}
+.sola-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text)}
+.sola-brand img{width:40px;height:40px;flex-shrink:0}
+.sola-brand-name{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.35rem;letter-spacing:-.02em}
+.sola-brand-name em{font-style:normal;color:var(--cyan)}
+.sola-brand-tag{display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-top:.1rem}
+.sola-back-main{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;
+  color:var(--blue);text-decoration:none;padding:.5rem .95rem;border-radius:999px;
+  border:1px solid var(--chip-border);background:var(--chip-bg);white-space:nowrap}
+.sola-back-main:hover{border-color:var(--blue)}
+
+.sola-crumbs{font-size:.85rem;color:var(--muted);margin-bottom:1.6rem}
+.sola-crumbs a{color:var(--muted);text-decoration:none}
+.sola-crumbs a:hover{color:var(--cyan)}
+
+/* ── hero s fotografijo ── */
+.sola-hero{position:relative;border-radius:22px;overflow:hidden;margin-bottom:2rem;
+  min-height:260px;display:flex;align-items:flex-end;box-shadow:var(--card-shadow);
+  border:1px solid var(--card-border)}
+.sola-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sola-hero::after{content:'';position:absolute;inset:0;background:var(--hero-overlay)}
+.sola-hero-body{position:relative;z-index:1;padding:1.6rem 1.5rem;color:#fff}
+.sola-hero-kicker{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);
+  padding:.3rem .7rem;border-radius:999px;margin-bottom:.7rem}
+.sola-hero h1{color:#fff;margin-bottom:.5rem;font-size:1.9rem}
+.sola-hero p{color:rgba(255,255,255,.92);margin-bottom:0;font-size:1.05rem;max-width:46ch}
+
+/* ── kartice ── */
+.sola-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
+  padding:1.5rem;box-shadow:var(--card-shadow);margin-bottom:1.4rem}
+.sola-card h2,.sola-card h3{margin-top:0}
+
+.sola-resources{display:grid;gap:1.2rem;margin:1.4rem 0 2rem}
+.sola-res-card{display:block;text-decoration:none;color:var(--text);background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:18px;overflow:hidden;box-shadow:var(--card-shadow);
+  transition:transform .15s,box-shadow .15s}
+.sola-res-card:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(10,60,110,.14)}
+.sola-res-thumb{aspect-ratio:16/9;width:100%;object-fit:cover;display:block;background:var(--bg-2)}
+.sola-res-body{padding:1.2rem 1.3rem 1.4rem}
+.sola-res-tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--blue);background:var(--chip-bg);border:1px solid var(--chip-border);
+  padding:.22rem .6rem;border-radius:999px;margin-bottom:.6rem}
+.sola-res-body h3{margin:0 0 .4rem;font-size:1.25rem}
+.sola-res-body p{margin:0;color:var(--muted);font-size:1rem}
+.sola-res-arrow{display:inline-block;margin-top:.7rem;font-weight:700;color:var(--blue)}
+
+.sola-soon{border:1.5px dashed var(--card-border);border-radius:18px;padding:1.3rem 1.4rem;
+  color:var(--muted);font-size:.98rem;text-align:center}
+
+/* ── ciljni razredi/predmeti (chip vrstica) ── */
+.sola-chips{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0 1.6rem}
+.sola-chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.92rem;font-weight:600;
+  color:var(--blue);background:var(--chip-bg);border:1px solid var(--chip-border);
+  padding:.45rem .9rem;border-radius:999px}
+
+/* ── cilji učnega načrta ── */
+.sola-goal-group{border-left:3px solid var(--chip-border);padding-left:1rem;margin-bottom:1.4rem}
+.sola-goal-group h3{margin-top:0}
+.sola-goal-group .sola-src{display:block;font-size:.82rem;color:var(--muted);margin-top:.6rem;font-style:italic}
+
+/* ── gumb za prenos ── */
+.sola-cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  background:var(--blue);color:#fff;font:inherit;font-weight:700;font-size:1.05rem;
+  padding:.95rem 1.6rem;border-radius:14px;text-decoration:none;border:0;cursor:pointer;
+  box-shadow:0 6px 20px rgba(2,132,199,.3)}
+.sola-cta:hover{background:var(--cyan)}
+.sola-cta-note{font-size:.85rem;color:var(--muted);margin-top:.7rem}
+
+/* ── živi podatki blok ── */
+.sola-live{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;
+  padding:1.4rem;box-shadow:var(--card-shadow);margin:1.4rem 0 2rem}
+.sola-live h2{margin-top:0}
+.sola-live iframe{width:100%;height:262px;border:0;border-radius:14px;overflow:hidden;
+  display:block;margin-top:.9rem}
+.sola-live-link{display:inline-block;margin-top:.8rem;font-weight:600}
+
+/* ── FAQ ── */
+.sola-faq-item{border-bottom:1px solid var(--border);padding:1.1rem 0}
+.sola-faq-item:last-child{border-bottom:0}
+.sola-faq-item h3{margin:0 0 .5rem;font-size:1.08rem}
+.sola-faq-item p{margin:0;color:var(--muted)}
+
+/* ── nožica ── */
+.sola-foot{margin-top:3rem;padding-top:1.6rem;border-top:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:.6rem;justify-content:space-between;align-items:center;
+  font-size:.88rem;color:var(--muted)}
+.sola-foot a{color:var(--blue);text-decoration:none;font-weight:600}
+.sola-back-link{display:inline-block;margin-top:1.6rem;color:var(--blue);text-decoration:none;font-weight:700}
+.sola-back-link:hover{text-decoration:underline}
+
+@media (max-width:600px){
+  body{font-size:1.0625rem}
+  .sola-hero{min-height:220px}
+  .sola-hero h1{font-size:1.55rem}
+  h1{font-size:1.7rem}
+  h2{font-size:1.3rem}
+  .sola-live iframe{height:250px}
+}
