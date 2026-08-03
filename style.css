@@ -2265,26 +2265,32 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:420px){.cu-days{gap:.35rem}.cu-day{padding:.65rem .25rem}}
 
 /* ── AI Forecast card (yr.no + Claude) ── */
-.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative}
-.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.07) 0%,transparent 60%);pointer-events:none}
-.aifc-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
-.aifc-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.aifc-badge{font-size:.58rem;font-weight:700;padding:.16rem .4rem;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
-.aifc-badge.yr{background:rgba(96,165,250,.15);color:#60a5fa}
-.aifc-badge.ai{background:rgba(167,139,250,.15);color:#a78bfa}
-.aifc-badge.mtr{background:rgba(52,211,153,.15);color:#34d399}
-.aifc-text{font-size:.88rem;line-height:1.78;color:var(--text);min-height:2.5rem}
+.aifc-card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:20px;padding:1.3rem 1.4rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.09) 0%,transparent 55%);pointer-events:none}
+.aifc-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#60a5fa,#a78bfa 55%,#34d399)}
+.aifc-header{display:flex;align-items:center;gap:.55rem;margin-bottom:.85rem;flex-wrap:wrap}
+.aifc-title{font-size:.94rem;font-weight:800;letter-spacing:-.01em;color:var(--text)}
+.aifc-badge{font-size:.6rem;font-weight:700;padding:.2rem .55rem;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;border:1px solid transparent}
+.aifc-badge.yr{background:rgba(96,165,250,.14);color:#60a5fa;border-color:rgba(96,165,250,.25)}
+.aifc-badge.ai{background:rgba(167,139,250,.14);color:#a78bfa;border-color:rgba(167,139,250,.25)}
+.aifc-badge.mtr{background:rgba(52,211,153,.14);color:#34d399;border-color:rgba(52,211,153,.25)}
+.aifc-text{font-size:.9rem;line-height:1.8;color:var(--text);min-height:2.5rem}
 .aifc-text.italic{font-style:italic}
 .aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}
 @keyframes aifc-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:1rem}
-.aifc-day{background:var(--bg);border-radius:11px;padding:.7rem .35rem;text-align:center;border:1px solid transparent}
-.aifc-day.today{background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3)}
-.aifc-day-name{font-size:.66rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.28rem}
-.aifc-day-icon{font-size:1.65rem;line-height:1.25}
-.aifc-day-t{font-size:.86rem;font-weight:800;white-space:nowrap;margin-top:.14rem}
-.aifc-day-tlo{font-weight:400;color:var(--muted)}
-.aifc-day-rain{font-size:.64rem;color:#60a5fa;margin-top:.14rem}
+.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:1.1rem}
+.aifc-day{background:var(--fc-bg);border-radius:13px;padding:.75rem .35rem .65rem;text-align:center;border:1px solid var(--fc-border);transition:transform .18s,box-shadow .18s,border-color .18s}
+.aifc-day:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.aifc-day.today{background:linear-gradient(160deg,rgba(96,165,250,.16),rgba(96,165,250,.04));border-color:rgba(96,165,250,.4)}
+.aifc-day-name{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.32rem}
+.aifc-day.today .aifc-day-name{color:#60a5fa}
+.aifc-day-icon{font-size:1.65rem;line-height:1.25;margin-bottom:.05rem}
+.aifc-day-icon img{filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))}
+.aifc-day-t{font-size:.88rem;font-weight:800;white-space:nowrap;margin-top:.18rem;color:var(--text)}
+.aifc-day-tlo{font-weight:500;color:var(--muted)}
+.aifc-day-bar{height:4px;border-radius:2px;background:var(--card-border);margin:.45rem .1rem 0;position:relative;overflow:hidden}
+.aifc-day-bar-fill{position:absolute;top:0;bottom:0;border-radius:2px;background:linear-gradient(90deg,#60a5fa,#f59e0b)}
+.aifc-day-rain{font-size:.62rem;font-weight:600;color:#60a5fa;background:rgba(96,165,250,.12);border-radius:999px;padding:.1rem .42rem;margin-top:.4rem;display:inline-block}
 /* 7 dni se v mrežo na telefonu ne izide — pri 3 stolpcih ostane zadnja
    ploščica sama v vrsti. Zato vodoravni drsni trak. Drsi samo trak: telo
    strani se vodoravno ne premika (overscroll-behavior-x:contain). */
@@ -2295,13 +2301,15 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 }
 /* Uradna ARSO napoved za Slovenijo — vizualno podrejena lokalnemu besedilu
    nad njo, da je jasno, kaj velja za Rečico in kaj za državo. */
-.aifc-arso{margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--card-border)}
+.aifc-arso{margin-top:1.1rem;padding:.85rem 1rem;border-radius:12px;background:rgba(148,163,184,.07);border:1px solid var(--card-border);border-left:3px solid rgba(148,163,184,.5)}
 .aifc-arso[hidden]{display:none}
-.aifc-arso-lbl{display:inline-block;font-size:.58rem;font-weight:700;padding:.16rem .4rem;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;background:rgba(148,163,184,.16);color:var(--muted);margin-bottom:.4rem}
-.aifc-arso-txt{font-size:.78rem;line-height:1.7;color:var(--muted)}
-.aifc-meta{font-size:.58rem;color:var(--muted);margin-top:.6rem;text-align:right}
-.aifc-refresh{background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--muted);padding:.15rem .3rem;border-radius:4px;transition:color .15s}
-.aifc-refresh:hover{color:var(--text)}
+.aifc-arso-lbl{display:inline-flex;align-items:center;gap:.32rem;font-size:.6rem;font-weight:700;padding:.16rem .5rem;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;background:rgba(148,163,184,.18);color:var(--muted);margin-bottom:.45rem}
+.aifc-arso-lbl::before{content:'🇸🇮'}
+.aifc-arso-txt{font-size:.8rem;line-height:1.72;color:var(--muted)}
+.aifc-meta{font-size:.68rem;color:var(--muted);margin-top:.75rem;text-align:right}
+.aifc-refresh{margin-left:auto;background:var(--card-bg);border:1px solid var(--card-border);cursor:pointer;font-size:.85rem;color:var(--muted);width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s,transform .35s}
+.aifc-refresh:hover{color:var(--text);border-color:var(--card-border-h)}
+.aifc-refresh:active{transform:rotate(180deg)}
 
 /* ── Srednja napoved Tab ── */
 .med-kpi-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:1.1rem}
