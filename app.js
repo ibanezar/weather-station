@@ -5,20 +5,64 @@ const LAT = 46.325779, LON = 14.921137;
 // Odstrani po tem, ko dobimo podatke iz overlay-a na napravi, kjer se
 // pojavlja. Na zaslonu izpisuje visualViewport resize + layout-shift
 // dogodke, da vidimo TOČNO kaj/kdaj povzroči skok — brez potrebe po
-// snemanju videa ali odpiranju DevTools na telefonu.
+// snemanju videa ali odpiranju DevTools na telefonu. En gumb kopira CEL
+// log v odložišče (ni treba screenshotati/ročno izbirati besedila), in
+// dogodki zunaj kratkega okna okrog preklopa zavihka se ignorirajo, da se
+// log ne napolni s šumom iz ostalega dogajanja na strani.
 (function(){
+  const wrap=document.createElement('div');
+  wrap.id='wx-debug-overlay';
+  wrap.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,.92);font-family:monospace';
+  const bar=document.createElement('div');
+  bar.style.cssText='display:flex;gap:.5rem;align-items:center;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.15)';
+  const copyBtn=document.createElement('button');
+  copyBtn.textContent='📋 Kopiraj log';
+  copyBtn.style.cssText='font:11px monospace;padding:3px 8px;border-radius:6px;border:1px solid #4ade80;background:transparent;color:#4ade80';
+  const closeBtn=document.createElement('button');
+  closeBtn.textContent='✕';
+  closeBtn.style.cssText='font:11px monospace;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;margin-left:auto';
+  const status=document.createElement('span');
+  status.style.cssText='font:10px monospace;color:#9ca3af';
+  bar.appendChild(copyBtn); bar.appendChild(status); bar.appendChild(closeBtn);
   const box=document.createElement('pre');
-  box.id='wx-debug-overlay';
-  box.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:999999;max-height:38vh;overflow:auto;background:rgba(0,0,0,.88);color:#4ade80;font:10px/1.45 monospace;padding:6px 8px;margin:0;white-space:pre-wrap;pointer-events:none';
+  box.style.cssText='max-height:32vh;overflow:auto;color:#4ade80;font:10px/1.45 monospace;padding:6px 8px;margin:0;white-space:pre-wrap';
   box.textContent='[wx-debug] čakam na preklop zavihka…\n';
-  (document.body||document.documentElement).appendChild(box);
-  let t0=0;
+  wrap.appendChild(bar); wrap.appendChild(box);
+  (document.body||document.documentElement).appendChild(wrap);
+
+  copyBtn.onclick=function(){
+    const text=box.textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject())
+      .then(function(){ status.textContent='kopirano ✓'; })
+      .catch(function(){
+        // Fallback za brskalnike/kontekste brez Clipboard API-ja
+        const ta=document.createElement('textarea');
+        ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); status.textContent='kopirano ✓'; }
+        catch(e){ status.textContent='kopiranje ni uspelo — označi ročno'; box.style.userSelect='text'; }
+        document.body.removeChild(ta);
+      });
+  };
+  closeBtn.onclick=function(){ wrap.remove(); };
+
+  let t0=0, windowEnd=0, lineCount=0;
+  const MAX_LINES=60, WINDOW_MS=4000;
   window._wxDebugStart=function(label){
     t0=performance.now();
+    windowEnd=t0+WINDOW_MS;
+    lineCount=0;
     box.textContent='[wx-debug] '+label+'\n';
+    status.textContent='';
   };
   window._wxDebugLog=function(msg){
+    if(performance.now()>windowEnd) return; // izven okna preklopa — verjetno šum, ignoriraj
     const t=t0?(performance.now()-t0).toFixed(0):'0';
+    lineCount++;
+    if(lineCount>MAX_LINES){
+      if(lineCount===MAX_LINES+1) box.textContent+='… (nadaljnje vrstice izpuščene, prvih '+MAX_LINES+' zgoraj) …\n';
+      return;
+    }
     box.textContent+='[+'+t+'ms] '+msg+'\n';
     box.scrollTop=box.scrollHeight;
   };
@@ -30,6 +74,7 @@ const LAT = 46.325779, LON = 14.921137;
   try{
     new PerformanceObserver(function(list){
       list.getEntries().forEach(function(e){
+        if(e.value<0.01) return; // zanemarljivi mikro-premiki, samo šum
         const srcs=(e.sources||[]).map(function(s){ return s.node?(s.node.id||s.node.className||s.node.tagName):'?'; }).join(', ');
         window._wxDebugLog('layout-shift value='+e.value.toFixed(4)+' src=['+srcs+']');
       });
