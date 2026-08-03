@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="t">
+<title id="t">Ilustracija: različne vrste oblakov na nebu nad dolino</title>
+
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#bfe3ff"/>
+    <stop offset="55%" stop-color="#e3f3ff"/>
+    <stop offset="100%" stop-color="#eef8ea"/>
+  </linearGradient>
+  <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#8fc98a"/>
+    <stop offset="100%" stop-color="#6fae6a"/>
+  </linearGradient>
+  <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#5f9f63"/>
+    <stop offset="100%" stop-color="#3f7a48"/>
+  </linearGradient>
+  <radialGradient id="bokeh" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
+    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+
+
+
+<rect width="1200" height="675" fill="url(#sky)"/>
+<path d="M0 420 Q220 340 430 400 T860 380 Q1040 350 1200 410 V675 H0 Z" fill="url(#hill1)" opacity=".55"/>
+<path d="M0 470 Q260 400 520 450 T1000 430 Q1120 415 1200 450 V675 H0 Z" fill="url(#hill2)" opacity=".85"/>
+<circle cx="120" cy="140" r="34" fill="url(#bokeh)"/>
+<circle cx="980" cy="90" r="46" fill="url(#bokeh)"/>
+<circle cx="1080" cy="220" r="24" fill="url(#bokeh)"/>
+<circle cx="220" cy="230" r="18" fill="url(#bokeh)"/>
+
+
+<g fill="#ffffff" opacity=".95">
+  <ellipse cx="260" cy="150" rx="90" ry="34"/>
+  <ellipse cx="330" cy="130" rx="60" ry="30"/>
+  <ellipse cx="200" cy="130" rx="55" ry="26"/>
+</g>
+<g fill="#e7eef4" opacity=".9">
+  <rect x="500" y="220" width="260" height="26" rx="13"/>
+  <rect x="470" y="248" width="320" height="22" rx="11"/>
+</g>
+<g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".85">
+  <path d="M880 110 Q940 100 990 112 T1090 108"/>
+  <path d="M860 140 Q930 130 980 142 T1080 138"/>
+</g>
+<g fill="#5b6b78" opacity=".92">
+  <ellipse cx="330" cy="380" rx="100" ry="42"/>
+  <ellipse cx="410" cy="360" rx="70" ry="34"/>
+  <ellipse cx="260" cy="360" rx="60" ry="30"/>
+  <rect x="230" y="380" width="200" height="18" fill="#5b6b78"/>
+</g>
+
+
+<g stroke="#2f6b3c" stroke-width="6" stroke-linecap="round" opacity=".8">
+  <path d="M60 675 C55 590 90 560 80 500"/>
+  <path d="M110 675 C120 600 90 555 100 490"/>
+  <path d="M1130 675 C1120 580 1160 550 1145 480"/>
+  <path d="M1080 675 C1095 595 1060 560 1075 500"/>
+</g>
+
+</svg>

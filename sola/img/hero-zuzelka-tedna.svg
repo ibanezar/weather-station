@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="t">
+<title id="t">Ilustracija: pikapolonica na travniškem listu</title>
+
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#bfe3ff"/>
+    <stop offset="55%" stop-color="#e3f3ff"/>
+    <stop offset="100%" stop-color="#eef8ea"/>
+  </linearGradient>
+  <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#8fc98a"/>
+    <stop offset="100%" stop-color="#6fae6a"/>
+  </linearGradient>
+  <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#5f9f63"/>
+    <stop offset="100%" stop-color="#3f7a48"/>
+  </linearGradient>
+  <radialGradient id="bokeh" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
+    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+
+
+
+<rect width="1200" height="675" fill="url(#sky)"/>
+<path d="M0 420 Q220 340 430 400 T860 380 Q1040 350 1200 410 V675 H0 Z" fill="url(#hill1)" opacity=".55"/>
+<path d="M0 470 Q260 400 520 450 T1000 430 Q1120 415 1200 450 V675 H0 Z" fill="url(#hill2)" opacity=".85"/>
+<circle cx="120" cy="140" r="34" fill="url(#bokeh)"/>
+<circle cx="980" cy="90" r="46" fill="url(#bokeh)"/>
+<circle cx="1080" cy="220" r="24" fill="url(#bokeh)"/>
+<circle cx="220" cy="230" r="18" fill="url(#bokeh)"/>
+
+
+<g transform="translate(600,380) scale(1.6)">
+  <ellipse cx="0" cy="10" rx="70" ry="46" fill="#6fae6a"/>
+  <path d="M-40 10 Q0 -30 40 10 Q0 40 -40 10 Z" fill="#4f9752"/>
+</g>
+<g transform="translate(610,340)">
+  <ellipse cx="0" cy="0" rx="26" ry="20" fill="#e74c3c"/>
+  <line x1="0" y1="-20" x2="0" y2="20" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="-11" cy="-6" r="3.4" fill="#1a1a1a"/>
+  <circle cx="11" cy="-6" r="3.4" fill="#1a1a1a"/>
+  <circle cx="-13" cy="6" r="3.4" fill="#1a1a1a"/>
+  <circle cx="13" cy="6" r="3.4" fill="#1a1a1a"/>
+  <circle cx="0" cy="-20" r="8" fill="#1a1a1a"/>
+  <line x1="-3" y1="-27" x2="-8" y2="-36" stroke="#1a1a1a" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="3" y1="-27" x2="8" y2="-36" stroke="#1a1a1a" stroke-width="2.4" stroke-linecap="round"/>
+</g>
+<g transform="translate(880,180)" opacity=".9">
+  <ellipse cx="-14" cy="0" rx="20" ry="12" fill="#f4b942" transform="rotate(-20 -14 0)"/>
+  <ellipse cx="14" cy="0" rx="20" ry="12" fill="#f4b942" transform="rotate(20 14 0)"/>
+  <ellipse cx="-12" cy="18" rx="16" ry="10" fill="#e8a23a" transform="rotate(-15 -12 18)"/>
+  <ellipse cx="12" cy="18" rx="16" ry="10" fill="#e8a23a" transform="rotate(15 12 18)"/>
+  <line x1="0" y1="-4" x2="0" y2="30" stroke="#1a1a1a" stroke-width="2.4"/>
+</g>
+
+
+<g stroke="#2f6b3c" stroke-width="6" stroke-linecap="round" opacity=".8">
+  <path d="M60 675 C55 590 90 560 80 500"/>
+  <path d="M110 675 C120 600 90 555 100 490"/>
+  <path d="M1130 675 C1120 580 1160 550 1145 480"/>
+  <path d="M1080 675 C1095 595 1060 560 1075 500"/>
+</g>
+
+</svg>

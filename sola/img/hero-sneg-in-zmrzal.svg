@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="t">
+<title id="t">Ilustracija: snežinka nad zasneženo dolino</title>
+
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#dce8f5"/>
+    <stop offset="55%" stop-color="#eef4fa"/>
+    <stop offset="100%" stop-color="#f3f7f0"/>
+  </linearGradient>
+  <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#f3f8fc"/>
+    <stop offset="100%" stop-color="#dce9f4"/>
+  </linearGradient>
+  <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#e6eff6"/>
+    <stop offset="100%" stop-color="#c9dcea"/>
+  </linearGradient>
+  <radialGradient id="bokeh" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
+    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+
+
+
+<rect width="1200" height="675" fill="url(#sky)"/>
+<path d="M0 420 Q220 340 430 400 T860 380 Q1040 350 1200 410 V675 H0 Z" fill="url(#hill1)" opacity=".55"/>
+<path d="M0 470 Q260 400 520 450 T1000 430 Q1120 415 1200 450 V675 H0 Z" fill="url(#hill2)" opacity=".85"/>
+<circle cx="120" cy="140" r="34" fill="url(#bokeh)"/>
+<circle cx="980" cy="90" r="46" fill="url(#bokeh)"/>
+<circle cx="1080" cy="220" r="24" fill="url(#bokeh)"/>
+<circle cx="220" cy="230" r="18" fill="url(#bokeh)"/>
+
+
+<g fill="#ffffff" opacity=".95">
+  <circle cx="220" cy="560" r="10"/>
+  <circle cx="340" cy="520" r="7"/>
+  <circle cx="460" cy="580" r="9"/>
+  <circle cx="700" cy="540" r="8"/>
+  <circle cx="820" cy="590" r="10"/>
+  <circle cx="960" cy="530" r="7"/>
+  <circle cx="150" cy="300" r="6"/>
+  <circle cx="1000" cy="260" r="6"/>
+  <circle cx="650" cy="200" r="5"/>
+</g>
+<g transform="translate(600,300)" stroke="#bcdcf4" stroke-width="6" stroke-linecap="round">
+  <line x1="0" y1="-70" x2="0" y2="70"/>
+  <line x1="-60" y1="-35" x2="60" y2="35"/>
+  <line x1="-60" y1="35" x2="60" y2="-35"/>
+  <line x1="-20" y1="-55" x2="-40" y2="-70"/>
+  <line x1="-20" y1="-55" x2="0" y2="-75"/>
+  <line x1="20" y1="55" x2="40" y2="70"/>
+  <line x1="20" y1="55" x2="0" y2="75"/>
+</g>
+
+
+</svg>

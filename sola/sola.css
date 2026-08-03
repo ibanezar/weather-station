@@ -85,6 +85,7 @@ li{margin-bottom:.5rem}
 .sola-card h2,.sola-card h3{margin-top:0}
 
 .sola-resources{display:grid;gap:1.2rem;margin:1.4rem 0 2rem}
+@media (min-width:640px){.sola-resources{grid-template-columns:1fr 1fr}}
 .sola-res-card{display:block;text-decoration:none;color:var(--text);background:var(--card-bg);
   border:1px solid var(--card-border);border-radius:18px;overflow:hidden;box-shadow:var(--card-shadow);
   transition:transform .15s,box-shadow .15s}
@@ -97,9 +98,6 @@ li{margin-bottom:.5rem}
 .sola-res-body h3{margin:0 0 .4rem;font-size:1.25rem}
 .sola-res-body p{margin:0;color:var(--muted);font-size:1rem}
 .sola-res-arrow{display:inline-block;margin-top:.7rem;font-weight:700;color:var(--blue)}
-
-.sola-soon{border:1.5px dashed var(--card-border);border-radius:18px;padding:1.3rem 1.4rem;
-  color:var(--muted);font-size:.98rem;text-align:center}
 
 /* ── ciljni razredi/predmeti (chip vrstica) ── */
 .sola-chips{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0 1.6rem}
