@@ -2364,16 +2364,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-card:hover{transform:translateY(-3px);box-shadow:var(--card-shadow-h)}
 .gallery-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
 .gallery-card:hover img{transform:scale(1.04)}
-.gallery-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 55%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:.7rem .8rem}
-.gallery-card:hover .gallery-card-overlay{opacity:1}
+.gallery-card-chip{position:absolute;top:.5rem;left:.5rem;background:rgba(0,0,0,.55);color:#fff;font-size:.62rem;font-weight:600;padding:.2rem .55rem;border-radius:50px;max-width:calc(100% - 3rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gallery-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 30%,transparent 60%);opacity:1;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:.7rem .8rem}
+.gallery-card-meta{font-size:.64rem;color:rgba(255,255,255,.72);margin-top:.2rem;display:none}
+.gallery-card:hover .gallery-card-meta{display:block}
 .gallery-card-title{font-size:.78rem;font-weight:700;color:#fff;line-height:1.3}
-.gallery-card-meta{font-size:.64rem;color:rgba(255,255,255,.72);margin-top:.2rem}
 .gallery-card-del{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:26px;height:26px;color:#fff;font-size:.8rem;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .15s}
 .gallery-card:hover .gallery-card-del{display:flex}
 .gallery-card-del:hover{background:rgba(220,38,38,.8)}
+@media(pointer:coarse){.gallery-card-del{display:flex}}
 .gallery-empty{grid-column:1/-1;text-align:center;padding:3rem 1rem;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted)}
 .gallery-empty-icon{font-size:3rem;margin-bottom:.75rem}
-.gallery-empty-text{font-size:.88rem}
+.gallery-empty-text{font-size:.88rem;margin-bottom:1rem}
+.gallery-more-btn{grid-column:1/-1;padding:.6rem;border-radius:10px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.gallery-more-btn:hover{border-color:var(--blue);color:var(--blue)}
+.gallery-count-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.75rem}
+.gallery-count-row .gallery-count{margin-bottom:0}
+.gallery-pending-btn{padding:.3rem .7rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.68rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.gallery-pending-btn:hover{border-color:var(--blue);color:var(--blue)}
+.gallery-pending{display:none;flex-direction:column;gap:.5rem;margin-bottom:1rem;padding:.75rem;border:1px dashed var(--border);border-radius:12px}
+.gallery-pending.open{display:flex}
+.gallery-pending-empty{font-size:.8rem;color:var(--muted);text-align:center;padding:.5rem}
+.gallery-pending-item{display:flex;align-items:center;gap:.6rem}
+.gallery-pending-item img{width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.gallery-pending-info{flex:1;min-width:0}
+.gallery-pending-title{font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gallery-pending-meta{font-size:.68rem;color:var(--muted)}
+.gallery-pending-approve,.gallery-pending-reject{border:none;border-radius:8px;padding:.35rem .6rem;font-size:.72rem;font-weight:600;cursor:pointer;flex-shrink:0}
+.gallery-pending-approve{background:rgba(52,211,153,.15);color:#10b981}
+.gallery-pending-reject{background:rgba(239,68,68,.12);color:#ef4444}
 .gallery-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
 .gallery-modal-overlay.open{display:flex}
 .gallery-modal{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(600px,98vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}

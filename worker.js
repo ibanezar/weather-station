@@ -3622,13 +3622,45 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── Gallery / photo endpoints ──────────────────────────
+      // Vsi galerijski objekti živijo pod ključem "photos/…" v istem R2
+      // bucketu kot radar cache, feedback in subscriber podatki — list()
+      // MORA imeti prefix, sicer se te interne datoteke izlistajo v javnem
+      // odgovoru (zgodilo se je, glej git zgodovino).
+      const GALLERY_ADMIN_LOCKOUT_MAX = 8;
+      const GALLERY_ADMIN_LOCKOUT_TTL = 15 * 60; // sekund
+      async function _galleryAdminAuthed(request, env) {
+        const secret = env.DELETE_SECRET;
+        const auth = request.headers.get("Authorization") || "";
+        if (!secret) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+        if (env.COUNTER_KV) {
+          const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+          const lockKey = "gal_admin_fail:" + ip;
+          const fails = parseInt((await env.COUNTER_KV.get(lockKey)) || "0") || 0;
+          if (fails >= GALLERY_ADMIN_LOCKOUT_MAX) {
+            return { ok: false, status: 429, error: "Preveč neuspešnih poskusov, poskusi kasneje." };
+          }
+          if (auth !== "Bearer " + secret) {
+            await env.COUNTER_KV.put(lockKey, String(fails + 1), { expirationTtl: GALLERY_ADMIN_LOCKOUT_TTL });
+            return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+          }
+          await env.COUNTER_KV.delete(lockKey);
+          return { ok: true };
+        }
+        if (auth !== "Bearer " + secret) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+        return { ok: true };
+      }
+
       if (path === "/gallery") {
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ photos: [], error: "R2 not bound" }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
         const categoryFilter = url.searchParams.get("category");
-        const listed = await env.PHOTOS_R2.list({ include: ["customMetadata", "httpMetadata"] });
+        const cursor = url.searchParams.get("cursor") || undefined;
+        const listed = await env.PHOTOS_R2.list({
+          prefix: "photos/", limit: 100, cursor, include: ["customMetadata", "httpMetadata"]
+        });
         let photos = listed.objects
+          .filter(obj => (obj.customMetadata?.status || "approved") !== "pending")
           .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
           .map(obj => ({
             key: obj.key,
@@ -3639,8 +3671,61 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             ...(obj.customMetadata || {})
           }));
         if (categoryFilter) photos = photos.filter(p => p.category === categoryFilter);
-        return new Response(JSON.stringify({ photos, truncated: listed.truncated }), {
+        return new Response(JSON.stringify({
+          photos, truncated: listed.truncated, cursor: listed.truncated ? listed.cursor : null
+        }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+        });
+      }
+
+      if (path === "/gallery/pending") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const listed = await env.PHOTOS_R2.list({
+          prefix: "photos/", limit: 100, include: ["customMetadata", "httpMetadata"]
+        });
+        const photos = listed.objects
+          .filter(obj => obj.customMetadata?.status === "pending")
+          .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
+          .map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            uploaded: obj.uploaded,
+            contentType: obj.httpMetadata?.contentType || "image/jpeg",
+            ...(obj.customMetadata || {})
+          }));
+        return new Response(JSON.stringify({ photos }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+        });
+      }
+
+      if (path.startsWith("/gallery/approve/") && request.method === "POST") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const key = decodeURIComponent(path.slice("/gallery/approve/".length));
+        if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const obj = await env.PHOTOS_R2.get(key);
+        if (!obj) return new Response(JSON.stringify({ error: "Ni najdeno" }), {
+          status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        await env.PHOTOS_R2.put(key, obj.body, {
+          httpMetadata: obj.httpMetadata,
+          customMetadata: { ...(obj.customMetadata || {}), status: "approved" }
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
       }
 
@@ -3676,7 +3761,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             weather:    (fd.get("weather") || "").slice(0, 200),
             category,
             location:   (fd.get("location") || "").slice(0, 120),
-            uploadedAt: new Date().toISOString()
+            uploadedAt: new Date().toISOString(),
+            status:     "pending"
           }
         });
         return new Response(JSON.stringify({ ok: true, key }), {
@@ -3703,13 +3789,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
           status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
-        const secret = env.DELETE_SECRET;
-        const auth = request.headers.get("Authorization") || "";
-        if (!secret || auth !== "Bearer " + secret) {
-          return new Response(JSON.stringify({ error: "Nepooblaščen dostop" }), {
-            status: 401, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
-        }
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
         const key = decodeURIComponent(path.slice("/gallery/delete/".length));
         if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
           status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }

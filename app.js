@@ -2280,8 +2280,14 @@ document.addEventListener('click',e=>{if(!e.target.closest('.tab-dropdown'))clos
 // ══════════════════════════════════════════════════════
 let _galleryPhotos = [];
 let _galleryLoaded = false;
+let _galleryCursor = null;
+let _galleryTruncated = false;
 let _lbIdx = 0;
 let _galleryPendingFile = null;
+
+function _galEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 function galleryOpenPicker(){
   const inp = document.createElement('input');
@@ -2302,13 +2308,18 @@ function initGallery(){
   }
 }
 
-async function loadGallery(){
+async function loadGallery(reset){
   const grid = document.getElementById('gallery-grid');
   const cnt = document.getElementById('gallery-count');
+  if(reset !== false){ _galleryPhotos = []; _galleryCursor = null; }
   try {
-    const res = await fetch(PROXY+'/gallery?category=general', { cache:'no-cache' });
+    let url = PROXY+'/gallery?category=general';
+    if(_galleryCursor) url += '&cursor='+encodeURIComponent(_galleryCursor);
+    const res = await fetch(url, { cache:'no-cache' });
     const data = await res.json();
-    _galleryPhotos = data.photos || [];
+    _galleryPhotos = _galleryPhotos.concat(data.photos || []);
+    _galleryTruncated = !!data.truncated;
+    _galleryCursor = data.cursor || null;
     if(cnt) cnt.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';
     renderGallery();
   } catch(e){
@@ -2316,27 +2327,126 @@ async function loadGallery(){
   }
 }
 
+function galleryLoadMore(){ loadGallery(false); }
+
 function renderGallery(){
   const grid = document.getElementById('gallery-grid');
   if(!grid) return;
   if(!_galleryPhotos.length){
-    grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">📷</div><div class="gallery-empty-text">Še ni fotografij. Bodi prvi!</div></div>';
+    grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">📷</div><div class="gallery-empty-text">Še ni fotografij. Bodi prvi!</div><button class="gallery-pick-btn" onclick="galleryOpenPicker()">📤 Dodaj fotografijo</button></div>';
     return;
   }
-  grid.innerHTML = _galleryPhotos.map((p,i)=>{
+  const cards = _galleryPhotos.map((p,i)=>{
     const imgUrl = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
     const date = p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString('sl-SI',{day:'numeric',month:'long',year:'numeric'}) : '';
-    const author = p.author && p.author!=='Anonimno' ? p.author : '';
+    const author = p.author && p.author!=='Anonimno' ? _galEsc(p.author) : '';
     const meta = [date, author].filter(Boolean).join(' · ');
+    const title = _galEsc(p.title) || 'Brez naslova';
     return `<div class="gallery-card" onclick="openGalleryLightbox(${i})">
-      <img src="${imgUrl}" alt="${p.title||''}" loading="lazy">
+      <img src="${imgUrl}" alt="${title}" loading="lazy">
+      ${p.weather?`<div class="gallery-card-chip">${_galEsc(p.weather)}</div>`:''}
       <div class="gallery-card-overlay">
-        <div class="gallery-card-title">${p.title||'Brez naslova'}</div>
+        <div class="gallery-card-title">${title}</div>
         ${meta?`<div class="gallery-card-meta">${meta}</div>`:''}
       </div>
       <button class="gallery-card-del" title="Izbriši" onclick="event.stopPropagation();galleryDelete(${i})">✕</button>
     </div>`;
   }).join('');
+  const more = _galleryTruncated ? '<button class="gallery-more-btn" onclick="galleryLoadMore()">Naloži več</button>' : '';
+  grid.innerHTML = cards + more;
+}
+
+let _galleryPending = [];
+
+async function galleryTogglePending(){
+  const panel = document.getElementById('gallery-pending');
+  if(!panel) return;
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    return;
+  }
+  let pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd){
+    pwd = prompt('Geslo za pregled predlogov:');
+    if(!pwd) return;
+  }
+  try {
+    const res = await fetch(PROXY+'/gallery/pending', { headers:{ 'Authorization':'Bearer '+pwd } });
+    if(res.status === 401 || res.status === 429){
+      sessionStorage.removeItem('_galAdminPwd');
+      const data = await res.json().catch(()=>({}));
+      showToast(data.error || 'Napačno geslo.');
+      return;
+    }
+    sessionStorage.setItem('_galAdminPwd', pwd);
+    const data = await res.json();
+    _galleryPending = data.photos || [];
+    _renderGalleryPending();
+    panel.classList.add('open');
+  } catch(e){
+    showToast('Napaka pri nalaganju predlogov.');
+  }
+}
+
+function _renderGalleryPending(){
+  const panel = document.getElementById('gallery-pending');
+  if(!panel) return;
+  if(!_galleryPending.length){
+    panel.innerHTML = '<div class="gallery-pending-empty">Ni čakajočih predlogov.</div>';
+    return;
+  }
+  panel.innerHTML = _galleryPending.map((p,i)=>{
+    const imgUrl = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
+    return `<div class="gallery-pending-item">
+      <img src="${imgUrl}" alt="">
+      <div class="gallery-pending-info">
+        <div class="gallery-pending-title">${_galEsc(p.title)||'Brez naslova'}</div>
+        <div class="gallery-pending-meta">${_galEsc(p.author)||'Anonimno'}</div>
+      </div>
+      <button class="gallery-pending-approve" onclick="galleryApprove(${i})">✓ Odobri</button>
+      <button class="gallery-pending-reject" onclick="galleryReject(${i})">✕ Zavrni</button>
+    </div>`;
+  }).join('');
+}
+
+async function galleryApprove(idx){
+  const photo = _galleryPending[idx];
+  if(!photo) return;
+  const pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd) return;
+  try {
+    const res = await fetch(PROXY+'/gallery/approve/'+encodeURIComponent(photo.key), {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+pwd }
+    });
+    if(!res.ok) throw new Error();
+    _galleryPending.splice(idx, 1);
+    _renderGalleryPending();
+    showToast('Fotografija odobrena.');
+    loadGallery();
+  } catch(e){
+    showToast('Napaka pri odobritvi.');
+  }
+}
+
+async function galleryReject(idx){
+  const photo = _galleryPending[idx];
+  if(!photo) return;
+  if(!confirm('Zavrni in izbriši ta predlog?')) return;
+  const pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd) return;
+  try {
+    const res = await fetch(PROXY+'/gallery/delete/'+encodeURIComponent(photo.key), {
+      method:'DELETE',
+      headers:{ 'Authorization':'Bearer '+pwd }
+    });
+    if(!res.ok) throw new Error();
+    _galleryPending.splice(idx, 1);
+    _renderGalleryPending();
+    showToast('Predlog zavrnjen.');
+  } catch(e){
+    showToast('Napaka pri zavrnitvi.');
+  }
 }
 
 function galleryFileSelected(file){
@@ -2386,22 +2496,11 @@ async function gallerySubmitUpload(){
     const data = await res.json();
     if(!res.ok || !data.ok) throw new Error(data.error || 'Napaka pri nalaganju');
     if(fill) fill.style.width='100%';
-    // Optimistic update — dodamo sliko direktno brez re-fetcha (nič ne flicera)
-    _galleryPhotos.unshift({
-      key: data.key,
-      uploaded: new Date().toISOString(),
-      uploadedAt: new Date().toISOString(),
-      contentType: _galleryPendingFile.type,
-      title:   fd.get('title')   || '',
-      caption: fd.get('caption') || '',
-      author:  fd.get('author')  || 'Anonimno',
-      weather: chip
-    });
+    // Nova fotka gre v pregled (status "pending" na strežniku) — v javni
+    // grid se NE doda optimistično, ker je normalen obiskovalec še ne bi
+    // smel videti dokler je admin ne odobri.
     closeGalleryUploadModal();
-    showToast('Fotografija uspešno naložena! 📸');
-    const _cnt = document.getElementById('gallery-count');
-    if(_cnt) _cnt.textContent = _galleryPhotos.length+' fotografij';
-    requestAnimationFrame(renderGallery);
+    showToast('Fotografija poslana v pregled! Objavljena bo po odobritvi. 📸');
     ['gallery-title','gallery-caption','gallery-author'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
   } catch(e){
     showToast('Napaka: '+e.message);
@@ -2426,9 +2525,10 @@ async function galleryDelete(idx){
       method:'DELETE',
       headers:{ 'Authorization': 'Bearer '+pwd }
     });
-    if(res.status === 401){
+    if(res.status === 401 || res.status === 429){
       sessionStorage.removeItem('_galAdminPwd');
-      showToast('Napačno geslo.');
+      const data = await res.json().catch(()=>({}));
+      showToast(data.error || 'Napačno geslo.');
       return;
     }
     sessionStorage.setItem('_galAdminPwd', pwd);
@@ -2457,12 +2557,12 @@ function _renderLightbox(){
   if(img) img.src = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
   if(info){
     const date = p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString('sl-SI',{day:'numeric',month:'long',year:'numeric'}) : '';
-    const author = p.author && p.author!=='Anonimno' ? p.author : '';
-    const meta = [date, author, p.weather].filter(Boolean).join(' · ');
+    const author = p.author && p.author!=='Anonimno' ? _galEsc(p.author) : '';
+    const meta = [date, author, _galEsc(p.weather)].filter(Boolean).join(' · ');
     info.innerHTML = `
-      <div class="gallery-lb-title">${p.title||'Brez naslova'}</div>
+      <div class="gallery-lb-title">${_galEsc(p.title)||'Brez naslova'}</div>
       ${meta?`<div class="gallery-lb-meta">${meta}</div>`:''}
-      ${p.caption?`<div class="gallery-lb-caption">${p.caption}</div>`:''}
+      ${p.caption?`<div class="gallery-lb-caption">${_galEsc(p.caption)}</div>`:''}
     `;
   }
   const prev = document.getElementById('gallery-lb-prev');
