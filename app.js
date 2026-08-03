@@ -2415,6 +2415,95 @@ async function galleryReject(idx){
   }
 }
 
+// Enkratna migracija za fotke, naložene PRED uvedbo klientske pomanjšave
+// zgoraj — pobere vse javno odobrene fotke, jih po vrsti pomanjša in
+// zamenja prek /gallery/replace/{key} (ohrani naslov/opis/status). Poganja
+// se v brskalniku obiskovalca, ki ima admin geslo že shranjeno v tej seji
+// (isto geslo kot za Predlogi/brisanje) — gesla se nikoli ne pošilja meni.
+async function galleryOptimizeExisting(){
+  let pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd){
+    pwd = prompt('Geslo za optimizacijo:');
+    if(!pwd) return;
+  }
+  if(!confirm('Pomanjšaj vse obstoječe (prevelike) fotke v galeriji? To lahko traja nekaj minut.')) return;
+  const btn = document.getElementById('gallery-optimize-btn');
+  if(btn){ btn.disabled = true; }
+  try {
+    // Zberi vse fotke (ne le trenutno naložena stran v _galleryPhotos).
+    let all = [], cursor = null;
+    do {
+      let url = PROXY+'/gallery?category=general';
+      if(cursor) url += '&cursor='+encodeURIComponent(cursor);
+      const res = await fetch(url, { cache:'no-cache' });
+      const data = await res.json();
+      all = all.concat(data.photos || []);
+      cursor = data.truncated ? data.cursor : null;
+    } while(cursor);
+    const MIN_SIZE = 400*1024; // pod tem ni smiselno ponovno stiskati
+    const targets = all.filter(p => (p.size||0) > MIN_SIZE);
+    if(!targets.length){ showToast('Vse fotke so že dovolj majhne.'); return; }
+    let ok=0, fail=0, savedBytes=0;
+    for(const p of targets){
+      if(btn) btn.textContent = `Optimiziram… (${ok+fail+1}/${targets.length})`;
+      try {
+        const imgRes = await fetch(PROXY+'/gallery/img/'+encodeURIComponent(p.key));
+        const blob = await imgRes.blob();
+        const resized = await _galResizeImage(blob, 1600, 0.82);
+        if(resized.size >= blob.size){ ok++; continue; } // ni se izplačalo, pusti original
+        const fd = new FormData();
+        fd.append('photo', resized, 'photo.jpg');
+        const putRes = await fetch(PROXY+'/gallery/replace/'+encodeURIComponent(p.key), {
+          method:'POST', headers:{ 'Authorization':'Bearer '+pwd }, body: fd
+        });
+        if(putRes.status === 401 || putRes.status === 429){
+          sessionStorage.removeItem('_galAdminPwd');
+          showToast('Napačno geslo ali preveč poskusov — ustavljam.');
+          break;
+        }
+        if(!putRes.ok) throw new Error();
+        savedBytes += (blob.size - resized.size);
+        ok++;
+      } catch(e){ fail++; }
+    }
+    showToast(`Optimizirano ${ok}${fail?`, napaka pri ${fail}`:''} — prihranjeno ${(savedBytes/1024/1024).toFixed(1)} MB.`);
+    loadGallery();
+  } catch(e){
+    showToast('Napaka pri optimizaciji.');
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '🗜️ Optimiziraj'; }
+  }
+}
+
+// Fotke iz telefonskih kamer znašajo 2-5 MB pri 3000-4000px širine, za
+// prikaz v ~200px galerijski kartici pa je to popolnoma odveč — nalaganje
+// tolikih slik hkrati je bilo vzrok "čudnega osveževanja" pri scrollanju
+// skozi galerijo (brskalnik mora prenesti in dekodirati vse te MB-e). Vsaka
+// nalagana fotka gre zato skozi klientsko pomanjšavo (canvas) na razumno
+// največjo stranico, preden gre na strežnik.
+function _galResizeImage(file, maxDim, quality){
+  maxDim = maxDim || 1600; quality = quality || 0.82;
+  return new Promise(function(resolve){
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function(){
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      if(scale >= 1){ resolve(file); return; } // že dovolj majhna
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width*scale);
+      canvas.height = Math.round(img.height*scale);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function(blob){
+        resolve(blob ? new File([blob], file.name||'photo.jpg', {type:'image/jpeg'}) : file);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); resolve(file); }; // ob napaki pošlji original
+    img.src = url;
+  });
+}
+
 function galleryFileSelected(file){
   if(!file) return;
   if(!file.type.startsWith('image/')){
@@ -2447,10 +2536,13 @@ async function gallerySubmitUpload(){
   const prog = document.getElementById('gallery-progress');
   const fill = document.getElementById('gallery-progress-fill');
   btn.disabled = true;
+  btn.textContent = 'Pripravljam…';
+  if(prog){ prog.style.display='block'; fill.style.width='15%'; }
+  const resized = await _galResizeImage(_galleryPendingFile);
   btn.textContent = 'Nalagam…';
-  if(prog){ prog.style.display='block'; fill.style.width='30%'; }
+  if(prog){ fill.style.width='30%'; }
   const fd = new FormData();
-  fd.append('photo', _galleryPendingFile);
+  fd.append('photo', resized);
   fd.append('title',   document.getElementById('gallery-title')?.value?.trim() || '');
   fd.append('caption', document.getElementById('gallery-caption')?.value?.trim() || '');
   fd.append('author',  document.getElementById('gallery-author')?.value?.trim() || 'Anonimno');

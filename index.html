@@ -3108,7 +3108,10 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 
     <div class="gallery-count-row">
       <div class="gallery-count" id="gallery-count"></div>
-      <button class="gallery-pending-btn" onclick="galleryTogglePending()">🔒 Predlogi</button>
+      <div class="gallery-count-actions">
+        <button class="gallery-pending-btn" id="gallery-optimize-btn" onclick="galleryOptimizeExisting()">🗜️ Optimiziraj</button>
+        <button class="gallery-pending-btn" onclick="galleryTogglePending()">🔒 Predlogi</button>
+      </div>
     </div>
 
     <div class="gallery-pending" id="gallery-pending"></div>
