@@ -399,9 +399,9 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
   <!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->
-  <div class="daily-fact-card" id="daily-fact-card" data-date="2026-08-01" role="status">
+  <div class="daily-fact-card" id="daily-fact-card" data-date="2026-08-02" role="status">
     <span class="dfc-icon" aria-hidden="true">🏆</span>
-    <span class="dfc-text">Včeraj, 1. avgust, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — vročina <strong>36,8 °C</strong>. S tem je padel dosedanji rekord 32,3 °C iz leta 2020, v 6-letni zgodovini meritev postaje IREICA1.</span>
+    <span class="dfc-text">Včeraj, 2. avgust, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — vročina <strong>34,7 °C</strong>. S tem je padel dosedanji rekord 28,8 °C iz leta 2024, v 6-letni zgodovini meritev postaje IREICA1.</span>
     <button class="dfc-close" onclick="dismissDailyFact()" aria-label="Zapri" title="Skrij za danes">×</button>
   </div>
   <!-- WX-DAILY-FACT:END -->
@@ -513,9 +513,9 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     <canvas id="hero-canvas"></canvas>
     <div class="hero-top">
       <div class="hero-left">
-        <div class="condition-badge"><span id="cond-icon">—</span><span id="cond-label">—</span></div>
-        <div class="temp-huge"><span id="temp-val">—</span><span class="temp-unit-sup"> °C</span></div>
-        <div class="feels">Občutena temperatura: <span style="white-space:nowrap"><strong id="feels-val">—</strong> °C</span> <span id="feels-pill" class="feels-pill"></span> Temperatura rosišča: <span style="white-space:nowrap"><strong id="dewpt-hero">—</strong> °C</span></div>
+        <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
+        <div class="temp-huge"><span id="temp-val" class="skel-shimmer">—</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="feels">Občutena temperatura: <span style="white-space:nowrap"><strong id="feels-val" class="skel-shimmer">—</strong> °C</span> <span id="feels-pill" class="feels-pill"></span> Temperatura rosišča: <span style="white-space:nowrap"><strong id="dewpt-hero" class="skel-shimmer">—</strong> °C</span></div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
       </div>
       <div class="hero-icon" id="hero-icon"></div>
@@ -530,28 +530,28 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-val skel-shimmer" id="hs-humidity">—<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
         <span class="hm-lbl">Relativna vlažnost</span>
       </div>
       <div class="hm hm-pres" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-val skel-shimmer" id="hs-pressure">—<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
         <span class="hm-lbl">Zračni tlak</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
-        <span class="hm-val" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val skel-shimmer" id="hs-wind">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter</span>
       </div>
       <div class="hm hm-gust" id="hm-gust">
-        <span class="hm-val" id="hs-gust">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val skel-shimmer" id="hs-gust">—<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Sunki vetra</span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
-        <span class="hm-val" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
+        <span class="hm-val skel-shimmer" id="hs-rain-today">—<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
         <span class="hm-lbl">Padavine danes</span>
         <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">intenziteta: 0,0 mm/h</span>
       </div>
       <div class="hm hm-uv" id="hm-uv">
-        <span class="hm-val" id="hs-uv">—</span>
+        <span class="hm-val skel-shimmer" id="hs-uv">—</span>
         <span class="hm-lbl">UV indeks</span>
         <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
       </div>
@@ -571,19 +571,19 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-08-02T13:38">13:38</time>, 2. avgusta 2026): temperatura 33,0 °C, rosišče 18,0 °C, relativna vlažnost 41 %, veter 5,0 km/h (sunki 7,0 km/h), zračni tlak 1017 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>.</p>
+  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-08-03T06:54">06:54</time>, 3. avgusta 2026): temperatura 17,0 °C, rosišče 15,0 °C, relativna vlažnost 94 %, veter 0,0 km/h (sunki 0,0 km/h), zračni tlak 1017 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
-  <p class="wx-static" id="wx-record-watch">Včeraj (1. avgust) smo na Rečici ob Savinji postavili nov rekord za ta koledarski dan: <strong>36,8 °C</strong> — prejšnji rekord je bil 32,3 °C (2020), v 6-letni zgodovini meritev postaje IREICA1 na ta dan.</p>
+  <p class="wx-static" id="wx-record-watch">Včeraj (2. avgust) smo na Rečici ob Savinji postavili nov rekord za ta koledarski dan: <strong>34,7 °C</strong> — prejšnji rekord je bil 28,8 °C (2024), v 6-letni zgodovini meritev postaje IREICA1 na ta dan.</p>
   <!-- WX-RECORD-WATCH:END -->
 
   <!-- Day summary -->
   <div class="day-summary simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">—</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
-    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">—</span></span></div>
-    <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high" class="skel-shimmer">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time skel-shimmer" id="day-hi-time">—</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low" class="skel-shimmer">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time skel-shimmer" id="day-lo-time">—</span></span></div>
+    <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg" class="skel-shimmer">—</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- ── Zadnjih 7 dni ── -->
@@ -631,16 +631,22 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <span class="radar-time" id="mrad-time">—</span>
       <div class="radar-track" id="mrad-track" onclick="meteorecRadarSeek(event)"><div class="radar-track-fill" id="mrad-track-fill"></div></div>
     </div>
+    <div class="mrad-views">
+      <button class="radar-btn active" data-mrad-view="sirok" onclick="switchMeteorecRadarView('sirok')">Širše</button>
+      <button class="radar-btn" data-mrad-view="savinja" onclick="switchMeteorecRadarView('savinja')">Zgornja Savinjska</button>
+    </div>
     <div class="radar-legend">
       <div class="mrad-legend">
         <div class="mrad-bar" id="mrad-scale"></div>
         <div class="mrad-ticks" id="mrad-ticks"></div>
       </div>
       <span>mm/h</span>
-      <span style="margin-left:auto">Vira:
+      <span style="margin-left:auto">Padavine:
         <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">ARSO</a> in
         <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">EUMETNET OPERA</a>
-        (CC BY 4.0)</span>
+        (CC BY 4.0) · Zemljevid:
+        <a href="https://carto.com/attributions" target="_blank" rel="noopener nofollow" style="color:var(--blue)">CARTO</a>,
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener nofollow" style="color:var(--blue)">OpenStreetMap</a></span>
     </div>
   </div>
 
@@ -681,10 +687,10 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
           </g>
         </svg>
         <div>
-          <div class="ws-big"><span id="wind-speed">—</span><span class="ws-unit"> km/h</span></div>
-          <div class="wdir" id="wind-dir-lbl">—</div>
-          <div class="wgust">Sunki vetra: <span id="wind-gust">—</span> km/h</div>
-          <div class="beaufort-badge"><span id="bft-num">Beaufort: —</span><span id="bft-label">—</span></div>
+          <div class="ws-big"><span id="wind-speed" class="skel-shimmer">—</span><span class="ws-unit"> km/h</span></div>
+          <div class="wdir skel-shimmer" id="wind-dir-lbl">—</div>
+          <div class="wgust">Sunki vetra: <span id="wind-gust" class="skel-shimmer">—</span> km/h</div>
+          <div class="beaufort-badge"><span id="bft-num" class="skel-shimmer">Beaufort: —</span><span id="bft-label" class="skel-shimmer">—</span></div>
         </div>
       </div>
     </div>
@@ -693,10 +699,10 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="clabel">📊 Tlak</div>
       <div class="pressure-body">
         <div class="pressure-left">
-          <div class="cval" id="pressure-val">—<span class="unit"> hPa</span></div>
-          <div id="p-trend" class="p-trend t-flat" style="margin-top:.5rem">— stabilno</div>
+          <div class="cval skel-shimmer" id="pressure-val">—<span class="unit"> hPa</span></div>
+          <div id="p-trend" class="p-trend t-flat skel-shimmer" style="margin-top:.5rem">— stabilno</div>
           <div id="p-rate" class="p-rate"></div>
-          <div class="csub" id="pressure-label">—</div>
+          <div class="csub skel-shimmer" id="pressure-label">—</div>
         </div>
         <div class="pressure-right">
           <svg style="width:100%;display:block" viewBox="0 0 130 70">
@@ -771,25 +777,25 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   <div class="g4" style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel">🌧 Intenziteta padavin</div>
-      <div class="cval" id="rain-rate">—<span class="unit"> mm/h</span></div>
+      <div class="cval skel-shimmer" id="rain-rate">—<span class="unit"> mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
-      <div class="csub">Danes: <span id="rain-total">—</span> mm</div>
+      <div class="csub">Danes: <span id="rain-total" class="skel-shimmer">—</span> mm</div>
     </div>
     <div class="card">
       <div class="clabel">☀ UV indeks</div>
-      <div class="cval" id="uv-val">—</div>
+      <div class="cval skel-shimmer" id="uv-val">—</div>
       <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
-      <div class="csub" id="uv-label">—</div>
+      <div class="csub skel-shimmer" id="uv-label">—</div>
     </div>
     <div class="card">
       <div class="clabel">☀ Sončno sevanje</div>
-      <div class="cval" id="solar-val">—<span class="unit"> W/m²</span></div>
-      <div class="csub" id="solar-label">—</div>
+      <div class="cval skel-shimmer" id="solar-val">—<span class="unit"> W/m²</span></div>
+      <div class="csub skel-shimmer" id="solar-label">—</div>
     </div>
     <div class="card">
       <div class="clabel">💧 Temperatura rosišča</div>
-      <div class="cval" id="dewpt-val">—<span class="unit"> °C</span></div>
-      <div class="csub" id="dewpt-label">—</div>
+      <div class="cval skel-shimmer" id="dewpt-val">—<span class="unit"> °C</span></div>
+      <div class="csub skel-shimmer" id="dewpt-label">—</div>
     </div>
   </div>
 
@@ -2424,8 +2430,8 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="clabel">🔗 Oceanografski viri</div>
       <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
         <a href="https://www.nib.si/mbp/sl/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🇸🇮 NIB – Morska biološka postaja Piran</a>
-        <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">⚓ ARSO – pomorska napoved</a>
-        <a href="https://www.seatemperature.org/europe/adriatic-sea/piran.htm" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🌡 Temperatura morja – Piran</a>
+        <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/coast/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">⚓ ARSO – pomorska napoved</a>
+        <a href="https://www.seatemperature.org/europe/slovenia/pirano.htm" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🌡 Temperatura morja – Piran</a>
         <a href="https://www.windy.com/?waves,45.5,13.6,8" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🌊 Windy – valovanje</a>
         <a href="https://www.emodnet-physics.eu/map/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">📡 EMODnet – fizika morja</a>
         <a href="https://marine.copernicus.eu/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🛰 Copernicus Marine</a>
@@ -2740,7 +2746,31 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       </div>
       <div class="aifc-text loading" id="aifc-text">Nalagam napoved…</div>
       <div class="aifc-days" id="aifc-days"></div>
+      <!-- Uradna ARSO napoved za Slovenijo — ločeno od lokalnega besedila zgoraj,
+           da je jasno, kaj velja za Rečico in kaj za državo. -->
+      <div class="aifc-arso" id="aifc-arso" hidden>
+        <span class="aifc-arso-lbl" id="aifc-arso-lbl">ARSO</span>
+        <p class="aifc-arso-txt" id="aifc-arso-txt"></p>
+      </div>
       <div class="aifc-meta" id="aifc-meta"></div>
+    </div>
+
+    <!-- MTR — lastni model (MOS), poskusna napoved za dno doline -->
+    <div class="card chart-card" style="margin-bottom:1.25rem">
+      <div class="chart-hdr">
+        <span style="display:flex;align-items:center;gap:.4rem">
+          <span class="clabel" style="margin:0">📊 MTR — poskusna napoved</span>
+          <span class="aifc-badge mtr" id="mos-badge"></span>
+        </span>
+        <span class="chart-range" id="mos-updated">Nalaganje…</span>
+      </div>
+      <div class="mos-spark-row" id="mos-spark-row"></div>
+      <div id="mos-grid" class="mos-grid">
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+      </div>
+      <div class="mos-note" id="mos-note"></div>
+      <div class="txfc-source">Poskusno · Open-Meteo + popravek, naučen na meritvah postaje ·
+        <a href="/tocnost-napovedi/">kako se odreže</a></div>
     </div>
 
     <!-- Sky Strip -->
@@ -2821,7 +2851,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     <div class="card" style="margin-bottom:1rem">
       <div class="clabel">🔗 Jadransko morje — viri</div>
       <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
-        <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🇸🇮 ARSO — pomorska napoved</a>
+        <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/coast/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🇸🇮 ARSO — pomorska napoved</a>
         <a href="https://www.windy.com/?waves,45.5,13.6,8" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🌊 Windy — valovanje</a>
         <a href="https://www.meteologix.com/si/model-charts/00z/europe/wind-10m.html" target="_blank" rel="noopener nofollow" class="mtn-avk-link">💨 Meteologix — veter</a>
         <a href="https://www.navionics.com/weatherzone" target="_blank" rel="noopener nofollow" class="mtn-avk-link">⚓ Navionics</a>
@@ -2870,7 +2900,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="clabel">🔗 Planinska napoved — viri</div>
       <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
         <a href="https://www.gore-ljudje.net/informacije/vreme/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">⛰ Gore-Ljudje — vreme</a>
-        <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🇸🇮 ARSO — planinska napoved</a>
+        <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/mountain/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🇸🇮 ARSO — planinska napoved</a>
         <a href="https://www.lawinenwarndienst-bayern.de/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">⚠️ Nevarnost plazov (SI/AT)</a>
         <a href="https://www.windy.com/?46.38,13.84,9" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🌀 Windy — Triglav</a>
         <a href="https://www.bergfex.si/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🎿 Bergfex SI</a>
@@ -2923,7 +2953,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <a href="https://www.xcskies.com/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">☁️ XCSkies</a>
         <a href="https://www.burnair.ch/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🔥 Burnair</a>
         <a href="https://www.paraglidingmap.com/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🗺 ParaglidingMap</a>
-        <a href="https://www.xcontest.org/world/sl/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🏆 XContest SI</a>
+        <a href="https://www.xcontest.org/world/en/flights/#filter[country]=SI" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🏆 XContest SI</a>
         <a href="https://skysight.io/" target="_blank" rel="noopener nofollow" class="mtn-avk-link">🔭 SkySight</a>
       </div>
     </div>
@@ -3076,7 +3106,12 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <button class="gallery-pick-btn" onclick="event.stopPropagation();galleryOpenPicker()">Izberi datoteko</button>
     </div>
 
-    <div class="gallery-count" id="gallery-count"></div>
+    <div class="gallery-count-row">
+      <div class="gallery-count" id="gallery-count"></div>
+      <button class="gallery-pending-btn" onclick="galleryTogglePending()">🔒 Predlogi</button>
+    </div>
+
+    <div class="gallery-pending" id="gallery-pending"></div>
 
     <div class="gallery-grid" id="gallery-grid">
       <div class="gallery-empty"><div class="gallery-empty-icon">📷</div><div class="gallery-empty-text">Nalagam fotografije…</div></div>

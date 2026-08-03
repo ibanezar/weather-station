@@ -145,7 +145,7 @@ const CC = {
 
 // ── Utilities ─────────────────────────────────────────────
 function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d);}
-function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function set(id,v){const e=document.getElementById(id);if(e){e.textContent=v;e.classList.remove('skel-shimmer');}}
 function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
@@ -191,6 +191,7 @@ function feelsStyle(t){
 function beaufort(kmh){const s=[[1,'0','Tišina'],[5,'1','Tih zrak'],[11,'2','Lahek vetrič'],[19,'3','Blagi vetrič'],[28,'4','Zmerni vetrič'],[38,'5','Svež veter'],[49,'6','Močan veter'],[61,'7','Skoraj vihar'],[74,'8','Vihar'],[88,'9','Močan vihar'],[102,'10','Nevihta'],[117,'11','Silovit vihar'],[999,'12','Orkan']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Hurricane'};}
 function countUp(id,target,dec,unitHTML,dur){
   const el=document.getElementById(id);if(!el||isNaN(Number(target)))return;
+  el.classList.remove('skel-shimmer');
   const uHTML=unitHTML||'',t0=performance.now();
   const step=(now)=>{const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);el.innerHTML=(Number(target)*ease).toFixed(dec)+uHTML;if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
@@ -1349,11 +1350,11 @@ function checkThresholdAlerts(obs){
 
 function checkAlerts(obs){
   const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,base=[];
-  if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) base.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
-  else if(m.temp<=3) base.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
+  if(m.temp!=null&&m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp!=null&&m.temp<=0) base.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
+  else if(m.temp!=null&&m.temp<=3) base.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
   if(uv>=11)         base.push({cls:'a-uv',icon:'☀️',title:'Ekstremni UV — UV '+uv,desc:'Izogibajte se bivanju zunaj. Nujen SPF 50+ in senca.'});
   else if(uv>=8)     base.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
-  if(m.temp>=35)     base.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
+  if(m.temp!=null&&m.temp>=35)     base.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
   if(wind>=50)       base.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
   // Preserve special-tagged alerts (nowcast, user thresholds)
   _liveAlerts=[..._liveAlerts.filter(a=>a._precipNowcast||a._threshold),...base];
@@ -1913,7 +1914,7 @@ function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const tempEl=document.getElementById('temp-val');
-  if(tempEl){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
+  if(tempEl&&m.temp!=null){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
@@ -1923,7 +1924,7 @@ function applyObs(obs){
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   // UV hero card — value + color
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
-  const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;}
+  const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;uvEl.classList.remove('skel-shimmer');}
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
@@ -2211,8 +2212,14 @@ document.addEventListener('click',e=>{if(!e.target.closest('.tab-dropdown'))clos
 // ══════════════════════════════════════════════════════
 let _galleryPhotos = [];
 let _galleryLoaded = false;
+let _galleryCursor = null;
+let _galleryTruncated = false;
 let _lbIdx = 0;
 let _galleryPendingFile = null;
+
+function _galEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 function galleryOpenPicker(){
   const inp = document.createElement('input');
@@ -2233,13 +2240,18 @@ function initGallery(){
   }
 }
 
-async function loadGallery(){
+async function loadGallery(reset){
   const grid = document.getElementById('gallery-grid');
   const cnt = document.getElementById('gallery-count');
+  if(reset !== false){ _galleryPhotos = []; _galleryCursor = null; }
   try {
-    const res = await fetch(PROXY+'/gallery?category=general', { cache:'no-cache' });
+    let url = PROXY+'/gallery?category=general';
+    if(_galleryCursor) url += '&cursor='+encodeURIComponent(_galleryCursor);
+    const res = await fetch(url, { cache:'no-cache' });
     const data = await res.json();
-    _galleryPhotos = data.photos || [];
+    _galleryPhotos = _galleryPhotos.concat(data.photos || []);
+    _galleryTruncated = !!data.truncated;
+    _galleryCursor = data.cursor || null;
     if(cnt) cnt.textContent = _galleryPhotos.length ? _galleryPhotos.length+' fotografij' : '';
     renderGallery();
   } catch(e){
@@ -2247,27 +2259,126 @@ async function loadGallery(){
   }
 }
 
+function galleryLoadMore(){ loadGallery(false); }
+
 function renderGallery(){
   const grid = document.getElementById('gallery-grid');
   if(!grid) return;
   if(!_galleryPhotos.length){
-    grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">📷</div><div class="gallery-empty-text">Še ni fotografij. Bodi prvi!</div></div>';
+    grid.innerHTML='<div class="gallery-empty"><div class="gallery-empty-icon">📷</div><div class="gallery-empty-text">Še ni fotografij. Bodi prvi!</div><button class="gallery-pick-btn" onclick="galleryOpenPicker()">📤 Dodaj fotografijo</button></div>';
     return;
   }
-  grid.innerHTML = _galleryPhotos.map((p,i)=>{
+  const cards = _galleryPhotos.map((p,i)=>{
     const imgUrl = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
     const date = p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString('sl-SI',{day:'numeric',month:'long',year:'numeric'}) : '';
-    const author = p.author && p.author!=='Anonimno' ? p.author : '';
+    const author = p.author && p.author!=='Anonimno' ? _galEsc(p.author) : '';
     const meta = [date, author].filter(Boolean).join(' · ');
+    const title = _galEsc(p.title) || 'Brez naslova';
     return `<div class="gallery-card" onclick="openGalleryLightbox(${i})">
-      <img src="${imgUrl}" alt="${p.title||''}" loading="lazy">
+      <img src="${imgUrl}" alt="${title}" loading="lazy">
+      ${p.weather?`<div class="gallery-card-chip">${_galEsc(p.weather)}</div>`:''}
       <div class="gallery-card-overlay">
-        <div class="gallery-card-title">${p.title||'Brez naslova'}</div>
+        <div class="gallery-card-title">${title}</div>
         ${meta?`<div class="gallery-card-meta">${meta}</div>`:''}
       </div>
       <button class="gallery-card-del" title="Izbriši" onclick="event.stopPropagation();galleryDelete(${i})">✕</button>
     </div>`;
   }).join('');
+  const more = _galleryTruncated ? '<button class="gallery-more-btn" onclick="galleryLoadMore()">Naloži več</button>' : '';
+  grid.innerHTML = cards + more;
+}
+
+let _galleryPending = [];
+
+async function galleryTogglePending(){
+  const panel = document.getElementById('gallery-pending');
+  if(!panel) return;
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    return;
+  }
+  let pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd){
+    pwd = prompt('Geslo za pregled predlogov:');
+    if(!pwd) return;
+  }
+  try {
+    const res = await fetch(PROXY+'/gallery/pending', { headers:{ 'Authorization':'Bearer '+pwd } });
+    if(res.status === 401 || res.status === 429){
+      sessionStorage.removeItem('_galAdminPwd');
+      const data = await res.json().catch(()=>({}));
+      showToast(data.error || 'Napačno geslo.');
+      return;
+    }
+    sessionStorage.setItem('_galAdminPwd', pwd);
+    const data = await res.json();
+    _galleryPending = data.photos || [];
+    _renderGalleryPending();
+    panel.classList.add('open');
+  } catch(e){
+    showToast('Napaka pri nalaganju predlogov.');
+  }
+}
+
+function _renderGalleryPending(){
+  const panel = document.getElementById('gallery-pending');
+  if(!panel) return;
+  if(!_galleryPending.length){
+    panel.innerHTML = '<div class="gallery-pending-empty">Ni čakajočih predlogov.</div>';
+    return;
+  }
+  panel.innerHTML = _galleryPending.map((p,i)=>{
+    const imgUrl = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
+    return `<div class="gallery-pending-item">
+      <img src="${imgUrl}" alt="">
+      <div class="gallery-pending-info">
+        <div class="gallery-pending-title">${_galEsc(p.title)||'Brez naslova'}</div>
+        <div class="gallery-pending-meta">${_galEsc(p.author)||'Anonimno'}</div>
+      </div>
+      <button class="gallery-pending-approve" onclick="galleryApprove(${i})">✓ Odobri</button>
+      <button class="gallery-pending-reject" onclick="galleryReject(${i})">✕ Zavrni</button>
+    </div>`;
+  }).join('');
+}
+
+async function galleryApprove(idx){
+  const photo = _galleryPending[idx];
+  if(!photo) return;
+  const pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd) return;
+  try {
+    const res = await fetch(PROXY+'/gallery/approve/'+encodeURIComponent(photo.key), {
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+pwd }
+    });
+    if(!res.ok) throw new Error();
+    _galleryPending.splice(idx, 1);
+    _renderGalleryPending();
+    showToast('Fotografija odobrena.');
+    loadGallery();
+  } catch(e){
+    showToast('Napaka pri odobritvi.');
+  }
+}
+
+async function galleryReject(idx){
+  const photo = _galleryPending[idx];
+  if(!photo) return;
+  if(!confirm('Zavrni in izbriši ta predlog?')) return;
+  const pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd) return;
+  try {
+    const res = await fetch(PROXY+'/gallery/delete/'+encodeURIComponent(photo.key), {
+      method:'DELETE',
+      headers:{ 'Authorization':'Bearer '+pwd }
+    });
+    if(!res.ok) throw new Error();
+    _galleryPending.splice(idx, 1);
+    _renderGalleryPending();
+    showToast('Predlog zavrnjen.');
+  } catch(e){
+    showToast('Napaka pri zavrnitvi.');
+  }
 }
 
 function galleryFileSelected(file){
@@ -2317,22 +2428,11 @@ async function gallerySubmitUpload(){
     const data = await res.json();
     if(!res.ok || !data.ok) throw new Error(data.error || 'Napaka pri nalaganju');
     if(fill) fill.style.width='100%';
-    // Optimistic update — dodamo sliko direktno brez re-fetcha (nič ne flicera)
-    _galleryPhotos.unshift({
-      key: data.key,
-      uploaded: new Date().toISOString(),
-      uploadedAt: new Date().toISOString(),
-      contentType: _galleryPendingFile.type,
-      title:   fd.get('title')   || '',
-      caption: fd.get('caption') || '',
-      author:  fd.get('author')  || 'Anonimno',
-      weather: chip
-    });
+    // Nova fotka gre v pregled (status "pending" na strežniku) — v javni
+    // grid se NE doda optimistično, ker je normalen obiskovalec še ne bi
+    // smel videti dokler je admin ne odobri.
     closeGalleryUploadModal();
-    showToast('Fotografija uspešno naložena! 📸');
-    const _cnt = document.getElementById('gallery-count');
-    if(_cnt) _cnt.textContent = _galleryPhotos.length+' fotografij';
-    requestAnimationFrame(renderGallery);
+    showToast('Fotografija poslana v pregled! Objavljena bo po odobritvi. 📸');
     ['gallery-title','gallery-caption','gallery-author'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
   } catch(e){
     showToast('Napaka: '+e.message);
@@ -2357,9 +2457,10 @@ async function galleryDelete(idx){
       method:'DELETE',
       headers:{ 'Authorization': 'Bearer '+pwd }
     });
-    if(res.status === 401){
+    if(res.status === 401 || res.status === 429){
       sessionStorage.removeItem('_galAdminPwd');
-      showToast('Napačno geslo.');
+      const data = await res.json().catch(()=>({}));
+      showToast(data.error || 'Napačno geslo.');
       return;
     }
     sessionStorage.setItem('_galAdminPwd', pwd);
@@ -2388,12 +2489,12 @@ function _renderLightbox(){
   if(img) img.src = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
   if(info){
     const date = p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString('sl-SI',{day:'numeric',month:'long',year:'numeric'}) : '';
-    const author = p.author && p.author!=='Anonimno' ? p.author : '';
-    const meta = [date, author, p.weather].filter(Boolean).join(' · ');
+    const author = p.author && p.author!=='Anonimno' ? _galEsc(p.author) : '';
+    const meta = [date, author, _galEsc(p.weather)].filter(Boolean).join(' · ');
     info.innerHTML = `
-      <div class="gallery-lb-title">${p.title||'Brez naslova'}</div>
+      <div class="gallery-lb-title">${_galEsc(p.title)||'Brez naslova'}</div>
       ${meta?`<div class="gallery-lb-meta">${meta}</div>`:''}
-      ${p.caption?`<div class="gallery-lb-caption">${p.caption}</div>`:''}
+      ${p.caption?`<div class="gallery-lb-caption">${_galEsc(p.caption)}</div>`:''}
     `;
   }
   const prev = document.getElementById('gallery-lb-prev');
@@ -2537,7 +2638,7 @@ function setPeriodBtns(period,loading){
 
 function showHistLoading(){
   const t=document.getElementById('history-tbody');
-  if(t)t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--muted)">Nalaganje…</td></tr>';
+  if(t)t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem"><span class="skel-shimmer">Nalaganje…</span></td></tr>';
 }
 
 function updateAccumInfo(shown,total){
@@ -3424,7 +3525,8 @@ function drawWindRose(observations){
 // Zemljevida ne gradimo, dokler kartica ne pride na zaslon — Leaflet je
 // večji od vsega ostalega na strani skupaj.
 let _mradMap=null,_mradFrames=[],_mradIdx=-1,_mradTimer=null,_mradPoll=null,
-    _mradPlaying=true,_mradBounds=null,_mradLast='';
+    _mradPlaying=true,_mradBounds=null,_mradLast='',
+    _mradView='sirok',_mradViewApplied='';
 const MRAD_OPACITY=.82;
 
 async function initMeteorecRadar(){
@@ -3435,12 +3537,14 @@ async function initMeteorecRadar(){
     await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
   }
   _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10}).setView([LAT,LON],7);
-  L.tileLayer(isDark()
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd'}).addTo(_mradMap);
-  L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2})
-    .addTo(_mradMap).bindPopup('IREICA1 · Rečica ob Savinji');
+  // Voyager namesto temne podlage: reliefno obarvan, z imeni krajev, in dovolj
+  // svetel, da se pod padavinami še vidi, kje si. V temni temi ga po CSS malo
+  // pridušimo, sicer v temni kartici žari.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd',className:'mrad-tiles'}).addTo(_mradMap);
+  L.circleMarker([LAT,LON],{radius:6,color:'#fff',fillColor:'#2563eb',fillOpacity:1,weight:2})
+    .addTo(_mradMap)
+    .bindTooltip('Rečica ob Savinji',{permanent:true,direction:'right',offset:[8,0],className:'mrad-label'});
 
   await refreshMeteorecRadar();
   // Nov posnetek je vsakih 5 minut; ko je zavihek skrit, ne osvežujemo.
@@ -3453,11 +3557,21 @@ async function initMeteorecRadar(){
 async function refreshMeteorecRadar(){
   const tEl=document.getElementById('mrad-time');
   try{
-    const m=await(await fetch(PROXY+'/radar-composite.json')).json();
+    const m=await(await fetch(PROXY+'/radar-composite.json?pogled='+_mradView)).json();
     const list=(m.okvirji||[]).filter(f=>f&&f.zig);
     if(!list.length)throw new Error('ni okvirjev');
     _mradBounds=m.meje;
     renderMeteorecRadarLegend(m.legenda);
+    // Ob prvem prikazu in ob vsaki menjavi pogleda zemljevid poravnamo na
+    // izsek; ozki pogled prenese večji približek, ker je risan finejše.
+    // Približek je izbran tako, da izsek napolni kartico; fitBounds bi se
+    // poravnal po nižji stranici in ob strani pokazal zemljevid, kamor slika
+    // ne sega, kar je videti kot da se je radar ustavil sredi ničesar.
+    if(_mradViewApplied!==_mradView){
+      _mradMap.setMaxZoom(_mradView==='sirok'?10:11);
+      _mradMap.setView([LAT,LON],_mradView==='sirok'?7:10);
+      _mradViewApplied=_mradView;
+    }
     if(list[list.length-1].zig===_mradLast)return;   // nič novega
     _mradLast=list[list.length-1].zig;
 
@@ -3485,7 +3599,7 @@ function mradLoadFrame(i){
   const f=_mradFrames[i];
   if(!f||f.layer)return Promise.resolve();
   return new Promise(res=>{
-    const layer=L.imageOverlay(PROXY+'/radar-composite?t='+encodeURIComponent(f.zig),
+    const layer=L.imageOverlay(PROXY+'/radar-composite?pogled='+_mradView+'&t='+encodeURIComponent(f.zig),
       _mradBounds,{opacity:0,interactive:false});
     layer.once('load',()=>{f.ready=true;res();});
     layer.once('error',()=>{f.err=true;res();});
@@ -3527,6 +3641,20 @@ function startMeteorecRadarAnim(){
     showMeteorecRadarFrame(i);
     if(i===_mradFrames.length-1)hold=3;
   },450);
+}
+
+// Preklop med širokim in dolinskim izsekom. Okvirji so za oba isti posnetki,
+// a druge slike, zato plasti pobrišemo in naložimo znova.
+function switchMeteorecRadarView(id){
+  if(id===_mradView||!_mradMap)return;
+  _mradView=id;
+  document.querySelectorAll('[data-mrad-view]').forEach(b=>
+    b.classList.toggle('active',b.dataset.mradView===id));
+  clearInterval(_mradTimer);_mradTimer=null;
+  _mradFrames.forEach(f=>{if(f.layer)_mradMap.removeLayer(f.layer);});
+  _mradFrames=[];_mradIdx=-1;_mradLast='';
+  const t=document.getElementById('mrad-time');if(t)t.textContent='—';
+  refreshMeteorecRadar();
 }
 
 function toggleMeteorecRadarPlay(){
@@ -5425,7 +5553,7 @@ function _yrIcon(sym){
 }
 
 async function fetchAIForecast(force=false){
-  const CACHE_KEY='aifc-v8',CACHE_TTL=30*60*1000;
+  const CACHE_KEY='aifc-v9',CACHE_TTL=30*60*1000;
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -5457,11 +5585,14 @@ function _renderAIFC(data){
   const metaEl=document.getElementById('aifc-meta');
   const srcBadge=document.getElementById('aifc-src-badge');
   const SL_DS=['ned','pon','tor','sre','čet','pet','sob'];
-  if(srcBadge&&data.source){srcBadge.textContent=data.source;}
+  // Značka opisuje vir vodilnega odstavka — ta je zdaj vedno lokalni yr.no.
+  // ARSO napoved za Slovenijo ima svojo oznako v #aifc-arso.
+  if(srcBadge){srcBadge.textContent=data.source||'yr.no';srcBadge.className='aifc-badge yr';}
   if(textEl){
-    if(data.text){
+    const lead=data.local||data.text;
+    if(lead){
       textEl.className='aifc-text';
-      textEl.textContent=data.text;
+      textEl.textContent=lead;
     }else if(data.summaries?.length){
       const s=data.summaries;
       const lines=[];
@@ -5473,20 +5604,52 @@ function _renderAIFC(data){
   }
   if(daysEl&&data.summaries?.length){
     const today=_localDateStr(new Date());
-    daysEl.innerHTML=data.summaries.slice(0,7).map((s,i)=>{
+    const tomorrow=_localDateStr(new Date(Date.now()+864e5));
+    const week=data.summaries.slice(0,7);
+    // Razpon dneva glede na najhladnejši/najtoplejši dan v tednu, da je na
+    // prvi pogled vidno, kateri dnevi izstopajo (topli/hladni).
+    const los=week.map(s=>s.tmin).filter(v=>v!=null);
+    const his=week.map(s=>s.tmax).filter(v=>v!=null);
+    const weekMin=los.length?Math.min(...los):null;
+    const weekRange=(weekMin!=null&&his.length)?Math.max(Math.max(...his)-weekMin,1):null;
+    daysEl.innerHTML=week.map(s=>{
       const dt=new Date(s.date+'T12:00:00');
-      const lbl=i===0?'Danes':i===1?'Jutri':SL_DS[dt.getDay()];
+      // Oznaka iz datuma, ne iz indeksa: tik pred polnočjo yr.no vrne kot prvi
+      // dan že jutrišnjega, in "Danes" bi pristalo na napačni ploščici.
+      // s.partial = dnevni vrh je že mimo, zato max ni več smiseln in
+      // ploščica pokaže samo nocojšnji minimum.
+      const lbl=s.partial?'Nocoj':s.date===today?'Danes':s.date===tomorrow?'Jutri':SL_DS[dt.getDay()];
+      const temps=s.partial
+        ?`<span class="aifc-day-tlo">${s.tmin!=null?Math.round(s.tmin)+'°':'—'}</span>`
+        :`${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span>`;
+      const bar=(!s.partial&&weekRange&&s.tmin!=null&&s.tmax!=null)
+        ?`<div class="aifc-day-bar"><span class="aifc-day-bar-fill" style="left:${((s.tmin-weekMin)/weekRange*100).toFixed(0)}%;width:${Math.max((s.tmax-s.tmin)/weekRange*100,8).toFixed(0)}%"></span></div>`
+        :'';
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
 <div class="aifc-day-icon">${_yrImg(s.symbol,28)}</div>
-<div class="aifc-day-t">${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span></div>
+<div class="aifc-day-t">${temps}</div>
+${bar}
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 </div>`;
     }).join('');
   }
+  const arsoEl=document.getElementById('aifc-arso');
+  if(arsoEl){
+    const txtEl=document.getElementById('aifc-arso-txt');
+    const lblEl=document.getElementById('aifc-arso-lbl');
+    if(data.arso){
+      if(lblEl)lblEl.textContent=data.arsoTitle||'ARSO';
+      if(txtEl)txtEl.textContent=data.arso;
+      arsoEl.hidden=false;
+    }else{
+      arsoEl.hidden=true;
+    }
+  }
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
-    metaEl.textContent=(data.source||'yr.no')+(t?' · '+t:'');
+    const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
+    metaEl.textContent=src+(t?' · 🕐 '+t:'');
   }
 }
 
@@ -5541,6 +5704,127 @@ async function fetchTextForecast(){
     if(g)g.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved trenutno ni na voljo.</div>';
     console.warn('TextForecast:',e);
   }
+}
+
+/* ── Naš model (MOS) ────────────────────────────────────────────────────────
+   Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
+   Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
+   kar je model prispeval, in edino, po čemer se loči od že prikazanih napovedi.
+   Kartica ni simple-keep, zato gre klic skozi runAdvancedOnly(). */
+async function fetchMosForecast(){
+  const grid=document.getElementById('mos-grid');
+  if(!grid)return;
+  try{
+    const res=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const days=data.days||[];
+    if(!days.length)throw new Error('brez dni');
+
+    const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
+    const dayLabel=d=>{
+      const date=new Date(d.date+'T12:00:00');
+      return d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
+    };
+    grid.innerHTML='';
+    days.forEach(d=>{
+      const lbl=dayLabel(d);
+      const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+      const dmax=Number.isFinite(d.d_tmax)?d.d_tmax:null;
+      const dmin=Number.isFinite(d.d_tmin)?d.d_tmin:null;
+      const diff=v=>v===null?'':(v>0?'+':'')+v.toFixed(1).replace('.',',');
+
+      const card=document.createElement('div');
+      card.className='mos-card';
+      const dec=v=>fmt(v).replace('.',',');
+      card.title='Open-Meteo napoveduje '+dec(d.om_tmax)+' / '+dec(d.om_tmin)+' °C'
+        +(dmax!==null?' · popravek MTR '+diff(dmax)+' / '+diff(dmin)+' °C':'');
+      card.innerHTML=
+        '<div class="mos-lbl">'+lbl+'</div>'+
+        '<div class="mos-temp"><span class="mos-th">'+Math.round(d.tmax)+'°</span>'+
+        '<span style="color:var(--muted);font-size:.74rem">/</span>'+
+        '<span class="mos-tl">'+Math.round(d.tmin)+'°</span></div>'+
+        (dmax!==null?'<div class="mos-diff">proti Open-Meteu '+diff(dmax)+' / '+diff(dmin)+' °C</div>':'')+
+        (pop!==null?'<div class="mos-pop">🌧 '+pop+' % verj. dežja</div>':'');
+      grid.appendChild(card);
+    });
+
+    drawMosSpark(days,days.map(dayLabel));
+
+    const badge=document.getElementById('mos-badge');
+    if(badge){
+      const major=(data.model_version||'').split('.')[0];
+      badge.textContent=major?'v'+major:'';
+    }
+    const note=document.getElementById('mos-note');
+    if(note){
+      const r=data.train_range||{};
+      note.textContent='MTR (Meteorec) je poskusni model za to dolino: Open-Meteo kot vhod, popravek naučen na meritvah postaje'
+        +(r.from&&r.to?' ('+r.from+' → '+r.to+')':'')
+        +'. Količine padavin MTR ne popravlja — za to ostaja Open-Meteo.';
+    }
+    const upd=document.getElementById('mos-updated');
+    if(upd&&data.generated_at){
+      const t=new Date(data.generated_at);
+      upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
+        +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    }
+  }catch(e){
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved MTR trenutno ni na voljo.</div>';
+    const spark=document.getElementById('mos-spark-row');
+    if(spark)spark.innerHTML='';
+    const upd=document.getElementById('mos-updated');
+    if(upd)upd.textContent='ni na voljo';
+    console.warn('MOS:',e);
+  }
+}
+
+/* Dva majhna sparkline grafa (Tmax, Tmin): polna črta MTR, črtkana Open-Meteo.
+   Samo 3 točke — smoothPath ni potreben, navadna lomljena črta je jasnejša. */
+function drawMosSpark(days,labels){
+  const row=document.getElementById('mos-spark-row');
+  if(!row)return;
+  row.innerHTML='';
+  if(days.length<2)return; // ena sama točka ni graf
+
+  const VW=140,VH=54,pad={t:6,r:4,b:14,l:4};
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const xS=i=>pad.l+(days.length===1?cw/2:i/(days.length-1)*cw);
+
+  [{key:'tmax',omKey:'om_tmax',lbl:'Tmax',color:'#f87171'},
+   {key:'tmin',omKey:'om_tmin',lbl:'Tmin',color:CC.tempLine}].forEach(spec=>{
+    const vals=days.map(d=>d[spec.key]).concat(days.map(d=>d[spec.omKey])).filter(Number.isFinite);
+    if(!vals.length)return;
+    const lo=Math.min(...vals),hi=Math.max(...vals);
+    const span=Math.max(hi-lo,1);
+    const yS=v=>pad.t+(1-(v-lo)/span)*ch;
+
+    const col=document.createElement('div');
+    col.className='mos-spark-col';
+    col.innerHTML='<div class="mos-spark-lbl">'+spec.lbl+'</div>';
+
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+    const mtrPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.key])}));
+    const omPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.omKey])}));
+    const toLine=pts=>'M '+pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ');
+
+    mkSVG(svg,'path',{d:toLine(omPts),fill:'none',stroke:spec.color,'stroke-width':'1.5',
+      'stroke-dasharray':'3,2',opacity:'.45'});
+    mkSVG(svg,'path',{d:toLine(mtrPts),fill:'none',stroke:spec.color,'stroke-width':'2',
+      'stroke-linecap':'round'});
+    mtrPts.forEach(p=>mkSVG(svg,'circle',{cx:p.x,cy:p.y,r:'2',fill:spec.color}));
+    labels.forEach((lbl,i)=>{
+      const t=mkSVG(svg,'text',{x:xS(i),y:VH-2,'text-anchor':i===0?'start':(i===labels.length-1?'end':'middle'),
+        'font-size':'7','font-family':'JetBrains Mono,monospace',fill:CC.label});
+      t.textContent=lbl.replace('Jutri','jut').split(' ')[0];
+    });
+
+    col.appendChild(svg);
+    row.appendChild(col);
+  });
 }
 
 function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}
@@ -14488,6 +14772,7 @@ async function init(){
     fetchForecastExtras();
     fetchAndDrawSkyStrip();
     fetchComingUp();
+    runAdvancedOnly(()=>fetchMosForecast());
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
@@ -15589,7 +15874,7 @@ function _buildOcnTides(m){
   el.innerHTML=`<div class="chart-svg-wrap">${svg}</div><div style="margin-top:.5rem">${evHtml}
     <div class="ocn-row"><span style="color:var(--muted)">Amplituda plimovanja</span><b>${range} m</b></div>
     <div class="ocn-row"><span style="color:var(--muted)">Tip plimovanja</span><b>${tidalType}</b></div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/sea/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.4rem;line-height:1.5">Za Koper je značilno mikroplimovanje (amplituda do ~0,7 m). Prikaz temelji na harmonskem modelu (M2 + S2 + K1 + O1) in je izključno <em>informativne</em> narave. Za natančne pomorske napovedi spremljajte uradne podatke agencije <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/coast/" target="_blank" style="color:var(--blue)">ARSO</a>.</div>
   </div>`;
 }
 
@@ -16278,7 +16563,7 @@ function _buildGoreTriglav({triglav}){
   html+='</div>';
   html+=`<div class="mtn-summit-info">
     <b>Opomba:</b> Temperature so modelsko prilagojene na višino vrha Triglava (2864 m) z metodo statističnega zniževanja (Open-Meteo). Za operativno planinarjenje vedno preveri
-    <a href="https://meteo.arso.gov.si/met/sl/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
+    <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
   </div>`;
   el.innerHTML=html;
 }

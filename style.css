@@ -140,7 +140,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   transition:opacity .5s;
   max-width:300px;line-height:1.4;
 }
-.theme-btn{position:fixed;top:1rem;right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s;line-height:1}
+/* --ticker-h nastavlja _syncAlertBarHeight() v app.js; brez tega gumb sedi
+   čez gumb za zapiranje ARSO traku (.alerts-wrap ima nižji z-index). */
+.theme-btn{position:fixed;top:calc(1rem + var(--ticker-h,0px));right:1rem;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);transition:box-shadow .2s,background .2s,transform .15s,top .2s;line-height:1}
 .theme-btn:hover{box-shadow:var(--card-shadow-h);transform:scale(1.08)}
 .theme-btn:active{transform:scale(.93)}
 
@@ -320,7 +322,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
 [data-theme="light"] .card:hover{background:rgba(255,255,255,.99)}
 .clabel{font-size:.72rem;letter-spacing:.10em;text-transform:uppercase;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;transition:color .35s;font-weight:600;opacity:.85}
-.cval{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text)}
+.cval{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:2rem;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
 .unit{font-size:.78rem;color:var(--muted);margin-left:.15em}
 .csub{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 
@@ -337,7 +339,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 /* Hero metrics strip */
 .hero-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:.65rem;padding-top:1.1rem;border-top:1px solid var(--border)}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
-.hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15}
+.hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 .hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-gust{--hm-accent:var(--cyan)}.hm-rain{--hm-accent:var(--blue)}.hm-uv{--hm-accent:var(--amber)}
 /* Live pulse animations */
@@ -353,7 +355,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .feels-pill{display:inline-flex;align-items:center;font-size:.72rem;padding:2px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
 .condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--blue);letter-spacing:.06em;margin-bottom:1rem;width:fit-content;transition:background .35s}
 #cond-icon{font-size:1rem}
-.temp-huge{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start}
+.temp-huge{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
 .temp-unit-sup{font-size:.28em;color:var(--muted);margin-top:.3em;font-weight:600}
 /* Hero icon — večja, centrirana v praznem prostoru, rahlo "živa" */
 .hero-icon{display:flex;align-items:center;justify-content:center;flex:1 1 auto}
@@ -1027,7 +1029,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .ds-item{flex:1;padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:.3rem;position:relative}
 .ds-item+.ds-item::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:var(--day-divider)}
 .ds-arrow{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
-.ds-temp{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1;color:var(--text)}
+.ds-temp{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:300;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums}
 .ds-unit{font-size:.7rem;color:var(--muted);margin-left:.1em}
 .ds-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 .ds-time{font-family:'JetBrains Mono',monospace;font-weight:300}
@@ -1037,7 +1039,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 
 /* Wind */
 .wind-body{display:flex;align-items:center;gap:1.5rem}
-.ws-big{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:300;line-height:1;color:var(--text)}
+.ws-big{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:300;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
 .ws-unit{font-size:.8rem;color:var(--muted);margin-left:3px}
 .wdir{font-size:.8rem;color:var(--purple);margin-top:.3rem;letter-spacing:.05em;font-weight:500}
 .wgust{font-size:.76rem;color:var(--muted);margin-top:.3rem}
@@ -1514,6 +1516,17 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .mrad-bar i{display:block;height:100%}
 .mrad-ticks{display:grid;font-size:.58rem;color:var(--muted);line-height:1}
 .mrad-ticks span{text-align:left}
+.mrad-views{display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap}
+.radar-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(37,99,235,.1)}
+/* Podlaga v temni temi: pridušena, da ne žari izpod padavin. */
+:root[data-theme="dark"] .mrad-tiles{filter:brightness(.78) saturate(.85) contrast(1.05)}
+/* Leafletov list se naloži za našim, zato je za oznako potrebna višja
+   specifičnost — sicer prevlada privzeti bel oblaček. */
+.leaflet-tooltip.mrad-label{background:rgba(15,20,32,.85);border:0;box-shadow:none;color:#fff;
+  font-size:.66rem;font-weight:600;padding:2px 7px;border-radius:9px;white-space:nowrap}
+.leaflet-tooltip.mrad-label::before{display:none}
+:root[data-theme="light"] .leaflet-tooltip.mrad-label{background:rgba(255,255,255,.92);color:#111827;
+  box-shadow:0 1px 3px rgba(0,0,0,.25)}
 #micro-map{width:100%;height:360px;background:var(--fc-bg);border-radius:14px}
 .micromap-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#1d4ed8,#60a5fa,#e2e8f0,#fca5a5,#dc2626)}
 .micromap-pop{font-size:.78rem;line-height:1.5}
@@ -2087,6 +2100,26 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
+
+/* Naš model (MOS) — poskusna napoved, D+1..D+3. Slog sledi družini .txfc-*,
+   le da so kartice tri in vsaka nosi še razliko do Open-Meteo. */
+.mos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.25rem;min-height:96px}
+.mos-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.7rem .5rem .65rem;display:flex;flex-direction:column;align-items:center;gap:.22rem;text-align:center;transition:background .2s,box-shadow .2s;cursor:default}
+.mos-card:hover{background:var(--card-bg);box-shadow:var(--card-shadow-h)}
+.mos-lbl{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mos-temp{font-family:'JetBrains Mono',monospace;font-size:1.05rem;display:flex;gap:.25rem;align-items:baseline}
+.mos-th{color:#f87171}.mos-tl{color:var(--blue)}
+.mos-diff{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3}
+.mos-pop{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
+.mos-note{font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
+@media(max-width:380px){.mos-grid{grid-template-columns:repeat(2,1fr)}.mos-card:nth-child(n+3){display:none}}
+
+/* MTR sparkline: dva majhna grafa (Tmax/Tmin), polna črta = MTR, črtkana = Open-Meteo */
+.mos-spark-row{display:flex;gap:.9rem;margin-bottom:.7rem}
+.mos-spark-col{flex:1;min-width:0}
+.mos-spark-lbl{font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+.mos-spark-col svg{width:100%;height:auto;display:block}
+@media(max-width:420px){.mos-spark-row{gap:.5rem}}
 .daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
 .daily-fc-main{display:flex;gap:1rem;align-items:center}
 .daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}
@@ -2232,30 +2265,51 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:420px){.cu-days{gap:.35rem}.cu-day{padding:.65rem .25rem}}
 
 /* ── AI Forecast card (yr.no + Claude) ── */
-.aifc-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--shadow);position:relative}
-.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.07) 0%,transparent 60%);pointer-events:none}
-.aifc-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
-.aifc-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.aifc-badge{font-size:.58rem;font-weight:700;padding:.16rem .4rem;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
-.aifc-badge.yr{background:rgba(96,165,250,.15);color:#60a5fa}
-.aifc-badge.ai{background:rgba(167,139,250,.15);color:#a78bfa}
-.aifc-text{font-size:.88rem;line-height:1.78;color:var(--text);min-height:2.5rem}
+.aifc-card{background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border:1px solid var(--card-border);border-radius:20px;padding:1.3rem 1.4rem 1.2rem;margin-bottom:1.25rem;box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+.aifc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(96,165,250,.09) 0%,transparent 55%);pointer-events:none}
+.aifc-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#60a5fa,#a78bfa 55%,#34d399)}
+.aifc-header{display:flex;align-items:center;gap:.55rem;margin-bottom:.85rem;flex-wrap:wrap}
+.aifc-title{font-size:.94rem;font-weight:800;letter-spacing:-.01em;color:var(--text)}
+.aifc-badge{font-size:.6rem;font-weight:700;padding:.2rem .55rem;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;border:1px solid transparent}
+.aifc-badge.yr{background:rgba(96,165,250,.14);color:#60a5fa;border-color:rgba(96,165,250,.25)}
+.aifc-badge.ai{background:rgba(167,139,250,.14);color:#a78bfa;border-color:rgba(167,139,250,.25)}
+.aifc-badge.mtr{background:rgba(52,211,153,.14);color:#34d399;border-color:rgba(52,211,153,.25)}
+.aifc-text{font-size:.9rem;line-height:1.8;color:var(--text);min-height:2.5rem}
 .aifc-text.italic{font-style:italic}
 .aifc-text.loading{color:var(--muted);animation:aifc-pulse 1.4s ease-in-out infinite}
 @keyframes aifc-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:1rem}
-@media(max-width:620px){.aifc-days{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:380px){.aifc-days{grid-template-columns:repeat(3,1fr)}}
-.aifc-day{background:var(--bg);border-radius:11px;padding:.7rem .35rem;text-align:center}
-.aifc-day.today{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3)}
-.aifc-day-name{font-size:.66rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.28rem}
-.aifc-day-icon{font-size:1.65rem;line-height:1.25}
-.aifc-day-t{font-size:.86rem;font-weight:800;white-space:nowrap;margin-top:.14rem}
-.aifc-day-tlo{font-weight:400;color:var(--muted)}
-.aifc-day-rain{font-size:.64rem;color:#60a5fa;margin-top:.14rem}
-.aifc-meta{font-size:.58rem;color:var(--muted);margin-top:.6rem;text-align:right}
-.aifc-refresh{background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--muted);padding:.15rem .3rem;border-radius:4px;transition:color .15s}
-.aifc-refresh:hover{color:var(--text)}
+.aifc-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:1.1rem}
+.aifc-day{background:var(--fc-bg);border-radius:13px;padding:.75rem .35rem .65rem;text-align:center;border:1px solid var(--fc-border);transition:transform .18s,box-shadow .18s,border-color .18s}
+.aifc-day:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.aifc-day.today{background:linear-gradient(160deg,rgba(96,165,250,.16),rgba(96,165,250,.04));border-color:rgba(96,165,250,.4)}
+.aifc-day-name{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.32rem}
+.aifc-day.today .aifc-day-name{color:#60a5fa}
+.aifc-day-icon{font-size:1.65rem;line-height:1.25;margin-bottom:.05rem}
+.aifc-day-icon img{filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))}
+.aifc-day-t{font-size:.88rem;font-weight:800;white-space:nowrap;margin-top:.18rem;color:var(--text)}
+.aifc-day-tlo{font-weight:500;color:var(--muted)}
+.aifc-day-bar{height:4px;border-radius:2px;background:var(--card-border);margin:.45rem .1rem 0;position:relative;overflow:hidden}
+.aifc-day-bar-fill{position:absolute;top:0;bottom:0;border-radius:2px;background:linear-gradient(90deg,#60a5fa,#f59e0b)}
+.aifc-day-rain{font-size:.62rem;font-weight:600;color:#60a5fa;background:rgba(96,165,250,.12);border-radius:999px;padding:.1rem .42rem;margin-top:.4rem;display:inline-block}
+/* 7 dni se v mrežo na telefonu ne izide — pri 3 stolpcih ostane zadnja
+   ploščica sama v vrsti. Zato vodoravni drsni trak. Drsi samo trak: telo
+   strani se vodoravno ne premika (overscroll-behavior-x:contain). */
+@media(max-width:620px){
+  .aifc-days{display:flex;grid-template-columns:none;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:.2rem}
+  .aifc-days::-webkit-scrollbar{display:none}
+  .aifc-day{flex:0 0 calc((100% - 1.5rem)/4.2);min-width:74px;scroll-snap-align:start}
+}
+/* Uradna ARSO napoved za Slovenijo — vizualno podrejena lokalnemu besedilu
+   nad njo, da je jasno, kaj velja za Rečico in kaj za državo. */
+.aifc-arso{margin-top:1.1rem;padding:.85rem 1rem;border-radius:12px;background:rgba(148,163,184,.07);border:1px solid var(--card-border);border-left:3px solid rgba(148,163,184,.5)}
+.aifc-arso[hidden]{display:none}
+.aifc-arso-lbl{display:inline-flex;align-items:center;gap:.32rem;font-size:.6rem;font-weight:700;padding:.16rem .5rem;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;background:rgba(148,163,184,.18);color:var(--muted);margin-bottom:.45rem}
+.aifc-arso-lbl::before{content:'🇸🇮'}
+.aifc-arso-txt{font-size:.8rem;line-height:1.72;color:var(--muted)}
+.aifc-meta{font-size:.68rem;color:var(--muted);margin-top:.75rem;text-align:right}
+.aifc-refresh{margin-left:auto;background:var(--card-bg);border:1px solid var(--card-border);cursor:pointer;font-size:.85rem;color:var(--muted);width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s,transform .35s}
+.aifc-refresh:hover{color:var(--text);border-color:var(--card-border-h)}
+.aifc-refresh:active{transform:rotate(180deg)}
 
 /* ── Srednja napoved Tab ── */
 .med-kpi-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:1.1rem}
@@ -2310,16 +2364,35 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .gallery-card:hover{transform:translateY(-3px);box-shadow:var(--card-shadow-h)}
 .gallery-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
 .gallery-card:hover img{transform:scale(1.04)}
-.gallery-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 55%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:.7rem .8rem}
-.gallery-card:hover .gallery-card-overlay{opacity:1}
+.gallery-card-chip{position:absolute;top:.5rem;left:.5rem;background:rgba(0,0,0,.55);color:#fff;font-size:.62rem;font-weight:600;padding:.2rem .55rem;border-radius:50px;max-width:calc(100% - 3rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gallery-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 30%,transparent 60%);opacity:1;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:.7rem .8rem}
+.gallery-card-meta{font-size:.64rem;color:rgba(255,255,255,.72);margin-top:.2rem;display:none}
+.gallery-card:hover .gallery-card-meta{display:block}
 .gallery-card-title{font-size:.78rem;font-weight:700;color:#fff;line-height:1.3}
-.gallery-card-meta{font-size:.64rem;color:rgba(255,255,255,.72);margin-top:.2rem}
 .gallery-card-del{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:26px;height:26px;color:#fff;font-size:.8rem;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .15s}
 .gallery-card:hover .gallery-card-del{display:flex}
 .gallery-card-del:hover{background:rgba(220,38,38,.8)}
+@media(pointer:coarse){.gallery-card-del{display:flex}}
 .gallery-empty{grid-column:1/-1;text-align:center;padding:3rem 1rem;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted)}
 .gallery-empty-icon{font-size:3rem;margin-bottom:.75rem}
-.gallery-empty-text{font-size:.88rem}
+.gallery-empty-text{font-size:.88rem;margin-bottom:1rem}
+.gallery-more-btn{grid-column:1/-1;padding:.6rem;border-radius:10px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.gallery-more-btn:hover{border-color:var(--blue);color:var(--blue)}
+.gallery-count-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.75rem}
+.gallery-count-row .gallery-count{margin-bottom:0}
+.gallery-pending-btn{padding:.3rem .7rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.68rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;font-family:'Inter',sans-serif}
+.gallery-pending-btn:hover{border-color:var(--blue);color:var(--blue)}
+.gallery-pending{display:none;flex-direction:column;gap:.5rem;margin-bottom:1rem;padding:.75rem;border:1px dashed var(--border);border-radius:12px}
+.gallery-pending.open{display:flex}
+.gallery-pending-empty{font-size:.8rem;color:var(--muted);text-align:center;padding:.5rem}
+.gallery-pending-item{display:flex;align-items:center;gap:.6rem}
+.gallery-pending-item img{width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.gallery-pending-info{flex:1;min-width:0}
+.gallery-pending-title{font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gallery-pending-meta{font-size:.68rem;color:var(--muted)}
+.gallery-pending-approve,.gallery-pending-reject{border:none;border-radius:8px;padding:.35rem .6rem;font-size:.72rem;font-weight:600;cursor:pointer;flex-shrink:0}
+.gallery-pending-approve{background:rgba(52,211,153,.15);color:#10b981}
+.gallery-pending-reject{background:rgba(239,68,68,.12);color:#ef4444}
 .gallery-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
 .gallery-modal-overlay.open{display:flex}
 .gallery-modal{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.5);width:min(600px,98vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}

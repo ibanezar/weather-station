@@ -33,7 +33,7 @@ Potrebne env spremenljivke:
 import json, os, sys, re, shutil, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY, seo_title
 
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 LAT, LON = 46.325779, 14.921137
@@ -341,6 +341,9 @@ STROGA PRAVILA:
 - 700-900 besed skupaj v paragraphs poljih.
 
 SEO / KLJUČNE BESEDE:
+- Naslov ("title") naj ima NAJVEČ 60 znakov -- daljše Google odreže. Glavno ključno frazo daj
+  na začetek naslova. Izogibaj se dolgim dvodelnim naslovom tipa "Nekaj splošnega: dolg podnaslov";
+  če naslov ne gre pod 60 znakov, raje izpusti okrasni uvodni del kot ključne besede.
 - Dobiš seznam "seo_keywords" (ciljne fraze za to temo). Vpleti glavno frazo naravno v naslov,
   v prvi odstavek (lead) in v vsaj en H2 naslov -- brez keyword-stuffinga, mora zveneti naravno.
   Če fraza ne zveni naravno na danem mestu, jo preoblikuj ali izpusti raje kot da jo na silo vtakneš.
@@ -356,7 +359,7 @@ INTERNO LINKANJE:
 
 Vrni SAMO veljaven JSON (brez markdown fence, brez dodatnega besedila) v tej shemi:
 {
-  "title": "...",
+  "title": "NAJVEČ 60 znakov, z glavno ključno frazo",
   "meta_description": "150-160 znakov",
   "tags": ["...", "IREICA1", "Savinja"],
   "section_label": "Napoved" | "Analiza" | "Rekord" | "Sezona",
@@ -902,7 +905,7 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec</title>
+<title>{seo_title(title)}</title>
 <link rel="canonical" href="{url}">
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">

@@ -29,7 +29,7 @@ Potrebne env spremenljivke:
 import datetime, json, math, os, sys, time, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate  # noqa: E402
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title  # noqa: E402
 from generate_daily_post import app_bottomnav, hexrgb, call_lektor  # noqa: E402
 
 BASE = "https://api.inaturalist.org/v1"
@@ -439,7 +439,7 @@ def build_weekly_html(article, alerts, now_utc):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec</title>
+<title>{seo_title(title)}</title>
 <link rel="canonical" href="{url}">
 <link rel="alternate" hreflang="sl" href="{url}">
 <link rel="alternate" hreflang="x-default" href="{url}">
@@ -632,7 +632,7 @@ def build_monthly_digest(config, state, output):
   gtag('config', 'G-LE8PJ1HR8B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} | Meteorec</title>
+<title>{seo_title(title)}</title>
 <link rel="canonical" href="{url}">
 <meta name="description" content="{desc}">
 <meta name="robots" content="index, follow, max-image-preview:large">

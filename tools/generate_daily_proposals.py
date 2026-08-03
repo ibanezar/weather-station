@@ -81,6 +81,8 @@ Za VSAKO temo predlagaj:
   podanih podatkih. Ne izmišljuj številk -- uporabi samo vrednosti iz podatkov,
   lahko pa jih izpustiš in ostaneš splošen.
 
+- "title": NAJVEČ 60 znakov (daljše Google odreže v rezultatih), ključna fraza na začetku.
+
 Predlogi naj se med sabo jasno razlikujejo po kotu/vsebini, da je izbira smiselna.
 
 Vrni SAMO veljaven JSON (brez markdown fence) v tej shemi:

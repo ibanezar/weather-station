@@ -60,24 +60,71 @@ const ARSO_TEXT_ENDPOINTS = [
   "https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_SI_SAVINJSKA_latest.xml",
 ];
 
+// Sekcije, ki NISO napoved in ne smejo nikoli v napovedno kartico.
+// "OPOZORILO" (oz. warning_si) je isto besedilo, kot že teče v traku na vrhu
+// strani — če pride sem, kartica "Napoved za Rečico" podvaja opozorilo.
+const ARSO_SKIP_SECTIONS = /^(OPOZORILO|WARNING)/i;
+
+const _arsoClean = s => (s || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const _arsoIsProse = s => s.length > 45 && /\s/.test(s) && /[a-zčšžćđA-ZČŠŽ]/.test(s);
+
+// `para` je pri ARSO enkrat niz, enkrat seznam nizov, enkrat seznam objektov
+// z lastnim `para` (glej fcast_si_hint) — vse zvedi na seznam čistih nizov.
+function _arsoParas(para) {
+  const out = [];
+  const take = v => {
+    if (typeof v === "string") { const s = _arsoClean(v); if (s) out.push(s); }
+    else if (Array.isArray(v)) v.forEach(take);
+    else if (v && typeof v === "object" && v.para !== undefined) take(v.para);
+  };
+  take(para);
+  return out;
+}
+
+// Namensko branje fcast_si_text.section[] iz /api/1.0/nonlocation/.
+// Sekcije z nepraznim `title` začnejo novo skupino, sekcije s praznim `title`
+// so nadaljevanje prejšnje — tako je "NAPOVED ZA SLOVENIJO" sestavljena iz
+// section[0] (nocoj) in section[1] (jutri).
+function _arsoFcastSections(parsed) {
+  const sections = parsed?.fcast_si_text?.section;
+  if (!Array.isArray(sections)) return {};
+  const groups = {};
+  let current = null;
+  for (const sec of sections) {
+    const title = _arsoClean(sec?.title).toUpperCase();
+    if (title) { current = title; if (!groups[current]) groups[current] = []; }
+    if (!current) continue;
+    groups[current].push(..._arsoParas(sec?.para).filter(_arsoIsProse));
+  }
+  for (const k of Object.keys(groups)) if (!groups[k].length) delete groups[k];
+  return groups;
+}
+
 function _arsoExtractProse(body, ct) {
   const proses = [];
-  const isProse = s => s.length > 45 && /\s/.test(s) && /[a-zčšžćđA-ZČŠŽ]/.test(s);
   const push = s => {
-    s = (s || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    if (isProse(s)) proses.push(s);
+    s = _arsoClean(s);
+    if (_arsoIsProse(s)) proses.push(s);
   };
   let parsed = null;
   if (/json/i.test(ct) || /^\s*[\{\[]/.test(body)) {
     try { parsed = JSON.parse(body); } catch (_) {}
   }
   if (parsed) {
-    const walk = v => {
+    // Varovalka: warning_si stoji v odgovoru PRED fcast_si_text, zato bi ga
+    // slepi obhod vedno pobral prvega. Napovedi ne sme izriniti opozorilo.
+    const walk = (v, key) => {
+      if (key === "warning_si") return;
       if (typeof v === "string") push(v);
-      else if (Array.isArray(v)) v.forEach(walk);
-      else if (v && typeof v === "object") Object.values(v).forEach(walk);
+      else if (Array.isArray(v)) v.forEach(x => walk(x, key));
+      else if (v && typeof v === "object") {
+        for (const [k, x] of Object.entries(v)) {
+          if (k === "title" && ARSO_SKIP_SECTIONS.test(_arsoClean(x))) return;
+        }
+        for (const [k, x] of Object.entries(v)) walk(x, k);
+      }
     };
-    walk(parsed);
+    walk(parsed, null);
   } else {
     body.replace(/<[^>]+>/g, "\n").split(/\n+/).forEach(push);
   }
@@ -100,21 +147,46 @@ async function _arsoFetch(url) {
   } finally { clearTimeout(to); }
 }
 
+const ARSO_TEXT_LIMIT = 600;
+
+function _arsoTrim(t) {
+  return t.length > ARSO_TEXT_LIMIT ? t.slice(0, ARSO_TEXT_LIMIT - 20).replace(/\s+\S*$/, "") + "…" : t;
+}
+
 async function fetchArsoText() {
   for (const url of ARSO_TEXT_ENDPOINTS) {
     try {
       const r = await _arsoFetch(url);
       if (!r.ok) continue;
       const ct = r.headers.get("content-type") || "";
-      const proses = _arsoExtractProse(await r.text(), ct);
+      const body = await r.text();
+
+      // 1) Strukturirana pot: iz JSON vira preberi točno napovedne sekcije.
+      if (/json/i.test(ct) || /^\s*[\{\[]/.test(body)) {
+        let parsed = null;
+        try { parsed = JSON.parse(body); } catch (_) {}
+        const groups = _arsoFcastSections(parsed);
+        const fcast = groups["NAPOVED ZA SLOVENIJO"] || [];
+        if (fcast.length) {
+          let t = fcast.join(" ");
+          // Obete pripni le, če se skupaj še prilegajo — sicer raje sama napoved.
+          const outlook = groups["OBETI"] || [];
+          if (outlook.length) {
+            const withOutlook = t + " " + outlook.join(" ");
+            if (withOutlook.length <= ARSO_TEXT_LIMIT) t = withOutlook;
+          }
+          return { text: _arsoTrim(t), title: "Napoved za Slovenijo", source: "ARSO", url };
+        }
+      }
+
+      // 2) Rezerva za XML vire brez sekcijske sheme.
+      const proses = _arsoExtractProse(body, ct);
       if (proses.length) {
-        let t = proses.slice(0, 2).join(" ");
-        if (t.length > 600) t = t.slice(0, 580).replace(/\s+\S*$/, "") + "…";
-        return { text: t, source: "ARSO", url };
+        return { text: _arsoTrim(proses.slice(0, 2).join(" ")), title: "ARSO", source: "ARSO", url };
       }
     } catch (_) {}
   }
-  return { text: null, source: null, url: null };
+  return { text: null, title: null, source: null, url: null };
 }
 
 // Standard ARSO warning descriptions per type + severity
@@ -1091,8 +1163,22 @@ const OPERA_S3 = "https://s3.waw3-1.cloudferro.com/openradar-24h";
 const OPERA_MAX_AGE_MIN = 30;
 
 // Izsek, ki ga rišemo: Slovenija s celotnim alpsko-jadranskim zaledjem.
-const COMP_LON0 = 11.5, COMP_LON1 = 17.8, COMP_LAT0 = 44.4, COMP_LAT1 = 47.9;
-const COMP_W = 1024;               // ~0,47 km/px pri 46 °N — ustreza ARSO jedru
+// Dva izseka. Široki pokriva alpsko-jadransko zaledje, ozki pa dolino, kjer
+// stoji postaja: ta je v celoti znotraj 120 km od Lisce in Pasje ravni, torej
+// je čisto ARSO jedro. Ker ga rišemo trikrat finejše od izvornih 0,5 km, ga
+// vzorčimo gladko — pri širokem to ne pride v poštev, ker je izris tam
+// praktično 1 : 1 z virom in bi glajenje detajl le razmazalo.
+const COMP_VIEWS = {
+  sirok: {
+    lon0: 11.5, lon1: 17.8, lat0: 44.4, lat1: 47.9, w: 1024,
+    ime: "Slovenija in širša okolica", gladkoArso: false,
+  },
+  savinja: {
+    lon0: 14.25, lon1: 15.55, lat0: 46.0, lat1: 46.65, w: 640,
+    ime: "Zgornja Savinjska dolina", gladkoArso: true,
+  },
+};
+const COMP_VIEW_DEFAULT = "sirok";
 
 // Lambertova azimutalna ploskovno enaka projekcija mreže OPERA (iz GeoTIFF-a).
 const LAEA = { lat0: 55, lon0: 10, fe: 1950000, fn: -2100000, a: 6378137, f: 1 / 298.257223563 };
@@ -1111,6 +1197,26 @@ const COMP_ALPHA = [110, 150, 190, 225, 245, 255, 255, 255, 255, 255, 255, 255, 
 const COMP_SI_RADARJI = [[46.068, 15.285], [46.099, 14.234]];  // Lisca, Pasja ravan
 const COMP_R_JEDRO = 120, COMP_R_ROB = 170;                    // km
 const COMP_KM_LAT = 111.32, COMP_KM_LON = 77.2;                // 1° pri ~46,2 °N
+
+// Barvna lestvica zgoraj je lestvica *legende*. Za izris jo podrobimo, ker
+// ima obroč zvezne vrednosti in bi ga 14 stopenj razrezalo v vidne pasove.
+// Paletni PNG prenese 256 vnosov, zato je to zastonj.
+const COMP_SUB = 3;
+const _COMP_SCALE = (() => {
+  const mmh = [], rgb = [], alpha = [];
+  for (let i = 0; i < COMP_MMH.length; i++) {
+    const m0 = COMP_MMH[i], m1 = i + 1 < COMP_MMH.length ? COMP_MMH[i + 1] : COMP_MMH[i] * 1.5;
+    const c0 = COMP_RGB[i], c1 = i + 1 < COMP_RGB.length ? COMP_RGB[i + 1] : COMP_RGB[i];
+    const a0 = COMP_ALPHA[i], a1 = i + 1 < COMP_ALPHA.length ? COMP_ALPHA[i + 1] : COMP_ALPHA[i];
+    for (let k = 0; k < COMP_SUB; k++) {
+      const t = k / COMP_SUB;
+      mmh.push(m0 * Math.pow(m1 / m0, t));                       // geometrično, kot je lestvica
+      rgb.push(c0.map((v, j) => Math.round(v + (c1[j] - v) * t)));
+      alpha.push(Math.round(a0 + (a1 - a0) * t));
+    }
+  }
+  return { mmh, rgb, alpha };
+})();
 
 // ── Projekcije ─────────────────────────────────────────────
 // Avtalična širina zahteva logaritem, zato jo računamo enkrat na vrstico.
@@ -1324,24 +1430,70 @@ async function _compArso(stampMs) {
 }
 
 function _compLevel(mmh) {
+  const s = _COMP_SCALE.mmh;
   let L = 0;
-  for (let i = 0; i < COMP_MMH.length; i++) if (mmh >= COMP_MMH[i]) L = i + 1;
+  for (let i = 0; i < s.length; i++) if (mmh >= s[i]) L = i + 1;
   return L;
+}
+
+// Odbojnost v mm/h. NaN pomeni izmerjeno brez padavin, vrednost pod -1e5
+// pa da radar tja ne vidi — to dvoje je treba ločiti, sicer bi luknje v
+// pokritju zgladili v suho.
+const _dbzMmh = (v) => Number.isNaN(v) ? 0 : Math.pow(Math.pow(10, v / 10) / 200, 1 / 1.6);
+
+// Dvolinearno vzorčenje obroča. Mreža OPERA je 1 km, izris pa pol tega, zato
+// najbližji sosed nariše vidne kvadratke; glajenje ne doda podatka, odstrani
+// pa stopnice. Če je katerikoli od štirih sosedov zunaj pokritja, se vrnemo
+// na najbližjega — drugače bi rob pokritja razmazali v padavine.
+function _operaSample(win, fx, fy) {
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const x1 = x0 + 1, y1 = y0 + 1;
+  if (x0 < 0 || y0 < 0 || x1 >= win.w || y1 >= win.h) {
+    const cx = Math.round(fx), cy = Math.round(fy);
+    if (cx < 0 || cy < 0 || cx >= win.w || cy >= win.h) return -1;
+    const v = win.data[cy * win.w + cx];
+    return v < -1e5 ? -1 : _dbzMmh(v);
+  }
+  const a = win.data[y0 * win.w + x0], b = win.data[y0 * win.w + x1];
+  const c = win.data[y1 * win.w + x0], d = win.data[y1 * win.w + x1];
+  if (a < -1e5 || b < -1e5 || c < -1e5 || d < -1e5) {
+    const v = win.data[Math.round(fy) * win.w + Math.round(fx)];
+    return v < -1e5 ? -1 : _dbzMmh(v);
+  }
+  const tx = fx - x0, ty = fy - y0;
+  return (_dbzMmh(a) * (1 - tx) + _dbzMmh(b) * tx) * (1 - ty)
+       + (_dbzMmh(c) * (1 - tx) + _dbzMmh(d) * tx) * ty;
+}
+
+// Vzorčenje ARSO jedra. Pri gladkem načinu interpoliramo v mm/h in ne po
+// stopnjah, ker je lestvica geometrijska in bi vmesne stopnje sicer preskakovale.
+function _arsoSample(arso, fx, fy, gladko) {
+  const g = (x, y) => { const L = arso.levels[y * arso.w + x]; return L ? RADAR_LEVEL_MMH[L - 1] : 0; };
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  if (!gladko || x0 < 0 || y0 < 0 || x0 + 1 >= arso.w || y0 + 1 >= arso.h) {
+    const x = Math.round(fx), y = Math.round(fy);
+    return (x < 0 || y < 0 || x >= arso.w || y >= arso.h) ? null : g(x, y);
+  }
+  const tx = fx - x0, ty = fy - y0;
+  return (g(x0, y0) * (1 - tx) + g(x0 + 1, y0) * tx) * (1 - ty)
+       + (g(x0, y0 + 1) * (1 - tx) + g(x0 + 1, y0 + 1) * tx) * ty;
 }
 
 // Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
 // jedro — nepopolna slika je še vedno boljša od napake.
-async function _radarComposite(key, stampMs) {
-  const H = Math.round(COMP_W * (_mercY(COMP_LAT1) - _mercY(COMP_LAT0)) / ((COMP_LON1 - COMP_LON0) * Math.PI / 180));
-  const y0 = _mercY(COMP_LAT1), y1 = _mercY(COMP_LAT0);
+async function _radarComposite(key, stampMs, view) {
+  const V = view || COMP_VIEWS[COMP_VIEW_DEFAULT];
+  const W = V.w;
+  const H = Math.round(W * (_mercY(V.lat1) - _mercY(V.lat0)) / ((V.lon1 - V.lon0) * Math.PI / 180));
+  const y0 = _mercY(V.lat1), y1 = _mercY(V.lat0);
 
   // Okno v koordinatah mreže: projekcija ni poravnana z mrežo poldnevnikov,
   // zato robove okna vzorčimo in vzamemo očrtani pravokotnik.
   const bb = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
   for (let i = 0; i <= 40; i++) {
     const t = i / 40;
-    const la = COMP_LAT0 + (COMP_LAT1 - COMP_LAT0) * t, lo = COMP_LON0 + (COMP_LON1 - COMP_LON0) * t;
-    for (const [a, b] of [[la, COMP_LON0], [la, COMP_LON1], [COMP_LAT0, lo], [COMP_LAT1, lo]]) {
+    const la = V.lat0 + (V.lat1 - V.lat0) * t, lo = V.lon0 + (V.lon1 - V.lon0) * t;
+    for (const [a, b] of [[la, V.lon0], [la, V.lon1], [V.lat0, lo], [V.lat1, lo]]) {
       const [x, y] = _laeaXY(a, b);
       bb.x0 = Math.min(bb.x0, x); bb.x1 = Math.max(bb.x1, x);
       bb.y0 = Math.min(bb.y0, y); bb.y1 = Math.max(bb.y1, y);
@@ -1354,60 +1506,56 @@ async function _radarComposite(key, stampMs) {
   ]);
   if (!win && !arso) throw new Error("noben radarski vir ni dosegljiv");
 
-  const idx = new Uint8Array(COMP_W * H);
-  const NODATA = COMP_RGB.length + 1;
+  const idx = new Uint8Array(W * H);
+  const NODATA = _COMP_SCALE.rgb.length + 1;
   const R2_JEDRO = COMP_R_JEDRO * COMP_R_JEDRO, R2_ROB = COMP_R_ROB * COMP_R_ROB;
 
   // Kar je odvisno samo od stolpca, izračunamo vnaprej — sicer bi sinus in
-  // kosinus tekla 840.000-krat.
-  const sinDl = new Float64Array(COMP_W), cosDl = new Float64Array(COMP_W);
-  const arsoX = new Int32Array(COMP_W), dxKm = new Float64Array(COMP_W * COMP_SI_RADARJI.length);
-  for (let x = 0; x < COMP_W; x++) {
-    const lo = COMP_LON0 + (COMP_LON1 - COMP_LON0) * (x + 0.5) / COMP_W;
+  // kosinus tekla stotisočkrat.
+  const sinDl = new Float64Array(W), cosDl = new Float64Array(W);
+  const arsoX = new Float64Array(W), dxKm = new Float64Array(W * COMP_SI_RADARJI.length);
+  for (let x = 0; x < W; x++) {
+    const lo = V.lon0 + (V.lon1 - V.lon0) * (x + 0.5) / W;
     const dl = (lo - LAEA.lon0) * Math.PI / 180;
     sinDl[x] = Math.sin(dl); cosDl[x] = Math.cos(dl);
-    arsoX[x] = Math.round(RAD_AX * lo + RAD_BX);
-    COMP_SI_RADARJI.forEach(([, rlo], k) => { dxKm[k * COMP_W + x] = (lo - rlo) * COMP_KM_LON; });
+    arsoX[x] = RAD_AX * lo + RAD_BX;
+    COMP_SI_RADARJI.forEach(([, rlo], k) => { dxKm[k * W + x] = (lo - rlo) * COMP_KM_LON; });
   }
 
   let nBlind = 0;
   for (let y = 0; y < H; y++) {
     const la = _mercLat(y0 - (y0 - y1) * (y + 0.5) / H);
     const b = Math.asin(_LAEA.q(la * Math.PI / 180) / _LAEA.qp), sb = Math.sin(b), cb = Math.cos(b);
-    const arsoY = Math.round(RAD_AY * la + RAD_BY);
+    const arsoY = RAD_AY * la + RAD_BY;
     const dyKm = COMP_SI_RADARJI.map(([rla]) => (la - rla) * COMP_KM_LAT);
-    const row = y * COMP_W;
+    const row = y * W;
 
-    for (let x = 0; x < COMP_W; x++) {
+    for (let x = 0; x < W; x++) {
       let mmh = -1;                                  // -1 = nihče ne vidi
 
       if (win) {
         const B = _LAEA.Rq * Math.sqrt(2 / (1 + _LAEA.sinb0 * sb + _LAEA.cosb0 * cb * cosDl[x]));
-        const gx = Math.round(((B * _LAEA.D * cb * sinDl[x] + LAEA.fe) - win.ox) / win.px) - win.c0;
-        const gy = Math.round((win.oy - ((B / _LAEA.D) * (_LAEA.cosb0 * sb - _LAEA.sinb0 * cb * cosDl[x]) + LAEA.fn)) / win.py) - win.r0;
-        if (gx >= 0 && gx < win.w && gy >= 0 && gy < win.h) {
-          const v = win.data[gy * win.w + gx];
-          if (Number.isNaN(v)) mmh = 0;              // izmerjeno, a brez padavin
-          else if (v > -1e5) mmh = Math.pow(Math.pow(10, v / 10) / 200, 1 / 1.6);   // Marshall-Palmer
-        }
+        const fx = ((B * _LAEA.D * cb * sinDl[x] + LAEA.fe) - win.ox) / win.px - win.c0;
+        const fy = (win.oy - ((B / _LAEA.D) * (_LAEA.cosb0 * sb - _LAEA.sinb0 * cb * cosDl[x]) + LAEA.fn)) / win.py - win.r0;
+        mmh = _operaSample(win, fx, fy);             // Marshall-Palmer je v _dbzMmh
       }
 
       if (arso) {
         let d2 = Infinity;
         for (let k = 0; k < COMP_SI_RADARJI.length; k++) {
-          const dx = dxKm[k * COMP_W + x], dy = dyKm[k];
+          const dx = dxKm[k * W + x], dy = dyKm[k];
           const s = dx * dx + dy * dy;
           if (s < d2) d2 = s;
         }
-        const ax = arsoX[x];
-        if (d2 < R2_ROB && ax >= 0 && ax < arso.w && arsoY >= 0 && arsoY < arso.h) {
-          const L = arso.levels[arsoY * arso.w + ax];
-          const a = L ? RADAR_LEVEL_MMH[L - 1] : 0;
+        if (d2 < R2_ROB) {
+          const a = _arsoSample(arso, arsoX[x], arsoY, V.gladkoArso);
           // Znotraj dosega naših radarjev ima ARSO prednost (štirikrat boljša
           // ločljivost istih meritev), v prehodnem pasu vzamemo močnejšega od
           // obeh, da na šivu ne nastane luknja.
-          if (d2 <= R2_JEDRO) mmh = a;
-          else mmh = Math.max(mmh, a);
+          if (a != null) {
+            if (d2 <= R2_JEDRO) mmh = a;
+            else mmh = Math.max(mmh, a);
+          }
         }
       }
 
@@ -1416,10 +1564,10 @@ async function _radarComposite(key, stampMs) {
     }
   }
 
-  const png = await _pngIndexed(idx, COMP_W, H,
-    [[0, 0, 0], ...COMP_RGB, [120, 125, 135]],
-    [0, ...COMP_ALPHA, 45]);
-  return { png, w: COMP_W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (COMP_W * H) };
+  const png = await _pngIndexed(idx, W, H,
+    [[0, 0, 0], ..._COMP_SCALE.rgb, [120, 125, 135]],
+    [0, ..._COMP_SCALE.alpha, 45]);
+  return { png, w: W, h: H, opera: !!win, arso: !!arso, brezPodatkov: nBlind / (W * H) };
 }
 
 // Vsak izrisan okvir hranimo v R2 pod svojim ključem, ker jih animacija
@@ -1429,14 +1577,15 @@ const COMP_R2_PREFIX = "radar/comp-";
 const COMP_ANIM_MIN = 60;                       // dolžina animacije
 const COMP_KEEP_MS = (COMP_ANIM_MIN + 20) * 60000;
 
-async function _radarCompositeCached(env, stamp) {
+async function _radarCompositeCached(env, stamp, viewId) {
   const r2 = env?.PHOTOS_R2;
+  const vid = COMP_VIEWS[viewId] ? viewId : COMP_VIEW_DEFAULT;
   if (!stamp) {
     const key = await _operaLatestKey();
     stamp = key ? _compStamp(key) : null;
     if (!stamp) throw new Error("ni posnetka OPERA");
   }
-  const r2key = COMP_R2_PREFIX + stamp + ".png";
+  const r2key = `${COMP_R2_PREFIX}${vid}-${stamp}.png`;
 
   if (r2) {
     try {
@@ -1447,9 +1596,9 @@ async function _radarCompositeCached(env, stamp) {
 
   const key = _operaKeyForStamp(stamp);
   if (!key) throw new Error("neveljaven časovni žig");
-  const c = await _radarComposite(key, _compStampMs(stamp));
+  const c = await _radarComposite(key, _compStampMs(stamp), COMP_VIEWS[vid]);
   const meta = {
-    stamp,
+    stamp, pogled: vid,
     opera: String(c.opera), arso: String(c.arso),
     brezPodatkov: c.brezPodatkov.toFixed(4),
     w: String(c.w), h: String(c.h),
@@ -1471,7 +1620,9 @@ async function _radarCompositePrune(env) {
   try {
     const list = await r2.list({ prefix: COMP_R2_PREFIX, limit: 200 });
     for (const o of list.objects || []) {
-      const s = (o.key.match(/comp-(\d{8}T\d{4})\.png$/) || [])[1];
+      // Ključ je comp-<pogled>-<žig>.png; brez imena pogleda so ostanki
+      // prejšnje sheme in gredo prav tako proč.
+      const s = (o.key.match(/comp-[a-z]+-(\d{8}T\d{4})\.png$/) || [])[1];
       const ms = s ? _compStampMs(s) : NaN;
       if (Number.isNaN(ms) || ms < cutoff) { await r2.delete(o.key); n++; }
     }
@@ -1483,7 +1634,9 @@ async function _radarCompositePrune(env) {
 // že topla; sproti počisti stare.
 async function _cronRenderRadarComposite(env) {
   try {
-    await _radarCompositeCached(env, null);
+    for (const vid of Object.keys(COMP_VIEWS)) {
+      await _radarCompositeCached(env, null, vid).catch(() => null);
+    }
     await _radarCompositePrune(env);
     return true;
   } catch (_) { return false; }
@@ -2040,7 +2193,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const local = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
           const date = local.toISOString().slice(0, 10);
           const hour = local.getUTCHours();
-          if (!days[date]) days[date] = { temps: [], winds: [], rain: 0, syms: [], noonSym: null };
+          if (!days[date]) days[date] = { temps: [], winds: [], rain: 0, syms: [], noonSym: null, firstHour: hour };
           const det = ts.data.instant.details;
           days[date].temps.push(det.air_temperature);
           days[date].winds.push(det.wind_speed * 3.6);
@@ -2068,6 +2221,29 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         };
 
         const todayKey = new Date(Date.now() + ljOff * 3600000).toISOString().slice(0, 10);
+        const tomorrowKey = new Date(Date.now() + ljOff * 3600000 + 86400000).toISOString().slice(0, 10);
+
+        // yr.no vrne časovno vrsto od TRENUTNE ure naprej, zato je "današnji"
+        // max zvečer le max preostalih ur dneva (ob 22h npr. 26 °C na dan, ko
+        // je postaja izmerila 36,8 °C). Ko je dnevni vrh mimo, ploščice ne
+        // označimo več kot "danes", ampak kot "nocoj" — in takrat potrebujemo
+        // pravi nočni minimum, ki sega čez polnoč do jutranjih ur.
+        const todayFirstHour = days[todayKey]?.firstHour ?? 0;
+        const partialToday = todayFirstHour >= 16;
+        let nightMin = null;
+        if (partialToday) {
+          const nightTemps = [];
+          for (const ts of timeseries) {
+            const local = new Date(new Date(ts.time).getTime() + ljOff * 3600000);
+            const date = local.toISOString().slice(0, 10);
+            const hour = local.getUTCHours();
+            if (date === todayKey || (date === tomorrowKey && hour <= 8)) {
+              nightTemps.push(ts.data.instant.details.air_temperature);
+            }
+          }
+          if (nightTemps.length) nightMin = Math.round(Math.min(...nightTemps));
+        }
+
         const summaries = Object.entries(days)
           .filter(([d]) => d >= todayKey)
           .sort(([a],[b]) => a < b ? -1 : 1)
@@ -2076,11 +2252,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             const dt = new Date(date + 'T12:00:00');
             const rawSym = d.noonSym || d.syms[Math.floor(d.syms.length/2)] || 'partlycloudy_day';
             const isToday = date === todayKey;
+            const isPartial = isToday && partialToday;
             return {
               date,
-              dayName: isToday ? 'danes' : SL_DAYS[dt.getDay()],
-              tmax: d.temps.length ? Math.round(Math.max(...d.temps)) : null,
-              tmin: d.temps.length ? Math.round(Math.min(...d.temps)) : null,
+              dayName: isPartial ? 'nocoj' : isToday ? 'danes' : SL_DAYS[dt.getDay()],
+              // Pri nepopolnem dnevu je max zavajajoč — vrh je že mimo.
+              tmax: isPartial ? null : d.temps.length ? Math.round(Math.max(...d.temps)) : null,
+              tmin: isPartial ? nightMin : d.temps.length ? Math.round(Math.min(...d.temps)) : null,
+              partial: isPartial || undefined,
               windMax: d.winds.length ? Math.round(Math.max(...d.winds)) : null,
               rain: Math.round(d.rain * 10) / 10,
               symbol: rawSym,        // raw yr.no code (frontend maps to emoji)
@@ -2090,41 +2269,51 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
 
         if (!summaries.length) throw new Error("yr.no: no data");
 
-        // 1) ARSO official Slovenian text forecast (tried via fetchArsoText)
-        let text = null, source = "yr.no";
-        if (arsoTry.status === "fulfilled" && arsoTry.value?.text) {
-          text = arsoTry.value.text;
-          source = "ARSO";
-        }
-
-        // 2) Fallback: build a complete description from yr.no summaries
-        if (!text) {
-          const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-          const parts = [];
-          const s0 = summaries[0];
-          if (s0) {
+        // 1) Lokalno besedilo za Rečico iz yr.no — to je vodilni odstavek
+        // kartice. Zavihek se imenuje "Lokalna napoved", zato mora obiskovalec
+        // najprej prebrati nekaj o Rečici, ne o Sloveniji.
+        const parts = [];
+        const s0 = summaries[0];
+        if (s0) {
+          if (s0.partial) {
+            let p = `Nocoj bo na Rečici ob Savinji ${symLabel(s0.symbol)}`;
+            if (s0.tmin != null) p += `, najnižja temperatura okoli ${s0.tmin} °C`;
+            if (s0.rain >= 0.5) p += `, skupaj okoli ${s0.rain} mm padavin`;
+            parts.push(p + ".");
+          } else {
             let p = `Danes bo na Rečici ob Savinji ${symLabel(s0.symbol)}, s temperaturo med ${s0.tmin} in ${s0.tmax} °C`;
             if (s0.rain >= 0.5) p += `, skupaj okoli ${s0.rain} mm padavin`;
             if (s0.windMax >= 30) p += `, veter v sunkih do ${s0.windMax} km/h`;
             parts.push(p + ".");
           }
-          const s1 = summaries[1];
-          if (s1) {
-            let p = `Jutri ${symLabel(s1.symbol)}, ${s1.tmin}–${s1.tmax} °C`;
-            if (s1.rain >= 0.5) p += `, dež ${s1.rain} mm`;
-            parts.push(p + ".");
-          }
-          // Brief outlook for the rest of the period
-          const rest = summaries.slice(2, 5);
-          if (rest.length) {
-            const trend = rest.map(s => `${s.dayName} ${symLabel(s.symbol)} (${s.tmax}°)`).join(", ");
-            parts.push(`V nadaljevanju: ${trend}.`);
-          }
-          text = parts.join(" ");
-          source = "yr.no";
+        }
+        const s1 = summaries[1];
+        if (s1) {
+          let p = `Jutri ${symLabel(s1.symbol)}, ${s1.tmin}–${s1.tmax} °C`;
+          if (s1.rain >= 0.5) p += `, dež ${s1.rain} mm`;
+          parts.push(p + ".");
+        }
+        // Brief outlook for the rest of the period
+        const rest = summaries.slice(2, 5);
+        if (rest.length) {
+          const trend = rest.map(s => `${s.dayName} ${symLabel(s.symbol)} (${s.tmax}°)`).join(", ");
+          parts.push(`V nadaljevanju: ${trend}.`);
+        }
+        const local = parts.join(" ");
+
+        // 2) Uradna ARSO napoved za Slovenijo — ločeno polje, da ne izrine
+        // lokalnega besedila. Opozorila fetchArsoText() ne vrača; ta so v
+        // traku na vrhu strani.
+        let arso = null, arsoTitle = null;
+        if (arsoTry.status === "fulfilled" && arsoTry.value?.text) {
+          arso = arsoTry.value.text;
+          arsoTitle = arsoTry.value.title || "ARSO";
         }
 
-        return new Response(JSON.stringify({ summaries, text, source }), {
+        return new Response(JSON.stringify({
+          summaries, local, arso, arsoTitle, source: "yr.no",
+          text: local,   // združljivost s starimi predpomnjenimi odjemalci
+        }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
         });
       }
@@ -2143,6 +2332,17 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             rec.bodyLength = body.length;
             rec.bodyHead = body.slice(0, 700);
             rec.extracted = _arsoExtractProse(body, rec.contentType).slice(0, 3);
+            // Naslovi sekcij, ki jih vidi _arsoFcastSections(). Če ARSO
+            // preimenuje "NAPOVED ZA SLOVENIJO", se tu takoj vidi, zakaj je
+            // napovedna kartica ostala prazna.
+            if (/json/i.test(rec.contentType) || /^\s*[\{\[]/.test(body)) {
+              try {
+                const groups = _arsoFcastSections(JSON.parse(body));
+                rec.sections = Object.fromEntries(
+                  Object.entries(groups).map(([k, v]) => [k, { paras: v.length, head: (v[0] || "").slice(0, 120) }])
+                );
+              } catch (e) { rec.sectionsError = String(e); }
+            }
           } catch (e) { rec.error = String(e); }
           out.push(rec);
         }
@@ -2613,6 +2813,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Lasten kompozit padavin (ARSO jedro + OPERA obroč) kot paletni PNG v
       // Web Mercatorju; .json vrne meje, legendo in čas posnetka.
       if (path === "/radar-composite" || path === "/radar-composite.json") {
+        const vid = COMP_VIEWS[url.searchParams.get("pogled")] ? url.searchParams.get("pogled") : COMP_VIEW_DEFAULT;
+        const V = COMP_VIEWS[vid];
         if (path.endsWith(".json")) {
           const keys = await _operaKeys();
           const stamps = keys.map(_compStamp).filter(Boolean);
@@ -2629,9 +2831,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             starost_min: Number.isNaN(ms) ? null : Math.round((Date.now() - ms) / 60000),
             okvirji,
             korak_min: 5,
-            meje: [[COMP_LAT0, COMP_LON0], [COMP_LAT1, COMP_LON1]],
+            pogled: vid,
+            pogledi: Object.entries(COMP_VIEWS).map(([id, v]) => ({
+              id, ime: v.ime,
+              meje: [[v.lat0, v.lon0], [v.lat1, v.lon1]],
+              km_px: Number(((v.lon1 - v.lon0) * COMP_KM_LON / v.w).toFixed(3)),
+            })),
+            meje: [[V.lat0, V.lon0], [V.lat1, V.lon1]],
             projekcija: "EPSG:3857",
-            sirina: COMP_W,
+            sirina: V.w,
             legenda: COMP_MMH.map((mmh, i) => ({
               mmh,
               barva: "#" + COMP_RGB[i].map(v => v.toString(16).padStart(2, "0")).join(""),
@@ -2659,7 +2867,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             });
           }
         }
-        const c = await _radarCompositeCached(env, tParam);
+        const c = await _radarCompositeCached(env, tParam, vid);
         return new Response(c.body, {
           headers: {
             ...CORS_ALLOWED,
@@ -2668,6 +2876,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             "Cache-Control": tParam ? "public, max-age=86400, immutable" : "public, max-age=120",
             "X-Radar-Stamp": c.stamp || "",
             "X-Radar-Viri": `arso=${c.meta?.arso ?? "?"} opera=${c.meta?.opera ?? "?"}`,
+            "X-Radar-Pogled": vid,
             "X-Radar-Cache": c.cached ? "hit" : "miss",
           },
         });
@@ -3413,13 +3622,45 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── Gallery / photo endpoints ──────────────────────────
+      // Vsi galerijski objekti živijo pod ključem "photos/…" v istem R2
+      // bucketu kot radar cache, feedback in subscriber podatki — list()
+      // MORA imeti prefix, sicer se te interne datoteke izlistajo v javnem
+      // odgovoru (zgodilo se je, glej git zgodovino).
+      const GALLERY_ADMIN_LOCKOUT_MAX = 8;
+      const GALLERY_ADMIN_LOCKOUT_TTL = 15 * 60; // sekund
+      async function _galleryAdminAuthed(request, env) {
+        const secret = env.DELETE_SECRET;
+        const auth = request.headers.get("Authorization") || "";
+        if (!secret) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+        if (env.COUNTER_KV) {
+          const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+          const lockKey = "gal_admin_fail:" + ip;
+          const fails = parseInt((await env.COUNTER_KV.get(lockKey)) || "0") || 0;
+          if (fails >= GALLERY_ADMIN_LOCKOUT_MAX) {
+            return { ok: false, status: 429, error: "Preveč neuspešnih poskusov, poskusi kasneje." };
+          }
+          if (auth !== "Bearer " + secret) {
+            await env.COUNTER_KV.put(lockKey, String(fails + 1), { expirationTtl: GALLERY_ADMIN_LOCKOUT_TTL });
+            return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+          }
+          await env.COUNTER_KV.delete(lockKey);
+          return { ok: true };
+        }
+        if (auth !== "Bearer " + secret) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+        return { ok: true };
+      }
+
       if (path === "/gallery") {
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ photos: [], error: "R2 not bound" }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
         const categoryFilter = url.searchParams.get("category");
-        const listed = await env.PHOTOS_R2.list({ include: ["customMetadata", "httpMetadata"] });
+        const cursor = url.searchParams.get("cursor") || undefined;
+        const listed = await env.PHOTOS_R2.list({
+          prefix: "photos/", limit: 100, cursor, include: ["customMetadata", "httpMetadata"]
+        });
         let photos = listed.objects
+          .filter(obj => (obj.customMetadata?.status || "approved") !== "pending")
           .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
           .map(obj => ({
             key: obj.key,
@@ -3430,8 +3671,61 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             ...(obj.customMetadata || {})
           }));
         if (categoryFilter) photos = photos.filter(p => p.category === categoryFilter);
-        return new Response(JSON.stringify({ photos, truncated: listed.truncated }), {
+        return new Response(JSON.stringify({
+          photos, truncated: listed.truncated, cursor: listed.truncated ? listed.cursor : null
+        }), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+        });
+      }
+
+      if (path === "/gallery/pending") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const listed = await env.PHOTOS_R2.list({
+          prefix: "photos/", limit: 100, include: ["customMetadata", "httpMetadata"]
+        });
+        const photos = listed.objects
+          .filter(obj => obj.customMetadata?.status === "pending")
+          .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
+          .map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            uploaded: obj.uploaded,
+            contentType: obj.httpMetadata?.contentType || "image/jpeg",
+            ...(obj.customMetadata || {})
+          }));
+        return new Response(JSON.stringify({ photos }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+        });
+      }
+
+      if (path.startsWith("/gallery/approve/") && request.method === "POST") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const key = decodeURIComponent(path.slice("/gallery/approve/".length));
+        if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const obj = await env.PHOTOS_R2.get(key);
+        if (!obj) return new Response(JSON.stringify({ error: "Ni najdeno" }), {
+          status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        await env.PHOTOS_R2.put(key, obj.body, {
+          httpMetadata: obj.httpMetadata,
+          customMetadata: { ...(obj.customMetadata || {}), status: "approved" }
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
       }
 
@@ -3467,7 +3761,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             weather:    (fd.get("weather") || "").slice(0, 200),
             category,
             location:   (fd.get("location") || "").slice(0, 120),
-            uploadedAt: new Date().toISOString()
+            uploadedAt: new Date().toISOString(),
+            status:     "pending"
           }
         });
         return new Response(JSON.stringify({ ok: true, key }), {
@@ -3494,13 +3789,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
           status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
         });
-        const secret = env.DELETE_SECRET;
-        const auth = request.headers.get("Authorization") || "";
-        if (!secret || auth !== "Bearer " + secret) {
-          return new Response(JSON.stringify({ error: "Nepooblaščen dostop" }), {
-            status: 401, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
-          });
-        }
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
         const key = decodeURIComponent(path.slice("/gallery/delete/".length));
         if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
           status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
@@ -4556,7 +4848,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
         const ageMin = obs?.obsTimeUtc
           ? (Date.now() - new Date(obs.obsTimeUtc).getTime()) / 60000
           : Infinity;
-        if (!obs || ageMin > 30) {
+        // WU upload je lahko "svež" po času, a s praznimi (null) meritvami —
+        // ne samo zastarel. Rezervo zato sprožimo tudi, če manjka temperatura.
+        if (!obs || ageMin > 30 || obs?.metric?.temp == null) {
           const fallback = await fetchEcowittAsWuObs(env);
           if (fallback) {
             return new Response(JSON.stringify({ observations: [fallback] }), {

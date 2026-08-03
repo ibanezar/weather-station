@@ -257,14 +257,17 @@
   else article.appendChild(authorBox);
 
   // ── 4) Sorodni članki ──────────────────────────────────────
+  // Objave dobijo "Teme:" in "Sorodni članki" že ob objavi vpisane v HTML
+  // (wire_all() -> inject_related_links()), da so povezave vidne tudi brez JS.
+  // Tu jih zato izrišemo samo, če jih v HTML še ni — sicer bi se podvojile.
+  // Prednostni vir je blog/related.json (TF-IDF podobnost dejanskega besedila,
+  // glej tools/compute_related_posts.py); rezerva je ujemanje po skupnih tagih.
   if (!SLUG) return;
+  var hasStaticRelated = !!document.querySelector(".related-posts");
+  var hasStaticTopics = !!document.querySelector(".post-topics");
+  var needsSidebar = !!document.querySelector(".blog-sidebar .side-recent");
+  if (hasStaticRelated && hasStaticTopics && !needsSidebar) return;
 
-  // ── 4) Sorodni članki ──────────────────────────────────────
-  // Prednostni vir: blog/related.json (TF-IDF podobnost dejanskega besedila,
-  // izračunana ob objavi — glej tools/compute_related_posts.py). Če datoteka
-  // manjka ali nima vnosa za ta članek, se uporabi obstoječe ujemanje po
-  // skupnih tagih kot rezerva.
-  if (!SLUG) return;
   Promise.all([
     fetch("/blog.json", { cache: "force-cache" }).then(function (r) { return r.json(); }),
     fetch("/blog/related.json", { cache: "force-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
@@ -294,7 +297,7 @@
       var myTags = (me.tags || []).map(function (t) { return String(t).toLowerCase(); });
 
       // "Teme:" — povezave na kategorijske strani (le tagi z ≥2 objavama = imajo stran)
-      if (myTags.length) {
+      if (myTags.length && !hasStaticTopics) {
         var freq = {};
         posts.forEach(function (p) {
           (p.tags || []).forEach(function (t) { t = String(t).toLowerCase(); freq[t] = (freq[t] || 0) + 1; });
@@ -339,7 +342,7 @@
           .slice(0, 3);
       }
 
-      if (!scored.length) return;
+      if (!scored.length || hasStaticRelated) return;
 
       function fmtDate(d) {
         try {

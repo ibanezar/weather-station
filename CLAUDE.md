@@ -43,6 +43,24 @@ vezaj namesto pomišljaja).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
 
+### `<title>` ne sme čez 60 znakov
+
+Google daljše naslove odreže, Semrush javi »too much text within the title
+tags«. Zato gre vsak `<title>` skozi `seo_title()` iz
+`tools/generate_monthly_post.py` — **novi predlogi in generatorji naj ga
+uporabijo enako** (`<title>{seo_title(title)}</title>`, drugi argument je
+pripona, npr. `" | Meteorec, Rečica ob Savinji"`).
+
+Funkcija skrajša **samo title tag** — naslov članka (h1, `og:title`, JSON-LD,
+`blog.json`) pusti nedotaknjen, ker se ta objavlja tudi na FB/IG in ga lektor
+po pravilu ne spreminja. Vzame najbogatejšo različico naslova, ki se še
+prilega (cel naslov → brez oklepajskega dodatka → do dvopičja/pomišljaja), in
+pripono doda le, če po tem ostane pod mejo.
+
+Modelu je meja 60 znakov povedana že v pozivu (`generate_daily_post.py` in
+`generate_daily_proposals.py`), tako da so naslovi praviloma dovolj kratki že
+ob nastanku; `seo_title()` je varovalka za ostalo.
+
 ## Objava na Facebook in Instagram
 
 Vsak nov članek, ki ga `wire_all()` zapiše v `blog.json`, se samodejno objavi
@@ -106,6 +124,32 @@ Kako je narejeno:
   kamere, normale …), je v `init()` ovito v `runAdvancedOnly()` — v vrsto gre
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
+
+## MTR — lastni napovedni model (MOS)
+
+**MTR (Meteorec)** je poskusni statistični model za Rečico: vzame Open-Meteo
+kot vhod in mu doda popravek za dno doline, naučen na meritvah postaje.
+Prikazana različica (»MTR v1« ipd.) se izpelje iz `model_version` — nikjer je
+ne zapisuj trdo. Podrobno v `docs/model-recica.md`.
+
+Interni identifikatorji (`meteorec` ključ v `forecast_verification.json`,
+imena datotek/funkcij) ostajajo nespremenjeni — MTR je prikazna znamka nad
+tem stikom, ne preimenovanje kode.
+
+- `tools/train_recica_mos.py` → `model/recica-mos.json` (koeficienti + izmerjena
+  veščina). **Datoteke ne ureja nihče ročno** — nastane samo iz učenja, mesečno
+  prek `mos-train.yml` ali ročno.
+- `tools/predict_recica_mos.py` → `napoved-modela.json`, teče v
+  `forecast-verify.yml` **pred** `verify_forecasts.py`, ki napoved zabeleži kot
+  tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
+  merilu. Kartica v `app.js` je `fetchMosForecast()` (+ sparkline
+  `drawMosSpark()`).
+- Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
+  napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
+  tiho dobiva druge vhode, kot jih pozna.
+- Model se uči **samo** iz `history.json` in Open-Meteo. Nobenih notranjih
+  meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
+  tem cevovodu ne uporablja.
 
 ## Razvoj
 

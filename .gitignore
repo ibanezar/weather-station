@@ -7,3 +7,4 @@ __pycache__/
 .wrangler/
 .dev.vars
 tools/.drive_photo_tmp.jpg
+tools/.mos_cache.json
