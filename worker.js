@@ -3729,6 +3729,47 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      // Zamenja binarno vsebino obstoječe fotke (npr. klientsko pomanjšana
+      // različica) ob ohranitvi customMetadata (title/caption/author/status
+      // ...) — uporablja galleryOptimizeExisting() v app.js za enkratno
+      // zmanjšanje že naloženih (prevelikih) fotk brez potrebe po ločenem
+      // "izbriši + znova naloži" koraku, ki bi izgubil odobritev/opis.
+      if (path.startsWith("/gallery/replace/") && request.method === "POST") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const key = decodeURIComponent(path.slice("/gallery/replace/".length));
+        if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const existing = await env.PHOTOS_R2.head(key);
+        if (!existing) return new Response(JSON.stringify({ error: "Ni najdeno" }), {
+          status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        let fd;
+        try { fd = await request.formData(); } catch (e) {
+          return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const file = fd.get("photo");
+        if (!file || !file.size) return new Response(JSON.stringify({ error: "Ni datoteke" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        if (file.size > 20 * 1024 * 1024) return new Response(JSON.stringify({ error: "Datoteka je prevelika (max 20 MB)" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        await env.PHOTOS_R2.put(key, file.stream(), {
+          httpMetadata: { contentType: file.type || existing.httpMetadata?.contentType },
+          customMetadata: existing.customMetadata
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       if (path === "/gallery/upload" && request.method === "POST") {
         if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
           status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
