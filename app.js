@@ -1349,11 +1349,11 @@ function checkThresholdAlerts(obs){
 
 function checkAlerts(obs){
   const m=obs.metric,uv=obs.uv??0,wind=m.windSpeed??0,base=[];
-  if(m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp<=0) base.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
-  else if(m.temp<=3) base.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
+  if(m.temp!=null&&m.temp<=0)      {maybePushAlert('❄️ Zmrzal','Temperatura: '+m.temp.toFixed(1)+'°C. Možna zmrzel.');} if(m.temp!=null&&m.temp<=0) base.push({cls:'a-freeze',icon:'🧊',title:'Zmrzovalne razmere',desc:'Temperatura pri ali pod 0°C — na površinah verjetna zmrzel in led.'});
+  else if(m.temp!=null&&m.temp<=3) base.push({cls:'a-frost', icon:'❄️',title:'Blizu zmrzišča',desc:'Temperatura pod 3°C — zaščitite občutljive rastline.'});
   if(uv>=11)         base.push({cls:'a-uv',icon:'☀️',title:'Ekstremni UV — UV '+uv,desc:'Izogibajte se bivanju zunaj. Nujen SPF 50+ in senca.'});
   else if(uv>=8)     base.push({cls:'a-uv',icon:'🌞',title:'Zelo visok UV — UV '+uv,desc:'Priporočena zaščita pred soncem.'});
-  if(m.temp>=35)     base.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
+  if(m.temp!=null&&m.temp>=35)     base.push({cls:'a-heat',icon:'🌡️',title:'Opozorilo pred vročino — '+m.temp.toFixed(1)+'°C',desc:'Pijte dovolj tekočine in se izogibajte dalj časa trajajočim aktivnostim.'});
   if(wind>=50)       base.push({cls:'a-wind',icon:'💨',title:'Močan veter — '+wind.toFixed(1)+' km/h',desc:'Zavarujte predmete na prostem.'});
   // Preserve special-tagged alerts (nowcast, user thresholds)
   _liveAlerts=[..._liveAlerts.filter(a=>a._precipNowcast||a._threshold),...base];
@@ -1978,7 +1978,7 @@ function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   const tempEl=document.getElementById('temp-val');
-  if(tempEl){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
+  if(tempEl&&m.temp!=null){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
