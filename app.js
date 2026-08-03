@@ -5570,7 +5570,14 @@ function _renderAIFC(data){
   if(daysEl&&data.summaries?.length){
     const today=_localDateStr(new Date());
     const tomorrow=_localDateStr(new Date(Date.now()+864e5));
-    daysEl.innerHTML=data.summaries.slice(0,7).map(s=>{
+    const week=data.summaries.slice(0,7);
+    // Razpon dneva glede na najhladnejši/najtoplejši dan v tednu, da je na
+    // prvi pogled vidno, kateri dnevi izstopajo (topli/hladni).
+    const los=week.map(s=>s.tmin).filter(v=>v!=null);
+    const his=week.map(s=>s.tmax).filter(v=>v!=null);
+    const weekMin=los.length?Math.min(...los):null;
+    const weekRange=(weekMin!=null&&his.length)?Math.max(Math.max(...his)-weekMin,1):null;
+    daysEl.innerHTML=week.map(s=>{
       const dt=new Date(s.date+'T12:00:00');
       // Oznaka iz datuma, ne iz indeksa: tik pred polnočjo yr.no vrne kot prvi
       // dan že jutrišnjega, in "Danes" bi pristalo na napačni ploščici.
@@ -5580,10 +5587,14 @@ function _renderAIFC(data){
       const temps=s.partial
         ?`<span class="aifc-day-tlo">${s.tmin!=null?Math.round(s.tmin)+'°':'—'}</span>`
         :`${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span>`;
+      const bar=(!s.partial&&weekRange&&s.tmin!=null&&s.tmax!=null)
+        ?`<div class="aifc-day-bar"><span class="aifc-day-bar-fill" style="left:${((s.tmin-weekMin)/weekRange*100).toFixed(0)}%;width:${Math.max((s.tmax-s.tmin)/weekRange*100,8).toFixed(0)}%"></span></div>`
+        :'';
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
 <div class="aifc-day-icon">${_yrImg(s.symbol,28)}</div>
 <div class="aifc-day-t">${temps}</div>
+${bar}
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
 </div>`;
     }).join('');
@@ -5603,7 +5614,7 @@ ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
-    metaEl.textContent=src+(t?' · '+t:'');
+    metaEl.textContent=src+(t?' · 🕐 '+t:'');
   }
 }
 
