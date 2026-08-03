@@ -1939,6 +1939,8 @@ function _wfRecentDayHighs(n){
 function checkWeatherFeaturedBanner(obs){
   const el=document.getElementById('wf-banner');
   if(!el)return;
+  // Aktivno ARSO opozorilo ima prednost — ne kažemo hkrati še promocijske pasice.
+  if(document.getElementById('alerts-wrap')?.children.length){el.style.display='none';return;}
   const m=obs.metric||{};
   const dir=obs.winddir;
   const gust=m.windGust??m.windSpeed??0;
