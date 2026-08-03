@@ -1,87 +1,6 @@
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
-// ── ZAČASNA DIAGNOSTIKA "flikne zaslon ob preklopu zavihkov" ──────────
-// Odstrani po tem, ko dobimo podatke iz overlay-a na napravi, kjer se
-// pojavlja. Na zaslonu izpisuje visualViewport resize + layout-shift
-// dogodke, da vidimo TOČNO kaj/kdaj povzroči skok — brez potrebe po
-// snemanju videa ali odpiranju DevTools na telefonu. En gumb kopira CEL
-// log v odložišče (ni treba screenshotati/ročno izbirati besedila), in
-// dogodki zunaj kratkega okna okrog preklopa zavihka se ignorirajo, da se
-// log ne napolni s šumom iz ostalega dogajanja na strani.
-(function(){
-  const wrap=document.createElement('div');
-  wrap.id='wx-debug-overlay';
-  wrap.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,.92);font-family:monospace';
-  const bar=document.createElement('div');
-  bar.style.cssText='display:flex;gap:.5rem;align-items:center;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.15)';
-  const copyBtn=document.createElement('button');
-  copyBtn.textContent='📋 Kopiraj log';
-  copyBtn.style.cssText='font:11px monospace;padding:3px 8px;border-radius:6px;border:1px solid #4ade80;background:transparent;color:#4ade80';
-  const closeBtn=document.createElement('button');
-  closeBtn.textContent='✕';
-  closeBtn.style.cssText='font:11px monospace;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;margin-left:auto';
-  const status=document.createElement('span');
-  status.style.cssText='font:10px monospace;color:#9ca3af';
-  bar.appendChild(copyBtn); bar.appendChild(status); bar.appendChild(closeBtn);
-  const box=document.createElement('pre');
-  box.style.cssText='max-height:32vh;overflow:auto;color:#4ade80;font:10px/1.45 monospace;padding:6px 8px;margin:0;white-space:pre-wrap';
-  box.textContent='[wx-debug] čakam na preklop zavihka…\n';
-  wrap.appendChild(bar); wrap.appendChild(box);
-  (document.body||document.documentElement).appendChild(wrap);
-
-  copyBtn.onclick=function(){
-    const text=box.textContent;
-    (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject())
-      .then(function(){ status.textContent='kopirano ✓'; })
-      .catch(function(){
-        // Fallback za brskalnike/kontekste brez Clipboard API-ja
-        const ta=document.createElement('textarea');
-        ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-        document.body.appendChild(ta); ta.select();
-        try{ document.execCommand('copy'); status.textContent='kopirano ✓'; }
-        catch(e){ status.textContent='kopiranje ni uspelo — označi ročno'; box.style.userSelect='text'; }
-        document.body.removeChild(ta);
-      });
-  };
-  closeBtn.onclick=function(){ wrap.remove(); };
-
-  let t0=0, windowEnd=0, lineCount=0;
-  const MAX_LINES=60, WINDOW_MS=4000;
-  window._wxDebugStart=function(label){
-    t0=performance.now();
-    windowEnd=t0+WINDOW_MS;
-    lineCount=0;
-    box.textContent='[wx-debug] '+label+'\n';
-    status.textContent='';
-  };
-  window._wxDebugLog=function(msg){
-    if(performance.now()>windowEnd) return; // izven okna preklopa — verjetno šum, ignoriraj
-    const t=t0?(performance.now()-t0).toFixed(0):'0';
-    lineCount++;
-    if(lineCount>MAX_LINES){
-      if(lineCount===MAX_LINES+1) box.textContent+='… (nadaljnje vrstice izpuščene, prvih '+MAX_LINES+' zgoraj) …\n';
-      return;
-    }
-    box.textContent+='[+'+t+'ms] '+msg+'\n';
-    box.scrollTop=box.scrollHeight;
-  };
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',function(){
-      window._wxDebugLog('visualViewport RESIZE -> vv.height='+Math.round(window.visualViewport.height)+' innerHeight='+window.innerHeight+' scrollY='+Math.round(window.scrollY));
-    });
-  }
-  try{
-    new PerformanceObserver(function(list){
-      list.getEntries().forEach(function(e){
-        if(e.value<0.01) return; // zanemarljivi mikro-premiki, samo šum
-        const srcs=(e.sources||[]).map(function(s){ return s.node?(s.node.id||s.node.className||s.node.tagName):'?'; }).join(', ');
-        window._wxDebugLog('layout-shift value='+e.value.toFixed(4)+' src=['+srcs+']');
-      });
-    }).observe({type:'layout-shift',buffered:true});
-  }catch(e){}
-})();
-
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 const _resLoaded = new Set();
@@ -2602,19 +2521,6 @@ function _lbKeyHandler(e){
 }
 
 function switchTab(tab){
-  // Zavihki zelo razlikujejo po višini vsebine (npr. Galerija je bistveno
-  // krajša od večine ostalih). Menjava iz dolgega v kratek zavihek trenutno
-  // skrči <div class="wrap"> (in s tem stran) za tisoč+ pikslov naenkrat —
-  // na Android Chromu to (skupaj s prisilnim popravkom scroll pozicije)
-  // sproži tudi vrnitev dinamične naslovne vrstice, kar da viden "skok"
-  // cele postavitve. Namesto boja s scroll pozicijo zaklenemo trenutno
-  // višino .wrap PRED zamenjavo pane-a, nato jo z eno CSS tranzicijo
-  // postopoma spustimo na naravno višino nove vsebine — stran se skrči
-  // gladko namesto v enem koraku.
-  window._wxDebugStart && window._wxDebugStart('switchTab("'+tab+'") start');
-  const wrap = document.querySelector('.wrap');
-  const oldH = wrap ? wrap.getBoundingClientRect().height : 0;
-  window._wxDebugLog && window._wxDebugLog('oldH='+Math.round(oldH)+' scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
   // V preprostem pogledu zavihkov ni. Če kaka notranja povezava vseeno
   // zahteva drug zavihek, preklopimo v napredni pogled — sicer bi obiskovalec
   // pristal na skriti plošči in videl prazno stran.
@@ -2623,34 +2529,6 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn, .tab-dd-menu button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-dd-trigger').forEach(b=>b.classList.remove('dd-active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
-  if(wrap){
-    // Novi pane je naravno kratek/visok, oldH pa nam pove, kolikšna je bila
-    // stran trenutek prej — zaklenemo nazaj na oldH (brez vidnega skoka, ker
-    // se to zgodi še preden brskalnik sploh naslika ta frame), nato v
-    // naslednjem framu z eno tranzicijo spustimo na naravno višino nove
-    // vsebine (FLIP tehnika) — stran se skrči gladko namesto naenkrat.
-    const newH = wrap.getBoundingClientRect().height;
-    window._wxDebugLog && window._wxDebugLog('po zamenjavi pane-a: newH='+Math.round(newH)+' scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
-    wrap.style.minHeight = oldH+'px';
-    wrap.offsetHeight; // force reflow, da je oldH "od koder" tranzicije veljaven
-    window._wxDebugLog && window._wxDebugLog('minHeight zaklenjen na oldH='+Math.round(oldH));
-    requestAnimationFrame(()=>{
-      window._wxDebugLog && window._wxDebugLog('rAF: start tranzicije proti newH='+Math.round(newH)+' scrollY='+Math.round(window.scrollY));
-      wrap.style.transition = 'min-height .28s ease';
-      wrap.style.minHeight = newH+'px';
-      // Scroll na vrh usklajeno z isto tranzicijo (namesto ločenega prejšnjega
-      // skoka) — brskalnik tako ne dobi dveh zaporednih razlogov za popravek
-      // pozicije/naslovne vrstice.
-      window.scrollTo({top:0, behavior: newH<oldH ? 'smooth' : 'instant'});
-      setTimeout(()=>{
-        wrap.style.transition='';
-        wrap.style.minHeight='';
-        window._wxDebugLog && window._wxDebugLog('tranzicija konec, minHeight sproščen. scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
-      }, 320);
-    });
-  } else {
-    window.scrollTo(0, 0);
-  }
   // Activate button — either primary or inside dropdown
   const directBtn=document.getElementById('tab-btn-'+tab);
   if(directBtn&&!directBtn.closest('.tab-dd-menu'))directBtn.classList.add('active');
