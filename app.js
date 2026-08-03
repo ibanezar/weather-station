@@ -1,6 +1,42 @@
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// ── ZAČASNA DIAGNOSTIKA "flikne zaslon ob preklopu zavihkov" ──────────
+// Odstrani po tem, ko dobimo podatke iz overlay-a na napravi, kjer se
+// pojavlja. Na zaslonu izpisuje visualViewport resize + layout-shift
+// dogodke, da vidimo TOČNO kaj/kdaj povzroči skok — brez potrebe po
+// snemanju videa ali odpiranju DevTools na telefonu.
+(function(){
+  const box=document.createElement('pre');
+  box.id='wx-debug-overlay';
+  box.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:999999;max-height:38vh;overflow:auto;background:rgba(0,0,0,.88);color:#4ade80;font:10px/1.45 monospace;padding:6px 8px;margin:0;white-space:pre-wrap;pointer-events:none';
+  box.textContent='[wx-debug] čakam na preklop zavihka…\n';
+  (document.body||document.documentElement).appendChild(box);
+  let t0=0;
+  window._wxDebugStart=function(label){
+    t0=performance.now();
+    box.textContent='[wx-debug] '+label+'\n';
+  };
+  window._wxDebugLog=function(msg){
+    const t=t0?(performance.now()-t0).toFixed(0):'0';
+    box.textContent+='[+'+t+'ms] '+msg+'\n';
+    box.scrollTop=box.scrollHeight;
+  };
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',function(){
+      window._wxDebugLog('visualViewport RESIZE -> vv.height='+Math.round(window.visualViewport.height)+' innerHeight='+window.innerHeight+' scrollY='+Math.round(window.scrollY));
+    });
+  }
+  try{
+    new PerformanceObserver(function(list){
+      list.getEntries().forEach(function(e){
+        const srcs=(e.sources||[]).map(function(s){ return s.node?(s.node.id||s.node.className||s.node.tagName):'?'; }).join(', ');
+        window._wxDebugLog('layout-shift value='+e.value.toFixed(4)+' src=['+srcs+']');
+      });
+    }).observe({type:'layout-shift',buffered:true});
+  }catch(e){}
+})();
+
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 const _resLoaded = new Set();
@@ -2530,8 +2566,10 @@ function switchTab(tab){
   // višino .wrap PRED zamenjavo pane-a, nato jo z eno CSS tranzicijo
   // postopoma spustimo na naravno višino nove vsebine — stran se skrči
   // gladko namesto v enem koraku.
+  window._wxDebugStart && window._wxDebugStart('switchTab("'+tab+'") start');
   const wrap = document.querySelector('.wrap');
   const oldH = wrap ? wrap.getBoundingClientRect().height : 0;
+  window._wxDebugLog && window._wxDebugLog('oldH='+Math.round(oldH)+' scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
   // V preprostem pogledu zavihkov ni. Če kaka notranja povezava vseeno
   // zahteva drug zavihek, preklopimo v napredni pogled — sicer bi obiskovalec
   // pristal na skriti plošči in videl prazno stran.
@@ -2547,16 +2585,23 @@ function switchTab(tab){
     // naslednjem framu z eno tranzicijo spustimo na naravno višino nove
     // vsebine (FLIP tehnika) — stran se skrči gladko namesto naenkrat.
     const newH = wrap.getBoundingClientRect().height;
+    window._wxDebugLog && window._wxDebugLog('po zamenjavi pane-a: newH='+Math.round(newH)+' scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
     wrap.style.minHeight = oldH+'px';
     wrap.offsetHeight; // force reflow, da je oldH "od koder" tranzicije veljaven
+    window._wxDebugLog && window._wxDebugLog('minHeight zaklenjen na oldH='+Math.round(oldH));
     requestAnimationFrame(()=>{
+      window._wxDebugLog && window._wxDebugLog('rAF: start tranzicije proti newH='+Math.round(newH)+' scrollY='+Math.round(window.scrollY));
       wrap.style.transition = 'min-height .28s ease';
       wrap.style.minHeight = newH+'px';
       // Scroll na vrh usklajeno z isto tranzicijo (namesto ločenega prejšnjega
       // skoka) — brskalnik tako ne dobi dveh zaporednih razlogov za popravek
       // pozicije/naslovne vrstice.
       window.scrollTo({top:0, behavior: newH<oldH ? 'smooth' : 'instant'});
-      setTimeout(()=>{ wrap.style.transition=''; wrap.style.minHeight=''; }, 320);
+      setTimeout(()=>{
+        wrap.style.transition='';
+        wrap.style.minHeight='';
+        window._wxDebugLog && window._wxDebugLog('tranzicija konec, minHeight sproščen. scrollY='+Math.round(window.scrollY)+' innerHeight='+window.innerHeight+' vvHeight='+(window.visualViewport?Math.round(window.visualViewport.height):'n/a'));
+      }, 320);
     });
   } else {
     window.scrollTo(0, 0);
