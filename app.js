@@ -145,7 +145,7 @@ const CC = {
 
 // ── Utilities ─────────────────────────────────────────────
 function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d);}
-function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function set(id,v){const e=document.getElementById(id);if(e){e.textContent=v;e.classList.remove('skel-shimmer');}}
 function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
@@ -191,6 +191,7 @@ function feelsStyle(t){
 function beaufort(kmh){const s=[[1,'0','Tišina'],[5,'1','Tih zrak'],[11,'2','Lahek vetrič'],[19,'3','Blagi vetrič'],[28,'4','Zmerni vetrič'],[38,'5','Svež veter'],[49,'6','Močan veter'],[61,'7','Skoraj vihar'],[74,'8','Vihar'],[88,'9','Močan vihar'],[102,'10','Nevihta'],[117,'11','Silovit vihar'],[999,'12','Orkan']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Hurricane'};}
 function countUp(id,target,dec,unitHTML,dur){
   const el=document.getElementById(id);if(!el||isNaN(Number(target)))return;
+  el.classList.remove('skel-shimmer');
   const uHTML=unitHTML||'',t0=performance.now();
   const step=(now)=>{const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);el.innerHTML=(Number(target)*ease).toFixed(dec)+uHTML;if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
@@ -1988,7 +1989,7 @@ function applyObs(obs){
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   // UV hero card — value + color
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
-  const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;}
+  const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;uvEl.classList.remove('skel-shimmer');}
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
@@ -2603,7 +2604,7 @@ function setPeriodBtns(period,loading){
 
 function showHistLoading(){
   const t=document.getElementById('history-tbody');
-  if(t)t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--muted)">Nalaganje…</td></tr>';
+  if(t)t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem"><span class="skel-shimmer">Nalaganje…</span></td></tr>';
 }
 
 function updateAccumInfo(shown,total){
