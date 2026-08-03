@@ -4765,7 +4765,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
         const ageMin = obs?.obsTimeUtc
           ? (Date.now() - new Date(obs.obsTimeUtc).getTime()) / 60000
           : Infinity;
-        if (!obs || ageMin > 30) {
+        // WU upload je lahko "svež" po času, a s praznimi (null) meritvami —
+        // ne samo zastarel. Rezervo zato sprožimo tudi, če manjka temperatura.
+        if (!obs || ageMin > 30 || obs?.metric?.temp == null) {
           const fallback = await fetchEcowittAsWuObs(env);
           if (fallback) {
             return new Response(JSON.stringify({ observations: [fallback] }), {
