@@ -2521,6 +2521,13 @@ function _lbKeyHandler(e){
 }
 
 function switchTab(tab){
+  // Zavihki zelo razlikujejo po višini vsebine (npr. Galerija je bistveno
+  // krajša od večine ostalih). Če smo bili scrollani globoko v prejšnjem
+  // (visokem) zavihku, brskalnik ob zamenjavi na kratkega prisilno "poskoči"
+  // scroll nazaj, da ostane znotraj nove (krajše) višine strani — to je
+  // viden skok/utrip postavitve. Scroll na vrh PRED zamenjavo pane-a (dokler
+  // je stara, visoka vsebina še prisotna) to prepreči.
+  window.scrollTo(0, 0);
   // V preprostem pogledu zavihkov ni. Če kaka notranja povezava vseeno
   // zahteva drug zavihek, preklopimo v napredni pogled — sicer bi obiskovalec
   // pristal na skriti plošči in videl prazno stran.
