@@ -2522,12 +2522,16 @@ function _lbKeyHandler(e){
 
 function switchTab(tab){
   // Zavihki zelo razlikujejo po višini vsebine (npr. Galerija je bistveno
-  // krajša od večine ostalih). Če smo bili scrollani globoko v prejšnjem
-  // (visokem) zavihku, brskalnik ob zamenjavi na kratkega prisilno "poskoči"
-  // scroll nazaj, da ostane znotraj nove (krajše) višine strani — to je
-  // viden skok/utrip postavitve. Scroll na vrh PRED zamenjavo pane-a (dokler
-  // je stara, visoka vsebina še prisotna) to prepreči.
-  window.scrollTo(0, 0);
+  // krajša od večine ostalih). Menjava iz dolgega v kratek zavihek trenutno
+  // skrči <div class="wrap"> (in s tem stran) za tisoč+ pikslov naenkrat —
+  // na Android Chromu to (skupaj s prisilnim popravkom scroll pozicije)
+  // sproži tudi vrnitev dinamične naslovne vrstice, kar da viden "skok"
+  // cele postavitve. Namesto boja s scroll pozicijo zaklenemo trenutno
+  // višino .wrap PRED zamenjavo pane-a, nato jo z eno CSS tranzicijo
+  // postopoma spustimo na naravno višino nove vsebine — stran se skrči
+  // gladko namesto v enem koraku.
+  const wrap = document.querySelector('.wrap');
+  const oldH = wrap ? wrap.getBoundingClientRect().height : 0;
   // V preprostem pogledu zavihkov ni. Če kaka notranja povezava vseeno
   // zahteva drug zavihek, preklopimo v napredni pogled — sicer bi obiskovalec
   // pristal na skriti plošči in videl prazno stran.
@@ -2536,6 +2540,27 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn, .tab-dd-menu button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-dd-trigger').forEach(b=>b.classList.remove('dd-active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
+  if(wrap){
+    // Novi pane je naravno kratek/visok, oldH pa nam pove, kolikšna je bila
+    // stran trenutek prej — zaklenemo nazaj na oldH (brez vidnega skoka, ker
+    // se to zgodi še preden brskalnik sploh naslika ta frame), nato v
+    // naslednjem framu z eno tranzicijo spustimo na naravno višino nove
+    // vsebine (FLIP tehnika) — stran se skrči gladko namesto naenkrat.
+    const newH = wrap.getBoundingClientRect().height;
+    wrap.style.minHeight = oldH+'px';
+    wrap.offsetHeight; // force reflow, da je oldH "od koder" tranzicije veljaven
+    requestAnimationFrame(()=>{
+      wrap.style.transition = 'min-height .28s ease';
+      wrap.style.minHeight = newH+'px';
+      // Scroll na vrh usklajeno z isto tranzicijo (namesto ločenega prejšnjega
+      // skoka) — brskalnik tako ne dobi dveh zaporednih razlogov za popravek
+      // pozicije/naslovne vrstice.
+      window.scrollTo({top:0, behavior: newH<oldH ? 'smooth' : 'instant'});
+      setTimeout(()=>{ wrap.style.transition=''; wrap.style.minHeight=''; }, 320);
+    });
+  } else {
+    window.scrollTo(0, 0);
+  }
   // Activate button — either primary or inside dropdown
   const directBtn=document.getElementById('tab-btn-'+tab);
   if(directBtn&&!directBtn.closest('.tab-dd-menu'))directBtn.classList.add('active');
