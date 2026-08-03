@@ -2327,7 +2327,11 @@ function _renderGalleryPending(){
     panel.innerHTML = '<div class="gallery-pending-empty">Ni čakajočih predlogov.</div>';
     return;
   }
-  panel.innerHTML = _galleryPending.map((p,i)=>{
+  const header = `<div class="gallery-pending-header">
+    <span>${_galleryPending.length} čaka</span>
+    <button class="gallery-pending-approve-all" onclick="galleryApproveAll()">✓✓ Odobri vse</button>
+  </div>`;
+  const items = _galleryPending.map((p,i)=>{
     const imgUrl = PROXY+'/gallery/img/'+encodeURIComponent(p.key);
     return `<div class="gallery-pending-item">
       <img src="${imgUrl}" alt="">
@@ -2339,6 +2343,15 @@ function _renderGalleryPending(){
       <button class="gallery-pending-reject" onclick="galleryReject(${i})">✕ Zavrni</button>
     </div>`;
   }).join('');
+  panel.innerHTML = header + items;
+}
+
+async function _galleryApproveKey(key, pwd){
+  const res = await fetch(PROXY+'/gallery/approve/'+encodeURIComponent(key), {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+pwd }
+  });
+  return res.ok;
 }
 
 async function galleryApprove(idx){
@@ -2347,11 +2360,8 @@ async function galleryApprove(idx){
   const pwd = sessionStorage.getItem('_galAdminPwd');
   if(!pwd) return;
   try {
-    const res = await fetch(PROXY+'/gallery/approve/'+encodeURIComponent(photo.key), {
-      method:'POST',
-      headers:{ 'Authorization':'Bearer '+pwd }
-    });
-    if(!res.ok) throw new Error();
+    const ok = await _galleryApproveKey(photo.key, pwd);
+    if(!ok) throw new Error();
     _galleryPending.splice(idx, 1);
     _renderGalleryPending();
     showToast('Fotografija odobrena.');
@@ -2359,6 +2369,30 @@ async function galleryApprove(idx){
   } catch(e){
     showToast('Napaka pri odobritvi.');
   }
+}
+
+async function galleryApproveAll(){
+  if(!_galleryPending.length) return;
+  const pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd) return;
+  if(!confirm('Odobri vseh '+_galleryPending.length+' čakajočih fotografij?')) return;
+  const btn = document.querySelector('.gallery-pending-approve-all');
+  if(btn){ btn.disabled = true; }
+  // Zaporedno (ne vzporedno), da ne obremenimo Workerja/rate-limita in da
+  // dobimo zanesljivo končno število uspešnih/neuspešnih odobritev.
+  const queue = _galleryPending.slice();
+  let ok = 0, fail = 0;
+  for(const photo of queue){
+    if(btn) btn.textContent = `Odobravam… (${ok+fail+1}/${queue.length})`;
+    try {
+      const success = await _galleryApproveKey(photo.key, pwd);
+      if(success){ ok++; _galleryPending = _galleryPending.filter(p=>p.key!==photo.key); }
+      else fail++;
+    } catch(e){ fail++; }
+  }
+  _renderGalleryPending();
+  showToast(fail ? `Odobrenih ${ok}, napaka pri ${fail}.` : `Odobrenih vseh ${ok}.`);
+  loadGallery();
 }
 
 async function galleryReject(idx){
