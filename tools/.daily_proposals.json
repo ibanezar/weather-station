@@ -1,47 +1,49 @@
 {
-  "date": "2026-08-02",
-  "created": "2026-08-02T06:20:50.719083+00:00",
+  "date": "2026-08-03",
+  "created": "2026-08-03T06:47:09.529716+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročinski val se krepi: danes 33,8 °C, do torka že 37,1 °C",
-      "teaser": "Napoved za Zgornjo Savinjsko dolino kaže postopno stopnjevanje vročine – od 33,8 °C danes do 37,1 °C v torek, 5. avgusta. Padavin ni na vidiku niti en dan, kar pomeni, da se bo vročina le še kopičila. Poglejmo, kako se bodo razmere razvijale dan za dnem.",
+      "title": "Vročina nad Savinjsko dolino: do 37,1 °C v prihodnjih dneh",
+      "teaser": "Danes se temperatura povzpne do 35,9 °C, jutri pa napoved kaže še višjih 37,1 °C. Analiziramo, kako dolgo bo vročinski val trajal in kdaj lahko pričakujemo osvežitev, saj padavin v naslednjih dneh praktično ni na vidiku.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (33,8 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (35,9 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 33.8,
+          "value": 35.9,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "tropske-noci",
-      "title": "Kdaj pade temperatura pod 20 °C? Nočno ohlajanje kljub vročinskemu valu",
-      "teaser": "Kljub visokim dnevnim vrednostim minimalne temperature v prihodnjih dneh ostajajo med 17,8 in 18,9 °C, kar pomeni, da tropskih noči (nad 20 °C) po napovedi za zdaj ne bo. Preverimo, zakaj je nočno ohlajanje pod 20 °C pomembno za spanje in počutje ter kako dolgo bo to še veljalo.",
+      "id": "dusljivost-zraka",
+      "title": "Rosišče Savinjska dolina: zakaj vročina duši bolj, kot kaže",
+      "teaser": "Kljub trenutni temperaturi 23,3 °C rosišče znaša kar 17,9 °C, vlažnost pa 72 %, kar zrak naredi dušljiv in neprijeten. Razložimo, zakaj se ob takšnih razmerah počutje razlikuje od tega, kar pokaže termometer.",
       "topic": {
-        "id": "tropske-noci",
+        "id": "dusljivost-zraka",
         "sezona": [
+          5,
           6,
           7,
-          8
+          8,
+          9
         ],
-        "tag": "tropska-noc",
-        "brief": "Tropske noči zadnjih dni: ali temperatura ponoči pade pod 20 °C in kaj to pomeni za spanje/zdravje.",
+        "tag": "dusljivost",
+        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
         "seo_keywords": [
-          "tropska noč Savinjska dolina",
-          "vroče noči poletje",
-          "kdaj se ohladi ponoči"
+          "rosišče Savinjska dolina",
+          "dušljivo vreme",
+          "občutek vročine vlaga"
         ]
       }
     },
     {
       "id": "pozarna-ogrozenost",
-      "title": "Suša brez konca: kakšna je požarna ogroženost v Zgornji Savinjski dolini",
-      "teaser": "Štiridnevna napoved ne prinaša niti kapljice dežja, temperature pa se bodo vzpenjale proti 37 °C, kar dodatno suši tla in vegetacijo. Ob trenutni vlažnosti zraka 78 % in šibkem vetru analiziramo, kako se razmere odražajo na tveganju za požare v naravi.",
+      "title": "Požarna ogroženost v Zgornji Savinjski dolini narašča",
+      "teaser": "Brez dežja v zadnjih dneh in z napovedanimi 0,0 mm padavin danes ter jutri se tla dodatno sušijo, kar povečuje tveganje za požare v naravi. Poglejmo, kako trenutna vlažnost zraka in šibek veter vplivajo na oceno požarne nevarnosti v regiji.",
       "topic": {
         "id": "pozarna-ogrozenost",
         "sezona": [
