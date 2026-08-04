@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 04 Aug 2026 06:28:42 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2026 15:38:36 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Ohladitev v petek: konec vročinskega vala, dež do sobote</title>
+      <link>https://meteorec.si/blog/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.html</guid>
+      <pubDate>Tue, 04 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Po vročinskem valu z do 37 °C ohladitev v petek prinese dež v Zgornji Savinjski dolini. Koliko padavin pade in kdaj se spet zjasni – primerjava ARSO in Open-Meteo napovedi.</description>
+      <category>napoved</category>
+      <category>ohladitev</category>
+      <category>padavine</category>
+      <category>IREICA1</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Rečica in svet: kaj pove šest let podatkov o segrevanju</title>
       <link>https://meteorec.si/blog/recica-in-svet-segrevanje-v-podatkih.html</link>
