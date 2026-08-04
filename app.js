@@ -580,22 +580,25 @@ function renderClimateAnomaly(){
   const todRain=m.precipTotal??0;
   const yrs=_insYears(store).length;
   const mkItem=(val,norm,unit,dec,invert)=>{
-    if(val==null||norm==null)return'<div class="anom-item"><div class="anom-val anom-zero">—</div><div class="anom-lbl">ni podatka</div></div>';
+    if(val==null||norm==null||isNaN(norm))return{bad:true};
     const d=val-norm;
     const cls=Math.abs(d)<(unit==='mm'?2:0.4)?'anom-zero':(d>0?(invert?'anom-neg':'anom-pos'):(invert?'anom-pos':'anom-neg'));
     const sign=d>0?'+':'';
-    return{d,cls,sign,txt:sign+d.toFixed(dec)};
+    return{bad:false,d,cls,sign,txt:sign+d.toFixed(dec)};
   };
+  const mkItemHtml=(it,lbl,unit)=>it.bad
+    ?'<div class="anom-item"><div class="anom-val anom-zero">—</div><div class="anom-lbl">ni podatka</div></div>'
+    :'<div class="anom-item"><div class="anom-val '+it.cls+'">'+it.txt+'<span class="au">'+unit+'</span></div><div class="anom-lbl">'+lbl+'</div></div>';
   const it1=mkItem(todHi,normTHi,'°C',1,false);
   const it3=mkItem(todRain,normRain,'mm',1,true);
   let html='<div class="anom-grid">';
-  html+='<div class="anom-item"><div class="anom-val '+it1.cls+'">'+it1.txt+'<span class="au">°C</span></div><div class="anom-lbl">Tmax glede na normalo</div></div>';
-  html+='<div class="anom-item"><div class="anom-val '+it3.cls+'">'+it3.txt+'<span class="au">mm</span></div><div class="anom-lbl">Padavine glede na normalo</div></div>';
+  html+=mkItemHtml(it1,'Tmax glede na normalo','°C');
+  html+=mkItemHtml(it3,'Padavine glede na normalo','mm');
   html+='</div>';
-  const warmer=it1.d>0;
-  html+='<div class="anom-note">Normala za '+new Date().toLocaleDateString('sl',{day:'numeric',month:'long'})+' (±3 dni, '+yrs+' let): <b style="color:var(--text)">'+normTHi.toFixed(1)+'°C</b> Tmax, <b style="color:var(--text)">'+normRain.toFixed(1)+' mm</b> dež. Danes je '+(Math.abs(it1.d)<0.4?'skoraj točno povprečno':(warmer?'topleje':'hladneje'))+'.</div>';
+  const warmer=!it1.bad&&it1.d>0;
+  html+='<div class="anom-note">Normala za '+new Date().toLocaleDateString('sl',{day:'numeric',month:'long'})+' (±3 dni, '+yrs+' let): <b style="color:var(--text)">'+normTHi.toFixed(1)+'°C</b> Tmax, <b style="color:var(--text)">'+normRain.toFixed(1)+' mm</b> dež.'+(it1.bad?'':' Danes je '+(Math.abs(it1.d)<0.4?'skoraj točno povprečno':(warmer?'topleje':'hladneje'))+'.')+'</div>';
   body.innerHTML=html;
-  badge.textContent=(it1.d>0?'+':'')+it1.d.toFixed(1)+'°C';
+  badge.textContent=it1.bad?'—':(it1.d>0?'+':'')+it1.d.toFixed(1)+'°C';
 }
 
 // ── 2. Streak tracker ────────────────────────────────────
