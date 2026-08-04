@@ -2216,6 +2216,24 @@ let _galleryCursor = null;
 let _galleryTruncated = false;
 let _lbIdx = 0;
 let _galleryPendingFile = null;
+let _galleryCategoryFilter = null;
+
+const GALLERY_CATEGORIES = [
+  { id:'nevihte',   label:'🌩️ Nevihte' },
+  { id:'sneg',      label:'❄️ Sneg' },
+  { id:'sonce',     label:'☀️ Sonce & mavrice' },
+  { id:'megla',     label:'🌫️ Megla' },
+  { id:'pokrajina', label:'🏔️ Pokrajina' },
+  { id:'general',   label:'📷 Splošno' }
+];
+
+function galleryFilterCategory(cat){
+  _galleryCategoryFilter = cat || null;
+  document.querySelectorAll('.gallery-cat-chip').forEach(c=>{
+    c.classList.toggle('active', (c.dataset.cat||null) === _galleryCategoryFilter);
+  });
+  loadGallery(true);
+}
 
 function _galEsc(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2245,8 +2263,11 @@ async function loadGallery(reset){
   const cnt = document.getElementById('gallery-count');
   if(reset !== false){ _galleryPhotos = []; _galleryCursor = null; }
   try {
-    let url = PROXY+'/gallery?category=general';
-    if(_galleryCursor) url += '&cursor='+encodeURIComponent(_galleryCursor);
+    let url = PROXY+'/gallery';
+    const qs = [];
+    if(_galleryCategoryFilter) qs.push('category='+encodeURIComponent(_galleryCategoryFilter));
+    if(_galleryCursor) qs.push('cursor='+encodeURIComponent(_galleryCursor));
+    if(qs.length) url += '?'+qs.join('&');
     const res = await fetch(url, { cache:'no-cache' });
     const data = await res.json();
     _galleryPhotos = _galleryPhotos.concat(data.photos || []);
@@ -2433,8 +2454,8 @@ async function galleryOptimizeExisting(){
     // Zberi vse fotke (ne le trenutno naložena stran v _galleryPhotos).
     let all = [], cursor = null;
     do {
-      let url = PROXY+'/gallery?category=general';
-      if(cursor) url += '&cursor='+encodeURIComponent(cursor);
+      let url = PROXY+'/gallery';
+      if(cursor) url += '?cursor='+encodeURIComponent(cursor);
       const res = await fetch(url, { cache:'no-cache' });
       const data = await res.json();
       all = all.concat(data.photos || []);
@@ -2473,6 +2494,85 @@ async function galleryOptimizeExisting(){
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = '🗜️ Optimiziraj'; }
   }
+}
+
+// Enkratna migracija: fotke, naložene pred uvedbo kategorij, so vse pristale
+// pod "general". Spodnji seznam je ročno določen glede na naslov/opis vsake
+// od prvih 42 fotk (glej git zgodovino) — nove nalaganja category dobijo že
+// ob nalaganju prek izbirnika v obrazcu in te migracije ne potrebujejo.
+const GALLERY_RECATEGORIZE_MAP = {
+  '1785760047809-b45ec992.jpg': 'nevihte',
+  '1785760049649-86bb9c01.jpg': 'sonce',
+  '1785760051628-6f175f42.jpg': 'pokrajina',
+  '1785760053617-31138082.jpg': 'pokrajina',
+  '1785760055451-fa92a539.jpg': 'pokrajina',
+  '1785760056928-440826ee.jpg': 'nevihte',
+  '1785760059178-45d229a3.jpg': 'sonce',
+  '1785760061753-f9efec38.jpg': 'sonce',
+  '1785760064151-a9d3d877.jpg': 'pokrajina',
+  '1785760066506-769f1326.jpg': 'nevihte',
+  '1785760068343-919b57a5.jpg': 'nevihte',
+  '1785760071335-a70338ea.jpg': 'sonce',
+  '1785760072974-0c2fb853.jpg': 'pokrajina',
+  '1785760074566-7e0edff0.jpg': 'nevihte',
+  '1785760076658-e567da86.jpg': 'sonce',
+  '1785760078325-b74644ff.jpg': 'megla',
+  '1785760080469-7a843abd.jpg': 'nevihte',
+  '1785760082296-9b990736.jpg': 'sonce',
+  '1785760084623-d0fbb752.jpg': 'nevihte',
+  '1785760086320-a7de0b46.jpg': 'sonce',
+  '1785756446068-8824f8dc.jpg': 'pokrajina',
+  '1785756447903-9ad6712e.jpg': 'sneg',
+  '1785756450286-2be8bc2d.jpg': 'sonce',
+  '1785756452159-ecf768f3.jpg': 'sonce',
+  '1785756453866-6c412ad4.jpg': 'sonce',
+  '1785756455342-a0b6a359.jpg': 'nevihte',
+  '1785756457117-c5030a9b.jpg': 'pokrajina',
+  '1785756458767-d29a061e.jpg': 'sonce',
+  '1785756462029-50858514.jpg': 'nevihte',
+  '1785756463869-13e950fb.jpg': 'nevihte',
+  '1785756465402-bf4fbcf3.jpg': 'nevihte',
+  '1785756466876-3d47ce37.jpg': 'nevihte',
+  '1785756468405-9a280bcc.jpg': 'nevihte',
+  '1785756469902-74af52e8.jpg': 'sonce',
+  '1785756442890-f9389162.jpg': 'nevihte',
+  '1785756444483-857cf0c1.jpg': 'megla',
+  '1785756460544-a48db7ec.jpg': 'pokrajina',
+  '1785756471765-f8eabc8b.jpg': 'nevihte',
+  '1785756473728-6ef59e1f.jpg': 'nevihte',
+  '1785753666808-a8fdeba0.jpg': 'nevihte'
+};
+
+async function galleryRecategorizeExisting(){
+  let pwd = sessionStorage.getItem('_galAdminPwd');
+  if(!pwd){
+    pwd = prompt('Geslo za kategorizacijo:');
+    if(!pwd) return;
+  }
+  const entries = Object.entries(GALLERY_RECATEGORIZE_MAP);
+  if(!confirm('Razvrsti '+entries.length+' obstoječih fotografij po kategorijah?')) return;
+  const btn = document.getElementById('gallery-recategorize-btn');
+  if(btn){ btn.disabled = true; }
+  let ok=0, fail=0;
+  for(const [suffix, category] of entries){
+    if(btn) btn.textContent = `Kategoriziram… (${ok+fail+1}/${entries.length})`;
+    const key = 'photos/'+suffix;
+    try {
+      const res = await fetch(PROXY+'/gallery/recategorize/'+encodeURIComponent(key)+'?category='+encodeURIComponent(category), {
+        method:'POST', headers:{ 'Authorization':'Bearer '+pwd }
+      });
+      if(res.status === 401 || res.status === 429){
+        sessionStorage.removeItem('_galAdminPwd');
+        showToast('Napačno geslo ali preveč poskusov — ustavljam.');
+        break;
+      }
+      if(!res.ok) throw new Error();
+      ok++;
+    } catch(e){ fail++; }
+  }
+  showToast(fail ? `Kategoriziranih ${ok}, napaka pri ${fail}.` : `Kategoriziranih vseh ${ok}.`);
+  loadGallery();
+  if(btn){ btn.disabled = false; btn.textContent = '🏷️ Kategoriziraj obstoječe'; }
 }
 
 // Fotke iz telefonskih kamer znašajo 2-5 MB pri 3000-4000px širine, za
@@ -2548,6 +2648,7 @@ async function gallerySubmitUpload(){
   fd.append('author',  document.getElementById('gallery-author')?.value?.trim() || 'Anonimno');
   const chip = document.getElementById('gallery-weather-chip-val')?.textContent || '';
   fd.append('weather', chip);
+  fd.append('category', document.getElementById('gallery-category')?.value || 'general');
   try {
     if(fill) fill.style.width='65%';
     const res = await fetch(PROXY+'/gallery/upload', { method:'POST', body:fd });

@@ -3729,6 +3729,32 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         });
       }
 
+      if (path.startsWith("/gallery/recategorize/") && request.method === "POST") {
+        if (!env.PHOTOS_R2) return new Response(JSON.stringify({ error: "R2 not bound" }), {
+          status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const auth = await _galleryAdminAuthed(request, env);
+        if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), {
+          status: auth.status, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const key = decodeURIComponent(path.slice("/gallery/recategorize/".length));
+        if (!key.startsWith("photos/")) return new Response(JSON.stringify({ error: "Neveljaven ključ" }), {
+          status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        const category = (url.searchParams.get("category") || "general").slice(0, 30);
+        const obj = await env.PHOTOS_R2.get(key);
+        if (!obj) return new Response(JSON.stringify({ error: "Ni najdeno" }), {
+          status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+        await env.PHOTOS_R2.put(key, obj.body, {
+          httpMetadata: obj.httpMetadata,
+          customMetadata: { ...(obj.customMetadata || {}), category }
+        });
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json" }
+        });
+      }
+
       // Zamenja binarno vsebino obstoječe fotke (npr. klientsko pomanjšana
       // različica) ob ohranitvi customMetadata (title/caption/author/status
       // ...) — uporablja galleryOptimizeExisting() v app.js za enkratno
