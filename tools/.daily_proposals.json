@@ -1,18 +1,18 @@
 {
-  "date": "2026-08-03",
-  "created": "2026-08-03T06:47:09.529716+00:00",
+  "date": "2026-08-04",
+  "created": "2026-08-04T06:16:04.657640+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročina nad Savinjsko dolino: do 37,1 °C v prihodnjih dneh",
-      "teaser": "Danes se temperatura povzpne do 35,9 °C, jutri pa napoved kaže še višjih 37,1 °C. Analiziramo, kako dolgo bo vročinski val trajal in kdaj lahko pričakujemo osvežitev, saj padavin v naslednjih dneh praktično ni na vidiku.",
+      "title": "Danes 37,1 °C: vročinski vrh, nato ohladitev do konca tedna",
+      "teaser": "Napoved za IREICA1 kaže vrh vročine danes s 37,1 °C, jutri še 36,9 °C, v sredo pa 35,6 °C brez padavin. Konec tedna prinese preobrat -- v petek se najvišja dnevna temperatura spusti na 24,4 °C, pričakovanih pa je tudi 7,2 mm dežja.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (35,9 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (37,1 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 35.9,
+          "value": 37.1,
           "unit": "°C"
         },
         "seo_keywords": []
@@ -20,8 +20,8 @@
     },
     {
       "id": "dusljivost-zraka",
-      "title": "Rosišče Savinjska dolina: zakaj vročina duši bolj, kot kaže",
-      "teaser": "Kljub trenutni temperaturi 23,3 °C rosišče znaša kar 17,9 °C, vlažnost pa 72 %, kar zrak naredi dušljiv in neprijeten. Razložimo, zakaj se ob takšnih razmerah počutje razlikuje od tega, kar pokaže termometer.",
+      "title": "Rosišče Savinjska dolina: zakaj vročina duši bolj",
+      "teaser": "Trenutno rosišče je 16,7 °C ob 72-odstotni vlažnosti, kar pomeni, da se 22,0 °C počuti kot 24,3 °C. Razložimo, zakaj taka kombinacija naredi vročino dušljivo, čeprav termometer ne kaže ekstremnih vrednosti.",
       "topic": {
         "id": "dusljivost-zraka",
         "sezona": [
@@ -41,27 +41,24 @@
       }
     },
     {
-      "id": "pozarna-ogrozenost",
-      "title": "Požarna ogroženost v Zgornji Savinjski dolini narašča",
-      "teaser": "Brez dežja v zadnjih dneh in z napovedanimi 0,0 mm padavin danes ter jutri se tla dodatno sušijo, kar povečuje tveganje za požare v naravi. Poglejmo, kako trenutna vlažnost zraka in šibek veter vplivajo na oceno požarne nevarnosti v regiji.",
+      "id": "gobarska-sezona",
+      "title": "Gobarska napoved za Zgornjo Savinjsko dolino",
+      "teaser": "Zadnji dnevi so bili suhi -- danes brez dežja in vročina do 37,1 °C -- kar tlom ne prija za rast gob. Preobrat pa se obeta v petek, ko napoved za dolino kaže 7,2 mm padavin ob občutno nižjih temperaturah, kar bi lahko spodbudilo gobarjenje okoli Rečice ob Savinji.",
       "topic": {
-        "id": "pozarna-ogrozenost",
+        "id": "gobarska-sezona",
         "sezona": [
-          3,
-          4,
-          5,
           6,
           7,
           8,
           9,
           10
         ],
-        "tag": "pozarna-ogrozenost",
-        "brief": "Trenutna požarna ogroženost glede na suha tla, vlažnost zraka in veter zadnjih dni.",
+        "tag": "gobe",
+        "brief": "Gobarska sezona -- kaj kažejo trenutna vlažnost tal, temperature in padavine za rast gob v dolini.",
         "seo_keywords": [
-          "požarna ogroženost Zgornja Savinjska dolina",
-          "nevarnost požara v naravi",
-          "suša in gozdni požari"
+          "gobarska napoved Zgornja Savinjska dolina",
+          "kdaj rastejo gobe",
+          "gobarjenje Rečica ob Savinji"
         ]
       }
     }
