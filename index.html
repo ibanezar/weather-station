@@ -3107,9 +3107,19 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <button class="gallery-pick-btn" onclick="event.stopPropagation();galleryOpenPicker()">Izberi datoteko</button>
     </div>
 
+    <div class="gallery-cat-chips" id="gallery-cat-chips">
+      <button class="gallery-cat-chip active" data-cat="" onclick="galleryFilterCategory('')">Vse</button>
+      <button class="gallery-cat-chip" data-cat="nevihte" onclick="galleryFilterCategory('nevihte')">🌩️ Nevihte</button>
+      <button class="gallery-cat-chip" data-cat="sneg" onclick="galleryFilterCategory('sneg')">❄️ Sneg</button>
+      <button class="gallery-cat-chip" data-cat="sonce" onclick="galleryFilterCategory('sonce')">☀️ Sonce &amp; mavrice</button>
+      <button class="gallery-cat-chip" data-cat="megla" onclick="galleryFilterCategory('megla')">🌫️ Megla</button>
+      <button class="gallery-cat-chip" data-cat="pokrajina" onclick="galleryFilterCategory('pokrajina')">🏔️ Pokrajina</button>
+    </div>
+
     <div class="gallery-count-row">
       <div class="gallery-count" id="gallery-count"></div>
       <div class="gallery-count-actions">
+        <button class="gallery-pending-btn" id="gallery-recategorize-btn" onclick="galleryRecategorizeExisting()">🏷️ Kategoriziraj obstoječe</button>
         <button class="gallery-pending-btn" id="gallery-optimize-btn" onclick="galleryOptimizeExisting()">🗜️ Optimiziraj</button>
         <button class="gallery-pending-btn" onclick="galleryTogglePending()">🔒 Predlogi</button>
       </div>
@@ -3252,6 +3262,14 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <div class="gallery-form">
           <label>Naslov<input type="text" id="gallery-title" placeholder="npr. Sončni zahod nad dolino" maxlength="120"></label>
           <label>Opis<textarea id="gallery-caption" placeholder="Kratek opis fotografije…" maxlength="500" rows="3"></textarea></label>
+          <label>Kategorija<select id="gallery-category">
+            <option value="general">📷 Splošno</option>
+            <option value="nevihte">🌩️ Nevihte</option>
+            <option value="sneg">❄️ Sneg</option>
+            <option value="sonce">☀️ Sonce &amp; mavrice</option>
+            <option value="megla">🌫️ Megla</option>
+            <option value="pokrajina">🏔️ Pokrajina</option>
+          </select></label>
           <label>Avtor<input type="text" id="gallery-author" placeholder="Tvoje ime (neobvezno)" maxlength="60"></label>
           <div class="gallery-weather-chip">🌡 <span id="gallery-weather-chip-val">nalagam vreme…</span></div>
           <button class="gallery-submit-btn" id="gallery-submit-btn" onclick="gallerySubmitUpload()">⬆ Naloži fotografijo</button>
