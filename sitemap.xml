@@ -69,11 +69,11 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html</loc>
+    <loc>https://meteorec.si/blog/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.html</loc>
     <lastmod>2026-08-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/je-letosnja-susa-rekordna-kaj-pravi-spi.jpg</image:loc></image:image>
+    <image:image><image:loc>https://meteorec.si/og/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/recica-in-svet-segrevanje-v-podatkih.html</loc>
@@ -762,6 +762,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/ogrevanje/</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/ohladitev/</loc>
     <lastmod>2026-08-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
