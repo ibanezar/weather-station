@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 04 Aug 2026 15:38:36 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2026 17:24:37 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Je letošnja suša rekordna? Kaj pravi SPI</title>
+      <link>https://meteorec.si/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html</guid>
+      <pubDate>Tue, 04 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Poletje 2026 se zdi izjemno sušno, a standardni padavinski kazalnik SPI na 36-letnem nizu pokaže drugačno sliko: julij je bil zmerno suh, širša vodna bilanca pa blizu normale — rekord to (še) ni.</description>
+      <category>suša</category>
+      <category>SPI</category>
+      <category>padavine</category>
+      <category>IREICA1</category>
+      <category>analiza</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Ohladitev v petek: konec vročinskega vala, dež do sobote</title>
       <link>https://meteorec.si/blog/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.html</link>
