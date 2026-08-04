@@ -4,15 +4,20 @@ tools/inject_current_weather.py — Pre-render the latest known measurement into
 static, crawlable HTML in index.html.
 
 The homepage hero ("Trenutno vreme") is filled by JavaScript, so search engines
-see only "—" placeholders. This script injects a real measurement between marker
-comments in index.html, giving crawlers real content. The live JS hero is
-untouched and still updates on load.
+see only "—" placeholders — and browsers can't paint the LCP element (the big
+temperature number) until app.js has loaded, run, and fetched live data. This
+script injects a real measurement between marker comments in index.html, and
+(in --live mode) also patches the hero's number spans directly so the page
+paints real values on first render. The live JS hero is untouched code-wise
+and still overwrites these numbers with fresh data once it loads.
 
 Two modes:
   (default)  inject the last known daily summary from history.json (value + date)
   --live     fetch the current observation from the Weather Underground PWS API
-             (station IREICA1) and inject instantaneous values + exact time;
-             falls back to the daily summary if the API is unreachable.
+             (station IREICA1), inject instantaneous values + exact time into the
+             WX-STATIC text block, and patch the hero card's number spans;
+             falls back to the daily summary (text block only) if the API is
+             unreachable.
 
 Wired into:
   .github/workflows/update-history.yml   (daily, default mode)
@@ -124,9 +129,76 @@ def build_block_live(obs):
     return wrap(text)
 
 
+def js_num(x):
+    """Mimic JS Number→string coercion (5.0 → '5', 5.3 → '5.3'), dot decimal."""
+    f = float(x)
+    return str(int(f)) if f == int(f) else str(f)
+
+
+def _patch_span(html, elem_id, value_text, drop_shimmer=True):
+    """Replace the text right after `id="elem_id"...>` up to the next '<',
+    optionally dropping a `skel-shimmer` class so the pre-rendered value
+    doesn't show the loading animation before JS hydrates it."""
+    pattern = re.compile(
+        r'(<[a-z]+\b[^>]*\bid="' + re.escape(elem_id) + r'"[^>]*>)([^<]*)'
+    )
+
+    def repl(m):
+        tag = m.group(1)
+        if drop_shimmer:
+            tag = re.sub(r'\s*\bskel-shimmer\b', '', tag)
+            tag = re.sub(r'\s+class=""', '', tag)
+        return tag + value_text
+
+    return pattern.subn(repl, html, count=1)
+
+
+def patch_hero(html, obs):
+    """Fill the hero card's number spans with the live observation so the
+    LCP element (the big temperature) paints from static HTML instead of
+    waiting on the client-side fetch. Condition icon/label are left as-is —
+    they need app.js's fuller condition classification."""
+    m = obs.get("metric", {})
+    humidity = obs.get("humidity")
+    uv = obs.get("uv") or 0
+    feels = m.get("heatIndex")
+    if feels is None:
+        feels = m.get("windChill")
+    if feels is None:
+        feels = m.get("temp")
+    gust = m.get("windGust")
+    if gust is None:
+        gust = m.get("windSpeed")
+
+    patches = [
+        ("temp-val", num(m.get("temp"), 1)),
+        ("feels-val", num(feels, 1)),
+        ("dewpt-hero", num(m.get("dewpt"), 1)),
+        ("hs-humidity", num(humidity, 0)),
+        ("hs-pressure", num(m.get("pressure"), 1)),
+        ("hs-wind", num(m.get("windSpeed"), 1)),
+        ("hs-gust", num(gust, 1)),
+        ("hs-rain-today", num(m.get("precipTotal", 0), 1)),
+        ("hs-uv", js_num(uv) if uv else "—"),
+    ]
+    for elem_id, value_text in patches:
+        html, n = _patch_span(html, elem_id, value_text)
+        if n == 0:
+            print(f"OPOZORILO: hero element #{elem_id} ni najden — preskočeno.", file=sys.stderr)
+
+    rr = m.get("precipRate", 0) or 0
+    html = re.sub(
+        r'(<span id="hs-rain-rate"[^>]*>)intenziteta: [^<]*(</span>)',
+        lambda mo: mo.group(1) + f"intenziteta: {num(rr, 1)} mm/h" + mo.group(2),
+        html, count=1,
+    )
+    return html
+
+
 def main():
     live = "--live" in sys.argv[1:]
     block = None
+    obs = None
     if live:
         obs = fetch_live_wu()
         if obs:
@@ -140,6 +212,9 @@ def main():
     else:
         print("ERROR: markers not found in index.html — add them once first.", file=sys.stderr)
         return 1
+
+    if obs:
+        new = patch_hero(new, obs)
 
     if new != html:
         open(INDEX, "w", encoding="utf-8").write(new)
