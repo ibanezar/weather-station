@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 04 Aug 2026 17:24:37 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2026 23:29:50 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>ARSO rdeče opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
+      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.html</guid>
+      <pubDate>Tue, 04 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Agencija RS za okolje (ARSO) je izdala rdeče opozorilo (vročina) (veljavno sre., 5. 8. 09:00–21:59). ARSO ga je izdal 4. 8. 2026 ob 08:53. Visoka temperatura</description>
+      <category>ARSO opozorilo</category>
+      <category>vročina</category>
+      <category>IREICA1</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Je letošnja suša rekordna? Kaj pravi SPI</title>
       <link>https://meteorec.si/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html</link>
