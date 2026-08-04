@@ -157,8 +157,16 @@ def patch_hero(html, obs):
     """Fill the hero card's number spans with the live observation so the
     LCP element (the big temperature) paints from static HTML instead of
     waiting on the client-side fetch. Condition icon/label are left as-is —
-    they need app.js's fuller condition classification."""
+    they need app.js's fuller condition classification.
+
+    If the observation itself is missing temp (seen in practice: a station
+    telemetry gap where WU returns pressure but nulls everything else), skip
+    patching entirely rather than showing a bare "—" with the loading
+    shimmer removed — that would look more broken than the skeleton state."""
     m = obs.get("metric", {})
+    if m.get("temp") is None:
+        print("OPOZORILO: WU obs brez temp — hero ni popravljen, ostane skelet.", file=sys.stderr)
+        return html
     humidity = obs.get("humidity")
     uv = obs.get("uv") or 0
     feels = m.get("heatIndex")
