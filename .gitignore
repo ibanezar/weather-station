@@ -8,3 +8,4 @@ __pycache__/
 .dev.vars
 tools/.drive_photo_tmp.jpg
 tools/.mos_cache.json
+tools/.drought_cache.json
