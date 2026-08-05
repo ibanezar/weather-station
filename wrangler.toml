@@ -34,5 +34,9 @@ PREMIUM_ALERT_COOLDOWN_DAYS = "5"
 # (AI prepoznava gobe iz fotografije, Claude vision). Brez njega endpoint vrne 503.
 
 # Samodejni pragovni push alarm — preveri meritve vsakih 5 minut.
+# Drugi urnik (zamaknjen 2 min) je za ICON napoved + sledenje nevihtnim
+# celicam — ločeno od zgornjega, da ne tekmujeta za isti CPU/časovni
+# proračun ene invokacije z že obstoječimi (težjimi) opravili zgoraj; glej
+# scheduled() v worker.js, ki loči po event.cron.
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/5 * * * *", "2-59/5 * * * *"]
