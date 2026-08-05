@@ -150,3 +150,107 @@ Kar se lahko pokvari, če ARSO spremeni sliko:
 
 Modelski `_cronCheckPrecipNowcast` ostaja kot rezerva: požene se le, kadar
 radar odpove, sicer bi za isti dogodek poslali dve obvestili.
+
+# ICON napoved in sledenje nevihtnim celicam
+
+Dve ločeni razširitvi lastnega kompozitnega radarja ("Lasten radar padavin",
+worker.js razdelek za `COMP_*`/`_radarComposite*`, ne zgornji ARSO-GIF
+nowcast). Obe delita cel del kode s kompozitom in obe tečejo v istem
+5-minutnem cronu (`_cronRenderRadarComposite`).
+
+## ICON — nadaljevanje časovnice po zadnji uri radarja
+
+Kartica "Lasten radar padavin" pred tem ni imela nowcast-segmenta — animacija
+je pokrivala samo pretekle posnetke zadnje ure. Po zadnji uri radarja se zdaj
+na pogledu **"savinja"** (Zgornja Savinjska dolina) nadaljuje s 6 urami
+napovedi modela ICON (DWD, ~2 km), izrisane po isti barvni lestvici kot
+radar, tako da je prehod viden kot en trak, ne dva ločena vira.
+
+```
+Open-Meteo /v1/forecast (batch, 48 točk, ICON-D2) ──▶ _iconCached (cron, ~urno)
+                                                          │
+                                          R2: icon/frame-*.png, icon/latest.json
+                                                          │
+                     GET /radar-composite.json → napoved  ├─▶ GET /icon-precip (PNG okvir)
+```
+
+**Zakaj ICON, ne AROME.** Prvotni predlog je bil Météo-France AROME (bliže
+ARSO-jevemu ALADIN-u po družini modela). Preverjeno neposredno pred pisanjem
+kode: `models=meteofrance_arome_france_hd` in `..._france` za Rečico
+(46,3258, 14,9211) oba vrneta prazne/napačne odgovore — Slovenija je izven
+dosega obeh AROME domen prek Open-Meteo. `icon_d2` vrača prave vrednosti,
+zato je primarni model; `icon_eu` (širši, grobejši) je rezerva, če
+`icon_d2` kdaj odpove.
+
+**Mreža in izris.** Open-Meteo nima gotovega polja, samo točkovni API — zato
+`_iconGrid` vzorči 8×6 točk enakomerno čez pogled "savinja" (rahlo znotraj
+robov, brez ekstrapolacije), `_iconFetchModel` jih prenese v **enem** batch
+klicu (vejico ločen `latitude=`/`longitude=`, potrjeno na dejanski
+Open-Meteo API: odgovor je array, en objekt na točko, vsak s svojima
+`latitude`/`longitude`). Ujemanje nazaj na zahtevano točko je po najbližji
+razdalji, ne po vrstnem redu — Open-Meteo vrstnega reda batcha ne
+dokumentira. `_iconFrame` bilinearno interpolira to grobo mrežo v PNG,
+enako kot `_arsoSample`, in gre skozi isto `_compLevel`/`_COMP_SCALE`
+paleto kot kompozit.
+
+**Osveževanje.** Worker nima zanesljivega vpogleda v urnik ICON-D2 teka, zato
+`_iconCached` samo preveri, ali je manifest za trenutno UTC uro (`runStamp`)
+že svež; če je, cron te ure ne naredi ničesar (poceni no-op na večini
+petminutnih tikov). Vsak nov urni tek v celoti nadomesti prejšnjega, zato
+`_iconPrune` nima časovnega cutoffa kot `_radarCompositePrune` — zbriše
+preprosto vse, kar ni trenutni `runStamp`.
+
+**Gladek propad.** Če `_iconFetchModel` ne vrne uporabnih podatkov (oba
+modela), cron manifesta ne posodobi in ne vrže napake. `/radar-composite.json`
+vrne `napoved: null`, če manifesta ni ali je starejši od 90 minut — časovnica
+se v tem primeru tiho skrči nazaj na samo pretekli radar, brez vidne napake.
+
+## Sledenje nevihtnim celicam
+
+Nowcast zgoraj oceni **en skupen premik za celotno polje** in ga uporabi na
+oknu okoli vsake vasi. To je nekaj drugega: prepozna **posamezne** konvektivne
+celice kot povezana območja nad pragom nevihte in jim sledi med posnetki —
+vsaka dobi svoj id, lego, površino, jakost, smer in hitrost. Endpoint
+`GET /radar-cells.json`, osveženo vsakih 5 minut skupaj s "sirok" kompozitom
+(deli isti OPERA/ARSO prenos — `_cronRenderRadarComposite` ju prenese enkrat
+in poda naprej `_cronRenderRadarCells`, da se drag OPERA S3 Range-GET in ARSO
+GIF prenos ne podvoji).
+
+**Polje in projekcija.** Zaznavanje teče na lastni, enakomerni lon/lat mreži
+(`CELL_GRID_DEG`, privzeto 0,015° ≈ 420×230 čez cel "sirok" izsek) — ne na
+Web Mercator piksel-prostoru izrisa, kjer km/piksel ni enakomeren — da
+sledenje deluje neodvisno od tega, kateri pogled ima obiskovalec odprt.
+`_cellSample` vzorči OPERA in ARSO po isti projekciji in prioritetnem pravilu
+kot `_radarComposite`-jeva izrisna zanka (ARSO znotraj `COMP_R_JEDRO`, OPERA
+sicer), a po eni točki namesto po vrstici. **Koda je namerno vzporedna, ne
+deljena** s tisto zanko, da izris kompozita ostane nedotaknjen — če se
+prioritetno pravilo tam kdaj spremeni, uskladi tudi tu.
+
+**Prag in oznaka celice.** `CELL_STORM_MMH = 15` in `CELL_CORE_MMH = 50` sta
+isti mm/h vrednosti kot `RADAR_LEVEL_MMH[RADAR_L_STORM-1]` in
+`[RADAR_L_CORE-1]` zgoraj, samo izpisani eksplicitno — `RADAR_L_STORM`/`_CORE`
+sta indeksa v ARSO-GIF-ovi lastni 15-stopenjski lestvici in ne veljata na tej
+mreži. `_cellLabel` je iterativno (eksplicit sklad, ne rekurzija — globina
+klicnega sklada je resnično tveganje na ~420×230 mreži) 8-povezano
+flood-fill; `CELL_MIN_AREA_KM2 = 1,5` (isti koncept kot `RADAR_CORE_MIN_PX`,
+samo prenešen na to ločljivost mreže) odreže posamezne šumne piksle.
+
+**Sledenje med posnetki.** Pohlepno ujemanje najbližjega centroida znotraj
+`CELL_MATCH_RADIUS_KM = 20` (dovolj za nevihtno hitrost pri 5-minutnem
+koraku), brez napovedi premika. Prvotna zamisel je bila uporabiti obstoječo
+`_radMotion` kot napovedni prior — opuščeno, ker `_radMotion`-ova pretvorba
+v km/smer uporablja `RAD_KM_X/Y` (km na piksel ARSO-GIF-ove lastne mreže) in
+bi na tej, drugačni mreži vrnila napačne vrednosti brez prilagoditve; pri
+5-minutnem koraku sam iskalni polmer zadošča. To **ni** Madžarski algoritem,
+samo "dovolj dobro, dokumentirana omejitev" — enako kot že drugod v tem
+cevovodu. Znane omejitve: brez ponovne identifikacije po popolni zakritvi
+(celica, ki izgine za >`CELL_MAX_MISSES` posnetkov, ob vrnitvi dobi nov id),
+brez logike za cepitev/združitev celic (celica, ki se razcepi na dve, obdrži
+en id in požene eno novo, ali pa obe zgrešita ujemanje in dobita novi id-ji,
+odvisno od premika centroida).
+
+**Smer.** `smer` je kompasni azimut (0 = sever, urni kazalec), izračunan iz
+resničnega geografskega premika centroida (`atan2(vzhod_km, sever_km)`) — za
+razliko od `_radMotion`, kjer je zaradi ARSO-pikslovega obrnjenega predznaka
+(piksel Y raste proti jugu) v formuli negacija; tu je ni, ker sta `dx`/`dy`
+že prava geografska km.

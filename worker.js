@@ -1479,16 +1479,11 @@ function _arsoSample(arso, fx, fy, gladko) {
        + (g(x0, y0 + 1) * (1 - tx) + g(x0 + 1, y0 + 1) * tx) * ty;
 }
 
-// Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
-// jedro — nepopolna slika je še vedno boljša od napake.
-async function _radarComposite(key, stampMs, view) {
-  const V = view || COMP_VIEWS[COMP_VIEW_DEFAULT];
-  const W = V.w;
-  const H = Math.round(W * (_mercY(V.lat1) - _mercY(V.lat0)) / ((V.lon1 - V.lon0) * Math.PI / 180));
-  const y0 = _mercY(V.lat1), y1 = _mercY(V.lat0);
-
-  // Okno v koordinatah mreže: projekcija ni poravnana z mrežo poldnevnikov,
-  // zato robove okna vzorčimo in vzamemo očrtani pravokotnik.
+// Okno v koordinatah mreže: projekcija ni poravnana z mrežo poldnevnikov,
+// zato robove okna vzorčimo in vzamemo očrtani pravokotnik. Izluščeno iz
+// _radarComposite, da si ga lahko izposodi tudi cron, kadar mora OPERA/ARSO
+// prenesti vnaprej (glej _cronRenderRadarComposite).
+function _compBBox(V) {
   const bb = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
   for (let i = 0; i <= 40; i++) {
     const t = i / 40;
@@ -1499,9 +1494,21 @@ async function _radarComposite(key, stampMs, view) {
       bb.y0 = Math.min(bb.y0, y); bb.y1 = Math.max(bb.y1, y);
     }
   }
+  return bb;
+}
 
-  const [win, arso] = await Promise.all([
-    _operaWindow(key, bb).catch(() => null),
+// Vrne PNG in podatke o obeh virih. Če OPERA odpove, narišemo samo ARSO
+// jedro — nepopolna slika je še vedno boljša od napake. `sources`, če
+// podan, je že prenesen [win, arso] par (deli ga s sledenjem nevihtnim
+// celicam, da se za isti "sirok" izris ne prenese dvakrat).
+async function _radarComposite(key, stampMs, view, sources) {
+  const V = view || COMP_VIEWS[COMP_VIEW_DEFAULT];
+  const W = V.w;
+  const H = Math.round(W * (_mercY(V.lat1) - _mercY(V.lat0)) / ((V.lon1 - V.lon0) * Math.PI / 180));
+  const y0 = _mercY(V.lat1), y1 = _mercY(V.lat0);
+
+  const [win, arso] = sources || await Promise.all([
+    _operaWindow(key, _compBBox(V)).catch(() => null),
     _compArso(stampMs),
   ]);
   if (!win && !arso) throw new Error("noben radarski vir ni dosegljiv");
@@ -1577,7 +1584,7 @@ const COMP_R2_PREFIX = "radar/comp-";
 const COMP_ANIM_MIN = 60;                       // dolžina animacije
 const COMP_KEEP_MS = (COMP_ANIM_MIN + 20) * 60000;
 
-async function _radarCompositeCached(env, stamp, viewId) {
+async function _radarCompositeCached(env, stamp, viewId, sources) {
   const r2 = env?.PHOTOS_R2;
   const vid = COMP_VIEWS[viewId] ? viewId : COMP_VIEW_DEFAULT;
   if (!stamp) {
@@ -1596,7 +1603,7 @@ async function _radarCompositeCached(env, stamp, viewId) {
 
   const key = _operaKeyForStamp(stamp);
   if (!key) throw new Error("neveljaven časovni žig");
-  const c = await _radarComposite(key, _compStampMs(stamp), COMP_VIEWS[vid]);
+  const c = await _radarComposite(key, _compStampMs(stamp), COMP_VIEWS[vid], sources);
   const meta = {
     stamp, pogled: vid,
     opera: String(c.opera), arso: String(c.arso),
@@ -1630,14 +1637,397 @@ async function _radarCompositePrune(env) {
   return n;
 }
 
+// ── ICON kratkoročna napoved (nadaljevanje radarske časovnice) ─────
+// AROME (Météo-France) prek Open-Meteo ne pokriva Slovenije — preverjeno:
+// meteofrance_arome_france_hd in _france oba vrneta prazno/napako za
+// Rečico (150+ km od francoske meje). ICON (DWD, ~2 km) jo pokriva, zato
+// po zadnji uri radarja nadaljuje isto animacijo s 6 urami napovedi, samo
+// na pogledu "savinja". Open-Meteo nima gotove mreže — samo točkovni API —
+// zato vzorčimo grobo mrežo točk v enem batch klicu (vejico ločeni
+// latitude/longitude) in izrišemo enako kot kompozitni radar (ista paleta,
+// isti PNG izpis), da je prehod iz radarja v napoved viden kot en trak.
+const ICON_MODEL = "icon_d2";
+const ICON_MODEL_FALLBACK = "icon_eu";
+const ICON_HOURS = 6;
+const ICON_GRID_NX = 8, ICON_GRID_NY = 6;   // 48 točk; en batch klic na urni tek
+const ICON_GRID_INSET = 0.05;               // rahlo znotraj robov, brez ekstrapolacije
+const ICON_R2_PREFIX = "icon/";
+
+function _iconGrid(V) {
+  const pts = [];
+  for (let j = 0; j < ICON_GRID_NY; j++) {
+    const lat = V.lat0 + (V.lat1 - V.lat0) * (ICON_GRID_INSET + (1 - 2 * ICON_GRID_INSET) * j / (ICON_GRID_NY - 1));
+    for (let i = 0; i < ICON_GRID_NX; i++) {
+      const lon = V.lon0 + (V.lon1 - V.lon0) * (ICON_GRID_INSET + (1 - 2 * ICON_GRID_INSET) * i / (ICON_GRID_NX - 1));
+      pts.push([lon, lat]);
+    }
+  }
+  return pts;
+}
+
+async function _iconFetchModel(pts, model) {
+  const lats = pts.map((p) => p[1].toFixed(4)).join(",");
+  const lons = pts.map((p) => p[0].toFixed(4)).join(",");
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}`
+    + `&hourly=precipitation&forecast_hours=${ICON_HOURS}&models=${model}&timezone=UTC`;
+  let data;
+  try {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+    if (!res.ok) return null;
+    data = await res.json();
+  } catch (_) { return null; }
+  const list = Array.isArray(data) ? data : [data];
+  if (!list.length || list.every((d) => !d || d.error)) return null;
+  // Vsako vrnjeno točko ujemi nazaj po njenih lastnih latitude/longitude
+  // poljih, ne po vrstnem redu — Open-Meteo vrstnega reda znotraj batch
+  // zahtevka ne dokumentira, poceni je biti defenziven.
+  const out = pts.map(([lon, lat]) => {
+    let best = null, bd = Infinity;
+    for (const d of list) {
+      if (!d || d.error || !d.hourly?.precipitation) continue;
+      const dd = (d.latitude - lat) ** 2 + (d.longitude - lon) ** 2;
+      if (dd < bd) { bd = dd; best = d; }
+    }
+    return best ? { lon, lat, precip: best.hourly.precipitation } : null;
+  });
+  return out.some((o) => o) ? out : null;
+}
+
+async function _iconFetch(V) {
+  const pts = _iconGrid(V);
+  return (await _iconFetchModel(pts, ICON_MODEL).catch(() => null))
+    || (await _iconFetchModel(pts, ICON_MODEL_FALLBACK).catch(() => null));
+}
+
+// Dvolinearno vzorčenje grobe ICON mreže (enakomerna v lon/lat, torej brez
+// LAEA/Mercator popravkov) — v slogu _arsoSample-a. Manjkajoče sosede
+// nadomesti z najbližjim znanim, da rob mreže ne razmaže v ničlo.
+function _iconSampleAt(grid, nx, ny, fx, fy, hourIdx) {
+  const g = (gx, gy) => {
+    const p = grid[gy * nx + gx];
+    const v = p ? p.precip[hourIdx] : null;
+    return v == null ? null : v;
+  };
+  const x0 = Math.max(0, Math.min(nx - 1, Math.floor(fx))), y0 = Math.max(0, Math.min(ny - 1, Math.floor(fy)));
+  const x1 = Math.max(0, Math.min(nx - 1, x0 + 1)), y1 = Math.max(0, Math.min(ny - 1, y0 + 1));
+  const a = g(x0, y0), b = g(x1, y0), c = g(x0, y1), d = g(x1, y1);
+  if (a == null && b == null && c == null && d == null) return null;
+  const av = a ?? b ?? c ?? d, bv = b ?? a ?? d ?? c, cv = c ?? d ?? a ?? b, dv = d ?? c ?? b ?? a;
+  const tx = Math.max(0, Math.min(1, fx - x0)), ty = Math.max(0, Math.min(1, fy - y0));
+  return (av * (1 - tx) + bv * tx) * (1 - ty) + (cv * (1 - tx) + dv * tx) * ty;
+}
+
+async function _iconFrame(grid, V, hourIdx) {
+  const W = V.w;
+  const H = Math.round(W * (_mercY(V.lat1) - _mercY(V.lat0)) / ((V.lon1 - V.lon0) * Math.PI / 180));
+  const y0m = _mercY(V.lat1), y1m = _mercY(V.lat0);
+  const idx = new Uint8Array(W * H);
+  const NODATA = _COMP_SCALE.rgb.length + 1;
+  const lonMin = V.lon0 + (V.lon1 - V.lon0) * ICON_GRID_INSET, lonSpan = (V.lon1 - V.lon0) * (1 - 2 * ICON_GRID_INSET);
+  const latMin = V.lat0 + (V.lat1 - V.lat0) * ICON_GRID_INSET, latSpan = (V.lat1 - V.lat0) * (1 - 2 * ICON_GRID_INSET);
+  for (let y = 0; y < H; y++) {
+    const la = _mercLat(y0m - (y0m - y1m) * (y + 0.5) / H);
+    const fy = ((la - latMin) / latSpan) * (ICON_GRID_NY - 1);
+    const row = y * W;
+    for (let x = 0; x < W; x++) {
+      const lo = V.lon0 + (V.lon1 - V.lon0) * (x + 0.5) / W;
+      const fx = ((lo - lonMin) / lonSpan) * (ICON_GRID_NX - 1);
+      const mmh = _iconSampleAt(grid, ICON_GRID_NX, ICON_GRID_NY, fx, fy, hourIdx);
+      idx[row + x] = mmh == null ? NODATA : _compLevel(mmh);
+    }
+  }
+  return _pngIndexed(idx, W, H, [[0, 0, 0], ..._COMP_SCALE.rgb, [120, 125, 135]], [0, ..._COMP_SCALE.alpha, 45]);
+}
+
+// Uro zaokroženo v UTC — Open-Meteo objavlja nov ICON-D2 tek nekajkrat
+// dnevno, worker pa nima zanesljivega vpogleda v urnik teka, zato je "urno
+// osveževanje" doseženo posredno: manifest se ponovno izriše šele, ko se
+// ura spremeni, kar drži cesta cron poceni na preostalih petminutnih tikih.
+function _iconRunStamp() {
+  const d = new Date(Math.floor(Date.now() / 3600000) * 3600000);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}00`;
+}
+
+async function _iconCached(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return null;
+  const runStamp = _iconRunStamp();
+  const manifestKey = `${ICON_R2_PREFIX}latest.json`;
+  try {
+    const o = await r2.get(manifestKey);
+    if (o) {
+      const m = JSON.parse(await o.text());
+      if (m.runStamp === runStamp) return m;
+    }
+  } catch (_) {}
+
+  const V = COMP_VIEWS.savinja;
+  const grid = await _iconFetch(V);
+  if (!grid) return null;   // gladek propad — cron ne posodobi manifesta, prejšnji ostane veljaven do izteka starosti
+
+  const okvirji = [];
+  for (let h = 0; h < ICON_HOURS; h++) {
+    const png = await _iconFrame(grid, V, h);
+    const zig = `${runStamp}-h${h + 1}`;
+    const cas = new Date(_compStampMs(runStamp) + (h + 1) * 3600000).toISOString();
+    try {
+      await r2.put(`${ICON_R2_PREFIX}frame-${zig}.png`, png, {
+        httpMetadata: { contentType: "image/png" },
+        customMetadata: { runStamp, h: String(h + 1), cas },
+      });
+    } catch (_) {}
+    okvirji.push({ zig, cas });
+  }
+  const manifest = { runStamp, cas: new Date().toISOString(), okvirji };
+  try { await r2.put(manifestKey, JSON.stringify(manifest), { httpMetadata: { contentType: "application/json" } }); } catch (_) {}
+  return manifest;
+}
+
+// Vsak urni tek v celoti nadomesti prejšnjega (za razliko od kompozita, kjer
+// vsak okvir predstavlja svoj resnični trenutek), zato tu ni časovnega
+// cutoffa — zbrišemo preprosto vse, kar ni trenutni runStamp.
+async function _iconPrune(env, keepRunStamp) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return 0;
+  let n = 0;
+  try {
+    const list = await r2.list({ prefix: ICON_R2_PREFIX, limit: 200 });
+    for (const o of list.objects || []) {
+      if (o.key === `${ICON_R2_PREFIX}latest.json`) continue;
+      const s = (o.key.match(/frame-(\d{8}T\d{4})-h\d+\.png$/) || [])[1];
+      if (s !== keepRunStamp) { await r2.delete(o.key); n++; }
+    }
+  } catch (_) {}
+  return n;
+}
+
+async function _cronRenderIcon(env) {
+  try {
+    const m = await _iconCached(env);
+    if (m) await _iconPrune(env, m.runStamp);
+    return true;
+  } catch (_) { return false; }
+}
+
+// ── Sledenje nevihtnim celicam ──────────────────────────────
+// Nowcast (zgoraj) oceni en skupen premik za celotno polje in ga uporabi na
+// oknu okoli vsake vasi. Tu namesto tega prepoznamo posamezne konvektivne
+// celice kot povezana območja nad pragom nevihte in jim sledimo med
+// posnetki — nekaj, česar noben javni radar (ARSO, Windy) ne prikaže.
+// Zaznavanje teče na lastni, enakomerni lon/lat mreži čez cel "sirok"
+// izsek (ne na Web Mercator piksel-prostoru izrisa, kjer km/piksel ni
+// enakomeren), da sledenje deluje neodvisno od tega, kateri pogled ima
+// obiskovalec odprt.
+const CELL_STORM_MMH = 15;    // = RADAR_LEVEL_MMH[RADAR_L_STORM - 1] (glej zgoraj) — obseg celice
+const CELL_CORE_MMH = 50;     // = RADAR_LEVEL_MMH[RADAR_L_CORE - 1] — jedro, ki zmore točo
+const CELL_MIN_AREA_KM2 = 1.5;  // isti koncept kot RADAR_CORE_MIN_PX, prenesen na to mrežo
+const CELL_GRID_DEG = 0.015;    // ~420×230 mreža čez "sirok"; poviša (bolj grobo), če je cron počasen
+const CELL_MATCH_RADIUS_KM = 20; // dovolj za nevihtno hitrost (~60 km/h) čez 5-minutni cron korak
+const CELL_MAX_MISSES = 2;       // celica se opusti po ~2 zaporednih zgrešenih zaznavah (~10 min)
+const CELL_R2_STATE = "cells/state.json";
+const CELL_R2_LATEST = "cells/latest.json";
+
+// Ista projekcija in prioritetno pravilo (ARSO znotraj COMP_R_JEDRO, OPERA
+// sicer) kot glavna izrisna zanka v _radarComposite, a po eni točki namesto
+// po vrstici — koda je namerno vzporedna, ne deljena s tisto zanko, da izris
+// kompozita ostane nedotaknjen. Če se prioritetno pravilo tam spremeni,
+// uskladi tudi tu.
+function _cellSample(win, arso, lon, lat) {
+  let mmh = -1;
+  if (win) {
+    const [x, y] = _laeaXY(lat, lon);
+    const fx = (x - win.ox) / win.px - win.c0;
+    const fy = (win.oy - y) / win.py - win.r0;
+    mmh = _operaSample(win, fx, fy);
+  }
+  if (arso) {
+    const [ax, ay] = _radLonLat2Px(lon, lat);
+    let d2 = Infinity;
+    for (const [rla, rlo] of COMP_SI_RADARJI) {
+      const dx = (lon - rlo) * COMP_KM_LON, dy = (lat - rla) * COMP_KM_LAT;
+      const s = dx * dx + dy * dy;
+      if (s < d2) d2 = s;
+    }
+    if (d2 < COMP_R_ROB * COMP_R_ROB) {
+      const a = _arsoSample(arso, ax, ay, false);
+      if (a != null) {
+        if (d2 <= COMP_R_JEDRO * COMP_R_JEDRO) mmh = a;
+        else mmh = Math.max(mmh, a);
+      }
+    }
+  }
+  return mmh < 0 ? 0 : mmh;   // za zaznavo celic je "ni podatka" enako "ni padavin"
+}
+
+function _cellField(win, arso) {
+  const V = COMP_VIEWS.sirok;
+  const nx = Math.max(2, Math.round((V.lon1 - V.lon0) / CELL_GRID_DEG));
+  const ny = Math.max(2, Math.round((V.lat1 - V.lat0) / CELL_GRID_DEG));
+  const field = new Float32Array(nx * ny);
+  for (let j = 0; j < ny; j++) {
+    const lat = V.lat0 + (V.lat1 - V.lat0) * (j + 0.5) / ny;
+    for (let i = 0; i < nx; i++) {
+      const lon = V.lon0 + (V.lon1 - V.lon0) * (i + 0.5) / nx;
+      field[j * nx + i] = _cellSample(win, arso, lon, lat);
+    }
+  }
+  return { field, nx, ny, V };
+}
+
+// Iterativno (eksplicit sklad, ne rekurzija — globina klicnega sklada je
+// resnično tveganje na ~420×230 mreži) 8-povezano flood-fill nad pragom.
+function _cellLabel(field, nx, ny, thresholdMmh) {
+  const labels = new Int32Array(nx * ny);
+  const stack = new Int32Array(nx * ny);
+  const cells = [];
+  let nextLabel = 0;
+  for (let start = 0; start < nx * ny; start++) {
+    if (labels[start] !== 0 || field[start] < thresholdMmh) continue;
+    nextLabel++;
+    let sp = 0;
+    stack[sp++] = start;
+    labels[start] = nextLabel;
+    let pixelCount = 0, sumX = 0, sumY = 0, maxMmh = 0, corePixelCount = 0;
+    while (sp > 0) {
+      const p = stack[--sp];
+      const py = Math.floor(p / nx), px = p - py * nx;
+      pixelCount++; sumX += px; sumY += py;
+      if (field[p] > maxMmh) maxMmh = field[p];
+      if (field[p] >= CELL_CORE_MMH) corePixelCount++;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const qx = px + dx, qy = py + dy;
+          if (qx < 0 || qy < 0 || qx >= nx || qy >= ny) continue;
+          const q = qy * nx + qx;
+          if (labels[q] === 0 && field[q] >= thresholdMmh) { labels[q] = nextLabel; stack[sp++] = q; }
+        }
+      }
+    }
+    cells.push({ pixelCount, sumX, sumY, maxMmh, corePixelCount });
+  }
+  return cells;
+}
+
+function _cellsFromField(win, arso) {
+  const { field, nx, ny, V } = _cellField(win, arso);
+  const cells = _cellLabel(field, nx, ny, CELL_STORM_MMH);
+  const degLon = (V.lon1 - V.lon0) / nx, degLat = (V.lat1 - V.lat0) / ny;
+  const km2PerPx = degLon * COMP_KM_LON * degLat * COMP_KM_LAT;
+  const minPx = CELL_MIN_AREA_KM2 / km2PerPx;
+  return cells.filter((c) => c.pixelCount >= minPx).map((c) => {
+    const cx = c.sumX / c.pixelCount, cy = c.sumY / c.pixelCount;
+    return {
+      lon: V.lon0 + (V.lon1 - V.lon0) * (cx + 0.5) / nx,
+      lat: V.lat0 + (V.lat1 - V.lat0) * (cy + 0.5) / ny,
+      areaKm2: Math.round(c.pixelCount * km2PerPx * 10) / 10,
+      maxMmh: Math.round(c.maxMmh * 10) / 10,
+      toca: c.maxMmh >= CELL_CORE_MMH && c.corePixelCount * km2PerPx >= CELL_MIN_AREA_KM2,
+    };
+  });
+}
+
+// Ujemanje med posnetki: pohlepno po najbližjem centroidu znotraj
+// CELL_MATCH_RADIUS_KM, brez napovedi premika (pri 5-minutnem koraku in
+// razumni nevihtni hitrosti je iskalni polmer sam po sebi dovolj — napoved
+// premika bi zahtevala hranjenje celotnega prejšnjega polja samo za ta
+// namen). Ni Madžarskega algoritma, samo "dovolj dobro, dokumentirana
+// omejitev" — enako kot že drugod v tem cevovodu (glej docs/nowcast.md).
+async function _cellTrack(env, newCells) {
+  const r2 = env?.PHOTOS_R2;
+  let state = { nextId: 1, ts: null, cells: [] };
+  if (r2) {
+    try { const o = await r2.get(CELL_R2_STATE); if (o) state = JSON.parse(await o.text()); } catch (_) {}
+  }
+  const elapsedMin = state.ts ? (Date.now() - state.ts) / 60000 : null;
+
+  const pairs = [];
+  state.cells.forEach((p, pi) => newCells.forEach((n, ni) => {
+    const dKm = Math.hypot((n.lon - p.lon) * COMP_KM_LON, (n.lat - p.lat) * COMP_KM_LAT);
+    if (dKm <= CELL_MATCH_RADIUS_KM) pairs.push({ pi, ni, dKm });
+  }));
+  pairs.sort((a, b) => a.dKm - b.dKm);
+
+  const takenP = new Set(), takenN = new Set(), matched = [];
+  for (const { pi, ni } of pairs) {
+    if (takenP.has(pi) || takenN.has(ni)) continue;
+    takenP.add(pi); takenN.add(ni);
+    const prev = state.cells[pi], now = newCells[ni];
+    let smer = prev.smer ?? null, kmh = prev.kmh ?? null;
+    if (elapsedMin && elapsedMin > 0.5) {
+      const dx = (now.lon - prev.lon) * COMP_KM_LON, dy = (now.lat - prev.lat) * COMP_KM_LAT;
+      kmh = Math.round(Math.hypot(dx, dy) / (elapsedMin / 60) * 10) / 10;
+      // dx/dy sta tu prava geografska km (vzhod/sever), za razliko od
+      // _radMotion, kjer je dy v ARSO pikslih z obrnjenim predznakom
+      // (piksel Y raste proti jugu) — zato tu BREZ negacije dy.
+      smer = Math.round((Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360);
+    }
+    matched.push({ ...now, id: prev.id, missCount: 0, smer, kmh });
+  }
+  state.cells.forEach((p, pi) => {
+    if (takenP.has(pi)) return;
+    if ((p.missCount || 0) + 1 <= CELL_MAX_MISSES) matched.push({ ...p, missCount: (p.missCount || 0) + 1 });
+  });
+  newCells.forEach((n, ni) => {
+    if (takenN.has(ni)) return;
+    matched.push({ ...n, id: state.nextId++, missCount: 0, smer: null, kmh: null });
+  });
+
+  const newState = {
+    nextId: state.nextId, ts: Date.now(),
+    cells: matched.map((c) => ({
+      id: c.id, lon: c.lon, lat: c.lat, areaKm2: c.areaKm2, maxMmh: c.maxMmh, toca: c.toca,
+      missCount: c.missCount, smer: c.smer, kmh: c.kmh,
+    })),
+  };
+  if (r2) { try { await r2.put(CELL_R2_STATE, JSON.stringify(newState)); } catch (_) {} }
+  return matched.filter((c) => c.missCount === 0);  // "zgrešene" celice ostanejo v stanju za ujemanje, a se ne kažejo
+}
+
+async function _cronRenderRadarCells(env, win, arso) {
+  try {
+    if (!win && !arso) return false;
+    const tracked = await _cellTrack(env, _cellsFromField(win, arso));
+    const out = {
+      cas: new Date().toISOString(),
+      celice: tracked.map((c) => ({
+        id: c.id, lat: Math.round(c.lat * 1000) / 1000, lon: Math.round(c.lon * 1000) / 1000,
+        povrsina_km2: c.areaKm2, mmh: c.maxMmh, toca: !!c.toca,
+        smer: c.smer == null ? null : Math.round(c.smer), kmh: c.kmh == null ? null : c.kmh,
+      })),
+    };
+    const r2 = env?.PHOTOS_R2;
+    if (r2) await r2.put(CELL_R2_LATEST, JSON.stringify(out), { httpMetadata: { contentType: "application/json" } });
+    return true;
+  } catch (_) { return false; }
+}
+
 // Cron vsakih 5 minut izriše najnovejši okvir, da je animacija za obiskovalca
-// že topla; sproti počisti stare.
+// že topla; sproti počisti stare. Za "sirok" pogled prenese OPERA/ARSO vire
+// enkrat in jih deli s sledenjem nevihtnim celicam, da se isti prenos ne
+// podvoji.
 async function _cronRenderRadarComposite(env) {
   try {
+    let sirokSources = null;
     for (const vid of Object.keys(COMP_VIEWS)) {
+      if (vid === "sirok") {
+        const key = await _operaLatestKey();
+        const stamp = key ? _compStamp(key) : null;
+        if (stamp) {
+          sirokSources = await Promise.all([
+            _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch(() => null),
+            _compArso(_compStampMs(stamp)),
+          ]);
+          await _radarCompositeCached(env, stamp, "sirok", sirokSources).catch(() => null);
+          continue;
+        }
+      }
       await _radarCompositeCached(env, null, vid).catch(() => null);
     }
     await _radarCompositePrune(env);
+    if (sirokSources && (sirokSources[0] || sirokSources[1])) {
+      await _cronRenderRadarCells(env, sirokSources[0], sirokSources[1]).catch(() => null);
+    }
     return true;
   } catch (_) { return false; }
 }
@@ -1654,6 +2044,7 @@ export default {
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
     ctx.waitUntil(_cronRenderRadarComposite(env));
+    ctx.waitUntil(_cronRenderIcon(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -2825,11 +3216,27 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const okvirji = stamps.filter(s => _compStampMs(s) >= od).map(s => ({
             zig: s, cas: new Date(_compStampMs(s)).toISOString(),
           }));
+          // Nadaljevanje časovnice z ICON napovedjo — samo na pogledu
+          // "savinja" in samo če ni starejša od 90 min (glej _cronRenderIcon).
+          let napoved = null;
+          if (vid === "savinja") {
+            try {
+              const o = await env?.PHOTOS_R2?.get(`${ICON_R2_PREFIX}latest.json`);
+              if (o) {
+                const m = JSON.parse(await o.text());
+                const genMs = new Date(m.cas).getTime();
+                if (!Number.isNaN(genMs) && Date.now() - genMs < 90 * 60000) {
+                  napoved = { slika: "/icon-precip", okvirji: m.okvirji, korak_min: 60 };
+                }
+              }
+            } catch (_) {}
+          }
           return new Response(JSON.stringify({
             slika: "/radar-composite",
             cas: Number.isNaN(ms) ? null : new Date(ms).toISOString(),
             starost_min: Number.isNaN(ms) ? null : Math.round((Date.now() - ms) / 60000),
             okvirji,
+            napoved,
             korak_min: 5,
             pogled: vid,
             pogledi: Object.entries(COMP_VIEWS).map(([id, v]) => ({
@@ -2879,6 +3286,53 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             "X-Radar-Pogled": vid,
             "X-Radar-Cache": c.cached ? "hit" : "miss",
           },
+        });
+      }
+
+      // ── /icon-precip ────────────────────────────────────────
+      // Nadaljevanje radarske časovnice: 6h ICON napoved padavin za dolino
+      // (samo pogled "savinja"), izrisana z isto paleto kot kompozit. ?t=
+      // je obvezen, oblika <runStamp>-h<N> — iz /radar-composite.json →
+      // napoved.okvirji.
+      if (path === "/icon-precip") {
+        const t = url.searchParams.get("t");
+        if (!t || !/^\d{8}T\d{4}-h[1-6]$/.test(t)) {
+          return new Response(JSON.stringify({ error: "neveljaven t" }), {
+            status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+        const r2 = env?.PHOTOS_R2;
+        const o = r2 ? await r2.get(`${ICON_R2_PREFIX}frame-${t}.png`).catch(() => null) : null;
+        if (!o) {
+          return new Response(JSON.stringify({ error: "okvir ni na voljo" }), {
+            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(o.body, {
+          headers: { ...CORS_ALLOWED, "Content-Type": "image/png", "Cache-Control": "public, max-age=86400, immutable" },
+        });
+      }
+
+      // ── /radar-cells.json ────────────────────────────────────
+      // Sledenje posameznim nevihtnim celicam (za razliko od nowcasta, ki
+      // oceni en skupen premik polja): id, lega, površina, jakost, smer in
+      // hitrost vsake celice nad pragom nevihte, osveženo vsakih 5 minut
+      // skupaj s "sirok" kompozitom.
+      if (path === "/radar-cells.json") {
+        const r2 = env?.PHOTOS_R2;
+        let data = null;
+        try {
+          const o = r2 ? await r2.get(CELL_R2_LATEST) : null;
+          if (o) data = JSON.parse(await o.text());
+        } catch (_) {}
+        const genMs = data ? new Date(data.cas).getTime() : NaN;
+        if (!data || Number.isNaN(genMs) || Date.now() - genMs > 15 * 60000) {
+          return new Response(JSON.stringify({ celice: [], cas: null, opozorilo: "celice trenutno niso na voljo" }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
+          });
+        }
+        return new Response(JSON.stringify(data), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=120" },
         });
       }
 

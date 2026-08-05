@@ -3758,6 +3758,7 @@ let _mradMap=null,_mradFrames=[],_mradIdx=-1,_mradTimer=null,_mradPoll=null,
     _mradPlaying=true,_mradBounds=null,_mradLast='',
     _mradView='sirok',_mradViewApplied='';
 const MRAD_OPACITY=.82;
+let _mradCellMarkers=new Map();
 
 async function initMeteorecRadar(){
   if(_mradMap)return;
@@ -3777,9 +3778,10 @@ async function initMeteorecRadar(){
     .bindTooltip('Rečica ob Savinji',{permanent:true,direction:'right',offset:[8,0],className:'mrad-label'});
 
   await refreshMeteorecRadar();
+  refreshMeteorecRadarCells();
   // Nov posnetek je vsakih 5 minut; ko je zavihek skrit, ne osvežujemo.
   clearInterval(_mradPoll);
-  _mradPoll=setInterval(()=>{if(!document.hidden)refreshMeteorecRadar();},5*60*1000);
+  _mradPoll=setInterval(()=>{if(!document.hidden){refreshMeteorecRadar();refreshMeteorecRadarCells();}},5*60*1000);
 }
 
 // Uskladi seznam okvirjev s tistim, kar ponuja worker: doda nove, odstrani
@@ -3788,8 +3790,14 @@ async function refreshMeteorecRadar(){
   const tEl=document.getElementById('mrad-time');
   try{
     const m=await(await fetch(PROXY+'/radar-composite.json?pogled='+_mradView)).json();
-    const list=(m.okvirji||[]).filter(f=>f&&f.zig);
+    const list=(m.okvirji||[]).filter(f=>f&&f.zig).map(f=>({zig:f.zig,cas:f.cas,kind:'radar'}));
     if(!list.length)throw new Error('ni okvirjev');
+    // Nadaljevanje časovnice z ICON napovedjo (samo pogled "savinja", ko jo
+    // worker ponudi) — isti seznam okvirjev, samo drug vir/oznaka, da
+    // track/seek/play in legenda delujejo nespremenjeno naprej.
+    const iconList=(_mradView==='savinja'&&m.napoved?.okvirji||[]).filter(f=>f&&f.zig)
+      .map(f=>({zig:f.zig,cas:f.cas,kind:'icon'}));
+    const full=list.concat(iconList);
     _mradBounds=m.meje;
     renderMeteorecRadarLegend(m.legenda);
     // Ob prvem prikazu in ob vsaki menjavi pogleda zemljevid poravnamo na
@@ -3802,13 +3810,15 @@ async function refreshMeteorecRadar(){
       _mradMap.setView([LAT,LON],_mradView==='sirok'?7:10);
       _mradViewApplied=_mradView;
     }
+    // Dedup po zadnjem RADARSKEM okvirju (ta se spreminja vsakih 5 min);
+    // ICON se osveži urno in bi sicer redko sprožil ta zgodnji izhod.
     if(list[list.length-1].zig===_mradLast)return;   // nič novega
     _mradLast=list[list.length-1].zig;
 
-    const zivi=new Set(list.map(f=>f.zig));
+    const zivi=new Set(full.map(f=>f.zig));
     _mradFrames.filter(f=>!zivi.has(f.zig)&&f.layer).forEach(f=>_mradMap.removeLayer(f.layer));
     const stari=new Map(_mradFrames.map(f=>[f.zig,f]));
-    _mradFrames=list.map(f=>stari.get(f.zig)||{zig:f.zig,cas:f.cas,layer:null,ready:false});
+    _mradFrames=full.map(f=>stari.get(f.zig)||{zig:f.zig,cas:f.cas,kind:f.kind,layer:null,ready:false});
 
     // Najprej zadnji okvir, da uporabnik takoj nekaj vidi; ostale zatem po
     // vrsti, da workerja ne zasujemo s trinajstimi izrisi hkrati.
@@ -3829,8 +3839,10 @@ function mradLoadFrame(i){
   const f=_mradFrames[i];
   if(!f||f.layer)return Promise.resolve();
   return new Promise(res=>{
-    const layer=L.imageOverlay(PROXY+'/radar-composite?pogled='+_mradView+'&t='+encodeURIComponent(f.zig),
-      _mradBounds,{opacity:0,interactive:false});
+    const src=f.kind==='icon'
+      ?PROXY+'/icon-precip?t='+encodeURIComponent(f.zig)
+      :PROXY+'/radar-composite?pogled='+_mradView+'&t='+encodeURIComponent(f.zig);
+    const layer=L.imageOverlay(src,_mradBounds,{opacity:0,interactive:false});
     layer.once('load',()=>{f.ready=true;res();});
     layer.once('error',()=>{f.err=true;res();});
     layer.addTo(_mradMap);
@@ -3847,9 +3859,10 @@ function showMeteorecRadarFrame(i){
   _mradIdx=i;
   const tEl=document.getElementById('mrad-time');
   if(tEl){
-    const zdaj=i===_mradFrames.length-1;
-    tEl.innerHTML=new Date(f.cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})
-      +(zdaj?' <span class="radar-now-badge">zdaj</span>':'');
+    const zdaj=i===_mradFrames.length-1&&f.kind!=='icon';
+    const badge=f.kind==='icon'?' <span class="radar-fc-badge">napoved</span>'
+      :zdaj?' <span class="radar-now-badge">zdaj</span>':'';
+    tEl.innerHTML=new Date(f.cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+badge;
   }
   const fill=document.getElementById('mrad-track-fill');
   if(fill)fill.style.width=((i+1)/_mradFrames.length*100)+'%';
@@ -3922,6 +3935,38 @@ function renderMeteorecRadarLegend(leg){
   const lab=leg.filter((_,i)=>i%2===0);
   ticks.innerHTML=lab.map(l=>'<span>'+String(l.mmh).replace('.',',')+'</span>').join('');
   ticks.style.gridTemplateColumns='repeat('+lab.length+',1fr)';
+}
+
+// Sledenje nevihtnim celicam: id, smer, hitrost — za razliko od enotne
+// ocene premika polja. Enak osvežilni ritem kot _mradPoll (5 min), izrisano
+// na isti karti ne glede na izbrani pogled (širok/savinja).
+async function refreshMeteorecRadarCells(){
+  if(!_mradMap)return;
+  try{
+    const d=await(await fetch(PROXY+'/radar-cells.json')).json();
+    const cells=(d.celice||[]);
+    const zivi=new Set(cells.map(c=>c.id));
+    for(const[id,mk]of _mradCellMarkers){
+      if(!zivi.has(id)){_mradMap.removeLayer(mk);_mradCellMarkers.delete(id);}
+    }
+    cells.forEach(c=>{
+      const label=(c.kmh!=null&&c.smer!=null)
+        ?Math.round(c.kmh)+' km/h → '+windDir(c.smer)
+        :(c.toca?'nevihta (toča?)':'nevihta');
+      let mk=_mradCellMarkers.get(c.id);
+      if(!mk){
+        mk=L.circleMarker([c.lat,c.lon],{radius:5,color:'#fff',weight:2,
+          fillColor:c.toca?'#c0143c':'#ff6a00',fillOpacity:.95})
+          .addTo(_mradMap)
+          .bindTooltip(label,{permanent:true,direction:'top',offset:[0,-4],className:'mrad-label mrad-cell-label'});
+        _mradCellMarkers.set(c.id,mk);
+      }else{
+        mk.setLatLng([c.lat,c.lon]);
+        mk.setStyle({fillColor:c.toca?'#c0143c':'#ff6a00'});
+        mk.setTooltipContent(label);
+      }
+    });
+  }catch(e){console.warn('Nevihtne celice:',e);}
 }
 
 (function(){

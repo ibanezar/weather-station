@@ -636,6 +636,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <button class="radar-btn active" data-mrad-view="sirok" onclick="switchMeteorecRadarView('sirok')">Širše</button>
       <button class="radar-btn" data-mrad-view="savinja" onclick="switchMeteorecRadarView('savinja')">Zgornja Savinjska</button>
     </div>
+    <small class="mrad-hint">V pogledu "Zgornja Savinjska" se trak po zadnji uri radarja nadaljuje s 6-urno ICON napovedjo. Obarvane pike so sledene nevihtne celice (smer/hitrost), vidne v obeh pogledih.</small>
     <div class="radar-legend">
       <div class="mrad-legend">
         <div class="mrad-bar" id="mrad-scale"></div>
@@ -643,9 +644,9 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       </div>
       <span>mm/h</span>
       <span style="margin-left:auto">Padavine:
-        <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">ARSO</a> in
+        <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">ARSO</a>,
         <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">EUMETNET OPERA</a>
-        (CC BY 4.0) · Zemljevid:
+        (CC BY 4.0) · Napoved: <a href="https://open-meteo.com/" target="_blank" rel="noopener nofollow" style="color:var(--blue)">Open-Meteo</a> (DWD ICON) · Zemljevid:
         <a href="https://carto.com/attributions" target="_blank" rel="noopener nofollow" style="color:var(--blue)">CARTO</a>,
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener nofollow" style="color:var(--blue)">OpenStreetMap</a></span>
     </div>
