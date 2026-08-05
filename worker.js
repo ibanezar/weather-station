@@ -2248,6 +2248,34 @@ export default {
         );
       }
 
+      // ── /online ───────────────────────────────────────────
+      // Koliko brskalnikov je trenutno na strani. Vsak obiskovalec pošlje
+      // "utrip" na ~25 s z naključnim id-jem (?id=); ključ "online:<id>" ima
+      // expirationTtl 90 s, torej se sam počisti, če zavihek zapre ali
+      // izgubi povezavo — brez eksplicitnega "odjavi se" klica. Število je
+      // približno (KV list ima eventual consistency ~60 s), kar je za
+      // dekorativen widget dovolj dobro.
+      if (path === "/online") {
+        const kv = env?.COUNTER_KV;
+        if (!kv) {
+          return new Response(JSON.stringify({ stevilo: null }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
+          });
+        }
+        const id = url.searchParams.get("id");
+        if (id && /^[a-zA-Z0-9-]{8,64}$/.test(id)) {
+          try { await kv.put(`online:${id}`, "1", { expirationTtl: 90 }); } catch (_) {}
+        }
+        let stevilo = 0;
+        try {
+          const list = await kv.list({ prefix: "online:", limit: 1000 });
+          stevilo = list.keys.length;
+        } catch (_) {}
+        return new Response(JSON.stringify({ stevilo }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
+        });
+      }
+
       // ── /like ─────────────────────────────────────────────
       // Všečki na blog posta. Ključ v KV: "like:<slug>".
       // GET  /like?slug=xxx            → { slug, count }

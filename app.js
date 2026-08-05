@@ -15012,6 +15012,36 @@ async function initVisitorCounter(){
   if(wrap)wrap.style.display='none';
 }
 
+// ── Koliko je trenutno online ────────────────────────────
+// Napredni pogled samo (skrito v preprostem prek style.css
+// html[data-mode="simple"] #online-widget). Naključen id na sejo
+// brskalnika, utrip vsakih 25 s; worker ključ ugasne sam po 90 s TTL, če
+// zavihek zapre ali izgubi povezavo — brez eksplicitne "odjave".
+let _onlineId=null,_onlineTimer=null;
+async function pingOnline(){
+  if(!_onlineId){
+    _onlineId=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID()
+      :'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+        const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);
+      });
+  }
+  try{
+    const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch(PROXY+'/online?id='+_onlineId,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.stevilo==null)return;
+    const el=document.getElementById('online-num'),wrap=document.getElementById('online-widget');
+    if(el)el.textContent=d.stevilo.toLocaleString('sl');
+    if(wrap)wrap.hidden=false;
+  }catch(_){}
+}
+function initOnlineWidget(){
+  pingOnline();
+  clearInterval(_onlineTimer);
+  _onlineTimer=setInterval(()=>{if(!document.hidden)pingOnline();},25000);
+}
+
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
@@ -15059,6 +15089,7 @@ async function init(){
     fetchEcowittCurrent();
     runAdvancedOnly(()=>initInsights());
     initVisitorCounter();
+    runAdvancedOnly(()=>initOnlineWidget());
     checkSmartNotifications();
     runAdvancedOnly(()=>loadBlogTicker());
   },2500);
