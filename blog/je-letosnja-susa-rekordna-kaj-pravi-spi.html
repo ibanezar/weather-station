@@ -97,13 +97,13 @@
     <h1>Je letošnja suša rekordna? Kaj pravi SPI</h1>
     <p class="post-meta">4. avgusta 2026 · Filip Eremita</p>
 
-    <p class="lead">Konec julija smo v članku o letošnjih padavinah ugotovili, da je v Rečici ob Savinji do 29. julija padlo 26 % manj dežja kot v povprečju zadnjih šestih let — drugo najbolj suho leto od sedmih, kolikor jih meri naša postaja. Vprašanje, ki je ostalo odprto: ali to sploh pomeni <em>rekordno</em> sušo? Šest let lastne zgodovine je za tako trditev prekratkih in preveč lokalnih. Zato smo poskusili z metodo, ki se dejansko uporablja za merjenje suše — standardiziranim padavinskim indeksom (SPI) — na dovolj dolgem nizu. Odgovor je bolj zapleten, kot smo pričakovali.</p>
+    <p class="lead">Konec julija smo v članku o letošnjih padavinah ugotovili, da je v Rečici ob Savinji do 29. julija padlo 26 % manj dežja kot v povprečju zadnjih šestih let — to je drugo najbolj suho leto od sedmih, odkar meri naša postaja. Vprašanje, ki ostaja odprto: ali to sploh pomeni <em>rekordno</em> sušo? Šest let lastne zgodovine je za takšno trditev prekratko obdobje in premalo lokalno reprezentativno. Zato smo poskusili z metodo, ki se dejansko uporablja za merjenje suše — standardiziranim padavinskim indeksom (SPI) — na dovolj dolgem nizu. Odgovor je bolj zapleten, kot smo pričakovali.</p>
 
     <div class="stat-grid">
       <div class="stat-card c-dry">
         <div class="sc-label">SPI za julij (1 mesec)</div>
         <div class="sc-val">−1,08</div>
-        <div class="sc-sub">zmerno suho · 7. najbolj suh julij od 36 let</div>
+        <div class="sc-sub">zmerno suho · 7. najbolj suh julij v zadnjih 36 letih</div>
       </div>
       <div class="stat-card c-ok">
         <div class="sc-label">SPI, maj–julij (3 mesece)</div>
@@ -124,42 +124,42 @@
 
     <span class="section-label">01 — Zakaj šest let ne zadošča</span>
     <h2 id="zakaj-sest-let-ne-zadosca">Zakaj šest let podatkov ne zadošča za trditev o rekordu</h2>
-    <p>Postaja IREICA1 meri od novembra 2019 — odlično za primerjavo „letos proti lanskemu poletju“, premalo pa za oceno, kaj je za to dolino sploh normalno. Standardni kazalnik za sušo, ki ga uporabljajo tudi vremenske službe (SPI – Standardized Precipitation Index), zahteva vsaj 30 let podatkov, da lahko padavine za posamezno obdobje statistično primerja z dolgoletno porazdelitvijo. Namesto na postajini zgodovini smo zato SPI izračunali na dolgem nizu dnevnih padavin iz ERA5 reanalize (Open-Meteo, isti vir, ki ga uporabljamo za zapolnjevanje manjkajočih dni v <code>history.json</code>) za isto točko — 36 let, 1991–2026.</p>
-    <p>Metoda (Thom, 1966): padavinsko vsoto za izbrano obdobje (1, 3, 6, 12 mesecev) prilagodimo na gama porazdelitev, izračunano ločeno za vsak koledarski mesec, nato pretvorimo v standardno normalno vrednost. Rezultat pove, koliko standardnih odklonov je bilo obdobje bolj suho ali mokro od tega, kar je za ta mesec/sezono običajno — ne glede na to, koliko dežja dejansko pade v dolini v absolutnem smislu.</p>
+    <p>Postaja IREICA1 beleži podatke od novembra 2019, kar je odlično za primerjavo med letošnjim in lanskim poletjem, premalo pa za oceno, kaj je za Zgornjo Savinjsko dolino sploh običajno. Standardni kazalnik za sušo, ki ga uporabljajo tudi vremenske službe (SPI – Standardized Precipitation Index), zahteva vsaj 30 let podatkov, da lahko padavine za posamezno obdobje statistično primerjamo z dolgoletno porazdelitvijo. Namesto na podlagi postajine zgodovine smo SPI zato izračunali na dolgem nizu dnevnih padavin iz ERA5 reanalize (Open-Meteo, isti vir, ki ga uporabljamo za zapolnjevanje manjkajočih dni v <code>history.json</code>) za isto točko v obdobju 36 let, natančneje od 1991 do 2026.</p>
+    <p>Metoda (Thom, 1966): padavinsko vsoto za izbrano obdobje (1, 3, 6, 12 mesecev) prilagodimo na gama porazdelitev, izračunano ločeno za vsak koledarski mesec, nato pa jo pretvorimo v standardno normalno vrednost. Rezultat nam pove, za koliko standardnih odklonov je bilo izbrano obdobje bolj suho ali mokro od povprečja za ta mesec ali sezono — ne glede na to, koliko dežja v absolutnem smislu dejansko pade v Zgornji Savinjski dolini.</p>
 
     <span class="section-label">02 — Rezultati</span>
     <h2 id="kaj-pokaze-spi">Kaj dejansko pokaže SPI</h2>
-    <p>Julij sam je bil resnično suh: SPI-1 znaša −1,08, kar je po standardni razvrstitvi (McKee in sod., 1993) „zmerna suša“ in 7. najbolj suh julij od 36 let nazaj. Toda čim razširimo okno na tri ali šest mesecev, se slika umiri — SPI-3 (maj–julij) je +0,17, SPI-6 (februar–julij) −0,02, oboje trdno znotraj razpona „ni suša“. Vodna bilanca zadnjega pol leta je torej blizu normale; primanjkljaj je predvsem julijski.</p>
+    <p>Julij je bil resnično suh: SPI-1 znaša −1,08, kar po standardni razvrstitvi (McKee in sod., 1993) pomeni „zmerno sušo“ in 7. najbolj suh julij v zadnjih 36 letih. Toda takoj, ko okno razširimo na tri ali šest mesecev, se slika spremeni — SPI-3 (maj–julij) znaša +0,17, SPI-6 (februar–julij) pa −0,02. Obe vrednosti sta trdno znotraj razpona normalnega stanja. Vodna bilanca zadnjega pol leta je torej blizu normale, primanjkljaj pa je izključno julijski.</p>
 
     <div class="chart-card">
       <h3>SPI za 3-mesečno okno maj–julij, po letih (1991–2026)</h3>
       <canvas id="chartSpi3"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Negativne vrednosti = bolj suho od normale za to obdobje, pozitivne = bolj mokro. 2026 (oranžen stolpec) ni med skrajnostmi.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Negativne vrednosti označujejo bolj suho obdobje od normale, pozitivne pa bolj mokro. Leto 2026 (oranžen stolpec) ne izstopa.</p>
     </div>
 
-    <p>Za primerjavo: leta, ki jih ta niz pokaže kot resnično skrajna, se ujemajo z dobro znanimi sušnimi leti v Sloveniji — 1992 (SPI-3 −2,69), 2022 (−2,22) in 1993 (−1,68) padejo v razred „huda“ do „skrajna“ suša, 2017 je tik na meji hude suše (−1,49). Nobeno od teh let se niti približno ne primerja z letošnjim +0,17. To je tudi neke vrste preverjanje metode: če bi izračun 2003, 2012, 2017 in 2022 – leta, ki jih dejansko pomnimo kot sušna – pokazal kot „normalna“, bi bilo nekaj narobe. Pokaže jih pravilno, kar da rezultatom za 2026 dodatno težo.</p>
+    <p>Zgodovinski pregled to potrjuje: leta, ki jih niz opredeli kot resnično skrajna, se ujemajo z dobro znanimi sušnimi leti v Sloveniji. Leta 1992 (SPI-3 −2,69), 1993 (−1,68) in 2022 (−2,22) spadajo v razred hude do skrajne suše, medtem ko je bilo leto 2017 tik na njeni meji (−1,49). Letošnja vrednost +0,17 z njimi sploh ni primerljiva. S tem smo metodo tudi preverili: če bi izračun pokazal, da so zloglasna sušna leta (2003, 2012, 2017 in 2022) normalna, bi bil izračun napačen. Metoda jih pravilno prepozna, kar daje letošnjim rezultatom dodatno težo.</p>
 
     <div class="chart-card">
       <h3>Padavine od 1. 1. do 29. 7., po letih (1991–2026, ocena za točko)</h3>
       <canvas id="chartYtd"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Vodoravna črta: 36-letno povprečje (592 mm). Najbolj sušna leta v tem nizu: 1993, 2022, 1992, 2003, 2012 — vsa občutno pod letošnjim 2026.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Vodoravna črta prikazuje 36-letno povprečje (592 mm). Najbolj sušna leta v tem nizu (1992, 1993, 2003, 2012 in 2022) so občutno pod letošnjo vrednostjo.</p>
     </div>
 
     <span class="section-label">03 — previdno s številkami</span>
     <div class="caveat">
-      <p><strong>Reanaliza ni dežemer.</strong> ERA5 je model, ne meritev — za isto točko in isto obdobje (1. 1.–29. 7.) je v zadnjih petih letih dosledno kazal 12–20 % manj dežja, kot ga je dejansko izmeril dežemer na postaji. Letos je razmerje presenetljivo obrnjeno: ERA5 za to obdobje oceni 628 mm, postaja pa je izmerila le 554,5 mm — torej približno 13 % manj, kot bi model pričakoval. Zato absolutnih milimetrov iz ERA5 ne jemljemo dobesedno, uporabljamo jih le za razmerja med leti znotraj istega, notranje doslednega niza (za kar je SPI kot standardizirano odstopanje razmeroma odporen). Da je ravno letos ta razlika med modelom in meritvijo obrnjena, je samo po sebi zanimivo — bodisi gre za resnično hiperlokalno sušo, ki jo 25-kilometrska mreža modela zgladi, bodisi za statistični šum enega leta. Za zanesljiv odgovor bi rabili daljšo vrsto let s tem vzorcem.</p>
+      <p><strong>Reanaliza ni dežemer.</strong> ERA5 je model in ne meritev — za isto točko in isto obdobje (od 1. 1. do 29. 7.) je v zadnjih petih letih dosledno kazal od 12 do 20 % manj dežja, kot ga je dejansko izmeril dežemer na postaji. Letos je razmerje presenetljivo obrnjeno: ERA5 za to obdobje oceni 628 mm, postaja pa je izmerila le 554,5 mm — torej približno 13 % manj od modeliranih pričakovanj. Zato absolutnih milimetrov iz ERA5 ne smemo jemati povsem dobesedno, temveč jih uporabljamo le za razmerja znotraj notranje doslednega niza (za kar je SPI kot standardizirano odstopanje dokaj odporen). Da je ravno letos razlika med modelom in meritvijo obrnjena, je izjemno zanimivo. Morda gre za hiperlokalno sušo, ki jo 25-kilometrska mreža modela zgladi, ali pa zgolj za statistični šum. Za zanesljiv odgovor bi potrebovali daljšo vrsto let s takšnim vzorcem.</p>
     </div>
 
     <span class="section-label">04 — zakaj se zdi hujše</span>
     <h2 id="zakaj-se-zdi-hujse">Zakaj se lokalno zdi hujše, kot pokaže dolgi niz</h2>
-    <p>Prejšnji članek je letošnjih 554,5 mm primerjal s povprečjem let 2020–2025 (750,3 mm) — in razlika 26 % je resnična in pravilno izračunana. Težava je v izhodišču: teh šest let, edinih, ki jih ima postaja, je bilo samo po sebi nadpovprečno mokrih. Isto obdobje na 36-letnem nizu (1991–2025) ima povprečje 592 mm, torej precej nižje. Ko primerjaš letošnje leto z nenavadno mokrim izhodiščem, vsako približno normalno leto izgleda kot huda suša — čeprav je, gledano širše, blizu tega, kar je za dolino dolgoročno običajno.</p>
+    <p>Prejšnji članek je letošnjih 554,5 mm primerjal s povprečjem let 2020–2025 (750,3 mm). Izračunana razlika 26 % je povsem pravilna, težava pa tiči v izhodišču: teh šest let, ki jih beleži postaja, je bilo nadpovprečno mokrih. Isto obdobje na 36-letnem nizu (1991–2025) ima občutno nižje povprečje (592 mm). Ko letošnje padavine primerjamo z nenavadno mokrim izhodiščem, vsako normalno leto deluje kot huda suša, čeprav je glede na dolgoročno povprečje v Zgornji Savinjski dolini to povsem običajno stanje.</p>
 
     <span class="section-label">05 — sklep</span>
     <h2 id="sklep">Torej: rekord ali ne?</h2>
-    <p>Po standardnem kazalniku SPI in dovolj dolgem nizu — ne, vsaj še ne. Julij je bil lokalno zmerno suh, kar je resnično in vredno omembe, toda 3- in 6-mesečna vodna bilanca ostajata blizu normale, skupna letošnja količina padavin pa je po tej oceni celo rahlo nad 36-letnim povprečjem. Resnično rekordna sušna leta iz tega niza (1992, 1993, 2022) so bila po vseh merilih občutno hujša. To se seveda lahko spremeni — avgust šele teče, in če ostane suh in vroč, kot kaže trenutna napoved, se lahko 3- in 6-mesečni SPI do jeseni premakneta precej nižje.</p>
+    <p>Po standardnem kazalniku SPI in dovolj dolgem nizu — ne, vsaj še ne. Julij je bil lokalno zmerno suh, kar nedvomno drži, toda 3- in 6-mesečna vodna bilanca ostajata blizu normale. Skupna letošnja količina padavin po tej oceni celo rahlo presega 36-letno povprečje. Resnično rekordna sušna leta iz tega niza (1992, 1993, 2022) so bila po vseh merilih občutno hujša. Situacija pa se seveda lahko še poslabša. Avgust šele poteka in če ostane suh in vroč, kot napovedujejo, se lahko 3- in 6-mesečni SPI do jeseni premakneta precej nižje.</p>
 
     <div class="callout">
-      <p><strong>Na kratko:</strong> po standardnem padavinskem indeksu (SPI) na 36-letnem nizu 2026 (še) ni rekordno sušno leto — julij je bil zmerno suh, širša vodna bilanca pa blizu normale. Občutek, da je letos izjemno sušno, delno izhaja iz tega, da je postajina lastna šestletna zgodovina (2020–2025) sama po sebi nadpovprečno mokra, zato vsako bolj normalno leto ob njej izstopa. Za uradno trditev o rekordu na ravni cele Slovenije je vseeno treba pogledati uradni SPI Agencije RS za okolje (agromet.mkgp.gov.si) ali EDO (European Drought Observatory) — ta izračun velja za točko postaje, ne za državo.</p>
+      <p><strong>Na kratko:</strong> po standardnem padavinskem indeksu (SPI) na 36-letnem nizu leto 2026 (še) ni rekordno sušno. Julij je bil zmerno suh, širša vodna bilanca pa ostaja v mejah normale. Občutek izjemne suše delno izhaja iz dejstva, da je postajina šestletna zgodovina (2020–2025) nadpovprečno mokra, ob čemer vsako normalno leto močno izstopa. Za uradno trditev o rekordu na državni ravni bi morali preveriti uradni SPI Agencije RS za okolje (agromet.mkgp.gov.si) ali EDO (European Drought Observatory) — naš izračun namreč velja zgolj za točko postaje in ne za celotno Slovenijo.</p>
     </div>
 
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Podatki: dnevne padavine, Open-Meteo ERA5 arhiv za točko 46,326° S, 14,921° V, 1. 1. 1991–4. 8. 2026; postajine meritve IREICA1 (Rečica ob Savinji) za primerjavo za obdobje 2020–2026. Metoda: SPI po Thomu (1966), razvrstitev suše po McKee in sod. (1993).</p>
