@@ -565,6 +565,15 @@ def main():
 
     if wire:
         save_json(STATE_FILE, state)
+        # Loči "nekaj se je spremenilo" (npr. resolve_pending je dopolnil star,
+        # že objavljen zapis) od "nastal je nov članek" — samo slednje sme
+        # sprožiti objavo na Facebook/Instagram in IndexNow ping. Brez tega
+        # vsak tek, ki samo popravi star zapis, znova deli TRENUTNO najnovejši
+        # članek (blog.json[0]), ki je lahko povsem nepovezan s to spremembo.
+        gh_output = os.environ.get("GITHUB_OUTPUT")
+        if gh_output:
+            with open(gh_output, "a", encoding="utf-8") as f:
+                f.write(f"new_post={'true' if published else 'false'}\n")
 
 
 if __name__ == "__main__":
