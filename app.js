@@ -3966,7 +3966,21 @@ async function refreshMeteorecRadarCells(){
         mk.setTooltipContent(label);
       }
     });
+    renderCellEtaBanner(d.prihaja);
   }catch(e){console.warn('Nevihtne celice:',e);}
+}
+
+// Najbolj nujna prihajajoča celica (worker jo že izbere in doda ETA prek
+// _cellEta — premočrten najbližji prehod trajektorije mimo postaje, ne
+// samo "je nekje v okolici"). Enak "gladek propad" kot povsod: brez
+// prihajajoče celice se pasica preprosto skrije.
+function renderCellEtaBanner(p){
+  const el=document.getElementById('cell-eta-banner');
+  if(!el)return;
+  if(!p){el.hidden=true;return;}
+  el.innerHTML='⛈ Nevihtna celica prihaja proti Rečici ob Savinji čez <b>~'+p.eta_min+' min</b>'
+    +' ('+Math.round(p.kmh)+' km/h, '+windDir(p.smer)+')';
+  el.hidden=false;
 }
 
 (function(){

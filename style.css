@@ -1537,6 +1537,12 @@ html[data-mode="simple"] #online-widget{display:none!important}
    ker jih je lahko naenkrat prikazanih več. */
 .leaflet-tooltip.mrad-cell-label{font-size:.6rem;font-weight:600;padding:1px 6px}
 .mrad-hint{display:block;font-size:.68rem;color:var(--muted);margin-top:.4rem;line-height:1.4}
+/* ETA sledene nevihtne celice, ki gre proti postaji — glej _cellEta v
+   worker.js (najbližji prehod trajektorije mimo postaje). */
+.cell-eta-banner{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;border-radius:10px;
+  background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:var(--text);
+  font-size:.78rem;margin-bottom:.7rem}
+.cell-eta-banner b{font-weight:700;color:var(--red)}
 #micro-map{width:100%;height:360px;background:var(--fc-bg);border-radius:14px}
 .micromap-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#1d4ed8,#60a5fa,#e2e8f0,#fca5a5,#dc2626)}
 .micromap-pop{font-size:.78rem;line-height:1.5}

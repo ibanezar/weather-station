@@ -211,10 +211,21 @@ Nowcast zgoraj oceni **en skupen premik za celotno polje** in ga uporabi na
 oknu okoli vsake vasi. To je nekaj drugega: prepozna **posamezne** konvektivne
 celice kot povezana območja nad pragom nevihte in jim sledi med posnetki —
 vsaka dobi svoj id, lego, površino, jakost, smer in hitrost. Endpoint
-`GET /radar-cells.json`, osveženo vsakih 5 minut skupaj s "sirok" kompozitom
-(deli isti OPERA/ARSO prenos — `_cronRenderRadarComposite` ju prenese enkrat
-in poda naprej `_cronRenderRadarCells`, da se drag OPERA S3 Range-GET in ARSO
-GIF prenos ne podvoji).
+`GET /radar-cells.json`.
+
+**Cron: lasten, zamaknjen urnik.** Sprva je `_cronRenderRadarCells` tekel
+znotraj istega 5-minutnega cron tika kot ICON (glej zgoraj) in kompozitni
+izris, delil OPERA/ARSO prenos s slednjim, da se ne podvoji. V produkciji se
+zaradi tega **ni nikoli izvedel do konca** — vsi `ctx.waitUntil()` znotraj ene
+`scheduled()` invokacije si delijo en časovni/CPU proračun, in kot zadnja
+dodatka v vrsti (za pragovnim alarmom, nowcastom, dežjem, aurora in
+kompozitom) preprosto nista dobila priložnosti. Rešitev: `_cronRenderIcon` in
+sledenje celicam zdaj tečeta na **lastnem, za 2 minuti zamaknjenem** cron
+urniku (`"2-59/5 * * * *"`, `wrangler.toml`, ločen od `"*/5 * * * *"` zgoraj;
+`scheduled()` loči po `event.cron`). Cena: OPERA/ARSO za "sirok" se zdaj
+prenese neodvisno namesto deljeno s kompozitnim izrisom — sprejemljivo, ker
+gre prek istega `cf:{cacheTtl}` robnega predpomnilnika, torej brez dodatne
+obremenitve izvora.
 
 **Polje in projekcija.** Zaznavanje teče na lastni, enakomerni lon/lat mreži
 (`CELL_GRID_DEG`, privzeto 0,015° ≈ 420×230 čez cel "sirok" izsek) — ne na
@@ -254,3 +265,18 @@ resničnega geografskega premika centroida (`atan2(vzhod_km, sever_km)`) — za
 razliko od `_radMotion`, kjer je zaradi ARSO-pikslovega obrnjenega predznaka
 (piksel Y raste proti jugu) v formuli negacija; tu je ni, ker sta `dx`/`dy`
 že prava geografska km.
+
+**ETA do postaje.** `_cellEta` za vsako celico s poznano smerjo/hitrostjo
+izračuna najbližji prehod (closest point of approach) njene premočrtne
+trajektorije mimo postaje — standardna CPA formula `t_cpa = -(V·C0)/|V|²`,
+kjer je `C0` lega celice relativno na postajo (vzhod/sever, km) in `V`
+hitrostni vektor iz istega `smer`/`kmh`. `t_cpa ≤ 0` pomeni, da se celica že
+oddaljuje (najbližji prehod je v preteklosti) — brez ETA. Poroča se samo, če
+je napovedan najbližji prehod znotraj `CELL_ETA_RADIUS_KM` (15 km, "gre proti
+dolini") in `CELL_ETA_MAX_MIN` (90 min — dlje linearna ekstrapolacija ni
+zanesljiva, glej "Ocena premika" zgoraj) ter je hitrost nad `CELL_ETA_MIN_KMH`
+(3 km/h — pod tem je smer preveč šumna). Najbolj nujna celica (najkrajši ETA)
+gre v `prihaja` na vrhu odgovora `/radar-cells.json` — namerno **ne**
+`opozorilo`, ker to ime že uporablja mehek odpovedni odgovor (niz z
+razlogom), različna oblika bi zmedla odjemalca. Frontend (`renderCellEtaBanner`,
+app.js) prikaže pasico nad radarsko karto, ko `prihaja` ni `null`.
