@@ -1131,6 +1131,12 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .visitor-counter .vc-num{color:var(--text);font-weight:500}
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .visitor-counter.loaded{animation:vc-in .4s ease}
+.online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);animation:online-pulse 2s ease-in-out infinite}
+@keyframes online-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* Widget je "napredni samo" dodatek, ne bistvena vremenska informacija —
+   za razliko od kartic v #tab-current (allowlist s simple-keep) je ta v
+   nogi strani, torej izven tistega pravila, in ga skrijemo tu eksplicitno. */
+html[data-mode="simple"] #online-widget{display:none!important}
 .ft-donate-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.69rem;color:rgba(0,191,174,.75);text-decoration:none;transition:color .2s}
 .ft-donate-link:hover{color:#00bfae}
 .ft-social{display:flex;align-items:center;gap:.6rem}
