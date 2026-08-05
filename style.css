@@ -1527,6 +1527,10 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .leaflet-tooltip.mrad-label::before{display:none}
 :root[data-theme="light"] .leaflet-tooltip.mrad-label{background:rgba(255,255,255,.92);color:#111827;
   box-shadow:0 1px 3px rgba(0,0,0,.25)}
+/* Oznake sledenih nevihtnih celic — enak čoln kot postajna oznaka, a manjše,
+   ker jih je lahko naenkrat prikazanih več. */
+.leaflet-tooltip.mrad-cell-label{font-size:.6rem;font-weight:600;padding:1px 6px}
+.mrad-hint{display:block;font-size:.68rem;color:var(--muted);margin-top:.4rem;line-height:1.4}
 #micro-map{width:100%;height:360px;background:var(--fc-bg);border-radius:14px}
 .micromap-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#1d4ed8,#60a5fa,#e2e8f0,#fca5a5,#dc2626)}
 .micromap-pop{font-size:.78rem;line-height:1.5}
