@@ -1921,7 +1921,11 @@ function _cellsFromField(win, arso) {
       lon: V.lon0 + (V.lon1 - V.lon0) * (cx + 0.5) / nx,
       lat: V.lat0 + (V.lat1 - V.lat0) * (cy + 0.5) / ny,
       areaKm2: Math.round(c.pixelCount * km2PerPx * 10) / 10,
-      maxMmh: Math.round(c.maxMmh * 10) / 10,
+      // Marshall-Palmer (_dbzMmh) lahko na posameznem šumnem/anomalnem pikslu
+      // vrne fizikalno nesmiselno visok mm/h; za prikaz porežemo na najvišjo
+      // vrednost, ki jo pozna sama radarska lestvica (RADAR_LEVEL_MMH), ne
+      // pustimo, da tak izjemek pride kot številka v oznako na karti.
+      maxMmh: Math.min(RADAR_LEVEL_MMH[RADAR_LEVEL_MMH.length - 1], Math.round(c.maxMmh * 10) / 10),
       toca: c.maxMmh >= CELL_CORE_MMH && c.corePixelCount * km2PerPx >= CELL_MIN_AREA_KM2,
     };
   });
@@ -2003,18 +2007,18 @@ async function _cronRenderRadarCells(env, win, arso) {
 }
 
 // Cron vsakih 5 minut izriše najnovejši okvir, da je animacija za obiskovalca
-// že topla; sproti počisti stare. Za "sirok" pogled prenese OPERA/ARSO vire
-// enkrat in jih deli s sledenjem nevihtnim celicam, da se isti prenos ne
-// podvoji.
+// že topla; sproti počisti stare. Za "sirok" pogled si vir OPERA/ARSO izposodi
+// naprej v _radarComposite (da se v tej isti funkciji ne prenese dvakrat), a
+// sledenje celicam TU ne teče več — glej opombo pri _cronRenderIconAndCells,
+// zakaj je na ločenem urniku.
 async function _cronRenderRadarComposite(env) {
   try {
-    let sirokSources = null;
     for (const vid of Object.keys(COMP_VIEWS)) {
       if (vid === "sirok") {
         const key = await _operaLatestKey();
         const stamp = key ? _compStamp(key) : null;
         if (stamp) {
-          sirokSources = await Promise.all([
+          const sirokSources = await Promise.all([
             _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch(() => null),
             _compArso(_compStampMs(stamp)),
           ]);
@@ -2025,15 +2029,52 @@ async function _cronRenderRadarComposite(env) {
       await _radarCompositeCached(env, null, vid).catch(() => null);
     }
     await _radarCompositePrune(env);
-    if (sirokSources && (sirokSources[0] || sirokSources[1])) {
-      await _cronRenderRadarCells(env, sirokSources[0], sirokSources[1]).catch(() => null);
-    }
     return true;
   } catch (_) { return false; }
 }
 
+// ICON napoved in sledenje celicam sta bila sprva na istem 5-minutnem
+// urniku kot spodnja (že sama po sebi težka) opravila — v praksi se v
+// produkciji nista nikoli izvedla (potrjeno: neposreden klic prek HTTP je
+// deloval takoj in hitro, isti klic prek scheduled() pa ~40 min/8 tikov ni
+// zapisal ničesar), najverjetneje ker si vsi ctx.waitUntil() znotraj ENE
+// invokacije delijo en časovni/CPU proračun in so ta dva dodatka zadnja v
+// vrsti. Zato tečeta na LASTNEM, za 2 min zamaknjenem cron urniku
+// ("2-59/5 * * * *", wrangler.toml) — ločena invokacija scheduled() pomeni
+// lasten proračun, brez tekmovanja s spodnjimi opravili. Cena: lasten
+// (neshared) prenos OPERA/ARSO za "sirok" namesto souporabe s kompozitom —
+// sprejemljivo, ker gre prek istega `cf:{cacheTtl}` robnega predpomnilnika.
+async function _cronRenderIconAndCells(env) {
+  const t0 = Date.now();
+  const iconOk = await _cronRenderIcon(env).catch(() => false);
+  let cellsOk = false, cellsErr = null;
+  try {
+    const key = await _operaLatestKey();
+    const stamp = key ? _compStamp(key) : null;
+    if (stamp) {
+      const [win, arso] = await Promise.all([
+        _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch(() => null),
+        _compArso(_compStampMs(stamp)),
+      ]);
+      cellsOk = await _cronRenderRadarCells(env, win, arso);
+    }
+  } catch (e) { cellsErr = String((e && e.message) || e); }
+  const r2 = env?.PHOTOS_R2;
+  if (r2) {
+    try {
+      await r2.put("debug/newradar-cron.json", JSON.stringify({
+        cas: new Date().toISOString(), ms: Date.now() - t0, iconOk, cellsOk, cellsErr,
+      }), { httpMetadata: { contentType: "application/json" } });
+    } catch (_) {}
+  }
+}
+
 export default {
   async scheduled(event, env, ctx) {
+    if (event.cron === "2-59/5 * * * *") {
+      ctx.waitUntil(_cronRenderIconAndCells(env));
+      return;
+    }
     ctx.waitUntil(_cronCheckThresholds(env));
     // Radarski nowcast nadomesti modelski; na model pademo le, če radar odpove,
     // sicer bi za isti dogodek poslali dve obvestili.
@@ -2044,7 +2085,6 @@ export default {
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
     ctx.waitUntil(_cronRenderRadarComposite(env));
-    ctx.waitUntil(_cronRenderIcon(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -2124,6 +2164,13 @@ export default {
       } catch (e) {
         out.cells = { ok: false, ms: Date.now() - t, error: String((e && e.message) || e), stack: ((e && e.stack) || "").slice(0, 800) };
       }
+      // Zapis zadnjega DEJANSKEGA cron tika (ne tega ročnega HTTP klica) —
+      // _cronRenderIconAndCells piše sem, torej pove, ali ločen urnik
+      // dejansko teče do konca.
+      try {
+        const o = await env?.PHOTOS_R2?.get("debug/newradar-cron.json");
+        if (o) out.zadnjiCron = JSON.parse(await o.text());
+      } catch (_) {}
       return new Response(JSON.stringify(out, null, 2), {
         headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
       });
