@@ -74,7 +74,15 @@ def wrap(icon, text, date):
 
 
 def fact_record(hist, last, mmdd, param, label, unit, superlative):
-    """Nov rekord ali bližina rekorda za ta koledarski dan, za en parameter."""
+    """Nov rekord ali bližina rekorda za ta koledarski dan, za en parameter.
+
+    Ločeno preveri tudi, ali gre hkrati za ABSOLUTNI rekord postaje (najvišja/
+    najnižja vrednost v celotni zgodovini, ne le na ta koledarski dan) — enako
+    razlikovanje kot že v tools/seo_smart_routine.py (detect_events, "rekord-
+    vrocina"/"rekord-mraz" proti ožjemu "rekord-dneva-*"). Ta kartica je bila
+    prej slepa za absolutni rekord in bi 37,6 °C 4. 8. 2026 (dejansko nov
+    absolutni rekord postaje) napovedala samo kot "rekord za ta dan".
+    """
     today_v = hist[last].get(param)
     if today_v is None:
         return None
@@ -84,17 +92,31 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
         return None
 
     years = len({d[:4] for d, _ in prior})
+    all_prior = [(d, v[param]) for d, v in hist.items()
+                 if d != last and v.get(param) is not None]
+    all_years = len({d[:4] for d in hist})
     if superlative == "max":
         rec_date, rec_val = max(prior, key=lambda dv: dv[1])
         is_new = today_v > rec_val
         diff = today_v - rec_val if is_new else rec_val - today_v
+        is_absolute = bool(all_prior) and today_v > max(v for _, v in all_prior)
+        superlat_word = "najvišja"
     else:
         rec_date, rec_val = min(prior, key=lambda dv: dv[1])
         is_new = today_v < rec_val
         diff = rec_val - today_v if is_new else today_v - rec_val
+        is_absolute = bool(all_prior) and today_v < min(v for _, v in all_prior)
+        superlat_word = "najnižja"
 
     word = day_word(last)
-    if is_new:
+    if is_new and is_absolute:
+        score = 120  # bolj zanimivo od navadnega dnevnega rekorda -- naj med kandidati vedno zmaga
+        text = (f'{word}, {dm_label(last)}, smo na Rečici ob Savinji postavili <strong>nov absolutni rekord '
+                 f'postaje</strong> — {label} <strong>{num(today_v)}{unit}</strong>, {superlat_word} vrednost '
+                 f'v celotni {all_years}-letni zgodovini meritev postaje IREICA1. Hkrati je to tudi nov rekord '
+                 f'za ta koledarski dan — padel je dosedanji {num(rec_val)}{unit} iz leta {rec_date[:4]}.')
+        icon = "🥇"
+    elif is_new:
         score = 100
         text = (f'{word}, {dm_label(last)}, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — '
                  f'{label} <strong>{num(today_v)}{unit}</strong>. S tem je padel dosedanji rekord '
