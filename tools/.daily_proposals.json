@@ -1,64 +1,78 @@
 {
-  "date": "2026-08-04",
-  "created": "2026-08-04T06:16:04.657640+00:00",
+  "date": "2026-08-05",
+  "created": "2026-08-05T06:12:04.753569+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Danes 37,1 °C: vročinski vrh, nato ohladitev do konca tedna",
-      "teaser": "Napoved za IREICA1 kaže vrh vročine danes s 37,1 °C, jutri še 36,9 °C, v sredo pa 35,6 °C brez padavin. Konec tedna prinese preobrat -- v petek se najvišja dnevna temperatura spusti na 24,4 °C, pričakovanih pa je tudi 7,2 mm dežja.",
+      "title": "Vročinski val nad Zgornjo Savinjsko dolino: do 36,7 °C",
+      "teaser": "Napoved za Rečico ob Savinji kaže vrh vročine s 36,7 °C tako danes kot jutri, nato pa ohladitev proti 27,5 °C v petek. Pogledamo, kako dolgo bo vročina trajala in kdaj lahko pričakujemo osvežitev z manjšo količino padavin.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (37,1 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (36,7 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 37.1,
+          "value": 36.7,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "dusljivost-zraka",
-      "title": "Rosišče Savinjska dolina: zakaj vročina duši bolj",
-      "teaser": "Trenutno rosišče je 16,7 °C ob 72-odstotni vlažnosti, kar pomeni, da se 22,0 °C počuti kot 24,3 °C. Razložimo, zakaj taka kombinacija naredi vročino dušljivo, čeprav termometer ne kaže ekstremnih vrednosti.",
+      "id": "dolzina-dneva",
+      "title": "Ure sonca v Zgornji Savinjski dolini: koliko smo jih ujeli",
+      "teaser": "Ob avgustovskih dnevih s solarnim sevanjem okoli 109 W/m² in nizkim UV indeksom preverimo, koliko sončnega vremena je dejansko doseglo postajo IREICA1 glede na dolžino dneva. Analiziramo tudi, kaj to pomeni za sončno vreme v Rečici ob Savinji v prihodnjih dneh.",
       "topic": {
-        "id": "dusljivost-zraka",
+        "id": "dolzina-dneva",
         "sezona": [
+          1,
+          2,
+          3,
+          4,
           5,
           6,
           7,
           8,
-          9
+          9,
+          10,
+          11,
+          12
         ],
-        "tag": "dusljivost",
-        "brief": "Rosišče in dušljivost zraka zadnjih dni -- zakaj se vročina počuti hujše, kot kaže termometer.",
+        "tag": "sonce",
+        "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
         "seo_keywords": [
-          "rosišče Savinjska dolina",
-          "dušljivo vreme",
-          "občutek vročine vlaga"
+          "ure sonca Zgornja Savinjska dolina",
+          "dolžina dneva vreme",
+          "sončno vreme Rečica ob Savinji"
         ]
       }
     },
     {
-      "id": "gobarska-sezona",
-      "title": "Gobarska napoved za Zgornjo Savinjsko dolino",
-      "teaser": "Zadnji dnevi so bili suhi -- danes brez dežja in vročina do 37,1 °C -- kar tlom ne prija za rast gob. Preobrat pa se obeta v petek, ko napoved za dolino kaže 7,2 mm padavin ob občutno nižjih temperaturah, kar bi lahko spodbudilo gobarjenje okoli Rečice ob Savinji.",
+      "id": "veter-in-tlak",
+      "title": "Zračni tlak in veter: znaki spremembe vremena v dolini",
+      "teaser": "Zračni tlak na postaji IREICA1 se giblje okoli 1016 hPa, veter pa je trenutno miren, kar skupaj z napovedjo do 13 km/h vetra v sredo nakazuje spremembo vzorca. Razložimo, kaj gibanje tlaka in vetra zadnjih 24 ur pove o vremenu v Zgornji Savinjski dolini v naslednjih dneh.",
       "topic": {
-        "id": "gobarska-sezona",
+        "id": "veter-in-tlak",
         "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
           6,
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "tag": "gobe",
-        "brief": "Gobarska sezona -- kaj kažejo trenutna vlažnost tal, temperature in padavine za rast gob v dolini.",
+        "tag": "pritisk",
+        "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
         "seo_keywords": [
-          "gobarska napoved Zgornja Savinjska dolina",
-          "kdaj rastejo gobe",
-          "gobarjenje Rečica ob Savinji"
+          "zračni tlak napoved vreme",
+          "veter Zgornja Savinjska dolina",
+          "sprememba vremena znaki"
         ]
       }
     }
