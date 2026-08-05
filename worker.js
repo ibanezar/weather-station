@@ -2129,53 +2129,6 @@ export default {
       }
     }
 
-    // /debug-newradar — ZAČASNO diagnostično orodje: ICON/celice cron
-    // (_cronRenderIcon, cell pipeline) napake tiho požreta (gladek propad za
-    // obiskovalca), zato ju tu poženemo sinhrono in napake/čas vrnemo
-    // neposredno. Odstrani po diagnozi.
-    if (path === "/debug-newradar") {
-      const out = {};
-      let t = Date.now();
-      try {
-        const m = await _iconCached(env);
-        out.icon = { ok: true, ms: Date.now() - t, manifest: m };
-      } catch (e) {
-        out.icon = { ok: false, ms: Date.now() - t, error: String((e && e.message) || e), stack: ((e && e.stack) || "").slice(0, 800) };
-      }
-      t = Date.now();
-      try {
-        const key = await _operaLatestKey();
-        const stamp = key ? _compStamp(key) : null;
-        if (!stamp) throw new Error("ni OPERA stamp");
-        const tSrc0 = Date.now();
-        const [win, arso] = await Promise.all([
-          _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch((e) => { throw new Error("operaWindow: " + e.message); }),
-          _compArso(_compStampMs(stamp)),
-        ]);
-        const tField0 = Date.now();
-        const cells = _cellsFromField(win, arso);
-        const tLabel0 = Date.now();
-        const tracked = await _cellTrack(env, cells);
-        out.cells = {
-          ok: true, ms: Date.now() - t, stamp, win: !!win, arso: !!arso,
-          srcMs: tField0 - tSrc0, fieldMs: tLabel0 - tField0, trackMs: Date.now() - tLabel0,
-          raw: cells.length, tracked: tracked.length,
-        };
-      } catch (e) {
-        out.cells = { ok: false, ms: Date.now() - t, error: String((e && e.message) || e), stack: ((e && e.stack) || "").slice(0, 800) };
-      }
-      // Zapis zadnjega DEJANSKEGA cron tika (ne tega ročnega HTTP klica) —
-      // _cronRenderIconAndCells piše sem, torej pove, ali ločen urnik
-      // dejansko teče do konca.
-      try {
-        const o = await env?.PHOTOS_R2?.get("debug/newradar-cron.json");
-        if (o) out.zadnjiCron = JSON.parse(await o.text());
-      } catch (_) {}
-      return new Response(JSON.stringify(out, null, 2), {
-        headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
-      });
-    }
-
     // /debug-headers — returns all incoming request headers as JSON (no auth required)
     if (path === "/debug-headers") {
       const headers = {};
