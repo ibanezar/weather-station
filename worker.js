@@ -1826,6 +1826,34 @@ const CELL_MATCH_RADIUS_KM = 20; // dovolj za nevihtno hitrost (~60 km/h) čez 5
 const CELL_MAX_MISSES = 2;       // celica se opusti po ~2 zaporednih zgrešenih zaznavah (~10 min)
 const CELL_R2_STATE = "cells/state.json";
 const CELL_R2_LATEST = "cells/latest.json";
+const CELL_ETA_RADIUS_KM = 15;   // "gre proti dolini", če najbližji prehod pade znotraj tega
+const CELL_ETA_MAX_MIN = 90;     // linearna ekstrapolacija čez to postane nezanesljiva (glej docs/nowcast.md)
+const CELL_ETA_MIN_KMH = 3;      // pod tem je smer preveč šumna, da bi iz nje sklepali ETA
+
+// Najbližji prehod (closest point of approach) premočrtne trajektorije
+// celice mimo postaje. C0 = lega celice relativno na postajo (vzhod/sever,
+// km), V = hitrostni vektor iz istega smer/kmh, ki ga uporablja tudi
+// windDir() na frontendu (0 = sever, urno). Standardna CPA formula:
+// t_cpa = -(V·C0)/|V|², minimizira |C0 + V·t|. t_cpa <= 0 pomeni, da se
+// celica že oddaljuje (najbližji prehod je v preteklosti) — brez ETA.
+function _cellEta(cell) {
+  if (cell.kmh == null || cell.smer == null || cell.kmh < CELL_ETA_MIN_KMH) return null;
+  const rad = cell.smer * Math.PI / 180;
+  const vx = cell.kmh * Math.sin(rad), vy = cell.kmh * Math.cos(rad);   // vzhod, sever (km/h)
+  // Postaja Rečica ob Savinji — isti koordinati kot povsod drugod v datoteki
+  // (npr. NOWCAST_VASI "recica", worker.js:792), brez skupne konstante po
+  // uveljavljeni konvenciji te datoteke.
+  const c0x = (cell.lon - 14.9211) * COMP_KM_LON, c0y = (cell.lat - 46.3258) * COMP_KM_LAT;
+  const vv = vx * vx + vy * vy;
+  const tCpa = -(vx * c0x + vy * c0y) / vv;                             // ure
+  if (tCpa <= 0) return null;
+  const dx = c0x + vx * tCpa, dy = c0y + vy * tCpa;
+  const distCpa = Math.hypot(dx, dy);
+  if (distCpa > CELL_ETA_RADIUS_KM) return null;
+  const etaMin = Math.round(tCpa * 60);
+  if (etaMin > CELL_ETA_MAX_MIN) return null;
+  return { etaMin, etaKm: Math.round(distCpa * 10) / 10 };
+}
 
 // Ista projekcija in prioritetno pravilo (ARSO znotraj COMP_R_JEDRO, OPERA
 // sicer) kot glavna izrisna zanka v _radarComposite, a po eni točki namesto
@@ -1992,14 +2020,21 @@ async function _cronRenderRadarCells(env, win, arso) {
   try {
     if (!win && !arso) return false;
     const tracked = await _cellTrack(env, _cellsFromField(win, arso));
-    const out = {
-      cas: new Date().toISOString(),
-      celice: tracked.map((c) => ({
+    const celice = tracked.map((c) => {
+      const eta = _cellEta(c);
+      return {
         id: c.id, lat: Math.round(c.lat * 1000) / 1000, lon: Math.round(c.lon * 1000) / 1000,
         povrsina_km2: c.areaKm2, mmh: c.maxMmh, toca: !!c.toca,
         smer: c.smer == null ? null : Math.round(c.smer), kmh: c.kmh == null ? null : c.kmh,
-      })),
-    };
+        eta_min: eta ? eta.etaMin : null, eta_km: eta ? eta.etaKm : null,
+      };
+    });
+    // Najbolj nujna prihajajoča celica (najkrajši ETA) kot pripravljen povzetek
+    // za banner — frontend se mu ni treba sam sprehoditi čez seznam. Polje se
+    // namerno NE imenuje "opozorilo" — to ime že uporablja mehek odpovedni
+    // odgovor spodaj (niz z razlogom), različna oblika bi zmedla odjemalca.
+    const prihaja = celice.filter((c) => c.eta_min != null).sort((a, b) => a.eta_min - b.eta_min)[0] || null;
+    const out = { cas: new Date().toISOString(), celice, prihaja };
     const r2 = env?.PHOTOS_R2;
     if (r2) await r2.put(CELL_R2_LATEST, JSON.stringify(out), { httpMetadata: { contentType: "application/json" } });
     return true;
@@ -3395,7 +3430,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         } catch (_) {}
         const genMs = data ? new Date(data.cas).getTime() : NaN;
         if (!data || Number.isNaN(genMs) || Date.now() - genMs > 15 * 60000) {
-          return new Response(JSON.stringify({ celice: [], cas: null, opozorilo: "celice trenutno niso na voljo" }), {
+          return new Response(JSON.stringify({ celice: [], cas: null, prihaja: null, opozorilo: "celice trenutno niso na voljo" }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
           });
         }
