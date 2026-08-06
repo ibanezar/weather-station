@@ -79,6 +79,9 @@
 .force-table th{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
 .force-table td.num{font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .force-table tr.hl td{color:#fca5a5;font-weight:600}
+.badge-yes,.badge-no{display:inline-flex;align-items:center;gap:.3rem;font-weight:700;font-size:.85rem}
+.badge-yes{color:#34d399}
+.badge-no{color:#f87171}
 </style>
 </head>
 <body>
@@ -134,13 +137,19 @@
     <table class="force-table">
       <thead><tr><th>Dejavnik</th><th>Kaj počne</th><th>Ujema se s segrevanjem?</th></tr></thead>
       <tbody>
-        <tr><td>Sončevo obsevanje</td><td>Nihanja znotraj 11-letnega cikla; brez trenda navzgor po 1980-ih</td><td>Ne</td></tr>
-        <tr><td>Orbita (Milankovič)</td><td>Deluje na tisočletja; trenutno kaže proti počasnemu ohlajanju</td><td>Ne</td></tr>
-        <tr><td>Vulkanski aerosoli</td><td>Kratkotrajno ohlajanje (1–3 leta), nato izgine</td><td>Ne — samo ohlaja, in še to začasno</td></tr>
-        <tr><td>Antropogeni aerosoli (onesnaženje)</td><td>Ohlajajo, delno zakrivajo segrevanje TGP</td><td>Ne — nasproten predznak</td></tr>
-        <tr class="hl"><td>Toplogredni plini</td><td>Dosledno naraščajo od industrializacije, brez prekinitve</td><td>Da — ujema se po smeri, velikosti in časovnem poteku</td></tr>
+        <tr><td>Sončevo obsevanje</td><td>Nihanja znotraj 11-letnega cikla; brez trenda navzgor po 1980-ih</td><td><span class="badge-no">✗ ne</span></td></tr>
+        <tr><td>Orbita (Milankovič)</td><td>Deluje na tisočletja; trenutno kaže proti počasnemu ohlajanju</td><td><span class="badge-no">✗ ne</span></td></tr>
+        <tr><td>Vulkanski aerosoli</td><td>Kratkotrajno ohlajanje (1–3 leta), nato izgine</td><td><span class="badge-no">✗ ne</span> — samo ohlaja, in še to začasno</td></tr>
+        <tr><td>Antropogeni aerosoli (onesnaženje)</td><td>Ohlajajo, delno zakrivajo segrevanje TGP</td><td><span class="badge-no">✗ ne</span> — nasproten predznak</td></tr>
+        <tr class="hl"><td>Toplogredni plini</td><td>Dosledno naraščajo od industrializacije, brez prekinitve</td><td><span class="badge-yes">✓ da</span> — ujema se po smeri, velikosti in času</td></tr>
       </tbody>
     </table>
+
+    <div class="chart-card">
+      <h3>Radiativni prisil po dejavniku (W/m², od 1750)</h3>
+      <canvas id="chartForcing"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Pozitivne vrednosti segrevajo, negativne ohlajajo. Vulkanski aerosoli niso prikazani, ker delujejo epizodno (glej naslednji razdelek) in nimajo ene same dolgoročne vrednosti.</p>
+    </div>
 
     <span class="section-label">02 — sonce in orbita</span>
     <h2 id="sonce-in-orbita">Sonce in orbita: oba gresta v napačno smer</h2>
@@ -157,6 +166,12 @@
     <p>Koncentracija CO2 je bila skozi vso predindustrijsko zgodovino (izmerjeno iz mehurčkov zraka v ledenih jedrih) presenetljivo stabilna, okoli 280 delcev na milijon (ppm). Od začetka industrializacije narašča brez prekinitve — danes je pri približno 425 ppm, najvišje vrednosti v vsaj 800.000 letih, kolikor sega neposreden ledeniški zapis. Časovni potek naraščanja CO2 se natančno ujema s časovnim potekom izmerjenega segrevanja: počasi od sredine 19. stoletja, hitreje po petdesetih letih 20. stoletja, ko se je svetovna poraba fosilnih goriv večkratno povečala.</p>
     <p>Fizika za tem ni sporna niti nova: da CO2 in drugi toplogredni plini absorbirajo infrardeče sevanje in s tem segrevajo spodnjo atmosfero, je znano od poskusov Johna Tyndalla leta 1859. Vprašanje danes ni, ali CO2 segreva ozračje — to je izmerjena fizikalna lastnost molekule, ne hipoteza — temveč zgolj, koliko natančno in kako hitro se odziv kaže v podnebnem sistemu.</p>
 
+    <div class="chart-card">
+      <h3>CO2 v ozračju in globalna temperaturna anomalija, 1958–2025</h3>
+      <canvas id="chartCo2Temp"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Oranžna krivulja: CO2 (ppm, leva os). Rdeča krivulja: temperaturna anomalija glede na povprečje 1951–1980 (°C, desna os). Obe krivulji naraščata skupaj, brez izjeme, od začetka meritev na Mauni Loa.</p>
+    </div>
+
     <div class="caveat">
       <p><strong>Negotovost je znana, ne skrita.</strong> Noben od teh prisilov ni ocenjen na pamet — vsak ima objavljen razpon negotovosti (npr. IPCC AR6 poroča razpon za skupni antropogeni prisil, ne ene same številke). To, da znanost negotovost eksplicitno meri in objavlja, je znak, da gre za metodo, ki se lahko sama preveri — ne za ugibanje. Prav ta preverljivost je razlog, da lahko posamezne dejavnike med seboj primerjamo namesto da bi verjeli izjavam na pamet.</p>
     </div>
@@ -169,7 +184,7 @@
       <p><strong>Na kratko:</strong> vseh pet znanih podnebnih dejavnikov (sonce, orbita, vulkani, aerosoli, toplogredni plini) znanost meri neodvisno. Le naraščanje toplogrednih plinov se po smeri, obsegu in časovnem poteku ujema z izmerjenim segrevanjem zadnjega stoletja. Preostali štirje bodisi ne kažejo trenda, delujejo prepočasi, ali pa dejansko ohlajajo. Za lokalni kontekst si oglejte tudi <a href="/blog/recica-in-svet-segrevanje-v-podatkih.html">Rečica in svet: kaj pove šest let podatkov o segrevanju</a> in <a href="/blog/podnebna-zgodovina-recica-savinji-1950-2025.html">Rečica ob Savinji od leta 1950</a>.</p>
     </div>
 
-    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Viri: NOAA Annual Greenhouse Gas Index (AGGI); NOAA Global Monitoring Laboratory, Mauna Loa CO2 zapis; IPCC AR6 (2021), poglavje o radiativnem prisilu; NASA/NOAA sestavljen zapis skupnega sončnega obsevanja (TSI) od 1978. Navedene številke so zaokrožene ocene za orientacijo, ne uradna objava — za natančne trenutne vrednosti glejte navedene vire.</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Viri: NOAA Annual Greenhouse Gas Index (AGGI); NOAA Global Monitoring Laboratory, Mauna Loa CO2 zapis; NASA GISTEMP v4 (temperaturna anomalija, izhodišče 1951–1980); IPCC AR6 (2021), poglavje o radiativnem prisilu; NASA/NOAA sestavljen zapis skupnega sončnega obsevanja (TSI) od 1978. Navedene številke, tudi v grafih, so zaokrožene ocene za orientacijo, ne uradna objava — za natančne trenutne vrednosti glejte navedene vire.</p>
 
     <div class="share-bar" id="share-bar">
       <span class="share-label">Deli</span>
@@ -230,5 +245,78 @@
 <script src="/blog/comments.js" defer></script>
 <script src="/blog/article-enhance.js" defer></script>
 <script src="/blog/subscribe.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+
+  const CHART_DEFAULTS = {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: { mode: 'index', intersect: false },
+    animation: { duration: 700, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+        titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10 }
+    }
+  };
+
+  // Radiativni prisil po dejavniku (W/m², od 1750) -- ocene, glej vire pod člankom
+  const forceLabels = ['Sonce', 'Orbita', 'Aerosoli\n(onesnaženje)', 'Toplogredni\nplini'];
+  const forceVals = [0.1, 0.0, -0.9, 2.7];
+  new Chart(document.getElementById('chartForcing'), {
+    type: 'bar',
+    data: {
+      labels: forceLabels,
+      datasets: [{ data: forceVals,
+        backgroundColor: forceVals.map(v => v > 1 ? 'rgba(239,68,68,.85)' : (v < 0 ? 'rgba(96,165,250,.6)' : 'rgba(173,192,216,.5)')),
+        borderRadius: 4 }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      indexAxis: 'y',
+      plugins: { ...CHART_DEFAULTS.plugins,
+        tooltip: { ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: { label: (ctx) => (ctx.parsed.x > 0 ? '+' : '') + ctx.parsed.x.toFixed(1) + ' W/m²' } } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#adc0d8', font: { size: 10 } },
+             title: { display: true, text: 'W/m²', color: '#adc0d8', font: { size: 10 } } },
+        y: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // CO2 (Mauna Loa, ppm) in temperaturna anomalija (NASA GISTEMP, °C, izhodišče 1951-1980)
+  // Zaokrožene ocene po petih letih za ponazoritev ujemanja krivulj, ne uradna objava.
+  const co2Years = ['1958','1965','1970','1975','1980','1985','1990','1995','2000','2005','2010','2015','2020','2023','2025'];
+  const co2Ppm   = [315, 320, 325, 331, 339, 346, 354, 360, 369, 379, 389, 400, 414, 419, 425];
+  const tempAnom = [0.06, -0.10, 0.03, -0.01, 0.26, 0.11, 0.44, 0.44, 0.42, 0.68, 0.72, 0.87, 1.02, 1.17, 1.20];
+  new Chart(document.getElementById('chartCo2Temp'), {
+    data: {
+      labels: co2Years,
+      datasets: [
+        { label: 'CO2 (ppm)', type: 'line', data: co2Ppm, yAxisID: 'y1',
+          borderColor: '#fb923c', backgroundColor: 'rgba(251,146,60,.12)', fill: true,
+          borderWidth: 2, pointRadius: 2, tension: .3 },
+        { label: 'Temperaturna anomalija (°C)', type: 'line', data: tempAnom, yAxisID: 'y2',
+          borderColor: '#ef4444', borderWidth: 2, pointRadius: 2, tension: .3 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: true, position: 'top',
+        labels: { color: '#adc0d8', font: { size: 10 }, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 9 } } },
+        y1: { position: 'left', grid: { color: 'rgba(255,255,255,.05)' },
+              ticks: { color: '#fb923c', font: { size: 10 } },
+              title: { display: true, text: 'CO2 (ppm)', color: '#fb923c', font: { size: 10 } } },
+        y2: { position: 'right', grid: { display: false },
+              ticks: { color: '#ef4444', font: { size: 10 } },
+              title: { display: true, text: '°C (anomalija)', color: '#ef4444', font: { size: 10 } } }
+      }
+    }
+  });
+
+</script>
 </body>
 </html>
