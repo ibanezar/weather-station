@@ -1824,6 +1824,7 @@ const CELL_MIN_AREA_KM2 = 1.5;  // isti koncept kot RADAR_CORE_MIN_PX, prenesen 
 const CELL_GRID_DEG = 0.015;    // ~420×230 mreža čez "sirok"; poviša (bolj grobo), če je cron počasen
 const CELL_MATCH_RADIUS_KM = 20; // dovolj za nevihtno hitrost (~60 km/h) čez 5-minutni cron korak
 const CELL_MAX_MISSES = 2;       // celica se opusti po ~2 zaporednih zgrešenih zaznavah (~10 min)
+const CELL_TRAIL_MAX = 4;        // koliko zadnjih leg hrani sled vsake celice (vključno s trenutno)
 const CELL_R2_STATE = "cells/state.json";
 const CELL_R2_LATEST = "cells/latest.json";
 const CELL_ETA_RADIUS_KM = 15;   // "gre proti dolini", če najbližji prehod pade znotraj tega
@@ -1994,26 +1995,66 @@ async function _cellTrack(env, newCells) {
       // (piksel Y raste proti jugu) — zato tu BREZ negacije dy.
       smer = Math.round((Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360);
     }
-    matched.push({ ...now, id: prev.id, missCount: 0, smer, kmh });
+    const trail = [...(prev.trail || [[prev.lon, prev.lat]]), [now.lon, now.lat]].slice(-CELL_TRAIL_MAX);
+    matched.push({ ...now, id: prev.id, missCount: 0, smer, kmh, trail });
   }
   state.cells.forEach((p, pi) => {
     if (takenP.has(pi)) return;
+    // Zgrešena celica: pozicije ne poznamo na novo, zato sledi ne podaljšamo
+    // (podvojena zadnja točka bi sled samo skrajšala na eno mesto).
     if ((p.missCount || 0) + 1 <= CELL_MAX_MISSES) matched.push({ ...p, missCount: (p.missCount || 0) + 1 });
   });
   newCells.forEach((n, ni) => {
     if (takenN.has(ni)) return;
-    matched.push({ ...n, id: state.nextId++, missCount: 0, smer: null, kmh: null });
+    matched.push({ ...n, id: state.nextId++, missCount: 0, smer: null, kmh: null, trail: [[n.lon, n.lat]] });
   });
 
   const newState = {
     nextId: state.nextId, ts: Date.now(),
     cells: matched.map((c) => ({
       id: c.id, lon: c.lon, lat: c.lat, areaKm2: c.areaKm2, maxMmh: c.maxMmh, toca: c.toca,
-      missCount: c.missCount, smer: c.smer, kmh: c.kmh,
+      missCount: c.missCount, smer: c.smer, kmh: c.kmh, trail: c.trail,
     })),
   };
   if (r2) { try { await r2.put(CELL_R2_STATE, JSON.stringify(newState)); } catch (_) {} }
   return matched.filter((c) => c.missCount === 0);  // "zgrešene" celice ostanejo v stanju za ujemanje, a se ne kažejo
+}
+
+// Enako kot windDir() v app.js — tu ločeno, ker push besedilo sestavimo na
+// strežniku, brez dostopa do frontend kode.
+function _smerBesedilo(deg) {
+  const d = ["S", "SSV", "SV", "VSV", "V", "VJV", "JV", "JJV", "J", "JJZ", "JZ", "ZJZ", "Z", "ZSZ", "SZ", "SSZ"];
+  return d[Math.round(deg / 22.5) % 16];
+}
+
+// Push obvestilo, ko celica prvič dobi veljaven ETA (glej _cellEta) — ne ob
+// vsakem cron tiku, dokler je "na poti", sicer bi za eno nevihto poslali
+// obvestilo vsakih 5 minut. cell.id se med sledenjem nikoli ne ponovi (glej
+// state.nextId v _cellTrack), zato "enkrat na id" zadošča kot ključ, brez
+// ločenega časovnega cooldowna kot pri PUSH_THRESHOLDS/nowcastu zgoraj.
+async function _cronPushCellEta(env, celice) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let notified = {};
+  try { const o = await r2.get("push/cell_eta_state.json"); notified = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+
+  const liveIds = new Set(celice.map((c) => c.id));
+  let changed = false;
+  for (const id of Object.keys(notified)) {
+    if (!liveIds.has(Number(id))) { delete notified[id]; changed = true; }
+  }
+
+  for (const c of celice) {
+    if (c.eta_min == null || notified[c.id]) continue;
+    await _pushAll(env, {
+      title: "Meteorec — nevihta se približuje",
+      body: "⛈️ Nevihtna celica prihaja proti Rečici ob Savinji čez ~" + c.eta_min + " min ("
+        + Math.round(c.kmh) + " km/h, " + _smerBesedilo(c.smer) + ").",
+      url: "/", tag: "wx-cell-" + c.id,
+    });
+    notified[c.id] = true;
+    changed = true;
+  }
+  if (changed) { try { await r2.put("push/cell_eta_state.json", JSON.stringify(notified), { httpMetadata: { contentType: "application/json" } }); } catch (_) {} }
 }
 
 async function _cronRenderRadarCells(env, win, arso) {
@@ -2027,6 +2068,9 @@ async function _cronRenderRadarCells(env, win, arso) {
         povrsina_km2: c.areaKm2, mmh: c.maxMmh, toca: !!c.toca,
         smer: c.smer == null ? null : Math.round(c.smer), kmh: c.kmh == null ? null : c.kmh,
         eta_min: eta ? eta.etaMin : null, eta_km: eta ? eta.etaKm : null,
+        // [lat,lon] pari, najstarejši prvi — kratka sled zadnjih leg za izris
+        // na karti namesto gole pike (glej CELL_TRAIL_MAX).
+        sled: (c.trail || []).map(([lo, la]) => [Math.round(la * 1000) / 1000, Math.round(lo * 1000) / 1000]),
       };
     });
     // Najbolj nujna prihajajoča celica (najkrajši ETA) kot pripravljen povzetek
@@ -2037,6 +2081,7 @@ async function _cronRenderRadarCells(env, win, arso) {
     const out = { cas: new Date().toISOString(), celice, prihaja };
     const r2 = env?.PHOTOS_R2;
     if (r2) await r2.put(CELL_R2_LATEST, JSON.stringify(out), { httpMetadata: { contentType: "application/json" } });
+    await _cronPushCellEta(env, celice).catch(() => {});
     return true;
   } catch (_) { return false; }
 }

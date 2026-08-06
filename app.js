@@ -3759,6 +3759,7 @@ let _mradMap=null,_mradFrames=[],_mradIdx=-1,_mradTimer=null,_mradPoll=null,
     _mradView='sirok',_mradViewApplied='';
 const MRAD_OPACITY=.82;
 let _mradCellMarkers=new Map();
+let _mradCellTrails=new Map();
 
 async function initMeteorecRadar(){
   if(_mradMap)return;
@@ -3949,21 +3950,40 @@ async function refreshMeteorecRadarCells(){
     for(const[id,mk]of _mradCellMarkers){
       if(!zivi.has(id)){_mradMap.removeLayer(mk);_mradCellMarkers.delete(id);}
     }
+    for(const[id,ln]of _mradCellTrails){
+      if(!zivi.has(id)){_mradMap.removeLayer(ln);_mradCellTrails.delete(id);}
+    }
     cells.forEach(c=>{
       const label=(c.kmh!=null&&c.smer!=null)
         ?Math.round(c.kmh)+' km/h → '+windDir(c.smer)
         :(c.toca?'nevihta (toča?)':'nevihta');
+      const barva=c.toca?'#c0143c':'#ff6a00';
       let mk=_mradCellMarkers.get(c.id);
       if(!mk){
         mk=L.circleMarker([c.lat,c.lon],{radius:5,color:'#fff',weight:2,
-          fillColor:c.toca?'#c0143c':'#ff6a00',fillOpacity:.95})
+          fillColor:barva,fillOpacity:.95})
           .addTo(_mradMap)
           .bindTooltip(label,{permanent:true,direction:'top',offset:[0,-4],className:'mrad-label mrad-cell-label'});
         _mradCellMarkers.set(c.id,mk);
       }else{
         mk.setLatLng([c.lat,c.lon]);
-        mk.setStyle({fillColor:c.toca?'#c0143c':'#ff6a00'});
+        mk.setStyle({fillColor:barva});
         mk.setTooltipContent(label);
+      }
+      // Kratka sled zadnjih leg (worker jo že omeji na CELL_TRAIL_MAX) namesto
+      // gole pike — na prvi pogled pove smer, brez branja oznake.
+      if(c.sled&&c.sled.length>=2){
+        let ln=_mradCellTrails.get(c.id);
+        if(!ln){
+          ln=L.polyline(c.sled,{color:barva,weight:2,opacity:.55,dashArray:'1,6',lineCap:'round'}).addTo(_mradMap);
+          _mradCellTrails.set(c.id,ln);
+        }else{
+          ln.setLatLngs(c.sled);
+          ln.setStyle({color:barva});
+        }
+      }else{
+        const old=_mradCellTrails.get(c.id);
+        if(old){_mradMap.removeLayer(old);_mradCellTrails.delete(c.id);}
       }
     });
     renderCellEtaBanner(d.prihaja);
