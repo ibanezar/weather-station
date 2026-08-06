@@ -55,6 +55,16 @@ def fmtd(iso):
 WU_URL = ("https://api.weather.com/v2/pws/observations/current"
           "?stationId=IREICA1&format=json&units=m&apiKey=619a8bb3ba4d42069a8bb3ba4d02061f")
 
+# Isti WU API, isti ključ in postaja kot WU_URL zgoraj — samo drug endpoint
+# (uro-natančna zgodovina zadnjih 7 dni namesto trenutne meritve), da lahko
+# napolnimo 7-dnevno tabelo in dnevni min/max/povprečje z realnimi podatki.
+WU_HOURLY_URL = ("https://api.weather.com/v2/pws/observations/hourly/7day"
+                  "?stationId=IREICA1&format=json&units=m&apiKey=619a8bb3ba4d42069a8bb3ba4d02061f"
+                  "&numericPrecision=decimal")
+
+MES_ABBR = {1: "jan.", 2: "feb.", 3: "mar.", 4: "apr.", 5: "maj", 6: "jun.",
+            7: "jul.", 8: "avg.", 9: "sep.", 10: "okt.", 11: "nov.", 12: "dec."}
+
 
 def wrap(text):
     return f'{START}\n  <p class="wx-static" id="wx-static">{text}</p>\n  {END}'
@@ -203,6 +213,158 @@ def patch_hero(html, obs):
     return html
 
 
+def fetch_hourly_wu():
+    """Return the last 7 days of hourly WU observations for IREICA1, or None
+    on any failure (network error, malformed response)."""
+    try:
+        with urllib.request.urlopen(WU_HOURLY_URL, timeout=20) as r:
+            data = json.loads(r.read())
+        obs = data.get("observations") or []
+        return obs or None
+    except Exception as e:
+        print(f"WU hourly API ni dosegljiv ({e}) — 7-dnevna tabela in dnevni "
+              f"min/max ostaneta nespremenjena.", file=sys.stderr)
+        return None
+
+
+def fmt_hist_date(iso):
+    y, m, d = int(iso[:4]), int(iso[5:7]), int(iso[8:10])
+    return f"{d}. {MES_ABBR[m]} {y}"
+
+
+def build_daily_summaries(observations):
+    """Group hourly WU observations into daily min/max/avg summaries — the
+    Python equivalent of buildDailySummaries() in app.js, applied to the same
+    hourly/7day endpoint the client fetches once JS hydrates. Note: in this
+    WU API humidityAvg lives on the observation itself, not under `metric`
+    (unlike tempAvg/windspeedAvg/precipTotal) — read it from there."""
+    by_day = {}
+    for o in observations:
+        day = (o.get("obsTimeLocal") or "")[:10]
+        if not day:
+            continue
+        m = o.get("metric", {})
+        d = by_day.setdefault(day, {"highs": [], "lows": [], "temps": [],
+                                     "rains": [], "winds": [], "gusts": [], "hums": []})
+        if m.get("tempHigh") is not None:
+            d["highs"].append(m["tempHigh"])
+        elif m.get("tempAvg") is not None:
+            d["highs"].append(m["tempAvg"])
+        if m.get("tempLow") is not None:
+            d["lows"].append(m["tempLow"])
+        elif m.get("tempAvg") is not None:
+            d["lows"].append(m["tempAvg"])
+        if m.get("tempAvg") is not None:
+            d["temps"].append(m["tempAvg"])
+        if m.get("precipTotal") is not None:
+            d["rains"].append(m["precipTotal"])
+        if m.get("windspeedAvg") is not None:
+            d["winds"].append(m["windspeedAvg"])
+        if m.get("windspeedHigh") is not None:
+            d["gusts"].append(m["windspeedHigh"])
+        hum = o.get("humidityAvg", m.get("humidityAvg"))
+        if hum is not None:
+            d["hums"].append(hum)
+
+    out = []
+    for day, d in by_day.items():
+        out.append({
+            "date": day,
+            "tempHigh": max(d["highs"]) if d["highs"] else None,
+            "tempLow": min(d["lows"]) if d["lows"] else None,
+            "tempAvg": (sum(d["temps"]) / len(d["temps"])) if d["temps"] else None,
+            "precipTotal": max(d["rains"]) if d["rains"] else 0,
+            "windspeedAvg": (sum(d["winds"]) / len(d["winds"])) if d["winds"] else None,
+            "windspeedHigh": max(d["gusts"]) if d["gusts"] else None,
+            "humidityAvg": round(sum(d["hums"]) / len(d["hums"])) if d["hums"] else None,
+        })
+    out.sort(key=lambda x: x["date"])
+    return out
+
+
+def build_day_stats(observations):
+    """Today's high/low/avg temperature + times — Python equivalent of
+    applyDayStats() in app.js. "Today" is taken as the most recent
+    observation's own local date rather than the build machine's date, so a
+    build running just after local midnight doesn't misclassify."""
+    if not observations:
+        return None
+    today = max((o.get("obsTimeLocal") or "")[:10] for o in observations if o.get("obsTimeLocal"))
+    today_obs = [o for o in observations if (o.get("obsTimeLocal") or "").startswith(today)]
+    max_t = min_t = max_time = min_time = None
+    temp_sum, count, total_rain = 0.0, 0, 0.0
+    for o in today_obs:
+        m = o.get("metric", {})
+        t = m.get("tempAvg")
+        if t is None:
+            continue
+        local = o.get("obsTimeLocal", "")
+        hhmm = local[11:16] if len(local) >= 16 else ""
+        if max_t is None or t > max_t:
+            max_t, max_time = t, hhmm
+        if min_t is None or t < min_t:
+            min_t, min_time = t, hhmm
+        temp_sum += t
+        count += 1
+        total_rain = max(total_rain, m.get("precipTotal") or 0)
+    if count == 0:
+        return None
+    return {"high": max_t, "low": min_t, "avg": temp_sum / count,
+            "hiTime": max_time, "loTime": min_time, "rain": total_rain}
+
+
+def build_history_rows(daily):
+    """Mirror applyHistory()'s row markup in app.js exactly (same classes,
+    same inline unit-span style) so JS hydration doesn't cause a visible
+    style flash when it overwrites these rows with fresh data."""
+    u = '<span style="font-size:.74rem;color:var(--muted);margin-left:1px">'
+    rows = []
+    for d in list(reversed(daily))[:7]:
+        rows.append(
+            "<tr>"
+            f"<td>{fmt_hist_date(d['date'])}</td>"
+            f"<td class=\"td-high\">{num(d['tempHigh'], 1)}{u}°C</span></td>"
+            f"<td class=\"td-low\">{num(d['tempLow'], 1)}{u}°C</span></td>"
+            f"<td>{num(d['tempAvg'], 1)}{u}°C</span></td>"
+            f"<td class=\"td-rain\">{num(d['precipTotal'], 1)}{u}mm</span></td>"
+            f"<td>{num(d['windspeedAvg'], 1)}{u}km/h</span></td>"
+            f"<td style=\"color:var(--purple)\">{num(d['windspeedHigh'], 1)}{u}km/h</span></td>"
+            f"<td>{num(d['humidityAvg'], 0)}{u}%</span></td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def patch_history_table(html, daily):
+    rows_html = build_history_rows(daily)
+    pattern = re.compile(r'(<tbody id="history-tbody">).*?(</tbody>)', re.S)
+    new_html, n = pattern.subn(lambda m: m.group(1) + "\n" + rows_html + "\n          " + m.group(2), html, count=1)
+    if n == 0:
+        print("OPOZORILO: #history-tbody ni najden — 7-dnevna tabela preskočena.", file=sys.stderr)
+        return html
+    return new_html
+
+
+def patch_day_summary(html, stats):
+    """Fill the day-high/day-low/day-avg block (and their times) — kept to
+    exactly the three items named for pre-rendering; "Dež danes" (day-rain)
+    is left as-is."""
+    patches = [
+        ("day-high", num(stats["high"], 1)),
+        ("day-low", num(stats["low"], 1)),
+        ("day-avg", num(stats["avg"], 1)),
+    ]
+    if stats.get("hiTime"):
+        patches.append(("day-hi-time", stats["hiTime"]))
+    if stats.get("loTime"):
+        patches.append(("day-lo-time", stats["loTime"]))
+    for elem_id, value_text in patches:
+        html, n = _patch_span(html, elem_id, value_text)
+        if n == 0:
+            print(f"OPOZORILO: dnevni element #{elem_id} ni najden — preskočeno.", file=sys.stderr)
+    return html
+
+
 def main():
     live = "--live" in sys.argv[1:]
     block = None
@@ -223,6 +385,16 @@ def main():
 
     if obs:
         new = patch_hero(new, obs)
+
+    if live:
+        hourly = fetch_hourly_wu()
+        if hourly:
+            daily = build_daily_summaries(hourly)
+            if daily:
+                new = patch_history_table(new, daily)
+            stats = build_day_stats(hourly)
+            if stats:
+                new = patch_day_summary(new, stats)
 
     if new != html:
         open(INDEX, "w", encoding="utf-8").write(new)

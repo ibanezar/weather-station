@@ -238,7 +238,7 @@ def dataset_schema(url, observations):
             '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
 
 
-def named_dataset_schema(url, name, description, variable_measured=None, temporal_coverage=None):
+def named_dataset_schema(url, name, description, variable_measured=None, temporal_coverage=None, id_suffix="dataset"):
     """Compact Dataset node for a derived archive page (records, phenomena …).
     Links back to the Person/DataCatalog entities defined once on the homepage
     via @id reference rather than redefining them, so Google resolves the
@@ -250,12 +250,17 @@ def named_dataset_schema(url, name, description, variable_measured=None, tempora
     an @id back to index.html to find them, so a bare {"@id": ...} reference
     was flagged in Search Console ("Either 'name' or 'url' should be
     specified"). creator doesn't need the same treatment — Person isn't
-    checked for required name/url the way DataCatalog is."""
+    checked for required name/url the way DataCatalog is.
+
+    id_suffix: override the "#dataset" @id fragment when a page carries more
+    than one distinct Dataset node (e.g. /toca/ has both the crowdsourced
+    hail-report archive and the station-based convective-day table) — each
+    needs its own @id or they collide."""
     full = f"{SITE}{url}"
     data = {
         "@context": "https://schema.org",
         "@type": "Dataset",
-        "@id": f"{full}#dataset",
+        "@id": f"{full}#{id_suffix}",
         "name": name,
         "description": description,
         "url": full,
