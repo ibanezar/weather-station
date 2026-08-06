@@ -8,6 +8,10 @@ pravočasno prebere OG meta podatke s ciljne strani (ta cache je nezanesljiv
 v prvih minutah po objavi). Če nalaganje slike iz kakršnegakoli razloga
 spodleti, se skript vrne na preprost POST /{page-id}/feed z linkom.
 
+Link do članka NI v besedilu objave (caption/message) — objavi se ločeno kot
+prvi komentar (POST /{post-id}/comments), ker naj bi Facebook posts z linkom
+v telesu objave dosegli manjši organski doseg kot tiste brez.
+
 Besedilo objave je prilagojeno tipu članka (razpoznan po predponi sluga):
   vremenski-povzetek-   → mesečni povzetek
   nevihtni-opazovalec-  → nevihtni opazovalec (storm-watch)
@@ -64,11 +68,11 @@ def build_message(post):
     if post["slug"].startswith("arso-opozorilo-"):
         lines.append(ARSO_SOURCE_NOTE)
     post_url = f"{SITE}{post['url']}"
-    lines.append(post_url)
     return "\n\n".join(lines), post_url
 
 
-def post_with_photo(page_id, token, post, message, post_url):
+def post_with_photo(page_id, token, post, message):
+    """Objavi sliko brez linka v besedilu. Vrne post_id (za komentar z linkom)."""
     photo_url = f"{SITE}/og/{post['slug']}.jpg"
     payload = urllib.parse.urlencode({
         "url": photo_url,
@@ -77,7 +81,8 @@ def post_with_photo(page_id, token, post, message, post_url):
     }).encode()
     req = urllib.request.Request(f"{GRAPH}/{page_id}/photos", data=payload, method="POST")
     with urllib.request.urlopen(req, timeout=20) as r:
-        return r.read().decode()
+        data = json.load(r)
+    return data.get("post_id") or data.get("id")
 
 
 def post_link_only(page_id, token, message, post_url):
@@ -87,6 +92,18 @@ def post_link_only(page_id, token, message, post_url):
         "access_token": token,
     }).encode()
     req = urllib.request.Request(f"{GRAPH}/{page_id}/feed", data=payload, method="POST")
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.read().decode()
+
+
+def post_link_comment(post_id, token, post_url):
+    """Doda link kot prvi komentar — namesto v besedilu objave, ker linki v
+    caption/body naj bi zaviral doseg (glej PR/CLAUDE.md kontekst distribucije)."""
+    payload = urllib.parse.urlencode({
+        "message": f"Cel članek: {post_url}",
+        "access_token": token,
+    }).encode()
+    req = urllib.request.Request(f"{GRAPH}/{post_id}/comments", data=payload, method="POST")
     with urllib.request.urlopen(req, timeout=15) as r:
         return r.read().decode()
 
@@ -108,8 +125,14 @@ def main():
     message, post_url = build_message(post)
 
     try:
-        body = post_with_photo(page_id, token, post, message, post_url)
-        print(f"Facebook: objavljeno (s sliko) — {body}")
+        post_id = post_with_photo(page_id, token, post, message)
+        print(f"Facebook: objavljeno (s sliko) — post_id={post_id}")
+        try:
+            post_link_comment(post_id, token, post_url)
+            print("Facebook: link dodan kot prvi komentar.")
+        except urllib.error.HTTPError as e:
+            comment_err = e.read().decode("utf-8", "replace")[:300]
+            print(f"Facebook: dodajanje linka v komentar spodletelo ({e.code}: {comment_err}).", file=sys.stderr)
         return 0
     except urllib.error.HTTPError as e:
         photo_err = e.read().decode("utf-8", "replace")[:300]

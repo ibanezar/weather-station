@@ -9,6 +9,10 @@ Instagram Graph API objavlja v dveh korakih: najprej ustvari "container"
 IG_ACCESS_TOKEN je dolgotrajen (60 dni, izdan prek Instagram Business Login)
 in ga je treba periodično osvežiti -- glej tools/ig_refresh_token.py.
 
+Link do članka NI v caption -- objavi se ločeno kot prvi komentar (POST
+/{media-id}/comments) po uspešni objavi, ker naj bi objave z linkom v
+besedilu dosegle manjši organski doseg kot tiste brez.
+
 Rabi okoljski spremenljivki IG_ACCOUNT_ID in IG_ACCESS_TOKEN (GitHub secreta).
 
 Wired into: .github/workflows/daily-post.yml, monthly-post.yml,
@@ -55,8 +59,7 @@ def build_caption(post):
         lines.append(post["summary"])
     if post["slug"].startswith("arso-opozorilo-"):
         lines.append(ARSO_SOURCE_NOTE)
-    lines.append(f"Cel članek: {SITE}{post['url']}")
-    lines.append("(povezava je tudi v bio)")
+    lines.append("Cel članek: povezava je v prvem komentarju (in v bio).")
     if post.get("tags"):
         cleaned = (t.replace("-", "") for t in ("meteorec", "vreme", *post["tags"]))
         lines.append(" ".join(f"#{t}" for t in cleaned if t.isalnum()))
@@ -94,6 +97,14 @@ def main():
         time.sleep(3)  # IG včasih rabi trenutek, da container obdela sliko
         result = api_post(f"{account_id}/media_publish", creation_id=creation_id)
         print(f"Instagram: objavljeno — {result}")
+        media_id = result["id"]
+        post_url = f"{SITE}{post['url']}"
+        try:
+            api_post(f"{media_id}/comments", message=f"Cel članek: {post_url}")
+            print("Instagram: link dodan kot prvi komentar.")
+        except urllib.error.HTTPError as e:
+            comment_err = e.read().decode("utf-8", "replace")[:300]
+            print(f"Instagram: dodajanje linka v komentar spodletelo ({e.code}: {comment_err}).", file=sys.stderr)
         return 0
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace")[:500]
