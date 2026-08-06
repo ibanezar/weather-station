@@ -1,29 +1,29 @@
 {
-  "date": "2026-08-05",
-  "created": "2026-08-05T06:12:04.753569+00:00",
+  "date": "2026-08-06",
+  "created": "2026-08-06T06:15:11.444202+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Vročinski val nad Zgornjo Savinjsko dolino: do 36,7 °C",
-      "teaser": "Napoved za Rečico ob Savinji kaže vrh vročine s 36,7 °C tako danes kot jutri, nato pa ohladitev proti 27,5 °C v petek. Pogledamo, kako dolgo bo vročina trajala in kdaj lahko pričakujemo osvežitev z manjšo količino padavin.",
+      "title": "Vročina napoved: danes do 37 °C v Savinjski dolini",
+      "teaser": "Napoved za današnji dan kaže vrh vročinskega vala s temperaturo do 37,0 °C, medtem ko postaja IREICA1 trenutno kaže 22,0 °C ob 78-odstotni vlagi. V nadaljevanju pogledamo, kako hitro se bo ohladilo - jutri na 30,6 °C in v naslednjih dneh proti 26,1 °C, ko bo prišel tudi dež.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (36,7 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (37,0 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 36.7,
+          "value": 37.0,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "dolzina-dneva",
-      "title": "Ure sonca v Zgornji Savinjski dolini: koliko smo jih ujeli",
-      "teaser": "Ob avgustovskih dnevih s solarnim sevanjem okoli 109 W/m² in nizkim UV indeksom preverimo, koliko sončnega vremena je dejansko doseglo postajo IREICA1 glede na dolžino dneva. Analiziramo tudi, kaj to pomeni za sončno vreme v Rečici ob Savinji v prihodnjih dneh.",
+      "id": "zgodovinska-primerjava",
+      "title": "Podnebno povprečje: kako vroč je res ta avgust",
+      "teaser": "Napovedanih 37,0 °C za danes postavimo ob bok večletnemu ERA5 povprečju za začetek avgusta v Zgornji Savinjski dolini. Pogledamo, ali gre za izjemno vročino ali le sezonsko pričakovano toplino, in kaj o tem povedo pretekli podatki.",
       "topic": {
-        "id": "dolzina-dneva",
+        "id": "zgodovinska-primerjava",
         "sezona": [
           1,
           2,
@@ -38,19 +38,19 @@
           11,
           12
         ],
-        "tag": "sonce",
-        "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
+        "tag": "zgodovina",
+        "brief": "Kako se zadnji dnevi primerjajo z večletnim (ERA5) povprečjem za ta del leta.",
         "seo_keywords": [
-          "ure sonca Zgornja Savinjska dolina",
-          "dolžina dneva vreme",
-          "sončno vreme Rečica ob Savinji"
+          "podnebno povprečje Savinjska dolina",
+          "primerjava z lansko letom vreme",
+          "zgodovinski podatki ERA5"
         ]
       }
     },
     {
       "id": "veter-in-tlak",
-      "title": "Zračni tlak in veter: znaki spremembe vremena v dolini",
-      "teaser": "Zračni tlak na postaji IREICA1 se giblje okoli 1016 hPa, veter pa je trenutno miren, kar skupaj z napovedjo do 13 km/h vetra v sredo nakazuje spremembo vzorca. Razložimo, kaj gibanje tlaka in vetra zadnjih 24 ur pove o vremenu v Zgornji Savinjski dolini v naslednjih dneh.",
+      "title": "Zračni tlak in veter napovedujeta spremembo vremena",
+      "teaser": "Trenutni relativni zračni tlak 1017,1 hPa in šibek veter iz smeri 204° kažeta na trenutno umirjeno vreme, a napoved za prihodnje dni prinaša okrepitev vetra do 14,3 km/h in dež (3,5 mm ter kasneje 18,82 mm). Razložimo, kaj te spremembe pomenijo za konec tedna v dolini.",
       "topic": {
         "id": "veter-in-tlak",
         "sezona": [
