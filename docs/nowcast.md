@@ -280,3 +280,23 @@ gre v `prihaja` na vrhu odgovora `/radar-cells.json` — namerno **ne**
 `opozorilo`, ker to ime že uporablja mehek odpovedni odgovor (niz z
 razlogom), različna oblika bi zmedla odjemalca. Frontend (`renderCellEtaBanner`,
 app.js) prikaže pasico nad radarsko karto, ko `prihaja` ni `null`.
+
+**Push obvestilo.** `_cronPushCellEta` pošlje isto ETA sporočilo kot pasica
+tudi kot push (isti `_pushAll`/VAPID cevovod kot `PUSH_THRESHOLDS` in
+nowcast zgoraj), a **samo enkrat na `id`** — ne ob vsakem cron tiku, dokler
+je celica "na poti". Ker `state.nextId` v `_cellTrack` nikoli ne ponovi
+vrednosti, "enkrat na id" zadošča kot ključ, brez ločenega časovnega
+cooldowna; stanje (`push/cell_eta_state.json`) se sproti obreže na id-je, ki
+jih sledenje še pozna, da ne raste v nedogled. Besedilo obvestila gradi
+`_smerBesedilo` — namerna podvojitev `windDir()` iz app.js, ker strežnik
+nima dostopa do frontend kode.
+
+**Sled.** Vsaka celica v `_cellTrack`-ovem stanju hrani zadnjih
+`CELL_TRAIL_MAX` (4) leg svoje poti (`trail`, `[lon,lat]` pari) — ob
+ujemanju se doda trenutna pozicija in obreže na najstarejšo, ob zgrešeni
+zaznavi se ne spreminja (podvojena zadnja točka bi sled samo skrajšala na
+eno mesto same nase). V javnem odgovoru je preslikana v `sled`
+(`[lat,lon]` pari, najstarejši prvi, isti vrstni red kot Leaflet
+pričakuje). Frontend (`refreshMeteorecRadarCells`) jo izriše kot
+prekinjeno črto namesto gole pike — na prvi pogled pove smer, brez
+branja oznake.
