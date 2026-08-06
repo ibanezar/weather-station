@@ -1509,6 +1509,10 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .radar-time{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);min-width:130px}
 .radar-track{flex:1;min-width:120px;height:5px;background:var(--rain-track);border-radius:3px;position:relative;cursor:pointer}
 .radar-track-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .2s}
+/* Meja radar→ICON na traku (glej mrad-track-split v refreshMeteorecRadar) —
+   viden namig, preden animacija tja pride, da ni presenečenja. */
+.radar-track-split{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--purple);left:0}
+.radar-track-split[hidden]{display:none}
 .radar-now-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);font-weight:600}
 .radar-fc-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(167,139,250,.15);color:var(--purple);font-weight:600}
 .leaflet-container{font-family:'Inter',sans-serif!important;background:var(--fc-bg)!important}
