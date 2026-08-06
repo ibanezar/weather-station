@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zakaj-se-ozracje-segreva-podnebni-dejavniki.html</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-se-ozracje-segreva-podnebni-dejavniki.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806.html</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -813,6 +820,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/tema/podnebne-spremembe/</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/tema/podnebno-povprecje/</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>weekly</changefreq>
@@ -838,6 +851,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/pozarna-ogrozenost/</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/razlaga/</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
