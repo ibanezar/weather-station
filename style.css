@@ -1509,6 +1509,10 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .radar-time{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);min-width:130px}
 .radar-track{flex:1;min-width:120px;height:5px;background:var(--rain-track);border-radius:3px;position:relative;cursor:pointer}
 .radar-track-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .2s}
+/* Meja radar→ICON na traku (glej mrad-track-split v refreshMeteorecRadar) —
+   viden namig, preden animacija tja pride, da ni presenečenja. */
+.radar-track-split{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--purple);left:0}
+.radar-track-split[hidden]{display:none}
 .radar-now-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(74,222,128,.15);color:var(--green);font-weight:600}
 .radar-fc-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(167,139,250,.15);color:var(--purple);font-weight:600}
 .leaflet-container{font-family:'Inter',sans-serif!important;background:var(--fc-bg)!important}
@@ -1542,6 +1546,12 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .cell-eta-banner{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;border-radius:10px;
   background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:var(--text);
   font-size:.78rem;margin-bottom:.7rem}
+/* Avtorski `display` zgoraj sicer prevlada nad privzetim [hidden]{display:none}
+   iz UA sloga (izvor pravila je pomembnejši od specifičnosti) — brez te
+   vrstice bi bila pasica vedno vidna (in prazna), ne glede na atribut
+   `hidden`. Enak vzorec potrebuje vsak element, ki nastavi display in tudi
+   uporablja `hidden`. */
+.cell-eta-banner[hidden]{display:none}
 .cell-eta-banner b{font-weight:700;color:var(--red)}
 #micro-map{width:100%;height:360px;background:var(--fc-bg);border-radius:14px}
 .micromap-legend-grad{height:8px;width:120px;border-radius:4px;background:linear-gradient(to right,#1d4ed8,#60a5fa,#e2e8f0,#fca5a5,#dc2626)}

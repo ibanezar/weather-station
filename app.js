@@ -3820,6 +3820,18 @@ async function refreshMeteorecRadar(){
     const stari=new Map(_mradFrames.map(f=>[f.zig,f]));
     _mradFrames=full.map(f=>stari.get(f.zig)||{zig:f.zig,cas:f.cas,kind:f.kind,layer:null,ready:false});
 
+    // Viden namig na traku, preden animacija pride do meje radar→ICON.
+    const splitEl=document.getElementById('mrad-track-split');
+    if(splitEl){
+      const splitIdx=_mradFrames.findIndex(f=>f.kind==='icon');
+      if(splitIdx>0){
+        splitEl.style.left=(splitIdx/_mradFrames.length*100)+'%';
+        splitEl.hidden=false;
+      }else{
+        splitEl.hidden=true;
+      }
+    }
+
     // Najprej zadnji okvir, da uporabnik takoj nekaj vidi; ostale zatem po
     // vrsti, da workerja ne zasujemo s trinajstimi izrisi hkrati.
     await mradLoadFrame(_mradFrames.length-1);
@@ -3882,7 +3894,12 @@ function startMeteorecRadarAnim(){
       if(_mradFrames[i].ready)break;
     }
     showMeteorecRadarFrame(i);
-    if(i===_mradFrames.length-1)hold=3;
+    // Meja radar→ICON (savinja): korak časa tam naenkrat naraste iz 5 na 60
+    // minut. Brez postanka je prehod videti kot pokvarjen skok namesto
+    // namernega vstopa v napoved — zadržimo enako kot na koncu zanke.
+    const prev=_mradFrames[(i-1+_mradFrames.length)%_mradFrames.length];
+    const enteringIcon=_mradFrames[i].kind==='icon'&&prev.kind!=='icon';
+    if(i===_mradFrames.length-1||enteringIcon)hold=3;
   },450);
 }
 
