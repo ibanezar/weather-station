@@ -31,5 +31,10 @@ jobs:
           else
             git add index.html
             git commit -m "chore: pre-render trenutne meritve [skip ci]"
+            for i in 1 2 3 4 5; do
+              git push && exit 0
+              echo "Push zavrnjen, poskus $i — rebase na origin/main in ponovi."
+              git pull --rebase origin main
+            done
             git push
           fi
