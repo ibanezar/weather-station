@@ -40,6 +40,29 @@ TODAY = seo.TODAY
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Toca/1.0; +https://meteorec.si)"}
 
+# Vidno besedilo v build_body() (FAQ razdelek) in FAQPage shema v main()
+# morata biti dobesedno enaka -- na enem mestu, da se ne razideta.
+TOCA_FAQ = [
+    ("Je bila danes toča v Zgornji Savinjski dolini?",
+     "Preveri opozorilni pas na vrhu te strani — prikazuje trenutno aktivna uradna ARSO opozorila "
+     "pred nevihtami s točo. Za potrjene dogodke v posameznih krajih poglej skupnostni arhiv fotografij "
+     "spodaj, ki ga sproti dopolnjujejo prebivalci doline."),
+    ("Je bila toča v Mozirju, Ljubnem, Nazarjah ali Rečici ob Savinji?",
+     "Ta stran zbira prijave iz celotne Zgornje Savinjske doline s fotografijo in navedbo kraja. "
+     "Če je v tvojem kraju padla toča, jo prijavi spodaj — tako nastaja skupni pregled po naseljih."),
+    ("Kakšna je škoda toče na hmelju v Savinjski dolini?",
+     "Debela toča lahko v nekaj minutah uniči velik del pridelka hmelja in poškoduje mreže proti toči. "
+     "Za uradno oceno škode se obrni na Kmetijsko gozdarski zavod Celje ali svoje zavarovalnico; na tej "
+     "strani lahko škodo dokumentiraš s fotografijo za skupno sliko razsežnosti dogodka v dolini."),
+    ("Kako postaja IREICA1 zaznava točo?",
+     "Postaja nima namenskega senzorja za točo. Kot orientacijski signal uporabljamo kombinacijo "
+     "intenzivnega naliva in visokih sunkov vetra v toplem delu leta (glej razpredelnico spodaj) — to "
+     "NI potrditev toče, temveč pogoji, v katerih je bila verjetna. Za potrjene dogodke je najbolj "
+     "zanesljiv skupnostni arhiv fotografij."),
+    ("Kje najdem uro-natančno napoved tveganja za točo?",
+     "Na naslovni strani meteorec.si, zavihek »Nevihte«, je živ pripomoček z verjetnostjo toče za "
+     "naslednjih 12 ur na podlagi CAPE, striženja vetra in drugih konvektivnih indeksov."),
+]
 
 def fetch_json(url, timeout=15):
     req = urllib.request.Request(url, headers=UA)
@@ -216,29 +239,8 @@ def build_body(alert, reports, hist):
   </div>'''
 
     # ── FAQ ─────────────────────────────────────────────────────────────
-    qa = [
-        ("Je bila danes toča v Zgornji Savinjski dolini?",
-         "Preveri opozorilni pas na vrhu te strani — prikazuje trenutno aktivna uradna ARSO opozorila "
-         "pred nevihtami s točo. Za potrjene dogodke v posameznih krajih poglej skupnostni arhiv fotografij "
-         "spodaj, ki ga sproti dopolnjujejo prebivalci doline."),
-        ("Je bila toča v Mozirju, Ljubnem, Nazarjah ali Rečici ob Savinji?",
-         "Ta stran zbira prijave iz celotne Zgornje Savinjske doline s fotografijo in navedbo kraja. "
-         "Če je v tvojem kraju padla toča, jo prijavi spodaj — tako nastaja skupni pregled po naseljih."),
-        ("Kakšna je škoda toče na hmelju v Savinjski dolini?",
-         "Debela toča lahko v nekaj minutah uniči velik del pridelka hmelja in poškoduje mreže proti toči. "
-         "Za uradno oceno škode se obrni na Kmetijsko gozdarski zavod Celje ali svoje zavarovalnico; na tej "
-         "strani lahko škodo dokumentiraš s fotografijo za skupno sliko razsežnosti dogodka v dolini."),
-        ("Kako postaja IREICA1 zaznava točo?",
-         "Postaja nima namenskega senzorja za točo. Kot orientacijski signal uporabljamo kombinacijo "
-         "intenzivnega naliva in visokih sunkov vetra v toplem delu leta (glej razpredelnico spodaj) — to "
-         "NI potrditev toče, temveč pogoji, v katerih je bila verjetna. Za potrjene dogodke je najbolj "
-         "zanesljiv skupnostni arhiv fotografij."),
-        ("Kje najdem uro-natančno napoved tveganja za točo?",
-         "Na naslovni strani meteorec.si, zavihek »Nevihte«, je živ pripomoček z verjetnostjo toče za "
-         "naslednjih 12 ur na podlagi CAPE, striženja vetra in drugih konvektivnih indeksov."),
-    ]
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
-        f'    <details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in qa
+        f'    <details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in TOCA_FAQ
     ) + "\n  </div>"
 
     related_section = f'  <h2>Sorodno na blogu</h2>\n{rel_html}' if rel_html else ""
@@ -341,6 +343,21 @@ def main():
     desc = ("Toča danes v Savinjski dolini: ARSO opozorila v živo, skupnostni arhiv prijav s fotografijo "
             "po krajih (Mozirje, Nazarje, Ljubno, Rečica ob Savinji) in dnevi z izrazito nevihtno aktivnostjo.")
 
+    cands = convective_candidates(hist)
+    storm_schema = []
+    if cands:
+        years = sorted({int(d[:4]) for d, _, _ in cands})
+        temporal_coverage = f"{years[0]}//{years[-1]}" if years[0] != years[-1] else str(years[0])
+        storm_schema.append(seo.named_dataset_schema(
+            url, "Dnevi z izrazito nevihtno aktivnostjo — postaja IREICA1, Rečica ob Savinji",
+            "Orientacijski seznam toplih dni z izrazitim nalivom in visokimi sunki vetra po meritvah "
+            "postaje IREICA1 — pogoji, v katerih je bila toča v Zgornji Savinjski dolini verjetna. "
+            "Postaja nima namenskega senzorja za točo, zato to ni potrditev dogodkov.",
+            variable_measured=["padavine (mm)", "sunki vetra (km/h)"],
+            temporal_coverage=temporal_coverage,
+            id_suffix="storm-dataset",
+        ))
+
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-14"),
         seo.crumbs_schema([("Meteorec", "/"), ("Toča", None)]),
@@ -352,6 +369,8 @@ def main():
                 {"@type": "PropertyValue", "name": "Prijave skupnosti", "value": len(reports), "unitText": "prijav"},
             ],
         ),
+        *storm_schema,
+        seo.faq_schema(TOCA_FAQ),
     ])
 
     html_out = seo.page_shell(title, desc, url, schema, body)
