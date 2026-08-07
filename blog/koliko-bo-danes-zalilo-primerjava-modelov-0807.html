@@ -72,6 +72,12 @@
 .stat-card.c-green .sc-val{color:#34d399}
 .stat-card.c-dry .sc-val{color:#f59e0b}
 .stat-card.c-rain .sc-val{color:#60a5fa}
+.model-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 1.1rem}
+.model-btn{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.03em;
+  padding:.45rem .85rem;border-radius:999px;border:1px solid var(--card-border);
+  background:var(--card-bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.model-btn:hover{color:var(--text);border-color:var(--cyan)}
+.model-btn.active{background:var(--cyan);border-color:var(--cyan);color:#04070e}
 </style>
 </head>
 <body>
@@ -95,12 +101,12 @@
     <h1>Koliko bo danes zalilo v Rečici? Primerjava modelov</h1>
     <p class="post-meta">7. avgusta 2026 · Filip Eremita</p>
 
-    <p class="lead">Postaja IREICA1 je ta petek zjutraj še suha – do pol devetih ni padla niti kaplja, termometer kaže 22,3 °C. A za preostanek dneva se šest vremenskih modelov med seboj skoraj ne strinja: <span class="hl">ARSO za dolino napoveduje 31,8 mm in možnost neviht</span>, medtem ko ICON kaže komaj <span class="hl">0,4 mm</span>. Zakaj je razlika tolikšna in kateremu viru sploh verjeti?</p>
+    <p class="lead">Postaja IREICA1 je ta petek zjutraj še suha – do pol devetih ni padla niti kaplja, termometer kaže 23,2 °C. A za preostanek dneva se šest vremenskih modelov med seboj skoraj ne strinja: <span class="hl">ARSO za dolino napoveduje 31,8 mm in možnost neviht</span>, medtem ko ICON kaže komaj <span class="hl">0,4 mm</span>. Zakaj je razlika tolikšna in kateremu viru sploh verjeti?</p>
 
     <div class="stat-grid">
       <div class="stat-card c-cool">
         <div class="sc-label">Trenutna temperatura</div>
-        <div class="sc-val">22,3</div>
+        <div class="sc-val">23,2</div>
         <div class="sc-sub">°C · postaja IREICA1</div>
       </div>
       <div class="stat-card c-rain">
@@ -110,7 +116,7 @@
       </div>
       <div class="stat-card c-green">
         <div class="sc-label">Vlažnost</div>
-        <div class="sc-val">73</div>
+        <div class="sc-val">71</div>
         <div class="sc-sub">%</div>
       </div>
       <div class="stat-card c-dry">
@@ -147,13 +153,26 @@
 
     <span class="section-label">02 — Ozadje</span>
     <h2 id="zakaj-se-razhajajo">Zakaj se modeli tako razhajajo</h2>
-    <p>Razlog ni v tem, da bi kak model bolje ali slabše "znal" vreme – gre za ločljivost mreže, na kateri vsak od njih računa. GFS pokriva ves svet na mreži s približno 13 km med točkami, prosto dostopni ECMWF pa na približno 28 km. Poletna nevihtna celica je lahko ozka – nekaj kilometrov – torej manjša od ene same mreže teh dveh modelov. Takrat gre v resnici za met kovanca: bo padla natanko na točko, ki jo model računa, ali pa mimo nje.</p>
+    <p>Razlog ni v tem, da bi kak model bolje ali slabše „znal“ vreme – gre za ločljivost mreže, na kateri vsak od njih računa. GFS pokriva ves svet na mreži s približno 13 km med točkami, prosto dostopni ECMWF pa na približno 28 km. Poletna nevihtna celica je lahko ozka – nekaj kilometrov – torej manjša od ene same mreže teh dveh modelov. Takrat gre v resnici za met kovanca: bo padla natanko na točko, ki jo model računa, ali pa mimo nje.</p>
     <p>ICON evropska različica računa na gostejši, približno 7-kilometrski mreži, kar razliko že zmanjša. Modela, ki bi lahko posamezno nevihtno celico ujela res natančno – nemški ICON-D2 (~2 km) in francoski AROME (~1,5–2,5 km) – pa do Rečice sploh ne segata: ICON-D2 pokriva Nemčijo, Švico in Avstrijo, AROME pa Francijo in njeno neposredno sosedstvo. Zato v primerjavi namesto AROME nastopi ARPEGE, globalni model istega ponudnika (Météo-France) na grobi mreži – in posledično pokaže skoraj enako malo kot GFS in ECMWF.</p>
-    <p>ARSO je poseben primer: njegova javna napoved ni surov izpis enega modela, ampak jo prognostik sestavi iz lastnega regionalnega modela ALADIN/SI, vodstva ECMWF in – najpomembneje – jutranjega radarja in satelita. Zato lahko ARSO že zjutraj "stavi" na konkreten scenarij (nevihta, 31,8 mm), medtem ko globalni modeli le povprečijo, kaj je verjetno na širšem območju.</p>
+    <p>ARSO je poseben primer: njegova javna napoved ni surov izpis enega modela, ampak jo prognostik sestavi iz lastnega regionalnega modela ALADIN/SI, vodstva ECMWF in – najpomembneje – jutranjega radarja in satelita. Zato lahko ARSO že zjutraj „stavi“ na konkreten scenarij (nevihta, 31,8 mm), medtem ko globalni modeli le povprečijo, kaj je verjetno na širšem območju.</p>
 
     <span class="section-label">03 — Kdaj danes paziti</span>
     <h2 id="kdaj-danes">Kdaj bi lahko danes deževalo</h2>
     <p>Urne napovedi se glede časa razhajajo manj kot glede količine. GFS težišče dežja postavlja pozno zvečer, z vrhom okoli 22. ure in verjetnostjo do 61 %. ECMWF kaže šibkejši, a bolj razpotegnjen dež popoldne, med 13. in 20. uro, z verjetnostjo okoli 35–40 %. ICON napoveduje le kratek naliv okoli poldneva, z nizko, 5–10-odstotno verjetnostjo. Skupni imenovalec: če bo danes kaj padlo, bo to najverjetneje med poldnevom in poznim večerom – ne dopoldne.</p>
+
+    <div class="chart-card">
+      <h3>Urna napoved padavin danes — izberi model</h3>
+      <div class="model-picker" role="group" aria-label="Izbira modela za urni graf">
+        <button type="button" class="model-btn active" data-model="open-meteo">Open-Meteo</button>
+        <button type="button" class="model-btn" data-model="ecmwf">ECMWF</button>
+        <button type="button" class="model-btn" data-model="gfs">GFS</button>
+        <button type="button" class="model-btn" data-model="icon">ICON</button>
+        <button type="button" class="model-btn" data-model="arpege">ARPEGE*</button>
+      </div>
+      <canvas id="chartUrni"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Urna napoved padavin (mm/h) za Rečico ob Savinji, danes 7. avgusta – po urah, po izbranem viru. *ARPEGE nastopi namesto AROME (glej zgoraj). ARSO objavlja le dnevno vsoto, zato tu ni izbirljiv – njegova številka je v tabeli zgoraj.</p>
+    </div>
 
     <div class="callout">
       <p><strong>Nasvet:</strong> Pri tako razhajajoči se napovedi je zjutrajšnja številka manj vredna kot pogled na radar popoldne. Živo stanje neba nad dolino spremljajte na naši <a href="/nevihte/" style="color:var(--blue)">nevihtni napovedi</a>, dejanske padavine na postaji pa sproti na <a href="/" style="color:var(--blue)">naslovnici</a>.</p>
@@ -229,6 +248,56 @@
              ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } }
       }
     }
+  });
+
+  const HOURLY_MODELI = {
+    'open-meteo': { label: 'Open-Meteo', color: '#60a5fa',
+      data: [0,0,0,0,0,0,0,0,0,0,0,0,0.2,0.1,0.1,0,0,0,0,0,0,0,0,0.1] },
+    'ecmwf': { label: 'ECMWF', color: '#a78bfa',
+      data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.2,0.2,0.2,0,0,0] },
+    'gfs': { label: 'GFS', color: '#f97316',
+      data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.2,0.5,1.1,2.3,0.4] },
+    'icon': { label: 'ICON', color: '#34d399',
+      data: [0,0,0,0,0,0,0,0,0,0,0,0,0.2,0.1,0.1,0,0,0,0,0,0,0,0,0] },
+    'arpege': { label: 'ARPEGE (namesto AROME)', color: '#f43f5e',
+      data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+  };
+  const URE = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0') + ':00');
+
+  const chartUrni = new Chart(document.getElementById('chartUrni'), {
+    type: 'bar',
+    data: {
+      labels: URE,
+      datasets: [{
+        label: HOURLY_MODELI['open-meteo'].label,
+        data: HOURLY_MODELI['open-meteo'].data,
+        backgroundColor: HOURLY_MODELI['open-meteo'].color,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+        y: { beginAtZero: true, suggestedMax: 2.5, grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } }
+      }
+    }
+  });
+
+  document.querySelectorAll('.model-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.model;
+      const m = HOURLY_MODELI[key];
+      if (!m) return;
+      document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      chartUrni.data.datasets[0].label = m.label;
+      chartUrni.data.datasets[0].data = m.data;
+      chartUrni.data.datasets[0].backgroundColor = m.color;
+      chartUrni.update();
+    });
   });
 
 </script>
