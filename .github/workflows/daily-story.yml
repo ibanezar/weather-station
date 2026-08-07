@@ -1,0 +1,103 @@
+name: Dnevna zgodba (FB + IG)
+
+# Vsak dan zjutraj sestavi kartico v formatu zgodbe (1080x1920) na podlagi
+# napovedi za današnji dan in jo objavi kot zgodbo na Facebook strani in
+# Instagram računu Meteorec.
+#
+# Kaj je na kartici, določi napoved (tools/generate_story_card.py):
+#   dež      -> "Kdaj bo danes začelo deževati?"  + ura začetka
+#   vroče    -> "Kako vroče bo danes?"            + najvišja temperatura
+#   ostalo   -> "Kakšno bo danes vreme?"          + najvišja temperatura
+#
+# Termin: cron teče po UTC, mi hočemo 6:00 po naši uri -- poleti je to
+# 04:00 UTC, pozimi 05:00 UTC. Sprožimo oba, tools/story_gate.py pa spusti
+# skozi samo tistega, ki se pri nas res zgodi med 6:00 in 12:00, in poskrbi,
+# da gre zgodba ven enkrat na dan.
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # 6:00 po naši uri poleti (CEST)
+    - cron: '0 5 * * *'   # 6:00 po naši uri pozimi (CET)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = objavi ne glede na uro in na to, ali je zgodba danes že šla ven'
+        required: false
+        default: 'true'
+
+jobs:
+  zgodba:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri, ali je čas za objavo
+        id: gate
+        run: |
+          python3 tools/story_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
+      - name: Namesti Pillow
+        if: steps.gate.outputs.proceed == 'true'
+        run: pip install Pillow --quiet
+
+      - name: Sestavi kartico iz napovedi
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/generate_story_card.py
+
+      - name: Objavi kartico na main
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/story_gate.py mark
+          git add -A og/story tools/.story_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+          else
+            git commit -m "story: dnevna kartica $(date -u +%Y-%m-%d) [skip ci]"
+            for i in 1 2 3 4; do
+              git push && break
+              echo "push spodletel, poskus $i" && sleep $((2 ** i))
+              git pull --rebase origin main || true
+            done
+          fi
+
+      # Facebook in Instagram sliko poberata prek javnega URL-ja, zato mora
+      # GitHub Pages najprej postreči novo datoteko. Deploy traja nekaj deset
+      # sekund do nekaj minut -- počakamo, sicer objava spodleti na 404.
+      - name: Počakaj, da je slika dosegljiva
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('og/story/latest.json'))['image'])")
+          echo "Čakam na $URL"
+          for i in $(seq 1 40); do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "$URL" || echo 000)
+            if [ "$CODE" = "200" ]; then echo "Slika je dosegljiva (poskus $i)."; exit 0; fi
+            sleep 15
+          done
+          echo "Slika po 10 minutah ni dosegljiva — objavo preskačem." >&2
+          exit 1
+
+      - name: Objavi zgodbo na Facebook
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_story_to_facebook.py
+
+      - name: Objavi zgodbo na Instagram
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_story_to_instagram.py
