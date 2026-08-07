@@ -92,14 +92,31 @@ FB/IG ne podre objave članka).
 Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
 (1080×1920) — `.github/workflows/daily-story.yml`.
 
-- `tools/generate_story_card.py` iz napovedi izbere enega od treh predlogov:
-  **dež** (»Kdaj bo danes začelo deževati?« + ura), **vroče** (»Kako vroče bo
-  danes?« + najvišja temperatura) ali **splošno**. Zapiše
-  `og/story/<datum>.jpg` + `og/story/latest.json`, stare kartice (>14 dni)
-  pobriše sam.
+- `tools/generate_story_card.py` ima ~24 tem (registrator `@topic(ime,
+  prioriteta)`, seznam `TOPICS`), vsaka s 5+ besedilnimi različicami (skupaj
+  čez 100 — `python3 tools/generate_story_card.py --list-topics` izpiše
+  natančno število). Vsaka tema je funkcija `t_*(ctx)`, ki vrne kartico ali
+  `None`, če danes ne velja (npr. FROST rabi `tmin<=0`); izmed upravičenih
+  zmaga tista z najvišjo prioriteto (zmrzal/sneg/nevihta pred splošnim
+  povzetkom). Besedilna različica se izbere determinístično po datumu
+  (`hashlib.sha256(datum|ime_teme)`), da je isti dan vedno ista, drug dan pa
+  praviloma drugačna. Podatkovni viri: napoved + UV/veter/sončni vzhod
+  (Open-Meteo), ARSO, kakovost zraka + cvetni prah (Open-Meteo air-quality),
+  gobarski indeks (`gobarska-napoved/index.json`) in `history.json` (rekordi,
+  primerjava z včeraj, suh niz). Zapiše `og/story/<datum>.jpg` +
+  `og/story/latest.json`, stare kartice (>14 dni) pobriše sam.
+- Nova tema gre v isto datoteko: funkcija `t_ime(ctx)` z `@topic("IME",
+  prioriteta)`, vrne `card(...)` ali `None`. **Ne uvažaj** modelov iz drugih
+  generatorjev (npr. `gobe_model.py`) — ta skript bere samo že objavljene,
+  committane JSON-e (isto načelo kot drugod v repozitoriju: generatorji strani
+  so samostojni, ne si delijo knjižnic).
 - Padavinska številka ARSO in verjetnost Open-Meteo sta na kartici **označeni z
   virom** in se ne zlivata v eno število — ta dva vira se pri padavinah pogosto
   močno razideta.
+- Dolga vrednost v statistiki (npr. ime gobje vrste) se v `render()` skrajša
+  (`fit_value_text()`) — brez tega pade čez oznako na levi, ker se je prej
+  merilo proti celotni širini vrstice namesto proti prostoru, ki ga oznaka
+  pusti.
 - Objavita `tools/post_story_to_facebook.py` (`/photos?published=false` →
   `/photo_stories`) in `tools/post_story_to_instagram.py`
   (`media_type=STORIES` → `/media_publish`). Zgodbe nimajo podpisa — vse mora
