@@ -1313,6 +1313,32 @@ function _compStampMs(stamp) {
   const m = stamp.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})$/);
   return m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:00Z`) : NaN;
 }
+function _msToStamp(ms) {
+  const d = new Date(ms), p = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}`;
+}
+
+// OPERA včasih obstane za več ur (zunanji vir, CloudFerro S3), ARSO pa teče
+// naprej — brez tega bi seznam okvirjev ostal prazen in bi frontend javil
+// "Radar ni dosegljiv", čeprav je slovenski kompozit povsem v redu. Vrne
+// samo čas zadnjega ARSO okvirja (poravnan na 5-minutno mrežo); sam izris
+// tudi brez OPERA že zna narisati samo ARSO jedro (glej _radarComposite).
+async function _arsoLatestMs() {
+  try {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 8000);
+    let res = await fetch(RADAR_URL, { method: "HEAD", signal: ctrl.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid));
+    if (res.status === 405 || res.status === 501) {
+      const ctrl2 = new AbortController(); const tid2 = setTimeout(() => ctrl2.abort(), 8000);
+      res = await fetch(RADAR_URL, { signal: ctrl2.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid2));
+    }
+    if (!res.ok) return null;
+    const lm = res.headers.get("last-modified");
+    if (!lm) return null;
+    const lmMs = new Date(lm).getTime();
+    if (Number.isNaN(lmMs) || (Date.now() - lmMs) / 60000 > RADAR_MAX_AGE_MIN) return null;
+    return Math.floor(lmMs / ARSO_STEP_MS) * ARSO_STEP_MS;
+  } catch (_) { return null; }
+}
 
 // Preberi samo ploščice, ki pokrivajo dano okno v koordinatah mreže.
 async function _operaWindow(key, bbox) {
@@ -1590,7 +1616,11 @@ async function _radarCompositeCached(env, stamp, viewId, sources) {
   if (!stamp) {
     const key = await _operaLatestKey();
     stamp = key ? _compStamp(key) : null;
-    if (!stamp) throw new Error("ni posnetka OPERA");
+    if (!stamp) {
+      const arsoMs = await _arsoLatestMs();
+      stamp = arsoMs ? _msToStamp(arsoMs) : null;
+    }
+    if (!stamp) throw new Error("noben radarski vir ni dosegljiv");
   }
   const r2key = `${COMP_R2_PREFIX}${vid}-${stamp}.png`;
 
@@ -3356,7 +3386,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const V = COMP_VIEWS[vid];
         if (path.endsWith(".json")) {
           const keys = await _operaKeys();
-          const stamps = keys.map(_compStamp).filter(Boolean);
+          let stamps = keys.map(_compStamp).filter(Boolean);
+          // OPERA je zunanji vir in včasih obstane za ure; ARSO pa v tem
+          // primeru večinoma teče naprej, zato brez OPERA sestavimo
+          // časovnico kar iz njega (glej _arsoLatestMs).
+          if (!stamps.length) {
+            const arsoMs = await _arsoLatestMs();
+            if (arsoMs) {
+              stamps = [];
+              for (let t = arsoMs - (COMP_ANIM_MIN - 5) * 60000; t <= arsoMs; t += ARSO_STEP_MS) {
+                stamps.push(_msToStamp(t));
+              }
+            }
+          }
           const stamp = stamps.length ? stamps[stamps.length - 1] : null;
           const ms = stamp ? _compStampMs(stamp) : NaN;
           // Okvirji animacije: zadnja ura, od najstarejšega proti zdaj.
