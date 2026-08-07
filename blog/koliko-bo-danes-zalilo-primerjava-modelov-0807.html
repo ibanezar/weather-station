@@ -101,7 +101,7 @@
     <h1>Koliko bo danes zalilo v Rečici? Primerjava modelov</h1>
     <p class="post-meta">7. avgusta 2026 · Filip Eremita</p>
 
-    <p class="lead">Postaja IREICA1 je ta petek zjutraj še suha – do pol devetih ni padla niti kaplja, termometer kaže 23,2 °C. A za preostanek dneva se šest vremenskih modelov med seboj skoraj ne strinja: <span class="hl">ARSO za dolino napoveduje 31,8 mm in možnost neviht</span>, medtem ko ICON kaže komaj <span class="hl">0,4 mm</span>. Zakaj je razlika tolikšna in kateremu viru sploh verjeti?</p>
+    <p class="lead">Postaja IREICA1 je ta petek zjutraj še suha – do 8.30 ni padla niti kaplja, termometer pa kaže 23,2 °C. A za preostanek dneva se šest vremenskih modelov skoraj ne strinja: <span class="hl">ARSO za dolino napoveduje 31,8 mm in možnost neviht</span>, medtem ko ICON kaže komaj <span class="hl">0,4 mm</span>. Zakaj je razlika tolikšna in kateremu viru sploh verjeti?</p>
 
     <div class="stat-grid">
       <div class="stat-card c-cool">
@@ -128,7 +128,7 @@
 
     <span class="section-label">01 — Šest virov, ena napoved</span>
     <h2 id="kaj-pravijo-modeli">Kaj za danes pravijo modeli</h2>
-    <p>Zjutraj smo za Rečico ob Savinji (46,326° S, 14,921° V) povlekli napoved padavin za danes iz šestih virov: uradne napovedi ARSO, ter modelov ECMWF, GFS, ICON in AROME/ARPEGE prek Open-Meteo, ob strani pa še privzeta izbira Open-Meteo, ki jo prikazuje tudi naslovnica <a href="/" style="color:var(--blue)">meteorec.si</a>. Rezultat je razpon od praktično nič do skoraj 32 mm – za isti dan, na istem koščku doline.</p>
+    <p>Zjutraj smo za Rečico ob Savinji (46,326° S, 14,921° V) pridobili napoved padavin za danes iz šestih virov: uradne napovedi ARSO ter modelov ECMWF, GFS, ICON in AROME/ARPEGE prek storitve Open-Meteo, poleg tega pa še privzeto izbiro Open-Meteo, ki jo prikazuje naslovnica <a href="/" style="color:var(--blue)">meteorec.si</a>. Rezultat je razpon od skoraj nič do 31,8 mm – za isti dan, v isti dolini.</p>
 
     <table class="stats">
       <thead>
@@ -143,23 +143,35 @@
         <tr><th>ARPEGE (namesto AROME – glej spodaj)</th><td>0,0 mm</td><td>–</td></tr>
       </tbody>
     </table>
-    <p style="color:var(--muted);font-size:.85rem;margin-top:-1rem">ARSO nima napovednega mesta za Rečico – številka velja za Ljubno ob Savinji, ~9 km gorvodno po isti dolini. Verjetnost za ARSO in ARPEGE ni javno objavljena.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:-1rem">ARSO nima napovednega mesta za Rečico – številka velja za Ljubno ob Savinji (~9 km gorvodno po isti dolini). Verjetnost pri ARSO in ARPEGE ni javno objavljena.</p>
 
     <div class="chart-card">
-      <h3>Padavine po modelih: danes proti jutri</h3>
+      <h3>Padavine po modelih: primerjava med danes in jutri</h3>
       <canvas id="chartModeli"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Dnevna vsota padavin za Rečico ob Savinji, kot jo danes zjutraj kaže vsak posamezen vir.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Dnevna vsota padavin za Rečico ob Savinji, kot jo danes zjutraj prikazuje posamezen vir.</p>
     </div>
 
     <span class="section-label">02 — Ozadje</span>
     <h2 id="zakaj-se-razhajajo">Zakaj se modeli tako razhajajo</h2>
-    <p>Razlog ni v tem, da bi kak model bolje ali slabše „znal“ vreme – gre za ločljivost mreže, na kateri vsak od njih računa. GFS pokriva ves svet na mreži s približno 13 km med točkami, prosto dostopni ECMWF pa na približno 28 km. Poletna nevihtna celica je lahko ozka – nekaj kilometrov – torej manjša od ene same mreže teh dveh modelov. Takrat gre v resnici za met kovanca: bo padla natanko na točko, ki jo model računa, ali pa mimo nje.</p>
-    <p>ICON evropska različica računa na gostejši, približno 7-kilometrski mreži, kar razliko že zmanjša. Modela, ki bi lahko posamezno nevihtno celico ujela res natančno – nemški ICON-D2 (~2 km) in francoski AROME (~1,5–2,5 km) – pa do Rečice sploh ne segata: ICON-D2 pokriva Nemčijo, Švico in Avstrijo, AROME pa Francijo in njeno neposredno sosedstvo. Zato v primerjavi namesto AROME nastopi ARPEGE, globalni model istega ponudnika (Météo-France) na grobi mreži – in posledično pokaže skoraj enako malo kot GFS in ECMWF.</p>
-    <p>ARSO je poseben primer: njegova javna napoved ni surov izpis enega modela, ampak jo prognostik sestavi iz lastnega regionalnega modela ALADIN/SI, vodstva ECMWF in – najpomembneje – jutranjega radarja in satelita. Zato lahko ARSO že zjutraj „stavi“ na konkreten scenarij (nevihta, 31,8 mm), medtem ko globalni modeli le povprečijo, kaj je verjetno na širšem območju.</p>
+    <p>Razlog ni v tem, da bi posamezen model bolje ali slabše »razumel« vreme, temveč v ločljivosti računske mreže:</p>
+    <ul style="margin:.2rem 0 1.2rem 1.2rem;color:var(--text)">
+      <li><strong>GFS</strong> – približno 13 km med točkami (globalno)</li>
+      <li><strong>ECMWF</strong> (prosto dostopni) – približno 28 km</li>
+      <li><strong>ICON</strong>, evropska različica – približno 7 km</li>
+    </ul>
+    <p>Poletna nevihtna celica meri le nekaj kilometrov, zato je manjša od posamezne mrežne celice prvih dveh modelov. Takrat gre za met kovanca: bo padavinska celica zadela točko, ki jo model računa, ali pa jo bo zgrešila. Gostejša mreža modela ICON to negotovost zmanjša, a je ne odpravi.</p>
+    <p>Modela, ki bi posamezno nevihtno celico lahko ujela natančneje – nemški ICON-D2 (~2 km) in francoski AROME (~1,5–2,5 km) – pa do Savinjske doline ne segata: ICON-D2 pokriva Nemčijo, Švico in Avstrijo, AROME pa Francijo in njeno neposredno sosedstvo. Zato namesto AROME nastopi ARPEGE, globalni model Météo-France na grobi mreži, ki posledično prikazuje podobno nizke vrednosti kot GFS in ECMWF.</p>
+    <p>ARSO je poseben primer: njegova javna napoved ni surov izpis posameznega modela, temveč jo prognostik sestavi iz regionalnega modela ALADIN/SI, izračunov ECMWF ter jutranjih podatkov radarja in satelita. Zato ARSO zjutraj lahko predvidi konkreten scenarij (nevihta, 31,8 mm), medtem ko globalni modeli le izračunajo povprečje verjetnosti za širše območje.</p>
 
     <span class="section-label">03 — Kdaj danes paziti</span>
-    <h2 id="kdaj-danes">Kdaj bi lahko danes deževalo</h2>
-    <p>Urne napovedi se glede časa razhajajo manj kot glede količine. GFS težišče dežja postavlja pozno zvečer, z vrhom okoli 22. ure in verjetnostjo do 61 %. ECMWF kaže šibkejši, a bolj razpotegnjen dež popoldne, med 13. in 20. uro, z verjetnostjo okoli 35–40 %. ICON napoveduje le kratek naliv okoli poldneva, z nizko, 5–10-odstotno verjetnostjo. Skupni imenovalec: če bo danes kaj padlo, bo to najverjetneje med poldnevom in poznim večerom – ne dopoldne.</p>
+    <h2 id="kdaj-danes">Kdaj bo danes deževalo</h2>
+    <p>Urni izpisi se glede časa razhajajo manj kot glede količine:</p>
+    <ul style="margin:.2rem 0 1.2rem 1.2rem;color:var(--text)">
+      <li><strong>GFS</strong> – glavnina dežja v <strong>poznem večeru</strong>, z vrhuncem okoli 22. ure (do 61 %)</li>
+      <li><strong>ECMWF</strong> – šibkejše, a bolj razpotegnjeno deževje <strong>popoldne, med 13. in 20. uro</strong> (35–40 %)</li>
+      <li><strong>ICON</strong> – le kratek naliv <strong>okoli poldneva</strong>, z nizko 5–10-odstotno verjetnostjo</li>
+    </ul>
+    <p>Skupni imenovalec: če bo danes deževalo, bo to najverjetneje med poldnevom in poznim večerom – ne pa dopoldne.</p>
 
     <div class="chart-card">
       <h3>Urna napoved padavin danes — izberi model</h3>
@@ -171,17 +183,17 @@
         <button type="button" class="model-btn" data-model="arpege">ARPEGE*</button>
       </div>
       <canvas id="chartUrni"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Urna napoved padavin (mm/h) za Rečico ob Savinji, danes 7. avgusta – po urah, po izbranem viru. *ARPEGE nastopi namesto AROME (glej zgoraj). ARSO objavlja le dnevno vsoto, zato tu ni izbirljiv – njegova številka je v tabeli zgoraj.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Urna napoved padavin (mm/h) za Rečico ob Savinji za petek, 7. avgusta. *ARPEGE nastopi namesto AROME (glej zgoraj). ARSO objavlja le dnevno vsoto, zato tu ni vključen – njegova številka je v tabeli zgoraj.</p>
     </div>
 
     <div class="callout">
-      <p><strong>Nasvet:</strong> Pri tako razhajajoči se napovedi je zjutrajšnja številka manj vredna kot pogled na radar popoldne. Živo stanje neba nad dolino spremljajte na naši <a href="/nevihte/" style="color:var(--blue)">nevihtni napovedi</a>, dejanske padavine na postaji pa sproti na <a href="/" style="color:var(--blue)">naslovnici</a>.</p>
+      <p><strong>Nasvet:</strong> Pri tako raznolikih napovedih je jutranja številka manj zanesljiva kot popoldanski pogled na radar. Trenutno stanje nad dolino spremljajte na <a href="/nevihte/" style="color:var(--blue)">nevihtni napovedi</a>, izmerjene padavine na postaji pa sproti na <a href="/" style="color:var(--blue)">naslovnici</a>.</p>
     </div>
 
     <span class="section-label">04 — In jutri?</span>
-    <h2 id="jutri">Enaka zmeda, obrnjene vloge</h2>
-    <p>Kdor bi si mislil, da se bo slika do jutra uredila, se moti – le vloge se zamenjajo. Za jutri (8. avgust) GFS pade na 2,2 mm, ARSO na 7,9 mm, medtem ko Open-Meteo in ICON naenkrat kažeta okoli 27 mm. Isti šest virov, popolnoma drugačen razpored favoritov. To ni znak, da je kateri od modelov pokvarjen, temveč da je vso to obdobje vremensko nestanovitno in da napoved za točno določeno dolino v Alpah preprosto nosi veliko negotovost, tudi en dan vnaprej.</p>
-    <p>Kako se posamezni viri v praksi obnesejo skozi čas, iz dneva v dan beležimo na strani <a href="/tocnost-napovedi/" style="color:var(--blue)">točnost napovedi</a>, kjer ARSO, Open-Meteo in naš lastni statistični model MTR tekmujejo po istem pravilu. Kako se taka negotovost razplete v praksi, smo že opisali – enkrat je nevihta res prinesla toliko dežja, kot je bilo napovedano (<a href="/blog/koliko-je-zalilo-nevihta-11-julij-2026.html" style="color:var(--blue)">11. julija</a>), drugič pa napovedano neurje preprosto ni prišlo (<a href="/blog/zakaj-ni-bilo-neurja-14-julij-2026.html" style="color:var(--blue)">14. julija</a>). Oba scenarija sta danes še vedno na mizi.</p>
+    <h2 id="jutri">Enaka negotovost, obrnjene vloge</h2>
+    <p>Slika se do jutri ne bo uredila – zamenjale se bodo le vloge modelov. Za jutri (8. avgust) GFS pade na 2,2 mm, ARSO na 7,9 mm, medtem ko Open-Meteo in ICON naenkrat prikazujeta okoli 27 mm. Istih šest virov ponuja popolnoma drugačen razpored favoritov. To ni znak okvare modelov, temveč potrditev, da je celotno obdobje vremensko nestabilno in da napoved za posamezno alpsko dolino nosi visoko stopnjo negotovosti tudi en dan vnaprej.</p>
+    <p>Kako se posamezni viri obnesejo v praksi, iz dneva v dan beležimo na strani <a href="/tocnost-napovedi/" style="color:var(--blue)">Točnost napovedi</a>, kjer ARSO, Open-Meteo in naš statistični model MTR tekmujejo po enakih pravilih. Enkrat je nevihta res prinesla toliko dežja, kot je bilo napovedano (<a href="/blog/koliko-je-zalilo-nevihta-11-julij-2026.html" style="color:var(--blue)">11. julija</a>), drugič pa napovedanega neurja ni bilo (<a href="/blog/zakaj-ni-bilo-neurja-14-julij-2026.html" style="color:var(--blue)">14. julija</a>). Oba scenarija ostajata odprta tudi danes.</p>
 
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Podatki: osebna vremenska postaja IREICA1 (Rečica ob Savinji), ARSO (vreme.arso.gov.si, napoved za Ljubno ob Savinji) in Open-Meteo (modeli GFS, ECMWF, ICON, ARPEGE ter privzeta izbira), vsi pridobljeni zjutraj 7. avgusta 2026.</p>
 
