@@ -341,7 +341,7 @@ def t_frost(ctx):
     return card(ctx, "FROST", headline, f"{num_sl(ctx['tmin'], 1)} °C", big_sub,
                 [("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C"),
                  ("Vreme", ctx["cond"] or "jasno"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_CYAN, "night-fog-valley", eyebrow="POZOR DANES")
 
 
@@ -397,7 +397,7 @@ def t_storm(ctx):
                 f"ob {start}. uri" if start is not None else "čez dan", big_sub,
                 [("Verjetnost", f"{int(ctx['max_prob'])} %"),
                  ("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C"),
-                 ("Dežja", f"{num_sl(max(ctx['rain_total'], ctx['arso_precip']), 1)} mm")],
+                 ("Količina dežja", f"{num_sl(max(ctx['rain_total'], ctx['arso_precip']), 1)} mm")],
                 C_PURPLE, photo, eyebrow="POZOR DANES")
 
 
@@ -417,7 +417,7 @@ def t_heat_extreme(ctx):
     return card(ctx, "HEAT_EXTREME", headline, f"{num_sl(ctx['tmax'], 1)} °C", big_sub,
                 [("Najnižja temp.", f"{num_sl(ctx['tmin'], 1)} °C"),
                  ("UV indeks", f"{num_sl(ctx['uv_max'], 1)}" if ctx["uv_max"] is not None else "–"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_RED, "drought", eyebrow="POZOR DANES")
 
 
@@ -451,11 +451,11 @@ def t_windy(ctx):
         ("Veter se\nkrepi", "najmočnejši napovedan sunek"),
         ("Pridrži\nklobuk", "najmočnejši napovedan sunek"),
         ("Sunkovit\ndan", "najmočnejši napovedan sunek"),
-        ("Veter danes\nzagode", "najmočnejši napovedan sunek"),
+        ("Veter danes\nnagaja", "najmočnejši napovedan sunek"),
     ]
     headline, big_sub = pick(ctx, "WINDY", variants)
     return card(ctx, "WINDY", headline, f"{num_sl(ctx['gust_max'])} km/h", big_sub,
-                [("Povprečen veter", f"{num_sl(ctx['wind_max'])} km/h"),
+                [("Povprečna hitrost vetra", f"{num_sl(ctx['wind_max'])} km/h"),
                  ("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C"),
                  ("Vreme", ctx["cond"] or "spremenljivo")],
                 C_PURPLE, "storm-clouds", eyebrow="POZOR DANES")
@@ -472,7 +472,7 @@ def t_aq_poor(ctx):
         ("Danes raje\nokna zaprta", "evropski indeks kakovosti zraka"),
         ("Slab zrak\nv dolini", "evropski indeks kakovosti zraka"),
         ("Pozor,\nonesnaženost", "evropski indeks kakovosti zraka"),
-        ("Danes globoko\nne vdihuj zunaj", "evropski indeks kakovosti zraka"),
+        ("Danes zunaj\nne vdihuj globoko", "evropski indeks kakovosti zraka"),
     ]
     headline, big_sub = pick(ctx, "AIR_QUALITY_POOR", variants)
     cur = ctx["aq"]["current"]
@@ -538,9 +538,9 @@ def t_rain_timing(ctx):
     ]
     headline, big_sub = pick(ctx, "RAIN_TIMING", variants)
     if ctx["arso_precip"]:
-        amount = ("Dežja · ARSO", f"{num_sl(ctx['arso_precip'], 1)} mm")
+        amount = ("Dež · ARSO", f"{num_sl(ctx['arso_precip'], 1)} mm")
     else:
-        amount = ("Dežja · Open-Meteo", f"{num_sl(ctx['rain_total'], 1)} mm")
+        amount = ("Dež · Open-Meteo", f"{num_sl(ctx['rain_total'], 1)} mm")
     return card(ctx, "RAIN_TIMING", headline,
                 f"ob {start}. uri" if start is not None else "čez dan", big_sub,
                 [amount,
@@ -556,7 +556,7 @@ def t_heat(ctx):
         return None
     variants = [
         ("Kako vroče\nbo danes?", "najvišja napovedana temperatura"),
-        ("Danes bo\ngorko", "najvišja napovedana temperatura"),
+        ("Danes bo\nvroče", "najvišja napovedana temperatura"),
         ("Poletje\nkaže mišice", "najvišja napovedana temperatura"),
         ("Vroč dan\npred nami", "najvišja napovedana temperatura"),
         ("Danes se\nsegreje", "najvišja napovedana temperatura"),
@@ -565,7 +565,7 @@ def t_heat(ctx):
     return card(ctx, "HEAT", headline, f"{num_sl(ctx['tmax'], 1)} °C", big_sub,
                 [("Najnižja temp.", f"{num_sl(ctx['tmin'], 1)} °C"),
                  ("Vreme", ctx["cond"] or "jasno"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_ORANGE, "drought")
 
 
@@ -585,7 +585,7 @@ def t_cold_morning(ctx):
     return card(ctx, "COLD_MORNING", headline, f"{num_sl(ctx['tmin'], 1)} °C", big_sub,
                 [("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C"),
                  ("Vreme", ctx["cond"] or "jasno"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_CYAN, "misty-valley")
 
 
@@ -617,7 +617,7 @@ def t_uv_high(ctx):
     variants = [
         ("Visok UV\ndanes", "vrh UV indeksa"),
         ("Sonce danes\npeče močno", "vrh UV indeksa"),
-        ("Ne pozabi\nkreme", "vrh UV indeksa"),
+        ("Ne pozabi\nna kremo", "vrh UV indeksa"),
         ("UV indeks\nv rdečem", "vrh UV indeksa"),
         ("Danes previdno\nna soncu", "vrh UV indeksa"),
     ]
@@ -625,7 +625,7 @@ def t_uv_high(ctx):
     return card(ctx, "UV_HIGH", headline, num_sl(ctx["uv_max"], 1), big_sub,
                 [("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C"),
                  ("Vreme", ctx["cond"] or "jasno"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_AMBER, "spring")
 
 
@@ -639,7 +639,7 @@ def t_muggy(ctx):
     variants = [
         ("Danes bo\nsoparno", "občutena temperatura"),
         ("Vlaga danes\nteži", "občutena temperatura"),
-        ("Zrak se\nlepi", "občutena temperatura"),
+        ("Zrak je\nlepljiv", "občutena temperatura"),
         ("Sparen\ndan", "občutena temperatura"),
         ("Danes se\nobčuti huje", "občutena temperatura"),
     ]
@@ -746,7 +746,7 @@ def t_drought(ctx):
     ]
     headline, big_sub = pick(ctx, "DROUGHT_DRY_STREAK", variants)
     return card(ctx, "DROUGHT_DRY_STREAK", headline, f"{streak} dni", big_sub,
-                [("Danes dežja", f"{num_sl(ctx['rain_total'], 1)} mm"),
+                [("Današnje padavine", f"{num_sl(ctx['rain_total'], 1)} mm"),
                  ("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C" if ctx["tmax"] is not None else "–"),
                  ("Postaja", "IREICA1")],
                 C_AMBER, "drought")
@@ -769,7 +769,7 @@ def t_mushroom(ctx):
     photo = "gobe-lastna" if variant_index(ctx, "MUSHROOM", 2) == 0 else "gobe-inverzija"
     return card(ctx, "MUSHROOM", headline, str(g.get("index")), big_sub,
                 [("Ocena", g.get("level", "–")),
-                 ("Najbolj obetavna", g.get("top_species_sl", "–")),
+                 ("Najobetavnejša", g.get("top_species_sl", "–")),
                  ("Vreme danes", ctx["cond"] or "spremenljivo")],
                 C_GREEN, photo)
 
@@ -784,7 +784,7 @@ def t_aq_good(ctx):
         ("Zrak danes\nodličen", "evropski indeks kakovosti zraka"),
         ("Globoko\nvdihni", "evropski indeks kakovosti zraka"),
         ("Čist zrak\nv dolini", "evropski indeks kakovosti zraka"),
-        ("Danes diha\nse lepo", "evropski indeks kakovosti zraka"),
+        ("Danes se\ndiha lepo", "evropski indeks kakovosti zraka"),
         ("Zrak v\nnajboljšem redu", "evropski indeks kakovosti zraka"),
     ]
     headline, big_sub = pick(ctx, "AIR_QUALITY_GOOD", variants)
@@ -864,7 +864,7 @@ def t_pressure(ctx):
     sign = "+" if diff > 0 else "−"
     return card(ctx, "PRESSURE_TREND", headline, f"{sign}{num_sl(abs(diff), 1)} hPa", big_sub,
                 [("Zdaj", f"{num_sl(pres, 1)} hPa"),
-                 ("Včeraj povp.", f"{num_sl(hy['pressureAvg'], 1)} hPa"),
+                 ("Povprečje včeraj", f"{num_sl(hy['pressureAvg'], 1)} hPa"),
                  ("Vreme danes", ctx["cond"] or "spremenljivo")],
                 C_PURPLE, "dusk-storm")
 
@@ -906,7 +906,7 @@ def t_general(ctx):
     variants = [
         ("Kakšno bo\ndanes vreme?", "najvišja napovedana temperatura"),
         ("Vreme za\ndanes", "najvišja napovedana temperatura"),
-        ("Kaj prinaša\ndanešnji dan?", "najvišja napovedana temperatura"),
+        ("Kaj prinaša\ndanašnji dan?", "najvišja napovedana temperatura"),
         ("Napoved za\ndanes", "najvišja napovedana temperatura"),
         ("Danes v\nRečici", "najvišja napovedana temperatura"),
         ("Kakšen dan\nnas čaka?", "najvišja napovedana temperatura"),
@@ -919,7 +919,7 @@ def t_general(ctx):
                 f"{num_sl(ctx['tmax'], 1)} °C" if ctx["tmax"] is not None else "–", big_sub,
                 [("Najnižja temp.", f"{num_sl(ctx['tmin'], 1)} °C" if ctx["tmin"] is not None else "–"),
                  ("Vreme", ctx["cond"] or "spremenljivo"),
-                 ("Dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
+                 ("Količina dežja", f"{num_sl(ctx['rain_total'], 1)} mm")],
                 C_CYAN, photo)
 
 
