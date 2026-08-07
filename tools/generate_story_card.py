@@ -368,17 +368,26 @@ def t_snow(ctx):
 # ── STORM_RISK ──
 @topic("STORM_RISK", 92)
 def t_storm(ctx):
+    # Sam dnevni WMO kod (95/96/99) ni dovolj -- Open-Meteo z njim včasih
+    # označi dan, tudi če je urna verjetnost/količina čez dan nizka (npr. en
+    # sam šibek konvektivni signal). Brez te potrditve je kartica že dobila
+    # alarmni okvir "POZOR DANES" ob komaj 20-% verjetnosti, kar je zavajajoče.
     if ctx["code"] not in STORM_CODES:
+        return None
+    if ctx["max_prob"] < 30 and ctx["arso_precip"] < 5 and ctx["rain_total"] < 3:
         return None
     start = None
     for i in ctx["idx_today"]:
         if (ctx["precip"][i] or 0) >= 0.2 or (ctx["prob"][i] or 0) >= 50:
             start = int(ctx["times"][i][11:13])
             break
+    # Naslov ne sme trditi konkretnega dela dneva (npr. "popoldne"), ker to
+    # ni nujno tisto, kar dejansko pove `big` spodaj -- če ura ni znana, se
+    # `big` umakne v splošno "čez dan" in bi bil naslov v nasprotju z njim.
     variants = [
         ("Bo danes\ngrmelo?", "možnost neviht po napovedi"),
         ("Nevihtni dan\nv dolini", "najvišja verjetnost danes"),
-        ("Pazi na\nnebo popoldne", "možnost neviht po napovedi"),
+        ("Pazi na\nnebo danes", "možnost neviht po napovedi"),
         ("Danes lahko\nzagrmi", "možnost neviht po napovedi"),
         ("Nevihtni\nobeti", "možnost neviht po napovedi"),
     ]
