@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 07 Aug 2026 00:12:39 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 07 Aug 2026 06:29:33 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko bo danes zalilo v Rečici? Primerjava modelov</title>
+      <link>https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</guid>
+      <pubDate>Fri, 07 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Postaja IREICA1 je zjutraj še suha. ARSO za danes napoveduje 31,8 mm in možnost neviht, ICON komaj 0,4 mm. Primerjava šestih vremenskih modelov za Rečico ob Savinji.</description>
+      <category>napoved</category>
+      <category>modeli</category>
+      <category>primerjava</category>
+      <category>padavine</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>ARSO oranžno opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.html</link>

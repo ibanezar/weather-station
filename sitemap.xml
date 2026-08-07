@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</loc>
+    <lastmod>2026-08-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/koliko-bo-danes-zalilo-primerjava-modelov-0807.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.html</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
@@ -858,6 +865,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/pozarna-ogrozenost/</loc>
+    <lastmod>2026-08-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/primerjava/</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
