@@ -14,6 +14,8 @@ Kje je to zarezano (če dodajaš nov vir ali odjemalca, zareži tudi tam):
   enkrat, ker gre cel odgovor v `call_claude()` kot `trenutne_razmere` in bi
   model o njem pisal, če bi ga videl.
 - `app.js`, Ecowitt kartica — notranjih meritev ne prikazuje.
+- `tools/generate_story_card.py`, `fetch_current()` — blok se izbriše, ker gre
+  kartica na FB/IG zgodbe; na njej sme biti samo zunanja temperatura.
 
 Zgodilo se je 30. 7. 2026: dnevni članek je objavil notranjo temperaturo in
 občuteno temperaturo v hiši, ker je surov Ecowitt odgovor romal naravnost v
@@ -84,6 +86,31 @@ FB/IG ne podre objave članka).
 - **`.github/workflows/social-repost.yml`** — ročni workflow_dispatch za
   (re)objavo poljubnega članka po slugu (prazno = zadnji), uporaben tudi za
   end-to-end test secretov.
+
+### Dnevna zgodba (story) ob 6:00
+
+Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
+(1080×1920) — `.github/workflows/daily-story.yml`.
+
+- `tools/generate_story_card.py` iz napovedi izbere enega od treh predlogov:
+  **dež** (»Kdaj bo danes začelo deževati?« + ura), **vroče** (»Kako vroče bo
+  danes?« + najvišja temperatura) ali **splošno**. Zapiše
+  `og/story/<datum>.jpg` + `og/story/latest.json`, stare kartice (>14 dni)
+  pobriše sam.
+- Padavinska številka ARSO in verjetnost Open-Meteo sta na kartici **označeni z
+  virom** in se ne zlivata v eno število — ta dva vira se pri padavinah pogosto
+  močno razideta.
+- Objavita `tools/post_story_to_facebook.py` (`/photos?published=false` →
+  `/photo_stories`) in `tools/post_story_to_instagram.py`
+  (`media_type=STORIES` → `/media_publish`). Zgodbe nimajo podpisa — vse mora
+  biti na sliki. Uporabljata iste secrete kot objave člankov.
+- **Termin:** cron teče po UTC, zato sta nastavljena dva (04:00 in 05:00 UTC),
+  `tools/story_gate.py` pa spusti skozi samo tistega, ki je pri nas med 6:00 in
+  12:00, in poskrbi, da gre zgodba ven enkrat na dan (stanje v
+  `tools/.story_state.json`). Tako termin drži poleti in pozimi, prenese pa tudi
+  običajno zamudo GitHubovega crona.
+- Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
+  GitHub Pages res postreže (do 10 minut), preden objavi.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
 Token — Meta app "Meteorec", App ID 4757580174464018), `IG_ACCOUNT_ID`,
