@@ -97,6 +97,15 @@
       "validEnd": "2026-08-07T21:59:00+00:00",
       "resolved": false,
       "publishedAt": "2026-08-07T00:12:38.961548+00:00"
+    },
+    "arso-opozorilo-warningtx-2026-08-07-2323-823a95": {
+      "slug": "arso-opozorilo-warningtx-2026-08-07-2323-823a95",
+      "types": [
+        "WarningTx"
+      ],
+      "validEnd": "2026-08-08T19:59:00+00:00",
+      "resolved": false,
+      "publishedAt": "2026-08-07T23:23:40.105086+00:00"
     }
   }
 }
