@@ -930,7 +930,15 @@ def gen_records_page(hist, sitemap_urls):
     tmax_d, tmax_v = find_record("tempHigh", max)
     tmin_d, tmin_v = find_record("tempLow", min)
     prec_d, prec_v = find_record("precipTotal", max)
-    wind_d, wind_v = find_record("windspeedHigh", max)
+    # "windgustHigh" (sunek) je bil dodan pozneje v podatkovni sklop; za dneve
+    # brez njega pade nazaj na "windspeedHigh" (najvišja sprotna hitrost), ki
+    # sicer meri drugo količino — zato gre v tabelo pod ustrezno oznako.
+    gust_d, gust_v = find_record("windgustHigh", max)
+    speed_d, speed_v = find_record("windspeedHigh", max)
+    if gust_v is not None and (speed_v is None or gust_v >= speed_v):
+        wind_d, wind_v, wind_label = gust_d, gust_v, "Najmočnejši izmerjeni sunek vetra"
+    else:
+        wind_d, wind_v, wind_label = speed_d, speed_v, "Najvišja izmerjena hitrost vetra"
 
     # Monthly records
     by_month = defaultdict(list)
@@ -999,9 +1007,41 @@ def gen_records_page(hist, sitemap_urls):
         f'<td class="record-date">{ym_link(driest_ym)}</td></tr>'
     )
     rows_wind = (
-        f'    <tr><th>Najmočnejši izmerjeni sunek vetra</th>'
+        f'    <tr><th>{wind_label}</th>'
         f'<td class="record-val">{wind_str}</td><td class="record-date">{wind_link}</td></tr>'
     )
+
+    # Najdaljše obdobje brez dežja (zaporedni dnevi s precipTotal 0 ali
+    # manjkajočim podatkom se ne štejejo kot "brez dežja" — samo izmerjena nič).
+    dry_dates = sorted(d for d, v in hist.items() if v.get("precipTotal") is not None)
+    best_len, best_start, best_end = 0, None, None
+    run_start, run_len = None, 0
+    prev_date, prev_dry = None, False
+    for d in dry_dates:
+        is_dry = hist[d]["precipTotal"] == 0
+        contiguous = prev_date is not None and (
+            datetime.date.fromisoformat(d) - datetime.date.fromisoformat(prev_date)
+        ).days == 1
+        if is_dry and contiguous and prev_dry:
+            run_len += 1
+        elif is_dry:
+            run_start, run_len = d, 1
+        else:
+            run_len = 0
+        if is_dry and run_len > best_len:
+            best_len, best_start, best_end = run_len, run_start, d
+        prev_date, prev_dry = d, is_dry
+
+    if best_len >= 2:
+        start_link, _ = d_link(best_start, "")
+        end_link, _ = d_link(best_end, "")
+        rows_dry = (
+            f'    <tr><th>Najdaljše obdobje brez dežja</th>'
+            f'<td class="record-val">{best_len} dni</td>'
+            f'<td class="record-date">{start_link} – {end_link}</td></tr>'
+        )
+    else:
+        rows_dry = None
 
     first_date = min(hist.keys())
     schema = "\n".join([
@@ -1013,8 +1053,9 @@ def gen_records_page(hist, sitemap_urls):
                 {"@type": "PropertyValue", "name": "Absolutno najvišja temperatura", "value": tmax_v, "unitText": "°C"},
                 {"@type": "PropertyValue", "name": "Absolutno najnižja temperatura", "value": tmin_v, "unitText": "°C"},
                 {"@type": "PropertyValue", "name": "Dnevni rekord padavin", "value": prec_v, "unitText": "mm"},
-                {"@type": "PropertyValue", "name": "Najmočnejši sunek vetra", "value": wind_v, "unitText": "km/h"},
-            ],
+                {"@type": "PropertyValue", "name": wind_label, "value": wind_v, "unitText": "km/h"},
+            ] + ([{"@type": "PropertyValue", "name": "Najdaljše obdobje brez dežja", "value": best_len, "unitText": "dni"}]
+                 if rows_dry else []),
             temporal_coverage=f"{first_date}/..",
         ),
     ])
@@ -1030,7 +1071,7 @@ def gen_records_page(hist, sitemap_urls):
 
   <h2>Padavine</h2>
   <table class="stats">
-{rows_prec}
+{rows_prec}{(chr(10) + rows_dry) if rows_dry else ""}
   </table>
 
   <h2>Veter</h2>
