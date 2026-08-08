@@ -69,6 +69,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/koliko-je-letos-dezevalo-v-recici-ob-savinji-0808.html</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/koliko-je-letos-dezevalo-v-recici-ob-savinji-0808.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
