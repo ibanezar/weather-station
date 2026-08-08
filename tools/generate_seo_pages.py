@@ -511,8 +511,14 @@ def gen_daily_pages(hist, force, sitemap_urls):
         if v.get("tempLow") is not None and v["tempLow"] != v.get("tempAvg"):
             rows.append(("Najnižja temperatura", f"{num(v['tempLow'])} °C"))
         rows.append(("Padavine", f"{num(v.get('precipTotal', 0))} mm"))
-        if v.get("windspeedHigh") is not None:
-            rows.append(("Najmočnejši sunek vetra", f"{num(v['windspeedHigh'])} km/h"))
+        # Isti popravek kot na /rekord/: "windgustHigh" (sunek) je pravi vir za
+        # oznako "sunek vetra"; "windspeedHigh" (najvišja sprotna hitrost) je
+        # samo nadomestek za dneve pred uvedbo tega polja.
+        gust_val = v.get("windgustHigh")
+        if gust_val is not None:
+            rows.append(("Najmočnejši sunek vetra", f"{num(gust_val)} km/h"))
+        elif v.get("windspeedHigh") is not None:
+            rows.append(("Najvišja izmerjena hitrost vetra", f"{num(v['windspeedHigh'])} km/h"))
         if v.get("windspeedAvg") is not None:
             rows.append(("Povprečna hitrost vetra", f"{num(v['windspeedAvg'])} km/h"))
         if v.get("humidityAvg") is not None:
@@ -720,9 +726,16 @@ def gen_yearly_pages(hist, force, sitemap_urls):
             sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.7"))
             continue
 
+        # Tekoče leto še ni končano — kartice "letna temperatura/padavine" bi
+        # brez opombe zavajale (leto še ni odigrano), enako kot smo popravili
+        # na /padavine/. Pretekla, zaključena leta ohranijo prvotno oznako.
+        temp_label = "Povp. temp. (do zdaj)" if is_current else "Letna povp. temp."
+        rain_label = "Padavine (do zdaj)" if is_current else "Letne padavine"
+
         title = f"Vreme {y} — Rečica ob Savinji"
-        desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: povprečna temperatura "
-                f"{num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin letno. Postaja IREICA1.")
+        desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: {'doslej ' if is_current else ''}povprečna "
+                f"temperatura {num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin"
+                f"{'' if is_current else ' letno'}. Postaja IREICA1.")
 
         crumbs = [
             ("Meteorec", "/"),
@@ -732,7 +745,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
 
         cards = f'''  <div class="stat-grid">
     <div class="stat-card c-temp">
-      <div class="sc-label">Letna povp. temp.</div>
+      <div class="sc-label">{temp_label}</div>
       <div class="sc-val">{num(s['tavg'])} °C</div>
     </div>
     <div class="stat-card c-up">
@@ -744,10 +757,16 @@ def gen_yearly_pages(hist, force, sitemap_urls):
       <div class="sc-val">{num(s['tmin'])} °C</div>
     </div>
     <div class="stat-card c-rain">
-      <div class="sc-label">Letne padavine</div>
+      <div class="sc-label">{rain_label}</div>
       <div class="sc-val">{num(s['prec_total'])} mm</div>
     </div>
   </div>'''
+
+        in_progress_note = (
+            f'  <p class="muted-note">Leto {y} še ni končano — zgornje vrednosti so izračunane iz '
+            f'meritev do {fmtd(lastmod)}, ne iz celega leta. Za pretekla, zaključena leta glej '
+            f'<a href="/vreme/{y-1}/">{y-1}</a>.</p>' if is_current else ''
+        )
 
         month_rows = []
         for m in range(1, 13):
@@ -793,6 +812,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
   <h1 class="page-title">Vreme {y} — Rečica ob Savinji</h1>
   <p class="post-meta">Letni pregled · postaja IREICA1 · {ELEV} m n. m.</p>
 {cards}
+{in_progress_note}
   <h2>Mesečni pregled</h2>
 {month_table}
 {ynav}'''
@@ -930,7 +950,15 @@ def gen_records_page(hist, sitemap_urls):
     tmax_d, tmax_v = find_record("tempHigh", max)
     tmin_d, tmin_v = find_record("tempLow", min)
     prec_d, prec_v = find_record("precipTotal", max)
-    wind_d, wind_v = find_record("windspeedHigh", max)
+    # "windgustHigh" (sunek) je bil dodan pozneje v podatkovni sklop; za dneve
+    # brez njega pade nazaj na "windspeedHigh" (najvišja sprotna hitrost), ki
+    # sicer meri drugo količino — zato gre v tabelo pod ustrezno oznako.
+    gust_d, gust_v = find_record("windgustHigh", max)
+    speed_d, speed_v = find_record("windspeedHigh", max)
+    if gust_v is not None and (speed_v is None or gust_v >= speed_v):
+        wind_d, wind_v, wind_label = gust_d, gust_v, "Najmočnejši izmerjeni sunek vetra"
+    else:
+        wind_d, wind_v, wind_label = speed_d, speed_v, "Najvišja izmerjena hitrost vetra"
 
     # Monthly records
     by_month = defaultdict(list)
@@ -999,9 +1027,41 @@ def gen_records_page(hist, sitemap_urls):
         f'<td class="record-date">{ym_link(driest_ym)}</td></tr>'
     )
     rows_wind = (
-        f'    <tr><th>Najmočnejši izmerjeni sunek vetra</th>'
+        f'    <tr><th>{wind_label}</th>'
         f'<td class="record-val">{wind_str}</td><td class="record-date">{wind_link}</td></tr>'
     )
+
+    # Najdaljše obdobje brez dežja (zaporedni dnevi s precipTotal 0 ali
+    # manjkajočim podatkom se ne štejejo kot "brez dežja" — samo izmerjena nič).
+    dry_dates = sorted(d for d, v in hist.items() if v.get("precipTotal") is not None)
+    best_len, best_start, best_end = 0, None, None
+    run_start, run_len = None, 0
+    prev_date, prev_dry = None, False
+    for d in dry_dates:
+        is_dry = hist[d]["precipTotal"] == 0
+        contiguous = prev_date is not None and (
+            datetime.date.fromisoformat(d) - datetime.date.fromisoformat(prev_date)
+        ).days == 1
+        if is_dry and contiguous and prev_dry:
+            run_len += 1
+        elif is_dry:
+            run_start, run_len = d, 1
+        else:
+            run_len = 0
+        if is_dry and run_len > best_len:
+            best_len, best_start, best_end = run_len, run_start, d
+        prev_date, prev_dry = d, is_dry
+
+    if best_len >= 2:
+        start_link, _ = d_link(best_start, "")
+        end_link, _ = d_link(best_end, "")
+        rows_dry = (
+            f'    <tr><th>Najdaljše obdobje brez dežja</th>'
+            f'<td class="record-val">{best_len} dni</td>'
+            f'<td class="record-date">{start_link} – {end_link}</td></tr>'
+        )
+    else:
+        rows_dry = None
 
     first_date = min(hist.keys())
     schema = "\n".join([
@@ -1013,8 +1073,9 @@ def gen_records_page(hist, sitemap_urls):
                 {"@type": "PropertyValue", "name": "Absolutno najvišja temperatura", "value": tmax_v, "unitText": "°C"},
                 {"@type": "PropertyValue", "name": "Absolutno najnižja temperatura", "value": tmin_v, "unitText": "°C"},
                 {"@type": "PropertyValue", "name": "Dnevni rekord padavin", "value": prec_v, "unitText": "mm"},
-                {"@type": "PropertyValue", "name": "Najmočnejši sunek vetra", "value": wind_v, "unitText": "km/h"},
-            ],
+                {"@type": "PropertyValue", "name": wind_label, "value": wind_v, "unitText": "km/h"},
+            ] + ([{"@type": "PropertyValue", "name": "Najdaljše obdobje brez dežja", "value": best_len, "unitText": "dni"}]
+                 if rows_dry else []),
             temporal_coverage=f"{first_date}/..",
         ),
     ])
@@ -1030,7 +1091,7 @@ def gen_records_page(hist, sitemap_urls):
 
   <h2>Padavine</h2>
   <table class="stats">
-{rows_prec}
+{rows_prec}{(chr(10) + rows_dry) if rows_dry else ""}
   </table>
 
   <h2>Veter</h2>
@@ -1314,8 +1375,19 @@ def climate_facts(hist):
                           if v.get("tempLow") is not None), key=lambda x: x[1])
     prec_d, prec_v = max(((d, v["precipTotal"]) for d, v in hist.items()
                           if v.get("precipTotal") is not None), key=lambda x: x[1])
-    wind_d, wind_v = max(((d, v["windspeedHigh"]) for d, v in hist.items()
-                          if v.get("windspeedHigh") is not None), key=lambda x: x[1])
+    # Isti popravek kot na /rekord/ in dnevnih straneh: "windgustHigh" (sunek)
+    # je pravi vir za "najmočnejši sunek", "windspeedHigh" pa le nadomestek za
+    # dneve pred uvedbo tega polja — brez tega bi ta funkcija (deljena z
+    # /vreme-recica-ob-savinji/ in stranmi sosednjih krajev) tiho podcenjevala
+    # rekord sunka enako, kot ga je prej /rekord/.
+    gust_cands = [(d, v["windgustHigh"]) for d, v in hist.items() if v.get("windgustHigh") is not None]
+    speed_cands = [(d, v["windspeedHigh"]) for d, v in hist.items() if v.get("windspeedHigh") is not None]
+    gust_best = max(gust_cands, key=lambda x: x[1]) if gust_cands else (None, None)
+    speed_best = max(speed_cands, key=lambda x: x[1]) if speed_cands else (None, None)
+    if gust_best[1] is not None and (speed_best[1] is None or gust_best[1] >= speed_best[1]):
+        wind_d, wind_v = gust_best
+    else:
+        wind_d, wind_v = speed_best
 
     yr = defaultdict(list)
     for d, v in hist.items():
@@ -1916,7 +1988,9 @@ def gen_landing_page(hist, sitemap_urls):
         {"name": "Najnižja temperatura", "value": latest.get("tempLow"), "unit": "°C"},
         {"name": "Padavine", "value": latest.get("precipTotal"), "unit": "mm"},
         {"name": "Relativna vlažnost", "value": latest.get("humidityAvg"), "unit": "%"},
-        {"name": "Najmočnejši sunek vetra", "value": latest.get("windspeedHigh"), "unit": "km/h"},
+        {"name": "Najmočnejši sunek vetra",
+         "value": latest.get("windgustHigh") if latest.get("windgustHigh") is not None else latest.get("windspeedHigh"),
+         "unit": "km/h"},
     ]
     observations = [o for o in observations if o["value"] is not None]
     schema = "\n".join([
