@@ -2573,6 +2573,30 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <button class="ai-train-btn" id="ai-train-btn" onclick="initAINowcast()">↻ Osveži napoved</button>
     </div>
 
+    <!-- MTR — ločen model (dnevni MOS, D+1..D+3), ne zamenjuj s HW/k-NN nowcastom
+         zgoraj/spodaj: ta kartica bere isti napoved-modela.json kot domača
+         stran, samo prek fetchMosForecast('ai-mos-'), da elementi ne trčijo. -->
+    <div class="card chart-card" style="margin-bottom:1rem">
+      <div class="chart-hdr">
+        <span style="display:flex;align-items:center;gap:.4rem">
+          <span class="clabel" style="margin:0">📊 MTR — poskusna napoved (D+1..D+3)</span>
+          <span class="aifc-badge mtr" id="ai-mos-badge"></span>
+        </span>
+        <span class="chart-range" id="ai-mos-updated">Nalaganje…</span>
+      </div>
+      <div class="mos-spark-row" id="ai-mos-spark-row"></div>
+      <div id="ai-mos-grid" class="mos-grid">
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
+      </div>
+      <div class="mos-note" id="ai-mos-note"></div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:.5rem;line-height:1.55">
+        <strong style="color:var(--text)">Drugačen model od zgornjega:</strong> MTR je ločen, na strežniku vnaprej
+        izračunan model za naslednje dni (grebenska regresija, naučena na meritvah te postaje), medtem ko je
+        Holt-Winters spodaj sprotni nowcast za naslednjih 6 ur, izračunan v brskalniku.
+        <a href="/tocnost-napovedi/">Kako se MTR odreže v praksi →</a>
+      </div>
+    </div>
+
     <!-- Forecast cards -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">

@@ -213,6 +213,31 @@ def fetch_forecast():
         return None
 
 
+def fetch_mtr_forecast():
+    """D+1 napoved lastnega modela MTR, za omembo v članku kot ločen,
+    izrecno označen poskusni vir (ne kot uradna/zanesljiva napoved).
+
+    Bere lokalno napoved-modela.json (piše ga tools/predict_recica_mos.py v
+    forecast-verify.yml, ki teče pred tem workflowom in commita na main --
+    zato tu ni potreben nov klic Open-Meteo). Vrne None, če datoteke ni ali
+    je prazna, da članek preprosto izpusti omembo MTR."""
+    try:
+        with open(os.path.join(ROOT, "napoved-modela.json"), encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    d1 = next((d for d in data.get("days", []) if d.get("lead") == 1), None)
+    if not d1:
+        return None
+    return {
+        "opis": "Poskusni lokalni model (MOS): Open-Meteo kot vhod, popravek za dno "
+                "doline naučen na meritvah postaje IREICA1. NI uradna napoved.",
+        "tmax": d1.get("tmax"), "tmin": d1.get("tmin"),
+        "om_tmax": d1.get("om_tmax"), "om_tmin": d1.get("om_tmin"),
+        "verjetnost_dezja": d1.get("pop"),
+    }
+
+
 def load_state():
     try:
         return json.load(open(STATE_FILE, encoding="utf-8"))
@@ -353,6 +378,15 @@ SEO / KLJUČNE BESEDE:
   Če fraza ne zveni naravno na danem mestu, jo preoblikuj ali izpusti raje kot da jo na silo vtakneš.
 - Uporabi tudi 1-2 sorodni dolgi rep (long-tail) fraze skozi telo besedila, kjer se organsko prilegajo.
 
+MTR (naš poskusni model):
+- Če dobiš polje "mtr_napoved_jutri", ga smeš omeniti KVEČJEMU v enem stavku/odstavku, in
+  SAMO če je tematsko smiselno (npr. tema govori o napovedi za jutri/prihodnje dni) --
+  ni obvezno, da se pojavi v vsakem članku, pri temah brez zveze z napovedjo ga izpusti.
+- Vedno ga imenuj "naš poskusni model MTR" (ali "MTR, naš eksperimentalni model za to
+  dolino") -- nikoli ga ne predstavi kot uradno, preverjeno ali zanesljivo napoved.
+- Uporabi SAMO številke iz tega polja (tmax/tmin proti om_tmax/om_tmin); ne izračunavaj,
+  ne zaokrožuj drugače in ne dodajaj lastne interpretacije natančnosti modela.
+
 INTERNO LINKANJE:
 - Dobiš seznam "interni_linki" (naslov + URL obstoječih strani na meteorec.si). Vpleti 2-4 od njih
   kot naravne inline povezave znotraj odstavkov (NE kot seznam na koncu), v obliki:
@@ -468,7 +502,7 @@ def stream_claude(payload, api_key, timeout=180):
     raise RuntimeError(f"Claude API po {len(_RETRY_DELAYS) + 1} poskusih še vedno ni na voljo: {last_err}")
 
 
-def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None):
+def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None, mtr=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ANTHROPIC_API_KEY manjka.")
@@ -482,6 +516,8 @@ def call_claude(topic, current, hourly, forecast, stat_cards, desired_title=None
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
         "datum": TODAY,
     }
+    if mtr:
+        context["mtr_napoved_jutri"] = mtr
     if desired_title:
         context["izbrani_naslov"] = desired_title
     user_prompt = "Podatki za današnji članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)
@@ -1051,6 +1087,7 @@ def main():
     current = fetch_current()
     hourly = fetch_hourly()
     forecast = fetch_forecast()
+    mtr = fetch_mtr_forecast()
 
     print("2/6 Izbiram temo...")
     state = load_state()
@@ -1073,7 +1110,7 @@ def main():
     if dry_run:
         print("   (--dry-run: preskačem klic Claude API)")
         return
-    draft = call_claude(topic, current, hourly, forecast, stat_cards, desired_title)
+    draft = call_claude(topic, current, hourly, forecast, stat_cards, desired_title, mtr)
 
     print("4/6 Lektura...")
     lektor_context = {
@@ -1081,6 +1118,8 @@ def main():
         "napoved_4dni": (forecast or {}).get("daily"),
         "izracunane_stat_kartice": [{"label": l, "value": v, "sub": s} for _, l, v, s in stat_cards],
     }
+    if mtr:
+        lektor_context["mtr_napoved_jutri"] = mtr
     review = call_lektor(draft, lektor_context)
     if review.get("issues"):
         print("   popravki/opombe lektorja:")
