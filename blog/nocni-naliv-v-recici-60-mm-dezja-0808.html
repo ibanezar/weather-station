@@ -15,7 +15,7 @@
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html">
 <meta name="description" content="Ponoči je nad Rečico ob Savinji padlo 60,5 mm dežja, skoraj vse v dveh urah okoli polnoči z vrhom 69 mm/h. Drugi najbolj moker avgust na postaji IREICA1.">
-<meta name="keywords" content="padavine, naliv, nevihta, IREICA1, Savinja, suša">
+<meta name="keywords" content="padavine, naliv, nevihta, IREICA1, Savinja, suša, vodna bilanca">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="article">
@@ -48,7 +48,7 @@
   "publisher": { "@type": "Organization", "name": "Meteorec", "logo": { "@type": "ImageObject", "url": "https://meteorec.si/icon-512.png" } },
   "mainEntityOfPage": { "@type": "WebPage", "@id": "https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html" },
   "about": { "@type": "Place", "name": "Rečica ob Savinji", "sameAs": ["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"], "geo": { "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 } },
-  "keywords": "padavine, naliv, nevihta, IREICA1, Savinja, suša"
+  "keywords": "padavine, naliv, nevihta, IREICA1, Savinja, suša, vodna bilanca"
 }
 </script>
 <script type="application/ld+json">
@@ -150,18 +150,30 @@
 
     <span class="section-label">05 — Savinja in tla</span>
     <h2 id="savinja-in-susa">Kaj to pomeni za Savinjo in za sušo</h2>
-    <p>Kljub obilici dežja se je <strong><a href="/vodostaj-savinje/" style="color:var(--blue)">Savinja pri Nazarjah</a></strong> odzvala zmerno: vodostaj je zjutraj znašal 48 cm, pretok pa 5,98 m³/s – še vedno v razredu »mali pretok«, le nekoliko nad poletnim minimumom (42 cm / 4,5 m³/s v začetku julija). To potrjuje, da je šlo za lokaliziran naliv, ne za padavine po vsem porečju, zato o poplavni nevarnosti ni sledu. Za <a href="/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html" style="color:var(--blue)">sušna tla</a>, ki so bila po vročinskem valu izrazito suha, pa je 60,5 mm dežja vseeno pomembna, čeprav enkratna injekcija vode – koliko od tega je resnično prišlo do koreninske cone in koliko je odteklo ali izhlapelo, bo pokazala ločena vodna bilanca v prihodnjih dneh.</p>
+    <p>Kljub obilici dežja se je <strong><a href="/vodostaj-savinje/" style="color:var(--blue)">Savinja pri Nazarjah</a></strong> odzvala zmerno: vodostaj je zjutraj znašal 48 cm, pretok pa 5,98 m³/s – še vedno v razredu »mali pretok«, le nekoliko nad poletnim minimumom (42 cm / 4,5 m³/s v začetku julija). To potrjuje, da je šlo za lokaliziran naliv, ne za padavine po vsem porečju, zato o poplavni nevarnosti ni sledu. Za <a href="/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html" style="color:var(--blue)">sušna tla</a>, ki so bila po vročinskem valu izrazito suha, pa je 60,5 mm dežja pomembna, čeprav enkratna injekcija vode – koliko od tega je bilo dovolj, pokaže vodna bilanca spodaj.</p>
+
+    <span class="section-label">06 — vodna bilanca</span>
+    <h2 id="je-namocilo-dovolj">Je namočilo dovolj? Vodna bilanca pravi: še ne</h2>
+    <p>Za odgovor ne zadošča samo količina dežja – primerjati jo je treba z referenčno evapotranspiracijo (ET₀), torej s tem, koliko vode bi ob danih vremenskih razmerah izhlapelo iz tal in rastlin. V šestih tednih pred nalivom (25. junij–6. avgust) je na postaji IREICA1 padlo skupaj le <strong>49,8 mm</strong> dežja, medtem ko je ET₀ (Open-Meteo, metoda FAO Penman-Monteith) za isto obdobje znašal <strong>216,2 mm</strong>. Neto vodna bilanca je bila torej <strong>−166,4 mm</strong> – dolina se je vztrajno izsuševala tudi ob občasnem šibkem dežju.</p>
+
+    <div class="chart-card">
+      <h3>Kumulativna vodna bilanca P − ET₀ (25. junij – 8. avgust 2026)</h3>
+      <canvas id="chartBilanca"></canvas>
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:-.6rem">Padavine (P) so dejanske meritve postaje IREICA1, referenčna evapotranspiracija (ET₀) pa modelska ocena Open-Meteo za lokacijo postaje. Zadnja točka (8. 8.) je delna – zajema le uro do zore, ko je naliv ponehal.</p>
+
+    <p>Nočni naliv je v to bilanco vnesel pravi preobrat, a ne dovolj velikega. Ob upoštevanju evapotranspiracije obeh dni (skupaj približno 8,8 mm) je neto pridobitev vode <strong>+51,7 mm</strong> – kumulativna bilanca od 25. junija se je s tem popravila na približno <strong>−114,7 mm</strong>. Naliv je tako pokril slabo tretjino (≈ 31 %) šesttedenskega primanjkljaja, preostanek pa ostaja odprt. Odgovor na naslovno vprašanje je torej: delno. Za rastline in vrtove je bila to nujna in dobrodošla osvežitev po tednih vročine, a globlje v tleh primanjkljaj ostaja – za dejansko izravnavo bi bilo treba še vsaj dvakrat toliko dežja, po možnosti bolj umirjenega in razporejenega čez več dni, saj tako intenziven naliv velik del vode odvede površinsko, namesto da bi počasi prodrla globlje (podobno je pokazala že <a href="/blog/koliko-je-zalilo-nevihta-11-julij-2026.html" style="color:var(--blue)">analiza naliva 11. julija</a>). Sprotno stanje vodne bilance in ET₀ spremljamo na <a href="/agrometeo/" style="color:var(--blue)">agrometeo strani</a>.</p>
 
     <div class="callout">
-      <p><strong>Skratka:</strong> Noč na 8. avgust je Rečici prinesla 60,5 mm dežja – drugo najbolj mokro avgustovsko obdobje v sedemletni zgodovini postaje, strnjeno v samo dve uri okoli polnoči. Šlo je za izrazito padavinski, ne vetrovni dogodek, Savinja pa se nanj ni burno odzvala. Po tednu vročinskih opozoril je bila to dobrodošla, čeprav silovita osvežitev.</p>
+      <p><strong>Skratka:</strong> Noč na 8. avgust je Rečici prinesla 60,5 mm dežja – drugo najbolj mokro avgustovsko obdobje v sedemletni zgodovini postaje, strnjeno v samo dve uri okoli polnoči. Šlo je za izrazito padavinski, ne vetrovni dogodek, Savinja pa se nanj ni burno odzvala. Za sušna tla je naliv pokril le okoli 31 % šesttedenskega primanjkljaja – dobrodošla, a še zdaleč ne zadostna osvežitev po tednih vročine.</p>
     </div>
 
-    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: meritve vremenske postaje IREICA1 (urni in dnevni arhiv, Rečica ob Savinji, 366 m n. m.), zgodovinski dnevni podatki postaje od novembra 2019, hidrološki podatki ARSO za Savinjo pri Nazarjah (vode.arso.gov.si). Trenutne meritve v živo so na voljo na <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: meritve vremenske postaje IREICA1 (urni in dnevni arhiv, Rečica ob Savinji, 366 m n. m.), zgodovinski dnevni podatki postaje od novembra 2019, referenčna evapotranspiracija ET₀ (Open-Meteo, FAO Penman-Monteith), hidrološki podatki ARSO za Savinjo pri Nazarjah (vode.arso.gov.si). Trenutne meritve v živo so na voljo na <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
 
     <!-- Vrstico za deljenje izriše /blog/share-bar.js (edini vir za vse generatorje). -->
 
     <!-- teme:start — samodejno, wire_all(); ne urejaj ročno -->
-    <div class="post-topics"><span class="pt-label">Teme:</span> <a class="pt-tag" href="/blog/tema/padavine/">padavine</a><a class="pt-tag" href="/blog/tema/nevihta/">nevihta</a><a class="pt-tag" href="/blog/tema/ireica1/">ireica1</a><a class="pt-tag" href="/blog/tema/savinja/">savinja</a><a class="pt-tag" href="/blog/tema/susa/">susa</a></div>
+    <div class="post-topics"><span class="pt-label">Teme:</span> <a class="pt-tag" href="/blog/tema/padavine/">padavine</a><a class="pt-tag" href="/blog/tema/nevihta/">nevihta</a><a class="pt-tag" href="/blog/tema/ireica1/">ireica1</a><a class="pt-tag" href="/blog/tema/savinja/">savinja</a><a class="pt-tag" href="/blog/tema/susa/">suša</a><a class="pt-tag" href="/blog/tema/vodna-bilanca/">vodna bilanca</a></div>
     <!-- teme:end -->
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
@@ -169,7 +181,7 @@
   <!-- sorodni:start — samodejno, wire_all(); ne urejaj ročno -->
   <section class="related-posts">
     <h2 class="related-title">Sorodni članki</h2>
-    <div class="related-grid"><a class="related-card" href="/blog/koliko-je-zalilo-nevihta-11-julij-2026.html"><span class="related-date">11. julija 2026</span><span class="related-h">Koliko je danes v resnici »zalilo«? Nevihta 11. julija 2026 pod drobnogledom</span><span class="related-sum">Popoldanska nevihta je odložila 8,9 mm dežja z vrhom 24,6 mm/h. A ko upoštevamo evapotranspiracijo, odtok in globino nav…</span></a><a class="related-card" href="/blog/ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804.html"><span class="related-date">4. avgusta 2026</span><span class="related-h">Ohladitev v petek: konec vročinskega vala, dež do sobote</span><span class="related-sum">Po vročinskem valu z do 37 °C ohladitev v petek prinese dež v Zgornji Savinjski dolini. Koliko padavin pade in kdaj se s…</span></a><a class="related-card" href="/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html"><span class="related-date">7. avgusta 2026</span><span class="related-h">Koliko bo danes zalilo v Rečici? Primerjava modelov</span><span class="related-sum">Postaja IREICA1 je zjutraj še suha. ARSO za danes napoveduje 31,8 mm in možnost neviht, ICON komaj 0,4 mm. Primerjava še…</span></a></div>
+    <div class="related-grid"><a class="related-card" href="/blog/koliko-je-zalilo-nevihta-11-julij-2026.html"><span class="related-date">11. julija 2026</span><span class="related-h">Koliko je danes v resnici »zalilo«? Nevihta 11. julija 2026 pod drobnogledom</span><span class="related-sum">Popoldanska nevihta je odložila 8,9 mm dežja z vrhom 24,6 mm/h. A ko upoštevamo evapotranspiracijo, odtok in globino nav…</span></a><a class="related-card" href="/blog/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.html"><span class="related-date">16. julija 2026</span><span class="related-h">Vodna bilanca tal: koliko od zadnjega dežja je res prišlo do korenin</span><span class="related-sum">Koliko dežja je dejansko koristilo tlom v Zgornji Savinjski dolini? Pogled na vodno bilanco tal, evapotranspiracijo in o…</span></a><a class="related-card" href="/blog/vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712.html"><span class="related-date">12. julija 2026</span><span class="related-h">Vodna bilanca: koliko od dežja zadnjih dni je dejansko ostalo v tleh?</span><span class="related-sum">13,9 mm dežja, potem sonce in 777 W/m² sevanja. Analiziramo, koliko vode je šlo v tla in koliko je izhlapelo že prvi dan…</span></a></div>
   </section>
   <!-- sorodni:end -->
 
@@ -258,6 +270,31 @@
         x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } },
         y: { min: 0, max: 40, grid: { color: 'rgba(255,255,255,.05)' },
              ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } }
+      }
+    }
+  });
+
+  const bilancaLab = ['25.6.','26.6.','27.6.','28.6.','29.6.','30.6.','1.7.','2.7.','3.7.','4.7.','5.7.','6.7.','7.7.','8.7.','9.7.','10.7.','11.7.','12.7.','13.7.','14.7.','15.7.','16.7.','17.7.','18.7.','19.7.','20.7.','21.7.','22.7.','23.7.','24.7.','25.7.','26.7.','27.7.','28.7.','29.7.','30.7.','31.7.','1.8.','2.8.','3.8.','4.8.','5.8.','6.8.','7.8.','8.8.*'];
+  const bilancaData = [-5.7,-11.7,-17.8,-23.8,-29.5,-35.0,-39.0,-43.9,-48.8,-53.8,-58.6,-62.8,-68.1,-71.2,-75.2,-78.7,-70.5,-75.3,-80.8,-80.5,-76.2,-75.3,-79.5,-72.7,-77.1,-81.1,-81.8,-86.4,-90.1,-94.6,-100.0,-104.3,-109.2,-113.8,-119.5,-125.4,-131.1,-136.7,-142.4,-148.3,-154.8,-160.4,-166.4,-135.3,-114.7];
+  new Chart(document.getElementById('chartBilanca'), {
+    data: {
+      labels: bilancaLab,
+      datasets: [{
+        type: 'line', label: 'Kumulativna bilanca P − ET₀ (mm)', data: bilancaData,
+        borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.12)',
+        borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, tension: .2, fill: true
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false },
+        tooltip: { ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks: { label: ctx => ` ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(1)} mm` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 9 }, maxTicksLimit: 10, autoSkip: true } },
+        y: { min: -180, max: 20,
+             grid: { color: ctx => ctx.tick.value === 0 ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.05)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => (v > 0 ? '+' : '') + v + ' mm' } }
       }
     }
   });
