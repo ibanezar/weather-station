@@ -810,6 +810,37 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
     if not complete_years:
         complete_years = annual_precip
 
+    # "Koliko je letos deževalo" — tekoče leto ni v letnem grafu (nepošteno bi
+    # ga primerjalo s polnimi leti), a je najbolj iskan lokalni long-tail
+    # (glej SEO raziskavo §4/§12 P1). Namesto tega dobi svojo kartico, primerjano
+    # s pričakovano količino do istega koledarskega dne (mesečne norme, zadnji
+    # mesec prorated glede na potekle dni — ne s polnoletnim povprečjem).
+    ytd_year = int(last_date[:4])
+    ytd_month = int(last_date[5:7])
+    ytd_day = int(last_date[8:10])
+    ytd_total = annual_precip.get(ytd_year)
+    ytd_html = ""
+    if ytd_total is not None:
+        days_in_month = calendar.monthrange(ytd_year, ytd_month)[1]
+        expected = sum((normals.get(m, {}).get("precip_monthly") or 0) for m in range(1, ytd_month))
+        expected += (normals.get(ytd_month, {}).get("precip_monthly") or 0) * (ytd_day / days_in_month)
+        pct = (ytd_total / expected * 100) if expected else None
+        pct_txt = ""
+        if pct is not None:
+            if pct >= 105:
+                pct_txt = f'<span class="br-sub">{num(pct, 0)} % povprečja za to obdobje leta — nadpovprečno namočeno</span>'
+            elif pct <= 95:
+                pct_txt = f'<span class="br-sub">{num(pct, 0)} % povprečja za to obdobje leta — podpovprečno namočeno</span>'
+            else:
+                pct_txt = f'<span class="br-sub">{num(pct, 0)} % povprečja za to obdobje leta — blizu normale</span>'
+        ytd_html = (
+            '  <div class="event-hero">\n'
+            f'    <div class="ev-label">Letos do {fmtd(last_date)}</div>\n'
+            f'    <div class="ev-value rain">{num(ytd_total, 0)} mm</div>\n'
+            f'    <div class="ev-date">{pct_txt}</div>\n'
+            '  </div>'
+        )
+
     # Bar chart za letne padavine
     max_prec_val = max(complete_years.values()) if complete_years else 1
     bar_rows = []
@@ -857,6 +888,14 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
 
     faq_qa = [
         (
+            f"Koliko je letos ({ytd_year}) deževalo v Rečici ob Savinji?",
+            f"Do {fmtd(last_date)} je postaja IREICA1 letos zabeležila {num(ytd_total, 0)} mm padavin."
+            + (f" To je {num(pct, 0)} % povprečne količine za to obdobje leta." if ytd_total is not None and pct is not None else "")
+        ) if ytd_total is not None else (
+            "Koliko dežja pade v Rečici ob Savinji na leto?",
+            f"Postaja IREICA1 beleži povprečno {num(avg_ann, 0)} mm padavin na leto."
+        ),
+        (
             "Koliko dežja pade v Rečici ob Savinji na leto?",
             f"Postaja IREICA1 v Rečici ob Savinji ({ELEV} m n. m.) beleži povprečno "
             f"{num(avg_ann, 0)} mm padavin na leto (povprečje 2019–{TODAY.year}). "
@@ -887,7 +926,10 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
                           for q, a in faq_qa)
 
     title = "Padavine Rečica ob Savinji — letni in mesečni podatki"
-    desc  = (f"Klimatologija padavin za Rečico ob Savinji: letne in mesečne količine, "
+    desc  = (f"Koliko je letos deževalo v Rečici ob Savinji? {num(ytd_total, 0)} mm do {fmtd_short(last_date)}. "
+             f"Letne in mesečne količine, rekordi — podatki postaje IREICA1 od 2019."
+             if ytd_total is not None else
+             f"Klimatologija padavin za Rečico ob Savinji: letne in mesečne količine, "
              f"rekordi in trendi — podatki meteorološke postaje IREICA1 od 2019.")
 
     schema = (crumbs_schema([("Meteorec", "/"), ("Padavine", None)])
@@ -902,7 +944,7 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
   <p class="archive-intro">Klimatološki pregled padavin meteorološke postaje IREICA1
   v Rečici ob Savinji ({ELEV} m n. m.). Letne skupne vrednosti, mesečne norme in rekordi
   na osnovi meritev od novembra 2019.</p>
-
+{ytd_html}
 {bars_html}
 {month_bars_html}
 
