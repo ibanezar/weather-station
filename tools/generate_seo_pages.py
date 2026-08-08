@@ -720,9 +720,16 @@ def gen_yearly_pages(hist, force, sitemap_urls):
             sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.7"))
             continue
 
+        # Tekoče leto še ni končano — kartice "letna temperatura/padavine" bi
+        # brez opombe zavajale (leto še ni odigrano), enako kot smo popravili
+        # na /padavine/. Pretekla, zaključena leta ohranijo prvotno oznako.
+        temp_label = "Povp. temp. (do zdaj)" if is_current else "Letna povp. temp."
+        rain_label = "Padavine (do zdaj)" if is_current else "Letne padavine"
+
         title = f"Vreme {y} — Rečica ob Savinji"
-        desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: povprečna temperatura "
-                f"{num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin letno. Postaja IREICA1.")
+        desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: {'doslej ' if is_current else ''}povprečna "
+                f"temperatura {num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin"
+                f"{'' if is_current else ' letno'}. Postaja IREICA1.")
 
         crumbs = [
             ("Meteorec", "/"),
@@ -732,7 +739,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
 
         cards = f'''  <div class="stat-grid">
     <div class="stat-card c-temp">
-      <div class="sc-label">Letna povp. temp.</div>
+      <div class="sc-label">{temp_label}</div>
       <div class="sc-val">{num(s['tavg'])} °C</div>
     </div>
     <div class="stat-card c-up">
@@ -744,10 +751,16 @@ def gen_yearly_pages(hist, force, sitemap_urls):
       <div class="sc-val">{num(s['tmin'])} °C</div>
     </div>
     <div class="stat-card c-rain">
-      <div class="sc-label">Letne padavine</div>
+      <div class="sc-label">{rain_label}</div>
       <div class="sc-val">{num(s['prec_total'])} mm</div>
     </div>
   </div>'''
+
+        in_progress_note = (
+            f'  <p class="muted-note">Leto {y} še ni končano — zgornje vrednosti so izračunane iz '
+            f'meritev do {fmtd(lastmod)}, ne iz celega leta. Za pretekla, zaključena leta glej '
+            f'<a href="/vreme/{y-1}/">{y-1}</a>.</p>' if is_current else ''
+        )
 
         month_rows = []
         for m in range(1, 13):
@@ -793,6 +806,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
   <h1 class="page-title">Vreme {y} — Rečica ob Savinji</h1>
   <p class="post-meta">Letni pregled · postaja IREICA1 · {ELEV} m n. m.</p>
 {cards}
+{in_progress_note}
   <h2>Mesečni pregled</h2>
 {month_table}
 {ynav}'''
