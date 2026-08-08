@@ -1375,8 +1375,19 @@ def climate_facts(hist):
                           if v.get("tempLow") is not None), key=lambda x: x[1])
     prec_d, prec_v = max(((d, v["precipTotal"]) for d, v in hist.items()
                           if v.get("precipTotal") is not None), key=lambda x: x[1])
-    wind_d, wind_v = max(((d, v["windspeedHigh"]) for d, v in hist.items()
-                          if v.get("windspeedHigh") is not None), key=lambda x: x[1])
+    # Isti popravek kot na /rekord/ in dnevnih straneh: "windgustHigh" (sunek)
+    # je pravi vir za "najmočnejši sunek", "windspeedHigh" pa le nadomestek za
+    # dneve pred uvedbo tega polja — brez tega bi ta funkcija (deljena z
+    # /vreme-recica-ob-savinji/ in stranmi sosednjih krajev) tiho podcenjevala
+    # rekord sunka enako, kot ga je prej /rekord/.
+    gust_cands = [(d, v["windgustHigh"]) for d, v in hist.items() if v.get("windgustHigh") is not None]
+    speed_cands = [(d, v["windspeedHigh"]) for d, v in hist.items() if v.get("windspeedHigh") is not None]
+    gust_best = max(gust_cands, key=lambda x: x[1]) if gust_cands else (None, None)
+    speed_best = max(speed_cands, key=lambda x: x[1]) if speed_cands else (None, None)
+    if gust_best[1] is not None and (speed_best[1] is None or gust_best[1] >= speed_best[1]):
+        wind_d, wind_v = gust_best
+    else:
+        wind_d, wind_v = speed_best
 
     yr = defaultdict(list)
     for d, v in hist.items():
@@ -1977,7 +1988,9 @@ def gen_landing_page(hist, sitemap_urls):
         {"name": "Najnižja temperatura", "value": latest.get("tempLow"), "unit": "°C"},
         {"name": "Padavine", "value": latest.get("precipTotal"), "unit": "mm"},
         {"name": "Relativna vlažnost", "value": latest.get("humidityAvg"), "unit": "%"},
-        {"name": "Najmočnejši sunek vetra", "value": latest.get("windspeedHigh"), "unit": "km/h"},
+        {"name": "Najmočnejši sunek vetra",
+         "value": latest.get("windgustHigh") if latest.get("windgustHigh") is not None else latest.get("windspeedHigh"),
+         "unit": "km/h"},
     ]
     observations = [o for o in observations if o["value"] is not None]
     schema = "\n".join([
