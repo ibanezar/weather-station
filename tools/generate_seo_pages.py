@@ -1366,7 +1366,8 @@ NEARBY_TOWNS = [
      "lat": 46.338050, "lon": 14.957203, "elev": 340,
      "short": "spodnji del doline",
      "note": ("največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline, "
-              "na najširšem in najbolj odprtem delu dolinskega dna (Mozirsko polje)"),
+              "na najširšem in najbolj odprtem delu dolinskega dna (Mozirsko polje), znan tudi "
+              "po botaničnem parku Mozirski gaj"),
      "microclimate": ("Mozirje leži nekoliko niže in na širšem, bolj odprtem delu doline kot "
                        "postaja IREICA1, zato je manj podvrženo nočnemu zbiranju hladnega zraka "
                        "kot ožji, više ležeči kraji gorvodno — jutranje temperaturne inverzije so "
