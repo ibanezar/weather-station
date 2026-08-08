@@ -1815,7 +1815,7 @@ def gen_landing_page(hist, sitemap_urls):
     trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
                  else f"{num(trend, 2)} °C na leto")
 
-    title = "Vreme Rečica ob Savinji — meritve v živo in lokalna mikroklima"
+    title = "Vreme Rečica ob Savinji zdaj — meritve v živo in lokalna mikroklima"
     desc = (f"Vreme v Rečici ob Savinji (Zgornja Savinjska dolina, {ELEV} m n. m.): meritve "
             f"v živo in {n_days} dni arhiva postaje IREICA1. Mikroklima doline, megla, "
             f"inverzija, veter in trend segrevanja {trend_txt}.")
@@ -1880,6 +1880,11 @@ def gen_landing_page(hist, sitemap_urls):
          "Trenutne meritve temperature, padavin, vlage in vetra v živo objavlja meteorološka "
          "postaja IREICA1 na naslovni strani Meteorec (meteorec.si). Podatki so dejanske meritve "
          "z lokacije v Rečici ob Savinji, ne le napoved iz modela."),
+        ("Ali ta stran pokriva vreme za celotno Zgornjo Savinjsko dolino?",
+         "Da. Postaja IREICA1 v Rečici ob Savinji je edina z neprekinjenimi meritvami v Zgornji "
+         "Savinjski dolini, zato služi kot referenčna postaja za vso dolino. Za sosednje kraje "
+         "(Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad, Luče, Solčava) so na voljo ločene "
+         "ocene, prilagojene njihovi nadmorski višini in legi."),
         ("Kje stoji vremenska postaja v Rečici ob Savinji?",
          f"Postaja IREICA1 stoji v Rečici ob Savinji na dnu Zgornje Savinjske doline, na približno "
          f"{ELEV} m nadmorske višine. Meritve so na voljo od novembra 2019."),
