@@ -12509,6 +12509,15 @@ function aiDrawComparison(actual,lstm,omPast){
   html+=`<line x1="${nowX}" x2="${nowX}" y1="${pt}" y2="${VH-pb}" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-dasharray="3,3"/><text x="${+nowX+4}" y="${pt+8}" font-size="8" fill="var(--muted)">zdaj</text>`;
   svg.innerHTML=html;
   const r=document.getElementById('ai-compare-range');if(r)r.textContent='Zadnjih 24 ur + napoved za 6 ur';
+  // Graf je širši od zaslona (min-width 880px) in oviti div ima overflow-x:auto,
+  // ki privzeto kaže levi rob (samo pretekle ure) -- na mobilnem zato ostane
+  // napovedni del (zadnjih 6h, HW) vedno zunaj vidnega polja, dokler uporabnik
+  // sam ne odrola. Ob risanju odrolamo tako, da je "zdaj" delilnik viden.
+  const wrap=svg.parentElement;
+  if(wrap&&wrap.scrollWidth>wrap.clientWidth){
+    const nowPx=+nowX/VW*wrap.scrollWidth;
+    wrap.scrollLeft=Math.max(0,nowPx-wrap.clientWidth*0.55);
+  }
 }
 
 // ── Fetch 92-day Open-Meteo history for LSTM training ────
@@ -12685,7 +12694,7 @@ async function aiDrawComparisonChart(){
   // Build actual from hourly obs
   const cutoff=Date.now()-24*3600*1000;
   const actual=(_hourlyObs||[]).filter(o=>new Date(o.obsTimeLocal?.replace(' ','T')||0).getTime()>cutoff)
-    .map(o=>({t:new Date(o.obsTimeLocal?.replace(' ','T')||0).getTime(),v:o.metric?.temp??null})).filter(d=>d.v!=null);
+    .map(o=>({t:new Date(o.obsTimeLocal?.replace(' ','T')||0).getTime(),v:o.metric?.tempAvg??o.metric?.temp??null})).filter(d=>d.v!=null);
   // LSTM predictions (next 6h)
   const lstm=_aiLstmPredictions?.preds.map((p,i)=>({t:Date.now()+(i+1)*3600*1000,v:p}))||[];
   // Open-Meteo historical past 24h
