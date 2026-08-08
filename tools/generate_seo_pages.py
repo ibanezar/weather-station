@@ -511,8 +511,14 @@ def gen_daily_pages(hist, force, sitemap_urls):
         if v.get("tempLow") is not None and v["tempLow"] != v.get("tempAvg"):
             rows.append(("Najnižja temperatura", f"{num(v['tempLow'])} °C"))
         rows.append(("Padavine", f"{num(v.get('precipTotal', 0))} mm"))
-        if v.get("windspeedHigh") is not None:
-            rows.append(("Najmočnejši sunek vetra", f"{num(v['windspeedHigh'])} km/h"))
+        # Isti popravek kot na /rekord/: "windgustHigh" (sunek) je pravi vir za
+        # oznako "sunek vetra"; "windspeedHigh" (najvišja sprotna hitrost) je
+        # samo nadomestek za dneve pred uvedbo tega polja.
+        gust_val = v.get("windgustHigh")
+        if gust_val is not None:
+            rows.append(("Najmočnejši sunek vetra", f"{num(gust_val)} km/h"))
+        elif v.get("windspeedHigh") is not None:
+            rows.append(("Najvišja izmerjena hitrost vetra", f"{num(v['windspeedHigh'])} km/h"))
         if v.get("windspeedAvg") is not None:
             rows.append(("Povprečna hitrost vetra", f"{num(v['windspeedAvg'])} km/h"))
         if v.get("humidityAvg") is not None:
