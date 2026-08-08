@@ -86,6 +86,7 @@ def predict_day(model, lead, feats):
         out[f"{target}_sd"] = entry["residual_sd"].get(target)
         skill = (entry.get("skill") or {}).get(target) or {}
         out[f"{target}_mae"] = skill.get("mae_meteorec")
+        out[f"{target}_improvement_pct"] = skill.get("improvement_pct")
 
     pop_coefs = entry["coefficients"].get("pop")
     out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats)), 2) if pop_coefs else None

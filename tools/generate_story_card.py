@@ -30,6 +30,7 @@ Teme (razvrščene po prioriteti, višja zmaga, če je več hkrati aktualnih):
   VS_YESTERDAY                                 — velika sprememba od včeraj
   PRESSURE_TREND                                — hiter padec/dvig tlaka
   SUNRISE_SUNSET                                 — dolžina dneva
+  MTR_FORECAST                                    — napoved lastnega modela MTR za jutri
   GENERAL                                         — splošni povzetek (fallback)
 
 Zapiše og/story/<YYYY-MM-DD>.jpg (1080x1920) + og/story/latest.json.
@@ -62,6 +63,7 @@ SITE = "https://meteorec.si"
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 HISTORY = os.path.join(ROOT, "history.json")
 GOBE_JSON = os.path.join(ROOT, "gobarska-napoved", "index.json")
+MTR_JSON = os.path.join(ROOT, "napoved-modela.json")
 
 LAT, LON = 46.325779, 14.921137
 TZ = ZoneInfo("Europe/Ljubljana")
@@ -208,6 +210,19 @@ def load_gobe_index(today_iso):
     return None
 
 
+def load_mtr_forecast():
+    """Jutrišnja (D+1) napoved lastnega modela MTR -- bere lokalni
+    napoved-modela.json (piše ga tools/predict_recica_mos.py), ne uvaža
+    modela samega (isto načelo kot pri gobarskem indeksu)."""
+    try:
+        with open(MTR_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+        return next((d for d in data.get("days", []) if d.get("lead") == 1), None)
+    except Exception as e:
+        print(f"⚠ napoved-modela.json ni dosegljiv: {e}", file=sys.stderr)
+        return None
+
+
 # ────────────────────────── pomožne funkcije ──────────────────────────
 
 def num_sl(x, d=0):
@@ -288,10 +303,11 @@ def build_ctx():
 
     yday_key = (today - datetime.timedelta(days=1)).isoformat()
     hist_yesterday = hist.get(yday_key)
+    mtr = load_mtr_forecast()
 
     return dict(
         now=now, today=today, date_iso=today.isoformat(),
-        fc=fc, daily=daily, hourly=hourly,
+        fc=fc, daily=daily, hourly=hourly, mtr=mtr,
         tmax=d("temperature_2m_max"), tmin=d("temperature_2m_min"),
         code=d("weather_code"), cond=WMO.get(d("weather_code"), ""),
         sunrise=d("sunrise"), sunset=d("sunset"),
@@ -898,6 +914,28 @@ def t_daylength(ctx):
                  ("Sončni zahod", to_dt(ctx["sunset"]).strftime("%H:%M")),
                  ("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C" if ctx["tmax"] is not None else "–")],
                 C_AMBER, "spring")
+
+
+# ── MTR (naš poskusni model, napoved za jutri) ──
+@topic("MTR_FORECAST", 33)
+def t_mtr(ctx):
+    mtr = ctx.get("mtr")
+    if not mtr or mtr.get("tmax") is None or mtr.get("tmin") is None:
+        return None
+    om_tmax = mtr.get("om_tmax")
+    variants = [
+        ("Jutri po\nnašem modelu", "MTR — napoved za dno doline"),
+        ("Kaj pravi\nMTR za jutri?", "naš poskusni lokalni model"),
+        ("MTR napoveduje\nza jutri", "popravek za dno doline"),
+        ("Jutrišnja\nnapoved MTR", "naš poskusni model za Rečico"),
+        ("Naš model za\njutri pravi", "MTR — poskusna napoved"),
+    ]
+    headline, big_sub = pick(ctx, "MTR_FORECAST", variants)
+    return card(ctx, "MTR_FORECAST", headline, f"{num_sl(mtr['tmax'], 1)} °C", big_sub,
+                [("Open-Meteo za jutri", f"{num_sl(om_tmax, 1)} °C" if om_tmax is not None else "–"),
+                 ("Najnižja (MTR)", f"{num_sl(mtr['tmin'], 1)} °C"),
+                 ("Verjetnost dežja", f"{int(round((mtr.get('pop') or 0) * 100))} %")],
+                C_GREEN, "weather-station", eyebrow="MTR — NAŠ MODEL")
 
 
 # ── GENERAL (fallback, vedno na voljo) ──

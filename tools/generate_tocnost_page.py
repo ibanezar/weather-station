@@ -27,11 +27,20 @@ ROOT = seo.ROOT
 SITE = seo.SITE
 TODAY = seo.TODAY
 VERIFICATION_PATH = os.path.join(ROOT, "forecast_verification.json")
+MODEL_PATH = os.path.join(ROOT, "model", "recica-mos.json")
 
 
 def load_verification():
     try:
         with open(VERIFICATION_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def load_model():
+    try:
+        with open(MODEL_PATH, encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
@@ -181,6 +190,80 @@ def build_body(verification):
 
     intro_block = intro + ("\n" + mos_intro if mos_intro else "")
 
+    # ── MTR: veščina po vodilnem času (D+1..D+3), hindcast ob učenju ─────
+    # Ločeno od scoreboarda zgoraj: kartice/mesečni pregled merijo samo D+1,
+    # sproti, na dneh, ki so se dejansko zgodili po objavi. Ta razdelek bere
+    # model/recica-mos.json (piše ga train_recica_mos.py) -- leave-one-year-out
+    # ocena vseh treh vodilnih časov, izračunana ob zadnjem učenju.
+    skill_section = ""
+    if has_mos:
+        model = load_model()
+        leads = model.get("leads") or {}
+        if leads:
+            def pct_txt(v):
+                return f'{seo.num(v)} %' if v is not None else "—"
+
+            lead_nums = sorted(leads, key=int)
+            lead_rows = []
+            year_blocks = []
+            for ln in lead_nums:
+                entry = leads[ln] or {}
+                tmax_sk = (entry.get("skill") or {}).get("tmax") or {}
+                tmin_sk = (entry.get("skill") or {}).get("tmin") or {}
+                lead_rows.append(
+                    f'    <tr><th>D+{ln}</th>'
+                    f'<td>±{seo.num(tmax_sk.get("mae_open_meteo"))} °C</td>'
+                    f'<td>±{seo.num(tmax_sk.get("mae_meteorec"))} °C</td>'
+                    f'<td>{pct_txt(tmax_sk.get("improvement_pct"))}</td>'
+                    f'<td>±{seo.num(tmin_sk.get("mae_open_meteo"))} °C</td>'
+                    f'<td>±{seo.num(tmin_sk.get("mae_meteorec"))} °C</td>'
+                    f'<td>{pct_txt(tmin_sk.get("improvement_pct"))}</td>'
+                    f'<td>{tmax_sk.get("n", "—")}</td></tr>'
+                )
+
+                tmax_py = tmax_sk.get("per_year") or {}
+                tmin_py = tmin_sk.get("per_year") or {}
+                years = sorted(set(tmax_py) | set(tmin_py))
+                if years:
+                    py_rows = []
+                    for y in years:
+                        ty, ny = tmax_py.get(y) or {}, tmin_py.get(y) or {}
+                        py_rows.append(
+                            f'      <tr><th>{y}</th>'
+                            f'<td>±{seo.num(ty.get("open_meteo"))} °C</td>'
+                            f'<td>±{seo.num(ty.get("meteorec"))} °C</td>'
+                            f'<td>±{seo.num(ny.get("open_meteo"))} °C</td>'
+                            f'<td>±{seo.num(ny.get("meteorec"))} °C</td>'
+                            f'<td>{ty.get("n", "—")}</td></tr>'
+                        )
+                    year_blocks.append(
+                        f'    <details><summary>D+{ln} po letih</summary>\n'
+                        '      <table class="stats">\n'
+                        f'      <tr><th>Leto</th><th colspan="2">Tmax (Open-Meteo / {mtr_label})</th>'
+                        f'<th colspan="2">Tmin (Open-Meteo / {mtr_label})</th><th>Vzorcev</th></tr>\n'
+                        + "\n".join(py_rows) + '\n      </table>\n    </details>'
+                    )
+
+            trained_iso = (model.get("trained_at") or "")[:10]
+            trained_txt = seo.fmtd(trained_iso) if len(trained_iso) == 10 else "—"
+            lead_table = (
+                '  <table class="stats">\n'
+                '    <tr><th>Vodilni čas</th><th colspan="3">Maks. temp. (Tmax)</th>'
+                '<th colspan="3">Min. temp. (Tmin)</th><th>Vzorcev</th></tr>\n'
+                f'    <tr><th></th><th>Open-Meteo</th><th>{mtr_label}</th><th>Izboljšava</th>'
+                f'<th>Open-Meteo</th><th>{mtr_label}</th><th>Izboljšava</th><th></th></tr>\n'
+                + "\n".join(lead_rows) + '\n  </table>'
+            )
+            skill_section = (
+                f'  <h2>{mtr_label}: veščina glede na vodilni čas</h2>\n'
+                '  <p class="archive-intro">To ni ista številka kot zgoraj — kartice in mesečni pregled merijo '
+                'samo napoved za jutri (D+1), sproti, na dneh, ki so se dejansko zgodili po objavi. Spodnja '
+                f'tabela je hindcast ob zadnjem učenju modela ({trained_txt}): izpuščanje celega leta iz učne '
+                'množice in ocena na izpuščenem, za vse tri vodilne čase (D+1 do D+3) in ločeno po letih.</p>\n'
+                + lead_table
+                + ('\n  <div class="faq">\n' + "\n".join(year_blocks) + '\n  </div>' if year_blocks else '')
+            )
+
     # ── FAQ ─────────────────────────────────────────────────────────────
     qa = [
         ("Kako točna je vremenska napoved za Zgornjo Savinjsko dolino?",
@@ -220,6 +303,7 @@ def build_body(verification):
 {intro_block}
 {status}
 {cards}
+{skill_section}
   <h2>Mesečni pregled</h2>
 {month_table}
   <h2>Zadnji dnevi</h2>
