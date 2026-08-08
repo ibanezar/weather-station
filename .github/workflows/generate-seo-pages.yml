@@ -28,7 +28,9 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add vreme/ rekord/ pojavi/ podatki/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml || true
+          git add vreme/ rekord/ pojavi/ podatki/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml \
+                  vreme-recica-ob-savinji/ vreme-mozirje/ vreme-nazarje/ vreme-ljubno-ob-savinji/ \
+                  vreme-gornji-grad/ vreme-luce/ vreme-solcava/ slovar/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi programatske strani $(date -u +%Y-%m-%d) [skip ci]"
           git push

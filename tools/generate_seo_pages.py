@@ -1967,6 +1967,12 @@ def gen_landing_page(hist, sitemap_urls):
         ("Se podnebje v Rečici ob Savinji segreva?",
          f"Da. Iz arhiva postaje IREICA1 je razviden trend naraščanja povprečne letne temperature za "
          f"približno {num(trend, 2)} °C na leto v obdobju {full_years[0]}–{full_years[-1]}."),
+        ("Je na voljo napoved po urah za Rečico ob Savinji?",
+         "Da, urna napoved (temperatura, padavine, veter po urah za naslednje dni) je na naslovni "
+         "strani Meteorec (meteorec.si), skupaj s trenutnimi meritvami v živo."),
+        ("Kako daleč vnaprej sega napoved za Rečico ob Savinji?",
+         "Meteorec na naslovni strani prikazuje srednjeročno napoved do 16 dni vnaprej, poleg "
+         "podrobnejše 7-dnevne napovedi in urne napovedi za bližnje dni."),
     ]
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
