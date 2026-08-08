@@ -5,8 +5,22 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 07 Aug 2026 23:23:40 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 08 Aug 2026 05:37:30 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Nočni naliv v Rečici: 60 mm dežja v nekaj urah</title>
+      <link>https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nocni-naliv-v-recici-60-mm-dezja-0808.html</guid>
+      <pubDate>Sat, 08 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Ponoči je nad Rečico ob Savinji padlo 60,5 mm dežja, skoraj vse v dveh urah okoli polnoči z vrhom 69 mm/h. Drugi najbolj moker avgust na postaji IREICA1.</description>
+      <category>padavine</category>
+      <category>naliv</category>
+      <category>nevihta</category>
+      <category>ireica1</category>
+      <category>savinja</category>
+      <category>suša</category>
+      <category>vodna bilanca</category>
+    </item>
     <item>
       <title>ARSO oranžno opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
       <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-2323-823a95.html</link>
