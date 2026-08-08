@@ -82,6 +82,10 @@ Za VSAKO temo predlagaj:
   lahko pa jih izpustiš in ostaneš splošen.
 
 - "title": NAJVEČ 60 znakov (daljše Google odreže v rezultatih), ključna fraza na začetku.
+- Če tema po naravi sprašuje PO ČASU (kdaj pride slana/sneg/ohladitev/nevihta/konec vročine ipd.),
+  razmisli o naslovu v obliki vprašanja ("Kdaj ...?") namesto trditve -- v Google Search Console se
+  je tak naslov ("Kdaj pade temperatura pod 20 °C?") izkazal za posebej učinkovitega kljub generični,
+  nebrandirani frazi. Uporabi vprašanje samo, če tema res časovno vpraša "kdaj" -- na silo ga ne vtikaj.
 
 Predlogi naj se med sabo jasno razlikujejo po kotu/vsebini, da je izbira smiselna.
 

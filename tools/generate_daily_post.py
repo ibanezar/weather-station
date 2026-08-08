@@ -344,6 +344,10 @@ SEO / KLJUČNE BESEDE:
 - Naslov ("title") naj ima NAJVEČ 60 znakov -- daljše Google odreže. Glavno ključno frazo daj
   na začetek naslova. Izogibaj se dolgim dvodelnim naslovom tipa "Nekaj splošnega: dolg podnaslov";
   če naslov ne gre pod 60 znakov, raje izpusti okrasni uvodni del kot ključne besede.
+- Če tema po naravi sprašuje PO ČASU (kdaj pride slana/sneg/ohladitev/nevihta/konec vročine ipd.) in
+  naslova ni izbral že Filip iz jutranjih predlogov, razmisli o naslovu v obliki vprašanja ("Kdaj
+  ...?") namesto trditve -- v Google Search Console se je tak naslov izkazal za posebej učinkovitega
+  kljub generični, nebrandirani frazi. Uporabi vprašanje samo, če tema res časovno vpraša "kdaj".
 - Dobiš seznam "seo_keywords" (ciljne fraze za to temo). Vpleti glavno frazo naravno v naslov,
   v prvi odstavek (lead) in v vsaj en H2 naslov -- brez keyword-stuffinga, mora zveneti naravno.
   Če fraza ne zveni naravno na danem mestu, jo preoblikuj ali izpusti raje kot da jo na silo vtakneš.
