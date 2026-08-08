@@ -2076,7 +2076,7 @@ def gen_slovar_pages(sitemap_urls):
         url = f"/slovar/{t['slug']}/"
         rel = f"slovar/{t['slug']}/index.html"
         short_name = re.sub(r"\s*\([^)]*\)\s*$", "", t["term"]).strip() or t["term"]
-        title = f"Kaj je {short_name.lower()}? — Vremenski slovar"
+        title = f"{short_name} — pomen in razlaga"
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
