@@ -73,13 +73,21 @@ jobs:
       # Facebook in Instagram sliko poberata prek javnega URL-ja, zato mora
       # GitHub Pages najprej postreči novo datoteko. Deploy traja nekaj deset
       # sekund do nekaj minut -- počakamo, sicer objava spodleti na 404.
+      #
+      # POZOR: vsak poskus gre na SVOJ query-string (?probe=...), ne na goli
+      # URL. Cloudflare (proxy pred GitHub Pages) predpomni tudi 404 -- ker
+      # GitHub Pages nanj da cache-control: max-age=31536000 celo na napake --
+      # zato bi prvi prezgodnji poskus na goli URL isti 404 "zamrznil" za
+      # skoraj eno leto in bi bili prezgodnji tudi vsi poznejši, dejansko
+      # uspešni poskusi na isti URL. Tako je vsak poskus svoj, nikoli
+      # ponovljen cache key.
       - name: Počakaj, da je slika dosegljiva
         if: steps.gate.outputs.proceed == 'true'
         run: |
           URL=$(python3 -c "import json;print(json.load(open('og/story/latest.json'))['image'])")
           echo "Čakam na $URL"
           for i in $(seq 1 40); do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' "$URL" || echo 000)
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${URL}?probe=${i}-$(date +%s%N)" || echo 000)
             if [ "$CODE" = "200" ]; then echo "Slika je dosegljiva (poskus $i)."; exit 0; fi
             sleep 15
           done

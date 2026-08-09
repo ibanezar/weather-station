@@ -21,6 +21,7 @@ Usage:
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -50,6 +51,12 @@ def main():
     else:
         with open(LATEST, encoding="utf-8") as f:
             image_url = json.load(f)["image"]
+        # Cloudflare (proxy pred GitHub Pages) zna 404, ki ga je ujel med
+        # deployem, predpomniti za skoraj eno leto (GitHub Pages da
+        # cache-control: max-age=31536000 tudi na napake). Svež query-string
+        # zagotovi, da Facebookov pobiralec slike ne podeduje takega
+        # zamrznjenega 404, tudi če je bil goli URL med čakanjem "zastrupljen".
+        image_url += ("&" if "?" in image_url else "?") + f"cb={int(time.time())}"
 
     try:
         # 1) naloži sliko, a je ne objavi v feed -- služi samo kot vir za zgodbo
