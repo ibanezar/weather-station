@@ -104,7 +104,7 @@
         "WarningTx"
       ],
       "validEnd": "2026-08-08T19:59:00+00:00",
-      "resolved": false,
+      "resolved": true,
       "publishedAt": "2026-08-07T23:23:40.105086+00:00"
     },
     "arso-opozorilo-warningtx-2026-08-08-2119-d13e53": {
