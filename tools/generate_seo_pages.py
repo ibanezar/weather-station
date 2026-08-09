@@ -1657,6 +1657,144 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
 
 
+# Kamp Menina (Varpolje 105, Rečica ob Savinji) — NOT a NEARBY_TOWNS entry:
+# it's a specific point of interest, not a separate settlement without a
+# station, and it sits only ~1.8 km from IREICA1 on the same valley floor
+# along the Savinja — a lapse-rate elevation correction would be spurious
+# noise at that distance, so this page states measurements directly instead
+# of estimating them like the nearby-town pages do. Coordinates from the
+# camp's own published GPS point (N 46.3119, E 14.9085), not guessed.
+CAMP_MENINA_LAT, CAMP_MENINA_LON = 46.3119, 14.9085
+
+
+def gen_camp_menina_page(hist, sitemap_urls):
+    """Hand-curated POI landing page: /vreme-kamp-menina/.
+
+    Targets 'vreme kamp menina' search intent (campers checking conditions
+    before/during a stay) — not affiliated with the campsite, purely a
+    weather reference page using the station's own measurements."""
+    url = "/vreme-kamp-menina/"
+    rel = "vreme-kamp-menina/index.html"
+    lastmod = max(hist.keys())
+
+    f = climate_facts(hist)
+    mean_t, mean_hum, frost_days = f["mean_t"], f["mean_hum"], f["frost_days"]
+    tmax_d, tmax_v = f["tmax_d"], f["tmax_v"]
+    tmin_d, tmin_v = f["tmin_d"], f["tmin_v"]
+    prec_d, prec_v = f["prec_d"], f["prec_v"]
+    trend, full_years = f["trend"], f["full_years"]
+    n_days, annual_precip = f["n_days"], f["annual_precip"]
+
+    km = _haversine_km(LAT, LON, CAMP_MENINA_LAT, CAMP_MENINA_LON)
+    dirn = _bearing_compass(LAT, LON, CAMP_MENINA_LAT, CAMP_MENINA_LON)
+
+    def dl(d):
+        y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
+        return f'<a href="/vreme/{y}/{m:02d}/{dd:02d}/">{dd}. {MES_GEN[m]} {y}</a>'
+
+    trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
+                 else f"{num(trend, 2)} °C na leto")
+
+    title = "Vreme Kamp Menina — razmere za kampiranje ob Savinji"
+    desc = (f"Vreme za Kamp Menina v Rečici ob Savinji: postaja IREICA1 stoji le "
+            f"{num(km,1)} km {dirn}, na istem dolinskem dnu ob Savinji — brez višinske "
+            f"korekcije. Nočne temperature, padavine in vodostaj Savinje za kampiranje.")
+
+    crumbs = [("Meteorec", "/"), ("Vreme Kamp Menina", None)]
+
+    intro = f'''  <p class="archive-intro">
+  <strong>Kamp Menina</strong> leži ob reki Savinji v Rečici ob Savinji, na istem dolinskem
+  dnu Zgornje Savinjske doline kot meteorološka postaja <strong>IREICA1</strong> — le
+  {num(km,1)} km {dirn}. Ker gre za isto nadmorsko višino iste doline, tukajšnje meritve
+  ne potrebujejo višinske korekcije, kot jo uporabljamo za oddaljenejše kraje: spodaj so
+  <strong>dejanske meritve</strong>, ne ocena. Postaja meri neprekinjeno od {fmtd(f["first_date"])} —
+  skupaj {n_days} dni podatkov o temperaturi, padavinah, vlagi in vetru.</p>'''
+
+    camping = f'''  <h2>Kaj pomeni za kampiranje</h2>
+  <p>Dno doline ima izrazito <strong>kotlinsko mikroklimo</strong>: hladen zrak se ob jasnih nočeh
+  nabira na dnu doline, zato so lahko jutra v šotoru ali prikolici opazno hladnejša, kot bi
+  pričakoval glede na dnevno temperaturo. Postaja je doslej zabeležila <strong>{frost_days} dni
+  z zmrzaljo</strong> (najnižja dnevna temperatura ≤ 0 °C) — večina teh je zunaj sezone kampiranja,
+  a zgodnja pomlad in pozna jesen lahko presenetita. Povprečna letna temperatura na postaji znaša
+  <strong>{num(mean_t)} °C</strong>, absolutni razpon pa od {num(tmin_v)} °C ({dl(tmin_d)}) do
+  {num(tmax_v)} °C ({dl(tmax_d)}).</p>
+  <p>Območje je razmeroma namočeno (povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na
+  leto</strong>), poletni nalivi in nevihte pa znajo priti hitro — dnevni rekord padavin postaje
+  znaša <strong>{num(prec_v)} mm</strong> ({dl(prec_d)}). Za kopanje, kajak ali SUP v Savinji ob
+  kampu je poleg vremena smiseln tudi pogled na vodostaj reke.</p>'''
+
+    cta = '''  <div class="stat-grid" style="margin-top:1.5rem">
+    <a class="stat-card c-temp" href="/" style="text-decoration:none">
+      <div class="sc-label">Trenutno vreme</div><div class="sc-val">V živo →</div>
+      <div class="sc-sub">Postaja IREICA1</div></a>
+    <a class="stat-card c-rain" href="/vodostaj-savinje/" style="text-decoration:none">
+      <div class="sc-label">Vodostaj Savinje</div><div class="sc-val">Preveri →</div>
+      <div class="sc-sub">Kopanje, kajak, SUP</div></a>
+    <a class="stat-card c-up" href="/vreme/" style="text-decoration:none">
+      <div class="sc-label">Vremenski arhiv</div><div class="sc-val">Po dnevih →</div>
+      <div class="sc-sub">Od 2019</div></a>
+  </div>'''
+
+    qa = [
+        ("Ima Kamp Menina svojo vremensko postajo?",
+         f"Kamp Menina nima lastne uradne postaje ARSO, a leži le {num(km,1)} km {dirn} od "
+         f"meteorološke postaje IREICA1 v Rečici ob Savinji, na istem dolinskem dnu ob Savinji "
+         f"— to je najbližji vir dejanskih meritev za to lokacijo."),
+        ("Je treba meritve postaje višinsko prilagoditi za Kamp Menina?",
+         "Ne. Za razliko od bolj oddaljenih krajev v dolini (npr. Gornji Grad, Solčava) Kamp "
+         "Menina leži praktično na isti nadmorski višini kot postaja, zato spodnji podatki "
+         "veljajo neposredno, brez korekcije."),
+        ("Kako mrzlo je lahko ponoči v Kampu Menina?",
+         f"Dno Zgornje Savinjske doline se ob jasnih nočeh rado ohladi zaradi nabiranja hladnega "
+         f"zraka. Postaja IREICA1 je od {fmtd(f['first_date'])} zabeležila {frost_days} dni z "
+         f"zmrzaljo — največ pozno jeseni, pozimi in zgodaj spomladi, izven glavne sezone "
+         f"kampiranja, a april in oktober znata še presenetiti."),
+        ("Kje preverim vodostaj Savinje pri kampu?",
+         "Na strani /vodostaj-savinje/ Meteorec objavlja vodostaj reke Savinje, uporaben za "
+         "presojo primernosti za kopanje, kajak ali SUP v bližini kampa."),
+    ]
+    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+    ) + "\n  </div>"
+
+    place_about = (f'<script type="application/ld+json">\n'
+                   f'{{"@context":"https://schema.org","@type":"Campground",'
+                   f'"name":"Kamp Menina","address":{{"@type":"PostalAddress",'
+                   f'"addressLocality":"Rečica ob Savinji","addressRegion":"Zgornja Savinjska dolina",'
+                   f'"addressCountry":"SI"}},'
+                   f'"geo":{{"@type":"GeoCoordinates","latitude":{CAMP_MENINA_LAT},'
+                   f'"longitude":{CAMP_MENINA_LON}}}}}\n</script>')
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        faq_schema(qa),
+        place_about,
+    ])
+
+    body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme Kamp Menina</h1>
+  <p class="post-meta">Postaja IREICA1 · {num(km,1)} km {dirn} · isto dolinsko dno · Rečica ob Savinji</p>
+  <div class="partial-note">Ta stran ni uradna stran kampa, temveč vremenski pregled Meteorec za
+  okolico Kampa Menina, izpeljan iz meritev postaje IREICA1 ({num(km,1)} km {dirn}). Za rezervacije
+  in informacije o kampu se obrni neposredno na Kamp Menina.</div>
+{intro}
+{cta}
+{camping}
+  <h2>Podnebje se segreva</h2>
+  <p>Iz arhiva postaje je razviden trend naraščanja povprečne letne temperature za približno
+  <strong>{trend_txt}</strong> (obdobje {full_years[0]}–{full_years[-1]}), kar velja tudi za okolico
+  Kampa Menina.</p>
+{faq_html}
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
+  Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.</p>
+  <a class="back-link" href="/vreme-recica-ob-savinji/">← Vreme Rečica ob Savinji</a>'''
+
+    html = page_shell(title, desc, url, schema, body)
+    write_page(rel, html, force=True)
+    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.6"))
+
+
 def gen_month_climatology(hist, sitemap_urls):
     """12 zimzelenih klimatoloških strani po koledarskem mesecu: /vreme/mesec/<ime>/.
 
@@ -1991,7 +2129,8 @@ def gen_landing_page(hist, sitemap_urls):
     )
     nearby_html = (f'  <h2>Vreme v bližnjih krajih</h2>\n'
                    f'  <p>Sosednji kraji v Zgornji Savinjski dolini nimajo lastne postaje ARSO — '
-                   f'meritve IREICA1 so zanje najbližji realni vir: {town_links}.</p>')
+                   f'meritve IREICA1 so zanje najbližji realni vir: {town_links}.</p>\n'
+                   f'  <p>Načrtuješ kampiranje? → <a href="/vreme-kamp-menina/">Vreme Kamp Menina</a></p>')
 
     # ── Schema ───────────────────────────────────────────────────────────────
     latest = hist[lastmod]
@@ -2236,6 +2375,10 @@ def main():
     print("Generiram strani za sosednje kraje …")
     gen_nearby_town_pages(hist, sitemap_urls)
     print(f"  → {len(NEARBY_TOWNS)} strani ({', '.join(t['town'] for t in NEARBY_TOWNS)})")
+
+    print("Generiram stran /vreme-kamp-menina/ …")
+    gen_camp_menina_page(hist, sitemap_urls)
+    print("  → /vreme-kamp-menina/index.html")
 
     print("Generiram vremenski slovar …")
     n_terms = len(load_glossary_terms())

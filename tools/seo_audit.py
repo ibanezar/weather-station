@@ -47,6 +47,7 @@ CORE = {
     "vreme/":                    ("daily",   "0.7"),
     "slovar/":                   ("monthly", "0.6"),
     "vreme-recica-ob-savinji/":  ("daily",   "0.7"),
+    "vreme-kamp-menina/":        ("daily",   "0.6"),
     "vreme-mozirje/":            ("daily",   "0.6"),
     "vreme-nazarje/":            ("daily",   "0.6"),
     "vreme-ljubno-ob-savinji/":  ("daily",   "0.6"),
