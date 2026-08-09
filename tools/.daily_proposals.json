@@ -1,56 +1,27 @@
 {
-  "date": "2026-08-08",
-  "created": "2026-08-08T04:39:44.215485+00:00",
+  "date": "2026-08-09",
+  "created": "2026-08-09T04:50:16.983590+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Analiza dogodka: 24,9 mm dežja nad Rečico ob Savinji",
-      "teaser": "Postaja IREICA1 je danes zabeležila 24,9 mm dežja, medtem ko je skupna količina znotraj tega dogodka (in hkrati tedenska ter mesečna vsota) dosegla 60,5 mm. Pogledali bomo, kako se ta dogodek umešča v napoved za 8. avgust, ki predvideva skupno 32,1 mm padavin.",
+      "title": "Kdaj bo najbolj vroče? Vrh vročine v sredo pri 33,7 °C",
+      "teaser": "Danes se temperatura dvigne do 31,4 °C, jutranji minimum pa je bil 13,5 °C. Napoved za prihodnje dni kaže še višje vrednosti -- v sredo do 33,7 °C, v četrtek 32,8 °C -- preden se v petek ohladi na 31,6 °C. Veter bo ves ta čas šibek, kar bo vročino le še stopnjevalo.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: padavine (24,9 mm)",
-        "tag": "padavine",
+        "brief": "Analiza dogodka: vročina-napoved (31,4 °C)",
+        "tag": "vročina-napoved",
         "event": {
-          "type": "padavine",
-          "value": 24.9,
-          "unit": "mm"
+          "type": "vročina-napoved",
+          "value": 31.4,
+          "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "veter-in-tlak",
-      "title": "Zračni tlak napoved vreme: kaj kaže mirno ozračje",
-      "teaser": "Relativni zračni tlak na postaji je 1020 hPa, veter pa je praktično zamrl (0 km/h, smer okoli 204° - JZ). Ob tem napoved kaže, da bo dež po današnjem dnevu popustil, temperature pa bodo do 10. avgusta poskočile tudi na 34,8 °C - klasičen znak, da se za Zgornjo Savinjsko dolino pripravlja sprememba vremena.",
-      "topic": {
-        "id": "veter-in-tlak",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "pritisk",
-        "brief": "Kaj gibanje zračnega tlaka in vetra zadnjih 24h pove o vremenu naslednjih dni.",
-        "seo_keywords": [
-          "zračni tlak napoved vreme",
-          "veter Zgornja Savinjska dolina",
-          "sprememba vremena znaki"
-        ]
-      }
-    },
-    {
       "id": "dusljivost-zraka",
-      "title": "Rosišče Savinjska dolina: zakaj zrak danes duši",
-      "teaser": "Rosišče je s 17,6 °C skoraj izenačeno z dejansko temperaturo zraka 17,8 °C, vlažnost pa dosega 99 %, kar pojasni, zakaj se navidezna temperatura giblje pri 20,4 °C. Razložimo, zakaj tak zrak deluje dušljiv, čeprav termometer ne kaže ekstremnih vrednosti.",
+      "title": "Dušljivo vreme v Savinjski dolini: rosišče tik pod 14 °C",
+      "teaser": "Trenutna temperatura zraka je 14,3 °C, rosišče pa je z 14,1 °C skoraj enako -- ob vlažnosti 99 % to pomeni skorajda popolno nasičenost zraka z vodno paro. Zato se zunaj počuti dušljivo, kar potrjuje tudi vrednost 'app temp' 15,6 °C, ki je nad dejansko izmerjeno temperaturo.",
       "topic": {
         "id": "dusljivost-zraka",
         "sezona": [
@@ -66,6 +37,29 @@
           "rosišče Savinjska dolina",
           "dušljivo vreme",
           "občutek vročine vlaga"
+        ]
+      }
+    },
+    {
+      "id": "planinski-izlet",
+      "title": "Vreme za pohod v Savinjske Alpe: brezvetrje, jutri veter",
+      "teaser": "Trenutno na postaji IREICA1 ni zaznanega vetra, kar obeta mirne razmere za današnji izlet, a visoka vlažnost 99 % lahko pomeni jutranjo meglo v dolini. Jutri se razmere spremenijo -- pričakovan je veter do 16,8 km/h in 2,7 mm dežja, kar velja upoštevati pri načrtovanju poti v hribe.",
+      "topic": {
+        "id": "planinski-izlet",
+        "sezona": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tag": "planine",
+        "brief": "Kakšne so razmere za izlet v okoliške hribe glede na veter, vidljivost in nevihtno tveganje.",
+        "seo_keywords": [
+          "vreme za pohod Savinjske Alpe",
+          "razmere v hribih Zgornja Savinjska dolina",
+          "planinarjenje vreme"
         ]
       }
     }
