@@ -1613,6 +1613,9 @@ def gen_nearby_town_pages(hist, sitemap_urls):
             nearby_links += ('\n  <p>Kampiranje v okolici: ' + " · ".join(
                 f'<a href="/{c["slug"]}/">Vreme {c["name"]}</a>' for c in own_camps
             ) + '</p>')
+        if t["slug"] == "vreme-solcava":
+            nearby_links += ('\n  <p>Naprej po dolini: '
+                              '<a href="/vreme-logarska-dolina/">Vreme Logarska dolina</a></p>')
 
         qa = [
             (f"Ima {town} svojo vremensko postajo?",
@@ -1923,6 +1926,124 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         html = page_shell(title, desc, url, schema, body)
         write_page(rel, html, force=True)
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.5"))
+
+
+# Entrance/parking to Logarska dolina — coordinates from the valley's own
+# published GPS point (N 46.419924, E 14.645536), not guessed.
+LOGARSKA_LAT, LOGARSKA_LON = 46.419924, 14.645536
+ARSO_MOUNTAIN_FORECAST = "https://meteo.arso.gov.si/met/sl/weather/bulletin/mountain/"
+
+
+def gen_logarska_dolina_page(hist, sitemap_urls):
+    """Honest 'nearest real source' hub for /vreme-logarska-dolina/ — deliberately
+    does NOT extrapolate a station estimate this far: Logarska dolina is ~24 km
+    from IREICA1 and several hundred metres higher (valley floor ~740 m, Rinka
+    1120 m, source of the Savinja 1280-1380 m in the Okrešelj cirque), well
+    beyond the elevation range (60-280 m) the lapse-rate correction on the
+    NEARBY_TOWNS pages was built to cover. Instead this page states plainly
+    what we do and don't have, and routes to ARSO's own mountain forecast for
+    the numbers that actually matter for a trip up there."""
+    url = "/vreme-logarska-dolina/"
+    rel = "vreme-logarska-dolina/index.html"
+    lastmod = max(hist.keys())
+
+    f = climate_facts(hist)
+    solcava = next(t for t in NEARBY_TOWNS if t["slug"] == "vreme-solcava")
+    km_station = _haversine_km(LAT, LON, LOGARSKA_LAT, LOGARSKA_LON)
+    dir_station = _bearing_compass(LAT, LON, LOGARSKA_LAT, LOGARSKA_LON)
+    km_solcava = _haversine_km(solcava["lat"], solcava["lon"], LOGARSKA_LAT, LOGARSKA_LON)
+
+    title = "Vreme Logarska dolina — najbližji realni vir"
+    desc = (f"Logarska dolina nima lastne postaje ARSO in je ~{num(km_station,0)} km ter precej "
+            f"više od postaje IREICA1 — pretegnjena ocena bi bila nezanesljiva. Kar dejansko "
+            f"vemo: Solčava kot najbližji realni vir, izvir Savinje, in povezava na ARSO gorsko napoved.")
+
+    crumbs = [("Meteorec", "/"), ("Vreme Logarska dolina", None)]
+
+    disclaimer = (f'  <div class="partial-note">Pomembno: za razliko od ostalih strani na Meteorec tu '
+                  f'<strong>ne ponujamo ocene temperature</strong> za Logarsko dolino. Dolina je '
+                  f'{num(km_station,0)} km {dir_station} od postaje IREICA1 in bistveno više (dno doline '
+                  f'~740 m, slap Rinka 1120 m, izvir Savinje 1280–1380 m) — razlika je prevelika za '
+                  f'pošteno višinsko korekcijo, ki jo uporabljamo za bližnje kraje (do ~280 m razlike). '
+                  f'Za dejanske gorske razmere glej <a href="{ARSO_MOUNTAIN_FORECAST}" rel="nofollow">'
+                  f'uradno gorsko napoved ARSO</a>.</div>')
+
+    intro = f'''  <p class="archive-intro">
+  <strong>Logarska dolina</strong> je 7 km dolga ledeniška dolina v Kamniško-Savinjskih Alpah, zavarovana
+  kot krajinski park, na zgornjem koncu Zgornje Savinjske doline. Postaja <strong>IREICA1</strong> v Rečici
+  ob Savinji je od nje {num(km_station,0)} km {dir_station} — predaleč in prenizko za zanesljivo oceno
+  razmer v visokogorju, kjer se veter, sneg in nevihte pogosto močno razlikujejo od dolinskega dna.</p>'''
+
+    nearest = f'''  <h2>Kar dejansko vemo</h2>
+  <p><strong>Solčava</strong>, vhod v Logarsko dolino, je naš najbližji vir realnih meritev — le
+  {num(km_solcava,1)} km od doline, a še vedno {num(_haversine_km(LAT, LON, solcava["lat"], solcava["lon"]),0)} km
+  od same postaje IREICA1 in klimatsko najbolj različen kraj v naši oceni. Glej
+  <a href="/vreme-solcava/">Vreme Solčava</a> za polno oceno in njene omejitve.</p>
+  <p>Slap <strong>Rinka</strong> na koncu doline je hkrati eden od izvirov reke <strong>Savinje</strong>
+  (spodnja stopnja slapu je na 1120 m, sam izvir pod krnico Okrešelj na 1280–1380 m) — ista reka, ki jo
+  Meteorec spremlja dolvodno pri postaji. Vodostaj naprej po toku: <a href="/vodostaj-savinje/">Vodostaj Savinje</a>.</p>
+  <p>Dolgoletni padavinski vzorci širšega območja Zgornje Savinjske doline (postaja IREICA1, povprečno
+  {num(f["annual_precip"], 0)} mm padavin na leto) kažejo, da je poletje čas najpogostejših neviht v celi
+  dolini, vključno z visokogorjem — a natančne količine v samem visokogorju presegajo, kar lahko pošteno
+  ocenimo iz dolinske postaje.</p>'''
+
+    cta = f'''  <div class="stat-grid" style="margin-top:1.5rem">
+    <a class="stat-card c-temp" href="{ARSO_MOUNTAIN_FORECAST}" style="text-decoration:none" rel="nofollow">
+      <div class="sc-label">Gorska napoved</div><div class="sc-val">ARSO →</div>
+      <div class="sc-sub">Uradna, za visokogorje</div></a>
+    <a class="stat-card c-rain" href="/vreme-solcava/" style="text-decoration:none">
+      <div class="sc-label">Vreme Solčava</div><div class="sc-val">Najbližji vir →</div>
+      <div class="sc-sub">{num(km_solcava,1)} km od doline</div></a>
+    <a class="stat-card c-up" href="/vodostaj-savinje/" style="text-decoration:none">
+      <div class="sc-label">Vodostaj Savinje</div><div class="sc-val">Dolvodno →</div>
+      <div class="sc-sub">Postaja IREICA1</div></a>
+  </div>'''
+
+    qa = [
+        ("Ima Meteorec meritve za Logarsko dolino?",
+         f"Ne neposredno. Logarska dolina je {num(km_station,0)} km {dir_station} od postaje IREICA1 in "
+         f"bistveno više (dno doline ~740 m proti {ELEV} m pri postaji) — prevelika razlika za zanesljivo "
+         f"oceno. Najbližji realni vir Meteorec je Solčava, vhod v dolino."),
+        ("Kje dobim zanesljivo napoved za pohod v Logarski dolini ali na Rinko?",
+         f'Za gorske razmere (veter, sneg, nevihte, meja sneženja) je pravi vir '
+         f'<a href="{ARSO_MOUNTAIN_FORECAST}" rel="nofollow">uradna gorska napoved ARSO</a>, ne dolinska ocena.'),
+        ("Kje izvira reka Savinja?",
+         "V zatrepu Logarske doline, pod krnico Okrešelj, na približno 1280–1380 m nadmorske višine. "
+         "Slap Rinka, ena od znamenitosti doline, leži nekoliko niže, na 1120 m."),
+    ]
+    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+    ) + "\n  </div>"
+
+    place_about = (f'<script type="application/ld+json">\n'
+                   f'{{"@context":"https://schema.org","@type":"Place",'
+                   f'"name":"Logarska dolina","address":{{"@type":"PostalAddress",'
+                   f'"addressLocality":"Solčava","addressRegion":"Zgornja Savinjska dolina",'
+                   f'"addressCountry":"SI"}},'
+                   f'"geo":{{"@type":"GeoCoordinates","latitude":{LOGARSKA_LAT},"longitude":{LOGARSKA_LON}}}}}\n</script>')
+    schema = "\n".join([
+        webpage_schema(url, title, desc),
+        crumbs_schema(crumbs),
+        faq_schema(qa),
+        place_about,
+    ])
+
+    body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme Logarska dolina</h1>
+  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station} · Kamniško-Savinjske Alpe</p>
+{disclaimer}
+{intro}
+{cta}
+{nearest}
+{faq_html}
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.). Za gorske
+  razmere v Logarski dolini glej uradno gorsko napoved ARSO (povezava zgoraj).</p>
+  <a class="back-link" href="/vreme-solcava/">← Vreme Solčava</a>'''
+
+    html = page_shell(title, desc, url, schema, body)
+    write_page(rel, html, force=True)
+    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.6"))
 
 
 def gen_month_climatology(hist, sitemap_urls):
@@ -2513,6 +2634,10 @@ def main():
     print("Generiram strani kampov/glampingov v dolini …")
     gen_valley_camp_pages(hist, sitemap_urls)
     print(f"  → {len(VALLEY_CAMPS)} strani ({', '.join(c['name'] for c in VALLEY_CAMPS)})")
+
+    print("Generiram stran /vreme-logarska-dolina/ …")
+    gen_logarska_dolina_page(hist, sitemap_urls)
+    print("  → /vreme-logarska-dolina/index.html")
 
     print("Generiram vremenski slovar …")
     n_terms = len(load_glossary_terms())

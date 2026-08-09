@@ -15613,6 +15613,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/vreme-logarska-dolina/</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/slovar/rosisce/</loc>
     <lastmod>2026-08-09</lastmod>
     <changefreq>monthly</changefreq>

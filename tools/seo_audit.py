@@ -51,6 +51,7 @@ CORE = {
     "vreme-forest-camping-mozirje/": ("daily", "0.5"),
     "vreme-glamping-savinja/":   ("daily",   "0.5"),
     "vreme-herbal-glamping-ljubno/": ("daily", "0.5"),
+    "vreme-logarska-dolina/":    ("daily",   "0.6"),
     "vreme-mozirje/":            ("daily",   "0.6"),
     "vreme-nazarje/":            ("daily",   "0.6"),
     "vreme-ljubno-ob-savinji/":  ("daily",   "0.6"),
