@@ -4180,6 +4180,72 @@ async function fetchPollen(){
 }
 
 // ══════════════════════════════════════════════════════════
+// ── Biovreme — zračni tlak, toplota, UV, zrak/pelod ──────
+// Isti pragovi kot tools/generate_biovreme_page.py (zavestno podvojeno,
+// glej opombo tam) in kot applyPressureTrend() (±1/±3 hPa).
+// ══════════════════════════════════════════════════════════
+function _biovremeLevel(rank){return['ugodno','zmerno','obremenjujoče'][rank];}
+const _biovremeCol={ugodno:'#4ade80',zmerno:'#fbbf24','obremenjujoče':'#f87171'};
+const _biovremeCls={ugodno:'suit-good',zmerno:'suit-fair','obremenjujoče':'suit-poor'};
+
+async function initBiovreme(){
+  const card=document.getElementById('biovreme-card');if(!card)return;
+  try{
+    const [fc,aq]=await Promise.all([
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=apparent_temperature_max,apparent_temperature_min,uv_index_max&timezone=Europe%2FLjubljana&forecast_days=1`).then(r=>r.json()),
+      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=european_aqi,${POLLEN_TYPES.map(p=>p.key).join(',')}&timezone=Europe%2FLjubljana&forecast_days=1`).then(r=>r.json())
+    ]);
+
+    const pDiff=pressureTrend3h();
+    const pRank=Math.abs(pDiff)>=3?2:Math.abs(pDiff)>=1?1:0;
+    const pDetail=`${pDiff>=0?'+':''}${pDiff.toFixed(1)} hPa / 3 h`;
+
+    const amax=fc.daily?.apparent_temperature_max?.[0]??null;
+    const amin=fc.daily?.apparent_temperature_min?.[0]??null;
+    const tRank=((amax!=null&&amax>=32)||(amin!=null&&amin<=-10))?2:((amax!=null&&amax>=28)||(amin!=null&&amin<=-5))?1:0;
+    const tDetail=[amax!=null?`do ${Math.round(amax)} °C`:null,amin!=null?`od ${Math.round(amin)} °C`:null].filter(Boolean).join(' · ')||'—';
+
+    const uv=fc.daily?.uv_index_max?.[0]??null;
+    const uRank=uv!=null&&uv>=8?2:uv!=null&&uv>=6?1:0;
+    const uDetail=uv!=null?`UV ${Math.round(uv)}`:'—';
+
+    const ai=_aqNowIdx(aq.hourly?.time);
+    const aqi=ai!=null?aq.hourly?.european_aqi?.[ai]:null;
+    let domVal=0,domName='—';
+    POLLEN_TYPES.forEach(p=>{const v=ai!=null?aq.hourly?.[p.key]?.[ai]:null;if(v!=null&&v>domVal){domVal=v;domName=p.name;}});
+    const aRank=Math.max(aqi==null?0:(aqi<=40?0:aqi<=60?1:2), domVal<=50?0:domVal<=200?1:2);
+    const aDetail=`EU AQI ${aqi??'—'}`+(domVal>10?` · ${domName} ${domVal>50?'visoko':'zmerno'}`:'');
+
+    const factors=[
+      {l:'🌬 Zračni tlak',rank:pRank,detail:pDetail},
+      {l:'🌡 Toplota',rank:tRank,detail:tDetail},
+      {l:'☀️ UV indeks',rank:uRank,detail:uDetail},
+      {l:'🌫 Zrak/pelod',rank:aRank,detail:aDetail},
+    ];
+    const compositeRank=Math.max(...factors.map(f=>f.rank));
+    const compositeLvl=_biovremeLevel(compositeRank);
+    const col=_biovremeCol[compositeLvl];
+    const desc=compositeRank===0?'Nič od štirih dejavnikov trenutno ne izstopa.':
+      compositeRank===1?'Vsaj en dejavnik je danes izrazitejši.':
+      'Vsaj en dejavnik je danes precej izrazit.';
+
+    card.className=`card sc-risk-card ${_biovremeCls[compositeLvl]}`;
+    card.innerHTML=`<div class="sc-risk-head">
+      <span class="sc-risk-icon">🩺</span>
+      <div class="sc-risk-text">
+        <div class="clabel" style="margin:0">🩺 Biovreme – Rečica ob Savinji</div>
+        <div class="sc-risk-level" style="color:${col}">${compositeLvl.toUpperCase()}</div>
+        <div class="sc-risk-desc">${desc} <a href="/biovreme/">Podrobno →</a></div>
+      </div>
+    </div>
+    <div class="sc-risk-factors">${factors.map(f=>`<div class="sc-risk-factor"><small>${f.l}</small><b>${_biovremeLevel(f.rank)}</b><span>${f.detail}</span></div>`).join('')}</div>`;
+  }catch(e){
+    card.innerHTML='<div style="color:var(--muted);font-size:.78rem">Biovreme trenutno ni dosegljivo. <a href="/biovreme/">Podrobno →</a></div>';
+    console.warn('Biovreme:',e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
 // ── Reka Savinja — pretok (Open-Meteo Flood / GloFAS) ────
 // ══════════════════════════════════════════════════════════
 async function fetchFlood(){
@@ -15176,6 +15242,7 @@ async function init(){
     fetchMeteoalarm();
     fetchGoogleAlerts();
     runAdvancedOnly(()=>fetchPollen());
+    runAdvancedOnly(()=>initBiovreme());
     fetchAIBrief();
     runAdvancedOnly(()=>connectLightning());
     runAdvancedOnly(()=>buildPrecipNormals());
@@ -18281,7 +18348,7 @@ const GLOSSARY_TERMS=[
    fun:'En sam močan kumulonimbus lahko vsebuje do milijardo litrov vode in ustvari električno napetost do 100 milijonov voltov.',
    score:obs=>{const r=obs?.metric?.precipRate??0;return r>5?9:r>1?5:0;}},
   {term:'Kumulus (Cumulus)',icon:'⛅',cat:'oblaki',
-   def:'Lepi, "kupičasti" beli oblaki z ravno osnovo in zaobljenimi vrhovi. Nastanejo zaradi konvekcije ob sončnem in stabilnem vremenu.',
+   def:'Lepi, »kupičasti« beli oblaki z ravno osnovo in zaobljenimi vrhovi. Nastanejo zaradi konvekcije ob sončnem in stabilnem vremenu.',
    fun:'Kumulus je nekakšen vizualni kazalnik termike – nastane na vrhu stebra toplega in vlažnega zraka, ki se dviga z ogretih tal.',
    score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return(sr>300&&sr<700)?7:2;}},
   {term:'Stratus',icon:'🌥',cat:'oblaki',
@@ -18408,10 +18475,16 @@ const GLOSSARY_TERMS=[
    def:'Del sončnega spektra valovnih dolžin med 400 in 700 nanometri, ki ga rastline neposredno absorbirajo in predelajo v procesu fotosinteze. Meri se v mikromolih fotonov na kvadratni meter na sekundo (μmol/m²/s).',
    fun:'Optimalne svetlobne razmere za večino kmetijskih rastlin so med 1000 in 2000 μmol/m²/s, kar so vrednosti, ki jih v naših krajih brez težav dosežemo ob jasnem poletnem poldnevu.',
    score:obs=>{const sr=obs?.metric?.solarRadiation??obs?.solarRadiation??0;return sr>400?5:sr>100?2:0;}},
+
+  // ZDRAVJE
+  {term:'Biovreme',icon:'🩺',cat:'zdravje',
+   def:'Dnevna ocena, kako lahko vreme vpliva na počutje – združuje toplotno obremenitev, spremembe zračnega tlaka ob prehodu vremenskih front, UV sevanje in kakovost zraka. V Sloveniji jo pod istim imenom redno objavlja ARSO.',
+   fun:'Med prvimi, ki je zapisal opažanja o vplivu vremena na počutje na Slovenskem, je bil že leta 1689 Janez Vajkard Valvasor – v Slavi vojvodine Kranjske je opisal, kako ima razmeroma majhna Kranjska izjemno velike podnebne razlike.',
+   score:obs=>2},
 ];
 
-const _GLOSS_CAT_LABELS={vlaga:'Vlaga',padavine:'Padavine',oblaki:'Oblaki',veter:'Veter',tlak:'Zračni tlak',temperatura:'Temperatura',sevanje:'Sevanje'};
-const _GLOSS_CATS=['vlaga','padavine','oblaki','veter','tlak','temperatura','sevanje'];
+const _GLOSS_CAT_LABELS={vlaga:'Vlaga',padavine:'Padavine',oblaki:'Oblaki',veter:'Veter',tlak:'Zračni tlak',temperatura:'Temperatura',sevanje:'Sevanje',zdravje:'Zdravje in počutje'};
+const _GLOSS_CATS=['vlaga','padavine','oblaki','veter','tlak','temperatura','sevanje','zdravje'];
 
 let _glossaryInit=false;
 let _glossaryTimer=null;

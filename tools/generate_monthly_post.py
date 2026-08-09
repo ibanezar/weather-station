@@ -351,6 +351,7 @@ def rewrite_sitemap_and_index(posts):
         (f"{SITE}/nevihte/",               "daily",   "0.8", TODAY, None),
         (f"{SITE}/agrometeo/",             "daily",   "0.7", TODAY, None),
         (f"{SITE}/kakovost-zraka/",        "daily",   "0.7", TODAY, None),
+        (f"{SITE}/biovreme/",              "daily",   "0.7", TODAY, None),
         (f"{SITE}/vreme-za-padalce/",      "daily",   "0.6", TODAY, None),
         (f"{SITE}/trendi/",                "weekly",  "0.7", TODAY, None),
         (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-07-08", f"{SITE}/og/poplave-2023.jpg"),

@@ -116,6 +116,7 @@ SPOKE_PAGES = [
     (("nevihta",), "/nevihte/", "nevihtno napoved"),
     (("padavine", "poplave"), "/vodostaj-savinje/", "vodostaj Savinje"),
     (("zrak", "ozon"), "/kakovost-zraka/", "kakovost zraka"),
+    (("biovreme", "tlak", "pocutje"), "/biovreme/", "biovreme"),
     (("padalci", "veter"), "/vreme-za-padalce/", "vreme za padalce"),
     (("trend",), "/trendi/", "dolgoročne trende"),
     (("rekord",), "/rekord/", "vremenske rekorde postaje"),

@@ -22,7 +22,7 @@ Generates from app.js (GLOSSARY_TERMS, parsed — not hand-duplicated):
 Usage:
   python3 tools/generate_seo_pages.py [--force]
 """
-import json, math, os, sys, re, calendar, datetime, statistics as st, argparse
+import html, json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
 from generate_monthly_post import seo_title
 
@@ -345,32 +345,39 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
     full_url = f"{SITE}{canonical}"
     y = year or TODAY.year
     img = og_image or f"{SITE}/og-image.jpg"
+    # title/desc land inside HTML attributes (content="...") below -- escape
+    # so a stray straight quote (e.g. from GLOSSARY_TERMS text) can't break
+    # the attribute and truncate the tag (see /slovar/kumulus/ incident).
+    title_esc = html.escape(seo_title(title))
+    og_title_esc = html.escape(title)
+    desc_esc = html.escape(desc)
+    img_esc = html.escape(img)
     return f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
 {GA}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{seo_title(title)}</title>
+<title>{title_esc}</title>
 <link rel="canonical" href="{full_url}">
 <link rel="alternate" hreflang="sl" href="{full_url}">
 <link rel="alternate" hreflang="x-default" href="{full_url}">
-<meta name="description" content="{desc}">
+<meta name="description" content="{desc_esc}">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{full_url}">
 <meta property="og:site_name" content="Meteorec">
-<meta property="og:title" content="{title}">
-<meta property="og:description" content="{desc}">
-<meta property="og:image" content="{img}">
+<meta property="og:title" content="{og_title_esc}">
+<meta property="og:description" content="{desc_esc}">
+<meta property="og:image" content="{img_esc}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{title}">
-<meta name="twitter:description" content="{desc}">
-<meta name="twitter:image" content="{img}">
+<meta name="twitter:title" content="{og_title_esc}">
+<meta name="twitter:description" content="{desc_esc}">
+<meta name="twitter:image" content="{img_esc}">
 {head_extras}
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/blog/blog.css">
@@ -2027,8 +2034,9 @@ def gen_landing_page(hist, sitemap_urls):
 GLOSS_CAT_LABELS = {
     "vlaga": "Vlaga", "padavine": "Padavine", "oblaki": "Oblaki", "veter": "Veter",
     "tlak": "Zračni tlak", "temperatura": "Temperatura", "sevanje": "Sevanje",
+    "zdravje": "Zdravje in počutje",
 }
-GLOSS_CATS = ["vlaga", "padavine", "oblaki", "veter", "tlak", "temperatura", "sevanje"]
+GLOSS_CATS = ["vlaga", "padavine", "oblaki", "veter", "tlak", "temperatura", "sevanje", "zdravje"]
 
 
 def slovar_slug(term):
