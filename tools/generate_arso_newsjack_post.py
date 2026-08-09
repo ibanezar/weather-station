@@ -108,6 +108,14 @@ DEFAULT_CAT = {"label": "vreme", "icon": "⚠️", "practical": "Spremljaj uradn
                "link_url": "/", "link_label": "🌡 Trenutne razmere v živo",
                "photo": "storm-clouds", "accent": (234, 179, 8)}
 
+# ARSO med vročinskim valom skoraj vsak dan izda novo WarningTx opozorilo z
+# novim validEnd (namesto da bi podaljšal staro) -- find_covering_post ga zato
+# vsakič obravnava kot "novo" in objava se je v prvem avgustovskem tednu 2026
+# ponovila ~10x v nekaj dneh (glej blog.json). Filip je 9. 8. 2026 prosil, naj
+# se WarningTx izklopi; drugi tipi opozoril (nevihte, veter, dež, požarna
+# ogroženost …) ostanejo nespremenjeni.
+EXCLUDED_TYPES = {"WarningTx"}
+
 # Ključne besede kot rezerva, če ARSO-jeva koda parametra (node.parameter) ni
 # med zgoraj poimenovanimi ali je prazna — klasifikacija po besedilu opozorila.
 KEYWORD_CATEGORY = [
@@ -512,7 +520,8 @@ def main():
         print(f"⚠ ARSO opozorila nedosegljiva: {e}", file=sys.stderr)
         alerts, issued = [], None
 
-    significant = [a for a in alerts if a.get("level") in ("orange", "red")]
+    significant = [a for a in alerts
+                   if a.get("level") in ("orange", "red") and a.get("type") not in EXCLUDED_TYPES]
     now = datetime.datetime.now(datetime.timezone.utc)
     published = 0
 
