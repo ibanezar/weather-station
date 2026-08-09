@@ -1608,6 +1608,12 @@ def gen_nearby_town_pages(hist, sitemap_urls):
             for o in others
         ) + "\n  </div>")
 
+        own_camps = [c for c in VALLEY_CAMPS if c["anchor_slug"] == t["slug"]]
+        if own_camps:
+            nearby_links += ('\n  <p>Kampiranje v okolici: ' + " · ".join(
+                f'<a href="/{c["slug"]}/">Vreme {c["name"]}</a>' for c in own_camps
+            ) + '</p>')
+
         qa = [
             (f"Ima {town} svojo vremensko postajo?",
              f"{town} nima lastne uradne postaje ARSO. Najbližje neprekinjene meritve vremena "
@@ -1793,6 +1799,130 @@ def gen_camp_menina_page(hist, sitemap_urls):
     html = page_shell(title, desc, url, schema, body)
     write_page(rel, html, force=True)
     sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.6"))
+
+
+# Camps/glamping sites that are too close to an existing NEARBY_TOWNS entry
+# to justify their own separate lapse-rate estimate (a few km within the same
+# stretch of valley is noise, not signal) — anchor_slug points at the
+# NEARBY_TOWNS town whose already-computed estimate this page reuses instead
+# of re-deriving. Coordinates from each site's own published GPS point.
+VALLEY_CAMPS = [
+    {"slug": "vreme-forest-camping-mozirje", "name": "Forest Camping Mozirje",
+     "addr": "Loke pri Mozirju 14 C, Mozirje", "lat": 46.330360, "lon": 14.992459,
+     "anchor_slug": "vreme-mozirje", "activity": "kopanje in ribolov v Savinji"},
+    {"slug": "vreme-glamping-savinja", "name": "Glamping Savinja",
+     "addr": "Juvanje 27a, Ljubno ob Savinji", "lat": 46.339006, "lon": 14.848857,
+     "anchor_slug": "vreme-ljubno-ob-savinji", "activity": "rafting in kopanje v Savinji"},
+    {"slug": "vreme-herbal-glamping-ljubno", "name": "Herbal Glamping Resort Ljubno",
+     "addr": "Ter 42, Ljubno ob Savinji", "lat": 46.3713, "lon": 14.8424,
+     "anchor_slug": "vreme-ljubno-ob-savinji", "activity": "sprehodi in oddih v naravi"},
+]
+
+
+def gen_valley_camp_pages(hist, sitemap_urls):
+    """Short companion landing pages for VALLEY_CAMPS — each reuses its
+    anchor town's lapse-rate estimate (recomputed identically here) rather
+    than deriving a second, spuriously more precise number for a site a few
+    km away on the same valley floor."""
+    f = climate_facts(hist)
+    lastmod = max(hist.keys())
+    anchors = {t["slug"]: t for t in NEARBY_TOWNS}
+
+    for c in VALLEY_CAMPS:
+        t = anchors[c["anchor_slug"]]
+        km_station = _haversine_km(LAT, LON, c["lat"], c["lon"])
+        dir_station = _bearing_compass(LAT, LON, c["lat"], c["lon"])
+        km_anchor = _haversine_km(t["lat"], t["lon"], c["lat"], c["lon"])
+        elev_diff = t["elev"] - ELEV
+        lapse_corr = -LAPSE_RATE_C_PER_100M * elev_diff / 100
+        est_mean_t = f["mean_t"] + lapse_corr if f["mean_t"] is not None else None
+
+        url = f"/{c['slug']}/"
+        rel = f"{c['slug']}/index.html"
+        name = c["name"]
+
+        title = f"Vreme {name} — najbližja meritev (postaja IREICA1)"
+        desc = (f"Vreme za {name} ({c['addr']}): {num(km_station,0)} km od postaje IREICA1, "
+                f"{num(km_anchor,1)} km od {t['town']}, na podobni nadmorski višini. "
+                f"Ocena temperature, padavine in vodostaj Savinje.")
+
+        crumbs = [("Meteorec", "/"), (f"Vreme {name}", None)]
+
+        intro = f'''  <p class="archive-intro">
+  <strong>{name}</strong> ({c["addr"]}) leži v Zgornji Savinjski dolini, {num(km_anchor,1)} km od
+  {t["gen"]} — dovolj blizu, da velja ista ocena podnebja kot za <a href="/{t['slug']}/">{t['town']}</a>,
+  brez dodatne (in nezanesljive) korekcije za tako majhno razdaljo. Ta ocena izhaja iz meritev postaje
+  <strong>IREICA1</strong> v Rečici ob Savinji, {num(km_station,0)} km {dir_station}, prilagojenih
+  nadmorski višini {t["gen"]} ({t["elev"]} m).</p>'''
+
+        est_row = (f'    <tr><th>Ocenjena povprečna letna temperatura</th>'
+                   f'<td>{num(est_mean_t)} °C <span class="muted-note" style="display:inline">'
+                   f'(enako kot ocena za {t["gen"]})</span></td></tr>'
+                   if est_mean_t is not None else "")
+
+        facts = f'''  <h2>Ocenjeno podnebje pri {name}</h2>
+  <table class="stats">
+{est_row}
+    <tr><th>Razdalja od postaje IREICA1</th><td>{num(km_station,1)} km {dir_station}</td></tr>
+    <tr><th>Razdalja od {t["gen"]}</th><td>{num(km_anchor,1)} km</td></tr>
+    <tr><th>Dni z zmrzaljo pri postaji (od {f["first_date"][:4]})</th><td>{f["frost_days"]}</td></tr>
+    <tr><th>Povprečne letne padavine (postaja)</th><td>{num(f["annual_precip"], 0)} mm</td></tr>
+  </table>'''
+
+        cta = f'''  <div class="stat-grid" style="margin-top:1.5rem">
+    <a class="stat-card c-temp" href="/" style="text-decoration:none">
+      <div class="sc-label">Trenutno vreme</div><div class="sc-val">V živo →</div>
+      <div class="sc-sub">Postaja IREICA1</div></a>
+    <a class="stat-card c-rain" href="/vodostaj-savinje/" style="text-decoration:none">
+      <div class="sc-label">Vodostaj Savinje</div><div class="sc-val">Preveri →</div>
+      <div class="sc-sub">{c["activity"][0].upper()}{c["activity"][1:]}</div></a>
+    <a class="stat-card c-up" href="/{t['slug']}/" style="text-decoration:none">
+      <div class="sc-label">Vreme {t["town"]}</div><div class="sc-val">Polna ocena →</div>
+      <div class="sc-sub">{num(km_anchor,1)} km stran</div></a>
+  </div>'''
+
+        qa = [
+            (f"Ima {name} svojo vremensko postajo?",
+             f"Ne. Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
+             f"{num(km_station,0)} km {dir_station}. {name} leži {num(km_anchor,1)} km od {t['gen']}, "
+             f"zato zanj velja ista ocena podnebja kot za {t['town']}."),
+            ("Kje preverim vodostaj Savinje pri kampu?",
+             f"Na strani /vodostaj-savinje/ Meteorec objavlja vodostaj reke Savinje — uporabno za "
+             f"{c['activity']}."),
+        ]
+        faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+            f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+        ) + "\n  </div>"
+
+        place_about = (f'<script type="application/ld+json">\n'
+                       f'{{"@context":"https://schema.org","@type":"LodgingBusiness",'
+                       f'"name":{json.dumps(name)},"address":{{"@type":"PostalAddress",'
+                       f'"streetAddress":{json.dumps(c["addr"])},"addressCountry":"SI"}},'
+                       f'"geo":{{"@type":"GeoCoordinates","latitude":{c["lat"]},"longitude":{c["lon"]}}}}}\n</script>')
+        schema = "\n".join([
+            webpage_schema(url, title, desc),
+            crumbs_schema(crumbs),
+            faq_schema(qa),
+            place_about,
+        ])
+
+        body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Vreme {name}</h1>
+  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station} · {c["addr"]}</p>
+  <div class="partial-note">Ta stran ni uradna stran namestitve, temveč vremenski pregled Meteorec,
+  izpeljan iz meritev postaje IREICA1. Za rezervacije se obrni neposredno na {name}.</div>
+{intro}
+{cta}
+{facts}
+{faq_html}
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
+  Savinjska dolina.</p>
+  <a class="back-link" href="/{t['slug']}/">← Vreme {t['town']}</a>'''
+
+        html = page_shell(title, desc, url, schema, body)
+        write_page(rel, html, force=True)
+        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.5"))
 
 
 def gen_month_climatology(hist, sitemap_urls):
@@ -2379,6 +2509,10 @@ def main():
     print("Generiram stran /vreme-kamp-menina/ …")
     gen_camp_menina_page(hist, sitemap_urls)
     print("  → /vreme-kamp-menina/index.html")
+
+    print("Generiram strani kampov/glampingov v dolini …")
+    gen_valley_camp_pages(hist, sitemap_urls)
+    print(f"  → {len(VALLEY_CAMPS)} strani ({', '.join(c['name'] for c in VALLEY_CAMPS)})")
 
     print("Generiram vremenski slovar …")
     n_terms = len(load_glossary_terms())
