@@ -34,6 +34,7 @@ CORE = {
     "nevihte/":                  ("daily",   "0.8"),
     "agrometeo/":                ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
+    "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     "klima/":                    ("weekly",  "0.8"),
