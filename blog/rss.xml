@@ -5,8 +5,23 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 09 Aug 2026 05:26:07 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 09 Aug 2026 19:49:46 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Opozorilo glede resne požarne ogroženosti gozdov: kaj pomeni in kako ravnati</title>
+      <link>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</guid>
+      <pubDate>Sun, 09 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Kaj pomeni opozorilo glede resne požarne ogroženosti gozdov in kako ravnati. V Zgornji Savinjski dolini ga sproži suha fenska fronta s severnim vetrom, ki prinese še vetrolome v smrekovih sestojih in biovremenska nihanja.</description>
+      <category>analiza</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>pozari</category>
+      <category>veter</category>
+      <category>gozd</category>
+      <category>biovreme</category>
+      <category>IREICA1</category>
+    </item>
     <item>
       <title>Vročina je nazaj, ampak do kdaj?</title>
       <link>https://meteorec.si/blog/vrocina-je-nazaj-ampak-do-kdaj-0809.html</link>
@@ -1021,21 +1036,6 @@
       <category>nevihte</category>
       <category>downburst</category>
       <category>rosišče</category>
-      <category>IREICA1</category>
-    </item>
-    <item>
-      <title>Ekološka in okoljska tveganja: požarna ogroženost in vetrolomi</title>
-      <link>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</guid>
-      <pubDate>Wed, 01 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Fenska fronta s suhim severnim vetrom poveča požarno ogroženost gozdov, ruši plitvo koreninjene smreke z vetrolomi in sproža izrazita biovremenska nihanja pri prebivalcih Zgornje Savinjske doline.</description>
-      <category>analiza</category>
-      <category>julij</category>
-      <category>2026</category>
-      <category>pozari</category>
-      <category>veter</category>
-      <category>gozd</category>
-      <category>biovreme</category>
       <category>IREICA1</category>
     </item>
     <item>
