@@ -81,6 +81,10 @@ def main():
     else:
         with open(LATEST, encoding="utf-8") as f:
             image_url = json.load(f)["image"]
+        # Glej enak komentar v post_story_to_facebook.py: Cloudflare zna 404,
+        # ujet med GitHub Pages deployem, predpomniti za skoraj eno leto, zato
+        # Instagramov pobiralec slike dobi svež query-string, ne gol URL.
+        image_url += ("&" if "?" in image_url else "?") + f"cb={int(time.time())}"
 
     try:
         container = api_post(f"{account_id}/media", token,
