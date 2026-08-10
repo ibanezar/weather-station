@@ -28,6 +28,18 @@ MODEL
 VEŠČINA se meri z izpuščanjem celega leta (nikoli naključni razbit set —
 sosednji dnevi so odvisni in bi veščino napihnili) in se zapiše v model.
 
+DRUGI VHOD (--aifs)
+  Poskusno se poleg privzetega Open-Meteo vzame še ECMWF AIFS (AI model, ki ga
+  Windy prikazuje kot podaljšek modela ECMWF) — ne kot zamenjava vhoda, ampak
+  kot dodatne značilke: njegova Tmax/Tmin in razlika do privzetega modela. Ker
+  se arhiv AIFS začne 2025-02-20, je učno okno s tem vhodom krajše; osnovo je
+  treba za pošteno primerjavo pognati na istem oknu:
+
+    python3 tools/train_recica_mos.py --from 2025-02-20 --report          # osnova
+    python3 tools/train_recica_mos.py --from 2025-02-20 --aifs --report   # z AIFS
+
+  Izid poskusa je zapisan v docs/model-recica.md.
+
 Uporaba:
   python3 tools/train_recica_mos.py            # nauči in zapiši model/recica-mos.json
   python3 tools/train_recica_mos.py --report   # samo izpiši veščino, ne piši
@@ -60,6 +72,14 @@ TRAIN_START = "2024-01-01"   # prej *_previous_dayN ni na voljo
 RIDGE_LAMBDA = 2.0
 WET_DAY_MM = 0.2             # prag za "moker dan"
 
+# ECMWF AIFS — AI model, ki ga ECMWF poganja operativno od 25. 2. 2025 (Windy ga
+# prikazuje kot 15-dnevni podaljšek modela ECMWF). Z --aifs ga vzamemo kot drugi
+# vhod poleg privzetega Open-Meteo: ne kot zamenjavo, ampak kot dodatne značilke.
+# Arhiv Open-Meteo zanj se začne 20. 2. 2025, zato je učno okno s tem vhodom
+# bistveno krajše — primerjava z osnovo mora zato teči na istem oknu.
+AIFS_MODEL = "ecmwf_aifs025_single"
+AIFS_START = "2025-02-20"
+
 # Urne spremenljivke, iz katerih gradimo dnevne značilke. Isti seznam uporablja
 # tools/predict_recica_mos.py za živo napoved — kar se tu spremeni, se mora tam
 # spremeniti samo po sebi (uvozi ga od tod).
@@ -87,6 +107,12 @@ POP_FEATURES = [
     "tmax30", "sin_doy", "cos_doy",
 ]
 
+# Dodatek pri --aifs. Razlika med modeloma (d*) je tu bolj zanimiva od golih
+# vrednosti AIFS: kadar se globalni AI model in seamless razideta, je negotovost
+# večja in popravek naj bo drugačen.
+AIFS_TEMP_FEATURES = ["aifs_tmax", "aifs_tmin", "aifs_dtmax", "aifs_dtmin"]
+AIFS_POP_FEATURES = ["aifs_sqrt_prec", "aifs_wet_frac"]
+
 
 # ── Zajem ───────────────────────────────────────────────────────────────────
 def _get_json(url, timeout=240, tries=4):
@@ -105,9 +131,12 @@ def _get_json(url, timeout=240, tries=4):
     raise RuntimeError(f"zajem ni uspel: {last}")
 
 
-def fetch_archived_forecasts(lead, start, end):
+def fetch_archived_forecasts(lead, start, end, model=None):
     """Vrne {datum: {spremenljivka: [(ura, vrednost), ...]}} za napoved izpred
-    `lead` dni. Zajema po letih, ker je enoletni odgovor še obvladljiv."""
+    `lead` dni. Zajema po letih, ker je enoletni odgovor še obvladljiv.
+
+    Brez `model` je to privzeti seamless Open-Meteo; z `model` en sam imenovan
+    model (pri nas AIFS)."""
     hourly = ",".join(f"{v}_previous_day{lead}" for v in HOURLY_VARS)
     rows = {}
     y0 = int(start[:4])
@@ -117,12 +146,15 @@ def fetch_archived_forecasts(lead, start, end):
         b = min(end, f"{year}-12-31")
         if a > b:
             continue
-        q = urllib.parse.urlencode({
+        params = {
             "latitude": LAT, "longitude": LON,
             "start_date": a, "end_date": b,
             "hourly": hourly, "timezone": TZ,
-        })
-        print(f"  D+{lead} {a} → {b} …")
+        }
+        if model:
+            params["models"] = model
+        q = urllib.parse.urlencode(params)
+        print(f"  D+{lead} {a} → {b}{f' [{model}]' if model else ''} …")
         data = _get_json("https://historical-forecast-api.open-meteo.com/v1/forecast?" + q)
         h = data.get("hourly") or {}
         times = h.get("time") or []
@@ -176,27 +208,53 @@ def daily_features(series, day):
     return f
 
 
-def temp_vector(f):
+def merge_aifs(f, af):
+    """Doda značilke drugega vhoda (AIFS) k dnevnim značilkam privzetega modela.
+    `af` je izhod daily_features() nad arhivom AIFS — ista funkcija, druga mreža.
+    Vrne None, kadar AIFS za ta dan nima uporabnega dneva; klicatelj tak dan
+    izpusti, da model ne dobi napol praznega vhoda."""
+    if f is None or af is None:
+        return None
+    g = dict(f)
+    g["aifs_tmax"] = af["om_tmax"]
+    g["aifs_tmin"] = af["om_tmin"]
+    g["aifs_dtmax"] = af["om_tmax"] - f["om_tmax"]
+    g["aifs_dtmin"] = af["om_tmin"] - f["om_tmin"]
+    g["aifs_prec"] = af["om_prec"]
+    g["aifs_wet_hours"] = af["wet_hours"]
+    return g
+
+
+def temp_vector(f, with_aifs=False):
     """Načrtovalna vrstica za temperaturo. `coldpool` je jedro modela: ob jasni
     (nizka nočna oblačnost) in mirni (nizek nočni veter) noči gre proti 1 in
-    ujame nabiranje hladnega zraka na dnu doline, ki ga mreža ne razreši."""
+    ujame nabiranje hladnega zraka na dnu doline, ki ga mreža ne razreši.
+
+    Z `with_aifs` se na konec pripnejo značilke drugega vhoda — vrstni red
+    ustreza TEMP_FEATURES + AIFS_TEMP_FEATURES."""
     coldpool = (100 - f["cloud_n"]) / 100 * (1 / (1 + f["wind_n"]))
-    return [
+    v = [
         1.0,
         f["om_tmax"], f["om_tmin"], f["cloud"], f["cloud_n"], f["wind"], f["wind_n"],
         f["rh"], f["pres"] - 1013, f["rad"] / 100, min(f["om_prec"], 30),
         f["sin_doy"], f["cos_doy"],
         coldpool, f["sin_doy"] * f["om_tmax"], f["cos_doy"] * f["om_tmax"],
     ]
+    if with_aifs:
+        v += [f["aifs_tmax"], f["aifs_tmin"], f["aifs_dtmax"], f["aifs_dtmin"]]
+    return v
 
 
-def pop_vector(f):
-    return [
+def pop_vector(f, with_aifs=False):
+    v = [
         1.0,
         math.sqrt(min(f["om_prec"], 50)), f["wet_hours"] / 24, f["rh"] / 100,
         f["cloud"] / 100, (f["pres"] - 1013) / 10, f["om_tmax"] / 30,
         f["sin_doy"], f["cos_doy"],
     ]
+    if with_aifs:
+        v += [math.sqrt(min(f["aifs_prec"], 50)), f["aifs_wet_hours"] / 24]
+    return v
 
 
 # ── Regresija (čisti Python, brez numpy) ────────────────────────────────────
@@ -276,9 +334,12 @@ def load_history():
         return json.load(f)
 
 
-def build_samples(rows, hist):
+def build_samples(rows, hist, aifs_rows=None):
     """Poveže dnevne značilke z izmerjenim dnem. Dnevi z izvorom "era5" so
-    modelska ocena in ne meritev — v učenju bi model učili lastnega vhoda."""
+    modelska ocena in ne meritev — v učenju bi model učili lastnega vhoda.
+
+    Z `aifs_rows` se vsakemu dnevu pripnejo še značilke drugega vhoda; dan, ki
+    ga v tem arhivu ni, odpade."""
     samples = []
     for day in sorted(rows):
         obs = hist.get(day)
@@ -289,6 +350,11 @@ def build_samples(rows, hist):
         f = daily_features(rows[day], day)
         if f is None:
             continue
+        if aifs_rows is not None:
+            af = daily_features(aifs_rows.get(day) or {}, day)
+            f = merge_aifs(f, af)
+            if f is None:
+                continue
         samples.append({
             "date": day,
             "f": f,
@@ -300,7 +366,7 @@ def build_samples(rows, hist):
 
 
 # ── Veščina ─────────────────────────────────────────────────────────────────
-def blocked_cv(samples, target, om_key):
+def blocked_cv(samples, target, om_key, with_aifs=False):
     """MAE modela in surovega Open-Meteo pri izpuščanju celega leta.
 
     Naključna delitev bi tu lagala: vreme je iz dneva v dan močno odvisno, zato
@@ -312,11 +378,11 @@ def blocked_cv(samples, target, om_key):
         te = [s for s in samples if s["date"][:4] == hold]
         if not tr or not te:
             continue
-        coefs = solve_ridge([temp_vector(s["f"]) for s in tr],
+        coefs = solve_ridge([temp_vector(s["f"], with_aifs) for s in tr],
                             [s[target] for s in tr], RIDGE_LAMBDA)
         eo, em = [], []
         for s in te:
-            pred = predict_linear(coefs, temp_vector(s["f"]))
+            pred = predict_linear(coefs, temp_vector(s["f"], with_aifs))
             em.append(abs(pred - s[target]))
             eo.append(abs(s["f"][om_key] - s[target]))
         per_year[hold] = {"n": len(te),
@@ -337,7 +403,7 @@ def blocked_cv(samples, target, om_key):
     }
 
 
-def blocked_cv_pop(samples):
+def blocked_cv_pop(samples, with_aifs=False):
     """Brierjeva ocena za verjetnost padavin, proti klimatologiji učne množice."""
     years = sorted({s["date"][:4] for s in samples})
     brier, base = [], []
@@ -346,10 +412,10 @@ def blocked_cv_pop(samples):
         te = [s for s in samples if s["date"][:4] == hold]
         if not tr or not te:
             continue
-        coefs = solve_logistic([pop_vector(s["f"]) for s in tr], [s["wet"] for s in tr])
+        coefs = solve_logistic([pop_vector(s["f"], with_aifs) for s in tr], [s["wet"] for s in tr])
         clim = sum(s["wet"] for s in tr) / len(tr)
         for s in te:
-            p = predict_prob(coefs, pop_vector(s["f"]))
+            p = predict_prob(coefs, pop_vector(s["f"], with_aifs))
             brier.append((p - s["wet"]) ** 2)
             base.append((clim - s["wet"]) ** 2)
     if not brier:
@@ -364,9 +430,9 @@ def blocked_cv_pop(samples):
     }
 
 
-def residual_sd(samples, coefs, target):
+def residual_sd(samples, coefs, target, with_aifs=False):
     """Standardni odklon ostankov — pas negotovosti na kartici."""
-    errs = [predict_linear(coefs, temp_vector(s["f"])) - s[target] for s in samples]
+    errs = [predict_linear(coefs, temp_vector(s["f"], with_aifs)) - s[target] for s in samples]
     if len(errs) < 2:
         return None
     mean = sum(errs) / len(errs)
@@ -403,9 +469,18 @@ def main():
     ap.add_argument("--to", dest="end", default=None)
     ap.add_argument("--report", action="store_true", help="samo izpiši veščino")
     ap.add_argument("--no-cache", action="store_true")
+    ap.add_argument("--aifs", action="store_true",
+                    help="dodaj ECMWF AIFS kot drugi vhod (učno okno se skrajša na arhiv AIFS)")
+    ap.add_argument("--out", default=None, help="druga izhodna pot (za poskuse)")
     args = ap.parse_args()
 
     end = args.end or (dt.date.today() - dt.timedelta(days=1)).isoformat()
+    # Z AIFS se učno okno samo po sebi skrči na to, kar arhiv sploh ima. Brez
+    # tega bi prvi dve leti tiho odpadli šele pri sestavljanju vzorcev in bi
+    # izpis kazal učno okno, ki ga ni bilo.
+    if args.aifs and args.start < AIFS_START:
+        print(f"--aifs: učno okno se začne {AIFS_START} (prej arhiva AIFS ni)")
+        args.start = AIFS_START
     hist = load_history()
     cache = {} if args.no_cache else load_cache()
 
@@ -415,34 +490,48 @@ def main():
         "train_range": {"from": args.start, "to": end},
         "station": {"lat": LAT, "lon": LON, "name": "Rečica ob Savinji (IREICA1)"},
         "hourly_vars": HOURLY_VARS,
-        "temp_features": TEMP_FEATURES,
-        "pop_features": POP_FEATURES,
+        "uses_aifs": bool(args.aifs),
+        "aifs_model": AIFS_MODEL if args.aifs else None,
+        "temp_features": TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else []),
+        "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
         "wet_day_mm": WET_DAY_MM,
         "ridge_lambda": RIDGE_LAMBDA,
         "leads": {},
     }
 
-    for lead in LEADS:
-        key = f"lead{lead}:{args.start}:{end}"
+    def archive_rows(lead, model_id=None):
+        """Arhiv napovedi za en vodilni čas, s predpomnilnikom. Vrne None, kadar
+        zajem ni uspel — klicatelj tak vodilni čas izpusti."""
+        key = f"lead{lead}:{args.start}:{end}" + (f":{model_id}" if model_id else "")
         if key in cache:
-            print(f"D+{lead}: iz predpomnilnika")
-            rows = _rows_from_cache(cache[key])
-        else:
-            print(f"D+{lead}: zajemam arhiv napovedi")
-            try:
-                rows = fetch_archived_forecasts(lead, args.start, end)
-            except RuntimeError as e:
-                # Vodilni čas, ki ga ni bilo mogoče pobrati, preprosto izpustimo.
-                # Prejšnji so že izračunani in bi jih vržena napaka vzela s seboj.
-                print(f"  ⚠ D+{lead} preskočen: {e}", file=sys.stderr)
-                continue
-            if not args.no_cache:
-                # Shrani takoj po vsakem vodilnem času: zajem traja minute in
-                # prekinjen tek bi sicer vrgel stran vse, kar je že pobral.
-                cache[key] = _rows_to_cache(rows)
-                save_cache(cache)
+            print(f"D+{lead}{f' [{model_id}]' if model_id else ''}: iz predpomnilnika")
+            return _rows_from_cache(cache[key])
+        print(f"D+{lead}{f' [{model_id}]' if model_id else ''}: zajemam arhiv napovedi")
+        try:
+            rows = fetch_archived_forecasts(lead, args.start, end, model=model_id)
+        except RuntimeError as e:
+            # Vodilni čas, ki ga ni bilo mogoče pobrati, preprosto izpustimo.
+            # Prejšnji so že izračunani in bi jih vržena napaka vzela s seboj.
+            print(f"  ⚠ D+{lead} preskočen: {e}", file=sys.stderr)
+            return None
+        if not args.no_cache:
+            # Shrani takoj po vsakem vodilnem času: zajem traja minute in
+            # prekinjen tek bi sicer vrgel stran vse, kar je že pobral.
+            cache[key] = _rows_to_cache(rows)
+            save_cache(cache)
+        return rows
 
-        samples = build_samples(rows, hist)
+    for lead in LEADS:
+        rows = archive_rows(lead)
+        if rows is None:
+            continue
+        aifs_rows = None
+        if args.aifs:
+            aifs_rows = archive_rows(lead, AIFS_MODEL)
+            if aifs_rows is None:
+                continue
+
+        samples = build_samples(rows, hist, aifs_rows)
         if len(samples) < 200:
             print(f"  ⚠ premalo vzorcev za D+{lead} ({len(samples)}) — vodilni čas izpuščen",
                   file=sys.stderr)
@@ -454,18 +543,18 @@ def main():
                  "skill": {}, "coefficients": {}, "residual_sd": {}}
 
         for target, om_key in (("tmax", "om_tmax"), ("tmin", "om_tmin")):
-            skill = blocked_cv(samples, target, om_key)
-            coefs = solve_ridge([temp_vector(s["f"]) for s in samples],
+            skill = blocked_cv(samples, target, om_key, args.aifs)
+            coefs = solve_ridge([temp_vector(s["f"], args.aifs) for s in samples],
                                 [s[target] for s in samples], RIDGE_LAMBDA)
             entry["skill"][target] = skill
             entry["coefficients"][target] = [round(c, 6) for c in coefs]
-            entry["residual_sd"][target] = residual_sd(samples, coefs, target)
+            entry["residual_sd"][target] = residual_sd(samples, coefs, target, args.aifs)
             if skill:
                 print(f"  {target}: Open-Meteo {skill['mae_open_meteo']} °C → "
                       f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %)")
 
-        pop_skill = blocked_cv_pop(samples)
-        pop_coefs = solve_logistic([pop_vector(s["f"]) for s in samples],
+        pop_skill = blocked_cv_pop(samples, args.aifs)
+        pop_coefs = solve_logistic([pop_vector(s["f"], args.aifs) for s in samples],
                                    [s["wet"] for s in samples])
         entry["skill"]["pop"] = pop_skill
         entry["coefficients"]["pop"] = [round(c, 6) for c in pop_coefs]
@@ -483,11 +572,12 @@ def main():
         print("\n(--report: model ni zapisan)")
         return 0
 
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    with open(MODEL_PATH, "w", encoding="utf-8") as f:
+    out_path = args.out or MODEL_PATH
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(model, f, ensure_ascii=False, indent=2)
         f.write("\n")
-    print(f"\n→ {os.path.relpath(MODEL_PATH, ROOT)}: vodilni časi {', '.join(model['leads'])}")
+    print(f"\n→ {os.path.relpath(out_path, ROOT)}: vodilni časi {', '.join(model['leads'])}")
     return 0
 
 

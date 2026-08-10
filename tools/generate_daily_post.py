@@ -914,9 +914,17 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
             f'<script>\n{chart_js}\n</script>'
         )
 
+    # Odstavek, ki se že začne z blokovno oznako (tabela, seznam, citat), gre
+    # skozi nedotaknjen — <p><table>…</table></p> brskalnik razbije po svoje in
+    # nastane neveljaven HTML.
+    def para_html(p):
+        if p.lstrip().startswith(("<table", "<ul", "<ol", "<blockquote", "<figure", "<div")):
+            return f"    {p}"
+        return f"    <p>{p}</p>"
+
     sec_parts = []
     for s in article["sections"]:
-        paras = "\n".join(f"    <p>{p}</p>" for p in s["paragraphs"])
+        paras = "\n".join(para_html(p) for p in s["paragraphs"])
         sec_parts.append(
             f'    <span class="section-label">{s["label"]}</span>\n'
             f'    <h2 id="{s["id"]}">{s["heading"]}</h2>\n{paras}'
