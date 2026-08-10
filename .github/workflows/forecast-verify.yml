@@ -28,6 +28,12 @@ jobs:
       - name: Razreši pretekle napovedi in zabeleži novo
         run: python3 tools/verify_forecasts.py
 
+      # AIFS je edini vir na semaforju, ki ima arhiv preteklih napovedi. Zato se
+      # dan, ki mu je AIFS ušel (izpad zajema, prehod ob uvedbi vira), lahko
+      # zapolni za nazaj. Ne sme podreti workflowa — semafor teče tudi brez tega.
+      - name: Zapolni manjkajoče AIFS napovedi iz arhiva
+        run: python3 tools/backfill_aifs_verification.py || true
+
       - name: Generiraj stran /tocnost-napovedi/
         run: python3 tools/generate_tocnost_page.py
 
