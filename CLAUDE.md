@@ -195,6 +195,16 @@ tem stikom, ne preimenovanje kode.
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
 
+## SEO sistem
+
+Dnevna in tedenska SEO avtomatika (klimatološke hub strani, dogodkovne
+strani ob rekordih, tedenski nadzor pokritosti sitemapov, IndexNow) že teče
+prek `tools/seo_smart_routine.py`, `tools/seo_audit.py` in pripadajočih
+workflowov — ne podvajaj je ročno. Podrobno v `docs/seo.md` (kaj generira
+katera skripta, kje je `CORE` seznam ključnih strani za `seo_audit.py`, kje
+je edina deljena funkcija `seo_title()`). Sezonski vsebinski plan (kaj
+pisati, kdaj) je ločen dokument, npr. `docs/seo-plan-2026-07.md`.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
