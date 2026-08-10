@@ -85,7 +85,20 @@ def lektor_file(slug, api_key):
     }
     text = stream_claude(payload, api_key)
     cleaned = re.sub(r"^```json|```$", "", text.strip(), flags=re.M).strip()
-    result = json.loads(cleaned)
+
+    # Čist članek je pričakovan izid, ne napaka. Poziv se konča z „Če napak ni,
+    # vrni prazna seznama“, model pa v tem primeru pogosto ne vrne ničesar —
+    # in prej je prav to podrlo cel workflow z JSONDecodeError. Isto varovalko
+    # ima call_lektor() v generate_daily_post.py; tu je manjkala.
+    if not cleaned:
+        print(f"\n── {slug}: lektor ni vrnil popravkov (prazen odgovor) -- brez sprememb.")
+        return False
+    try:
+        result = json.loads(cleaned)
+    except json.JSONDecodeError:
+        print(f"⚠ {slug}: lektor ni vrnil veljavnega JSON -- preskačem. "
+              f"Prvih 200 znakov: {cleaned[:200]!r}", file=sys.stderr)
+        return False
 
     print(f"\n── {slug}")
     for issue in result.get("issues", []):
