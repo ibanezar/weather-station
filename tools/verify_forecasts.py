@@ -23,11 +23,15 @@ actual measurement):
      forecast, and log both as a new pending prediction to be resolved
      tomorrow. Our own local MOS model (tools/predict_recica_mos.py, read from
      napoved-modela.json) is logged as a third contestant and scored by exactly
-     the same rule — the whole point is that it can lose in public.
+     the same rule — the whole point is that it can lose in public. ECMWF AIFS
+     (the AI model Windy shows as its 15-day ECMWF extension) is the fourth,
+     fetched from the same Open-Meteo endpoint with models=ecmwf_aifs025_single.
 
-There is no way to backfill history: ARSO/Open-Meteo don't publish
-retroactive forecast archives, so the scoreboard only starts accumulating
-from the day this pipeline first runs and grows one day at a time.
+Za ARSO in Open-Meteo semafor nima zgodovine za nazaj: ARSO ne objavlja arhiva
+preteklih napovedi, Open-Meteo pa smo tu začeli beležiti sproti. AIFS je izjema
+— Open-Meteo hrani arhiv preteklih napovedi (*_previous_dayN), zato ga je
+tools/backfill_aifs_verification.py napolnil za nazaj do prvega dne semaforja.
+Ti zapisi imajo src "archive"; sproti zabeleženi imajo "live".
 
 State:
   tools/.forecast_pending.json    — predictions awaiting resolution
@@ -51,6 +55,13 @@ VERIFICATION_PATH = os.path.join(ROOT, "forecast_verification.json")
 MODEL_FORECAST_PATH = os.path.join(ROOT, "napoved-modela.json")
 
 WET_DAY_MM = 0.2  # isti prag kot pri učenju modela (train_recica_mos.py)
+
+# ECMWF AIFS — AI model, ki ga ECMWF operativno poganja od 25. 2. 2025 in ga
+# Windy prikazuje kot 15-dnevni podaljšek modela ECMWF. Prek Open-Meteo je
+# dostopen brez ključa. Ločljivost 0,25° (~28 km), 6-urni koraki: doline ne
+# razreši, zato je tu predvsem merilo, koliko sinoptična veščina zaleže brez
+# lokalne ločljivosti.
+AIFS_MODEL = "ecmwf_aifs025_single"
 
 
 def load_json(path, default):
@@ -85,13 +96,19 @@ def fetch_arso_tomorrow(target_date):
     return None
 
 
-def fetch_open_meteo_tomorrow(target_date):
-    params = urllib.parse.urlencode({
+def fetch_open_meteo_tomorrow(target_date, model=None):
+    """Open-Meteo napoved za `target_date`. Brez `model` je to privzeti seamless
+    (pri nas ICON-D2 ~2 km); z `model` je to en sam imenovan model — tako gre po
+    isti poti tudi AIFS in se meri po povsem istem pravilu."""
+    q = {
         "latitude": LAT, "longitude": LON,
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
         "timezone": "Europe/Ljubljana",
         "forecast_days": 3,
-    })
+    }
+    if model:
+        q["models"] = model
+    params = urllib.parse.urlencode(q)
     req = urllib.request.Request(f"https://api.open-meteo.com/v1/forecast?{params}", headers=UA)
     with urllib.request.urlopen(req, timeout=20) as r:
         data = json.load(r)
@@ -140,7 +157,7 @@ def fetch_model_tomorrow(target_date):
     return None
 
 
-def build_record(target, made_at, actual, arso, om, meteorec=None):
+def build_record(target, made_at, actual, arso, om, meteorec=None, aifs=None):
     """Assemble one verification record from a prediction + the measurement."""
     actual_tmax = actual.get("tempHigh")
     actual_tmin = actual.get("tempLow")
@@ -164,6 +181,18 @@ def build_record(target, made_at, actual, arso, om, meteorec=None):
             "err_tmax": err(om.get("tmax"), actual_tmax),
             "err_tmin": err(om.get("tmin"), actual_tmin),
             "err_precip": err(om.get("precip"), actual_precip),
+        }
+    if aifs:
+        record["aifs"] = {
+            "tmax": aifs.get("tmax"), "tmin": aifs.get("tmin"), "precip": aifs.get("precip"),
+            "model": aifs.get("model") or AIFS_MODEL,
+            # "live" = zabeleženo dan prej kot vsi ostali viri; "archive" =
+            # napolnjeno za nazaj iz arhiva napovedi. Razlika je majhna, a jo
+            # zapišemo, da je na strani lahko povedana.
+            "src": aifs.get("src") or "live",
+            "err_tmax": err(aifs.get("tmax"), actual_tmax),
+            "err_tmin": err(aifs.get("tmin"), actual_tmin),
+            "err_precip": err(aifs.get("precip"), actual_precip),
         }
     if meteorec:
         wet = None if actual_precip is None else (1.0 if actual_precip >= WET_DAY_MM else 0.0)
@@ -200,6 +229,7 @@ def refresh_actuals(verification, hist):
         fresh = build_record(
             date, record.get("made_at"), actual,
             record.get("arso"), record.get("open_meteo"), record.get("meteorec"),
+            record.get("aifs"),
         )
         if fresh != record:
             old = (record.get("actual") or {}).get("tmax")
@@ -230,6 +260,7 @@ def resolve_pending(pending, hist, verification):
         verification[target] = build_record(
             target, entry.get("made_at"), actual,
             entry.get("arso"), entry.get("open_meteo"), entry.get("meteorec"),
+            entry.get("aifs"),
         )
         resolved += 1
     return still_pending, resolved
@@ -255,7 +286,7 @@ def main():
     if any(e["target_date"] == tomorrow for e in still_pending):
         print(f"  Napoved za {tomorrow} je že zabeležena, preskačem.")
     else:
-        arso = om = None
+        arso = om = aifs = None
         try:
             arso = fetch_arso_tomorrow(tomorrow)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
@@ -264,21 +295,30 @@ def main():
             om = fetch_open_meteo_tomorrow(tomorrow)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
             print(f"  ⚠ Open-Meteo napoved nedosegljiva: {e}", file=sys.stderr)
+        try:
+            aifs = fetch_open_meteo_tomorrow(tomorrow, model=AIFS_MODEL)
+            if aifs:
+                aifs["model"] = AIFS_MODEL
+                aifs["src"] = "live"
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+            print(f"  ⚠ AIFS napoved nedosegljiva: {e}", file=sys.stderr)
         meteorec = fetch_model_tomorrow(tomorrow)
         if meteorec is None:
             print("  ⚠ Napovedi lastnega modela ni — napoved-modela.json manjka ali je stara.",
                   file=sys.stderr)
 
-        if arso or om or meteorec:
+        if arso or om or meteorec or aifs:
             still_pending.append({
                 "target_date": tomorrow,
                 "made_at": today.isoformat(),
                 "arso": arso,
                 "open_meteo": om,
                 "meteorec": meteorec,
+                "aifs": aifs,
             })
             print(f"  Zabeležena napoved za {tomorrow}: ARSO={'da' if arso else 'ne'}, "
-                  f"Open-Meteo={'da' if om else 'ne'}, naš model={'da' if meteorec else 'ne'}")
+                  f"Open-Meteo={'da' if om else 'ne'}, AIFS={'da' if aifs else 'ne'}, "
+                  f"naš model={'da' if meteorec else 'ne'}")
         else:
             print("  ✗ Nobenega vira napovedi ni bilo mogoče pridobiti.", file=sys.stderr)
 
