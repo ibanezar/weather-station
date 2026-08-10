@@ -188,6 +188,12 @@ tem stikom, ne preimenovanje kode.
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
   merilu. Kartica v `app.js` je `fetchMosForecast()` (+ sparkline
   `drawMosSpark()`).
+- Četrti vir na semaforju je **ECMWF AIFS** (`models=ecmwf_aifs025_single` prek
+  Open-Meteo) — AI model, ki ga Windy prikazuje kot 15-dnevni podaljšek modela
+  ECMWF. Edini vir tu z arhivom preteklih napovedi, zato ga
+  `tools/backfill_aifs_verification.py` napolni tudi za nazaj; isti skript v
+  workflowu zapolni dneve, ki bi viru ušli. Ločljivost 0,25° pomeni, da doline
+  ne vidi — na semaforju je zato pošteno, a slabo, in tako je tudi povedano.
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.

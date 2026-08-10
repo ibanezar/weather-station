@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 09 Aug 2026 05:26:07 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 07:11:43 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kateri AI model uporablja Windy in kako se odreže pri nas</title>
+      <link>https://meteorec.si/blog/kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810.html</guid>
+      <pubDate>Mon, 10 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Windy prikazuje ECMWF AIFS, prvi operativni AI model za napoved vremena. Preverili smo ga na meritvah postaje v Rečici ob Savinji: v maksimalni temperaturi se moti za 3 °C, a je ta napaka skoraj čista pristranskost.</description>
+      <category>AI</category>
+      <category>napoved</category>
+      <category>modeli</category>
+      <category>ECMWF</category>
+      <category>MTR</category>
+      <category>IREICA1</category>
+    </item>
     <item>
       <title>Vročina je nazaj, ampak do kdaj?</title>
       <link>https://meteorec.si/blog/vrocina-je-nazaj-ampak-do-kdaj-0809.html</link>

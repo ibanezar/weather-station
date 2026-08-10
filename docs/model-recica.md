@@ -75,6 +75,8 @@ slej razšla in model bi tiho dobival druge vhode, kot jih pozna.
 - **persistence (včerajšnja meritev) ni v modelu.** Preizkušena je bila in ni
   prispevala nič (1,10 proti 1,11 °C). Model je brez nje preprostejši in ni
   odvisen od tega, ali je arhiv postaje že osvežen.
+- **ECMWF AIFS kot drugi vhod je preizkušen in za zdaj izklopljen** — glej
+  spodnji razdelek.
 
 Vse je čisti Python iz standardne knjižnice: pri 16 značilkah in ~900 vzorcih se
 normalne enačbe rešijo z Gauss-Jordanovo eliminacijo v milisekundah, logistična
@@ -125,6 +127,72 @@ Pomembna opozorila k tem številkam:
   tega, ali bo sevalna noč, in ta pogoj model na dva dni ujame slabše.
   Če se `previous_dayN` kdaj obnaša drugače, ponovi ta dva testa.
 - Model je **poskusen** in tako tudi označen povsod, kjer se prikaže.
+
+## Poskus: ECMWF AIFS kot drugi vhod (`--aifs`)
+
+AIFS je AI model ECMWF, ki ga Windy prikazuje kot 15-dnevni podaljšek modela
+ECMWF; prek Open-Meteo je dosegljiv kot `models=ecmwf_aifs025_single`. Na
+`/tocnost-napovedi/` teče kot samostojen tekmovalec in tam **izgublja** — pri
+maksimalni temperaturi se moti za ±3,0 °C proti ±1,4 °C pri Open-Meteo.
+
+Zanimivo je, **zakaj** izgublja. Napaka je skoraj čista pristranskost, ne
+razpršenost (26 dni, julij–avgust 2026):
+
+| | povprečni odklon | razpršenost |
+|---|---|---|
+| Open-Meteo, Tmax | −1,05 °C | 1,33 °C |
+| AIFS, Tmax | −3,02 °C | **1,11 °C** |
+| Open-Meteo, Tmin | +1,14 °C | 1,50 °C |
+| AIFS, Tmin | +3,20 °C | 1,82 °C |
+
+Mreža 0,25° dnevni razpon stisne za dobrih 6 °C — natanko tista vrsta
+sistematičnega premika, ki jo MOS odstrani. Pri Tmax je AIFS iz dneva v dan celo
+**bolj dosleden** od Open-Meteo. Zato poskus: AIFS ne kot zamenjava vhoda, ampak
+kot dodatne značilke (`AIFS_TEMP_FEATURES`, `AIFS_POP_FEATURES`) — njegova
+Tmax/Tmin in razlika do privzetega modela.
+
+Izmerjeno na **istih dnevih** (2025-02-20 → 2026-08-09, presek datumov, isto
+izpuščanje celega leta):
+
+| | MTR brez AIFS | MTR z AIFS | |
+|---|---|---|---|
+| Tmax D+1 | 1,34 °C | 1,30 °C | −3 % |
+| Tmax D+2 | 1,77 °C | 1,60 °C | −10 % |
+| Tmax D+3 | 1,96 °C | 1,83 °C | −7 % |
+| Tmin D+1 | 1,26 °C | 1,16 °C | −8 % |
+| Tmin D+2 | 1,43 °C | 1,27 °C | −11 % |
+| Tmin D+3 | 1,46 °C | 1,35 °C | −8 % |
+| Brier D+1..3 | 0,158 / 0,173 / 0,175 | 0,157 / 0,169 / 0,168 | |
+
+Izboljšanje je majhno, a **dosledno v vseh 12 celicah po letih** — ne šum. Največ
+prispeva razlika med modeloma: kadar se AIFS in Open-Meteo razideta, je
+negotovost večja.
+
+**Zakaj kljub temu ni vklopljeno.** Arhiv AIFS se začne 2025-02-20, zato se učna
+množica skrči z ~930 na ~530 dni. Na tako kratkem oknu se popravek za Tmax ne
+posploši — brez cele jeseni in zime v učni množici je osnova na tem oknu celo
+slabša od surovega Open-Meteo (−1,2 % pri D+1). Primerjava tistega, kar je
+dejansko mogoče objaviti:
+
+| D+1 | Tmax | Tmin |
+|---|---|---|
+| produkcija (dolgo okno, brez AIFS) | **1,10 °C** | 1,24 °C |
+| kratko okno z AIFS | 1,30 °C | **1,16 °C** |
+
+Pri Tmin bi AIFS že zdaj zmagal, pri Tmax pa izguba učnih podatkov odtehta.
+Zato ostane produkcija pri MTR v1, poskus pa je ohranjen za ponovitev, ko bo
+arhiv AIFS dolg ~3 leta (predvidoma pomlad 2028 za tri cele sezone; smiselno ga
+je ponoviti že po naslednji zimi).
+
+Ponovitev:
+
+```
+python3 tools/train_recica_mos.py --from 2025-02-20 --report          # osnova
+python3 tools/train_recica_mos.py --from 2025-02-20 --aifs --report   # z AIFS
+```
+
+Ob vklopu se `uses_aifs` zapiše v `model/recica-mos.json` in
+`predict_recica_mos.py` sam pobere še živo napoved AIFS — drugih posegov ni.
 
 ## Vzdrževanje
 

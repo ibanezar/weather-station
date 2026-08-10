@@ -38,14 +38,19 @@ OUT_PATH = os.path.join(ROOT, "napoved-modela.json")
 UA = mos.UA
 
 
-def fetch_live_forecast():
-    """Živa napoved Open-Meteo, urno, za danes + 3 dni naprej."""
-    q = urllib.parse.urlencode({
+def fetch_live_forecast(model_id=None):
+    """Živa napoved Open-Meteo, urno, za danes + 3 dni naprej. Brez `model_id`
+    je to privzeti seamless; z njim en sam imenovan model (AIFS), kadar se je
+    model učil z drugim vhodom."""
+    params = {
         "latitude": mos.LAT, "longitude": mos.LON,
         "hourly": ",".join(mos.HOURLY_VARS),
         "timezone": mos.TZ,
         "forecast_days": 4,
-    })
+    }
+    if model_id:
+        params["models"] = model_id
+    q = urllib.parse.urlencode(params)
     req = urllib.request.Request("https://api.open-meteo.com/v1/forecast?" + q, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as r:
         data = json.load(r)
@@ -76,7 +81,8 @@ def predict_day(model, lead, feats):
     if not entry:
         return None
 
-    tvec = mos.temp_vector(feats)
+    with_aifs = bool(model.get("uses_aifs"))
+    tvec = mos.temp_vector(feats, with_aifs)
     out = {}
     for target in ("tmax", "tmin"):
         coefs = entry["coefficients"].get(target)
@@ -89,7 +95,7 @@ def predict_day(model, lead, feats):
         out[f"{target}_improvement_pct"] = skill.get("improvement_pct")
 
     pop_coefs = entry["coefficients"].get("pop")
-    out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats)), 2) if pop_coefs else None
+    out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats, with_aifs)), 2) if pop_coefs else None
 
     # Surovi Open-Meteo za primerjavo — kartica prikaže razliko, ker je prav ta
     # razlika tisto, kar je model prispeval.
@@ -115,6 +121,10 @@ def main():
 
     try:
         rows = fetch_live_forecast()
+        # Model, naučen z drugim vhodom, ga mora dobiti tudi v napovedi — sicer
+        # bi mu manjkale značilke, ki jih ima v koeficientih.
+        aifs_rows = fetch_live_forecast(model.get("aifs_model") or mos.AIFS_MODEL) \
+            if model.get("uses_aifs") else None
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
             json.JSONDecodeError, OSError) as e:
         print(f"✗ Open-Meteo ni dosegljiv ({e}) — napoved ni osvežena", file=sys.stderr)
@@ -130,6 +140,10 @@ def main():
         feats = mos.daily_features(series, target)
         if feats is None:
             continue
+        if aifs_rows is not None:
+            feats = mos.merge_aifs(feats, mos.daily_features(aifs_rows.get(target) or {}, target))
+            if feats is None:
+                continue
         pred = predict_day(model, lead, feats)
         if pred is None:
             continue

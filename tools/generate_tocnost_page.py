@@ -9,10 +9,15 @@ to what the station actually measured. Nobody publishes this systematically
 for a Slovenian valley — it's a genuine, unique content type built entirely
 from data this station already has.
 
-The scoreboard has no historical backfill (forecast providers don't publish
-retroactive archives) — it starts accumulating from whenever the pipeline
-first ran and grows one resolved day at a time. The page is honest about
-that instead of pretending otherwise.
+Četrti tekmovalec je ECMWF AIFS — AI model, ki ga Windy prikazuje kot 15-dnevni
+podaljšek modela ECMWF. Tu je zato, da se pove, kar se sicer ne meri nikjer:
+koliko AI model pri 0,25° ločljivosti zaleže na dnu ozke doline.
+
+Za ARSO in Open-Meteo semafor nima zgodovine za nazaj (ARSO arhiva napovedi ne
+objavlja, Open-Meteo smo začeli beležiti sproti) — raste dan za dnem. AIFS je
+izjema, ker Open-Meteo hrani arhiv preteklih napovedi; napolnil ga je
+tools/backfill_aifs_verification.py. Stran to pove namesto da bi delala vtis,
+da so vsi viri merjeni enako dolgo.
 
 Usage:
   python3 tools/generate_tocnost_page.py
@@ -80,7 +85,9 @@ def build_body(verification):
     arso_stats = source_stats(records, "arso")
     om_stats = source_stats(records, "open_meteo")
     mos_stats = source_stats(records, "meteorec")
+    aifs_stats = source_stats(records, "aifs")
     has_mos = mos_stats["n"] > 0
+    has_aifs = aifs_stats["n"] > 0
 
     # MTR — ime lastnega modela. Različica se izpelje iz zadnjega zapisa, ki jo
     # nosi (meteorec.model_version), da se oznaka sama dvigne, ko se model kdaj
@@ -111,6 +118,8 @@ def build_body(verification):
             parts.append(f'Open-Meteo: povprečna napaka najvišje temperature ±{seo.num(om_stats["mae_tmax"])} °C')
         if arso_stats["mae_tmax"] is not None:
             parts.append(f'ARSO: ±{seo.num(arso_stats["mae_tmax"])} °C')
+        if aifs_stats["mae_tmax"] is not None:
+            parts.append(f'ECMWF AIFS: ±{seo.num(aifs_stats["mae_tmax"])} °C')
         if mos_stats["mae_tmax"] is not None:
             parts.append(f'{mtr_label}: ±{seo.num(mos_stats["mae_tmax"])} °C')
         status =(f'  <p class="archive-intro"><strong>{n_days} razrešenih dni</strong> od {seo.fmtd(first_date)}. '
@@ -122,6 +131,26 @@ def build_body(verification):
                  'ponoči pa hladnejša od modelske mreže, ob jasnih in mirnih nočeh se na dnu doline nabere '
                  'hladen zrak. Popravek je naučen na meritvah te postaje. Meri se z istim merilom kot ARSO in '
                  'Open-Meteo, na isti tabeli — tudi kadar izgubi.</p>') if has_mos else ""
+
+    # AIFS: koliko dni je napolnjenih iz arhiva in ne zabeleženih sproti. To ni
+    # kozmetika — arhivski zapis je nastal po drugi poti (urne vrednosti,
+    # sešteto v dnevne) in bralec mora vedeti, kje meja teče.
+    aifs_archive_n = sum(1 for r in records if (r.get("aifs") or {}).get("src") == "archive")
+    aifs_note = (f' Prvih {aifs_archive_n} dni je napolnjenih iz arhiva preteklih napovedi '
+                 'Open-Meteo (AIFS je edini vir tu, ki tak arhiv sploh ima), naprej se beleži '
+                 'sproti kot vsi ostali.') if aifs_archive_n else ""
+    aifs_model_id = next((r["aifs"].get("model") for r in reversed(records)
+                          if r.get("aifs") and r["aifs"].get("model")), "ecmwf_aifs025_single")
+    aifs_method = (f' ECMWF AIFS jemljemo prek Open-Meteo (model {aifs_model_id}); dnevi, napolnjeni iz '
+                   'arhiva preteklih napovedi, so sešteti iz urnih vrednosti, sproti zabeleženi pa iz '
+                   'dnevne agregacije Open-Meteo — razlika je nekaj desetink stopinje.') if has_aifs else ""
+    aifs_intro = ('  <p class="archive-intro"><strong>Četrti tekmovalec je ECMWF AIFS</strong> — AI model '
+                  'Evropskega centra za srednjeročne napovedi, ki od februarja 2025 teče operativno in ga '
+                  'Windy prikazuje kot 15-dnevni podaljšek modela ECMWF. Vremena ne računa iz enačb, ampak '
+                  'ga je napovedovanja naučila nevronska mreža na štiridesetih letih arhiva. Teče v '
+                  'ločljivosti 0,25° (~28 km) in v šesturnih korakih, kar pomeni, da naše doline ne vidi — '
+                  'na tej tabeli je zato predvsem odgovor na vprašanje, ali AI po sebi odtehta lokalno '
+                  f'ločljivost.{aifs_note}</p>') if has_aifs else ""
 
     intro = ('  <p class="archive-intro">Vsak dan zabeležimo, kaj ARSO in Open-Meteo napovesta za jutrišnjo '
              'najvišjo/najnižjo temperaturo v Rečici ob Savinji, naslednji dan pa to primerjamo z dejansko '
@@ -139,6 +168,7 @@ def build_body(verification):
     cards = ('  <div class="stat-grid">\n'
               + stat_card("ARSO", arso_stats, "c-temp") + "\n"
               + stat_card("Open-Meteo", om_stats, "c-rain") + "\n"
+              + (stat_card("ECMWF AIFS", aifs_stats, "c-wind") + "\n" if has_aifs else "")
               + (stat_card(mtr_label, mos_stats, "c-up") + "\n" if has_mos else "")
               + '  </div>') if n_days else ""
 
@@ -152,12 +182,15 @@ def build_body(verification):
         a = source_stats(recs, "arso")
         o = source_stats(recs, "open_meteo")
         mm = source_stats(recs, "meteorec")
+        ai = source_stats(recs, "aifs")
         y, m = int(ym[:4]), int(ym[5:7])
         a_txt = mae_txt(a)
         o_txt = mae_txt(o)
+        ai_col = f'<td>{mae_txt(ai)}</td>' if has_aifs else ""
         m_col = f'<td>{mae_txt(mm)}</td>' if has_mos else ""
-        month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td>{m_col}<td>{len(recs)}</td></tr>')
+        month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td>{ai_col}{m_col}<td>{len(recs)}</td></tr>')
     month_head = ('    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th>'
+                  + ('<th>ECMWF AIFS</th>' if has_aifs else '')
                   + (f'<th>{mtr_label}</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
     month_table = ('  <table class="stats">\n'
                     + month_head
@@ -173,22 +206,25 @@ def build_body(verification):
         a = r.get("arso") or {}
         o = r.get("open_meteo") or {}
         mm = r.get("meteorec") or {}
+        ai = r.get("aifs") or {}
         a_txt = pred_txt(a)
         o_txt = pred_txt(o)
+        ai_col = f'<td>{pred_txt(ai)}</td>' if has_aifs else ""
         m_col = f'<td>{pred_txt(mm)}</td>' if has_mos else ""
         recent_rows.append(
             f'    <tr><th><a href="/vreme/{d[:4]}/{d[5:7]}/{d[8:10]}/">{seo.fmtd(d)}</a></th>'
-            f'<td>{seo.num(act.get("tmax"))} °C</td><td>{a_txt}</td><td>{o_txt}</td>{m_col}</tr>'
+            f'<td>{seo.num(act.get("tmax"))} °C</td><td>{a_txt}</td><td>{o_txt}</td>{ai_col}{m_col}</tr>'
         )
     recent_head = ('    <tr><th>Datum</th><th>Dejanska maks. T</th><th>ARSO je napovedal</th>'
                    '<th>Open-Meteo je napovedal</th>'
+                   + ('<th>AIFS je napovedal</th>' if has_aifs else '')
                    + (f'<th>{mtr_label} je napovedal</th>' if has_mos else '') + '</tr>\n')
     recent_table = ('  <table class="stats">\n'
                      + recent_head
                      + "\n".join(recent_rows) + '\n  </table>') if recent_rows else \
         '  <p class="muted-note">Še ni razrešenih dni.</p>'
 
-    intro_block = intro + ("\n" + mos_intro if mos_intro else "")
+    intro_block = intro + ("\n" + mos_intro if mos_intro else "") + ("\n" + aifs_intro if aifs_intro else "")
 
     # ── MTR: veščina po vodilnem času (D+1..D+3), hindcast ob učenju ─────
     # Ločeno od scoreboarda zgoraj: kartice/mesečni pregled merijo samo D+1,
@@ -275,16 +311,26 @@ def build_body(verification):
          "napovedano najvišjo/najnižjo temperaturo za eno konkretno lokacijo (Rečica ob Savinji), ne "
          "splošne zanesljivosti ARSO napovedi za Slovenijo."),
         ("Zakaj se primerjava začne šele nedavno?",
-         "ARSO in Open-Meteo ne objavljata arhiva preteklih napovedi, zato primerjave ni mogoče izračunati "
-         "za nazaj — beležimo jo dan za dnem, odkar ta stran obstaja."),
+         "ARSO ne objavlja arhiva preteklih napovedi, zato primerjave zanj ni mogoče izračunati za nazaj — "
+         "beležimo jo dan za dnem, odkar ta stran obstaja. Izjema je ECMWF AIFS: Open-Meteo za svoje modele "
+         "hrani arhiv preteklih napovedi, zato je AIFS napolnjen tudi za dneve pred tem."),
         ("Kje je primerjava za naslednjih nekaj ur (ne dni)?",
          "Uro-natančno primerjavo lastnega statističnega modela (Holt-Winters), Open-Meteo in postaje za "
          "zadnjih 24 ur najdeš na naslovni strani v razdelku »AI napoved«."),
     ]
     # Vprašanje o lastnem modelu se pojavi šele, ko ima model kaj pokazati —
     # dokler ni razrešenih dni, bi bilo obljuba brez številk.
+    if has_aifs:
+        qa.insert(2, (
+            "Kateri AI model uporablja Windy in ali je boljši?",
+            "Windy ne razvija svojega modela — prikazuje ECMWF AIFS, AI model Evropskega centra za "
+            "srednjeročne napovedi, kot 15-dnevni podaljšek modela ECMWF. Na tej tabeli teče pod istim "
+            "merilom kot vsi ostali. Pri nas ga omejuje ločljivost: AIFS računa na mreži 0,25° (~28 km), "
+            "kar je za ozko dolino pregrobo — dno doline vidi kot pobočje. Za sinoptično sliko nekaj dni "
+            "vnaprej je to lahko odličen model, za najvišjo temperaturo v Rečici pa številke v tabeli "
+            "povedo, kje dejansko je."))
     if has_mos:
-        qa.insert(3, (
+        qa.insert(4 if has_aifs else 3, (
             f"Kaj je {mtr_label}?",
             "MTR (Meteorec) je lastni statistični model za Rečico ob Savinji. Vzame napoved Open-Meteo in ji "
             "doda popravek, naučen na meritvah postaje IREICA1 — kako se dno doline sistematično razlikuje od "
@@ -299,7 +345,7 @@ def build_body(verification):
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Točnost napovedi", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Točnost vremenske napovedi — Rečica ob Savinji</h1>
-  <p class="post-meta">{f"ARSO vs. Open-Meteo vs. {mtr_label} vs. dejanska meritev" if has_mos else "ARSO vs. Open-Meteo vs. dejanska meritev"} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
+  <p class="post-meta">{" vs. ".join(["ARSO", "Open-Meteo"] + (["ECMWF AIFS"] if has_aifs else []) + ([mtr_label] if has_mos else []) + ["dejanska meritev"])} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
 {intro_block}
 {status}
 {cards}
@@ -312,7 +358,7 @@ def build_body(verification):
   <p class="muted-note">Metodologija: vsak dan zabeležimo napoved ARSO in Open-Meteo za jutrišnjo najvišjo/
   najnižjo temperaturo v Rečici ob Savinji; ko dan mine, ju primerjamo z dejansko dnevno meritvijo postaje
   IREICA1. Napaka je absolutna razlika v °C. Nobena pretekla napoved se ne popravlja ali briše; kadar
-  arhiv postaje naknadno dopolni meritev za pretekli dan, napako preračunamo na dopolnjeno meritev.{arso_note}</p>
+  arhiv postaje naknadno dopolni meritev za pretekli dan, napako preračunamo na dopolnjeno meritev.{arso_note}{aifs_method}</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
     return body
@@ -325,15 +371,16 @@ def main():
     url = "/tocnost-napovedi/"
     title = "Točnost vremenske napovedi — Rečica ob Savinji"
     n = len(verification)
-    desc = (f"Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO vs. "
-            f"Open-Meteo proti dejanskim meritvam postaje IREICA1 — {n} razrešenih dni.")
+    desc = (f"Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO, "
+            f"Open-Meteo in AI modela ECMWF AIFS proti dejanskim meritvam postaje IREICA1 — "
+            f"{n} razrešenih dni.")
 
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-14"),
         seo.crumbs_schema([("Meteorec", "/"), ("Točnost napovedi", None)]),
         seo.named_dataset_schema(
             url, "Verifikacija vremenske napovedi — Rečica ob Savinji",
-            "Dnevna primerjava napovedi ARSO in Open-Meteo z dejansko meritvijo postaje IREICA1.",
+            "Dnevna primerjava napovedi ARSO, Open-Meteo in ECMWF AIFS z dejansko meritvijo postaje IREICA1.",
             variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
         ),
     ])
