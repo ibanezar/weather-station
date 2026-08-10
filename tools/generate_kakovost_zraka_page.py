@@ -248,6 +248,9 @@ def build_body(data):
     </div>
   </div>
 {faq_html}
+  <div style="margin-bottom:1rem">
+    <a href="/biovreme/" class="mtn-avk-link">📖 Biovreme — kako se kakovost zraka pozna pri počutju →</a>
+  </div>
   <p class="muted-note">Model uporablja iste vhodne podatke (Open-Meteo Air Quality API, CAMS Europe) kot živi
   pripomoček na <a href="/">naslovni strani Meteorec</a> (zavihek »Zrak«).</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
