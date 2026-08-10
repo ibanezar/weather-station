@@ -75,6 +75,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/tedenska-napoved-11-17-avgust-2026.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/tedenska-napoved-11-17-avgust-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810.html</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>monthly</changefreq>
@@ -847,6 +854,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/modeli/</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/mtr/</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
