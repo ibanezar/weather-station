@@ -1038,6 +1038,13 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   <!-- Biovreme -->
   <div id="biovreme-card" class="card sc-risk-card suit-fair" style="margin-bottom:1rem">Nalagam…</div>
 
+  <!-- Povezava je NAMENOMA zunaj #biovreme-card: initBiovreme() prepiše cel
+       innerHTML kartice, brez JS pa v njej ostane samo »Nalagam…«. Tako je
+       /biovreme/ edina statična, za pajke vidna povezava na to stran. -->
+  <div style="margin-bottom:1rem">
+    <a href="/biovreme/" class="mtn-avk-link">📖 Celoten pregled biovremena — tlak, toplotna obremenitev, UV in zrak →</a>
+  </div>
+
   <!-- Pollen -->
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">🌸 Pelod in alergeni</div>
