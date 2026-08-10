@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 09 Aug 2026 05:26:07 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 06:56:15 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Tedenska napoved 11.–17. avgusta: sredina tedna je uganka, konec tedna vroč</title>
+      <link>https://meteorec.si/blog/tedenska-napoved-11-17-avgust-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/tedenska-napoved-11-17-avgust-2026.html</guid>
+      <pubDate>Mon, 10 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Pet globalnih modelov, ARSO in domači MTR za teden od 11. do 17. avgusta. Za četrtek se napovedi razhajajo za sedem stopinj, do nedelje pa se vročina vrača proti 35 °C.</description>
+      <category>napoved</category>
+      <category>primerjava modelov</category>
+      <category>MTR</category>
+      <category>ARSO</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Vročina je nazaj, ampak do kdaj?</title>
       <link>https://meteorec.si/blog/vrocina-je-nazaj-ampak-do-kdaj-0809.html</link>
