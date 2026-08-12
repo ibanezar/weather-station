@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 11 Aug 2026 08:20:32 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 12 Aug 2026 07:42:57 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Hodograf: kaj krivulja vetra pove o nevihti</title>
+      <link>https://meteorec.si/blog/hodograf-krivulja-vetra-nevihte.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/hodograf-krivulja-vetra-nevihte.html</guid>
+      <pubDate>Wed, 12 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Hodograf v enem diagramu pokaže, kako se veter obrača in krepi z višino. Trije resnični hodografi iz Rečice ob Savinji povedo, kdaj iz nevihte nastane naliv in kdaj se ne zgodi nič.</description>
+      <category>nevihte</category>
+      <category>razlaga</category>
+      <category>hodograf</category>
+      <category>striženje vetra</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Tedenska napoved 11.–17. avgusta: sredina tedna je uganka, konec tedna vroč</title>
       <link>https://meteorec.si/blog/tedenska-napoved-11-17-avgust-2026.html</link>
