@@ -12,11 +12,15 @@ CC BY, CC BY-SA, GFDL). Vse z NC ali ND zavrne — stran je javna in bi jih
 kršila. Kjer primerne slike ni, datoteke ne naredi in kartica ostane pri
 rezervnem prikazu; to ni napaka.
 
+Z `--target dvojnice` isto opravi za primerjalne kartice na /dvojnice/, kjer
+rabita sliko obe strani para — užitna vrsta in njena nevarna dvojnica.
+
 Uporaba:
   python3 tools/fetch_species_photos.py --dry-run      # samo izpiši, kaj bi vzel
   python3 tools/fetch_species_photos.py --limit 20     # prenesi prvih 20 manjkajočih
   python3 tools/fetch_species_photos.py --only boletus_edulis
   python3 tools/fetch_species_photos.py --recheck      # poskusi tudi tam, kjer slika že je
+  python3 tools/fetch_species_photos.py --target dvojnice
 """
 import argparse
 import html
@@ -35,8 +39,12 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RULES_PATH = os.path.join(ROOT, "species_rules.yaml")
-IMG_DIR = os.path.join(ROOT, "gobarska-napoved", "img", "vrste")
-CREDITS_PATH = os.path.join(IMG_DIR, "CREDITS.json")
+
+# Imeni datotek na /dvojnice/ določi generator strani (id vrste za užitno stran,
+# _slug(ime) za dvojnico). Ti dve funkciji uvozimo od tam namesto da bi ju
+# prepisali — prepis, ki se razide, tiho naredi datoteko, ki je stran ne pobere.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from generate_gobe_page import _slug, parse_double  # noqa: E402
 
 API = "https://commons.wikimedia.org/w/api.php"
 UA = "MeteorecGobarskaNapoved/1.0 (https://meteorec.si; filip.eremita@gmail.com)"
@@ -59,6 +67,16 @@ LICENSE_OK = [
     ("GFDL", "GFDL"),
 ]
 LICENSE_BAD = ("-NC", "NONCOMMERCIAL", "-ND", "NODERIV", "FAIR USE")
+
+# Kartica hoče gobo, kot jo vidiš v gozdu. V kategorijah vrst je poleg tega
+# polno mikroskopije, risb in zemljevidov razširjenosti; slika trosov pod
+# mikroskopom je za prepoznavanje na terenu neuporabna in na primerjalni
+# kartici zavajajoča. Ime datoteke tega pogosto ne izda ("2010-09-19 Suillus
+# grevillei … 125164.jpg" so trosi), kategorija na Commons pa ga — zato se sito
+# gleda po kategorijah in opisu, ne le po naslovu.
+CONTENT_BAD = ("spore", "micrograph", "microscop", "mikroskop", "illustration",
+               "drawing", "zeichnung", "distribution map", "herbarium",
+               "diagram", "chromatogra", "postage", "logo")
 
 
 # ── Commons API ──────────────────────────────────────────────────────────────
@@ -90,14 +108,17 @@ def strip_html(s):
 # ("This image was created by user X at Mushroom Observer …"); v tabeli virov
 # hočemo ime avtorja, ne odstavka.
 ARTIST_PREFIXES = re.compile(
-    r"^(this (image|photo(graph)?) (was )?(created|taken|uploaded) by( user)?|"
-    r"photo(graph)? by|image by|foto:|photo:|©)\s*", re.I)
+    r"^((copyright\s*)?[©(]*\s*(c\)|\d{4})?\s*)?"
+    r"(this (image|photo(graph)?) (was )?(created|taken|uploaded) by( user)?|"
+    r"photo(graph)? by|image by|foto:|photo:)?\s*", re.I)
 ARTIST_TAIL = re.compile(r"\s*(,|\bat\b|\bfrom\b|\(|–|—|\|).*$", re.S)
 
 
 def clean_artist(s):
     s = ARTIST_PREFIXES.sub("", strip_html(s)).strip()
-    if len(s) > 40:                     # še vedno stavek — vzemi prvi del
+    # "Ime at Mushroom Observer" je ime + vir; v tabeli virov hočemo ime, vir
+    # pa je že v svojem stolpcu. Odreži tudi, kadar je niz kratek.
+    if len(s) > 40 or re.search(r"\b(at|from)\b", s, re.I):
         s = ARTIST_TAIL.sub("", s).strip()
     s = s.strip(" .,;:-")
     return s[:60] or "neznan avtor"
@@ -149,10 +170,16 @@ def pick(name_lat, candidates):
     wanted = (epithet or genus).lower()
     scored = []
     for c in candidates:
-        lic = license_of((c["info"].get("extmetadata") or {}))
+        meta_all = c["info"].get("extmetadata") or {}
+        lic = license_of(meta_all)
         if not lic:
             continue
         title = c["title"].lower()
+        haystack = " ".join([title] + [
+            strip_html((meta_all.get(k) or {}).get("value", "")).lower()
+            for k in ("Categories", "ImageDescription", "ObjectName")])
+        if any(b in haystack for b in CONTENT_BAD):
+            continue
         score = 0
         if wanted and wanted in title:
             score += 2
@@ -195,62 +222,92 @@ def download_jpeg(url, dest):
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
+def wanted_vrste(rules):
+    """(id, latinsko ime, prikazno ime) za vsako vrsto v bazi."""
+    return [(sp["id"], sp["name_lat"], sp["name_sl"]) for sp in rules["species"]]
+
+
+def wanted_dvojnice(rules):
+    """Obe strani vsakega primerjalnega para na /dvojnice/: užitna vrsta in
+    njena dvojnica. Pare sestavi generator strani iz indeksiranih vrst z
+    razčlenljivim zapisom dvojnice, zato tu velja isto sito."""
+    out, seen = [], set()
+    for sp in rules["species"]:
+        if not sp.get("gets_index") or not sp.get("doubles"):
+            continue
+        parsed = parse_double(sp["doubles"])
+        if not parsed:
+            continue
+        dname, dlatin, _ = parsed
+        for key, lat, sl in ((sp["id"], sp["name_lat"], sp["name_sl"]),
+                             (_slug(dname), dlatin, dname)):
+            if key not in seen:
+                seen.add(key)
+                out.append((key, lat, sl))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description="Prenesi fotografije vrst z Wikimedia Commons")
+    ap.add_argument("--target", choices=("vrste", "dvojnice"), default="vrste",
+                    help="kateri imenik slik polnimo (privzeto vrste)")
     ap.add_argument("--limit", type=int, default=0, help="največ toliko vrst (0 = brez omejitve)")
     ap.add_argument("--only", help="samo ta id vrste")
     ap.add_argument("--recheck", action="store_true", help="poskusi tudi tam, kjer slika že obstaja")
     ap.add_argument("--dry-run", action="store_true", help="samo izpiši, ne prenašaj")
     args = ap.parse_args()
 
+    img_dir = os.path.join(ROOT, "gobarska-napoved", "img", args.target)
+    credits_path = os.path.join(img_dir, "CREDITS.json")
+    os.makedirs(img_dir, exist_ok=True)
+
     with open(RULES_PATH, encoding="utf-8") as f:
         rules = yaml.safe_load(f)
     try:
-        with open(CREDITS_PATH, encoding="utf-8") as f:
+        with open(credits_path, encoding="utf-8") as f:
             credits = json.load(f)
     except (OSError, ValueError):
         credits = {}
 
+    wanted = wanted_vrste(rules) if args.target == "vrste" else wanted_dvojnice(rules)
     todo = []
-    for sp in rules["species"]:
-        if args.only and sp["id"] != args.only:
+    for key, lat, sl in wanted:
+        if args.only and key != args.only:
             continue
-        dest = os.path.join(IMG_DIR, f"{sp['id']}.jpg")
-        if os.path.exists(dest) and not args.recheck:
+        if os.path.exists(os.path.join(img_dir, f"{key}.jpg")) and not args.recheck:
             continue
-        todo.append(sp)
+        todo.append((key, lat, sl))
     if args.limit:
         todo = todo[:args.limit]
 
-    print(f"Vrst brez fotografije: {len(todo)}")
+    print(f"[{args.target}] brez fotografije: {len(todo)}")
     got = missed = 0
-    for i, sp in enumerate(todo, 1):
-        name_lat = sp["name_lat"]
+    for i, (key, name_lat, name_sl) in enumerate(todo, 1):
         hit = pick(name_lat, search_images(name_lat))
         if not hit:
             missed += 1
             print(f"  [{i}/{len(todo)}] ✗ {name_lat} — ni proste slike")
             continue
-        fn = f"{sp['id']}.jpg"
+        fn = f"{key}.jpg"
         if args.dry_run:
             got += 1
             print(f"  [{i}/{len(todo)}] → {name_lat}: {hit['license']}, {hit['artist'][:40]}")
             continue
         try:
-            kb = download_jpeg(hit["thumburl"], os.path.join(IMG_DIR, fn)) / 1024
+            kb = download_jpeg(hit["thumburl"], os.path.join(img_dir, fn)) / 1024
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             missed += 1
             print(f"  [{i}/{len(todo)}] ✗ {name_lat} — prenos ni uspel: {e}")
             continue
         credits[fn] = {"artist": hit["artist"], "latin": name_lat, "license": hit["license"],
-                       "sl": sp["name_sl"], "source_url": hit["source_url"]}
+                       "sl": name_sl, "source_url": hit["source_url"]}
         got += 1
-        print(f"  [{i}/{len(todo)}] ✓ {sp['name_sl']} ({name_lat}) — {hit['license']}, {kb:.0f} kB")
+        print(f"  [{i}/{len(todo)}] ✓ {name_sl} ({name_lat}) — {hit['license']}, {kb:.0f} kB")
 
     if not args.dry_run and got:
-        with open(CREDITS_PATH, "w", encoding="utf-8") as f:
+        with open(credits_path, "w", encoding="utf-8") as f:
             json.dump(credits, f, ensure_ascii=False, indent=1, sort_keys=True)
-        print(f"→ {CREDITS_PATH} ({len(credits)} vnosov)")
+        print(f"→ {credits_path} ({len(credits)} vnosov)")
     print(f"\nPrevzetih: {got} · brez slike: {missed}")
     return 0
 

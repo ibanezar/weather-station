@@ -6,6 +6,13 @@
   "sl": "Poljski kukmak",
   "source_url": "https://commons.wikimedia.org/wiki/File:Agaricus_campestris.jpg"
  },
+ "albatrellus_ovinus.jpg": {
+  "artist": "Bernypisa",
+  "latin": "Albatrellus ovinus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Ovčji ovčar",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Albatrellus-ovinus.jpg"
+ },
  "amanita_rubescens.jpg": {
   "artist": "No machine-readable author provided. Archenzo assumed (based on copyright claims).",
   "latin": "Amanita rubescens",
@@ -69,6 +76,13 @@
   "sl": "Velika tintnica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Coprinus_comatus.jpg"
  },
+ "craterellus_lutescens.jpg": {
+  "artist": "Andreas Kunze",
+  "latin": "Craterellus lutescens",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rumena lisička",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2007-11-10_Craterellus_lutescens.jpg"
+ },
  "craterellus_tubaeformis.jpg": {
   "artist": "Jerzy Opioła",
   "latin": "Craterellus tubaeformis",
@@ -104,6 +118,13 @@
   "sl": "Rumeni ježek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Hedgehog_fungi2.jpg"
  },
+ "hydnum_rufescens.jpg": {
+  "artist": "User:Strobilomyces",
+  "latin": "Hydnum rufescens",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rdečkasti ježek",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Hydnum_rufescens_20070927w.JPG"
+ },
  "imleria_badia.jpg": {
   "artist": "Jean-Pol GRANDMONT",
   "latin": "Imleria badia",
@@ -118,6 +139,13 @@
   "sl": "Karbolni kukmak",
   "source_url": "https://commons.wikimedia.org/wiki/File:Agaricus_xanthodermus_section.jpg"
  },
+ "kozja-noga.jpg": {
+  "artist": "Sporulator",
+  "latin": "Scutiger pes-caprae",
+  "license": "CC BY-SA 3.0",
+  "sl": "Kozja noga",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-08-17_Scutiger_pes-caprae_(Pers.)_Bondartsev_%26_Singer_163152.jpg"
+ },
  "laccaria_amethystina.jpg": {
   "artist": "Luridiformis at en.wikipedia",
   "latin": "Laccaria amethystina",
@@ -131,6 +159,20 @@
   "license": "CC BY-SA 3.0",
   "sl": "Užitna sirovka",
   "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_deliciosus.jpg"
+ },
+ "lactarius_salmonicolor.jpg": {
+  "artist": "Holger Krisp",
+  "latin": "Lactarius salmonicolor",
+  "license": "CC BY 3.0",
+  "sl": "Jelkova sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lachs-Reizker_Lactarius_salmonicolor.jpg"
+ },
+ "lactarius_semisanguifluus.jpg": {
+  "artist": "Markus Wilhelm",
+  "latin": "Lactarius semisanguifluus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Polkrvava sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Lactarius_semisanguifluus1597.jpg"
  },
  "lactifluus_piperatus.jpg": {
   "artist": "Svencapoeira",
@@ -153,12 +195,26 @@
   "sl": "Brezov turek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum_versipelle,_Kozlarz_pomaranczowy.jpg"
  },
+ "lijasta-lisicka.jpg": {
+  "artist": "Andreas Kunze",
+  "latin": "Craterellus tubaeformis",
+  "license": "CC BY-SA 3.0",
+  "sl": "Lijasta lisička",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2009-10-07_Craterellus_tubaeformis_Leotia_lubrica.jpg"
+ },
  "lycoperdon_perlatum.jpg": {
   "artist": "Daniel Ullrich, Threedots",
   "latin": "Lycoperdon perlatum",
   "license": "CC BY-SA 3.0",
   "sl": "Betičasta prašnica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Single_lycoperdon_perlatum.jpg"
+ },
+ "macesnova-lupljivka.jpg": {
+  "artist": "amadej trnkoczy",
+  "latin": "Suillus grevillei",
+  "license": "CC BY-SA 3.0",
+  "sl": "Macesnova lupljivka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2010-09-19_Suillus_grevillei_(Klotzsch)_Singer_125171.jpg"
  },
  "macrolepiota_procera.jpg": {
   "artist": "Chrumps",
@@ -244,6 +300,13 @@
   "sl": "Rdečerjavi ježek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Hydnum_rufescens_2.jpg"
  },
+ "rumeni-jezek.jpg": {
+  "artist": "Alan Rockefeller",
+  "latin": "Hydnum repandum",
+  "license": "CC BY-SA 3.0",
+  "sl": "Rumeni ježek",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2012-08-29_Hydnum_repandum_L_256175.jpg"
+ },
  "russula_cyanoxantha.jpg": {
   "artist": "Björn S...",
   "latin": "Russula cyanoxantha",
@@ -257,6 +320,13 @@
   "license": "CC BY-SA 3.0",
   "sl": "Zelena golobica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Russula_virescens3.JPG"
+ },
+ "smrekova-sirovka.jpg": {
+  "artist": "Andreas Kunze",
+  "latin": "Lactarius deterrimus",
+  "license": "CC BY-SA 3.0",
+  "sl": "Smrekova sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-07-31_Lactarius_deterrimus_3.jpg"
  },
  "strupena-galerina.jpg": {
   "artist": "Lebrac",
@@ -272,12 +342,26 @@
   "sl": "Strupena rdečeča dežnica",
   "source_url": "https://commons.wikimedia.org/wiki/File:Chlorophyllum_brunneum_ts1.jpg"
  },
+ "suillus_cavipes.jpg": {
+  "artist": "Copyright ©2011 Bob",
+  "latin": "Suillus cavipes",
+  "license": "CC BY-SA 3.0",
+  "sl": "Votlobetna lupljivka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2011-10-26_Suillus_cavipes_(Opatowski)_Smith_%26_Thiers_177547.jpg"
+ },
  "trepetlikov-turek.jpg": {
   "artist": "Jerzy Opioła",
   "latin": "Leccinum aurantiacum",
   "license": "CC BY-SA 3.0",
   "sl": "Trepetlikov turek",
   "source_url": "https://commons.wikimedia.org/wiki/File:Leccinum_aurantiacum_G3_(1).jpg"
+ },
+ "uzitna-sirovka.jpg": {
+  "artist": "furtwangl",
+  "latin": "Lactarius deliciosus",
+  "license": "CC BY 2.0",
+  "sl": "Užitna sirovka",
+  "source_url": "https://commons.wikimedia.org/wiki/File:2009-09-28_Lactarius_deliciosus.jpg"
  },
  "vijolicasta-celadica.jpg": {
   "artist": "Eva K. / Eva K.",
