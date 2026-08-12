@@ -9,24 +9,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/dvojnice/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/dvojnice/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/dvojnice/">
-<meta name="description" content="26 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
+<meta name="description" content="32 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/dvojnice/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Nevarne dvojnice gob — primerjava s fotografijami — Gobarska napoved">
-<meta property="og:description" content="26 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
+<meta property="og:description" content="32 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Nevarne dvojnice gob — primerjava s fotografijami — Gobarska napoved">
-<meta name="twitter:description" content="26 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
+<meta name="twitter:description" content="32 primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno ločevanje.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/dvojnice/","name":"Nevarne dvojnice gob \u2014 primerjava s fotografijami","description":"26 primerjav u\u017eitnih vrst z nevarnimi dvojnicami, s fotografijami in klju\u010dno razliko za varno lo\u010devanje.","url":"https://meteorec.si/gobarska-napoved/dvojnice/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/dvojnice/","name":"Nevarne dvojnice gob \u2014 primerjava s fotografijami","description":"32 primerjav u\u017eitnih vrst z nevarnimi dvojnicami, s fotografijami in klju\u010dno razliko za varno lo\u010devanje.","url":"https://meteorec.si/gobarska-napoved/dvojnice/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved","item":"https://meteorec.si/gobarska-napoved/"},{"@type":"ListItem","position":3,"name":"Nevarne dvojnice"}]}
@@ -283,6 +283,7 @@ body{
 .gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
+.gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -321,8 +322,13 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Ekološka skupina + rastni zamik vrste — pove, katero okno dežja "Sprožilni
+   dež" spodaj sploh meri (pri kukmaku drugo kot pri jurčku). */
+.gp-eco{display:inline-block;margin-top:.45rem;padding:.12rem .45rem;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid var(--card-border);
+  font-size:.68rem;color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 /* Per-factor "why" breakdown — the model already scores each species on 6
-   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   independent 0-100 signals (soil temp, trigger/base rain, soil moisture, air
    humidity, night-cooling trigger) and blends them into the single index;
    previously only the blended number + a prose summary were ever shown.
    Surfacing the actual bars is the real "not a black box" version of the
@@ -1234,6 +1240,120 @@ body .wrap{padding-bottom:5.5rem}
       </div>
       <ul class="gp-vs-diff"><li>prav tako užiten in odličen, raste pod trepetlikami/topoli</li></ul>
     </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/craterellus_lutescens.jpg" alt="Rumena lisička" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Rumena lisička</div>
+          <div class="gp-vs-lat">Craterellus lutescens</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lijasta-lisicka.jpg" alt="Lijasta lisička" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Lijasta lisička</div>
+          <div class="gp-vs-lat">Craterellus tubaeformis</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna</li><li>lutescens ima gladko, oranžno spodnjo stran brez izrazitih gub</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/hydnum_rufescens.jpg" alt="Rdečkasti ježek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Rdečkasti ježek</div>
+          <div class="gp-vs-lat">Hydnum rufescens</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/rumeni-jezek.jpg" alt="Rumeni ježek" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Rumeni ježek</div>
+          <div class="gp-vs-lat">Hydnum repandum</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užiten, večji in bledejši</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/albatrellus_ovinus.jpg" alt="Ovčji ovčar" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Ovčji ovčar</div>
+          <div class="gp-vs-lat">Albatrellus ovinus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/kozja-noga.jpg" alt="Kozja noga" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Kozja noga</div>
+          <div class="gp-vs-lat">Scutiger pes-caprae</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna. Grenki ovčarji rodu Albatrellopsis</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/suillus_cavipes.jpg" alt="Votlobetna lupljivka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Votlobetna lupljivka</div>
+          <div class="gp-vs-lat">Suillus cavipes</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/macesnova-lupljivka.jpg" alt="Macesnova lupljivka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Macesnova lupljivka</div>
+          <div class="gp-vs-lat">Suillus grevillei</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna</li><li>cavipes ima votel bet in suh, kosmat klobuk</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lactarius_semisanguifluus.jpg" alt="Polkrvava sirovka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Polkrvava sirovka</div>
+          <div class="gp-vs-lat">Lactarius semisanguifluus</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/uzitna-sirovka.jpg" alt="Užitna sirovka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Užitna sirovka</div>
+          <div class="gp-vs-lat">Lactarius deliciosus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna</li><li>semisanguifluus ima mleček, ki iz oranžnega prehaja v vinsko rdeč</li></ul>
+    </div>
+    <div class="gp-vs-card">
+      <div class="gp-vs-pair">
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/lactarius_salmonicolor.jpg" alt="Jelkova sirovka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🍄'}))"></div>
+          <div class="gp-vs-name">✅ Jelkova sirovka</div>
+          <div class="gp-vs-lat">Lactarius salmonicolor</div>
+        </div>
+        <div class="gp-vs-x">VS</div>
+        <div class="gp-vs-side">
+          <div class="gp-vs-photo"><img src="/gobarska-napoved/img/dvojnice/smrekova-sirovka.jpg" alt="Smrekova sirovka" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'☠️'}))"></div>
+          <div class="gp-vs-name">Smrekova sirovka</div>
+          <div class="gp-vs-lat">Lactarius deterrimus</div>
+          <span class="gp-badge e-none">Neužitna</span>
+        </div>
+      </div>
+      <ul class="gp-vs-diff"><li>prav tako užitna</li><li>salmonicolor ima lososovo oranžen mleček, ki ne pozeleni takoj</li></ul>
+    </div>
   </div>
     <div class="gp-vs-note"><b>Užitna golobica:</b> Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika).</div>
     <div class="gp-vs-note"><b>Pšenična koprenka:</b> Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom.</div>
@@ -1255,6 +1375,10 @@ body .wrap{padding-bottom:5.5rem}
     <div class="gp-vs-note"><b>Bukov ostrigar:</b> V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</div>
     <div class="gp-vs-note"><b>Orjaška plešivka:</b> Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</div>
     <div class="gp-vs-note"><b>Hrastov turek:</b> Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</div>
+    <div class="gp-vs-note"><b>Xerocomus subtomentosus:</b> Drugi manjši gobani rodu Xerocomus – vsi neškodljivi, a slabše kakovosti.</div>
+    <div class="gp-vs-note"><b>Navadna lupljivka:</b> Druge lupljivke – vse užitne; luteus ima izrazit membranast obroček na betu.</div>
+    <div class="gp-vs-note"><b>Storžasti luskarin:</b> Nezamenljiv – črno kosmate luske na klobuku so značilne. Meso ob prerezu pordeči, nato počrni.</div>
+    <div class="gp-vs-note"><b>Rakova golobica:</b> Druge temne golobice – xerampelina zadiši po rakih ali morski hrani, zlasti ob starosti.</div>
   <details class="gp-collapse">
     <summary>Viri fotografij <small>(46)</small></summary>
     <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami (CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>

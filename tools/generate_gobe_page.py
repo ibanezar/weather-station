@@ -392,6 +392,7 @@ body{
 .gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
+.gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -430,8 +431,13 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Ekološka skupina + rastni zamik vrste — pove, katero okno dežja "Sprožilni
+   dež" spodaj sploh meri (pri kukmaku drugo kot pri jurčku). */
+.gp-eco{display:inline-block;margin-top:.45rem;padding:.12rem .45rem;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid var(--card-border);
+  font-size:.68rem;color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 /* Per-factor "why" breakdown — the model already scores each species on 6
-   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   independent 0-100 signals (soil temp, trigger/base rain, soil moisture, air
    humidity, night-cooling trigger) and blends them into the single index;
    previously only the blended number + a prose summary were ever shown.
    Surfacing the actual bars is the real "not a black box" version of the
@@ -894,9 +900,17 @@ PAGE_JS = """<script>
   // The blended index is 6 independently-scored 0-100 signals; this renders
   // those actual bars instead of just the prose summary, inside the same
   // "Zakaj?" disclosure — the model was already computing all of this.
-  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_7d:"Padavine 7d",rain_14d:"Padavine 14d",
+  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_trigger:"Sprožilni dež",rain_base:"Zaloga vode",
     soil_moisture:"Vlaga tal",humidity:"Zračna vlaga",temp_drop:"Nočna ohladitev"};
-  var FACTOR_ORDER=["soil_temp","rain_7d","rain_14d","soil_moisture","humidity","temp_drop"];
+  var FACTOR_ORDER=["soil_temp","rain_trigger","rain_base","soil_moisture","humidity","temp_drop"];
+  // Skupina in zamik povesta, KATERI dež je vrsto sploh lahko sprožil — brez
+  // tega je "sprožilni dež" pri kukmaku in pri jurčku videti kot ista številka.
+  var ECO_LABELS={mikorizna:"mikorizna",razkrojevalka:"razkrojevalka stelje",lesna:"lesna razkrojevalka"};
+  function ecoBadgeHtml(m){
+    if(!m||!m.ecology)return"";
+    var lag=m.lag_days?(" · dež pred "+m.lag_days[0]+"–"+m.lag_days[1]+" dnevi"):"";
+    return '<span class="gp-eco">'+esc2(ECO_LABELS[m.ecology]||m.ecology)+esc2(lag)+'</span>';
+  }
   function factorBarsHtml(components){
     if(!components)return"";
     var rows=FACTOR_ORDER.filter(function(k){return components[k]!=null;});
@@ -918,7 +932,7 @@ PAGE_JS = """<script>
         <div class="gp-explain-body">
         <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
         <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
-        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${factorsHtml}</details>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${ecoBadgeHtml(m)}${factorsHtml}</details>
         </div></div>`;}).join('');
   }
   function dayLabel(day, isFirst){
@@ -1889,6 +1903,10 @@ def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
   </figure>
   <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '''
             'do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>\n'
+            '  <p class="post-meta">Jedro baze je zbrano na terenu v Zgornji Savinjski dolini. Vrste z oznako '
+            '<em>◌ ni terensko preverjeno</em> so dodane iz razširjenega seznama — izbrane so po dejanskih '
+            'zapisih o pojavljanju v Sloveniji (GBIF), njihovi opisi pa so povzeti po literaturi in v dolini '
+            'niso preverjeni. Gobarski indeks te vrste praviloma ne dobijo.</p>\n'
             + species_table + "\n" + vrste_credits_html)
     return subpage_shell(
         "baza-vrst", f"Baza {species_count} vrst gob — užitnost in nevarne dvojnice",
@@ -2318,8 +2336,8 @@ def build_body(rules, premium, free):
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
-    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, padavine pod pragom, nočna ohladitev zaznana«)
-    in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
+    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, sprožilni dež pred 8–16 dnevi pod pragom,
+    nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
     <div class="gp-skel">
 {skel_rows}
     </div>
@@ -2385,6 +2403,12 @@ def build_body(rules, premium, free):
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
         dbl = s.get("doubles")
         dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
+        # Vrste iz razširjenega seznama so sestavljene iz literature, ne
+        # preverjene na terenu v dolini — to mora biti na kartici vidno, ker
+        # gre tudi za podatek o užitnosti.
+        unver_html = ("" if s.get("verified", True) else
+                      '<div class="gp-sp-unver" title="Vnos iz razširjenega seznama; '
+                      'podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>')
         sp_cards.append(f'''    <div class="gp-sp-card">
       <div class="gp-sp-top {cls}">
         <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
@@ -2395,6 +2419,7 @@ def build_body(rules, premium, free):
         <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
         <div class="gp-sp-lat">{_esc(s["name_lat"])}</div>
         <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {season_txt}</span></div>
+        {unver_html}
         {dbl_html}
       </div>
     </div>''')
@@ -2464,11 +2489,24 @@ def build_body(rules, premium, free):
     qa = [
         ("Je gobarski indeks napoved najdbe?",
          "Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — "
-         "temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in "
-         "geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe."),
+         "temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga "
+         "in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks "
+         "pomeni ugodne razmere, ne zajamčene gobe."),
         ("Katere vrste zajema premium napoved?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
+        ("Zakaj indeksa ne dobijo vse vrste iz baze?",
+         "Baza vrst je referenčna in je precej večja od napovedi. Indeks dobijo užitne vrste, ki so v dolini "
+         "res prisotne in jih je mogoče zanesljivo določiti. Vrste, ki so v bazi zaradi opozorila na dvojnico, "
+         "in tiste iz razširjenega seznama, ki na terenu v dolini niso preverjene, ostanejo brez indeksa — "
+         "raje manj napovedanih vrst kot napoved, ki vabi po gobo z nevarno dvojnico."),
+        ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
+         "Ker se skupine gliv odzivajo z različnim zamikom, in model ga upošteva. Razkrojevalke stelje in "
+         "travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke "
+         "(ostrigar, panjevka, uhljevka) nekoliko pozneje, mikorizne vrste (gobani, lisičke, golobice) pa šele "
+         "teden in pol do dva. Padavinsko okno je zato pri vsaki vrsti zamaknjeno za njen rastni zamik: dež, "
+         "ki je padel včeraj, jurčku danes indeksa ne dvigne, kukmaku pa ga lahko. Skupina in zamik sta "
+         "izpisana na kartici vsake vrste."),
         ("Zakaj se indeks razlikuje med gozdovi?",
          "Model upošteva geologijo: kislo vulkansko pogorje Smrekovca ustreza jurčkom in žametastemu gobanu, "
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
@@ -2661,6 +2699,10 @@ def main():
          "Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."),
         ("Katere vrste zajema premium napoved?",
          "Užitne in pogojno užitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."),
+        ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
+         "Ker se skupine gliv odzivajo z različnim zamikom. Razkrojevalke stelje tvorijo trosnjake nekaj dni po "
+         "plohi, lesne razkrojevalke nekoliko pozneje, mikorizne vrste šele teden in pol do dva — model "
+         "padavinsko okno zato pri vsaki vrsti zamakne za njen rastni zamik."),
         ("Ali je to uradna napoved ARSO?",
          "Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."),
     ]

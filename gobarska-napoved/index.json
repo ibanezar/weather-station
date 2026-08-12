@@ -1,12 +1,12 @@
 {
- "generated": "2026-08-12T06:21:03+00:00",
- "model_version": "1.1",
+ "generated": "2026-08-12T17:04:25+00:00",
+ "model_version": "1.2",
  "date": "2026-08-12",
  "location": "Rečica ob Savinji",
- "index": 75,
- "level": "ODLIČNA",
- "top_species_sl": "Gabrov ded",
- "species_count": 98,
+ "index": 54,
+ "level": "ZMERNA",
+ "top_species_sl": "Bezgova uhljevka",
+ "species_count": 108,
  "locations_count": 8,
  "forecast_days": 7
 }

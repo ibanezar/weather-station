@@ -283,6 +283,7 @@ body{
 .gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
+.gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -321,8 +322,13 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Ekološka skupina + rastni zamik vrste — pove, katero okno dežja "Sprožilni
+   dež" spodaj sploh meri (pri kukmaku drugo kot pri jurčku). */
+.gp-eco{display:inline-block;margin-top:.45rem;padding:.12rem .45rem;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid var(--card-border);
+  font-size:.68rem;color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 /* Per-factor "why" breakdown — the model already scores each species on 6
-   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   independent 0-100 signals (soil temp, trigger/base rain, soil moisture, air
    humidity, night-cooling trigger) and blends them into the single index;
    previously only the blended number + a prose summary were ever shown.
    Surfacing the actual bars is the real "not a black box" version of the
