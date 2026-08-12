@@ -1,4 +1,9 @@
 {
+  "hodograf-krivulja-vetra-nevihte": [
+    "kako-brati-nevihtno-napoved-cape-striz-vetra",
+    "nevihtni-obeti-11-julij-2026",
+    "zakaj-ni-bilo-neurja-14-julij-2026"
+  ],
   "tedenska-napoved-11-17-avgust-2026": [
     "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810",
     "koliko-bo-danes-zalilo-primerjava-modelov-0807",
@@ -227,7 +232,7 @@
   "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd": [
     "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
-    "arso-opozorilo-warningts-2026-07-21-0915-995891"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
   ],
   "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718": [
     "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714",
@@ -245,8 +250,8 @@
     "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "nevihte-od-cetrtka-do-nedelje-16-19-julij-2026": [
-    "nevihtni-obeti-11-julij-2026",
     "koliko-bo-danes-zalilo-primerjava-modelov-0807",
+    "nevihtni-obeti-11-julij-2026",
     "nevihtni-pas-14-julij-2026"
   ],
   "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716": [
@@ -257,7 +262,7 @@
   "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8": [
     "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd",
     "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423",
-    "arso-opozorilo-warningts-2026-07-21-0915-995891"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
   ],
   "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715": [
     "gobarska-sezona-julij-2026-kje-nabirati",
@@ -267,7 +272,7 @@
   "arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423": [
     "arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8",
     "arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd",
-    "arso-opozorilo-warningts-2026-07-21-0915-995891"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70"
   ],
   "zakaj-ni-bilo-neurja-14-julij-2026": [
     "nevihtni-pas-14-julij-2026",
@@ -286,8 +291,8 @@
   ],
   "nevihtni-pas-14-julij-2026": [
     "medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721",
-    "arso-opozorilo-warningts-2026-07-21-0915-995891",
-    "arso-opozorilo-warningts-2026-07-19-0840-b8a4cf"
+    "arso-opozorilo-warningts-2026-07-14-1304-e1db70",
+    "arso-opozorilo-warningts-2026-07-21-0915-995891"
   ],
   "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -346,8 +351,8 @@
   ],
   "primerjava-krajev-vrocinski-val-julij-2026": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
-    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725",
-    "med-dvema-vrocinskima-valoma-ireica1"
+    "med-dvema-vrocinskima-valoma-ireica1",
+    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725"
   ],
   "prva-tropska-noc-recica-julij-2026": [
     "kdaj-pade-temperatura-pod-20-c-nocno-ohlajanje-kljub-vrocins-0802",
