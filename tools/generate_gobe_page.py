@@ -77,6 +77,7 @@ def _esc(s):
     return (str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
+import collections as _collections
 import re as _re
 import unicodedata as _ud
 
@@ -120,6 +121,28 @@ def double_danger(text):
     # Brez besede o užitnosti ne trdimo ničesar; prej je privzeto vrnilo
     # "neužitna" in stran je užitnim dvojnicam pripisala neužitnost.
     return None
+
+
+# Užitnost → ključ filtra. Strupene stopnje se združijo v enega, ker nabiralca
+# pri brskanju zanima »ne jej«, ne pa katera od treh stopenj.
+EDIB_FILTER = {
+    "užitna": "uzitna",
+    "pogojno užitna": "pogojno",
+    "neužitna": "neuzitna",
+    "strupena": "strupena",
+    "zelo strupena": "strupena",
+    "smrtno strupena": "strupena",
+    "zaščitena": "zascitena",
+}
+FILTER_LABELS = [("uzitna", "Užitne"), ("pogojno", "Pogojno užitne"),
+                 ("strupena", "Strupene"), ("neuzitna", "Neužitne"),
+                 ("zascitena", "Zaščitene")]
+
+
+def _search_key(s):
+    """Iskalni niz brez šumnikov in ločil — da 'jurcek' najde 'Jurček'."""
+    s = _ud.normalize("NFKD", s.lower()).encode("ascii", "ignore").decode()
+    return _re.sub(r"[^a-z0-9 ]+", " ", s).strip()
 
 
 def season_months(sp):
@@ -399,6 +422,28 @@ body{
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
 .gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
+/* Orodna vrstica baze vrst: iskanje + filtri po užitnosti in sezoni. Kartic je
+   300, zato se jih naenkrat izriše le prvih nekaj (glej SP_JS) — brez JS
+   ostanejo vidne vse, da se pajku in obiskovalcu brez skript ne skrije nič. */
+/* Odmik je višina fiksne .gp-topbar (48 px) — brez njega iskalno polje ob
+   drsenju zleze podnjo in ostanejo vidni samo filtri. */
+.gp-sp-tools{position:sticky;top:48px;z-index:5;padding:.6rem 0 .5rem;background:var(--bg);
+  backdrop-filter:blur(6px);margin-bottom:.2rem}
+.gp-sp-search{width:100%;box-sizing:border-box;padding:.6rem .8rem;border-radius:10px;
+  border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:.9rem}
+.gp-sp-search::placeholder{color:var(--muted)}
+.gp-sp-chips{display:flex;gap:.4rem;overflow-x:auto;padding:.55rem .1rem .1rem;scrollbar-width:none}
+.gp-sp-chips::-webkit-scrollbar{display:none}
+.gp-sp-chip{flex:0 0 auto;padding:.34rem .7rem;border-radius:999px;cursor:pointer;
+  border:1px solid var(--card-border);background:var(--card-bg);color:var(--muted);
+  font-size:.76rem;font-family:inherit;white-space:nowrap}
+.gp-sp-chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.gp-sp-count{font-size:.75rem;color:var(--muted);margin:.4rem .1rem 0}
+.gp-sp-card[hidden]{display:none}
+.gp-sp-more{display:flex;justify-content:center;margin:.9rem 0 .3rem}
+.gp-sp-more button{padding:.55rem 1.1rem;border-radius:10px;cursor:pointer;font-family:inherit;
+  font-size:.85rem;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text)}
+.gp-sp-more button[hidden]{display:none}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -1565,6 +1610,64 @@ DIARY_JS = """<script>
 })();
 </script>"""
 
+# ── Baza vrst: iskanje, filtri in postopno prikazovanje ──────────────────────
+# 300 kartic naenkrat je na telefonu preveč — v HTML so vse (pajek jih mora
+# videti), naenkrat pa se izriše prvih PAGE, ostalo odpre gumb ali filter.
+SP_JS = """<script>
+(function(){
+  var grid=document.getElementById("gp-sp-grid");
+  if(!grid)return;
+  var PAGE=24;
+  var cards=[].slice.call(grid.querySelectorAll(".gp-sp-card"));
+  var qEl=document.getElementById("gp-sp-q");
+  var moreEl=document.getElementById("gp-sp-more");
+  var countEl=document.getElementById("gp-sp-count");
+  var chips=[].slice.call(document.querySelectorAll(".gp-sp-chip"));
+  var month=String(new Date().getMonth()+1);
+  var filter="vse", query="", shown=PAGE;
+
+  function norm(s){
+    return (s||"").toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"")
+      .replace(/[^a-z0-9 ]+/g," ").trim();
+  }
+  function matches(c){
+    if(query && c.getAttribute("data-q").indexOf(query)<0) return false;
+    if(filter==="vse") return true;
+    if(filter==="sezona") return (c.getAttribute("data-m")||"").split(",").indexOf(month)>=0;
+    return c.getAttribute("data-e")===filter;
+  }
+  function render(){
+    var n=0;
+    for(var i=0;i<cards.length;i++){
+      var ok=matches(cards[i]);
+      if(ok)n++;
+      cards[i].hidden = !ok || n>shown;
+    }
+    moreEl.hidden = n<=shown;
+    if(!moreEl.hidden) moreEl.textContent = "Pokaži več vrst ("+(n-shown)+")";
+    countEl.hidden=false;
+    // Rodilnik: "od ene vrste", od dveh naprej "od … vrst".
+    countEl.textContent = n===0 ? "Nobena vrsta ne ustreza iskanju."
+      : "Prikazanih "+Math.min(shown,n)+" od "+n+(n===1?" vrste.":" vrst.");
+  }
+  chips.forEach(function(ch){
+    ch.addEventListener("click",function(){
+      chips.forEach(function(o){o.classList.toggle("on",o===ch);});
+      filter=ch.getAttribute("data-f"); shown=PAGE; render();
+    });
+  });
+  if(qEl){
+    var t;
+    qEl.addEventListener("input",function(){
+      clearTimeout(t);
+      t=setTimeout(function(){ query=norm(qEl.value); shown=PAGE; render(); },150);
+    });
+  }
+  moreEl.addEventListener("click",function(){ shown+=PAGE*2; render(); });
+  render();
+})();
+</script>"""
+
 # ── Sezonski trend: SVG graf letos vs. pretekla leta (iz trend.json) ─────────
 TREND_JS = """<script>
 (function(){
@@ -1718,27 +1821,32 @@ def gauge_svg(pct):
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
 
 
+# Naslovi in napovedniki so predloge s {…} mesti, ki jih napolni hub_counts() —
+# ta števila so se prej pisala na roko in so ob vsaki razširitvi baze zastarela
+# (kartica je oglaševala 51 vrst, ko jih je bilo v bazi že 300).
 GOBE_HUB = [
     # (url slug, icon, title, one-line teaser, quicknav label, thumbnail)
-    ("zemljevid",  "🗺️", "Zemljevid območij",    "16 nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid",
+    ("zemljevid",  "🗺️", "Zemljevid območij",    "{spots} nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid",
      "gozdna-pot-dron.jpg"),
     ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar",
      "gozd-mah-banner.jpg"),
     ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend",
      "sluzavke-banner.jpg"),
-    ("baza-vrst",  "📖", "Baza 51 vrst",         "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst",
+    ("baza-vrst",  "📖", "Baza {species} vrst",  "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst",
      "megla-jutro-banner.jpg"),
-    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "46 fotografij: užitna vrsta ob strupeni dvojnici.", "⚠️ Dvojnice",
+    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "{pairs} parov: užitna vrsta ob vrsti, s katero jo zamenjajo.", "⚠️ Dvojnice",
      "sluzavka-portret.jpg"),
 ]
 
 
-def hub_cards_html():
+def hub_cards_html(counts):
     cards = "\n".join(
         f'    <a class="gp-hub-card" href="/gobarska-napoved/{slug}/">'
         f'<div class="gp-hub-photo"><img src="/gobarska-napoved/img/foto/{thumb}" loading="lazy" alt=""></div>'
-        f'<div class="gp-hub-body"><span class="gp-hub-ic">{ic}</span><span class="gp-hub-title">{_esc(title)}</span>'
-        f'<span class="gp-hub-sub">{_esc(sub)}</span><span class="gp-hub-arrow">Odpri →</span></div></a>'
+        f'<div class="gp-hub-body"><span class="gp-hub-ic">{ic}</span>'
+        f'<span class="gp-hub-title">{_esc(title.format(**counts))}</span>'
+        f'<span class="gp-hub-sub">{_esc(sub.format(**counts))}</span>'
+        f'<span class="gp-hub-arrow">Odpri →</span></div></a>'
         for slug, ic, title, sub, _, thumb in GOBE_HUB
     )
     return f'  <div class="gp-hub">\n{cards}\n  </div>'
@@ -1917,7 +2025,7 @@ def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
     return subpage_shell(
         "baza-vrst", f"Baza {species_count} vrst gob — užitnost in nevarne dvojnice",
         f"Referenčna baza {species_count} vrst gob Zgornje Savinjske doline: užitnost, sezona in nevarne dvojnice.",
-        "Baza vrst", body)
+        "Baza vrst", body, extra_js=SP_JS)
 
 
 def build_dvojnice_page(vs_html, vs_count, credits_html):
@@ -2397,17 +2505,30 @@ def build_body(rules, premium, free):
         for m in range(1, 13)
     ]
 
-    # ── 50-species reference cards (free, SEO + credibility) ──────────────────
+    # ── species reference cards (free, SEO + credibility) ─────────────────────
     # Card top-half shows a real photo once one exists at img/vrste/<id>.jpg;
     # until then onerror swaps it for an edibility-tinted placeholder, so
     # photos can be dropped in later species-by-species with no code change
     # (same graceful-fallback trick as the /dvojnice/ comparison cards).
+    #
+    # Vseh 300 kartic je v HTML (pajek jih mora videti, prav ta seznam je
+    # vsebina strani), prikaže pa se jih naenkrat le prvih SP_PAGE — ostale
+    # odpre gumb ali filter. Brez JS ostanejo vidne vse, tako da se za obiskovalca
+    # brez skript ali za iskalnik ne skrije nič.
     sp_cards = []
+    now_month = TODAY.month
     for s in sorted(species, key=lambda x: (not x.get("gets_index"), x["name_sl"])):
         se = s["season"]
         season_txt = f'{se["start"]}–{se["end"]}'
         edib = (s.get("edibility") or "").lower().strip()
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
+        months = season_months(s)
+        # Podatki za filtriranje in iskanje na strani; iskalni niz je že
+        # normaliziran, da JS ne ponavlja odstranjevanja šumnikov ob vsakem tipku.
+        data_attrs = (f'data-e="{_esc(EDIB_FILTER.get(edib, "drugo"))}" '
+                      f'data-m="{",".join(str(m) for m in sorted(months))}" '
+                      f'data-v="{"1" if s.get("verified", True) else "0"}" '
+                      f'data-q="{_esc(_search_key(s["name_sl"] + " " + s["name_lat"]))}"')
         dbl = s.get("doubles")
         dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
         # Vrste iz razširjenega seznama so sestavljene iz literature, ne
@@ -2416,7 +2537,7 @@ def build_body(rules, premium, free):
         unver_html = ("" if s.get("verified", True) else
                       '<div class="gp-sp-unver" title="Vnos iz razširjenega seznama; '
                       'podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>')
-        sp_cards.append(f'''    <div class="gp-sp-card">
+        sp_cards.append(f'''    <div class="gp-sp-card" {data_attrs}>
       <div class="gp-sp-top {cls}">
         <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2430,7 +2551,23 @@ def build_body(rules, premium, free):
         {dbl_html}
       </div>
     </div>''')
-    species_table = '  <div class="gp-sp-grid">\n' + "\n".join(sp_cards) + "\n  </div>"
+    n_season = sum(1 for s in species if now_month in season_months(s))
+    by_filter = _collections.Counter(
+        EDIB_FILTER.get((s.get("edibility") or "").lower().strip(), "drugo") for s in species)
+    chips = [("vse", f"Vse ({len(species)})"), ("sezona", f"V sezoni zdaj ({n_season})")]
+    chips += [(key, f"{label} ({by_filter[key]})") for key, label in FILTER_LABELS if by_filter[key]]
+    chips_html = "\n".join(
+        f'      <button type="button" class="gp-sp-chip{" on" if k == "vse" else ""}" '
+        f'data-f="{k}">{_esc(lbl)}</button>' for k, lbl in chips)
+    species_table = (
+        '  <div class="gp-sp-tools">\n'
+        '    <input type="search" id="gp-sp-q" class="gp-sp-search" placeholder="Poišči vrsto — slovensko ali latinsko ime"\n'
+        '      autocomplete="off" aria-label="Iskanje po vrstah">\n'
+        '    <div class="gp-sp-chips" role="group" aria-label="Filtri">\n' + chips_html + "\n    </div>\n"
+        '    <p class="gp-sp-count" id="gp-sp-count" hidden></p>\n'
+        "  </div>\n"
+        '  <div class="gp-sp-grid" id="gp-sp-grid">\n' + "\n".join(sp_cards) + "\n  </div>\n"
+        '  <div class="gp-sp-more"><button type="button" id="gp-sp-more" hidden>Pokaži več vrst</button></div>')
 
     # ── dvojnik: side-by-side edible vs. dangerous-double comparison ──────────
     # Photos: drop matching files into gobarska-napoved/img/dvojnice/<slug>.jpg
@@ -2476,6 +2613,11 @@ def build_body(rules, premium, free):
 
     # ── photo credits (CC BY / CC BY-SA / GFDL require visible attribution) ───
     credits_html = photo_credits_html("dvojnice")
+
+    # Števila na razdelilnih karticah se izpeljejo iz istih podatkov, iz katerih
+    # nastanejo strani — drugače zastarijo ob vsaki razširitvi baze.
+    hub_html = hub_cards_html({"spots": len(premium["locations"]),
+                               "species": len(species), "pairs": len(vs_cards)})
     vrste_credits_html = photo_credits_html("vrste")
 
     # ── terrain map (free) ────────────────────────────────────────────────────
@@ -2610,7 +2752,7 @@ def build_body(rules, premium, free):
   <h2 class="gp-h2">🗂️ Več o dolini in gobah</h2>
   <p class="archive-intro">Koledar sezone, večletni trend, celotna baza vrst in primerjava nevarnih dvojnic —
   vsaka na svoji strani, da glavna stran ostane pregledna.</p>
-{hub_cards_html()}
+{hub_html}
   <details class="gp-collapse gp-collapse-section" id="tereni">
   <summary>🗺️ Geološki tereni doline</summary>
   <div class="gp-collapse-body">
