@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """
-tools/import_species_db.py — build species_rules.yaml from data/baza_gob.xlsx
+tools/import_species_db.py — build species_rules.yaml from the species database
 
-The Excel workbook (50-species Zgornja Savinjska database) is the seed; this
-script converts it into species_rules.yaml, which is the hand-editable source
-of truth the model reads. Run manually whenever the workbook changes — NOT in
-the daily CI workflow.
+Two sources, in this order:
+  * data/baza_gob.xlsx        — the hand-curated Zgornja Savinjska core,
+                                emitted with verified: true;
+  * data/baza_gob_dodatek.csv — the compiled extension (species chosen by GBIF
+                                occurrence counts for Slovenia, fields written
+                                from literature), emitted with verified: false
+                                and indexed only where its "Indeks" column says
+                                so. A duplicate of a workbook species is dropped.
+
+Together they build species_rules.yaml, the source of truth the model reads.
+Run manually whenever either source changes — NOT in the daily CI workflow.
 
 Everything the script *derives* (soil-temp window from the air-temp threshold,
 rain thresholds, elevation band, geology affinity, temp-drop requirement,
@@ -19,6 +26,7 @@ Usage:
   python3 tools/import_species_db.py --stdout   # print YAML, don't write
 """
 import argparse
+import csv
 import datetime as dt
 import os
 import re
@@ -29,6 +37,7 @@ import openpyxl
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 XLSX = os.path.join(ROOT, "data", "baza_gob.xlsx")
+EXTRA_CSV = os.path.join(ROOT, "data", "baza_gob_dodatek.csv")
 OUT = os.path.join(ROOT, "species_rules.yaml")
 
 # Column indices in the "Baza Gob" sheet (0-based), from the workbook header.
@@ -36,6 +45,18 @@ C_NAME_SL, C_NAME_LAT, C_EDIB, C_SEASON, C_AIRTEMP = 0, 1, 2, 3, 4
 C_MYCO, C_SUBSTRATE, C_SOILPH, C_DOUBLES = 5, 6, 7, 8
 C_ELEV, C_FREQ, C_GEOLOGY = 12, 13, 14
 C_MOIST7, C_OPTTEMP = 15, 16
+
+# The extension CSV carries the same columns under the same headings, so one
+# record builder serves both sources. Index positions must match the C_* map.
+CSV_COLUMNS = [
+    "Slovensko ime", "Znanstveno ime", "Užitnost", "Čas rasti", "Temp. prag (zrak)",
+    "Mikorizni partner", "Tip rastišča (Prehranjevanje)", "Tip tal (pH vrednost)",
+    "Nevarnost zamenjave (Dvojnice)", "Vonj in okus", "Sprememba barve mesa ob poškodbi",
+    "Shranjevanje in priprava", "Višinski pas in značilna območja",
+    "Pogostost v Zgornji savinjski", "Geološki mikro-teren (Zg. Savinjska)",
+    "Minimalna kumulativna vlaga (7 dni, mm)", "Optimalni temperaturni pas (°C)",
+    "Vpliv vetra/izsušitve", "Gobarski indeks (Izračun)",
+]
 
 SL_MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "maj": 5, "jun": 6,
              "jul": 7, "avg": 8, "sep": 9, "okt": 10, "nov": 11, "dec": 12}
@@ -372,6 +393,8 @@ def build_yaml(species):
         L.append(f"    name_lat: {q(s['name_lat'])}")
         L.append(f"    edibility: {q(s['edibility'])}")
         L.append(f"    gets_index: {'true' if s['gets_index'] else 'false'}")
+        L.append(f"    verified: {'true' if s['verified'] else 'false'}"
+                 f"{'' if s['verified'] else '   # iz dodatka, ni terensko preverjeno'}")
         L.append(f"    frequency: {q(s['frequency'])}")
         L.append(f"    frequency_factor: {s['frequency_factor']}   # TODO: kalibriraj (lokalna prisotnost)")
         st = s["season"]
@@ -400,48 +423,96 @@ def build_yaml(species):
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
-def read_species():
+def build_record(r, verified, index_flag=None):
+    """One species record from a row of cells, indexed by the C_* constants.
+    `index_flag` overrides the edibility rule for gets_index (the extension CSV
+    decides per species; the workbook lets edibility decide)."""
+    edib = (r[C_EDIB] or "").strip()
+    season = parse_season(r[C_SEASON])
+    air_lo, air_hi = parse_temp_range(r[C_AIRTEMP])
+    if air_lo is None:
+        air_lo, air_hi = 10, 18  # fallback, unlikely
+    soil = derive_soil_temp(air_lo, air_hi, offset=SOIL_TEMP_OFFSET_C, shoulder=SOIL_TEMP_SHOULDER_C)
+    rain7 = parse_moisture(r[C_MOIST7])
+    elev_min, elev_max = derive_elevation(r[C_ELEV])
+    ecology = derive_ecology(r[C_SUBSTRATE], r[C_MYCO])
+    gets_index = (edib.lower() in INDEXED_EDIBILITY) if index_flag is None else bool(index_flag)
+    return {
+        "id": slugify(r[C_NAME_LAT]),
+        "name_sl": r[C_NAME_SL],
+        "name_lat": r[C_NAME_LAT],
+        "edibility": edib,
+        "gets_index": gets_index,
+        "verified": verified,
+        "frequency": r[C_FREQ],
+        "frequency_factor": derive_frequency_factor(r[C_FREQ]),
+        "season": season if season[0] else ("01.01", "12.31"),
+        "air_temp": (air_lo, air_hi),
+        "soil_temp": soil,
+        "rain_7d_min": rain7,
+        "rain_14d_min": rain7 * 2,
+        "ecology": ecology,
+        "fruiting_lag_days": ecology_lag(ecology),
+        "mycorrhiza": split_list(r[C_MYCO]),
+        "substrate": r[C_SUBSTRATE],
+        "soil_ph": r[C_SOILPH],
+        "geology_affinity": derive_geology(r[C_GEOLOGY], r[C_SOILPH]),
+        "elevation_zone": r[C_ELEV],
+        "elevation_pref_m": (elev_min, elev_max),
+        "requires_temp_drop": derive_requires_temp_drop(season[0]),
+        "doubles": r[C_DOUBLES],
+    }
+
+
+def read_workbook():
+    """The hand-curated core: data/baza_gob.xlsx, verified species."""
     wb = openpyxl.load_workbook(XLSX, read_only=True, data_only=True)
     ws = wb["Baza Gob"]
     rows = list(ws.iter_rows(values_only=True))
-    out = []
-    for r in rows[1:]:
-        if not r[C_NAME_SL] or not r[C_NAME_LAT]:
-            continue
-        edib = (r[C_EDIB] or "").strip()
-        season = parse_season(r[C_SEASON])
-        air_lo, air_hi = parse_temp_range(r[C_AIRTEMP])
-        if air_lo is None:
-            air_lo, air_hi = 10, 18  # fallback, unlikely
-        soil = derive_soil_temp(air_lo, air_hi, offset=SOIL_TEMP_OFFSET_C, shoulder=SOIL_TEMP_SHOULDER_C)
-        rain7 = parse_moisture(r[C_MOIST7])
-        elev_min, elev_max = derive_elevation(r[C_ELEV])
-        ecology = derive_ecology(r[C_SUBSTRATE], r[C_MYCO])
-        out.append({
-            "id": slugify(r[C_NAME_LAT]),
-            "name_sl": r[C_NAME_SL],
-            "name_lat": r[C_NAME_LAT],
-            "edibility": edib,
-            "gets_index": edib.lower() in INDEXED_EDIBILITY,
-            "frequency": r[C_FREQ],
-            "frequency_factor": derive_frequency_factor(r[C_FREQ]),
-            "season": season if season[0] else ("01.01", "12.31"),
-            "air_temp": (air_lo, air_hi),
-            "soil_temp": soil,
-            "rain_7d_min": rain7,
-            "rain_14d_min": rain7 * 2,
-            "ecology": ecology,
-            "fruiting_lag_days": ecology_lag(ecology),
-            "mycorrhiza": split_list(r[C_MYCO]),
-            "substrate": r[C_SUBSTRATE],
-            "soil_ph": r[C_SOILPH],
-            "geology_affinity": derive_geology(r[C_GEOLOGY], r[C_SOILPH]),
-            "elevation_zone": r[C_ELEV],
-            "elevation_pref_m": (elev_min, elev_max),
-            "requires_temp_drop": derive_requires_temp_drop(season[0]),
-            "doubles": r[C_DOUBLES],
-        })
+    return [build_record(r, verified=True)
+            for r in rows[1:] if r[C_NAME_SL] and r[C_NAME_LAT]]
+
+
+def read_extension():
+    """The extension list: data/baza_gob_dodatek.csv.
+
+    Kept as CSV, not merged into the workbook, because these rows are compiled
+    (species picked by GBIF occurrence counts for Slovenia, fields written from
+    literature) rather than checked in the field like the workbook is — a text
+    file is reviewable in a diff, an .xlsx blob is not. They land in the YAML
+    with verified: false, and only take a foraging index where the "Indeks"
+    column says so."""
+    if not os.path.exists(EXTRA_CSV):
+        return []
+    with open(EXTRA_CSV, encoding="utf-8", newline="") as f:
+        rdr = csv.DictReader(f)
+        missing = [c for c in CSV_COLUMNS if c not in (rdr.fieldnames or [])]
+        if missing:
+            print(f"✗ {os.path.basename(EXTRA_CSV)}: manjkajo stolpci {missing}", file=sys.stderr)
+            sys.exit(1)
+        out = []
+        for row in rdr:
+            if not row.get(CSV_COLUMNS[C_NAME_SL]) or not row.get(CSV_COLUMNS[C_NAME_LAT]):
+                continue
+            cells = [row.get(name) for name in CSV_COLUMNS]
+            index_flag = (row.get("Indeks") or "").strip().lower() in ("da", "1", "true")
+            out.append(build_record(cells, verified=False, index_flag=index_flag))
     return out
+
+
+def read_species():
+    """Workbook first, extension after; a duplicate id in the extension is
+    dropped, so the hand-checked row always wins."""
+    core = read_workbook()
+    seen = {s["id"] for s in core}
+    extra = []
+    for s in read_extension():
+        if s["id"] in seen:
+            print(f"  ⚠ podvojena vrsta v dodatku, preskočena: {s['name_lat']}", file=sys.stderr)
+            continue
+        seen.add(s["id"])
+        extra.append(s)
+    return core + extra
 
 
 def main():

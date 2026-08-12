@@ -226,6 +226,33 @@ zaloga vode pa 14 dni do začetka tega okna.
   `tools/import_species_db.py`; skupino izpelje `derive_ecology()` iz stolpca
   substrat. Ročni popravek v YAML regeneracija povozi — popravi skript.
 
+## Baza vrst: preverjeno jedro in razširjeni seznam
+
+Baza ima 300 vrst iz dveh virov, ki ju uvoznik združi (in ju ne mešaj):
+
+- `data/baza_gob.xlsx` — 145 vrst, zbranih na terenu; v YAML gredo z
+  `verified: true` in indeks dobijo po pravilu užitnosti.
+- `data/baza_gob_dodatek.csv` — 155 vrst, izbranih po dejanskih zapisih o
+  pojavljanju v Sloveniji (GBIF, rangirano po številu zapisov) in opisanih po
+  literaturi. V YAML gredo z `verified: false`, indeks pa dobijo **samo**, kjer
+  stolpec `Indeks` pravi `da`. Zato je CSV in ne vrstice v xlsx: sestavljene
+  trditve o užitnosti in dvojnicah morajo biti vidne v diffu.
+
+Pravila, ki jih ne obračaj:
+
+- **Nepreverjena vrsta praviloma ne dobi indeksa.** Indeks pomeni »pojdi po to
+  gobo«; dokler vrsta ni preverjena na terenu, to ni pošteno. Trenutno jih ima
+  indeks 10 od 155 — same nezamenljive užitne vrste.
+- Na kartici vrste je oznaka »ni terensko preverjeno«; ne odstranjuj je, dokler
+  vrsta ni res preverjena (takrat gre vrstica iz CSV v xlsx).
+- Pri dodajanju vrst preveri sinonime: GBIF vrača tudi stara imena
+  (`Boletus badius` = `Imleria badia`), uvoznik pa lovi le enak slug. Primerjaj
+  po sprejetem imenu **in** po vrstnem imenu proti obstoječim vrstam.
+- Fotografije doda `tools/fetch_species_photos.py` z Wikimedia Commons; sprejme
+  samo licence z dovoljeno objavo (CC0, javna domena, CC BY, CC BY-SA, GFDL) in
+  vsako vpiše v `CREDITS.json`, ki se izriše v tabelo virov. Vrsta brez proste
+  slike ostane pri rezervnem prikazu — to ni napaka.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

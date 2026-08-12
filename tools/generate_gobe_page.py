@@ -392,6 +392,7 @@ body{
 .gp-sp-dbl{font-size:.76rem;color:var(--muted);margin-top:.4rem;padding-top:.4rem;
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
+.gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
@@ -1902,6 +1903,10 @@ def build_baza_vrst_page(species_table, species_count, vrste_credits_html):
   </figure>
   <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko '''
             'do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>\n'
+            '  <p class="post-meta">Jedro baze je zbrano na terenu v Zgornji Savinjski dolini. Vrste z oznako '
+            '<em>◌ ni terensko preverjeno</em> so dodane iz razširjenega seznama — izbrane so po dejanskih '
+            'zapisih o pojavljanju v Sloveniji (GBIF), njihovi opisi pa so povzeti po literaturi in v dolini '
+            'niso preverjeni. Gobarski indeks te vrste praviloma ne dobijo.</p>\n'
             + species_table + "\n" + vrste_credits_html)
     return subpage_shell(
         "baza-vrst", f"Baza {species_count} vrst gob — užitnost in nevarne dvojnice",
@@ -2398,6 +2403,12 @@ def build_body(rules, premium, free):
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
         dbl = s.get("doubles")
         dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
+        # Vrste iz razširjenega seznama so sestavljene iz literature, ne
+        # preverjene na terenu v dolini — to mora biti na kartici vidno, ker
+        # gre tudi za podatek o užitnosti.
+        unver_html = ("" if s.get("verified", True) else
+                      '<div class="gp-sp-unver" title="Vnos iz razširjenega seznama; '
+                      'podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>')
         sp_cards.append(f'''    <div class="gp-sp-card">
       <div class="gp-sp-top {cls}">
         <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
@@ -2408,6 +2419,7 @@ def build_body(rules, premium, free):
         <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
         <div class="gp-sp-lat">{_esc(s["name_lat"])}</div>
         <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {season_txt}</span></div>
+        {unver_html}
         {dbl_html}
       </div>
     </div>''')
@@ -2483,6 +2495,11 @@ def build_body(rules, premium, free):
         ("Katere vrste zajema premium napoved?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
+        ("Zakaj indeksa ne dobijo vse vrste iz baze?",
+         "Baza vrst je referenčna in je precej večja od napovedi. Indeks dobijo užitne vrste, ki so v dolini "
+         "res prisotne in jih je mogoče zanesljivo določiti. Vrste, ki so v bazi zaradi opozorila na dvojnico, "
+         "in tiste iz razširjenega seznama, ki na terenu v dolini niso preverjene, ostanejo brez indeksa — "
+         "raje manj napovedanih vrst kot napoved, ki vabi po gobo z nevarno dvojnico."),
         ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
          "Ker se skupine gliv odzivajo z različnim zamikom, in model ga upošteva. Razkrojevalke stelje in "
          "travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke "

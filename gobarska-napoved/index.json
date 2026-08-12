@@ -1,12 +1,12 @@
 {
- "generated": "2026-08-12T10:43:56+00:00",
+ "generated": "2026-08-12T17:04:25+00:00",
  "model_version": "1.2",
  "date": "2026-08-12",
  "location": "Rečica ob Savinji",
  "index": 54,
  "level": "ZMERNA",
  "top_species_sl": "Bezgova uhljevka",
- "species_count": 98,
+ "species_count": 108,
  "locations_count": 8,
  "forecast_days": 7
 }
