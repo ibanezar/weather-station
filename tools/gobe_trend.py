@@ -29,7 +29,8 @@ import urllib.parse
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gobe_model import load_rules, load_locations, eval_species, in_season  # noqa: E402
+from gobe_model import (load_rules, load_locations, eval_species, in_season,  # noqa: E402
+                        past_days_needed)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TREND_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "trend.json")
@@ -49,11 +50,12 @@ ARCHIVE_HOURLY = [
 ARCHIVE_DAILY = ["precipitation_sum", "temperature_2m_min"]
 
 
-def fetch_archive_year(lat, lon, year):
+def fetch_archive_year(lat, lon, year, lead_in=0):
     """One year of ERA5-Land daily+hourly series for the home spot, capped at
-    yesterday for the current year (archive data lags a few days)."""
+    yesterday for the current year (archive data lags a few days). `lead_in`
+    days are fetched before the season so the lagged rain windows start full."""
     today = dt.date.today()
-    start = dt.date(year, *SEASON_START)
+    start = dt.date(year, *SEASON_START) - dt.timedelta(days=lead_in)
     end = dt.date(year, *SEASON_END)
     if year == today.year:
         end = min(end, today - dt.timedelta(days=1))
@@ -115,13 +117,16 @@ def build_series_from_archive(data):
     }
 
 
-def daily_overall(rules, spot, series):
+def daily_overall(rules, spot, series, skip_days=0):
     """Max species index per day, using the same eval_species scoring as the
-    live forecast model."""
+    live forecast model. The first `skip_days` are the lead-in the lagged rain
+    windows need; they are scored but not returned."""
     indexed = [sp for sp in rules["species"] if sp.get("gets_index")]
     meta = {sp["id"]: sp["name_sl"] for sp in indexed}
     out = []
     for i, dstr in enumerate(series["dates"]):
+        if i < skip_days:
+            continue
         date = dt.date.fromisoformat(dstr)
         best_id, best_idx = None, 0
         for sp in indexed:
@@ -156,20 +161,27 @@ def main():
 
     today = dt.date.today()
     years = list(range(today.year - args.years + 1, today.year + 1))
+    # Padavinski okni sta zamaknjeni za rastni zamik vrste (glej gobe_model),
+    # zato mora arhiv segati toliko dni pred sezono, da ima 1. april že polno
+    # okno. Zalet pove ista funkcija kot dnevni napovedi, da se številki ne
+    # razideta; dnevi zaleta se izračunajo, v izhod pa ne gredo.
+    lead_in = past_days_needed(rules)
 
     result = {"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
               "location": home["name"], "years": {}}
     for year in years:
         print(f"Pridobivam ERA5-Land arhiv {year} …", file=sys.stderr)
         try:
-            data = fetch_archive_year(home["lat"], home["lon"], year)
+            data = fetch_archive_year(home["lat"], home["lon"], year, lead_in)
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
             print(f"  ✗ {year}: {e}", file=sys.stderr)
             continue
         if not data:
             continue
         series = build_series_from_archive(data)
-        days = daily_overall(rules, home, series)
+        season_start = dt.date(year, *SEASON_START).isoformat()
+        skip = sum(1 for d in series["dates"] if d < season_start)
+        days = daily_overall(rules, home, series, skip)
         best = max(days, key=lambda d: d["overall"], default=None)
         result["years"][str(year)] = {
             "monthly_avg": monthly_avg(days),

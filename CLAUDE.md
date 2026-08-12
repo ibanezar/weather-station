@@ -201,6 +201,31 @@ tem stikom, ne preimenovanje kode.
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
 
+## Gobarski model — rastni zamik po ekoloških skupinah
+
+Vsaka vrsta v `species_rules.yaml` ima `ecology` (`mikorizna`, `razkrojevalka`,
+`lesna`) in iz skupine izpeljan `fruiting_lag_days`. Model za ta zamik
+**premakne obe padavinski okni nazaj v čas** (`gobe_model.eval_species`):
+sprožilni dež se šteje v oknu `lag_min`–`lag_max` dni pred dnem napovedi,
+zaloga vode pa 14 dni do začetka tega okna.
+
+- **Ne vračaj okna, ki se konča danes.** Prav to je bila napaka v v1.1: dež
+  izpred dveh dni je jurčku dvignil indeks enako kot kukmaku, čeprav mikorizna
+  vrsta pred 8–16 dnevi po dežju ne more roditi. Pripombo je javno postavil
+  bralec na FB, popravljeno v v1.2 (12. 8. 2026).
+- Vlaga tal in zračna vlaga **ostaneta na tekočem dnevu** — zamaknjeni okni
+  povesta, ali je bil trosnjak sploh sprožen, ta dva pa, ali danes lahko
+  nabrekne in se ne posuši.
+- Prag `rain_7d_min` je izražen kot 7-dnevna kumulativa in se preračuna na
+  dolžino okna vrste, da skupine z daljšim oknom niso samodejno v prednosti.
+- Kdor spreminja zamike, mora poskrbeti tudi za dolžino zgodovine:
+  `past_days_needed()` pove, koliko preteklih dni potrebuje poizvedba, in isto
+  funkcijo uporabi `gobe_trend.py` za zalet pred 1. aprilom. Prekratka
+  zgodovina se ne javi kot napaka — okno se tiho skrajša.
+- `species_rules.yaml` nastane iz `data/baza_gob.xlsx` prek
+  `tools/import_species_db.py`; skupino izpelje `derive_ecology()` iz stolpca
+  substrat. Ročni popravek v YAML regeneracija povozi — popravi skript.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

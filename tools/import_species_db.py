@@ -8,8 +8,9 @@ of truth the model reads. Run manually whenever the workbook changes — NOT in
 the daily CI workflow.
 
 Everything the script *derives* (soil-temp window from the air-temp threshold,
-rain thresholds, elevation band, geology affinity, temp-drop requirement) is
-emitted with a "# TODO: kalibriraj" marker, so calibration targets stay visible.
+rain thresholds, elevation band, geology affinity, temp-drop requirement,
+ecological group and the fruiting lag that follows from it) is emitted with a
+"# TODO: kalibriraj" marker, so calibration targets stay visible.
 Directly-sourced fields (season, air temp, mycorrhiza, doubles, edibility) are not
 marked.
 
@@ -56,6 +57,31 @@ INDEXED_EDIBILITY = {"užitna", "pogojno užitna"}
 # TODO: kalibriraj — prej: offset=-2.0, shoulder=4.0
 SOIL_TEMP_OFFSET_C = -1.5
 SOIL_TEMP_SHOULDER_C = 3.0
+
+# Ecological groups. The lag between the trigger rain and a fruit body differs
+# by an order of days between them, and that is what the model's rain windows
+# are shifted by — a litter saprotroph answers a shower within days, a
+# mycorrhizal species only after a week and a half.
+# TODO: kalibriraj — vrednosti so iz literature/izkušenj, ne iz meritev.
+ECOLOGIES = [
+    ("razkrojevalka", "Razkrojevalka stelje in travinja", (2, 8),
+     "Kukmaki, tintnice, plešivke, marela. Trosnjak sledi dežju v nekaj dneh."),
+    ("lesna", "Lesna razkrojevalka / parazit na lesu", (3, 10),
+     "Ostrigar, panjevka, štorovka, uhljevka. Les zadržuje vlago, odziv je nekaj dni daljši."),
+    ("mikorizna", "Mikorizna vrsta", (8, 16),
+     "Gobani, lisičke, golobice. Trosnjak pride šele teden in pol do dva po sprožilnem dežju."),
+]
+DEFAULT_ECOLOGY = "mikorizna"
+
+# Substrate keywords → ecological group. "Razkrajalka" on its own says only
+# "decomposer", and where it decomposes usually sits in the tail of the cell —
+# so a plain decomposer growing on stumps must read as a wood one. Only an
+# explicit litter/grassland head ("Razkrajalka organskih ostankov; …") keeps a
+# passing mention of wood from claiming the species.
+ECOLOGY_MYCO_KEYS = ("mikoriz",)
+ECOLOGY_LITTER_HEAD_KEYS = ("organsk", "stelj", "humus", "travnik", "pašnik", "gnoj")
+ECOLOGY_WOOD_KEYS = ("les", "debl", "štor", "panj", "lubj", "veje", "korenin")
+ECOLOGY_DECAY_KEYS = ("razkraj", "saprofit", "saprob")
 
 # Terrain definitions — three productive geological terrains of the valley,
 # plus the strictly-protected zones (no foraging).
@@ -183,6 +209,37 @@ def derive_frequency_factor(text):
     return 0.8
 
 
+def derive_ecology(substrate, mycorrhiza):
+    """Ecological group from the substrate description.
+
+    The leading clause of the substrate cell carries the trophic mode
+    ("Mikoriza; v tleh …", "Razkrajalka organskih ostankov; … ali lesu"); the
+    substrate it lives on can sit anywhere in the cell. The mycorrhiza column
+    settles what the text leaves open; it marks saprotrophs as "(saprofit)"."""
+    t = (substrate or "").lower()
+    head = t.split(";", 1)[0]
+    if any(k in head for k in ECOLOGY_MYCO_KEYS):
+        return "mikorizna"
+    if any(k in head for k in ECOLOGY_LITTER_HEAD_KEYS):
+        return "razkrojevalka"
+    if any(k in t for k in ECOLOGY_WOOD_KEYS):
+        return "lesna"
+    if any(k in t for k in ECOLOGY_DECAY_KEYS):
+        return "razkrojevalka"
+    m = (mycorrhiza or "").lower()
+    if any(k in m for k in ECOLOGY_DECAY_KEYS + ("parazit",)):
+        return "razkrojevalka"
+    return "mikorizna" if m.strip() else DEFAULT_ECOLOGY
+
+
+ECOLOGY_LAGS = {gid: lag for gid, _name, lag, _note in ECOLOGIES}
+
+
+def ecology_lag(group):
+    """Fruiting lag (days) of the group — the seed for the species' own value."""
+    return ECOLOGY_LAGS.get(group) or ECOLOGY_LAGS[DEFAULT_ECOLOGY]
+
+
 def derive_requires_temp_drop(season_start):
     """Late-season species (fruiting from August onward) treat night cooling
     as a trigger; earlier species do not. Heuristic — flagged for calibration."""
@@ -221,8 +278,9 @@ def build_yaml(species):
     L.append("# regeneracija jo prepiše, zato spremembe pomeni prenesti tudi v bazo ali skript.")
     L.append("#")
     L.append("# Izpeljane vrednosti (talno-temp. okno, padavinski pragovi, višina, geološka")
-    L.append("# afiniteta, nočna ohladitev) so označene '# TODO: kalibriraj'. Neposredno iz")
-    L.append("# baze (sezona, zračni prag, mikoriza, dvojnice, užitnost) niso.")
+    L.append("# afiniteta, nočna ohladitev, ekološka skupina in rastni zamik) so označene")
+    L.append("# '# TODO: kalibriraj'. Neposredno iz baze (sezona, zračni prag, mikoriza,")
+    L.append("# dvojnice, užitnost) niso.")
     L.append(f"# Zadnja regeneracija: {dt.date.today().isoformat()} · {len(species)} vrst.")
     L.append("")
 
@@ -230,8 +288,8 @@ def build_yaml(species):
     L.append("# Globalne uteži za izračun indeksa (0–100)")
     L.append("weights:")
     L.append("  soil_temp: 0.35        # ujemanje talne temp. z optimalnim oknom vrste")
-    L.append("  rain_7d: 0.25          # kumulativne padavine 7 dni")
-    L.append("  rain_14d: 0.15         # kumulativne padavine 14 dni")
+    L.append("  rain_trigger: 0.25     # sprožilni dež v zamiku vrste (fruiting_lag_days)")
+    L.append("  rain_base: 0.15        # zaloga vode v tleh 14 dni pred zamikom")
     L.append("  soil_moisture: 0.10")
     L.append("  humidity: 0.08")
     L.append("  temp_drop: 0.07        # nočna ohladitev kot sprožilec")
@@ -266,6 +324,21 @@ def build_yaml(species):
     L.append("    match_factor: 1.15       # TODO: kalibriraj — afiniteta se ujema s terenom")
     L.append("    mismatch_factor: 0.75    # TODO: kalibriraj — afiniteta se NE ujema")
     L.append("    neutral_factor: 1.0      # vrsta brez izrazite geološke preference")
+    L.append("")
+
+    # Ecological groups
+    L.append("# Ekološke skupine. fruiting_lag_days je zamik med sprožilnim dežjem in")
+    L.append("# trosnjakom; model za ta zamik premakne obe padavinski okni, tako da ista")
+    L.append("# ploha pri razkrojevalki in pri mikorizni vrsti ne šteje isti dan.")
+    L.append("# Vrednost tu je izhodišče, iz katerega import_species_db.py napolni")
+    L.append("# fruiting_lag_days pri vrsti — model bere vrednost PRI VRSTI, zato jo lahko")
+    L.append("# za posamezno vrsto ročno prepišeš, ne da bi premaknil celo skupino.")
+    L.append("ecologies:")
+    for eid, name, lag, note in ECOLOGIES:
+        L.append(f"  - id: {eid}")
+        L.append(f"    name_sl: {q(name)}")
+        L.append(f"    fruiting_lag_days: {{ min: {lag[0]}, max: {lag[1]} }}  # TODO: kalibriraj")
+        L.append(f"    note: {q(note)}")
     L.append("")
 
     # Terrains
@@ -307,10 +380,11 @@ def build_yaml(species):
         L.append(f"    air_temp: {{ min: {at[0]}, max: {at[1]} }}  # zračni prag iz baze")
         so = s["soil_temp"]
         L.append(f"    soil_temp: {{ min: {so[0]}, opt_low: {so[1]}, opt_high: {so[2]}, max: {so[3]} }}  # TODO: kalibriraj (izpeljano iz air_temp)")
-        L.append(f"    rain_7d_min: {s['rain_7d_min']}        # TODO: kalibriraj (baza: vlaga 7d)")
-        L.append(f"    rain_14d_min: {s['rain_14d_min']}       # TODO: kalibriraj")
+        L.append(f"    rain_7d_min: {s['rain_7d_min']}        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)")
+        L.append(f"    rain_14d_min: {s['rain_14d_min']}       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)")
+        L.append(f"    ecology: {s['ecology']}   # TODO: kalibriraj (izpeljano iz substrata)")
         fl = s["fruiting_lag_days"]
-        L.append(f"    fruiting_lag_days: {{ min: {fl[0]}, max: {fl[1]} }}  # TODO: kalibriraj")
+        L.append(f"    fruiting_lag_days: {{ min: {fl[0]}, max: {fl[1]} }}  # TODO: kalibriraj (iz skupine {s['ecology']})")
         L.append(f"    mycorrhiza: {yaml_list(s['mycorrhiza'])}")
         L.append(f"    substrate: {q(s['substrate'])}")
         L.append(f"    soil_ph: {q(s['soil_ph'])}")
@@ -342,6 +416,7 @@ def read_species():
         soil = derive_soil_temp(air_lo, air_hi, offset=SOIL_TEMP_OFFSET_C, shoulder=SOIL_TEMP_SHOULDER_C)
         rain7 = parse_moisture(r[C_MOIST7])
         elev_min, elev_max = derive_elevation(r[C_ELEV])
+        ecology = derive_ecology(r[C_SUBSTRATE], r[C_MYCO])
         out.append({
             "id": slugify(r[C_NAME_LAT]),
             "name_sl": r[C_NAME_SL],
@@ -355,7 +430,8 @@ def read_species():
             "soil_temp": soil,
             "rain_7d_min": rain7,
             "rain_14d_min": rain7 * 2,
-            "fruiting_lag_days": (7, 14),
+            "ecology": ecology,
+            "fruiting_lag_days": ecology_lag(ecology),
             "mycorrhiza": split_list(r[C_MYCO]),
             "substrate": r[C_SUBSTRATE],
             "soil_ph": r[C_SOILPH],

@@ -5,15 +5,16 @@
 # regeneracija jo prepiše, zato spremembe pomeni prenesti tudi v bazo ali skript.
 #
 # Izpeljane vrednosti (talno-temp. okno, padavinski pragovi, višina, geološka
-# afiniteta, nočna ohladitev) so označene '# TODO: kalibriraj'. Neposredno iz
-# baze (sezona, zračni prag, mikoriza, dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-07-18 · 145 vrst.
+# afiniteta, nočna ohladitev, ekološka skupina in rastni zamik) so označene
+# '# TODO: kalibriraj'. Neposredno iz baze (sezona, zračni prag, mikoriza,
+# dvojnice, užitnost) niso.
+# Zadnja regeneracija: 2026-08-12 · 145 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
   soil_temp: 0.35        # ujemanje talne temp. z optimalnim oknom vrste
-  rain_7d: 0.25          # kumulativne padavine 7 dni
-  rain_14d: 0.15         # kumulativne padavine 14 dni
+  rain_trigger: 0.25     # sprožilni dež v zamiku vrste (fruiting_lag_days)
+  rain_base: 0.15        # zaloga vode v tleh 14 dni pred zamikom
   soil_moisture: 0.10
   humidity: 0.08
   temp_drop: 0.07        # nočna ohladitev kot sprožilec
@@ -46,6 +47,26 @@ scoring:
     match_factor: 1.15       # TODO: kalibriraj — afiniteta se ujema s terenom
     mismatch_factor: 0.75    # TODO: kalibriraj — afiniteta se NE ujema
     neutral_factor: 1.0      # vrsta brez izrazite geološke preference
+
+# Ekološke skupine. fruiting_lag_days je zamik med sprožilnim dežjem in
+# trosnjakom; model za ta zamik premakne obe padavinski okni, tako da ista
+# ploha pri razkrojevalki in pri mikorizni vrsti ne šteje isti dan.
+# Vrednost tu je izhodišče, iz katerega import_species_db.py napolni
+# fruiting_lag_days pri vrsti — model bere vrednost PRI VRSTI, zato jo lahko
+# za posamezno vrsto ročno prepišeš, ne da bi premaknil celo skupino.
+ecologies:
+  - id: razkrojevalka
+    name_sl: "Razkrojevalka stelje in travinja"
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj
+    note: "Kukmaki, tintnice, plešivke, marela. Trosnjak sledi dežju v nekaj dneh."
+  - id: lesna
+    name_sl: "Lesna razkrojevalka / parazit na lesu"
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj
+    note: "Ostrigar, panjevka, štorovka, uhljevka. Les zadržuje vlago, odziv je nekaj dni daljši."
+  - id: mikorizna
+    name_sl: "Mikorizna vrsta"
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj
+    note: "Gobani, lisičke, golobice. Trosnjak pride šele teden in pol do dva po sprožilnem dežju."
 
 # Geološki tereni doline (za geo-afiniteto v izračunu po lokaciji).
 terrains:
@@ -137,9 +158,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bukev", "bor", "hrast"]
     substrate: "Mikoriza; v tleh v iglastih in mešanih gozdovih"
     soil_ph: "Kisla do nevtralna tla"
@@ -158,9 +180,10 @@ species:
     season: { start: "05.01", end: "09.30" }
     air_temp: { min: 18, max: 24 }  # zračni prag iz baze
     soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "bukev", "gaber", "kostanj"]
     substrate: "Mikoriza; v tleh v toplih listnatih gozdovih"
     soil_ph: "Nevtralna do bazična (apnenčasta) tla"
@@ -179,9 +202,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bor", "smreka", "bukev"]
     substrate: "Mikoriza; v tleh v gorskih iglastih gozdovih, v mahu"
     soil_ph: "Izrazito kisla tla (igličevje, borovnice)"
@@ -200,9 +224,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 20, max: 26 }  # zračni prag iz baze
     soil_temp: { min: 15.5, opt_low: 18.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "pitni kostanj"]
     substrate: "Mikoriza; v tleh v toploljubnih listnatih gozdovih"
     soil_ph: "Nevtralna do bazična (apnenčasta) tla"
@@ -221,9 +246,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bukev", "hrast"]
     substrate: "Mikoriza; v tleh. Surova strupena, obvezno kuhati 15-20 min"
     soil_ph: "Kisla tla"
@@ -242,9 +268,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 17 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 15.5, max: 18.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "rdeči bor"]
     substrate: "Mikoriza; v tleh, pogosto raste neposredno v mahu"
     soil_ph: "Kisle gozdne talne razmere"
@@ -263,9 +290,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bukev", "bor"]
     substrate: "Mikoriza; v tleh, na robovih gozdov, v parkih in jarkih"
     soil_ph: "Kisla do nevtralna tla"
@@ -284,9 +312,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno macesen (larix)"]
     substrate: "Mikoriza; na tleh pod macesni. Pred uporabo olupiti sluzasto kožico klobuka"
     soil_ph: "Nevtralna do bazična tla"
@@ -305,9 +334,10 @@ species:
     season: { start: "07.01", end: "09.30" }
     air_temp: { min: 18, max: 25 }  # zračni prag iz baze
     soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 23.5, max: 26.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "bukev"]
     substrate: "Mikoriza; v tleh v toplih, svetlih listnatih gozdovih"
     soil_ph: "Bazična (apnenčasta) tla"
@@ -326,9 +356,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bukev"]
     substrate: "Mikoriza; v tleh v gorskih iglastih gozdovih"
     soil_ph: "Kisle talne podlage"
@@ -347,9 +378,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bukev", "bor", "hrast"]
     substrate: "Mikoriza; v tleh, v mahu, borovničevju ali med listjem"
     soil_ph: "Kisle gozdne talne podlage"
@@ -368,9 +400,10 @@ species:
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 5, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bor"]
     substrate: "Mikoriza; v vlažnem mahu pozno jeseni v iglastih gozdovih"
     soil_ph: "Izrazito kisla in vlažna tla"
@@ -389,9 +422,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 12, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "hrast"]
     substrate: "Mikoriza; raste na vlažnih tleh, med odpadlim listjem v bukovih gozdovih"
     soil_ph: "Nevtralna do bazična (glinasta) tla"
@@ -410,9 +444,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "smreka", "hrast"]
     substrate: "Mikoriza; v tleh, pogosto raste v 'vilinskih krogih' ali dolgih vrstah"
     soil_ph: "Nevtralna do rahlo bazična tla"
@@ -431,9 +466,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "hrast", "smreka"]
     substrate: "Mikoriza; v tleh, v listnatih in mešanih gozdovih"
     soil_ph: "Nevtralna do rahlo kisla tla"
@@ -452,9 +488,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "bukev"]
     substrate: "Mikoriza; v tleh v svetlih listnatih gozdovih"
     soil_ph: "Nevtralna do kisla tla"
@@ -473,9 +510,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "bukev"]
     substrate: "Mikoriza; v tleh, v svetlih in toplih listnatih gozdovih"
     soil_ph: "Nevtralna do rahlo bazična tla"
@@ -494,9 +532,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "rdeči bor"]
     substrate: "Mikoriza; v vlažnih iglastih gozdovih, barjih, na šotnem mahu"
     soil_ph: "Zelo kisla in mokrotna tla"
@@ -515,9 +554,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno rdeči", "črni bor (pinus)"]
     substrate: "Mikoriza; na tleh, v travi ali pesku pod bori"
     soil_ph: "Bazična do nevtralna tla (apnenec)"
@@ -536,9 +576,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno smreka (picea)"]
     substrate: "Mikoriza; na tleh v vlažnih smrekovih gozdovih, med mahom"
     soil_ph: "Kisla do nevtralna tla"
@@ -557,9 +598,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "hrast"]
     substrate: "Mikoriza; v tleh, v gostih listnatih gozdovih. Užitna le močno pečena"
     soil_ph: "Nevtralna do bazična (glinasta) tla"
@@ -578,9 +620,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 15, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "hrast", "smreka"]
     substrate: "Mikoriza; v tleh v listnatih in mešanih gozdovih"
     soil_ph: "Kisla do nevtralna tla"
@@ -599,9 +642,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 18, max: 26 }  # zračni prag iz baze
     soil_temp: { min: 13.5, opt_low: 16.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "pitni kostanj"]
     substrate: "Mikoriza; v tleh na toplih, južnih in sončnih legah gozdov"
     soil_ph: "Bazična (apnenčasta) tla"
@@ -620,9 +664,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "smreka", "bor", "hrast"]
     substrate: "Mikoriza; v tleh. Surova strupena, zahteva temeljito toplotno obdelavo"
     soil_ph: "Zelo prilagodljiva; raste na vseh tleh"
@@ -641,9 +686,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "smreka", "bor"]
     substrate: "Mikoriza; v tleh v mešanih in iglastih gozdovih"
     soil_ph: "Kisla tla"
@@ -662,9 +708,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "bukev", "gaber", "leska"]
     substrate: "Mikoriza; v tleh v toplih listnatih gozdovih. Že 30g je lahko smrtonosna doza"
     soil_ph: "Nevtralna do bazična tla"
@@ -683,9 +730,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "hrast", "rdeči bor"]
     substrate: "Mikoriza; v tleh v svetlih gozdovih"
     soil_ph: "Nevtralna do bazična tla"
@@ -704,9 +752,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bor", "bukev"]
     substrate: "Mikoriza; v tleh v vlažnih gorskih iglastih gozdovih"
     soil_ph: "Kisla tla"
@@ -725,9 +774,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka organskih snovi; robovi gozdov, travniki, gozdne jase"
     soil_ph: "Kisla do nevtralna, bogata tla"
@@ -746,9 +796,10 @@ species:
     season: { start: "05.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka; travniki, pašniki, kjer se pase živina"
     soil_ph: "Nevtralna do bazična, dobro gnojena prst"
@@ -767,9 +818,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka; vrtovi, parki, ob poteh, gredice z zastirko"
     soil_ph: "Nevtralna do bazična, bogata tla"
@@ -788,9 +840,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 10, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["smreka", "bor", "borovnice"]
     substrate: "Mikoriza; v tleh v vlažnih iglastih gozdovih, med mahom"
     soil_ph: "Kisla tla"
@@ -809,9 +862,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["hrast", "bukev", "sadno drevje (parazit", "saprofit)"]
     substrate: "Zajeda živa in razkraja odmrla debla; raste v gostih šopih na lesu"
     soil_ph: "Saprofit na lesu; nevtralna tla"
@@ -830,9 +884,10 @@ species:
     season: { start: "11.01", end: "03.31" }
     air_temp: { min: -2, max: 8 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 0.0, opt_high: 6.5, max: 9.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["vrba", "jelša", "bezeg", "javor (saprofit", "parazit)"]
     substrate: "Razkraja odmrli les; raste pozimi v šopih neposredno na deblih"
     soil_ph: "Saprofit na lesu"
@@ -851,9 +906,10 @@ species:
     season: { start: "10.01", end: "01.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["bukev", "oreh", "vrba (saprofit", "parazit)"]
     substrate: "Raste v velikih prekrivajočih grmičih na odmrlem ali oslabelem lesu listavcev"
     soil_ph: "Saprofit na lesu"
@@ -872,9 +928,10 @@ species:
     season: { start: "05.01", end: "12.31" }
     air_temp: { min: 8, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["različni listavci", "iglavci (saprofit)"]
     substrate: "Razkrajalka; raste v izjemno gostih in velikih šopih na štori in koreninah"
     soil_ph: "Saprofit na lesu"
@@ -893,9 +950,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["bukev", "smreka"]
     substrate: "Mikoriza; raste na vlažnih tleh, med odpadlim listjem ali mahom"
     soil_ph: "Kisla do nevtralna tla"
@@ -914,9 +972,10 @@ species:
     season: { start: "04.01", end: "05.31" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["jesen", "brest", "divja jablana (saprofit", "mikoriza)"]
     substrate: "Raste spomladi na poplavnih območjih, logih ob rekah ter pogoriščih"
     soil_ph: "Nevtralna do bazična (ilovnata in vlažna) tla"
@@ -935,9 +994,10 @@ species:
     season: { start: "03.01", end: "05.31" }
     air_temp: { min: 6, max: 13 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 11.5, max: 14.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["iglavci (bor", "smreka) (saprofit)"]
     substrate: "Raste na lesnih ostankih, sekačih, gozdnih robovih, lubju"
     soil_ph: "Kisla do nevtralna tla"
@@ -956,9 +1016,10 @@ species:
     season: { start: "03.01", end: "05.31" }
     air_temp: { min: 5, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka; raste na peščenih tleh v bližini borovih korenin in lesnih ostankov"
     soil_ph: "Kisla, peščena tla"
@@ -977,9 +1038,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["iglavci (saprofit)"]
     substrate: "Razkraja les; raste na gnijočih deblih iglavcev ali na tleh z lesnimi sekači"
     soil_ph: "Kisle, lesne talne podlage"
@@ -998,9 +1060,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "smreka", "jelša", "bor"]
     substrate: "Mikoriza; v tleh v vlažnih mešanih gozdovih, parkih. Kumulativni strup"
     soil_ph: "Kisla tla"
@@ -1019,9 +1082,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka; raste na bogatih travnikih, pašnikih, sadovnjakih"
     soil_ph: "Nevtralna do bazična, z dušikom izjemno bogata tla"
@@ -1040,9 +1104,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka; raste na bogatih, gnojenih travnikih, ob poteh, vrtovih"
     soil_ph: "Nevtralna do bazična prst"
@@ -1061,9 +1126,10 @@ species:
     season: { start: "01.01", end: "12.31" }
     air_temp: { min: 5, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["črni bezeg (sambucus nigra) (saprofit)"]
     substrate: "Razkraja odmrle bezgove veje; želatinasta struktura, ki med kuhanjem hrusta"
     soil_ph: "Saprofit na lesu bezga"
@@ -1082,9 +1148,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["nobenega (saprofit)"]
     substrate: "Razkrajalka organskih ostankov; raste v skupinah na gozdnih tleh ali lesu"
     soil_ph: "Kisla do nevtralna tla"
@@ -1103,9 +1170,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno smreka (picea)"]
     substrate: "Mikoriza; raste v vlažnem mahu pod smrekami. Izrazito sluzasta goba"
     soil_ph: "Kisla tla"
@@ -1124,9 +1192,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno breza (betula)"]
     substrate: "Mikoriza; v tleh pod brezami v mešanih gozdovih"
     soil_ph: "Kisla do nevtralna tla"
@@ -1145,9 +1214,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["izključno breza (betula)"]
     substrate: "Mikoriza; v tleh pod brezami, rad ima nekoliko vlažnejša rastišča"
     soil_ph: "Kisle talne podlage"
@@ -1166,9 +1236,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["hrast", "trepetlika", "topol"]
     substrate: "Mikoriza; v tleh v svetlih listnatih gozdovih"
     soil_ph: "Nevtralna do bazična tla"
@@ -1187,9 +1258,10 @@ species:
     season: { start: "01.01", end: "12.31" }
     air_temp: { min: 5, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["različni listavci (predvsem bukev) (saprofit)"]
     substrate: "Razkrajalka; raste v pahljačah na odmrlih deblih in štori. Uporabna v medicini"
     soil_ph: "Saprofit na lesu"
@@ -1208,9 +1280,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1229,9 +1302,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1250,9 +1324,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1271,9 +1346,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1292,9 +1368,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1313,9 +1390,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1334,9 +1412,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1355,9 +1434,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1376,9 +1456,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1397,9 +1478,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1418,9 +1500,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1439,9 +1522,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1460,9 +1544,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1481,9 +1566,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["iglavci (bor", "macesen)"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
@@ -1502,9 +1588,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["iglavci (bor", "macesen)"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
@@ -1523,9 +1610,10 @@ species:
     season: { start: "06.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["iglavci (bor", "macesen)"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
@@ -1544,9 +1632,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1565,9 +1654,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 15, max: 24 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "gaber", "trepetlika"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1586,9 +1676,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "gaber", "trepetlika"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1607,9 +1698,10 @@ species:
     season: { start: "06.01", end: "10.31" }
     air_temp: { min: 15, max: 24 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "gaber", "trepetlika"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1628,9 +1720,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "gaber", "trepetlika"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1649,9 +1742,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["breza", "gaber", "trepetlika"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1670,9 +1764,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1691,9 +1786,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 35        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 70       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 35        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 70       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1712,9 +1808,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1733,9 +1830,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 24 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1754,9 +1852,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 15, max: 25 }  # zračni prag iz baze
     soil_temp: { min: 10.5, opt_low: 13.5, opt_high: 23.5, max: 26.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1775,9 +1874,10 @@ species:
     season: { start: "07.01", end: "09.30" }
     air_temp: { min: 16, max: 26 }  # zračni prag iz baze
     soil_temp: { min: 11.5, opt_low: 14.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1796,9 +1896,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1817,9 +1918,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1838,9 +1940,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1859,9 +1962,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1880,9 +1984,10 @@ species:
     season: { start: "07.01", end: "09.30" }
     air_temp: { min: 16, max: 26 }  # zračni prag iz baze
     soil_temp: { min: 11.5, opt_low: 14.5, opt_high: 24.5, max: 27.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1901,9 +2006,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1922,9 +2028,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1943,9 +2050,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Izrazito kisla silikatna in šotna tla (pH 4.0 - 5.5)"
@@ -1964,9 +2072,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 6, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -1985,9 +2094,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 6, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2006,9 +2116,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2027,9 +2138,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 6, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2048,9 +2160,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2069,9 +2182,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2090,9 +2204,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2111,9 +2226,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2132,9 +2248,10 @@ species:
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2153,9 +2270,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2174,9 +2292,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2195,9 +2314,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2216,9 +2336,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 10, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2237,9 +2358,10 @@ species:
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2258,9 +2380,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2279,9 +2402,10 @@ species:
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2300,9 +2424,10 @@ species:
     season: { start: "09.01", end: "12.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2321,9 +2446,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2342,9 +2468,10 @@ species:
     season: { start: "10.01", end: "12.31" }
     air_temp: { min: 4, max: 12 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 10.5, max: 13.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2363,9 +2490,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2384,9 +2512,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2405,9 +2534,10 @@ species:
     season: { start: "07.01", end: "11.30" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2426,9 +2556,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2447,9 +2578,10 @@ species:
     season: { start: "10.01", end: "12.31" }
     air_temp: { min: 2, max: 10 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2468,9 +2600,10 @@ species:
     season: { start: "10.01", end: "12.31" }
     air_temp: { min: 2, max: 10 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2489,9 +2622,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2510,9 +2644,10 @@ species:
     season: { start: "10.01", end: "12.31" }
     air_temp: { min: 2, max: 10 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2531,9 +2666,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2552,9 +2688,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2573,9 +2710,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2594,9 +2732,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2615,9 +2754,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 6, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2636,9 +2776,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2657,9 +2798,10 @@ species:
     season: { start: "09.01", end: "11.30" }
     air_temp: { min: 6, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 1.5, opt_low: 4.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2678,9 +2820,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2699,9 +2842,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2720,9 +2864,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 10, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2741,9 +2886,10 @@ species:
     season: { start: "08.01", end: "11.30" }
     air_temp: { min: 8, max: 16 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 14.5, max: 17.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 60       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2762,9 +2908,10 @@ species:
     season: { start: "03.01", end: "05.31" }
     air_temp: { min: 4, max: 10 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 2.5, opt_high: 8.5, max: 11.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2783,9 +2930,10 @@ species:
     season: { start: "10.01", end: "12.31" }
     air_temp: { min: 2, max: 8 }  # zračni prag iz baze
     soil_temp: { min: 0.0, opt_low: 0.5, opt_high: 6.5, max: 9.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2804,9 +2952,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2825,9 +2974,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 24 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 22.5, max: 25.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2846,9 +2996,10 @@ species:
     season: { start: "04.01", end: "06.30" }
     air_temp: { min: 8, max: 18 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 16.5, max: 19.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2867,9 +3018,10 @@ species:
     season: { start: "04.01", end: "06.30" }
     air_temp: { min: 8, max: 14 }  # zračni prag iz baze
     soil_temp: { min: 3.5, opt_low: 6.5, opt_high: 12.5, max: 15.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2888,9 +3040,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit na travnikih/gozdovih"
     soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
@@ -2909,9 +3062,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 14, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 9.5, opt_low: 12.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit na travnikih/gozdovih"
     soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
@@ -2930,9 +3084,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit na travnikih/gozdovih"
     soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
@@ -2951,9 +3106,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 40       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: razkrojevalka   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 2, max: 8 }  # TODO: kalibriraj (iz skupine razkrojevalka)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit na travnikih/gozdovih"
     soil_ph: "Bazična apnenčasta tla in rendzine (pH 7.0 - 8.5)"
@@ -2972,9 +3128,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -2993,9 +3150,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3014,9 +3172,10 @@ species:
     season: { start: "08.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3035,9 +3194,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit/Parazit na lesu"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3056,9 +3216,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit/Parazit na lesu"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3077,9 +3238,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Saprofit/Parazit na lesu"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3098,9 +3260,10 @@ species:
     season: { start: "05.01", end: "11.30" }
     air_temp: { min: 10, max: 22 }  # zračni prag iz baze
     soil_temp: { min: 5.5, opt_low: 8.5, opt_high: 20.5, max: 23.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3119,9 +3282,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3140,9 +3304,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Bogata humozna nevtralna tla (pH 6.0 - 7.0)"
@@ -3161,9 +3326,10 @@ species:
     season: { start: "07.01", end: "10.31" }
     air_temp: { min: 12, max: 20 }  # zračni prag iz baze
     soil_temp: { min: 7.5, opt_low: 10.5, opt_high: 18.5, max: 21.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d)
-    rain_14d_min: 50       # TODO: kalibriraj
-    fruiting_lag_days: { min: 7, max: 14 }  # TODO: kalibriraj
+    rain_7d_min: 25        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
+    rain_14d_min: 50       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
+    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
     mycorrhiza: ["mešani gozdovi"]
     substrate: "Mikoriza; v tleh"
     soil_ph: "Z dušikom bogata (nitrofilna) antropogena tla (travniki, pašniki)"

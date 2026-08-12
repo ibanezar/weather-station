@@ -430,8 +430,13 @@ body{
 .gp-explain-more[open] summary::before{content:"Skrij ▴"}
 .gp-explain-more p{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.55}
 .gp-explain-more .dbl{display:block;margin-top:.3rem;color:var(--muted)}
+/* Ekološka skupina + rastni zamik vrste — pove, katero okno dežja "Sprožilni
+   dež" spodaj sploh meri (pri kukmaku drugo kot pri jurčku). */
+.gp-eco{display:inline-block;margin-top:.45rem;padding:.12rem .45rem;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid var(--card-border);
+  font-size:.68rem;color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 /* Per-factor "why" breakdown — the model already scores each species on 6
-   independent 0-100 signals (soil temp, rain 7d/14d, soil moisture, air
+   independent 0-100 signals (soil temp, trigger/base rain, soil moisture, air
    humidity, night-cooling trigger) and blends them into the single index;
    previously only the blended number + a prose summary were ever shown.
    Surfacing the actual bars is the real "not a black box" version of the
@@ -894,9 +899,17 @@ PAGE_JS = """<script>
   // The blended index is 6 independently-scored 0-100 signals; this renders
   // those actual bars instead of just the prose summary, inside the same
   // "Zakaj?" disclosure — the model was already computing all of this.
-  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_7d:"Padavine 7d",rain_14d:"Padavine 14d",
+  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_trigger:"Sprožilni dež",rain_base:"Zaloga vode",
     soil_moisture:"Vlaga tal",humidity:"Zračna vlaga",temp_drop:"Nočna ohladitev"};
-  var FACTOR_ORDER=["soil_temp","rain_7d","rain_14d","soil_moisture","humidity","temp_drop"];
+  var FACTOR_ORDER=["soil_temp","rain_trigger","rain_base","soil_moisture","humidity","temp_drop"];
+  // Skupina in zamik povesta, KATERI dež je vrsto sploh lahko sprožil — brez
+  // tega je "sprožilni dež" pri kukmaku in pri jurčku videti kot ista številka.
+  var ECO_LABELS={mikorizna:"mikorizna",razkrojevalka:"razkrojevalka stelje",lesna:"lesna razkrojevalka"};
+  function ecoBadgeHtml(m){
+    if(!m||!m.ecology)return"";
+    var lag=m.lag_days?(" · dež pred "+m.lag_days[0]+"–"+m.lag_days[1]+" dnevi"):"";
+    return '<span class="gp-eco">'+esc2(ECO_LABELS[m.ecology]||m.ecology)+esc2(lag)+'</span>';
+  }
   function factorBarsHtml(components){
     if(!components)return"";
     var rows=FACTOR_ORDER.filter(function(k){return components[k]!=null;});
@@ -918,7 +931,7 @@ PAGE_JS = """<script>
         <div class="gp-explain-body">
         <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
         <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
-        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${factorsHtml}</details>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${ecoBadgeHtml(m)}${factorsHtml}</details>
         </div></div>`;}).join('');
   }
   function dayLabel(day, isFirst){
@@ -2318,8 +2331,8 @@ def build_body(rules, premium, free):
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
-    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, padavine pod pragom, nočna ohladitev zaznana«)
-    in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
+    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, sprožilni dež pred 8–16 dnevi pod pragom,
+    nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
     <div class="gp-skel">
 {skel_rows}
     </div>
@@ -2464,11 +2477,19 @@ def build_body(rules, premium, free):
     qa = [
         ("Je gobarski indeks napoved najdbe?",
          "Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — "
-         "temperatura in vlaga tal, kumulativne padavine, zračna vlaga in nočna ohladitev, uteženo po vrsti in "
-         "geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe."),
+         "temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga "
+         "in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks "
+         "pomeni ugodne razmere, ne zajamčene gobe."),
         ("Katere vrste zajema premium napoved?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
+        ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
+         "Ker se skupine gliv odzivajo z različnim zamikom, in model ga upošteva. Razkrojevalke stelje in "
+         "travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke "
+         "(ostrigar, panjevka, uhljevka) nekoliko pozneje, mikorizne vrste (gobani, lisičke, golobice) pa šele "
+         "teden in pol do dva. Padavinsko okno je zato pri vsaki vrsti zamaknjeno za njen rastni zamik: dež, "
+         "ki je padel včeraj, jurčku danes indeksa ne dvigne, kukmaku pa ga lahko. Skupina in zamik sta "
+         "izpisana na kartici vsake vrste."),
         ("Zakaj se indeks razlikuje med gozdovi?",
          "Model upošteva geologijo: kislo vulkansko pogorje Smrekovca ustreza jurčkom in žametastemu gobanu, "
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
@@ -2661,6 +2682,10 @@ def main():
          "Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."),
         ("Katere vrste zajema premium napoved?",
          "Užitne in pogojno užitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."),
+        ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
+         "Ker se skupine gliv odzivajo z različnim zamikom. Razkrojevalke stelje tvorijo trosnjake nekaj dni po "
+         "plohi, lesne razkrojevalke nekoliko pozneje, mikorizne vrste šele teden in pol do dva — model "
+         "padavinsko okno zato pri vsaki vrsti zamakne za njen rastni zamik."),
         ("Ali je to uradna napoved ARSO?",
          "Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."),
     ]

@@ -6,6 +6,12 @@ Computes a 0-100 "gobarski indeks" (favourability-of-conditions index, NOT a
 promise of finds) per species, per day (today + 6), per location, driven
 entirely by species_rules.yaml — no thresholds live in this file.
 
+Rain is read through the species' own fruiting lag (`fruiting_lag_days`,
+derived per ecological group in species_rules.yaml): the trigger window ends
+lag_min days back, not today. Litter saprotrophs answer a shower within days,
+wood decayers a little later, mycorrhizal species only after a week and a
+half — so the same downpour lifts their indices on different days.
+
 Inputs
   * Open-Meteo forecast API: daily precipitation + T min/max, hourly soil
     temperature at 6 and 18 cm, soil moisture 3-9 cm, relative humidity,
@@ -42,9 +48,15 @@ RULES_PATH = os.path.join(ROOT, "species_rules.yaml")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 FREE_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "index.json")
 
-MODEL_VERSION = "1.1"
-PAST_DAYS = 14
+MODEL_VERSION = "1.2"
 FORECAST_DAYS = 7
+
+# Padavinski okni se pri vsaki vrsti zamakneta za njen rastni zamik
+# (fruiting_lag_days), zato model potrebuje toliko preteklih dni, da najdaljši
+# zamik še vidi celo osnovno okno — glej past_days_needed().
+BASE_WINDOW_DAYS = 14   # dolžina okna "zaloga vode v tleh"
+TRIGGER_NORM_DAYS = 7   # rain_7d_min je izražen kot 7-dnevna kumulativa
+MIN_PAST_DAYS = 14
 
 # Locations come from species_rules.yaml (`locations:`); see load_locations().
 
@@ -75,13 +87,21 @@ def load_locations(rules):
     return spots, protected
 
 
-def fetch_forecast(spots):
+def past_days_needed(rules):
+    """Koliko preteklih dni mora zajeti poizvedba, da ima tudi vrsta z
+    najdaljšim zamikom polno osnovno okno (zamik + 14 dni pred njim)."""
+    lags = [int(sp["fruiting_lag_days"]["max"]) for sp in rules.get("species", [])
+            if sp.get("fruiting_lag_days")]
+    return max(MIN_PAST_DAYS, (max(lags) if lags else 0) + BASE_WINDOW_DAYS)
+
+
+def fetch_forecast(spots, past_days=MIN_PAST_DAYS):
     params = urllib.parse.urlencode({
         "latitude": ",".join(str(s["lat"]) for s in spots),
         "longitude": ",".join(str(s["lon"]) for s in spots),
         "daily": ",".join(DAILY_VARS),
         "hourly": ",".join(HOURLY_VARS),
-        "past_days": PAST_DAYS,
+        "past_days": past_days,
         "forecast_days": FORECAST_DAYS,
         "timezone": "Europe/Ljubljana",
     }, safe=",")
@@ -161,17 +181,16 @@ def build_series(loc, station_precip=None):
     }
 
 
-def rain_window(series, i, days):
-    """Cumulative precipitation over the trailing window ending at day i (inclusive)."""
-    lo = max(0, i - days + 1)
-    return sum(series["precip"][lo:i + 1])
-
-
 def rain_lag_window(series, i, lag_min, lag_max):
-    """Cumulative precipitation that fell lag_min..lag_max days before day i."""
+    """Cumulative precipitation that fell lag_min..lag_max days before day i.
+    Returns 0 when the window lies entirely before the start of the series —
+    the caller must fetch enough past days (see past_days_needed()), otherwise
+    a truncated window silently under-reports rain."""
+    hi = i - lag_min
+    if hi < 0:
+        return 0.0
     lo = max(0, i - lag_max)
-    hi = max(0, i - lag_min)
-    return sum(series["precip"][lo:hi + 1]) if hi >= lo else 0.0
+    return sum(series["precip"][lo:hi + 1])
 
 
 def temp_drop_triggered(series, i, cfg):
@@ -283,21 +302,41 @@ def eval_species(sp, series, i, date, spot, rules):
             state = "nad optimalnim oknom"
         parts.append(f"talna temp. {st:.1f} °C {state}")
 
-    # Rain, 7- and 14-day cumulative vs. species thresholds
+    # Rain — both windows are shifted back by the species' fruiting lag, so what
+    # counts is the rain that could have started the fruit body visible today,
+    # not the rain that just fell. A litter saprotroph fruits days after a
+    # shower; a mycorrhizal bolete needs a week and a half, and until then the
+    # same rain must not lift its index.
     rain_cfg = scoring["rain"]
-    r7 = rain_window(series, i, 7)
-    r14 = rain_window(series, i, 14)
-    f_r7, r7_state = rain_score(r7, float(sp["rain_7d_min"]), rain_cfg)
-    f_r14, r14_state = rain_score(r14, float(sp["rain_14d_min"]), rain_cfg)
-    components["rain_7d"] = f_r7
-    components["rain_14d"] = f_r14
-    r7_txt = {"pod_pragom": "pod pragom", "nad_pragom": "nad pragom",
-              "prenamoceno": "prenamočeno"}[r7_state]
-    parts.append(f"padavine 7 dni {r7:.1f}/{sp['rain_7d_min']} mm ({r7_txt})")
-    if r14_state == "prenamoceno" and r7_state != "prenamoceno":
-        parts.append("14-dnevna kumulativa kaže prenamočenost")
+    lag = sp["fruiting_lag_days"]
+    lag_min, lag_max = int(lag["min"]), int(lag["max"])
 
-    # Soil moisture ramp
+    # Trigger: rain inside the species' lag window. Its length differs per
+    # ecological group, so the 7-day-equivalent threshold is scaled to the
+    # window — groups stay comparable instead of the widest window winning.
+    trig_days = lag_max - lag_min + 1
+    trig_mm = rain_lag_window(series, i, lag_min, lag_max)
+    trig_min = float(sp["rain_7d_min"]) * trig_days / TRIGGER_NORM_DAYS
+    f_trig, trig_state = rain_score(trig_mm, trig_min, rain_cfg)
+
+    # Base: soil water reserve the mycelium had going into that trigger — the
+    # 14 days up to the most recent edge of the lag window, so it contains the
+    # trigger window the way the old 14-day sum contained the 7-day one.
+    base_mm = rain_lag_window(series, i, lag_min, lag_min + BASE_WINDOW_DAYS - 1)
+    f_base, base_state = rain_score(base_mm, float(sp["rain_14d_min"]), rain_cfg)
+
+    components["rain_trigger"] = f_trig
+    components["rain_base"] = f_base
+    trig_txt = {"pod_pragom": "pod pragom", "nad_pragom": "nad pragom",
+                "prenamoceno": "prenamočeno"}[trig_state]
+    parts.append(f"sprožilni dež pred {lag_min}–{lag_max} dnevi "
+                 f"{trig_mm:.1f}/{trig_min:.0f} mm ({trig_txt})")
+    if base_state == "prenamoceno" and trig_state != "prenamoceno":
+        parts.append("zaloga vode v tleh kaže prenamočenost")
+
+    # Soil moisture and air humidity stay on the current day on purpose: the
+    # lag windows above ask whether the fruit body was ever started, these ask
+    # whether it can swell and not dry out today.
     smc = scoring["soil_moisture"]
     f_sm = ramp(series["soil_moisture"][i], float(smc["dry"]), float(smc["full"]))
     components["soil_moisture"] = 0.0 if f_sm is None else f_sm
@@ -320,13 +359,6 @@ def eval_species(sp, series, i, date, spot, rules):
         parts.append("nočna ohladitev zaznana" if triggered else "čaka na nočno ohladitev")
     else:
         components["temp_drop"] = 1.0  # species doesn't need the trigger
-
-    # Fruiting lag: was there trigger-grade rain lag_min..lag_max days ago?
-    # Informational only — the weights above already carry the rain signal.
-    lag = sp["fruiting_lag_days"]
-    lag_rain = rain_lag_window(series, i, int(lag["min"]), int(lag["max"]))
-    if lag_rain >= float(sp["rain_7d_min"]):
-        parts.append(f"sprožilni dež pred {lag['min']}–{lag['max']} dnevi ({lag_rain:.0f} mm)")
 
     # Display copy of components — drops temp_drop for species that don't use
     # it (there it's a fixed 1.0 bypass for the score sum below, not a real
@@ -399,6 +431,11 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
         "name_sl": sp["name_sl"],
         "name_lat": sp["name_lat"],
         "edibility": sp.get("edibility"),
+        "ecology": sp.get("ecology"),
+        # Zamik pove, kateri dež je vrsto sploh lahko sprožil — na kartici stoji
+        # ob razlagi, da je vidno, zakaj ista ploha pri dveh vrstah ne šteje enako.
+        "lag_days": [int(sp["fruiting_lag_days"]["min"]),
+                     int(sp["fruiting_lag_days"]["max"])],
         "doubles": sp.get("doubles") or None,
     } for sp in indexed}
     out_locations = []
@@ -406,7 +443,7 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
         series = build_series(loc, station_precip if spot.get("home") else None)
         dates = series["dates"]
         iso = today.isoformat()
-        ti = dates.index(iso) if iso in dates else PAST_DAYS
+        ti = dates.index(iso) if iso in dates else past_days_needed(rules)
 
         days = []
         for i in range(ti, min(ti + FORECAST_DAYS, len(dates))):
@@ -445,6 +482,7 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
         "species_indexed": len(indexed),
         "species_meta": species_meta,
         "terrains": {t["id"]: t["name_sl"] for t in rules.get("terrains", [])},
+        "ecologies": {e["id"]: e["name_sl"] for e in rules.get("ecologies", [])},
         "protected_areas": [p["name"] for p in (protected or [])],
         "locations": out_locations,
     }
@@ -478,9 +516,11 @@ def print_summary(premium, top=8):
     home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
     print(f"\n=== {home['name']} ({home.get('terrain')}) — danes, top {top} vrst (od {premium['species_indexed']}) ===")
     for s in home["days"][0]["species"][:top]:
-        dbl = meta[s["id"]].get("doubles")
+        m = meta[s["id"]]
+        dbl = m.get("doubles")
         dbl = f"  ⚠ {dbl[:60]}" if dbl else ""
-        print(f"  {s['index']:3d} %  {nm(s['id']):<28} {s['explanation']}{dbl}")
+        eco = f"[{(m.get('ecology') or '?')[:4]} {'–'.join(str(v) for v in m['lag_days'])}d]"
+        print(f"  {s['index']:3d} %  {nm(s['id']):<28} {eco:<12} {s['explanation']}{dbl}")
     print(f"\n=== {home['name']} — 7-dnevni skupni indeks ===")
     for day in home["days"]:
         best = nm(day["species"][0]["id"]) if day["species"] else "-"
@@ -505,9 +545,11 @@ def main():
 
     rules = load_rules()
     spots, protected = load_locations(rules)
-    print(f"Pridobivam Open-Meteo napoved za {len(spots)} lokacij (+ {len(protected)} zaščitenih) …")
+    past_days = past_days_needed(rules)
+    print(f"Pridobivam Open-Meteo napoved za {len(spots)} lokacij "
+          f"(+ {len(protected)} zaščitenih), {past_days} preteklih dni …")
     try:
-        locs = fetch_forecast(spots)
+        locs = fetch_forecast(spots, past_days)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
         print(f"✗ Open-Meteo: {e}", file=sys.stderr)
         sys.exit(1)
