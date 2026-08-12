@@ -570,7 +570,7 @@ def build_tag_pages(posts):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tema: {tag} — članki | Meteorec, Rečica ob Savinji</title>
+<title>{seo_title(f"Tema: {tag} — članki", " | Meteorec, Rečica ob Savinji")}</title>
 <link rel="canonical" href="{canon}">
 <meta name="description" content="{desc}">
 <meta name="robots" content="index, follow, max-image-preview:large">

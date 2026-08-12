@@ -30,6 +30,14 @@ CORE = {
     "blog/":                     ("weekly",  "0.8"),
     "o-postaji.html":            ("monthly", "0.6"),
     "gobarska-napoved/":         ("daily",   "0.8"),
+    # Referenčne podstrani gobarske napovedi. Imajo svoj canonical, opis in
+    # JSON-LD, v nobenem sitemapu pa jih ni bilo — baza vrst in dvojnice sta
+    # ravno strani, ki iskanju največ povesta.
+    "gobarska-napoved/baza-vrst/":  ("weekly",  "0.7"),
+    "gobarska-napoved/dvojnice/":   ("weekly",  "0.7"),
+    "gobarska-napoved/koledar/":    ("monthly", "0.6"),
+    "gobarska-napoved/trend/":      ("weekly",  "0.5"),
+    "gobarska-napoved/zemljevid/":  ("daily",   "0.6"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
     "agrometeo/":                ("daily",   "0.7"),

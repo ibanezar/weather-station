@@ -113,7 +113,13 @@ def double_danger(text):
         return "zaščitena"
     if "neužit" in t:
         return "neužitna"
-    return "neužitna"
+    # "prav tako užitna" — dvojnica, ki ni nevarna, je pogosta pri parih znotraj
+    # istega rodu. Mora se preverjati za "neužit", ki vsebuje isti koren.
+    if "užitn" in t or "užiten" in t:
+        return "užitna"
+    # Brez besede o užitnosti ne trdimo ničesar; prej je privzeto vrnilo
+    # "neužitna" in stran je užitnim dvojnicam pripisala neužitnost.
+    return None
 
 
 def season_months(sp):
@@ -1921,8 +1927,9 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
     <figcaption>📷 Avtorski makro posnetek — tudi navidez podobne gobe znajo biti povsem različne vrste</figcaption>
   </figure>
 '''
-            '  <p class="post-meta">Užitna vrsta ob strupeni ali neužitni dvojnici, s ključno razliko za varno '
-            'ločevanje. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
+            '  <p class="post-meta">Užitna vrsta ob vrsti, s katero jo je mogoče zamenjati, s ključno razliko za '
+            'varno ločevanje. Dvojnica je pri večini parov strupena ali neužitna, ponekod pa prav tako užitna — '
+            'oznaka pri njej pove, za kaj gre. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
             + vs_html + "\n" + credits_html)
     return subpage_shell(
         "dvojnice", "Nevarne dvojnice gob — primerjava s fotografijami",
@@ -2181,8 +2188,8 @@ def build_zemljevid_page(premium, rules):
 
     return subpage_shell(
         "zemljevid", "Zemljevid nabiralnih območij — Zgornja Savinjska dolina",
-        f"Interaktivni zemljevid {pick_count} nabiralnih območij Zgornje Savinjske doline, obarvanih po današnjem "
-        "gobarskem indeksu. Vključuje zaščitena območja, kjer je nabiranje prepovedano.",
+        f"Zemljevid {pick_count} nabiralnih območij Zgornje Savinjske doline, obarvanih po današnjem gobarskem "
+        "indeksu, z zaščitenimi območji, kjer je nabiranje prepovedano.",
         "Zemljevid", inner, extra_js=map_js)
 
 
@@ -2441,7 +2448,7 @@ def build_body(rules, premium, free):
             continue
         dname, dlatin, bullets = parsed
         danger = double_danger(s["doubles"])
-        badge = edib_badge(danger)
+        badge = edib_badge(danger) if danger else ""
         e_img = f"/gobarska-napoved/img/dvojnice/{s['id']}.jpg"
         d_img = f"/gobarska-napoved/img/dvojnice/{_slug(dname)}.jpg"
         bullets_html = "".join(f"<li>{_esc(b)}</li>" for b in bullets)
@@ -2690,9 +2697,10 @@ def main():
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"
+    # Meta description naj ostane pod ~160 znaki, sicer jo Google odreže sredi
+    # stavka; zadnji del je zato najbolj pogrešljiv.
     desc = (f"Gobarski indeks danes: {free['index']} % ({free['level']}). Napoved rasti gob po vrstah za "
-            f"Zgornjo Savinjsko dolino — 7-dnevni premium model, baza {len(rules['species'])} vrst, "
-            f"nevarne dvojnice in gobarski koledar.")
+            f"Zgornjo Savinjsko dolino, baza {len(rules['species'])} vrst in nevarne dvojnice.")
 
     qa_for_schema = [
         ("Je gobarski indeks napoved najdbe?",
