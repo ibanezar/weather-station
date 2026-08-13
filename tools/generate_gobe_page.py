@@ -551,7 +551,7 @@ body{
 
 /* Sub-headings in the JS-rendered premium block (#gp-content) are bare <h3>
    with no built-in spacing, so they sit flush against whatever scrolled
-   above them — most visibly right under the sticky quicknav. Force room. */
+   above them. Force room. */
 #gp-content h3{margin:1.7rem 0 .6rem;font-size:1.05rem}
 #gp-content h3:first-child{margin-top:.4rem}
 .gp-explain-h{margin-top:1.6rem}
@@ -761,28 +761,7 @@ body{
 .gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
 .gp-trend-best b{color:var(--text)}
 
-/* ── Hitri meni (sticky) + zložljive (details) sekcije ── */
-/* Wrapper omogoča fade namig na desni, da je jasno, da se meni scrolla vodoravno. */
-.gp-quicknav-wrap{position:sticky;top:0;z-index:20;background:var(--bg);
-  border-bottom:1px solid var(--border);margin:.2rem 0 1.4rem}
-.gp-quicknav-wrap::after{content:"";position:absolute;top:0;right:0;bottom:1px;width:2.4rem;
-  pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg))}
-/* flex-wrap intentionally omitted (default nowrap) so the row never breaks
-   onto a second line; overflow-x:auto turns the overflow into a touch/scroll
-   swipe instead. Scrollbar hidden per-engine (Firefox/WebKit/legacy Edge)
-   since the horizontal swipe is already obvious from the chip row itself. */
-/* Samo skoki po strani. Povezave na podstrani (koledar, trend, baza vrst,
-   dvojnice) so od mreže .gp-feat naprej tam — v obeh hkrati so pomenile dve
-   navigaciji eno pod drugo. */
-.gp-quicknav{display:flex;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding:.65rem 0;
-  scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
-.gp-quicknav::-webkit-scrollbar{display:none}
-.gp-quicknav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:2.75rem;
-  background:var(--badge-bg);border:1px solid var(--card-border);
-  color:var(--text);text-decoration:none;font-size:.82rem;padding:.4rem .8rem;border-radius:20px;
-  white-space:nowrap;transition:border-color .15s ease,color .15s ease}
-.gp-quicknav a:last-child{margin-right:2.4rem}
-.gp-quicknav a:hover{border-color:var(--blue);color:var(--blue)}
+/* ── Zložljive (details) sekcije ── */
 .gp-collapse{border:1px solid var(--card-border);border-radius:14px;margin:.6rem 0 1rem;overflow:hidden}
 .gp-collapse summary{cursor:pointer;list-style:none;padding:.8rem 1rem;font-weight:700;
   display:flex;align-items:center;justify-content:space-between;background:var(--card-bg)}
@@ -792,16 +771,6 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
-/* ── Section-level accordions (Geološki tereni / Nasveti / Dnevnik) — same
-   collapse mechanics as .gp-collapse, but the summary reads like a .gp-h2
-   heading rather than a small card toggle, so a closed section still looks
-   like a normal page section, just one the user has to tap to open. Default
-   closed (no `open` attribute) keeps the "active" data above the fold. ── */
-.gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
-.gp-collapse-section summary{padding:0 0 .4rem;min-height:2.75rem;border-bottom:1px solid var(--border);
-  background:transparent;font-size:1.35rem;font-weight:700}
-.gp-collapse-section summary::after{font-size:1rem}
-.gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
 /* FAQ <details> otherwise rely on bare UA defaults — too short a tap target
    on mobile. Padding (not margin) grows the hit area without widening the
    row's footprint or spacing against its neighbours. */
@@ -858,13 +827,13 @@ body{
    which media query is narrower. */
 body .wrap{padding-bottom:5.5rem}
 
-/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
-   quicknav/hub cards already cover cross-page navigation ── */
+/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the
+   mreža .gp-feat already covers cross-page navigation ── */
 .gp-bottomnav{display:none}
 /* ── Top App Bar (mobile, Material 3 "small top app bar") — a NEW element
    scoped to this page only, not a rework of the shared .site-head used by
-   every other generated page. It sits above the sticky quicknav so a user
-   mid-scroll always knows which of the 6 gobarska-napoved/ pages they're on
+   every other generated page. It tells a user mid-scroll which of the
+   gobarska-napoved/ pages they're on
    and has a 1-tap way back, without us touching the site-wide header. ── */
 .gp-topbar{display:none}
 @media (max-width:760px){
@@ -886,7 +855,6 @@ body .wrap{padding-bottom:5.5rem}
   .gp-topbar-title{flex:1;font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gp-topbar-action{flex:0 0 auto;width:2.2rem;height:2.2rem;display:flex;align-items:center;
     justify-content:center;font-size:1.1rem;text-decoration:none;border-radius:50%;background:var(--badge-bg)}
-  .gp-quicknav-wrap{top:3rem}
   /* z-index:70 — the highest layer on the page (topbar 55, SOS FAB/panel 60)
      so the bottom nav always stays on top of everything else, never gets
      covered by other fixed/sticky elements. */
@@ -1437,11 +1405,9 @@ PAGE_JS = """<script>
     catch(e){ return iso; }
   }
   var pricingWrap=document.getElementById("gp-pricing-wrap");
-  var navPricing=document.getElementById("gp-nav-pricing");
   var heroUnlock=document.getElementById("gp-hero-unlock");
   function hidePricing(){
     if(pricingWrap)pricingWrap.hidden=true;
-    if(navPricing)navPricing.hidden=true;
     if(heroUnlock)heroUnlock.hidden=true;
   }
   function skeletonHtml(){
@@ -1557,16 +1523,6 @@ PAGE_JS = """<script>
     });
   }
 
-  // Section accordions (Geološki tereni / Nasveti / Dnevnik) default closed;
-  // auto-open + jump when the quicknav links straight to one via #hash.
-  function openHashSection(){
-    var id=location.hash.slice(1);
-    if(!id)return;
-    var el=document.getElementById(id);
-    if(el&&el.tagName==="DETAILS")el.open=true;
-  }
-  openHashSection();
-  window.addEventListener("hashchange",openHashSection);
 })();
 </script>"""
 
@@ -2060,6 +2016,35 @@ _FI_DNEVNIK = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/20
     '<circle cx="14.6" cy="17.2" r="1" fill="currentColor"/></svg>')
 
 
+_FI_TERENI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M2.6 7.6c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7v3.2c-1.6 0-3.2-.6-4.8-1.7'
+    '-2.2-1.6-4.6-2.4-7.2-2.4-2 0-4.2.7-6.6 2.1V7.6Z" fill="currentColor" fill-opacity=".45"/>'
+    '<path d="M2.6 7.6c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M2.6 13.4c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>'
+    '<path d="M2.6 19.2c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>')
+
+_FI_NASVETI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<rect x="4" y="2.8" width="16" height="18.4" rx="2.6" fill="currentColor" fill-opacity=".14" '
+    'stroke="currentColor" stroke-width="1.6"/>'
+    '<path d="m7.4 8 1.5 1.5 2.6-2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+    'stroke-linejoin="round"/>'
+    '<path d="m7.4 13.4 1.5 1.5 2.6-2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+    'stroke-linejoin="round"/>'
+    '<path d="M13.6 8.2h3.2M13.6 13.6h3.2M7.4 18.4h9.4" stroke="currentColor" stroke-width="1.5" '
+    'stroke-linecap="round" opacity=".7"/></svg>')
+
+_FI_FAQ = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M3 6.4a2.6 2.6 0 0 1 2.6-2.6h12.8A2.6 2.6 0 0 1 21 6.4v8a2.6 2.6 0 0 1-2.6 2.6H9.6L5 20.8V17h-.4'
+    'A1.6 1.6 0 0 1 3 15.4V6.4Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linejoin="round"/>'
+    '<path d="M9.7 8.6a2.3 2.3 0 0 1 4.5.7c0 1.5-2.2 1.8-2.2 3.2" stroke="currentColor" stroke-width="1.7" '
+    'stroke-linecap="round"/>'
+    '<circle cx="12" cy="14.8" r="1.05" fill="currentColor"/></svg>')
+
+
 # Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
 # ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
 # roko pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
@@ -2070,7 +2055,7 @@ _FI_DNEVNIK = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/20
 # enakih zelenih kartic se ne bi ločilo med sabo.
 GOBE_FEATURES = [
     # (href, ikona, poudarek, naslov, napovednik, oznaka)
-    ("#gozdovi", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
+    ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
      "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
     ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
      "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
@@ -2086,8 +2071,14 @@ GOBE_FEATURES = [
      "Katere užitne vrste so v sezoni, mesec za mesecem.", None),
     ("/gobarska-napoved/trend/", _FI_TREND, "#f472b6", "Sezonski trend",
      "Letos proti petim preteklim sezonam, dan za dnem.", None),
-    ("#dnevnik", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
+    ("/gobarska-napoved/tereni/", _FI_TERENI, "#c1874e", "Geološki tereni",
+     "Zakaj ista vrsta ni enako verjetna v vsakem gozdu.", None),
+    ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
      "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
+    ("/gobarska-napoved/nasveti/", _FI_NASVETI, "#c084fc", "Nasveti in pravila",
+     "Koliko smeš nabrati, kje je prepovedano, kako nositi gobe.", None),
+    ("#faq", _FI_FAQ, "#38bdf8", "Pogosta vprašanja",
+     "Kaj indeks pove in česa ne — spodaj na tej strani.", None),
 ]
 
 
@@ -2150,7 +2141,7 @@ _IC_DVOJNICE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2
 
 # App-style bottom nav (mobile only, see .gp-bottomnav) — 4 destinations max,
 # thumb-reachable, mirroring what the eventual Android app's bottom bar will
-# show. Kept separate from the top gp-quicknav (in-page section jumps).
+# show. Sorodna, a ločena od mreže .gp-feat na glavni strani.
 BOTTOM_NAV = [
     ("",           _IC_NAPOVED,    "Napoved",   None),
     ("zemljevid",  _IC_ZEMLJEVID,  "Zemljevid", None),
@@ -2339,6 +2330,86 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
         f"{vs_count} primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno "
         "ločevanje.",
         "Nevarne dvojnice", body)
+
+
+# ── Razdelki, ki so prej stali na glavni strani ─────────────────────────────
+# Glavna stran je pristajalna: junaška kartica z indeksom, mreža zmožnosti,
+# premium in cenik ter pogosta vprašanja. Vse ostalo ima svojo stran in se do
+# nje pride prek kartice — prej je bilo vse na kupu, tudi za obiskovalca, ki
+# je prišel samo pogledat, ali se danes splača v gozd.
+
+
+def build_danes_page(forests_html, free):
+    """Dnevni indeks po nabiralnih območjih — brezplačno jedro napovedi.
+    Ker ta stran nosi vsakodnevno sveže število, je v sitemapu daily."""
+    body = ('  <p class="post-meta">Gobarski indeks za nabiralna območja Zgornje Savinjske doline za '
+            f'{TODAY.isoformat()}. Izračunan je iz vlage in temperature tal, kumulativnih padavin '
+            '(lokalno iz postaje IREICA1), zračne vlage in nočne ohladitve — po vrstah in po geologiji '
+            'terena.</p>\n'
+            f'  <p class="archive-intro">Danes v Rečici ob Savinji: <strong>{free["index"]} % · '
+            f'{_esc(free["level"])}</strong>. Indeks je ocena ugodnosti pogojev za rast, ne obljuba '
+            'najdbe — gozd ima vedno zadnjo besedo.</p>\n'
+            + forests_html)
+    return subpage_shell(
+        "danes", "Danes po gozdovih — gobarski indeks po območjih",
+        "Gobarski indeks po nabiralnih območjih Zgornje Savinjske doline za današnji dan — Golte, Menina, "
+        "Smrekovec, Dleskovška planota in okolica.",
+        "Danes po gozdovih", body)
+
+
+def build_tereni_page(terrain_html):
+    body = ('  <p class="post-meta">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do '
+            'terena, zato ista vrsta isti dan ni enako verjetna povsod po dolini.</p>\n'
+            + terrain_html + '\n'
+            '  <p class="archive-intro">Izjema so lesne vrste (ostrigar, panjevka, uhljevka): rastejo na lesu '
+            'nad tlemi, zato zanje geologija podlage ne odloča.</p>')
+    return subpage_shell(
+        "tereni", "Geološki tereni Zgornje Savinjske doline",
+        "Kislo vulkansko pogorje, karbonatni masivi in rečni logi — katera podlaga katerim gobam ustreza in "
+        "zakaj se indeks med gozdovi razlikuje.",
+        "Geološki tereni", body)
+
+
+NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in navad, ki jih velja poznati, preden greš
+  po gobe v Zgornji Savinjski dolini.</p>
+  <div class="card" style="margin:1rem 0">
+    <div style="font-size:.9rem;color:var(--muted);line-height:1.9">
+      ⚖️ Do <b>2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
+      🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
+      🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
+      ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu vprašaj gobarsko društvo ali mikologa.<br>
+      🚫 Logarska dolina, Robanov in Matkov kot: <b>zaščiteno — nabiranje prepovedano.</b>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem">
+      <a href="https://www.gobe.si/" target="_blank" rel="noopener" class="mtn-avk-link">🍄 Gobe.si</a>
+      <a href="https://www.gobarskazveza.si/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 Gobarska zveza Slovenije</a>
+      <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
+    </div>
+  </div>
+  <p class="archive-intro">Ob sumu zastrupitve pokliči <b>112</b>, za posvet o zaužiti gobi pa Center za
+  zastrupitve UKC Ljubljana, <a href="tel:+38615225283">(01) 522 52 83</a> (24 ur). Vzemi s seboj vzorec
+  gobe — pomaga pri določitvi vrste.</p>
+  <p class="archive-intro">Preden gobo daš v košaro, preveri še <a href="/gobarska-napoved/dvojnice/">nevarne
+  dvojnice</a> in njen zapis v <a href="/gobarska-napoved/baza-vrst/">bazi vrst</a>.</p>'''
+
+
+def build_nasveti_page():
+    return subpage_shell(
+        "nasveti", "Nabiranje gob — nasveti in pravila",
+        "Koliko gob smeš nabrati na dan, kje je nabiranje prepovedano, kako gobe nositi in kam po pomoč ob "
+        "sumu zastrupitve.",
+        "Nasveti in pravila", NASVETI_HTML)
+
+
+def build_dnevnik_page(diary_html):
+    body = ('  <p class="post-meta">Zabeleži najdbo z datumom, vrsto, lokacijo in fotografijo. Vse ostane v '
+            'tvojem brskalniku; naročniki lahko dnevnik sinhronizirajo med napravami.</p>\n'
+            + diary_html)
+    return subpage_shell(
+        "dnevnik", "Gobarjev dnevnik",
+        "Zasebni dnevnik gobarskih najdb — datum, vrsta, lokacija in fotografija, shranjeni v tvojem "
+        "brskalniku.",
+        "Gobarjev dnevnik", body, extra_js=DIARY_JS)
 
 
 # ZGS (Zavod za gozdove Slovenije) javna WFS storitev — sloj "sestoji" (gozdni
@@ -2965,57 +3036,9 @@ def build_body(rules, premium, free):
   <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
 {features_html}
-  <div class="gp-quicknav-wrap">
-  <nav class="gp-quicknav" aria-label="Hitri meni">
-    <a href="#zmoznosti">🧭 Pregled</a>
-    <a href="#gozdovi">🌲 Gozdovi</a>
-    <a href="#premium">🔓 Premium</a>
-    <a href="#pricing" id="gp-nav-pricing">🎟️ Cenik</a>
-    <a href="#tereni">🗺️ Tereni</a>
-    <a href="#nasveti">📋 Nasveti</a>
-    <a href="#dnevnik">📔 Dnevnik</a>
-    <a href="#faq">❓ FAQ</a>
-  </nav>
-  </div>
-  <h2 class="gp-h2" id="gozdovi">🌲 Danes po gozdovih</h2>
-  <p class="archive-intro">Gobarski indeks za nabiralna območja Zgornje Savinjske doline, izračunan iz istih vhodnih
-  podatkov (vlaga in temperatura tal, padavine, zračna vlaga) ter geologije terena.</p>
-{forests_html}
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
 {pricing}
-  <details class="gp-collapse gp-collapse-section" id="tereni">
-  <summary>🗺️ Geološki tereni doline</summary>
-  <div class="gp-collapse-body">
-  <p class="archive-intro">Podlaga odloča, kaj raste: model za vsako vrsto upošteva afiniteto do terena.</p>
-{terrain_html}
-  </div>
-  </details>
-  <details class="gp-collapse gp-collapse-section" id="nasveti">
-  <summary>📋 Nasveti in pravila</summary>
-  <div class="gp-collapse-body">
-  <div class="card" style="margin:1rem 0">
-    <div style="font-size:.85rem;color:var(--muted);line-height:1.7">
-      ⚖️ Do <b>2 kg gob na osebo na dan</b> (Uredba o varstvu samoniklih gliv).<br>
-      🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
-      🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
-      ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu vprašaj gobarsko društvo ali mikologa.<br>
-      🚫 Logarska dolina, Robanov in Matkov kot: <b>zaščiteno — nabiranje prepovedano.</b>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
-      <a href="https://www.gobe.si/" target="_blank" rel="noopener" class="mtn-avk-link">🍄 Gobe.si</a>
-      <a href="https://www.gobarskazveza.si/" target="_blank" rel="noopener" class="mtn-avk-link">🇸🇮 Gobarska zveza Slovenije</a>
-      <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener" class="mtn-avk-link">🌱 ARSO — agrometeorologija</a>
-    </div>
-  </div>
-  </div>
-  </details>
-  <details class="gp-collapse gp-collapse-section" id="dnevnik">
-  <summary>📔 Gobarjev dnevnik</summary>
-  <div class="gp-collapse-body">
-{diary_html}
-  </div>
-  </details>
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
@@ -3031,13 +3054,14 @@ def build_body(rules, premium, free):
     <a class="gp-sos-call alt" href="tel:+38615225283">☎️ (01) 522 52 83 <small>Center za zastrupitve UKC Ljubljana · 24 ur</small></a>
     <p style="margin-bottom:0">Vzemi s seboj vzorec gobe (cela, s trosovnico) — pomaga pri določitvi vrste.</p>
   </div>
-{PAGE_JS}
-{DIARY_JS}'''
+{PAGE_JS}'''
     subpages = {
         "cal_data": cal_data, "month": month,
         "species": species,
         "vs_html": vs_html, "vs_count": len(vs_cards),
         "credits_html": credits_html, "vrste_credits_html": vrste_credits_html,
+        # Razdelki, ki so se z glavne strani preselili na svoje podstrani.
+        "forests_html": forests_html, "terrain_html": terrain_html, "diary_html": diary_html,
     }
     return body, subpages
 
@@ -3066,8 +3090,12 @@ def main():
     build_trend_page()
     n_baza = build_baza_vrst_pages(sub["species"], sub["vrste_credits_html"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
-    print(f"  → {3 + n_baza + 1} podstrani (zemljevid, koledar, trend, "
-          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice)")
+    build_danes_page(sub["forests_html"], free)
+    build_tereni_page(sub["terrain_html"])
+    build_nasveti_page()
+    build_dnevnik_page(sub["diary_html"])
+    print(f"  → {3 + n_baza + 5} podstrani (zemljevid, koledar, trend, "
+          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice, danes, tereni, nasveti, dnevnik)")
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"

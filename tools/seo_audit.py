@@ -44,6 +44,13 @@ CORE = {
     "gobarska-napoved/koledar/":    ("monthly", "0.6"),
     "gobarska-napoved/trend/":      ("weekly",  "0.5"),
     "gobarska-napoved/zemljevid/":  ("daily",   "0.6"),
+    # Razdelki, ki so se z glavne strani preselili na svoje strani — glavna je
+    # od zdaj pristajalna (indeks, mreža zmožnosti, premium, cenik, FAQ).
+    # "danes" nosi dnevno sveže indekse po območjih, zato daily.
+    "gobarska-napoved/danes/":      ("daily",   "0.7"),
+    "gobarska-napoved/tereni/":     ("monthly", "0.5"),
+    "gobarska-napoved/nasveti/":    ("monthly", "0.5"),
+    "gobarska-napoved/dnevnik/":    ("monthly", "0.4"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
     "agrometeo/":                ("daily",   "0.7"),

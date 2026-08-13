@@ -324,7 +324,7 @@ body{
 
 /* Sub-headings in the JS-rendered premium block (#gp-content) are bare <h3>
    with no built-in spacing, so they sit flush against whatever scrolled
-   above them — most visibly right under the sticky quicknav. Force room. */
+   above them. Force room. */
 #gp-content h3{margin:1.7rem 0 .6rem;font-size:1.05rem}
 #gp-content h3:first-child{margin-top:.4rem}
 .gp-explain-h{margin-top:1.6rem}
@@ -534,28 +534,7 @@ body{
 .gp-trend-best{font-size:.85rem;color:var(--muted);margin-top:.7rem;border-top:1px solid var(--border);padding-top:.6rem}
 .gp-trend-best b{color:var(--text)}
 
-/* ── Hitri meni (sticky) + zložljive (details) sekcije ── */
-/* Wrapper omogoča fade namig na desni, da je jasno, da se meni scrolla vodoravno. */
-.gp-quicknav-wrap{position:sticky;top:0;z-index:20;background:var(--bg);
-  border-bottom:1px solid var(--border);margin:.2rem 0 1.4rem}
-.gp-quicknav-wrap::after{content:"";position:absolute;top:0;right:0;bottom:1px;width:2.4rem;
-  pointer-events:none;background:linear-gradient(90deg,transparent,var(--bg))}
-/* flex-wrap intentionally omitted (default nowrap) so the row never breaks
-   onto a second line; overflow-x:auto turns the overflow into a touch/scroll
-   swipe instead. Scrollbar hidden per-engine (Firefox/WebKit/legacy Edge)
-   since the horizontal swipe is already obvious from the chip row itself. */
-/* Samo skoki po strani. Povezave na podstrani (koledar, trend, baza vrst,
-   dvojnice) so od mreže .gp-feat naprej tam — v obeh hkrati so pomenile dve
-   navigaciji eno pod drugo. */
-.gp-quicknav{display:flex;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding:.65rem 0;
-  scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
-.gp-quicknav::-webkit-scrollbar{display:none}
-.gp-quicknav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:2.75rem;
-  background:var(--badge-bg);border:1px solid var(--card-border);
-  color:var(--text);text-decoration:none;font-size:.82rem;padding:.4rem .8rem;border-radius:20px;
-  white-space:nowrap;transition:border-color .15s ease,color .15s ease}
-.gp-quicknav a:last-child{margin-right:2.4rem}
-.gp-quicknav a:hover{border-color:var(--blue);color:var(--blue)}
+/* ── Zložljive (details) sekcije ── */
 .gp-collapse{border:1px solid var(--card-border);border-radius:14px;margin:.6rem 0 1rem;overflow:hidden}
 .gp-collapse summary{cursor:pointer;list-style:none;padding:.8rem 1rem;font-weight:700;
   display:flex;align-items:center;justify-content:space-between;background:var(--card-bg)}
@@ -565,16 +544,6 @@ body{
 .gp-collapse summary small{font-weight:500;color:var(--muted);margin-left:.5rem}
 .gp-collapse > :not(summary){padding:0 1rem 1rem}
 .gp-collapse[open] > :not(summary){padding-top:.3rem}
-/* ── Section-level accordions (Geološki tereni / Nasveti / Dnevnik) — same
-   collapse mechanics as .gp-collapse, but the summary reads like a .gp-h2
-   heading rather than a small card toggle, so a closed section still looks
-   like a normal page section, just one the user has to tap to open. Default
-   closed (no `open` attribute) keeps the "active" data above the fold. ── */
-.gp-collapse-section{border:none;border-radius:0;margin:2.6rem 0 1rem;overflow:visible;scroll-margin-top:4rem}
-.gp-collapse-section summary{padding:0 0 .4rem;min-height:2.75rem;border-bottom:1px solid var(--border);
-  background:transparent;font-size:1.35rem;font-weight:700}
-.gp-collapse-section summary::after{font-size:1rem}
-.gp-collapse-section > .gp-collapse-body{padding:.9rem 0 0}
 /* FAQ <details> otherwise rely on bare UA defaults — too short a tap target
    on mobile. Padding (not margin) grows the hit area without widening the
    row's footprint or spacing against its neighbours. */
@@ -631,13 +600,13 @@ body{
    which media query is narrower. */
 body .wrap{padding-bottom:5.5rem}
 
-/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the top
-   quicknav/hub cards already cover cross-page navigation ── */
+/* ── Bottom nav (mobile, app-style) — hidden on desktop, where the
+   mreža .gp-feat already covers cross-page navigation ── */
 .gp-bottomnav{display:none}
 /* ── Top App Bar (mobile, Material 3 "small top app bar") — a NEW element
    scoped to this page only, not a rework of the shared .site-head used by
-   every other generated page. It sits above the sticky quicknav so a user
-   mid-scroll always knows which of the 6 gobarska-napoved/ pages they're on
+   every other generated page. It tells a user mid-scroll which of the
+   gobarska-napoved/ pages they're on
    and has a 1-tap way back, without us touching the site-wide header. ── */
 .gp-topbar{display:none}
 @media (max-width:760px){
@@ -659,7 +628,6 @@ body .wrap{padding-bottom:5.5rem}
   .gp-topbar-title{flex:1;font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gp-topbar-action{flex:0 0 auto;width:2.2rem;height:2.2rem;display:flex;align-items:center;
     justify-content:center;font-size:1.1rem;text-decoration:none;border-radius:50%;background:var(--badge-bg)}
-  .gp-quicknav-wrap{top:3rem}
   /* z-index:70 — the highest layer on the page (topbar 55, SOS FAB/panel 60)
      so the bottom nav always stays on top of everything else, never gets
      covered by other fixed/sticky elements. */
