@@ -290,6 +290,28 @@ skupina je svoj iskalni cilj (»užitne gobe«, »strupene gobe«).
 - Nova skupina gre v `BAZA_CATS` in v `CORE` v `tools/seo_audit.py`, sicer je
   v nobenem sitemapu ni.
 
+### Glavna stran gobarja je pristajalna, ne zbirna
+
+`/gobarska-napoved/` nosi samo junaško kartico z dnevnim indeksom, **mrežo
+zmožnosti** (`GOBE_FEATURES` → `.gp-feat`), premium s cenikom in pogosta
+vprašanja. Vse ostalo ima svojo stran: `danes` (indeks po območjih), `tereni`,
+`nasveti`, `dnevnik`, poleg že prej ločenih `zemljevid`, `koledar`, `trend`,
+`baza-vrst`, `dvojnice`.
+
+- **Nova zmožnost ni nov razdelek na glavni strani** — dobi svojo podstran
+  (`subpage_shell()`) in svojo kartico v `GOBE_FEATURES`. Brez kartice je
+  nedosegljiva, ker drugih menijev na strani ni (hitri meni je odstranjen,
+  spodnja navigacija je omejena na pet ciljev).
+- Vsaka kartica ima **risano ikono** (`_FI_*`, 24×24, obris `currentColor` +
+  ploskve istega currentColor z nizko prekrivnostjo) in svoj poudarek `--fa`.
+  **Ne uporabljaj emoji** — med platformami se razlikujejo in se ne dajo
+  prebarvati. Preveri, da je ikona berljiva pri ~20 px; drobni detajli
+  (goba v lupi, klicaj v trikotniku) se pri tej velikosti zlijejo.
+- Nova podstran gre tudi v `CORE` v `tools/seo_audit.py` (`--fix` jo doda v
+  sitemap) — sicer je ni v nobenem sitemapu.
+- FAQ ostane na glavni strani, ker nosi `FAQPage` strukturirane podatke za
+  glavni URL.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
