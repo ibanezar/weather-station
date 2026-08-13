@@ -544,6 +544,9 @@ body{
    onto a second line; overflow-x:auto turns the overflow into a touch/scroll
    swipe instead. Scrollbar hidden per-engine (Firefox/WebKit/legacy Edge)
    since the horizontal swipe is already obvious from the chip row itself. */
+/* Samo skoki po strani. Povezave na podstrani (koledar, trend, baza vrst,
+   dvojnice) so od mreže .gp-feat naprej tam — v obeh hkrati so pomenile dve
+   navigaciji eno pod drugo. */
 .gp-quicknav{display:flex;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding:.65rem 0;
   scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
 .gp-quicknav::-webkit-scrollbar{display:none}
@@ -581,20 +584,42 @@ body{
   padding:.7rem .2rem;font-weight:600}
 .faq p{margin:0 .2rem .8rem;color:var(--muted);font-size:.9rem;line-height:1.6}
 
-/* ── Navigacijski hub (kartice na podstrani) ── */
-.gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
-  border:1px solid var(--card-border);border-radius:14px;
-  text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
+/* ── Pregled zmožnosti — kartice takoj pod junaško kartico ──
+   Stran ima veliko: gozdove, premium napoved, AI prepoznavo, zemljevid, bazo
+   vrst, dvojnice, koledar, trend, dnevnik. Kdor pride prvič, tega ne vidi —
+   razdelki so razmetani čez vso dolžino, deloma za drsnimi vrsticami in
+   zloženimi <details>. Ta mreža jih pokaže naenkrat, brez drsenja.
+
+   Vsaka kartica ima svojo ikono (dvobarvni SVG, glej _FI_*) in svoj poudarek
+   (--fa), da se mreža bere kot devet različnih stvari in ne kot devet enakih
+   pravokotnikov. Ikone so risane, ne emoji: ti se med platformami razlikujejo
+   in se ne dajo prebarvati (isti razlog kot pri spodnji navigaciji).
+
+   Mreža je nadomestila prejšnji hub s fotografijami, ki je stal pod cenikom —
+   isti cilji, le da so zdaj na vrhu in jih je devet namesto petih. */
+.gp-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
+  padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
+  background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
+  text-decoration:none;color:var(--text);
   transition:border-color .15s ease,transform .15s ease}
-.gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-photo{height:84px}
-.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
-.gp-hub-ic{font-size:1.3rem}
-.gp-hub-title{font-weight:700;font-size:1.02rem}
-.gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
-.gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
+.gp-feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.gp-feat-card::after{content:"";position:absolute;top:-45%;right:-30%;width:70%;height:130%;
+  border-radius:50%;background:var(--fa);opacity:0;filter:blur(30px);
+  transition:opacity .2s ease;pointer-events:none}
+.gp-feat-card:hover{border-color:var(--fa);transform:translateY(-2px)}
+.gp-feat-card:hover::after{opacity:.18}
+.gp-feat-card:focus-visible{outline:2px solid var(--fa);outline-offset:2px}
+.gp-feat-ic{display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;
+  flex:0 0 auto;border-radius:12px;background:var(--fa-soft);color:var(--fa)}
+.gp-feat-ic svg{width:1.55rem;height:1.55rem;display:block}
+.gp-feat-title{font-weight:700;font-size:1rem;line-height:1.3}
+.gp-feat-sub{font-size:.8rem;color:var(--muted);line-height:1.45}
+/* Oznaka za plačljivi del — ista beseda kot na ceniku, da je razlika med
+   brezplačnim in premium delom vidna že tu, ne šele ob kliku. */
+.gp-feat-badge{position:absolute;top:.7rem;right:.75rem;font-size:.6rem;font-weight:700;
+  letter-spacing:.06em;padding:.16rem .45rem;border-radius:999px;
+  background:var(--fa-soft);color:var(--fa)}
 
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno).
    body .wrap (not .wrap) so this reliably beats blog.css's own unconditional
@@ -723,7 +748,16 @@ body .wrap{padding-bottom:5.5rem}
   .gp-gauge-num .num{font-size:2.1rem}
   .gp-hero-lvl{font-size:1.55rem}
   /* Kartice v enem stolpcu z malenkost večjim razmikom, da "dihajo". */
-  .gp-forests,.gp-hub,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
+  .gp-forests,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
+  /* Pregled zmožnosti ostane v dveh stolpcih — devet kartic v enem stolpcu bi
+     bilo prav tisto drsenje, ki ga mreža odpravlja. Kartice se zato stisnejo. */
+  .gp-feat{grid-template-columns:repeat(2,1fr);gap:.55rem}
+  .gp-feat-card{padding:.8rem .8rem .9rem;gap:.35rem}
+  .gp-feat-ic{width:2.2rem;height:2.2rem;border-radius:10px}
+  .gp-feat-ic svg{width:1.4rem;height:1.4rem}
+  .gp-feat-title{font-size:.88rem}
+  .gp-feat-sub{font-size:.74rem}
+  .gp-feat-badge{top:.55rem;right:.55rem;font-size:.55rem}
   .gp-hero-note{font-size:.82rem}
   .gp-pricing{grid-template-columns:1fr}
   /* CTA gumbi naj bodo polne širine za lažji dotik. */
