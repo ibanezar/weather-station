@@ -6,6 +6,11 @@ Computes a 0-100 "gobarski indeks" (favourability-of-conditions index, NOT a
 promise of finds) per species, per day (today + 6), per location, driven
 entirely by species_rules.yaml — no thresholds live in this file.
 
+Which thermometer drives a species depends on where it fruits: soil
+temperature for mycorrhizal species and litter saprotrophs, air temperature for
+wood decayers, which sit on a branch above ground and never feel the soil. For
+the same reason the geological terrain multiplier does not apply to them.
+
 Rain is read through the species' own fruiting lag (`fruiting_lag_days`,
 derived per ecological group in species_rules.yaml): the trigger window ends
 lag_min days back, not today. Litter saprotrophs answer a shower within days,
@@ -48,7 +53,7 @@ RULES_PATH = os.path.join(ROOT, "species_rules.yaml")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 FREE_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "index.json")
 
-MODEL_VERSION = "1.2"
+MODEL_VERSION = "1.3"
 FORECAST_DAYS = 7
 
 # Padavinski okni se pri vsaki vrsti zamakneta za njen rastni zamik
@@ -284,23 +289,34 @@ def eval_species(sp, series, i, date, spot, rules):
     parts = []       # explanation fragments, most important first
     components = {}
 
-    # Soil temperature — trapezoid over the species' optimal window
-    stc = sp["soil_temp"]
-    st = series["soil_temp"][i]
-    f_st = trapezoid(st, stc["min"], stc["opt_low"], stc["opt_high"], stc["max"])
-    components["soil_temp"] = f_st
-    if st is None:
-        parts.append("talna temp. ni na voljo")
+    # Temperature — trapezoid over the species' optimal window. Which
+    # thermometer counts depends on where the fungus actually fruits: a wood
+    # decayer sits on a branch above ground, so soil temperature at 6-18 cm
+    # says nothing about it — for those the air temperature decides.
+    if sp.get("ecology") == "lesna":
+        shoulder = float(scoring["temperature"]["air_shoulder_c"])
+        at = sp["air_temp"]
+        lo, hi = float(at["min"]), float(at["max"])
+        curve = (lo - shoulder, lo, hi, hi + shoulder)
+        temp, temp_label = series["tair"][i], "zračna temp."
     else:
-        if f_st >= 1.0:
+        stc = sp["soil_temp"]
+        curve = (stc["min"], stc["opt_low"], stc["opt_high"], stc["max"])
+        temp, temp_label = series["soil_temp"][i], "talna temp."
+    f_t = trapezoid(temp, *curve)
+    components["temperature"] = f_t
+    if temp is None:
+        parts.append(f"{temp_label} ni na voljo")
+    else:
+        if f_t >= 1.0:
             state = "optimalna"
-        elif f_st <= 0.0:
+        elif f_t <= 0.0:
             state = "izven razpona vrste"
-        elif st < stc["opt_low"]:
+        elif temp < curve[1]:
             state = "pod optimalnim oknom"
         else:
             state = "nad optimalnim oknom"
-        parts.append(f"talna temp. {st:.1f} °C {state}")
+        parts.append(f"{temp_label} {temp:.1f} °C {state}")
 
     # Rain — both windows are shifted back by the species' fruiting lag, so what
     # counts is the rain that could have started the fruit body visible today,
@@ -383,11 +399,15 @@ def eval_species(sp, series, i, date, spot, rules):
         if ff <= 0.4:
             parts.append("lokalno redka/odsotna vrsta")
 
-    # Geological terrain affinity — match/mismatch multiplier
+    # Geological terrain affinity — match/mismatch multiplier. Ne velja za
+    # lesne vrste: te rastejo na lesu, ne v tleh, zato jim podlaga gozda ne
+    # more dvigniti ali znižati možnosti (bezgovi uhljevki je prej dvigovala).
     gcfg = scoring.get("geology") or {}
     affinity = sp.get("geology_affinity", "nevtralna")
     terrain = spot.get("terrain")
-    if affinity == "nevtralna" or not terrain:
+    if sp.get("ecology") == "lesna":
+        pass
+    elif affinity == "nevtralna" or not terrain:
         pass
     elif affinity == terrain:
         score *= float(gcfg.get("match_factor", 1.0))

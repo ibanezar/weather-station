@@ -1040,9 +1040,12 @@ PAGE_JS = """<script>
   // The blended index is 6 independently-scored 0-100 signals; this renders
   // those actual bars instead of just the prose summary, inside the same
   // "Zakaj?" disclosure — the model was already computing all of this.
-  var FACTOR_LABELS={soil_temp:"Talna temp.",rain_trigger:"Sprožilni dež",rain_base:"Zaloga vode",
+  // "Temperatura" brez pridevnika: pri mikoriznih vrstah in razkrojevalkah je
+  // to talna, pri lesnih zračna (rastejo na lesu nad tlemi) — katera, pove
+  // razlaga nad stolpci.
+  var FACTOR_LABELS={temperature:"Temperatura",rain_trigger:"Sprožilni dež",rain_base:"Zaloga vode",
     soil_moisture:"Vlaga tal",humidity:"Zračna vlaga",temp_drop:"Nočna ohladitev"};
-  var FACTOR_ORDER=["soil_temp","rain_trigger","rain_base","soil_moisture","humidity","temp_drop"];
+  var FACTOR_ORDER=["temperature","rain_trigger","rain_base","soil_moisture","humidity","temp_drop"];
   // Skupina in zamik povesta, KATERI dež je vrsto sploh lahko sprožil — brez
   // tega je "sprožilni dež" pri kukmaku in pri jurčku videti kot ista številka.
   var ECO_LABELS={mikorizna:"mikorizna",razkrojevalka:"razkrojevalka stelje",lesna:"lesna razkrojevalka"};

@@ -8,11 +8,12 @@
 # afiniteta, nočna ohladitev, ekološka skupina in rastni zamik) so označene
 # '# TODO: kalibriraj'. Neposredno iz baze (sezona, zračni prag, mikoriza,
 # dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-08-12 · 300 vrst.
+# Zadnja regeneracija: 2026-08-13 · 300 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
-  soil_temp: 0.35        # ujemanje talne temp. z optimalnim oknom vrste
+  temperature: 0.35      # ujemanje temperature z optimalnim oknom vrste
+                         # (talna pri mikoriznih in razkrojevalkah, zračna pri lesnih)
   rain_trigger: 0.25     # sprožilni dež v zamiku vrste (fruiting_lag_days)
   rain_base: 0.15        # zaloga vode v tleh 14 dni pred zamikom
   soil_moisture: 0.10
@@ -36,6 +37,10 @@ scoring:
     window_days: 5           # TODO: kalibriraj
     min_drop_c: 3.0          # TODO: kalibriraj
     persist_days: 4          # TODO: kalibriraj
+  # Pri lesnih vrstah odloča zračna temperatura (rastejo na lesu nad tlemi),
+  # zato njihov trapez nastane iz air_temp s temi rameni.
+  temperature:
+    air_shoulder_c: 3.0      # TODO: kalibriraj — širina ramen pri zračni temp.
   elevation:
     out_of_range_factor: 0.7  # TODO: kalibriraj
   # Izpeljava talno-temp. okna iz zračnega praga (soil hladnejši/dušen od zraka).
@@ -1171,8 +1176,8 @@ species:
     season: { start: "01.01", end: "12.31" }
     air_temp: { min: 5, max: 15 }  # zračni prag iz baze
     soil_temp: { min: 0.5, opt_low: 3.5, opt_high: 13.5, max: 16.5 }  # TODO: kalibriraj (izpeljano iz air_temp)
-    rain_7d_min: 20        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
-    rain_14d_min: 40       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
+    rain_7d_min: 35        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)  # ROČNO UMERJENO: celoletna vrsta z najnižjimi pragovi je monopolizirala vrh
+    rain_14d_min: 70       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
     ecology: lesna   # TODO: kalibriraj (izpeljano iz substrata)
     fruiting_lag_days: { min: 3, max: 10 }  # TODO: kalibriraj (iz skupine lesna)
     mycorrhiza: ["črni bezeg (sambucus nigra) (saprofit)"]
