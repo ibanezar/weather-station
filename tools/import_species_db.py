@@ -104,6 +104,23 @@ ECOLOGY_LITTER_HEAD_KEYS = ("organsk", "stelj", "humus", "travnik", "pašnik", "
 ECOLOGY_WOOD_KEYS = ("les", "debl", "štor", "panj", "lubj", "veje", "korenin")
 ECOLOGY_DECAY_KEYS = ("razkraj", "saprofit", "saprob")
 
+# Ročne kalibracije posameznih vrst. Baza pove, kaj vrsta potrebuje, ne pa,
+# kako se njene zahteve primerjajo z drugimi — indeks je delež izpolnjenih
+# zahtev vrste, zato vrsta z ohlapnimi pragovi zasede vrh, še preden je v
+# gozdu karkoli za nabrat. Vsak vnos tu potrebuje razlog; ne dodajaj jih, da bi
+# popravil vtis, ampak kadar je primerjava med vrstami dokazljivo popačena.
+CALIBRATION = {
+    "auricularia_auricula_judae": {
+        "rain_7d_min": 35, "rain_14d_min": 70,
+        # Edina vrsta v bazi s celoletno sezono, hkrati pa z najnižjimi
+        # padavinskimi pragovi in 10 °C širokim temperaturnim oknom. V
+        # petletnem backtestu je bila zato najboljši dan vsakega leta prav ona,
+        # s 100 %. Želatinast trosnjak na veji potrebuje res premočen les, ne
+        # 20 mm v tednu — višja pragova jo vrneta med druge vrste.
+        "razlog": "celoletna vrsta z najnižjimi pragovi je monopolizirala vrh",
+    },
+}
+
 # Terrain definitions — three productive geological terrains of the valley,
 # plus the strictly-protected zones (no foraging).
 TERRAINS = [
@@ -308,7 +325,8 @@ def build_yaml(species):
     # Global weights
     L.append("# Globalne uteži za izračun indeksa (0–100)")
     L.append("weights:")
-    L.append("  soil_temp: 0.35        # ujemanje talne temp. z optimalnim oknom vrste")
+    L.append("  temperature: 0.35      # ujemanje temperature z optimalnim oknom vrste")
+    L.append("                         # (talna pri mikoriznih in razkrojevalkah, zračna pri lesnih)")
     L.append("  rain_trigger: 0.25     # sprožilni dež v zamiku vrste (fruiting_lag_days)")
     L.append("  rain_base: 0.15        # zaloga vode v tleh 14 dni pred zamikom")
     L.append("  soil_moisture: 0.10")
@@ -334,6 +352,10 @@ def build_yaml(species):
     L.append("    window_days: 5           # TODO: kalibriraj")
     L.append("    min_drop_c: 3.0          # TODO: kalibriraj")
     L.append("    persist_days: 4          # TODO: kalibriraj")
+    L.append("  # Pri lesnih vrstah odloča zračna temperatura (rastejo na lesu nad tlemi),")
+    L.append("  # zato njihov trapez nastane iz air_temp s temi rameni.")
+    L.append("  temperature:")
+    L.append("    air_shoulder_c: 3.0      # TODO: kalibriraj — širina ramen pri zračni temp.")
     L.append("  elevation:")
     L.append("    out_of_range_factor: 0.7  # TODO: kalibriraj")
     L.append("  # Izpeljava talno-temp. okna iz zračnega praga (soil hladnejši/dušen od zraka).")
@@ -403,7 +425,8 @@ def build_yaml(species):
         L.append(f"    air_temp: {{ min: {at[0]}, max: {at[1]} }}  # zračni prag iz baze")
         so = s["soil_temp"]
         L.append(f"    soil_temp: {{ min: {so[0]}, opt_low: {so[1]}, opt_high: {so[2]}, max: {so[3]} }}  # TODO: kalibriraj (izpeljano iz air_temp)")
-        L.append(f"    rain_7d_min: {s['rain_7d_min']}        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)")
+        cal_note = f"  # ROČNO UMERJENO: {s['calibrated']}" if s.get("calibrated") else ""
+        L.append(f"    rain_7d_min: {s['rain_7d_min']}        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa){cal_note}")
         L.append(f"    rain_14d_min: {s['rain_14d_min']}       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)")
         L.append(f"    ecology: {s['ecology']}   # TODO: kalibriraj (izpeljano iz substrata)")
         fl = s["fruiting_lag_days"]
@@ -437,8 +460,10 @@ def build_record(r, verified, index_flag=None):
     elev_min, elev_max = derive_elevation(r[C_ELEV])
     ecology = derive_ecology(r[C_SUBSTRATE], r[C_MYCO])
     gets_index = (edib.lower() in INDEXED_EDIBILITY) if index_flag is None else bool(index_flag)
-    return {
-        "id": slugify(r[C_NAME_LAT]),
+    sid = slugify(r[C_NAME_LAT])
+    cal = CALIBRATION.get(sid, {})
+    rec = {
+        "id": sid,
         "name_sl": r[C_NAME_SL],
         "name_lat": r[C_NAME_LAT],
         "edibility": edib,
@@ -462,6 +487,10 @@ def build_record(r, verified, index_flag=None):
         "requires_temp_drop": derive_requires_temp_drop(season[0]),
         "doubles": r[C_DOUBLES],
     }
+    rec.update({k: v for k, v in cal.items() if k != "razlog"})
+    if cal:
+        rec["calibrated"] = cal["razlog"]
+    return rec
 
 
 def read_workbook():

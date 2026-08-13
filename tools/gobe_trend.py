@@ -24,6 +24,7 @@ import datetime as dt
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -48,6 +49,7 @@ ARCHIVE_HOURLY = [
     "temperature_2m",
 ]
 ARCHIVE_DAILY = ["precipitation_sum", "temperature_2m_min"]
+ARCHIVE_TRIES = 4
 
 
 def fetch_archive_year(lat, lon, year, lead_in=0):
@@ -70,8 +72,17 @@ def fetch_archive_year(lat, lon, year, lead_in=0):
     })
     url = f"https://archive-api.open-meteo.com/v1/archive?{params}"
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.load(r)
+    # Arhivski klici občasno padejo na TLS; brez ponovnega poskusa skript leto
+    # tiho izpusti in trend.json ima manj let, kot jih obljublja stran.
+    for attempt in range(ARCHIVE_TRIES):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as e:
+            if attempt == ARCHIVE_TRIES - 1:
+                raise
+            print(f"  … {year}: {e}; poskus {attempt + 2}/{ARCHIVE_TRIES}", file=sys.stderr)
+            time.sleep(2 ** attempt * 3)
 
 
 def daily_mean(hourly, var, times):

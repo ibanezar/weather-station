@@ -216,6 +216,11 @@ zaloga vode pa 14 dni do začetka tega okna.
 - Vlaga tal in zračna vlaga **ostaneta na tekočem dnevu** — zamaknjeni okni
   povesta, ali je bil trosnjak sploh sprožen, ta dva pa, ali danes lahko
   nabrekne in se ne posuši.
+- **Lesne vrste tečejo po zračni, ne talni temperaturi** (v1.3): rastejo na
+  lesu nad tlemi in talne temperature na 6–18 cm ne čutijo. Iz istega razloga
+  zanje **ne velja geološki množitelj** — podlaga gozda ne odloča, kaj raste na
+  bezgovi veji. Trapez sestavi model iz `air_temp` in `scoring.temperature.
+  air_shoulder_c`. Komponenta se zato imenuje `temperature`, ne `soil_temp`.
 - Prag `rain_7d_min` je izražen kot 7-dnevna kumulativa in se preračuna na
   dolžino okna vrste, da skupine z daljšim oknom niso samodejno v prednosti.
 - Kdor spreminja zamike, mora poskrbeti tudi za dolžino zgodovine:
@@ -225,6 +230,19 @@ zaloga vode pa 14 dni do začetka tega okna.
 - `species_rules.yaml` nastane iz `data/baza_gob.xlsx` prek
   `tools/import_species_db.py`; skupino izpelje `derive_ecology()` iz stolpca
   substrat. Ročni popravek v YAML regeneracija povozi — popravi skript.
+
+### Ročno umerjanje posameznih vrst
+
+Indeks je **delež izpolnjenih zahtev vrste**, ne primerjava med vrstami. Vrsta z
+ohlapnimi pragovi zato zasede vrh, še preden je v gozdu kaj za nabrat — bezgova
+uhljevka je bila edina celoletna vrsta z najnižjimi pragovi in je bila v
+petletnem backtestu najboljši dan vsakega leta, vselej s 100 %.
+
+Take primere popravi tabela `CALIBRATION` v `tools/import_species_db.py`: ključ
+je slug vrste, vrednosti prepišejo polja iz baze, `razlog` pa se izpiše kot
+`# ROČNO UMERJENO: …` v YAML. **Vsak vnos potrebuje razlog** in gre vanjo šele,
+ko je primerjava med vrstami dokazljivo popačena — ne zato, da bi popravil vtis
+o posameznem dnevu.
 
 ## Baza vrst: preverjeno jedro in razširjeni seznam
 
