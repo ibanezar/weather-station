@@ -944,14 +944,16 @@ body .wrap{padding-bottom:5.5rem}
   .gp-hero-lvl{font-size:1.55rem}
   /* Kartice v enem stolpcu z malenkost večjim razmikom, da "dihajo". */
   .gp-forests,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
-  /* Pregled zmožnosti ostane v dveh stolpcih — devet kartic v enem stolpcu bi
-     bilo prav tisto drsenje, ki ga mreža odpravlja. Kartice se zato stisnejo. */
+  /* Pregled zmožnosti ostane v dveh stolpcih — dvanajst kartic v enem stolpcu
+     bi bilo prav tisto drsenje, ki ga mreža odpravlja. Napovedniki na telefonu
+     odpadejo (ostaneta ikona in naslov), ker so kartice s tem za polovico
+     nižje; besedilo ostane v HTML-ju, skrije ga samo CSS. */
   .gp-feat{grid-template-columns:repeat(2,1fr);gap:.55rem}
-  .gp-feat-card{padding:.8rem .8rem .9rem;gap:.35rem}
+  .gp-feat-card{padding:.75rem .8rem .85rem;gap:.45rem}
   .gp-feat-ic{width:2.2rem;height:2.2rem;border-radius:10px}
   .gp-feat-ic svg{width:1.4rem;height:1.4rem}
   .gp-feat-title{font-size:.88rem}
-  .gp-feat-sub{font-size:.74rem}
+  .gp-feat-sub{display:none}
   .gp-feat-badge{top:.55rem;right:.55rem;font-size:.55rem}
   .gp-hero-note{font-size:.82rem}
   .gp-pricing{grid-template-columns:1fr}
