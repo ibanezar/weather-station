@@ -771,6 +771,9 @@ body{
    onto a second line; overflow-x:auto turns the overflow into a touch/scroll
    swipe instead. Scrollbar hidden per-engine (Firefox/WebKit/legacy Edge)
    since the horizontal swipe is already obvious from the chip row itself. */
+/* Samo skoki po strani. Povezave na podstrani (koledar, trend, baza vrst,
+   dvojnice) so od mreže .gp-feat naprej tam — v obeh hkrati so pomenile dve
+   navigaciji eno pod drugo. */
 .gp-quicknav{display:flex;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding:.65rem 0;
   scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
 .gp-quicknav::-webkit-scrollbar{display:none}
@@ -808,20 +811,42 @@ body{
   padding:.7rem .2rem;font-weight:600}
 .faq p{margin:0 .2rem .8rem;color:var(--muted);font-size:.9rem;line-height:1.6}
 
-/* ── Navigacijski hub (kartice na podstrani) ── */
-.gp-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:.6rem 0 1.2rem}
-.gp-hub-card{display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden;
-  border:1px solid var(--card-border);border-radius:14px;
-  text-decoration:none;color:var(--text);box-shadow:var(--card-shadow);
+/* ── Pregled zmožnosti — kartice takoj pod junaško kartico ──
+   Stran ima veliko: gozdove, premium napoved, AI prepoznavo, zemljevid, bazo
+   vrst, dvojnice, koledar, trend, dnevnik. Kdor pride prvič, tega ne vidi —
+   razdelki so razmetani čez vso dolžino, deloma za drsnimi vrsticami in
+   zloženimi <details>. Ta mreža jih pokaže naenkrat, brez drsenja.
+
+   Vsaka kartica ima svojo ikono (dvobarvni SVG, glej _FI_*) in svoj poudarek
+   (--fa), da se mreža bere kot devet različnih stvari in ne kot devet enakih
+   pravokotnikov. Ikone so risane, ne emoji: ti se med platformami razlikujejo
+   in se ne dajo prebarvati (isti razlog kot pri spodnji navigaciji).
+
+   Mreža je nadomestila prejšnji hub s fotografijami, ki je stal pod cenikom —
+   isti cilji, le da so zdaj na vrhu in jih je devet namesto petih. */
+.gp-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
+  padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
+  background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
+  text-decoration:none;color:var(--text);
   transition:border-color .15s ease,transform .15s ease}
-.gp-hub-card:hover{border-color:var(--blue);transform:translateY(-2px)}
-.gp-hub-photo{height:84px}
-.gp-hub-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.gp-hub-body{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1.1rem 1.05rem}
-.gp-hub-ic{font-size:1.3rem}
-.gp-hub-title{font-weight:700;font-size:1.02rem}
-.gp-hub-sub{font-size:.82rem;color:var(--muted);line-height:1.4}
-.gp-hub-arrow{margin-top:.3rem;font-size:.8rem;color:var(--blue);font-weight:600}
+.gp-feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.gp-feat-card::after{content:"";position:absolute;top:-45%;right:-30%;width:70%;height:130%;
+  border-radius:50%;background:var(--fa);opacity:0;filter:blur(30px);
+  transition:opacity .2s ease;pointer-events:none}
+.gp-feat-card:hover{border-color:var(--fa);transform:translateY(-2px)}
+.gp-feat-card:hover::after{opacity:.18}
+.gp-feat-card:focus-visible{outline:2px solid var(--fa);outline-offset:2px}
+.gp-feat-ic{display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;
+  flex:0 0 auto;border-radius:12px;background:var(--fa-soft);color:var(--fa)}
+.gp-feat-ic svg{width:1.55rem;height:1.55rem;display:block}
+.gp-feat-title{font-weight:700;font-size:1rem;line-height:1.3}
+.gp-feat-sub{font-size:.8rem;color:var(--muted);line-height:1.45}
+/* Oznaka za plačljivi del — ista beseda kot na ceniku, da je razlika med
+   brezplačnim in premium delom vidna že tu, ne šele ob kliku. */
+.gp-feat-badge{position:absolute;top:.7rem;right:.75rem;font-size:.6rem;font-weight:700;
+  letter-spacing:.06em;padding:.16rem .45rem;border-radius:999px;
+  background:var(--fa-soft);color:var(--fa)}
 
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno).
    body .wrap (not .wrap) so this reliably beats blog.css's own unconditional
@@ -950,7 +975,16 @@ body .wrap{padding-bottom:5.5rem}
   .gp-gauge-num .num{font-size:2.1rem}
   .gp-hero-lvl{font-size:1.55rem}
   /* Kartice v enem stolpcu z malenkost večjim razmikom, da "dihajo". */
-  .gp-forests,.gp-hub,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
+  .gp-forests,.gp-vs-grid,.gp-terrmap{grid-template-columns:1fr;gap:.7rem}
+  /* Pregled zmožnosti ostane v dveh stolpcih — devet kartic v enem stolpcu bi
+     bilo prav tisto drsenje, ki ga mreža odpravlja. Kartice se zato stisnejo. */
+  .gp-feat{grid-template-columns:repeat(2,1fr);gap:.55rem}
+  .gp-feat-card{padding:.8rem .8rem .9rem;gap:.35rem}
+  .gp-feat-ic{width:2.2rem;height:2.2rem;border-radius:10px}
+  .gp-feat-ic svg{width:1.4rem;height:1.4rem}
+  .gp-feat-title{font-size:.88rem}
+  .gp-feat-sub{font-size:.74rem}
+  .gp-feat-badge{top:.55rem;right:.55rem;font-size:.55rem}
   .gp-hero-note{font-size:.82rem}
   .gp-pricing{grid-template-columns:1fr}
   /* CTA gumbi naj bodo polne širine za lažji dotik. */
@@ -1920,35 +1954,166 @@ def gauge_svg(pct):
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
 
 
-# Naslovi in napovedniki so predloge s {…} mesti, ki jih napolni hub_counts() —
-# ta števila so se prej pisala na roko in so ob vsaki razširitvi baze zastarela
-# (kartica je oglaševala 51 vrst, ko jih je bilo v bazi že 300).
-GOBE_HUB = [
-    # (url slug, icon, title, one-line teaser, quicknav label, thumbnail)
-    ("zemljevid",  "🗺️", "Zemljevid območij",    "{spots} nabiralnih območij na interaktivni karti doline.", "🗺️ Zemljevid",
-     "gozdna-pot-dron.jpg"),
-    ("koledar",    "📅", "Koledar po mesecih",   "Katere užitne vrste so v sezoni — mesec za mesecem.", "📅 Koledar",
-     "gozd-mah-banner.jpg"),
-    ("trend",      "📊", "Sezonski trend",       "Letos vs. pretekla leta — backtest zadnjih 5 sezon.", "📊 Trend",
-     "sluzavke-banner.jpg"),
-    ("baza-vrst",  "📖", "Baza {species} vrst",  "Užitnost, sezona in nevarne dvojnice za vsako vrsto.", "📖 Baza vrst",
-     "megla-jutro-banner.jpg"),
-    ("dvojnice",   "⚠️", "Nevarne dvojnice",     "{pairs} parov: užitna vrsta ob vrsti, s katero jo zamenjajo.", "⚠️ Dvojnice",
-     "sluzavka-portret.jpg"),
+# ── Pregled zmožnosti (mreža .gp-feat pod junaško kartico) ──────────────────
+# Ikone so risane, ne emoji — emoji se med platformami razlikujejo in se ne
+# dajo prebarvati v poudarek kartice (isti razlog kot pri _IC_* spodaj). Vsaka
+# je 24×24, obris v stroke="currentColor" (kartica ga postavi na svoj --fa),
+# ploskve pa so isti currentColor z nizko prekrivnostjo — dvobarvni videz brez
+# druge barve. Vsaka mora ostati prepoznavna pri ~23 px.
+_FI_GOZDOVI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M7 3.5 11.4 11H2.6L7 3.5Z" fill="currentColor" fill-opacity=".22"/>'
+    '<path d="M7 3.5 11.4 11H2.6L7 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M7 8.6 12.2 17H1.8L7 8.6Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M7 17v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '<path d="M17.4 6.2 21.8 14h-8.8l4.4-7.8Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M17.4 14v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '<path d="M2 20.5h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".55"/></svg>')
+
+_FI_7DNI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<rect x="2.6" y="14.5" width="2.4" height="6" rx=".9" fill="currentColor" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.3"/>'
+    '<rect x="7" y="11" width="2.4" height="9.5" rx=".9" fill="currentColor" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.3"/>'
+    '<rect x="11.4" y="7.2" width="2.4" height="13.3" rx=".9" fill="currentColor" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.3"/>'
+    '<rect x="15.8" y="12.4" width="2.4" height="8.1" rx=".9" fill="currentColor" fill-opacity=".3" '
+    'stroke="currentColor" stroke-width="1.3"/>'
+    '<path d="M2.6 4.2c1.9 2.4 4.2 3.6 6.9 3.6 3.4 0 6.4-1.9 8.9-5.6" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linecap="round" opacity=".75"/>'
+    '<circle cx="20.6" cy="4.6" r="1.5" fill="currentColor"/></svg>')
+
+_FI_AI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<circle cx="10.2" cy="10.2" r="7.2" fill="currentColor" fill-opacity=".14" stroke="currentColor" '
+    'stroke-width="1.6"/>'
+    '<path d="M5.3 10.6c0-2.7 2.2-4.8 4.9-4.8s4.9 2.1 4.9 4.8H5.3Z" fill="currentColor"/>'
+    '<path d="M8.3 10.6v2.6a1.9 1.9 0 0 0 3.8 0v-2.6" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linejoin="round"/>'
+    '<path d="m15.6 15.6 4.6 4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+    '<path d="M19 2.2l.65 1.85 1.85.65-1.85.65L19 7.2l-.65-1.85-1.85-.65 1.85-.65L19 2.2Z" '
+    'fill="currentColor"/></svg>')
+
+_FI_ZEMLJEVID = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M2.8 6.4 8.6 4v13.4l-5.8 2.4V6.4Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M8.6 4l5.8 2.4v13.4L8.6 17.4V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="m14.4 6.4 5.8-2.4v6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".6"/>'
+    '<path d="M18.4 12c1.8 0 3.2 1.4 3.2 3.2 0 2.2-3.2 5.6-3.2 5.6s-3.2-3.4-3.2-5.6c0-1.8 1.4-3.2 3.2-3.2Z" '
+    'fill="currentColor" fill-opacity=".45" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<circle cx="18.4" cy="15.3" r="1.1" fill="currentColor"/></svg>')
+
+_FI_BAZA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M7 6.4c0-2.4 2-4.3 4.4-4.3s4.4 1.9 4.4 4.3H7Z" fill="currentColor"/>'
+    '<path d="M9.8 6.4v2.4a1.6 1.6 0 0 0 3.2 0V6.4" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linejoin="round"/>'
+    '<path d="M11.4 13.2C9.8 11.7 7.4 11.1 3.6 11.6v9.2c3.8-.5 6.2.1 7.8 1.6v-9.2Z" fill="currentColor" '
+    'fill-opacity=".22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M11.4 13.2c1.6-1.5 4-2.1 7.8-1.6v9.2c-3.8-.5-6.2.1-7.8 1.6v-9.2Z" stroke="currentColor" '
+    'stroke-width="1.5" stroke-linejoin="round"/></svg>')
+
+# Dvojnici: levo obris (užitna), desno polna (strupena), vmes črtkana meja —
+# par, ki se ga da ločiti tudi pri 20 px. Klicaj v trikotniku se pri tej
+# velikosti zlije v packo, zato ga tu ni; nevarnost pove rdeč poudarek kartice.
+_FI_DVOJNICE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M1.4 10.4c0-2.7 2.1-4.8 4.8-4.8s4.8 2.1 4.8 4.8H1.4Z" fill="currentColor" fill-opacity=".2" '
+    'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M4.2 10.4v4.6a2 2 0 0 0 4 0v-4.6" stroke="currentColor" stroke-width="1.5" '
+    'stroke-linejoin="round"/>'
+    '<path d="M13 10.4c0-2.7 2.1-4.8 4.8-4.8s4.8 2.1 4.8 4.8H13Z" fill="currentColor"/>'
+    '<path d="M15.8 10.4v4.6a2 2 0 0 0 4 0v-4.6" stroke="currentColor" stroke-width="1.5" '
+    'stroke-linejoin="round"/>'
+    '<path d="M12 3.4v17.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" '
+    'stroke-dasharray="2 2.6" opacity=".7"/></svg>')
+
+_FI_KOLEDAR = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<rect x="3" y="5" width="18" height="16" rx="2.6" fill="currentColor" fill-opacity=".16" '
+    'stroke="currentColor" stroke-width="1.6"/>'
+    '<path d="M3 9.6h18" stroke="currentColor" stroke-width="1.5"/>'
+    '<path d="M7.6 2.6v3.4M16.4 2.6v3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'
+    '<circle cx="7.6" cy="13.2" r="1.15" fill="currentColor" opacity=".5"/>'
+    '<circle cx="12" cy="13.2" r="1.15" fill="currentColor"/>'
+    '<circle cx="16.4" cy="13.2" r="1.15" fill="currentColor" opacity=".5"/>'
+    '<circle cx="7.6" cy="17.4" r="1.15" fill="currentColor" opacity=".5"/>'
+    '<circle cx="12" cy="17.4" r="1.15" fill="currentColor" opacity=".5"/></svg>')
+
+_FI_TREND = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M3 20.2V4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>'
+    '<path d="M3 20.2h17.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>'
+    '<path d="M5.4 16.8c2.4.4 4-1 5.4-4.2 1.3-3 2.8-4.6 4.6-4.8 1.7-.2 3.2 1.2 4.6 4.2v8.2H5.4v-3.4Z" '
+    'fill="currentColor" fill-opacity=".18"/>'
+    '<path d="M5.4 16.8c2.4.4 4-1 5.4-4.2 1.3-3 2.8-4.6 4.6-4.8 1.7-.2 3.2 1.2 4.6 4.2" stroke="currentColor" '
+    'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M5.4 13.4c2.2-.2 3.6-1.4 4.8-3.6" stroke="currentColor" stroke-width="1.4" '
+    'stroke-linecap="round" stroke-dasharray="2 2.4" opacity=".7"/>'
+    '<circle cx="20" cy="12" r="1.6" fill="currentColor"/></svg>')
+
+_FI_DNEVNIK = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M5.4 3.6h11.2a1.8 1.8 0 0 1 1.8 1.8v15a1.8 1.8 0 0 1-1.8 1.8H5.4V3.6Z" fill="currentColor" '
+    'fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="M5.4 3.6a2 2 0 0 0-2 2v13.2a2 2 0 0 0 2 2" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linejoin="round"/>'
+    '<path d="M8.6 8.2h6.4M8.6 11.6h6.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" '
+    'opacity=".65"/>'
+    '<path d="M14.6 14.4c1.6 0 2.9 1.3 2.9 2.9 0 2-2.9 5-2.9 5s-2.9-3-2.9-5c0-1.6 1.3-2.9 2.9-2.9Z" '
+    'fill="currentColor" fill-opacity=".5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>'
+    '<circle cx="14.6" cy="17.2" r="1" fill="currentColor"/></svg>')
+
+
+# Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
+# ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
+# roko pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
+# 51 vrst, ko jih je bilo v bazi že 300).
+#
+# Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v mreži 3×3
+# nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a devet
+# enakih zelenih kartic se ne bi ločilo med sabo.
+GOBE_FEATURES = [
+    # (href, ikona, poudarek, naslov, napovednik, oznaka)
+    ("#gozdovi", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
+     "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
+    ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
+     "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
+    ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
+     "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
+    ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
+     "Vseh {spots} nabiralnih območij na karti doline.", None),
+    ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
+     "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
+    ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
+     "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
+    ("/gobarska-napoved/koledar/", _FI_KOLEDAR, "#a3e635", "Koledar po mesecih",
+     "Katere užitne vrste so v sezoni, mesec za mesecem.", None),
+    ("/gobarska-napoved/trend/", _FI_TREND, "#f472b6", "Sezonski trend",
+     "Letos proti petim preteklim sezonam, dan za dnem.", None),
+    ("#dnevnik", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
+     "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
 ]
 
 
-def hub_cards_html(counts):
-    cards = "\n".join(
-        f'    <a class="gp-hub-card" href="/gobarska-napoved/{slug}/">'
-        f'<div class="gp-hub-photo"><img src="/gobarska-napoved/img/foto/{thumb}" loading="lazy" alt=""></div>'
-        f'<div class="gp-hub-body"><span class="gp-hub-ic">{ic}</span>'
-        f'<span class="gp-hub-title">{_esc(title.format(**counts))}</span>'
-        f'<span class="gp-hub-sub">{_esc(sub.format(**counts))}</span>'
-        f'<span class="gp-hub-arrow">Odpri →</span></div></a>'
-        for slug, ic, title, sub, _, thumb in GOBE_HUB
-    )
-    return f'  <div class="gp-hub">\n{cards}\n  </div>'
+def _rgba(hex_color, alpha):
+    """#rrggbb → rgba(r,g,b,alpha) — mehka podlaga ikone iz istega poudarka."""
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def feature_cards_html(counts):
+    """Mreža kartic »kaj vse najdeš tukaj« — glej .gp-feat v slogu strani."""
+    cards = []
+    for href, icon, accent, title, sub, badge in GOBE_FEATURES:
+        badge_html = f'<span class="gp-feat-badge">{badge}</span>' if badge else ""
+        cards.append(
+            f'    <a class="gp-feat-card" href="{href}" '
+            f'style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">{badge_html}'
+            f'<span class="gp-feat-ic" aria-hidden="true">{icon}</span>'
+            f'<span class="gp-feat-title">{_esc(title.format(**counts))}</span>'
+            f'<span class="gp-feat-sub">{_esc(sub.format(**counts))}</span></a>'
+        )
+    return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Kaj vse najdeš tukaj</h2>\n'
+            '  <p class="archive-intro">Napoved je le začetek — vsaka kartica pelje naravnost na svojo '
+            'stran ali razdelek.</p>\n'
+            '  <div class="gp-feat">\n' + "\n".join(cards) + '\n  </div>')
 
 
 # Custom two-tone (duotone) SVG icon set for the bottom nav — replaces the
@@ -2686,10 +2851,10 @@ def build_body(rules, premium, free):
     # ── photo credits (CC BY / CC BY-SA / GFDL require visible attribution) ───
     credits_html = photo_credits_html("dvojnice")
 
-    # Števila na razdelilnih karticah se izpeljejo iz istih podatkov, iz katerih
+    # Števila na karticah pregleda se izpeljejo iz istih podatkov, iz katerih
     # nastanejo strani — drugače zastarijo ob vsaki razširitvi baze.
-    hub_html = hub_cards_html({"spots": len(premium["locations"]),
-                               "species": len(species), "pairs": len(vs_cards)})
+    features_html = feature_cards_html({"spots": len(premium["locations"]),
+                                        "species": len(species), "pairs": len(vs_cards)})
     vrste_credits_html = photo_credits_html("vrste")
 
     # ── terrain map (free) ────────────────────────────────────────────────────
@@ -2799,15 +2964,13 @@ def build_body(rules, premium, free):
 {coming_soon}
   <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
+{features_html}
   <div class="gp-quicknav-wrap">
   <nav class="gp-quicknav" aria-label="Hitri meni">
+    <a href="#zmoznosti">🧭 Pregled</a>
     <a href="#gozdovi">🌲 Gozdovi</a>
     <a href="#premium">🔓 Premium</a>
     <a href="#pricing" id="gp-nav-pricing">🎟️ Cenik</a>
-    <a href="/gobarska-napoved/koledar/">📅 Koledar</a>
-    <a href="/gobarska-napoved/trend/">📊 Trend</a>
-    <a href="/gobarska-napoved/baza-vrst/">📖 Baza vrst</a>
-    <a href="/gobarska-napoved/dvojnice/">⚠️ Dvojnice</a>
     <a href="#tereni">🗺️ Tereni</a>
     <a href="#nasveti">📋 Nasveti</a>
     <a href="#dnevnik">📔 Dnevnik</a>
@@ -2821,10 +2984,6 @@ def build_body(rules, premium, free):
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
 {pricing}
-  <h2 class="gp-h2">🗂️ Več o dolini in gobah</h2>
-  <p class="archive-intro">Koledar sezone, večletni trend, celotna baza vrst in primerjava nevarnih dvojnic —
-  vsaka na svoji strani, da glavna stran ostane pregledna.</p>
-{hub_html}
   <details class="gp-collapse gp-collapse-section" id="tereni">
   <summary>🗺️ Geološki tereni doline</summary>
   <div class="gp-collapse-body">
