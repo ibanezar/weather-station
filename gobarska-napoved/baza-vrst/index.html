@@ -298,7 +298,7 @@ body{
 .gp-sp-chips::-webkit-scrollbar{display:none}
 .gp-sp-chip{flex:0 0 auto;padding:.34rem .7rem;border-radius:999px;cursor:pointer;
   border:1px solid var(--card-border);background:var(--card-bg);color:var(--muted);
-  font-size:.76rem;font-family:inherit;white-space:nowrap}
+  font-size:.76rem;font-family:inherit;white-space:nowrap;text-decoration:none}
 .gp-sp-chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
 .gp-sp-count{font-size:.75rem;color:var(--muted);margin:.4rem .1rem 0}
 .gp-sp-card[hidden]{display:none}
@@ -766,24 +766,25 @@ body .wrap{padding-bottom:5.5rem}
       alt="Jutranja megla nad gozdovi Zgornje Savinjske doline">
     <figcaption>📷 Avtorski posnetek — jutranja inverzija nad gozdovi doline</figcaption>
   </figure>
-  <p class="post-meta">Referenčni pregled najpogostejših gob doline z oznako užitnosti in ključno razliko do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
+  <p class="post-meta">Referenčni pregled gob doline z oznako užitnosti in ključno razliko do nevarnih dvojnic. <strong>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</strong></p>
   <p class="post-meta">Jedro baze je zbrano na terenu v Zgornji Savinjski dolini. Vrste z oznako <em>◌ ni terensko preverjeno</em> so dodane iz razširjenega seznama — izbrane so po dejanskih zapisih o pojavljanju v Sloveniji (GBIF), njihovi opisi pa so povzeti po literaturi in v dolini niso preverjeni. Gobarski indeks te vrste praviloma ne dobijo.</p>
   <div class="gp-sp-tools">
     <input type="search" id="gp-sp-q" class="gp-sp-search" placeholder="Poišči vrsto — slovensko ali latinsko ime"
       autocomplete="off" aria-label="Iskanje po vrstah">
-    <div class="gp-sp-chips" role="group" aria-label="Filtri">
-      <button type="button" class="gp-sp-chip on" data-f="vse">Vse (300)</button>
-      <button type="button" class="gp-sp-chip" data-f="sezona">V sezoni zdaj (235)</button>
-      <button type="button" class="gp-sp-chip" data-f="uzitna">Užitne (129)</button>
-      <button type="button" class="gp-sp-chip" data-f="pogojno">Pogojno užitne (50)</button>
-      <button type="button" class="gp-sp-chip" data-f="strupena">Strupene (41)</button>
-      <button type="button" class="gp-sp-chip" data-f="neuzitna">Neužitne (79)</button>
-      <button type="button" class="gp-sp-chip" data-f="zascitena">Zaščitene (1)</button>
+    <nav class="gp-sp-chips" aria-label="Skupine po užitnosti">
+      <a class="gp-sp-chip on" href="/gobarska-napoved/baza-vrst/">Vse (300)</a>
+      <a class="gp-sp-chip" href="/gobarska-napoved/baza-vrst/uzitne/">Užitne (129)</a>
+      <a class="gp-sp-chip" href="/gobarska-napoved/baza-vrst/pogojno-uzitne/">Pogojno užitne (50)</a>
+      <a class="gp-sp-chip" href="/gobarska-napoved/baza-vrst/strupene/">Strupene (41)</a>
+      <a class="gp-sp-chip" href="/gobarska-napoved/baza-vrst/neuzitne/">Neužitne (79)</a>
+    </nav>
+    <div class="gp-sp-chips">
+      <button type="button" class="gp-sp-chip" id="gp-sp-season" data-f="sezona">V sezoni zdaj (235)</button>
     </div>
     <p class="gp-sp-count" id="gp-sp-count" hidden></p>
   </div>
   <div class="gp-sp-grid" id="gp-sp-grid">
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="anisova koprenka cortinarius odorifer">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="anisova koprenka cortinarius odorifer">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_odorifer.jpg" alt="Anisova koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -797,7 +798,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="beticasta prasnica lycoperdon perlatum">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="beticasta prasnica lycoperdon perlatum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lycoperdon_perlatum.jpg" alt="Betičasta prašnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -811,7 +812,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna smrdljivka (Scleroderma citrinum) – strupena; zelo trda, lupina je debela, usnjata, meso znotraj hitro počrni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="1" data-q="bezgova uhljevka auricularia auricula judae">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="bezgova uhljevka auricularia auricula judae">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/auricularia_auricula_judae.jpg" alt="Bezgova uhljevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -825,7 +826,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta zvedavka (Auricularia mesenterica) – neužitna; nima oblike ušesa in je bolj usnjata.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10,11" data-v="1" data-q="borov goban boletus pinophilus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="borov goban boletus pinophilus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/boletus_pinophilus.jpg" alt="Borov goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -839,7 +840,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, grenak okus. Druge vrste užitnih gobanov.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="borova gliva sparassis crispa">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="borova gliva sparassis crispa">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/sparassis_crispa.jpg" alt="Borova gliva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -853,7 +854,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="brezov ded leccinum scabrum">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="brezov ded leccinum scabrum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_scabrum.jpg" alt="Brezov ded" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -867,7 +868,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, izredno grenak; loči se po rožnati trosovnici (cevke pod klobukom).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="brezov turek leccinum versipelle">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="brezov turek leccinum versipelle">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_versipelle.jpg" alt="Brezov turek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -881,7 +882,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Trepetlikov turek (Leccinum aurantiacum) – prav tako užiten in odličen, raste pod trepetlikami/topoli.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="1,10,11,12" data-v="1" data-q="bukov ostrigar pleurotus ostreatus">
+    <div class="gp-sp-card" data-m="1,10,11,12" data-q="bukov ostrigar pleurotus ostreatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/pleurotus_ostreatus.jpg" alt="Bukov ostrigar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -895,7 +896,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> V času njegove rasti (pozno jeseni in pozimi) ni nevarnih podobnih gob na lesu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="dekliski deznik macrolepiota puellaris">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="dekliski deznik macrolepiota puellaris">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/macrolepiota_puellaris.jpg" alt="Dekliški dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -909,7 +910,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="diseca kolesnica lepista irina">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="diseca kolesnica lepista irina">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lepista_irina.jpg" alt="Dišeča kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -923,7 +924,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="10,11,12" data-v="1" data-q="dvobarvna kolesnica lepista personata">
+    <div class="gp-sp-card" data-m="10,11,12" data-q="dvobarvna kolesnica lepista personata">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lepista_personata.jpg" alt="Dvobarvna kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -937,7 +938,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="dvotrosni kukmak agaricus bisporus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="dvotrosni kukmak agaricus bisporus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_bisporus.jpg" alt="Dvotrosni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -951,7 +952,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="gabrov ded leccinum pseudoscabrum">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="gabrov ded leccinum pseudoscabrum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_pseudoscabrum.jpg" alt="Gabrov ded" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -965,7 +966,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="10,11,12" data-v="1" data-q="gola kolesnica lepista glaucocana">
+    <div class="gp-sp-card" data-m="10,11,12" data-q="gola kolesnica lepista glaucocana">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lepista_glaucocana.jpg" alt="Gola kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -979,7 +980,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="gozdni kukmak agaricus langei">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="gozdni kukmak agaricus langei">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_langei.jpg" alt="Gozdni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -993,7 +994,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="hostni kukmak agaricus silvicola">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="hostni kukmak agaricus silvicola">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_silvicola.jpg" alt="Hostni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1007,7 +1008,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="hrastov turek leccinum aurantiacum">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="hrastov turek leccinum aurantiacum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_aurantiacum.jpg" alt="Hrastov turek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1021,7 +1022,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge vrste užitnih turkov in dedov – vsi so varni in odlični za hrano.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="janezeva livka clitocybe odora">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="janezeva livka clitocybe odora">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/clitocybe_odora.jpg" alt="Janeževa livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1035,7 +1036,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="jelkova sirovka lactarius salmonicolor">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="jelkova sirovka lactarius salmonicolor">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_salmonicolor.jpg" alt="Jelkova sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1049,7 +1050,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Smrekova sirovka (Lactarius deterrimus) – prav tako užitna; salmonicolor ima lososovo oranžen mleček, ki ne pozeleni takoj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="1" data-q="jesenski goban  jurcek  boletus edulis">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="jesenski goban  jurcek  boletus edulis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/boletus_edulis.jpg" alt="Jesenski goban (Jurček)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1063,7 +1064,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in rožnati trosovnici.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="3,4,5" data-v="1" data-q="konicasti smrcek morchella elata">
+    <div class="gp-sp-card" data-m="3,4,5" data-q="konicasti smrcek morchella elata">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/morchella_elata.jpg" alt="Koničasti smrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1077,7 +1078,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima klobuk podoben možganom in nima pravilnih navpičnih jamic.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="kostanjevka imleria badia">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="kostanjevka imleria badia">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/imleria_badia.jpg" alt="Kostanjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1091,7 +1092,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten, grenak. Kostanjevka močno pomodri na cevkatem delu ob pritisku.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="kravja lupljivka suillus bovinus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="kravja lupljivka suillus bovinus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_bovinus.jpg" alt="Kravja lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1105,7 +1106,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="kravja mlecnica lactifluus piperatus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="kravja mlecnica lactifluus piperatus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lactifluus_piperatus.jpg" alt="Kravja mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1119,7 +1120,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Polsteni mlečnik (Lactifluus vellereus) – neužiten; ima žametno dlako na klobuku in bolj razmaknjene lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="krvavosocna sirovka lactarius sanguifluus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="krvavosocna sirovka lactarius sanguifluus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_sanguifluus.jpg" alt="Krvavosočna sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1133,7 +1134,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="1" data-q="lepljiva koprenka cortinarius mucosus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="lepljiva koprenka cortinarius mucosus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_mucosus.jpg" alt="Lepljiva koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1147,7 +1148,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="lesnikova golobica russula heterophylla">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="lesnikova golobica russula heterophylla">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_heterophylla.jpg" alt="Lešnikova golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1161,7 +1162,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="1" data-q="lijasta lisicka craterellus tubaeformis">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="lijasta lisicka craterellus tubaeformis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/craterellus_tubaeformis.jpg" alt="Lijasta lisička" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1175,7 +1176,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zlatorumena lisička (Cantharellus lutescens) – prav tako užitna, nima tako izrazitih letvic.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="1" data-q="lisicja mraznica armillaria tabescens">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="lisicja mraznica armillaria tabescens">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/armillaria_tabescens.jpg" alt="Lisičja mraznica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1189,7 +1190,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="macesnova lupljivka suillus grevillei">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="macesnova lupljivka suillus grevillei">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_grevillei.jpg" alt="Macesnova lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1203,7 +1204,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge maslenke in lupljivke pod iglavci, ki pa so vse užitne in nekatere prav tako sluzaste.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9" data-v="1" data-q="malinova golobica russula romellii">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="malinova golobica russula romellii">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_romellii.jpg" alt="Malinova golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1217,7 +1218,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="3,4,5" data-v="1" data-q="marcna polzevka hygrophorus marzuolus">
+    <div class="gp-sp-card" data-m="3,4,5" data-q="marcna polzevka hygrophorus marzuolus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_marzuolus.jpg" alt="Marčna polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1231,7 +1232,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="medena polzevka hygrophorus russula">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="medena polzevka hygrophorus russula">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_russula.jpg" alt="Medena polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1245,7 +1246,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="10,11,12" data-v="1" data-q="meglenka clitocybe nebularis">
+    <div class="gp-sp-card" data-m="10,11,12" data-q="meglenka clitocybe nebularis">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/clitocybe_nebularis.jpg" alt="Meglenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1259,7 +1260,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="1" data-q="miska tricholoma scalpturatum">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="miska tricholoma scalpturatum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_scalpturatum.jpg" alt="Miška" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1273,7 +1274,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="modrikasta golobica russula cyanoxantha">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="modrikasta golobica russula cyanoxantha">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_cyanoxantha.jpg" alt="Modrikasta golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1287,7 +1288,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena mušnica (Amanita phalloides) – smrtno strupena; mušnica ima obroček na betu in lupino v dnu beta, golobica ne.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="modrikasta koprenka cortinarius violaceus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="modrikasta koprenka cortinarius violaceus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_violaceus.jpg" alt="Modrikasta koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1301,7 +1302,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10,11" data-v="1" data-q="navadna lisicka cantharellus cibarius">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="navadna lisicka cantharellus cibarius">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cantharellus_cibarius.jpg" alt="Navadna lisička" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1315,7 +1316,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Oljkov livkar (Omphalotus olearius) – strupen; raste v šopih na lesu (predvsem na Primorskem pod oljkami/hrasti).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="navadna lupljivka suillus luteus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="navadna lupljivka suillus luteus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_luteus.jpg" alt="Navadna lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1329,7 +1330,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge lupljivke – vse užitne; luteus ima izrazit membranast obroček na betu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10,11" data-v="1" data-q="oranzna lupinarica amanita crocea">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="oranzna lupinarica amanita crocea">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_crocea.jpg" alt="Oranžna lupinarica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1343,7 +1344,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="orjaska plesivka calvatia gigantea">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="orjaska plesivka calvatia gigantea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/calvatia_gigantea.jpg" alt="Orjaška plešivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1357,7 +1358,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zaradi izjemne velikosti (lahko kot velika bela žoga) in kroglaste oblike je praktično nezamenljiva.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10,11" data-v="1" data-q="orjaski deznik  marela  macrolepiota procera">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="orjaski deznik  marela  macrolepiota procera">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/macrolepiota_procera.jpg" alt="Orjaški dežnik (Marela)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1371,7 +1372,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena rdečeča dežnica (Chlorophyllum brunneum) – strupena; meso ob poškodbi močno pordeči, bet nima marogastega vzorca.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="ovcja lupljivka suillus granulatus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="ovcja lupljivka suillus granulatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_granulatus.jpg" alt="Ovčja lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1385,7 +1386,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="ovcji ovcar albatrellus ovinus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="ovcji ovcar albatrellus ovinus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/albatrellus_ovinus.jpg" alt="Ovčji ovčar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1399,7 +1400,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Kozja noga (Scutiger pes-caprae) – prav tako užitna. Grenki ovčarji rodu Albatrellopsis.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="pescena lupljivka suillus variegatus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="pescena lupljivka suillus variegatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_variegatus.jpg" alt="Peščena lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1413,7 +1414,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9" data-v="1" data-q="poletni goban boletus reticulatus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9" data-q="poletni goban boletus reticulatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/boletus_reticulatus.jpg" alt="Poletni goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1427,7 +1428,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žolčasti goban (Tylopilus felleus) – neužiten; loči se po izrazito grenkem okusu in mrežici na betu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10" data-v="1" data-q="poljski kukmak agaricus campestris">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10" data-q="poljski kukmak agaricus campestris">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_campestris.jpg" alt="Poljski kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1441,7 +1442,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Karbolni kukmak (Agaricus xanthodermus) – strupen; v dnu beta ob prerezu močno porumeni in smrdi po črnilu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="polkrvava sirovka lactarius semisanguifluus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="polkrvava sirovka lactarius semisanguifluus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_semisanguifluus.jpg" alt="Polkrvava sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1455,7 +1456,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitna sirovka (Lactarius deliciosus) – prav tako užitna; semisanguifluus ima mleček, ki iz oranžnega prehaja v vinsko rdeč.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="pozna livka infundibulicybe geotropa">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="pozna livka infundibulicybe geotropa">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/infundibulicybe_geotropa.jpg" alt="Pozna livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1469,7 +1470,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="preprosti goban suillellus luridus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="preprosti goban suillellus luridus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/suillellus_luridus.jpg" alt="Preprosti goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1483,7 +1484,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="1" data-q="prstena kolobarnica tricholoma terreum">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="prstena kolobarnica tricholoma terreum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_terreum.jpg" alt="Prstena kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1497,7 +1498,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="psenicna koprenka cortinarius caperatus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="psenicna koprenka cortinarius caperatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_caperatus.jpg" alt="Pšenična koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1511,7 +1512,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sorodne strupene koprenke – pšenična se loči po narebranem svetlem klobuku z značilnim srebrnkastim prahom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="rakova golobica russula xerampelina">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="rakova golobica russula xerampelina">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_xerampelina.jpg" alt="Rakova golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1525,7 +1526,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge temne golobice – xerampelina zadiši po rakih ali morski hrani, zlasti ob starosti.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="1" data-q="rdeca griva ramaria botrytis">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="rdeca griva ramaria botrytis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/ramaria_botrytis.jpg" alt="Rdeča griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1539,7 +1540,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10,11" data-v="1" data-q="rdecebetka xerocomellus chrysenteron">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="rdecebetka xerocomellus chrysenteron">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/xerocomellus_chrysenteron.jpg" alt="Rdečebetka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1553,7 +1554,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sorodni polstenci (npr. rdečeči polstenec), ki so prav tako večinoma užitni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10,11" data-v="1" data-q="rdecerjava mlecnica lactarius rufus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rdecerjava mlecnica lactarius rufus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lactarius_rufus.jpg" alt="Rdečerjava mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1567,7 +1568,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="rdececa deznica chlorophyllum rhacodes">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rdececa deznica chlorophyllum rhacodes">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/chlorophyllum_rhacodes.jpg" alt="Rdečeča dežnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1581,7 +1582,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="rdeci goban hortiboletus rubellus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rdeci goban hortiboletus rubellus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hortiboletus_rubellus.jpg" alt="Rdeči goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1595,7 +1596,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="5,6,7,8,9,10,11" data-v="1" data-q="rdeckasta musnica  bisernica  amanita rubescens">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="rdeckasta musnica  bisernica  amanita rubescens">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_rubescens.jpg" alt="Rdečkasta mušnica (Bisernica)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1609,7 +1610,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Panterjeva mušnica (Amanita pantherina) – zelo strupena! Bisernica vedno rdeči na zraku/poškodbah in ima narebren obroček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="rdeckasti jezek hydnum rufescens">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rdeckasti jezek hydnum rufescens">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hydnum_rufescens.jpg" alt="Rdečkasti ježek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1623,7 +1624,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumeni ježek (Hydnum repandum) – prav tako užiten, večji in bledejši.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10,11" data-v="1" data-q="rjava lupinarica amanita fulva">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="rjava lupinarica amanita fulva">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_fulva.jpg" alt="Rjava lupinarica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1637,7 +1638,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="1" data-q="rjavi turek leccinum duriusculum">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="rjavi turek leccinum duriusculum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_duriusculum.jpg" alt="Rjavi turek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1651,7 +1652,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="rjavkasta golobica russula mustelina">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rjavkasta golobica russula mustelina">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_mustelina.jpg" alt="Rjavkasta golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1665,7 +1666,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="rjavkasta livka clitocybe gibba">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rjavkasta livka clitocybe gibba">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/clitocybe_gibba.jpg" alt="Rjavkasta livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1679,7 +1680,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="rjavoluski kukmak agaricus sylvaticus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rjavoluski kukmak agaricus sylvaticus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_sylvaticus.jpg" alt="Rjavoluski kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1693,7 +1694,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="rumena lisicka craterellus lutescens">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="rumena lisicka craterellus lutescens">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/craterellus_lutescens.jpg" alt="Rumena lisička" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1707,7 +1708,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Lijasta lisička (Craterellus tubaeformis) – prav tako užitna; lutescens ima gladko, oranžno spodnjo stran brez izrazitih gub.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="rumeni goban neoboletus pseudosulphureus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rumeni goban neoboletus pseudosulphureus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/neoboletus_pseudosulphureus.jpg" alt="Rumeni goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1721,7 +1722,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10,11" data-v="1" data-q="rumeni jezek hydnum repandum">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="rumeni jezek hydnum repandum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hydnum_repandum.jpg" alt="Rumeni ježek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1735,7 +1736,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečerjavi ježek (Hydnum rufescens) – manjši, bolj oranžen, prav tako užiten (odstranijo se bodičke).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10,11" data-v="1" data-q="siva lupinarica amanita vaginata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="siva lupinarica amanita vaginata">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_vaginata.jpg" alt="Siva lupinarica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1749,7 +1750,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="6,7,8,9,10" data-v="1" data-q="siva musnica amanita spissa">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="siva musnica amanita spissa">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_spissa.jpg" alt="Siva mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1763,7 +1764,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="sivi goban hemileccinum impolitum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="sivi goban hemileccinum impolitum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hemileccinum_impolitum.jpg" alt="Sivi goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1777,7 +1778,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="sivkasta kolesnica lepista luscina">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="sivkasta kolesnica lepista luscina">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lepista_luscina.jpg" alt="Sivkasta kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1791,7 +1792,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="1" data-q="sivorumena mraznica  storovka  armillaria mellea">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sivorumena mraznica  storovka  armillaria mellea">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/armillaria_mellea.jpg" alt="Sivorumena mraznica (Štorovka)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1805,7 +1806,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna žveplenjača (Hypholoma fasciculare) – strupena; nima obročka na betu, klobuk je žvepleno rumen in zelo grenak.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="sivozelena golobica russula aeruginea">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="sivozelena golobica russula aeruginea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_aeruginea.jpg" alt="Sivozelena golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1819,7 +1820,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="5,6,7,8,9,10,11" data-v="1" data-q="sljudnata tintnica coprinellus micaceus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="sljudnata tintnica coprinellus micaceus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/coprinellus_micaceus.jpg" alt="Sljudnata tintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1833,7 +1834,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="1" data-q="sluzava koprenka cortinarius collinitus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sluzava koprenka cortinarius collinitus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_collinitus.jpg" alt="Sluzava koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1847,7 +1848,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10,11" data-v="1" data-q="smrekova sirovka lactarius deterrimus">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="smrekova sirovka lactarius deterrimus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_deterrimus.jpg" alt="Smrekova sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1861,7 +1862,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge sirovke z oranžnim mlečkom – vse so užitne (smrekova hitro pozeleni na mestih poškodb).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="socna mlecnica lactifluus volemus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="socna mlecnica lactifluus volemus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactifluus_volemus.jpg" alt="Sočna mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1875,7 +1876,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="storzasti luskarin strobilomyces strobilaceus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="storzasti luskarin strobilomyces strobilaceus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/strobilomyces_strobilaceus.jpg" alt="Storžasti luskarin" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1889,7 +1890,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Nezamenljiv – črno kosmate luske na klobuku so značilne. Meso ob prerezu pordeči, nato počrni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="svinjski goban suillellus queletii">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="svinjski goban suillellus queletii">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/suillellus_queletii.jpg" alt="Svinjski goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1903,7 +1904,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="topolov turek leccinum populinum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="topolov turek leccinum populinum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_populinum.jpg" alt="Topolov turek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1917,7 +1918,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="uzitna golobica russula vesca">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="uzitna golobica russula vesca">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_vesca.jpg" alt="Užitna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1931,7 +1932,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge rdeče golobice – nekatere so pekoče in neužitne/strupene (pripravite test s konico jezika).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="uzitna sirovka lactarius deliciosus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="uzitna sirovka lactarius deliciosus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_deliciosus.jpg" alt="Užitna sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1945,7 +1946,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna tura (Lactarius torminosus) – strupena; raste pod brezami in izloča bel, zelo pekoč mleček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="4,5" data-v="1" data-q="uzitni smrcek  mavrah  morchella esculenta">
+    <div class="gp-sp-card" data-m="4,5" data-q="uzitni smrcek  mavrah  morchella esculenta">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/morchella_esculenta.jpg" alt="Užitni smrček (Mavrah)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1959,7 +1960,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Pomladanski hrček (Gyromitra esculenta) – zelo strupen; hrček ima možgansko naguban klobuk in ni votel.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10,11" data-v="1" data-q="velika tintnica coprinus comatus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="velika tintnica coprinus comatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="Velika tintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1973,7 +1974,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Gola tintnica (Coprinopsis atramentaria) – pogojno strupena z alkoholom; nima luskastega in visokega valjastega klobuka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="veliki slinar gomphidius glutinosus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="veliki slinar gomphidius glutinosus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/gomphidius_glutinosus.jpg" alt="Veliki slinar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -1987,7 +1988,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bakerasti polžar (Chroogomphus rutilus) – užiten; nima prozorne debele sluzi in je ves rdečkasto-bakerne barve.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10,11" data-v="1" data-q="vijolicasta bledivka laccaria amethystina">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="vijolicasta bledivka laccaria amethystina">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/laccaria_amethystina.jpg" alt="Vijoličasta bledivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2001,7 +2002,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta čeladica (Mycena pura) – strupena; loči se po izrazitem vonju po redkvici in tanjših, gostejših lističih.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="10,11,12" data-v="1" data-q="vijolicasta kolesnica lepista nuda">
+    <div class="gp-sp-card" data-m="10,11,12" data-q="vijolicasta kolesnica lepista nuda">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lepista_nuda.jpg" alt="Vijoličasta kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2015,7 +2016,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="votlobetna lupljivka suillus cavipes">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="votlobetna lupljivka suillus cavipes">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_cavipes.jpg" alt="Votlobetna lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2029,7 +2030,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Macesnova lupljivka (Suillus grevillei) – prav tako užitna; cavipes ima votel bet in suh, kosmat klobuk.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="0" data-q="xerocomus subtomentosus xerocomus subtomentosus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="xerocomus subtomentosus xerocomus subtomentosus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/xerocomus_subtomentosus.jpg" alt="Xerocomus subtomentosus" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2043,7 +2044,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Drugi manjši gobani rodu Xerocomus – vsi neškodljivi, a slabše kakovosti.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="zelena golobica russula virescens">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="zelena golobica russula virescens">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_virescens.jpg" alt="Zelena golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2057,7 +2058,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena mušnica (Amanita phalloides) – smrtno strupena! Mušnica ima kožnat obroček in lupino (vrečko) v dnu beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="1" data-q="zimska kolobarnica tricholoma portentosum">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="zimska kolobarnica tricholoma portentosum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_portentosum.jpg" alt="Zimska kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2071,7 +2072,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="1,2,3,11,12" data-v="1" data-q="zimska panjevka flammulina velutipes">
+    <div class="gp-sp-card" data-m="1,2,3,11,12" data-q="zimska panjevka flammulina velutipes">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/flammulina_velutipes.jpg" alt="Zimska panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2085,7 +2086,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena galerina (Galerina marginata) – smrtno strupena; galerina raste na iglavcih, ima obroček in nima žametnega beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="10,11,12" data-v="1" data-q="zimska polzevka hygrophorus hypothejus">
+    <div class="gp-sp-card" data-m="10,11,12" data-q="zimska polzevka hygrophorus hypothejus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_hypothejus.jpg" alt="Zimska polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2099,7 +2100,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="1" data-q="zlata griva ramaria aurea">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="zlata griva ramaria aurea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/ramaria_aurea.jpg" alt="Zlata griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2113,7 +2114,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9" data-v="1" data-q="zlatolistna golobica russula aurea">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="zlatolistna golobica russula aurea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_aurea.jpg" alt="Zlatolistna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2127,7 +2128,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="6,7,8,9,10" data-v="1" data-q="cokata musnica amanita excelsa">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="cokata musnica amanita excelsa">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_excelsa.jpg" alt="Čokata mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2141,7 +2142,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="1" data-q="crna mlecnica lactarius lignyotus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="crna mlecnica lactarius lignyotus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_lignyotus.jpg" alt="Črna mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2155,7 +2156,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="1" data-q="crna trobenta craterellus cornucopioides">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="crna trobenta craterellus cornucopioides">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/craterellus_cornucopioides.jpg" alt="Črna trobenta" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2169,7 +2170,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ni nevarnih dvojnic zaradi specifične trobentaste oblike in povsem črne/sive barve.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="1" data-q="crni ded leccinum melaneum">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="crni ded leccinum melaneum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_melaneum.jpg" alt="Črni ded" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2183,7 +2184,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="crni goban boletus aereus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="crni goban boletus aereus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/boletus_aereus.jpg" alt="Črni goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2197,7 +2198,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ni nevarnih neposrednih dvojnic zaradi zelo temnega klobuka in čvrstega, nespremenljivega belega mesa.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="crnikasta golobica russula nigricans">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="crnikasta golobica russula nigricans">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/russula_nigricans.jpg" alt="Črnikasta golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2211,7 +2212,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="1" data-q="crnomekinasta kolobarnica tricholoma atrosquamosum">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="crnomekinasta kolobarnica tricholoma atrosquamosum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_atrosquamosum.jpg" alt="Črnomekinasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2225,7 +2226,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="4,5,6" data-v="1" data-q="scitasta rdecelistka entoloma clypeatum">
+    <div class="gp-sp-card" data-m="4,5,6" data-q="scitasta rdecelistka entoloma clypeatum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/entoloma_clypeatum.jpg" alt="Ščitasta rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2239,7 +2240,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="1" data-q="zafranasta mlecnica lactarius croceus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zafranasta mlecnica lactarius croceus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lactarius_croceus.jpg" alt="Žafranasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2253,7 +2254,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="1" data-q="zafranasti ded leccinum crocipodium">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="zafranasti ded leccinum crocipodium">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/leccinum_crocipodium.jpg" alt="Žafranasti ded" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2267,7 +2268,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="5,6,7,8,9,10,11" data-v="1" data-q="zametasti goban neoboletus erythropus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="zametasti goban neoboletus erythropus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/neoboletus_erythropus.jpg" alt="Žametasti goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2281,7 +2282,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vražji goban (Rubroboletus satanas) – strupen; loči se po zelo svetlem (sivem) klobuku in rasti na apnencu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="1" data-q="zvepleni lesic laetiporus sulphureus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zvepleni lesic laetiporus sulphureus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/laetiporus_sulphureus.jpg" alt="Žvepleni lešič" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2295,7 +2296,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="albatrellopsis confluens albatrellopsis confluens">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="albatrellopsis confluens albatrellopsis confluens">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/albatrellopsis_confluens.jpg" alt="Albatrellopsis confluens" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2309,7 +2310,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ovčji ovčar (Albatrellus ovinus) – prav tako užiten.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="amanita battarrae amanita battarrae">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="amanita battarrae amanita battarrae">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_battarrae.jpg" alt="Amanita battarrae" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2323,7 +2324,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena mušnica (Amanita phalloides) – SMRTNO STRUPENA. Lupinarice nimajo obročka, a jih od mladih smrtno strupenih mušnic loči le izkušeno oko.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="bakreni slinar chroogomphus rutilus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="bakreni slinar chroogomphus rutilus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/chroogomphus_rutilus.jpg" alt="Bakreni slinar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2337,7 +2338,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Veliki slinar (Gomphidius glutinosus) – prav tako užiten.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="0" data-q="bela golobica russula delica">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bela golobica russula delica">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/russula_delica.jpg" alt="Bela golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2351,7 +2352,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Kravja mlečnica (Lactifluus piperatus) – ta pušča bel mleček, golobica ne.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="5,6,7,8,9,10" data-v="0" data-q="bela krhkotrosovka candolleomyces candolleanus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10" data-q="bela krhkotrosovka candolleomyces candolleanus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/candolleomyces_candolleanus.jpg" alt="Bela krhkotrosovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2365,7 +2366,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Robata smrtnica (Galerina marginata) – smrtno strupena, raste v podobnih šopih. Krhkotrosovk ne nabiramo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10,11" data-v="1" data-q="bela livka clitocybe dealbata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="bela livka clitocybe dealbata">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/clitocybe_dealbata.jpg" alt="Bela livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2379,7 +2380,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="beli deznik leucoagaricus leucothites">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="beli deznik leucoagaricus leucothites">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/leucoagaricus_leucothites.jpg" alt="Beli dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2393,7 +2394,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bele mušnice (Amanita virosa) in zelena mušnica – SMRTNO STRUPENE. Bele gobe s travnikov brez preverjanja ovoja ob dnu beta ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="beticasta livka ampulloclitocybe clavipes">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="beticasta livka ampulloclitocybe clavipes">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/ampulloclitocybe_clavipes.jpg" alt="Betičasta livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2407,7 +2408,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne livke – clavipes ima odebeljen bet in v kombinaciji z alkoholom povzroča slabost.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="1" data-q="bleda griva ramaria pallida">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="bleda griva ramaria pallida">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/ramaria_pallida.jpg" alt="Bleda griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2421,7 +2422,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="bleda mlecnica lactarius pallidus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="bleda mlecnica lactarius pallidus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_pallidus.jpg" alt="Bleda mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2435,7 +2436,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="1" data-q="bleda musnica amanita citrina">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="bleda musnica amanita citrina">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/amanita_citrina.jpg" alt="Bleda mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2449,7 +2450,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10,11" data-v="0" data-q="bledorumena golobica russula ochroleuca">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="bledorumena golobica russula ochroleuca">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/russula_ochroleuca.jpg" alt="Bledorumena golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2463,7 +2464,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bljuvna golobica (Russula emetica) – rdeča in pekoča; ochroleuca je okerrumena in blago pekoča.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="bljuvna golobica russula emetica">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bljuvna golobica russula emetica">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/russula_emetica.jpg" alt="Bljuvna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2477,7 +2478,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne rdeče golobice – bljuvna je izjemno pekoča in povzroča hude prebavne motnje.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="bodicasti deznik echinoderma asperum">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="bodicasti deznik echinoderma asperum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/echinoderma_asperum.jpg" alt="Bodičasti dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2491,7 +2492,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Dežniki (Macrolepiota) – asperum je gosto pokrit s koničastimi luskami in neprijetno diši.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="borov luknjicar phaeolus schweinitzii">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="borov luknjicar phaeolus schweinitzii">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/phaeolus_schweinitzii.jpg" alt="Borov luknjičar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2505,7 +2506,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="0" data-q="bradavicasta pokovka scleroderma verrucosum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bradavicasta pokovka scleroderma verrucosum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/scleroderma_verrucosum.jpg" alt="Bradavičasta pokovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2519,7 +2520,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade prašnice – pokovka ima trdo lupino in temno notranjost. Prerez pokovke je črnovijoličast, prašnice bel.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="bradavicasti deznik macrolepiota mastoidea">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="bradavicasti deznik macrolepiota mastoidea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/macrolepiota_mastoidea.jpg" alt="Bradavičasti dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2533,7 +2534,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena rdečeča dežnica (Chlorophyllum brunneum) – meso te ob prerezu pordeči. Drobnih marelic rodu Lepiota ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="breskova mlecnica lactarius persicinus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="breskova mlecnica lactarius persicinus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_persicinus.jpg" alt="Breskova mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2547,7 +2548,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="brezova kresilaca fomitopsis betulina">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="brezova kresilaca fomitopsis betulina">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/fomitopsis_betulina.jpg" alt="Brezova kresilača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2561,7 +2562,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="bridka golobica russula sardonia">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="bridka golobica russula sardonia">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_sardonia.jpg" alt="Bridka golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2575,7 +2576,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne rdeče golobice – sardonia je izrazito pekoča, z rumenkastimi lističi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="bukova kresilka fomes fomentarius">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bukova kresilka fomes fomentarius">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/fomes_fomentarius.jpg" alt="Bukova kresilka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2589,7 +2590,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9" data-v="0" data-q="butyriboletus appendiculatus butyriboletus appendiculatus">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="butyriboletus appendiculatus butyriboletus appendiculatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/butyriboletus_appendiculatus.jpg" alt="Butyriboletus appendiculatus" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2603,7 +2604,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vražji goban (Rubroboletus satanas) – strupen, z rdečimi cevkami; appendiculatus ima rumene cevke in blago modri.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9" data-v="0" data-q="butyriboletus fechtneri butyriboletus fechtneri">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="butyriboletus fechtneri butyriboletus fechtneri">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/butyriboletus_fechtneri.jpg" alt="Butyriboletus fechtneri" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2617,7 +2618,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vražji goban (Rubroboletus satanas) – strupen, z rdečimi cevkami; fechtneri ima rumene cevke in srebrnkasto siv klobuk.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="cantharellus ianthinoxanthus cantharellus ianthinoxanthus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="cantharellus ianthinoxanthus cantharellus ianthinoxanthus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cantharellus_ianthinoxanthus.jpg" alt="Cantharellus ianthinoxanthus" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2631,7 +2632,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna lisička (Cantharellus cibarius) – prav tako užitna; ianthinoxanthus ima vijoličasto nadahnjene gube.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="cela golobica russula integra">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="cela golobica russula integra">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_integra.jpg" alt="Cela golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2645,7 +2646,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge velike rjavkaste golobice – integra ima okerrumen trosni prah in blag okus.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10" data-v="0" data-q="cestni kukmak agaricus bitorquis">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10" data-q="cestni kukmak agaricus bitorquis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/agaricus_bitorquis.jpg" alt="Cestni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2659,7 +2660,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Karbolni kukmak (Agaricus xanthodermus) – ta ob dnu beta porumeni in diši po karbolu. Bele mušnice imajo ovoj ob dnu beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10,11" data-v="1" data-q="cimetasta koprenka cortinarius cinnamomeus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="cimetasta koprenka cortinarius cinnamomeus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_cinnamomeus.jpg" alt="Cimetasta koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2673,7 +2674,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="9,10,11" data-v="0" data-q="clitocybe fasciculata clitocybe fasciculata">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="clitocybe fasciculata clitocybe fasciculata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/clitocybe_fasciculata.jpg" alt="Clitocybe fasciculata" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2687,7 +2688,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Travniška vitezovka (Marasmius oreades) – bele livke s travnikov vsebujejo muskarin in so nevarne.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="collybiopsis confluens collybiopsis confluens">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="collybiopsis confluens collybiopsis confluens">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/collybiopsis_confluens.jpg" alt="Collybiopsis confluens" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2701,7 +2702,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10,11" data-v="0" data-q="collybiopsis peronata collybiopsis peronata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="collybiopsis peronata collybiopsis peronata">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/collybiopsis_peronata.jpg" alt="Collybiopsis peronata" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2715,7 +2716,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="cystoderma amianthinum cystoderma amianthinum">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="cystoderma amianthinum cystoderma amianthinum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/cystoderma_amianthinum.jpg" alt="Cystoderma amianthinum" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2729,7 +2730,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="diseca polzevka hygrophorus agathosmus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="diseca polzevka hygrophorus agathosmus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_agathosmus.jpg" alt="Dišeča polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2743,7 +2744,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge sive polževke – agathosmus diši po grenkih mandljih.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="diseci tramovec gloeophyllum odoratum">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="diseci tramovec gloeophyllum odoratum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/gloeophyllum_odoratum.jpg" alt="Dišeči tramovec" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2757,7 +2758,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="diseci skoljkar lentinellus cochleatus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="diseci skoljkar lentinellus cochleatus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lentinellus_cochleatus.jpg" alt="Dišeči školjkar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2771,7 +2772,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="friesova lisicka cantharellus friesii">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="friesova lisicka cantharellus friesii">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cantharellus_friesii.jpg" alt="Friesova lisička" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2785,7 +2786,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna lisička (Cantharellus cibarius) – prav tako užitna; friesii je drobnejša in oranžnejša. Lažna lisička (Hygrophoropsis aurantiaca) ima prave lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="gabrova mlecnica lactarius circellatus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="gabrova mlecnica lactarius circellatus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_circellatus.jpg" alt="Gabrova mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2799,7 +2800,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sluzasta mlečnica (Lactarius blennius) – ta raste pod bukvijo; circellatus je vezana na gaber.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="gola tintnica coprinopsis atramentaria">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="gola tintnica coprinopsis atramentaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/coprinopsis_atramentaria.jpg" alt="Gola tintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2813,7 +2814,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="golobja kolobarnica tricholoma columbetta">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="golobja kolobarnica tricholoma columbetta">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_columbetta.jpg" alt="Golobja kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2827,7 +2828,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bele mušnice (Amanita virosa) – smrtno strupene; kolobarnica nima obročka ne ovoja ob dnu beta. Razlikovanje zahteva izkušnje.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="9,10,11" data-v="0" data-q="gorcicna grenivka hebeloma sinapizans">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="gorcicna grenivka hebeloma sinapizans">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/hebeloma_sinapizans.jpg" alt="Gorčična grenivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2841,7 +2842,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Miška (Tricholoma scalpturatum) in druge svetle kolobarnice – grenivka ima vonj po redkvi in rjav trosni prah.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="gostolistna golobica russula densifolia">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="gostolistna golobica russula densifolia">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_densifolia.jpg" alt="Gostolistna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2855,7 +2856,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Črnikasta golobica (Russula nigricans) – densifolia ima gostejše lističe in meso, ki pordeči, nato počrni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="gozdna polzevka hygrophorus nemoreus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="gozdna polzevka hygrophorus nemoreus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_nemoreus.jpg" alt="Gozdna polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2869,7 +2870,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge polževke – vse neškodljive; nemoreus diši po moki.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="grbasta ploskocevka trametes gibbosa">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="grbasta ploskocevka trametes gibbosa">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/trametes_gibbosa.jpg" alt="Grbasta ploskocevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2883,7 +2884,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Pisana ploskocevka (Trametes versicolor) – ta je tanjša in pisano kolobarjasta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="grda mlecnica lactarius turpis">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="grda mlecnica lactarius turpis">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_turpis.jpg" alt="Grda mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2897,7 +2898,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Temne sirovke – turpis je olivno črnikast in pekoč, velja za rakotvornega.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10,11" data-v="0" data-q="grebenasta koralovka clavulina coralloides">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="grebenasta koralovka clavulina coralloides">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/clavulina_coralloides.jpg" alt="Grebenasta koralovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2911,7 +2912,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="grenki bocnik panellus stipticus">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="grenki bocnik panellus stipticus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/panellus_stipticus.jpg" alt="Grenki bočnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2925,7 +2926,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bukov ostrigar (Pleurotus ostreatus) – ta je velik in mesnat; stipticus je drobcen in trpko grenak.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="heterobasidion annosum heterobasidion annosum">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="heterobasidion annosum heterobasidion annosum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/heterobasidion_annosum.jpg" alt="Heterobasidion annosum" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2939,7 +2940,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="hobotnicasta mreznica clathrus archeri">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="hobotnicasta mreznica clathrus archeri">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/clathrus_archeri.jpg" alt="Hobotničasta mrežnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2953,7 +2954,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlado 'jajce' je podobno prašnici – prerez pokaže rdeče krake v želatini. Tujerodna, priseljena vrsta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="hrapava musnica amanita franchetii">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="hrapava musnica amanita franchetii">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/amanita_franchetii.jpg" alt="Hrapava mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2967,7 +2968,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="hrastova labirintnica daedalea quercina">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="hrastova labirintnica daedalea quercina">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/daedalea_quercina.jpg" alt="Hrastova labirintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2981,7 +2982,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="hrastova mlecnica lactarius quietus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="hrastova mlecnica lactarius quietus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_quietus.jpg" alt="Hrastova mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -2995,7 +2996,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge rjave mlečnice – quietus ima vonj po stenicah in kolobarjast klobuk.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="5,6,7,8,9,10,11" data-v="0" data-q="hrastova panjevka gymnopus dryophilus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="hrastova panjevka gymnopus dryophilus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/gymnopus_dryophilus.jpg" alt="Hrastova panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3009,7 +3010,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Drobne strupene čeladice in vlaknarice – dryophilus je vitka, s tanko rjavkasto klobukom in praktično brez okusa.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="hruskasta prasnica apioperdon pyriforme">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="hruskasta prasnica apioperdon pyriforme">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/apioperdon_pyriforme.jpg" alt="Hruškasta prašnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3023,7 +3024,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade bele mušnice – prerez prašnice mora biti povsem bel in enoten, brez zametka klobuka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="hygrophorus poetarum hygrophorus poetarum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="hygrophorus poetarum hygrophorus poetarum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_poetarum.jpg" alt="Hygrophorus poetarum" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3037,7 +3038,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge svetle polževke – vse neškodljive.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9" data-v="0" data-q="imperator rhodopurpureus imperator rhodopurpureus">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="imperator rhodopurpureus imperator rhodopurpureus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/imperator_rhodopurpureus.jpg" alt="Imperator rhodopurpureus" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3051,7 +3052,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vražji goban (Rubroboletus satanas) – strupen. Gobanov z rdečimi cevkami, ki močno pomodrijo, brez izkušenj ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="izvihana kolesnica paralepista flaccida">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="izvihana kolesnica paralepista flaccida">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/paralepista_flaccida.jpg" alt="Izvihana kolesnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3065,7 +3066,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupene bele livke (Clitocybe) – flaccida je rjastorjava z globoko lijasto klobukom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="jamicasta mlecnica lactarius scrobiculatus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="jamicasta mlecnica lactarius scrobiculatus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_scrobiculatus.jpg" alt="Jamičasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3079,7 +3080,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne sirovke (Lactarius deliciosus) – te imajo oranžen mleček; scrobiculatus ima bel mleček, ki na zraku porumeni, in jamičast bet.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="1" data-q="jelseva mlecnica lactarius obscuratus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="jelseva mlecnica lactarius obscuratus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_obscuratus.jpg" alt="Jelševa mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3093,7 +3094,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="9,10,11" data-v="1" data-q="jesenski hrcek gyromitra infula">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="jesenski hrcek gyromitra infula">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/gyromitra_infula.jpg" alt="Jesenski hrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3107,7 +3108,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rogati hrček (Gyromitra gigas) ali drugi jesenski hrčki, ki so vsi sumljivi in potencialno nevarni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="jetrasti ozobnik fistulina hepatica">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="jetrasti ozobnik fistulina hepatica">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/fistulina_hepatica.jpg" alt="Jetrasti ozobnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3121,7 +3122,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Nezamenljiv – videz surovega mesa in rdeč sok sta značilna.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="kafrova mlecnica lactarius camphoratus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="kafrova mlecnica lactarius camphoratus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lactarius_camphoratus.jpg" alt="Kafrova mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3135,7 +3136,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge drobne rjave mlečnice – camphoratus diši po kafri oziroma po posušeni zelišči; uporablja se kot dišava.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="6,7,8,9,10" data-v="1" data-q="karbolni kukmak agaricus xanthodermus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="karbolni kukmak agaricus xanthodermus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/agaricus_xanthodermus.jpg" alt="Karbolni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3149,7 +3150,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmak (Agaricus campestris) – užiten; poljski kukmak prijetno diši po mandljih in v dnu beta ne rumeni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="kijasta prasnica lycoperdon excipuliforme">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="kijasta prasnica lycoperdon excipuliforme">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lycoperdon_excipuliforme.jpg" alt="Kijasta prašnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3163,7 +3164,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade bele mušnice – prerez mora biti povsem bel in enoten. Užitna le, dokler je meso belo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="kijasti bunkar clavariadelphus pistillaris">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="kijasti bunkar clavariadelphus pistillaris">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/clavariadelphus_pistillaris.jpg" alt="Kijasti bunkar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3177,7 +3178,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="zascitena" data-m="7,8,9,10" data-v="1" data-q="knezja musnica  karzelj  amanita caesarea">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="knezja musnica  karzelj  amanita caesarea">
       <div class="gp-sp-top e-prot">
         <img src="/gobarska-napoved/img/vrste/amanita_caesarea.jpg" alt="Knežja mušnica (Karželj)" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3191,7 +3192,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdeča mušnica (Amanita muscaria) – strupena; rdeča mušnica ima bele lističe in bet ter luskice, karželj pa je živo rumen.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10,11" data-v="0" data-q="kodrasti hrcek helvella crispa">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="kodrasti hrcek helvella crispa">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/helvella_crispa.jpg" alt="Kodrasti hrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3205,7 +3206,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Pomladanski hrček (Gyromitra esculenta) – strupen. Vsi hrčki so surovi strupeni in jih je treba dolgo kuhati.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="kolobarjasta mlecnica lactarius zonarius">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="kolobarjasta mlecnica lactarius zonarius">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_zonarius.jpg" alt="Kolobarjasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3219,7 +3220,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne sirovke – zonarius ima bel, pekoč mleček in kolobarjast klobuk.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="konicasta musnica amanita virosa">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="konicasta musnica amanita virosa">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/amanita_virosa.jpg" alt="Koničasta mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3233,7 +3234,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmaki (Agaricus campestris) – užitni; kukmaki nimajo lupine v dnu beta, njihovi lističi pa hitro pordečijo ali rjavijo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="konicasta vlaznica hygrocybe conica">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="konicasta vlaznica hygrocybe conica">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/hygrocybe_conica.jpg" alt="Koničasta vlažnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3247,7 +3248,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge vlažnice – conica na dotik in s starostjo počrni.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="koreninasta grenivka hebeloma radicosum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="koreninasta grenivka hebeloma radicosum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/hebeloma_radicosum.jpg" alt="Koreninasta grenivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3261,7 +3262,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge grenivke – vse neužitne ali strupene; radicosum diši po marcipanu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="6,7,8,9,10" data-v="0" data-q="koreninasta panjevka hymenopellis radicata">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="koreninasta panjevka hymenopellis radicata">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/hymenopellis_radicata.jpg" alt="Koreninasta panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3275,7 +3276,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9" data-v="0" data-q="koreninasti postavnez caloboletus radicans">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="koreninasti postavnez caloboletus radicans">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/caloboletus_radicans.jpg" alt="Koreninasti postavnež" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3289,7 +3290,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitni gobani – radicans je izrazito grenek, z belkastim klobukom in modrečim mesom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="kosmata mlecnica lactarius torminosus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="kosmata mlecnica lactarius torminosus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_torminosus.jpg" alt="Kosmata mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3303,7 +3304,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitna sirovka (Lactarius deliciosus) – torminosus ima kosmat rob klobuka in bel, pekoč mleček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="kosmata plesnivka stereum hirsutum">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="kosmata plesnivka stereum hirsutum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/stereum_hirsutum.jpg" alt="Kosmata plesnivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3317,7 +3318,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="kozja noga scutiger pes caprae">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="kozja noga scutiger pes caprae">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/scutiger_pes_caprae.jpg" alt="Kozja noga" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3331,7 +3332,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ovčji ovčar (Albatrellus ovinus) – prav tako užiten in cenjen.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="kravja kolobarnica tricholoma vaccinum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="kravja kolobarnica tricholoma vaccinum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_vaccinum.jpg" alt="Kravja kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3345,7 +3346,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rjava kolobarnica (Tricholoma ustale) – strupena; vaccinum ima kosmat, luskast klobuk.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="krhka golobica russula fragilis">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="krhka golobica russula fragilis">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/russula_fragilis.jpg" alt="Krhka golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3359,7 +3360,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10,11" data-v="1" data-q="krvavordeca koprenka cortinarius sanguineus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="krvavordeca koprenka cortinarius sanguineus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_sanguineus.jpg" alt="Krvavordeča koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3373,7 +3374,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="laeticutis cristata laeticutis cristata">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="laeticutis cristata laeticutis cristata">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/laeticutis_cristata.jpg" alt="Laeticutis cristata" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3387,7 +3388,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ovčji ovčar (Albatrellus ovinus) – užiten; cristata je zelenkasta in grenkobna.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11,12" data-v="0" data-q="lazna lisicka hygrophoropsis aurantiaca">
+    <div class="gp-sp-card" data-m="8,9,10,11,12" data-q="lazna lisicka hygrophoropsis aurantiaca">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/hygrophoropsis_aurantiaca.jpg" alt="Lažna lisička" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3401,7 +3402,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna lisička (Cantharellus cibarius) – prava lisička ima gube, ne pravih lističev, in je bledo rumena; lažna je živo oranžna z mehkimi, vilastimi lističi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="lepa griva ramaria formosa">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="lepa griva ramaria formosa">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/ramaria_formosa.jpg" alt="Lepa griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3415,7 +3416,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumena griva (Ramaria flava) in rdeča griva (Ramaria botrytis) – formosa je rožnata z rumenimi konicami in povzroča drisko.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="leponogi postavnez caloboletus calopus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="leponogi postavnez caloboletus calopus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/caloboletus_calopus.jpg" alt="Leponogi postavnež" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3429,7 +3430,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Grenki goban (Caloboletus radicans) – neužiten in grenak. Leponogi ima izrazito rdeč spodnji del beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="ljubka golobica russula amoena">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="ljubka golobica russula amoena">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_amoena.jpg" alt="Ljubka golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3443,7 +3444,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge vijoličaste golobice – amoena ima žametast klobuk in vonj po topinamburju.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9" data-v="0" data-q="luskasta musnica amanita strobiliformis">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="luskasta musnica amanita strobiliformis">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/amanita_strobiliformis.jpg" alt="Luskasta mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3457,7 +3458,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Panterjeva mušnica (Amanita pantherina) – strupena. Mušnic brez zanesljive določitve ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="luskasti srnjak sarcodon imbricatus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="luskasti srnjak sarcodon imbricatus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/sarcodon_imbricatus.jpg" alt="Luskasti srnjak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3471,7 +3472,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sarcodon scabrosus – grenak in neužiten; imbricatus ima grobe temne luske in blag okus.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="lyophyllum decastes lyophyllum decastes">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="lyophyllum decastes lyophyllum decastes">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lyophyllum_decastes.jpg" alt="Lyophyllum decastes" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3485,7 +3486,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupene rdečelistke in koprenke, ki prav tako rastejo v šopih – decastes ima bel trosni prah in sivorjav, gladek klobuk. Ločevanje zahteva izkušnje.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10,11" data-v="0" data-q="lyophyllum loricatum lyophyllum loricatum">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="lyophyllum loricatum lyophyllum loricatum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/lyophyllum_loricatum.jpg" alt="Lyophyllum loricatum" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3499,7 +3500,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupene rdečelistke in koprenke, ki rastejo v šopih – loricatum ima hrustljav, trd klobuk in bel trosni prah.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="macesnova goba fomitopsis officinalis">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="macesnova goba fomitopsis officinalis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/fomitopsis_officinalis.jpg" alt="Macesnova goba" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3513,7 +3514,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="1" data-q="mahova mlecnica lactarius omphaliformis">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="mahova mlecnica lactarius omphaliformis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_omphaliformis.jpg" alt="Mahova mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3527,7 +3528,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="4,5,6" data-v="0" data-q="majska kolobarnica calocybe gambosa">
+    <div class="gp-sp-card" data-m="4,5,6" data-q="majska kolobarnica calocybe gambosa">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/calocybe_gambosa.jpg" alt="Majska kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3541,7 +3542,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Velika rdečelistka (Entoloma sinuatum) – strupena in raste v istem času; gambosa ima bel trosni prah in močan vonj po moki.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="mandljeva golobica russula grata">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="mandljeva golobica russula grata">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_grata.jpg" alt="Mandljeva golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3555,7 +3556,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Smrdljiva golobica (Russula foetens) – grata diši po grenkih mandljih.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11,12" data-v="0" data-q="maslena panjevka rhodocollybia butyracea">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="maslena panjevka rhodocollybia butyracea">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/rhodocollybia_butyracea.jpg" alt="Maslena panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3569,7 +3570,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="5,6,7,8,9,10" data-v="0" data-q="megacollybia platyphylla megacollybia platyphylla">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10" data-q="megacollybia platyphylla megacollybia platyphylla">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/megacollybia_platyphylla.jpg" alt="Megacollybia platyphylla" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3583,7 +3584,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="mehurjasta prasnica bovistella utriformis">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="mehurjasta prasnica bovistella utriformis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/bovistella_utriformis.jpg" alt="Mehurjasta prašnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3597,7 +3598,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade bele mušnice – prerez mora biti povsem bel. Užitna le mlada.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="6,7,8,9,10" data-v="0" data-q="mesnata uhljevka guepinia helvelloides">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="mesnata uhljevka guepinia helvelloides">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/guepinia_helvelloides.jpg" alt="Mesnata uhljevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3611,7 +3612,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bezgova uhljevka (Auricularia auricula-judae) – prav tako užitna.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10,11" data-v="0" data-q="mesnordeca bledivka laccaria laccata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="mesnordeca bledivka laccaria laccata">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/laccaria_laccata.jpg" alt="Mesnordeča bledivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3625,7 +3626,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta bledivka (Laccaria amethystina) – prav tako užitna. Mlade rdečelistke – pozor na rožnate lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="1" data-q="milnata kolobarnica tricholoma saponaceum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="milnata kolobarnica tricholoma saponaceum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_saponaceum.jpg" alt="Milnata kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3639,7 +3640,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="navadna koprenka cortinarius trivialis">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="navadna koprenka cortinarius trivialis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/cortinarius_trivialis.jpg" alt="Navadna koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3653,7 +3654,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Smrtno strupene koprenke (Cortinarius orellanus) – rod koprenk vsebuje smrtno strupene vrste in ga ne nabiramo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="6,7,8,9,10,11" data-v="1" data-q="navadna podvihanka paxillus involutus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="navadna podvihanka paxillus involutus">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/paxillus_involutus.jpg" alt="Navadna podvihanka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3667,7 +3668,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Velike rjave livke – podvihanka se prepozna po močno spodvihanem žametnem robu klobuka in rjavenju ob dotiku.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="0" data-q="navadna pokovka scleroderma citrinum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="navadna pokovka scleroderma citrinum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/scleroderma_citrinum.jpg" alt="Navadna pokovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3681,7 +3682,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade prašnice in gomoljike – pokovka ima trdo, belo lupino in črno-vijoličasto notranjost že v mladosti.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="5,6,7,8,9,10,11,12" data-v="1" data-q="navadna zveplenjaca hypholoma fasciculare">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11,12" data-q="navadna zveplenjaca hypholoma fasciculare">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/hypholoma_fasciculare.jpg" alt="Navadna žveplenjača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3695,7 +3696,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sivorumena mraznica (Armillaria mellea) – užitna po kuhanju; mraznica ima nežen obroček, luskice in bel trosni prah.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="navadni cepilistnik schizophyllum commune">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="navadni cepilistnik schizophyllum commune">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/schizophyllum_commune.jpg" alt="Navadni cepilistnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3709,7 +3710,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="6,7,8,9,10" data-v="0" data-q="navadni smrdljivec phallus impudicus">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="navadni smrdljivec phallus impudicus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/phallus_impudicus.jpg" alt="Navadni smrdljivec" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3723,7 +3724,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlado 'jajce' se lahko zamenja s prašnico ali gomoljiko – prerez pokaže želatinasto plast in zametek beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="nenavadna koprenka cortinarius anomalus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="nenavadna koprenka cortinarius anomalus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/cortinarius_anomalus.jpg" alt="Nenavadna koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3737,7 +3738,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Smrtno strupene koprenke (Cortinarius orellanus) – rod koprenk vsebuje smrtno strupene vrste in ga ne nabiramo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="olivna golobica russula olivacea">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="olivna golobica russula olivacea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_olivacea.jpg" alt="Olivna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3751,7 +3752,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge velike golobice – olivacea ima olivno rdečkast klobuk s koncentrično progavostjo; surova povzroča slabost.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="opecnata zveplenjaca hypholoma lateritium">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="opecnata zveplenjaca hypholoma lateritium">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/hypholoma_lateritium.jpg" alt="Opečnata žveplenjača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3765,7 +3766,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna žveplenjača (Hypholoma fasciculare) – strupena, grenka, z žveplenorumenimi lističi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="oranzna mlecnica lactarius aurantiacus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="oranzna mlecnica lactarius aurantiacus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_aurantiacus.jpg" alt="Oranžna mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3779,7 +3780,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne sirovke – aurantiacus ima bel mleček, sirovke oranžnega.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10" data-v="0" data-q="orjaska kolobarnica tricholoma colossus">
+    <div class="gp-sp-card" data-m="9,10" data-q="orjaska kolobarnica tricholoma colossus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tricholoma_colossus.jpg" alt="Orjaška kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3793,7 +3794,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge velike kolobarnice – colossus je mesnat in zelo velik, z rdečkasto rjavim klobukom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="ozgana ploskocevka bjerkandera adusta">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="ozgana ploskocevka bjerkandera adusta">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/bjerkandera_adusta.jpg" alt="Ožgana ploskocevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3807,7 +3808,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="panterjeva musnica amanita pantherina">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="panterjeva musnica amanita pantherina">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/amanita_pantherina.jpg" alt="Panterjeva mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3821,7 +3822,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečkasta mušnica (Amanita rubescens) – užitna; rdečkasta rdeči ob poškodbi, panterjeva pa ne spreminja barve mesa.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="pegasta kolobarnica tricholoma pardinum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="pegasta kolobarnica tricholoma pardinum">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/tricholoma_pardinum.jpg" alt="Pegasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3835,7 +3836,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10,11" data-v="0" data-q="pegasta panjevka rhodocollybia maculata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="pegasta panjevka rhodocollybia maculata">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/rhodocollybia_maculata.jpg" alt="Pegasta panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3849,7 +3850,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="1" data-q="pisana ploskocevka trametes versicolor">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="pisana ploskocevka trametes versicolor">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/trametes_versicolor.jpg" alt="Pisana ploskocevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3863,7 +3864,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bližnje sorodne ploskocevke – nobena ni strupena, so pa vse preveč lesene za neposredno prehrano.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="ploscata poloscenka ganoderma applanatum">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="ploscata poloscenka ganoderma applanatum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/ganoderma_applanatum.jpg" alt="Ploščata pološčenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3877,7 +3878,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="poljska koprenka cortinarius orellanus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="poljska koprenka cortinarius orellanus">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/cortinarius_orellanus.jpg" alt="Poljska koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3891,7 +3892,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="poljski deznik macrolepiota excoriata">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="poljski deznik macrolepiota excoriata">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/macrolepiota_excoriata.jpg" alt="Poljski dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3905,7 +3906,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupena rdečeča dežnica (Chlorophyllum brunneum) in drobne marelice (Lepiota) – dežnikov z rdečečim mesom in tistih, manjših od dlani, ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="polkrvava koprenka cortinarius semisanguineus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="polkrvava koprenka cortinarius semisanguineus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_semisanguineus.jpg" alt="Polkrvava koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3919,7 +3920,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Krvavordeča koprenka (Cortinarius sanguineus) – rod koprenk vsebuje smrtno strupene vrste in ga ne nabiramo.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="polsteni mlecnik lactifluus vellereus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="polsteni mlecnik lactifluus vellereus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactifluus_vellereus.jpg" alt="Polsteni mlečnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3933,7 +3934,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Kravja mlečnica (Lactifluus piperatus) – pogojno užitna; ima popolnoma gladko kožico klobuka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="4,5,6" data-v="1" data-q="pomladanska rdecelistka entoloma vernum">
+    <div class="gp-sp-card" data-m="4,5,6" data-q="pomladanska rdecelistka entoloma vernum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/entoloma_vernum.jpg" alt="Pomladanska rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3947,7 +3948,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="3,4,5" data-v="1" data-q="pomladanski hrcek gyromitra esculenta">
+    <div class="gp-sp-card" data-m="3,4,5" data-q="pomladanski hrcek gyromitra esculenta">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/gyromitra_esculenta.jpg" alt="Pomladanski hrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3961,7 +3962,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitni smrček (Morchella esculenta) – užiten; smrček ima satast klobuk (kot panj) in je v celoti votel.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="poprov goban chalciporus piperatus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="poprov goban chalciporus piperatus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/chalciporus_piperatus.jpg" alt="Poprov goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3975,7 +3976,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mladi gobani – piperatus je drobcen, z rdečkastimi cevkami in izrazito pekočim okusom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="1" data-q="porfirasta musnica amanita porphyria">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="porfirasta musnica amanita porphyria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_porphyria.jpg" alt="Porfirasta mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -3989,7 +3990,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zamenljiva z užitnimi vrstami! Previdno!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="progasta kolobarnica tricholoma virgatum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="progasta kolobarnica tricholoma virgatum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_virgatum.jpg" alt="Progasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4003,7 +4004,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zimska kolobarnica (Tricholoma portentosum) – užitna; virgatum je izrazito pekoča, s koničasto grbo na klobuku.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="4,5,6,7,8,9,10,11,12" data-v="0" data-q="progasta celadica mycena galericulata">
+    <div class="gp-sp-card" data-m="4,5,6,7,8,9,10,11,12" data-q="progasta celadica mycena galericulata">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/mycena_galericulata.jpg" alt="Progasta čeladica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4017,7 +4018,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11,12" data-v="0" data-q="prozorni jezek pseudohydnum gelatinosum">
+    <div class="gp-sp-card" data-m="9,10,11,12" data-q="prozorni jezek pseudohydnum gelatinosum">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/pseudohydnum_gelatinosum.jpg" alt="Prozorni ježek" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4031,7 +4032,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="puhasta ploskocevka trametes pubescens">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="puhasta ploskocevka trametes pubescens">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/trametes_pubescens.jpg" alt="Puhasta ploskocevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4045,7 +4046,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="queletova golobica russula queletii">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="queletova golobica russula queletii">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_queletii.jpg" alt="Queletova golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4059,7 +4060,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne vijoličaste golobice – queletii je pekoča in diši po kompotu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="ramaria fennica ramaria fennica">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="ramaria fennica ramaria fennica">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/ramaria_fennica.jpg" alt="Ramaria fennica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4073,7 +4074,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumena griva (Ramaria flava) – fennica je vijoličasto sivkasta in grenka. Ločevanje griv je zahtevno.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="6,7,8,9,10" data-v="0" data-q="razpokana vlaknarica pseudosperma rimosum">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="razpokana vlaknarica pseudosperma rimosum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/pseudosperma_rimosum.jpg" alt="Razpokana vlaknarica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4087,7 +4088,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Miška (Tricholoma scalpturatum) in mokovka – vlaknarice vsebujejo muskarin in so nevarne. Radialno razpokan klobuk je znak rodu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10,11" data-v="1" data-q="rdeca musnica amanita muscaria">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rdeca musnica amanita muscaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_muscaria.jpg" alt="Rdeča mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4101,7 +4102,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Knežja mušnica (Amanita caesarea) – užitna/zaščitena; karželj ima rumene lističe, bet in obroček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="rdeckasta labirintnica daedaleopsis confragosa">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="rdeckasta labirintnica daedaleopsis confragosa">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/daedaleopsis_confragosa.jpg" alt="Rdečkasta labirintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4115,7 +4116,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="rdeckasta polzevka hygrophorus erubescens">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="rdeckasta polzevka hygrophorus erubescens">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_erubescens.jpg" alt="Rdečkasta polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4129,7 +4130,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Medena polževka (Hygrophorus russula) – erubescens ima rdečkaste lise, ki porumenijo, in grenkoben okus.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="rjava kolobarnica tricholoma ustale">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="rjava kolobarnica tricholoma ustale">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_ustale.jpg" alt="Rjava kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4143,7 +4144,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10,11" data-v="1" data-q="rjava koprenka cortinarius bolaris">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rjava koprenka cortinarius bolaris">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_bolaris.jpg" alt="Rjava koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4157,7 +4158,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="robata kresilaca fomitopsis pinicola">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="robata kresilaca fomitopsis pinicola">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/fomitopsis_pinicola.jpg" alt="Robata kresilača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4171,7 +4172,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bukova kresilka (Fomes fomentarius) – siva, brez rdečega roba.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="roznati slinar gomphidius roseus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="roznati slinar gomphidius roseus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/gomphidius_roseus.jpg" alt="Rožnati slinar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4185,7 +4186,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Veliki slinar (Gomphidius glutinosus) – prav tako užiten.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="rumena griva ramaria flava">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="rumena griva ramaria flava">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/ramaria_flava.jpg" alt="Rumena griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4199,7 +4200,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Lepa griva (Ramaria formosa) – odvajalno strupena, rožnata z rumenimi konicami. Ločevanje griv je zahtevno.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="6,7,8,9,10" data-v="0" data-q="rumena musnica amanita gemmata">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="rumena musnica amanita gemmata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_gemmata.jpg" alt="Rumena mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4213,7 +4214,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Knežja mušnica (Amanita caesarea) – užitna; gemmata ima belo lamele in bel bet z ovojem, caesarea rumene lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11,12" data-v="0" data-q="rumena rogljaca calocera viscosa">
+    <div class="gp-sp-card" data-m="8,9,10,11,12" data-q="rumena rogljaca calocera viscosa">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/calocera_viscosa.jpg" alt="Rumena rogljača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4227,7 +4228,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumene grive (Ramaria) – rogljača je gumijasta, lepljiva in raste neposredno na lesu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="runjava marelica lepiota clypeolaria">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="runjava marelica lepiota clypeolaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lepiota_clypeolaria.jpg" alt="Runjava marelica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4241,7 +4242,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mladi dežniki (Macrolepiota) – marelice rodu Lepiota vsebujejo smrtno nevarne amatoksine. Drobnih dežnikom podobnih gob ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="sajasta mlecnica lactarius fuliginosus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="sajasta mlecnica lactarius fuliginosus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/lactarius_fuliginosus.jpg" alt="Sajasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4255,7 +4256,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Črna mlečnica (Lactarius lignyotus) – prav tako pogojno užitna; fuliginosus ima žametno rjav klobuk in mleček, ki porozi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="siva golobica russula grisea">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="siva golobica russula grisea">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_grisea.jpg" alt="Siva golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4269,7 +4270,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Modrikasta golobica (Russula cyanoxantha) – prav tako užitna in zelo podobna.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="siva lupljivka suillus viscidus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="siva lupljivka suillus viscidus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/suillus_viscidus.jpg" alt="Siva lupljivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4283,7 +4284,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge lupljivke – vse užitne; viscidus je sivkasto umazano bela.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="sivkasta kolobarnica tricholoma sciodes">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sivkasta kolobarnica tricholoma sciodes">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_sciodes.jpg" alt="Sivkasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4297,7 +4298,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Pegasta kolobarnica (Tricholoma pardinum) – strupena in mnogo večja; sciodes je grenka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="8,9,10" data-v="0" data-q="sivkasta rdecelistka entoloma rhodopolium">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="sivkasta rdecelistka entoloma rhodopolium">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/entoloma_rhodopolium.jpg" alt="Sivkasta rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4311,7 +4312,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ščitasta rdečelistka (Entoloma clypeatum) in mokovka (Clitopilus prunulus) – rhodopolium povzroča hude prebavne motnje. Rožnati trosni prah je znak rodu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="sivolistna zveplenjaca hypholoma capnoides">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sivolistna zveplenjaca hypholoma capnoides">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hypholoma_capnoides.jpg" alt="Sivolistna žveplenjača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4325,7 +4326,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna žveplenjača (Hypholoma fasciculare) – strupena in grenka, z zelenkastožveplenimi lističi; capnoides ima sive lističe in blag okus. Razlika je za nabiralca ključna.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="sladkasta mlecnica lactarius subdulcis">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="sladkasta mlecnica lactarius subdulcis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_subdulcis.jpg" alt="Sladkasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4339,7 +4340,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge drobne rjave mlečnice – subdulcis ima bel, sprva blag mleček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="slonokoscena polzevka hygrophorus eburneus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="slonokoscena polzevka hygrophorus eburneus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_eburneus.jpg" alt="Slonokoščena polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4353,7 +4354,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bele mušnice (Amanita virosa) – smrtno strupene; polževka nima ovoja ob dnu beta in ima debele, voščene lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="sluzasta mlecnica lactarius blennius">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="sluzasta mlecnica lactarius blennius">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_blennius.jpg" alt="Sluzasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4367,7 +4368,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge sivozelene mlečnice – blennius ima izrazito sluzast, kolobarjast klobuk in pekoč mleček.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="sluzasta panjevka mucidula mucida">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sluzasta panjevka mucidula mucida">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/mucidula_mucida.jpg" alt="Sluzasta panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4381,7 +4382,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="smolnata mlecnica lactarius picinus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="smolnata mlecnica lactarius picinus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_picinus.jpg" alt="Smolnata mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4395,7 +4396,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Črna mlečnica (Lactarius lignyotus) – picinus ima žametno črnorjav klobuk brez nagubanega roba.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10,11" data-v="1" data-q="smrdljiva golobica russula foetens">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="smrdljiva golobica russula foetens">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_foetens.jpg" alt="Smrdljiva golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4409,7 +4410,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="1" data-q="smrdljiva koprenka cortinarius camphoratus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="smrdljiva koprenka cortinarius camphoratus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/cortinarius_camphoratus.jpg" alt="Smrdljiva koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4423,7 +4424,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10,11" data-v="0" data-q="smrdljiva marelica lepiota cristata">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="smrdljiva marelica lepiota cristata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lepiota_cristata.jpg" alt="Smrdljiva marelica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4437,7 +4438,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mladi dežniki (Macrolepiota) – marelice rodu Lepiota so drobne in med njimi so smrtno strupene vrste. Drobnih dežnikom podobnih gob ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="sneznobela vlaznica cuphophyllus virgineus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="sneznobela vlaznica cuphophyllus virgineus">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cuphophyllus_virgineus.jpg" alt="Snežnobela vlažnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4451,7 +4452,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bele livke (Clitocybe dealbata) – smrtno nevarne; vlažnica ima debele, voščene, redke lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="4,5,6,7,8,9,10,11" data-v="0" data-q="spremenljiva panjevka kuehneromyces mutabilis">
+    <div class="gp-sp-card" data-m="4,5,6,7,8,9,10,11" data-q="spremenljiva panjevka kuehneromyces mutabilis">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/kuehneromyces_mutabilis.jpg" alt="Spremenljiva panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4465,7 +4466,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Robata smrtnica (Galerina marginata) – SMRTNO STRUPENA in raste v enakih šopih na lesu. Brez zanesljivega razlikovanja te vrste ne nabiraj.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="5,6,7,8,9,10,11" data-v="0" data-q="srnji scitovec pluteus cervinus">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="srnji scitovec pluteus cervinus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/pluteus_cervinus.jpg" alt="Srnji ščitovec" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4479,7 +4480,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečelistke (Entoloma) – pozor, nekatere so strupene; ščitovec ima proste, rožnate lističe in raste na lesu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="temna mraznica armillaria ostoyae">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="temna mraznica armillaria ostoyae">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/armillaria_ostoyae.jpg" alt="Temna mraznica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4493,7 +4494,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Strupene koprenke in žveplenjače – mraznica ima bel trosni prah in obroček. Surova je strupena, obvezno kuhati.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10" data-v="0" data-q="temnordeca golobica russula atropurpurea">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="temnordeca golobica russula atropurpurea">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/russula_atropurpurea.jpg" alt="Temnordeča golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4507,7 +4508,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bljuvna golobica (Russula emetica) – pekoča in strupena; atropurpurea je blago pekoča, s temno vijoličastordečim klobukom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="5,6,7,8,9,10,11" data-v="0" data-q="travniska vitezovka marasmius oreades">
+    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11" data-q="travniska vitezovka marasmius oreades">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/marasmius_oreades.jpg" alt="Travniška vitezovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4521,7 +4522,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bela livka (Clitocybe dealbata) – smrtno nevarna in raste na istih travnikih. Vitezovka ima žilav bet in redke, široke lističe.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="trda golobica russula lepida">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="trda golobica russula lepida">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_lepida.jpg" alt="Trda golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4535,7 +4536,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="8,9,10" data-v="0" data-q="trdna polzevka hygrophorus penarius">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="trdna polzevka hygrophorus penarius">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_penarius.jpg" alt="Trdna polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4549,7 +4550,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge bele polževke – vse neškodljive; penarius je čvrsta in suha.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10,11" data-v="0" data-q="tricholomopsis rutilans tricholomopsis rutilans">
+    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="tricholomopsis rutilans tricholomopsis rutilans">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholomopsis_rutilans.jpg" alt="Tricholomopsis rutilans" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4563,7 +4564,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelenkasta kolobarnica (Tricholoma equestre) – pozor, ta je bila vzrok zastrupitev; rutilans ima rdeče luske na rumeni podlagi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="0" data-q="trpka kolobarnica tricholoma acerbum">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="trpka kolobarnica tricholoma acerbum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_acerbum.jpg" alt="Trpka kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4577,7 +4578,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge svetle kolobarnice – acerbum je trpka in ima nagrbančen rob klobuka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10" data-v="0" data-q="velika koprenka cortinarius praestans">
+    <div class="gp-sp-card" data-m="9,10" data-q="velika koprenka cortinarius praestans">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/cortinarius_praestans.jpg" alt="Velika koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4591,7 +4592,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Smrtno strupene koprenke (Cortinarius orellanus) – rod koprenk vsebuje smrtno strupene vrste. Nabiranje koprenk odsvetujemo brez določitve pri mikologu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="7,8,9,10" data-v="0" data-q="velika mokovka clitopilus prunulus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="velika mokovka clitopilus prunulus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/clitopilus_prunulus.jpg" alt="Velika mokovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4605,7 +4606,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bela livka (Clitocybe dealbata) in sorodne bele livke – smrtno nevarne zaradi muskarina; mokovka ima rožnate lističe in močan vonj po moki.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="velika rdecelistka entoloma sinuatum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="velika rdecelistka entoloma sinuatum">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/entoloma_sinuatum.jpg" alt="Velika rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4619,7 +4620,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="6,7,8,9,10,11" data-v="0" data-q="vijolicasta celadica mycena pura">
+    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="vijolicasta celadica mycena pura">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/mycena_pura.jpg" alt="Vijoličasta čeladica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4633,7 +4634,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta kolesnica (Lepista nuda) – užitna in mnogo bolj mesnata; čeladica je drobna in diši po redkvi.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="vijolicastobetna golobica russula violeipes">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="vijolicastobetna golobica russula violeipes">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_violeipes.jpg" alt="Vijoličastobetna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4647,7 +4648,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge blage golobice – violeipes ima vijoličasto nadahnjen bet in vonj po topinamburju.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="vlazna mlecnica lactarius uvidus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="vlazna mlecnica lactarius uvidus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_uvidus.jpg" alt="Vlažna mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4661,7 +4662,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge sivkaste mlečnice – uvidus ima bel mleček, ki na mesu pusti vijoličasto liso.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="vodena krhkotrosovka psathyrella piluliformis">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="vodena krhkotrosovka psathyrella piluliformis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/psathyrella_piluliformis.jpg" alt="Vodena krhkotrosovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4675,7 +4676,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Robata smrtnica (Galerina marginata) – smrtno strupena, raste v podobnih šopih na lesu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="9,10,11" data-v="1" data-q="vodena mlecnica lactarius serifluus">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="vodena mlecnica lactarius serifluus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/lactarius_serifluus.jpg" alt="Vodena mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4689,7 +4690,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9" data-v="1" data-q="vrazji goban rubroboletus satanas">
+    <div class="gp-sp-card" data-m="7,8,9" data-q="vrazji goban rubroboletus satanas">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/rubroboletus_satanas.jpg" alt="Vražji goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4703,7 +4704,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="6,7,8,9,10" data-v="0" data-q="vretenasta panjevka gymnopus fusipes">
+    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="vretenasta panjevka gymnopus fusipes">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/gymnopus_fusipes.jpg" alt="Vretenasta panjevka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4717,7 +4718,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="0" data-q="zelena grintavka stropharia aeruginosa">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="zelena grintavka stropharia aeruginosa">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/stropharia_aeruginosa.jpg" alt="Zelena grintavka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4731,7 +4732,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Janeževa livka (Clitocybe odora) – ta je zelenkasta, a diši po janežu in nima obročka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="zelena musnica amanita phalloides">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zelena musnica amanita phalloides">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/amanita_phalloides.jpg" alt="Zelena mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4745,7 +4746,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="zelenkasta kolobarnica tricholoma equestre">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zelenkasta kolobarnica tricholoma equestre">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/tricholoma_equestre.jpg" alt="Zelenkasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4759,7 +4760,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="1,2,3,4,10,11,12" data-v="0" data-q="zimski luknjicar polyporus brumalis">
+    <div class="gp-sp-card" data-m="1,2,3,4,10,11,12" data-q="zimski luknjicar polyporus brumalis">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/polyporus_brumalis.jpg" alt="Zimski luknjičar" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4773,7 +4774,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="strupena" data-m="7,8,9,10" data-v="1" data-q="zlata sirovka lactarius chrysorrheus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zlata sirovka lactarius chrysorrheus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_chrysorrheus.jpg" alt="Zlata sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4787,7 +4788,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="zlatorumena golobica russula risigallina">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zlatorumena golobica russula risigallina">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_risigallina.jpg" alt="Zlatorumena golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4801,7 +4802,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge rumene golobice – risigallina je drobna, z oker trosnim prahom in sadnim vonjem.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-v="0" data-q="zlatorumena trepetlika tremella mesenterica">
+    <div class="gp-sp-card" data-m="1,2,3,4,5,6,7,8,9,10,11,12" data-q="zlatorumena trepetlika tremella mesenterica">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/tremella_mesenterica.jpg" alt="Zlatorumena trepetlika" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4815,7 +4816,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumena rogljača (Calocera viscosa) – ta je čvrsta in razrasla, trepetlika mehko nagubana.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="9,10,11" data-v="0" data-q="zlatozobata polzevka hygrophorus chrysodon">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="zlatozobata polzevka hygrophorus chrysodon">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/hygrophorus_chrysodon.jpg" alt="Zlatozobata polževka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4829,7 +4830,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge bele polževke – chrysodon ima zlatorumene zrnate pike na robu klobuka.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="uzitna" data-m="7,8,9,10" data-v="0" data-q="zorna golobica russula aurora">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zorna golobica russula aurora">
       <div class="gp-sp-top e-ok">
         <img src="/gobarska-napoved/img/vrste/russula_aurora.jpg" alt="Zorna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4843,7 +4844,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bljuvna golobica (Russula emetica) – pekoča; aurora je blaga, z rožnato belkastim klobukom.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="zrascena livka leucocybe connata">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="zrascena livka leucocybe connata">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/leucocybe_connata.jpg" alt="Zraščena livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4857,7 +4858,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bele livke (Clitocybe) in mladi dežniki – connata raste v izrazito zraščenih šopih.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="1" data-q="zvoncasta koprenka cortinarius traganus">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="zvoncasta koprenka cortinarius traganus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/cortinarius_traganus.jpg" alt="Zvončasta koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4871,7 +4872,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="8,9,10,11" data-v="0" data-q="cesnova nitka mycetinis alliaceus">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="cesnova nitka mycetinis alliaceus">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/mycetinis_alliaceus.jpg" alt="Česnova nitka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4885,7 +4886,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="cesnjeva golobica russula sanguinaria">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="cesnjeva golobica russula sanguinaria">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_sanguinaria.jpg" alt="Češnjeva golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4899,7 +4900,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="pogojno" data-m="9,10,11" data-v="0" data-q="skrlatna vlaznica hygrocybe punicea">
+    <div class="gp-sp-card" data-m="9,10,11" data-q="skrlatna vlaznica hygrocybe punicea">
       <div class="gp-sp-top e-cond">
         <img src="/gobarska-napoved/img/vrste/hygrocybe_punicea.jpg" alt="Škrlatna vlažnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4913,7 +4914,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge rdeče vlažnice – punicea je največja med njimi. Vlažnice so kazalke ohranjenih travnikov; puščaj jih rasti.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="0" data-q="zametna podvihanka tapinella atrotomentosa">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zametna podvihanka tapinella atrotomentosa">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tapinella_atrotomentosa.jpg" alt="Žametna podvihanka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4927,7 +4928,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Navadna podvihanka (Paxillus involutus) – strupena; atrotomentosa ima žametno temno rjav bet.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="zolta kolobarnica tricholoma sejunctum">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zolta kolobarnica tricholoma sejunctum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_sejunctum.jpg" alt="Žolta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4941,7 +4942,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="7,8,9,10" data-v="1" data-q="zolcasti goban tylopilus felleus">
+    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zolcasti goban tylopilus felleus">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tylopilus_felleus.jpg" alt="Žolčasti goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4955,7 +4956,7 @@ body .wrap{padding-bottom:5.5rem}
         
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10" data-v="0" data-q="zolcna golobica russula fellea">
+    <div class="gp-sp-card" data-m="8,9,10" data-q="zolcna golobica russula fellea">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/russula_fellea.jpg" alt="Žolčna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -4969,7 +4970,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Bledorumena golobica (Russula ochroleuca) – fellea je izrazito pekoča in diši po jabolčnem kompotu.</div>
       </div>
     </div>
-    <div class="gp-sp-card" data-e="neuzitna" data-m="8,9,10,11" data-v="1" data-q="zveplena kolobarnica tricholoma sulphureum">
+    <div class="gp-sp-card" data-m="8,9,10,11" data-q="zveplena kolobarnica tricholoma sulphureum">
       <div class="gp-sp-top e-none">
         <img src="/gobarska-napoved/img/vrste/tricholoma_sulphureum.jpg" alt="Žveplena kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
@@ -5307,9 +5308,9 @@ derivative work: Ak ccm (talk)</td><td>CC BY-SA 3.0</td><td><a href="https://com
   var qEl=document.getElementById("gp-sp-q");
   var moreEl=document.getElementById("gp-sp-more");
   var countEl=document.getElementById("gp-sp-count");
-  var chips=[].slice.call(document.querySelectorAll(".gp-sp-chip"));
+  var seasonEl=document.getElementById("gp-sp-season");
   var month=String(new Date().getMonth()+1);
-  var filter="vse", query="", shown=PAGE;
+  var seasonOnly=false, query="", shown=PAGE;
 
   function norm(s){
     return (s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
@@ -5317,9 +5318,8 @@ derivative work: Ak ccm (talk)</td><td>CC BY-SA 3.0</td><td><a href="https://com
   }
   function matches(c){
     if(query && c.getAttribute("data-q").indexOf(query)<0) return false;
-    if(filter==="vse") return true;
-    if(filter==="sezona") return (c.getAttribute("data-m")||"").split(",").indexOf(month)>=0;
-    return c.getAttribute("data-e")===filter;
+    if(seasonOnly && (c.getAttribute("data-m")||"").split(",").indexOf(month)<0) return false;
+    return true;
   }
   function render(){
     var n=0;
@@ -5335,12 +5335,14 @@ derivative work: Ak ccm (talk)</td><td>CC BY-SA 3.0</td><td><a href="https://com
     countEl.textContent = n===0 ? "Nobena vrsta ne ustreza iskanju."
       : "Prikazanih "+Math.min(shown,n)+" od "+n+(n===1?" vrste.":" vrst.");
   }
-  chips.forEach(function(ch){
-    ch.addEventListener("click",function(){
-      chips.forEach(function(o){o.classList.toggle("on",o===ch);});
-      filter=ch.getAttribute("data-f"); shown=PAGE; render();
+  if(seasonEl){
+    seasonEl.addEventListener("click",function(){
+      seasonOnly=!seasonOnly;
+      seasonEl.classList.toggle("on",seasonOnly);
+      seasonEl.setAttribute("aria-pressed",seasonOnly?"true":"false");
+      shown=PAGE; render();
     });
-  });
+  }
   if(qEl){
     var t;
     qEl.addEventListener("input",function(){
@@ -5349,6 +5351,12 @@ derivative work: Ak ccm (talk)</td><td>CC BY-SA 3.0</td><td><a href="https://com
     });
   }
   moreEl.addEventListener("click",function(){ shown+=PAGE*2; render(); });
+  // Vrstica skupin drsi vodoravno; na strani skupine je aktivna lahko zunaj
+  // vidnega dela, zato jo pripeljemo v pogled (brez premika same strani).
+  var active=document.querySelector(".gp-sp-chips a.on");
+  if(active && active.parentNode.scrollWidth>active.parentNode.clientWidth){
+    active.parentNode.scrollLeft = active.offsetLeft - 12;
+  }
   render();
 })();
 </script>

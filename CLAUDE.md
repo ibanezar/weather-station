@@ -251,7 +251,26 @@ Pravila, ki jih ne obračaj:
 - Fotografije doda `tools/fetch_species_photos.py` z Wikimedia Commons; sprejme
   samo licence z dovoljeno objavo (CC0, javna domena, CC BY, CC BY-SA, GFDL) in
   vsako vpiše v `CREDITS.json`, ki se izriše v tabelo virov. Vrsta brez proste
-  slike ostane pri rezervnem prikazu — to ni napaka.
+  slike ostane pri rezervnem prikazu — to ni napaka. Sito zavrne mikroskopijo
+  in risbe **po kategorijah na Commons**, ne po imenu datoteke: ime tega ne
+  izda, kategorija »Fungal spores« pa. `--target dvojnice` polni primerjalne
+  slike, imeni datotek vzame iz generatorja strani.
+
+### Baza vrst je razbita na strani po užitnosti
+
+`/baza-vrst/` ima vseh 300 vrst, pod njo pa so `uzitne`, `pogojno-uzitne`,
+`strupene` in `neuzitne` (`BAZA_CATS` + `species_section_html()`). Razlog je
+dvojen: ena stran s 300 karticami je 405 kB, skupina pa 100–170 kB, in vsaka
+skupina je svoj iskalni cilj (»užitne gobe«, »strupene gobe«).
+
+- Med skupinami se hodi **po povezavah, ne s filtrom v JS** — vsaka ima svoj
+  URL, naslov in canonical. Iskanje in »V sezoni zdaj« sta filtra v JS znotraj
+  trenutne strani.
+- Kartice so vse v HTML, naenkrat se jih izriše 24 (`SP_JS`), gumb odpre
+  naslednjih 48. **Ne prestavljaj izrisa v JSON** — prav ta seznam je vsebina,
+  po kateri stran najdejo iskalniki; brez JS morajo biti vidne vse.
+- Nova skupina gre v `BAZA_CATS` in v `CORE` v `tools/seo_audit.py`, sicer je
+  v nobenem sitemapu ni.
 
 ## Razvoj
 
