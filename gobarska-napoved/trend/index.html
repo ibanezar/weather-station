@@ -284,6 +284,28 @@ body{
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
 .gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
+/* Orodna vrstica baze vrst: iskanje + filtri po užitnosti in sezoni. Kartic je
+   300, zato se jih naenkrat izriše le prvih nekaj (glej SP_JS) — brez JS
+   ostanejo vidne vse, da se pajku in obiskovalcu brez skript ne skrije nič. */
+/* Odmik je višina fiksne .gp-topbar (48 px) — brez njega iskalno polje ob
+   drsenju zleze podnjo in ostanejo vidni samo filtri. */
+.gp-sp-tools{position:sticky;top:48px;z-index:5;padding:.6rem 0 .5rem;background:var(--bg);
+  backdrop-filter:blur(6px);margin-bottom:.2rem}
+.gp-sp-search{width:100%;box-sizing:border-box;padding:.6rem .8rem;border-radius:10px;
+  border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:.9rem}
+.gp-sp-search::placeholder{color:var(--muted)}
+.gp-sp-chips{display:flex;gap:.4rem;overflow-x:auto;padding:.55rem .1rem .1rem;scrollbar-width:none}
+.gp-sp-chips::-webkit-scrollbar{display:none}
+.gp-sp-chip{flex:0 0 auto;padding:.34rem .7rem;border-radius:999px;cursor:pointer;
+  border:1px solid var(--card-border);background:var(--card-bg);color:var(--muted);
+  font-size:.76rem;font-family:inherit;white-space:nowrap}
+.gp-sp-chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.gp-sp-count{font-size:.75rem;color:var(--muted);margin:.4rem .1rem 0}
+.gp-sp-card[hidden]{display:none}
+.gp-sp-more{display:flex;justify-content:center;margin:.9rem 0 .3rem}
+.gp-sp-more button{padding:.55rem 1.1rem;border-radius:10px;cursor:pointer;font-family:inherit;
+  font-size:.85rem;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text)}
+.gp-sp-more button[hidden]{display:none}
 .gp-terrmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.7rem;margin:.6rem 0}
 .gp-terrmap .t{background:var(--card-bg);border:1px solid var(--card-border);border-left-width:4px;
   border-radius:10px;padding:.85rem 1rem;box-shadow:var(--card-shadow)}
