@@ -34,6 +34,12 @@ CORE = {
     # JSON-LD, v nobenem sitemapu pa jih ni bilo — baza vrst in dvojnice sta
     # ravno strani, ki iskanju največ povesta.
     "gobarska-napoved/baza-vrst/":  ("weekly",  "0.7"),
+    # Baza po skupinah užitnosti — vsaka skupina je svoj iskalni cilj
+    # ("užitne gobe", "strupene gobe") in svoja, precej manjša stran.
+    "gobarska-napoved/baza-vrst/uzitne/":          ("weekly",  "0.7"),
+    "gobarska-napoved/baza-vrst/pogojno-uzitne/":  ("weekly",  "0.6"),
+    "gobarska-napoved/baza-vrst/strupene/":        ("weekly",  "0.7"),
+    "gobarska-napoved/baza-vrst/neuzitne/":        ("weekly",  "0.5"),
     "gobarska-napoved/dvojnice/":   ("weekly",  "0.7"),
     "gobarska-napoved/koledar/":    ("monthly", "0.6"),
     "gobarska-napoved/trend/":      ("weekly",  "0.5"),
