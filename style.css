@@ -1886,6 +1886,23 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .ecw-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.15rem}
 .ecw-offline{font-size:.75rem;color:var(--muted);padding:.5rem 0}
 
+/* Dolinski dvoboj — IREICA1 (domača) ⇄ IREICA7 (Varpolje) */
+.duel-row{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:stretch;margin-top:.5rem}
+.duel-side{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.65rem .7rem;text-align:center}
+.duel-side.duel-home{border-color:var(--fc-today-border);background:var(--fc-today-bg)}
+.duel-name{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.duel-home .duel-name{color:var(--blue)}
+.duel-temp{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:300;margin:.1rem 0}
+.duel-meta{font-size:.67rem;color:var(--muted);line-height:1.45}
+.duel-mid{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:74px}
+.duel-delta{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:300}
+.duel-delta-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:.1rem}
+.duel-verdict{font-size:.78rem;line-height:1.5;margin-top:.55rem}
+.duel-credit{font-size:.67rem;color:var(--muted);margin-top:.45rem}
+.duel-credit a{color:var(--blue)}
+.duel-offline{font-size:.75rem;color:var(--muted);padding:.5rem 0}
+@media(max-width:420px){.duel-temp{font-size:1.2rem}.duel-side{padding:.55rem .45rem}.duel-mid{min-width:58px}}
+
 /* ARSO cross-check */
 .arso-diff-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.78rem}
 .arso-diff-row:last-child{border-bottom:none}

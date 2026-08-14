@@ -21,6 +21,11 @@ const EW_APP_FALLBACK = "A7E5CAF73FCC9BF859CDE788D69A1C91";
 const EW_API_FALLBACK = "0bd213c8-8e54-4bf6-b6da-127a1c605034";
 const EW_MAC = "BC:DD:C2:42:8D:56";
 
+// Sosednja postaja IREICA7 v Varpolju (~1,6 km jugozahodno), last prijatelja,
+// ki jo javno objavlja kot JSON. Njegov strežnik se osveži približno vsakih
+// 5 minut — pogostejše poizvedovanje ne vrne ničesar novega.
+const VARPOLJE_URL = "https://varpolje.si/station.json";
+
 const ALLOWED_ORIGINS = [
   "https://ibanezar.github.io",
   "https://meteorec.si",
@@ -2669,6 +2674,32 @@ export default {
         return new Response(JSON.stringify(ewData), {
           headers: {...CORS_ALLOWED, "Content-Type":"application/json", "Cache-Control":"max-age=120"}
         });
+      }
+
+      // ── /varpolje-current ─────────────────────────────────
+      // Sosednja postaja IREICA7 (Varpolje). Prijateljev strežnik ne pošilja
+      // glave CORS, zato je brskalnik na meteorec.si ne sme brati neposredno
+      // in gre poizvedba prek nas.
+      //
+      // Zasebnost velja tudi za sosedovo hišo: če bi se v odgovoru kdaj
+      // pojavile notranje meritve, jih režemo tu, pri viru, tako da jih noben
+      // odjemalec ne dobi (isto načelo kot pri /ecowitt-current, CLAUDE.md).
+      if (path === "/varpolje-current") {
+        try {
+          const vpRes = await fetch(VARPOLJE_URL, { headers: { "Accept": "application/json" } });
+          if (!vpRes.ok) throw new Error("HTTP " + vpRes.status);
+          const vpData = await vpRes.json();
+          delete vpData.indoor;
+          if (vpData && vpData.current) delete vpData.current.indoor;
+          return new Response(JSON.stringify(vpData), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=120" }
+          });
+        } catch (e) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "varpolje_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
       }
 
       // ── /arso-obs ─────────────────────────────────────────

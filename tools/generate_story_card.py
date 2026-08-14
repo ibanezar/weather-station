@@ -4,7 +4,7 @@ tools/generate_story_card.py — dnevna kartica za Instagram/Facebook zgodbo.
 
 Zjutraj pogleda napoved, trenutne meritve, kakovost zraka, cvetni prah,
 gobarski indeks in zgodovino postaje (history.json) za Rečico ob Savinji,
-nato izmed ~24 tipov kartic ("tem") izbere tisto, ki je danes najbolj
+nato izmed ~25 tipov kartic ("tem") izbere tisto, ki je danes najbolj
 aktualna -- vsaka tema ima več besedilnih različic (skupaj prek 100), da se
 kartica čez čas ne ponavlja.
 
@@ -23,15 +23,16 @@ Teme (razvrščene po prioriteti, višja zmaga, če je več hkrati aktualnih):
   HUMID_MUGGY                           — soparno
   POLLEN_HIGH                            — visok cvetni prah
   RECORD_WATCH                            — blizu/nad rekordom za ta dan
-  TROPICAL_NIGHT                           — tropska noč za nami
-  DROUGHT_DRY_STREAK                        — dolg suh niz
-  MUSHROOM                                   — gobarski pogoji
-  AIR_QUALITY_GOOD                            — čist zrak
-  VS_YESTERDAY                                 — velika sprememba od včeraj
-  PRESSURE_TREND                                — hiter padec/dvig tlaka
-  SUNRISE_SUNSET                                 — dolžina dneva
-  MTR_FORECAST                                    — napoved lastnega modela MTR za jutri
-  GENERAL                                         — splošni povzetek (fallback)
+  VALLEY_DUEL                              — velika razlika do sosednje postaje
+  TROPICAL_NIGHT                            — tropska noč za nami
+  DROUGHT_DRY_STREAK                         — dolg suh niz
+  MUSHROOM                                    — gobarski pogoji
+  AIR_QUALITY_GOOD                             — čist zrak
+  VS_YESTERDAY                                  — velika sprememba od včeraj
+  PRESSURE_TREND                                 — hiter padec/dvig tlaka
+  SUNRISE_SUNSET                                  — dolžina dneva
+  MTR_FORECAST                                     — napoved lastnega modela MTR za jutri
+  GENERAL                                          — splošni povzetek (fallback)
 
 Zapiše og/story/<YYYY-MM-DD>.jpg (1080x1920) + og/story/latest.json.
 Objavita jo tools/post_story_to_facebook.py in post_story_to_instagram.py
@@ -190,6 +191,30 @@ def fetch_current():
         return {}
 
 
+def fetch_varpolje():
+    """Sosednja postaja IREICA7 v Varpolju (~1,6 km jugozahodno), last prijatelja,
+    ki jo javno objavlja na varpolje.si.
+
+    Bere se prek workerja (/varpolje-current) in ne neposredno, ker worker
+    odgovor tudi počisti. Postaja je gost: sem pride samo kot primerjava, v
+    history.json in v učenje modela MTR pa ne gre nikoli (CLAUDE.md).
+    """
+    try:
+        data = fetch_json(f"{WORKER}/varpolje-current")
+        temp = (data.get("current") or {}).get("temp_c")
+        if temp is None:
+            return None
+        age_min = None
+        upd = data.get("updated_utc")
+        if upd:
+            stamp = datetime.datetime.fromisoformat(upd.replace("Z", "+00:00"))
+            age_min = (datetime.datetime.now(datetime.timezone.utc) - stamp).total_seconds() / 60
+        return {"temp": temp, "age_min": age_min}
+    except Exception as e:
+        print(f"⚠ Sosednja postaja Varpolje ni dosegljiva: {e}", file=sys.stderr)
+        return None
+
+
 def load_history():
     try:
         with open(HISTORY, encoding="utf-8") as f:
@@ -297,6 +322,7 @@ def build_ctx():
 
     arso = fetch_arso()
     current = fetch_current()
+    varpolje = fetch_varpolje()
     aq = fetch_air_quality()
     hist = load_history()
     gobe = load_gobe_index(today.isoformat())
@@ -320,6 +346,7 @@ def build_ctx():
         arso=arso, arso_precip=(arso or {}).get("precip") or 0,
         current=current,
         current_temp=((current.get("outdoor") or {}).get("temperature") or {}).get("value"),
+        varpolje=varpolje,
         aq=aq, hist=hist, hist_yesterday=hist_yesterday, gobe=gobe,
     )
 
@@ -722,6 +749,44 @@ def t_record(ctx):
                  ("Postaja", "IREICA1"),
                  ("Vreme", ctx["cond"] or "jasno")],
                 C_RED, "weather-station")
+
+
+# ── VALLEY_DUEL ──
+# Edina tema, ki primerja dve postaji. Zjutraj je razlika največja: hladen
+# zrak se ponoči nabira na dnu doline in dve točki 1,6 km narazen se lahko
+# razideta za več stopinj. Meritev Meteoreca je vedno navedena prva -- sosed
+# je gost, ne enakovreden vir.
+@topic("VALLEY_DUEL", 47)
+def t_valley_duel(ctx):
+    vp = ctx["varpolje"]
+    mine = ctx["current_temp"]
+    if not vp or mine is None:
+        return None
+    # Zastarel posnetek sosedove postaje ni primerjava, ampak dve različni uri.
+    if vp["age_min"] is not None and vp["age_min"] > 45:
+        return None
+    try:
+        mine_t = float(mine)
+        vp_t = float(vp["temp"])
+    except (TypeError, ValueError):
+        return None
+    diff = mine_t - vp_t
+    if abs(diff) < 2.0:
+        return None
+    variants = [
+        ("Dve postaji,\nena dolina", "razlika med Rečico in Varpoljem"),
+        ("Dolina ni\npovsod enaka", "razlika med Rečico in Varpoljem"),
+        ("Kilometer in pol\nrazlike", "razlika med Rečico in Varpoljem"),
+        ("Dolinski\ndvoboj", "razlika med Rečico in Varpoljem"),
+        ("Sosedov termometer\nkaže drugače", "razlika med Rečico in Varpoljem"),
+    ]
+    headline, big_sub = pick(ctx, "VALLEY_DUEL", variants)
+    sign = "+" if diff > 0 else "−"
+    return card(ctx, "VALLEY_DUEL", headline, f"{sign}{num_sl(abs(diff), 1)} °C", big_sub,
+                [("Rečica (IREICA1)", f"{num_sl(mine_t, 1)} °C"),
+                 ("Varpolje (IREICA7)", f"{num_sl(vp_t, 1)} °C"),
+                 ("Zračna razdalja", "1,6 km")],
+                C_CYAN, "misty-valley", eyebrow="REČICA IN VARPOLJE")
 
 
 # ── TROPICAL_NIGHT ──
