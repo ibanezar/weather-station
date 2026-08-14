@@ -1,33 +1,5 @@
 [
   {
-    "target_date": "2026-08-13",
-    "made_at": "2026-08-12",
-    "arso": {
-      "tmax": 24,
-      "tmin": 15,
-      "loc": "Ljubno ob Savinji"
-    },
-    "open_meteo": {
-      "tmax": 28.4,
-      "tmin": 14.4,
-      "precip": 0.0
-    },
-    "meteorec": {
-      "tmax": 29.7,
-      "tmin": 11.6,
-      "pop": 0.16,
-      "lead": 1,
-      "model_version": "1.0"
-    },
-    "aifs": {
-      "tmax": 27.3,
-      "tmin": 17.1,
-      "precip": 0.0,
-      "model": "ecmwf_aifs025_single",
-      "src": "live"
-    }
-  },
-  {
     "target_date": "2026-08-14",
     "made_at": "2026-08-13",
     "arso": {
@@ -50,6 +22,34 @@
     "aifs": {
       "tmax": 28.1,
       "tmin": 16.2,
+      "precip": 0.0,
+      "model": "ecmwf_aifs025_single",
+      "src": "live"
+    }
+  },
+  {
+    "target_date": "2026-08-15",
+    "made_at": "2026-08-14",
+    "arso": {
+      "tmax": 27,
+      "tmin": 16,
+      "loc": "Ljubno ob Savinji"
+    },
+    "open_meteo": {
+      "tmax": 33.0,
+      "tmin": 10.7,
+      "precip": 0.0
+    },
+    "meteorec": {
+      "tmax": 33.8,
+      "tmin": 9.2,
+      "pop": 0.17,
+      "lead": 1,
+      "model_version": "1.0"
+    },
+    "aifs": {
+      "tmax": 29.5,
+      "tmin": 16.0,
       "precip": 0.0,
       "model": "ecmwf_aifs025_single",
       "src": "live"
