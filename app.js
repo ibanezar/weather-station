@@ -2832,7 +2832,16 @@ const LS_KEY='wx-history-v1';
 function saveToLocalHistory(dailySummaries){
   try{
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-    dailySummaries.forEach(s=>{stored[s.obsTimeLocal]=s.metric;});
+    const today=_localDateStr(new Date());
+    dailySummaries.forEach(s=>{
+      const k=s.obsTimeLocal;
+      // Zaključenega dne, ki je že usklajen z arhivom (history.json, "src":
+      // "station"), urni povzetki WU ne prepišejo nazaj — sicer bi se razlika
+      // med obema oblakoma vsakih pet minut vrnila. Današnji dan v arhivu še
+      // ni zaključen in se osvežuje sproti.
+      if(k<today&&stored[k]?.src==='station')return;
+      stored[k]=s.metric;
+    });
     const cutoff=new Date(Date.now()-6*365*24*3600*1000).toISOString().slice(0,10);
     Object.keys(stored).forEach(k=>{if(k<cutoff)delete stored[k];});
     localStorage.setItem(LS_KEY,JSON.stringify(stored));
@@ -3074,15 +3083,30 @@ async function autoLoadHistoryFile(){
     const parsed=parseHistoryJson(raw);
     if(!parsed.length)return;
     const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
-    let added=0;
-    parsed.forEach(d=>{if(d.obsTimeLocal&&!stored[d.obsTimeLocal]){stored[d.obsTimeLocal]=d.metric;added++;}});
-    if(added>0){
+    const today=_localDateStr(new Date());
+    let added=0,fixed=0;
+    parsed.forEach(d=>{
+      const k=d.obsTimeLocal;if(!k)return;
+      if(!stored[k]){stored[k]=d.metric;added++;return;}
+      // Zaključen dan prepiše arhiv. Lokalna shramba se polni iz WU (urne
+      // konice), history.json pa iz Ecowitta — postaja je ista, vrednosti pa
+      // se razideta za kakšno desetinko (5. 8. 2026: WU 38,1 °C, Ecowitt
+      // 37,8 °C) in kartica rekordov je potem v neskladju z /rekord/ in
+      // članki. Merodajen je arhiv, iz katerega živi vse ostalo.
+      // Današnji dan ostane lokalen (v arhivu ga še ni), meritve postaje pa
+      // ne sme povoziti model — zato samo zapisi s "src":"station".
+      if(k>=today||d.metric?.src!=='station')return;
+      if(stored[k].src==='station')return; // dan je že usklajen z arhivom
+      stored[k]=d.metric;fixed++;
+    });
+    if(added>0||fixed>0){
       localStorage.setItem(LS_KEY,JSON.stringify(stored));
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
       applyMonthlySummary();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
       if(histTabActive())switchPeriod(_currentPeriod);
       const t=document.getElementById('toast');
-      if(t){t.textContent='📂 history.json: uvoženih '+added+' novih dni';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+      const msg=[added?'uvoženih '+added+' novih dni':'',fixed?'usklajenih '+fixed+' dni z arhivom':''].filter(Boolean).join(', ');
+      if(t){t.textContent='📂 history.json: '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
     }
   }catch(e){console.warn('[history.json]',e.message);}
 }
@@ -5163,7 +5187,7 @@ function applyYearRecords(){
     if(entries.length<3){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za '+y+'…</div>';return;}
     const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
     const recs=[
-      {icon:'🌡',lbl:'Najhoglejša temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
+      {icon:'🌡',lbl:'Najvišja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
       {icon:'❄️',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:parseFloat(e[1].tempLow).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--blue)'},
       {icon:'🌧',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:parseFloat(e[1].precipTotal).toFixed(1)+' mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
       {icon:'💨',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:parseFloat(e[1].windspeedHigh).toFixed(1)+' km/h',d:fmtD(e[0])};},col:'var(--purple)'},
