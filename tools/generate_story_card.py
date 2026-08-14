@@ -783,9 +783,10 @@ def t_valley_duel(ctx):
     headline, big_sub = pick(ctx, "VALLEY_DUEL", variants)
     sign = "+" if diff > 0 else "−"
     return card(ctx, "VALLEY_DUEL", headline, f"{sign}{num_sl(abs(diff), 1)} °C", big_sub,
+                # Zgodbe nimajo podpisa, zato gre navedba prijatelja na sliko.
                 [("Rečica (IREICA1)", f"{num_sl(mine_t, 1)} °C"),
                  ("Varpolje (IREICA7)", f"{num_sl(vp_t, 1)} °C"),
-                 ("Zračna razdalja", "1,6 km")],
+                 ("Postajo deli", "Jaka Robnik")],
                 C_CYAN, "misty-valley", eyebrow="REČICA IN VARPOLJE")
 
 

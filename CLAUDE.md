@@ -200,7 +200,8 @@ Kje je vključena:
 - `tools/generate_story_card.py`, tema `VALLEY_DUEL` (prioriteta 47) — kartica
   za zgodbo se sproži samo ob razliki **≥ 2 °C** in samo, če sosedov posnetek
   ni starejši od 45 minut. Zastarel posnetek ni primerjava, ampak dve različni
-  uri.
+  uri. Ker zgodbe nimajo podpisa, je navedba prijatelja tretja vrstica
+  statistike na sami sliki.
 
 Če se vir kdaj ustavi ali spremeni obliko, vse tri točke tiho odpadejo
 (kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
