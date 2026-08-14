@@ -8448,6 +8448,95 @@ async function fetchEcowittCurrent(){
 }
 
 // ══════════════════════════════════════════════════════════
+// ── 1b. Dolinski dvoboj: IREICA1 ⇄ IREICA7 (Varpolje) ─────
+// ══════════════════════════════════════════════════════════
+// Prijateljeva postaja v Varpolju je ~1,6 km jugozahodno, na istem dnu
+// doline. Zanimiva je prav zato, ker ena postaja tega ne more pokazati:
+// koliko se dve točki v isti dolini razideta, ko se ponoči nabira hladen
+// zrak. Sosednja postaja tu ostane gost — v history.json, v učenje modela
+// MTR in na semafor /tocnost-napovedi/ ne gre (CLAUDE.md).
+//
+// Vir se osvežuje ~vsakih 5 minut, bere pa se prek workerja, ker sosedov
+// strežnik ne pošilja glave CORS.
+const DUEL_NEIGHBOUR={
+  name:'Varpolje', id:'IREICA7',
+  url:'https://www.varpolje.si/',
+  owner:'Jaka Robnik',   // navedba na kartici: »Meritve sosednje postaje deli …«
+};
+
+function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
+
+function _duelVerdict(diff,hour){
+  const a=Math.abs(diff);
+  if(a<0.3)return 'Postaji kažeta tako rekoč isto — zrak nad dolino je premešan.';
+  const toplejsi=diff>0?'Rečici':'Varpolju';
+  const hladnejsi=diff>0?'Varpolju':'Rečici';
+  let s='V '+toplejsi+' je '+_duelNum(a,1)+' °C topleje kot v '+hladnejsi+'.';
+  if(hour<9&&a>=1.5)s+=' Jutranja razlika te velikosti je znak jezera hladnega zraka na dnu doline.';
+  else if(a>=2)s+=' Na 1,6 km zračne razdalje — dolina očitno ni ena sama vremenska točka.';
+  return s;
+}
+
+async function fetchValleyDuel(){
+  const body=document.getElementById('duel-body');
+  const upd=document.getElementById('duel-updated');
+  if(!body)return;
+  try{
+    const res=await fetch(PROXY+'/varpolje-current');
+    const data=await res.json();
+    const vp=data&&data.current;
+    if(!res.ok||!vp){body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';return;}
+
+    // Domača postaja: zadnja meritev, ki jo je prikazal hero (applyObs).
+    const obs=_lastBriefObs;
+    if(!obs||!obs.metric){
+      body.innerHTML='<div class="duel-offline">Čakam meritev domače postaje…</div>';
+      setTimeout(fetchValleyDuel,20000);
+      return;
+    }
+    const m=obs.metric;
+    const homeT=m.temp, vpT=vp.temp_c;
+    const diff=(homeT!=null&&vpT!=null)?homeT-vpT:null;
+
+    // Kako svež je sosedov posnetek — vir se osveži na ~5 minut.
+    const vpAge=data.updated_utc?Math.round((Date.now()-new Date(data.updated_utc))/60000):null;
+    const stale=vpAge!=null&&vpAge>30;
+
+    const dCol=diff==null?'var(--muted)':Math.abs(diff)<0.3?'var(--muted)':diff>0?'var(--red)':'var(--blue)';
+    const dSign=diff==null?'':diff>0?'+':'−';
+
+    body.innerHTML=
+      '<div class="duel-row">'+
+        '<div class="duel-side duel-home">'+
+          '<div class="duel-name">Rečica · IREICA1</div>'+
+          '<div class="duel-temp" style="color:'+(homeT==null?'var(--muted)':tempColor(homeT))+'">'+_duelNum(homeT,1)+' °C</div>'+
+          '<div class="duel-meta">vlaga '+_duelNum(obs.humidity,0)+' %<br>veter '+_duelNum(m.windSpeed,1)+' km/h<br>dež danes '+_duelNum(m.precipTotal,1)+' mm</div>'+
+        '</div>'+
+        '<div class="duel-mid">'+
+          '<div class="duel-delta" style="color:'+dCol+'">'+dSign+_duelNum(diff==null?null:Math.abs(diff),1)+'</div>'+
+          '<div class="duel-delta-lbl">°C razlike</div>'+
+        '</div>'+
+        '<div class="duel-side">'+
+          '<div class="duel-name">Varpolje · IREICA7</div>'+
+          '<div class="duel-temp" style="color:'+(vpT==null?'var(--muted)':tempColor(vpT))+'">'+_duelNum(vpT,1)+' °C</div>'+
+          '<div class="duel-meta">vlaga '+_duelNum(vp.humidity_pct,0)+' %<br>veter '+_duelNum(vp.wind_speed_kmh,1)+' km/h<br>dež danes '+_duelNum(vp.rain_today_mm,1)+' mm</div>'+
+        '</div>'+
+      '</div>'+
+      (diff==null?'':'<div class="duel-verdict">'+_duelVerdict(diff,new Date().getHours())+'</div>')+
+      (stale?'<div class="duel-verdict" style="color:var(--muted)">Sosedov zadnji posnetek je star '+vpAge+' min — razlika je lahko zastarela.</div>':'')+
+      '<div class="duel-credit">Meritve sosednje postaje '+
+        (DUEL_NEIGHBOUR.owner?'deli '+DUEL_NEIGHBOUR.owner+' · ':'· ')+
+        'vir <a href="'+DUEL_NEIGHBOUR.url+'" target="_blank" rel="noopener">varpolje.si</a>. '+
+        'Arhiv, model MTR in semafor točnosti ostajajo na meritvah IREICA1.</div>';
+
+    if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
+    console.warn('Dvoboj Varpolje:',e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
 // ── 2. ARSO cross-check & drift detekcija ─────────────────
 // ══════════════════════════════════════════════════════════
 const ARSO_DRIFT_KEY='arso-drift-v1';
@@ -15226,6 +15315,7 @@ async function init(){
     fetchClimateComparison();
     fetchFogForecast();
     fetchEcowittCurrent();
+    runAdvancedOnly(()=>fetchValleyDuel());
     runAdvancedOnly(()=>initInsights());
     initVisitorCounter();
     runAdvancedOnly(()=>initOnlineWidget());
@@ -15254,6 +15344,9 @@ async function init(){
 init();
 setInterval(fetchCurrent,5*60*1000);
 setInterval(fetchEcowittCurrent,5*60*1000);
+// V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
+// zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).
+setInterval(()=>{if(!isSimpleMode())fetchValleyDuel();},5*60*1000);
 setInterval(fetchPollen,30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);

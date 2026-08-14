@@ -92,7 +92,7 @@ FB/IG ne podre objave članka).
 Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
 (1080×1920) — `.github/workflows/daily-story.yml`.
 
-- `tools/generate_story_card.py` ima ~24 tem (registrator `@topic(ime,
+- `tools/generate_story_card.py` ima ~26 tem (registrator `@topic(ime,
   prioriteta)`, seznam `TOPICS`), vsaka s 5+ besedilnimi različicami (skupaj
   čez 100 — `python3 tools/generate_story_card.py --list-topics` izpiše
   natančno število). Vsaka tema je funkcija `t_*(ctx)`, ki vrne kartico ali
@@ -168,6 +168,44 @@ Kako je narejeno:
   kamere, normale …), je v `init()` ovito v `runAdvancedOnly()` — v vrsto gre
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
+
+## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
+
+Prijatelj iz Varpolja (občina Rečica ob Savinji, ~1,6 km jugozahodno, isto dno
+doline) svojo postajo javno objavlja kot JSON na
+`https://varpolje.si/station.json`. Vključena je kot **primerjava**, ker ena
+sama postaja ne more pokazati, koliko se dve točki v isti dolini razideta —
+razlika je največja zjutraj, ko se na dnu doline nabira hladen zrak.
+
+**IREICA1 ostaja edina referenca.** Sosednja postaja je gost:
+
+- **ne** gre v `history.json`, **ne** v učenje ali napovedovanje modela MTR in
+  **ne** na semafor `/tocnost-napovedi/`. Tam se meri Filipova postaja in nič
+  drugega — sicer se arhiv in izmerjena veščina modela tiho popačita.
+- V vsakem prikazu je meritev IREICA1 navedena prva in vizualno poudarjena.
+
+Kje je vključena:
+
+- `worker.js`, `/varpolje-current` — proxy do `varpolje.si/station.json`.
+  Prek workerja gre zato, ker sosedov strežnik ne pošilja glave CORS in je
+  brskalnik na meteorec.si ne sme brati neposredno. Vir se osveži na ~5 minut,
+  zato `Cache-Control: max-age=120`. **Zasebnost velja tudi za sosedovo hišo**:
+  blok notranjih meritev se izbriše pri viru, čeprav ga trenutni odgovor nima
+  (glej pravilo na vrhu tega dokumenta).
+- `app.js`, `fetchValleyDuel()` + kartica `#duel-card` v `index.html` —
+  obe temperaturi, razlika in razlaga. Kartica ni `simple-keep`, torej je v
+  preprostem pogledu skrita; klic gre skozi `runAdvancedOnly()`, interval pa se
+  sproži samo v naprednem pogledu (drugače bi se klici kopičili v vrsti).
+  Navedba prijatelja je konstanta `DUEL_NEIGHBOUR`.
+- `tools/generate_story_card.py`, tema `VALLEY_DUEL` (prioriteta 47) — kartica
+  za zgodbo se sproži samo ob razliki **≥ 2 °C** in samo, če sosedov posnetek
+  ni starejši od 45 minut. Zastarel posnetek ni primerjava, ampak dve različni
+  uri. Ker zgodbe nimajo podpisa, je navedba prijatelja tretja vrstica
+  statistike na sami sliki.
+
+Če se vir kdaj ustavi ali spremeni obliko, vse tri točke tiho odpadejo
+(kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
+druga stran od tega ni odvisna.
 
 ## MTR — lastni napovedni model (MOS)
 
