@@ -8461,7 +8461,7 @@ async function fetchEcowittCurrent(){
 const DUEL_NEIGHBOUR={
   name:'Varpolje', id:'IREICA7',
   url:'https://www.varpolje.si/',
-  owner:'',   // ime prijatelja — dopolni, izpiše se kot »podatke deli …«
+  owner:'Jaka Robnik',   // navedba na kartici: »Meritve sosednje postaje deli …«
 };
 
 function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
