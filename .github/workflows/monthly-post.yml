@@ -52,7 +52,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           MONTH="${{ steps.month.outputs.month }}"
-          git add blog/ blog.json sitemap.xml og/ tools/.photo_rotation_state.json
+          git add blog/ blog.json sitemap.xml og/ i/ tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb — objava za $MONTH morda že obstaja."
             echo "published=false" >> $GITHUB_OUTPUT

@@ -78,6 +78,18 @@ FB/IG ne podre objave članka).
   skripti).
 - **`tools/post_to_instagram.py`** — Instagram Graph API, dvostopenjsko
   (`/media` container → `/media_publish`). Uporablja isto OG sliko.
+- **`tools/short_links.py`** — kratke povezave `meteorec.si/i/<koda>`.
+  Instagram povezave **nikjer** ne naredi klikabilne (ne v podpisu, ne v
+  komentarju; API ne pozna nalepke s povezavo v zgodbah) — klikabilna je samo
+  povezava v bio. Bralec jo mora pretipkati, zato gre v prvi komentar kratka
+  koda in ne polni URL članka (čez 70 znakov). Strani `i/<koda>.html` (meta
+  refresh + canonical + `noindex`) in preslikavo `i/index.json` piše
+  `wire_all()` — **izpeljano, ročno se ne ureja**; `--backfill` naredi kode za
+  vse članke iz `blog.json`. Koda je izpeljana iz sluga (sha256) in se ob trku
+  podaljša, zato je merodajen `i/index.json` (`lookup()`), ne izračun. Objavljena
+  koda se ne spreminja. V sitemap preusmeritve ne gredo. Facebook povezave
+  linkificira sam, zato tam kratke ni.
+
 - **`tools/fb_comments.py`** — ROČNO orodje (ni v nobenem workflowu) za
   pregled/odgovarjanje na FB komentarje: `list [--unanswered-only]`,
   `reply <comment_id> "besedilo"`.

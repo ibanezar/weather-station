@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add blog/ blog.json sitemap.xml og/ tools/.storm_watch_state.json tools/.photo_rotation_state.json
+          git add blog/ blog.json sitemap.xml og/ i/ tools/.storm_watch_state.json tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb — prag ni presežen ali velja hlajenje."
             echo "published=false" >> $GITHUB_OUTPUT

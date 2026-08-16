@@ -125,7 +125,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add blog/ blog.json sitemap.xml og/ img/ tools/.daily_post_state.json tools/.photo_rotation_state.json
+          git add blog/ blog.json sitemap.xml og/ i/ img/ tools/.daily_post_state.json tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT

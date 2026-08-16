@@ -696,6 +696,15 @@ def wire_all(entry, url, stats=None):
         inject_related_links(posts)
     except Exception as e:
         print(f"⚠ statične notranje povezave preskočene: {e}")
+    # Kratka povezava meteorec.si/i/<koda> — Instagram povezav ne naredi
+    # klikabilnih, zato mora biti dovolj kratka, da se jo da pretipkati.
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import short_links
+        code = short_links.ensure(entry["slug"], url)
+        print(f"✓ kratka povezava: {short_links.short_url(code)}")
+    except Exception as e:
+        print(f"⚠ kratka povezava preskočena: {e}")
     # Try to generate per-article OG image (requires Pillow)
     if stats:
         try:

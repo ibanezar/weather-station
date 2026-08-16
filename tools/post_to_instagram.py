@@ -13,6 +13,13 @@ Link do članka NI v caption -- objavi se ločeno kot prvi komentar (POST
 /{media-id}/comments) po uspešni objavi, ker naj bi objave z linkom v
 besedilu dosegle manjši organski doseg kot tiste brez.
 
+Instagram povezave nikjer ne naredi klikabilne (ne v podpisu, ne v komentarju,
+API pa ne pozna nalepke s povezavo v zgodbah) -- klikabilna je samo povezava v
+bio. Bralec jo mora torej pretipkati, zato gre v komentar **kratka** povezava
+meteorec.si/i/<koda> (glej tools/short_links.py) in ne polni URL članka, ki je
+čez 70 znakov dolg. Če članek kode še nima (starejše objave, ki jih ročno
+požene social-repost.yml), pade nazaj na polni URL.
+
 Rabi okoljski spremenljivki IG_ACCOUNT_ID in IG_ACCESS_TOKEN (GitHub secreta).
 
 Wired into: .github/workflows/daily-post.yml, monthly-post.yml,
@@ -23,6 +30,9 @@ Usage:
   python3 tools/post_to_instagram.py [slug]   # brez sluga: zadnji članek (blog.json[0])
 """
 import json, os, sys, time, urllib.request, urllib.error, urllib.parse
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import short_links
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BLOG_JSON = os.path.join(ROOT, "blog.json")
@@ -52,6 +62,14 @@ def label_for(slug):
     return None
 
 
+def article_link(post):
+    """Povezava za prvi komentar — kratka, ker je na IG ni mogoče klikniti."""
+    code = short_links.lookup(post["slug"], ROOT)
+    if code:
+        return short_links.short_url(code).replace("https://", "")
+    return f"{SITE}{post['url']}"
+
+
 def build_caption(post):
     label = label_for(post["slug"])
     lines = [f"{label}: {post['title']}"] if label else [post["title"]]
@@ -59,7 +77,8 @@ def build_caption(post):
         lines.append(post["summary"])
     if post["slug"].startswith("arso-opozorilo-"):
         lines.append(ARSO_SOURCE_NOTE)
-    lines.append("Cel članek: povezava je v prvem komentarju (in v bio).")
+    lines.append("Cel članek: kratka povezava je v prvem komentarju "
+                 "(klikabilna pa v bio).")
     if post.get("tags"):
         cleaned = (t.replace("-", "") for t in ("meteorec", "vreme", *post["tags"]))
         lines.append(" ".join(f"#{t}" for t in cleaned if t.isalnum()))
@@ -98,9 +117,12 @@ def main():
         result = api_post(f"{account_id}/media_publish", creation_id=creation_id)
         print(f"Instagram: objavljeno — {result}")
         media_id = result["id"]
-        post_url = f"{SITE}{post['url']}"
+        link = article_link(post)
         try:
-            api_post(f"{media_id}/comments", message=f"Cel članek: {post_url}")
+            api_post(f"{media_id}/comments",
+                     message=f"Cel članek: {link}\n"
+                             "(Instagram povezav ne naredi klikabilnih — "
+                             "prepiši jo v brskalnik ali klikni povezavo v bio.)")
             print("Instagram: link dodan kot prvi komentar.")
         except urllib.error.HTTPError as e:
             comment_err = e.read().decode("utf-8", "replace")[:300]
