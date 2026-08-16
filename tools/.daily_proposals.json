@@ -1,56 +1,27 @@
 {
-  "date": "2026-08-14",
-  "created": "2026-08-14T05:20:01.354637+00:00",
+  "date": "2026-08-16",
+  "created": "2026-08-16T04:20:26.297043+00:00",
   "proposals": [
     {
       "id": "dogodek",
-      "title": "Kdaj popusti vročina? Do 35 °C, nato preobrat",
-      "teaser": "Danes se obeta 30,5 °C, jutri 33,1 °C, v nedeljo pa vrh pri 35 °C. Napoved kaže, da ohladitev in prve padavine (0,2 mm v nedeljo, 3 mm v ponedeljek) prinesejo padec na 23,9 °C -- pogledamo, kdaj natanko se vročinski val prelomi.",
+      "title": "Kdaj popusti vročina po vrhuncu 35,8 °C?",
+      "teaser": "Danes se temperatura povzpne do 35,8 °C, a že jutri sledi občuten padec na 25,1 °C, pojutrišnjem pa na 23,9 °C ob rahlih 12,1 mm padavin. Pogledamo, kako hitro se ohladi in kdaj se vročina znova vrne proti koncu tedna, ko napoved kaže 30,3 °C.",
       "topic": {
         "id": "dogodek",
-        "brief": "Analiza dogodka: vročina-napoved (30,5 °C)",
+        "brief": "Analiza dogodka: vročina-napoved (35,8 °C)",
         "tag": "vročina-napoved",
         "event": {
           "type": "vročina-napoved",
-          "value": 30.5,
+          "value": 35.8,
           "unit": "°C"
         },
         "seo_keywords": []
       }
     },
     {
-      "id": "susa-vlaga-tal",
-      "title": "Suša v Zgornji Savinjski dolini: koliko brez dežja",
-      "teaser": "Danes dežja ni bilo, v tednu je padlo le 12,7 mm, mesečno pa 73,2 mm -- pogledamo, kako to vpliva na vlago tal ob napovedani vročini do 35 °C. Prve rahle padavine so v napovedi šele čez nekaj dni (0,2 mm in 3 mm).",
-      "topic": {
-        "id": "susa-vlaga-tal",
-        "sezona": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "tag": "susa",
-        "brief": "Trenutno stanje suše/vlage tal glede na zadnje padavine in evapotranspiracijo.",
-        "seo_keywords": [
-          "suša Zgornja Savinjska dolina",
-          "vlaga tal Rečica ob Savinji",
-          "koliko časa brez dežja"
-        ]
-      }
-    },
-    {
       "id": "dusljivost-zraka",
-      "title": "Rosišče 11 °C: zakaj je vreme videti dušljivo",
-      "teaser": "Ob temperaturi 12,3 °C in vlažnosti 92 % je rosišče trenutno le 1,3 °C nižje od zraka, kar da občutek soparnosti kljub zmerni temperaturi. Razložimo, zakaj bo ta učinek ob napovedanih 30-35 °C še bolj izrazit.",
+      "title": "Rosišče Savinjska dolina: zakaj vročina duši",
+      "teaser": "Trenutna vlažnost na postaji IREICA1 znaša kar 94 %, rosišče pa je le dober stopinjo pod dejansko temperaturo (11,6 °C proti 12,5 °C) -- to je recept za dušljiv občutek zraka. Razložimo, zakaj je pri takšnih vrednostih razlika med izmerjeno temperaturo in občutkom lahko precejšnja.",
       "topic": {
         "id": "dusljivost-zraka",
         "sezona": [
@@ -66,6 +37,35 @@
           "rosišče Savinjska dolina",
           "dušljivo vreme",
           "občutek vročine vlaga"
+        ]
+      }
+    },
+    {
+      "id": "dolzina-dneva",
+      "title": "Ure sonca Zgornja Savinjska dolina: koliko smo ujeli",
+      "teaser": "Sončno sevanje je bilo ob jutranjem merjenju le 11,6 W/m² ob UV indeksu 0, kar kaže na oblačno ali zgodnje jutro brez neposrednega sonca. Pogledamo, koliko dejanskih ur sonca smo ujeli glede na dolžino avgustovskega dneva v Rečici ob Savinji.",
+      "topic": {
+        "id": "dolzina-dneva",
+        "sezona": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tag": "sonce",
+        "brief": "Koliko sonca smo dejansko ujeli zadnje dni glede na dolžino dneva in oblačnost.",
+        "seo_keywords": [
+          "ure sonca Zgornja Savinjska dolina",
+          "dolžina dneva vreme",
+          "sončno vreme Rečica ob Savinji"
         ]
       }
     }
