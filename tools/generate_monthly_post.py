@@ -14,6 +14,10 @@ import json, sys, os, calendar, re, datetime
 import statistics as st
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from asset_version import css_links
+# Tema strani se pregenerirajo ob vsaki objavi, zato verzija pride v HTML sama.
+CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css')
 SITE = "https://meteorec.si"
 # datum objave: privzeto današnji (UTC), z možnostjo prepisa prek POST_DATE
 TODAY = os.environ.get("POST_DATE") or datetime.date.today().isoformat()
@@ -653,8 +657,7 @@ def build_tag_pages(posts):
 {{"@type":"ListItem","position":2,"name":"Blog","item":"{SITE}/blog/"}},
 {{"@type":"ListItem","position":3,"name":"{tag}"}}]}}
 </script>
-<link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/blog/blog.css">
+{CSS_LINKS}
 </head>
 <body>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
