@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/invasive_state.json data/invazivke.json blog/ blog.json sitemap.xml og/ invazivke/ tools/.photo_rotation_state.json
+          git add data/invasive_state.json data/invazivke.json blog/ blog.json sitemap.xml og/ i/ invazivke/ tools/.photo_rotation_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             echo "published=false" >> $GITHUB_OUTPUT
