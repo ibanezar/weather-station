@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 16 Aug 2026 06:22:03 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 17 Aug 2026 04:11:13 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Kdaj popusti vročina po vrhuncu 35,6 °C?</title>
@@ -19,6 +19,18 @@
       <category>IREICA1</category>
       <category>Savinja</category>
       <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Invazivke ta teden: 2 opazovanji v Zgornji Savinjski dolini</title>
+      <link>https://meteorec.si/blog/invazivka-tedenski-pregled-20260815.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-tedenski-pregled-20260815.html</guid>
+      <pubDate>Sat, 15 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Tedenski pregled invazivnih vrst v Zgornji Savinjski dolini (14.–15. avgust 2026): 2 opazovanji — Pelinolistna ambrozija in Žlezava nedotika.</description>
+      <category>invazivke</category>
+      <category>tedenski-pregled</category>
+      <category>2026</category>
+      <category>ambrozija</category>
+      <category>zlezava-nedotika</category>
     </item>
     <item>
       <title>Suša v Zgornji Savinjski dolini: kako dolgo že brez dežja</title>
