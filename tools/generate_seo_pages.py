@@ -2346,9 +2346,10 @@ def gen_landing_page(hist, sitemap_urls):
     # ── FAQ (visible + schema) ───────────────────────────────────────────────
     qa = [
         ("Kakšno je trenutno vreme v Rečici ob Savinji?",
-         "Trenutne meritve temperature, padavin, vlage in vetra v živo objavlja meteorološka "
-         "postaja IREICA1 na naslovni strani Meteorec (meteorec.si). Podatki so dejanske meritve "
-         "z lokacije v Rečici ob Savinji, ne le napoved iz modela."),
+         "Zadnja meritev temperature, vlage, vetra in padavin je na vrhu te strani in se "
+         "osveži vsako uro; vrednosti v živo iz minute v minuto so na naslovni strani Meteorec "
+         "(meteorec.si). Podatki so dejanske meritve postaje IREICA1 z lokacije v Rečici ob "
+         "Savinji, ne napoved iz modela."),
         ("Ali ta stran pokriva vreme za celotno Zgornjo Savinjsko dolino?",
          "Da. Postaja IREICA1 v Rečici ob Savinji je edina z neprekinjenimi meritvami v Zgornji "
          "Savinjski dolini, zato služi kot referenčna postaja za vso dolino. Za sosednje kraje "
@@ -2403,12 +2404,24 @@ def gen_landing_page(hist, sitemap_urls):
         dataset_schema(url, observations),
     ])
 
+    # Statična meritev takoj pod naslovom. Kdor išče »vreme rečica ob savinji«,
+    # hoče najprej vedeti, koliko je stopinj — doslej ga je stran poslala na
+    # naslovno. Blok med markerjema vsako uro osveži tools/inject_current_weather.py;
+    # tu se zapiše zadnja znana dnevna meritev, da stran nikoli ni prazna.
+    # Besedilo gradi ista funkcija kot za naslovno stran — ne podvajaj je, sicer
+    # se zapisa razideta.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from inject_current_weather import build_block_history, TAIL_RECICA
+    wx_now = build_block_history(TAIL_RECICA)
+
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme Rečica ob Savinji</h1>
   <p class="post-meta">Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · {ELEV} m n. m.</p>
-{intro}
+  <h2 id="zdaj">Trenutno vreme v Rečici ob Savinji</h2>
+{wx_now}
 {cta}
+{intro}
 {micro}
 {nearby_html}
 {faq_html}

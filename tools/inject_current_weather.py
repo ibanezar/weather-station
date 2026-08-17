@@ -31,7 +31,18 @@ from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "index.html")
+RECICA = os.path.join(ROOT, "vreme-recica-ob-savinji", "index.html")
 HIST = os.path.join(ROOT, "history.json")
+
+# Strani, ki dobijo statično meritev, in sklepni stavek bloka za vsako. Besedilo
+# se razlikuje, ker ima naslovna stran nad blokom živo kartico, pristajalna pa ne
+# — na njej bi »posodabljajo zgoraj« kazalo na nekaj, česar tam ni.
+TAIL_INDEX = ('Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v '
+              '<a href="/vreme/">vremenskem arhivu</a>.')
+TAIL_RECICA = ('Meritev se osveži vsako uro. Pretekli dnevi so v '
+               '<a href="/vreme/">vremenskem arhivu</a>, vrednosti v živo in urna '
+               'napoved pa na <a href="/">naslovni strani</a>.')
+TARGETS = [(INDEX, TAIL_INDEX), (RECICA, TAIL_RECICA)]
 
 START = "<!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->"
 END = "<!-- WX-STATIC:END -->"
@@ -70,7 +81,7 @@ def wrap(text):
     return f'{START}\n  <p class="wx-static" id="wx-static">{text}</p>\n  {END}'
 
 
-def build_block_history():
+def build_block_history(tail=TAIL_INDEX):
     hist = json.load(open(HIST, encoding="utf-8"))
     # Zadnji dan s PRAVO meritvijo: modelske (ERA5) ocene preskočimo, da uvod ne
     # prikazuje rezervnih podatkov kot "meritev postaje IREICA1".
@@ -89,9 +100,7 @@ def build_block_history():
     summary = ", ".join(parts[:2]) + " — " + ", ".join(parts[2:]) + "."
 
     text = (f'Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji '
-            f'(<time datetime="{last}">{fmtd(last)}</time>): {summary} '
-            f'Trenutne vrednosti v živo se posodabljajo zgoraj, vsak dan ima svojo stran v '
-            f'<a href="/vreme/">vremenskem arhivu</a>.')
+            f'(<time datetime="{last}">{fmtd(last)}</time>): {summary} {tail}')
     return wrap(text)
 
 
@@ -111,7 +120,7 @@ def fetch_live_wu():
         return None
 
 
-def build_block_live(obs):
+def build_block_live(obs, tail=TAIL_INDEX):
     m = obs.get("metric", {})
     # obsTimeLocal e.g. "2026-06-27 14:35:00"
     local = obs.get("obsTimeLocal", "")
@@ -133,9 +142,7 @@ def build_block_live(obs):
 
     text = (f'Trenutno vreme na Rečici ob Savinji '
             f'(meritev postaje IREICA1 ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}): '
-            f'{", ".join(parts)}. '
-            f'Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v '
-            f'<a href="/vreme/">vremenskem arhivu</a>.')
+            f'{", ".join(parts)}. {tail}')
     return wrap(text)
 
 
@@ -367,41 +374,45 @@ def patch_day_summary(html, stats):
 
 def main():
     live = "--live" in sys.argv[1:]
-    block = None
-    obs = None
-    if live:
-        obs = fetch_live_wu()
-        if obs:
-            block = build_block_live(obs)
-    if block is None:
-        block = build_block_history()
-    html = open(INDEX, encoding="utf-8").read()
+    obs = fetch_live_wu() if live else None
 
-    if START in html and END in html:
+    # Urne podatke poberemo enkrat in jih uporabimo samo na naslovni strani
+    # (tabela zadnjih 7 dni in dnevni povzetek obstajata le tam).
+    hourly = fetch_hourly_wu() if live else None
+
+    rc = 0
+    for path, tail in TARGETS:
+        rel = os.path.relpath(path, ROOT)
+        if not os.path.exists(path):
+            print(f"OPOZORILO: {rel} ne obstaja — preskočeno.", file=sys.stderr)
+            continue
+
+        block = build_block_live(obs, tail) if obs else build_block_history(tail)
+        html = open(path, encoding="utf-8").read()
+
+        if START not in html or END not in html:
+            print(f"ERROR: markerjev ni v {rel} — dodaj jih enkrat.", file=sys.stderr)
+            rc = 1
+            continue
         new = re.sub(re.escape(START) + r".*?" + re.escape(END), block, html, flags=re.S)
-    else:
-        print("ERROR: markers not found in index.html — add them once first.", file=sys.stderr)
-        return 1
 
-    if obs:
-        new = patch_hero(new, obs)
+        if path == INDEX:
+            if obs:
+                new = patch_hero(new, obs)
+            if hourly:
+                daily = build_daily_summaries(hourly)
+                if daily:
+                    new = patch_history_table(new, daily)
+                stats = build_day_stats(hourly)
+                if stats:
+                    new = patch_day_summary(new, stats)
 
-    if live:
-        hourly = fetch_hourly_wu()
-        if hourly:
-            daily = build_daily_summaries(hourly)
-            if daily:
-                new = patch_history_table(new, daily)
-            stats = build_day_stats(hourly)
-            if stats:
-                new = patch_day_summary(new, stats)
-
-    if new != html:
-        open(INDEX, "w", encoding="utf-8").write(new)
-        print("index.html: posodobljena statična meritev.")
-    else:
-        print("index.html: brez sprememb.")
-    return 0
+        if new != html:
+            open(path, "w", encoding="utf-8").write(new)
+            print(f"{rel}: posodobljena statična meritev.")
+        else:
+            print(f"{rel}: brez sprememb.")
+    return rc
 
 
 if __name__ == "__main__":

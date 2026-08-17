@@ -19,17 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Vbrizgaj trenutno meritev v index.html
+      - name: Vbrizgaj trenutno meritev v index.html in pristajalno stran
         run: python3 tools/inject_current_weather.py --live
 
       - name: Commit in push (samo če so spremembe)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet index.html; then
+          PATHS="index.html vreme-recica-ob-savinji/index.html"
+          if git diff --quiet -- $PATHS; then
             echo "Brez sprememb."
           else
-            git add index.html
+            git add $PATHS
             git commit -m "chore: pre-render trenutne meritve [skip ci]"
             for i in 1 2 3 4 5; do
               git push && exit 0

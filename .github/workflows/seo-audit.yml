@@ -2,8 +2,13 @@ name: SEO audit — pokritost sitemapa in on-page pregled
 
 on:
   schedule:
-    # Vsako nedeljo ob 04:40 UTC — pred ponedeljkovo seo-smart-routine (05:30)
-    - cron: '40 4 * * 0'
+    # Vsak dan ob 04:40 UTC — pred ponedeljkovo seo-smart-routine (05:30) in pred
+    # jutranjimi predlogi daily-post (03:45, a ta redno zamuja).
+    # Tedensko je bilo premalo: sitemap je med dvema pregledoma nihal (objava
+    # članka je pobrisala gobarske podstrani, pregled jih je vrnil) in 13 strani
+    # je bilo večino dni v nobenem sitemapu, ne da bi to kdo opazil. Dnevni tek
+    # tako napako ujame isti dan. Če ni sprememb, se korak commita ne sproži.
+    - cron: '40 4 * * *'
   workflow_dispatch:   # ročni zagon
 
 jobs:

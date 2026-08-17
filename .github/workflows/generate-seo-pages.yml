@@ -24,6 +24,13 @@ jobs:
       - name: Generate /podatki/ (HTML-first data digest)
         run: python3 tools/generate_podatki_page.py
 
+      # Generator v /vreme-recica-ob-savinji/ zapiše zadnjo dnevno meritev kot
+      # rezervo; takoj za njim jo zamenjamo s trenutno, da stran ni do naslednjega
+      # urnega zagona (prerender-current, :30) stara pol dneva.
+      - name: Osveži trenutno meritev na pristajalni strani
+        run: python3 tools/inject_current_weather.py --live
+        continue-on-error: true
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
