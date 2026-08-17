@@ -160,6 +160,31 @@ varnostno ponastavitev seje (npr. prijave v nova zasebna okna/naprave). Če
 ponovno generirati prek Graph API Explorerja (isti postopek kot za prvotno
 nastavitev — glej git zgodovino za natančen tok).
 
+## Statična meritev (WX-STATIC) — dve strani, ne ena
+
+`tools/inject_current_weather.py` piše zadnjo meritev kot **crawlable HTML** med
+markerja `<!-- WX-STATIC:START … -->` / `<!-- WX-STATIC:END -->`. Cilji so v
+`TARGETS`; trenutno sta dva:
+
+- `index.html` — poleg bloka popravi še junaško kartico, tabelo zadnjih 7 dni in
+  dnevni povzetek (to obstaja samo tu);
+- `vreme-recica-ob-savinji/index.html` — samo blok, takoj pod `<h1>`.
+
+Zakaj tudi pristajalna stran: »vreme rečica ob savinji« je s ~1 950 prikazi in
+pozicijo ~9,5 največja neizkoriščena poizvedba, stran pa je obiskovalca po
+trenutno vreme pošiljala na naslovno. Zdaj nanj odgovori sama.
+
+- Sklepni stavek bloka je za vsako stran svoj (`TAIL_*`) — na pristajalni strani
+  nad blokom ni žive kartice, zato tam ne sme pisati »posodablja se zgoraj«.
+- Besedilo bloka gradita `build_block_history()` / `build_block_live()`.
+  `generate_seo_pages.py` prvo **uvozi** (ne prepiše) za rezervni zapis, ki ga
+  zapiše ob generiranju strani — dva prepisa bi se razšla.
+- Markerja na pristajalno stran zapiše generator; če ju ni, skript javi napako za
+  tisto stran in nadaljuje z drugo (izhod 1).
+- Osvežujeta `prerender-current.yml` (urno, `--live`) in `generate-seo-pages.yml`
+  (takoj po generiranju, da stran ni pol dneva na rezervnem zapisu).
+- **Notranjih meritev tu ni** in ne smejo priti — velja pravilo z vrha dokumenta.
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom
