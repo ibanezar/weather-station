@@ -338,22 +338,65 @@ def touch_existing(slug, wire=True):
         print(f"⚠ blog/related.json preskočen: {e}")
     print(f"✓ '{slug}' označen kot posodobljen ({TODAY}); blog.json, blog/index.html in sitemap.xml osveženi.")
 
+def core_sitemap_entries():
+    """Fiksni del sitemap.xml, izpeljan iz `CORE` v tools/seo_audit.py.
+
+    Vnos je peterka, kot jo pričakuje rewrite_sitemap_and_index:
+    (loc, changefreq, priority, lastmod, image).
+
+    Izpuščene so strani, ki jih pokriva sitemap-seo.xml ali sitemap-weather.xml
+    (klima, padavine, vreme/…) — te imajo svoj generator in tam tudi svoj
+    lastmod; podvajanje po sitemapih ne prinese ničesar. Izpuščene so tudi
+    strani, ki jih ni na disku, da v sitemapu ne nastane mrtva povezava.
+
+    lastmod: strani, ki se osvežujejo vsak dan (hourly/daily), in tisti dve, ki
+    ju ta objava res spremeni (domača stran in /blog/), dobijo današnji datum.
+    Ostale ohranijo datum iz obstoječega sitemapa — sicer bi vsaka objava članka
+    trdila, da so se spremenile tudi mirujoče strani (npr. o-postaji.html).
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import seo_audit
+
+    covered = set()
+    for name in ("sitemap-seo.xml", "sitemap-weather.xml"):
+        p = os.path.join(ROOT, name)
+        if os.path.exists(p):
+            covered |= seo_audit.sitemap_locs(open(p, encoding="utf-8").read())
+
+    prev = {}
+    main = os.path.join(ROOT, "sitemap.xml")
+    if os.path.exists(main):
+        for block in re.findall(r"<url>(.*?)</url>", open(main, encoding="utf-8").read(), re.S):
+            loc = re.search(r"<loc>(.*?)</loc>", block)
+            lm = re.search(r"<lastmod>(.*?)</lastmod>", block)
+            if loc and lm:
+                prev[loc.group(1)] = lm.group(1)
+
+    entries = []
+    for page, (cf, prio) in seo_audit.CORE.items():
+        url = f"{SITE}/{page}"
+        if url in covered or not os.path.exists(seo_audit.local_path(page)):
+            continue
+        fresh = cf in ("hourly", "daily") or page in ("", "blog/")
+        lastmod = TODAY if fresh else prev.get(url, TODAY)
+        img = f"{SITE}/og-image.jpg" if page == "" else None
+        entries.append((url, cf, prio, lastmod, img))
+    return entries
+
+
 def rewrite_sitemap_and_index(posts):
     # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav (lastmod = zadnja sprememba)
     # image: samo za strani z resnično lastno (ne generično) sliko -- domača
     # stran in posamezni članki bloga, vsak s svojim og/<slug>.jpg.
-    sm = [
-        (f"{SITE}/",                       "hourly",  "1.0", TODAY, f"{SITE}/og-image.jpg"),
-        (f"{SITE}/blog/",                  "weekly",  "0.8", TODAY, None),
-        (f"{SITE}/o-postaji.html",         "monthly", "0.6", "2026-06-19", None),
-        (f"{SITE}/gobarska-napoved/",      "daily",   "0.8", TODAY, None),
-        (f"{SITE}/vodostaj-savinje/",      "daily",   "0.8", TODAY, None),
-        (f"{SITE}/nevihte/",               "daily",   "0.8", TODAY, None),
-        (f"{SITE}/agrometeo/",             "daily",   "0.7", TODAY, None),
-        (f"{SITE}/kakovost-zraka/",        "daily",   "0.7", TODAY, None),
-        (f"{SITE}/biovreme/",              "daily",   "0.7", TODAY, None),
-        (f"{SITE}/vreme-za-padalce/",      "daily",   "0.6", TODAY, None),
-        (f"{SITE}/trendi/",                "weekly",  "0.7", TODAY, None),
+    #
+    # Fiksni del NI svoj seznam: izpelje se iz `CORE` v tools/seo_audit.py, ki je
+    # edina tabela ključnih strani. Prej sta bila seznama dva in sta se razšla —
+    # ko je gobarska napoved dobila podstrani (baza-vrst, dvojnice, danes …), so
+    # bile dodane samo v CORE, tukaj pa ne. Ker ta funkcija sitemap.xml prepiše na
+    # novo, jih je vsaka objava članka spet pobrisala, `seo_audit --fix` (nedeljski
+    # cron) pa jih je vrnil — 13 strani je bilo tako večino dni v nobenem sitemapu.
+    # Nova ključna stran gre torej samo v CORE in se pojavi tudi tu.
+    sm = core_sitemap_entries() + [
         (f"{SITE}/blog/poplave-2023.html", "yearly",  "0.6", "2026-07-08", f"{SITE}/og/poplave-2023.jpg"),
     ]
     sm += [(f"{SITE}{p['url']}", "monthly", "0.7", p.get("updated") or p["date"],
@@ -542,18 +585,32 @@ def inject_related_links(posts, quiet=False):
 def build_tag_pages(posts):
     """Ustvari pristajalne strani /blog/tema/<tag>/ za tage z ≥2 objavama.
     Vrne seznam (slug) za sitemap."""
-    # zberi objave po tagu
-    by_tag = {}
+    # Zberi objave po slugu, ne po surovem tagu. Tagi so v blog.json pisani
+    # neenotno — „vročina“ in „vrocina“, „suša“ in „susa“, „vodna bilanca“ in
+    # „vodna-bilanca“ — vse pa se preslika v isti slug. Ob združevanju po surovem
+    # tagu je zato nastala ista stran dvakrat: druga je prvo prepisala, tako da je
+    # /blog/tema/vrocina/ naštela 16 od 27 objav, /blog/tema/susa/ pa 9 od 12,
+    # v sitemapu pa sta bila oba sluga podvojena. Različice, ki same niso imele
+    # dveh objav, so tiho ostale brez strani.
+    by_slug = {}
     for p in posts:
         for t in p.get("tags", []):
-            by_tag.setdefault(str(t).lower(), []).append(p)
+            t = str(t).lower()
+            slug = tagslug(t)
+            if not slug:
+                continue
+            g = by_slug.setdefault(slug, {"posts": {}, "variants": {}})
+            g["posts"][p["slug"]] = p
+            g["variants"][t] = g["variants"].get(t, 0) + 1
     made = []
-    for tag, plist in by_tag.items():
+    for slug, g in by_slug.items():
+        plist = list(g["posts"].values())
         if len(plist) < 2:
             continue
-        slug = tagslug(tag)
-        if not slug:
-            continue
+        # Naslov strani: najbolj pravilno zapisana različica — najprej tista s
+        # šumniki (»vročina« pred »vrocina«), nato najpogostejša.
+        tag = max(g["variants"].items(),
+                  key=lambda kv: (any(ord(c) > 127 for c in kv[0]), kv[1]))[0]
         plist = sorted(plist, key=lambda p: p.get("updated") or p["date"], reverse=True)
         cards = "\n".join(
             f'    <li>\n      <a class="post-card" href="/blog/{p["slug"]}.html">\n'

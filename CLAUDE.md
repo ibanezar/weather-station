@@ -41,6 +41,12 @@ vezaj namesto pomišljaja).
 - Vse izpeljane datoteke (blog.json, blog/index.html, sitemap.xml,
   blog/rss.xml, blog/tema/*, blog/related.json, OG slika) ureja
   `wire_all()` iz `tools/generate_monthly_post.py` — nikoli ročno.
+- **Fiksni del `sitemap.xml` je `CORE` iz `tools/seo_audit.py`** — ne seznam v
+  `rewrite_sitemap_and_index()`. Seznama sta bila nekoč dva in sta se razšla:
+  podstrani gobarske napovedi so bile samo v `CORE`, zato jih je vsaka objava
+  članka (ki sitemap prepiše na novo) pobrisala, nedeljski `seo-audit.yml` pa
+  vrnil — 13 strani je bilo večino dni v nobenem sitemapu. Popravljeno
+  17. 8. 2026; **ne uvajaj drugega seznama ključnih strani**.
 - Po objavi na `main` pošlji IndexNow ping (glej korak v `daily-post.yml`).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
@@ -357,8 +363,8 @@ vprašanja. Vse ostalo ima svojo stran: `danes` (indeks po območjih), `tereni`,
   **Ne uporabljaj emoji** — med platformami se razlikujejo in se ne dajo
   prebarvati. Preveri, da je ikona berljiva pri ~20 px; drobni detajli
   (goba v lupi, klicaj v trikotniku) se pri tej velikosti zlijejo.
-- Nova podstran gre tudi v `CORE` v `tools/seo_audit.py` (`--fix` jo doda v
-  sitemap) — sicer je ni v nobenem sitemapu.
+- Nova podstran gre tudi v `CORE` v `tools/seo_audit.py` — sicer je ni v nobenem
+  sitemapu. To je edini vpis: iz `CORE` jo poberta tako `--fix` kot `wire_all()`.
 - FAQ ostane na glavni strani, ker nosi `FAQPage` strukturirane podatke za
   glavni URL.
 
