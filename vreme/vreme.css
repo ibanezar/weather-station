@@ -167,3 +167,14 @@
    se style.css na tej strani slučajno ne naloži. */
 .wx-now{margin:.2rem 0 1rem;line-height:1.7}
 .wx-now a{color:var(--blue)}
+
+/* ── Osnovna barva povezav ──
+   blog.css oblikuje povezave samo po komponentah (.site-nav a, .crumbs a,
+   .site-foot a …), osnovnega pravila za `a` pa nima. Vse povezave zunaj teh
+   komponent so zato padle na privzeto barvo brskalnika rgb(0,0,238) —
+   kontrast 2,14:1 na temnem ozadju, krepko pod WCAG AA. Prizadetih je bilo
+   ~2 700 generiranih strani (na /pojavi/zmrzal/ 508 od 522 povezav).
+   Pravilo je element-selektor, zato ga vsi obstoječi razredni slogi
+   (.crumbs a, .site-foot a …) še naprej prevozijo — namerne barve ostanejo.
+   Blog objav to ne zadeva: vreme.css nalagajo samo generirane strani. */
+a{color:var(--blue)}
