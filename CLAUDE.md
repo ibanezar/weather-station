@@ -184,6 +184,34 @@ trenutno vreme pošiljala na naslovno. Zdaj nanj odgovori sama.
 - Osvežujeta `prerender-current.yml` (urno, `--live`) in `generate-seo-pages.yml`
   (takoj po generiranju, da stran ni pol dneva na rezervnem zapisu).
 - **Notranjih meritev tu ni** in ne smejo priti — velja pravilo z vrha dokumenta.
+- Razred bloka je `CLS_*`: na naslovni strani `wx-static` (v `style.css` namenoma
+  vizualno skrit — vrednosti kaže živa kartica), na pristajalni `wx-static wx-now`,
+  ker tam žive kartice ni in mora biti viden. **Vidnost mora biti izrecna**: prej je
+  bil viden le zato, ker se `style.css` na tej strani ne naloži (nalagajo se
+  `fonts.css`, `blog.css`, `vreme.css`) — to je bilo naključje, ne odločitev.
+
+## Napoved na pristajalni strani
+
+`tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah
+(`WX-FCH`) na `/vreme-recica-ob-savinji/`. Razlog je isti kot pri meritvi:
+»vreme rečica ob savinji po urah« in »… 14 dni« sta poizvedbi, na kateri je stran
+odgovarjala le z besedilom »napoved je na naslovni strani«.
+
+- **Vira se ne zlivata v eno številko** (isto načelo kot na kartici za zgodbe):
+  Open-Meteo pokriva vseh 7 dni, MTR ima **svoj stolpec** in samo dneve, za katere
+  je naučen. Ime različice se izpelje iz `model_version` — ne zapisuj ga trdo.
+- Ob nedosegljivem Open-Meteo skript pusti staro napoved in konča z 0 — raje malo
+  stara napoved kot prazna stran. Brez markerjev javi napako in vrne 1.
+- Rezervni zapis (ob generiranju strani) je iz committanega `napoved-modela.json`,
+  ker je to edini napovedni vir v repozitoriju.
+
+### `.data-table` / `.table-scroll` živita v `vreme/vreme.css`
+
+Razreda sta bila v uporabi na 12 straneh `/vreme/mesec/*/`, definirana pa v nobenem
+CSS — tabele so se izrisovale s privzetim slogom brskalnika, povezave v njih pa v
+privzeti modri (kontrast 2,1:1 na temnem ozadju). Popravljeno 17. 8. 2026; isti slog
+uporablja napoved. Če dodajaš tabelo na stran, ki nalaga `vreme.css`, uporabi ta
+razreda in ne novih.
 
 ## Preprost ⇄ napredni pogled domače strani
 

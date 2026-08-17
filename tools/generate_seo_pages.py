@@ -2411,8 +2411,41 @@ def gen_landing_page(hist, sitemap_urls):
     # Besedilo gradi ista funkcija kot za naslovno stran — ne podvajaj je, sicer
     # se zapisa razideta.
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from inject_current_weather import build_block_history, TAIL_RECICA
-    wx_now = build_block_history(TAIL_RECICA)
+    from inject_current_weather import build_block_history, TAIL_RECICA, CLS_RECICA
+    wx_now = build_block_history(TAIL_RECICA, CLS_RECICA)
+
+    # Napoved: markerja + rezervni zapis iz committanega napoved-modela.json (MTR,
+    # 3 dni). Urni tools/inject_forecast.py ju napolni s 7-dnevno in urno napovedjo.
+    # Rezerva obstaja zato, da stran med generiranjem in prvim urnim zagonom ni
+    # prazna; MTR je edini napovedni vir, ki je v repozitoriju.
+    import inject_forecast as IF
+    fc_rows = []
+    try:
+        _mos = json.load(open(os.path.join(ROOT, "napoved-modela.json"), encoding="utf-8"))
+        for d in _mos.get("days", []):
+            fc_rows.append(
+                f"      <tr><td>{IF.daylabel(d['date'])}</td>"
+                f"<td>{IF.num(d.get('tmax'))} / {IF.num(d.get('tmin'))}</td>"
+                f"<td>{IF.num((d.get('pop') or 0) * 100, 0)} %</td></tr>")
+    except Exception:
+        pass
+    if fc_rows:
+        _ver = _mos.get("model_version")
+        _lbl = f"MTR v{_ver.split('.')[0]}" if _ver else "MTR"
+        fc_fallback = (f'  <h2 id="napoved">Napoved za Rečico ob Savinji</h2>\n'
+                       f'  <div class="table-scroll">\n  <table class="data-table">\n'
+                       f'    <caption>Napoved modela {_lbl} (lastni model Meteorec s popravkom '
+                       f'za dno doline). Daljša, 7-dnevna napoved se osveži vsako uro.</caption>\n'
+                       f'    <thead><tr><th>Dan</th><th>Najvišja / najnižja (°C)</th>'
+                       f'<th>Verjetnost padavin</th></tr></thead>\n    <tbody>\n'
+                       + "\n".join(fc_rows) + '\n    </tbody>\n  </table>\n  </div>')
+    else:
+        fc_fallback = ('  <h2 id="napoved">Napoved za Rečico ob Savinji</h2>\n'
+                       '  <p>Napoved se osveži vsako uro.</p>')
+    fc7 = f"{IF.FC7_START}\n{fc_fallback}\n  {IF.FC7_END}"
+    fch = (f'{IF.FCH_START}\n  <h2 id="po-urah">Vreme po urah za Rečico ob Savinji</h2>\n'
+           f'  <p>Napoved po urah se osveži vsako uro; podrobnejši urni prikaz je na '
+           f'<a href="/">naslovni strani</a>.</p>\n  {IF.FCH_END}')
 
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
@@ -2420,6 +2453,8 @@ def gen_landing_page(hist, sitemap_urls):
   <p class="post-meta">Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · {ELEV} m n. m.</p>
   <h2 id="zdaj">Trenutno vreme v Rečici ob Savinji</h2>
 {wx_now}
+{fch}
+{fc7}
 {cta}
 {intro}
 {micro}
