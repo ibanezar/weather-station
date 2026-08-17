@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 17 Aug 2026 04:11:13 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 17 Aug 2026 05:59:37 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko dežja bo danes? Modeli si niso enotni</title>
+      <link>https://meteorec.si/blog/koliko-dezja-bo-danes-modeli-si-niso-enotni-0817.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dezja-bo-danes-modeli-si-niso-enotni-0817.html</guid>
+      <pubDate>Mon, 17 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Enajst virov za isti dan in isto točko napove od 1,2 do 16,9 mm dežja. Grafi primerjajo količine in uro padavin — ter kaj o tem pravi zadnji mesec preverjanja.</description>
+      <category>padavine</category>
+      <category>napoved</category>
+      <category>primerjava modelov</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>ARSO</category>
+    </item>
     <item>
       <title>Kdaj popusti vročina po vrhuncu 35,6 °C?</title>
       <link>https://meteorec.si/blog/kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816.html</link>

@@ -75,6 +75,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/koliko-dezja-bo-danes-modeli-si-niso-enotni-0817.html</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/koliko-dezja-bo-danes-modeli-si-niso-enotni-0817.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816.html</loc>
     <lastmod>2026-08-16</lastmod>
     <changefreq>monthly</changefreq>
