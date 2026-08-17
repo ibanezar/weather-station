@@ -38,11 +38,18 @@ def seo_title(title, suffix=" | Meteorec"):
     no_paren = re.sub(r"\s*\([^()]*\)\s*$", "", title)
     if no_paren and no_paren != title:
         variants.append(no_paren)
+    # Repne dele odrezujemo POSTOPOMA: "A — B — C" da tudi "A — B", ne samo "A".
+    # Prej je bil vzet le split(sep)[0], zato je funkcija pri naslovih z dvema
+    # ločiloma skočila z vsega naravnost na prvi odsek in preskočila vmesno
+    # različico, ki se je prilegala in nosila ključne besede — npr.
+    # "Danes po gozdovih — gobarski indeks po območjih — Gobarska napoved" (66)
+    # je dalo "Danes po gozdovih" (17) namesto srednje (46), po kateri ljudje
+    # sploh iščejo.
     for base in list(variants):
         for sep in (": ", " — ", " – "):
-            head = base.split(sep)[0]
-            if head != base:
-                variants.append(head)
+            parts = base.split(sep)
+            for k in range(len(parts) - 1, 0, -1):
+                variants.append(sep.join(parts[:k]))
 
     # Od najbogatejše (najdaljše) proti najkrajši -- prva, ki se prilega.
     for v in sorted(set(variants), key=len, reverse=True):
