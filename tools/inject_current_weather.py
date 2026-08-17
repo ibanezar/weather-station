@@ -42,7 +42,15 @@ TAIL_INDEX = ('Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v '
 TAIL_RECICA = ('Meritev se osveži vsako uro. Pretekli dnevi so v '
                '<a href="/vreme/">vremenskem arhivu</a>, vrednosti v živo in urna '
                'napoved pa na <a href="/">naslovni strani</a>.')
-TARGETS = [(INDEX, TAIL_INDEX), (RECICA, TAIL_RECICA)]
+
+# Razred bloka. Na naslovni strani je `wx-static` v style.css namenoma vizualno
+# skrit — vrednosti tam prikazuje živa kartica, blok je le berljiv dvojnik za
+# iskalnike. Na pristajalni strani žive kartice ni, zato mora biti blok viden;
+# `wx-now` (vreme/vreme.css) to pove izrecno. Prej je bil viden le zato, ker se
+# style.css na tisti strani ne naloži — to ni bila odločitev, ampak naključje.
+CLS_INDEX = "wx-static"
+CLS_RECICA = "wx-static wx-now"
+TARGETS = [(INDEX, TAIL_INDEX, CLS_INDEX), (RECICA, TAIL_RECICA, CLS_RECICA)]
 
 START = "<!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->"
 END = "<!-- WX-STATIC:END -->"
@@ -77,11 +85,11 @@ MES_ABBR = {1: "jan.", 2: "feb.", 3: "mar.", 4: "apr.", 5: "maj", 6: "jun.",
             7: "jul.", 8: "avg.", 9: "sep.", 10: "okt.", 11: "nov.", 12: "dec."}
 
 
-def wrap(text):
-    return f'{START}\n  <p class="wx-static" id="wx-static">{text}</p>\n  {END}'
+def wrap(text, cls=CLS_INDEX):
+    return f'{START}\n  <p class="{cls}" id="wx-static">{text}</p>\n  {END}'
 
 
-def build_block_history(tail=TAIL_INDEX):
+def build_block_history(tail=TAIL_INDEX, cls=CLS_INDEX):
     hist = json.load(open(HIST, encoding="utf-8"))
     # Zadnji dan s PRAVO meritvijo: modelske (ERA5) ocene preskočimo, da uvod ne
     # prikazuje rezervnih podatkov kot "meritev postaje IREICA1".
@@ -101,7 +109,7 @@ def build_block_history(tail=TAIL_INDEX):
 
     text = (f'Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji '
             f'(<time datetime="{last}">{fmtd(last)}</time>): {summary} {tail}')
-    return wrap(text)
+    return wrap(text, cls)
 
 
 def fetch_live_wu():
@@ -120,7 +128,7 @@ def fetch_live_wu():
         return None
 
 
-def build_block_live(obs, tail=TAIL_INDEX):
+def build_block_live(obs, tail=TAIL_INDEX, cls=CLS_INDEX):
     m = obs.get("metric", {})
     # obsTimeLocal e.g. "2026-06-27 14:35:00"
     local = obs.get("obsTimeLocal", "")
@@ -143,7 +151,7 @@ def build_block_live(obs, tail=TAIL_INDEX):
     text = (f'Trenutno vreme na Rečici ob Savinji '
             f'(meritev postaje IREICA1 ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}): '
             f'{", ".join(parts)}. {tail}')
-    return wrap(text)
+    return wrap(text, cls)
 
 
 def js_num(x):
@@ -381,13 +389,13 @@ def main():
     hourly = fetch_hourly_wu() if live else None
 
     rc = 0
-    for path, tail in TARGETS:
+    for path, tail, cls in TARGETS:
         rel = os.path.relpath(path, ROOT)
         if not os.path.exists(path):
             print(f"OPOZORILO: {rel} ne obstaja — preskočeno.", file=sys.stderr)
             continue
 
-        block = build_block_live(obs, tail) if obs else build_block_history(tail)
+        block = build_block_live(obs, tail, cls) if obs else build_block_history(tail, cls)
         html = open(path, encoding="utf-8").read()
 
         if START not in html or END not in html:

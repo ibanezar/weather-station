@@ -139,3 +139,31 @@
 .gobe-sp-ic{font-size:1.3rem;line-height:1.2;flex-shrink:0}
 .gobe-sp-nm{font-size:.85rem;font-weight:600}
 .gobe-sp-nt{font-size:.75rem;color:var(--muted);line-height:1.5}
+
+/* ── Podatkovne tabele ──
+   .data-table / .table-scroll sta bila v uporabi na 12 straneh /vreme/mesec/*/,
+   definirana pa v nobenem CSS — tabele so se izrisovale s privzetim slogom
+   brskalnika (glave skupaj, brez razmikov). Sloga uporablja tudi napoved na
+   /vreme-recica-ob-savinji/. */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9rem 0}
+.data-table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:32rem}
+.data-table th,.data-table td{padding:.5rem .7rem;text-align:right;
+  border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table th:first-child,.data-table td:first-child{text-align:left}
+.data-table thead th{font-size:.74rem;font-weight:600;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table td{font-variant-numeric:tabular-nums}
+/* Brez tega povezave v tabeli podedujejo privzeto modro brskalnika
+   (rgb(0,0,238)) — na temnem ozadju kontrast 2,1:1, torej neberljivo. */
+.data-table a{color:var(--blue);text-decoration:none}
+.data-table a:hover{text-decoration:underline}
+.data-table caption{caption-side:bottom;text-align:left;padding:.5rem .1rem .9rem;
+  font-size:.76rem;color:var(--muted);line-height:1.5}
+
+/* Trenutna meritev na pristajalni strani. Na naslovni strani je isti blok
+   razreda .wx-static namenoma vizualno skrit (vrednosti tam kaže živa kartica);
+   tu žive kartice ni, zato mora biti viden — in to eksplicitno, ne po tem, da
+   se style.css na tej strani slučajno ne naloži. */
+.wx-now{margin:.2rem 0 1rem;line-height:1.7}
+.wx-now a{color:var(--blue)}

@@ -22,6 +22,12 @@ jobs:
       - name: Vbrizgaj trenutno meritev v index.html in pristajalno stran
         run: python3 tools/inject_current_weather.py --live
 
+      # Napoved (7 dni + po urah) na pristajalno stran. Ob nedosegljivem
+      # Open-Meteo pusti staro napoved in konča z 0 — raje malo stara napoved
+      # kot prazna stran.
+      - name: Vbrizgaj napoved na pristajalno stran
+        run: python3 tools/inject_forecast.py
+
       - name: Commit in push (samo če so spremembe)
         run: |
           git config user.name  "github-actions[bot]"
