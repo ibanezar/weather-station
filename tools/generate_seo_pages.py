@@ -2514,9 +2514,172 @@ def load_glossary_terms():
     return terms
 
 
+def station_facts(hist):
+    """Izmerjena dejstva postaje IREICA1 po slovarskih pojmih.
+
+    Slovarske strani so bile doslej definicija + zanimivost, torej isto, kar o
+    pojmu pove vsak drug vir — in generični pojmi so zato rangirali na 32.–73.
+    mestu (kondenzacija 52, ciklon 40, nevihta 40, megla 35, burja 35). Edino,
+    česar drugi nimajo, so meritve te postaje, zato jih pripnemo pojmu.
+
+    Vrne {slug: besedilo}. Pojem dobi vnos SAMO, če postaja to res meri:
+    megle, snega, toče in smeri vetra `history.json` ne vsebuje, zato zanje tu
+    ni ničesar — raje brez odstavka kot z izpeljanim približkom, ki bi bral kot
+    meritev. Dnevi z modelsko oceno (`src == "era5"`) se ne štejejo.
+    """
+    d = {k: v for k, v in hist.items() if v.get("src") != "era5"}
+    if not d:
+        return {}
+    days = sorted(d)
+    n = len(days)
+    span = f"{fmtd(days[0])} – {fmtd(days[-1])}"
+    head = f"Postaja IREICA1 v Rečici ob Savinji ({n} dni meritev, {span})"
+
+    def vals(key):
+        return [(k, v[key]) for k, v in d.items() if v.get(key) is not None]
+
+    def top(key, biggest=True):
+        xs = vals(key)
+        if not xs:
+            return None, None
+        return (max(xs, key=lambda x: x[1]) if biggest else min(xs, key=lambda x: x[1]))
+
+    def count(key, pred):
+        return sum(1 for _, v in d.items() if v.get(key) is not None and pred(v[key]))
+
+    def mean(key):
+        xs = [v for _, v in vals(key)]
+        return sum(xs) / len(xs) if xs else None
+
+    def longest_run(pred):
+        best = cur = 0
+        prev = None
+        for k in days:
+            ok = pred(d[k])
+            if ok and (prev is None or (datetime.date.fromisoformat(k)
+                                        - datetime.date.fromisoformat(prev)).days == 1):
+                cur += 1
+            elif ok:
+                cur = 1
+            else:
+                cur = 0
+            prev = k
+            best = max(best, cur)
+        return best
+
+    f = {}
+
+    # ── Rosišče in vlaga ────────────────────────────────────────────────────
+    dk, dv = top("dewptHigh")
+    if dk:
+        sultry = count("dewptHigh", lambda x: x >= 18)
+        f["rosisce"] = (f"{head} je najvišje rosišče izmerila {num(dv)} °C ({fmtd(dk)}). "
+                        f"Rosišče je bilo vsaj 18 °C — meja, pri kateri zrak občutimo kot "
+                        f"soparen — na {sultry} dneh.")
+    mh = mean("humidityAvg")
+    if mh is not None:
+        f["relativna-vlaznost"] = (
+            f"{head} beleži povprečno relativno vlažnost {num(mh, 0)} %. "
+            f"Dni s povprečno vlažnostjo nad 90 % je bilo "
+            f"{count('humidityAvg', lambda x: x >= 90)} — dno doline je vlažno, "
+            f"kar je za kotlinsko lego značilno.")
+
+    # Kondenzacija: zrak se je ohladil do rosišča (tempLow <= dewptHigh).
+    cond = sum(1 for v in d.values()
+               if v.get("tempLow") is not None and v.get("dewptHigh") is not None
+               and v["tempLow"] <= v["dewptHigh"])
+    withdew = sum(1 for v in d.values()
+                  if v.get("tempLow") is not None and v.get("dewptHigh") is not None)
+    if withdew:
+        f["kondenzacija"] = (
+            f"{head} je na {cond} od {withdew} dni z merjenim rosiščem "
+            f"({100 * cond / withdew:.0f} %) najnižja nočna temperatura padla na rosišče "
+            f"ali podenj — takrat vodna para kondenzira v roso ali meglo.")
+
+    # ── Padavine ────────────────────────────────────────────────────────────
+    pk, pv = top("precipTotal")
+    if pk:
+        wet = count("precipTotal", lambda x: x > 0)
+        heavy = count("precipTotal", lambda x: x >= 20)
+        f["intenziteta-padavin"] = (
+            f"{head} je največ dežja v enem dnevu izmerila {num(pv)} mm ({fmtd(pk)}). "
+            f"Dni z vsaj 20 mm je bilo {heavy}.")
+        f["ploha"] = (f"{head} je padavine zabeležila na {wet} dneh "
+                      f"({100 * wet / n:.0f} % vseh dni); največ v enem dnevu "
+                      f"{num(pv)} mm ({fmtd(pk)}).")
+
+    # ── Veter ───────────────────────────────────────────────────────────────
+    gk, gv = top("windgustHigh")
+    if gk:
+        f["sunek-vetra"] = (
+            f"{head} je najmočnejši sunek vetra izmerila {num(gv)} km/h ({fmtd(gk)}). "
+            f"Dolina veter kanalizira po svoji osi, zato so sunki tu redkeje "
+            f"ekstremni kot na odprtem.")
+        f["beaufortova-lestvica"] = (
+            f"{head} je najmočnejši sunek dosegel {num(gv)} km/h ({fmtd(gk)}), kar je "
+            f"na Beaufortovi lestvici stopnja {beaufort(gv)}.")
+
+    # ── Zračni tlak ─────────────────────────────────────────────────────────
+    lk, lv = top("pressureLow", biggest=False)
+    hk, hv = top("pressureHigh")
+    if lk and hk:
+        f["atmosferski-zracni-tlak"] = (
+            f"{head} je izmerila razpon zračnega tlaka od {num(lv, 0)} hPa ({fmtd(lk)}) "
+            f"do {num(hv, 0)} hPa ({fmtd(hk)}) — razlika {num(hv - lv, 0)} hPa.")
+        f["barometer"] = f["atmosferski-zracni-tlak"]
+        f["ciklon"] = (f"{head} je najnižji zračni tlak izmerila {num(lv, 0)} hPa "
+                       f"({fmtd(lk)}) — najgloblje ciklonsko območje v arhivu postaje.")
+        f["anticiklon"] = (f"{head} je najvišji zračni tlak izmerila {num(hv, 0)} hPa "
+                           f"({fmtd(hk)}) — najmočnejši anticiklon v arhivu postaje.")
+
+    # ── Temperatura ─────────────────────────────────────────────────────────
+    hot = longest_run(lambda v: (v.get("tempHigh") or -99) >= 30)
+    if hot:
+        f["toplotni-val"] = (
+            f"{head} je najdaljše zaporedje dni z najvišjo temperaturo vsaj 30 °C "
+            f"trajalo {hot} dni. Vročih dni (≥ 30 °C) je bilo skupaj "
+            f"{count('tempHigh', lambda x: x >= 30)}.")
+    cold = longest_run(lambda v: (v.get("tempHigh") or 99) <= 0)
+    if cold:
+        f["hladni-val"] = (
+            f"{head} je najdaljše zaporedje ledenih dni (najvišja temperatura pod 0 °C) "
+            f"trajalo {cold} dni; skupaj jih je bilo "
+            f"{count('tempHigh', lambda x: x <= 0)}.")
+    amps = [(k, v["tempHigh"] - v["tempLow"]) for k, v in d.items()
+            if v.get("tempHigh") is not None and v.get("tempLow") is not None]
+    if amps:
+        ak, av = max(amps, key=lambda x: x[1])
+        f["dnevna-amplituda-temperature"] = (
+            f"{head} je največjo dnevno amplitudo izmerila {num(av)} °C ({fmtd(ak)}); "
+            f"povprečna dnevna amplituda je {num(sum(a for _, a in amps) / len(amps))} °C. "
+            f"Na dnu doline je razlika med dnevom in nočjo večja kot na pobočjih.")
+
+    # ── Sevanje: NAMENOMA brez vnosa ────────────────────────────────────────
+    # `uviHigh` in `solarHigh` sta nezanesljiva in ju tu ne objavljamo:
+    #   - UV-indeks doseže 15 tudi 18. 2. 2022 in 24. 9. 2024; na 46° širine je
+    #     realni vrh ~8–9 in februarja tega ni mogoče doseči. 293 dni trdi ≥ 10.
+    #   - sončno obsevanje doseže 1 478 W/m², kar je nad zgornjo mejo pri tleh
+    #     (~1 100 W/m²) in celo nad solarno konstanto.
+    # Dokler senzorja nista umerjena, bi bila objavljena maksimuma napaka,
+    # predstavljena kot meritev. Pojmi uv-indeks, soncno-sevanje in insolacija
+    # zato ostanejo brez tega bloka.
+
+    return f
+
+
+def beaufort(kmh):
+    """Stopnja Beaufortove lestvice za hitrost v km/h."""
+    for lim, deg in ((1, 0), (5, 1), (11, 2), (19, 3), (28, 4), (38, 5), (49, 6),
+                     (61, 7), (74, 8), (88, 9), (102, 10), (117, 11)):
+        if kmh < lim:
+            return deg
+    return 12
+
+
 def gen_slovar_pages(sitemap_urls):
     terms = load_glossary_terms()
     lastmod = TODAY.isoformat()
+    facts = station_facts(load_history())
 
     for t in terms:
         url = f"/slovar/{t['slug']}/"
@@ -2527,6 +2690,15 @@ def gen_slovar_pages(sitemap_urls):
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
         qa = [(f"Kaj je {short_name.lower()}?", t["def"])]
+        fact = facts.get(t["slug"])
+        if fact:
+            qa.append((f"Kaj o pojmu {short_name.lower()} kažejo meritve v Rečici ob Savinji?",
+                       fact))
+        fact_html = (f'''  <h2>Kaj o tem pove postaja IREICA1</h2>
+  <p class="archive-intro">{fact}</p>
+  <p class="muted-note">Vir: meritve postaje IREICA1 na Rečici ob Savinji (366 m n. m.).
+  Celoten arhiv po dnevih je v <a href="/vreme/">vremenskem arhivu</a>.</p>
+''' if fact else "")
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
@@ -2543,7 +2715,7 @@ def gen_slovar_pages(sitemap_urls):
     <div class="clabel">💡 Zanimivost</div>
     <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
   </div>
-  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+{fact_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
   <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
   <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
 
