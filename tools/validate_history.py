@@ -38,6 +38,22 @@ OPTIONAL_RANGES = {
     'uviHigh':      (0, 20),
 }
 
+# Meje verjetnosti (NE napake). Zgornji `OPTIONAL_RANGES` lovijo očitne smeti;
+# ti dve polji pa dajeta vrednosti, ki so znotraj tistih mej, a fizikalno
+# nemogoče:
+#   - uviHigh doseže 15 tudi 18. 2. 2022 in 24. 9. 2024; na 46° zemljepisne
+#     širine je realni vrh ~8–9 in februarja tega ni mogoče doseči;
+#   - solarHigh doseže 1478 W/m², kar je nad zgornjo mejo pri tleh (~1100) in
+#     celo nad solarno konstanto (1361).
+# Meje NISO napaka, ker sta senzorja taka ~15 % dni in bi dnevna posodobitev
+# zgodovine odpovedala vsak teden. Namen je, da je težava vidna v izpisu in se
+# ne izgubi. Dokler senzorja nista umerjena, se ti dve polji ne objavljata
+# (glej station_facts() v tools/generate_seo_pages.py).
+PLAUSIBLE_MAX = {
+    'uviHigh':   11,
+    'solarHigh': 1200,
+}
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("Uporaba: validate_history.py YYYY-MM [MIN_COUNT]")
@@ -56,6 +72,7 @@ def main():
         sys.exit("NAPAKA: history.json ne obstaja")
 
     errors = []
+    warnings = []
 
     # 1. Key format
     for key in d:
@@ -86,6 +103,12 @@ def main():
             if field in entry and entry[field] is not None:
                 if not (lo <= float(entry[field]) <= hi):
                     errors.append(f"{key}.{field}: {entry[field]} izven [{lo}, {hi}]")
+        # Fizikalno neverjetne, a ne smetne vrednosti — samo opozorilo
+        for field, cap in PLAUSIBLE_MAX.items():
+            if field in entry and entry[field] is not None:
+                if float(entry[field]) > cap:
+                    warnings.append(f"{key}.{field}: {entry[field]} > {cap} "
+                                    f"(fizikalno neverjetno — senzor?)")
 
     # 3. No entries were deleted (regression check)
     total = len(d)
@@ -104,6 +127,14 @@ def main():
         if len(errors) > 25:
             print(f"  ... in še {len(errors) - 25} napak")
         sys.exit(1)
+
+    if warnings:
+        print(f"OPOZORILO — {len(warnings)} neverjetnih vrednosti "
+              f"(ne ustavi posodobitve, a senzor kaže na težavo):")
+        for w in warnings[:10]:
+            print(f"  • {w}")
+        if len(warnings) > 10:
+            print(f"  ... in še {len(warnings) - 10}")
 
     print(f"✓ history.json je veljaven ({total} dni skupaj, {len(month_days)} dni za {month})")
 

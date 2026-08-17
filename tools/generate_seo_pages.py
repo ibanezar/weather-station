@@ -27,6 +27,10 @@ from collections import defaultdict
 from generate_monthly_post import seo_title
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from asset_version import css_links
+# Ena sama definicija CSS vrstic za vse ovoje strani (glej tools/asset_version.py).
+CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css', 'vreme/vreme.css')
 SITE = "https://meteorec.si"
 STATION_ID = "IREICA1"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
@@ -379,9 +383,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
 <meta name="twitter:description" content="{desc_esc}">
 <meta name="twitter:image" content="{img_esc}">
 {head_extras}
-<link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/blog/blog.css">
-<link rel="stylesheet" href="/vreme/vreme.css">
+{CSS_LINKS}
 </head>
 <body>
 {BLOBS}
