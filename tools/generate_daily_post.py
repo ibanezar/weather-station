@@ -620,7 +620,11 @@ def parse_lektor_json(text):
        poskusimo še izsek od prvega `{` do zadnjega `}`;
     2. nizi `old`/`new` so dobesedni izseki iz HTML in vsebujejo prave prelome
        vrstic, ti pa so znotraj JSON niza po standardu prepovedani -- zato
-       dekodiramo s `strict=False`, ki krmilne znake v nizih dovoli.
+       dekodiramo s `strict=False`, ki krmilne znake v nizih dovoli;
+    3. model je vrnil DVA JSON bloka -- prvega s popravki, nato premislek in
+       drugega s praznima seznamoma -- zato posamezne objekte poberemo z
+       `raw_decode` in obvelja zadnji, ki je oblike lektorjevega odgovora
+       (končna beseda modela, ne osnutek).
 
     Uporabljata jo call_lektor() tu in lektor_existing_posts.py -- ena sama
     izvedba, da se obrambi ne razideta.
@@ -629,17 +633,22 @@ def parse_lektor_json(text):
     if not cleaned:
         return None
     lax = json.JSONDecoder(strict=False)
-    start, end = cleaned.find("{"), cleaned.rfind("}")
-    kandidati = [cleaned]
-    if start != -1 and end > start:
-        kandidati.append(cleaned[start:end + 1])
-    for kandidat in kandidati:
-        for decode in (json.loads, lax.decode):
-            try:
-                return decode(kandidat)
-            except json.JSONDecodeError:
-                continue
-    return None
+    for decode in (json.loads, lax.decode):
+        try:
+            return decode(cleaned)
+        except json.JSONDecodeError:
+            pass
+    najdeni = []
+    for i, znak in enumerate(cleaned):
+        if znak != "{":
+            continue
+        try:
+            obj, _ = lax.raw_decode(cleaned, i)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict) and {"issues", "replacements", "corrected"} & set(obj):
+            najdeni.append(obj)
+    return najdeni[-1] if najdeni else None
 
 
 def call_lektor(article, context):
