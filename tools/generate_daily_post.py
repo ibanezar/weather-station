@@ -612,11 +612,15 @@ hitro dokonča ročno."""
 def parse_lektor_json(text):
     """Iz odgovora lektorja izlušči JSON objekt; vrne None, če ga ni.
 
-    Model občasno pred JSON pripiše uvodni stavek („Preglejal sem besedilo …“),
-    čeprav poziv zahteva samo JSON. Golo `json.loads` v tem primeru pade in
-    lektura se tiho preskoči — 18. 8. 2026 se je to zgodilo pri članku o
-    valovitih altokumulusih. Zato poleg golega parsiranja poskusimo še izsek od
-    prvega `{` do zadnjega `}`.
+    Dve stvari 18. 8. 2026 sta lekturo članka o valovitih altokumulusih tiho
+    preskočili, obakrat s padcem golega `json.loads`:
+
+    1. model je pred JSON pripisal uvodni stavek („Preglejal sem besedilo …“),
+       čeprav poziv zahteva samo JSON -- zato poleg golega parsiranja
+       poskusimo še izsek od prvega `{` do zadnjega `}`;
+    2. nizi `old`/`new` so dobesedni izseki iz HTML in vsebujejo prave prelome
+       vrstic, ti pa so znotraj JSON niza po standardu prepovedani -- zato
+       dekodiramo s `strict=False`, ki krmilne znake v nizih dovoli.
 
     Uporabljata jo call_lektor() tu in lektor_existing_posts.py -- ena sama
     izvedba, da se obrambi ne razideta.
@@ -624,17 +628,18 @@ def parse_lektor_json(text):
     cleaned = re.sub(r"^```json|```$", "", (text or "").strip(), flags=re.M).strip()
     if not cleaned:
         return None
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
+    lax = json.JSONDecoder(strict=False)
     start, end = cleaned.find("{"), cleaned.rfind("}")
-    if start == -1 or end <= start:
-        return None
-    try:
-        return json.loads(cleaned[start:end + 1])
-    except json.JSONDecodeError:
-        return None
+    kandidati = [cleaned]
+    if start != -1 and end > start:
+        kandidati.append(cleaned[start:end + 1])
+    for kandidat in kandidati:
+        for decode in (json.loads, lax.decode):
+            try:
+                return decode(kandidat)
+            except json.JSONDecodeError:
+                continue
+    return None
 
 
 def call_lektor(article, context):
