@@ -1,8 +1,13 @@
 {
-  "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817": [
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
+  "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818": [
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
     "tedenska-napoved-11-17-avgust-2026",
     "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810"
+  ],
+  "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817": [
+    "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
+    "tedenska-napoved-11-17-avgust-2026"
   ],
   "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816": [
     "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
@@ -31,8 +36,8 @@
   ],
   "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810": [
     "tedenska-napoved-11-17-avgust-2026",
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
+    "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
   ],
   "vrocina-je-nazaj-ampak-do-kdaj-0809": [
     "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727",
@@ -195,8 +200,8 @@
     "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712"
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "invazivka-zlezava-nedotika-20260719-4632-1486": [
@@ -307,7 +312,7 @@
   "velika-pozarna-ogrozenost-8-julij-2026": [
     "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi",
     "medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721",
-    "nevihtni-pas-14-julij-2026"
+    "najbolj-suha-pomlad-2026-ireica1"
   ],
   "primerjava-krajev-vrocinski-val-julij-2026": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
@@ -326,8 +331,8 @@
   ],
   "hmelj-vreme-julij-rastne-stopinje-vodna-bilanca": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
-    "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712",
-    "koliko-je-zalilo-nevihta-11-julij-2026"
+    "koliko-je-zalilo-nevihta-11-julij-2026",
+    "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712"
   ],
   "kako-brati-nevihtno-napoved-cape-striz-vetra": [
     "nevihtni-obeti-11-julij-2026",
@@ -386,8 +391,8 @@
   ],
   "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi": [
     "velika-pozarna-ogrozenost-8-julij-2026",
-    "medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721",
-    "nevihte-toca-hudourniki-julij-2026"
+    "nevihte-toca-hudourniki-julij-2026",
+    "nevihtni-pas-14-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
     "vremenski-povzetek-julij-2026",
