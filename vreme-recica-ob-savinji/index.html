@@ -63,22 +63,41 @@
   <p class="post-meta">Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · 366 m n. m.</p>
   <h2 id="zdaj">Trenutno vreme v Rečici ob Savinji</h2>
 <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static wx-now" id="wx-static">Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji (<time datetime="2026-08-17">17. avgusta 2026</time>): povprečna temperatura 20,4 °C, najvišja 27,1 °C, najnižja 16,0 °C — 16,2 mm padavin, relativna vlažnost 83 %, najmočnejši sunek vetra 9,7 km/h. Meritev se osveži vsako uro. Pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, vrednosti v živo in urna napoved pa na <a href="/">naslovni strani</a>.</p>
+  <p class="wx-static wx-now" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-08-18T09:10">09:10</time>, 18. avgusta 2026): temperatura 16,0 °C, rosišče 15,0 °C, relativna vlažnost 99 %, veter 1,0 km/h (sunki 2,0 km/h), zračni tlak 1015 hPa, padavine danes 0,0 mm. Meritev se osveži vsako uro. Pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, vrednosti v živo in urna napoved pa na <a href="/">naslovni strani</a>.</p>
   <!-- WX-STATIC:END -->
 <!-- WX-FCH:START (auto: tools/inject_forecast.py) -->
   <h2 id="po-urah">Vreme po urah za Rečico ob Savinji</h2>
-  <p>Napoved po urah se osveži vsako uro; podrobnejši urni prikaz je na <a href="/">naslovni strani</a>.</p>
-  <!-- WX-FCH:END -->
-<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->
-  <h2 id="napoved">Napoved za Rečico ob Savinji</h2>
   <div class="table-scroll">
   <table class="data-table">
-    <caption>Napoved modela MTR v1 (lastni model Meteorec s popravkom za dno doline). Daljša, 7-dnevna napoved se osveži vsako uro.</caption>
-    <thead><tr><th>Dan</th><th>Najvišja / najnižja (°C)</th><th>Verjetnost padavin</th></tr></thead>
+    <caption>Naslednjih 24 ur v 3-urnih korakih (Open-Meteo, časovni pas Europe/Ljubljana). Podrobnejši urni prikaz je na <a href="/">naslovni strani</a>.</caption>
+    <thead><tr><th>Ura</th><th>Temperatura (°C)</th><th>Padavine (mm)</th><th>Verjetnost</th><th>Veter (km/h)</th></tr></thead>
     <tbody>
-      <tr><td>sre. 19. avg.</td><td>31,3 / 15,9</td><td>27 %</td></tr>
-      <tr><td>čet. 20. avg.</td><td>28,0 / 17,2</td><td>35 %</td></tr>
-      <tr><td>pet. 21. avg.</td><td>28,4 / 20,3</td><td>55 %</td></tr>
+      <tr><td>tor. 18. avg., 07:00</td><td>13,6</td><td>0,0</td><td>0 %</td><td>0</td></tr>
+      <tr><td>tor. 18. avg., 10:00</td><td>20,9</td><td>0,0</td><td>0 %</td><td>2</td></tr>
+      <tr><td>tor. 18. avg., 13:00</td><td>25,7</td><td>0,0</td><td>0 %</td><td>5</td></tr>
+      <tr><td>tor. 18. avg., 16:00</td><td>26,4</td><td>0,0</td><td>0 %</td><td>2</td></tr>
+      <tr><td>tor. 18. avg., 19:00</td><td>24,2</td><td>0,0</td><td>0 %</td><td>7</td></tr>
+      <tr><td>tor. 18. avg., 22:00</td><td>19,3</td><td>0,0</td><td>18 %</td><td>4</td></tr>
+      <tr><td>sre. 19. avg., 01:00</td><td>18,3</td><td>0,0</td><td>0 %</td><td>4</td></tr>
+      <tr><td>sre. 19. avg., 04:00</td><td>18,0</td><td>0,0</td><td>0 %</td><td>3</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <!-- WX-FCH:END -->
+<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->
+  <h2 id="napoved">Napoved za Rečico ob Savinji, 7 dni</h2>
+  <div class="table-scroll">
+  <table class="data-table">
+    <caption>Najvišja / najnižja temperatura (°C), padavine (mm), verjetnost padavin in najmočnejši veter (km/h). Stolpec MTR v1 je lastni model Meteorec s popravkom za dno doline; pokriva prve dni, za katere je naučen. Vira sta navedena ločeno in se ne zlivata v eno številko. Osveženo vsako uro.</caption>
+    <thead><tr><th>Dan</th><th>MTR v1 (°C)</th><th>Open-Meteo (°C)</th><th>Padavine (mm)</th><th>Verjetnost</th><th>Veter (km/h)</th></tr></thead>
+    <tbody>
+      <tr><td>tor. 18. avg.</td><td><span class="muted">—</span></td><td>26,7 / 13,6</td><td>0,0</td><td>18 %</td><td>7</td></tr>
+      <tr><td>sre. 19. avg.</td><td>31,3 / 15,9</td><td>31,4 / 16,7</td><td>0,0</td><td>3 %</td><td>17</td></tr>
+      <tr><td>čet. 20. avg.</td><td>28,0 / 17,2</td><td>27,5 / 18,9</td><td>0,0</td><td>15 %</td><td>11</td></tr>
+      <tr><td>pet. 21. avg.</td><td>28,4 / 20,3</td><td>28,0 / 21,3</td><td>0,3</td><td>63 %</td><td>13</td></tr>
+      <tr><td>sob. 22. avg.</td><td><span class="muted">—</span></td><td>22,0 / 18,7</td><td>10,3</td><td>53 %</td><td>8</td></tr>
+      <tr><td>ned. 23. avg.</td><td><span class="muted">—</span></td><td>28,7 / 16,5</td><td>0,0</td><td>7 %</td><td>9</td></tr>
+      <tr><td>pon. 24. avg.</td><td><span class="muted">—</span></td><td>28,4 / 17,7</td><td>0,6</td><td>38 %</td><td>13</td></tr>
     </tbody>
   </table>
   </div>
