@@ -289,7 +289,7 @@
 
     <p>Avgust je torej z včerajšnjim dnem prešel iz primanjkljaja v presežek — a komaj. Pri napovedanem izhlapevanju bo ta presežek porabljen že v sredo. En močan dan dežja v tem vremenu kupi približno tri dni izhlapevanja, nič več.</p>
 
-    <p>Širše okno je še bolj streznjujoče. V zadnjih tridesetih dneh je padlo 92,7 mm dežja, izhlapelo pa je za 146,8 mm — bilanca <span class="mono">−54,1 mm</span>. Brez včerajšnjega dežja bi bila pri −70,3 mm. Od 1. junija je bilanca <span class="mono">−7,4 mm</span>, kar je po poletju s 304 mm dežja skoraj izenačeno stanje; primanjkljaj se je nabral predvsem v zadnjem mesecu.</p>
+    <p>Širše okno je še bolj streznjujoče. V tridesetih dneh do vključno včeraj je padlo 92,7 mm dežja, izhlapelo pa je za 146,8 mm — bilanca <span class="mono">−54,1 mm</span>. Brez včerajšnjega dežja bi bila pri −70,3 mm. Od 1. junija je bilanca <span class="mono">−6,3 mm</span>, kar je po poletju s 304 mm dežja skoraj izenačeno stanje; primanjkljaj se je nabral predvsem v zadnjem mesecu.</p>
 
     <table class="stats">
       <thead><tr><th>Obdobje</th><th>Padavine</th><th>ET₀</th><th>Bilanca</th></tr></thead>
@@ -297,8 +297,8 @@
         <tr><td>17. avgust<br><span class="src-sub">dan naliva</span></td><td>16,2 mm</td><td>2,2 mm</td><td><strong>+14,0 mm</strong></td></tr>
         <tr><td>Avgust do 16.<br><span class="src-sub">pred nalivom</span></td><td>73,2 mm</td><td>82,9 mm</td><td>−9,7 mm</td></tr>
         <tr><td>Avgust do 17.<br><span class="src-sub">z nalivom</span></td><td>89,4 mm</td><td>85,0 mm</td><td><strong>+4,4 mm</strong></td></tr>
-        <tr><td>Zadnjih 30 dni</td><td>92,7 mm</td><td>146,8 mm</td><td>−54,1 mm</td></tr>
-        <tr><td>Od 1. junija</td><td>304,0 mm</td><td>311,4 mm</td><td>−7,4 mm</td></tr>
+        <tr><td>30 dni do 17. avgusta</td><td>92,7 mm</td><td>146,8 mm</td><td>−54,1 mm</td></tr>
+        <tr><td>1. junij–17. avgust</td><td>304,0 mm</td><td>310,3 mm</td><td>−6,3 mm</td></tr>
       </tbody>
     </table>
 
@@ -324,11 +324,11 @@
 
     <p>Zanimiv je še en podatek. Napoved izpred dneva je za Open-Meteo znašala 12,1 mm (napaka 4,1 mm), za AIFS pa 2,4 mm. Ko se je jutro približalo, je AIFS svojo napoved <em>znižal</em> na 1,2 mm in se od meritve oddaljil. Model umetne inteligence, naučen na povprečjih, ob bližajoči se nevihti raje ponudi srednjo vrednost kot ostro konico — kar smo opisali <a href="/blog/kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810.html">v članku o modelu, ki ga prikazuje Windy</a>.</p>
 
-    <p>Naš model MTR količine padavin ne napoveduje, ker je mokrih dni za učenje premalo; včeraj je dal verjetnost padavin 99 % in ta del je zadel. Temperaturo je zgrešil za manj kot stopinjo.</p>
+    <p>Naš model MTR količine padavin ne napoveduje, ker je mokrih dni za učenje premalo; včeraj je dal verjetnost padavin 99 % in ta del je zadel. Pri temperaturi pa mu dan ni šel od rok. Postaja je izmerila 27,1 °C in 16,0 °C, MTR je najvišjo zgrešil za 1,7 °C in najnižjo za 1,5 °C. Prognostik ARSO je bil pri najvišji natančnejši (1,1 °C), Open-Meteo pa pri najnižji (0,3 °C). Včerajšnji dan je torej pripadel prognostiku — pri količini dežja in pri najvišji temperaturi.</p>
 
     <h2 id="naprej">Kaj je pred nami</h2>
 
-    <p>Danes ostaja suho. Open-Meteo za Rečico napoveduje 25,8 °C brez padavin, naš MTR 26,4 °C in 36-odstotno verjetnost padavin, ARSO za Ljubno ob Savinji 21 °C — razlika petih stopinj med prognostikom in modeli je za današnji dan največja odprta točka, ki jo bo jutri spet rešil merilnik.</p>
+    <p>Danes ostaja suho. Napovedi, ki so bile nocoj zabeležene na semaforju in jih bo jutri sodil merilnik, so takšne: Open-Meteo za Rečico 25,8 °C brez padavin, naš MTR 26,4 °C in 36-odstotna verjetnost padavin, ARSO za Ljubno ob Savinji 21 °C — razlika petih stopinj med prognostikom in modeli je za današnji dan največja odprta točka.</p>
 
     <p>Do petka po Open-Meteo ni omembe vrednih padavin, prvi resnejši dež je napovedan za soboto, 22. avgusta, okoli 10 mm. Do takrat bo izhlapevanje pojedlo ves torkov presežek in avgustovska bilanca bo spet negativna. Suša v dolini se torej ni končala — dobila je le premor.</p>
 
@@ -358,8 +358,18 @@
     </p>
 
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Viri: izmerjene padavine, temperatura in jakost dežja so s postaje IREICA1 (Rečica ob Savinji, 366 m n. m., petminutni zapis). Napovedi enajstih virov so tiste, objavljene 17. avgusta 2026 ob 7.45 (modelski izračuni prek Open-Meteo, napoved ARSO za Ljubno ob Savinji). ET₀ in ocena vlage tal sta izračun Open-Meteo za isto točko, ne meritev postaje. Meritev sosednje postaje IREICA7 v Varpolju je z varpolje.si. Ocene točnosti izhajajo iz zapisov na strani točnost napovedi za obdobje od 15. julija do 17. avgusta 2026.</p>
+    <!-- teme:start — samodejno, wire_all(); ne urejaj ročno -->
+    <div class="post-topics"><span class="pt-label">Teme:</span> <a class="pt-tag" href="/blog/tema/padavine/">padavine</a><a class="pt-tag" href="/blog/tema/vodna-bilanca/">vodna bilanca</a><a class="pt-tag" href="/blog/tema/ireica1/">ireica1</a><a class="pt-tag" href="/blog/tema/zgornja-savinjska-dolina/">zgornja savinjska dolina</a><a class="pt-tag" href="/blog/tema/arso/">arso</a></div>
+    <!-- teme:end -->
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
+
+  <!-- sorodni:start — samodejno, wire_all(); ne urejaj ročno -->
+  <section class="related-posts">
+    <h2 class="related-title">Sorodni članki</h2>
+    <div class="related-grid"><a class="related-card" href="/blog/koliko-dezja-bo-danes-modeli-si-niso-enotni-0817.html"><span class="related-date">17. avgusta 2026</span><span class="related-h">Koliko dežja bo danes? Modeli si niso enotni</span><span class="related-sum">Enajst virov za isti dan in isto točko napove od 1,2 do 16,9 mm dežja. Grafi primerjajo količine in uro padavin — ter ka…</span></a><a class="related-card" href="/blog/tedenska-napoved-11-17-avgust-2026.html"><span class="related-date">10. avgusta 2026</span><span class="related-h">Tedenska napoved 11.–17. avgusta: sredina tedna je uganka, konec tedna vroč</span><span class="related-sum">Šest globalnih modelov, ARSO in domači MTR za teden od 11. do 17. avgusta. V torek nevihte, sredi tedna hladne noči, za …</span></a><a class="related-card" href="/blog/kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810.html"><span class="related-date">10. avgusta 2026</span><span class="related-h">Kateri AI model uporablja Windy in kako se odreže pri nas</span><span class="related-sum">Windy prikazuje ECMWF AIFS, prvi operativni AI model za napoved vremena. Preverili smo ga na meritvah postaje v Rečici o…</span></a></div>
+  </section>
+  <!-- sorodni:end -->
 
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
