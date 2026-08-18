@@ -609,6 +609,34 @@ ga ni mogoče objaviti niti po tvojih popravkih -- v tem primeru naj bo
 hitro dokonča ročno."""
 
 
+def parse_lektor_json(text):
+    """Iz odgovora lektorja izlušči JSON objekt; vrne None, če ga ni.
+
+    Model občasno pred JSON pripiše uvodni stavek („Preglejal sem besedilo …“),
+    čeprav poziv zahteva samo JSON. Golo `json.loads` v tem primeru pade in
+    lektura se tiho preskoči — 18. 8. 2026 se je to zgodilo pri članku o
+    valovitih altokumulusih. Zato poleg golega parsiranja poskusimo še izsek od
+    prvega `{` do zadnjega `}`.
+
+    Uporabljata jo call_lektor() tu in lektor_existing_posts.py -- ena sama
+    izvedba, da se obrambi ne razideta.
+    """
+    cleaned = re.sub(r"^```json|```$", "", (text or "").strip(), flags=re.M).strip()
+    if not cleaned:
+        return None
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+    start, end = cleaned.find("{"), cleaned.rfind("}")
+    if start == -1 or end <= start:
+        return None
+    try:
+        return json.loads(cleaned[start:end + 1])
+    except json.JSONDecodeError:
+        return None
+
+
 def call_lektor(article, context):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     user_prompt = (
@@ -644,11 +672,10 @@ def call_lektor(article, context):
 
     if not text:
         return {"ok": True, "issues": ["lektura preskočena -- prazen odgovor"], "blocking": False, "corrected": article}
-    cleaned = re.sub(r"^```json|```$", "", text.strip(), flags=re.M).strip()
-    try:
-        return json.loads(cleaned)
-    except Exception:
+    result = parse_lektor_json(text)
+    if result is None:
         return {"ok": True, "issues": ["lektura preskočena -- neveljaven JSON"], "blocking": False, "corrected": article}
+    return result
 
 
 def open_review_issue(article, slug, issues):

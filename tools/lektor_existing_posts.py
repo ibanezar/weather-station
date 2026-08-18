@@ -23,7 +23,7 @@ import json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT
-from generate_daily_post import ANTHROPIC_MODEL, stream_claude
+from generate_daily_post import ANTHROPIC_MODEL, stream_claude, parse_lektor_json
 
 LEKTOR_REPLACE_PROMPT = """Si natančen slovenski lektor za blog meteorec.si. Dobiš HTML že objavljenega
 članka. Tvoja naloga je najti in popraviti jezikovne napake v VIDNEM besedilu
@@ -84,20 +84,20 @@ def lektor_file(slug, api_key):
         "messages": [{"role": "user", "content": "HTML članka za lekturo:\n\n" + stripped}],
     }
     text = stream_claude(payload, api_key)
-    cleaned = re.sub(r"^```json|```$", "", text.strip(), flags=re.M).strip()
 
     # Čist članek je pričakovan izid, ne napaka. Poziv se konča z „Če napak ni,
     # vrni prazna seznama“, model pa v tem primeru pogosto ne vrne ničesar —
     # in prej je prav to podrlo cel workflow z JSONDecodeError. Isto varovalko
     # ima call_lektor() v generate_daily_post.py; tu je manjkala.
-    if not cleaned:
+    if not text.strip():
         print(f"\n── {slug}: lektor ni vrnil popravkov (prazen odgovor) -- brez sprememb.")
         return False
-    try:
-        result = json.loads(cleaned)
-    except json.JSONDecodeError:
+    # Izluščenje JSON prevzame parse_lektor_json() iz generate_daily_post.py --
+    # ta prenese tudi uvodni stavek pred JSON, ki ga model občasno pripiše.
+    result = parse_lektor_json(text)
+    if result is None:
         print(f"⚠ {slug}: lektor ni vrnil veljavnega JSON -- preskačem. "
-              f"Prvih 200 znakov: {cleaned[:200]!r}", file=sys.stderr)
+              f"Prvih 200 znakov: {text.strip()[:200]!r}", file=sys.stderr)
         return False
 
     print(f"\n── {slug}")
