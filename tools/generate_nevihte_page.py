@@ -311,6 +311,18 @@ def build_body(data):
          "Toča je v Sloveniji, tudi v Zgornji Savinjski dolini, najpogostejša med majem in avgustom v popoldanskih "
          "in večernih urah, ko je dnevno segrevanje največje in atmosfera najbolj nestabilna."),
     ]
+    # Aktivna opozorila ARSO piše tools/inject_arso_warnings.py med markerja.
+    # Tu je le rezervni zapis, da stran med generiranjem in prvim zagonom ni
+    # prazna; opozorila so stanje in ne trdimo, da jih ni — samo, da še niso
+    # preverjena.
+    arso_block = (
+        '<!-- WX-ARSO:START (auto: tools/inject_arso_warnings.py) -->\n'
+        '  <h2 id="opozorila">Aktivna opozorila ARSO</h2>\n'
+        '  <p class="archive-intro">Stanje opozoril se osvežuje samodejno; '
+        'uradni vir so <a href="https://meteo.arso.gov.si/met/sl/warning/" '
+        'target="_blank" rel="noopener">opozorila ARSO</a>.</p>\n'
+        '  <!-- WX-ARSO:END -->')
+
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -336,6 +348,7 @@ def build_body(data):
   merita nestabilnost na drugačen način in se med seboj dopolnjujeta. <strong>Striženje vetra</strong> (razlika hitrosti
   in smeri vetra med tlemi in višino ~5,5 km) organizira nevihte — višje vrednosti povečajo možnost dolgotrajnejših,
   močnejših neviht. <strong>Višina ledišča</strong> določa, ali se toča staja, preden doseže tla.</p>
+{arso_block}
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">⚠️ Uradna opozorila</div>
     <div style="font-size:.85rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
