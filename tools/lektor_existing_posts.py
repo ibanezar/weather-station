@@ -96,8 +96,10 @@ def lektor_file(slug, api_key):
     # ta prenese tudi uvodni stavek pred JSON, ki ga model občasno pripiše.
     result = parse_lektor_json(text)
     if result is None:
+        t = text.strip()
         print(f"⚠ {slug}: lektor ni vrnil veljavnega JSON -- preskačem. "
-              f"Prvih 200 znakov: {text.strip()[:200]!r}", file=sys.stderr)
+              f"Dolžina odgovora: {len(t)} znakov. Prvih 200: {t[:200]!r} "
+              f"| zadnjih 200: {t[-200:]!r}", file=sys.stderr)
         return False
 
     print(f"\n── {slug}")
