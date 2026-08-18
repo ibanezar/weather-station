@@ -691,6 +691,37 @@ def build_tag_pages(posts):
         os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(html)
         made.append(slug)
+
+    # Tema strani, ki so padle pod prag dveh objav (npr. ko se objave umaknejo),
+    # se ne pregenerirajo — datoteka pa ostane in našteva stare, morda umaknjene
+    # članke. Pretvorimo jih v preusmeritev na /blog/: brisanje bi indeksiran
+    # URL sesulo v 404, tiho puščanje pa bi obiskovalcu kazalo zastarel seznam.
+    tema_dir = os.path.join(ROOT, "blog", "tema")
+    if os.path.isdir(tema_dir):
+        live = set(made)
+        for name in sorted(os.listdir(tema_dir)):
+            d = os.path.join(tema_dir, name)
+            if not os.path.isdir(d) or name in live:
+                continue
+            target = f"{SITE}/blog/"
+            open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(
+                f"""<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<title>Tema nima več svoje strani — Meteorec</title>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="{target}">
+<meta http-equiv="refresh" content="0; url={target}">
+<script>location.replace("{target}");</script>
+<style>body{{font:16px/1.6 system-ui,sans-serif;margin:3rem auto;max-width:40rem;padding:0 1rem}}</style>
+</head>
+<body>
+<p>Ta tema nima več dovolj objav za svojo stran.</p>
+<p>Preusmerjam na <a href="{target}">blog Meteorec</a> …</p>
+</body>
+</html>
+""")
     return sorted(made)
 
 
