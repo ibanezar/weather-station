@@ -498,7 +498,14 @@ def gen_daily_pages(hist, force, sitemap_urls):
         prev_d = dates[i - 1] if i > 0 else None
         next_d = dates[i + 1] if i < len(dates) - 1 else None
 
-        title = f"Vreme {d}. {MES_GEN[m]} {y} — Rečica ob Savinji"
+        # Naslov NE sme posnemati glavne poizvedbe. Prej je bil vzorec
+        # "Vreme <datum> — Rečica ob Savinji" na 2 462 dnevnih, 94 mesečnih in
+        # 9 letnih straneh — strukturno enak poizvedbi »vreme rečica ob savinji«
+        # (1,8K/mes.). Semrush je pokazal ~20 teh strani, kako zanjo tekmujejo na
+        # pozicijah 44–93, medtem ko je namenska /vreme-recica-ob-savinji/ obtičala
+        # na 18. Kraj ostane v opisu, drobtinicah in vsebini; iz naslova gre ven,
+        # da te strani ciljajo svojo poizvedbo (»vreme 8. avgust 2023«), ne tuje.
+        title = f"Vreme {d}. {MES_GEN[m]} {y} — arhiv postaje IREICA1"
         desc = (f"Vremenski podatki za {d}. {MES_GEN[m]} {y} v Rečici ob Savinji: "
                 f"povp. temperatura {num(v.get('tempAvg'))} °C, "
                 f"padavine {num(v.get('precipTotal', 0))} mm. Postaja IREICA1.")
@@ -603,7 +610,7 @@ def gen_monthly_pages(hist, force, sitemap_urls):
 
         dim = calendar.monthrange(y, m)[1]
         partial = s["count"] < dim
-        title = f"Vreme — {MES_NOM[m].capitalize()} {y}, Rečica ob Savinji"
+        title = f"Vreme {MES_NOM[m].capitalize()} {y} — arhiv postaje IREICA1"
         desc = (f"{MES_NOM[m].capitalize()} {y} v Rečici ob Savinji: povp. temperatura "
                 f"{num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin. "
                 f"Mesečni pregled postaje IREICA1.")
@@ -741,7 +748,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
         temp_label = "Povp. temp. (do zdaj)" if is_current else "Letna povp. temp."
         rain_label = "Padavine (do zdaj)" if is_current else "Letne padavine"
 
-        title = f"Vreme {y} — Rečica ob Savinji"
+        title = f"Vreme {y} — arhiv postaje IREICA1"
         desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: {'doslej ' if is_current else ''}povprečna "
                 f"temperatura {num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin"
                 f"{'' if is_current else ' letno'}. Postaja IREICA1.")
