@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 17 Aug 2026 16:41:19 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 18 Aug 2026 06:57:01 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Koliko dežja bo danes? Modeli si niso enotni</title>
@@ -111,17 +111,6 @@
       <category>Zgornja Savinjska dolina</category>
     </item>
     <item>
-      <title>ARSO oranžno opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-08-2119-d13e53.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-08-2119-d13e53.html</guid>
-      <pubDate>Sat, 08 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (vročina) (veljavno ned., 9. 8. 06:00–21:59). ARSO ga je izdal 8. 8. 2026 ob 06:01. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Koliko je letos deževalo v Rečici ob Savinji?</title>
       <link>https://meteorec.si/blog/koliko-je-letos-dezevalo-v-recici-ob-savinji-0808.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/koliko-je-letos-dezevalo-v-recici-ob-savinji-0808.html</guid>
@@ -147,17 +136,6 @@
       <category>vodna bilanca</category>
     </item>
     <item>
-      <title>ARSO oranžno opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-2323-823a95.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-2323-823a95.html</guid>
-      <pubDate>Fri, 07 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (vročina) (veljavno sob., 8. 8. 07:00–21:59). ARSO ga je izdal 7. 8. 2026 ob 07:39. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Koliko bo danes zalilo v Rečici? Primerjava modelov</title>
       <link>https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</guid>
@@ -169,17 +147,6 @@
       <category>padavine</category>
       <category>IREICA1</category>
       <category>Savinja</category>
-    </item>
-    <item>
-      <title>ARSO oranžno opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.html</guid>
-      <pubDate>Fri, 07 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (vročina) (veljavno pet., 7. 8. 07:00–23:59). ARSO ga je izdal 6. 8. 2026 ob 09:01. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Zakaj se ozračje segreva? Pet dejavnikov, en osumljenec</title>
@@ -204,28 +171,6 @@
       <category>IREICA1</category>
       <category>Savinja</category>
       <category>ERA5</category>
-    </item>
-    <item>
-      <title>ARSO rdeče opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-05-2140-a24d5c.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-05-2140-a24d5c.html</guid>
-      <pubDate>Wed, 05 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala rdeče opozorilo (vročina) (veljavno čet., 6. 8. 09:00–21:59). ARSO ga je izdal 5. 8. 2026 ob 06:32. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
-      <title>ARSO rdeče opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.html</guid>
-      <pubDate>Tue, 04 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala rdeče opozorilo (vročina) (veljavno sre., 5. 8. 09:00–21:59). ARSO ga je izdal 4. 8. 2026 ob 08:53. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Je letošnja suša rekordna? Kaj pravi SPI</title>
@@ -262,17 +207,6 @@
       <category>segrevanje</category>
       <category>IREICA1</category>
       <category>analiza</category>
-      <category>2026</category>
-    </item>
-    <item>
-      <title>ARSO rdeče opozorilo — vročina: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-03-2345-c39de2.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-03-2345-c39de2.html</guid>
-      <pubDate>Mon, 03 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala rdeče opozorilo (vročina) (veljavno tor., 4. 8. 07:00–23:59). ARSO ga je izdal 3. 8. 2026 ob 06:06. Visoka temperatura</description>
-      <category>ARSO opozorilo</category>
-      <category>vročina</category>
-      <category>IREICA1</category>
       <category>2026</category>
     </item>
     <item>
@@ -532,17 +466,6 @@
       <category>Savinjska dolina</category>
     </item>
     <item>
-      <title>ARSO oranžno opozorilo — nevihte: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-21-0915-995891.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-21-0915-995891.html</guid>
-      <pubDate>Tue, 21 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (nevihte) (veljavno tor., 21. 7. 12:00–20:59). Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.</description>
-      <category>ARSO opozorilo</category>
-      <category>nevihte</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Zakaj po dežju gobe ne zrastejo takoj</title>
       <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
@@ -590,17 +513,6 @@
       <category>2026</category>
     </item>
     <item>
-      <title>ARSO oranžno opozorilo — nevihte: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-19-0840-b8a4cf.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-19-0840-b8a4cf.html</guid>
-      <pubDate>Sun, 19 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (nevihte) (veljavno ned., 19. 7. 13:00–19:59). Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.</description>
-      <category>ARSO opozorilo</category>
-      <category>nevihte</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Temperaturni trend v Savinjski dolini: od 28,9 °C danes do hladnejšega konca tedna</title>
       <link>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html</guid>
@@ -611,17 +523,6 @@
       <category>Savinja</category>
       <category>temperaturni trend</category>
       <category>Rečica ob Savinji</category>
-    </item>
-    <item>
-      <title>ARSO oranžno opozorilo — požarna ogroženost: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd.html</guid>
-      <pubDate>Sun, 19 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (požarna ogroženost) (veljavno ned., 19. 7. 07:00 – pon., 20. 7. 23:59). Požarna ogroženost</description>
-      <category>ARSO opozorilo</category>
-      <category>požarna ogroženost</category>
-      <category>IREICA1</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Bo danes v Zgornji Savinjski dolini grmelo? Nevihtni obeti za Rečico ob Savinji</title>
@@ -685,17 +586,6 @@
       <category>Savinja</category>
     </item>
     <item>
-      <title>ARSO oranžno opozorilo — požarna ogroženost: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8.html</guid>
-      <pubDate>Wed, 15 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (požarna ogroženost) (veljavno sre., 15. 7. 09:00 – čet., 16. 7. 23:59). Požarna ogroženost</description>
-      <category>ARSO opozorilo</category>
-      <category>požarna ogroženost</category>
-      <category>IREICA1</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Gobarska napoved za Zgornjo Savinjsko dolino: kaj pravita vlaga in dež</title>
       <link>https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</guid>
@@ -706,18 +596,6 @@
       <category>IREICA1</category>
       <category>Savinja</category>
       <category>gobarjenje</category>
-    </item>
-    <item>
-      <title>ARSO oranžno opozorilo — nevihte in požarna ogroženost: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423.html</guid>
-      <pubDate>Tue, 14 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (nevihte) (veljavno sre., 15. 7. 12:00–23:59) ter oranžno opozorilo (požarna ogroženost) (veljavno tor., 14. 7. 21:00 – sre., 15. 7. 23:59).…</description>
-      <category>ARSO opozorilo</category>
-      <category>nevihte</category>
-      <category>požarna ogroženost</category>
-      <category>IREICA1</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Zakaj napovedanih neurij 14. julija ni bilo? Anatomija »busta«</title>
@@ -731,17 +609,6 @@
       <category>julij</category>
       <category>2026</category>
       <category>IREICA1</category>
-    </item>
-    <item>
-      <title>ARSO oranžno opozorilo — nevihte: kaj to pomeni za Zgornjo Savinjsko dolino</title>
-      <link>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</guid>
-      <pubDate>Tue, 14 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Agencija RS za okolje (ARSO) je izdala oranžno opozorilo (nevihte), veljavno tor., 14. 7. 14:00–20:59. Nevihte bodo ponekod z obilnimi padavinami, točo in nevarnimi sunki vetra.</description>
-      <category>ARSO opozorilo</category>
-      <category>nevihte</category>
-      <category>IREICA1</category>
-      <category>2026</category>
     </item>
     <item>
       <title>31,1 °C danes na Rečici: vročina se vrača, a le za kratek čas</title>

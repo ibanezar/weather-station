@@ -190,6 +190,26 @@ trenutno vreme pošiljala na naslovno. Zdaj nanj odgovori sama.
   bil viden le zato, ker se `style.css` na tej strani ne naloži (nalagajo se
   `fonts.css`, `blog.css`, `vreme.css`) — to je bilo naključje, ne odločitev.
 
+## Opozorila ARSO gredo na `/nevihte/`, ne v blog
+
+Prej je vsako opozorilo ARSO dobilo svojo blog objavo in šlo na FB/IG. GA4
+(21. 7. – 17. 8. 2026) pokaže, da jih nihče ni bral: 5 objav, 10 ogledov,
+**0 sekund** povprečnega časa branja, v Search Consoleu skupaj en klik. Objave
+niso prinesle obiska, so pa redčile blog (12 od 99 objav) in sitemap.
+
+Opozorilo je **stanje, ne novica** — velja nekaj ur in se prekliče. Zato:
+
+- `tools/inject_arso_warnings.py` piše aktivna opozorila med markerja `WX-ARSO`
+  na `/nevihte/`; `arso-newsjack.yml` teče vsakih 15 minut in nič ne objavlja.
+- Čas preverjanja je v besedilu **samo datum, brez ure** — ura bi ob ciklu 15
+  minut delala ~96 commitov na dan, tudi ko se opozorila ne spremenijo.
+- 15. člen ZDMHS (navedba vira in časa izdaje ARSO) velja tudi tu — `fmt_issued()`
+  in `classify()` sta uvožena iz `generate_arso_newsjack_post.py`, ne podvojena.
+- 12 prejšnjih objav je pretvorjenih v **preusmeritve** na `/nevihte/` (noindex +
+  canonical), ne izbrisanih — indeksirani URL-ji se ne smejo sesuti v 404.
+- `generate_arso_newsjack_post.py` ostaja v repozitoriju zaradi teh dveh funkcij
+  in zgodovine; kot generator objav se ne uporablja več.
+
 ## Napoved na pristajalni strani
 
 `tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah

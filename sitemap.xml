@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://meteorec.si/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
     <image:image><image:loc>https://meteorec.si/og-image.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://meteorec.si/gobarska-napoved/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -75,13 +75,13 @@
   </url>
   <url>
     <loc>https://meteorec.si/gobarska-napoved/zemljevid/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://meteorec.si/gobarska-napoved/danes/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
@@ -105,37 +105,37 @@
   </url>
   <url>
     <loc>https://meteorec.si/vodostaj-savinje/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://meteorec.si/nevihte/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://meteorec.si/agrometeo/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meteorec.si/kakovost-zraka/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meteorec.si/biovreme/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meteorec.si/vreme-za-padalce/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -209,13 +209,6 @@
     <image:image><image:loc>https://meteorec.si/og/vrocina-je-nazaj-ampak-do-kdaj-0809.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-08-2119-d13e53.html</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-08-2119-d13e53.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/koliko-je-letos-dezevalo-v-recici-ob-savinji-0808.html</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
@@ -230,25 +223,11 @@
     <image:image><image:loc>https://meteorec.si/og/nocni-naliv-v-recici-60-mm-dezja-0808.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-2323-823a95.html</loc>
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-07-2323-823a95.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/koliko-bo-danes-zalilo-primerjava-modelov-0807.html</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/koliko-bo-danes-zalilo-primerjava-modelov-0807.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.html</loc>
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-07-0012-ff67f0.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/zakaj-se-ozracje-segreva-podnebni-dejavniki.html</loc>
@@ -263,20 +242,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-05-2140-a24d5c.html</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-05-2140-a24d5c.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.html</loc>
-    <lastmod>2026-08-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-04-2329-9d308c.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/je-letosnja-susa-rekordna-kaj-pravi-spi.html</loc>
@@ -298,13 +263,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/recica-in-svet-segrevanje-v-podatkih.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningtx-2026-08-03-2345-c39de2.html</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningtx-2026-08-03-2345-c39de2.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/kdaj-pade-temperatura-pod-20-c-nocno-ohlajanje-kljub-vrocins-0802.html</loc>
@@ -454,13 +412,6 @@
     <image:image><image:loc>https://meteorec.si/og/medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-21-0915-995891.html</loc>
-    <lastmod>2026-07-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningts-2026-07-21-0915-995891.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
@@ -489,25 +440,11 @@
     <image:image><image:loc>https://meteorec.si/og/invazivka-zlezava-nedotika-20260719-4632-1486.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-19-0840-b8a4cf.html</loc>
-    <lastmod>2026-07-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningts-2026-07-19-0840-b8a4cf.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html</loc>
     <lastmod>2026-07-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd.html</loc>
-    <lastmod>2026-07-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningforestfire-2026-07-19-0621-0597cd.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718.html</loc>
@@ -545,13 +482,6 @@
     <image:image><image:loc>https://meteorec.si/og/vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8.html</loc>
-    <lastmod>2026-07-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningforestfire-2026-07-15-0802-c974c8.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.html</loc>
     <lastmod>2026-07-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -559,25 +489,11 @@
     <image:image><image:loc>https://meteorec.si/og/gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423.html</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningforestfire-warningts-2026-07-14-2021-94f423.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/zakaj-ni-bilo-neurja-14-julij-2026.html</loc>
     <lastmod>2026-07-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/zakaj-ni-bilo-neurja-14-julij-2026.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/arso-opozorilo-warningts-2026-07-14-1304-e1db70.html</loc>
-    <lastmod>2026-07-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/arso-opozorilo-warningts-2026-07-14-1304-e1db70.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714.html</loc>
@@ -847,349 +763,343 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/2026/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/agrometeo/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/agrometeorologija/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/analiza/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/arso/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/arso-opozorilo/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/cape/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/ecmwf/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/era5/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/evapotranspiracija/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/gobe/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/high/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/hladna-fronta/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/invazivke/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/inverzija/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/ireica1/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/julij/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/julij-2026/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/junij/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/megla/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/mikroklima/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/modeli/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/mtr/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/napoved/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/nevihta/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/nevihte/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/ogrevanje/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/ohladitev/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/padavine/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/podnebje/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/podnebne-spremembe/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/podnebno-povprecje/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/poletje-2026/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/poplave/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/povzetek/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/tema/pozarna-ogrozenost/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/primerjava/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/razlaga/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/recica-ob-savinji/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/rekord/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/savinja/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/savinjska-dolina/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/susa/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/temperatura/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/temperaturni-trend/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/toca/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/topoklimatologija/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/tropska-noc/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/tropske-noci/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/veter/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vlaga-tal/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vodna-bilanca/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vreme/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vrocina/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/vrocinski-val/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/zgodovina/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/zgornja-savinjska-dolina/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/zlezava-nedotika/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

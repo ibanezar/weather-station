@@ -52,7 +52,7 @@ CATEGORY = {
     },
     "WarningWind": {
         "label": "veter", "icon": "💨",
-        "practical": ("Pospravi ali pritrdi vse, kar veter lahko odnese (mize, senčnike, tramponline). "
+        "practical": ("Pospravi ali pritrdi vse, kar veter lahko odnese (mize, senčnike, trampoline). "
                       "Izogibaj se gozdu in vožnji skozi gozdnate odseke, dokler ne mine."),
         "link_url": "/#tab-storm", "link_label": "💨 Napoved sunkov vetra v živo",
         "photo": "storm-clouds", "accent": (96, 165, 250),
