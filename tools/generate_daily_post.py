@@ -493,6 +493,14 @@ def stream_claude(payload, api_key, timeout=180):
             last_err = e
         except urllib.error.HTTPError as e:
             if e.code not in _RETRYABLE_HTTP_CODES:
+                # Telo odgovora nosi pravi razlog (npr. "prompt is too long");
+                # brez tega izpisa ostane v dnevniku samo "HTTP Error 400: Bad
+                # Request" in se ne da ugotoviti, kaj je bilo narobe.
+                try:
+                    print(f"⚠ Claude API {e.code}: {e.read().decode('utf-8', 'replace')[:800]}",
+                          file=sys.stderr)
+                except Exception:
+                    pass
                 raise
             last_err = e
         if delay is None:
