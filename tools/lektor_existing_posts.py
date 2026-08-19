@@ -75,10 +75,11 @@ def lektor_file(slug, api_key):
     stripped = re.sub(r"<script[\s\S]*?</script>", "", html)
     # Enako velja za vgrajene <svg> grafe: lektor jih ne sme popravljati (oznake
     # v njih so podatki, ne besedilo), so pa lahko večji od vsega ostalega
-    # članka skupaj. Članek s petimi grafi je imel 102 kB brez skript in 25 kB
-    # brez njih -- s celotnim SVG je API zavrnil zahtevo s HTTP 400, preden je
-    # lektura sploh stekla. Besedili <title>/<desc> grafov ostaneta v prompt,
-    # ker sta vidni bralnikom zaslona in ju je smiselno lektorirati.
+    # članka skupaj -- članek s petimi grafi ima 102 kB brez skript in 25 kB
+    # brez grafov. Gre torej za varčnost in manj šuma, ne za popravek napake:
+    # HTTP 400, ob katerem je bil ta filter dodan, je prišel od praznega
+    # dobroimetja na računu Anthropic, ne od dolžine poziva. Besedili
+    # <title>/<desc> grafov ostaneta v pozivu, ker ju berejo bralniki zaslona.
     stripped = re.sub(
         r"<svg\b[\s\S]*?</svg>",
         lambda m: "".join(re.findall(r"<(?:title|desc)\b[\s\S]*?</(?:title|desc)>", m.group(0))),
