@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 18 Aug 2026 22:06:35 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 19 Aug 2026 06:55:58 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Dež v četrtek ali petek? Viri se ne strinjajo o dnevu</title>
+      <link>https://meteorec.si/blog/dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819.html</guid>
+      <pubDate>Wed, 19 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Enajst napovedi za četrtek in petek: v četrtek od 0,0 do 17,8 mm, v petek od 0,3 do 47,5 mm. Grafi primerjajo dneva, ure in doseg modelskih tekov.</description>
+      <category>padavine</category>
+      <category>napoved</category>
+      <category>točnost napovedi</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>ARSO</category>
+    </item>
     <item>
       <title>Altocumulus undulatus nad Rečico: valovi pred fronto</title>
       <link>https://meteorec.si/blog/altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819.html</link>
