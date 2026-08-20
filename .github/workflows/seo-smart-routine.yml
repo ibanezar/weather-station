@@ -29,7 +29,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add klima/ padavine/ temperatura/ teden/ novosti/ sitemap-seo.xml || true
+          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
           git push

@@ -441,6 +441,42 @@ vprašanja. Vse ostalo ima svojo stran: `danes` (indeks po območjih), `tereni`,
 - FAQ ostane na glavni strani, ker nosi `FAQPage` strukturirane podatke za
   glavni URL.
 
+## SEO smart routina — hub strani in vremenski dogodki
+
+`tools/seo_smart_routine.py` teče dnevno ob 01:45 UTC
+(`.github/workflows/seo-smart-routine.yml`, po `update-history.yml`, pred
+`generate-seo-pages.yml`) in vzdržuje dve stvari, ki ju drugi generatorji ne
+pokrivajo:
+
+- **Klimatološke hub strani** — `/klima/`, `/padavine/`, `/temperatura/`,
+  `/teden/` — mesečne norme, letne vsote, rekordi, samodejni FAQ, izračunani
+  iz celotne `history.json`. Osvežujejo se ob vsakem teku (`force=True`).
+- **Vremenski dogodki** (`/novosti/<slug>/` + indeks `/novosti/`) —
+  `detect_events()`/`detect_heat_waves()`/`detect_droughts()` v zadnjih 30
+  (oz. 30 za valove/sušo) dneh zaznajo nove absolutne rekorde, rekorde za
+  koledarski dan, sezonska prva, toplotne valove in sušna obdobja. Vsak
+  dogodek dobi svojo stran (ustvari se enkrat, potem ostane nespremenjena) in
+  vnos v **`novosti.json`** — to je edini vir resnice za to, kateri dogodki
+  sploh obstajajo; ko dogodek pade iz 30-dnevnega okna zaznave, ga skript ne
+  najde več sam, zato mora priti iz shranjenega kataloga.
+
+Svoj **`sitemap-seo.xml`** (ne `sitemap.xml`) — isti vzorec kot
+`sitemap-weather.xml` za arhiv vremena; oba sta v `robots.txt` in v
+`SITEMAPS` v `tools/seo_audit.py`. `generate_monthly_post.py` `wire_all()`
+te strani zato izpusti iz svojega prepisa sitemap.xml — ne podvajaj vpisov
+med sitemapi. Po teku pošlje IndexNow za vse spremenjene URL-je
+(`--skip-indexnow` za ročni preizkus).
+
+**`novosti.json` je v korenu repozitorija, ne v mapi `novosti/`** — v
+`git add` koraku delavnega toka ju je treba navesti ločeno
+(`novosti/ novosti.json`). 19.–20. 8. 2026 je koraku manjkal `novosti.json`,
+zato se je katalog lokalno pravilno posodabljal, a nikoli commital: strani
+so nastajale in ostajale žive, ko pa je dogodek padel iz 30-dnevnega okna
+zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
+(stalno starem) katalogu ni bilo. Popravljeno; 3 tako osirotele strani so
+bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
+prepričaj, da isto pot pokriva tudi `git add`.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
