@@ -160,7 +160,8 @@ def main():
     body = build_body(hist, facts)
 
     url = "/podatki/"
-    title = "Podatki — Rečica ob Savinji (IREICA1)"
+    # »Podatki« samo po sebi ni iskalni izraz — »vremenski podatki« je.
+    title = "Vremenski podatki Rečica ob Savinji – IREICA1"
     desc = ("Vremenski podatki Rečice ob Savinji brez JavaScripta: trenutne meritve, vsi časi rekordi in "
             "klimatološke norme po mesecih, postaja IREICA1, meritve od 2019.")
 

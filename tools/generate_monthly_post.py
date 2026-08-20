@@ -480,6 +480,7 @@ DATA_LINKS = [
     ("/padavine/", "Padavine"),
     ("/rekord/", "Rekordi"),
     ("/vreme-zgornja-savinjska-dolina/", "Vreme Zgornja Savinjska dolina"),
+    ("/tocnost-napovedi/", "Točnost napovedi"),
 ]
 
 

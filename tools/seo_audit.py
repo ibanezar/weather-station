@@ -58,6 +58,9 @@ CORE = {
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
+    # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
+    # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
+    "tocnost-napovedi/":         ("daily",   "0.8"),
     "klima/":                    ("weekly",  "0.8"),
     "padavine/":                 ("weekly",  "0.8"),
     "temperatura/":              ("weekly",  "0.8"),

@@ -76,6 +76,52 @@ def mae_txt(stats):
     return f'±{seo.num(stats["mae_tmax"])} °C'
 
 
+def latest_day_block(verification, labels):
+    """Konkretna primerjava za zadnji razrešeni dan, nad povzetki.
+
+    Zapisi nosijo `err_tmax` kot ABSOLUTNO napako, zato predznak ("podcenila"
+    proti "precenila") izpeljemo iz napoved − izmerjeno; brez tega bi izsek
+    povedal le velikost napake, ne pa smeri, kar je ravno tisto, kar bralca
+    zanima. Padavine se izpišejo samo pri virih, ki jih napovedujejo — ARSO
+    zapisi jih nimajo in prazna vrednost bi brala kot napoved 0 mm.
+    """
+    if not verification:
+        return ""
+    d = max(verification)
+    rec = verification[d]
+    actual = rec.get("actual") or {}
+    a_tmax = actual.get("tmax")
+    if a_tmax is None:
+        return ""
+
+    rows = []
+    for key, label in labels:
+        src = rec.get(key)
+        if not src or src.get("tmax") is None:
+            continue
+        diff = src["tmax"] - a_tmax
+        if abs(diff) < 0.05:
+            verdict = "zadela v desetinko"
+        else:
+            verdict = (f'{"podcenila" if diff < 0 else "precenila"} za '
+                       f'{seo.num(abs(diff))} °C')
+        precip = ""
+        if src.get("precip") is not None and actual.get("precip") is not None:
+            precip = (f' · padavine: napoved {seo.num(src["precip"])} mm, '
+                      f'izmerjeno {seo.num(actual["precip"])} mm')
+        rows.append(
+            f'    <tr><th>{label}</th>'
+            f'<td class="record-val">{seo.num(src["tmax"])} °C</td>'
+            f'<td>napoved je {verdict}{precip}</td></tr>')
+    if not rows:
+        return ""
+
+    return (f'  <h2 id="vceraj">Kako točna je bila napoved za {seo.fmtd(d)}?</h2>\n'
+            f'  <p>Postaja IREICA1 je tega dne izmerila najvišjo temperaturo '
+            f'<strong>{seo.num(a_tmax)} °C</strong>. Dan prej so viri napovedali:</p>\n'
+            f'  <table class="stats">\n' + "\n".join(rows) + '\n  </table>')
+
+
 def build_body(verification):
     dates = sorted(verification.keys())
     records = [verification[d] for d in dates]
@@ -342,10 +388,17 @@ def build_body(verification):
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
 
+    latest_block = latest_day_block(verification, (
+        [("arso", "ARSO"), ("open_meteo", "Open-Meteo")]
+        + ([("aifs", "ECMWF AIFS")] if has_aifs else [])
+        + ([("meteorec", mtr_label)] if has_mos else [])
+    ))
+
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Točnost napovedi", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Točnost vremenske napovedi — Rečica ob Savinji</h1>
   <p class="post-meta">{" vs. ".join(["ARSO", "Open-Meteo"] + (["ECMWF AIFS"] if has_aifs else []) + ([mtr_label] if has_mos else []) + ["dejanska meritev"])} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
+{latest_block}
 {intro_block}
 {status}
 {cards}

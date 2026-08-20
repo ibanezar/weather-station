@@ -772,7 +772,8 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last
     faq_html = "\n".join(f'    <h3>{q}</h3>\n    <p class="hub-intro">{a}</p>'
                           for q, a in faq_qa)
 
-    title = "Klima Rečica ob Savinji — mesečne norme in rekordi"
+    # Usklajeno s H1 (»Klima in podnebje«) — »podnebje« je samostojna poizvedba.
+    title = "Klima in podnebje Rečice ob Savinji — norme in rekordi"
     desc  = (f"Klimatološke norme za Rečico ob Savinji ({ELEV} m n. m.): mesečna povprečja temperature "
              f"in padavin, absolutni rekordi, mrzli in vroči dnevi — podatki postaje IREICA1 od 2019.")
 
@@ -1097,7 +1098,7 @@ def gen_temperatura(normals, annual_frost, annual_hot, full_years, last_date, si
                           for q, a in faq_qa)
 
     title = "Temperatura Rečica ob Savinji — mesečna povprečja in trendi"
-    desc  = (f"Klimatologija temperature za Rečico ob Savinji: mesečna povprečja in ekstremni, "
+    desc  = (f"Klimatologija temperature za Rečico ob Savinji: mesečna povprečja in ekstremi, "
              f"trend mrzlih in vročih dni — podatki meteorološke postaje IREICA1 od 2019.")
 
     schema = (crumbs_schema([("Meteorec", "/"), ("Temperatura", None)])
