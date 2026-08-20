@@ -1422,10 +1422,14 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         '  </div>'
     )
 
-    schema = (crumbs_schema([("Meteorec", "/"), ("Novosti", "/novosti/"), (title[:60], None)])
+    # Drobtina: en sam vir za vidni HTML in za BreadcrumbList. Prej je schema
+    # uporabljala title[:60], HTML pa label — poleg neujemanja s tem, kar vidi
+    # bralec, je rez pri 60 znakih ime odrezal sredi besede ("… 9,3 °C (4. ju").
+    novosti_crumbs = [("Meteorec", "/"), ("Novosti", "/novosti/"), (label, None)]
+    schema = (crumbs_schema(novosti_crumbs)
               + article_schema(url, title, desc, ds))
 
-    body = f'''{crumbs_html([("Meteorec", "/"), ("Novosti", "/novosti/"), (label, None)])}
+    body = f'''{crumbs_html(novosti_crumbs)}
   <h1 class="page-title">{title}</h1>
   <p class="post-meta">Meteorec · postaja IREICA1 · {fmtd(ds)}</p>
 
