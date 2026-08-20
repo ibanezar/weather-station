@@ -448,11 +448,23 @@ def rewrite_sitemap_and_index(posts):
     build_rss(posts)
 
 
+# Tagi, ki pomenijo isto, a so zapisani v ednini/množini ali ožje/širše. Brez
+# te preslikave dobi vsaka oblika svojo, še tanjšo tematsko stran: „nevihta“ (6
+# objav) in „nevihte“ (9) sta bili dve strani namesto ene s 15. Ključ je slug
+# oblike, ki se opusti; vrednost slug oblike, ki obvelja.
+TAG_SYNONYMS = {
+    "nevihta": "nevihte",
+    "tropska-noc": "tropske-noci",
+    "savinjska-dolina": "zgornja-savinjska-dolina",
+}
+
+
 def tagslug(t):
     t = str(t).lower()
     for a, b in (("č", "c"), ("š", "s"), ("ž", "z"), ("ć", "c"), ("đ", "d")):
         t = t.replace(a, b)
-    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+    slug = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+    return TAG_SYNONYMS.get(slug, slug)
 
 
 # ── Statične notranje povezave v člankih ────────────────────────────────
@@ -636,9 +648,19 @@ def inject_related_links(posts, quiet=False):
     return changed
 
 
+# Najmanjše število objav za svojo tematsko stran. Pri pragu 2 je bilo 33 od 58
+# strani podprtih z le dvema ali tremi objavami, vse z enakim boilerplate
+# besedilom — tanke podvojene arhivske strani, pred katerimi svari SEO audit
+# (točka 43). Strani, ki padejo pod prag, se NE brišejo: spodnja zanka jih
+# pretvori v noindex + canonical na /blog/, ker se indeksiran URL ne sme sesuti
+# v 404. Vzorec je samopopravljalen — ko tag dobi tretjo objavo, stran spet
+# nastane.
+TAG_MIN_POSTS = 3
+
+
 def build_tag_pages(posts):
-    """Ustvari pristajalne strani /blog/tema/<tag>/ za tage z ≥2 objavama.
-    Vrne seznam (slug) za sitemap."""
+    """Ustvari pristajalne strani /blog/tema/<tag>/ za tage z dovolj objavami
+    (TAG_MIN_POSTS). Vrne seznam (slug) za sitemap."""
     # Zberi objave po slugu, ne po surovem tagu. Tagi so v blog.json pisani
     # neenotno — „vročina“ in „vrocina“, „suša“ in „susa“, „vodna bilanca“ in
     # „vodna-bilanca“ — vse pa se preslika v isti slug. Ob združevanju po surovem
@@ -659,7 +681,7 @@ def build_tag_pages(posts):
     made = []
     for slug, g in by_slug.items():
         plist = list(g["posts"].values())
-        if len(plist) < 2:
+        if len(plist) < TAG_MIN_POSTS:
             continue
         # Naslov strani: najbolj pravilno zapisana različica — najprej tista s
         # šumniki (»vročina« pred »vrocina«), nato najpogostejša.
@@ -675,7 +697,14 @@ def build_tag_pages(posts):
             f'        </div>\n      </a>\n    </li>'
             for p in plist)
         canon = f"{SITE}/blog/tema/{slug}/"
-        desc = f"Vsi članki bloga Meteorec na temo „{tag}“ — vremenske analize, povzetki in rekordi z meritvami postaje IREICA1 v Rečici ob Savinji."
+        # Uvod in opis nista več enak boilerplate za vse teme: navedeta dejanski
+        # obseg te teme (koliko objav, od kdaj do kdaj), da se strani med seboj
+        # razlikujejo tudi v besedilu, ne le po vstavljenem imenu.
+        _dates = sorted(p["date"] for p in plist)
+        _span = (f"od {fmtdate(_dates[0])}" if _dates[0][:7] == _dates[-1][:7]
+                 else f"med {fmtdate(_dates[0])} in {fmtdate(_dates[-1])}")
+        desc = (f"{len(plist)} člankov bloga Meteorec na temo „{tag}“, objavljenih {_span}. "
+                f"Vremenske analize in povzetki z meritvami postaje IREICA1 v Rečici ob Savinji.")
         html = f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
@@ -718,7 +747,7 @@ def build_tag_pages(posts):
   </header>
   <nav class="crumbs" aria-label="Drobtine"><a href="/">Meteorec</a> › <a href="/blog/">Blog</a> › Tema: {tag}</nav>
   <h1 class="page-title">Tema: {tag}</h1>
-  <p class="page-intro">{len(plist)} člankov na temo „{tag}“. <a href="/blog/" style="color:var(--blue)">← Vsi članki</a></p>
+  <p class="page-intro">{len(plist)} člankov na temo „{tag}“, objavljenih {_span}. <a href="/blog/" style="color:var(--blue)">← Vsi članki</a></p>
   <ul class="post-list">
 {cards}
   </ul>

@@ -1928,7 +1928,8 @@ def gen_nearby_town_pages(hist, sitemap_urls):
                 f"približno {num(km,0)} km {dirn}, {abs(elev_diff):.0f} m {'više' if elev_diff > 0 else 'niže'}. "
                 f"Ocena temperature, lokalna mikroklima in trend segrevanja.")
 
-        crumbs = [("Meteorec", "/"), (f"Vreme {town}", None)]
+        crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
+                  (f"Vreme {town}", None)]
 
         disclaimer = (f'  <div class="partial-note">Pomembno: {town} nima lastne uradne '
                       f'meteorološke postaje. Spodnji podatki so dejanske meritve postaje '
@@ -2234,7 +2235,8 @@ def gen_camp_menina_page(hist, sitemap_urls):
             f"{num(km,1)} km {dirn}, na istem dolinskem dnu ob Savinji — brez višinske "
             f"korekcije. Nočne temperature, padavine in vodostaj Savinje za kampiranje.")
 
-    crumbs = [("Meteorec", "/"), ("Vreme Kamp Menina", None)]
+    crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
+              ("Vreme Kamp Menina", None)]
 
     intro = f'''  <p class="archive-intro">
   <strong>Kamp Menina</strong> leži ob reki Savinji v Rečici ob Savinji, na istem dolinskem
@@ -2374,7 +2376,8 @@ def gen_valley_camp_pages(hist, sitemap_urls):
                 f"{num(km_anchor,1)} km od {t['town']}, na podobni nadmorski višini. "
                 f"Ocena temperature, padavine in vodostaj Savinje.")
 
-        crumbs = [("Meteorec", "/"), (f"Vreme {name}", None)]
+        crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
+                  (f"Vreme {name}", None)]
 
         intro = f'''  <p class="archive-intro">
   <strong>{name}</strong> ({c["addr"]}) leži v Zgornji Savinjski dolini, {num(km_anchor,1)} km od
@@ -2483,7 +2486,8 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
             f"više od postaje IREICA1 — pretegnjena ocena bi bila nezanesljiva. Kar dejansko "
             f"vemo: Solčava kot najbližji realni vir, izvir Savinje, in povezava na ARSO gorsko napoved.")
 
-    crumbs = [("Meteorec", "/"), ("Vreme Logarska dolina", None)]
+    crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
+              ("Vreme Logarska dolina", None)]
 
     disclaimer = (f'  <div class="partial-note">Pomembno: za razliko od ostalih strani na Meteorec tu '
                   f'<strong>ne ponujamo ocene temperature</strong> za Logarsko dolino. Dolina je '

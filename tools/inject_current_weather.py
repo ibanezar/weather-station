@@ -37,8 +37,14 @@ HIST = os.path.join(ROOT, "history.json")
 # Strani, ki dobijo statično meritev, in sklepni stavek bloka za vsako. Besedilo
 # se razlikuje, ker ima naslovna stran nad blokom živo kartico, pristajalna pa ne
 # — na njej bi »posodabljajo zgoraj« kazalo na nekaj, česar tam ni.
+# Naslovna stran napovedi nima v statičnem HTML (nima markerjev WX-FC7/WX-FCH —
+# ta sta samo na pristajalni strani), zato jo pajek brez JS tu ne vidi. Sklepni
+# stavek ga zato napoti na statično tabelo napovedi, namesto da bi napoved ostala
+# dosegljiva le prek JavaScripta.
 TAIL_INDEX = ('Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v '
-              '<a href="/vreme/">vremenskem arhivu</a>.')
+              '<a href="/vreme/">vremenskem arhivu</a>, '
+              '<a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> '
+              'pa na strani Vreme Rečica ob Savinji.')
 TAIL_RECICA = ('Meritev se osveži vsako uro. Pretekli dnevi so v '
                '<a href="/vreme/">vremenskem arhivu</a>, vrednosti v živo in urna '
                'napoved pa na <a href="/">naslovni strani</a>.')
