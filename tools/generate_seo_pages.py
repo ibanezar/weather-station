@@ -612,10 +612,14 @@ def gen_monthly_pages(hist, force, sitemap_urls):
 
         dim = calendar.monthrange(y, m)[1]
         partial = s["count"] < dim
-        title = f"Vreme {MES_NOM[m].capitalize()} {y} — arhiv postaje IREICA1"
+        title = f"Vreme {MES_NOM[m]} {y} — dnevne meritve, padavine"
         desc = (f"{MES_NOM[m].capitalize()} {y} v Rečici ob Savinji: povp. temperatura "
                 f"{num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin. "
                 f"Mesečni pregled postaje IREICA1.")
+        intro = (f'  <p class="archive-intro">Kakšno je bilo vreme {MES_GEN[m]} {y} v Rečici ob Savinji? '
+                  f'Spodaj so dnevne meritve temperature, padavin, vetra in vremenskih pojavov s postaje '
+                  f'IREICA1 — povprečna temperatura je bila {num(s["tavg"])} °C, skupaj je padlo '
+                  f'{num(s["prec_total"])} mm padavin.</p>')
 
         crumbs = [
             ("Meteorec", "/"),
@@ -708,8 +712,9 @@ def gen_monthly_pages(hist, force, sitemap_urls):
         schema = "\n".join([webpage_schema(url, title, desc, entries[0][0]), crumbs_schema(crumbs)])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
-  <h1 class="page-title">{MES_NOM[m].capitalize()} {y} — Rečica ob Savinji</h1>
+  <h1 class="page-title">Vreme {MES_NOM[m]} {y} v Rečici ob Savinji</h1>
   <p class="post-meta">Meritve postaje IREICA1 · {ELEV} m n. m. · Savinjska dolina</p>
+{intro}
 {partial_note}{cards}
   <h2>Dnevi v mesecu</h2>
 {day_table}
@@ -750,10 +755,52 @@ def gen_yearly_pages(hist, force, sitemap_urls):
         temp_label = "Povp. temp. (do zdaj)" if is_current else "Letna povp. temp."
         rain_label = "Padavine (do zdaj)" if is_current else "Letne padavine"
 
-        title = f"Vreme {y} — arhiv postaje IREICA1"
+        title = f"Vreme Rečica ob Savinji {y} — temperatura, padavine"
         desc = (f"Vremenski pregled leta {y} v Rečici ob Savinji: {'doslej ' if is_current else ''}povprečna "
                 f"temperatura {num(s['tavg'])} °C in {num(s['prec_total'])} mm padavin"
                 f"{'' if is_current else ' letno'}. Postaja IREICA1.")
+        intro = (f'  <p class="archive-intro">Kakšno je bilo vreme v Rečici ob Savinji leta {y}? Povprečna '
+                  f'letna temperatura, padavine, ekstremi in mesečni pregled — vsi izračunani iz '
+                  f'{s["count"]} dni meritev postaje IREICA1.</p>')
+
+        # ── Ekstremi leta (dan/mesec, ne le agregat) — glej SEO audit 2026-08,
+        # točka 30: year_stats() vrne le agregate (povprečje/min/maks), tu
+        # dodamo konkretne dneve/mesece, ki jih audit izrecno zahteva.
+        year_entries = [(d, v) for d, v in hist.items() if d.startswith(yr)]
+
+        def yd_link(d, val_str):
+            if not d or val_str is None:
+                return "—"
+            yy, mm, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
+            return f'{val_str} (<a href="/vreme/{yy}/{mm:02d}/{dd:02d}/">{dd}. {MES_GEN[mm]}</a>)'
+
+        hot_cands = [(d, v["tempHigh"]) for d, v in year_entries if v.get("tempHigh") is not None]
+        cold_cands = [(d, v["tempLow"]) for d, v in year_entries if v.get("tempLow") is not None]
+        prec_cands = [(d, v["precipTotal"]) for d, v in year_entries if v.get("precipTotal") is not None]
+        hot_d, hot_v = max(hot_cands, key=lambda x: x[1]) if hot_cands else (None, None)
+        cold_d, cold_v = min(cold_cands, key=lambda x: x[1]) if cold_cands else (None, None)
+        prec_d, prec_v = max(prec_cands, key=lambda x: x[1]) if prec_cands else (None, None)
+
+        hot_days_n = sum(1 for _, v in year_entries if is_hot(v))
+        frost_days_n = sum(1 for _, v in year_entries if is_frost(v))
+
+        wettest_m = (max(s["months"], key=lambda mm: s["months"][mm]["prec_total"])
+                     if s["months"] else None)
+        wettest_month_txt = (
+            f'<a href="/vreme/{y}/{wettest_m:02d}/">{MES_NOM[wettest_m].capitalize()}</a> '
+            f'({num(s["months"][wettest_m]["prec_total"])} mm)'
+        ) if wettest_m else "—"
+
+        extremes_html = f'''  <h2>Ekstremi leta {y}</h2>
+  <table class="stats">
+    <tr><th>Najtoplejši dan</th><td class="record-val">{yd_link(hot_d, f"{num(hot_v)} °C" if hot_v is not None else None)}</td></tr>
+    <tr><th>Najhladnejši dan</th><td class="record-val">{yd_link(cold_d, f"{num(cold_v)} °C" if cold_v is not None else None)}</td></tr>
+    <tr><th>Dan z največ padavinami</th><td class="record-val">{yd_link(prec_d, f"{num(prec_v)} mm" if prec_v is not None else None)}</td></tr>
+    <tr><th>Najbolj moker mesec</th><td class="record-val">{wettest_month_txt}</td></tr>
+    <tr><th>Najvišja izmerjena hitrost vetra</th><td class="record-val">{num(s["wind_max"]) + " km/h" if s.get("wind_max") is not None else "—"}</td></tr>
+    <tr><th>Vroči dnevi (≥30 °C oz. ≥25 °C povp.)</th><td class="record-val">{hot_days_n}</td></tr>
+    <tr><th>Dnevi z zmrzaljo</th><td class="record-val">{frost_days_n}</td></tr>
+  </table>'''
 
         crumbs = [
             ("Meteorec", "/"),
@@ -827,10 +874,12 @@ def gen_yearly_pages(hist, force, sitemap_urls):
         schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs)])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
-  <h1 class="page-title">Vreme {y} — Rečica ob Savinji</h1>
+  <h1 class="page-title">Vreme v Rečici ob Savinji — leto {y}</h1>
   <p class="post-meta">Letni pregled · postaja IREICA1 · {ELEV} m n. m.</p>
+{intro}
 {cards}
 {in_progress_note}
+{extremes_html}
   <h2>Mesečni pregled</h2>
 {month_table}
 {ynav}'''
