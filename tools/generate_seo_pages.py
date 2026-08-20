@@ -351,7 +351,8 @@ def footer_html(year=None):
             f' · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a>'
             f' · <a href="/podatki/">Podatki</a>'
             f' · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a>'
-            f' · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a></span>\n  </footer>')
+            f' · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a>'
+            f' · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>\n  </footer>')
 
 def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_image=None):
     full_url = f"{SITE}{canonical}"
@@ -1138,7 +1139,7 @@ def gen_archive_index(hist, sitemap_urls, seasons=None):
     first_date = min(hist.keys())
     last_date = max(hist.keys())
 
-    title = "Vremenski arhiv — Rečica ob Savinji"
+    title = "Vremenski arhiv Rečica ob Savinji od 2019"
     desc = (f"Arhiv vremenskih meritev postaje IREICA1 v Rečici ob Savinji od {fmtd(first_date)}. "
             f"Dnevni, mesečni in letni pregledi temperature, padavin in vetra.")
 
@@ -2808,7 +2809,10 @@ def gen_landing_page(hist, sitemap_urls):
     trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
                  else f"{num(trend, 2)} °C na leto")
 
-    title = "Vreme Rečica ob Savinji zdaj — meritve v živo in lokalna mikroklima"
+    # 53 znakov: seo_title() ga pusti celega, a brez priponke » | Meteorec« (64 > 60).
+    # Prejšnji 68-znakovni naslov se je tiho razbil po » — « nazaj na »Vreme Rečica ob
+    # Savinji zdaj« in ključni rep se je izgubil — na glavni money strani.
+    title = "Vreme Rečica ob Savinji — napoved, temperatura, radar"
     desc = (f"Vreme v Rečici ob Savinji (Zgornja Savinjska dolina, {ELEV} m n. m.): meritve "
             f"v živo in {n_days} dni arhiva postaje IREICA1. Mikroklima doline, megla, "
             f"inverzija, veter in trend segrevanja {trend_txt}.")
@@ -2821,7 +2825,9 @@ def gen_landing_page(hist, sitemap_urls):
   približno {ELEV} m nadmorske višine. Meteorološka postaja <strong>IREICA1</strong> tu neprekinjeno
   meri vreme od {fmtd(first_date)} — skupaj že <strong>{n_days} dni</strong> podatkov o temperaturi,
   padavinah, vlagi in vetru. Za razliko od splošnih napovedi, ki za to območje ponujajo le model,
-  so spodnji podatki <strong>dejanske meritve</strong> z lokacije.</p>'''
+  so spodnji podatki <strong>dejanske meritve</strong> z lokacije — prav zato lahko vsak dan
+  <a href="/tocnost-napovedi/">preverimo, kako točna je bila napoved</a> ARSO, Open-Meteo in
+  drugih virov za našo dolino.</p>'''
 
     micro = f'''  <h2>Mikroklima Rečice ob Savinji</h2>
   <p>Dno alpske doline ima izrazito <strong>kotlinsko mikroklimo</strong>. Hladen zrak se ob jasnih
