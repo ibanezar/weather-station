@@ -30,7 +30,7 @@ Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
-import json, os, sys, re, shutil, time, random, datetime, urllib.request, urllib.error, urllib.parse
+import json, os, sys, re, shutil, struct, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY, seo_title
@@ -776,7 +776,11 @@ def collect_local_photos(slug):
     photos = []
     for i, fname in enumerate(files, 1):
         ext = os.path.splitext(fname)[1].lower()
-        new_name = f"foto-{i}{ext}"
+        # Ime datoteke naj pove, kaj je na sliki, ne le zaporedne številke —
+        # »foto-1.jpg« je za iskanje slik ničvredno. Slug objave je najboljši
+        # opisni kontekst, ki ga imamo ob gradnji. Obstoječih datotek ne
+        # preimenujemo: nanje kaže HTML že objavljenih člankov.
+        new_name = f"{slug}-{i}{ext}"
         shutil.move(os.path.join(PENDING_PHOTOS_DIR, fname), os.path.join(dest_dir, new_name))
         photos.append({
             "filename": new_name,
@@ -811,7 +815,7 @@ def fetch_stock_photo(query, slug):
                 content = resp.read()
             dest_dir = os.path.join(ROOT, "img", "blog", slug)
             os.makedirs(dest_dir, exist_ok=True)
-            filename = "stock-1.jpg"
+            filename = f"{slug}-stock.jpg"
             with open(os.path.join(dest_dir, filename), "wb") as f:
                 f.write(content)
             creator = result.get("creator") or "neznan avtor"
@@ -826,15 +830,67 @@ def fetch_stock_photo(query, slug):
     return []
 
 
+def image_size(path):
+    """(širina, višina) iz glave JPEG/PNG, brez zunanjih odvisnosti.
+
+    Fotografije v člankih se izrisujejo z `width:100%; height:auto`
+    (blog.css `.post-photo img`). Brez atributov brskalnik razmerja stranic ne
+    pozna, dokler se slika ne naloži, zato zanjo rezervira nič višine in vsebina
+    pod njo poskoči — merljiv CLS. Z atributoma je prostor rezerviran vnaprej.
+    """
+    try:
+        with open(path, "rb") as fh:
+            d = fh.read(65536)
+        if d[:8] == b"\x89PNG\r\n\x1a\n":
+            return struct.unpack(">II", d[16:24])
+        if d[:2] == b"\xff\xd8":
+            i = 2
+            while i < len(d) - 9:
+                if d[i] != 0xFF:
+                    i += 1
+                    continue
+                # Med segmenti je dovoljeno poljubno število polnilnih bajtov
+                # 0xFF; markerja ne smemo brati, dokler jih ne preskočimo.
+                # Brez tega je datoteka z glavo "FF D8 FF FF E1 …" prebrala
+                # dolžino segmenta iz napačnega mesta in odskočila čez glavo.
+                j = i
+                while j < len(d) and d[j] == 0xFF:
+                    j += 1
+                if j >= len(d) - 8:
+                    break
+                mk = d[j]
+                if mk in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
+                          0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+                    h, w = struct.unpack(">HH", d[j + 4:j + 8])
+                    return w, h
+                if mk in (0xD8, 0xD9) or 0xD0 <= mk <= 0xD7:
+                    i = j + 1
+                    continue
+                i = j + 1 + struct.unpack(">H", d[j + 1:j + 3])[0]
+    except Exception:
+        pass
+    return None
+
+
 def build_photos_html(photos, slug):
     if not photos:
         return ""
     parts = []
     for p in photos:
         cap = p["caption"]
+        # Alt NE sme biti podpis: ta se že izpiše v <figcaption> tik pod sliko,
+        # poleg tega je privzeti podpis kreditna vrstica ("Rečica ob Savinji,
+        # <datum>. Foto: …"), ki o vsebini fotografije ne pove nič. Kadar je
+        # podpis ročno napisan in torej res opisen, ga uporabimo; sicer damo
+        # kontekst objave. Resnično opisen alt zahteva človeka in ga tu ne
+        # izmišljujemo.
+        alt = p.get("alt") or (cap if p.get("caption_is_descriptive") else
+                               f"Fotografija ob članku — Rečica ob Savinji")
+        dim = image_size(os.path.join(ROOT, "img", "blog", slug, p["filename"]))
+        dim_attr = f' width="{dim[0]}" height="{dim[1]}"' if dim else ""
         parts.append(
             f'    <figure class="post-photo">\n'
-            f'      <img src="/img/blog/{slug}/{p["filename"]}" alt="{cap[:120]}" loading="lazy">\n'
+            f'      <img src="/img/blog/{slug}/{p["filename"]}" alt="{alt[:120]}"{dim_attr} loading="lazy">\n'
             f'      <figcaption>{cap}</figcaption>\n'
             f'    </figure>'
         )

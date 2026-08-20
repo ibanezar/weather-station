@@ -568,8 +568,71 @@ def sitemap_entry(loc, lastmod, changefreq, priority, image=None):
 # PAGE GENERATORS
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def index_by_mmdd(hist):
+    """Indeks MM-DD → [(datum, zapis), …], zgrajen ENKRAT.
+
+    Isto-koledarski-dan logika je v repozitoriju že v štirih skriptih kot vrstica
+    `d[5:] == mmdd` (generate_daily_fact.py ×2, inject_record_watch.py,
+    seo_smart_routine.py). Peta kopija bi bila napaka — poleg tega bi filtriranje
+    celotne zgodovine za vsako od 2464 dnevnih strani posebej pomenilo kvadratno
+    delo. Dnevi z `src == "era5"` so modelska ocena, ne meritev, zato jih ta
+    indeks izpusti — enako kot to že dela inject_record_watch.py.
+    """
+    idx = defaultdict(list)
+    for d, v in hist.items():
+        if v.get("src") == "era5":
+            continue
+        idx[d[5:]].append((d, v))
+    for k in idx:
+        idx[k].sort()
+    return idx
+
+
+def same_day_section(mmdd_days, date, m, d):
+    """Razdelek »Ta dan v drugih letih« za eno dnevno stran.
+
+    Leta brez meritve se preprosto ne pojavijo — manjkajočega leta ne izpisujemo
+    kot 0 ali prazno vrstico, ker bi to bralo kot izmerjena vrednost.
+    """
+    others = [(dd, vv) for dd, vv in mmdd_days
+              if dd != date and vv.get("tempHigh") is not None]
+    if len(others) < 2:
+        return ""
+
+    rows = []
+    for dd, vv in others:
+        yy = int(dd[:4])
+        prec = vv.get("precipTotal")
+        rows.append(
+            f'      <tr><td><a href="/vreme/{yy}/{m:02d}/{d:02d}/">{yy}</a></td>'
+            f'<td>{num(vv.get("tempHigh"))} °C</td>'
+            f'<td>{num(vv.get("tempLow"))} °C</td>'
+            f'<td>{num(prec) if prec is not None else "—"} mm</td></tr>')
+
+    warm = max(others, key=lambda x: x[1]["tempHigh"])
+    lows = [(dd, vv) for dd, vv in others if vv.get("tempLow") is not None]
+    cold = min(lows, key=lambda x: x[1]["tempLow"]) if lows else None
+    note = (f'Najtoplejši {d}. {MES_NOM[m]} v arhivu postaje: '
+            f'<strong>{num(warm[1]["tempHigh"])} °C</strong> ({warm[0][:4]})')
+    if cold:
+        note += (f', najhladnejši pa <strong>{num(cold[1]["tempLow"])} °C</strong> '
+                 f'({cold[0][:4]})')
+    return f'''  <h2>Ta dan v drugih letih</h2>
+  <p>{note}.</p>
+  <div class="table-scroll">
+  <table class="data-table">
+    <caption>Isti koledarski dan ({d}. {MES_NOM[m]}) v drugih letih meritev postaje IREICA1.</caption>
+    <thead><tr><th>Leto</th><th>Najvišja</th><th>Najnižja</th><th>Padavine</th></tr></thead>
+    <tbody>
+{chr(10).join(rows)}
+    </tbody>
+  </table>
+  </div>'''
+
+
 def gen_daily_pages(hist, force, sitemap_urls):
     dates = sorted(hist.keys())
+    mmdd_idx = index_by_mmdd(hist)
     written = skipped = 0
     for i, date in enumerate(dates):
         v = hist[date]
@@ -654,6 +717,8 @@ def gen_daily_pages(hist, force, sitemap_urls):
                     f'    {day_link(next_d, f"{int(next_d[8:10])}. {MES_GEN[int(next_d[5:7])]} →" if next_d else "")}\n'
                     f'  </nav>')
 
+        same_day_html = same_day_section(mmdd_idx.get(date[5:], []), date, m, d)
+
         schema = "\n".join([webpage_schema(url, title, desc, date), crumbs_schema(crumbs)])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
@@ -663,6 +728,7 @@ def gen_daily_pages(hist, force, sitemap_urls):
   <table class="stats">
 {rows_html}
   </table>
+{same_day_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Savinjska dolina.
   Meritve so dnevni povzetki.</p>
 {nav_html}'''
@@ -2074,6 +2140,129 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
 
 
+def gen_extreme_weather_hub(hist, sitemap_urls):
+    """/ekstremno-vreme/ — razdelilnik po TIPU NEVARNOSTI (SEO audit točka 49).
+
+    Namenoma NE našteva posameznih dogodkov: to že delajo /pojavi/ (arhivi po
+    pragovih), /rekord/ (superlativi) in /novosti/ (zaznani dogodki). Četrti
+    seznam istih dogodkov bi bil podvojitev. Kar ni obstajalo, je skupen vstop
+    po nevarnostih — toča, poplave in veter doslej niso imeli nadrejene strani,
+    /toca/ in /vodostaj-savinje/ pa v ta sklop nista bila povezana od nikoder.
+    """
+    url = "/ekstremno-vreme/"
+    rel = "ekstremno-vreme/index.html"
+    lastmod = max(hist.keys())
+    f = climate_facts(hist)
+
+    n_frost = sum(1 for v in hist.values() if is_frost(v))
+    n_hot = sum(1 for v in hist.values() if is_hot(v))
+    n_rain = sum(1 for v in hist.values() if is_heavy_rain(v))
+
+    title = "Ekstremno vreme v Zgornji Savinjski dolini"
+    desc = (f"Vročina, mraz, nalivi, toča, poplave, veter in suša v Zgornji Savinjski "
+            f"dolini — arhivi, rekordi in opozorila, izmerjeni na postaji IREICA1 od "
+            f"{fmtd(f['first_date'])}.")
+    crumbs = [("Meteorec", "/"), ("Ekstremno vreme", None)]
+
+    intro = f'''  <p class="archive-intro">
+  Ta stran je razdelilnik: po posameznih vrstah izrednega vremena vodi do arhivov,
+  rekordov in opozoril, ki jih Meteorec že vodi. Podatki izhajajo iz
+  <strong>{f["n_days"]} dni</strong> meritev postaje <strong>IREICA1</strong> v Rečici ob
+  Savinji od {fmtd(f["first_date"])}, opozorila in vodostaj pa iz uradnih virov.</p>'''
+
+    # (naslov, opis, [(besedilo povezave, url), …]) — vsi cilji obstajajo že prej;
+    # hub ne uvaja nobene nove vsebine, samo pot do nje.
+    hazards = [
+        ("Vročina in vročinski valovi",
+         f"Postaja je doslej zabeležila <strong>{n_hot} vročih dni</strong>. Absolutni "
+         f"rekord znaša {num(f['tmax_v'])} °C.",
+         [("Arhiv vročih dni", "/pojavi/vroč-dan/"),
+          ("Najvišja izmerjena temperatura", "/rekord/najvisja-temperatura/"),
+          ("Najbolj vroč mesec", "/rekord/najbolj-vroc-mesec/")]),
+        ("Mraz in zmrzal",
+         f"<strong>{n_frost} dni z zmrzaljo</strong> (najnižja dnevna temperatura ≤ 0 °C); "
+         f"najnižja izmerjena temperatura je {num(f['tmin_v'])} °C. Dno doline se ponoči "
+         f"ohladi bolj kot okoliška pobočja.",
+         [("Arhiv dni z zmrzaljo", "/pojavi/zmrzal/"),
+          ("Najnižja izmerjena temperatura", "/rekord/najnizja-temperatura/"),
+          ("Mikroklima in inverzije", "/vreme-recica-ob-savinji/")]),
+        ("Nalivi in obilne padavine",
+         f"<strong>{n_rain} dni</strong> z vsaj 20 mm padavin; dnevni rekord je "
+         f"{num(f['prec_v'])} mm.",
+         [("Arhiv nalivov", "/pojavi/naliv/"),
+          ("Največ padavin v enem dnevu", "/rekord/najvec-padavin-v-dnevu/"),
+          ("Padavine — klimatologija", "/padavine/")]),
+        ("Nevihte in toča",
+         "Nevihtno napoved (CAPE, strižni veter, verjetnost toče) in sledilnik toče s "
+         "prijavami iz doline vodita ločeni strani.",
+         [("Nevihtna napoved", "/nevihte/"),
+          ("Toča — sledilnik in arhiv prijav", "/toca/")]),
+        ("Poplave in vodostaj Savinje",
+         "Pretok in vodostaj Savinje s 7-dnevno napovedjo ter zgodovino poplav, vključno "
+         "z avgustom 2023.",
+         [("Vodostaj in pretok Savinje", "/vodostaj-savinje/")]),
+        ("Veter",
+         f"Najmočnejši izmerjeni sunek doslej: {num(f['wind_v'])} km/h. Vetrovi v dolini "
+         f"so večinoma šibki in kanalizirani po njeni osi.",
+         [("Najmočnejši veter", "/rekord/najmocnejsi-veter/")]),
+        ("Suša",
+         "Daljša sušna obdobja zaznava samodejni pregled dogodkov; najbolj suhi meseci so "
+         "zbrani med rekordi.",
+         [("Zaznani vremenski dogodki", "/novosti/"),
+          ("Najbolj sušen mesec", "/rekord/najbolj-suh-mesec/"),
+          ("Vodna bilanca in kmetijstvo", "/agrometeo/")]),
+    ]
+
+    cards = []
+    for h2, lead, links in hazards:
+        ls = " · ".join(f'<a href="{u}">{t}</a>' for t, u in links)
+        cards.append(f'  <h2>{h2}</h2>\n  <p>{lead}</p>\n  <p>{ls}</p>')
+    hazards_html = "\n".join(cards)
+
+    # Poštenost: česa postaja ne meri, povemo, namesto da bi vrzel zapolnili z
+    # izpeljano vrednostjo (isto načelo kot pri snegu v batch 6).
+    gaps = ('  <h2>Česa tu ni</h2>\n'
+            '  <p>Postaja IREICA1 <strong>ne meri snežne odeje</strong>, zato Meteorec nima '
+            'arhiva snežnih dni — take vrednosti bi bile ocena, ne meritev. Prav tako ni '
+            'ločenega arhiva pozebe: zabeleženi so dnevi z zmrzaljo, ne pa škoda na '
+            'rastlinah, ki je odvisna od faze rasti.</p>')
+
+    qa = [
+        ("Katero izredno vreme je v Zgornji Savinjski dolini najpogostejše?",
+         f"Po meritvah postaje IREICA1 so daleč najpogostejši dnevi z zmrzaljo "
+         f"({n_frost} dni), sledijo vroči dnevi ({n_hot}) in dnevi z vsaj 20 mm padavin "
+         f"({n_rain})."),
+        ("Kje najdem opozorila za nevihte in točo?",
+         "Nevihtna napoved z indeksi nestabilnosti je na strani /nevihte/, aktivna "
+         "opozorila ARSO in prijave toče iz doline pa na strani /toca/."),
+        ("Ali Meteorec spremlja poplave?",
+         "Da — vodostaj in pretok Savinje s 7-dnevno napovedjo ter pregled preteklih "
+         "poplav, vključno s katastrofalno poplavo avgusta 2023, so na strani "
+         "/vodostaj-savinje/."),
+    ]
+    faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+    ) + "\n  </div>")
+
+    schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs),
+                        faq_schema(qa)])
+    body = f'''{crumbs_html(crumbs)}
+{stn_badge()}
+  <h1 class="page-title">Ekstremno vreme v Zgornji Savinjski dolini</h1>
+  <p class="post-meta">Vročina · mraz · nalivi · toča · poplave · veter · suša</p>
+{intro}
+{hazards_html}
+{gaps}
+{faq_html}
+  <p class="muted-note">Vir meritev: postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
+  Opozorila in vodostaj so iz uradnih virov (ARSO), kar je navedeno na posameznih straneh.
+  Zadnja posodobitev: {fmtd(lastmod)}.</p>
+  <a class="back-link" href="/vreme-zgornja-savinjska-dolina/">← Vreme Zgornja Savinjska dolina</a>'''
+
+    write_page(rel, page_shell(title, desc, url, schema, body), force=True)
+    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
+
+
 def gen_valley_hub_page(hist, sitemap_urls):
     """Topical hub stran /vreme-zgornja-savinjska-dolina/, ki poveže postajo
     IREICA1 (edina referenca za vso dolino) z vsemi sedmimi kraji doline na
@@ -3393,6 +3582,10 @@ def main():
     print("Generiram stran /vreme-zgornja-savinjska-dolina/ …")
     gen_valley_hub_page(hist, sitemap_urls)
     print("  → /vreme-zgornja-savinjska-dolina/index.html")
+
+    print("Generiram stran /ekstremno-vreme/ …")
+    gen_extreme_weather_hub(hist, sitemap_urls)
+    print("  → /ekstremno-vreme/index.html")
 
     print("Generiram stran /vreme-kamp-menina/ …")
     gen_camp_menina_page(hist, sitemap_urls)

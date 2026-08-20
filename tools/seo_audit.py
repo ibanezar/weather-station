@@ -53,6 +53,12 @@ CORE = {
     "gobarska-napoved/dnevnik/":    ("monthly", "0.4"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
+    # /toca/ je obstajala in bila povezana, a je ni bilo v nobenem sitemapu —
+    # ista napaka kot pri /tocnost-napovedi/ (popravljena 20. 8. 2026).
+    "toca/":                     ("daily",   "0.7"),
+    # Razdelilnik po tipu nevarnosti; ne našteva dogodkov (to delajo /pojavi/,
+    # /rekord/ in /novosti/), ampak jih poveže v en vstop.
+    "ekstremno-vreme/":          ("weekly",  "0.7"),
     "agrometeo/":                ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
