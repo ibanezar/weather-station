@@ -29,6 +29,12 @@ from generate_monthly_post import seo_title
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asset_version import css_links
+# Klimatološke norme so izpeljane iz ENE funkcije (glej tudi opombo o full_years
+# v seo_smart_routine.compute_climate): mesečne in letne arhivske strani tu ter
+# hub strani /klima/, /padavine/, /temperatura/ tam morajo primerjati proti isti
+# normi. Dva ločena izračuna sta se že enkrat razšla — 1147 mm proti 1377 mm
+# povprečnih letnih padavin (popravljeno 20. 8. 2026, SEO audit točka 17).
+from seo_smart_routine import compute_climate
 # Ena sama definicija CSS vrstic za vse ovoje strani (glej tools/asset_version.py).
 CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css', 'vreme/vreme.css')
 SITE = "https://meteorec.si"
@@ -409,6 +415,9 @@ def write_page(rel_path, html, force=False):
 
 # ── Phenomenon detection ─────────────────────────────────────────────────────
 
+# Ti dve sta namenoma zrcalni kopiji istoimenskih funkcij v seo_smart_routine.py
+# (od koder uvažamo compute_climate). Pragova morata ostati enaka, sicer bi ista
+# stran štela "vroče dni" po enem pravilu, norma zanje pa bi prišla po drugem.
 def is_frost(v):
     tl = v.get("tempLow")
     return tl is not None and tl <= 0
@@ -419,6 +428,11 @@ def is_hot(v):
     if th is not None and th != ta:
         return th >= 30
     return ta is not None and ta >= 25
+
+# Tropska noč: edina definicija na strani je v app.js ("Tropske noči (Tmin ≥ 20 °C)").
+def is_tropical_night(v):
+    tl = v.get("tempLow")
+    return tl is not None and tl >= 20
 
 def is_heavy_rain(v):
     p = v.get("precipTotal")
@@ -470,6 +484,79 @@ def year_stats(hist, year):
         if me:
             s["months"][m] = month_stats(me)
     return s
+
+# ── Primerjava z normalo ─────────────────────────────────────────────────────
+# Besedišče je namenoma isto kot na hub straneh (seo_smart_routine.py):
+# temperatura kot predznačeno odstopanje v °C (gen_teden), padavine kot odstotek
+# norme s tristopenjskim opisom in pragovoma 105/95 % (gen_padavine). Če se
+# jezik razide, ista številka na dveh straneh bere kot dva različna podatka.
+
+def temp_anomaly_txt(actual, normal):
+    if actual is None or normal is None:
+        return None
+    d = actual - normal
+    return f"{'+' if d >= 0 else ''}{num(d)} °C"
+
+
+def precip_anomaly_txt(actual, expected):
+    if actual is None or not expected:
+        return None
+    pct = actual / expected * 100
+    if pct >= 105:
+        label = "nadpovprečno namočeno"
+    elif pct <= 95:
+        label = "podpovprečno namočeno"
+    else:
+        label = "blizu normale"
+    return f"{num(pct, 0)} % povprečja — {label}"
+
+
+# Obe normi se računata iz DEJANSKO POKRITIH DNI, ne iz koledarskega obdobja.
+# Brez tega delna obdobja izpadejo kot ekstremi: 2019 ima samo november in
+# december, zato bi proti celoletni normi kazalo -6,0 °C in 20 % padavin —
+# to ni vreme tistega leta, ampak zima, primerjana s celim letom. Isti razred
+# napake kot razhajanje povprečnih padavin, popravljeno v točki 17.
+
+def normal_temp_for_period(entries, normals):
+    """Mesečne temperaturne norme, utežene s številom dni z meritvijo v vsakem
+    mesecu obdobja."""
+    per_month = defaultdict(int)
+    for d, v in entries:
+        if v.get("tempAvg") is not None:
+            per_month[int(d[5:7])] += 1
+    tot, cnt = 0.0, 0
+    for m, n in per_month.items():
+        nm = normals.get(m, {}).get("tempAvg")
+        if nm is not None:
+            tot += nm * n
+            cnt += n
+    return tot / cnt if cnt else None
+
+
+def normal_precip_for_period(entries, normals, year):
+    """Mesečne padavinske norme, sorazmerno skrajšane na število dni, ki jih
+    obdobje v posameznem mesecu res pokriva."""
+    per_month = defaultdict(set)
+    for d, _v in entries:
+        per_month[int(d[5:7])].add(int(d[8:10]))
+    tot, have = 0.0, False
+    for m, days in per_month.items():
+        pm = normals.get(m, {}).get("precip_monthly")
+        if pm is None:
+            continue
+        tot += pm * (len(days) / calendar.monthrange(year, m)[1])
+        have = True
+    return tot if have else None
+
+
+def norm_note(full_years):
+    """Norma je iz ~6 let meritev, ne iz 30-letne klimatološke serije — to mora
+    biti povedano povsod, kjer se primerja (isto kot /klima/)."""
+    if not full_years:
+        return ""
+    return (f"Norma je povprečje {len(full_years)} polnih let meritev postaje "
+            f"({full_years[0]}–{full_years[-1]}), ne 30-letna klimatološka serija.")
+
 
 # ── Sitemap accumulator ──────────────────────────────────────────────────────
 
@@ -587,7 +674,7 @@ def gen_daily_pages(hist, force, sitemap_urls):
     return written, skipped
 
 
-def gen_monthly_pages(hist, force, sitemap_urls):
+def gen_monthly_pages(hist, force, sitemap_urls, normals, full_years):
     # Group by YYYY-MM
     by_month = defaultdict(list)
     for date, v in hist.items():
@@ -620,6 +707,62 @@ def gen_monthly_pages(hist, force, sitemap_urls):
                   f'Spodaj so dnevne meritve temperature, padavin, vetra in vremenskih pojavov s postaje '
                   f'IREICA1 — povprečna temperatura je bila {num(s["tavg"])} °C, skupaj je padlo '
                   f'{num(s["prec_total"])} mm padavin.</p>')
+
+        # ── Primerjava z normalo (SEO audit točka 33) ────────────────────────
+        t_anom = temp_anomaly_txt(s["tavg"], normal_temp_for_period(entries, normals))
+        p_anom = precip_anomaly_txt(s["prec_total"],
+                                     normal_precip_for_period(entries, normals, y))
+        anom_rows = []
+        if t_anom:
+            anom_rows.append(f'    <tr><th>Temperatura glede na normo</th>'
+                             f'<td class="record-val">{t_anom}</td></tr>')
+        if p_anom:
+            anom_rows.append(f'    <tr><th>Padavine glede na normo{" (do zdaj)" if partial else ""}</th>'
+                             f'<td class="record-val">{p_anom}</td></tr>')
+        anom_html = ""
+        if anom_rows:
+            anom_html = ('  <h2>Primerjava z dolgoletnim povprečjem</h2>\n'
+                         '  <table class="stats">\n' + "\n".join(anom_rows) + '\n  </table>\n'
+                         f'  <p class="muted-note">{norm_note(full_years)}</p>')
+
+        # ── Ekstremi meseca (SEO audit točka 32) ─────────────────────────────
+        # Snežnih dni tu ni: history.json nima nobenega polja o snegu, zato jih
+        # ne izpisujemo niti kot oceno.
+        def md_link(d, val_str):
+            if not d or val_str is None:
+                return "—"
+            dd = int(d[8:10])
+            return f'{val_str} (<a href="/vreme/{y}/{m:02d}/{dd:02d}/">{dd}. {MES_GEN[m]}</a>)'
+
+        hi_c = [(d, v["tempHigh"]) for d, v in entries if v.get("tempHigh") is not None]
+        lo_c = [(d, v["tempLow"]) for d, v in entries if v.get("tempLow") is not None]
+        pr_c = [(d, v["precipTotal"]) for d, v in entries if v.get("precipTotal") is not None]
+        hi_d, hi_v = max(hi_c, key=lambda x: x[1]) if hi_c else (None, None)
+        lo_d, lo_v = min(lo_c, key=lambda x: x[1]) if lo_c else (None, None)
+        pr_d, pr_v = max(pr_c, key=lambda x: x[1]) if pr_c else (None, None)
+        m_hot = sum(1 for _, v in entries if is_hot(v))
+        m_frost = sum(1 for _, v in entries if is_frost(v))
+        m_trop = sum(1 for _, v in entries if is_tropical_night(v))
+
+        m_extra = []
+        if m_trop:
+            m_extra.append(f'    <tr><th>Tropske noči (Tmin ≥ 20 °C)</th>'
+                           f'<td class="record-val">{m_trop}</td></tr>')
+        # Sunek vetra: windgustHigh manjka za prvih ~490 dni arhiva, zato vrstica
+        # odpade, namesto da bi izpisala prazno vrednost.
+        if s.get("wind_max") is not None:
+            m_extra.append(f'    <tr><th>Najvišja izmerjena hitrost vetra</th>'
+                           f'<td class="record-val">{num(s["wind_max"])} km/h</td></tr>')
+
+        month_extremes = f'''  <h2>Ekstremi {MES_GEN[m]} {y}</h2>
+  <table class="stats">
+    <tr><th>Najtoplejši dan</th><td class="record-val">{md_link(hi_d, f"{num(hi_v)} °C" if hi_v is not None else None)}</td></tr>
+    <tr><th>Najhladnejši dan</th><td class="record-val">{md_link(lo_d, f"{num(lo_v)} °C" if lo_v is not None else None)}</td></tr>
+    <tr><th>Dan z največ padavinami</th><td class="record-val">{md_link(pr_d, f"{num(pr_v)} mm" if pr_v is not None else None)}</td></tr>
+    <tr><th>Vroči dnevi</th><td class="record-val">{m_hot}</td></tr>
+    <tr><th>Dnevi z zmrzaljo</th><td class="record-val">{m_frost}</td></tr>
+{chr(10).join(m_extra)}
+  </table>'''
 
         crumbs = [
             ("Meteorec", "/"),
@@ -716,6 +859,8 @@ def gen_monthly_pages(hist, force, sitemap_urls):
   <p class="post-meta">Meritve postaje IREICA1 · {ELEV} m n. m. · Savinjska dolina</p>
 {intro}
 {partial_note}{cards}
+{anom_html}
+{month_extremes}
   <h2>Dnevi v mesecu</h2>
 {day_table}
   <p class="muted-note">Temperatura je dnevno povprečje. Padavine so dnevna vsota. Prikazana je tudi max. hitrost sunka vetra.</p>
@@ -730,7 +875,7 @@ def gen_monthly_pages(hist, force, sitemap_urls):
     return written
 
 
-def gen_yearly_pages(hist, force, sitemap_urls):
+def gen_yearly_pages(hist, force, sitemap_urls, normals, full_years):
     years = sorted({d[:4] for d in hist})
     written = 0
 
@@ -783,6 +928,7 @@ def gen_yearly_pages(hist, force, sitemap_urls):
 
         hot_days_n = sum(1 for _, v in year_entries if is_hot(v))
         frost_days_n = sum(1 for _, v in year_entries if is_frost(v))
+        trop_nights_n = sum(1 for _, v in year_entries if is_tropical_night(v))
 
         wettest_m = (max(s["months"], key=lambda mm: s["months"][mm]["prec_total"])
                      if s["months"] else None)
@@ -791,16 +937,92 @@ def gen_yearly_pages(hist, force, sitemap_urls):
             f'({num(s["months"][wettest_m]["prec_total"])} mm)'
         ) if wettest_m else "—"
 
+        y_extra = []
+        # Tropskih noči postaja doslej ni zabeležila nobene (dno doline se ponoči
+        # močno ohladi), zato vrstica pride šele, ko se to zgodi — trajno ničelna
+        # vrstica bi brala kot manjkajoč podatek.
+        if trop_nights_n:
+            y_extra.append(f'    <tr><th>Tropske noči (Tmin ≥ 20 °C)</th>'
+                           f'<td class="record-val">{trop_nights_n}</td></tr>')
+        if s.get("wind_max") is not None:
+            y_extra.append(f'    <tr><th>Najvišja izmerjena hitrost vetra</th>'
+                           f'<td class="record-val">{num(s["wind_max"])} km/h</td></tr>')
+
         extremes_html = f'''  <h2>Ekstremi leta {y}</h2>
   <table class="stats">
     <tr><th>Najtoplejši dan</th><td class="record-val">{yd_link(hot_d, f"{num(hot_v)} °C" if hot_v is not None else None)}</td></tr>
     <tr><th>Najhladnejši dan</th><td class="record-val">{yd_link(cold_d, f"{num(cold_v)} °C" if cold_v is not None else None)}</td></tr>
     <tr><th>Dan z največ padavinami</th><td class="record-val">{yd_link(prec_d, f"{num(prec_v)} mm" if prec_v is not None else None)}</td></tr>
     <tr><th>Najbolj moker mesec</th><td class="record-val">{wettest_month_txt}</td></tr>
-    <tr><th>Najvišja izmerjena hitrost vetra</th><td class="record-val">{num(s["wind_max"]) + " km/h" if s.get("wind_max") is not None else "—"}</td></tr>
     <tr><th>Vroči dnevi (≥30 °C oz. ≥25 °C povp.)</th><td class="record-val">{hot_days_n}</td></tr>
     <tr><th>Dnevi z zmrzaljo</th><td class="record-val">{frost_days_n}</td></tr>
+{chr(10).join(y_extra)}
   </table>'''
+
+        # ── Primerjava z normalo (točka 33) ──────────────────────────────────
+        # Norma se vzame za natanko tiste mesece/dneve, ki jih leto pokriva —
+        # 2019 ima samo november in december, tekoče leto pa se konča sredi meseca.
+        y_t_anom = temp_anomaly_txt(s["tavg"], normal_temp_for_period(year_entries, normals))
+        y_p_anom = precip_anomaly_txt(s["prec_total"],
+                                       normal_precip_for_period(year_entries, normals, y))
+        y_anom_rows = []
+        if y_t_anom:
+            y_anom_rows.append(f'    <tr><th>Temperatura glede na normo</th>'
+                               f'<td class="record-val">{y_t_anom}</td></tr>')
+        if y_p_anom:
+            y_anom_rows.append(f'    <tr><th>Padavine glede na normo{" (do zdaj)" if is_current else ""}</th>'
+                               f'<td class="record-val">{y_p_anom}</td></tr>')
+        y_anom_html = ""
+        if y_anom_rows:
+            y_anom_html = ('  <h2>Primerjava z dolgoletnim povprečjem</h2>\n'
+                           '  <table class="stats">\n' + "\n".join(y_anom_rows) + '\n  </table>\n'
+                           f'  <p class="muted-note">{norm_note(full_years)}</p>')
+
+        # ── Letni "story" odstavek (točka 31) ────────────────────────────────
+        # Sestavljen iz že izračunanih številk, brez modela — stran se generira
+        # ob vsakem zagonu in mora biti reproducibilna.
+        story_bits = []
+        if y_t_anom:
+            warmer = not y_t_anom.startswith("-")
+            story_bits.append(f'povprečna temperatura {num(s["tavg"])} °C, kar je <strong>{y_t_anom}</strong> '
+                               f'{"nad" if warmer else "pod"} dolgoletnim povprečjem postaje')
+        story_bits.append(f'{hot_days_n} vročih dni')
+        if trop_nights_n:
+            story_bits.append(f'{trop_nights_n} tropskih noči')
+        story_bits.append(f'{frost_days_n} dni z zmrzaljo')
+        if s.get("wind_max") is not None:
+            story_bits.append(f'najmočnejši izmerjeni veter {num(s["wind_max"])} km/h')
+        story_lead = (f"Leto {y} doslej v Rečici ob Savinji" if is_current
+                      else f"Leto {y} v Rečici ob Savinji na kratko")
+        story_html = f'  <p class="archive-intro">{story_lead}: ' + ", ".join(story_bits) + '.</p>'
+
+        # ── FAQ (točka 34) — isti qa seznam poganja vidni HTML in JSON-LD ────
+        qa = []
+        if y_t_anom:
+            warmer = not y_t_anom.startswith("-")
+            qa.append((
+                f"Ali je bilo leto {y} v Rečici ob Savinji toplejše od povprečja?",
+                f"{'Da' if warmer else 'Ne'}. Povprečna temperatura leta {y} je bila "
+                f"{num(s['tavg'])} °C, kar je {y_t_anom} {'nad' if warmer else 'pod'} dolgoletnim "
+                f"povprečjem postaje IREICA1. {norm_note(full_years)}"))
+        if hot_v is not None and hot_d:
+            qa.append((
+                f"Kateri je bil najbolj vroč dan leta {y}?",
+                f"Najvišja temperatura leta {y} je bila {num(hot_v)} °C, izmerjena {fmtd(hot_d)} "
+                f"na postaji IREICA1 v Rečici ob Savinji."))
+        if wettest_m:
+            qa.append((
+                f"Kateri mesec je bil leta {y} najbolj moker?",
+                f"Največ padavin je leta {y} padlo {MES_GEN[wettest_m]} — "
+                f"{num(s['months'][wettest_m]['prec_total'])} mm. Skupaj je v letu {y} padlo "
+                f"{num(s['prec_total'])} mm."))
+        qa.append((
+            f"Koliko dni z zmrzaljo je bilo leta {y}?",
+            f"Postaja IREICA1 je leta {y} zabeležila {frost_days_n} dni z zmrzaljo "
+            f"(najnižja dnevna temperatura ≤ 0 °C) in {hot_days_n} vročih dni."))
+        faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+            f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+        ) + "\n  </div>")
 
         crumbs = [
             ("Meteorec", "/"),
@@ -871,7 +1093,8 @@ def gen_yearly_pages(hist, force, sitemap_urls):
                 + (f'    <a href="/vreme/{y+1}/">{y+1} →</a>\n' if next_exists else '    <span></span>\n')
                 + '  </nav>')
 
-        schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs)])
+        schema = "\n".join([webpage_schema(url, title, desc), crumbs_schema(crumbs),
+                            faq_schema(qa)])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme v Rečici ob Savinji — leto {y}</h1>
@@ -879,9 +1102,12 @@ def gen_yearly_pages(hist, force, sitemap_urls):
 {intro}
 {cards}
 {in_progress_note}
+{story_html}
+{y_anom_html}
 {extremes_html}
   <h2>Mesečni pregled</h2>
 {month_table}
+{faq_html}
 {ynav}'''
 
         html = page_shell(title, desc, url, schema, body, y)
@@ -3108,16 +3334,22 @@ def main():
 
     sitemap_urls = []
 
+    # Norme izračunamo ENKRAT in jih podamo naprej — compute_climate() prehodi
+    # celotno zgodovino, mesečnih strani pa je čez 80.
+    print("Izračunavam klimatološke norme …")
+    normals, _ann_prec, _ann_frost, _ann_hot, full_years = compute_climate(hist)
+    print(f"  → norme iz {len(full_years)} polnih let")
+
     print("Generiram dnevne strani …")
     w, s = gen_daily_pages(hist, args.force, sitemap_urls)
     print(f"  → {w} novih, {s} preskočenih")
 
     print("Generiram mesečne strani …")
-    w = gen_monthly_pages(hist, args.force, sitemap_urls)
+    w = gen_monthly_pages(hist, args.force, sitemap_urls, normals, full_years)
     print(f"  → {w} strani")
 
     print("Generiram letne strani …")
-    w = gen_yearly_pages(hist, args.force, sitemap_urls)
+    w = gen_yearly_pages(hist, args.force, sitemap_urls, normals, full_years)
     print(f"  → {w} strani")
 
     print("Generiram sezonske strani …")
