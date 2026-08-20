@@ -1,0 +1,134 @@
+name: Nevihtna karta Slovenije
+
+# Vsak dan ob 10:00 po naši uri sestavi statično nevihtno karto za vso
+# Slovenijo (glej tools/generate_storm_map.py) in jo vgradi na /nevihte/.
+# Na FB/IG (feed + zgodba) gre samo, če je nekje v Sloveniji danes vsaj
+# ZMERNO — should_post v latest.json, preverjajo ga posamezni post-* koraki
+# sami, zato tu ni pogojne YAML logike.
+#
+# Termin: isti vzorec kot daily-story.yml -- cron teče po UTC in zamuja, zato
+# sta nastavljena dva termina (08:00 in 09:00 UTC = 10:00 pri nas poleti oz.
+# pozimi), tools/storm_map_gate.py pa spusti skozi samo pravega in poskrbi,
+# da gre karta ven enkrat na dan.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = sestavi ne glede na uro in na to, ali je karta danes že nastala'
+        required: false
+        default: 'true'
+
+jobs:
+  karta:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri, ali je čas za karto
+        id: gate
+        run: |
+          python3 tools/storm_map_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
+      - name: Namesti Pillow
+        if: steps.gate.outputs.proceed == 'true'
+        run: pip install Pillow --quiet
+
+      - name: Sestavi karto
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/generate_storm_map.py
+
+      - name: Vgradi karto na /nevihte/
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/inject_storm_map.py
+
+      - name: Objavi na main
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/storm_map_gate.py mark
+          git add og/storm-map nevihte/index.html tools/.storm_map_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+          else
+            git commit -m "nevihte: dnevna karta Slovenije $(date -u +%Y-%m-%d) [skip ci]"
+            for i in 1 2 3 4 5; do
+              if git push; then break; fi
+              echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+              git fetch origin main
+              git rebase origin/main
+              sleep $((i * 3))
+            done
+          fi
+
+      # Enak razlog in vzorec kot v daily-story.yml: FB/IG pobirata sliko prek
+      # javnega URL-ja in Cloudflare zna 404, ujet med deployem, predpomniti
+      # za skoraj eno leto, zato vsak poskus uporabi svoj query-string.
+      - name: Počakaj, da je slika dosegljiva
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('og/storm-map/latest.json'))['image'])")
+          echo "Čakam na $URL"
+          for i in $(seq 1 40); do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${URL}?probe=${i}-$(date +%s%N)" || echo 000)
+            if [ "$CODE" = "200" ]; then echo "Slika je dosegljiva (poskus $i)."; exit 0; fi
+            sleep 15
+          done
+          echo "Slika po 10 minutah ni dosegljiva — objavo preskačem." >&2
+          exit 1
+
+      - name: Objavi karto na Facebook (feed)
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_storm_map_to_facebook.py
+
+      - name: Objavi karto na Instagram (feed)
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_storm_map_to_instagram.py
+
+      - name: Objavi karto kot zgodbo na Facebook
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          if python3 -c "import json,sys;sys.exit(0 if json.load(open('og/storm-map/latest.json'))['should_post'] else 1)"; then
+            IMG=$(python3 -c "import json;print(json.load(open('og/storm-map/latest.json'))['image_story'])")
+            python3 tools/post_story_to_facebook.py "$IMG"
+          else
+            echo "Nevihtni potencial danes ni dovolj visok — zgodba se preskoči."
+          fi
+
+      - name: Objavi karto kot zgodbo na Instagram
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          if python3 -c "import json,sys;sys.exit(0 if json.load(open('og/storm-map/latest.json'))['should_post'] else 1)"; then
+            IMG=$(python3 -c "import json;print(json.load(open('og/storm-map/latest.json'))['image_story'])")
+            python3 tools/post_story_to_instagram.py "$IMG"
+          else
+            echo "Nevihtni potencial danes ni dovolj visok — zgodba se preskoči."
+          fi
