@@ -769,7 +769,7 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
               + faq_schema(faq_qa))
 
     body = f'''{crumbs_html([("Meteorec", "/"), ("Klima", None)])}
-  <h1 class="page-title">Klima Rečice ob Savinji</h1>
+  <h1 class="page-title">Klima in podnebje Rečice ob Savinji</h1>
   <p class="archive-intro">Klimatološki povzetek meteorološke postaje IREICA1 v Rečici ob Savinji
   ({ELEV} m n. m., Zgornja Savinjska dolina) na osnovi {years_span} let meritev (2019–{TODAY.year}).
   Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki.</p>

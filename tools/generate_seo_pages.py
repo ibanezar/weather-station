@@ -931,10 +931,11 @@ def gen_archive_index(hist, sitemap_urls, seasons=None):
     ])
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
-  <h1 class="page-title">Vremenski arhiv</h1>
-  <p class="archive-intro">Arhiv meritev meteorološke postaje <strong>IREICA1</strong> v <strong>Rečici ob Savinji</strong>
-  (Savinjska dolina, {ELEV} m n. m.) od novembra 2019. Vsak dan ima svojo stran z natančnimi podatki o temperaturi,
-  padavinah in vetru.</p>
+  <h1 class="page-title">Vremenski arhiv Rečica ob Savinji</h1>
+  <p class="archive-intro">Vremenski arhiv Rečice ob Savinji vsebuje dnevne meritve temperature, padavin,
+  vetra, vlage in zračnega tlaka meteorološke postaje <strong>IREICA1</strong> (Zgornja Savinjska dolina,
+  {ELEV} m n. m.) od {fmtd(first_date)}. Poglej, kakšno je bilo vreme v posameznem dnevu, mesecu ali letu —
+  vsak dan ima svojo stran z natančnimi podatki.</p>
 {at_cards}
   <h2>Izberi leto</h2>
   <div class="card-grid">
@@ -1080,6 +1081,91 @@ def gen_records_page(hist, sitemap_urls):
     else:
         rows_dry = None
 
+    # ── Posamezne tematske podstrani (long-tail iskanja: "najvišja temperatura
+    # Rečica ob Savinji" ipd.) — glej SEO audit 2026-08, točka 9. Vsaka podstran
+    # je majhna, samostojna stran z eno vrednostjo, ne podvojitev tabel zgoraj.
+    def record_subpage(slug, h1, label, value_str, when_html, context_p):
+        r_url, r_rel = f"/rekord/{slug}/", f"rekord/{slug}/index.html"
+        r_title = f"{h1} — rekord postaje IREICA1"
+        r_desc = f"{label} v Rečici ob Savinji (postaja IREICA1): {value_str}. {context_p}"
+        r_crumbs = [("Meteorec", "/"), ("Vremenski arhiv", "/vreme/"),
+                    ("Rekordi", "/rekord/"), (h1, None)]
+        r_schema = "\n".join([
+            webpage_schema(r_url, r_title, r_desc),
+            crumbs_schema(r_crumbs),
+        ])
+        r_body = f'''{crumbs_html(r_crumbs)}
+{stn_badge()}
+  <h1 class="page-title">{h1}</h1>
+  <p class="post-meta">Postaja IREICA1 · Rečica ob Savinji · meritve od novembra 2019</p>
+  <div class="all-time-grid">
+    <div class="at-card">
+      <div class="at-label">{label}</div>
+      <div class="at-val hot">{value_str}</div>
+      <div class="at-sub">{when_html}</div>
+    </div>
+  </div>
+  <p>{context_p}</p>
+  <a class="back-link" href="/rekord/">← Vsi rekordi Rečice ob Savinji</a>'''
+        write_page(r_rel, page_shell(r_title, r_desc, r_url, r_schema, r_body), force=True)
+        sitemap_urls.append(sitemap_entry(SITE + r_url, lastmod, "weekly", "0.6"))
+        return (slug, h1, value_str)
+
+    record_cards = []
+    if tmax_d:
+        record_cards.append(record_subpage(
+            "najvisja-temperatura", "Najvišja temperatura v Rečici ob Savinji",
+            "Absolutno najvišja temperatura", tmax_str, tmax_link,
+            f"Postaja IREICA1 je najvišjo temperaturo doslej izmerila {fmtd(tmax_d)}."))
+    if tmin_d:
+        record_cards.append(record_subpage(
+            "najnizja-temperatura", "Najnižja temperatura v Rečici ob Savinji",
+            "Absolutno najnižja temperatura", tmin_str, tmin_link,
+            f"Postaja IREICA1 je najnižjo temperaturo doslej izmerila {fmtd(tmin_d)}."))
+    if prec_d:
+        record_cards.append(record_subpage(
+            "najvec-padavin-v-dnevu", "Največ padavin v enem dnevu v Rečici ob Savinji",
+            "Dnevni rekord padavin", prec_str, prec_link,
+            f"Toliko dežja je v enem dnevu padlo {fmtd(prec_d)} — dnevni rekord postaje IREICA1."))
+    if wind_d:
+        record_cards.append(record_subpage(
+            "najmocnejsi-veter", "Najmočnejši veter v Rečici ob Savinji",
+            wind_label, wind_str, wind_link,
+            f"{wind_label} je postaja IREICA1 izmerila {fmtd(wind_d)}."))
+    if hottest_ym:
+        record_cards.append(record_subpage(
+            "najbolj-vroc-mesec", "Najbolj vroč mesec v Rečici ob Savinji",
+            "Najtoplejši mesec (povprečna temperatura)",
+            f"{num(month_avgs.get(hottest_ym))} °C", ym_link(hottest_ym),
+            f"{MES_NOM[int(hottest_ym[5:7])].capitalize()} {hottest_ym[:4]} je bil doslej "
+            f"najtoplejši mesec po povprečni temperaturi na postaji IREICA1."))
+    if coldest_ym:
+        record_cards.append(record_subpage(
+            "najbolj-hladen-mesec", "Najbolj hladen mesec v Rečici ob Savinji",
+            "Najhladnejši mesec (povprečna temperatura)",
+            f"{num(month_avgs.get(coldest_ym))} °C", ym_link(coldest_ym),
+            f"{MES_NOM[int(coldest_ym[5:7])].capitalize()} {coldest_ym[:4]} je bil doslej "
+            f"najhladnejši mesec po povprečni temperaturi na postaji IREICA1."))
+    if wettest_ym:
+        record_cards.append(record_subpage(
+            "najbolj-dezeven-mesec", "Najbolj deževen mesec v Rečici ob Savinji",
+            "Mesec z največ padavinami", f"{num(month_precs.get(wettest_ym))} mm", ym_link(wettest_ym),
+            f"{MES_NOM[int(wettest_ym[5:7])].capitalize()} {wettest_ym[:4]} je bil doslej mesec "
+            f"z največ padavinami na postaji IREICA1."))
+    if driest_ym:
+        record_cards.append(record_subpage(
+            "najbolj-suh-mesec", "Najbolj sušen mesec v Rečici ob Savinji",
+            "Mesec z najmanj padavinami (≥20 meritev)",
+            f"{num(month_precs.get(driest_ym))} mm", ym_link(driest_ym),
+            f"{MES_NOM[int(driest_ym[5:7])].capitalize()} {driest_ym[:4]} je bil doslej najsušnejši "
+            f"mesec (z vsaj 20 dnevi meritev) na postaji IREICA1."))
+
+    records_hub_html = ('  <h2>Rekordi po temah</h2>\n  <div class="card-grid">\n' + "\n".join(
+        f'    <a class="phenom-card" href="/rekord/{slug}/">{h1.split(" v Rečici")[0]}'
+        f'<div class="ph-count">{val}</div></a>'
+        for slug, h1, val in record_cards
+    ) + '\n  </div>')
+
     first_date = min(hist.keys())
     schema = "\n".join([
         webpage_schema(url, title, desc),
@@ -1115,6 +1201,8 @@ def gen_records_page(hist, sitemap_urls):
   <table class="stats">
 {rows_wind}
   </table>
+
+{records_hub_html}
 
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina ({ELEV} m n. m.).
   Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev.</p>

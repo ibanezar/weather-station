@@ -15493,6 +15493,54 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/rekord/najvisja-temperatura/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najnizja-temperatura/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najvec-padavin-v-dnevu/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najmocnejsi-veter/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najbolj-vroc-mesec/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najbolj-hladen-mesec/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najbolj-dezeven-mesec/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/rekord/najbolj-suh-mesec/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/rekord/</loc>
     <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
