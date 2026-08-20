@@ -210,6 +210,45 @@ Opozorilo je **stanje, ne novica** — velja nekaj ur in se prekliče. Zato:
 - `generate_arso_newsjack_post.py` ostaja v repozitoriju zaradi teh dveh funkcij
   in zgodovine; kot generator objav se ne uporablja več.
 
+## Nevihtna karta Slovenije (WX-STORMMAP)
+
+Vsak dan ob 10:00 po naši uri `tools/generate_storm_map.py` sestavi **lastno**
+statično karto nevihtnega potenciala za vso Slovenijo (ne kopija tuje karte,
+npr. Neurje.si) in jo `tools/inject_storm_map.py` vgradi med markerja
+WX-STORMMAP na `/nevihte/` — isti vzorec kot WX-ARSO zgoraj (rezervni blok v
+`generate_nevihte_page.py`, injektor javi napako in konča z 1, če markerjev
+ni).
+
+- **Ocena je ista formula kot povsod na strani** — `storm_threat_score()` iz
+  `generate_nevihte_page.py` je uvožena, ne podvojena. Mreža točk, obris
+  Slovenije in barvna lestvica pa so prepisani iz app.js (`SLO_POLY`,
+  `SLO_CITIES`, `buildSloGrid`, `sloScoreColor` — živi zavihek »Lovec na
+  nevihte« → karta Slovenije na naslovni strani). JS in Python ne moreta
+  deliti iste kode — **če spremeniš eno, spremeni tudi drugo**.
+- Ocena na vsaki mrežni točki je **najvišja pričakovana danes** (od zdaj do
+  konca dneva), ne trenutna — karta pove, kaj lahko danes pričakuješ.
+- Piše `og/storm-map/<datum>.jpg` (1080×1350, feed) in `<datum>-story.jpg`
+  (1080×1920, zgodba) + `latest.json` (kazalec + `should_post`). Stare karte
+  (>14 dni) pobriše sam, isto kot dnevna zgodba.
+- **FB/IG (feed + zgodba, oboje) gresta ven samo, če je nekje v Sloveniji
+  danes vsaj ZMERNO** (ocena >= 22) — `should_post` v `latest.json`,
+  preverjajo ga `tools/post_storm_map_to_facebook.py`,
+  `tools/post_storm_map_to_instagram.py` in workflow sam (za zgodbo). Razlog:
+  vsakodnevna objava "brez neviht" bi imela isto usodo kot stare ARSO objave
+  (glej razdelek zgoraj — 0 sekund povprečnega časa branja).
+- Zgodba gre prek obstoječih `tools/post_story_to_facebook.py` /
+  `post_story_to_instagram.py` (sprejmeta URL slike kot argument) — ni
+  podvojenega objavljalnika za zgodbe, samo za feed (karta ni blog članek iz
+  `blog.json`, zato `tools/post_to_facebook.py`/`post_to_instagram.py` ne
+  ustrezata).
+- **Termin:** isti dvojni-cron + gate vzorec kot dnevna zgodba
+  (`tools/storm_map_gate.py`, okno 10:00–15:00, lastno stanje
+  `tools/.storm_map_state.json` — ločeno od `.story_state.json`).
+- Slovenija je širša kot visoka, zato bi sredinjena karta na pokončni zgodbi
+  (9:16) pustila velik prazen pas nad/pod njo — `render()` v
+  `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo
+  (če ga je dovolj) zapolni s seznamom potenciala po mestih namesto praznine.
+
 ## Napoved na pristajalni strani
 
 `tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah

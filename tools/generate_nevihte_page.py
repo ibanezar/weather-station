@@ -323,6 +323,16 @@ def build_body(data):
         'target="_blank" rel="noopener">opozorila ARSO</a>.</p>\n'
         '  <!-- WX-ARSO:END -->')
 
+    # Dnevno nevihtno karto Slovenije piše tools/inject_storm_map.py med
+    # markerja (glej tools/generate_storm_map.py) — isti vzorec kot WX-ARSO
+    # zgoraj: tu je le rezervni zapis, da stran med generiranjem in prvim
+    # zagonom injektorja ni prazna.
+    stormmap_block = (
+        '<!-- WX-STORMMAP:START (auto: tools/inject_storm_map.py) -->\n'
+        '  <h2 id="karta">Nevihtna karta Slovenije — danes</h2>\n'
+        '  <p class="archive-intro">Karta se osvežuje vsak dan ob 10:00.</p>\n'
+        '  <!-- WX-STORMMAP:END -->')
+
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -333,6 +343,7 @@ def build_body(data):
   <p class="post-meta">Model atmosferske nestabilnosti iz podatkov Open-Meteo · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {answer}
 {quick}
+{stormmap_block}
   <h2>Indeksi nestabilnosti — trenutno</h2>
   <p class="archive-intro">Ključni atmosferski indeksi, ki jih meteorologi uporabljajo za oceno nevihtnega potenciala nad Rečico ob Savinji.</p>
 {idx_table}
