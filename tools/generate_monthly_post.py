@@ -465,6 +465,22 @@ REL_START = "<!-- sorodni:start — samodejno, wire_all(); ne urejaj ročno -->"
 REL_END = "<!-- sorodni:end -->"
 TOPICS_START = "<!-- teme:start — samodejno, wire_all(); ne urejaj ročno -->"
 TOPICS_END = "<!-- teme:end -->"
+# Blok "Vreme in podatki" -- glej SEO audit 2026-08, točka 11/13/15: članki so
+# doslej linkali predvsem na naslovno stran in med seboj (sorodni:*), premalo
+# pa na Meteorecove lastne podatkovne hub strani, ki so glavna SEO prednost
+# strani. Seznam je namenoma statičen in enak za vse članke (brez
+# teme-detekcije) -- vse povezave so univerzalno relevantne za vsak članek o
+# vremenu v dolini, dodatna klasifikacija ne bi prinesla dovolj vrednosti.
+DATA_START = "<!-- podatki:start — samodejno, wire_all(); ne urejaj ročno -->"
+DATA_END = "<!-- podatki:end -->"
+DATA_LINKS = [
+    ("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji"),
+    ("/vreme/", "Vremenski arhiv"),
+    ("/klima/", "Klima in podnebje"),
+    ("/padavine/", "Padavine"),
+    ("/rekord/", "Rekordi"),
+    ("/vreme-zgornja-savinjska-dolina/", "Vreme Zgornja Savinjska dolina"),
+]
 
 
 def esc_attr(s):
@@ -513,6 +529,21 @@ def render_related_html(related_posts):
             f'  {REL_END}\n')
 
 
+def render_datalinks_html():
+    """Sekcija 'Vreme in podatki' -- statične povezave na hub strani. Enaka
+    razredna oblika kot 'Sorodni članki' (.related-posts/.related-grid/
+    .related-card), samo brez datuma/povzetka na kartici."""
+    cards = "".join(
+        f'<a class="related-card" href="{href}"><span class="related-h">{label}</span></a>'
+        for href, label in DATA_LINKS)
+    return (f'  {DATA_START}\n'
+            f'  <section class="related-posts">\n'
+            f'    <h2 class="related-title">Vreme in podatki</h2>\n'
+            f'    <div class="related-grid">{cards}</div>\n'
+            f'  </section>\n'
+            f'  {DATA_END}\n')
+
+
 def _replace_block(html, start, end, new_block):
     """Zamenja obstoječi označeni blok; vrne (html, ali_je_bil_ze_tam)."""
     i = html.find(start)
@@ -554,6 +585,8 @@ def inject_related_links(posts, quiet=False):
             t = str(t).lower()
             freq[t] = freq.get(t, 0) + 1
 
+    datalinks_block = render_datalinks_html()
+
     changed = 0
     for p in posts:
         slug = p["slug"]
@@ -582,6 +615,15 @@ def inject_related_links(posts, quiet=False):
             m = re.search(r"^[ \t]*</article>[ \t]*\n", html, re.M)
             if m:
                 html = html[:m.end()] + "\n" + related_block + html[m.end():]
+
+        html, had = _replace_block(html, DATA_START, DATA_END, datalinks_block)
+        if not had:
+            # za sorodnimi članki, če obstajajo, sicer neposredno za </article>
+            m = re.search(re.escape(REL_END) + r"[ \t]*\n", html)
+            if not m:
+                m = re.search(r"^[ \t]*</article>[ \t]*\n", html, re.M)
+            if m:
+                html = html[:m.end()] + "\n" + datalinks_block + html[m.end():]
 
         if html != orig:
             with open(path, "w", encoding="utf-8") as f:
