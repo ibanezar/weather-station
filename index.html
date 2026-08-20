@@ -283,6 +283,11 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 }
 </script>
 
+<!-- Pisavo brskalnik sicer odkrije šele po razčlenitvi fonts.css (druga raven
+     globine), zato jo napovemo že tu. Različica -ext- nosi č/š/ž — brez nje se
+     slovensko besedilo preriše pozneje kot ostalo. -->
+<link rel="preload" href="/fonts/Inter-latin-normal-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Inter-latin-ext-normal-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://weatherireica1.filip-eremita.workers.dev" crossorigin>
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">

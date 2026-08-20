@@ -429,18 +429,21 @@ def rewrite_sitemap_and_index(posts):
     # blog/index.html — pregeneriraj seznam objav med markerjema
     idx = os.path.join(ROOT, "blog", "index.html")
     h = open(idx, encoding="utf-8").read()
-    def li(p):
+    def li(p, i=1):
         date_html = fmtdate(p["date"])
         if p.get("updated"):
             date_html += f' <span class="post-updated" title="Posodobljeno {fmtdate(p["updated"])}">☁️</span>'
         alt = p["title"].replace('"', "&quot;")
+        # Prva sličica je nad pregibom in je LCP kandidat te strani — lazy nalaganje
+        # jo odkrije šele po layoutu in LCP zato zamakne. Ostale ostanejo lazy.
+        ld = ('loading="eager" fetchpriority="high"' if i == 0 else 'loading="lazy"')
         return (f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
-                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="260" height="260" loading="lazy">\n'
+                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="260" height="260" {ld}>\n'
                 f'        <div class="post-card-body">\n'
                 f'          <div class="date">{date_html}</div>\n'
                 f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
                 f'        </div>\n      </a>\n    </li>')
-    items = "\n".join(li(p) for p in posts)
+    items = "\n".join(li(p, i) for i, p in enumerate(posts))
     h = re.sub(r'(<ul class="post-list">).*?(</ul>)',
                r'\1\n' + items + r'\n  \2', h, flags=re.S)
     open(idx, "w", encoding="utf-8").write(h)
@@ -690,12 +693,13 @@ def build_tag_pages(posts):
         plist = sorted(plist, key=lambda p: p.get("updated") or p["date"], reverse=True)
         cards = "\n".join(
             f'    <li>\n      <a class="post-card" href="/blog/{p["slug"]}.html">\n'
-            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="260" height="260" loading="lazy">\n'
+            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="260" height="260" '
+            f'{"loading=" + chr(34) + "eager" + chr(34) + " fetchpriority=" + chr(34) + "high" + chr(34) if _i == 0 else "loading=" + chr(34) + "lazy" + chr(34)}>\n'
             f'        <div class="post-card-body">\n'
             f'          <div class="date">{fmtdate(p["date"])}</div>\n'
             f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
             f'        </div>\n      </a>\n    </li>'
-            for p in plist)
+            for _i, p in enumerate(plist))
         canon = f"{SITE}/blog/tema/{slug}/"
         # Uvod in opis nista več enak boilerplate za vse teme: navedeta dejanski
         # obseg te teme (koliko objav, od kdaj do kdaj), da se strani med seboj
