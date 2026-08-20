@@ -299,6 +299,7 @@ def archive_dataset_schema(first_date, last_date):
         "@type": "Dataset",
         "@id": f"{SITE}/#dataset",
         "name": "Vremenske meritve — Rečica ob Savinji (IREICA1)",
+        "alternateName": "Meteorec IREICA1 Weather Dataset",
         "description": ("Dnevni arhiv temperature, padavin, relativne vlage in vetra "
                          f"meteorološke postaje {STATION_ID} v Rečici ob Savinji od {fmtd(first_date)}."),
         "url": f"{SITE}/vreme/",
@@ -945,7 +946,8 @@ def gen_archive_index(hist, sitemap_urls, seasons=None):
   <p class="archive-intro">Dolgoletno povprečje in rekordi za posamezni mesec:
   <a href="/vreme/mesec/">→ Vreme po mesecih</a>.</p>
   <p class="muted-note">Za vse rekorde: <a href="/rekord/">→ Vremenski rekordi</a> ·
-  Vremenski pojavi: <a href="/pojavi/">→ Zmrzal, vroči dnevi, nalivi</a></p>'''
+  Vremenski pojavi: <a href="/pojavi/">→ Zmrzal, vroči dnevi, nalivi</a></p>
+  <p class="muted-note">Zadnja posodobitev: {fmtd(last_date)}.</p>'''
 
     html = page_shell(title, desc, url, schema, body)
     write_page(rel, html, force=True)
@@ -1106,6 +1108,8 @@ def gen_records_page(hist, sitemap_urls):
     </div>
   </div>
   <p>{context_p}</p>
+  <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
+  Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/rekord/">← Vsi rekordi Rečice ob Savinji</a>'''
         write_page(r_rel, page_shell(r_title, r_desc, r_url, r_schema, r_body), force=True)
         sitemap_urls.append(sitemap_entry(SITE + r_url, lastmod, "weekly", "0.6"))
@@ -1205,7 +1209,7 @@ def gen_records_page(hist, sitemap_urls):
 {records_hub_html}
 
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina ({ELEV} m n. m.).
-  Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev.</p>
+  Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev. Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/vreme/">← Vremenski arhiv</a>'''
 
     html = page_shell(title, desc, url, schema, body)
@@ -1784,7 +1788,8 @@ def gen_nearby_town_pages(hist, sitemap_urls):
 {nearby_links}
 {faq_html}
   <p class="muted-note">Vir meritev: postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
-  Vrednosti niso izmerjene v {t["loc"]}, temveč na najbližji postaji in po potrebi višinsko prilagojene.</p>
+  Vrednosti niso izmerjene v {t["loc"]}, temveč na najbližji postaji in po potrebi višinsko prilagojene.
+  Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/vreme-recica-ob-savinji/">← Vreme Rečica ob Savinji</a>'''
 
         html = page_shell(title, desc, url, schema, body)
@@ -1901,7 +1906,8 @@ def gen_valley_hub_page(hist, sitemap_urls):
 {towns_html}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
-  Za kraje brez lastne postaje so vrednosti ocene, izpeljane iz meritev IREICA1.</p>
+  Za kraje brez lastne postaje so vrednosti ocene, izpeljane iz meritev IREICA1.
+  Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/vreme-recica-ob-savinji/">← Vreme Rečica ob Savinji</a>'''
 
     html = page_shell(title, desc, url, schema, body)
@@ -2706,7 +2712,8 @@ def gen_landing_page(hist, sitemap_urls):
 {nearby_html}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
-  Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.</p>
+  Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.
+  Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/">← Trenutno vreme v živo</a>'''
 
     html = page_shell(title, desc, url, schema, body)

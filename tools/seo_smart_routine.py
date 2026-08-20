@@ -338,6 +338,7 @@ def compute_climate(history):
     annual_precip = defaultdict(float)
     annual_frost  = defaultdict(int)
     annual_hot    = defaultdict(int)
+    year_tavg_count = defaultdict(int)
 
     for ds, v in history.items():
         yr = int(ds[:4])
@@ -345,6 +346,7 @@ def compute_climate(history):
 
         if v.get("tempAvg") is not None:
             month_tavg[mo].append(v["tempAvg"])
+            year_tavg_count[yr] += 1
         if v.get("tempHigh") is not None:
             month_thigh[mo].append(v["tempHigh"])
             if mo not in monthly_abs_max or v["tempHigh"] > monthly_abs_max[mo][1]:
@@ -382,7 +384,14 @@ def compute_climate(history):
             "years_count":    len(all_years),
         }
 
-    return normals, dict(annual_precip), dict(annual_frost), dict(annual_hot)
+    # Polna leta (≥350 dni s tempAvg) -- isti prag kot climate_facts() v
+    # generate_seo_pages.py. Brez tega bi povprečje "letno pade X mm" zajelo
+    # tudi 2019 (samo nov.-dec.) in tekoče leto (samo do avgusta) kot polni
+    # leti, kar je dalo 1147 mm namesto pravih 1377 mm -- glej SEO audit
+    # 2026-08, točka 17 (isti podatek, dve različni številki na dveh straneh).
+    full_years = sorted(y for y, n in year_tavg_count.items() if n >= 350)
+
+    return normals, dict(annual_precip), dict(annual_frost), dict(annual_hot), full_years
 
 # ── Detekcija dogodkov ─────────────────────────────────────────────────────
 
@@ -635,15 +644,22 @@ def save_novosti_catalog(events):
 
 # ── Generatorji strani ─────────────────────────────────────────────────────
 
-def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitemap_urls):
+def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last_date, sitemap_urls):
     """Generiraj /klima/index.html — mesečne klimatološke norme."""
     url = "/klima/"
     lastmod = TODAY.isoformat()
-    years_span = TODAY.year - 2019 + 1
+    years_span = len(full_years)
 
-    avg_ann_prec  = st.mean(annual_precip.values()) if annual_precip else None
-    avg_ann_frost = st.mean(annual_frost.values())  if annual_frost  else None
-    avg_ann_hot   = st.mean(annual_hot.values())    if annual_hot    else None
+    # Letno povprečje samo iz polnih let (glej compute_climate()) -- 2019 (samo
+    # nov.-dec.) in tekoče leto (samo do zadnjega datuma) bi drugače potisnila
+    # povprečje navzdol, kot se je zgodilo pred popravkom SEO audita 2026-08,
+    # točka 17.
+    ann_prec_full  = {y: v for y, v in annual_precip.items() if y in full_years}
+    ann_frost_full = {y: v for y, v in annual_frost.items()  if y in full_years}
+    ann_hot_full   = {y: v for y, v in annual_hot.items()    if y in full_years}
+    avg_ann_prec  = st.mean(ann_prec_full.values())  if ann_prec_full  else None
+    avg_ann_frost = st.mean(ann_frost_full.values()) if ann_frost_full else None
+    avg_ann_hot   = st.mean(ann_hot_full.values())   if ann_hot_full   else None
 
     # Mesečna tabela
     rows = []
@@ -796,15 +812,20 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitem
     print("  → /klima/index.html")
 
 
-def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
+def gen_padavine(normals, annual_precip, full_years, last_date, sitemap_urls):
     """Generiraj /padavine/index.html — hub stran za padavine."""
     url = "/padavine/"
     lastmod = TODAY.isoformat()
 
-    avg_ann = st.mean(annual_precip.values()) if annual_precip else None
+    # Povprečje in "najbolj moker/suh leto" samo iz polnih let -- glej opombo v
+    # gen_klima() / compute_climate(). Brez filtra bi lahko 2019 (2 meseca) ali
+    # tekoče leto (do zadnjega datuma) tiho "zmagala" primerjavo, čeprav gre za
+    # nedokončano leto.
+    ann_prec_full = {y: v for y, v in annual_precip.items() if y in full_years}
+    avg_ann = st.mean(ann_prec_full.values()) if ann_prec_full else None
     sorted_years = sorted(annual_precip)
-    max_year = max(annual_precip, key=annual_precip.get) if annual_precip else None
-    min_year = min(annual_precip, key=annual_precip.get) if annual_precip else None
+    max_year = max(ann_prec_full, key=ann_prec_full.get) if ann_prec_full else None
+    min_year = min(ann_prec_full, key=ann_prec_full.get) if ann_prec_full else None
 
     # Letna skupna tabela (vse leto, brez tekočega)
     complete_years = {y: v for y, v in annual_precip.items() if y < TODAY.year}
@@ -965,13 +986,16 @@ def gen_padavine(normals, annual_precip, last_date, sitemap_urls):
     print("  → /padavine/index.html")
 
 
-def gen_temperatura(normals, annual_frost, annual_hot, last_date, sitemap_urls):
+def gen_temperatura(normals, annual_frost, annual_hot, full_years, last_date, sitemap_urls):
     """Generiraj /temperatura/index.html — hub stran za temperature."""
     url = "/temperatura/"
     lastmod = TODAY.isoformat()
 
-    avg_ann_frost = st.mean(annual_frost.values()) if annual_frost else None
-    avg_ann_hot   = st.mean(annual_hot.values())   if annual_hot   else None
+    # Povprečje samo iz polnih let -- glej opombo v gen_klima() / compute_climate().
+    ann_frost_full = {y: v for y, v in annual_frost.items() if y in full_years}
+    ann_hot_full   = {y: v for y, v in annual_hot.items()   if y in full_years}
+    avg_ann_frost = st.mean(ann_frost_full.values()) if ann_frost_full else None
+    avg_ann_hot   = st.mean(ann_hot_full.values())   if ann_hot_full   else None
 
     # Mesečni temperaturni profil
     rows = []
@@ -1219,7 +1243,8 @@ def gen_teden(history, normals, sitemap_urls):
 {faq_html}
 
   <p class="muted-note">Povzetek se osveži vsak ponedeljek. Vse dnevne meritve so dostopne v
-  <a href="/vreme/">arhivu vremena</a>. Klimatološka norma za primerjavo: <a href="/klima/">klima Rečice ob Savinji</a>.</p>
+  <a href="/vreme/">arhivu vremena</a>. Klimatološka norma za primerjavo: <a href="/klima/">klima Rečice ob Savinji</a>.
+  Zadnja posodobitev: {fmtd(end_date)}.</p>
   <a class="back-link" href="/vreme/">→ Celoten vremenski arhiv</a>'''
 
     html = page_shell(title, desc, url, schema, body)
@@ -1554,19 +1579,19 @@ def main():
     print(f"  → Zadnji datum: {last_date}")
 
     print("\nIzračunavam klimatološke norme …")
-    normals, annual_precip, annual_frost, annual_hot = compute_climate(history)
+    normals, annual_precip, annual_frost, annual_hot, full_years = compute_climate(history)
 
     sitemap_urls = []
     changed_urls = []
 
     print("\nGeneriram hub strani …")
-    gen_klima(normals, annual_precip, annual_frost, annual_hot, last_date, sitemap_urls)
+    gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last_date, sitemap_urls)
     changed_urls.append(f"{SITE}/klima/")
 
-    gen_padavine(normals, annual_precip, last_date, sitemap_urls)
+    gen_padavine(normals, annual_precip, full_years, last_date, sitemap_urls)
     changed_urls.append(f"{SITE}/padavine/")
 
-    gen_temperatura(normals, annual_frost, annual_hot, last_date, sitemap_urls)
+    gen_temperatura(normals, annual_frost, annual_hot, full_years, last_date, sitemap_urls)
     changed_urls.append(f"{SITE}/temperatura/")
 
     print("\nGeneriram tedenski povzetek …")

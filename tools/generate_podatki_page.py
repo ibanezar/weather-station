@@ -117,7 +117,8 @@ def build_body(hist, facts):
   <p class="archive-intro">Meteorološka postaja IREICA1 pri Rečici ob Savinji (Zgornja Savinjska dolina, 366 m n. m.,
   46,325779° S, 14,921137° V) neprekinjeno meri vreme od {seo.fmtd(first_date)}. Ta stran zbira ključne podatke
   brez JavaScripta, za enostavno branje in citiranje. Polni arhiv je na <a href="/vreme/">/vreme/</a>,
-  surovi podatki v <a href="/history.json">history.json</a> (CC BY 4.0 — navedi "Meteorec (meteorec.si), postaja IREICA1").</p>
+  surovi podatki v <a href="/history.json">history.json</a> pod imenom <strong>Meteorec IREICA1 Weather
+  Dataset</strong> (CC BY 4.0 — navedi "Meteorec (meteorec.si), postaja IREICA1").</p>
 
   <h2>Trenutne razmere (zadnja znana dnevna meritev)</h2>
 {cur_table}
