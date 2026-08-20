@@ -1,6 +1,258 @@
 [
   {
     "type": "rekord-dneva-vrocina",
+    "date": "2026-08-19",
+    "value": 31.5,
+    "prev_value": 30.6,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-19",
+    "years_covered": 5
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-08-16",
+    "value": 35.6,
+    "prev_value": 35.2,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-16",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-08-16",
+    "value": 12.4,
+    "prev_value": 14.0,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-08-16",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-08-15",
+    "value": 10.6,
+    "prev_value": 11.5,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-08-15",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-08-14",
+    "value": 10.6,
+    "prev_value": 11.5,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-08-14",
+    "years_covered": 6
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-08-14",
+    "end_date": "2026-08-16",
+    "value": 35.6,
+    "param": "tempHigh",
+    "label": "Toplotni val (3 dni)",
+    "slug": "toplotni-val-2026-08-14",
+    "duration": 3
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-08-09",
+    "end_date": "2026-08-11",
+    "value": 34.6,
+    "param": "tempHigh",
+    "label": "Toplotni val (3 dni)",
+    "slug": "toplotni-val-2026-08-09",
+    "duration": 3
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-08-07",
+    "value": 31.9,
+    "prev_value": 30.8,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-07",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-08-06",
+    "value": 37.2,
+    "prev_value": 30.6,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-06",
+    "years_covered": 5
+  },
+  {
+    "type": "rekord-vrocina",
+    "date": "2026-08-05",
+    "value": 37.8,
+    "param": "tempHigh",
+    "label": "Rekordna vročina",
+    "slug": "rekord-vrocina-2026-08-05"
+  },
+  {
+    "type": "rekord-vrocina",
+    "date": "2026-08-04",
+    "value": 37.6,
+    "param": "tempHigh",
+    "label": "Rekordna vročina",
+    "slug": "rekord-vrocina-2026-08-04"
+  },
+  {
+    "type": "rekord-vrocina",
+    "date": "2026-08-03",
+    "value": 37.3,
+    "param": "tempHigh",
+    "label": "Rekordna vročina",
+    "slug": "rekord-vrocina-2026-08-03"
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-08-02",
+    "value": 34.7,
+    "prev_value": 28.8,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-02",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-08-01",
+    "value": 36.8,
+    "prev_value": 32.3,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-01",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-vrocina",
+    "date": "2026-07-31",
+    "value": 37.2,
+    "param": "tempHigh",
+    "label": "Rekordna vročina",
+    "slug": "rekord-vrocina-2026-07-31"
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-30",
+    "value": 36.2,
+    "prev_value": 31.3,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-30",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-29",
+    "value": 34.5,
+    "prev_value": 32.4,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-29",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-27",
+    "value": 32.2,
+    "prev_value": 31.7,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-27",
+    "years_covered": 6
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-07-27",
+    "end_date": "2026-08-07",
+    "value": 37.8,
+    "param": "tempHigh",
+    "label": "Toplotni val (12 dni)",
+    "slug": "toplotni-val-2026-07-27",
+    "duration": 12
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-25",
+    "value": 8.0,
+    "prev_value": 14.0,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-25",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-24",
+    "value": 11.0,
+    "prev_value": 13.6,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-24",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-23",
+    "value": 11.5,
+    "prev_value": 12.2,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-23",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-22",
+    "value": 11.8,
+    "prev_value": 12.6,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-22",
+    "years_covered": 6
+  },
+  {
+    "type": "susa",
+    "date": "2026-07-22",
+    "end_date": "2026-08-06",
+    "value": 16.0,
+    "param": "precipTotal",
+    "label": "Sušno obdobje (16 dni)",
+    "slug": "susa-2026-07-22",
+    "duration": 16
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-07-20",
+    "value": 11.8,
+    "prev_value": 12.2,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-07-20",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-07-18",
+    "value": 32.2,
+    "prev_value": 31.5,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-07-18",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-vrocina",
     "date": "2026-07-13",
     "value": 32.8,
     "prev_value": 30.6,
@@ -8,6 +260,16 @@
     "label": "Rekord za ta koledarski dan — vročina",
     "slug": "rekord-dneva-vrocina-2026-07-13",
     "years_covered": 6
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-07-13",
+    "end_date": "2026-07-19",
+    "value": 32.8,
+    "param": "tempHigh",
+    "label": "Toplotni val (7 dni)",
+    "slug": "toplotni-val-2026-07-13",
+    "duration": 7
   },
   {
     "type": "rekord-dneva-vrocina",
