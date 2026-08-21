@@ -227,8 +227,8 @@ def patch_hero(html, obs):
 
     rr = m.get("precipRate", 0) or 0
     html = re.sub(
-        r'(<span id="hs-rain-rate"[^>]*>)intenziteta: [^<]*(</span>)',
-        lambda mo: mo.group(1) + f"intenziteta: {num(rr, 1)} mm/h" + mo.group(2),
+        r'(<span id="hs-rain-rate"[^>]*>)[^<]*(</span>)',
+        lambda mo: mo.group(1) + f"trenutno {num(rr, 1)} mm/h" + mo.group(2),
         html, count=1,
     )
     return html
