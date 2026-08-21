@@ -144,7 +144,7 @@ const CC = {
 };
 
 // ── Utilities ─────────────────────────────────────────────
-function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d);}
+function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d).replace('.',',');}
 function set(id,v){const e=document.getElementById(id);if(e){e.textContent=v;e.classList.remove('skel-shimmer');}}
 function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
@@ -193,7 +193,7 @@ function countUp(id,target,dec,unitHTML,dur){
   const el=document.getElementById(id);if(!el||isNaN(Number(target)))return;
   el.classList.remove('skel-shimmer');
   const uHTML=unitHTML||'',t0=performance.now();
-  const step=(now)=>{const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);el.innerHTML=(Number(target)*ease).toFixed(dec)+uHTML;if(p<1)requestAnimationFrame(step);};
+  const step=(now)=>{const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);el.innerHTML=(Number(target)*ease).toFixed(dec).replace('.',',')+uHTML;if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
 }
 
@@ -1084,9 +1084,9 @@ function renderRecordTeaser(){
     if(!hot||curMax==null||isNaN(curMax)){el.hidden=true;return;}
     const diff=hot.val-curMax;
     if(diff<=0){
-      el.innerHTML='🏆 <span>Danes je <b>nov rekord</b> za ta koledarski dan — '+curMax.toFixed(1)+'°C (prejšnji '+hot.val.toFixed(1)+'°C)</span><span class="ht-arrow">→</span>';
+      el.innerHTML='🏆 <span>Danes je <b>nov rekord</b> za ta koledarski dan — '+fmt(curMax)+'°C (prejšnji '+fmt(hot.val)+'°C)</span><span class="ht-arrow">→</span>';
     }else if(diff<3){
-      el.innerHTML='🎯 <span>Rekord na dosegu — manjka še <b>'+diff.toFixed(1)+'°C</b> do rekorda za danes ('+hot.val.toFixed(1)+'°C)</span><span class="ht-arrow">→</span>';
+      el.innerHTML='🎯 <span>Rekord na dosegu — manjka še <b>'+fmt(diff)+'°C</b> do rekorda za danes ('+fmt(hot.val)+'°C)</span><span class="ht-arrow">→</span>';
     }else{el.hidden=true;return;}
     el.hidden=false;
   }catch(e){el.hidden=true;}
@@ -5379,10 +5379,13 @@ function applyMonthlySummary(){
     // Odstopanje od povprečja pride iz fetchClimateComparison() (isti izračun,
     // brez podvojenih klicev na archive-api) — na voljo šele, ko ta reši.
     const anomTxt=_climAnomalyT!=null
-      ?' To je '+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1)+'°C glede na '+_climAnomalyYears+'-letno povprečje.'
+      ?' To je '+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1).replace('.',',')+'°C glede na '+_climAnomalyYears+'-letno povprečje.'
       :'';
+    // Decimalna vejica samo za prikaz — maxT/minT ostaneta s piko zaradi
+    // primerjave zgoraj (parseFloat proti surovim številkam iz JSON-a).
+    const dec=v=>v.replace('.',',');
     const el=document.getElementById('month-txt');
-    if(el)el.innerHTML=mn+' — '+entries.length+' dni podatkov. Povprečna temperatura: <b>'+avgT+'°C</b>.'+anomTxt+' Skupne padavine: <b>'+totR+' mm</b> v <b>'+rainyDays+' deževnih dnevih</b>.'+(frostDays>0?' Zmrzujočih dni: <b>'+frostDays+'</b>.':'')+' Najtoplejše: <b>'+maxT+'°C</b>'+(maxE?' ('+fmtD(maxE[0])+')':"")+'.'+ ' Najhladnejše: <b>'+minT+'°C</b>'+(minE?' ('+fmtD(minE[0])+')':"")+'.';
+    if(el)el.innerHTML=mn+' — '+entries.length+' dni podatkov. Povprečna temperatura: <b>'+dec(avgT)+'°C</b>.'+anomTxt+' Skupne padavine: <b>'+dec(totR)+' mm</b> v <b>'+rainyDays+' deževnih dnevih</b>.'+(frostDays>0?' Zmrzujočih dni: <b>'+frostDays+'</b>.':'')+' Najtoplejše: <b>'+dec(maxT)+'°C</b>'+(maxE?' ('+fmtD(maxE[0])+')':"")+'.'+ ' Najhladnejše: <b>'+dec(minT)+'°C</b>'+(minE?' ('+fmtD(minE[0])+')':"")+'.';
   }catch(e){set('month-txt','Napaka: '+e.message);}
 }
 
@@ -6367,7 +6370,7 @@ async function fetchMosForecast(idp){
 
       const card=document.createElement('div');
       card.className='mos-card';
-      const dec=v=>fmt(v).replace('.',',');
+      const dec=v=>fmt(v);
       card.title='Open-Meteo napoveduje '+dec(d.om_tmax)+' / '+dec(d.om_tmin)+' °C'
         +(dmax!==null?' · popravek MTR '+diff(dmax)+' / '+diff(dmin)+' °C':'')
         +(sdmax!==null?' · razpon negotovosti ±'+dec(sdmax)+' / ±'+dec(sdmin)+' °C':'');
@@ -17896,11 +17899,13 @@ function _buildNerdKPIs(){
   const el=document.getElementById('nerd-kpis');
   if(!el)return;
 
-  // Live obs values from DOM (already rendered by main data fetch)
-  const T  = parseFloat(document.querySelector('#temp-val')?.textContent) || null;
-  const Td = parseFloat(document.getElementById('dewpt-val')?.textContent) || null;
-  const RH = parseFloat(document.querySelector('.hm-humidity .hm-val')?.textContent) || null;
-  const P  = parseFloat(document.getElementById('pressure-val')?.textContent) || null;
+  // Live obs values from DOM (already rendered by main data fetch) — besedilo
+  // je od fmt()/countUp() zdaj z decimalno vejico, zato pred parseFloat nazaj v piko.
+  const domNum=s=>{const n=parseFloat((s||'').replace(',','.'));return isNaN(n)?null:n;};
+  const T  = domNum(document.querySelector('#temp-val')?.textContent);
+  const Td = domNum(document.getElementById('dewpt-val')?.textContent);
+  const RH = domNum(document.querySelector('.hm-humidity .hm-val')?.textContent);
+  const P  = domNum(document.getElementById('pressure-val')?.textContent);
 
   // Pressure tendency 3h (existing fn, returns number hPa)
   const dp3=pressureTrend3h();
