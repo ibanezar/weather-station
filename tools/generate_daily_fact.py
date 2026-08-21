@@ -122,11 +122,18 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
                  f'{label} <strong>{num(today_v)}{unit}</strong>. S tem je padel dosedanji rekord '
                  f'{num(rec_val)}{unit} iz leta {rec_date[:4]}, v {years}-letni zgodovini meritev postaje IREICA1.')
         icon = "🏆"
+    elif diff < 0.05:
+        # Zaokroženo na eno decimalko bi razlika pokazala kot "0,0 °C", kar bi
+        # bralcu povedalo, da je rekord SKORAJ padel -- v resnici je izenačen.
+        score = 90
+        text = (f'{word}, {dm_label(last)}, smo na Rečici ob Savinji izenačili rekord za ta koledarski dan — '
+                 f'{label}: <strong>{num(today_v)}{unit}</strong>, prav toliko kot rekord iz leta {rec_date[:4]}.')
+        icon = "🤝"
     elif diff < 1.0:
         score = 80
         text = (f'{word}, {dm_label(last)}, nas je na Rečici ob Savinji od rekorda za ta koledarski dan ločilo le '
-                 f'<strong>{num(diff)}{unit}</strong> — {label} smo izmerili {num(today_v)}{unit}, rekord je '
-                 f'{num(rec_val)}{unit} iz leta {rec_date[:4]}.')
+                 f'<strong>{num(diff)}{unit}</strong> — {label}: {num(today_v)}{unit}, rekord {num(rec_val)}{unit} '
+                 f'iz leta {rec_date[:4]}.')
         icon = "📈"
     else:
         return None
