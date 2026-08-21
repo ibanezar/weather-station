@@ -86,9 +86,17 @@ def build_block():
                  f'({rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1 na ta dan.')
     else:
         diff = rec_val - today_v
-        text = (f'{word} ({dm_label}) je bilo na Rečici ob Savinji {num(today_v)} °C — '
-                 f'<strong>{num(diff)} °C</strong> od rekorda za ta koledarski dan '
-                 f'({num(rec_val)} °C, {rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1.')
+        if diff < 0.05:
+            # Zaokroženo na eno decimalko bi razlika pokazala kot "0,0 °C", kar
+            # bi bralcu povedalo, da je rekord SKORAJ padel -- v resnici je
+            # izenačen (isti bug kot v tools/generate_daily_fact.py).
+            text = (f'{word} ({dm_label}) smo na Rečici ob Savinji izenačili rekord za ta koledarski dan: '
+                     f'<strong>{num(today_v)} °C</strong>, prav toliko kot rekord iz leta {rec_date[:4]}, '
+                     f'v {years}-letni zgodovini meritev postaje IREICA1.')
+        else:
+            text = (f'{word} ({dm_label}) je bilo na Rečici ob Savinji {num(today_v)} °C — '
+                     f'<strong>{num(diff)} °C</strong> od rekorda za ta koledarski dan '
+                     f'({num(rec_val)} °C, {rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1.')
 
     return wrap(text)
 
