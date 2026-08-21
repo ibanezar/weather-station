@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 20 Aug 2026 15:37:39 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 07:51:30 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko dežja je padlo ponoči in koliko ga še bo?</title>
+      <link>https://meteorec.si/blog/koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821.html</guid>
+      <pubDate>Fri, 21 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Po vročem dnevu z 31,6 °C je v Rečici ob Savinji od popoldneva do jutra padlo 35,8 mm dežja, glavnina ponoči. Kaj napovedi kažejo za danes in ta teden.</description>
+      <category>padavine</category>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>vodna bilanca</category>
+    </item>
     <item>
       <title>Dež v četrtek ali petek? Viri se ne strinjajo o dnevu</title>
       <link>https://meteorec.si/blog/dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819.html</link>
