@@ -292,7 +292,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/style.min.css?v=62b29398">
+<link rel="stylesheet" href="/style.min.css?v=9ad2c1ee">
 </head>
 <body>
 
@@ -473,6 +473,18 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <span class="ticker-item" style="color:var(--muted)">Nalagam podatke…</span>
       </div>
     </div>
+  </div>
+
+  <!-- Teaserja za "Rekordi na dosegu" in "Lovec na nevihte" — vidna samo,
+       kadar je dejansko relevantno (blizu rekorda / možnost neviht danes);
+       klik odpre obstoječi zavihek. Izračun v app.js: renderRecordTeaser()
+       (poceni, samo lokalna zgodovina) in renderStormTeaser() (poceni proxy
+       iz že prenesene urne napovedi — NI podvojitev formule iz zavihka
+       "Lovec na nevihte", ki za polno oceno CAPE/strižnega vetra prenese
+       precej težji nabor podatkov šele ob odprtju tega zavihka). -->
+  <div class="home-teasers" id="home-teasers">
+    <a href="javascript:void(0)" class="home-teaser" id="record-teaser" onclick="switchTab('records')" hidden></a>
+    <a href="javascript:void(0)" class="home-teaser" id="storm-teaser" onclick="switchTab('storm')" hidden></a>
   </div>
 
   <!-- Nowcasting: kaj pride nad izbrano vas v naslednjih 45 minutah. Vir je
@@ -3500,7 +3512,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </footer>
 </div>
 
-<script src="app.min.js?v=af5abca6" defer></script>
+<script src="app.min.js?v=85872093" defer></script>
 
 
 <div id="toast"></div>

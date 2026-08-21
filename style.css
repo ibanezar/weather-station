@@ -313,6 +313,17 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   padding:0;line-height:1;flex-shrink:0}
 .dfc-close:hover{color:var(--text)}
 
+/* Teaserja "Rekordi na dosegu" / "Lovec na nevihte" nad heroj — glej index.html */
+.home-teasers{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.home-teaser{display:flex;align-items:center;gap:.5rem;background:var(--card-bg);
+  border:1px solid var(--border);border-radius:12px;padding:.6rem .85rem;
+  font-size:.82rem;line-height:1.4;color:var(--text);text-decoration:none;
+  cursor:pointer;transition:border-color .2s,background .2s;animation:alert-in .35s ease}
+.home-teaser:hover{border-color:var(--blue)}
+.home-teaser[hidden]{display:none}
+.home-teaser b{color:var(--cyan)}
+.home-teaser .ht-arrow{margin-left:auto;color:var(--muted);flex-shrink:0}
+
 img.wx-icon{display:inline-block;vertical-align:middle}
 .cu-he .wx-icon{filter:drop-shadow(0 1px 5px rgba(0,0,0,.35))}
 [data-theme="dark"] .cu-he .wx-icon{filter:drop-shadow(0 1px 6px rgba(0,0,0,.6)) brightness(1.55) saturate(1.15)}
