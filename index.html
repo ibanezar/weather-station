@@ -292,7 +292,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/style.min.css?v=7974eb6b">
+<link rel="stylesheet" href="/style.min.css?v=9ad2c1ee">
 </head>
 <body>
 
@@ -475,6 +475,18 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     </div>
   </div>
 
+  <!-- Teaserja za "Rekordi na dosegu" in "Lovec na nevihte" — vidna samo,
+       kadar je dejansko relevantno (blizu rekorda / možnost neviht danes);
+       klik odpre obstoječi zavihek. Izračun v app.js: renderRecordTeaser()
+       (poceni, samo lokalna zgodovina) in renderStormTeaser() (poceni proxy
+       iz že prenesene urne napovedi — NI podvojitev formule iz zavihka
+       "Lovec na nevihte", ki za polno oceno CAPE/strižnega vetra prenese
+       precej težji nabor podatkov šele ob odprtju tega zavihka). -->
+  <div class="home-teasers" id="home-teasers">
+    <a href="javascript:void(0)" class="home-teaser" id="record-teaser" onclick="switchTab('records')" hidden></a>
+    <a href="javascript:void(0)" class="home-teaser" id="storm-teaser" onclick="switchTab('storm')" hidden></a>
+  </div>
+
   <!-- Nowcasting: kaj pride nad izbrano vas v naslednjih 45 minutah. Vir je
        radarska slika ARSO (premik celic), ne modelska napoved. Stoji zunaj
        zavihkov, da ostane viden ne glede na izbrani zavihek. -->
@@ -518,6 +530,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   <h2 class="simple-keep" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Trenutno vreme na Rečici ob Savinji</h2>
   <div class="hero card simple-keep">
     <canvas id="hero-canvas"></canvas>
+    <div class="hero-station" id="hero-station">IREICA1 <span id="hero-station-time"></span></div>
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
@@ -563,15 +576,16 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="hm hm-wind" id="hm-wind">
         <span class="hm-val" id="hs-wind">2,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
+        <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">4,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
         <span class="hm-val" id="hs-rain-today">41,7<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
-        <span class="hm-lbl">Padavine danes</span>
-        <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">intenziteta: 0,0 mm/h</span>
+        <span class="hm-lbl">Danes</span>
+        <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">trenutno 0,0 mm/h</span>
       </div>
-      <div class="hm hm-gust hm-secondary" id="hm-gust">
-        <span class="hm-val" id="hs-gust">4,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
-        <span class="hm-lbl">Sunki vetra</span>
+      <div class="hm hm-range" id="hm-range">
+        <span class="hm-val" id="hs-range"><span id="hs-range-min">18,2</span>–<span id="hs-range-max">28,0</span><span style="font-size:.7rem;color:var(--muted)">°C</span></span>
+        <span class="hm-lbl">Danes min–maks</span>
       </div>
       <div class="hm hm-uv hm-secondary" id="hm-uv">
         <span class="hm-val" id="hs-uv">—</span>
@@ -597,12 +611,21 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     </div>
   </div>
 
+  <!-- Why is weather like this — premaknjeno tik pod heroj (prej ~15 kartic nižje, samo v naprednem pogledu) -->
+  <div class="card why-card simple-keep" style="margin-bottom:1rem">
+    <div class="chart-hdr" style="margin-bottom:.4rem">
+      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
+      <span class="why-updated" id="why-updated">—</span>
+    </div>
+    <div class="why-text" id="why-text">Nalaganje razlage…</div>
+  </div>
+
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
   <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-08-21T18:56">18:56</time>, 21. avgusta 2026): temperatura 18,0 °C, rosišče 18,0 °C, relativna vlažnost 98 %, veter 2,0 km/h (sunki 4,0 km/h), zračni tlak 1009 hPa, padavine danes 41,7 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
-  <p class="wx-static" id="wx-record-watch">Včeraj (20. avgust) smo na Rečici ob Savinji izenačili rekord za ta koledarski dan: <strong>31,6 °C</strong>, prav toliko kot rekord iz leta 2023, v 5-letni zgodovini meritev postaje IREICA1.</p>
+  <p class="wx-static" id="wx-record-watch">Včeraj (20. avgust) smo na Rečici ob Savinji izenačili rekord za ta koledarski dan: <strong>31,6 °C</strong>, prav toliko kot rekord iz leta 2023, v 5-letni zgodovini meritev postaje IREICA1. <a href="/rekord/">Vsi rekordi postaje →</a></p>
   <!-- WX-RECORD-WATCH:END -->
 
   <!-- Day summary -->
@@ -932,15 +955,6 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <span class="chart-range" id="mc-updated">—</span>
     </div>
     <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
-  </div>
-
-  <!-- Why is weather like this -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.4rem">
-      <span class="clabel" style="margin:0">💬 Zakaj je danes takšno vreme?</span>
-      <span class="why-updated" id="why-updated">—</span>
-    </div>
-    <div class="why-text" id="why-text">Nalaganje razlage…</div>
   </div>
 
   <!-- Station On This Day -->
@@ -3498,7 +3512,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </footer>
 </div>
 
-<script src="app.min.js?v=2032adcc" defer></script>
+<script src="app.min.js?v=a60efd3b" defer></script>
 
 
 <div id="toast"></div>

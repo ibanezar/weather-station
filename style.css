@@ -313,6 +313,17 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   padding:0;line-height:1;flex-shrink:0}
 .dfc-close:hover{color:var(--text)}
 
+/* Teaserja "Rekordi na dosegu" / "Lovec na nevihte" nad heroj — glej index.html */
+.home-teasers{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.home-teaser{display:flex;align-items:center;gap:.5rem;background:var(--card-bg);
+  border:1px solid var(--border);border-radius:12px;padding:.6rem .85rem;
+  font-size:.82rem;line-height:1.4;color:var(--text);text-decoration:none;
+  cursor:pointer;transition:border-color .2s,background .2s;animation:alert-in .35s ease}
+.home-teaser:hover{border-color:var(--blue)}
+.home-teaser[hidden]{display:none}
+.home-teaser b{color:var(--cyan)}
+.home-teaser .ht-arrow{margin-left:auto;color:var(--muted);flex-shrink:0}
+
 img.wx-icon{display:inline-block;vertical-align:middle}
 .cu-he .wx-icon{filter:drop-shadow(0 1px 5px rgba(0,0,0,.35))}
 [data-theme="dark"] .cu-he .wx-icon{filter:drop-shadow(0 1px 6px rgba(0,0,0,.6)) brightness(1.55) saturate(1.15)}
@@ -341,12 +352,14 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
 .hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-gust{--hm-accent:var(--cyan)}.hm-rain{--hm-accent:var(--blue)}.hm-uv{--hm-accent:var(--amber)}
-/* Sekundarni podatki (sunki/UV/tlak) — manj vizualne teže kot vlaga/veter/padavine v prvi vrsti */
+.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}.hm-uv{--hm-accent:var(--amber)}.hm-range{--hm-accent:var(--red)}
+/* Sekundarni podatki (UV/tlak) — manj vizualne teže kot vlaga/veter/padavine/razpon v prvi vrsti,
+   in samo v naprednem pogledu (glej pravilo "Kaj je v preprostem pogledu skrito" nižje) */
 .hm-secondary{background:transparent}
 .hm-secondary .hm-val{font-size:1.05rem;font-weight:300;color:var(--muted)}
 .hm-secondary .hm-lbl{opacity:.8}
 .hm-sub-inline{text-transform:none;letter-spacing:0;margin-left:.15em;opacity:.85}
+.hm-sub{font-size:.65rem;color:var(--muted)}
 /* Live pulse animations */
 @keyframes live-pulse{0%{background:var(--fc-bg);box-shadow:none}30%{background:rgba(255,255,255,.07);box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}100%{background:var(--fc-bg);box-shadow:none}}
 @keyframes temp-pulse{0%,100%{text-shadow:0 0 40px currentColor}35%{text-shadow:0 0 80px currentColor,0 0 140px currentColor}}
@@ -367,6 +380,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 /* Hero icon — manjša (bila je vizualno dominantnejša od temperature, ne da bi nosila
    dodaten podatek: isto sporoča že condition-badge), centrirana v praznem prostoru, rahlo "živa" */
 .hero-icon{display:flex;align-items:center;justify-content:center;flex:1 1 auto}
+.hero-station{position:absolute;top:1.1rem;right:1.4rem;z-index:1;font-size:.66rem;letter-spacing:.03em;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .hero-icon svg,.hero-icon .wx-icon{width:clamp(84px,10vw,132px);height:auto;filter:drop-shadow(0 6px 22px rgba(0,0,0,.18));transition:opacity .5s}
 /* Pametni povzetek — en stavek, ki razmere razloži namesto da jih samo našteje */
 .hero-briefing{display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1.1rem;padding:.8rem .95rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border)}
@@ -2918,6 +2932,10 @@ html[data-mode="simple"] #tab-current>*:not(.simple-keep):not(.wx-static){displa
 /* V junaški kartici odpadeta drsnik napovedi in vrstica z zvokom/deljenjem */
 html[data-mode="simple"] .hero .fc-slider-wrap,
 html[data-mode="simple"] .hero .sc-bar{display:none !important}
+/* ...in UV/tlak — sekundarni podatki, dnevni razpon (.hm-range) je zanju zamenjava spredaj */
+html[data-mode="simple"] .hero .hm-uv,
+html[data-mode="simple"] .hero .hm-pres{display:none !important}
+html[data-mode="simple"] .hero-metrics{grid-template-columns:repeat(2,1fr)}
 
 /* ── Berljivost: vse mere so v rem, zato zadošča osnovna velikost pisave ── */
 html[data-mode="simple"]{font-size:110%}
