@@ -72,6 +72,7 @@
 .stat-card.c-green .sc-val{color:#34d399}
 .stat-card.c-dry .sc-val{color:#f59e0b}
 .stat-card.c-rain .sc-val{color:#60a5fa}
+#chartModels{max-height:340px!important}
 </style>
 </head>
 <body>
@@ -142,7 +143,19 @@
     <p>Trenutno je suho in sonce že sije. Po napovedi Open-Meteo za preostanek dneva ni izključena še kakšna kratka ploha – predvsem popoldne in zvečer, z verjetnostjo do 38 % in skupaj do približno 6 mm, torej precej manj kot ponoči.</p>
     <p>Jutri, v soboto, je za zgodnje jutranje ure napovedanih še do 2,4 mm – šibek ostanek fronte, verjetnost okoli 55 %. Od nedelje, 23. avgusta, dalje Open-Meteo za naslednje dni ne kaže omembe vrednih padavin (verjetnost pod 10 %), tako da se dolina po tem nalivu spet vrača v suho obdobje.</p>
 
-    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Izmerjene padavine in temperature so s postaje IREICA1 (Rečica ob Savinji, 366 m n. m.) – dnevna vsota za 20. avgust iz arhiva, urni potek za noč na 21. avgust iz petminutnega zapisa. Napoved je Open-Meteo za isto točko, zajeta 21. avgusta zjutraj.</p>
+    <span class="section-label">04 — Primerjava modelov</span>
+    <h2 id="modeli">Koliko dodatnega dežja še vidi posamezen model</h2>
+    <p>Deset vremenskih modelov se za celotno današnjo dnevno vsoto (21. avgust) razhaja od 1,5 do 35,8 mm. Ker je do zdaj že izmerjenih 25,9 mm, pove primerjava z izmerjeno črto predvsem eno stvar: koliko dodatnega dežja posamezen model še pričakuje do večera.</p>
+
+    <div class="chart-card">
+      <h3>Primerjava modelov za 21. avgust – celodnevna vsota padavin</h3>
+      <canvas id="chartModels"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Črtkana črta označuje že izmerjenih 25,9 mm na postaji IREICA1. Modri stolpci računajo na dodaten dež do konca dneva, sivi so s celodnevno vsoto že pod izmerjenim.</p>
+    </div>
+
+    <p>Najvišje računata <strong>ICON-D2</strong> in poenoteni <strong>ICON (seamless)</strong>, ki za to točko in danes prav tako izbere ICON-D2 – oba s 35,8 mm, torej še vedno pričakujeta približno 10 mm dodatnega dežja. Sledi <strong>UKMO</strong> z 32,1 mm (še dobrih 6 mm). Vseh preostalih sedem modelov – Météo-France, ECMWF AIFS, GFS, ECMWF IFS, GEM, ICON-EU in globalni ICON – je s celodnevno vsoto med 1,5 in 15,9 mm ostalo <em>pod</em> tem, kar je že dejansko padlo; za preostanek dneva torej praktično ne napovedujejo nič, kar se ujema z majhno, a ne zanemarljivo verjetnostjo popoldanske plohe, omenjeno zgoraj.</p>
+
+    <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Izmerjene padavine in temperature so s postaje IREICA1 (Rečica ob Savinji, 366 m n. m.) – dnevna vsota za 20. avgust iz arhiva, urni potek za noč na 21. avgust iz petminutnega zapisa. Napoved je Open-Meteo za isto točko, zajeta 21. avgusta zjutraj; primerjava desetih modelov je iz istega vira (parameter <code>models</code>), zajeta istega jutra.</p>
 
     <!-- Vrstico za deljenje izriše /blog/share-bar.js (edini vir za vse generatorje). -->
 
@@ -219,6 +232,55 @@
               ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' } }
       }
     }
+  });
+
+  const measuredLinePlugin = {
+    id: 'measuredLine',
+    afterDraw(chart) {
+      if (chart.canvas.id !== 'chartModels') return;
+      const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+      const xPix = x.getPixelForValue(25.9);
+      ctx.save();
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(xPix, top);
+      ctx.lineTo(xPix, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = "12px 'Space Grotesk', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillText('izmerjeno 25,9 mm', xPix, top - 6);
+      ctx.restore();
+    }
+  };
+  const modelLabels = ["ICON-D2", "ICON (seamless)", "UKMO", "Météo-France", "ECMWF AIFS", "GFS", "ECMWF IFS", "GEM", "ICON-EU", "ICON global"];
+  const modelValues = [35.8, 35.8, 32.1, 15.9, 13.5, 13.1, 11.9, 5.6, 3.2, 1.5];
+  new Chart(document.getElementById('chartModels'), {
+    type: 'bar',
+    data: {
+      labels: modelLabels,
+      datasets: [{
+        label: 'Napovedana dnevna vsota (mm)',
+        data: modelValues,
+        backgroundColor: modelValues.map(v => v >= 25.9 ? 'rgba(77,159,248,.85)' : 'rgba(127,146,171,.55)'),
+        borderRadius: 5
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      indexAxis: 'y',
+      layout: { padding: { top: 24 } },
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+      scales: {
+        x: { min: 0, grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' mm' } },
+        y: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 11 } } }
+      }
+    },
+    plugins: [measuredLinePlugin]
   });
 
 </script>
