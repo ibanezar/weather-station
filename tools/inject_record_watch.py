@@ -98,6 +98,7 @@ def build_block():
                      f'<strong>{num(diff)} °C</strong> od rekorda za ta koledarski dan '
                      f'({num(rec_val)} °C, {rec_date[:4]}), v {years}-letni zgodovini meritev postaje IREICA1.')
 
+    text += ' <a href="/rekord/">Vsi rekordi postaje →</a>'
     return wrap(text)
 
 
