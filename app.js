@@ -295,6 +295,7 @@ function attachScrub(svg,onMove,onLeave){
 
 let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
+let _lastComfortLabel=null,_lastDewLabel=null,_lastDeltaPhrase=null;
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -1386,6 +1387,7 @@ async function fetchComingUp(){
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
+    drawHeroSparkline();
     const stripHours=hours.filter((_,i)=>i===0||i%2===0).slice(0,13);
 
     // Hourly cells
@@ -1873,6 +1875,7 @@ function _fcSliderUpdate(){
   }else{
     sl.style.background='var(--border)';
   }
+  if(lbl)lbl.classList.toggle('is-now',v===0);
   if(v===0){
     _sliderActive=false;
     if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
@@ -1910,7 +1913,71 @@ function _fcSliderInit(){
   sl.style.background='var(--border)';
   sl.addEventListener('input',_fcSliderUpdate);
   const lbl=document.getElementById('fc-slider-center');
-  if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
+  if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis','is-now');}
+}
+
+// ── Junaška kartica: sparkline "poteka dneva" nad drsnikom ──
+// Gradi krivuljo iz zadnjih ur (_hourlyObs, prek _histObsAtHoursAgo) + trenutne
+// žive temperature + napovedi (_forecastHours) — isti podatki, ki jih drsnik že
+// uporablja za scrubbing, samo narisani vnaprej namesto skriti za prazno črto.
+function drawHeroSparkline(){
+  const wrap=document.getElementById('hero-spark-wrap');
+  const g=document.getElementById('hero-spark-g');
+  const nowPill=document.getElementById('hero-spark-now');
+  if(!wrap||!g)return;
+  const nowT=_liveTemp??_lastTemp;
+  if(nowT==null||!_forecastHours.length){wrap.hidden=true;return;}
+
+  const past=[];
+  for(let h=6;h>=1;h--){
+    const obs=_histObsAtHoursAgo(h);
+    const t=obs?.metric?.tempAvg??obs?.metric?.temp;
+    if(t!=null)past.push({h:-h,t});
+  }
+  const future=_forecastHours.slice(0,24).map((f,i)=>({h:i+1,t:f.temp}));
+  const pts=[...past,{h:0,t:nowT},...future];
+  if(pts.length<4){wrap.hidden=true;return;}
+
+  const W=320,H=56,minH=-6,maxH=pts[pts.length-1].h;
+  const temps=pts.map(p=>p.t),tMin=Math.min(...temps),tMax=Math.max(...temps);
+  const pad=Math.max(1,(tMax-tMin)*.15),lo=tMin-pad,hi=tMax+pad;
+  const px=h=>((h-minH)/(maxH-minH))*W;
+  const py=t=>H-((t-lo)/(hi-lo))*H;
+  const P=pts.map(p=>({x:px(p.h),y:py(p.t)}));
+
+  let d='M'+P[0].x.toFixed(1)+','+P[0].y.toFixed(1);
+  for(let i=1;i<P.length-1;i++){
+    const xc=(P[i].x+P[i+1].x)/2,yc=(P[i].y+P[i+1].y)/2;
+    d+=' Q'+P[i].x.toFixed(1)+','+P[i].y.toFixed(1)+' '+xc.toFixed(1)+','+yc.toFixed(1);
+  }
+  const last=P[P.length-1];
+  d+=' Q'+last.x.toFixed(1)+','+last.y.toFixed(1)+' '+last.x.toFixed(1)+','+last.y.toFixed(1);
+  const area=d+' L'+W+','+H+' L0,'+H+' Z';
+  const nowX=px(0),nowY=py(nowT);
+
+  g.innerHTML=
+    '<line class="hspark-base" x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke-width="1"/>'+
+    '<line class="hspark-guide" x1="'+nowX.toFixed(1)+'" y1="0" x2="'+nowX.toFixed(1)+'" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
+    '<path d="'+area+'" fill="url(#heroSparkFill)"/>'+
+    '<path class="hspark-line" d="'+d+'" stroke-width="2.25" stroke-linecap="round"/>'+
+    '<circle class="hspark-dot" cx="'+nowX.toFixed(1)+'" cy="'+nowY.toFixed(1)+'" r="4.5" stroke-width="2.5"/>';
+  if(nowPill)nowPill.textContent='ZDAJ · '+Number(nowT).toFixed(1)+'°';
+  if(nowPill)nowPill.style.left=(nowX/W*100).toFixed(1)+'%';
+  wrap.hidden=false;
+}
+
+// ── Junaška kartica: "pametni povzetek" — en stavek namesto naštevanja podatkov ──
+// Sestavljen iz že izračunanih vrednosti (feelsStyle, dewLabel, yesterday-delta),
+// ne iz branja izrisanega besedila nazaj — da se ne ponovi calque-napaka, kot je
+// bila popravljena v tools/generate_daily_fact.py (glej git zgodovino).
+function renderHeroBriefing(){
+  const wrap=document.getElementById('hero-briefing'),textEl=document.getElementById('hb-text');
+  if(!wrap||!textEl||!_lastComfortLabel)return;
+  const comfort=_lastComfortLabel,dew=_lastDewLabel;
+  let s=(dew&&comfort.toLowerCase()!==dew.toLowerCase())?comfort+' in '+dew.toLowerCase()+'.':comfort+'.';
+  if(_lastDeltaPhrase)s+=' '+_lastDeltaPhrase;
+  textEl.textContent=s;
+  wrap.hidden=false;
 }
 
 function applyObs(obs){
@@ -1921,9 +1988,12 @@ function applyObs(obs){
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
+  if(m.dewpt!=null){const dl=dewLabel(m.dewpt);_lastDewLabel=dl;set('dew-desc',' · '+dl.toLowerCase());}
+  _lastComfortLabel=fs.label;renderHeroBriefing();
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
+  if(obs.winddir!=null)set('hs-wind-dir',' · '+windDir(obs.winddir));
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   // UV hero card — value + color
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
@@ -1983,6 +2053,7 @@ function applyObs(obs){
   triggerLivePulse();
   refreshLife();
   updateOBLog(); // keep O-B log current even when analysis tab isn't open
+  drawHeroSparkline();
   if(_daInit){ try{runKalmanFilter();}catch(e){} }
   if(document.getElementById('tab-storm')?.classList.contains('active'))
     try{buildTurbulenceIndex();}catch(e){}
@@ -2037,6 +2108,7 @@ function applyHourly(observations){
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   drawHourlyProfile(observations);
   _hourlyObs=observations;
+  drawHeroSparkline();
   _autoInitAI();
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
   saveToLocalHistory(_histCache['7']);
@@ -3616,11 +3688,14 @@ function applyYesterdayDelta(observations){
   observations.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T'));const df=Math.abs(t-target);if(df<minDiff){minDiff=df;closest=o;}});
   if(!closest||_lastTemp===null)return;
   const ty=closest.metric?.tempAvg??closest.metric?.temp;if(ty==null)return;
-  const d=_lastTemp-ty,sign=d>0?'+':'';
-  const word=d>0.5?'topleje kot včeraj':d<-0.5?'hladneje kot včeraj':'podobno kot včeraj';
+  const d=_lastTemp-ty,absD=Math.abs(d).toFixed(1);
+  const arrow=d>0.5?'↑':d<-0.5?'↓':'→';
+  const word=d>0.5?'topleje kot včeraj ob tem času':d<-0.5?'hladneje kot včeraj ob tem času':'podobno kot včeraj ob tem času';
   const col=d>0.5?'var(--red)':d<-0.5?'var(--blue)':'var(--muted)';
   const el=document.getElementById('yesterday-delta');
-  if(el)el.innerHTML=`<span class="dv" style="color:${col}">${sign}${d.toFixed(1)}°C</span> <span style="color:var(--muted)">${word}</span>`;
+  if(el)el.innerHTML=`<span class="dv" style="color:${col}">${arrow} ${absD}°C</span> <span style="color:var(--muted)">${word}</span>`;
+  _lastDeltaPhrase=Math.abs(d)<0.5?null:'Danes je za '+absD+' °C '+(d>0?'topleje':'hladneje')+' kot ob istem času včeraj.';
+  renderHeroBriefing();
 }
 
 function drawWindTrend(observations){
