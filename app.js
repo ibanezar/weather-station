@@ -1875,7 +1875,7 @@ function _fcSliderUpdate(){
   }else{
     sl.style.background='var(--border)';
   }
-  if(lbl)lbl.classList.toggle('is-now',v===0);
+  if(lbl){lbl.classList.toggle('is-now',v===0);lbl.style.left=thumbPct+'%';}
   moveHeroSparkMarker(v);
   if(v===0){
     _sliderActive=false;
@@ -1914,7 +1914,11 @@ function _fcSliderInit(){
   sl.style.background='var(--border)';
   sl.addEventListener('input',_fcSliderUpdate);
   const lbl=document.getElementById('fc-slider-center');
-  if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis','is-now');}
+  if(lbl){
+    lbl.textContent='zdaj';lbl.classList.add('vis','is-now');
+    const min=+sl.min,max=+sl.max;
+    lbl.style.left=((0-min)/(max-min)*100).toFixed(1)+'%';
+  }
 }
 
 // ── Junaška kartica: sparkline "poteka dneva" nad drsnikom ──
@@ -1952,7 +1956,10 @@ function drawHeroSparkline(){
     const t=obs?.metric?.tempAvg??obs?.metric?.temp;
     if(t!=null)past.push({h:-h,t});
   }
-  const future=_forecastHours.slice(0,24).map((f,i)=>({h:i+1,t:f.temp}));
+  // Brez umetne omejitve na 24 ur: slider.max je nastavljen na _forecastHours.length
+  // (glej fetchComingUp) in mora predstavljati isto skalo kot krivulja tukaj, sicer
+  // se piko "zdaj" (in oznaka pod drsnikom) rahlo razideta z dejansko lego drsnika.
+  const future=_forecastHours.map((f,i)=>({h:i+1,t:f.temp}));
   const pts=[...past,{h:0,t:nowT},...future];
   if(pts.length<4){wrap.hidden=true;return;}
 
