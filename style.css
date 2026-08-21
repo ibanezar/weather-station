@@ -378,8 +378,11 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
-.fc-slider-info{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--muted)}
-.fc-slider-center{flex:1;text-align:center;font-size:.72rem;font-weight:600;color:var(--text);opacity:0;transition:opacity .2s;letter-spacing:.01em}
+.fc-slider-info{position:relative;display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--muted)}
+/* Postavljena na dejanski delež "zdaj"/vlečene ure (isti izračun kot pri drsniku
+   samem in piki na sparklinu) — prej je bila sredinjena prek flexboxa in se ni
+   ujemala s tem, kje "zdaj" resnično leži na −6h…+24h skali. */
+.fc-slider-center{position:absolute;left:20%;top:0;transform:translateX(-50%);text-align:center;font-size:.72rem;font-weight:600;color:var(--text);opacity:0;transition:opacity .2s,left .15s;letter-spacing:.01em;white-space:nowrap}
 .fc-slider-center.vis{opacity:1}
 .fc-slider-center.is-now{color:var(--blue)}
 /* Potek dneva — sparkline nad drsnikom (−6h…+24h), zgrajena iz _hourlyObs + _forecastHours */
