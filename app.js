@@ -1876,6 +1876,7 @@ function _fcSliderUpdate(){
     sl.style.background='var(--border)';
   }
   if(lbl)lbl.classList.toggle('is-now',v===0);
+  moveHeroSparkMarker(v);
   if(v===0){
     _sliderActive=false;
     if(lbl){lbl.textContent='zdaj';lbl.classList.add('vis');}
@@ -1920,10 +1921,27 @@ function _fcSliderInit(){
 // Gradi krivuljo iz zadnjih ur (_hourlyObs, prek _histObsAtHoursAgo) + trenutne
 // žive temperature + napovedi (_forecastHours) — isti podatki, ki jih drsnik že
 // uporablja za scrubbing, samo narisani vnaprej namesto skriti za prazno črto.
+// Catmull-Rom → cubic Bezier: v nasprotju s prejšnjo "kvadratna skozi razpolovišča"
+// tehniko krivulja teče NATANKO skozi vsako podano točko (tudi "zdaj") — prej je
+// pika za "zdaj" sedela poleg krivulje, ne na njej, ker tista tehnika interior
+// točk sploh ni prečkala.
+function _catmullRomPath(P){
+  if(P.length<2)return'';
+  let d='M'+P[0].x.toFixed(1)+','+P[0].y.toFixed(1);
+  for(let i=0;i<P.length-1;i++){
+    const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||p2;
+    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+    d+=' C'+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
+  }
+  return d;
+}
+
+let _sparkByHour=null,_sparkW=320;
+
 function drawHeroSparkline(){
   const wrap=document.getElementById('hero-spark-wrap');
   const g=document.getElementById('hero-spark-g');
-  const nowPill=document.getElementById('hero-spark-now');
   if(!wrap||!g)return;
   const nowT=_liveTemp??_lastTemp;
   if(nowT==null||!_forecastHours.length){wrap.hidden=true;return;}
@@ -1945,25 +1963,42 @@ function drawHeroSparkline(){
   const py=t=>H-((t-lo)/(hi-lo))*H;
   const P=pts.map(p=>({x:px(p.h),y:py(p.t)}));
 
-  let d='M'+P[0].x.toFixed(1)+','+P[0].y.toFixed(1);
-  for(let i=1;i<P.length-1;i++){
-    const xc=(P[i].x+P[i+1].x)/2,yc=(P[i].y+P[i+1].y)/2;
-    d+=' Q'+P[i].x.toFixed(1)+','+P[i].y.toFixed(1)+' '+xc.toFixed(1)+','+yc.toFixed(1);
-  }
+  const d=_catmullRomPath(P);
   const last=P[P.length-1];
-  d+=' Q'+last.x.toFixed(1)+','+last.y.toFixed(1)+' '+last.x.toFixed(1)+','+last.y.toFixed(1);
-  const area=d+' L'+W+','+H+' L0,'+H+' Z';
-  const nowX=px(0),nowY=py(nowT);
+  const area=d+' L'+last.x.toFixed(1)+','+H+' L0,'+H+' Z';
 
   g.innerHTML=
     '<line class="hspark-base" x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke-width="1"/>'+
-    '<line class="hspark-guide" x1="'+nowX.toFixed(1)+'" y1="0" x2="'+nowX.toFixed(1)+'" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
+    '<line class="hspark-guide" id="hero-spark-guide" x1="0" y1="0" x2="0" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
     '<path d="'+area+'" fill="url(#heroSparkFill)"/>'+
     '<path class="hspark-line" d="'+d+'" stroke-width="2.25" stroke-linecap="round"/>'+
-    '<circle class="hspark-dot" cx="'+nowX.toFixed(1)+'" cy="'+nowY.toFixed(1)+'" r="4.5" stroke-width="2.5"/>';
-  if(nowPill)nowPill.textContent='ZDAJ · '+Number(nowT).toFixed(1)+'°';
-  if(nowPill)nowPill.style.left=(nowX/W*100).toFixed(1)+'%';
+    '<circle class="hspark-dot" id="hero-spark-dot" cx="0" cy="0" r="4.5" stroke-width="2.5"/>';
+
+  _sparkByHour=new Map(pts.map((p,i)=>[p.h,{x:P[i].x,y:P[i].y,t:p.t}]));
+  _sparkW=W;
   wrap.hidden=false;
+  moveHeroSparkMarker(_sliderActive?+((document.getElementById('fc-slider')||{}).value||0):0);
+}
+
+// Premakne piko/vodilno črto/oznako na krivulji na uro, ki jo drsnik trenutno
+// kaže — prej je krivulja ob vlečenju drsnika ostala popolnoma nespremenjena
+// ("statična"), čeprav se je število pod njo spreminjalo.
+function moveHeroSparkMarker(v){
+  const dot=document.getElementById('hero-spark-dot');
+  const guide=document.getElementById('hero-spark-guide');
+  const pill=document.getElementById('hero-spark-now');
+  if(!dot||!guide||!_sparkByHour||!_sparkByHour.size)return;
+  let best=null,bestDiff=Infinity;
+  for(const h of _sparkByHour.keys()){const diff=Math.abs(h-v);if(diff<bestDiff){bestDiff=diff;best=h;}}
+  if(best==null)return;
+  const pt=_sparkByHour.get(best);
+  dot.setAttribute('cx',pt.x.toFixed(1));dot.setAttribute('cy',pt.y.toFixed(1));
+  guide.setAttribute('x1',pt.x.toFixed(1));guide.setAttribute('x2',pt.x.toFixed(1));
+  if(pill){
+    pill.style.left=(pt.x/_sparkW*100).toFixed(1)+'%';
+    const hLbl=best===0?'ZDAJ':(best>0?'+':'−')+Math.abs(best)+'h';
+    pill.textContent=hLbl+' · '+Number(pt.t).toFixed(1)+'°';
+  }
 }
 
 // ── Junaška kartica: "pametni povzetek" — en stavek namesto naštevanja podatkov ──
