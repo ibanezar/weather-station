@@ -1995,7 +1995,8 @@ let _sparkByHour=null,_sparkW=320;
 function drawHeroSparkline(){
   const wrap=document.getElementById('hero-spark-wrap');
   const g=document.getElementById('hero-spark-g');
-  if(!wrap||!g)return;
+  const svg=document.getElementById('hero-spark-svg');
+  if(!wrap||!g||!svg)return;
   const nowT=_liveTemp??_lastTemp;
   if(nowT==null||!_forecastHours.length){wrap.hidden=true;return;}
 
@@ -2012,7 +2013,13 @@ function drawHeroSparkline(){
   const pts=[...past,{h:0,t:nowT},...future];
   if(pts.length<4){wrap.hidden=true;return;}
 
-  const W=320,H=56,minH=-6,maxH=pts[pts.length-1].h;
+  // viewBox mora slediti dejanski širini kartice v CSS pikslih: SVG ima
+  // preserveAspectRatio="none" (raztegne se čez celo širino), zato je bila
+  // krivulja na širokih (namizje) zaslonih vodoravno stisnjena/sploščena, ko je
+  // ostajal viewBox trdo kodiran na 320 — na mobilnem se to skoraj ni poznalo,
+  // ker je bila širina kartice blizu 320px.
+  const W=Math.round(svg.getBoundingClientRect().width)||320,H=56,minH=-6,maxH=pts[pts.length-1].h;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const temps=pts.map(p=>p.t),tMin=Math.min(...temps),tMax=Math.max(...temps);
   const pad=Math.max(1,(tMax-tMin)*.15),lo=tMin-pad,hi=tMax+pad;
   const px=h=>((h-minH)/(maxH-minH))*W;
@@ -2035,6 +2042,10 @@ function drawHeroSparkline(){
   wrap.hidden=false;
   moveHeroSparkMarker(_sliderActive?+((document.getElementById('fc-slider')||{}).value||0):0);
 }
+// Okno se lahko preseže (širši zaslon, obrat naprave) precej prej, kot se
+// krivulja naslednjič nariše ob osvežitvi podatkov (~5 min) — brez tega bi
+// ostala raztegnjena do takrat.
+window.addEventListener('resize',()=>{if(!document.getElementById('hero-spark-wrap')?.hidden)drawHeroSparkline();},{passive:true});
 
 // Premakne piko/vodilno črto/oznako na krivulji na uro, ki jo drsnik trenutno
 // kaže — prej je krivulja ob vlečenju drsnika ostala popolnoma nespremenjena
