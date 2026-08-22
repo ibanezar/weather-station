@@ -166,7 +166,20 @@
     <span class="section-label">04 — Kje iskati</span>
     <h2 id="kje-iskati">Na kaj je vredno biti pozoren</h2>
     <p>Vlaga se po dolini ne porazdeli enakomerno. Severna, bolj senčna pobočja in gozdni robovi ob potokih tla dlje časa držijo vlažna kot osončene južne lege, zato so po tednu, kakršen je bil ta, običajno prva na vrsti. Nadmorska višina sliko dodatno spreminja: v nižjih delih doline se tla zaradi današnje toplote sušijo hitreje kot više v gozdovih pod grebeni, kjer je bilo v zadnjih dneh tudi hladneje in torej manj izhlapevanja.</p>
-    <p>Postaja IREICA1 meri na enem samem mestu na dnu doline, zato je za druga območja bolje pogledati indeks po posameznih conah, ne le številke od tu. Razlike med conami znajo biti presenetljivo velike že na razdalji nekaj kilometrov, predvsem kadar je – tako kot zdaj – šlo za en sam daljši dežni teden in ne za enakomerno namočeno celotno sezono.</p>
+    <p>Postaja IREICA1 meri na enem samem mestu na dnu doline, zato je za druga območja bolje pogledati indeks po posameznih conah, ne le številke od tu. Razlike med conami znajo biti presenetljivo velike že na razdalji nekaj kilometrov, predvsem kadar je – tako kot zdaj – šlo za en sam daljši dežni teden in ne za enakomerno namočeno celotno sezono. Graf spodaj to pokaže številčno.</p>
+
+    
+    <div class="chart-card">
+      <h3>Gobarski indeks po območjih danes</h3>
+      <canvas id="chartGobeAreas"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Isti indeks kot na <a href="/gobarska-napoved/danes/" style="color:var(--blue)">strani po območjih</a> -- Rečica ob Savinji (dno doline, vlažna tla) je danes nižje od gozdov na Smrekovškem pogorju in Menini, kjer je model za več vrst na 100 %.</p>
+    </div>
+
+    <div class="chart-card">
+      <h3>Gobarski indeks — letošnja sezona po mesecih</h3>
+      <canvas id="chartGobeSeason"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Mesečno povprečje indeksa za Rečico ob Savinji, sezona 138 dni 2026. Avgust je bil do zdaj najšibkejši mesec sezone (povprečje 60,4) -- današnji indeks 87 kaže, kako hitro en dežni teden razmere obrne.</p>
+    </div>
 
     <div class="callout">
       <p><strong>Preden greš:</strong> Za razporeditev po posameznih območjih doline preveri <a href='/gobarska-napoved/' style='color:var(--blue)'>gobarsko napoved</a> – ali pa poglej, <a href='/blog/gobarska-sezona-julij-2026-kje-nabirati.html' style='color:var(--blue)'>kje so bile v dolini nazadnje najboljše razmere</a>.</p>
@@ -233,6 +246,48 @@
       }
     }
   });
+
+  new Chart(document.getElementById('chartGobeAreas'), {
+    type: 'bar',
+    data: {
+      labels: ["Smrekovško pogorje", "Komen (Smrekovec)", "Menina planina", "Dleskovška planota", "Gozdovi nad Ljubnim", "Dobrovlje – Čreta", "Golte", "Rečica ob Savinji"],
+      datasets: [
+        { label: 'Gobarski indeks (%)', data: [100, 100, 100, 100, 97, 95, 87, 86],
+           backgroundColor: ["rgba(52,211,153,.75)", "rgba(52,211,153,.75)", "rgba(52,211,153,.75)", "rgba(52,211,153,.75)", "rgba(52,211,153,.75)", "rgba(52,211,153,.75)", "rgba(52,211,153,.5)", "rgba(52,211,153,.5)"], borderRadius: 5 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      indexAxis: 'y',
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+      scales: {
+        x: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#34d399', font: { size: 10 }, callback: v => v + ' %' } },
+        y: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10 } } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartGobeSeason'), {
+    data: {
+      labels: ["apr.", "maj", "jun.", "jul.", "avg."],
+      datasets: [
+        { type: 'line', label: 'Mesečno povprečje indeksa', data: [65.2, 80.4, 80.2, 69.0, 60.4],
+           borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,.12)', borderWidth: 2,
+           pointRadius: 4, pointBackgroundColor: '#34d399', fill: true, tension: .35 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#34d399', font: { size: 10 }, callback: v => v + ' %' } }
+      }
+    }
+  });
+
 
 
   new Chart(document.getElementById('chartRainHum'), {
