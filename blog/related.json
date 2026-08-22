@@ -1,8 +1,13 @@
 {
+  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
+    "susa-v-zgornji-savinjski-dolini-kako-dolgo-ze-brez-dezja-0814",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
   "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821": [
-    "nocni-naliv-v-recici-60-mm-dezja-0808",
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
+    "nocni-naliv-v-recici-60-mm-dezja-0808"
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
@@ -11,13 +16,13 @@
   ],
   "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819": [
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "nocni-naliv-v-recici-60-mm-dezja-0808"
+    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821",
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
   ],
   "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
-    "tedenska-napoved-11-17-avgust-2026"
+    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821"
   ],
   "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817": [
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
@@ -65,9 +70,9 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "nocni-naliv-v-recici-60-mm-dezja-0808": [
+    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821",
     "koliko-je-zalilo-nevihta-11-julij-2026",
-    "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
-    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821"
+    "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818"
   ],
   "koliko-bo-danes-zalilo-primerjava-modelov-0807": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
@@ -155,8 +160,8 @@
     "vrocinski-val-konec-julija-2026"
   ],
   "napoved-avgust-2026-zgornja-savinjska-dolina": [
-    "poplave-2023-kaj-je-izmerila-postaja",
     "letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730",
+    "poplave-2023-kaj-je-izmerila-postaja",
     "koliko-je-letos-dezevalo-v-recici-ob-savinji-0808"
   ],
   "reke-megle-temperaturna-inverzija-recica-savinji": [
@@ -171,8 +176,8 @@
   ],
   "vrocinski-val-konec-julija-2026": [
     "tropske-noci-inverzija-savinjska-dolina",
-    "topoklima-savinjska-dolina-ireica1",
-    "med-dvema-vrocinskima-valoma-ireica1"
+    "med-dvema-vrocinskima-valoma-ireica1",
+    "topoklima-savinjska-dolina-ireica1"
   ],
   "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725": [
     "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712",
@@ -185,8 +190,8 @@
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804"
   ],
   "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723": [
-    "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806",
     "napoved-julij-2026",
+    "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806",
     "julij-skozi-zgodovino-recica-savinji"
   ],
   "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723": [
@@ -207,7 +212,7 @@
   "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
     "gobarska-sezona-julij-2026-kje-nabirati",
     "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
-    "susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720"
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
   ],
   "susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720": [
     "susa-v-zgornji-savinjski-dolini-kako-dolgo-ze-brez-dezja-0814",
@@ -342,7 +347,7 @@
   "gobarska-sezona-julij-2026-kje-nabirati": [
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
     "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
-    "med-dvema-vrocinskima-valoma-ireica1"
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
   ],
   "hmelj-vreme-julij-rastne-stopinje-vodna-bilanca": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",

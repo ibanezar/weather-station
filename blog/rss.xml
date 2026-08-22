@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 21 Aug 2026 07:51:30 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 22 Aug 2026 06:34:23 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kdaj po tednu dežja zrastejo gobe?</title>
+      <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</guid>
+      <pubDate>Sat, 22 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?</description>
+      <category>gobe</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Koliko dežja je padlo ponoči in koliko ga še bo?</title>
       <link>https://meteorec.si/blog/koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821.html</link>
