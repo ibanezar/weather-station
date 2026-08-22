@@ -2015,10 +2015,16 @@ function drawHeroSparkline(){
 
   // viewBox mora slediti dejanski širini kartice v CSS pikslih: SVG ima
   // preserveAspectRatio="none" (raztegne se čez celo širino), zato je bila
-  // krivulja na širokih (namizje) zaslonih vodoravno stisnjena/sploščena, ko je
+  // krivulja na širokih (namizje) zaslonih vodoravno raztegnjena/sploščena, ko je
   // ostajal viewBox trdo kodiran na 320 — na mobilnem se to skoraj ni poznalo,
   // ker je bila širina kartice blizu 320px.
-  const W=Math.round(svg.getBoundingClientRect().width)||320,H=56,minH=-6,maxH=pts[pts.length-1].h;
+  // Meriti je treba na nadrejenem #fc-slider-wrap, NE na samem svg elementu:
+  // #hero-spark-wrap ima na prvi izris (preden se par vrstic nižje odstrani
+  // `hidden`) še `display:none`, zato bi getBoundingClientRect() na svg-ju
+  // vrnil 0 in padel nazaj na privzetih 320 — natanko ista napaka kot prej,
+  // samo da bi jo popravil šele naslednji izris (osvežitev podatkov / resize).
+  // #fc-slider-wrap nima `hidden`, zato ima pravo širino že ob prvem klicu.
+  const W=Math.round(wrap.parentElement?.getBoundingClientRect().width||svg.getBoundingClientRect().width)||320,H=56,minH=-6,maxH=pts[pts.length-1].h;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const temps=pts.map(p=>p.t),tMin=Math.min(...temps),tMax=Math.max(...temps);
   const pad=Math.max(1,(tMax-tMin)*.15),lo=tMin-pad,hi=tMax+pad;
