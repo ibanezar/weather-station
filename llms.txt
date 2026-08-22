@@ -1,43 +1,45 @@
 # Meteorec
 
-> Meteorec (meteorec.si) is a personal weather station's website in Rečica ob Savinji, Zgornja Savinjska dolina, Slovenia (station ID IREICA1, 366 m elevation, 46.325779, 14.921137). It publishes live conditions and a continuous daily measurement archive since 7 November 2019 — temperature, precipitation, humidity, wind and pressure — for a valley with no official ARSO station of its own. Content, data and analysis are in Slovenian.
+> Vreme za Rečico ob Savinji (Zgornja Savinjska dolina, Slovenija) v živo iz lastne
+> vremenske postaje IREICA1, z arhivom meritev od leta 2019. Ni modelska ocena za
+> širše območje, ampak dejanska meritev na tej točki — temperatura, padavine, veter,
+> vlažnost, zračni tlak. Poleg vremena stran vodi tudi gobarski napovedni model za
+> okolico in poskusni statistični napovedni model MTR za dno doline.
 
-Data is original station measurement, not a forecast model. Reuse is free under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — attribute "Meteorec (meteorec.si), postaja IREICA1" and link back to https://meteorec.si/.
+## Vreme v živo in napoved
 
-## Live conditions & data
-- [Domača stran / trenutno vreme](https://meteorec.si/): current live readings plus interactive widgets (storms, agrometeo, air quality, pollen, sea/mountain conditions, paragliding).
-- [Gobarska napoved](https://meteorec.si/gobarska-napoved/): daily mushroom-foraging fruiting index for five Zgornja Savinjska dolina forest locations, a 7-day outlook, and a month-by-month species calendar.
-- [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/): Savinja river flow/level status combining a GloFAS 7-day forecast with live ARSO gauge readings, plus the historical flood timeline through August 2023.
-- [Nevihtna napoved](https://meteorec.si/nevihte/): atmospheric-instability snapshot (CAPE, CIN, Lifted Index, Total Totals, K-index, wind shear) with 12-hour hail-risk and damaging-wind-risk outlooks for Rečica ob Savinji.
-- [Toča-tracker](https://meteorec.si/toca/): live ARSO hail-warning status plus a crowdsourced archive of user-submitted hail reports (photo + location) across Zgornja Savinjska dolina.
-- [Točnost napovedi](https://meteorec.si/tocnost-napovedi/): running daily scoreboard comparing ARSO's and Open-Meteo's day-ahead forecast against the station's actual measurement — mean absolute error by month, no retroactive edits.
-- [Podatki](https://meteorec.si/podatki/): single JavaScript-free page with plain HTML tables — current conditions, all-time records, and monthly climate normals — for tools that don't render JS.
-- [Agrometeo](https://meteorec.si/agrometeo/): growing-degree-day accumulation, hop phenology and disease risk, per-crop GDD milestones, 7-day frost alarm, spray-window and hay-drying outlooks, and water balance for Zgornja Savinjska dolina.
-- [Kakovost zraka](https://meteorec.si/kakovost-zraka/): current EU AQI, pollutant levels (PM2.5, PM10, ozone, NO2, SO2, CO) against EU limits, a 5-day pollen forecast, and health recommendations for Rečica ob Savinji.
-- [Vreme za padalce](https://meteorec.si/vreme-za-padalce/): paragliding flyability score, hour-by-hour flying window (boundary layer height, wind, CAPE), and a 7-day outlook for Zgornja Savinjska dolina.
-- [Vremenski arhiv](https://meteorec.si/vreme/): full daily/monthly/yearly measurement archive since 2019-11-07, the primary dataset page.
-- [Vremenski rekordi](https://meteorec.si/rekord/): all-time station extremes (temperature, precipitation, wind).
-- [Vremenski pojavi](https://meteorec.si/pojavi/): archives of frost days, hot days and heavy-rain days.
-- [Vreme ta teden](https://meteorec.si/teden/): rolling 7-day summary.
-- [Vremenski trendi](https://meteorec.si/trendi/): interactive long-run charts (temperature, precipitation, wind, pressure, dew point, solar, UV).
-- [Klima](https://meteorec.si/klima/), [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): monthly climate normals for Rečica ob Savinji.
-- [history.json](https://meteorec.si/history.json): raw daily-summary JSON backing the archive.
-- [Vremenski slovar](https://meteorec.si/slovar/): 46 meteorological terms (dew point, hail, CAPE-adjacent instability concepts, temperature inversion, etc.), each on its own page with a definition and a fact, several tied to Zgornja Savinjska dolina specifically.
+- [Domača stran](https://meteorec.si/): trenutne meritve, dnevni povzetek, 7-dnevna napoved, radar, nevihtna karta Slovenije.
+- [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/): trenutna meritev, 7-dnevna napoved in napoved po urah za osrednji kraj, s primerjavo Open-Meteo in poskusnega modela MTR (dno doline).
+- [Točnost napovedi](https://meteorec.si/tocnost-napovedi/): sprotna primerjava napovedi (ARSO, Open-Meteo, MTR, ECMWF AIFS) z dejansko izmerjenim vremenom.
+- [Nevihte in opozorila ARSO](https://meteorec.si/nevihte/): aktivna opozorila ARSO za območje in dnevna nevihtna karta Slovenije.
+- [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
 
-## Nearby-location pages
-- [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/)
-- [Vreme Mozirje](https://meteorec.si/vreme-mozirje/)
-- [Vreme Nazarje](https://meteorec.si/vreme-nazarje/)
-- [Vreme Ljubno ob Savinji](https://meteorec.si/vreme-ljubno-ob-savinji/)
+## Podnebje in arhiv (2019–danes)
 
-## Writing
-- [Blog](https://meteorec.si/blog/): monthly weather summaries and event analyses for Savinjska dolina.
-- [Vremenski dogodki](https://meteorec.si/novosti/): logged notable events (heat waves, droughts, records).
-- [Napoved za julij 2026](https://meteorec.si/blog/napoved-julij-2026.html): 16-day Open-Meteo forecast for Rečica ob Savinji (warm start, thundery mid-month, renewed heat to ~35 °C) plus honest climatological outlook for the rest of the month, with an explanation of forecast skill limits.
-- [Julij skozi zgodovino](https://meteorec.si/blog/julij-skozi-zgodovino-recica-savinji.html): July across 75 years (Open-Meteo ERA5, 1950–2025) at Rečica ob Savinji — the warmest month warmed ~2 °C; station IREICA1 shows the valley paradox: record 36.5 °C days yet zero tropical nights and mornings down to 7.5 °C.
-- [Podnebna zgodovina Rečice ob Savinji 1950–2025](https://meteorec.si/blog/podnebna-zgodovina-recica-savinji-1950-2025.html): 75-year Open-Meteo (ERA5) record shows ~2 °C valley warming since 1950; six years of station IREICA1 reveal the valley floor is ~0.5 °C cooler and ~20 % wetter than the model.
-- [Poplave avgusta 2023](https://meteorec.si/blog/poplave-2023.html): in-depth account of the August 2023 Zgornja Savinjska dolina floods — causes, hydrological records, damage and recovery.
-- [Najhladnejša julijska jutra](https://meteorec.si/blog/najhladnejsa-julijska-jutra-recica.html): coldest July mornings at station IREICA1 (record 7.5 °C, 14 Jul 2020) and the valley cold-pooling effect, data 2020–2025.
+- [Podnebje](https://meteorec.si/klima/): mesečne norme, letne vsote, rekordi za Rečico ob Savinji.
+- [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): klimatološki povzetki po meritvah postaje IREICA1.
+- [Ta teden](https://meteorec.si/teden/): tedenski vremenski povzetek, samodejno osvežen vsak ponedeljek.
+- [Rekordi](https://meteorec.si/rekord/), [Vremenski dogodki](https://meteorec.si/novosti/): novi absolutni rekordi, toplotni valovi, sušna obdobja.
+- [Trendi](https://meteorec.si/trendi/): dolgoročni trend po meritvah od 2019.
+- [Podatki o postaji](https://meteorec.si/o-postaji.html): postaja IREICA1, oprema, metodologija, odprti podatki (CC BY 4.0).
 
-## About
-- [O postaji](https://meteorec.si/o-postaji.html): station equipment, location and FAQ.
+## Gobarska napoved
+
+- [Gobarska napoved](https://meteorec.si/gobarska-napoved/): dnevni gobarski indeks za okolico Rečice ob Savinji, izpeljan iz vlage tal, padavinskih oken in temperature po ekoloških skupinah vrst.
+- [Indeks po območjih danes](https://meteorec.si/gobarska-napoved/danes/), [Zemljevid](https://meteorec.si/gobarska-napoved/zemljevid/), [Koledar sezone](https://meteorec.si/gobarska-napoved/koledar/), [Trend sezone](https://meteorec.si/gobarska-napoved/trend/)
+- [Baza vrst](https://meteorec.si/gobarska-napoved/baza-vrst/): 300 vrst gob, terensko preverjene in po literaturi, ločene po užitnosti.
+- [Dvojnice](https://meteorec.si/gobarska-napoved/dvojnice/): zamenljive strupene/užitne vrste s primerjalnimi fotografijami.
+
+## Druge lokacije v dolini
+
+- [Kamp Menina](https://meteorec.si/vreme-kamp-menina/), [Logarska dolina](https://meteorec.si/vreme-logarska-dolina/), [Mozirje](https://meteorec.si/vreme-mozirje/), [Nazarje](https://meteorec.si/vreme-nazarje/), [Ljubno ob Savinji](https://meteorec.si/vreme-ljubno-ob-savinji/)
+
+## Blog
+
+- [Blog](https://meteorec.si/blog/): dnevni in mesečni članki o vremenu, podnebju in gobarski sezoni v dolini, vsi vezani na dejanske meritve postaje IREICA1.
+
+## Opombe
+
+- Vse meritve so iz ene same postaje (IREICA1, Rečica ob Savinji) — za širše območje glej Open-Meteo/ARSO, ne ekstrapoliraj te postaje na drugo lokacijo.
+- Notranje meritve (temperatura/vlaga v hiši) se namenoma ne objavljajo nikjer na strani.
+- Odprti podatki: [history.json](https://meteorec.si/history.json) (CC BY 4.0, navedi vir "Meteorec, postaja IREICA1").
