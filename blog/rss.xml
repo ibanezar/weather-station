@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 22 Aug 2026 06:34:23 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 22 Aug 2026 16:26:17 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Kdaj po tednu dežja zrastejo gobe?</title>
@@ -377,17 +377,6 @@
       <category>vodna-bilanca</category>
     </item>
     <item>
-      <title>Invazivka na novi lokaciji: Japonski dresnik pri Luče ob Savinji, 3334 Luče, Slovénie</title>
-      <link>https://meteorec.si/blog/invazivka-japonski-dresnik-20260729-4635-1474.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-japonski-dresnik-20260729-4635-1474.html</guid>
-      <pubDate>Wed, 29 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Japonski dresnik (Reynoutria japonica) je bila opažena na novi lokaciji pri Luče ob Savinji, 3334 Luče, Slovénie (29. julija 2026). Resnost: visoka.</description>
-      <category>invazivke</category>
-      <category>japonski-dresnik</category>
-      <category>high</category>
-      <category>2026</category>
-    </item>
-    <item>
       <title>Anketa o aplikaciji Meteorec: 10 proti 9 – zakaj to ni odgovor</title>
       <link>https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html</guid>
@@ -561,17 +550,6 @@
       <category>2026</category>
       <category>IREICA1</category>
       <category>Savinjska dolina</category>
-    </item>
-    <item>
-      <title>Invazivka na novi lokaciji: Žlezava nedotika pri Okonina, 3333 Ljubno ob Savinji, Slovenija</title>
-      <link>https://meteorec.si/blog/invazivka-zlezava-nedotika-20260719-4632-1486.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-zlezava-nedotika-20260719-4632-1486.html</guid>
-      <pubDate>Sun, 19 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Žlezava nedotika (Impatiens glandulifera) je bila opažena na novi lokaciji pri Okonina, 3333 Ljubno ob Savinji, Slovenija (19. julija 2026). Resnost: visoka.</description>
-      <category>invazivke</category>
-      <category>zlezava-nedotika</category>
-      <category>high</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Temperaturni trend v Savinjski dolini: od 28,9 °C danes do hladnejšega konca tedna</title>

@@ -375,13 +375,6 @@
     <image:image><image:loc>https://meteorec.si/og/letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/invazivka-japonski-dresnik-20260729-4635-1474.html</loc>
-    <lastmod>2026-07-29</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/invazivka-japonski-dresnik-20260729-4635-1474.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/anketa-android-aplikacija-meteorec.html</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>
@@ -478,13 +471,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/invazivka-zlezava-nedotika-20260719-4632-1486.html</loc>
-    <lastmod>2026-07-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/invazivka-zlezava-nedotika-20260719-4632-1486.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html</loc>
@@ -852,12 +838,6 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/gobe/</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/tema/invazivke/</loc>
     <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
