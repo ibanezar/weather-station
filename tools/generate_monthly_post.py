@@ -548,12 +548,16 @@ def render_related_html(related_posts):
 def render_datalinks_html():
     """Sekcija 'Vreme in podatki' -- statične povezave na hub strani. Enaka
     razredna oblika kot 'Sorodni članki' (.related-posts/.related-grid/
-    .related-card), samo brez datuma/povzetka na kartici."""
+    .related-card), samo brez datuma/povzetka na kartici.
+
+    Razred related-posts-data loči to sekcijo od 'Sorodni članki' za mrežo v
+    blog.css (body.has-blog-sidebar) -- brez njega bi obe merili isto
+    grid-area in se na širokem zaslonu vizualno prekrivali."""
     cards = "".join(
         f'<a class="related-card" href="{href}"><span class="related-h">{label}</span></a>'
         for href, label in DATA_LINKS)
     return (f'  {DATA_START}\n'
-            f'  <section class="related-posts">\n'
+            f'  <section class="related-posts related-posts-data">\n'
             f'    <h2 class="related-title">Vreme in podatki</h2>\n'
             f'    <div class="related-grid">{cards}</div>\n'
             f'  </section>\n'
