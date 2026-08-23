@@ -5,8 +5,22 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 22 Aug 2026 16:26:17 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 23 Aug 2026 07:14:13 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Napoved za teden 24.–28. avgusta: torek uganka, petek vroč in vetroven</title>
+      <link>https://meteorec.si/blog/tedenska-napoved-24-28-avgust-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/tedenska-napoved-24-28-avgust-2026.html</guid>
+      <pubDate>Sun, 23 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Šest modelov, ARSO in domači MTR za teden 24.–28. avgusta v Zgornji Savinjski dolini: torek je velika uganka, petek vroč do 32 °C s sunki vetra do 54 km/h.</description>
+      <category>napoved</category>
+      <category>modeli</category>
+      <category>ECMWF</category>
+      <category>MTR</category>
+      <category>ARSO</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Kdaj po tednu dežja zrastejo gobe?</title>
       <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>

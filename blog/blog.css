@@ -423,7 +423,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
     max-width:1100px;
     display:grid;
     grid-template-columns:minmax(0,1fr) 270px;
-    grid-template-areas:"head head" "crumbs crumbs" "main side" "related related" "comments comments" "subscribe subscribe" "foot foot";
+    grid-template-areas:"head head" "crumbs crumbs" "main side" "related related" "related2 related2" "comments comments" "subscribe subscribe" "foot foot";
     column-gap:3rem;
     align-items:start;
   }
@@ -434,8 +434,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
   body.has-blog-sidebar .wrap > main{grid-area:main;max-width:730px;width:100%}
   /* JS vstavi te razdelke (sorodni članki, komentarji, prijava na novičke)
      kot dodatne otroke .wrap — brez eksplicitnega grid-area bi jih
-     samodejno postavljanje mreže potisnilo v napačen stolpec/vrstico. */
+     samodejno postavljanje mreže potisnilo v napačen stolpec/vrstico.
+     Vsak članek ima DVA .related-posts razdelka (Sorodni članki in Vreme in
+     podatki, glej wire_all() v generate_monthly_post.py) -- brez ločenega
+     razreda za drugega bi oba merila isto grid-area in se prekrivala. */
   body.has-blog-sidebar .wrap > .related-posts{grid-area:related;max-width:730px;width:100%}
+  body.has-blog-sidebar .wrap > .related-posts.related-posts-data{grid-area:related2}
   body.has-blog-sidebar .wrap > .cmt-section{grid-area:comments;max-width:730px;width:100%}
   body.has-blog-sidebar .wrap > .subscribe-box{grid-area:subscribe;max-width:730px;width:100%}
   body.has-blog-sidebar .blog-sidebar{
