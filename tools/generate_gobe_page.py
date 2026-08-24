@@ -928,6 +928,15 @@ body .wrap{padding-bottom:5.5rem}
 .gp-species-legend-title{flex-basis:100%}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
+.gp-mini-map{margin:1.4rem 0}
+.gp-mini-map-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 .9rem}
+.gp-mmap-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .65rem;border-radius:10px;
+  background:var(--card-bg);border:1px solid var(--card-border);font-size:.82rem;color:var(--text);
+  text-decoration:none}
+.gp-mmap-chip i{width:.7rem;height:.7rem;border-radius:50%;flex:0 0 auto}
+.gp-mmap-chip .nm{font-weight:600}
+.gp-mmap-chip .pct{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+.gp-mmap-chip.prot{opacity:.75}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -2887,6 +2896,32 @@ def build_zemljevid_page(premium, rules):
         "Zemljevid", inner, extra_js=map_js)
 
 
+def mini_map_preview_html(premium):
+    """Compact, static (no Leaflet) area-status preview for the homepage —
+    same today['overall']/level data build_zemljevid_page() uses, just a
+    row of small chips instead of a full interactive map. Colour is always
+    paired with the level word, never colour alone (accessibility)."""
+    chips = []
+    for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
+        o = loc["days"][0]
+        chips.append(
+            f'    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(loc["name"])}">'
+            f'<i style="background:{level_color(o["overall"])}"></i>'
+            f'<span class="nm">{_esc(loc["name"])}</span>'
+            f'<span class="pct">{o["overall"]}/100 · {_esc(o["level"])}</span></a>')
+    for name in premium.get("protected_areas", []):
+        chips.append(
+            f'    <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(name)}">'
+            f'<i style="background:#a78bfa"></i>'
+            f'<span class="nm">{_esc(name)}</span>'
+            f'<span class="pct">Zaščiteno</span></a>')
+    return ('  <div class="gp-mini-map">\n'
+            '    <h2 class="gp-h2">🗺️ Danes v dolini</h2>\n'
+            '    <div class="gp-mini-map-grid">\n' + "\n".join(chips) + '\n    </div>\n'
+            '    <a class="gp-cta alt" href="/gobarska-napoved/zemljevid/">Odpri interaktivni zemljevid →</a>\n'
+            '  </div>')
+
+
 def photo_credits_html(img_dir):
     """CC BY / CC BY-SA / GFDL all require visible attribution — render the
     CREDITS.json sitting next to gobarska-napoved/img/<img_dir>/*.jpg as a
@@ -3155,6 +3190,7 @@ def build_body(rules, premium, free):
     features_html = feature_cards_html({"spots": len(premium["locations"]),
                                         "species": len(species), "pairs": len(vs_cards)})
     vrste_credits_html = photo_credits_html("vrste")
+    mini_map_html = mini_map_preview_html(premium)
 
     # ── terrain map (free) ────────────────────────────────────────────────────
     terr_items = []
@@ -3265,6 +3301,7 @@ def build_body(rules, premium, free):
 {coming_soon}
   <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
+{mini_map_html}
 {features_html}
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}
