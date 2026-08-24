@@ -1,4 +1,9 @@
 {
+  "koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824": [
+    "tedenska-napoved-24-28-avgust-2026",
+    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821",
+    "tedenska-napoved-11-17-avgust-2026"
+  ],
   "tedenska-napoved-24-28-avgust-2026": [
     "tedenska-napoved-11-17-avgust-2026",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
@@ -16,8 +21,8 @@
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
-    "tedenska-napoved-24-28-avgust-2026"
+    "tedenska-napoved-24-28-avgust-2026",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
   ],
   "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819": [
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
@@ -26,8 +31,8 @@
   ],
   "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
-    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821"
+    "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821",
+    "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819"
   ],
   "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817": [
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
@@ -80,9 +85,9 @@
     "koliko-je-zalilo-nevihta-11-julij-2026"
   ],
   "koliko-bo-danes-zalilo-primerjava-modelov-0807": [
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
+    "tedenska-napoved-24-28-avgust-2026",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
-    "tedenska-napoved-24-28-avgust-2026"
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
   ],
   "zakaj-se-ozracje-segreva-podnebni-dejavniki": [
     "recica-in-svet-segrevanje-v-podatkih",
@@ -90,8 +95,8 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806": [
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816"
   ],
   "je-letosnja-susa-rekordna-kaj-pravi-spi": [
