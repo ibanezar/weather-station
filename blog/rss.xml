@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 23 Aug 2026 07:14:13 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 24 Aug 2026 17:56:14 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko dežja bo jutri? ARSO in Open-Meteo narazen</title>
+      <link>https://meteorec.si/blog/koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824.html</guid>
+      <pubDate>Mon, 24 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Open-Meteo za torek, 25. avgust, v Rečici ob Savinji napoveduje 2,3 mm dežja (55 %), ARSO komaj 0,2 mm. Kdaj natančno lahko pade in zakaj se je ocena skrčila.</description>
+      <category>padavine</category>
+      <category>napoved</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>ARSO</category>
+    </item>
     <item>
       <title>Napoved za teden 24.–28. avgusta: torek uganka, petek vroč in vetroven</title>
       <link>https://meteorec.si/blog/tedenska-napoved-24-28-avgust-2026.html</link>
