@@ -1,0 +1,60 @@
+name: Test napovedi — dnevni zajem
+
+on:
+  schedule:
+    # 01:50 UTC — po update-history.yml (01:15, včerajšnja meritev je v
+    # history.json) in po forecast-verify.yml (01:35), da se izogneva sočasnemu
+    # pushu na main (oba imata rebase+retry, a manj kolizij je bolje).
+    - cron: '50 1 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # past-days je majhen -- poln arhiv nazaj (past-days=820) je bil enkraten
+      # backfill; dnevni tek samo dopolni zadnjih ~10 dni (starejši dnevi so
+      # itak že v data/forecast-archive.csv, load_existing() jih preskoči).
+      - name: Dopolni arhiv napovedi (Open-Meteo Previous Runs)
+        run: python3 tools/build_forecast_archive.py --past-days 10
+
+      - name: Zabeleži napoved ARSO in Yr (MET Norway)
+        run: python3 tools/log_forward_forecasts.py
+
+      - name: Zabeleži urne meritve (za bodočo analizo pristranskosti)
+        run: python3 tools/log_hourly_observations.py
+
+      - name: Izračunaj metrike
+        run: python3 tools/compute_forecast_test_metrics.py
+
+      - name: Generiraj stran /test-napovedi/ in podatki.csv
+        run: python3 tools/generate_test_napovedi_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/forecast-archive.csv data/forecast-forward-log.csv \
+                  data/hourly-observations.csv data/test-napovedi.json test-napovedi/
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

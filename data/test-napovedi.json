@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-08-24T08:40:36",
+  "generated_at": "2026-08-24T09:43:15",
   "n_obs_days": 2463,
   "n_obs_rejected": 0,
+  "n_compared_days": 816,
   "climatology": {
     "tmax": {
       "n": 2463,
@@ -1348,5 +1349,201 @@
       }
     }
   },
-  "zero_crossing_lead_days": {}
+  "zero_crossing_lead_days": {},
+  "forward_models": {
+    "arso": "ARSO",
+    "yr": "Yr (MET Norway)"
+  },
+  "forward_results": {
+    "arso": {
+      "1": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "2": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "3": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "4": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "5": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "6": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "7": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      }
+    },
+    "yr": {
+      "1": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "2": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "3": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "4": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "5": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "6": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      },
+      "7": {
+        "tmax": {
+          "n": 0
+        },
+        "tmin": {
+          "n": 0
+        },
+        "precip_contingency": {
+          "0.2": null,
+          "5.0": null
+        },
+        "skill_tmax_vs_climatology": null
+      }
+    }
+  },
+  "forward_n": {
+    "arso": 0,
+    "yr": 0
+  }
 }

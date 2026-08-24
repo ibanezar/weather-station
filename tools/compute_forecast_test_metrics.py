@@ -35,15 +35,25 @@ from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARCHIVE_PATH = os.path.join(ROOT, "data", "forecast-archive.csv")
+FORWARD_LOG_PATH = os.path.join(ROOT, "data", "forecast-forward-log.csv")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 OUT_PATH = os.path.join(ROOT, "data", "test-napovedi.json")
 
+# Pet virov z arhivom vodilnega časa nazaj (Open-Meteo Previous Runs API) —
+# glavna primerjava na strani, dovolj dolga zgodovina za zanesljiv rezultat.
 MODEL_LABELS = {
     "ecmwf_ifs025": "ECMWF IFS",
     "icon_seamless": "ICON",
     "gfs_seamless": "GFS",
     "meteofrance_arpege_europe": "ARPEGE",
     "best_match": "Best Match",
+}
+# ARSO in Yr/MET Norway nimata arhiva preteklih napovedi (Faza 1b) -- beležimo
+# ju sproti (tools/log_forward_forecasts.py) od datuma prvega zagona naprej.
+# Stran ju prikaže ločeno, dokler nimata dovolj razrešenih dni.
+FORWARD_LABELS = {
+    "arso": "ARSO",
+    "yr": "Yr (MET Norway)",
 }
 LEADS = list(range(1, 8))
 CLIMO_WINDOW = 7      # +/- dni okoli koledarskega dne za klimatologijo
@@ -74,14 +84,20 @@ def load_observations():
 
 
 def load_forecasts():
+    """Bere data/forecast-archive.csv (arhivsko, pet Open-Meteo virov) IN
+    data/forecast-forward-log.csv (sprotno, ARSO/Yr — če datoteka že obstaja).
+    Ista shema vrstic, zato gresta v isti slovar."""
     rows = defaultdict(list)  # (model, lead) -> list of rows
-    with open(ARCHIVE_PATH, encoding="utf-8", newline="") as f:
-        for r in csv.DictReader(f):
-            r["lead_days"] = int(r["lead_days"])
-            r["tmax_c"] = float(r["tmax_c"]) if r["tmax_c"] not in ("", None) else None
-            r["tmin_c"] = float(r["tmin_c"]) if r["tmin_c"] not in ("", None) else None
-            r["precip_mm"] = float(r["precip_mm"]) if r["precip_mm"] not in ("", None) else None
-            rows[(r["model"], r["lead_days"])].append(r)
+    for path in (ARCHIVE_PATH, FORWARD_LOG_PATH):
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                r["lead_days"] = int(r["lead_days"])
+                r["tmax_c"] = float(r["tmax_c"]) if r["tmax_c"] not in ("", None) else None
+                r["tmin_c"] = float(r["tmin_c"]) if r["tmin_c"] not in ("", None) else None
+                r["precip_mm"] = float(r["precip_mm"]) if r["precip_mm"] not in ("", None) else None
+                rows[(r["model"], r["lead_days"])].append(r)
     return rows
 
 
@@ -207,14 +223,11 @@ def main():
           f"(n={pers_stats['tmax'].get('n')}), Tmin MAE={pers_stats['tmin'].get('mae')} °C")
 
     # ── Po (model, lead_days) ───────────────────────────────────────────────
-    results = {}
-    zero_crossing = {}  # model -> prvi lead_days, kjer je skill_tmax <= 0
-    print("\n{:<12} {:>4}  {:>6}  {:>7} {:>7} {:>7} {:>6}   {:>7} {:>7} {:>7} {:>6}   {:>7}".format(
-        "model", "lead", "n", "MAE_tx", "bias_tx", "RMSE_tx", ">3°C%",
-        "MAE_tn", "bias_tn", "RMSE_tn", ">3°C%", "skill_tx"))
-
-    for model in MODEL_LABELS:
-        results[model] = {}
+    def score_source(model):
+        """Izračuna results[model] za vse vodilne čase; vrne (per_lead, zero_crossing_lead, n_total)."""
+        per_lead = {}
+        zero_lead = None
+        n_total = 0
         for lead in LEADS:
             rows = fc_by_key.get((model, lead), [])
             pairs_tmax, pairs_tmin = [], []
@@ -233,40 +246,77 @@ def main():
             tmax_stats = err_stats(pairs_tmax)
             tmin_stats = err_stats(pairs_tmin)
             precip_ct = {str(t): contingency(precip_pairs, t) for t in WET_THRESHOLDS}
+            n_total += tmax_stats.get("n", 0)
 
             skill_tmax = None
             if tmax_stats.get("mae") is not None and climo_stats["tmax"].get("mae"):
                 skill_tmax = round(1 - tmax_stats["mae"] / climo_stats["tmax"]["mae"], 3)
-                if skill_tmax <= 0 and model not in zero_crossing:
-                    zero_crossing[model] = lead
+                if skill_tmax <= 0 and zero_lead is None:
+                    zero_lead = lead
 
-            results[model][lead] = {
+            per_lead[lead] = {
                 "tmax": tmax_stats, "tmin": tmin_stats,
                 "precip_contingency": precip_ct,
                 "skill_tmax_vs_climatology": skill_tmax,
             }
-
             if tmax_stats.get("n"):
-                print("{:<12} {:>4}  {:>6}  {:>7} {:>7} {:>7} {:>6}   {:>7} {:>7} {:>7} {:>6}   {:>7}".format(
+                print("{:<16} {:>4}  {:>6}  {:>7} {:>7} {:>7} {:>6}   {:>7} {:>7} {:>7} {:>6}   {:>7}".format(
                     model, lead, tmax_stats["n"],
                     tmax_stats.get("mae"), tmax_stats.get("bias"), tmax_stats.get("rmse"), tmax_stats.get("pct_gt3"),
                     tmin_stats.get("mae"), tmin_stats.get("bias"), tmin_stats.get("rmse"), tmin_stats.get("pct_gt3"),
                     skill_tmax))
+        return per_lead, zero_lead, n_total
+
+    print("\n{:<16} {:>4}  {:>6}  {:>7} {:>7} {:>7} {:>6}   {:>7} {:>7} {:>7} {:>6}   {:>7}".format(
+        "model", "lead", "n", "MAE_tx", "bias_tx", "RMSE_tx", ">3°C%",
+        "MAE_tn", "bias_tn", "RMSE_tn", ">3°C%", "skill_tx"))
+
+    results = {}
+    zero_crossing = {}
+    compared_dates = set()
+    for model in MODEL_LABELS:
+        per_lead, zero_lead, _ = score_source(model)
+        results[model] = per_lead
+        if zero_lead is not None:
+            zero_crossing[model] = zero_lead
+        for lead in LEADS:
+            for r in fc_by_key.get((model, lead), []):
+                if r["valid_at"] in obs:
+                    compared_dates.add(r["valid_at"])
+    n_compared_days = len(compared_dates)
+    print(f"\nDatumi z vsaj eno primerjavo (kateri koli vir/vodilni čas): {n_compared_days}")
 
     print("\nDan, ko napoved (Tmax) pade na raven klimatologije (skill <= 0):")
     for model in MODEL_LABELS:
         lead = zero_crossing.get(model)
-        print(f"  {MODEL_LABELS[model]:<12} {'D+' + str(lead) if lead else 'ni doseženo v D+1..D+7 vzorcu'}")
+        print(f"  {MODEL_LABELS[model]:<16} {'D+' + str(lead) if lead else 'ni doseženo v D+1..D+7 vzorcu'}")
+
+    # ARSO in Yr -- sprotno beleženje od tools/log_forward_forecasts.py, brez
+    # arhiva nazaj (Faza 1b). Vseeno gresta skozi isto merilo, samo n_total
+    # pove strani, ali je smiselno prikazati številke ali samo "zbiranje se
+    # je začelo" (isto besedilo kot tocnost-napovedi ob n_days==0).
+    print("\nSprotno beleženi viri (ARSO, Yr) -- brez arhiva za nazaj:")
+    forward_results = {}
+    forward_n = {}
+    for model in FORWARD_LABELS:
+        per_lead, _, n_total = score_source(model)
+        forward_results[model] = per_lead
+        forward_n[model] = n_total
+        print(f"  {FORWARD_LABELS[model]:<16} {n_total} razrešenih napovedi (vseh vodilnih časov skupaj)")
 
     out = {
         "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "n_obs_days": len(obs),
         "n_obs_rejected": len(rejected),
+        "n_compared_days": n_compared_days,
         "climatology": climo_stats,
         "persistence": pers_stats,
         "models": MODEL_LABELS,
         "results": results,
         "zero_crossing_lead_days": zero_crossing,
+        "forward_models": FORWARD_LABELS,
+        "forward_results": forward_results,
+        "forward_n": forward_n,
     }
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
