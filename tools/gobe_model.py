@@ -551,7 +551,7 @@ def print_summary(premium, top=8):
         best = nm(d0["species"][0]["id"]) if d0["species"] else "-"
         print(f"  {d0['overall']:3d} % ({d0['level']:<7}) {loc['name']:<22} {loc.get('terrain','-'):<8} ({loc['elev_m']} m) — {best}")
     if premium.get("protected_areas"):
-        print(f"\n  Zaščitena območja (nabiranje prepovedano): {', '.join(premium['protected_areas'])}")
+        print(f"\n  Zaščitena območja (preveri omejitve nabiranja): {', '.join(premium['protected_areas'])}")
 
 
 def main():
