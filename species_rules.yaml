@@ -86,6 +86,12 @@ terrains:
     note: "Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk."
 
 # Napovedne točke. protected=true → zaščiteno območje, ne prikazuj kot nabiralno mesto.
+# picking_restriction (samo pri protected=true): "unknown" | "prohibited". UI sme
+# pisati "nabiranje prepovedano" SAMO pri "prohibited" IN obstoječem restriction_source
+# (preverjen pravni vir za TO območje) — sicer nevtralno "preveri omejitve". Trenutno za
+# nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato je edino
+# zavarovano območje (Logarska dolina) na "unknown". Ne spreminjaj v "prohibited" brez
+# konkretnega vira.
 locations:
   - name: "Rečica ob Savinji"
     lat: 46.326
@@ -150,6 +156,7 @@ locations:
     terrain: vlazna
     home: false
     protected: true
+    picking_restriction: unknown
 
 # Vrste. gets_index=true dobijo gobarski indeks; ostale so referenca / dvojnice.
 species:

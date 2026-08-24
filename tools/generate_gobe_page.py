@@ -161,6 +161,16 @@ BAZA_CATS = [
 ]
 
 
+def format_season_range(start, end):
+    """'MM.DD' raw storage → localized Slovenian display, e.g.
+    '09.01'/'11.30' → '1. 9.–30. 11.'. Display only — cross-year wraparound
+    (e.g. '10.01'/'01.31') is handled by gobe_model.in_season(), not here."""
+    def fmt(md):
+        m, d = md.split(".")
+        return f"{int(d)}. {int(m)}."
+    return f"{fmt(start)}–{fmt(end)}"
+
+
 def species_section_html(subset, all_species, current=""):
     """Orodna vrstica (iskanje + povezave na kategorije + filter sezone) in
     mreža kartic za dano podmnožico vrst.
@@ -172,7 +182,7 @@ def species_section_html(subset, all_species, current=""):
     cards = []
     for s in sorted(subset, key=lambda x: (not x.get("gets_index"), x["name_sl"])):
         se = s["season"]
-        season_txt = f'{se["start"]}–{se["end"]}'
+        season_txt = format_season_range(se["start"], se["end"])
         edib = (s.get("edibility") or "").lower().strip()
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
         # Podatki za filtriranje in iskanje na strani; iskalni niz je že
@@ -973,6 +983,10 @@ PAGE_JS = """<script>
 (function(){
   var API=""" + '"' + WORKER_BASE + '"' + """;
   var LS="mr_gobe_token";
+  // Minimal conversion-funnel tracking — no PII (no email, token or image).
+  function gaEvent(name,params){
+    try{if(typeof gtag==="function")gtag("event",name,params||{});}catch(e){}
+  }
   function tok(){
     try{
       var u=new URL(location.href);
@@ -1338,6 +1352,7 @@ PAGE_JS = """<script>
         .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
         .then(function(res){
           msgEl.textContent=res.ok?"✓ Alarmi shranjeni.":(res.body&&res.body.error?res.body.error:"Napaka pri shranjevanju.");
+          if(res.ok)gaEvent("alarm_create",{count:rules.length});
         })
         .catch(function(){msgEl.textContent="Napaka pri povezavi. Poskusi znova.";});
     });
@@ -1378,6 +1393,7 @@ PAGE_JS = """<script>
     });
     btn.addEventListener("click",function(){
       if(!pendingImg)return;
+      gaEvent("ai_identification_start");
       btn.disabled=true;statusEl2.textContent="Analiziram fotografijo …";resultEl.innerHTML="";
       fetch(API+"/premium/identify",{method:"POST",
         headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
@@ -1388,17 +1404,20 @@ PAGE_JS = """<script>
           if(!res.ok){statusEl2.textContent=res.body&&res.body.error?res.body.error:"Napaka pri prepoznavi.";return;}
           statusEl2.textContent="";
           var d=res.body;
+          gaEvent("ai_identification_complete",{candidates:(d.candidates||[]).length});
           var html=(d.candidates||[]).map(function(c){
             var confCls=CONF_CLS[c.confidence]||"mid";
             return '<div class="gp-id-card"><div class="gp-id-head"><span><span class="gp-id-name">'+
               esc2(c.name_sl||"?")+'</span><span class="gp-id-lat">'+esc2(c.name_lat||"")+'</span></span>'+
               '<span class="gp-id-conf '+confCls+'">zanesljivost: '+esc2(c.confidence||"?")+'</span></div>'+
-              (c.edibility?'<div class="gp-id-reason"><b style="color:var(--text)">'+esc2(c.edibility)+'</b></div>':'')+
+              (c.edibility?'<div class="gp-id-reason"><b style="color:var(--text)">AI ocena užitnosti: '+esc2(c.edibility)+'</b></div>':'')+
               (c.reasoning?'<div class="gp-id-reason">'+esc2(c.reasoning)+'</div>':'')+
               (c.warning?'<div class="gp-id-warn">⚠ '+esc2(c.warning)+'</div>':'')+'</div>';
           }).join("");
           if(d.note)html+='<div class="gp-id-note">'+esc2(d.note)+'</div>';
           if(!html)html='<div class="gp-id-note">AI ni prepoznal gobe na fotografiji. Poskusi z bolj ostro sliko klobuka in trosovnice.</div>';
+          else html+='<div class="gp-id-note">⚠ AI rezultat ni potrditev užitnosti — je le najverjetnejši '+
+            'predlog iz fotografije. Gobe ne uživaj samo na podlagi tega rezultata.</div>';
           resultEl.innerHTML=html;
         })
         .catch(function(){btn.disabled=false;statusEl2.textContent="Napaka pri povezavi. Poskusi znova.";});
@@ -1457,6 +1476,7 @@ PAGE_JS = """<script>
   if(f){f.addEventListener("submit",function(e){e.preventDefault();
     var msg=document.getElementById("gp-login-msg");var em=(f.email.value||"").trim();
     if(!em){return;}msg.textContent="Pošiljam …";
+    gaEvent("premium_access_request");
     fetch(API+"/premium/login",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({email:em})}).then(function(r){return r.json();})
       .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
@@ -1481,6 +1501,8 @@ PAGE_JS = """<script>
   document.querySelectorAll("[data-paddle]").forEach(function(btn){
     btn.addEventListener("click",function(e){
       var plan=btn.getAttribute("data-paddle");
+      var src=btn.getAttribute("data-src")||"unknown";
+      gaEvent("premium_cta_click",{plan:plan,source:src});
       var priceId=cfg?cfg.prices[plan]:null;
       if(!ready||!priceId){
         // Fallback: not configured yet — go to pricing, don't break the page.
@@ -1490,6 +1512,7 @@ PAGE_JS = """<script>
         return;
       }
       e.preventDefault();
+      gaEvent("premium_checkout_start",{plan:plan,source:src});
       Paddle.Checkout.open({
         items:[{priceId:priceId,quantity:1}],
         customData:{plan:plan},
@@ -2050,6 +2073,14 @@ _FI_FAQ = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/s
     'stroke-linecap="round"/>'
     '<circle cx="12" cy="14.8" r="1.05" fill="currentColor"/></svg>')
 
+_FI_METODOLOGIJA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M4 16.4a8 8 0 0 1 16 0" fill="currentColor" fill-opacity=".14"/>'
+    '<path d="M4 16.4a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '<path d="M12 16.4 8.7 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+    '<circle cx="12" cy="16.4" r="1.2" fill="currentColor"/>'
+    '<path d="M4 16.4h1.5M18.5 16.4H20M6.2 10.6l1.1 1M17.8 10.6l-1.1 1M12 6.8v1.6" stroke="currentColor" '
+    'stroke-width="1.3" stroke-linecap="round" opacity=".6"/></svg>')
+
 
 # Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
 # ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
@@ -2082,7 +2113,9 @@ GOBE_FEATURES = [
     ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
      "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
     ("/gobarska-napoved/nasveti/", _FI_NASVETI, "#c084fc", "Nasveti in pravila",
-     "Koliko smeš nabrati, kje je prepovedano, kako nositi gobe.", None),
+     "Koliko smeš nabrati, kje so zavarovana območja, kako nositi gobe.", None),
+    ("/gobarska-napoved/metodologija/", _FI_METODOLOGIJA, "#fb923c", "Kako deluje model",
+     "Vhodni podatki, rastni zamik in meje gobarskega indeksa.", None),
     ("#faq", _FI_FAQ, "#38bdf8", "Pogosta vprašanja",
      "Kaj indeks pove in česa ne — spodaj na tej strani.", None),
 ]
@@ -2384,7 +2417,8 @@ NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in navad, ki jih
       🧺 Gobe nosi v zračni košari, ne v vrečki — trosi se tako raznašajo.<br>
       🔪 Gobo izvij ali odreži pri dnu in mesto rahlo prekrij.<br>
       ☠️ <b>Nikoli ne uživaj gobe, ki je ne poznaš 100 %.</b> Ob dvomu vprašaj gobarsko društvo ali mikologa.<br>
-      🚫 Logarska dolina, Robanov in Matkov kot: <b>zaščiteno — nabiranje prepovedano.</b>
+      🔒 Nekatera območja doline (npr. Logarska dolina) so zavarovana — pred nabiranjem preveri veljavne
+      omejitve na kraju samem, saj zavarovan status sam po sebi še ne pomeni splošne prepovedi nabiranja.
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem">
       <a href="https://www.gobe.si/" target="_blank" rel="noopener" class="mtn-avk-link">🍄 Gobe.si</a>
@@ -2402,9 +2436,64 @@ NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in navad, ki jih
 def build_nasveti_page():
     return subpage_shell(
         "nasveti", "Nabiranje gob — nasveti in pravila",
-        "Koliko gob smeš nabrati na dan, kje je nabiranje prepovedano, kako gobe nositi in kam po pomoč ob "
+        "Koliko gob smeš nabrati na dan, kje so zavarovana območja, kako gobe nositi in kam po pomoč ob "
         "sumu zastrupitve.",
         "Nasveti in pravila", NASVETI_HTML)
+
+
+METODOLOGIJA_HTML = '''  <p class="post-meta">Kaj gobarski indeks pomeni, iz česa je izračunan in kje so njegove meje —
+  brez razkrivanja same formule.</p>
+
+  <h2 class="gp-h2">Kaj pomeni indeks 0–100</h2>
+  <p class="archive-intro">Gobarski indeks je <strong>ocena ugodnosti vremenskih in talnih pogojev</strong> za
+  rast posamezne vrste — ne verjetnost, da boš to vrsto danes res našel. Gozd ima vedno zadnjo besedo: visok
+  indeks pomeni, da so pogoji ugodni, ne da je goba zajamčena.</p>
+
+  <h2 class="gp-h2">Vhodni podatki</h2>
+  <p class="archive-intro">Model za vsako lokacijo in vsako vrsto upošteva:</p>
+  <ul class="archive-intro">
+    <li>lokalne padavine iz postaje IREICA1 (Rečica ob Savinji) in Open-Meteo za ostala območja doline,</li>
+    <li>temperaturo in vlago tal,</li>
+    <li>zračno vlago,</li>
+    <li>nočno ohladitev,</li>
+    <li>rastni zamik vrste (glej spodaj),</li>
+    <li>geologijo območja (kisla, bazična ali vlažna podlaga — razen pri lesnih vrstah, glej spodaj).</li>
+  </ul>
+
+  <h2 class="gp-h2">Rastni zamik po ekoloških skupinah</h2>
+  <p class="archive-intro">Različne skupine gliv se na isti dež ne odzovejo enako hitro. Razkrojevalke stelje in
+  travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke (ostrigar,
+  panjevka, uhljevka) nekoliko pozneje, mikorizne vrste (gobani, lisičke, golobice) pa šele teden in pol do dva.
+  Padavinsko okno je zato pri vsaki vrsti zamaknjeno za njen rastni zamik: dež, ki je padel včeraj, jurčku danes
+  indeksa ne dvigne, kukmaku pa ga lahko.</p>
+
+  <h2 class="gp-h2">Geologija</h2>
+  <p class="archive-intro">Kislo vulkansko pogorje (npr. Smrekovec) ustreza jurčkom in žametastemu gobanu,
+  karbonatni masivi (npr. Golte, Menina) pa marelam in poletnemu gobanu — zato ista vrsta isti dan ni enako
+  verjetna povsod. Izjema so lesne vrste: rastejo na lesu nad tlemi, zato zanje geologija podlage ne odloča.</p>
+
+  <h2 class="gp-h2">Omejitve modela</h2>
+  <p class="archive-intro">Indeks ne zazna: mikroklime posameznega gozdnega roba, dejanske sestave in starosti
+  gozda, pretekle pobiralne aktivnosti na območju, ali dejanske gobe same. Napovedne točke so <strong>širša
+  območja</strong>, ne točne najdbe.</p>
+
+  <h2 class="gp-h2">Viri podatkov</h2>
+  <p class="archive-intro"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> za
+  vremensko napoved vseh območij, lastna postaja IREICA1 v Rečici ob Savinji za lokalne meritve padavin,
+  temperature in vlage. Model se uči izključno iz teh dveh virov in izmerjene zgodovine postaje — brez notranjih
+  meritev hiše (glej <a href="/zasebnost.html">politiko zasebnosti</a>).</p>
+
+  <p class="archive-intro" style="color:var(--muted);font-size:.85rem">Zadnja večja sprememba modela:
+  gobarski indeks v1.3 (avgust 2026) — glej <a href="/gobarska-napoved/dnevnik/">dnevnik</a> in
+  <a href="/gobarska-napoved/trend/">sezonski trend</a> za preteklo delovanje.</p>'''
+
+
+def build_metodologija_page():
+    return subpage_shell(
+        "metodologija", "Kako deluje gobarski indeks",
+        "Kaj pomeni gobarski indeks 0–100, kateri podatki ga sestavljajo, kako model upošteva rastni zamik "
+        "vrst in geologijo terena — ter kje so njegove meje.",
+        "Kako deluje model", METODOLOGIJA_HTML)
 
 
 def build_dnevnik_page(diary_html):
@@ -2545,6 +2634,35 @@ def build_zemljevid_page(premium, rules):
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
 
+    # Server-rendered fallback list — same `pts` as the interactive map, so
+    # there's no second source of truth to drift. Leaflet stays click-to-load
+    # (see map_js below), but without it (crawlers, screen readers, JS off)
+    # the area names/status were previously invisible on this page.
+    fallback_rows = []
+    for p in sorted(pts, key=lambda p: (p["prot"], -(p["idx"] or 0))):
+        if p["prot"]:
+            fallback_rows.append(
+                f'''    <div class="gp-forest gp-forest-prot">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🔒 {_esc(p["name"])}</span>
+        <span class="gp-terr">zaščiteno</span>
+        <span class="gp-forest-sp">Preveri omejitve nabiranja</span>
+      </div>
+    </div>''')
+        else:
+            fallback_rows.append(
+                f'''    <div class="gp-forest">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">{_esc(p["name"])}</span>
+        <span class="gp-terr">{_esc(p["terrain"] or "")} · {p["elev"]} m</span>
+      </div>
+      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}%</span><span class="lvl">{_esc(p["lvl"])}</span></div>
+    </div>''')
+    fallback_html = ('  <details class="gp-collapse">\n'
+        '    <summary>Območja doline (seznam) <small>({pick_count})</small></summary>\n'
+        '    <div class="gp-forests">\n' + "\n".join(fallback_rows) + '\n    </div>\n'
+        '  </details>').format(pick_count=pick_count)
+
     # Real forest-stand composition (ZGS) per pickable location — only drawn
     # when a visitor arrives via ?loc= deep link (see focusName in map_js),
     # so it's fetched for all locations up front but stays inert weight
@@ -2566,8 +2684,9 @@ def build_zemljevid_page(premium, rules):
     <figcaption>📷 Avtorski dronski posnetek — gozdna pot skozi eno od nabiralnih območij</figcaption>
   </figure>
   <p class="post-meta">Vseh {pick_count} nabiralnih območij Zgornje Savinjske doline na eni karti,
-  obarvanih po <strong>današnjem gobarskem indeksu</strong>. Klikni oznako za podrobnosti. Zaščitena območja
-  (nabiranje prepovedano) so označena posebej. Oznake so <strong>širša območja</strong>, ne točne najdbe.</p>
+  obarvanih po <strong>današnjem gobarskem indeksu</strong>. Klikni oznako za podrobnosti. Zavarovana območja
+  so označena posebej — pred nabiranjem preveri veljavne omejitve na kraju samem. Oznake so
+  <strong>širša območja</strong>, ne točne najdbe.</p>
   <div class="gp-map-legend">
     <span><i style="background:#34d399"></i>Dobra/odlična (≥55 %)</span>
     <span><i style="background:#f59e0b"></i>Zmerna (35–54 %)</span>
@@ -2590,7 +2709,8 @@ def build_zemljevid_page(premium, rules):
   <p class="gp-map-attr">Karta: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
   contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
   Sestava sestojev: <a href="https://www.zgs.si/" target="_blank" rel="noopener">© Zavod za gozdove Slovenije</a>.
-  Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>'''
+  Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>
+{fallback_html}'''
 
     map_js = '''<script>
 (function(){
@@ -2612,7 +2732,8 @@ def build_zemljevid_page(premium, rules):
     var h='<div class="gp-map-pop"><b>'+esc(p.name)+'</b><br>';
     h+='<span class="terr">'+esc(p.terrain||"")+(p.elev?" · "+p.elev+" m":"")+'</span>';
     if(p.prot){
-      h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🚫 Zaščiteno — nabiranje prepovedano</div>';
+      h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🔒 Zavarovano območje — preveri aktualne '+
+        'omejitve nabiranja na kraju samem</div>';
     }else{
       h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
       if(p.sp&&p.sp.length){
@@ -2684,7 +2805,7 @@ def build_zemljevid_page(premium, rules):
     return subpage_shell(
         "zemljevid", "Zemljevid nabiralnih območij — Zgornja Savinjska dolina",
         f"Zemljevid {pick_count} nabiralnih območij Zgornje Savinjske doline, obarvanih po današnjem gobarskem "
-        "indeksu, z zaščitenimi območji, kjer je nabiranje prepovedano.",
+        "indeksu, z označenimi zavarovanimi območji.",
         "Zemljevid", inner, extra_js=map_js)
 
 
@@ -2755,7 +2876,8 @@ def build_body(rules, premium, free):
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
-    nočno ohladitev — po vrstah in po geologiji terena.</div>
+    nočno ohladitev — po vrstah in po geologiji terena.
+    <a href="/gobarska-napoved/metodologija/">Kako izračunamo indeks →</a></div>
   </div>'''
 
     # ── today per forest (free) — compact row: info left, % disc right ────────
@@ -2782,9 +2904,9 @@ def build_body(rules, premium, free):
         forests.append(
             f'''    <div class="gp-forest gp-forest-prot">
       <div class="gp-forest-info">
-        <span class="gp-forest-nm">🚫 {_esc(", ".join(premium["protected_areas"]))}</span>
+        <span class="gp-forest-nm">🔒 {_esc(", ".join(premium["protected_areas"]))}</span>
         <span class="gp-terr">zaščiteno</span>
-        <span class="gp-forest-sp">Nabiranje prepovedano</span>
+        <span class="gp-forest-sp">Preveri omejitve nabiranja</span>
       </div>
     </div>''')
     forests.append("  </div>")
@@ -2844,8 +2966,8 @@ def build_body(rules, premium, free):
 {skel_rows}
     </div>
     <div class="gp-lockbar">
-      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se ({PRICE_MONTHLY}/mes)</button>
-      <button type="button" class="gp-cta alt" data-paddle="season">Sezonski dostop ({PRICE_SEASON})</button>
+      <button type="button" class="gp-cta" data-paddle="monthly" data-src="lock">Naroči se ({PRICE_MONTHLY}/mes)</button>
+      <button type="button" class="gp-cta alt" data-paddle="season" data-src="lock">Sezonski dostop ({PRICE_SEASON})</button>
     </div>
   </div>'''
 
@@ -2864,10 +2986,10 @@ def build_body(rules, premium, free):
         <li>🔔 Lastni alarmi po vrsti, območju in nadmorski višini</li>
         <li>Prekliči kadarkoli</li>
       </ul>
-      <button type="button" class="gp-cta" data-paddle="monthly">Naroči se</button>
+      <button type="button" class="gp-cta" data-paddle="monthly" data-src="pricing">Naroči se</button>
     </div>
     <div class="gp-plan best">
-      <span class="gp-tag">CELA SEZONA · najugodneje</span>
+      <span class="gp-tag">CELA SEZONA</span>
       <div class="p-price">{PRICE_SEASON}<small> / sezona</small></div>
       <ul>
         <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo)</li>
@@ -2875,7 +2997,7 @@ def build_body(rules, premium, free):
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
       </ul>
-      <button type="button" class="gp-cta" data-paddle="season">Kupi sezono</button>
+      <button type="button" class="gp-cta" data-paddle="season" data-src="pricing">Kupi sezono</button>
     </div>
   </div>
   <div id="gp-checkout-msg" class="gp-msg"></div>
@@ -2969,7 +3091,7 @@ def build_body(rules, premium, free):
          "Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — "
          "temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga "
          "in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks "
-         "pomeni ugodne razmere, ne zajamčene gobe."),
+         "pomeni ugodne razmere, ne zajamčene gobe. Podrobno na strani »Kako deluje model«."),
         ("Katere vrste zajema premium napoved?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
@@ -2994,7 +3116,9 @@ def build_body(rules, premium, free):
          "brez ustvarjanja računa in gesla. Če izgubiš povezavo, jo z istim e-naslovom kadarkoli zahtevaš znova."),
         ("Koliko gob smem nabrati?",
          "V Sloveniji je dovoljeno nabrati do 2 kg gob na osebo na dan (Uredba o varstvu samoniklih gliv). "
-         "Logarska dolina, Robanov in Matkov kot so zaščitena območja — nabiranje je tam prepovedano."),
+         "Nekatera območja doline (npr. Logarska dolina) so zavarovana — zavarovan status sam po sebi ne "
+         "pomeni nujno splošne prepovedi nabiranja, zato pred nabiranjem preveri veljavne omejitve na kraju "
+         "samem."),
         ("Ali je to uradna napoved ARSO?",
          "Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob "
          "Savinji. Ni uradna napoved ARSO."),
@@ -3114,9 +3238,10 @@ def main():
     build_danes_page(sub["forests_html"], free)
     build_tereni_page(sub["terrain_html"])
     build_nasveti_page()
+    build_metodologija_page()
     build_dnevnik_page(sub["diary_html"])
-    print(f"  → {3 + n_baza + 5} podstrani (zemljevid, koledar, trend, "
-          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice, danes, tereni, nasveti, dnevnik)")
+    print(f"  → {3 + n_baza + 6} podstrani (zemljevid, koledar, trend, "
+          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice, danes, tereni, nasveti, metodologija, dnevnik)")
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"

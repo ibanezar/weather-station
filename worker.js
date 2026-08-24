@@ -4865,6 +4865,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         const PAGE_URL = "https://meteorec.si/gobarska-napoved/";
         const TOKEN_TTL_S = 60 * 60 * 24 * 90;
+        const LOGIN_RL_MAX = 5;
+        const LOGIN_RL_TTL_S = 15 * 60; // sekund — isto okno kot gallery admin lockout
 
         function _json(obj, status) {
           return new Response(JSON.stringify(obj), {
@@ -5009,6 +5011,18 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (body.website) return _json({ ok: true }); // honeypot
           const email = (body.email || "").trim().toLowerCase();
           if (!EMAIL_RE.test(email) || email.length > 120) return _json({ error: "Neveljaven e-naslov" }, 400);
+          // Rate-limit per email so a script can't hammer the mail-send path.
+          // Same neutral response as success either way — a different reply
+          // here would itself leak "this email is being rate-limited", which
+          // is as much of an oracle as leaking subscription status.
+          if (kv) {
+            const rlKey = "premium_login_rl:" + email;
+            const count = parseInt((await kv.get(rlKey)) || "0") || 0;
+            if (count >= LOGIN_RL_MAX) {
+              return _json({ ok: true, msg: "Če je e-naslov naročen, smo nanj poslali povezavo za dostop." });
+            }
+            await kv.put(rlKey, String(count + 1), { expirationTtl: LOGIN_RL_TTL_S });
+          }
           const sub = await _subFor(email);
           if (sub?.expires && new Date(sub.expires) > new Date()) {
             const tok = await _newToken(email);
