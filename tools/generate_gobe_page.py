@@ -161,6 +161,24 @@ BAZA_CATS = [
 ]
 
 
+# Kurirani seznam drevesnih partnerjev za filter po habitatu — izpeljan iz
+# dejanske pogostosti besed v `mycorrhiza` (glej analizo ob uvedbi, avg 2026):
+# bukev/smreka/hrast/bor/breza/gaber so edina imena s smiselnim številom
+# vrst. `elevation_zone`/`substrate` NISO uporabljena za filter — obe polji
+# sta prosto besedilo z ~60-166 različnimi zapisi (vključno s pokvarjenimi
+# uvoznimi fragmenti), zato bi vsak poskus razvrščanja v skupine pomenil
+# uredniško sojenje o vsebini vrste, ne le prikaz obstoječega podatka.
+TREE_PARTNERS = ["bukev", "smreka", "hrast", "bor", "breza", "gaber"]
+
+
+def species_tree_tokens(sp):
+    """Which of TREE_PARTNERS appear (as a substring) in this species'
+    mycorrhiza list — presence-check against an existing structured field,
+    not a reinterpretation of free text."""
+    text = " ".join(sp.get("mycorrhiza") or []).lower()
+    return [t for t in TREE_PARTNERS if t in text]
+
+
 def format_season_range(start, end):
     """'MM.DD' raw storage → localized Slovenian display, e.g.
     '09.01'/'11.30' → '1. 9.–30. 11.'. Display only — cross-year wraparound
@@ -187,7 +205,9 @@ def species_section_html(subset, all_species, current=""):
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
         # Podatki za filtriranje in iskanje na strani; iskalni niz je že
         # normaliziran, da JS ne ponavlja odstranjevanja šumnikov ob vsakem tipku.
-        data_attrs = (f'data-m="{",".join(str(m) for m in sorted(season_months(s)))}" '
+        data_attrs = (f'data-id="{s["id"]}" data-m="{",".join(str(m) for m in sorted(season_months(s)))}" '
+                      f'data-eco="{_esc(s.get("ecology") or "")}" '
+                      f'data-tree="{",".join(species_tree_tokens(s))}" '
                       f'data-q="{_esc(_search_key(s["name_sl"] + " " + s["name_lat"]))}"')
         dbl = s.get("doubles")
         dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
@@ -202,6 +222,7 @@ def species_section_html(subset, all_species, current=""):
         <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="{s['id']}" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
@@ -209,6 +230,7 @@ def species_section_html(subset, all_species, current=""):
         <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {season_txt}</span></div>
         {unver_html}
         {dbl_html}
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta={s['id']}#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>''')
 
@@ -226,12 +248,30 @@ def species_section_html(subset, all_species, current=""):
     n_season = sum(1 for s in subset if now_month in season_months(s))
     season_chip = (f'      <button type="button" class="gp-sp-chip" id="gp-sp-season" '
                    f'data-f="sezona">V sezoni zdaj ({n_season})</button>' if n_season else "")
+    fav_chip = ('      <button type="button" class="gp-sp-chip" id="gp-sp-fav-filter" '
+                'data-f="priljubljene">♡ Priljubljene</button>')
+
+    eco_labels = {"mikorizna": "Mikorizne", "razkrojevalka": "Razkrojevalke", "lesna": "Lesne"}
+    eco_present = [e for e in ("mikorizna", "razkrojevalka", "lesna")
+                   if any((s.get("ecology") or "") == e for s in subset)]
+    eco_chips = "".join(
+        f'      <button type="button" class="gp-sp-chip" data-eco-f="{e}">{eco_labels[e]}</button>\n'
+        for e in eco_present)
+    tree_present = [t for t in TREE_PARTNERS if any(t in species_tree_tokens(s) for s in subset)]
+    tree_chips = "".join(
+        f'      <button type="button" class="gp-sp-chip" data-tree-f="{t}">{t.capitalize()}</button>\n'
+        for t in tree_present)
+
     return (
         '  <div class="gp-sp-tools">\n'
         '    <input type="search" id="gp-sp-q" class="gp-sp-search" placeholder="Poišči vrsto — slovensko ali latinsko ime"\n'
         '      autocomplete="off" aria-label="Iskanje po vrstah">\n'
         '    <nav class="gp-sp-chips" aria-label="Skupine po užitnosti">\n' + "\n".join(links) + "\n    </nav>\n"
-        + (f'    <div class="gp-sp-chips">\n{season_chip}\n    </div>\n' if season_chip else "")
+        + f'    <div class="gp-sp-chips">\n{season_chip}\n{fav_chip}\n    </div>\n'
+        + (f'    <nav class="gp-sp-chips" aria-label="Filter po ekološki skupini">\n{eco_chips}    </nav>\n'
+           if eco_chips else "")
+        + (f'    <nav class="gp-sp-chips" aria-label="Filter po drevesnem partnerju">\n{tree_chips}    </nav>\n'
+           if tree_chips else "")
         + '    <p class="gp-sp-count" id="gp-sp-count" hidden></p>\n'
         "  </div>\n"
         '  <div class="gp-sp-grid" id="gp-sp-grid">\n' + "\n".join(cards) + "\n  </div>\n"
@@ -516,6 +556,10 @@ body{
 .gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
 .gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
 .gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-fav{position:absolute;top:.4rem;right:.4rem;z-index:1;width:1.9rem;height:1.9rem;border-radius:50%;
+  border:none;background:rgba(4,7,14,.55);color:#fff;font-size:1.05rem;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.gp-sp-fav.on{color:#f87171}
 .gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
 .gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
 .gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
@@ -525,6 +569,8 @@ body{
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
 .gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
+.gp-sp-alert-link{display:block;font-size:.76rem;color:var(--blue);margin-top:.5rem;text-decoration:none}
+.gp-sp-alert-link:hover{text-decoration:underline}
 /* Orodna vrstica baze vrst: iskanje + filtri po užitnosti in sezoni. Kartic je
    300, zato se jih naenkrat izriše le prvih nekaj (glej SP_JS) — brez JS
    ostanejo vidne vse, da se pajku in obiskovalcu brez skript ne skrije nič. */
@@ -1013,6 +1059,14 @@ PAGE_JS = """<script>
       return localStorage.getItem(LS);
     }catch(e){return null;}
   }
+  // Deep link from a species card on /baza-vrst/ ("Obvesti me ob ugodnih
+  // pogojih") — same URLSearchParams pattern as focusName on the zemljevid
+  // page, but this is a separate parser since PAGE_JS and map_js don't
+  // share code. Left in the URL (not stripped like token — nothing
+  // sensitive about it).
+  function wantedSpecies(){
+    try{return new URLSearchParams(location.search).get("vrsta");}catch(e){return null;}
+  }
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
@@ -1373,10 +1427,21 @@ PAGE_JS = """<script>
         })
         .catch(function(){msgEl.textContent="Napaka pri povezavi. Poskusi znova.";});
     });
+    // ?vrsta=<id> deep link (glej wantedSpecies zgoraj) — če vrsta obstaja
+    // in še nima svojega alarma, dodamo prazno vrstico z že izbrano vrsto.
+    function withWanted(rules){
+      var wanted=wantedSpecies();
+      rules=rules||[];
+      if(wanted && speciesList.some(function(s){return s.id===wanted;}) &&
+         !rules.some(function(r){return r.species_id===wanted;})){
+        rules=rules.concat([{species_id:wanted}]);
+      }
+      return rules;
+    }
     fetch(API+"/premium/alerts?token="+encodeURIComponent(token))
       .then(function(r){return r.json();})
-      .then(function(res){renderRows(res&&res.rules);})
-      .catch(function(){renderRows(null);});
+      .then(function(res){renderRows(withWanted(res&&res.rules));})
+      .catch(function(){renderRows(withWanted(null));});
   }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
@@ -1746,21 +1811,60 @@ SP_JS = """<script>
   var grid=document.getElementById("gp-sp-grid");
   if(!grid)return;
   var PAGE=24;
+  var FAV_LS="mr_gobe_priljubljene";
   var cards=[].slice.call(grid.querySelectorAll(".gp-sp-card"));
   var qEl=document.getElementById("gp-sp-q");
   var moreEl=document.getElementById("gp-sp-more");
   var countEl=document.getElementById("gp-sp-count");
   var seasonEl=document.getElementById("gp-sp-season");
+  var favFilterEl=document.getElementById("gp-sp-fav-filter");
+  var ecoEls=[].slice.call(document.querySelectorAll("[data-eco-f]"));
+  var treeEls=[].slice.call(document.querySelectorAll("[data-tree-f]"));
   var month=String(new Date().getMonth()+1);
-  var seasonOnly=false, query="", shown=PAGE;
+  var seasonOnly=false, favOnly=false, query="", shown=PAGE;
+  var ecoOn={}, treeOn={};
+
+  function loadFavs(){
+    try{return new Set(JSON.parse(localStorage.getItem(FAV_LS)||"[]"));}catch(e){return new Set();}
+  }
+  function saveFavs(s){
+    try{localStorage.setItem(FAV_LS,JSON.stringify(Array.from(s)));}catch(e){}
+  }
+  var favs=loadFavs();
+  function paintFavButtons(){
+    grid.querySelectorAll(".gp-sp-fav").forEach(function(btn){
+      var on=favs.has(btn.getAttribute("data-id"));
+      btn.classList.toggle("on",on);
+      btn.setAttribute("aria-pressed",on?"true":"false");
+      btn.textContent=on?"♥":"♡";
+    });
+  }
+  grid.addEventListener("click",function(e){
+    var btn=e.target.closest(".gp-sp-fav");
+    if(!btn)return;
+    e.preventDefault();
+    var id=btn.getAttribute("data-id");
+    if(favs.has(id))favs.delete(id); else favs.add(id);
+    saveFavs(favs);
+    paintFavButtons();
+    if(favOnly)render();
+  });
+  paintFavButtons();
 
   function norm(s){
     return (s||"").toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"")
       .replace(/[^a-z0-9 ]+/g," ").trim();
   }
+  function anyOn(map){return Object.keys(map).some(function(k){return map[k];});}
   function matches(c){
     if(query && c.getAttribute("data-q").indexOf(query)<0) return false;
     if(seasonOnly && (c.getAttribute("data-m")||"").split(",").indexOf(month)<0) return false;
+    if(favOnly && !favs.has(c.getAttribute("data-id"))) return false;
+    if(anyOn(ecoOn) && !ecoOn[c.getAttribute("data-eco")]) return false;
+    if(anyOn(treeOn)){
+      var trees=(c.getAttribute("data-tree")||"").split(",");
+      if(!trees.some(function(t){return treeOn[t];})) return false;
+    }
     return true;
   }
   function render(){
@@ -1785,6 +1889,30 @@ SP_JS = """<script>
       shown=PAGE; render();
     });
   }
+  if(favFilterEl){
+    favFilterEl.addEventListener("click",function(){
+      favOnly=!favOnly;
+      favFilterEl.classList.toggle("on",favOnly);
+      favFilterEl.setAttribute("aria-pressed",favOnly?"true":"false");
+      shown=PAGE; render();
+    });
+  }
+  ecoEls.forEach(function(btn){
+    var key=btn.getAttribute("data-eco-f");
+    btn.addEventListener("click",function(){
+      ecoOn[key]=!ecoOn[key];
+      btn.classList.toggle("on",ecoOn[key]);
+      shown=PAGE; render();
+    });
+  });
+  treeEls.forEach(function(btn){
+    var key=btn.getAttribute("data-tree-f");
+    btn.addEventListener("click",function(){
+      treeOn[key]=!treeOn[key];
+      btn.classList.toggle("on",treeOn[key]);
+      shown=PAGE; render();
+    });
+  });
   if(qEl){
     var t;
     qEl.addEventListener("input",function(){
