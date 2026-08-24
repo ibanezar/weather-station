@@ -929,7 +929,11 @@ body .wrap{padding-bottom:5.5rem}
 .gp-map-pop .terr{font-size:.72rem;color:#9a9a9a;text-transform:uppercase;letter-spacing:.04em}
 .gp-map-pop .idx{font-weight:800;font-size:1.1rem}
 .gp-map-pop .sp{font-size:.82rem;margin-top:.2rem}
-.gp-map-pop .sp-list{list-style:none;margin:.3rem 0 0;padding:0;font-size:.8rem;line-height:1.5}
+.gp-map-pop .sp-list{list-style:none;margin:.3rem 0 0;padding:0;font-size:.8rem;line-height:1.5;
+  max-height:190px;overflow-y:auto}
+.gp-map-pop .sp-list li{display:flex;justify-content:space-between;gap:.6rem}
+.gp-map-pop .sp-pct{color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-map-pop .sp-more{font-size:.72rem;color:var(--muted);margin-top:.25rem}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#130f0b;color:var(--text)}
 .leaflet-popup-content{margin:.6rem .8rem}
 
@@ -2511,14 +2515,24 @@ def build_zemljevid_page(premium, rules):
     lazily on first click, mirroring the site's storm-map pattern."""
     meta = premium["species_meta"]
     pts = []
+    # Popup lists the top 8 species per location (same depth as the location
+    # detail panel on the main hub page — locDetailHtml uses the same slice)
+    # instead of just 3, since a location routinely has 80+ species with a
+    # nonzero index and 3 barely scratched the surface.
+    MAP_POPUP_SPECIES = 8
     for loc in premium["locations"]:
         d0 = loc["days"][0]
-        top3 = d0.get("species", [])[:3]
+        # species_out is sorted desc by index and always lists every indexed
+        # species (many at 0 %) — only the ones with an actual positive score
+        # belong in "how many species have some potential here".
+        nonzero = [s for s in d0.get("species", []) if s["id"] in meta and s["index"] > 0]
+        top = nonzero[:MAP_POPUP_SPECIES]
         pts.append({
             "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
             "elev": loc["elev_m"], "terrain": loc.get("terrain"),
             "idx": d0["overall"], "lvl": d0["level"],
-            "sp": [meta[s["id"]]["name_sl"] for s in top3 if s["id"] in meta],
+            "sp": [{"n": meta[s["id"]]["name_sl"], "i": s["index"]} for s in top],
+            "sp_total": len(nonzero),
             "prot": False,
         })
     for loc in rules.get("locations", []):
@@ -2526,7 +2540,7 @@ def build_zemljevid_page(premium, rules):
             pts.append({
                 "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
                 "elev": loc.get("elev_m"), "terrain": loc.get("terrain"),
-                "idx": None, "lvl": None, "sp": [], "prot": True,
+                "idx": None, "lvl": None, "sp": [], "sp_total": 0, "prot": True,
             })
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
@@ -2601,7 +2615,12 @@ def build_zemljevid_page(premium, rules):
       h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🚫 Zaščiteno — nabiranje prepovedano</div>';
     }else{
       h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
-      if(p.sp&&p.sp.length)h+='<ul class="sp-list">'+p.sp.map(function(s){return'<li>🍄 '+esc(s)+'</li>';}).join('')+'</ul>';
+      if(p.sp&&p.sp.length){
+        h+='<ul class="sp-list">'+p.sp.map(function(s){
+          return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+' %</span></li>';
+        }).join('')+'</ul>';
+        if(p.sp_total>p.sp.length)h+='<div class="sp-more">+'+(p.sp_total-p.sp.length)+' drugih vrst z indeksom</div>';
+      }
     }
     h+='</div>';
     return h;
