@@ -2073,6 +2073,14 @@ _FI_FAQ = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/s
     'stroke-linecap="round"/>'
     '<circle cx="12" cy="14.8" r="1.05" fill="currentColor"/></svg>')
 
+_FI_METODOLOGIJA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M4 16.4a8 8 0 0 1 16 0" fill="currentColor" fill-opacity=".14"/>'
+    '<path d="M4 16.4a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '<path d="M12 16.4 8.7 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+    '<circle cx="12" cy="16.4" r="1.2" fill="currentColor"/>'
+    '<path d="M4 16.4h1.5M18.5 16.4H20M6.2 10.6l1.1 1M17.8 10.6l-1.1 1M12 6.8v1.6" stroke="currentColor" '
+    'stroke-width="1.3" stroke-linecap="round" opacity=".6"/></svg>')
+
 
 # Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
 # ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
@@ -2106,6 +2114,8 @@ GOBE_FEATURES = [
      "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
     ("/gobarska-napoved/nasveti/", _FI_NASVETI, "#c084fc", "Nasveti in pravila",
      "Koliko smeš nabrati, kje so zavarovana območja, kako nositi gobe.", None),
+    ("/gobarska-napoved/metodologija/", _FI_METODOLOGIJA, "#fb923c", "Kako deluje model",
+     "Vhodni podatki, rastni zamik in meje gobarskega indeksa.", None),
     ("#faq", _FI_FAQ, "#38bdf8", "Pogosta vprašanja",
      "Kaj indeks pove in česa ne — spodaj na tej strani.", None),
 ]
@@ -2431,6 +2441,61 @@ def build_nasveti_page():
         "Nasveti in pravila", NASVETI_HTML)
 
 
+METODOLOGIJA_HTML = '''  <p class="post-meta">Kaj gobarski indeks pomeni, iz česa je izračunan in kje so njegove meje —
+  brez razkrivanja same formule.</p>
+
+  <h2 class="gp-h2">Kaj pomeni indeks 0–100</h2>
+  <p class="archive-intro">Gobarski indeks je <strong>ocena ugodnosti vremenskih in talnih pogojev</strong> za
+  rast posamezne vrste — ne verjetnost, da boš to vrsto danes res našel. Gozd ima vedno zadnjo besedo: visok
+  indeks pomeni, da so pogoji ugodni, ne da je goba zajamčena.</p>
+
+  <h2 class="gp-h2">Vhodni podatki</h2>
+  <p class="archive-intro">Model za vsako lokacijo in vsako vrsto upošteva:</p>
+  <ul class="archive-intro">
+    <li>lokalne padavine iz postaje IREICA1 (Rečica ob Savinji) in Open-Meteo za ostala območja doline,</li>
+    <li>temperaturo in vlago tal,</li>
+    <li>zračno vlago,</li>
+    <li>nočno ohladitev,</li>
+    <li>rastni zamik vrste (glej spodaj),</li>
+    <li>geologijo območja (kisla, bazična ali vlažna podlaga — razen pri lesnih vrstah, glej spodaj).</li>
+  </ul>
+
+  <h2 class="gp-h2">Rastni zamik po ekoloških skupinah</h2>
+  <p class="archive-intro">Različne skupine gliv se na isti dež ne odzovejo enako hitro. Razkrojevalke stelje in
+  travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke (ostrigar,
+  panjevka, uhljevka) nekoliko pozneje, mikorizne vrste (gobani, lisičke, golobice) pa šele teden in pol do dva.
+  Padavinsko okno je zato pri vsaki vrsti zamaknjeno za njen rastni zamik: dež, ki je padel včeraj, jurčku danes
+  indeksa ne dvigne, kukmaku pa ga lahko.</p>
+
+  <h2 class="gp-h2">Geologija</h2>
+  <p class="archive-intro">Kislo vulkansko pogorje (npr. Smrekovec) ustreza jurčkom in žametastemu gobanu,
+  karbonatni masivi (npr. Golte, Menina) pa marelam in poletnemu gobanu — zato ista vrsta isti dan ni enako
+  verjetna povsod. Izjema so lesne vrste: rastejo na lesu nad tlemi, zato zanje geologija podlage ne odloča.</p>
+
+  <h2 class="gp-h2">Omejitve modela</h2>
+  <p class="archive-intro">Indeks ne zazna: mikroklime posameznega gozdnega roba, dejanske sestave in starosti
+  gozda, pretekle pobiralne aktivnosti na območju, ali dejanske gobe same. Napovedne točke so <strong>širša
+  območja</strong>, ne točne najdbe.</p>
+
+  <h2 class="gp-h2">Viri podatkov</h2>
+  <p class="archive-intro"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> za
+  vremensko napoved vseh območij, lastna postaja IREICA1 v Rečici ob Savinji za lokalne meritve padavin,
+  temperature in vlage. Model se uči izključno iz teh dveh virov in izmerjene zgodovine postaje — brez notranjih
+  meritev hiše (glej <a href="/zasebnost.html">politiko zasebnosti</a>).</p>
+
+  <p class="archive-intro" style="color:var(--muted);font-size:.85rem">Zadnja večja sprememba modela:
+  gobarski indeks v1.3 (avgust 2026) — glej <a href="/gobarska-napoved/dnevnik/">dnevnik</a> in
+  <a href="/gobarska-napoved/trend/">sezonski trend</a> za preteklo delovanje.</p>'''
+
+
+def build_metodologija_page():
+    return subpage_shell(
+        "metodologija", "Kako deluje gobarski indeks",
+        "Kaj pomeni gobarski indeks 0–100, kateri podatki ga sestavljajo, kako model upošteva rastni zamik "
+        "vrst in geologijo terena — ter kje so njegove meje.",
+        "Kako deluje model", METODOLOGIJA_HTML)
+
+
 def build_dnevnik_page(diary_html):
     body = ('  <p class="post-meta">Zabeleži najdbo z datumom, vrsto, lokacijo in fotografijo. Vse ostane v '
             'tvojem brskalniku; naročniki lahko dnevnik sinhronizirajo med napravami.</p>\n'
@@ -2569,6 +2634,35 @@ def build_zemljevid_page(premium, rules):
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
 
+    # Server-rendered fallback list — same `pts` as the interactive map, so
+    # there's no second source of truth to drift. Leaflet stays click-to-load
+    # (see map_js below), but without it (crawlers, screen readers, JS off)
+    # the area names/status were previously invisible on this page.
+    fallback_rows = []
+    for p in sorted(pts, key=lambda p: (p["prot"], -(p["idx"] or 0))):
+        if p["prot"]:
+            fallback_rows.append(
+                f'''    <div class="gp-forest gp-forest-prot">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">🔒 {_esc(p["name"])}</span>
+        <span class="gp-terr">zaščiteno</span>
+        <span class="gp-forest-sp">Preveri omejitve nabiranja</span>
+      </div>
+    </div>''')
+        else:
+            fallback_rows.append(
+                f'''    <div class="gp-forest">
+      <div class="gp-forest-info">
+        <span class="gp-forest-nm">{_esc(p["name"])}</span>
+        <span class="gp-terr">{_esc(p["terrain"] or "")} · {p["elev"]} m</span>
+      </div>
+      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}%</span><span class="lvl">{_esc(p["lvl"])}</span></div>
+    </div>''')
+    fallback_html = ('  <details class="gp-collapse">\n'
+        '    <summary>Območja doline (seznam) <small>({pick_count})</small></summary>\n'
+        '    <div class="gp-forests">\n' + "\n".join(fallback_rows) + '\n    </div>\n'
+        '  </details>').format(pick_count=pick_count)
+
     # Real forest-stand composition (ZGS) per pickable location — only drawn
     # when a visitor arrives via ?loc= deep link (see focusName in map_js),
     # so it's fetched for all locations up front but stays inert weight
@@ -2615,7 +2709,8 @@ def build_zemljevid_page(premium, rules):
   <p class="gp-map-attr">Karta: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
   contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
   Sestava sestojev: <a href="https://www.zgs.si/" target="_blank" rel="noopener">© Zavod za gozdove Slovenije</a>.
-  Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>'''
+  Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>
+{fallback_html}'''
 
     map_js = '''<script>
 (function(){
@@ -2781,7 +2876,8 @@ def build_body(rules, premium, free):
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
-    nočno ohladitev — po vrstah in po geologiji terena.</div>
+    nočno ohladitev — po vrstah in po geologiji terena.
+    <a href="/gobarska-napoved/metodologija/">Kako izračunamo indeks →</a></div>
   </div>'''
 
     # ── today per forest (free) — compact row: info left, % disc right ────────
@@ -2995,7 +3091,7 @@ def build_body(rules, premium, free):
          "Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — "
          "temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga "
          "in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks "
-         "pomeni ugodne razmere, ne zajamčene gobe."),
+         "pomeni ugodne razmere, ne zajamčene gobe. Podrobno na strani »Kako deluje model«."),
         ("Katere vrste zajema premium napoved?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
@@ -3142,9 +3238,10 @@ def main():
     build_danes_page(sub["forests_html"], free)
     build_tereni_page(sub["terrain_html"])
     build_nasveti_page()
+    build_metodologija_page()
     build_dnevnik_page(sub["diary_html"])
-    print(f"  → {3 + n_baza + 5} podstrani (zemljevid, koledar, trend, "
-          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice, danes, tereni, nasveti, dnevnik)")
+    print(f"  → {3 + n_baza + 6} podstrani (zemljevid, koledar, trend, "
+          f"baza-vrst + {n_baza - 1} po skupinah, dvojnice, danes, tereni, nasveti, metodologija, dnevnik)")
 
     url = "/gobarska-napoved/"
     title = "Gobarska napoved — Zgornja Savinjska dolina"

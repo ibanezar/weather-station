@@ -50,6 +50,7 @@ CORE = {
     "gobarska-napoved/danes/":      ("daily",   "0.7"),
     "gobarska-napoved/tereni/":     ("monthly", "0.5"),
     "gobarska-napoved/nasveti/":    ("monthly", "0.5"),
+    "gobarska-napoved/metodologija/": ("monthly", "0.5"),
     "gobarska-napoved/dnevnik/":    ("monthly", "0.4"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
