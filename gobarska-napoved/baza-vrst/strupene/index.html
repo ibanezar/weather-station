@@ -104,6 +104,10 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+.gp-hero-topsp{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+.gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
+.gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-hero-spark .gp-spark{width:84px;height:22px}
 /* Thumb-friendly action row right under the gauge — "glanceable" actions
    (share, map, notify) instead of making the user read/scroll for them. */
 .gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
@@ -148,7 +152,7 @@ body{
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.gp-forest-pct .n{font-size:.92rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
   text-align:center;text-transform:uppercase;opacity:.9}
 /* Dynamic badge tiers — separate classes (not inline colour) so each growth
@@ -275,6 +279,10 @@ body{
 .gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
 .gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
 .gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-fav{position:absolute;top:.4rem;right:.4rem;z-index:1;width:1.9rem;height:1.9rem;border-radius:50%;
+  border:none;background:rgba(4,7,14,.55);color:#fff;font-size:1.05rem;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.gp-sp-fav.on{color:#f87171}
 .gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
 .gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
 .gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
@@ -284,6 +292,8 @@ body{
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
 .gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
+.gp-sp-alert-link{display:block;font-size:.76rem;color:var(--blue);margin-top:.5rem;text-decoration:none}
+.gp-sp-alert-link:hover{text-decoration:underline}
 /* Orodna vrstica baze vrst: iskanje + filtri po užitnosti in sezoni. Kartic je
    300, zato se jih naenkrat izriše le prvih nekaj (glej SP_JS) — brez JS
    ostanejo vidne vse, da se pajku in obiskovalcu brez skript ne skrije nič. */
@@ -566,7 +576,11 @@ body{
 
    Mreža je nadomestila prejšnji hub s fotografijami, ki je stal pod cenikom —
    isti cilji, le da so zdaj na vrhu in jih je devet namesto petih. */
-.gp-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat-group{margin-bottom:.3rem}
+.gp-feat-group-title{font-size:.92rem;font-weight:700;color:var(--muted);margin:1.1rem 0 .1rem}
+.gp-feat-more{font-size:.85rem;color:var(--muted);margin:.2rem 0 1.3rem}
+.gp-feat-more a{color:var(--muted)}
 .gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
   padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
@@ -687,6 +701,15 @@ body .wrap{padding-bottom:5.5rem}
 .gp-species-legend-title{flex-basis:100%}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
+.gp-mini-map{margin:1.4rem 0}
+.gp-mini-map-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 .9rem}
+.gp-mmap-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .65rem;border-radius:10px;
+  background:var(--card-bg);border:1px solid var(--card-border);font-size:.82rem;color:var(--text);
+  text-decoration:none}
+.gp-mmap-chip i{width:.7rem;height:.7rem;border-radius:50%;flex:0 0 auto}
+.gp-mmap-chip .nm{font-weight:600}
+.gp-mmap-chip .pct{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+.gp-mmap-chip.prot{opacity:.75}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -788,15 +811,30 @@ body .wrap{padding-bottom:5.5rem}
     </nav>
     <div class="gp-sp-chips">
       <button type="button" class="gp-sp-chip" id="gp-sp-season" data-f="sezona">V sezoni zdaj (36)</button>
+      <button type="button" class="gp-sp-chip" id="gp-sp-fav-filter" data-f="priljubljene">♡ Priljubljene</button>
     </div>
+    <nav class="gp-sp-chips" aria-label="Filter po ekološki skupini">
+      <button type="button" class="gp-sp-chip" data-eco-f="mikorizna">Mikorizne</button>
+      <button type="button" class="gp-sp-chip" data-eco-f="razkrojevalka">Razkrojevalke</button>
+      <button type="button" class="gp-sp-chip" data-eco-f="lesna">Lesne</button>
+    </nav>
+    <nav class="gp-sp-chips" aria-label="Filter po drevesnem partnerju">
+      <button type="button" class="gp-sp-chip" data-tree-f="bukev">Bukev</button>
+      <button type="button" class="gp-sp-chip" data-tree-f="smreka">Smreka</button>
+      <button type="button" class="gp-sp-chip" data-tree-f="hrast">Hrast</button>
+      <button type="button" class="gp-sp-chip" data-tree-f="bor">Bor</button>
+      <button type="button" class="gp-sp-chip" data-tree-f="breza">Breza</button>
+      <button type="button" class="gp-sp-chip" data-tree-f="gaber">Gaber</button>
+    </nav>
     <p class="gp-sp-count" id="gp-sp-count" hidden></p>
   </div>
   <div class="gp-sp-grid" id="gp-sp-grid">
-    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="bela livka clitocybe dealbata">
+    <div class="gp-sp-card" data-id="clitocybe_dealbata" data-m="7,8,9,10,11" data-eco="mikorizna" data-tree="" data-q="bela livka clitocybe dealbata">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/clitocybe_dealbata.jpg" alt="Bela livka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="clitocybe_dealbata" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Bela livka</div>
@@ -804,13 +842,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 1. 7.–30. 11.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=clitocybe_dealbata#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="bleda griva ramaria pallida">
+    <div class="gp-sp-card" data-id="ramaria_pallida" data-m="8,9,10" data-eco="mikorizna" data-tree="" data-q="bleda griva ramaria pallida">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/ramaria_pallida.jpg" alt="Bleda griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="ramaria_pallida" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Bleda griva</div>
@@ -818,13 +858,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=ramaria_pallida#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bljuvna golobica russula emetica">
+    <div class="gp-sp-card" data-id="russula_emetica" data-m="7,8,9,10" data-eco="mikorizna" data-tree="smreka,bor" data-q="bljuvna golobica russula emetica">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/russula_emetica.jpg" alt="Bljuvna golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="russula_emetica" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Bljuvna golobica</div>
@@ -832,13 +874,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne rdeče golobice – bljuvna je izjemno pekoča in povzroča hude prebavne motnje.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=russula_emetica#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="bodicasti deznik echinoderma asperum">
+    <div class="gp-sp-card" data-id="echinoderma_asperum" data-m="8,9,10" data-eco="razkrojevalka" data-tree="" data-q="bodicasti deznik echinoderma asperum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/echinoderma_asperum.jpg" alt="Bodičasti dežnik" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="echinoderma_asperum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Bodičasti dežnik</div>
@@ -846,13 +890,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Dežniki (Macrolepiota) – asperum je gosto pokrit s koničastimi luskami in neprijetno diši.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=echinoderma_asperum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="bradavicasta pokovka scleroderma verrucosum">
+    <div class="gp-sp-card" data-id="scleroderma_verrucosum" data-m="7,8,9,10" data-eco="mikorizna" data-tree="hrast,breza" data-q="bradavicasta pokovka scleroderma verrucosum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/scleroderma_verrucosum.jpg" alt="Bradavičasta pokovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="scleroderma_verrucosum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Bradavičasta pokovka</div>
@@ -860,13 +906,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade prašnice – pokovka ima trdo lupino in temno notranjost. Prerez pokovke je črnovijoličast, prašnice bel.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=scleroderma_verrucosum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10,11" data-q="cimetasta koprenka cortinarius cinnamomeus">
+    <div class="gp-sp-card" data-id="cortinarius_cinnamomeus" data-m="8,9,10,11" data-eco="mikorizna" data-tree="" data-q="cimetasta koprenka cortinarius cinnamomeus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_cinnamomeus.jpg" alt="Cimetasta koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="cortinarius_cinnamomeus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Cimetasta koprenka</div>
@@ -874,13 +922,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=cortinarius_cinnamomeus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="9,10,11" data-q="clitocybe fasciculata clitocybe fasciculata">
+    <div class="gp-sp-card" data-id="clitocybe_fasciculata" data-m="9,10,11" data-eco="razkrojevalka" data-tree="" data-q="clitocybe fasciculata clitocybe fasciculata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/clitocybe_fasciculata.jpg" alt="Clitocybe fasciculata" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="clitocybe_fasciculata" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Clitocybe fasciculata</div>
@@ -888,13 +938,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 9.–30. 11.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Travniška vitezovka (Marasmius oreades) – bele livke s travnikov vsebujejo muskarin in so nevarne.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=clitocybe_fasciculata#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="gola tintnica coprinopsis atramentaria">
+    <div class="gp-sp-card" data-id="coprinopsis_atramentaria" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="gola tintnica coprinopsis atramentaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/coprinopsis_atramentaria.jpg" alt="Gola tintnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="coprinopsis_atramentaria" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Gola tintnica</div>
@@ -902,13 +954,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=coprinopsis_atramentaria#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="9,10,11" data-q="gorcicna grenivka hebeloma sinapizans">
+    <div class="gp-sp-card" data-id="hebeloma_sinapizans" data-m="9,10,11" data-eco="mikorizna" data-tree="bukev,hrast" data-q="gorcicna grenivka hebeloma sinapizans">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/hebeloma_sinapizans.jpg" alt="Gorčična grenivka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="hebeloma_sinapizans" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Gorčična grenivka</div>
@@ -916,13 +970,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 9.–30. 11.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Miška (Tricholoma scalpturatum) in druge svetle kolobarnice – grenivka ima vonj po redkvi in rjav trosni prah.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=hebeloma_sinapizans#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="grda mlecnica lactarius turpis">
+    <div class="gp-sp-card" data-id="lactarius_turpis" data-m="8,9,10" data-eco="mikorizna" data-tree="breza" data-q="grda mlecnica lactarius turpis">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_turpis.jpg" alt="Grda mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lactarius_turpis" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Grda mlečnica</div>
@@ -930,13 +986,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Temne sirovke – turpis je olivno črnikast in pekoč, velja za rakotvornega.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lactarius_turpis#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="jamicasta mlecnica lactarius scrobiculatus">
+    <div class="gp-sp-card" data-id="lactarius_scrobiculatus" data-m="8,9,10" data-eco="mikorizna" data-tree="smreka" data-q="jamicasta mlecnica lactarius scrobiculatus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_scrobiculatus.jpg" alt="Jamičasta mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lactarius_scrobiculatus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Jamičasta mlečnica</div>
@@ -944,13 +1002,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitne sirovke (Lactarius deliciosus) – te imajo oranžen mleček; scrobiculatus ima bel mleček, ki na zraku porumeni, in jamičast bet.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lactarius_scrobiculatus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="9,10,11" data-q="jesenski hrcek gyromitra infula">
+    <div class="gp-sp-card" data-id="gyromitra_infula" data-m="9,10,11" data-eco="lesna" data-tree="" data-q="jesenski hrcek gyromitra infula">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/gyromitra_infula.jpg" alt="Jesenski hrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="gyromitra_infula" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Jesenski hrček</div>
@@ -958,13 +1018,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 9.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rogati hrček (Gyromitra gigas) ali drugi jesenski hrčki, ki so vsi sumljivi in potencialno nevarni.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=gyromitra_infula#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="karbolni kukmak agaricus xanthodermus">
+    <div class="gp-sp-card" data-id="agaricus_xanthodermus" data-m="6,7,8,9,10" data-eco="razkrojevalka" data-tree="" data-q="karbolni kukmak agaricus xanthodermus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/agaricus_xanthodermus.jpg" alt="Karbolni kukmak" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="agaricus_xanthodermus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Karbolni kukmak</div>
@@ -972,13 +1034,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 6.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmak (Agaricus campestris) – užiten; poljski kukmak prijetno diši po mandljih in v dnu beta ne rumeni.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=agaricus_xanthodermus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="konicasta musnica amanita virosa">
+    <div class="gp-sp-card" data-id="amanita_virosa" data-m="7,8,9,10" data-eco="mikorizna" data-tree="bukev,smreka,bor" data-q="konicasta musnica amanita virosa">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/amanita_virosa.jpg" alt="Koničasta mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_virosa" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Koničasta mušnica</div>
@@ -986,13 +1050,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Poljski kukmaki (Agaricus campestris) – užitni; kukmaki nimajo lupine v dnu beta, njihovi lističi pa hitro pordečijo ali rjavijo.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_virosa#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="kosmata mlecnica lactarius torminosus">
+    <div class="gp-sp-card" data-id="lactarius_torminosus" data-m="8,9,10" data-eco="mikorizna" data-tree="breza" data-q="kosmata mlecnica lactarius torminosus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_torminosus.jpg" alt="Kosmata mlečnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lactarius_torminosus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Kosmata mlečnica</div>
@@ -1000,13 +1066,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitna sirovka (Lactarius deliciosus) – torminosus ima kosmat rob klobuka in bel, pekoč mleček.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lactarius_torminosus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="krhka golobica russula fragilis">
+    <div class="gp-sp-card" data-id="russula_fragilis" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="krhka golobica russula fragilis">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/russula_fragilis.jpg" alt="Krhka golobica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="russula_fragilis" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Krhka golobica</div>
@@ -1014,13 +1082,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Druge golobice (pekoče so strupene)</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=russula_fragilis#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10,11" data-q="krvavordeca koprenka cortinarius sanguineus">
+    <div class="gp-sp-card" data-id="cortinarius_sanguineus" data-m="8,9,10,11" data-eco="mikorizna" data-tree="" data-q="krvavordeca koprenka cortinarius sanguineus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_sanguineus.jpg" alt="Krvavordeča koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="cortinarius_sanguineus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Krvavordeča koprenka</div>
@@ -1028,13 +1098,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=cortinarius_sanguineus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="lepa griva ramaria formosa">
+    <div class="gp-sp-card" data-id="ramaria_formosa" data-m="8,9,10" data-eco="mikorizna" data-tree="bukev" data-q="lepa griva ramaria formosa">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/ramaria_formosa.jpg" alt="Lepa griva" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="ramaria_formosa" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Lepa griva</div>
@@ -1042,13 +1114,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rumena griva (Ramaria flava) in rdeča griva (Ramaria botrytis) – formosa je rožnata z rumenimi konicami in povzroča drisko.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=ramaria_formosa#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="navadna podvihanka paxillus involutus">
+    <div class="gp-sp-card" data-id="paxillus_involutus" data-m="6,7,8,9,10,11" data-eco="mikorizna" data-tree="smreka,bor,breza" data-q="navadna podvihanka paxillus involutus">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/paxillus_involutus.jpg" alt="Navadna podvihanka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="paxillus_involutus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Navadna podvihanka</div>
@@ -1056,13 +1130,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 1. 6.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Velike rjave livke – podvihanka se prepozna po močno spodvihanem žametnem robu klobuka in rjavenju ob dotiku.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=paxillus_involutus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="navadna pokovka scleroderma citrinum">
+    <div class="gp-sp-card" data-id="scleroderma_citrinum" data-m="7,8,9,10" data-eco="mikorizna" data-tree="bukev,hrast,breza" data-q="navadna pokovka scleroderma citrinum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/scleroderma_citrinum.jpg" alt="Navadna pokovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="scleroderma_citrinum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Navadna pokovka</div>
@@ -1070,13 +1146,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mlade prašnice in gomoljike – pokovka ima trdo, belo lupino in črno-vijoličasto notranjost že v mladosti.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=scleroderma_citrinum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="5,6,7,8,9,10,11,12" data-q="navadna zveplenjaca hypholoma fasciculare">
+    <div class="gp-sp-card" data-id="hypholoma_fasciculare" data-m="5,6,7,8,9,10,11,12" data-eco="lesna" data-tree="" data-q="navadna zveplenjaca hypholoma fasciculare">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/hypholoma_fasciculare.jpg" alt="Navadna žveplenjača" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="hypholoma_fasciculare" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Navadna žveplenjača</div>
@@ -1084,13 +1162,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 5.–31. 12.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Sivorumena mraznica (Armillaria mellea) – užitna po kuhanju; mraznica ima nežen obroček, luskice in bel trosni prah.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=hypholoma_fasciculare#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="panterjeva musnica amanita pantherina">
+    <div class="gp-sp-card" data-id="amanita_pantherina" data-m="7,8,9,10" data-eco="mikorizna" data-tree="bukev,hrast,bor" data-q="panterjeva musnica amanita pantherina">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/amanita_pantherina.jpg" alt="Panterjeva mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_pantherina" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Panterjeva mušnica</div>
@@ -1098,13 +1178,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Rdečkasta mušnica (Amanita rubescens) – užitna; rdečkasta rdeči ob poškodbi, panterjeva pa ne spreminja barve mesa.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_pantherina#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="pegasta kolobarnica tricholoma pardinum">
+    <div class="gp-sp-card" data-id="tricholoma_pardinum" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="pegasta kolobarnica tricholoma pardinum">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/tricholoma_pardinum.jpg" alt="Pegasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="tricholoma_pardinum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Pegasta kolobarnica</div>
@@ -1112,13 +1194,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=tricholoma_pardinum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="poljska koprenka cortinarius orellanus">
+    <div class="gp-sp-card" data-id="cortinarius_orellanus" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="poljska koprenka cortinarius orellanus">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/cortinarius_orellanus.jpg" alt="Poljska koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="cortinarius_orellanus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Poljska koprenka</div>
@@ -1126,13 +1210,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=cortinarius_orellanus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="polkrvava koprenka cortinarius semisanguineus">
+    <div class="gp-sp-card" data-id="cortinarius_semisanguineus" data-m="8,9,10" data-eco="mikorizna" data-tree="smreka,bor" data-q="polkrvava koprenka cortinarius semisanguineus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_semisanguineus.jpg" alt="Polkrvava koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="cortinarius_semisanguineus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Polkrvava koprenka</div>
@@ -1140,13 +1226,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Krvavordeča koprenka (Cortinarius sanguineus) – rod koprenk vsebuje smrtno strupene vrste in ga ne nabiramo.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=cortinarius_semisanguineus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="4,5,6" data-q="pomladanska rdecelistka entoloma vernum">
+    <div class="gp-sp-card" data-id="entoloma_vernum" data-m="4,5,6" data-eco="mikorizna" data-tree="" data-q="pomladanska rdecelistka entoloma vernum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/entoloma_vernum.jpg" alt="Pomladanska rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="entoloma_vernum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Pomladanska rdečelistka</div>
@@ -1154,13 +1242,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 4.–30. 6.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=entoloma_vernum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="3,4,5" data-q="pomladanski hrcek gyromitra esculenta">
+    <div class="gp-sp-card" data-id="gyromitra_esculenta" data-m="3,4,5" data-eco="lesna" data-tree="" data-q="pomladanski hrcek gyromitra esculenta">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/gyromitra_esculenta.jpg" alt="Pomladanski hrček" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="gyromitra_esculenta" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Pomladanski hrček</div>
@@ -1168,13 +1258,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 1. 3.–31. 5.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Užitni smrček (Morchella esculenta) – užiten; smrček ima satast klobuk (kot panj) in je v celoti votel.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=gyromitra_esculenta#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="porfirasta musnica amanita porphyria">
+    <div class="gp-sp-card" data-id="amanita_porphyria" data-m="8,9,10" data-eco="mikorizna" data-tree="" data-q="porfirasta musnica amanita porphyria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_porphyria.jpg" alt="Porfirasta mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_porphyria" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Porfirasta mušnica</div>
@@ -1182,13 +1274,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zamenljiva z užitnimi vrstami! Previdno!</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_porphyria#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="razpokana vlaknarica pseudosperma rimosum">
+    <div class="gp-sp-card" data-id="pseudosperma_rimosum" data-m="6,7,8,9,10" data-eco="mikorizna" data-tree="bukev,hrast" data-q="razpokana vlaknarica pseudosperma rimosum">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/pseudosperma_rimosum.jpg" alt="Razpokana vlaknarica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="pseudosperma_rimosum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Razpokana vlaknarica</div>
@@ -1196,13 +1290,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 6.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Miška (Tricholoma scalpturatum) in mokovka – vlaknarice vsebujejo muskarin in so nevarne. Radialno razpokan klobuk je znak rodu.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=pseudosperma_rimosum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rdeca musnica amanita muscaria">
+    <div class="gp-sp-card" data-id="amanita_muscaria" data-m="8,9,10,11" data-eco="mikorizna" data-tree="smreka,bor,breza" data-q="rdeca musnica amanita muscaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_muscaria.jpg" alt="Rdeča mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_muscaria" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Rdeča mušnica</div>
@@ -1210,13 +1306,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Knežja mušnica (Amanita caesarea) – užitna/zaščitena; karželj ima rumene lističe, bet in obroček.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_muscaria#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10,11" data-q="rjava koprenka cortinarius bolaris">
+    <div class="gp-sp-card" data-id="cortinarius_bolaris" data-m="8,9,10,11" data-eco="mikorizna" data-tree="" data-q="rjava koprenka cortinarius bolaris">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/cortinarius_bolaris.jpg" alt="Rjava koprenka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="cortinarius_bolaris" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Rjava koprenka</div>
@@ -1224,13 +1322,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–30. 11.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelo nevarna zamenjava s strupenimi koprenkami!</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=cortinarius_bolaris#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="6,7,8,9,10" data-q="rumena musnica amanita gemmata">
+    <div class="gp-sp-card" data-id="amanita_gemmata" data-m="6,7,8,9,10" data-eco="mikorizna" data-tree="bukev,hrast,bor" data-q="rumena musnica amanita gemmata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/amanita_gemmata.jpg" alt="Rumena mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_gemmata" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Rumena mušnica</div>
@@ -1238,13 +1338,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 6.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Knežja mušnica (Amanita caesarea) – užitna; gemmata ima belo lamele in bel bet z ovojem, caesarea rumene lističe.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_gemmata#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="runjava marelica lepiota clypeolaria">
+    <div class="gp-sp-card" data-id="lepiota_clypeolaria" data-m="8,9,10" data-eco="razkrojevalka" data-tree="" data-q="runjava marelica lepiota clypeolaria">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lepiota_clypeolaria.jpg" alt="Runjava marelica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lepiota_clypeolaria" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Runjava marelica</div>
@@ -1252,13 +1354,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mladi dežniki (Macrolepiota) – marelice rodu Lepiota vsebujejo smrtno nevarne amatoksine. Drobnih dežnikom podobnih gob ne nabiraj.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lepiota_clypeolaria#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="8,9,10" data-q="sivkasta rdecelistka entoloma rhodopolium">
+    <div class="gp-sp-card" data-id="entoloma_rhodopolium" data-m="8,9,10" data-eco="mikorizna" data-tree="bukev,hrast" data-q="sivkasta rdecelistka entoloma rhodopolium">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/entoloma_rhodopolium.jpg" alt="Sivkasta rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="entoloma_rhodopolium" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Sivkasta rdečelistka</div>
@@ -1266,13 +1370,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 8.–31. 10.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Ščitasta rdečelistka (Entoloma clypeatum) in mokovka (Clitopilus prunulus) – rhodopolium povzroča hude prebavne motnje. Rožnati trosni prah je znak rodu.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=entoloma_rhodopolium#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10,11" data-q="smrdljiva marelica lepiota cristata">
+    <div class="gp-sp-card" data-id="lepiota_cristata" data-m="7,8,9,10,11" data-eco="razkrojevalka" data-tree="" data-q="smrdljiva marelica lepiota cristata">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lepiota_cristata.jpg" alt="Smrdljiva marelica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lepiota_cristata" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Smrdljiva marelica</div>
@@ -1280,13 +1386,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–30. 11.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Mladi dežniki (Macrolepiota) – marelice rodu Lepiota so drobne in med njimi so smrtno strupene vrste. Drobnih dežnikom podobnih gob ne nabiraj.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lepiota_cristata#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="velika rdecelistka entoloma sinuatum">
+    <div class="gp-sp-card" data-id="entoloma_sinuatum" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="velika rdecelistka entoloma sinuatum">
       <div class="gp-sp-top e-tox2">
         <img src="/gobarska-napoved/img/vrste/entoloma_sinuatum.jpg" alt="Velika rdečelistka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="entoloma_sinuatum" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Velika rdečelistka</div>
@@ -1294,13 +1402,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox2">Zelo strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=entoloma_sinuatum#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="6,7,8,9,10,11" data-q="vijolicasta celadica mycena pura">
+    <div class="gp-sp-card" data-id="mycena_pura" data-m="6,7,8,9,10,11" data-eco="razkrojevalka" data-tree="" data-q="vijolicasta celadica mycena pura">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/mycena_pura.jpg" alt="Vijoličasta čeladica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="mycena_pura" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Vijoličasta čeladica</div>
@@ -1308,13 +1418,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 6.–30. 11.</span></div>
         <div class="gp-sp-unver" title="Vnos iz razširjenega seznama; podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Vijoličasta kolesnica (Lepista nuda) – užitna in mnogo bolj mesnata; čeladica je drobna in diši po redkvi.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=mycena_pura#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9" data-q="vrazji goban rubroboletus satanas">
+    <div class="gp-sp-card" data-id="rubroboletus_satanas" data-m="7,8,9" data-eco="mikorizna" data-tree="bukev,hrast" data-q="vrazji goban rubroboletus satanas">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/rubroboletus_satanas.jpg" alt="Vražji goban" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="rubroboletus_satanas" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Vražji goban</div>
@@ -1322,13 +1434,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–30. 9.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Žametasti goban (Neoboletus erythropus) – užiten po kuhanju (ima temno rjav klobuk, vražji pa siv/bel).</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=rubroboletus_satanas#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zelena musnica amanita phalloides">
+    <div class="gp-sp-card" data-id="amanita_phalloides" data-m="7,8,9,10" data-eco="mikorizna" data-tree="bukev,hrast,gaber" data-q="zelena musnica amanita phalloides">
       <div class="gp-sp-top e-death">
         <img src="/gobarska-napoved/img/vrste/amanita_phalloides.jpg" alt="Zelena mušnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="amanita_phalloides" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Zelena mušnica</div>
@@ -1336,13 +1450,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-death">Smrtno strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         <div class="gp-sp-dbl"><b>Dvojnica:</b> Zelena golobica (Russula virescens) – užitna; golobica nima obročka na betu in nima lupine (vrečke) v dnu beta.</div>
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=amanita_phalloides#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zelenkasta kolobarnica tricholoma equestre">
+    <div class="gp-sp-card" data-id="tricholoma_equestre" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="zelenkasta kolobarnica tricholoma equestre">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/tricholoma_equestre.jpg" alt="Zelenkasta kolobarnica" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="tricholoma_equestre" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Zelenkasta kolobarnica</div>
@@ -1350,13 +1466,15 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=tricholoma_equestre#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
-    <div class="gp-sp-card" data-m="7,8,9,10" data-q="zlata sirovka lactarius chrysorrheus">
+    <div class="gp-sp-card" data-id="lactarius_chrysorrheus" data-m="7,8,9,10" data-eco="mikorizna" data-tree="" data-q="zlata sirovka lactarius chrysorrheus">
       <div class="gp-sp-top e-tox">
         <img src="/gobarska-napoved/img/vrste/lactarius_chrysorrheus.jpg" alt="Zlata sirovka" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="lactarius_chrysorrheus" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">Zlata sirovka</div>
@@ -1364,6 +1482,7 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-sp-row"><span class="gp-badge e-tox">Strupena</span><span class="gp-sp-season">📅 1. 7.–31. 10.</span></div>
         
         
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta=lactarius_chrysorrheus#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>
   </div>
@@ -1381,21 +1500,60 @@ body .wrap{padding-bottom:5.5rem}
   var grid=document.getElementById("gp-sp-grid");
   if(!grid)return;
   var PAGE=24;
+  var FAV_LS="mr_gobe_priljubljene";
   var cards=[].slice.call(grid.querySelectorAll(".gp-sp-card"));
   var qEl=document.getElementById("gp-sp-q");
   var moreEl=document.getElementById("gp-sp-more");
   var countEl=document.getElementById("gp-sp-count");
   var seasonEl=document.getElementById("gp-sp-season");
+  var favFilterEl=document.getElementById("gp-sp-fav-filter");
+  var ecoEls=[].slice.call(document.querySelectorAll("[data-eco-f]"));
+  var treeEls=[].slice.call(document.querySelectorAll("[data-tree-f]"));
   var month=String(new Date().getMonth()+1);
-  var seasonOnly=false, query="", shown=PAGE;
+  var seasonOnly=false, favOnly=false, query="", shown=PAGE;
+  var ecoOn={}, treeOn={};
+
+  function loadFavs(){
+    try{return new Set(JSON.parse(localStorage.getItem(FAV_LS)||"[]"));}catch(e){return new Set();}
+  }
+  function saveFavs(s){
+    try{localStorage.setItem(FAV_LS,JSON.stringify(Array.from(s)));}catch(e){}
+  }
+  var favs=loadFavs();
+  function paintFavButtons(){
+    grid.querySelectorAll(".gp-sp-fav").forEach(function(btn){
+      var on=favs.has(btn.getAttribute("data-id"));
+      btn.classList.toggle("on",on);
+      btn.setAttribute("aria-pressed",on?"true":"false");
+      btn.textContent=on?"♥":"♡";
+    });
+  }
+  grid.addEventListener("click",function(e){
+    var btn=e.target.closest(".gp-sp-fav");
+    if(!btn)return;
+    e.preventDefault();
+    var id=btn.getAttribute("data-id");
+    if(favs.has(id))favs.delete(id); else favs.add(id);
+    saveFavs(favs);
+    paintFavButtons();
+    if(favOnly)render();
+  });
+  paintFavButtons();
 
   function norm(s){
     return (s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
       .replace(/[^a-z0-9 ]+/g," ").trim();
   }
+  function anyOn(map){return Object.keys(map).some(function(k){return map[k];});}
   function matches(c){
     if(query && c.getAttribute("data-q").indexOf(query)<0) return false;
     if(seasonOnly && (c.getAttribute("data-m")||"").split(",").indexOf(month)<0) return false;
+    if(favOnly && !favs.has(c.getAttribute("data-id"))) return false;
+    if(anyOn(ecoOn) && !ecoOn[c.getAttribute("data-eco")]) return false;
+    if(anyOn(treeOn)){
+      var trees=(c.getAttribute("data-tree")||"").split(",");
+      if(!trees.some(function(t){return treeOn[t];})) return false;
+    }
     return true;
   }
   function render(){
@@ -1420,6 +1578,30 @@ body .wrap{padding-bottom:5.5rem}
       shown=PAGE; render();
     });
   }
+  if(favFilterEl){
+    favFilterEl.addEventListener("click",function(){
+      favOnly=!favOnly;
+      favFilterEl.classList.toggle("on",favOnly);
+      favFilterEl.setAttribute("aria-pressed",favOnly?"true":"false");
+      shown=PAGE; render();
+    });
+  }
+  ecoEls.forEach(function(btn){
+    var key=btn.getAttribute("data-eco-f");
+    btn.addEventListener("click",function(){
+      ecoOn[key]=!ecoOn[key];
+      btn.classList.toggle("on",ecoOn[key]);
+      shown=PAGE; render();
+    });
+  });
+  treeEls.forEach(function(btn){
+    var key=btn.getAttribute("data-tree-f");
+    btn.addEventListener("click",function(){
+      treeOn[key]=!treeOn[key];
+      btn.classList.toggle("on",treeOn[key]);
+      shown=PAGE; render();
+    });
+  });
   if(qEl){
     var t;
     qEl.addEventListener("input",function(){
