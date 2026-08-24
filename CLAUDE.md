@@ -516,6 +516,54 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
 
+## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
+
+Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za
+dnem). `/test-napovedi/` meri **pet Open-Meteo virov (ECMWF IFS, ICON, GFS,
+ARPEGE, best_match) po vodilnem času D+1..D+7**, z izhodiščema klimatologija in
+persistenca — ker Open-Meteo Previous Runs API (`previous-runs-api.open-meteo.com`,
+spremenljivke `..._previous_dayN`) za te modele arhivira nazaj do sredine 2024,
+je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
+
+- `tools/build_forecast_archive.py` — zajame urne `_previous_day1..7` vrednosti,
+  agregira v dnevni Tmax/Tmin/padavine **po lokalnem času (Europe/Ljubljana)** in
+  piše `data/forecast-archive.csv` (dodaja samo nove vrstice, arhiva ne prepisuje).
+  Dnevni tek kliče z majhnim `--past-days` (10) — poln backfill (~820) je bil
+  enkraten.
+- `tools/log_forward_forecasts.py` — ARSO (prek Worker `/arso-forecast`) in
+  Yr/MET Norway (`api.met.no`, obvezen User-Agent) nimata arhiva nazaj, zato se
+  beležita sproti od uvedbe naprej, v isto shemo kot zgoraj
+  (`data/forecast-forward-log.csv`) — `tools/compute_forecast_test_metrics.py`
+  ju bere po isti poti, samo z manj zgodovine.
+- `tools/log_hourly_observations.py` — urne meritve IREICA1 za bodočo analizo
+  "pristranskost po urah dneva" iz prvotnega načrta. **Ecowitt vrne polno 5-min
+  ločljivost samo za zadnjih ~90 dni** (starejše poizvedbe so na strežniku že
+  podvzorčene na ~6 točk/dan — preverjeno ob gradnji, ni v Ecowitt dokumentaciji)
+  — zato tega ni šlo zapolniti za nazaj kot arhiv napovedi zgoraj, samo od zdaj
+  naprej. Ker bi hkrati potrebovali tudi urne (ne dnevne) napovedi vseh petih
+  virov za nazaj — kar bi `data/forecast-archive.csv` napihnilo ~150×, na
+  velikost, ki v repozitorij ne sodi — stran namesto tega prikaže primerjavo
+  Tmax- proti Tmin-pristranskosti pri D+1 (ista zgodba — spregledana nočna
+  inverzija — brez urnega arhiva).
+- `tools/compute_forecast_test_metrics.py` — MAE/bias/RMSE/delež >3 °C in
+  kontingenčna tabela za padavine (0,2 in 5 mm), po (vir, vodilni čas), proti
+  klimatologiji (±7 dni okoli koledarskega dne, iz cele postajne zgodovine —
+  ne ERA5, postaja ima dovolj let sama) in persistenci. Piše
+  `data/test-napovedi.json`.
+- `tools/generate_test_napovedi_page.py` — `test-napovedi/index.html` (grafi so
+  inline SVG, izrisani v brskalniku iz `/data/test-napovedi.json` — isti vzorec
+  kot `TREND_JS` v `generate_gobe_page.py`, brez zunanjih JS knjižnic) in javni
+  `test-napovedi/podatki.csv` (samo razrešeni dnevi, licenca CC BY 4.0 v glavi).
+- `tools/generate_forecast_test_post.py` — mesečni povzetek (predloga s pravimi
+  izračunanimi številkami, brez LLM osnutka — isti vzorec kot
+  `invasive_watch.py` — nato en prehod lekture prek `generate_daily_post.call_lektor`).
+  `--wire` pokliče `wire_all()`.
+- **FB/IG objava je namenoma izklopljena** za mesečni članek (drugače od ostalih
+  petih objavljalnih workflowov) — nova vrsta vsebine, prva objava naj gre skozi
+  ročni pregled, preden se doda.
+- Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
+  `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
