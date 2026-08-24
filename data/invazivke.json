@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T04:10:47.354035+00:00",
+  "updated": "2026-08-24T04:13:06.534651+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -35,7 +35,7 @@
       "sci": "Impatiens glandulifera",
       "severity": "high",
       "total_cells": 2,
-      "new_cells_30d": 2,
+      "new_cells_30d": 1,
       "last_observed": "2026-08-14",
       "recent": [
         {
