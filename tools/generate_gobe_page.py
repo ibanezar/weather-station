@@ -161,6 +161,24 @@ BAZA_CATS = [
 ]
 
 
+# Kurirani seznam drevesnih partnerjev za filter po habitatu — izpeljan iz
+# dejanske pogostosti besed v `mycorrhiza` (glej analizo ob uvedbi, avg 2026):
+# bukev/smreka/hrast/bor/breza/gaber so edina imena s smiselnim številom
+# vrst. `elevation_zone`/`substrate` NISO uporabljena za filter — obe polji
+# sta prosto besedilo z ~60-166 različnimi zapisi (vključno s pokvarjenimi
+# uvoznimi fragmenti), zato bi vsak poskus razvrščanja v skupine pomenil
+# uredniško sojenje o vsebini vrste, ne le prikaz obstoječega podatka.
+TREE_PARTNERS = ["bukev", "smreka", "hrast", "bor", "breza", "gaber"]
+
+
+def species_tree_tokens(sp):
+    """Which of TREE_PARTNERS appear (as a substring) in this species'
+    mycorrhiza list — presence-check against an existing structured field,
+    not a reinterpretation of free text."""
+    text = " ".join(sp.get("mycorrhiza") or []).lower()
+    return [t for t in TREE_PARTNERS if t in text]
+
+
 def format_season_range(start, end):
     """'MM.DD' raw storage → localized Slovenian display, e.g.
     '09.01'/'11.30' → '1. 9.–30. 11.'. Display only — cross-year wraparound
@@ -187,7 +205,9 @@ def species_section_html(subset, all_species, current=""):
         cls = EDIB_STYLE.get(edib, (None, "e-none"))[1]
         # Podatki za filtriranje in iskanje na strani; iskalni niz je že
         # normaliziran, da JS ne ponavlja odstranjevanja šumnikov ob vsakem tipku.
-        data_attrs = (f'data-m="{",".join(str(m) for m in sorted(season_months(s)))}" '
+        data_attrs = (f'data-id="{s["id"]}" data-m="{",".join(str(m) for m in sorted(season_months(s)))}" '
+                      f'data-eco="{_esc(s.get("ecology") or "")}" '
+                      f'data-tree="{",".join(species_tree_tokens(s))}" '
                       f'data-q="{_esc(_search_key(s["name_sl"] + " " + s["name_lat"]))}"')
         dbl = s.get("doubles")
         dbl_html = (f'<div class="gp-sp-dbl"><b>Dvojnica:</b> {_esc(dbl)}</div>' if dbl else "")
@@ -202,6 +222,7 @@ def species_section_html(subset, all_species, current=""):
         <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
           onerror="this.parentElement.classList.add('ph');this.remove()">
         <span class="gp-sp-emoji">🍄</span>
+        <button type="button" class="gp-sp-fav" data-id="{s['id']}" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>
       <div class="gp-sp-body">
         <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
@@ -209,6 +230,7 @@ def species_section_html(subset, all_species, current=""):
         <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {season_txt}</span></div>
         {unver_html}
         {dbl_html}
+        <a class="gp-sp-alert-link" href="/gobarska-napoved/?vrsta={s['id']}#premium">🔔 Obvesti me ob ugodnih pogojih</a>
       </div>
     </div>''')
 
@@ -226,12 +248,30 @@ def species_section_html(subset, all_species, current=""):
     n_season = sum(1 for s in subset if now_month in season_months(s))
     season_chip = (f'      <button type="button" class="gp-sp-chip" id="gp-sp-season" '
                    f'data-f="sezona">V sezoni zdaj ({n_season})</button>' if n_season else "")
+    fav_chip = ('      <button type="button" class="gp-sp-chip" id="gp-sp-fav-filter" '
+                'data-f="priljubljene">♡ Priljubljene</button>')
+
+    eco_labels = {"mikorizna": "Mikorizne", "razkrojevalka": "Razkrojevalke", "lesna": "Lesne"}
+    eco_present = [e for e in ("mikorizna", "razkrojevalka", "lesna")
+                   if any((s.get("ecology") or "") == e for s in subset)]
+    eco_chips = "".join(
+        f'      <button type="button" class="gp-sp-chip" data-eco-f="{e}">{eco_labels[e]}</button>\n'
+        for e in eco_present)
+    tree_present = [t for t in TREE_PARTNERS if any(t in species_tree_tokens(s) for s in subset)]
+    tree_chips = "".join(
+        f'      <button type="button" class="gp-sp-chip" data-tree-f="{t}">{t.capitalize()}</button>\n'
+        for t in tree_present)
+
     return (
         '  <div class="gp-sp-tools">\n'
         '    <input type="search" id="gp-sp-q" class="gp-sp-search" placeholder="Poišči vrsto — slovensko ali latinsko ime"\n'
         '      autocomplete="off" aria-label="Iskanje po vrstah">\n'
         '    <nav class="gp-sp-chips" aria-label="Skupine po užitnosti">\n' + "\n".join(links) + "\n    </nav>\n"
-        + (f'    <div class="gp-sp-chips">\n{season_chip}\n    </div>\n' if season_chip else "")
+        + f'    <div class="gp-sp-chips">\n{season_chip}\n{fav_chip}\n    </div>\n'
+        + (f'    <nav class="gp-sp-chips" aria-label="Filter po ekološki skupini">\n{eco_chips}    </nav>\n'
+           if eco_chips else "")
+        + (f'    <nav class="gp-sp-chips" aria-label="Filter po drevesnem partnerju">\n{tree_chips}    </nav>\n'
+           if tree_chips else "")
         + '    <p class="gp-sp-count" id="gp-sp-count" hidden></p>\n'
         "  </div>\n"
         '  <div class="gp-sp-grid" id="gp-sp-grid">\n' + "\n".join(cards) + "\n  </div>\n"
@@ -341,6 +381,10 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+.gp-hero-topsp{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+.gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
+.gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-hero-spark .gp-spark{width:84px;height:22px}
 /* Thumb-friendly action row right under the gauge — "glanceable" actions
    (share, map, notify) instead of making the user read/scroll for them. */
 .gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
@@ -385,7 +429,7 @@ body{
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.gp-forest-pct .n{font-size:.92rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
   text-align:center;text-transform:uppercase;opacity:.9}
 /* Dynamic badge tiers — separate classes (not inline colour) so each growth
@@ -512,6 +556,10 @@ body{
 .gp-sp-top.ph.e-tox,.gp-sp-top.ph.e-tox2{background:linear-gradient(135deg,rgba(248,113,113,.32),rgba(248,113,113,.06))}
 .gp-sp-top.ph.e-death{background:linear-gradient(135deg,rgba(248,113,113,.45),rgba(248,113,113,.1))}
 .gp-sp-top.ph.e-prot{background:linear-gradient(135deg,rgba(167,139,250,.32),rgba(167,139,250,.06))}
+.gp-sp-fav{position:absolute;top:.4rem;right:.4rem;z-index:1;width:1.9rem;height:1.9rem;border-radius:50%;
+  border:none;background:rgba(4,7,14,.55);color:#fff;font-size:1.05rem;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.gp-sp-fav.on{color:#f87171}
 .gp-sp-body{padding:.7rem .8rem .8rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
 .gp-sp-name{font-weight:700;font-size:.95rem;line-height:1.25}
 .gp-sp-lat{font-style:italic;color:var(--muted);font-size:.78rem;margin-bottom:.15rem}
@@ -521,6 +569,8 @@ body{
   border-top:1px dashed var(--card-border);line-height:1.4}
 .gp-sp-dbl b{color:var(--text)}
 .gp-sp-unver{font-size:.7rem;color:var(--muted);opacity:.85;margin-top:.15rem;letter-spacing:.01em}
+.gp-sp-alert-link{display:block;font-size:.76rem;color:var(--blue);margin-top:.5rem;text-decoration:none}
+.gp-sp-alert-link:hover{text-decoration:underline}
 /* Orodna vrstica baze vrst: iskanje + filtri po užitnosti in sezoni. Kartic je
    300, zato se jih naenkrat izriše le prvih nekaj (glej SP_JS) — brez JS
    ostanejo vidne vse, da se pajku in obiskovalcu brez skript ne skrije nič. */
@@ -803,7 +853,11 @@ body{
 
    Mreža je nadomestila prejšnji hub s fotografijami, ki je stal pod cenikom —
    isti cilji, le da so zdaj na vrhu in jih je devet namesto petih. */
-.gp-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat-group{margin-bottom:.3rem}
+.gp-feat-group-title{font-size:.92rem;font-weight:700;color:var(--muted);margin:1.1rem 0 .1rem}
+.gp-feat-more{font-size:.85rem;color:var(--muted);margin:.2rem 0 1.3rem}
+.gp-feat-more a{color:var(--muted)}
 .gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
   padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
@@ -924,6 +978,15 @@ body .wrap{padding-bottom:5.5rem}
 .gp-species-legend-title{flex-basis:100%}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
+.gp-mini-map{margin:1.4rem 0}
+.gp-mini-map-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 .9rem}
+.gp-mmap-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .65rem;border-radius:10px;
+  background:var(--card-bg);border:1px solid var(--card-border);font-size:.82rem;color:var(--text);
+  text-decoration:none}
+.gp-mmap-chip i{width:.7rem;height:.7rem;border-radius:50%;flex:0 0 auto}
+.gp-mmap-chip .nm{font-weight:600}
+.gp-mmap-chip .pct{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+.gp-mmap-chip.prot{opacity:.75}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -995,6 +1058,14 @@ PAGE_JS = """<script>
         history.replaceState({},"",u.pathname+u.search+u.hash);}
       return localStorage.getItem(LS);
     }catch(e){return null;}
+  }
+  // Deep link from a species card on /baza-vrst/ ("Obvesti me ob ugodnih
+  // pogojih") — same URLSearchParams pattern as focusName on the zemljevid
+  // page, but this is a separate parser since PAGE_JS and map_js don't
+  // share code. Left in the URL (not stripped like token — nothing
+  // sensitive about it).
+  function wantedSpecies(){
+    try{return new URLSearchParams(location.search).get("vrsta");}catch(e){return null;}
   }
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
@@ -1139,7 +1210,7 @@ PAGE_JS = """<script>
       '<div class="gp-forest-top"><div class="gp-forest-namewrap">'+
       '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
       '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span></div>'+
-      '<div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+'%</span><span class="lvl">'+o.level+'</span></div>'+
+      '<div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+'/100</span><span class="lvl">'+o.level+'</span></div>'+
       '</div>'+
       '<div class="gp-forest-sp3">'+spHtml+'</div>'+
       '<div class="gp-forest-bottom"><div class="gp-forest-meta">'+metaHtml+'</div>'+
@@ -1356,10 +1427,21 @@ PAGE_JS = """<script>
         })
         .catch(function(){msgEl.textContent="Napaka pri povezavi. Poskusi znova.";});
     });
+    // ?vrsta=<id> deep link (glej wantedSpecies zgoraj) — če vrsta obstaja
+    // in še nima svojega alarma, dodamo prazno vrstico z že izbrano vrsto.
+    function withWanted(rules){
+      var wanted=wantedSpecies();
+      rules=rules||[];
+      if(wanted && speciesList.some(function(s){return s.id===wanted;}) &&
+         !rules.some(function(r){return r.species_id===wanted;})){
+        rules=rules.concat([{species_id:wanted}]);
+      }
+      return rules;
+    }
     fetch(API+"/premium/alerts?token="+encodeURIComponent(token))
       .then(function(r){return r.json();})
-      .then(function(res){renderRows(res&&res.rules);})
-      .catch(function(){renderRows(null);});
+      .then(function(res){renderRows(withWanted(res&&res.rules));})
+      .catch(function(){renderRows(withWanted(null));});
   }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
@@ -1729,21 +1811,60 @@ SP_JS = """<script>
   var grid=document.getElementById("gp-sp-grid");
   if(!grid)return;
   var PAGE=24;
+  var FAV_LS="mr_gobe_priljubljene";
   var cards=[].slice.call(grid.querySelectorAll(".gp-sp-card"));
   var qEl=document.getElementById("gp-sp-q");
   var moreEl=document.getElementById("gp-sp-more");
   var countEl=document.getElementById("gp-sp-count");
   var seasonEl=document.getElementById("gp-sp-season");
+  var favFilterEl=document.getElementById("gp-sp-fav-filter");
+  var ecoEls=[].slice.call(document.querySelectorAll("[data-eco-f]"));
+  var treeEls=[].slice.call(document.querySelectorAll("[data-tree-f]"));
   var month=String(new Date().getMonth()+1);
-  var seasonOnly=false, query="", shown=PAGE;
+  var seasonOnly=false, favOnly=false, query="", shown=PAGE;
+  var ecoOn={}, treeOn={};
+
+  function loadFavs(){
+    try{return new Set(JSON.parse(localStorage.getItem(FAV_LS)||"[]"));}catch(e){return new Set();}
+  }
+  function saveFavs(s){
+    try{localStorage.setItem(FAV_LS,JSON.stringify(Array.from(s)));}catch(e){}
+  }
+  var favs=loadFavs();
+  function paintFavButtons(){
+    grid.querySelectorAll(".gp-sp-fav").forEach(function(btn){
+      var on=favs.has(btn.getAttribute("data-id"));
+      btn.classList.toggle("on",on);
+      btn.setAttribute("aria-pressed",on?"true":"false");
+      btn.textContent=on?"♥":"♡";
+    });
+  }
+  grid.addEventListener("click",function(e){
+    var btn=e.target.closest(".gp-sp-fav");
+    if(!btn)return;
+    e.preventDefault();
+    var id=btn.getAttribute("data-id");
+    if(favs.has(id))favs.delete(id); else favs.add(id);
+    saveFavs(favs);
+    paintFavButtons();
+    if(favOnly)render();
+  });
+  paintFavButtons();
 
   function norm(s){
     return (s||"").toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"")
       .replace(/[^a-z0-9 ]+/g," ").trim();
   }
+  function anyOn(map){return Object.keys(map).some(function(k){return map[k];});}
   function matches(c){
     if(query && c.getAttribute("data-q").indexOf(query)<0) return false;
     if(seasonOnly && (c.getAttribute("data-m")||"").split(",").indexOf(month)<0) return false;
+    if(favOnly && !favs.has(c.getAttribute("data-id"))) return false;
+    if(anyOn(ecoOn) && !ecoOn[c.getAttribute("data-eco")]) return false;
+    if(anyOn(treeOn)){
+      var trees=(c.getAttribute("data-tree")||"").split(",");
+      if(!trees.some(function(t){return treeOn[t];})) return false;
+    }
     return true;
   }
   function render(){
@@ -1768,6 +1889,30 @@ SP_JS = """<script>
       shown=PAGE; render();
     });
   }
+  if(favFilterEl){
+    favFilterEl.addEventListener("click",function(){
+      favOnly=!favOnly;
+      favFilterEl.classList.toggle("on",favOnly);
+      favFilterEl.setAttribute("aria-pressed",favOnly?"true":"false");
+      shown=PAGE; render();
+    });
+  }
+  ecoEls.forEach(function(btn){
+    var key=btn.getAttribute("data-eco-f");
+    btn.addEventListener("click",function(){
+      ecoOn[key]=!ecoOn[key];
+      btn.classList.toggle("on",ecoOn[key]);
+      shown=PAGE; render();
+    });
+  });
+  treeEls.forEach(function(btn){
+    var key=btn.getAttribute("data-tree-f");
+    btn.addEventListener("click",function(){
+      treeOn[key]=!treeOn[key];
+      btn.classList.toggle("on",treeOn[key]);
+      shown=PAGE; render();
+    });
+  });
   if(qEl){
     var t;
     qEl.addEventListener("input",function(){
@@ -1939,6 +2084,80 @@ def gauge_svg(pct):
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
 
 
+# ── Dnevna zgodovina hero indeksa (za delto "od včeraj" + 7-dnevni sparkline) ─
+# Ta datoteka je edini vir za oboje — brez nje ni preteklih dni za primerjavo,
+# zato se je piše tu (isti generator, ki jo bere), namesto v ločenem workflow
+# koraku. En vnos na dan; ob večkratnem zagonu istega dne (ročno testiranje,
+# ponovni build) se današnji vnos prepiše, ne podvoji.
+INDEX_HISTORY_PATH = os.path.join(ROOT, "gobarska-napoved", "indeks-zgodovina.json")
+INDEX_HISTORY_MAX_DAYS = 30
+
+
+def update_index_history(pct):
+    """Append today's index to the rolling history file (kept ≤30 days) and
+    return the updated list, sorted oldest→newest. Best-effort: a missing or
+    corrupt file just starts fresh — this is a nice-to-have trend, not a
+    system of record."""
+    try:
+        with open(INDEX_HISTORY_PATH, encoding="utf-8") as f:
+            hist = _json_mod.load(f)
+    except (OSError, ValueError):
+        hist = []
+    today_iso = TODAY.isoformat()
+    hist = [h for h in hist if h.get("date") != today_iso]
+    hist.append({"date": today_iso, "index": pct})
+    hist.sort(key=lambda h: h["date"])
+    hist = hist[-INDEX_HISTORY_MAX_DAYS:]
+    with open(INDEX_HISTORY_PATH, "w", encoding="utf-8") as f:
+        _json_mod.dump(hist, f, ensure_ascii=False, indent=0)
+    return hist
+
+
+def hero_sparkline_svg(vals, color):
+    """Same tiny auto-scaling polyline as the client-side sparklineSvg() in
+    PAGE_JS (forest rows), server-rendered here because the free-tier hero
+    has no client fetch to hang a JS version off of."""
+    w, h, pad = 140, 32, 3
+    n = len(vals)
+    known = [v for v in vals if v is not None]
+    if not known:
+        return ""
+    lo, hi = min(known), max(known)
+    if hi == lo:
+        hi, lo = hi + 1, lo - 1
+    pts = []
+    for i, v in enumerate(vals):
+        if v is None:
+            continue
+        x = pad + (w - 2 * pad) * (0 if n == 1 else i / (n - 1))
+        y = h - pad - (h - 2 * pad) * ((v - lo) / (hi - lo))
+        pts.append(f"{x:.1f},{y:.1f}")
+    return (f'<svg viewBox="0 0 {w} {h}" class="gp-spark" preserveAspectRatio="none" aria-hidden="true">'
+            f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="2" '
+            'stroke-linecap="round" stroke-linejoin="round"/></svg>')
+
+
+def hero_trend_html(pct):
+    """Delta vs. yesterday + 7-day sparkline under the hero level line.
+    Empty string until there's at least 2 days of history — no fabricated
+    trend on day one."""
+    hist = update_index_history(pct)
+    if len(hist) < 2:
+        return ""
+    yesterday_iso = (TODAY - _dt.timedelta(days=1)).isoformat()
+    yesterday = next((h["index"] for h in hist if h["date"] == yesterday_iso), None)
+    delta_html = ""
+    if yesterday is not None:
+        delta = pct - yesterday
+        arrow = "↑" if delta > 0 else ("↓" if delta < 0 else "→")
+        delta_html = f'<span class="gp-hero-delta">{arrow} {delta:+d} od včeraj</span>'
+    spark = hero_sparkline_svg([h["index"] for h in hist[-7:]], "#c17f3e")
+    spark_html = f'<span class="gp-hero-spark">{spark}</span>' if spark else ""
+    if not delta_html and not spark_html:
+        return ""
+    return f'<div class="gp-hero-trend">{delta_html}{spark_html}</div>'
+
+
 # ── Pregled zmožnosti (mreža .gp-feat pod junaško kartico) ──────────────────
 # Ikone so risane, ne emoji — emoji se med platformami razlikujejo in se ne
 # dajo prebarvati v poudarek kartice (isti razlog kot pri _IC_* spodaj). Vsaka
@@ -2081,43 +2300,63 @@ _FI_METODOLOGIJA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
     '<path d="M4 16.4h1.5M18.5 16.4H20M6.2 10.6l1.1 1M17.8 10.6l-1.1 1M12 6.8v1.6" stroke="currentColor" '
     'stroke-width="1.3" stroke-linecap="round" opacity=".6"/></svg>')
 
+_FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.6c-3 0-5.1 2.3-5.1 5.5v2.9l-1.7 3.2c-.3.6.1 1.3.8 1.3h12'
+    'c.7 0 1.1-.7.8-1.3l-1.7-3.2V9.1c0-3.2-2.1-5.5-5.1-5.5Z" fill="currentColor" fill-opacity=".16" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="M9.6 18.9a2.4 2.4 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '</svg>')
 
-# Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
-# ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
-# roko pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
+
+# Kartice pregleda zmožnosti, grupirane v 4 skupine (glej CLAUDE.md "Glavna
+# stran gobarja je pristajalna, ne zbirna" — skupinjenje je dokumentirano
+# tam; nova zmožnost gre pod ustrezno skupino ali v GOBE_MORE, ne nazaj v
+# ploski seznam). Naslovi in napovedniki so predloge s {…} mesti, ki jih
+# napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na roko
+# pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
 # 51 vrst, ko jih je bilo v bazi že 300).
 #
-# Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v mreži 3×3
-# nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a devet
-# enakih zelenih kartic se ne bi ločilo med sabo.
-GOBE_FEATURES = [
-    # (href, ikona, poudarek, naslov, napovednik, oznaka)
-    ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
-     "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
-    ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
-     "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
-    ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
-     "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
-    ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
-     "Vseh {spots} nabiralnih območij na karti doline.", None),
-    ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
-     "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
-    ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
-     "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
-    ("/gobarska-napoved/koledar/", _FI_KOLEDAR, "#a3e635", "Koledar po mesecih",
-     "Katere užitne vrste so v sezoni, mesec za mesecem.", None),
-    ("/gobarska-napoved/trend/", _FI_TREND, "#f472b6", "Sezonski trend",
-     "Letos proti petim preteklim sezonam, dan za dnem.", None),
-    ("/gobarska-napoved/tereni/", _FI_TERENI, "#c1874e", "Geološki tereni",
-     "Zakaj ista vrsta ni enako verjetna v vsakem gozdu.", None),
-    ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
-     "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
-    ("/gobarska-napoved/nasveti/", _FI_NASVETI, "#c084fc", "Nasveti in pravila",
-     "Koliko smeš nabrati, kje so zavarovana območja, kako nositi gobe.", None),
-    ("/gobarska-napoved/metodologija/", _FI_METODOLOGIJA, "#fb923c", "Kako deluje model",
-     "Vhodni podatki, rastni zamik in meje gobarskega indeksa.", None),
-    ("#faq", _FI_FAQ, "#38bdf8", "Pogosta vprašanja",
-     "Kaj indeks pove in česa ne — spodaj na tej strani.", None),
+# Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v isti
+# skupini nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a
+# same zelene kartice se ne bi ločile med sabo.
+GOBE_CATEGORIES = [
+    # (ključ, emoji, naslov skupine, [(href, ikona, poudarek, naslov, napovednik, oznaka), ...])
+    ("napoved", "🍄", "Napoved", [
+        ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
+         "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
+        ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
+         "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
+    ]),
+    ("kje", "🗺", "Kje nabirati", [
+        ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
+         "Vseh {spots} nabiralnih območij na karti doline.", None),
+        ("/gobarska-napoved/tereni/", _FI_TERENI, "#c1874e", "Geološki tereni",
+         "Zakaj ista vrsta ni enako verjetna v vsakem gozdu.", None),
+    ]),
+    ("prepoznaj", "🔍", "Prepoznaj gobo", [
+        ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
+         "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
+        ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
+         "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
+        ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
+         "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
+    ]),
+    ("moje", "♡", "Moje gobe", [
+        ("#premium", _FI_ALARM, "#fbbf24", "Moji alarmi",
+         "E-mail, ko pogoji za tvojo vrsto ali območje postanejo ugodni.", "PREMIUM"),
+        ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
+         "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
+    ]),
+]
+
+# Manj pogosto obiskane podstrani — ena vrstica povezav pod skupinami,
+# namesto lastnih kartic (bile so del istega ploskega seznama kot zgoraj).
+GOBE_MORE = [
+    ("/gobarska-napoved/koledar/", "Koledar"),
+    ("/gobarska-napoved/trend/", "Trend"),
+    ("/gobarska-napoved/metodologija/", "Metodologija"),
+    ("/gobarska-napoved/nasveti/", "Nasveti"),
+    ("#faq", "FAQ"),
 ]
 
 
@@ -2129,21 +2368,31 @@ def _rgba(hex_color, alpha):
 
 
 def feature_cards_html(counts):
-    """Mreža kartic »kaj vse najdeš tukaj« — glej .gp-feat v slogu strani."""
-    cards = []
-    for href, icon, accent, title, sub, badge in GOBE_FEATURES:
-        badge_html = f'<span class="gp-feat-badge">{badge}</span>' if badge else ""
-        cards.append(
-            f'    <a class="gp-feat-card" href="{href}" '
-            f'style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">{badge_html}'
-            f'<span class="gp-feat-ic" aria-hidden="true">{icon}</span>'
-            f'<span class="gp-feat-title">{_esc(title.format(**counts))}</span>'
-            f'<span class="gp-feat-sub">{_esc(sub.format(**counts))}</span></a>'
-        )
+    """Kartice »kaj vse najdeš tukaj«, grupirane v 4 skupine (GOBE_CATEGORIES)
+    + ena vrstica povezav za manj pogosto obiskane podstrani (GOBE_MORE).
+    Glej .gp-feat / .gp-feat-group v slogu strani."""
+    groups = []
+    for key, emoji, label, items in GOBE_CATEGORIES:
+        cards = []
+        for href, icon, accent, title, sub, badge in items:
+            badge_html = f'<span class="gp-feat-badge">{badge}</span>' if badge else ""
+            cards.append(
+                f'    <a class="gp-feat-card" href="{href}" '
+                f'style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">{badge_html}'
+                f'<span class="gp-feat-ic" aria-hidden="true">{icon}</span>'
+                f'<span class="gp-feat-title">{_esc(title.format(**counts))}</span>'
+                f'<span class="gp-feat-sub">{_esc(sub.format(**counts))}</span></a>'
+            )
+        groups.append(
+            f'  <div class="gp-feat-group" data-cat="{key}">\n'
+            f'    <h3 class="gp-feat-group-title">{emoji} {_esc(label)}</h3>\n'
+            f'    <div class="gp-feat">\n' + "\n".join(cards) + '\n    </div>\n'
+            '  </div>')
+    more_html = " · ".join(f'<a href="{href}">{_esc(label)}</a>' for href, label in GOBE_MORE)
     return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Kaj vse najdeš tukaj</h2>\n'
             '  <p class="archive-intro">Napoved je le začetek — vsaka kartica pelje naravnost na svojo '
-            'stran ali razdelek.</p>\n'
-            '  <div class="gp-feat">\n' + "\n".join(cards) + '\n  </div>')
+            'stran ali razdelek.</p>\n' + "\n".join(groups) +
+            f'\n  <p class="gp-feat-more">Več: {more_html}</p>')
 
 
 # Custom two-tone (duotone) SVG icon set for the bottom nav — replaces the
@@ -2656,7 +2905,7 @@ def build_zemljevid_page(premium, rules):
         <span class="gp-forest-nm">{_esc(p["name"])}</span>
         <span class="gp-terr">{_esc(p["terrain"] or "")} · {p["elev"]} m</span>
       </div>
-      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}%</span><span class="lvl">{_esc(p["lvl"])}</span></div>
+      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}/100</span><span class="lvl">{_esc(p["lvl"])}</span></div>
     </div>''')
     fallback_html = ('  <details class="gp-collapse">\n'
         '    <summary>Območja doline (seznam) <small>({pick_count})</small></summary>\n'
@@ -2735,7 +2984,7 @@ def build_zemljevid_page(premium, rules):
       h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🔒 Zavarovano območje — preveri aktualne '+
         'omejitve nabiranja na kraju samem</div>';
     }else{
-      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
+      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' / 100</span> · '+esc(p.lvl)+'</div>';
       if(p.sp&&p.sp.length){
         h+='<ul class="sp-list">'+p.sp.map(function(s){
           return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+' %</span></li>';
@@ -2809,6 +3058,32 @@ def build_zemljevid_page(premium, rules):
         "Zemljevid", inner, extra_js=map_js)
 
 
+def mini_map_preview_html(premium):
+    """Compact, static (no Leaflet) area-status preview for the homepage —
+    same today['overall']/level data build_zemljevid_page() uses, just a
+    row of small chips instead of a full interactive map. Colour is always
+    paired with the level word, never colour alone (accessibility)."""
+    chips = []
+    for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
+        o = loc["days"][0]
+        chips.append(
+            f'    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(loc["name"])}">'
+            f'<i style="background:{level_color(o["overall"])}"></i>'
+            f'<span class="nm">{_esc(loc["name"])}</span>'
+            f'<span class="pct">{o["overall"]}/100 · {_esc(o["level"])}</span></a>')
+    for name in premium.get("protected_areas", []):
+        chips.append(
+            f'    <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(name)}">'
+            f'<i style="background:#a78bfa"></i>'
+            f'<span class="nm">{_esc(name)}</span>'
+            f'<span class="pct">Zaščiteno</span></a>')
+    return ('  <div class="gp-mini-map">\n'
+            '    <h2 class="gp-h2">🗺️ Danes v dolini</h2>\n'
+            '    <div class="gp-mini-map-grid">\n' + "\n".join(chips) + '\n    </div>\n'
+            '    <a class="gp-cta alt" href="/gobarska-napoved/zemljevid/">Odpri interaktivni zemljevid →</a>\n'
+            '  </div>')
+
+
 def photo_credits_html(img_dir):
     """CC BY / CC BY-SA / GFDL all require visible attribution — render the
     CREDITS.json sitting next to gobarska-napoved/img/<img_dir>/*.jpg as a
@@ -2853,17 +3128,20 @@ def build_body(rules, premium, free):
     month = TODAY.month
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
+    hero_trend = hero_trend_html(pct)
     hero = f'''  <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
         {gauge_svg(pct)}
-        <div class="gp-gauge-num"><span class="num">{pct}</span><small>%</small></div>
+        <div class="gp-gauge-num"><span class="num">{pct}</span><small>/ 100</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
         <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
+        {hero_trend}
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
-          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} % · {best_o["level"]}</span></div>
+          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span></div>
+        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
         <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
@@ -2898,7 +3176,7 @@ def build_body(rules, premium, free):
         <span class="gp-terr">{terr} · {loc["elev_m"]} m</span>
         <span class="gp-forest-sp">{top_ic}{_esc(top_nm)}</span>
       </div>
-      <div class="gp-forest-pct {pct_cls}"><span class="n">{o["overall"]}%</span><span class="lvl">{o["level"]}</span></div>
+      <div class="gp-forest-pct {pct_cls}"><span class="n">{o["overall"]}/100</span><span class="lvl">{o["level"]}</span></div>
     </div>''')
     if premium.get("protected_areas"):
         forests.append(
@@ -2972,18 +3250,22 @@ def build_body(rules, premium, free):
   </div>'''
 
     # ── pricing ───────────────────────────────────────────────────────────────
+    # Bullets naj vodijo z izidom ("kdaj in kam iti"), ne s funkcijo — funkcije
+    # (AI prepoznava, alarmi) ostanejo navedene, a niže, kot podporo izidu.
     pricing = f'''  <div id="gp-pricing-wrap">
-  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
+  <h2 id="pricing" class="gp-h2">🎟️ Vedeti, kdaj iti v gozd</h2>
+  <p class="post-meta">Ne ugibaj, ali je prezgodaj po dežju. Premium spremlja vlago tal, temperaturo, dež in
+  rastni zamik posamezne vrste — in pove, katera vrsta in katero območje imata danes največ možnosti.</p>
   <div class="gp-pricing">
     <div class="gp-plan">
       <span class="gp-tag">MESEČNO</span>
       <div class="p-price">{PRICE_MONTHLY}<small> / mesec</small></div>
       <ul>
-        <li>7-dnevna napoved po vrstah</li>
-        <li>Indeks za vsa nabiralna območja</li>
-        <li>Razlage in opozorila na dvojnice</li>
+        <li>Naslednjih 7 dni, ne le danes</li>
+        <li>Katera vrsta ima danes najboljše pogoje, na katerem od {len(premium["locations"])} območij</li>
+        <li>Razlage po komponentah in opozorila na nevarne dvojnice</li>
         <li>🔍 AI prepoznava gobe iz fotografije</li>
-        <li>🔔 Lastni alarmi po vrsti, območju in nadmorski višini</li>
+        <li>🔔 Alarm, ko se pogoji izboljšajo</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly" data-src="pricing">Naroči se</button>
@@ -2992,7 +3274,7 @@ def build_body(rules, premium, free):
       <span class="gp-tag">CELA SEZONA</span>
       <div class="p-price">{PRICE_SEASON}<small> / sezona</small></div>
       <ul>
-        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo)</li>
+        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo in 🔔 alarme)</li>
         <li>Dostop do konca sezone (30. 11.)</li>
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
@@ -3070,6 +3352,7 @@ def build_body(rules, premium, free):
     features_html = feature_cards_html({"spots": len(premium["locations"]),
                                         "species": len(species), "pairs": len(vs_cards)})
     vrste_credits_html = photo_credits_html("vrste")
+    mini_map_html = mini_map_preview_html(premium)
 
     # ── terrain map (free) ────────────────────────────────────────────────────
     terr_items = []
@@ -3180,6 +3463,7 @@ def build_body(rules, premium, free):
 {coming_soon}
   <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
+{mini_map_html}
 {features_html}
   <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
 {premium_block}

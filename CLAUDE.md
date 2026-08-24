@@ -461,13 +461,22 @@ skupina je svoj iskalni cilj (»užitne gobe«, »strupene gobe«).
 ### Glavna stran gobarja je pristajalna, ne zbirna
 
 `/gobarska-napoved/` nosi samo junaško kartico z dnevnim indeksom, **mrežo
-zmožnosti** (`GOBE_FEATURES` → `.gp-feat`), premium s cenikom in pogosta
-vprašanja. Vse ostalo ima svojo stran: `danes` (indeks po območjih), `tereni`,
-`nasveti`, `dnevnik`, poleg že prej ločenih `zemljevid`, `koledar`, `trend`,
-`baza-vrst`, `dvojnice`.
+zmožnosti** (`GOBE_CATEGORIES` → `.gp-feat`, grupirano v 4 skupine — glej
+spodaj), premium s cenikom in pogosta vprašanja. Vse ostalo ima svojo stran:
+`danes` (indeks po območjih), `tereni`, `nasveti`, `dnevnik`, poleg že prej
+ločenih `zemljevid`, `koledar`, `trend`, `baza-vrst`, `dvojnice`.
 
-- **Nova zmožnost ni nov razdelek na glavni strani** — dobi svojo podstran
-  (`subpage_shell()`) in svojo kartico v `GOBE_FEATURES`. Brez kartice je
+- **Kartice zmožnosti so grupirane v 4 skupine** (`GOBE_CATEGORIES` v
+  `tools/generate_gobe_page.py`): 🍄 Napoved, 🗺 Kje nabirati, 🔍 Prepoznaj
+  gobo, ♡ Moje gobe — popravljeno 24. 8. 2026, ko je zunanji UX pregled
+  pravilno opozoril, da je prejšnji ploski seznam (13 enakovrednih kartic,
+  `GOBE_FEATURES`) uporabnika soočil z vsem naenkrat namesto da bi ga vodil.
+  **Nova zmožnost ni nov razdelek na glavni strani** — dobi svojo podstran
+  (`subpage_shell()`) in vnos pod ustrezno od 4 skupin v `GOBE_CATEGORIES`.
+  Redkeje obiskane podstrani (koledar, trend, metodologija, nasveti, FAQ) so
+  namesto lastne kartice samo povezava v vrstici `GOBE_MORE` pod skupinami —
+  za tja sodi vse, kar ni ena od štirih glavnih uporabnikovih namer.
+- Brez uvrstitve (v `GOBE_CATEGORIES` ali `GOBE_MORE`) je podstran
   nedosegljiva, ker drugih menijev na strani ni (hitri meni je odstranjen,
   spodnja navigacija je omejena na pet ciljev).
 - Vsaka kartica ima **risano ikono** (`_FI_*`, 24×24, obris `currentColor` +
