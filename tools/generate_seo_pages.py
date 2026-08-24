@@ -3006,9 +3006,11 @@ def gen_landing_page(hist, sitemap_urls):
     # Prejšnji 68-znakovni naslov se je tiho razbil po » — « nazaj na »Vreme Rečica ob
     # Savinji zdaj« in ključni rep se je izgubil — na glavni money strani.
     title = "Vreme Rečica ob Savinji — napoved, temperatura, radar"
-    desc = (f"Vreme v Rečici ob Savinji (Zgornja Savinjska dolina, {ELEV} m n. m.): meritve "
-            f"v živo in {n_days} dni arhiva postaje IREICA1. Mikroklima doline, megla, "
-            f"inverzija, veter in trend segrevanja {trend_txt}.")
+    # Krajši opis (152 znakov): prejšnji (198 znakov, arhivsko/statistično usmerjen)
+    # se je na mobilnem odrezal, glavna poizvedba »vreme rečica ob savinji« pa je imela
+    # kljub poziciji ~9 CTR 0,2% — opis ni odgovarjal na takojšnjo namero (trenutno vreme).
+    desc = ("Trenutno vreme v Rečici ob Savinji: temperatura, padavine in veter v živo "
+            "(IREICA1). Napoved po urah, 7 dni naprej in radar za Zgornjo Savinjsko dolino.")
 
     crumbs = [("Meteorec", "/"), ("Vreme Rečica ob Savinji", None)]
 
