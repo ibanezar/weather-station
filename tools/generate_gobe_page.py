@@ -807,7 +807,11 @@ body{
 
    Mreža je nadomestila prejšnji hub s fotografijami, ki je stal pod cenikom —
    isti cilji, le da so zdaj na vrhu in jih je devet namesto petih. */
-.gp-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin:.5rem 0 1.3rem}
+.gp-feat-group{margin-bottom:.3rem}
+.gp-feat-group-title{font-size:.92rem;font-weight:700;color:var(--muted);margin:1.1rem 0 .1rem}
+.gp-feat-more{font-size:.85rem;color:var(--muted);margin:.2rem 0 1.3rem}
+.gp-feat-more a{color:var(--muted)}
 .gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
   padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
@@ -2168,43 +2172,63 @@ _FI_METODOLOGIJA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
     '<path d="M4 16.4h1.5M18.5 16.4H20M6.2 10.6l1.1 1M17.8 10.6l-1.1 1M12 6.8v1.6" stroke="currentColor" '
     'stroke-width="1.3" stroke-linecap="round" opacity=".6"/></svg>')
 
+_FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.6c-3 0-5.1 2.3-5.1 5.5v2.9l-1.7 3.2c-.3.6.1 1.3.8 1.3h12'
+    'c.7 0 1.1-.7.8-1.3l-1.7-3.2V9.1c0-3.2-2.1-5.5-5.1-5.5Z" fill="currentColor" fill-opacity=".16" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="M9.6 18.9a2.4 2.4 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    '</svg>')
 
-# Kartice pregleda zmožnosti. Naslovi in napovedniki so predloge s {…} mesti,
-# ki jih napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na
-# roko pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
+
+# Kartice pregleda zmožnosti, grupirane v 4 skupine (glej CLAUDE.md "Glavna
+# stran gobarja je pristajalna, ne zbirna" — skupinjenje je dokumentirano
+# tam; nova zmožnost gre pod ustrezno skupino ali v GOBE_MORE, ne nazaj v
+# ploski seznam). Naslovi in napovedniki so predloge s {…} mesti, ki jih
+# napolnijo števila iz istih podatkov, iz katerih nastanejo strani — na roko
+# pisana zastarijo ob vsaki razširitvi baze (kartica je nekoč oglaševala
 # 51 vrst, ko jih je bilo v bazi že 300).
 #
-# Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v mreži 3×3
-# nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a devet
-# enakih zelenih kartic se ne bi ločilo med sabo.
-GOBE_FEATURES = [
-    # (href, ikona, poudarek, naslov, napovednik, oznaka)
-    ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
-     "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
-    ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
-     "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
-    ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
-     "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
-    ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
-     "Vseh {spots} nabiralnih območij na karti doline.", None),
-    ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
-     "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
-    ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
-     "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
-    ("/gobarska-napoved/koledar/", _FI_KOLEDAR, "#a3e635", "Koledar po mesecih",
-     "Katere užitne vrste so v sezoni, mesec za mesecem.", None),
-    ("/gobarska-napoved/trend/", _FI_TREND, "#f472b6", "Sezonski trend",
-     "Letos proti petim preteklim sezonam, dan za dnem.", None),
-    ("/gobarska-napoved/tereni/", _FI_TERENI, "#c1874e", "Geološki tereni",
-     "Zakaj ista vrsta ni enako verjetna v vsakem gozdu.", None),
-    ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
-     "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
-    ("/gobarska-napoved/nasveti/", _FI_NASVETI, "#c084fc", "Nasveti in pravila",
-     "Koliko smeš nabrati, kje so zavarovana območja, kako nositi gobe.", None),
-    ("/gobarska-napoved/metodologija/", _FI_METODOLOGIJA, "#fb923c", "Kako deluje model",
-     "Vhodni podatki, rastni zamik in meje gobarskega indeksa.", None),
-    ("#faq", _FI_FAQ, "#38bdf8", "Pogosta vprašanja",
-     "Kaj indeks pove in česa ne — spodaj na tej strani.", None),
+# Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v isti
+# skupini nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a
+# same zelene kartice se ne bi ločile med sabo.
+GOBE_CATEGORIES = [
+    # (ključ, emoji, naslov skupine, [(href, ikona, poudarek, naslov, napovednik, oznaka), ...])
+    ("napoved", "🍄", "Napoved", [
+        ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
+         "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
+        ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
+         "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
+    ]),
+    ("kje", "🗺", "Kje nabirati", [
+        ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
+         "Vseh {spots} nabiralnih območij na karti doline.", None),
+        ("/gobarska-napoved/tereni/", _FI_TERENI, "#c1874e", "Geološki tereni",
+         "Zakaj ista vrsta ni enako verjetna v vsakem gozdu.", None),
+    ]),
+    ("prepoznaj", "🔍", "Prepoznaj gobo", [
+        ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
+         "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
+        ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
+         "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
+        ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
+         "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
+    ]),
+    ("moje", "♡", "Moje gobe", [
+        ("#premium", _FI_ALARM, "#fbbf24", "Moji alarmi",
+         "E-mail, ko pogoji za tvojo vrsto ali območje postanejo ugodni.", "PREMIUM"),
+        ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
+         "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
+    ]),
+]
+
+# Manj pogosto obiskane podstrani — ena vrstica povezav pod skupinami,
+# namesto lastnih kartic (bile so del istega ploskega seznama kot zgoraj).
+GOBE_MORE = [
+    ("/gobarska-napoved/koledar/", "Koledar"),
+    ("/gobarska-napoved/trend/", "Trend"),
+    ("/gobarska-napoved/metodologija/", "Metodologija"),
+    ("/gobarska-napoved/nasveti/", "Nasveti"),
+    ("#faq", "FAQ"),
 ]
 
 
@@ -2216,21 +2240,31 @@ def _rgba(hex_color, alpha):
 
 
 def feature_cards_html(counts):
-    """Mreža kartic »kaj vse najdeš tukaj« — glej .gp-feat v slogu strani."""
-    cards = []
-    for href, icon, accent, title, sub, badge in GOBE_FEATURES:
-        badge_html = f'<span class="gp-feat-badge">{badge}</span>' if badge else ""
-        cards.append(
-            f'    <a class="gp-feat-card" href="{href}" '
-            f'style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">{badge_html}'
-            f'<span class="gp-feat-ic" aria-hidden="true">{icon}</span>'
-            f'<span class="gp-feat-title">{_esc(title.format(**counts))}</span>'
-            f'<span class="gp-feat-sub">{_esc(sub.format(**counts))}</span></a>'
-        )
+    """Kartice »kaj vse najdeš tukaj«, grupirane v 4 skupine (GOBE_CATEGORIES)
+    + ena vrstica povezav za manj pogosto obiskane podstrani (GOBE_MORE).
+    Glej .gp-feat / .gp-feat-group v slogu strani."""
+    groups = []
+    for key, emoji, label, items in GOBE_CATEGORIES:
+        cards = []
+        for href, icon, accent, title, sub, badge in items:
+            badge_html = f'<span class="gp-feat-badge">{badge}</span>' if badge else ""
+            cards.append(
+                f'    <a class="gp-feat-card" href="{href}" '
+                f'style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">{badge_html}'
+                f'<span class="gp-feat-ic" aria-hidden="true">{icon}</span>'
+                f'<span class="gp-feat-title">{_esc(title.format(**counts))}</span>'
+                f'<span class="gp-feat-sub">{_esc(sub.format(**counts))}</span></a>'
+            )
+        groups.append(
+            f'  <div class="gp-feat-group" data-cat="{key}">\n'
+            f'    <h3 class="gp-feat-group-title">{emoji} {_esc(label)}</h3>\n'
+            f'    <div class="gp-feat">\n' + "\n".join(cards) + '\n    </div>\n'
+            '  </div>')
+    more_html = " · ".join(f'<a href="{href}">{_esc(label)}</a>' for href, label in GOBE_MORE)
     return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Kaj vse najdeš tukaj</h2>\n'
             '  <p class="archive-intro">Napoved je le začetek — vsaka kartica pelje naravnost na svojo '
-            'stran ali razdelek.</p>\n'
-            '  <div class="gp-feat">\n' + "\n".join(cards) + '\n  </div>')
+            'stran ali razdelek.</p>\n' + "\n".join(groups) +
+            f'\n  <p class="gp-feat-more">Več: {more_html}</p>')
 
 
 # Custom two-tone (duotone) SVG icon set for the bottom nav — replaces the
