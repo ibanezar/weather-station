@@ -1,10 +1,10 @@
 {
-  "date": "2026-08-23",
-  "issued_at": "2026-08-23T10:29:11.252055+02:00",
-  "national_score": 21,
-  "national_level": "NIZKO",
-  "national_place": "Rečica ob Savinji",
-  "should_post": false,
-  "image": "https://meteorec.si/og/storm-map/2026-08-23.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-08-23-story.jpg"
+  "date": "2026-08-24",
+  "issued_at": "2026-08-24T10:46:43.587373+02:00",
+  "national_score": 26,
+  "national_level": "ZMERNO",
+  "national_place": "Nova Gorica",
+  "should_post": true,
+  "image": "https://meteorec.si/og/storm-map/2026-08-24.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-08-24-story.jpg"
 }
