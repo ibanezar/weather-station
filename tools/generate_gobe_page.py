@@ -341,6 +341,10 @@ body{
 .gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
   border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
+.gp-hero-topsp{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+.gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
+.gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-hero-spark .gp-spark{width:84px;height:22px}
 /* Thumb-friendly action row right under the gauge — "glanceable" actions
    (share, map, notify) instead of making the user read/scroll for them. */
 .gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
@@ -385,7 +389,7 @@ body{
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.gp-forest-pct .n{font-size:1.05rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.gp-forest-pct .n{font-size:.92rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
   text-align:center;text-transform:uppercase;opacity:.9}
 /* Dynamic badge tiers — separate classes (not inline colour) so each growth
@@ -1139,7 +1143,7 @@ PAGE_JS = """<script>
       '<div class="gp-forest-top"><div class="gp-forest-namewrap">'+
       '<span class="gp-forest-nm">'+(TERR_ICON[l.terrain]||"🌲")+' '+esc2(l.name)+'</span>'+
       '<span class="gp-terr">'+(l.terrain||'')+' · '+l.elev_m+' m</span></div>'+
-      '<div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+'%</span><span class="lvl">'+o.level+'</span></div>'+
+      '<div class="gp-forest-pct '+pctCls+'"><span class="n">'+o.overall+'/100</span><span class="lvl">'+o.level+'</span></div>'+
       '</div>'+
       '<div class="gp-forest-sp3">'+spHtml+'</div>'+
       '<div class="gp-forest-bottom"><div class="gp-forest-meta">'+metaHtml+'</div>'+
@@ -1939,6 +1943,80 @@ def gauge_svg(pct):
             f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
 
 
+# ── Dnevna zgodovina hero indeksa (za delto "od včeraj" + 7-dnevni sparkline) ─
+# Ta datoteka je edini vir za oboje — brez nje ni preteklih dni za primerjavo,
+# zato se je piše tu (isti generator, ki jo bere), namesto v ločenem workflow
+# koraku. En vnos na dan; ob večkratnem zagonu istega dne (ročno testiranje,
+# ponovni build) se današnji vnos prepiše, ne podvoji.
+INDEX_HISTORY_PATH = os.path.join(ROOT, "gobarska-napoved", "indeks-zgodovina.json")
+INDEX_HISTORY_MAX_DAYS = 30
+
+
+def update_index_history(pct):
+    """Append today's index to the rolling history file (kept ≤30 days) and
+    return the updated list, sorted oldest→newest. Best-effort: a missing or
+    corrupt file just starts fresh — this is a nice-to-have trend, not a
+    system of record."""
+    try:
+        with open(INDEX_HISTORY_PATH, encoding="utf-8") as f:
+            hist = _json_mod.load(f)
+    except (OSError, ValueError):
+        hist = []
+    today_iso = TODAY.isoformat()
+    hist = [h for h in hist if h.get("date") != today_iso]
+    hist.append({"date": today_iso, "index": pct})
+    hist.sort(key=lambda h: h["date"])
+    hist = hist[-INDEX_HISTORY_MAX_DAYS:]
+    with open(INDEX_HISTORY_PATH, "w", encoding="utf-8") as f:
+        _json_mod.dump(hist, f, ensure_ascii=False, indent=0)
+    return hist
+
+
+def hero_sparkline_svg(vals, color):
+    """Same tiny auto-scaling polyline as the client-side sparklineSvg() in
+    PAGE_JS (forest rows), server-rendered here because the free-tier hero
+    has no client fetch to hang a JS version off of."""
+    w, h, pad = 140, 32, 3
+    n = len(vals)
+    known = [v for v in vals if v is not None]
+    if not known:
+        return ""
+    lo, hi = min(known), max(known)
+    if hi == lo:
+        hi, lo = hi + 1, lo - 1
+    pts = []
+    for i, v in enumerate(vals):
+        if v is None:
+            continue
+        x = pad + (w - 2 * pad) * (0 if n == 1 else i / (n - 1))
+        y = h - pad - (h - 2 * pad) * ((v - lo) / (hi - lo))
+        pts.append(f"{x:.1f},{y:.1f}")
+    return (f'<svg viewBox="0 0 {w} {h}" class="gp-spark" preserveAspectRatio="none" aria-hidden="true">'
+            f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="2" '
+            'stroke-linecap="round" stroke-linejoin="round"/></svg>')
+
+
+def hero_trend_html(pct):
+    """Delta vs. yesterday + 7-day sparkline under the hero level line.
+    Empty string until there's at least 2 days of history — no fabricated
+    trend on day one."""
+    hist = update_index_history(pct)
+    if len(hist) < 2:
+        return ""
+    yesterday_iso = (TODAY - _dt.timedelta(days=1)).isoformat()
+    yesterday = next((h["index"] for h in hist if h["date"] == yesterday_iso), None)
+    delta_html = ""
+    if yesterday is not None:
+        delta = pct - yesterday
+        arrow = "↑" if delta > 0 else ("↓" if delta < 0 else "→")
+        delta_html = f'<span class="gp-hero-delta">{arrow} {delta:+d} od včeraj</span>'
+    spark = hero_sparkline_svg([h["index"] for h in hist[-7:]], "#c17f3e")
+    spark_html = f'<span class="gp-hero-spark">{spark}</span>' if spark else ""
+    if not delta_html and not spark_html:
+        return ""
+    return f'<div class="gp-hero-trend">{delta_html}{spark_html}</div>'
+
+
 # ── Pregled zmožnosti (mreža .gp-feat pod junaško kartico) ──────────────────
 # Ikone so risane, ne emoji — emoji se med platformami razlikujejo in se ne
 # dajo prebarvati v poudarek kartice (isti razlog kot pri _IC_* spodaj). Vsaka
@@ -2656,7 +2734,7 @@ def build_zemljevid_page(premium, rules):
         <span class="gp-forest-nm">{_esc(p["name"])}</span>
         <span class="gp-terr">{_esc(p["terrain"] or "")} · {p["elev"]} m</span>
       </div>
-      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}%</span><span class="lvl">{_esc(p["lvl"])}</span></div>
+      <div class="gp-forest-pct {level_class(p["idx"])}"><span class="n">{p["idx"]}/100</span><span class="lvl">{_esc(p["lvl"])}</span></div>
     </div>''')
     fallback_html = ('  <details class="gp-collapse">\n'
         '    <summary>Območja doline (seznam) <small>({pick_count})</small></summary>\n'
@@ -2735,7 +2813,7 @@ def build_zemljevid_page(premium, rules):
       h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🔒 Zavarovano območje — preveri aktualne '+
         'omejitve nabiranja na kraju samem</div>';
     }else{
-      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' %</span> · '+esc(p.lvl)+'</div>';
+      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' / 100</span> · '+esc(p.lvl)+'</div>';
       if(p.sp&&p.sp.length){
         h+='<ul class="sp-list">'+p.sp.map(function(s){
           return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+' %</span></li>';
@@ -2853,17 +2931,20 @@ def build_body(rules, premium, free):
     month = TODAY.month
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
+    hero_trend = hero_trend_html(pct)
     hero = f'''  <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
         {gauge_svg(pct)}
-        <div class="gp-gauge-num"><span class="num">{pct}</span><small>%</small></div>
+        <div class="gp-gauge-num"><span class="num">{pct}</span><small>/ 100</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
         <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
+        {hero_trend}
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
-          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} % · {best_o["level"]}</span></div>
+          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span></div>
+        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
         <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
       </div>
     </div>
@@ -2898,7 +2979,7 @@ def build_body(rules, premium, free):
         <span class="gp-terr">{terr} · {loc["elev_m"]} m</span>
         <span class="gp-forest-sp">{top_ic}{_esc(top_nm)}</span>
       </div>
-      <div class="gp-forest-pct {pct_cls}"><span class="n">{o["overall"]}%</span><span class="lvl">{o["level"]}</span></div>
+      <div class="gp-forest-pct {pct_cls}"><span class="n">{o["overall"]}/100</span><span class="lvl">{o["level"]}</span></div>
     </div>''')
     if premium.get("protected_areas"):
         forests.append(
@@ -2972,18 +3053,22 @@ def build_body(rules, premium, free):
   </div>'''
 
     # ── pricing ───────────────────────────────────────────────────────────────
+    # Bullets naj vodijo z izidom ("kdaj in kam iti"), ne s funkcijo — funkcije
+    # (AI prepoznava, alarmi) ostanejo navedene, a niže, kot podporo izidu.
     pricing = f'''  <div id="gp-pricing-wrap">
-  <h2 id="pricing" class="gp-h2">🎟️ Naročnina</h2>
+  <h2 id="pricing" class="gp-h2">🎟️ Vedeti, kdaj iti v gozd</h2>
+  <p class="post-meta">Ne ugibaj, ali je prezgodaj po dežju. Premium spremlja vlago tal, temperaturo, dež in
+  rastni zamik posamezne vrste — in pove, katera vrsta in katero območje imata danes največ možnosti.</p>
   <div class="gp-pricing">
     <div class="gp-plan">
       <span class="gp-tag">MESEČNO</span>
       <div class="p-price">{PRICE_MONTHLY}<small> / mesec</small></div>
       <ul>
-        <li>7-dnevna napoved po vrstah</li>
-        <li>Indeks za vsa nabiralna območja</li>
-        <li>Razlage in opozorila na dvojnice</li>
+        <li>Naslednjih 7 dni, ne le danes</li>
+        <li>Katera vrsta ima danes najboljše pogoje, na katerem od {len(premium["locations"])} območij</li>
+        <li>Razlage po komponentah in opozorila na nevarne dvojnice</li>
         <li>🔍 AI prepoznava gobe iz fotografije</li>
-        <li>🔔 Lastni alarmi po vrsti, območju in nadmorski višini</li>
+        <li>🔔 Alarm, ko se pogoji izboljšajo</li>
         <li>Prekliči kadarkoli</li>
       </ul>
       <button type="button" class="gp-cta" data-paddle="monthly" data-src="pricing">Naroči se</button>
@@ -2992,7 +3077,7 @@ def build_body(rules, premium, free):
       <span class="gp-tag">CELA SEZONA</span>
       <div class="p-price">{PRICE_SEASON}<small> / sezona</small></div>
       <ul>
-        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo)</li>
+        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo in 🔔 alarme)</li>
         <li>Dostop do konca sezone (30. 11.)</li>
         <li>Enkratno plačilo, brez obnavljanja</li>
         <li>Podpora lokalnemu projektu</li>
