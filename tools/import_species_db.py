@@ -132,23 +132,48 @@ TERRAINS = [
      "Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk."),
 ]
 
-# Forecast spots, each tagged with a terrain. Logarska dolina is a strictly
-# protected area (foraging forbidden) per the workbook — kept, but flagged so
-# the model never ranks it as a picking spot.
+# Forecast spots, each tagged with a terrain. Protected areas (Logarska
+# dolina, Robanov kot) are kept for display but flagged so the model never
+# ranks them as a picking spot.
 LOCATIONS = [
-    ("Rečica ob Savinji",   46.326, 14.921, 400,  "vlazna",  True,  False),
-    ("Gozdovi nad Ljubnim", 46.348, 14.834, 700,  "kisla",   False, False),
-    ("Smrekovško pogorje",  46.430, 14.860, 1300, "kisla",   False, False),
-    ("Komen (Smrekovec)",   46.415, 14.845, 1150, "kisla",   False, False),
-    ("Golte",               46.348, 14.840, 1300, "bazicna", False, False),
-    ("Dobrovlje – Čreta",   46.300, 14.860, 900,  "bazicna", False, False),
-    ("Menina planina",      46.280, 14.780, 1000, "bazicna", False, False),
-    ("Dleskovška planota",  46.400, 14.680, 1300, "bazicna", False, False),
-    ("Logarska dolina",     46.392, 14.628, 750,  "vlazna",  False, True),
+    # (name, lat, lon, elev_m, terrain, home, protected, picking_restriction)
+    # picking_restriction (samo pri protected=true): "unknown" | "prohibited" —
+    # glej pravilo tik pod tabelo.
+    ("Rečica ob Savinji",         46.326, 14.921, 400,  "vlazna",  True,  False, None),
+    ("Gozdovi nad Ljubnim",       46.348, 14.834, 700,  "kisla",   False, False, None),
+    ("Smrekovško pogorje",        46.430, 14.860, 1300, "kisla",   False, False, None),
+    ("Komen (Smrekovec)",         46.415, 14.845, 1600, "kisla",   False, False, None),
+    ("Golte",                     46.348, 14.840, 1300, "bazicna", False, False, None),
+    ("Dobrovlje – Čreta",         46.300, 14.860, 900,  "bazicna", False, False, None),
+    ("Menina planina",            46.262, 14.819, 1453, "bazicna", False, False, None),
+    ("Dleskovška planota",        46.357, 14.698, 1500, "bazicna", False, False, None),
+    ("Logarska dolina",           46.392, 14.628, 750,  "vlazna",  False, True,  "unknown"),
+    ("Solčava",                   46.420, 14.692, 650,  "vlazna",  False, False, None),
+    ("Robanov kot",               46.397, 14.710, 700,  "vlazna",  False, True,  "unknown"),
+    ("Podveža",                   46.352, 14.722, 830,  "bazicna", False, False, None),
+    ("Raduha – vznožje",          46.390, 14.735, 1300, "bazicna", False, False, None),
+    ("Olševa – gozdna meja",      46.440, 14.700, 1450, "bazicna", False, False, None),
+    ("Nazarje",                   46.320, 14.953, 390,  "vlazna",  False, False, None),
 ]
-# NOTE: Komen/Menina planina/Dleskovška planota coordinates are estimates —
-# no lat/lon in data/baza_gob.xlsx, only place names. Verify on a map before
-# treating them as precise. # TODO: kalibriraj (potrdi koordinate)
+# picking_restriction (samo pri protected=true): "unknown" | "prohibited". UI sme
+# pisati "nabiranje prepovedano" SAMO pri "prohibited" IN obstoječem restriction_source
+# (preverjen pravni vir za TO območje) — sicer nevtralno "preveri omejitve". Trenutno za
+# nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato sta obe
+# zavarovani območji (Logarska dolina, Robanov kot) na "unknown". Ne spreminjaj v
+# "prohibited" brez konkretnega vira.
+# NOTE: Komen (Smrekovec)/Menina planina/Dleskovška planota so bile prej groba
+# ocena (ni bilo lat/lon v data/baza_gob.xlsx, samo ime kraja). Popravljeno na
+# javno objavljene koordinate/nadm. višine referenčnih točk (vrh/koča/plato),
+# a ŠE VEDNO niso terensko GPS-preverjene.
+# Nova območja (Solčava, Robanov kot, Podveža, Raduha – vznožje, Olševa –
+# gozdna meja, Nazarje) so prav tako ocene: Solčava/Podveža/Nazarje imajo
+# solidne javne koordinate naselja, Raduha/Olševa sta namenoma spuščeni pod
+# objavljeni vrh (ta je nad gozdno mejo) na oceno gozdne cone — ti dve sta
+# najmanj zanesljivi in najbolj potrebujeta terensko presojo. Robanov kot je
+# označen kot protected=True previdnostno (krajinski park, status nabiranja
+# ni potrjen pri upravi Solčavskega).
+# TODO: kalibriraj (potrdi koordinate na terenu / geoportalu, in status
+# zaščite za Robanov kot)
 
 
 # ── parsing helpers ──────────────────────────────────────────────────────────
@@ -395,8 +420,13 @@ def build_yaml(species):
 
     # Locations
     L.append("# Napovedne točke. protected=true → zaščiteno območje, ne prikazuj kot nabiralno mesto.")
+    L.append("# picking_restriction (samo pri protected=true): \"unknown\" | \"prohibited\". UI sme")
+    L.append("# pisati \"nabiranje prepovedano\" SAMO pri \"prohibited\" IN obstoječem restriction_source")
+    L.append("# (preverjen pravni vir za TO območje) — sicer nevtralno \"preveri omejitve\". Trenutno za")
+    L.append("# nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato so vsa")
+    L.append("# zavarovana območja na \"unknown\". Ne spreminjaj v \"prohibited\" brez konkretnega vira.")
     L.append("locations:")
-    for name, lat, lon, elev, terr, home, prot in LOCATIONS:
+    for name, lat, lon, elev, terr, home, prot, restriction in LOCATIONS:
         L.append(f"  - name: {q(name)}")
         L.append(f"    lat: {lat}")
         L.append(f"    lon: {lon}")
@@ -404,6 +434,8 @@ def build_yaml(species):
         L.append(f"    terrain: {terr}")
         L.append(f"    home: {'true' if home else 'false'}")
         L.append(f"    protected: {'true' if prot else 'false'}")
+        if prot and restriction:
+            L.append(f"    picking_restriction: {restriction}")
     L.append("")
 
     # Species

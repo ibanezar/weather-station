@@ -1288,7 +1288,7 @@ PAGE_JS = """<script>
     });
     html+='</div>';
     html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
-    // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
+    // location picker — 7-day per-species matrix for ANY pickable area, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
     html+='<div class="gp-chip-row" id="gp-loc-chips">';
     locs.forEach(function(l,i){

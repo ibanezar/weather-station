@@ -8,7 +8,7 @@
 # afiniteta, nočna ohladitev, ekološka skupina in rastni zamik) so označene
 # '# TODO: kalibriraj'. Neposredno iz baze (sezona, zračni prag, mikoriza,
 # dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-08-13 · 300 vrst.
+# Zadnja regeneracija: 2026-08-24 · 300 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
@@ -89,9 +89,8 @@ terrains:
 # picking_restriction (samo pri protected=true): "unknown" | "prohibited". UI sme
 # pisati "nabiranje prepovedano" SAMO pri "prohibited" IN obstoječem restriction_source
 # (preverjen pravni vir za TO območje) — sicer nevtralno "preveri omejitve". Trenutno za
-# nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato je edino
-# zavarovano območje (Logarska dolina) na "unknown". Ne spreminjaj v "prohibited" brez
-# konkretnega vira.
+# nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato so vsa
+# zavarovana območja na "unknown". Ne spreminjaj v "prohibited" brez konkretnega vira.
 locations:
   - name: "Rečica ob Savinji"
     lat: 46.326
@@ -117,7 +116,7 @@ locations:
   - name: "Komen (Smrekovec)"
     lat: 46.415
     lon: 14.845
-    elev_m: 1150
+    elev_m: 1600
     terrain: kisla
     home: false
     protected: false
@@ -136,16 +135,16 @@ locations:
     home: false
     protected: false
   - name: "Menina planina"
-    lat: 46.28
-    lon: 14.78
-    elev_m: 1000
+    lat: 46.262
+    lon: 14.819
+    elev_m: 1453
     terrain: bazicna
     home: false
     protected: false
   - name: "Dleskovška planota"
-    lat: 46.4
-    lon: 14.68
-    elev_m: 1300
+    lat: 46.357
+    lon: 14.698
+    elev_m: 1500
     terrain: bazicna
     home: false
     protected: false
@@ -157,6 +156,49 @@ locations:
     home: false
     protected: true
     picking_restriction: unknown
+  - name: "Solčava"
+    lat: 46.42
+    lon: 14.692
+    elev_m: 650
+    terrain: vlazna
+    home: false
+    protected: false
+  - name: "Robanov kot"
+    lat: 46.397
+    lon: 14.71
+    elev_m: 700
+    terrain: vlazna
+    home: false
+    protected: true
+    picking_restriction: unknown
+  - name: "Podveža"
+    lat: 46.352
+    lon: 14.722
+    elev_m: 830
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Raduha – vznožje"
+    lat: 46.39
+    lon: 14.735
+    elev_m: 1300
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Olševa – gozdna meja"
+    lat: 46.44
+    lon: 14.7
+    elev_m: 1450
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Nazarje"
+    lat: 46.32
+    lon: 14.953
+    elev_m: 390
+    terrain: vlazna
+    home: false
+    protected: false
 
 # Vrste. gets_index=true dobijo gobarski indeks; ostale so referenca / dvojnice.
 species:
