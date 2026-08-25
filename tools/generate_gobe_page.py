@@ -667,6 +667,7 @@ body{
 .gp-soil-trend-lbl{font-size:.7rem;color:var(--muted)}
 .gp-soil-trend-range{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-spark{display:block;width:140px;height:32px}
+.gp-soil-trend .gp-spark{width:210px;height:50px}
 .gp-spark-empty{font-size:.75rem;color:var(--muted)}
 
 /* ── SOS floating action button ── */
@@ -1160,8 +1161,10 @@ PAGE_JS = """<script>
         '<span class="gp-factor-val">'+v+' %</span></div>';
     }).join('')+'</div>';
   }
-  function explainCardsHtml(day, meta){
-    return day.species.slice(0,6).map(function(s){var m=meta[s.id]||{};
+  var GP_EXPLAIN_PAGE=12, GP_EXPLAIN_STEP=24;
+  var gpExplainShown=GP_EXPLAIN_PAGE;
+  function explainCardsHtml(day, meta, shown){
+    return day.species.slice(0,shown).map(function(s){var m=meta[s.id]||{};
       var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
       var factorsHtml=factorBarsHtml(s.components);
       return `<div class="gp-explain-card">
@@ -1228,6 +1231,7 @@ PAGE_JS = """<script>
   }
   function locDetailHtml(loc, meta){
     var html="";
+    gpExplainShown=GP_EXPLAIN_PAGE;
     var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
     html+='<h3>'+esc2(loc.name)+' — 7-dnevna napoved</h3>';
     html+='<a class="gp-cta alt gp-map-open-link" target="_blank" rel="noopener" '+
@@ -1239,7 +1243,10 @@ PAGE_JS = """<script>
         dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(day.overall)+'">'+day.overall+' %</span></button>';
     });
     html+='</div>';
-    html+='<div class="gp-explain-grid" id="gp-explain-grid">'+explainCardsHtml(loc.days[0], meta)+'</div>';
+    var day0=loc.days[0], total0=day0.species.length;
+    html+='<div class="gp-explain-grid" id="gp-explain-grid">'+explainCardsHtml(day0, meta, gpExplainShown)+'</div>';
+    html+='<div class="gp-sp-more"><button type="button" id="gp-explain-more-btn"'+
+      (total0<=gpExplainShown?' hidden':'')+'>Pokaži več vrst ('+(total0-gpExplainShown)+')</button></div>';
     html+=soilCardHtml(loc);
     html+='<details class="gp-collapse gp-matrix-toggle"><summary>Podrobna tabela vseh dni <small>(vseh 8 vrst)</small></summary>';
     html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
@@ -1261,14 +1268,32 @@ PAGE_JS = """<script>
   function wireDayChips(root, loc, meta){
     var row=root.querySelector(".gp-day-chips");
     var grid=root.querySelector("#gp-explain-grid");
+    var moreBtn=root.querySelector("#gp-explain-more-btn");
     if(!row||!grid)return;
+    function renderExplain(dayIdx){
+      var day=loc.days[dayIdx];
+      grid.innerHTML=explainCardsHtml(day, meta, gpExplainShown);
+      if(moreBtn){
+        var total=day.species.length;
+        moreBtn.hidden = total<=gpExplainShown;
+        if(!moreBtn.hidden) moreBtn.textContent="Pokaži več vrst ("+(total-gpExplainShown)+")";
+      }
+    }
     row.addEventListener("click",function(e){
       var btn=e.target.closest(".gp-chip");
       if(!btn)return;
       row.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
       btn.classList.add("active");
-      grid.innerHTML=explainCardsHtml(loc.days[parseInt(btn.dataset.day,10)], meta);
+      gpExplainShown=GP_EXPLAIN_PAGE;
+      renderExplain(parseInt(btn.dataset.day,10));
     });
+    if(moreBtn){
+      moreBtn.addEventListener("click",function(){
+        gpExplainShown+=GP_EXPLAIN_STEP;
+        var activeChip=row.querySelector(".gp-chip.active");
+        renderExplain(activeChip?parseInt(activeChip.dataset.day,10):0);
+      });
+    }
   }
   function render(d){
     var meta=d.species_meta||{};
