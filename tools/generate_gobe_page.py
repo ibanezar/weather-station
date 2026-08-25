@@ -1001,7 +1001,6 @@ body .app-bottomnav{display:none}
 .gp-mmap-chip i{width:.7rem;height:.7rem;border-radius:50%;flex:0 0 auto}
 .gp-mmap-chip .nm{font-weight:600}
 .gp-mmap-chip .pct{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
-.gp-mmap-chip.prot{opacity:.75}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -3212,29 +3211,35 @@ def build_zemljevid_page(premium, rules):
         "Zemljevid", inner, extra_js=map_js)
 
 
+MINI_MAP_TEASER_N = 8
+
+
 def mini_map_preview_html(premium):
-    """Compact, static (no Leaflet) area-status preview for the homepage —
+    """Compact, static (no Leaflet) area-status teaser for the homepage —
     same today['overall']/level data build_zemljevid_page() uses, just a
-    row of small chips instead of a full interactive map. Colour is always
-    paired with the level word, never colour alone (accessibility)."""
+    handful of small chips instead of a full interactive map. Colour is
+    always paired with the level word, never colour alone (accessibility).
+
+    Capped to the top MINI_MAP_TEASER_N by index (not all locations, and
+    not the protected-area chips either) — with 97 locations this used to
+    render every single one, turning a "how's the valley doing today"
+    glance into most of the homepage. The full, searchable list already
+    lives at /danes/ (see DANES_JS), so the CTA points there instead of
+    the interactive map — that's the more useful next stop from a capped
+    teaser than a map click just to see the rest of the names."""
+    locs = sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True)
     chips = []
-    for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
+    for loc in locs[:MINI_MAP_TEASER_N]:
         o = loc["days"][0]
         chips.append(
             f'    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(loc["name"])}">'
             f'<i style="background:{level_color(o["overall"])}"></i>'
             f'<span class="nm">{_esc(loc["name"])}</span>'
             f'<span class="pct">{o["overall"]}/100 · {_esc(o["level"])}</span></a>')
-    for name in premium.get("protected_areas", []):
-        chips.append(
-            f'    <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(name)}">'
-            f'<i style="background:#a78bfa"></i>'
-            f'<span class="nm">{_esc(name)}</span>'
-            f'<span class="pct">Zaščiteno</span></a>')
     return ('  <div class="gp-mini-map">\n'
             '    <h2 class="gp-h2">🗺️ Danes v dolini</h2>\n'
             '    <div class="gp-mini-map-grid">\n' + "\n".join(chips) + '\n    </div>\n'
-            '    <a class="gp-cta alt" href="/gobarska-napoved/zemljevid/">Odpri interaktivni zemljevid →</a>\n'
+            f'    <a class="gp-cta alt" href="/gobarska-napoved/danes/">Poglej vseh {len(locs)} območij →</a>\n'
             '  </div>')
 
 
