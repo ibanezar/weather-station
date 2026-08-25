@@ -379,6 +379,7 @@ body{
 .gp-soil-trend-lbl{font-size:.7rem;color:var(--muted)}
 .gp-soil-trend-range{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-spark{display:block;width:140px;height:32px}
+.gp-soil-trend .gp-spark{width:210px;height:50px}
 .gp-spark-empty{font-size:.75rem;color:var(--muted)}
 
 /* ── SOS floating action button ── */
@@ -813,13 +814,73 @@ body .wrap{padding-bottom:5.5rem}
     <div class="gp-mini-map-grid">
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Gozdovi%20nad%20Ljubnim"><i style="background:#34d399"></i><span class="nm">Gozdovi nad Ljubnim</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Smrekov%C5%A1ko%20pogorje"><i style="background:#34d399"></i><span class="nm">Smrekovško pogorje</span><span class="pct">100/100 · ODLIČNA</span></a>
-    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Komen%20%28Smrekovec%29"><i style="background:#34d399"></i><span class="nm">Komen (Smrekovec)</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Golte"><i style="background:#34d399"></i><span class="nm">Golte</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Dobrovlje%20%E2%80%93%20%C4%8Creta"><i style="background:#34d399"></i><span class="nm">Dobrovlje – Čreta</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Menina%20planina"><i style="background:#34d399"></i><span class="nm">Menina planina</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Dleskov%C5%A1ka%20planota"><i style="background:#34d399"></i><span class="nm">Dleskovška planota</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Radegunda%20spodaj"><i style="background:#34d399"></i><span class="nm">Radegunda spodaj</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=%C5%BDekovec"><i style="background:#34d399"></i><span class="nm">Žekovec</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Radegunda%20vi%C5%A1je"><i style="background:#34d399"></i><span class="nm">Radegunda višje</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Radegunda%20%E2%86%92%20Golte%2C%20spodnji%20pas"><i style="background:#34d399"></i><span class="nm">Radegunda → Golte, spodnji pas</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Po%C4%8Divavnik%E2%80%93Korte"><i style="background:#34d399"></i><span class="nm">Počivavnik–Korte</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Golte%2C%20vzhodni%20gozdni%20pas"><i style="background:#34d399"></i><span class="nm">Golte, vzhodni gozdni pas</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Mozirska%20ko%C4%8Da%20%E2%80%93%20gozd%20precej%20ni%C5%BEje"><i style="background:#34d399"></i><span class="nm">Mozirska koča – gozd precej nižje</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Pahtin"><i style="background:#34d399"></i><span class="nm">Pahtin</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Mali%20lazi"><i style="background:#34d399"></i><span class="nm">Mali lazi</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Veliki%20lazi%20/%20Kokarca"><i style="background:#34d399"></i><span class="nm">Veliki lazi / Kokarca</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Brezovci%20%E2%80%93%20severno%20pobo%C4%8Dje%20Smrekovca"><i style="background:#34d399"></i><span class="nm">Brezovci – severno pobočje Smrekovca</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kramarica%20%E2%80%93%20vzhodno%20pobo%C4%8Dje%20Smrekovca"><i style="background:#34d399"></i><span class="nm">Kramarica – vzhodno pobočje Smrekovca</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Mrzle%20vode%20%E2%80%93%20severna%20stran%20Komna"><i style="background:#34d399"></i><span class="nm">Mrzle vode – severna stran Komna</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kugovnik"><i style="background:#34d399"></i><span class="nm">Kugovnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Ram%C5%A1ak%20pod%20Krnesom"><i style="background:#34d399"></i><span class="nm">Ramšak pod Krnesom</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kolarica%20%E2%80%93%20gozdni%20pas%20proti%20Komnu"><i style="background:#34d399"></i><span class="nm">Kolarica – gozdni pas proti Komnu</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Vrta%C4%8Dnikov%20potok%20/%20Pudgarsko"><i style="background:#34d399"></i><span class="nm">Vrtačnikov potok / Pudgarsko</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Bistra%20%E2%80%93%20pod%20Petelinjekom"><i style="background:#34d399"></i><span class="nm">Bistra – pod Petelinjekom</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=%C4%8Crni%20vrh%20pri%20Smrekovcu%20%E2%80%93%20gozd%20ni%C5%BEje"><i style="background:#34d399"></i><span class="nm">Črni vrh pri Smrekovcu – gozd nižje</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Ljubenske%20Rastke"><i style="background:#34d399"></i><span class="nm">Ljubenske Rastke</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Rasto%C4%8Dnik"><i style="background:#34d399"></i><span class="nm">Rastočnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Retkovo"><i style="background:#34d399"></i><span class="nm">Retkovo</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kumprej"><i style="background:#34d399"></i><span class="nm">Kumprej</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Atel%C5%A1ek"><i style="background:#34d399"></i><span class="nm">Atelšek</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Vrniv%C5%A1ek"><i style="background:#34d399"></i><span class="nm">Vrnivšek</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Atelsko%20sedlo"><i style="background:#34d399"></i><span class="nm">Atelsko sedlo</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kozlova%20planina%20%E2%80%93%20gozd%20spodaj"><i style="background:#34d399"></i><span class="nm">Kozlova planina – gozd spodaj</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Tra%C4%8Dka%20planina%20%E2%80%93%20gozdni%20rob"><i style="background:#34d399"></i><span class="nm">Tračka planina – gozdni rob</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Po%C4%8Dka%20/%20Robnikova%20planina"><i style="background:#34d399"></i><span class="nm">Počka / Robnikova planina</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Travnik%20%E2%80%93%20P1"><i style="background:#34d399"></i><span class="nm">Travnik – P1</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Travnik%20%E2%80%93%20P2"><i style="background:#34d399"></i><span class="nm">Travnik – P2</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Bukovnik%20%28Primo%C5%BE%29"><i style="background:#34d399"></i><span class="nm">Bukovnik (Primož)</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Lenko%E2%80%93Frgelj"><i style="background:#34d399"></i><span class="nm">Lenko–Frgelj</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Pod%20Smrekovcem%2C%20ju%C5%BEni%20gozd"><i style="background:#34d399"></i><span class="nm">Pod Smrekovcem, južni gozd</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Lu%C4%8De%20%28nad%20dolino%29"><i style="background:#34d399"></i><span class="nm">Luče (nad dolino)</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Zgornji%20Jerov%C4%8Dnik"><i style="background:#34d399"></i><span class="nm">Zgornji Jerovčnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Podvolovljek%20%E2%80%93%20Mlinar"><i style="background:#34d399"></i><span class="nm">Podvolovljek – Mlinar</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Krnica%20%E2%80%93%20Metulj"><i style="background:#34d399"></i><span class="nm">Krnica – Metulj</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Mlakar%E2%80%93Majk"><i style="background:#34d399"></i><span class="nm">Mlakar–Majk</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=%C5%A0komen"><i style="background:#34d399"></i><span class="nm">Škomen</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Kogel"><i style="background:#34d399"></i><span class="nm">Kogel</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Riher"><i style="background:#34d399"></i><span class="nm">Riher</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Vavdnovo"><i style="background:#34d399"></i><span class="nm">Vavdnovo</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Navr%C5%A1nik%E2%80%93Pe%C4%8Dovsko"><i style="background:#34d399"></i><span class="nm">Navršnik–Pečovsko</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Podve%C5%BEa%20%E2%80%93%20srednji%20pas"><i style="background:#34d399"></i><span class="nm">Podveža – srednji pas</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Planina%20Ravne%20%E2%80%93%20gozd%20pod%20planino"><i style="background:#34d399"></i><span class="nm">Planina Ravne – gozd pod planino</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Pod%20planino%20Podve%C5%BEak"><i style="background:#34d399"></i><span class="nm">Pod planino Podvežak</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Gozdarska%20ko%C4%8Da%20%E2%80%93%20%C5%A1ir%C5%A1i%20blok"><i style="background:#34d399"></i><span class="nm">Gozdarska koča – širši blok</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Plahojca%E2%80%93%C5%A0ibje"><i style="background:#34d399"></i><span class="nm">Plahojca–Šibje</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Zavratnik%E2%80%93Tratnik"><i style="background:#34d399"></i><span class="nm">Zavratnik–Tratnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Pod%20Loko%20/%20ju%C5%BEna%20Raduha"><i style="background:#34d399"></i><span class="nm">Pod Loko / južna Raduha</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Sedelce"><i style="background:#34d399"></i><span class="nm">Sedelce</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Vodole"><i style="background:#34d399"></i><span class="nm">Vodole</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=De%C5%A1man%E2%80%93Smre%C4%8Dnik"><i style="background:#34d399"></i><span class="nm">Dešman–Smrečnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Ro%C5%BEni%20vrh%20%E2%80%93%20gozd%20pod%20vrhom"><i style="background:#34d399"></i><span class="nm">Rožni vrh – gozd pod vrhom</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Huda%20go%C5%A1a%20/%20spodnji%20Ro%C5%BEni%20vrh"><i style="background:#34d399"></i><span class="nm">Huda goša / spodnji Rožni vrh</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Tolstovr%C5%A1nik"><i style="background:#34d399"></i><span class="nm">Tolstovršnik</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Podol%C5%A1eva%20%E2%80%93%20Sv.%20Duh"><i style="background:#34d399"></i><span class="nm">Podolševa – Sv. Duh</span><span class="pct">100/100 · ODLIČNA</span></a>
+    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Bukovnik%20%28Grohat%29"><i style="background:#34d399"></i><span class="nm">Bukovnik (Grohat)</span><span class="pct">100/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc=Re%C4%8Dica%20ob%20Savinji"><i style="background:#34d399"></i><span class="nm">Rečica ob Savinji</span><span class="pct">82/100 · ODLIČNA</span></a>
     <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc=Logarska%20dolina"><i style="background:#a78bfa"></i><span class="nm">Logarska dolina</span><span class="pct">Zaščiteno</span></a>
+    <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc=Robanov%20kot"><i style="background:#a78bfa"></i><span class="nm">Robanov kot</span><span class="pct">Zaščiteno</span></a>
+    <a class="gp-mmap-chip prot" href="/gobarska-napoved/zemljevid/?loc=Komen%20%28Smrekovec%29"><i style="background:#a78bfa"></i><span class="nm">Komen (Smrekovec)</span><span class="pct">Zaščiteno</span></a>
     </div>
     <a class="gp-cta alt" href="/gobarska-napoved/zemljevid/">Odpri interaktivni zemljevid →</a>
   </div>
@@ -828,14 +889,14 @@ body .wrap{padding-bottom:5.5rem}
   <div class="gp-feat-group" data-cat="napoved">
     <h3 class="gp-feat-group-title">🍄 Napoved</h3>
     <div class="gp-feat">
-    <a class="gp-feat-card" href="/gobarska-napoved/danes/" style="--fa:#34d399;--fa-soft:rgba(52,211,153,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5 11.4 11H2.6L7 3.5Z" fill="currentColor" fill-opacity=".22"/><path d="M7 3.5 11.4 11H2.6L7 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 8.6 12.2 17H1.8L7 8.6Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 17v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.4 6.2 21.8 14h-8.8l4.4-7.8Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M17.4 14v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 20.5h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".55"/></svg></span><span class="gp-feat-title">Danes po gozdovih</span><span class="gp-feat-sub">Indeks za 8 nabiralnih območij doline, vsak dan znova.</span></a>
+    <a class="gp-feat-card" href="/gobarska-napoved/danes/" style="--fa:#34d399;--fa-soft:rgba(52,211,153,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5 11.4 11H2.6L7 3.5Z" fill="currentColor" fill-opacity=".22"/><path d="M7 3.5 11.4 11H2.6L7 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 8.6 12.2 17H1.8L7 8.6Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 17v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.4 6.2 21.8 14h-8.8l4.4-7.8Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M17.4 14v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 20.5h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".55"/></svg></span><span class="gp-feat-title">Danes po gozdovih</span><span class="gp-feat-sub">Indeks za 66 nabiralnih območij doline, vsak dan znova.</span></a>
     <a class="gp-feat-card" href="#premium" style="--fa:#4d9ff8;--fa-soft:rgba(77,159,248,.16)"><span class="gp-feat-badge">BREZPLAČNO</span><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.6" y="14.5" width="2.4" height="6" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="11" width="2.4" height="9.5" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="11.4" y="7.2" width="2.4" height="13.3" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="15.8" y="12.4" width="2.4" height="8.1" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 4.2c1.9 2.4 4.2 3.6 6.9 3.6 3.4 0 6.4-1.9 8.9-5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".75"/><circle cx="20.6" cy="4.6" r="1.5" fill="currentColor"/></svg></span><span class="gp-feat-title">Napoved po vrstah, 7 dni</span><span class="gp-feat-sub">Za vsak dan in vsako območje, z razlago po komponentah.</span></a>
     </div>
   </div>
   <div class="gp-feat-group" data-cat="kje">
     <h3 class="gp-feat-group-title">🗺 Kje nabirati</h3>
     <div class="gp-feat">
-    <a class="gp-feat-card" href="/gobarska-napoved/zemljevid/" style="--fa:#22d3ee;--fa-soft:rgba(34,211,238,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.8 6.4 8.6 4v13.4l-5.8 2.4V6.4Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.6 4l5.8 2.4v13.4L8.6 17.4V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m14.4 6.4 5.8-2.4v6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".6"/><path d="M18.4 12c1.8 0 3.2 1.4 3.2 3.2 0 2.2-3.2 5.6-3.2 5.6s-3.2-3.4-3.2-5.6c0-1.8 1.4-3.2 3.2-3.2Z" fill="currentColor" fill-opacity=".45" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="18.4" cy="15.3" r="1.1" fill="currentColor"/></svg></span><span class="gp-feat-title">Zemljevid območij</span><span class="gp-feat-sub">Vseh 8 nabiralnih območij na karti doline.</span></a>
+    <a class="gp-feat-card" href="/gobarska-napoved/zemljevid/" style="--fa:#22d3ee;--fa-soft:rgba(34,211,238,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.8 6.4 8.6 4v13.4l-5.8 2.4V6.4Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.6 4l5.8 2.4v13.4L8.6 17.4V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m14.4 6.4 5.8-2.4v6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".6"/><path d="M18.4 12c1.8 0 3.2 1.4 3.2 3.2 0 2.2-3.2 5.6-3.2 5.6s-3.2-3.4-3.2-5.6c0-1.8 1.4-3.2 3.2-3.2Z" fill="currentColor" fill-opacity=".45" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="18.4" cy="15.3" r="1.1" fill="currentColor"/></svg></span><span class="gp-feat-title">Zemljevid območij</span><span class="gp-feat-sub">Vseh 66 nabiralnih območij na karti doline.</span></a>
     <a class="gp-feat-card" href="/gobarska-napoved/tereni/" style="--fa:#c1874e;--fa-soft:rgba(193,135,78,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.6 7.6c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7v3.2c-1.6 0-3.2-.6-4.8-1.7-2.2-1.6-4.6-2.4-7.2-2.4-2 0-4.2.7-6.6 2.1V7.6Z" fill="currentColor" fill-opacity=".45"/><path d="M2.6 7.6c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.6 13.4c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/><path d="M2.6 19.2c2.4-1.4 4.6-2.1 6.6-2.1 2.6 0 5 .8 7.2 2.4 1.6 1.1 3.2 1.7 4.8 1.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg></span><span class="gp-feat-title">Geološki tereni</span><span class="gp-feat-sub">Zakaj ista vrsta ni enako verjetna v vsakem gozdu.</span></a>
     </div>
   </div>
@@ -1042,8 +1103,10 @@ body .wrap{padding-bottom:5.5rem}
         '<span class="gp-factor-val">'+v+' %</span></div>';
     }).join('')+'</div>';
   }
-  function explainCardsHtml(day, meta){
-    return day.species.slice(0,6).map(function(s){var m=meta[s.id]||{};
+  var GP_EXPLAIN_PAGE=12, GP_EXPLAIN_STEP=24;
+  var gpExplainShown=GP_EXPLAIN_PAGE;
+  function explainCardsHtml(day, meta, shown){
+    return day.species.slice(0,shown).map(function(s){var m=meta[s.id]||{};
       var dblHtml=m.doubles?('<span class="dbl">⚠ dvojnica: '+esc2(m.doubles)+'</span>'):'';
       var factorsHtml=factorBarsHtml(s.components);
       return `<div class="gp-explain-card">
@@ -1110,6 +1173,7 @@ body .wrap{padding-bottom:5.5rem}
   }
   function locDetailHtml(loc, meta){
     var html="";
+    gpExplainShown=GP_EXPLAIN_PAGE;
     var top=loc.days[0].species.slice(0,8).map(function(s){return s.id;});
     html+='<h3>'+esc2(loc.name)+' — 7-dnevna napoved</h3>';
     html+='<a class="gp-cta alt gp-map-open-link" target="_blank" rel="noopener" '+
@@ -1121,7 +1185,10 @@ body .wrap{padding-bottom:5.5rem}
         dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(day.overall)+'">'+day.overall+' %</span></button>';
     });
     html+='</div>';
-    html+='<div class="gp-explain-grid" id="gp-explain-grid">'+explainCardsHtml(loc.days[0], meta)+'</div>';
+    var day0=loc.days[0], total0=day0.species.length;
+    html+='<div class="gp-explain-grid" id="gp-explain-grid">'+explainCardsHtml(day0, meta, gpExplainShown)+'</div>';
+    html+='<div class="gp-sp-more"><button type="button" id="gp-explain-more-btn"'+
+      (total0<=gpExplainShown?' hidden':'')+'>Pokaži več vrst ('+(total0-gpExplainShown)+')</button></div>';
     html+=soilCardHtml(loc);
     html+='<details class="gp-collapse gp-matrix-toggle"><summary>Podrobna tabela vseh dni <small>(vseh 8 vrst)</small></summary>';
     html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
@@ -1143,14 +1210,32 @@ body .wrap{padding-bottom:5.5rem}
   function wireDayChips(root, loc, meta){
     var row=root.querySelector(".gp-day-chips");
     var grid=root.querySelector("#gp-explain-grid");
+    var moreBtn=root.querySelector("#gp-explain-more-btn");
     if(!row||!grid)return;
+    function renderExplain(dayIdx){
+      var day=loc.days[dayIdx];
+      grid.innerHTML=explainCardsHtml(day, meta, gpExplainShown);
+      if(moreBtn){
+        var total=day.species.length;
+        moreBtn.hidden = total<=gpExplainShown;
+        if(!moreBtn.hidden) moreBtn.textContent="Pokaži več vrst ("+(total-gpExplainShown)+")";
+      }
+    }
     row.addEventListener("click",function(e){
       var btn=e.target.closest(".gp-chip");
       if(!btn)return;
       row.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
       btn.classList.add("active");
-      grid.innerHTML=explainCardsHtml(loc.days[parseInt(btn.dataset.day,10)], meta);
+      gpExplainShown=GP_EXPLAIN_PAGE;
+      renderExplain(parseInt(btn.dataset.day,10));
     });
+    if(moreBtn){
+      moreBtn.addEventListener("click",function(){
+        gpExplainShown+=GP_EXPLAIN_STEP;
+        var activeChip=row.querySelector(".gp-chip.active");
+        renderExplain(activeChip?parseInt(activeChip.dataset.day,10):0);
+      });
+    }
   }
   function render(d){
     var meta=d.species_meta||{};
@@ -1172,7 +1257,7 @@ body .wrap{padding-bottom:5.5rem}
     });
     html+='</div>';
     html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
-    // location picker — 7-day per-species matrix for ANY of the 16 areas, not just home
+    // location picker — 7-day per-species matrix for ANY pickable area, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
     html+='<div class="gp-chip-row" id="gp-loc-chips">';
     locs.forEach(function(l,i){
