@@ -3217,7 +3217,7 @@ def build_body(rules, premium, free):
         top_nm = premium["species_meta"][top["id"]]["name_sl"] if top else "—"
         top_ic = (f'<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/{top["id"]}.jpg" alt="" loading="lazy" '
                   'onerror="this.replaceWith(document.createTextNode(\'🍄 \'))">') if top else "🍄 "
-        terr = loc.get("terrain", "")
+        terr = loc.get("terrain") or ""
         t_icon = TERRAIN_STYLE.get(terr, ("", "🌲"))[1]
         pct_cls = level_class(o["overall"])
         forests.append(
