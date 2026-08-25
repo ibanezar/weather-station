@@ -1287,7 +1287,7 @@ PAGE_JS = """<script>
     html+='</div>';
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
-    content.hidden=false;lock.hidden=true;
+    content.hidden=false;if(lock)lock.hidden=true;
     var todayDayChips=document.getElementById("gp-today-day-chips");
     var todayForests=document.getElementById("gp-today-forests");
     if(todayDayChips&&todayForests){todayDayChips.addEventListener("click",function(e){
