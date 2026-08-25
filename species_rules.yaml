@@ -207,6 +207,13 @@ locations:
     terrain: bazicna
     home: false
     protected: false
+  - name: "Mozirska koča – gozd precej nižje"
+    lat: 46.37139
+    lon: 14.9047
+    elev_m: 1100
+    terrain: bazicna
+    home: false
+    protected: false
   - name: "Pahtin"
     lat: 46.33
     lon: 14.944
@@ -226,6 +233,69 @@ locations:
     lon: 14.927
     elev_m: 600
     terrain: bazicna
+    home: false
+    protected: false
+  - name: "Brezovci – severno pobočje Smrekovca"
+    lat: 46.42976
+    lon: 14.8906
+    elev_m: 1130
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Kramarica – vzhodno pobočje Smrekovca"
+    lat: 46.426
+    lon: 14.9035
+    elev_m: 1140
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Mrzle vode – severna stran Komna"
+    lat: 46.41582
+    lon: 14.83113
+    elev_m: 1226
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Kugovnik"
+    lat: 46.41274
+    lon: 14.87742
+    elev_m: 1233
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Ramšak pod Krnesom"
+    lat: 46.416
+    lon: 14.869
+    elev_m: 1300
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Kolarica – gozdni pas proti Komnu"
+    lat: 46.411
+    lon: 14.8119
+    elev_m: 1328
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Vrtačnikov potok / Pudgarsko"
+    lat: 46.438
+    lon: 14.865
+    elev_m: 1150
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Bistra – pod Petelinjekom"
+    lat: 46.4444
+    lon: 14.8072
+    elev_m: 1100
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Črni vrh pri Smrekovcu – gozd nižje"
+    lat: 46.40946
+    lon: 14.89846
+    elev_m: 1150
+    terrain: kisla
     home: false
     protected: false
   - name: "Ljubenske Rastke"
