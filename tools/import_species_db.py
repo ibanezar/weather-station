@@ -136,17 +136,27 @@ TERRAINS = [
 # dolina, Robanov kot, Komen) are kept for display but flagged so the model
 # never ranks them as a picking spot.
 #
-# Koordinate spodnjih vrstic (razen prvih 7 in treh zavarovanih) so od Filipa,
-# ki je 27. 8. 2026 poslal tretji, dokončno prečiščen krog: 49 osebno
-# izbranih mikro-območij po 4 poteh (od prvotnih ~55 po 5 poteh), vsako z
-# oznako zanesljivosti — A: preverjena kartirana točka/izhodišče, B:
-# orientacijska točka znotraj širšega gozdnega odseka (jemlji kot začetek
-# raziskovanja, ne kot "GPS rastišča"). Model pozna samo eno nadm. višino na
-# območje, zato je pri vrsticah s podanim razponom uporabljena sredina
-# razpona (ali vrednost pod navedenim vrhom/sedlom, kjer besedilo pravi
-# "cilja nižje" — glej opombe pri posameznih vrsticah). Ekspozicija, ločene
-# ocene za jurčke/lisičke in "dni po dežju" iz Filipove tabele NISO polja v
-# modelu (ostajajo samo tu, v dokumentaciji) — model tega ne zna izračunati.
+# Koordinate spodnjih vrstic (razen prvih 7 in treh zavarovanih) izvorno
+# temeljijo na Filipovem 27. 8. 2026 prečiščenem krogu (49 mikro-območij po
+# 4 poteh). 29. 8. 2026 je Filip poslal pravi geološki vir —
+# zgornja_savinjska_geo_glivna_mreza_96_OGK100_2_0.csv, 96 točk iz OGK100
+# (Osnovna geološka karta 1:100.000), ZGS gozdnogospodarskih načrtov in
+# enega lokalitetnega članka — ki je terrain popravil pri 29 vrsticah in
+# dodal 37 novih. Elevacija ostaja sredina/ocena iz prejšnjega kroga, kjer
+# CSV ni dal natančnejše.
+#
+# terrain je lahko tudi None (namesto niza) — POMEMBNO, ne "nevtralna" vrsta
+# terena, ampak DEJANSKO MANJKAJOČ podatek: CSV razkrije, da je velik del
+# doline (~40 % od 96 točk) geološka STIČNA/MOZAIČNA cona (oznake z ↔, →, +,
+# npr. "TUF↔VOL") ali lapor/glinovec/meljevec (koda MAR) — nobenega od teh
+# baza vrst (145 terensko preverjenih vrst) NE navaja kot prednost nobene
+# vrste, zato bi prisilna uvrstitev v kisla/bazicna/vlazna vsaki vrsti s
+# to ali drugo afiniteto dala napačno kazen. gobe_model.eval_species() že
+# ima za to pravilo ("elif affinity == 'nevtralna' or not terrain: pass") —
+# terrain=None torej pomeni "ne kaznuj tu nikogar", ne napako. build_yaml()
+# spodaj zato izpusti "terrain:" vrstico, kadar je terrain None/prazen —
+# GLEJ TUDI generate_gobe_page.py, kjer mora vsako `terrain`-branje ostati
+# null-varno (`loc.get("terrain") or ""`, ne `loc.get("terrain", "")`).
 LOCATIONS = [
     # (name, lat, lon, elev_m, terrain, home, protected, picking_restriction)
     # picking_restriction (samo pri protected=true): "unknown" | "prohibited" —
@@ -173,19 +183,55 @@ LOCATIONS = [
     # Pozor (Filip): blizu je gozdni rezervat Mozirska požganija — spodnje
     # koordinate niso dovoljenje za nabiranje, pred odmikom globlje v gozd
     # preveri plast "Gozdni rezervati" v ZGS Pregledovalniku.
-    ("Radegunda spodaj",                    46.35854, 14.93136, 495,  "bazicna", False, False, None),
-    ("Žekovec",                             46.35509, 14.93338, 525,  "bazicna", False, False, None),
+    # OGK100: andezitni tuf (TUF) → kisla.
+    ("Radegunda spodaj",                    46.35854, 14.93136, 495,  "kisla",   False, False, None),
+    # OGK100: TUF↔LIM/DOL, stik dveh podlag — brez terena (glej opombo zgoraj).
+    ("Žekovec",                             46.35509, 14.93338, 525,  None,      False, False, None),
     ("Radegunda višje",                     46.36608, 14.93296, 700,  "bazicna", False, False, None),
-    ("Radegunda → Golte, spodnji pas",      46.365,   14.925,   750,  "bazicna", False, False, None),
+    ("Radegunda → Golte, spodnji pas",      46.365,   14.925,   750,  None,      False, False, None),
     ("Počivavnik–Korte",                    46.370,   14.920,   900,  "bazicna", False, False, None),
     ("Golte, vzhodni gozdni pas",           46.370,   14.913,   1100, "bazicna", False, False, None),
     # Filip je to prej označil kot "samo orientacija" (koča je pri 1405 m),
     # zdaj pa jo je vključil z opombo "gozd precej nižje" — elevacija tu je
     # zato precej pod višino same koče.
     ("Mozirska koča – gozd precej nižje",   46.37139, 14.90470, 1100, "bazicna", False, False, None),
-    ("Pahtin",                              46.330,   14.944,   600,  "bazicna", False, False, None),
-    ("Mali lazi",                           46.313,   14.931,   575,  "bazicna", False, False, None),
-    ("Veliki lazi / Kokarca",               46.304,   14.927,   600,  "bazicna", False, False, None),
+    # OGK100: TUF → kisla.
+    ("Pahtin",                              46.330,   14.944,   600,  "kisla",   False, False, None),
+    # OGK100: lapor/glinovec/meljevec (MAR) — baza vrst tega substrata ne
+    # pozna kot prednost nobene vrste, zato brez terena (ne "bazicna").
+    ("Mali lazi",                           46.313,   14.931,   575,  None,      False, False, None),
+    ("Veliki lazi / Kokarca",               46.304,   14.927,   600,  None,      False, False, None),
+    ("Spodnja Kokarca",                     46.293,   14.922,   550,  None,      False, False, None),
+    ("Pusto Polje – rob gričevja",          46.29266, 14.91849, 430,  None,      False, False, None),
+    ("Prihova – gozdni rob",                46.3238,  14.94388, 485,  None,      False, False, None),
+    ("Kokarje – severni gozdni rob",        46.30272, 14.93893, 525,  "kisla",   False, False, None),
+
+    # ── Nazarje/Rečica – obrečni pas Savinje in Drete, ~340–360 m ───────────
+    # OGK100: ALL (rečni prod/pesek/melj) — sodi v "vlazna" (rečni logi in
+    # dolinske terase), enako kot obstoječa Rečica ob Savinji.
+    ("Nazarje – sotočje Drete in Savinje",  46.3188,  14.9489,  340,  "vlazna",  False, False, None),
+    ("Spodnje Pobrežje – ob Savinji",       46.329,   14.927,   350,  "vlazna",  False, False, None),
+    ("Trnovec / Nizka – obrečni pas",       46.334,   14.912,   360,  "vlazna",  False, False, None),
+
+    # ── Dobrovlje–Čreta, dodatek ─────────────────────────────────────────────
+    ("Čreta pri Kokarjah",                  46.2891,  14.95628, 636,  None,      False, False, None),
+    ("Dom na Čreti – gozdni rob",           46.27695, 14.95924, 876,  "bazicna", False, False, None),
+    ("Čreta – keratofirni pas",             46.28333, 14.96667, 900,  "kisla",   False, False, None),
+
+    # ── Gornji Grad – Menina – Črnivec, ~430–1400 m (nova podregija) ────────
+    # OGK100 pokriva tudi občino Gornji Grad, doslej v LOCATIONS ne pokrito.
+    ("Bočna – dolinski rob",                46.28889, 14.85389, 440,  "vlazna",  False, False, None),
+    ("Bočna – spodnji gozd proti Menini",   46.28,    14.844,   650,  "bazicna", False, False, None),
+    ("Bočka trata – orientacijski gozdni pas", 46.27, 14.839,   900,  "bazicna", False, False, None),
+    ("Rovt pod Menino",                     46.296,   14.895,   600,  None,      False, False, None),
+    ("Črnivec – severna stran prelaza",     46.26059, 14.70212, 902,  "kisla",   False, False, None),
+    ("Kašni vrh – gozd pod vrhom",          46.29697, 14.71769, 1175, "kisla",   False, False, None),
+    ("Lepenatka – gozd pod vrhom",          46.30991, 14.74055, 1290, "kisla",   False, False, None),
+    ("Menina – severni srednji pas",        46.278,   14.828,   1025, None,      False, False, None),
+    ("Menina – visoki gozd pod domom",      46.265,   14.821,   1325, "bazicna", False, False, None),
+    ("Biba planina – spodnji gozd",         46.245,   14.845,   1225, None,      False, False, None),
+    ("Dreta pri Gornjem Gradu",             46.295,   14.806,   430,  "vlazna",  False, False, None),
+    ("Hom / severno gričevje",              46.317,   14.855,   575,  "kisla",   False, False, None),
 
     # ── 2) Ljubno – Rastke – Primož – Smrekovec, ~550–1330 m ────────────────
     # Brezovci/Kramarica/Mrzle vode/Kugovnik/Ramšak/Kolarica/Vrtačnikov potok/
@@ -200,44 +246,52 @@ LOCATIONS = [
     ("Kugovnik",                            46.41274, 14.87742, 1233, "kisla", False, False, None),
     ("Ramšak pod Krnesom",                  46.416,   14.869,   1300, "kisla", False, False, None),
     ("Kolarica – gozdni pas proti Komnu",   46.41100, 14.81190, 1328, "kisla", False, False, None),
-    ("Vrtačnikov potok / Pudgarsko",        46.438,   14.865,   1150, "kisla", False, False, None),
+    # OGK100: COL/VOL (koluvij nad andezitom), reakcija "spremenljivo" —
+    # brez terena.
+    ("Vrtačnikov potok / Pudgarsko",        46.438,   14.865,   1150, None,      False, False, None),
     ("Bistra – pod Petelinjekom",           46.44440, 14.80720, 1100, "kisla", False, False, None),
     # Filip: "gozd nižje od vrha" — koordinata je bližina vrha.
     ("Črni vrh pri Smrekovcu – gozd nižje", 46.40946, 14.89846, 1150, "kisla", False, False, None),
     ("Ljubenske Rastke",                    46.38529, 14.84697, 554,  "kisla", False, False, None),
     ("Rastočnik",                           46.388,   14.850,   675,  "kisla", False, False, None),
     ("Retkovo",                             46.392,   14.857,   800,  "kisla", False, False, None),
-    ("Kumprej",                             46.39930, 14.87290, 782,  "kisla", False, False, None),
-    ("Atelšek",                             46.39915, 14.88119, 950,  "kisla", False, False, None),
-    ("Vrnivšek",                            46.40520, 14.88160, 875,  "kisla", False, False, None),
+    # OGK100: TUF↔VOL, stik tufa in strjenega vulkanita — brez terena.
+    ("Kumprej",                             46.39930, 14.87290, 782,  None,      False, False, None),
+    ("Atelšek",                             46.39915, 14.88119, 950,  None,      False, False, None),
+    ("Vrnivšek",                            46.40520, 14.88160, 875,  None,      False, False, None),
     # Filip: "cilja nižji gozdovi" — koordinata je sedlo (1317 m), zato je
-    # elevacija tu namenoma nižja.
+    # elevacija tu namenoma nižja. OGK100 tu (VOL, kislo) je čisti kisli
+    # vulkanit, ne stik — ostane "kisla".
     ("Atelsko sedlo",                       46.40329, 14.89713, 1150, "kisla", False, False, None),
     ("Kozlova planina – gozd spodaj",       46.399,   14.850,   1025, "kisla", False, False, None),
     ("Tračka planina – gozdni rob",         46.41432, 14.82479, 1200, "kisla", False, False, None),
     ("Počka / Robnikova planina",           46.40421, 14.81777, 1100, "kisla", False, False, None),
     ("Travnik – P1",                        46.411113,14.812025,1200, "kisla", False, False, None),
-    ("Travnik – P2",                        46.418383,14.817943,1300, "kisla", False, False, None),
+    # OGK100: TUF↔VOL — brez terena.
+    ("Travnik – P2",                        46.418383,14.817943,1300, None,      False, False, None),
     ("Bukovnik (Primož)",                   46.360,   14.811,   750,  "kisla", False, False, None),
     ("Lenko–Frgelj",                        46.376,   14.821,   850,  "kisla", False, False, None),
     # Filip: "ne uporabljaj vršnega grebena kot nabiralnega območja" — greben
     # Smrekovec–Komen je zavarovan (glej "Komen (Smrekovec)" zgoraj); ta
-    # točka predstavlja južni gozd POD grebenom.
-    ("Pod Smrekovcem, južni gozd",          46.410,   14.889,   1225, "kisla", False, False, None),
+    # točka predstavlja južni gozd POD grebenom. OGK100: TUF↔VOL — brez terena.
+    ("Pod Smrekovcem, južni gozd",          46.410,   14.889,   1225, None,      False, False, None),
 
     # ── 3) Luče – Krnica – Podvolovljek – Podveža, ~600–1500 m ──────────────
     # Pozor (Filip): Dleskovška planota ima rezervatna območja — pri višjih
     # točkah tega bloka (Planina Ravne, pod Podvežakom, Gozdarska koča,
     # Plahojca–Šibje) preveri ZGS sloje, preden greš izven gospodarskega
     # gozda; ti štirje so tudi bolj rezerva za vroče/suho obdobje.
-    ("Luče (nad dolino)",                   46.356413,14.743139,600,  "bazicna", False, False, None),
-    ("Zgornji Jerovčnik",                   46.34953, 14.74480, 650,  "bazicna", False, False, None),
-    ("Podvolovljek – Mlinar",               46.302045,14.693477,650,  "bazicna", False, False, None),
-    ("Krnica – Metulj",                     46.340,   14.740,   650,  "bazicna", False, False, None),
-    ("Mlakar–Majk",                         46.335,   14.735,   675,  "bazicna", False, False, None),
-    ("Škomen",                              46.339,   14.747,   675,  "bazicna", False, False, None),
+    # OGK100: ALL (rečni nanos Savinje/Lučnice pri Lučah) → vlazna.
+    ("Luče (nad dolino)",                   46.356413,14.743139,600,  "vlazna",  False, False, None),
+    # OGK100: DOL (dolomit), reakcija "spremenljivo" — brez terena.
+    ("Zgornji Jerovčnik",                   46.34953, 14.74480, 650,  None,      False, False, None),
+    # OGK100: TUF, reakcija "spremenljivo" (ne izrazito kislo) — brez terena.
+    ("Podvolovljek – Mlinar",               46.302045,14.693477,650,  None,      False, False, None),
+    ("Krnica – Metulj",                     46.340,   14.740,   650,  None,      False, False, None),
+    ("Mlakar–Majk",                         46.335,   14.735,   675,  None,      False, False, None),
+    ("Škomen",                              46.339,   14.747,   675,  None,      False, False, None),
     ("Kogel",                               46.321,   14.756,   850,  "bazicna", False, False, None),
-    ("Riher",                               46.328,   14.722,   800,  "bazicna", False, False, None),
+    ("Riher",                               46.328,   14.722,   800,  None,      False, False, None),
     ("Vavdnovo",                            46.354,   14.720,   850,  "bazicna", False, False, None),
     ("Navršnik–Pečovsko",                   46.361,   14.728,   900,  "bazicna", False, False, None),
     ("Podveža – srednji pas",               46.343,   14.717,   825,  "bazicna", False, False, None),
@@ -246,29 +300,62 @@ LOCATIONS = [
     ("Gozdarska koča – širši blok",         46.324,   14.681,   1350, "bazicna", False, False, None),
     ("Plahojca–Šibje",                      46.307,   14.656,   1050, "bazicna", False, False, None),
 
-    # ── 4) Raduha – Solčava – Podolševa, ~875–1350 m ────────────────────────
-    ("Zavratnik–Tratnik",                   46.383,   14.740,   875,  "bazicna", False, False, None),
+    # ── Lučka Bela / Dleskovška planota, dodatek ────────────────────────────
+    # OGK100: MOR→LIM/DOL / MOR↔LIM/DOL (morenski nanos nad karbonatom) —
+    # brez terena, morena zakrije pravo podlago.
+    ("Lučka Bela – spodnja dolina",         46.315,   14.676,   800,  None,      False, False, None),
+    ("Lučka Bela – zgornji morenski rob",   46.302,   14.648,   1025, None,      False, False, None),
+    ("Ravne–Dleskovec kontaktni rob",       46.345,   14.685,   1325, None,      False, False, None),
+
+    # ── 4) Raduha – Solčava – Podolševa, ~640–1350 m ────────────────────────
+    # OGK100: WER (werfenske plasti), reakcija "nevtralno–bazično" — ne
+    # čisto bazično, zato brez terena (razen kjer je posebej označeno).
+    ("Zavratnik–Tratnik",                   46.383,   14.740,   875,  None,      False, False, None),
     # Filip: "gozd nižje" — koordinata je visoka referenčna točka (~1420 m).
     ("Pod Loko / južna Raduha",             46.4035,  14.7575,  1250, "bazicna", False, False, None),
-    ("Sedelce",                             46.390,   14.759,   1000, "bazicna", False, False, None),
-    ("Vodole",                              46.397,   14.773,   1050, "bazicna", False, False, None),
-    ("Dešman–Smrečnik",                     46.375,   14.775,   925,  "bazicna", False, False, None),
-    # Filip: "gozd pod vrhom" — koordinata je vrh Rožni vrh (1478 m).
-    ("Rožni vrh – gozd pod vrhom",          46.4014136,14.6691938,1300,"bazicna", False, False, None),
-    ("Huda goša / spodnji Rožni vrh",       46.399,   14.681,   1125, "bazicna", False, False, None),
-    ("Tolstovršnik",                        46.41379, 14.70864, 900,  "bazicna", False, False, None),
-    ("Podolševa – Sv. Duh",                 46.435528,14.659476,1200, "bazicna", False, False, None),
-    # Filip: "gozd pod domačijo" — koordinata je pri domačiji (1327 m).
-    ("Bukovnik (Grohat)",                   46.43400, 14.73710, 1200, "bazicna", False, False, None),
+    ("Sedelce",                             46.390,   14.759,   1000, None,      False, False, None),
+    ("Vodole",                              46.397,   14.773,   1050, None,      False, False, None),
+    ("Dešman–Smrečnik",                     46.375,   14.775,   925,  None,      False, False, None),
+    # Filip: "gozd pod vrhom" — koordinata je vrh Rožni vrh (1478 m). OGK100:
+    # MAR/LIM↔LIM/DOL, stik — brez terena.
+    ("Rožni vrh – gozd pod vrhom",          46.4014136,14.6691938,1300,None,      False, False, None),
+    ("Huda goša / spodnji Rožni vrh",       46.399,   14.681,   1125, None,      False, False, None),
+    ("Tolstovršnik",                        46.41379, 14.70864, 900,  None,      False, False, None),
+    # OGK100: SIL (paleozojski silikatni klastiti), reakcija "kislo" → kisla
+    # (prej bazicna po napačni oceni).
+    ("Podolševa – Sv. Duh",                 46.435528,14.659476,1200, "kisla",   False, False, None),
+    ("Podolševa – vzhodni gozd",            46.431,   14.674,   1125, None,      False, False, None),
+    ("Podolševa – zahodni gozd",            46.434,   14.646,   1175, "kisla",   False, False, None),
+    # Filip: "gozd pod domačijo" — koordinata je pri domačiji (1327 m). OGK100:
+    # MAR/LIM, reakcija "nevtralno–bazično" — brez terena.
+    ("Bukovnik (Grohat)",                   46.43400, 14.73710, 1200, None,      False, False, None),
+    ("Grohat – spodnji gozd",               46.417,   14.735,   1250, None,      False, False, None),
+    ("Grohat – vulkanski kontakt",          46.4215,  14.7405,  1375, None,      False, False, None),
+    ("Lipni plaz – vulkanski kontakt",      46.415,   14.728,   1300, None,      False, False, None),
+    ("Solčava – ob Savinji",                46.419,   14.693,   640,  "vlazna",  False, False, None),
+
+    # ── Matkov kot — nov, doslej nepokrit stranski dolinski krak ────────────
+    # Previdnostno zaščiteno, enako kot Logarska dolina/Robanov kot — v PR
+    # #770 je Matkov kot že bil naveden skupaj z njima za enako nevtralno
+    # pravno formulacijo (glej opombo pri picking_restriction spodaj).
+    ("Odcep Matkov kot",                    46.41967, 14.6275,  800,  None,      False, True,  "unknown"),
+    ("Matkov kot – notranji dolinski rob",  46.425,   14.61,    925,  None,      False, True,  "unknown"),
+
+    # ── Notranjost Logarske doline / Robanovega kota — previdnostno
+    #    zaščiteno, enako kot obstoječi vrhnji vnos za vsako dolino ─────────
+    ("Začetek Logarske doline",             46.41,    14.63711, 730,  "vlazna",  False, True,  "unknown"),
+    ("Srednja Logarska dolina",             46.3995,  14.6305,  800,  "vlazna",  False, True,  "unknown"),
+    ("Začetek Robanovega kota",             46.39409, 14.69556, 675,  None,      False, True,  "unknown"),
+    ("Srednji Robanov kot",                 46.3951,  14.71215, 775,  None,      False, True,  "unknown"),
 ]
 # picking_restriction (samo pri protected=true): "unknown" | "prohibited". UI sme
 # pisati "nabiranje prepovedano" SAMO pri "prohibited" IN obstoječem restriction_source
 # (preverjen pravni vir za TO območje) — sicer nevtralno "preveri omejitve". Trenutno za
 # nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato so vsa
 # zavarovana območja na "unknown". Ne spreminjaj v "prohibited" brez konkretnega vira.
-# TODO: kalibriraj — koordinate poti 1-4 so od Filipa (27. 8. 2026, tretji in
-# najbolj prečiščen krog), z A/B oznako zanesljivosti v njegovi izvirni
-# tabeli, a še vedno ne pomenijo GPS-izmerjene meje parcele.
+# TODO: kalibriraj — koordinate poti so od Filipa (27. 8. 2026 mikro-lokacije,
+# 29. 8. 2026 geološki popravek/dodatek iz OGK100), a še vedno ne pomenijo
+# GPS-izmerjene meje parcele.
 # Filipovih 12 najljubših za "prvi resen scan" (razpon ~650–1250 m, veliko
 # ekspozicij): Radegunda višje, Počivavnik–Korte, Retkovo, Kumprej, Atelšek,
 # Vrnivšek, Pod Smrekovcem (južni gozd), Mlakar–Majk, Riher, Navršnik–
@@ -530,7 +617,8 @@ def build_yaml(species):
         L.append(f"    lat: {lat}")
         L.append(f"    lon: {lon}")
         L.append(f"    elev_m: {elev}")
-        L.append(f"    terrain: {terr}")
+        if terr:
+            L.append(f"    terrain: {terr}")
         L.append(f"    home: {'true' if home else 'false'}")
         L.append(f"    protected: {'true' if prot else 'false'}")
         if prot and restriction:
