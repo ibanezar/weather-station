@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 24 Aug 2026 17:56:14 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 25 Aug 2026 02:36:25 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Nevihtni opazovalec, 25. avgusta 2026 ob 04:34: hiter padec zračnega tlaka</title>
+      <link>https://meteorec.si/blog/nevihtni-opazovalec-2026-08-25-0236.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/nevihtni-opazovalec-2026-08-25-0236.html</guid>
+      <pubDate>Tue, 25 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Zračni tlak na postaji IREICA1 je v zadnjih treh urah padel za 3,1 hPa (zdaj 1014 hPa) — znak hitre spremembe vremena, pogosto pred frontalnim prehodom ali nevihto.</description>
+      <category>nevihtni-opazovalec</category>
+      <category>samodejno</category>
+      <category>pritisk</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Koliko dežja bo jutri? ARSO in Open-Meteo narazen</title>
       <link>https://meteorec.si/blog/koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824.html</link>
