@@ -440,6 +440,12 @@ body{
 .gp-sp-ic{width:1.15rem;height:1.15rem;border-radius:50%;object-fit:cover;flex:0 0 auto;
   vertical-align:-.2rem;margin-right:.3rem;background:var(--badge-bg)}
 .gp-forest-prot{opacity:.6}
+/* Species-search result on /danes/ (DANES_JS): replaces the "top species"
+   line while a species is selected, so the two never show at once. */
+.sp-mode .gp-forest-sp{display:none}
+.gp-forest-sp-match{display:none;font-size:.8rem;font-weight:600;color:var(--blue);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.sp-mode .gp-forest-sp-match{display:block}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
@@ -889,6 +895,16 @@ body{
    after this one in source order would otherwise beat it regardless of
    which media query is narrower. */
 body .wrap{padding-bottom:5.5rem}
+/* Every gobarska-napoved page also gets the site-wide mobile tab bar
+   (.app-bottomnav, from blog/blog.css, loaded by every page using this
+   shell — see seo.page_shell()) stacked on top of the section's own
+   .gp-bottomnav below: both are position:fixed;bottom:0 at the same
+   max-width:760px breakpoint, so the generic 8-tab bar (higher z-index)
+   fully covered the gobar-specific 5-tab one. body .app-bottomnav (extra
+   ancestor selector, same trick as body .wrap above) outranks blog.css's
+   plain .app-bottomnav on specificity regardless of load order, so this
+   works whether it's declared inside the mobile media query or not. */
+body .app-bottomnav{display:none}
 
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the
    mreža .gp-feat already covers cross-page navigation ── */
@@ -1966,6 +1982,102 @@ SP_JS = """<script>
 })();
 </script>"""
 
+# ── /danes/: iskanje po območju in po vrsti med 97 nabiralnimi območji ───────
+# Območje filtrira kot SP_JS zgoraj (data-q, isti norm()). Vrsta ne filtrira
+# (ena poizvedba bi sicer ustrezala več vrstam naenkrat, gozd pa ima za vsako
+# svoj indeks) — mora ujemati eno od datalist možnosti natanko, nato prikaže
+# in razvrsti po njenem indeksu (data-sp: "pozicija:indeks" pari, samo
+# neničelni, glej sp_search_order/sp_search_pos v build_body()).
+DANES_JS = """<script>
+(function(){
+  var wrap=document.querySelector(".gp-forests");
+  if(!wrap)return;
+  var cards=[].slice.call(wrap.querySelectorAll(".gp-forest:not(.gp-forest-prot)"));
+  cards.forEach(function(c,i){ c.dataset.order=i; });
+  // Reordering only ever touches `cards` (below) — the protected-areas card,
+  // if present, is re-appended last every render so it stays put at the
+  // bottom instead of drifting mid-list once siblings start moving.
+  var protCard=wrap.querySelector(".gp-forest-prot");
+  var qEl=document.getElementById("gp-forest-q");
+  var spEl=document.getElementById("gp-forest-sp-q");
+  var spOptions=[].slice.call(document.querySelectorAll("#gp-forest-sp-list option"));
+  var countEl=document.getElementById("gp-forest-count");
+  var regionQuery="", spPos=-1, spName="";
+
+  function norm(s){
+    return (s||"").toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"")
+      .replace(/[^a-z0-9 ]+/g," ").trim();
+  }
+  function spValue(card){
+    var raw=card.getAttribute("data-sp")||"";
+    if(!raw)return 0;
+    var pairs=raw.split(",");
+    for(var i=0;i<pairs.length;i++){
+      var kv=pairs[i].split(":");
+      if(kv[0]===String(spPos))return parseInt(kv[1],10)||0;
+    }
+    return 0;
+  }
+  function matchLabel(card){
+    var el=card.querySelector(".gp-forest-sp-match");
+    if(!el){
+      el=document.createElement("span");
+      el.className="gp-forest-sp-match";
+      card.querySelector(".gp-forest-info").appendChild(el);
+    }
+    return el;
+  }
+  function render(){
+    var visible=cards.filter(function(c){
+      var ok=!regionQuery || (c.getAttribute("data-q")||"").indexOf(regionQuery)>=0;
+      c.hidden=!ok;
+      return ok;
+    });
+    wrap.classList.toggle("sp-mode",spPos>=0);
+    if(spPos>=0){
+      visible.forEach(function(c){ c._spVal=spValue(c); });
+      visible.sort(function(a,b){ return b._spVal-a._spVal; });
+      visible.forEach(function(c){
+        wrap.appendChild(c);
+        matchLabel(c).textContent="🍄 "+spName+": "+c._spVal+"/100";
+      });
+    } else {
+      cards.slice().sort(function(a,b){ return a.dataset.order-b.dataset.order; })
+        .forEach(function(c){ wrap.appendChild(c); });
+    }
+    if(protCard)wrap.appendChild(protCard);
+    countEl.hidden=false;
+    countEl.textContent = visible.length===0 ? "Nobeno območje ne ustreza iskanju."
+      : "Prikazanih "+visible.length+" od "+cards.length+" območij."
+        + (spPos>=0 ? " Razvrščeno po vrsti „"+spName+"“." : "");
+  }
+  if(qEl){
+    var t;
+    qEl.addEventListener("input",function(){
+      clearTimeout(t);
+      t=setTimeout(function(){ regionQuery=norm(qEl.value); render(); },150);
+    });
+  }
+  if(spEl){
+    var t2;
+    spEl.addEventListener("input",function(){
+      clearTimeout(t2);
+      t2=setTimeout(function(){
+        var q=norm(spEl.value);
+        spPos=-1; spName="";
+        if(q){
+          for(var i=0;i<spOptions.length;i++){
+            if(norm(spOptions[i].value)===q){ spPos=i; spName=spOptions[i].value; break; }
+          }
+        }
+        render();
+      },150);
+    });
+  }
+  render();
+})();
+</script>"""
+
 # ── Sezonski trend: SVG graf letos vs. pretekla leta (iz trend.json) ─────────
 TREND_JS = """<script>
 (function(){
@@ -2684,7 +2796,7 @@ def build_danes_page(forests_html, free):
         "danes", "Danes po gozdovih — gobarski indeks po območjih",
         "Gobarski indeks po nabiralnih območjih Zgornje Savinjske doline za današnji dan — Golte, Menina, "
         "Smrekovec, Dleskovška planota in okolica.",
-        "Danes po gozdovih", body)
+        "Danes po gozdovih", body, extra_js=DANES_JS)
 
 
 def build_tereni_page(terrain_html):
@@ -3167,6 +3279,11 @@ def build_body(rules, premium, free):
 
     species = rules["species"]
     indexed = [s for s in species if s.get("gets_index")]
+    # Stable alphabetical order shared by the /danes/ species-search datalist
+    # and each forest card's data-sp attribute — same position must mean the
+    # same species in both, so this is built once and reused for both.
+    sp_search_order = sorted(indexed, key=lambda s: s["name_sl"])
+    sp_search_pos = {s["id"]: i for i, s in enumerate(sp_search_order)}
     month = TODAY.month
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
@@ -3210,6 +3327,12 @@ def build_body(rules, premium, free):
   </div>'''
 
     # ── today per forest (free) — compact row: info left, % disc right ────────
+    # data-q/data-sp feed the /danes/ search box (DANES_JS): data-q is the
+    # normalised area+terrain search key (same _search_key() as baza-vrst's
+    # species search), data-sp is "position:index" pairs into sp_search_order
+    # for every species with a nonzero index here today, so the species
+    # search can show/sort by one species' index across all areas without a
+    # second, separately-serialised data blob.
     forests = ['  <div class="gp-forests">']
     for loc in sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True):
         o = loc["days"][0]
@@ -3220,8 +3343,10 @@ def build_body(rules, premium, free):
         terr = loc.get("terrain") or ""
         t_icon = TERRAIN_STYLE.get(terr, ("", "🌲"))[1]
         pct_cls = level_class(o["overall"])
+        data_q = _esc(_search_key(f'{loc["name"]} {terr}'))
+        data_sp = ",".join(f'{sp_search_pos[sp["id"]]}:{sp["index"]}' for sp in o["species"] if sp["index"] > 0)
         forests.append(
-            f'''    <div class="gp-forest">
+            f'''    <div class="gp-forest" data-q="{data_q}" data-sp="{data_sp}">
       <div class="gp-forest-info">
         <span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>
         <span class="gp-terr">{terr} · {loc["elev_m"]} m</span>
@@ -3239,7 +3364,21 @@ def build_body(rules, premium, free):
       </div>
     </div>''')
     forests.append("  </div>")
-    forests_html = "\n".join(forests)
+    # Search tools live outside .gp-forests (DANES_JS reads them by id) — only
+    # /danes/ renders forests_html, so this box never doubles up elsewhere.
+    sp_options = "".join(
+        f'<option value="{_esc(s["name_sl"])}">{_esc(s["name_lat"])}</option>' for s in sp_search_order)
+    forest_tools_html = (
+        '  <div class="gp-sp-tools">\n'
+        '    <input type="search" id="gp-forest-q" class="gp-sp-search" placeholder="Poišči območje ali teren"\n'
+        '      autocomplete="off" aria-label="Iskanje po območju">\n'
+        '    <input type="text" id="gp-forest-sp-q" class="gp-sp-search" list="gp-forest-sp-list"\n'
+        '      placeholder="Poišči vrsto — pokaže indeks po območjih" autocomplete="off" '
+        'aria-label="Iskanje po vrsti">\n'
+        f'    <datalist id="gp-forest-sp-list">{sp_options}</datalist>\n'
+        '    <p class="gp-sp-count" id="gp-forest-count" hidden></p>\n'
+        '  </div>\n')
+    forests_html = forest_tools_html + "\n".join(forests)
 
     # ── PREMIUM locked block ────────────────────────────────────────────────
     # Placeholder rows read like real forecast lines (number + level word),
