@@ -5041,9 +5041,16 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         // ── GET /premium/forecast — the paid payload
+        // Sezonski zagon: ko je env.PREMIUM_FREE_LAUNCH="true" (wrangler.toml),
+        // gre napoved ven brez žetona — glej PREMIUM_FREE_LAUNCH v
+        // tools/generate_gobe_page.py. AI prepoznava, alarmi in dnevnik ostanejo
+        // za pravim naročniškim žetonom ne glede na to zastavico.
         if (path === "/premium/forecast" && request.method === "GET") {
-          const sub = await _authedSub();
-          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          const freeLaunch = String(env?.PREMIUM_FREE_LAUNCH || "").toLowerCase() === "true";
+          if (!freeLaunch) {
+            const sub = await _authedSub();
+            if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
+          }
           const data = await kv.get("premium:data");
           if (!data) return _json({ error: "Napoved še ni pripravljena" }, 503);
           return new Response(data, {

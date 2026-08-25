@@ -14,7 +14,9 @@ Layout:
   * PREMIUM (gated): the forward-looking 7-day, per-species, per-location
     forecast with plain-language explanations. Rendered as a locked placeholder;
     the real content is fetched client-side from the Worker /premium/forecast
-    endpoint only when a valid access token is present.
+    endpoint only when a valid access token is present — unless PREMIUM_FREE_LAUNCH
+    below is on, in which case everyone gets it free and the lock/pricing UI is
+    skipped. AI identify, alerts and diary sync stay behind a real token either way.
 
 Positioning: the index is an "indeks ugodnosti pogojev" (favourability index),
 never a promise of finds — scientifically honest and it protects against angry
@@ -51,6 +53,18 @@ PADDLE_PRICE_SEASON = "pri_REPLACE_SEASON"    # TODO: enako kot v wrangler.toml
 
 PRICE_MONTHLY = "3,99 €"
 PRICE_SEASON = "24,99 €"
+
+# Sezonski zagon (25. 8. 2026): Paddle plačevanje zgoraj še ni priklopljeno
+# (PADDLE_CLIENT_TOKEN prazen), gobarska sezona pa se že začenja — zato je
+# 7-dnevna napoved po vrstah zaenkrat brezplačna za vse, brez prijave. Lock
+# in cenik se ne izrišeta, hero/kartica dobita opombo "zaenkrat brezplačno".
+# AI prepoznava, moji alarmi in sinhronizacija dnevnika ostanejo zaklenjeni
+# (pridejo z naročnino, ko bo Paddle pripravljen — glej docs/premium-setup.md).
+# Ujema se z env PREMIUM_FREE_LAUNCH v wrangler.toml, ki v worker.js odpre
+# GET /premium/forecast brez žetona. Ko je plačevanje pripravljeno: nastavi na
+# False tukaj, odstrani PREMIUM_FREE_LAUNCH iz wrangler.toml in ponovno
+# generiraj stran — izvirni paywall se vrne nespremenjen.
+PREMIUM_FREE_LAUNCH = True
 
 MES_FULL = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju",
             "juliju", "avgustu", "septembru", "oktobru", "novembru", "decembru"]
@@ -485,17 +499,6 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
-/* ── Pre-launch gate: everything below the header is blurred/disabled for
-   anyone without a verified access token — the "coming soon" cover above it
-   is the only interactive thing a non-subscriber sees. Lifted client-side
-   (PAGE_JS) the moment /premium/verify succeeds, same trigger the existing
-   paywall reveal already uses. ── */
-.gp-cs-card{position:relative;border:1px solid var(--card-border);border-radius:16px;
-  padding:1.4rem 1.5rem;margin:1rem 0 1.6rem;background:var(--card-bg);text-align:center}
-.gp-cs-card h2{margin:.3rem 0 .5rem;font-size:1.35rem}
-.gp-cs-card p{color:var(--muted);font-size:.92rem;line-height:1.6;max-width:36rem;margin:0 auto .9rem}
-.gp-cs-card .gp-login{justify-content:center;max-width:24rem;margin:0 auto}
-.gp-cs-blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
 
 /* ── Loading skeleton — shown to premium users the instant a token is
    found, while /premium/forecast is still in flight, so they never see
@@ -508,12 +511,6 @@ body{
 @media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg)}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
-.gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
-  border-radius:9px;padding:.5rem .7rem;color:var(--text);font-size:.9rem}
-.gp-login button{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
-  background:var(--blue);color:#04070e;border:0;border-radius:9px;
-  padding:.5rem 1rem;font-weight:700;cursor:pointer}
 .gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
 .gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
 .gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.1rem;
@@ -1045,6 +1042,7 @@ body .wrap{padding-bottom:5.5rem}
 PAGE_JS = """<script>
 (function(){
   var API=""" + '"' + WORKER_BASE + '"' + """;
+  var FREE_LAUNCH=""" + ("true" if PREMIUM_FREE_LAUNCH else "false") + """;
   var LS="mr_gobe_token";
   // Minimal conversion-funnel tracking — no PII (no email, token or image).
   function gaEvent(name,params){
@@ -1070,16 +1068,6 @@ PAGE_JS = """<script>
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
-  var csWrap=document.getElementById("gp-cs-wrap");
-  var csCover=document.getElementById("gp-cs-cover");
-  function revealPage(){
-    if(csWrap)csWrap.classList.remove("gp-cs-blur");
-    if(csCover)csCover.hidden=true;
-  }
-  function reblurPage(){
-    if(csWrap)csWrap.classList.add("gp-cs-blur");
-    if(csCover)csCover.hidden=false;
-  }
   var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
   function levelColor(v){
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
@@ -1524,10 +1512,9 @@ PAGE_JS = """<script>
   }
   var t=tok();
   if(t){
-    // A paying user shouldn't see the pre-launch cover or the "Naroči se"
-    // upsell while their own data is still in flight — reveal the page and
-    // swap straight to a skeleton instead of flashing either first.
-    revealPage();
+    // A paying user shouldn't see the lock or the "Naroči se" upsell while
+    // their own data is still in flight — swap straight to a skeleton
+    // instead of flashing either first.
     if(lock)lock.hidden=true;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
@@ -1547,22 +1534,31 @@ PAGE_JS = """<script>
       .then(function(d){render(d);initIdentify(t);initAlerts(t,d);})
       .catch(function(){
         // Token turned out to be invalid/expired or the fetch genuinely
-        // failed — fall back to the pre-launch cover instead of leaving the
+        // failed — fall back to the lock/pricing instead of leaving the
         // skeleton spinning forever.
         if(content){content.hidden=true;content.innerHTML="";}
         if(lock)lock.hidden=false;
-        reblurPage();
+      });
+  }else if(FREE_LAUNCH){
+    // Season-launch mode (PREMIUM_FREE_LAUNCH in generate_gobe_page.py): no
+    // token needed, the Worker serves /premium/forecast to anyone while the
+    // flag is on (see PREMIUM_FREE_LAUNCH in worker.js). AI identify and
+    // alerts stay locked — initIdentify()/initAlerts() are only called from
+    // the token branch above, so they're never reached here.
+    if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
+    fetch(API+"/premium/forecast")
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(d){
+        render(d);
+        if(statusEl){
+          statusEl.hidden=false;
+          statusEl.textContent="🎉 Ob zagonu gobarske sezone je 7-dnevna napoved po vrstah brezplačna za vse.";
+        }
+      })
+      .catch(function(){
+        if(content){content.hidden=true;content.innerHTML="";}
       });
   }
-  var f=document.getElementById("gp-login");
-  if(f){f.addEventListener("submit",function(e){e.preventDefault();
-    var msg=document.getElementById("gp-login-msg");var em=(f.email.value||"").trim();
-    if(!em){return;}msg.textContent="Pošiljam …";
-    gaEvent("premium_access_request");
-    fetch(API+"/premium/login",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email:em})}).then(function(r){return r.json();})
-      .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
-      .catch(function(){msg.textContent="Napaka pri pošiljanju. Poskusi znova.";});});}
 
   // ── Paddle.js overlay checkout ──────────────────────────────────────────
   // Config comes from window.MR_PADDLE (injected in <head>); when it or the
@@ -2319,13 +2315,17 @@ _FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000
 # Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v isti
 # skupini nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a
 # same zelene kartice se ne bi ločile med sabo.
+# Oznaka napovedi po vrstah sledi PREMIUM_FREE_LAUNCH — AI prepoznava in
+# alarmi spodaj ostanejo "PREMIUM" ves čas, ker ostajata zaklenjena tudi med
+# brezplačnim zagonom.
+_FORECAST_BADGE = "BREZPLAČNO" if PREMIUM_FREE_LAUNCH else "PREMIUM"
 GOBE_CATEGORIES = [
     # (ključ, emoji, naslov skupine, [(href, ikona, poudarek, naslov, napovednik, oznaka), ...])
     ("napoved", "🍄", "Napoved", [
         ("/gobarska-napoved/danes/", _FI_GOZDOVI, "#34d399", "Danes po gozdovih",
          "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
         ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
-         "Za vsak dan in vsako območje, z razlago po komponentah.", "PREMIUM"),
+         "Za vsak dan in vsako območje, z razlago po komponentah.", _FORECAST_BADGE),
     ]),
     ("kje", "🗺", "Kje nabirati", [
         ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
@@ -3129,6 +3129,16 @@ def build_body(rules, premium, free):
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
     hero_trend = hero_trend_html(pct)
+    hero_cta = (f'<a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">'
+                f'🎉 Poglej 7-dnevno napoved po vrstah (zaenkrat brezplačno) →</a>'
+                if PREMIUM_FREE_LAUNCH else
+                f'<a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">'
+                f'Odkleni 7-dnevno napoved po vrstah →</a>')
+    # "Obvesti me ob ugodnih pogojih" vodi na cenik za nastavitev alarma —
+    # med brezplačnim zagonom cenika ni (glej PREMIUM_FREE_LAUNCH), zato gre
+    # ta klic ven šele, ko se cenik vrne.
+    alert_chip = ('' if PREMIUM_FREE_LAUNCH else
+                  '\n      <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>')
     hero = f'''  <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
@@ -3142,14 +3152,13 @@ def build_body(rules, premium, free):
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
           <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span></div>
         {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
-        <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
+        {hero_cta}
       </div>
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
         data-pct="{pct}" data-lvl="{_esc(lvl)}">📤 Deli</button>
-      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
-      <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
+      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>{alert_chip}
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
@@ -3234,7 +3243,7 @@ def build_body(rules, premium, free):
     </div>
     <div id="gp-alert-msg" class="gp-msg"></div>
   </div>
-  <div id="gp-lock" class="gp-lock">
+  ''' + ("" if PREMIUM_FREE_LAUNCH else f'''<div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
@@ -3247,12 +3256,16 @@ def build_body(rules, premium, free):
       <button type="button" class="gp-cta" data-paddle="monthly" data-src="lock">Naroči se ({PRICE_MONTHLY}/mes)</button>
       <button type="button" class="gp-cta alt" data-paddle="season" data-src="lock">Sezonski dostop ({PRICE_SEASON})</button>
     </div>
-  </div>'''
+  </div>''')
 
     # ── pricing ───────────────────────────────────────────────────────────────
     # Bullets naj vodijo z izidom ("kdaj in kam iti"), ne s funkcijo — funkcije
     # (AI prepoznava, alarmi) ostanejo navedene, a niže, kot podporo izidu.
-    pricing = f'''  <div id="gp-pricing-wrap">
+    # Med brezplačnim zagonom (PREMIUM_FREE_LAUNCH) sploh ne obstaja — glavna
+    # naprodaj vsebina (napoved po vrstah) je zaenkrat brezplačna, prodajati
+    # samo AI prepoznavo/alarme za isto ceno bi bilo zavajajoče. Vrne se
+    # nespremenjen, ko flag postane False.
+    pricing = "" if PREMIUM_FREE_LAUNCH else f'''  <div id="gp-pricing-wrap">
   <h2 id="pricing" class="gp-h2">🎟️ Vedeti, kdaj iti v gozd</h2>
   <p class="post-meta">Ne ugibaj, ali je prezgodaj po dežju. Premium spremlja vlago tal, temperaturo, dež in
   rastni zamik posamezne vrste — in pove, katera vrsta in katero območje imata danes največ možnosti.</p>
@@ -3394,6 +3407,10 @@ def build_body(rules, premium, free):
          "Model upošteva geologijo: kislo vulkansko pogorje Smrekovca ustreza jurčkom in žametastemu gobanu, "
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
          "verjetna povsod."),
+        ("Ali napoved po vrstah kaj stane?",
+         "Ob zagonu gobarske sezone je zaenkrat brezplačna za vse obiskovalce, brez prijave. AI prepoznava gobe iz "
+         "fotografije in e-mail alarmi ob ugodnih pogojih ostajajo del naročnine, ki jo dodamo pozneje."
+         ) if PREMIUM_FREE_LAUNCH else
         ("Kako plačam in dostopam?",
          "Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — "
          "brez ustvarjanja računa in gesla. Če izgubiš povezavo, jo z istim e-naslovom kadarkoli zahtevaš znova."),
@@ -3442,17 +3459,8 @@ def build_body(rules, premium, free):
     <div id="gp-diary-list" class="gp-diary-list"></div>
   </div>'''
 
-    coming_soon = '''  <div id="gp-cs-cover" class="gp-cs-card">
-    <span class="gp-tag">🍄 KMALU</span>
-    <h2>MeteoGobar prihaja kmalu</h2>
-    <p>Gobarska napoved za Zgornjo Savinjsko dolino se še pripravlja — brezplačni in premium del bosta na voljo
-    v kratkem. Že imaš dostop (zgodnji naročniki)? Vpiši e-naslov spodaj za povezavo.</p>
-    <form id="gp-login" class="gp-login" autocomplete="email">
-      <input type="email" name="email" placeholder="e-naslov" required>
-      <button type="submit">Pošlji povezavo</button>
-    </form>
-    <div id="gp-login-msg" class="gp-msg"></div>
-  </div>'''
+    premium_h2 = ("🔓 Premium: 7-dnevna napoved po vrstah — zaenkrat brezplačno! 🎉"
+                  if PREMIUM_FREE_LAUNCH else "🔓 Premium: 7-dnevna napoved po vrstah")
 
     body = f'''{BRAND_SWAP}
 {top_bar_html("Gobarska napoved", None)}
@@ -3460,12 +3468,10 @@ def build_body(rules, premium, free):
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
-{coming_soon}
-  <div id="gp-cs-wrap" class="gp-cs-blur">
 {hero}
 {mini_map_html}
 {features_html}
-  <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2" id="premium">{premium_h2}</h2>
 {premium_block}
 {pricing}
 {faq_html}
@@ -3473,7 +3479,6 @@ def build_body(rules, premium, free):
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 {bottom_nav_html("")}
-  </div>
   <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
   <div class="gp-sos-panel" id="gp-sos-panel">
     <h4>Sum zastrupitve z gobami?</h4>

@@ -28,6 +28,13 @@ PREMIUM_SEASON_END = "11-30"
 # Alarm "pogoji optimalni": prag indeksa in najmanjši razmik med obvestili (dni).
 PREMIUM_ALERT_THRESHOLD = "70"
 PREMIUM_ALERT_COOLDOWN_DAYS = "5"
+# Sezonski zagon (25. 8. 2026): Paddle plačevanje zgoraj še ni priklopljeno,
+# gobarska sezona pa se že začenja — dokler je "true", GET /premium/forecast
+# vrne napoved brez žetona (glej worker.js in PREMIUM_FREE_LAUNCH v
+# tools/generate_gobe_page.py, ki mora biti usklajen). AI prepoznava, alarmi
+# in dnevnik ostanejo za pravim žetonom. Odstrani to vrstico (ali nastavi na
+# "false"), ko je Paddle pripravljen za pravi zagon plačevanja.
+PREMIUM_FREE_LAUNCH = "true"
 # Skrivnosti (wrangler secret put …): PREMIUM_SYNC_KEY, PADDLE_WEBHOOK_SECRET,
 # PADDLE_API_KEY (RESEND_API_KEY že obstaja).
 # ANTHROPIC_KEY (wrangler secret put ANTHROPIC_KEY) — potreben za POST /premium/identify

@@ -208,17 +208,6 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
-/* ── Pre-launch gate: everything below the header is blurred/disabled for
-   anyone without a verified access token — the "coming soon" cover above it
-   is the only interactive thing a non-subscriber sees. Lifted client-side
-   (PAGE_JS) the moment /premium/verify succeeds, same trigger the existing
-   paywall reveal already uses. ── */
-.gp-cs-card{position:relative;border:1px solid var(--card-border);border-radius:16px;
-  padding:1.4rem 1.5rem;margin:1rem 0 1.6rem;background:var(--card-bg);text-align:center}
-.gp-cs-card h2{margin:.3rem 0 .5rem;font-size:1.35rem}
-.gp-cs-card p{color:var(--muted);font-size:.92rem;line-height:1.6;max-width:36rem;margin:0 auto .9rem}
-.gp-cs-card .gp-login{justify-content:center;max-width:24rem;margin:0 auto}
-.gp-cs-blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
 
 /* ── Loading skeleton — shown to premium users the instant a token is
    found, while /premium/forecast is still in flight, so they never see
@@ -231,12 +220,6 @@ body{
 @media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg)}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
-.gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
-  border-radius:9px;padding:.5rem .7rem;color:var(--text);font-size:.9rem}
-.gp-login button{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
-  background:var(--blue);color:#04070e;border:0;border-radius:9px;
-  padding:.5rem 1rem;font-weight:700;cursor:pointer}
 .gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
 .gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
 .gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.1rem;

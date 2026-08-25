@@ -211,17 +211,6 @@ body{
   padding:1.3rem;margin:.6rem 0 1rem;background:linear-gradient(180deg,rgba(77,159,248,.06),transparent)}
 .gp-lock h3{margin:.1rem 0 .3rem}
 .gp-skel{filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;margin:.7rem 0;display:grid;gap:.5rem}
-/* ── Pre-launch gate: everything below the header is blurred/disabled for
-   anyone without a verified access token — the "coming soon" cover above it
-   is the only interactive thing a non-subscriber sees. Lifted client-side
-   (PAGE_JS) the moment /premium/verify succeeds, same trigger the existing
-   paywall reveal already uses. ── */
-.gp-cs-card{position:relative;border:1px solid var(--card-border);border-radius:16px;
-  padding:1.4rem 1.5rem;margin:1rem 0 1.6rem;background:var(--card-bg);text-align:center}
-.gp-cs-card h2{margin:.3rem 0 .5rem;font-size:1.35rem}
-.gp-cs-card p{color:var(--muted);font-size:.92rem;line-height:1.6;max-width:36rem;margin:0 auto .9rem}
-.gp-cs-card .gp-login{justify-content:center;max-width:24rem;margin:0 auto}
-.gp-cs-blur{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
 
 /* ── Loading skeleton — shown to premium users the instant a token is
    found, while /premium/forecast is still in flight, so they never see
@@ -234,12 +223,6 @@ body{
 @media (prefers-reduced-motion:reduce){.gp-loadskel{animation:none;opacity:.7}}
 .gp-skel .gp-forest{background:var(--badge-bg)}
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
-.gp-login{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.gp-login input{flex:1;min-width:180px;background:var(--badge-bg);border:1px solid var(--card-border);
-  border-radius:9px;padding:.5rem .7rem;color:var(--text);font-size:.9rem}
-.gp-login button{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
-  background:var(--blue);color:#04070e;border:0;border-radius:9px;
-  padding:.5rem 1rem;font-weight:700;cursor:pointer}
 .gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
 .gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
 .gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.1rem;
@@ -797,18 +780,6 @@ body .wrap{padding-bottom:5.5rem}
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza 300 vrst · osvežuje se dnevno · 2026-08-25</p>
-  <div id="gp-cs-cover" class="gp-cs-card">
-    <span class="gp-tag">🍄 KMALU</span>
-    <h2>MeteoGobar prihaja kmalu</h2>
-    <p>Gobarska napoved za Zgornjo Savinjsko dolino se še pripravlja — brezplačni in premium del bosta na voljo
-    v kratkem. Že imaš dostop (zgodnji naročniki)? Vpiši e-naslov spodaj za povezavo.</p>
-    <form id="gp-login" class="gp-login" autocomplete="email">
-      <input type="email" name="email" placeholder="e-naslov" required>
-      <button type="submit">Pošlji povezavo</button>
-    </form>
-    <div id="gp-login-msg" class="gp-msg"></div>
-  </div>
-  <div id="gp-cs-wrap" class="gp-cs-blur">
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
@@ -822,14 +793,13 @@ body .wrap{padding-bottom:5.5rem}
         <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>Gozdovi nad Ljubnim</strong>
           <span class="gp-hero-best-pct" style="background:#34d39922;color:#34d399">100 / 100 · ODLIČNA</span></div>
         <div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta: <strong>Žvepleni lešič</strong></div>
-        <a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">Odkleni 7-dnevno napoved po vrstah →</a>
+        <a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">🎉 Poglej 7-dnevno napoved po vrstah (zaenkrat brezplačno) →</a>
       </div>
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
         data-pct="82" data-lvl="ODLIČNA">📤 Deli</button>
       <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>
-      <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
@@ -858,7 +828,7 @@ body .wrap{padding-bottom:5.5rem}
     <h3 class="gp-feat-group-title">🍄 Napoved</h3>
     <div class="gp-feat">
     <a class="gp-feat-card" href="/gobarska-napoved/danes/" style="--fa:#34d399;--fa-soft:rgba(52,211,153,.16)"><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5 11.4 11H2.6L7 3.5Z" fill="currentColor" fill-opacity=".22"/><path d="M7 3.5 11.4 11H2.6L7 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 8.6 12.2 17H1.8L7 8.6Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 17v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17.4 6.2 21.8 14h-8.8l4.4-7.8Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M17.4 14v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 20.5h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".55"/></svg></span><span class="gp-feat-title">Danes po gozdovih</span><span class="gp-feat-sub">Indeks za 8 nabiralnih območij doline, vsak dan znova.</span></a>
-    <a class="gp-feat-card" href="#premium" style="--fa:#4d9ff8;--fa-soft:rgba(77,159,248,.16)"><span class="gp-feat-badge">PREMIUM</span><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.6" y="14.5" width="2.4" height="6" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="11" width="2.4" height="9.5" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="11.4" y="7.2" width="2.4" height="13.3" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="15.8" y="12.4" width="2.4" height="8.1" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 4.2c1.9 2.4 4.2 3.6 6.9 3.6 3.4 0 6.4-1.9 8.9-5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".75"/><circle cx="20.6" cy="4.6" r="1.5" fill="currentColor"/></svg></span><span class="gp-feat-title">Napoved po vrstah, 7 dni</span><span class="gp-feat-sub">Za vsak dan in vsako območje, z razlago po komponentah.</span></a>
+    <a class="gp-feat-card" href="#premium" style="--fa:#4d9ff8;--fa-soft:rgba(77,159,248,.16)"><span class="gp-feat-badge">BREZPLAČNO</span><span class="gp-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.6" y="14.5" width="2.4" height="6" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="11" width="2.4" height="9.5" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="11.4" y="7.2" width="2.4" height="13.3" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><rect x="15.8" y="12.4" width="2.4" height="8.1" rx=".9" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 4.2c1.9 2.4 4.2 3.6 6.9 3.6 3.4 0 6.4-1.9 8.9-5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".75"/><circle cx="20.6" cy="4.6" r="1.5" fill="currentColor"/></svg></span><span class="gp-feat-title">Napoved po vrstah, 7 dni</span><span class="gp-feat-sub">Za vsak dan in vsako območje, z razlago po komponentah.</span></a>
     </div>
   </div>
   <div class="gp-feat-group" data-cat="kje">
@@ -884,7 +854,7 @@ body .wrap{padding-bottom:5.5rem}
     </div>
   </div>
   <p class="gp-feat-more">Več: <a href="/gobarska-napoved/koledar/">Koledar</a> · <a href="/gobarska-napoved/trend/">Trend</a> · <a href="/gobarska-napoved/metodologija/">Metodologija</a> · <a href="/gobarska-napoved/nasveti/">Nasveti</a> · <a href="#faq">FAQ</a></p>
-  <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah</h2>
+  <h2 class="gp-h2" id="premium">🔓 Premium: 7-dnevna napoved po vrstah — zaenkrat brezplačno! 🎉</h2>
   <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
   <div id="gp-identify" class="gp-ai-card" hidden>
@@ -919,58 +889,8 @@ body .wrap{padding-bottom:5.5rem}
     </div>
     <div id="gp-alert-msg" class="gp-msg"></div>
   </div>
-  <div id="gp-lock" class="gp-lock">
-    <span class="gp-tag">🔒 PREMIUM</span>
-    <h3>7-dnevna napoved po vrstah in gozdovih</h3>
-    <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od 8 nabiralnih območij:
-    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, sprožilni dež pred 8–16 dnevi pod pragom,
-    nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.</p>
-    <div class="gp-skel">
-      <div class="gp-forest"><span>Žvepleni lešič</span><b>72 % · DOBRA</b></div>
-      <div class="gp-forest"><span>Siva mušnica</span><b>58 % · ZMERNA</b></div>
-      <div class="gp-forest"><span>Čokata mušnica</span><b>81 % · ODLIČNA</b></div>
-      <div class="gp-forest"><span>Oranžna lupinarica</span><b>44 % · ZMERNA</b></div>
-      <div class="gp-forest"><span>Siva lupinarica</span><b>65 % · DOBRA</b></div>
-    </div>
-    <div class="gp-lockbar">
-      <button type="button" class="gp-cta" data-paddle="monthly" data-src="lock">Naroči se (3,99 €/mes)</button>
-      <button type="button" class="gp-cta alt" data-paddle="season" data-src="lock">Sezonski dostop (24,99 €)</button>
-    </div>
-  </div>
-  <div id="gp-pricing-wrap">
-  <h2 id="pricing" class="gp-h2">🎟️ Vedeti, kdaj iti v gozd</h2>
-  <p class="post-meta">Ne ugibaj, ali je prezgodaj po dežju. Premium spremlja vlago tal, temperaturo, dež in
-  rastni zamik posamezne vrste — in pove, katera vrsta in katero območje imata danes največ možnosti.</p>
-  <div class="gp-pricing">
-    <div class="gp-plan">
-      <span class="gp-tag">MESEČNO</span>
-      <div class="p-price">3,99 €<small> / mesec</small></div>
-      <ul>
-        <li>Naslednjih 7 dni, ne le danes</li>
-        <li>Katera vrsta ima danes najboljše pogoje, na katerem od 8 območij</li>
-        <li>Razlage po komponentah in opozorila na nevarne dvojnice</li>
-        <li>🔍 AI prepoznava gobe iz fotografije</li>
-        <li>🔔 Alarm, ko se pogoji izboljšajo</li>
-        <li>Prekliči kadarkoli</li>
-      </ul>
-      <button type="button" class="gp-cta" data-paddle="monthly" data-src="pricing">Naroči se</button>
-    </div>
-    <div class="gp-plan best">
-      <span class="gp-tag">CELA SEZONA</span>
-      <div class="p-price">24,99 €<small> / sezona</small></div>
-      <ul>
-        <li>Vse iz mesečnega paketa (vklj. 🔍 AI prepoznavo in 🔔 alarme)</li>
-        <li>Dostop do konca sezone (30. 11.)</li>
-        <li>Enkratno plačilo, brez obnavljanja</li>
-        <li>Podpora lokalnemu projektu</li>
-      </ul>
-      <button type="button" class="gp-cta" data-paddle="season" data-src="pricing">Kupi sezono</button>
-    </div>
-  </div>
-  <div id="gp-checkout-msg" class="gp-msg"></div>
-  <p class="muted-note">Plačila varno obdeluje Paddle (prodajalec od zapisa, uredi DDV za EU). Brez ustvarjanja
-  računa — po plačilu prejmeš povezavo za dostop na svoj e-naslov, ki deluje na vseh napravah.</p>
-  </div>
+  
+
   <h2 class="gp-h2" id="faq">❓ Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Je gobarski indeks napoved najdbe?</summary><p>Ne. Indeks (0–100) je ocena, kako ugodni so vremenski in talni pogoji za rast posamezne vrste — temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks pomeni ugodne razmere, ne zajamčene gobe. Podrobno na strani »Kako deluje model«.</p></details>
@@ -978,7 +898,7 @@ body .wrap{padding-bottom:5.5rem}
     <details><summary>Zakaj indeksa ne dobijo vse vrste iz baze?</summary><p>Baza vrst je referenčna in je precej večja od napovedi. Indeks dobijo užitne vrste, ki so v dolini res prisotne in jih je mogoče zanesljivo določiti. Vrste, ki so v bazi zaradi opozorila na dvojnico, in tiste iz razširjenega seznama, ki na terenu v dolini niso preverjene, ostanejo brez indeksa — raje manj napovedanih vrst kot napoved, ki vabi po gobo z nevarno dvojnico.</p></details>
     <details><summary>Zakaj po istem dežju vse vrste ne zrastejo hkrati?</summary><p>Ker se skupine gliv odzivajo z različnim zamikom, in model ga upošteva. Razkrojevalke stelje in travinja (kukmaki, tintnice, marela) tvorijo trosnjake nekaj dni po plohi, lesne razkrojevalke (ostrigar, panjevka, uhljevka) nekoliko pozneje, mikorizne vrste (gobani, lisičke, golobice) pa šele teden in pol do dva. Padavinsko okno je zato pri vsaki vrsti zamaknjeno za njen rastni zamik: dež, ki je padel včeraj, jurčku danes indeksa ne dvigne, kukmaku pa ga lahko. Skupina in zamik sta izpisana na kartici vsake vrste.</p></details>
     <details><summary>Zakaj se indeks razlikuje med gozdovi?</summary><p>Model upošteva geologijo: kislo vulkansko pogorje Smrekovca ustreza jurčkom in žametastemu gobanu, karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako verjetna povsod.</p></details>
-    <details><summary>Kako plačam in dostopam?</summary><p>Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — brez ustvarjanja računa in gesla. Če izgubiš povezavo, jo z istim e-naslovom kadarkoli zahtevaš znova.</p></details>
+    <details><summary>Ali napoved po vrstah kaj stane?</summary><p>Ob zagonu gobarske sezone je zaenkrat brezplačna za vse obiskovalce, brez prijave. AI prepoznava gobe iz fotografije in e-mail alarmi ob ugodnih pogojih ostajajo del naročnine, ki jo dodamo pozneje.</p></details>
     <details><summary>Koliko gob smem nabrati?</summary><p>V Sloveniji je dovoljeno nabrati do 2 kg gob na osebo na dan (Uredba o varstvu samoniklih gliv). Nekatera območja doline (npr. Logarska dolina) so zavarovana — zavarovan status sam po sebi ne pomeni nujno splošne prepovedi nabiranja, zato pred nabiranjem preveri veljavne omejitve na kraju samem.</p></details>
     <details><summary>Ali je to uradna napoved ARSO?</summary><p>Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob Savinji. Ni uradna napoved ARSO.</p></details>
   </div>
@@ -992,7 +912,6 @@ body .wrap{padding-bottom:5.5rem}
     <a href="/gobarska-napoved/baza-vrst/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5.5C10.3 4 7.8 3.5 4 4v14c3.8-.5 6.3 0 8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 5.5C13.7 4 16.2 3.5 20 4v14c-3.8-.5-6.3 0-8 1.5V5.5Z" fill="var(--cyan)" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Baza vrst</a>
     <a href="/gobarska-napoved/dvojnice/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.5 21.5 20h-19L12 3.5Z" fill="var(--cyan)" fill-opacity=".3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><line x1="12" y1="10" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="currentColor"/></svg></span>Dvojnice</a>
   </nav>
-  </div>
   <button type="button" class="gp-sos-fab" id="gp-sos-btn" aria-label="Sum zastrupitve z gobami — pomoč">🆘</button>
   <div class="gp-sos-panel" id="gp-sos-panel">
     <h4>Sum zastrupitve z gobami?</h4>
@@ -1005,6 +924,7 @@ body .wrap{padding-bottom:5.5rem}
 <script>
 (function(){
   var API="https://weatherireica1.filip-eremita.workers.dev";
+  var FREE_LAUNCH=true;
   var LS="mr_gobe_token";
   // Minimal conversion-funnel tracking — no PII (no email, token or image).
   function gaEvent(name,params){
@@ -1030,16 +950,6 @@ body .wrap{padding-bottom:5.5rem}
   var lock=document.getElementById("gp-lock");
   var content=document.getElementById("gp-content");
   var statusEl=document.getElementById("gp-premium-status");
-  var csWrap=document.getElementById("gp-cs-wrap");
-  var csCover=document.getElementById("gp-cs-cover");
-  function revealPage(){
-    if(csWrap)csWrap.classList.remove("gp-cs-blur");
-    if(csCover)csCover.hidden=true;
-  }
-  function reblurPage(){
-    if(csWrap)csWrap.classList.add("gp-cs-blur");
-    if(csCover)csCover.hidden=false;
-  }
   var TERR_ICON={kisla:"🌲",bazicna:"⛰️",vlazna:"💧"};
   function levelColor(v){
     if(v>=55)return"#34d399";if(v>=35)return"#f59e0b";if(v>=18)return"#fb923c";return"#f87171";
@@ -1484,10 +1394,9 @@ body .wrap{padding-bottom:5.5rem}
   }
   var t=tok();
   if(t){
-    // A paying user shouldn't see the pre-launch cover or the "Naroči se"
-    // upsell while their own data is still in flight — reveal the page and
-    // swap straight to a skeleton instead of flashing either first.
-    revealPage();
+    // A paying user shouldn't see the lock or the "Naroči se" upsell while
+    // their own data is still in flight — swap straight to a skeleton
+    // instead of flashing either first.
     if(lock)lock.hidden=true;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
@@ -1507,22 +1416,31 @@ body .wrap{padding-bottom:5.5rem}
       .then(function(d){render(d);initIdentify(t);initAlerts(t,d);})
       .catch(function(){
         // Token turned out to be invalid/expired or the fetch genuinely
-        // failed — fall back to the pre-launch cover instead of leaving the
+        // failed — fall back to the lock/pricing instead of leaving the
         // skeleton spinning forever.
         if(content){content.hidden=true;content.innerHTML="";}
         if(lock)lock.hidden=false;
-        reblurPage();
+      });
+  }else if(FREE_LAUNCH){
+    // Season-launch mode (PREMIUM_FREE_LAUNCH in generate_gobe_page.py): no
+    // token needed, the Worker serves /premium/forecast to anyone while the
+    // flag is on (see PREMIUM_FREE_LAUNCH in worker.js). AI identify and
+    // alerts stay locked — initIdentify()/initAlerts() are only called from
+    // the token branch above, so they're never reached here.
+    if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
+    fetch(API+"/premium/forecast")
+      .then(function(r){if(!r.ok)throw 0;return r.json();})
+      .then(function(d){
+        render(d);
+        if(statusEl){
+          statusEl.hidden=false;
+          statusEl.textContent="🎉 Ob zagonu gobarske sezone je 7-dnevna napoved po vrstah brezplačna za vse.";
+        }
+      })
+      .catch(function(){
+        if(content){content.hidden=true;content.innerHTML="";}
       });
   }
-  var f=document.getElementById("gp-login");
-  if(f){f.addEventListener("submit",function(e){e.preventDefault();
-    var msg=document.getElementById("gp-login-msg");var em=(f.email.value||"").trim();
-    if(!em){return;}msg.textContent="Pošiljam …";
-    gaEvent("premium_access_request");
-    fetch(API+"/premium/login",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email:em})}).then(function(r){return r.json();})
-      .then(function(x){msg.textContent=x.msg||"Če je e-naslov naročen, smo nanj poslali povezavo za dostop.";})
-      .catch(function(){msg.textContent="Napaka pri pošiljanju. Poskusi znova.";});});}
 
   // ── Paddle.js overlay checkout ──────────────────────────────────────────
   // Config comes from window.MR_PADDLE (injected in <head>); when it or the
