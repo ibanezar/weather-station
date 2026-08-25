@@ -665,6 +665,7 @@ body{
 .gp-soil-trends{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.5rem}
 .gp-soil-trend{display:flex;flex-direction:column;gap:.2rem}
 .gp-soil-trend-lbl{font-size:.7rem;color:var(--muted)}
+.gp-soil-trend-range{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-spark{display:block;width:140px;height:32px}
 .gp-spark-empty{font-size:.75rem;color:var(--muted)}
 
@@ -1105,17 +1106,30 @@ PAGE_JS = """<script>
       '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2" '+
       'stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
+  // A sparkline auto-scales to its own min/max (see sparklineSvg above), so
+  // a week that's flat and excellent (e.g. 77-82%) fills the same visual
+  // range as a week that swings wildly — without a number next to it, that
+  // reads as "volatile" when it's actually "stable". This one-line caption
+  // is the number the shape alone can't give you.
+  function sparkRangeHtml(vals){
+    var known=vals.filter(function(v){return v!=null;});
+    if(!known.length)return'';
+    var mn=Math.min.apply(null,known),mx=Math.max.apply(null,known);
+    return '<span class="gp-soil-trend-range">'+(mn===mx?(mn+' %'):(mn+'–'+mx+' %'))+' ta teden</span>';
+  }
   function soilCardHtml(loc){
     var d0=loc.days[0];
+    var soilVals=loc.days.map(function(d){return d.soil_moisture_pct;});
+    var idxVals=loc.days.map(function(d){return d.overall;});
     return '<div class="gp-soil-card">'+
       '<div class="gp-soil-gauge">'+soilRingSvg(d0.soil_moisture_pct)+
       '<span class="gp-soil-num">'+(d0.soil_moisture_pct==null?'—':d0.soil_moisture_pct+'%')+'</span></div>'+
       '<div class="gp-soil-body"><div class="gp-soil-label">💧 Vlaga tal danes <small>(polnost za vrste tega gozda)</small></div>'+
       '<div class="gp-soil-trends">'+
       '<div class="gp-soil-trend"><span class="gp-soil-trend-lbl">Vlaga tal · 7 dni</span>'+
-      sparklineSvg(loc.days.map(function(d){return d.soil_moisture_pct;}),"#5c8374")+'</div>'+
+      sparklineSvg(soilVals,"#5c8374")+sparkRangeHtml(soilVals)+'</div>'+
       '<div class="gp-soil-trend"><span class="gp-soil-trend-lbl">Gobarski indeks · 7 dni</span>'+
-      sparklineSvg(loc.days.map(function(d){return d.overall;}),"#c17f3e")+'</div>'+
+      sparklineSvg(idxVals,"#c17f3e")+sparkRangeHtml(idxVals)+'</div>'+
       '</div></div></div>';
   }
   // The blended index is 6 independently-scored 0-100 signals; this renders
@@ -1204,7 +1218,7 @@ PAGE_JS = """<script>
       '<div class="gp-forest-bottom"><div class="gp-forest-meta">'+metaHtml+'</div>'+
       '<div class="gp-forest-spark">'+sparklineSvg(l.days.map(function(dd){return dd.overall;}),"#c17f3e")+'</div>'+
       '</div>'+
-      '<div class="gp-forest-more">🍄 vseh '+o.species.length+' vrst · 🗺️ zemljevid · 7-dnevna napoved →</div>'+
+      '<div class="gp-forest-more">🍄 napoved po vrstah · 🗺️ zemljevid · 7-dnevna napoved →</div>'+
       '</div>';
   }
   function forestsListHtml(locs, dayIdx, meta){
