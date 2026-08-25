@@ -4937,7 +4937,13 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const auth = request.headers.get("Authorization") || "";
           if (!syncKey || !_tsEqual(auth, `Bearer ${syncKey}`)) return _json({ error: "Nedovoljeno" }, 401);
           const raw = await request.text();
-          if (raw.length > 1024 * 1024) return _json({ error: "Preveliko" }, 413);
+          // Bila je 1 MiB — z rastjo baze indeksiranih vrst (108 danes) je
+          // dnevni payload prerasel to mejo (~2 MiB) nekje okrog 18. 7. 2026,
+          // vsak dnevni push je od takrat tiho odpovedal s 413 (gobe-forecast.yml
+          // ob curl -sf/napaki samo opozori in nadaljuje), KV pa je ves ta čas
+          // tiho postrezala mesec dni staro napoved. 8 MiB pusti precej prostora
+          // za nadaljnjo rast baze (KV vrednosti dovolijo do 25 MiB).
+          if (raw.length > 8 * 1024 * 1024) return _json({ error: "Preveliko" }, 413);
           let parsed;
           try { parsed = JSON.parse(raw); } catch (_) { return _json({ error: "Neveljaven JSON" }, 400); }
           if (!Array.isArray(parsed?.locations) || !parsed.locations.length)
