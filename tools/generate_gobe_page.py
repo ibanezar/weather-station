@@ -895,6 +895,16 @@ body{
    after this one in source order would otherwise beat it regardless of
    which media query is narrower. */
 body .wrap{padding-bottom:5.5rem}
+/* Every gobarska-napoved page also gets the site-wide mobile tab bar
+   (.app-bottomnav, from blog/blog.css, loaded by every page using this
+   shell — see seo.page_shell()) stacked on top of the section's own
+   .gp-bottomnav below: both are position:fixed;bottom:0 at the same
+   max-width:760px breakpoint, so the generic 8-tab bar (higher z-index)
+   fully covered the gobar-specific 5-tab one. body .app-bottomnav (extra
+   ancestor selector, same trick as body .wrap above) outranks blog.css's
+   plain .app-bottomnav on specificity regardless of load order, so this
+   works whether it's declared inside the mobile media query or not. */
+body .app-bottomnav{display:none}
 
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the
    mreža .gp-feat already covers cross-page navigation ── */
