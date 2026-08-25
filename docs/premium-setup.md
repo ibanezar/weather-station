@@ -13,6 +13,23 @@ Stran /gobarska-napoved/ ──token──▶ Worker /premium/forecast ──▶
 Brez uporabniških računov: e-naslov + žeton (magic link, 90 dni). Dostop poteče
 z naročnino (`expires` v KV), žetona ni treba preklicevati.
 
+## 0. Sezonski zagon (25. 8. 2026) — napoved je zaenkrat brezplačna
+
+Paddle spodaj še ni priklopljen (`PADDLE_CLIENT_TOKEN` prazen), gobarska sezona
+pa se je začela, zato je 7-dnevna napoved po vrstah zaenkrat na voljo vsem brez
+prijave — `PREMIUM_FREE_LAUNCH = "true"` v `wrangler.toml` odpre
+`GET /premium/forecast` v worker.js brez žetona, `PREMIUM_FREE_LAUNCH = True`
+na vrhu `tools/generate_gobe_page.py` pa izpusti lock in cenik ter doda opombo
+"zaenkrat brezplačno". AI prepoznava, moji alarmi in sinhronizacija dnevnika
+ostanejo za pravim naročniškim žetonom ne glede na to zastavico — spodnji
+koraki (Paddle) jih pripravijo za prodajo.
+
+Ko je Paddle pripravljen za pravi zagon plačevanja: odstrani
+`PREMIUM_FREE_LAUNCH` iz `wrangler.toml` (ali nastavi na `"false"`), v
+`generate_gobe_page.py` nastavi `PREMIUM_FREE_LAUNCH = False` in ponovno
+generiraj stran (`python3 tools/generate_gobe_page.py`) — izvirni lock in
+cenik se vrneta nespremenjena.
+
 ## 1. Paddle (plačila, merchant-of-record)
 
 1. Registriraj se na [paddle.com](https://www.paddle.com) (najprej **sandbox**
