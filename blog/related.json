@@ -1,4 +1,9 @@
 {
+  "test-napovedi-2026-07": [
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
+    "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819"
+  ],
   "nevihtni-opazovalec-2026-08-25-0236": [
     "nevihtni-opazovalec-2026-07-17-1205",
     "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712",
@@ -21,8 +26,8 @@
   ],
   "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821": [
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "nocni-naliv-v-recici-60-mm-dezja-0808"
+    "nocni-naliv-v-recici-60-mm-dezja-0808",
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
@@ -51,8 +56,8 @@
   ],
   "invazivka-tedenski-pregled-20260815": [
     "invazivke-mesecni-pregled-2026-07",
-    "nevihtni-opazovalec-2026-07-17-1205",
-    "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720"
+    "nevihtni-opazovalec-2026-08-25-0236",
+    "nevihtni-opazovalec-2026-07-17-1205"
   ],
   "susa-v-zgornji-savinjski-dolini-kako-dolgo-ze-brez-dezja-0814": [
     "susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720",
@@ -66,8 +71,8 @@
   ],
   "tedenska-napoved-11-17-avgust-2026": [
     "tedenska-napoved-24-28-avgust-2026",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
-    "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810"
+    "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
   ],
   "kateri-ai-model-uporablja-windy-in-kako-se-odreze-pri-nas-0810": [
     "tedenska-napoved-11-17-avgust-2026",
@@ -100,8 +105,8 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806": [
-    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
+    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816"
   ],
   "je-letosnja-susa-rekordna-kaj-pravi-spi": [
@@ -205,8 +210,8 @@
     "julij-skozi-zgodovino-recica-savinji"
   ],
   "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723": [
-    "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
+    "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712",
     "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "koliko-sonca-smo-dejansko-ujeli-v-zgornji-savinjski-dolini-t-0722": [
@@ -291,8 +296,8 @@
   ],
   "kaj-gibanje-zracnega-tlaka-in-vetra-pove-o-vremenu-ki-prihaj-0712": [
     "nevihtni-opazovalec-2026-07-17-1205",
-    "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
+    "nevihtni-opazovalec-2026-08-25-0236",
+    "poslabsanje-vremena-danes-popoldne-v-zgornji-savinjski-dolin-0723"
   ],
   "vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712": [
     "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725",

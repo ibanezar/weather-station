@@ -5,8 +5,18 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 25 Aug 2026 02:36:25 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 25 Aug 2026 14:54:06 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Test napovedi: julij 2026 — zmagal ICON</title>
+      <link>https://meteorec.si/blog/test-napovedi-2026-07.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/test-napovedi-2026-07.html</guid>
+      <pubDate>Tue, 25 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino v juliju 2026: primerjava ECMWF, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.</description>
+      <category>test-napovedi</category>
+      <category>mesecni-pregled</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Nevihtni opazovalec, 25. avgusta 2026 ob 04:34: hiter padec zračnega tlaka</title>
       <link>https://meteorec.si/blog/nevihtni-opazovalec-2026-08-25-0236.html</link>
