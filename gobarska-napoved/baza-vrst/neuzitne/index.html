@@ -149,6 +149,12 @@ body{
 .gp-sp-ic{width:1.15rem;height:1.15rem;border-radius:50%;object-fit:cover;flex:0 0 auto;
   vertical-align:-.2rem;margin-right:.3rem;background:var(--badge-bg)}
 .gp-forest-prot{opacity:.6}
+/* Species-search result on /danes/ (DANES_JS): replaces the "top species"
+   line while a species is selected, so the two never show at once. */
+.sp-mode .gp-forest-sp{display:none}
+.gp-forest-sp-match{display:none;font-size:.8rem;font-weight:600;color:var(--blue);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.sp-mode .gp-forest-sp-match{display:block}
 .gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
@@ -598,6 +604,16 @@ body{
    after this one in source order would otherwise beat it regardless of
    which media query is narrower. */
 body .wrap{padding-bottom:5.5rem}
+/* Every gobarska-napoved page also gets the site-wide mobile tab bar
+   (.app-bottomnav, from blog/blog.css, loaded by every page using this
+   shell — see seo.page_shell()) stacked on top of the section's own
+   .gp-bottomnav below: both are position:fixed;bottom:0 at the same
+   max-width:760px breakpoint, so the generic 8-tab bar (higher z-index)
+   fully covered the gobar-specific 5-tab one. body .app-bottomnav (extra
+   ancestor selector, same trick as body .wrap above) outranks blog.css's
+   plain .app-bottomnav on specificity regardless of load order, so this
+   works whether it's declared inside the mobile media query or not. */
+body .app-bottomnav{display:none}
 
 /* ── Bottom nav (mobile, app-style) — hidden on desktop, where the
    mreža .gp-feat already covers cross-page navigation ── */
