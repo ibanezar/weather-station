@@ -165,387 +165,345 @@ locations:
     home: false
     protected: true
     picking_restriction: unknown
-  - name: "Pahtin"
-    lat: 46.336
-    lon: 14.905
-    elev_m: 750
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Radegunda – spodnji gozdovi"
-    lat: 46.333
-    lon: 14.898
-    elev_m: 620
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Radegunda – srednji pas"
-    lat: 46.337
-    lon: 14.893
-    elev_m: 825
+  - name: "Radegunda spodaj"
+    lat: 46.35854
+    lon: 14.93136
+    elev_m: 495
     terrain: bazicna
     home: false
     protected: false
   - name: "Žekovec"
-    lat: 46.33
-    lon: 14.882
+    lat: 46.35509
+    lon: 14.93338
+    elev_m: 525
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Radegunda višje"
+    lat: 46.36608
+    lon: 14.93296
     elev_m: 700
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Radegunda → Golte, spodnji pas"
+    lat: 46.365
+    lon: 14.925
+    elev_m: 750
     terrain: bazicna
     home: false
     protected: false
   - name: "Počivavnik–Korte"
-    lat: 46.334
-    lon: 14.872
-    elev_m: 800
+    lat: 46.37
+    lon: 14.92
+    elev_m: 900
     terrain: bazicna
     home: false
     protected: false
-  - name: "Opihovnik / Lepa Njiva"
-    lat: 46.34
-    lon: 14.865
-    elev_m: 850
+  - name: "Golte, vzhodni gozdni pas"
+    lat: 46.37
+    lon: 14.913
+    elev_m: 1100
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Pahtin"
+    lat: 46.33
+    lon: 14.944
+    elev_m: 600
     terrain: bazicna
     home: false
     protected: false
   - name: "Mali lazi"
-    lat: 46.344
-    lon: 14.857
-    elev_m: 950
+    lat: 46.313
+    lon: 14.931
+    elev_m: 575
     terrain: bazicna
     home: false
     protected: false
-  - name: "Veliki lazi"
-    lat: 46.346
-    lon: 14.85
-    elev_m: 900
+  - name: "Veliki lazi / Kokarca"
+    lat: 46.304
+    lon: 14.927
+    elev_m: 600
     terrain: bazicna
     home: false
     protected: false
-  - name: "Spodnja Kokarca"
-    lat: 46.323
-    lon: 14.928
-    elev_m: 620
-    terrain: bazicna
+  - name: "Ljubenske Rastke"
+    lat: 46.38529
+    lon: 14.84697
+    elev_m: 554
+    terrain: kisla
     home: false
     protected: false
   - name: "Rastočnik"
-    lat: 46.352
-    lon: 14.82
-    elev_m: 750
+    lat: 46.388
+    lon: 14.85
+    elev_m: 675
     terrain: kisla
     home: false
     protected: false
   - name: "Retkovo"
-    lat: 46.358
-    lon: 14.815
-    elev_m: 900
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Kozlova planina – gozd pod planino"
-    lat: 46.365
-    lon: 14.808
-    elev_m: 1000
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Krumpačnik–Sušnik"
-    lat: 46.36
-    lon: 14.825
-    elev_m: 850
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Rotk–Bezovc"
-    lat: 46.355
-    lon: 14.835
+    lat: 46.392
+    lon: 14.857
     elev_m: 800
     terrain: kisla
     home: false
     protected: false
-  - name: "Marovt"
-    lat: 46.368
-    lon: 14.818
-    elev_m: 950
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Tračka planina – spodnji gozdni pas"
-    lat: 46.372
-    lon: 14.8
-    elev_m: 1050
-    terrain: kisla
-    home: false
-    protected: false
   - name: "Kumprej"
-    lat: 46.378
-    lon: 14.812
-    elev_m: 1100
+    lat: 46.3993
+    lon: 14.8729
+    elev_m: 782
     terrain: kisla
     home: false
     protected: false
-  - name: "Pogorevčnik–Petovčnik"
-    lat: 46.363
-    lon: 14.795
-    elev_m: 900
-    terrain: kisla
-    home: false
-    protected: false
-  - name: "Bukovnik"
-    lat: 46.37
-    lon: 14.79
+  - name: "Atelšek"
+    lat: 46.39915
+    lon: 14.88119
     elev_m: 950
     terrain: kisla
     home: false
     protected: false
-  - name: "Lenko"
-    lat: 46.375
-    lon: 14.83
-    elev_m: 1000
+  - name: "Vrnivšek"
+    lat: 46.4052
+    lon: 14.8816
+    elev_m: 875
     terrain: kisla
     home: false
     protected: false
-  - name: "Frgelj"
-    lat: 46.38
-    lon: 14.822
-    elev_m: 1050
+  - name: "Atelsko sedlo"
+    lat: 46.40329
+    lon: 14.89713
+    elev_m: 1150
     terrain: kisla
     home: false
     protected: false
-  - name: "Atelšek – jug"
-    lat: 46.358
-    lon: 14.845
-    elev_m: 700
+  - name: "Kozlova planina – gozd spodaj"
+    lat: 46.399
+    lon: 14.85
+    elev_m: 1025
     terrain: kisla
     home: false
     protected: false
-  - name: "Kijev ston"
-    lat: 46.385
-    lon: 14.815
+  - name: "Tračka planina – gozdni rob"
+    lat: 46.41432
+    lon: 14.82479
+    elev_m: 1200
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Počka / Robnikova planina"
+    lat: 46.40421
+    lon: 14.81777
     elev_m: 1100
     terrain: kisla
     home: false
     protected: false
-  - name: "Mlinar / Podvolovljek"
-    lat: 46.378
-    lon: 14.715
+  - name: "Travnik – P1"
+    lat: 46.411113
+    lon: 14.812025
+    elev_m: 1200
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Travnik – P2"
+    lat: 46.418383
+    lon: 14.817943
+    elev_m: 1300
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Bukovnik (Primož)"
+    lat: 46.36
+    lon: 14.811
     elev_m: 750
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Lenko–Frgelj"
+    lat: 46.376
+    lon: 14.821
+    elev_m: 850
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Pod Smrekovcem, južni gozd"
+    lat: 46.41
+    lon: 14.889
+    elev_m: 1225
+    terrain: kisla
+    home: false
+    protected: false
+  - name: "Luče (nad dolino)"
+    lat: 46.356413
+    lon: 14.743139
+    elev_m: 600
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Zgornji Jerovčnik"
+    lat: 46.34953
+    lon: 14.7448
+    elev_m: 650
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Podvolovljek – Mlinar"
+    lat: 46.302045
+    lon: 14.693477
+    elev_m: 650
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Krnica – Metulj"
+    lat: 46.34
+    lon: 14.74
+    elev_m: 650
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Mlakar–Majk"
+    lat: 46.335
+    lon: 14.735
+    elev_m: 675
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Škomen"
+    lat: 46.339
+    lon: 14.747
+    elev_m: 675
     terrain: bazicna
     home: false
     protected: false
   - name: "Kogel"
-    lat: 46.372
+    lat: 46.321
+    lon: 14.756
+    elev_m: 850
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Riher"
+    lat: 46.328
+    lon: 14.722
+    elev_m: 800
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Vavdnovo"
+    lat: 46.354
     lon: 14.72
     elev_m: 850
     terrain: bazicna
     home: false
     protected: false
-  - name: "Spodnji Jerovčnik"
-    lat: 46.365
-    lon: 14.735
-    elev_m: 700
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Mlakar"
-    lat: 46.36
-    lon: 14.725
-    elev_m: 850
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Majk"
-    lat: 46.355
-    lon: 14.718
-    elev_m: 900
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Škomen"
-    lat: 46.35
-    lon: 14.712
-    elev_m: 950
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Oto"
-    lat: 46.348
-    lon: 14.705
-    elev_m: 800
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Metulj"
-    lat: 46.345
-    lon: 14.7
-    elev_m: 750
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Riher"
-    lat: 46.352
-    lon: 14.695
-    elev_m: 850
-    terrain: bazicna
-    home: false
-    protected: false
   - name: "Navršnik–Pečovsko"
-    lat: 46.358
-    lon: 14.69
-    elev_m: 950
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Vavdnovo"
-    lat: 46.362
-    lon: 14.7
-    elev_m: 1000
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Ravni"
-    lat: 46.365
-    lon: 14.71
+    lat: 46.361
+    lon: 14.728
     elev_m: 900
     terrain: bazicna
     home: false
     protected: false
-  - name: "Podvežak – gozd pod planino"
-    lat: 46.35
-    lon: 14.725
-    elev_m: 1100
+  - name: "Podveža – srednji pas"
+    lat: 46.343
+    lon: 14.717
+    elev_m: 825
     terrain: bazicna
     home: false
     protected: false
-  - name: "Gozdarska koča – širši gozdni pas"
-    lat: 46.355
-    lon: 14.73
-    elev_m: 1150
+  - name: "Planina Ravne – gozd pod planino"
+    lat: 46.35006
+    lon: 14.69912
+    elev_m: 1350
     terrain: bazicna
     home: false
     protected: false
-  - name: "Plahojca / Šibje"
-    lat: 46.348
-    lon: 14.735
-    elev_m: 800
+  - name: "Pod planino Podvežak"
+    lat: 46.332
+    lon: 14.6721
+    elev_m: 1350
     terrain: bazicna
     home: false
     protected: false
-  - name: "Mrzlak–Kovač"
-    lat: 46.358
-    lon: 14.745
-    elev_m: 950
+  - name: "Gozdarska koča – širši blok"
+    lat: 46.324
+    lon: 14.681
+    elev_m: 1350
     terrain: bazicna
     home: false
     protected: false
-  - name: "Strmčnik–Pacler"
-    lat: 46.352
-    lon: 14.75
-    elev_m: 1050
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Pustotnik–Fužinšek"
-    lat: 46.348
-    lon: 14.74
-    elev_m: 900
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Črsko"
-    lat: 46.36
-    lon: 14.755
-    elev_m: 1100
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Martk"
-    lat: 46.355
-    lon: 14.76
-    elev_m: 1000
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Sedelce"
-    lat: 46.35
-    lon: 14.765
-    elev_m: 1150
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Vodole"
-    lat: 46.345
-    lon: 14.755
+  - name: "Plahojca–Šibje"
+    lat: 46.307
+    lon: 14.656
     elev_m: 1050
     terrain: bazicna
     home: false
     protected: false
   - name: "Zavratnik–Tratnik"
-    lat: 46.358
-    lon: 14.735
+    lat: 46.383
+    lon: 14.74
+    elev_m: 875
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Pod Loko / južna Raduha"
+    lat: 46.4035
+    lon: 14.7575
     elev_m: 1250
     terrain: bazicna
     home: false
     protected: false
-  - name: "Dešman"
-    lat: 46.362
-    lon: 14.748
-    elev_m: 950
+  - name: "Sedelce"
+    lat: 46.39
+    lon: 14.759
+    elev_m: 1000
     terrain: bazicna
     home: false
     protected: false
-  - name: "Smrečnik"
-    lat: 46.353
-    lon: 14.742
-    elev_m: 1200
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Huda goša – Rožni Vrh"
-    lat: 46.428
-    lon: 14.68
+  - name: "Vodole"
+    lat: 46.397
+    lon: 14.773
     elev_m: 1050
     terrain: bazicna
     home: false
     protected: false
-  - name: "Rožni Vrh"
-    lat: 46.43
-    lon: 14.675
-    elev_m: 1100
+  - name: "Dešman–Smrečnik"
+    lat: 46.375
+    lon: 14.775
+    elev_m: 925
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Rožni vrh – gozd pod vrhom"
+    lat: 46.4014136
+    lon: 14.6691938
+    elev_m: 1300
+    terrain: bazicna
+    home: false
+    protected: false
+  - name: "Huda goša / spodnji Rožni vrh"
+    lat: 46.399
+    lon: 14.681
+    elev_m: 1125
     terrain: bazicna
     home: false
     protected: false
   - name: "Tolstovršnik"
-    lat: 46.435
-    lon: 14.685
-    elev_m: 950
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Travnikar"
-    lat: 46.425
-    lon: 14.69
+    lat: 46.41379
+    lon: 14.70864
     elev_m: 900
     terrain: bazicna
     home: false
     protected: false
-  - name: "Zgornji Icmank"
-    lat: 46.432
-    lon: 14.67
-    elev_m: 1000
+  - name: "Podolševa – Sv. Duh"
+    lat: 46.435528
+    lon: 14.659476
+    elev_m: 1200
     terrain: bazicna
     home: false
     protected: false
-  - name: "Grohot – nižji gozdni pas"
-    lat: 46.438
-    lon: 14.665
-    elev_m: 1000
-    terrain: bazicna
-    home: false
-    protected: false
-  - name: "Podolševa – gozdovi pod/ob panoramski cesti"
-    lat: 46.443
-    lon: 14.685
+  - name: "Bukovnik (Grohat)"
+    lat: 46.434
+    lon: 14.7371
     elev_m: 1200
     terrain: bazicna
     home: false
