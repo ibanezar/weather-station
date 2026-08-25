@@ -3358,7 +3358,7 @@ species:
     requires_temp_drop: false   # TODO: kalibriraj
     doubles: ""
   - id: laetiporus_sulphureus
-    name_sl: "Žvepleni lešič"
+    name_sl: "Žvepleni lepoluknjičar"
     name_lat: "Laetiporus sulphureus"
     edibility: "Pogojno užitna"
     gets_index: true
