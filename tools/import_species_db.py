@@ -179,13 +179,31 @@ LOCATIONS = [
     ("Radegunda → Golte, spodnji pas",      46.365,   14.925,   750,  "bazicna", False, False, None),
     ("Počivavnik–Korte",                    46.370,   14.920,   900,  "bazicna", False, False, None),
     ("Golte, vzhodni gozdni pas",           46.370,   14.913,   1100, "bazicna", False, False, None),
-    # "Mozirska koča – samo orientacija" NI dodana: Filip jo je izrecno
-    # označil kot orientacijsko točko (cilja nižje od koče), ne nabiralno.
+    # Filip je to prej označil kot "samo orientacija" (koča je pri 1405 m),
+    # zdaj pa jo je vključil z opombo "gozd precej nižje" — elevacija tu je
+    # zato precej pod višino same koče.
+    ("Mozirska koča – gozd precej nižje",   46.37139, 14.90470, 1100, "bazicna", False, False, None),
     ("Pahtin",                              46.330,   14.944,   600,  "bazicna", False, False, None),
     ("Mali lazi",                           46.313,   14.931,   575,  "bazicna", False, False, None),
     ("Veliki lazi / Kokarca",               46.304,   14.927,   600,  "bazicna", False, False, None),
 
-    # ── 2) Ljubno – Rastke – Primož – Smrekovec, ~550–1320 m ────────────────
+    # ── 2) Ljubno – Rastke – Primož – Smrekovec, ~550–1330 m ────────────────
+    # Brezovci/Kramarica/Mrzle vode/Kugovnik/Ramšak/Kolarica/Vrtačnikov potok/
+    # Bistra/Črni vrh so dodane 27. 8. 2026 (isti dan, sledeč krog) — Filip
+    # jih je našel na severnih/vzhodnih pobočjih Smrekovca/Komna/Krnesa, z
+    # nadm. višinami, preverjenimi na hribi.net. Ramšak, Kolarica in Črni vrh
+    # ležijo tik ob grebenu Smrekovec–Komen (glej "Komen (Smrekovec)" zgoraj)
+    # — Filip: pred nabiranjem preveri mejo rezervata v ZGS Pregledovalniku.
+    ("Brezovci – severno pobočje Smrekovca", 46.42976, 14.89060, 1130, "kisla", False, False, None),
+    ("Kramarica – vzhodno pobočje Smrekovca", 46.42600, 14.90350, 1140, "kisla", False, False, None),
+    ("Mrzle vode – severna stran Komna",    46.41582, 14.83113, 1226, "kisla", False, False, None),
+    ("Kugovnik",                            46.41274, 14.87742, 1233, "kisla", False, False, None),
+    ("Ramšak pod Krnesom",                  46.416,   14.869,   1300, "kisla", False, False, None),
+    ("Kolarica – gozdni pas proti Komnu",   46.41100, 14.81190, 1328, "kisla", False, False, None),
+    ("Vrtačnikov potok / Pudgarsko",        46.438,   14.865,   1150, "kisla", False, False, None),
+    ("Bistra – pod Petelinjekom",           46.44440, 14.80720, 1100, "kisla", False, False, None),
+    # Filip: "gozd nižje od vrha" — koordinata je bližina vrha.
+    ("Črni vrh pri Smrekovcu – gozd nižje", 46.40946, 14.89846, 1150, "kisla", False, False, None),
     ("Ljubenske Rastke",                    46.38529, 14.84697, 554,  "kisla", False, False, None),
     ("Rastočnik",                           46.388,   14.850,   675,  "kisla", False, False, None),
     ("Retkovo",                             46.392,   14.857,   800,  "kisla", False, False, None),
