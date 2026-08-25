@@ -167,94 +167,103 @@ LOCATIONS = [
     # botanični rezervat — prej pomotoma vodeno kot navadno nabiralno točko.
     ("Komen (Smrekovec)",         46.415, 14.845, 1600, "kisla",   False, True,  "unknown"),
 
-    # ── 1) Nazarje → Mozirje → Rečica/Golte, ~550–1050 m, S/SV/SZ lege ──────
-    ("Pahtin",                    46.336, 14.905, 750,  "bazicna", False, False, None),
-    ("Radegunda – spodnji gozdovi", 46.333, 14.898, 620, "bazicna", False, False, None),
-    ("Radegunda – srednji pas",   46.337, 14.893, 825,  "bazicna", False, False, None),
-    ("Žekovec",                   46.330, 14.882, 700,  "bazicna", False, False, None),
-    ("Počivavnik–Korte",          46.334, 14.872, 800,  "bazicna", False, False, None),
-    ("Opihovnik / Lepa Njiva",    46.340, 14.865, 850,  "bazicna", False, False, None),
-    ("Mali lazi",                 46.344, 14.857, 950,  "bazicna", False, False, None),
-    ("Veliki lazi",               46.346, 14.850, 900,  "bazicna", False, False, None),
-    ("Spodnja Kokarca",           46.323, 14.928, 620,  "bazicna", False, False, None),
+    # ── 1) Mozirje – Radegunda – Krašica, ~550–1050 m ───────────────────────
+    # Koordinate od Filipa (25. 8. 2026), preverjene proti ZGS gozdnim odsekom
+    # in kartiranim krajem (Pregledovalnik podatkov o gozdovih, Mapcarta,
+    # hribi.net) — natančnejše od prvotne ocene po legi na poti. Mali lazi,
+    # Veliki lazi in Spodnja Kokarca so pri Kokarjah–Prihovi–Pustem Polju/
+    # Krašici, NE pri Radegundi/Golteh (popravek prvotne ocene).
+    ("Pahtin",                              46.330,   14.944,   750,  "bazicna", False, False, None),
+    ("Radegunda – spodnji del",             46.35854, 14.93136, 620,  "bazicna", False, False, None),
+    ("Radegunda – srednji/višji gozd",      46.36608, 14.93296, 825,  "bazicna", False, False, None),
+    ("Žekovec",                             46.35509, 14.93338, 700,  "bazicna", False, False, None),
+    ("Počivavnik–Korte",                    46.370,   14.920,   800,  "bazicna", False, False, None),
+    ("Opihovnik / Lepa Njiva",              46.372,   14.979,   850,  "bazicna", False, False, None),
+    ("Mali lazi",                           46.313,   14.931,   550,  "bazicna", False, False, None),
+    ("Veliki lazi",                         46.304,   14.927,   580,  "bazicna", False, False, None),
+    ("Spodnja Kokarca",                     46.293,   14.922,   550,  "bazicna", False, False, None),
 
-    # ── 2) Ljubno → Ter → Primož → Rastke, ~650–1200 m ──────────────────────
-    ("Rastočnik",                 46.352, 14.820, 750,  "kisla",   False, False, None),
-    ("Retkovo",                   46.358, 14.815, 900,  "kisla",   False, False, None),
-    ("Kozlova planina – gozd pod planino", 46.365, 14.808, 1000, "kisla", False, False, None),
-    ("Krumpačnik–Sušnik",         46.360, 14.825, 850,  "kisla",   False, False, None),
-    ("Rotk–Bezovc",               46.355, 14.835, 800,  "kisla",   False, False, None),
-    ("Marovt",                    46.368, 14.818, 950,  "kisla",   False, False, None),
-    ("Tračka planina – spodnji gozdni pas", 46.372, 14.800, 1050, "kisla", False, False, None),
-    ("Kumprej",                   46.378, 14.812, 1100, "kisla",   False, False, None),
-    ("Pogorevčnik–Petovčnik",     46.363, 14.795, 900,  "kisla",   False, False, None),
-    ("Bukovnik",                  46.370, 14.790, 950,  "kisla",   False, False, None),
-    ("Lenko",                     46.375, 14.830, 1000, "kisla",   False, False, None),
-    ("Frgelj",                    46.380, 14.822, 1050, "kisla",   False, False, None),
-    ("Atelšek – jug",             46.358, 14.845, 700,  "kisla",   False, False, None),
-    ("Kijev ston",                46.385, 14.815, 1100, "kisla",   False, False, None),
+    # ── 2) Ljubno – Primož – Ter – Rastke, ~650–1200 m ──────────────────────
+    ("Rastočnik / spodnje Rastke",          46.38529, 14.84697, 750,  "kisla", False, False, None),
+    ("Retkovo",                             46.392,   14.857,   900,  "kisla", False, False, None),
+    ("Kozlova planina",                     46.399,   14.850,   1000, "kisla", False, False, None),
+    ("Krumpačnik–Sušnik",                   46.395,   14.875,   850,  "kisla", False, False, None),
+    ("Rotk–Bezovc",                         46.405,   14.838,   900,  "kisla", False, False, None),
+    ("Marovt",                              46.378,   14.856,   950,  "kisla", False, False, None),
+    ("Tračka planina",                      46.41432, 14.82479, 1050, "kisla", False, False, None),
+    ("Kumprej",                             46.39930, 14.87290, 1100, "kisla", False, False, None),
+    ("Pogorevčnik–Petovčnik",               46.383,   14.865,   900,  "kisla", False, False, None),
+    ("Bukovnik",                            46.35962, 14.81138, 950,  "kisla", False, False, None),
+    ("Lenko",                               46.373,   14.823,   1000, "kisla", False, False, None),
+    ("Frgelj",                              46.379,   14.818,   1050, "kisla", False, False, None),
+    ("Atelšek",                             46.39915, 14.88119, 1150, "kisla", False, False, None),
+    ("Kijev ston",                          46.396,   14.850,   1100, "kisla", False, False, None),
+    # Vrnivšek — Filip: skupaj s Kumprej/Atelšek/Atelsko sedlo "uporaben niz
+    # treh višin za raziskovanje terena".
+    ("Rastke – višje proti Smrekovcu",      46.40520, 14.88160, 1200, "kisla", False, False, None),
+    ("Atelsko sedlo",                       46.40329, 14.89713, 1317, "kisla", False, False, None),
+    # Filip: "ostani nižje od grebena" — greben Smrekovec–Komen je zavarovan
+    # (glej "Komen (Smrekovec)" zgoraj), zato namenoma pod 1300 m.
+    ("Spodnji gozdovi proti Smrekovcu",     46.406,   14.888,   950,  "kisla", False, False, None),
 
-    # ── 3) Luče → Podvolovljek → Krnica → Podveža, ~650–1250 m ──────────────
-    ("Mlinar / Podvolovljek",     46.378, 14.715, 750,  "bazicna", False, False, None),
-    ("Kogel",                     46.372, 14.720, 850,  "bazicna", False, False, None),
-    ("Spodnji Jerovčnik",         46.365, 14.735, 700,  "bazicna", False, False, None),
-    ("Mlakar",                    46.360, 14.725, 850,  "bazicna", False, False, None),
-    ("Majk",                      46.355, 14.718, 900,  "bazicna", False, False, None),
-    ("Škomen",                    46.350, 14.712, 950,  "bazicna", False, False, None),
-    ("Oto",                       46.348, 14.705, 800,  "bazicna", False, False, None),
-    ("Metulj",                    46.345, 14.700, 750,  "bazicna", False, False, None),
-    ("Riher",                     46.352, 14.695, 850,  "bazicna", False, False, None),
-    ("Navršnik–Pečovsko",         46.358, 14.690, 950,  "bazicna", False, False, None),
-    ("Vavdnovo",                  46.362, 14.700, 1000, "bazicna", False, False, None),
-    ("Ravni",                     46.365, 14.710, 900,  "bazicna", False, False, None),
-    ("Podvežak – gozd pod planino", 46.350, 14.725, 1100, "bazicna", False, False, None),
-    ("Gozdarska koča – širši gozdni pas", 46.355, 14.730, 1150, "bazicna", False, False, None),
-    ("Plahojca / Šibje",          46.348, 14.735, 800,  "bazicna", False, False, None),
+    # ── 3) Luče – Podvolovljek – Krnica – Podveža, ~650–1250 m ──────────────
+    ("Mlinar / Podvolovljek",               46.30205, 14.69348, 750,  "bazicna", False, False, None),
+    ("Kogel",                               46.3214,  14.7564,  850,  "bazicna", False, False, None),
+    ("Spodnji Jerovčnik",                   46.3507,  14.7448,  700,  "bazicna", False, False, None),
+    ("Mlakar",                              46.326,   14.738,   850,  "bazicna", False, False, None),
+    ("Majk",                                46.329,   14.735,   900,  "bazicna", False, False, None),
+    ("Metulj",                              46.332,   14.742,   750,  "bazicna", False, False, None),
+    ("Škomen",                              46.327,   14.747,   950,  "bazicna", False, False, None),
+    ("Oto",                                 46.331,   14.751,   800,  "bazicna", False, False, None),
+    ("Riher / Rihar",                       46.328,   14.722,   850,  "bazicna", False, False, None),
+    ("Navršnik–Pečovsko",                   46.361,   14.728,   950,  "bazicna", False, False, None),
+    ("Pečovnik",                            46.36565, 14.72837, 1000, "bazicna", False, False, None),
+    ("Vavdnovo",                            46.354,   14.720,   1000, "bazicna", False, False, None),
+    ("Ravni / Planina Ravne",               46.338,   14.691,   900,  "bazicna", False, False, None),
+    ("Podveža – naselje",                   46.34297, 14.71747, 700,  "bazicna", False, False, None),
+    ("Gozd pod Podvežakom",                 46.335,   14.685,   1100, "bazicna", False, False, None),
+    ("Parkirišče pod Podvežakom",           46.33057, 14.67420, 1200, "bazicna", False, False, None),
+    ("Gozdarska koča – širši blok",         46.324,   14.681,   1150, "bazicna", False, False, None),
+    ("Plahojca",                            46.309,   14.663,   800,  "bazicna", False, False, None),
+    ("Šibje",                               46.305,   14.650,   900,  "bazicna", False, False, None),
 
-    # ── 4) Luče → Konjski Vrh → spodnja Raduha, ~800–1300/1350 m ────────────
-    ("Mrzlak–Kovač",              46.358, 14.745, 950,  "bazicna", False, False, None),
-    ("Strmčnik–Pacler",           46.352, 14.750, 1050, "bazicna", False, False, None),
-    ("Pustotnik–Fužinšek",        46.348, 14.740, 900,  "bazicna", False, False, None),
-    ("Črsko",                     46.360, 14.755, 1100, "bazicna", False, False, None),
-    ("Martk",                     46.355, 14.760, 1000, "bazicna", False, False, None),
-    ("Sedelce",                   46.350, 14.765, 1150, "bazicna", False, False, None),
-    ("Vodole",                    46.345, 14.755, 1050, "bazicna", False, False, None),
-    ("Zavratnik–Tratnik",         46.358, 14.735, 1250, "bazicna", False, False, None),
-    ("Dešman",                    46.362, 14.748, 950,  "bazicna", False, False, None),
-    ("Smrečnik",                  46.353, 14.742, 1200, "bazicna", False, False, None),
+    # ── 4) Raduha – Konjski Vrh – Strmec, ~800–1300/1350 m ──────────────────
+    ("Mrzlak–Kovač",                        46.371,   14.752,   950,  "bazicna", False, False, None),
+    ("Strmčnik–Pacler",                     46.375,   14.754,   1050, "bazicna", False, False, None),
+    ("Pustotnik–Fužinšek",                  46.379,   14.756,   900,  "bazicna", False, False, None),
+    ("Črsko",                               46.384,   14.757,   1100, "bazicna", False, False, None),
+    ("Martk",                               46.387,   14.752,   1000, "bazicna", False, False, None),
+    ("Sedelce",                             46.390,   14.759,   1150, "bazicna", False, False, None),
+    ("Vodole",                              46.397,   14.773,   1050, "bazicna", False, False, None),
+    ("Zavratnik–Tratnik",                   46.3830,  14.7403,  1250, "bazicna", False, False, None),
+    ("Zgornji Zavratnik",                   46.38222, 14.74399, 1300, "bazicna", False, False, None),
+    ("Dešman",                              46.373,   14.771,   950,  "bazicna", False, False, None),
+    ("Smrečnik",                            46.376,   14.778,   1200, "bazicna", False, False, None),
+    # "Snežna jama – orientacija" NI dodana: Filip jo je izrecno označil kot
+    # "ne kot nabiralno mesto, ampak za lego območja".
 
-    # ── 5) Luče → Solčava → Rožni Vrh / Podolševa, ~800–1300+ m ─────────────
-    ("Huda goša – Rožni Vrh",     46.428, 14.680, 1050, "bazicna", False, False, None),
-    ("Rožni Vrh",                 46.430, 14.675, 1100, "bazicna", False, False, None),
-    ("Tolstovršnik",              46.435, 14.685, 950,  "bazicna", False, False, None),
-    ("Travnikar",                 46.425, 14.690, 900,  "bazicna", False, False, None),
-    ("Zgornji Icmank",            46.432, 14.670, 1000, "bazicna", False, False, None),
-    ("Grohot – nižji gozdni pas", 46.438, 14.665, 1000, "bazicna", False, False, None),
-    # Filip: v bližini (Olševa) je gozdni rezervat — pred nabiranjem preveri
-    # mejo v ZGS Pregledovalniku, ne sklepaj samo po imenu gore. Ta točka naj
-    # predstavlja gozd ob cesti, ne rezervat sam; meja ni GIS-preverjena.
-    ("Podolševa – gozdovi pod/ob panoramski cesti", 46.443, 14.685, 1200, "bazicna", False, False, None),
+    # ── 5) Solčava – Rožni Vrh – Grohot – Podolševa, ~800–1300+ m ───────────
+    ("Huda goša / širši Rožni Vrh",         46.399,   14.681,   1050, "bazicna", False, False, None),
+    ("Rožni Vrh",                           46.40141, 14.66919, 1100, "bazicna", False, False, None),
+    ("Tolstovršnik",                        46.41379, 14.70864, 950,  "bazicna", False, False, None),
+    ("Travnikar",                           46.392,   14.715,   900,  "bazicna", False, False, None),
+    ("Zgornji Icmank",                      46.408,   14.657,   1000, "bazicna", False, False, None),
+    ("Grohot – nižji gozd",                 46.417,   14.735,   1000, "bazicna", False, False, None),
+    # "Koča na Grohatu" NI dodana: Filip jo je označil "samo orientacija".
+    ("Podolševa – Sv. Duh",                 46.43553, 14.65948, 1150, "bazicna", False, False, None),
+    ("Podolševa – gozdovi vzhodno",         46.431,   14.674,   1200, "bazicna", False, False, None),
+    # Filip: "preveri varstvene režime" — v bližini gozdni rezervat Olševa,
+    # meja ni GIS-preverjena; ostane nabiralna točka, a z opozorilom v kodi.
+    ("Podolševa – gozdovi zahodno",         46.434,   14.646,   1200, "bazicna", False, False, None),
 ]
 # picking_restriction (samo pri protected=true): "unknown" | "prohibited". UI sme
 # pisati "nabiranje prepovedano" SAMO pri "prohibited" IN obstoječem restriction_source
 # (preverjen pravni vir za TO območje) — sicer nevtralno "preveri omejitve". Trenutno za
 # nobeno območje ni preverjenega vira za splošno prepoved gobarjenja, zato so vsa
 # zavarovana območja na "unknown". Ne spreminjaj v "prohibited" brez konkretnega vira.
-# TODO: kalibriraj (potrdi koordinate na terenu / geoportalu za vse zgornje
-# ocenjene vrstice — glej opombo nad LOCATIONS).
-# NOTE: Komen (Smrekovec)/Menina planina/Dleskovška planota so bile prej groba
-# ocena (ni bilo lat/lon v data/baza_gob.xlsx, samo ime kraja). Popravljeno na
-# javno objavljene koordinate/nadm. višine referenčnih točk (vrh/koča/plato),
-# a ŠE VEDNO niso terensko GPS-preverjene.
-# Nova območja (Solčava, Robanov kot, Podveža, Raduha – vznožje, Olševa –
-# gozdna meja, Nazarje) so prav tako ocene: Solčava/Podveža/Nazarje imajo
-# solidne javne koordinate naselja, Raduha/Olševa sta namenoma spuščeni pod
-# objavljeni vrh (ta je nad gozdno mejo) na oceno gozdne cone — ti dve sta
-# najmanj zanesljivi in najbolj potrebujeta terensko presojo. Robanov kot je
-# označen kot protected=True previdnostno (krajinski park, status nabiranja
-# ni potrjen pri upravi Solčavskega).
-# TODO: kalibriraj (potrdi koordinate na terenu / geoportalu, in status
-# zaščite za Robanov kot)
+# TODO: kalibriraj — koordinate poti 1-5 so od Filipa (25. 8. 2026), preverjene
+# proti ZGS gozdnim odsekom/kartiranim krajem (bistveno natančnejše od prvotne
+# ocene po legi na poti), a še vedno ne pomenijo GPS-izmerjene meje parcele.
 
 
 # ── parsing helpers ──────────────────────────────────────────────────────────
