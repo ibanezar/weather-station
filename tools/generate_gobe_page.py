@@ -2315,10 +2315,13 @@ _FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000
 # Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v isti
 # skupini nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a
 # same zelene kartice se ne bi ločile med sabo.
-# Oznaka napovedi po vrstah sledi PREMIUM_FREE_LAUNCH — AI prepoznava in
-# alarmi spodaj ostanejo "PREMIUM" ves čas, ker ostajata zaklenjena tudi med
-# brezplačnim zagonom.
+# Oznaka napovedi po vrstah sledi PREMIUM_FREE_LAUNCH. AI prepoznava dobi
+# "KMALU" namesto "PREMIUM" ves čas, dokler traja brezplačni zagon — plačila
+# (Paddle) še niso priklopljena, cenika sploh ni na strani (glej pricing v
+# build_body), zato bi "PREMIUM" tu obljubljalo nakup, ki ga trenutno ni
+# mogoče izvesti. "Moji alarmi" ostane "PREMIUM" nespremenjeno.
 _FORECAST_BADGE = "BREZPLAČNO" if PREMIUM_FREE_LAUNCH else "PREMIUM"
+_AI_BADGE = "KMALU" if PREMIUM_FREE_LAUNCH else "PREMIUM"
 GOBE_CATEGORIES = [
     # (ključ, emoji, naslov skupine, [(href, ikona, poudarek, naslov, napovednik, oznaka), ...])
     ("napoved", "🍄", "Napoved", [
@@ -2335,7 +2338,7 @@ GOBE_CATEGORIES = [
     ]),
     ("prepoznaj", "🔍", "Prepoznaj gobo", [
         ("#premium", _FI_AI, "#a78bfa", "AI prepoznava gobe",
-         "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", "PREMIUM"),
+         "Naložiš fotografijo, dobiš najverjetnejšo vrsto in opozorilo.", _AI_BADGE),
         ("/gobarska-napoved/baza-vrst/", _FI_BAZA, "#f59e0b", "Baza {species} vrst",
          "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
         ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
