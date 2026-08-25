@@ -132,8 +132,8 @@ def build_article(y, m, per_model, biggest, site_data):
 
     return {
         "title": title,
-        "meta_description": (f'Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino, '
-                              f'{mes_loc} {y}: primerjava ECMWF, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
+        "meta_description": (f'Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino '
+                              f'v {mes_loc} {y}: primerjava ECMWF, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
         "tags": ["test-napovedi", "mesecni-pregled", str(y)],
         "section_label": "Test napovedi",
         "og_photo": "weather-station",
