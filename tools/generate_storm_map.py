@@ -202,14 +202,16 @@ def point_score(hourly, ci):
 
 def today_peak(hourly, times, ci_now):
     if not times:
-        return 0
+        return 0, None
     day = times[ci_now][:10]
-    best = 0
+    best, best_hour = 0, times[ci_now][11:16]
     ci = ci_now
     while ci < len(times) and times[ci][:10] == day:
-        best = max(best, point_score(hourly, ci))
+        s = point_score(hourly, ci)
+        if s > best:
+            best, best_hour = s, times[ci][11:16]
         ci += 1
-    return best
+    return best, best_hour
 
 
 def score_color(s):
@@ -273,8 +275,8 @@ def compute():
             if datetime.datetime.fromisoformat(t) >= now:
                 ci_now = max(0, k - 1)
                 break
-        score = today_peak(g["hourly"], times, ci_now)
-        pts.append({"la": g["la"], "lo": g["lo"], "score": score})
+        score, hour = today_peak(g["hourly"], times, ci_now)
+        pts.append({"la": g["la"], "lo": g["lo"], "score": score, "hour": hour})
 
     if not pts:
         raise ValueError("Open-Meteo ni vrnil podatkov za mrežo")
@@ -282,7 +284,7 @@ def compute():
     peak = max(pts, key=lambda p: p["score"])
     level = score_level(peak["score"])
     place = nearest_city(peak["lo"], peak["la"], STATION)
-    return pts, {"score": peak["score"], "level": level, "place": place}
+    return pts, {"score": peak["score"], "level": level, "place": place, "hour": peak["hour"]}
 
 
 def font(name, size):
@@ -464,6 +466,8 @@ def render(w, h, top, bottom, pts, summary, now):
     d.line([(pad, fy), (w - pad, fy)], fill=(255, 255, 255, 40), width=1)
     fy += 20
     place_txt = f"Najvišji potencial danes: {summary['level']} — bliže {summary['place']}"
+    if summary["score"] > 0 and summary.get("hour"):
+        place_txt += f", okoli {summary['hour']}"
     d.text((pad, fy), place_txt, font=f_foot_b, fill=WHITE)
     fy += 40
     d.text((pad, fy), "Model iz podatkov Open-Meteo, ni uradno opozorilo ARSO. meteorec.si/nevihte",
@@ -504,7 +508,7 @@ def main():
         return 1
 
     should_post = summary["score"] >= POST_THRESHOLD
-    print(f"  → najvišji potencial: {summary['level']} ({summary['score']}/88) — bliže {summary['place']}")
+    print(f"  → najvišji potencial: {summary['level']} ({summary['score']}/88) — bliže {summary['place']}, okoli {summary['hour']}")
     print(f"  → should_post={should_post}")
 
     if dry:
@@ -531,6 +535,7 @@ def main():
         "national_score": summary["score"],
         "national_level": summary["level"],
         "national_place": summary["place"],
+        "national_hour": summary["hour"],
         "should_post": should_post,
         "image": f"{SITE}/og/storm-map/{name}",
         "image_story": f"{SITE}/og/storm-map/{name_story}",
