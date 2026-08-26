@@ -392,10 +392,20 @@ body{
 .gp-hero-body{flex:1;min-width:250px}
 .gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
-.gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+/* Best-area score gets its own bordered card, not an inline sentence right
+   under the gauge — the two numbers ("your station" vs "best area today")
+   read as similar-weight stats a few lines apart otherwise, which reviewer
+   feedback flagged as easy to misread as one figure. Same best_loc/best_o
+   data as before, just given equal visual footing instead of a footnote. */
+.gp-hero-best-card{background:rgba(0,0,0,.24);border:1px solid var(--card-border);border-radius:12px;
+  padding:.6rem .85rem;margin-bottom:.75rem}
+.gp-hero-best-label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-top:.25rem}
+.gp-hero-best-name{font-size:1rem;font-weight:700}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
-  border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
-.gp-hero-topsp{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+  border-radius:6px;font-variant-numeric:tabular-nums}
+.gp-hero-topsp{font-size:.85rem;color:var(--muted);margin-bottom:.75rem}
 .gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
 .gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-hero-spark .gp-spark{width:84px;height:22px}
@@ -2542,9 +2552,9 @@ def feature_cards_html(counts):
             f'    <div class="gp-feat">\n' + "\n".join(cards) + '\n    </div>\n'
             '  </div>')
     more_html = " · ".join(f'<a href="{href}">{_esc(label)}</a>' for href, label in GOBE_MORE)
-    return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Kaj vse najdeš tukaj</h2>\n'
-            '  <p class="archive-intro">Napoved je le začetek — vsaka kartica pelje naravnost na svojo '
-            'stran ali razdelek.</p>\n' + "\n".join(groups) +
+    return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Orodja za gobarje</h2>\n'
+            '  <p class="archive-intro">Zemljevid, baza vrst, dnevnik in drugo — vsaka kartica pelje naravnost na '
+            'svojo stran ali razdelek.</p>\n' + "\n".join(groups) +
             f'\n  <p class="gp-feat-more">Več: {more_html}</p>')
 
 
@@ -3211,7 +3221,7 @@ def build_zemljevid_page(premium, rules):
         "Zemljevid", inner, extra_js=map_js)
 
 
-MINI_MAP_TEASER_N = 8
+MINI_MAP_TEASER_N = 3
 
 
 def mini_map_preview_html(premium):
@@ -3223,10 +3233,12 @@ def mini_map_preview_html(premium):
     Capped to the top MINI_MAP_TEASER_N by index (not all locations, and
     not the protected-area chips either) — with 97 locations this used to
     render every single one, turning a "how's the valley doing today"
-    glance into most of the homepage. The full, searchable list already
-    lives at /danes/ (see DANES_JS), so the CTA points there instead of
-    the interactive map — that's the more useful next stop from a capped
-    teaser than a map click just to see the rest of the names."""
+    glance into most of the homepage. Kept to a 3-chip glance (best areas
+    only) so a mobile visitor sees the answer without scrolling; the full,
+    searchable list already lives at /danes/ (see DANES_JS), so the CTA
+    points there instead of the interactive map — that's the more useful
+    next stop from a capped teaser than a map click just to see the rest
+    of the names."""
     locs = sorted(premium["locations"], key=lambda l: l["days"][0]["overall"], reverse=True)
     chips = []
     for loc in locs[:MINI_MAP_TEASER_N]:
@@ -3313,9 +3325,14 @@ def build_body(rules, premium, free):
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
         <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
         {hero_trend}
-        <div class="gp-hero-best">🌲 Najugodnejši gozd danes: <strong>{_esc(best_loc["name"])}</strong>
-          <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span></div>
-        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
+        <div class="gp-hero-best-card">
+          <div class="gp-hero-best-label">🌲 Najboljši teren danes</div>
+          <div class="gp-hero-best-row">
+            <strong class="gp-hero-best-name">{_esc(best_loc["name"])}</strong>
+            <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span>
+          </div>
+        </div>
+        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta pri tebi: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
         {hero_cta}
       </div>
     </div>
@@ -3452,7 +3469,7 @@ def build_body(rules, premium, free):
     # samo AI prepoznavo/alarme za isto ceno bi bilo zavajajoče. Vrne se
     # nespremenjen, ko flag postane False.
     pricing = "" if PREMIUM_FREE_LAUNCH else f'''  <div id="gp-pricing-wrap">
-  <h2 id="pricing" class="gp-h2">🎟️ Vedeti, kdaj iti v gozd</h2>
+  <h2 id="pricing" class="gp-h2">🔒 Vedeti, kdaj iti v gozd</h2>
   <p class="post-meta">Ne ugibaj, ali je prezgodaj po dežju. Premium spremlja vlago tal, temperaturo, dež in
   rastni zamik posamezne vrste — in pove, katera vrsta in katero območje imata danes največ možnosti.</p>
   <div class="gp-pricing">
@@ -3645,8 +3662,12 @@ def build_body(rules, premium, free):
     <div id="gp-diary-list" class="gp-diary-list"></div>
   </div>'''
 
-    premium_h2 = ("🔓 Premium: 7-dnevna napoved po vrstah — zaenkrat brezplačno! 🎉"
-                  if PREMIUM_FREE_LAUNCH else "🔓 Premium: 7-dnevna napoved po vrstah")
+    # Med brezplačnim zagonom naslov ne sme začeti z "Premium:" — to je prav
+    # tisto poimenovanje, ki bralca prepriča, da mora plačati, ko pa je
+    # napoved po vrstah zdaj brezplačna za vse (glej _FORECAST_BADGE zgoraj,
+    # ki iz istega razloga med zagonom kaže "BREZPLAČNO", ne "PREMIUM").
+    premium_h2 = ("🍄 7-dnevna napoved po vrstah — zaenkrat brezplačno"
+                  if PREMIUM_FREE_LAUNCH else "🔒 Premium: 7-dnevna napoved po vrstah")
 
     body = f'''{BRAND_SWAP}
 {top_bar_html("Gobarska napoved", None)}
@@ -3656,10 +3677,10 @@ def build_body(rules, premium, free):
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {hero}
 {mini_map_html}
-{features_html}
   <h2 class="gp-h2" id="premium">{premium_h2}</h2>
 {premium_block}
 {pricing}
+{features_html}
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
