@@ -1,9 +1,10 @@
 {
   "date": "2026-08-26",
-  "issued_at": "2026-08-26T10:42:15.777368+02:00",
+  "issued_at": "2026-08-26T10:55:58.769129+02:00",
   "national_score": 50,
   "national_level": "VISOKO",
   "national_place": "Kranj",
+  "national_hour": "18:00",
   "should_post": true,
   "image": "https://meteorec.si/og/storm-map/2026-08-26.jpg",
   "image_story": "https://meteorec.si/og/storm-map/2026-08-26-story.jpg"
