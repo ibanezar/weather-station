@@ -683,12 +683,12 @@ body{
 .gp-soil-body{flex:1;min-width:200px}
 .gp-soil-label{font-size:.85rem;font-weight:700}
 .gp-soil-label small{font-weight:500;color:var(--muted)}
-.gp-soil-trends{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.5rem}
-.gp-soil-trend{display:flex;flex-direction:column;gap:.2rem}
+.gp-soil-trends{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;margin-top:.5rem}
+.gp-soil-trend{display:flex;flex-direction:column;gap:.2rem;flex:1 1 220px}
 .gp-soil-trend-lbl{font-size:.7rem;color:var(--muted)}
 .gp-soil-trend-range{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-spark{display:block;width:140px;height:32px}
-.gp-soil-trend .gp-spark{width:210px;height:50px}
+.gp-soil-trend .gp-spark{width:100%;max-width:320px;height:68px}
 .gp-spark-empty{font-size:.75rem;color:var(--muted)}
 
 /* ── SOS floating action button ── */
