@@ -64,4 +64,18 @@ jobs:
           git add gobarska-napoved/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi gobarsko napoved $(date -u +%Y-%m-%d) [skip ci]"
-          git push
+          # Generiranje zgoraj traja ~4 min, v tem času pa na main pogosto
+          # pišejo tudi drugi delovni tokovi (npr. prerender-current.yml na
+          # 15-20 min) — navaden "git push" je zato tu občasno padel z
+          # "rejected (fetch first)", čeprav ni bilo pravega konflikta
+          # vsebine (drug tok ne dotika gobarska-napoved/). Rebase + ponovni
+          # poskus namesto ročnega re-runa.
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen (verjetno je drug delovni tok medtem pisal na main) — poskus $i, rebase in ponovim …"
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; echo "::error::Rebase spodletel — potreben ročni pregled."; exit 1; }
+            sleep $((i * 3))
+          done
+          echo "::error::Push ni uspel po $i poskusih."
+          exit 1
