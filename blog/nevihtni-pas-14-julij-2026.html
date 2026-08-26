@@ -479,7 +479,11 @@
         pmLoadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
         await pmLoadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
       }
-      pmMap = L.map('pm-map', { zoomControl: true, attributionControl: false, minZoom: 9, maxZoom: 13 }).setView([46.355, 14.80], 11);
+      if (!L.control.fullscreen) {
+        pmLoadCss('https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.css');
+        await pmLoadScript('https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.js');
+      }
+      pmMap = L.map('pm-map', { zoomControl: true, attributionControl: false, minZoom: 9, maxZoom: 13, fullscreenControl: true }).setView([46.355, 14.80], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         { maxZoom: 13, maxNativeZoom: 19, subdomains: 'abc' }).addTo(pmMap);
       setTimeout(function () { pmMap.invalidateSize(); }, 60);

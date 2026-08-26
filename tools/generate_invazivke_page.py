@@ -119,8 +119,12 @@ def build_map_section(pts, region):
       loadCss("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
       await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
     }}
+    if (!L.control.fullscreen) {{
+      loadCss("https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.css");
+      await loadScript("https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.js");
+    }}
     hint.style.display = "none";
-    var map = L.map("iv-map", {{zoomControl:true, attributionControl:false, scrollWheelZoom:false}}).setView(CENTER, 10);
+    var map = L.map("iv-map", {{zoomControl:true, attributionControl:false, scrollWheelZoom:false, fullscreenControl:true}}).setView(CENTER, 10);
     L.tileLayer("https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png", {{maxZoom:15, subdomains:"abc"}}).addTo(map);
     PTS.forEach(function(p){{
       L.circleMarker([p.lat, p.lng], {{radius:8, color:"#0b0906", weight:1.5,

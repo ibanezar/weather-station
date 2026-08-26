@@ -3212,8 +3212,12 @@ def build_zemljevid_page(premium, rules):
         loadCss("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
         await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
       }
+      if(!L.control.fullscreen){
+        loadCss("https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.css");
+        await loadScript("https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.js");
+      }
       hint.style.display="none";
-      var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false}).setView([46.35,14.80],10);
+      var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false,fullscreenControl:true}).setView([46.35,14.80],10);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {maxZoom:15,subdomains:"abc"}).addTo(map);
       var group=[],focusMarker=null;

@@ -20,6 +20,16 @@ function _loadCss(href) {
   const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href;
   document.head.appendChild(l);
 }
+async function _loadLeaflet() {
+  if (typeof L === 'undefined') {
+    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+  }
+  if (!L.control.fullscreen) {
+    _loadCss('https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.css');
+    await _loadScript('https://unpkg.com/leaflet.fullscreen@3.0.2/Control.FullScreen.js');
+  }
+}
 
 // Archive API throttle — max 1 request per 600ms, in-memory cache keyed by URL
 const _archCache={};
@@ -4007,11 +4017,8 @@ let _mradCellTrails=new Map();
 async function initMeteorecRadar(){
   if(_mradMap)return;
   const el=document.getElementById('mrad-map');if(!el)return;
-  if(typeof L==='undefined'){
-    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-  }
-  _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10}).setView([LAT,LON],7);
+  await _loadLeaflet();
+  _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10,fullscreenControl:true}).setView([LAT,LON],7);
   // CARTO (Voyager/dark_all/light_all) zdaj vsepovsod zahteva API ključ —
   // OSM standardne ploščice so edine, ki delajo brez njega.
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -4278,13 +4285,10 @@ let _radarMap=null,_radarFrames=[],_radarIdx=0,_radarTimer=null,_radarLayers={},
 
 async function initRadarMap(){
   if(_radarMap)return;
-  if(typeof L==='undefined'){
-    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-  }
+  await _loadLeaflet();
   const mapEl=document.getElementById('radar-map');if(!mapEl)return;
 
-  _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false,minZoom:4,maxZoom:10}).setView([LAT,LON],7);
+  _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false,minZoom:4,maxZoom:10,fullscreenControl:true}).setView([LAT,LON],7);
 
   // CARTO zahteva API ključ; OSM ploščice delajo brez njega (samo svetla različica).
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -8104,12 +8108,9 @@ function _microMapColor(diff){
 async function renderMicroMap(myTemp,stations){
   const mapEl=document.getElementById('micro-map');
   if(!mapEl)return;
-  if(typeof L==='undefined'){
-    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-  }
+  await _loadLeaflet();
   if(!_microMap){
-    _microMap=L.map('micro-map',{zoomControl:true,attributionControl:false,minZoom:8,maxZoom:14}).setView([LAT,LON],11);
+    _microMap=L.map('micro-map',{zoomControl:true,attributionControl:false,minZoom:8,maxZoom:14,fullscreenControl:true}).setView([LAT,LON],11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:14,maxNativeZoom:19,subdomains:'abc'}).addTo(_microMap);
   }
@@ -11369,12 +11370,9 @@ async function fetchSloStormMap(){
 
 async function initSloMap(){
   if(_sloMap)return;
-  if(typeof L==='undefined'){
-    _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-  }
+  await _loadLeaflet();
   const el=document.getElementById('sc-slo-map');if(!el)return;
-  _sloMap=L.map('sc-slo-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:11}).setView([46.15,14.99],7);
+  _sloMap=L.map('sc-slo-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:11,fullscreenControl:true}).setView([46.15,14.99],7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {maxZoom:11,subdomains:'abc'}).addTo(_sloMap);
   // City reference markers
@@ -19225,12 +19223,9 @@ async function renderObsMap(reports) {
   if (!reports.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = '';
   try {
-    if (typeof L === 'undefined') {
-      _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-      await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-    }
+    await _loadLeaflet();
     if (!_obsMap) {
-      _obsMap = L.map('obs-map', { zoomControl: true, attributionControl: false, minZoom: 8, maxZoom: 14 })
+      _obsMap = L.map('obs-map', { zoomControl: true, attributionControl: false, minZoom: 8, maxZoom: 14, fullscreenControl: true })
         .setView([LAT, LON], 10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         { maxZoom: 14, maxNativeZoom: 19, subdomains: 'abc' }).addTo(_obsMap);
@@ -19373,11 +19368,8 @@ async function initStormMap(){
   // Fetch forecast in parallel — it must not be blocked behind the map CDN.
   const dataP=loadSmData();
   try{
-    if(typeof L==='undefined'){
-      _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-      await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
-    }
-    _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:13}).setView([46.12,14.85],8);
+    await _loadLeaflet();
+    _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:13,fullscreenControl:true}).setView([46.12,14.85],8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:13,maxNativeZoom:19,subdomains:'abc'}).addTo(_smMap);
     setTimeout(()=>_smMap.invalidateSize(),60);
