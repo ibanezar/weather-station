@@ -426,11 +426,14 @@ def eval_species(sp, series, i, date, spot, rules):
 
 
 def level(p):
-    if p >= 75: return "ODLIČNA"
-    if p >= 55: return "DOBRA"
-    if p >= 35: return "ZMERNA"
-    if p >= 18: return "SLABA"
-    return "BREZ"
+    """Sentence case, not ALL CAPS — 'Zelo neugodno' still lets the reader
+    know growth is unlikely without the flat finality of the old "BREZ"
+    (the index isn't a presence/absence claim, see build_body's hero note)."""
+    if p >= 75: return "Odlično"
+    if p >= 55: return "Dobro"
+    if p >= 35: return "Zmerno"
+    if p >= 18: return "Slabo"
+    return "Zelo neugodno"
 
 
 # ── forecast assembly ────────────────────────────────────────────────────────
