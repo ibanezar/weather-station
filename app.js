@@ -4012,11 +4012,10 @@ async function initMeteorecRadar(){
     await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
   }
   _mradMap=L.map('mrad-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:10}).setView([LAT,LON],7);
-  // Voyager namesto temne podlage: reliefno obarvan, z imeni krajev, in dovolj
-  // svetel, da se pod padavinami še vidi, kje si. V temni temi ga po CSS malo
-  // pridušimo, sicer v temni kartici žari.
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    {maxZoom:10,maxNativeZoom:19,subdomains:'abcd',className:'mrad-tiles'}).addTo(_mradMap);
+  // CARTO (Voyager/dark_all/light_all) zdaj vsepovsod zahteva API ključ —
+  // OSM standardne ploščice so edine, ki delajo brez njega.
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:10,maxNativeZoom:19,subdomains:'abc',className:'mrad-tiles'}).addTo(_mradMap);
   L.circleMarker([LAT,LON],{radius:6,color:'#fff',fillColor:'#2563eb',fillOpacity:1,weight:2})
     .addTo(_mradMap)
     .bindTooltip('Rečica ob Savinji',{permanent:true,direction:'right',offset:[8,0],className:'mrad-label'});
@@ -4287,12 +4286,9 @@ async function initRadarMap(){
 
   _radarMap=L.map('radar-map',{zoomControl:true,attributionControl:false,minZoom:4,maxZoom:10}).setView([LAT,LON],7);
 
-  // Base tiles — theme-aware
-  const dark=isDark();
-  const baseUrl=dark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  L.tileLayer(baseUrl,{maxZoom:10,maxNativeZoom:19,subdomains:'abcd'}).addTo(_radarMap);
+  // CARTO zahteva API ključ; OSM ploščice delajo brez njega (samo svetla različica).
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:10,maxNativeZoom:19,subdomains:'abc'}).addTo(_radarMap);
 
   // Station marker
   L.circleMarker([LAT,LON],{radius:6,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.9,weight:2}).addTo(_radarMap).bindPopup('IREICA1 · Rečica ob Savinji');
@@ -8114,10 +8110,8 @@ async function renderMicroMap(myTemp,stations){
   }
   if(!_microMap){
     _microMap=L.map('micro-map',{zoomControl:true,attributionControl:false,minZoom:8,maxZoom:14}).setView([LAT,LON],11);
-    const baseUrl=isDark()
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    L.tileLayer(baseUrl,{maxZoom:14,maxNativeZoom:19,subdomains:'abcd'}).addTo(_microMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:14,maxNativeZoom:19,subdomains:'abc'}).addTo(_microMap);
   }
   L.circleMarker([LAT,LON],{radius:9,color:'#2563eb',fillColor:'#4d9ff8',fillOpacity:.95,weight:2}).addTo(_microMap)
     .bindPopup('<div class="micromap-pop"><b>📡 IREICA1 · Rečica ob Savinji'+(myTemp!=null?' ('+myTemp.toFixed(1).replace('.',',')+' °C)':'')+'</b></div>');
@@ -11381,10 +11375,8 @@ async function initSloMap(){
   }
   const el=document.getElementById('sc-slo-map');if(!el)return;
   _sloMap=L.map('sc-slo-map',{zoomControl:true,attributionControl:false,minZoom:6,maxZoom:11}).setView([46.15,14.99],7);
-  const baseUrl=isDark()
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  L.tileLayer(baseUrl,{maxZoom:11,subdomains:'abcd'}).addTo(_sloMap);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:11,subdomains:'abc'}).addTo(_sloMap);
   // City reference markers
   SLO_CITIES.forEach(c=>{
     const m=L.circleMarker([c.la,c.lo],{radius:4,color:'#1e293b',weight:1,fillColor:'#e2e8f0',fillOpacity:.85}).addTo(_sloMap);
@@ -19240,10 +19232,8 @@ async function renderObsMap(reports) {
     if (!_obsMap) {
       _obsMap = L.map('obs-map', { zoomControl: true, attributionControl: false, minZoom: 8, maxZoom: 14 })
         .setView([LAT, LON], 10);
-      L.tileLayer(isDark()
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-        { maxZoom: 14, maxNativeZoom: 19, subdomains: 'abcd' }).addTo(_obsMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { maxZoom: 14, maxNativeZoom: 19, subdomains: 'abc' }).addTo(_obsMap);
       _obsMapLayer = L.layerGroup().addTo(_obsMap);
       setTimeout(() => _obsMap.invalidateSize(), 60);
     }
@@ -19388,11 +19378,8 @@ async function initStormMap(){
       await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
     }
     _smMap=L.map('storm-map',{zoomControl:true,attributionControl:false,minZoom:7,maxZoom:13}).setView([46.12,14.85],8);
-    const dark=isDark();
-    L.tileLayer(dark
-      ?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      :'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      {maxZoom:13,maxNativeZoom:19,subdomains:'abcd'}).addTo(_smMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:13,maxNativeZoom:19,subdomains:'abc'}).addTo(_smMap);
     setTimeout(()=>_smMap.invalidateSize(),60);
     renderSmMarkers(); // draw markers if the forecast already arrived
   }catch(e){

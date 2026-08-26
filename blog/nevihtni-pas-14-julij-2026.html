@@ -480,8 +480,8 @@
         await pmLoadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
       }
       pmMap = L.map('pm-map', { zoomControl: true, attributionControl: false, minZoom: 9, maxZoom: 13 }).setView([46.355, 14.80], 11);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        { maxZoom: 13, maxNativeZoom: 19, subdomains: 'abcd' }).addTo(pmMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { maxZoom: 13, maxNativeZoom: 19, subdomains: 'abc' }).addTo(pmMap);
       setTimeout(function () { pmMap.invalidateSize(); }, 60);
     } catch (e) {
       console.warn('storm map: Leaflet ni na voljo', e);

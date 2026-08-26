@@ -3155,12 +3155,12 @@ def build_zemljevid_page(premium, rules):
     <div id="gp-map" class="gp-map" role="application" aria-label="Zemljevid nabiralnih območij"></div>
     <div id="gp-map-hint" class="gp-map-hint">
       <b>🗺️ Interaktivni zemljevid</b>
-      <span>Klikni za nalaganje karte (Leaflet · OpenStreetMap / CARTO)</span>
+      <span>Klikni za nalaganje karte (Leaflet · OpenStreetMap)</span>
       <span class="gp-map-load">Naloži zemljevid</span>
     </div>
   </div>
   <p class="gp-map-attr">Karta: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
-  contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.
+  contributors.
   Sestava sestojev: <a href="https://www.zgs.si/" target="_blank" rel="noopener">© Zavod za gozdove Slovenije</a>.
   Leaflet se naloži šele ob kliku (s storitve unpkg.com).</p>
 {fallback_html}'''
@@ -3214,8 +3214,8 @@ def build_zemljevid_page(premium, rules):
       }
       hint.style.display="none";
       var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false}).setView([46.35,14.80],10);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        {maxZoom:15,subdomains:"abcd"}).addTo(map);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {maxZoom:15,subdomains:"abc"}).addTo(map);
       var group=[],focusMarker=null;
       PTS.forEach(function(p){
         var isFocus=focusName&&p.name===focusName;
