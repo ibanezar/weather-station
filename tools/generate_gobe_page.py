@@ -676,7 +676,7 @@ body{
 .gp-soil-gauge{position:relative;width:56px;height:56px;flex:0 0 auto}
 .gp-soil-ring{display:block;width:100%;height:100%}
 .gp-soil-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:6}
-.gp-soil-ring-fg{fill:none;stroke:#5c8374;stroke-width:6;stroke-linecap:round;
+.gp-soil-ring-fg{fill:none;stroke-width:6;stroke-linecap:round;
   transform:rotate(-90deg);transform-origin:28px 28px}
 .gp-soil-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:.82rem;font-weight:800;color:var(--text)}
@@ -1115,7 +1115,8 @@ PAGE_JS = """<script>
     var r=24,circ=2*Math.PI*r,off=circ*(1-p/100);
     return '<svg viewBox="0 0 56 56" class="gp-soil-ring" aria-hidden="true">'+
       '<circle cx="28" cy="28" r="'+r+'" class="gp-soil-ring-bg"/>'+
-      '<circle cx="28" cy="28" r="'+r+'" class="gp-soil-ring-fg" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>';
+      '<circle cx="28" cy="28" r="'+r+'" class="gp-soil-ring-fg" stroke="'+levelColor(p)+'" '+
+      'stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>';
   }
   // Tiny 7-day trend line. Auto-scales to the values it's given (not a fixed
   // 0-100 domain) so small week-to-week moves stay visible instead of
@@ -1158,7 +1159,7 @@ PAGE_JS = """<script>
       '<div class="gp-soil-body"><div class="gp-soil-label">💧 Vlaga tal danes <small>(polnost za vrste tega gozda)</small></div>'+
       '<div class="gp-soil-trends">'+
       '<div class="gp-soil-trend"><span class="gp-soil-trend-lbl">Vlaga tal · 7 dni</span>'+
-      sparklineSvg(soilVals,"#5c8374")+sparkRangeHtml(soilVals)+'</div>'+
+      sparklineSvg(soilVals,levelColor(d0.soil_moisture_pct==null?0:d0.soil_moisture_pct))+sparkRangeHtml(soilVals)+'</div>'+
       '<div class="gp-soil-trend"><span class="gp-soil-trend-lbl">Gobarski indeks · 7 dni</span>'+
       sparklineSvg(idxVals,"#c17f3e")+sparkRangeHtml(idxVals)+'</div>'+
       '</div></div></div>';
