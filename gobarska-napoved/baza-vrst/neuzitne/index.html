@@ -101,10 +101,20 @@ body{
 .gp-hero-body{flex:1;min-width:250px}
 .gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
-.gp-hero-best{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+/* Best-area score gets its own bordered card, not an inline sentence right
+   under the gauge — the two numbers ("your station" vs "best area today")
+   read as similar-weight stats a few lines apart otherwise, which reviewer
+   feedback flagged as easy to misread as one figure. Same best_loc/best_o
+   data as before, just given equal visual footing instead of a footnote. */
+.gp-hero-best-card{background:rgba(0,0,0,.24);border:1px solid var(--card-border);border-radius:12px;
+  padding:.6rem .85rem;margin-bottom:.75rem}
+.gp-hero-best-label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-top:.25rem}
+.gp-hero-best-name{font-size:1rem;font-weight:700}
 .gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
-  border-radius:6px;margin-left:.25rem;font-variant-numeric:tabular-nums}
-.gp-hero-topsp{font-size:.95rem;color:var(--text);margin-bottom:.75rem}
+  border-radius:6px;font-variant-numeric:tabular-nums}
+.gp-hero-topsp{font-size:.85rem;color:var(--muted);margin-bottom:.75rem}
 .gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
 .gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
 .gp-hero-spark .gp-spark{width:84px;height:22px}
