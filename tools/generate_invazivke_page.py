@@ -96,7 +96,7 @@ def build_map_section(pts, region):
     card = f'''  <div class="iv-map-shell">
     <div class="iv-map" id="iv-map"></div>
     <div class="iv-map-hint" id="iv-map-hint">
-      <span>🗺️ Klikni za nalaganje zemljevida (Leaflet · OpenStreetMap / CARTO)</span>
+      <span>🗺️ Klikni za nalaganje zemljevida (Leaflet · OpenStreetMap)</span>
       <span class="iv-map-load">Naloži zemljevid</span>
     </div>
   </div>
@@ -121,7 +121,7 @@ def build_map_section(pts, region):
     }}
     hint.style.display = "none";
     var map = L.map("iv-map", {{zoomControl:true, attributionControl:false, scrollWheelZoom:false}}).setView(CENTER, 10);
-    L.tileLayer("https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png", {{maxZoom:15, subdomains:"abcd"}}).addTo(map);
+    L.tileLayer("https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png", {{maxZoom:15, subdomains:"abc"}}).addTo(map);
     PTS.forEach(function(p){{
       L.circleMarker([p.lat, p.lng], {{radius:8, color:"#0b0906", weight:1.5,
         fillColor: COLOR[p.severity] || "#60a5fa", fillOpacity:.85}})
