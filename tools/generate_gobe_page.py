@@ -1035,13 +1035,13 @@ body .app-bottomnav{display:none}
 .gp-map-attr{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gp-map-attr a{color:var(--muted)}
 .gp-mini-map{margin:1.4rem 0}
-.gp-mini-map-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 .9rem}
-.gp-mmap-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .65rem;border-radius:10px;
-  background:var(--card-bg);border:1px solid var(--card-border);font-size:.82rem;color:var(--text);
-  text-decoration:none}
-.gp-mmap-chip i{width:.7rem;height:.7rem;border-radius:50%;flex:0 0 auto}
-.gp-mmap-chip .nm{font-weight:600}
-.gp-mmap-chip .pct{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+/* mini_map_preview_html() now reuses the full .gp-forest row (terrain +
+   elevation + top species, not just name+pct) so the 3 areas shown here
+   are as tellable-apart as the full /danes/ list — a bare pct chip left
+   several 100/100 areas looking identical. It's an <a> here (whole row
+   links to the map), so it needs its own link-style reset; .gp-forest
+   itself is only ever a <div> elsewhere. */
+.gp-mmap-card{text-decoration:none;color:inherit}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -1529,17 +1529,24 @@ PAGE_JS = """<script>
   }
   function initIdentify(token){
     var card=document.getElementById("gp-identify");
-    var fileInput=document.getElementById("gp-id-photo");
+    // Two inputs (camera-first "Fotografiraj gobo" + gallery "Izberi
+    // fotografijo") sharing one handler — a single file input with
+    // capture="environment" forces the camera even for someone who wants
+    // to pick an existing photo, and dropping capture entirely makes
+    // mobile browsers show a generic file picker instead of offering the
+    // camera up front. Two inputs let each button mean what it says.
+    var camInput=document.getElementById("gp-id-photo");
+    var galInput=document.getElementById("gp-id-photo-gallery");
     var preview=document.getElementById("gp-id-preview");
     var btn=document.getElementById("gp-id-btn");
     var statusEl2=document.getElementById("gp-id-status");
     var resultEl=document.getElementById("gp-id-result");
-    if(!card||!fileInput||!btn)return;
+    if(!card||!camInput||!galInput||!btn)return;
     card.hidden=false;
     var pendingImg=null;
     var CONF_CLS={visoka:"hi",srednja:"mid",nizka:"lo"};
-    fileInput.addEventListener("change",function(){
-      var f=fileInput.files&&fileInput.files[0];
+    function handleFile(input){
+      var f=input.files&&input.files[0];
       if(!f)return;
       var img=new Image();
       var reader=new FileReader();
@@ -1556,7 +1563,9 @@ PAGE_JS = """<script>
         img.src=e.target.result;
       };
       reader.readAsDataURL(f);
-    });
+    }
+    camInput.addEventListener("change",function(){handleFile(camInput);});
+    galInput.addEventListener("change",function(){handleFile(galInput);});
     btn.addEventListener("click",function(){
       if(!pendingImg)return;
       gaEvent("ai_identification_start");
@@ -2236,18 +2245,18 @@ def paddle_head():
 # Status ramp tied to the forecast level — green (good) → amber (moderate) → red.
 # The level word is always shown alongside, so colour is never the sole signal.
 def level_color(pct):
-    if pct >= 55: return "#34d399"   # DOBRA / ODLIČNA
-    if pct >= 35: return "#f59e0b"   # ZMERNA
-    if pct >= 18: return "#fb923c"   # SLABA
-    return "#f87171"                  # BREZ
+    if pct >= 55: return "#34d399"   # Dobro / Odlično
+    if pct >= 35: return "#f59e0b"   # Zmerno
+    if pct >= 18: return "#fb923c"   # Slabo
+    return "#f87171"                  # Zelo neugodno
 
 # Same ramp as level_color, mapped to the .gp-pct-* badge classes (gp-forest
 # row disc) instead of an inline colour.
 def level_class(pct):
-    if pct >= 55: return "gp-pct-hi"    # DOBRA / ODLIČNA
-    if pct >= 35: return "gp-pct-mid"   # ZMERNA
-    if pct >= 18: return "gp-pct-low"   # SLABA
-    return "gp-pct-none"                 # BREZ
+    if pct >= 55: return "gp-pct-hi"    # Dobro / Odlično
+    if pct >= 35: return "gp-pct-mid"   # Zmerno
+    if pct >= 18: return "gp-pct-low"   # Slabo
+    return "gp-pct-none"                 # Zelo neugodno
 
 # Terrain accent colour + icon (also used for the terrain cards).
 # Earthy palette for this page — greens/browns, no blue (vlazna reads as
@@ -3275,15 +3284,28 @@ def mini_map_preview_html(premium):
     chips = []
     for loc in locs[:MINI_MAP_TEASER_N]:
         o = loc["days"][0]
+        # Same terrain/elevation/top-species fields the full .gp-forest rows on
+        # /danes/ already show (build_body's forest loop) — a bare name+pct
+        # chip left several 100/100 areas indistinguishable from each other,
+        # with nothing to help pick one over another.
+        top = o["species"][0] if o["species"] else None
+        top_nm = premium["species_meta"][top["id"]]["name_sl"] if top else "—"
+        top_ic = (f'<img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/{top["id"]}.jpg" alt="" loading="lazy" '
+                  'onerror="this.replaceWith(document.createTextNode(\'🍄 \'))">') if top else "🍄 "
+        terr = loc.get("terrain") or ""
+        t_icon = TERRAIN_STYLE.get(terr, ("", "🌲"))[1]
         chips.append(
-            f'    <a class="gp-mmap-chip" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(loc["name"])}">'
-            f'<i style="background:{level_color(o["overall"])}"></i>'
-            f'<span class="nm">{_esc(loc["name"])}</span>'
-            f'<span class="pct">{o["overall"]}/100 · {_esc(o["level"])}</span></a>')
+            f'    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc={urllib.parse.quote(loc["name"])}">'
+            f'<div class="gp-forest-info">'
+            f'<span class="gp-forest-nm">{t_icon} {_esc(loc["name"])}</span>'
+            f'<span class="gp-terr">{terr} · {loc["elev_m"]} m</span>'
+            f'<span class="gp-forest-sp">{top_ic}{_esc(top_nm)}</span></div>'
+            f'<div class="gp-forest-pct {level_class(o["overall"])}">'
+            f'<span class="n">{o["overall"]}/100</span><span class="lvl">{o["level"]}</span></div></a>')
     return ('  <div class="gp-mini-map">\n'
             '    <h2 class="gp-h2">🗺️ Danes v dolini</h2>\n'
-            '    <div class="gp-mini-map-grid">\n' + "\n".join(chips) + '\n    </div>\n'
-            f'    <a class="gp-cta alt" href="/gobarska-napoved/danes/">Poglej vseh {len(locs)} območij →</a>\n'
+            '    <div class="gp-forests">\n' + "\n".join(chips) + '\n    </div>\n'
+            f'    <a class="gp-cta alt" href="/gobarska-napoved/danes/">Vsa območja ({len(locs)}) →</a>\n'
             '  </div>')
 
 
@@ -3337,8 +3359,11 @@ def build_body(rules, premium, free):
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
     hero_trend = hero_trend_html(pct)
-    hero_cta = (f'<a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">'
-                f'🎉 Poglej 7-dnevno napoved po vrstah (zaenkrat brezplačno) →</a>'
+    # Kratek gumb + ločena majhna značka namesto ene dolge promocijske vrstice
+    # ("🎉 Poglej ... (zaenkrat brezplačno) →") — bralec naj v enem pogledu
+    # loči akcijo (kam vodi klik) od stanja cenika (da je trenutno brezplačno).
+    hero_cta = (f'<a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">7-dnevna napoved →</a>'
+                f'<span class="gp-badge e-ok" style="margin-left:.5rem;vertical-align:middle">Trenutno brezplačno</span>'
                 if PREMIUM_FREE_LAUNCH else
                 f'<a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">'
                 f'Odkleni 7-dnevno napoved po vrstah →</a>')
@@ -3364,20 +3389,20 @@ def build_body(rules, premium, free):
             <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span>
           </div>
         </div>
-        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta pri tebi: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
+        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta za Rečico ob Savinji: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
         {hero_cta}
       </div>
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
-        data-pct="{pct}" data-lvl="{_esc(lvl)}">📤 Deli</button>
-      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">🗺️ Zemljevid</a>{alert_chip}
+        data-pct="{pct}" data-lvl="{_esc(lvl)}">Deli</button>
+      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">Odpri zemljevid</a>{alert_chip}
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
     Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
     nočno ohladitev — po vrstah in po geologiji terena.
-    <a href="/gobarska-napoved/metodologija/">Kako izračunamo indeks →</a></div>
+    <a href="/gobarska-napoved/metodologija/">Kako deluje indeks →</a></div>
   </div>'''
 
     # ── today per forest (free) — compact row: info left, % disc right ────────
@@ -3439,7 +3464,7 @@ def build_body(rules, premium, free):
     # not manually-masked dots — the CSS blur filter on .gp-skel is what
     # actually obscures them. Values are generic decoys, not the real
     # per-species forecast, so the teaser never leaks paywalled numbers.
-    _SKEL_DECOY = [(72, "DOBRA"), (58, "ZMERNA"), (81, "ODLIČNA"), (44, "ZMERNA"), (65, "DOBRA")]
+    _SKEL_DECOY = [(72, "Dobro"), (58, "Zmerno"), (81, "Odlično"), (44, "Zmerno"), (65, "Dobro")]
     skel_rows = "\n".join(
         f'      <div class="gp-forest"><span>{_esc(premium["species_meta"][s["id"]]["name_sl"])}</span>'
         f'<b>{_SKEL_DECOY[i % len(_SKEL_DECOY)][0]} % · {_SKEL_DECOY[i % len(_SKEL_DECOY)][1]}</b></div>'
@@ -3450,15 +3475,23 @@ def build_body(rules, premium, free):
     <div class="gp-ai-banner">
       <span class="gp-ai-badge">✨ AI</span>
       <span class="gp-ai-icon">🔍<span class="gp-ai-icon-mush">🍄</span></span>
-      <span class="gp-ai-banner-title">AI prepoznava gobe</span>
+      <!-- h2, not a span — this and "Alarmi" below used to sit as plain text
+      (or an h3) entirely inside the "7-dnevna napoved po vrstah" h2's
+      section, so a screen reader's heading outline read AI-ID and alerts
+      as part of the forecast rather than as their own features. Same
+      .gp-ai-banner-title look either way, just resolved by tag now. -->
+      <h2 class="gp-ai-banner-title">AI prepoznava gobe</h2>
     </div>
     <div class="gp-ai-body">
     <p class="gp-diary-priv">Naloži fotografijo najdene gobe — AI predlaga najverjetnejšo vrsto iz lokalne baze
-    {len(species)} vrst, oceni zanesljivost in opozori na nevarne dvojnice. <b>To ni zamenjava za mikologa</b> — ob
-    najmanjšem dvomu gobe nikoli ne uživaj.</p>
+    {len(species)} vrst, oceni zanesljivost in opozori na nevarne dvojnice. <b>AI-prepoznava ne nadomesti pregleda
+    pri mikologu</b> — ob najmanjšem dvomu gobe nikoli ne uživaj.</p>
     <div class="gp-diary-row">
-      <label class="gp-diary-btn gp-diary-photobtn">📷 Izberi fotografijo
+      <label class="gp-diary-btn gp-diary-photobtn">📷 Fotografiraj gobo
         <input type="file" accept="image/*" capture="environment" id="gp-id-photo" hidden>
+      </label>
+      <label class="gp-diary-btn gp-diary-photobtn">🖼️ Izberi fotografijo
+        <input type="file" accept="image/*" id="gp-id-photo-gallery" hidden>
       </label>
       <img id="gp-id-preview" class="gp-d-photo-preview" alt="">
       <button type="button" class="gp-cta" id="gp-id-btn" disabled>Prepoznaj gobo</button>
@@ -3468,13 +3501,13 @@ def build_body(rules, premium, free):
     </div>
   </div>
   <div id="gp-alerts" class="gp-alert-card" hidden>
-    <h3 style="margin-top:0">🔔 Moji alarmi</h3>
+    <h2 class="gp-h2" style="margin-top:0;border-bottom:0;padding-bottom:0">🔔 Alarmi</h2>
     <p class="gp-diary-priv">Nastavi lastne pogoje (vrsta, območje, nadmorska višina, prag) — pošljemo e-mail, ko jih
     napoved doseže. Preverjeno enkrat dnevno, ob jutranji objavi nove napovedi.</p>
     <div id="gp-alert-rows" class="gp-alert-rows"></div>
     <div class="gp-alert-actions">
-      <button type="button" class="gp-diary-btn" id="gp-alert-add">+ Dodaj alarm</button>
-      <button type="button" class="gp-cta" id="gp-alert-save">Shrani alarme</button>
+      <button type="button" class="gp-diary-btn" id="gp-alert-add">Nov alarm</button>
+      <button type="button" class="gp-cta" id="gp-alert-save">Shrani spremembe</button>
     </div>
     <div id="gp-alert-msg" class="gp-msg"></div>
   </div>
