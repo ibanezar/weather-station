@@ -3741,11 +3741,11 @@ def build_body(rules, premium, free):
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {hero}
+{features_html}
 {mini_map_html}
   <h2 class="gp-h2" id="premium">{premium_h2}</h2>
 {premium_block}
 {pricing}
-{features_html}
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
