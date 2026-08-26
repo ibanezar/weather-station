@@ -340,7 +340,12 @@ body{
 #gp-content h3{margin:1.7rem 0 .6rem;font-size:1.05rem}
 #gp-content h3:first-child{margin-top:.4rem}
 .gp-explain-h{margin-top:1.6rem}
-.gp-explain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.7rem;margin-top:.7rem}
+/* min column width must fit the expanded "Zakaj?" factor-bar row (fixed
+   6.4rem label + 2.6rem value + gaps ≈ 190px of the card's inner width) —
+   220px let desktop lay out several columns too narrow to show the bar at
+   all, collapsing it to nothing (mobile was fine only because a single
+   ~360px column already forced one card per row regardless). */
+.gp-explain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.7rem;margin-top:.7rem}
 .gp-explain-card{display:flex;gap:.7rem;align-items:flex-start;background:var(--card-bg);
   border:1px solid var(--card-border);border-radius:12px;padding:.7rem .8rem;box-shadow:var(--card-shadow)}
 .gp-explain-photo{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:0 0 auto;
