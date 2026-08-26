@@ -366,8 +366,26 @@ body{
      own box and the page's bottom padding compensation below, so the two
      can't drift apart. */
   --gp-bnh:4rem;
+
+  /* ── Design tokens (spacing / type / radius) ──────────────────────────
+     A UX audit of this section (Aug 2026) asked for a named, consistent
+     scale instead of ad-hoc rem values sprinkled through the rules below.
+     These don't replace the earthy palette above or re-theme anything —
+     existing rules keep their current hand-picked values (many are already
+     tuned to fit a specific glyph/icon/breakpoint, see their own comments)
+     — new and touched-up rules below should reach for one of these instead
+     of a fresh magic number, so spacing/type stay on-grid as the page grows.
+     4px spacing base (--gp-sp-*) and a small type scale (--gp-fs-*), both
+     picked to match values already in wide use here rather than invent a
+     competing set. */
+  --gp-sp-1:.25rem; --gp-sp-2:.5rem; --gp-sp-3:.75rem; --gp-sp-4:1rem;
+  --gp-sp-5:1.25rem; --gp-sp-6:1.5rem; --gp-sp-7:2rem; --gp-sp-8:2.5rem;
+  --gp-sp-9:3rem; --gp-sp-10:4rem;
+  --gp-fs-xs:.7rem; --gp-fs-sm:.85rem; --gp-fs-base:1rem; --gp-fs-md:1.05rem;
+  --gp-fs-lg:1.35rem; --gp-fs-xl:1.9rem; --gp-fs-display:2.7rem;
+  --gp-r-control:.625rem; --gp-r-card:.875rem; --gp-r-panel:1.125rem; --gp-r-pill:999px;
 }
-.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:18px;
+.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
   padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
   background:linear-gradient(200deg,rgba(8,14,7,.45) 0%,rgba(6,10,6,.72) 55%,rgba(6,10,6,.92) 100%),
     url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
@@ -387,11 +405,16 @@ body{
    Stacking both lines and centering each independently sidesteps that. */
 .gp-gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;line-height:1}
-.gp-gauge-num .num{font-size:2.7rem;font-weight:800;color:var(--text)}
-.gp-gauge-num small{display:block;margin-top:.15rem;font-size:.85rem;color:var(--muted);font-weight:600}
+.gp-gauge-num .num{font-size:var(--gp-fs-display);font-weight:800;color:var(--text)}
+.gp-gauge-num small{display:block;margin-top:.15rem;font-size:var(--gp-fs-sm);color:var(--muted);font-weight:600}
 .gp-hero-body{flex:1;min-width:250px}
-.gp-hero-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.gp-hero-lvl{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
+/* .74rem → --gp-fs-xs (.7rem): this and .gp-hero-best-label below are the
+   same "eyebrow" label style repeated at slightly different sizes picked up
+   over separate edits; the token scale is what makes that drift visible, so
+   both now share one size instead of two that differ by a fraction of a
+   pixel. */
+.gp-hero-kicker{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-lvl{font-size:var(--gp-fs-xl);font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
 /* Best-area score gets its own bordered card, not an inline sentence right
    under the gauge — the two numbers ("your station" vs "best area today")
    read as similar-weight stats a few lines apart otherwise, which reviewer
@@ -399,7 +422,7 @@ body{
    data as before, just given equal visual footing instead of a footnote. */
 .gp-hero-best-card{background:rgba(0,0,0,.24);border:1px solid var(--card-border);border-radius:12px;
   padding:.6rem .85rem;margin-bottom:.75rem}
-.gp-hero-best-label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.gp-hero-best-label{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
   flex-wrap:wrap;margin-top:.25rem}
 .gp-hero-best-name{font-size:1rem;font-weight:700}
@@ -420,13 +443,13 @@ body{
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
 .gp-h2{margin-top:2.6rem;margin-bottom:.9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);
-  font-size:1.35rem;scroll-margin-top:4rem}
+  font-size:var(--gp-fs-lg);scroll-margin-top:4rem}
 .gp-h2 + .archive-intro,.gp-h2 + .post-meta{margin-top:-.3rem}
 .gp-cta{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
   background:var(--blue);color:#04070e;font:inherit;
-  font-weight:700;padding:.6rem 1.2rem;border-radius:10px;text-decoration:none;margin-top:.4rem;
+  font-weight:700;padding:.6rem 1.2rem;border-radius:var(--gp-r-control);text-decoration:none;margin-top:.4rem;
   border:0;cursor:pointer;line-height:1.2}
-.gp-cta-lg{padding:.7rem 1.4rem;font-size:1rem}
+.gp-cta-lg{padding:.7rem 1.4rem;font-size:var(--gp-fs-base)}
 .gp-cta.alt{background:transparent;color:var(--blue);border:1px solid var(--blue)}
 .gp-map-open-link{display:inline-flex;margin-bottom:.7rem;font-size:.85rem;min-height:2.3rem;padding:.45rem 1rem}
 .gp-forests{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin:.6rem 0 1.2rem}
@@ -456,8 +479,8 @@ body{
 .gp-forest-sp-match{display:none;font-size:.8rem;font-weight:600;color:var(--blue);overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .sp-mode .gp-forest-sp-match{display:block}
-.gp-terr{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:14px;padding:.4rem .5rem;display:flex;
+.gp-terr{font-size:var(--gp-fs-xs);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gp-forest-pct{flex:0 0 auto;min-width:3.5rem;border-radius:var(--gp-r-card);padding:.4rem .5rem;display:flex;
   flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .gp-forest-pct .n{font-size:.92rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gp-forest-pct .lvl{font-size:.48rem;font-weight:700;letter-spacing:.01em;line-height:1.1;margin-top:.15rem;
@@ -529,15 +552,18 @@ body{
 .gp-lockbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem}
 .gp-msg{font-size:.85rem;color:var(--muted);margin-top:.4rem;min-height:1.1em}
 .gp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;margin:.8rem 0}
-.gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.1rem;
+.gp-plan{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--gp-r-card);padding:1.1rem;
   display:flex;flex-direction:column;gap:.5rem;box-shadow:var(--card-shadow)}
 .gp-plan.best{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),var(--card-shadow)}
 .gp-plan .p-price{font-size:1.9rem;font-weight:800}
 .gp-plan .p-price small{font-size:.85rem;color:var(--muted);font-weight:600}
 .gp-plan ul{margin:.2rem 0;padding-left:1.1rem;color:var(--muted);font-size:.88rem;line-height:1.7}
-.gp-tag{display:inline-block;font-size:.7rem;font-weight:700;color:var(--blue);
+.gp-tag{display:inline-block;font-size:var(--gp-fs-xs);font-weight:700;color:var(--blue);
   border:1px solid var(--blue);border-radius:6px;padding:.05rem .4rem;align-self:flex-start}
-.gp-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:.08rem .45rem;border-radius:6px;white-space:nowrap}
+/* .72rem → --gp-fs-xs, same eyebrow-label size as .gp-tag right above and
+   .gp-hero-kicker/.gp-hero-best-label — one more spot where a near-duplicate
+   size had crept in. */
+.gp-badge{display:inline-block;font-size:var(--gp-fs-xs);font-weight:700;padding:.08rem .45rem;border-radius:6px;white-space:nowrap}
 .e-ok{background:rgba(52,211,153,.15);color:var(--green)}
 .e-cond{background:rgba(245,158,11,.15);color:var(--amber)}
 .e-none{background:var(--badge-bg);color:var(--muted)}
@@ -879,7 +905,7 @@ body{
 .gp-feat-more{font-size:.85rem;color:var(--muted);margin:.2rem 0 1.3rem}
 .gp-feat-more a{color:var(--muted)}
 .gp-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;
-  padding:.95rem 1rem 1.05rem;border-radius:14px;overflow:hidden;
+  padding:.95rem 1rem 1.05rem;border-radius:var(--gp-r-card);overflow:hidden;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
   text-decoration:none;color:var(--text);
   transition:border-color .15s ease,transform .15s ease}
@@ -893,12 +919,12 @@ body{
 .gp-feat-ic{display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;
   flex:0 0 auto;border-radius:12px;background:var(--fa-soft);color:var(--fa)}
 .gp-feat-ic svg{width:1.55rem;height:1.55rem;display:block}
-.gp-feat-title{font-weight:700;font-size:1rem;line-height:1.3}
+.gp-feat-title{font-weight:700;font-size:var(--gp-fs-base);line-height:1.3}
 .gp-feat-sub{font-size:.8rem;color:var(--muted);line-height:1.45}
 /* Oznaka za plačljivi del — ista beseda kot na ceniku, da je razlika med
    brezplačnim in premium delom vidna že tu, ne šele ob kliku. */
 .gp-feat-badge{position:absolute;top:.7rem;right:.75rem;font-size:.6rem;font-weight:700;
-  letter-spacing:.06em;padding:.16rem .45rem;border-radius:999px;
+  letter-spacing:.06em;padding:.16rem .45rem;border-radius:var(--gp-r-pill);
   background:var(--fa-soft);color:var(--fa)}
 
 /* Zadnja vsebina naj se ne skrije za plavajočim SOS gumbom (spodaj desno).
@@ -958,7 +984,7 @@ body .app-bottomnav{display:none}
   .gp-bottomnav a{flex:1;min-height:2.75rem;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:.15rem;
     padding:.3rem .2rem;color:var(--muted);text-decoration:none;font-size:.66rem;line-height:1.2;
-    border-radius:10px}
+    border-radius:var(--gp-r-control)}
   .gp-bottomnav a .ic{font-size:1.25rem;line-height:1}
   /* Custom two-tone SVG icons (see BOTTOM_NAV): stroke="currentColor" so the
      line art itself picks up the active/inactive tab colour exactly like the
