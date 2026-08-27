@@ -61,6 +61,7 @@ CORE = {
     # /rekord/ in /novosti/), ampak jih poveže v en vstop.
     "ekstremno-vreme/":          ("weekly",  "0.7"),
     "agrometeo/":                ("daily",   "0.7"),
+    "opozorilo-pred-pozebo/":    ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),

@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-08-27T18:11:43.344396+00:00",
+  "generated_at_local": "27. 8. 2026 ob 20:11",
+  "in_season": false,
+  "station": {
+    "temp_now_c": 26.0,
+    "humidity_now_pct": 68.0,
+    "wind_now_kmh": 3.5,
+    "wind_gust_now_kmh": 3.5,
+    "min_24h_c": 14.6
+  },
+  "overall_category": null,
+  "nights": [
+    {
+      "date": "2026-08-27",
+      "label": "nocoj",
+      "predicted_min_c": 16.0,
+      "source": "ARSO napoved (predhodna — sonce še ni dovolj dolgo zašlo za lokalni model)",
+      "arso_tmin_c": 16.0,
+      "radiative": null,
+      "species": [],
+      "worst": null
+    },
+    {
+      "date": "2026-08-28",
+      "label": "jutri zvečer",
+      "predicted_min_c": 18.0,
+      "source": "ARSO napoved",
+      "arso_tmin_c": 18.0,
+      "radiative": null,
+      "species": [],
+      "worst": null
+    },
+    {
+      "date": "2026-08-29",
+      "label": "pojutrišnjem zvečer",
+      "predicted_min_c": 17.0,
+      "source": "ARSO napoved",
+      "arso_tmin_c": 17.0,
+      "radiative": null,
+      "species": [],
+      "worst": null
+    }
+  ]
+}
