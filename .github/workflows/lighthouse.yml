@@ -15,5 +15,13 @@ jobs:
       - name: Namesti Lighthouse CI
         run: npm install -g @lhci/cli
 
-      - name: Zaženi Lighthouse CI
+      - name: Zaženi Lighthouse CI (desktop)
         run: lhci autorun
+
+      # Večina obiska je z mobilnikov, CI pa je do zdaj meril samo desktop
+      # (.lighthouserc.json) — mobilna regresija bi šla skozi neopaženo.
+      # Prag je namenoma "warn", ne "error": brez izmerjene osnove bi trden
+      # prag lahko podrl vsak push zaradi napačnega uganjenega števila.
+      # Ko Filip vidi realne rezultate teka, jih lahko zaostri na "error".
+      - name: Zaženi Lighthouse CI (mobile)
+        run: lhci autorun --config=.lighthouserc.mobile.json

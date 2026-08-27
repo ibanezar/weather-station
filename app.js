@@ -1492,6 +1492,26 @@ async function fetchComingUp(){
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
       }
+      // Confidence note on "Jutri" only: MTR's D+1 uncertainty range
+      // (tmax_sd, from training) is the one piece of real forecast-spread
+      // data already computed server-side, but it only ever showed up
+      // inside the buried "AI napoved" tab's own card. Reusing it here
+      // instead of a second full render — one field, one extra small
+      // fetch, wrapped so a missing/stale model file just hides it.
+      try{
+        const tomorrow=daysEl.children[0];
+        if(tomorrow){
+          const mos=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json());
+          const d1=(mos.days||[]).find(x=>x.lead===1);
+          if(d1&&Number.isFinite(d1.tmax_sd)){
+            const agree=d1.tmax_sd<1?'visoko soglasje modelov':d1.tmax_sd<2?'srednje soglasje modelov':'nizko soglasje modelov';
+            const cap=document.createElement('span');
+            cap.className='cu-confidence';
+            cap.textContent='± '+fmt(d1.tmax_sd,1)+' °C · '+agree;
+            tomorrow.appendChild(cap);
+          }
+        }
+      }catch(_){}
     }
 
     const upd=document.getElementById('cu-updated');

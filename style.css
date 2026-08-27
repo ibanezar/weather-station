@@ -2362,6 +2362,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-dry{color:var(--green)!important}
 .cu-prob-bar{width:80%;height:4px;background:var(--rain-track);border-radius:2px;overflow:hidden;margin-top:.1rem}
 .cu-prob-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .6s ease}
+.cu-confidence{font-size:.58rem;color:var(--muted);opacity:.85;margin-top:.25rem;line-height:1.3;text-align:center}
 @media(max-width:420px){.cu-days{gap:.35rem}.cu-day{padding:.65rem .25rem}}
 
 /* ── AI Forecast card (yr.no + Claude) ── */
