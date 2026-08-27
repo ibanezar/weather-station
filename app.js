@@ -1428,7 +1428,7 @@ async function fetchComingUp(){
       +'?latitude='+LAT+'&longitude='+LON
       +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
-      +'&timezone=Europe%2FLjubljana&forecast_days=4';
+      +'&timezone=Europe%2FLjubljana&forecast_days=8';
     const data=await _archFetch(url);
     const h=data.hourly,d=data.daily;
     if(!h||!d)return;
@@ -1465,12 +1465,14 @@ async function fetchComingUp(){
       });
     }
 
-    // Next 3 days
+    // Next 7 days — was next 3; the homepage now leans on this strip as
+    // the primary "tomorrow / this weekend" answer (see cu-wrap position),
+    // so it needs the full week, not just a 3-day teaser.
     const SL=['ned','pon','tor','sre','čet','pet','sob'];
     const daysEl=document.getElementById('cu-days');
     if(daysEl){
       daysEl.innerHTML='';
-      for(let i=1;i<=3&&i<d.time.length;i++){
+      for(let i=1;i<=7&&i<d.time.length;i++){
         const date=new Date(d.time[i]+'T12:00:00');
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
@@ -2425,7 +2427,7 @@ function wmoInfo(code){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','records','extremes','surroundings','trivia','glossary']};
+const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');

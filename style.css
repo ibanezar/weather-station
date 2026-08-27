@@ -1408,17 +1408,22 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .tab-dd-group-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);
   padding:.3rem .6rem .15rem;margin-top:.1rem}
 .tab-dd-divider{height:1px;background:var(--border);margin:.35rem .4rem}
-.tab-dd-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;
+.tab-dd-menu button,.tab-dd-menu a{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;
   padding:.42rem .65rem;font-size:.74rem;color:var(--text);cursor:pointer;text-transform:uppercase;letter-spacing:.04em;
-  transition:background .12s;font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap}
-.tab-dd-menu button:hover{background:var(--fc-bg)}
+  transition:background .12s;font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;text-decoration:none;box-sizing:border-box}
+.tab-dd-menu button:hover,.tab-dd-menu a:hover{background:var(--fc-bg)}
 .tab-dd-menu button.active{background:var(--blue);color:#fff}
+/* Kraji dropdown: plain links to other pages, grouped under sub-labels smaller
+   than .tab-dd-group-lbl so "Vasi / Kampi in turizem / Aktivnosti" read as
+   sub-groups of one menu, not three separate menus. */
+.tab-dd-sub-lbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  opacity:.75;padding:.3rem .65rem .1rem;white-space:nowrap}
 @media(max-width:760px){
   .tab-nav-wrap{border-radius:14px;padding:.3rem .35rem}
   /* On mobile the nav is a horizontal slider instead of wrapping rows */
   .tab-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
   .tab-nav::-webkit-scrollbar{display:none}
-  .tab-btn{scroll-snap-align:start;font-size:.66rem;padding:.36rem .7rem}
+  .tab-btn{scroll-snap-align:start;font-size:.71rem;padding:.5rem .85rem;min-height:34px}
   /* Scroll affordances: edge fades + bouncing arrow */
   .tab-nav-wrap::after{display:block;content:'';position:absolute;top:0;right:0;width:56px;height:100%;background:linear-gradient(to right,transparent,var(--card-bg) 72%);pointer-events:none;border-radius:0 14px 14px 0;transition:opacity .3s;z-index:2}
   .tab-nav-wrap::before{display:block;content:'';position:absolute;top:0;left:0;width:34px;height:100%;background:linear-gradient(to left,transparent,var(--card-bg) 78%);pointer-events:none;border-radius:14px 0 0 14px;opacity:0;transition:opacity .3s;z-index:2}
@@ -2336,8 +2341,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .cu-htemp{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
 .cu-hprob{font-size:.66rem;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .cu-sep{height:1px;background:var(--border);margin:.8rem 0 .6rem}
-.cu-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
-.cu-day{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem .7rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center;position:relative;overflow:hidden}
+/* Was a fixed 3-column grid when this only ever rendered 3 days; now
+   renders up to 7, so it scrolls horizontally like .cu-strip above it
+   instead of squeezing 7 cards into 3 columns' width. */
+.cu-days{display:flex;gap:.55rem;overflow-x:auto;padding-bottom:.2rem;scrollbar-width:none}
+.cu-days::-webkit-scrollbar{display:none}
+.cu-day{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem .7rem;border-radius:14px;background:var(--fc-bg);border:1px solid var(--fc-border);text-align:center;position:relative;overflow:hidden;flex-shrink:0;min-width:104px}
 .cu-day::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--cu-accent,var(--border))}
 .cu-dlbl{font-size:.7rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.07em}
 .cu-demo{font-size:2rem;line-height:1.1}

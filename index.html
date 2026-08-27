@@ -292,7 +292,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/style.min.css?v=9ad2c1ee">
+<link rel="stylesheet" href="/style.min.css?v=280a3eda">
 </head>
 <body>
 
@@ -435,17 +435,53 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <button id="tab-btn-stormmap"   onclick="switchTab('stormmap');closeTabDDs()">🗺️ Nevihtni zemljevid SLO</button>
       </div>
     </div>
+    <!-- Kraji dropdown: real <a href> links (not switchTab) to the 14
+         vreme-* village/tourism pages. Before this, 12 of the 14 had zero
+         links anywhere on the homepage — reachable only via sitemap or a
+         direct URL. Plain links, not JS tab panes, so they're crawlable. -->
+    <div class="tab-dropdown" id="tab-dd-kraji">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-kraji-btn" onclick="toggleTabDD('kraji')">📍 Kraji ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-kraji-menu">
+        <div class="tab-dd-group-lbl">Vreme po krajih</div>
+        <div class="tab-dd-sub-lbl">Vasi v dolini</div>
+        <a href="/vreme-recica-ob-savinji/">Rečica ob Savinji</a>
+        <a href="/vreme-mozirje/">Mozirje</a>
+        <a href="/vreme-nazarje/">Nazarje</a>
+        <a href="/vreme-ljubno-ob-savinji/">Ljubno ob Savinji</a>
+        <a href="/vreme-luce/">Luče</a>
+        <a href="/vreme-solcava/">Solčava</a>
+        <a href="/vreme-gornji-grad/">Gornji Grad</a>
+        <a href="/vreme-zgornja-savinjska-dolina/">Cela dolina</a>
+        <div class="tab-dd-divider"></div>
+        <div class="tab-dd-sub-lbl">Kampi in turizem</div>
+        <a href="/vreme-kamp-menina/">Kamp Menina</a>
+        <a href="/vreme-logarska-dolina/">Logarska dolina</a>
+        <a href="/vreme-glamping-savinja/">Glamping Savinja</a>
+        <a href="/vreme-forest-camping-mozirje/">Forest Camping Mozirje</a>
+        <a href="/vreme-herbal-glamping-ljubno/">Herbal Glamping Ljubno</a>
+        <div class="tab-dd-divider"></div>
+        <div class="tab-dd-sub-lbl">Aktivnosti</div>
+        <a href="/vreme-za-padalce/">Vreme za padalce</a>
+      </div>
+    </div>
     <button class="tab-btn"        id="tab-btn-po-meri"   onclick="switchTab('po-meri')">🎯 Po meri</button>
     <button class="tab-btn"        id="tab-btn-storm"      onclick="switchTab('storm')">🌩 Lovec na nevihte</button>
     <button class="tab-btn"        id="tab-btn-ai"         onclick="switchTab('ai')">🤖 AI napoved</button>
-    <button class="tab-btn"        id="tab-btn-life"       onclick="switchTab('life')">🌱 Narava</button>
-    <button class="tab-btn"        id="tab-btn-water"     onclick="switchTab('water')">🌊 Vodostaj</button>
-    <button class="tab-btn"        id="tab-btn-oceanologija" onclick="switchTab('oceanologija')">🔬 Oceanologija</button>
-    <button class="tab-btn"        id="tab-btn-zrak"      onclick="switchTab('zrak')">🌫️ Kakovost zraka</button>
-    <button class="tab-btn"        id="tab-btn-agro"      onclick="switchTab('agro')">🌾 Agrometeo</button>
-    <button class="tab-btn"        id="tab-btn-nerd"      onclick="switchTab('nerd')">🔭 Napredno</button>
-    <button class="tab-btn"        id="tab-btn-gallery"   onclick="switchTab('gallery')">📸 Galerija</button>
-    <button class="tab-btn"        id="tab-btn-community" onclick="switchTab('community')">👥 Skupnost</button>
+    <!-- Okolje dropdown: was 5 flat top-level buttons (Narava, Vodostaj,
+         Oceanologija, Kakovost zraka, Agrometeo) — grouped so the primary
+         nav row doesn't force a visitor to scan past all 5 to find e.g.
+         "Po meri" or "AI napoved". -->
+    <div class="tab-dropdown" id="tab-dd-okolje">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-okolje-btn" onclick="toggleTabDD('okolje')">🌿 Okolje ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-okolje-menu">
+        <div class="tab-dd-group-lbl">Okolje</div>
+        <button id="tab-btn-life"          onclick="switchTab('life');closeTabDDs()">🌱 Narava</button>
+        <button id="tab-btn-water"         onclick="switchTab('water');closeTabDDs()">🌊 Vodostaj</button>
+        <button id="tab-btn-oceanologija"  onclick="switchTab('oceanologija');closeTabDDs()">🔬 Oceanologija</button>
+        <button id="tab-btn-zrak"          onclick="switchTab('zrak');closeTabDDs()">🌫️ Kakovost zraka</button>
+        <button id="tab-btn-agro"          onclick="switchTab('agro');closeTabDDs()">🌾 Agrometeo</button>
+      </div>
+    </div>
     <!-- Podatki dropdown -->
     <div class="tab-dropdown" id="tab-dd-data">
       <button class="tab-btn tab-dd-trigger" id="tab-dd-data-btn" onclick="toggleTabDD('data')">📊 Podatki ▾</button>
@@ -454,14 +490,31 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <button id="tab-btn-history"     onclick="switchTab('history');closeTabDDs()">📊 Zgodovina</button>
         <button id="tab-btn-analysis"    onclick="switchTab('analysis');closeTabDDs()">🔬 Analize</button>
         <button id="tab-btn-climate"     onclick="switchTab('climate');closeTabDDs()">🌍 Klimatologija</button>
+        <button id="tab-btn-nerd"        onclick="switchTab('nerd');closeTabDDs()">🔭 Napredno</button>
         <div class="tab-dd-divider"></div>
         <div class="tab-dd-group-lbl">Rekordi in okolje</div>
         <button id="tab-btn-records"     onclick="switchTab('records');closeTabDDs()">🏆 Rekordi</button>
         <button id="tab-btn-extremes"    onclick="switchTab('extremes');closeTabDDs()">⚡ Dogodki</button>
         <button id="tab-btn-surroundings" onclick="switchTab('surroundings');closeTabDDs()">🗺 Okolica</button>
+        <a href="/novosti/">📰 Novosti (rekordi in vali)</a>
+        <div class="tab-dd-divider"></div>
+        <div class="tab-dd-group-lbl">Klimatski podatki</div>
+        <a href="/padavine/">🌧 Padavine (dolina)</a>
+        <a href="/temperatura/">🌡 Temperatura (dolina)</a>
+        <a href="/teden/">📆 Ta teden v zgodovini</a>
+        <a href="/test-napovedi/">🎯 Test napovedi (5 modelov)</a>
         <div class="tab-dd-divider"></div>
         <button id="tab-btn-trivia"    onclick="switchTab('trivia');closeTabDDs()">🎲 Zanimivosti</button>
         <button id="tab-btn-glossary"  onclick="switchTab('glossary');closeTabDDs()">📖 Slovarček</button>
+      </div>
+    </div>
+    <!-- Skupnost dropdown: was 2 flat top-level buttons (Galerija, Skupnost). -->
+    <div class="tab-dropdown" id="tab-dd-skupnost">
+      <button class="tab-btn tab-dd-trigger" id="tab-dd-skupnost-btn" onclick="toggleTabDD('skupnost')">👥 Skupnost ▾</button>
+      <div class="tab-dd-menu" id="tab-dd-skupnost-menu">
+        <div class="tab-dd-group-lbl">Skupnost</div>
+        <button id="tab-btn-gallery"    onclick="switchTab('gallery');closeTabDDs()">📸 Galerija</button>
+        <button id="tab-btn-community"  onclick="switchTab('community');closeTabDDs()">👥 Skupnost</button>
       </div>
     </div>
   </div><button class="tab-nav-arrow" id="tab-nav-arrow" aria-label="Drsaj za več zavihkov" title="Drsaj za več">›</button></div>
@@ -611,6 +664,23 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     </div>
   </div>
 
+  <!-- Kaj prihaja — premaknjeno neposredno pod heroj (prej ~7 kartic nižje,
+       za dnevnim povzetkom in zadnjimi 7 dnevi). "Kakšno bo vreme jutri /
+       ta vikend" je najpogostejše vprašanje na strani, pa je do zdaj
+       zahtevalo klik na spustni meni "Napoved ▾" — zdaj je vidno takoj.
+       cu-days zdaj kaže 7 dni, ne 3 (glej fetchComingUp v app.js). -->
+  <div class="card cu-card simple-keep" id="cu-wrap">
+    <div class="cu-hdr">
+      <span class="clabel" style="margin:0">🔮 Vremenski obeti</span>
+      <span class="cu-time" id="cu-updated">—</span>
+    </div>
+    <div class="cu-section-lbl">Naslednjih 24 ur</div>
+    <div class="cu-strip" id="cu-hourly"></div>
+    <div class="cu-sep"></div>
+    <div class="cu-section-lbl">Naslednjih 7 dni</div>
+    <div class="cu-days" id="cu-days"></div>
+  </div>
+
   <!-- Why is weather like this — premaknjeno tik pod heroj (prej ~15 kartic nižje, samo v naprednem pogledu) -->
   <div class="card why-card simple-keep" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.4rem">
@@ -642,19 +712,6 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </div>
   <div class="past-days-scroll" id="past-days-scroll"></div>
   <div class="pd-detail-wrap" id="pd-detail"></div>
-
-  <!-- Kaj prihaja -->
-  <div class="card cu-card simple-keep" id="cu-wrap">
-    <div class="cu-hdr">
-      <span class="clabel" style="margin:0">🔮 Vremenski obeti</span>
-      <span class="cu-time" id="cu-updated">—</span>
-    </div>
-    <div class="cu-section-lbl">Naslednjih 24 ur</div>
-    <div class="cu-strip" id="cu-hourly"></div>
-    <div class="cu-sep"></div>
-    <div class="cu-section-lbl">Naslednji dnevi</div>
-    <div class="cu-days" id="cu-days"></div>
-  </div>
 
 <div class="insights-row">
     <div class="insight-card" id="ic-inversion">
@@ -3512,7 +3569,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </footer>
 </div>
 
-<script src="app.min.js?v=65bcf508" defer></script>
+<script src="app.min.js?v=78fcf6f9" defer></script>
 
 
 <div id="toast"></div>
