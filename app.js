@@ -1519,23 +1519,46 @@ async function fetchComingUp(){
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
       }
-      // Confidence note on "Jutri" only: MTR's D+1 uncertainty range
-      // (tmax_sd, from training) is the one piece of real forecast-spread
-      // data already computed server-side, but it only ever showed up
-      // inside the buried "AI napoved" tab's own card. Reusing it here
-      // instead of a second full render — one field, one extra small
-      // fetch, wrapped so a missing/stale model file just hides it.
+      // Confidence note across the whole strip, not just "Jutri": MTR's
+      // own D+1..D+3 training uncertainty (tmax_sd) is the most authoritative
+      // signal where it exists; for days it doesn't cover, fall back to how
+      // far ARSO's own tmax lands from Open-Meteo's for that same date — a
+      // real second source, not a fabricated one. A day with neither gets
+      // no caption at all rather than a guessed one, matching how the rest
+      // of the site never blends sources into a single invented number.
       try{
-        const tomorrow=daysEl.children[0];
-        if(tomorrow){
-          const mos=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json());
-          const d1=(mos.days||[]).find(x=>x.lead===1);
-          if(d1&&Number.isFinite(d1.tmax_sd)){
-            const agree=d1.tmax_sd<1?'visoko soglasje modelov':d1.tmax_sd<2?'srednje soglasje modelov':'nizko soglasje modelov';
+        const [mos,arso]=await Promise.all([
+          fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json()).catch(()=>null),
+          fetch(PROXY+'/arso-forecast').then(r=>r.json()).catch(()=>null)
+        ]);
+        const mosByDate={};
+        (mos?.days||[]).forEach(x=>{if(x.date)mosByDate[x.date]=x;});
+        const arsoByDate={};
+        (arso?.days||[]).forEach(x=>{if(x.valid_date)arsoByDate[x.valid_date]=x;});
+        const agreeLabel=(spread)=>spread<1?'visoko soglasje':spread<2.5?'srednje soglasje':'nizko soglasje';
+        for(let i=1;i<=7&&i<d.time.length;i++){
+          const cell=daysEl.children[i-1];
+          if(!cell)continue;
+          const date=d.time[i];
+          const m=mosByDate[date];
+          let capText=null,capTitle=null;
+          if(m&&Number.isFinite(m.tmax_sd)){
+            capText='± '+fmt(m.tmax_sd,1)+' °C · '+agreeLabel(m.tmax_sd);
+            capTitle='Negotovost modela MTR, iz učenja na meritvah postaje (D+'+m.lead+').';
+          }else{
+            const a=arsoByDate[date];
+            if(a&&Number.isFinite(a.tmax)&&Number.isFinite(d.temperature_2m_max[i])){
+              const spread=Math.abs(a.tmax-d.temperature_2m_max[i]);
+              capText='Δ '+fmt(spread,1)+' °C · '+agreeLabel(spread);
+              capTitle='Razlika med ARSO ('+fmt(a.tmax,0)+'°C) in Open-Meteo ('+fmt(d.temperature_2m_max[i],0)+'°C) za najvišjo temperaturo — ne izmerjena negotovost, samo koliko se dva vira razhajata.';
+            }
+          }
+          if(capText){
             const cap=document.createElement('span');
             cap.className='cu-confidence';
-            cap.textContent='± '+fmt(d1.tmax_sd,1)+' °C · '+agree;
-            tomorrow.appendChild(cap);
+            cap.textContent=capText;
+            if(capTitle)cap.title=capTitle;
+            cell.appendChild(cap);
           }
         }
       }catch(_){}

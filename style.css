@@ -1439,6 +1439,21 @@ html[data-mode="simple"] #online-widget{display:none!important}
   .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
 }
 .tab-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.46rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.045em;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s;line-height:1.35;opacity:1}
+/* Line-icon set replacing the old emoji-only tab labels (was a branding
+   inconsistency: the mushroom-forecast page already banned emoji icons for
+   exactly this reason — different rendering per platform, can't be
+   recolored — while the site's own primary nav was built entirely from
+   them). .tab-btn is flex, so the SVG sits inline via gap; .tab-dd-menu
+   items are block-level, so the SVG needs its own margin instead. */
+.tab-btn svg{width:14px;height:14px;flex-shrink:0}
+.tab-dd-menu svg{width:14px;height:14px;flex-shrink:0;margin-right:.5rem;vertical-align:-3px}
+
+/* Essentials-vs-everything-else fold, between the radar/cameras and the
+   deep advanced-content cards (see index.html for why it's placed there). */
+.section-fold{display:flex;align-items:center;gap:.9rem;margin:1.9rem 0 1.5rem;color:var(--muted)}
+.section-fold-line{flex:1;height:1px;background:var(--border)}
+.section-fold-lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;flex-shrink:0}
+@media(max-width:560px){.section-fold-lbl{white-space:normal;text-align:center;font-size:.62rem;max-width:60%}}
 .tab-btn.active{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(29,78,216,.4),0 1px 3px rgba(0,0,0,.15)}
 .tab-btn:hover:not(.active){background:var(--border);color:var(--text);border-color:var(--card-border);transform:translateY(-1px)}
 .tab-btn:active:not(.active){transform:scale(.97)}
@@ -2978,3 +2993,23 @@ html[data-mode="simple"] .hero-metrics{grid-template-columns:repeat(3,1fr);gap:.
 html[data-mode="simple"] .mca-in-simple{display:block}
 html[data-mode="simple"] button.mca-in-simple{display:inline-flex}
 html[data-mode="simple"] .mca-in-advanced{display:none}
+
+/* Global prefers-reduced-motion fallback. The stylesheet has ~100 individual
+   animation/transition declarations (hero float, skeleton shimmer, dropdown
+   open, hover lifts, the tab-nav-arrow pulse…) and only a handful were
+   already gated per-component (search "prefers-reduced-motion" above for
+   those — this doesn't replace them, it's the safety net for everything
+   they don't cover). Auditing every declaration individually isn't
+   necessary: shortening all of them to near-zero is the standard, safe
+   pattern and doesn't change layout, only motion. scroll-behavior is
+   included because html{scroll-behavior:smooth} drives every in-page
+   anchor jump, which is exactly the kind of motion this setting exists to
+   suppress. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
