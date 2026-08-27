@@ -37,28 +37,47 @@ body{
   --blue:#f59e0b; --cyan:#ef4444;
   --gf-sp-3:.75rem; --gf-sp-4:1rem; --gf-sp-6:1.5rem;
 }
-.gf-hero{position:relative;border:1px solid var(--card-border);border-radius:1.1rem;
+.gf-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:1.1rem;
   padding:1.5rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:var(--card-bg)}
+  background:linear-gradient(200deg,rgba(10,6,4,.55) 0%,rgba(8,5,4,.78) 55%,rgba(8,5,4,.93) 100%),
+    url('/og/bg/drought.jpg') center 40%/cover}
 .gf-hero-top{display:flex;align-items:center;gap:1.3rem;flex-wrap:wrap}
-.gf-hero-num{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:800;
-  line-height:1;min-width:5rem}
+.gf-gauge-wrap{position:relative;width:112px;height:112px;flex:0 0 auto}
+.gf-ring{display:block;width:100%;height:100%}
+.gf-ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
+.gf-ring-fg{fill:none;stroke-width:10;stroke-linecap:round;transform:rotate(-90deg);transform-origin:56px 56px}
+.gf-gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;line-height:1}
+.gf-gauge-num .num{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:800;color:#fff}
+.gf-gauge-num small{display:block;margin-top:.15rem;font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600}
 .gf-hero-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gf-hero-body{flex:1;min-width:220px}
 .gf-badge{display:inline-block;padding:.28rem .8rem;border-radius:999px;font-size:.8rem;
   font-weight:700;margin-bottom:.4rem}
-.gf-hero-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;line-height:1.5}
+.gf-hero-note{font-size:.78rem;color:rgba(255,255,255,.75);margin-top:.6rem;line-height:1.5}
+.gf-hero-note a{color:#fff}
 .gf-bars{display:flex;gap:4px;align-items:flex-end;height:80px;margin-top:1.1rem}
 .gf-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
 .gf-bar{width:100%;max-width:22px;border-radius:3px 3px 0 0}
-.gf-bar-lbl{font-size:.55rem;color:var(--muted)}
+.gf-bar-lbl{font-size:.55rem;color:rgba(255,255,255,.65)}
+.gf-legend{display:flex;flex-wrap:wrap;gap:.6rem .9rem;font-size:.74rem;color:rgba(255,255,255,.8);
+  margin:.9rem 0 0;padding-top:.8rem;border-top:1px solid rgba(255,255,255,.14)}
+.gf-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gf-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gf-feat-group{margin:1.6rem 0}
 .gf-feat-group h3{font-size:1rem;margin:0 0 .6rem}
 .gf-feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.8rem}
-.gf-feat-card{display:block;border:1px solid var(--card-border);border-radius:.9rem;
-  padding:1rem;background:var(--card-bg);text-decoration:none;color:var(--text);
-  transition:transform .15s ease,border-color .15s ease}
-.gf-feat-card:hover{transform:translateY(-2px);border-color:var(--fa,var(--cyan))}
+.gf-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;overflow:hidden;
+  border:1px solid var(--card-border);border-radius:.9rem;
+  padding:1rem 1.1rem 1.1rem;background:var(--card-bg);box-shadow:var(--card-shadow);
+  text-decoration:none;color:var(--text);
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.gf-feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.gf-feat-card:hover{transform:translateY(-2px);border-color:var(--fa);
+  box-shadow:0 10px 24px -12px var(--fa)}
+.gf-feat-ic{display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;
+  flex:0 0 auto;border-radius:12px;background:var(--fa-soft);color:var(--fa)}
+.gf-feat-ic svg{width:1.5rem;height:1.5rem;display:block}
 .gf-feat-title{display:block;font-weight:700;margin:.3rem 0 .2rem}
 .gf-feat-sub{display:block;font-size:.78rem;color:var(--muted);line-height:1.4}
 .gf-firms{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;
@@ -67,6 +86,14 @@ body{
 .gf-tbl{width:100%;border-collapse:collapse;font-size:.82rem;margin:.8rem 0}
 .gf-tbl th,.gf-tbl td{padding:.4rem .5rem;border-bottom:1px solid var(--card-border);text-align:left}
 .gf-back{display:inline-block;margin-top:1.4rem;font-size:.85rem}
+@media (max-width:480px){
+  .gf-feat{grid-template-columns:repeat(2,1fr)}
+  .gf-feat-card{padding:.8rem .85rem .9rem}
+  .gf-feat-ic{width:2.2rem;height:2.2rem;border-radius:10px}
+  .gf-feat-ic svg{width:1.35rem;height:1.35rem}
+  .gf-feat-title{font-size:.88rem}
+  .gf-feat-sub{display:none}
+}
 </style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
 <link rel="stylesheet" href="/blog/blog.css?v=602ed072">
@@ -103,14 +130,14 @@ body{
   <table class="gf-tbl">
     <thead><tr><th>Čas</th><th>Hitrost</th><th>Sunki</th><th>Smer</th></tr></thead>
     <tbody>
-<tr><td>danes 20:00</td><td>6 km/h</td><td>15 km/h</td><td>JJZ</td></tr>
-<tr><td>danes 23:00</td><td>3 km/h</td><td>5 km/h</td><td>JV</td></tr>
-<tr><td>jutri 02:00</td><td>6 km/h</td><td>12 km/h</td><td>JJV</td></tr>
-<tr><td>jutri 05:00</td><td>3 km/h</td><td>13 km/h</td><td>VJV</td></tr>
-<tr><td>jutri 08:00</td><td>1 km/h</td><td>4 km/h</td><td>SV</td></tr>
-<tr><td>jutri 11:00</td><td>6 km/h</td><td>17 km/h</td><td>SSV</td></tr>
-<tr><td>jutri 14:00</td><td>22 km/h</td><td>46 km/h</td><td>ZJZ</td></tr>
-<tr><td>jutri 17:00</td><td>18 km/h</td><td>37 km/h</td><td>ZJZ</td></tr>
+<tr><td>danes 21:00</td><td>5 km/h</td><td>12 km/h</td><td>J</td></tr>
+<tr><td>jutri 00:00</td><td>3 km/h</td><td>4 km/h</td><td>JJV</td></tr>
+<tr><td>jutri 03:00</td><td>2 km/h</td><td>10 km/h</td><td>JV</td></tr>
+<tr><td>jutri 06:00</td><td>2 km/h</td><td>5 km/h</td><td>V</td></tr>
+<tr><td>jutri 09:00</td><td>5 km/h</td><td>10 km/h</td><td>SSV</td></tr>
+<tr><td>jutri 12:00</td><td>6 km/h</td><td>15 km/h</td><td>SSV</td></tr>
+<tr><td>jutri 15:00</td><td>19 km/h</td><td>47 km/h</td><td>JZ</td></tr>
+<tr><td>jutri 18:00</td><td>19 km/h</td><td>39 km/h</td><td>JZ</td></tr>
     </tbody>
   </table>
   <h2>🌩 Nacionalni nevihtni potencial danes</h2>

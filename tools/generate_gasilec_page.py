@@ -22,6 +22,7 @@ Usage:
 """
 import datetime as _dt
 import json
+import math
 import os
 import sys
 import urllib.error
@@ -55,28 +56,47 @@ body{
   --blue:#f59e0b; --cyan:#ef4444;
   --gf-sp-3:.75rem; --gf-sp-4:1rem; --gf-sp-6:1.5rem;
 }
-.gf-hero{position:relative;border:1px solid var(--card-border);border-radius:1.1rem;
+.gf-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:1.1rem;
   padding:1.5rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:var(--card-bg)}
+  background:linear-gradient(200deg,rgba(10,6,4,.55) 0%,rgba(8,5,4,.78) 55%,rgba(8,5,4,.93) 100%),
+    url('/og/bg/drought.jpg') center 40%/cover}
 .gf-hero-top{display:flex;align-items:center;gap:1.3rem;flex-wrap:wrap}
-.gf-hero-num{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:800;
-  line-height:1;min-width:5rem}
+.gf-gauge-wrap{position:relative;width:112px;height:112px;flex:0 0 auto}
+.gf-ring{display:block;width:100%;height:100%}
+.gf-ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
+.gf-ring-fg{fill:none;stroke-width:10;stroke-linecap:round;transform:rotate(-90deg);transform-origin:56px 56px}
+.gf-gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;line-height:1}
+.gf-gauge-num .num{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:800;color:#fff}
+.gf-gauge-num small{display:block;margin-top:.15rem;font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600}
 .gf-hero-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 .gf-hero-body{flex:1;min-width:220px}
 .gf-badge{display:inline-block;padding:.28rem .8rem;border-radius:999px;font-size:.8rem;
   font-weight:700;margin-bottom:.4rem}
-.gf-hero-note{font-size:.78rem;color:var(--muted);margin-top:.6rem;line-height:1.5}
+.gf-hero-note{font-size:.78rem;color:rgba(255,255,255,.75);margin-top:.6rem;line-height:1.5}
+.gf-hero-note a{color:#fff}
 .gf-bars{display:flex;gap:4px;align-items:flex-end;height:80px;margin-top:1.1rem}
 .gf-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
 .gf-bar{width:100%;max-width:22px;border-radius:3px 3px 0 0}
-.gf-bar-lbl{font-size:.55rem;color:var(--muted)}
+.gf-bar-lbl{font-size:.55rem;color:rgba(255,255,255,.65)}
+.gf-legend{display:flex;flex-wrap:wrap;gap:.6rem .9rem;font-size:.74rem;color:rgba(255,255,255,.8);
+  margin:.9rem 0 0;padding-top:.8rem;border-top:1px solid rgba(255,255,255,.14)}
+.gf-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.gf-legend i{width:.8rem;height:.8rem;border-radius:3px;display:inline-block}
 .gf-feat-group{margin:1.6rem 0}
 .gf-feat-group h3{font-size:1rem;margin:0 0 .6rem}
 .gf-feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.8rem}
-.gf-feat-card{display:block;border:1px solid var(--card-border);border-radius:.9rem;
-  padding:1rem;background:var(--card-bg);text-decoration:none;color:var(--text);
-  transition:transform .15s ease,border-color .15s ease}
-.gf-feat-card:hover{transform:translateY(-2px);border-color:var(--fa,var(--cyan))}
+.gf-feat-card{position:relative;display:flex;flex-direction:column;gap:.4rem;overflow:hidden;
+  border:1px solid var(--card-border);border-radius:.9rem;
+  padding:1rem 1.1rem 1.1rem;background:var(--card-bg);box-shadow:var(--card-shadow);
+  text-decoration:none;color:var(--text);
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.gf-feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.gf-feat-card:hover{transform:translateY(-2px);border-color:var(--fa);
+  box-shadow:0 10px 24px -12px var(--fa)}
+.gf-feat-ic{display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;
+  flex:0 0 auto;border-radius:12px;background:var(--fa-soft);color:var(--fa)}
+.gf-feat-ic svg{width:1.5rem;height:1.5rem;display:block}
 .gf-feat-title{display:block;font-weight:700;margin:.3rem 0 .2rem}
 .gf-feat-sub{display:block;font-size:.78rem;color:var(--muted);line-height:1.4}
 .gf-firms{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;
@@ -85,7 +105,49 @@ body{
 .gf-tbl{width:100%;border-collapse:collapse;font-size:.82rem;margin:.8rem 0}
 .gf-tbl th,.gf-tbl td{padding:.4rem .5rem;border-bottom:1px solid var(--card-border);text-align:left}
 .gf-back{display:inline-block;margin-top:1.4rem;font-size:.85rem}
+@media (max-width:480px){
+  .gf-feat{grid-template-columns:repeat(2,1fr)}
+  .gf-feat-card{padding:.8rem .85rem .9rem}
+  .gf-feat-ic{width:2.2rem;height:2.2rem;border-radius:10px}
+  .gf-feat-ic svg{width:1.35rem;height:1.35rem}
+  .gf-feat-title{font-size:.88rem}
+  .gf-feat-sub{display:none}
+}
 </style>"""
+
+
+def _rgba(hex_color, alpha):
+    """#rrggbb → rgba(r,g,b,alpha) — mehka podlaga ikone iz istega poudarka
+    (ista tehnika kot _rgba() v generate_gobe_page.py, lokalna kopija)."""
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+# FWI teoretično ni navzgor omejen, praktično pa se za to lego giblje do ~45-50
+# — kapiramo na GAUGE_MAX zgolj za berljiv obroč. To NI odstotek FWI, samo
+# vizualna lestvica (ista disciplina kot drugod na strani: število se ne sme
+# napačno brati kot %).
+GAUGE_MAX = 45.0
+
+
+def gauge_svg(fwi, color):
+    r = 46
+    circ = 2 * math.pi * r
+    pct = max(0.0, min(1.0, fwi / GAUGE_MAX))
+    off = circ * (1 - pct)
+    return (f'<svg viewBox="0 0 112 112" class="gf-ring" aria-hidden="true">'
+            f'<circle cx="56" cy="56" r="{r}" class="gf-ring-bg"/>'
+            f'<circle cx="56" cy="56" r="{r}" class="gf-ring-fg" stroke="{color}" '
+            f'stroke-dasharray="{circ:.1f}" stroke-dashoffset="{off:.1f}"/></svg>')
+
+
+def legend_html():
+    chips = []
+    for label, color, lo, hi in fm.FWI_LEVELS:
+        rng = f"{lo:g}–{hi:g}" if hi is not None else f"{lo:g}+"
+        chips.append(f'<span><i style="background:{color}"></i>{_esc(label)} ({rng})</span>')
+    return f'  <div class="gf-legend">{"".join(chips)}</div>'
 
 
 def _bars_svg_html(days):
@@ -113,17 +175,18 @@ def build_hero(payload):
     color = next((d["color"] for d in payload["days"] if d["date"] == payload["date"]), "#f59e0b")
     return f'''  <div class="gf-hero">
     <div class="gf-hero-top">
-      <div>
-        <div class="gf-hero-num" style="color:{color}">{today["fwi"]:.1f}</div>
-        <div class="gf-hero-sub">FWI danes</div>
+      <div class="gf-gauge-wrap">
+        {gauge_svg(today["fwi"], color)}
+        <div class="gf-gauge-num"><span class="num">{today["fwi"]:.1f}</span><small>FWI danes</small></div>
       </div>
       <div class="gf-hero-body">
-        <span class="gf-badge" style="background:{color}22;border:1px solid {color};color:{color}">{_esc(today["level"])}</span>
-        <p style="margin:.3rem 0 0;font-size:.88rem;color:var(--muted)">Kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi Open-Meteo.
+        <span class="gf-badge" style="background:{color}33;border:1px solid {color};color:#fff">{_esc(today["level"])}</span>
+        <p style="margin:.3rem 0 0;font-size:.88rem;color:rgba(255,255,255,.82)">Kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi Open-Meteo.
         Ni uradna ocena ARSO ali URSZR — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
       </div>
     </div>
 {_bars_svg_html(payload["days"])}
+{legend_html()}
     <p class="gf-hero-note">🔥 Ista metodologija kot na naslovnici (kartica »Požarna nevarnost – indeks FWI«) — tu preračunana strežniško, da je vidna tudi iskalnikom in brez JS.</p>
   </div>'''
 
@@ -161,8 +224,8 @@ def feature_cards_html():
     cards = []
     for href, icon, accent, title, sub in FEATURES:
         cards.append(
-            f'    <a class="gf-feat-card" href="{href}" style="--fa:{accent}">'
-            f'<span style="color:{accent}">{icon}</span>'
+            f'    <a class="gf-feat-card" href="{href}" style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">'
+            f'<span class="gf-feat-ic" aria-hidden="true">{icon}</span>'
             f'<span class="gf-feat-title">{_esc(title)}</span>'
             f'<span class="gf-feat-sub">{_esc(sub)}</span></a>'
         )
