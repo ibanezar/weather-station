@@ -131,17 +131,24 @@ def calc_one_day_fwi(prev, T, H, W, r, month_idx):
     return {"ffmc": ffmc, "dmc": dmc, "dc": dc, "isi": isi, "bui": bui, "fwi": max(0.0, fwi)}
 
 
+# Ena resnica za pragove/barve/oznake FWI stopenj — uporabljata jo fwi_class()
+# (razvrščanje) in generate_gasilec_page.py (legenda). Isti pragovi kot
+# _fwiClass() v app.js — glej opombo na vrhu datoteke. Zgornja meja je None za
+# zadnjo (odprto navzgor) stopnjo.
+FWI_LEVELS = [
+    ("Nizka", "#22c55e", 0, 5.2),
+    ("Zmerna", "#84cc16", 5.2, 11.2),
+    ("Visoka", "#f59e0b", 11.2, 21.3),
+    ("Zelo visoka", "#ef4444", 21.3, 38.0),
+    ("Ekstremna", "#7c3aed", 38.0, None),
+]
+
+
 def fwi_class(v):
-    """Ista razredba/besedilo kot _fwiClass() v app.js — glej opombo na vrhu."""
-    if v < 5.2:
-        return "Nizka", "#22c55e"
-    if v < 11.2:
-        return "Zmerna", "#84cc16"
-    if v < 21.3:
-        return "Visoka", "#f59e0b"
-    if v < 38.0:
-        return "Zelo visoka", "#ef4444"
-    return "Ekstremna", "#7c3aed"
+    for label, color, lo, hi in FWI_LEVELS:
+        if hi is None or v < hi:
+            return label, color
+    return FWI_LEVELS[-1][0], FWI_LEVELS[-1][1]
 
 
 def fetch_daily(lat=LAT, lon=LON, past_days=7, forecast_days=7):
