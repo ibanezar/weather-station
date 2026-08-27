@@ -587,13 +587,13 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
-        <div class="temp-huge"><span id="temp-val">28,0</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="temp-huge"><span id="temp-val">25,0</span><span class="temp-unit-sup"> °C</span></div>
         <div class="feels">
           <span id="feels-pill" class="feels-pill"></span>
-          <span>Občutek <strong id="feels-val">30,0</strong>°C</span>
+          <span>Občutek <strong id="feels-val">26,0</strong>°C</span>
         </div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
-        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">21,0</strong>°C<span id="dew-desc"></span></div>
+        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">19,0</strong>°C<span id="dew-desc"></span></div>
         <!-- "Our forecast, graded daily against ARSO" is the site's
              strongest trust signal (/tocnost-napovedi/), but it lived only
              on that one page. Populated by fetchTrustBadge() in app.js;
@@ -629,13 +629,13 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">63<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-val" id="hs-humidity">71<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
         <span class="hm-lbl">Relativna vlažnost</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
-        <span class="hm-val" id="hs-wind">0,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val" id="hs-wind">3,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
-        <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">0,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
+        <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">7,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
         <span class="hm-val" id="hs-rain-today">0,0<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
@@ -647,12 +647,12 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         <span class="hm-lbl">Danes min–maks</span>
       </div>
       <div class="hm hm-uv hm-secondary" id="hm-uv">
-        <span class="hm-val" id="hs-uv">4</span>
+        <span class="hm-val" id="hs-uv">—</span>
         <span class="hm-lbl">UV indeks</span>
         <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
       </div>
       <div class="hm hm-pres hm-secondary" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">1016,9<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-val" id="hs-pressure">1016,6<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
         <span class="hm-lbl">Zračni tlak</span>
       </div>
     </div>
@@ -697,7 +697,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji (<time datetime="2026-08-26">26. avgusta 2026</time>): povprečna temperatura 21,7 °C, najvišja 30,6 °C, najnižja 15,7 °C — 0,0 mm padavin, relativna vlažnost 83 %, najmočnejši sunek vetra 4,5 km/h. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
+  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-08-27T22:36">22:36</time>, 27. avgusta 2026): temperatura 25,0 °C, rosišče 19,0 °C, relativna vlažnost 71 %, veter 3,0 km/h (sunki 7,0 km/h), zračni tlak 1017 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
@@ -706,10 +706,10 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 
   <!-- Day summary -->
   <div class="day-summary simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">26,6</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">11:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">30,6</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">15:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
     <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">15,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">06:59</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">18,7</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">23,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- ── Zadnjih 7 dni ── -->
@@ -1464,7 +1464,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
             </tr>
           </thead>
           <tbody id="history-tbody">
-<tr><td>27. avg. 2026</td><td class="td-high">28,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">14,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>18,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">4,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>92<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>27. avg. 2026</td><td class="td-high">31,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">14,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>23,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">14,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>77<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>26. avg. 2026</td><td class="td-high">30,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">15,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>21,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">7,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>83<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>25. avg. 2026</td><td class="td-high">27,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">12,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>18,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">1,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">8,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>89<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>24. avg. 2026</td><td class="td-high">29,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">11,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>19,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">10,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>78<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
