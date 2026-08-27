@@ -2137,7 +2137,11 @@ def gen_nearby_town_pages(hist, sitemap_urls):
 
         html = page_shell(title, desc, url, schema, body)
         write_page(rel, html, force=True)
-        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.7"))
+        # V CORE (tools/seo_audit.py) — core_sitemap_entries() jo doda v sitemap.xml.
+        # Tu je NAMENOMA ne dodajamo v sitemap_urls (sitemap-weather.xml): če je URL
+        # v obeh, core_sitemap_entries() jo izpusti ("covered"), stran pa potem obtiči
+        # v sitemap-weather.xml med 2000+ dnevnimi arhivskimi stranmi namesto v
+        # sitemap.xml, kjer iskalniki pričakujejo evergreen strani po krajih.
 
 
 def gen_extreme_weather_hub(hist, sitemap_urls):
@@ -2378,7 +2382,11 @@ def gen_valley_hub_page(hist, sitemap_urls):
 
     html = page_shell(title, desc, url, schema, body)
     write_page(rel, html, force=True)
-    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.75"))
+    # V CORE (tools/seo_audit.py) — core_sitemap_entries() jo doda v sitemap.xml.
+    # Tu je NAMENOMA ne dodajamo v sitemap_urls (sitemap-weather.xml): če je URL
+    # v obeh, core_sitemap_entries() jo izpusti ("covered"), stran pa potem obtiči
+    # v sitemap-weather.xml med 2000+ dnevnimi arhivskimi stranmi namesto v
+    # sitemap.xml, kjer iskalniki pričakujejo evergreen strani po krajih.
 
 
 # Kamp Menina (Varpolje 105, Rečica ob Savinji) — NOT a NEARBY_TOWNS entry:
@@ -2510,6 +2518,7 @@ def gen_camp_menina_page(hist, sitemap_urls):
   <p>Iz arhiva postaje je razviden trend naraščanja povprečne letne temperature za približno
   <strong>{trend_txt}</strong> (obdobje {full_years[0]}–{full_years[-1]}), kar velja tudi za okolico
   Kampa Menina.</p>
+  <p>Vreme za druge kraje v dolini: <a href="/vreme-zgornja-savinjska-dolina/">pregled vseh krajev</a>.</p>
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
   Savinjska dolina. Vrednosti so dnevni povzetki, izračunani iz {n_days} dni meritev.</p>
@@ -2517,7 +2526,11 @@ def gen_camp_menina_page(hist, sitemap_urls):
 
     html = page_shell(title, desc, url, schema, body)
     write_page(rel, html, force=True)
-    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.6"))
+    # V CORE (tools/seo_audit.py) — core_sitemap_entries() jo doda v sitemap.xml.
+    # Tu je NAMENOMA ne dodajamo v sitemap_urls (sitemap-weather.xml): če je URL
+    # v obeh, core_sitemap_entries() jo izpusti ("covered"), stran pa potem obtiči
+    # v sitemap-weather.xml med 2000+ dnevnimi arhivskimi stranmi namesto v
+    # sitemap.xml, kjer iskalniki pričakujejo evergreen strani po krajih.
 
 
 # Camps/glamping sites that are too close to an existing NEARBY_TOWNS entry
@@ -2642,7 +2655,11 @@ def gen_valley_camp_pages(hist, sitemap_urls):
 
         html = page_shell(title, desc, url, schema, body)
         write_page(rel, html, force=True)
-        sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.5"))
+        # V CORE (tools/seo_audit.py) — core_sitemap_entries() jo doda v sitemap.xml.
+        # Tu je NAMENOMA ne dodajamo v sitemap_urls (sitemap-weather.xml): če je URL
+        # v obeh, core_sitemap_entries() jo izpusti ("covered"), stran pa potem obtiči
+        # v sitemap-weather.xml med 2000+ dnevnimi arhivskimi stranmi namesto v
+        # sitemap.xml, kjer iskalniki pričakujejo evergreen strani po krajih.
 
 
 # Entrance/parking to Logarska dolina — coordinates from the valley's own
@@ -2761,7 +2778,11 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
 
     html = page_shell(title, desc, url, schema, body)
     write_page(rel, html, force=True)
-    sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.6"))
+    # V CORE (tools/seo_audit.py) — core_sitemap_entries() jo doda v sitemap.xml.
+    # Tu je NAMENOMA ne dodajamo v sitemap_urls (sitemap-weather.xml): če je URL
+    # v obeh, core_sitemap_entries() jo izpusti ("covered"), stran pa potem obtiči
+    # v sitemap-weather.xml med 2000+ dnevnimi arhivskimi stranmi namesto v
+    # sitemap.xml, kjer iskalniki pričakujejo evergreen strani po krajih.
 
 
 def gen_month_climatology(hist, sitemap_urls):

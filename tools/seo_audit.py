@@ -87,6 +87,14 @@ CORE = {
     "vreme-mozirje/":            ("daily",   "0.6"),
     "vreme-nazarje/":            ("daily",   "0.6"),
     "vreme-ljubno-ob-savinji/":  ("daily",   "0.6"),
+    # Bile so na disku in povezane (NEARBY_TOWNS/valley-hub v
+    # generate_seo_pages.py), a manjkale so tu v CORE — zato jih
+    # core_sitemap_entries() ni nikoli štel za "pokrite drugje" in so
+    # obtičale v sitemap-weather.xml med dnevnimi arhivskimi stranmi.
+    "vreme-luce/":                ("daily",   "0.6"),
+    "vreme-solcava/":             ("daily",   "0.6"),
+    "vreme-gornji-grad/":         ("daily",   "0.6"),
+    "vreme-zgornja-savinjska-dolina/": ("daily", "0.7"),
 }
 
 # Strani, na katerih preverimo osnovne on-page SEO elemente.

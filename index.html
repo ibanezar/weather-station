@@ -292,7 +292,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/style.min.css?v=280a3eda">
+<link rel="stylesheet" href="/style.min.css?v=446b8f55">
 </head>
 <body>
 
@@ -594,6 +594,12 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
         </div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
         <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">18,0</strong>°C<span id="dew-desc"></span></div>
+        <!-- "Our forecast, graded daily against ARSO" is the site's
+             strongest trust signal (/tocnost-napovedi/), but it lived only
+             on that one page. Populated by fetchTrustBadge() in app.js;
+             stays hidden until real data loads, so it never flashes a
+             placeholder or shows a stale claim. -->
+        <div class="mtr-trust-badge" id="mtr-trust-badge" hidden></div>
       </div>
       <div class="hero-icon" id="hero-icon"></div>
     </div>
@@ -3569,7 +3575,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </footer>
 </div>
 
-<script src="app.min.js?v=78fcf6f9" defer></script>
+<script src="app.min.js?v=5e9792f7" defer></script>
 
 
 <div id="toast"></div>

@@ -1499,6 +1499,27 @@ async function fetchComingUp(){
   }catch(e){console.warn('ComingUp:',e);}
 }
 
+// Trust badge near the hero: "our forecast, graded daily, against ARSO" is
+// the site's strongest differentiator (see /tocnost-napovedi/), but it was
+// only ever visible if a visitor happened to open that page. Same MAE
+// computation as source_stats() in tools/generate_tocnost_page.py — mean of
+// the "meteorec" (MTR) source's err_tmax across every resolved day — so the
+// number here never disagrees with the scoreboard it links to.
+async function fetchTrustBadge(){
+  const el=document.getElementById('mtr-trust-badge');
+  if(!el)return;
+  try{
+    const data=await fetch('/forecast_verification.json').then(r=>r.json());
+    const errs=Object.values(data||{})
+      .map(r=>r.meteorec&&r.meteorec.err_tmax)
+      .filter(v=>v!=null);
+    if(!errs.length)return;
+    const mae=errs.reduce((a,b)=>a+b,0)/errs.length;
+    el.innerHTML='<a href="/tocnost-napovedi/">🎯 MTR napoved: povp. napaka ±'+fmt(mae,1)+' °C na '+errs.length+' dneh · glej točnost napovedi →</a>';
+    el.hidden=false;
+  }catch(e){console.warn('TrustBadge:',e);}
+}
+
 // ── Napoved nevihte / huda vremena (Open-Meteo) ──────────
 async function fetchSevereWeather(){
   try{
@@ -15567,6 +15588,7 @@ async function init(){
     runAdvancedOnly(()=>initOnlineWidget());
     checkSmartNotifications();
     runAdvancedOnly(()=>loadBlogTicker());
+    fetchTrustBadge();
   },2500);
 
   // ── Wave 3.5: precip nowcast (4 s) ──

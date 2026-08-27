@@ -373,6 +373,11 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .feels-pill{display:inline-flex;align-items:center;font-size:.74rem;padding:3px 11px;border-radius:20px;font-weight:700;letter-spacing:.04em;border:1px solid transparent;transition:background .5s,color .5s,border-color .5s}
 .dew-line{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 .dew-line strong{color:var(--text);font-weight:600}
+.mtr-trust-badge{margin-top:.5rem;font-size:.7rem}
+.mtr-trust-badge a{display:inline-flex;align-items:center;gap:.3rem;color:var(--muted);text-decoration:none;
+  border:1px solid var(--fc-border);background:var(--fc-bg);border-radius:999px;padding:.3rem .65rem;
+  transition:color .15s,border-color .15s}
+.mtr-trust-badge a:hover{color:var(--blue);border-color:var(--blue)}
 .condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--blue);letter-spacing:.06em;margin-bottom:.4rem;width:fit-content;transition:background .35s}
 #cond-icon{font-size:1rem}
 .temp-huge{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(4.5rem,12vw,7.5rem);line-height:.95;letter-spacing:-.04em;display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
