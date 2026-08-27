@@ -6365,7 +6365,7 @@ function _renderAIFC(data){
         :'';
       return`<div class="aifc-day${s.date===today?' today':''}">
 <div class="aifc-day-name">${lbl}</div>
-<div class="aifc-day-icon">${_yrImg(s.symbol,28)}</div>
+<div class="aifc-day-icon">${_yrImg(s.symbol,36)}</div>
 <div class="aifc-day-t">${temps}</div>
 ${bar}
 ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
@@ -7876,7 +7876,7 @@ async function initForecast2(){
         const wcode=h.weather_code[hi+i]||0;
         card.innerHTML=
           '<div class="fc2-h-time">'+(isNow?'zdaj':String(date.getHours()).padStart(2,'0')+':00')+'</div>'+
-          '<div class="fc2-h-emoji">'+_wmoImg(wcode,true,30)+'</div>'+
+          '<div class="fc2-h-emoji">'+_wmoImg(wcode,true,36)+'</div>'+
           '<div class="fc2-h-temp">'+(h.temperature_2m[hi+i]||0).toFixed(1)+'°</div>'+
           '<div class="fc2-h-rain">'+(h.precipitation[hi+i]>0.1?'🌧'+(h.precipitation[hi+i]).toFixed(1):'')+'</div>'+
           '<div class="fc2-h-wind">'+(h.wind_speed_10m[hi+i]>0?Math.round(h.wind_speed_10m[hi+i])+'km/h':'')+'</div>';
@@ -7896,7 +7896,7 @@ async function initForecast2(){
         card.innerHTML=
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">'+
             '<div style="font-size:.72rem;font-weight:600">'+(isToday?'<span style="color:var(--blue)">Danes</span>':lbl)+'</div>'+
-            '<div>'+_wmoImg(d.weather_code[i],true,28)+'</div>'+
+            '<div>'+_wmoImg(d.weather_code[i],true,40)+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:.75rem;font-family:\'JetBrains Mono\',monospace;font-size:.88rem">'+
             '<span style="color:var(--red)">↑ '+(d.temperature_2m_max[i]||0).toFixed(1)+'°</span>'+
@@ -13167,7 +13167,7 @@ function aiRenderForecastCards(preds){
     // Enrich from Open-Meteo forecast hours (nearest match by time)
     const fh=_forecastHours.reduce((best,x)=>Math.abs(x.t-h)<Math.abs((best?.t||Infinity)-h)?x:best,null);
     const prob=fh?.prob??null;
-    const emoji=fh?_wmoImg(fh.wmo,fh.isDay,28):'';
+    const emoji=fh?_wmoImg(fh.wmo,fh.isDay,34):'';
     const probHtml=prob!=null?`<div style="font-size:.62rem;color:${prob>=50?'var(--blue)':'var(--muted)'};margin-top:.15rem">💧${prob}%</div>`:'';
     return `<div class="ai-fc-card${isBest?' ai-fc-best':''}">
       <div class="ai-fc-hour">+${i+1}h · ${hStr}</div>
@@ -17160,7 +17160,7 @@ function _buildMorjeFc({fc,marine}){
     const wind=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i])+' km/h':'—';
     html+=`<div class="sea-fc-day">
       <div class="sea-fc-name">${dn}</div>
-      <div class="sea-fc-icon">${_wmoImg(wmo,true,28)}</div>
+      <div class="sea-fc-icon">${_wmoImg(wmo,true,34)}</div>
       <div class="sea-fc-t">${tmax}/${tmin}</div>
       <div class="sea-fc-sub">🌊 ${wh}<br>💨 ${wind}<br>🌧 ${rain}mm</div>
     </div>`;
@@ -17432,7 +17432,7 @@ function _buildGoreTriglav({triglav}){
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
       <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoImg(wmo,true,28)}</div>
+      <div class="mtn-fc-icon">${_wmoImg(wmo,true,34)}</div>
       <div class="mtn-fc-t">${tmaxT!=null?tmaxT.toFixed(0)+'°':'—'}/${tminT!=null?tminT.toFixed(0)+'°':'—'}</div>
       <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
     </div>`;
@@ -17460,7 +17460,7 @@ function _buildGoreKrvavec({krvavec}){
     const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
     html+=`<div class="mtn-fc-day">
       <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoImg(wmo,true,28)}</div>
+      <div class="mtn-fc-icon">${_wmoImg(wmo,true,34)}</div>
       <div class="mtn-fc-t">${tmaxK!=null?tmaxK.toFixed(0)+'°':'—'}/${tminK!=null?tminK.toFixed(0)+'°':'—'}</div>
       <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
     </div>`;
