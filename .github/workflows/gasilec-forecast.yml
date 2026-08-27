@@ -1,0 +1,39 @@
+name: MeteoGasilec
+
+on:
+  schedule:
+    - cron: '5 5 * * *'   # 5:05 UTC daily (6:05 CET / 7:05 CEST), po generate-seo-pages.yml
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate MeteoGasilec stran (FWI + podstrani)
+        run: python3 tools/generate_gasilec_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add meteogasilec/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi MeteoGasilec $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen (verjetno je drug delovni tok medtem pisal na main) — poskus $i, rebase in ponovim …"
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; echo "::error::Rebase spodletel — potreben ročni pregled."; exit 1; }
+            sleep $((i * 3))
+          done
+          echo "::error::Push ni uspel po $i poskusih."
+          exit 1

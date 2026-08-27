@@ -52,6 +52,10 @@ CORE = {
     "gobarska-napoved/nasveti/":    ("monthly", "0.5"),
     "gobarska-napoved/metodologija/": ("monthly", "0.5"),
     "gobarska-napoved/dnevnik/":    ("monthly", "0.4"),
+    "meteogasilec/":                    ("daily",   "0.7"),
+    "meteogasilec/vreme-intervencije/": ("daily",   "0.6"),
+    "meteogasilec/nasveti/":            ("monthly", "0.5"),
+    "meteogasilec/metodologija/":       ("monthly", "0.5"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
     # /toca/ je obstajala in bila povezana, a je ni bilo v nobenem sitemapu —
