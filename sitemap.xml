@@ -1146,4 +1146,28 @@
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://meteorec.si/meteogasilec/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/meteogasilec/vreme-intervencije/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/meteogasilec/nasveti/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/meteogasilec/metodologija/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>
