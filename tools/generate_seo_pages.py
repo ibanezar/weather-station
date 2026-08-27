@@ -2057,6 +2057,17 @@ def gen_nearby_town_pages(hist, sitemap_urls):
       <div class="sc-sub">Od 2019</div></a>
   </div>'''
 
+        # Napoved: markerja + preprost rezervni zapis. Za razliko od postaje
+        # (ki ima MTR kot rezervo iz committanega napoved-modela.json) vaške
+        # strani nimajo lastnega committanega napovednega vira, zato je
+        # rezerva samo besedilo — pravo Open-Meteo napoved za koordinate
+        # kraja (ne postaje) vsako uro napolni tools/inject_forecast.py.
+        import inject_forecast as IF
+        fc7 = (f'{IF.FC7_START}\n  <h2 id="napoved">Napoved, {town} — 7 dni</h2>\n'
+               f'  <p>Napoved se osveži vsako uro.</p>\n  {IF.FC7_END}')
+        fch = (f'{IF.FCH_START}\n  <h2 id="po-urah">Vreme po urah, {town}</h2>\n'
+               f'  <p>Napoved po urah se osveži vsako uro.</p>\n  {IF.FCH_END}')
+
         others = [o for o in NEARBY_TOWNS if o["slug"] != t["slug"]]
         nearby_links = ('  <h2>Vreme po krajih v dolini</h2>\n'
                          '  <p>Pregled vseh krajev na enem mestu: '
@@ -2126,6 +2137,8 @@ def gen_nearby_town_pages(hist, sitemap_urls):
 {disclaimer}
 {intro}
 {cta}
+{fch}
+{fc7}
 {facts}
 {comparison}
 {nearby_links}

@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          PATHS="index.html vreme-recica-ob-savinji/index.html"
+          PATHS="index.html vreme-recica-ob-savinji/index.html vreme-mozirje/index.html vreme-nazarje/index.html vreme-ljubno-ob-savinji/index.html vreme-gornji-grad/index.html vreme-luce/index.html vreme-solcava/index.html"
           if git diff --quiet -- $PATHS; then
             echo "Brez sprememb."
           else

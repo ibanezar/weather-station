@@ -1,29 +1,45 @@
 #!/usr/bin/env python3
 """
 tools/inject_forecast.py — Pre-render the forecast into static, crawlable HTML
-on /vreme-recica-ob-savinji/.
+on /vreme-recica-ob-savinji/ and, since 27. 8. 2026, the six vreme-* village
+pages that have their own real coordinates (NEARBY_TOWNS in
+tools/generate_seo_pages.py — Mozirje, Nazarje, Ljubno ob Savinji, Gornji
+Grad, Luče, Solčava).
 
 Zakaj: »vreme rečica ob savinji po urah« (42 prikazov, poz. 10,0) in »… 14 dni«
 (20 prikazov, poz. 9,1) sta poizvedbi, na kateri je stran doslej odgovarjala
 samo z besedilom »napoved je na naslovni strani«. Napovedi na strani ni bilo, in
 tisto, česar na strani ni, ne more rangirati. Skupaj s krovno poizvedbo
 (~1 950 prikazov na poz. ~9,5) je to največja neizkoriščena lokalna vrzel.
+Enak razlog velja za vaška imena v poizvedbah ("vreme mozirje", "vreme nazarje"
+…) — te strani so doslej obiskovalca (in iskalnik) pošiljale nazaj na naslovno.
 
-Dva bloka med markerji:
+Dva bloka med markerji na vsaki strani:
   WX-FC7   — 7-dnevna napoved (tabela)
   WX-FCH   — napoved po urah za naslednjih ~24 ur (tabela)
 
-Viri se NE zlivajo v eno številko (isto načelo kot na kartici za zgodbe):
-  - Open-Meteo za vse dni in ure;
-  - MTR (`napoved-modela.json`) je lasten model s popravkom za dno doline in ima
-    v tabeli SVOJ stolpec, samo za dneve, ki jih pokriva (lead 1–3).
-Ime modela (»MTR v1«) se izpelje iz `model_version` — nikjer ni zapisano trdo.
+Postaja (Rečica ob Savinji) dobi svoj MTR stolpec — svoj model, naučen na
+meritvah te postaje (glej build_fc7_station). Vaške strani ga NE dobijo: MTR
+popravlja pristranskost te postaje, ne bi bilo pošteno trditi enako natančnost
+za kraj nekaj km stran, ki ga model sploh ne pozna (isto načelo kot povsod v
+repozitoriju — "IREICA1 ostaja edina referenca"). Vaške strani zato dobijo
+čisto Open-Meteo napoved za SVOJE koordinate — to je resnična, ne izpeljana
+vrednost, in se razlikuje stran od strani.
 
-Ob nedosegljivem API-ju skript pusti obstoječo vsebino pri miru (raje malo stara
-napoved kot prazna stran) in vrne 0; brez markerjev javi napako in vrne 1.
+Koordinate vasi so podvojene iz NEARBY_TOWNS v tools/generate_seo_pages.py, ne
+uvožene — ta modul že uvaža inject_forecast (za daylabel/num/markerje), uvoz v
+obratno smer bi naredil krožno odvisnost. Če se koordinate kraja kdaj
+spremenijo, popravi na obeh mestih.
+
+Ob nedosegljivem API-ju skript za posamezno stran pusti obstoječo vsebino pri
+miru (raje malo stara napoved kot prazna stran); manjkajoči markerji na
+posamezni strani javijo napako za TO stran in ne ustavijo ostalih — isti vzorec
+kot TARGETS v tools/inject_current_weather.py.
 
 Wired into:
-  .github/workflows/prerender-current.yml (urno)
+  .github/workflows/prerender-current.yml (urno) — PATHS v tistem workflowu
+  mora vsebovati vse ciljne strani, sicer se napoved lokalno posodobi, a nikoli
+  ne commita (ista napaka kot pri novosti.json, glej CLAUDE.md).
 
 Usage:
   python3 tools/inject_forecast.py [--dry-run]
@@ -32,10 +48,20 @@ import json, os, re, sys, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PAGE = os.path.join(ROOT, "vreme-recica-ob-savinji", "index.html")
+STATION_PAGE = os.path.join(ROOT, "vreme-recica-ob-savinji", "index.html")
 MOS = os.path.join(ROOT, "napoved-modela.json")
 
-LAT, LON = 46.325779, 14.921137
+LAT, LON = 46.325779, 14.921137  # IREICA1
+
+# (slug, ime kraja v imenovalniku, lat, lon) — glej opombo o podvojitvi zgoraj.
+TOWNS = [
+    ("vreme-mozirje", "Mozirje", 46.338050, 14.957203),
+    ("vreme-nazarje", "Nazarje", 46.320208, 14.953128),
+    ("vreme-ljubno-ob-savinji", "Ljubno ob Savinji", 46.349700, 14.834347),
+    ("vreme-gornji-grad", "Gornji Grad", 46.296042, 14.807663),
+    ("vreme-luce", "Luče", 46.356461, 14.743625),
+    ("vreme-solcava", "Solčava", 46.420125, 14.691811),
+]
 
 FC7_START = "<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->"
 FC7_END = "<!-- WX-FC7:END -->"
@@ -58,10 +84,10 @@ def daylabel(iso):
     return f"{DAYS_SHORT[d.weekday()]} {d.day}. {MES_ABBR[d.month]}"
 
 
-def fetch_open_meteo():
-    """7 dni dnevne napovedi + urna napoved. None ob katerikoli napaki."""
+def fetch_open_meteo(lat=LAT, lon=LON):
+    """7 dni dnevne napovedi + urna napoved za dano koordinato. None ob napaki."""
     params = urllib.parse.urlencode({
-        "latitude": LAT, "longitude": LON,
+        "latitude": lat, "longitude": lon,
         "daily": ("temperature_2m_max,temperature_2m_min,precipitation_sum,"
                   "precipitation_probability_max,wind_speed_10m_max"),
         "hourly": "temperature_2m,precipitation,precipitation_probability,wind_speed_10m",
@@ -74,7 +100,7 @@ def fetch_open_meteo():
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.load(r)
     except Exception as e:
-        print(f"Open-Meteo ni dosegljiv ({e}) — napoved ostane nespremenjena.",
+        print(f"Open-Meteo ni dosegljiv za {lat},{lon} ({e}) — napoved ostane nespremenjena.",
               file=sys.stderr)
         return None
 
@@ -91,8 +117,8 @@ def load_mos():
     return by_date, label
 
 
-def build_fc7(om, mos, mos_label):
-    """7-dnevna tabela. MTR ima svoj stolpec in se z Open-Meteo ne zliva."""
+def build_fc7_station(om, mos, mos_label):
+    """7-dnevna tabela za postajo. MTR ima svoj stolpec in se z Open-Meteo ne zliva."""
     d = om["daily"]
     rows = []
     have_mos = False
@@ -130,8 +156,36 @@ def build_fc7(om, mos, mos_label):
             f'  {FC7_END}')
 
 
-def build_fch(om):
-    """Napoved po urah za naslednjih ~24 ur, v 3-urnih korakih."""
+def build_fc7_town(om, town):
+    """7-dnevna tabela za vaško stran — samo Open-Meteo, za koordinate kraja
+    samega (ne postaje), zato brez MTR stolpca (glej opombo na vrhu datoteke)."""
+    d = om["daily"]
+    rows = []
+    for i, day in enumerate(d["time"]):
+        pop = d["precipitation_probability_max"][i]
+        rows.append(
+            f"      <tr><td>{daylabel(day)}</td>"
+            f"<td>{num(d['temperature_2m_max'][i])} / {num(d['temperature_2m_min'][i])}</td>"
+            f"<td>{num(d['precipitation_sum'][i])}</td>"
+            f"<td>{num(pop, 0) if pop is not None else '—'} %</td>"
+            f"<td>{num(d['wind_speed_10m_max'][i], 0)}</td></tr>")
+
+    return (f'{FC7_START}\n'
+            f'  <h2 id="napoved">Napoved, {town} — 7 dni</h2>\n'
+            f'  <div class="table-scroll">\n'
+            f'  <table class="data-table">\n'
+            f'    <caption>Open-Meteo napoved za koordinate kraja {town} — modelska ocena, '
+            f'ne meritev postaje IREICA1. Najvišja/najnižja temperatura (°C), padavine (mm), '
+            f'verjetnost padavin in najmočnejši veter (km/h). Osveženo vsako uro.</caption>\n'
+            f'    <thead><tr><th>Dan</th><th>Temperatura (°C)</th>'
+            f'<th>Padavine (mm)</th><th>Verjetnost</th><th>Veter (km/h)</th></tr></thead>\n'
+            f'    <tbody>\n' + "\n".join(rows) + f'\n    </tbody>\n  </table>\n  </div>\n'
+            f'  {FC7_END}')
+
+
+def build_fch(om, heading, caption_tail):
+    """Napoved po urah za naslednjih ~24 ur, v 3-urnih korakih. Skupna za
+    postajo in vaške strani — le naslov in opomba v napisu se razlikujeta."""
     h = om["hourly"]
     now = datetime.now(timezone.utc).astimezone()
     idx = [i for i, t in enumerate(h["time"])
@@ -152,12 +206,11 @@ def build_fch(om):
             f"<td>{num(h['wind_speed_10m'][i], 0)}</td></tr>")
 
     return (f'{FCH_START}\n'
-            f'  <h2 id="po-urah">Vreme po urah za Rečico ob Savinji</h2>\n'
+            f'  <h2 id="po-urah">{heading}</h2>\n'
             f'  <div class="table-scroll">\n'
             f'  <table class="data-table">\n'
             f'    <caption>Naslednjih 24 ur v 3-urnih korakih (Open-Meteo, časovni pas '
-            f'Europe/Ljubljana). Podrobnejši urni prikaz je na '
-            f'<a href="/">naslovni strani</a>.</caption>\n'
+            f'Europe/Ljubljana). {caption_tail}</caption>\n'
             f'    <thead><tr><th>Ura</th><th>Temperatura (°C)</th><th>Padavine (mm)</th>'
             f'<th>Verjetnost</th><th>Veter (km/h)</th></tr></thead>\n'
             f'    <tbody>\n' + "\n".join(rows) + f'\n    </tbody>\n  </table>\n  </div>\n'
@@ -169,39 +222,62 @@ def replace_block(html, start, end, block):
                   html, flags=re.S)
 
 
-def main():
-    dry = "--dry-run" in sys.argv[1:]
-    if not os.path.exists(PAGE):
-        print(f"ERROR: {PAGE} ne obstaja.", file=sys.stderr)
-        return 1
-    html = open(PAGE, encoding="utf-8").read()
-
-    missing = [n for n, s, e in (("WX-FC7", FC7_START, FC7_END),
-                                 ("WX-FCH", FCH_START, FCH_END))
+def inject_page(page_path, fc7_html, fch_html):
+    """Vbrizga oba bloka v eno stran. Vrne 'ok' | 'no-markers' | 'unchanged' | 'updated'."""
+    if not os.path.exists(page_path):
+        print(f"ERROR: {page_path} ne obstaja.", file=sys.stderr)
+        return "no-markers"
+    html = open(page_path, encoding="utf-8").read()
+    missing = [n for n, s, e in (("WX-FC7", FC7_START, FC7_END), ("WX-FCH", FCH_START, FCH_END))
                if s not in html or e not in html]
     if missing:
-        print(f"ERROR: markerjev ni v strani: {', '.join(missing)} — "
+        print(f"ERROR: markerjev ni v strani {page_path}: {', '.join(missing)} — "
               f"poženi najprej tools/generate_seo_pages.py.", file=sys.stderr)
-        return 1
+        return "no-markers"
+    new = replace_block(html, FC7_START, FC7_END, fc7_html)
+    new = replace_block(new, FCH_START, FCH_END, fch_html)
+    if new == html:
+        print(f"{page_path}: napoved brez sprememb.")
+        return "unchanged"
+    open(page_path, "w", encoding="utf-8").write(new)
+    print(f"{page_path}: posodobljena napoved.")
+    return "updated"
 
-    om = fetch_open_meteo()
-    if om is None:
-        return 0                      # pusti staro napoved, ne izprazni strani
 
-    mos, mos_label = load_mos()
-    new = replace_block(html, FC7_START, FC7_END, build_fc7(om, mos, mos_label))
-    new = replace_block(new, FCH_START, FCH_END, build_fch(om))
+def main():
+    dry = "--dry-run" in sys.argv[1:]
+    exit_code = 0
 
-    if dry:
-        print("--dry-run: sprememb ne zapisujem.")
-        print("spremenjeno" if new != html else "brez sprememb")
-        return 0
-    if new != html:
-        open(PAGE, "w", encoding="utf-8").write(new)
-        print("vreme-recica-ob-savinji/index.html: posodobljena napoved.")
-    else:
-        print("vreme-recica-ob-savinji/index.html: napoved brez sprememb.")
-    return 0
+    # ── Postaja: nespremenjeno vedenje (MTR stolpec, lastne koordinate) ──
+    om = fetch_open_meteo(LAT, LON)
+    if om is not None:
+        mos, mos_label = load_mos()
+        fc7 = build_fc7_station(om, mos, mos_label)
+        fch = build_fch(om, "Vreme po urah za Rečico ob Savinji",
+                         'Podrobnejši urni prikaz je na <a href="/">naslovni strani</a>.')
+        if dry:
+            print(f"--dry-run: {STATION_PAGE} bi se posodobil.")
+        else:
+            if inject_page(STATION_PAGE, fc7, fch) == "no-markers":
+                exit_code = 1
+    # Nedosegljiv Open-Meteo za postajo ni napaka — pusti staro napoved (glej docstring).
+
+    # ── Vaške strani: Open-Meteo za svoje koordinate, brez MTR stolpca ──
+    for slug, town, lat, lon in TOWNS:
+        page_path = os.path.join(ROOT, slug, "index.html")
+        om = fetch_open_meteo(lat, lon)
+        if om is None:
+            continue
+        fc7 = build_fc7_town(om, town)
+        fch = build_fch(om, f"Vreme po urah, {town}",
+                         f'Za koordinate kraja {town}, ne za postajo IREICA1.')
+        if dry:
+            print(f"--dry-run: {page_path} bi se posodobil.")
+            continue
+        if inject_page(page_path, fc7, fch) == "no-markers":
+            exit_code = 1
+
+    return exit_code
 
 
 if __name__ == "__main__":
