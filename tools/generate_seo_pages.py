@@ -109,6 +109,13 @@ def app_bottomnav(active=None):
     ic_blog = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
     ic_arhiv = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
     ic_info = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    # Was a raw 🍄 emoji, the only one of 7 icons here not built as an SVG —
+    # same inconsistency fixed on index.html's own nav (mushroom pages ban
+    # emoji icons in their own build notes; this shared component did the
+    # opposite). Routed through a() like its siblings, which also means it
+    # now picks up active='gobe' correctly — the hand-inlined version never
+    # could, since a() is what applies the "active" class.
+    ic_gobe = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11.5C4 7.36 7.58 4 12 4s8 3.36 8 7.5c0 .83-.9 1.5-2 1.5H6c-1.1 0-2-.67-2-1.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 13v3.7a2.5 2.5 0 0 0 5 0V13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     items = (
         a('domov', '/', ic_home, 'Domov')
         + a('klima', '/klima/', ic_klima, 'Klima')
@@ -116,7 +123,7 @@ def app_bottomnav(active=None):
         + a('trendi', '/trendi/', ic_trend, 'Trendi')
         + a('blog', '/blog/', ic_blog, 'Blog')
         + a('arhiv', '/vreme/', ic_arhiv, 'Arhiv')
-        + '<a href="/gobarska-napoved/"><span class="ic">🍄</span>Gobe</a>'
+        + a('gobe', '/gobarska-napoved/', ic_gobe, 'Gobe')
         + a('o-postaji', '/o-postaji.html', ic_info, 'O postaji')
     )
     return f'<nav class="app-bottomnav" aria-label="Glavna navigacija">{items}</nav>'
