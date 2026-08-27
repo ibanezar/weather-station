@@ -1,0 +1,11 @@
+{
+  "_comment": "Ročni popravek trenutne fenofaze po vrsti za sadovnjake v Savinjski dolini. Fenologija se giblje +/-10-14 dni glede na sezono, zato je datumski koledar (fallback_phenophase() v tools/calculate_frost_risk.py) samo groba ocena -- v sezoni pozebe (marec-maj) ga po potrebi prepiši tu. Vrednost null = uporabi datumski fallback. Neveljaven id (ki ni v data/frost-thresholds.json za to vrsto) se tiho obravnava kot null. 'updated' je informativen, kod ga ne preverja -- posodobi ga ob vsakem ročnem popravku, da veš, kako svež je vnos.",
+  "updated": null,
+  "species": {
+    "jabolka": null,
+    "hruske": null,
+    "breskve-nektarine": null,
+    "slive": null,
+    "cesnje": null
+  }
+}

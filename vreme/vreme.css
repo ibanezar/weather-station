@@ -37,6 +37,30 @@
 .badge-hot{color:#fb923c;background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.35)}
 .badge-rain{color:#60a5fa;background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.35)}
 
+/* ── /opozorilo-pred-pozebo/ — kategorija tveganja (3 stopnje + "ni podatka" / "izven sezone") ── */
+.frost-hero{border:1px solid;border-radius:14px;padding:1.1rem 1.3rem}
+.frost-hero .fh-cat{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;letter-spacing:.03em;margin:.3rem 0}
+.frost-hero .fh-sub{color:var(--muted);font-size:.85rem;line-height:1.55;margin:0}
+.frost-hero.frost-izven{background:rgba(71,85,105,.12);border-color:rgba(71,85,105,.3)}
+.frost-hero.frost-izven .fh-cat{color:var(--muted)}
+.frost-hero.frost-nizko{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35)}
+.frost-hero.frost-nizko .fh-cat{color:#38bdf8}
+.frost-hero.frost-srednje{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.frost-hero.frost-srednje .fh-cat{color:#fbbf24}
+.frost-hero.frost-visoko{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.6)}
+.frost-hero.frost-visoko .fh-cat{color:#f87171}
+.frost-model-detail{margin-top:.7rem}
+.frost-model-detail summary{cursor:pointer;font-size:.78rem;color:var(--muted)}
+.badge-risk{display:inline-block;font-size:.78rem;padding:.15rem .55rem;border-radius:999px;border:1px solid;white-space:nowrap}
+.badge-risk-nizko{color:#38bdf8;background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35)}
+.badge-risk-srednje{color:#fbbf24;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.badge-risk-visoko{color:#f87171;background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.5)}
+.badge-risk-none{color:var(--muted);background:rgba(71,85,105,.12);border-color:rgba(71,85,105,.3)}
+.frost-actions{margin:0 0 1.4rem;padding-left:1.2rem;line-height:1.6;color:var(--text)}
+.frost-actions li{margin-bottom:.4rem}
+.frost-chart-wrap{margin-bottom:1rem}
+.frost-chart{width:100%;height:auto;display:block}
+
 /* ── Dnevna tabela na mesečni strani ── */
 .day-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:.82rem;white-space:nowrap}
 .day-table td:first-child a{color:var(--cyan);text-decoration:none}

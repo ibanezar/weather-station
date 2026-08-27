@@ -307,7 +307,8 @@ def build_body(hist, fc):
   <p class="archive-intro">Ocenjena razvojna faza za pet pridelkov, značilnih za Zgornjo Savinjsko dolino, glede na vsoto GDD letos.</p>
 {crop_table}
   <h2>Alarm pred pozebo — naslednjih 7 dni</h2>
-  <p class="archive-intro">{frost_note}</p>
+  <p class="archive-intro">{frost_note} Za tveganje po sadni vrsti in fenofazi (jabolka, hruške, breskve, slive,
+  češnje) glej <a href="/opozorilo-pred-pozebo/">podroben model opozorila pred pozebo</a>.</p>
 {frost_table}
   <h2>Okno za škropljenje — naslednjih 7 dni</h2>
   <p class="archive-intro">Primerne ure: veter ≤ 4 km/h, brez padavin, temperatura ≥ 5 °C.</p>

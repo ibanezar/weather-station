@@ -1,0 +1,91 @@
+name: Opozorilo pred pozebo
+
+# Sezona pozebe za sadno drevje je marec-maj (tools/frost_gate.py). Dva termina
+# na dan: popoldanski (predhodna ocena, ARSO) in večerni (glavni -- sonce je
+# takrat že zašlo, radiacijski model ima kaj meriti, glej spec §3). Cron teče
+# po UTC in zamuja, poleg tega se CET/CEST razlikujeta, zato je vsak termin
+# sprožen dvakrat (kot daily-story.yml/storm-map.yml) -- gate spusti skozi
+# samo pravega in prepreči podvojen tek istega termina isti dan. Izven sezone
+# gate vedno zavrne, zato ta workflow lahko teče vse leto brez posebne
+# pogojne YAML logike.
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # ~15:00 CEST (poletni čas)
+    - cron: '0 14 * * *'   # ~15:00 CET (zimski čas / zgodnji marec)
+    - cron: '0 18 * * *'   # ~20:00 CEST
+    - cron: '0 19 * * *'   # ~20:00 CET
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Termin za ročni preizkus'
+        required: true
+        default: 'evening'
+        type: choice
+        options: ['afternoon', 'evening']
+      force:
+        description: 'true = izvedi ne glede na uro/sezono in na to, ali je termin danes že opravljen'
+        required: false
+        default: 'true'
+
+concurrency:
+  group: frost-warning
+  cancel-in-progress: false
+
+jobs:
+  frost:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Ugotovi termin (popoldanski/večerni) za samodejni tek
+        id: pick-slot
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          HOUR=$(TZ=Europe/Ljubljana date +%H)
+          if [ "$HOUR" -lt 18 ]; then echo "slot=afternoon" >> "$GITHUB_OUTPUT"; else echo "slot=evening" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Preveri, ali je čas za izračun
+        id: gate
+        run: |
+          SLOT="${{ github.event_name == 'workflow_dispatch' && inputs.slot || steps.pick-slot.outputs.slot }}"
+          python3 tools/frost_gate.py check "$SLOT" \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+          echo "slot=$SLOT" >> "$GITHUB_OUTPUT"
+
+      - name: Izračunaj tveganje pozebe
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/calculate_frost_risk.py
+
+      - name: Sestavi stran /opozorilo-pred-pozebo/
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/generate_frost_page.py
+
+      - name: Commit & push (samo če se je stanje spremenilo)
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/frost_gate.py mark "${{ steps.gate.outputs.slot }}"
+          git add data/frost-risk.json data/frost-risk-history.json opozorilo-pred-pozebo/ tools/.frost_gate_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            exit 0
+          fi
+          git commit -m "pozeba: posodobi opozorilo (${{ steps.gate.outputs.slot }}) $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

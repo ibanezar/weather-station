@@ -1,0 +1,47 @@
+{
+  "_comment": "Prag poškodb po fenofazi za sadne vrste v Savinjski dolini. Vir: standardna WSU/Utah State frost damage tables. Kjer vir navaja razpon (npr. mirovanje popkov), je vzeta toplejša (manj negativna) meja razpona -- to je zavestno konzervativna izbira, ker zgodneje sproži opozorilo, kot da bi tvegali prepozno. t10 = temperatura pri 10% poškodb popkov/cvetov, t90 = temperatura pri 90% poškodb. Tabela je statična in se med sezonami ne spreminja, razen če dodaš vrsto (npr. marelice, kutine) -- glej CLAUDE.md.",
+  "species": [
+    {
+      "id": "jabolka",
+      "name": "Jabolka",
+      "phenophases": [
+        {"id": "mirovanje", "name": "mirovanje popkov", "t10": -19, "t90": -30},
+        {"id": "rozati-popek", "name": "rožnati popek", "t10": -3.9, "t90": -8.9},
+        {"id": "polno-cvetenje", "name": "polno cvetenje", "t10": -2.2, "t90": -3.9},
+        {"id": "mladi-plod", "name": "mladi plod", "t10": -1.1, "t90": -2.2}
+      ]
+    },
+    {
+      "id": "hruske",
+      "name": "Hruške",
+      "phenophases": [
+        {"id": "belo-balonasto", "name": "belo balonasto", "t10": -2.8, "t90": -5.6},
+        {"id": "polno-cvetenje", "name": "polno cvetenje", "t10": -1.7, "t90": -3.3}
+      ]
+    },
+    {
+      "id": "breskve-nektarine",
+      "name": "Breskve in nektarine",
+      "phenophases": [
+        {"id": "rozati-popek", "name": "rožnati popek", "t10": -3.9, "t90": -9.4},
+        {"id": "polno-cvetenje", "name": "polno cvetenje", "t10": -2.2, "t90": -3.9}
+      ]
+    },
+    {
+      "id": "slive",
+      "name": "Slive",
+      "phenophases": [
+        {"id": "belo-balonasto", "name": "belo balonasto", "t10": -2.2, "t90": -6.1},
+        {"id": "polno-cvetenje", "name": "polno cvetenje", "t10": -1.1, "t90": -2.8}
+      ]
+    },
+    {
+      "id": "cesnje",
+      "name": "Češnje",
+      "phenophases": [
+        {"id": "belo-balonasto", "name": "belo balonasto", "t10": -2.2, "t90": -3.9},
+        {"id": "polno-cvetenje", "name": "polno cvetenje", "t10": -2.2, "t90": -3.3}
+      ]
+    }
+  ]
+}
