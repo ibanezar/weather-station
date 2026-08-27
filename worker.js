@@ -5572,12 +5572,22 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           // Vas je edini podatek o lokaciji, ki ga hranimo — izbrana s seznama,
           // ne iz GPS. Neznan id zavržemo, da v shrambo ne pride poljuben niz.
           const vas = NOWCAST_VASI.some(v => v.id === body.vas) ? body.vas : null;
+          // "digest" (jutranji povzetek) je LOČEN opt-in od splošnih vremenskih
+          // opozoril — kdor vklopi 🔔 Obvestila, je pristal na huda vremena in
+          // nowcast, ne na dnevni potisk. Zato ga posodobimo samo, če ga klic
+          // izrecno pošlje (boolean), sicer obstoječa vrednost ostane
+          // nedotaknjena — klic, ki posodablja samo vas, drugače ne bi smel
+          // tiho izklopiti že vklopljenega povzetka.
+          const hasDigest = typeof body.digest === "boolean";
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
           if (obstoječa) {
-            if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; await pWrite(subs); }
+            let changed = false;
+            if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; changed = true; }
+            if (hasDigest && obstoječa.digest !== body.digest) { obstoječa.digest = body.digest; changed = true; }
+            if (changed) await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });
@@ -5595,7 +5605,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najm
           if (!secret || body.secret !== secret) return pj({ error: "Nedovoljeno" }, 401);
           if (!env.VAPID_PRIVATE) return pj({ error: "VAPID_PRIVATE ni nastavljen" }, 503);
           const payload = { title: (body.title || "Meteorec").slice(0, 100), body: (body.body || "").slice(0, 300), url: body.url || "/", tag: body.tag || "meteorec" };
-          const res = await _pushAll(env, payload);
+          // audience:"digest" cilja samo naročnike, ki so vklopili jutranji
+          // povzetek (glej /push/subscribe zgoraj) — brez tega parametra je
+          // vedenje nespremenjeno (pošlje vsem), kot doslej za huda vremena.
+          const filter = body.audience === "digest" ? (s => s.digest === true) : null;
+          const res = await _pushAll(env, payload, filter);
           return pj({ ok: true, ...res });
         }
       }

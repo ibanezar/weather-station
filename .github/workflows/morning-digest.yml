@@ -1,0 +1,70 @@
+name: Jutranji povzetek (potisno obvestilo)
+
+# Vsak dan zjutraj pošlje kratko potisno obvestilo (današnja najvišja/najnižja
+# temperatura, možnost dežja) samo naročnikom, ki so ga izrecno vklopili —
+# "🌅 Jutranji povzetek" v plošči "Moja opozorila". To je ločen opt-in od
+# splošnih vremenskih opozoril (huda vremena, nowcast): kdor je vklopil samo
+# tista, tega povzetka NE dobi (glej worker.js, /push/subscribe "digest").
+#
+# Termin: cron teče po UTC, mi hočemo 7:00 po naši uri -- poleti je to
+# 05:00 UTC, pozimi 06:00 UTC. Sprožimo oba, tools/digest_gate.py pa spusti
+# skozi samo tistega, ki se pri nas res zgodi med 7:00 in 9:00, in poskrbi,
+# da gre povzetek ven enkrat na dan (isti vzorec kot daily-story.yml).
+#
+# Potrebuje GitHub Secret PUSH_SECRET z isto vrednostjo kot SUBSCRIBE_SECRET
+# na Cloudflare Workerju (env.SUBSCRIBE_SECRET v worker.js) — brez tega
+# tools/send_morning_digest.py konča z napako in ne pošlje ničesar.
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # 7:00 po naši uri poleti (CEST)
+    - cron: '0 6 * * *'   # 7:00 po naši uri pozimi (CET)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = pošlji ne glede na uro in na to, ali je povzetek danes že šel ven'
+        required: false
+        default: 'true'
+
+jobs:
+  povzetek:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri, ali je čas za pošiljanje
+        id: gate
+        run: |
+          python3 tools/digest_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
+      - name: Pošlji jutranji povzetek
+        if: steps.gate.outputs.proceed == 'true'
+        env:
+          PUSH_SECRET: ${{ secrets.SUBSCRIBE_SECRET }}
+        run: python3 tools/send_morning_digest.py
+
+      - name: Zabeleži, da je povzetek poslan
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/digest_gate.py mark
+          git add tools/.digest_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+          else
+            git commit -m "digest: jutranji povzetek $(date -u +%Y-%m-%d) [skip ci]"
+            for i in 1 2 3 4; do
+              git push && break
+              echo "push spodletel, poskus $i" && sleep $((2 ** i))
+              git pull --rebase origin main || true
+            done
+          fi

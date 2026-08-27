@@ -2865,6 +2865,9 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .tp-inp-sel select{background:var(--fc-bg);border:1px solid var(--border);border-radius:8px;
   padding:.38rem .55rem;font:inherit;font-size:.82rem;color:var(--text);cursor:pointer;max-width:190px}
 .tp-inp-sel select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.2)}
+.tp-inp-check input{width:20px;height:20px;accent-color:var(--blue);cursor:pointer}
+.tp-inp-check input:disabled{opacity:.4;cursor:not-allowed}
+.tp-digest-hint{font-size:.7rem;color:var(--muted);margin:-.3rem 0 0;line-height:1.4}
 /* Ob osveževanju zadržimo prejšnji izris pri manjši motnosti — brez poskoka. */
 .nowcast.is-refreshing .nowcast-lead,.nowcast.is-refreshing .nowcast-sub,
 .nowcast.is-refreshing .nowcast-fig{opacity:.55;transition:opacity .2s ease}

@@ -1354,6 +1354,7 @@ function evaluateLiveEvent(obs){
 
 // ── Moja opozorila (osebni pragovi) ──────────────────────
 const THRESHOLD_KEY='wx-thresholds-v1';
+const DIGEST_KEY='wx-digest';
 const _thr={tempMin:null,tempMax:null,wind:null,rain:null};
 
 function loadThresholds(){
@@ -1371,10 +1372,30 @@ function openThresholdModal(){
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??'';};
   sv('thr-temp-min',_thr.tempMin);sv('thr-temp-max',_thr.tempMax);
   sv('thr-wind',_thr.wind);sv('thr-rain',_thr.rain);
+  // Jutranji povzetek gre po istem potisnem kanalu kot vremenska opozorila,
+  // zato je smiseln le, če so ta že vklopljena — sicer bi kljukica dala
+  // vtis, da se je nekaj shranilo, čeprav ni naročnine, kamor bi ga poslali.
+  const notifOn=localStorage.getItem('wx-notif')==='on';
+  const digestEl=document.getElementById('thr-digest');
+  if(digestEl){digestEl.checked=notifOn&&localStorage.getItem(DIGEST_KEY)==='on';digestEl.disabled=!notifOn;}
+  const hint=document.getElementById('thr-digest-hint');
+  if(hint)hint.hidden=notifOn;
   const m=document.getElementById('threshold-modal');if(m){m.style.display='flex';}
 }
 function closeThresholdModal(){
   const m=document.getElementById('threshold-modal');if(m)m.style.display='none';
+}
+// Posodobi "jutranji povzetek" na obstoječi push-naročnini (če je ni, ni kaj
+// posodobiti — kljukica je v tem primeru onemogočena, glej openThresholdModal).
+async function updateDigestPreference(on){
+  try{
+    if(!('serviceWorker' in navigator))return;
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription();
+    if(!sub)return;
+    const vas=getNowcastVas();
+    await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,digest:on})});
+  }catch(e){console.warn('digest pref:',e);}
 }
 function saveThresholdSettings(){
   const gv=(id)=>{const v=parseFloat(document.getElementById(id)?.value);return isNaN(v)?null:v;};
@@ -1383,6 +1404,12 @@ function saveThresholdSettings(){
   try{localStorage.setItem(THRESHOLD_KEY,JSON.stringify(_thr));}catch{}
   const hasAny=Object.values(_thr).some(v=>v!==null);
   document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
+  const digestEl=document.getElementById('thr-digest');
+  if(digestEl&&!digestEl.disabled){
+    const on=!!digestEl.checked;
+    try{localStorage.setItem(DIGEST_KEY,on?'on':'off');}catch{}
+    updateDigestPreference(on);
+  }
   closeThresholdModal();
   if(_lastBriefObs)checkThresholdAlerts(_lastBriefObs);
 }

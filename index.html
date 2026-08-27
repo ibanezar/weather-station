@@ -292,7 +292,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/style.min.css?v=00175e7b">
+<link rel="stylesheet" href="/style.min.css?v=9ebdb016">
 </head>
 <body>
 
@@ -3575,7 +3575,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
   </footer>
 </div>
 
-<script src="app.min.js?v=2e397972" defer></script>
+<script src="app.min.js?v=aa293695" defer></script>
 
 
 <div id="toast"></div>
@@ -3597,6 +3597,8 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
       <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row tp-row-digest"><label for="thr-digest">🌅 Jutranji povzetek</label><div class="tp-inp tp-inp-check"><input type="checkbox" id="thr-digest"></div></div>
+      <p class="tp-digest-hint" id="thr-digest-hint" hidden>Najprej vklopi 🔔 Obvestila (gumb zgoraj na strani) — jutranji povzetek gre po istem kanalu.</p>
     </div>
     <div class="tp-footer">
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>
