@@ -5,32 +5,33 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LE8PJ1HR8B');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MeteoHmeljar — parcele | Meteorec</title>
+<title>MeteoHmeljar — karta hmeljišč | Meteorec</title>
 <link rel="canonical" href="https://meteorec.si/meteohmeljar/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/meteohmeljar/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/meteohmeljar/">
-<meta name="description" content="Škropilno okno, tveganje za peronosporo/pepelovko, vodna bilanca in nevarnost neurja po parceli za hmeljišča v Zgornji Savinjski dolini.">
+<meta name="description" content="Interaktivna karta hmeljišč Zgornje Savinjske doline (uradni MKGP GIS sloj) — klikni parcelo za škropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti točki.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/meteohmeljar/">
 <meta property="og:site_name" content="Meteorec">
-<meta property="og:title" content="MeteoHmeljar — parcele">
-<meta property="og:description" content="Škropilno okno, tveganje za peronosporo/pepelovko, vodna bilanca in nevarnost neurja po parceli za hmeljišča v Zgornji Savinjski dolini.">
+<meta property="og:title" content="MeteoHmeljar — karta hmeljišč">
+<meta property="og:description" content="Interaktivna karta hmeljišč Zgornje Savinjske doline (uradni MKGP GIS sloj) — klikni parcelo za škropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti točki.">
 <meta property="og:image" content="https://meteorec.si/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MeteoHmeljar — parcele">
-<meta name="twitter:description" content="Škropilno okno, tveganje za peronosporo/pepelovko, vodna bilanca in nevarnost neurja po parceli za hmeljišča v Zgornji Savinjski dolini.">
+<meta name="twitter:title" content="MeteoHmeljar — karta hmeljišč">
+<meta name="twitter:description" content="Interaktivna karta hmeljišč Zgornje Savinjske doline (uradni MKGP GIS sloj) — klikni parcelo za škropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti točki.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/meteohmeljar/","name":"MeteoHmeljar","description":"\u0160kropilno okno, tveganje za peronosporo/pepelovko, vodna bilanca in nevarnost neurja po parceli za hmelji\u0161\u010da v Zgornji Savinjski dolini.","url":"https://meteorec.si/meteohmeljar/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/meteohmeljar/","name":"MeteoHmeljar","description":"Interaktivna karta hmelji\u0161\u010d Zgornje Savinjske doline (uradni MKGP GIS sloj) \u2014 klikni parcelo za \u0161kropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti to\u010dki.","url":"https://meteorec.si/meteohmeljar/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"MeteoHmeljar"}]}
 </script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""><style>#hm-map{height:440px;border-radius:1rem;overflow:hidden;margin:.8rem 0;border:1px solid var(--card-border)}</style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
 <link rel="stylesheet" href="/blog/blog.css?v=602ed072">
 <link rel="stylesheet" href="/vreme/vreme.css?v=b23e42bf">
@@ -53,17 +54,17 @@
     <a href="/">Meteorec</a> › <span aria-current="page">MeteoHmeljar</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-  <h1 class="page-title">MeteoHmeljar — parcele</h1>
-  <p class="post-meta">Vreme → agronomska interpretacija → operativna odločitev, po parceli, za hmeljišča
-  v Zgornji Savinjski dolini.</p>
-  <div class="card" style="margin-bottom:1rem">
-    <div class="clabel"><a href="/meteohmeljar/demo-1/">Demo hmeljišče 1 (MKGP RABA_PID 3730018, ni last uporabnika)</a></div>
-    <p class="archive-intro" style="margin:.3rem 0 0">⛈️ Nevarnost neurja čez ~0h — glavno tveganje: nevihte.</p>
-  </div>
-  <div class="card" style="margin-bottom:1rem">
-    <div class="clabel"><a href="/meteohmeljar/demo-2/">Demo hmeljišče 2 (MKGP RABA_PID 288247, ni last uporabnika)</a></div>
-    <p class="archive-intro" style="margin:.3rem 0 0">⛈️ Nevarnost neurja čez ~0h — glavno tveganje: nevihte.</p>
-  </div>
+  <h1 class="page-title">MeteoHmeljar</h1>
+  <p class="post-meta">Interaktivna karta hmeljišč Zgornje Savinjske doline (uradni MKGP GIS sloj) — klikni parcelo za škropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti točki.</p>
+  <div id="hm-map"></div>
+  <p class="gf-note" id="hm-map-note">Nalagam hmeljišča …</p>
+  <div id="hm-dashboard"></div>
+  <p class="muted-note">Meje parcel so iz javnega sloja rabe tal (MKGP RABA), ne evidence lastništva — preveri, da je
+  izbrana parcela res tvoja, preden se odločaš po njej. Meteorološko okno za škropljenje je ocena, ne navodilo — nikoli
+  ne preglasi registracije, etikete ali navodil konkretnega fitofarmacevtskega sredstva.</p>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/meteohmeljar/hmeljar.js"></script>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>

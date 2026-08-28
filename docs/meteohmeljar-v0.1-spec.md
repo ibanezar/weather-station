@@ -1,10 +1,55 @@
 # MeteoHmeljar v0.1 — podatkovni model in pravila enginea
 
-Status: **specifikacija za implementacijo**, ne izvedeno. Piše se za eno gospodarstvo
-(Filip, znane parcele), brez baze/prijave — checked-in config po vzorcu
-`species_rules.yaml` / `HYDRANT_OVERRIDES`. Nov razdelek v `weather-station`,
-tehnično po vzorcu `/meteogasilec/` (samostojne strani, lasten `worker.js` proxy
-kjer je treba, cron generator).
+## PIVOT (28. 8. 2026) — beri to najprej
+
+Ta dokument je bil sprva napisan za "eno gospodarstvo, znane parcele" (glej
+§1.1, §7, §9 spodaj) — v0.1 je bil tako tudi zgrajen (checked-in
+`data/hmeljar_parcele.yaml`, urni cron `generate_hmeljar_page.py`, statične
+strani na parcelo). Izkazalo se je, da to ni bil cilj: MeteoHmeljar je
+mišljen za **vse hmeljarje v dolini** — obiskovalec klikne poljubno parcelo na
+karti, brez prijave, brez vnaprej znanega seznama.
+
+To je spremenilo arhitekturo, formule (§2–§6 spodaj) pa ostajajo veljavne:
+
+- **Ni več `data/hmeljar_parcele.yaml`, ni cron generatorja, ni statične
+  strani na parcelo.** `/meteohmeljar/` je ena sama, POVSEM statična stran z
+  Leaflet karto (isti vzorec/SRI kot `/meteogasilec/karta/`), ki prikaže
+  hmeljiške parcele iz uradnega **MKGP GIS sloja RABA** (`RABA_ID=1160`,
+  `geohub.gov.si`) za Zgornjo Savinjsko dolino, prek novega Worker proxyja
+  `/hmeljar-raba` (geohub ne pošilja CORS glave — isto načelo kot
+  `/varpolje-current`).
+- **Ves engine (§2–§6) zdaj teče CLIENT-SIDE**, v `meteohmeljar/hmeljar.js`
+  (ročno pisana datoteka, ni generirana — isto vlogo ima `gasilec.js` za
+  MeteoGasilca). `tools/hmeljar_model.py` ostaja kot referenčna
+  implementacija/specifikacija formul (berljiva, testabilna), ne teče več v
+  produkciji — ni več generatorja, ki bi ga klical za znano parcelo, ker
+  parcela ni znana vnaprej.
+- **Posledica za WaterBalance**: brez cron teka na kliknjeno točko ni
+  vztrajnega dnevnika, zato `cumulativeDeficit` v JS različici ni več pravi
+  tekoč seštevek (glej §4) — namesto tega se izračuna iz enega daljšega
+  Open-Meteo okna (60 pretečenih dni, resetira se ob dnevu z ≥15mm dežja
+  znotraj tega okna). Dovolj natančno za večino primerov, manj natančno v
+  suši, daljši od 60 dni brez resetnega dežja.
+- **Posledica za PeronosporaRisk/PepelovkaRisk**: dnevni trend (»22→38→67→81«)
+  in "preskok" v Decision Engineu (§6) v v0.1-karta izvedbi **ne delujeta** —
+  potrebovala bi včerajšnjo vrednost, ki je brez strežniškega stanja nima kje
+  čakati. Decision Engine v v0.1-karta prikazuje samo nevarnost/škropilno
+  okno/vodni primanjkljaj (postavki 1, 2, 4 iz §6 — brez postavke 3).
+- RABA sloj je **evidenca rabe tal, ne lastništva** — pove mejo/tip rabe, ne
+  pove, čigava je parcela. To ostaja jasno izpisano na strani.
+
+Ostanek dokumenta (§1–§9) je izvirna specifikacija — beri jo kot **formule in
+razloge zanje** (še vedno točne), ne kot dejansko datotečno postavitev (§1.1,
+§7 sta zastarela glede YAML/cron dela).
+
+---
+
+Status (izvirno besedilo, glej PIVOT zgoraj za trenutno stanje): specifikacija
+za implementacijo. Piše se za eno gospodarstvo (Filip, znane parcele), brez
+baze/prijave — checked-in config po vzorcu `species_rules.yaml` /
+`HYDRANT_OVERRIDES`. Nov razdelek v `weather-station`, tehnično po vzorcu
+`/meteogasilec/` (samostojne strani, lasten `worker.js` proxy kjer je treba,
+cron generator).
 
 Relacija do `/agrometeo/`: ta stran ostane (dolinski povzetek za splošno kmetijstvo:
 hmelj, koruza, krompir, pšenica, trava). MeteoHmeljar je **ločen generator**

@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
 """
 tools/hmeljar_model.py — SprayScore, PeronosporaRisk, PepelovkaRisk, WaterBalance,
-StormRisk in Decision Engine za MeteoHmeljar (/meteohmeljar/).
+StormRisk in Decision Engine za MeteoHmeljar — REFERENČNA implementacija.
+
+MeteoHmeljar je za vse hmeljarje v dolini (klik na poljubno parcelo na karti,
+glej /meteohmeljar/), ne en znan seznam parcel — zato v produkciji NE teče ta
+datoteka, ampak njena JS podvojitev meteohmeljar/hmeljar.js, CLIENT-SIDE, na
+zahtevo (Python ne teče v brskalniku; ni izvedljivo strežniško cron-generirati
+stran za vsako od stotih možnih kliknjenih parcel v dolini). Ta datoteka
+ostaja kot berljiva specifikacija formul in osnova za teste — če spremeniš
+formulo/prag tu, popravi tudi v meteohmeljar/hmeljar.js (isto načelo kot
+gasilec_model.py/app.js/gasilec.js, glej opombo na vrhu gasilec_model.py).
 
 Namerno LOČENO od tools/generate_agrometeo_page.py (GDD, fenologija, grob
 dolinski bolezenski indeks, škropilno okno za celo Zgornjo Savinjsko dolino) —
 to je parcelno natančen engine z lastnim configom (operation_profile na
-parcelo), ne dolinski povzetek. Isto pravilo kot povsod v repozitoriju:
-generatorji si ne delijo knjižnic med seboj, tudi kadar računajo podobne stvari
-(glej opombo na vrhu gasilec_model.py). Kjer je formula namerno enaka
-(GDD₁₀/fenologija — HOP_STAGES spodaj), je to zapisano kot komentar, ne uvoz.
+parcelo), ne dolinski povzetek. Kjer je formula namerno enaka (GDD₁₀/
+fenologija — HOP_STAGES spodaj), je to zapisano kot komentar, ne uvoz.
 
-Vse funkcije so čiste (brez I/O) — fetch/render/log je v
-tools/generate_hmeljar_page.py. Podrobna specifikacija: docs/meteohmeljar-v0.1-spec.md
+Vse funkcije so čiste (brez I/O). Podrobna specifikacija formul (še vedno
+veljavna — samo arhitektura okrog njih se je spremenila iz cron/YAML v
+klik/karto): docs/meteohmeljar-v0.1-spec.md
 
 GDD₁₀/fenologija ostaneta vezana na postajo (history.json) — vse parcele so v
 istem delu doline kot IREICA1, in postajna zgodovina je za akumulacijo skozi
