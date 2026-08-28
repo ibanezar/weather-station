@@ -148,6 +148,13 @@ body{
 .gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
   padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
+.gf-arso{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow);margin:1.4rem 0}
+.gf-arso-list{display:flex;flex-direction:column;gap:.5rem}
+.gf-arso-item{padding:.5rem .7rem;border-radius:.5rem;font-size:.85rem;border-left:3px solid #eab308;
+  background:rgba(234,179,8,.08)}
+.gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
+.gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -333,6 +340,26 @@ def firms_widget_html():
         +'<tbody>'+rows+'</tbody></table>';
     }}).catch(function(){{el.innerHTML='<p class="gf-note">Vir trenutno ni na voljo.</p>';}});
   }})();</script>'''
+
+
+def arso_widget_html(compact=False):
+    """Uradna opozorila ARSO — klientsko klicana (isti Worker endpoint kot
+    generate_arso_newsjack_post.py/fetch_alerts() in /nevihte/ WX-ARSO), da so
+    vedno sveža ne glede na dnevni cikel tega generatorja. Namenoma BREZ
+    strežniško izrisane vsebine (za razliko od FWI/vetra zgoraj) — opozorilo je
+    stanje, ne novica (glej razdelek v CLAUDE.md), zato bi enkrat-dnevni
+    posnetek v urah zastaral; crawlable vsebina je namesto tega samo povezava
+    na uradno stran ARSO, ki ne zastara."""
+    body_id = "gf-arso-compact" if compact else "gf-arso-body"
+    if compact:
+        return (f'  <div class="gf-note" id="{body_id}">Preverjam uradna opozorila ARSO …</div>')
+    return f'''  <div class="gf-arso">
+    <h2 style="margin-top:0">🏛 Uradna opozorila ARSO</h2>
+    <div id="{body_id}">Preverjam …</div>
+    <p class="gf-note">Uradna vremenska opozorila Agencije RS za okolje — ločeno od MeteoGasilec lastnih ocen
+    (FWI, obrat vetra) na tej strani. Vsa opozorila za Slovenijo: <a href="https://meteo.arso.gov.si/met/sl/warning/"
+    target="_blank" rel="noopener">stran ARSO</a>.</p>
+  </div>'''
 
 
 def subpage_shell(slug, title, desc, inner_html, extra_head=""):
@@ -549,6 +576,7 @@ def build_intervencija_page(payload):
     <div id="gf-interv-shift-wrap">
 {shift_html}
     </div>
+{arso_widget_html(compact=True)}
     <p class="gf-note" id="gf-interv-note"></p>
     <p class="gf-note"><a id="gf-interv-map" href="/meteogasilec/karta/" target="_blank" rel="noopener">🗺 Odpri operativno karto (hidranti, požarišča)</a></p>
     <div class="gf-briefing">
@@ -566,7 +594,18 @@ def build_intervencija_page(payload):
     var FWI_TODAY={fwi_json};
     var currentFWI={{fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false}};
     var lastData=null;
+    var lastArsoAlerts=[];
     function fmtHM(t){{return t?t.slice(11,16):'—';}}
+    function refreshBriefingArso(){{
+      if(lastData){{
+        lastData.arsoAlerts=lastArsoAlerts;
+        document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+      }}
+    }}
+    Gasilec.renderArsoWidget(document.getElementById('gf-arso-compact'),{{compact:true}}).then(function(res){{
+      lastArsoAlerts=res.alerts||[];
+      refreshBriefingArso();
+    }});
     function updateFwiDisplay(){{
       var fwiVal=document.getElementById('gf-fwi-val'),fwiLvl=document.getElementById('gf-fwi-lvl'),
           isiVal=document.getElementById('gf-isi-val'),note=document.getElementById('gf-fwi-note');
@@ -625,7 +664,7 @@ def build_intervencija_page(payload):
         timeLabel:new Date().toLocaleTimeString('sl',{{hour:'2-digit',minute:'2-digit'}}),
         placeLabel:label, temp:temp[i], rh:rh[i], windSpeed:spd[i], windGust:gust[i],
         windFromDeg:wdir[i], precip3h:precip3, fwi:currentFWI.fwi, fwiLevel:currentFWI.level,
-        isi:currentFWI.isi, shift:shift.detected?shift:null,
+        isi:currentFWI.isi, shift:shift.detected?shift:null, arsoAlerts:lastArsoAlerts,
       }};
       document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
     }}
@@ -965,13 +1004,15 @@ def main():
   <p class="post-meta">Indeks FWI in vreme za intervencije · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {interv_banner_html()}
 {build_hero(payload)}
-{feature_cards_html()}
-{firms_widget_html()}
+{arso_widget_html()}
   <script src="/meteogasilec/gasilec.js"></script>
   <script>(function(){{
     var el=document.getElementById('gf-fresh');
     if(el&&window.Gasilec)Gasilec.renderFreshness(el,el.closest('.gf-hero').dataset.generated,{{greenH:26,yellowH:50}});
+    if(window.Gasilec)Gasilec.renderArsoWidget(document.getElementById('gf-arso-body'));
   }})();</script>
+{feature_cards_html()}
+{firms_widget_html()}
   <h2 id="faq">Pogosta vprašanja</h2>
   <p><b>Je MeteoGasilec uradna napoved?</b><br>Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski
   FWI metodologiji, ki jo za Evropo uporablja EFFIS/GWIS. Uradno oceno objavlja ARSO.</p>

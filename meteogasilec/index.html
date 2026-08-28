@@ -125,6 +125,13 @@ body{
 .gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
   padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
+.gf-arso{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow);margin:1.4rem 0}
+.gf-arso-list{display:flex;flex-direction:column;gap:.5rem}
+.gf-arso-item{padding:.5rem .7rem;border-radius:.5rem;font-size:.85rem;border-left:3px solid #eab308;
+  background:rgba(234,179,8,.08)}
+.gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
+.gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -168,7 +175,7 @@ body{
     </div>
     <a class="gf-btn" href="/meteogasilec/intervencija/">📍 Odpri</a>
   </div>
-  <div class="gf-hero" data-generated="2026-08-28T08:35:17+00:00">
+  <div class="gf-hero" data-generated="2026-08-28T09:00:56+00:00">
     <div class="gf-hero-top">
       <div class="gf-gauge-wrap">
         <svg viewBox="0 0 112 112" class="gf-ring" aria-hidden="true"><circle cx="56" cy="56" r="46" class="gf-ring-bg"/><circle cx="56" cy="56" r="46" class="gf-ring-fg" stroke="#f59e0b" stroke-dasharray="289.0" stroke-dashoffset="177.3"/></svg>
@@ -185,6 +192,19 @@ body{
     <p class="gf-hero-note">🔥 Ista metodologija kot na naslovnici (kartica »Požarna nevarnost – indeks FWI«) — tu preračunana strežniško, da je vidna tudi iskalnikom in brez JS.</p>
     <p class="gf-hero-note gf-fresh" id="gf-fresh">posodobljeno 2026-08-28</p>
   </div>
+  <div class="gf-arso">
+    <h2 style="margin-top:0">🏛 Uradna opozorila ARSO</h2>
+    <div id="gf-arso-body">Preverjam …</div>
+    <p class="gf-note">Uradna vremenska opozorila Agencije RS za okolje — ločeno od MeteoGasilec lastnih ocen
+    (FWI, obrat vetra) na tej strani. Vsa opozorila za Slovenijo: <a href="https://meteo.arso.gov.si/met/sl/warning/"
+    target="_blank" rel="noopener">stran ARSO</a>.</p>
+  </div>
+  <script src="/meteogasilec/gasilec.js"></script>
+  <script>(function(){
+    var el=document.getElementById('gf-fresh');
+    if(el&&window.Gasilec)Gasilec.renderFreshness(el,el.closest('.gf-hero').dataset.generated,{greenH:26,yellowH:50});
+    if(window.Gasilec)Gasilec.renderArsoWidget(document.getElementById('gf-arso-body'));
+  })();</script>
   <h2>🧭 Orodja za gasilce</h2>
   <div class="gf-feat">
     <a class="gf-feat-card" href="/meteogasilec/intervencija/" style="--fa:#ef4444;--fa-soft:rgba(239,68,68,.16)"><span class="gf-feat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.6c-3.7 0-6.4 2.9-6.4 6.5 0 4.5 5.1 10.4 6 11.4a.6.6 0 0 0 .8 0c.9-1 6-6.9 6-11.4 0-3.6-2.7-6.5-6.4-6.5Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="9.2" r="2.3" fill="currentColor"/></svg></span><span class="gf-feat-title">Intervencija zdaj</span><span class="gf-feat-sub">Tvoja lokacija (GPS): veter, obrat vetra, FWI in kopiraj briefing.</span></a>
@@ -215,11 +235,6 @@ body{
         +'<table class="gf-tbl"><thead><tr><th>Razdalja</th><th>Čas</th><th>Zaupanje</th><th>FRP (MW)</th></tr></thead>'
         +'<tbody>'+rows+'</tbody></table>';
     }).catch(function(){el.innerHTML='<p class="gf-note">Vir trenutno ni na voljo.</p>';});
-  })();</script>
-  <script src="/meteogasilec/gasilec.js"></script>
-  <script>(function(){
-    var el=document.getElementById('gf-fresh');
-    if(el&&window.Gasilec)Gasilec.renderFreshness(el,el.closest('.gf-hero').dataset.generated,{greenH:26,yellowH:50});
   })();</script>
   <h2 id="faq">Pogosta vprašanja</h2>
   <p><b>Je MeteoGasilec uradna napoved?</b><br>Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski

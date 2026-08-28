@@ -606,6 +606,15 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
 - **Obrat vetra ≥45° je MeteoGasilec kriterij, ne uradno opozorilo ARSO** —
   vedno tako označen. Prag: obrat smeri >=45° IN veter/sunki na vsaj eni
   strani >=15 km/h (da se pri skoraj brezvetrju ne sproža po nepotrebnem).
+- **Uradna opozorila ARSO so jasno ločena od MeteoGasilec lastnih ocen.**
+  `Gasilec.renderArsoWidget()` (gasilec.js) kliče isti Worker `/arso-warning`
+  endpoint kot `generate_arso_newsjack_post.py`/`fetch_alerts()` in `/nevihte/`
+  (WX-ARSO), a NEPOSREDNO iz brskalnika — namenoma brez strežniško izrisane
+  vsebine, ker bi enkrat-dnevni posnetek tega generatorja v urah zastaral
+  (opozorilo je stanje, ne novica, glej razdelek o ARSO opozorilih zgoraj).
+  Prikazan na `/meteogasilec/` (razdelek »🏛 Uradna opozorila ARSO«, ločen od
+  FWI kartice) in strnjeno na `/intervencija/`, od koder se aktivna opozorila
+  vključijo tudi v »Kopiraj briefing« (`buildBriefing()`).
 - **Freshness sistem — nikoli ne skrivaj stare vrednosti, samo jo označi.**
   `renderFreshness()` izpiše 🟢 (<26h, en dnevni tek zamujen), 🟡 (26–50h) ali
   🔴 (>50h, zamujena ≥2 teka) glede na `data-generated` na `.gf-hero`. Uveden

@@ -232,6 +232,51 @@
     el.innerHTML = '<span class="gf-fresh-dot">' + dot + '</span> <span class="gf-fresh-label">' + label + '</span>';
   }
 
+  // ── ARSO uradna opozorila (jasno ločeno od MeteoGasilec lastnih ocen) ────
+  // Isti Worker endpoint kot generate_arso_newsjack_post.py/fetch_alerts()
+  // in /nevihte/ (WX-ARSO) — klican neposredno iz brskalnika, da je stanje
+  // vedno sveže, ne glede na dnevni cikel generatorja strani (opozorilo je
+  // stanje, ne novica, glej CLAUDE.md "Opozorila ARSO gredo na /nevihte/").
+  var ARSO_WORKER = 'https://weatherireica1.filip-eremita.workers.dev';
+  var ARSO_LEVEL = {
+    red: { emoji: '🔴', label: 'rdeče' },
+    orange: { emoji: '🟠', label: 'oranžno' },
+    yellow: { emoji: '🟡', label: 'rumeno' },
+  };
+
+  function fetchArsoAlerts(region) {
+    region = region || 'SLOVENIA_NORTH-EAST';
+    return fetch(ARSO_WORKER + '/arso-warning?region=' + region)
+      .then(function (r) { return r.json(); })
+      .then(function (d) { return { alerts: (d && d.alerts) || [], issued: d && d.issued }; });
+  }
+
+  // Izriše v `el` in vrne Promise z {alerts,issued} — klicatelj ga lahko
+  // uporabi za dopolnitev briefinga (glej buildBriefing `arsoAlerts`).
+  function renderArsoWidget(el, opts) {
+    if (!el) return Promise.resolve({ alerts: [] });
+    opts = opts || {};
+    return fetchArsoAlerts(opts.region).then(function (res) {
+      var alerts = res.alerts || [];
+      if (!alerts.length) {
+        el.innerHTML = '<p class="gf-note" style="margin:0">✅ ' +
+          (opts.compact ? 'Ni aktivnih uradnih opozoril ARSO.' : 'Trenutno ni aktivnih uradnih opozoril ARSO za to območje.') +
+          '</p>';
+        return res;
+      }
+      var items = alerts.map(function (a) {
+        var lv = ARSO_LEVEL[a.level] || { emoji: '⚠️' };
+        return '<div class="gf-arso-item gf-arso-' + (a.level || 'yellow') + '">' + lv.emoji + ' <b>' +
+          (a.text || a.desc || 'Opozorilo') + '</b></div>';
+      }).join('');
+      el.innerHTML = '<div class="gf-arso-list">' + items + '</div>';
+      return res;
+    }).catch(function () {
+      el.innerHTML = '<p class="gf-note" style="margin:0">Vir trenutno ni na voljo.</p>';
+      return { alerts: [] };
+    });
+  }
+
   // ── briefing ───────────────────────────────────────────────────────────
   // data: {timeLabel, placeLabel, temp, rh, windSpeed, windGust, windFromDeg,
   //        precip3h, fwi, fwiLevel, isi, shift: detectWindShift() rezultat|null}
@@ -248,11 +293,20 @@
     if (data.fwi != null) lines.push('🔥 FWI ' + data.fwi.toFixed(1) + ' — ' + (data.fwiLevel || '').toUpperCase());
     if (data.isi != null) lines.push('⚡ ISI ' + data.isi.toFixed(1));
     if (data.shift && data.shift.detected) {
-      lines.push('⚠ Ob ' + data.shift.toTime + ' možen obrat vetra ' +
+      var shiftTime = data.shift.toTime && data.shift.toTime.length >= 16
+        ? data.shift.toTime.slice(11, 16) : (data.shift.toTime || '—');
+      lines.push('⚠ Ob ' + shiftTime + ' možen obrat vetra ' +
         dirLabel(data.shift.fromDir) + ' → ' + dirLabel(data.shift.toDir) +
         ' (+' + data.shift.degrees + '°)');
     }
     if (data.precip3h != null) lines.push('🌧 Padavine naslednje 3 h: ' + data.precip3h.toFixed(1) + ' mm');
+    if (data.arsoAlerts && data.arsoAlerts.length) {
+      lines.push('ARSO:');
+      data.arsoAlerts.forEach(function (a) {
+        var lv = ARSO_LEVEL[a.level] || { emoji: '⚠️' };
+        lines.push(lv.emoji + ' ' + (a.text || a.desc || 'opozorilo'));
+      });
+    }
     lines.push('');
     lines.push('MeteoGasilec — informativni podatki, ni uradna ocena ARSO/URSZR');
     return lines.join('\n');
@@ -301,6 +355,8 @@
     fwiClass: fwiClass,
     distanceKm: distanceKm,
     fwiSeriesFromDaily: fwiSeriesFromDaily,
+    fetchArsoAlerts: fetchArsoAlerts,
+    renderArsoWidget: renderArsoWidget,
     renderFreshness: renderFreshness,
     buildBriefing: buildBriefing,
     wireBriefingButtons: wireBriefingButtons,
