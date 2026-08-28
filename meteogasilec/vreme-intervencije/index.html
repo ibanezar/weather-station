@@ -86,6 +86,37 @@ body{
 .gf-tbl{width:100%;border-collapse:collapse;font-size:.82rem;margin:.8rem 0}
 .gf-tbl th,.gf-tbl td{padding:.4rem .5rem;border-bottom:1px solid var(--card-border);text-align:left}
 .gf-back{display:inline-block;margin-top:1.4rem;font-size:.85rem}
+.gf-fresh{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;color:var(--muted)}
+.gf-interv-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  border:1px solid #ef444455;border-radius:1rem;padding:1rem 1.2rem;margin:.8rem 0 1.2rem;
+  background:linear-gradient(120deg,#ef444422,#ef444408)}
+.gf-interv-banner h2{margin:0 0 .2rem;font-size:1.05rem}
+.gf-interv-banner p{margin:0;font-size:.8rem;color:var(--muted)}
+.gf-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:.7rem;
+  font-weight:700;font-size:.88rem;text-decoration:none;border:none;cursor:pointer;
+  background:#ef4444;color:#fff;white-space:nowrap}
+.gf-btn:hover{background:#dc2626}
+.gf-btn.secondary{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border)}
+.gf-btn.secondary:hover{border-color:#ef4444}
+.gf-interv-card{border:1px solid var(--card-border);border-radius:1rem;padding:1.2rem;
+  background:var(--card-bg);box-shadow:var(--card-shadow);margin:1rem 0}
+.gf-interv-loc{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;
+  margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid var(--card-border)}
+.gf-interv-loc b{font-size:.92rem}
+.gf-interv-body{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center}
+.gf-compass-wrap{flex:0 0 auto;text-align:center;color:var(--text)}
+.gf-compass-lbl{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gf-interv-stats{flex:1;min-width:220px;display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem .9rem}
+.gf-stat{display:flex;flex-direction:column}
+.gf-stat b{font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-stat span{font-size:.7rem;color:var(--muted)}
+.gf-shift-warn{margin-top:1rem;padding:.8rem 1rem;border-radius:.8rem;background:#f59e0b22;
+  border:1px solid #f59e0b66;font-size:.85rem;line-height:1.5}
+.gf-shift-warn b{display:block;margin-bottom:.2rem}
+.gf-briefing{margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--card-border)}
+.gf-briefing pre{white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.76rem;
+  background:var(--bg-alt,rgba(127,127,127,.08));border-radius:.6rem;padding:.8rem;margin:.6rem 0}
+.gf-briefing-actions{display:flex;gap:.6rem;flex-wrap:wrap}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -130,14 +161,14 @@ body{
   <table class="gf-tbl">
     <thead><tr><th>Čas</th><th>Hitrost</th><th>Sunki</th><th>Smer</th></tr></thead>
     <tbody>
-<tr><td>danes 21:00</td><td>5 km/h</td><td>12 km/h</td><td>J</td></tr>
-<tr><td>jutri 00:00</td><td>3 km/h</td><td>4 km/h</td><td>JJV</td></tr>
-<tr><td>jutri 03:00</td><td>2 km/h</td><td>10 km/h</td><td>JV</td></tr>
-<tr><td>jutri 06:00</td><td>2 km/h</td><td>5 km/h</td><td>V</td></tr>
-<tr><td>jutri 09:00</td><td>5 km/h</td><td>10 km/h</td><td>SSV</td></tr>
-<tr><td>jutri 12:00</td><td>6 km/h</td><td>15 km/h</td><td>SSV</td></tr>
-<tr><td>jutri 15:00</td><td>19 km/h</td><td>47 km/h</td><td>JZ</td></tr>
-<tr><td>jutri 18:00</td><td>19 km/h</td><td>39 km/h</td><td>JZ</td></tr>
+<tr><td>danes 08:00</td><td>2 km/h</td><td>5 km/h</td><td>JJV</td></tr>
+<tr><td>danes 11:00</td><td>8 km/h</td><td>17 km/h</td><td>SSV</td></tr>
+<tr><td>danes 14:00</td><td>4 km/h</td><td>19 km/h</td><td>SV</td></tr>
+<tr><td>danes 17:00</td><td>20 km/h</td><td>44 km/h</td><td>ZJZ</td></tr>
+<tr><td>danes 20:00</td><td>6 km/h</td><td>22 km/h</td><td>JJZ</td></tr>
+<tr><td>danes 23:00</td><td>5 km/h</td><td>13 km/h</td><td>J</td></tr>
+<tr><td>jutri 02:00</td><td>6 km/h</td><td>29 km/h</td><td>VJV</td></tr>
+<tr><td>jutri 05:00</td><td>3 km/h</td><td>8 km/h</td><td>VJV</td></tr>
     </tbody>
   </table>
   <h2>🌩 Nacionalni nevihtni potencial danes</h2>

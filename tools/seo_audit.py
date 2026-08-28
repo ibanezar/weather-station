@@ -53,6 +53,7 @@ CORE = {
     "gobarska-napoved/metodologija/": ("monthly", "0.5"),
     "gobarska-napoved/dnevnik/":    ("monthly", "0.4"),
     "meteogasilec/":                    ("daily",   "0.7"),
+    "meteogasilec/intervencija/":       ("daily",   "0.7"),
     "meteogasilec/vreme-intervencije/": ("daily",   "0.6"),
     "meteogasilec/nasveti/":            ("monthly", "0.5"),
     "meteogasilec/metodologija/":       ("monthly", "0.5"),

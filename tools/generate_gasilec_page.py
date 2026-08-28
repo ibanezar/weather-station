@@ -13,9 +13,12 @@ Vsebina:
     naslovnici, glej gasilec_model.py) + 7-dnevni graf.
   * NASA FIRMS — dejansko zaznane toplotne anomalije v bližini (isti Worker
     endpoint /pozari kot na naslovnici, klican na novo od tu).
-  * Tri podstrani: vreme-intervencije/ (lokalni veter + nacionalni nevihtni
-    potencial iz že objavljenega og/storm-map/latest.json), nasveti/ (kurjenje
-    v naravi, kontakti), metodologija/ (razlaga FWI, viri, omejitve).
+  * Štiri podstrani: intervencija/ (hiter operativni pogled — GPS lokacija,
+    grafičen veter, detektor obrata vetra, kopiraj briefing; klientska logika
+    je v meteogasilec/gasilec.js, deljena med vsemi /meteogasilec/* stranmi),
+    vreme-intervencije/ (lokalni veter + nacionalni nevihtni potencial iz že
+    objavljenega og/storm-map/latest.json), nasveti/ (kurjenje v naravi,
+    kontakti), metodologija/ (razlaga FWI, viri, omejitve).
 
 Usage:
   python3 tools/generate_gasilec_page.py
@@ -105,6 +108,37 @@ body{
 .gf-tbl{width:100%;border-collapse:collapse;font-size:.82rem;margin:.8rem 0}
 .gf-tbl th,.gf-tbl td{padding:.4rem .5rem;border-bottom:1px solid var(--card-border);text-align:left}
 .gf-back{display:inline-block;margin-top:1.4rem;font-size:.85rem}
+.gf-fresh{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;color:var(--muted)}
+.gf-interv-banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  border:1px solid #ef444455;border-radius:1rem;padding:1rem 1.2rem;margin:.8rem 0 1.2rem;
+  background:linear-gradient(120deg,#ef444422,#ef444408)}
+.gf-interv-banner h2{margin:0 0 .2rem;font-size:1.05rem}
+.gf-interv-banner p{margin:0;font-size:.8rem;color:var(--muted)}
+.gf-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:.7rem;
+  font-weight:700;font-size:.88rem;text-decoration:none;border:none;cursor:pointer;
+  background:#ef4444;color:#fff;white-space:nowrap}
+.gf-btn:hover{background:#dc2626}
+.gf-btn.secondary{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border)}
+.gf-btn.secondary:hover{border-color:#ef4444}
+.gf-interv-card{border:1px solid var(--card-border);border-radius:1rem;padding:1.2rem;
+  background:var(--card-bg);box-shadow:var(--card-shadow);margin:1rem 0}
+.gf-interv-loc{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;
+  margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid var(--card-border)}
+.gf-interv-loc b{font-size:.92rem}
+.gf-interv-body{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center}
+.gf-compass-wrap{flex:0 0 auto;text-align:center;color:var(--text)}
+.gf-compass-lbl{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gf-interv-stats{flex:1;min-width:220px;display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem .9rem}
+.gf-stat{display:flex;flex-direction:column}
+.gf-stat b{font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-stat span{font-size:.7rem;color:var(--muted)}
+.gf-shift-warn{margin-top:1rem;padding:.8rem 1rem;border-radius:.8rem;background:#f59e0b22;
+  border:1px solid #f59e0b66;font-size:.85rem;line-height:1.5}
+.gf-shift-warn b{display:block;margin-bottom:.2rem}
+.gf-briefing{margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--card-border)}
+.gf-briefing pre{white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.76rem;
+  background:var(--bg-alt,rgba(127,127,127,.08));border-radius:.6rem;padding:.8rem;margin:.6rem 0}
+.gf-briefing-actions{display:flex;gap:.6rem;flex-wrap:wrap}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -173,7 +207,7 @@ def _bars_svg_html(days):
 def build_hero(payload):
     today = payload
     color = next((d["color"] for d in payload["days"] if d["date"] == payload["date"]), "#f59e0b")
-    return f'''  <div class="gf-hero">
+    return f'''  <div class="gf-hero" data-generated="{_esc(payload.get("generated"))}">
     <div class="gf-hero-top">
       <div class="gf-gauge-wrap">
         {gauge_svg(today["fwi"], color)}
@@ -188,6 +222,7 @@ def build_hero(payload):
 {_bars_svg_html(payload["days"])}
 {legend_html()}
     <p class="gf-hero-note">🔥 Ista metodologija kot na naslovnici (kartica »Požarna nevarnost – indeks FWI«) — tu preračunana strežniško, da je vidna tudi iskalnikom in brez JS.</p>
+    <p class="gf-hero-note gf-fresh" id="gf-fresh">posodobljeno {_esc(TODAY.isoformat())}</p>
   </div>'''
 
 
@@ -208,16 +243,33 @@ _FI_NASVETI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/20
     '<path d="M13.6 8.2h3.2M7.4 13.4h9.2M7.4 17.4h9.2" stroke="currentColor" stroke-width="1.5" '
     'stroke-linecap="round" opacity=".7"/></svg>')
 
+_FI_INTERV = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 2.6c-3.7 0-6.4 2.9-6.4 6.5 0 4.5 5.1 10.4 6 11.4a.6.6 0 0 0 .8 0c.9-1 6-6.9 6-11.4 '
+    '0-3.6-2.7-6.5-6.4-6.5Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linejoin="round"/><circle cx="12" cy="9.2" r="2.3" fill="currentColor"/></svg>')
+
 FEATURES = [
-    ("/meteogasilec/metodologija/", _FI_OGROZENOST, "#ef4444", "Kako se izračuna FWI",
+    ("/meteogasilec/intervencija/", _FI_INTERV, "#ef4444", "Intervencija zdaj",
+     "Tvoja lokacija (GPS): veter, obrat vetra, FWI in kopiraj briefing."),
+    ("/meteogasilec/metodologija/", _FI_OGROZENOST, "#f59e0b", "Kako se izračuna FWI",
      "Sestavine kanadskega indeksa (FFMC/DMC/DC/ISI/BUI) in kaj indeks ni."),
-    ("/nevihte/", _FI_OGROZENOST, "#f59e0b", "Aktivna opozorila ARSO",
+    ("/nevihte/", _FI_OGROZENOST, "#eab308", "Aktivna opozorila ARSO",
      "Vključno s kategorijo »požarna ogroženost«, sproti vsakih 15 minut."),
     ("/meteogasilec/vreme-intervencije/", _FI_VETER, "#22d3ee", "Vreme za intervencije",
      "Veter, sunki in nacionalni nevihtni potencial za danes."),
     ("/meteogasilec/nasveti/", _FI_NASVETI, "#84cc16", "Kurjenje v naravi in kontakti",
      "Kdaj sme in kdaj ne sme, 112, URSZR, Gasilska zveza Slovenije."),
 ]
+
+
+def interv_banner_html():
+    return '''  <div class="gf-interv-banner">
+    <div>
+      <h2>🚨 Intervencija zdaj</h2>
+      <p>Tvoja lokacija (GPS): veter, obrat vetra in FWI v nekaj sekundah, plus gumb za briefing.</p>
+    </div>
+    <a class="gf-btn" href="/meteogasilec/intervencija/">📍 Odpri</a>
+  </div>'''
 
 
 def feature_cards_html():
@@ -351,6 +403,210 @@ def build_vreme_intervencije_page():
                           "podatki v pomoč gasilskim intervencijam.", inner)
 
 
+# ── intervencija zdaj (GPS) ──────────────────────────────────────────────────
+
+def fetch_current_hourly(lat=None, lon=None):
+    """Urni temp/vlaga/padavine/veter za naslednja 2 dni — vhod za rezervni
+    (brez-JS) prikaz na /intervencija/. Isti Open-Meteo forecast endpoint kot
+    JS na tej strani kliče v brskalniku (glej Gasilec bootstrap spodaj),
+    samo za privzeto lokacijo (Rečica ob Savinji)."""
+    params = urllib.parse.urlencode({
+        "latitude": lat or fm.LAT, "longitude": lon or fm.LON,
+        "hourly": "temperature_2m,relative_humidity_2m,precipitation,"
+                  "wind_speed_10m,wind_gusts_10m,wind_direction_10m",
+        "forecast_days": 2, "timezone": "Europe/Ljubljana",
+    })
+    url = f"https://api.open-meteo.com/v1/forecast?{params}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.load(r)
+
+
+def _compass_svg_py(dir_from_deg, size=128):
+    """Strežniška kopija windCompassSvg() iz gasilec.js — glej opombo na vrhu
+    te datoteke (JS in Python namerno računata/rišeta isto stvar ločeno, isto
+    načelo kot SLO_POLY/buildSloGrid med app.js in generate_storm_map.py)."""
+    to_deg = (dir_from_deg + 180) % 360
+    cx = cy = size / 2
+    r = size / 2 - 16
+    labels = [("S", cx, 15), ("V", size - 9, cy + 4), ("J", cx, size - 6), ("Z", 9, cy + 4)]
+    labels_html = "".join(
+        f'<text x="{x}" y="{y}" text-anchor="middle" font-size="11" font-weight="700" '
+        f'fill="currentColor" opacity=".55">{t}</text>' for t, x, y in labels)
+    return (f'<svg viewBox="0 0 {size} {size}" width="{size}" height="{size}" class="gf-compass" '
+            f'aria-hidden="true"><circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="currentColor" '
+            f'stroke-opacity=".18" stroke-width="1.5"/>{labels_html}'
+            f'<g transform="rotate({to_deg} {cx} {cy})">'
+            f'<line x1="{cx}" y1="{cy}" x2="{cx}" y2="{cy - r + 6}" stroke="currentColor" stroke-width="3" '
+            f'stroke-linecap="round"/><path d="M {cx - 7} {cy - r + 18} L {cx} {cy - r + 4} L {cx + 7} '
+            f'{cy - r + 18} Z" fill="currentColor"/></g></svg>')
+
+
+def _angle_diff_py(a, b):
+    return abs(((b - a + 540) % 360) - 180)
+
+
+def _detect_wind_shift_py(times, spd, gust, wdir, start, horizon=12):
+    """Strežniška kopija detectWindShift() iz gasilec.js, za rezervni prikaz
+    brez JS. Isti pragova (45°, 15 km/h) — glej opombo v gasilec.js."""
+    n = min(len(times) - start, horizon)
+    for di in range(max(0, n - 1)):
+        i = start + di
+        for dj in range(di + 1, n):
+            j = start + dj
+            diff = _angle_diff_py(wdir[i], wdir[j])
+            if diff < 45:
+                continue
+            if max(spd[i] or 0, gust[i] or 0) >= 15 or max(spd[j] or 0, gust[j] or 0) >= 15:
+                return {"i": i, "j": j, "degrees": round(diff)}
+    return None
+
+
+def build_intervencija_page(payload):
+    today_fwi = payload["fwi"]
+    today_level = payload["level"]
+    today_isi = next((d["isi"] for d in payload["days"] if d["date"] == payload["date"]), None)
+
+    body_html = '<p class="gf-note">Trenutni podatki za Rečico ob Savinji trenutno niso na voljo.</p>'
+    shift_html = ""
+    try:
+        data = fetch_current_hourly()
+        h = data.get("hourly") or {}
+        times = h.get("time") or []
+        temp = h.get("temperature_2m") or []
+        rh = h.get("relative_humidity_2m") or []
+        precip = h.get("precipitation") or []
+        spd = h.get("wind_speed_10m") or []
+        gust = h.get("wind_gusts_10m") or []
+        wdir = h.get("wind_direction_10m") or []
+        now_iso = _dt.datetime.now().strftime("%Y-%m-%dT%H:00")
+        i = next((k for k, t in enumerate(times) if t >= now_iso), 0)
+        precip3 = sum(v or 0 for v in precip[i:i + 3])
+        body_html = f'''  <div class="gf-interv-body">
+      <div class="gf-compass-wrap" id="gf-interv-compass">
+        {_compass_svg_py(wdir[i])}
+        <div class="gf-compass-lbl">{_dir_label(wdir[i])} → {_dir_label((wdir[i] + 180) % 360)} · {spd[i]:.0f} km/h</div>
+      </div>
+      <div class="gf-interv-stats" id="gf-interv-stats">
+        <div class="gf-stat"><b>{temp[i]:.1f} °C</b><span>Temperatura</span></div>
+        <div class="gf-stat"><b>{rh[i]:.0f} %</b><span>Vlaga</span></div>
+        <div class="gf-stat"><b>{gust[i]:.0f} km/h</b><span>Sunki vetra</span></div>
+        <div class="gf-stat"><b>{precip3:.1f} mm</b><span>Padavine 3 h</span></div>
+        <div class="gf-stat"><b>{today_fwi:.1f}</b><span>FWI danes ({_esc(today_level)})</span></div>
+        <div class="gf-stat"><b>{today_isi:.1f}</b><span>ISI danes</span></div>
+      </div>
+    </div>'''
+        shift = _detect_wind_shift_py(times, spd, gust, wdir, i)
+        if shift:
+            shift_html = f'''  <div class="gf-shift-warn" id="gf-interv-shift">
+      <b>⚠ MeteoGasilec kriterij: možen obrat vetra</b>
+      Ob {times[shift["j"]][11:16]} pričakovan obrat smeri za +{shift["degrees"]}°
+      ({_dir_label(wdir[shift["i"]])} → {_dir_label(wdir[shift["j"]])}),
+      sunki {gust[shift["i"]]:.0f} → {gust[shift["j"]]:.0f} km/h.
+      Ni uradno opozorilo ARSO.
+    </div>'''
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, IndexError) as e:
+        print(f"  ⚠ intervencija SSR: {e}", file=sys.stderr)
+
+    fwi_json = json.dumps({"fwi": today_fwi, "level": today_level, "isi": today_isi})
+    inner = f'''  <p class="post-meta">Hiter operativni pogled: dovoli lokacijo (GPS) in v nekaj sekundah dobiš veter,
+  morebiten obrat vetra in gumb za briefing. Indeks FWI/ISI spodaj ostaja izračunan za Rečico ob Savinji, ne za tvojo
+  GPS lokacijo (dokler modela ne posplošimo na poljubno točko) — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
+  <div class="gf-interv-card">
+    <div class="gf-interv-loc">
+      <b id="gf-interv-loc">📍 Rečica ob Savinji (privzeto)</b>
+      <button class="gf-btn" id="btn-gps" type="button">📍 Uporabi mojo lokacijo</button>
+    </div>
+    <div id="gf-interv-body">
+{body_html}
+    </div>
+    <div id="gf-interv-shift-wrap">
+{shift_html}
+    </div>
+    <p class="gf-note" id="gf-interv-note"></p>
+    <p class="gf-note"><a id="gf-interv-map" href="https://www.openstreetmap.org/?mlat={fm.LAT}&amp;mlon={fm.LON}#map=12/{fm.LAT}/{fm.LON}" target="_blank" rel="noopener">🗺 Odpri na zemljevidu (OpenStreetMap)</a></p>
+    <div class="gf-briefing">
+      <h2 style="margin-top:0">📋 Briefing</h2>
+      <pre id="gf-briefing-pre">Nalaganje…</pre>
+      <div class="gf-briefing-actions">
+        <button class="gf-btn secondary" id="btn-copy" type="button">📋 Kopiraj briefing</button>
+        <button class="gf-btn secondary" id="btn-share" type="button" hidden>📤 Deli</button>
+      </div>
+    </div>
+  </div>
+  <script src="/meteogasilec/gasilec.js"></script>
+  <script>(function(){{
+    var DEFAULT_LAT={fm.LAT!r}, DEFAULT_LON={fm.LON!r};
+    var FWI_TODAY={fwi_json};
+    var lastData=null;
+    function fmtHM(t){{return t?t.slice(11,16):'—';}}
+    function render(json,label){{
+      var h=json.hourly||{{}};
+      var times=h.time||[],temp=h.temperature_2m||[],rh=h.relative_humidity_2m||[],
+          precip=h.precipitation||[],spd=h.wind_speed_10m||[],gust=h.wind_gusts_10m||[],wdir=h.wind_direction_10m||[];
+      var nowIso=new Date().toISOString().slice(0,13)+':00';
+      var i=0;for(var k=0;k<times.length;k++){{if(times[k]>=nowIso){{i=k;break;}}}}
+      var precip3=0;for(var p=i;p<Math.min(i+3,precip.length);p++){{precip3+=precip[p]||0;}}
+      document.getElementById('gf-interv-loc').textContent='📍 '+label;
+      document.getElementById('gf-interv-compass').innerHTML=
+        Gasilec.windCompassSvg(wdir[i])+'<div class="gf-compass-lbl">'+Gasilec.dirLabel(wdir[i])+' → '+
+        Gasilec.dirLabel((wdir[i]+180)%360)+' · '+Math.round(spd[i])+' km/h</div>';
+      document.getElementById('gf-interv-stats').innerHTML=
+        '<div class="gf-stat"><b>'+temp[i].toFixed(1)+' °C</b><span>Temperatura</span></div>'
+        +'<div class="gf-stat"><b>'+Math.round(rh[i])+' %</b><span>Vlaga</span></div>'
+        +'<div class="gf-stat"><b>'+Math.round(gust[i])+' km/h</b><span>Sunki vetra</span></div>'
+        +'<div class="gf-stat"><b>'+precip3.toFixed(1)+' mm</b><span>Padavine 3 h</span></div>'
+        +'<div class="gf-stat"><b>'+FWI_TODAY.fwi.toFixed(1)+'</b><span>FWI danes ('+FWI_TODAY.level+')</span></div>'
+        +'<div class="gf-stat"><b>'+FWI_TODAY.isi.toFixed(1)+'</b><span>ISI danes</span></div>';
+      var shift=Gasilec.detectWindShift(times.slice(i),spd.slice(i),gust.slice(i),wdir.slice(i),{{horizonHours:12}});
+      var shiftWrap=document.getElementById('gf-interv-shift-wrap');
+      if(shift.detected){{
+        shiftWrap.innerHTML='<div class="gf-shift-warn"><b>⚠ MeteoGasilec kriterij: možen obrat vetra</b>'
+          +'Ob '+fmtHM(shift.toTime)+' pričakovan obrat smeri za +'+shift.degrees+'° ('
+          +Gasilec.dirLabel(shift.fromDir)+' → '+Gasilec.dirLabel(shift.toDir)+'), sunki '
+          +Math.round(shift.gustBefore)+' → '+Math.round(shift.gustAfter)+' km/h. Ni uradno opozorilo ARSO.</div>';
+      }}else{{
+        shiftWrap.innerHTML='';
+      }}
+      lastData={{
+        timeLabel:new Date().toLocaleTimeString('sl',{{hour:'2-digit',minute:'2-digit'}}),
+        placeLabel:label, temp:temp[i], rh:rh[i], windSpeed:spd[i], windGust:gust[i],
+        windFromDeg:wdir[i], precip3h:precip3, fwi:FWI_TODAY.fwi, fwiLevel:FWI_TODAY.level,
+        isi:FWI_TODAY.isi, shift:shift.detected?shift:null,
+      }};
+      document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+    }}
+    function load(lat,lon,label){{
+      var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+        +'&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m'
+        +'&forecast_days=2&timezone=Europe%2FLjubljana';
+      fetch(url).then(function(r){{return r.json();}}).then(function(j){{render(j,label);}}).catch(function(e){{
+        console.warn('intervencija:',e);
+      }});
+    }}
+    document.getElementById('btn-gps').addEventListener('click',function(){{
+      var note=document.getElementById('gf-interv-note');
+      if(!navigator.geolocation){{note.textContent='GPS ni podprt v tem brskalniku — prikazani ostajajo podatki za Rečico ob Savinji.';return;}}
+      note.textContent='Pridobivam lokacijo …';
+      navigator.geolocation.getCurrentPosition(function(pos){{
+        note.textContent='';
+        var lat=pos.coords.latitude.toFixed(4),lon=pos.coords.longitude.toFixed(4);
+        document.getElementById('gf-interv-map').href='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=13/'+lat+'/'+lon;
+        load(lat,lon,'Tvoja lokacija ('+lat+', '+lon+')');
+      }},function(err){{
+        note.textContent='Lokacija ni na voljo (zavrnjeno ali napaka) — prikazani ostajajo podatki za Rečico ob Savinji.';
+      }},{{enableHighAccuracy:true,timeout:10000}});
+    }});
+    Gasilec.wireBriefingButtons(document.getElementById('btn-copy'),document.getElementById('btn-share'),function(){{
+      return lastData?Gasilec.buildBriefing(lastData):null;
+    }});
+    load(DEFAULT_LAT,DEFAULT_LON,'Rečica ob Savinji (privzeto)');
+  }})();</script>'''
+    return subpage_shell("intervencija", "Intervencija zdaj",
+                          "Hiter operativni pogled za gasilske intervencije: veter po GPS lokaciji, samodejni "
+                          "detektor obrata vetra in gumb za kopiranje briefinga.", inner)
+
+
 NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
   lokalnega gasilskega poveljstva.</p>
   <h2>🔥 Kurjenje v naravi</h2>
@@ -427,6 +683,7 @@ def main():
     with open(os.path.join(ROOT, "meteogasilec", "index.json"), "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
 
+    build_intervencija_page(payload)
     build_vreme_intervencije_page()
     build_nasveti_page()
     build_metodologija_page()
@@ -435,9 +692,15 @@ def main():
 {seo.stn_badge()}
   <h1 class="page-title">MeteoGasilec — požarna ogroženost, Rečica ob Savinji</h1>
   <p class="post-meta">Indeks FWI in vreme za intervencije · osvežuje se dnevno · {TODAY.isoformat()}</p>
+{interv_banner_html()}
 {build_hero(payload)}
 {feature_cards_html()}
 {firms_widget_html()}
+  <script src="/meteogasilec/gasilec.js"></script>
+  <script>(function(){{
+    var el=document.getElementById('gf-fresh');
+    if(el&&window.Gasilec)Gasilec.renderFreshness(el,el.closest('.gf-hero').dataset.generated,{{greenH:26,yellowH:50}});
+  }})();</script>
   <h2 id="faq">Pogosta vprašanja</h2>
   <p><b>Je MeteoGasilec uradna napoved?</b><br>Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski
   FWI metodologiji, ki jo za Evropo uporablja EFFIS/GWIS. Uradno oceno objavlja ARSO.</p>
@@ -467,7 +730,7 @@ def main():
     head_extras = schema + "\n" + PAGE_CSS
     html = seo.page_shell(title, desc, url, head_extras, body)
     seo.write_page("meteogasilec/index.html", html, force=True)
-    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 3 podstrani")
+    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 4 podstrani")
 
 
 if __name__ == "__main__":

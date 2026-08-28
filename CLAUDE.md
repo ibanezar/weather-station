@@ -573,6 +573,42 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
 - Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
   `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
 
+## MeteoGasilec — dva načina uporabe
+
+`/meteogasilec/` ima od 28. 8. 2026 dva na sebi: **pripravljalni** (dnevni FWI,
+metodologija, FIRMS, vreme za intervencije — vse za Rečico ob Savinji) in
+**operativni** (`/meteogasilec/intervencija/` — hiter pogled med intervencijo:
+GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
+
+- **`meteogasilec/gasilec.js`** — nova skupna klientska datoteka, ROČNO pisana
+  (ni generirana), deljena med vsemi `/meteogasilec/*` stranmi. Vsebuje kompas
+  (`windCompassSvg`), detektor obrata vetra (`angleDiff`/`detectWindShift`),
+  freshness (`renderFreshness`) in generator briefinga (`buildBriefing`). Ta
+  strani ne nalagajo `app.js` (samostojne, self-contained — enako kot FIRMS
+  widget), zato je bilo to potrebno, da FWI/kompas logika ne bi postala tretja
+  ločena kopija iste stvari (poleg `app.js` in `gasilec_model.py`). Načelo
+  "generatorji strani si ne delijo knjižnic" iz tega dokumenta velja med
+  RAZLIČNIMI Python generatorji — ne med podstranmi ENEGA generatorja
+  (`generate_gasilec_page.py` generira vse štiri `/meteogasilec/*` strani).
+  FWI izračun v tej datoteki (`calcOneDayFWI`/`fwiClass`) je namerna dobesedna
+  kopija iz `app.js` (glej opombo na vrhu `gasilec_model.py`) — če spremeniš
+  formulo/pragove, popravi vse tri kopije (app.js, gasilec_model.py,
+  gasilec.js). Isto velja za 16-smerna imena vetra (`_DIRS` v
+  `generate_gasilec_page.py` ↔ `GASILEC_DIRS` v gasilec.js).
+- **GPS na `/intervencija/` velja SAMO za vreme/veter, ne za FWI/ISI** — ta dva
+  ostajata izračunana za fiksno Rečico ob Savinji (`meteogasilec/index.json`,
+  zgrajen dnevno). Posplošitev FWI modela na poljubno GPS točko je namenoma
+  izpuščena (naslednji korak) — stran to eksplicitno pove, da ne zavaja.
+- **Obrat vetra ≥45° je MeteoGasilec kriterij, ne uradno opozorilo ARSO** —
+  vedno tako označen. Prag: obrat smeri >=45° IN veter/sunki na vsaj eni
+  strani >=15 km/h (da se pri skoraj brezvetrju ne sproža po nepotrebnem).
+- **Freshness sistem — nikoli ne skrivaj stare vrednosti, samo jo označi.**
+  `renderFreshness()` izpiše 🟢 (<26h, en dnevni tek zamujen), 🟡 (26–50h) ali
+  🔴 (>50h, zamujena ≥2 teka) glede na `data-generated` na `.gf-hero`. Uveden
+  po incidentu, ko je stran tiho kazala včerajšnji datum brez opozorila.
+- Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
+  isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
