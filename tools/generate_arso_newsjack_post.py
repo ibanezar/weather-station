@@ -25,7 +25,8 @@ Usage:
 import datetime, hashlib, json, os, re, shutil, sys, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title  # noqa: E402
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title, CSS_LINKS  # noqa: E402
+from asset_version import asset_href  # noqa: E402
 
 try:
     from zoneinfo import ZoneInfo
@@ -392,8 +393,7 @@ def build_post(alerts, current, now_utc, issued=None):
   "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": ["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"], "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
 }}
 </script>
-<link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="blog.css">
+{CSS_LINKS}
 </head>
 <body>
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
@@ -430,9 +430,9 @@ def build_post(alerts, current, now_utc, issued=None):
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a class="social-link" href="https://www.facebook.com/meteorec.si" target="_blank" rel="noopener" aria-label="Meteorec na Facebooku"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46H15.2c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z"/></svg></a> · <a class="social-link" href="https://www.instagram.com/meteorec.si" target="_blank" rel="noopener" aria-label="Meteorec na Instagramu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></span>
   </footer>
 </div>
-<script src="likes.js" defer></script>
-<script src="views.js" defer></script>
-<script src="/blog/share-bar.js" defer></script>
+<script src="{asset_href('blog/likes.js')}" defer></script>
+<script src="{asset_href('blog/views.js')}" defer></script>
+<script src="{asset_href('blog/share-bar.js')}" defer></script>
 </body>
 </html>
 '''

@@ -33,7 +33,8 @@ Potrebne env spremenljivke:
 import json, os, sys, re, shutil, struct, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY, seo_title
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY, seo_title, CSS_LINKS
+from asset_version import asset_href
 
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 LAT, LON = 46.325779, 14.921137
@@ -1115,9 +1116,8 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
   ]
 }}
 </script>
-<link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
-<link rel="stylesheet" href="blog.css">
+{CSS_LINKS}
 <style>{EXTRA_STYLE}</style>
 </head>
 <body>
@@ -1165,12 +1165,12 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
 </div>
 
 <script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script src="likes.js" defer></script>
-<script src="views.js" defer></script>
-<script src="/blog/comments.js" defer></script>
-<script src="/blog/share-bar.js" defer></script>
-<script src="/blog/article-enhance.js" defer></script>
-<script src="/blog/subscribe.js" defer></script>
+<script src="{asset_href('blog/likes.js')}" defer></script>
+<script src="{asset_href('blog/views.js')}" defer></script>
+<script src="{asset_href('blog/comments.js')}" defer></script>
+<script src="{asset_href('blog/share-bar.js')}" defer></script>
+<script src="{asset_href('blog/article-enhance.js')}" defer></script>
+<script src="{asset_href('blog/subscribe.js')}" defer></script>
 {chart_scripts_html}
 {app_bottomnav()}
 </body>

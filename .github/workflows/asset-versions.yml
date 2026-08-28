@@ -1,0 +1,54 @@
+name: Asset cache-busting
+
+# GitHub Pages servira CSS/JS z max-age=31536000 (eno leto) in ne podpira
+# nastavljivih glav v repozitoriju -- edini način, da sprememba enega od teh
+# virov doseže brskalnike vračajočih se obiskovalcev, je nov ?v=<hash> v
+# URL-ju na VSAKI strani, ki ga nalaga (glej tools/update_asset_versions.py).
+# Ta workflow to zažene ob vsaki spremembi enega od virov, tako da popravek
+# doseže tudi ~2900 že objavljenih strani, ki se same ne pregenerirajo.
+on:
+  push:
+    branches: [main]
+    paths:
+      - blog/blog.css
+      - vreme/vreme.css
+      - fonts/fonts.css
+      - sola/sola.css
+      - blog/likes.js
+      - blog/views.js
+      - blog/comments.js
+      - blog/share-bar.js
+      - blog/article-enhance.js
+      - blog/subscribe.js
+      - blog/list-enhance.js
+  workflow_dispatch:
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Uskladi ?v= na vseh straneh
+        run: python3 tools/update_asset_versions.py
+
+      - name: Commit & push če je kaj novega
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add -A -- '*.html'
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: uskladi cache-busting verzije statičnih virov [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen, poskus $i — rebase na origin/main in ponovi."
+            git pull --rebase origin main
+          done
+          git push
