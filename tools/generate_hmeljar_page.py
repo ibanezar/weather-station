@@ -87,6 +87,17 @@ HM_CSS = """<style>
 LEAFLET_CSS = ('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" '
                'integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">')
 
+# Lastna kopija BRAND_SWAP iz generate_gasilec_page.py (drug generator, ne
+# uvoženo — glej opombo na vrhu datoteke). Zamenja logo/ime v skupnem
+# site-head z MeteoHmeljar znamko, tako da stran deluje kot samostojen
+# produkt, ne kot podstran Meteorec bloga — isto kar naredi MeteoGasilec.
+BRAND_SWAP = '''<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/meteohmeljar/logo-hmeljar.svg";img.alt="MeteoHmeljar";}
+  if(nm){nm.innerHTML="Meteo<em>Hmeljar</em>";}
+})();</script>'''
+
 _FI_SPRAY = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
              '<path d="M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
              '<path d="M8 7c0 2.5-2 3-2 5.2a2 2 0 0 0 4 0C10 10 8 9.5 8 7Z" fill="currentColor" fill-opacity=".18" '
@@ -179,7 +190,8 @@ def build_page():
         seo.webpage_schema("/meteohmeljar/", "MeteoHmeljar", DESC),
         seo.crumbs_schema(crumbs),
     ])
-    body = f'''{seo.crumbs_html(crumbs)}
+    body = f'''{BRAND_SWAP}
+{seo.crumbs_html(crumbs)}
 {seo.stn_badge()}
 {inner}
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
