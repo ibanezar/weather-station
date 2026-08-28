@@ -21,7 +21,8 @@ Potrebne env spremenljivke:
 import datetime, json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title  # noqa: E402
+from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title, CSS_LINKS  # noqa: E402
+from asset_version import asset_href  # noqa: E402
 from generate_daily_post import app_bottomnav, hexrgb, call_lektor  # noqa: E402
 import generate_seo_pages as seo  # noqa: E402
 from compute_forecast_test_metrics import (  # noqa: E402
@@ -219,9 +220,8 @@ def build_html(article, y, m, now_utc):
   "keywords": "{keywords}"
 }}
 </script>
-<link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="alternate" type="application/rss+xml" title="Meteorec — blog" href="/blog/rss.xml">
-<link rel="stylesheet" href="blog.css">
+{CSS_LINKS}
 <style>.section-label{{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);opacity:.75}}</style>
 </head>
 <body>
@@ -258,11 +258,11 @@ def build_html(article, y, m, now_utc):
   </footer>
 
 </div>
-<script src="likes.js" defer></script>
-<script src="views.js" defer></script>
-<script src="/blog/share-bar.js" defer></script>
-<script src="/blog/comments.js" defer></script>
-<script src="/blog/subscribe.js" defer></script>
+<script src="{asset_href('blog/likes.js')}" defer></script>
+<script src="{asset_href('blog/views.js')}" defer></script>
+<script src="{asset_href('blog/share-bar.js')}" defer></script>
+<script src="{asset_href('blog/comments.js')}" defer></script>
+<script src="{asset_href('blog/subscribe.js')}" defer></script>
 {app_bottomnav()}
 </body>
 </html>
