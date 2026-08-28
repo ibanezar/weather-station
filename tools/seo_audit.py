@@ -69,6 +69,7 @@ CORE = {
     # /rekord/ in /novosti/), ampak jih poveže v en vstop.
     "ekstremno-vreme/":          ("weekly",  "0.7"),
     "agrometeo/":                ("daily",   "0.7"),
+    "meteohmeljar/":              ("hourly",  "0.7"),
     "opozorilo-pred-pozebo/":    ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
@@ -105,6 +106,22 @@ CORE = {
     "vreme-gornji-grad/":         ("daily",   "0.6"),
     "vreme-zgornja-savinjska-dolina/": ("daily", "0.7"),
 }
+
+# Parcelne strani MeteoHmeljar (/meteohmeljar/<id>/) so dinamične — izpeljane
+# iz data/hmeljar_parcele.yaml, ne naštete ročno tu. Isti razlog kot pri
+# CORE/sitemap incidentu na vrhu tega dokumenta: dva ločena seznama bi se prej
+# ali slej razšla. Manjkajoč PyYAML ali datoteka tega pregleda ne sme podreti —
+# takrat CORE preprosto ostane brez teh vnosov in seo_audit to javi kot
+# manjkajočo pokritost (isto kot za katerokoli drugo pozabljeno stran).
+try:
+    import yaml as _yaml
+    with open(os.path.join(ROOT, "data", "hmeljar_parcele.yaml"), encoding="utf-8") as _f:
+        _hmeljar_data = _yaml.safe_load(_f) or {}
+    for _p in _hmeljar_data.get("parcele") or []:
+        if _p.get("aktivna") and _p.get("id"):
+            CORE[f"meteohmeljar/{_p['id']}/"] = ("hourly", "0.6")
+except Exception:
+    pass
 
 # Strani, na katerih preverimo osnovne on-page SEO elemente.
 ONPAGE_SAMPLE = [

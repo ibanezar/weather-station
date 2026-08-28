@@ -1,0 +1,44 @@
+# data/hmeljar_parcele.yaml — parcele za MeteoHmeljar (/meteohmeljar/)
+#
+# Eno gospodarstvo, znane parcele — ni baze, ni prijave. Ročno urejano, isti
+# vzorec kot species_rules.yaml (CALIBRATION) / fetch_hydrants.py
+# (HYDRANT_OVERRIDES). Bere ga tools/generate_hmeljar_page.py.
+#
+# "id" je slug (uporabi se v URL-ju /meteohmeljar/<id>/ in v imenu dnevnika
+# data/meteohmeljar/<id>-log.json) — se ne spreminja, ko je parcela enkrat
+# objavljena (kot pri kodah i/<koda> za kratke povezave).
+#
+# operation_profile: privzete vrednosti (glej hmeljar_standard spodaj) so PRVI
+# PRIBLIŽEK za v0.1 (docs/meteohmeljar-v0.1-spec.md §9) — popravi jih iz
+# izkušenj, ne čakaj na "popolne" številke.
+
+parcele:
+  # TODO: to je PLACEHOLDER na koordinatah postaje IREICA1 — zamenjaj z
+  # dejanskim lat/lon, površino, sorto in namakanjem prve prave parcele, preden
+  # gre stran v uporabo. Brez tega generator teče, a rezultati niso za nobeno
+  # resnično parcelo.
+  - id: parcela-1
+    naziv: "Parcela 1 (PLACEHOLDER — zamenjaj s pravo lokacijo)"
+    lat: 46.325779
+    lon: 14.921137
+    povrsina_ha: 1.0
+    sorta: "Aurora"
+    namakanje: brez   # kapljicno | razprsevanje | brez
+    aktivna: true
+    operation_profile: hmelj_standard
+
+operation_profiles:
+  hmelj_standard:
+    wind_optimal_kmh: 2
+    wind_max_kmh: 8
+    gust_max_kmh: 15
+    temperature_min_c: 8
+    temperature_max_c: 25
+    temperature_shoulder_low_c: 12
+    temperature_shoulder_high_c: 22
+    rainfree_hours_required: 4
+    rh_wet_leaf_pct: 95
+    rh_taper_start_pct: 70
+    wet_leaf_allowed: false
+    precip_prob_gate_pct: 50
+    precip_prob_taper_pct: 40

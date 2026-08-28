@@ -1,0 +1,42 @@
+name: MeteoHmeljar
+
+on:
+  schedule:
+    - cron: '20 * * * *'   # vsako uro (urna časovna vrsta je bistvo SprayScore/StormRisk)
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Namesti PyYAML (data/hmeljar_parcele.yaml)
+        run: pip install pyyaml
+
+      - name: Generate MeteoHmeljar strani (parcele + indeks)
+        run: python3 tools/generate_hmeljar_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add meteohmeljar/ data/meteohmeljar/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi MeteoHmeljar $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen (verjetno je drug delovni tok medtem pisal na main) — poskus $i, rebase in ponovim …"
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; echo "::error::Rebase spodletel — potreben ročni pregled."; exit 1; }
+            sleep $((i * 3))
+          done
+          echo "::error::Push ni uspel po $i poskusih."
+          exit 1
