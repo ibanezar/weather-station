@@ -54,6 +54,8 @@ body{
 .gf-gauge-num .num{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:800;color:#fff}
 .gf-gauge-num small{display:block;margin-top:.15rem;font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600}
 .gf-hero-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gf-kicker{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.04em;
+  text-transform:uppercase;margin:0 0 .5rem}
 .gf-hero-body{flex:1;min-width:220px}
 .gf-badge{display:inline-block;padding:.28rem .8rem;border-radius:999px;font-size:.8rem;
   font-weight:700;margin-bottom:.4rem}
@@ -125,8 +127,8 @@ body{
 .gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
   padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
-.gf-arso{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
-  box-shadow:var(--card-shadow);margin:1.4rem 0}
+.gf-arso{border:1px solid var(--card-border);border-top:3px solid #2563eb;border-radius:.9rem;padding:1rem;
+  background:var(--card-bg);box-shadow:var(--card-shadow);margin:1.4rem 0}
 .gf-arso-list{display:flex;flex-direction:column;gap:.5rem}
 .gf-arso-item{padding:.5rem .7rem;border-radius:.5rem;font-size:.85rem;border-left:3px solid #eab308;
   background:rgba(234,179,8,.08)}
@@ -202,15 +204,18 @@ body{
 })();</script>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">MeteoGasilec — požarna ogroženost, Rečica ob Savinji</h1>
-  <p class="post-meta">Indeks FWI in vreme za intervencije · osvežuje se dnevno · 2026-08-28</p>
-  <div class="gf-interv-banner">
-    <div>
-      <h2>🚨 Intervencija zdaj</h2>
-      <p>Tvoja lokacija (GPS): veter, obrat vetra in FWI v nekaj sekundah, plus gumb za briefing.</p>
-    </div>
-    <a class="gf-btn" href="/meteogasilec/intervencija/">📍 Odpri</a>
+  <p class="post-meta">Uradna opozorila ARSO in lokalni indeks FWI za Rečico ob Savinji · osvežuje se dnevno ·
+  2026-08-28</p>
+  <div class="gf-arso">
+    <span class="gf-kicker" style="color:#2563eb">🏛 Uradni vir · Agencija RS za okolje</span>
+    <h2 style="margin:.1rem 0 0">Uradna opozorila</h2>
+    <div id="gf-arso-body"><div class="gf-arso-list"><div class="gf-arso-item gf-arso-orange">🟠 <b>Nevihte · pet., 28. 8. 19:00 – sob., 29. 8. 05:59</b></div><div class="gf-arso-item gf-arso-yellow">🟡 <b>Visoka temperatura · pet., 28. 8. 18:00–20:59</b></div></div></div>
+    <p class="gf-note">Uradna vremenska opozorila ARSO — ločeno od MeteoGasilec lastnih ocen (FWI, obrat vetra)
+    spodaj na tej strani. Preverjeno 28. 8. ob 17:34, sproti se osvežuje v brskalniku. Vsa opozorila za Slovenijo:
+    <a href="https://meteo.arso.gov.si/met/sl/warning/" target="_blank" rel="noopener">stran ARSO</a>.</p>
   </div>
-  <div class="gf-hero" data-generated="2026-08-28T17:13:55+00:00">
+  <div class="gf-hero" data-generated="2026-08-28T17:34:29+00:00">
+    <span class="gf-kicker" style="color:rgba(255,255,255,.65)">📊 Lokalni meteorološki indeks · model MeteoGasilec</span>
     <div class="gf-hero-top">
       <div class="gf-gauge-wrap">
         <svg viewBox="0 0 112 112" class="gf-ring" aria-hidden="true"><circle cx="56" cy="56" r="46" class="gf-ring-bg"/><circle cx="56" cy="56" r="46" class="gf-ring-fg" stroke="#f59e0b" stroke-dasharray="289.0" stroke-dashoffset="183.7"/></svg>
@@ -218,8 +223,9 @@ body{
       </div>
       <div class="gf-hero-body">
         <span class="gf-badge" style="background:#f59e0b33;border:1px solid #f59e0b;color:#fff">Visoka</span>
-        <p style="margin:.3rem 0 0;font-size:.88rem;color:rgba(255,255,255,.82)">Kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi Open-Meteo.
-        Ni uradna ocena ARSO ali URSZR — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
+        <p style="margin:.3rem 0 0;font-size:.88rem;color:rgba(255,255,255,.82)"><strong>Ni uradna ocena ARSO ali
+        URSZR</strong> — kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi
+        Open-Meteo. Uradni status je zgoraj — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
       </div>
     </div>
   <div class="gf-bars"><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-08-21: FWI 0.0 (Nizka)"></div><span class="gf-bar-lbl">Pet</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-08-22: FWI 0.2 (Nizka)"></div><span class="gf-bar-lbl">Sob</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-08-23: FWI 0.9 (Nizka)"></div><span class="gf-bar-lbl">Ned</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:21px;background:#84cc16;opacity:0.6;" title="2026-08-24: FWI 5.5 (Zmerna)"></div><span class="gf-bar-lbl">Pon</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-08-25: FWI 0.2 (Nizka)"></div><span class="gf-bar-lbl">Tor</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:5px;background:#22c55e;opacity:0.6;" title="2026-08-26: FWI 1.4 (Nizka)"></div><span class="gf-bar-lbl">Sre</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:47px;background:#f59e0b;opacity:0.6;" title="2026-08-27: FWI 12.0 (Visoka)"></div><span class="gf-bar-lbl">Čet</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:64px;background:#f59e0b;opacity:1;outline:2px solid var(--text);outline-offset:1px;" title="2026-08-28: FWI 16.4 (Visoka)"></div><span class="gf-bar-lbl">Pet</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:42px;background:#84cc16;opacity:0.6;" title="2026-08-29: FWI 10.8 (Zmerna)"></div><span class="gf-bar-lbl">Sob</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:46px;background:#f59e0b;opacity:0.6;" title="2026-08-30: FWI 11.8 (Visoka)"></div><span class="gf-bar-lbl">Ned</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:12px;background:#22c55e;opacity:0.6;" title="2026-08-31: FWI 3.1 (Nizka)"></div><span class="gf-bar-lbl">Pon</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-09-01: FWI 0.3 (Nizka)"></div><span class="gf-bar-lbl">Tor</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:6px;background:#22c55e;opacity:0.6;" title="2026-09-02: FWI 1.6 (Nizka)"></div><span class="gf-bar-lbl">Sre</span></div><div class="gf-bar-col"><div class="gf-bar" style="height:4px;background:#22c55e;opacity:0.6;" title="2026-09-03: FWI 0.0 (Nizka)"></div><span class="gf-bar-lbl">Čet</span></div></div>
@@ -227,12 +233,12 @@ body{
     <p class="gf-hero-note">🔥 Ista metodologija kot na naslovnici (kartica »Požarna nevarnost – indeks FWI«) — tu preračunana strežniško, da je vidna tudi iskalnikom in brez JS.</p>
     <p class="gf-hero-note gf-fresh" id="gf-fresh">posodobljeno 2026-08-28</p>
   </div>
-  <div class="gf-arso">
-    <h2 style="margin-top:0">🏛 Uradna opozorila ARSO</h2>
-    <div id="gf-arso-body">Preverjam …</div>
-    <p class="gf-note">Uradna vremenska opozorila Agencije RS za okolje — ločeno od MeteoGasilec lastnih ocen
-    (FWI, obrat vetra) na tej strani. Vsa opozorila za Slovenijo: <a href="https://meteo.arso.gov.si/met/sl/warning/"
-    target="_blank" rel="noopener">stran ARSO</a>.</p>
+  <div class="gf-interv-banner">
+    <div>
+      <h2>🚨 Intervencija zdaj</h2>
+      <p>Tvoja lokacija (GPS): veter, obrat vetra in FWI v nekaj sekundah, plus gumb za briefing.</p>
+    </div>
+    <a class="gf-btn" href="/meteogasilec/intervencija/">📍 Odpri</a>
   </div>
   <script src="/meteogasilec/gasilec.js"></script>
   <script>(function(){

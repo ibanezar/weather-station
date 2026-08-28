@@ -43,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo   # noqa: E402 — shared template helpers
 import gasilec_model as fm         # noqa: E402 — FWI model
 import generate_vodostaj_page as vod  # noqa: E402 — ARSO hidro postaje (ne podvajaj fetch_arso_stations)
+from generate_arso_newsjack_post import fetch_alerts as fetch_arso_alerts  # noqa: E402 — isti Worker klic, ne podvajaj
 
 ROOT = seo.ROOT
 TODAY = seo.TODAY
@@ -81,6 +82,8 @@ body{
 .gf-gauge-num .num{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:800;color:#fff}
 .gf-gauge-num small{display:block;margin-top:.15rem;font-size:.62rem;color:rgba(255,255,255,.7);font-weight:600}
 .gf-hero-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.gf-kicker{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.04em;
+  text-transform:uppercase;margin:0 0 .5rem}
 .gf-hero-body{flex:1;min-width:220px}
 .gf-badge{display:inline-block;padding:.28rem .8rem;border-radius:999px;font-size:.8rem;
   font-weight:700;margin-bottom:.4rem}
@@ -152,8 +155,8 @@ body{
 .gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
   padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
-.gf-arso{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
-  box-shadow:var(--card-shadow);margin:1.4rem 0}
+.gf-arso{border:1px solid var(--card-border);border-top:3px solid #2563eb;border-radius:.9rem;padding:1rem;
+  background:var(--card-bg);box-shadow:var(--card-shadow);margin:1.4rem 0}
 .gf-arso-list{display:flex;flex-direction:column;gap:.5rem}
 .gf-arso-item{padding:.5rem .7rem;border-radius:.5rem;font-size:.85rem;border-left:3px solid #eab308;
   background:rgba(234,179,8,.08)}
@@ -263,6 +266,7 @@ def build_hero(payload):
     today = payload
     color = next((d["color"] for d in payload["days"] if d["date"] == payload["date"]), "#f59e0b")
     return f'''  <div class="gf-hero" data-generated="{_esc(payload.get("generated"))}">
+    <span class="gf-kicker" style="color:rgba(255,255,255,.65)">📊 Lokalni meteorološki indeks · model MeteoGasilec</span>
     <div class="gf-hero-top">
       <div class="gf-gauge-wrap">
         {gauge_svg(today["fwi"], color)}
@@ -270,8 +274,9 @@ def build_hero(payload):
       </div>
       <div class="gf-hero-body">
         <span class="gf-badge" style="background:{color}33;border:1px solid {color};color:#fff">{_esc(today["level"])}</span>
-        <p style="margin:.3rem 0 0;font-size:.88rem;color:rgba(255,255,255,.82)">Kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi Open-Meteo.
-        Ni uradna ocena ARSO ali URSZR — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
+        <p style="margin:.3rem 0 0;font-size:.88rem;color:rgba(255,255,255,.82)"><strong>Ni uradna ocena ARSO ali
+        URSZR</strong> — kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi
+        Open-Meteo. Uradni status je zgoraj — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
       </div>
     </div>
 {_bars_svg_html(payload["days"])}
@@ -410,23 +415,58 @@ def firms_widget_html():
   }})();</script>'''
 
 
-def arso_widget_html(compact=False):
-    """Uradna opozorila ARSO — klientsko klicana (isti Worker endpoint kot
-    generate_arso_newsjack_post.py/fetch_alerts() in /nevihte/ WX-ARSO), da so
-    vedno sveža ne glede na dnevni cikel tega generatorja. Namenoma BREZ
-    strežniško izrisane vsebine (za razliko od FWI/vetra zgoraj) — opozorilo je
-    stanje, ne novica (glej razdelek v CLAUDE.md), zato bi enkrat-dnevni
-    posnetek v urah zastaral; crawlable vsebina je namesto tega samo povezava
-    na uradno stran ARSO, ki ne zastara."""
+_ARSO_EMOJI = {"red": "🔴", "orange": "🟠", "yellow": "🟡"}
+
+
+def _arso_alerts_body_html(alerts, fetch_ok, compact):
+    """Isti HTML kot uspešna/neuspešna veja Gasilec.renderArsoWidget() v
+    gasilec.js (glej opombo tam) — tako se ob nalaganju JS ne vidi vizualni
+    skok, ko klientski živi podatek povozi ta strežniški posnetek.
+
+    `fetch_ok=False` NIKOLI ne izpiše "ni aktivnih opozoril" — to bi bila
+    varnostno nevarna napačno-negativna trditev (nismo preverili, ne da jih
+    ni). Namesto tega pove, da preverjanje ni uspelo, in usmeri na uradno
+    stran ARSO."""
+    if not fetch_ok:
+        return ('<p class="gf-note" style="margin:0">⚠ Uradnih opozoril trenutno ni bilo mogoče preveriti — '
+                'poskusi znova čez nekaj minut ali preveri neposredno na '
+                '<a href="https://meteo.arso.gov.si/met/sl/warning/" target="_blank" rel="noopener">'
+                'strani ARSO</a>.</p>')
+    if not alerts:
+        msg = "Ni aktivnih uradnih opozoril ARSO." if compact else "Trenutno ni aktivnih uradnih opozoril ARSO za to območje."
+        return f'<p class="gf-note" style="margin:0">✅ {msg}</p>'
+    items = []
+    for a in alerts:
+        level = a.get("level") or "yellow"
+        emoji = _ARSO_EMOJI.get(level, "⚠️")
+        text = _esc(a.get("text") or a.get("desc") or "Opozorilo")
+        items.append(f'<div class="gf-arso-item gf-arso-{level}">{emoji} <b>{text}</b></div>')
+    return f'<div class="gf-arso-list">{"".join(items)}</div>'
+
+
+def arso_widget_html(alerts, fetch_ok, checked_at, compact=False):
+    """Uradna opozorila ARSO — isti Worker endpoint kot
+    generate_arso_newsjack_post.py/fetch_alerts() in /nevihte/ WX-ARSO.
+
+    Za razliko od prejšnje različice (samo "Preverjam …", brez vsebine dokler
+    JS ne odgovori) je zdaj strežniško izrisan zadnji znan posnetek — MeteoGasilec
+    je varnostno-kritično orodje in nalagajoč se placeholder ne sme delovati kot
+    odgovor, če je JS počasen ali ne steče. Klientski Gasilec.renderArsoWidget()
+    ta posnetek na nalaganju osveži z živimi podatki (opozorilo je stanje, ne
+    novica — enkrat-dnevni posnetek bi v urah zastaral, glej CLAUDE.md); če
+    osvežitev spodleti, gasilec.js pusti ta posnetek namesto da ga izbriše."""
     body_id = "gf-arso-compact" if compact else "gf-arso-body"
+    body = _arso_alerts_body_html(alerts, fetch_ok, compact)
     if compact:
-        return (f'  <div class="gf-note" id="{body_id}">Preverjam uradna opozorila ARSO …</div>')
+        return (f'  <p class="gf-note" style="margin:0 0 .3rem;font-weight:700">🏛 Uradna opozorila ARSO</p>\n'
+                f'  <div id="{body_id}">{body}</div>')
     return f'''  <div class="gf-arso">
-    <h2 style="margin-top:0">🏛 Uradna opozorila ARSO</h2>
-    <div id="{body_id}">Preverjam …</div>
-    <p class="gf-note">Uradna vremenska opozorila Agencije RS za okolje — ločeno od MeteoGasilec lastnih ocen
-    (FWI, obrat vetra) na tej strani. Vsa opozorila za Slovenijo: <a href="https://meteo.arso.gov.si/met/sl/warning/"
-    target="_blank" rel="noopener">stran ARSO</a>.</p>
+    <span class="gf-kicker" style="color:#2563eb">🏛 Uradni vir · Agencija RS za okolje</span>
+    <h2 style="margin:.1rem 0 0">Uradna opozorila</h2>
+    <div id="{body_id}">{body}</div>
+    <p class="gf-note">Uradna vremenska opozorila ARSO — ločeno od MeteoGasilec lastnih ocen (FWI, obrat vetra)
+    spodaj na tej strani. Preverjeno {_esc(checked_at)}, sproti se osvežuje v brskalniku. Vsa opozorila za Slovenijo:
+    <a href="https://meteo.arso.gov.si/met/sl/warning/" target="_blank" rel="noopener">stran ARSO</a>.</p>
   </div>'''
 
 
@@ -583,7 +623,7 @@ def _detect_wind_shift_py(times, spd, gust, wdir, start, horizon=12):
     return None
 
 
-def build_intervencija_page(payload):
+def build_intervencija_page(payload, arso_alerts, arso_ok, arso_checked_at):
     today_fwi = payload["fwi"]
     today_level = payload["level"]
     today_isi = next((d["isi"] for d in payload["days"] if d["date"] == payload["date"]), None)
@@ -630,6 +670,13 @@ def build_intervencija_page(payload):
         print(f"  ⚠ intervencija SSR: {e}", file=sys.stderr)
 
     fwi_json = json.dumps({"fwi": today_fwi, "level": today_level, "isi": today_isi})
+    # Za začetno stanje briefinga (preden živi klic morda spodleti) — glej opombo
+    # ob lastArsoAlerts spodaj in ob arso_widget_html() zakaj se posnetek ne sme
+    # tiho izgubiti.
+    arso_reserve_json = json.dumps([
+        {"level": a.get("level") or "yellow", "text": a.get("text") or a.get("desc") or "Opozorilo"}
+        for a in (arso_alerts if arso_ok else [])
+    ])
     inner = f'''  <p class="post-meta">Hiter operativni pogled: dovoli lokacijo (GPS) in v nekaj sekundah dobiš veter,
   morebiten obrat vetra in gumb za briefing. <span id="gf-fwi-note">Indeks FWI/ISI spodaj je izračunan za Rečico ob
   Savinji.</span> Glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
@@ -638,6 +685,7 @@ def build_intervencija_page(payload):
       <b id="gf-interv-loc">📍 Rečica ob Savinji (privzeto)</b>
       <button class="gf-btn" id="btn-gps" type="button">📍 Uporabi mojo lokacijo</button>
     </div>
+{arso_widget_html(arso_alerts, arso_ok, arso_checked_at, compact=True)}
     <div id="gf-interv-body">
 {body_html}
     </div>
@@ -648,7 +696,6 @@ def build_intervencija_page(payload):
     <div id="gf-interv-shift-wrap">
 {shift_html}
     </div>
-{arso_widget_html(compact=True)}
     <p class="gf-note" id="gf-interv-note"></p>
     <p class="gf-note"><a id="gf-interv-map" href="/meteogasilec/karta/" target="_blank" rel="noopener">🗺 Odpri operativno karto (hidranti, požarišča)</a></p>
     <div class="gf-briefing">
@@ -666,7 +713,7 @@ def build_intervencija_page(payload):
     var FWI_TODAY={fwi_json};
     var currentFWI={{fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false}};
     var lastData=null;
-    var lastArsoAlerts=[];
+    var lastArsoAlerts={arso_reserve_json};
     function fmtHM(t){{return t?t.slice(11,16):'—';}}
     function refreshBriefingArso(){{
       if(lastData){{
@@ -675,8 +722,7 @@ def build_intervencija_page(payload):
       }}
     }}
     Gasilec.renderArsoWidget(document.getElementById('gf-arso-compact'),{{compact:true}}).then(function(res){{
-      lastArsoAlerts=res.alerts||[];
-      refreshBriefingArso();
+      if(res){{lastArsoAlerts=res.alerts||[];refreshBriefingArso();}}
     }});
     function updateFwiDisplay(){{
       var fwiVal=document.getElementById('gf-fwi-val'),fwiLvl=document.getElementById('gf-fwi-lvl'),
@@ -1178,7 +1224,18 @@ def main():
     with open(os.path.join(ROOT, "meteogasilec", "index.json"), "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
 
-    build_intervencija_page(payload)
+    # En sam zajem uradnih opozoril ARSO za vso stran (naslovnica + kompakten
+    # blok na /intervencija/) — glej arso_widget_html() zakaj se nikoli ne sme
+    # tiho izpisati "ni aktivnih", če preverjanje sploh ni uspelo.
+    try:
+        arso_alerts, _arso_issued = fetch_arso_alerts()
+        arso_ok = True
+    except Exception as e:  # Worker je lahko nedosegljiv iz katerega koli razloga
+        print(f"  ⚠ ARSO opozorila: {e}", file=sys.stderr)
+        arso_alerts, arso_ok = [], False
+    arso_checked_at = f"{_dt.datetime.now():%-d. %-m. ob %H:%M}"
+
+    build_intervencija_page(payload, arso_alerts, arso_ok, arso_checked_at)
     build_karta_page()
     build_kalkulator_page()
     build_vodotoki_page()
@@ -1189,10 +1246,11 @@ def main():
     body = f'''{BRAND_SWAP}
 {seo.stn_badge()}
   <h1 class="page-title">MeteoGasilec — požarna ogroženost, Rečica ob Savinji</h1>
-  <p class="post-meta">Indeks FWI in vreme za intervencije · osvežuje se dnevno · {TODAY.isoformat()}</p>
-{interv_banner_html()}
+  <p class="post-meta">Uradna opozorila ARSO in lokalni indeks FWI za Rečico ob Savinji · osvežuje se dnevno ·
+  {TODAY.isoformat()}</p>
+{arso_widget_html(arso_alerts, arso_ok, arso_checked_at)}
 {build_hero(payload)}
-{arso_widget_html()}
+{interv_banner_html()}
   <script src="/meteogasilec/gasilec.js"></script>
   <script>(function(){{
     var el=document.getElementById('gf-fresh');
