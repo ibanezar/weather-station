@@ -56,6 +56,7 @@ CORE = {
     "meteogasilec/intervencija/":       ("daily",   "0.7"),
     "meteogasilec/karta/":              ("daily",   "0.7"),
     "meteogasilec/kalkulator/":         ("monthly", "0.5"),
+    "meteogasilec/vodotoki/":           ("daily",   "0.6"),
     "meteogasilec/vreme-intervencije/": ("daily",   "0.6"),
     "meteogasilec/nasveti/":            ("monthly", "0.5"),
     "meteogasilec/metodologija/":       ("monthly", "0.5"),

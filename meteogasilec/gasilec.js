@@ -232,6 +232,84 @@
     el.innerHTML = '<span class="gf-fresh-dot">' + dot + '</span> <span class="gf-fresh-label">' + label + '</span>';
   }
 
+  // ── veter + teren (naklon/ekspozicija) ────────────────────────────────
+  // Povsem klientsko, brez strežniške kopije — za razliko od FWI/vetra je
+  // odvisno od TRENUTNE aktivne lokacije (GPS jo spremeni), zato SSR rezerva
+  // ne bi imela pomena (glej opombo v generate_gasilec_page.py).
+  var TERRAIN_STEP_M = 90; // ločljivost DEM-a, ki ga Open-Meteo Elevation API uporablja
+  var TERRAIN_ALIGN_DEG = 45; // MeteoGasilec kriterij za "poravnano", isti prag kot obrat vetra
+
+  function offsetLatLon(lat, lon, dNorthM, dEastM) {
+    var dLat = dNorthM / 111320;
+    var dLon = dEastM / (111320 * Math.cos(lat * Math.PI / 180));
+    return [lat + dLat, lon + dLon];
+  }
+
+  // En klic na Open-Meteo Elevation API za 3×3 mrežo okrog (lat,lon), korak
+  // `stepM` metrov. Vrne poimenovane točke (ne golo zaporedje), da je vrstni
+  // red za computeSlopeAspect() nedvoumen.
+  function fetchElevationGrid(lat, lon, stepM) {
+    stepM = stepM || TERRAIN_STEP_M;
+    var pts = {
+      nw: offsetLatLon(lat, lon, stepM, -stepM), n: offsetLatLon(lat, lon, stepM, 0),
+      ne: offsetLatLon(lat, lon, stepM, stepM), w: offsetLatLon(lat, lon, 0, -stepM),
+      center: [lat, lon], e: offsetLatLon(lat, lon, 0, stepM),
+      sw: offsetLatLon(lat, lon, -stepM, -stepM), s: offsetLatLon(lat, lon, -stepM, 0),
+      se: offsetLatLon(lat, lon, -stepM, stepM),
+    };
+    var order = ['nw', 'n', 'ne', 'w', 'center', 'e', 'sw', 's', 'se'];
+    var lats = order.map(function (k) { return pts[k][0]; }).join(',');
+    var lons = order.map(function (k) { return pts[k][1]; }).join(',');
+    var url = 'https://api.open-meteo.com/v1/elevation?latitude=' + lats + '&longitude=' + lons;
+    return fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      var el = (d && d.elevation) || [];
+      var g = {};
+      order.forEach(function (k, i) { g[k] = el[i]; });
+      return g;
+    });
+  }
+
+  // Horn (1981) naklon/ekspozicija — standardni GIS algoritem (ArcGIS/QGIS),
+  // enotno testiran pred vklopom (glej Node test s sintetičnimi mrežami znane
+  // smeri: sever/jug/vzhod/zahod). `aspectDeg` je smer, KAMOR je pobočje
+  // obrnjeno (smer padanja terena) — kompas bearing 0-360.
+  function computeSlopeAspect(g, cellSizeM) {
+    cellSizeM = cellSizeM || TERRAIN_STEP_M;
+    var dzdx = ((g.ne + 2 * g.e + g.se) - (g.nw + 2 * g.w + g.sw)) / (8 * cellSizeM);
+    var dzdy = ((g.sw + 2 * g.s + g.se) - (g.nw + 2 * g.n + g.ne)) / (8 * cellSizeM);
+    var slopeDeg = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy)) * 57.29578;
+    var a = Math.atan2(dzdy, -dzdx) * 57.29578;
+    var aspectDeg;
+    if (a < 0) aspectDeg = 90.0 - a;
+    else if (a > 90.0) aspectDeg = 360.0 - a + 90.0;
+    else aspectDeg = 90.0 - a;
+    return { slopeDeg: slopeDeg, aspectDeg: aspectDeg };
+  }
+
+  // windToDeg: smer KAM veter piha (ne od kod — glej windCompassSvg). Opozori,
+  // če je poravnan z aspectDeg (smer padanja pobočja) znotraj praga — to je
+  // MeteoGasilec kriterij, poenostavljen (brez vegetacije/gostote gozda).
+  function renderTerrainWind(el, aspectDeg, windToDeg, slopeDeg) {
+    if (!el) return;
+    var diff = angleDiff(aspectDeg, windToDeg);
+    var aligned = diff <= TERRAIN_ALIGN_DEG;
+    var html = '<div class="gf-interv-stats">' +
+      '<div class="gf-stat"><b>' + Math.round(slopeDeg) + '°</b><span>Naklon terena</span></div>' +
+      '<div class="gf-stat"><b>' + dirLabel(aspectDeg) + '</b><span>Pobočje pada proti</span></div>' +
+      '<div class="gf-stat"><b>' + dirLabel(windToDeg) + '</b><span>Veter piha proti</span></div>' +
+      '</div>';
+    if (aligned) {
+      html += '<div class="gf-shift-warn"><b>⚠ MeteoGasilec kriterij: veter in pobočje sta poravnana</b>' +
+        'Veter piha v isto smer, kot pobočje pada (' + dirLabel(aspectDeg) + ') — na takem terenu se ogenj širi ' +
+        'bistveno hitreje navzgor. Poenostavljena ocena (brez vegetacije/gostote gozda) — ni nadomestilo za ' +
+        'presojo na terenu.</div>';
+    } else {
+      html += '<p class="gf-note" style="margin:.4rem 0 0">Veter in naklon pobočja trenutno nista poravnana ' +
+        '(razlika ' + Math.round(diff) + '°). Poenostavljena ocena — ni nadomestilo za presojo na terenu.</p>';
+    }
+    el.innerHTML = html;
+  }
+
   // ── ARSO uradna opozorila (jasno ločeno od MeteoGasilec lastnih ocen) ────
   // Isti Worker endpoint kot generate_arso_newsjack_post.py/fetch_alerts()
   // in /nevihte/ (WX-ARSO) — klican neposredno iz brskalnika, da je stanje
@@ -357,6 +435,10 @@
     fwiSeriesFromDaily: fwiSeriesFromDaily,
     fetchArsoAlerts: fetchArsoAlerts,
     renderArsoWidget: renderArsoWidget,
+    offsetLatLon: offsetLatLon,
+    fetchElevationGrid: fetchElevationGrid,
+    computeSlopeAspect: computeSlopeAspect,
+    renderTerrainWind: renderTerrainWind,
     renderFreshness: renderFreshness,
     buildBriefing: buildBriefing,
     wireBriefingButtons: wireBriefingButtons,

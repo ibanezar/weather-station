@@ -589,7 +589,7 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
   ločena kopija iste stvari (poleg `app.js` in `gasilec_model.py`). Načelo
   "generatorji strani si ne delijo knjižnic" iz tega dokumenta velja med
   RAZLIČNIMI Python generatorji — ne med podstranmi ENEGA generatorja
-  (`generate_gasilec_page.py` generira vseh šest `/meteogasilec/*` strani).
+  (`generate_gasilec_page.py` generira vseh sedem `/meteogasilec/*` strani).
   FWI izračun v tej datoteki (`calcOneDayFWI`/`fwiClass`) je namerna dobesedna
   kopija iz `app.js` (glej opombo na vrhu `gasilec_model.py`) — če spremeniš
   formulo/pragove, popravi vse tri kopije (app.js, gasilec_model.py,
@@ -615,6 +615,24 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
   Prikazan na `/meteogasilec/` (razdelek »🏛 Uradna opozorila ARSO«, ločen od
   FWI kartice) in strnjeno na `/intervencija/`, od koder se aktivna opozorila
   vključijo tudi v »Kopiraj briefing« (`buildBriefing()`).
+- **Veter + teren** (`/intervencija/`, razdelek »🏔 Veter + teren«) — za
+  trenutno aktivno lokacijo (GPS ali privzeta Rečica) `Gasilec.
+  fetchElevationGrid()` pokliče Open-Meteo Elevation API za mrežo 3×3
+  (korak 90 m — ločljivost DEM-a, ki ga API uporablja), `computeSlopeAspect()`
+  iz nje izračuna naklon/ekspozicijo po Horn (1981) metodi (standardni GIS
+  algoritem, isti kot ArcGIS/QGIS — **enotno testiran z Node na sintetičnih
+  mrežah znane smeri pred vklopom**, ker gre za novo geometrijo, ne kopijo
+  obstoječe formule). Opozorilo "veter in pobočje sta poravnana" je
+  MeteoGasilec kriterij (razlika ≤45°), namenoma poenostavljen (brez
+  vegetacije/gostote gozda) — jasna opomba na strani. Povsem klientsko, brez
+  strežniške rezerve (odvisno od trenutne lokacije, enako kot lokalni FWI).
+- **Vodotoki** (`/meteogasilec/vodotoki/`) — NE podvaja ARSO hidro branja:
+  uvozi `fetch_arso_stations()`/`station_status()` iz
+  `tools/generate_vodostaj_page.py` (obstoječa polna stran `/vodostaj-savinje/`
+  z GloFAS napovedjo in zgodovino poplav), prikaže samo 3 najbližje postaje ob
+  Savinji + povezavo na polno stran. Besedilo namenoma pravi "najbližji
+  vodotok/postaja", NE "vodo lahko črpaš" — vodostaj ne pove nič o fizičnem
+  dostopu vozila.
 - **Freshness sistem — nikoli ne skrivaj stare vrednosti, samo jo označi.**
   `renderFreshness()` izpiše 🟢 (<26h, en dnevni tek zamujen), 🟡 (26–50h) ali
   🔴 (>50h, zamujena ≥2 teka) glede na `data-generated` na `.gf-hero`. Uveden
