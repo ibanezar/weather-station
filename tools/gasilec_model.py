@@ -191,6 +191,7 @@ def fwi_series(daily):
         days.append({
             "date": date, "fwi": round(res["fwi"], 1), "isi": round(res["isi"], 1),
             "bui": round(res["bui"]), "ffmc": round(res["ffmc"]),
+            "dmc": round(res["dmc"]), "dc": round(res["dc"]),
             "level": label, "color": color,
         })
     return days

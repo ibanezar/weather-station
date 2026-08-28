@@ -130,6 +130,40 @@ body{
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 .gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
+.gf-status-banner{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;border-radius:.9rem;
+  margin:.8rem 0 1.2rem;font-size:.92rem;font-weight:600}
+.gf-status-banner .emoji{font-size:1.4rem;flex:0 0 auto}
+.gf-tip-grid,.gf-contact-grid,.gf-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.8rem;margin:.8rem 0 1.2rem}
+.gf-tip-card{position:relative;overflow:hidden;display:flex;gap:.7rem;align-items:flex-start;
+  border:1px solid var(--card-border);border-radius:.8rem;padding:.9rem 1rem;background:var(--card-bg)}
+.gf-tip-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--fa,#84cc16)}
+.gf-tip-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;
+  border-radius:9px;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-tip-ic svg{width:1.25rem;height:1.25rem;display:block}
+.gf-tip-card p{margin:0;font-size:.84rem;line-height:1.45}
+.gf-contact-card{display:flex;align-items:center;gap:.7rem;border:1px solid var(--card-border);border-radius:.8rem;
+  padding:.8rem 1rem;background:var(--card-bg);text-decoration:none;color:var(--text);transition:border-color .15s}
+.gf-contact-card:hover{border-color:var(--fa,#84cc16)}
+.gf-contact-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.3rem;height:2.3rem;
+  border-radius:50%;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-contact-ic svg{width:1.3rem;height:1.3rem;display:block}
+.gf-contact-card b{display:block;font-size:.88rem}
+.gf-contact-card span{display:block;font-size:.74rem;color:var(--muted)}
+.gf-component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin:.8rem 0 1.2rem}
+.gf-component-card{border:1px solid var(--card-border);border-radius:.8rem;padding:.8rem;background:var(--card-bg);
+  text-align:center}
+.gf-component-card b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem}
+.gf-component-card span{display:block;font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.gf-station-card{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow)}
+.gf-station-card h3{margin:0 0 .5rem;font-size:.95rem}
+.gf-station-stats{display:flex;gap:1.2rem;margin-bottom:.6rem}
+.gf-station-stats div{flex:1}
+.gf-station-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-station-stats span{display:block;font-size:.7rem;color:var(--muted)}
+.gf-status-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .7rem;border-radius:999px;
+  font-size:.76rem;font-weight:700}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -174,14 +208,14 @@ body{
   <table class="gf-tbl">
     <thead><tr><th>Čas</th><th>Hitrost</th><th>Sunki</th><th>Smer</th></tr></thead>
     <tbody>
-<tr><td>danes 09:00</td><td>4 km/h</td><td>10 km/h</td><td>SV</td></tr>
-<tr><td>danes 12:00</td><td>8 km/h</td><td>18 km/h</td><td>SSV</td></tr>
-<tr><td>danes 15:00</td><td>18 km/h</td><td>39 km/h</td><td>ZJZ</td></tr>
-<tr><td>danes 18:00</td><td>16 km/h</td><td>40 km/h</td><td>ZJZ</td></tr>
-<tr><td>danes 21:00</td><td>6 km/h</td><td>11 km/h</td><td>J</td></tr>
-<tr><td>jutri 00:00</td><td>6 km/h</td><td>13 km/h</td><td>J</td></tr>
-<tr><td>jutri 03:00</td><td>6 km/h</td><td>10 km/h</td><td>V</td></tr>
-<tr><td>jutri 06:00</td><td>3 km/h</td><td>9 km/h</td><td>V</td></tr>
+<tr><td>danes 11:00</td><td>8 km/h</td><td>17 km/h</td><td>SV</td></tr>
+<tr><td>danes 14:00</td><td>5 km/h</td><td>19 km/h</td><td>ZJZ</td></tr>
+<tr><td>danes 17:00</td><td>21 km/h</td><td>45 km/h</td><td>ZJZ</td></tr>
+<tr><td>danes 20:00</td><td>7 km/h</td><td>21 km/h</td><td>JJZ</td></tr>
+<tr><td>danes 23:00</td><td>6 km/h</td><td>13 km/h</td><td>JJZ</td></tr>
+<tr><td>jutri 02:00</td><td>6 km/h</td><td>13 km/h</td><td>J</td></tr>
+<tr><td>jutri 05:00</td><td>3 km/h</td><td>4 km/h</td><td>VJV</td></tr>
+<tr><td>jutri 08:00</td><td>6 km/h</td><td>12 km/h</td><td>VSV</td></tr>
     </tbody>
   </table>
   <h2>🌩 Nacionalni nevihtni potencial danes</h2>

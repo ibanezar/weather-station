@@ -1,8 +1,8 @@
 {
- "generated": "2026-08-28T09:55:02+00:00",
+ "generated": "2026-08-28T11:15:06+00:00",
  "model_version": "1.0",
  "date": "2026-08-28",
- "fwi": 17.4,
+ "fwi": 17.5,
  "level": "Visoka",
  "days": [
   {
@@ -11,6 +11,8 @@
    "isi": 0.1,
    "bui": 4,
    "ffmc": 44,
+   "dmc": 4,
+   "dc": 7,
    "level": "Nizka",
    "color": "#22c55e"
   },
@@ -20,6 +22,8 @@
    "isi": 0.6,
    "bui": 5,
    "ffmc": 61,
+   "dmc": 5,
+   "dc": 14,
    "level": "Nizka",
    "color": "#22c55e"
   },
@@ -29,6 +33,8 @@
    "isi": 1.6,
    "bui": 8,
    "ffmc": 79,
+   "dmc": 8,
+   "dc": 22,
    "level": "Nizka",
    "color": "#22c55e"
   },
@@ -38,6 +44,8 @@
    "isi": 4.6,
    "bui": 12,
    "ffmc": 88,
+   "dmc": 12,
+   "dc": 30,
    "level": "Zmerna",
    "color": "#84cc16"
   },
@@ -47,6 +55,8 @@
    "isi": 0.3,
    "bui": 10,
    "ffmc": 54,
+   "dmc": 8,
+   "dc": 29,
    "level": "Nizka",
    "color": "#22c55e"
   },
@@ -56,6 +66,8 @@
    "isi": 1.5,
    "bui": 14,
    "ffmc": 79,
+   "dmc": 13,
+   "dc": 37,
    "level": "Nizka",
    "color": "#22c55e"
   },
@@ -65,69 +77,85 @@
    "isi": 8.9,
    "bui": 17,
    "ffmc": 89,
+   "dmc": 17,
+   "dc": 46,
    "level": "Visoka",
    "color": "#f59e0b"
   },
   {
    "date": "2026-08-28",
-   "fwi": 17.4,
-   "isi": 12.7,
+   "fwi": 17.5,
+   "isi": 12.8,
    "bui": 21,
    "ffmc": 90,
+   "dmc": 21,
+   "dc": 54,
    "level": "Visoka",
    "color": "#f59e0b"
   },
   {
    "date": "2026-08-29",
-   "fwi": 4.2,
-   "isi": 2.3,
-   "bui": 24,
-   "ffmc": 81,
+   "fwi": 0.8,
+   "isi": 0.9,
+   "bui": 19,
+   "ffmc": 65,
+   "dmc": 16,
+   "dc": 57,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-08-30",
-   "fwi": 8.7,
-   "isi": 4.5,
-   "bui": 27,
-   "ffmc": 88,
-   "level": "Zmerna",
-   "color": "#84cc16"
+   "fwi": 3.5,
+   "isi": 2.1,
+   "bui": 22,
+   "ffmc": 82,
+   "dmc": 20,
+   "dc": 65,
+   "level": "Nizka",
+   "color": "#22c55e"
   },
   {
    "date": "2026-08-31",
-   "fwi": 0.6,
+   "fwi": 0.5,
    "isi": 0.6,
-   "bui": 24,
-   "ffmc": 63,
+   "bui": 19,
+   "ffmc": 62,
+   "dmc": 15,
+   "dc": 66,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-09-01",
-   "fwi": 0.2,
+   "fwi": 0.1,
    "isi": 0.2,
-   "bui": 19,
+   "bui": 16,
    "ffmc": 49,
+   "dmc": 11,
+   "dc": 67,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-09-02",
-   "fwi": 0.8,
+   "fwi": 0.7,
    "isi": 0.9,
-   "bui": 22,
+   "bui": 18,
    "ffmc": 71,
+   "dmc": 13,
+   "dc": 73,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-09-03",
-   "fwi": 4.9,
+   "fwi": 4.4,
    "isi": 2.6,
-   "bui": 25,
+   "bui": 21,
    "ffmc": 83,
+   "dmc": 16,
+   "dc": 79,
    "level": "Nizka",
    "color": "#22c55e"
   }

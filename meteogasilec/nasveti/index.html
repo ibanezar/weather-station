@@ -130,6 +130,40 @@ body{
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 .gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
+.gf-status-banner{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;border-radius:.9rem;
+  margin:.8rem 0 1.2rem;font-size:.92rem;font-weight:600}
+.gf-status-banner .emoji{font-size:1.4rem;flex:0 0 auto}
+.gf-tip-grid,.gf-contact-grid,.gf-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.8rem;margin:.8rem 0 1.2rem}
+.gf-tip-card{position:relative;overflow:hidden;display:flex;gap:.7rem;align-items:flex-start;
+  border:1px solid var(--card-border);border-radius:.8rem;padding:.9rem 1rem;background:var(--card-bg)}
+.gf-tip-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--fa,#84cc16)}
+.gf-tip-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;
+  border-radius:9px;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-tip-ic svg{width:1.25rem;height:1.25rem;display:block}
+.gf-tip-card p{margin:0;font-size:.84rem;line-height:1.45}
+.gf-contact-card{display:flex;align-items:center;gap:.7rem;border:1px solid var(--card-border);border-radius:.8rem;
+  padding:.8rem 1rem;background:var(--card-bg);text-decoration:none;color:var(--text);transition:border-color .15s}
+.gf-contact-card:hover{border-color:var(--fa,#84cc16)}
+.gf-contact-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.3rem;height:2.3rem;
+  border-radius:50%;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-contact-ic svg{width:1.3rem;height:1.3rem;display:block}
+.gf-contact-card b{display:block;font-size:.88rem}
+.gf-contact-card span{display:block;font-size:.74rem;color:var(--muted)}
+.gf-component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin:.8rem 0 1.2rem}
+.gf-component-card{border:1px solid var(--card-border);border-radius:.8rem;padding:.8rem;background:var(--card-bg);
+  text-align:center}
+.gf-component-card b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem}
+.gf-component-card span{display:block;font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.gf-station-card{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow)}
+.gf-station-card h3{margin:0 0 .5rem;font-size:.95rem}
+.gf-station-stats{display:flex;gap:1.2rem;margin-bottom:.6rem}
+.gf-station-stats div{flex:1}
+.gf-station-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-station-stats span{display:block;font-size:.7rem;color:var(--muted)}
+.gf-status-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .7rem;border-radius:999px;
+  font-size:.76rem;font-weight:700}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -170,23 +204,23 @@ body{
   <h1 class="page-title">Nasveti in kontakti</h1>
   <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
   lokalnega gasilskega poveljstva.</p>
+  <div class="gf-status-banner" style="background:#f59e0b22;border:1px solid #f59e0b66"><span class="emoji">⚠️</span><span>Kurjenje danes odsvetovano — preveri morebitne lokalne odloke. (FWI danes: Visoka)</span></div>
   <h2>🔥 Kurjenje v naravi</h2>
-  <p>Kurjenje v naravnem okolju je ob visoki in zelo visoki požarni ogroženosti (glej FWI zgoraj) močno odsvetovano,
-  ob razglašeni povečani požarni ogroženosti pa je ponekod prepovedano z odlokom občine ali uprave za zaščito in
-  reševanje. Pred kurjenjem vedno preveri trenutno stanje in morebitne lokalne omejitve.</p>
-  <ul>
-    <li>Ne odmetavaj cigaretnih ogorkov v naravi.</li>
-    <li>Kres oz. ogenj v naravi vedno nadzoruj in ga po končanem kurjenju temeljito pogasi.</li>
-    <li>Ob sunkih vetra (glej <a href="/meteogasilec/vreme-intervencije/">vreme za intervencije</a>) se ogenj širi bistveno hitreje.</li>
-  </ul>
+  <p>Kurjenje v naravnem okolju je ob visoki in zelo visoki požarni ogroženosti (glej banner zgoraj) močno
+  odsvetovano, ob razglašeni povečani požarni ogroženosti pa je ponekod prepovedano z odlokom občine ali uprave za
+  zaščito in reševanje. Pred kurjenjem vedno preveri trenutno stanje in morebitne lokalne omejitve.</p>
+  <div class="gf-tip-grid">
+    <div class="gf-tip-card" style="--fa:#f59e0b;--fa-soft:rgba(245,158,11,.16)"><span class="gf-tip-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="10.6" width="14" height="4.2" rx="1" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.5"/><rect x="14.4" y="10.6" width="3" height="4.2" fill="currentColor" fill-opacity=".4"/><path d="M18 8.6c1 .9 1 2.1 0 3M20.2 7c1.6 1.4 1.6 3.4 0 4.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M4 18.4h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></svg></span><div><b>Ne odmetavaj ogorkov</b><p>Cigaretni ogorki v suhi travi ali stelji so pogost vzrok vžiga — vedno v pepelnik ali vodo.</p></div></div>
+    <div class="gf-tip-card" style="--fa:#ef4444;--fa-soft:rgba(239,68,68,.16)"><span class="gf-tip-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.6c-3.4 0-6 2.8-6 6.6 0 3.2 2 4.6 2 7a4 4 0 0 0 8 0c0-2.4 2-3.8 2-7 0-3.8-2.6-6.6-6-6.6Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9.3 12.6 1.8 1.8 3.6-3.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><b>Nadzoruj in pogasi</b><p>Kres oz. ogenj v naravi vedno nadzoruj in ga po končanem kurjenju temeljito pogasi, tudi žerjavico.</p></div></div>
+    <div class="gf-tip-card" style="--fa:#22d3ee;--fa-soft:rgba(34,211,238,.16)"><span class="gf-tip-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.6h11.5a2.7 2.7 0 1 0-2.6-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 13h15a2.9 2.9 0 1 1-2.8 3.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 17.4h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg></span><div><b>Pazi na veter</b><p>Ob sunkih vetra (glej <a href="/meteogasilec/vreme-intervencije/">vreme za intervencije</a>) se ogenj širi bistveno hitreje in nepredvidljivo.</p></div></div>
+  </div>
   <h2>📞 Kontakti</h2>
-  <ul>
-    <li><b>112</b> — enotna evropska številka za klic v sili (požar, nesreča).</li>
-    <li><a href="https://www.gzs-slo.si/" target="_blank" rel="noopener nofollow">Gasilska zveza Slovenije</a></li>
-    <li><a href="https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/" target="_blank"
-       rel="noopener nofollow">URSZR — Uprava RS za zaščito in reševanje</a></li>
-    <li><a href="https://meteo.arso.gov.si/met/sl/agromet/pozar/" target="_blank" rel="noopener nofollow">ARSO — uradni indeks požarne ogroženosti</a></li>
-  </ul>
+  <div class="gf-contact-grid">
+    <a class="gf-contact-card" href="tel:112" style="--fa:#ef4444;--fa-soft:rgba(239,68,68,.16)" ><span class="gf-contact-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A15.5 15.5 0 0 1 4 5.6 1.5 1.5 0 0 1 5.5 4Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span><span><b>112</b><span>Enotna evropska številka za klic v sili</span></span></a>
+    <a class="gf-contact-card" href="https://www.gzs-slo.si/" style="--fa:#84cc16;--fa-soft:rgba(132,204,22,.16)" target="_blank" rel="noopener nofollow"><span class="gf-contact-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.4 19 6v5.4c0 4.6-3 7.8-7 9.2-4-1.4-7-4.6-7-9.2V6l7-2.6Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9 12 2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Gasilska zveza Slovenije</b><span>gzs-slo.si</span></span></a>
+    <a class="gf-contact-card" href="https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/" style="--fa:#0ea5e9;--fa-soft:rgba(14,165,233,.16)" target="_blank" rel="noopener nofollow"><span class="gf-contact-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.4 19 6v5.4c0 4.6-3 7.8-7 9.2-4-1.4-7-4.6-7-9.2V6l7-2.6Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9 12 2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>URSZR</b><span>Uprava RS za zaščito in reševanje</span></span></a>
+    <a class="gf-contact-card" href="https://meteo.arso.gov.si/met/sl/agromet/pozar/" style="--fa:#f59e0b;--fa-soft:rgba(245,158,11,.16)" target="_blank" rel="noopener nofollow"><span class="gf-contact-ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.6c-3.4 0-6 2.8-6 6.6 0 3.2 2 4.6 2 7a4 4 0 0 0 8 0c0-2.4 2-3.8 2-7 0-3.8-2.6-6.6-6-6.6Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9c-1.4 1.6-1.8 3-.8 4.4 1 1.4-.2 2.2-1 1.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span><b>ARSO</b><span>Uradni indeks požarne ogroženosti</span></span></a>
+  </div>
   <a class="gf-back" href="/meteogasilec/">← Nazaj na MeteoGasilec</a>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>

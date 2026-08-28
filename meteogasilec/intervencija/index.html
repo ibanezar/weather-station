@@ -130,6 +130,40 @@ body{
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 .gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
+.gf-status-banner{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;border-radius:.9rem;
+  margin:.8rem 0 1.2rem;font-size:.92rem;font-weight:600}
+.gf-status-banner .emoji{font-size:1.4rem;flex:0 0 auto}
+.gf-tip-grid,.gf-contact-grid,.gf-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.8rem;margin:.8rem 0 1.2rem}
+.gf-tip-card{position:relative;overflow:hidden;display:flex;gap:.7rem;align-items:flex-start;
+  border:1px solid var(--card-border);border-radius:.8rem;padding:.9rem 1rem;background:var(--card-bg)}
+.gf-tip-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--fa,#84cc16)}
+.gf-tip-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;
+  border-radius:9px;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-tip-ic svg{width:1.25rem;height:1.25rem;display:block}
+.gf-tip-card p{margin:0;font-size:.84rem;line-height:1.45}
+.gf-contact-card{display:flex;align-items:center;gap:.7rem;border:1px solid var(--card-border);border-radius:.8rem;
+  padding:.8rem 1rem;background:var(--card-bg);text-decoration:none;color:var(--text);transition:border-color .15s}
+.gf-contact-card:hover{border-color:var(--fa,#84cc16)}
+.gf-contact-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.3rem;height:2.3rem;
+  border-radius:50%;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-contact-ic svg{width:1.3rem;height:1.3rem;display:block}
+.gf-contact-card b{display:block;font-size:.88rem}
+.gf-contact-card span{display:block;font-size:.74rem;color:var(--muted)}
+.gf-component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin:.8rem 0 1.2rem}
+.gf-component-card{border:1px solid var(--card-border);border-radius:.8rem;padding:.8rem;background:var(--card-bg);
+  text-align:center}
+.gf-component-card b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem}
+.gf-component-card span{display:block;font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.gf-station-card{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow)}
+.gf-station-card h3{margin:0 0 .5rem;font-size:.95rem}
+.gf-station-stats{display:flex;gap:1.2rem;margin-bottom:.6rem}
+.gf-station-stats div{flex:1}
+.gf-station-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-station-stats span{display:block;font-size:.7rem;color:var(--muted)}
+.gf-status-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .7rem;border-radius:999px;
+  font-size:.76rem;font-weight:700}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -179,16 +213,16 @@ body{
     <div id="gf-interv-body">
   <div class="gf-interv-body">
       <div class="gf-compass-wrap" id="gf-interv-compass">
-        <svg viewBox="0 0 128 128" width="128" height="128" class="gf-compass" aria-hidden="true"><circle cx="64.0" cy="64.0" r="48.0" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1.5"/><text x="64.0" y="15" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">S</text><text x="119" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">V</text><text x="64.0" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">J</text><text x="9" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">Z</text><g transform="rotate(222 64.0 64.0)"><line x1="64.0" y1="64.0" x2="64.0" y2="22.0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M 57.0 34.0 L 64.0 20.0 L 71.0 34.0 Z" fill="currentColor"/></g></svg>
-        <div class="gf-compass-lbl">SV → JZ · 4 km/h</div>
+        <svg viewBox="0 0 128 128" width="128" height="128" class="gf-compass" aria-hidden="true"><circle cx="64.0" cy="64.0" r="48.0" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1.5"/><text x="64.0" y="15" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">S</text><text x="119" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">V</text><text x="64.0" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">J</text><text x="9" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">Z</text><g transform="rotate(217 64.0 64.0)"><line x1="64.0" y1="64.0" x2="64.0" y2="22.0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M 57.0 34.0 L 64.0 20.0 L 71.0 34.0 Z" fill="currentColor"/></g></svg>
+        <div class="gf-compass-lbl">SV → JZ · 8 km/h</div>
       </div>
       <div class="gf-interv-stats" id="gf-interv-stats">
-        <div class="gf-stat"><b>22.6 °C</b><span>Temperatura</span></div>
-        <div class="gf-stat"><b>79 %</b><span>Vlaga</span></div>
-        <div class="gf-stat"><b>10 km/h</b><span>Sunki vetra</span></div>
+        <div class="gf-stat"><b>25.5 °C</b><span>Temperatura</span></div>
+        <div class="gf-stat"><b>68 %</b><span>Vlaga</span></div>
+        <div class="gf-stat"><b>17 km/h</b><span>Sunki vetra</span></div>
         <div class="gf-stat"><b>0.0 mm</b><span>Padavine 3 h</span></div>
-        <div class="gf-stat"><b>17.4</b><span>FWI danes (Visoka)</span></div>
-        <div class="gf-stat"><b>12.7</b><span>ISI danes</span></div>
+        <div class="gf-stat"><b>17.5</b><span>FWI danes (Visoka)</span></div>
+        <div class="gf-stat"><b>12.8</b><span>ISI danes</span></div>
       </div>
     </div>
     </div>
@@ -199,9 +233,9 @@ body{
     <div id="gf-interv-shift-wrap">
   <div class="gf-shift-warn" id="gf-interv-shift">
       <b>⚠ MeteoGasilec kriterij: možen obrat vetra</b>
-      Ob 15:00 pričakovan obrat smeri za +161°
+      Ob 14:00 pričakovan obrat smeri za +155°
       (SV → ZJZ),
-      sunki 10 → 39 km/h.
+      sunki 17 → 19 km/h.
       Ni uradno opozorilo ARSO.
     </div>
     </div>
@@ -220,7 +254,7 @@ body{
   <script src="/meteogasilec/gasilec.js"></script>
   <script>(function(){
     var DEFAULT_LAT=46.325779, DEFAULT_LON=14.921137;
-    var FWI_TODAY={"fwi": 17.4, "level": "Visoka", "isi": 12.7};
+    var FWI_TODAY={"fwi": 17.5, "level": "Visoka", "isi": 12.8};
     var currentFWI={fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false};
     var lastData=null;
     var lastArsoAlerts=[];
