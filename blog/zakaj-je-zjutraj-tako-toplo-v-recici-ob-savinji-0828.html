@@ -72,6 +72,29 @@
 .stat-card.c-green .sc-val{color:#34d399}
 .stat-card.c-dry .sc-val{color:#f59e0b}
 .stat-card.c-rain .sc-val{color:#60a5fa}
+
+/* Interaktivni drsnik: premakni se skozi napovedne dni */
+.scr-days-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem}
+.scr-days-label{font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.scr-days-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.5rem;color:#fff;line-height:1}
+.scr-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
+  background:linear-gradient(90deg,#f87171 0%,#f59e0b 34%,#60a5fa 68%,#22d3ee 100%);
+  outline:none;margin:.5rem 0 .4rem;cursor:pointer}
+.scr-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;
+  border-radius:50%;background:#fff;border:3px solid #05070d;box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
+.scr-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #05070d;cursor:pointer}
+.scr-marker-row{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:1.1rem}
+.scr-readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:1rem}
+.scr-stat .scr-lab{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.4rem}
+.scr-bar-wrap{height:10px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;margin-bottom:.35rem}
+.scr-bar-fill{height:100%;border-radius:10px;transition:width .2s ease,background-color .2s ease}
+.scr-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.88rem;color:#fff}
+.scr-status{text-align:center;padding:.6rem;border-radius:10px;font-weight:700;font-size:.85rem;
+  transition:background-color .2s ease,color .2s ease}
+.scr-note{font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.55}
+@media (max-width:640px){.scr-readouts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -154,7 +177,42 @@
     <p>Po današnji vročini bo razlika še kako občutna.</p>
     <p>Takšni hitri poletni preobrati v Savinjski dolini sicer niso nič nenavadnega. Vročemu dnevu lahko ob prihodu hladnejšega zraka že v nekaj urah sledi precej bolj sveže vreme. Podoben, še bolj oster preobrat smo opisali že <a href="/blog/temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719.html" style="color:var(--blue)">v julijskem članku o padcu s 28,9 °C proti ohladitvi</a>.</p>
 
-    <span class="section-label">04 — kratka ohladitev</span>
+    <span class="section-label">04 — premakni se skozi dneve</span>
+    <h2 id="premakni-se">Interaktivno: dan za dnem do ponedeljka</h2>
+    <p>Povlecite drsnik in poglejte, kako se dan za dnem spreminjajo najvišja in najnižja dnevna temperatura ter pričakovane padavine v Rečici ob Savinji.</p>
+
+    <div class="chart-card">
+      <h3>Dnevi napovedi · IREICA1</h3>
+      <div class="scr-days-row">
+        <span class="scr-days-label">Dan</span>
+        <span class="scr-days-val" id="scrDay">28. avgust (danes)</span>
+      </div>
+      <input type="range" class="scr-slider" id="scrSlider" min="0" max="3" value="0" step="1" aria-label="Dan napovedi">
+      <div class="scr-marker-row">
+        <span>28. 8.</span><span>29. 8.</span><span>30. 8.</span><span>31. 8.</span>
+      </div>
+      <div class="scr-readouts">
+        <div class="scr-stat">
+          <div class="scr-lab">Tmax</div>
+          <div class="scr-bar-wrap"><div class="scr-bar-fill" id="scrTmaxFill" style="width:0%;background:#f87171"></div></div>
+          <div class="scr-num" id="scrTmaxVal">32,7 °C</div>
+        </div>
+        <div class="scr-stat">
+          <div class="scr-lab">Tmin</div>
+          <div class="scr-bar-wrap"><div class="scr-bar-fill" id="scrTminFill" style="width:0%;background:#22d3ee"></div></div>
+          <div class="scr-num" id="scrTminVal">18,3 °C</div>
+        </div>
+        <div class="scr-stat">
+          <div class="scr-lab">Padavine</div>
+          <div class="scr-bar-wrap"><div class="scr-bar-fill" id="scrRainFill" style="width:0%;background:#60a5fa"></div></div>
+          <div class="scr-num" id="scrRainVal">0,0 mm</div>
+        </div>
+      </div>
+      <div class="scr-status" id="scrStatus" style="background:rgba(248,113,113,.14);color:#f87171">Vrh vročine</div>
+      <p class="scr-note">Podatki: 4-dnevna napoved Open-Meteo za točko postaje IREICA1, Rečica ob Savinji. Gre za modelsko napoved, ki se lahko do izteka obdobja še spremeni.</p>
+    </div>
+
+    <span class="section-label">05 — kratka ohladitev</span>
     <h2 id="kratka-ohladitev">Ohladitev bo kratka: v nedeljo spet nad 27 °C</h2>
     <p>Kdor se boji, da sobotna ohladitev pomeni konec poletja, je lahko za zdaj miren.</p>
     <p>Že v nedeljo naj bi se na Rečici ob Savinji znova ogrelo do okoli 27,4 °C, vreme pa naj bi ostalo suho.</p>
@@ -162,7 +220,7 @@
     <p>Jutranje temperature bodo še naprej okoli 16 °C, vendar naj bi bilo precej manj soparno kot danes.</p>
     <p>Tudi ponedeljek bo topel. Napoved trenutno kaže okoli 27,7 °C, zato sobotna ohladitev za zdaj deluje predvsem kot kratek premor med vročimi dnevi.</p>
 
-    <span class="section-label">05 — kaj nas čaka</span>
+    <span class="section-label">06 — kaj nas čaka</span>
     <h2 id="kaj-nas-caka">Kaj nas torej čaka do konca tedna?</h2>
     <p>Danes bo na Rečici ob Savinji vroče in soparno. Če imate v načrtu delo na vrtu, daljši sprehod, izlet ali druga opravila na prostem, jih je bolje opraviti zjutraj ali proti večeru.</p>
     <p>Čez dan se bo temperatura približala 33 stopinjam, zato bo predvsem sredi dneva vročina precej izrazita.</p>
@@ -212,6 +270,55 @@
 <script src="/blog/share-bar.js?v=4587b9e2" defer></script>
 <script src="/blog/article-enhance.js?v=73b716df" defer></script>
 <script src="/blog/subscribe.js?v=01bdb1be" defer></script>
+<script>
+// Interaktivni drsnik "premakni se skozi dni" -- podatki iz istega 4-dnevnega
+// niza kot graf spodaj (Open-Meteo, točka postaje IREICA1).
+(function () {
+  var DATA = [
+    { date: '28. avgust (danes)',    tmax: 32.7, tmin: 18.3, rain: 0.0, status: ['Vrh vročine', '#f87171'] },
+    { date: '29. avgust (sobota)',   tmax: 24.3, tmin: 16.6, rain: 0.5, status: ['Oster padec, možen dež', '#f59e0b'] },
+    { date: '30. avgust (nedelja)',  tmax: 27.4, tmin: 16.4, rain: 0.0, status: ['Delen povratek toplote, suho', '#60a5fa'] },
+    { date: '31. avgust (ponedeljek)', tmax: 27.7, tmin: 15.9, rain: 0.0, status: ['Podobno, brez soparnosti', '#22d3ee'] }
+  ];
+
+  var slider = document.getElementById('scrSlider');
+  if (!slider) return;
+  var dayEl    = document.getElementById('scrDay');
+  var tmaxFill = document.getElementById('scrTmaxFill');
+  var tmaxVal  = document.getElementById('scrTmaxVal');
+  var tminFill = document.getElementById('scrTminFill');
+  var tminVal  = document.getElementById('scrTminVal');
+  var rainFill = document.getElementById('scrRainFill');
+  var rainVal  = document.getElementById('scrRainVal');
+  var statusEl = document.getElementById('scrStatus');
+
+  function fmt1(n) { return n.toFixed(1).replace('.', ','); }
+
+  function update() {
+    var d = DATA[parseInt(slider.value, 10)];
+    dayEl.textContent = d.date;
+
+    var tmaxPct = Math.max(4, Math.min(100, Math.round((d.tmax - 5) / (35 - 5) * 100)));
+    tmaxFill.style.width = tmaxPct + '%';
+    tmaxVal.textContent = fmt1(d.tmax) + ' °C';
+
+    var tminPct = Math.max(4, Math.min(100, Math.round((d.tmin - 5) / (35 - 5) * 100)));
+    tminFill.style.width = tminPct + '%';
+    tminVal.textContent = fmt1(d.tmin) + ' °C';
+
+    var rainPct = Math.max(3, Math.min(100, Math.round(d.rain / 8 * 100)));
+    rainFill.style.width = rainPct + '%';
+    rainVal.textContent = fmt1(d.rain) + ' mm';
+
+    statusEl.textContent = d.status[0];
+    statusEl.style.background = d.status[1] + '22';
+    statusEl.style.color = d.status[1];
+  }
+
+  slider.addEventListener('input', update);
+  update();
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 
