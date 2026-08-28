@@ -1,0 +1,147 @@
+{
+ "generated": "2026-08-28T08:21:43+00:00",
+ "bbox": [
+  46.26,
+  14.6,
+  46.45,
+  15.05
+ ],
+ "count": 9,
+ "items": [
+  {
+   "id": "node/5141202673",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.447989,
+   "lon": 14.976223,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "node/5793595328",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.446516,
+   "lon": 14.846203,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "node/8729771166",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.268962,
+   "lon": 14.61935,
+   "status": "osm",
+   "tags": {
+    "diameter": "80",
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": "main"
+   }
+  },
+  {
+   "id": "node/8729771167",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.26808,
+   "lon": 14.616564,
+   "status": "osm",
+   "tags": {
+    "diameter": "80",
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": "main"
+   }
+  },
+  {
+   "id": "node/13018643280",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.354329,
+   "lon": 14.745973,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "node/13085110865",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.316021,
+   "lon": 14.882557,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "node/13868234930",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.286616,
+   "lon": 14.90614,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "node/14063811426",
+   "type": "fire_hydrant",
+   "label": "Hidrant",
+   "lat": 46.317219,
+   "lon": 14.633156,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": "pillar",
+    "water_source": null
+   }
+  },
+  {
+   "id": "way/1028786671",
+   "type": "water_tank",
+   "label": "Požarni rezervoar",
+   "lat": 46.344002,
+   "lon": 15.039101,
+   "status": "osm",
+   "tags": {
+    "diameter": null,
+    "pressure": null,
+    "flow_rate": null,
+    "hydrant_type": null,
+    "water_source": null
+   }
+  }
+ ]
+}

@@ -117,6 +117,11 @@ body{
 .gf-briefing pre{white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.76rem;
   background:var(--bg-alt,rgba(127,127,127,.08));border-radius:.6rem;padding:.8rem;margin:.6rem 0}
 .gf-briefing-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.gf-calc-row{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
+.gf-calc-row label{display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:var(--muted);flex:1;min-width:160px}
+.gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
+  padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
+.gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -156,8 +161,8 @@ body{
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Intervencija zdaj</h1>
   <p class="post-meta">Hiter operativni pogled: dovoli lokacijo (GPS) in v nekaj sekundah dobiš veter,
-  morebiten obrat vetra in gumb za briefing. Indeks FWI/ISI spodaj ostaja izračunan za Rečico ob Savinji, ne za tvojo
-  GPS lokacijo (dokler modela ne posplošimo na poljubno točko) — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
+  morebiten obrat vetra in gumb za briefing. <span id="gf-fwi-note">Indeks FWI/ISI spodaj je izračunan za Rečico ob
+  Savinji.</span> Glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
   <div class="gf-interv-card">
     <div class="gf-interv-loc">
       <b id="gf-interv-loc">📍 Rečica ob Savinji (privzeto)</b>
@@ -189,7 +194,7 @@ body{
     </div>
     </div>
     <p class="gf-note" id="gf-interv-note"></p>
-    <p class="gf-note"><a id="gf-interv-map" href="https://www.openstreetmap.org/?mlat=46.325779&amp;mlon=14.921137#map=12/46.325779/14.921137" target="_blank" rel="noopener">🗺 Odpri na zemljevidu (OpenStreetMap)</a></p>
+    <p class="gf-note"><a id="gf-interv-map" href="/meteogasilec/karta/" target="_blank" rel="noopener">🗺 Odpri operativno karto (hidranti, požarišča)</a></p>
     <div class="gf-briefing">
       <h2 style="margin-top:0">📋 Briefing</h2>
       <pre id="gf-briefing-pre">Nalaganje…</pre>
@@ -203,8 +208,35 @@ body{
   <script>(function(){
     var DEFAULT_LAT=46.325779, DEFAULT_LON=14.921137;
     var FWI_TODAY={"fwi": 17.4, "level": "Visoka", "isi": 12.7};
+    var currentFWI={fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false};
     var lastData=null;
     function fmtHM(t){return t?t.slice(11,16):'—';}
+    function updateFwiDisplay(){
+      var fwiVal=document.getElementById('gf-fwi-val'),fwiLvl=document.getElementById('gf-fwi-lvl'),
+          isiVal=document.getElementById('gf-isi-val'),note=document.getElementById('gf-fwi-note');
+      if(fwiVal)fwiVal.textContent=currentFWI.fwi.toFixed(1);
+      if(fwiLvl)fwiLvl.textContent='FWI danes ('+currentFWI.level+')'+(currentFWI.isLocal?' · tvoja lokacija':'');
+      if(isiVal)isiVal.textContent=currentFWI.isi.toFixed(1);
+      if(note)note.textContent=currentFWI.isLocal
+        ?'Indeks FWI/ISI spodaj je izračunan za tvojo GPS lokacijo.'
+        :'Indeks FWI/ISI spodaj je izračunan za Rečico ob Savinji.';
+      if(lastData){
+        lastData.fwi=currentFWI.fwi;lastData.isi=currentFWI.isi;lastData.fwiLevel=currentFWI.level;
+        document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+      }
+    }
+    function fetchLocalFwi(lat,lon){
+      var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+        +'&daily=temperature_2m_max,relative_humidity_2m_min,windspeed_10m_max,precipitation_sum'
+        +'&past_days=7&forecast_days=1&timezone=Europe%2FLjubljana';
+      fetch(url).then(function(r){return r.json();}).then(function(j){
+        var series=Gasilec.fwiSeriesFromDaily(j.daily||{});
+        if(!series.length)return;
+        var today=series[series.length-1];
+        currentFWI={fwi:today.fwi,level:today.level,isi:today.isi,isLocal:true};
+        updateFwiDisplay();
+      }).catch(function(e){console.warn('lokalni FWI:',e);});
+    }
     function render(json,label){
       var h=json.hourly||{};
       var times=h.time||[],temp=h.temperature_2m||[],rh=h.relative_humidity_2m||[],
@@ -221,8 +253,8 @@ body{
         +'<div class="gf-stat"><b>'+Math.round(rh[i])+' %</b><span>Vlaga</span></div>'
         +'<div class="gf-stat"><b>'+Math.round(gust[i])+' km/h</b><span>Sunki vetra</span></div>'
         +'<div class="gf-stat"><b>'+precip3.toFixed(1)+' mm</b><span>Padavine 3 h</span></div>'
-        +'<div class="gf-stat"><b>'+FWI_TODAY.fwi.toFixed(1)+'</b><span>FWI danes ('+FWI_TODAY.level+')</span></div>'
-        +'<div class="gf-stat"><b>'+FWI_TODAY.isi.toFixed(1)+'</b><span>ISI danes</span></div>';
+        +'<div class="gf-stat"><b id="gf-fwi-val">'+currentFWI.fwi.toFixed(1)+'</b><span id="gf-fwi-lvl">FWI danes ('+currentFWI.level+')</span></div>'
+        +'<div class="gf-stat"><b id="gf-isi-val">'+currentFWI.isi.toFixed(1)+'</b><span>ISI danes</span></div>';
       var shift=Gasilec.detectWindShift(times.slice(i),spd.slice(i),gust.slice(i),wdir.slice(i),{horizonHours:12});
       var shiftWrap=document.getElementById('gf-interv-shift-wrap');
       if(shift.detected){
@@ -236,8 +268,8 @@ body{
       lastData={
         timeLabel:new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}),
         placeLabel:label, temp:temp[i], rh:rh[i], windSpeed:spd[i], windGust:gust[i],
-        windFromDeg:wdir[i], precip3h:precip3, fwi:FWI_TODAY.fwi, fwiLevel:FWI_TODAY.level,
-        isi:FWI_TODAY.isi, shift:shift.detected?shift:null,
+        windFromDeg:wdir[i], precip3h:precip3, fwi:currentFWI.fwi, fwiLevel:currentFWI.level,
+        isi:currentFWI.isi, shift:shift.detected?shift:null,
       };
       document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
     }
@@ -256,8 +288,12 @@ body{
       navigator.geolocation.getCurrentPosition(function(pos){
         note.textContent='';
         var lat=pos.coords.latitude.toFixed(4),lon=pos.coords.longitude.toFixed(4);
-        document.getElementById('gf-interv-map').href='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=13/'+lat+'/'+lon;
+        document.getElementById('gf-interv-map').href='/meteogasilec/karta/?lat='+lat+'&lon='+lon;
+        currentFWI={fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false};
         load(lat,lon,'Tvoja lokacija ('+lat+', '+lon+')');
+        if(Gasilec.distanceKm(parseFloat(lat),parseFloat(lon),DEFAULT_LAT,DEFAULT_LON)>2){
+          fetchLocalFwi(lat,lon);
+        }
       },function(err){
         note.textContent='Lokacija ni na voljo (zavrnjeno ali napaka) — prikazani ostajajo podatki za Rečico ob Savinji.';
       },{enableHighAccuracy:true,timeout:10000});

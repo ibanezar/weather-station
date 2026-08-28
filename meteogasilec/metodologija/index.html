@@ -117,6 +117,11 @@ body{
 .gf-briefing pre{white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.76rem;
   background:var(--bg-alt,rgba(127,127,127,.08));border-radius:.6rem;padding:.8rem;margin:.6rem 0}
 .gf-briefing-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.gf-calc-row{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
+.gf-calc-row label{display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:var(--muted);flex:1;min-width:160px}
+.gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
+  padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
+.gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}

@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Osveži hidrante (Overpass/OSM, Zgornja Savinjska dolina)
+        run: python3 tools/fetch_hydrants.py
+
       - name: Generate MeteoGasilec stran (FWI + podstrani)
         run: python3 tools/generate_gasilec_page.py
 

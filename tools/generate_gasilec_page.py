@@ -13,12 +13,16 @@ Vsebina:
     naslovnici, glej gasilec_model.py) + 7-dnevni graf.
   * NASA FIRMS — dejansko zaznane toplotne anomalije v bližini (isti Worker
     endpoint /pozari kot na naslovnici, klican na novo od tu).
-  * Štiri podstrani: intervencija/ (hiter operativni pogled — GPS lokacija,
-    grafičen veter, detektor obrata vetra, kopiraj briefing; klientska logika
-    je v meteogasilec/gasilec.js, deljena med vsemi /meteogasilec/* stranmi),
-    vreme-intervencije/ (lokalni veter + nacionalni nevihtni potencial iz že
-    objavljenega og/storm-map/latest.json), nasveti/ (kurjenje v naravi,
-    kontakti), metodologija/ (razlaga FWI, viri, omejitve).
+  * Šest podstrani: intervencija/ (hiter operativni pogled — GPS lokacija,
+    grafičen veter, detektor obrata vetra, lokalni FWI ko je GPS >2 km od
+    Rečice, kopiraj briefing; klientska logika je v meteogasilec/gasilec.js,
+    deljena med vsemi /meteogasilec/* stranmi), karta/ (Leaflet + OSM
+    ploščice — hidranti/odvzemna mesta iz meteogasilec/hidranti.json,
+    tools/fetch_hydrants.py, + FIRMS požarišča), kalkulator/ (cisterna,
+    penilo, statični tlak), vreme-intervencije/ (lokalni veter + nacionalni
+    nevihtni potencial iz že objavljenega og/storm-map/latest.json),
+    nasveti/ (kurjenje v naravi, kontakti), metodologija/ (razlaga FWI,
+    viri, omejitve).
 
 Usage:
   python3 tools/generate_gasilec_page.py
@@ -139,6 +143,11 @@ body{
 .gf-briefing pre{white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.76rem;
   background:var(--bg-alt,rgba(127,127,127,.08));border-radius:.6rem;padding:.8rem;margin:.6rem 0}
 .gf-briefing-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.gf-calc-row{display:flex;gap:1rem;flex-wrap:wrap;margin:.6rem 0}
+.gf-calc-row label{display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:var(--muted);flex:1;min-width:160px}
+.gf-calc-row input[type=number]{background:var(--card-bg);border:1px solid var(--card-border);border-radius:.5rem;
+  padding:.5rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem}
+.gf-calc-result{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin:.6rem 0 0}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -247,16 +256,33 @@ _FI_INTERV = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/200
     '<path d="M12 2.6c-3.7 0-6.4 2.9-6.4 6.5 0 4.5 5.1 10.4 6 11.4a.6.6 0 0 0 .8 0c.9-1 6-6.9 6-11.4 '
     '0-3.6-2.7-6.5-6.4-6.5Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" '
     'stroke-linejoin="round"/><circle cx="12" cy="9.2" r="2.3" fill="currentColor"/></svg>')
+_FI_KARTA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z" fill="currentColor" fill-opacity=".14" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="1.4" opacity=".6"/>'
+    '<circle cx="12" cy="11" r="2.1" fill="currentColor"/></svg>')
+_FI_KALK = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<rect x="4.5" y="2.8" width="15" height="18.4" rx="2.4" fill="currentColor" fill-opacity=".14" '
+    'stroke="currentColor" stroke-width="1.6"/>'
+    '<rect x="7" y="5.4" width="10" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.4"/>'
+    '<circle cx="8" cy="12.6" r="1.05" fill="currentColor"/><circle cx="12" cy="12.6" r="1.05" fill="currentColor"/>'
+    '<circle cx="16" cy="12.6" r="1.05" fill="currentColor"/><circle cx="8" cy="16.6" r="1.05" fill="currentColor"/>'
+    '<circle cx="12" cy="16.6" r="1.05" fill="currentColor"/><circle cx="16" cy="16.6" r="1.05" fill="currentColor"/>'
+    '</svg>')
 
 FEATURES = [
     ("/meteogasilec/intervencija/", _FI_INTERV, "#ef4444", "Intervencija zdaj",
      "Tvoja lokacija (GPS): veter, obrat vetra, FWI in kopiraj briefing."),
+    ("/meteogasilec/karta/", _FI_KARTA, "#0ea5e9", "Operativna karta in hidranti",
+     "Hidranti, odvzemna mesta in zaznana požarišča (FIRMS) na eni interaktivni karti."),
     ("/meteogasilec/metodologija/", _FI_OGROZENOST, "#f59e0b", "Kako se izračuna FWI",
      "Sestavine kanadskega indeksa (FFMC/DMC/DC/ISI/BUI) in kaj indeks ni."),
     ("/nevihte/", _FI_OGROZENOST, "#eab308", "Aktivna opozorila ARSO",
      "Vključno s kategorijo »požarna ogroženost«, sproti vsakih 15 minut."),
     ("/meteogasilec/vreme-intervencije/", _FI_VETER, "#22d3ee", "Vreme za intervencije",
      "Veter, sunki in nacionalni nevihtni potencial za danes."),
+    ("/meteogasilec/kalkulator/", _FI_KALK, "#a855f7", "Gasilski kalkulator",
+     "Praznjenje cisterne, penilo in statični tlak iz višinske razlike."),
     ("/meteogasilec/nasveti/", _FI_NASVETI, "#84cc16", "Kurjenje v naravi in kontakti",
      "Kdaj sme in kdaj ne sme, 112, URSZR, Gasilska zveza Slovenije."),
 ]
@@ -309,11 +335,11 @@ def firms_widget_html():
   }})();</script>'''
 
 
-def subpage_shell(slug, title, desc, inner_html):
+def subpage_shell(slug, title, desc, inner_html, extra_head=""):
     url = f"/meteogasilec/{slug}/"
     crumbs = [("Meteorec", "/"), ("MeteoGasilec", "/meteogasilec/"), (title, None)]
     schema = "\n".join([seo.webpage_schema(url, title, desc), seo.crumbs_schema(crumbs)])
-    head_extras = schema + "\n" + PAGE_CSS
+    head_extras = schema + "\n" + PAGE_CSS + ("\n" + extra_head if extra_head else "")
     body = f'''{BRAND_SWAP}
 {seo.crumbs_html(crumbs)}
 {seo.stn_badge()}
@@ -510,8 +536,8 @@ def build_intervencija_page(payload):
 
     fwi_json = json.dumps({"fwi": today_fwi, "level": today_level, "isi": today_isi})
     inner = f'''  <p class="post-meta">Hiter operativni pogled: dovoli lokacijo (GPS) in v nekaj sekundah dobiš veter,
-  morebiten obrat vetra in gumb za briefing. Indeks FWI/ISI spodaj ostaja izračunan za Rečico ob Savinji, ne za tvojo
-  GPS lokacijo (dokler modela ne posplošimo na poljubno točko) — glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
+  morebiten obrat vetra in gumb za briefing. <span id="gf-fwi-note">Indeks FWI/ISI spodaj je izračunan za Rečico ob
+  Savinji.</span> Glej <a href="/meteogasilec/metodologija/">metodologijo</a>.</p>
   <div class="gf-interv-card">
     <div class="gf-interv-loc">
       <b id="gf-interv-loc">📍 Rečica ob Savinji (privzeto)</b>
@@ -524,7 +550,7 @@ def build_intervencija_page(payload):
 {shift_html}
     </div>
     <p class="gf-note" id="gf-interv-note"></p>
-    <p class="gf-note"><a id="gf-interv-map" href="https://www.openstreetmap.org/?mlat={fm.LAT}&amp;mlon={fm.LON}#map=12/{fm.LAT}/{fm.LON}" target="_blank" rel="noopener">🗺 Odpri na zemljevidu (OpenStreetMap)</a></p>
+    <p class="gf-note"><a id="gf-interv-map" href="/meteogasilec/karta/" target="_blank" rel="noopener">🗺 Odpri operativno karto (hidranti, požarišča)</a></p>
     <div class="gf-briefing">
       <h2 style="margin-top:0">📋 Briefing</h2>
       <pre id="gf-briefing-pre">Nalaganje…</pre>
@@ -538,8 +564,35 @@ def build_intervencija_page(payload):
   <script>(function(){{
     var DEFAULT_LAT={fm.LAT!r}, DEFAULT_LON={fm.LON!r};
     var FWI_TODAY={fwi_json};
+    var currentFWI={{fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false}};
     var lastData=null;
     function fmtHM(t){{return t?t.slice(11,16):'—';}}
+    function updateFwiDisplay(){{
+      var fwiVal=document.getElementById('gf-fwi-val'),fwiLvl=document.getElementById('gf-fwi-lvl'),
+          isiVal=document.getElementById('gf-isi-val'),note=document.getElementById('gf-fwi-note');
+      if(fwiVal)fwiVal.textContent=currentFWI.fwi.toFixed(1);
+      if(fwiLvl)fwiLvl.textContent='FWI danes ('+currentFWI.level+')'+(currentFWI.isLocal?' · tvoja lokacija':'');
+      if(isiVal)isiVal.textContent=currentFWI.isi.toFixed(1);
+      if(note)note.textContent=currentFWI.isLocal
+        ?'Indeks FWI/ISI spodaj je izračunan za tvojo GPS lokacijo.'
+        :'Indeks FWI/ISI spodaj je izračunan za Rečico ob Savinji.';
+      if(lastData){{
+        lastData.fwi=currentFWI.fwi;lastData.isi=currentFWI.isi;lastData.fwiLevel=currentFWI.level;
+        document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+      }}
+    }}
+    function fetchLocalFwi(lat,lon){{
+      var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+        +'&daily=temperature_2m_max,relative_humidity_2m_min,windspeed_10m_max,precipitation_sum'
+        +'&past_days=7&forecast_days=1&timezone=Europe%2FLjubljana';
+      fetch(url).then(function(r){{return r.json();}}).then(function(j){{
+        var series=Gasilec.fwiSeriesFromDaily(j.daily||{{}});
+        if(!series.length)return;
+        var today=series[series.length-1];
+        currentFWI={{fwi:today.fwi,level:today.level,isi:today.isi,isLocal:true}};
+        updateFwiDisplay();
+      }}).catch(function(e){{console.warn('lokalni FWI:',e);}});
+    }}
     function render(json,label){{
       var h=json.hourly||{{}};
       var times=h.time||[],temp=h.temperature_2m||[],rh=h.relative_humidity_2m||[],
@@ -556,8 +609,8 @@ def build_intervencija_page(payload):
         +'<div class="gf-stat"><b>'+Math.round(rh[i])+' %</b><span>Vlaga</span></div>'
         +'<div class="gf-stat"><b>'+Math.round(gust[i])+' km/h</b><span>Sunki vetra</span></div>'
         +'<div class="gf-stat"><b>'+precip3.toFixed(1)+' mm</b><span>Padavine 3 h</span></div>'
-        +'<div class="gf-stat"><b>'+FWI_TODAY.fwi.toFixed(1)+'</b><span>FWI danes ('+FWI_TODAY.level+')</span></div>'
-        +'<div class="gf-stat"><b>'+FWI_TODAY.isi.toFixed(1)+'</b><span>ISI danes</span></div>';
+        +'<div class="gf-stat"><b id="gf-fwi-val">'+currentFWI.fwi.toFixed(1)+'</b><span id="gf-fwi-lvl">FWI danes ('+currentFWI.level+')</span></div>'
+        +'<div class="gf-stat"><b id="gf-isi-val">'+currentFWI.isi.toFixed(1)+'</b><span>ISI danes</span></div>';
       var shift=Gasilec.detectWindShift(times.slice(i),spd.slice(i),gust.slice(i),wdir.slice(i),{{horizonHours:12}});
       var shiftWrap=document.getElementById('gf-interv-shift-wrap');
       if(shift.detected){{
@@ -571,8 +624,8 @@ def build_intervencija_page(payload):
       lastData={{
         timeLabel:new Date().toLocaleTimeString('sl',{{hour:'2-digit',minute:'2-digit'}}),
         placeLabel:label, temp:temp[i], rh:rh[i], windSpeed:spd[i], windGust:gust[i],
-        windFromDeg:wdir[i], precip3h:precip3, fwi:FWI_TODAY.fwi, fwiLevel:FWI_TODAY.level,
-        isi:FWI_TODAY.isi, shift:shift.detected?shift:null,
+        windFromDeg:wdir[i], precip3h:precip3, fwi:currentFWI.fwi, fwiLevel:currentFWI.level,
+        isi:currentFWI.isi, shift:shift.detected?shift:null,
       }};
       document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
     }}
@@ -591,8 +644,12 @@ def build_intervencija_page(payload):
       navigator.geolocation.getCurrentPosition(function(pos){{
         note.textContent='';
         var lat=pos.coords.latitude.toFixed(4),lon=pos.coords.longitude.toFixed(4);
-        document.getElementById('gf-interv-map').href='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=13/'+lat+'/'+lon;
+        document.getElementById('gf-interv-map').href='/meteogasilec/karta/?lat='+lat+'&lon='+lon;
+        currentFWI={{fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false}};
         load(lat,lon,'Tvoja lokacija ('+lat+', '+lon+')');
+        if(Gasilec.distanceKm(parseFloat(lat),parseFloat(lon),DEFAULT_LAT,DEFAULT_LON)>2){{
+          fetchLocalFwi(lat,lon);
+        }}
       }},function(err){{
         note.textContent='Lokacija ni na voljo (zavrnjeno ali napaka) — prikazani ostajajo podatki za Rečico ob Savinji.';
       }},{{enableHighAccuracy:true,timeout:10000}});
@@ -605,6 +662,218 @@ def build_intervencija_page(payload):
     return subpage_shell("intervencija", "Intervencija zdaj",
                           "Hiter operativni pogled za gasilske intervencije: veter po GPS lokaciji, samodejni "
                           "detektor obrata vetra in gumb za kopiranje briefinga.", inner)
+
+
+# ── operativna karta (hidranti + FIRMS) ─────────────────────────────────────
+
+HIDRANTI_JSON = os.path.join(ROOT, "meteogasilec", "hidranti.json")
+_STATUS_DOT = {"verified": "🟢", "osm": "🟡", "broken": "🔴"}
+_STATUS_LABEL = {"verified": "preverjeno", "osm": "samo OSM", "broken": "nedelujoče"}
+
+
+def _haversine_km(lat1, lon1, lat2, lon2):
+    r = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def load_hydrants():
+    try:
+        with open(HIDRANTI_JSON, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def build_karta_page():
+    hdata = load_hydrants()
+    items = list((hdata or {}).get("items") or [])
+    for it in items:
+        it["_dist"] = _haversine_km(fm.LAT, fm.LON, it["lat"], it["lon"])
+    items.sort(key=lambda it: it["_dist"])
+    nearest = items[:10]
+
+    if nearest:
+        rows = "\n".join(
+            f'<tr><td>{it["_dist"]:.1f} km</td><td>{_esc(it["label"])}</td>'
+            f'<td>{_STATUS_DOT.get(it["status"], "🟡")} {_esc(_STATUS_LABEL.get(it["status"], "samo OSM"))}</td></tr>'
+            for it in nearest
+        )
+        table_html = f'''  <table class="gf-tbl">
+    <thead><tr><th>Razdalja od Rečice</th><th>Tip</th><th>Status</th></tr></thead>
+    <tbody>
+{rows}
+    </tbody>
+  </table>'''
+    else:
+        table_html = '<p class="gf-note">Seznam hidrantov trenutno ni na voljo.</p>'
+
+    # _dist je bil samo za SSR razvrščanje — ne pošiljamo ga v klientski JSON.
+    hydrants_json = json.dumps([{k: v for k, v in it.items() if k != "_dist"} for it in items], ensure_ascii=False)
+
+    inner = f'''  <p class="post-meta">Hidranti in odvzemna mesta (OpenStreetMap, Zgornja Savinjska dolina) ter zaznana
+  požarišča (NASA FIRMS) na eni interaktivni karti. Prikaz je informativen — za dostop z vozilom vedno preveri stanje
+  na terenu.</p>
+  <div class="gf-map-layers">
+    <label><input type="checkbox" id="gf-layer-hydrants" checked> 💧 Hidranti in odvzemna mesta</label>
+    <label><input type="checkbox" id="gf-layer-firms"> 🛰 Požarišča (FIRMS)</label>
+    <button class="gf-btn" id="btn-gps" type="button">📍 Uporabi mojo lokacijo</button>
+  </div>
+  <div id="gf-map"></div>
+  <p class="gf-note" id="gf-map-note"></p>
+  <h2>💧 Najbližji hidranti (od Rečice ob Savinji)</h2>
+{table_html}
+  <p class="gf-note">Vir: prispevki <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>,
+  osveženo dnevno. Status 🟡 »samo OSM« pomeni, da podatka ni potrdilo lokalno gasilsko društvo — pred zanašanjem nanj
+  preveri stanje na terenu.</p>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>(function(){{
+    if(typeof L==='undefined'){{
+      document.getElementById('gf-map-note').textContent='Interaktivna karta trenutno ni na voljo — glej seznam spodaj.';
+      return;
+    }}
+    var HYDRANTS={hydrants_json};
+    var DEFAULT_LAT={fm.LAT!r}, DEFAULT_LON={fm.LON!r};
+    var params=new URLSearchParams(location.search);
+    var qLat=parseFloat(params.get('lat')), qLon=parseFloat(params.get('lon'));
+    var startLat=isFinite(qLat)?qLat:DEFAULT_LAT, startLon=isFinite(qLon)?qLon:DEFAULT_LON;
+    var STATUS_COLOR={{verified:'#22c55e',osm:'#f59e0b',broken:'#ef4444'}};
+    var STATUS_LABEL={{verified:'preverjeno',osm:'samo OSM',broken:'nedelujoče'}};
+    var TYPE_LABEL={{fire_hydrant:'Hidrant',suction_point:'Sesalno mesto',water_tank:'Požarni rezervoar'}};
+
+    var map=L.map('gf-map').setView([startLat,startLon],13);
+    L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{
+      maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }}).addTo(map);
+
+    var userMarker=L.marker([startLat,startLon],{{title:'Lokacija'}}).addTo(map)
+      .bindPopup(isFinite(qLat)?'📍 Izbrana lokacija':'📍 Rečica ob Savinji (privzeto)');
+
+    var hydrantLayer=L.layerGroup().addTo(map);
+    HYDRANTS.forEach(function(it){{
+      var col=STATUS_COLOR[it.status]||'#f59e0b';
+      var m=L.circleMarker([it.lat,it.lon],{{radius:7,color:'#fff',weight:1.5,fillColor:col,fillOpacity:.9}});
+      var tagsHtml='';
+      if(it.tags){{
+        if(it.tags.diameter)tagsHtml+='Premer: '+it.tags.diameter+' mm<br>';
+        if(it.tags.pressure)tagsHtml+='Tlak: '+it.tags.pressure+' bar<br>';
+        if(it.tags.flow_rate)tagsHtml+='Pretok: '+it.tags.flow_rate+' l/min<br>';
+      }}
+      m.bindPopup('<b>'+(TYPE_LABEL[it.type]||it.type)+'</b><br>'+tagsHtml
+        +(STATUS_LABEL[it.status]||'samo OSM')+'<br><a href="https://www.openstreetmap.org/?mlat='+it.lat+'&mlon='+it.lon
+        +'#map=18/'+it.lat+'/'+it.lon+'" target="_blank" rel="noopener">Navigacija →</a>');
+      hydrantLayer.addLayer(m);
+    }});
+
+    var firmsLayer=L.layerGroup();
+    fetch('{WORKER_BASE}/pozari').then(function(r){{return r.json();}}).then(function(d){{
+      if(!d||!d.fires)return;
+      d.fires.forEach(function(it){{
+        if(it.lat==null||it.lon==null)return;
+        var m=L.circleMarker([it.lat,it.lon],{{radius:6,color:'#fff',weight:1.5,fillColor:'#dc2626',fillOpacity:.85}});
+        m.bindPopup('<b>🛰 Satelitska toplotna anomalija</b><br>'+(it.date||'')+' '+(it.time||'')+' UTC<br>Zaupanje: '+(it.conf||'—'));
+        firmsLayer.addLayer(m);
+      }});
+    }}).catch(function(){{}});
+
+    document.getElementById('gf-layer-hydrants').addEventListener('change',function(e){{
+      if(e.target.checked)map.addLayer(hydrantLayer);else map.removeLayer(hydrantLayer);
+    }});
+    document.getElementById('gf-layer-firms').addEventListener('change',function(e){{
+      if(e.target.checked)map.addLayer(firmsLayer);else map.removeLayer(firmsLayer);
+    }});
+
+    document.getElementById('btn-gps').addEventListener('click',function(){{
+      var note=document.getElementById('gf-map-note');
+      if(!navigator.geolocation){{note.textContent='GPS ni podprt v tem brskalniku.';return;}}
+      note.textContent='Pridobivam lokacijo …';
+      navigator.geolocation.getCurrentPosition(function(pos){{
+        note.textContent='';
+        var lat=pos.coords.latitude,lon=pos.coords.longitude;
+        map.setView([lat,lon],14);
+        userMarker.setLatLng([lat,lon]).bindPopup('📍 Tvoja lokacija').openPopup();
+      }},function(){{
+        note.textContent='Lokacija ni na voljo (zavrnjeno ali napaka).';
+      }},{{enableHighAccuracy:true,timeout:10000}});
+    }});
+  }})();</script>'''
+    leaflet_css = ('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" '
+                   'integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">'
+                   '<style>#gf-map{height:420px;border-radius:1rem;overflow:hidden;margin:.8rem 0;'
+                   'border:1px solid var(--card-border)}.gf-map-layers{display:flex;flex-wrap:wrap;gap:.8rem 1.2rem;'
+                   'align-items:center;font-size:.85rem;margin:.6rem 0}.gf-map-layers label{display:flex;'
+                   'align-items:center;gap:.35rem;cursor:pointer}</style>')
+    return subpage_shell("karta", "Operativna karta",
+                          "Hidranti, odvzemna mesta in zaznana požarišča (NASA FIRMS) na eni interaktivni karti za "
+                          "Zgornjo Savinjsko dolino.", inner, extra_head=leaflet_css)
+
+
+# ── gasilski kalkulator ──────────────────────────────────────────────────────
+
+KALKULATOR_HTML = '''  <p class="post-meta">Trije neodvisni hitri izračuni. Vpiši vrednosti — rezultat se izračuna sproti,
+  brez gumba. Uporabljaj skupaj s preverjenimi parametri svoje opreme, ne kot edini vir za odločanje.</p>
+  <div class="gf-interv-card">
+    <h2 style="margin-top:0">🚒 Čas praznjenja cisterne</h2>
+    <div class="gf-calc-row">
+      <label>Voda v cisterni (L) <input type="number" id="c-vol" value="5000" min="0"></label>
+      <label>Skupni pretok (L/min) <input type="number" id="c-flow" value="400" min="1"></label>
+    </div>
+    <p class="gf-calc-result" id="c-time-out">⏱ —</p>
+  </div>
+  <div class="gf-interv-card">
+    <h2 style="margin-top:0">🧯 Penilo</h2>
+    <div class="gf-calc-row">
+      <label>Voda (L) <input type="number" id="f-vol" value="4000" min="0"></label>
+      <label>Koncentracija (%) <input type="number" id="f-conc" value="3" min="0" max="100" step="0.5"></label>
+    </div>
+    <p class="gf-calc-result" id="f-out">🧯 —</p>
+  </div>
+  <div class="gf-interv-card">
+    <h2 style="margin-top:0">⬆ Statični tlak (višinska razlika)</h2>
+    <div class="gf-calc-row">
+      <label>Črpalka (m n.v.) <input type="number" id="h-pump" value="460"></label>
+      <label>Ročnik (m n.v.) <input type="number" id="h-nozzle" value="530"></label>
+    </div>
+    <p class="gf-calc-result" id="h-out">⬆ —</p>
+    <p class="gf-note">Približen izračun (0,0981 bar na vsak meter višinske razlike) — brez upoštevanja izgub v cevovodu.</p>
+  </div>
+  <script>(function(){
+    function num(id){var v=parseFloat(document.getElementById(id).value);return isFinite(v)?v:0;}
+    function fmtTime(min){
+      if(min<=0)return '—';
+      var h=Math.floor(min/60),m=Math.round(min%60);
+      return (h>0?h+' h ':'')+m+' min';
+    }
+    function calcCisterna(){
+      var vol=num('c-vol'),flow=num('c-flow');
+      document.getElementById('c-time-out').textContent='⏱ '+(flow>0?fmtTime(vol/flow):'—');
+    }
+    function calcPenilo(){
+      var vol=num('f-vol'),conc=num('f-conc');
+      var foam=vol*conc/100;
+      document.getElementById('f-out').textContent='🧯 '+foam.toFixed(0)+' L penila (na '+vol.toFixed(0)+' L vode)';
+    }
+    function calcVisina(){
+      var pump=num('h-pump'),nozzle=num('h-nozzle');
+      var dh=nozzle-pump;
+      var bar=Math.abs(dh)*0.0981;
+      var smer=dh>0?'izguba (ročnik višje)':dh<0?'pridobitev (ročnik nižje)':'brez razlike';
+      document.getElementById('h-out').textContent='⬆ Δh='+dh.toFixed(0)+' m → '+bar.toFixed(2)+' bar ('+smer+')';
+    }
+    ['c-vol','c-flow'].forEach(function(id){document.getElementById(id).addEventListener('input',calcCisterna);});
+    ['f-vol','f-conc'].forEach(function(id){document.getElementById(id).addEventListener('input',calcPenilo);});
+    ['h-pump','h-nozzle'].forEach(function(id){document.getElementById(id).addEventListener('input',calcVisina);});
+    calcCisterna();calcPenilo();calcVisina();
+  })();</script>'''
+
+
+def build_kalkulator_page():
+    return subpage_shell("kalkulator", "Gasilski kalkulator",
+                          "Čas praznjenja cisterne, potrebno penilo in statični tlak iz višinske razlike — trije "
+                          "hitri izračuni za gasilske intervencije.", KALKULATOR_HTML)
 
 
 NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
@@ -684,6 +953,8 @@ def main():
         json.dump(payload, f, ensure_ascii=False, indent=1)
 
     build_intervencija_page(payload)
+    build_karta_page()
+    build_kalkulator_page()
     build_vreme_intervencije_page()
     build_nasveti_page()
     build_metodologija_page()
@@ -730,7 +1001,7 @@ def main():
     head_extras = schema + "\n" + PAGE_CSS
     html = seo.page_shell(title, desc, url, head_extras, body)
     seo.write_page("meteogasilec/index.html", html, force=True)
-    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 4 podstrani")
+    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 6 podstrani")
 
 
 if __name__ == "__main__":

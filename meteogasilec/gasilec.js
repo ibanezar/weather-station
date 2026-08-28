@@ -157,6 +157,44 @@
     return { ffmc: ffmc, dmc: dmc, dc: dc, isi: isi, bui: bui, fwi: Math.max(0, fwi) };
   }
 
+  // haversine razdalja v km — uporabljata karta (razdalja do hidranta) in
+  // intervencija (ali je GPS lokacija dovolj daleč od Rečice za lokalni FWI).
+  function distanceKm(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var toRad = function (d) { return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // Sekvenčno gradi dnevni FWI iz Open-Meteo `daily` bloka (temperature_2m_max,
+  // relative_humidity_2m_min, windspeed_10m_max, precipitation_sum) — analogno
+  // fwi_series() v gasilec_model.py in fetchFireWeather() v app.js. Uporablja
+  // se za lokalni FWI po poljubni GPS lokaciji na /intervencija/ (P1) — FWI za
+  // fiksno Rečico ostaja strežniško izračunan (gasilec_model.py).
+  function fwiSeriesFromDaily(daily) {
+    var dates = daily.time || [];
+    var tmax = daily.temperature_2m_max || [];
+    var rhmin = daily.relative_humidity_2m_min || [];
+    var wind = daily.windspeed_10m_max || [];
+    var precip = daily.precipitation_sum || [];
+    var prev = { ffmc: 85, dmc: 6, dc: 15 };
+    var days = [];
+    for (var i = 0; i < dates.length; i++) {
+      var T = tmax[i] != null ? tmax[i] : 20;
+      var H = rhmin[i] != null ? rhmin[i] : 50;
+      var W = wind[i] != null ? wind[i] : 0;
+      var r = precip[i] != null ? precip[i] : 0;
+      var month = new Date(dates[i]).getMonth();
+      var res = calcOneDayFWI(prev, T, H, W, r, month);
+      prev = res;
+      var cls = fwiClass(res.fwi);
+      days.push({ date: dates[i], fwi: res.fwi, isi: res.isi, level: cls.label });
+    }
+    return days;
+  }
+
   function fwiClass(v) {
     if (v < 5.2) return { label: 'Nizka', col: '#22c55e' };
     if (v < 11.2) return { label: 'Zmerna', col: '#84cc16' };
@@ -261,6 +299,8 @@
     windCompassSvg: windCompassSvg,
     calcOneDayFWI: calcOneDayFWI,
     fwiClass: fwiClass,
+    distanceKm: distanceKm,
+    fwiSeriesFromDaily: fwiSeriesFromDaily,
     renderFreshness: renderFreshness,
     buildBriefing: buildBriefing,
     wireBriefingButtons: wireBriefingButtons,
