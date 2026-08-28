@@ -329,11 +329,22 @@
       .then(function (d) { return { alerts: (d && d.alerts) || [], issued: d && d.issued }; });
   }
 
-  // Izriše v `el` in vrne Promise z {alerts,issued} — klicatelj ga lahko
-  // uporabi za dopolnitev briefinga (glej buildBriefing `arsoAlerts`).
+  // Izriše v `el` in vrne Promise z {alerts,issued} (ali `null`, glej spodaj) —
+  // klicatelj ga lahko uporabi za dopolnitev briefinga (glej buildBriefing
+  // `arsoAlerts`).
+  //
+  // `el` ob klicu praviloma že vsebuje strežniško izrisan zadnji znan posnetek
+  // (glej arso_widget_html() v generate_gasilec_page.py) — ne več prazen
+  // "Preverjam …" placeholder. Če živi klic uspe, ta posnetek vedno povozimo s
+  // sveže podatki. Če spodleti, GA NE IZBRIŠEMO: stran je varnostno-kritična in
+  // star-a-znan status je boljši od izgubljenega konteksta ali napačno-pomirjujočega
+  // "vir ni na voljo" čez dober posnetek. V tem primeru vrnemo `null`, da
+  // klicatelj (glej gf-arso-compact zgoraj v generate_gasilec_page.py) ne povozi
+  // svojega že pravilno inicializiranega seznama opozoril z null podatkom.
   function renderArsoWidget(el, opts) {
-    if (!el) return Promise.resolve({ alerts: [] });
+    if (!el) return Promise.resolve(null);
     opts = opts || {};
+    var hadSnapshot = !!(el.textContent && el.textContent.trim());
     return fetchArsoAlerts(opts.region).then(function (res) {
       var alerts = res.alerts || [];
       if (!alerts.length) {
@@ -350,8 +361,10 @@
       el.innerHTML = '<div class="gf-arso-list">' + items + '</div>';
       return res;
     }).catch(function () {
-      el.innerHTML = '<p class="gf-note" style="margin:0">Vir trenutno ni na voljo.</p>';
-      return { alerts: [] };
+      if (!hadSnapshot) {
+        el.innerHTML = '<p class="gf-note" style="margin:0">Vir trenutno ni na voljo.</p>';
+      }
+      return null;
     });
   }
 

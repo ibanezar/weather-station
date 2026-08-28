@@ -606,15 +606,27 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
 - **Obrat vetra ≥45° je MeteoGasilec kriterij, ne uradno opozorilo ARSO** —
   vedno tako označen. Prag: obrat smeri >=45° IN veter/sunki na vsaj eni
   strani >=15 km/h (da se pri skoraj brezvetrju ne sproža po nepotrebnem).
-- **Uradna opozorila ARSO so jasno ločena od MeteoGasilec lastnih ocen.**
-  `Gasilec.renderArsoWidget()` (gasilec.js) kliče isti Worker `/arso-warning`
-  endpoint kot `generate_arso_newsjack_post.py`/`fetch_alerts()` in `/nevihte/`
-  (WX-ARSO), a NEPOSREDNO iz brskalnika — namenoma brez strežniško izrisane
-  vsebine, ker bi enkrat-dnevni posnetek tega generatorja v urah zastaral
-  (opozorilo je stanje, ne novica, glej razdelek o ARSO opozorilih zgoraj).
-  Prikazan na `/meteogasilec/` (razdelek »🏛 Uradna opozorila ARSO«, ločen od
-  FWI kartice) in strnjeno na `/intervencija/`, od koder se aktivna opozorila
-  vključijo tudi v »Kopiraj briefing« (`buildBriefing()`).
+- **Uradna opozorila ARSO so jasno ločena od MeteoGasilec lastnih ocen — in
+  pred njimi po vrstnem redu na strani** (uradni status nad FWI heroj, ne pod
+  njim — 28. 8. 2026 popravljeno po zunanjem UX pregledu, ki je opozoril, da
+  bi uporabnik FWI-jevo besedno oznako, npr. »Visoka«, lahko zamenjal za
+  uradno oceno). `generate_gasilec_page.py` (`fetch_arso_alerts` = uvožen
+  `fetch_alerts()` iz `generate_arso_newsjack_post.py`, isti Worker
+  `/arso-warning` endpoint kot `/nevihte/` WX-ARSO) zajame opozorila **ob
+  generiranju strani** in jih izriše strežniško (`arso_widget_html()`) — stran
+  je varnostno-kritična, zato nalagajoč se placeholder ("Preverjam …") ne sme
+  biti edino, kar vidi uporabnik ali crawler, dokler JS ne odgovori. Klientski
+  `Gasilec.renderArsoWidget()` ta posnetek ob nalaganju osveži z živimi podatki
+  (opozorilo je stanje, ne novica — enkrat-dnevni posnetek bi v urah zastaral,
+  glej razdelek o ARSO opozorilih zgoraj), **če pa živi klic spodleti, posnetka
+  ne izbriše niti ne prepiše z "ni aktivnih"** — oboje bi bila varnostno
+  nevarna napačno-pomirjujoča trditev. Iz istega razloga `fetch_ok=False` (Worker
+  nedosegljiv že ob generiranju) izpiše "ni bilo mogoče preveriti", nikoli "ni
+  aktivnih opozoril". Prikazan na `/meteogasilec/` (razdelek »🏛 Uradna
+  opozorila«, nad FWI kartico) in strnjeno na `/intervencija/` (nad vremensko
+  kartico, isto načelo), od koder se aktivna opozorila (vključno z rezervnim
+  posnetkom, če se živi klic ni še izvedel ali je spodletel) vključijo tudi v
+  »Kopiraj briefing« (`buildBriefing()`).
 - **Veter + teren** (`/intervencija/`, razdelek »🏔 Veter + teren«) — za
   trenutno aktivno lokacijo (GPS ali privzeta Rečica) `Gasilec.
   fetchElevationGrid()` pokliče Open-Meteo Elevation API za mrežo 3×3
