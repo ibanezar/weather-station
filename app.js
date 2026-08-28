@@ -4983,6 +4983,16 @@ const HOP_STAGES=[
   {min:950, max:1250, label:'Oblikovanje storžkov',         emoji:'🍺',col:'#f97316'},
   {min:1250,max:9999, label:'Tehnološka zrelost / obiranje',emoji:'🎉',col:'#ef4444'},
 ];
+// Tehnološka zrelost hmelja po sorti — ROČNO VZDRŽEVANA (namerna kopija IHPS_STATUS
+// iz tools/generate_agrometeo_page.py, isto načelo kot HOP_STAGES zgoraj). GDD₁₀ spodaj
+// je samo modelirana razvojna faza za dolino kot celoto, ne dejanska tehnološka zrelost
+// (odvisna tudi od sorte, tehnoloških ukrepov, tal, lokacije) — vpiši ročno ob objavi IHPS.
+const IHPS_STATUS=[
+  {sorta:'Savinjski golding',status:'✅ tehnološko zrel',vir:'IHPS, 18. 8. 2026'},
+  {sorta:'Styrian Gold',      status:'✅ tehnološko zrel',vir:'IHPS, 25. 8. 2026'},
+  {sorta:'Aurora',            status:'ni objavljenega statusa IHPS',vir:null},
+  {sorta:'Celeia',            status:'ni objavljenega statusa IHPS',vir:null},
+];
 const CROP_GDD=[
   {name:'Hmelj',     emoji:'🌿',base:10,milestones:[{v:150,l:'odganjanje'},{v:400,l:'razvejanje'},{v:600,l:'cvetenje'},{v:950,l:'storžki'},{v:1250,l:'obiranje'}],        col:'#22c55e'},
   {name:'Koruza',    emoji:'🌽',base:10,milestones:[{v:100,l:'kalitev'},{v:600,l:'svilanje'},{v:1300,l:'metličenje'},{v:2400,l:'spravilo'}],                         col:'#f59e0b'},
@@ -5040,16 +5050,25 @@ function _buildAgroHop(gdd10){
   const pct=Math.min(100,Math.round((gdd10-stage.min)/(stage.max-stage.min)*100));
   const toNext=nextStage?nextStage.min-gdd10:0;
   body.innerHTML=
-    '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem">'
+    '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">'
     +'<div style="font-size:2rem">'+stage.emoji+'</div>'
-    +'<div><div style="font-size:.95rem;font-weight:600;color:var(--text)">'+stage.label+'</div>'
+    +'<div><div style="font-size:.95rem;font-weight:600;color:var(--text)">Modelirani razvoj: '+stage.label+'</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">GDD₁₀: '+gdd10+(nextStage?' · do naslednje faze: '+toNext+' GDD₁₀ ('+nextStage.label+')':'')+'</div></div>'
     +'</div>'
     +'<div class="hop-phase-bar"><div class="hop-phase-fill" style="width:'+pct+'%;background:'+stage.col+'"></div></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.85rem">'
+    +'<div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.5rem">'
     +'<span>'+stage.min+' GDD₁₀</span><span>'+pct+'%</span>'+(stage.max<9999?'<span>'+stage.max+' GDD₁₀</span>':'')+'</div>'
+    +'<div style="font-size:.7rem;color:var(--muted);margin-bottom:.85rem">Ocena iz enega dejavnika (temperature) za dolino kot celoto — ne pove dejanske tehnološke zrelosti, ki je odvisna tudi od sorte, tehnoloških ukrepov, tal in lokacije.</div>'
+    +'<div style="font-size:.75rem;font-weight:600;color:var(--text);margin-bottom:.35rem">🏛️ Tehnološka zrelost — IHPS (ročno vzdrževano)</div>'
+    +'<div style="margin-bottom:.85rem">'+IHPS_STATUS.map(function(s){
+      return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:.2rem 0;border-bottom:1px solid var(--border)">'
+        +'<span style="color:var(--text)">'+s.sorta+'</span>'
+        +'<span style="color:var(--muted)">'+s.status+(s.vir?' <span style="opacity:.7">('+s.vir+')</span>':'')+'</span></div>';
+    }).join('')+'</div>'
+    +'<div style="font-size:.66rem;color:var(--muted);margin-bottom:.85rem">Vir: <a href="https://www.ihps.si/" target="_blank" rel="noopener">IHPS</a>. Seznam ni izčrpen in se ne osvežuje samodejno.</div>'
+    +'<div style="font-size:.75rem;font-weight:600;color:var(--text);margin-bottom:.35rem">🌦️ Meteorološka primernost pogojev za bolezni</div>'
     +'<div class="agro-risk-grid" id="agro-disease-grid">'
-    +'<div style="color:var(--muted);font-size:.75rem">Tveganje za bolezni – nalaganje podatkov …</div>'
+    +'<div style="color:var(--muted);font-size:.75rem">Nalaganje podatkov …</div>'
     +'</div>';
 }
 
@@ -5066,15 +5085,16 @@ function _buildAgroHopDisease(rh,temp){
   ];
   grid.innerHTML=diseases.map(d=>{
     const col=d.risk<30?'var(--green)':d.risk<60?'var(--amber)':'var(--red)';
-    const lbl=d.risk<30?'Nizko':d.risk<60?'Zmerno':'Visoko';
+    const lbl=d.risk<30?'nizka':d.risk<60?'zmerna':'visoka';
     return '<div class="agro-risk-card">'
       +'<div style="font-size:.75rem;font-weight:600;color:var(--text)">'+d.name+'</div>'
       +'<div class="agro-risk-bar"><div class="agro-risk-fill" style="width:'+Math.round(d.risk)+'%;background:'+col+'"></div></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:.66rem">'
-      +'<span style="color:'+col+'">'+lbl+' ('+Math.round(d.risk)+'%)</span>'
+      +'<span style="color:'+col+'">Pogoji: '+lbl+' primernost</span>'
       +'<span style="color:var(--muted)">'+d.note+'</span></div>'
       +'</div>';
-  }).join('');
+  }).join('')
+    +'<div style="grid-column:1/-1;font-size:.66rem;color:var(--muted);margin-top:.3rem">Meteorološki indikator vremenske ugodnosti za razvoj bolezni, ne prognostična napoved ali diagnoza po metodologiji IHPS.</div>';
 }
 
 function _buildAgroGDD(gdd5,gdd10){
@@ -5229,7 +5249,8 @@ function _buildAgroSpray(d){
       +'</div>';
   }
   body.innerHTML=html
-    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.25rem">🟢 Primerno (veter ≤ 4 m/s, brez dežja, T ≥ 5 °C) &nbsp;⬜ Neprimerno</div>';
+    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.25rem">🟢 Primerno (veter ≤ 4 m/s, brez dežja, T ≥ 5 °C) &nbsp;⬜ Neprimerno</div>'
+    +'<div style="font-size:.67rem;color:var(--muted);margin-top:.4rem">Ocena temelji samo na vremenu — ne upošteva etikete sredstva, zanašanja, bližine voda ali opraševalcev. Pred uporabo FFS preveri etiketo, FITO-INFO in priporočila IHPS.</div>';
 }
 
 function _buildAgroHay(d){
