@@ -573,6 +573,88 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
 - Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
   `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
 
+## MeteoGasilec — dva načina uporabe
+
+`/meteogasilec/` ima od 28. 8. 2026 dva na sebi: **pripravljalni** (dnevni FWI,
+metodologija, FIRMS, vreme za intervencije — vse za Rečico ob Savinji) in
+**operativni** (`/meteogasilec/intervencija/` — hiter pogled med intervencijo:
+GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
+
+- **`meteogasilec/gasilec.js`** — nova skupna klientska datoteka, ROČNO pisana
+  (ni generirana), deljena med vsemi `/meteogasilec/*` stranmi. Vsebuje kompas
+  (`windCompassSvg`), detektor obrata vetra (`angleDiff`/`detectWindShift`),
+  freshness (`renderFreshness`) in generator briefinga (`buildBriefing`). Ta
+  strani ne nalagajo `app.js` (samostojne, self-contained — enako kot FIRMS
+  widget), zato je bilo to potrebno, da FWI/kompas logika ne bi postala tretja
+  ločena kopija iste stvari (poleg `app.js` in `gasilec_model.py`). Načelo
+  "generatorji strani si ne delijo knjižnic" iz tega dokumenta velja med
+  RAZLIČNIMI Python generatorji — ne med podstranmi ENEGA generatorja
+  (`generate_gasilec_page.py` generira vseh šest `/meteogasilec/*` strani).
+  FWI izračun v tej datoteki (`calcOneDayFWI`/`fwiClass`) je namerna dobesedna
+  kopija iz `app.js` (glej opombo na vrhu `gasilec_model.py`) — če spremeniš
+  formulo/pragove, popravi vse tri kopije (app.js, gasilec_model.py,
+  gasilec.js). Isto velja za 16-smerna imena vetra (`_DIRS` v
+  `generate_gasilec_page.py` ↔ `GASILEC_DIRS` v gasilec.js).
+- **GPS na `/intervencija/` velja za vreme/veter VEDNO, za FWI/ISI pa samo, če
+  je lokacija >2 km od Rečice ob Savinji** — pod tem pragom ostane prikazan
+  FWI za Rečico (`meteogasilec/index.json`, zgrajen dnevno), nad njim JS
+  pokliče Open-Meteo `daily` za GPS točko in prek `Gasilec.fwiSeriesFromDaily()`
+  (gasilec.js) preračuna lokalni FWI/ISI — četrta namerna kopija iste FWI
+  formule (poleg app.js, gasilec_model.py, gasilec.js-ovega `calcOneDayFWI`),
+  ker klientska stran ne more klicati Python kode. Opomba pod naslovom
+  (`#gf-fwi-note`) vedno pove, za katero lokacijo je FWI prikazan.
+- **Obrat vetra ≥45° je MeteoGasilec kriterij, ne uradno opozorilo ARSO** —
+  vedno tako označen. Prag: obrat smeri >=45° IN veter/sunki na vsaj eni
+  strani >=15 km/h (da se pri skoraj brezvetrju ne sproža po nepotrebnem).
+- **Uradna opozorila ARSO so jasno ločena od MeteoGasilec lastnih ocen.**
+  `Gasilec.renderArsoWidget()` (gasilec.js) kliče isti Worker `/arso-warning`
+  endpoint kot `generate_arso_newsjack_post.py`/`fetch_alerts()` in `/nevihte/`
+  (WX-ARSO), a NEPOSREDNO iz brskalnika — namenoma brez strežniško izrisane
+  vsebine, ker bi enkrat-dnevni posnetek tega generatorja v urah zastaral
+  (opozorilo je stanje, ne novica, glej razdelek o ARSO opozorilih zgoraj).
+  Prikazan na `/meteogasilec/` (razdelek »🏛 Uradna opozorila ARSO«, ločen od
+  FWI kartice) in strnjeno na `/intervencija/`, od koder se aktivna opozorila
+  vključijo tudi v »Kopiraj briefing« (`buildBriefing()`).
+- **Freshness sistem — nikoli ne skrivaj stare vrednosti, samo jo označi.**
+  `renderFreshness()` izpiše 🟢 (<26h, en dnevni tek zamujen), 🟡 (26–50h) ali
+  🔴 (>50h, zamujena ≥2 teka) glede na `data-generated` na `.gf-hero`. Uveden
+  po incidentu, ko je stran tiho kazala včerajšnji datum brez opozorila.
+- **Hidranti (`meteogasilec/hidranti.json`) so cron + statičen JSON, NE Worker
+  proxy.** `tools/fetch_hydrants.py` teče enkrat dnevno znotraj
+  `gasilec-forecast.yml` (ne ločen delavni tok — hidranti se spreminjajo
+  redko) in povpraša javni Overpass strežnik za bbox **Zgornje Savinjske
+  doline** (Solčava–Luče–Ljubno–Rečica–Mozirje–Nazarje–Gornji Grad,
+  `46.26,14.60,46.45,15.05`) — regionalno, ne nacionalno, isti lokalni
+  značaj kot preostanek strani. Overpass glavni strežnik (`overpass-api.de`)
+  je pri gradnji zavračal zahteve iz podatkovnega centra (connection reset) —
+  zato `OVERPASS_MIRRORS` poskusi več javnih zrcal po vrsti
+  (`overpass.openstreetmap.fr` prvo, ker je delovalo zanesljivo). Ob napaki
+  vseh zrcal skript obdrži star `hidranti.json` in konča z 0 — isto načelo
+  "raje star podatek kot prazna stran" kot `inject_forecast.py`. Tri stanja
+  hidranta (🟢 preverjeno/🟡 samo OSM/🔴 nedelujoče) gredo prek ročne
+  `HYDRANT_OVERRIDES` tabele v `fetch_hydrants.py` — isti vzorec (ključ +
+  obvezen `razlog`) kot `CALIBRATION` v `import_species_db.py`.
+- **`/meteogasilec/karta/` je prva stran v repozitoriju z zunanjo JS
+  knjižnico** (Leaflet 1.9.4 prek `unpkg.com`, samo na tej strani, z SRI
+  `integrity` atributom na obeh `<script>`/`<link>` tagih). Doslej so vse
+  karte na strani (nevihtni potencial, gobarska) risane kot lasten
+  vektor/SVG — to zadošča za nacionalni pregled, ne pa za "najdi pot do
+  hidranta 180 m stran", kjer je prava ulična karta (OSM raster ploščice)
+  bistvo funkcije. Stran ima strežniško izrisan rezervni seznam 10
+  najbližjih hidrantov (brez JS/za pajke) in klientsko Leaflet karto s sloji
+  (hidranti iz `hidranti.json`, FIRMS prek Worker `/pozari`, isti klic kot
+  `firms_widget_html()`). Če se Leaflet iz kakršnega koli razloga ne
+  naloži, inline skript to preveri (`typeof L==='undefined'`) in pusti samo
+  rezervni seznam — nikoli ne podre strani z nedefinirano spremenljivko.
+- `/intervencija/` gumb "Odpri operativno karto" vodi na
+  `/meteogasilec/karta/?lat=..&lon=..` (karta prebere query parametra in se
+  centrira nanju), ne več na surov OpenStreetMap URL.
+- `/meteogasilec/kalkulator/` (cisterna, penilo, statični tlak) je povsem
+  klientski, brez zunanjih podatkov — formule ostanejo lokalne v
+  `build_kalkulator_page()`, ne v `gasilec.js` (nič drugega jih ne rabi).
+- Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
+  isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

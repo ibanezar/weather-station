@@ -1,51 +1,42 @@
 {
- "generated": "2026-08-27T21:03:43+00:00",
+ "generated": "2026-08-28T09:00:56+00:00",
  "model_version": "1.0",
- "date": "2026-08-27",
- "fwi": 12.2,
+ "date": "2026-08-28",
+ "fwi": 17.4,
  "level": "Visoka",
  "days": [
   {
-   "date": "2026-08-20",
-   "fwi": 12.6,
-   "isi": 12.9,
-   "bui": 10,
-   "ffmc": 90,
-   "level": "Visoka",
-   "color": "#f59e0b"
-  },
-  {
    "date": "2026-08-21",
-   "fwi": 0.1,
+   "fwi": 0.0,
    "isi": 0.1,
-   "bui": 5,
-   "ffmc": 45,
+   "bui": 4,
+   "ffmc": 44,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-08-22",
-   "fwi": 0.3,
+   "fwi": 0.2,
    "isi": 0.6,
-   "bui": 7,
+   "bui": 5,
    "ffmc": 61,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-08-23",
-   "fwi": 1.0,
+   "fwi": 0.9,
    "isi": 1.6,
-   "bui": 10,
-   "ffmc": 80,
+   "bui": 8,
+   "ffmc": 79,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
    "date": "2026-08-24",
-   "fwi": 6.0,
+   "fwi": 5.5,
    "isi": 4.6,
-   "bui": 14,
+   "bui": 12,
    "ffmc": 88,
    "level": "Zmerna",
    "color": "#84cc16"
@@ -70,66 +61,75 @@
   },
   {
    "date": "2026-08-27",
-   "fwi": 12.2,
+   "fwi": 12.0,
    "isi": 8.9,
-   "bui": 18,
+   "bui": 17,
    "ffmc": 89,
    "level": "Visoka",
    "color": "#f59e0b"
   },
   {
    "date": "2026-08-28",
-   "fwi": 19.4,
-   "isi": 14.5,
-   "bui": 22,
-   "ffmc": 91,
+   "fwi": 17.4,
+   "isi": 12.7,
+   "bui": 21,
+   "ffmc": 90,
    "level": "Visoka",
    "color": "#f59e0b"
   },
   {
    "date": "2026-08-29",
-   "fwi": 13.6,
-   "isi": 8.4,
-   "bui": 25,
-   "ffmc": 90,
-   "level": "Visoka",
-   "color": "#f59e0b"
-  },
-  {
-   "date": "2026-08-30",
-   "fwi": 11.8,
-   "isi": 6.4,
-   "bui": 28,
-   "ffmc": 90,
-   "level": "Visoka",
-   "color": "#f59e0b"
-  },
-  {
-   "date": "2026-08-31",
-   "fwi": 1.6,
-   "isi": 1.0,
-   "bui": 29,
-   "ffmc": 75,
+   "fwi": 4.2,
+   "isi": 2.3,
+   "bui": 24,
+   "ffmc": 81,
    "level": "Nizka",
    "color": "#22c55e"
   },
   {
+   "date": "2026-08-30",
+   "fwi": 8.7,
+   "isi": 4.5,
+   "bui": 27,
+   "ffmc": 87,
+   "level": "Zmerna",
+   "color": "#84cc16"
+  },
+  {
+   "date": "2026-08-31",
+   "fwi": 10.0,
+   "isi": 5.0,
+   "bui": 30,
+   "ffmc": 88,
+   "level": "Zmerna",
+   "color": "#84cc16"
+  },
+  {
    "date": "2026-09-01",
-   "fwi": 7.3,
-   "isi": 3.4,
-   "bui": 32,
-   "ffmc": 85,
+   "fwi": 10.7,
+   "isi": 5.2,
+   "bui": 33,
+   "ffmc": 88,
    "level": "Zmerna",
    "color": "#84cc16"
   },
   {
    "date": "2026-09-02",
-   "fwi": 10.7,
-   "isi": 4.9,
+   "fwi": 7.0,
+   "isi": 3.0,
    "bui": 35,
-   "ffmc": 89,
+   "ffmc": 85,
    "level": "Zmerna",
    "color": "#84cc16"
+  },
+  {
+   "date": "2026-09-03",
+   "fwi": 11.6,
+   "isi": 5.2,
+   "bui": 38,
+   "ffmc": 88,
+   "level": "Visoka",
+   "color": "#f59e0b"
   }
  ]
 }
