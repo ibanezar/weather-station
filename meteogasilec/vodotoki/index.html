@@ -130,6 +130,40 @@ body{
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 .gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
+.gf-status-banner{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;border-radius:.9rem;
+  margin:.8rem 0 1.2rem;font-size:.92rem;font-weight:600}
+.gf-status-banner .emoji{font-size:1.4rem;flex:0 0 auto}
+.gf-tip-grid,.gf-contact-grid,.gf-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.8rem;margin:.8rem 0 1.2rem}
+.gf-tip-card{position:relative;overflow:hidden;display:flex;gap:.7rem;align-items:flex-start;
+  border:1px solid var(--card-border);border-radius:.8rem;padding:.9rem 1rem;background:var(--card-bg)}
+.gf-tip-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--fa,#84cc16)}
+.gf-tip-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;
+  border-radius:9px;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-tip-ic svg{width:1.25rem;height:1.25rem;display:block}
+.gf-tip-card p{margin:0;font-size:.84rem;line-height:1.45}
+.gf-contact-card{display:flex;align-items:center;gap:.7rem;border:1px solid var(--card-border);border-radius:.8rem;
+  padding:.8rem 1rem;background:var(--card-bg);text-decoration:none;color:var(--text);transition:border-color .15s}
+.gf-contact-card:hover{border-color:var(--fa,#84cc16)}
+.gf-contact-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.3rem;height:2.3rem;
+  border-radius:50%;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-contact-ic svg{width:1.3rem;height:1.3rem;display:block}
+.gf-contact-card b{display:block;font-size:.88rem}
+.gf-contact-card span{display:block;font-size:.74rem;color:var(--muted)}
+.gf-component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin:.8rem 0 1.2rem}
+.gf-component-card{border:1px solid var(--card-border);border-radius:.8rem;padding:.8rem;background:var(--card-bg);
+  text-align:center}
+.gf-component-card b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem}
+.gf-component-card span{display:block;font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.gf-station-card{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow)}
+.gf-station-card h3{margin:0 0 .5rem;font-size:.95rem}
+.gf-station-stats{display:flex;gap:1.2rem;margin-bottom:.6rem}
+.gf-station-stats div{flex:1}
+.gf-station-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-station-stats span{display:block;font-size:.7rem;color:var(--muted)}
+.gf-status-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .7rem;border-radius:999px;
+  font-size:.76rem;font-weight:700}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -170,14 +204,32 @@ body{
   <h1 class="page-title">Vodotoki</h1>
   <p class="post-meta">Najbližje merilne postaje ARSO ob Savinji — orientacija pri presoji vodnih virov
   med intervencijo.</p>
-  <table class="gf-tbl">
-    <thead><tr><th>Postaja</th><th>Vodostaj</th><th>Pretok</th><th>Stanje</th></tr></thead>
-    <tbody>
-<tr><td>Savinja - Nazarje</td><td>37 cm</td><td>3,6 m³/s</td><td>Normalen</td></tr>
-<tr><td>Savinja - Letuš I</td><td>60 cm</td><td>3,6 m³/s</td><td>Normalen</td></tr>
-<tr><td>Savinja - Solčava I</td><td>74 cm</td><td>0,3 m³/s</td><td>Normalen</td></tr>
-    </tbody>
-  </table>
+  <div class="gf-station-grid">
+    <div class="gf-station-card">
+      <h3>Savinja - Nazarje</h3>
+      <div class="gf-station-stats">
+        <div><b>37 cm</b><span>Vodostaj</span></div>
+        <div><b>3,6 m³/s</b><span>Pretok</span></div>
+      </div>
+      <span class="gf-status-chip" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e66">Normalen</span>
+    </div>
+    <div class="gf-station-card">
+      <h3>Savinja - Letuš I</h3>
+      <div class="gf-station-stats">
+        <div><b>60 cm</b><span>Vodostaj</span></div>
+        <div><b>3,6 m³/s</b><span>Pretok</span></div>
+      </div>
+      <span class="gf-status-chip" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e66">Normalen</span>
+    </div>
+    <div class="gf-station-card">
+      <h3>Savinja - Solčava I</h3>
+      <div class="gf-station-stats">
+        <div><b>74 cm</b><span>Vodostaj</span></div>
+        <div><b>0,3 m³/s</b><span>Pretok</span></div>
+      </div>
+      <span class="gf-status-chip" style="background:#22c55e22;color:#22c55e;border:1px solid #22c55e66">Normalen</span>
+    </div>
+  </div>
   <p class="gf-note"><b>Vodostaj postaje ne pove, ali je vodotok dostopen z vozilom</b> — pove le, koliko vode teče
   mimo merilne točke. Za dejanski dostop (breg, globina, pretok na odjemnem mestu) vedno preveri stanje na terenu.
   »Povečan«/»opozorilo«/»alarm« so orientacijski pragovi (postaja Letuš), ne uradna klasifikacija ARSO/URSZR.</p>

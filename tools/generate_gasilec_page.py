@@ -160,6 +160,40 @@ body{
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
 .gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
+.gf-status-banner{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;border-radius:.9rem;
+  margin:.8rem 0 1.2rem;font-size:.92rem;font-weight:600}
+.gf-status-banner .emoji{font-size:1.4rem;flex:0 0 auto}
+.gf-tip-grid,.gf-contact-grid,.gf-station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:.8rem;margin:.8rem 0 1.2rem}
+.gf-tip-card{position:relative;overflow:hidden;display:flex;gap:.7rem;align-items:flex-start;
+  border:1px solid var(--card-border);border-radius:.8rem;padding:.9rem 1rem;background:var(--card-bg)}
+.gf-tip-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--fa,#84cc16)}
+.gf-tip-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;
+  border-radius:9px;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-tip-ic svg{width:1.25rem;height:1.25rem;display:block}
+.gf-tip-card p{margin:0;font-size:.84rem;line-height:1.45}
+.gf-contact-card{display:flex;align-items:center;gap:.7rem;border:1px solid var(--card-border);border-radius:.8rem;
+  padding:.8rem 1rem;background:var(--card-bg);text-decoration:none;color:var(--text);transition:border-color .15s}
+.gf-contact-card:hover{border-color:var(--fa,#84cc16)}
+.gf-contact-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:2.3rem;height:2.3rem;
+  border-radius:50%;background:var(--fa-soft,rgba(132,204,22,.16));color:var(--fa,#84cc16)}
+.gf-contact-ic svg{width:1.3rem;height:1.3rem;display:block}
+.gf-contact-card b{display:block;font-size:.88rem}
+.gf-contact-card span{display:block;font-size:.74rem;color:var(--muted)}
+.gf-component-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin:.8rem 0 1.2rem}
+.gf-component-card{border:1px solid var(--card-border);border-radius:.8rem;padding:.8rem;background:var(--card-bg);
+  text-align:center}
+.gf-component-card b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem}
+.gf-component-card span{display:block;font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.gf-station-card{border:1px solid var(--card-border);border-radius:.9rem;padding:1rem;background:var(--card-bg);
+  box-shadow:var(--card-shadow)}
+.gf-station-card h3{margin:0 0 .5rem;font-size:.95rem}
+.gf-station-stats{display:flex;gap:1.2rem;margin-bottom:.6rem}
+.gf-station-stats div{flex:1}
+.gf-station-stats b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.15rem}
+.gf-station-stats span{display:block;font-size:.7rem;color:var(--muted)}
+.gf-status-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .7rem;border-radius:999px;
+  font-size:.76rem;font-weight:700}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -285,6 +319,28 @@ _FI_VODA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/
     '<path d="M12 3.2c2.6 3.6 5.6 7.6 5.6 11a5.6 5.6 0 1 1-11.2 0c0-3.4 3-7.4 5.6-11Z" '
     'fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
     '<path d="M8.8 15.4a3.2 3.2 0 0 0 3.2 3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+    '</svg>')
+
+# ── ikone za nasveti/ (kurjenje, kontakti) ───────────────────────────────────
+_FI_CIGARETTE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<rect x="3" y="10.6" width="14" height="4.2" rx="1" fill="currentColor" fill-opacity=".16" '
+    'stroke="currentColor" stroke-width="1.5"/>'
+    '<rect x="14.4" y="10.6" width="3" height="4.2" fill="currentColor" fill-opacity=".4"/>'
+    '<path d="M18 8.6c1 .9 1 2.1 0 3M20.2 7c1.6 1.4 1.6 3.4 0 4.8" stroke="currentColor" stroke-width="1.4" '
+    'stroke-linecap="round"/><path d="M4 18.4h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" '
+    'opacity=".5"/></svg>')
+_FI_WATCHFIRE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.6c-3.4 0-6 2.8-6 6.6 0 3.2 2 4.6 2 7a4 4 0 0 0 8 0c0-2.4 2-3.8 2-7 0-3.8-2.6-6.6-6-6.6Z" '
+    'fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="m9.3 12.6 1.8 1.8 3.6-3.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" '
+    'stroke-linejoin="round"/></svg>')
+_FI_PHONE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M5.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A15.5 15.5 0 0 1 4 5.6 1.5 1.5 0 0 1 5.5 4Z" '
+    'fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>')
+_FI_SHIELD = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.4 19 6v5.4c0 4.6-3 7.8-7 9.2-4-1.4-7-4.6-7-9.2V6l7-2.6Z" fill="currentColor" fill-opacity=".16" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="m9 12 2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'
     '</svg>')
 
 FEATURES = [
@@ -945,6 +1001,11 @@ def build_kalkulator_page():
 # poplav) ostaja na /vodostaj-savinje/, ta stran je samo strnjen prikaz v
 # MeteoGasilec kontekstu.
 
+# Isti pragovi/imena kot station_status() v generate_vodostaj_page.py — samo
+# barva čipa je tu, ker je le vizualna (Python stran ne zna barv).
+_STATION_STATUS_COLOR = {"Normalen": "#22c55e", "Povečan": "#eab308", "Opozorilo": "#f97316", "Alarm": "#ef4444"}
+
+
 def build_vodotoki_page():
     try:
         stations = vod.fetch_arso_stations()[:3]
@@ -953,19 +1014,19 @@ def build_vodotoki_page():
         stations = []
 
     if stations:
-        rows = "\n".join(
-            f'<tr><td>{_esc(s["name"])}</td>'
-            f'<td>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm</td>'
-            f'<td>{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s</td>'
-            f'<td>{_esc(vod.station_status(s["pretok"]))}</td></tr>'
-            for s in stations
-        )
-        table_html = f'''  <table class="gf-tbl">
-    <thead><tr><th>Postaja</th><th>Vodostaj</th><th>Pretok</th><th>Stanje</th></tr></thead>
-    <tbody>
-{rows}
-    </tbody>
-  </table>'''
+        cards = []
+        for s in stations:
+            status = vod.station_status(s["pretok"])
+            col = _STATION_STATUS_COLOR.get(status, "#94a3b8")
+            cards.append(f'''    <div class="gf-station-card">
+      <h3>{_esc(s["name"])}</h3>
+      <div class="gf-station-stats">
+        <div><b>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm</b><span>Vodostaj</span></div>
+        <div><b>{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s</b><span>Pretok</span></div>
+      </div>
+      <span class="gf-status-chip" style="background:{col}22;color:{col};border:1px solid {col}66">{_esc(status)}</span>
+    </div>''')
+        table_html = '  <div class="gf-station-grid">\n' + "\n".join(cards) + '\n  </div>'
     else:
         table_html = '<p class="gf-note">Postaje ARSO trenutno niso dosegljive.</p>'
 
@@ -982,34 +1043,95 @@ def build_vodotoki_page():
                           "stanja za gasilske intervencije v Zgornji Savinjski dolini.", inner)
 
 
-NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
+# level -> (emoji, banner besedilo). Isti FWI_LEVELS imena kot povsod drugod
+# na strani (gasilec_model.FWI_LEVELS) — ne nov razred stopenj.
+_NASVETI_STATUS = {
+    "Nizka": ("✅", "Danes ni posebnih omejitev za kurjenje v naravi."),
+    "Zmerna": ("✅", "Danes ni posebnih omejitev za kurjenje v naravi — bodi previden."),
+    "Visoka": ("⚠️", "Kurjenje danes odsvetovano — preveri morebitne lokalne odloke."),
+    "Zelo visoka": ("🚫", "Kurjenje danes močno odsvetovano — možna prepoved z odlokom občine/URSZR."),
+    "Ekstremna": ("🚫", "Kurjenje danes močno odsvetovano — možna prepoved z odlokom občine/URSZR."),
+}
+
+_NASVETI_TIPS = [
+    (_FI_CIGARETTE, "#f59e0b", "Ne odmetavaj ogorkov", "Cigaretni ogorki v suhi travi ali stelji so pogost vzrok vžiga — vedno v pepelnik ali vodo."),
+    (_FI_WATCHFIRE, "#ef4444", "Nadzoruj in pogasi", "Kres oz. ogenj v naravi vedno nadzoruj in ga po končanem kurjenju temeljito pogasi, tudi žerjavico."),
+    (_FI_VETER, "#22d3ee", "Pazi na veter", 'Ob sunkih vetra (glej <a href="/meteogasilec/vreme-intervencije/">vreme za intervencije</a>) se ogenj širi bistveno hitreje in nepredvidljivo.'),
+]
+
+_NASVETI_CONTACTS = [
+    (_FI_PHONE, "#ef4444", "tel:112", "112", "Enotna evropska številka za klic v sili"),
+    (_FI_SHIELD, "#84cc16", "https://www.gzs-slo.si/", "Gasilska zveza Slovenije", "gzs-slo.si"),
+    (_FI_SHIELD, "#0ea5e9", "https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/",
+     "URSZR", "Uprava RS za zaščito in reševanje"),
+    (_FI_OGROZENOST, "#f59e0b", "https://meteo.arso.gov.si/met/sl/agromet/pozar/", "ARSO",
+     "Uradni indeks požarne ogroženosti"),
+]
+
+
+def build_nasveti_page(payload):
+    today_level = payload["level"]
+    today_color = next((d["color"] for d in payload["days"] if d["date"] == payload["date"]), "#84cc16")
+    emoji, msg = _NASVETI_STATUS.get(today_level, ("ℹ️", "Preveri trenutno požarno ogroženost zgoraj."))
+    banner = (f'  <div class="gf-status-banner" style="background:{today_color}22;border:1px solid {today_color}66">'
+              f'<span class="emoji">{emoji}</span><span>{_esc(msg)} (FWI danes: {_esc(today_level)})</span></div>')
+
+    tips_html = "\n".join(
+        f'    <div class="gf-tip-card" style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}">'
+        f'<span class="gf-tip-ic">{icon}</span><div><b>{_esc(title)}</b><p>{text}</p></div></div>'
+        for icon, accent, title, text in _NASVETI_TIPS
+    )
+
+    contacts_html = "\n".join(
+        f'    <a class="gf-contact-card" href="{href}" style="--fa:{accent};--fa-soft:{_rgba(accent, ".16")}" '
+        + ('target="_blank" rel="noopener nofollow"' if href.startswith("http") else "")
+        + f'><span class="gf-contact-ic">{icon}</span><span><b>{_esc(label)}</b><span>{_esc(sub)}</span></span></a>'
+        for icon, accent, href, label, sub in _NASVETI_CONTACTS
+    )
+
+    inner = f'''  <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
   lokalnega gasilskega poveljstva.</p>
+{banner}
   <h2>🔥 Kurjenje v naravi</h2>
-  <p>Kurjenje v naravnem okolju je ob visoki in zelo visoki požarni ogroženosti (glej FWI zgoraj) močno odsvetovano,
-  ob razglašeni povečani požarni ogroženosti pa je ponekod prepovedano z odlokom občine ali uprave za zaščito in
-  reševanje. Pred kurjenjem vedno preveri trenutno stanje in morebitne lokalne omejitve.</p>
-  <ul>
-    <li>Ne odmetavaj cigaretnih ogorkov v naravi.</li>
-    <li>Kres oz. ogenj v naravi vedno nadzoruj in ga po končanem kurjenju temeljito pogasi.</li>
-    <li>Ob sunkih vetra (glej <a href="/meteogasilec/vreme-intervencije/">vreme za intervencije</a>) se ogenj širi bistveno hitreje.</li>
-  </ul>
+  <p>Kurjenje v naravnem okolju je ob visoki in zelo visoki požarni ogroženosti (glej banner zgoraj) močno
+  odsvetovano, ob razglašeni povečani požarni ogroženosti pa je ponekod prepovedano z odlokom občine ali uprave za
+  zaščito in reševanje. Pred kurjenjem vedno preveri trenutno stanje in morebitne lokalne omejitve.</p>
+  <div class="gf-tip-grid">
+{tips_html}
+  </div>
   <h2>📞 Kontakti</h2>
-  <ul>
-    <li><b>112</b> — enotna evropska številka za klic v sili (požar, nesreča).</li>
-    <li><a href="https://www.gzs-slo.si/" target="_blank" rel="noopener nofollow">Gasilska zveza Slovenije</a></li>
-    <li><a href="https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/" target="_blank"
-       rel="noopener nofollow">URSZR — Uprava RS za zaščito in reševanje</a></li>
-    <li><a href="https://meteo.arso.gov.si/met/sl/agromet/pozar/" target="_blank" rel="noopener nofollow">ARSO — uradni indeks požarne ogroženosti</a></li>
-  </ul>'''
-
-
-def build_nasveti_page():
+  <div class="gf-contact-grid">
+{contacts_html}
+  </div>'''
     return subpage_shell("nasveti", "Nasveti in kontakti",
                           "Kurjenje v naravi, kdaj je odsvetovano ali prepovedano, in kontakti ob požaru v naravi.",
-                          NASVETI_HTML)
+                          inner)
 
 
-METODOLOGIJA_HTML = '''  <p class="post-meta">MeteoGasilec ni uradna napoved ARSO ali URSZR. Je dodatna, samostojno izračunana
+# (oznaka, ključ v payload["days"] vnosu, kratek opis) — vrstni red je vrstni
+# red gradnje kanadskega sistema (trije vlažnostni indeksi → ISI/BUI → FWI).
+_METODOLOGIJA_COMPONENTS = [
+    ("FFMC", "ffmc", "Vlažnost tanke stelje"),
+    ("DMC", "dmc", "Srednje globoka plast"),
+    ("DC", "dc", "Globlja, sušna plast"),
+    ("ISI", "isi", "Hitrost širjenja"),
+    ("BUI", "bui", "Razpoložljivo gorivo"),
+    ("FWI", "fwi", "Skupna ocena"),
+]
+
+
+def build_metodologija_page(payload):
+    today = next((d for d in payload["days"] if d["date"] == payload["date"]), {}) or {}
+    cards_html = "\n".join(
+        f'    <div class="gf-component-card"><b>{today[key]}</b><span>{label}</span></div>'
+        for label, key, _sub in _METODOLOGIJA_COMPONENTS if today.get(key) is not None
+    )
+    components_html = f'''  <h3 style="margin:1.2rem 0 .3rem">Današnje vrednosti (Rečica ob Savinji)</h3>
+  <div class="gf-component-grid">
+{cards_html}
+  </div>''' if cards_html else ""
+
+    inner = f'''  <p class="post-meta">MeteoGasilec ni uradna napoved ARSO ali URSZR. Je dodatna, samostojno izračunana
   ocena, namenjena orientaciji — pri odločanju vedno velja uradna ocena in odlok pristojnega organa.</p>
   <h2>🧮 Kanadski Fire Weather Index (FWI)</h2>
   <p>FWI je mednarodno uveljavljena metodologija (Van Wagner, kanadski gozdarski sistem), ki jo za Evropo uporablja
@@ -1023,6 +1145,7 @@ METODOLOGIJA_HTML = '''  <p class="post-meta">MeteoGasilec ni uradna napoved ARS
     <li><b>BUI</b> — razpoložljivo gorivo za zgorevanje (iz DMC in DC).</li>
     <li><b>FWI</b> — skupna ocena intenzivnosti požara, iz ISI in BUI.</li>
   </ul>
+{components_html}
   <p>Izračun poganja dnevna napoved Open-Meteo (temperatura, najnižja relativna vlažnost, veter, padavine) za
   Rečico ob Savinji, 7 dni nazaj (za pravilen zagon vlažnostnih kod) in 7 dni naprej. Ista formula teče strežniško
   (ta stran, tools/gasilec_model.py) in v brskalniku (naslovnica, app.js) — vrednosti za isti dan se ujemata.</p>
@@ -1033,12 +1156,9 @@ METODOLOGIJA_HTML = '''  <p class="post-meta">MeteoGasilec ni uradna napoved ARS
     ali odloke lokalnih oblasti.</li>
     <li>Velja za eno točko (Rečica ob Savinji) — v drugih delih Slovenije se razmere lahko razlikujejo.</li>
   </ul>'''
-
-
-def build_metodologija_page():
     return subpage_shell("metodologija", "Metodologija",
                           "Kako MeteoGasilec izračuna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.",
-                          METODOLOGIJA_HTML)
+                          inner)
 
 
 def main():
@@ -1063,8 +1183,8 @@ def main():
     build_kalkulator_page()
     build_vodotoki_page()
     build_vreme_intervencije_page()
-    build_nasveti_page()
-    build_metodologija_page()
+    build_nasveti_page(payload)
+    build_metodologija_page(payload)
 
     body = f'''{BRAND_SWAP}
 {seo.stn_badge()}
