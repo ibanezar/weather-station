@@ -13,16 +13,18 @@ Vsebina:
     naslovnici, glej gasilec_model.py) + 7-dnevni graf.
   * NASA FIRMS — dejansko zaznane toplotne anomalije v bližini (isti Worker
     endpoint /pozari kot na naslovnici, klican na novo od tu).
-  * Šest podstrani: intervencija/ (hiter operativni pogled — GPS lokacija,
+  * Sedem podstrani: intervencija/ (hiter operativni pogled — GPS lokacija,
     grafičen veter, detektor obrata vetra, lokalni FWI ko je GPS >2 km od
-    Rečice, kopiraj briefing; klientska logika je v meteogasilec/gasilec.js,
-    deljena med vsemi /meteogasilec/* stranmi), karta/ (Leaflet + OSM
-    ploščice — hidranti/odvzemna mesta iz meteogasilec/hidranti.json,
+    Rečice, veter+teren prek Open-Meteo Elevation API, kopiraj briefing;
+    klientska logika je v meteogasilec/gasilec.js, deljena med vsemi
+    /meteogasilec/* stranmi), karta/ (Leaflet + OSM ploščice —
+    hidranti/odvzemna mesta iz meteogasilec/hidranti.json,
     tools/fetch_hydrants.py, + FIRMS požarišča), kalkulator/ (cisterna,
-    penilo, statični tlak), vreme-intervencije/ (lokalni veter + nacionalni
-    nevihtni potencial iz že objavljenega og/storm-map/latest.json),
-    nasveti/ (kurjenje v naravi, kontakti), metodologija/ (razlaga FWI,
-    viri, omejitve).
+    penilo, statični tlak), vodotoki/ (najbližje ARSO hidro postaje ob
+    Savinji, uvožene iz generate_vodostaj_page.py), vreme-intervencije/
+    (lokalni veter + nacionalni nevihtni potencial iz že objavljenega
+    og/storm-map/latest.json), nasveti/ (kurjenje v naravi, kontakti),
+    metodologija/ (razlaga FWI, viri, omejitve).
 
 Usage:
   python3 tools/generate_gasilec_page.py
@@ -35,10 +37,12 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo   # noqa: E402 — shared template helpers
 import gasilec_model as fm         # noqa: E402 — FWI model
+import generate_vodostaj_page as vod  # noqa: E402 — ARSO hidro postaje (ne podvajaj fetch_arso_stations)
 
 ROOT = seo.ROOT
 TODAY = seo.TODAY
@@ -155,6 +159,7 @@ body{
   background:rgba(234,179,8,.08)}
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
+.gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -276,6 +281,11 @@ _FI_KALK = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/
     '<circle cx="16" cy="12.6" r="1.05" fill="currentColor"/><circle cx="8" cy="16.6" r="1.05" fill="currentColor"/>'
     '<circle cx="12" cy="16.6" r="1.05" fill="currentColor"/><circle cx="16" cy="16.6" r="1.05" fill="currentColor"/>'
     '</svg>')
+_FI_VODA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 3.2c2.6 3.6 5.6 7.6 5.6 11a5.6 5.6 0 1 1-11.2 0c0-3.4 3-7.4 5.6-11Z" '
+    'fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+    '<path d="M8.8 15.4a3.2 3.2 0 0 0 3.2 3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+    '</svg>')
 
 FEATURES = [
     ("/meteogasilec/intervencija/", _FI_INTERV, "#ef4444", "Intervencija zdaj",
@@ -290,6 +300,8 @@ FEATURES = [
      "Veter, sunki in nacionalni nevihtni potencial za danes."),
     ("/meteogasilec/kalkulator/", _FI_KALK, "#a855f7", "Gasilski kalkulator",
      "Praznjenje cisterne, penilo in statični tlak iz višinske razlike."),
+    ("/meteogasilec/vodotoki/", _FI_VODA, "#0891b2", "Vodotoki",
+     "Najbližje merilne postaje ARSO ob Savinji — vodostaj in pretok."),
     ("/meteogasilec/nasveti/", _FI_NASVETI, "#84cc16", "Kurjenje v naravi in kontakti",
      "Kdaj sme in kdaj ne sme, 112, URSZR, Gasilska zveza Slovenije."),
 ]
@@ -573,6 +585,10 @@ def build_intervencija_page(payload):
     <div id="gf-interv-body">
 {body_html}
     </div>
+    <div class="gf-terrain">
+      <h3 style="margin:.2rem 0 .5rem">🏔 Veter + teren</h3>
+      <div id="gf-interv-terrain"><p class="gf-note" style="margin:0 0 .5rem">Nalaganje terena …</p></div>
+    </div>
     <div id="gf-interv-shift-wrap">
 {shift_html}
     </div>
@@ -632,7 +648,7 @@ def build_intervencija_page(payload):
         updateFwiDisplay();
       }}).catch(function(e){{console.warn('lokalni FWI:',e);}});
     }}
-    function render(json,label){{
+    function render(json,label,lat,lon){{
       var h=json.hourly||{{}};
       var times=h.time||[],temp=h.temperature_2m||[],rh=h.relative_humidity_2m||[],
           precip=h.precipitation||[],spd=h.wind_speed_10m||[],gust=h.wind_gusts_10m||[],wdir=h.wind_direction_10m||[];
@@ -667,12 +683,19 @@ def build_intervencija_page(payload):
         isi:currentFWI.isi, shift:shift.detected?shift:null, arsoAlerts:lastArsoAlerts,
       }};
       document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+      if(lat!=null&&lon!=null){{
+        var windToDeg=(wdir[i]+180)%360;
+        Gasilec.fetchElevationGrid(parseFloat(lat),parseFloat(lon)).then(function(grid){{
+          var sa=Gasilec.computeSlopeAspect(grid);
+          Gasilec.renderTerrainWind(document.getElementById('gf-interv-terrain'),sa.aspectDeg,windToDeg,sa.slopeDeg);
+        }}).catch(function(e){{console.warn('teren:',e);}});
+      }}
     }}
     function load(lat,lon,label){{
       var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
         +'&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m'
         +'&forecast_days=2&timezone=Europe%2FLjubljana';
-      fetch(url).then(function(r){{return r.json();}}).then(function(j){{render(j,label);}}).catch(function(e){{
+      fetch(url).then(function(r){{return r.json();}}).then(function(j){{render(j,label,lat,lon);}}).catch(function(e){{
         console.warn('intervencija:',e);
       }});
     }}
@@ -915,6 +938,50 @@ def build_kalkulator_page():
                           "hitri izračuni za gasilske intervencije.", KALKULATOR_HTML)
 
 
+# ── vodotoki (ARSO hidro postaje) ────────────────────────────────────────────
+# Ponovna uporaba fetch_arso_stations()/station_status() iz
+# generate_vodostaj_page.py (uvožen kot `vod` na vrhu datoteke) — ne
+# podvajaj branja ARSO hidro XML-ja. Polna slika (GloFAS napoved, zgodovina
+# poplav) ostaja na /vodostaj-savinje/, ta stran je samo strnjen prikaz v
+# MeteoGasilec kontekstu.
+
+def build_vodotoki_page():
+    try:
+        stations = vod.fetch_arso_stations()[:3]
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ET.ParseError) as e:
+        print(f"  ⚠ vodotoki: {e}", file=sys.stderr)
+        stations = []
+
+    if stations:
+        rows = "\n".join(
+            f'<tr><td>{_esc(s["name"])}</td>'
+            f'<td>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm</td>'
+            f'<td>{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s</td>'
+            f'<td>{_esc(vod.station_status(s["pretok"]))}</td></tr>'
+            for s in stations
+        )
+        table_html = f'''  <table class="gf-tbl">
+    <thead><tr><th>Postaja</th><th>Vodostaj</th><th>Pretok</th><th>Stanje</th></tr></thead>
+    <tbody>
+{rows}
+    </tbody>
+  </table>'''
+    else:
+        table_html = '<p class="gf-note">Postaje ARSO trenutno niso dosegljive.</p>'
+
+    inner = f'''  <p class="post-meta">Najbližje merilne postaje ARSO ob Savinji — orientacija pri presoji vodnih virov
+  med intervencijo.</p>
+{table_html}
+  <p class="gf-note"><b>Vodostaj postaje ne pove, ali je vodotok dostopen z vozilom</b> — pove le, koliko vode teče
+  mimo merilne točke. Za dejanski dostop (breg, globina, pretok na odjemnem mestu) vedno preveri stanje na terenu.
+  »Povečan«/»opozorilo«/»alarm« so orientacijski pragovi (postaja Letuš), ne uradna klasifikacija ARSO/URSZR.</p>
+  <p class="gf-note">Polna slika — 7-dnevna napoved pretoka (GloFAS) in zgodovina poplav Savinje — je na
+  <a href="/vodostaj-savinje/">strani Vodostaj Savinje</a>.</p>'''
+    return subpage_shell("vodotoki", "Vodotoki",
+                          "Najbližje merilne postaje ARSO ob Savinji — vodostaj, pretok in orientacijska ocena "
+                          "stanja za gasilske intervencije v Zgornji Savinjski dolini.", inner)
+
+
 NASVETI_HTML = '''  <p class="post-meta">Kratek povzetek pravil in kontaktov — ne nadomešča uradnih navodil URSZR ali
   lokalnega gasilskega poveljstva.</p>
   <h2>🔥 Kurjenje v naravi</h2>
@@ -994,6 +1061,7 @@ def main():
     build_intervencija_page(payload)
     build_karta_page()
     build_kalkulator_page()
+    build_vodotoki_page()
     build_vreme_intervencije_page()
     build_nasveti_page()
     build_metodologija_page()
@@ -1042,7 +1110,7 @@ def main():
     head_extras = schema + "\n" + PAGE_CSS
     html = seo.page_shell(title, desc, url, head_extras, body)
     seo.write_page("meteogasilec/index.html", html, force=True)
-    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 6 podstrani")
+    print(f"  → meteogasilec/index.html (FWI {payload['fwi']}, {payload['level']}) + 7 podstrani")
 
 
 if __name__ == "__main__":

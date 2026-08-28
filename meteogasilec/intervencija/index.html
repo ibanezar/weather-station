@@ -129,6 +129,7 @@ body{
   background:rgba(234,179,8,.08)}
 .gf-arso-item.gf-arso-orange{border-left-color:#f97316;background:rgba(249,115,22,.08)}
 .gf-arso-item.gf-arso-red{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
+.gf-terrain{margin:1rem 0;padding-top:.9rem;border-top:1px solid var(--card-border)}
 @media (max-width:480px){
   .gf-feat{grid-template-columns:repeat(2,1fr)}
   .gf-feat-card{padding:.8rem .85rem .9rem}
@@ -190,6 +191,10 @@ body{
         <div class="gf-stat"><b>12.7</b><span>ISI danes</span></div>
       </div>
     </div>
+    </div>
+    <div class="gf-terrain">
+      <h3 style="margin:.2rem 0 .5rem">🏔 Veter + teren</h3>
+      <div id="gf-interv-terrain"><p class="gf-note" style="margin:0 0 .5rem">Nalaganje terena …</p></div>
     </div>
     <div id="gf-interv-shift-wrap">
   <div class="gf-shift-warn" id="gf-interv-shift">
@@ -256,7 +261,7 @@ body{
         updateFwiDisplay();
       }).catch(function(e){console.warn('lokalni FWI:',e);});
     }
-    function render(json,label){
+    function render(json,label,lat,lon){
       var h=json.hourly||{};
       var times=h.time||[],temp=h.temperature_2m||[],rh=h.relative_humidity_2m||[],
           precip=h.precipitation||[],spd=h.wind_speed_10m||[],gust=h.wind_gusts_10m||[],wdir=h.wind_direction_10m||[];
@@ -291,12 +296,19 @@ body{
         isi:currentFWI.isi, shift:shift.detected?shift:null, arsoAlerts:lastArsoAlerts,
       };
       document.getElementById('gf-briefing-pre').textContent=Gasilec.buildBriefing(lastData);
+      if(lat!=null&&lon!=null){
+        var windToDeg=(wdir[i]+180)%360;
+        Gasilec.fetchElevationGrid(parseFloat(lat),parseFloat(lon)).then(function(grid){
+          var sa=Gasilec.computeSlopeAspect(grid);
+          Gasilec.renderTerrainWind(document.getElementById('gf-interv-terrain'),sa.aspectDeg,windToDeg,sa.slopeDeg);
+        }).catch(function(e){console.warn('teren:',e);});
+      }
     }
     function load(lat,lon,label){
       var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
         +'&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m'
         +'&forecast_days=2&timezone=Europe%2FLjubljana';
-      fetch(url).then(function(r){return r.json();}).then(function(j){render(j,label);}).catch(function(e){
+      fetch(url).then(function(r){return r.json();}).then(function(j){render(j,label,lat,lon);}).catch(function(e){
         console.warn('intervencija:',e);
       });
     }
