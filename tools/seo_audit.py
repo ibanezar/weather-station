@@ -104,6 +104,10 @@ CORE = {
     "vreme-solcava/":             ("daily",   "0.6"),
     "vreme-gornji-grad/":         ("daily",   "0.6"),
     "vreme-zgornja-savinjska-dolina/": ("daily", "0.7"),
+    # Interaktivna karta hmeljišč (MKGP RABA) — vsa parcelna vsebina je
+    # klientsko izračunana ob kliku (glej meteohmeljar/hmeljar.js), zato je
+    # samo ena statična stran, ne seznam podstrani kot pri /meteogasilec/.
+    "meteohmeljar/":              ("weekly",  "0.7"),
 }
 
 # Strani, na katerih preverimo osnovne on-page SEO elemente.

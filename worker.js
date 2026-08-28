@@ -26,6 +26,11 @@ const EW_MAC = "BC:DD:C2:42:8D:56";
 // 5 minut — pogostejše poizvedovanje ne vrne ničesar novega.
 const VARPOLJE_URL = "https://varpolje.si/station.json";
 
+// Bbox Zgornje Savinjske doline za MeteoHmeljar zemljevid — isto območje kot
+// fetch_hydrants.py (Solčava–Luče–Ljubno–Rečica–Mozirje–Nazarje–Gornji Grad).
+// esriGeometryEnvelope pričakuje xmin,ymin,xmax,ymax (lon,lat,lon,lat).
+const RABA_BBOX = "14.60,46.26,15.05,46.45";
+
 const ALLOWED_ORIGINS = [
   "https://ibanezar.github.io",
   "https://meteorec.si",
@@ -2697,6 +2702,35 @@ export default {
         } catch (e) {
           return new Response(
             JSON.stringify({ ok: false, error: "varpolje_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // ── /hmeljar-raba ────────────────────────────────────────
+      // Hmeljiške parcele (MKGP RABA_ID=1160, uradni GIS sloj RABA) za
+      // MeteoHmeljar zemljevid, omejeno na Zgornjo Savinjsko dolino
+      // (RABA_BBOX). Uradni geohub.gov.si strežnik ne pošilja
+      // Access-Control-Allow-Origin, zato ga brskalnik ne sme brati
+      // neposredno (isto načelo kot /varpolje-current) — gre prek nas.
+      // RABA se osveži nekajkrat na leto, ne v realnem času, zato dolg
+      // predpomnilnik.
+      if (path === "/hmeljar-raba") {
+        try {
+          const rabaUrl = "https://geohub.gov.si/ags/rest/services/TEMELJNE_VSEBINE/GH_MKGP_GERK_RABA/MapServer/1551/query"
+            + "?where=RABA_ID%3D1160&outFields=RABA_PID,POVRSINA"
+            + "&geometry=" + encodeURIComponent(RABA_BBOX)
+            + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects"
+            + "&returnGeometry=true&outSR=4326&f=geojson";
+          const rabaRes = await fetch(rabaUrl, { headers: { "Accept": "application/geo+json" } });
+          if (!rabaRes.ok) throw new Error("HTTP " + rabaRes.status);
+          const rabaData = await rabaRes.text();
+          return new Response(rabaData, {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/geo+json", "Cache-Control": "max-age=86400" }
+          });
+        } catch (e) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "raba_unreachable", detail: String(e) }),
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }
