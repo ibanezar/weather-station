@@ -23,6 +23,7 @@ ROOT = seo.ROOT
 SITE = seo.SITE
 TODAY = seo.TODAY
 LAT, LON = seo.LAT, seo.LON
+GEN_TIME = datetime.datetime.now()  # točen čas teka, za freshness banner (glej build_body)
 
 DAN_KRATKO = ["ned", "pon", "tor", "sre", "čet", "pet", "sob"]
 
@@ -37,6 +38,20 @@ HOP_STAGES = [
     (600, 950, "Cvetenje in razvoj storžkov", "🌸"),
     (950, 1250, "Oblikovanje storžkov", "🍺"),
     (1250, float("inf"), "Tehnološka zrelost / obiranje", "🎉"),
+]
+
+# Tehnološka zrelost hmelja po sorti — ROČNO VZDRŽEVANA tabela (isti vzorec kot
+# CALIBRATION v tools/import_species_db.py / HYDRANT_OVERRIDES v tools/fetch_hydrants.py).
+# GDD₁₀ spodaj kaže SAMO modelirano razvojno fazo za dolino kot celoto — dejanska
+# tehnološka zrelost je odvisna tudi od sorte, tehnoloških ukrepov, časa rezi in
+# napeljave, gnojenja, tal in lokacije (IHPS). Ne izpeljuj statusa iz GDD — vpiši ga
+# ročno ob vsaki novi objavi IHPS (https://www.ihps.si/), z virom in datumom.
+IHPS_STATUS = [
+    # (sorta, status, vir_datum)
+    ("Savinjski golding", "✅ tehnološko zrel", "IHPS, 18. 8. 2026"),
+    ("Styrian Gold", "✅ tehnološko zrel", "IHPS, 25. 8. 2026"),
+    ("Aurora", "ni objavljenega statusa IHPS", None),
+    ("Celeia", "ni objavljenega statusa IHPS", None),
 ]
 
 CROP_GDD = [
@@ -106,8 +121,12 @@ def hop_disease_risk(rh, temp):
     ]
 
 
-def risk_label(pct):
-    return "Nizko" if pct < 30 else "Zmerno" if pct < 60 else "Visoko"
+def suitability_label(pct):
+    """Kvalitativna oznaka meteorološke primernosti pogojev za bolezen — namenoma
+    brez izpisa surovega odstotka na strani (glej opombo pri hop_html): '100 %
+    tveganje' bralcu zveni kot skoraj potrjena bolezen, čeprav gre za weather-
+    suitability heuristiko, ne prognostično napoved po metodologiji IHPS."""
+    return "nizka" if pct < 30 else "zmerna" if pct < 60 else "visoka"
 
 
 def build_body(hist, fc):
@@ -130,9 +149,21 @@ def build_body(hist, fc):
     # ── answer block ─────────────────────────────────────────────────────────
     answer = (f'  <p class="archive-intro">Vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes '
               f'<strong>GDD₅ {gdd5}</strong> in <strong>GDD₁₀ {gdd10}</strong> (od 1. januarja {TODAY.year}). '
-              f'Hmelj je po vsoti GDD₁₀ v fazi <strong>{stage_label.lower()}</strong>. Danes: ET₀ {seo.num(et0, 1)} mm, '
+              f'Modelirani razvoj hmelja je po vsoti GDD₁₀ v fazi <strong>{stage_label.lower()}</strong>. Danes: ET₀ {seo.num(et0, 1)} mm, '
               f'sonce {seo.num(sun_h, 1)} h, vodna bilanca {"+" if wbal_today >= 0 else ""}{seo.num(wbal_today, 1)} mm '
-              f'— nazadnje posodobljeno {TODAY.isoformat()}.</p>')
+              f'— nazadnje posodobljeno {TODAY.isoformat()}.</p>\n'
+              f'  <div id="agro-fresh" class="muted-note" data-generated="{GEN_TIME.isoformat()}" style="margin:.2rem 0 .8rem"></div>\n'
+              f'  <script>(function(){{var el=document.getElementById("agro-fresh");if(!el)return;'
+              f'var then=new Date(el.dataset.generated).getTime();if(isNaN(then))return;'
+              f'var ageH=(Date.now()-then)/3600000;if(ageH<26)return;'
+              f'var d=new Date(then);'
+              f'var datum=d.toLocaleDateString("sl",{{day:"2-digit",month:"2-digit",year:"numeric"}});'
+              f'var ura=d.toLocaleTimeString("sl",{{hour:"2-digit",minute:"2-digit"}});'
+              f'var rdece=ageH>=50;'
+              f'el.innerHTML=(rdece?"🔴":"🟡")+" <strong>Podatki niso sveži.</strong> Zadnja uspešna posodobitev: "'
+              f'+datum+" ob "+ura+"."+(rdece?" Trenutnih priporočil ne uporabljajte za odločanje.":"");'
+              f'el.style.color=rdece?"#dc2626":"#b45309";'
+              f'}})();</script>')
 
     quick = f'''  <div class="stat-grid">
     <div class="stat-card c-up">
@@ -160,15 +191,32 @@ def build_body(hist, fc):
     # ── hop section ────────────────────────────────────────────────────────
     to_next = f' · do naslednje faze: {round(hi - gdd10)} GDD₁₀' if hi != float("inf") else ""
     disease_rows = "\n".join(
-        f'      <tr><th>{name}</th><td>{round(pct)} % — {risk_label(pct)} <span class="muted-note" style="margin:0;display:inline">({note})</span></td></tr>'
+        f'      <tr><th>{name}</th><td>Pogoji: <strong>{suitability_label(pct)}</strong> primernost '
+        f'<span class="muted-note" style="margin:0;display:inline">({note})</span></td></tr>'
         for name, pct, note in diseases
     )
+    ihps_rows = "\n".join(
+        f'      <tr><th>{sorta}</th><td>{status}'
+        + (f' <span class="muted-note" style="margin:0;display:inline">({vir})</span>' if vir else '')
+        + '</td></tr>'
+        for sorta, status, vir in IHPS_STATUS
+    )
     hop_html = f'''  <div class="card" style="margin-bottom:1rem">
-    <div class="clabel">{stage_emoji} Fenologija hmelja</div>
-    <p class="archive-intro" style="margin:.4rem 0 .8rem">Trenutna faza: <strong>{stage_label}</strong> (GDD₁₀ {gdd10}{to_next}).</p>
+    <div class="clabel">{stage_emoji} Modelirani fenološki razvoj</div>
+    <p class="archive-intro" style="margin:.4rem 0 .8rem">Model po vsoti temperatur kaže fazo <strong>{stage_label.lower()}</strong> (GDD₁₀ {gdd10}{to_next}).
+    To je dolinsko povprečje iz enega samega dejavnika (temperature) — <strong>ne pove dejanske tehnološke zrelosti</strong>, ki je odvisna tudi od sorte,
+    tehnoloških ukrepov, časa rezi in napeljave, gnojenja, tal in lokacije parcele.</p>
+    <div class="clabel" style="margin-top:.9rem">🏛️ Tehnološka zrelost — IHPS (ročno vzdrževano)</div>
+    <table class="stats">
+{ihps_rows}
+    </table>
+    <p class="muted-note">Vir: <a href="https://www.ihps.si/" rel="noopener">Inštitut za hmeljarstvo in pivovarstvo Slovenije</a>. Seznam ni izčrpen in se
+    ne osvežuje samodejno — za sorte brez vnosa ali za najnovejše stanje preveri neposredno pri IHPS.</p>
+    <div class="clabel" style="margin-top:.9rem">🌦️ Meteorološka primernost pogojev za bolezni</div>
     <table class="stats">
 {disease_rows}
     </table>
+    <p class="muted-note">Gre za meteorološki indikator vremenske ugodnosti za razvoj bolezni, ne za prognostično napoved ali diagnozo po metodologiji IHPS.</p>
   </div>'''
 
     # ── crop GDD table ────────────────────────────────────────────────────
@@ -180,7 +228,9 @@ def build_body(hist, fc):
         stage = cur[-1][1] if cur else "pred vznikom"
         nxt_txt = f'{nxt[1]} čez {nxt[0] - gdd} GDD' if nxt else "zaključeno"
         crop_rows.append(f'      <tr><th>{emoji} {name}</th><td>{gdd} GDD — {stage} · {nxt_txt}</td></tr>')
-    crop_table = '  <table class="stats">\n' + "\n".join(crop_rows) + "\n  </table>"
+    crop_table = ('  <table class="stats">\n' + "\n".join(crop_rows) + "\n  </table>\n"
+                   '  <p class="muted-note">Modelirana ocena razvojne faze glede na vsoto temperatur, ne uradna napoved zrelosti/spravila — '
+                   'dejanski čas je odvisen tudi od sorte, tehnoloških ukrepov in vremena. Za hmelj glej tehnološko zrelost po sorti zgoraj.</p>')
 
     # ── frost alarm (7 days) ──────────────────────────────────────────────
     fd_time = daily.get("time") or []
@@ -227,6 +277,9 @@ def build_body(hist, fc):
         val = f'{len(ok_hours)} primernih ur' + (f' ({", ".join(f"{h}h" for h in ok_hours[:6])})' if ok_hours else "")
         spray_rows.append(f'      <tr><th>{lbl}</th><td>{val}</td></tr>')
     spray_table = '  <table class="stats">\n' + "\n".join(spray_rows) + "\n  </table>"
+    spray_disclaimer = ('  <p class="muted-note">Ocena temelji samo na vremenu (veter, padavine, temperatura) — ne upošteva etikete '
+                         'konkretnega sredstva, zanašanja, bližine voda ali opraševalcev. Pred uporabo FFS preveri etiketo sredstva, '
+                         'FITO-INFO in aktualna priporočila IHPS.</p>')
 
     # ── hay drying windows (5 days) ──────────────────────────────────────
     windows, cur = [], None
@@ -283,10 +336,13 @@ def build_body(hist, fc):
          "10 °C), seštetih od začetka leta. Uporablja se za napovedovanje razvojnih faz rastlin — višja vsota "
          "pomeni naprednejšo rastno fazo."),
         ("V kateri fazi je hmelj trenutno v Zgornji Savinjski dolini?",
-         f"Po vsoti GDD₁₀ ({gdd10} od 1. januarja {TODAY.year}) je hmelj trenutno v fazi: {stage_label.lower()}."),
-        ("Kdaj je okno za škropljenje primerno?",
-         "Škropljenje je primerno, ko je hitrost vetra do 4 km/h, ni padavin in je temperatura vsaj 5 °C — "
-         "praviloma zgodaj dopoldan ali pozno popoldan, ko je veter najšibkejši."),
+         f"Po vsoti GDD₁₀ ({gdd10} od 1. januarja {TODAY.year}) je modelirani razvoj hmelja v fazi: {stage_label.lower()}. To je ocena iz enega "
+         "dejavnika (temperature) za dolino kot celoto, ne dejanska tehnološka zrelost — ta je odvisna tudi od sorte in je objavljena pri IHPS "
+         "(glej tabelo »Tehnološka zrelost — IHPS« zgoraj)."),
+        ("Kdaj je meteorološko okno za nanos ugodno?",
+         "Meteorološko gledano je nanos ugodnejši, ko je hitrost vetra do 4 km/h, ni padavin in je temperatura vsaj 5 °C — "
+         "praviloma zgodaj dopoldan ali pozno popoldan, ko je veter najšibkejši. To ni nadomestilo za etiketo sredstva, FITO-INFO ali "
+         "priporočila IHPS."),
         ("Kako se izračuna vodna bilanca?",
          "Vodna bilanca je razlika med padavinami in referenčno evapotranspiracijo (ET₀, FAO Penman-Monteith). "
          "Pozitivna bilanca pomeni presežek vode v tleh, negativna pa primanjkljaj, ki ga je treba nadomestiti z namakanjem."),
@@ -301,7 +357,7 @@ def build_body(hist, fc):
   <p class="post-meta">GDD, vodna bilanca in fenologija iz meritev IREICA1 + napoved Open-Meteo · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {answer}
 {quick}
-  <h2>Fenologija hmelja in tveganje za bolezni</h2>
+  <h2>Fenologija hmelja</h2>
 {hop_html}
   <h2>Vsota efektivnih temperatur (GDD) — po pridelkih</h2>
   <p class="archive-intro">Ocenjena razvojna faza za pet pridelkov, značilnih za Zgornjo Savinjsko dolino, glede na vsoto GDD letos.</p>
@@ -310,9 +366,10 @@ def build_body(hist, fc):
   <p class="archive-intro">{frost_note} Za tveganje po sadni vrsti in fenofazi (jabolka, hruške, breskve, slive,
   češnje) glej <a href="/opozorilo-pred-pozebo/">podroben model opozorila pred pozebo</a>.</p>
 {frost_table}
-  <h2>Okno za škropljenje — naslednjih 7 dni</h2>
+  <h2>Meteorološko okno za nanos — naslednjih 7 dni</h2>
   <p class="archive-intro">Primerne ure: veter ≤ 4 km/h, brez padavin, temperatura ≥ 5 °C.</p>
 {spray_table}
+{spray_disclaimer}
   <h2>Okno za sušenje sena — naslednjih 5 dni</h2>
 {hay_table}
   <h2>Vodna bilanca — zadnjih 14 dni + 7-dnevna napoved</h2>
