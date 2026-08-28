@@ -573,6 +573,40 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
 - Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
   `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
 
+## Agrometeo (`/agrometeo/` + zavihek na naslovni strani) — modelirana ocena, ne diagnoza
+
+Bralec je 28. 8. 2026 pravilno opozoril, da je stran svoje modelirane ocene prikazovala
+z večjo agronomsko gotovostjo, kot jo GDD/vremenski model dejansko lahko zagotovi:
+»Hmelj: 1144 GDD — storžki · obiranje čez 106 GDD« ob dejanskem stanju, ko je IHPS že
+sredi avgusta poročal, da je Savinjski golding v tehnološki zrelosti — in »Hmeljeva
+pepelovka — 100 %«, kar bralcu zveni kot skoraj potrjena bolezen, ne kot weather-suitability
+heuristika. Popravljeno v `tools/generate_agrometeo_page.py` in `app.js`
+(`_buildAgroHop`/`_buildAgroHopDisease`/`_buildAgroSpray`):
+
+- **GDD pove modelirano razvojno fazo, ne tehnološko zrelost.** Fenološka tabela (`HOP_STAGES`)
+  ostaja (uporabna groba ocena), a besedilo okrog nje zdaj eksplicitno pravi, da gre za oceno
+  iz enega dejavnika (temperature) za dolino kot celoto — dejanska zrelost je odvisna tudi od
+  sorte, tehnoloških ukrepov, tal in lokacije. Poleg nje je nova, **ročno vzdrževana** tabela
+  »Tehnološka zrelost — IHPS« (`IHPS_STATUS` v obeh datotekah, namerna podvojitev, isto načelo
+  kot `HOP_STAGES`) — vpiši ročno ob vsaki novi objavi na ihps.si, z virom in datumom. Ne
+  izpeljuj statusa iz GDD.
+- **Bolezni: »primernost«, ne »tveganje %«.** `hop_disease_risk()`/`_buildAgroHopDisease()`
+  računata odstotek še naprej (za barvo/dolžino stolpička), a stran ga ne izpisuje kot
+  »Tveganje 100 %« — izpiše samo kvalitativno oznako (`suitability_label()`: nizka/zmerna/visoka
+  primernost) in eksplicitno opombo, da gre za meteorološki indikator, ne prognostično napoved
+  ali diagnozo po metodologiji IHPS.
+- **»Okno za škropljenje« → »Meteorološko okno za nanos«**, povsod (h2, FAQ, `clabel` v
+  `index.html`), z opombo, da ocena upošteva samo veter/padavine/temperaturo — ne etikete
+  sredstva, zanašanja, bližine voda ali opraševalcev; pred uporabo FFS preveri etiketo, FITO-INFO
+  in priporočila IHPS.
+- **Freshness na `/agrometeo/`**: stran generira cron (`agrometeo-forecast.yml`, dnevno) in je,
+  za razliko od zavihka na naslovni strani (ta vedno kliče Open-Meteo v živo), statičen posnetek
+  — če cron enkrat ali večkrat izostane, stran tiho kaže vse starejši datum brez opozorila. Zdaj
+  `data-generated` na strani + vgrajen inline `<script>` (isti prag kot MeteoGasilec: 🟡 26–50h,
+  🔴 >50h) izpiše »Podatki niso sveži« in nad 50h doda »trenutnih priporočil ne uporabljajte za
+  odločanje«. Ne skrivaj stare vrednosti, samo jo označi — isto načelo kot `renderFreshness()`
+  v `meteogasilec/gasilec.js`.
+
 ## MeteoGasilec — dva načina uporabe
 
 `/meteogasilec/` ima od 28. 8. 2026 dva na sebi: **pripravljalni** (dnevni FWI,
