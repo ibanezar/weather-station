@@ -2518,7 +2518,7 @@ function wmoInfo(code){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
+const DD_TABS={fc:['forecast2','mtr','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -3115,7 +3115,8 @@ function switchTab(tab){
   if(tab==='water'){     initVodostaj(); }
   if(tab==='agro'){      initAgro(); }
   if(tab==='nerd'){      initNerd(); }
-  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); fetchMosForecast('ai-mos-'); }
+  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
+  if(tab==='mtr'){       fetchMosForecast(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   if(tab==='gallery'){     initGallery(); }
   if(tab==='community'){  initCommunity(); }
@@ -6469,10 +6470,11 @@ async function fetchTextForecast(){
    Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
    Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
    kar je model prispeval, in edino, po čemer se loči od že prikazanih napovedi.
-   Kartica ni simple-keep, zato gre klic skozi runAdvancedOnly().
-   idp: id-predpona elementov na strani — 'mos-' za domačo kartico (privzeto),
-   'ai-mos-' za ločeno kartico v zavihku "AI napoved" (isti vir podatkov,
-   samo drug prikaz, da se MTR ne zamenja s HW/k-NN modelom tega zavihka). */
+   Kartica ni simple-keep, zato gre eager klic (brez idp) skozi runAdvancedOnly()
+   v init(); lazy klic ob preklopu na zavihek #tab-mtr osveži isto kartico.
+   idp: id-predpona elementov na strani, privzeto 'mos-' — samo ta kartica
+   obstaja (prej podvojena tudi v "AI napoved" pod 'ai-mos-', odstranjeno, ko
+   je MTR dobil svoj zavihek — glej #tab-mtr). */
 async function fetchMosForecast(idp){
   idp=idp||'mos-';
   const grid=document.getElementById(idp+'grid');
