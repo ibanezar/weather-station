@@ -1,6 +1,26 @@
 [
   {
     "type": "rekord-dneva-vrocina",
+    "date": "2026-08-28",
+    "value": 32.2,
+    "prev_value": 30.0,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-08-28",
+    "years_covered": 6
+  },
+  {
+    "type": "toplotni-val",
+    "date": "2026-08-26",
+    "end_date": "2026-08-28",
+    "value": 32.2,
+    "param": "tempHigh",
+    "label": "Toplotni val (3 dni)",
+    "slug": "toplotni-val-2026-08-26",
+    "duration": 3
+  },
+  {
+    "type": "rekord-dneva-vrocina",
     "date": "2026-08-19",
     "value": 31.5,
     "prev_value": 30.6,
