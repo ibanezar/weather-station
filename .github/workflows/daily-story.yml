@@ -11,7 +11,7 @@ name: Dnevna zgodba (FB + IG)
 #
 # Termin: cron teče po UTC, mi hočemo 6:00 po naši uri -- poleti je to
 # 04:00 UTC, pozimi 05:00 UTC. Sprožimo oba, tools/story_gate.py pa spusti
-# skozi samo tistega, ki se pri nas res zgodi med 6:00 in 12:00, in poskrbi,
+# skozi samo tistega, ki se pri nas res zgodi med 6:00 in 15:00, in poskrbi,
 # da gre zgodba ven enkrat na dan.
 
 on:

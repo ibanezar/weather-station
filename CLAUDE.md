@@ -141,9 +141,11 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   biti na sliki. Uporabljata iste secrete kot objave člankov.
 - **Termin:** cron teče po UTC, zato sta nastavljena dva (04:00 in 05:00 UTC),
   `tools/story_gate.py` pa spusti skozi samo tistega, ki je pri nas med 6:00 in
-  12:00, in poskrbi, da gre zgodba ven enkrat na dan (stanje v
+  15:00, in poskrbi, da gre zgodba ven enkrat na dan (stanje v
   `tools/.story_state.json`). Tako termin drži poleti in pozimi, prenese pa tudi
-  običajno zamudo GitHubovega crona.
+  zamudo GitHubovega crona — konec avgusta 2026 je ta štiri dni zapored zamujal
+  6-12 ur namesto običajne 1-2 uri in okno 6:00-12:00 vsakič zgrešil (nobena
+  kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
 
