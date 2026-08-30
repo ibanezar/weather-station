@@ -21,7 +21,7 @@ import json, os, re, sys, datetime
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
 TODAY = datetime.date.today().isoformat()
-SITEMAPS = ["sitemap.xml", "sitemap-seo.xml", "sitemap-weather.xml"]
+SITEMAPS = ["sitemap.xml", "sitemap-seo.xml", "sitemap-weather.xml", "sitemap-makro.xml"]
 
 # Ključne strani, ki MORAJO biti pokrite v vsaj enem sitemapu.
 # Metapodatki (changefreq, priority) se uporabijo le, ko stran dodajamo v sitemap.xml.
@@ -108,6 +108,11 @@ CORE = {
     # klientsko izračunana ob kliku (glej meteohmeljar/hmeljar.js), zato je
     # samo ena statična stran, ne seznam podstrani kot pri /meteogasilec/.
     "meteohmeljar/":              ("weekly",  "0.7"),
+    # Osebni makro-fotografski arhiv (glej tools/generate_makro_post.py) —
+    # ni SEO-gonjen, a hub stran mora vseeno obstajati in biti pokrita, sicer
+    # jo ta pregled prijavi kot manjkajočo. Lasten sitemap-makro.xml, ne ta
+    # seznam, nosi posamezne strani po vrstah (glej SITEMAPS spodaj).
+    "makro/":                     ("weekly",  "0.4"),
 }
 
 # Strani, na katerih preverimo osnovne on-page SEO elemente.
