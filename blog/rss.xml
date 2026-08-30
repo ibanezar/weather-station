@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 28 Aug 2026 06:31:12 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 30 Aug 2026 07:13:28 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Po rekordu 32,2 °C teden, ki se ne more odločiti: gor, dol, spet gor</title>
+      <link>https://meteorec.si/blog/teden-ki-se-ne-more-odlociti-0830.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/teden-ki-se-ne-more-odlociti-0830.html</guid>
+      <pubDate>Sun, 30 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Po ponedeljkovem rekordu je temperatura v enem dnevu padla za 6,5 stopinje, zdaj pa spet raste. Takšna nihanja so avgusta na Rečici ob Savinji redka — v šestih letih meritev smo jih zabeležili le dvakrat, obakrat lani.</description>
+      <category>vreme</category>
+      <category>temperaturni trend</category>
+      <category>rekord vročine</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Danes še skoraj 33 °C, jutri pa preobrat: na Rečici ob Savinji bo občutno hladneje</title>
       <link>https://meteorec.si/blog/zakaj-je-zjutraj-tako-toplo-v-recici-ob-savinji-0828.html</link>
