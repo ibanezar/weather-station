@@ -1,0 +1,49 @@
+name: Dolinski dvoboj — dnevni zapis (IREICA1 vs Varpolje)
+
+# Zgradi preverljivo zgodovino jutranje razlike med IREICA1 in sosednjo
+# postajo v Varpolju, preden se piše članek na podlagi enkratnega opazovanja
+# (30. 8. 2026 se je pokazalo, da ~6:40-6:50 ni bila v šestih preverjenih
+# jutrih razlika nikoli >= 2 °C -- ta tek teče kasneje, ob 8:00 CEST, ko je
+# bila prejšnja razlika dejansko izmerjena). Diagnostično orodje, ni namenjeno
+# trajno: glej tools/log_valley_duel.py za omejitve (ne gre v history.json,
+# ne v model, ne na semafor točnosti -- CLAUDE.md).
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 8:00 po naši uri poleti (CEST); pozimi 7:00 (CET)
+  workflow_dispatch:
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Zabeleži primerjavo
+        run: python3 tools/log_valley_duel.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/valley-duel-log.csv
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: dolinski dvoboj $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
