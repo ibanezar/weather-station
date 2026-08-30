@@ -212,7 +212,11 @@ def fact_year_ago(hist, last):
         return None
 
     diff = today_v - prev_temp
-    if abs(diff) < 0.2:
+    if abs(diff) < 0.05:
+        text = (f'{dm_label(last)} je bilo letos enako toplo kot lani — '
+                 f'<strong>{num(today_v)} °C</strong> oba dneva.')
+        icon = "🔁"
+    elif abs(diff) < 0.2:
         text = (f'{dm_label(last)} je bilo letos skoraj enako toplo kot lani — '
                  f'<strong>{num(today_v)} °C</strong> letos in {num(prev_temp)} °C lani.')
         icon = "🔁"
