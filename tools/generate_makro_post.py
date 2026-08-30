@@ -86,12 +86,17 @@ def load_sidecar(photo_path):
 
 
 def _gps_to_deg(coord, ref):
-    if not coord:
+    # Telefoni z izklopljeno lokacijo pogosto zapišejo GPS IFD z ničelnim
+    # ref-om ("\x00") in NaN vrednostmi namesto praznega IFD-ja -- brez tega
+    # preverjanja bi round(nan, 6) tiho vrnil nan, ki potem konča v JSON-u.
+    if not coord or ref not in ("N", "S", "E", "W"):
         return None
     try:
         d, m, s = coord
         val = float(d) + float(m) / 60 + float(s) / 3600
     except (TypeError, ValueError):
+        return None
+    if val != val:  # nan != nan je edini prenosljiv način za zaznati NaN brez uvoza math
         return None
     if ref in ("S", "W"):
         val = -val
@@ -306,6 +311,34 @@ def invasive_link_for(vrsta, sci):
     return None
 
 
+# Užitnost (species_rules.yaml) -> pot pod /gobarska-napoved/baza-vrst/ --
+# ista razdelitev kot BAZA_CATS v generate_gobe_page.py. Baza nima posamične
+# strani na vrsto (glej CLAUDE.md, razdelek o /baza-vrst/), zato povežemo na
+# kategorijsko stran, ne na neobstoječ sidrni ID posamezne kartice.
+GOBE_EDIBILITY_PATH = {
+    "užitna": "uzitne", "pogojno užitna": "pogojno-uzitne",
+    "strupena": "strupene", "neužitna": "neuzitne",
+}
+
+
+def gobe_link_for(sci):
+    """Če je znanstveno ime v gobarski bazi (species_rules.yaml -- gobe so v
+    Koraku 6 omenjene kot 'kasneje', a baza že obstaja, zato preverimo takoj),
+    poveže na ustrezno kategorijo v /gobarska-napoved/baza-vrst/."""
+    if not sci:
+        return None
+    try:
+        rules = yaml.safe_load(open(os.path.join(ROOT, "species_rules.yaml"), encoding="utf-8"))
+    except Exception:
+        return None
+    sci_l = sci.strip().lower()
+    for sp in rules.get("species", []):
+        if (sp.get("name_lat") or "").strip().lower() == sci_l:
+            path = GOBE_EDIBILITY_PATH.get((sp.get("edibility") or "").strip().lower())
+            return f"/gobarska-napoved/baza-vrst/{path}/" if path else "/gobarska-napoved/baza-vrst/"
+    return None
+
+
 # ── Slika: EXIF-orientacija popravljena, pomanjšana kopija za splet ─────────
 
 def save_web_photo(src_path, slug, date_iso):
@@ -464,9 +497,13 @@ def build_species_page(sp, article, sighting, w, h):
 
     link_html = ""
     if sp.get("invasive_link"):
-        link_html = (f'\n    <p style="color:var(--muted);font-size:.9rem">Ta vrsta je tudi na seznamu '
-                      f'invazivnih vrst v dolini — <a href="{sp["invasive_link"]}" style="color:var(--blue)">'
-                      f'poglej razširjenost na /invazivke/</a>.</p>\n')
+        link_html += (f'\n    <p style="color:var(--muted);font-size:.9rem">Ta vrsta je tudi na seznamu '
+                       f'invazivnih vrst v dolini — <a href="{sp["invasive_link"]}" style="color:var(--blue)">'
+                       f'poglej razširjenost na /invazivke/</a>.</p>\n')
+    if sp.get("gobe_link"):
+        link_html += (f'\n    <p style="color:var(--muted);font-size:.9rem">Ta vrsta je tudi v gobarski bazi — '
+                       f'<a href="{sp["gobe_link"]}" style="color:var(--blue)">poglej užitnost in dvojnice na '
+                       f'gobarski napovedi</a>.</p>\n')
 
     log_items = []
     for s in reversed(sp["sightings"]):
@@ -614,6 +651,7 @@ def main():
                 "last_seen": meta["datum"],
                 "og_accent_hex": article.get("og_accent_hex", "#38bdf8"),
                 "invasive_link": invasive_link_for(meta["vrsta"], meta.get("sci")),
+                "gobe_link": gobe_link_for(meta.get("sci")),
                 "sightings": [sighting],
             }
             cat["species"].append(sp)
@@ -623,6 +661,10 @@ def main():
             sp["cover_photo"] = photo_url
             sp["last_seen"] = meta["datum"]
             sp["og_accent_hex"] = article.get("og_accent_hex", sp.get("og_accent_hex", "#38bdf8"))
+            # Osveži, ne samo nastavi pri prvem opažanju -- npr. če je sci
+            # manjkal pri prvem opažanju in je znan šele zdaj.
+            sp["invasive_link"] = sp.get("invasive_link") or invasive_link_for(sp["sl"], sp["sci"])
+            sp["gobe_link"] = sp.get("gobe_link") or gobe_link_for(sp["sci"])
             sp["sightings"].append(sighting)
             sp["sightings"].sort(key=lambda s: s["date"])
 
