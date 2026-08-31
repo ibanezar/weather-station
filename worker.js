@@ -2199,8 +2199,68 @@ async function _cronRenderIconAndCells(env) {
   }
 }
 
+// ── Varovalka za nezanesljiv GitHub Actions "schedule" prožilec ─────────────
+// 31. 8. 2026 se je izkazalo, da GitHub cron dogodkov ne le zamuja, ampak jih
+// nekaterim delovnim tokovom (storm-map.yml, vodostaj-forecast.yml) tisti dan
+// ni dostavil sploh — kljub že obstoječim dvojnim terminom/oknu v teh delovnih
+// tokovih (glej CLAUDE.md). Cloudflarov Cron Trigger teče na drugi
+// infrastrukturi, zato tu deluje kot neodvisna varovalka: pokliče GitHub REST
+// API workflow_dispatch prek istega ref (main), kot bi ga sprožil cron sam.
+//
+// - storm-map.yml dobi `force: "false"` — tools/storm_map_gate.py znotraj
+//   delovnega toka sam presodi, ali je karta za danes že narejena (dedup) in
+//   ali smo znotraj njegovega 6:00-8:00 okna; brez tega bi force:true lahko
+//   podvojil FB/IG objavo, če je GitHubov lastni cron karto medtem že objavil.
+// - vodostaj-forecast.yml nima gatea in ne objavlja nikamor (samo prepiše
+//   stran in commita, če se je kaj spremenilo) — ponovni klic je neškodljiv,
+//   zato brez posebnih vhodov.
+const GITHUB_REPO = "ibanezar/weather-station";
+
+async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
+  const token = env.GH_DISPATCH_TOKEN;
+  if (!token) return { ok: false, reason: "manjka GH_DISPATCH_TOKEN" };
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${workflowFile}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "User-Agent": "meteorec-cron-backstop",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ref: "main", inputs: inputs || {} }),
+      }
+    );
+    return { ok: res.status === 204, status: res.status };
+  } catch (e) {
+    return { ok: false, reason: String((e && e.message) || e) };
+  }
+}
+
+async function _cronDispatchScheduledWorkflows(env) {
+  const results = {
+    cas: new Date().toISOString(),
+    "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
+    "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
+  };
+  const r2 = env?.PHOTOS_R2;
+  if (r2) {
+    try {
+      await r2.put("debug/github-dispatch-cron.json", JSON.stringify(results), {
+        httpMetadata: { contentType: "application/json" },
+      });
+    } catch (_) {}
+  }
+}
+
 export default {
   async scheduled(event, env, ctx) {
+    if (event.cron === "10,40 6-7 * * *") {
+      ctx.waitUntil(_cronDispatchScheduledWorkflows(env));
+      return;
+    }
     if (event.cron === "2-59/5 * * * *") {
       ctx.waitUntil(_cronRenderIconAndCells(env));
       return;
