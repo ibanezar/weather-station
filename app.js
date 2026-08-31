@@ -9482,7 +9482,7 @@ function renderDailyMicroclimateFingerprint(obs,h){
   signals.sort((a,b)=>(b.type==='alert')-(a.type==='alert')||b.score-a.score);
   const main=signals[0];
   const kpis=[['Dep.',dep.toFixed(1)+'°C'],['Nočni padec',coolingDrop>0?coolingDrop.toFixed(1)+'°C':'—'],['Sunki 12h',Math.round(gustMax)+' km/h'],['CAPE',Math.round(capeMax)]];
-  el.innerHTML='<div><div class="mcf-main"><div class="mcf-icon">'+main.icon+'</div><div><div class="mcf-title">'+main.name+'</div><div class="mcf-text">'+main.text+'</div></div></div><div class="mcf-kpis">'+kpis.map(k=>'<div class="mcf-kpi"><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join('')+'</div></div><div class="mcf-signals">'+signals.slice(0,4).map(s=>'<div class="mcf-signal '+(s.type==='alert'?'alert':s.type==='warn'?'warn':s.type==='good'?'good':'')+'"><div class="mcf-sig-name"><span>'+s.icon+'</span>'+s.name+'</div><div class="mcf-sig-text">'+s.text+'</div></div>').join('')+'</div>';
+  el.innerHTML='<div><div class="mcf-main"><div class="mcf-icon">'+main.icon+'</div><div><div class="mcf-title">'+main.name+'</div><div class="mcf-text">'+main.text+'</div></div></div><div class="mcf-kpis">'+kpis.map(k=>'<div class="mcf-kpi"><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join('')+'</div></div><div class="mcf-signals">'+signals.slice(1,5).map(s=>'<div class="mcf-signal '+(s.type==='alert'?'alert':s.type==='warn'?'warn':s.type==='good'?'good':'')+'"><div class="mcf-sig-name"><span>'+s.icon+'</span>'+s.name+'</div><div class="mcf-sig-text">'+s.text+'</div></div>').join('')+'</div>';
   if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
