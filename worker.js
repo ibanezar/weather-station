@@ -1868,7 +1868,12 @@ const CELL_TRAIL_MAX = 4;        // koliko zadnjih leg hrani sled vsake celice (
 const CELL_R2_STATE = "cells/state.json";
 const CELL_R2_LATEST = "cells/latest.json";
 const CELL_ETA_RADIUS_KM = 15;   // "gre proti dolini", če najbližji prehod pade znotraj tega
-const CELL_ETA_MAX_MIN = 90;     // linearna ekstrapolacija čez to postane nezanesljiva (glej docs/nowcast.md)
+const CELL_ETA_MAX_MIN = 45;     // znižano z 90 (31. 8. 2026): pri toliko oddaljenem horizontu je
+                                  // linearna ekstrapolacija smeri/hitrosti nezanesljiva (isto spoznanje
+                                  // kot pri obzorju nowcasta zgoraj — "Kaj kaže preverjanje" v
+                                  // docs/nowcast.md, kjer FAR za jedro pri 45 min že naraste na 0,60) —
+                                  // pri 90 min je oddaljena (60-100+ km) in vizualno nikjer "blizu"
+                                  // celica lahko sprožila push, še preden bi realno prišla v dolino.
 const CELL_ETA_MIN_KMH = 3;      // pod tem je smer preveč šumna, da bi iz nje sklepali ETA
 
 // Najbližji prehod (closest point of approach) premočrtne trajektorije
@@ -1893,7 +1898,11 @@ function _cellEta(cell) {
   if (distCpa > CELL_ETA_RADIUS_KM) return null;
   const etaMin = Math.round(tCpa * 60);
   if (etaMin > CELL_ETA_MAX_MIN) return null;
-  return { etaMin, etaKm: Math.round(distCpa * 10) / 10 };
+  // Razdalja ZDAJ (ne pri CPA) — brez nje pasica/push povesta samo ETA minute
+  // in celica na 60-100 km stran je videti "blizu" (glej git zgodovino,
+  // 31. 8. 2026: napačen vtis prihajajoče nevihte, ko na karti ni bilo nič v okolici).
+  const nowKm = Math.round(Math.hypot(c0x, c0y) * 10) / 10;
+  return { etaMin, etaKm: Math.round(distCpa * 10) / 10, nowKm };
 }
 
 // Ista projekcija in prioritetno pravilo (ARSO znotraj COMP_R_JEDRO, OPERA
@@ -2087,8 +2096,8 @@ async function _cronPushCellEta(env, celice) {
     if (c.eta_min == null || notified[c.id]) continue;
     await _pushAll(env, {
       title: "Meteorec — nevihta se približuje",
-      body: "⛈️ Nevihtna celica prihaja proti Rečici ob Savinji čez ~" + c.eta_min + " min ("
-        + Math.round(c.kmh) + " km/h, " + _smerBesedilo(c.smer) + ").",
+      body: "⛈️ Nevihtna celica prihaja proti Rečici ob Savinji čez ~" + c.eta_min + " min (trenutno ~"
+        + c.zdaj_km + " km stran, " + Math.round(c.kmh) + " km/h, " + _smerBesedilo(c.smer) + ").",
       url: "/", tag: "wx-cell-" + c.id,
     });
     notified[c.id] = true;
@@ -2108,6 +2117,7 @@ async function _cronRenderRadarCells(env, win, arso) {
         povrsina_km2: c.areaKm2, mmh: c.maxMmh, toca: !!c.toca,
         smer: c.smer == null ? null : Math.round(c.smer), kmh: c.kmh == null ? null : c.kmh,
         eta_min: eta ? eta.etaMin : null, eta_km: eta ? eta.etaKm : null,
+        zdaj_km: eta ? eta.nowKm : null,
         // [lat,lon] pari, najstarejši prvi — kratka sled zadnjih leg za izris
         // na karti namesto gole pike (glej CELL_TRAIL_MAX).
         sled: (c.trail || []).map(([lo, la]) => [Math.round(la * 1000) / 1000, Math.round(lo * 1000) / 1000]),
