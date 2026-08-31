@@ -213,20 +213,20 @@ body{
       <button class="gf-btn" id="btn-gps" type="button">📍 Uporabi mojo lokacijo</button>
     </div>
   <p class="gf-note" style="margin:0 0 .3rem;font-weight:700">🏛 Uradna opozorila ARSO</p>
-  <div id="gf-arso-compact"><div class="gf-arso-list"><div class="gf-arso-item gf-arso-yellow">🟡 <b>Veter · pon., 31. 8. 18:00–23:59</b></div><div class="gf-arso-item gf-arso-yellow">🟡 <b>Nevihte · pon., 31. 8. 14:00–21:59</b></div><div class="gf-arso-item gf-arso-yellow">🟡 <b>Visoka temperatura · pon., 31. 8. 12:00–19:59</b></div></div></div>
+  <div id="gf-arso-compact"><div class="gf-arso-list"><div class="gf-arso-item gf-arso-yellow">🟡 <b>Veter · pon., 31. 8. 18:00–23:59</b></div><div class="gf-arso-item gf-arso-yellow">🟡 <b>Nevihte · pon., 31. 8. 14:00 – tor., 1. 9. 03:59</b></div><div class="gf-arso-item gf-arso-yellow">🟡 <b>Visoka temperatura · pon., 31. 8. 12:00–19:59</b></div></div></div>
     <div id="gf-interv-body">
   <div class="gf-interv-body">
       <div class="gf-compass-wrap" id="gf-interv-compass">
-        <svg viewBox="0 0 128 128" width="128" height="128" class="gf-compass" aria-hidden="true"><circle cx="64.0" cy="64.0" r="48.0" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1.5"/><text x="64.0" y="15" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">S</text><text x="119" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">V</text><text x="64.0" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">J</text><text x="9" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">Z</text><g transform="rotate(180 64.0 64.0)"><line x1="64.0" y1="64.0" x2="64.0" y2="22.0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M 57.0 34.0 L 64.0 20.0 L 71.0 34.0 Z" fill="currentColor"/></g></svg>
-        <div class="gf-compass-lbl">S → J · 2 km/h</div>
+        <svg viewBox="0 0 128 128" width="128" height="128" class="gf-compass" aria-hidden="true"><circle cx="64.0" cy="64.0" r="48.0" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1.5"/><text x="64.0" y="15" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">S</text><text x="119" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">V</text><text x="64.0" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">J</text><text x="9" y="68.0" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" opacity=".55">Z</text><g transform="rotate(234 64.0 64.0)"><line x1="64.0" y1="64.0" x2="64.0" y2="22.0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M 57.0 34.0 L 64.0 20.0 L 71.0 34.0 Z" fill="currentColor"/></g></svg>
+        <div class="gf-compass-lbl">SV → JZ · 5 km/h</div>
       </div>
       <div class="gf-interv-stats" id="gf-interv-stats">
-        <div class="gf-stat"><b>22.0 °C</b><span>Temperatura</span></div>
-        <div class="gf-stat"><b>60 %</b><span>Vlaga</span></div>
-        <div class="gf-stat"><b>6 km/h</b><span>Sunki vetra</span></div>
+        <div class="gf-stat"><b>26.6 °C</b><span>Temperatura</span></div>
+        <div class="gf-stat"><b>51 %</b><span>Vlaga</span></div>
+        <div class="gf-stat"><b>9 km/h</b><span>Sunki vetra</span></div>
         <div class="gf-stat"><b>0.0 mm</b><span>Padavine 3 h</span></div>
-        <div class="gf-stat"><b>13.1</b><span>FWI danes (Visoka)</span></div>
-        <div class="gf-stat"><b>7.3</b><span>ISI danes</span></div>
+        <div class="gf-stat"><b>16.1</b><span>FWI danes (Visoka)</span></div>
+        <div class="gf-stat"><b>9.0</b><span>ISI danes</span></div>
       </div>
     </div>
     </div>
@@ -235,13 +235,7 @@ body{
       <div id="gf-interv-terrain"><p class="gf-note" style="margin:0 0 .5rem">Nalaganje terena …</p></div>
     </div>
     <div id="gf-interv-shift-wrap">
-  <div class="gf-shift-warn" id="gf-interv-shift">
-      <b>⚠ MeteoGasilec kriterij: možen obrat vetra</b>
-      Ob 16:00 pričakovan obrat smeri za +90°
-      (S → V),
-      sunki 6 → 15 km/h.
-      Ni uradno opozorilo ARSO.
-    </div>
+
     </div>
     <p class="gf-note" id="gf-interv-note"></p>
     <p class="gf-note"><a id="gf-interv-map" href="/meteogasilec/karta/" target="_blank" rel="noopener">🗺 Odpri operativno karto (hidranti, požarišča)</a></p>
@@ -257,10 +251,10 @@ body{
   <script src="/meteogasilec/gasilec.js"></script>
   <script>(function(){
     var DEFAULT_LAT=46.325779, DEFAULT_LON=14.921137;
-    var FWI_TODAY={"fwi": 13.1, "level": "Visoka", "isi": 7.3};
+    var FWI_TODAY={"fwi": 16.1, "level": "Visoka", "isi": 9.0};
     var currentFWI={fwi:FWI_TODAY.fwi,level:FWI_TODAY.level,isi:FWI_TODAY.isi,isLocal:false};
     var lastData=null;
-    var lastArsoAlerts=[{"level": "yellow", "text": "Veter \u00b7 pon., 31. 8. 18:00\u201323:59"}, {"level": "yellow", "text": "Nevihte \u00b7 pon., 31. 8. 14:00\u201321:59"}, {"level": "yellow", "text": "Visoka temperatura \u00b7 pon., 31. 8. 12:00\u201319:59"}];
+    var lastArsoAlerts=[{"level": "yellow", "text": "Veter \u00b7 pon., 31. 8. 18:00\u201323:59"}, {"level": "yellow", "text": "Nevihte \u00b7 pon., 31. 8. 14:00 \u2013 tor., 1. 9. 03:59"}, {"level": "yellow", "text": "Visoka temperatura \u00b7 pon., 31. 8. 12:00\u201319:59"}];
     function fmtHM(t){return t?t.slice(11,16):'—';}
     function refreshBriefingArso(){
       if(lastData){
