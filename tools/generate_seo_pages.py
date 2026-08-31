@@ -76,6 +76,18 @@ GA = ('<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR
       '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
       "gtag('js',new Date());gtag('config','G-LE8PJ1HR8B');</script>")
 
+GTM_HEAD = ("<!-- Google Tag Manager -->\n"
+            "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':"
+            "new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],"
+            "j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src="
+            "'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);"
+            "})(window,document,'script','dataLayer','GTM-N2B38HHG');</script>\n"
+            "<!-- End Google Tag Manager -->")
+GTM_BODY = ('<!-- Google Tag Manager (noscript) -->\n'
+            '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N2B38HHG"\n'
+            'height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>\n'
+            '<!-- End Google Tag Manager (noscript) -->')
+
 BLOBS = ('<div id="bg" aria-hidden="true">'
          '<div class="blob b1"></div><div class="blob b2"></div>'
          '<div class="blob b3"></div><div class="blob b4"></div>'
@@ -375,6 +387,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
     return f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
+{GTM_HEAD}
 <meta charset="UTF-8">
 {GA}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -402,6 +415,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
 {CSS_LINKS}
 </head>
 <body>
+{GTM_BODY}
 {BLOBS}
 <div class="wrap">
 {HEADER}

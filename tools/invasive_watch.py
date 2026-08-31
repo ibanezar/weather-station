@@ -430,6 +430,13 @@ def build_weekly_html(article, alerts, now_utc):
     html = f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){{w[l]=w[l]||[];w[l].push({{'gtm.start':
+new Date().getTime(),event:'gtm.js'}});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+}})(window,document,'script','dataLayer','GTM-N2B38HHG');</script>
+<!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>
@@ -485,6 +492,10 @@ def build_weekly_html(article, alerts, now_utc):
 <style>.section-label{{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);opacity:.75}}</style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N2B38HHG"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
 
@@ -623,6 +634,13 @@ def build_monthly_digest(config, state, output):
     html = f'''<!DOCTYPE html>
 <html lang="sl">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){{w[l]=w[l]||[];w[l].push({{'gtm.start':
+new Date().getTime(),event:'gtm.js'}});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+}})(window,document,'script','dataLayer','GTM-N2B38HHG');</script>
+<!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>
@@ -646,6 +664,10 @@ def build_monthly_digest(config, state, output):
 <link rel="stylesheet" href="blog.css">
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N2B38HHG"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
 <div class="wrap">
   <header class="site-head">
