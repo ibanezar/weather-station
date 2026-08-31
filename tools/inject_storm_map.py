@@ -13,6 +13,7 @@ Wired into: .github/workflows/storm-map.yml
 Usage:
   python3 tools/inject_storm_map.py [--dry-run]
 """
+import datetime
 import html
 import json
 import os
@@ -35,14 +36,27 @@ def build_block(meta):
     level = esc(meta.get("national_level", "—"))
     place = esc(meta.get("national_place", "—"))
     image = esc(meta.get("image", ""))
+    # tools/nevihte-forecast.yml zdaj to pokliče tudi zjutraj, s še včerajšnjo
+    # (ali starejšo, če je storm-map.yml zaradi zamude GitHubovega crona
+    # zamudil svoje okno) karto — brez opombe bi besedilo trdilo "danes" za
+    # dan, ki to ni. Datum je zato vedno izpisan, opomba o starosti pa se
+    # doda samo, kadar karta res ni od danes (isto načelo kot renderFreshness()
+    # v meteogasilec/gasilec.js: stare vrednosti ne skrivamo, samo označimo).
+    is_today = meta.get("date") == datetime.date.today().isoformat()
+    note = (
+        "" if is_today else
+        f'  <p class="muted-note" style="margin:.5rem 0 0">Prikazana karta je iz {date} — '
+        f'današnja bo na voljo predvidoma ob 10:00.</p>\n'
+    )
     return (
         f'{START}\n'
         f'  <h2 id="karta">Nevihtna karta Slovenije — danes</h2>\n'
-        f'  <p class="archive-intro">Najvišji nevihtni potencial danes je <strong>{level}</strong>, '
+        f'  <p class="archive-intro">Najvišji nevihtni potencial za {date} je <strong>{level}</strong>, '
         f'pričakovan bliže {place}. Karta prikazuje oceno po vsej Sloveniji iz iste formule kot zgornji '
         f'indeksi (Open-Meteo) — ni uradno opozorilo ARSO, izdana je vsak dan ob 10:00.</p>\n'
         f'  <img src="{image}" alt="Nevihtna karta Slovenije, {date}" loading="lazy" '
         f'style="width:100%;max-width:720px;border-radius:16px;display:block;margin:0 auto">\n'
+        f'{note}'
         f'  {END}'
     )
 
