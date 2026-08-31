@@ -8590,185 +8590,6 @@ async function initSurroundings(){
   }
 }
 
-// ── 24h Sky Strip ──────────────────────────────────────────
-function skyColorForHour(hour, wmo, darkMode){
-  // Base sky color by hour
-  const h=((hour%24)+24)%24;
-  let r,g,b;
-  if(h<5||h>22){r=2;g=6;b=23;}          // deep night
-  else if(h<6){r=15;g=23;b=42;}         // pre-dawn
-  else if(h<7){r=120;g=53;b=14;}        // golden AM
-  else if(h<8){r=180;g=100;b=30;}       // warm morning
-  else if(h<10){r=3;g=105;b=161;}       // fresh morning
-  else if(h<17){r=2;g=132;b=199;}       // full day sky
-  else if(h<18){r=3;g=105;b=161;}       // afternoon
-  else if(h<19.5){r=120;g=53;b=14;}     // golden PM
-  else if(h<21){r=30;g=58;b=95;}        // dusk
-  else{r=15;g=23;b=42;}                 // night
-  // Weather modifier (overcast = darker/greyer)
-  const overcast=wmo>=2&&wmo<50?0.55:wmo>=50?0.35:1.0;
-  const grey=darkMode?15:140;
-  r=Math.round(r*(overcast)+(grey*(1-overcast)));
-  g=Math.round(g*(overcast)+(grey*(1-overcast)));
-  b=Math.round(b*(overcast)+(grey*(1-overcast)));
-  return`rgb(${r},${g},${b})`;
-}
-function uvToColor(uv){
-  if(!uv||uv<1)return'rgba(30,30,30,0)';
-  if(uv<3) return`rgba(250,204,21,${Math.min(0.5,uv*0.15)})`;
-  if(uv<6) return`rgba(251,146,60,${Math.min(0.6,uv*0.1)})`;
-  if(uv<9) return`rgba(239,68,68,${Math.min(0.65,uv*0.08)})`;
-  return`rgba(168,85,247,0.7)`;
-}
-
-async function fetchAndDrawSkyStrip(){
-  try{
-    const url='https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON
-      +'&hourly=temperature_2m,precipitation,wind_speed_10m,uv_index,weather_code,apparent_temperature'
-      +'&timezone=Europe%2FLjubljana&forecast_days=2&past_hours=1';
-    const res=await fetch(url);const data=await res.json();
-    const h=data.hourly;if(!h?.time?.length)return;
-    const now=new Date();
-    // Find current hour index
-    const startIdx=Math.max(0,h.time.findIndex(t=>new Date(t)>=now));
-    const slice=h.time.slice(startIdx,startIdx+24);
-    const hours=slice.map((_,i)=>{
-      const idx=startIdx+i;
-      const date=new Date(h.time[idx]);
-      return{
-        hour:date.getHours(),
-        label:String(date.getHours()).padStart(2,'0')+':00',
-        temp:h.temperature_2m[idx]??0,
-        apparent:h.apparent_temperature[idx]??0,
-        rain:h.precipitation[idx]??0,
-        wind:h.wind_speed_10m[idx]??0,
-        uv:h.uv_index[idx]??0,
-        wmo:h.weather_code[idx]??0,
-        isNow:i===0,
-      };
-    });
-    const rangeEl=document.getElementById('sky-range');
-    if(rangeEl)rangeEl.textContent=hours[0]?.label+' – '+hours[hours.length-1]?.label;
-    drawSkyStrip(hours);
-  }catch(e){
-    console.warn('SkyStrip:',e);
-    const s=document.getElementById('sky-strip-svg');
-    if(s){s.innerHTML='<text x="480" y="64" text-anchor="middle" font-size="11" fill="rgba(128,128,128,.5)" font-family="Inter,sans-serif">Trak neba ni dosegljiv ('+e.message+')</text>';}
-  }
-}
-
-function drawSkyStrip(hours){
-  const svg=document.getElementById('sky-strip-svg');if(!svg||!hours.length)return;
-  const VW=960,VH=128;
-  const cellW=VW/hours.length;
-  const LABEL_H=14, SKY_TOP=LABEL_H, SKY_H=72;
-  const UV_Y=SKY_TOP+SKY_H+2, UV_H=8;
-  const RAIN_Y=UV_Y+UV_H+2, RAIN_H=14;
-  const WIND_Y=RAIN_Y+RAIN_H+2, WIND_H=10;
-  const dark=isDark();
-
-  svg.innerHTML='';
-  const mk=(tag,attrs,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;};
-  const defs=mk('defs',{});
-
-  // ── Sky background cells (smooth gradient between hours)
-  hours.forEach((h,i)=>{
-    const x=i*cellW;
-    const col=skyColorForHour(h.hour,h.wmo,dark);
-    const colNext=i<hours.length-1?skyColorForHour(hours[i+1].hour,hours[i+1].wmo,dark):col;
-    const gid='sg'+i;
-    defs.innerHTML+=`<linearGradient id="${gid}" x1="0" x2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="${colNext}"/></linearGradient>`;
-    mk('rect',{x:x.toFixed(1),y:SKY_TOP,width:(cellW+1).toFixed(1),height:SKY_H,fill:`url(#${gid})`});
-  });
-
-  // ── UV band
-  hours.forEach((h,i)=>{
-    const x=i*cellW;
-    mk('rect',{x:x.toFixed(1),y:UV_Y,width:cellW.toFixed(1),height:UV_H,fill:uvToColor(h.uv)});
-  });
-
-  // ── Precipitation bars
-  const maxRain=Math.max(...hours.map(h=>h.rain),0.5);
-  hours.forEach((h,i)=>{
-    if(h.rain<0.1)return;
-    const bh=Math.max(3,Math.min(RAIN_H,(h.rain/maxRain)*RAIN_H));
-    mk('rect',{x:(i*cellW+1.5).toFixed(1),y:(RAIN_Y+RAIN_H-bh).toFixed(1),
-      width:(cellW-3).toFixed(1),height:bh.toFixed(1),
-      fill:h.wmo>=71?'rgba(147,197,253,0.75)':'rgba(96,165,250,0.75)',rx:'1.5'});
-  });
-
-  // ── Wind bars
-  const maxWind=Math.max(...hours.map(h=>h.wind),5);
-  hours.forEach((h,i)=>{
-    if(h.wind<8)return;
-    const bh=Math.max(2,Math.min(WIND_H,((h.wind-8)/(maxWind-8))*WIND_H));
-    mk('rect',{x:(i*cellW+1.5).toFixed(1),y:(WIND_Y+WIND_H-bh).toFixed(1),
-      width:(cellW-3).toFixed(1),height:bh.toFixed(1),
-      fill:'rgba(167,139,250,0.7)',rx:'1.5'});
-  });
-
-  // ── Temperature line + area
-  const temps=hours.map(h=>h.temp);
-  const tmin=Math.min(...temps)-1,tmax=Math.max(...temps)+1;
-  const tY=t=>SKY_TOP+4+(1-(t-tmin)/(tmax-tmin))*(SKY_H-8);
-  const pts=hours.map((h,i)=>({x:i*cellW+cellW/2,y:tY(h.temp)}));
-  const tempPath=smoothPath(pts);
-  const lastPt=pts[pts.length-1];
-  const firstPt=pts[0];
-  // Area fill
-  const areaId='ta';
-  defs.innerHTML+=`<linearGradient id="${areaId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f87171" stop-opacity="0.25"/><stop offset="100%" stop-color="#f87171" stop-opacity="0"/></linearGradient>`;
-  mk('path',{d:`${tempPath} L${lastPt.x},${SKY_TOP+SKY_H} L${firstPt.x},${SKY_TOP+SKY_H} Z`,fill:`url(#${areaId})`});
-  mk('path',{d:tempPath,fill:'none',stroke:'#f87171','stroke-width':'2','stroke-linecap':'round'});
-  // Temp dots at peaks/troughs
-  const maxT=Math.max(...temps),minT=Math.min(...temps);
-  const maxIdx=temps.indexOf(maxT),minIdx=temps.indexOf(minT);
-  [[maxIdx,maxT,'#f87171',-10],[minIdx,minT,'#38bdf8',14]].forEach(([idx,t,col,dy])=>{
-    if(idx<0)return;
-    const x=idx*cellW+cellW/2,y=tY(t);
-    mk('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:'4',fill:col,stroke:'white','stroke-width':'1.5'});
-    mk('text',{x:x.toFixed(1),y:(y+dy).toFixed(1),'text-anchor':'middle','font-size':'8',fill:col,'font-family':'JetBrains Mono,monospace','font-weight':'600'},t.toFixed(1)+'°');
-  });
-
-  // ── Condition icons (every 2h, skip if too many)
-  hours.forEach((h,i)=>{
-    if(i%2!==0)return;
-    const x=i*cellW+cellW;
-    const iconY=SKY_TOP+SKY_H*0.55;
-    mk('text',{x:x.toFixed(1),y:iconY.toFixed(1),'text-anchor':'middle','font-size':'13',
-      'dominant-baseline':'central','font-family':'sans-serif'},_wmoEmoji(h.wmo));
-  });
-
-  // ── Apparent temperature mini dots (feels like) — subtle
-  hours.forEach((h,i)=>{
-    if(Math.abs(h.apparent-h.temp)<1.5)return;
-    const x=i*cellW+cellW/2,y=tY(h.apparent);
-    mk('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:'2',fill:'rgba(248,113,113,0.35)'});
-  });
-
-  // ── Time labels every 3h
-  hours.forEach((h,i)=>{
-    if(i%3!==0)return;
-    mk('text',{x:(i*cellW+cellW/2).toFixed(1),y:(LABEL_H-2).toFixed(1),'text-anchor':'middle',
-      'font-size':'8',fill:dark?'rgba(148,163,184,0.8)':'rgba(71,85,105,0.8)',
-      'font-family':'JetBrains Mono,monospace'},h.label);
-  });
-
-  // ── "Zdaj" marker
-  const nowX=cellW/2;
-  mk('line',{x1:nowX.toFixed(1),x2:nowX.toFixed(1),y1:SKY_TOP,y2:VH,
-    stroke:'rgba(255,180,0,0.7)','stroke-width':'1.5','stroke-dasharray':'3,3'});
-  mk('text',{x:(nowX+3).toFixed(1),y:(SKY_TOP+8).toFixed(1),
-    'font-size':'7',fill:'rgba(255,180,0,0.8)','font-family':'JetBrains Mono,monospace'},'zdaj');
-
-  // ── Bottom section labels
-  const lbls=[['UV',UV_Y+5],['mm',RAIN_Y+9],['km/h',WIND_Y+7]];
-  lbls.forEach(([lbl,y])=>{
-    mk('text',{x:(VW-2).toFixed(1),y:y.toFixed(1),'text-anchor':'end',
-      'font-size':'6.5',fill:dark?'rgba(148,163,184,0.5)':'rgba(100,116,139,0.5)',
-      'font-family':'JetBrains Mono,monospace'},lbl);
-  });
-}
 
 
 // ══════════════════════════════════════════════════════════
@@ -9551,19 +9372,19 @@ function analyzeLocalMicroclimate(obs){
     });
   }
 
-  // Render
+  // Render — fog/orographic izpustimo tu, ker ju že podrobneje (z vpletenim
+  // vremenskim podatkom) pokrije zgornji mikroklimatski odtis (mcf-content).
   const list=document.getElementById('mc-list');
-  const upd=document.getElementById('mc-updated');
-  if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   if(!list)return;
+  const shown=conditions.filter(c=>c.type!=='fog'&&c.type!=='orographic');
 
-  if(!conditions.length){
+  if(!shown.length){
     list.innerHTML='<div class="mc-none">✓ Razmere so stabilne in v mejah normale – brez posebnosti ali izrazitih mikroklimatskih pojavov.</div>';
     return;
   }
 
   list.innerHTML='';
-  conditions.slice(0,4).forEach(c=>{
+  shown.slice(0,4).forEach(c=>{
     const div=document.createElement('div');
     div.className='mc-item '+c.cls;
     div.innerHTML=
@@ -15661,7 +15482,6 @@ async function init(){
   setTimeout(()=>{
     fetchTextForecast();
     fetchForecastExtras();
-    fetchAndDrawSkyStrip();
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
   },800);
@@ -15712,7 +15532,7 @@ setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchPrecipNowcast,10*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
-setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(fetchAndDrawSkyStrip,60*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 
 
 // ══════════════════════════════════════════════════════════
