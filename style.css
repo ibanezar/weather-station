@@ -1566,6 +1566,7 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .ltg-list{flex:1;max-height:90px;overflow-y:auto;font-size:.74rem;font-family:'JetBrains Mono',monospace;color:var(--muted)}
 .ltg-row{padding:.18rem 0;border-bottom:1px solid var(--border);white-space:nowrap}
 .ltg-close{color:var(--red)}.ltg-far{color:var(--muted)}
+.ltg-history{margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--border);font-size:.74rem;color:var(--muted);overflow-x:auto}
 
 /* RainViewer radar map */
 .radar-map-wrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--fc-border)}
