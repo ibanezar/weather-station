@@ -24,7 +24,11 @@ STATE = os.path.join(ROOT, "tools", ".storm_map_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 10  # ne prej kot ob 10:00 po naši uri
-WINDOW_END = 15    # in ne kasneje kot ob 15:00 (cron zamuja tudi po nekaj ur)
+WINDOW_END = 18    # razširjeno s 15 na 18 (31. 8. 2026): 29. in 30. 8. je
+                   # cron dvakrat zaporedoma zamudil ravno 15:00 (za manj kot
+                   # uro), 27. in 28. 8. pa še precej huje (do ~13 ur) — glej
+                   # git zgodovino. Do takrat je bila stran brez slike, ker
+                   # nevihte-forecast.yml ni imel rezerve (glej tam).
 
 
 def load_state():

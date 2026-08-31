@@ -325,8 +325,10 @@ def build_body(data):
 
     # Dnevno nevihtno karto Slovenije piše tools/inject_storm_map.py med
     # markerja (glej tools/generate_storm_map.py) — isti vzorec kot WX-ARSO
-    # zgoraj: tu je le rezervni zapis, da stran med generiranjem in prvim
-    # zagonom injektorja ni prazna.
+    # zgoraj: tu je le rezervni zapis brez slike. V praksi ostane viden le
+    # kratek trenutek — .github/workflows/nevihte-forecast.yml ta isti
+    # skript pokliče takoj po tem in vgradi zadnjo znano (po potrebi
+    # označeno kot staro) karto namesto tega besedila.
     stormmap_block = (
         '<!-- WX-STORMMAP:START (auto: tools/inject_storm_map.py) -->\n'
         '  <h2 id="karta">Nevihtna karta Slovenije — danes</h2>\n'
