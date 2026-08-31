@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // Cloudflare Worker — IREICA1 Weather Proxy
 // ═══════════════════════════════════════════════════════════
+import { DurableObject } from "cloudflare:workers";
 
 const STATION = "IREICA1";
 const WU_KEY  = "619a8bb3ba4d42069a8bb3ba4d02061f";
@@ -1887,7 +1888,7 @@ function _cellEta(cell) {
   const rad = cell.smer * Math.PI / 180;
   const vx = cell.kmh * Math.sin(rad), vy = cell.kmh * Math.cos(rad);   // vzhod, sever (km/h)
   // Postaja Rečica ob Savinji — isti koordinati kot povsod drugod v datoteki
-  // (npr. NOWCAST_VASI "recica", worker.js:792), brez skupne konstante po
+  // (npr. NOWCAST_VASI "recica", worker.js:803), brez skupne konstante po
   // uveljavljeni konvenciji te datoteke.
   const c0x = (cell.lon - 14.9211) * COMP_KM_LON, c0y = (cell.lat - 46.3258) * COMP_KM_LAT;
   const vv = vx * vx + vy * vy;
@@ -2255,6 +2256,114 @@ async function _cronDispatchScheduledWorkflows(env) {
   }
 }
 
+// ── Stalno beleženje strel (Blitzortung) ──────────────────
+// Klientska kartica ("Strele v bližini", app.js connectLightning/_ltgDecode)
+// je vezana na odprt zavihek — ko ga ni, ni ne prikaza ne zapisa. Ta Durable
+// Object drži lastno, trajno odhodno WebSocket povezavo na isto omrežje in
+// vsako strelo znotraj 200 km od postaje zapiše v svoj SQLite — neodvisno od
+// tega, ali ima kdo stran odprto. Cena tega je v wrangler.toml (ob
+// [[durable_objects.bindings]] LIGHTNING_LOGGER) — DO se ne more hibernirati,
+// dokler je odhodna povezava odprta, in se ves čas zaračunava po trajanju.
+//
+// _ltgDecode/_ltgDist sta namerna podvojitev istoimenskih/enakovrednih
+// funkcij v app.js (haversine, LZW dekodiranje Blitzortung sporočil) — isto
+// načelo kot _smerBesedilo zgoraj: strežnik nima dostopa do klientske kode.
+function _ltgDecode(b) {
+  var a, e = {}, d = b.split(""), c = d[0], f = c, g = [c], h = 256, o = h;
+  for (let i = 1; i < d.length; i++) {
+    a = d[i].charCodeAt(0);
+    a = h > a ? d[i] : (e[a] ? e[a] : f + c);
+    g.push(a); c = a.charAt(0); e[o] = f + c; o++; f = a;
+  }
+  return g.join("");
+}
+function _ltgDist(lat1, lon1, lat2, lon2) {
+  const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+const LTG_HOSTS = ["ws1.blitzortung.org", "ws2.blitzortung.org", "ws7.blitzortung.org", "ws8.blitzortung.org"];
+const LTG_RADIUS_KM = 200;       // isti obseg kot klientska kartica
+const LTG_RETENTION_DAYS = 14;   // surovi dogodki — isti rok kot stare karte/zgodbe drugod; dnevni povzetki ostanejo trajno
+
+export class LightningLogger extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.ws = null;
+    this.hostIdx = 0;
+    ctx.blockConcurrencyWhile(async () => {
+      this.ctx.storage.sql.exec(`
+        CREATE TABLE IF NOT EXISTS strikes (ts INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL, dist_km REAL NOT NULL);
+        CREATE INDEX IF NOT EXISTS idx_strikes_ts ON strikes(ts);
+        CREATE TABLE IF NOT EXISTS daily (date TEXT PRIMARY KEY, count INTEGER NOT NULL, closest_km REAL NOT NULL);
+      `);
+    });
+  }
+
+  // Pokliče jo _cronKeepLightningAlive vsakih 5 minut — edini način, da se ta
+  // DO sploh kdaj zbudi in vzpostavi/preveri povezavo, saj Durable Objecti
+  // sicer čakajo na prvi dohodni klic. Klic je poceni (WS že odprt → takoj
+  // vrne), zato pogostost ni problem.
+  async keepAlive() {
+    this.ctx.storage.sql.exec("DELETE FROM strikes WHERE ts < ?", Date.now() - LTG_RETENTION_DAYS * 86400000);
+    await this._ensureConnected();
+    return { connected: this.ws?.readyState === 1 };
+  }
+
+  async recent(hours, dailyDays) {
+    const since = Date.now() - (hours || 1) * 3600000;
+    const strikes = this.ctx.storage.sql.exec(
+      "SELECT ts, dist_km AS dist FROM strikes WHERE ts > ? ORDER BY ts DESC LIMIT 300", since
+    ).toArray();
+    const daily = this.ctx.storage.sql.exec(
+      "SELECT date, count, closest_km FROM daily ORDER BY date DESC LIMIT ?", dailyDays || 30
+    ).toArray();
+    return { strikes, daily, connected: this.ws?.readyState === 1 };
+  }
+
+  async _ensureConnected() {
+    if (this.ws && this.ws.readyState === 1) return;
+    try {
+      const host = LTG_HOSTS[this.hostIdx++ % LTG_HOSTS.length];
+      const ws = new WebSocket("wss://" + host);
+      ws.addEventListener("open", () => ws.send('{"a":111}'));
+      ws.addEventListener("message", (ev) => this._onMessage(ev.data));
+      ws.addEventListener("close", () => { if (this.ws === ws) this.ws = null; });
+      ws.addEventListener("error", () => { if (this.ws === ws) this.ws = null; });
+      this.ws = ws;
+    } catch (_) { this.ws = null; }
+  }
+
+  _onMessage(raw) {
+    try {
+      const d = JSON.parse(_ltgDecode(raw));
+      if (!("lat" in d) || !("lon" in d)) return;
+      let lat = Number(d.lat), lon = Number(d.lon);
+      if (d.latc != null) lat += Number(d.latc);
+      if (d.lonc != null) lon += Number(d.lonc);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+      const dist = _ltgDist(46.3258, 14.9211, lat, lon);
+      if (dist > LTG_RADIUS_KM) return;
+      const ts = Date.now();
+      this.ctx.storage.sql.exec("INSERT INTO strikes (ts, lat, lon, dist_km) VALUES (?, ?, ?, ?)", ts, lat, lon, dist);
+      const day = new Date(ts).toISOString().slice(0, 10);
+      this.ctx.storage.sql.exec(
+        `INSERT INTO daily (date, count, closest_km) VALUES (?, 1, ?)
+         ON CONFLICT(date) DO UPDATE SET count = count + 1, closest_km = MIN(closest_km, excluded.closest_km)`,
+        day, dist
+      );
+    } catch (_) {}
+  }
+}
+
+async function _cronKeepLightningAlive(env) {
+  try {
+    if (!env?.LIGHTNING_LOGGER) return;
+    const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
+    await stub.keepAlive();
+  } catch (_) {}
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "10,40 6-7 * * *") {
@@ -2275,6 +2384,7 @@ export default {
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
     ctx.waitUntil(_cronRenderRadarComposite(env));
+    ctx.waitUntil(_cronKeepLightningAlive(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -3659,6 +3769,28 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         return new Response(JSON.stringify(data), {
           headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=120" },
         });
+      }
+
+      // ── /strele-zgodovina.json ──────────────────────────────
+      // Zgodovina strel iz LightningLogger (glej razdelek "Stalno beleženje
+      // strel" zgoraj) — za razliko od klientske kartice (app.js, samo
+      // dokler je stran odprta) gre za trajen zapis. ?ur= (privzeto 1) je
+      // okno za surove dogodke, ?dni= (privzeto 30) za dnevne povzetke.
+      if (path === "/strele-zgodovina.json") {
+        try {
+          if (!env?.LIGHTNING_LOGGER) throw new Error("LIGHTNING_LOGGER ni vezan");
+          const ur = Math.min(24, Math.max(1, Number(url.searchParams.get("ur")) || 1));
+          const dni = Math.min(365, Math.max(1, Number(url.searchParams.get("dni")) || 30));
+          const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
+          const data = await stub.recent(ur, dni);
+          return new Response(JSON.stringify(data), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ strikes: [], daily: [], connected: false, error: String(e.message || e) }), {
+            status: 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
+          });
+        }
       }
 
       // ── /arso-radar ───────────────────────────────────────

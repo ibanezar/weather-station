@@ -10,6 +10,27 @@ bucket_name = "meteorec-photos"
 binding = "COUNTER_KV"
 id = "ad19629f12a042dd8cd90c64a68662b4"
 
+# Stalno beleženje strel (Blitzortung) blizu postaje — glej LightningLogger
+# v worker.js. Durable Object drži eno samo, trajno odhodno WebSocket povezavo
+# (namesto klientske v app.js, ki teče le, dokler ima kdo stran odprto) in
+# strele shrani v svoj SQLite.
+#
+# Cena: dokler je odhodna WebSocket povezava odprta, se DO ne more hibernirati
+# in se ves čas zaračunava po trajanju (GB-s) — okvirno ~10.800 GB-s/dan pri
+# privzetih 128 MB. Brezplačni plan ima 13.000 GB-s/dan, kar je zelo tesno
+# (~83 % samo za obstoj tega enega DO); plačljiv plan (5 $/mesec, 400.000
+# GB-s/mesec vključenih) ima dovolj rezerve. Ob prekoračitvi na brezplačnem
+# planu klici v ta DO preprosto odpovedo (ni doplačila) — beleženje se za tisti
+# dan ustavi, ostala stran ostane nedotaknjena (ločen meter od običajnih
+# Worker zahtev).
+[[durable_objects.bindings]]
+name = "LIGHTNING_LOGGER"
+class_name = "LightningLogger"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LightningLogger"]
+
 [vars]
 # Pošiljatelj e-obvestil o komentarjih (domena meteorec.si verificirana v Resend).
 NOTIFY_FROM = "Meteorec <komentarji@meteorec.si>"
