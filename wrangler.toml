@@ -45,5 +45,18 @@ PREMIUM_FREE_LAUNCH = "true"
 # celicam — ločeno od zgornjega, da ne tekmujeta za isti CPU/časovni
 # proračun ene invokacije z že obstoječimi (težjimi) opravili zgoraj; glej
 # scheduled() v worker.js, ki loči po event.cron.
+#
+# Tretji urnik je varovalka za GitHub Actions "schedule" prožilce, ki so se
+# 31. 8. 2026 izkazali za nezanesljive do te mere, da nekateri delovni tokovi
+# (storm-map.yml, vodostaj-forecast.yml) tisti dan sploh niso stekli sami od
+# sebe (ne le zamudili — GitHubov cron dogodka ni nikoli dostavil), kljub že
+# obstoječim dvojnim terminom in razširjenim oknom v teh delovnih tokovih.
+# Cloudflarov Cron Trigger teče na ločeni infrastrukturi in take zanesljivostne
+# težave doslej ni imel, zato ob 6:10/6:40/7:10/7:40 UTC (znotraj okna
+# tools/storm_map_gate.py, 6:00-8:00) prek GitHub API pokliče workflow_dispatch
+# za oba delovna tokova — glej _cronDispatchScheduledWorkflows() v worker.js.
+# Rabi skrivnost GH_DISPATCH_TOKEN (fine-grained PAT, samo ta repo, "Actions:
+# Read and write") — `wrangler secret put GH_DISPATCH_TOKEN`. Brez nje funkcija
+# tiho ne naredi nič (glej manjkajoč env.GH_DISPATCH_TOKEN).
 [triggers]
-crons = ["*/5 * * * *", "2-59/5 * * * *"]
+crons = ["*/5 * * * *", "2-59/5 * * * *", "10,40 6-7 * * *"]
