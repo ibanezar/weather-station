@@ -8,10 +8,12 @@ Zakaj je to potrebno:
    Poleti je to 04:00 UTC, pozimi 05:00 UTC. Workflow zato sproži OBA termina,
    ta gate pa pusti skozi samo tistega, ki se pri nas res zgodi ob 6h ali kasneje.
 
-2. GitHubov cron redno zamuja eno do dve uri (glej opombo v daily-post.yml).
-   Zato ne zahtevamo natanko 6h, ampak okno med 6:00 in 12:00 -- zgodba
-   "kdaj bo danes začelo deževati" ob 14h ne pove več nič uporabnega, zato
-   se po 12h rajši ne objavi nič.
+2. GitHubov cron redno zamuja eno do dve uri (glej opombo v daily-post.yml), konec
+   avgusta 2026 pa je nekaj dni zapored zamujal 6-12 ur (oba scheduled teka sta
+   pristala popoldne namesto zjutraj) in je okno 6:00-12:00 zamudil vsak dan, štiri
+   dni zapored ni šla ven nobena kartica. Zato okno sega do 15:00 -- zgodba
+   "kdaj bo danes začelo deževati" pri 17h res ne pove več nič uporabnega, po 15h
+   pa se rajši objavi malce pozna kartica kot nobena.
 
 3. Ker se lahko sprožita oba termina, si zapomnimo, kateri dan je zgodba
    že šla ven, in drugega preskočimo.
@@ -31,7 +33,12 @@ STATE = os.path.join(ROOT, "tools", ".story_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 6   # ne prej kot ob 6:00 po naši uri
-WINDOW_END = 12    # in ne kasneje kot ob 12:00
+WINDOW_END = 18    # razširjeno s 15 na 18 (31. 8. 2026): 27. in 28. 8. je ta
+                   # cron zamudil tudi to okno (zagon šele ob 17:04 in 19:06
+                   # po naši uri) — ista GitHubova zamuda crona, ki je isti
+                   # teden prizadela tudi storm_map_gate in digest_gate.
+                   # Tista dva dneva zgodba ni šla ven; širše okno je poceni
+                   # varovalka proti ponovitvi.
 
 
 def load_state():

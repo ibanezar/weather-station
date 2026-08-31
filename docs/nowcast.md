@@ -273,10 +273,17 @@ kjer je `C0` lega celice relativno na postajo (vzhod/sever, km) in `V`
 hitrostni vektor iz istega `smer`/`kmh`. `t_cpa ≤ 0` pomeni, da se celica že
 oddaljuje (najbližji prehod je v preteklosti) — brez ETA. Poroča se samo, če
 je napovedan najbližji prehod znotraj `CELL_ETA_RADIUS_KM` (15 km, "gre proti
-dolini") in `CELL_ETA_MAX_MIN` (90 min — dlje linearna ekstrapolacija ni
-zanesljiva, glej "Ocena premika" zgoraj) ter je hitrost nad `CELL_ETA_MIN_KMH`
-(3 km/h — pod tem je smer preveč šumna). Najbolj nujna celica (najkrajši ETA)
-gre v `prihaja` na vrhu odgovora `/radar-cells.json` — namerno **ne**
+dolini") in `CELL_ETA_MAX_MIN` (45 min — dlje linearna ekstrapolacija ni
+zanesljiva, glej "Ocena premika" zgoraj; znižano z 90 min 31. 8. 2026, ker je
+90-minutni horizont pri hitrih celicah dopuščal ETA za celico 60-100+ km
+stran, ki na karti ni bila nikjer v bližini — isto spoznanje, ki je za nowcast
+zgoraj že prej pripeljalo do 30/45-minutnega obzorja) ter je hitrost nad
+`CELL_ETA_MIN_KMH` (3 km/h — pod tem je smer preveč šumna). Poleg ETA
+razdalje ob najbližjem prehodu (`eta_km`) `_cellEta` vrne tudi razdaljo do
+celice **zdaj** (`nowKm` → polje `zdaj_km` v odgovoru in v besedilu pasice/
+push obvestila) — brez nje bi sporočilo povedalo samo minute, ne pa, da je
+celica trenutno lahko še desetine km stran. Najbolj nujna celica (najkrajši
+ETA) gre v `prihaja` na vrhu odgovora `/radar-cells.json` — namerno **ne**
 `opozorilo`, ker to ime že uporablja mehek odpovedni odgovor (niz z
 razlogom), različna oblika bi zmedla odjemalca. Frontend (`renderCellEtaBanner`,
 app.js) prikaže pasico nad radarsko karto, ko `prihaja` ni `null`.

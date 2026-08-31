@@ -2,7 +2,7 @@
 """
 tools/generate_storm_map.py — dnevna statična nevihtna karta Slovenije.
 
-Vsako jutro ob 10:00 po naši uri sestavi karto nevihtnega potenciala za vso
+Vsako jutro do 7:00 po naši uri sestavi karto nevihtnega potenciala za vso
 Slovenijo (ne le za Rečico) — lastna, ne kopija tuje karte (npr. Neurje.si).
 Uporablja isto oceno kot živi pripomoček na naslovni strani (zavihek »Lovec
 na nevihte« → »stormmap«, glej app.js `renderSloStormMap`/`sloPointScore`) in

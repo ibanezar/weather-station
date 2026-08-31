@@ -1,11 +1,11 @@
 {
-  "date": "2026-08-26",
-  "issued_at": "2026-08-26T10:55:58.769129+02:00",
-  "national_score": 50,
-  "national_level": "VISOKO",
-  "national_place": "Kranj",
+  "date": "2026-08-31",
+  "issued_at": "2026-08-31T09:58:58.196714+02:00",
+  "national_score": 65,
+  "national_level": "EKSTREMNO",
+  "national_place": "Nova Gorica",
   "national_hour": "18:00",
   "should_post": true,
-  "image": "https://meteorec.si/og/storm-map/2026-08-26.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-08-26-story.jpg"
+  "image": "https://meteorec.si/og/storm-map/2026-08-31.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-08-31-story.jpg"
 }

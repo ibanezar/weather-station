@@ -2225,6 +2225,14 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mos-note{font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
 @media(max-width:380px){.mos-grid{grid-template-columns:repeat(2,1fr)}.mos-card:nth-child(n+3){display:none}}
 
+/* Kartica-povezava na zavihek "MTR" — MTR ima zdaj svoj zavihek (glej
+   #tab-mtr), zato je tu samo skok nanj, ne podvojena kartica. */
+.mtr-jump-card{display:flex;flex-direction:column;gap:.3rem;width:100%;text-align:left;
+  background:var(--card-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
+  border:1px solid var(--card-border);border-radius:18px;padding:1rem 1.2rem;margin-bottom:1.25rem;
+  cursor:pointer;font-family:inherit;transition:background .2s,border-color .2s,box-shadow .2s}
+.mtr-jump-card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
+
 /* MTR sparkline: dva majhna grafa (Tmax/Tmin), polna črta = MTR, črtkana = Open-Meteo */
 .mos-spark-row{display:flex;gap:.9rem;margin-bottom:.7rem}
 .mos-spark-col{flex:1;min-width:0}

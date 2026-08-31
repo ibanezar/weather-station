@@ -2518,7 +2518,7 @@ function wmoInfo(code){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
+const DD_TABS={fc:['forecast2','mtr','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -3115,7 +3115,8 @@ function switchTab(tab){
   if(tab==='water'){     initVodostaj(); }
   if(tab==='agro'){      initAgro(); }
   if(tab==='nerd'){      initNerd(); }
-  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); fetchMosForecast('ai-mos-'); }
+  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
+  if(tab==='mtr'){       fetchMosForecast(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   if(tab==='gallery'){     initGallery(); }
   if(tab==='community'){  initCommunity(); }
@@ -4358,7 +4359,7 @@ function renderCellEtaBanner(p){
   if(!el)return;
   if(!p){el.hidden=true;return;}
   el.innerHTML='⛈ Nevihtna celica prihaja proti Rečici ob Savinji čez <b>~'+p.eta_min+' min</b>'
-    +' ('+Math.round(p.kmh)+' km/h, '+windDir(p.smer)+')';
+    +' (trenutno ~'+p.zdaj_km+' km stran, '+Math.round(p.kmh)+' km/h, '+windDir(p.smer)+')';
   el.hidden=false;
 }
 
@@ -6469,18 +6470,24 @@ async function fetchTextForecast(){
    Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
    Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
    kar je model prispeval, in edino, po čemer se loči od že prikazanih napovedi.
-   Kartica ni simple-keep, zato gre klic skozi runAdvancedOnly().
-   idp: id-predpona elementov na strani — 'mos-' za domačo kartico (privzeto),
-   'ai-mos-' za ločeno kartico v zavihku "AI napoved" (isti vir podatkov,
-   samo drug prikaz, da se MTR ne zamenja s HW/k-NN modelom tega zavihka). */
+   Kartica ni simple-keep, zato gre eager klic (brez idp) skozi runAdvancedOnly()
+   v init(); lazy klic ob preklopu na zavihek #tab-mtr osveži isto kartico.
+   idp: id-predpona elementov na strani, privzeto 'mos-' — samo ta kartica
+   obstaja (prej podvojena tudi v "AI napoved" pod 'ai-mos-', odstranjeno, ko
+   je MTR dobil svoj zavihek — glej #tab-mtr). */
 async function fetchMosForecast(idp){
   idp=idp||'mos-';
   const grid=document.getElementById(idp+'grid');
   if(!grid)return;
   try{
-    const res=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
+    const cacheBust='?_='+Math.floor(Date.now()/36e5);
+    const [res,accRes]=await Promise.all([
+      fetch('/napoved-modela.json'+cacheBust),
+      fetch('/data/mtr-accuracy.json'+cacheBust).catch(()=>null),
+    ]);
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
+    const accData=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
     const days=data.days||[];
     if(!days.length)throw new Error('brez dni');
 
@@ -6526,12 +6533,18 @@ async function fetchMosForecast(idp){
     const note=document.getElementById(idp+'note');
     if(note){
       const r=data.train_range||{};
-      const d1=days.find(d=>d.lead===1);
-      const skillTxt=(d1&&Number.isFinite(d1.tmax_improvement_pct)&&Number.isFinite(d1.tmin_improvement_pct))
-        ?' Na testu za jutrišnji dan (D+1) je MTR v povprečju za '
-          +Math.round((d1.tmax_improvement_pct+d1.tmin_improvement_pct)/2)+' % natančnejši od surovega Open-Meteo.'
+      // Živa, sproti izračunana %-izboljšava (data/mtr-accuracy.json, glej
+      // tools/compute_mtr_accuracy_metrics.py) — ne hindcast iz učenja modela.
+      // Ista številka kot na /trendi/, en vir resnice za oboje.
+      const d1acc=accData&&accData.leads&&accData.leads['1'];
+      const atx=d1acc&&d1acc.all_time&&d1acc.all_time.tmax;
+      const atn=d1acc&&d1acc.all_time&&d1acc.all_time.tmin;
+      const skillTxt=(atx&&atn&&Number.isFinite(atx.improvement_pct)&&Number.isFinite(atn.improvement_pct)&&d1acc.n>=5)
+        ?' Na živih napovedih za jutrišnji dan (D+1, '+d1acc.n+' razrešenih dni) je MTR v povprečju za '
+          +Math.round((atx.improvement_pct+atn.improvement_pct)/2)+' % natančnejši od surovega Open-Meteo.'
+          +' <a href="/trendi/">Trend →</a>'
         :'';
-      note.textContent='MTR (Meteorec) je poskusni model za to dolino: Open-Meteo kot vhod, popravek naučen na meritvah postaje'
+      note.innerHTML='MTR (Meteorec) je poskusni model za to dolino: Open-Meteo kot vhod, popravek naučen na meritvah postaje'
         +(r.from&&r.to?' ('+r.from+' → '+r.to+')':'')
         +'. Količine padavin MTR ne popravlja — za to ostaja Open-Meteo.'+skillTxt;
     }

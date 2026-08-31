@@ -4,10 +4,11 @@ tools/storm_map_gate.py — odloči, ali naj se danes sploh sestavi/objavi
 nevihtna karta Slovenije.
 
 Isto načelo kot tools/story_gate.py (glej tam za polno obrazložitev): GitHubov
-cron teče po UTC in redno zamuja, zato workflow sproži dva termina (08:00 in
-09:00 UTC, kar je 10:00 po naši uri poleti oz. pozimi), ta gate pa pusti skozi
-samo tistega, ki se pri nas res zgodi v oknu, in prepreči dvojno objavo istega
-dne. Ločena stanja od story_gate.py (drug ritem, druga vsebina).
+cron teče po UTC in redno zamuja, zato workflow sproži dva termina (05:00 in
+06:00 UTC, kar je 7:00 po naši uri poleti oz. pozimi -- karta mora biti nova
+do 7h zjutraj), ta gate pa pusti skozi samo tistega, ki se pri nas res zgodi
+v oknu, in prepreči dvojno objavo istega dne. Ločena stanja od story_gate.py
+(drug ritem, druga vsebina).
 
 Usage:
   python3 tools/storm_map_gate.py check [--force]
@@ -23,8 +24,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", ".storm_map_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
-WINDOW_START = 10  # ne prej kot ob 10:00 po naši uri
-WINDOW_END = 15    # in ne kasneje kot ob 15:00 (cron zamuja tudi po nekaj ur)
+WINDOW_START = 6   # karta mora biti nova do 7:00 zjutraj (zahteva 31. 8. 2026)
+                   # -- začne se uro prej, da cron, ki zamuja le nekaj minut,
+                   # ni izločen po nepotrebnem.
+WINDOW_END = 8     # trdi rok je 7:00; do 8:00 je varovalka za manjšo (do ~1h)
+                   # zamudo GitHubovega crona. Karta rojena po 8. uri ni več
+                   # "pripravljena zjutraj", zato ta dan ostane na zadnji
+                   # znani (nevihte-forecast.yml jo vgradi jasno označeno kot
+                   # staro -- glej tools/inject_storm_map.py) -- boljše kot
+                   # trditi, da je karta iz 7h, ko dejansko ni.
 
 
 def load_state():
