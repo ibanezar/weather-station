@@ -7160,7 +7160,13 @@ async function applyPheno(){
       if(doy>=p.doy[0]-14||totalGdd>=p.gdd[0]-80)return{cls:'pheno-soon',txt:'kmalu',col:'var(--amber)'};
       return{cls:'pheno-future',txt:'kasneje',col:'var(--muted)'};
     };
-    const half=Math.ceil(PHENO.length/2);
+    // Konec avgusta je večina spomladanskih/poletnih pojavov že "mimo" —
+    // brez razvrščanja bi oba stolpca kazala pretežno sivo preteklost.
+    // Aktivni/prihajajoči pojavi zato splavajo na vrh, pretekli na dno.
+    const statusOrder={aktivno:0,kmalu:1,kasneje:2,mimo:3};
+    const sortedPheno=PHENO.slice().sort((a,b)=>
+      statusOrder[statusFor(a).txt]-statusOrder[statusFor(b).txt]);
+    const half=Math.ceil(sortedPheno.length/2);
     const renderList=(items,elId)=>{
       const el=document.getElementById(elId);if(!el)return;el.innerHTML='';
       items.forEach(p=>{
@@ -7177,8 +7183,8 @@ async function applyPheno(){
         el.appendChild(row);
       });
     };
-    renderList(PHENO.slice(0,half),'pheno-list-left');
-    renderList(PHENO.slice(half),'pheno-list-right');
+    renderList(sortedPheno.slice(0,half),'pheno-list-left');
+    renderList(sortedPheno.slice(half),'pheno-list-right');
     const next=PHENO.find(p=>statusFor(p).txt==='aktivno')||PHENO.find(p=>statusFor(p).txt==='kmalu');
     const note=document.getElementById('pheno-note');
     if(note&&next)note.textContent='Fenološki koledar je ocena za dolinsko lego Rečice: GDD5 + sezonsko okno. Trenutni signal: '+next.icon+' '+next.name+'. To ni točen datum cvetenja, ampak lokalno verjetnostno okno.';
@@ -7362,9 +7368,13 @@ function buildPhenologyCalendar(){
   });
   html+='</div></div>';
 
-  // Event list
+  // Event list — prihajajoči pojavi najprej, mimo šle na dno (konec poletja bi
+  // sicer seznam začel s samimi "že mimo" vnosi, glej vrstni red za timeline zgoraj).
   html+='<div style="display:flex;flex-direction:column;gap:.55rem">';
-  events.forEach(e=>{
+  events.slice().sort((a,b)=>{
+    const pa=todayDoy>a.doy?1:0,pb=todayDoy>b.doy?1:0;
+    return pa!==pb?pa-pb:a.doy-b.doy;
+  }).forEach(e=>{
     const passed=todayDoy>e.doy;
     html+=`<div style="display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
       <span style="font-size:1.1rem;flex-shrink:0">${e.icon}</span>
