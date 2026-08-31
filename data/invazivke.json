@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T04:13:06.534651+00:00",
+  "updated": "2026-08-31T09:58:43.385267+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -16,7 +16,7 @@
       "sci": "Reynoutria japonica",
       "severity": "high",
       "total_cells": 2,
-      "new_cells_30d": 1,
+      "new_cells_30d": 0,
       "last_observed": "2026-07-29",
       "recent": [
         {
