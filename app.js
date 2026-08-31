@@ -5638,8 +5638,8 @@ function connectLightning(){
         applyLightning();
       }catch(_){}
     };
-    _ltgWs.onerror=_ltgWs.onclose=()=>{setTimeout(connectLightning,10000);};
-  }catch(e){}
+    _ltgWs.onerror=_ltgWs.onclose=()=>{applyLightning();setTimeout(connectLightning,10000);};
+  }catch(e){applyLightning();setTimeout(connectLightning,10000);}
 }
 function updateLightningFromEcowitt(count,dist){
   if(count==null&&dist==null)return;
