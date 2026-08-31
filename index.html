@@ -975,28 +975,6 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
     <div class="omx-card" id="omx-soil"><div class="omx-sub">Nalaganje podatkov o tleh…</div></div>
   </div>
 
-  <!-- 24h Sky Strip -->
-  <div class="card chart-card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.5rem">
-      <span class="clabel" style="margin:0">🌅 Pregled neba — naslednjih 24 ur</span>
-      <span class="chart-range" id="sky-range">—</span>
-    </div>
-    <div class="sky-strip-outer">
-      <svg id="sky-strip-svg" viewBox="0 0 960 128" preserveAspectRatio="none"
-           xmlns="http://www.w3.org/2000/svg" height="128">
-        <text x="480" y="64" text-anchor="middle" font-size="12"
-              fill="rgba(128,128,128,.3)" font-family="Inter,sans-serif">Nalaganje…</text>
-      </svg>
-    </div>
-    <div class="sky-legend">
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#f87171"></span>Temperatura</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#fbbf24"></span>UV indeks</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#60a5fa"></span>Padavine</span>
-      <span class="sky-leg-item"><span class="sky-leg-dot" style="background:#a78bfa"></span>Veter</span>
-      <span style="margin-left:auto;opacity:.6">↔ povlecite za cel dan</span>
-    </div>
-  </div>
-
   <!-- Phenological calendar -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr">
@@ -1012,23 +990,20 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 
 
 
-  <!-- Daily mikroklimatski odtis -->
+  <!-- Mikroklima Rečice: zgoraj napovedni odtis (kombinira trenutno meritev +
+       napoved), spodaj trenutni signali, ki jih odtis ne pokrije (megla in
+       orografski dež namenoma izpuščena tu — glej filter v
+       analyzeLocalMicroclimate() v app.js). Prej dve ločeni, delno
+       prekrivajoči se kartici. -->
   <div class="card chart-card" style="margin-bottom:1rem">
     <div class="chart-hdr" style="margin-bottom:.45rem">
-      <span class="clabel" style="margin:0">🧭 Mikroklimatski odtis Rečice</span>
+      <span class="clabel" style="margin:0">🧭 Mikroklima Rečice</span>
       <span class="chart-range" id="mcf-updated">Nalaganje…</span>
     </div>
     <div id="mcf-content" class="mcf-hero">
       <div style="color:var(--muted);font-size:.78rem">Berem lokalne signale doline…</div>
     </div>
-  </div>
-
-  <!-- Microclimate analysis -->
-  <div class="card" style="margin-bottom:1rem">
-    <div class="chart-hdr" style="margin-bottom:.25rem">
-      <span class="clabel" style="margin:0">🏔 Mikroklima Rečice zdaj</span>
-      <span class="chart-range" id="mc-updated">—</span>
-    </div>
+    <div class="clabel" style="font-size:.72rem;margin:.85rem 0 .3rem;opacity:.8">Trenutno stanje</div>
     <div class="mc-list" id="mc-list"><div style="color:var(--muted);font-size:.78rem">Nalaganje…</div></div>
   </div>
 
