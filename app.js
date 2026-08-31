@@ -1178,8 +1178,8 @@ function renderWeatherMemory(obs){
 function renderStormAutopsy(){
   const el=document.getElementById('storm-autopsy');if(!el)return;
   const recent=recentRainDelta(6);
-  const lightning=_stormMode.lightningCount??(_ltgEcowitt?.count??_ltgStrikes.length);
-  const lightningDist=_stormMode.lightningDist??_ltgEcowitt?.dist;
+  const lightning=_stormMode.lightningCount??0;
+  const lightningDist=_stormMode.lightningDist;
   const maxGust=Math.max(recent.maxWind||0,_stormMode.gust||0,_stormMode.nowcast?.gust||0);
   const cape=_stormMode.cape??_stormMode.nowcast?.cape??0;
   const active=_stormMode.active||_stormMode.nowcast?.storm||lightning>0||recent.rain>=2||maxGust>=45;
@@ -5600,7 +5600,7 @@ function drawHeatmap(){
 }
 
 // ── Lightning (Blitzortung) ───────────────────────────────
-let _ltgStrikes=[],_ltgWs=null,_ltgEcowitt=null;
+let _ltgStrikes=[],_ltgWs=null;
 function haversine(lat1,lon1,lat2,lon2){
   const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -5647,40 +5647,31 @@ function connectLightning(){
     _ltgWs.onerror=_ltgWs.onclose=()=>{applyLightning();setTimeout(connectLightning,10000);};
   }catch(e){applyLightning();setTimeout(connectLightning,10000);}
 }
-function updateLightningFromEcowitt(count,dist){
-  if(count==null&&dist==null)return;
-  _ltgEcowitt={
-    count:Number(count)||0,
-    dist:dist!=null&&Number.isFinite(Number(dist))?Number(dist):null,
-    ts:Date.now()
-  };
-  updateStormMode({lightningCount:_ltgEcowitt.count,lightningDist:_ltgEcowitt.dist});
-  applyLightning();
-  renderStormAutopsy();
-}
 function applyLightning(){
   const hourAgo=Date.now()-3600000;
   _ltgStrikes=_ltgStrikes.filter(s=>(s.ts||0)>hourAgo);
-  if(_ltgEcowitt&&Date.now()-_ltgEcowitt.ts>15*60*1000)_ltgEcowitt=null;
   const c=document.getElementById('ltg-count');
-  const primaryCount=_ltgEcowitt?Math.round(_ltgEcowitt.count):_ltgStrikes.length;
-  if(c)c.textContent=primaryCount;
-  const win=document.getElementById('ltg-window');
-  if(win)win.textContent=_ltgEcowitt?'udarov danes (Ecowitt)':'strel v zadnji uri';
+  if(c)c.textContent=_ltgStrikes.length;
   const nearest=_ltgStrikes.length?_ltgStrikes.reduce((m,s)=>parseFloat(s.dist)<parseFloat(m.dist)?s:m):null;
-  const nearestDist=_ltgEcowitt?.dist??(nearest?parseFloat(nearest.dist):null);
+  const nearestDist=nearest?parseFloat(nearest.dist):null;
   const nEl=document.getElementById('ltg-nearest');
   if(nEl)nEl.textContent=nearestDist!=null?'Najbližja: '+nearestDist.toFixed(0)+' km':'—';
   const list=document.getElementById('ltg-list');
-  if(!list)return;list.innerHTML='';
-  if(_ltgEcowitt){
-    const row=document.createElement('div');
-    row.className='ltg-row '+(_ltgEcowitt.dist!=null&&_ltgEcowitt.dist<30?'ltg-close':'ltg-far');
-    row.textContent='Ecowitt · '+Math.round(_ltgEcowitt.count)+' danes'+(_ltgEcowitt.dist!=null?' · najbližja '+_ltgEcowitt.dist.toFixed(0)+' km':'');
-    list.appendChild(row);
+  if(list){
+    if(!_ltgStrikes.length){
+      list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri · WebSocket: '+((_ltgWs&&_ltgWs.readyState===1)?'🟢 aktiven':'🔴 ni povezave')+'</div>';
+    }else{
+      list.innerHTML='';
+      _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
+    }
   }
-  if(!_ltgStrikes.length&&!_ltgEcowitt){list.innerHTML='<div style="color:var(--muted)">Ni strel v zadnji uri · WebSocket: '+((_ltgWs&&_ltgWs.readyState===1)?'🟢 aktiven':'🔴 ni povezave')+'</div>';return;}
-  _ltgStrikes.slice(0,15).forEach(s=>{const d=document.createElement('div');d.className='ltg-row '+(s.dist<30?'ltg-close':'ltg-far');d.textContent=s.time+' · '+s.dist+' km';list.appendChild(d);});
+  // Postaja nima lastnega strelnega senzorja (prej Ecowitt, ki ga IREICA1 ne
+  // podpira) — storm-mode/forecast-personality/storm-autopsy zdaj namesto
+  // tega dobijo dejansko delujoč vir: strele iz globalne Blitzortung mreže
+  // znotraj 50 km (ne celih 200 km kartice zgoraj — tam gre za pregled
+  // regije, tu za signal "nevihta je blizu Rečice").
+  const nearby=_ltgStrikes.filter(s=>parseFloat(s.dist)<=50);
+  updateStormMode({lightningCount:nearby.length,lightningDist:nearestDist});
 }
 
 // ── Nowcasting toče in neviht ─────────────────────────────
@@ -8622,42 +8613,11 @@ async function initSurroundings(){
 
 
 // ══════════════════════════════════════════════════════════
-// ── 1. Ecowitt live data ───────────────────────────────────
-// ══════════════════════════════════════════════════════════
-async function fetchEcowittCurrent(){
-  const grid=document.getElementById('ecw-grid');
-  const upd=document.getElementById('ecw-updated');
-  if(!grid)return;
-  try{
-    const res=await fetch(PROXY+'/ecowitt-current');
-    const data=await res.json();
-    if(data.error==='no_key'){
-      grid.innerHTML='<div class="ecw-offline">⚙️ Dodaj Ecowitt app key v worker.js (ecowitt.net → Profile → Application Key)</div>';
-      return;
-    }
-    const d=data.data||{};
-    const items=[];
-    // Notranje temperature in vlage tu namenoma ni: postaja ju meri, a sta
-    // zasebni in ne gresta ven. Worker ju reže že pri viru (/ecowitt-current).
-    const co2=d.co2?.co2?.value;
-    if(co2!=null){const ppm=Math.round(co2);items.push({icon:'🌬',val:ppm+' ppm',lbl:'CO₂',col:ppm<800?'var(--green)':ppm<1200?'var(--amber)':'var(--red)'});}
-    const pm=d.pm25?.pm25?.value??d.pm25_ch1?.pm25?.value;
-    if(pm!=null)items.push({icon:'🏭',val:parseFloat(pm).toFixed(0)+' µg',lbl:'PM2.5',col:pm<12?'var(--green)':pm<35?'var(--amber)':'var(--red)'});
-    const ltCount=d.lightning?.count?.value??d.lightning_num?.value;
-    const ltDist=d.lightning?.distance?.value??d.lightning_dis?.value;
-    if(ltCount!=null)items.push({icon:'⚡',val:Math.round(ltCount)+' udarov',lbl:'Strele danes',col:ltCount>0?'var(--amber)':'var(--green)'});
-    if(ltDist!=null&&parseFloat(ltDist)<100)items.push({icon:'📍',val:parseFloat(ltDist).toFixed(0)+' km',lbl:'Najbližja strela',col:parseFloat(ltDist)<20?'var(--red)':parseFloat(ltDist)<50?'var(--amber)':'var(--muted)'});
-    const soilT=d.soil_ch1?.soiltemp?.value;
-    const soilH=d.soil_ch1?.soilmoisture?.value??d.soil_ch1?.humidity?.value;
-    if(soilT!=null)items.push({icon:'🌱',val:parseFloat(soilT).toFixed(1)+'°C',lbl:'Temp. tal',col:'var(--green)'});
-    if(soilH!=null)items.push({icon:'💦',val:parseFloat(soilH).toFixed(0)+'%',lbl:'Vlaga tal',col:'var(--blue)'});
-    if(!items.length){grid.innerHTML='<div class="ecw-offline">Ecowitt: ni senzorjev ali napaka API.</div>';return;}
-    grid.innerHTML=items.map(it=>`<div class="ecw-item"><div class="ecw-val" style="color:${it.col}">${it.icon} ${it.val}</div><div class="ecw-lbl">${it.lbl}</div></div>`).join('');
-    if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    updateLightningFromEcowitt(ltCount,ltDist);
-    if(ltCount>0){const mc=document.getElementById('mc-list');if(mc&&!mc.querySelector('.lightning-alert')){const div=document.createElement('div');div.className='mc-item mc-item-alert lightning-alert';div.innerHTML='<div class="mc-head"><span class="mc-icon">⚡</span><span class="mc-name">Aktivne strele v okolici</span></div><div class="mc-text">Danes '+Math.round(ltCount)+' udarov'+(ltDist?', najbližja '+parseFloat(ltDist).toFixed(0)+' km stran':'')+'.</div>';mc.prepend(div);}}
-  }catch(e){if(grid)grid.innerHTML='<div class="ecw-offline">Ecowitt ni dosegljiv.</div>';console.warn('Ecowitt:',e);}
-}
+// (Ecowitt CO₂/PM2.5/strele/tla kartica odstranjena — postaja IREICA1 nima
+// teh senzorskih kanalov priklopljenih, zato je stalno kazala "ni senzorjev".
+// Lokalne strele zdaj prikazuje samo kartica "Strele v bližini", ki bere
+// globalno Blitzortung mrežo (connectLightning/applyLightning spodaj) in
+// isti vir polni tudi _stormMode.lightning*.)
 
 // ══════════════════════════════════════════════════════════
 // ── 1b. Dolinski dvoboj: IREICA1 ⇄ IREICA7 (Varpolje) ─────
@@ -15521,7 +15481,6 @@ async function init(){
     fetchAgrometeo();
     fetchClimateComparison();
     fetchFogForecast();
-    fetchEcowittCurrent();
     runAdvancedOnly(()=>fetchValleyDuel());
     runAdvancedOnly(()=>initInsights());
     initVisitorCounter();
@@ -15551,7 +15510,6 @@ async function init(){
 
 init();
 setInterval(fetchCurrent,5*60*1000);
-setInterval(fetchEcowittCurrent,5*60*1000);
 // V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
 // zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).
 setInterval(()=>{if(!isSimpleMode())fetchValleyDuel();},5*60*1000);
