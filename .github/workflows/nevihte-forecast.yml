@@ -22,13 +22,13 @@ jobs:
         run: python3 tools/generate_nevihte_page.py
 
       # generate_nevihte_page.py zgoraj vedno prepiše WX-STORMMAP blok na
-      # rezervno besedilo brez slike (glej komentar tam); storm-map.yml ga
-      # čez dan povrne z današnjo karto, a samo znotraj svojega 10:00-18:00
-      # okna (tools/storm_map_gate.py) — če ga zamudi (zamuda GitHubovega
-      # crona, glej git zgodovino 31. 8. 2026), je stran do naslednjega
-      # dneva brez slike. Zato tu takoj vgradimo zadnjo znano karto (jasno
-      # označeno, če ni od danes) — raje star podatek kot prazna stran,
-      # isto načelo kot povsod drugod v repozitoriju.
+      # rezervno besedilo brez slike (glej komentar tam); storm-map.yml jo
+      # zjutraj povrne z današnjo karto, a samo znotraj svojega 6:00-8:00
+      # okna (tools/storm_map_gate.py, trdi rok 7:00) — če ga zamudi (zamuda
+      # GitHubovega crona, glej git zgodovino 31. 8. 2026), je stran do
+      # naslednjega dneva brez slike. Zato tu takoj vgradimo zadnjo znano
+      # karto (jasno označeno, če ni od danes) — raje star podatek kot
+      # prazna stran, isto načelo kot povsod drugod v repozitoriju.
       - name: Vgradi zadnjo znano nevihtno karto
         run: python3 tools/inject_storm_map.py
 
