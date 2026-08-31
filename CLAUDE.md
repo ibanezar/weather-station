@@ -255,6 +255,44 @@ ni).
   `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo
   (če ga je dovolj) zapolni s seznamom potenciala po mestih namesto praznine.
 
+## Stalno beleženje strel (LightningLogger)
+
+Kartica "Strele v bližini" (`#ltg-list`, `app.js` `connectLightning()`) se poveže
+neposredno iz brskalnika na Blitzortung WebSocket (`ws1/ws2/ws7/ws8.blitzortung.org`
+— izmenično, ker imata `live.`/`ws.` gostitelja potekla TLS certifikata) in kaže
+strele zadnjo uro. To je **klientski prikaz, ne zapis** — deluje samo, dokler ima
+kdo stran odprto v naprednem pogledu (`runAdvancedOnly()`), zato ni primerna
+osnova za zgodovino (31. 8. 2026: `_ltgRetry` v `connectLightning()` sploh ni bila
+deklarirana, zato se povezava nikoli ni vzpostavila — glej git zgodovino; to je
+ločena napaka od tega, da klient sam po sebi ne more biti trajen zapisovalnik).
+
+Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
+
+- Drži lastno, trajno odhodno WebSocket povezavo na isto Blitzortung omrežje
+  (ista `_ltgDecode` LZW-dekodirna logika kot v app.js, namerna podvojitev —
+  strežnik nima dostopa do klientske kode, isto načelo kot `_smerBesedilo`).
+- Vsako strelo znotraj 200 km od postaje (isti obseg kot klientska kartica)
+  zapiše v svoj SQLite: surove dogodke (`strikes`, 14 dni, isti rok kot stare
+  karte/zgodbe drugod) in trajne dnevne povzetke (`daily` — število + najbližja
+  razdalja), isto načelo kot `history.json`.
+- **Durable Objecti se zbudijo šele ob prvem dohodnem klicu** — zato obstoječi
+  5-minutni cron v `scheduled()` (`_cronKeepLightningAlive`) DO vsakič "prebudi"
+  in preveri/obnovi povezavo. Brez tega klica bi DO ostal speč in se nikoli ne
+  bi povezal.
+- Javno bran prek `GET /strele-zgodovina.json` (`?ur=`, `?dni=`) — ločeno od
+  klientske kartice, ki bere neposredno iz svoje WebSocket povezave.
+- **Cena:** dokler je odhodna WebSocket povezava odprta, se DO ne more
+  hibernirati in se ves čas zaračunava po trajanju (GB-s) — okvirno
+  ~10.800 GB-s/dan pri privzetih 128 MB. Brezplačni plan ima 13.000 GB-s/dan
+  (zelo tesno), plačljiv (5 $/mesec) ima 400.000 GB-s/mesec vključenih (dovolj
+  rezerve). Ob prekoračitvi na brezplačnem planu klici v ta DO preprosto
+  odpovedo (ni doplačila) — ločen meter od običajnih Worker zahtev, torej
+  ostala stran ostane nedotaknjena. Podrobnosti in vezava v `wrangler.toml`.
+- Zaenkrat samo zapisuje — na strani (razen surovega JSON endpointa) še ni
+  prikazana zgodovina/statistika. Nova prikazna kartica bi šla v `app.js` po
+  istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
+  endpoint namesto na klientsko WebSocket povezavo.
+
 ## Napoved na pristajalni strani
 
 `tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah
