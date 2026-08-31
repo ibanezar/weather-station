@@ -214,7 +214,8 @@ Opozorilo je **stanje, ne novica** — velja nekaj ur in se prekliče. Zato:
 
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
-Vsak dan ob 10:00 po naši uri `tools/generate_storm_map.py` sestavi **lastno**
+Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva
+31. 8. 2026, prej je bil termin 10:00) — `tools/generate_storm_map.py` sestavi **lastno**
 statično karto nevihtnega potenciala za vso Slovenijo (ne kopija tuje karte,
 npr. Neurje.si) in jo `tools/inject_storm_map.py` vgradi med markerja
 WX-STORMMAP na `/nevihte/` — isti vzorec kot WX-ARSO zgoraj (rezervni blok v
@@ -244,8 +245,11 @@ ni).
   `blog.json`, zato `tools/post_to_facebook.py`/`post_to_instagram.py` ne
   ustrezata).
 - **Termin:** isti dvojni-cron + gate vzorec kot dnevna zgodba
-  (`tools/storm_map_gate.py`, okno 10:00–15:00, lastno stanje
-  `tools/.storm_map_state.json` — ločeno od `.story_state.json`).
+  (`tools/storm_map_gate.py`, okno 6:00–8:00 — trdi rok je 7:00 zjutraj,
+  lastno stanje `tools/.storm_map_state.json` — ločeno od `.story_state.json`).
+  Če cron zamudi tudi to okno, `nevihte-forecast.yml` vgradi zadnjo znano
+  karto, jasno označeno kot staro (glej `tools/inject_storm_map.py`) — raje
+  star podatek kot prazna stran.
 - Slovenija je širša kot visoka, zato bi sredinjena karta na pokončni zgodbi
   (9:16) pustila velik prazen pas nad/pod njo — `render()` v
   `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo

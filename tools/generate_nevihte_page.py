@@ -332,7 +332,7 @@ def build_body(data):
     stormmap_block = (
         '<!-- WX-STORMMAP:START (auto: tools/inject_storm_map.py) -->\n'
         '  <h2 id="karta">Nevihtna karta Slovenije — danes</h2>\n'
-        '  <p class="archive-intro">Karta se osvežuje vsak dan ob 10:00.</p>\n'
+        '  <p class="archive-intro">Karta se osvežuje vsak dan do 7:00 zjutraj.</p>\n'
         '  <!-- WX-STORMMAP:END -->')
 
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(

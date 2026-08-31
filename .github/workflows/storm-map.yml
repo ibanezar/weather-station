@@ -1,20 +1,20 @@
 name: Nevihtna karta Slovenije
 
-# Vsak dan ob 10:00 po naši uri sestavi statično nevihtno karto za vso
-# Slovenijo (glej tools/generate_storm_map.py) in jo vgradi na /nevihte/.
+# Vsak dan mora biti nova karta pripravljena do 7:00 zjutraj po naši uri
+# (glej tools/generate_storm_map.py) in vgrajena na /nevihte/.
 # Na FB/IG (feed + zgodba) gre samo, če je nekje v Sloveniji danes vsaj
 # ZMERNO — should_post v latest.json, preverjajo ga posamezni post-* koraki
 # sami, zato tu ni pogojne YAML logike.
 #
 # Termin: isti vzorec kot daily-story.yml -- cron teče po UTC in zamuja, zato
-# sta nastavljena dva termina (08:00 in 09:00 UTC = 10:00 pri nas poleti oz.
+# sta nastavljena dva termina (05:00 in 06:00 UTC = 7:00 pri nas poleti oz.
 # pozimi), tools/storm_map_gate.py pa spusti skozi samo pravega in poskrbi,
 # da gre karta ven enkrat na dan.
 
 on:
   schedule:
-    - cron: '0 8 * * *'
-    - cron: '0 9 * * *'
+    - cron: '0 5 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       force:
