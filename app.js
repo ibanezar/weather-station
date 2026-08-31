@@ -1842,10 +1842,14 @@ async function fetchGoogleAlerts(){
 function applyDayStats(observations){
   const today=new Date().toDateString(),todayObs=observations.filter(o=>new Date(o.obsTimeLocal.replace(' ','T')).toDateString()===today);
   if(!todayObs.length)return;
-  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0;
-  todayObs.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T')),temp=o.metric.tempAvg??o.metric.temp??0;if(temp>maxT){maxT=temp;maxTime=t;}if(temp<minT){minT=temp;minTime=t;}tempSum+=temp;});
+  let maxT=-Infinity,minT=Infinity,maxTime=null,minTime=null,tempSum=0,tempCount=0;
+  // Postaja občasno vrne uro brez meritve (vsa temperaturna polja null, npr.
+  // kratek izpad senzorja) — taka ura se izpusti, sicer bi privzeta vrednost
+  // 0 postala dnevni minimum poleti.
+  todayObs.forEach(o=>{const temp=o.metric.tempAvg??o.metric.temp;if(temp==null)return;const t=new Date(o.obsTimeLocal.replace(' ','T'));if(temp>maxT){maxT=temp;maxTime=t;}if(temp<minT){minT=temp;minTime=t;}tempSum+=temp;tempCount++;});
+  if(!tempCount)return;
   const totalRain=todayObs.reduce((mx,o)=>Math.max(mx,o.metric.precipTotal??0),0);
-  set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/todayObs.length,1));
+  set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/tempCount,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
   set('hs-range-min',fmt(minT,1));set('hs-range-max',fmt(maxT,1));
   updateTodayPercentile(maxT);
@@ -2053,8 +2057,8 @@ function _fcSliderUpdate(){
     const hr=t.getHours();
     const timeStr=(hr<10?'0':'')+hr+':00';
     if(lbl){lbl.textContent=timeStr+' · −'+hoursAgo+'h';lbl.classList.add('vis');}
-    const temp=obs.metric.tempAvg??obs.metric.temp??0;
-    if(tv){tv.textContent=(+temp).toFixed(1);tv.style.color=tempColor(temp);}
+    const temp=obs.metric.tempAvg??obs.metric.temp??null;
+    if(tv){tv.textContent=temp!=null?(+temp).toFixed(1):'—';tv.style.color=temp!=null?tempColor(temp):'var(--muted)';}
     const condLabel=_getConditionLabelFromObs(obs);
     if(iconEl)iconEl.innerHTML=_condImg(condLabel,108);
   }
@@ -2342,7 +2346,9 @@ function buildDailySummaries(observations){
 
 function applyHourly(observations){
   const raw=observations.slice(-24);
-  drawTempChart(raw.map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp??0})));
+  // Ura brez meritve (glej applyDayStats) se pri risanju grafa izpusti,
+  // sicer privzeta vrednost 0 ustvari navidezen padec na grafu.
+  drawTempChart(raw.filter(o=>(o.metric.tempAvg??o.metric.temp)!=null).map(o=>({time:new Date(o.obsTimeLocal.replace(' ','T')),temp:o.metric.tempAvg??o.metric.temp})));
   drawRainChart(raw.map((o,i,arr)=>{
     const curr=o.metric.precipTotal??0;
     if(i===0) return{time:new Date(o.obsTimeLocal.replace(' ','T')),rain:0};
