@@ -4359,7 +4359,7 @@ function renderCellEtaBanner(p){
   if(!el)return;
   if(!p){el.hidden=true;return;}
   el.innerHTML='⛈ Nevihtna celica prihaja proti Rečici ob Savinji čez <b>~'+p.eta_min+' min</b>'
-    +' ('+Math.round(p.kmh)+' km/h, '+windDir(p.smer)+')';
+    +' (trenutno ~'+p.zdaj_km+' km stran, '+Math.round(p.kmh)+' km/h, '+windDir(p.smer)+')';
   el.hidden=false;
 }
 
