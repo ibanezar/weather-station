@@ -33,7 +33,12 @@ STATE = os.path.join(ROOT, "tools", ".story_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 6   # ne prej kot ob 6:00 po naši uri
-WINDOW_END = 15    # in ne kasneje kot ob 15:00
+WINDOW_END = 18    # razširjeno s 15 na 18 (31. 8. 2026): 27. in 28. 8. je ta
+                   # cron zamudil tudi to okno (zagon šele ob 17:04 in 19:06
+                   # po naši uri) — ista GitHubova zamuda crona, ki je isti
+                   # teden prizadela tudi storm_map_gate in digest_gate.
+                   # Tista dva dneva zgodba ni šla ven; širše okno je poceni
+                   # varovalka proti ponovitvi.
 
 
 def load_state():

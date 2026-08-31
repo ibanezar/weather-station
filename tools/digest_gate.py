@@ -25,7 +25,13 @@ STATE = os.path.join(ROOT, "tools", ".digest_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 7
-WINDOW_END = 9
+WINDOW_END = 18  # razširjeno z 9 na 18 (31. 8. 2026): odkar je bil ta delovni
+                 # tok uveden (28. 8.), je VSEH 6 zagonov zamudilo prvotno
+                 # 2-urno okno (zamude do ~13 ur, isti GitHub cron problem kot
+                 # pri story_gate/storm_map_gate) — povzetek ni šel ven niti
+                 # enkrat. "Jutranji" okvir izgubi nekaj smisla pozno popoldne,
+                 # a je še vedno uporabna vsebina (danes max/min, dež) — in
+                 # boljše kot noben povzetek.
 
 
 def load_state():
