@@ -63,8 +63,10 @@ jobs:
           else
             git commit -m "digest: jutranji povzetek $(date -u +%Y-%m-%d) [skip ci]"
             for i in 1 2 3 4; do
-              git push && break
+              git push && exit 0
               echo "push spodletel, poskus $i" && sleep $((2 ** i))
               git pull --rebase origin main || true
             done
+            echo "Push ni uspel po 4 poskusih." >&2
+            exit 1
           fi

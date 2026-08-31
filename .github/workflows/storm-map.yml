@@ -65,12 +65,14 @@ jobs:
           else
             git commit -m "nevihte: dnevna karta Slovenije $(date -u +%Y-%m-%d) [skip ci]"
             for i in 1 2 3 4 5; do
-              if git push; then break; fi
+              if git push; then exit 0; fi
               echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
               git fetch origin main
               git rebase origin/main
               sleep $((i * 3))
             done
+            echo "Push ni uspel po 5 poskusih." >&2
+            exit 1
           fi
 
       # Enak razlog in vzorec kot v daily-story.yml: FB/IG pobirata sliko prek
