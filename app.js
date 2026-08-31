@@ -5674,6 +5674,26 @@ function applyLightning(){
   updateStormMode({lightningCount:nearby.length,lightningDist:nearestDist});
 }
 
+// Trajna zgodovina iz LightningLogger (worker.js, Durable Object) — za
+// razliko od zgornjega WebSocket prikaza (samo zadnja ura, dokler je stran
+// odprta) teče v ozadju neprestano. Klic je enkraten (ob nalaganju strani),
+// ker se dnevni podatki spreminjajo počasi.
+async function fetchLightningHistory(){
+  const el=document.getElementById('ltg-history');
+  if(!el)return;
+  try{
+    const d=await(await fetch(PROXY+'/strele-zgodovina.json?dni=14')).json();
+    const dni=(d.daily||[]).filter(x=>x.count>0);
+    if(!dni.length){el.hidden=true;return;}
+    el.hidden=false;
+    el.innerHTML='<div style="margin-bottom:.3rem">Zadnjih 14 dni (stalni zapis):</div>'+
+      dni.map(x=>{
+        const dan=new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+        return '<span style="white-space:nowrap;margin-right:.7rem">'+dan+': <b style="color:var(--text)">'+x.count+'</b> (najbližja '+Math.round(x.closest_km)+' km)</span>';
+      }).join('');
+  }catch(e){console.warn('Zgodovina strel:',e);}
+}
+
 // ── Nowcasting toče in neviht ─────────────────────────────
 // Kaj pride nad izbrano vas v naslednjih ~45 minutah. Vir je radarska slika
 // ARSO (premik celic), ne modelska napoved — zato "nowcast" in ne "napoved".
@@ -15502,6 +15522,7 @@ async function init(){
     runAdvancedOnly(()=>initBiovreme());
     fetchAIBrief();
     runAdvancedOnly(()=>connectLightning());
+    runAdvancedOnly(()=>fetchLightningHistory());
     runAdvancedOnly(()=>buildPrecipNormals());
     runAdvancedOnly(()=>buildSunshineNormals());
     runAdvancedOnly(()=>applyPheno());
