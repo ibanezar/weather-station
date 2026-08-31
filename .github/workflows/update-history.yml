@@ -1,13 +1,29 @@
 name: Posodobi history.json
 
+# Termin: cron teče po UTC ob 01:15, a redno zamuja -- konec avgusta 2026 je en
+# tek pristal šele ob 12:46 UTC (skoraj 11,5h zamude, isti razred težave kot pri
+# daily-story.yml). Ker "record watch" na vrhu naslovnice (tools/
+# inject_record_watch.py) prikazuje včerajšnji dan, taka zamuda pomeni, da stran
+# pol dneva kaže rekord za dan PRED včerajšnjim. Zato je poleg 01:15 UTC
+# sproženih še nekaj poznejših terminov (pokrijejo ~12h zamude); tools/
+# update_history_gate.py spusti skozi samo tistega, ki dejansko najde, da
+# včerajšnji dan še nima meritve postaje -- glej opombo v tisti datoteki.
 on:
   schedule:
-    - cron: '15 1 * * *'   # vsak dan ob 02:15 CET (01:15 UTC)
+    - cron: '15 1 * * *'   # 02:15 CET / 03:15 CEST
+    - cron: '15 4 * * *'   # +3h
+    - cron: '15 7 * * *'   # +6h
+    - cron: '15 10 * * *'  # +9h
+    - cron: '15 13 * * *'  # +12h
   workflow_dispatch:         # ročni zagon iz GitHub UI
     inputs:
       month:
         description: 'Mesec za osvežitev (YYYY-MM, privzeto: mesec zadnjega dokončanega dne)'
         required: false
+      force:
+        description: 'true = teci ne glede na to, ali je včerajšnji dan že zabeležen'
+        required: false
+        default: 'true'
 
 jobs:
   update:
@@ -18,8 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Preveri, ali je delo za danes že opravljeno
+        id: gate
+        run: |
+          python3 tools/update_history_gate.py \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
       - name: Shrani število dni pred posodobitvijo
         id: before
+        if: steps.gate.outputs.proceed == 'true'
         run: |
           COUNT=$(python3 -c "import json; print(len(json.load(open('history.json'))))")
           echo "count=$COUNT" >> $GITHUB_OUTPUT
@@ -32,6 +55,7 @@ jobs:
       # ko je padel absolutni temperaturni rekord postaje).
       - name: Določi mesec
         id: month
+        if: steps.gate.outputs.proceed == 'true'
         run: |
           if [ -n "${{ github.event.inputs.month }}" ]; then
             MONTH="${{ github.event.inputs.month }}"
@@ -42,6 +66,7 @@ jobs:
           echo "Osvežujem mesec: $MONTH"
 
       - name: Posodobi mesec
+        if: steps.gate.outputs.proceed == 'true'
         env:
           EW_APP: ${{ secrets.EW_APP }}
           EW_API: ${{ secrets.EW_API }}
@@ -49,19 +74,24 @@ jobs:
         run: python3 tools/update_history.py "${{ steps.month.outputs.month }}"
 
       - name: Preveri celovitost history.json
+        if: steps.gate.outputs.proceed == 'true'
         run: |
           python3 tools/validate_history.py "${{ steps.month.outputs.month }}" "${{ steps.before.outputs.count }}"
 
       - name: Pre-renderiraj zadnjo meritev v index.html
+        if: steps.gate.outputs.proceed == 'true'
         run: python3 tools/inject_current_weather.py
 
       - name: Pre-renderiraj "record watch" (rekord za ta koledarski dan)
+        if: steps.gate.outputs.proceed == 'true'
         run: python3 tools/inject_record_watch.py
 
       - name: Pre-renderiraj dnevno dejstvo (vidna kartica na naslovnici)
+        if: steps.gate.outputs.proceed == 'true'
         run: python3 tools/generate_daily_fact.py
 
       - name: Commit in push (samo če so spremembe)
+        if: steps.gate.outputs.proceed == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
