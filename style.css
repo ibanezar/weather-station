@@ -2618,6 +2618,21 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .card-modal-dl{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.5rem;background:#38bdf8;color:#030812;border:none;border-radius:50px;font-size:.84rem;font-weight:700;cursor:pointer;transition:opacity .18s;font-family:'Inter',sans-serif}
 .card-modal-dl:hover{opacity:.85}
 
+/* Weather Q&A buttons */
+.qa-bar{display:flex;flex-wrap:wrap;gap:.5rem;padding-top:.75rem;border-top:1px solid var(--border);margin-top:.6rem}
+.qa-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .85rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:.74rem;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s,background .2s;font-family:'Inter',sans-serif}
+.qa-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(56,189,248,.06)}
+.qa-btn .qa-icon{font-size:.95rem}
+
+/* Weather Q&A modal */
+.qa-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.qa-modal-overlay.open{display:flex}
+.qa-modal-box{position:relative;background:#080f1e;border:1px solid rgba(56,189,248,.2);border-radius:16px;padding:1.5rem;max-width:min(420px,calc(100vw - 2rem));width:100%;box-shadow:0 24px 64px rgba(0,0,0,.75)}
+.qa-modal-close{position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:32px;height:32px;color:#adc0d8;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s}
+.qa-modal-close:hover{background:rgba(255,255,255,.15)}
+.qa-modal-q{font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:.6rem;padding-right:1.8rem}
+.qa-modal-a{font-size:.92rem;line-height:1.5;color:#cdd8e8}
+
 /* ── "Real-Feel" micro-poll (flip card) ──────────────────────── */
 .feel-poll-card{padding:0;overflow:hidden;perspective:1400px;margin-bottom:1.25rem}
 .feel-poll-flip{position:relative;width:100%;min-height:230px;transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}

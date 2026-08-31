@@ -303,7 +303,7 @@ function attachScrub(svg,onMove,onLeave){
   svg.addEventListener('touchcancel',onLeave);
 }
 
-let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[];
+let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[],_cuDailyData=null;
 let _climAnomalyT=null,_climAnomalyYears=null;
 let _lastObsTime=null;
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
@@ -1469,6 +1469,7 @@ async function fetchComingUp(){
     for(let i=si;i<h.time.length&&hours.length<25;i++)
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
+    _cuDailyData=d;
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
     drawHeroSparkline();
     renderHeroBriefing();
@@ -15458,6 +15459,108 @@ function initOnlineWidget(){
   _onlineTimer=setInterval(()=>{if(!document.hidden)pingOnline();},25000);
 }
 
+// ── Vprašanja o vremenu na hero kartici (nabor se prilagaja mesecu) ──
+const QA_TOPICS=[
+  {id:'storm',icon:'⛈',q:'Bo nevihta?',priority:90,eligible:mo=>mo>=5&&mo<=9,answer(){
+    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const hit=_forecastHours.find(h=>[95,96,99].includes(h.wmo));
+    if(!hit)return 'V naslednjih ~24 urah nevihta ni napovedana.';
+    return 'Da, možna okoli '+hit.t.getHours()+':00.';
+  }},
+  {id:'snow',icon:'❄️',q:'Bo sneg?',priority:90,eligible:mo=>mo<=2||mo>=11,answer(){
+    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const hit=_forecastHours.find(h=>[71,73,75,77,85,86].includes(h.wmo));
+    if(!hit)return 'V naslednjih ~24 urah sneg ni napovedan.';
+    return 'Da, možen okoli '+hit.t.getHours()+':00.';
+  }},
+  {id:'heat',icon:'🌡',q:'Bo danes vroče?',priority:85,eligible:mo=>mo>=6&&mo<=8,answer(){
+    const tmax=_cuDailyData?.temperature_2m_max?.[0];
+    if(tmax==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const t=tmax.toFixed(0).replace('.',',');
+    if(tmax>=30)return 'Da, vroče — do '+t+' °C.';
+    if(tmax>=25)return 'Toplo, do '+t+' °C.';
+    return 'Ne posebej — do '+t+' °C.';
+  }},
+  {id:'frost',icon:'🧊',q:'Bo zmrzal?',priority:85,eligible:mo=>mo<=5||mo>=10,answer(){
+    let tmin=_forecastHours.length?Math.min(..._forecastHours.map(h=>h.temp)):null;
+    if(tmin==null)tmin=_cuDailyData?.temperature_2m_min?.[0]??null;
+    if(tmin==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const t=tmin.toFixed(1).replace('.',',');
+    if(tmin<=0)return 'Da, ponoči/zjutraj lahko pade do '+t+' °C.';
+    if(tmin<=3)return 'Tesno — najnižja pričakovana temperatura je '+t+' °C, blizu ledišča.';
+    return 'Ne, najnižja pričakovana temperatura je '+t+' °C.';
+  }},
+  {id:'fog',icon:'🌫',q:'Bo megla?',priority:80,eligible:mo=>mo>=10||mo<=2,answer(){
+    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const hit=_forecastHours.find(h=>[45,48].includes(h.wmo));
+    if(!hit)return 'V naslednjih ~24 urah megla ni napovedana.';
+    return 'Da, možna okoli '+hit.t.getHours()+':00.';
+  }},
+  {id:'uv',icon:'☀️',q:'Kakšen je UV indeks?',priority:60,eligible:mo=>mo>=5&&mo<=8,answer(){
+    const uv=_lastBriefObs?.uv;
+    if(uv==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    let lbl='nizek';
+    if(uv>=11)lbl='ekstremen';else if(uv>=8)lbl='zelo visok';else if(uv>=6)lbl='visok';else if(uv>=3)lbl='zmeren';
+    return 'Trenutni UV indeks je '+uv.toFixed(0)+' ('+lbl+').';
+  }},
+  {id:'rain-timing',icon:'🌧',q:'Kdaj bo dež?',priority:20,eligible:()=>true,answer(){
+    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const hit=_forecastHours.find(h=>h.prob>=50);
+    if(!hit)return 'V naslednjih 24 urah dežja ni napovedanega.';
+    const today=new Date().toDateString()===hit.t.toDateString();
+    return (today?'Danes':'Jutri')+' okoli '+hit.t.getHours()+':00.';
+  }},
+  {id:'clothing',icon:'🧥',q:'Kaj naj oblečem?',priority:15,eligible:()=>true,answer(){
+    const m=_lastBriefObs?.metric;
+    if(!m||m.temp==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
+    const t=m.temp;
+    let base;
+    if(t<5)base='Topla jakna in kapa.';
+    else if(t<12)base='Jakna ali topel pulover.';
+    else if(t<20)base='Lahka jakna zadošča.';
+    else base='Kratki rokavi so v redu.';
+    const extras=[];
+    const rainSoon=_forecastHours.length&&_forecastHours.slice(0,6).some(h=>h.prob>=50);
+    if(rainSoon)extras.push('vzemi dežnik');
+    const gust=m.windGust??m.windSpeed??0;
+    if(gust>=40)extras.push('veter bo močan');
+    return base+(extras.length?' Poleg tega: '+extras.join(', ')+'.':'');
+  }}
+];
+
+function selectQaQuestions(){
+  const mo=new Date().getMonth()+1;
+  return QA_TOPICS.filter(t=>t.eligible(mo)).sort((a,b)=>b.priority-a.priority).slice(0,3);
+}
+
+let _qaSelected=[];
+function initWeatherQA(){
+  _qaSelected=selectQaQuestions();
+  const bar=document.getElementById('qa-bar');
+  if(!bar||!_qaSelected.length)return;
+  bar.innerHTML=_qaSelected.map(t=>
+    `<button class="qa-btn" onclick="openQaModal('${t.id}')"><span class="qa-icon">${t.icon}</span><span>${t.q}</span></button>`
+  ).join('');
+  bar.hidden=false;
+}
+
+function openQaModal(id){
+  const t=_qaSelected.find(x=>x.id===id);
+  if(!t)return;
+  let answer;
+  try{ answer=t.answer(); }catch(_){ answer='Podatki trenutno niso na voljo, poskusi znova čez trenutek.'; }
+  const qEl=document.getElementById('qa-modal-q'),aEl=document.getElementById('qa-modal-a'),modal=document.getElementById('qa-modal');
+  if(qEl)qEl.textContent=t.icon+' '+t.q;
+  if(aEl)aEl.textContent=answer;
+  if(modal){modal.classList.add('open');document.body.style.overflow='hidden';}
+}
+function closeQaModal(e){
+  if(e&&e.target!==document.getElementById('qa-modal'))return;
+  const modal=document.getElementById('qa-modal');
+  if(modal)modal.classList.remove('open');
+  document.body.style.overflow='';
+}
+
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
@@ -15473,6 +15576,7 @@ async function init(){
   try{initNotifBtn();}catch(_){}
   try{initNotifHint();}catch(_){}
   try{initDailyFact();}catch(_){}
+  try{initWeatherQA();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
   runAdvancedOnly(()=>initValleyCam());

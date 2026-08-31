@@ -299,7 +299,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=5af3127f">
+<link rel="stylesheet" href="/style.min.css?v=e1fd08d1">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -680,6 +680,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span>Deli karto</span>
       </button>
     </div>
+    <div class="qa-bar" id="qa-bar" hidden></div>
   </div>
 
   <!-- Kaj prihaja — premaknjeno neposredno pod heroj (prej ~7 kartic nižje,
@@ -3608,7 +3609,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=8d4f9f41" defer></script>
+<script src="app.min.js?v=ff59bd05" defer></script>
 
 
 <div id="toast"></div>
@@ -3737,6 +3738,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="card-modal-actions">
       <button class="card-modal-dl" onclick="downloadWeatherCard()">⬇ Prenesi PNG</button>
     </div>
+  </div>
+</div>
+
+<!-- Weather Q&A modal -->
+<div id="qa-modal" class="qa-modal-overlay" onclick="closeQaModal(event)">
+  <div class="qa-modal-box">
+    <button class="qa-modal-close" onclick="closeQaModal()" title="Zapri">✕</button>
+    <div class="qa-modal-q" id="qa-modal-q"></div>
+    <div class="qa-modal-a" id="qa-modal-a"></div>
   </div>
 </div>
 
