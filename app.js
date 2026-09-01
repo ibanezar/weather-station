@@ -1456,7 +1456,10 @@ async function fetchComingUp(){
       +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,wind_speed_10m_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=8';
-    const data=await _archFetch(url);
+    const [data,mosHourly]=await Promise.all([
+      _archFetch(url),
+      fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json()).catch(()=>null)
+    ]);
     const h=data.hourly,d=data.daily;
     if(!h||!d)return;
 
@@ -1465,9 +1468,24 @@ async function fetchComingUp(){
     let si=0;
     for(let i=0;i<h.time.length;i++){if(new Date(h.time[i]).getTime()>=nowMs-1800000){si=i;break;}}
 
+    // MTR (lasten model) pokriva samo D+1..D+3 in samo dnevni Tmax/Tmin — nima
+    // urne ločljivosti. Za drsnik na junaški kartici zato surovo Open-Meteo urno
+    // krivuljo tistega dne raztegnemo iz njenega surovega dnevnega razpona
+    // (om_tmin–om_tmax, ki ga MTR že hrani) v MTR popravljen razpon (tmin–tmax):
+    // oblika krivulje (kdaj je vrh/dno) ostane iz Open-Meteo, raven in amplituda
+    // pa iz MTR — isto načelo, po katerem MTR sam popravlja Open-Meteo. Dnevi, ki
+    // jih MTR ne pokriva (danes, D+4 naprej), ostanejo nespremenjeni.
+    const mosByDate={};
+    (mosHourly?.days||[]).forEach(x=>{if(x.date)mosByDate[x.date]=x;});
+    const mosAdjust=(t,dateKey)=>{
+      const m=mosByDate[dateKey];
+      if(!m||!Number.isFinite(m.om_tmax)||!Number.isFinite(m.om_tmin)||m.om_tmax===m.om_tmin)return t;
+      return m.tmin+(t-m.om_tmin)/(m.om_tmax-m.om_tmin)*(m.tmax-m.tmin);
+    };
+
     const hours=[];
     for(let i=si;i<h.time.length&&hours.length<25;i++)
-      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
+      hours.push({t:new Date(h.time[i]),temp:mosAdjust(h.temperature_2m[i]??15,h.time[i].slice(0,10)),prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     _cuDailyData=d;
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
@@ -1528,12 +1546,7 @@ async function fetchComingUp(){
       // no caption at all rather than a guessed one, matching how the rest
       // of the site never blends sources into a single invented number.
       try{
-        const [mos,arso]=await Promise.all([
-          fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json()).catch(()=>null),
-          fetch(PROXY+'/arso-forecast').then(r=>r.json()).catch(()=>null)
-        ]);
-        const mosByDate={};
-        (mos?.days||[]).forEach(x=>{if(x.date)mosByDate[x.date]=x;});
+        const arso=await fetch(PROXY+'/arso-forecast').then(r=>r.json()).catch(()=>null);
         const arsoByDate={};
         (arso?.days||[]).forEach(x=>{if(x.valid_date)arsoByDate[x.valid_date]=x;});
         const agreeLabel=(spread)=>spread<1?'visoko soglasje':spread<2.5?'srednje soglasje':'nizko soglasje';
