@@ -1454,7 +1454,7 @@ async function fetchComingUp(){
     const url='https://api.open-meteo.com/v1/forecast'
       +'?latitude='+LAT+'&longitude='+LON
       +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
-      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,wind_speed_10m_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=8';
     const data=await _archFetch(url);
     const h=data.hourly,d=data.daily;
@@ -15556,16 +15556,16 @@ const QA_TOPICS=[
       'Da, vidljivost se lahko okoli '+t+' poslabša zaradi megle.'
     ]);
   }},
-  {id:'uv',icon:'☀️',q:'Kakšen je UV indeks?',priority:60,eligible:mo=>mo>=5&&mo<=8,answer(){
-    const uv=_lastBriefObs?.uv;
+  {id:'uv',icon:'☀️',q:'Kako visok bo danes UV?',priority:60,eligible:mo=>mo>=5&&mo<=8,answer(){
+    const uv=_cuDailyData?.uv_index_max?.[0];
     if(uv==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     let lbl='nizek';
     if(uv>=11)lbl='ekstremen';else if(uv>=8)lbl='zelo visok';else if(uv>=6)lbl='visok';else if(uv>=3)lbl='zmeren';
     const v=uv.toFixed(0);
     return _qaPick('uv',[
-      'Trenutni UV indeks je '+v+' ('+lbl+').',
-      'UV je zdaj '+v+' — '+lbl+'.',
-      'Trenutno merimo UV '+v+', kar je '+lbl+'.'
+      'Danes je pričakovan UV indeks do '+v+' ('+lbl+').',
+      'UV bo danes segel do '+v+' — '+lbl+'.',
+      'Napoved za danes: UV do '+v+', kar je '+lbl+'.'
     ]);
   }},
   {id:'rain-timing',icon:'🌧',q:'Kdaj bo dež?',priority:20,eligible:()=>true,answer(){
@@ -15585,20 +15585,20 @@ const QA_TOPICS=[
     ]);
   }},
   {id:'clothing',icon:'🧥',q:'Kaj naj oblečem?',priority:15,eligible:()=>true,answer(){
-    const m=_lastBriefObs?.metric;
-    if(!m||m.temp==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const t=m.temp;
+    const tmax=_cuDailyData?.temperature_2m_max?.[0],tmin=_cuDailyData?.temperature_2m_min?.[0];
+    if(tmax==null||tmin==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     let base;
-    if(t<5)base=_qaPick('cloth:cold',['Topla jakna in kapa.','Obleci se toplo — jakna in kapa.','Zunaj je mrzlo, vzemi toplo jakno in kapo.']);
-    else if(t<12)base=_qaPick('cloth:cool',['Jakna ali topel pulover.','Vzemi jakno ali topel pulover.','Toplejša oblačila bodo dobrodošla.']);
-    else if(t<20)base=_qaPick('cloth:mild',['Lahka jakna zadošča.','Tanjša jakna bo dovolj.','Lahka jakna ali pulover zadostuje.']);
+    if(tmax<5)base=_qaPick('cloth:cold',['Topla jakna in kapa.','Obleci se toplo — jakna in kapa.','Zunaj bo mrzlo, vzemi toplo jakno in kapo.']);
+    else if(tmax<12)base=_qaPick('cloth:cool',['Jakna ali topel pulover.','Vzemi jakno ali topel pulover.','Toplejša oblačila bodo dobrodošla.']);
+    else if(tmax<20)base=_qaPick('cloth:mild',['Lahka jakna zadošča.','Tanjša jakna bo dovolj.','Lahka jakna ali pulover zadostuje.']);
     else base=_qaPick('cloth:warm',['Kratki rokavi so v redu.','Lahka obleka, kratki rokavi.','Poletno oblečen boš v redu.']);
     const extras=[];
     const rainSoon=_forecastHours.length&&_forecastHours.slice(0,6).some(h=>h.prob>=50);
     if(rainSoon)extras.push(_qaPick('cloth:rain',['vzemi dežnik','ne pozabi dežnika']));
-    const gust=m.windGust??m.windSpeed??0;
-    if(gust>=40)extras.push(_qaPick('cloth:wind',['veter bo močan','pričakuj močnejši veter']));
-    return base+(extras.length?' Poleg tega: '+extras.join(', ')+'.':'');
+    const windMax=_cuDailyData?.wind_speed_10m_max?.[0]??0;
+    if(windMax>=40)extras.push(_qaPick('cloth:wind',['veter bo močan','pričakuj močnejši veter']));
+    const range='Danes od '+tmin.toFixed(0).replace('.',',')+' do '+tmax.toFixed(0).replace('.',',')+' °C — ';
+    return range+base+(extras.length?' Poleg tega: '+extras.join(', ')+'.':'');
   }}
 ];
 
