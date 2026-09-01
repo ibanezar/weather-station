@@ -4697,6 +4697,7 @@ document.addEventListener('visibilitychange',()=>{
     if(_meshCanvas&&!_meshAnimId)_meshDraw();
     if(_heroCanvas&&!_heroAnimId)animateHero();
     if(_sfActive&&!_sfAnim){_sfPrev=0;_sfAnim=requestAnimationFrame(_sfFrame);}
+    if(_artCtx&&!_artAnim)artFrame();
   }
 });
 
@@ -9053,7 +9054,7 @@ function scheduleLightning(){
 let _animPaused=false;
 
 // ── Hero canvas particles ─────────────────────────────────
-let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='';
+let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='',_heroFrame=0;
 function initHeroCanvas(){
   _heroCanvas=document.getElementById('hero-canvas');
   if(!_heroCanvas)return;
@@ -9087,6 +9088,9 @@ function makeHeroP(cond,W,H,init=false){
 function animateHero(){
   if(_animPaused){_heroAnimId=null;return;}
   if(!_heroCtx||!_heroCanvas){return;}
+  // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
+  if(_heroFrame%3!==0&&navigator.maxTouchPoints>0){_heroFrame++;_heroAnimId=requestAnimationFrame(animateHero);return;}
+  _heroFrame++;
   const ctx=_heroCtx,W=_heroCanvas.width,H=_heroCanvas.height,t=performance.now()/1000;
   ctx.clearRect(0,0,W,H);
   const cond=_heroCond;
@@ -9519,7 +9523,7 @@ function renderDailyMicroclimateFingerprint(obs,h){
   if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
-let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[];
+let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[],_artFrame=0;
 function resizeWeatherArtCanvas(){
   const c=document.getElementById('weather-art-canvas');if(!c)return false;
   const rect=c.getBoundingClientRect();
@@ -9573,7 +9577,11 @@ function setWeatherArt(obs){
   initWeatherArt();
 }
 function artFrame(){
+  if(_animPaused){_artAnim=null;return;}
   const ctx=_artCtx;if(!ctx)return;
+  // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
+  if(_artFrame%3!==0&&navigator.maxTouchPoints>0){_artFrame++;_artAnim=requestAnimationFrame(artFrame);return;}
+  _artFrame++;
   const c=document.getElementById('weather-art-canvas');
   if(resizeWeatherArtCanvas())_artParticles=[];
   const W=c.width,H=c.height;const dark=isDark();
