@@ -15613,7 +15613,7 @@ function initWeatherQA(){
   const bar=document.getElementById('qa-bar');
   if(!bar||!_qaSelected.length)return;
   bar.innerHTML=_qaSelected.map(t=>
-    `<button class="qa-btn" onclick="openQaModal('${t.id}')"><span class="qa-icon">${t.icon}</span><span>${t.q}</span></button>`
+    `<button class="qa-btn" onclick="openQaModal('${t.id}')"><span class="qa-icon">${t.icon}</span><span class="qa-lbl">${t.q}</span></button>`
   ).join('');
   bar.hidden=false;
 }
