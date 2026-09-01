@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-08-31T07:32:02Z",
-  "n_records": 26,
+  "generated_at": "2026-09-01T06:43:24Z",
+  "n_records": 28,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-08-30"
+    "to": "2026-08-31"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 26,
+      "n": 27,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-08-30"
+        "to": "2026-08-31"
       },
       "all_time": {
         "tmax": {
-          "n": 26,
-          "mae_mtr": 1.01,
-          "mae_om": 1.4,
-          "improvement_pct": 27.9
+          "n": 27,
+          "mae_mtr": 0.98,
+          "mae_om": 1.39,
+          "improvement_pct": 29.5
         },
         "tmin": {
-          "n": 26,
-          "mae_mtr": 1.13,
-          "mae_om": 1.17,
-          "improvement_pct": 3.4
+          "n": 27,
+          "mae_mtr": 1.12,
+          "mae_om": 1.14,
+          "improvement_pct": 1.8
         }
       },
       "rolling": {
@@ -182,6 +182,13 @@
             "mae_mtr": 1.01,
             "mae_om": 1.4,
             "improvement_pct": 27.9
+          },
+          {
+            "date": "2026-08-31",
+            "n": 27,
+            "mae_mtr": 0.98,
+            "mae_om": 1.39,
+            "improvement_pct": 29.5
           }
         ],
         "tmin": [
@@ -338,26 +345,73 @@
             "mae_mtr": 1.13,
             "mae_om": 1.17,
             "improvement_pct": 3.4
+          },
+          {
+            "date": "2026-08-31",
+            "n": 27,
+            "mae_mtr": 1.12,
+            "mae_om": 1.14,
+            "improvement_pct": 1.8
           }
         ]
+      }
+    },
+    "2": {
+      "n": 1,
+      "date_range": {
+        "from": "2026-08-31",
+        "to": "2026-08-31"
+      },
+      "all_time": {
+        "tmax": {
+          "n": 1,
+          "mae_mtr": 2.7,
+          "mae_om": 3.7,
+          "improvement_pct": 27.0
+        },
+        "tmin": {
+          "n": 1,
+          "mae_mtr": 2.1,
+          "mae_om": 1.2,
+          "improvement_pct": -75.0
+        }
+      },
+      "rolling": {
+        "tmax": [],
+        "tmin": []
       }
     }
   },
   "seasons": {
     "poletje": {
       "1": {
-        "n": 26,
+        "n": 27,
         "tmax": {
-          "n": 26,
-          "mae_mtr": 1.01,
-          "mae_om": 1.4,
-          "improvement_pct": 27.9
+          "n": 27,
+          "mae_mtr": 0.98,
+          "mae_om": 1.39,
+          "improvement_pct": 29.5
         },
         "tmin": {
-          "n": 26,
-          "mae_mtr": 1.13,
-          "mae_om": 1.17,
-          "improvement_pct": 3.4
+          "n": 27,
+          "mae_mtr": 1.12,
+          "mae_om": 1.14,
+          "improvement_pct": 1.8
+        }
+      },
+      "2": {
+        "n": 1,
+        "tmax": {
+          "n": 1,
+          "mae_mtr": 2.7,
+          "mae_om": 3.7,
+          "improvement_pct": 27.0
+        },
+        "tmin": {
+          "n": 1,
+          "mae_mtr": 2.1,
+          "mae_om": 1.2,
+          "improvement_pct": -75.0
         }
       }
     }
