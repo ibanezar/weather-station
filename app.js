@@ -5678,21 +5678,57 @@ function applyLightning(){
 // Trajna zgodovina iz LightningLogger (worker.js, Durable Object) — za
 // razliko od zgornjega WebSocket prikaza (samo zadnja ura, dokler je stran
 // odprta) teče v ozadju neprestano. Klic je enkraten (ob nalaganju strani),
-// ker se dnevni podatki spreminjajo počasi.
+// ker se dnevni podatki spreminjajo počasi. ur=24 zraven prinese tudi surove
+// dogodke za zemljevid (renderLightningMap) — en klic za oboje.
 async function fetchLightningHistory(){
   const el=document.getElementById('ltg-history');
   if(!el)return;
   try{
-    const d=await(await fetch(PROXY+'/strele-zgodovina.json?dni=14')).json();
+    const d=await(await fetch(PROXY+'/strele-zgodovina.json?ur=24&dni=14')).json();
     const dni=(d.daily||[]).filter(x=>x.count>0);
-    if(!dni.length){el.hidden=true;return;}
-    el.hidden=false;
-    el.innerHTML='<div style="margin-bottom:.3rem">Zadnjih 14 dni (stalni zapis):</div>'+
-      dni.map(x=>{
-        const dan=new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-        return '<span style="white-space:nowrap;margin-right:.7rem">'+dan+': <b style="color:var(--text)">'+x.count+'</b> (najbližja '+Math.round(x.closest_km)+' km)</span>';
-      }).join('');
+    if(!dni.length){el.hidden=true;}else{
+      el.hidden=false;
+      el.innerHTML='<div style="margin-bottom:.3rem">Zadnjih 14 dni (stalni zapis):</div>'+
+        dni.map(x=>{
+          const dan=new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+          return '<span style="white-space:nowrap;margin-right:.7rem">'+dan+': <b style="color:var(--text)">'+x.count+'</b> (najbližja '+Math.round(x.closest_km)+' km)</span>';
+        }).join('');
+    }
+    renderLightningMap(d.strikes||[]);
   }catch(e){console.warn('Zgodovina strel:',e);}
+}
+
+// Zemljevid strel zadnjih 24 ur (isti vzorec kot renderObsMap: majhen
+// Leaflet zemljevid, naložen na zahtevo, skrit brez podatkov).
+let _ltgMap=null, _ltgMapLayer=null;
+async function renderLightningMap(strikes){
+  const wrap=document.getElementById('ltg-map-wrap');
+  if(!wrap)return;
+  if(!strikes.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+  try{
+    await _loadLeaflet();
+    if(!_ltgMap){
+      _ltgMap=L.map('ltg-map',{zoomControl:true,attributionControl:false,minZoom:5,maxZoom:11,fullscreenControl:true}).setView([LAT,LON],7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {maxZoom:11,maxNativeZoom:19,subdomains:'abc'}).addTo(_ltgMap);
+      L.marker([LAT,LON],{icon:L.divIcon({html:'<span style="font-size:1.1rem">📍</span>',className:'obs-map-icon',iconSize:[22,22],iconAnchor:[11,11]})})
+        .bindPopup('IREICA1 · Rečica ob Savinji').addTo(_ltgMap);
+      _ltgMapLayer=L.layerGroup().addTo(_ltgMap);
+      setTimeout(()=>_ltgMap.invalidateSize(),60);
+    }
+    _ltgMapLayer.clearLayers();
+    strikes.forEach(s=>{
+      const agoMin=Math.round((Date.now()-s.ts)/60000);
+      const ago=agoMin<60?agoMin+' min':Math.round(agoMin/60)+' h';
+      L.circleMarker([s.lat,s.lon],{radius:4,weight:1,color:'#fff',fillColor:s.dist<30?'#ef4444':'#f59e0b',fillOpacity:.85})
+        .bindPopup('pred '+ago+' · '+Math.round(s.dist)+' km')
+        .addTo(_ltgMapLayer);
+    });
+  }catch(e){
+    console.warn('strele zemljevid:',e);
+    wrap.style.display='none';
+  }
 }
 
 // ── Nowcasting toče in neviht ─────────────────────────────

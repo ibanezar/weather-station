@@ -2313,7 +2313,7 @@ export class LightningLogger extends DurableObject {
   async recent(hours, dailyDays) {
     const since = Date.now() - (hours || 1) * 3600000;
     const strikes = this.ctx.storage.sql.exec(
-      "SELECT ts, dist_km AS dist FROM strikes WHERE ts > ? ORDER BY ts DESC LIMIT 300", since
+      "SELECT ts, lat, lon, dist_km AS dist FROM strikes WHERE ts > ? ORDER BY ts DESC LIMIT 300", since
     ).toArray();
     const daily = this.ctx.storage.sql.exec(
       "SELECT date, count, closest_km FROM daily ORDER BY date DESC LIMIT ?", dailyDays || 30
