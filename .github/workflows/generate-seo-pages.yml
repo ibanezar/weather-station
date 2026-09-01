@@ -31,6 +31,15 @@ jobs:
         run: python3 tools/inject_current_weather.py --live
         continue-on-error: true
 
+      # Isti razlog kot zgoraj, za WX-FC7/WX-FCH: generate_seo_pages.py zapiše
+      # samo besedilno rezervo ("napoved se osveži vsako uro"), pravo napoved
+      # doda tools/inject_forecast.py. Brez tega koraka pristajalna in vaške
+      # strani do naslednjega urnega zagona prerender-current.yml sploh nimajo
+      # napovedi (ne le stare — prazne).
+      - name: Osveži napoved na pristajalni in vaških straneh
+        run: python3 tools/inject_forecast.py
+        continue-on-error: true
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
