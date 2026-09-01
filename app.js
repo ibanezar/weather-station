@@ -15460,70 +15460,144 @@ function initOnlineWidget(){
 }
 
 // ── Vprašanja o vremenu na hero kartici (nabor se prilagaja mesecu) ──
+// Vsak odgovor ima več besedilnih različic (isto načelo kot pri temah
+// dnevne zgodbe v generate_story_card.py) — različica se izbere
+// deterministično po datumu, da ni vsak dan/klik enaka kalupljena fraza.
+function _qaPick(seed,arr){
+  const day=new Date().toDateString();
+  let h=0;const s=day+'|'+seed;
+  for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;
+  return arr[Math.abs(h)%arr.length];
+}
 const QA_TOPICS=[
   {id:'storm',icon:'⛈',q:'Bo nevihta?',priority:90,eligible:mo=>mo>=5&&mo<=9,answer(){
     if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     const hit=_forecastHours.find(h=>[95,96,99].includes(h.wmo));
-    if(!hit)return 'V naslednjih ~24 urah nevihta ni napovedana.';
-    return 'Da, možna okoli '+hit.t.getHours()+':00.';
+    if(!hit)return _qaPick('storm:no',[
+      'V naslednjih ~24 urah nevihta ni napovedana.',
+      'Nebo naj bi ostalo mirno — neviht v naslednjem dnevu ne kaže.',
+      'Trenutno nič nevihtnega na obzorju za naslednjih 24 ur.'
+    ]);
+    const t=hit.t.getHours()+':00';
+    return _qaPick('storm:yes',[
+      'Da, nevihta je mogoča okoli '+t+'.',
+      'Kaže na nevihto okoli '+t+' — spremljaj nebo.',
+      'Da, model kaže nevihtni potencial okoli '+t+'.'
+    ]);
   }},
   {id:'snow',icon:'❄️',q:'Bo sneg?',priority:90,eligible:mo=>mo<=2||mo>=11,answer(){
     if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     const hit=_forecastHours.find(h=>[71,73,75,77,85,86].includes(h.wmo));
-    if(!hit)return 'V naslednjih ~24 urah sneg ni napovedan.';
-    return 'Da, možen okoli '+hit.t.getHours()+':00.';
+    if(!hit)return _qaPick('snow:no',[
+      'V naslednjih ~24 urah sneg ni napovedan.',
+      'Trenutno kopno vreme — snega v naslednjem dnevu ne kaže.',
+      'Brez snega na vidiku za zdaj.'
+    ]);
+    const t=hit.t.getHours()+':00';
+    return _qaPick('snow:yes',[
+      'Da, sneženje je možno okoli '+t+'.',
+      'Kaže na sneg okoli '+t+'.',
+      'Da, po napovedi lahko okoli '+t+' zapade sneg.'
+    ]);
   }},
   {id:'heat',icon:'🌡',q:'Bo danes vroče?',priority:85,eligible:mo=>mo>=6&&mo<=8,answer(){
     const tmax=_cuDailyData?.temperature_2m_max?.[0];
     if(tmax==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const t=tmax.toFixed(0).replace('.',',');
-    if(tmax>=30)return 'Da, vroče — do '+t+' °C.';
-    if(tmax>=25)return 'Toplo, do '+t+' °C.';
-    return 'Ne posebej — do '+t+' °C.';
+    const t=tmax.toFixed(0).replace('.',',')+' °C';
+    if(tmax>=30)return _qaPick('heat:hot',[
+      'Da, vroče bo — do '+t+'.',
+      'Pripravi se na vročino, do '+t+'.',
+      'Termometer bo segel do '+t+' — vroč dan.'
+    ]);
+    if(tmax>=25)return _qaPick('heat:warm',[
+      'Toplo, do '+t+'.',
+      'Prijetno toplo, okoli '+t+'.',
+      'Poletno, do '+t+'.'
+    ]);
+    return _qaPick('heat:mild',[
+      'Ne posebej vroče — do '+t+'.',
+      'Zmerno, do '+t+'.',
+      'Brez vročinskega vala, do '+t+'.'
+    ]);
   }},
   {id:'frost',icon:'🧊',q:'Bo zmrzal?',priority:85,eligible:mo=>mo<=5||mo>=10,answer(){
     let tmin=_forecastHours.length?Math.min(..._forecastHours.map(h=>h.temp)):null;
     if(tmin==null)tmin=_cuDailyData?.temperature_2m_min?.[0]??null;
     if(tmin==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const t=tmin.toFixed(1).replace('.',',');
-    if(tmin<=0)return 'Da, ponoči/zjutraj lahko pade do '+t+' °C.';
-    if(tmin<=3)return 'Tesno — najnižja pričakovana temperatura je '+t+' °C, blizu ledišča.';
-    return 'Ne, najnižja pričakovana temperatura je '+t+' °C.';
+    const t=tmin.toFixed(1).replace('.',',')+' °C';
+    if(tmin<=0)return _qaPick('frost:yes',[
+      'Da, ponoči/zjutraj lahko pade do '+t+'.',
+      'Zmrzal je verjetna — do '+t+'.',
+      'Da, pričakuj slano zjutraj, do '+t+'.'
+    ]);
+    if(tmin<=3)return _qaPick('frost:close',[
+      'Tesno — najnižja temperatura bo okoli '+t+', blizu ledišča.',
+      'Mejno, '+t+' — možna je rahla zmrzal.',
+      'Blizu ničle, '+t+' — ni izključeno.'
+    ]);
+    return _qaPick('frost:no',[
+      'Ne, najnižja pričakovana temperatura je '+t+'.',
+      'Brez zmrzali — okoli '+t+'.',
+      'Ne kaže na zmrzal, '+t+'.'
+    ]);
   }},
   {id:'fog',icon:'🌫',q:'Bo megla?',priority:80,eligible:mo=>mo>=10||mo<=2,answer(){
     if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     const hit=_forecastHours.find(h=>[45,48].includes(h.wmo));
-    if(!hit)return 'V naslednjih ~24 urah megla ni napovedana.';
-    return 'Da, možna okoli '+hit.t.getHours()+':00.';
+    if(!hit)return _qaPick('fog:no',[
+      'V naslednjih ~24 urah megla ni napovedana.',
+      'Brez megle na vidiku.',
+      'Vidljivost naj bi ostala dobra.'
+    ]);
+    const t=hit.t.getHours()+':00';
+    return _qaPick('fog:yes',[
+      'Da, megla je možna okoli '+t+'.',
+      'Kaže na meglo okoli '+t+'.',
+      'Da, vidljivost se lahko okoli '+t+' poslabša zaradi megle.'
+    ]);
   }},
   {id:'uv',icon:'☀️',q:'Kakšen je UV indeks?',priority:60,eligible:mo=>mo>=5&&mo<=8,answer(){
     const uv=_lastBriefObs?.uv;
     if(uv==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     let lbl='nizek';
     if(uv>=11)lbl='ekstremen';else if(uv>=8)lbl='zelo visok';else if(uv>=6)lbl='visok';else if(uv>=3)lbl='zmeren';
-    return 'Trenutni UV indeks je '+uv.toFixed(0)+' ('+lbl+').';
+    const v=uv.toFixed(0);
+    return _qaPick('uv',[
+      'Trenutni UV indeks je '+v+' ('+lbl+').',
+      'UV je zdaj '+v+' — '+lbl+'.',
+      'Trenutno merimo UV '+v+', kar je '+lbl+'.'
+    ]);
   }},
   {id:'rain-timing',icon:'🌧',q:'Kdaj bo dež?',priority:20,eligible:()=>true,answer(){
     if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     const hit=_forecastHours.find(h=>h.prob>=50);
-    if(!hit)return 'V naslednjih 24 urah dežja ni napovedanega.';
+    if(!hit)return _qaPick('rain:no',[
+      'V naslednjih 24 urah dežja ni napovedanega.',
+      'Brez dežja v naslednjih 24 urah.',
+      'Suho vreme se nadaljuje naslednjih 24 ur.'
+    ]);
     const today=new Date().toDateString()===hit.t.toDateString();
-    return (today?'Danes':'Jutri')+' okoli '+hit.t.getHours()+':00.';
+    const when=today?'Danes':'Jutri',t=hit.t.getHours()+':00';
+    return _qaPick('rain:yes',[
+      when+' okoli '+t+'.',
+      when+' lahko okoli '+t+' zapade dež.',
+      when+' kaže na dež okoli '+t+'.'
+    ]);
   }},
   {id:'clothing',icon:'🧥',q:'Kaj naj oblečem?',priority:15,eligible:()=>true,answer(){
     const m=_lastBriefObs?.metric;
     if(!m||m.temp==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
     const t=m.temp;
     let base;
-    if(t<5)base='Topla jakna in kapa.';
-    else if(t<12)base='Jakna ali topel pulover.';
-    else if(t<20)base='Lahka jakna zadošča.';
-    else base='Kratki rokavi so v redu.';
+    if(t<5)base=_qaPick('cloth:cold',['Topla jakna in kapa.','Obleci se toplo — jakna in kapa.','Zunaj je mrzlo, vzemi toplo jakno in kapo.']);
+    else if(t<12)base=_qaPick('cloth:cool',['Jakna ali topel pulover.','Vzemi jakno ali topel pulover.','Toplejša oblačila bodo dobrodošla.']);
+    else if(t<20)base=_qaPick('cloth:mild',['Lahka jakna zadošča.','Tanjša jakna bo dovolj.','Lahka jakna ali pulover zadostuje.']);
+    else base=_qaPick('cloth:warm',['Kratki rokavi so v redu.','Lahka obleka, kratki rokavi.','Poletno oblečen boš v redu.']);
     const extras=[];
     const rainSoon=_forecastHours.length&&_forecastHours.slice(0,6).some(h=>h.prob>=50);
-    if(rainSoon)extras.push('vzemi dežnik');
+    if(rainSoon)extras.push(_qaPick('cloth:rain',['vzemi dežnik','ne pozabi dežnika']));
     const gust=m.windGust??m.windSpeed??0;
-    if(gust>=40)extras.push('veter bo močan');
+    if(gust>=40)extras.push(_qaPick('cloth:wind',['veter bo močan','pričakuj močnejši veter']));
     return base+(extras.length?' Poleg tega: '+extras.join(', ')+'.':'');
   }}
 ];
