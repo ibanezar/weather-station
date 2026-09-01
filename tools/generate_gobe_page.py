@@ -16,7 +16,10 @@ Layout:
     the real content is fetched client-side from the Worker /premium/forecast
     endpoint only when a valid access token is present — unless PREMIUM_FREE_LAUNCH
     below is on, in which case everyone gets it free and the lock/pricing UI is
-    skipped. AI identify, alerts and diary sync stay behind a real token either way.
+    skipped. AI identify, alerts and diary sync still sit behind a real access
+    token, but while PREMIUM_FREE_LAUNCH is on that token is free too — the
+    free-signup box (#gp-freeauth) posts an email to Worker /premium/login,
+    which grants it without a Paddle purchase (see worker.js).
 
 Positioning: the index is an "indeks ugodnosti pogojev" (favourability index),
 never a promise of finds — scientifically honest and it protects against angry
@@ -54,16 +57,20 @@ PADDLE_PRICE_SEASON = "pri_REPLACE_SEASON"    # TODO: enako kot v wrangler.toml
 PRICE_MONTHLY = "3,99 €"
 PRICE_SEASON = "24,99 €"
 
-# Sezonski zagon (25. 8. 2026): Paddle plačevanje zgoraj še ni priklopljeno
-# (PADDLE_CLIENT_TOKEN prazen), gobarska sezona pa se že začenja — zato je
-# 7-dnevna napoved po vrstah zaenkrat brezplačna za vse, brez prijave. Lock
-# in cenik se ne izrišeta, hero/kartica dobita opombo "zaenkrat brezplačno".
-# AI prepoznava, moji alarmi in sinhronizacija dnevnika ostanejo zaklenjeni
-# (pridejo z naročnino, ko bo Paddle pripravljen — glej docs/premium-setup.md).
+# Sezonski zagon (25. 8. 2026, razširjen na vse premium zmožnosti 1. 9. 2026):
+# Paddle plačevanje zgoraj še ni priklopljeno (PADDLE_CLIENT_TOKEN prazen),
+# zato je cel MeteoGobar Premium zaenkrat brezplačen za vse: 7-dnevna napoved
+# po vrstah brez prijave, AI prepoznava/moji alarmi/sinhronizacija dnevnika z
+# brezplačno prijavo (samo e-naslov, brez plačila — glej #gp-freeauth spodaj
+# in POST /premium/login v worker.js, ki pod to zastavico podeli naročnino
+# brez Paddla). Lock in cenik se ne izrišeta, hero/kartica dobita opombo
+# "zaenkrat brezplačno".
 # Ujema se z env PREMIUM_FREE_LAUNCH v wrangler.toml, ki v worker.js odpre
-# GET /premium/forecast brez žetona. Ko je plačevanje pripravljeno: nastavi na
-# False tukaj, odstrani PREMIUM_FREE_LAUNCH iz wrangler.toml in ponovno
-# generiraj stran — izvirni paywall se vrne nespremenjen.
+# GET /premium/forecast brez žetona IN naredi POST /premium/login brezplačen.
+# Ko je plačevanje pripravljeno: nastavi na False tukaj, odstrani
+# PREMIUM_FREE_LAUNCH iz wrangler.toml in ponovno generiraj stran — izvirni
+# paywall (vključno z resničnim naročniškim žetonom za identify/alerts/diary)
+# se vrne nespremenjen.
 PREMIUM_FREE_LAUNCH = True
 
 MES_FULL = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju",
@@ -776,7 +783,7 @@ body{
   padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
 .gp-diary-priv{font-size:.78rem;color:var(--muted);margin-bottom:.7rem}
 .gp-diary-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.55rem;align-items:center}
-.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary textarea{
+.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary-row input[type=email],.gp-diary textarea{
   background:var(--badge-bg);border:1px solid var(--card-border);border-radius:9px;
   padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit}
 .gp-diary-row input[type=text]{flex:1;min-width:160px}
@@ -1615,12 +1622,45 @@ PAGE_JS = """<script>
     return '<div class="gp-loadskel-group">'+block('1.4rem')+block('5.2rem')+block('5.2rem')+
       block('2.6rem')+block('9rem')+block('9rem')+'</div>';
   }
+  var freeauth=document.getElementById("gp-freeauth");
+  var faBtn=document.getElementById("gp-freeauth-btn");
+  var faEmail=document.getElementById("gp-freeauth-email");
+  var faWebsite=document.getElementById("gp-freeauth-website");
+  var faMsg=document.getElementById("gp-freeauth-msg");
+  // Free-signup box (#gp-freeauth, only rendered while PREMIUM_FREE_LAUNCH):
+  // posts an email to /premium/login, which under that same flag grants a
+  // free subscription instead of requiring a Paddle purchase (see
+  // worker.js). The magic-link email that comes back re-opens this page
+  // with ?token=…, landing in the tok() branch below exactly like a paying
+  // subscriber would — same initIdentify()/initAlerts() call either way.
+  if(faBtn){
+    faBtn.addEventListener("click",function(){
+      var email=(faEmail&&faEmail.value||"").trim();
+      if(!email){if(faMsg)faMsg.textContent="Vpiši e-naslov.";return;}
+      faBtn.disabled=true;
+      if(faMsg)faMsg.textContent="Pošiljam …";
+      gaEvent("free_login_request");
+      fetch(API+"/premium/login",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email:email,website:faWebsite?faWebsite.value:""})})
+        .then(function(r){return r.json();})
+        .then(function(res){
+          faBtn.disabled=false;
+          if(faMsg)faMsg.textContent=(res&&res.msg)||"Preveri e-pošto — povezava za dostop je na poti.";
+        })
+        .catch(function(){
+          faBtn.disabled=false;
+          if(faMsg)faMsg.textContent="Napaka pri povezavi. Poskusi znova.";
+        });
+    });
+  }
   var t=tok();
   if(t){
-    // A paying user shouldn't see the lock or the "Naroči se" upsell while
-    // their own data is still in flight — swap straight to a skeleton
-    // instead of flashing either first.
+    // A paying (or, during PREMIUM_FREE_LAUNCH, freely-signed-up) user
+    // shouldn't see the lock or the "Naroči se" upsell while their own data
+    // is still in flight — swap straight to a skeleton instead of flashing
+    // either first.
     if(lock)lock.hidden=true;
+    if(freeauth)freeauth.hidden=true;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/verify?token="+encodeURIComponent(t))
       .then(function(r){if(!r.ok)throw 0;return r.json();})
@@ -1628,9 +1668,13 @@ PAGE_JS = """<script>
         if(!v||!v.ok)return;
         hidePricing();
         if(statusEl){
-          var planTxt=v.plan==="sezona"?"sezonska naročnina":"mesečna naročnina";
           statusEl.hidden=false;
-          statusEl.textContent="✓ Premium aktiven ("+planTxt+(v.expires?", velja do "+fmtExpires(v.expires):"")+").";
+          if(v.plan==="brezplacno"){
+            statusEl.textContent="✓ Brezplačen dostop odklenjen"+(v.expires?(" (velja do "+fmtExpires(v.expires)+")"):"")+".";
+          }else{
+            var planTxt=v.plan==="sezona"?"sezonska naročnina":"mesečna naročnina";
+            statusEl.textContent="✓ Premium aktiven ("+planTxt+(v.expires?", velja do "+fmtExpires(v.expires):"")+").";
+          }
         }
       })
       .catch(function(){});
@@ -1643,13 +1687,16 @@ PAGE_JS = """<script>
         // skeleton spinning forever.
         if(content){content.hidden=true;content.innerHTML="";}
         if(lock)lock.hidden=false;
+        if(freeauth)freeauth.hidden=false;
       });
   }else if(FREE_LAUNCH){
     // Season-launch mode (PREMIUM_FREE_LAUNCH in generate_gobe_page.py): no
     // token needed, the Worker serves /premium/forecast to anyone while the
     // flag is on (see PREMIUM_FREE_LAUNCH in worker.js). AI identify and
-    // alerts stay locked — initIdentify()/initAlerts() are only called from
-    // the token branch above, so they're never reached here.
+    // alerts still need a token — the free-signup box above gets one
+    // without payment, so show it right away rather than waiting on the
+    // forecast fetch below.
+    if(freeauth)freeauth.hidden=false;
     if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
     fetch(API+"/premium/forecast")
       .then(function(r){if(!r.ok)throw 0;return r.json();})
@@ -1657,7 +1704,7 @@ PAGE_JS = """<script>
         render(d);
         if(statusEl){
           statusEl.hidden=false;
-          statusEl.textContent="🎉 Ob zagonu gobarske sezone je 7-dnevna napoved po vrstah brezplačna za vse.";
+          statusEl.textContent="🎉 Ob zagonu gobarske sezone je MeteoGobar Premium brezplačen za vse.";
         }
       })
       .catch(function(){
@@ -1870,10 +1917,12 @@ DIARY_JS = """<script>
 
   render();
 
-  // ── Ob nalaganju: premium naročniki dobijo dnevnik iz oblaka (vse naprave) ──
+  // ── Ob nalaganju: kdor ima žeton (brezplačna prijava ob PREMIUM_FREE_LAUNCH
+  // ali plačljiva naročnina sicer — glej #gp-freeauth na /gobarska-napoved/)
+  // dobi dnevnik iz oblaka (vse naprave) ──
   var t=token();
   if(t){
-    if(privEl)privEl.innerHTML='☁️ Najdbe se sinhronizirajo med tvojimi napravami (premium) — fotografije vidiš samo ti.';
+    if(privEl)privEl.innerHTML='☁️ Najdbe se sinhronizirajo med tvojimi napravami — fotografije vidiš samo ti.';
     if(syncEl){syncEl.hidden=false; syncEl.textContent="Sinhroniziram …";}
     fetch(API+"/premium/diary?token="+encodeURIComponent(t))
       .then(function(r){return r.ok?r.json():null;})
@@ -2516,13 +2565,15 @@ _FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000
 # Poudarki (--fa) so zavestno razporejeni tako, da sosednji kartici v isti
 # skupini nista v istem odtenku; stran je sicer zemeljska (zelena/rjava), a
 # same zelene kartice se ne bi ločile med sabo.
-# Oznaka napovedi po vrstah sledi PREMIUM_FREE_LAUNCH. AI prepoznava dobi
-# "KMALU" namesto "PREMIUM" ves čas, dokler traja brezplačni zagon — plačila
-# (Paddle) še niso priklopljena, cenika sploh ni na strani (glej pricing v
-# build_body), zato bi "PREMIUM" tu obljubljalo nakup, ki ga trenutno ni
-# mogoče izvesti. "Moji alarmi" ostane "PREMIUM" nespremenjeno.
+# Oznake sledijo PREMIUM_FREE_LAUNCH. Ob uvedbi brezplačne prijave (1. 9.
+# 2026, glej #gp-freeauth) so AI prepoznava in moji alarmi enako brezplačni
+# kot napoved po vrstah — vsi trije gredo prek istega POST /premium/login, ki
+# pod to zastavico podeli dostop brez Paddla (glej worker.js). "PREMIUM" bi
+# tu obljubljalo nakup, ki ga trenutno ni mogoče izvesti (cenika med
+# brezplačnim zagonom sploh ni na strani, glej pricing v build_body).
 _FORECAST_BADGE = "BREZPLAČNO" if PREMIUM_FREE_LAUNCH else "PREMIUM"
-_AI_BADGE = "KMALU" if PREMIUM_FREE_LAUNCH else "PREMIUM"
+_AI_BADGE = "BREZPLAČNO" if PREMIUM_FREE_LAUNCH else "PREMIUM"
+_ALERT_BADGE = "BREZPLAČNO" if PREMIUM_FREE_LAUNCH else "PREMIUM"
 GOBE_CATEGORIES = [
     # (ključ, emoji, naslov skupine, [(href, ikona, poudarek, naslov, napovednik, oznaka), ...])
     ("napoved", "🍄", "Napoved", [
@@ -2547,7 +2598,7 @@ GOBE_CATEGORIES = [
     ]),
     ("moje", "♡", "Moje gobe", [
         ("#premium", _FI_ALARM, "#fbbf24", "Moji alarmi",
-         "E-mail, ko pogoji za tvojo vrsto ali območje postanejo ugodni.", "PREMIUM"),
+         "E-mail, ko pogoji za tvojo vrsto ali območje postanejo ugodni.", _ALERT_BADGE),
         ("/gobarska-napoved/dnevnik/", _FI_DNEVNIK, "#2dd4bf", "Gobarjev dnevnik",
          "Najdbe z lokacijo in fotografijo, shranjene le v brskalniku.", None),
     ]),
@@ -2950,8 +3001,10 @@ def build_metodologija_page():
 
 
 def build_dnevnik_page(diary_html):
+    sync_note = ("brezplačno prijavo z e-naslovom" if PREMIUM_FREE_LAUNCH else "naročnino")
     body = ('  <p class="post-meta">Zabeleži najdbo z datumom, vrsto, lokacijo in fotografijo. Vse ostane v '
-            'tvojem brskalniku; naročniki lahko dnevnik sinhronizirajo med napravami.</p>\n'
+            f'tvojem brskalniku; z {sync_note} (razdelek 🔍 AI prepoznava gobe na '
+            '<a href="/gobarska-napoved/">glavni strani</a>) pa dnevnik sinhroniziraš med napravami.</p>\n'
             + diary_html)
     return subpage_shell(
         "dnevnik", "Gobarjev dnevnik",
@@ -3475,6 +3528,19 @@ def build_body(rules, premium, free):
         for i, s in enumerate(home["days"][0]["species"][:5]))
     premium_block = f'''  <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
+  ''' + (f'''<div id="gp-freeauth" class="gp-diary" hidden>
+    <p class="gp-diary-priv" style="margin-bottom:.5rem">🔓 <b>AI prepoznava, moji alarmi in sinhronizacija dnevnika so
+    ob zagonu sezone brezplačni za vse</b> — vpiši e-naslov (brez gesla, brez plačila) in dobiš povezavo za dostop,
+    ki velja na vseh tvojih napravah.</p>
+    <div class="gp-diary-row">
+      <input type="text" id="gp-freeauth-website" name="website" autocomplete="off" tabindex="-1"
+        style="position:absolute;left:-9999px" aria-hidden="true">
+      <input type="email" id="gp-freeauth-email" placeholder="tvoj@e-naslov.si" autocomplete="email"
+        style="flex:1;min-width:200px">
+      <button type="button" class="gp-cta" id="gp-freeauth-btn">Pošlji brezplačno povezavo</button>
+    </div>
+    <div id="gp-freeauth-msg" class="gp-msg"></div>
+  </div>''' if PREMIUM_FREE_LAUNCH else "") + f'''
   <div id="gp-identify" class="gp-ai-card" hidden>
     <div class="gp-ai-banner">
       <span class="gp-ai-badge">✨ AI</span>
@@ -3680,8 +3746,10 @@ def build_body(rules, premium, free):
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
          "verjetna povsod."),
         ("Ali napoved po vrstah kaj stane?",
-         "Ob zagonu gobarske sezone je zaenkrat brezplačna za vse obiskovalce, brez prijave. AI prepoznava gobe iz "
-         "fotografije in e-mail alarmi ob ugodnih pogojih ostajajo del naročnine, ki jo dodamo pozneje."
+         "Ob zagonu gobarske sezone je ves MeteoGobar Premium brezplačen za vse. Napoved po vrstah vidiš brez "
+         "prijave; za AI prepoznavo gobe iz fotografije, e-mail alarme ob ugodnih pogojih in sinhronizacijo "
+         "dnevnika med napravami vpiši samo e-naslov (razdelek 🔍 AI prepoznava gobe) — brez gesla in brez plačila, "
+         "dobiš povezavo za dostop."
          ) if PREMIUM_FREE_LAUNCH else
         ("Kako plačam in dostopam?",
          "Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — "

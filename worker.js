@@ -5084,7 +5084,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // ── /premium (gobarska napoved — plačljivi dostop) ──────
       //   POST /premium/data      Bearer PREMIUM_SYNC_KEY → store forecast JSON (from GitHub Action)
       //   POST /premium/webhook   Paddle Billing notification (signature-verified)
-      //   POST /premium/login     { email } → magic link via Resend
+      //   POST /premium/login     { email } → magic link via Resend. Ko je
+      //                           env.PREMIUM_FREE_LAUNCH="true" in (e)poštni
+      //                           naslov (še) nima aktivne naročnine, se mu tu
+      //                           samodejno podeli brezplačna ("brezplacno",
+      //                           glej FREE_LAUNCH_DAYS spodaj) — brez Paddla.
+      //                           To je edini vratar za identify/diary/alerts
+      //                           (vsi gredo skozi _authedSub()), zato ta
+      //                           zastavica med sezonskim zagonom odpre čisto
+      //                           vse premium zmožnosti, ne le /premium/forecast.
       //   GET  /premium/verify    Bearer token → { ok, plan, expires }
       //   GET  /premium/forecast  Bearer token → premium forecast JSON
       //   GET  /premium/alerts    Bearer token → saved custom alert rules
@@ -5103,6 +5111,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const TOKEN_TTL_S = 60 * 60 * 24 * 90;
         const LOGIN_RL_MAX = 5;
         const LOGIN_RL_TTL_S = 15 * 60; // sekund — isto okno kot gallery admin lockout
+        // Sezonski zagon — glej PREMIUM_FREE_LAUNCH v tools/generate_gobe_page.py.
+        // Ko je true, /premium/login spodaj brezplačno podeli naročnino (ni
+        // Paddle nakupa), ki traja do konca cele naslednje sezone.
+        const FREE_LAUNCH = String(env?.PREMIUM_FREE_LAUNCH || "").toLowerCase() === "true";
+        const FREE_LAUNCH_GRANT_DAYS = 396; // ~13 mesecev — čez celo naslednjo gobarsko sezono
 
         function _json(obj, status) {
           return new Response(JSON.stringify(obj), {
@@ -5265,14 +5278,30 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             }
             await kv.put(rlKey, String(count + 1), { expirationTtl: LOGIN_RL_TTL_S });
           }
-          const sub = await _subFor(email);
-          if (sub?.expires && new Date(sub.expires) > new Date()) {
+          let sub = await _subFor(email);
+          const hasAccess = sub?.expires && new Date(sub.expires) > new Date();
+          if (!hasAccess && FREE_LAUNCH) {
+            // Brezplačen zagon: ni treba plačati, da dobiš dostop — vsak
+            // e-naslov, ki (še) nima naročnine, jo tu dobi brezplačno. To
+            // odklene identify/diary/alerts enako kot pravo naročnino, ker vsi
+            // gredo skozi isti _authedSub().
+            const now = new Date();
+            const expires = new Date(now.getTime() + FREE_LAUNCH_GRANT_DAYS * 864e5);
+            sub = { email, plan: "brezplacno", expires: expires.toISOString(), customer_id: null, updated: now.toISOString() };
+            await kv.put(`premium:sub:${email}`, JSON.stringify(sub));
+          }
+          const granted = sub?.expires && new Date(sub.expires) > new Date();
+          if (granted) {
             const tok = await _newToken(email);
-            ctx.waitUntil(_sendMail(email, "Povezava do gobarske napovedi Premium 🍄",
+            ctx.waitUntil(_sendMail(email, "Povezava do gobarske napovedi 🍄",
               _magicLinkMail(`${PAGE_URL}?token=${tok}`)));
           }
-          // Same answer either way — don't reveal who is subscribed
-          return _json({ ok: true, msg: "Če je e-naslov naročen, smo nanj poslali povezavo za dostop." });
+          // FREE_LAUNCH always grants on a valid address, so the response can
+          // say so outright; outside it, same neutral answer either way so a
+          // caller can't use this to learn who is subscribed.
+          return _json({ ok: true, msg: (granted && FREE_LAUNCH)
+            ? "Povezavo za dostop smo poslali na tvoj e-naslov — preveri tudi vsiljeno pošto."
+            : "Če je e-naslov naročen, smo nanj poslali povezavo za dostop." });
         }
 
         // ── GET /premium/verify — is this token still good?
@@ -5283,13 +5312,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         // ── GET /premium/forecast — the paid payload
-        // Sezonski zagon: ko je env.PREMIUM_FREE_LAUNCH="true" (wrangler.toml),
-        // gre napoved ven brez žetona — glej PREMIUM_FREE_LAUNCH v
-        // tools/generate_gobe_page.py. AI prepoznava, alarmi in dnevnik ostanejo
-        // za pravim naročniškim žetonom ne glede na to zastavico.
+        // Sezonski zagon: ko je FREE_LAUNCH true (env.PREMIUM_FREE_LAUNCH v
+        // wrangler.toml), gre napoved ven brez žetona sploh — glej
+        // PREMIUM_FREE_LAUNCH v tools/generate_gobe_page.py. Identify, diary in
+        // alerts spodaj še vedno zahtevajo žeton, a pod isto zastavico ga
+        // /premium/login zdaj podeli brezplačno (glej FREE_LAUNCH zgoraj), zato
+        // je med sezonskim zagonom brezplačno tudi vse, kar žeton zahteva.
         if (path === "/premium/forecast" && request.method === "GET") {
-          const freeLaunch = String(env?.PREMIUM_FREE_LAUNCH || "").toLowerCase() === "true";
-          if (!freeLaunch) {
+          if (!FREE_LAUNCH) {
             const sub = await _authedSub();
             if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
           }

@@ -13,22 +13,34 @@ Stran /gobarska-napoved/ ──token──▶ Worker /premium/forecast ──▶
 Brez uporabniških računov: e-naslov + žeton (magic link, 90 dni). Dostop poteče
 z naročnino (`expires` v KV), žetona ni treba preklicevati.
 
-## 0. Sezonski zagon (25. 8. 2026) — napoved je zaenkrat brezplačna
+## 0. Sezonski zagon (25. 8. 2026, razširjen na ves Premium 1. 9. 2026)
 
 Paddle spodaj še ni priklopljen (`PADDLE_CLIENT_TOKEN` prazen), gobarska sezona
-pa se je začela, zato je 7-dnevna napoved po vrstah zaenkrat na voljo vsem brez
-prijave — `PREMIUM_FREE_LAUNCH = "true"` v `wrangler.toml` odpre
-`GET /premium/forecast` v worker.js brez žetona, `PREMIUM_FREE_LAUNCH = True`
-na vrhu `tools/generate_gobe_page.py` pa izpusti lock in cenik ter doda opombo
-"zaenkrat brezplačno". AI prepoznava, moji alarmi in sinhronizacija dnevnika
-ostanejo za pravim naročniškim žetonom ne glede na to zastavico — spodnji
-koraki (Paddle) jih pripravijo za prodajo.
+pa se je začela, zato je **cel MeteoGobar Premium zaenkrat brezplačen za
+vse** — ne le napoved po vrstah, ampak tudi AI prepoznava, moji alarmi in
+sinhronizacija dnevnika:
+
+- `PREMIUM_FREE_LAUNCH = "true"` v `wrangler.toml` odpre `GET
+  /premium/forecast` v worker.js brez žetona — 7-dnevna napoved po vrstah je
+  vidna vsem, brez kakršne koli prijave.
+- Ista zastavica naredi `POST /premium/login` brezplačen: e-naslov, ki (še)
+  nima naročnine, jo tam dobi takoj, brez Paddle nakupa (plan `"brezplacno"`,
+  velja ~13 mesecev — glej `FREE_LAUNCH_GRANT_DAYS` v worker.js). AI
+  prepoznava, alarmi in dnevnik sinhronizacija gredo vsi skozi isti
+  `_authedSub()` kot pravi naročniki, zato jih ta brezplačna prijava enako
+  odklene — ni ločenega "premium brez plačila" mehanizma za vsakega posebej.
+- `PREMIUM_FREE_LAUNCH = True` na vrhu `tools/generate_gobe_page.py` izpusti
+  lock in cenik, doda opombo "zaenkrat brezplačno" in izriše brezplačno
+  prijavno polje `#gp-freeauth` (e-naslov → `POST /premium/login` → magic
+  link) nad razdelkoma AI prepoznave in alarmov.
 
 Ko je Paddle pripravljen za pravi zagon plačevanja: odstrani
 `PREMIUM_FREE_LAUNCH` iz `wrangler.toml` (ali nastavi na `"false"`), v
 `generate_gobe_page.py` nastavi `PREMIUM_FREE_LAUNCH = False` in ponovno
-generiraj stran (`python3 tools/generate_gobe_page.py`) — izvirni lock in
-cenik se vrneta nespremenjena.
+generiraj stran (`python3 tools/generate_gobe_page.py`) — izvirni lock,
+cenik in pravi naročniški paywall (vključno za identify/alerts/dnevnik) se
+vrnejo nespremenjeni; obstoječi `plan:"brezplacno"` zapisi v KV preprosto
+potečejo ob svojem `expires` in se ne obnavljajo.
 
 ## 1. Paddle (plačila, merchant-of-record)
 
