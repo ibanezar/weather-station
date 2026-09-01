@@ -9139,7 +9139,7 @@ function setHeroCond(cond){
 }
 
 // ── Mesh gradient canvas ──────────────────────────────────
-let _meshCtx=null,_meshCanvas=null,_meshNodes=[],_meshAnimId=null,_meshFrame=0;
+let _meshCtx=null,_meshCanvas=null,_meshNodes=[],_meshAnimId=null;
 let _meshWindAngle=0,_meshWindSpeed=0.5;
 
 const MESH_DEFS=[
@@ -9169,11 +9169,9 @@ function meshTimeOverride(t){
   return null;
 }
 
-function _meshDraw(){
-  if(_animPaused||!_meshCtx||!_meshCanvas){_meshAnimId=null;return;}
+function _meshRender(){
+  if(!_meshCtx||!_meshCanvas)return;
   const ctx=_meshCtx,W=_meshCanvas.width,H=_meshCanvas.height;
-  // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
-  if(_meshFrame%3!==0&&navigator.maxTouchPoints>0){_meshFrame++;_meshAnimId=requestAnimationFrame(_meshDraw);return;}
   ctx.clearRect(0,0,W,H);
   _meshNodes.forEach(n=>{
     const x=n.x*W,y=n.y*H,r=n.r*Math.max(W,H)*0.85;
@@ -9181,15 +9179,20 @@ function _meshDraw(){
     g.addColorStop(0,n.color);g.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   });
-  if(_meshFrame%3===0){
-    const spd=_meshWindSpeed*.00006,dx=Math.sin(_meshWindAngle)*spd,dy=-Math.cos(_meshWindAngle)*spd;
-    _meshNodes.forEach(n=>{
-      n.x+=dx+n.vx;n.y+=dy+n.vy;
-      if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
-      if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
-    });
-  }
-  _meshFrame++;
+}
+function _meshDraw(){
+  if(_animPaused||!_meshCtx||!_meshCanvas){_meshAnimId=null;return;}
+  // Continuous drift is disabled on touch devices to reduce heat — same
+  // treatment as .blob in style.css (see @media(pointer:coarse) there).
+  // Colour still updates via _meshRender(), called from updateMeshColors().
+  if(navigator.maxTouchPoints>0){_meshRender();_meshAnimId=null;return;}
+  _meshRender();
+  const spd=_meshWindSpeed*.00006,dx=Math.sin(_meshWindAngle)*spd,dy=-Math.cos(_meshWindAngle)*spd;
+  _meshNodes.forEach(n=>{
+    n.x+=dx+n.vx;n.y+=dy+n.vy;
+    if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
+    if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
+  });
   _meshAnimId=requestAnimationFrame(_meshDraw);
 }
 
@@ -9199,7 +9202,7 @@ function initMeshCanvas(){
   _meshCanvas=c;
   _meshCtx=c.getContext('2d');
   c.style.opacity = meshOpacity();
-  const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;};
+  const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight;_meshRender();};
   resize();
   window.addEventListener('resize',resize);
   _meshNodes=MESH_DEFS.map((d,i)=>({
@@ -9219,6 +9222,9 @@ function updateMeshColors(cond,windDir,windSpeed){
   const override=meshTimeOverride(t);
   const palette=override||(MESH_PALETTES[cond]||MESH_PALETTES.cloudy);
   _meshNodes.forEach((n,i)=>{n.color=palette[i]||palette[0];});
+  // The animation loop is stopped on touch devices (see _meshDraw) — redraw
+  // once here so a colour change still reaches the canvas.
+  if(!_meshAnimId)_meshRender();
 }
 
 function updateBgFromObs(obs){
