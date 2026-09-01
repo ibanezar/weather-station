@@ -34,6 +34,24 @@ sinhronizacija dnevnika:
   prijavno polje `#gp-freeauth` (e-naslov → `POST /premium/login` → magic
   link) nad razdelkoma AI prepoznave in alarmov.
 
+**AI prepoznava (`POST /premium/identify`) teče na Cloudflare Workers AI, ne
+na plačljivem Anthropic API.** Pred 1. 9. 2026 je klicala Claude vision
+(`ANTHROPIC_KEY`) — ob brezplačnem dostopu za vse bi to pomenilo neomejene
+API stroške brez naročnine, ki bi jih pokrila. Zdaj kliče
+`@cf/moondream/moondream3.1-9B-A2B` prek `env.AI` binding (`[ai]` v
+`wrangler.toml`), ki ima 10.000 brezplačnih "Neuronov" na dan (resetira se ob
+00:00 UTC) — brez ločenega ključa ali plačila, isti Cloudflare račun kot ta
+Worker. `IDENTIFY_DAILY_CAP` (`wrangler.toml`, privzeto 50) je dodatna
+varovalka pod to brezplačno kvoto — ko je dosežena, endpoint vrne 429 z
+razlago namesto da bi tvegal doplačilo, tudi na Workers Paid planu (kjer bi
+Workers AI presežek dejansko zaračunal, $0.011/1.000 Neuronov).
+`ANTHROPIC_KEY` ostane v uporabi le za `/ai-brief` (ločena, trenutno
+neaktivna funkcija) — ni ga več treba nastaviti za gobarski identify.
+Odgovor modela zahteva strogo JSON obliko v pozivu (`question` v
+worker.js) namesto Anthropicovega tool-use; če ga model kdaj ne vrne čisto,
+endpoint vseeno vrne `ok:true` s praznimi kandidati in surovim besedilom v
+`note`, namesto da bi odpovedal.
+
 Ko je Paddle pripravljen za pravi zagon plačevanja: odstrani
 `PREMIUM_FREE_LAUNCH` iz `wrangler.toml` (ali nastavi na `"false"`), v
 `generate_gobe_page.py` nastavi `PREMIUM_FREE_LAUNCH = False` in ponovno

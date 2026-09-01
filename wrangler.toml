@@ -10,6 +10,12 @@ bucket_name = "meteorec-photos"
 binding = "COUNTER_KV"
 id = "ad19629f12a042dd8cd90c64a68662b4"
 
+# POST /premium/identify (AI prepoznava gobe iz fotografije) teče na Workers AI
+# (@cf/moondream/moondream3.1-9B-A2B) — 10.000 brezplačnih Neuronov/dan, brez
+# ločenega ključa/plačila (glej worker.js in IDENTIFY_DAILY_CAP spodaj).
+[ai]
+binding = "AI"
+
 # Stalno beleženje strel (Blitzortung) blizu postaje — glej LightningLogger
 # v worker.js. Durable Object drži eno samo, trajno odhodno WebSocket povezavo
 # (namesto klientske v app.js, ki teče le, dokler ima kdo stran odprto) in
@@ -49,17 +55,22 @@ PREMIUM_SEASON_END = "11-30"
 # Alarm "pogoji optimalni": prag indeksa in najmanjši razmik med obvestili (dni).
 PREMIUM_ALERT_THRESHOLD = "70"
 PREMIUM_ALERT_COOLDOWN_DAYS = "5"
-# Sezonski zagon (25. 8. 2026): Paddle plačevanje zgoraj še ni priklopljeno,
-# gobarska sezona pa se že začenja — dokler je "true", GET /premium/forecast
-# vrne napoved brez žetona (glej worker.js in PREMIUM_FREE_LAUNCH v
-# tools/generate_gobe_page.py, ki mora biti usklajen). AI prepoznava, alarmi
-# in dnevnik ostanejo za pravim žetonom. Odstrani to vrstico (ali nastavi na
-# "false"), ko je Paddle pripravljen za pravi zagon plačevanja.
+# Sezonski zagon (25. 8. 2026, razširjen na ves Premium 1. 9. 2026): Paddle
+# plačevanje zgoraj še ni priklopljeno, zato dokler je "true": GET
+# /premium/forecast vrne napoved brez žetona, POST /premium/login pa vsakemu
+# e-naslovu brez naročnine podeli brezplačno (glej worker.js in
+# PREMIUM_FREE_LAUNCH v tools/generate_gobe_page.py, ki mora biti usklajen) —
+# to odklene tudi identify/alerts/dnevnik, ker gredo vsi skozi isti žeton.
+# Odstrani to vrstico (ali nastavi na "false"), ko je Paddle pripravljen za
+# pravi zagon plačevanja.
 PREMIUM_FREE_LAUNCH = "true"
+# Dnevna varovalka za POST /premium/identify (glej [ai] zgoraj) — pod okvirno
+# brezplačno kvoto Workers AI (10.000 Neuronov/dan), da tudi ob nenadnem
+# zanimanju dan ne preseže brezplačnega. Nastavljivo brez posega v kodo.
+IDENTIFY_DAILY_CAP = "50"
 # Skrivnosti (wrangler secret put …): PREMIUM_SYNC_KEY, PADDLE_WEBHOOK_SECRET,
-# PADDLE_API_KEY (RESEND_API_KEY že obstaja).
-# ANTHROPIC_KEY (wrangler secret put ANTHROPIC_KEY) — potreben za POST /premium/identify
-# (AI prepoznava gobe iz fotografije, Claude vision). Brez njega endpoint vrne 503.
+# PADDLE_API_KEY (RESEND_API_KEY že obstaja). ANTHROPIC_KEY ni več potreben za
+# /premium/identify (glej [ai] zgoraj) — uporablja ga le /ai-brief.
 
 # Samodejni pragovni push alarm — preveri meritve vsakih 5 minut.
 # Drugi urnik (zamaknjen 2 min) je za ICON napoved + sledenje nevihtnim
