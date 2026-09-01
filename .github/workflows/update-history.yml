@@ -101,5 +101,15 @@ jobs:
             MONTH="${{ steps.month.outputs.month }}"
             git add history.json index.html
             git commit -m "chore: posodobi history.json + statično meritev za $MONTH [skip ci]"
+            # index.html pišejo tudi drugi pogosti delovni tokovi (prerender-current.yml
+            # na 15-20 min, ARSO opozorila, storm-map …) — navaden "git push" je zato tu
+            # padel z "rejected (fetch first)" (1. 9. 2026: rekord na vrhu naslovnice se
+            # zato ni posodobil, čeprav je bilo history.json lokalno pravilno osveženo).
+            # Rebase + ponovni poskus, isti vzorec kot prerender-current.yml.
+            for i in 1 2 3 4 5; do
+              git push && exit 0
+              echo "Push zavrnjen, poskus $i — rebase na origin/main in ponovi."
+              git pull --rebase origin main
+            done
             git push
           fi
