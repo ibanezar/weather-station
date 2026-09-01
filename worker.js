@@ -5330,23 +5330,38 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           });
         }
 
-        // ── POST /premium/identify — AI prepoznava gobe iz fotografije (Claude vision)
+        // ── POST /premium/identify — AI prepoznava gobe iz fotografije
+        // Teče na Cloudflare Workers AI (@cf/moondream/moondream3.1-9B-A2B), ne
+        // na plačljivem Anthropic API kot prej — Workers AI ima 10.000
+        // brezplačnih "Neuronov" na dan (resetira se ob 00:00 UTC, isti
+        // Cloudflare račun kot ta Worker, brez ločenega ključa/plačila), kar je
+        // za en klic identify (slika + poziv z bazo vrst) okvirno ducat deset
+        // klicev na dan zastonj. Glej docs/premium-setup.md. IDENTIFY_DAILY_CAP
+        // spodaj je dodatna varovalka pod tem pragom, da tudi ob nenadnem
+        // zanimanju dan ne preseže brezplačne kvote.
         if (path === "/premium/identify" && request.method === "POST") {
           const sub = await _authedSub();
           if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
-          if (!env.ANTHROPIC_KEY) return _json({ error: "AI prepoznava trenutno ni na voljo" }, 503);
+          if (!env.AI) return _json({ error: "AI prepoznava trenutno ni na voljo" }, 503);
+
+          const dailyCap = parseInt(env.IDENTIFY_DAILY_CAP || "50", 10);
+          const dayKey = "identify_daily:" + new Date().toISOString().slice(0, 10);
+          const dayCount = parseInt((await kv.get(dayKey)) || "0", 10) || 0;
+          if (dayCount >= dailyCap) {
+            return _json({ error: "AI prepoznava je za danes razporejena (brezplačna dnevna kvota) — poskusi jutri." }, 429);
+          }
 
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
           const raw = String(body.image || "");
           const m = raw.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/s);
           if (!m) return _json({ error: "Manjka slika (jpeg/png/webp)" }, 400);
-          const [, mediaType, imgB64] = m;
+          const imgB64 = m[2];
           if (imgB64.length > 6_000_000) return _json({ error: "Slika je prevelika" }, 413);
 
           const dbLines = GOBE_SPECIES_DB.map(s =>
             `- ${s.sl} (${s.lat}) — ${s.ed}${s.dbl ? "; dvojnica: " + s.dbl : ""}`).join("\n");
-          const prompt = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
+          const question = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
 
 Referenčna baza vrst te doline (uporabi ta slovenska imena, kadar gre za isto vrsto):
 ${dbLines}
@@ -5357,74 +5372,33 @@ Naloga:
 3. Če obstaja nevarna dvojnica, jo IZRECNO navedi z opozorilom.
 4. Če fotografija ni dovolj jasna, ali gre morda za mušnico (Amanita) ali drug nevaren rod, bodi še posebej previden in to jasno povej.
 
-Rezultat sporoči IZKLJUČNO s klicem orodja "report_identification" — ne piši nobenega besedila izven tega klica.
+Odgovori IZKLJUČNO z enim samim JSON objektom, brez uvoda, brez razlage izven njega in brez markdown ograjic, natanko v tej obliki:
+{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}
+Polje "warning" izpusti (ali pusti prazno), če ni nevarne dvojnice. "candidates" naj bo prazen seznam in "unclear":true, če fotografija ne zadošča za noben predlog.
 
-POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika, naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
+POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
 
-          const tool = {
-            name: "report_identification",
-            description: "Poroča o prepoznanih kandidatih za vrsto gobe na fotografiji.",
-            input_schema: {
-              type: "object",
-              properties: {
-                candidates: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      name_sl: { type: "string" },
-                      name_lat: { type: "string" },
-                      confidence: { type: "string", enum: ["nizka", "srednja", "visoka"] },
-                      reasoning: { type: "string" },
-                      edibility: { type: "string" },
-                      warning: { type: "string" },
-                    },
-                    required: ["name_sl", "confidence", "reasoning", "edibility"],
-                  },
-                },
-                unclear: { type: "boolean" },
-                note: { type: "string" },
-              },
-              required: ["candidates", "unclear", "note"],
-            },
-          };
-
-          let aiRes;
+          let aiData;
           try {
-            aiRes = await fetch("https://api.anthropic.com/v1/messages", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-api-key": env.ANTHROPIC_KEY,
-                "anthropic-version": "2023-06-01",
-              },
-              body: JSON.stringify({
-                model: "claude-sonnet-5",
-                max_tokens: 1024,
-                tools: [tool],
-                tool_choice: { type: "tool", name: "report_identification" },
-                messages: [{
-                  role: "user",
-                  content: [
-                    { type: "image", source: { type: "base64", media_type: mediaType, data: imgB64 } },
-                    { type: "text", text: prompt },
-                  ],
-                }],
-              }),
+            aiData = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+              image: raw, task: "query", question, reasoning: false, max_tokens: 1500,
             });
-          } catch (_) { return _json({ error: "AI storitev ni dosegljiva (omrežje)" }, 502); }
-          if (!aiRes.ok) {
-            let detail = "";
-            try { detail = (await aiRes.json())?.error?.message || ""; } catch (_) {}
-            return _json({ error: "AI storitev ni dosegljiva", upstream_status: aiRes.status, upstream_detail: detail }, 502);
+          } catch (e) { return _json({ error: "AI storitev ni dosegljiva", upstream_detail: String(e) }, 502); }
+
+          const answer = String(aiData?.answer || aiData?.response || "").trim();
+          const jsonMatch = answer.match(/\{[\s\S]*\}/);
+          let parsed = null;
+          if (jsonMatch) { try { parsed = JSON.parse(jsonMatch[0]); } catch (_) { parsed = null; } }
+
+          await kv.put(dayKey, String(dayCount + 1), { expirationTtl: 2 * 86400 });
+
+          if (!parsed || !Array.isArray(parsed.candidates)) {
+            // Model didn't return clean JSON — still hand back something
+            // useful (the raw answer as a note) instead of a hard failure.
+            return _json({ ok: true, candidates: [], unclear: true,
+              note: answer || "AI ni vrnil razpoznavnega odgovora. Poskusi z bolj ostro fotografijo." });
           }
-          const aiData = await aiRes.json();
-          const toolUse = (aiData.content || []).find(c => c.type === "tool_use" && c.name === "report_identification");
-          if (!toolUse || !toolUse.input) {
-            return _json({ error: "Napaka pri obdelavi odgovora", stop_reason: aiData.stop_reason || null }, 500);
-          }
-          const parsed = toolUse.input;
-          return _json({ ok: true, candidates: parsed.candidates || [], unclear: !!parsed.unclear, note: parsed.note || "" });
+          return _json({ ok: true, candidates: parsed.candidates, unclear: !!parsed.unclear, note: parsed.note || "" });
         }
 
         // ── Gobarjev dnevnik: sinhronizacija med napravami (premium) ──────────
