@@ -1,4 +1,9 @@
 {
+  "test-napovedi-2026-08": [
+    "test-napovedi-2026-07",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
+  ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
@@ -20,9 +25,9 @@
     "31-5-c-danes-v-recici-ob-savinji-nato-obrat-dez-in-ohladitev-0713"
   ],
   "test-napovedi-2026-07": [
+    "test-napovedi-2026-08",
     "koliko-bo-danes-zalilo-primerjava-modelov-0807",
-    "tedenska-napoved-24-28-avgust-2026",
-    "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819"
+    "tedenska-napoved-24-28-avgust-2026"
   ],
   "nevihtni-opazovalec-2026-08-25-0236": [
     "nevihtni-opazovalec-2026-07-17-1205",
@@ -125,8 +130,8 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806": [
-    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
+    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816"
   ],
   "je-letosnja-susa-rekordna-kaj-pravi-spi": [
@@ -161,8 +166,8 @@
   ],
   "vremenski-povzetek-julij-2026": [
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-maj-2026",
-    "vremenski-povzetek-april-2026"
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-maj-2026"
   ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
     "max-temperatura-28-junij-2026",
@@ -446,8 +451,8 @@
   ],
   "vremenski-povzetek-junij-2026": [
     "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-april-2026",
-    "vremenski-povzetek-maj-2026"
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-april-2026"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
     "nevihtni-pas-14-julij-2026",
@@ -482,11 +487,11 @@
   "vremenski-povzetek-maj-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-april-2026"
+    "vremenski-povzetek-avgust-2026"
   ],
   "vremenski-povzetek-april-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-maj-2026"
+    "vremenski-povzetek-avgust-2026"
   ]
 }
