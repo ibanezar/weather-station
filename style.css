@@ -1487,6 +1487,9 @@ html[data-mode="simple"] #online-widget{display:none!important}
 /* Share & install buttons */
 .share-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:50%;width:44px;height:44px;padding:0;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;justify-content:center}
 .share-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(77,159,248,.08)}
+.share-btn:disabled{opacity:.55;cursor:default}
+.share-btn.spinning{color:var(--blue);border-color:var(--blue);animation:wx-refresh-spin .8s linear infinite}
+@keyframes wx-refresh-spin{to{transform:rotate(360deg)}}
 .install-btn{display:none;align-items:center;justify-content:center;gap:.3rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:30px;height:44px;padding:0 .7rem;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .install-btn.show{display:inline-flex}
 

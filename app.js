@@ -3927,6 +3927,35 @@ function shareWeather(){
   else{navigator.clipboard.writeText(txt).then(()=>showToast('✓ Kopirano v odložišče!')).catch(()=>showToast('Deljenje ni podprto'));}
 }
 
+// ── Manual refresh ────────────────────────────────────────
+// Nameščena Windows/desktop različica (standalone PWA) lahko obstane odprta
+// ure ali dneve; brskalnik intervale v zavihku v ozadju upočasni ali povsem
+// ustavi (varčevanje z energijo/spanje zavihka), zato spodnji setInterval-i
+// ne pridejo skozi in kartice obtičijo na stari meritvi. Gumb pokliče isti
+// nabor osvežitev ročno, brez ponovnega init() (ta bi podvojil poslušalce
+// dogodkov in platna).
+let _refreshingNow=false;
+async function refreshWeatherNow(){
+  if(_refreshingNow)return;
+  _refreshingNow=true;
+  const btn=document.getElementById('refresh-btn');
+  if(btn){btn.disabled=true;btn.classList.add('spinning');}
+  try{
+    await Promise.all([fetchCurrent(),fetchHourly()]);
+    fetchTextForecast();fetchForecastExtras();fetchComingUp();fetchPrecipNowcast();
+    fetchSevereWeather();fetchMeteoalarm();fetchGoogleAlerts();
+    updateSunArc(LAT,LON);
+    runAdvancedOnly(()=>{fetchValleyDuel();fetchPollen();});
+    _nextRefresh=Date.now()+5*60*1000;
+    showToast('✓ Osveženo');
+  }catch(e){
+    showToast('Osvežitev ni uspela');
+  }finally{
+    _refreshingNow=false;
+    if(btn){btn.disabled=false;btn.classList.remove('spinning');}
+  }
+}
+
 // ── Countdown ─────────────────────────────────────────────
 let _nextRefresh=Date.now()+5*60*1000;
 function updateCountdown(){
