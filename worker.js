@@ -2462,6 +2462,14 @@ export default {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "caption" });
         } else if (mode === "nomodel") {
           raw = await env.AI.run("@cf/llava-hf/llava-1.5-7b-hf", { image: [...new Uint8Array(await (await fetch(testImgUrl)).arrayBuffer())], prompt: "Describe this image" });
+        } else if (mode === "q") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?" });
+        } else if (mode === "qr") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false });
+        } else if (mode === "qrm") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300 });
+        } else if (mode === "qrs") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, stream: false });
         } else {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
