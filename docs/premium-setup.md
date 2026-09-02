@@ -132,6 +132,32 @@ curl -X POST https://weatherireica1.filip-eremita.workers.dev/premium/login \
   -H "Content-Type: application/json" -d '{"email":"kupec@example.com"}'
 ```
 
+## 4a. Pregled prijavljenih e-naslovov
+
+`GET /premium/subscribers` — admin endpoint, isto geslo kot za galerijo
+(`DELETE_SECRET`, isti lockout prek `_galleryAdminAuthed`). Prebere vse
+`premium:sub:<email>` zapise iz KV (e-naslov, plan, kdaj prijavljen/potekel)
+in jih vrne kot JSON, razvrščene od zadnjega dogodka nazaj:
+
+```sh
+curl -s "https://weatherireica1.filip-eremita.workers.dev/premium/subscribers" \
+  -H "Authorization: Bearer $DELETE_SECRET" | python3 -m json.tool
+
+# samo aktivni (plan == brezplacno pomeni prijavo med sezonskim zagonom,
+# ne pravo naročnino — glej PREMIUM_FREE_LAUNCH zgoraj)
+curl -s "https://weatherireica1.filip-eremita.workers.dev/premium/subscribers" \
+  -H "Authorization: Bearer $DELETE_SECRET" \
+  | python3 -c 'import json,sys,datetime as dt; d=json.load(sys.stdin); now=dt.datetime.now(dt.timezone.utc); \
+    [print(s["email"], s["plan"], s["expires"]) for s in d["subscribers"] if s.get("expires") and dt.datetime.fromisoformat(s["expires"].replace("Z","+00:00"))>now]'
+```
+
+Odgovor: `{ subscribers: [...], count, active, truncated, cursor }`. Nad 1000
+zapisov (KV `list()` limit na klic) je `truncated: true` — ponovi klic z
+`?cursor=<cursor>` za naslednjo stran. Zapisi so brani posamezno (N+1 `get()`
+na `list()`), kar je poceni pri trenutni velikosti baze; ob resnični rasti
+naročnikov bi kazalo dodati KV metadata ob `kv.put()` v `/premium/login` in
+`/premium/webhook`, da `list()` sam vrne podatke brez dodatnih branj.
+
 ## 4b. E-mail alarm "moji pogoji" (faza 4 + lastna pravila)
 
 Vsak naročnik si na strani (razdelek 🔔 Moji alarmi) lahko nastavi do 5 lastnih
