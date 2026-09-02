@@ -258,7 +258,7 @@ def dataset_schema(url, observations):
             '"inLanguage":"sl","keywords":["vreme Rečica ob Savinji",'
             '"vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],'
             f'"url":"{full}",'
-            '"creator":{"@type":"Person","name":"Filip Eremita"},'
+            f'"creator":{{"@id":"{SITE}/#person"}},'
             '"license":"https://creativecommons.org/licenses/by/4.0/",'
             '"isAccessibleForFree":true,'
             f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
@@ -335,7 +335,7 @@ def archive_dataset_schema(first_date, last_date):
         "keywords": ["vreme Rečica ob Savinji", "vreme Zgornja Savinjska dolina",
                      "vremenska postaja Savinjska dolina"],
         "temporalCoverage": f"{first_date}/..",
-        "creator": {"@type": "Person", "name": "Filip Eremita"},
+        "creator": {"@id": f"{SITE}/#person"},
         "publisher": {"@type": "Organization", "name": "Meteorec", "url": SITE + "/"},
         "spatialCoverage": {
             "@type": "Place",

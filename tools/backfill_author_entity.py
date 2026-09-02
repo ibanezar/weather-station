@@ -16,6 +16,10 @@ Zamenja natanko besedilo zgoraj z različico, ki vsebuje `url` in `sameAs` —
 enako besedilo, kot ga zdaj pišejo generatorji. Nič drugega na strani se ne
 spremeni (ne vidna vsebina, ne drugi JSON-LD bloki).
 
+Zajame tudi blog/index.html — ta ima ločen, ročno zamrznjen seznam 22 objav
+(`blogPost` v Blog shemi), ki ga noben generator ne vzdržuje, a ima isti bosi
+avtorski zapis v isti obliki, zato ga popravi isti niz.
+
     python3 tools/backfill_author_entity.py            # zapiše spremembe
     python3 tools/backfill_author_entity.py --dry-run   # samo poročilo
 
@@ -36,8 +40,6 @@ NEW = ('"author": { "@type": "Person", "name": "Filip Eremita", '
 def main():
     changed = []
     for path in sorted(glob.glob(os.path.join(ROOT, "blog", "*.html"))):
-        if os.path.basename(path) == "index.html":
-            continue  # ločen, ročno pisan blogPost seznam — glej opombo spodaj
         html = open(path, encoding="utf-8").read()
         n = html.count(OLD)
         if n == 0:
