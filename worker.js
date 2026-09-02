@@ -2452,11 +2452,22 @@ export default {
           const buf = await r.arrayBuffer();
           out.fetched_bytes = buf.byteLength;
           imgArg = [...new Uint8Array(buf)];
+        } else if (mode === "minimal" || mode === "caption" || mode === "nomodel") {
+          imgArg = testImgUrl;
         }
-        const raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-          image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
-          reasoning: false, max_tokens: 300, stream: false,
-        });
+        let raw;
+        if (mode === "minimal") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg });
+        } else if (mode === "caption") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "caption" });
+        } else if (mode === "nomodel") {
+          raw = await env.AI.run("@cf/llava-hf/llava-1.5-7b-hf", { image: [...new Uint8Array(await (await fetch(testImgUrl)).arrayBuffer())], prompt: "Describe this image" });
+        } else {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+            image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
+            reasoning: false, max_tokens: 300, stream: false,
+          });
+        }
         out.ok = true; out.raw = raw;
         return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
       } catch (e) {
