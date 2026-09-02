@@ -73,6 +73,9 @@ CORE = {
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
+    # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
+    # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.
+    "igra/":                     ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
