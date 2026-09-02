@@ -2429,6 +2429,23 @@ export default {
       }
     }
 
+    // ── ZAČASNO: GET /debug-moondream — diagnostika prazne AI prepoznave.
+    // Kliče isti model na javni testni fotografiji, brez avtentikacije, da
+    // vidimo surov odgovor Workers AI. Odstrani po diagnozi.
+    if (path === "/debug-moondream" && request.method === "GET") {
+      if (!env.AI) return new Response(JSON.stringify({ error: "no AI binding" }), { status: 503, headers: { "Content-Type": "application/json" } });
+      const testImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Amanita_muscaria_3_vliegenzwammen_op_rij.jpg/640px-Amanita_muscaria_3_vliegenzwammen_op_rij.jpg";
+      try {
+        const raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+          image: testImg, task: "query", question: "What mushroom is this? Answer in one sentence.",
+          reasoning: false, max_tokens: 300, stream: false,
+        });
+        return new Response(JSON.stringify({ ok: true, raw }), { headers: { "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e), stack: e?.stack || null }), { headers: { "Content-Type": "application/json" } });
+      }
+    }
+
     // /debug-headers — returns all incoming request headers as JSON (no auth required)
     if (path === "/debug-headers") {
       const headers = {};
@@ -5355,23 +5372,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           return new Response(data, {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
           });
-        }
-
-        // ── ZAČASNO: GET /debug-moondream — diagnostika prazne AI prepoznave.
-        // Kliče isti model na javni testni fotografiji, brez avtentikacije, da
-        // vidimo surov odgovor Workers AI. Odstrani po diagnozi.
-        if (path === "/debug-moondream" && request.method === "GET") {
-          if (!env.AI) return _json({ error: "no AI binding" }, 503);
-          const testImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Amanita_muscaria_3_vliegenzwammen_op_rij.jpg/640px-Amanita_muscaria_3_vliegenzwammen_op_rij.jpg";
-          try {
-            const raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-              image: testImg, task: "query", question: "What mushroom is this? Answer in one sentence.",
-              reasoning: false, max_tokens: 300, stream: false,
-            });
-            return _json({ ok: true, raw });
-          } catch (e) {
-            return _json({ ok: false, error: String(e), stack: e?.stack || null });
-          }
         }
 
         // ── POST /premium/identify — AI prepoznava gobe iz fotografije
