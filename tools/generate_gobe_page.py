@@ -14,12 +14,13 @@ Layout:
   * PREMIUM (gated): the forward-looking 7-day, per-species, per-location
     forecast with plain-language explanations. Rendered as a locked placeholder;
     the real content is fetched client-side from the Worker /premium/forecast
-    endpoint only when a valid access token is present — unless PREMIUM_FREE_LAUNCH
-    below is on, in which case everyone gets it free and the lock/pricing UI is
-    skipped. AI identify, alerts and diary sync still sit behind a real access
-    token, but while PREMIUM_FREE_LAUNCH is on that token is free too — the
-    free-signup box (#gp-freeauth) posts an email to Worker /premium/login,
-    which grants it without a Paddle purchase (see worker.js).
+    endpoint only when a valid access token is present. AI identify, alerts
+    and diary sync sit behind the same token. While PREMIUM_FREE_LAUNCH below
+    is on, a token is still required for all of it (forecast included) — it's
+    just free to get: the free-signup box (#gp-freeauth) posts an email to
+    Worker /premium/login, which grants a token without a Paddle purchase (see
+    worker.js). So every visitor still has to leave an email address before
+    seeing the forecast; only the paywall/pricing UI is skipped.
 
 Positioning: the index is an "indeks ugodnosti pogojev" (favourability index),
 never a promise of finds — scientifically honest and it protects against angry
@@ -59,18 +60,21 @@ PRICE_SEASON = "24,99 €"
 
 # Sezonski zagon (25. 8. 2026, razširjen na vse premium zmožnosti 1. 9. 2026):
 # Paddle plačevanje zgoraj še ni priklopljeno (PADDLE_CLIENT_TOKEN prazen),
-# zato je cel MeteoGobar Premium zaenkrat brezplačen za vse: 7-dnevna napoved
-# po vrstah brez prijave, AI prepoznava/moji alarmi/sinhronizacija dnevnika z
+# zato je cel MeteoGobar Premium zaenkrat brezplačen za vse — a vsak
+# obiskovalec mora pred napovedjo pustiti e-naslov: 7-dnevna napoved po
+# vrstah IN AI prepoznava/moji alarmi/sinhronizacija dnevnika gredo vsi za
 # brezplačno prijavo (samo e-naslov, brez plačila — glej #gp-freeauth spodaj
 # in POST /premium/login v worker.js, ki pod to zastavico podeli naročnino
-# brez Paddla). Lock in cenik se ne izrišeta, hero/kartica dobita opombo
-# "zaenkrat brezplačno".
-# Ujema se z env PREMIUM_FREE_LAUNCH v wrangler.toml, ki v worker.js odpre
-# GET /premium/forecast brez žetona IN naredi POST /premium/login brezplačen.
+# brez Paddla). Plačljivi lock/cenik se ne izrišeta, namesto tega dobi
+# napoved svoj brezplačni "vpiši e-naslov" teaser (glej #gp-lock v
+# premium_block spodaj), in hero/kartica dobita opombo "zaenkrat brezplačno".
+# Ujema se z env PREMIUM_FREE_LAUNCH v wrangler.toml, ki v worker.js naredi
+# POST /premium/login brezplačen; GET /premium/forecast žeton zahteva vedno,
+# tudi pod to zastavico (glej /premium/forecast v worker.js).
 # Ko je plačevanje pripravljeno: nastavi na False tukaj, odstrani
 # PREMIUM_FREE_LAUNCH iz wrangler.toml in ponovno generiraj stran — izvirni
-# paywall (vključno z resničnim naročniškim žetonom za identify/alerts/diary)
-# se vrne nespremenjen.
+# paywall (vključno z resničnim naročniškim žetonom za forecast/identify/
+# alerts/diary) se vrne nespremenjen.
 PREMIUM_FREE_LAUNCH = True
 
 MES_FULL = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju",
@@ -1690,26 +1694,14 @@ PAGE_JS = """<script>
         if(freeauth)freeauth.hidden=false;
       });
   }else if(FREE_LAUNCH){
-    // Season-launch mode (PREMIUM_FREE_LAUNCH in generate_gobe_page.py): no
-    // token needed, the Worker serves /premium/forecast to anyone while the
-    // flag is on (see PREMIUM_FREE_LAUNCH in worker.js). AI identify and
-    // alerts still need a token — the free-signup box above gets one
-    // without payment, so show it right away rather than waiting on the
-    // forecast fetch below.
+    // Season-launch mode (PREMIUM_FREE_LAUNCH in generate_gobe_page.py): a
+    // token is still required for /premium/forecast (see worker.js) — it's
+    // just free to get. So without a token, every visitor sees the locked
+    // teaser (#gp-lock, rendered in its free-launch wording) plus the
+    // free-signup box, and nothing is fetched until they get a token via
+    // the magic-link email (which lands back here in the t branch above).
+    if(lock)lock.hidden=false;
     if(freeauth)freeauth.hidden=false;
-    if(content){content.hidden=false;content.innerHTML=skeletonHtml();}
-    fetch(API+"/premium/forecast")
-      .then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){
-        render(d);
-        if(statusEl){
-          statusEl.hidden=false;
-          statusEl.textContent="🎉 Ob zagonu gobarske sezone je MeteoGobar Premium brezplačen za vse.";
-        }
-      })
-      .catch(function(){
-        if(content){content.hidden=true;content.innerHTML="";}
-      });
   }
 
   // ── Paddle.js overlay checkout ──────────────────────────────────────────
@@ -3529,9 +3521,9 @@ def build_body(rules, premium, free):
     premium_block = f'''  <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
   ''' + (f'''<div id="gp-freeauth" class="gp-diary" hidden>
-    <p class="gp-diary-priv" style="margin-bottom:.5rem">🔓 <b>AI prepoznava, moji alarmi in sinhronizacija dnevnika so
-    ob zagonu sezone brezplačni za vse</b> — vpiši e-naslov (brez gesla, brez plačila) in dobiš povezavo za dostop,
-    ki velja na vseh tvojih napravah.</p>
+    <p class="gp-diary-priv" style="margin-bottom:.5rem">🔓 <b>7-dnevna napoved po vrstah, AI prepoznava, moji alarmi
+    in sinhronizacija dnevnika so ob zagonu sezone brezplačni za vse</b> — vpiši e-naslov (brez gesla, brez plačila)
+    in dobiš povezavo za dostop, ki velja na vseh tvojih napravah.</p>
     <div class="gp-diary-row">
       <input type="text" id="gp-freeauth-website" name="website" autocomplete="off" tabindex="-1"
         style="position:absolute;left:-9999px" aria-hidden="true">
@@ -3581,7 +3573,17 @@ def build_body(rules, premium, free):
     </div>
     <div id="gp-alert-msg" class="gp-msg"></div>
   </div>
-  ''' + ("" if PREMIUM_FREE_LAUNCH else f'''<div id="gp-lock" class="gp-lock">
+  ''' + (f'''<div id="gp-lock" class="gp-lock">
+    <span class="gp-tag">🔓 BREZPLAČNO — a šele po prijavi</span>
+    <h3>7-dnevna napoved po vrstah in gozdovih</h3>
+    <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
+    indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, sprožilni dež pred 8–16 dnevi pod pragom,
+    nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.
+    Ob zagonu sezone brezplačno za vse — vpiši e-naslov zgoraj, da odkleneš.</p>
+    <div class="gp-skel">
+{skel_rows}
+    </div>
+  </div>''' if PREMIUM_FREE_LAUNCH else f'''<div id="gp-lock" class="gp-lock">
     <span class="gp-tag">🔒 PREMIUM</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
@@ -3746,10 +3748,10 @@ def build_body(rules, premium, free):
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
          "verjetna povsod."),
         ("Ali napoved po vrstah kaj stane?",
-         "Ob zagonu gobarske sezone je ves MeteoGobar Premium brezplačen za vse. Napoved po vrstah vidiš brez "
-         "prijave; za AI prepoznavo gobe iz fotografije, e-mail alarme ob ugodnih pogojih in sinhronizacijo "
-         "dnevnika med napravami vpiši samo e-naslov (razdelek 🔍 AI prepoznava gobe) — brez gesla in brez plačila, "
-         "dobiš povezavo za dostop."
+         "Ob zagonu gobarske sezone je ves MeteoGobar Premium brezplačen za vse — tudi napoved po vrstah, AI "
+         "prepoznava gobe iz fotografije, e-mail alarmi ob ugodnih pogojih in sinhronizacija dnevnika med napravami. "
+         "Vpiši samo e-naslov (razdelek 🍄 7-dnevna napoved po vrstah) — brez gesla in brez plačila, dobiš povezavo "
+         "za dostop, ki velja na vseh tvojih napravah."
          ) if PREMIUM_FREE_LAUNCH else
         ("Kako plačam in dostopam?",
          "Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — "

@@ -20,19 +20,21 @@ pa se je začela, zato je **cel MeteoGobar Premium zaenkrat brezplačen za
 vse** — ne le napoved po vrstah, ampak tudi AI prepoznava, moji alarmi in
 sinhronizacija dnevnika:
 
-- `PREMIUM_FREE_LAUNCH = "true"` v `wrangler.toml` odpre `GET
-  /premium/forecast` v worker.js brez žetona — 7-dnevna napoved po vrstah je
-  vidna vsem, brez kakršne koli prijave.
-- Ista zastavica naredi `POST /premium/login` brezplačen: e-naslov, ki (še)
-  nima naročnine, jo tam dobi takoj, brez Paddle nakupa (plan `"brezplacno"`,
-  velja ~13 mesecev — glej `FREE_LAUNCH_GRANT_DAYS` v worker.js). AI
-  prepoznava, alarmi in dnevnik sinhronizacija gredo vsi skozi isti
-  `_authedSub()` kot pravi naročniki, zato jih ta brezplačna prijava enako
-  odklene — ni ločenega "premium brez plačila" mehanizma za vsakega posebej.
+- `PREMIUM_FREE_LAUNCH = "true"` v `wrangler.toml` naredi `POST
+  /premium/login` brezplačen: e-naslov, ki (še) nima naročnine, jo tam dobi
+  takoj, brez Paddle nakupa (plan `"brezplacno"`, velja ~13 mesecev — glej
+  `FREE_LAUNCH_GRANT_DAYS` v worker.js). `GET /premium/forecast` žeton
+  zahteva **vedno**, tudi pod to zastavico — 7-dnevna napoved po vrstah je
+  torej brezplačna, a šele po vpisu e-naslova, ne vidna vsem brez prijave.
+  AI prepoznava, alarmi in dnevnik sinhronizacija gredo skozi isti
+  `_authedSub()` kot forecast in kot pravi naročniki, zato jih ta brezplačna
+  prijava enako odklene — ni ločenega "premium brez plačila" mehanizma za
+  vsakega posebej.
 - `PREMIUM_FREE_LAUNCH = True` na vrhu `tools/generate_gobe_page.py` izpusti
   lock in cenik, doda opombo "zaenkrat brezplačno" in izriše brezplačno
   prijavno polje `#gp-freeauth` (e-naslov → `POST /premium/login` → magic
-  link) nad razdelkoma AI prepoznave in alarmov.
+  link) nad razdelkoma AI prepoznave in alarmov — napoved sama ostane
+  zaklenjena (`#gp-lock`, s prilagojenim besedilom) dokler žetona ni.
 
 **AI prepoznava (`POST /premium/identify`) teče na Cloudflare Workers AI, ne
 na plačljivem Anthropic API.** Pred 1. 9. 2026 je klicala Claude vision
