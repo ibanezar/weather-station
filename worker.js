@@ -2472,6 +2472,29 @@ export default {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, stream: false });
         } else if (mode === "qrms") {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300, stream: false });
+        } else if (mode === "long") {
+          const dbLines = GOBE_SPECIES_DB.map(s =>
+            `- ${s.sl} (${s.lat}) — ${s.ed}${s.dbl ? "; dvojnica: " + s.dbl : ""}`).join("\n");
+          const question = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
+
+Referenčna baza vrst te doline (uporabi ta slovenska imena, kadar gre za isto vrsto):
+${dbLines}
+
+Naloga:
+1. Predlagaj 1–3 najverjetnejše vrste (najprej najbolj verjetna), po možnosti iz zgornje baze.
+2. Za vsak predlog: slovensko in latinsko ime, zanesljivost (nizka/srednja/visoka), kratko utemeljitev (barva, oblika, rast, habitat) in užitnost.
+3. Če obstaja nevarna dvojnica, jo IZRECNO navedi z opozorilom.
+4. Če fotografija ni dovolj jasna, ali gre morda za mušnico (Amanita) ali drug nevaren rod, bodi še posebej previden in to jasno povej.
+
+Odgovori IZKLJUČNO z enim samim JSON objektom, brez uvoda, brez razlage izven njega in brez markdown ograjic, natanko v tej obliki:
+{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}
+Polje "warning" izpusti (ali pusti prazno), če ni nevarne dvojnice. "candidates" naj bo prazen seznam in "unclear":true, če fotografija ne zadošča za noben predlog.
+
+POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
+          out.question_len = question.length;
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+            image: imgArg, task: "query", question, reasoning: false, max_tokens: 1500, stream: false,
+          });
         } else {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
