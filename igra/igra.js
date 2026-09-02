@@ -351,8 +351,11 @@
   var sim = null;
   var ui = {
     vir: '', svez: null, phase: 'loading',   // loading | ready | flying | over
-    mode: 'glide', nudge: 0, lastTs: 0, acc: 0, shake: 0, frameNo: 0
+    mode: 'glide', nudge: 0, lastTs: 0, acc: 0, shake: 0, frameNo: 0,
+    trail: [], trailAcc: 0                   // sled leta (barogram med letom)
   };
+  var TRAIL_MAX = 160;      // ~4 km sledi pri vzorčenju spodaj
+  var TRAIL_EVERY = 1.6;    // simulacijske sekunde med točkama
   var held = { circle: false, fast: false };
 
   function fmt(v, d) {
@@ -399,6 +402,8 @@
     ui.vir = vir;
     ui.svez = svezina(level.generated);
     renderConditions();
+    buildRoute();
+    updateHud();
     if (ui.phase === 'loading') { ui.phase = 'ready'; showOverlay('ready'); }
   }
 
@@ -456,14 +461,62 @@
   function sx(m, cam) { return (m - cam.x) / VIEW_W * W; }
   function sy(a, cam) { return (cam.top - a) / VIEW_H * H; }
 
-  function skyColors() {
-    var l = sim.level;
-    var code = l.koda_vremena || 0;
-    if (code === 45 || code === 48) return ['#5c6673', '#9aa3ad'];
-    if ((l.padavine_mm || 0) > 0.7) return ['#2b3a4d', '#4d5f73'];
-    if (code <= 1) return ['#0a3a70', '#82c4f2'];
-    if (code <= 3) return ['#28496c', '#9cbcd6'];
-    return ['#3b4a5a', '#a7b3bf'];
+  // ── Nebo ───────────────────────────────────────────────────────────────
+  // Trije zaustavki namesto dveh: zenit, sredina in soparna plast tik nad
+  // obzorjem. Dvobarvni preliv je bil raven kot stena — prav spodnja svetla
+  // plast je tisto, kar naredi globino.
+  function skyStops() {
+    var l = sim.level, code = l.koda_vremena || 0;
+    if (code === 45 || code === 48) return ['#6a727d', '#8f97a1', '#b9bfc6'];
+    if ((l.padavine_mm || 0) > 0.7) return ['#1e2b3c', '#3a4c62', '#5d7085'];
+    if (code <= 1) return ['#0a3670', '#3d8fd4', '#a9d6f2'];
+    if (code <= 3) return ['#1e4472', '#5f92bf', '#bcd4e4'];
+    return ['#33455a', '#6c7f93', '#aab5c0'];
+  }
+
+  function drawSky(cam) {
+    var st = skyStops();
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, st[0]);
+    g.addColorStop(0.62, st[1]);
+    g.addColorStop(1, st[2]);
+    ctx.fillStyle = g;
+    ctx.fillRect(-12, -12, W + 24, H + 24);
+
+    var code = sim.level.koda_vremena || 0;
+    if (code <= 3 && (sim.level.padavine_mm || 0) < 0.7) drawSun();
+    drawHaze(cam);
+  }
+
+  // Sonce stoji glede na uro vrhunca termike — ob 13h visoko, ob 17h nizko.
+  // Ne premika se s kamero: je nebesno telo, ne del pokrajine.
+  function drawSun() {
+    var ura = sim.level.ura ? parseInt(sim.level.ura.slice(0, 2), 10) : 13;
+    var t = clamp((ura - 6) / 12, 0, 1);          // 6h → vzhod, 18h → zahod
+    var x = W * (0.12 + 0.76 * t);
+    var y = H * (0.52 - 0.40 * Math.sin(Math.PI * t));
+    var r = Math.max(11, W * 0.017);
+    var glow = ctx.createRadialGradient(x, y, r * 0.6, x, y, r * 7);
+    glow.addColorStop(0, 'rgba(255,236,180,.42)');
+    glow.addColorStop(0.35, 'rgba(255,226,150,.13)');
+    glow.addColorStop(1, 'rgba(255,226,150,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(x, y, r * 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,247,214,.95)';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Soparna plast nad dolino: v resnici je meja konvekcijske plasti pogosto
+  // vidna kot rjavkast rob, in prav tam se termika ustavi.
+  function drawHaze(cam) {
+    var hy = sy(sim.ceilASL, cam);
+    if (hy < -60 || hy > H + 60) return;
+    var g = ctx.createLinearGradient(0, hy - H * 0.05, 0, hy + H * 0.16);
+    g.addColorStop(0, 'rgba(214,190,150,0)');
+    g.addColorStop(0.4, 'rgba(214,190,150,.10)');
+    g.addColorStop(1, 'rgba(214,190,150,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, hy - H * 0.05, W, H * 0.21);
   }
 
   function draw() {
@@ -473,24 +526,22 @@
     if (ui.shake > 0.02 && !reduceMotion) {
       ctx.translate((Math.random() - 0.5) * ui.shake * 5, (Math.random() - 0.5) * ui.shake * 5);
     }
-    var cols = skyColors();
-    var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, cols[0]); g.addColorStop(1, cols[1]);
-    ctx.fillStyle = g;
-    ctx.fillRect(-12, -12, W + 24, H + 24);
 
-    drawCeiling(cam, l);
+    drawSky(cam);
+    drawRidges(cam);
     for (var i = 0; i < sim.clouds.length; i++) {
       var c = sim.clouds[i], cxp = sx(c.km * 1000, cam);
-      if (cxp < -300 || cxp > W + 300) continue;
+      if (cxp < -320 || cxp > W + 320) continue;
       drawCumulus(cxp, sy(c.alt, cam), c.w / VIEW_W * W, c.h / VIEW_H * H);
     }
+    drawCeiling(cam, l);
     drawThermals(cam, l);
     drawTerrain(cam);
     if ((l.padavine_mm || 0) > 0.15) drawRain(l);
+    drawTrail(cam);
     drawGlider(cam);
     ctx.restore();
-    drawInstruments();
+    drawInstruments(cam);
   }
 
   function drawLoading() {
@@ -507,86 +558,211 @@
   function drawCeiling(cam, l) {
     var cy = sy(sim.ceilASL, cam);
     if (cy < -40 || cy > H) return;
-    ctx.strokeStyle = 'rgba(255,255,255,.32)';
-    ctx.setLineDash([7, 6]); ctx.lineWidth = 1.2;
+    ctx.strokeStyle = 'rgba(255,255,255,.30)';
+    ctx.setLineDash([6, 7]); ctx.lineWidth = 1.1;
     ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(255,255,255,.62)';
-    ctx.font = '600 11px system-ui,sans-serif';
     // Padalo je vedno pri ~33 % širine, zato gre oznaka desno od njega —
     // sicer se ob prehodu skozi strop besedilo in krilo prekrijeta.
-    ctx.fillText((l.baza_m ? 'baza oblakov ' : 'vrh termike ') +
-      Math.round(sim.ceilASL) + ' m', W * 0.52, Math.max(12, cy - 6));
+    var txt = (l.baza_m ? 'baza oblakov ' : 'vrh termike ') + Math.round(sim.ceilASL) + ' m';
+    ctx.font = '600 11px system-ui,sans-serif';
+    var tw = ctx.measureText(txt).width;
+    // Desno je vario stolpec (~38 px), levo pri 33 % padalo — oznaka mora med
+    // njiju, na ozkem zaslonu pa se umakne levo.
+    var tx = Math.max(W * 0.36, Math.min(W * 0.52, W - 42 - tw));
+    var ty = Math.max(13, cy - 7);
+    ctx.fillStyle = 'rgba(4,7,14,.34)';
+    ctx.fillRect(tx - 4, ty - 10, tw + 8, 14);
+    ctx.fillStyle = 'rgba(255,255,255,.78)';
+    ctx.fillText(txt, tx, ty);
   }
 
+  // Kumulus s senčenjem: bela kapa zgoraj, siva ravna baza spodaj. Ravno po
+  // ravni, temni bazi pilot prepozna delujoč oblak.
   function drawCumulus(x, y, w, h) {
-    ctx.fillStyle = 'rgba(255,255,255,.90)';
+    ctx.save();
+    var g = ctx.createLinearGradient(0, y - h * 0.6, 0, y + h * 0.55);
+    g.addColorStop(0, 'rgba(255,255,255,.97)');
+    g.addColorStop(0.62, 'rgba(238,244,250,.95)');
+    g.addColorStop(1, 'rgba(178,193,211,.92)');
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.ellipse(x, y, w * 0.5, h * 0.55, 0, 0, Math.PI * 2);
-    ctx.ellipse(x - w * 0.26, y + h * 0.16, w * 0.3, h * 0.4, 0, 0, Math.PI * 2);
-    ctx.ellipse(x + w * 0.28, y + h * 0.14, w * 0.32, h * 0.42, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y - h * 0.10, w * 0.40, h * 0.52, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - w * 0.27, y + h * 0.10, w * 0.29, h * 0.40, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + w * 0.29, y + h * 0.08, w * 0.31, h * 0.42, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - w * 0.08, y + h * 0.20, w * 0.34, h * 0.34, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(120,145,175,.35)';
+    // Ravna, temnejša baza.
+    ctx.fillStyle = 'rgba(120,140,166,.55)';
     ctx.beginPath();
-    ctx.ellipse(x, y + h * 0.42, w * 0.46, h * 0.2, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y + h * 0.36, w * 0.44, h * 0.13, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
   }
 
+  // Grebeni v ozadju: dve plasti z različno paralakso. Ena sama ploskev je
+  // bila videti kot prazna klanina — z dvema dolina dobi globino.
+  // Grebeni v ozadju NISO izpeljani iz profila poti: ta opisuje dno doline, po
+  // katerem letimo, ne gora ob njej. Ko sem jih poskusil dobiti z raztegom
+  // profila, so se skrili za bližnje pobočje (ali pa zrasli čez vse nebo).
+  // Zato so lastna silhueta — vsota treh sinusov, determinističnih iz svetovne
+  // lege, v višinskem pasu, ki ustreza obronkom Savinjske doline.
+  // Vrhovi ostajajo v pasu ~650–1100 m: obronki Savinjske doline se nad dnom
+  // dvignejo za nekaj sto metrov, ne za kilometer in pol. Z večjimi amplitudami
+  // je greben zapolnil zgornjo polovico zaslona in šel celo čez sonce.
+  var RIDGES = [
+    { par: 0.55, base: 880, a: [130, 62, 30, 13], f: [0.55, 1.30, 2.90, 6.70],
+      p: [0.7, 2.1, 4.3, 1.2], col: 'rgba(104,142,180,.40)' },
+    { par: 0.76, base: 690, a: [105, 50, 24, 11], f: [0.80, 1.90, 3.70, 8.30],
+      p: [1.9, 0.4, 3.1, 5.6], col: 'rgba(56,92,126,.54)' }
+  ];
+  function ridgeElev(km, L) {
+    // Četrti, visokofrekvenčni člen da grebenu robatost — s tremi je bil
+    // videti kot sipina, ne kot hrib.
+    return L.base
+      + Math.sin(km * L.f[0] + L.p[0]) * L.a[0]
+      + Math.sin(km * L.f[1] + L.p[1]) * L.a[1]
+      + Math.sin(km * L.f[2] + L.p[2]) * L.a[2]
+      + Math.sin(km * L.f[3] + L.p[3]) * L.a[3];
+  }
+  function drawRidges(cam) {
+    for (var li = 0; li < RIDGES.length; li++) {
+      var L = RIDGES[li];
+      ctx.fillStyle = L.col;
+      ctx.beginPath();
+      ctx.moveTo(-2, H + 8);
+      for (var px = -2; px <= W + 2; px += 10) {
+        var km = (cam.x * L.par + px / W * VIEW_W) / 1000;
+        ctx.lineTo(px, sy(ridgeElev(km, L), cam));
+      }
+      ctx.lineTo(W + 2, H + 8);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // Stebri: mehak stožec PLUS dvigajoči se delci. Sam preliv je bil amorfna
+  // packa; delci povedo tudi, kako močno vleče — hitrost dviga je sorazmerna
+  // moči stebra, tako kot pri variu.
   function drawThermals(cam, l) {
     // Ob modrem dnevu so stebri komaj zaznavni — takrat se leti po variu in
     // po terenu, ne po očeh. Prav to je razlika, ki jo igra uči. Čisto
     // nevidni pa ne smejo biti: pravi pilot ima ob modrem dnevu namige, ki
     // jih tu ni mogoče narisati (ptice, druga padala, občutek krila).
-    var vis = l.baza_m ? 0.19 : 0.10;
+    var vis = l.baza_m ? 0.16 : 0.08;
     var offLow = clamp(sim.tiltPerM * 150, -2.5, 2.5);
     var offHigh = clamp(sim.tiltPerM * sim.ceilAGLref, -2.5, 2.5);
+    var ty = sy(sim.ceilASL, cam);
     for (var i = 0; i < sim.thermals.length; i++) {
       var t = sim.thermals[i];
       var xb = sx((t.km + offLow) * 1000, cam), xt = sx((t.km + offHigh) * 1000, cam);
       if (Math.max(xb, xt) < -200 || Math.min(xb, xt) > W + 200) continue;
-      var gy = sy(terrainAt(sim, t.km), cam), ty = sy(sim.ceilASL, cam);
+      var gy = sy(terrainAt(sim, t.km), cam);
       var wb = t.r0 * 0.7 / VIEW_W * W, wt = t.r0 * 1.5 / VIEW_W * W;
       var rel = clamp(t.moc / Math.max(l.termika_ms, 0.1), 0, 1.5);
       var gr = ctx.createLinearGradient(0, gy, 0, ty);
-      gr.addColorStop(0, 'rgba(245,158,11,0)');
-      gr.addColorStop(0.4, 'rgba(245,158,11,' + (vis * rel).toFixed(3) + ')');
-      gr.addColorStop(1, 'rgba(245,158,11,0)');
+      gr.addColorStop(0, 'rgba(255,196,90,0)');
+      gr.addColorStop(0.35, 'rgba(255,196,90,' + (vis * rel).toFixed(3) + ')');
+      gr.addColorStop(1, 'rgba(255,196,90,0)');
       ctx.fillStyle = gr;
       ctx.beginPath();
       ctx.moveTo(xb - wb, gy); ctx.lineTo(xt - wt, ty);
       ctx.lineTo(xt + wt, ty); ctx.lineTo(xb + wb, gy);
       ctx.closePath(); ctx.fill();
+
+      if (reduceMotion) continue;
+      // Delci se dvigajo od tal proti stropu; hitrejši so v močnejšem stebru.
+      var n = 7, span = gy - ty;
+      if (span <= 0) continue;
+      ctx.fillStyle = 'rgba(255,222,150,' + (0.30 + 0.34 * (l.baza_m ? 1 : 0.45)).toFixed(2) + ')';
+      for (var k = 0; k < n; k++) {
+        var ph = ((sim.simTime * (0.05 + 0.045 * rel) + k / n + i * 0.37) % 1);
+        var py = gy - span * ph;
+        var f = ph;                                   // delež poti navzgor
+        var pw = wb + (wt - wb) * f;
+        var px2 = (xb + (xt - xb) * f) + Math.sin((ph * 7 + i) * 2.1) * pw * 0.42;
+        var rr = 1.5 + 1.6 * rel * (1 - f * 0.5);
+        ctx.globalAlpha = Math.sin(Math.PI * ph) * 0.9;
+        ctx.beginPath(); ctx.arc(px2, py, rr, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
   }
 
   function drawTerrain(cam) {
-    ctx.fillStyle = 'rgba(20,40,64,.32)';
-    ctx.beginPath(); ctx.moveTo(0, H + 6);
-    for (var px = 0; px <= W; px += 14) {
-      var km = (cam.x + px / W * VIEW_W) / 1000;
-      ctx.lineTo(px, sy(terrainAt(sim, km * 0.85 + 1.6) * 1.3 + 200, cam));
+    // Sam profil.
+    var pts = [], step = 4;
+    for (var p = -2; p <= W + 2; p += step) {
+      pts.push([p, sy(terrainAt(sim, (cam.x + p / W * VIEW_W) / 1000), cam)]);
     }
-    ctx.lineTo(W, H + 6); ctx.closePath(); ctx.fill();
+    var g = ctx.createLinearGradient(0, sy(1500, cam), 0, H);
+    g.addColorStop(0, '#3c5a3f');
+    g.addColorStop(0.45, '#24402a');
+    g.addColorStop(1, '#14251a');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(-2, H + 8);
+    for (var i = 0; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(W + 2, H + 8);
+    ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = '#16281c'; ctx.strokeStyle = '#3f7a4d'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, H + 6);
-    for (var p = 0; p <= W; p += 5) {
-      ctx.lineTo(p, sy(terrainAt(sim, (cam.x + p / W * VIEW_W) / 1000), cam));
+    // Sončni rob na grebenu.
+    ctx.strokeStyle = 'rgba(150,205,150,.55)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (var j = 0; j < pts.length; j++) {
+      if (j === 0) ctx.moveTo(pts[j][0], pts[j][1]); else ctx.lineTo(pts[j][0], pts[j][1]);
     }
-    ctx.lineTo(W, H + 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.stroke();
 
+    drawForest(cam);
+    drawPlaces(cam);
+  }
+
+  // Gozd: drobni stožci, pripeti na SVETOVNE koordinate (ne na piksle), da ob
+  // premikanju ne migotajo. Le nad ~420 m — nižje je dolina s polji.
+  function drawForest(cam) {
+    if (W < 340) return;
+    var stepM = 55;
+    var from = Math.floor(cam.x / stepM) * stepM;
+    ctx.fillStyle = 'rgba(20,48,28,.85)';
+    for (var m = from; m < cam.x + VIEW_W + stepM; m += stepM) {
+      var km = m / 1000;
+      var e = terrainAt(sim, km);
+      if (e < 420) continue;
+      // Determinističen odmik iz svetovne lege — brez naključja na okvir.
+      var j = Math.sin(m * 0.017) * 0.5 + 0.5;
+      var x = sx(m + j * stepM * 0.7, cam);
+      if (x < -8 || x > W + 8) continue;
+      var y = sy(e, cam);
+      var h = 5 + j * 5;
+      ctx.beginPath();
+      ctx.moveTo(x, y - h);
+      ctx.lineTo(x - h * 0.36, y + 1.5);
+      ctx.lineTo(x + h * 0.36, y + 1.5);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  function drawPlaces(cam) {
     ctx.font = '600 11px system-ui,sans-serif';
     ctx.textAlign = 'center';
     for (var i = 0; i < sim.places.length; i++) {
       var pl = sim.places[i], x = sx(pl.km * 1000, cam);
       if (x < -70 || x > W + 70) continue;
       var y = sy(terrainAt(sim, pl.km), cam);
-      ctx.fillStyle = 'rgba(255,255,255,.26)';
-      ctx.fillRect(x - 0.5, y, 1, Math.max(0, H - y));
-      ctx.fillStyle = 'rgba(232,237,248,.92)';
-      ctx.fillText(pl.ime, x, y - 7);
-      ctx.fillStyle = 'rgba(232,237,248,.48)';
-      ctx.fillText(fmt(pl.km, 1) + ' km', x, y - 19);
+      var g = ctx.createLinearGradient(0, y - 46, 0, y);
+      g.addColorStop(0, 'rgba(255,255,255,0)');
+      g.addColorStop(1, 'rgba(255,255,255,.34)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - 0.5, y - 46, 1, 46);
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      ctx.beginPath(); ctx.arc(x, y, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(238,243,252,.94)';
+      ctx.fillText(pl.ime, x, y - 52);
+      ctx.fillStyle = 'rgba(238,243,252,.5)';
+      ctx.font = '500 10px "JetBrains Mono",ui-monospace,monospace';
+      ctx.fillText(fmt(pl.km, 1) + ' km', x, y - 41);
+      ctx.font = '600 11px system-ui,sans-serif';
     }
     ctx.textAlign = 'left';
   }
@@ -603,48 +779,180 @@
     ctx.stroke();
   }
 
+  // Sled leta, obarvana po dvigu/spustu v tistem trenutku. Ni le okras: na
+  // njej vidiš, kje si pridobival in kje zapravljal — barogram med letom.
+  function drawTrail(cam) {
+    var tr = ui.trail;
+    if (tr.length < 2) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    for (var i = 1; i < tr.length; i++) {
+      var a = tr[i - 1], b = tr[i];
+      var ax = sx(a.km * 1000, cam), bx = sx(b.km * 1000, cam);
+      if ((ax < -20 && bx < -20) || (ax > W + 20 && bx > W + 20)) continue;
+      var age = i / tr.length;                       // 0 = najstarejši
+      var up = b.vz > 0.15, down = b.vz < -1.5;
+      ctx.strokeStyle = (up ? 'rgba(52,211,153,' : (down ? 'rgba(248,113,113,' : 'rgba(226,236,250,'))
+        + (0.10 + 0.42 * age).toFixed(2) + ')';
+      ctx.beginPath();
+      ctx.moveTo(ax, sy(a.alt, cam));
+      ctx.lineTo(bx, sy(b.alt, cam));
+      ctx.stroke();
+    }
+  }
+
   function drawGlider(cam) {
     var x = sx(sim.km * 1000, cam), y = sy(sim.alt, cam);
-    ctx.save(); ctx.translate(x, y);
-    ctx.rotate(ui.mode === 'circle' ? Math.sin(sim.simTime * 0.5) * 0.5
-      : (ui.mode === 'fast' ? 0.16 : 0.05));
-    ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 3.2;
-    ctx.beginPath(); ctx.moveTo(-13, -9);
-    ctx.quadraticCurveTo(0, -16, 13, -9); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
+    var circling = ui.mode === 'circle';
+    // Med kroženjem se krilo nagiba; pri pospeševalniku se spusti naprej.
+    var bank = circling ? Math.sin(sim.simTime * 0.5) * 0.42
+      : (ui.mode === 'fast' ? 0.17 : 0.05);
+    // Navidezno skrajšanje krila, ko je obrnjeno stran — iz tega nastane
+    // občutek kroženja, ne le zibanja.
+    var squash = circling ? (0.35 + 0.65 * Math.abs(Math.cos(sim.simTime * 0.5))) : 1;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(bank);
+    ctx.scale(squash, 1);
+
+    // Kupola z rebri.
+    var kg = ctx.createLinearGradient(0, -17, 0, -7);
+    kg.addColorStop(0, '#ffe08a');
+    kg.addColorStop(1, '#f0a52e');
+    ctx.fillStyle = kg;
     ctx.beginPath();
-    ctx.moveTo(-10, -8); ctx.lineTo(0, 3);
-    ctx.moveTo(10, -8); ctx.lineTo(0, 3);
+    ctx.moveTo(-15, -8);
+    ctx.quadraticCurveTo(0, -19, 15, -8);
+    ctx.quadraticCurveTo(0, -13.5, -15, -8);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,72,10,.35)'; ctx.lineWidth = 0.7;
+    for (var c = -2; c <= 2; c++) {
+      var cx = c * 5.4;
+      ctx.beginPath();
+      ctx.moveTo(cx, -8.6);
+      ctx.lineTo(cx * 0.92, -13.6 + Math.abs(c) * 1.1);
+      ctx.stroke();
+    }
+    // Vrvi.
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-11.5, -7.6); ctx.lineTo(-0.6, 4);
+    ctx.moveTo(-4, -8.6); ctx.lineTo(-0.6, 4);
+    ctx.moveTo(11.5, -7.6); ctx.lineTo(0.6, 4);
+    ctx.moveTo(4, -8.6); ctx.lineTo(0.6, 4);
     ctx.stroke();
-    ctx.fillStyle = '#e8edf8';
-    ctx.beginPath(); ctx.arc(0, 5, 3.1, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // Pilot v sedežu — brez raztega, da ostane okrogel.
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(bank * 0.55);
+    ctx.fillStyle = '#dfe7f5';
+    ctx.beginPath();
+    if (ctx.roundRect) { ctx.roundRect(-3.4, 3.2, 6.8, 6.4, 2.6); }
+    else { ctx.arc(0, 6.4, 3.3, 0, Math.PI * 2); }
+    ctx.fill();
+    ctx.fillStyle = '#a8b6cc';
+    ctx.beginPath(); ctx.arc(0, 3.4, 2.1, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
-  function drawInstruments() {
-    var bw = 13, bh = Math.min(180, H - 80), bx = W - bw - 12, by = 36;
-    ctx.fillStyle = 'rgba(4,7,14,.55)';
-    ctx.fillRect(bx - 3, by - 3, bw + 6, bh + 6);
-    var mid = by + bh / 2, v = clamp(sim.vario, -5, 5), hgt = (v / 5) * (bh / 2);
-    ctx.fillStyle = v >= 0 ? '#34d399' : '#f87171';
-    if (v >= 0) ctx.fillRect(bx, mid - hgt, bw, hgt);
-    else ctx.fillRect(bx, mid, bw, -hgt);
-    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(bx - 3, mid); ctx.lineTo(bx + bw + 3, mid); ctx.stroke();
-    ctx.fillStyle = 'rgba(232,237,248,.92)';
-    ctx.font = '600 11px system-ui,sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(fmt(sim.vario, 1) + ' m/s', W - 12, by + bh + 16);
-    var u = windAt(sim, Math.max(0, sim.alt - terrainAt(sim, sim.km)));
-    ctx.fillText((u >= 0 ? '→ ' : '← ') + fmt(Math.abs(u) * 3.6, 0) + ' km/h', W - 12, 22);
-    ctx.textAlign = 'left';
+  // ── Inštrumenti ────────────────────────────────────────────────────────
+  function drawInstruments(cam) {
+    drawVario();
+    drawWindBadge(cam);
     if (sim.atCeiling) {
-      ctx.fillStyle = 'rgba(255,209,102,.95)';
+      var t = 'BAZA OBLAKOV — višje ne gre';
       ctx.font = '700 12px system-ui,sans-serif';
+      var w = ctx.measureText(t).width;
+      ctx.fillStyle = 'rgba(4,7,14,.55)';
+      if (ctx.roundRect) {
+        ctx.beginPath(); ctx.roundRect(W / 2 - w / 2 - 9, 9, w + 18, 21, 10); ctx.fill();
+      } else ctx.fillRect(W / 2 - w / 2 - 9, 9, w + 18, 21);
+      ctx.fillStyle = 'rgba(255,209,102,.98)';
       ctx.textAlign = 'center';
-      ctx.fillText('BAZA OBLAKOV — višje ne gre', W / 2, 22);
+      ctx.fillText(t, W / 2, 24);
       ctx.textAlign = 'left';
     }
+  }
+
+  // Vario kot pravi inštrument: razdelki na ±1..±5, sredinska os, obarvani
+  // coni. Gol pravokotnik ni povedal, ali je 2 m/s veliko ali malo.
+  function drawVario() {
+    var bw = 15, bh = Math.min(190, H - 86), bx = W - bw - 16, by = 40;
+    var mid = by + bh / 2, half = bh / 2;
+    ctx.save();
+    ctx.fillStyle = 'rgba(4,7,14,.48)';
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx - 5, by - 5, bw + 10, bh + 10, 9); ctx.fill(); }
+    else ctx.fillRect(bx - 5, by - 5, bw + 10, bh + 10);
+
+    // Blaga cona dviga/spusta v ozadju.
+    ctx.fillStyle = 'rgba(52,211,153,.10)'; ctx.fillRect(bx, by, bw, half);
+    ctx.fillStyle = 'rgba(248,113,113,.10)'; ctx.fillRect(bx, mid, bw, half);
+
+    var v = clamp(sim.vario, -5, 5);
+    var hgt = (v / 5) * half;
+    var vg = ctx.createLinearGradient(bx, mid - hgt, bx, mid);
+    if (v >= 0) { vg.addColorStop(0, '#6ee7b7'); vg.addColorStop(1, '#10b981'); }
+    else { vg.addColorStop(0, '#ef4444'); vg.addColorStop(1, '#fca5a5'); }
+    ctx.fillStyle = vg;
+    if (v >= 0) ctx.fillRect(bx, mid - hgt, bw, hgt);
+    else ctx.fillRect(bx, mid, bw, -hgt);
+
+    // Razdelki. Številke gredo LEVO od plošče, ne vanjo — v stolpcu so se
+    // zlivale z barvnim stanjem in bile neberljive.
+    ctx.font = '500 9px "JetBrains Mono",ui-monospace,monospace';
+    ctx.textAlign = 'right';
+    for (var k = -5; k <= 5; k++) {
+      var y = mid - (k / 5) * half;
+      var major = (k % 2 === 0);
+      ctx.strokeStyle = 'rgba(255,255,255,' + (major ? .45 : .22) + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(bx + bw - (major ? 7 : 4), y); ctx.lineTo(bx + bw, y); ctx.stroke();
+      if (major && k !== 0) {
+        ctx.fillStyle = 'rgba(4,7,14,.5)';
+        ctx.fillText(String(Math.abs(k)), bx - 9.5, y + 3.5);
+        ctx.fillStyle = 'rgba(232,237,248,.62)';
+        ctx.fillText(String(Math.abs(k)), bx - 10, y + 3);
+      }
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(bx - 5, mid); ctx.lineTo(bx + bw + 5, mid); ctx.stroke();
+
+    // Odčitek.
+    ctx.font = '700 11px "JetBrains Mono",ui-monospace,monospace';
+    ctx.fillStyle = sim.vario > 0.2 ? '#6ee7b7' : (sim.vario < -1.5 ? '#fca5a5' : 'rgba(232,237,248,.9)');
+    ctx.fillText(fmt(sim.vario, 1), bx + bw + 5, by + bh + 17);
+    ctx.font = '500 8px system-ui,sans-serif';
+    ctx.fillStyle = 'rgba(232,237,248,.5)';
+    ctx.fillText('m/s', bx + bw + 5, by + bh + 27);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
+
+  // Veter na trenutni višini — puščica pove smer, dolžina jakost.
+  function drawWindBadge(cam) {
+    var u = windAt(sim, Math.max(0, sim.alt - terrainAt(sim, sim.km)));
+    var kmh = Math.abs(u) * 3.6;
+    var txt = fmt(kmh, 0) + ' km/h';
+    ctx.font = '600 11px "JetBrains Mono",ui-monospace,monospace';
+    var tw = ctx.measureText(txt).width;
+    var bw2 = tw + 34, bx = 12, by = 12;
+    ctx.fillStyle = 'rgba(4,7,14,.45)';
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx, by, bw2, 20, 10); ctx.fill(); }
+    else ctx.fillRect(bx, by, bw2, 20);
+    var ax = bx + 13, ay = by + 10, dir = u >= 0 ? 1 : -1;
+    var len = 5 + clamp(kmh / 4, 0, 7);
+    ctx.strokeStyle = u >= 0 ? 'rgba(125,211,252,.95)' : 'rgba(253,186,116,.95)';
+    ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(ax - dir * len * 0.5, ay); ctx.lineTo(ax + dir * len * 0.5, ay);
+    ctx.moveTo(ax + dir * len * 0.5, ay); ctx.lineTo(ax + dir * (len * 0.5 - 3.4), ay - 3);
+    ctx.moveTo(ax + dir * len * 0.5, ay); ctx.lineTo(ax + dir * (len * 0.5 - 3.4), ay + 3);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(232,237,248,.92)';
+    ctx.fillText(txt, bx + 24, by + 14);
   }
 
   // ── Zanka ──────────────────────────────────────────────────────────────
@@ -660,6 +968,12 @@
       while (ui.acc >= FIXED_DT && ui.phase === 'flying' && guard++ < 400) {
         if (stepFixed(sim, ctrl, FIXED_DT) !== 'flying') { endFlight(); break; }
         ui.acc -= FIXED_DT;
+        ui.trailAcc += FIXED_DT;
+        if (ui.trailAcc >= TRAIL_EVERY) {
+          ui.trailAcc = 0;
+          ui.trail.push({ km: sim.km, alt: sim.alt, vz: sim.vario });
+          if (ui.trail.length > TRAIL_MAX) ui.trail.shift();
+        }
       }
       if (sim.level.turbulenca > 0.35) ui.shake = Math.min(1, sim.level.turbulenca - 0.3);
       ui.shake *= 0.93;
@@ -683,6 +997,25 @@
     var v = el('pg-vario');
     if (v) v.className = 'pg-v' + (sim.vario > 0.2 ? ' up' : (sim.vario < -1.5 ? ' down' : ''));
     setTxt('pg-time', Math.floor(sim.simTime / 60) + ' min');
+    var pct = clamp(sim.km / sim.endKm, 0, 1) * 100;
+    var f = el('pg-route-fill'), m = el('pg-route-mark');
+    if (f) f.style.width = pct.toFixed(1) + '%';
+    if (m) m.style.left = pct.toFixed(1) + '%';
+  }
+
+  // Pike na traku so kraji iz nivoja — postavimo jih enkrat ob nalaganju.
+  function buildRoute() {
+    var bar = el('pg-route-bar');
+    if (!bar) return;
+    var old = bar.querySelectorAll('.pg-route-tick');
+    for (var i = 0; i < old.length; i++) bar.removeChild(old[i]);
+    for (var j = 1; j < sim.places.length; j++) {
+      var d = document.createElement('i');
+      d.className = 'pg-route-tick';
+      d.style.left = (clamp(sim.places[j].km / sim.endKm, 0, 1) * 100).toFixed(1) + '%';
+      d.title = sim.places[j].ime;
+      bar.appendChild(d);
+    }
   }
 
   function renderConditions() {
@@ -892,6 +1225,7 @@
     resetSim(sim);
     hideOverlay();
     ui.phase = 'flying'; ui.lastTs = 0; ui.acc = 0;
+    ui.trail = []; ui.trailAcc = 0;
     held.circle = false; held.fast = false; ui.nudge = 0; applyMode();
     updateHud(); root.focus();
     announce('Vzlet z Golt.');
