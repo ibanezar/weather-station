@@ -5407,8 +5407,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
 
           let aiData;
           try {
+            // stream:false je obvezen — privzeto je true, kar vrne ReadableStream
+            // namesto {answer:...} in bi spodnji aiData?.answer vedno bral prazno,
+            // ne glede na kakovost fotografije.
             aiData = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-              image: raw, task: "query", question, reasoning: false, max_tokens: 1500,
+              image: raw, task: "query", question, reasoning: false, max_tokens: 1500, stream: false,
             });
           } catch (e) { return _json({ error: "AI storitev ni dosegljiva", upstream_detail: String(e) }, 502); }
 
