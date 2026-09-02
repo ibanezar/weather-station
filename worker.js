@@ -2497,6 +2497,23 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question, reasoning: false, max_tokens: 1500, stream: false,
           });
+        } else if (mode === "nodb") {
+          const question = `Si mikološki pomočnik. Uporabnik je poslal fotografijo gobe, najdene na terenu v Sloveniji.
+
+Naloga: predlagaj 1–3 najverjetnejše vrste (najprej najbolj verjetna). Za vsak predlog: slovensko in latinsko ime, zanesljivost (nizka/srednja/visoka), kratko utemeljitev, užitnost in nevarno dvojnico, če obstaja.
+
+Odgovori IZKLJUČNO z enim JSON objektom, brez uvoda, natanko v tej obliki:
+{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}`;
+          out.question_len = question.length;
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+            image: imgArg, task: "query", question, reasoning: false, max_tokens: 600, stream: false,
+          });
+        } else if (mode === "plain") {
+          const question = "Katera vrsta gobe je to? Odgovori v eni ali dveh povedih v slovenščini, brez JSON-a.";
+          out.question_len = question.length;
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+            image: imgArg, task: "query", question, reasoning: false, max_tokens: 300, stream: false,
+          });
         } else {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
