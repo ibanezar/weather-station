@@ -383,12 +383,22 @@ def build_body(l, svez_opomba):
     <div id="pg-game" tabindex="0" role="application"
          aria-label="Termika — igra jadralnega padalca nad Savinjsko dolino">
       <div class="pg-hud">
-        <div><span class="pg-lbl">Razdalja</span><span class="pg-val"><span id="pg-km">0,2</span> km</span></div>
-        <div><span class="pg-lbl">Višina</span><span class="pg-val"><span id="pg-alt">1440</span> m</span></div>
-        <div><span class="pg-lbl">Nad tlemi</span><span class="pg-val"><span id="pg-agl">40</span> m</span></div>
-        <div><span class="pg-lbl">Vario</span><span class="pg-val"><span id="pg-vario" class="pg-v">0,0</span> m/s</span></div>
-        <div><span class="pg-lbl">Čas leta</span><span class="pg-val" id="pg-time">0 min</span></div>
-        <div><span class="pg-lbl">Rekord</span><span class="pg-val" id="pg-best">—</span></div>
+        <p class="pg-hero"><span id="pg-km">0,2</span><small>km</small></p>
+        <div class="pg-stats">
+          <div><span class="pg-lbl">Višina</span><span class="pg-val"><span id="pg-alt">1440</span> m</span></div>
+          <div><span class="pg-lbl">Nad tlemi</span><span class="pg-val"><span id="pg-agl">40</span> m</span></div>
+          <div><span class="pg-lbl">Vario</span><span class="pg-val"><span id="pg-vario" class="pg-v">0,0</span> m/s</span></div>
+          <div><span class="pg-lbl">Čas leta</span><span class="pg-val" id="pg-time">0 min</span></div>
+          <div><span class="pg-lbl">Rekord</span><span class="pg-val" id="pg-best">—</span></div>
+        </div>
+      </div>
+      <div class="pg-route" aria-hidden="true">
+        <span>Golte</span>
+        <div class="pg-route-bar" id="pg-route-bar">
+          <i class="pg-route-fill" id="pg-route-fill"></i>
+          <i class="pg-route-mark" id="pg-route-mark"></i>
+        </div>
+        <span>Celje</span>
       </div>
       <canvas id="pg-canvas" width="900" height="506"
               aria-label="Stranski pogled na dolino: padalo, termični stebri, oblaki in teren"></canvas>

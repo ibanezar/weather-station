@@ -47,26 +47,102 @@
 #pg-canvas:active { cursor: grabbing; }
 
 /* ── Merilniki nad platnom ─────────────────────────────────────────────── */
+/* Razdalja je rezultat igre, zato je edina velika; ostalo je opora. Prej je
+   bilo vseh šest vrednosti enako veliko in oko ni imelo kam pogledati. */
 .pg-hud {
   display: flex;
-  flex-wrap: wrap;
-  gap: .1rem 1.15rem;
-  padding: .5rem .75rem;
-  background: rgba(4, 7, 14, .55);
+  align-items: center;
+  gap: .9rem;
+  padding: .45rem .8rem;
+  background: linear-gradient(rgba(4, 7, 14, .68), rgba(4, 7, 14, .5));
   border-bottom: 1px solid var(--border);
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: .78rem;
 }
-.pg-hud div { display: flex; align-items: baseline; gap: .35rem; }
-.pg-hud dt, .pg-hud .pg-lbl {
+.pg-hero {
+  margin: 0;
+  flex: 0 0 auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pg-hero small {
+  font-size: .62rem;
+  font-weight: 500;
   color: var(--muted);
-  font-size: .68rem;
+  margin-left: .22rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.pg-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .05rem .95rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .74rem;
+  min-width: 0;
+}
+.pg-stats > div { display: flex; align-items: baseline; gap: .3rem; }
+.pg-lbl {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-family: system-ui, sans-serif;
+}
+.pg-val { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pg-v.up { color: var(--green); }
+.pg-v.down { color: #f87171; }
+
+/* ── Trak poti ─────────────────────────────────────────────────────────── */
+/* Brez njega igralec ne ve, ali je 12 km veliko ali malo. */
+.pg-route {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .3rem .8rem .45rem;
+  background: rgba(4, 7, 14, .5);
+  font-size: .64rem;
+  color: var(--muted);
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.pg-hud dd, .pg-hud .pg-val { margin: 0; color: var(--text); font-weight: 600; }
-.pg-v.up { color: var(--green); }
-.pg-v.down { color: #f87171; }
+.pg-route-bar {
+  position: relative;
+  flex: 1 1 auto;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .11);
+  overflow: visible;
+}
+.pg-route-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+}
+.pg-route-mark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: #ffd166;
+  box-shadow: 0 0 0 2px rgba(4, 7, 14, .65);
+}
+.pg-route-tick {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .38);
+}
 
 /* ── Prekrivno okno (začetek / konec leta) ─────────────────────────────── */
 .pg-overlay {
@@ -207,7 +283,11 @@
 }
 
 @media (max-width: 460px) {
-  .pg-hud { font-size: .72rem; gap: .1rem .8rem; }
+  .pg-hud { gap: .6rem; padding: .4rem .6rem; }
+  .pg-hero { font-size: 1.35rem; }
+  .pg-stats { font-size: .68rem; gap: .05rem .6rem; }
+  .pg-lbl { font-size: .56rem; }
+  .pg-route { padding-inline: .6rem; font-size: .58rem; }
   .pg-btn { min-height: 56px; }
   /* Na ozkem zaslonu gresta držalna gumba v prvo vrstico, vario pa pod njiju —
      sicer se napis »Pospeši · proti vetru« lomi čez dve vrstici. */
