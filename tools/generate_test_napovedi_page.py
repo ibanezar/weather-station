@@ -449,6 +449,8 @@ def main():
             "Dnevna primerjava napovedi ECMWF, ICON, GFS, ARPEGE, best_match, ARSO in Yr/MET Norway z "
             "dejansko meritvijo postaje IREICA1, po vodilnem času D+1..D+7.",
             variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
+            distribution={"@type": "DataDownload", "encodingFormat": "text/csv",
+                          "contentUrl": f"{seo.SITE}/test-napovedi/podatki.csv"},
         ),
     ]) + "\n" + CHART_CSS
 

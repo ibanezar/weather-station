@@ -356,6 +356,7 @@ def main():
             variable_measured=["padavine (mm)", "sunki vetra (km/h)"],
             temporal_coverage=temporal_coverage,
             id_suffix="storm-dataset",
+            distribution=seo.HISTORY_DISTRIBUTION,
         ))
 
     schema = "\n".join([

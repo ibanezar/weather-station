@@ -239,6 +239,7 @@ def dataset_schema(url, name, desc, keywords):
             f'"url":{jd(full)},'
             f'"creator":{{"@type":"Person","name":"Filip Eremita","url":"{SITE}/o-postaji.html","sameAs":["https://ibanezar.github.io","https://www.wunderground.com/dashboard/pws/IREICA1"]}},'
             f'"isAccessibleForFree":true,'
+            f'"distribution":{{"@type":"DataDownload","encodingFormat":"application/json","contentUrl":"{SITE}/history.json"}},'
             f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON}}}}},'
             f'"temporalCoverage":"2019-11-07/..",'
