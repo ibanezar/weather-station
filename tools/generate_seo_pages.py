@@ -24,7 +24,7 @@ Usage:
 """
 import html, json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
-from generate_monthly_post import seo_title
+from generate_monthly_post import seo_title, PLACE_SAMEAS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,10 +40,10 @@ CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css', 'vreme/vreme.css')
 SITE = "https://meteorec.si"
 STATION_ID = "IREICA1"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
-# Entity-linking za Place-shemo: verjeta Wikidata/Wikipedia stran (preverjeno,
-# ne domnevano -- Q969326 je naselje samo, ne občina).
-RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
-                 "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
+# Entity-linking za Place-shemo -- register je v generate_monthly_post.py
+# (PLACE_SAMEAS), da ga uvozijo tudi generatorji objav brez tveganja krožnega
+# uvoza (ta datoteka uvozi seo_title od tam, obratno ne gre).
+RECICA_SAMEAS = PLACE_SAMEAS["Rečica ob Savinji"]
 RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
 
 # Edini dejanski javni izvoz postajne zgodovine (CC BY 4.0, glej o-postaji.html)

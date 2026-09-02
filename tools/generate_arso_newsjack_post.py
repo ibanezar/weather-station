@@ -25,7 +25,8 @@ Usage:
 import datetime, hashlib, json, os, re, shutil, sys, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, seo_title, CSS_LINKS  # noqa: E402
+from generate_monthly_post import (ROOT, SITE, wire_all, fmtdate, seo_title, CSS_LINKS,  # noqa: E402
+                                    RECICA_SAMEAS_JSON)
 from asset_version import asset_href  # noqa: E402
 
 try:
@@ -397,7 +398,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "author": {{ "@type": "Person", "name": "Filip Eremita", "url": "{SITE}/o-postaji.html", "sameAs": ["https://ibanezar.github.io", "https://www.wunderground.com/dashboard/pws/IREICA1"] }},
   "publisher": {{ "@type": "Organization", "name": "Meteorec", "logo": {{ "@type": "ImageObject", "url": "{SITE}/icon-512.png" }} }},
   "mainEntityOfPage": {{ "@type": "WebPage", "@id": "{url}" }},
-  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": ["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"], "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
+  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": {RECICA_SAMEAS_JSON}, "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
 }}
 </script>
 {CSS_LINKS}
