@@ -768,6 +768,26 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
 - Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
   isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
 
+## GEO — citiranost pri AI asistentih
+
+`tools/geo_audit.py` preverja tisto, kar `seo_audit.py` ne: veljavnost
+JSON-LD, ujemanje FAQPage sheme z vidno vsebino, avtorsko entiteto,
+zastarelost `dateModified` na ključnih straneh, skoraj podvojeno vsebino med
+kraji v dolini in neveljavne `@id` reference. Poganjaj ga **ob vsaki novi
+strani ali generatorju** — isto načelo kot obvezna lektura zgoraj: nova stran
+ni končana, dokler `geo_audit.py` zanjo ne javi 0 napak. Novo strukturirano
+entiteto (Person/Organization/Place `sameAs`) dodajaj v skupni register
+(`PLACE_SAMEAS` v `generate_monthly_post.py`), ne kot vtipkan niz na novem
+mestu — glej opombo pri registru, zakaj.
+
+**Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
+vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem: isti nabor
+vprašanj vsak mesec vprašaj ChatGPT, Perplexity in Google AI Overview
+("vreme rečica ob savinji zdaj", "vreme zgornja savinjska dolina po urah",
+"gobarska napoved zgornja savinjska dolina", "kaj je rosišče", "je danes
+nevarnost požara v savinjski dolini") in zapiši, ali/kako omenijo
+meteorec.si. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
