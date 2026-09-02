@@ -5094,6 +5094,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       //                           zato ta zastavica med sezonskim zagonom
       //                           odpre vse premium zmožnosti — brezplačno,
       //                           a šele po vpisu e-naslova.
+      //   GET  /premium/subscribers Bearer DELETE_SECRET (admin) → list vseh naročnikov
       //   GET  /premium/verify    Bearer token → { ok, plan, expires }
       //   GET  /premium/forecast  Bearer token → premium forecast JSON
       //   GET  /premium/alerts    Bearer token → saved custom alert rules
@@ -5303,6 +5304,33 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           return _json({ ok: true, msg: (granted && FREE_LAUNCH)
             ? "Povezavo za dostop smo poslali na tvoj e-naslov — preveri tudi vsiljeno pošto."
             : "Če je e-naslov naročen, smo nanj poslali povezavo za dostop." });
+        }
+
+        // ── GET /premium/subscribers — admin: list all e-naslovi z dostopom
+        // Enako admin geslo kot galerija (Bearer env.DELETE_SECRET prek
+        // _galleryAdminAuthed, definiran zgoraj — isti lockout, en admin,
+        // en secret). premium:sub:<email> zapisi so shranjeni brez metadata,
+        // zato list() prebere samo ključe in nato vsak zapis posebej (get) —
+        // pri velikosti te naročniške baze (deseti/stoti zapisi med sezonskim
+        // zagonom) je to poceni; ob resnični rasti bi kazalo dodati metadata
+        // ob kv.put() v /premium/login in /premium/webhook namesto N+1 branja.
+        if (path === "/premium/subscribers" && request.method === "GET") {
+          const auth = await _galleryAdminAuthed(request, env);
+          if (!auth.ok) return _json({ error: auth.error }, auth.status);
+          const cursor = url.searchParams.get("cursor") || undefined;
+          const listed = await kv.list({ prefix: "premium:sub:", limit: 1000, cursor });
+          const subs = [];
+          for (const k of listed.keys) {
+            let rec; try { rec = JSON.parse(await kv.get(k.name)); } catch (_) { continue; }
+            if (rec?.email) subs.push(rec);
+          }
+          subs.sort((a, b) => new Date(b.updated || 0) - new Date(a.updated || 0));
+          const now = new Date();
+          const active = subs.filter(s => s.expires && new Date(s.expires) > now).length;
+          return _json({
+            subscribers: subs, count: subs.length, active,
+            truncated: !listed.list_complete, cursor: listed.list_complete ? null : listed.cursor,
+          });
         }
 
         // ── GET /premium/verify — is this token still good?
