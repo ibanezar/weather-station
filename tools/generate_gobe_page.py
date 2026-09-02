@@ -3842,6 +3842,9 @@ def build_body(rules, premium, free):
         "credits_html": credits_html, "vrste_credits_html": vrste_credits_html,
         # Razdelki, ki so se z glavne strani preselili na svoje podstrani.
         "forests_html": forests_html, "terrain_html": terrain_html, "diary_html": diary_html,
+        # Isti seznam kot vidni FAQ zgoraj — FAQPage shema ne sme obljubljati
+        # vprašanj/odgovorov, ki jih na strani dejansko ni (glej geo_audit.py).
+        "qa": qa,
     }
     return body, subpages
 
@@ -3885,22 +3888,10 @@ def main():
     desc = (f"Gobarski indeks danes: {free['index']} % ({free['level']}). Napoved rasti gob po vrstah za "
             f"Zgornjo Savinjsko dolino, baza {len(rules['species'])} vrst in nevarne dvojnice.")
 
-    qa_for_schema = [
-        ("Je gobarski indeks napoved najdbe?",
-         "Ne. Indeks je ocena ugodnosti vremenskih in talnih pogojev za rast, ne obljuba najdbe."),
-        ("Katere vrste zajema premium napoved?",
-         "Užitne in pogojno užitne gobe Zgornje Savinjske doline; strupene le kot opozorilo na dvojnice."),
-        ("Zakaj po istem dežju vse vrste ne zrastejo hkrati?",
-         "Ker se skupine gliv odzivajo z različnim zamikom. Razkrojevalke stelje tvorijo trosnjake nekaj dni po "
-         "plohi, lesne razkrojevalke nekoliko pozneje, mikorizne vrste šele teden in pol do dva — model "
-         "padavinsko okno zato pri vsaki vrsti zamakne za njen rastni zamik."),
-        ("Ali je to uradna napoved ARSO?",
-         "Ne. Samostojen model iz podatkov Open-Meteo in meritev postaje IREICA1. Ni uradna napoved ARSO."),
-    ]
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
-        seo.faq_schema(qa_for_schema),
+        seo.faq_schema(sub["qa"]),
     ])
     head_extras = schema + "\n" + PAGE_CSS + "\n" + paddle_head()
 

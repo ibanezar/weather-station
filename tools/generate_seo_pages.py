@@ -3472,11 +3472,13 @@ def gen_slovar_pages(sitemap_urls):
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
-        qa = [(f"Kaj je {short_name.lower()}?", t["def"])]
+        q0 = f"Kaj je {short_name.lower()}?"
+        qa = [(q0, t["def"])]
         fact = facts.get(t["slug"])
         if fact:
-            qa.append((f"Kaj o pojmu {short_name.lower()} kažejo meritve v Rečici ob Savinji?",
-                       fact))
+            # Vprašanje se ujema z vidnim h2 v fact_html spodaj — FAQPage shema
+            # sme obljubljati samo besedilo, ki je res prikazano (glej geo_audit.py).
+            qa.append(("Kaj o tem pove postaja IREICA1", fact))
         fact_html = (f'''  <h2>Kaj o tem pove postaja IREICA1</h2>
   <p class="archive-intro">{fact}</p>
   <p class="muted-note">Vir: meritve postaje IREICA1 na Rečici ob Savinji (366 m n. m.).
@@ -3493,6 +3495,7 @@ def gen_slovar_pages(sitemap_urls):
 {stn_badge()}
   <h1 class="page-title">{t["icon"]} {t["term"]}</h1>
   <p class="post-meta">Vremenski slovar · <a href="/slovar/#{t["cat"]}">{cat_label}</a></p>
+  <h2>{q0}</h2>
   <p class="archive-intro">{t["def"]}</p>
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">💡 Zanimivost</div>
