@@ -2429,116 +2429,6 @@ export default {
       }
     }
 
-    // ── ZAČASNO: GET /debug-moondream — diagnostika prazne AI prepoznave.
-    // Kliče isti model na javni testni fotografiji, brez avtentikacije, da
-    // vidimo surov odgovor Workers AI. Odstrani po diagnozi.
-    if (path === "/debug-moondream" && request.method === "GET") {
-      if (!env.AI) return new Response(JSON.stringify({ error: "no AI binding" }), { status: 503, headers: { "Content-Type": "application/json" } });
-      const testImgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Amanita_muscaria_3_vliegenzwammen_op_rij.jpg/640px-Amanita_muscaria_3_vliegenzwammen_op_rij.jpg";
-      const mode = url.searchParams.get("mode") || "url"; // ?mode=url|b64|arr
-      const out = { mode };
-      try {
-        let imgArg;
-        if (mode === "url") {
-          imgArg = testImgUrl;
-        } else if (mode === "b64") {
-          const r = await fetch(testImgUrl);
-          const buf = await r.arrayBuffer();
-          out.fetched_bytes = buf.byteLength;
-          const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-          imgArg = `data:image/jpeg;base64,${b64}`;
-        } else if (mode === "arr") {
-          const r = await fetch(testImgUrl);
-          const buf = await r.arrayBuffer();
-          out.fetched_bytes = buf.byteLength;
-          imgArg = [...new Uint8Array(buf)];
-        } else if (mode === "minimal" || mode === "caption" || mode === "nomodel") {
-          imgArg = testImgUrl;
-        }
-        let raw;
-        if (mode === "minimal") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg });
-        } else if (mode === "caption") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "caption" });
-        } else if (mode === "nomodel") {
-          raw = await env.AI.run("@cf/llava-hf/llava-1.5-7b-hf", { image: [...new Uint8Array(await (await fetch(testImgUrl)).arrayBuffer())], prompt: "Describe this image" });
-        } else if (mode === "q") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?" });
-        } else if (mode === "qr") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false });
-        } else if (mode === "qrm") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300 });
-        } else if (mode === "qrs") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, stream: false });
-        } else if (mode === "qrms") {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300, stream: false });
-        } else if (mode === "long" || mode === "short") {
-          const dbLines = mode === "short"
-            ? GOBE_SPECIES_DB.map(s => `- ${s.sl} (${s.lat}) — ${s.ed}`).join("\n")
-            : GOBE_SPECIES_DB.map(s =>
-                `- ${s.sl} (${s.lat}) — ${s.ed}${s.dbl ? "; dvojnica: " + s.dbl : ""}`).join("\n");
-          const question = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
-
-Referenčna baza vrst te doline (uporabi ta slovenska imena, kadar gre za isto vrsto):
-${dbLines}
-
-Naloga:
-1. Predlagaj 1–3 najverjetnejše vrste (najprej najbolj verjetna), po možnosti iz zgornje baze.
-2. Za vsak predlog: slovensko in latinsko ime, zanesljivost (nizka/srednja/visoka), kratko utemeljitev (barva, oblika, rast, habitat) in užitnost.
-3. Če obstaja nevarna dvojnica, jo IZRECNO navedi z opozorilom.
-4. Če fotografija ni dovolj jasna, ali gre morda za mušnico (Amanita) ali drug nevaren rod, bodi še posebej previden in to jasno povej.
-
-Odgovori IZKLJUČNO z enim samim JSON objektom, brez uvoda, brez razlage izven njega in brez markdown ograjic, natanko v tej obliki:
-{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}
-Polje "warning" izpusti (ali pusti prazno), če ni nevarne dvojnice. "candidates" naj bo prazen seznam in "unclear":true, če fotografija ne zadošča za noben predlog.
-
-POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj se ob najmanjšem dvomu obrne na mikologa ali gobarsko društvo, preden gobo zaužije.`;
-          out.question_len = question.length;
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-            image: imgArg, task: "query", question, reasoning: false, max_tokens: 1500, stream: false,
-          });
-        } else if (mode === "nodb") {
-          const question = `Si mikološki pomočnik. Uporabnik je poslal fotografijo gobe, najdene na terenu v Sloveniji.
-
-Naloga: predlagaj 1–3 najverjetnejše vrste (najprej najbolj verjetna). Za vsak predlog: slovensko in latinsko ime, zanesljivost (nizka/srednja/visoka), kratko utemeljitev, užitnost in nevarno dvojnico, če obstaja.
-
-Odgovori IZKLJUČNO z enim JSON objektom, brez uvoda, natanko v tej obliki:
-{"candidates":[{"name_sl":"...","name_lat":"...","confidence":"nizka|srednja|visoka","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}`;
-          out.question_len = question.length;
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-            image: imgArg, task: "query", question, reasoning: false, max_tokens: 600, stream: false,
-          });
-        } else if (mode === "plain") {
-          const question = "Katera vrsta gobe je to? Odgovori v eni ali dveh povedih v slovenščini, brez JSON-a.";
-          out.question_len = question.length;
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-            image: imgArg, task: "query", question, reasoning: false, max_tokens: 300, stream: false,
-          });
-        } else if (mode === "en") {
-          const question = `You are a mycology assistant. The user sent a photo of a mushroom found in the field.
-
-Task: suggest 1-3 most likely species (most likely first). For each: common name, latin name, confidence (low/medium/high), brief reasoning, edibility, and dangerous look-alike if any.
-
-Respond ONLY with a single JSON object, no intro, exactly in this shape:
-{"candidates":[{"name":"...","name_lat":"...","confidence":"low|medium|high","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}`;
-          out.question_len = question.length;
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-            image: imgArg, task: "query", question, reasoning: false, max_tokens: 600, stream: false,
-          });
-        } else {
-          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-            image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
-            reasoning: false, max_tokens: 300, stream: false,
-          });
-        }
-        out.ok = true; out.raw = raw;
-        return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
-      } catch (e) {
-        out.ok = false; out.error = String(e); out.stack = e?.stack || null;
-        return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
-      }
-    }
-
     // /debug-headers — returns all incoming request headers as JSON (no auth required)
     if (path === "/debug-headers") {
       const headers = {};
@@ -5533,7 +5423,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           } catch (e) { return _json({ error: "AI storitev ni dosegljiva", upstream_detail: String(e) }, 502); }
 
           // env.AI.run() vrne {result:{answer,...}, usage:{...}} za ta model —
-          // raw aiData.answer je vedno undefined (glej /debug-moondream diagnozo).
+          // raw aiData.answer je vedno undefined.
           const answer = String(aiData?.result?.answer || aiData?.answer || aiData?.response || "").trim();
           const jsonMatch = answer.match(/\{[\s\S]*\}/);
           let parsed = null;
