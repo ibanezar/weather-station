@@ -13,6 +13,7 @@
 - [Točnost napovedi](https://meteorec.si/tocnost-napovedi/): sprotna primerjava napovedi (ARSO, Open-Meteo, MTR, ECMWF AIFS) z dejansko izmerjenim vremenom.
 - [Nevihte in opozorila ARSO](https://meteorec.si/nevihte/): aktivna opozorila ARSO za območje in dnevna nevihtna karta Slovenije.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
+- [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
 
 ## Podnebje in arhiv (2019–danes)
 
