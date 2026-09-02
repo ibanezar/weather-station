@@ -2514,6 +2514,17 @@ Odgovori IZKLJUČNO z enim JSON objektom, brez uvoda, natanko v tej obliki:
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question, reasoning: false, max_tokens: 300, stream: false,
           });
+        } else if (mode === "en") {
+          const question = `You are a mycology assistant. The user sent a photo of a mushroom found in the field.
+
+Task: suggest 1-3 most likely species (most likely first). For each: common name, latin name, confidence (low/medium/high), brief reasoning, edibility, and dangerous look-alike if any.
+
+Respond ONLY with a single JSON object, no intro, exactly in this shape:
+{"candidates":[{"name":"...","name_lat":"...","confidence":"low|medium|high","reasoning":"...","edibility":"...","warning":"..."}],"unclear":false,"note":"..."}`;
+          out.question_len = question.length;
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
+            image: imgArg, task: "query", question, reasoning: false, max_tokens: 600, stream: false,
+          });
         } else {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
