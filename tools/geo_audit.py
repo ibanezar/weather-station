@@ -17,13 +17,26 @@ sistemov (ChatGPT, Perplexity, Google AI Overviews):
      entiteto z index.html/o-postaji.html.
   4. Mrtve povezave v llms.txt — če AI orodje prebere llms.txt in mu prva
      povezava vrne 404, je zaupanje v preostanek datoteke vprašljivo.
+  5. Zastarelost dateModified na ključnih, redno osveženih straneh —
+     zastarel datum je napačen signal svežosti za vsak sistem, ki bere
+     samo shemo, ne dejanske vsebine.
+  6. Skoraj podvojena vsebina med kraji v dolini (vreme-*) — predlogi
+     istega generatorja se lahko razlikujejo samo po imenu kraja, kar je
+     ravno vzorec, ki ga Google in AI sistemi kaznujejo kot tanko/podvojeno
+     vsebino.
+  7. Neveljavne @id reference — {"@id": "..."} brez ustrezne definicije
+     tega @id kjerkoli na strani je pokvarjena povezava znotraj grafa
+     entitet, enako resno kot mrtva <a href>.
+
+Preverjanji 5 in 6 sta opozorili (ne blokirata izhodne kode) — gre za mehka
+signala, ne za zlomljeno shemo. Preverjanje 7 je napaka.
 
 Samo pregled — nič ne popravlja. Izhodni status 1, če najde napake.
 
 Zaženi:
   python3 tools/geo_audit.py
 """
-import json, os, re, sys, glob, datetime
+import difflib, json, os, re, sys, glob, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -168,6 +181,111 @@ def check_llms_txt(problems):
             problems.append(f"llms.txt KAŽE NA MANJKAJOČO STRAN: {url}")
 
 
+# 5) Zastarelost dateModified na ključnih straneh ----------------------------
+
+# Prag = največ dovoljenih dni med dateModified in danes, preden stran
+# postane opozorilo. Grobo po dejanski frekvenci osveževanja (dnevni cron
+# dobi tesen prag, mesečni širšega) — namenoma velikodušno, da en sam
+# zamujen tek crona še ne sproži lažnega alarma (isto načelo kot 🟡/🔴 prag
+# v meteogasilec/gasilec.js).
+FRESHNESS_PAGES = {
+    "klima/index.html": 2, "padavine/index.html": 2, "temperatura/index.html": 2,
+    "teden/index.html": 8, "trendi/index.html": 8,
+    "tocnost-napovedi/index.html": 2, "gobarska-napoved/index.html": 2,
+    "meteogasilec/index.html": 2, "nevihte/index.html": 1,
+    "agrometeo/index.html": 2, "test-napovedi/index.html": 32,
+}
+DATE_MOD_RE = re.compile(r'"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})')
+
+
+def check_freshness(notes):
+    today = datetime.date.today()
+    for page, max_days in FRESHNESS_PAGES.items():
+        path = os.path.join(ROOT, page)
+        if not os.path.exists(path):
+            continue
+        m = DATE_MOD_RE.search(read(path))
+        if not m:
+            continue
+        age = (today - datetime.date.fromisoformat(m.group(1))).days
+        if age > max_days:
+            notes.append(f"ZASTAREL dateModified: {page} — {m.group(1)} ({age} dni nazaj, prag {max_days})")
+
+
+# 6) Skoraj podvojena vsebina med kraji v dolini -----------------------------
+
+NEARBY_TOWN_PAGES = [
+    "vreme-mozirje/index.html", "vreme-nazarje/index.html",
+    "vreme-ljubno-ob-savinji/index.html", "vreme-gornji-grad/index.html",
+    "vreme-luce/index.html", "vreme-solcava/index.html",
+    "vreme-kamp-menina/index.html", "vreme-logarska-dolina/index.html",
+    "vreme-forest-camping-mozirje/index.html", "vreme-glamping-savinja/index.html",
+    "vreme-herbal-glamping-ljubno/index.html",
+]
+TAG_STRIP_RE = re.compile(r"<[^>]+>")
+NEAR_DUP_THRESHOLD = 0.85
+
+
+def main_content_text(html):
+    """Besedilo med <h1> in footerjem -- izloči skupno glavo/nogo, ki bi
+    podobnost med KATERIMA KOLI dvema stranema strani napihnila umetno."""
+    start = html.find("<h1")
+    end = html.find('<footer class="site-foot">')
+    if start == -1 or end == -1 or end <= start:
+        return None
+    body = html[start:end]
+    body = re.sub(r"<script[\s\S]*?</script>|<style[\s\S]*?</style>", " ", body)
+    return re.sub(r"\s+", " ", TAG_STRIP_RE.sub(" ", body)).strip()
+
+
+def check_near_duplicate_towns(notes):
+    texts = {}
+    for page in NEARBY_TOWN_PAGES:
+        path = os.path.join(ROOT, page)
+        if not os.path.exists(path):
+            continue
+        text = main_content_text(read(path))
+        if text:
+            texts[page] = text
+    pages = list(texts.items())
+    for i in range(len(pages)):
+        for j in range(i + 1, len(pages)):
+            page_a, text_a = pages[i]
+            page_b, text_b = pages[j]
+            ratio = difflib.SequenceMatcher(None, text_a, text_b).ratio()
+            if ratio >= NEAR_DUP_THRESHOLD:
+                notes.append(
+                    f"SKORAJ PODVOJENA VSEBINA: {page_a} ↔ {page_b} — "
+                    f"{ratio:.0%} podobnosti glavnega besedila")
+
+
+# 7) Neveljavne @id reference -------------------------------------------------
+
+ID_DEF_RE = re.compile(r'"@id"\s*:\s*"([^"]+)"')
+BARE_ID_REF_RE = re.compile(r'\{\s*"@id"\s*:\s*"([^"]+)"\s*\}')
+
+
+def check_id_references(problems):
+    all_ids = set()
+    all_refs = []  # (path, id)
+    for path in all_html_files():
+        html = read(path)
+        for block in LDJSON_RE.findall(html):
+            if '"@id"' not in block:
+                continue
+            refs_here = [(path, m.group(1)) for m in BARE_ID_REF_RE.finditer(block)]
+            # Definicije = "@id" ki NI del gole {"@id": "..."} reference --
+            # zamaskiraj reference, preden štejemo definicije, sicer bi
+            # referenca sama sebe "potrdila" kot veljavno.
+            masked = BARE_ID_REF_RE.sub("", block)
+            for m in ID_DEF_RE.finditer(masked):
+                all_ids.add(m.group(1))
+            all_refs.extend(refs_here)
+    for path, ref_id in all_refs:
+        if ref_id not in all_ids:
+            problems.append(f"NEVELJAVNA @id REFERENCA: {rel(path)} → {ref_id} (ni definirana nikjer na strani)")
+
+
 def audit():
     problems, notes = [], []
 
@@ -175,6 +293,9 @@ def audit():
     check_faq_consistency(problems)
     check_author_entities(notes)
     check_llms_txt(problems)
+    check_freshness(notes)
+    check_near_duplicate_towns(notes)
+    check_id_references(problems)
 
     lines = [f"# GEO audit — {TODAY}", ""]
     if problems:
