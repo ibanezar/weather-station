@@ -2434,15 +2434,34 @@ export default {
     // vidimo surov odgovor Workers AI. Odstrani po diagnozi.
     if (path === "/debug-moondream" && request.method === "GET") {
       if (!env.AI) return new Response(JSON.stringify({ error: "no AI binding" }), { status: 503, headers: { "Content-Type": "application/json" } });
-      const testImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Amanita_muscaria_3_vliegenzwammen_op_rij.jpg/640px-Amanita_muscaria_3_vliegenzwammen_op_rij.jpg";
+      const testImgUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Amanita_muscaria_3_vliegenzwammen_op_rij.jpg/640px-Amanita_muscaria_3_vliegenzwammen_op_rij.jpg";
+      const mode = url.searchParams.get("mode") || "url"; // ?mode=url|b64|arr
+      const out = { mode };
       try {
+        let imgArg;
+        if (mode === "url") {
+          imgArg = testImgUrl;
+        } else if (mode === "b64") {
+          const r = await fetch(testImgUrl);
+          const buf = await r.arrayBuffer();
+          out.fetched_bytes = buf.byteLength;
+          const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+          imgArg = `data:image/jpeg;base64,${b64}`;
+        } else if (mode === "arr") {
+          const r = await fetch(testImgUrl);
+          const buf = await r.arrayBuffer();
+          out.fetched_bytes = buf.byteLength;
+          imgArg = [...new Uint8Array(buf)];
+        }
         const raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-          image: testImg, task: "query", question: "What mushroom is this? Answer in one sentence.",
+          image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
           reasoning: false, max_tokens: 300, stream: false,
         });
-        return new Response(JSON.stringify({ ok: true, raw }), { headers: { "Content-Type": "application/json" } });
+        out.ok = true; out.raw = raw;
+        return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
       } catch (e) {
-        return new Response(JSON.stringify({ ok: false, error: String(e), stack: e?.stack || null }), { headers: { "Content-Type": "application/json" } });
+        out.ok = false; out.error = String(e); out.stack = e?.stack || null;
+        return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
       }
     }
 
