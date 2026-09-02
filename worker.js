@@ -5089,10 +5089,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       //                           naslov (še) nima aktivne naročnine, se mu tu
       //                           samodejno podeli brezplačna ("brezplacno",
       //                           glej FREE_LAUNCH_DAYS spodaj) — brez Paddla.
-      //                           To je edini vratar za identify/diary/alerts
-      //                           (vsi gredo skozi _authedSub()), zato ta
-      //                           zastavica med sezonskim zagonom odpre čisto
-      //                           vse premium zmožnosti, ne le /premium/forecast.
+      //                           To je edini vratar za forecast/identify/
+      //                           diary/alerts (vsi gredo skozi _authedSub()),
+      //                           zato ta zastavica med sezonskim zagonom
+      //                           odpre vse premium zmožnosti — brezplačno,
+      //                           a šele po vpisu e-naslova.
       //   GET  /premium/verify    Bearer token → { ok, plan, expires }
       //   GET  /premium/forecast  Bearer token → premium forecast JSON
       //   GET  /premium/alerts    Bearer token → saved custom alert rules
@@ -5312,17 +5313,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
 
         // ── GET /premium/forecast — the paid payload
-        // Sezonski zagon: ko je FREE_LAUNCH true (env.PREMIUM_FREE_LAUNCH v
-        // wrangler.toml), gre napoved ven brez žetona sploh — glej
-        // PREMIUM_FREE_LAUNCH v tools/generate_gobe_page.py. Identify, diary in
-        // alerts spodaj še vedno zahtevajo žeton, a pod isto zastavico ga
-        // /premium/login zdaj podeli brezplačno (glej FREE_LAUNCH zgoraj), zato
-        // je med sezonskim zagonom brezplačno tudi vse, kar žeton zahteva.
+        // Sezonski zagon: FREE_LAUNCH (env.PREMIUM_FREE_LAUNCH v wrangler.toml,
+        // glej PREMIUM_FREE_LAUNCH v tools/generate_gobe_page.py) naredi dostop
+        // brezplačen, ne pa odprt — žeton je še vedno obvezen, dobi pa se ga
+        // brezplačno prek /premium/login (glej FREE_LAUNCH zgoraj). Tako mora
+        // vsak obiskovalec pustiti e-naslov, preden vidi napoved, tudi med
+        // brezplačnim zagonom.
         if (path === "/premium/forecast" && request.method === "GET") {
-          if (!FREE_LAUNCH) {
-            const sub = await _authedSub();
-            if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
-          }
+          const sub = await _authedSub();
+          if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
           const data = await kv.get("premium:data");
           if (!data) return _json({ error: "Napoved še ni pripravljena" }, 503);
           return new Response(data, {
