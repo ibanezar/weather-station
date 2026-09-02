@@ -2470,6 +2470,8 @@ export default {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300 });
         } else if (mode === "qrs") {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, stream: false });
+        } else if (mode === "qrms") {
+          raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", { image: imgArg, task: "query", question: "What mushroom is this?", reasoning: false, max_tokens: 300, stream: false });
         } else {
           raw = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
             image: imgArg, task: "query", question: "What mushroom is this? Answer in one sentence.",
