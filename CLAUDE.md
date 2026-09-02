@@ -36,6 +36,11 @@ Lektor preverja slovnico, slog, interno konsistentnost in — posebej pomembno �
 anglicizme/kalke (dobesedni prevodi, prekomerni trpnik, angleški narekovaji,
 vezaj namesto pomišljaja).
 
+`tools/lektor_existing_posts.py` po dejansko apliciranih popravkih zapiše tudi
+`dateModified` v JSON-LD in `updated` v `blog.json` (prek `touch_existing()`) —
+prej je lektura besedilo spremenila, shema pa je še naprej trdila, da je stran
+nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
+
 ## Objava člankov
 
 - Vse izpeljane datoteke (blog.json, blog/index.html, sitemap.xml,
