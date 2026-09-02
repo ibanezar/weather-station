@@ -178,7 +178,11 @@ def crumbs_schema(crumbs):
             f'{{"@context":"https://schema.org","@type":"BreadcrumbList",'
             f'"itemListElement":[{",".join(items)}]}}\n</script>')
 
-def webpage_schema(url, title, desc, date_published=None, image=None):
+def webpage_schema(url, title, desc, date_published=None, image=None, speakable=None):
+    """speakable: seznam CSS selektorjev na strani, ki so kratke, samostojne
+    povedi (ne mreža številk/značk) -- glasovni asistent/izvleček jih prebere
+    dobesedno. Ne dodajaj je na vsako stran, samo tja, kjer res obstaja tak
+    odsek besedila (glej klicna mesta)."""
     full = f"{SITE}{url}"
     img = image or f"{SITE}/og-image.jpg"
     s = (f'{{"@context":"https://schema.org","@type":"WebPage",'
@@ -190,6 +194,9 @@ def webpage_schema(url, title, desc, date_published=None, image=None):
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
     if date_published:
         s += f',"datePublished":{json.dumps(date_published)}'
+    if speakable:
+        s += (f',"speakable":{{"@type":"SpeakableSpecification",'
+              f'"cssSelector":{json.dumps(speakable)}}}')
     s += "}"
     return f"<script type=\"application/ld+json\">\n{s}\n</script>"
 

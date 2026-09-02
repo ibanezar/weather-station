@@ -3889,7 +3889,8 @@ def main():
             f"Zgornjo Savinjsko dolino, baza {len(rules['species'])} vrst in nevarne dvojnice.")
 
     schema = "\n".join([
-        seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
+        seo.webpage_schema(url, title, desc, date_published="2026-07-02",
+                           speakable=[".gp-hero-kicker", ".gp-hero-lvl", ".gp-hero-topsp"]),
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
         seo.faq_schema(sub["qa"]),
     ])
