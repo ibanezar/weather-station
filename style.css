@@ -167,6 +167,31 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
   .quick-nav a .qn-ico{display:none}
 }
+
+/* Igre — <details> namesto dveh ločenih kapsul (Termika + Prehiti model),
+   da se .quick-nav ne razlomi na ozkih zaslonih. Native <details>/<summary>:
+   deluje brez JS, tipkovnica in bralnik zaslona ga poznata sama od sebe,
+   zato tu ni ponovljena logika "zapri ob kliku zunaj", ki jo ima app.js za
+   druge widgete. */
+.qn-drop{position:relative}
+.qn-drop summary{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;font-size:.8rem;font-weight:600;color:var(--blue);padding:.4rem .9rem;border-radius:999px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:border-color .18s,color .18s,background .18s,transform .15s;white-space:nowrap;cursor:pointer;list-style:none}
+.qn-drop summary::-webkit-details-marker{display:none}
+.qn-drop summary:hover{border-color:var(--card-border-h);color:var(--cyan);background:rgba(34,211,238,.07);transform:translateY(-1px)}
+.qn-drop summary::after{content:"";width:.4em;height:.4em;margin-left:.15rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
+.qn-drop[open] summary::after{transform:rotate(-135deg) translateY(2px)}
+.qn-drop[open] summary{border-color:var(--card-border-h);color:var(--cyan)}
+/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula pred »Šola«
+   in blizu desnega roba vrstice, ki je na ozkih zaslonih širša od zaslona
+   (glej opombo o segmentiranem traku zgoraj) — sredinjena menijska plošča bi
+   segla čez desni rob in se odrezala ob `body{overflow-x:hidden}`. */
+.qn-drop-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+.qn-drop-menu a{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.5rem .7rem;border-radius:9px;white-space:nowrap}
+.qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan)}
+@media (max-width:520px){
+  .qn-drop summary{padding:.45rem .7rem;font-size:.74rem}
+  .qn-drop summary .qn-ico{display:none}
+  .qn-drop-menu a .qn-ico{display:inline}
+}
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}
