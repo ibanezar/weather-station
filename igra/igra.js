@@ -47,9 +47,17 @@
   var TOP_RAMP = 150;           // toliko metrov pod stropom dvig ugaša
   function sinkAt(v) { return 0.95 + 0.0279 * (v - 8.5) * (v - 8.5); }
 
-  // Sejano naključje. Seme pride iz nivoja (izpeljano iz datuma), zato je
-  // razporeditev stebrov isti dan za vse enaka. Uporablja se SAMO za
-  // postavitev nivoja — nikoli za fiziko, vnos ali izračun rezultata.
+  // Sejano naključje. Uporablja se SAMO za postavitev stebrov — nikoli za
+  // fiziko, vnos ali izračun rezultata. Prvi polet dneva (takoj po nalaganju
+  // strani, glej makeSim) je posejan iz nivoja (izpeljano iz datuma) — to je
+  // determinističen del, ki ga preverja tools/test_igra.mjs (isto seme →
+  // ista postavitev). Vsak naslednji poskus (endFlight spodaj) stebre
+  // PRESEJE s svežim naključnim semenom, ne z l.seme -- teža dneva (strop,
+  // povprečna moč termike, razmik) pride še vedno iz vremena in ostaja ista
+  // za vse cel dan, spremeni se le, KJE natančno stebri stojijo. Brez tega bi
+  // igralec po dveh-treh poletih vedel na meter natančno, kje je vsak steber,
+  // in igra bi se sprevrgla v zapomnjeno pot namesto branje vremena (opažil
+  // Filip 3. 9. 2026 -- "cel dan je ista").
   function mulberry32(a) {
     return function () {
       a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -144,8 +152,8 @@
     return hi;
   }
 
-  function buildThermals(sim) {
-    var l = sim.level, rnd = mulberry32(l.seme || 1);
+  function buildThermals(sim, seed) {
+    var l = sim.level, rnd = mulberry32(seed != null ? seed : (l.seme || 1));
     var list = [], km = 0.6, guard = 0;
     var gostota = clamp(l.gostota_km || 2, 0.7, 4.5);
     // Premer stebra je vezan na globino konvekcije (~z_i/9 v polmeru), ne
@@ -1311,6 +1319,11 @@
     ui.phase = 'over';
     held.circle = false; held.fast = false; ui.nudge = 0; applyMode();
     updateHud();
+    // Nov razpored stebrov za naslednji poskus (glej opombo pri mulberry32) —
+    // tu, ne v startFlight, da ozadje že med pregledom "Še enkrat" kaže
+    // postavitev, ki jo bo igralec dejansko letel, ne stare izpod peruti.
+    sim.thermals = buildThermals(sim, Math.floor(Math.random() * 0xffffffff));
+    sim.clouds = buildClouds(sim);
     showOverlay('over');
   }
 
