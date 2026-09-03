@@ -36,6 +36,10 @@ HOURLY_VARS = ",".join([
     # ── za /igra/ ──
     "direct_radiation", "shortwave_radiation", "cloud_cover_low",
     "wind_speed_180m", "wind_direction_180m", "wind_gusts_10m", "weather_code",
+    # Gradientni veter na ~1500 m: po njem igra izbere koridor dneva, ker
+    # prelet poteka v tem pasu, ne pri tleh. Dolinski vetrič (10/180 m) je
+    # pogosto obrnjen ravno nasproti njemu.
+    "wind_speed_850hPa", "wind_direction_850hPa",
 ])
 DAILY_VARS = ",".join([
     "temperature_2m_max", "precipitation_sum", "wind_speed_10m_max", "wind_gusts_10m_max",

@@ -39,37 +39,37 @@ URL = "/igra/"
 TITLE = "Termika — igra jadralnega padalca nad Savinjsko dolino"
 SEZNAM_URE = range(9, 19)          # ure, med katerimi iščemo vrhunec termike
 
-# ── Pot preleta ─────────────────────────────────────────────────────────────
-# Lomljenka skozi prave kraje (dolina se zavije, zato ravna črta ne gre).
-# Razdalje so kumulativne po tej poti, višine so dejanske.
-#
-# ZAKAJ NI ZAJETO IZ Open-Meteo Elevation API: preverjeno ob gradnji — tisti
-# vir je v dolini točen (Rečica 374 m, Mozirje 338 m, Celje 241 m), gorski
-# svet pa močno splošči (vzletišče Golte ~1400 m vrne kot ~600 m, Menina
-# planina 1500 m kot 1077 m). Za igro, ki se začne s spustom z Golt, je to
-# neuporabno. Profil je zato ročen: dolinske višine iz tistega vira, vrhovi in
-# vzletišče po objavljenih podatkih. NE zamenjuj tega s klicem Elevation API.
-POT = [
-    # (km po poti, nadmorska višina v m)
-    (0.0, 1400), (0.6, 1300), (1.2, 1150), (2.0, 950), (3.0, 760),
-    (4.0, 620), (5.5, 500), (7.0, 430), (8.5, 395), (10.3, 374),
-    (12.0, 355), (13.6, 338), (15.0, 380), (16.5, 470), (17.8, 400),
-    (19.1, 320), (21.0, 360), (23.4, 290), (25.7, 280), (28.0, 320),
-    (30.5, 300), (33.5, 250), (36.0, 285), (38.5, 320), (41.7, 241),
-    (44.0, 260),
-]
-MEJNIKI = [
-    (0.0, "Golte"), (10.3, "Rečica"), (13.6, "Mozirje"), (19.1, "Letuš"),
-    (23.4, "Braslovče"), (25.7, "Polzela"), (33.5, "Žalec"), (41.7, "Celje"),
-]
-KONEC_KM = 44.0
-TEREN_KORAK_M = 250
+# ── Koridorji ───────────────────────────────────────────────────────────────
+# Igra ne leti po eni sami osi. Vsak dan izbere smer glede na veter — tako kot
+# pilot. Geometrijo (potek, mejnike, višinski profil) pripravi enkratni
+# tools/build_igra_corridors.py in je committana v igra/koridorji.json; tu jo
+# samo preberemo. Tam je tudi opisano, od kod višine in kje je vir nezanesljiv.
+KORIDORJI_PATH = os.path.join(ROOT, "igra", "koridorji.json")
 
-# Os doline Golte→Celje; nanjo projiciramo veter, ker je igra dvodimenzionalna.
-OS_AZIMUT = 113.8
 # Referenčna višina dna doline: konvekcijska plast in baza oblakov sta podani
 # nad tlemi, igra pa računa v nadmorskih višinah.
 DNO_DOLINE_M = 350
+
+
+def nalozi_koridorje():
+    with open(KORIDORJI_PATH, encoding="utf-8") as f:
+        d = json.load(f)
+    if not d.get("koridorji"):
+        raise ValueError("igra/koridorji.json je prazen")
+    return d["koridorji"]
+
+
+def teren_na(kor, km):
+    """Višina terena koridorja na dani kilometrini (linearna interpolacija)."""
+    t = kor["teren"]
+    h = t["h"]
+    f = (km - t.get("od_km", 0)) / (t["korak_m"] / 1000.0)
+    if f <= 0:
+        return float(h[0])
+    if f >= len(h) - 1:
+        return float(h[-1])
+    i = int(f)
+    return h[i] + (h[i + 1] - h[i]) * (f - i)
 
 
 def q(x, step):
@@ -87,34 +87,49 @@ def fnv1a(s):
     return h
 
 
-def teren_vzorci():
-    """Profil poti, prevzorčen na enakomeren korak (igra vmes interpolira)."""
-    out, km, korak = [], 0.0, TEREN_KORAK_M / 1000.0
-    while km <= KONEC_KM + 1e-9:
-        out.append(round(_lerp(POT, km)))
-        km += korak
-    return out
-
-
-def _lerp(pairs, km):
-    if km <= pairs[0][0]:
-        return float(pairs[0][1])
-    if km >= pairs[-1][0]:
-        return float(pairs[-1][1])
-    for i in range(1, len(pairs)):
-        if km <= pairs[i][0]:
-            (x0, y0), (x1, y1) = pairs[i - 1], pairs[i]
-            return y0 + (y1 - y0) * (km - x0) / (x1 - x0)
-    return float(pairs[-1][1])
-
-
-def vzdolzna(speed_kmh, dir_from_deg):
-    """Komponenta vetra vzdolž osi doline v m/s. + je hrbtnik (proti Celju).
+def vzdolzna(speed_kmh, dir_from_deg, azimut):
+    """Komponenta vetra vzdolž dane smeri v m/s. + je hrbtnik.
 
     Open-Meteo poda smer, IZ katere veter piha, zato +180°.
-    Preveri: SZ veter (315°) → cos(315+180−113,8) = cos(381,2°) ≈ +0,98 → hrbtnik.
+    Preveri: SZ veter (315°) na osi 113,8° → cos(381,2°) ≈ +0,98 → hrbtnik.
     """
-    return speed_kmh * math.cos(math.radians(dir_from_deg + 180 - OS_AZIMUT)) / 3.6
+    return speed_kmh * math.cos(math.radians(dir_from_deg + 180 - azimut)) / 3.6
+
+
+def precna(speed_kmh, dir_from_deg, azimut):
+    """Komponenta pravokotno na smer leta (m/s, brez predznaka).
+
+    Igra je dvodimenzionalna in te komponente ne more narisati, a je NE
+    zavržemo: prečni veter ob pobočjih dela rotor in nemiren zrak, zato gre v
+    turbulenco. Prej je preprosto izginila, čeprav je bila v 58 % termično
+    uporabnih ur večja od vzdolžne.
+    """
+    return abs(speed_kmh * math.sin(math.radians(dir_from_deg + 180 - azimut))) / 3.6
+
+
+def hrbtnik_koridorja(kor, speed_kmh, dir_from_deg):
+    """Z dolžino uteženo povprečje hrbtnika po odsekih lomljenke.
+
+    Koridor ni ravna črta, zato en sam azimut ni pošten — dolina se zavije in
+    veter je lahko na enem odseku v hrbet, na drugem čelno.
+    """
+    odseki = kor.get("odseki") or [{"dolzina_km": 1, "azimut": kor["azimut"]}]
+    skupaj = sum(o["dolzina_km"] for o in odseki) or 1.0
+    return sum(o["dolzina_km"] * vzdolzna(speed_kmh, dir_from_deg, o["azimut"])
+               for o in odseki) / skupaj
+
+
+def izberi_koridor(koridorji, speed_kmh, dir_from_deg):
+    """Koridor dneva = tisti z največ hrbtnika po GRADIENTNEM vetru (~1500 m).
+
+    Zakaj višinski in ne prizemni: prelet poteka med ~500 in 2500 m, dolinski
+    vetrič pri tleh pa je pogosto obrnjen ravno nasproti gradientnemu (3. 9.
+    2026 npr. 180 m proti ZJZ, 850 hPa proti VSV). Za izbiro smeri je
+    merodajen tisti, ki te dejansko nese.
+    """
+    ocene = [(hrbtnik_koridorja(k, speed_kmh, dir_from_deg), k) for k in koridorji]
+    ocene.sort(key=lambda x: -x[0])
+    return ocene[0][1], ocene[0][0], ocene
 
 
 def _hv(h, key, i, dflt=0.0):
@@ -141,8 +156,8 @@ def w_star(direct_rad, z_i):
     return val ** (1.0 / 3.0) if val > 0 else 0.0
 
 
-def build_level(data, date):
-    """Napoved → nivo dneva. Čista funkcija: isti (data, date) → isti nivo."""
+def build_level(data, date, koridorji):
+    """Napoved → nivo dneva. Čista funkcija: isti (data, date, koridorji) → isti nivo."""
     h = data.get("hourly") or {}
     times = h.get("time") or []
     if not times:
@@ -165,9 +180,13 @@ def build_level(data, date):
     z_i = max(0.0, _hv(h, "boundary_layer_height", best))
     ws = w_star(rad(best), z_i)
     low_cloud = min(100.0, max(0.0, _hv(h, "cloud_cover_low", best)))
-    # Jedro termike je hitrejše od povprečja stolpca (~1,35×); nizka oblačnost
-    # gasi sevanje pri tleh in s tem termiko.
-    termika = 1.35 * ws * (1 - min(90.0, low_cloud) / 140.0)
+    # Jedro termike je hitrejše od povprečja stolpca. Literatura daje vršni
+    # dvig v jedru ~1,5–2× w*; s količnikom 1,35 je igra dajala dvige, šibkejše
+    # od spuščanja padala med kroženjem (1,28 m/s), zato kroženje sploh ni
+    # dvigalo. Pri 1,6 aprilski dan (w* 1,7) da ~1,4 m/s vzpona na variu, kar
+    # ustreza temu, kar pilot tak dan res vidi.
+    # Nizka oblačnost gasi sevanje pri tleh in s tem termiko.
+    termika = 1.6 * ws * (1 - min(90.0, low_cloud) / 140.0)
 
     t2, td = _hv(h, "temperature_2m", best, 15.0), _hv(h, "dew_point_2m", best, 8.0)
     baza_agl = 125.0 * max(0.0, t2 - td)          # Espy
@@ -182,16 +201,27 @@ def build_level(data, date):
     w180 = _hv(h, "wind_speed_180m", best, w10 * 1.6)
     d10 = _hv(h, "wind_direction_10m", best, 270.0)
     d180 = _hv(h, "wind_direction_180m", best, d10)
+    # Gradientni veter na ~1500 m — po njem izberemo koridor in po njem se
+    # ravna zgornji del vetrovnega profila v igri.
+    w850 = _hv(h, "wind_speed_850hPa", best, w180 * 1.4)
+    d850 = _hv(h, "wind_direction_850hPa", best, d180)
     gust = _hv(h, "wind_gusts_10m", best, w10)
     rain = max(0.0, _hv(h, "precipitation", best))
     code = int(_hv(h, "weather_code", best, 0))
     cape = _hv(h, "cape", best)
 
-    # Turbulenca: sunkovitost pri tleh + strig med nivoji. (Ne iz višine
-    # ničelne izoterme — ta z nemirnostjo zraka nima zveze.)
+    kor, hrbtnik, lestvica = izberi_koridor(koridorji, w850, d850)
+    az = kor["azimut"]
+
+    # Prečni veter ni več zavržen: ob pobočjih dela rotor in nemiren zrak.
+    prec = precna(w850, d850, az)
+
+    # Turbulenca: sunkovitost pri tleh + strig med nivoji + prečna komponenta.
+    # (Ne iz višine ničelne izoterme — ta z nemirnostjo zraka nima zveze.)
     strig = abs(w180 - w10)
-    turb = min(1.0, max(0.0, (gust - w10) / 25.0)) * 0.6 \
-        + min(1.0, max(0.0, strig / 20.0)) * 0.4
+    turb = min(1.0, max(0.0, (gust - w10) / 25.0)) * 0.5 \
+        + min(1.0, max(0.0, strig / 20.0)) * 0.3 \
+        + min(1.0, max(0.0, prec / 5.5)) * 0.2
 
     # Megla in padavine termiko zbijejo; strop pade.
     if code in (45, 48):
@@ -210,7 +240,7 @@ def build_level(data, date):
 
     ocena = fly_score(w10, _hv(h, "precipitation_probability", best), cape, z_i, 1)
 
-    return {
+    lvl = {
         "datum": ds,
         "generated": datetime.datetime.now(datetime.timezone.utc)
                      .isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -225,43 +255,70 @@ def build_level(data, date):
         "sink_ms": q(sink, 0.05),
         "gostota_km": q(gostota, 0.1),
         "z_i_m": q(z_i, 25),
-        "veter_tla_ms": q(vzdolzna(w10, d10), 0.1),
-        "veter_180_ms": q(vzdolzna(w180, d180), 0.1),
-        "veter_kmh": q(w180, 1),
-        "veter_smer": q(d180, 10),
+        "veter_tla_ms": q(vzdolzna(w10, d10, az), 0.1),
+        "veter_180_ms": q(vzdolzna(w180, d180, az), 0.1),
+        "veter_visoko_ms": q(vzdolzna(w850, d850, az), 0.1),
+        "veter_precno_ms": q(prec, 0.1),
+        "veter_kmh": q(w850, 1),
+        "veter_smer": q(d850, 10),
+        "veter_tla_kmh": q(w180, 1),
+        "veter_tla_smer": q(d180, 10),
         "sunki_kmh": q(gust, 1),
         "turbulenca": q(turb, 0.05),
         "padavine_mm": q(rain, 0.1),
         "koda_vremena": code,
         "cape": q(cape, 25),
         "ocena": ocena,
-        "konec_km": KONEC_KM,
-        "mejniki": [{"km": km, "ime": ime} for km, ime in MEJNIKI],
-        "teren": {"korak_m": TEREN_KORAK_M, "od_km": 0, "h": teren_vzorci()},
     }
+    return vstavi_koridor(lvl, kor, hrbtnik, lestvica)
 
 
-def rezervni_level(prejsnji):
+def vstavi_koridor(lvl, kor, hrbtnik=None, lestvica=None):
+    """Doda geometrijo koridorja v nivo. Teren in mejniki gredo VEDNO od tu,
+    tudi pri zastarelem nivoju — pot se z vremenom ne spreminja in stara kopija
+    bi po spremembi profila obtičala."""
+    lvl["koridor"] = {
+        "id": kor["id"], "ime": kor["ime"], "kratko": kor["kratko"],
+        "opis": kor["opis"], "azimut": kor["azimut"],
+        "dolzina_km": kor["dolzina_km"],
+        "hrbtnik_kmh": q(hrbtnik * 3.6, 1) if hrbtnik is not None else None,
+        "izbira": [{"id": k["id"], "kratko": k["kratko"], "hrbtnik_kmh": q(v * 3.6, 1)}
+                   for v, k in (lestvica or [])],
+    }
+    lvl["konec_km"] = kor["konec_km"]
+    lvl["mejniki"] = kor["mejniki"]
+    lvl["teren"] = kor["teren"]
+    return lvl
+
+
+def rezervni_level(prejsnji, koridorji):
     """Raje star podatek kot prazna stran (isto načelo kot inject_forecast.py).
 
     Če imamo včerajšnji nivo, ga obdržimo — igra ga označi kot nesvežega prek
     `generated`. Če nimamo niti tega, sestavimo povprečen dan in ga izrecno
     označimo kot rezervo, nikoli kot »današnjega«.
+
+    Koridor: pri zastarelem nivoju obdržimo tistega, ki je bil izbran takrat
+    (smer je del tistega dne), pri čisti rezervi pa privzamemo prvega.
     """
+    po_id = {k["id"]: k for k in koridorji}
     if prejsnji:
-        return dict(prejsnji, vir="zastarel")
+        lvl = dict(prejsnji, vir="zastarel")
+        prej = (prejsnji.get("koridor") or {}).get("id")
+        kor = po_id.get(prej, koridorji[0])
+        return vstavi_koridor(lvl, kor)
     ds = TODAY.isoformat()
-    return {
+    lvl = {
         "datum": ds, "generated": None, "vir": "rezerva", "seme": fnv1a(ds),
         "ura": None, "strop_m": 1600, "strop_bl_m": 1650, "baza_m": 1575,
         "termika_ms": 2.1, "w_star": 1.6, "sink_ms": 0.52, "gostota_km": 1.9,
         "z_i_m": 1250, "veter_tla_ms": 1.0, "veter_180_ms": 2.4,
-        "veter_kmh": 9, "veter_smer": 290, "sunki_kmh": 15, "turbulenca": 0.3,
+        "veter_visoko_ms": 3.2, "veter_precno_ms": 1.0,
+        "veter_kmh": 12, "veter_smer": 290, "veter_tla_kmh": 9,
+        "veter_tla_smer": 290, "sunki_kmh": 15, "turbulenca": 0.3,
         "padavine_mm": 0.0, "koda_vremena": 2, "cape": 0, "ocena": None,
-        "konec_km": KONEC_KM,
-        "mejniki": [{"km": km, "ime": ime} for km, ime in MEJNIKI],
-        "teren": {"korak_m": TEREN_KORAK_M, "od_km": 0, "h": teren_vzorci()},
     }
+    return vstavi_koridor(lvl, koridorji[0])
 
 
 # ── Besedilo ────────────────────────────────────────────────────────────────
@@ -284,8 +341,8 @@ def opis_dneva(l):
                   "lahko samo zdrsneš v sivino.")
     elif strop and strop < 1400:
         znacaj = (f"Konvekcija seže le do {num(strop)} m, to je pod vzletiščem na Goltah "
-                  f"({num(POT[0][1])} m). Z Golt boš najprej samo padal; loviti se začne "
-                  f"šele nižje v dolini, kjer je zrak sploh premešan.")
+                  f"({num(teren_na(l, 0))} m). Z Golt boš najprej samo padal; loviti se "
+                  f"začne šele nižje, kjer je zrak sploh premešan.")
     elif (l["padavine_mm"] or 0) > 1.2:
         znacaj = ("Dežuje. Termika je zbita, zrak med stebri pada hitreje kot "
                   "običajno. Danes gre za preživetje prvih kilometrov.")
@@ -293,8 +350,10 @@ def opis_dneva(l):
         znacaj = ("Mrtev zrak — dvigov skoraj ni. Vprašanje ni, kako visoko, "
                   "ampak kako daleč prideš z eno samo višino z vzletišča.")
     elif dvig < 1.0:
-        znacaj = ("Šibek dan. Vsak steber šteje in nobene višine ne smeš "
-                  "zapraviti — do Rečice je z Golt 10,3 km.")
+        prvi = (l.get("mejniki") or [{}, {}])[1]
+        znacaj = ("Šibek dan. Vsak steber šteje in nobene višine ne smeš zapraviti — "
+                  f"že do prvega mejnika ({prvi.get('ime','?')}) je "
+                  f"{num(prvi.get('km', 0), 1)} km.")
     elif dvig < 2.0:
         znacaj = "Soliden dan. Dolina je odprta, Letuš je realen cilj."
     elif dvig < 3.0:
@@ -327,19 +386,27 @@ def build_body(l, svez_opomba):
     esc = html.escape
     crumbs = [("Meteorec", "/"), ("Vreme za padalce", "/vreme-za-padalce/"), ("Termika", None)]
     dvig = (l["termika_ms"] or 0) - 1.28
+    kor = l.get("koridor") or {}
+    mejniki = l.get("mejniki") or []
 
+    # id-ji so tu zato, da lahko igra kartico osveži, če je nivo.json svežji od
+    # (morda predpomnjenega) HTML-a — sicer bi kartica in igra kazali različne
+    # številke istega dne.
     pogoji = f'''  <ul class="pg-cond">
-    <li><b>Strop</b><span>{num(l["strop_m"])} m</span><em>{"baza oblakov" if l["baza_m"] else "vrh termike"}</em></li>
-    <li><b>Dvigi v jedru</b><span>{num(l["termika_ms"], 1)} m/s</span><em>vzpon padala ~{num(max(0, dvig), 1)} m/s</em></li>
-    <li><b>Razmik stebrov</b><span>{num(l["gostota_km"], 1)} km</span><em>toliko preletiš med njimi</em></li>
-    <li><b>Veter na 180 m</b><span>{num(l["veter_kmh"])} km/h</span><em>{"v hrbet" if (l["veter_180_ms"] or 0) > 0 else "čelno"} vzdolž doline</em></li>
-    <li><b>Konvekcijska plast</b><span>{num(l["z_i_m"])} m</span><em>nad tlemi (z<sub>i</sub>)</em></li>
-    <li><b>Turbulenca</b><span>{num(l["turbulenca"], 2)}</span><em>iz sunkov in striženja</em></li>
+    <li><b>Smer dneva</b><span id="pg-c-korridor">{esc(kor.get("ime", "—"))}</span><em>izbral jo je veter na 1500 m</em></li>
+    <li><b>Strop</b><span id="pg-c-ceiling">{num(l["strop_m"])} m</span><em>{"baza oblakov" if l["baza_m"] else "vrh termike"}</em></li>
+    <li><b>Dvigi v jedru</b><span id="pg-c-lift">{num(l["termika_ms"], 1)} m/s</span><em>vzpon padala ~{num(max(0, dvig), 1)} m/s</em></li>
+    <li><b>Razmik stebrov</b><span id="pg-c-spacing">{num(l["gostota_km"], 1)} km</span><em>toliko preletiš med njimi</em></li>
+    <li><b>Veter na 1500 m</b><span id="pg-c-wind">{num(l["veter_kmh"])} km/h</span><em>{"v hrbet" if (l.get("veter_visoko_ms") or 0) > 0 else "čelno"} po koridorju</em></li>
+    <li><b>Prečni veter</b><span id="pg-c-cross">{num((l.get("veter_precno_ms") or 0) * 3.6)} km/h</span><em>ne nese naprej, dela nemir</em></li>
+    <li><b>Konvekcijska plast</b><span id="pg-c-zi">{num(l["z_i_m"])} m</span><em>nad tlemi (z<sub>i</sub>)</em></li>
+    <li><b>Turbulenca</b><span id="pg-c-turb">{num(l["turbulenca"], 2)}</span><em>sunki, strig, prečni veter</em></li>
   </ul>'''
 
     mejnik_vrstice = "\n".join(
-        f'      <tr><th>{esc(ime)}</th><td>{num(km, 1)} km · tla {num(_lerp(POT, km))} m</td></tr>'
-        for km, ime in MEJNIKI)
+        f'      <tr><th>{esc(m["ime"])}</th><td>{num(m["km"], 1)} km · '
+        f'tla {num(teren_na(l, m["km"]))} m</td></tr>'
+        for m in (l.get("mejniki") or []))
 
     faq = [
         ("Ali je igra realistična?",
@@ -361,11 +428,34 @@ def build_body(l, svez_opomba):
          "Ne. To je igra, ne pripomoček za odločanje o letu. Za oceno primernosti letenja "
          "je tu <a href=\"/vreme-za-padalce/\">Vreme za padalce</a>, odločitev pa je vedno "
          "pilotova in odvisna od izkušenj, opreme, terena in razmer na kraju samem."),
+        ("Zakaj letim danes prav v to smer?",
+         "Ker te tja nese veter. Igra ima štiri koridorje z Golt — po Savinjski dolini "
+         "proti Celju, navzgor proti Solčavi, čez Gornji Grad proti Kamniku in čez Raduho "
+         "na Koroško — in vsako jutro izbere tistega z največ vetra v hrbet. Enako se "
+         "odloči pilot: smeri preleta ne izbereš ti, izbere jo veter."),
+        ("Kateri veter odloča o smeri?",
+         "Gradientni na približno 1500 m (850 hPa), ne tisti pri tleh. Prelet poteka v tem "
+         "pasu, dolinski vetrič pri tleh pa je podnevi pogosto obrnjen ravno nasproti — "
+         "3. septembra 2026 je pri tleh pihalo proti zahodu, na 1500 m pa proti vzhodu. "
+         "V igri to čutiš: nizko te veter zavira, visoko te nese."),
         ("Kje je pot, po kateri letim?",
-         "Po Zgornji Savinjski dolini: z vzletišča na Goltah (~1400 m) mimo Rečice ob "
-         "Savinji, Mozirja, Letuša, Braslovč in Žalca do Celja — 41,7 km po dejanski poti "
-         "skozi te kraje. Višinski profil je poenostavljen."),
+         "Po lomljenki skozi prave kraje, ker se doline zavijejo in ravna črta reže čez "
+         "pobočja. Višine dna doline so iz javnega višinskega modela, vzletišče Golte "
+         "(~1400 m) pa po objavljeni višini — tisti model gore močno splošči. Zato so "
+         "koridorji, ki prečkajo visokogorje, v igri lažji od resničnosti."),
+        ("Zakaj so rekordi ločeni po smereh?",
+         "Ker so koridorji različno dolgi: proti Celju jih je 42 km, čez Raduho na Koroško "
+         "pa 11,5. Dvajset kilometrov čez gorsko pregrado ni isto kot dvajset po ravni "
+         "dolini, zato bi skupen rekord pomenil malo."),
     ]
+    izbira = kor.get("izbira") or []
+    lestvica_html = ("  <table class=\"stats\">\n" + "\n".join(
+        f'      <tr><th>{esc(i["kratko"])}</th><td>'
+        f'{"+" if (i["hrbtnik_kmh"] or 0) >= 0 else ""}{num(i["hrbtnik_kmh"], 0)} km/h '
+        f'{"v hrbet" if (i["hrbtnik_kmh"] or 0) >= 0 else "čelno"}'
+        f'{" · izbrana" if i["id"] == kor.get("id") else ""}</td></tr>'
+        for i in izbira) + "\n  </table>") if izbira else ""
+
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f"    <details><summary>{esc(q_)}</summary><p>{a}</p></details>" for q_, a in faq
     ) + "\n  </div>"
@@ -393,12 +483,12 @@ def build_body(l, svez_opomba):
         </div>
       </div>
       <div class="pg-route" aria-hidden="true">
-        <span>Golte</span>
+        <span id="pg-route-a">{esc(mejniki[0]["ime"]) if mejniki else "Golte"}</span>
         <div class="pg-route-bar" id="pg-route-bar">
           <i class="pg-route-fill" id="pg-route-fill"></i>
           <i class="pg-route-mark" id="pg-route-mark"></i>
         </div>
-        <span>Celje</span>
+        <span id="pg-route-b">{esc(mejniki[-1]["ime"]) if mejniki else ""}</span>
       </div>
       <canvas id="pg-canvas" width="900" height="506"
               aria-label="Stranski pogled na dolino: padalo, termični stebri, oblaki in teren"></canvas>
@@ -459,7 +549,14 @@ def build_body(l, svez_opomba):
       <a href="/slovar/strizenje-vetra/">striženje vetra</a> to še poudari.</td></tr>
   </table>
 
-  <h2>Pot preleta</h2>
+  <h2>Koridor dneva: {esc(kor.get("ime", "—"))}</h2>
+  <p class="archive-intro">{esc(kor.get("opis", ""))}
+  {("Veter na 1500 m ti danes doda " + num(kor["hrbtnik_kmh"], 0) + " km/h v hrbet."
+    if (kor.get("hrbtnik_kmh") or 0) > 3 else
+    ("Vse smeri so danes proti vetru; ta je najmanj slaba."
+     if (kor.get("hrbtnik_kmh") or 0) < -1 else
+     "Veter danes ne pomaga in ne ovira — šteje samo termika."))}</p>
+{lestvica_html}
   <table class="stats">
 {mejnik_vrstice}
   </table>
@@ -477,6 +574,7 @@ def build_body(l, svez_opomba):
 
 def main():
     offline = "--offline" in sys.argv
+    koridorji = nalozi_koridorje()
     path_json = os.path.join(ROOT, "igra", "nivo.json")
     prejsnji = None
     if os.path.exists(path_json):
@@ -490,19 +588,12 @@ def main():
     if not offline:
         try:
             print(f"[{TODAY}] Pridobivam napoved Open-Meteo …")
-            level = build_level(fetch_forecast(), TODAY)
+            level = build_level(fetch_forecast(), TODAY, koridorji)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
                 json.JSONDecodeError, ValueError, KeyError) as e:
             print(f"! Napoved ni dosegljiva ({e}) — obdržim prejšnji nivo.", file=sys.stderr)
     if level is None:
-        level = rezervni_level(prejsnji)
-
-    # Teren in mejnike vedno osvežimo iz te datoteke, tudi pri zastarelem nivoju —
-    # pot se ne spreminja z vremenom in stara kopija bi po morebitni spremembi
-    # profila obtičala.
-    level["mejniki"] = [{"km": km, "ime": ime} for km, ime in MEJNIKI]
-    level["teren"] = {"korak_m": TEREN_KORAK_M, "od_km": 0, "h": teren_vzorci()}
-    level["konec_km"] = KONEC_KM
+        level = rezervni_level(prejsnji, koridorji)
 
     os.makedirs(os.path.join(ROOT, "igra"), exist_ok=True)
     with open(path_json, "w", encoding="utf-8") as f:
