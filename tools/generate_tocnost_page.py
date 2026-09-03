@@ -407,6 +407,11 @@ def build_body(verification):
 {month_table}
   <h2>Zadnji dnevi</h2>
 {recent_table}
+  <h2>Misliš, da zmoreš bolje?</h2>
+  <p class="archive-intro">V igri <a href="/napovej/"><strong>Prehiti model</strong></a> vsak dan napoveš
+  jutrišnjo najvišjo in najnižjo temperaturo za Rečico, naslednje jutro pa te oceni ista meritev in isto
+  pravilo kot vse štiri vire na tej strani. Modeli računajo na mreži in dna doline ne vidijo — kdor ve, kdaj
+  se v njej nabere hladen zrak, jih lahko premaga.</p>
 {faq_html}
   <p class="muted-note">Metodologija: vsak dan zabeležimo napoved ARSO in Open-Meteo za jutrišnjo najvišjo/
   najnižjo temperaturo v Rečici ob Savinji; ko dan mine, ju primerjamo z dejansko dnevno meritvijo postaje

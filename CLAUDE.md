@@ -622,6 +622,44 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
 - Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
   `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
 
+## »Prehiti model« (`/napovej/`) — igralec kot peti tekmovalec semaforja
+
+Igra, v kateri obiskovalec vsak dan napove jutrišnjo najvišjo/najnižjo temperaturo
+in dež za Rečico, naslednje jutro pa ga oceni meritev IREICA1 — po istem pravilu
+kot ARSO, Open-Meteo, MTR in ECMWF AIFS na `/tocnost-napovedi/`. Druga igra na
+strani (prva je »Termika«, `/igra/`) in namenoma po istem vzorcu: Python sestavi
+krog dneva, JS ga samo igra.
+
+- **Nasprotniki se NE zajemajo na novo.** `tools/generate_napovej_page.py` bere
+  `tools/.forecast_pending.json` (čakajoče napovedi za jutri, zapiše jih
+  `verify_forecasts.py`) in `forecast_verification.json` (razrešeni dnevi). Drug
+  zajem bi pomenil drugo napoved pod istim imenom in dva semaforja, ki se
+  razideta — isto načelo kot `daily_features` pri MTR. Zato skript teče v
+  `forecast-verify.yml`, takoj za `generate_tocnost_page.py`, in nikjer drugje.
+- **Glavna ocena teče samo po temperaturah.** ARSO objavlja besedno napoved brez
+  milimetrov, MTR pa verjetnost padavin (`pop`), ne količine — skupna ocena po
+  dežju bi merila štiri vire po treh različnih merilih. Dež je zato ločena mera:
+  ali je vir zadel, da bo padlo vsaj **0,2 mm**. Ta prag je isti kot `WET_DAY_MM`
+  v `verify_forecasts.py` in `MOKER_MM` v `napovej/napovej.js` — če ga
+  spreminjaš, spremeni na vseh treh mestih.
+- **Modeli se v sezonski statistiki merijo SAMO na dnevih, ki jih je igralec
+  igral.** Sicer bi bila na isti tabeli tvojih pet dni proti njihovim petdesetim,
+  kar sta dve različni meritvi in ne primerjava.
+- **Rezultat živi v `localStorage`, javne lestvice ni.** Oddana napoved se
+  zaklene (`shrani()` obstoječega vnosa ne prepiše), a vse teče v brskalniku in
+  se da prirediti — stran to izrecno pove, namesto da bi se delala varna. Če bo
+  kdaj skupna lestvica, gre prek `COUNTER_KV` v `worker.js`, ne prek nove
+  odvisnosti.
+- **Krog je vedno za JUTRI.** Za dan, ki že teče, igra napovedi ne sprejema
+  (`odprt()`); ob izpadu dnevnega teka ostane stari krog in stran to označi —
+  raje star podatek kot prazna stran, a brez pobiranja napovedi za nazaj.
+- Model (ocenjevanje, sezona, niz) je v `napovej/napovej.js` ločen od prikaza in
+  izvožen za Node; preverja ga `tools/test_napovej.mjs`, ki teče v istem
+  workflowu pred objavo — isto kot `test_igra.mjs` pri Termiki.
+- Stran je v `CORE` v `tools/seo_audit.py`, v `llms.txt` in med hitrimi
+  povezavami na naslovni strani; datoteki `napovej/napovej.css` in
+  `napovej.js` sta v `asset-versions.yml`.
+
 ## Agrometeo (`/agrometeo/` + zavihek na naslovni strani) — modelirana ocena, ne diagnoza
 
 Bralec je 28. 8. 2026 pravilno opozoril, da je stran svoje modelirane ocene prikazovala

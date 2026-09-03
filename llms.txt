@@ -14,6 +14,7 @@
 - [Nevihte in opozorila ARSO](https://meteorec.si/nevihte/): aktivna opozorila ARSO za območje in dnevna nevihtna karta Slovenije.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
 - [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
+- [Prehiti model — igra](https://meteorec.si/napovej/): vsak dan napoveš jutrišnjo najvišjo in najnižjo temperaturo za Rečico ob Savinji in tekmuješ proti ARSO, Open-Meteo, MTR in ECMWF AIFS. Oceni te dejanska meritev postaje IREICA1, po istem pravilu kot modele na strani [Točnost napovedi](https://meteorec.si/tocnost-napovedi/). Ni napoved in ni pripomoček za odločanje.
 
 ## Podnebje in arhiv (2019–danes)
 

@@ -37,6 +37,18 @@ jobs:
       - name: Generiraj stran /tocnost-napovedi/
         run: python3 tools/generate_tocnost_page.py
 
+      # Igra »Prehiti model« (/napovej/) bere ISTI čakalni seznam napovedi, ki
+      # ga je verify_forecasts.py pravkar zapisal za jutri, in razrešene dneve iz
+      # forecast_verification.json. Zato teče tu in ne v svojem delavnem toku:
+      # drug zajem bi pomenil druge nasprotnike pod istimi imeni.
+      - name: Generiraj igro /napovej/ — krog dneva
+        run: python3 tools/generate_napovej_page.py
+
+      # Igra obljublja, da igralca meri po istem pravilu kot modele. Ob padcu
+      # testa se krog ne objavi.
+      - name: Test modela igre /napovej/
+        run: node tools/test_napovej.mjs
+
       # Ločeno od zgornjega semaforja (ta je D+1, dan za dnem): beleži tudi D+2
       # in izračuna rolling 30-dnevni MAE za zavihek "Trendi" (/trendi/).
       - name: Zabeleži točnost MTR (D+1/D+2) in izračunaj rolling MAE
@@ -48,7 +60,9 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add forecast_verification.json tools/.forecast_pending.json tocnost-napovedi/ napoved-modela.json \
+          # napovej/ mora biti tu naveden posebej — glej opozorilo o novosti.json
+          # v CLAUDE.md: skript je pisal, git add pa poti ni pokrival.
+          git add forecast_verification.json tools/.forecast_pending.json tocnost-napovedi/ napovej/ napoved-modela.json \
                   data/mtr-accuracy-log.csv tools/.mtr_accuracy_pending.json data/mtr-accuracy.json || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "chore: posodobi verifikacijo napovedi $(date -u +%Y-%m-%d) [skip ci]"

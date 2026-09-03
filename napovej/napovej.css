@@ -1,0 +1,157 @@
+/*
+ * napovej/napovej.css — slogi za /napovej/ (»Prehiti model«).
+ *
+ * ROČNO pisana, samostojna datoteka (ni generirana), naložena samo na tej
+ * strani. Vsi razredi imajo predpono .np- — stran nalaga tudi blog/blog.css in
+ * vreme/vreme.css, ki prideta ZA to datoteko (page_shell() postavi head_extras
+ * pred CSS_LINKS), zato se z njima ne sme prekrivati noben izbirnik. Barve so
+ * izključno spremenljivke iz blog.css, da stran ostane del Meteoreca.
+ *
+ * Za razliko od igre /igra/ ta stran NI na ves zaslon: tu se ne igra z refleksi,
+ * ampak odda ena številka na dan in prebere razlaga. Zato ostane navadna stran z
+ * glavo, nogo in spodnjim trakom.
+ */
+
+.np-card {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, .12));
+  border-radius: 14px;
+  background: var(--card, rgba(255, 255, 255, .04));
+}
+
+.np-kicker {
+  margin: 0 0 .9rem;
+  font-size: .82rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.np-h2 { margin: 0 0 .6rem; font-size: 1.15rem; }
+
+.np-note {
+  margin: .7rem 0 0;
+  font-size: .88rem;
+  line-height: 1.5;
+  opacity: .8;
+}
+
+.np-source { margin: .4rem 0 1.6rem; font-size: .85rem; opacity: .75; }
+
+/* ── Obrazec ───────────────────────────────────────────────────────────────
+   Številčno polje in drsnik sta ISTA vrednost v dveh oblikah: na telefonu je
+   drsnik hitrejši, s tipkovnico pa je natančnejši vpis. Drsnik je zato
+   aria-hidden in tabindex="-1" — bralnik zaslona naj vidi eno polje, ne dveh. */
+.np-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .5rem .9rem;
+  margin-bottom: 1rem;
+}
+
+.np-field-lbl { font-weight: 600; }
+.np-field-lbl em { display: block; font-style: normal; font-size: .8rem; opacity: .7; }
+
+.np-field input[type="number"] {
+  width: 6.5rem;
+  padding: .55rem .6rem;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: inherit;
+  background: rgba(0, 0, 0, .25);
+  border: 1px solid var(--line, rgba(255, 255, 255, .18));
+  border-radius: 9px;
+}
+
+.np-field input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--cyan, #38bdf8);
+}
+
+.np-btn {
+  display: inline-block;
+  margin-top: .4rem;
+  padding: .7rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  color: #04121d;
+  background: var(--cyan, #38bdf8);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.np-btn:hover { filter: brightness(1.08); }
+.np-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+.np-ghost {
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line, rgba(255, 255, 255, .25));
+}
+
+.np-share-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+
+/* ── Tabele ───────────────────────────────────────────────────────────────── */
+.np-table {
+  width: 100%;
+  margin: .6rem 0 0;
+  border-collapse: collapse;
+  font-size: .92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.np-table th,
+.np-table td {
+  padding: .45rem .5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, .1));
+}
+
+.np-table td { text-align: right; }
+.np-table small { display: block; font-size: .78rem; opacity: .65; }
+
+/* Igralčeva vrstica mora biti prepoznavna na prvi pogled — po tem se stran
+   bere. Poudarek je barven IN krepek, ne samo barven (barvna slepota). */
+.np-table tr.np-me th,
+.np-table tr.np-me td {
+  font-weight: 700;
+  color: var(--cyan, #38bdf8);
+}
+
+/* Tabela zadnjih dni ima šest stolpcev in na telefonu ne gre v širino — drsi
+   znotraj svojega okvira, stran pa ne (isto načelo kot .table-scroll v
+   vreme/vreme.css). */
+.np-wide { display: block; overflow-x: auto; white-space: nowrap; }
+
+.np-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.np-cols h3 { margin: .8rem 0 0; font-size: .95rem; opacity: .85; }
+
+/* ── Namigi ───────────────────────────────────────────────────────────────── */
+.np-hints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: .8rem;
+  margin: 1rem 0 1.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.np-hints li {
+  padding: .7rem .8rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, .12));
+  border-radius: 12px;
+}
+
+.np-hints b { display: block; font-size: .8rem; opacity: .75; }
+.np-hints span { display: block; margin: .15rem 0; font-size: 1.25rem; font-weight: 700; }
+.np-hints em { display: block; font-style: normal; font-size: .76rem; opacity: .6; }

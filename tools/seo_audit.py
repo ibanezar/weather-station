@@ -76,6 +76,9 @@ CORE = {
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.
     "igra/":                     ("daily",   "0.6"),
+    # »Prehiti model« — igra napovedovanja proti štirim modelom s semaforja.
+    # Krog, namigi in tabela zadnjih dni se sestavijo vsak dan, zato daily.
+    "napovej/":                  ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
