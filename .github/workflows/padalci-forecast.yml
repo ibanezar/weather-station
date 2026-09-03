@@ -1,9 +1,26 @@
 name: Vreme za padalce + igra
 
+# Termin: isti dvojni-cron + gate vzorec kot daily-story.yml in storm-map.yml.
+# GitHubov cron teče po UTC in redno zamuja (konec avgusta 2026 je štiri dni
+# zapored zamujal 6-12 ur), zato sta nastavljena dva termina -- 4:45 UTC je
+# 6:45 pri nas poleti, 5:45 UTC pa 6:45 pozimi -- tools/igra_gate.py pa spusti
+# skozi samo tistega, ki se pri nas res zgodi v oknu, in poskrbi, da se nivo
+# sestavi enkrat na dan.
+#
+# Zakaj 6:45 in ne 7:00: zahteva je, da je nivo NA VOLJO ob 7:00, ne da se
+# takrat šele začne sestavljati. Prej je bil en sam termin ob 6:15 UTC, kar je
+# poleti 8:15 po naši uri -- igra je bila ob sedmih še na včerajšnjem nivoju.
+
 on:
   schedule:
-    - cron: '15 6 * * *'   # 6:15 UTC daily, po kakovost-zraka-forecast.yml
-  workflow_dispatch:        # allow manual trigger
+    - cron: '45 4 * * *'
+    - cron: '45 5 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = sestavi ne glede na uro in na to, ali je nivo danes že nastal'
+        required: false
+        default: 'true'
 
 jobs:
   build:
@@ -18,7 +35,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Preveri, ali je čas za nov nivo
+        id: gate
+        run: |
+          python3 tools/igra_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
       - uses: actions/setup-node@v4
+        if: steps.gate.outputs.proceed == 'true'
         with:
           node-version: '20'
 
@@ -27,26 +51,36 @@ jobs:
       # smemo podreti celega teka — sicer bi kratek izpad vira pomenil, da se
       # tudi nivo dneva ne osveži.
       - name: Generate vreme-za-padalce stran
+        if: steps.gate.outputs.proceed == 'true'
         continue-on-error: true
         run: python3 tools/generate_padalci_page.py
 
       # Igra bere isti zajem napovedi (fetch_forecast iz generate_padalci_page),
       # zato teče tu in ne v svojem delavnem toku.
       - name: Generate igro (/igra/) — nivo dneva
+        if: steps.gate.outputs.proceed == 'true'
         run: python3 tools/generate_igra_page.py
 
       # Preveri, da vreme res poganja razdaljo; ob padcu se nivo ne objavi.
       - name: Test modela igre
+        if: steps.gate.outputs.proceed == 'true'
         run: node tools/test_igra.mjs
 
       - name: Commit & push if changed
+        if: steps.gate.outputs.proceed == 'true'
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          # igra/ mora biti tu naveden posebej — igra/index.html in
-          # igra/nivo.json nastaneta ob vsakem teku (glej opozorilo o
-          # novosti.json v CLAUDE.md: skript je pisal, git add pa ni pokrival).
-          git add vreme-za-padalce/ igra/ || true
+          python3 tools/igra_gate.py mark
+          # igra/ in stanje gate-a morata biti tu navedena posebej — glej
+          # opozorilo o novosti.json v CLAUDE.md: skript je pisal, git add pa
+          # poti ni pokrival in stvar je tiho izginjala.
+          git add vreme-za-padalce/ igra/ tools/.igra_state.json || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi vreme za padalce in nivo igre $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen, poskus $i — rebase na origin/main in ponovi."
+            git pull --rebase origin main
+          done
           git push
