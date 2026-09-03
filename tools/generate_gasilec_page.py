@@ -1243,6 +1243,22 @@ def main():
     build_nasveti_page(payload)
     build_metodologija_page(payload)
 
+    # En sam seznam za vidni FAQ in za FAQPage shemo — ločena kopija bi (in je)
+    # z besedilom počasi razšla (glej geo_audit.py: shema mora obljubljati
+    # samo vprašanja/odgovore, ki so res prikazani).
+    qa = [
+        ("Je MeteoGasilec uradna napoved?",
+         "Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski FWI metodologiji, ki jo za "
+         "Evropo uporablja EFFIS/GWIS. Uradno oceno objavlja ARSO."),
+        ("Zakaj se FWI tu in na naslovnici lahko za trenutek razlikujeta?",
+         "Oba računata isto formulo iz iste Open-Meteo napovedi, a naslovnica jo osveži v brskalniku ob "
+         "vsakem obisku, ta stran pa enkrat dnevno — v urah po novi napovedi je lahko majhna razlika."),
+        ("Kaj pomenijo pike na karti NASA FIRMS?",
+         "Satelitsko zaznane toplotne anomalije zadnjih dni, ne nujno potrjeni gozdni požari — glej opombo "
+         "ob karti zgoraj."),
+    ]
+    faq_html = "\n".join(f'  <p><b>{q}</b><br>{a}</p>' for q, a in qa)
+
     body = f'''{BRAND_SWAP}
 {seo.stn_badge()}
   <h1 class="page-title">MeteoGasilec — požarna ogroženost, Rečica ob Savinji</h1>
@@ -1260,26 +1276,12 @@ def main():
 {feature_cards_html()}
 {firms_widget_html()}
   <h2 id="faq">Pogosta vprašanja</h2>
-  <p><b>Je MeteoGasilec uradna napoved?</b><br>Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski
-  FWI metodologiji, ki jo za Evropo uporablja EFFIS/GWIS. Uradno oceno objavlja ARSO.</p>
-  <p><b>Zakaj se FWI tu in na naslovnici lahko za trenutek razlikujeta?</b><br>Oba računata isto formulo iz iste
-  Open-Meteo napovedi, a naslovnica jo osveži v brskalniku ob vsakem obisku, ta stran pa enkrat dnevno — v urah po
-  novi napovedi je lahko majhna razlika.</p>
-  <p><b>Kaj pomenijo pike na karti NASA FIRMS?</b><br>Satelitsko zaznane toplotne anomalije zadnjih dni, ne nujno
-  potrjeni gozdni požari — glej opombo ob karti zgoraj.</p>'''
+{faq_html}'''
 
     url = "/meteogasilec/"
     title = "MeteoGasilec — požarna ogroženost, Rečica ob Savinji"
     desc = (f"Indeks požarne ogroženosti FWI danes: {payload['fwi']} ({payload['level']}). Veter za intervencije, "
             f"aktivna opozorila ARSO in zaznana požarišča NASA FIRMS za Rečico ob Savinji.")
-    qa = [
-        ("Je MeteoGasilec uradna napoved požarne ogroženosti?",
-         "Ne. Samostojen izračun po kanadski FWI metodologiji (EFFIS/GWIS) iz javnih podatkov Open-Meteo, ni "
-         "nadomestilo za uradno oceno ARSO ali odloke lokalnih oblasti."),
-        ("Kaj je indeks FWI?",
-         "Kanadski Fire Weather Index — mednarodno uveljavljena ocena požarne ogroženosti iz vlažnosti tal, "
-         "temperature, vlage zraka, vetra in padavin zadnjih dni."),
-    ]
     schema = "\n".join([
         seo.webpage_schema(url, title, desc),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoGasilec", None)]),

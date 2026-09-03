@@ -261,13 +261,14 @@ def build_body(data, state, config, species_cfg):
   <p class="archive-intro">Približna razporeditev znanih lokacij (mrežnih celic) po najbližji občini —
   ocena po geografski bližini, ne uradna evidenca.</p>
 {municipality_section(pts)}
+{faq_html}
   <p class="muted-note">Podatki se dnevno posodabljajo s postopkom, opisanim na
   <a href="/blog/" style="color:var(--blue)">blogu Meteorec</a>; ob novi lokaciji izide kratek samodejni
   zapis, prvi dan v mesecu pa mesečni pregled.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 {map_js}'''
 
-    return body, pts, species
+    return body, pts, species, qa
 
 
 def main():
@@ -279,7 +280,7 @@ def main():
     config = load_json("invasive_species.json")
     species_cfg = {s["slug"]: s for s in config["species"]}
 
-    body, pts, species = build_body(data, state, config, species_cfg)
+    body, pts, species, qa = build_body(data, state, config, species_cfg)
 
     url = "/invazivke/"
     title = "Invazivne vrste Zgornja Savinjska dolina — spremljanje najdb"
@@ -287,26 +288,10 @@ def main():
             f"japonski dresnik, žlezava nedotika, orjaški dežen in druge. Nove lokacije, zemljevid, "
             f"pregled po občinah.")
 
-    qa_schema = [
-        ("Kaj so invazivne vrste in zakaj jih spremljamo v Zgornji Savinjski dolini?",
-         "Invazivne vrste so rastline in živali, ki jih je v Slovenijo prinesel človek in se zaradi "
-         "odsotnosti naravnih sovražnikov hitro širijo na račun domorodnih vrst; v dolini ob Savinji je "
-         "širjenje obrežnih vrst posebej hitro."),
-        ("Je orjaški dežen nevaren?",
-         "Da, sok orjaškega dežna v stiku s kožo in sončno svetlobo povzroči hude opekline — rastline se "
-         "ne dotikaj, najdbo prijavi in obvesti občino."),
-        ("Kako prijavim najdbo invazivke?",
-         "Fotografiraj jo in objavi opazovanje na iNaturalist z lokacijo — potrjena opazovanja se "
-         "samodejno pojavijo na tej strani."),
-        ("Od kod prihajajo podatki na tej strani?",
-         "Iz javne baze iNaturalist (opazovanja skupnosti); stran se osvežuje vsako noč, natančne "
-         "koordinate niso objavljene."),
-    ]
-
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-18"),
         seo.crumbs_schema([("Meteorec", "/"), ("Invazivke", None)]),
-        seo.faq_schema(qa_schema),
+        seo.faq_schema(qa),
         seo.named_dataset_schema(
             url, "Invazivne vrste — Zgornja Savinjska dolina",
             "Nočno posodobljen nabor opazovanj invazivnih vrst (iNaturalist) po mrežnih celicah "

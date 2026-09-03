@@ -22,6 +22,20 @@ SITE = "https://meteorec.si"
 # datum objave: privzeto današnji (UTC), z možnostjo prepisa prek POST_DATE
 TODAY = os.environ.get("POST_DATE") or datetime.date.today().isoformat()
 
+# Entity-linking za Place-shemo, na enem mestu -- generatorji ga uvozijo namesto
+# da vsak sam vtipka isti QID/Wikipedia niz. Prej vtipkan posebej v petih
+# datotekah (ta, generate_daily_post, generate_storm_watch_post,
+# generate_arso_newsjack_post, generate_seo_pages/seo_smart_routine) -- natanko
+# vzorec, ki je pri avtorski entiteti že enkrat razšel besedilo (glej GEO
+# načrt, P3). Q969326 je preverjeno naselje samo, ne občina -- ne zamenjaj.
+PLACE_SAMEAS = {
+    "Rečica ob Savinji": ["https://www.wikidata.org/wiki/Q969326",
+                          "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],
+    "Zgornja Savinjska dolina": ["https://sl.wikipedia.org/wiki/Zgornja_Savinjska_dolina"],
+}
+RECICA_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Rečica ob Savinji"], ensure_ascii=False)
+VALLEY_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Zgornja Savinjska dolina"], ensure_ascii=False)
+
 # Zgornja meja za <title>: nad ~60 znaki ga Google odreže, Semrush pa javi
 # opozorilo "too much text within the title tags".
 TITLE_MAX = 60
@@ -231,10 +245,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "datePublished": "{TODAY}",
   "dateModified": "{TODAY}",
   "inLanguage": "sl",
-  "author": {{ "@type": "Person", "name": "Filip Eremita" }},
+  "author": {{ "@type": "Person", "name": "Filip Eremita", "url": "{SITE}/o-postaji.html", "sameAs": ["https://ibanezar.github.io", "https://www.wunderground.com/dashboard/pws/IREICA1"] }},
   "publisher": {{ "@type": "Organization", "name": "Meteorec", "logo": {{ "@type": "ImageObject", "url": "{SITE}/icon-512.png" }} }},
   "mainEntityOfPage": {{ "@type": "WebPage", "@id": "{url}" }},
-  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": ["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"], "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
+  "about": {{ "@type": "Place", "name": "Rečica ob Savinji", "sameAs": {RECICA_SAMEAS_JSON}, "geo": {{ "@type": "GeoCoordinates", "latitude": 46.325779, "longitude": 14.921137, "elevation": 366 }} }}
 }}
 </script>
 <script type="application/ld+json">

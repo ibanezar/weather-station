@@ -33,7 +33,8 @@ Potrebne env spremenljivke:
 import json, os, sys, re, shutil, struct, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT, SITE, wire_all, fmtdate, TODAY, seo_title, CSS_LINKS
+from generate_monthly_post import (ROOT, SITE, wire_all, fmtdate, TODAY, seo_title, CSS_LINKS,
+                                    RECICA_SAMEAS_JSON, VALLEY_SAMEAS_JSON)
 from asset_version import asset_href
 
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
@@ -1105,10 +1106,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "datePublished": "{TODAY}",
   "dateModified": "{TODAY}",
   "inLanguage": "sl",
-  "author": {{ "@type": "Person", "name": "Filip Eremita" }},
+  "author": {{ "@type": "Person", "name": "Filip Eremita", "url": "{SITE}/o-postaji.html", "sameAs": ["https://ibanezar.github.io", "https://www.wunderground.com/dashboard/pws/IREICA1"] }},
   "publisher": {{ "@type": "Organization", "name": "Meteorec", "logo": {{ "@type": "ImageObject", "url": "{SITE}/icon-512.png" }} }},
   "mainEntityOfPage": {{ "@type": "WebPage", "@id": "{url}" }},
-  "about": {{ "@type": "Place", "name": "Zgornja Savinjska dolina", "sameAs": ["https://sl.wikipedia.org/wiki/Zgornja_Savinjska_dolina"], "geo": {{ "@type": "GeoCoordinates", "latitude": {LAT}, "longitude": {LON} }} }},
+  "about": {{ "@type": "Place", "name": "Zgornja Savinjska dolina", "sameAs": {VALLEY_SAMEAS_JSON}, "geo": {{ "@type": "GeoCoordinates", "latitude": {LAT}, "longitude": {LON} }} }},
   "keywords": "{keywords}"
 }}
 </script>

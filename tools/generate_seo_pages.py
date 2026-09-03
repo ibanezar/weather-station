@@ -24,7 +24,7 @@ Usage:
 """
 import html, json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
-from generate_monthly_post import seo_title
+from generate_monthly_post import seo_title, PLACE_SAMEAS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,11 +40,20 @@ CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css', 'vreme/vreme.css')
 SITE = "https://meteorec.si"
 STATION_ID = "IREICA1"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
-# Entity-linking za Place-shemo: verjeta Wikidata/Wikipedia stran (preverjeno,
-# ne domnevano -- Q969326 je naselje samo, ne občina).
-RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
-                 "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
+# Entity-linking za Place-shemo -- register je v generate_monthly_post.py
+# (PLACE_SAMEAS), da ga uvozijo tudi generatorji objav brez tveganja krožnega
+# uvoza (ta datoteka uvozi seo_title od tam, obratno ne gre).
+RECICA_SAMEAS = PLACE_SAMEAS["Rečica ob Savinji"]
 RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
+
+# Edini dejanski javni izvoz postajne zgodovine (CC BY 4.0, glej o-postaji.html)
+# -- Dataset vozlišča, izpeljana iz iste history.json (rekordi, pojavi, arhiv,
+# klimatologija …), naj kažejo distribution sem, ne le tisto na o-postaji.html.
+# Strani z drugim virom (crowdsourced prijave, iNaturalist) tega ne dobijo --
+# glej klicna mesta.
+HISTORY_DISTRIBUTION = {"@type": "DataDownload", "encodingFormat": "application/json",
+                         "contentUrl": f"{SITE}/history.json"}
+HISTORY_DISTRIBUTION_JSON = json.dumps(HISTORY_DISTRIBUTION, ensure_ascii=False, separators=(",", ":"))
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
@@ -169,7 +178,11 @@ def crumbs_schema(crumbs):
             f'{{"@context":"https://schema.org","@type":"BreadcrumbList",'
             f'"itemListElement":[{",".join(items)}]}}\n</script>')
 
-def webpage_schema(url, title, desc, date_published=None, image=None):
+def webpage_schema(url, title, desc, date_published=None, image=None, speakable=None):
+    """speakable: seznam CSS selektorjev na strani, ki so kratke, samostojne
+    povedi (ne mreža številk/značk) -- glasovni asistent/izvleček jih prebere
+    dobesedno. Ne dodajaj je na vsako stran, samo tja, kjer res obstaja tak
+    odsek besedila (glej klicna mesta)."""
     full = f"{SITE}{url}"
     img = image or f"{SITE}/og-image.jpg"
     s = (f'{{"@context":"https://schema.org","@type":"WebPage",'
@@ -181,6 +194,9 @@ def webpage_schema(url, title, desc, date_published=None, image=None):
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
     if date_published:
         s += f',"datePublished":{json.dumps(date_published)}'
+    if speakable:
+        s += (f',"speakable":{{"@type":"SpeakableSpecification",'
+              f'"cssSelector":{json.dumps(speakable)}}}')
     s += "}"
     return f"<script type=\"application/ld+json\">\n{s}\n</script>"
 
@@ -258,16 +274,18 @@ def dataset_schema(url, observations):
             '"inLanguage":"sl","keywords":["vreme Rečica ob Savinji",'
             '"vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],'
             f'"url":"{full}",'
-            '"creator":{"@type":"Person","name":"Filip Eremita"},'
+            f'"creator":{{"@id":"{SITE}/#person"}},'
             '"license":"https://creativecommons.org/licenses/by/4.0/",'
             '"isAccessibleForFree":true,'
+            f'"distribution":{HISTORY_DISTRIBUTION_JSON},'
             f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}},'
             f'"temporalCoverage":"2019-11-07/..",'
             '"variableMeasured":[' + ",".join(obs) + "]}\n</script>")
 
 
-def named_dataset_schema(url, name, description, variable_measured=None, temporal_coverage=None, id_suffix="dataset"):
+def named_dataset_schema(url, name, description, variable_measured=None, temporal_coverage=None,
+                          id_suffix="dataset", distribution=None):
     """Compact Dataset node for a derived archive page (records, phenomena …).
     Links back to the Person/DataCatalog entities defined once on the homepage
     via @id reference rather than redefining them, so Google resolves the
@@ -284,7 +302,13 @@ def named_dataset_schema(url, name, description, variable_measured=None, tempora
     id_suffix: override the "#dataset" @id fragment when a page carries more
     than one distinct Dataset node (e.g. /toca/ has both the crowdsourced
     hail-report archive and the station-based convective-day table) — each
-    needs its own @id or they collide."""
+    needs its own @id or they collide.
+
+    distribution: pass HISTORY_DISTRIBUTION when this dataset is genuinely
+    derived from history.json (records, phenomena, storm days …). Omit it
+    for datasets with no real public export (crowdsourced reports,
+    iNaturalist-backed pages) — a distribution claims a downloadable file
+    exists; don't assert that where it doesn't."""
     full = f"{SITE}{url}"
     data = {
         "@context": "https://schema.org",
@@ -311,6 +335,8 @@ def named_dataset_schema(url, name, description, variable_measured=None, tempora
         data["temporalCoverage"] = temporal_coverage
     if variable_measured:
         data["variableMeasured"] = variable_measured
+    if distribution:
+        data["distribution"] = distribution
     return (f'<script type="application/ld+json">\n'
             f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
 
@@ -335,8 +361,9 @@ def archive_dataset_schema(first_date, last_date):
         "keywords": ["vreme Rečica ob Savinji", "vreme Zgornja Savinjska dolina",
                      "vremenska postaja Savinjska dolina"],
         "temporalCoverage": f"{first_date}/..",
-        "creator": {"@type": "Person", "name": "Filip Eremita"},
+        "creator": {"@id": f"{SITE}/#person"},
         "publisher": {"@type": "Organization", "name": "Meteorec", "url": SITE + "/"},
+        "distribution": HISTORY_DISTRIBUTION,
         "spatialCoverage": {
             "@type": "Place",
             "name": "Rečica ob Savinji",
@@ -1547,6 +1574,7 @@ def gen_records_page(hist, sitemap_urls):
             ] + ([{"@type": "PropertyValue", "name": "Najdaljše obdobje brez dežja", "value": best_len, "unitText": "dni"}]
                  if rows_dry else []),
             temporal_coverage=f"{first_date}/..",
+            distribution=HISTORY_DISTRIBUTION,
         ),
     ])
     body = f'''{crumbs_html(crumbs)}
@@ -1617,6 +1645,7 @@ def gen_phenomena_pages(hist, sitemap_urls):
                 url, title, desc,
                 variable_measured=[{"@type": "PropertyValue", "name": value_label, "value": len(days), "unitText": "dni"}],
                 temporal_coverage=f"{first_date}/..",
+                distribution=HISTORY_DISTRIBUTION,
             ),
         ])
         body = f'''{crumbs_html(crumbs)}
@@ -1703,6 +1732,7 @@ def gen_phenomena_pages(hist, sitemap_urls):
                 {"@type": "PropertyValue", "name": "Naliv", "value": len(rain_days), "unitText": "dni"},
             ],
             temporal_coverage=f"{min(hist.keys())}/..",
+            distribution=HISTORY_DISTRIBUTION,
         ),
     ])
     body = f'''{crumbs_html(crumbs)}
@@ -3472,11 +3502,13 @@ def gen_slovar_pages(sitemap_urls):
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
-        qa = [(f"Kaj je {short_name.lower()}?", t["def"])]
+        q0 = f"Kaj je {short_name.lower()}?"
+        qa = [(q0, t["def"])]
         fact = facts.get(t["slug"])
         if fact:
-            qa.append((f"Kaj o pojmu {short_name.lower()} kažejo meritve v Rečici ob Savinji?",
-                       fact))
+            # Vprašanje se ujema z vidnim h2 v fact_html spodaj — FAQPage shema
+            # sme obljubljati samo besedilo, ki je res prikazano (glej geo_audit.py).
+            qa.append(("Kaj o tem pove postaja IREICA1", fact))
         fact_html = (f'''  <h2>Kaj o tem pove postaja IREICA1</h2>
   <p class="archive-intro">{fact}</p>
   <p class="muted-note">Vir: meritve postaje IREICA1 na Rečici ob Savinji (366 m n. m.).
@@ -3493,6 +3525,7 @@ def gen_slovar_pages(sitemap_urls):
 {stn_badge()}
   <h1 class="page-title">{t["icon"]} {t["term"]}</h1>
   <p class="post-meta">Vremenski slovar · <a href="/slovar/#{t["cat"]}">{cat_label}</a></p>
+  <h2>{q0}</h2>
   <p class="archive-intro">{t["def"]}</p>
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">💡 Zanimivost</div>

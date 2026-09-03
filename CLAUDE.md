@@ -36,6 +36,11 @@ Lektor preverja slovnico, slog, interno konsistentnost in — posebej pomembno �
 anglicizme/kalke (dobesedni prevodi, prekomerni trpnik, angleški narekovaji,
 vezaj namesto pomišljaja).
 
+`tools/lektor_existing_posts.py` po dejansko apliciranih popravkih zapiše tudi
+`dateModified` v JSON-LD in `updated` v `blog.json` (prek `touch_existing()`) —
+prej je lektura besedilo spremenila, shema pa je še naprej trdila, da je stran
+nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
+
 ## Objava člankov
 
 - Vse izpeljane datoteke (blog.json, blog/index.html, sitemap.xml,
@@ -762,6 +767,26 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
   `build_kalkulator_page()`, ne v `gasilec.js` (nič drugega jih ne rabi).
 - Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
   isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
+
+## GEO — citiranost pri AI asistentih
+
+`tools/geo_audit.py` preverja tisto, kar `seo_audit.py` ne: veljavnost
+JSON-LD, ujemanje FAQPage sheme z vidno vsebino, avtorsko entiteto,
+zastarelost `dateModified` na ključnih straneh, skoraj podvojeno vsebino med
+kraji v dolini in neveljavne `@id` reference. Poganjaj ga **ob vsaki novi
+strani ali generatorju** — isto načelo kot obvezna lektura zgoraj: nova stran
+ni končana, dokler `geo_audit.py` zanjo ne javi 0 napak. Novo strukturirano
+entiteto (Person/Organization/Place `sameAs`) dodajaj v skupni register
+(`PLACE_SAMEAS` v `generate_monthly_post.py`), ne kot vtipkan niz na novem
+mestu — glej opombo pri registru, zakaj.
+
+**Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
+vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem: isti nabor
+vprašanj vsak mesec vprašaj ChatGPT, Perplexity in Google AI Overview
+("vreme rečica ob savinji zdaj", "vreme zgornja savinjska dolina po urah",
+"gobarska napoved zgornja savinjska dolina", "kaj je rosišče", "je danes
+nevarnost požara v savinjski dolini") in zapiši, ali/kako omenijo
+meteorec.si. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni.
 
 ## Razvoj
 

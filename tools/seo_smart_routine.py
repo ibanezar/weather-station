@@ -16,7 +16,7 @@ Zaženi:
 """
 import json, os, sys, datetime, calendar, statistics as st, argparse, urllib.request
 from collections import defaultdict
-from generate_monthly_post import seo_title
+from generate_monthly_post import seo_title, PLACE_SAMEAS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -26,9 +26,8 @@ SITE = "https://meteorec.si"
 LAT, LON, ELEV = 46.325779, 14.921137, 366
 TODAY = datetime.date.today()
 INDEXNOW_KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
-# Entity-linking za Place-shemo (preverjeno: Q969326 je naselje samo, ne občina).
-RECICA_SAMEAS = ["https://www.wikidata.org/wiki/Q969326",
-                 "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"]
+# Entity-linking za Place-shemo -- register je v generate_monthly_post.py.
+RECICA_SAMEAS = PLACE_SAMEAS["Rečica ob Savinji"]
 RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
@@ -237,8 +236,9 @@ def dataset_schema(url, name, desc, keywords):
             f'"description":{jd(desc)},'
             f'"inLanguage":"sl","keywords":{jd(keywords)},'
             f'"url":{jd(full)},'
-            f'"creator":{{"@type":"Person","name":"Filip Eremita"}},'
+            f'"creator":{{"@type":"Person","name":"Filip Eremita","url":"{SITE}/o-postaji.html","sameAs":["https://ibanezar.github.io","https://www.wunderground.com/dashboard/pws/IREICA1"]}},'
             f'"isAccessibleForFree":true,'
+            f'"distribution":{{"@type":"DataDownload","encodingFormat":"application/json","contentUrl":"{SITE}/history.json"}},'
             f'"spatialCoverage":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'
             f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON}}}}},'
             f'"temporalCoverage":"2019-11-07/..",'
@@ -253,7 +253,7 @@ def article_schema(url, title, desc, date_pub, date_mod=None):
             f'"description":{json.dumps(desc)},"url":{json.dumps(full)},'
             f'"inLanguage":"sl","datePublished":{json.dumps(date_pub)},'
             f'"dateModified":{json.dumps(dm)},'
-            f'"author":{{"@type":"Person","name":"Filip Eremita"}},'
+            f'"author":{{"@type":"Person","name":"Filip Eremita","url":"{SITE}/o-postaji.html","sameAs":["https://ibanezar.github.io","https://www.wunderground.com/dashboard/pws/IREICA1"]}},'
             f'"publisher":{{"@type":"Organization","name":"Meteorec",'
             f'"url":"{SITE}"}},'
             f'"about":{{"@type":"Place","name":"Rečica ob Savinji","sameAs":{RECICA_SAMEAS_JSON},'

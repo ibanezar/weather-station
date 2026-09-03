@@ -22,7 +22,7 @@ Potrebne env spremenljivke:
 import json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_monthly_post import ROOT
+from generate_monthly_post import ROOT, TODAY, touch_existing
 from generate_daily_post import ANTHROPIC_MODEL, stream_claude, parse_lektor_json
 
 LEKTOR_REPLACE_PROMPT = """Si natančen slovenski lektor za blog meteorec.si. Dobiš HTML že objavljenega
@@ -132,6 +132,12 @@ def lektor_file(slug, api_key):
         applied += 1
 
     if applied:
+        # Lektura je dejanska sprememba vsebine -- shema mora to povedati,
+        # sicer geo_audit.py (in vsak model, ki bere samo to stran) vidi
+        # dateModified, ki laže o svežosti (glej GEO načrt, P1).
+        html, n = re.subn(r'("dateModified":\s*")[^"]*(")', rf'\g<1>{TODAY}\g<2>', html, count=1)
+        if n == 0:
+            print(f"   ⚠ dateModified ni najden -- shema po lekturi ostaja z izvirnim datumom.")
         open(path, "w", encoding="utf-8").write(html)
         print(f"   ✓ {applied} popravkov apliciranih" + (f", {skipped} preskočenih" if skipped else ""))
         return True
@@ -155,7 +161,14 @@ def main():
         slugs = load_last_slugs(3)
 
     print("Lektura objav:", ", ".join(slugs))
-    changed = sum(1 for s in slugs if lektor_file(s, api_key))
+    changed = 0
+    for s in slugs:
+        if not lektor_file(s, api_key):
+            continue
+        changed += 1
+        # blog.json "updated" + blog/index.html + sitemap.xml -- ista funkcija,
+        # ki jo uporabi ročna oznaka "posodobljeno" (glej touch_existing).
+        touch_existing(s, wire=True)
     print(f"\nSkupaj spremenjenih datotek: {changed}/{len(slugs)}")
 
 

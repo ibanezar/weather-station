@@ -221,7 +221,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "datePublished": "{now_utc.isoformat()}",
   "dateModified": "{now_utc.isoformat()}",
   "inLanguage": "sl",
-  "author": {{ "@type": "Person", "name": "Filip Eremita" }},
+  "author": {{ "@type": "Person", "name": "Filip Eremita", "url": "{SITE}/o-postaji.html", "sameAs": ["https://ibanezar.github.io", "https://www.wunderground.com/dashboard/pws/IREICA1"] }},
   "publisher": {{ "@type": "Organization", "name": "Meteorec", "logo": {{ "@type": "ImageObject", "url": "{SITE}/icon-512.png" }} }},
   "mainEntityOfPage": {{ "@type": "WebPage", "@id": "{url}" }},
   "keywords": "{keywords}"
