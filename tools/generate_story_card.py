@@ -4,7 +4,7 @@ tools/generate_story_card.py — dnevna kartica za Instagram/Facebook zgodbo.
 
 Zjutraj pogleda napoved, trenutne meritve, kakovost zraka, cvetni prah,
 gobarski indeks in zgodovino postaje (history.json) za Rečico ob Savinji,
-nato izmed ~25 tipov kartic ("tem") izbere tisto, ki je danes najbolj
+nato izmed ~27 tipov kartic ("tem") izbere tisto, ki je danes najbolj
 aktualna -- vsaka tema ima več besedilnih različic (skupaj prek 100), da se
 kartica čez čas ne ponavlja.
 
@@ -28,11 +28,12 @@ Teme (razvrščene po prioriteti, višja zmaga, če je več hkrati aktualnih):
   DROUGHT_DRY_STREAK                         — dolg suh niz
   MUSHROOM                                    — gobarski pogoji
   AIR_QUALITY_GOOD                             — čist zrak
-  VS_YESTERDAY                                  — velika sprememba od včeraj
-  PRESSURE_TREND                                 — hiter padec/dvig tlaka
-  SUNRISE_SUNSET                                  — dolžina dneva
-  MTR_FORECAST                                     — napoved lastnega modela MTR za jutri
-  GENERAL                                          — splošni povzetek (fallback)
+  IGRA                                          — nosilen termični dan (igra Termika)
+  VS_YESTERDAY                                   — velika sprememba od včeraj
+  PRESSURE_TREND                                  — hiter padec/dvig tlaka
+  SUNRISE_SUNSET                                   — dolžina dneva
+  MTR_FORECAST                                      — napoved lastnega modela MTR za jutri
+  GENERAL                                           — splošni povzetek (fallback)
 
 Zapiše og/story/<YYYY-MM-DD>.jpg (1080x1920) + og/story/latest.json.
 Objavita jo tools/post_story_to_facebook.py in post_story_to_instagram.py
@@ -65,6 +66,7 @@ WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 HISTORY = os.path.join(ROOT, "history.json")
 GOBE_JSON = os.path.join(ROOT, "gobarska-napoved", "index.json")
 MTR_JSON = os.path.join(ROOT, "napoved-modela.json")
+IGRA_JSON = os.path.join(ROOT, "igra", "nivo.json")
 
 LAT, LON = 46.325779, 14.921137
 TZ = ZoneInfo("Europe/Ljubljana")
@@ -235,6 +237,25 @@ def load_gobe_index(today_iso):
     return None
 
 
+def load_igra_level(today_iso):
+    """Nivo dneva igre »Termika« -- bere že zapisan igra/nivo.json (piše ga
+    tools/generate_igra_page.py), ne sestavlja ga na novo (isto načelo kot pri
+    gobarskem indeksu in napovedi MTR).
+
+    Sprejme SAMO današnji nivo iz žive napovedi: kartica ne sme oglaševati
+    stropa in dvigov, ki so od včeraj. Zgodba in nivo nastaneta v ločenih
+    delavnih tokovih, zato se lahko zgodi, da nivo še ni osvežen -- takrat tema
+    preprosto ne pride v poštev in zgodbo dobi druga."""
+    try:
+        with open(IGRA_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+        if data.get("datum") == today_iso and data.get("vir") == "open-meteo":
+            return data
+    except Exception as e:
+        print(f"⚠ nivo igre ni dosegljiv: {e}", file=sys.stderr)
+    return None
+
+
 def load_mtr_forecast():
     """Jutrišnja (D+1) napoved lastnega modela MTR -- bere lokalni
     napoved-modela.json (piše ga tools/predict_recica_mos.py), ne uvaža
@@ -326,6 +347,7 @@ def build_ctx():
     aq = fetch_air_quality()
     hist = load_history()
     gobe = load_gobe_index(today.isoformat())
+    igra = load_igra_level(today.isoformat())
 
     yday_key = (today - datetime.timedelta(days=1)).isoformat()
     hist_yesterday = hist.get(yday_key)
@@ -347,7 +369,7 @@ def build_ctx():
         current=current,
         current_temp=((current.get("outdoor") or {}).get("temperature") or {}).get("value"),
         varpolje=varpolje,
-        aq=aq, hist=hist, hist_yesterday=hist_yesterday, gobe=gobe,
+        aq=aq, hist=hist, hist_yesterday=hist_yesterday, gobe=gobe, igra=igra,
     )
 
 
@@ -876,6 +898,45 @@ def t_aq_good(ctx):
                  ("PM10", f"{num_sl(cur.get('pm10'), 0)} µg/m³"),
                  ("Najvišja temp.", f"{num_sl(ctx['tmax'], 1)} °C" if ctx["tmax"] is not None else "–")],
                 C_GREEN, "spring")
+
+
+# ── IGRA ──
+# Edina tema, ki ne poroča o vremenu, ampak o tem, kaj se z njim danes da
+# početi. Uvrsti se SAMO ob res nosilnem dnevu: vsakodnevna kartica o igri bi
+# bila oglas in bi imela isto usodo kot stare ARSO objave (glej CLAUDE.md).
+# Zgodbe nimajo podpisa in povezave, zato gre naslov strani na sliko samo -- v
+# tretjo vrstico statistike, isto kot navedba prijatelja pri VALLEY_DUEL.
+@topic("IGRA", 39)
+def t_igra(ctx):
+    l = ctx["igra"]
+    if not l:
+        return None
+    strop = l.get("strop_m") or 0
+    # 1,28 m/s je spuščanje padala med kroženjem -- razlika do dviga v jedru je
+    # to, kar igralec res vidi na variu (isto izhodišče kot opis_dneva()
+    # v generate_igra_page.py).
+    dvig = (l.get("termika_ms") or 0) - 1.28
+    # Strop pod vzletiščem na Goltah (~1400 m) pomeni, da se z njih samo
+    # spustiš -- to ni dan, s katerim bi kdo vabil v dolino.
+    if dvig < 1.7 or strop < 1600:
+        return None
+    if l.get("koda_vremena") in (45, 48) or (l.get("padavine_mm") or 0) > 0.5:
+        return None
+    variants = [
+        ("Danes\nnosi visoko", "strop termike nad dolino"),
+        ("Termika\ndanes dela", "strop termike nad dolino"),
+        ("Dan za\nkrila", "strop termike nad dolino"),
+        ("Zrak danes\ndviga", "strop termike nad dolino"),
+        ("Danes bi\nletel daleč", "strop termike nad dolino"),
+        ("Dolina danes\nnosi", "strop termike nad dolino"),
+    ]
+    headline, big_sub = pick(ctx, "IGRA", variants)
+    kor = (l.get("koridor") or {}).get("kratko") or "po dolini"
+    return card(ctx, "IGRA", headline, f"{num_sl(strop)} m", big_sub,
+                [("Dvigi v jedru", f"{num_sl(l.get('termika_ms'), 1)} m/s"),
+                 ("Smer dneva", kor),
+                 ("Preleti jo v igri", "meteorec.si/igra")],
+                C_CYAN, "misty-valley")
 
 
 # ── VS_YESTERDAY ──
