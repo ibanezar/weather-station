@@ -115,7 +115,7 @@ FB/IG ne podre objave članka).
 Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
 (1080×1920) — `.github/workflows/daily-story.yml`.
 
-- `tools/generate_story_card.py` ima ~26 tem (registrator `@topic(ime,
+- `tools/generate_story_card.py` ima ~27 tem (registrator `@topic(ime,
   prioriteta)`, seznam `TOPICS`), vsaka s 5+ besedilnimi različicami (skupaj
   čez 100 — `python3 tools/generate_story_card.py --list-topics` izpiše
   natančno število). Vsaka tema je funkcija `t_*(ctx)`, ki vrne kartico ali
@@ -805,6 +805,71 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
   `build_kalkulator_page()`, ne v `gasilec.js` (nič drugega jih ne rabi).
 - Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
   isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
+
+## Termika (`/igra/`) — igra jadralnega padalca na dnevnem vremenu
+
+Arkadna igra, v kateri z Golt letiš po dolini, koliko daleč te nesejo dvigi.
+**Nivo ni izmišljen — sestavi ga dnevna napoved.** Zato velja nekaj pravil, ki
+jih ni videti iz kode:
+
+- **Nivo računa Python, ne brskalnik.** Modelski teki Open-Meteo se čez dan
+  menjajo; klic iz brskalnika ob 7:00 in ob 20:00 bi dal drugačen strop in
+  drugačne dvige, obljuba »isti dan, isti nivo za vse« pa bi bila laž in
+  deljeni rezultati neprimerljivi. `tools/generate_igra_page.py` zapiše
+  `igra/nivo.json` in ga vdela v `igra/index.html`; vrednosti so **kvantizirane**
+  (strop na 25 m, dvigi na 0,1 m/s), da drobna sprememba med tekoma ne premakne
+  nivoja pod nogami igralcev, ki so ga že igrali.
+- Napoved zajame `fetch_forecast()` iz `generate_padalci_page`, oceno
+  priletnosti `fly_score()` od tam — **uvožena, ne podvojena.** Če igra
+  potrebuje novo spremenljivko, jo dodaj v `HOURLY_VARS` **tam**, ne tu.
+- **Koridorji** (`igra/koridorji.json`) so smeri preleta z Golt: proti Celju,
+  Solčavi, Kamniku, Črni. Vsak dan izbere enega **gradientni veter na 850 hPa**
+  (`izberi_koridor()`) — tako kot pilot, ki leti tja, kamor ga nese. Geometrijo
+  (potek, mejnike, višinski profil) pripravi enkratni
+  `tools/build_igra_corridors.py`; **Open-Meteo Elevation API mesta izravna**
+  (Golte 1400 → 705 m), zato je višina vzletišča zapisana ročno in zlita z DEM
+  prek `max()` — glej opombo tam, preden se zaneseš na te višine.
+- **`igra/igra.js` je ročno pisan** (ni generiran) in razdeljen na čisti
+  MODEL (izvoženi `IgraModel` / `module.exports`) in prikazni del. Model je
+  brez DOM-a prav zato, da ga lahko poganja `tools/test_igra.mjs` — 53
+  trditev, med njimi ta, da **vreme res poganja razdaljo** (primerjava proti
+  mrtvemu zraku) in da mediana jedra termike presega spuščanje med kroženjem.
+  Testi tečejo v delavnem toku **pred objavo**; ob padcu se nivo ne objavi.
+- `opis_dneva()` v generatorju in `dayRating()` v `igra.js` sta namerna
+  podvojitev (Python piše stran, JS teče v igri) — **veji morata ostati
+  usklajeni**, sicer igralec na strani prebere »soliden dan«, igra pa mu takoj
+  zatem javi »nizek strop«.
+- **Stran je celozaslonska** (`#pg-game`, `100svh`): `igra/igra.css` skrije
+  glavo, nogo, ozadje in spodnjo navigacijo. Ni članek in naj tako tudi ne
+  izgleda. Selektorji so pisani kot `body .selector`, ker se `blog.css` nalaga
+  za `head_extras` in bi drugače prevladal.
+- **Termin:** isti dvojni-cron + gate vzorec kot dnevna zgodba
+  (`tools/igra_gate.py`, okno 5:00–12:00, lastno stanje
+  `tools/.igra_state.json`), v `.github/workflows/padalci-forecast.yml`.
+  Nivo mora biti gotov **pred 6:00**, ker ga takrat prebere dnevna zgodba, in
+  objavljen do 7:00. Popoldne se ne sme več spremeniti — kdor je igral zjutraj,
+  ne sme zvečer dobiti drugačnega stropa; če cron zgreši celo dopoldne, ostane
+  včerajšnji nivo, ki ga stran označi kot nesvežega (🟡/🔴).
+- Če je prejšnji nivo **že današnji** (jutranji tek je uspel, poznejši pa je
+  našel Open-Meteo nedosegljiv), `rezervni_level()` tega ne sme označiti za
+  zastarelega — glej opombo tam.
+- **Dnevna OG kartica** (`tools/generate_igra_og.py`) je narisan profil
+  današnjega koridorja s stropom, dvigi in mejniki — `og/igra/<datum>.jpg`,
+  stare čez 14 dni pobriše sama, isto kot zgodbe in nevihtne karte. Datirano
+  ime je namerno: Facebook si sliko za URL predpomni, zato bi stalno ime
+  pomenilo, da vsak dan deli včerajšnjo. Riše se **v istem teku** kot nivo (in
+  ne v svojem koraku), da slika in `og:image` na strani ne moreta biti iz
+  različnih dni; ob manjkajočem Pillow ali napaki pade stran nazaj na splošno
+  `og-image.jpg` in nivo se vseeno objavi.
+- **Tema `IGRA` v `tools/generate_story_card.py`** (prioriteta 39) da igro na
+  dnevno zgodbo, a **samo ob nosilnem dnevu** (dvig ≥ 1,7 m/s nad spuščanjem
+  med kroženjem, strop ≥ 1600 m, brez megle in dežja) — vsakodnevna kartica bi
+  bila oglas in bi imela isto usodo kot stare ARSO objave. Bere že zapisan
+  `igra/nivo.json` in sprejme **samo današnji nivo iz žive napovedi**; če nivo
+  še ni osvežen, tema tiho odpade in zgodbo dobi druga.
+- `igra/igra.css` in `igra/igra.js` sta v `ASSETS` v
+  `tools/update_asset_versions.py` in v `paths` v `asset-versions.yml`; stran
+  je v `CORE` v `tools/seo_audit.py`.
 
 ## GEO — citiranost pri AI asistentih
 

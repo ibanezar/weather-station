@@ -2,19 +2,25 @@ name: Vreme za padalce + igra
 
 # Termin: isti dvojni-cron + gate vzorec kot daily-story.yml in storm-map.yml.
 # GitHubov cron teče po UTC in redno zamuja (konec avgusta 2026 je štiri dni
-# zapored zamujal 6-12 ur), zato sta nastavljena dva termina -- 4:45 UTC je
-# 6:45 pri nas poleti, 5:45 UTC pa 6:45 pozimi -- tools/igra_gate.py pa spusti
+# zapored zamujal 6-12 ur), zato sta nastavljena dva termina -- 3:45 UTC je
+# 5:45 pri nas poleti, 4:45 UTC pa 5:45 pozimi -- tools/igra_gate.py pa spusti
 # skozi samo tistega, ki se pri nas res zgodi v oknu, in poskrbi, da se nivo
 # sestavi enkrat na dan.
 #
-# Zakaj 6:45 in ne 7:00: zahteva je, da je nivo NA VOLJO ob 7:00, ne da se
+# Zakaj 5:45 in ne 7:00: zahteva je, da je nivo NA VOLJO ob 7:00, ne da se
 # takrat šele začne sestavljati. Prej je bil en sam termin ob 6:15 UTC, kar je
 # poleti 8:15 po naši uri -- igra je bila ob sedmih še na včerajšnjem nivoju.
+#
+# Zakaj celo uro pred sedmo: dnevna zgodba (daily-story.yml) gre ven ob 6:00 in
+# ima temo IGRA, ki bere igra/nivo.json in sprejme samo današnji nivo. Če bi se
+# nivo sestavljal ob 6:45, bi zgodba vsak dan videla včerajšnjega in tema se ne
+# bi nikoli uvrstila. Zamude GitHubovega crona tega ne morejo zagotoviti v vseh
+# primerih -- zato tema ob nesvežem nivoju tiho odpade in zgodbo dobi druga.
 
 on:
   schedule:
+    - cron: '45 3 * * *'
     - cron: '45 4 * * *'
-    - cron: '45 5 * * *'
   workflow_dispatch:
     inputs:
       force:
@@ -46,6 +52,12 @@ jobs:
         with:
           node-version: '20'
 
+      # Za dnevno OG kartico igre (tools/generate_igra_og.py). Če je namestitev
+      # spodletela, generator strani to ujame in pade nazaj na og-image.jpg.
+      - name: Namesti Pillow
+        if: steps.gate.outputs.proceed == 'true'
+        run: pip install Pillow --quiet
+
       # Ob nedosegljivem Open-Meteo ta skript konča z 1 in strani ne prepiše
       # (stara ostane). Ker za njim teče še igra, ki ima lastno rezervo, tu ne
       # smemo podreti celega teka — sicer bi kratek izpad vira pomenil, da se
@@ -75,7 +87,7 @@ jobs:
           # igra/ in stanje gate-a morata biti tu navedena posebej — glej
           # opozorilo o novosti.json v CLAUDE.md: skript je pisal, git add pa
           # poti ni pokrival in stvar je tiho izginjala.
-          git add vreme-za-padalce/ igra/ tools/.igra_state.json || true
+          git add vreme-za-padalce/ igra/ og/igra/ tools/.igra_state.json || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi vreme za padalce in nivo igre $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

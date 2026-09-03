@@ -303,10 +303,18 @@ def rezervni_level(prejsnji, koridorji):
     """
     po_id = {k["id"]: k for k in koridorji}
     if prejsnji:
-        lvl = dict(prejsnji, vir="zastarel")
-        prej = (prejsnji.get("koridor") or {}).get("id")
-        kor = po_id.get(prej, koridorji[0])
-        return vstavi_koridor(lvl, kor)
+        prej_kor = prejsnji.get("koridor") or {}
+        kor = po_id.get(prej_kor.get("id"), koridorji[0])
+        # Če je prejšnji nivo ŽE današnji (jutranji tek je uspel, poznejši pa
+        # je našel Open-Meteo nedosegljiv), ni zastarel in ga ne smemo tako
+        # označiti -- stran bi po nepotrebnem javila 🟡, hrbtnik in lestvica
+        # smeri pa bi izpadla, čeprav sta bila izračunana iz žive napovedi.
+        if prejsnji.get("datum") == TODAY.isoformat():
+            lvl = vstavi_koridor(dict(prejsnji), kor)
+            lvl["koridor"]["hrbtnik_kmh"] = prej_kor.get("hrbtnik_kmh")
+            lvl["koridor"]["izbira"] = prej_kor.get("izbira") or []
+            return lvl
+        return vstavi_koridor(dict(prejsnji, vir="zastarel"), kor)
     ds = TODAY.isoformat()
     lvl = {
         "datum": ds, "generated": None, "vir": "rezerva", "seme": fnv1a(ds),
@@ -623,14 +631,30 @@ def main():
             f"čim več. Nivo se vsak dan sestavi iz dejanske napovedi — danes strop "
             f"{num(level['strop_m'])} m, dvigi {num(level['termika_ms'], 1)} m/s.")
 
+    # Dnevna OG kartica: profil današnjega koridorja, strop in dvigi. Riše se
+    # tu (in ne v svojem koraku delavnega toka), da slika in `og:image` na
+    # strani nikoli ne moreta biti iz različnih dni. Če Pillow manjka ali
+    # risanje odpove, ostane splošna og-image.jpg — slika ni vredna tega, da
+    # bi zaradi nje izostal nivo dneva. Nariše se PRED shemo, ker isti URL
+    # potrebujeta oba (og:image in `image` v JSON-LD) — razhajanje med njima
+    # javi geo_audit.py.
+    og_slika = None
+    try:
+        import generate_igra_og  # noqa: PLC0415 — lokalno, da manjkajoč Pillow ne podre teka
+        og_slika = generate_igra_og.zapisi(level, datetime.datetime.now())
+        print(f"  → OG kartica: {og_slika}")
+    except Exception as e:  # noqa: BLE001 — namenoma široko, glej opombo zgoraj
+        print(f"! OG kartica ni nastala ({e}) — ostane splošna og-image.jpg", file=sys.stderr)
+
     schema = "\n".join([
-        seo.webpage_schema(URL, TITLE, desc, date_published="2026-09-02"),
+        seo.webpage_schema(URL, TITLE, desc, date_published="2026-09-02", image=og_slika),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme za padalce", "/vreme-za-padalce/"),
                            ("Termika", None)]),
     ])
     head = schema + f'\n<link rel="stylesheet" href="{asset_href("igra/igra.css")}">'
 
-    html_out = seo.page_shell(TITLE, desc, URL, head, build_body(level, svez))
+    html_out = seo.page_shell(TITLE, desc, URL, head, build_body(level, svez),
+                              og_image=og_slika)
     seo.write_page("igra/index.html", html_out, force=True)
     print(f"  → igra/index.html + igra/nivo.json ({level['vir']}, strop {num(level['strop_m'])} m, "
           f"dvigi {num(level['termika_ms'], 1)} m/s, razmik {num(level['gostota_km'], 1)} km)")

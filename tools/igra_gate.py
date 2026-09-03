@@ -4,13 +4,14 @@ tools/igra_gate.py — odloči, ali naj se zdaj sestavi nivo dneva za /igra/.
 
 Isto načelo kot tools/story_gate.py in tools/storm_map_gate.py (glej tam za
 polno obrazložitev): GitHubov cron teče po UTC in redno zamuja, zato workflow
-sproži dva termina (4:45 in 5:45 UTC, kar je 6:45 po naši uri poleti oz.
+sproži dva termina (3:45 in 4:45 UTC, kar je 5:45 po naši uri poleti oz.
 pozimi), ta gate pa spusti skozi samo tistega, ki se pri nas res zgodi v oknu,
 in prepreči dvojno sestavljanje istega dne.
 
-Zakaj 4:45/5:45 in ne 5:00/6:00 kot pri nevihtni karti: zahteva je, da je nivo
-NA VOLJO ob 7:00, ne da se takrat šele začne sestavljati. Petnajst minut prej
-je dovolj, da tek in objava na GitHub Pages steceta pred sedmo.
+Zakaj 3:45/4:45 in ne 5:00/6:00 kot pri nevihtni karti: zahteva je, da je nivo
+NA VOLJO ob 7:00, ne da se takrat šele začne sestavljati. Poleg tega ga ob 6:00
+prebere dnevna zgodba (tema IGRA v generate_story_card.py), ki sprejme samo
+današnji nivo — zato mora biti gotov pred njo, ne le pred sedmo.
 
 Ločeno stanje od ostalih gate-ov (drug ritem, druga vsebina) — glej opozorilo
 v CLAUDE.md, da se stanja ne delijo.
@@ -29,7 +30,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", ".igra_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
-WINDOW_START = 6    # nivo mora biti nov do 7:00; okno se začne uro prej, da
+WINDOW_START = 5    # nivo mora biti nov do 6:00 (dnevna zgodba ga takrat
+                    # prebere) in objavljen do 7:00; okno se začne uro prej, da
                     # cron z manjšo zamudo ni izločen po nepotrebnem.
 WINDOW_END = 12     # Zgornja meja je kompromis, ne varnostna omejitev kot pri
                     # nevihtni karti. Nivo, sestavljen opoldne, je še vedno
