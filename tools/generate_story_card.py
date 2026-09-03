@@ -887,26 +887,31 @@ def t_vs_yesterday(ctx):
     diff = ctx["tmax"] - hy["tempHigh"]
     if abs(diff) < 4.0:
         return None
+    # Headline mora ostati napoved, ne trditev o že znanem dnevu: ctx["tmax"]
+    # je Open-Meteo napoved za CEL današnji dan, ne dosedanji izmerjeni vrh, in
+    # kartica lahko izide že ob 6h zjutraj (glej okno v daily-story.yml) --
+    # sedanjiški naslovi ("Danes manj kot včeraj") so pred popoldanskim vrhom
+    # zavajajoči, kot je pravilno opozoril bralec.
     if diff > 0:
         variants = [
-            ("Danes bo\ntopleje kot včeraj", "razlika od včerajšnjega vrha"),
-            ("Segreva\nse", "razlika od včerajšnjega vrha"),
-            ("Toplejši dan\nod včeraj", "razlika od včerajšnjega vrha"),
-            ("Termometer\ngre gor", "razlika od včerajšnjega vrha"),
-            ("Danes več\nkot včeraj", "razlika od včerajšnjega vrha"),
+            ("Danes bo\ntopleje kot včeraj", "napoved proti včerajšnjemu vrhu"),
+            ("Segreva\nse", "napoved proti včerajšnjemu vrhu"),
+            ("Toplejši dan\nse obeta", "napoved proti včerajšnjemu vrhu"),
+            ("Termometer\ngre gor", "napoved proti včerajšnjemu vrhu"),
+            ("Danes bo\nvišje kot včeraj", "napoved proti včerajšnjemu vrhu"),
         ]
     else:
         variants = [
-            ("Danes bo\nhladneje kot včeraj", "razlika od včerajšnjega vrha"),
-            ("Ohladitev\nje tu", "razlika od včerajšnjega vrha"),
-            ("Hladnejši dan\nod včeraj", "razlika od včerajšnjega vrha"),
-            ("Termometer\ngre dol", "razlika od včerajšnjega vrha"),
-            ("Danes manj\nkot včeraj", "razlika od včerajšnjega vrha"),
+            ("Danes bo\nhladneje kot včeraj", "napoved proti včerajšnjemu vrhu"),
+            ("Ohladitev\nje tu", "napoved proti včerajšnjemu vrhu"),
+            ("Hladnejši dan\nse obeta", "napoved proti včerajšnjemu vrhu"),
+            ("Termometer\ngre dol", "napoved proti včerajšnjemu vrhu"),
+            ("Danes bo\nmanj kot včeraj", "napoved proti včerajšnjemu vrhu"),
         ]
     headline, big_sub = pick(ctx, "VS_YESTERDAY", variants)
     sign = "+" if diff > 0 else "−"
     return card(ctx, "VS_YESTERDAY", headline, f"{sign}{num_sl(abs(diff), 1)} °C", big_sub,
-                [("Danes", f"{num_sl(ctx['tmax'], 1)} °C"),
+                [("Napoved danes", f"{num_sl(ctx['tmax'], 1)} °C"),
                  ("Včeraj", f"{num_sl(hy['tempHigh'], 1)} °C"),
                  ("Vreme danes", ctx["cond"] or "spremenljivo")],
                 C_ORANGE if diff > 0 else C_CYAN, "weather-station")
