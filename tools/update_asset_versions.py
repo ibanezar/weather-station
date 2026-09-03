@@ -44,6 +44,8 @@ ASSETS = [
     "blog/blog.css",
     "vreme/vreme.css",
     "sola/sola.css",
+    "igra/igra.css",
+    "igra/igra.js",
     "blog/likes.js",
     "blog/views.js",
     "blog/comments.js",

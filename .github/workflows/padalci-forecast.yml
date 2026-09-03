@@ -1,4 +1,4 @@
-name: Vreme za padalce
+name: Vreme za padalce + igra
 
 on:
   schedule:
@@ -18,14 +18,35 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Ob nedosegljivem Open-Meteo ta skript konča z 1 in strani ne prepiše
+      # (stara ostane). Ker za njim teče še igra, ki ima lastno rezervo, tu ne
+      # smemo podreti celega teka — sicer bi kratek izpad vira pomenil, da se
+      # tudi nivo dneva ne osveži.
       - name: Generate vreme-za-padalce stran
+        continue-on-error: true
         run: python3 tools/generate_padalci_page.py
+
+      # Igra bere isti zajem napovedi (fetch_forecast iz generate_padalci_page),
+      # zato teče tu in ne v svojem delavnem toku.
+      - name: Generate igro (/igra/) — nivo dneva
+        run: python3 tools/generate_igra_page.py
+
+      # Preveri, da vreme res poganja razdaljo; ob padcu se nivo ne objavi.
+      - name: Test modela igre
+        run: node tools/test_igra.mjs
 
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add vreme-za-padalce/ || true
+          # igra/ mora biti tu naveden posebej — igra/index.html in
+          # igra/nivo.json nastaneta ob vsakem teku (glej opozorilo o
+          # novosti.json v CLAUDE.md: skript je pisal, git add pa ni pokrival).
+          git add vreme-za-padalce/ igra/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
-          git commit -m "seo: posodobi vreme za padalce $(date -u +%Y-%m-%d) [skip ci]"
+          git commit -m "seo: posodobi vreme za padalce in nivo igre $(date -u +%Y-%m-%d) [skip ci]"
           git push

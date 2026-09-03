@@ -1,0 +1,302 @@
+/*
+ * igra/igra.css — slogi za /igra/ (»Termika«, igra jadralnega padalca).
+ *
+ * ROČNO pisana, samostojna datoteka (ni generirana), naložena samo na tej
+ * strani. Vsi razredi imajo predpono .pg- — stran nalaga tudi blog/blog.css
+ * in vreme/vreme.css, ki prideta ZA to datoteko (page_shell() postavi
+ * head_extras pred CSS_LINKS), zato se z njima ne sme prekrivati noben
+ * izbirnik. Barve so izključno spremenljivke iz blog.css, da igra ostane del
+ * strani in ne otok zase.
+ *
+ * Izjema pri barvah je nebo v igri: to riše canvas iz vremenske kode dneva,
+ * ne CSS — temna paleta strani bi jasno julijsko nebo naredila mrtvo.
+ */
+
+/* Igra rabi več širine, kot je .wrap (720 px), a ne cele strani.
+   Širina + `left: 50%` + `translateX(-50%)`, ne negativni margini: ti se ob
+   `max-width` prevedejo v prekoračitev desnega roba (gumbi in vario stolpec
+   so bili odrezani), medtem ko sredinjenje s premikom drži pri vsaki širini. */
+.pg-bleed {
+  width: min(100vw - 1.5rem, 1040px);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+#pg-game {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0a1422;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+#pg-game:focus { outline: none; }
+#pg-game:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+#pg-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Poteza po platnu je krmiljenje, ne drsenje po strani. Velja SAMO tu —
+     stran se povsod drugod drsa normalno. */
+  touch-action: none;
+  cursor: grab;
+}
+#pg-canvas:active { cursor: grabbing; }
+
+/* ── Merilniki nad platnom ─────────────────────────────────────────────── */
+/* Razdalja je rezultat igre, zato je edina velika; ostalo je opora. Prej je
+   bilo vseh šest vrednosti enako veliko in oko ni imelo kam pogledati. */
+.pg-hud {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .45rem .8rem;
+  background: linear-gradient(rgba(4, 7, 14, .68), rgba(4, 7, 14, .5));
+  border-bottom: 1px solid var(--border);
+}
+.pg-hero {
+  margin: 0;
+  flex: 0 0 auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pg-hero small {
+  font-size: .62rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: .22rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.pg-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .05rem .95rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .74rem;
+  min-width: 0;
+}
+.pg-stats > div { display: flex; align-items: baseline; gap: .3rem; }
+.pg-lbl {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-family: system-ui, sans-serif;
+}
+.pg-val { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pg-v.up { color: var(--green); }
+.pg-v.down { color: #f87171; }
+
+/* ── Trak poti ─────────────────────────────────────────────────────────── */
+/* Brez njega igralec ne ve, ali je 12 km veliko ali malo. */
+.pg-route {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .3rem .8rem .45rem;
+  background: rgba(4, 7, 14, .5);
+  font-size: .64rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.pg-route-bar {
+  position: relative;
+  flex: 1 1 auto;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .11);
+  overflow: visible;
+}
+.pg-route-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+}
+.pg-route-mark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: #ffd166;
+  box-shadow: 0 0 0 2px rgba(4, 7, 14, .65);
+}
+.pg-route-tick {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .38);
+}
+
+/* ── Prekrivno okno (začetek / konec leta) ─────────────────────────────── */
+.pg-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: linear-gradient(rgba(4, 7, 14, .72), rgba(4, 7, 14, .88));
+  backdrop-filter: blur(2px);
+  text-align: center;
+}
+.pg-overlay[hidden] { display: none; }
+.pg-ov-in { max-width: 30rem; }
+.pg-ov-kicker {
+  margin: 0 0 .3rem;
+  color: var(--muted);
+  font-size: .74rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.pg-ov-title {
+  margin: 0 0 .45rem;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  line-height: 1.15;
+  color: var(--text);
+}
+.pg-ov-sub { margin: 0 0 1rem; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+.pg-ov-sub.pg-small { font-size: .84rem; margin-bottom: .5rem; }
+.pg-ov-rec { margin: 0 0 .6rem; color: var(--amber); font-weight: 700; }
+.pg-ov-btns { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
+.pg-ov-help {
+  margin: .85rem 0 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+.pg-ov-help b { color: var(--text); }
+
+.pg-start, .pg-share {
+  font: inherit;
+  font-weight: 700;
+  padding: .7rem 1.35rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 44px;
+}
+.pg-start { background: var(--blue); color: #04070e; }
+.pg-share { background: transparent; color: var(--text); border-color: var(--card-border); }
+.pg-start:hover { filter: brightness(1.1); }
+.pg-share:hover { border-color: var(--cyan); color: var(--cyan); }
+.pg-start:focus-visible, .pg-share:focus-visible {
+  outline: 2px solid var(--cyan); outline-offset: 2px;
+}
+
+/* ── Krmilni gumbi ─────────────────────────────────────────────────────── */
+.pg-controls {
+  display: flex;
+  gap: .5rem;
+  padding: .55rem;
+  background: rgba(4, 7, 14, .55);
+  border-top: 1px solid var(--border);
+}
+.pg-btn {
+  font: inherit;
+  font-weight: 700;
+  flex: 1 1 0;
+  min-height: 52px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, .05);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pg-btn small { display: block; font-weight: 400; font-size: .68rem; color: var(--muted); }
+.pg-btn.pg-circle { flex: 2 1 0; }
+.pg-btn.on { background: var(--blue); color: #04070e; border-color: var(--blue); }
+.pg-btn.on small { color: rgba(4, 7, 14, .75); }
+.pg-btn.pg-sound { flex: 0 0 auto; min-width: 84px; font-size: .82rem; }
+.pg-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.pg-btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* ── Izvor in svežina nivoja ───────────────────────────────────────────── */
+.pg-source {
+  margin: .5rem 0 0;
+  font-size: .8rem;
+  color: var(--muted);
+  text-align: center;
+}
+.pg-source.warn { color: var(--amber); }
+
+/* ── Kartica današnjih razmer ──────────────────────────────────────────── */
+.pg-cond {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: .6rem;
+  margin: 1rem 0 .35rem;
+  padding: 0;
+  list-style: none;
+}
+.pg-cond li {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: .6rem .7rem;
+}
+.pg-cond b {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.pg-cond span {
+  display: block;
+  margin-top: .15rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+.pg-cond em { display: block; margin-top: .2rem; font-size: .74rem; color: var(--muted); font-style: normal; }
+
+/* Bralnikom zaslona sporočimo izid leta; vidno ga pove prekrivno okno. */
+.pg-live {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 460px) {
+  .pg-hud { gap: .6rem; padding: .4rem .6rem; }
+  .pg-hero { font-size: 1.35rem; }
+  .pg-stats { font-size: .68rem; gap: .05rem .6rem; }
+  .pg-lbl { font-size: .56rem; }
+  .pg-route { padding-inline: .6rem; font-size: .58rem; }
+  .pg-btn { min-height: 56px; }
+  /* Na ozkem zaslonu gresta držalna gumba v prvo vrstico, vario pa pod njiju —
+     sicer se napis »Pospeši · proti vetru« lomi čez dve vrstici. */
+  .pg-controls { flex-wrap: wrap; }
+  .pg-btn.pg-circle { flex: 1 1 58%; }
+  .pg-btn#pg-btn-speed { flex: 1 1 34%; }
+  .pg-btn.pg-sound { flex: 1 1 100%; min-height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-overlay { backdrop-filter: none; }
+}

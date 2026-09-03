@@ -73,6 +73,9 @@ CORE = {
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
+    # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
+    # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.
+    "igra/":                     ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
@@ -113,6 +116,16 @@ CORE = {
     # jo ta pregled prijavi kot manjkajočo. Lasten sitemap-makro.xml, ne ta
     # seznam, nosi posamezne strani po vrstah (glej SITEMAPS spodaj).
     "makro/":                     ("weekly",  "0.4"),
+    # Meteorec Šola — gradiva o vremenu za osnovno šolo, glej CLAUDE.md.
+    "sola/":                              ("weekly",  "0.7"),
+    "sola/naravoslovni-dan-vreme/":       ("monthly", "0.6"),
+    "sola/dezni-dnevnik/":                ("monthly", "0.6"),
+    "sola/kljuc-oblakov/":                ("monthly", "0.6"),
+    "sola/veter-vetrnica/":               ("monthly", "0.6"),
+    "sola/termometer-temperatura/":       ("monthly", "0.6"),
+    "sola/zuzelka-tedna/":                ("monthly", "0.6"),
+    "sola/gozd-in-vreme/":                ("monthly", "0.6"),
+    "sola/sneg-in-zmrzal/":               ("monthly", "0.6"),
 }
 
 # Strani, na katerih preverimo osnovne on-page SEO elemente.

@@ -24,10 +24,18 @@ LAT, LON = seo.LAT, seo.LON
 
 DAN_KRATKO = ["ned", "pon", "tor", "sre", "čet", "pet", "sob"]
 
+# Prva skupina je vse, kar rabi fly_score()/ta stran. Druga skupina je za
+# tools/generate_igra_page.py, ki fetch_forecast() UVOZI namesto da bi imel
+# svoj zajem — dva zajema z dvema seznamoma spremenljivk bi se sčasoma
+# razšla (isto načelo kot daily_features pri MTR ali CORE pri sitemapu).
+# Ta stran dodatna polja preprosto prezre.
 HOURLY_VARS = ",".join([
     "boundary_layer_height", "cape", "lifted_index", "wind_speed_10m", "wind_speed_80m",
     "wind_direction_10m", "wind_direction_80m", "precipitation_probability", "precipitation",
     "is_day", "temperature_2m", "dew_point_2m",
+    # ── za /igra/ ──
+    "direct_radiation", "shortwave_radiation", "cloud_cover_low",
+    "wind_speed_180m", "wind_direction_180m", "wind_gusts_10m", "weather_code",
 ])
 DAILY_VARS = ",".join([
     "temperature_2m_max", "precipitation_sum", "wind_speed_10m_max", "wind_gusts_10m_max",
@@ -206,6 +214,14 @@ def build_body(data):
   <p class="archive-intro">Ocena (0–100 %) upošteva veter na 10 m, verjetnost padavin, CAPE (nevihtni potencial) in
   višino konvekcijskega sloja. Nizek veter, malo padavin, zmeren CAPE (brez nevihtnega tveganja) in visok konvekcijski
   strop dajejo najvišjo oceno. Ocena ≥ 70 pomeni dobre pogoje za letenje, 40–69 mejne pogoje, pod 40 pa let odsvetuje.</p>
+  <div class="card" style="margin-bottom:1rem">
+    <div class="clabel">🪂 Termika — igra</div>
+    <p style="margin:.6rem 0 0">Iste številke, ki jih bereš zgoraj, poganjajo tudi
+    <a href="/igra/">igro jadralnega padalca</a>: vzletiš z Golt in poskušaš preleteti dolino,
+    nivo pa se vsak dan sestavi iz dejanske napovedi — strop, moč dvigov, razmik med stebri in
+    veter po višini. Ob plitvi konvekciji prideš do prve vasi, ob globoki do Celja.</p>
+  </div>
+
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">🔗 Padalski vremenski viri</div>
     <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">

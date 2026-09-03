@@ -5386,8 +5386,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const imgB64 = m[2];
           if (imgB64.length > 6_000_000) return _json({ error: "Slika je prevelika" }, 413);
 
-          const dbLines = GOBE_SPECIES_DB.map(s =>
-            `- ${s.sl} (${s.lat}) — ${s.ed}${s.dbl ? "; dvojnica: " + s.dbl : ""}`).join("\n");
+          // Samo ime + užitnost, brez besedila o dvojnicah — poln dbLines (z
+          // dvojnica opisi vsake vrste) je vprašanje napihnil na ~9900 znakov,
+          // kar je ta majhen model (moondream, primarno query/caption, ne
+          // sklepanje po 50-vrstičnem referenčnem seznamu) pahnilo v
+          // ponavljanje istega stavka, dokler ni zmanjkalo max_tokens
+          // (finish_reason:"length") — brez veljavnega JSON-a na koncu.
+          // Nevarne dvojnice ostanejo pokrite prek splošnega navodila spodaj
+          // (točki 3–4), ne prek poimenskega seznama.
+          const dbLines = GOBE_SPECIES_DB.map(s => `- ${s.sl} (${s.lat}) — ${s.ed}`).join("\n");
           const question = `Si mikološki pomočnik za gobarje v Zgornji Savinjski dolini, Slovenija. Uporabnik je poslal fotografijo gobe, najdene na terenu.
 
 Referenčna baza vrst te doline (uporabi ta slovenska imena, kadar gre za isto vrsto):
@@ -5407,12 +5414,17 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
 
           let aiData;
           try {
+            // stream:false je obvezen — privzeto je true, kar vrne ReadableStream
+            // namesto {answer:...} in bi spodnji aiData?.answer vedno bral prazno,
+            // ne glede na kakovost fotografije.
             aiData = await env.AI.run("@cf/moondream/moondream3.1-9B-A2B", {
-              image: raw, task: "query", question, reasoning: false, max_tokens: 1500,
+              image: raw, task: "query", question, reasoning: false, max_tokens: 1500, stream: false,
             });
           } catch (e) { return _json({ error: "AI storitev ni dosegljiva", upstream_detail: String(e) }, 502); }
 
-          const answer = String(aiData?.answer || aiData?.response || "").trim();
+          // env.AI.run() vrne {result:{answer,...}, usage:{...}} za ta model —
+          // raw aiData.answer je vedno undefined.
+          const answer = String(aiData?.result?.answer || aiData?.answer || aiData?.response || "").trim();
           const jsonMatch = answer.match(/\{[\s\S]*\}/);
           let parsed = null;
           if (jsonMatch) { try { parsed = JSON.parse(jsonMatch[0]); } catch (_) { parsed = null; } }
