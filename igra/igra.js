@@ -126,16 +126,22 @@
     return t.h[i] + (t.h[i + 1] - t.h[i]) * (f - i);
   }
 
-  // Veter po višini: med 10 m in 180 m linearno, nad tem po Hellmannovem
-  // zakonu (α = 0,14 za odprt teren). Vrednosti so v nivoju že projicirane na
-  // os doline — pozitivno je hrbtnik proti Celju.
+  // Veter po višini iz TREH izmerjenih nivojev: 10 m, 180 m in ~1500 m
+  // (850 hPa). Prej je bil zgornji del ekstrapoliran po Hellmannovem zakonu iz
+  // 180 m, kar je bilo ugibanje — in pogosto v napačno smer, ker je dolinski
+  // vetrič pri tleh redno obrnjen nasproti gradientnemu vetru zgoraj.
+  // Vrednosti so v nivoju že projicirane na koridor dneva: + je hrbtnik.
   function windAt(sim, agl) {
-    var lo = sim.level.veter_tla_ms || 0;
-    var hi = sim.level.veter_180_ms;
-    if (hi === undefined || hi === null) hi = lo;
+    var l = sim.level;
+    var lo = l.veter_tla_ms || 0;
+    var mid = l.veter_180_ms;
+    if (mid === undefined || mid === null) mid = lo;
+    var hi = l.veter_visoko_ms;
+    if (hi === undefined || hi === null) hi = mid;
     if (agl <= 10) return lo;
-    if (agl <= 180) return lo + (hi - lo) * (agl - 10) / 170;
-    return hi * Math.pow(agl / 180, 0.14);
+    if (agl <= 180) return lo + (mid - lo) * (agl - 10) / 170;
+    if (agl <= 1500) return mid + (hi - mid) * (agl - 180) / 1320;
+    return hi;
   }
 
   function buildThermals(sim) {
@@ -146,18 +152,26 @@
     // fiksen. Če je polmer fiksen, se ob plitvi konvekciji stebri prekrivajo,
     // nebo postane ena sama termika in dan se da preleteti brez enega
     // samega kroga — preverjeno s tools/test_igra.mjs.
+    // Premer jedra je pri konvekciji reda z_i/3, torej polmer ~z_i/6. Prej je
+    // bil tu z_i/9 in stebri so bili tako tanki, da jih je bilo mogoče
+    // prečkati, ne pa zadržati — dvigi so bili le drobne packe med spustom.
     var zi = l.z_i_m || sim.ceilAGLref || 1200;
-    var r0 = clamp(zi * 0.11, 90, 320);
+    var r0 = clamp(zi * 0.16, 110, 340);
     while (km < sim.endKm && guard++ < 300) {
       var here = terrainAt(sim, km);
       var around = (terrainAt(sim, km - 0.9) + terrainAt(sim, km + 0.9)) / 2;
-      // Termiko v resnici sprožijo grebeni in prisojna pobočja, ne ravno dno
-      // doline — zato steber nad izpostavljeno točko dobi pribitek.
-      var prom = clamp((here - around) / 130, -0.3, 0.45);
+      // Termiko sprožijo grebeni in prisojna pobočja, zato steber nad
+      // izpostavljeno točko dobi pribitek. Kazen za dno doline je blaga:
+      // odkar je profil iz pravega DEM-a in ne iz gladke ročne krivulje, je
+      // krajevna razgibanost velika in prejšnja meja (−30 %) je zadela skoraj
+      // vsak dolinski steber — dvigi so padli pod spust pri kroženju in
+      // kroženje ni več dvigalo. Sončno dno doline je v resnici spodoben
+      // sprožilec (polja, vasi), le slabši od grebena.
+      var prom = clamp((here - around) / 220, -0.18, 0.30);
       list.push({
         km: km,
         r0: r0 * (0.85 + 0.4 * rnd()),
-        moc: (l.termika_ms || 2) * (0.78 + 0.44 * rnd()) * (1 + prom)
+        moc: (l.termika_ms || 2) * (0.85 + 0.35 * rnd()) * (1 + prom)
       });
       km += gostota * (0.78 + 0.46 * rnd());
     }
@@ -1004,9 +1018,14 @@
   }
 
   // Pike na traku so kraji iz nivoja — postavimo jih enkrat ob nalaganju.
+  // Tudi konca traku: koridor se z vremenom menja, zato ne smeta biti
+  // trdo zapisana v HTML.
   function buildRoute() {
     var bar = el('pg-route-bar');
     if (!bar) return;
+    var p = sim.places;
+    setTxt('pg-route-a', p.length ? p[0].ime : 'Golte');
+    setTxt('pg-route-b', p.length ? p[p.length - 1].ime : '');
     var old = bar.querySelectorAll('.pg-route-tick');
     for (var i = 0; i < old.length; i++) bar.removeChild(old[i]);
     for (var j = 1; j < sim.places.length; j++) {
@@ -1019,10 +1038,14 @@
   }
 
   function renderConditions() {
-    var l = sim.level;
+    var l = sim.level, kor = l.koridor || {};
+    setTxt('pg-c-korridor', kor.ime || '—');
     setTxt('pg-c-ceiling', Math.round(sim.ceilASL) + ' m');
     setTxt('pg-c-lift', fmt(l.termika_ms || 0, 1) + ' m/s');
     setTxt('pg-c-wind', fmt(l.veter_kmh || 0, 0) + ' km/h ' + dirLabel(l.veter_smer));
+    setTxt('pg-c-cross', fmt((l.veter_precno_ms || 0) * 3.6, 0) + ' km/h');
+    setTxt('pg-c-zi', Math.round(l.z_i_m || 0) + ' m');
+    setTxt('pg-c-turb', fmt(l.turbulenca || 0, 2));
     setTxt('pg-c-spacing', fmt(l.gostota_km || 0, 1) + ' km');
     var src = el('pg-source');
     if (!src) return;
@@ -1057,6 +1080,7 @@
         '<p class="pg-ov-kicker">Nivo dneva' +
         (sim.level.datum ? ' · ' + esc(sim.level.datum) : '') + '</p>' +
         '<h2 class="pg-ov-title">' + esc(r.title) + '</h2>' +
+        '<p class="pg-ov-smer">' + esc(smerBesedilo()) + '</p>' +
         '<p class="pg-ov-sub">' + esc(r.sub) + '</p>' +
         '<button class="pg-start" id="pg-start" type="button">Vzleti z Golt</button>' +
         '<p class="pg-ov-help">Drži <b>Kroži</b>, ko vario kaže dvig · spusti in drsi naprej' +
@@ -1086,6 +1110,19 @@
   }
   function hideOverlay() { var ov = el('pg-overlay'); if (ov) ov.hidden = true; }
 
+  // Katera smer in zakaj. To je poanta koridorjev: smeri ne izbereš ti,
+  // izbere jo veter — enako kot pilot, ki se zjutraj odloči, kam bo letel.
+  function smerBesedilo() {
+    var kor = sim.level.koridor;
+    if (!kor || !kor.ime) return '';
+    var h = kor.hrbtnik_kmh;
+    if (h === null || h === undefined) return kor.ime;
+    if (h > 3) return kor.ime + ' — veter na višini te nese tja (' + fmt(h, 0) + ' km/h v hrbet).';
+    if (h > -1) return kor.ime + ' — veter ne pomaga in ne ovira; danes šteje samo termika.';
+    return kor.ime + ' — vse smeri so proti vetru, ta je najmanj slaba (' +
+      fmt(Math.abs(h), 0) + ' km/h čelno).';
+  }
+
   // Ocena dneva ZA IGRO — koliko višine ti dan podari. To NI priletnost:
   // tisto meri fly_score() in je izpisana v strežniškem delu strani.
   function dayRating() {
@@ -1107,35 +1144,63 @@
     if (climb < 0.3) return { title: 'Mrtev zrak', sub: 'Dvigov skoraj ni. Vprašanje ni, kako visoko, ampak kako daleč prideš z eno samo višino.' };
     if (climb < 1.0) return { title: 'Šibek dan', sub: 'Dvigi okoli ' + fmt(climb, 1) + ' m/s. Vsak steber šteje, nobene višine ne smeš zapraviti.' };
     if (climb < 2.0) return { title: 'Soliden dan', sub: 'Dvigi okoli ' + fmt(climb, 1) + ' m/s, strop ' + strop + ' m. Dolina je odprta.' };
-    if (climb < 3.0) return { title: 'Dober dan', sub: 'Dvigi ' + fmt(climb, 1) + ' m/s do ' + strop + ' m. Za Žalec je dovolj — če ne zgrešiš stebrov.' };
-    return { title: 'Odličen dan', sub: 'Dvigi ' + fmt(climb, 1) + ' m/s, strop ' + strop + ' m. Danes je Celje na dosegu.' };
+    if (climb < 3.0) return { title: 'Dober dan', sub: 'Dvigi ' + fmt(climb, 1) + ' m/s do ' + strop + ' m. Za dober kos koridorja je dovolj — če ne zgrešiš stebrov.' };
+    return { title: 'Odličen dan', sub: 'Dvigi ' + fmt(climb, 1) + ' m/s, strop ' + strop + ' m. Danes je konec koridorja na dosegu.' };
   }
 
+  // Komentar ob pristanku se ravna po MEJNIKIH koridorja, ne po pribitih
+  // kilometrih: proti Celju jih je 42, čez Raduho 11,5 — »do Rečice« pri
+  // koridorju na Koroško ne pomeni nič.
   function distanceComment() {
-    var d = sim.best;
-    if (sim.status === 'finished') return 'Preletel si vso dolino in šel čez Celje. To je bil dan.';
-    if (d >= 41.7) return 'Celje. Cela Savinjska od Golt do konca — tak dan si zapomniš.';
-    if (d >= 33.5) return 'Do Žalca — dolg prelet po celi dolini.';
-    if (d >= 23.4) return 'Braslovče. Dolino si prešel po dolgem.';
-    if (d >= 19.1) return 'Letuš — čez sleme si prišel, kar ni samoumevno.';
-    if (d >= 13.6) return 'Mozirje, mimo Rečice in naprej.';
-    if (d >= 10.3) return 'Do Rečice, nad postajo IREICA1. Deset kilometrov z Golt ni malo.';
-    if (d >= 6) return 'Pristanek v dolini pred Rečico — z eno višino se je izšlo skoraj do konca.';
-    if (d >= 3) return 'Pristanek pod Goltami — prvega stebra nisi ujel.';
-    return 'Takoj po vzletu na tla. Poišči dvig, preden izgubiš višino.';
+    if (sim.status === 'finished') {
+      return 'Preletel si ves koridor do konca. Tak dan si zapomniš.';
+    }
+    var zadnji = null, naslednji = null;
+    for (var i = 0; i < sim.places.length; i++) {
+      if (sim.best >= sim.places[i].km) zadnji = sim.places[i];
+      else { naslednji = sim.places[i]; break; }
+    }
+    var t = '';
+    if (!zadnji || zadnji.km <= 0.01) {
+      t = sim.best < 3
+        ? 'Takoj po vzletu na tla. Poišči dvig, preden izgubiš višino.'
+        : 'Pristanek še pod vzletiščem — prvega stebra nisi ujel.';
+    } else if (!naslednji) {
+      t = 'Prišel si mimo zadnjega mejnika (' + zadnji.ime + '). To je bil dober prelet.';
+    } else {
+      t = 'Najdlje do kraja ' + zadnji.ime + '. Do naslednjega (' + naslednji.ime +
+        ') ti je zmanjkalo ' + fmt(naslednji.km - sim.best, 1) + ' km.';
+    }
+    var delez = Math.round(clamp(sim.best / sim.endKm, 0, 1) * 100);
+    return t + ' Prehodil si ' + delez + ' % koridorja.';
   }
 
   // ── Rekord ─────────────────────────────────────────────────────────────
+  // Rekord se vodi PO KORIDORJIH. Koridorji so različno dolgi (proti Celju 44
+  // km, proti Črni 14), zato en sam skupni rekord ne bi pomenil nič — 20 km
+  // čez Raduho je nekaj čisto drugega kot 20 km po ravni dolini.
   var LS = 'wx-igra-rekord';
-  function loadBest() {
+  function korId() {
+    return (sim && sim.level && sim.level.koridor && sim.level.koridor.id) || 'celje';
+  }
+  function loadAllBest() {
     try {
       var d = JSON.parse(localStorage.getItem(LS) || '{}');
-      return { km: +d.km || 0, date: d.date || '' };
-    } catch (e) { return { km: 0, date: '' }; }
+      // Stara oblika ({km, date}) je bila iz časa ene same poti — ta je bila
+      // vedno Savinjska proti Celju, zato se preseli tja.
+      if (typeof d.km === 'number') d = { celje: { km: d.km, date: d.date || '' } };
+      return d && typeof d === 'object' ? d : {};
+    } catch (e) { return {}; }
+  }
+  function loadBest() {
+    var r = loadAllBest()[korId()] || {};
+    return { km: +r.km || 0, date: r.date || '' };
   }
   function saveBest(km, date) {
     try {
-      localStorage.setItem(LS, JSON.stringify({ km: Math.round(km * 10) / 10, date: date }));
+      var vse = loadAllBest();
+      vse[korId()] = { km: Math.round(km * 10) / 10, date: date };
+      localStorage.setItem(LS, JSON.stringify(vse));
       setTxt('pg-best', fmt(km, 1) + ' km');
     } catch (e) { /* zaseben zavihek ali polna shramba — rekord pač ne ostane */ }
   }
@@ -1145,7 +1210,9 @@
     var l = sim.level, n = 8;
     var done = Math.round(clamp(sim.best / sim.endKm, 0, 1) * n), bar = '';
     for (var i = 0; i < n; i++) bar += (i < done ? '🟩' : '⬜');
+    var kor = l.koridor || {};
     return '🪂 Meteorec — Termika ' + (l.datum || '') + '\n' +
+      (kor.kratko ? 'Smer dneva: ' + kor.kratko + '\n' : '') +
       'Golte → ' + (sim.reached || 'pod Goltami') + ' · ' + fmt(sim.best, 1) + ' km\n' +
       bar + '\n' +
       'Strop ' + Math.round(sim.ceilASL) + ' m · dvigi ' + fmt(l.termika_ms || 0, 1) +

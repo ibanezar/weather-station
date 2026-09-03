@@ -3,10 +3,14 @@
  *
  * Zakaj obstaja: igra obljublja, da jo poganja resnično vreme. To ni stvar
  * občutka, ampak trditev, ki se da izmeriti — sončen julijski nivo mora
- * leteti bistveno dlje kot novembrska megla. Če ta test pade, igra ni več to,
- * kar piše na strani. Isti pristop kot pri Horn naklonu/ekspoziciji v
- * meteogasilec/gasilec.js, ki je bil pred vklopom testiran z Node na
- * sintetičnih vhodih znane smeri.
+ * leteti bistveno dlje kot mrtev zrak, in smer dneva mora izbrati veter. Če
+ * ta test pade, igra ni več to, kar piše na strani. Isti pristop kot pri Horn
+ * naklonu/ekspoziciji v meteogasilec/gasilec.js, ki je bil pred vklopom
+ * testiran z Node na sintetičnih vhodih znane smeri.
+ *
+ * Regresijski dnevi tečejo po PRAVEM terenu koridorja iz igra/koridorji.json,
+ * ne po rezervnem profilu v igri — sicer bi merili nekaj, česar igralec nikoli
+ * ne vidi.
  *
  * Brez odvisnosti. Zaženi:  node tools/test_igra.mjs
  */
@@ -26,22 +30,29 @@ function ok(name, cond, detail) {
   console.log(`  ✗ ${name}${detail ? '  — ' + detail : ''}`);
 }
 function near(a, b, tol) { return Math.abs(a - b) <= tol; }
-
-// Sejano naključje, da so testi ponovljivi kljub turbulenci.
 const seeded = (s) => M.mulberry32(s);
 
-const baseLevel = {
-  datum: '2026-07-15', seme: 12345, konec_km: 44,
-  strop_m: 2400, strop_bl_m: 2450, baza_m: 2350,
-  termika_ms: 3.2, w_star: 2.4, sink_ms: 0.65, gostota_km: 2.4,
-  veter_tla_ms: 0.8, veter_180_ms: 1.8, veter_kmh: 10, veter_smer: 290,
-  turbulenca: 0.25, padavine_mm: 0, koda_vremena: 1,
-};
-const lvl = (over) => Object.assign({}, baseLevel, over);
+// ── Koridorji ────────────────────────────────────────────────────────────
+const KOR_PATH = path.join(ROOT, 'igra', 'koridorji.json');
+const korDoc = fs.existsSync(KOR_PATH) ? JSON.parse(fs.readFileSync(KOR_PATH, 'utf8')) : null;
+const celje = korDoc && korDoc.koridorji.find((k) => k.id === 'celje');
+
+// Sintetični nivo na pravem terenu koridorja: vreme si izmislimo, geometrijo ne.
+function dan(over) {
+  return Object.assign({
+    datum: '2026-07-15', seme: 42,
+    konec_km: celje ? celje.konec_km : 44,
+    mejniki: celje ? celje.mejniki : undefined,
+    teren: celje ? celje.teren : undefined,
+    veter_tla_ms: 0.5, veter_180_ms: 1.0, veter_visoko_ms: 2.0,
+    turbulenca: 0.25, padavine_mm: 0, koda_vremena: 1,
+    strop_m: 2400, baza_m: 2350, termika_ms: 3.4, w_star: 2.1,
+    sink_ms: 0.68, gostota_km: 2.6, z_i_m: 1900,
+  }, over);
+}
 
 console.log('\n1. Polara padala');
 {
-  // Najmanjši spust mora biti pri 8,5 m/s.
   let best = Infinity, bestV = 0;
   for (let v = 6; v <= 18; v += 0.01) {
     const s = M.sinkAt(v);
@@ -49,8 +60,6 @@ console.log('\n1. Polara padala');
   }
   ok('najmanjši spust pri ~8,5 m/s', near(bestV, 8.5, 0.05), `dobljeno ${bestV.toFixed(2)}`);
   ok('najmanjši spust ~0,95 m/s', near(best, 0.95, 0.01), `dobljeno ${best.toFixed(3)}`);
-
-  // Najboljše drsenje (največje v/sink) pri ~10,5 m/s in ~9,9 : 1.
   let bg = 0, bgV = 0;
   for (let v = 6; v <= 18; v += 0.01) {
     const g = v / M.sinkAt(v);
@@ -63,40 +72,75 @@ console.log('\n1. Polara padala');
 
 console.log('\n2. Determinizem nivoja');
 {
-  const a = M.makeSim(lvl({}));
-  const b = M.makeSim(lvl({}));
-  const c = M.makeSim(lvl({ seme: 999 }));
+  const a = M.makeSim(dan({}));
+  const b = M.makeSim(dan({}));
+  const c = M.makeSim(dan({ seme: 999 }));
   const key = (s) => s.thermals.map((t) => `${t.km.toFixed(4)}:${t.moc.toFixed(4)}:${t.r0.toFixed(2)}`).join('|');
   ok('isto seme → isti stebri', key(a) === key(b));
   ok('drugo seme → drugi stebri', key(a) !== key(c));
   ok('stebri pokrijejo pot', a.thermals.length > 8 &&
-    a.thermals[a.thermals.length - 1].km > 35, `${a.thermals.length} stebrov`);
+    a.thermals[a.thermals.length - 1].km > a.endKm * 0.8, `${a.thermals.length} stebrov`);
 }
 
-console.log('\n3. Teren');
+console.log('\n3. Koridorji (igra/koridorji.json)');
 {
-  const s = M.makeSim(lvl({}));
-  ok('vzletišče ~1400 m', near(M.terrainAt(s, 0), 1400, 5), `${M.terrainAt(s, 0).toFixed(0)}`);
-  ok('Rečica (10,3 km) ~374 m', near(M.terrainAt(s, 10.3), 374, 12), `${M.terrainAt(s, 10.3).toFixed(0)}`);
-  ok('Celje (41,7 km) ~241 m', near(M.terrainAt(s, 41.7), 241, 12), `${M.terrainAt(s, 41.7).toFixed(0)}`);
-  ok('profil monotono pada z Golt v dolino',
+  ok('datoteka obstaja', !!korDoc, 'poženi python3 tools/build_igra_corridors.py');
+  if (korDoc) {
+    ok('vsaj štirje koridorji', korDoc.koridorji.length >= 4, `${korDoc.koridorji.length}`);
+    let vsiOk = true, azimuti = [];
+    for (const k of korDoc.koridorji) {
+      const h = k.teren.h;
+      const dobro = k.id && k.ime && k.kratko && h.length > 40 &&
+        h[0] === korDoc.vzletisce.visina &&          // vsi se začnejo na vzletišču
+        k.mejniki.length >= 2 && k.mejniki[0].km === 0 &&
+        k.odseki.length >= 1 && k.konec_km > k.dolzina_km;
+      if (!dobro) { vsiOk = false; console.log(`      ✗ ${k.id}`); }
+      azimuti.push(k.azimut);
+    }
+    ok('vsi koridorji so celi in se začnejo na 1400 m', vsiOk);
+    // Smeri morajo biti razpršene, sicer izbira po vetru nima kaj izbirati.
+    azimuti.sort((a, b) => a - b);
+    let najvecjaVrzel = 360 - azimuti[azimuti.length - 1] + azimuti[0];
+    for (let i = 1; i < azimuti.length; i++) {
+      najvecjaVrzel = Math.max(najvecjaVrzel, azimuti[i] - azimuti[i - 1]);
+    }
+    ok('smeri pokrivajo rožo (največja vrzel < 150°)', najvecjaVrzel < 150,
+      `${najvecjaVrzel.toFixed(0)}°  [${azimuti.map((a) => a.toFixed(0)).join(', ')}]`);
+  }
+}
+
+console.log('\n4. Teren koridorja');
+{
+  const s = M.makeSim(dan({}));
+  ok('vzletišče 1400 m', near(M.terrainAt(s, 0), 1400, 5), `${M.terrainAt(s, 0).toFixed(0)}`);
+  ok('profil pada z Golt v dolino',
     M.terrainAt(s, 2) < M.terrainAt(s, 1) && M.terrainAt(s, 5) < M.terrainAt(s, 2));
+  if (celje) {
+    const recica = celje.mejniki.find((m) => m.ime === 'Rečica');
+    ok('Rečica je v dnu doline (< 550 m)', M.terrainAt(s, recica.km) < 550,
+      `${M.terrainAt(s, recica.km).toFixed(0)} m`);
+  }
 }
 
-console.log('\n4. Veter po višini');
+console.log('\n5. Veter po višini (trije izmerjeni nivoji)');
 {
-  const s = M.makeSim(lvl({ veter_tla_ms: 1, veter_180_ms: 4 }));
+  const s = M.makeSim(dan({ veter_tla_ms: 1, veter_180_ms: 4, veter_visoko_ms: 8 }));
   ok('pri tleh = vrednost na 10 m', near(M.windAt(s, 5), 1, 1e-9));
   ok('na 180 m = vrednost na 180 m', near(M.windAt(s, 180), 4, 1e-9));
-  ok('nad 180 m še krepi', M.windAt(s, 1500) > 4 && M.windAt(s, 1500) < 6,
-    `${M.windAt(s, 1500).toFixed(2)}`);
-  const h = M.makeSim(lvl({ veter_tla_ms: -1, veter_180_ms: -4 }));
-  ok('čelni veter ostane negativen', M.windAt(h, 1000) < -4);
+  ok('na 1500 m = vrednost na 1500 m', near(M.windAt(s, 1500), 8, 1e-9));
+  ok('vmes narašča zvezno', M.windAt(s, 800) > 4 && M.windAt(s, 800) < 8,
+    `${M.windAt(s, 800).toFixed(2)}`);
+  ok('nad 1500 m ostane', near(M.windAt(s, 2500), 8, 1e-9));
+  // Prav to je nova zmožnost: čelni veter pri tleh, hrbtnik na višini.
+  const strig = M.makeSim(dan({ veter_tla_ms: -1.2, veter_180_ms: -1.7, veter_visoko_ms: 3.1 }));
+  ok('čelno spodaj, v hrbet zgoraj (kar je 3. 9. 2026 res bilo)',
+    M.windAt(strig, 100) < 0 && M.windAt(strig, 1400) > 0,
+    `${M.windAt(strig, 100).toFixed(2)} → ${M.windAt(strig, 1400).toFixed(2)}`);
 }
 
-console.log('\n5. Dvigi in strop');
+console.log('\n6. Dvigi in strop');
 {
-  const s = M.makeSim(lvl({ veter_180_ms: 0, w_star: 2.4 }));
+  const s = M.makeSim(dan({ veter_180_ms: 0, veter_visoko_ms: 0 }));
   const t = s.thermals[3];
   const g = M.terrainAt(s, t.km);
   ok('v jedru stebra dviguje', M.airVertical(s, t.km, g + 600) > 1);
@@ -106,63 +150,85 @@ console.log('\n5. Dvigi in strop');
     M.airVertical(s, t.km, s.ceilASL - 20) < M.airVertical(s, t.km, s.ceilASL - 400));
   ok('tik nad tlemi je dvig šibek',
     M.airVertical(s, t.km, g + 20) < M.airVertical(s, t.km, g + 400));
+  // Če je jedro šibkejše od spusta pri kroženju, kroženje sploh ne dviga in
+  // igra izgubi svojo osrednjo potezo — to se je enkrat že zgodilo.
+  const jedra = s.thermals.map((x) => x.moc).sort((a, b) => b - a);
+  const mediana = jedra[Math.floor(jedra.length / 2)];
+  ok('mediana jeder je nad spustom pri kroženju',
+    mediana > M.sinkAt(M.V_CIRCLE) * M.BANK_PENALTY,
+    `${mediana.toFixed(2)} vs ${(M.sinkAt(M.V_CIRCLE) * M.BANK_PENALTY).toFixed(2)} m/s`);
 }
 
-console.log('\n6. Konec leta');
+console.log('\n7. Konec leta');
 {
-  // Na položnem odseku (pri Žalcu), sicer bi tla pod padalom padala hitreje
-  // od padala samega in stika ne bi bilo.
-  const s = M.makeSim(lvl({}));
-  s.km = 31;
-  s.alt = M.terrainAt(s, 31) + 0.5;
-  const st = M.stepFixed(s, { mode: 'glide', nudge: 0 }, 1);
-  ok('dotik tal konča let', st === 'landed', st);
-
-  const f = M.makeSim(lvl({}));
+  const s = M.makeSim(dan({}));
+  s.km = 31; s.alt = M.terrainAt(s, 31) + 0.5;
+  ok('dotik tal konča let',
+    M.stepFixed(s, { mode: 'glide', nudge: 0 }, 1) === 'landed');
+  const f = M.makeSim(dan({}));
   f.km = f.endKm - 0.001;
   ok('konec poti = dokončan prelet',
     M.stepFixed(f, { mode: 'glide', nudge: 0 }, 1) === 'finished');
 }
 
-console.log('\n7. Vreme res poganja razdaljo (regresija)');
+console.log('\n8. Vreme res poganja razdaljo (regresija)');
 {
-  const dan = (name, level, expect) => {
-    const r = M.autoFly(level, { rand: seeded(7) });
-    const s = `${r.km.toFixed(1)} km (${r.minutes.toFixed(0)} min, ${r.status})`;
-    ok(`${name}: ${expect.label}`, expect.test(r.km), s);
-    return r;
+  const leti = (level, strat) => {
+    const s = M.makeSim(level, seeded(7));
+    const c = { mode: 'glide', nudge: 0 };
+    while (s.status === 'flying' && s.simTime < 6 * 3600) {
+      const r = strat(s); c.mode = r.m; c.nudge = r.n || 0;
+      M.stepFixed(s, c, 1 / 60);
+    }
+    return s.best;
   };
-  // Merilo ni absolutna razdalja, ampak ZDRS: z vzletišča na 1400 m do dna
-  // doline na ~374 m padalo pri drsenju 9,9 : 1 v mirnem zraku preleti ~10 km
-  // tudi brez enega samega dviga. Dan je vreden toliko, kolikor doda NAD to.
-  const zdrs = dan('mrtev zrak (referenčni zdrs z Golt)',
-    lvl({ strop_m: 500, termika_ms: 0.0, w_star: 0.3, sink_ms: 0.0, gostota_km: 3.0,
-      baza_m: null, turbulenca: 0, veter_tla_ms: 0, veter_180_ms: 0 }),
-    { label: '9–12 km', test: (k) => k > 9 && k < 12 });
-  const julij = dan('julij, jasno, globoka konvekcija',
-    lvl({ strop_m: 2600, termika_ms: 3.4, w_star: 2.5, sink_ms: 0.68, gostota_km: 2.6, baza_m: 2500 }),
-    { label: '> 2,5× zdrs', test: (k) => k > zdrs.km * 2.5 });
-  // April je namenoma umerjen tako, da NE doseže konca proge — sicer bi se
-  // skupaj z julijem ustavil na 44 km in primerjava med njima ne bi ločila.
-  const april = dan('april, kopasti oblaki',
-    lvl({ strop_m: 1650, termika_ms: 1.8, w_star: 1.4, sink_ms: 0.5, gostota_km: 2.1,
-      z_i_m: 1250, baza_m: 1600 }),
-    { label: '> 1,3× zdrs, a ne do konca', test: (k) => k > zdrs.km * 1.3 && k < 44 });
-  const nov = dan('november, megla (strop pod vzletiščem)',
-    lvl({ strop_m: 600, termika_ms: 0.3, w_star: 0.4, sink_ms: 0.35, gostota_km: 1.0,
-      baza_m: null, koda_vremena: 45 }),
-    { label: '≤ zdrs', test: (k) => k <= zdrs.km + 0.5 });
-  ok('julij > april > november', julij.km > april.km && april.km > nov.km,
-    `${julij.km.toFixed(1)} / ${april.km.toFixed(1)} / ${nov.km.toFixed(1)}`);
+  const drsi = () => ({ m: 'glide' });
+  const pilot = (s) => {
+    const w = M.airVertical(s, s.km, s.alt);
+    if (w > 0.6 && s.ceilASL - s.alt > 30) return { m: 'circle', n: 1 };
+    if (w < -1.2) return { m: 'fast' };
+    return { m: 'glide' };
+  };
 
-  // Čelni veter mora skrajšati prelet.
-  const hrbet = M.autoFly(lvl({ veter_tla_ms: 2, veter_180_ms: 4 }), { rand: seeded(7) });
-  const celo = M.autoFly(lvl({ veter_tla_ms: -2, veter_180_ms: -4 }), { rand: seeded(7) });
-  ok('hrbtnik nese dlje kot čelni veter', hrbet.km > celo.km,
-    `${hrbet.km.toFixed(1)} vs ${celo.km.toFixed(1)}`);
+  // Merilo ni absolutna razdalja, ampak ZDRS: z vzletišča na 1400 m padalo v
+  // mirnem zraku preleti nekaj kilometrov tudi brez enega samega dviga. Dan je
+  // vreden toliko, kolikor doda NAD to.
+  const mrtev = dan({
+    strop_m: 500, baza_m: null, termika_ms: 0, w_star: 0.3, sink_ms: 0,
+    gostota_km: 3, z_i_m: 400, turbulenca: 0,
+    veter_tla_ms: 0, veter_180_ms: 0, veter_visoko_ms: 0,
+  });
+  const zdrs = leti(mrtev, drsi);
+  ok('mrtev zrak da zdrs 5–10 km', zdrs > 5 && zdrs < 10, `${zdrs.toFixed(1)} km`);
+  ok('v mrtvem zraku kroženje ne pomaga', leti(mrtev, pilot) <= zdrs + 0.5);
+
+  const julij = leti(dan({ strop_m: 2600, baza_m: 2500, termika_ms: 4.0, w_star: 2.5,
+    sink_ms: 0.76, gostota_km: 3.2, z_i_m: 2200 }), pilot);
+  ok('julij, globoka konvekcija: > 3× zdrs', julij > zdrs * 3, `${julij.toFixed(1)} km`);
+
+  const april = leti(dan({ strop_m: 1800, baza_m: 1750, termika_ms: 2.7, w_star: 1.7,
+    sink_ms: 0.59, gostota_km: 2.2, z_i_m: 1400 }), pilot);
+  ok('april: > 1,5× zdrs', april > zdrs * 1.5, `${april.toFixed(1)} km`);
+
+  const megla = leti(dan({ strop_m: 600, baza_m: null, termika_ms: 0.3, w_star: 0.4,
+    sink_ms: 0.35, gostota_km: 1.0, z_i_m: 250, koda_vremena: 45 }), pilot);
+  ok('megla: ne preseže zdrsa', megla <= zdrs + 0.5, `${megla.toFixed(1)} km`);
+  ok('julij > april > megla', julij > april && april > megla,
+    `${julij.toFixed(1)} / ${april.toFixed(1)} / ${megla.toFixed(1)}`);
+
+  // Znanje mora šteti: pameten pilot mora na spodobnem dnevu preseči zdrs.
+  const aprilDrsi = leti(dan({ strop_m: 1800, baza_m: 1750, termika_ms: 2.7, w_star: 1.7,
+    sink_ms: 0.59, gostota_km: 2.2, z_i_m: 1400 }), drsi);
+  ok('kroženje se na spodobnem dnevu izplača', april > aprilDrsi * 1.2,
+    `${april.toFixed(1)} vs ${aprilDrsi.toFixed(1)} km samo z drsenjem`);
+
+  const hrbet = leti(dan({ veter_tla_ms: 2, veter_180_ms: 3, veter_visoko_ms: 5 }), pilot);
+  const celo = leti(dan({ veter_tla_ms: -2, veter_180_ms: -3, veter_visoko_ms: -5 }), pilot);
+  ok('hrbtnik nese dlje kot čelni veter', hrbet > celo,
+    `${hrbet.toFixed(1)} vs ${celo.toFixed(1)}`);
 }
 
-console.log('\n8. Današnji nivo iz igra/nivo.json');
+console.log('\n9. Današnji nivo iz igra/nivo.json');
 {
   const p = path.join(ROOT, 'igra', 'nivo.json');
   if (!fs.existsSync(p)) {
@@ -170,14 +236,25 @@ console.log('\n8. Današnji nivo iz igra/nivo.json');
   } else {
     const level = JSON.parse(fs.readFileSync(p, 'utf8'));
     for (const k of ['datum', 'seme', 'strop_m', 'termika_ms', 'sink_ms', 'gostota_km',
-      'veter_tla_ms', 'veter_180_ms', 'konec_km', 'teren', 'mejniki']) {
+      'veter_tla_ms', 'veter_180_ms', 'veter_visoko_ms', 'konec_km', 'teren',
+      'mejniki', 'koridor']) {
       ok(`nivo.json ima ${k}`, level[k] !== undefined);
     }
-    ok('teren ima dovolj vzorcev', level.teren.h.length > 100, `${level.teren.h.length}`);
-    const r = M.autoFly(level, { rand: seeded(7) });
-    console.log(`     → današnji dan (${level.datum}, ${level.vir}): ` +
-      `${r.km.toFixed(1)} km do ${r.reached || '—'} v ${r.minutes.toFixed(0)} min`);
-    ok('današnji nivo je igralen (> 1 km)', r.km > 1, `${r.km.toFixed(1)} km`);
+    ok('koridor je eden od znanih',
+      !korDoc || korDoc.koridorji.some((k) => k.id === level.koridor.id),
+      level.koridor && level.koridor.id);
+    ok('teren ima dovolj vzorcev', level.teren.h.length > 40, `${level.teren.h.length}`);
+    const s = M.makeSim(level, seeded(7));
+    const c = { mode: 'glide', nudge: 0 };
+    while (s.status === 'flying' && s.simTime < 6 * 3600) {
+      const w = M.airVertical(s, s.km, s.alt);
+      c.mode = (w > 0.6 && s.ceilASL - s.alt > 30) ? 'circle' : 'glide';
+      c.nudge = c.mode === 'circle' ? 1 : 0;
+      M.stepFixed(s, c, 1 / 60);
+    }
+    console.log(`     → ${level.datum} · ${level.koridor.ime} · ` +
+      `${s.best.toFixed(1)} km do ${s.reached || '—'} v ${(s.simTime / 60).toFixed(0)} min`);
+    ok('današnji nivo je igralen (> 1 km)', s.best > 1, `${s.best.toFixed(1)} km`);
   }
 }
 
