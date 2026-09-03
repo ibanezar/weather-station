@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-09-02T06:21:09Z",
-  "n_records": 30,
+  "generated_at": "2026-09-03T06:23:51Z",
+  "n_records": 32,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-09-01"
+    "to": "2026-09-02"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 28,
+      "n": 29,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-09-01"
+        "to": "2026-09-02"
       },
       "all_time": {
         "tmax": {
-          "n": 28,
-          "mae_mtr": 1.01,
-          "mae_om": 1.44,
-          "improvement_pct": 29.9
+          "n": 29,
+          "mae_mtr": 1.0,
+          "mae_om": 1.41,
+          "improvement_pct": 29.1
         },
         "tmin": {
-          "n": 28,
-          "mae_mtr": 1.12,
-          "mae_om": 1.19,
-          "improvement_pct": 5.9
+          "n": 29,
+          "mae_mtr": 1.09,
+          "mae_om": 1.18,
+          "improvement_pct": 7.6
         }
       },
       "rolling": {
@@ -196,6 +196,13 @@
             "mae_mtr": 1.01,
             "mae_om": 1.44,
             "improvement_pct": 29.9
+          },
+          {
+            "date": "2026-09-02",
+            "n": 29,
+            "mae_mtr": 1.0,
+            "mae_om": 1.41,
+            "improvement_pct": 29.1
           }
         ],
         "tmin": [
@@ -366,28 +373,35 @@
             "mae_mtr": 1.12,
             "mae_om": 1.19,
             "improvement_pct": 5.9
+          },
+          {
+            "date": "2026-09-02",
+            "n": 29,
+            "mae_mtr": 1.09,
+            "mae_om": 1.18,
+            "improvement_pct": 7.6
           }
         ]
       }
     },
     "2": {
-      "n": 2,
+      "n": 3,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-09-01"
+        "to": "2026-09-02"
       },
       "all_time": {
         "tmax": {
-          "n": 2,
-          "mae_mtr": 2.95,
-          "mae_om": 4.3,
-          "improvement_pct": 31.4
+          "n": 3,
+          "mae_mtr": 2.57,
+          "mae_om": 4.0,
+          "improvement_pct": 35.8
         },
         "tmin": {
-          "n": 2,
-          "mae_mtr": 1.2,
-          "mae_om": 1.6,
-          "improvement_pct": 25.0
+          "n": 3,
+          "mae_mtr": 1.07,
+          "mae_om": 1.57,
+          "improvement_pct": 31.8
         }
       },
       "rolling": {
