@@ -781,12 +781,14 @@ entiteto (Person/Organization/Place `sameAs`) dodajaj v skupni register
 mestu — glej opombo pri registru, zakaj.
 
 **Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
-vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem: isti nabor
-vprašanj vsak mesec vprašaj ChatGPT, Perplexity in Google AI Overview
-("vreme rečica ob savinji zdaj", "vreme zgornja savinjska dolina po urah",
-"gobarska napoved zgornja savinjska dolina", "kaj je rosišče", "je danes
-nevarnost požara v savinjski dolini") in zapiši, ali/kako omenijo
-meteorec.si. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni.
+vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
+(informativna, primerjalna, priporočilo, how-to — ne le ključne besede) in
+natančna shema vnosa (asistent, `prompt_id`, `mentioned`,
+`competitors_mentioned`) sta v `docs/geo-prompt-panel.md` — vsak mesec
+rotiraj 6–8 vprašanj iz panela med ChatGPT, Perplexity in Google AI
+Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
+brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
+"omenjen/ni omenjen".
 
 ## Razvoj
 

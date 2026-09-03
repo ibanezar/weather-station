@@ -1,0 +1,28 @@
+name: Pregled zdravja blog arhiva (Izboljšaj/Konsolidiraj/Osveži/Pobriši)
+
+on:
+  workflow_dispatch:
+    inputs:
+      views:
+        description: 'Vključi žive oglede iz Workerja (/views)'
+        required: false
+        default: 'true'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Poženi pregled
+        run: |
+          if [ "${{ inputs.views }}" = "true" ]; then
+            python3 tools/content_health_audit.py --views
+          else
+            python3 tools/content_health_audit.py
+          fi
