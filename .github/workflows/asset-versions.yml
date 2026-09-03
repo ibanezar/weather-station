@@ -16,6 +16,8 @@ on:
       - sola/sola.css
       - igra/igra.css
       - igra/igra.js
+      - meteogasilec/gasilec.js
+      - meteohmeljar/hmeljar.js
       - blog/likes.js
       - blog/views.js
       - blog/comments.js
