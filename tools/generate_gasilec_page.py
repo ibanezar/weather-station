@@ -43,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo   # noqa: E402 — shared template helpers
 import gasilec_model as fm         # noqa: E402 — FWI model
 import generate_vodostaj_page as vod  # noqa: E402 — ARSO hidro postaje (ne podvajaj fetch_arso_stations)
+from asset_version import asset_href  # noqa: E402 — ?v=<hash> za gasilec.js
 from generate_arso_newsjack_post import fetch_alerts as fetch_arso_alerts  # noqa: E402 — isti Worker klic, ne podvajaj
 
 ROOT = seo.ROOT
@@ -707,7 +708,7 @@ def build_intervencija_page(payload, arso_alerts, arso_ok, arso_checked_at):
       </div>
     </div>
   </div>
-  <script src="/meteogasilec/gasilec.js"></script>
+  <script src="{asset_href("meteogasilec/gasilec.js")}"></script>
   <script>(function(){{
     var DEFAULT_LAT={fm.LAT!r}, DEFAULT_LON={fm.LON!r};
     var FWI_TODAY={fwi_json};
@@ -1267,7 +1268,7 @@ def main():
 {arso_widget_html(arso_alerts, arso_ok, arso_checked_at)}
 {build_hero(payload)}
 {interv_banner_html()}
-  <script src="/meteogasilec/gasilec.js"></script>
+  <script src="{asset_href("meteogasilec/gasilec.js")}"></script>
   <script>(function(){{
     var el=document.getElementById('gf-fresh');
     if(el&&window.Gasilec)Gasilec.renderFreshness(el,el.closest('.gf-hero').dataset.generated,{{greenH:26,yellowH:50}});

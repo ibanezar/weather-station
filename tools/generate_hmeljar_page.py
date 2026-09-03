@@ -40,6 +40,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
+from asset_version import asset_href  # noqa: E402 — ?v=<hash> za hmeljar.js
 
 DESC = ("Interaktivna karta hmeljišč Zgornje Savinjske doline (uradni MKGP GIS sloj) — klikni parcelo za "
         "škropilno okno, tveganje za peronosporo/pepelovko, vodno bilanco in nevarnost neurja na tisti točki.")
@@ -165,7 +166,7 @@ def feature_cards_html():
 
 
 def map_section_html():
-    return '''  <div class="hm-map-card">
+    return f'''  <div class="hm-map-card">
     <h2>🗺️ Poišči svojo parcelo</h2>
     <p class="muted-note" style="margin:0">Hmeljišča iz uradnega MKGP GIS sloja RABA, Zgornja Savinjska dolina.</p>
     <div id="hm-map"></div>
@@ -177,7 +178,7 @@ def map_section_html():
   ne preglasi registracije, etikete ali navodil konkretnega fitofarmacevtskega sredstva.</p>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="/meteohmeljar/hmeljar.js"></script>'''
+  <script src="{asset_href("meteohmeljar/hmeljar.js")}"></script>'''
 
 
 def build_page():
