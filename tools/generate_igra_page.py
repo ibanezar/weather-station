@@ -462,55 +462,63 @@ def build_body(l, svez_opomba):
 
     level_json = json.dumps(l, ensure_ascii=False, separators=(",", ":"))
 
-    return f'''{seo.crumbs_html(crumbs)}
+    # Igra se odpre na ves zaslon, kot igra — brez glave, noge in mobilnega
+    # spodnjega traku (skriti v igra.css, samo za to stran). Namesto glave je
+    # .pg-topbar: pot nazaj + ime igre, oboje del igralnega vmesnika, ne
+    # uredniške strani. Uvod (h1, datum, opis dneva) in preostala vsebina
+    # (razlaga, koridor, FAQ) sledijo POD igro — dosegljivi z drsenjem, ne
+    # nekaj, kar bi bralec moral prebrati, preden sploh vidi igro.
+    return f'''  <div id="pg-game" tabindex="0" role="application"
+       aria-label="Termika — igra jadralnega padalca nad Savinjsko dolino">
+    <div class="pg-topbar">
+      <a class="pg-topbar-back" href="/vreme-za-padalce/">← Vreme za padalce</a>
+      <span class="pg-topbar-word">🪂 Termika</span>
+    </div>
+    <div class="pg-hud">
+      <p class="pg-hero"><span id="pg-km">0,2</span><small>km</small></p>
+      <div class="pg-stats">
+        <div><span class="pg-lbl">Višina</span><span class="pg-val"><span id="pg-alt">1440</span> m</span></div>
+        <div><span class="pg-lbl">Nad tlemi</span><span class="pg-val"><span id="pg-agl">40</span> m</span></div>
+        <div><span class="pg-lbl">Vario</span><span class="pg-val"><span id="pg-vario" class="pg-v">0,0</span> m/s</span></div>
+        <div><span class="pg-lbl">Čas leta</span><span class="pg-val" id="pg-time">0 min</span></div>
+        <div><span class="pg-lbl">Rekord</span><span class="pg-val" id="pg-best">—</span></div>
+      </div>
+    </div>
+    <div class="pg-route" aria-hidden="true">
+      <span id="pg-route-a">{esc(mejniki[0]["ime"]) if mejniki else "Golte"}</span>
+      <div class="pg-route-bar" id="pg-route-bar">
+        <i class="pg-route-fill" id="pg-route-fill"></i>
+        <i class="pg-route-mark" id="pg-route-mark"></i>
+      </div>
+      <span id="pg-route-b">{esc(mejniki[-1]["ime"]) if mejniki else ""}</span>
+    </div>
+    <canvas id="pg-canvas" width="900" height="506"
+            aria-label="Stranski pogled na dolino: padalo, termični stebri, oblaki in teren"></canvas>
+    <div class="pg-overlay" id="pg-overlay">
+      <div class="pg-ov-in">
+        <p class="pg-ov-kicker">Nivo dneva · {TODAY.isoformat()}</p>
+        <h2 class="pg-ov-title">Termika</h2>
+        <p class="pg-ov-sub">Igra se naloži … Če se ne, potrebuje JavaScript —
+        današnje razmere so opisane spodaj, pod igro.</p>
+      </div>
+    </div>
+    <div class="pg-controls">
+      <button class="pg-btn pg-circle" id="pg-btn-circle" type="button">
+        Kroži<small>drži · levo/desno loviš jedro</small></button>
+      <button class="pg-btn" id="pg-btn-speed" type="button">
+        Pospeši<small>drži · proti vetru</small></button>
+      <button class="pg-btn pg-sound" id="pg-btn-sound" type="button" aria-pressed="false">🔇 Vario</button>
+    </div>
+    <p class="pg-live" id="pg-live" role="status" aria-live="polite"></p>
+  </div>
+  <p class="pg-source" id="pg-source">{esc(svez_opomba)}</p>
+
+{seo.crumbs_html(crumbs)}
 {seo.stn_badge()}
   <h1 class="page-title">Termika — igra jadralnega padalca</h1>
   <p class="post-meta">Vzleti z Golt in preleti Savinjsko dolino. Nivo se vsak dan
   sestavi iz dejanske vremenske napovedi · {TODAY.isoformat()}</p>
   <p class="archive-intro">{opis_dneva(l)}</p>
-
-  <div class="pg-bleed">
-    <div id="pg-game" tabindex="0" role="application"
-         aria-label="Termika — igra jadralnega padalca nad Savinjsko dolino">
-      <div class="pg-hud">
-        <p class="pg-hero"><span id="pg-km">0,2</span><small>km</small></p>
-        <div class="pg-stats">
-          <div><span class="pg-lbl">Višina</span><span class="pg-val"><span id="pg-alt">1440</span> m</span></div>
-          <div><span class="pg-lbl">Nad tlemi</span><span class="pg-val"><span id="pg-agl">40</span> m</span></div>
-          <div><span class="pg-lbl">Vario</span><span class="pg-val"><span id="pg-vario" class="pg-v">0,0</span> m/s</span></div>
-          <div><span class="pg-lbl">Čas leta</span><span class="pg-val" id="pg-time">0 min</span></div>
-          <div><span class="pg-lbl">Rekord</span><span class="pg-val" id="pg-best">—</span></div>
-        </div>
-      </div>
-      <div class="pg-route" aria-hidden="true">
-        <span id="pg-route-a">{esc(mejniki[0]["ime"]) if mejniki else "Golte"}</span>
-        <div class="pg-route-bar" id="pg-route-bar">
-          <i class="pg-route-fill" id="pg-route-fill"></i>
-          <i class="pg-route-mark" id="pg-route-mark"></i>
-        </div>
-        <span id="pg-route-b">{esc(mejniki[-1]["ime"]) if mejniki else ""}</span>
-      </div>
-      <canvas id="pg-canvas" width="900" height="506"
-              aria-label="Stranski pogled na dolino: padalo, termični stebri, oblaki in teren"></canvas>
-      <div class="pg-overlay" id="pg-overlay">
-        <div class="pg-ov-in">
-          <p class="pg-ov-kicker">Nivo dneva · {TODAY.isoformat()}</p>
-          <h2 class="pg-ov-title">Termika</h2>
-          <p class="pg-ov-sub">Igra se naloži … Če se ne, potrebuje JavaScript —
-          današnje razmere so opisane zgoraj in v tabeli pod igro.</p>
-        </div>
-      </div>
-      <div class="pg-controls">
-        <button class="pg-btn pg-circle" id="pg-btn-circle" type="button">
-          Kroži<small>drži · levo/desno loviš jedro</small></button>
-        <button class="pg-btn" id="pg-btn-speed" type="button">
-          Pospeši<small>drži · proti vetru</small></button>
-        <button class="pg-btn pg-sound" id="pg-btn-sound" type="button" aria-pressed="false">🔇 Vario</button>
-      </div>
-      <p class="pg-live" id="pg-live" role="status" aria-live="polite"></p>
-    </div>
-    <p class="pg-source" id="pg-source">{esc(svez_opomba)}</p>
-  </div>
 
   <h2>Današnje razmere v igri</h2>
 {pogoji}

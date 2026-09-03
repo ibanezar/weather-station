@@ -10,35 +10,80 @@
  *
  * Izjema pri barvah je nebo v igri: to riše canvas iz vremenske kode dneva,
  * ne CSS — temna paleta strani bi jasno julijsko nebo naredila mrtvo.
+ *
+ * ZASLON NA VES EKRAN: igra se odpre kot igra, ne kot članek — brez glave,
+ * animiranih blobov, noge in mobilnega spodnjega traku. Isti vzorec (dodatna
+ * predpona `body`, ne gola `.wrap`/`.app-bottomnav`) kot že uveljavljen v
+ * tools/generate_gobe_page.py: specifičnost `body .wrap` premaga blog.css-ov
+ * gol `.wrap{padding:2rem 0 4rem}` ne glede na vrstni red nalaganja, ker
+ * blog.css sicer pride ZA to datoteko (glej opombo zgoraj) in bi ob enaki
+ * specifičnosti zmagal on. To NI predelava skupne glave/noge — ti ostajata
+ * nedotaknjeni za vse druge strani, tu sta samo skrita za to eno stran.
  */
+body .site-head,
+body #bg,
+body .site-foot,
+body .app-bottomnav { display: none; }
+body .wrap { padding-top: 0; }
 
-/* Igra rabi več širine, kot je .wrap (720 px), a ne cele strani.
-   Širina + `left: 50%` + `translateX(-50%)`, ne negativni margini: ti se ob
-   `max-width` prevedejo v prekoračitev desnega roba (gumbi in vario stolpec
-   so bili odrezani), medtem ko sredinjenje s premikom drži pri vsaki širini. */
-.pg-bleed {
-  width: min(100vw - 1.5rem, 1040px);
+/* Igra rabi vso širino in višino prvega zaslona — ne .wrap (720 px), ne
+   kartico sredi članka. Širina + `left: 50%` + `translateX(-50%)`, ne
+   negativni margini: ti se ob `max-width` prevedejo v prekoračitev desnega
+   roba (gumbi in vario stolpec so bili odrezani), medtem ko sredinjenje s
+   premikom drži pri vsaki širini — preverjeno tudi na tem, precej večjem
+   elementu.
+   Višina: najprej `100vh` kot rezerva za brskalnike brez `svh`, nato
+   `100svh` (najmanjša višina vidnega polja — brez skoka, ko se na mobilnem
+   ob drsenju skrije/prikaže naslovna vrstica brskalnika). */
+#pg-game {
   position: relative;
+  width: 100vw;
   left: 50%;
   transform: translateX(-50%);
   box-sizing: border-box;
-}
-
-#pg-game {
-  position: relative;
-  border-radius: 14px;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background: #0a1422;
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
 }
 #pg-game:focus { outline: none; }
-#pg-game:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+#pg-game:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+
+/* Vrstica namesto glave: samo pot nazaj in ime igre — igralska, ne
+   uredniška. `env(safe-area-inset-top)` odrine vsebino izpod izreza/ure na
+   telefonih brez roba (notch). */
+.pg-topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: calc(.5rem + env(safe-area-inset-top)) .8rem .5rem;
+  background: rgba(4, 7, 14, .55);
+}
+.pg-topbar-back {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: .82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pg-topbar-back:hover, .pg-topbar-back:focus-visible { color: var(--text); }
+.pg-topbar-word {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .74rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 
 #pg-canvas {
   display: block;
   width: 100%;
-  height: auto;
+  flex: 1 1 0;
+  min-height: 140px;
   /* Poteza po platnu je krmiljenje, ne drsenje po strani. Velja SAMO tu —
      stran se povsod drugod drsa normalno. */
   touch-action: none;
@@ -50,6 +95,7 @@
 /* Razdalja je rezultat igre, zato je edina velika; ostalo je opora. Prej je
    bilo vseh šest vrednosti enako veliko in oko ni imelo kam pogledati. */
 .pg-hud {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: .9rem;
@@ -98,6 +144,7 @@
 /* ── Trak poti ─────────────────────────────────────────────────────────── */
 /* Brez njega igralec ne ve, ali je 12 km veliko ali malo. */
 .pg-route {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: .5rem;
@@ -201,9 +248,10 @@
 
 /* ── Krmilni gumbi ─────────────────────────────────────────────────────── */
 .pg-controls {
+  flex: 0 0 auto;
   display: flex;
   gap: .5rem;
-  padding: .55rem;
+  padding: .55rem .55rem calc(.55rem + env(safe-area-inset-bottom));
   background: rgba(4, 7, 14, .55);
   border-top: 1px solid var(--border);
 }
@@ -283,6 +331,7 @@
 }
 
 @media (max-width: 460px) {
+  .pg-topbar { padding-left: .6rem; padding-right: .6rem; }
   .pg-hud { gap: .6rem; padding: .4rem .6rem; }
   .pg-hero { font-size: 1.35rem; }
   .pg-stats { font-size: .68rem; gap: .05rem .6rem; }

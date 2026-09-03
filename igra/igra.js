@@ -439,7 +439,19 @@
   }
 
   // ── Izris ──────────────────────────────────────────────────────────────
-  var VIEW_W = 2600, VIEW_H = 900;   // m vidnega pasu (navpično raztegnjeno)
+  // VIEW_W je igralni parameter (koliko sveta vidiš naenkrat — vpliva na to,
+  // koliko časa imaš za odziv na steber) in ostaja fiksen, enak na telefonu in
+  // namizju. VIEW_H se PRERAČUNA ob vsaki spremembi velikosti platna (glej
+  // resize spodaj) — odkar je igra na ves zaslon, gre platno od širokega
+  // namizja do ozkega, visokega telefona, in fiksnih 900 m bi na visokem
+  // platnu teren stisnilo v tanek pas, na širokem pa ga močno popačilo.
+  var VIEW_W = 2600, VIEW_H = 900;
+  // Navpično razmerje je namenoma raztegnjeno ~1,6× glede na vodoravno (dolina
+  // bi bila sicer plosk trak) — to je razmerje med prvotnima fiksnima
+  // VIEW_W/VIEW_H (2600/900) in prvotnim ciljnim razmerjem platna (~1,79:1 na
+  // namizju). resize() ga ohranja pri VSAKI velikosti platna, da je izgled
+  // enak na telefonu in namizju, ne le pri eni širini.
+  var VERT_EXAGGERATION = 1.6;
   var W = 900, H = 506;
   var reduceMotion = false;
   try {
@@ -448,20 +460,17 @@
   } catch (e) { /* brez podpore: polna animacija */ }
 
   function resize() {
+    // Platno je flex element (CSS: #pg-canvas{flex:1}) znotraj #pg-game, ki je
+    // zdaj visok cel zaslon (100svh) — njegovo velikost torej v celoti določi
+    // postavitev (HUD + trak poti + platno + gumbi), ne več izračun iz širine.
     var rect = canvas.getBoundingClientRect();
-    var cssW = Math.max(280, Math.round(rect.width || canvas.clientWidth || 900));
-    // Na ozkem zaslonu je široko razmerje neigralno (pri 366 px širine bi bilo
-    // platno visoko 205 px, kar sam vario stolpec skoraj zapolni), zato je tam
-    // višje. Navzgor ga omeji višina okna, da ostane prostor za gumbe.
-    var ratio = cssW < 560 ? 0.86 : 0.56;
-    var cssH = Math.round(cssW * ratio);
-    var maxH = Math.round((window.innerHeight || 800) * 0.55);
-    if (cssH > maxH) cssH = Math.max(180, maxH);
+    var cssW = Math.max(240, Math.round(rect.width || canvas.clientWidth || 900));
+    var cssH = Math.max(140, Math.round(rect.height || canvas.clientHeight || 500));
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.style.height = cssH + 'px';
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     W = cssW; H = cssH;
+    VIEW_H = clamp(VIEW_W * (H / W) / VERT_EXAGGERATION, 500, 1700);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
@@ -1364,6 +1373,15 @@
   function init() {
     resize();
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
+    // Platno je zdaj flex element, ki zapolni razpoložljivo višino — ta se
+    // lahko spremeni tudi brez window 'resize' (npr. ko se ob drsenju skrije
+    // naslovna vrstica mobilnega brskalnika in se 100svh preračuna, ali ko
+    // HUD ob nalaganju podatkov spremeni višino). ResizeObserver to ujame,
+    // window 'resize' zgoraj ostane kot rezerva za brskalnike brez njega.
+    if (window.ResizeObserver) {
+      try { new ResizeObserver(resize).observe(canvas); } catch (e) { /* rezerva zgoraj zadošča */ }
+    }
     // Kroženje gre po gumbu IN po samem platnu — na telefonu je držanje prsta
     // na sliki najbolj naravno, gumb pa pove, da to sploh gre.
     bindHold(el('pg-btn-circle'), 'circle');
