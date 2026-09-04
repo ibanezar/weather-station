@@ -6,9 +6,26 @@ Enkratna navodila za aktivacijo plačljivega dostopa. Arhitektura:
 Paddle checkout ──webhook──▶ Worker /premium/webhook ──▶ KV: premium:sub:<email>
                                       │
                                       └─▶ Resend: magic link ▶ uporabnik
-GitHub Action (dnevno) ──▶ Worker /premium/data ──▶ KV: premium:data
+GitHub Action (dnevno) ──gzip──▶ Worker /premium/data ──────────▶ KV: premium:data (gzip)
+                        └──────▶ Worker /premium/data?kind=today ▶ KV: premium:today (izvleček)
 Stran /gobarska-napoved/ ──token──▶ Worker /premium/forecast ──▶ premium JSON
+Alarmi (/premium/notify, /premium/alerts) ──▶ KV: premium:today
 ```
+
+**Payload gre v KV stisnjen in se odvije šele ob branju** (v toku, glej
+`/premium/data` in `/premium/forecast` v `worker.js`). Nestisnjen je meje
+prerasel dvakrat: 18. 7. 2026 mejo 1 MiB, konec avgusta 2026 pa mejo 8 MiB
+(97 lokacij × 108 vrst × 7 dni je naneslo ~27 MB) — vsakič je push tiho
+odpovedal s 413, KV pa je tedne stregla staro napoved, tako da je stran
+septembra kazala avgustovsko »Napoved po gozdovih«. Zdaj:
+
+- `premium_wire()` v `gobe_model.py` piše kompaktno in razlage enkrat, v
+  skupnem seznamu (`explanations` + kazalec `e` pri vrsti) — ~12,5 MiB,
+  stisnjeno ~0,55 MiB;
+- `premium_today()` piše ločen izvleček dneva 0 (~0,4 MiB) za alarme —
+  `JSON.parse` cele napovedi bi presegel pomnilnik Workerja;
+- korak v `gobe-forecast.yml` ob neuspelem pushu **pade** (prej samo
+  `::warning::`), generiranje strani pa se z `if: always()` vseeno izvede.
 
 Brez uporabniških računov: e-naslov + žeton (magic link, 90 dni). Dostop poteče
 z naročnino (`expires` v KV), žetona ni treba preklicevati.

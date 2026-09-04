@@ -507,6 +507,25 @@ skupina je svoj iskalni cilj (»užitne gobe«, »strupene gobe«).
 - Nova skupina gre v `BAZA_CATS` in v `CORE` v `tools/seo_audit.py`, sicer je
   v nobenem sitemapu ni.
 
+### Premium napoved v KV gre stisnjena — in tiha odpoved je prepovedana
+
+Dnevni premium payload (97 lokacij × 108 vrst × 7 dni) je dvakrat prerasel mejo
+velikosti na `POST /premium/data` (18. 7. 2026 mejo 1 MiB, konec avgusta 2026
+mejo 8 MiB pri ~27 MB). Ker je `curl -sf` v `gobe-forecast.yml` napako požrl in
+je tek ostal zelen, je KV **tedne stregla staro napoved** — 4. 9. 2026 je stran
+še vedno kazala avgustovsko »Napoved po gozdovih«. Pravila po popravku:
+
+- Payload piše `premium_wire()` v `tools/gobe_model.py`: kompaktno, razlage v
+  skupnem seznamu `explanations` (vnos vrste nosi le kazalec `e`). V Worker gre
+  **gzipan** (`X-Premium-Gzip: 1`), tak ostane v KV in se odvije šele ob branju,
+  v toku — `/premium/forecast` odjemalcu vrne enak JSON kot prej.
+- **Cele napovedi Worker ne sme `JSON.parse`-ati** (~12,5 MiB odvito preseže
+  njegov pomnilnik). Alarmi (`/premium/notify`, validacija pravil v
+  `/premium/alerts`) berejo ločen izvleček dneva 0, `premium:today`, ki ga piše
+  `premium_today()` in potisne isti korak delovnega toka.
+- **Push v KV ob napaki pade** (`::error::` + izhod 1), generiranje in objava
+  strani pa tečeta naprej z `if: always()` — statične strani od KV niso odvisne.
+
 ### Glavna stran gobarja je pristajalna, ne zbirna
 
 `/gobarska-napoved/` nosi samo junaško kartico z dnevnim indeksom, **mrežo

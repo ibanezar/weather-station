@@ -22,8 +22,14 @@ jobs:
         run: pip install pyyaml
 
       - name: Izračunaj gobarski model (free + premium)
-        run: python3 tools/gobe_model.py --out-premium /tmp/premium.json
+        run: |
+          python3 tools/gobe_model.py \
+            --out-premium /tmp/premium.json \
+            --out-premium-today /tmp/premium-today.json
 
+      # Payload gre stisnjen (~0,5 MiB namesto ~12 MiB) in tak ostane v KV —
+      # glej /premium/data v worker.js, zakaj: nestisnjen je dvakrat prerasel
+      # mejo in je KV tedne tiho stregla staro napoved.
       - name: Push premium JSON v Worker KV
         env:
           PREMIUM_SYNC_KEY: ${{ secrets.PREMIUM_SYNC_KEY }}
@@ -32,14 +38,31 @@ jobs:
             echo "PREMIUM_SYNC_KEY ni nastavljen — preskočim KV push."
             exit 0
           fi
-          for i in 1 2 3; do
-            curl -sf -X POST "https://weatherireica1.filip-eremita.workers.dev/premium/data" \
-              -H "Authorization: Bearer $PREMIUM_SYNC_KEY" \
-              -H "Content-Type: application/json" \
-              --data-binary @/tmp/premium.json && exit 0
-            echo "Poskus $i ni uspel, čakam …"; sleep $((i * 5))
-          done
-          echo "::warning::Premium JSON ni bil naložen v KV (worker nedosegljiv?)"
+          gzip -9 -c /tmp/premium.json > /tmp/premium.json.gz
+          ls -lh /tmp/premium.json /tmp/premium.json.gz /tmp/premium-today.json
+
+          push() {  # $1 = URL, $2 = datoteka, ostalo = dodatne glave curl
+            local urlp="$1" file="$2"; shift 2
+            for i in 1 2 3; do
+              code=$(curl -s -o /tmp/push-out.json -w '%{http_code}' -X POST "$urlp" \
+                -H "Authorization: Bearer $PREMIUM_SYNC_KEY" "$@" \
+                --data-binary @"$file")
+              if [ "$code" = "200" ]; then cat /tmp/push-out.json; echo; return 0; fi
+              echo "Poskus $i ni uspel (HTTP ${code:-—}): $(cat /tmp/push-out.json 2>/dev/null)"
+              sleep $((i * 5))
+            done
+            return 1
+          }
+
+          BASE="https://weatherireica1.filip-eremita.workers.dev/premium/data"
+          # Napaka tu se NE sme požreti: prav tiha odpoved (curl -sf brez
+          # preverjanja kode) je dvakrat pustila mesec dni staro napoved v KV.
+          push "$BASE" /tmp/premium.json.gz \
+            -H "Content-Type: application/gzip" -H "X-Premium-Gzip: 1" || {
+            echo "::error::Premium JSON ni bil naložen v KV — napoved v KV ostaja stara."; exit 1; }
+          push "$BASE?kind=today" /tmp/premium-today.json \
+            -H "Content-Type: application/json" || {
+            echo "::error::Dnevni izvleček (kind=today) ni bil naložen — alarmi bi tekli po starih podatkih."; exit 1; }
 
       - name: Alarm premium naročnikom (pogoji optimalni)
         env:
@@ -54,10 +77,15 @@ jobs:
             -H "Authorization: Bearer $PREMIUM_SYNC_KEY" || \
             echo "::warning::Klic /premium/notify ni uspel."
 
+      # if: always() — statične strani so neodvisne od KV in se morajo
+      # osvežiti tudi, kadar push v KV pade (korak zgoraj namenoma pade
+      # glasno, da odpoved ne ostane neopažena kot doslej).
       - name: Generate gobarska-napoved stran
+        if: always()
         run: python3 tools/generate_gobe_page.py
 
       - name: Commit & push if changed
+        if: always()
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"

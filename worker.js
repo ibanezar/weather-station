@@ -5082,7 +5082,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       }
 
       // ── /premium (gobarska napoved — plačljivi dostop) ──────
-      //   POST /premium/data      Bearer PREMIUM_SYNC_KEY → store forecast JSON (from GitHub Action)
+      //   POST /premium/data      Bearer PREMIUM_SYNC_KEY → store forecast JSON (from GitHub Action);
+      //                           telo je gzipano (X-Premium-Gzip: 1), ?kind=today shrani dnevni izvleček
       //   POST /premium/webhook   Paddle Billing notification (signature-verified)
       //   POST /premium/login     { email } → magic link via Resend. Ko je
       //                           env.PREMIUM_FREE_LAUNCH="true" in (e)poštni
@@ -5101,7 +5102,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       //   POST /premium/alerts    Bearer token → replace custom alert rules
       //   POST /premium/notify    Bearer PREMIUM_SYNC_KEY → per-subscriber rule check + email (from CI, daily)
       // Storage (COUNTER_KV):
-      //   premium:data              — latest premium forecast JSON
+      //   premium:data              — latest premium forecast JSON (gzip, metadata.gzip=true)
+      //   premium:today             — day-0 digest (plain JSON) for /premium/notify + rule validation
       //   premium:sub:<email>       — { email, plan, expires, customer_id, updated }
       //   premium:tok:<token>       — { email, ts }  (TTL 90 days; sub expiry re-checked on every read)
       //   premium:alertrules:<email> — [{ species_id, location, min_elev_m, threshold }, …] (max 5)
@@ -5171,6 +5173,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!sub?.expires || new Date(sub.expires) < new Date()) return null;
           return sub;
         }
+        // Današnji dan brez razlag in komponent (premium_today() v
+        // gobe_model.py) — vhod za alarme in za preverjanje pravil. Cele
+        // napovedi (`premium:data`, ~12 MiB odvito) se tu NE sme razčleniti:
+        // JSON.parse te velikosti preseže pomnilnik Workerja. Staro vrednost
+        // brez izvlečka poberemo le, če je nestisnjena in torej iz časa pred
+        // to spremembo — takrat je bila dovolj majhna, da je parse še šel.
+        async function _premiumToday() {
+          const digest = await kv.get("premium:today", { type: "json" });
+          if (digest) return digest;
+          const { value, metadata } = await kv.getWithMetadata("premium:data", { type: "text" });
+          if (!value || metadata?.gzip) return null;
+          try { return JSON.parse(value); } catch (_) { return null; }
+        }
         function _magicLinkMail(link) {
           return `<p>Pozdravljen, gobar!</p>` +
             `<p>Tvoj dostop do <strong>gobarske napovedi Premium</strong> (7-dnevna napoved po vrstah in lokacijah):</p>` +
@@ -5183,24 +5198,68 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (!kv) return _json({ error: "Shramba ni dosegljiva" }, 503);
 
         // ── POST /premium/data — GitHub Action pushes the daily premium JSON
+        // Payload pride GZIPAN (glej gobe-forecast.yml) in tak tudi ostane v
+        // KV; /premium/forecast ga odvije šele ob branju, v toku.
+        //
+        // Zakaj: meja je bila najprej 1 MiB, nato 8 MiB, in payload je obakrat
+        // zrasel čeznjo (18. 7. 2026 na ~2 MiB, konec avgusta 2026 na ~27 MB
+        // z razširitvijo na 97 lokacij × 108 vrst × 7 dni). Vsak push je od
+        // tam tiho odpovedal s 413 — curl -sf v delovnem toku je napako
+        // požrl — KV pa je tedne stregla staro napoved, tako da je stran
+        // septembra kazala avgustovsko "Napoved po gozdovih". Stisnjen je
+        // isti payload ~0,5 MiB, kar meje ne bo doseglo niti ob nadaljnji
+        // rasti baze; korak v delovnem toku zdaj tudi pade, če push ne uspe.
+        //
+        // Preverjanje je namenoma poceni: payload se odvije v toku (nikoli ni
+        // cel v pomnilniku), preveri se le velikost in prvi odsek, kjer mora
+        // biti `locations_count` (premium_wire() v gobe_model.py ga zato piše
+        // med prva polja). JSON.parse celote bi pri 12 MiB pojedel pomnilnik
+        // Workerja — iz istega razloga notify/alerts spodaj berejo izvleček
+        // `premium:today`, ne te vrednosti.
         if (path === "/premium/data" && request.method === "POST") {
           const syncKey = env?.PREMIUM_SYNC_KEY;
           const auth = request.headers.get("Authorization") || "";
           if (!syncKey || !_tsEqual(auth, `Bearer ${syncKey}`)) return _json({ error: "Nedovoljeno" }, 401);
-          const raw = await request.text();
-          // Bila je 1 MiB — z rastjo baze indeksiranih vrst (108 danes) je
-          // dnevni payload prerasel to mejo (~2 MiB) nekje okrog 18. 7. 2026,
-          // vsak dnevni push je od takrat tiho odpovedal s 413 (gobe-forecast.yml
-          // ob curl -sf/napaki samo opozori in nadaljuje), KV pa je ves ta čas
-          // tiho postrezala mesec dni staro napoved. 8 MiB pusti precej prostora
-          // za nadaljnjo rast baze (KV vrednosti dovolijo do 25 MiB).
-          if (raw.length > 8 * 1024 * 1024) return _json({ error: "Preveliko" }, 413);
-          let parsed;
-          try { parsed = JSON.parse(raw); } catch (_) { return _json({ error: "Neveljaven JSON" }, 400); }
-          if (!Array.isArray(parsed?.locations) || !parsed.locations.length)
+          const MAX_UPLOAD = 8 * 1024 * 1024;    // stisnjeno (ali surovo, ob starem odjemalcu)
+          const MAX_RAW = 64 * 1024 * 1024;      // odvito — KV vrednost sme do 25 MiB, gzip ostane pod tem
+          const kind = url.searchParams.get("kind") === "today" ? "premium:today" : "premium:data";
+          const gzipped = request.headers.get("X-Premium-Gzip") === "1";
+          const buf = await request.arrayBuffer();
+          if (buf.byteLength > MAX_UPLOAD) return _json({ error: "Preveliko" }, 413);
+
+          let head = "", total = 0;
+          if (gzipped) {
+            const reader = new Response(buf).body
+              .pipeThrough(new DecompressionStream("gzip")).getReader();
+            const dec = new TextDecoder();
+            try {
+              for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                total += value.byteLength;
+                if (total > MAX_RAW) { await reader.cancel(); return _json({ error: "Preveliko (odvito)" }, 413); }
+                if (head.length < 4096) head += dec.decode(value, { stream: true });
+              }
+            } catch (_) { return _json({ error: "Neveljaven gzip" }, 400); }
+          } else {
+            head = new TextDecoder().decode(buf.slice(0, 4096));
+            total = buf.byteLength;
+          }
+          // Izvleček (kind=today) je majhen in ga je pošteno preveriti v celoti;
+          // pri celotni napovedi zadošča glava, ker JSON.parse ni izvedljiv.
+          if (kind === "premium:today") {
+            let parsed;
+            try { parsed = JSON.parse(gzipped ? await new Response(new Response(buf).body
+              .pipeThrough(new DecompressionStream("gzip"))).text() : new TextDecoder().decode(buf)); }
+            catch (_) { return _json({ error: "Neveljaven JSON" }, 400); }
+            if (!Array.isArray(parsed?.locations) || !parsed.locations.length)
+              return _json({ error: "Manjkajo lokacije" }, 422);
+          } else if (!/"locations_count":\s*[1-9]/.test(head)) {
             return _json({ error: "Manjkajo lokacije" }, 422);
-          await kv.put("premium:data", raw);
-          return _json({ ok: true, bytes: raw.length, generated: parsed.generated || null });
+          }
+          const generated = (head.match(/"generated":"([^"]{1,40})"/) || [])[1] || null;
+          await kv.put(kind, buf, { metadata: { gzip: gzipped, raw_bytes: total, generated } });
+          return _json({ ok: true, key: kind, bytes: buf.byteLength, raw_bytes: total, generated });
         }
 
         // ── POST /premium/webhook — Paddle Billing notifications
@@ -5350,9 +5409,13 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (path === "/premium/forecast" && request.method === "GET") {
           const sub = await _authedSub();
           if (!sub) return _json({ error: "Neveljaven ali potekel dostop", code: 401 }, 401);
-          const data = await kv.get("premium:data");
-          if (!data) return _json({ error: "Napoved še ni pripravljena" }, 503);
-          return new Response(data, {
+          // Vrednost je stisnjena (glej /premium/data zgoraj) in se odvije v
+          // toku — odjemalec dobi popolnoma enak JSON kot prej, Worker pa ga
+          // nikoli nima celega v pomnilniku.
+          const { value, metadata } = await kv.getWithMetadata("premium:data", { type: "stream" });
+          if (!value) return _json({ error: "Napoved še ni pripravljena" }, 503);
+          const body = metadata?.gzip ? value.pipeThrough(new DecompressionStream("gzip")) : value;
+          return new Response(body, {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
           });
         }
@@ -5530,9 +5593,8 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
 
           let knownSpecies = null, knownLocations = null;
           try {
-            const raw = await kv.get("premium:data");
-            if (raw) {
-              const data = JSON.parse(raw);
+            const data = await _premiumToday();
+            if (data) {
               knownSpecies = new Set(Object.keys(data.species_meta || {}));
               knownLocations = new Set((data.locations || []).map(l => l.name));
             }
@@ -5566,9 +5628,8 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const auth = request.headers.get("Authorization") || "";
           if (!secret || !_tsEqual(auth, `Bearer ${secret}`)) return _json({ error: "Nedovoljeno" }, 401);
 
-          const raw = await kv.get("premium:data");
-          if (!raw) return _json({ error: "Ni podatkov" }, 503);
-          let data; try { data = JSON.parse(raw); } catch (_) { return _json({ error: "Pokvarjeni podatki" }, 500); }
+          let data; try { data = await _premiumToday(); } catch (_) { data = null; }
+          if (!data) return _json({ error: "Ni podatkov" }, 503);
           const meta = data.species_meta || {};
           const defaultThreshold = parseInt(env.PREMIUM_ALERT_THRESHOLD || "70", 10);
           const cooldownD = parseInt(env.PREMIUM_ALERT_COOLDOWN_DAYS || "5", 10);
