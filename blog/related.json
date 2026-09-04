@@ -1,4 +1,9 @@
 {
+  "naslednji-teden-konec-poletja-0904": [
+    "tedenska-napoved-24-28-avgust-2026",
+    "tedenska-napoved-11-17-avgust-2026",
+    "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720"
+  ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",
     "koliko-bo-danes-zalilo-primerjava-modelov-0807",
@@ -165,8 +170,8 @@
     "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723"
   ],
   "vremenski-povzetek-julij-2026": [
-    "vremenski-povzetek-junij-2026",
     "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-junij-2026",
     "vremenski-povzetek-maj-2026"
   ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
@@ -286,8 +291,8 @@
   ],
   "nevihte-od-cetrtka-do-nedelje-16-19-julij-2026": [
     "nevihtni-obeti-11-julij-2026",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
-    "nevihtni-pas-14-julij-2026"
+    "nevihtni-pas-14-julij-2026",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
   ],
   "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716": [
     "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712",
@@ -430,8 +435,8 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "polletni-pregled-2026-ireica1": [
-    "vremenski-povzetek-junij-2026",
     "najbolj-suha-pomlad-2026-ireica1",
+    "vremenski-povzetek-junij-2026",
     "junij-2026-dvoglavi-mesec"
   ],
   "najhladnejsa-julijska-jutra-recica": [
@@ -450,8 +455,8 @@
     "nevihtni-pas-14-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
-    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-april-2026"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
@@ -486,12 +491,12 @@
   ],
   "vremenski-povzetek-maj-2026": [
     "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-avgust-2026"
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-junij-2026"
   ],
   "vremenski-povzetek-april-2026": [
-    "vremenski-povzetek-julij-2026",
+    "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-avgust-2026"
+    "vremenski-povzetek-julij-2026"
   ]
 }
