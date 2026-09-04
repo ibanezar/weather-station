@@ -111,7 +111,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="stat-grid">
       <div class="stat-card c-cool">
         <div class="sc-label">Trenutna temperatura</div>
-        <div class="sc-val">22,3</div>
+        <div class="sc-val">23,0</div>
         <div class="sc-sub">°C · postaja IREICA1</div>
       </div>
       <div class="stat-card c-rain">
@@ -121,7 +121,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="stat-card c-green">
         <div class="sc-label">Vlažnost</div>
-        <div class="sc-val">73</div>
+        <div class="sc-val">70</div>
         <div class="sc-sub">%</div>
       </div>
       <div class="stat-card c-dry">
@@ -132,9 +132,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="chart-card">
-      <h3>IREICA1 · napoved naslednjih dni (Open-Meteo)</h3>
-      <canvas id="chartForecast"></canvas>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Najvišje/najnižje dnevne temperature in pričakovane padavine za Rečico ob Savinji.</p>
+      <h3>Napoved proti dolgoletnemu povprečju</h3>
+      <canvas id="chartAnomalija"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Napovedane najvišje dnevne temperature (Open-Meteo) proti povprečju postaje IREICA1 za isti koledarski dan (okno ±3 dni, 2019–2025). Stolpci so pričakovane padavine. Do torka je napoved nad povprečjem, od četrtka pod njim.</p>
     </div>
 
 
@@ -147,7 +147,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="section-label">02 — kje se viri razidejo</span>
     <h2 id="kje-se-modeli-razidejo">Kje se modeli razidejo in kje se ujamejo</h2>
     <p>Napovedi za prihodnji teden ne zlivamo v eno samo številko. Takole ga vidijo trije glavni modeli, vsak po svoje:</p>
-    <div class="table-scroll">
+    <div class="chart-card">
+      <h3>Trije modeli, isti teden</h3>
+      <canvas id="chartModeli"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Najvišja dnevna temperatura po posameznem modelu — vsak zase, brez povprečenja. Črtkana črta je septembrski rekord postaje (32,4 °C, 3. 9. 2024). ICON sega do 10. septembra, ker ima krajši domet.</p>
+    </div>
+    <details class="table-scroll" style="margin:1.2rem 0">
+      <summary style="cursor:pointer;color:var(--muted);font-size:.85rem;padding:.4rem 0">Iste številke v tabeli</summary>
       <table class="stats num">
         <tr><th>Dan</th><th>ECMWF IFS</th><th>ICON</th><th>GFS</th></tr>
         <tr><td>pon., 7. 9.</td><td>27,1 °C</td><td>30,9 °C</td><td>27,3 °C</td></tr>
@@ -155,10 +161,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <tr><td>sre., 9. 9.</td><td>22,4 °C</td><td>28,9 °C</td><td>26,4 °C</td></tr>
         <tr><td>čet., 10. 9.</td><td>22,3 °C</td><td>18,5 °C</td><td>23,0 °C</td></tr>
         <tr><td>pet., 11. 9.</td><td>17,8 °C</td><td>—</td><td>22,1 °C</td></tr>
+        <tr><td>sob., 12. 9.</td><td>18,8 °C</td><td>—</td><td>23,4 °C</td></tr>
         <tr><td>ned., 13. 9.</td><td>22,4 °C</td><td>—</td><td>22,0 °C</td></tr>
+        <tr><td>pon., 14. 9.</td><td>21,8 °C</td><td>—</td><td>18,4 °C</td></tr>
         <tr><td>tor., 15. 9.</td><td>15,9 °C</td><td>—</td><td>23,8 °C</td></tr>
       </table>
-    </div>
+    </details>
     <p>Tako ujemanje kot razhajanje modelov povesta marsikaj. Vsi trije se strinjajo, da bo torek vrhunec in da bo proti koncu prihodnjega tedna občutno hladneje. Razhajajo pa se predvsem pri dveh stvareh: kako vroč bo torek in kdaj natančno bo prišla ohladitev.</p>
     <p>ICON za torek računa 32,6 °C, ECMWF in GFS pa 30,2 °C. Razlika ni zanemarljiva. Septembrski rekord postaje je 32,4 °C, izmerjenih 3. septembra 2024, zato bi ICON-ova napoved pomenila nov septembrski rekord. Druga dva modela kažeta »le« navaden vroč dan. Rekord zato omenjamo kot možnost, ne kot napoved.</p>
     <p>Še večji razpon je v sredo: od 22,4 °C po ECMWF do 28,9 °C po ICON-u, torej več kot šest stopinj razlike za isti dan. To je tipičen znak fronte, pri kateri se modeli ne strinjajo predvsem o uri prehoda. Če jo model čez dolino spusti že dopoldne, dobimo hladno sredo. Če pride šele popoldne, lahko dobimo še en povsem poleten dan.</p>
@@ -212,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- sorodni:start — samodejno, wire_all(); ne urejaj ročno -->
   <section class="related-posts">
     <h2 class="related-title">Sorodni članki</h2>
-    <div class="related-grid"><a class="related-card" href="/blog/tedenska-napoved-24-28-avgust-2026.html"><span class="related-date">23. avgusta 2026</span><span class="related-h">Napoved za teden 24.–28. avgusta: torek uganka, petek vroč in vetroven</span><span class="related-sum">Šest modelov, ARSO in domači MTR za teden 24.–28. avgusta v Zgornji Savinjski dolini: torek je velika uganka, petek vroč…</span></a><a class="related-card" href="/blog/tedenska-napoved-11-17-avgust-2026.html"><span class="related-date">10. avgusta 2026</span><span class="related-h">Tedenska napoved 11.–17. avgusta: sredina tedna je uganka, konec tedna vroč</span><span class="related-sum">Šest globalnih modelov, ARSO in domači MTR za teden od 11. do 17. avgusta. V torek nevihte, sredi tedna hladne noči, za …</span></a><a class="related-card" href="/blog/napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720.html"><span class="related-date">20. julija 2026</span><span class="related-h">Napoved za ta teden v Savinjski dolini: vroča sobota, dež se vrne v nedeljo</span><span class="related-sum">Vremenska napoved za teden od 20. do 26. julija v Rečici ob Savinji: stabilno v ponedeljek in torek, dež v četrtek, vroč…</span></a></div>
+    <div class="related-grid"><a class="related-card" href="/blog/tedenska-napoved-24-28-avgust-2026.html"><span class="related-date">23. avgusta 2026</span><span class="related-h">Napoved za teden 24.–28. avgusta: torek uganka, petek vroč in vetroven</span><span class="related-sum">Šest modelov, ARSO in domači MTR za teden 24.–28. avgusta v Zgornji Savinjski dolini: torek je velika uganka, petek vroč…</span></a><a class="related-card" href="/blog/tedenska-napoved-11-17-avgust-2026.html"><span class="related-date">10. avgusta 2026</span><span class="related-h">Tedenska napoved 11.–17. avgusta: sredina tedna je uganka, konec tedna vroč</span><span class="related-sum">Šest globalnih modelov, ARSO in domači MTR za teden od 11. do 17. avgusta. V torek nevihte, sredi tedna hladne noči, za …</span></a><a class="related-card" href="/blog/teden-ki-se-ne-more-odlociti-0830.html"><span class="related-date">30. avgusta 2026</span><span class="related-h">Po rekordu 32,2 °C teden, ki se ne more odločiti: gor, dol, spet gor</span><span class="related-sum">Po ponedeljkovem rekordu je temperatura v enem dnevu padla za 6,5 stopinje, zdaj pa spet raste. Takšna nihanja so avgust…</span></a></div>
   </section>
   <!-- sorodni:end -->
 
@@ -243,37 +251,92 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const CHART_DEFAULTS = {
     responsive: true,
     maintainAspectRatio: true,
+    // Na ozkem zaslonu je legenda v treh vrsticah in graf stisne v pas —
+    // zato je tam višje razmerje stranic.
+    aspectRatio: window.innerWidth < 520 ? 1.25 : 1.9,
     interaction: { mode: 'index', intersect: false },
     animation: { duration: 700, easing: 'easeOutQuart' },
     plugins: {
       legend: { display: true, position: 'top',
-        labels: { color: '#adc0d8', font: { size: 11, family: 'JetBrains Mono' }, boxWidth: 10, padding: 14 } },
-      tooltip: { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
-        titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10 }
+        labels: { color: '#adc0d8', font: { size: window.innerWidth < 520 ? 10 : 11, family: 'JetBrains Mono' },
+                  boxWidth: 8, usePointStyle: true, padding: window.innerWidth < 520 ? 9 : 14 } },
+      tooltip: { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)',
+        borderWidth: 1, titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10 }
     }
   };
-  new Chart(document.getElementById('chartForecast'), {
+
+  // Navpičen preliv pod krivuljo — brez njega je ploskev enakomerna packa.
+  function wxGradient(ctx, area, hex, vrh) {
+    if (!area) return 'rgba(0,0,0,0)';
+    const g = ctx.createLinearGradient(0, area.top, 0, area.bottom);
+    g.addColorStop(0, hex + vrh);
+    g.addColorStop(1, hex + '00');
+    return g;
+  }
+
+  new Chart(document.getElementById('chartAnomalija'), {
     data: {
-      labels: ["04.09.", "05.09.", "06.09.", "07.09."],
+      labels: ["4. 9.", "5. 9.", "6. 9.", "7. 9.", "8. 9.", "9. 9.", "10. 9.", "11. 9.", "12. 9.", "13. 9.", "14. 9.", "15. 9.", "16. 9.", "17. 9.", "18. 9.", "19. 9."],
       datasets: [
-        { type: 'bar', label: 'Padavine (mm)', data: [0.0, 13.6, 0.0, 0.0], backgroundColor: 'rgba(96,165,250,.55)',
-           borderRadius: 5, yAxisID: 'y1', order: 3 },
-        { type: 'line', label: 'Tmax (°C)', data: [30.8, 28.5, 27.2, 30.9], borderColor: '#f97316',
-           backgroundColor: 'rgba(249,115,22,.12)', borderWidth: 2, pointRadius: 3,
-           pointBackgroundColor: '#f97316', fill: true, tension: .35, order: 1 },
-        { type: 'line', label: 'Tmin (°C)', data: [13.7, 16.1, 16.6, 15.7], borderColor: '#22d3ee',
-           backgroundColor: 'rgba(34,211,238,.08)', borderWidth: 2, pointRadius: 3,
-           pointBackgroundColor: '#22d3ee', fill: true, tension: .35, order: 2 }
+        { type: 'bar', label: 'Padavine', data: [0.0, 13.6, 0.0, 0.0, 0.0, 3.6, 22.5, 13.7, 15.0, 8.1, 31.2, 0.3, 0.0, 4.2, 1.8, 0.0],
+           backgroundColor: 'rgba(125,211,252,.5)', hoverBackgroundColor: 'rgba(125,211,252,.8)',
+           borderColor: 'rgba(186,230,253,.85)', borderWidth: { top: 2 },
+           borderRadius: 3, barPercentage: .45, categoryPercentage: .9,
+           yAxisID: 'y1', order: 4 },
+        { type: 'line', label: 'Povprečje', data: [26.1, 26.2, 25.9, 25.7, 25.5, 25.2, 25.1, 24.9, 24.7, 24.4, 23.7, 23.2, 22.8, 22.5, 22.2, 21.9],
+           borderColor: 'rgba(173,192,216,.75)', borderWidth: 1.6, borderDash: [5, 4],
+           pointRadius: 0, tension: 0, fill: false, order: 2 },
+        { type: 'line', label: 'Napoved Tmax', data: [30.8, 28.5, 27.2, 30.9, 32.6, 28.9, 18.5, 19.2, 20.1, 18.1, 14.2, 19.9, 17.6, 16.0, 17.8, 18.5],
+           borderColor: '#f97316', borderWidth: 2.6, cubicInterpolationMode: 'monotone', tension: .3,
+           pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#f97316',
+           pointBorderColor: 'rgba(4,7,14,.9)', pointBorderWidth: 1.5,
+           fill: { target: 1, above: 'rgba(249,115,22,.22)', below: 'rgba(56,189,248,.10)' },
+           order: 1 }
       ]
     },
     options: {
       ...CHART_DEFAULTS,
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#adc0d8', font: { size: 10 } } },
+        x: { grid: { color: 'rgba(255,255,255,.04)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, maxRotation: 0, autoSkipPadding: 8 } },
         y: { position: 'left', grid: { color: 'rgba(255,255,255,.05)' },
              ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' } },
-        y1: { position: 'right', min: 0, grid: { display: false },
+        y1: { position: 'right', min: 0, suggestedMax: 40, grid: { display: false },
               ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartModeli'), {
+    data: {
+      labels: ["7. 9.", "8. 9.", "9. 9.", "10. 9.", "11. 9.", "12. 9.", "13. 9.", "14. 9.", "15. 9."],
+      datasets: [
+        { type: 'line', label: 'Septembrski rekord',
+           data: Array(9).fill(32.4),
+           borderColor: 'rgba(248,113,113,.8)', borderWidth: 1.4, borderDash: [6, 5],
+           pointRadius: 0, fill: false, order: 4 },
+        { type: 'line', label: 'ECMWF IFS', data: [27.1, 30.2, 22.4, 22.3, 17.8, 18.8, 22.4, 21.8, 15.9], borderColor: '#38bdf8',
+           borderWidth: 2.4, cubicInterpolationMode: 'monotone', tension: .3, pointRadius: 3, pointHoverRadius: 6,
+           pointBackgroundColor: '#38bdf8', pointBorderColor: 'rgba(4,7,14,.9)', pointBorderWidth: 1.5,
+           fill: true, order: 1,
+           backgroundColor: c => wxGradient(c.chart.ctx, c.chart.chartArea, '#38bdf8', '2e') },
+        { type: 'line', label: 'ICON', data: [30.9, 32.6, 28.9, 18.5, null, null, null, null, null], borderColor: '#f97316',
+           borderWidth: 2.4, cubicInterpolationMode: 'monotone', tension: .3, pointRadius: 3, pointHoverRadius: 6,
+           pointBackgroundColor: '#f97316', pointBorderColor: 'rgba(4,7,14,.9)', pointBorderWidth: 1.5,
+           fill: false, spanGaps: false, order: 2 },
+        { type: 'line', label: 'GFS', data: [27.3, 30.2, 26.4, 23.0, 22.1, 23.4, 22.0, 18.4, 23.8], borderColor: '#a78bfa',
+           borderWidth: 2.4, cubicInterpolationMode: 'monotone', tension: .3, pointRadius: 3, pointHoverRadius: 6,
+           pointBackgroundColor: '#a78bfa', pointBorderColor: 'rgba(4,7,14,.9)', pointBorderWidth: 1.5,
+           fill: false, order: 3 }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, maxRotation: 0 } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' °C' } }
       }
     }
   });

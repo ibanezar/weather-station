@@ -1029,7 +1029,8 @@ def build_html(article, stat_cards, slug, now_utc, forecast=None, photos=None):
     # skozi nedotaknjen — <p><table>…</table></p> brskalnik razbije po svoje in
     # nastane neveljaven HTML.
     def para_html(p):
-        if p.lstrip().startswith(("<table", "<ul", "<ol", "<blockquote", "<figure", "<div")):
+        if p.lstrip().startswith(("<table", "<ul", "<ol", "<blockquote", "<figure", "<div",
+                                  "<details")):
             return f"    {p}"
         return f"    <p>{p}</p>"
 
