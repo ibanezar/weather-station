@@ -183,9 +183,11 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   .quick-nav{gap:.4rem}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
   .quick-nav a .qn-ico{display:none}
-  /* Gobarsko napoved na tej širini nosi spodnja app-navigacija (»Gobe«),
-     zato tu kapsule ni — glava telefona ostane kratka. */
-  .quick-nav a.qn-feat{display:none}
+  /* MeteoGobar je viden tudi na telefonu (odkar se vrstica sme prelomiti, je
+     to samo ena kapsula več, ne odrezana vrstica) in edini obdrži ikono —
+     poudarek je smisel te kapsule, spodnja app-navigacija pa je na telefonu
+     druga, ne edina pot do gobarske napovedi. */
+  .quick-nav a.qn-feat .qn-ico{display:inline}
 }
 
 /* Igre — <details> namesto dveh ločenih kapsul (Termika + Prehiti model),
