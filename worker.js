@@ -2364,6 +2364,110 @@ async function _cronKeepLightningAlive(env) {
   } catch (_) {}
 }
 
+// ── Lestvica igre »Prehiti model« (/napovej/) ────────────────
+// Datum v času Europe/Ljubljana, ne v UTC (Worker sam teče v UTC) — mora se
+// ujemati z danesISO() v napovej/napovej.js, sicer bi krog na strani in
+// preverjanje tu gledala na dva različna "jutri" okoli polnoči.
+const _ljDatum = (d) => (d || new Date()).toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+
+// ISO 8601 teden ("YYYY-Www") za datum "YYYY-MM-DD" — standardni algoritem
+// (premik na četrtek istega tedna).
+function _isoTeden(datum) {
+  const d = new Date(datum + "T00:00:00Z");
+  const dan = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dan + 3);
+  const prviCet = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const fDan = (prviCet.getUTCDay() + 6) % 7;
+  prviCet.setUTCDate(prviCet.getUTCDate() - fDan + 3);
+  const teden = 1 + Math.round((d - prviCet) / 604800000);
+  return `${d.getUTCFullYear()}-W${String(teden).padStart(2, "0")}`;
+}
+
+// Ocenjevanje je namerna PODVOJITEV oceni()/tocke() iz napovej/napovej.js —
+// strežnik nima dostopa do klientske kode (isto načelo kot _smerBesedilo /
+// _ltgDecode drugod v tej datoteki). Če spremeniš TOL_T ali formulo točk,
+// spremeni na obeh mestih. Namerno meri SAMO temperaturi (glavna ocena v igri
+// tudi), dež je tu izpuščen — lestvica meri isto, kar igralec vidi kot "skupaj".
+const NAPOVEJ_TOL_T = 5;
+function _napovejSkupaj(nap, dej) {
+  if (!nap || !dej) return null;
+  if (nap.tmax == null || nap.tmin == null || dej.tmax == null || dej.tmin == null) return null;
+  const tTmax = Math.max(0, Math.round(100 * (1 - Math.abs(nap.tmax - dej.tmax) / NAPOVEJ_TOL_T)));
+  const tTmin = Math.max(0, Math.round(100 * (1 - Math.abs(nap.tmin - dej.tmin) / NAPOVEJ_TOL_T)));
+  return Math.round((tTmax + tTmin) / 2);
+}
+
+// Vsak dan ob 02:05 UTC, po tem, ko forecast-verify.yml (01:35 UTC) razreši
+// včerajšnji dan in ga zapiše v forecast_verification.json (30 min pustimo za
+// push + GitHub Pages redeploy — isti razlog kot čakanje na Pages pri dnevni
+// zgodbi), ta cron prebere napovedi, ki so jih igralci oddali za ta datum
+// (napovej:vnos:<datum>:<igralec>, zapisane prek POST /napovej/vnos ob
+// zaklepu napovedi v napovej.js) in jih oceni proti ISTI meritvi, ki jo vidi
+// tudi igralec na strani. Rezultat igralec sam nikoli ne odda — lestvica meri
+// samo to, kar je bilo zaklenjeno pred razrešitvijo dneva.
+async function _cronScoreNapovej(env) {
+  const kv = env?.COUNTER_KV;
+  if (!kv) return;
+  try {
+    const datum = _ljDatum(new Date(Date.now() - 86400000)); // dan, ki je bil pravkar razrešen
+    const verResp = await fetch("https://meteorec.si/forecast_verification.json", { cf: { cacheTtl: 0 } });
+    if (!verResp.ok) return;
+    const ver = await verResp.json();
+    const dej = ver?.[datum]?.actual;
+    if (!dej || dej.tmax == null || dej.tmin == null) return; // dan (še) ni razrešen — nič za oceniti
+
+    const predpona = `napovej:vnos:${datum}:`;
+    const list = await kv.list({ prefix: predpona });
+    if (!list.keys.length) return;
+
+    const dnevniSeznam = [];
+    for (const k of list.keys) {
+      let vnos;
+      try { vnos = JSON.parse(await kv.get(k.name)); } catch (_) { continue; }
+      const skupaj = _napovejSkupaj(vnos, dej);
+      if (skupaj === null) continue;
+      dnevniSeznam.push({
+        igralec: k.name.slice(predpona.length),
+        ime: (vnos && vnos.ime) || "Anonimni",
+        skupaj, datum,
+      });
+    }
+    if (!dnevniSeznam.length) { await Promise.all(list.keys.map(k => kv.delete(k.name).catch(() => {}))); return; }
+    dnevniSeznam.sort((a, b) => b.skupaj - a.skupaj);
+
+    // Javni dan-seznam ne sme razkriti igralčevega KV ključa (naključen, a
+    // vseeno ni namenjen javnosti) — samo vzdevek in točke.
+    const javniDan = dnevniSeznam.map(v => ({ ime: v.ime, skupaj: v.skupaj, datum: v.datum }));
+    await kv.put(`napovej:dan:${datum}`, JSON.stringify(javniDan.slice(0, 50)), { expirationTtl: 90 * 86400 });
+    await kv.put("napovej:zadnji_dan", datum);
+
+    // Teden in mesec: obdrži NAJBOLJŠI dan vsakega igralca v obdobju ("high
+    // score", ne vsota) — ključan po igralcu (naključen id v localStorage), ne
+    // po vzdevku, ker se vzdevek med dnevi lahko spremeni.
+    const teden = _isoTeden(datum), mesec = datum.slice(0, 7);
+    for (const [predponaObdobja, oznaka, ttl] of [
+      ["napovej:teden:", teden, 90 * 86400],
+      ["napovej:mesec:", mesec, 400 * 86400],
+    ]) {
+      const kljuc = predponaObdobja + oznaka;
+      let obstojeci = {};
+      try { obstojeci = JSON.parse(await kv.get(kljuc)) || {}; } catch (_) { obstojeci = {}; }
+      for (const v of dnevniSeznam) {
+        const prej = obstojeci[v.igralec];
+        if (!prej || v.skupaj > prej.skupaj) {
+          obstojeci[v.igralec] = { ime: v.ime, skupaj: v.skupaj, datum: v.datum };
+        }
+      }
+      await kv.put(kljuc, JSON.stringify(obstojeci), { expirationTtl: ttl });
+    }
+
+    // Oddane napovedi za ta dan so ocenjene — počisti jih (imajo sicer tudi
+    // svoj kratek TTL, glej POST /napovej/vnos spodaj, a raje takoj kot čez
+    // nekaj dni).
+    await Promise.all(list.keys.map(k => kv.delete(k.name).catch(() => {})));
+  } catch (_) { /* lestvica je okras, ne sme podreti crona */ }
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "10,40 6-7 * * *") {
@@ -2372,6 +2476,10 @@ export default {
     }
     if (event.cron === "2-59/5 * * * *") {
       ctx.waitUntil(_cronRenderIconAndCells(env));
+      return;
+    }
+    if (event.cron === "5 2 * * *") {
+      ctx.waitUntil(_cronScoreNapovej(env));
       return;
     }
     ctx.waitUntil(_cronCheckThresholds(env));
@@ -2817,6 +2925,89 @@ export default {
           JSON.stringify({ counts: full }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
         );
+      }
+
+      // ── /napovej/vnos ─────────────────────────────────────
+      // Igra »Prehiti model« (/napovej/): igralec ob ZAKLEPU napovedi (isti
+      // trenutek kot shrani() v napovej.js, preden je dan razrešen) odda tudi
+      // sem — to je edini način, da lestvica lahko kdaj oceni rezultat, ki ga
+      // ni sestavil sam igralec. Rezultata NE računamo tu: _cronScoreNapovej
+      // ga naslednje jutro oceni proti dejanski meritvi (glej tam). En vnos na
+      // (datum, igralec), ni popravljiv — enako pravilo kot v napovej.js.
+      // POST /napovej/vnos?datum=YYYY-MM-DD&igralec=<id>&tmax=&tmin=&dez=&ime=
+      if (path === "/napovej/vnos" && request.method === "POST") {
+        const kv = env?.COUNTER_KV;
+        if (!kv) {
+          return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }),
+            { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const p = url.searchParams;
+        const datum = p.get("datum") || "";
+        const igralec = p.get("igralec") || "";
+        const tmax = Number(p.get("tmax"));
+        const tmin = Number(p.get("tmin"));
+        const dez = Number(p.get("dez"));
+        // Krog sprejema napoved samo za JUTRI (glede na Ljubljano) — enako
+        // pravilo kot odprt() v napovej.js. Napoved za pretekli ali tekoči dan
+        // ne bi bila napoved.
+        if (datum !== _ljDatum(new Date(Date.now() + 86400000))) {
+          return new Response(JSON.stringify({ error: "krog za ta datum ni odprt" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        if (!/^[a-zA-Z0-9_-]{8,40}$/.test(igralec)) {
+          return new Response(JSON.stringify({ error: "neveljaven igralec" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        if (!isFinite(tmax) || tmax < -30 || tmax > 45 ||
+            !isFinite(tmin) || tmin < -35 || tmin > 35 || tmin > tmax ||
+            !isFinite(dez) || dez < 0 || dez > 200) {
+          return new Response(JSON.stringify({ error: "napoved izven dovoljenega obsega" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        // Vzdevek je okras za lestvico, ne identiteta — obreži in nikoli ne
+        // pusti praznega (prazen niz bi na lestvici izginil).
+        let ime = (p.get("ime") || "").trim().slice(0, 24);
+        if (!ime) ime = "Anonimni";
+
+        const kljuc = `napovej:vnos:${datum}:${igralec}`;
+        if ((await kv.get(kljuc)) !== null) {
+          return new Response(JSON.stringify({ error: "napoved za ta dan je že oddana" }),
+            { status: 409, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        // TTL 4 dni: _cronScoreNapovej vnos oceni in počisti naslednje jutro;
+        // to je samo varovalka, če cron kdaj izpade.
+        await kv.put(kljuc, JSON.stringify({ tmax, tmin, dez, ime }), { expirationTtl: 4 * 86400 });
+        return new Response(JSON.stringify({ ok: true }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+      }
+
+      // ── /napovej/lestvica ─────────────────────────────────
+      // Javna lestvica igre »Prehiti model«: NAJBOLJŠI rezultat vsakega
+      // igralca v obdobju ("high score", ne vsota) — glej _cronScoreNapovej,
+      // ki te tri KV zapise vsak dan zgradi/posodobi.
+      // GET /napovej/lestvica?obdobje=dan|teden|mesec → { obdobje, oznaka, lestvica }
+      if (path === "/napovej/lestvica") {
+        const kv = env?.COUNTER_KV;
+        const obdobje = url.searchParams.get("obdobje") || "dan";
+        if (!kv || !["dan", "teden", "mesec"].includes(obdobje)) {
+          return new Response(JSON.stringify({ obdobje, oznaka: null, lestvica: [] }),
+            { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+        }
+        let oznaka = null, lestvica = [];
+        if (obdobje === "dan") {
+          oznaka = await kv.get("napovej:zadnji_dan");
+          if (oznaka) {
+            try { lestvica = JSON.parse(await kv.get(`napovej:dan:${oznaka}`)) || []; } catch (_) { lestvica = []; }
+          }
+        } else {
+          oznaka = obdobje === "teden" ? _isoTeden(_ljDatum()) : _ljDatum().slice(0, 7);
+          let obj = {};
+          try { obj = JSON.parse(await kv.get(`napovej:${obdobje}:${oznaka}`)) || {}; } catch (_) { obj = {}; }
+          lestvica = Object.values(obj).sort((a, b) => b.skupaj - a.skupaj);
+        }
+        lestvica = lestvica.slice(0, 10).map(r => ({ ime: r.ime, skupaj: r.skupaj, datum: r.datum }));
+        return new Response(JSON.stringify({ obdobje, oznaka, lestvica }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" } });
       }
 
       // ── /ecowitt-history ──────────────────────────────────

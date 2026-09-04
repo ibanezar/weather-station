@@ -294,9 +294,11 @@ FAQ = [
      "ne ve — recimo, da se v jasni mirni noči na dnu te doline nabere hladen zrak in je jutranja "
      "temperatura nižja, kot računa mreža na 2 km."),
     ("Kje se hrani moj rezultat?",
-     "Samo v tvojem brskalniku (localStorage). Ni računa, ni strežnika, ni javne lestvice — in "
-     "ker vse teče pri tebi, je rezultat mogoče prirediti. Oddana napoved se sicer zaklene in se "
-     "ne da popraviti, a goljufija tu škodi samo meritvi tvoje lastne veščine."),
+     "Dvoje ločenega. Tvoja sezona (»Tvoja sezona« zgoraj, niz oddanih dni) je samo v tvojem "
+     "brskalniku (localStorage) — ni računa, ni gesla, in ker teče pri tebi, jo je mogoče "
+     "prirediti; goljufija tam škodi samo tvojemu lastnemu vpogledu. Javna lestvica pa ni "
+     "prepisljiva: ob zaklepu gre napoved tudi na strežnik, ki jo naslednje jutro sam oceni proti "
+     "izmerjenemu dnevu — kar vidiš na lestvici, ni izračunano v tvojem brskalniku."),
     ("Zakaj so modeli merjeni samo na dnevih, ki sem jih igral?",
      "Ker bi bila primerjava tvojih petih dni z njihovimi petdesetimi dvoje različnih meritev na "
      "isti tabeli. Model je lahko dober mesec dni in pade v enem samem fenskem dnevu — če tistega "
@@ -339,13 +341,28 @@ def build_body(krog, svez):
 {polje("np-tmax", "Najvišja temperatura", "°C", z_tmax, -20, 45, "0.1")}
 {polje("np-tmin", "Najnižja temperatura", "°C", z_tmin, -25, 30, "0.1")}
 {polje("np-dez", "Padavine", "mm", 0, 0, 60, "0.1")}
+      <label class="np-field np-field-text" for="np-ime">
+        <span class="np-field-lbl">Vzdevek za lestvico<em>neobvezno, do 24 znakov</em></span>
+        <input type="text" id="np-ime" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
+      </label>
       <button type="submit" class="np-btn">Zakleni napoved</button>
       <p class="np-note" id="np-msg">Oddaš lahko enkrat. Jutri zjutraj te oceni meritev postaje.</p>
     </form>
     <div id="np-locked" hidden></div>
   </div>
   <div class="np-card" id="np-result" hidden></div>
-  <div class="np-card" id="np-season" hidden></div>'''
+  <div class="np-card" id="np-season" hidden></div>
+  <div class="np-card" id="np-leaderboard">
+    <h2 class="np-h2">Lestvica</h2>
+    <p class="np-note">Najboljši rezultat vsakega igralca — ocenjen na strežniku, ne v tvojem
+    brskalniku, zato ga ni mogoče prirediti. Šteje samo napoved, oddana pred zaklepom.</p>
+    <div class="np-tabs" role="tablist">
+      <button type="button" class="np-btn np-ghost np-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
+      <button type="button" class="np-btn np-ghost np-tab" data-obdobje="teden" aria-pressed="false">Ta teden</button>
+      <button type="button" class="np-btn np-ghost np-tab" data-obdobje="mesec" aria-pressed="false">Ta mesec</button>
+    </div>
+    <div id="np-leaderboard-body"><p class="np-note">Nalagam …</p></div>
+  </div>'''
 
     namigi = f'''  <ul class="np-hints">
     <li><b>Običajno za ta dan</b><span id="np-h-tmax">{num(k.get("tmax_med"))} °C</span>
@@ -397,6 +414,9 @@ def build_body(krog, svez):
     <tr><th>Dež</th><td>Meri se posebej: ali je vir zadel, da bo padlo vsaj {num(MOKER_MM)} mm.
       ARSO in MTR milimetrov ne napovesta, zato pri njiju ta stolpec ostane prazen ali pa se
       izpelje iz verjetnosti.</td></tr>
+    <tr><th>Lestvica</th><td>Prikazuje najboljši dan vsakega igralca v obdobju (glavna ocena, brez
+      dežja) — dan se pomeri opolnoči, teden in mesec pa tečeta koledarsko. Vzdevek je neobvezen;
+      brez njega nastopiš kot »Anonimni«.</td></tr>
   </table>
 
   <h2>Kako premagati model</h2>
