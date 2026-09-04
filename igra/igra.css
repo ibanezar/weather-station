@@ -63,14 +63,27 @@ body .wrap { padding-top: 0; }
   padding: calc(.5rem + env(safe-area-inset-top)) .8rem .5rem;
   background: rgba(4, 7, 14, .55);
 }
-.pg-topbar-back {
-  color: var(--muted);
+/* Prej samo podpisan tekstovni link — na temnem celozaslonskem platnu se je
+   izgubil in ni bilo videti, da je stranploščo sploh mogoče zapustiti.
+   Zdaj vidno gumb: ozadje + rob + zaokroženi robovi. */
+.pg-topbar-close {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--text);
   text-decoration: none;
   font-size: .82rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  padding: .35rem .7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .18);
 }
-.pg-topbar-back:hover, .pg-topbar-back:focus-visible { color: var(--text); }
+.pg-topbar-close:hover, .pg-topbar-close:focus-visible {
+  background: rgba(255, 255, 255, .18);
+  outline: none;
+}
 .pg-topbar-word {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: .74rem;

@@ -486,7 +486,8 @@ def build_body(l, svez_opomba):
     return f'''  <div id="pg-game" tabindex="0" role="application"
        aria-label="Termika — igra jadralnega padalca nad Savinjsko dolino">
     <div class="pg-topbar">
-      <a class="pg-topbar-back" href="/vreme-za-padalce/">← Vreme za padalce</a>
+      <a class="pg-topbar-close" href="/vreme-za-padalce/"
+         aria-label="Zapri igro — nazaj na Vreme za padalce"><span aria-hidden="true">✕</span> Zapri</a>
       <span class="pg-topbar-word">🪂 Termika</span>
     </div>
     <div class="pg-hud">
