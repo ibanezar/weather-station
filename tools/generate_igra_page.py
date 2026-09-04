@@ -455,6 +455,13 @@ def build_body(l, svez_opomba):
          "Ker so koridorji različno dolgi: proti Celju jih je 42 km, čez Raduho na Koroško "
          "pa 11,5. Dvajset kilometrov čez gorsko pregrado ni isto kot dvajset po ravni "
          "dolini, zato bi skupen rekord pomenil malo."),
+        ("Ali je javna lestvica preverjena, kot pri »Prehiti model«?",
+         "Ne enako. Pri igri »Prehiti model« strežnik napoved sam oceni proti izmerjenemu "
+         "dnevu, zato je rezultat neprepisljiv. Tu je »Termika« fizikalna simulacija, ki teče "
+         "v celoti v tvojem brskalniku — ni resničnega dogodka, proti kateremu bi strežnik "
+         "prelet lahko preveril. Preveri samo, da prijavljena razdalja ne presega dolžine "
+         "koridorja; kdor si priredi odjemalca, lahko prijavi poljubno število do te meje. "
+         "Za pošteno igro se torej zanašamo nate."),
     ]
     izbira = kor.get("izbira") or []
     lestvica_html = ("  <table class=\"stats\">\n" + "\n".join(
@@ -520,6 +527,19 @@ def build_body(l, svez_opomba):
     <p class="pg-live" id="pg-live" role="status" aria-live="polite"></p>
   </div>
   <p class="pg-source" id="pg-source">{esc(svez_opomba)}</p>
+
+  <div class="pg-lb" id="pg-lb">
+    <h2 class="pg-lb-h2">Lestvica</h2>
+    <p class="muted-note">Vzdevek za lestvico (neobvezno):
+      <input id="pg-lb-ime" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
+      — prikazan je samo tvoj najboljši prelet, ne vsak poskus.</p>
+    <div class="pg-lb-tabs" role="tablist">
+      <button type="button" class="pg-lb-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
+      <button type="button" class="pg-lb-tab" data-obdobje="{esc(kor.get("id", "celje"))}" aria-pressed="false">
+        Rekord — {esc(kor.get("kratko", "ta koridor"))}</button>
+    </div>
+    <div id="pg-lb-body"><p class="muted-note">Nalagam …</p></div>
+  </div>
 
 {seo.crumbs_html(crumbs)}
 {seo.stn_badge()}
