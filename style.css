@@ -171,13 +171,20 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   background:linear-gradient(rgba(217,119,6,.12),rgba(217,119,6,.12)),var(--card-bg)}
 .quick-nav a.qn-feat:hover{color:var(--amber);border-color:rgba(217,119,6,.75);
   background:linear-gradient(rgba(217,119,6,.2),rgba(217,119,6,.2)),var(--card-bg)}
-/* Ozki zasloni: enakomeren segmentiran trak v eni vrstici */
+/* Ozki zasloni: manjše kapsule brez ikon. Vrstica se sme prelomiti —
+   `flex-wrap:nowrap` je bil tu prej zaradi enakomernega segmentiranega traku,
+   a trak je pri 7 kapsulah širok 478 px: na telefonih pod ~480 px je segel
+   čez oba robova, `body{overflow-x:hidden}` ga je odrezal in vodoravnega
+   drsenja ni bilo, tako da sta bila »Blog« in »Šola« (pri 360 px tudi
+   »Trendi« in »Igre«) nedosegljiva. Prelom v dve vrstici je manjše zlo od
+   nedosegljivih povezav; drsni trak (overflow-x:auto) bi odrezal spustni
+   meni »Igre«, ker je ta absolutno pozicioniran znotraj vrstice. */
 @media (max-width:520px){
-  .quick-nav{flex-wrap:nowrap;gap:.4rem}
+  .quick-nav{gap:.4rem}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
   .quick-nav a .qn-ico{display:none}
-  /* Vrstica je tu že širša od zaslona — dodatna kapsula bi jo še podaljšala,
-     gobarsko napoved pa na tej širini nosi spodnja app-navigacija (»Gobe«). */
+  /* Gobarsko napoved na tej širini nosi spodnja app-navigacija (»Gobe«),
+     zato tu kapsule ni — glava telefona ostane kratka. */
   .quick-nav a.qn-feat{display:none}
 }
 
