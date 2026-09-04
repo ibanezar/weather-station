@@ -867,6 +867,22 @@ jih ni videti iz kode:
   `tools/build_igra_corridors.py`; **Open-Meteo Elevation API mesta izravna**
   (Golte 1400 → 705 m), zato je višina vzletišča zapisana ročno in zlita z DEM
   prek `max()` — glej opombo tam, preden se zaneseš na te višine.
+- **Javna lestvica NI enako preverjena kot pri `/napovej/`.** Ob vsakem
+  pristanku `posljiRezultat()` v `igra.js` pošlje razdaljo na
+  `POST /igra/rezultat` v `worker.js`; strežnik obdrži najboljši rezultat
+  vsakega igralca (naključen id v `localStorage`, `wx-igra-igralec` — vzdevek
+  `wx-igra-ime` je okras, ne identiteta), tako za **danes** (`igra:dan:<datum>`,
+  TTL 60 dni) kot za **vse čase po koridorju** (`igra:rekord:<koridor>`, brez
+  TTL — pravi rekord ne sme sam izginiti). `GET /igra/lestvica?obdobje=dan` oz.
+  `?koridor=<id>` servira top 10; kartica `#pg-lb` pod igro (glej
+  `build_body()`) ju izriše z zavihkoma. Ker je »Termika« čista klientska
+  fizika brez izmerjenega dogodka, proti kateremu bi strežnik lahko preveril
+  rezultat (drugače kot pri `/napovej/`, kjer se napoved oceni proti postaji),
+  edino, kar `POST /igra/rezultat` preveri, je, da razdalja ne presega dolžine
+  koridorja — namerna PODVOJITEV `konec_km` iz `igra/koridorji.json` v
+  `IGRA_KORIDORJI_KM` (worker javne datoteke ne bere ob vsakem vnosu; če
+  koridorje kdaj znova zgradiš z drugo geometrijo, popravi tudi tam). Stran to
+  odkrito pove v FAQ, namesto da bi se delala varna.
 - **`igra/igra.js` je ročno pisan** (ni generiran) in razdeljen na čisti
   MODEL (izvoženi `IgraModel` / `module.exports`) in prikazni del. Model je
   brez DOM-a prav zato, da ga lahko poganja `tools/test_igra.mjs` — 53

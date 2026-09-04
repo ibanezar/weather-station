@@ -3010,6 +3010,110 @@ export default {
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=300" } });
       }
 
+      // ── Lestvica igre »Termika« (/igra/) ───────────────────
+      // Za razliko od /napovej/ tu ni jutranjega crona, ki bi rezultat oceni
+      // proti izmerjenemu dnevu — igra je čisto klientska fizikalna
+      // simulacija (igra/igra.js), ne primerjava z resničnostjo, zato tega ni
+      // proti čemu preveriti. Edino, kar strežnik lahko preveri, je, da
+      // prijavljena razdalja ne presega dolžine koridorja. To NI enaka raven
+      // zaupanja kot pri /napovej/ — kdor si priredi odjemalca, lahko prijavi
+      // poljubno število do meje koridorja. Stran to pove odkrito (glej FAQ na
+      // /igra/), namesto da bi se delala varna.
+      //
+      // Dolžine koridorjev so namerna PODVOJITEV igra/koridorji.json (isto
+      // polje `konec_km` na vsakem koridorju) — worker te javne datoteke ne
+      // bere ob vsakem vnosu, da POST ne bi rabil zunanjega klica. Koridorji
+      // so nastali z ENKRATNIM tools/build_igra_corridors.py in se ne
+      // spreminjajo; če jih kdaj znova zgradiš z drugačno geometrijo, popravi
+      // tudi tukaj.
+      const IGRA_KORIDORJI_KM = { celje: 44.57, solcava: 21.03, kamnik: 27.41, crna: 13.97 };
+
+      // POST /igra/rezultat?koridor=<id>&km=<n>&datum=YYYY-MM-DD&igralec=<id>&ime=
+      // Ob vsakem pristanku (glej posljiRezultat() v igra.js). Strežnik obdrži
+      // samo NAJBOLJŠI rezultat vsakega igralca — tako za danes kot za "vse
+      // čase" po koridorju (isto načelo kot teden/mesec pri /napovej/vnos).
+      if (path === "/igra/rezultat" && request.method === "POST") {
+        const kv = env?.COUNTER_KV;
+        if (!kv) {
+          return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }),
+            { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const p = url.searchParams;
+        const koridor = p.get("koridor") || "";
+        const datum = p.get("datum") || "";
+        const igralec = p.get("igralec") || "";
+        const km = Number(p.get("km"));
+        const maxKm = IGRA_KORIDORJI_KM[koridor];
+        if (!maxKm) {
+          return new Response(JSON.stringify({ error: "neznan koridor" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        // Nivo velja za DANES (ne "jutri" kot pri /napovej/) — igra se igra
+        // isti dan, ko se nivo objavi.
+        if (datum !== _ljDatum()) {
+          return new Response(JSON.stringify({ error: "rezultat ni za današnji nivo" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        if (!/^[a-zA-Z0-9_-]{8,40}$/.test(igralec)) {
+          return new Response(JSON.stringify({ error: "neveljaven igralec" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        if (!isFinite(km) || km <= 0 || km > maxKm + 0.05) {
+          return new Response(JSON.stringify({ error: "razdalja izven dovoljenega obsega" }),
+            { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        let ime = (p.get("ime") || "").trim().slice(0, 24);
+        if (!ime) ime = "Anonimni";
+        const kmR = Math.round(km * 10) / 10;
+
+        // "Vsi časi" po koridorju je trajen (brez TTL) — to je pravi rekord,
+        // ne sme sam po sebi izginiti. Dan je ephemeren (TTL), tako kot
+        // napovej:dan zgoraj.
+        for (const [kljuc, ttl] of [[`igra:rekord:${koridor}`, null], [`igra:dan:${datum}`, 60 * 86400]]) {
+          let obstojeci = {};
+          try { obstojeci = JSON.parse(await kv.get(kljuc)) || {}; } catch (_) { obstojeci = {}; }
+          const prej = obstojeci[igralec];
+          if (!prej || kmR > prej.km) {
+            obstojeci[igralec] = { ime, km: kmR, datum, koridor };
+            await kv.put(kljuc, JSON.stringify(obstojeci), ttl ? { expirationTtl: ttl } : undefined);
+          }
+        }
+        return new Response(JSON.stringify({ ok: true }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+      }
+
+      // GET /igra/lestvica?obdobje=dan               → danes (kateri koridor je danes na vrsti, pove nivo.json)
+      // GET /igra/lestvica?koridor=celje|solcava|kamnik|crna → "vsi časi" za ta koridor
+      if (path === "/igra/lestvica") {
+        const kv = env?.COUNTER_KV;
+        const koridorQ = url.searchParams.get("koridor");
+        const obdobje = koridorQ ? "koridor" : "dan";
+        if (!kv) {
+          return new Response(JSON.stringify({ obdobje, oznaka: null, lestvica: [] }),
+            { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+        }
+        let kljuc, oznaka;
+        if (obdobje === "koridor") {
+          if (!IGRA_KORIDORJI_KM[koridorQ]) {
+            return new Response(JSON.stringify({ error: "neznan koridor" }),
+              { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          kljuc = `igra:rekord:${koridorQ}`;
+          oznaka = koridorQ;
+        } else {
+          oznaka = _ljDatum();
+          kljuc = `igra:dan:${oznaka}`;
+        }
+        let obj = {};
+        try { obj = JSON.parse(await kv.get(kljuc)) || {}; } catch (_) { obj = {}; }
+        const lestvica = Object.values(obj)
+          .sort((a, b) => b.km - a.km)
+          .slice(0, 10)
+          .map(r => ({ ime: r.ime, km: r.km, datum: r.datum }));
+        return new Response(JSON.stringify({ obdobje, oznaka, lestvica }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=120" } });
+      }
+
       // ── /ecowitt-history ──────────────────────────────────
       if (path === "/ecowitt-history") {
         const now   = new Date();
