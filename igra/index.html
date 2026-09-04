@@ -102,6 +102,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <p class="pg-source" id="pg-source">🟢 Nivo dneva 2026-09-04 · vrhunec termike ob 14:00 · iz napovedi Open-Meteo</p>
 
+  <div class="pg-lb" id="pg-lb">
+    <h2 class="pg-lb-h2">Lestvica</h2>
+    <p class="muted-note">Vzdevek za lestvico (neobvezno):
+      <input id="pg-lb-ime" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
+      — prikazan je samo tvoj najboljši prelet, ne vsak poskus.</p>
+    <div class="pg-lb-tabs" role="tablist">
+      <button type="button" class="pg-lb-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
+      <button type="button" class="pg-lb-tab" data-obdobje="crna" aria-pressed="false">
+        Rekord — proti Črni</button>
+    </div>
+    <div id="pg-lb-body"><p class="muted-note">Nalagam …</p></div>
+  </div>
+
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/vreme-za-padalce/">Vreme za padalce</a> › <span aria-current="page">Termika</span>
   </nav>
@@ -183,13 +196,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <details><summary>Kateri veter odloča o smeri?</summary><p>Gradientni na približno 1500 m (850 hPa), ne tisti pri tleh. Prelet poteka v tem pasu, dolinski vetrič pri tleh pa je podnevi pogosto obrnjen ravno nasproti — 3. septembra 2026 je pri tleh pihalo proti zahodu, na 1500 m pa proti vzhodu. V igri to čutiš: nizko te veter zavira, visoko te nese.</p></details>
     <details><summary>Kje je pot, po kateri letim?</summary><p>Po lomljenki skozi prave kraje, ker se doline zavijejo in ravna črta reže čez pobočja. Višine dna doline so iz javnega višinskega modela, vzletišče Golte (~1400 m) pa po objavljeni višini — tisti model gore močno splošči. Zato so koridorji, ki prečkajo visokogorje, v igri lažji od resničnosti.</p></details>
     <details><summary>Zakaj so rekordi ločeni po smereh?</summary><p>Ker so koridorji različno dolgi: proti Celju jih je 42 km, čez Raduho na Koroško pa 11,5. Dvajset kilometrov čez gorsko pregrado ni isto kot dvajset po ravni dolini, zato bi skupen rekord pomenil malo.</p></details>
+    <details><summary>Ali je javna lestvica preverjena, kot pri »Prehiti model«?</summary><p>Ne enako. Pri igri »Prehiti model« strežnik napoved sam oceni proti izmerjenemu dnevu, zato je rezultat neprepisljiv. Tu je »Termika« fizikalna simulacija, ki teče v celoti v tvojem brskalniku — ni resničnega dogodka, proti kateremu bi strežnik prelet lahko preveril. Preveri samo, da prijavljena razdalja ne presega dolžine koridorja; kdor si priredi odjemalca, lahko prijavi poljubno število do te meje. Za pošteno igro se torej zanašamo nate.</p></details>
   </div>
   <p class="muted-note">Igra ni pripomoček za odločanje o letenju in ne nadomešča napovedi, presoje
   pilota ali predpisov. Za oceno razmer glej <a href="/vreme-za-padalce/">Vreme za padalce</a>.</p>
   <a class="back-link" href="/vreme-za-padalce/">← Vreme za padalce</a>
 
   <script type="application/json" id="pg-level">{"datum":"2026-09-04","generated":"2026-09-04T08:13:02Z","vir":"open-meteo","seme":181216612,"ura":"14:00","strop_m":1975,"strop_bl_m":1975,"baza_m":null,"termika_ms":3.3,"w_star":2.1,"sink_ms":0.65,"gostota_km":2.6,"z_i_m":1625,"veter_tla_ms":0.8,"veter_180_ms":1.1,"veter_visoko_ms":3.8,"veter_precno_ms":2.7,"veter_kmh":17,"veter_smer":230,"veter_tla_kmh":10,"veter_tla_smer":260,"sunki_kmh":22,"turbulenca":0.35,"padavine_mm":0.0,"koda_vremena":0,"cape":25,"ocena":100,"koridor":{"id":"crna","ime":"Čez Raduho na Koroško","kratko":"proti Črni","opis":"Najkrajši in najbolj zoprn: čez gorsko pregrado na drugo stran. Brez visokega stropa sploh ne prideš čez.","azimut":17.6,"dolzina_km":11.47,"hrbtnik_kmh":14,"izbira":[{"id":"crna","kratko":"proti Črni","hrbtnik_kmh":14},{"id":"celje","kratko":"proti Celju","hrbtnik_kmh":7},{"id":"solcava","kratko":"proti Solčavi","hrbtnik_kmh":-8},{"id":"kamnik","kratko":"proti Kamniku","hrbtnik_kmh":-14}]},"konec_km":13.97,"mejniki":[{"km":0.0,"ime":"Golte"},{"km":11.47,"ime":"Črna na Koroškem"}],"teren":{"korak_m":250,"od_km":0,"h":[1400,1322,1244,1167,1089,1011,933,856,908,967,1017,1122,1240,1195,1152,1188,1138,1167,1159,1274,1339,1383,1394,1434,1488,1428,1284,1179,1018,942,861,833,881,833,917,1025,1019,1006,1047,1119,1039,924,765,699,682,598,598,598,598,598,598,598,598,598,598,598,598]}}</script>
-  <script src="/igra/igra.js?v=a4c8e27e" defer></script>
+  <script src="/igra/igra.js?v=468490e2" defer></script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>

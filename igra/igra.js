@@ -755,22 +755,48 @@
     if (W < 340) return;
     var stepM = 55;
     var from = Math.floor(cam.x / stepM) * stepM;
-    ctx.fillStyle = 'rgba(20,48,28,.85)';
     for (var m = from; m < cam.x + VIEW_W + stepM; m += stepM) {
       var km = m / 1000;
       var e = terrainAt(sim, km);
       if (e < 420) continue;
-      // Determinističen odmik iz svetovne lege — brez naključja na okvir.
+      // Determinističen odmik in izbira vrste iz svetovne lege — brez
+      // naključja na okvir, sicer bi gozd migotal ob premikanju kamere.
       var j = Math.sin(m * 0.017) * 0.5 + 0.5;
+      var k = Math.sin(m * 0.071 + 1.7) * 0.5 + 0.5;
       var x = sx(m + j * stepM * 0.7, cam);
       if (x < -8 || x > W + 8) continue;
       var y = sy(e, cam);
       var h = 5 + j * 5;
-      ctx.beginPath();
-      ctx.moveTo(x, y - h);
-      ctx.lineTo(x - h * 0.36, y + 1.5);
-      ctx.lineTo(x + h * 0.36, y + 1.5);
-      ctx.closePath(); ctx.fill();
+      // Rahlo senčenje po drevesu, da gozd ni ena sama ponovljena barvna
+      // ploskev.
+      var sh = 0.74 + k * 0.32;
+      ctx.fillStyle = 'rgba(' + Math.round(18 * sh) + ',' + Math.round(50 * sh) +
+        ',' + Math.round(28 * sh) + ',.87)';
+      if (k < 0.33) {
+        // Ozka, visoka smreka — dve zloženi konici namesto ene.
+        ctx.beginPath();
+        ctx.moveTo(x, y - h * 1.2);
+        ctx.lineTo(x - h * 0.26, y - h * 0.38);
+        ctx.lineTo(x - h * 0.15, y - h * 0.38);
+        ctx.lineTo(x - h * 0.34, y + 1.5);
+        ctx.lineTo(x + h * 0.34, y + 1.5);
+        ctx.lineTo(x + h * 0.15, y - h * 0.38);
+        ctx.lineTo(x + h * 0.26, y - h * 0.38);
+        ctx.closePath(); ctx.fill();
+      } else if (k < 0.66) {
+        // Širša okrogla krošnja — listavec s kratkim deblom.
+        ctx.beginPath();
+        ctx.arc(x, y - h * 0.6, h * 0.48, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(x - 0.6, y - h * 0.2, 1.2, h * 0.32 + 1.5);
+      } else {
+        // Klasična konica — osnovni tip, kot prej.
+        ctx.beginPath();
+        ctx.moveTo(x, y - h);
+        ctx.lineTo(x - h * 0.36, y + 1.5);
+        ctx.lineTo(x + h * 0.36, y + 1.5);
+        ctx.closePath(); ctx.fill();
+      }
     }
   }
 
@@ -841,50 +867,90 @@
     // Navidezno skrajšanje krila, ko je obrnjeno stran — iz tega nastane
     // občutek kroženja, ne le zibanja.
     var squash = circling ? (0.35 + 0.65 * Math.abs(Math.cos(sim.simTime * 0.5))) : 1;
+    // Pri pospeševalniku pilot potisne trapez in se nagne naprej pod krilo;
+    // med kroženjem ima noge skoraj pod sabo.
+    var fwd = ui.mode === 'fast' ? 3.4 : (circling ? 0.4 : 1.3);
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(bank);
     ctx.scale(squash, 1);
 
-    // Kupola z rebri.
-    var kg = ctx.createLinearGradient(0, -17, 0, -7);
-    kg.addColorStop(0, '#ffe08a');
-    kg.addColorStop(1, '#f0a52e');
+    // Krilo: sprednji rob (zgoraj) poln lok, zadnji rob (spodaj) tanjši in
+    // bolj raven — pravi obris jadralnega krila (airfoil v profilu), ne
+    // simetrična leča kot prej.
+    var kg = ctx.createLinearGradient(0, -19.5, 0, -7);
+    kg.addColorStop(0, '#ffdd7a');
+    kg.addColorStop(0.55, '#f7b53a');
+    kg.addColorStop(1, '#d9871a');
     ctx.fillStyle = kg;
     ctx.beginPath();
-    ctx.moveTo(-15, -8);
-    ctx.quadraticCurveTo(0, -19, 15, -8);
-    ctx.quadraticCurveTo(0, -13.5, -15, -8);
+    ctx.moveTo(-16, -7.6);
+    ctx.quadraticCurveTo(-9.5, -19.4, 0, -19.7);
+    ctx.quadraticCurveTo(9.5, -19.4, 16, -7.6);
+    ctx.quadraticCurveTo(8, -11.9, 0, -12.3);
+    ctx.quadraticCurveTo(-8, -11.9, -16, -7.6);
     ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = 'rgba(120,72,10,.35)'; ctx.lineWidth = 0.7;
-    for (var c = -2; c <= 2; c++) {
-      var cx = c * 5.4;
+
+    // Odprtine komor na sprednjem robu — brez njih je krilo videti kot
+    // gladek balon, ne kot sestavljeno iz platnenih celic.
+    ctx.strokeStyle = 'rgba(40,20,4,.5)'; ctx.lineWidth = 1;
+    for (var n = -3; n <= 3; n++) {
+      var nx = n * 4.4, ny = -19.2 + Math.abs(n) * 1.75;
       ctx.beginPath();
-      ctx.moveTo(cx, -8.6);
-      ctx.lineTo(cx * 0.92, -13.6 + Math.abs(c) * 1.1);
+      ctx.moveTo(nx - 1.1, ny); ctx.lineTo(nx + 1.1, ny);
       ctx.stroke();
     }
-    // Vrvi.
-    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 0.9;
+    // Rebra od sprednjega do zadnjega roba.
+    ctx.strokeStyle = 'rgba(110,64,8,.4)'; ctx.lineWidth = 0.7;
+    for (var c = -3; c <= 3; c++) {
+      var cx = c * 4.4;
+      ctx.beginPath();
+      ctx.moveTo(cx, -19 + Math.abs(c) * 1.7);
+      ctx.lineTo(cx * 0.93, -12 + Math.abs(c) * 0.3);
+      ctx.stroke();
+    }
+    // Vrvi (A–D poenostavljene v en sklop) do dveh ramenskih točk — širina
+    // med njima je sedež pilota, ne ena sama zbirna nit.
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 0.85;
     ctx.beginPath();
-    ctx.moveTo(-11.5, -7.6); ctx.lineTo(-0.6, 4);
-    ctx.moveTo(-4, -8.6); ctx.lineTo(-0.6, 4);
-    ctx.moveTo(11.5, -7.6); ctx.lineTo(0.6, 4);
-    ctx.moveTo(4, -8.6); ctx.lineTo(0.6, 4);
+    ctx.moveTo(-14.5, -8.2); ctx.lineTo(-2.8, 4.2);
+    ctx.moveTo(-6.5, -12); ctx.lineTo(-2.8, 4.2);
+    ctx.moveTo(14.5, -8.2); ctx.lineTo(2.8, 4.2);
+    ctx.moveTo(6.5, -12); ctx.lineTo(2.8, 4.2);
     ctx.stroke();
     ctx.restore();
 
-    // Pilot v sedežu — brez raztega, da ostane okrogel.
+    // Pilot v sedežu, noge iztegnjene naprej — vrti se manj kot krilo, od
+    // tod občutek nihala pod krilom, ne toga paličica.
     ctx.save();
     ctx.translate(x, y); ctx.rotate(bank * 0.55);
+
+    // Noge naprej (v smer leta) s škornjem na koncu.
+    ctx.strokeStyle = '#3a4658'; ctx.lineWidth = 2.3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0.6, 6.6); ctx.lineTo(3.4 + fwd, 7.5);
+    ctx.stroke();
+    ctx.fillStyle = '#20262f';
+    ctx.beginPath(); ctx.arc(4.1 + fwd, 7.7, 1.1, 0, Math.PI * 2); ctx.fill();
+
+    // Sedež/trup — brez raztega, da ostane okrogel.
     ctx.fillStyle = '#dfe7f5';
     ctx.beginPath();
-    if (ctx.roundRect) { ctx.roundRect(-3.4, 3.2, 6.8, 6.4, 2.6); }
-    else { ctx.arc(0, 6.4, 3.3, 0, Math.PI * 2); }
+    if (ctx.roundRect) { ctx.roundRect(-3.2, 3.4, 6.6, 5.6, 2.4); }
+    else { ctx.arc(0, 6.2, 3.2, 0, Math.PI * 2); }
     ctx.fill();
+
+    // Roke do krmilnih vrvi (zavor), dlani ob ramenih.
+    ctx.strokeStyle = '#c7d0e0'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-2.1, 3.9); ctx.lineTo(-2.9, -0.2);
+    ctx.moveTo(2.1, 3.9); ctx.lineTo(2.9, -0.2);
+    ctx.stroke();
+
+    // Glava/čelada.
     ctx.fillStyle = '#a8b6cc';
-    ctx.beginPath(); ctx.arc(0, 3.4, 2.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 2.0, 2.15, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
