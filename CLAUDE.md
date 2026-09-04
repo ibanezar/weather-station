@@ -664,11 +664,30 @@ krog dneva, JS ga samo igra.
 - **Modeli se v sezonski statistiki merijo SAMO na dnevih, ki jih je igralec
   igral.** Sicer bi bila na isti tabeli tvojih pet dni proti njihovim petdesetim,
   kar sta dve različni meritvi in ne primerjava.
-- **Rezultat živi v `localStorage`, javne lestvice ni.** Oddana napoved se
-  zaklene (`shrani()` obstoječega vnosa ne prepiše), a vse teče v brskalniku in
-  se da prirediti — stran to izrecno pove, namesto da bi se delala varna. Če bo
-  kdaj skupna lestvica, gre prek `COUNTER_KV` v `worker.js`, ne prek nove
-  odvisnosti.
+- **Osebna zgodovina je v `localStorage`, javna lestvica pa je overjena na
+  strežniku — ločeno, ne mešaj ju.** »Tvoja sezona« (niz, sezonska statistika)
+  ostane samo v brskalniku, oddana napoved se zaklene (`shrani()` obstoječega
+  vnosa ne prepiše), a ker vse teče pri igralcu, jo je mogoče prirediti — to je
+  namerno, ni računa in ni gesla. Javna lestvica (dan/teden/mesec, kartica
+  »Lestvica« na strani) gre prek `COUNTER_KV` (kot je bilo predvideno), a NE
+  tako, da bi igralec sam odddal svoj rezultat: `posljiNaLestvico()` v
+  napovej.js ob zaklepu (isti trenutek kot `shrani()`) pošlje samo *napoved*
+  (še ne rezultat) na `POST /napovej/vnos` v worker.js — datum mora biti
+  natanko jutrišnji (Ljubljana), en vnos na (datum, igralec), ni popravljiv.
+  `_cronScoreNapovej()` (nov Cron Trigger `5 2 * * *` v `wrangler.toml`, 30 min
+  po `forecast-verify.yml`) naslednje jutro sam prebere
+  `forecast_verification.json` z meteorec.si in oceni vsak oddan vnos proti
+  dejanski meritvi — ISTA formula točk kot `oceni()`/`tocke()` v napovej.js,
+  namerna podvojitev (worker nima dostopa do klientske kode, isto načelo kot
+  `_smerBesedilo`/`_ltgDecode` drugod v worker.js; če spremeniš `TOL_T` ali
+  formulo, spremeni na obeh mestih). Zapiše `napovej:dan:<datum>` (javen
+  seznam) ter za teden/mesec najboljši dan vsakega igralca (`napovej:teden:
+  <YYYY-Www>`, `napovej:mesec:<YYYY-MM>`) — "high score" obdobja, ne vsota.
+  `GET /napovej/lestvica?obdobje=dan|teden|mesec` servira top 10, `napovej.js`
+  (`izrisiLestvico()`) jih izriše v kartici. Igralec je naslovljen po
+  naključnem id-ju v `localStorage` (`meteorec-napovej-igralec`), vzdevek
+  (`meteorec-napovej-ime`) je prostovoljen okras, ne identiteta, in gre skozi
+  `escHtml()` pri izrisu (uporabniško besedilo, vrnjeno vsem obiskovalcem).
 - **Krog je vedno za JUTRI.** Za dan, ki že teče, igra napovedi ne sprejema
   (`odprt()`); ob izpadu dnevnega teka ostane stari krog in stran to označi —
   raje star podatek kot prazna stran, a brez pobiranja napovedi za nazaj.

@@ -21,10 +21,16 @@
  *
  * NIČESAR NE SKRIVA. Napovedi modelov so v isti datoteki, ki jo naloži brskalnik,
  * in so tako ali tako objavljene drugod po strani. Igra jih pred oddajo samo ne
- * kaže — kdor jih prepiše, ne igra proti modelu, ampak je model. Enako velja za
- * rezultat: vse teče in se hrani v tvojem brskalniku (localStorage), zato ga je
- * mogoče prirediti. Lestvica je tvoja, ne javna; goljufija škodi samo meritvi
- * tvoje lastne veščine.
+ * kaže — kdor jih prepiše, ne igra proti modelu, ampak je model.
+ *
+ * OSEBNA ZGODOVINA (sezona, niz, "kako sem se odrezal") ostane v localStorage —
+ * ni računa, ni gesla. JAVNA LESTVICA (dan/teden/mesec, glej izrisiLestvico) pa
+ * ni prepisljiva: ob zaklepu napovedi (shrani(), spodaj) gre isti vnos tudi na
+ * worker (posljiNaLestvico), ki ga naslednje jutro oceni SAM proti izmerjenemu
+ * dnevu (_cronScoreNapovej v worker.js) — igralec svojega rezultata za lestvico
+ * nikoli ne izračuna in ne odda sam. Kdor bi po tem popravil localStorage, na
+ * javni lestvici s tem ne spremeni ničesar; kvečjemu zavede sam sebe v kartici
+ * "Tvoja sezona" spodaj.
  *
  * ZGRADBA: spodaj je najprej ČIST MODEL (ocenjevanje, sezonska statistika) brez
  * vsake navezave na DOM, nato prikazni del. Model se izvozi tudi za Node, ker ga
@@ -243,11 +249,50 @@
   // ═══════════════════════════════════════════════════════════════════════
 
   var LS = 'meteorec-napovej-v1';
+  var LS_IGRALEC = 'meteorec-napovej-igralec';
+  var LS_IME = 'meteorec-napovej-ime';
+  // Worker, ki oceni oddane napovedi in servira javno lestvico — glej
+  // POST /napovej/vnos in GET /napovej/lestvica v worker.js. Ista domena kot
+  // ARSO_WORKER v meteogasilec/gasilec.js (en sam Cloudflare Worker za vse).
+  var LESTVICA_WORKER = 'https://weatherireica1.filip-eremita.workers.dev';
   var $ = function (id) { return document.getElementById(id); };
 
   function st(v, d) {
     if (v === null || v === undefined) return '—';
     return v.toFixed(d === undefined ? 1 : d).replace('.', ',');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* Naključen, trajen id igralca (localStorage) — NI identiteta, samo ključ,
+     da lestvica za teden/mesec ve, kateri vnosi so istega igralca. Vzdevek
+     (ime) je ločen in prostovoljen okras, ki se lahko med dnevi spremeni. */
+  function igralecId() {
+    var re = /^[a-zA-Z0-9_-]{8,40}$/;
+    try {
+      var id = localStorage.getItem(LS_IGRALEC);
+      if (id && re.test(id)) return id;
+    } catch (e) { /* fall through */ }
+    var abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var bajti = (window.crypto && crypto.getRandomValues) ? crypto.getRandomValues(new Uint8Array(24)) : null;
+    var novId = '';
+    for (var i = 0; i < 24; i++) {
+      novId += abc[(bajti ? bajti[i] : Math.floor(Math.random() * 256)) % abc.length];
+    }
+    try { localStorage.setItem(LS_IGRALEC, novId); } catch (e) { /* ni localStorage — id ostane samo za ta klic */ }
+    return novId;
+  }
+
+  function beriIme() {
+    try { return localStorage.getItem(LS_IME) || ''; } catch (e) { return ''; }
+  }
+
+  function shraniIme(ime) {
+    try { localStorage.setItem(LS_IME, ime); } catch (e) { /* ni usodno — polje se prihodnjič ne prednastavi */ }
   }
 
   /* Slovenska množina: 1 dan, 2 dneva, 3 dnevi, 5 dni. Brez tega piše
@@ -494,10 +539,29 @@
       msg.textContent = 'Najnižja temperatura ne more biti višja od najvišje.';
       return;
     }
+    var imeEl = $('np-ime');
+    var ime = imeEl ? imeEl.value.trim().slice(0, 24) : '';
     if (!shrani(krog.tarca, { tmax: tmax, tmin: tmin, dez: dez, ob: new Date().toISOString() })) {
       msg.textContent = 'Napoved za ta dan je že oddana.';
+    } else {
+      shraniIme(ime);
+      posljiNaLestvico(krog.tarca, { tmax: tmax, tmin: tmin, dez: dez }, ime);
     }
     izrisi();
+  }
+
+  /* Napoved gre ob zaklepu tudi na worker, da jo lestvica lahko naslednji dan
+     oceni sama (glej opombo na vrhu datoteke). Tiha napaka: lestvica je okras,
+     ne sme podreti igre, če je worker nedosegljiv ali je krog na strežniku
+     (redko, ob izpadu jutranjega teka) že zaprt. */
+  function posljiNaLestvico(datum, vnos, ime) {
+    try {
+      var qs = new URLSearchParams({
+        datum: datum, igralec: igralecId(),
+        tmax: String(vnos.tmax), tmin: String(vnos.tmin), dez: String(vnos.dez), ime: ime || ''
+      });
+      fetch(LESTVICA_WORKER + '/napovej/vnos?' + qs.toString(), { method: 'POST' }).catch(function () {});
+    } catch (e) { /* npr. URLSearchParams manjka v starem brskalniku — lestvica ni bistvena */ }
   }
 
   function poveziDrsnike() {
@@ -512,11 +576,56 @@
     });
   }
 
+  /* ── Lestvica ───────────────────────────────────────────────────────────
+     Javna, ločena od "Tvoje sezone" zgoraj: prikaže NAJBOLJŠI rezultat vsakega
+     igralca v obdobju, kot ga je ocenil worker (glej opombo na vrhu datoteke).
+     Neodvisna od vdelanega kroga — naloži se vedno, tudi če krog danes ni
+     sestavljen. */
+  var OBDOBJA = { dan: 'Danes', teden: 'Ta teden', mesec: 'Ta mesec' };
+
+  function izrisiLestvico(obdobje) {
+    var body = $('np-leaderboard-body');
+    if (!body) return;
+    body.innerHTML = '<p class="np-note">Nalagam …</p>';
+    fetch(LESTVICA_WORKER + '/napovej/lestvica?obdobje=' + encodeURIComponent(obdobje), { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.lestvica || !d.lestvica.length) {
+          body.innerHTML = '<p class="np-note">Za "' + (OBDOBJA[obdobje] || obdobje).toLowerCase() +
+            '" še ni ocenjenih napovedi.</p>';
+          return;
+        }
+        var vrstice = d.lestvica.map(function (r, i) {
+          return '<tr><th>' + (i + 1) + '.</th><td>' + escHtml(r.ime) + '</td><td>' + r.skupaj + '</td></tr>';
+        }).join('');
+        body.innerHTML = '<table class="np-table"><tr><th></th><th>Igralec</th><th>Točke</th></tr>' +
+          vrstice + '</table>';
+      })
+      .catch(function () {
+        body.innerHTML = '<p class="np-note">Lestvice trenutno ni mogoče naložiti.</p>';
+      });
+  }
+
+  function poveziLestvico() {
+    var zavihki = document.querySelectorAll('#np-leaderboard .np-tab');
+    for (var i = 0; i < zavihki.length; i++) {
+      zavihki[i].addEventListener('click', function () {
+        for (var j = 0; j < zavihki.length; j++) zavihki[j].setAttribute('aria-pressed', 'false');
+        this.setAttribute('aria-pressed', 'true');
+        izrisiLestvico(this.getAttribute('data-obdobje'));
+      });
+    }
+    if (zavihki.length) izrisiLestvico('dan');
+  }
+
   function init() {
+    poveziLestvico();
     if (!krog) return;
     poveziDrsnike();
     var f = $('np-form');
     if (f) f.addEventListener('submit', oddaj);
+    var imeEl = $('np-ime');
+    if (imeEl) imeEl.value = beriIme();
     izrisi();
     osveziKrog().then(izrisi);
   }

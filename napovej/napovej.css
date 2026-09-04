@@ -66,6 +66,19 @@
   border-radius: 9px;
 }
 
+/* Vzdevek za lestvico: isto polje, a besedilno in levo poravnano — ni
+   številka, drsnika ob njem tudi ni (glej np-field-text v build_body()). */
+.np-field-text input[type="text"] {
+  width: 12rem;
+  padding: .55rem .6rem;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: rgba(0, 0, 0, .25);
+  border: 1px solid var(--line, rgba(255, 255, 255, .18));
+  border-radius: 9px;
+}
+
 .np-field input[type="range"] {
   grid-column: 1 / -1;
   width: 100%;
@@ -135,6 +148,15 @@
 }
 
 .np-cols h3 { margin: .8rem 0 0; font-size: .95rem; opacity: .85; }
+
+/* ── Lestvica ─────────────────────────────────────────────────────────────── */
+.np-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin: .8rem 0; }
+
+.np-tab[aria-pressed="true"] {
+  color: #04121d;
+  background: var(--cyan, #38bdf8);
+  border-color: transparent;
+}
 
 /* ── Namigi ───────────────────────────────────────────────────────────────── */
 .np-hints {

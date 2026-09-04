@@ -90,5 +90,11 @@ IDENTIFY_DAILY_CAP = "50"
 # Rabi skrivnost GH_DISPATCH_TOKEN (fine-grained PAT, samo ta repo, "Actions:
 # Read and write") — `wrangler secret put GH_DISPATCH_TOKEN`. Brez nje funkcija
 # tiho ne naredi nič (glej manjkajoč env.GH_DISPATCH_TOKEN).
+#
+# Četrti urnik (02:05 UTC) je za lestvico igre /napovej/ — _cronScoreNapovej()
+# v worker.js. Teče 30 min po forecast-verify.yml (01:35 UTC), ki tisto jutro
+# razreši včerajšnji dan v forecast_verification.json; 30 min pustita čas za
+# push in GitHub Pages redeploy, isti razlog kot pri drugih strežniško
+# generiranih straneh (glej daily-story.yml v CLAUDE.md).
 [triggers]
-crons = ["*/5 * * * *", "2-59/5 * * * *", "10,40 6-7 * * *"]
+crons = ["*/5 * * * *", "2-59/5 * * * *", "10,40 6-7 * * *", "5 2 * * *"]
