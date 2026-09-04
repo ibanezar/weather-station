@@ -1173,6 +1173,7 @@
     } else {
       var best = loadBest(), rec = sim.best > best.km + 0.049;
       if (rec) saveBest(sim.best, sim.level.datum || '');
+      posljiRezultat(sim.best);
       ov.innerHTML = '<div class="pg-ov-in">' +
         '<p class="pg-ov-kicker">' +
         (sim.status === 'finished' ? 'Prelet dokončan' : 'Pristanek') + '</p>' +
@@ -1286,6 +1287,107 @@
       localStorage.setItem(LS, JSON.stringify(vse));
       setTxt('pg-best', fmt(km, 1) + ' km');
     } catch (e) { /* zaseben zavihek ali polna shramba — rekord pač ne ostane */ }
+  }
+
+  // ── Javna lestvica ─────────────────────────────────────────────────────
+  // Rekord zgoraj je OSEBEN in v localStorage — ni računa, ni gesla, in ker
+  // teče pri igralcu, ga je mogoče prirediti. Javna lestvica gre na worker
+  // (isti kot pri /napovej/, glej worker.js), ki obdrži najboljši rezultat
+  // vsakega igralca, "danes" in "vsi časi" po koridorju. To NI enako preverjeno
+  // kot pri /napovej/: tam strežnik rezultat sam oceni proti izmerjenemu dnevu,
+  // tu pa gre za čisto klientsko fiziko, ki je ni proti čemu preveriti —
+  // strežnik samo pazi, da prijavljena razdalja ne presega dolžine koridorja
+  // (glej opombo pri IGRA_KORIDORJI_KM v worker.js). Kartica na strani to pove
+  // odkrito (glej FAQ), namesto da bi se delala varna.
+  var LS_IGRALEC = 'wx-igra-igralec';
+  var LS_IME = 'wx-igra-ime';
+  var LESTVICA_WORKER = 'https://weatherireica1.filip-eremita.workers.dev';
+
+  function igralecId() {
+    var re = /^[a-zA-Z0-9_-]{8,40}$/;
+    try {
+      var id = localStorage.getItem(LS_IGRALEC);
+      if (id && re.test(id)) return id;
+    } catch (e) { /* fall through */ }
+    var abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var bajti = (window.crypto && crypto.getRandomValues) ? crypto.getRandomValues(new Uint8Array(24)) : null;
+    var novId = '';
+    for (var i = 0; i < 24; i++) {
+      novId += abc[(bajti ? bajti[i] : Math.floor(Math.random() * 256)) % abc.length];
+    }
+    try { localStorage.setItem(LS_IGRALEC, novId); } catch (e) { /* id ostane samo za ta klic */ }
+    return novId;
+  }
+  function beriIme() {
+    try { return localStorage.getItem(LS_IME) || ''; } catch (e) { return ''; }
+  }
+  function shraniIme(ime) {
+    try { localStorage.setItem(LS_IME, ime); } catch (e) { /* ni usodno */ }
+  }
+
+  // Pošlje se ob VSAKEM pristanku, ne samo ob osebnem rekordu — strežnik sam
+  // obdrži samo najboljšega (glej POST /igra/rezultat v worker.js), zato je
+  // klic varno poklicati vedno. km < 0,3 (praktično takojšen pristanek)
+  // preskočimo, da ne polnimo lestvice z ničelnimi poskusi.
+  function posljiRezultat(km) {
+    if (!sim || !sim.level || !sim.level.datum || km < 0.3) return;
+    try {
+      var qs = new URLSearchParams({
+        koridor: korId(), km: String(Math.round(km * 10) / 10),
+        datum: sim.level.datum, igralec: igralecId(), ime: beriIme() || ''
+      });
+      fetch(LESTVICA_WORKER + '/igra/rezultat?' + qs.toString(), { method: 'POST' })
+        .then(function (r) { if (r.ok) osveziAktivniZavihekLestvice(); })
+        .catch(function () {});
+    } catch (e) { /* lestvica ni bistvena za igro */ }
+  }
+
+  function izrisiLestvico(obdobje) {
+    var body = el('pg-lb-body');
+    if (!body) return;
+    body.innerHTML = '<p class="muted-note">Nalagam …</p>';
+    var qs = obdobje === 'dan' ? 'obdobje=dan' : 'koridor=' + encodeURIComponent(obdobje);
+    fetch(LESTVICA_WORKER + '/igra/lestvica?' + qs, { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.lestvica || !d.lestvica.length) {
+          body.innerHTML = '<p class="muted-note">Za to izbiro še ni zabeleženih preletov.</p>';
+          return;
+        }
+        var vrstice = d.lestvica.map(function (r, i) {
+          return '<tr><th>' + (i + 1) + '.</th><td>' + esc(r.ime) + '</td><td>' + fmt(r.km, 1) + ' km</td></tr>';
+        }).join('');
+        body.innerHTML = '<table class="stats pg-lb-table"><tr><th></th><th>Pilot</th><th>Razdalja</th></tr>' +
+          vrstice + '</table>';
+      })
+      .catch(function () {
+        body.innerHTML = '<p class="muted-note">Lestvice trenutno ni mogoče naložiti.</p>';
+      });
+  }
+
+  function osveziAktivniZavihekLestvice() {
+    var aktiven = document.querySelector('#pg-lb .pg-lb-tab[aria-pressed="true"]');
+    if (aktiven) izrisiLestvico(aktiven.getAttribute('data-obdobje'));
+  }
+
+  function poveziLestvico() {
+    var zavihki = document.querySelectorAll('#pg-lb .pg-lb-tab');
+    for (var i = 0; i < zavihki.length; i++) {
+      zavihki[i].addEventListener('click', function () {
+        for (var j = 0; j < zavihki.length; j++) zavihki[j].setAttribute('aria-pressed', 'false');
+        this.setAttribute('aria-pressed', 'true');
+        izrisiLestvico(this.getAttribute('data-obdobje'));
+      });
+    }
+    if (zavihki.length) izrisiLestvico(zavihki[0].getAttribute('data-obdobje'));
+
+    var imeEl = el('pg-lb-ime');
+    if (imeEl) {
+      imeEl.value = beriIme();
+      var shrani = function () { shraniIme(imeEl.value.trim().slice(0, 24)); };
+      imeEl.addEventListener('change', shrani);
+      imeEl.addEventListener('blur', shrani);
+    }
   }
 
   // ── Deljenje ───────────────────────────────────────────────────────────
@@ -1477,6 +1579,10 @@
 
     var b = loadBest();
     if (b.km > 0) setTxt('pg-best', fmt(b.km, 1) + ' km');
+
+    // Lestvica je pod pregibom (glej #pg-lb v generate_igra_page.py) in ni
+    // odvisna od nivoja — poveži takoj, ne šele ko loadLevel() konča.
+    poveziLestvico();
 
     loadLevel();
     requestAnimationFrame(frame);

@@ -30,11 +30,16 @@ Outputs
     location; safe to publish on GitHub Pages.
   * premium JSON — full 7-day, per-species, per-location forecast with
     human-readable explanations; meant for the gated Worker endpoint,
-    NOT for the public repo.
+    NOT for the public repo. Zapisan je v "wire" obliki (glej
+    premium_wire()), ne v surovi obliki compute_forecast().
+  * premium "today" digest — samo današnji dan, brez razlag in komponent;
+    iz njega Worker poganja /premium/notify in preverja pravila alarmov,
+    ne da bi moral razčleniti cel (danes ~12 MiB) premium payload.
 
 Usage
   python3 tools/gobe_model.py                       # print summary, write free JSON
   python3 tools/gobe_model.py --out-premium out.json
+  python3 tools/gobe_model.py --out-premium-today today.json
   python3 tools/gobe_model.py --no-write            # print only
 """
 import argparse
@@ -511,6 +516,84 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
     }
 
 
+def premium_wire(premium):
+    """Zapis premium napovedi za prenos in KV — ista vsebina, manjši zapis.
+
+    97 lokacij × 7 dni × 108 vrst = 73k vnosov, in razlaga ("Talna temp.
+    20.3 °C optimalna, sprožilni dež …") je pri veliki večini teh vnosov
+    dobesedno ista — unikatnih je le ~19k. Zato gredo razlage v skupen
+    seznam `explanations`, vnos vrste pa nosi samo kazalec `e`. Skupaj s
+    kompaktnim zapisom (brez `indent`) to payload skrči z ~27 MB na ~12 MiB,
+    stisnjen pa je ~0,5 MiB (glej gobe-forecast.yml — v Worker gre gzipan).
+
+    Vnos vrste NAMENOMA obdrži `components`: odjemalec iz njih riše stolpce
+    faktorjev, kot polje pa bi jih moral razumeti tudi Worker in bi se dva
+    zapisa razšla ob vsaki novi komponenti.
+
+    `locations_count` je spredaj zato, da Worker po dekompresiji preveri
+    smiselnost payloada že iz prvega odseka toka, brez razčlenjevanja celote
+    (glej /premium/data v worker.js).
+    """
+    pool, index = [], {}
+
+    def eid(text):
+        i = index.get(text)
+        if i is None:
+            i = index[text] = len(pool)
+            pool.append(text)
+        return i
+
+    locations = []
+    for loc in premium["locations"]:
+        days = []
+        for day in loc["days"]:
+            days.append({**day, "species": [
+                {"id": s["id"], "index": s["index"], "e": eid(s["explanation"]),
+                 "components": s["components"]}
+                for s in day["species"]
+            ]})
+        locations.append({**loc, "days": days})
+
+    return {
+        "generated": premium["generated"],
+        "model_version": premium["model_version"],
+        "locations_count": len(locations),
+        "species_indexed": premium["species_indexed"],
+        "species_meta": premium["species_meta"],
+        "terrains": premium["terrains"],
+        "ecologies": premium["ecologies"],
+        "protected_areas": premium["protected_areas"],
+        "explanations": pool,
+        "locations": locations,
+    }
+
+
+def premium_today(premium):
+    """Današnji dan brez razlag in komponent — vhod za /premium/notify.
+
+    Alarmi ocenjujejo samo dan 0 (»danes so pogoji za tvojo vrsto ugodni«),
+    zato Workerju ni treba razčleniti cele napovedi; ta izvleček je ~0,5 MB
+    namesto ~12 MiB, kar je pod pomnilniško mejo Workerja tudi ob nadaljnji
+    rasti baze vrst.
+    """
+    return {
+        "generated": premium["generated"],
+        "model_version": premium["model_version"],
+        "species_meta": {sid: {"name_sl": m["name_sl"]}
+                         for sid, m in premium["species_meta"].items()},
+        "locations": [{
+            "name": loc["name"],
+            "elev_m": loc["elev_m"],
+            "days": [{
+                "date": d0["date"],
+                "overall": d0["overall"],
+                "level": d0["level"],
+                "species": [{"id": s["id"], "index": s["index"]} for s in d0["species"]],
+            } for d0 in loc["days"][:1]],
+        } for loc in premium["locations"]],
+    }
+
+
 def free_payload(premium):
     """Public teaser: today's overall index at the home location only."""
     meta = premium["species_meta"]
@@ -563,6 +646,8 @@ def main():
                     help="path for the public free-tier JSON")
     ap.add_argument("--out-premium", default=None,
                     help="path for the premium JSON (omit to skip writing)")
+    ap.add_argument("--out-premium-today", default=None,
+                    help="path for the day-0 digest used by /premium/notify")
     ap.add_argument("--no-write", action="store_true", help="print summary only")
     args = ap.parse_args()
 
@@ -593,9 +678,19 @@ def main():
             json.dump(free, f, ensure_ascii=False, indent=1)
         print(f"\n→ free JSON: {args.out_free}")
         if args.out_premium:
+            # Kompakten zapis (brez indent) — glej premium_wire(): payload gre
+            # v KV in vsak odvečen presledek se pomnoži s 73k vnosi.
             with open(args.out_premium, "w", encoding="utf-8") as f:
-                json.dump(premium, f, ensure_ascii=False, indent=1)
-            print(f"→ premium JSON: {args.out_premium}")
+                json.dump(premium_wire(premium), f, ensure_ascii=False,
+                          separators=(",", ":"))
+            print(f"→ premium JSON: {args.out_premium} "
+                  f"({os.path.getsize(args.out_premium) / 1048576:.1f} MiB)")
+        if args.out_premium_today:
+            with open(args.out_premium_today, "w", encoding="utf-8") as f:
+                json.dump(premium_today(premium), f, ensure_ascii=False,
+                          separators=(",", ":"))
+            print(f"→ premium digest: {args.out_premium_today} "
+                  f"({os.path.getsize(args.out_premium_today) / 1048576:.1f} MiB)")
 
 
 if __name__ == "__main__":

@@ -507,6 +507,25 @@ skupina je svoj iskalni cilj (»užitne gobe«, »strupene gobe«).
 - Nova skupina gre v `BAZA_CATS` in v `CORE` v `tools/seo_audit.py`, sicer je
   v nobenem sitemapu ni.
 
+### Premium napoved v KV gre stisnjena — in tiha odpoved je prepovedana
+
+Dnevni premium payload (97 lokacij × 108 vrst × 7 dni) je dvakrat prerasel mejo
+velikosti na `POST /premium/data` (18. 7. 2026 mejo 1 MiB, konec avgusta 2026
+mejo 8 MiB pri ~27 MB). Ker je `curl -sf` v `gobe-forecast.yml` napako požrl in
+je tek ostal zelen, je KV **tedne stregla staro napoved** — 4. 9. 2026 je stran
+še vedno kazala avgustovsko »Napoved po gozdovih«. Pravila po popravku:
+
+- Payload piše `premium_wire()` v `tools/gobe_model.py`: kompaktno, razlage v
+  skupnem seznamu `explanations` (vnos vrste nosi le kazalec `e`). V Worker gre
+  **gzipan** (`X-Premium-Gzip: 1`), tak ostane v KV in se odvije šele ob branju,
+  v toku — `/premium/forecast` odjemalcu vrne enak JSON kot prej.
+- **Cele napovedi Worker ne sme `JSON.parse`-ati** (~12,5 MiB odvito preseže
+  njegov pomnilnik). Alarmi (`/premium/notify`, validacija pravil v
+  `/premium/alerts`) berejo ločen izvleček dneva 0, `premium:today`, ki ga piše
+  `premium_today()` in potisne isti korak delovnega toka.
+- **Push v KV ob napaki pade** (`::error::` + izhod 1), generiranje in objava
+  strani pa tečeta naprej z `if: always()` — statične strani od KV niso odvisne.
+
 ### Glavna stran gobarja je pristajalna, ne zbirna
 
 `/gobarska-napoved/` nosi samo junaško kartico z dnevnim indeksom, **mrežo
@@ -621,6 +640,63 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   ročni pregled, preden se doda.
 - Delavna toka: `test-napovedi-daily.yml` (01:50 UTC, po `update-history.yml` in
   `forecast-verify.yml`) in `test-napovedi-monthly.yml` (1. v mesecu, 05:15 UTC).
+
+## »Prehiti model« (`/napovej/`) — igralec kot peti tekmovalec semaforja
+
+Igra, v kateri obiskovalec vsak dan napove jutrišnjo najvišjo/najnižjo temperaturo
+in dež za Rečico, naslednje jutro pa ga oceni meritev IREICA1 — po istem pravilu
+kot ARSO, Open-Meteo, MTR in ECMWF AIFS na `/tocnost-napovedi/`. Druga igra na
+strani (prva je »Termika«, `/igra/`) in namenoma po istem vzorcu: Python sestavi
+krog dneva, JS ga samo igra.
+
+- **Nasprotniki se NE zajemajo na novo.** `tools/generate_napovej_page.py` bere
+  `tools/.forecast_pending.json` (čakajoče napovedi za jutri, zapiše jih
+  `verify_forecasts.py`) in `forecast_verification.json` (razrešeni dnevi). Drug
+  zajem bi pomenil drugo napoved pod istim imenom in dva semaforja, ki se
+  razideta — isto načelo kot `daily_features` pri MTR. Zato skript teče v
+  `forecast-verify.yml`, takoj za `generate_tocnost_page.py`, in nikjer drugje.
+- **Glavna ocena teče samo po temperaturah.** ARSO objavlja besedno napoved brez
+  milimetrov, MTR pa verjetnost padavin (`pop`), ne količine — skupna ocena po
+  dežju bi merila štiri vire po treh različnih merilih. Dež je zato ločena mera:
+  ali je vir zadel, da bo padlo vsaj **0,2 mm**. Ta prag je isti kot `WET_DAY_MM`
+  v `verify_forecasts.py` in `MOKER_MM` v `napovej/napovej.js` — če ga
+  spreminjaš, spremeni na vseh treh mestih.
+- **Modeli se v sezonski statistiki merijo SAMO na dnevih, ki jih je igralec
+  igral.** Sicer bi bila na isti tabeli tvojih pet dni proti njihovim petdesetim,
+  kar sta dve različni meritvi in ne primerjava.
+- **Osebna zgodovina je v `localStorage`, javna lestvica pa je overjena na
+  strežniku — ločeno, ne mešaj ju.** »Tvoja sezona« (niz, sezonska statistika)
+  ostane samo v brskalniku, oddana napoved se zaklene (`shrani()` obstoječega
+  vnosa ne prepiše), a ker vse teče pri igralcu, jo je mogoče prirediti — to je
+  namerno, ni računa in ni gesla. Javna lestvica (dan/teden/mesec, kartica
+  »Lestvica« na strani) gre prek `COUNTER_KV` (kot je bilo predvideno), a NE
+  tako, da bi igralec sam odddal svoj rezultat: `posljiNaLestvico()` v
+  napovej.js ob zaklepu (isti trenutek kot `shrani()`) pošlje samo *napoved*
+  (še ne rezultat) na `POST /napovej/vnos` v worker.js — datum mora biti
+  natanko jutrišnji (Ljubljana), en vnos na (datum, igralec), ni popravljiv.
+  `_cronScoreNapovej()` (nov Cron Trigger `5 2 * * *` v `wrangler.toml`, 30 min
+  po `forecast-verify.yml`) naslednje jutro sam prebere
+  `forecast_verification.json` z meteorec.si in oceni vsak oddan vnos proti
+  dejanski meritvi — ISTA formula točk kot `oceni()`/`tocke()` v napovej.js,
+  namerna podvojitev (worker nima dostopa do klientske kode, isto načelo kot
+  `_smerBesedilo`/`_ltgDecode` drugod v worker.js; če spremeniš `TOL_T` ali
+  formulo, spremeni na obeh mestih). Zapiše `napovej:dan:<datum>` (javen
+  seznam) ter za teden/mesec najboljši dan vsakega igralca (`napovej:teden:
+  <YYYY-Www>`, `napovej:mesec:<YYYY-MM>`) — "high score" obdobja, ne vsota.
+  `GET /napovej/lestvica?obdobje=dan|teden|mesec` servira top 10, `napovej.js`
+  (`izrisiLestvico()`) jih izriše v kartici. Igralec je naslovljen po
+  naključnem id-ju v `localStorage` (`meteorec-napovej-igralec`), vzdevek
+  (`meteorec-napovej-ime`) je prostovoljen okras, ne identiteta, in gre skozi
+  `escHtml()` pri izrisu (uporabniško besedilo, vrnjeno vsem obiskovalcem).
+- **Krog je vedno za JUTRI.** Za dan, ki že teče, igra napovedi ne sprejema
+  (`odprt()`); ob izpadu dnevnega teka ostane stari krog in stran to označi —
+  raje star podatek kot prazna stran, a brez pobiranja napovedi za nazaj.
+- Model (ocenjevanje, sezona, niz) je v `napovej/napovej.js` ločen od prikaza in
+  izvožen za Node; preverja ga `tools/test_napovej.mjs`, ki teče v istem
+  workflowu pred objavo — isto kot `test_igra.mjs` pri Termiki.
+- Stran je v `CORE` v `tools/seo_audit.py`, v `llms.txt` in med hitrimi
+  povezavami na naslovni strani; datoteki `napovej/napovej.css` in
+  `napovej.js` sta v `asset-versions.yml`.
 
 ## Agrometeo (`/agrometeo/` + zavihek na naslovni strani) — modelirana ocena, ne diagnoza
 
@@ -791,6 +867,22 @@ jih ni videti iz kode:
   `tools/build_igra_corridors.py`; **Open-Meteo Elevation API mesta izravna**
   (Golte 1400 → 705 m), zato je višina vzletišča zapisana ročno in zlita z DEM
   prek `max()` — glej opombo tam, preden se zaneseš na te višine.
+- **Javna lestvica NI enako preverjena kot pri `/napovej/`.** Ob vsakem
+  pristanku `posljiRezultat()` v `igra.js` pošlje razdaljo na
+  `POST /igra/rezultat` v `worker.js`; strežnik obdrži najboljši rezultat
+  vsakega igralca (naključen id v `localStorage`, `wx-igra-igralec` — vzdevek
+  `wx-igra-ime` je okras, ne identiteta), tako za **danes** (`igra:dan:<datum>`,
+  TTL 60 dni) kot za **vse čase po koridorju** (`igra:rekord:<koridor>`, brez
+  TTL — pravi rekord ne sme sam izginiti). `GET /igra/lestvica?obdobje=dan` oz.
+  `?koridor=<id>` servira top 10; kartica `#pg-lb` pod igro (glej
+  `build_body()`) ju izriše z zavihkoma. Ker je »Termika« čista klientska
+  fizika brez izmerjenega dogodka, proti kateremu bi strežnik lahko preveril
+  rezultat (drugače kot pri `/napovej/`, kjer se napoved oceni proti postaji),
+  edino, kar `POST /igra/rezultat` preveri, je, da razdalja ne presega dolžine
+  koridorja — namerna PODVOJITEV `konec_km` iz `igra/koridorji.json` v
+  `IGRA_KORIDORJI_KM` (worker javne datoteke ne bere ob vsakem vnosu; če
+  koridorje kdaj znova zgradiš z drugo geometrijo, popravi tudi tam). Stran to
+  odkrito pove v FAQ, namesto da bi se delala varna.
 - **`igra/igra.js` je ročno pisan** (ni generiran) in razdeljen na čisti
   MODEL (izvoženi `IgraModel` / `module.exports`) in prikazni del. Model je
   brez DOM-a prav zato, da ga lahko poganja `tools/test_igra.mjs` — 53
@@ -846,12 +938,14 @@ entiteto (Person/Organization/Place `sameAs`) dodajaj v skupni register
 mestu — glej opombo pri registru, zakaj.
 
 **Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
-vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem: isti nabor
-vprašanj vsak mesec vprašaj ChatGPT, Perplexity in Google AI Overview
-("vreme rečica ob savinji zdaj", "vreme zgornja savinjska dolina po urah",
-"gobarska napoved zgornja savinjska dolina", "kaj je rosišče", "je danes
-nevarnost požara v savinjski dolini") in zapiši, ali/kako omenijo
-meteorec.si. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni.
+vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
+(informativna, primerjalna, priporočilo, how-to — ne le ključne besede) in
+natančna shema vnosa (asistent, `prompt_id`, `mentioned`,
+`competitors_mentioned`) sta v `docs/geo-prompt-panel.md` — vsak mesec
+rotiraj 6–8 vprašanj iz panela med ChatGPT, Perplexity in Google AI
+Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
+brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
+"omenjen/ni omenjen".
 
 ## Razvoj
 

@@ -161,11 +161,58 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .quick-nav a{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.4rem .9rem;border-radius:999px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:border-color .18s,color .18s,background .18s,transform .15s;white-space:nowrap}
 .quick-nav a:hover{border-color:var(--card-border-h);color:var(--cyan);background:rgba(34,211,238,.07);transform:translateY(-1px)}
 .quick-nav a .qn-ico{font-size:.95rem;line-height:1}
-/* Ozki zasloni: enakomeren segmentiran trak v eni vrstici */
+/* Poudarjena kapsula (MeteoGobar): jantarni odtenek, da se med enakimi
+   modrimi povezavami vidi kot samostojna stran in ne kot še en arhiv.
+   --amber je definiran za obe temi, jantarni nadih pa je plast NAD
+   var(--card-bg), ne namesto nje: samo prosojna barva bi na svetli temi
+   odvzela belo podlago kapsule in temno jantarno besedilo bi ostalo na
+   temni fotografiji ozadja. */
+.quick-nav a.qn-feat{color:var(--amber);border-color:rgba(217,119,6,.45);
+  background:linear-gradient(rgba(217,119,6,.12),rgba(217,119,6,.12)),var(--card-bg)}
+.quick-nav a.qn-feat:hover{color:var(--amber);border-color:rgba(217,119,6,.75);
+  background:linear-gradient(rgba(217,119,6,.2),rgba(217,119,6,.2)),var(--card-bg)}
+/* Ozki zasloni: manjše kapsule brez ikon. Vrstica se sme prelomiti —
+   `flex-wrap:nowrap` je bil tu prej zaradi enakomernega segmentiranega traku,
+   a trak je pri 7 kapsulah širok 478 px: na telefonih pod ~480 px je segel
+   čez oba robova, `body{overflow-x:hidden}` ga je odrezal in vodoravnega
+   drsenja ni bilo, tako da sta bila »Blog« in »Šola« (pri 360 px tudi
+   »Trendi« in »Igre«) nedosegljiva. Prelom v dve vrstici je manjše zlo od
+   nedosegljivih povezav; drsni trak (overflow-x:auto) bi odrezal spustni
+   meni »Igre«, ker je ta absolutno pozicioniran znotraj vrstice. */
 @media (max-width:520px){
-  .quick-nav{flex-wrap:nowrap;gap:.4rem}
+  .quick-nav{gap:.4rem}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
   .quick-nav a .qn-ico{display:none}
+  /* MeteoGobar je viden tudi na telefonu (odkar se vrstica sme prelomiti, je
+     to samo ena kapsula več, ne odrezana vrstica) in edini obdrži ikono —
+     poudarek je smisel te kapsule, spodnja app-navigacija pa je na telefonu
+     druga, ne edina pot do gobarske napovedi. */
+  .quick-nav a.qn-feat .qn-ico{display:inline}
+}
+
+/* Igre — <details> namesto dveh ločenih kapsul (Termika + Prehiti model),
+   da se .quick-nav ne razlomi na ozkih zaslonih. Native <details>/<summary>:
+   deluje brez JS, tipkovnica in bralnik zaslona ga poznata sama od sebe,
+   zato tu ni ponovljena logika "zapri ob kliku zunaj", ki jo ima app.js za
+   druge widgete. */
+.qn-drop{position:relative}
+.qn-drop summary{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;font-size:.8rem;font-weight:600;color:var(--blue);padding:.4rem .9rem;border-radius:999px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:border-color .18s,color .18s,background .18s,transform .15s;white-space:nowrap;cursor:pointer;list-style:none}
+.qn-drop summary::-webkit-details-marker{display:none}
+.qn-drop summary:hover{border-color:var(--card-border-h);color:var(--cyan);background:rgba(34,211,238,.07);transform:translateY(-1px)}
+.qn-drop summary::after{content:"";width:.4em;height:.4em;margin-left:.15rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
+.qn-drop[open] summary::after{transform:rotate(-135deg) translateY(2px)}
+.qn-drop[open] summary{border-color:var(--card-border-h);color:var(--cyan)}
+/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula pred »Šola«
+   in blizu desnega roba vrstice, ki je na ozkih zaslonih širša od zaslona
+   (glej opombo o segmentiranem traku zgoraj) — sredinjena menijska plošča bi
+   segla čez desni rob in se odrezala ob `body{overflow-x:hidden}`. */
+.qn-drop-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+.qn-drop-menu a{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.5rem .7rem;border-radius:9px;white-space:nowrap}
+.qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan)}
+@media (max-width:520px){
+  .qn-drop summary{padding:.45rem .7rem;font-size:.74rem}
+  .qn-drop summary .qn-ico{display:none}
+  .qn-drop-menu a .qn-ico{display:inline}
 }
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
@@ -374,8 +421,8 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .dew-line{font-size:.76rem;color:var(--muted);margin-top:.4rem}
 .dew-line strong{color:var(--text);font-weight:600}
 .mtr-trust-badge{margin-top:.5rem;font-size:.7rem}
-.mtr-trust-badge a{display:inline-flex;align-items:center;gap:.3rem;color:var(--muted);text-decoration:none;
-  border:1px solid var(--fc-border);background:var(--fc-bg);border-radius:999px;padding:.3rem .65rem;
+.mtr-trust-badge a{display:flex;align-items:center;gap:.3rem;color:var(--muted);text-decoration:none;
+  border:1px solid var(--fc-border);background:var(--fc-bg);border-radius:13px;padding:.8rem .95rem;
   transition:color .15s,border-color .15s}
 .mtr-trust-badge a:hover{color:var(--blue);border-color:var(--blue)}
 .condition-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:30px;padding:5px 14px;font-size:.72rem;color:var(--blue);letter-spacing:.06em;margin-bottom:.4rem;width:fit-content;transition:background .35s}
@@ -1480,8 +1527,8 @@ html[data-mode="simple"] #online-widget{display:none!important}
 .countdown-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width 1s linear;width:0%}
 
 /* Yesterday delta */
-.yesterday-delta{display:none;align-items:center;gap:.5rem;font-size:.78rem;margin-top:.7rem;padding:.4rem .75rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border);width:fit-content}
-.yesterday-delta:not(:empty){display:inline-flex}
+.yesterday-delta{display:none;align-items:center;gap:.5rem;font-size:.78rem;margin-top:.7rem;padding:.8rem .95rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border)}
+.yesterday-delta:not(:empty){display:flex}
 .yesterday-delta .dv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem}
 
 /* Share & install buttons */

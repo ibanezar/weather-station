@@ -1229,6 +1229,15 @@ PAGE_JS = """<script>
         '<span class="gp-factor-val">'+v+' %</span></div>';
     }).join('')+'</div>';
   }
+  // Razlage so v payloadu enkrat, v skupnem seznamu (premium_wire() v
+  // gobe_model.py) — vnos vrste nosi le kazalec `e`, ker je ista poved pri
+  // večini od 73k vnosov dobesedno enaka. `s.explanation` je zapis pred to
+  // spremembo; podpora ostaja, ker KV lahko kratek čas še streže star payload.
+  var EXPL=[];
+  function explText(s){
+    if(s.explanation!=null)return s.explanation;
+    return (s.e!=null&&EXPL[s.e]!=null)?EXPL[s.e]:"";
+  }
   var GP_EXPLAIN_PAGE=12, GP_EXPLAIN_STEP=24;
   var gpExplainShown=GP_EXPLAIN_PAGE;
   function explainCardsHtml(day, meta, shown){
@@ -1241,7 +1250,7 @@ PAGE_JS = """<script>
         <div class="gp-explain-body">
         <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
         <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
-        <details class="gp-explain-more"><summary></summary><p>${esc2(s.explanation)}${dblHtml}</p>${ecoBadgeHtml(m)}${factorsHtml}</details>
+        <details class="gp-explain-more"><summary></summary><p>${esc2(explText(s))}${dblHtml}</p>${ecoBadgeHtml(m)}${factorsHtml}</details>
         </div></div>`;}).join('');
   }
   function dayLabel(day, isFirst){
@@ -1365,6 +1374,7 @@ PAGE_JS = """<script>
   }
   function render(d){
     var meta=d.species_meta||{};
+    EXPL=d.explanations||[];
     var locs=d.locations||[];
     var home=locs.filter(function(l){return l.home;})[0]||locs[0];
     var html="";

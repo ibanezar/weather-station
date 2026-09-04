@@ -22,7 +22,7 @@ Generates from app.js (GLOSSARY_TERMS, parsed — not hand-duplicated):
 Usage:
   python3 tools/generate_seo_pages.py [--force]
 """
-import html, json, math, os, sys, re, calendar, datetime, statistics as st, argparse
+import hashlib, html, json, math, os, sys, re, calendar, datetime, statistics as st, argparse
 from collections import defaultdict
 from generate_monthly_post import seo_title, PLACE_SAMEAS
 
@@ -2615,6 +2615,17 @@ VALLEY_CAMPS = [
 ]
 
 
+def _camp_variant(slug, name, n):
+    """Deterministic per-page pick, same convention as generate_story_card.py's
+    `variant_index()` — keyed by slug (not date, these pages are evergreen) so
+    two camps sharing an anchor town don't end up with near-identical wording
+    around otherwise-identical anchor-derived numbers (geo_audit.py near-dup
+    check, found 86% similarity between vreme-glamping-savinja and
+    vreme-herbal-glamping-ljubno — both anchor to Ljubno ob Savinji)."""
+    h = hashlib.sha256(f"{slug}|{name}".encode()).hexdigest()
+    return int(h[:8], 16) % n
+
+
 def gen_valley_camp_pages(hist, sitemap_urls):
     """Short companion landing pages for VALLEY_CAMPS — each reuses its
     anchor town's lapse-rate estimate (recomputed identically here) rather
@@ -2645,12 +2656,21 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
                   (f"Vreme {name}", None)]
 
-        intro = f'''  <p class="archive-intro">
+        intro_variants = [
+            f'''  <p class="archive-intro">
   <strong>{name}</strong> ({c["addr"]}) leži v Zgornji Savinjski dolini, {num(km_anchor,1)} km od
   {t["gen"]} — dovolj blizu, da velja ista ocena podnebja kot za <a href="/{t['slug']}/">{t['town']}</a>,
   brez dodatne (in nezanesljive) korekcije za tako majhno razdaljo. Ta ocena izhaja iz meritev postaje
   <strong>IREICA1</strong> v Rečici ob Savinji, {num(km_station,0)} km {dir_station}, prilagojenih
-  nadmorski višini {t["gen"]} ({t["elev"]} m).</p>'''
+  nadmorski višini {t["gen"]} ({t["elev"]} m).</p>''',
+            f'''  <p class="archive-intro">
+  Na naslovu {c["addr"]} leži <strong>{name}</strong>, {num(km_anchor,1)} km od {t["gen"]} v Zgornji
+  Savinjski dolini. Razdalja je premajhna za lastno korekcijo, zato tu velja ocena podnebja za
+  <a href="/{t['slug']}/">{t['town']}</a> — izpeljana iz meritev postaje <strong>IREICA1</strong> v
+  Rečici ob Savinji ({num(km_station,0)} km {dir_station}) in prilagojena nadmorski višini {t["gen"]}
+  ({t["elev"]} m).</p>''',
+        ]
+        intro = intro_variants[_camp_variant(c["slug"], "intro", len(intro_variants))]
 
         est_row = (f'    <tr><th>Ocenjena povprečna letna temperatura</th>'
                    f'<td>{num(est_mean_t)} °C <span class="muted-note" style="display:inline">'
@@ -2662,9 +2682,9 @@ def gen_valley_camp_pages(hist, sitemap_urls):
 {est_row}
     <tr><th>Razdalja od postaje IREICA1</th><td>{num(km_station,1)} km {dir_station}</td></tr>
     <tr><th>Razdalja od {t["gen"]}</th><td>{num(km_anchor,1)} km</td></tr>
-    <tr><th>Dni z zmrzaljo pri postaji (od {f["first_date"][:4]})</th><td>{f["frost_days"]}</td></tr>
-    <tr><th>Povprečne letne padavine (postaja)</th><td>{num(f["annual_precip"], 0)} mm</td></tr>
-  </table>'''
+  </table>
+  <p class="muted-note">Zmrzal, padavine in drugi arhivski podatki za to podnebje so na strani
+  <a href="/{t['slug']}/">vreme {t["town"]}</a> — enaki kot tukaj, ker gre za isto oceno.</p>'''
 
         cta = f'''  <div class="stat-grid" style="margin-top:1.5rem">
     <a class="stat-card c-temp" href="/" style="text-decoration:none">
@@ -2678,11 +2698,18 @@ def gen_valley_camp_pages(hist, sitemap_urls):
       <div class="sc-sub">{num(km_anchor,1)} km stran</div></a>
   </div>'''
 
-        qa = [
+        qa1_variants = [
             (f"Ima {name} svojo vremensko postajo?",
              f"Ne. Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
              f"{num(km_station,0)} km {dir_station}. {name} leži {num(km_anchor,1)} km od {t['gen']}, "
              f"zato zanj velja ista ocena podnebja kot za {t['town']}."),
+            (f"Od kod prihajajo vremenski podatki za {name}?",
+             f"{name} nima lastne postaje. Uporabljena je ocena za {t['town']} "
+             f"({num(km_anchor,1)} km stran), izpeljana iz meritev postaje IREICA1 v Rečici ob Savinji "
+             f"({num(km_station,0)} km {dir_station})."),
+        ]
+        qa = [
+            qa1_variants[_camp_variant(c["slug"], "qa1", len(qa1_variants))],
             ("Kje preverim vodostaj Savinje pri kampu?",
              f"Na strani /vodostaj-savinje/ Meteorec objavlja vodostaj reke Savinje — uporabno za "
              f"{c['activity']}."),
@@ -2703,12 +2730,19 @@ def gen_valley_camp_pages(hist, sitemap_urls):
             place_about,
         ])
 
+        disclaimer_variants = [
+            f'''Ta stran ni uradna stran namestitve, temveč vremenski pregled Meteorec,
+  izpeljan iz meritev postaje IREICA1. Za rezervacije se obrni neposredno na {name}.''',
+            f'''Stran ni uradna stran ponudnika {name} — gre za neodvisen vremenski pregled Meteorec
+  na podlagi meritev postaje IREICA1. Rezervacije uredi neposredno pri ponudniku.''',
+        ]
+        disclaimer = disclaimer_variants[_camp_variant(c["slug"], "disclaimer", len(disclaimer_variants))]
+
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {name}</h1>
   <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station} · {c["addr"]}</p>
-  <div class="partial-note">Ta stran ni uradna stran namestitve, temveč vremenski pregled Meteorec,
-  izpeljan iz meritev postaje IREICA1. Za rezervacije se obrni neposredno na {name}.</div>
+  <div class="partial-note">{disclaimer}</div>
 {intro}
 {cta}
 {facts}
