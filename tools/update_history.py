@@ -29,6 +29,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED = ['tempHigh', 'tempLow', 'tempAvg', 'precipTotal',
             'windspeedHigh', 'windspeedAvg', 'humidityAvg']
 
+# Ročno umerjeni dnevni padavinski seštevki — za dneve, ko dežemer na postaji
+# ni deloval (senzor ostane "živ" in vrne 0 mm namesto manjkajoče vrednosti,
+# zato ga _complete() ne zazna kot vrzel in bi ga Ecowitt tiho povozil ob
+# vsakem naslednjem teku). Ključ je datum (YYYY-MM-DD), vrednost ročno
+# odčitana dnevna vsota v mm. Vsak vnos potrebuje razlog — isti vzorec kot
+# CALIBRATION v import_species_db.py / HYDRANT_OVERRIDES v fetch_hydrants.py.
+PRECIP_OVERRIDES = {
+    "2026-09-05": {
+        "precipTotal": 11.8,
+        "razlog": "dežemer ni deloval (senzorski izpad), 14:25–16:00 ročno odčitano na postaji",
+    },
+}
+
 # Fizikalna zgornja meja za globalno obsevanje (W/m²). Realne meritve — tudi z
 # ojačitvijo ob robovih oblakov — ne presežejo ~1500; višje so senzorske konice,
 # ki bi sicer napihnile dnevni maksimum (solarHigh). Take odčitke zavržemo.
@@ -340,6 +353,8 @@ def main():
                         s[f] = e[f]
             if _complete(s):
                 hist[date] = {**s, "src": "station"}
+                if date in PRECIP_OVERRIDES:
+                    hist[date]["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
                 n_station += 1
                 continue
 
@@ -348,6 +363,8 @@ def main():
             if hist.get(date, {}).get("src") == "station":
                 continue
             hist[date] = {**e, "src": "era5"}
+            if date in PRECIP_OVERRIDES:
+                hist[date]["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
             n_era5 += 1
 
     if not (n_station + n_era5):
