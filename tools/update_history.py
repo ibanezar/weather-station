@@ -29,16 +29,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED = ['tempHigh', 'tempLow', 'tempAvg', 'precipTotal',
             'windspeedHigh', 'windspeedAvg', 'humidityAvg']
 
-# Ročno umerjeni dnevni padavinski seštevki — za dneve, ko dežemer na postaji
-# ni deloval (senzor ostane "živ" in vrne 0 mm namesto manjkajoče vrednosti,
-# zato ga _complete() ne zazna kot vrzel in bi ga Ecowitt tiho povozil ob
-# vsakem naslednjem teku). Ključ je datum (YYYY-MM-DD), vrednost ročno
-# odčitana dnevna vsota v mm. Vsak vnos potrebuje razlog — isti vzorec kot
-# CALIBRATION v import_species_db.py / HYDRANT_OVERRIDES v fetch_hydrants.py.
+# Ročno umerjeni dnevni padavinski seštevki — za dneve, ko postajni dežemer
+# meritev sicer zajame, a ne pride do Ecowitt oblaka (izpad prenosa gateway →
+# strežnik; senzor sam pravilno šteje, API pa zato vrne 0 mm namesto manjkajoče
+# vrednosti, kar _complete() ne zazna kot vrzel in bi ga naslednji tek tiho
+# povozil). Ključ je datum (YYYY-MM-DD), vrednost je s konzole postaje ročno
+# odčitan dnevni seštevek RAIN TOTAL v mm — to je prava meritev IREICA1, samo
+# lokalna. Vsak vnos potrebuje razlog — isti vzorec kot CALIBRATION v
+# import_species_db.py / HYDRANT_OVERRIDES v fetch_hydrants.py.
 PRECIP_OVERRIDES = {
     "2026-09-05": {
-        "precipTotal": 11.8,
-        "razlog": "dežemer ni deloval (senzorski izpad), 14:25–16:00 ročno odčitano na postaji",
+        "precipTotal": 9.7,
+        "razlog": "podatek s konzole (RAIN TOTAL) ni prišel do Ecowitt oblaka; ročno odčitano na konzoli postaje",
     },
 }
 
