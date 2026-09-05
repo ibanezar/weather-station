@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-09-04T06:29:20Z",
-  "n_records": 34,
+  "generated_at": "2026-09-05T06:15:25Z",
+  "n_records": 36,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-09-03"
+    "to": "2026-09-04"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 30,
+      "n": 31,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-09-03"
+        "to": "2026-09-04"
       },
       "all_time": {
         "tmax": {
-          "n": 30,
+          "n": 31,
           "mae_mtr": 1.02,
-          "mae_om": 1.46,
-          "improvement_pct": 30.1
+          "mae_om": 1.41,
+          "improvement_pct": 27.7
         },
         "tmin": {
-          "n": 30,
+          "n": 31,
           "mae_mtr": 1.06,
-          "mae_om": 1.18,
-          "improvement_pct": 10.2
+          "mae_om": 1.15,
+          "improvement_pct": 7.8
         }
       },
       "rolling": {
@@ -210,6 +210,13 @@
             "mae_mtr": 1.03,
             "mae_om": 1.49,
             "improvement_pct": 30.9
+          },
+          {
+            "date": "2026-09-04",
+            "n": 29,
+            "mae_mtr": 1.04,
+            "mae_om": 1.46,
+            "improvement_pct": 28.8
           }
         ],
         "tmin": [
@@ -394,33 +401,56 @@
             "mae_mtr": 1.04,
             "mae_om": 1.22,
             "improvement_pct": 14.8
+          },
+          {
+            "date": "2026-09-04",
+            "n": 29,
+            "mae_mtr": 1.02,
+            "mae_om": 1.22,
+            "improvement_pct": 16.4
           }
         ]
       }
     },
     "2": {
-      "n": 4,
+      "n": 5,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-09-03"
+        "to": "2026-09-04"
       },
       "all_time": {
         "tmax": {
-          "n": 4,
-          "mae_mtr": 2.73,
-          "mae_om": 4.1,
-          "improvement_pct": 33.4
+          "n": 5,
+          "mae_mtr": 2.28,
+          "mae_om": 3.34,
+          "improvement_pct": 31.7
         },
         "tmin": {
-          "n": 4,
-          "mae_mtr": 1.0,
-          "mae_om": 1.73,
-          "improvement_pct": 42.2
+          "n": 5,
+          "mae_mtr": 1.14,
+          "mae_om": 1.52,
+          "improvement_pct": 25.0
         }
       },
       "rolling": {
-        "tmax": [],
-        "tmin": []
+        "tmax": [
+          {
+            "date": "2026-09-04",
+            "n": 5,
+            "mae_mtr": 2.28,
+            "mae_om": 3.34,
+            "improvement_pct": 31.7
+          }
+        ],
+        "tmin": [
+          {
+            "date": "2026-09-04",
+            "n": 5,
+            "mae_mtr": 1.14,
+            "mae_om": 1.52,
+            "improvement_pct": 25.0
+          }
+        ]
       }
     }
   },
