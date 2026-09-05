@@ -815,6 +815,21 @@
 
   // Gozd: drobni stožci, pripeti na SVETOVNE koordinate (ne na piksle), da ob
   // premikanju ne migotajo. Le nad ~420 m — nižje je dolina s polji.
+  // Predizračunana paleta senčenja gozda -- brez tega bi se enaka rgba()
+  // zloženka na novo sestavljala v VSAKI sličici za VSAK vidno drevo (na
+  // koridorju je naenkrat vidnih tudi ~50 dreves); na šibkejšem mobilnem
+  // procesorju je bilo to dovolj, da se je slika pri kamer-sledenju rahlo
+  // sekala ("vibrira") — opazil Filip 5. 9. 2026. Zdaj samo indeks v tabelo.
+  var FOREST_SHADES = (function () {
+    var out = [], n = 12;
+    for (var i = 0; i < n; i++) {
+      var sh = 0.74 + (i / (n - 1)) * 0.32;
+      out.push('rgba(' + Math.round(18 * sh) + ',' + Math.round(50 * sh) +
+        ',' + Math.round(28 * sh) + ',.87)');
+    }
+    return out;
+  })();
+
   function drawForest(cam) {
     if (W < 340) return;
     var stepM = 55;
@@ -833,9 +848,8 @@
       var h = 5 + j * 5;
       // Rahlo senčenje po drevesu, da gozd ni ena sama ponovljena barvna
       // ploskev.
-      var sh = 0.74 + k * 0.32;
-      ctx.fillStyle = 'rgba(' + Math.round(18 * sh) + ',' + Math.round(50 * sh) +
-        ',' + Math.round(28 * sh) + ',.87)';
+      ctx.fillStyle = FOREST_SHADES[Math.min(FOREST_SHADES.length - 1,
+        Math.floor(k * FOREST_SHADES.length))];
       if (k < 0.33) {
         // Ozka, visoka smreka — dve zloženi konici namesto ene.
         ctx.beginPath();
