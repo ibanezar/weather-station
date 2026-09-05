@@ -157,7 +157,15 @@ def w_star(direct_rad, z_i):
 
 
 def build_level(data, date, koridorji):
-    """Napoved → nivo dneva. Čista funkcija: isti (data, date, koridorji) → isti nivo."""
+    """Napoved → (nivo za danes izbrani koridor, nivoji za VSE koridorje).
+
+    Strop, dvigi, baza in ostalo iz konvekcije so ENAKI za vse štiri smeri —
+    odvisni so samo od vremena, ne od azimuta. Razlikujeta se le veter/
+    turbulenca (odvisna od smeri leta) in geometrija (teren, mejniki,
+    dolžina). Zato je poceni izračunati vse štiri naenkrat: igralec lahko po
+    koncu današnje (vetrom izbrane) proge poskusi še ostale tri z istim
+    dnevnim vremenom, namesto da čaka na jutri. Čista funkcija: isti
+    (data, date, koridorji) → isti izhod."""
     h = data.get("hourly") or {}
     times = h.get("time") or []
     if not times:
@@ -210,19 +218,6 @@ def build_level(data, date, koridorji):
     code = int(_hv(h, "weather_code", best, 0))
     cape = _hv(h, "cape", best)
 
-    kor, hrbtnik, lestvica = izberi_koridor(koridorji, w850, d850)
-    az = kor["azimut"]
-
-    # Prečni veter ni več zavržen: ob pobočjih dela rotor in nemiren zrak.
-    prec = precna(w850, d850, az)
-
-    # Turbulenca: sunkovitost pri tleh + strig med nivoji + prečna komponenta.
-    # (Ne iz višine ničelne izoterme — ta z nemirnostjo zraka nima zveze.)
-    strig = abs(w180 - w10)
-    turb = min(1.0, max(0.0, (gust - w10) / 25.0)) * 0.5 \
-        + min(1.0, max(0.0, strig / 20.0)) * 0.3 \
-        + min(1.0, max(0.0, prec / 5.5)) * 0.2
-
     # Megla in padavine termiko zbijejo; strop pade.
     if code in (45, 48):
         termika *= 0.2
@@ -240,7 +235,8 @@ def build_level(data, date, koridorji):
 
     ocena = fly_score(w10, _hv(h, "precipitation_probability", best), cape, z_i, 1)
 
-    lvl = {
+    # Skupna vremenska osnova — ENAKA za vse štiri koridorje.
+    skupno = {
         "datum": ds,
         "generated": datetime.datetime.now(datetime.timezone.utc)
                      .isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -255,22 +251,50 @@ def build_level(data, date, koridorji):
         "sink_ms": q(sink, 0.05),
         "gostota_km": q(gostota, 0.1),
         "z_i_m": q(z_i, 25),
-        "veter_tla_ms": q(vzdolzna(w10, d10, az), 0.1),
-        "veter_180_ms": q(vzdolzna(w180, d180, az), 0.1),
-        "veter_visoko_ms": q(vzdolzna(w850, d850, az), 0.1),
-        "veter_precno_ms": q(prec, 0.1),
         "veter_kmh": q(w850, 1),
         "veter_smer": q(d850, 10),
         "veter_tla_kmh": q(w180, 1),
         "veter_tla_smer": q(d180, 10),
         "sunki_kmh": q(gust, 1),
-        "turbulenca": q(turb, 0.05),
         "padavine_mm": q(rain, 0.1),
         "koda_vremena": code,
         "cape": q(cape, 25),
         "ocena": ocena,
     }
-    return vstavi_koridor(lvl, kor, hrbtnik, lestvica)
+
+    # `lestvica` = VSI koridorji, sortirani po hrbtniku (izberi_koridor jih že
+    # izračuna vse zase) — ponovno uporabimo, da ne kličemo hrbtnik_koridorja
+    # dvakrat za isti koridor.
+    kor_danes, _, lestvica = izberi_koridor(koridorji, w850, d850)
+    hrbtniki = {k["id"]: v for v, k in lestvica}
+
+    vse = {}
+    for kor in koridorji:
+        az = kor["azimut"]
+        # Prečni veter ni zavržen: ob pobočjih dela rotor in nemiren zrak.
+        prec = precna(w850, d850, az)
+        # Turbulenca: sunkovitost pri tleh + strig med nivoji + prečna
+        # komponenta. (Ne iz višine ničelne izoterme — ta z nemirnostjo zraka
+        # nima zveze.) Odvisna je od smeri leta, zato gre v zanko.
+        strig = abs(w180 - w10)
+        turb = min(1.0, max(0.0, (gust - w10) / 25.0)) * 0.5 \
+            + min(1.0, max(0.0, strig / 20.0)) * 0.3 \
+            + min(1.0, max(0.0, prec / 5.5)) * 0.2
+        lvl = dict(skupno)
+        lvl.update({
+            "veter_tla_ms": q(vzdolzna(w10, d10, az), 0.1),
+            "veter_180_ms": q(vzdolzna(w180, d180, az), 0.1),
+            "veter_visoko_ms": q(vzdolzna(w850, d850, az), 0.1),
+            "veter_precno_ms": q(prec, 0.1),
+            "turbulenca": q(turb, 0.05),
+        })
+        vse[kor["id"]] = vstavi_koridor(lvl, kor, hrbtniki[kor["id"]], lestvica)
+
+    # `level` je LOČENA kopija vnosa vetrom izbranega koridorja (ne isti
+    # objekt kot v `vse`) — main() vanjo doda `vse_koridorje`, in če bi bila
+    # to isti objekt, bi se sklic zavrtel sam vase (neskončna zanka pri
+    # json.dumps).
+    return dict(vse[kor_danes["id"]]), vse
 
 
 def vstavi_koridor(lvl, kor, hrbtnik=None, lestvica=None):
@@ -440,7 +464,15 @@ def build_body(l, svez_opomba):
          "Ker te tja nese veter. Igra ima štiri koridorje z Golt — po Savinjski dolini "
          "proti Celju, navzgor proti Solčavi, čez Gornji Grad proti Kamniku in čez Raduho "
          "na Koroško — in vsako jutro izbere tistega z največ vetra v hrbet. Enako se "
-         "odloči pilot: smeri preleta ne izbereš ti, izbere jo veter."),
+         "odloči pilot: smeri preleta ne izbereš ti, izbere jo veter. Preostale tri lahko "
+         "vseeno poskusiš — izbirnik smeri je v uvodnem oknu igre — z istim dnevnim "
+         "vremenom, le vetrom v hrbet imaš takrat drugačnega."),
+        ("Lahko letim tudi v drugo smer, ne samo v tisto, ki jo izbere veter?",
+         "Da. Strop in dvigi so isti za vse štiri smeri, ker so odvisni samo od vremena — "
+         "razlikujejo se le veter in dolžina proge. V dnevno lestvico (primerjava z drugimi "
+         "igralci istega dne) šteje samo prelet vetrom izbrane proge, ker bi drugače "
+         "mešala proge različnih dolžin. Rekord »vsi časi« po posamezni progi pa velja za "
+         "vse štiri, ne glede na to, katera je danes na vrsti."),
         ("Kateri veter odloča o smeri?",
          "Gradientni na približno 1500 m (850 hPa), ne tisti pri tleh. Prelet poteka v tem "
          "pasu, dolinski vetrič pri tleh pa je podnevi pogosto obrnjen ravno nasproti — "
@@ -625,7 +657,8 @@ def main():
     if not offline:
         try:
             print(f"[{TODAY}] Pridobivam napoved Open-Meteo …")
-            level = build_level(fetch_forecast(), TODAY, koridorji)
+            level, vse_koridorje = build_level(fetch_forecast(), TODAY, koridorji)
+            level["vse_koridorje"] = vse_koridorje
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
                 json.JSONDecodeError, ValueError, KeyError) as e:
             print(f"! Napoved ni dosegljiva ({e}) — obdržim prejšnji nivo.", file=sys.stderr)

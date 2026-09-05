@@ -255,6 +255,36 @@ console.log('\n9. Današnji nivo iz igra/nivo.json');
     console.log(`     → ${level.datum} · ${level.koridor.ime} · ` +
       `${s.best.toFixed(1)} km do ${s.reached || '—'} v ${(s.simTime / 60).toFixed(0)} min`);
     ok('današnji nivo je igralen (> 1 km)', s.best > 1, `${s.best.toFixed(1)} km`);
+
+    // Vse štiri smeri, da igralec po koncu današnje proge lahko poskusi
+    // ostale tri z istim dnevnim vremenom (glej opombo pri build_level()).
+    const vse = level.vse_koridorje;
+    ok('nivo.json ima vse_koridorje', !!vse);
+    if (vse) {
+      const ids = korDoc ? korDoc.koridorji.map((k) => k.id) : Object.keys(vse);
+      ok('vse_koridorje ima vse znane koridorje', ids.every((id) => !!vse[id]),
+        Object.keys(vse).join(', '));
+      ok('današnji koridor je med njimi isti kot level.koridor',
+        vse[level.koridor.id] && vse[level.koridor.id].konec_km === level.konec_km);
+      for (const id of ids) {
+        const l2 = vse[id];
+        if (!l2) continue;
+        // Strop/dvigi so od vremena, ne od smeri -- morajo biti IDENTIČNI.
+        ok(`${id}: strop enak kot pri današnjem nivoju`, l2.strop_m === level.strop_m);
+        ok(`${id}: dvigi enaki kot pri današnjem nivoju`, l2.termika_ms === level.termika_ms);
+        ok(`${id}: ima svoj teren in konec_km`, l2.teren && l2.teren.h.length > 40 && l2.konec_km > 0);
+        // Vsak igra do konca vsaj malo daleč -- isti preizkus kot za danes izbrani.
+        const s2 = M.makeSim(l2, seeded(7));
+        const c2 = { mode: 'glide', nudge: 0 };
+        while (s2.status === 'flying' && s2.simTime < 6 * 3600) {
+          const w2 = M.airVertical(s2, s2.km, s2.alt);
+          c2.mode = (w2 > 0.6 && s2.ceilASL - s2.alt > 30) ? 'circle' : 'glide';
+          c2.nudge = c2.mode === 'circle' ? 1 : 0;
+          M.stepFixed(s2, c2, 1 / 60);
+        }
+        ok(`${id}: je igralen (> 1 km)`, s2.best > 1, `${s2.best.toFixed(1)} km`);
+      }
+    }
   }
 }
 

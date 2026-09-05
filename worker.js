@@ -3043,6 +3043,13 @@ export default {
         const datum = p.get("datum") || "";
         const igralec = p.get("igralec") || "";
         const km = Number(p.get("km"));
+        // Igralec lahko poleg vetrom izbrane proge dneva poskusi tudi eno od
+        // preostalih treh (glej switchCorridor() v igra.js) -- tak rezultat
+        // gre naprej v "vsi časi" po koridorju, NE pa v dnevno lestvico, ker
+        // bi ta sicer mešala proge različnih dolžin. Namerno opt-OUT: brez
+        // tega zastavka (star odjemalec) se rezultat šteje za dnevnega, kot
+        // doslej.
+        const bonus = p.get("bonus") === "1";
         const maxKm = IGRA_KORIDORJI_KM[koridor];
         if (!maxKm) {
           return new Response(JSON.stringify({ error: "neznan koridor" }),
@@ -3069,7 +3076,9 @@ export default {
         // "Vsi časi" po koridorju je trajen (brez TTL) — to je pravi rekord,
         // ne sme sam po sebi izginiti. Dan je ephemeren (TTL), tako kot
         // napovej:dan zgoraj.
-        for (const [kljuc, ttl] of [[`igra:rekord:${koridor}`, null], [`igra:dan:${datum}`, 60 * 86400]]) {
+        const kljuci = [[`igra:rekord:${koridor}`, null]];
+        if (!bonus) kljuci.push([`igra:dan:${datum}`, 60 * 86400]);
+        for (const [kljuc, ttl] of kljuci) {
           let obstojeci = {};
           try { obstojeci = JSON.parse(await kv.get(kljuc)) || {}; } catch (_) { obstojeci = {}; }
           const prej = obstojeci[igralec];

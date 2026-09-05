@@ -419,14 +419,74 @@
     } catch (err) { return null; }
   }
 
+  // Koridor, ki ga je danes izbral veter -- ostane isti, tudi ko igralec
+  // pozneje preklopi na eno od ostalih treh smeri (glej switchCorridor).
+  // Postavi se samo OB PRVEM klicu (vedno pravi, strežniško izbrani nivo).
+  var featuredKorId = null;
+  // Nivoji za vse štiri koridorje, shranjeni LOČENO od sim.level -- vsak
+  // posamezen vnos v `vse_koridorje` (glej build_level() v Python-u) NE nosi
+  // lastne kopije te množice (drugače bi se pri json.dumps sklic zavrtel sam
+  // vase), zato bi po enem samem switchCorridor() izbirnik izginil, če bi ga
+  // brali iz trenutnega sim.level namesto od tu.
+  var vseNivojev = null;
+
   function applyLevel(level, vir) {
     sim = makeSim(level);
     ui.vir = vir;
     ui.svez = svezina(level.generated);
+    if (featuredKorId === null && level.koridor) featuredKorId = level.koridor.id;
+    if (!vseNivojev && level.vse_koridorje) vseNivojev = level.vse_koridorje;
     renderConditions();
     buildRoute();
     updateHud();
-    if (ui.phase === 'loading') { ui.phase = 'ready'; showOverlay('ready'); }
+    // Rekord je oseben PO KORIDORJU (glej loadBest/korId) -- brez tega bi HUD
+    // ob prvem nalaganju (in ob vsakem preklopu smeri) kazal rekord napačne
+    // proge, dokler igralec ne bi enkrat pristal.
+    var b = loadBest();
+    setTxt('pg-best', b.km > 0 ? fmt(b.km, 1) + ' km' : '—');
+    // Med letom preklop smeri ni mogoč (izbirnik je samo v prekrivnih oknih),
+    // zato tudi vmesnega stanja igre ne sme prekiniti.
+    if (ui.phase !== 'flying') { ui.phase = 'ready'; showOverlay('ready'); }
+  }
+
+  // Preklopi na eno od ostalih treh prog z istim dnevnim vremenom (glej
+  // vse_koridorje v build_level()). Kliče se iz izbirnika v prekrivnem oknu.
+  var korRocnoIzbran = false;
+  function switchCorridor(id) {
+    if (!vseNivojev || !vseNivojev[id]) return;
+    if (sim.level.koridor && sim.level.koridor.id === id) return;
+    korRocnoIzbran = true;
+    applyLevel(vseNivojev[id], ui.vir);
+    announce('Izbrana smer: ' + (vseNivojev[id].koridor ? vseNivojev[id].koridor.kratko : id) + '.');
+  }
+
+  // Izbirnik smeri v prekrivnem oknu -- prazen niz, če nivo (rezerva/zastarel
+  // brez shranjenih alternativ) ostalih treh prog nima.
+  var KOR_VRSTNI_RED = ['celje', 'solcava', 'kamnik', 'crna'];
+  function corridorPickerHtml() {
+    var alts = vseNivojev;
+    if (!alts) return '';
+    var chips = '';
+    for (var i = 0; i < KOR_VRSTNI_RED.length; i++) {
+      var id = KOR_VRSTNI_RED[i], alt = alts[id];
+      if (!alt || !alt.koridor) continue;
+      var aktivna = sim.level.koridor && sim.level.koridor.id === id;
+      chips += '<button type="button" class="pg-kor-chip' + (aktivna ? ' active' : '') +
+        '" data-kor="' + id + '"' + (aktivna ? ' aria-pressed="true"' : '') + '>' +
+        esc(alt.koridor.kratko) +
+        (id === featuredKorId ? ' <span class="pg-kor-danes">· danes veter</span>' : '') +
+        '</button>';
+    }
+    return chips ? '<div class="pg-kor-picker" role="group" aria-label="Izberi smer preleta">' +
+      chips + '</div>' : '';
+  }
+  function bindCorridorPicker(ov) {
+    var chips = ov.querySelectorAll('.pg-kor-chip');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].addEventListener('click', (function (btn) {
+        return function () { switchCorridor(btn.getAttribute('data-kor')); };
+      })(chips[i]));
+    }
   }
 
   function loadLevel() {
@@ -441,6 +501,10 @@
         if (!d || d.termika_ms === undefined) return;
         if (inline && d.datum === inline.datum && d.generated === inline.generated) return;
         if (ui.phase === 'flying') return;
+        // Igralec je morda med tem že ročno preklopil na eno od preostalih
+        // treh smeri (glej switchCorridor) -- osvežitev vdelanega nivoja s
+        // strežniškim posnetkom tega izbora ne sme tiho povoziti.
+        if (korRocnoIzbran) return;
         applyLevel(d, d.vir || 'open-meteo');
       })
       .catch(function () { if (!inline) applyLevel(TRAINING_LEVEL, 'vadba'); });
@@ -1159,17 +1223,21 @@
     ov.hidden = false;
     if (kind === 'ready') {
       var r = dayRating();
+      var picker = corridorPickerHtml();
       ov.innerHTML = '<div class="pg-ov-in">' +
         '<p class="pg-ov-kicker">Nivo dneva' +
         (sim.level.datum ? ' · ' + esc(sim.level.datum) : '') + '</p>' +
         '<h2 class="pg-ov-title">' + esc(r.title) + '</h2>' +
         '<p class="pg-ov-smer">' + esc(smerBesedilo()) + '</p>' +
         '<p class="pg-ov-sub">' + esc(r.sub) + '</p>' +
+        (picker ? '<p class="pg-ov-help pg-kor-label">Ali poskusi drugo smer z istim vremenom:</p>' +
+          picker : '') +
         '<button class="pg-start" id="pg-start" type="button">Vzleti z Golt</button>' +
         '<p class="pg-ov-help">Drži <b>Kroži</b>, ko vario kaže dvig · spusti in drsi naprej' +
         ' · <b>Pospeši</b> proti vetru in skozi spust</p></div>';
       var b = el('pg-start');
       if (b) { b.addEventListener('click', startFlight); b.focus(); }
+      bindCorridorPicker(ov);
     } else {
       var best = loadBest(), rec = sim.best > best.km + 0.049;
       if (rec) saveBest(sim.best, sim.level.datum || '');
@@ -1184,23 +1252,37 @@
           (best.date ? ' (' + esc(best.date) + ')' : '') + '</p>') +
         '<div class="pg-ov-btns">' +
         '<button class="pg-start" id="pg-again" type="button">Še enkrat</button>' +
-        '<button class="pg-share" id="pg-share" type="button">Deli rezultat</button></div>' +
+        '<button class="pg-share" id="pg-share" type="button">Deli rezultat</button>' +
+        (vseNivojev ?
+          '<button class="pg-kor-switch" id="pg-switch-kor" type="button">Zamenjaj smer</button>' : '') +
+        '</div>' +
         '<p class="pg-ov-help" id="pg-share-note"></p></div>';
       var a = el('pg-again'); if (a) { a.addEventListener('click', startFlight); a.focus(); }
       var s = el('pg-share'); if (s) s.addEventListener('click', share);
+      var sw = el('pg-switch-kor');
+      if (sw) sw.addEventListener('click', function () { ui.phase = 'ready'; showOverlay('ready'); });
       announce('Pristanek. Preleteno ' + fmt(sim.best, 1) + ' kilometrov.' +
         (sim.reached ? ' Najdlje do kraja ' + sim.reached + '.' : ''));
     }
   }
   function hideOverlay() { var ov = el('pg-overlay'); if (ov) ov.hidden = true; }
 
-  // Katera smer in zakaj. To je poanta koridorjev: smeri ne izbereš ti,
-  // izbere jo veter — enako kot pilot, ki se zjutraj odloči, kam bo letel.
+  // Katera smer in zakaj. Za DANES VETROM IZBRAN koridor je to poanta igre:
+  // smeri ne izbereš ti, izbere jo veter — enako kot pilot, ki se zjutraj
+  // odloči, kam bo letel. Za eno od preostalih treh (glej switchCorridor) je
+  // besedilo drugačno: to je igralčeva lastna izbira, ne vetrova, zato mu
+  // predstavljanje "veter te nese tja" ne bi smelo zveneti kot razlog izbire.
   function smerBesedilo() {
     var kor = sim.level.koridor;
     if (!kor || !kor.ime) return '';
     var h = kor.hrbtnik_kmh;
+    var izbral = !featuredKorId || kor.id === featuredKorId;
     if (h === null || h === undefined) return kor.ime;
+    if (!izbral) {
+      if (h > 3) return kor.ime + ' — na tej progi bi imel danes hrbtnik (' + fmt(h, 0) + ' km/h).';
+      if (h > -1) return kor.ime + ' — na tej progi je veter danes nevtralen.';
+      return kor.ime + ' — na tej progi bi danes letel proti vetru (' + fmt(Math.abs(h), 0) + ' km/h čelno).';
+    }
     if (h > 3) return kor.ime + ' — veter na višini te nese tja (' + fmt(h, 0) + ' km/h v hrbet).';
     if (h > -1) return kor.ime + ' — veter ne pomaga in ne ovira; danes šteje samo termika.';
     return kor.ime + ' — vse smeri so proti vetru, ta je najmanj slaba (' +
@@ -1332,10 +1414,19 @@
   function posljiRezultat(km) {
     if (!sim || !sim.level || !sim.level.datum || km < 0.3) return;
     try {
-      var qs = new URLSearchParams({
+      var params = {
         koridor: korId(), km: String(Math.round(km * 10) / 10),
         datum: sim.level.datum, igralec: igralecId(), ime: beriIme() || ''
-      });
+      };
+      // "Danes" lestvica primerja igralce na ISTI progi. Odkar je mogoče
+      // poskusiti tudi eno od preostalih treh smeri (glej switchCorridor),
+      // bi brez tega zastavka mešala rezultate s progami različnih dolžin.
+      // Rekord po koridorju (worker.js, igra:rekord:<id>) gre naprej VEDNO,
+      // ne glede na to. Zastavek je namerno opt-OUT (manjka -> šteje se za
+      // dnevno lestvico): stari predpomnjen odjemalec, ki ga še ne pozna, s
+      // tem ohrani natanko prejšnje obnašanje.
+      if (featuredKorId && korId() !== featuredKorId) params.bonus = '1';
+      var qs = new URLSearchParams(params);
       fetch(LESTVICA_WORKER + '/igra/rezultat?' + qs.toString(), { method: 'POST' })
         .then(function (r) { if (r.ok) osveziAktivniZavihekLestvice(); })
         .catch(function () {});
@@ -1577,8 +1668,10 @@
       ui.lastTs = 0;
     });
 
-    var b = loadBest();
-    if (b.km > 0) setTxt('pg-best', fmt(b.km, 1) + ' km');
+    // Rekorda tu (še) ne kažemo -- pred loadLevel() ne vemo, kateri koridor
+    // je danes izbran, in bi (korId() pade na privzeti 'celje') lahko
+    // prikazali rekord napačne proge. applyLevel() ga postavi pravilno takoj,
+    // ko nivo pride noter.
 
     // Lestvica je pod pregibom (glej #pg-lb v generate_igra_page.py) in ni
     // odvisna od nivoja — poveži takoj, ne šele ko loadLevel() konča.
