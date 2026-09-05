@@ -62,6 +62,13 @@ body .wrap { padding-top: 0; }
   gap: .5rem;
   padding: calc(.5rem + env(safe-area-inset-top)) .8rem .5rem;
   background: rgba(4, 7, 14, .55);
+  /* Nad prekrivnim oknom (.pg-overlay, absolutno pozicionirano čez ves
+     #pg-game) -- brez tega je bil gumb "Zapri" viden skozi prosojnost
+     okna, a klik je pobralo okno pod njim, ne gumb. Zapreti torej ni šlo
+     ravno takrat, ko je bilo okno odprto (pred vzletom, po pristanku) --
+     opazil Filip 5. 9. 2026. */
+  position: relative;
+  z-index: 2;
 }
 /* Prej samo podpisan tekstovni link — na temnem celozaslonskem platnu se je
    izgubil in ni bilo videti, da je stranploščo sploh mogoče zapustiti.
@@ -208,6 +215,7 @@ body .wrap { padding-top: 0; }
 .pg-overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
   padding: 1rem;
