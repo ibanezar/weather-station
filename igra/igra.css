@@ -242,7 +242,7 @@ body .wrap { padding-top: 0; }
 }
 .pg-ov-help b { color: var(--text); }
 
-.pg-start, .pg-share {
+.pg-start, .pg-share, .pg-kor-switch {
   font: inherit;
   font-weight: 700;
   padding: .7rem 1.35rem;
@@ -252,12 +252,43 @@ body .wrap { padding-top: 0; }
   min-height: 44px;
 }
 .pg-start { background: var(--blue); color: #04070e; }
-.pg-share { background: transparent; color: var(--text); border-color: var(--card-border); }
+.pg-share, .pg-kor-switch { background: transparent; color: var(--text); border-color: var(--card-border); }
 .pg-start:hover { filter: brightness(1.1); }
-.pg-share:hover { border-color: var(--cyan); color: var(--cyan); }
-.pg-start:focus-visible, .pg-share:focus-visible {
+.pg-share:hover, .pg-kor-switch:hover { border-color: var(--cyan); color: var(--cyan); }
+.pg-start:focus-visible, .pg-share:focus-visible, .pg-kor-switch:focus-visible {
   outline: 2px solid var(--cyan); outline-offset: 2px;
 }
+
+/* Izbirnik ene od preostalih treh prog (isto dnevno vreme, drug koridor) —
+   glej switchCorridor() v igra.js. Ločen od Vzleti/Še enkrat: to ni
+   nadaljevanje trenutnega leta, ampak zamenjava proge PRED njim. */
+.pg-kor-label { margin: .85rem 0 .4rem; }
+.pg-kor-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  justify-content: center;
+  margin: 0 0 .9rem;
+}
+.pg-kor-chip {
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  padding: .4rem .75rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.pg-kor-chip:hover { border-color: var(--cyan); color: var(--text); }
+.pg-kor-chip.active {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #04070e;
+}
+.pg-kor-chip .pg-kor-danes { opacity: .75; font-weight: 500; }
+.pg-kor-chip.active .pg-kor-danes { opacity: .8; }
 
 /* ── Krmilni gumbi ─────────────────────────────────────────────────────── */
 .pg-controls {

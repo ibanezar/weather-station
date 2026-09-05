@@ -867,6 +867,33 @@ jih ni videti iz kode:
   `tools/build_igra_corridors.py`; **Open-Meteo Elevation API mesta izravna**
   (Golte 1400 → 705 m), zato je višina vzletišča zapisana ročno in zlita z DEM
   prek `max()` — glej opombo tam, preden se zaneseš na te višine.
+- **Igralec lahko poleg vetrom izbrane proge poskusi tudi preostale tri**
+  (izbirnik smeri v uvodnem/pokrajinskem oknu, `switchCorridor()` v `igra.js`).
+  Strop, dvigi, baza in ostalo iz konvekcije so **enaki za vse štiri** —
+  odvisni samo od vremena, ne od azimuta — zato jih `build_level()` izračuna
+  enkrat (`skupno`) in nato v zanki doda le vetrovno/turbulenčno komponento
+  (odvisno od azimuta) in geometrijo vsakega koridorja. `nivo.json` in
+  `#pg-level` nosita en poln nivo (vetrom izbrani, kot doslej) PLUS
+  `vse_koridorje` — polni nivoji za vsa štiri, brez katerega bi bila igra spet
+  omejena na eno progo na dan.
+  - **Krožnega sklica se `build_level()` izogne namerno**: `vse_koridorje[id]`
+    NE nosi svoje kopije `vse_koridorje` (drugače bi se `json.dumps` zavrtel
+    sam vase). Zato si `igra.js` ob prvem `applyLevel()` shrani celotno
+    množico v ločeno spremenljivko `vseNivojev` — če bi izbirnik namesto tega
+    bral `sim.level.vse_koridorje`, bi po prvem `switchCorridor()` izginil
+    (`sim.level` postane eden od podrejenih nivojev, ki te množice nima).
+  - **Ozadnja osvežitev `nivo.json`** (zaradi service workerja je lahko
+    svežji od vdelanega) **ne sme povoziti ročne izbire smeri** — zastavek
+    `korRocnoIzbran` v `loadLevel()` to prepreči; brez njega bi hiter klik na
+    izbirnik tik po nalaganju strani včasih izgubil izbiro nazaj na vetrom
+    izbrano progo.
+  - **Dnevna lestvica šteje samo prelet vetrom izbrane proge** — drugače bi
+    mešala proge različnih dolžin (Črna 11,5 km proti Celju 42 km). Rezultat
+    na eni od preostalih treh gre naprej samo v "vsi časi" po koridorju.
+    `posljiRezultat()` pošlje `bonus=1`, ko `korId() !== featuredKorId`;
+    worker.js takrat izpusti pisanje v `igra:dan:<datum>` (rekord po
+    koridorju piše vedno). Zastavek je namerno opt-OUT — star predpomnjen
+    odjemalec brez njega ohrani natanko prejšnje obnašanje.
 - **Javna lestvica NI enako preverjena kot pri `/napovej/`.** Ob vsakem
   pristanku `posljiRezultat()` v `igra.js` pošlje razdaljo na
   `POST /igra/rezultat` v `worker.js`; strežnik obdrži najboljši rezultat
