@@ -401,7 +401,11 @@ def main():
             print(f"OPOZORILO: {rel} ne obstaja — preskočeno.", file=sys.stderr)
             continue
 
-        block = build_block_live(obs, tail, cls) if obs else build_block_history(tail, cls)
+        has_temp = obs and obs.get("metric", {}).get("temp") is not None
+        if obs and not has_temp:
+            print("OPOZORILO: WU obs brez temp — WX-STATIC pade nazaj na "
+                  "dnevni povzetek namesto »temperatura — °C«.", file=sys.stderr)
+        block = build_block_live(obs, tail, cls) if has_temp else build_block_history(tail, cls)
         html = open(path, encoding="utf-8").read()
 
         if START not in html or END not in html:
