@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 07 Sep 2026 05:59:27 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 07 Sep 2026 08:32:21 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Poslabšanje vremena sredi tedna: v sredo zvečer dež, v četrtek in petek oster padec temperature</title>
@@ -64,6 +64,17 @@
       <category>razlaga</category>
       <category>IREICA1</category>
       <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Invazivke ta teden: 1 opazovanje na novih lokacijah</title>
+      <link>https://meteorec.si/blog/invazivka-tedenski-pregled-20260830.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-tedenski-pregled-20260830.html</guid>
+      <pubDate>Sun, 30 Aug 2026 08:00:00 +0000</pubDate>
+      <description>Tedenski pregled invazivnih vrst v Zgornji Savinjski dolini (30. avgusta 2026–30. avgusta 2026): 1 opazovanje na novih lokacijah — Pelinolistna ambrozija.</description>
+      <category>invazivke</category>
+      <category>tedenski-pregled</category>
+      <category>2026</category>
+      <category>ambrozija</category>
     </item>
     <item>
       <title>Po rekordu 32,2 °C teden, ki se ne more odločiti: gor, dol, spet gor</title>

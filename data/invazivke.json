@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-31T09:58:43.385267+00:00",
+  "updated": "2026-09-07T08:32:19.877732+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -72,17 +72,17 @@
       "sl": "Pelinolistna ambrozija",
       "sci": "Ambrosia artemisiifolia",
       "severity": "high",
-      "total_cells": 1,
-      "new_cells_30d": 1,
-      "last_observed": "2026-08-15",
+      "total_cells": 2,
+      "new_cells_30d": 2,
+      "last_observed": "2026-08-30",
       "recent": [
         {
-          "date": "2026-08-15",
-          "place": "3330 Mozirje, Slovenia",
-          "lat_approx": 46.33,
-          "lng_approx": 14.96,
-          "url": "https://www.inaturalist.org/observations/391525035",
-          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/717410213/medium.jpg"
+          "date": "2026-08-30",
+          "place": "Regionalna Cesta 428, Luče, Luče, SI",
+          "lat_approx": 46.36,
+          "lng_approx": 14.75,
+          "url": "https://www.inaturalist.org/observations/397251483",
+          "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/728581705/medium.jpg"
         }
       ]
     },
@@ -174,6 +174,20 @@
     }
   ],
   "alerts": [
+    {
+      "slug": "ambrozija",
+      "sci": "Ambrosia artemisiifolia",
+      "sl": "Pelinolistna ambrozija",
+      "severity": "high",
+      "desc_sl": "Severnoameriška plevelna vrsta, katere cvetni prah je eden najmočnejših znanih sprožilcev alergij in astme, tudi pri zelo nizkih koncentracijah v zraku. Širi se predvsem po nasipih, njivah in gradbiščih.",
+      "date": "2026-08-30",
+      "cell": "46.35_14.75",
+      "place": "Regionalna Cesta 428, Luče, Luče, SI",
+      "lat_approx": 46.36,
+      "lng_approx": 14.75,
+      "url": "https://www.inaturalist.org/observations/397251483",
+      "photo": "https://inaturalist-open-data.s3.amazonaws.com/photos/728581705/medium.jpg"
+    },
     {
       "slug": "ambrozija",
       "sci": "Ambrosia artemisiifolia",
