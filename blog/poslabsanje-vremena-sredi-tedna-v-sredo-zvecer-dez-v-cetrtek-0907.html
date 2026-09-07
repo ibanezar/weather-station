@@ -79,6 +79,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .stat-card.c-green .sc-val{color:#34d399}
 .stat-card.c-dry .sc-val{color:#f59e0b}
 .stat-card.c-rain .sc-val{color:#60a5fa}
+.src-compare{display:flex;flex-direction:column;gap:1.15rem;margin:1.5rem 0 1.7rem}
+.src-row-head{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem;flex-wrap:wrap}
+.src-name{font-weight:600;color:var(--text)}
+.src-note{font-weight:400;color:var(--muted);font-size:.78rem;margin-left:.4rem}
+.src-meta{display:flex;align-items:baseline;gap:.7rem;white-space:nowrap}
+.src-temp{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted)}
+.src-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.02rem}
+.src-track{height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:.45rem}
+.src-fill{height:100%;border-radius:5px}
 </style>
 </head>
 <body>
@@ -158,30 +167,96 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 id="noc-na-cetrtek">Noč na četrtek prinese dež, dopoldne je najmočnejši</h2>
     <p>Dež po napovedi začne padati kmalu po polnoči na četrtek – sprva rahlo, nato pa se med 6. in 12. uro okrepi na 2 do dobrih 5 mm na uro. Oblačnost bo ves četrtek ostala pri 100 %, temperatura pa se bo med sredinim popoldnevom (okoli 29 °C) in četrtkovim dopoldnevom (okoli 16 °C) znižala za več kot 12 stopinj v manj kot 24 urah.</p>
     <p>Pri količini dežja v četrtek se štirje viri precej razlikujejo, zato njihovih napovedi ne združujemo v eno samo številko:</p>
-    <div class="table-scroll">
-      <table class="stats">
-        <tr><th>Vir</th><th>Najvišja temperatura</th><th>Padavine (četrtek)</th></tr>
-        <tr><td>ARSO (Ljubno ob Savinji)</td><td>16 °C</td><td>17,6 mm</td></tr>
-        <tr><td>ECMWF IFS</td><td>19,2 °C</td><td>22,9 mm</td></tr>
-        <tr><td>ICON / best_match</td><td>19,0 °C</td><td>48,7 mm</td></tr>
-        <tr><td>GFS</td><td>20,3 °C</td><td>30,0 mm</td></tr>
-      </table>
+    <div class="src-compare">
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ICON / best_match</span>
+          <span class="src-meta"><span class="src-temp">19,0 °C</span><span class="src-val" style="color:#38bdf8">48,7 mm</span></span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:97%;background:#38bdf8"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">GFS</span>
+          <span class="src-meta"><span class="src-temp">20,3 °C</span><span class="src-val" style="color:#34d399">30,0 mm</span></span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:60%;background:#34d399"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ECMWF IFS</span>
+          <span class="src-meta"><span class="src-temp">19,2 °C</span><span class="src-val" style="color:#60a5fa">22,9 mm</span></span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:46%;background:#60a5fa"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ARSO <span class="src-note">Ljubno ob Savinji</span></span>
+          <span class="src-meta"><span class="src-temp">16 °C</span><span class="src-val" style="color:#facc15">17,6 mm</span></span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:35%;background:#facc15"></div></div>
+      </div>
     </div>
     <p>Razlika med najnižjo oceno količine padavin (ARSO, 17,6 mm) in najvišjo (ICON, 48,7 mm) je skoraj trikratna. Vsi štirje viri pa se strinjajo glede občutne ohladitve: v četrtek bo najvišja dnevna temperatura med 16 in 20 °C, torej dobrih 11 do 16 stopinj nižja od torkovega vrha.</p>
     <p>Postaja IREICA1 je ta mesec doslej namerila 9,9 mm dežja. Če se uresniči najbolj mokra ocena, bi samo v četrtek padlo skoraj petkrat toliko – razlog več, da v naslednjih dneh spremljamo tudi <a href="/vodostaj-savinje/" style="color:var(--blue)">vodostaj Savinje</a>.</p>
     <p>Če sliko razširimo na vseh osem virov, ki jih spremljamo ta teden, in namesto enega dne pogledamo celoten tridnevni seštevek – sreda, četrtek in petek skupaj – se razpon še poveča:</p>
-    <div class="table-scroll">
-      <table class="stats">
-        <tr><th>Vir</th><th>Sreda–petek skupaj</th></tr>
-        <tr><td>ICON / best_match</td><td>81,1 mm</td></tr>
-        <tr><td>ALADIN (Ventusky)*</td><td>75,9 mm</td></tr>
-        <tr><td>UKMO</td><td>53,3 mm</td></tr>
-        <tr><td>ECMWF IFS</td><td>40,0 mm</td></tr>
-        <tr><td>ARSO (Ljubno ob Savinji)</td><td>36,5 mm</td></tr>
-        <tr><td>GFS</td><td>36,1 mm</td></tr>
-        <tr><td>GEM</td><td>31,0 mm</td></tr>
-        <tr><td>JMA</td><td>5,9 mm</td></tr>
-      </table>
+    <div class="src-compare">
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ICON / best_match</span>
+          <span class="src-val" style="color:#38bdf8">81,1 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:90%;background:#38bdf8"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ALADIN <span class="src-note">Ventusky*</span></span>
+          <span class="src-val" style="color:#fb923c">75,9 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:84%;background:#fb923c"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">UKMO</span>
+          <span class="src-val" style="color:#818cf8">53,3 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:59%;background:#818cf8"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ECMWF IFS</span>
+          <span class="src-val" style="color:#60a5fa">40,0 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:44%;background:#60a5fa"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">ARSO <span class="src-note">Ljubno ob Savinji</span></span>
+          <span class="src-val" style="color:#facc15">36,5 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:41%;background:#facc15"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">GFS</span>
+          <span class="src-val" style="color:#34d399">36,1 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:40%;background:#34d399"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">GEM</span>
+          <span class="src-val" style="color:#f472b6">31,0 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:34%;background:#f472b6"></div></div>
+      </div>
+      <div class="src-row">
+        <div class="src-row-head">
+          <span class="src-name">JMA <span class="src-note">groba ločljivost</span></span>
+          <span class="src-val" style="color:#94a3b8">5,9 mm</span>
+        </div>
+        <div class="src-track"><div class="src-fill" style="width:7%;background:#94a3b8"></div></div>
+      </div>
     </div>
     <p style="color:var(--muted);font-size:.85rem">* ALADIN je osamljen odčitek izpred nekaj ur (ni ista lokacija kot IREICA1, manjkajo tudi posamezne urne vrednosti) in se – drugače kot ostalih sedem virov – ni osvežil z najnovejšim zagonom. ARPEGE (Météo-France) je izpuščen, ker njegov domet ne sega do petka.</p>
     <p>Od najbolj skromne ocene (JMA, skoraj 6 mm – ta japonski globalni model ima nad Evropo grobo ločljivost in manjše padavinske sisteme pogosto zgreši) do najbolj namočene (ICON, dobrih 81 mm) je razlika več kot 13-kratna. Enotni so viri predvsem pri smeri: dež pride, ohladitev pride – koliko dežja natančno, bo jasno šele, ko bo dejansko padel.</p>
