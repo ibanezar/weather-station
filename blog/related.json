@@ -11,8 +11,8 @@
   ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807",
-    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
+    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
   ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
@@ -496,6 +496,11 @@
   ],
   "junij-2026-dvoglavi-mesec": [
     "max-temperatura-28-junij-2026",
+    "vremenski-povzetek-junij-2026",
+    "polletni-pregled-2026-ireica1"
+  ],
+  "el-nino-2026": [
+    "junij-2026-dvoglavi-mesec",
     "vremenski-povzetek-junij-2026",
     "polletni-pregled-2026-ireica1"
   ],
