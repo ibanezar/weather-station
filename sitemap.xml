@@ -382,7 +382,7 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.html</loc>
-    <lastmod>2026-09-08</lastmod>
+    <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.jpg</image:loc></image:image>
@@ -1081,6 +1081,13 @@
     <image:image><image:loc>https://meteorec.si/og/junij-2026-dvoglavi-mesec.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/el-nino-2026.html</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/el-nino-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-maj-2026.html</loc>
     <lastmod>2026-06-19</lastmod>
     <changefreq>monthly</changefreq>
@@ -1222,6 +1229,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/padavine/</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/podnebje/</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

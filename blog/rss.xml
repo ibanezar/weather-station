@@ -5,14 +5,14 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 08 Sep 2026 20:20:54 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 08 Sep 2026 11:15:09 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Poslabšanje vremena sredi tedna: v sredo zvečer dež, v četrtek in petek oster padec temperature</title>
       <link>https://meteorec.si/blog/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.html</guid>
-      <pubDate>Tue, 08 Sep 2026 08:00:00 +0000</pubDate>
-      <description>V sredo zvečer se v Zgornji Savinjski dolini konča vročina: od srede zvečer do petka lahko po nekaterih napovedih pade tudi prek 90 mm dežja, temperature pa se v četrtek znižajo za več kot 12 stopinj.</description>
+      <pubDate>Mon, 07 Sep 2026 08:00:00 +0000</pubDate>
+      <description>V sredo zvečer se v Zgornji Savinjski dolini konča vročina: v noči na četrtek in čez dan pade tudi do 50 mm dežja, temperature pa se znižajo za skoraj 16 stopinj.</description>
       <category>napoved</category>
       <category>poslabšanje</category>
       <category>padavine</category>
@@ -1262,6 +1262,18 @@
       <category>2026</category>
       <category>padavine</category>
       <category>vrocina</category>
+    </item>
+    <item>
+      <title>El Niño 2026: Pacifik se segreva</title>
+      <link>https://meteorec.si/blog/el-nino-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/el-nino-2026.html</guid>
+      <pubDate>Sat, 20 Jun 2026 08:00:00 +0000</pubDate>
+      <description>El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.</description>
+      <category>El Niño</category>
+      <category>podnebje</category>
+      <category>IREICA1</category>
+      <category>analiza</category>
+      <category>2026</category>
     </item>
     <item>
       <title>Vremenski povzetek — maj 2026</title>
