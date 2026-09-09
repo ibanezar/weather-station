@@ -1854,8 +1854,13 @@ function applyDayStats(observations){
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
   set('hs-range-min',fmt(minT,1));set('hs-range-max',fmt(maxT,1));
   todayObs.forEach(o=>{
-    const g=o.metric.windspeedHigh??o.metric.windGust??null;
-    if(g!=null)noteTodayGust(g,new Date(o.obsTimeLocal.replace(' ','T')));
+    const t=new Date(o.obsTimeLocal.replace(' ','T'));
+    // Urni zapis WU loči najmočnejši sunek (`windgustHigh`) od najvišjega
+    // trajnega vetra (`windspeedHigh`) — za sunek gre prvi, drugi je le
+    // rezerva, kadar ga ura nima.
+    const g=o.metric.windgustHigh??o.metric.windspeedHigh??null;
+    if(g!=null)noteTodayGust(g,t);
+    noteTodayHumidity(o.humidityLow??o.humidityAvg,o.humidityHigh??o.humidityAvg,t);
   });
   updateTodayPercentile(maxT);
 }
@@ -1884,6 +1889,52 @@ function renderTodayMaxGust(){
   set('hs-gust-max',fmt(_todayMaxGust.val,1)+' km/h');
   set('hs-gust-max-time',_todayMaxGust.time?' ob '+fmtTime(_todayMaxGust.time):'');
   line.hidden=false;
+}
+
+// ── Današnji razpon vlage na junaški kartici ──────────────
+// Isti vzorec kot pri sunku: urni zapis prispeva svoj `humidityHigh`/
+// `humidityLow`, trenutni odčitek pa sproti razširi razpon, ker je lahko
+// izven vrhov zadnje zaključene ure.
+let _todayHum=null;  // {date,min,max}
+
+function noteTodayHumidity(lo,hi,time){
+  if(!(time instanceof Date)||isNaN(time))return;
+  if(_localDateStr(time)!==_localDateStr(new Date()))return;
+  const vals=[lo,hi].filter(v=>v!=null&&isFinite(v));
+  if(!vals.length)return;
+  const day=_localDateStr(time);
+  if(!_todayHum||_todayHum.date!==day)_todayHum={date:day,min:Math.min(...vals),max:Math.max(...vals)};
+  else{_todayHum.min=Math.min(_todayHum.min,...vals);_todayHum.max=Math.max(_todayHum.max,...vals);}
+  renderTodayHumidity();
+}
+
+function renderTodayHumidity(){
+  const line=document.getElementById('hs-humidity-range');if(!line)return;
+  if(!_todayHum||_todayHum.date!==_localDateStr(new Date())){line.hidden=true;return;}
+  set('hs-hum-min',Math.round(_todayHum.min));
+  set('hs-hum-max',Math.round(_todayHum.max));
+  line.hidden=false;
+}
+
+// ── Trend tlaka na junaški kartici ────────────────────────
+// Trenutni tlak proti meritvi izpred ~3 h iz urne zgodovine. Urni zapis nosi
+// samo `pressureMax`/`pressureMin`, zato gre v primerjavo sredina med njima —
+// primerjava trenutne točke z urnim vrhom bi ob nemirnem tlaku pokazala padec,
+// ki ga ni. Če ura, oddaljena ~3 h, v zgodovini ne obstaja (sveže naložena
+// stran s kratko zgodovino), se vrstica ne izriše — raje nič kot lažen trend.
+function renderHeroPressureTrend(pNow){
+  const el=document.getElementById('hs-pressure-trend');if(!el)return;
+  const past=_histObsAtHoursAgo(3);
+  const pt=past?new Date(past.obsTimeLocal.replace(' ','T')).getTime():null;
+  const pm=(pt!=null&&Math.abs(pt-(Date.now()-3*3600000))<=90*60000)?(past.metric||{}):{};
+  const pOld=(pm.pressureMax!=null&&pm.pressureMin!=null)?(pm.pressureMax+pm.pressureMin)/2
+            :(pm.pressureMax??pm.pressureMin??pm.pressure??null);
+  if(pNow==null||pOld==null){el.hidden=true;return;}
+  const d=pNow-pOld;
+  const arrow=d>3?'↑↑':d>1?'↑':d>=-1?'→':d>-3?'↓':'↓↓';
+  el.textContent=arrow+' '+(d>=0?'+':'−')+fmt(Math.abs(d),1)+' hPa / 3 h';
+  el.style.color=d>1?'var(--green)':d<-1?'var(--red)':'var(--muted)';
+  el.hidden=false;
 }
 
 // ── Zgodovinski kontekst: kje se današnji vrh uvršča med vsemi
@@ -2272,7 +2323,10 @@ function applyObs(obs){
   if(m.dewpt!=null){const dl=dewLabel(m.dewpt);_lastDewLabel=dl;set('dew-desc',' · '+dl.toLowerCase());}
   _lastComfortLabel=fs.label;renderHeroBriefing();
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);
+  noteTodayHumidity(obs.humidity,obs.humidity,_lastObsTime??new Date());
+  renderTodayHumidity();
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
+  renderHeroPressureTrend(m.pressure??null);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   if(obs.winddir!=null)set('hs-wind-dir',' · '+windDir(obs.winddir));
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
@@ -2359,7 +2413,10 @@ function buildDailySummaries(observations){
     if(m.precipTotal!=null)    byDay[day].rains.push(m.precipTotal);
     if(m.windspeedAvg!=null)   byDay[day].winds.push(m.windspeedAvg);
     if(m.windspeedHigh!=null)  byDay[day].gusts.push(m.windspeedHigh);
-    if(m.humidityAvg!=null)    byDay[day].hums.push(m.humidityAvg);
+    // Vlaga je v urnem zapisu WU izven bloka `metric` (ni odvisna od enot) —
+    // branje samo iz `m` je bilo vedno null, dnevni povzetek pa brez vlage.
+    const hum=o.humidityAvg??m.humidityAvg;
+    if(hum!=null)              byDay[day].hums.push(hum);
   });
   return Object.values(byDay)
     .map(d=>({
@@ -2394,6 +2451,10 @@ function applyHourly(observations){
   drawWindRose(observations);drawWindTrend(observations);drawWindDist(observations);applyYesterdayDelta(observations);
   drawHourlyProfile(observations);
   _hourlyObs=observations;
+  // Zgodovina se lahko naloži šele po prvi živi meritvi — trend tlaka takrat
+  // dobi svojo primerjalno uro in se mora izrisati, ne čakati na naslednji
+  // petminutni odčitek.
+  if(_lastBriefObs?.metric?.pressure!=null)renderHeroPressureTrend(_lastBriefObs.metric.pressure);
   drawHeroSparkline();
   _autoInitAI();
   _histCache['7']=buildDailySummaries(observations);   // always build, never just delete
