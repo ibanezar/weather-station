@@ -42,6 +42,10 @@ PRECIP_OVERRIDES = {
         "precipTotal": 9.7,
         "razlog": "podatek s konzole (RAIN TOTAL) ni prišel do Ecowitt oblaka; ročno odčitano na konzoli postaje",
     },
+    "2026-09-09": {
+        "precipTotal": 0,
+        "razlog": "16,5 mm je ročni test dežemera (zalito vodo), ne pravi dež — dežja ta dan še ni bilo",
+    },
 }
 
 # Fizikalna zgornja meja za globalno obsevanje (W/m²). Realne meritve — tudi z
