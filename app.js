@@ -1853,7 +1853,37 @@ function applyDayStats(observations){
   set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/tempCount,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
   set('hs-range-min',fmt(minT,1));set('hs-range-max',fmt(maxT,1));
+  todayObs.forEach(o=>{
+    const g=o.metric.windspeedHigh??o.metric.windGust??null;
+    if(g!=null)noteTodayGust(g,new Date(o.obsTimeLocal.replace(' ','T')));
+  });
   updateTodayPercentile(maxT);
+}
+
+// ── Najmočnejši dnevni sunek na junaški kartici ───────────
+// Ura v zgodovini nosi svoj vrh (`windspeedHigh`), trenutni odčitek pa je
+// lahko močnejši od zadnje zaključene ure — zato se maksimum vzdržuje iz
+// obeh virov. Datum se hrani zraven, da se vrednost ob polnoči sama
+// ponastavi in včerajšnji sunek ne ostane viseti čez noč.
+let _todayMaxGust=null;  // {date,val,time}
+
+function noteTodayGust(val,time){
+  if(val==null||!isFinite(val)||!(time instanceof Date)||isNaN(time))return;
+  const day=_localDateStr(time);
+  if(day!==_localDateStr(new Date()))return;
+  if(!_todayMaxGust||_todayMaxGust.date!==day||val>_todayMaxGust.val)
+    _todayMaxGust={date:day,val,time};
+  renderTodayMaxGust();
+}
+
+function renderTodayMaxGust(){
+  const line=document.getElementById('hs-gust-max-line');if(!line)return;
+  if(!_todayMaxGust||_todayMaxGust.date!==_localDateStr(new Date())||!(_todayMaxGust.val>0)){
+    line.hidden=true;return;
+  }
+  set('hs-gust-max',fmt(_todayMaxGust.val,1)+' km/h');
+  set('hs-gust-max-time',_todayMaxGust.time?' ob '+fmtTime(_todayMaxGust.time):'');
+  line.hidden=false;
 }
 
 // ── Zgodovinski kontekst: kje se današnji vrh uvršča med vsemi
@@ -2246,6 +2276,8 @@ function applyObs(obs){
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   if(obs.winddir!=null)set('hs-wind-dir',' · '+windDir(obs.winddir));
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
+  noteTodayGust(m.windGust??m.windSpeed,_lastObsTime??new Date());
+  renderTodayMaxGust();
   // UV hero card — value + color
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
   const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;uvEl.classList.remove('skel-shimmer');}
