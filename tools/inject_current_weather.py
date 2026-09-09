@@ -90,6 +90,23 @@ WU_HOURLY_URL = ("https://api.weather.com/v2/pws/observations/hourly/7day"
 MES_ABBR = {1: "jan.", 2: "feb.", 3: "mar.", 4: "apr.", 5: "maj", 6: "jun.",
             7: "jul.", 8: "avg.", 9: "sep.", 10: "okt.", 11: "nov.", 12: "dec."}
 
+# Enkraten popravek živega prikaza: 16,5 mm je bilo 9. 9. 2026 ročno zalitih v
+# dežemer za preverjanje delovanja senzorja, ne pravi dež — isti dogodek kot
+# PRECIP_OVERRIDES["2026-09-09"] v tools/update_history.py (ta popravi jutrišnji
+# zapis v history.json; to tukaj popravi ISTI dan v ŽIVIH WU odčitkih, ki bi
+# sicer ves dan kazali lažen dež na hero kartici, v WX-STATIC besedilu in v
+# 7-dnevni tabeli — vse to bere WU API neposredno, ne history.json). Odšteje
+# se, ne postavi na 0, da se pravi dež, če pade še isti dan, prišteje na vrh
+# in ne izgine.
+RAIN_TEST_OFFSET_DATE = "2026-09-09"
+RAIN_TEST_OFFSET_MM = 16.5
+
+
+def _strip_rain_test_offset(precip_total, day_iso):
+    if precip_total is None or day_iso != RAIN_TEST_OFFSET_DATE:
+        return precip_total
+    return max(0.0, precip_total - RAIN_TEST_OFFSET_MM)
+
 
 def wrap(text, cls=CLS_INDEX):
     return f'{START}\n  <p class="{cls}" id="wx-static">{text}</p>\n  {END}'
@@ -151,8 +168,9 @@ def build_block_live(obs, tail=TAIL_INDEX, cls=CLS_INDEX):
         parts.append(f"veter {num(m['windSpeed'])} km/h{gust}")
     if m.get("pressure") is not None:
         parts.append(f"zračni tlak {num(m['pressure'], 0)} hPa")
-    if m.get("precipTotal") is not None:
-        parts.append(f"padavine danes {num(m['precipTotal'])} mm")
+    rain_today = _strip_rain_test_offset(m.get("precipTotal"), iso[:10])
+    if rain_today is not None:
+        parts.append(f"padavine danes {num(rain_today)} mm")
 
     text = (f'Trenutno vreme na Rečici ob Savinji '
             f'(meritev postaje IREICA1 ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}): '
@@ -209,6 +227,8 @@ def patch_hero(html, obs):
     if gust is None:
         gust = m.get("windSpeed")
 
+    day_iso = (obs.get("obsTimeLocal") or "")[:10]
+    rain_today = _strip_rain_test_offset(m.get("precipTotal", 0), day_iso)
     patches = [
         ("temp-val", num(m.get("temp"), 1)),
         ("feels-val", num(feels, 1)),
@@ -217,7 +237,7 @@ def patch_hero(html, obs):
         ("hs-pressure", num(m.get("pressure"), 1)),
         ("hs-wind", num(m.get("windSpeed"), 1)),
         ("hs-gust", num(gust, 1)),
-        ("hs-rain-today", num(m.get("precipTotal", 0), 1)),
+        ("hs-rain-today", num(rain_today, 1)),
         ("hs-uv", js_num(uv) if uv else "—"),
     ]
     for elem_id, value_text in patches:
@@ -278,7 +298,7 @@ def build_daily_summaries(observations):
         if m.get("tempAvg") is not None:
             d["temps"].append(m["tempAvg"])
         if m.get("precipTotal") is not None:
-            d["rains"].append(m["precipTotal"])
+            d["rains"].append(_strip_rain_test_offset(m["precipTotal"], day))
         if m.get("windspeedAvg") is not None:
             d["winds"].append(m["windspeedAvg"])
         if m.get("windspeedHigh") is not None:
@@ -327,7 +347,7 @@ def build_day_stats(observations):
             min_t, min_time = t, hhmm
         temp_sum += t
         count += 1
-        total_rain = max(total_rain, m.get("precipTotal") or 0)
+        total_rain = max(total_rain, _strip_rain_test_offset(m.get("precipTotal") or 0, today))
     if count == 0:
         return None
     return {"high": max_t, "low": min_t, "avg": temp_sum / count,
