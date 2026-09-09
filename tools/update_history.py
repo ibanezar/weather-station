@@ -48,6 +48,19 @@ PRECIP_OVERRIDES = {
     },
 }
 
+# Odštevki (mm) — za razliko od PRECIP_OVERRIDES zgoraj (ki postavi ABSOLUTNO
+# vrednost, ker je prava dnevna vrednost že znana) se to odšteje od dejansko
+# izmerjenega dnevnega seštevka. Uporabno, kadar je bil dežemer tisti dan
+# ročno testiran (zalita voda), a dan še ni končan in se vanj lahko še vedno
+# všteje pravi dež — absolutna vrednost bi ga jutri pri teku povozila. Isto
+# načelo kot RAIN_TEST_OFFSET v worker.js in tools/inject_current_weather.py.
+PRECIP_TEST_DEDUCTIONS = {
+    "2026-09-09": {
+        "mm": 16.5,
+        "razlog": "ročni test dežemera (zalita voda), ne pravi dež",
+    },
+}
+
 # Fizikalna zgornja meja za globalno obsevanje (W/m²). Realne meritve — tudi z
 # ojačitvijo ob robovih oblakov — ne presežejo ~1500; višje so senzorske konice,
 # ki bi sicer napihnile dnevni maksimum (solarHigh). Take odčitke zavržemo.
@@ -303,6 +316,15 @@ def openmeteo_days(start, end, ym):
 def _complete(m):
     return all(m.get(f) is not None for f in REQUIRED)
 
+def _apply_precip_corrections(date, rec):
+    """Uporabi PRECIP_OVERRIDES (absolutna vrednost) ali PRECIP_TEST_DEDUCTIONS
+    (odštevek od izmerjenega) za dani dan, če je vpisan katerikoli od obeh."""
+    if date in PRECIP_OVERRIDES:
+        rec["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
+    elif date in PRECIP_TEST_DEDUCTIONS and rec.get("precipTotal") is not None:
+        rec["precipTotal"] = round(
+            max(0.0, rec["precipTotal"] - PRECIP_TEST_DEDUCTIONS[date]["mm"]), 1)
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("Uporaba: update_history.py YYYY-MM")
@@ -359,8 +381,7 @@ def main():
                         s[f] = e[f]
             if _complete(s):
                 hist[date] = {**s, "src": "station"}
-                if date in PRECIP_OVERRIDES:
-                    hist[date]["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
+                _apply_precip_corrections(date, hist[date])
                 n_station += 1
                 continue
 
@@ -369,8 +390,7 @@ def main():
             if hist.get(date, {}).get("src") == "station":
                 continue
             hist[date] = {**e, "src": "era5"}
-            if date in PRECIP_OVERRIDES:
-                hist[date]["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
+            _apply_precip_corrections(date, hist[date])
             n_era5 += 1
 
     if not (n_station + n_era5):
