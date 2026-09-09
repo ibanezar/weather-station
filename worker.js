@@ -22,6 +22,20 @@ const EW_APP_FALLBACK = "A7E5CAF73FCC9BF859CDE788D69A1C91";
 const EW_API_FALLBACK = "0bd213c8-8e54-4bf6-b6da-127a1c605034";
 const EW_MAC = "BC:DD:C2:42:8D:56";
 
+// Enkraten popravek živega prikaza: 16,5 mm je bilo 9. 9. 2026 ročno zalitih v
+// dežemer za preverjanje delovanja senzorja, ne pravi dež — isti dogodek kot
+// PRECIP_OVERRIDES["2026-09-09"] v tools/update_history.py (ta popravi jutrišnji
+// zapis v history.json; to tukaj popravi ISTI dan v živih odčitkih, ki bi sicer
+// ves dan kazali lažen dež na strani — v /current, /ecowitt-current in
+// tools/inject_current_weather.py --live, ki bere WU neposredno). Odšteje se,
+// ne postavi na 0, da se pravi dež, če pade še isti dan, prišteje na vrh in
+// ne izgine. _ljDatum() je definiran nižje v datoteki.
+const RAIN_TEST_OFFSET = { date: "2026-09-09", mm: 16.5 };
+function _stripRainTestOffset(precipTotal) {
+  if (precipTotal == null || _ljDatum() !== RAIN_TEST_OFFSET.date) return precipTotal;
+  return Math.max(0, precipTotal - RAIN_TEST_OFFSET.mm);
+}
+
 // Sosednja postaja IREICA7 v Varpolju (~1,6 km jugozahodno), last prijatelja,
 // ki jo javno objavlja kot JSON. Njegov strežnik se osveži približno vsakih
 // 5 minut — pogostejše poizvedovanje ne vrne ničesar novega.
@@ -390,7 +404,7 @@ async function fetchEcowittAsWuObs(env) {
       windGust: v(d.wind?.wind_gust),
       pressure: v(d.pressure?.relative),
       precipRate: v(d.rainfall?.rain_rate),
-      precipTotal: v(d.rainfall?.daily),
+      precipTotal: _stripRainTestOffset(v(d.rainfall?.daily)),
       solarRadiation: v(d.solar_and_uvi?.solar),
     }
   };
@@ -3160,6 +3174,12 @@ export default {
         // stran, niti v članke, niti komurkoli, ki ta endpoint pokliče.
         // Režemo tu, pri viru, da noben odjemalec tega sploh ne more videti.
         if (ewData && ewData.data) delete ewData.data.indoor;
+        // Glej RAIN_TEST_OFFSET zgoraj — enkraten popravek testa dežemera.
+        if (ewData?.data?.rainfall?.daily?.value != null) {
+          ewData.data.rainfall.daily.value = String(
+            _stripRainTestOffset(parseFloat(ewData.data.rainfall.daily.value))
+          );
+        }
         return new Response(JSON.stringify(ewData), {
           headers: {...CORS_ALLOWED, "Content-Type":"application/json", "Cache-Control":"max-age=120"}
         });
@@ -6270,8 +6290,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
       // svežino in po potrebi preklopimo na Ecowitt real_time kot rezervo, da
       // se osrednji prikaz na strani ne "zamrzne".
       if (path !== "/hourly") {
-        let obs = null;
-        try { obs = JSON.parse(bodyText)?.observations?.[0]; } catch (_) { /* ignore */ }
+        let parsed = null;
+        try { parsed = JSON.parse(bodyText); } catch (_) { /* ignore */ }
+        let obs = parsed?.observations?.[0] || null;
         const ageMin = obs?.obsTimeUtc
           ? (Date.now() - new Date(obs.obsTimeUtc).getTime()) / 60000
           : Infinity;
@@ -6285,6 +6306,13 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
               headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
             });
           }
+        } else if (obs.metric) {
+          // Glej RAIN_TEST_OFFSET zgoraj — enkraten popravek testa dežemera.
+          obs.metric.precipTotal = _stripRainTestOffset(obs.metric.precipTotal);
+          return new Response(JSON.stringify(parsed), {
+            status: res.status,
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
         }
       }
 
