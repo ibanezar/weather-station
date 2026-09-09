@@ -2710,31 +2710,16 @@ export default {
         );
       }
 
-      // ── /online ───────────────────────────────────────────
-      // Koliko brskalnikov je trenutno na strani. Vsak obiskovalec pošlje
-      // "utrip" na ~25 s z naključnim id-jem (?id=); ključ "online:<id>" ima
-      // expirationTtl 90 s, torej se sam počisti, če zavihek zapre ali
-      // izgubi povezavo — brez eksplicitnega "odjavi se" klica. Število je
-      // približno (KV list ima eventual consistency ~60 s), kar je za
-      // dekorativen widget dovolj dobro.
+      // ── /online — UKINJEN 9. 9. 2026 ──────────────────────
+      // Widget "koliko je trenutno online" je odstranjen, ker je bil daleč
+      // največji porabnik dnevne kvote (utrip vsakih 25 s na zavihek, poleg
+      // tega KV put + KV list ob VSAKEM klicu — KV ima na brezplačnem planu
+      // 1000 zapisov in 1000 list operacij na dan). Glej CLAUDE.md, razdelek
+      // "Dnevne meje Cloudflare". Odgovor obdržimo samo zato, da stari
+      // predpomnjeni odjemalci ne dobijo napake; nič ne zapiše in nič ne bere.
       if (path === "/online") {
-        const kv = env?.COUNTER_KV;
-        if (!kv) {
-          return new Response(JSON.stringify({ stevilo: null }), {
-            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
-          });
-        }
-        const id = url.searchParams.get("id");
-        if (id && /^[a-zA-Z0-9-]{8,64}$/.test(id)) {
-          try { await kv.put(`online:${id}`, "1", { expirationTtl: 90 }); } catch (_) {}
-        }
-        let stevilo = 0;
-        try {
-          const list = await kv.list({ prefix: "online:", limit: 1000 });
-          stevilo = list.keys.length;
-        } catch (_) {}
-        return new Response(JSON.stringify({ stevilo }), {
-          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" },
+        return new Response(JSON.stringify({ stevilo: null }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" },
         });
       }
 

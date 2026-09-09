@@ -298,6 +298,35 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
   endpoint namesto na klientsko WebSocket povezavo.
 
+## Dnevne meje Cloudflare — pazi, kaj kliče app.js v zanki
+
+Worker teče na **brezplačnem planu**, kjer veljajo dnevne meje, ki se ponastavijo
+ob polnoči UTC:
+
+- **100.000 zahtev na worker/dan.** Ob prekoračitvi worker preneha odgovarjati
+  za ves preostanek dneva: `weatherireica1.filip-eremita.workers.dev` vrača
+  `HTTP 429, error code: 1027` za **vse** endpointe. Statične strani (GitHub
+  Pages) ostanejo, a vse žive kartice v `app.js` javijo »failed to fetch«.
+- **KV (`COUNTER_KV`): 1000 zapisov, 1000 delete in 1000 `list` operacij na
+  dan** (branj je 100.000). Ta meja je veliko nižja, kot je videti — deli si jo
+  vse: všečki, ogledi, premium žetoni, lestvici `/napovej/` in `/igra/`.
+
+Zato: **nobena funkcija v `app.js` ne sme klicati workerja pogosteje kot na 5
+minut** in **noben endpoint, ki ga kliče brskalnik v zanki, ne sme delati KV
+zapisa ali `list` ob vsakem klicu**. Pri 25-sekundnem utripu en sam odprt zavihek
+naredi 3456 zahtev na dan; ~30 takih zavihkov porabi celotno dnevno kvoto.
+
+Zgodilo se je 9. 9. 2026: widget »koliko je trenutno online« (noga strani,
+endpoint `/online`) je utripal vsakih 25 s in ob vsakem klicu naredil `kv.put` +
+`kv.list` — sam je predstavljal okoli 70 % vseh zahtev na worker. Stran je
+popoldne padla z 1027. Widget je odstranjen (`app.js`, `index.html`,
+`style.css`), endpoint `/online` pa je zdaj prazna vljudnostna lupina za stare
+predpomnjene odjemalce in ne dela ničesar. **Ne vračaj ga v tej obliki** — brez
+plačljivega plana takega števca ni mogoče poganjati.
+
+Deploy nove kode meje **ne** ponastavi; ob prekoračitvi je edina možnost počakati
+do polnoči UTC ali nadgraditi na Workers Paid (5 $/mesec).
+
 ## Napoved na pristajalni strani
 
 `tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah
