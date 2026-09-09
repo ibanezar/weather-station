@@ -1861,12 +1861,13 @@ function applyDayStats(observations){
     const g=o.metric.windgustHigh??o.metric.windspeedHigh??null;
     if(g!=null)noteTodayGust(g,t);
     noteTodayHumidity(o.humidityLow??o.humidityAvg,o.humidityHigh??o.humidityAvg,t);
+    if(o.uvHigh!=null)noteTodayUv(o.uvHigh,t);
   });
   updateTodayPercentile(maxT);
 }
 
 // ── Najmočnejši dnevni sunek na junaški kartici ───────────
-// Ura v zgodovini nosi svoj vrh (`windspeedHigh`), trenutni odčitek pa je
+// Ura v zgodovini nosi svoj vrh (`windgustHigh`), trenutni odčitek pa je
 // lahko močnejši od zadnje zaključene ure — zato se maksimum vzdržuje iz
 // obeh virov. Datum se hrani zraven, da se vrednost ob polnoči sama
 // ponastavi in včerajšnji sunek ne ostane viseti čez noč.
@@ -1913,6 +1914,32 @@ function renderTodayHumidity(){
   if(!_todayHum||_todayHum.date!==_localDateStr(new Date())){line.hidden=true;return;}
   set('hs-hum-min',Math.round(_todayHum.min));
   set('hs-hum-max',Math.round(_todayHum.max));
+  line.hidden=false;
+}
+
+// ── Današnji vrh UV na junaški kartici ────────────────────
+// Isti vzorec kot sunek: urni `uvHigh` iz zgodovine in trenutni odčitek.
+// Ob dnevih brez sonca (in ponoči, dokler ura z vrhom ne pade iz današnjega
+// datuma) je vrh 0 — takrat vrstice ni, ker "najvišji 0" ničesar ne pove.
+let _todayMaxUv=null;  // {date,val,time}
+
+function noteTodayUv(val,time){
+  if(val==null||!isFinite(val)||!(time instanceof Date)||isNaN(time))return;
+  const day=_localDateStr(time);
+  if(day!==_localDateStr(new Date()))return;
+  if(!_todayMaxUv||_todayMaxUv.date!==day||val>_todayMaxUv.val)
+    _todayMaxUv={date:day,val,time};
+  renderTodayUv();
+}
+
+function renderTodayUv(){
+  const line=document.getElementById('hs-uv-max-line');if(!line)return;
+  if(!_todayMaxUv||_todayMaxUv.date!==_localDateStr(new Date())||!(_todayMaxUv.val>0)){
+    line.hidden=true;return;
+  }
+  const v=Math.round(_todayMaxUv.val);
+  set('hs-uv-max',v+' · '+uvLabel(v).toLowerCase());
+  set('hs-uv-max-time',_todayMaxUv.time?' ob '+fmtTime(_todayMaxUv.time):'');
   line.hidden=false;
 }
 
@@ -2336,7 +2363,8 @@ function applyObs(obs){
   {const uv=obs.uv??0;const uvC=uv>=8?'#ef4444':uv>=6?'#ea580c':uv>=3?'#d97706':'#22c55e';
   const uvEl=document.getElementById('hs-uv');if(uvEl){uvEl.textContent=uv||'—';uvEl.style.color=uvC;uvEl.classList.remove('skel-shimmer');}
   set('hs-uv-label',uvLabel(uv));
-  document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);}
+  document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);
+  noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit"> km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
