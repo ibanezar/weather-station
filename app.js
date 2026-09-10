@@ -4513,6 +4513,17 @@ function renderMeteorecRadarLegend(leg){
   ticks.style.gridTemplateColumns='repeat('+lab.length+',1fr)';
 }
 
+// Oznaka celice: stalna samo za prihajajočo celico, sicer se odpre ob dotiku
+// (Leaflet nestalne oznake veže na mouseover IN click, torej dela tudi na
+// telefonu). Zastavek `_mradPerm` hranimo, ker Leaflet stalnosti po vezavi
+// ne more spremeniti.
+function _mradBindCellLabel(mk,label,perm){
+  if(mk.getTooltip())mk.unbindTooltip();
+  mk.bindTooltip(label,{permanent:perm,direction:'top',offset:[0,-4],
+    className:'mrad-label mrad-cell-label'+(perm?' mrad-cell-eta':'')});
+  mk._mradPerm=perm;
+}
+
 // Sledenje nevihtnim celicam: id, smer, hitrost — za razliko od enotne
 // ocene premika polja. Enak osvežilni ritem kot _mradPoll (5 min), izrisano
 // na isti karti ne glede na izbrani pogled (širok/savinja).
@@ -4528,22 +4539,32 @@ async function refreshMeteorecRadarCells(){
     for(const[id,ln]of _mradCellTrails){
       if(!zivi.has(id)){_mradMap.removeLayer(ln);_mradCellTrails.delete(id);}
     }
+    // Stalna oznaka gre SAMO celici, ki prihaja proti Rečici (`prihaja`).
+    // Ob nevihtnem dnevu je celic na karti lahko čez trideset in vse stalne
+    // oznake so prekrile radarsko sliko — prav tisto, zaradi česar je karta
+    // tu (bralec 10. 9. 2026: »nič se ne vidi«). Ostale se odprejo ob dotiku
+    // oz. prehodu z miško.
+    const nujnaId=d.prihaja?d.prihaja.id:null;
     cells.forEach(c=>{
       const label=(c.kmh!=null&&c.smer!=null)
         ?Math.round(c.kmh)+' km/h → '+windDir(c.smer)
         :(c.toca?'nevihta (toča?)':'nevihta');
       const barva=c.toca?'#c0143c':'#ff6a00';
+      const perm=c.id===nujnaId;
       let mk=_mradCellMarkers.get(c.id);
       if(!mk){
         mk=L.circleMarker([c.lat,c.lon],{radius:5,color:'#fff',weight:2,
           fillColor:barva,fillOpacity:.95})
-          .addTo(_mradMap)
-          .bindTooltip(label,{permanent:true,direction:'top',offset:[0,-4],className:'mrad-label mrad-cell-label'});
+          .addTo(_mradMap);
+        _mradBindCellLabel(mk,label,perm);
         _mradCellMarkers.set(c.id,mk);
       }else{
         mk.setLatLng([c.lat,c.lon]);
         mk.setStyle({fillColor:barva});
-        mk.setTooltipContent(label);
+        // Stalnosti oznake Leaflet po vezavi ne zna spremeniti — če se je
+        // spremenila (celica postane/preneha biti prihajajoča), jo prevežemo.
+        if(mk._mradPerm===perm)mk.setTooltipContent(label);
+        else _mradBindCellLabel(mk,label,perm);
       }
       // Kratka sled zadnjih leg (worker jo že omeji na CELL_TRAIL_MAX) namesto
       // gole pike — na prvi pogled pove smer, brez branja oznake.

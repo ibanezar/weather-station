@@ -1659,6 +1659,11 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 /* Oznake sledenih nevihtnih celic — enak čoln kot postajna oznaka, a manjše,
    ker jih je lahko naenkrat prikazanih več. */
 .leaflet-tooltip.mrad-cell-label{font-size:.6rem;font-weight:600;padding:1px 6px}
+/* Stalno oznako dobi samo celica, ki prihaja proti Rečici — poudarjena, da se
+   loči od tistih, ki se odprejo ob dotiku. */
+.leaflet-tooltip.mrad-cell-eta{background:rgba(192,20,60,.92);color:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.4)}
+:root[data-theme="light"] .leaflet-tooltip.mrad-cell-eta{background:rgba(192,20,60,.92);color:#fff}
 .mrad-hint{display:block;font-size:.68rem;color:var(--muted);margin-top:.4rem;line-height:1.4}
 /* ETA sledene nevihtne celice, ki gre proti postaji — glej _cellEta v
    worker.js (najbližji prehod trajektorije mimo postaje). */
