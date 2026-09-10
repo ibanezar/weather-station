@@ -2133,34 +2133,49 @@ function _smerBesedilo(deg) {
   return d[Math.round(deg / 22.5) % 16];
 }
 
-// Push obvestilo, ko celica prvič dobi veljaven ETA (glej _cellEta) — ne ob
-// vsakem cron tiku, dokler je "na poti", sicer bi za eno nevihto poslali
-// obvestilo vsakih 5 minut. cell.id se med sledenjem nikoli ne ponovi (glej
-// state.nextId v _cellTrack), zato "enkrat na id" zadošča kot ključ, brez
-// ločenega časovnega cooldowna kot pri PUSH_THRESHOLDS/nowcastu zgoraj.
+// Push obvestilo, ko celica dobi veljaven ETA (glej _cellEta) — ne ob vsakem
+// cron tiku, dokler je "na poti", sicer bi za eno nevihto poslali obvestilo
+// vsakih 5 minut. cell.id se med sledenjem nikoli ne ponovi (glej
+// state.nextId v _cellTrack), zato je "enkrat na id" pravi dedup ključ — a
+// smer/hitrost (in s tem ETA) se ob vsakem tiku preračuna samo iz zadnjih
+// DVEH centroidov (glej _cellTrack), kar je na eni 5-minutni legi šumno; ob
+// aktivni večcelični nevihti to občasno da lažen "gre proti dolini" zadetek,
+// in vsak kratek padec pod CELL_STORM_MMH (>2 zgrešena tika, glej
+// CELL_MAX_MISSES) ali cepitev/združitev celice ustvari nov id za isto
+// fizično nevihto — vsak tak "nov" id je spet sprožil svoj push. 10. 9. 2026:
+// ~30 obvestil v eni uri med aktivnim večceličnim dogodkom. Zato ETA šteje
+// šele, ko je veljaven DVA zaporedna tika (~10 min) za isti id — pravo
+// približevanje to zlahka prestane, enotni šumni tik pa ne dobi push-a.
 async function _cronPushCellEta(env, celice) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
-  let notified = {};
-  try { const o = await r2.get("push/cell_eta_state.json"); notified = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  let state = {};
+  try { const o = await r2.get("push/cell_eta_state.json"); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
 
   const liveIds = new Set(celice.map((c) => c.id));
   let changed = false;
-  for (const id of Object.keys(notified)) {
-    if (!liveIds.has(Number(id))) { delete notified[id]; changed = true; }
+  for (const id of Object.keys(state)) {
+    if (!liveIds.has(Number(id))) { delete state[id]; changed = true; }
   }
 
   for (const c of celice) {
-    if (c.eta_min == null || notified[c.id]) continue;
+    const prev = state[c.id] || { streak: 0, notified: false };
+    if (c.eta_min == null) {
+      if (prev.streak !== 0 || prev.notified) { delete state[c.id]; changed = true; }
+      continue;
+    }
+    const streak = prev.streak + 1;
+    if (prev.notified) { continue; }
+    if (streak < 2) { state[c.id] = { streak, notified: false }; changed = true; continue; }
     await _pushAll(env, {
       title: "Meteorec — nevihta se približuje",
       body: "⛈️ Nevihtna celica prihaja proti Rečici ob Savinji čez ~" + c.eta_min + " min (trenutno ~"
         + c.zdaj_km + " km stran, " + Math.round(c.kmh) + " km/h, " + _smerBesedilo(c.smer) + ").",
       url: "/", tag: "wx-cell-" + c.id,
     });
-    notified[c.id] = true;
+    state[c.id] = { streak, notified: true };
     changed = true;
   }
-  if (changed) { try { await r2.put("push/cell_eta_state.json", JSON.stringify(notified), { httpMetadata: { contentType: "application/json" } }); } catch (_) {} }
+  if (changed) { try { await r2.put("push/cell_eta_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } }); } catch (_) {} }
 }
 
 async function _cronRenderRadarCells(env, win, arso) {
