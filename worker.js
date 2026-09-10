@@ -1306,11 +1306,23 @@ function _operaPrefix(d) {
   return `${Y}/${M}/${D}/OPERA/COMP/OPERA@${Y}${M}${D}T${p(d.getUTCHours())}`;
 }
 
-// Ključi zadnjih dveh ur, urejeni od najstarejšega. Dve uri, ker mora seznam
-// pokriti celotno animacijo tudi tik po prehodu polne ure.
+// Seznam si znotraj izolata zapomnimo za minuto: nov posnetek je vsakih pet
+// minut, ta klic pa naredijo skoraj vsi radarski endpointi, zahtevek pa ima na
+// brezplačnem planu omejeno število podzahtevkov (izris "sirok" jih porabi
+// veliko za ploščice OPERA). Prazen izid ni odgovor, ampak izpad vira, zato se
+// ne shrani.
+let _operaKeysMemo = { ms: 0, keys: null };
+
+// Ključi zadnjih treh ur, urejeni od najstarejšega. Tri ure, ker mora seznam
+// pokriti celotno animacijo tudi tik po prehodu polne ure: OPERA zaostaja za
+// realnim časom ~10 minut, animacija sega uro nazaj od zadnjega posnetka, zato
+// je najstarejši potrebni žig lahko star 75 minut (ob 05:05 je to 03:50). Z
+// dvema urama sta v takem trenutku najstarejša okvirja izpadla iz seznama in
+// animacija se je začela s premikajočim se robom namesto z isto uro nazaj.
 async function _operaKeys() {
+  if (_operaKeysMemo.keys && Date.now() - _operaKeysMemo.ms < 60000) return _operaKeysMemo.keys;
   const out = [];
-  for (const back of [3600e3, 0]) {
+  for (const back of [7200e3, 3600e3, 0]) {
     try {
       const pfx = _operaPrefix(new Date(Date.now() - back));
       const r = await fetch(`${OPERA_S3}?list-type=2&prefix=${encodeURIComponent(pfx)}&max-keys=200`, { cf: { cacheTtl: 60 } });
@@ -1318,7 +1330,9 @@ async function _operaKeys() {
       out.push(...[...(await r.text()).matchAll(/<Key>([^<]+@DBZH\.tiff)<\/Key>/g)].map(m => m[1]));
     } catch (_) {}
   }
-  return out.sort();
+  out.sort();
+  if (out.length) _operaKeysMemo = { ms: Date.now(), keys: out };
+  return out;
 }
 
 async function _operaLatestKey() {
@@ -1630,7 +1644,7 @@ async function _radarComposite(key, stampMs, view, sources) {
 
 // Vsak izrisan okvir hranimo v R2 pod svojim ključem, ker jih animacija
 // potrebuje več hkrati. Za uro nazaj je to ~13 slik po 20 KB; starejše
-// pobriše _radarCompositePrune. Brez R2 se slika izriše ob vsakem zahtevku.
+// pobriše _radarCompositeUpkeep. Brez R2 se slika izriše ob vsakem zahtevku.
 const COMP_R2_PREFIX = "radar/comp-";
 const COMP_ANIM_MIN = 60;                       // dolžina animacije
 const COMP_KEEP_MS = (COMP_ANIM_MIN + 20) * 60000;
@@ -1673,23 +1687,26 @@ async function _radarCompositeCached(env, stamp, viewId, sources) {
   return { body: c.png, stamp, meta, cached: false };
 }
 
-// Pobriši izrise, ki so padli iz animacije. Teče iz crona, da zahtevki po
-// slikah ne plačujejo naštevanja vedra.
-async function _radarCompositePrune(env) {
-  const r2 = env?.PHOTOS_R2; if (!r2) return 0;
+// Pobriši izrise, ki so padli iz animacije, in povej, kateri so ostali. Teče
+// iz crona, da zahtevki po slikah ne plačujejo naštevanja vedra; en sam
+// prehod seznama služi obojemu (čiščenju in iskanju lukenj), da doda nič
+// zahtevkov. Vrne množico ključev "<pogled>-<žig>" ali null, če vedra ni.
+async function _radarCompositeUpkeep(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return null;
   const cutoff = Date.now() - COMP_KEEP_MS;
-  let n = 0;
+  const imamo = new Set();
   try {
-    const list = await r2.list({ prefix: COMP_R2_PREFIX, limit: 200 });
+    const list = await r2.list({ prefix: COMP_R2_PREFIX, limit: 400 });
     for (const o of list.objects || []) {
       // Ključ je comp-<pogled>-<žig>.png; brez imena pogleda so ostanki
       // prejšnje sheme in gredo prav tako proč.
-      const s = (o.key.match(/comp-[a-z]+-(\d{8}T\d{4})\.png$/) || [])[1];
-      const ms = s ? _compStampMs(s) : NaN;
-      if (Number.isNaN(ms) || ms < cutoff) { await r2.delete(o.key); n++; }
+      const m = o.key.match(/comp-([a-z]+)-(\d{8}T\d{4})\.png$/);
+      const ms = m ? _compStampMs(m[2]) : NaN;
+      if (Number.isNaN(ms) || ms < cutoff) { await r2.delete(o.key); continue; }
+      imamo.add(`${m[1]}-${m[2]}`);
     }
-  } catch (_) {}
-  return n;
+  } catch (_) { return null; }
+  return imamo;
 }
 
 // ── ICON kratkoročna napoved (nadaljevanje radarske časovnice) ─────
@@ -2151,29 +2168,50 @@ async function _cronRenderRadarCells(env, win, arso) {
   } catch (_) { return false; }
 }
 
+// Koliko manjkajočih okvirjev sme cron dorisati v enem tiku. Zamujen tik (vseh
+// šest opravil petminutnega crona si deli en proračun — glej opombo pri
+// _cronRenderIconAndCells) pomeni mrzel okvir, ki ga mora izrisati šele prvi
+// obiskovalec; tak izris je nekajkrat dražji od predpomnjenega in ob napaki
+// ostane v animaciji luknja. Meja je nizka namenoma: luknja se zapolni v nekaj
+// tikih, en tik pa ne pojé proračuna ostalim opravilom.
+const COMP_BACKFILL_MAX = 2;
+
 // Cron vsakih 5 minut izriše najnovejši okvir, da je animacija za obiskovalca
-// že topla; sproti počisti stare. Za "sirok" pogled si vir OPERA/ARSO izposodi
-// naprej v _radarComposite (da se v tej isti funkciji ne prenese dvakrat), a
-// sledenje celicam TU ne teče več — glej opombo pri _cronRenderIconAndCells,
-// zakaj je na ločenem urniku.
+// že topla; sproti počisti stare in doriše okvirje, ki so v prejšnjih tikih
+// izpadli. Za "sirok" pogled si vir OPERA/ARSO izposodi naprej v
+// _radarComposite (da se v tej isti funkciji ne prenese dvakrat), a sledenje
+// celicam TU ne teče več — glej opombo pri _cronRenderIconAndCells, zakaj je
+// na ločenem urniku.
 async function _cronRenderRadarComposite(env) {
   try {
+    const stamps = (await _operaKeys()).map(_compStamp).filter(Boolean);
+    const stamp = stamps.length ? stamps[stamps.length - 1] : null;
     for (const vid of Object.keys(COMP_VIEWS)) {
-      if (vid === "sirok") {
-        const key = await _operaLatestKey();
-        const stamp = key ? _compStamp(key) : null;
-        if (stamp) {
-          const sirokSources = await Promise.all([
-            _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch(() => null),
-            _compArso(_compStampMs(stamp)),
-          ]);
-          await _radarCompositeCached(env, stamp, "sirok", sirokSources).catch(() => null);
-          continue;
+      if (vid === "sirok" && stamp) {
+        const sirokSources = await Promise.all([
+          _operaWindow(_operaKeyForStamp(stamp), _compBBox(COMP_VIEWS.sirok)).catch(() => null),
+          _compArso(_compStampMs(stamp)),
+        ]);
+        await _radarCompositeCached(env, stamp, "sirok", sirokSources).catch(() => null);
+        continue;
+      }
+      await _radarCompositeCached(env, stamp, vid).catch(() => null);
+    }
+    const imamo = await _radarCompositeUpkeep(env);
+    // Doriši luknje v oknu animacije, od najnovejše proti najstarejši — te
+    // obiskovalec vidi prej.
+    if (imamo && stamp) {
+      const od = _compStampMs(stamp) - COMP_ANIM_MIN * 60000;
+      const okno = stamps.filter((s) => _compStampMs(s) >= od);
+      let n = 0;
+      for (let i = okno.length - 1; i >= 0 && n < COMP_BACKFILL_MAX; i--) {
+        for (const vid of Object.keys(COMP_VIEWS)) {
+          if (imamo.has(`${vid}-${okno[i]}`)) continue;
+          await _radarCompositeCached(env, okno[i], vid).catch(() => null);
+          if (++n >= COMP_BACKFILL_MAX) break;
         }
       }
-      await _radarCompositeCached(env, null, vid).catch(() => null);
     }
-    await _radarCompositePrune(env);
     return true;
   } catch (_) { return false; }
 }
