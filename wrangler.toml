@@ -23,12 +23,10 @@ binding = "AI"
 #
 # Cena: dokler je odhodna WebSocket povezava odprta, se DO ne more hibernirati
 # in se ves čas zaračunava po trajanju (GB-s) — okvirno ~10.800 GB-s/dan pri
-# privzetih 128 MB. Brezplačni plan ima 13.000 GB-s/dan, kar je zelo tesno
-# (~83 % samo za obstoj tega enega DO); plačljiv plan (5 $/mesec, 400.000
-# GB-s/mesec vključenih) ima dovolj rezerve. Ob prekoračitvi na brezplačnem
-# planu klici v ta DO preprosto odpovedo (ni doplačila) — beleženje se za tisti
-# dan ustavi, ostala stran ostane nedotaknjena (ločen meter od običajnih
-# Worker zahtev).
+# privzetih 128 MB. Na brezplačnem planu (13.000 GB-s/dan) je bilo to zelo
+# tesno, ~83 % kvote samo za obstoj tega enega DO. Od 10. 9. 2026 je worker na
+# plačljivem planu (400.000 GB-s/mesec vključenih), kjer ima to opravilo dovolj
+# rezerve — glej razdelek o mejah v CLAUDE.md.
 [[durable_objects.bindings]]
 name = "LIGHTNING_LOGGER"
 class_name = "LightningLogger"

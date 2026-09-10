@@ -1473,24 +1473,49 @@ async function _pngIndexed(idx, w, h, rgb, alpha) {
 // zamik po tej formuli ostane pod pol okvirja (~1 km pri običajni hitrosti
 // celic), medtem ko bi parjenje "najnovejši z najnovejšim" zgrešilo za 3 km.
 const ARSO_STEP_MS = 5 * 60000;
+
+// Dekodirano ARSO animacijo si zapomnimo za minuto (isti vzorec kot
+// _operaKeysMemo). En sam GIF nosi vse okvirje zadnjih ~90 minut, torej je za
+// vsak žig, ki ga v tem tiku rišemo, potreben isti prenos in isto dekodiranje —
+// prenos pokrije robni predpomnilnik (cf.cacheTtl), dekodiranje pa ne. Brez
+// memoja je vsak dorisan okvir plačal svoje dekodiranje cele animacije, kar je
+// pri dorisovanju lukenj (spodaj) največji posamezen strošek CPU. Hranimo samo
+// izluščene okvirje in paleto, ne surovega odgovora.
+//
+// Izmerjeno na posnetku z 10. 9. 2026 (Node, 26 klicev = celo okno animacije
+// krat oba pogleda): brez memoja 26 prenosov in 4576 ms, z memojem 1 prenos in
+// 531 ms. Ravno to je pred prehodom na plačljivi plan onemogočalo dorisovanje
+// več kot dveh okvirjev na tik.
+let _arsoGifMemo = null;
+
+async function _arsoAnim() {
+  if (_arsoGifMemo && Date.now() - _arsoGifMemo.ms < 60000) return _arsoGifMemo;
+  const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 12000);
+  const res = await fetch(RADAR_URL, { signal: ctrl.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid));
+  if (!res.ok) return null;
+  const lm = res.headers.get("last-modified");
+  const lmMs = lm ? new Date(lm).getTime() : Date.now();
+  const g = _gifDecodeFrames(new Uint8Array(await res.arrayBuffer()));
+  if (!g.palette || !g.frames.length) return null;
+  const frames = _radDistinct(g.frames, g.width);
+  if (!frames.length) return null;
+  _arsoGifMemo = { ms: Date.now(), lmMs, frames, lut: _radLut(g.palette), w: g.width, h: g.height };
+  return _arsoGifMemo;
+}
+
 async function _compArso(stampMs) {
   try {
-    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 12000);
-    const res = await fetch(RADAR_URL, { signal: ctrl.signal, cf: { cacheTtl: 60 } }).finally(() => clearTimeout(tid));
-    if (!res.ok) return null;
-    const lm = res.headers.get("last-modified");
-    const lmMs = lm ? new Date(lm).getTime() : Date.now();
-    if ((Date.now() - lmMs) / 60000 > RADAR_MAX_AGE_MIN) return null;   // animacija stoji
-    const g = _gifDecodeFrames(new Uint8Array(await res.arrayBuffer()));
-    if (!g.palette || !g.frames.length) return null;
-    const frames = _radDistinct(g.frames, g.width);
-    if (!frames.length) return null;
+    const a = await _arsoAnim();
+    if (!a) return null;
+    // Starost se meri ob VSAKEM klicu, ne ob polnjenju memoja — sicer bi
+    // minuto po tem, ko vir obstane, še vedno vračali okvirje kot sveže.
+    if ((Date.now() - a.lmMs) / 60000 > RADAR_MAX_AGE_MIN) return null;   // animacija stoji
 
-    const newestMs = Math.floor(lmMs / ARSO_STEP_MS) * ARSO_STEP_MS;
+    const newestMs = Math.floor(a.lmMs / ARSO_STEP_MS) * ARSO_STEP_MS;
     const k = Math.round((newestMs - stampMs) / ARSO_STEP_MS);
-    const i = frames.length - 1 - k;
-    if (i < 0 || i >= frames.length) return null;      // zunaj 90-minutne animacije
-    return { levels: _radLevels(frames[i], _radLut(g.palette), g.width), w: g.width, h: g.height, zamikMin: k * 5 };
+    const i = a.frames.length - 1 - k;
+    if (i < 0 || i >= a.frames.length) return null;      // zunaj 90-minutne animacije
+    return { levels: _radLevels(a.frames[i], a.lut, a.w), w: a.w, h: a.h, zamikMin: k * 5 };
   } catch (_) { return null; }
 }
 
@@ -2172,9 +2197,23 @@ async function _cronRenderRadarCells(env, win, arso) {
 // šest opravil petminutnega crona si deli en proračun — glej opombo pri
 // _cronRenderIconAndCells) pomeni mrzel okvir, ki ga mora izrisati šele prvi
 // obiskovalec; tak izris je nekajkrat dražji od predpomnjenega in ob napaki
-// ostane v animaciji luknja. Meja je nizka namenoma: luknja se zapolni v nekaj
-// tikih, en tik pa ne pojé proračuna ostalim opravilom.
-const COMP_BACKFILL_MAX = 2;
+// ostane v animaciji luknja.
+//
+// Meja je bila 2, ker sta jo na brezplačnem planu držali dve meji: 10 ms CPU na
+// invokacijo in 50 podzahtev nanjo (en okvir je glava OPERA + nekaj ploščic +
+// ARSO). Na plačljivem planu (od 10. 9. 2026) sta to 30 s CPU in 1000
+// podzahtev, zato zdaj pokrijemo celotno okno animacije v enem tiku: 13 žigov
+// krat oba pogleda je 26 okvirjev. Luknja tako izgine ob prvem naslednjem
+// tiku namesto čez pol ure.
+const COMP_BACKFILL_MAX = 26;
+
+// Časovni proračun dorisovanja. Meja po številu okvirjev ne pove nič o tem,
+// koliko časa vzamejo — počasen vir (OPERA po prehodu polne ure) lahko vsak
+// okvir vleče sekunde. Ker si vseh šest opravil tega crona deli proračun ene
+// invokacije, se dorisovanje po tem času ustavi in preostanek prepusti
+// naslednjemu tiku; opravila za obvestila in prebujanje LightningLoggerja so
+// pomembnejša od tega, da je animacija cela že zdaj.
+const COMP_BACKFILL_MS = 15000;
 
 // Cron vsakih 5 minut izriše najnovejši okvir, da je animacija za obiskovalca
 // že topla; sproti počisti stare in doriše okvirje, ki so v prejšnjih tikih
@@ -2203,12 +2242,13 @@ async function _cronRenderRadarComposite(env) {
     if (imamo && stamp) {
       const od = _compStampMs(stamp) - COMP_ANIM_MIN * 60000;
       const okno = stamps.filter((s) => _compStampMs(s) >= od);
+      const rok = Date.now() + COMP_BACKFILL_MS;
       let n = 0;
-      for (let i = okno.length - 1; i >= 0 && n < COMP_BACKFILL_MAX; i--) {
+      for (let i = okno.length - 1; i >= 0 && n < COMP_BACKFILL_MAX && Date.now() < rok; i--) {
         for (const vid of Object.keys(COMP_VIEWS)) {
           if (imamo.has(`${vid}-${okno[i]}`)) continue;
           await _radarCompositeCached(env, okno[i], vid).catch(() => null);
-          if (++n >= COMP_BACKFILL_MAX) break;
+          if (++n >= COMP_BACKFILL_MAX || Date.now() >= rok) break;
         }
       }
     }
@@ -2227,6 +2267,13 @@ async function _cronRenderRadarComposite(env) {
 // lasten proračun, brez tekmovanja s spodnjimi opravili. Cena: lasten
 // (neshared) prenos OPERA/ARSO za "sirok" namesto souporabe s kompozitom —
 // sprejemljivo, ker gre prek istega `cf:{cacheTtl}` robnega predpomnilnika.
+//
+// Prehod na plačljivi plan (10. 9. 2026) je prvotni vzrok odpravil — 30 s CPU
+// na invokacijo namesto 10 ms pomeni, da bi vsa opravila najbrž pretekla tudi
+// na skupnem urniku. Ločenega urnika kljub temu NE združuj nazaj: v produkciji
+// je preverjeno delujoč, združitev pa bi za nazaj plačala isto napako, ki je
+// osem tikov ni bilo videti (opravili sta tiho ne naredili ničesar, brez
+// napake). Če ga kdaj vseeno združiš, najprej preveri debug/newradar-cron.json.
 async function _cronRenderIconAndCells(env) {
   const t0 = Date.now();
   const iconOk = await _cronRenderIcon(env).catch(() => false);
@@ -2543,8 +2590,14 @@ export default {
     })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
-    ctx.waitUntil(_cronRenderRadarComposite(env));
+    // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
+    // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
+    // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
+    // naslednji tik, strela, ki je nihče ni poslušal, pa je ni več. Vsa
+    // opravila se sicer zaženejo sočasno; vrstni red odloča le, kdo prvi pride
+    // do svoje prve zahteve, ko je proračun invokacije tesen.
     ctx.waitUntil(_cronKeepLightningAlive(env));
+    ctx.waitUntil(_cronRenderRadarComposite(env));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
