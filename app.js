@@ -6050,6 +6050,18 @@ async function initValleyCam(){
   }catch(_){card.hidden=true;}
 }
 
+// Kartica je "hidden" do naložitve, zato je ni mogoče opazovati neposredno —
+// isti IntersectionObserver vzorec kot pri radarju (initMeteorecRadar), samo
+// na sosednjem sentinel elementu, ki ima layout box tudi pred nalaganjem.
+(function(){
+  const el=document.getElementById('valcam-sentinel');if(!el)return;
+  if(!('IntersectionObserver' in window)){initValleyCam();return;}
+  const io=new IntersectionObserver(es=>{
+    if(es.some(e=>e.isIntersecting)){io.disconnect();initValleyCam();}
+  },{rootMargin:'200px'});
+  io.observe(el);
+})();
+
 async function initNowcast(){
   const wrap=document.getElementById('nowcast-wrap');
   if(!wrap)return;
@@ -15940,7 +15952,6 @@ async function init(){
   try{initWeatherQA();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
-  runAdvancedOnly(()=>initValleyCam());
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
   try{autoLoadHistoryFile();}catch(_){}
