@@ -1048,9 +1048,10 @@ def build_kalkulator_page():
 # poplav) ostaja na /vodostaj-savinje/, ta stran je samo strnjen prikaz v
 # MeteoGasilec kontekstu.
 
-# Isti pragovi/imena kot station_status() v generate_vodostaj_page.py — samo
-# barva čipa je tu, ker je le vizualna (Python stran ne zna barv).
-_STATION_STATUS_COLOR = {"Normalen": "#22c55e", "Povečan": "#eab308", "Opozorilo": "#f97316", "Alarm": "#ef4444"}
+# Barva čipa po resnosti iz station_level() (0–3) — ne po besedilu oznake:
+# to se med postajami razlikuje (ARSO-jeva lastna oznaka pretoka, npr. »mali
+# pretok«) in bi ga ujemanje po nizu zgrešilo.
+_STATION_LEVEL_COLOR = ["#22c55e", "#eab308", "#f97316", "#ef4444"]
 
 
 def build_vodotoki_page():
@@ -1063,8 +1064,9 @@ def build_vodotoki_page():
     if stations:
         cards = []
         for s in stations:
-            status = vod.station_status(s["pretok"])
-            col = _STATION_STATUS_COLOR.get(status, "#94a3b8")
+            status = vod.station_status(s["pretok"], s)
+            lvl = vod.station_level(s["pretok"], s)
+            col = _STATION_LEVEL_COLOR[lvl] if lvl is not None else "#94a3b8"
             cards.append(f'''    <div class="gf-station-card">
       <h3>{_esc(s["name"])}</h3>
       <div class="gf-station-stats">

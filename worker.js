@@ -4604,6 +4604,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
                   pretok: num(field(b, "pretok")),
                   temperatura: num(field(b, "temp_vode")),
                   datum: field(b, "datum"),
+                  // Uradni pragovi visokih voda ZA TO POSTAJO in ARSO-jeva
+                  // lastna oznaka pretoka. Brez njih je vsaka ocena stanja
+                  // umerjena na eno postajo in za ostale napačna: prvi prag
+                  // je pri Solčavi 56 m³/s, pri Letušu 360.
+                  vv1: num(field(b, "prvi_vv_pretok")),
+                  vv2: num(field(b, "drugi_vv_pretok")),
+                  vv3: num(field(b, "tretji_vv_pretok")),
+                  znacilni: field(b, "pretok_znacilni"),
                 },
               });
             }

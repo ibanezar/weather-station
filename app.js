@@ -12396,7 +12396,39 @@ function buildDewMatrix(){
 // ── SAVINJA RIVER — vodostaj & napoved pretoka ─────────────
 // ══════════════════════════════════════════════════════════
 const _RIVER_CACHE_KEY='wx-river-v1';
-const _RIVER_THRESHOLDS={normal:30,raised:80,warning:200,alarm:400}; // m³/s GloFAS at Rečica
+const _RIVER_THRESHOLDS={normal:30,raised:80,warning:200,alarm:400}; // m³/s, umerjeno na Letuš
+
+// Stanje postaje po pragovih, ki jih ARSO objavi ZA TO POSTAJO
+// (`prvi/drugi/tretji_vv_pretok`, worker jih posreduje kot vv1/vv2/vv3).
+// _RIVER_THRESHOLDS je umerjen na eno samo postajo in za druge ne velja — pri
+// Solčavi je naš prag za »Opozorilo« (200 m³/s) nad tretjim pragom ARSO (100),
+// torej bi tam pravo visoko vodo prikazali kot normalno stanje. Naš približek
+// zato ostane samo tam, kjer ARSO pragov ne objavi.
+// Ko je pretok pod prvim pragom, prevzamemo ARSO-jevo lastno oznako
+// (`pretok_znacilni`, npr. »mali pretok«) namesto svoje besede.
+// Namerna podvojitev station_level()/station_status() iz
+// tools/generate_vodostaj_page.py (klient proti generatorju strani, isto
+// načelo kot drugod) — če spremeniš eno, spremeni drugo.
+function riverStationStatus(p){
+  const q=p?.pretok!=null?Number(p.pretok):(p?.q!=null?Number(p.q):null);
+  if(q==null||!isFinite(q))return{cls:'normal',txt:'—',opis:''};
+  const n=(v)=>v!=null&&isFinite(Number(v))?Number(v):null;
+  const vv1=n(p.vv1),vv2=n(p.vv2),vv3=n(p.vv3);
+  if(vv1!=null){
+    if(vv3!=null&&q>=vv3)return{cls:'alarm',txt:'3. prag ARSO',opis:'tretji prag visokih voda: '+vv3+' m³/s'};
+    if(vv2!=null&&q>=vv2)return{cls:'warning',txt:'2. prag ARSO',opis:'drugi prag visokih voda: '+vv2+' m³/s'};
+    if(q>=vv1)return{cls:'raised',txt:'1. prag ARSO',opis:'prvi prag visokih voda: '+vv1+' m³/s'};
+    const zn=(p.znacilni||'').trim();
+    return{cls:'normal',txt:zn?zn.charAt(0).toUpperCase()+zn.slice(1):'Pod pragom',
+           opis:'prvi prag visokih voda: '+vv1+' m³/s'};
+  }
+  const T=_RIVER_THRESHOLDS;
+  const opis='ocena brez uradnih pragov ARSO za to postajo';
+  if(q>=T.alarm)return{cls:'alarm',txt:'Alarm (ocena)',opis};
+  if(q>=T.warning)return{cls:'warning',txt:'Opozorilo (ocena)',opis};
+  if(q>=T.raised)return{cls:'raised',txt:'Povečan (ocena)',opis};
+  return{cls:'normal',txt:'Normalen (ocena)',opis};
+}
 
 async function fetchSavinjaRiver(){
   const el=document.getElementById('river-body');
@@ -12429,32 +12461,34 @@ function renderSavinjaRiver(arsoData, floodData){
   const todayIdx=times.indexOf(today);
   const todayQ=todayIdx>=0?flows[todayIdx]:flows[7]||null; // 7=today if past_days=7
   const maxQ=Math.max(...flows.filter(v=>v!=null),0.01);
-  // ── Status ─────────────────────────────────────────────
-  let pillCls='normal',pillTxt='Normalen pretok';
-  if(todayQ!=null){
-    if(todayQ>=T.alarm){pillCls='alarm';pillTxt='ALARM — poplavna nevarnost';}
-    else if(todayQ>=T.warning){pillCls='warning';pillTxt='Opozorilo — zvišan pretok';}
-    else if(todayQ>=T.raised){pillCls='raised';pillTxt='Povečan pretok';}
-  }
-  // ── ARSO station info ───────────────────────────────────
-  let arsoHtml='';
-  if(arsoData?.stations?.length){
-    const st=arsoData.stations[0];
-    const p=st.properties||{};
-    const name=p.postaja||p.name||p.station||'ARSO postaja';
-    const h=p.vodostaj||p.h||p.level||'—';
-    const q=p.pretok||p.q||p.flow||'—';
-    arsoHtml=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">ARSO: <b style="color:var(--text)">${name}</b> · Vodostaj: <b>${h}</b> cm · Pretok: <b>${q}</b> m³/s</div>`;
-  }
+  // ── Izmerjeno stanje (ARSO) ─────────────────────────────
+  // Glavna številka kartice je IZMERJENI pretok najbližje postaje, ne
+  // modelska vrednost GloFAS. GloFAS ima mrežo ~5 km in Savinje v ozki dolini
+  // ne razloči — celica pri Rečici je danes kazala manj kot izmerjeno pri
+  // Solčavi daleč gorvodno, na Letušu pa 0,08 m³/s proti izmerjenim 9,28.
+  // Model zato ostane na kartici kot NAPOVED, jasno označen, izmerjena
+  // vrednost pa je tista, ki jo bralec prebere kot »zdaj«.
+  const arsoSt=arsoData?.stations?.[0]||null;
+  const ap=arsoSt?.properties||{};
+  const arsoName=(ap.postaja||ap.name||ap.station||'ARSO postaja').replace(/\s*\(.*?\)/g,'').trim();
+  const arsoQ=ap.pretok??ap.q??null;
+  const arsoH=ap.vodostaj??ap.h??ap.level??null;
+  const stanje=riverStationStatus(ap);
+  const pillCls=stanje.cls,pillTxt=arsoQ!=null?stanje.txt:'Ni izmerjenega pretoka';
+  const arsoHtml=arsoSt
+    ? `<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Izmerjeno: <b style="color:var(--text)">${arsoName}</b>`
+      +(ap.datum?` · ${ap.datum}`:'')
+      +(ap.temperatura!=null?` · voda ${Number(ap.temperatura).toFixed(1)} °C`:'')+'</div>'
+    : '<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Izmerjenih podatkov ARSO trenutno ni — spodaj je samo modelska napoved.</div>';
   // ── KPIs ────────────────────────────────────────────────
   const next3max=flows.slice(Math.max(0,todayIdx),Math.min(flows.length,(todayIdx>=0?todayIdx:7)+4)).filter(v=>v!=null);
   const max3d=next3max.length?Math.max(...next3max):null;
   const kpis=
     '<div class="river-kpis">'+
-    `<div class="river-kpi"><div class="river-kpi-val">${todayQ!=null?todayQ.toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Pretok zdaj</div></div>`+
-    `<div class="river-kpi"><div class="river-kpi-val">${max3d!=null?max3d.toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max 3 dni</div></div>`+
-    `<div class="river-kpi"><div class="river-kpi-val">${maxQ.toFixed(0)} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max 16 dni</div></div>`+
-    `<div class="river-kpi"><div class="river-kpi-val">${flows.length}</div><div class="river-kpi-lbl">Dni napovedi</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${arsoQ!=null?Number(arsoQ).toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Pretok zdaj · ARSO</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${arsoH!=null?Number(arsoH).toFixed(0):'—'} <small style="font-size:.65rem">cm</small></div><div class="river-kpi-lbl">Vodostaj zdaj · ARSO</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${max3d!=null?max3d.toFixed(1):'—'} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max 3 dni · model</div></div>`+
+    `<div class="river-kpi"><div class="river-kpi-val">${maxQ.toFixed(0)} <small style="font-size:.65rem">m³/s</small></div><div class="river-kpi-lbl">Max ${flows.length} dni · model</div></div>`+
     '</div>';
   // ── SVG chart ───────────────────────────────────────────
   const W=600,H=110,PL=40,PR=10,PT=12,PB=28,CW=W-PL-PR,CH=H-PT-PB;
@@ -12511,6 +12545,13 @@ function renderSavinjaRiver(arsoData, floodData){
       `<span class="river-pill ${pillCls}">${pillTxt}</span>`+
     '</div>'+
     arsoHtml+kpis+
+    // Vira se ne zlivata v eno številko (isto načelo kot pri padavinah na
+    // kartici za zgodbe): graf je modelski potek, ne meritev, in se z zgornjo
+    // izmerjeno vrednostjo ne ujema — v ozki dolini jo model podceni.
+    '<div style="font-size:.68rem;color:var(--muted);margin:.15rem 0 .35rem">'+
+      'Graf: modelska napoved GloFAS za mrežno celico ~5 km. V ozki dolini pretok podceni, '+
+      'zato ga ne primerjaj neposredno z izmerjeno vrednostjo zgoraj — bere se kot potek, ne kot količina.'+
+    '</div>'+
     '<div class="river-chart-wrap">'+svg+'</div>'+
     '<div class="river-legend">'+
       '<span><span class="river-legend-dot" style="background:rgba(148,163,184,.5)"></span>Preteklost</span>'+
@@ -14494,29 +14535,21 @@ async function fetchArsoStations(){
     const d=await r.json();
     const stations=d.stations||[];
     if(!stations.length){el.innerHTML='<div class="clim-loading" style="color:var(--muted)">Podatki ARSO postaj trenutno nedostopni</div>';return;}
-    const T=_RIVER_THRESHOLDS;
     let html='<div class="arso-stations">';
     for(const st of stations){
       const p=st.properties||{};
       const name=(p.postaja||p.name||p.station||'ARSO').replace(/\s*\(.*?\)/g,'').trim();
-      const h=p.vodostaj!=null?p.vodostaj:(p.h!=null?p.h:'—');
-      const q=p.pretok!=null?p.pretok:(p.q!=null?p.q:null);
+      const h=p.vodostaj??p.h??p.level??null;
+      const q=p.pretok??p.q??null;
       const tw=p.temperatura??p.TW??p.tw??p.T??null;
-      const coords=st.geometry?.coordinates;
-      const reka=(p.reka||p.river||'Savinja');
-      let pillCls='normal',pillTxt='Normalen';
-      if(q!=null){
-        if(q>=T.alarm){pillCls='alarm';pillTxt='Alarm';}
-        else if(q>=T.warning){pillCls='warning';pillTxt='Opozorilo';}
-        else if(q>=T.raised){pillCls='raised';pillTxt='Povečan';}
-      }
+      const stanje=riverStationStatus(p);
       const twCol=tw!=null?(Number(tw)<10?'var(--blue)':Number(tw)<18?'#34d399':'#fbbf24'):'';
       html+=`<div class="arso-st">`+
         `<div class="arso-st-name" title="${name}">${name}</div>`+
-        `<div class="arso-st-row"><span class="arso-st-val" style="color:var(--blue)">${h!=='—'?Number(h).toFixed(0):h}</span><span class="arso-st-unit">cm</span></div>`+
+        `<div class="arso-st-row"><span class="arso-st-val" style="color:var(--blue)">${h!=null?Number(h).toFixed(0):'—'}</span><span class="arso-st-unit">cm</span></div>`+
         (q!=null?`<div class="arso-st-row"><span class="arso-st-val" style="color:var(--cyan)">${Number(q).toFixed(1)}</span><span class="arso-st-unit">m³/s</span></div>`:'')+
         (tw!=null?`<div class="arso-st-row"><span class="arso-st-val" style="color:${twCol}">${Number(tw).toFixed(1)}</span><span class="arso-st-unit">°C vode</span></div>`:'')+
-        `<div><span class="arso-st-pill ${pillCls}">${pillTxt}</span></div>`+
+        `<div><span class="arso-st-pill ${stanje.cls}"${stanje.opis?` title="${stanje.opis}"`:''}>${stanje.txt}</span></div>`+
         `</div>`;
     }
     html+='</div>';
