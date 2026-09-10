@@ -4313,7 +4313,9 @@ async function refreshMeteorecRadar(){
     }
     // Dedup po zadnjem RADARSKEM okvirju (ta se spreminja vsakih 5 min);
     // ICON se osveži urno in bi sicer redko sprožil ta zgodnji izhod.
-    if(list[list.length-1].zig===_mradLast)return;   // nič novega
+    // Izhod pa NE sme preskočiti okvirjev, ki se prejšnjič niso naložili —
+    // sicer ostane luknja v animaciji do konca seje (glej mradLoadFrame).
+    if(list[list.length-1].zig===_mradLast&&!_mradFrames.some(mradZaPonovni))return;
     _mradLast=list[list.length-1].zig;
 
     const zivi=new Set(full.map(f=>f.zig));
@@ -4341,6 +4343,12 @@ async function refreshMeteorecRadar(){
       await mradLoadFrame(i);
       if(_mradPlaying&&!_mradTimer&&mradReady().length>2)startMeteorecRadarAnim();
     }
+    // Drugi prehod samo čez tiste, ki so odpovedali: hipna napaka workerja
+    // (izris se ni ujel v proračun) se tako zaceli v nekaj sekundah in ne
+    // šele ob naslednji osvežitvi čez pet minut.
+    for(let i=0;i<_mradFrames.length;i++){
+      if(mradZaPonovni(_mradFrames[i]))await mradLoadFrame(i);
+    }
     if(_mradPlaying)startMeteorecRadarAnim();
   }catch(e){
     console.warn('Radar padavin:',e);
@@ -4348,16 +4356,34 @@ async function refreshMeteorecRadar(){
   }
 }
 
+// Okvir, ki se ni naložil, ni izgubljen okvir. Animacija preskoči vse, kar ni
+// `ready`, zato je en sam neuspel prenos prej pomenil trajno luknjo v
+// časovnici (»slika preskoči iz 6:15 na 6:40«) — plast je ostala pripeta na
+// okvir, zato ga naslednja osvežitev ni več poskusila naložiti. Zdaj se ob
+// napaki plast odpne in okvir gre v vrsto za ponovni poskus; poskusov je malo,
+// ker vsak zgrešen okvir workerja stane poln izris (glej dnevne meje v
+// CLAUDE.md).
+const MRAD_POSKUSOV=3;
+const mradZaPonovni=(f)=>!!f&&!f.ready&&!f.layer&&(f.napak||0)<MRAD_POSKUSOV;
+
 function mradLoadFrame(i){
   const f=_mradFrames[i];
-  if(!f||f.layer)return Promise.resolve();
+  if(!f||f.layer||f.ready)return Promise.resolve();
+  if((f.napak||0)>=MRAD_POSKUSOV)return Promise.resolve();
   return new Promise(res=>{
     const src=f.kind==='icon'
       ?PROXY+'/icon-precip?t='+encodeURIComponent(f.zig)
       :PROXY+'/radar-composite?pogled='+_mradView+'&t='+encodeURIComponent(f.zig);
     const layer=L.imageOverlay(src,_mradBounds,{opacity:0,interactive:false});
     layer.once('load',()=>{f.ready=true;res();});
-    layer.once('error',()=>{f.err=true;res();});
+    layer.once('error',()=>{
+      f.napak=(f.napak||0)+1;
+      // Plast odstranimo in pozabimo, sicer bi `f.layer` za vedno pomenil
+      // »ta okvir je že v delu« in ponovnega poskusa ne bi bilo nikoli.
+      try{_mradMap.removeLayer(layer);}catch(_){}
+      f.layer=null;
+      res();
+    });
     layer.addTo(_mradMap);
     f.layer=layer;
   });

@@ -298,6 +298,28 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
   endpoint namesto na klientsko WebSocket povezavo.
 
+## Lasten radar padavin — luknja v animaciji ni dovoljena
+
+Kompozit (ARSO jedro + obroč EUMETNET OPERA) sestavi `worker.js`
+(`/radar-composite`, `/radar-composite.json`), animacijo pa vodi `app.js`
+(`refreshMeteorecRadar`). Animacija pokriva zadnjo uro s korakom 5 minut in
+**preskoči vsak okvir, ki ni naložen** — zato je vsak izpadel okvir viden kot
+skok v času (»slika preskoči iz 6:15 na 6:40«). Tri zareze, ki to preprečujejo:
+
+- **Neuspel prenos okvirja se ponovi.** Ob napaki `mradLoadFrame()` plast
+  odpne in `f.layer` postavi nazaj na `null`; prej je plast ostala pripeta,
+  zato je bil okvir do konca seje označen kot »že v delu« in ga ni nič več
+  poskusilo naložiti. Poskusov je največ `MRAD_POSKUSOV` — vsak zgrešen okvir
+  workerja stane poln izris (glej dnevne meje spodaj).
+- **Cron doriše luknje, ne le najnovejšega okvirja.** Vseh šest opravil
+  petminutnega crona si deli en proračun, zato kak tik izpade in okvir ostane
+  mrzel; `_cronRenderRadarComposite` zato po čiščenju (`_radarCompositeUpkeep`
+  vrne, kaj je v R2) doriše do `COMP_BACKFILL_MAX` manjkajočih okvirjev iz
+  okna animacije, od najnovejšega proti najstarejšemu.
+- **Seznam ključev OPERA sega tri ure nazaj**, ne dve: OPERA zaostaja ~10 minut,
+  animacija sega uro nazaj od zadnjega posnetka, torej je najstarejši potrebni
+  žig lahko star 75 minut in je tik po prehodu polne ure padel iz seznama.
+
 ## Dnevne meje Cloudflare — pazi, kaj kliče app.js v zanki
 
 Worker teče na **brezplačnem planu**, kjer veljajo dnevne meje, ki se ponastavijo
