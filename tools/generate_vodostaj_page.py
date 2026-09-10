@@ -30,7 +30,8 @@ FORECAST_DAYS = 7
 REF_LAT, REF_LON = 46.3258, 14.9211  # Rečica ob Savinji, za razvrščanje postaj po bližini
 
 # Isti pragovi kot na živem pripomočku (app.js _RIVER_THRESHOLDS), umerjeni
-# na postajo Letuš.
+# na postajo Letuš. Uporabljajo se SAMO za postaje, za katere ARSO ne objavi
+# svojih pragov visokih voda — glej station_status().
 THRESHOLDS = {"raised": 80, "warning": 200, "alarm": 400}
 
 DAN_KRATKO = ["pon", "tor", "sre", "čet", "pet", "sob", "ned"]
@@ -90,6 +91,12 @@ def fetch_arso_stations():
             "vodostaj": to_float("vodostaj"),
             "pretok": to_float("pretok"),
             "temp": to_float("temp_vode"),
+            # Uradni pragovi visokih voda za TO postajo — brez njih je ocena
+            # stanja umerjena na eno samo postajo in za ostale napačna.
+            "vv1": to_float("prvi_vv_pretok"),
+            "vv2": to_float("drugi_vv_pretok"),
+            "vv3": to_float("tretji_vv_pretok"),
+            "znacilni": (p.findtext("pretok_znacilni") or "").strip() or None,
             "dist2": (lat - REF_LAT) ** 2 + (lon - REF_LON) ** 2,
         })
     out.sort(key=lambda s: s["dist2"])
@@ -107,16 +114,46 @@ def flow_status(q, mean):
     return "Visok pretok", ratio
 
 
-def station_status(q):
+def station_level(q, station=None):
+    """Resnost stanja postaje: None (ni podatka) ali 0–3.
+
+    Meri se po pragovih visokih voda, ki jih ARSO objavi ZA TO POSTAJO
+    (`prvi/drugi/tretji_vv_pretok`). THRESHOLDS je umerjen na Letuš in za druge
+    postaje ne velja: pri Solčavi je naš prag za »Opozorilo« (200 m³/s) nad
+    tretjim pragom ARSO (100), torej bi tam pravo visoko vodo prikazali kot
+    normalno stanje. Naš približek zato ostane samo tam, kjer ARSO pragov ne
+    objavi — in je v izpisu tako tudi označen.
+    """
     if q is None:
-        return "—"
+        return None
+    s = station or {}
+    vv1, vv2, vv3 = s.get("vv1"), s.get("vv2"), s.get("vv3")
+    if vv1 is not None:
+        if vv3 is not None and q >= vv3:
+            return 3
+        if vv2 is not None and q >= vv2:
+            return 2
+        return 1 if q >= vv1 else 0
     if q >= THRESHOLDS["alarm"]:
-        return "Alarm"
+        return 3
     if q >= THRESHOLDS["warning"]:
-        return "Opozorilo"
-    if q >= THRESHOLDS["raised"]:
-        return "Povečan"
-    return "Normalen"
+        return 2
+    return 1 if q >= THRESHOLDS["raised"] else 0
+
+
+def station_status(q, station=None):
+    """Besedna oznaka stanja. Pod prvim pragom prevzame ARSO-jevo lastno
+    oznako (`pretok_znacilni`, npr. »mali pretok«) namesto naše besede."""
+    lvl = station_level(q, station)
+    if lvl is None:
+        return "—"
+    s = station or {}
+    if s.get("vv1") is not None:
+        if lvl:
+            return f"{lvl}. prag ARSO"
+        zn = s.get("znacilni")
+        return zn[0].upper() + zn[1:] if zn else "Pod pragom"
+    return ["Normalen (ocena)", "Povečan (ocena)", "Opozorilo (ocena)", "Alarm (ocena)"][lvl]
 
 
 def build_body(flood, stations):
@@ -130,18 +167,27 @@ def build_body(flood, stations):
     max7 = max(discharge)
     status, ratio = flow_status(today_q, mean_q)
 
+    # Na vprašanje »kakšen je pretok danes« odgovori IZMERJENA vrednost, ne
+    # modelska. GloFAS ima mrežo ~5 km in Savinje v ozki dolini ne razloči —
+    # njegova celica pri Rečici kaže nekajkrat manj od meritve na postaji nekaj
+    # kilometrov dolvodno. Model ostane na strani kot napoved poteka, jasno
+    # označen; vira se ne zlivata v eno številko.
     nearest = stations[0] if stations else None
-    nearest_txt = ""
-    if nearest and nearest.get("pretok") is not None:
-        nearest_txt = (f" Najbližja merilna postaja ARSO ({nearest['name']}) trenutno meri "
-                        f"{seo.num(nearest['pretok'], 1)} m³/s"
-                        + (f" in vodostaj {seo.num(nearest['vodostaj'], 0)} cm" if nearest.get("vodostaj") is not None else "")
-                        + ".")
+    meritev = nearest.get("pretok") if nearest else None
 
-    answer = (f'  <p class="archive-intro">Napoved pretoka Savinje pri Rečici ob Savinji za danes je '
-              f'<strong>{seo.num(today_q, 1)} m³/s</strong> ({status.lower()}, {round(ratio * 100)} % tipične vrednosti '
-              f'{seo.num(mean_q, 1)} m³/s).{nearest_txt} Podatki GloFAS in ARSO se osvežujejo dnevno — '
-              f'nazadnje {TODAY.isoformat()}.</p>')
+    model_txt = (f'Modelska napoved GloFAS za današnji dan je {seo.num(today_q, 1)} m³/s '
+                 f'({status.lower()}, {round(ratio * 100)} % tipične vrednosti {seo.num(mean_q, 1)} m³/s); '
+                 f'v ozki dolini pretok podceni, zato je merodajna meritev.')
+    if meritev is not None:
+        answer = (f'  <p class="archive-intro">Savinja pri Rečici ob Savinji ima danes izmerjen pretok '
+                  f'<strong>{seo.num(meritev, 1)} m³/s</strong>'
+                  + (f' in vodostaj {seo.num(nearest["vodostaj"], 0)} cm' if nearest.get("vodostaj") is not None else '')
+                  + f' — najbližja merilna postaja ARSO je {nearest["name"]} '
+                  f'({station_status(meritev, nearest).lower()}). {model_txt} '
+                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}.</p>')
+    else:
+        answer = (f'  <p class="archive-intro">Meritev ARSO trenutno ni na voljo. {model_txt} '
+                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}.</p>')
 
     warn_box = ""
     if ratio >= 2.5:
@@ -150,14 +196,14 @@ def build_body(flood, stations):
 
     quick = f'''  <div class="stat-grid">
     <div class="stat-card c-rain">
-      <div class="sc-label">Pretok danes</div>
-      <div class="sc-val">{seo.num(today_q, 1)}</div>
-      <div class="sc-sub">m³/s · {status} · Rečica ob Savinji</div>
+      <div class="sc-label">Pretok danes — izmerjeno</div>
+      <div class="sc-val">{seo.num(meritev, 1) if meritev is not None else "—"}</div>
+      <div class="sc-sub">m³/s · {nearest["name"] if meritev is not None else "meritev ni na voljo"} · ARSO</div>
     </div>
     <div class="stat-card c-up">
       <div class="sc-label">Maks. v napovedi (7 dni)</div>
       <div class="sc-val">{seo.num(max7, 1)}</div>
-      <div class="sc-sub">m³/s · GloFAS</div>
+      <div class="sc-sub">m³/s · model GloFAS</div>
     </div>
     <div class="stat-card c-down">
       <div class="sc-label">Tipičen pretok</div>
@@ -173,7 +219,7 @@ def build_body(flood, stations):
             f'      <tr><th>{s["name"]}</th>'
             f'<td>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm · '
             f'{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s · '
-            f'{station_status(s["pretok"])}</td></tr>'
+            f'{station_status(s["pretok"], s)}</td></tr>'
             for s in stations[:6]
         )
         st_table = f'  <table class="stats">\n{st_rows}\n  </table>'
@@ -205,15 +251,20 @@ def build_body(flood, stations):
     # ── FAQ ─────────────────────────────────────────────────────────────────
     qa = [
         ("Kakšen je trenutni pretok Savinje pri Rečici ob Savinji?",
-         f"Po napovedi GloFAS (Open-Meteo) je pretok Savinje danes okoli {seo.num(today_q, 1)} m³/s, "
-         f"kar je {round(ratio * 100)} % tipične vrednosti za ta datum."),
+         (f"Najbližja merilna postaja ARSO ({nearest['name']}) danes meri {seo.num(meritev, 1)} m³/s. "
+          if meritev is not None else "Meritev ARSO trenutno ni na voljo. ")
+         + f"Modelska napoved GloFAS (Open-Meteo) za isti dan je {seo.num(today_q, 1)} m³/s, kar je "
+           f"{round(ratio * 100)} % tipične vrednosti za ta datum; model ima mrežo približno 5 km in "
+           f"pretok v ozki dolini podceni, zato je merodajna meritev."),
         ("Kdaj je bila zadnja večja poplava Savinje?",
          "Najhujša doslej zabeležena poplava je bila avgusta 2023, ko je pretok pri Letušu dosegel približno "
          "1100 m³/s in povzročil škodo za več kot 500 milijonov evrov po vsej Zgornji Savinjski dolini."),
-        ("Kaj pomenijo pragovi 'povečan', 'opozorilo' in 'alarm'?",
-         "Gre za okvirne pragove pretoka Savinje (izhodišče postaja Letuš): povečan pretok od približno "
-         "80 m³/s, opozorilo od 200 m³/s, alarm od 400 m³/s naprej. To niso uradni ARSO/URSZR pragovi, "
-         "temveč orientacijska ocena za hitro presojo razmer."),
+        ("Kaj pomenijo pragovi pri posameznih postajah?",
+         "Stanje vsake postaje se primerja z njenimi lastnimi pragovi visokih voda, ki jih objavi ARSO — "
+         "ti se med postajami močno razlikujejo, ker se razlikuje velikost prispevnega območja: prvi prag "
+         "je pri Solčavi okoli 56 m³/s, pri Letušu pa okoli 360 m³/s. Kjer ARSO pragov ne objavi, je "
+         "stanje označeno kot ocena po enotnem približku (povečan od 80, opozorilo od 200, alarm od "
+         "400 m³/s), umerjenem na Letuš. Za ukrepanje vedno štejejo uradna opozorila ARSO in URSZR."),
         ("Kje spremljam uradna opozorila pred poplavami?",
          "Uradna opozorila objavljata ARSO (meteo.arso.gov.si) in Uprava RS za zaščito in reševanje "
          "(gov.si/urszr); pri višjih vodostajih spremljaj tudi obvestila občine Rečica ob Savinji."),
@@ -240,10 +291,12 @@ def build_body(flood, stations):
   <a href="/blog/poplave-2023.html">ločenem članku na blogu</a>.</p>
 {hist_table}
   <h2>Kako brati pragove pretoka</h2>
-  <p class="archive-intro">Pragovi na tej strani (povečan, opozorilo, alarm) so orientacijska ocena, umerjena na
-  postajo Letuš, in niso uradna klasifikacija ARSO ali URSZR. Namenjeni so hitri presoji, ali je pretok Savinje
-  v danem trenutku bistveno nad običajnim za ta del leta — pri dejanski nevarnosti vedno upoštevaj uradna
-  opozorila.</p>
+  <p class="archive-intro">Stanje posamezne postaje v tabeli zgoraj se primerja z njenimi lastnimi pragovi
+  visokih voda, kot jih objavi ARSO (prvi, drugi in tretji prag). Ti se med postajami močno razlikujejo, ker
+  se razlikuje velikost prispevnega območja — enoten prag za vso dolino bi bil pri Solčavi previsok in pri
+  Celju prenizek. Kjer ARSO pragov ne objavi, je stanje izrecno označeno kot ocena po enotnem približku,
+  umerjenem na Letuš. Nobena od teh oznak ni uradno opozorilo: pri dejanski nevarnosti vedno štejejo
+  objave ARSO in URSZR.</p>
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">🚨 Uradni viri in opozorila</div>
     <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
@@ -257,7 +310,7 @@ def build_body(flood, stations):
   na <a href="/">naslovni strani Meteorec</a> (zavihek »Vodostaj«).</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
-    return body, today_q, status, ratio
+    return body, today_q, status, ratio, meritev
 
 
 def main():
@@ -275,15 +328,18 @@ def main():
         stations = []
 
     try:
-        body, today_q, status, ratio = build_body(flood, stations)
+        body, today_q, status, ratio, meritev = build_body(flood, stations)
     except ValueError as e:
         print(f"✗ {e}", file=sys.stderr)
         sys.exit(1)
 
     url = "/vodostaj-savinje/"
     title = "Vodostaj in pretok Savinje — Zgornja Savinjska dolina"
-    desc = (f"Pretok Savinje danes: {seo.num(today_q, 1)} m³/s ({status.lower()}). GloFAS napoved za 7 dni, "
-            f"meritve ARSO ob Savinji in zgodovina poplav vključno z avgustom 2023.")
+    # Opis vodi izmerjena vrednost; modelska gre v besedilo strani, ne v opis,
+    # ker je opis odgovor na "kakšen je pretok danes".
+    desc = ((f"Pretok Savinje danes: {seo.num(meritev, 1)} m³/s, izmerjeno na najbližji postaji ARSO. "
+             if meritev is not None else "Pretok Savinje danes po napovedi GloFAS. ")
+            + "GloFAS napoved za 7 dni, meritve ARSO ob Savinji in zgodovina poplav vključno z avgustom 2023.")
 
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
@@ -292,7 +348,7 @@ def main():
 
     html = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("vodostaj-savinje/index.html", html, force=True)
-    print(f"  → vodostaj-savinje/index.html ({seo.num(today_q, 1)} m³/s, {status})")
+    print(f"  → vodostaj-savinje/index.html (izmerjeno {seo.num(meritev, 1)} m³/s, model {seo.num(today_q, 1)} m³/s, {status})")
 
 
 if __name__ == "__main__":

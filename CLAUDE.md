@@ -320,6 +320,35 @@ skok v času (»slika preskoči iz 6:15 na 6:40«). Tri zareze, ki to preprečuj
   animacija sega uro nazaj od zadnjega posnetka, torej je najstarejši potrebni
   žig lahko star 75 minut in je tik po prehodu polne ure padel iz seznama.
 
+## Vodostaj — izmerjeno pred modelom, pragovi po postajah
+
+Zavihek »Vodostaj« (`app.js`, `initVodostaj`), stran `/vodostaj-savinje/` in
+`/meteogasilec/vodotoki/` mešajo dva vira, ki se ne smeta zliti v eno številko:
+
+- **Glavna številka je IZMERJEN pretok ARSO, ne GloFAS.** Open-Meteo Flood
+  (GloFAS) ima mrežo ~5 km in Savinje v ozki dolini ne razloči: 10. 9. 2026 je
+  celica pri Rečici kazala 1,9 m³/s, ARSO pa je pri Nazarjah izmeril 7,75 in
+  pri Letušu 9,28 (celica nad Letušem je dala 0,08). Model ostane na strani kot
+  **napoved poteka**, izrecno označen; kartica je prej modelsko vrednost
+  pokazala kot »Pretok zdaj« tik nad izmerjeno in bralec je videl dve številki
+  za isto reko.
+- **Stanje postaje se meri po pragovih TE postaje.** ARSO v hidro XML pošlje
+  `prvi/drugi/tretji_vv_pretok` za vsako postajo posebej in svojo oznako
+  pretoka (`pretok_znacilni`); worker jih posreduje kot `vv1/vv2/vv3` in
+  `znacilni`. Naš enotni `_RIVER_THRESHOLDS` (80/200/400 m³/s) je umerjen na
+  Letuš in je bil za druge postaje napačen v obe smeri: pri Solčavi je prag za
+  »Opozorilo« ležal nad tretjim pragom ARSO (100 m³/s), torej bi pravo visoko
+  vodo prikazali kot normalno stanje. Približek se uporabi samo tam, kjer ARSO
+  pragov nima (Medlog), in je tam označen z »(ocena)«.
+- Oceno računata `riverStationStatus()` v `app.js` in
+  `station_level()`/`station_status()` v `tools/generate_vodostaj_page.py` —
+  namerna podvojitev (klient proti generatorju, isto načelo kot drugod v
+  dokumentu); **če spremeniš eno, spremeni drugo**. `/meteogasilec/vodotoki/`
+  funkciji uvozi, ne podvaja, in barvo čipa izpelje iz `station_level()`, ne iz
+  besedila oznake — to se med postajami razlikuje.
+- Nobena od teh oznak ni uradno opozorilo in tako mora tudi pisati na strani;
+  za ukrepanje veljata ARSO in URSZR.
+
 ## Dnevne meje Cloudflare — pazi, kaj kliče app.js v zanki
 
 Worker teče na **brezplačnem planu**, kjer veljajo dnevne meje, ki se ponastavijo
