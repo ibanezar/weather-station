@@ -407,6 +407,11 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hm-secondary .hm-lbl{opacity:.8}
 .hm-sub-inline{text-transform:none;letter-spacing:0;margin-left:.15em;opacity:.85}
 .hm-sub{font-size:.65rem;color:var(--muted)}
+/* Padavinska ploščica ima dve podvrstici (izmerjena intenziteta + napoved),
+   zato tesnejši razmik; rep "do polnoči" na ozkem zaslonu odpade, ker bi se
+   vrstica v mreži treh stolpcev prelomila čez tri vrstice. */
+.hm-rain .hm-sub{line-height:1.25}
+@media(max-width:680px){.hm-fc-tail{display:none}}
 /* Live pulse animations */
 @keyframes live-pulse{0%{background:var(--fc-bg);box-shadow:none}30%{background:rgba(255,255,255,.07);box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}100%{background:var(--fc-bg);box-shadow:none}}
 @keyframes temp-pulse{0%,100%{text-shadow:0 0 40px currentColor}35%{text-shadow:0 0 80px currentColor,0 0 140px currentColor}}

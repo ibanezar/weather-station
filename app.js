@@ -1467,12 +1467,13 @@ async function fetchComingUp(){
 
     const hours=[];
     for(let i=si;i<h.time.length&&hours.length<25;i++)
-      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
+      hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,mm:h.precipitation?.[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     _cuDailyData=d;
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
     drawHeroSparkline();
     renderHeroBriefing();
+    renderHeroRainOutlook();
     try{renderStormTeaser();}catch(_){}
     const stripHours=hours.filter((_,i)=>i===0||i%2===0).slice(0,13);
 
@@ -2322,6 +2323,36 @@ function forecastPhrase(){
   return s;
 }
 
+// ── Junaška kartica, padavine: izmerjeno in napovedano ločeno ─────
+// Bralec je vprašal, ali je številka na ploščici napoved ali koliko je že
+// padlo — velika vrednost in "trenutno X mm/h" sta oboje MERITEV postaje,
+// napovedi na ploščici sploh ni bilo. Ta vrstica jo doda in jo poimenuje.
+// Podatek pride iz `_forecastHours` (isti klic kot obeti — nobenega novega
+// klica, glej dnevne meje v CLAUDE.md).
+// Ura, ki teče, je namenoma izpuščena: njen dež je deloma že v izmerjeni
+// kumulativi od polnoči in bi ga sicer prikazali dvakrat.
+function renderHeroRainOutlook(){
+  const el=document.getElementById('hs-rain-fc');
+  if(!el)return;
+  const now=Date.now(),todayStr=new Date().toDateString();
+  const prihod=(_forecastHours||[]).filter(x=>x.t.getTime()>now&&x.t.toDateString()===todayStr);
+  if(!prihod.length){el.hidden=true;return;}
+  const vsota=prihod.reduce((a,x)=>a+(x.mm||0),0);
+  const maxProb=Math.max(...prihod.map(x=>x.prob||0));
+  // Količina in verjetnost se razideta (0 mm ob 70 % ni redkost), zato ima
+  // vsak primer svoj stavek — sicer bi si ploščica nasprotovala z napovednim
+  // stavkom v briefingu, ki gre po verjetnosti (glej forecastPhrase).
+  const glava=vsota>=0.1
+    ?'napoved še +'+vsota.toFixed(1).replace('.',',')+' mm'
+    :maxProb>=50?'napoved: možne kaplje'
+    :'napoved: suho';
+  // "do polnoči" je v svojem span-u, ker se na ozkem zaslonu ploščica v mreži
+  // treh stolpcev drugače prelomi čez tri vrstice (skrije ga .hm-fc-tail v
+  // style.css). Vsebina je izpeljana iz naših številk, ne iz vnosa bralca.
+  el.innerHTML=glava+'<span class="hm-fc-tail"> do polnoči</span>';
+  el.hidden=false;
+}
+
 // ── Junaška kartica: "pametni povzetek" — en stavek namesto naštevanja podatkov ──
 // Sestavljen iz že izračunanih vrednosti (feelsStyle, dewLabel, yesterday-delta,
 // forecastPhrase), ne iz branja izrisanega besedila nazaj — da se ne ponovi
@@ -2383,6 +2414,7 @@ function applyObs(obs){
   updatePressureArc(m.pressure);
   const rr=m.precipRate??0;set('rain-rate',fmt(rr,2));set('rain-total',fmt(m.precipTotal,1));
   const rrEl=document.getElementById('hs-rain-rate');if(rrEl){rrEl.textContent='trenutno '+rr.toFixed(1).replace('.',',')+' mm/h';rrEl.style.color=rr>=0.1?'var(--blue)':'var(--muted)';}
+  renderHeroRainOutlook();
   document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
   const uv=obs.uv??0;set('uv-val',uv);set('uv-label',uvLabel(uv));document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
   const sol=m.solarRadiation??obs.solarRadiation;set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));

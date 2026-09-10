@@ -298,6 +298,34 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
   endpoint namesto na klientsko WebSocket povezavo.
 
+## Junaška kartica: padavine — izmerjeno in napovedano ločeno
+
+Bralec je 10. 9. 2026 vprašal, ali številka na padavinski ploščici pomeni
+napoved ali koliko je danes že padlo. Ploščica je bila označena samo z besedo
+»Danes«, obe vrednosti na njej pa sta bili **meritvi** postaje: kumulativa
+dežemera od polnoči (`hs-rain-today`) in trenutna intenziteta (`hs-rain-rate`).
+Napovedi na njej sploh ni bilo, jo je pa lahko omenil napovedni stavek v istem
+heroju (`forecastPhrase()`), kar je dvoumnost še povečalo.
+
+- Oznaka ploščice je **»Padlo danes«**, ne »Danes«.
+- Napoved je svoja vrstica (`hs-rain-fc`, `renderHeroRainOutlook()`) in se
+  vedno začne z besedo »napoved«. Vira se ne zlivata v eno številko — isto
+  načelo kot pri vodostaju in na kartici za zgodbe.
+- Podatek pride iz `_forecastHours`, ki jih `fetchComingUp()` že prenese
+  (`precipitation` je bil v klicu, a se je zavrgel) — **nobenega novega klica**,
+  glej dnevne meje spodaj.
+- **Ura, ki teče, se ne šteje.** Njen dež je deloma že v izmerjeni kumulativi
+  od polnoči in bi ga sicer prikazali dvakrat.
+- Količina in verjetnost se razideta (0 mm ob 70 % ni redkost), zato ima vsak
+  primer svoj stavek — sicer bi si ploščica nasprotovala z napovednim stavkom
+  v briefingu, ki gre po verjetnosti.
+- **Pred številko v `hs-rain-today` ne sme priti noben element** in v
+  `hs-rain-rate` ne sme priti vgnezden element: prvo bere `numOf()` prek
+  `firstChild.nodeValue` (deljiva slika), drugo pa prepiše
+  `tools/inject_current_weather.py` z regexom, ki `<` ne prečka. Zato je
+  napovedna vrstica ločen sosednji element in v statičnem HTML ostane prazna —
+  brez JS napovedi ni in je stran ne sme trditi.
+
 ## Lasten radar padavin — luknja v animaciji ni dovoljena
 
 Kompozit (ARSO jedro + obroč EUMETNET OPERA) sestavi `worker.js`
