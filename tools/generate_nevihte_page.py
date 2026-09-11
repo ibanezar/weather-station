@@ -346,6 +346,7 @@ def build_body(data):
 {answer}
 {quick}
 {stormmap_block}
+  <p class="archive-intro"><a href="/padavine-karta/">Karta izmerjenih padavin zadnjih 24 ur (ARSO postaje) →</a></p>
   <h2>Indeksi nestabilnosti — trenutno</h2>
   <p class="archive-intro">Ključni atmosferski indeksi, ki jih meteorologi uporabljajo za oceno nevihtnega potenciala nad Rečico ob Savinji.</p>
 {idx_table}

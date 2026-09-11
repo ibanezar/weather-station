@@ -1,0 +1,132 @@
+name: Padavinska karta Slovenije
+
+# Vsak dan mora biti nova karta pripravljena do 7:00 zjutraj po naši uri
+# (glej tools/generate_precip_map.py), ki tudi pripravi /padavine-karta/.
+# Na FB/IG (feed + zgodba) gre samo, če je nekje v Sloveniji v zadnjih 24h
+# padlo vsaj OBILNO (>=30 mm) — should_post v latest.json, preverjajo ga
+# posamezni post-* koraki sami, zato tu ni pogojne YAML logike.
+#
+# Termin: isti vzorec kot storm-map.yml -- cron teče po UTC in zamuja, zato
+# sta nastavljena dva termina (05:00 in 06:00 UTC = 7:00 pri nas poleti oz.
+# pozimi), tools/precip_map_gate.py pa spusti skozi samo pravega in poskrbi,
+# da gre karta ven enkrat na dan.
+
+on:
+  schedule:
+    - cron: '5 5 * * *'
+    - cron: '5 6 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = sestavi ne glede na uro in na to, ali je karta danes že nastala'
+        required: false
+        default: 'true'
+
+jobs:
+  karta:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri, ali je čas za karto
+        id: gate
+        run: |
+          python3 tools/precip_map_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
+      - name: Namesti Pillow
+        if: steps.gate.outputs.proceed == 'true'
+        run: pip install Pillow --quiet
+
+      - name: Sestavi karto in stran
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/generate_precip_map.py
+
+      - name: Objavi na main
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/precip_map_gate.py mark
+          git add og/precip-map padavine-karta/index.html tools/.precip_map_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+          else
+            git commit -m "padavine-karta: dnevna karta $(date -u +%Y-%m-%d) [skip ci]"
+            for i in 1 2 3 4 5; do
+              if git push; then exit 0; fi
+              echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+              git fetch origin main
+              git rebase origin/main
+              sleep $((i * 3))
+            done
+            echo "Push ni uspel po 5 poskusih." >&2
+            exit 1
+          fi
+
+      # Enak razlog in vzorec kot v storm-map.yml: FB/IG pobirata sliko prek
+      # javnega URL-ja in Cloudflare zna 404, ujet med deployem, predpomniti
+      # za skoraj eno leto, zato vsak poskus uporabi svoj query-string.
+      - name: Počakaj, da je slika dosegljiva
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('og/precip-map/latest.json'))['image'])")
+          echo "Čakam na $URL"
+          for i in $(seq 1 40); do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${URL}?probe=${i}-$(date +%s%N)" || echo 000)
+            if [ "$CODE" = "200" ]; then echo "Slika je dosegljiva (poskus $i)."; exit 0; fi
+            sleep 15
+          done
+          echo "Slika po 10 minutah ni dosegljiva — objavo preskačem." >&2
+          exit 1
+
+      - name: Objavi karto na Facebook (feed)
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_precip_map_to_facebook.py
+
+      - name: Objavi karto na Instagram (feed)
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_precip_map_to_instagram.py
+
+      - name: Objavi karto kot zgodbo na Facebook
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          if python3 -c "import json,sys;sys.exit(0 if json.load(open('og/precip-map/latest.json'))['should_post'] else 1)"; then
+            IMG=$(python3 -c "import json;print(json.load(open('og/precip-map/latest.json'))['image_story'])")
+            python3 tools/post_story_to_facebook.py "$IMG"
+          else
+            echo "Padavine danes niso dovolj obilne — zgodba se preskoči."
+          fi
+
+      - name: Objavi karto kot zgodbo na Instagram
+        if: steps.gate.outputs.proceed == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          if python3 -c "import json,sys;sys.exit(0 if json.load(open('og/precip-map/latest.json'))['should_post'] else 1)"; then
+            IMG=$(python3 -c "import json;print(json.load(open('og/precip-map/latest.json'))['image_story'])")
+            python3 tools/post_story_to_instagram.py "$IMG"
+          else
+            echo "Padavine danes niso dovolj obilne — zgodba se preskoči."
+          fi

@@ -63,6 +63,10 @@ CORE = {
     "meteogasilec/metodologija/":       ("monthly", "0.5"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
+    # Dnevna karta izmerjenih padavin na samodejnih postajah ARSO (glej
+    # tools/generate_precip_map.py) — ločena od /nevihte/ (izmerjeno, ne
+    # napovedano), zato samostojen vpis.
+    "padavine-karta/":           ("daily",   "0.7"),
     # /toca/ je obstajala in bila povezana, a je ni bilo v nobenem sitemapu —
     # ista napaka kot pri /tocnost-napovedi/ (popravljena 20. 8. 2026).
     "toca/":                     ("daily",   "0.7"),

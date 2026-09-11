@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-11",
+  "issued": "11.09.2026 8:00 CEST",
+  "issued_at": "2026-09-11T08:58:24.484620+02:00",
+  "top_station": "Portorož - Letališče",
+  "top_mm": 113.0,
+  "n_stations": 20,
+  "should_post": true,
+  "image": "https://meteorec.si/og/precip-map/2026-09-11.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-09-11-story.jpg"
+}

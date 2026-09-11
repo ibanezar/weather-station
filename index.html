@@ -299,7 +299,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=6906bb7c">
+<link rel="stylesheet" href="/style.min.css?v=0e439f07">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -617,13 +617,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
-        <div class="temp-huge"><span id="temp-val">11,0</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="temp-huge"><span id="temp-val">14,0</span><span class="temp-unit-sup"> °C</span></div>
         <div class="feels">
           <span id="feels-pill" class="feels-pill"></span>
-          <span>Občutek <strong id="feels-val">11,0</strong>°C</span>
+          <span>Občutek <strong id="feels-val">14,0</strong>°C</span>
         </div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
-        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">11,0</strong>°C<span id="dew-desc"></span></div>
+        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">14,0</strong>°C<span id="dew-desc"></span></div>
         <!-- "Our forecast, graded daily against ARSO" is the site's
              strongest trust signal (/tocnost-napovedi/), but it lived only
              on that one page. Populated by fetchTrustBadge() in app.js;
@@ -659,18 +659,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">99<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-val" id="hs-humidity">98<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
         <span class="hm-lbl">Relativna vlažnost</span>
         <span class="hm-sub" id="hs-humidity-range" hidden>danes <span id="hs-hum-min">—</span>–<span id="hs-hum-max">—</span> %</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
-        <span class="hm-val" id="hs-wind">2,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val" id="hs-wind">1,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
         <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">2,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
         <span class="hm-sub" id="hs-gust-max-line" hidden>danes najmočnejši <span id="hs-gust-max">—</span><span id="hs-gust-max-time"></span></span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
-        <span class="hm-val" id="hs-rain-today">21,8<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
+        <span class="hm-val" id="hs-rain-today">35,6<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
         <span class="hm-lbl">Padlo danes</span>
         <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">trenutno 0,0 mm/h</span>
         <span class="hm-sub" id="hs-rain-fc" hidden></span>
@@ -680,13 +680,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="hm-lbl">Danes min–maks</span>
       </div>
       <div class="hm hm-uv hm-secondary" id="hm-uv">
-        <span class="hm-val" id="hs-uv">—</span>
+        <span class="hm-val" id="hs-uv">3</span>
         <span class="hm-lbl">UV indeks</span>
         <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
         <span class="hm-sub" id="hs-uv-max-line" hidden>danes najvišji <span id="hs-uv-max">—</span><span id="hs-uv-max-time"></span></span>
       </div>
       <div class="hm hm-pres hm-secondary" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">1017,5<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-val" id="hs-pressure">1018,7<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
         <span class="hm-lbl">Zračni tlak</span>
         <span class="hm-sub" id="hs-pressure-trend" hidden></span>
       </div>
@@ -733,7 +733,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-09-11T08:09">08:09</time>, 11. septembra 2026): temperatura 11,0 °C, rosišče 11,0 °C, relativna vlažnost 99 %, veter 2,0 km/h (sunki 2,0 km/h), zračni tlak 1018 hPa, padavine danes 21,8 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
+  <p class="wx-static" id="wx-static">Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji (<time datetime="2026-09-10">10. septembra 2026</time>): povprečna temperatura 14,1 °C, najvišja 17,5 °C, najnižja 11,7 °C — 85,1 mm padavin, relativna vlažnost 99 %, najmočnejši sunek vetra 6,3 km/h. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
@@ -742,10 +742,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Day summary -->
   <div class="day-summary simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">11,5</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">00:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">16,0</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">15:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
     <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">11,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">03:59</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">11,4</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">12,8</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- ── Zadnjih 7 dni ── -->
@@ -1472,7 +1472,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </tr>
           </thead>
           <tbody id="history-tbody">
-<tr><td>11. sep. 2026</td><td class="td-high">11,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>11,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">21,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>11. sep. 2026</td><td class="td-high">16,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">35,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>98<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>10. sep. 2026</td><td class="td-high">17,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">11,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>14,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">85,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">11,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>9. sep. 2026</td><td class="td-high">27,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">13,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>18,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">4,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">24,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>90<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>8. sep. 2026</td><td class="td-high">33,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">13,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>21,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">7,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>76<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
@@ -2985,17 +2985,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
        fetchMosForecast() na privzeti tab-forecast2 — samo prestavljena. -->
   <div id="tab-mtr" class="tab-pane">
     <h2 class="visually-hidden">MTR — naš model</h2>
-    <div class="card" style="margin-bottom:1.25rem;font-size:.85rem;line-height:1.6;color:var(--muted)">
-      <strong style="color:var(--text)">MTR (Meteorec)</strong> je naš poskusni statistični model (MOS) za dno doline: vzame napoved
-      Open-Meteo in ji doda popravek, naučen na meritvah te postaje — podnevi je dolina toplejša, ponoči
-      hladnejša, kot pove modelska mreža. Popravlja samo Tmax/Tmin; za količino padavin ostaja Open-Meteo.
+    <div class="card mtr-logo-row" style="margin-bottom:1.25rem">
+      <svg class="mtr-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="rgba(52,211,153,.10)"/>
+        <circle cx="20" cy="20" r="19" fill="none" stroke="#34d399" stroke-width="1.2" opacity=".55"/>
+        <path d="M3 27 L13 12 L21 27 Z" fill="#7c8ba3" opacity=".9"/>
+        <path d="M17 27 L28 9 L37 27 Z" fill="#59718c" opacity=".95"/>
+        <circle cx="29" cy="9.5" r="2.6" fill="#fbbf24"/>
+        <line x1="29" y1="3.2" x2="29" y2="1" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="24.4" y1="5" x2="23" y2="3.4" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="33.6" y1="5" x2="35" y2="3.4" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M4 24 C9 20 12 26 18 21.5 C24 17 28 23 36 17.5" stroke="#34d399" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="mtr-logo-title">MTR<span class="mtr-logo-sub">Meteorec</span></div>
+        <div style="font-size:.85rem;line-height:1.6;color:var(--muted)">
+          Naš poskusni statistični model (MOS) za dno doline: vzame napoved Open-Meteo in ji doda popravek,
+          naučen na meritvah te postaje — podnevi je dolina toplejša, ponoči hladnejša, kot pove modelska mreža.
+          Popravlja samo Tmax/Tmin; za količino padavin ostaja Open-Meteo.
+        </div>
+      </div>
     </div>
 
     <!-- MTR — lastni model (MOS), poskusna napoved za dno doline -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
         <span style="display:flex;align-items:center;gap:.4rem">
-          <span class="clabel" style="margin:0">📊 MTR — poskusna napoved</span>
+          <span class="clabel" style="margin:0">
+            <svg class="mtr-logo-mini" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="20" cy="20" r="19" fill="rgba(52,211,153,.10)"/>
+              <path d="M3 27 L13 12 L21 27 Z" fill="#7c8ba3" opacity=".9"/>
+              <path d="M17 27 L28 9 L37 27 Z" fill="#59718c" opacity=".95"/>
+              <circle cx="29" cy="9.5" r="2.6" fill="#fbbf24"/>
+              <path d="M4 24 C9 20 12 26 18 21.5 C24 17 28 23 36 17.5" stroke="#34d399" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            MTR — poskusna napoved
+          </span>
           <span class="aifc-badge mtr" id="mos-badge"></span>
         </span>
         <span class="chart-range" id="mos-updated">Nalaganje…</span>
@@ -3636,7 +3661,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=68f09694" defer></script>
+<script src="app.min.js?v=7d7e369f" defer></script>
 
 
 <div id="toast"></div>
