@@ -2596,6 +2596,18 @@ _FI_ALARM = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000
     '<path d="M9.6 18.9a2.4 2.4 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
     '</svg>')
 
+# Kapljica + tri vedno širše zajete valovnice ("ripple") -- za kalkulator
+# rasti (/valovi/), ki razlaga zakaj se dež v tleh razširi na tri različno
+# oddaljene odzive.
+_FI_VALOVI = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<circle cx="12" cy="18.3" r="1.5" fill="currentColor"/>'
+    '<path d="M7.6 15.6a6.4 6.4 0 0 1 8.8 0" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" opacity=".55" fill="none"/>'
+    '<path d="M4.7 12.3a10.8 10.8 0 0 1 14.6 0" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" opacity=".8" fill="none"/>'
+    '<path d="M2 8.9a15 15 0 0 1 20 0" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" fill="none"/></svg>')
+
 
 # Kartice pregleda zmožnosti, grupirane v 4 skupine (glej CLAUDE.md "Glavna
 # stran gobarja je pristajalna, ne zbirna" — skupinjenje je dokumentirano
@@ -2624,6 +2636,8 @@ GOBE_CATEGORIES = [
          "Indeks za {spots} nabiralnih območij doline, vsak dan znova.", None),
         ("#premium", _FI_7DNI, "#4d9ff8", "Napoved po vrstah, 7 dni",
          "Za vsak dan in vsako območje, z razlago po komponentah.", _FORECAST_BADGE),
+        ("/gobarska-napoved/valovi/", _FI_VALOVI, "#a78bfa", "Kalkulator rasti po dežju",
+         "Vnesi datum dežja, preveri, katere gobe so danes lahko aktivne.", None),
     ]),
     ("kje", "🗺", "Kje nabirati", [
         ("/gobarska-napoved/zemljevid/", _FI_ZEMLJEVID, "#22d3ee", "Zemljevid območij",
@@ -2652,7 +2666,6 @@ GOBE_CATEGORIES = [
 GOBE_MORE = [
     ("/gobarska-napoved/koledar/", "Koledar"),
     ("/gobarska-napoved/trend/", "Trend"),
-    ("/gobarska-napoved/valovi/", "Kalkulator rasti"),
     ("/gobarska-napoved/metodologija/", "Metodologija"),
     ("/gobarska-napoved/nasveti/", "Nasveti"),
     ("#faq", "FAQ"),
