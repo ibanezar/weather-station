@@ -6762,6 +6762,30 @@ async function fetchTextForecast(){
   }
 }
 
+/* Ikone stanja za kartice MTR napovedi (D+1..D+3) — v istem ploskem slogu kot
+   MTR logo zgoraj. Stanje izpeljemo iz podatkov, ki jih kartica že prikazuje
+   (pop, om_precip, tmin), ne iz novega vira — vira se ne zlivata v eno
+   število, tako kot povsod drugod na strani, samo da tu izbereta ikono namesto
+   besedila. Sneg zahteva tmin<=0 IN dejansko padavino, sicer bi ledena
+   temperatura brez dežja narisala sneženje iz vedrega dne. */
+const MTR_COND_ICONS={
+  sunny:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="18" cy="18" r="7" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><line x1="18" y1="3" x2="18" y2="7"/><line x1="18" y1="29" x2="18" y2="33"/><line x1="3" y1="18" x2="7" y2="18"/><line x1="29" y1="18" x2="33" y2="18"/><line x1="7.4" y1="7.4" x2="10.2" y2="10.2"/><line x1="25.8" y1="25.8" x2="28.6" y2="28.6"/><line x1="7.4" y1="28.6" x2="10.2" y2="25.8"/><line x1="25.8" y1="10.2" x2="28.6" y2="7.4"/></g></svg>',
+  partly:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="11" r="5.5" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="3.5" y1="11" x2="6" y2="11"/><line x1="5" y1="4" x2="6.8" y2="5.8"/></g><path d="M9 30c-4 0-7-3-7-6.5S5 17 9 17c1-4 4.5-6.5 8.5-6.5 4.7 0 8.5 3.4 9.3 7.8 3.5.6 6.2 3.5 6.2 7 0 3.9-3.2 7-7.2 7H9z" fill="#c3cddc"/></svg>',
+  cloudy:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 27c-4.4 0-8-3.3-8-7.3S3.6 12.3 8 12.3c1.1-4.4 5-7.6 9.6-7.6 5.3 0 9.7 3.9 10.5 9 4 .6 7 4 7 8 0 4.5-3.7 8.1-8.2 8.1H8z" fill="#9aa7bd"/></svg>',
+  rain:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 22c-3.9 0-7-2.9-7-6.5s3.1-6.5 7-6.5c1-3.9 4.5-6.7 8.6-6.7 4.7 0 8.6 3.4 9.4 7.9 3.6.5 6.3 3.5 6.3 7 0 3.9-3.3 7-7.3 7H7z" fill="#93a1ba"/><g stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><line x1="10" y1="27" x2="8" y2="32"/><line x1="18" y1="27" x2="16" y2="32"/><line x1="26" y1="27" x2="24" y2="32"/></g></svg>',
+  snow:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 22c-3.9 0-7-2.9-7-6.5s3.1-6.5 7-6.5c1-3.9 4.5-6.7 8.6-6.7 4.7 0 8.6 3.4 9.4 7.9 3.6.5 6.3 3.5 6.3 7 0 3.9-3.3 7-7.3 7H7z" fill="#9aa7bd"/><g fill="#dbeafe"><circle cx="10" cy="29" r="1.6"/><circle cx="18" cy="31" r="1.6"/><circle cx="26" cy="29" r="1.6"/><circle cx="14" cy="26" r="1.6"/><circle cx="22" cy="26" r="1.6"/></g></svg>',
+};
+function mtrDayCond(d){
+  const precip=Number.isFinite(d.om_precip)?d.om_precip:0;
+  const pop=Number.isFinite(d.pop)?d.pop:0;
+  const tmin=Number.isFinite(d.tmin)?d.tmin:null;
+  if(tmin!==null&&tmin<=0&&precip>=0.2)return'snow';
+  if(precip>=1||pop>=0.6)return'rain';
+  if(precip>0||pop>=0.3)return'partly';
+  if(pop<0.15)return'sunny';
+  return'partly';
+}
+
 /* ── Naš model (MOS) ────────────────────────────────────────────────────────
    Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
    Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
@@ -6810,6 +6834,7 @@ async function fetchMosForecast(idp){
         +(sdmax!==null?' · razpon negotovosti ±'+dec(sdmax)+' / ±'+dec(sdmin)+' °C':'');
       card.innerHTML=
         '<div class="mos-lbl">'+lbl+'</div>'+
+        MTR_COND_ICONS[mtrDayCond(d)]+
         '<div class="mos-temp"><span class="mos-th">'+Math.round(d.tmax)+'°</span>'+
         '<span style="color:var(--muted);font-size:.74rem">/</span>'+
         '<span class="mos-tl">'+Math.round(d.tmin)+'°</span></div>'+

@@ -2985,17 +2985,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
        fetchMosForecast() na privzeti tab-forecast2 — samo prestavljena. -->
   <div id="tab-mtr" class="tab-pane">
     <h2 class="visually-hidden">MTR — naš model</h2>
-    <div class="card" style="margin-bottom:1.25rem;font-size:.85rem;line-height:1.6;color:var(--muted)">
-      <strong style="color:var(--text)">MTR (Meteorec)</strong> je naš poskusni statistični model (MOS) za dno doline: vzame napoved
-      Open-Meteo in ji doda popravek, naučen na meritvah te postaje — podnevi je dolina toplejša, ponoči
-      hladnejša, kot pove modelska mreža. Popravlja samo Tmax/Tmin; za količino padavin ostaja Open-Meteo.
+    <div class="card mtr-logo-row" style="margin-bottom:1.25rem">
+      <svg class="mtr-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="rgba(52,211,153,.10)"/>
+        <circle cx="20" cy="20" r="19" fill="none" stroke="#34d399" stroke-width="1.2" opacity=".55"/>
+        <path d="M3 27 L13 12 L21 27 Z" fill="#7c8ba3" opacity=".9"/>
+        <path d="M17 27 L28 9 L37 27 Z" fill="#59718c" opacity=".95"/>
+        <circle cx="29" cy="9.5" r="2.6" fill="#fbbf24"/>
+        <line x1="29" y1="3.2" x2="29" y2="1" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="24.4" y1="5" x2="23" y2="3.4" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="33.6" y1="5" x2="35" y2="3.4" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M4 24 C9 20 12 26 18 21.5 C24 17 28 23 36 17.5" stroke="#34d399" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="mtr-logo-title">MTR<span class="mtr-logo-sub">Meteorec</span></div>
+        <div style="font-size:.85rem;line-height:1.6;color:var(--muted)">
+          Naš poskusni statistični model (MOS) za dno doline: vzame napoved Open-Meteo in ji doda popravek,
+          naučen na meritvah te postaje — podnevi je dolina toplejša, ponoči hladnejša, kot pove modelska mreža.
+          Popravlja samo Tmax/Tmin; za količino padavin ostaja Open-Meteo.
+        </div>
+      </div>
     </div>
 
     <!-- MTR — lastni model (MOS), poskusna napoved za dno doline -->
     <div class="card chart-card" style="margin-bottom:1.25rem">
       <div class="chart-hdr">
         <span style="display:flex;align-items:center;gap:.4rem">
-          <span class="clabel" style="margin:0">📊 MTR — poskusna napoved</span>
+          <span class="clabel" style="margin:0">
+            <svg class="mtr-logo-mini" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="20" cy="20" r="19" fill="rgba(52,211,153,.10)"/>
+              <path d="M3 27 L13 12 L21 27 Z" fill="#7c8ba3" opacity=".9"/>
+              <path d="M17 27 L28 9 L37 27 Z" fill="#59718c" opacity=".95"/>
+              <circle cx="29" cy="9.5" r="2.6" fill="#fbbf24"/>
+              <path d="M4 24 C9 20 12 26 18 21.5 C24 17 28 23 36 17.5" stroke="#34d399" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            MTR — poskusna napoved
+          </span>
           <span class="aifc-badge mtr" id="mos-badge"></span>
         </span>
         <span class="chart-range" id="mos-updated">Nalaganje…</span>
