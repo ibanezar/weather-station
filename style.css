@@ -2273,7 +2273,17 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mos-sd{font-size:.66rem;color:var(--muted);opacity:.75;font-family:'JetBrains Mono',monospace;line-height:1.3}
 .mos-pop{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
 .mos-note{font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
+.mos-icon{width:28px;height:28px;flex:none}
 @media(max-width:380px){.mos-grid{grid-template-columns:repeat(2,1fr)}.mos-card:nth-child(n+3){display:none}}
+
+/* Logo MTR — krogla z dolino (dno doline, kjer model popravlja), soncem in
+   zeleno korekcijsko krivuljo (barva iz .aifc-badge.mtr). Ista oblika v dveh
+   velikostih: polna na uvodni kartici zavihka #tab-mtr, mini v naslovu grafa. */
+.mtr-logo-row{display:flex;align-items:flex-start;gap:.9rem}
+.mtr-logo{width:46px;height:46px;flex:none}
+.mtr-logo-title{font-weight:700;font-size:1rem;color:var(--text);letter-spacing:.02em;margin-bottom:.25rem}
+.mtr-logo-sub{font-weight:500;color:var(--muted);font-size:.76rem;margin-left:.4rem}
+.mtr-logo-mini{width:17px;height:17px;flex:none;vertical-align:-4px}
 
 /* Kartica-povezava na zavihek "MTR" — MTR ima zdaj svoj zavihek (glej
    #tab-mtr), zato je tu samo skok nanj, ne podvojena kartica. */
