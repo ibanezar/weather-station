@@ -1107,18 +1107,20 @@ body .app-bottomnav{display:none}
 /* ── /valovi/ — interaktivna časovnica "trije valovi po dežju" ── */
 .gp-val-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
   padding:1.4rem 1.4rem 1.6rem;margin:1.3rem 0 1.8rem;box-shadow:var(--card-shadow)}
+.gp-val-inlabel{display:block;font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:var(--gp-sp-2)}
+.gp-val-inrow{display:flex;gap:var(--gp-sp-2);flex-wrap:wrap}
+.gp-val-date{flex:1;min-width:9rem;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-control);color:var(--text);font:inherit;font-size:.95rem;padding:.55rem .7rem;
+  min-height:2.6rem}
+.gp-val-clear{background:transparent;border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--muted);font:inherit;font-size:.85rem;padding:.55rem .9rem;min-height:2.6rem;cursor:pointer}
+.gp-val-clear:hover{color:var(--text);border-color:var(--muted)}
+.gp-val-suggest{font-size:.78rem;color:var(--muted);margin:var(--gp-sp-2) 0 0;line-height:1.5}
+.gp-val-hint{font-size:.88rem;color:var(--text);font-weight:600;margin:var(--gp-sp-4) 0 var(--gp-sp-3)}
 .gp-val-readout-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gp-sp-2)}
 .gp-val-readout-lab{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .gp-val-readout-val{font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;color:var(--text)}
 .gp-val-readout-val span{font-size:.95rem;color:var(--muted);font-weight:600;margin-left:.25rem}
-.gp-val-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
-  background:linear-gradient(90deg,#2dd4bf 0%,#2dd4bf 10%,#c17f3e 15%,#c17f3e 50%,#a78bfa 55%,#a78bfa 80%,
-    rgba(255,255,255,.08) 80%,rgba(255,255,255,.08) 100%);
-  outline:none;margin:var(--gp-sp-2) 0 var(--gp-sp-3);cursor:pointer}
-.gp-val-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;
-  border-radius:50%;background:#fff;border:3px solid var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.6);cursor:pointer}
-.gp-val-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;
-  border:3px solid var(--bg);cursor:pointer}
 .gp-val-axis{display:flex;justify-content:space-between;font-size:var(--gp-fs-xs);color:var(--muted);
   margin-bottom:var(--gp-sp-4)}
 .gp-val-bands{display:flex;flex-direction:column;gap:var(--gp-sp-4);margin-bottom:var(--gp-sp-1)}
@@ -2650,7 +2652,7 @@ GOBE_CATEGORIES = [
 GOBE_MORE = [
     ("/gobarska-napoved/koledar/", "Koledar"),
     ("/gobarska-napoved/trend/", "Trend"),
-    ("/gobarska-napoved/valovi/", "Trije valovi"),
+    ("/gobarska-napoved/valovi/", "Kalkulator rasti"),
     ("/gobarska-napoved/metodologija/", "Metodologija"),
     ("/gobarska-napoved/nasveti/", "Nasveti"),
     ("#faq", "FAQ"),
@@ -2861,10 +2863,11 @@ def build_trend_page():
 
 
 # Ekološke skupine in preverjene, v septembru sezonske primerne vrste -- isti
-# nabor kot na interaktivnem drsniku v blog/trije-vali-gob-po-dezju-0911.html
-# (namerna podvojitev, glej opombo pri "generatorji strani si ne delijo
-# knjižnic" na vrhu CLAUDE.md -- ta stran bere species_rules.yaml samo za
-# lag-razpone/imena skupin, primeri vrst so tu ročno izbrani in prepisani).
+# nabor kot je bil prej na interaktivnem drsniku v
+# blog/trije-vali-gob-po-dezju-0911.html (namerna podvojitev, glej opombo pri
+# "generatorji strani si ne delijo knjižnic" na vrhu CLAUDE.md -- ta stran
+# bere species_rules.yaml samo za lag-razpone/imena skupin, primeri vrst so tu
+# ročno izbrani in prepisani).
 VALOVI_GROUPS = [
     ("razkrojevalka", "Razkrojevalke stelje", "#2dd4bf", 2, 8,
      ["Orjaški dežnik (marela)", "Velika tintnica", "Poljski kukmak",
@@ -2876,9 +2879,30 @@ VALOVI_GROUPS = [
       "Borov goban", "Kostanjevka", "Medena polževka"]),
 ]
 VALOVI_MAXDAY = 20
+# "Izdaten dež" prag za samodejni predlog datuma -- isto pravilo ("vsaj
+# 10-15 mm naenkrat") kot v blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html,
+# ne nov prag.
+VALOVI_RAIN_MM = 10
+VALOVI_LOOKBACK_DAYS = 25
+
+
+def _valovi_default_rain():
+    """Zadnji dan z >= VALOVI_RAIN_MM dežja na postaji, znotraj zadnjih
+    VALOVI_LOOKBACK_DAYS dni -- samodejni predlog za vnosno polje, da
+    kalkulator ob obisku ni prazen, če je pri nas res pred kratkim deževalo.
+    Vrne (iso_datum, mm) ali (None, None), če v oknu ni bilo izdatnega dežja."""
+    precip = gm.load_station_precip()
+    today = TODAY
+    for back in range(0, VALOVI_LOOKBACK_DAYS + 1):
+        d = (today - _dt.timedelta(days=back)).isoformat()
+        mm = precip.get(d)
+        if mm is not None and mm >= VALOVI_RAIN_MM:
+            return d, mm
+    return None, None
 
 
 def valovi_widget_html():
+    default_date, default_mm = _valovi_default_rain()
     rows = []
     for eco, name, color, lo, hi, _species in VALOVI_GROUPS:
         left = round(lo / VALOVI_MAXDAY * 100, 1)
@@ -2888,19 +2912,28 @@ def valovi_widget_html():
             f'        <div class="gp-val-name">{_esc(name)}<small>{lo}–{hi} dni</small></div>\n'
             f'        <div class="gp-val-track"><div class="gp-val-range" data-eco="{eco}" '
             f'style="left:{left}%;width:{width}%;background:{color}"></div>'
-            f'<div class="gp-val-play" id="gvalPlay-{eco}"></div></div>\n'
+            f'<div class="gp-val-play" id="gvalPlay-{eco}" hidden></div></div>\n'
             f'      </div>')
     axis = "".join(f"<span>{n}</span>" for n in (0, 5, 10, 15, 20))
     groups_json = _json_mod.dumps(
         [{"eco": eco, "name": name, "color": color, "min": lo, "max": hi, "species": species}
          for eco, name, color, lo, hi, species in VALOVI_GROUPS], ensure_ascii=False)
+    default_json = _json_mod.dumps({"date": default_date, "mm": default_mm})
+    date_input = (f'value="{default_date}"' if default_date else "")
+    suggest_note = (
+        f'    <p class="gp-val-suggest" id="gvalSuggest">Predlagano iz zadnjega izmerjenega dežja na postaji '
+        f'IREICA1 ({_fmt_mm(default_mm)} mm, ≥ {VALOVI_RAIN_MM} mm) — spremeni, če preverjaš drug dogodek.</p>\n'
+        if default_date else
+        '    <p class="gp-val-suggest" id="gvalSuggest">V zadnjih ' + str(VALOVI_LOOKBACK_DAYS) + ' dneh ni bilo '
+        f'dežja nad {VALOVI_RAIN_MM} mm — če veš za manjši, a pomemben dogodek, vnesi datum ročno.</p>\n')
     js = f'''<script>(function(){{
   var GROUPS = {groups_json};
   var MAXDAY = {VALOVI_MAXDAY};
-  var slider = document.getElementById('gvalSlider');
-  if (!slider) return;
-  var dayVal = document.getElementById('gvalDayVal');
-  var dayUnit = dayVal.querySelector('span');
+  var DEFAULT = {default_json};
+  var dateInput = document.getElementById('gvalDate');
+  var clearBtn = document.getElementById('gvalClear');
+  if (!dateInput) return;
+  var hint = document.getElementById('gvalHint');
   var panel = document.getElementById('gvalStatePanel');
   var plays = {{}};
   GROUPS.forEach(function(g){{ plays[g.eco] = document.getElementById('gvalPlay-' + g.eco); }});
@@ -2911,12 +2944,39 @@ def valovi_widget_html():
     if (day <= g.max) return {{ label: 'aktivno', tone: 'on' }};
     return {{ label: 'mimo', tone: 'past' }};
   }}
+  function daysSince(iso){{
+    var picked = new Date(iso + 'T00:00:00');
+    var today = new Date(); today.setHours(0,0,0,0);
+    return Math.round((today - picked) / 86400000);
+  }}
+
+  function clearState(){{
+    GROUPS.forEach(function(g){{ plays[g.eco].hidden = true; }});
+    document.querySelectorAll('.gp-val-range').forEach(function(t){{ t.classList.remove('active'); }});
+    panel.innerHTML = '';
+  }}
 
   function render(){{
-    var day = parseInt(slider.value, 10);
-    dayVal.childNodes[0].nodeValue = day;
-    dayUnit.textContent = day === 1 ? 'dan' : 'dni';
-    GROUPS.forEach(function(g){{ plays[g.eco].style.left = pct(day); }});
+    var iso = dateInput.value;
+    if (!iso){{
+      hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
+      clearState();
+      return;
+    }}
+    var day = daysSince(iso);
+    if (day < 0){{
+      hint.textContent = 'Ta datum je v prihodnosti -- izberi pretekli dan.';
+      clearState();
+      return;
+    }}
+    hint.textContent = day === 0 ? 'To je bilo danes.'
+      : 'To je bilo pred ' + day + (day === 1 ? ' dnevom.' : ' dnevi.');
+
+    GROUPS.forEach(function(g){{
+      if (day > MAXDAY){{ plays[g.eco].hidden = true; return; }}
+      plays[g.eco].hidden = false;
+      plays[g.eco].style.left = pct(day);
+    }});
 
     panel.innerHTML = '';
     GROUPS.forEach(function(g){{
@@ -2942,9 +3002,11 @@ def valovi_widget_html():
       title.textContent = g.name;
       var badge = document.createElement('span');
       badge.className = 'gp-val-status';
+      var badgeText = st.label;
+      if (st.tone === 'dim') badgeText = 'čez ' + (g.min - day) + (g.min - day === 1 ? ' dan' : ' dni');
       if (st.tone === 'on') {{ badge.style.background = g.color + '26'; badge.style.color = g.color; }}
       else {{ badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }}
-      badge.textContent = st.label;
+      badge.textContent = badgeText;
       head.appendChild(title); head.appendChild(badge);
       body.appendChild(head);
 
@@ -2963,17 +3025,20 @@ def valovi_widget_html():
       panel.appendChild(item);
     }});
   }}
-  slider.addEventListener('input', render);
+  dateInput.addEventListener('input', render);
+  clearBtn.addEventListener('click', function(){{ dateInput.value = ''; render(); }});
   render();
 }})();</script>'''
     html = (
         '  <div class="gp-val-card">\n'
-        '    <div class="gp-val-readout-row">\n'
-        '      <span class="gp-val-readout-lab">Dni od dežja</span>\n'
-        '      <span class="gp-val-readout-val" id="gvalDayVal">0<span>dni</span></span>\n'
+        '    <label class="gp-val-inlabel" for="gvalDate">Kdaj je nazadnje padel izdaten dež (vsaj 10–15 mm '
+        'naenkrat)?</label>\n'
+        '    <div class="gp-val-inrow">\n'
+        f'      <input type="date" id="gvalDate" class="gp-val-date" max="{TODAY}" {date_input}>\n'
+        '      <button type="button" id="gvalClear" class="gp-val-clear">Ni ga bilo</button>\n'
         '    </div>\n'
-        '    <input type="range" class="gp-val-slider" id="gvalSlider" min="0" max="20" value="0" step="1" '
-        'aria-label="Dni od dežja">\n'
+        + suggest_note +
+        '    <p class="gp-val-hint" id="gvalHint"></p>\n'
         f'    <div class="gp-val-axis">{axis}</div>\n'
         '    <div class="gp-val-bands">\n' + "\n".join(rows) + '\n    </div>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
@@ -2981,13 +3046,19 @@ def valovi_widget_html():
     return html
 
 
+def _fmt_mm(mm):
+    return f"{mm:.1f}".replace(".", ",") if mm is not None else ""
+
+
 def build_valovi_page():
-    """Trije valovi po dežju — zakaj se razkrojevalke, lesne in mikorizne vrste
-    na isti dež odzovejo z drugačnim zamikom (2–8 / 3–10 / 8–16 dni, glej
-    species_rules.yaml ecologies). Ista razlaga in interaktivni drsnik kot v
-    blog/trije-vali-gob-po-dezju-0911.html, tu pa kot trajna referenčna stran
-    v slogu MeteoGobarja (isti vzorec kot koledar/trend), ne kot enkratna
-    članku vezana objava."""
+    """Kalkulator rasti gob po dežju — vnesi datum zadnjega izdatnega dežja
+    (ali povej, da ga ni bilo) in preveri, katera ekološka skupina
+    (razkrojevalke/lesne/mikorizne, 2–8 / 3–10 / 8–16 dni zamika, glej
+    species_rules.yaml ecologies) je danes lahko aktivna. Datum se ob obisku
+    samodejno predlaga iz zadnjega dežja >= 10 mm na postaji (gm.
+    load_station_precip), a je povsem uredljiv -- to ni enkratna članku
+    vezana objava (glej blog/trije-vali-gob-po-dezju-0911.html), ampak trajno
+    orodje v slogu MeteoGobarja (isti vzorec kot koledar/trend)."""
     body = ('''  <figure class="gp-banner">
     <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
       alt="Mah in stelja na gozdnih tleh po dežju">
@@ -2996,14 +3067,14 @@ def build_valovi_page():
 '''
             '  <p class="post-meta">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in mikorizne '
             'vrste imajo vsaka svoj zamik med padavinami in trosnjakom — model za Rečico ta zamik upošteva tako, '
-            'da vsaki vrsti glede na skupino premakne padavinsko okno nazaj po časovnici. Povlecite drsnik in '
-            'poglejte, katera skupina se lahko odzove na kateri dan.</p>\n'
+            'da vsaki vrsti glede na skupino premakne padavinsko okno nazaj po časovnici. Vnesi datum zadnjega '
+            'izdatnega dežja (ali povej, da ga ni bilo) in preveri, kaj je danes lahko aktivno.</p>\n'
             + valovi_widget_html())
     return subpage_shell(
-        "valovi", "Trije valovi po dežju",
-        "Zakaj razkrojevalke, lesne in mikorizne vrste na isti dež odgovorijo z različnim zamikom (2–8 / 3–10 / "
-        "8–16 dni) — interaktivna časovnica za Rečico ob Savinji.",
-        "Trije valovi", body)
+        "valovi", "Kalkulator rasti gob po dežju",
+        "Vnesi datum zadnjega izdatnega dežja in preveri, ali so razkrojevalke, lesne ali mikorizne vrste (2–8 / "
+        "3–10 / 8–16 dni zamika) danes lahko aktivne — za Rečico ob Savinji.",
+        "Kalkulator rasti", body)
 
 
 BAZA_INTRO = (
