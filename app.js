@@ -3542,7 +3542,7 @@ function confirmImport(){
     // Invalidate cache and refresh
     Object.keys(_histCache).forEach(k=>delete _histCache[k]);
     switchPeriod(_currentPeriod);
-    applyMonthlySummary();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();
+    applyMonthlySummary();renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();
     // Success toast
     const t=document.getElementById('toast');
     if(t){t.textContent='✅ Uvoženih '+_importParsed.length+' dni podatkov';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
@@ -3582,7 +3582,7 @@ async function autoLoadHistoryFile(){
     if(added>0||fixed>0){
       localStorage.setItem(LS_KEY,JSON.stringify(stored));
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
-      applyMonthlySummary();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
+      applyMonthlySummary();renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
       if(histTabActive())switchPeriod(_currentPeriod);
       const t=document.getElementById('toast');
       const msg=[added?'uvoženih '+added+' novih dni':'',fixed?'usklajenih '+fixed+' dni z arhivom':''].filter(Boolean).join(', ');
@@ -5659,7 +5659,7 @@ async function fetchClimateComparison(){
       // od povprečja — namesto podvojenih klicev na archive-api ponovno uporabi
       // tega, ki ga ta funkcija itak že izračuna, in osveži povzetek.
       _climAnomalyT=dT;_climAnomalyYears=histOk.length;
-      try{applyMonthlySummary();}catch(_){}
+      try{applyMonthlySummary();renderMonthCard();}catch(_){}
     }
     if(histAvgR>0){
       const dR=((curR-histAvgR)/histAvgR*100),sR=dR>=0?'+':'';
@@ -5724,40 +5724,79 @@ function loadBlogTicker(){
 }
 
 // ── Monthly summary ───────────────────────────────────────
-function applyMonthlySummary(){
+// computeMonthStats() je edini vir za tekoči mesec iz history.json — uporabita
+// ga applyMonthlySummary() (besedilna kartica) in renderMonthCard() (kartica
+// "Ta mesec"), da se izračun ne podvaja.
+function computeMonthStats(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
   const pad=n=>String(n).padStart(2,'0');
   const pfx=y+'-'+pad(m);
+  const mn=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
+  const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
+  const entries=Object.entries(stored).filter(([k])=>k.startsWith(pfx));
+  if(entries.length<3)return{ok:false,monthName:mn};
+  const temps=entries.map(([,v])=>v.tempAvg).filter(x=>x!=null);
+  const highs=entries.map(([,v])=>v.tempHigh).filter(x=>x!=null);
+  const lows=entries.map(([,v])=>v.tempLow).filter(x=>x!=null);
+  const rains=entries.map(([,v])=>v.precipTotal||0);
+  const avgT=temps.reduce((a,b)=>a+b,0)/temps.length;
+  const totR=rains.reduce((a,b)=>a+b,0);
+  const rainyDays=rains.filter(r=>r>1).length;
+  const frostDays=lows.filter(t=>t<0).length;
+  const maxT=Math.max(...highs);
+  const minT=Math.min(...lows);
+  const maxE=entries.find(([,v])=>v.tempHigh===maxT);
+  const minE=entries.find(([,v])=>v.tempLow===minT);
+  return{ok:true,monthName:mn,entries,avgT,totR,rainyDays,frostDays,maxT,maxDate:maxE?maxE[0]:null,minT,minDate:minE?minE[0]:null};
+}
+function applyMonthlySummary(){
+  const s=computeMonthStats();
+  set('month-title',s.monthName);
   try{
-    const stored=JSON.parse(localStorage.getItem('wx-history-v1')||'{}');
-    const entries=Object.entries(stored).filter(([k])=>k.startsWith(pfx));
-    if(entries.length<3){set('month-txt','Zbiranje podatkov za '+now.toLocaleDateString('sl',{month:'long',year:'numeric'})+'…');return;}
-    const temps=entries.map(([,v])=>v.tempAvg).filter(x=>x!=null);
-    const highs=entries.map(([,v])=>v.tempHigh).filter(x=>x!=null);
-    const lows=entries.map(([,v])=>v.tempLow).filter(x=>x!=null);
-    const rains=entries.map(([,v])=>v.precipTotal||0);
-    const avgT=(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1);
-    const totR=rains.reduce((a,b)=>a+b,0).toFixed(1);
-    const rainyDays=rains.filter(r=>r>1).length;
-    const frostDays=lows.filter(t=>t<0).length;
-    const maxT=Math.max(...highs).toFixed(1);
-    const minT=Math.min(...lows).toFixed(1);
-    const maxE=entries.find(([,v])=>v.tempHigh===parseFloat(maxT));
-    const minE=entries.find(([,v])=>v.tempLow===parseFloat(minT));
+    if(!s.ok){set('month-txt','Zbiranje podatkov za '+s.monthName+'…');return;}
     const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-    const mn=now.toLocaleDateString('sl',{month:'long',year:'numeric'});
-    set('month-title',mn);
     // Odstopanje od povprečja pride iz fetchClimateComparison() (isti izračun,
     // brez podvojenih klicev na archive-api) — na voljo šele, ko ta reši.
     const anomTxt=_climAnomalyT!=null
       ?' To je '+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1).replace('.',',')+'°C glede na '+_climAnomalyYears+'-letno povprečje.'
       :'';
-    // Decimalna vejica samo za prikaz — maxT/minT ostaneta s piko zaradi
-    // primerjave zgoraj (parseFloat proti surovim številkam iz JSON-a).
-    const dec=v=>v.replace('.',',');
+    const dec=v=>v.toFixed(1).replace('.',',');
     const el=document.getElementById('month-txt');
-    if(el)el.innerHTML=mn+' — '+entries.length+' dni podatkov. Povprečna temperatura: <b>'+dec(avgT)+'°C</b>.'+anomTxt+' Skupne padavine: <b>'+dec(totR)+' mm</b> v <b>'+rainyDays+' deževnih dnevih</b>.'+(frostDays>0?' Zmrzujočih dni: <b>'+frostDays+'</b>.':'')+' Najtoplejše: <b>'+dec(maxT)+'°C</b>'+(maxE?' ('+fmtD(maxE[0])+')':"")+'.'+ ' Najhladnejše: <b>'+dec(minT)+'°C</b>'+(minE?' ('+fmtD(minE[0])+')':"")+'.';
+    if(el)el.innerHTML=s.monthName+' — '+s.entries.length+' dni podatkov. Povprečna temperatura: <b>'+dec(s.avgT)+'°C</b>.'+anomTxt+' Skupne padavine: <b>'+dec(s.totR)+' mm</b> v <b>'+s.rainyDays+' deževnih dnevih</b>.'+(s.frostDays>0?' Zmrzujočih dni: <b>'+s.frostDays+'</b>.':'')+' Najtoplejše: <b>'+dec(s.maxT)+'°C</b>'+(s.maxDate?' ('+fmtD(s.maxDate)+')':"")+'.'+ ' Najhladnejše: <b>'+dec(s.minT)+'°C</b>'+(s.minDate?' ('+fmtD(s.minDate)+')':"")+'.';
   }catch(e){set('month-txt','Napaka: '+e.message);}
+}
+
+// ── "Ta mesec" — hitra kartica ─────────────────────────────
+// Isti podatki kot applyMonthlySummary() (computeMonthStats()), samo v
+// hitro berljivi mreži kartic namesto v odstavku — za pregled na prvi pogled
+// pod kartico "Zadnjih 7 dni". Uporabi obstoječ .yr-grid/.yr-item vzorec
+// (glej applyYearRecords), da ne uvaja novega vizualnega jezika kartic.
+function renderMonthCard(){
+  const wrap=document.getElementById('month-card-grid');
+  if(!wrap)return;
+  const s=computeMonthStats();
+  const titleEl=document.getElementById('month-card-title');
+  if(titleEl)titleEl.textContent=s.monthName.charAt(0).toUpperCase()+s.monthName.slice(1);
+  if(!s.ok){wrap.innerHTML='<div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>';return;}
+  const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+  let anomHtml='';
+  if(_climAnomalyT!=null){
+    const col=Math.abs(_climAnomalyT)<1?'var(--muted)':_climAnomalyT>0?'var(--red)':'var(--blue)';
+    anomHtml=' <span style="font-size:.68rem;color:'+col+'">('+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1)+'° vs. '+_climAnomalyYears+'l)</span>';
+  }
+  const items=[
+    {icon:'🌡',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
+    {icon:'💧',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:s.rainyDays+' deževnih dni',col:'var(--rain-col)'},
+    {icon:'🥵',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
+    {icon:'🥶',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
+  ];
+  if(s.frostDays>0)items.push({icon:'❄️',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
+  wrap.innerHTML=items.map(it=>
+    '<div class="yr-item"><div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">'+it.icon+' '+it.lbl+'</div>'
+    +'<div class="yr-val" style="color:'+it.col+'">'+it.val+'</div>'
+    +(it.sub?'<div class="yr-dt">'+it.sub+'</div>':'')
+    +'</div>'
+  ).join('');
 }
 
 // ── Year records ──────────────────────────────────────────
@@ -15968,6 +16007,7 @@ async function init(){
   try{applyStationOnThisDay();}catch(_){}
   try{applyMoon();}catch(_){}
   try{applyMonthlySummary();}catch(_){}
+  try{renderMonthCard();}catch(_){}
   try{applyYearRecords();}catch(_){}
   try{renderPastDays();}catch(_){}
   try{applyPhotographyWidget(null);}catch(_){}

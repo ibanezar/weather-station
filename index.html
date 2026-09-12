@@ -755,6 +755,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="past-days-scroll" id="past-days-scroll"></div>
   <div class="pd-detail-wrap" id="pd-detail"></div>
 
+  <!-- ── Ta mesec — hitri povzetek (renderMonthCard, deli izračun s spodnjim
+       "Mesečni povzetek" prek computeMonthStats()) ── -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="clabel">📆 <span id="month-card-title">Ta mesec</span></div>
+    <div class="yr-grid" id="month-card-grid">
+      <div style="color:var(--muted);font-size:.78rem">Zbiranje podatkov…</div>
+    </div>
+  </div>
+
 <div class="insights-row">
     <div class="insight-card" id="ic-inversion">
       <div class="ic-head"><span>🔄 Temperaturna inverzija</span><span class="ic-badge" id="inv-badge">—</span></div>
