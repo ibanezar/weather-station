@@ -2393,6 +2393,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .pd-card.pd-windy{border-color:rgba(167,139,250,.6)}
 .pd-day{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.1rem}
 .pd-date{font-size:.6rem;color:var(--muted);margin-bottom:.5rem}
+.pd-icon{font-size:1.3rem;line-height:1;margin-bottom:.3rem}
 .pd-temp-high{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:300;color:var(--red);line-height:1}
 .pd-temp-low{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:300;color:var(--blue);margin-top:.08rem}
 .pd-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin:.5rem 0 .45rem;position:relative;overflow:hidden}
