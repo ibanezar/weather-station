@@ -3603,7 +3603,7 @@ function renderPastDays(){
   const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
   const today=new Date(); today.setHours(0,0,0,0);
   const days=[];
-  for(let i=7;i>=1;i--){
+  for(let i=1;i<=7;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     const key=_localDateStr(d); // local date — toISOString() would shift back a day in UTC+ timezones
     if(stored[key]) days.push({date:key,data:stored[key]});
@@ -3629,10 +3629,12 @@ function renderPastDays(){
     const barLeft=Math.round(((l??globalLow)-globalLow)/tempRange*100);
     const barW=Math.max(8,Math.round(((h??globalHigh)-(l??globalLow))/tempRange*100));
     const badge=isHot?'🌡':isWet?'💧':isWindy?'💨':'';
+    const cond=metricToCondition(d.data);
     return`<div class="pd-card${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}" data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)">
       ${badge?`<span class="pd-badge">${badge}</span>`:''}
       <div class="pd-day">${dn}</div>
       <div class="pd-date">${dm}</div>
+      <div class="pd-icon" title="${cond.desc}">${cond.emoji}</div>
       <div class="pd-temp-high">${h!=null?h.toFixed(1):'—'}°</div>
       <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
       <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
