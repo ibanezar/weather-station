@@ -805,6 +805,47 @@ body .app-bottomnav{display:none}
   .gp-lockbar .gp-cta,.gp-plan .gp-cta{width:100%;text-align:center}
   .gp-cta-lg{display:block;text-align:center}
 }
+/* ── /valovi/ — interaktivna časovnica "trije valovi po dežju" ── */
+.gp-val-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
+  padding:1.4rem 1.4rem 1.6rem;margin:1.3rem 0 1.8rem;box-shadow:var(--card-shadow)}
+.gp-val-inlabel{display:block;font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:var(--gp-sp-2)}
+.gp-val-inrow{display:flex;gap:var(--gp-sp-2);flex-wrap:wrap}
+.gp-val-date{flex:1;min-width:9rem;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-control);color:var(--text);font:inherit;font-size:.95rem;padding:.55rem .7rem;
+  min-height:2.6rem}
+.gp-val-clear{background:transparent;border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--muted);font:inherit;font-size:.85rem;padding:.55rem .9rem;min-height:2.6rem;cursor:pointer}
+.gp-val-clear:hover{color:var(--text);border-color:var(--muted)}
+.gp-val-suggest{font-size:.78rem;color:var(--muted);margin:var(--gp-sp-2) 0 0;line-height:1.5}
+.gp-val-hint{font-size:.88rem;color:var(--text);font-weight:600;margin:var(--gp-sp-4) 0 var(--gp-sp-3)}
+.gp-val-readout-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gp-sp-2)}
+.gp-val-readout-lab{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.gp-val-readout-val{font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;color:var(--text)}
+.gp-val-readout-val span{font-size:.95rem;color:var(--muted);font-weight:600;margin-left:.25rem}
+.gp-val-axis{display:flex;justify-content:space-between;font-size:var(--gp-fs-xs);color:var(--muted);
+  margin-bottom:var(--gp-sp-4)}
+.gp-val-bands{display:flex;flex-direction:column;gap:var(--gp-sp-4);margin-bottom:var(--gp-sp-1)}
+.gp-val-row{display:grid;grid-template-columns:9rem 1fr;gap:var(--gp-sp-4);align-items:center}
+.gp-val-name{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.25}
+.gp-val-name small{display:block;font-size:var(--gp-fs-xs);color:var(--muted);font-weight:400;margin-top:.1rem}
+.gp-val-track{position:relative;height:1.8rem;background:rgba(255,255,255,.06);border-radius:var(--gp-r-control)}
+.gp-val-range{position:absolute;top:0;bottom:0;border-radius:var(--gp-r-control);opacity:.28;
+  transition:opacity .25s ease}
+.gp-val-range.active{opacity:.85}
+.gp-val-play{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;border-radius:2px;
+  box-shadow:0 0 8px rgba(255,255,255,.6)}
+.gp-val-state{margin-top:var(--gp-sp-1)}
+.gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
+.gp-val-item:first-child{border-top:none}
+.gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+.gp-val-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.gp-val-title{font-weight:700;font-size:.9rem;color:var(--text)}
+.gp-val-status{font-size:var(--gp-fs-xs);letter-spacing:.05em;text-transform:uppercase;
+  padding:.15rem .5rem;border-radius:var(--gp-r-pill);white-space:nowrap}
+.gp-val-species{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+.gp-val-chip{font-size:.76rem;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-pill);padding:.2rem .6rem;color:var(--text)}
+@media(max-width:600px){.gp-val-row{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
 <link rel="stylesheet" href="/blog/blog.css?v=602ed072">

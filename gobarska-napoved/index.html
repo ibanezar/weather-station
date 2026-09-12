@@ -12,24 +12,24 @@
 <link rel="canonical" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/gobarska-napoved/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/gobarska-napoved/">
-<meta name="description" content="Gobarski indeks danes: 58 % (Dobro). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
+<meta name="description" content="Gobarski indeks danes: 76 % (Odlično). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/gobarska-napoved/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta property="og:description" content="Gobarski indeks danes: 58 % (Dobro). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
+<meta property="og:description" content="Gobarski indeks danes: 76 % (Odlično). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
 <meta property="og:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Gobarska napoved — Zgornja Savinjska dolina">
-<meta name="twitter:description" content="Gobarski indeks danes: 58 % (Dobro). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
+<meta name="twitter:description" content="Gobarski indeks danes: 76 % (Odlično). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.">
 <meta name="twitter:image" content="https://meteorec.si/og/gobarska-napoved.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 58 % (Dobro). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02","speakable":{"@type":"SpeakableSpecification","cssSelector":[".gp-hero-kicker", ".gp-hero-lvl", ".gp-hero-topsp"]}}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/gobarska-napoved/","name":"Gobarska napoved \u2014 Zgornja Savinjska dolina","description":"Gobarski indeks danes: 76 % (Odli\u010dno). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.","url":"https://meteorec.si/gobarska-napoved/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-07-02","speakable":{"@type":"SpeakableSpecification","cssSelector":[".gp-hero-kicker", ".gp-hero-lvl", ".gp-hero-topsp"]}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved"}]}
@@ -808,6 +808,47 @@ body .app-bottomnav{display:none}
   .gp-lockbar .gp-cta,.gp-plan .gp-cta{width:100%;text-align:center}
   .gp-cta-lg{display:block;text-align:center}
 }
+/* ── /valovi/ — interaktivna časovnica "trije valovi po dežju" ── */
+.gp-val-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
+  padding:1.4rem 1.4rem 1.6rem;margin:1.3rem 0 1.8rem;box-shadow:var(--card-shadow)}
+.gp-val-inlabel{display:block;font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:var(--gp-sp-2)}
+.gp-val-inrow{display:flex;gap:var(--gp-sp-2);flex-wrap:wrap}
+.gp-val-date{flex:1;min-width:9rem;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-control);color:var(--text);font:inherit;font-size:.95rem;padding:.55rem .7rem;
+  min-height:2.6rem}
+.gp-val-clear{background:transparent;border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--muted);font:inherit;font-size:.85rem;padding:.55rem .9rem;min-height:2.6rem;cursor:pointer}
+.gp-val-clear:hover{color:var(--text);border-color:var(--muted)}
+.gp-val-suggest{font-size:.78rem;color:var(--muted);margin:var(--gp-sp-2) 0 0;line-height:1.5}
+.gp-val-hint{font-size:.88rem;color:var(--text);font-weight:600;margin:var(--gp-sp-4) 0 var(--gp-sp-3)}
+.gp-val-readout-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gp-sp-2)}
+.gp-val-readout-lab{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.gp-val-readout-val{font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;color:var(--text)}
+.gp-val-readout-val span{font-size:.95rem;color:var(--muted);font-weight:600;margin-left:.25rem}
+.gp-val-axis{display:flex;justify-content:space-between;font-size:var(--gp-fs-xs);color:var(--muted);
+  margin-bottom:var(--gp-sp-4)}
+.gp-val-bands{display:flex;flex-direction:column;gap:var(--gp-sp-4);margin-bottom:var(--gp-sp-1)}
+.gp-val-row{display:grid;grid-template-columns:9rem 1fr;gap:var(--gp-sp-4);align-items:center}
+.gp-val-name{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.25}
+.gp-val-name small{display:block;font-size:var(--gp-fs-xs);color:var(--muted);font-weight:400;margin-top:.1rem}
+.gp-val-track{position:relative;height:1.8rem;background:rgba(255,255,255,.06);border-radius:var(--gp-r-control)}
+.gp-val-range{position:absolute;top:0;bottom:0;border-radius:var(--gp-r-control);opacity:.28;
+  transition:opacity .25s ease}
+.gp-val-range.active{opacity:.85}
+.gp-val-play{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;border-radius:2px;
+  box-shadow:0 0 8px rgba(255,255,255,.6)}
+.gp-val-state{margin-top:var(--gp-sp-1)}
+.gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
+.gp-val-item:first-child{border-top:none}
+.gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+.gp-val-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.gp-val-title{font-weight:700;font-size:.9rem;color:var(--text)}
+.gp-val-status{font-size:var(--gp-fs-xs);letter-spacing:.05em;text-transform:uppercase;
+  padding:.15rem .5rem;border-radius:var(--gp-r-pill);white-space:nowrap}
+.gp-val-species{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+.gp-val-chip{font-size:.76rem;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-pill);padding:.2rem .6rem;color:var(--text)}
+@media(max-width:600px){.gp-val-row{grid-template-columns:1fr}}
 </style>
 <script>window.MR_PADDLE=null;</script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
@@ -844,31 +885,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 300 vrst · osvežuje se dnevno · 2026-09-08</p>
+  <p class="post-meta">Model rasti gob po vrstah · lokalna baza 300 vrst · osvežuje se dnevno · 2026-09-12</p>
   <div class="gp-hero">
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap">
-        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="142.5"/></svg>
-        <div class="gp-gauge-num"><span class="num">58</span><small>/ 100</small></div>
+        <svg viewBox="0 0 128 128" class="gp-ring" aria-hidden="true"><circle cx="64" cy="64" r="54" class="gp-ring-bg"/><circle cx="64" cy="64" r="54" class="gp-ring-fg" stroke="#34d399" stroke-dasharray="339.3" stroke-dashoffset="81.4"/></svg>
+        <div class="gp-gauge-num"><span class="num">76</span><small>/ 100</small></div>
       </div>
       <div class="gp-hero-body">
         <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
-        <div class="gp-hero-lvl" style="color:#34d399">Dobro</div>
-        <div class="gp-hero-trend"><span class="gp-hero-spark"><svg viewBox="0 0 140 32" class="gp-spark" preserveAspectRatio="none" aria-hidden="true"><polyline points="3.0,5.5 25.3,6.7 47.7,5.5 70.0,3.0 92.3,5.5 114.7,8.0 137.0,29.0" fill="none" stroke="#c17f3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="gp-hero-lvl" style="color:#34d399">Odlično</div>
+        <div class="gp-hero-trend"><span class="gp-hero-spark"><svg viewBox="0 0 140 32" class="gp-spark" preserveAspectRatio="none" aria-hidden="true"><polyline points="3.0,6.7 25.3,5.5 47.7,3.0 70.0,5.5 92.3,8.0 114.7,29.0 137.0,6.7" fill="none" stroke="#c17f3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
         <div class="gp-hero-best-card">
           <div class="gp-hero-best-label">🌲 Najboljši teren danes</div>
           <div class="gp-hero-best-row">
-            <strong class="gp-hero-best-name">Pod planino Podvežak</strong>
+            <strong class="gp-hero-best-name">Gozdovi nad Ljubnim</strong>
             <span class="gp-hero-best-pct" style="background:#34d39922;color:#34d399">100 / 100 · Odlično</span>
           </div>
         </div>
-        <div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta za Rečico ob Savinji: <strong>Orjaški dežnik (Marela)</strong></div>
+        <div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta za Rečico ob Savinji: <strong>Bezgova uhljevka</strong></div>
         <a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">7-dnevna napoved →</a><span class="gp-badge e-ok" style="margin-left:.5rem;vertical-align:middle">Trenutno brezplačno</span>
       </div>
     </div>
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
-        data-pct="58" data-lvl="Dobro">Deli</button>
+        data-pct="76" data-lvl="Odlično">Deli</button>
       <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">Odpri zemljevid</a>
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
@@ -913,9 +954,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="gp-mini-map">
     <h2 class="gp-h2">🗺️ Danes v dolini</h2>
     <div class="gp-forests">
-    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Pod%20planino%20Podve%C5%BEak"><div class="gp-forest-info"><span class="gp-forest-nm">⛰️ Pod planino Podvežak</span><span class="gp-terr">bazicna · 1350 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">100/100</span><span class="lvl">Odlično</span></div></a>
-    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Kokarje%20%E2%80%93%20severni%20gozdni%20rob"><div class="gp-forest-info"><span class="gp-forest-nm">🌲 Kokarje – severni gozdni rob</span><span class="gp-terr">kisla · 525 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/macrolepiota_procera.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Orjaški dežnik (Marela)</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">99/100</span><span class="lvl">Odlično</span></div></a>
-    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Plahojca%E2%80%93%C5%A0ibje"><div class="gp-forest-info"><span class="gp-forest-nm">⛰️ Plahojca–Šibje</span><span class="gp-terr">bazicna · 1050 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">99/100</span><span class="lvl">Odlično</span></div></a>
+    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Gozdovi%20nad%20Ljubnim"><div class="gp-forest-info"><span class="gp-forest-nm">🌲 Gozdovi nad Ljubnim</span><span class="gp-terr">kisla · 700 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/macrolepiota_procera.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Orjaški dežnik (Marela)</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">100/100</span><span class="lvl">Odlično</span></div></a>
+    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Smrekov%C5%A1ko%20pogorje"><div class="gp-forest-info"><span class="gp-forest-nm">🌲 Smrekovško pogorje</span><span class="gp-terr">kisla · 1300 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/macrolepiota_procera.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Orjaški dežnik (Marela)</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">100/100</span><span class="lvl">Odlično</span></div></a>
+    <a class="gp-forest gp-mmap-card" href="/gobarska-napoved/zemljevid/?loc=Golte"><div class="gp-forest-info"><span class="gp-forest-nm">⛰️ Golte</span><span class="gp-terr">bazicna · 1300 m</span><span class="gp-forest-sp"><img class="gp-sp-ic" src="/gobarska-napoved/img/vrste/coprinus_comatus.jpg" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍄 '))">Velika tintnica</span></div><div class="gp-forest-pct gp-pct-hi"><span class="n">100/100</span><span class="lvl">Odlično</span></div></a>
     </div>
     <a class="gp-cta alt" href="/gobarska-napoved/danes/">Vsa območja (97) →</a>
   </div>
@@ -983,11 +1024,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.
     Ob zagonu sezone brezplačno za vse — vpiši e-naslov zgoraj, da odkleneš.</p>
     <div class="gp-skel">
-      <div class="gp-forest"><span>Orjaški dežnik (Marela)</span><b>72 % · Dobro</b></div>
-      <div class="gp-forest"><span>Hostni kukmak</span><b>58 % · Zmerno</b></div>
-      <div class="gp-forest"><span>Velika tintnica</span><b>81 % · Odlično</b></div>
-      <div class="gp-forest"><span>Siva mušnica</span><b>44 % · Zmerno</b></div>
-      <div class="gp-forest"><span>Čokata mušnica</span><b>65 % · Dobro</b></div>
+      <div class="gp-forest"><span>Bezgova uhljevka</span><b>72 % · Dobro</b></div>
+      <div class="gp-forest"><span>Žvepleni lepoluknjičar</span><b>58 % · Zmerno</b></div>
+      <div class="gp-forest"><span>Orjaški dežnik (Marela)</span><b>81 % · Odlično</b></div>
+      <div class="gp-forest"><span>Velika tintnica</span><b>44 % · Zmerno</b></div>
+      <div class="gp-forest"><span>Sivorumena mraznica (Štorovka)</span><b>65 % · Dobro</b></div>
     </div>
   </div>
 

@@ -890,10 +890,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="gp-val-card">
     <label class="gp-val-inlabel" for="gvalDate">Kdaj je nazadnje padel izdaten dež (vsaj 10–15 mm naenkrat)?</label>
     <div class="gp-val-inrow">
-      <input type="date" id="gvalDate" class="gp-val-date" max="2026-09-11" value="2026-09-10">
+      <input type="date" id="gvalDate" class="gp-val-date" max="2026-09-12" value="2026-09-11">
       <button type="button" id="gvalClear" class="gp-val-clear">Ni ga bilo</button>
     </div>
-    <p class="gp-val-suggest" id="gvalSuggest">Predlagano iz zadnjega izmerjenega dežja na postaji IREICA1 (85,1 mm, ≥ 10 mm) — spremeni, če preverjaš drug dogodek.</p>
+    <p class="gp-val-suggest" id="gvalSuggest">Predlagano iz zadnjega izmerjenega dežja na postaji IREICA1 (35,6 mm, ≥ 10 mm) — spremeni, če preverjaš drug dogodek.</p>
     <p class="gp-val-hint" id="gvalHint"></p>
     <div class="gp-val-axis"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span></div>
     <div class="gp-val-bands">
@@ -915,7 +915,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>(function(){
   var GROUPS = [{"eco": "razkrojevalka", "name": "Razkrojevalke stelje", "color": "#2dd4bf", "min": 2, "max": 8, "species": ["Orjaški dežnik (marela)", "Velika tintnica", "Poljski kukmak", "Betičasta prašnica", "Rjavoluski kukmak", "Gozdni kukmak"]}, {"eco": "lesna", "name": "Lesne vrste", "color": "#c17f3e", "min": 3, "max": 10, "species": ["Žvepleni lepoluknjičar", "Sivorumena mraznica (štorovka)", "Bezgova uhljevka"]}, {"eco": "mikorizna", "name": "Mikorizne vrste", "color": "#a78bfa", "min": 8, "max": 16, "species": ["Jesenski goban (jurček)", "Navadna lisička", "Rumeni ježek", "Užitna golobica", "Borov goban", "Kostanjevka", "Medena polževka"]}];
   var MAXDAY = 20;
-  var DEFAULT = {"date": "2026-09-10", "mm": 85.1};
+  var DEFAULT = {"date": "2026-09-11", "mm": 35.6};
   var dateInput = document.getElementById('gvalDate');
   var clearBtn = document.getElementById('gvalClear');
   if (!dateInput) return;
