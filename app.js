@@ -7152,6 +7152,18 @@ function drawMtrChart(idp){
   });
 }
 
+/* Ikona za en dan MTR kartice. napoved-modela.json ne nosi weather_code (MTR
+   popravlja samo Tmax/Tmin, ne oblačnosti) — zato se ne kliče Open-Meteo na
+   novo, ampak se ujema datum proti že prenesenim dnevnim podatkom, ki jih
+   stran itak ima (_cuDailyData iz fetchComingUp(), sicer _fcDailyData). Isto
+   načelo kot pri padavinski vrstici v junaški kartici: nobenega novega klica. */
+function _mtrWmoForDate(dateStr){
+  const src=(_cuDailyData&&_cuDailyData.time)?_cuDailyData:(_fcDailyData&&_fcDailyData.time)?_fcDailyData:null;
+  if(!src)return null;
+  const i=src.time.indexOf(dateStr);
+  return(i>=0&&Number.isFinite(src.weather_code?.[i]))?src.weather_code[i]:null;
+}
+
 /* Tri dnevne ploščice pod grafom: velika številka je MTR, pod njo Open-Meteo
    in popravek. Velika številka nosi nevtralno barvo besedila, identiteto pa
    pike ob njej — barva se v tej kartici uporablja za serijo, ne za številko. */
@@ -7168,9 +7180,11 @@ function renderMtrDays(idp){
     const chip=delta===null?''
       :'<span class="mtr-chip '+(delta<0?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta),1)+' °C</span>';
     const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+    const wmo=_mtrWmoForDate(d.date);
+    const icon=wmo!=null?_wmoImg(wmo,true,26):'';
     return '<div class="mtr-day">'
       +'<div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
-      +'<div class="mtr-day-val"><span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'
+      +'<div class="mtr-day-val">'+icon+'<span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'
         +fmt(v,1)+'<span class="mtr-day-unit">°C</span></div>'
       +(Number.isFinite(om)?'<div class="mtr-day-base">Open-Meteo '+fmt(om,1)+' °C '+chip+'</div>':'')
       +'<div class="mtr-day-meta">'
