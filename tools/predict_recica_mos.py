@@ -82,12 +82,14 @@ def predict_day(model, lead, feats):
         return None
 
     with_aifs = bool(model.get("uses_aifs"))
-    tvec = mos.temp_vector(feats, with_aifs)
+    use_bias = bool(model.get("uses_bias_features"))
+    use_cond = bool(model.get("uses_cond_features"))
     out = {}
     for target in ("tmax", "tmin"):
         coefs = entry["coefficients"].get(target)
         if not coefs:
             return None
+        tvec = mos.temp_vector(feats, target, with_aifs, use_bias, use_cond)
         out[target] = round(mos.predict_linear(coefs, tvec), 1)
         out[f"{target}_sd"] = entry["residual_sd"].get(target)
         skill = (entry.get("skill") or {}).get(target) or {}
@@ -131,6 +133,26 @@ def main():
         return 0
 
     today = dt.date.today()
+
+    # Avtokorelirana pristranskost (err_lag1/ma3/ma7, glej train_recica_mos.
+    # build_bias_series/err_stats): pri živi napovedi je "danes" izdaja za VSE
+    # vodilne čase hkrati, zato zadošča en majhen izsek D+1 arhiva za zadnjih
+    # ~10 dni (dovolj za ma7 + varnostna rezerva), ne glede na to, koliko
+    # vodilnih časov napovedujemo.
+    bias_series = None
+    if model.get("uses_bias_features"):
+        try:
+            hist = mos.load_history()
+            b_start = (today - dt.timedelta(days=10)).isoformat()
+            b_end = (today - dt.timedelta(days=1)).isoformat()
+            lead1_rows = mos.fetch_archived_forecasts(1, b_start, b_end)
+            bias_series = mos.build_bias_series(lead1_rows, hist)
+        except (RuntimeError, urllib.error.URLError, urllib.error.HTTPError,
+                TimeoutError, json.JSONDecodeError, OSError, FileNotFoundError) as e:
+            print(f"✗ Arhiv za pristranskost ni dosegljiv ({e}) — napoved ni osvežena",
+                  file=sys.stderr)
+            return 0
+
     days = []
     for lead in mos.LEADS:
         target = (today + dt.timedelta(days=lead)).isoformat()
@@ -144,6 +166,13 @@ def main():
             feats = mos.merge_aifs(feats, mos.daily_features(aifs_rows.get(target) or {}, target))
             if feats is None:
                 continue
+        if bias_series is not None:
+            for t in ("tmax", "tmin"):
+                lag1, ma3, ma7, missing = mos.err_stats(bias_series[t], target, lead)
+                feats[f"err_lag1_{t}"] = lag1
+                feats[f"err_ma3_{t}"] = ma3
+                feats[f"err_ma7_{t}"] = ma7
+                feats[f"is_err_missing_{t}"] = missing
         pred = predict_day(model, lead, feats)
         if pred is None:
             continue

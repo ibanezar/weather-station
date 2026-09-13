@@ -113,6 +113,31 @@ POP_FEATURES = [
 AIFS_TEMP_FEATURES = ["aifs_tmax", "aifs_tmin", "aifs_dtmax", "aifs_dtmin"]
 AIFS_POP_FEATURES = ["aifs_sqrt_prec", "aifs_wet_frac"]
 
+# Dodatek pri --use-bias: avtokorelirana pristranskost modela kot prediktor.
+# Zgrajena IZKLJUČNO iz D+1 arhiva (glej build_bias_series) — "kako zelo se je
+# Open-Meteo pred kratkim motil" je stanje, ki ga poznamo šele za včerajšnji in
+# starejše dni, ne glede na to, za kateri vodilni čas napovedujemo danes. Ločeno
+# za tmax/tmin, ker se model za vsak cilj uči na svoji napaki (glej err_stats).
+BIAS_FEATURES = ["err_lag1", "err_ma3", "err_ma7", "is_err_missing"]
+
+# Dodatek pri --use-cond: pogojni/režimski prediktorji in interakcije.
+# windcloud_n = nočni veter × nočna oblačnost — jasna in mirna noč (oba nizka)
+# napove močno radiacijsko inverzijo, oblačna in vetrovna pa popravek blizu nič;
+# to je ista fizika kot `coldpool` zgoraj, samo kot množinski (ne uteženi) člen.
+# sin_x_own/cos_x_own = sezonska interakcija z LASTNIM ciljem (om_tmax za model
+# tmax, om_tmin za model tmin) — obstoječa sin_x_tmax/cos_x_tmax v TEMP_FEATURES
+# zgoraj vedno uporabita om_tmax, tudi pri učenju tmin; ta dva sta dodatek, ne
+# zamenjava, zato je "obstoječi MTR" (brez zastavic) bit za bitom nespremenjen.
+COND_FEATURES = ["windmax", "radsum", "windcloud_n", "sin_x_own", "cos_x_own"]
+
+# Regularizacija se od uvedbe izbira z notranjo časovno validacijo (glej
+# select_lambda), ne več fiksno. RIDGE_LAMBDA ostane kot rezervna vrednost, če
+# zgodovine za izbiro zmanjka (npr. prvi meseci učne množice).
+LAMBDA_GRID = [0.5, 1.0, 2.0, 4.0, 8.0, 16.0]
+INNER_FOLDS = 3     # notranjih mesečnih rezin za izbiro lambda
+MIN_TRAIN_MONTHS = 3  # najmanj mesecev zgodovine, preden se sploh oceni prvi mesec
+OUTER_FOLDS = 12    # zaporednih mesečnih rezin za zunanjo (poročano) veščino
+
 
 # ── Zajem ───────────────────────────────────────────────────────────────────
 def _get_json(url, timeout=240, tries=4):
@@ -202,6 +227,14 @@ def daily_features(series, day):
     if any(f[k] is None for k in ("cloud", "cloud_n", "wind", "wind_n", "rh", "pres", "rad")):
         return None
 
+    # Pogojni/režimski prediktorji (--use-cond, glej COND_FEATURES): dnevni
+    # sunek namesto povprečja in dnevna energijska vsota obsevanja namesto
+    # samo dnevnega povprečja. Iz istih serij kot "wind"/"rad" zgoraj, zato ni
+    # dodatnega klica Open-Meteo.
+    wind_pairs = series.get("wind_speed_10m") or []
+    f["windmax"] = max(v for _, v in wind_pairs) if wind_pairs else None
+    f["radsum"] = sum(v for _, v in (series.get("shortwave_radiation") or []))
+
     doy = dt.date.fromisoformat(day).timetuple().tm_yday
     f["sin_doy"] = math.sin(2 * math.pi * doy / 365.25)
     f["cos_doy"] = math.cos(2 * math.pi * doy / 365.25)
@@ -225,13 +258,21 @@ def merge_aifs(f, af):
     return g
 
 
-def temp_vector(f, with_aifs=False):
+def temp_vector(f, target, with_aifs=False, use_bias=False, use_cond=False):
     """Načrtovalna vrstica za temperaturo. `coldpool` je jedro modela: ob jasni
     (nizka nočna oblačnost) in mirni (nizek nočni veter) noči gre proti 1 in
     ujame nabiranje hladnega zraka na dnu doline, ki ga mreža ne razreši.
 
-    Z `with_aifs` se na konec pripnejo značilke drugega vhoda — vrstni red
-    ustreza TEMP_FEATURES + AIFS_TEMP_FEATURES."""
+    Prvih 16 stolpcev (do `coldpool`/`sin_x_tmax`/`cos_x_tmax`) je NESPREMENJENIH
+    od uvedbe modela — pri `use_bias=use_cond=False` je vrnjeni vektor bit za
+    bitom enak prejšnjemu `temp_vector(f, with_aifs)`, kar "obstoječi MTR" v
+    primerjavi (tools/validate_recica_mos.py) naredi resnično obstoječega.
+
+    `target` ("tmax"/"tmin") pove, čigave err_* značilke (--use-bias) in čigav
+    "lasten" napovedani T (--use-cond, sin_x_own/cos_x_own) uporabiti — model za
+    tmax in model za tmin sta ločena regresija, zato tudi ločena vhoda za te
+    dele. Vrstni red: baza → aifs → bias → cond (ista pogodba mora veljati pri
+    učenju in napovedovanju, glej predict_recica_mos.py)."""
     coldpool = (100 - f["cloud_n"]) / 100 * (1 / (1 + f["wind_n"]))
     v = [
         1.0,
@@ -242,7 +283,69 @@ def temp_vector(f, with_aifs=False):
     ]
     if with_aifs:
         v += [f["aifs_tmax"], f["aifs_tmin"], f["aifs_dtmax"], f["aifs_dtmin"]]
+    if use_bias:
+        v += [
+            f[f"err_lag1_{target}"], f[f"err_ma3_{target}"], f[f"err_ma7_{target}"],
+            f[f"is_err_missing_{target}"],
+        ]
+    if use_cond:
+        own = f["om_tmax"] if target == "tmax" else f["om_tmin"]
+        windcloud_n = f["wind_n"] * f["cloud_n"] / 100
+        v += [
+            f["windmax"], f["radsum"] / 1000, windcloud_n,
+            f["sin_doy"] * own, f["cos_doy"] * own,
+        ]
     return v
+
+
+# ── Avtokorelirana pristranskost (--use-bias) ───────────────────────────────
+def build_bias_series(lead1_rows, hist):
+    """Časovna vrsta napake D+1 napovedi: izmerjeno − napovedano, ločeno za
+    tmax/tmin. To je EDINI vir za err_lag1/ma3/ma7 (glej err_stats), ne glede na
+    to, za kateri vodilni čas trenutno učimo ali napovedujemo — "kako zelo se je
+    model pred kratkim motil" je stanje, ki ga poznamo šele za pretekle,
+    razrešene dni, in D+1 je najsvežji tak vir (D+2/D+3 bi zahtevala čakanje
+    še en/dva dneva na razrešitev, torej manj svežo informacijo).
+
+    `lead1_rows` je izhod fetch_archived_forecasts(1, ...). Dan brez postajne
+    meritve (izpad, era5) ali brez popolne napovedi preprosto ni v vrsti — to
+    build_samples() prek err_stats() sam zazna kot vrzel (is_err_missing)."""
+    err_tmax, err_tmin = {}, {}
+    for day in lead1_rows:
+        obs = hist.get(day)
+        if not obs or obs.get("src") not in ("station", "wu"):
+            continue
+        if obs.get("tempHigh") is None or obs.get("tempLow") is None:
+            continue
+        f = daily_features(lead1_rows[day], day)
+        if f is None:
+            continue
+        err_tmax[day] = obs["tempHigh"] - f["om_tmax"]
+        err_tmin[day] = obs["tempLow"] - f["om_tmin"]
+    return {"tmax": err_tmax, "tmin": err_tmin}
+
+
+def err_stats(series, day, lead):
+    """(err_lag1, err_ma3, err_ma7, is_err_missing) za napoved dneva `day` pri
+    vodilnem času `lead`, brez uhajanja prihodnosti.
+
+    Napoved za `day` pri vodilnem času `lead` je (bila) izdana `lead` dni pred
+    `day` — torej je zadnji dan, ki je ob izdaji gotovo že končan in izmerjen,
+    `day - lead - 1`. To velja enotno za učenje (arhiv, poljubna pretekla
+    kombinacija dneva in vodilnega časa) in za živo napoved (izdaja je vedno
+    "danes", `day - lead` = danes za vsak `lead`, glej predict_recica_mos.py).
+
+    Manjkajoče vrednosti (začetek niza, izpad postaje/arhiva): NE vstavljamo
+    ničle tiho — vrnemo (0.0, 0.0, 0.0, 1.0) in kličatelj doda indikator
+    is_err_missing=1, model pa se iz njega nauči, kdaj značilki ne zaupati."""
+    end = dt.date.fromisoformat(day) - dt.timedelta(days=lead + 1)
+    window7 = [series.get((end - dt.timedelta(days=i)).isoformat()) for i in range(7)]
+    if any(v is None for v in window7):
+        return 0.0, 0.0, 0.0, 1.0
+    lag1 = window7[0]
+    ma3 = sum(window7[:3]) / 3
+    ma7 = sum(window7) / 7
+    return lag1, ma3, ma7, 0.0
 
 
 def pop_vector(f, with_aifs=False):
@@ -334,12 +437,17 @@ def load_history():
         return json.load(f)
 
 
-def build_samples(rows, hist, aifs_rows=None):
+def build_samples(rows, hist, lead, bias_series=None, aifs_rows=None):
     """Poveže dnevne značilke z izmerjenim dnem. Dnevi z izvorom "era5" so
     modelska ocena in ne meritev — v učenju bi model učili lastnega vhoda.
 
     Z `aifs_rows` se vsakemu dnevu pripnejo še značilke drugega vhoda; dan, ki
-    ga v tem arhivu ni, odpade."""
+    ga v tem arhivu ni, odpade.
+
+    Z `bias_series` (glej build_bias_series) se vsakemu dnevu pripnejo err_lag1/
+    ma3/ma7/is_err_missing, ločeno za tmax in tmin (glej err_stats) — `lead`
+    pove, kateri vodilni čas se tu uči, kar določi, koliko dni nazaj so te
+    značilke smele "videti"."""
     samples = []
     for day in sorted(rows):
         obs = hist.get(day)
@@ -355,6 +463,13 @@ def build_samples(rows, hist, aifs_rows=None):
             f = merge_aifs(f, af)
             if f is None:
                 continue
+        if bias_series is not None:
+            for target in ("tmax", "tmin"):
+                lag1, ma3, ma7, missing = err_stats(bias_series[target], day, lead)
+                f[f"err_lag1_{target}"] = lag1
+                f[f"err_ma3_{target}"] = ma3
+                f[f"err_ma7_{target}"] = ma7
+                f[f"is_err_missing_{target}"] = missing
         samples.append({
             "date": day,
             "f": f,
@@ -366,41 +481,102 @@ def build_samples(rows, hist, aifs_rows=None):
 
 
 # ── Veščina ─────────────────────────────────────────────────────────────────
-def blocked_cv(samples, target, om_key, with_aifs=False):
-    """MAE modela in surovega Open-Meteo pri izpuščanju celega leta.
+# Meteorološka sezona koledarskega meseca (za per_season razčlenitev spodaj).
+_SEASON_OF_MONTH = {
+    12: "zima", 1: "zima", 2: "zima",
+    3: "pomlad", 4: "pomlad", 5: "pomlad",
+    6: "poletje", 7: "poletje", 8: "poletje",
+    9: "jesen", 10: "jesen", 11: "jesen",
+}
 
-    Naključna delitev bi tu lagala: vreme je iz dneva v dan močno odvisno, zato
-    bi imel testni dan skoraj vedno svojega soseda v učni množici."""
-    years = sorted({s["date"][:4] for s in samples})
-    om_err, mos_err, per_year = [], [], {}
-    for hold in years:
-        tr = [s for s in samples if s["date"][:4] != hold]
-        te = [s for s in samples if s["date"][:4] == hold]
+
+def _season_of(date_str):
+    return _SEASON_OF_MONTH[int(date_str[5:7])]
+
+
+def select_lambda(samples, target, with_aifs=False, use_bias=False, use_cond=False,
+                   grid=LAMBDA_GRID, inner_folds=INNER_FOLDS):
+    """Izbere regularizacijo (lambda) z NOTRANJO časovno validacijo znotraj
+    `samples` — nikoli na zunanjem testnem nizu, ki bo pozneje meril veščino
+    tega izbora (glej walk_forward_cv). Zadnjih `inner_folds` mesecev te množice
+    služi kot notranji test, vsak proti vsemu, kar mu je strogo pred njim."""
+    months = sorted({s["date"][:7] for s in samples})
+    if len(months) <= inner_folds:
+        return RIDGE_LAMBDA  # premalo zgodovine za notranjo izbiro — rezervna vrednost
+    test_months = months[-inner_folds:]
+    best_lam, best_mae = RIDGE_LAMBDA, None
+    for lam in grid:
+        errs = []
+        for tm in test_months:
+            tr = [s for s in samples if s["date"][:7] < tm]
+            te = [s for s in samples if s["date"][:7] == tm]
+            if not tr or not te:
+                continue
+            coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond) for s in tr],
+                                [s[target] for s in tr], lam)
+            errs += [abs(predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond))
+                         - s[target]) for s in te]
+        if errs:
+            mae = sum(errs) / len(errs)
+            if best_mae is None or mae < best_mae:
+                best_mae, best_lam = mae, lam
+    return best_lam
+
+
+def walk_forward_cv(samples, target, om_key, with_aifs=False, use_bias=False, use_cond=False,
+                     outer_folds=OUTER_FOLDS, min_train_months=MIN_TRAIN_MONTHS):
+    """MAE modela in surovega Open-Meteo pri WALK-FORWARD validaciji: zaporedne
+    mesečne rezine, učenje SAMO na tem, kar je pred testnim mesecem — v
+    nasprotju s prejšnjim izpuščanjem celega leta (blocked_cv), ki je testni
+    mesec včasih napovedovala iz let, ki so sledila (uhajanje prihodnosti).
+
+    Regularizacija se izbere posebej za vsako rezino, izključno iz podatkov
+    pred njo (select_lambda) — testni mesec je od te izbire popolnoma
+    izoliran."""
+    months = sorted({s["date"][:7] for s in samples})
+    if len(months) <= min_train_months:
+        return None
+    test_months = months[min_train_months:][-outer_folds:]
+    om_err, mos_err, per_month = [], [], {}
+    season_errs = {}
+    for tm in test_months:
+        tr = [s for s in samples if s["date"][:7] < tm]
+        te = [s for s in samples if s["date"][:7] == tm]
         if not tr or not te:
             continue
-        coefs = solve_ridge([temp_vector(s["f"], with_aifs) for s in tr],
-                            [s[target] for s in tr], RIDGE_LAMBDA)
+        lam = select_lambda(tr, target, with_aifs, use_bias, use_cond)
+        coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond) for s in tr],
+                            [s[target] for s in tr], lam)
         eo, em = [], []
         for s in te:
-            pred = predict_linear(coefs, temp_vector(s["f"], with_aifs))
-            em.append(abs(pred - s[target]))
-            eo.append(abs(s["f"][om_key] - s[target]))
-        per_year[hold] = {"n": len(te),
+            pred = predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond))
+            e_om, e_mos = abs(s["f"][om_key] - s[target]), abs(pred - s[target])
+            eo.append(e_om)
+            em.append(e_mos)
+            se = season_errs.setdefault(_season_of(s["date"]), {"om": [], "mos": []})
+            se["om"].append(e_om)
+            se["mos"].append(e_mos)
+        per_month[tm] = {"n": len(te), "lambda": lam,
                           "open_meteo": round(sum(eo) / len(eo), 2),
                           "meteorec": round(sum(em) / len(em), 2)}
         om_err += eo
         mos_err += em
     if not om_err:
         return None
-    a = sum(om_err) / len(om_err)
-    b = sum(mos_err) / len(mos_err)
-    return {
-        "n": len(om_err),
-        "mae_open_meteo": round(a, 2),
-        "mae_meteorec": round(b, 2),
-        "improvement_pct": round(100 * (a - b) / a, 1) if a else 0.0,
-        "per_year": per_year,
-    }
+
+    def _skill(eo, em):
+        a, b = sum(eo) / len(eo), sum(em) / len(em)
+        return {
+            "n": len(eo), "mae_open_meteo": round(a, 2), "mae_meteorec": round(b, 2),
+            "rmse_open_meteo": round(math.sqrt(sum(e * e for e in eo) / len(eo)), 2),
+            "rmse_meteorec": round(math.sqrt(sum(e * e for e in em) / len(em)), 2),
+            "improvement_pct": round(100 * (a - b) / a, 1) if a else 0.0,
+        }
+
+    out = _skill(om_err, mos_err)
+    out["per_month"] = per_month
+    out["per_season"] = {s: _skill(v["om"], v["mos"]) for s, v in season_errs.items()}
+    return out
 
 
 def blocked_cv_pop(samples, with_aifs=False):
@@ -430,9 +606,10 @@ def blocked_cv_pop(samples, with_aifs=False):
     }
 
 
-def residual_sd(samples, coefs, target, with_aifs=False):
+def residual_sd(samples, coefs, target, with_aifs=False, use_bias=False, use_cond=False):
     """Standardni odklon ostankov — pas negotovosti na kartici."""
-    errs = [predict_linear(coefs, temp_vector(s["f"], with_aifs)) - s[target] for s in samples]
+    errs = [predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond)) - s[target]
+            for s in samples]
     if len(errs) < 2:
         return None
     mean = sum(errs) / len(errs)
@@ -471,6 +648,10 @@ def main():
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--aifs", action="store_true",
                     help="dodaj ECMWF AIFS kot drugi vhod (učno okno se skrajša na arhiv AIFS)")
+    ap.add_argument("--use-bias", action="store_true",
+                    help="dodaj avtokorelirano pristranskost (err_lag1/ma3/ma7) kot prediktor")
+    ap.add_argument("--use-cond", action="store_true",
+                    help="dodaj pogojne/režimske prediktorje in interakcije (glej COND_FEATURES)")
     ap.add_argument("--out", default=None, help="druga izhodna pot (za poskuse)")
     args = ap.parse_args()
 
@@ -492,10 +673,14 @@ def main():
         "hourly_vars": HOURLY_VARS,
         "uses_aifs": bool(args.aifs),
         "aifs_model": AIFS_MODEL if args.aifs else None,
-        "temp_features": TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else []),
+        "uses_bias_features": bool(args.use_bias),
+        "uses_cond_features": bool(args.use_cond),
+        "temp_features": (TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else [])
+                          + (BIAS_FEATURES if args.use_bias else [])
+                          + (COND_FEATURES if args.use_cond else [])),
         "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
         "wet_day_mm": WET_DAY_MM,
-        "ridge_lambda": RIDGE_LAMBDA,
+        "ridge_lambda": RIDGE_LAMBDA,  # rezervna vrednost; dejanska je od uvedbe select_lambda po ciljih spodaj
         "leads": {},
     }
 
@@ -521,6 +706,17 @@ def main():
             save_cache(cache)
         return rows
 
+    bias_series = None
+    if args.use_bias:
+        # D+1 arhiv je EDINI vir pristranskosti (glej build_bias_series) — vedno
+        # ta, ne glede na to, kateri vodilni čas se v zanki spodaj ravno uči.
+        lead1_rows = archive_rows(1)
+        if lead1_rows is None:
+            print("✗ --use-bias zahteva D+1 arhiv, ta pa ni dosegljiv.", file=sys.stderr)
+            return 1
+        bias_series = build_bias_series(lead1_rows, hist)
+        print(f"  pristranskost izračunana za {len(bias_series['tmax'])} dni")
+
     for lead in LEADS:
         rows = archive_rows(lead)
         if rows is None:
@@ -531,7 +727,7 @@ def main():
             if aifs_rows is None:
                 continue
 
-        samples = build_samples(rows, hist, aifs_rows)
+        samples = build_samples(rows, hist, lead, bias_series, aifs_rows)
         if len(samples) < 200:
             print(f"  ⚠ premalo vzorcev za D+{lead} ({len(samples)}) — vodilni čas izpuščen",
                   file=sys.stderr)
@@ -540,18 +736,25 @@ def main():
 
         entry = {"n_samples": len(samples),
                  "date_range": {"from": samples[0]["date"], "to": samples[-1]["date"]},
-                 "skill": {}, "coefficients": {}, "residual_sd": {}}
+                 "skill": {}, "coefficients": {}, "residual_sd": {}, "lambda": {}}
 
         for target, om_key in (("tmax", "om_tmax"), ("tmin", "om_tmin")):
-            skill = blocked_cv(samples, target, om_key, args.aifs)
-            coefs = solve_ridge([temp_vector(s["f"], args.aifs) for s in samples],
-                                [s[target] for s in samples], RIDGE_LAMBDA)
+            skill = walk_forward_cv(samples, target, om_key, args.aifs, args.use_bias, args.use_cond)
+            # Končna lambda za objavljene koeficiente: izbrana z isto notranjo
+            # časovno validacijo, tokrat na CELI učni množici (kar bo v produkciji
+            # dejansko na voljo), ne na eni izmed zunanjih rezin zgoraj.
+            lam = select_lambda(samples, target, args.aifs, args.use_bias, args.use_cond)
+            coefs = solve_ridge([temp_vector(s["f"], target, args.aifs, args.use_bias, args.use_cond)
+                                 for s in samples],
+                                [s[target] for s in samples], lam)
             entry["skill"][target] = skill
             entry["coefficients"][target] = [round(c, 6) for c in coefs]
-            entry["residual_sd"][target] = residual_sd(samples, coefs, target, args.aifs)
+            entry["lambda"][target] = lam
+            entry["residual_sd"][target] = residual_sd(samples, coefs, target, args.aifs,
+                                                        args.use_bias, args.use_cond)
             if skill:
                 print(f"  {target}: Open-Meteo {skill['mae_open_meteo']} °C → "
-                      f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %)")
+                      f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %, λ={lam})")
 
         pop_skill = blocked_cv_pop(samples, args.aifs)
         pop_coefs = solve_logistic([pop_vector(s["f"], args.aifs) for s in samples],
