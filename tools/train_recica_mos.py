@@ -124,11 +124,12 @@ BIAS_FEATURES = ["err_lag1", "err_ma3", "err_ma7", "is_err_missing"]
 # windcloud_n = nočni veter × nočna oblačnost — jasna in mirna noč (oba nizka)
 # napove močno radiacijsko inverzijo, oblačna in vetrovna pa popravek blizu nič;
 # to je ista fizika kot `coldpool` zgoraj, samo kot množinski (ne uteženi) člen.
-# sin_x_own/cos_x_own = sezonska interakcija z LASTNIM ciljem (om_tmax za model
-# tmax, om_tmin za model tmin) — obstoječa sin_x_tmax/cos_x_tmax v TEMP_FEATURES
-# zgoraj vedno uporabita om_tmax, tudi pri učenju tmin; ta dva sta dodatek, ne
-# zamenjava, zato je "obstoječi MTR" (brez zastavic) bit za bitom nespremenjen.
-COND_FEATURES = ["windmax", "radsum", "windcloud_n", "sin_x_own", "cos_x_own"]
+# sin_x_own/cos_x_own = sezonska interakcija z LASTNIM ciljem — SAMO pri tmin
+# (glej temp_vector): obstoječa sin_x_tmax/cos_x_tmax v TEMP_FEATURES zgoraj
+# vedno uporabita om_tmax, tudi pri učenju tmin, zato je pri tmin to dodatek,
+# ne zamenjava; pri tmax bi bila dobesedna kopija istih dveh stolpcev in samo
+# odvečen, nestabilen parameter (glej opombo v temp_vector).
+COND_FEATURES = ["windmax", "radsum", "windcloud_n", "sin_x_own_tmin_only", "cos_x_own_tmin_only"]
 
 # Regularizacija se od uvedbe izbira z notranjo časovno validacijo (glej
 # select_lambda), ne več fiksno. RIDGE_LAMBDA ostane kot rezervna vrednost, če
@@ -289,12 +290,17 @@ def temp_vector(f, target, with_aifs=False, use_bias=False, use_cond=False):
             f[f"is_err_missing_{target}"],
         ]
     if use_cond:
-        own = f["om_tmax"] if target == "tmax" else f["om_tmin"]
         windcloud_n = f["wind_n"] * f["cloud_n"] / 100
-        v += [
-            f["windmax"], f["radsum"] / 1000, windcloud_n,
-            f["sin_doy"] * own, f["cos_doy"] * own,
-        ]
+        v += [f["windmax"], f["radsum"] / 1000, windcloud_n]
+        # sin_x_own/cos_x_own SAMO za tmin: za tmax bi bila to dobesedna kopija
+        # sin_x_tmax/cos_x_tmax iz baze zgoraj (own == om_tmax) — odvečen,
+        # neidentificiran parameter, ki je pri walk-forward oceni po sezonah
+        # (kratka učna zgodovina, malo preteklih jeseni) nestabilno "izbiral"
+        # med dvema enakima stolpcema in k jesenski regresiji prispeval slabšo
+        # ekstrapolacijo (glej data/mtr-validation-report.md). Za tmin je
+        # interakcija z om_tmin resnično nova informacija, ki je v bazi ni.
+        if target == "tmin":
+            v += [f["sin_doy"] * f["om_tmin"], f["cos_doy"] * f["om_tmin"]]
     return v
 
 
@@ -336,12 +342,27 @@ def err_stats(series, day, lead):
     "danes", `day - lead` = danes za vsak `lead`, glej predict_recica_mos.py).
 
     Manjkajoče vrednosti (začetek niza, izpad postaje/arhiva): NE vstavljamo
-    ničle tiho — vrnemo (0.0, 0.0, 0.0, 1.0) in kličatelj doda indikator
-    is_err_missing=1, model pa se iz njega nauči, kdaj značilki ne zaupati."""
+    ničle tiho — err_lag1/ma3/ma7 nastavimo na KLIMATOLOŠKO povprečje
+    pristranskosti (povprečje vseh ŽE ZNANIH — strogo pred `end` — dni v
+    `series`), is_err_missing pa doda indikator, model pa se iz njega nauči,
+    kdaj značilki ne zaupati.
+
+    Prvotno je bila tu ničla: pri tmin je dolgoročno povprečje pristranskosti
+    ~−0,9 °C, pri tmax ~+0,8 °C, zato je ničla is_err_missing prisilila, da je
+    sam prevzel to razliko — velik koeficient (≈ ∓1 °C), ki je bil dober za
+    redke posamezne manjkajoče dni v učni množici (~1–2 %), ob resničnem
+    večdnevnem izpadu pa (20.–23. 11. 2025, glej data/mtr-validation-report.md
+    — jesenska regresija) dni tik po njem narobe popravil (napaka do 8,87 °C).
+    Klimatologija je nevtralna vrednost brez te napetosti; is_err_missing
+    lahko ostane majhen in izraža samo dodatno negotovost, ne osnovnega nivoja
+    pristranskosti."""
     end = dt.date.fromisoformat(day) - dt.timedelta(days=lead + 1)
     window7 = [series.get((end - dt.timedelta(days=i)).isoformat()) for i in range(7)]
     if any(v is None for v in window7):
-        return 0.0, 0.0, 0.0, 1.0
+        cutoff = end.isoformat()
+        known = [v for d, v in series.items() if d < cutoff]
+        clim = sum(known) / len(known) if known else 0.0
+        return clim, clim, clim, 1.0
     lag1 = window7[0]
     ma3 = sum(window7[:3]) / 3
     ma7 = sum(window7) / 7
