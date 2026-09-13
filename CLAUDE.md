@@ -521,12 +521,52 @@ tem stikom, ne preimenovanje kode.
 - `tools/predict_recica_mos.py` → `napoved-modela.json`, teče v
   `forecast-verify.yml` **pred** `verify_forecasts.py`, ki napoved zabeleži kot
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
-  merilu. Kartica v `app.js` je `fetchMosForecast()` — vrstice po dnevih riše
-  `mtrRow()` (razpon negotovosti je golo besedilo `±sd °C`, ne grafični
-  gauge — glej opombo pri `.mtr-range` v `style.css`, zakaj), eno-stavčno
-  razlago za jutri `mtrWhyText()`, sparkline zaupanja v vznožju kartice
-  `mtrSparkline()` (rolling MAE iz `data/mtr-accuracy.json`, ne napovedni
-  trend kot prej).
+  merilu. Kartico v `app.js` sestavi `fetchMosForecast()` → `renderMtrCard()`.
+
+### Kartica MTR na naslovni strani je GRAFIČNA, ne tabela
+
+Zavihek `#tab-mtr` je bil do 13. 9. 2026 seznam številk v vrsticah in je bil
+nepregleden: bralec je moral popravek modela sestaviti v glavi, grafa ni bilo
+nobenega. Zdaj to pokaže geometrija:
+
+- **Hero graf** (`drawMtrChart()`) — zadnjih 14 IZMERJENIH dni postaje, nato 3
+  dnevi napovedi MTR s pasom negotovosti (P10–P90) in Open-Meteo kot
+  primerjalno črto. Razmik med zeleno in vijolično črto **je** popravek modela.
+  Napovedni del ima rahlo podlago, ker je subjekt kartice napoved, preteklost
+  pa kontekst.
+- **Dnevne ploščice, KPI ploščice in "dvoboj"** (`drawMtrDuel()`) — za vsak
+  razrešen dan stolpec v smeri vira, ki je bil bližje meritvi; višina je
+  razlika napak. Semafor vseh štirih virov (`/tocnost-napovedi/`) in rolling
+  trend po sezonah (`/trendi/`) ostaneta na svojih straneh — tu je samo MTR
+  proti Open-Meteu, ker je prav ta razlika trditev te kartice.
+- **Preklopnik Tmax/Tmin** prerisuje vse štiri dele. Model popravlja obe
+  meritvi po svoje (podnevi navzgor, ponoči navzdol), zato sta to dve zgodbi
+  in ne ena — tudi dvoboj se izide drugače (Tmax 26/40, Tmin 21/40).
+
+Pravila, ki jih ne obračaj:
+
+- **Barve serij so IZRAČUNANE, ne izbrane na oko.** Par `#059669`/`#a855f7`
+  (temna tema) in `#047857`/`#6d28d9` (svetla) gre skozi vseh šest testov
+  palete — svetlost, kroma, ločljivost pri barvni slepoti, kontrast proti
+  podlagi. Znamčna zelena `#34d399` ostane na znački in logotipu, v graf pa ne
+  gre: na tem zelo temnem ozadju pade test svetlosti. Če menjaš barve, jih
+  spet poženi skozi validator (skill `dataviz`,
+  `scripts/validate_palette.js`), ne ugibaj — prav ugibanje je bilo vzrok, da
+  je bil prejšnji poskus neberljiv.
+- **Meritve so ravne daljice med dnevi, ne zglajena krivulja.** `smoothPath()`
+  bi med dvema dnevoma narisal preval pod izmerjeni minimum oziroma nad
+  maksimum — torej vrednosti, ki jih postaja ni izmerila. Zglajena je lahko
+  urna serija, dnevna ne.
+- **viewBox je odziven** (`narrow` v obeh risalnih funkcijah): na ozkem
+  zaslonu se enak viewBox stisne v pas in pisava pade pod 5 px. Ožji viewBox
+  pomeni sorazmerno večjo pisavo; preteklost se hkrati skrajša na 8 dni, da se
+  točke ne zlepijo. Ob prestopu praga prerisuje poslušalec `resize`.
+- **Osne oznake nosijo barvo besedila, ne barve serije** — identiteto nosijo
+  črte, legenda in neposredni oznaki ob koncu črt.
+- `forecast_verification.json` bereta ta kartica in značka zaupanja v heroju —
+  gre skozi `_verifOnce()`, da se 46 kB datoteka prenese enkrat.
+- Grafi nosijo barve v atributih SVG, ne v CSS, zato jih `setTheme()` ob
+  menjavi teme izrecno preriše (`renderMtrCard()`).
 - Četrti vir na semaforju je **ECMWF AIFS** (`models=ecmwf_aifs025_single` prek
   Open-Meteo) — AI model, ki ga Windy prikazuje kot 15-dnevni podaljšek modela
   ECMWF. Edini vir tu z arhivom preteklih napovedi, zato ga

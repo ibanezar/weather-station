@@ -299,7 +299,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=2733bafb">
+<link rel="stylesheet" href="/style.min.css?v=eeb41002">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -3034,16 +3034,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </span>
         <span class="chart-range" id="mos-updated">Nalaganje…</span>
       </div>
-      <div class="mtr-rows" id="mos-rows"><div class="mtr-skel"></div><div class="mtr-skel"></div></div>
+      <!-- Preklopnik meritve: model popravlja Tmax in Tmin po svoje (podnevi
+           navzgor, ponoči navzdol), zato sta to dve zgodbi. Prerisuje graf,
+           dnevne ploščice, KPI-je in dvoboj spodaj. -->
+      <div class="mtr-seg" id="mos-seg" role="tablist" aria-label="Katero meritev prikazujem">
+        <button type="button" class="mtr-seg-btn is-on" data-metric="tmax" role="tab" aria-selected="true">Najvišja dnevna</button>
+        <button type="button" class="mtr-seg-btn" data-metric="tmin" role="tab" aria-selected="false">Najnižja nočna</button>
+      </div>
+      <div class="mtr-legend" id="mos-legend"></div>
+      <svg id="mos-chart" class="mtr-chart" viewBox="0 0 880 300" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Zadnjih 14 izmerjenih dni postaje IREICA1 in trije dnevi napovedi MTR s pasom negotovosti, ob njej napoved Open-Meteo"></svg>
+      <div class="mtr-days" id="mos-days"></div>
       <p class="mtr-why" id="mos-why"></p>
-      <div class="mtr-trust" id="mos-trust"></div>
     </div>
 
-    <!-- Natančnost: semafor D+1 dan-za-dnem in rolling trend skozi čas na
-         enem mestu, namesto raztreseno po strani. -->
+    <!-- Natančnost: KPI ploščice + dvoboj po dnevih. Globinska pogleda
+         (semafor vseh štirih virov, rolling trend po sezonah) ostaneta na
+         svojih straneh — tu je samo MTR proti Open-Meteu, ker je prav ta
+         razlika trditev te kartice. -->
     <div class="card" style="margin-bottom:1.25rem">
-      <div class="clabel" style="margin:0 0 .8rem">🎯 Natančnost MTR</div>
-      <div style="display:flex;flex-direction:column;gap:.6rem">
+      <div class="clabel" style="margin:0 0 .9rem">🎯 Natančnost MTR — zadnji razrešeni dnevi</div>
+      <div class="mtr-kpis" id="mos-kpis"></div>
+      <div class="mtr-duel-hd">Dvoboj po dnevih — <span id="mos-duel-lbl">najvišja dnevna</span></div>
+      <svg id="mos-duel" class="mtr-duel" viewBox="0 0 880 132" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Za vsak razrešen dan stolpec v smeri vira, ki je bil bližje meritvi postaje"></svg>
+      <p class="mtr-duel-note" id="mos-duel-note"></p>
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:1rem">
         <a href="/tocnost-napovedi/" class="mtn-avk-link">📅 Semafor D+1, dan za dnem — ARSO, Open-Meteo, ECMWF AIFS, MTR →</a>
         <a href="/trendi/#mtr-accuracy" class="mtn-avk-link">📈 Rolling 30-dnevni MAE skozi čas, D+1/D+2, po sezonah →</a>
       </div>
@@ -3668,7 +3684,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=cdd1e0a2" defer></script>
+<script src="app.min.js?v=49924c66" defer></script>
 
 
 <div id="toast"></div>
