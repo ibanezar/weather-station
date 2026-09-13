@@ -2263,22 +2263,26 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 /* Naš model (MOS) — poskusna napoved, D+1..D+3, vrstična kartica: vsak dan je
    skupina dveh vrstic (Tmax/Tmin), vsaka prečrtano OM vrednost → popravek MTR,
-   pilulo razlike in pas negotovosti (glej mtrBand() v app.js). */
+   pilulo razlike in razpon negotovosti (glej mtrRow() v app.js). Prejšnja
+   različica je razpon risala kot SVG-krog na sredini raztegnjenega traku —
+   ker je MTR vedno sredina svojega razpona, je bila pika vedno na istem mestu
+   (brez informacije) in se je pri raztezanju sploščila v popačen krog; zdaj
+   golo besedilo (.mtr-range), poravnano k desnemu robu kot ostanek vrstice. */
 .mtr-rows{margin-top:.25rem}
-.mtr-daylbl{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:.9rem}
+.mtr-daylbl{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:1rem}
 .mtr-daylbl:first-child{margin-top:0}
 .mtr-pop{color:var(--rain-col);text-transform:none;letter-spacing:0;font-weight:500}
-.mtr-row{display:flex;align-items:center;gap:.55rem;padding:.45rem 0;border-top:1px solid var(--card-border)}
+.mtr-row{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.5rem;row-gap:.15rem;padding:.5rem 0;border-top:1px solid var(--card-border)}
 .mtr-daylbl+.mtr-row{border-top:0}
-.mtr-lbl{font-size:.72rem;color:var(--muted);width:36px;flex:none}
-.mtr-base{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.mtr-lbl{font-size:.74rem;font-weight:600;color:var(--muted);width:34px;flex:none}
+.mtr-base{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
 .mtr-arrow{color:var(--muted);opacity:.5;font-size:.78rem}
-.mtr-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;line-height:1}
+.mtr-val{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;line-height:1}
 .mtr-val.warm{color:#f87171}.mtr-val.cool{color:var(--blue)}
-.mtr-delta{font-size:.66rem;font-weight:600;padding:.12rem .4rem;border-radius:999px;white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.mtr-delta{font-size:.68rem;font-weight:600;padding:.14rem .45rem;border-radius:999px;white-space:nowrap;font-family:'JetBrains Mono',monospace}
 .mtr-delta.up{background:rgba(248,113,113,.14);color:#f87171}
 .mtr-delta.down{background:rgba(2,132,199,.14);color:var(--blue)}
-.mtr-band{flex:1;min-width:40px;height:20px;color:var(--muted)}
+.mtr-range{flex:1;text-align:right;font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .mtr-why{font-size:.78rem;color:var(--muted);margin:.8rem 0 0;line-height:1.5}
 .mtr-trust{display:flex;align-items:center;gap:.7rem;margin-top:.7rem;padding-top:.7rem;
   border-top:1px solid var(--card-border);font-size:.74rem;color:var(--muted);line-height:1.5}

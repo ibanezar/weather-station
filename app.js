@@ -6896,7 +6896,12 @@ async function fetchMosForecast(idp){
 }
 
 /* Ena vrstica kartice MTR (Tmax ali Tmin za en dan): prečrtana Open-Meteo
-   vrednost → popravek MTR, pilula razlike in pas negotovosti. */
+   vrednost → popravek MTR, pilula razlike in razpon negotovosti kot besedilo.
+   (Prejšnja različica je razpon risala kot SVG "gauge" s piko na sredini traku
+   — ker je MTR po definiciji sredina svojega razpona, je bila pika vedno na
+   istem mestu (brez informacije) in se je pri raztezanju v širino vrstice
+   spremenila v popačen, sploščen krog namesto kroga. Golo besedilo je jasnejše
+   in ne more biti popačeno.) */
 function mtrRow(m,f){
   if(!Number.isFinite(m.mtr))return'';
   const hasBase=Number.isFinite(m.base);
@@ -6908,19 +6913,8 @@ function mtrRow(m,f){
     +(hasBase?'<span class="mtr-base">'+f(m.base)+'°</span><span class="mtr-arrow">→</span>':'')
     +'<span class="mtr-val '+m.cls+'">'+f(m.mtr)+'°</span>'
     +(delta!==null?'<span class="mtr-delta '+cls+'">'+sign+f(Math.abs(delta))+' °C</span>':'')
-    +mtrBand(m)
+    +(Number.isFinite(m.sd)?'<span class="mtr-range">±'+f(1.2816*m.sd)+' °C</span>':'')
     +'</div>';
-}
-
-/* Pas negotovosti: MTR ± 1,2816·SD ≈ razpon P10–P90 pod normalno porazdelitvijo
-   napake (SD je izmerjena v treningu, glej tools/train_recica_mos.py). */
-function mtrBand(m){
-  if(!Number.isFinite(m.sd))return'<span class="mtr-band"></span>';
-  const lo=m.mtr-1.2816*m.sd,hi=m.mtr+1.2816*m.sd,w=(hi-lo)||1,pos=((m.mtr-lo)/w)*100;
-  return '<svg class="mtr-band" viewBox="0 0 100 20" preserveAspectRatio="none" role="img"'
-    +' aria-label="Razpon '+lo.toFixed(1)+' do '+hi.toFixed(1)+' stopinj">'
-    +'<rect x="0" y="8" width="100" height="4" rx="2" fill="currentColor" opacity=".14"></rect>'
-    +'<circle cx="'+pos.toFixed(1)+'" cy="10" r="3.2" fill="#34d399"></circle></svg>';
 }
 
 /* Eno-stavčna razlaga za jutri (D+1) — samo iz številk, ki jih model dejansko

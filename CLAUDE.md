@@ -522,9 +522,11 @@ tem stikom, ne preimenovanje kode.
   `forecast-verify.yml` **pred** `verify_forecasts.py`, ki napoved zabeleži kot
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
   merilu. Kartica v `app.js` je `fetchMosForecast()` — vrstice po dnevih riše
-  `mtrRow()`/`mtrBand()`, eno-stavčno razlago za jutri `mtrWhyText()`, sparkline
-  zaupanja v vznožju kartice `mtrSparkline()` (rolling MAE iz
-  `data/mtr-accuracy.json`, ne napovedni trend kot prej).
+  `mtrRow()` (razpon negotovosti je golo besedilo `±sd °C`, ne grafični
+  gauge — glej opombo pri `.mtr-range` v `style.css`, zakaj), eno-stavčno
+  razlago za jutri `mtrWhyText()`, sparkline zaupanja v vznožju kartice
+  `mtrSparkline()` (rolling MAE iz `data/mtr-accuracy.json`, ne napovedni
+  trend kot prej).
 - Četrti vir na semaforju je **ECMWF AIFS** (`models=ecmwf_aifs025_single` prek
   Open-Meteo) — AI model, ki ga Windy prikazuje kot 15-dnevni podaljšek modela
   ECMWF. Edini vir tu z arhivom preteklih napovedi, zato ga
