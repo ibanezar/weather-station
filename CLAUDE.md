@@ -534,6 +534,15 @@ nobenega. Zdaj to pokaže geometrija:
   primerjalno črto. Razmik med zeleno in vijolično črto **je** popravek modela.
   Napovedni del ima rahlo podlago, ker je subjekt kartice napoved, preteklost
   pa kontekst.
+- **Kartica stoji na dveh mestih in koda se ne podvaja.** Polna je na zavihku
+  (`mos-`), skrajšana na naslovni strani takoj za 7-dnevno napovedjo
+  (`hmos-`, brez KPI-jev in dvoboja — natančnost se razlaga na enem mestu).
+  Montaže so samo id-predpone v `MTR_MOUNT_IDS`; risalne funkcije sprejmejo
+  predpono, `renderMtrCard()` pa prerisuje vse najdene. Nova kartica torej ne
+  pomeni nove kode — dovolj je predpona tu in elementi v HTML. Stanje (izbrana
+  meritev) je skupno, zato preklop na eni kartici velja za obe. Prej je bil na
+  naslovni strani samo skok na zavihek (`.mtr-jump-card`, "ne podvojena
+  kartica"); od 13. 9. 2026 je tam graf, skok pa je ostal kot noga kartice.
 - **Dnevne ploščice, KPI ploščice in "dvoboj"** (`drawMtrDuel()`) — za vsak
   razrešen dan stolpec v smeri vira, ki je bil bližje meritvi; višina je
   razlika napak. Semafor vseh štirih virov (`/tocnost-napovedi/`) in rolling

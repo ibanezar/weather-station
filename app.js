@@ -6879,9 +6879,17 @@ function _mtrVerifRows(){
     .sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:0));
 }
 
-async function fetchMosForecast(idp){
-  idp=idp||'mos-';
-  if(!document.getElementById(idp+'chart'))return;
+/* Kartica je lahko na strani večkrat: polna na zavihku #tab-mtr ('mos-') in
+   skrajšana na naslovni strani ('hmos-', brez KPI-jev in dvoboja). Koda se ne
+   podvaja — vsaka montaža je samo druga id-predpona, risalne funkcije pa so
+   iste. Montaže se poiščejo v DOM, zato dodajanje nove kartice v HTML ne
+   zahteva spremembe v app.js: dovolj je predpono dopisati sem. */
+const MTR_MOUNT_IDS=['mos-','hmos-'];
+function _mtrMounts(){return MTR_MOUNT_IDS.filter(p=>document.getElementById(p+'chart'));}
+
+async function fetchMosForecast(){
+  const mounts=_mtrMounts();
+  if(!mounts.length)return;
   try{
     const cb='?_='+Math.floor(Date.now()/36e5);
     const [fcRes,accRes,verif]=await Promise.all([
@@ -6894,25 +6902,26 @@ async function fetchMosForecast(idp){
     const acc=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
     const days=(data.days||[]).filter(d=>Number.isFinite(d.tmax)&&Number.isFinite(d.tmin));
     if(!days.length)throw new Error('brez dni');
-    _mtrState={idp,data,days,acc,verif:verif||null,metric:(_mtrState&&_mtrState.metric)||'tmax'};
-    _mtrBindSeg();
+    _mtrState={data,days,acc,verif:verif||null,metric:(_mtrState&&_mtrState.metric)||'tmax'};
+    mounts.forEach(_mtrBindSeg);
     renderMtrCard();
   }catch(e){
-    const ch=document.getElementById(idp+'chart');
-    if(ch)ch.innerHTML='';
-    const days=document.getElementById(idp+'days');
-    if(days)days.innerHTML='<div class="mtr-empty">Napoved MTR trenutno ni na voljo.</div>';
-    const upd=document.getElementById(idp+'updated');
-    if(upd)upd.textContent='ni na voljo';
+    mounts.forEach(idp=>{
+      const ch=document.getElementById(idp+'chart');
+      if(ch)ch.innerHTML='';
+      const days=document.getElementById(idp+'days');
+      if(days)days.innerHTML='<div class="mtr-empty">Napoved MTR trenutno ni na voljo.</div>';
+      const upd=document.getElementById(idp+'updated');
+      if(upd)upd.textContent='ni na voljo';
+    });
     console.warn('MTR:',e);
   }
 }
 
 /* Preklopnik Tmax/Tmin. Poslušalci se pripnejo enkrat (dataset.bound), ker
    fetchMosForecast() teče znova ob vsakem preklopu na zavihek. */
-function _mtrBindSeg(){
-  const st=_mtrState;if(!st)return;
-  const seg=document.getElementById(st.idp+'seg');
+function _mtrBindSeg(idp){
+  const seg=document.getElementById(idp+'seg');
   if(!seg||seg.dataset.bound)return;
   seg.dataset.bound='1';
   seg.querySelectorAll('.mtr-seg-btn').forEach(btn=>{
@@ -6927,49 +6936,56 @@ function _mtrBindSeg(){
 
 function renderMtrCard(){
   const st=_mtrState;if(!st)return;
-  const M=MTR_METRICS[st.metric];
   _mtrNarrow=(window.innerWidth||880)<620;
+  _mtrMounts().forEach(_renderMtrMount);
+}
 
-  const seg=document.getElementById(st.idp+'seg');
+/* Ena montaža kartice. Kar v njej ni (KPI-ji in dvoboj na naslovni strani),
+   preskočijo risalne funkcije same — vsaka najprej poišče svoj element. */
+function _renderMtrMount(idp){
+  const st=_mtrState;if(!st)return;
+  const M=MTR_METRICS[st.metric];
+
+  const seg=document.getElementById(idp+'seg');
   if(seg)seg.querySelectorAll('.mtr-seg-btn').forEach(b=>{
     const on=b.dataset.metric===st.metric;
     b.classList.toggle('is-on',on);
     b.setAttribute('aria-selected',on?'true':'false');
   });
 
-  const badge=document.getElementById(st.idp+'badge');
+  const badge=document.getElementById(idp+'badge');
   if(badge){
     const major=(st.data.model_version||'').split('.')[0];
     badge.textContent=major?'v'+major:'';
   }
-  const upd=document.getElementById(st.idp+'updated');
+  const upd=document.getElementById(idp+'updated');
   if(upd&&st.data.generated_at){
     const t=new Date(st.data.generated_at);
     upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
       +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }
-  const leg=document.getElementById(st.idp+'legend');
+  const leg=document.getElementById(idp+'legend');
   if(leg)leg.innerHTML=
      '<span class="mtr-lg"><i class="mtr-lg-line" style="background:'+MTR_CC.actual+'"></i>Izmerjeno (IREICA1)</span>'
     +'<span class="mtr-lg"><i class="mtr-lg-line" style="background:'+MTR_CC.mtr+'"></i>MTR — napoved</span>'
     +'<span class="mtr-lg"><i class="mtr-lg-line mtr-lg-dash" style="background:'+MTR_CC.om+'"></i>Open-Meteo</span>'
     +'<span class="mtr-lg"><i class="mtr-lg-band" style="background:'+MTR_CC.mtrSoft+';border-color:'+MTR_CC.mtr+'"></i>razpon MTR (P10–P90)</span>';
 
-  drawMtrChart();
-  renderMtrDays();
-  renderMtrWhy();
-  renderMtrKpis();
-  drawMtrDuel();
-  const dl=document.getElementById(st.idp+'duel-lbl');
+  drawMtrChart(idp);
+  renderMtrDays(idp);
+  renderMtrWhy(idp);
+  renderMtrKpis(idp);
+  drawMtrDuel(idp);
+  const dl=document.getElementById(idp+'duel-lbl');
   if(dl)dl.textContent=M.lbl.toLowerCase();
 }
 
 /* Hero graf: izmerjena preteklost → napoved. Pas negotovosti in obe napovedni
    črti se začneta v zadnji izmerjeni točki, da je prehod iz meritve v napoved
    ena sama zvezna zgodba in ne dva ločena grafa. */
-function drawMtrChart(){
+function drawMtrChart(idp){
   const st=_mtrState;if(!st)return;
-  const svg=document.getElementById(st.idp+'chart');if(!svg)return;
+  const svg=document.getElementById(idp+'chart');if(!svg)return;
   const M=MTR_METRICS[st.metric];
   svg.innerHTML='';
 
@@ -7139,9 +7155,9 @@ function drawMtrChart(){
 /* Tri dnevne ploščice pod grafom: velika številka je MTR, pod njo Open-Meteo
    in popravek. Velika številka nosi nevtralno barvo besedila, identiteto pa
    pike ob njej — barva se v tej kartici uporablja za serijo, ne za številko. */
-function renderMtrDays(){
+function renderMtrDays(idp){
   const st=_mtrState;if(!st)return;
-  const el=document.getElementById(st.idp+'days');if(!el)return;
+  const el=document.getElementById(idp+'days');if(!el)return;
   const M=MTR_METRICS[st.metric];
   el.innerHTML=st.days.map(d=>{
     const v=d[M.key],om=d[M.om],sd=d[M.sd];
@@ -7164,9 +7180,9 @@ function renderMtrDays(){
   }).join('');
 }
 
-function renderMtrWhy(){
+function renderMtrWhy(idp){
   const st=_mtrState;if(!st)return;
-  const el=document.getElementById(st.idp+'why');if(!el)return;
+  const el=document.getElementById(idp+'why');if(!el)return;
   const d1=st.days.find(d=>d.lead===1);
   if(!d1||!Number.isFinite(d1.d_tmax)||!Number.isFinite(d1.d_tmin)){el.textContent='';return;}
   const t=v=>(v>=0?'topleje':'hladneje')+' za '+fmt(Math.abs(v),1)+' °C';
@@ -7177,9 +7193,9 @@ function renderMtrWhy(){
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
    razlika med njima. Vse tri so D+1 in za izbrano meritev, da se ne mešajo
    vodilni časi — semafor po dnevih in rolling trend sta na svojih straneh. */
-function renderMtrKpis(){
+function renderMtrKpis(idp){
   const st=_mtrState;if(!st)return;
-  const el=document.getElementById(st.idp+'kpis');if(!el)return;
+  const el=document.getElementById(idp+'kpis');if(!el)return;
   const M=MTR_METRICS[st.metric];
   const l1=st.acc&&st.acc.leads&&st.acc.leads['1'];
   const at=l1&&l1.all_time&&l1.all_time[M.key];
@@ -7204,10 +7220,10 @@ function renderMtrKpis(){
 /* "Dvoboj": za vsak razrešen dan stolpec v smeri vira, ki je bil bližje
    meritvi. Višina je razlika absolutnih napak — torej koliko je zmaga štela,
    ne samo kdo je zmagal. */
-function drawMtrDuel(){
+function drawMtrDuel(idp){
   const st=_mtrState;if(!st)return;
-  const svg=document.getElementById(st.idp+'duel');if(!svg)return;
-  const note=document.getElementById(st.idp+'duel-note');
+  const svg=document.getElementById(idp+'duel');if(!svg)return;
+  const note=document.getElementById(idp+'duel-note');
   const M=MTR_METRICS[st.metric];
   svg.innerHTML='';
 

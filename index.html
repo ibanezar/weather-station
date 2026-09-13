@@ -1014,6 +1014,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji</div>
   </div>
 
+  <!-- MTR na naslovni strani: isti graf kot na zavihku #tab-mtr, samo brez
+       KPI-jev in dvoboja (ta dva ostaneta tam, da se natančnost ne razlaga na
+       dveh mestih). Koda se NE podvaja — risalne funkcije v app.js sprejmejo
+       id-predpono, tu je 'hmos-'; predpona je vpisana v MTR_MOUNT_IDS.
+       Stoji takoj za 7-dnevno napovedjo, ker odgovarja na isto vprašanje:
+       splošna mreža pove to, naš popravek za dno doline pa to.
+       Kartica nima simple-keep, torej je v preprostem pogledu skrita in klic
+       gre skozi runAdvancedOnly() — velja pravilo iz CLAUDE.md. -->
+  <div class="card chart-card" style="margin-bottom:1rem">
+    <div class="chart-hdr">
+      <span style="display:flex;align-items:center;gap:.4rem">
+        <span class="clabel" style="margin:0">
+          <svg class="mtr-logo-mini" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" fill="rgba(52,211,153,.10)"/>
+            <path d="M3 27 L13 12 L21 27 Z" fill="#7c8ba3" opacity=".9"/>
+            <path d="M17 27 L28 9 L37 27 Z" fill="#59718c" opacity=".95"/>
+            <circle cx="29" cy="9.5" r="2.6" fill="#fbbf24"/>
+            <path d="M4 24 C9 20 12 26 18 21.5 C24 17 28 23 36 17.5" stroke="#34d399" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          MTR — naš model za dno doline
+        </span>
+        <span class="aifc-badge mtr" id="hmos-badge"></span>
+      </span>
+      <span class="chart-range" id="hmos-updated">Nalaganje…</span>
+    </div>
+    <div class="mtr-seg" id="hmos-seg" role="tablist" aria-label="Katero meritev prikazujem">
+      <button type="button" class="mtr-seg-btn is-on" data-metric="tmax" role="tab" aria-selected="true">Najvišja dnevna</button>
+      <button type="button" class="mtr-seg-btn" data-metric="tmin" role="tab" aria-selected="false">Najnižja nočna</button>
+    </div>
+    <div class="mtr-legend" id="hmos-legend"></div>
+    <svg id="hmos-chart" class="mtr-chart" viewBox="0 0 880 300" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-label="Zadnjih 14 izmerjenih dni postaje IREICA1 in trije dnevi napovedi MTR s pasom negotovosti, ob njej napoved Open-Meteo"></svg>
+    <div class="mtr-days" id="hmos-days"></div>
+    <p class="mtr-why" id="hmos-why"></p>
+    <button type="button" class="mtr-jump-card" onclick="switchTab('mtr')" style="margin-top:1rem">
+      <span class="clabel" style="margin:0">📊 Kako točen je MTR — dvoboj z Open-Meteom, semafor, trendi →</span>
+      <span style="color:var(--muted);font-size:.78rem">Open-Meteo kot vhod + popravek, naučen na meritvah te postaje. Popravlja samo Tmax/Tmin; za količino padavin ostaja Open-Meteo.</span>
+    </button>
+  </div>
+
   <!-- Advanced Open-Meteo signals -->
   <div class="omx-grid" id="omx-grid">
     <div class="omx-card" id="omx-trust"><div class="omx-sub">Računam zanesljivost napovedi …</div></div>
@@ -3684,7 +3724,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=49924c66" defer></script>
+<script src="app.min.js?v=2bb73921" defer></script>
 
 
 <div id="toast"></div>
