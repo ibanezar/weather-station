@@ -2261,20 +2261,33 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 @media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
 @media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
 
-/* Naš model (MOS) — poskusna napoved, D+1..D+3. Slog sledi družini .txfc-*,
-   le da so kartice tri in vsaka nosi še razliko do Open-Meteo. */
-.mos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.25rem;min-height:96px}
-.mos-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.7rem .5rem .65rem;display:flex;flex-direction:column;align-items:center;gap:.22rem;text-align:center;transition:background .2s,box-shadow .2s;cursor:default}
-.mos-card:hover{background:var(--card-bg);box-shadow:var(--card-shadow-h)}
-.mos-lbl{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.mos-temp{font-family:'JetBrains Mono',monospace;font-size:1.05rem;display:flex;gap:.25rem;align-items:baseline}
-.mos-th{color:#f87171}.mos-tl{color:var(--blue)}
-.mos-diff{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3}
-.mos-sd{font-size:.66rem;color:var(--muted);opacity:.75;font-family:'JetBrains Mono',monospace;line-height:1.3}
-.mos-pop{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
-.mos-note{font-size:.74rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
-.mos-icon{width:28px;height:28px;flex:none}
-@media(max-width:380px){.mos-grid{grid-template-columns:repeat(2,1fr)}.mos-card:nth-child(n+3){display:none}}
+/* Naš model (MOS) — poskusna napoved, D+1..D+3, vrstična kartica: vsak dan je
+   skupina dveh vrstic (Tmax/Tmin), vsaka prečrtano OM vrednost → popravek MTR,
+   pilulo razlike in pas negotovosti (glej mtrBand() v app.js). */
+.mtr-rows{margin-top:.25rem}
+.mtr-daylbl{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:.9rem}
+.mtr-daylbl:first-child{margin-top:0}
+.mtr-pop{color:var(--rain-col);text-transform:none;letter-spacing:0;font-weight:500}
+.mtr-row{display:flex;align-items:center;gap:.55rem;padding:.45rem 0;border-top:1px solid var(--card-border)}
+.mtr-daylbl+.mtr-row{border-top:0}
+.mtr-lbl{font-size:.72rem;color:var(--muted);width:36px;flex:none}
+.mtr-base{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.mtr-arrow{color:var(--muted);opacity:.5;font-size:.78rem}
+.mtr-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;line-height:1}
+.mtr-val.warm{color:#f87171}.mtr-val.cool{color:var(--blue)}
+.mtr-delta{font-size:.66rem;font-weight:600;padding:.12rem .4rem;border-radius:999px;white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.mtr-delta.up{background:rgba(248,113,113,.14);color:#f87171}
+.mtr-delta.down{background:rgba(2,132,199,.14);color:var(--blue)}
+.mtr-band{flex:1;min-width:40px;height:20px;color:var(--muted)}
+.mtr-why{font-size:.78rem;color:var(--muted);margin:.8rem 0 0;line-height:1.5}
+.mtr-trust{display:flex;align-items:center;gap:.7rem;margin-top:.7rem;padding-top:.7rem;
+  border-top:1px solid var(--card-border);font-size:.74rem;color:var(--muted);line-height:1.5}
+.mtr-trust b{color:#34d399}
+.mtr-spark{flex:none}
+.mtr-skel{height:38px;border-radius:8px;margin:.4rem 0;
+  background:linear-gradient(90deg,var(--fc-bg) 25%,var(--fc-border) 37%,var(--fc-bg) 63%);
+  background-size:400% 100%;animation:mtrsk 1.4s ease infinite}
+@keyframes mtrsk{0%{background-position:100% 0}100%{background-position:0 0}}
 
 /* Logo MTR — krogla z dolino (dno doline, kjer model popravlja), soncem in
    zeleno korekcijsko krivuljo (barva iz .aifc-badge.mtr). Ista oblika v dveh
@@ -2293,12 +2306,6 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
   cursor:pointer;font-family:inherit;transition:background .2s,border-color .2s,box-shadow .2s}
 .mtr-jump-card:hover{background:rgba(255,255,255,.07);border-color:var(--card-border-h);box-shadow:var(--card-shadow-h)}
 
-/* MTR sparkline: dva majhna grafa (Tmax/Tmin), polna črta = MTR, črtkana = Open-Meteo */
-.mos-spark-row{display:flex;gap:.9rem;margin-bottom:.7rem}
-.mos-spark-col{flex:1;min-width:0}
-.mos-spark-lbl{font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
-.mos-spark-col svg{width:100%;height:auto;display:block}
-@media(max-width:420px){.mos-spark-row{gap:.5rem}}
 .daily-fc-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.9fr);gap:1rem;align-items:stretch}
 .daily-fc-main{display:flex;gap:1rem;align-items:center}
 .daily-fc-icon{font-size:3.1rem;line-height:1;flex-shrink:0}

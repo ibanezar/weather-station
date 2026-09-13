@@ -6803,43 +6803,21 @@ async function fetchTextForecast(){
   }
 }
 
-/* Ikone stanja za kartice MTR napovedi (D+1..D+3) — v istem ploskem slogu kot
-   MTR logo zgoraj. Stanje izpeljemo iz podatkov, ki jih kartica že prikazuje
-   (pop, om_precip, tmin), ne iz novega vira — vira se ne zlivata v eno
-   število, tako kot povsod drugod na strani, samo da tu izbereta ikono namesto
-   besedila. Sneg zahteva tmin<=0 IN dejansko padavino, sicer bi ledena
-   temperatura brez dežja narisala sneženje iz vedrega dne. */
-const MTR_COND_ICONS={
-  sunny:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="18" cy="18" r="7" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><line x1="18" y1="3" x2="18" y2="7"/><line x1="18" y1="29" x2="18" y2="33"/><line x1="3" y1="18" x2="7" y2="18"/><line x1="29" y1="18" x2="33" y2="18"/><line x1="7.4" y1="7.4" x2="10.2" y2="10.2"/><line x1="25.8" y1="25.8" x2="28.6" y2="28.6"/><line x1="7.4" y1="28.6" x2="10.2" y2="25.8"/><line x1="25.8" y1="10.2" x2="28.6" y2="7.4"/></g></svg>',
-  partly:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="11" r="5.5" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="3.5" y1="11" x2="6" y2="11"/><line x1="5" y1="4" x2="6.8" y2="5.8"/></g><path d="M9 30c-4 0-7-3-7-6.5S5 17 9 17c1-4 4.5-6.5 8.5-6.5 4.7 0 8.5 3.4 9.3 7.8 3.5.6 6.2 3.5 6.2 7 0 3.9-3.2 7-7.2 7H9z" fill="#c3cddc"/></svg>',
-  cloudy:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 27c-4.4 0-8-3.3-8-7.3S3.6 12.3 8 12.3c1.1-4.4 5-7.6 9.6-7.6 5.3 0 9.7 3.9 10.5 9 4 .6 7 4 7 8 0 4.5-3.7 8.1-8.2 8.1H8z" fill="#9aa7bd"/></svg>',
-  rain:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 22c-3.9 0-7-2.9-7-6.5s3.1-6.5 7-6.5c1-3.9 4.5-6.7 8.6-6.7 4.7 0 8.6 3.4 9.4 7.9 3.6.5 6.3 3.5 6.3 7 0 3.9-3.3 7-7.3 7H7z" fill="#93a1ba"/><g stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><line x1="10" y1="27" x2="8" y2="32"/><line x1="18" y1="27" x2="16" y2="32"/><line x1="26" y1="27" x2="24" y2="32"/></g></svg>',
-  snow:'<svg class="mos-icon" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 22c-3.9 0-7-2.9-7-6.5s3.1-6.5 7-6.5c1-3.9 4.5-6.7 8.6-6.7 4.7 0 8.6 3.4 9.4 7.9 3.6.5 6.3 3.5 6.3 7 0 3.9-3.3 7-7.3 7H7z" fill="#9aa7bd"/><g fill="#dbeafe"><circle cx="10" cy="29" r="1.6"/><circle cx="18" cy="31" r="1.6"/><circle cx="26" cy="29" r="1.6"/><circle cx="14" cy="26" r="1.6"/><circle cx="22" cy="26" r="1.6"/></g></svg>',
-};
-function mtrDayCond(d){
-  const precip=Number.isFinite(d.om_precip)?d.om_precip:0;
-  const pop=Number.isFinite(d.pop)?d.pop:0;
-  const tmin=Number.isFinite(d.tmin)?d.tmin:null;
-  if(tmin!==null&&tmin<=0&&precip>=0.2)return'snow';
-  if(precip>=1||pop>=0.6)return'rain';
-  if(precip>0||pop>=0.3)return'partly';
-  if(pop<0.15)return'sunny';
-  return'partly';
-}
-
 /* ── Naš model (MOS) ────────────────────────────────────────────────────────
    Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
-   Kartica namenoma prikaže tudi razliko do Open-Meteo: prav ta razlika je vse,
-   kar je model prispeval, in edino, po čemer se loči od že prikazanih napovedi.
-   Kartica ni simple-keep, zato gre eager klic (brez idp) skozi runAdvancedOnly()
-   v init(); lazy klic ob preklopu na zavihek #tab-mtr osveži isto kartico.
+   Kartica je vrstična: vsak dan dobi dve vrstici (Tmax/Tmin), vsaka pokaže
+   prečrtano Open-Meteo vrednost → popravek MTR, pilulo razlike in pas
+   negotovosti — prav ta razlika je vse, kar je model prispeval, in edino, po
+   čemer se loči od že prikazanih napovedi. Kartica ni simple-keep, zato gre
+   eager klic (brez idp) skozi runAdvancedOnly() v init(); lazy klic ob
+   preklopu na zavihek #tab-mtr osveži isto kartico.
    idp: id-predpona elementov na strani, privzeto 'mos-' — samo ta kartica
    obstaja (prej podvojena tudi v "AI napoved" pod 'ai-mos-', odstranjeno, ko
    je MTR dobil svoj zavihek — glej #tab-mtr). */
 async function fetchMosForecast(idp){
   idp=idp||'mos-';
-  const grid=document.getElementById(idp+'grid');
-  if(!grid)return;
+  const rowsEl=document.getElementById(idp+'rows');
+  if(!rowsEl)return;
   try{
     const cacheBust='?_='+Math.floor(Date.now()/36e5);
     const [res,accRes]=await Promise.all([
@@ -6849,7 +6827,7 @@ async function fetchMosForecast(idp){
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const accData=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
-    const days=data.days||[];
+    const days=(data.days||[]).slice(0,3);
     if(!days.length)throw new Error('brez dni');
 
     const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
@@ -6857,58 +6835,47 @@ async function fetchMosForecast(idp){
       const date=new Date(d.date+'T12:00:00');
       return d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
     };
-    grid.innerHTML='';
-    days.forEach(d=>{
-      const lbl=dayLabel(d);
+    const f=n=>Number.isFinite(n)?n.toLocaleString('sl-SI',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
+
+    rowsEl.innerHTML=days.map(d=>{
       const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
-      const dmax=Number.isFinite(d.d_tmax)?d.d_tmax:null;
-      const dmin=Number.isFinite(d.d_tmin)?d.d_tmin:null;
-      const sdmax=Number.isFinite(d.tmax_sd)?d.tmax_sd:null;
-      const sdmin=Number.isFinite(d.tmin_sd)?d.tmin_sd:null;
-      const diff=v=>v===null?'':(v>0?'+':'')+v.toFixed(1).replace('.',',');
-
-      const card=document.createElement('div');
-      card.className='mos-card';
-      const dec=v=>fmt(v);
-      card.title='Open-Meteo napoveduje '+dec(d.om_tmax)+' / '+dec(d.om_tmin)+' °C'
-        +(dmax!==null?' · popravek MTR '+diff(dmax)+' / '+diff(dmin)+' °C':'')
-        +(sdmax!==null?' · razpon negotovosti ±'+dec(sdmax)+' / ±'+dec(sdmin)+' °C':'');
-      card.innerHTML=
-        '<div class="mos-lbl">'+lbl+'</div>'+
-        MTR_COND_ICONS[mtrDayCond(d)]+
-        '<div class="mos-temp"><span class="mos-th">'+Math.round(d.tmax)+'°</span>'+
-        '<span style="color:var(--muted);font-size:.74rem">/</span>'+
-        '<span class="mos-tl">'+Math.round(d.tmin)+'°</span></div>'+
-        (dmax!==null?'<div class="mos-diff">proti Open-Meteu '+diff(dmax)+' / '+diff(dmin)+' °C</div>':'')+
-        (sdmax!==null?'<div class="mos-sd">razpon ±'+dec(sdmax)+' / ±'+dec(sdmin)+' °C</div>':'')+
-        (pop!==null?'<div class="mos-pop">🌧 '+pop+' % verj. dežja</div>':'');
-      grid.appendChild(card);
-    });
-
-    drawMosSpark(days,days.map(dayLabel),idp);
+      const dayHtml='<div class="mtr-daylbl">'+dayLabel(d)
+        +(pop!==null?' <span class="mtr-pop">🌧 '+pop+' %</span>':'')+'</div>';
+      const rows=[
+        mtrRow({lbl:'Tmax',base:d.om_tmax,mtr:d.tmax,sd:d.tmax_sd,cls:'warm'},f),
+        mtrRow({lbl:'Tmin',base:d.om_tmin,mtr:d.tmin,sd:d.tmin_sd,cls:'cool'},f),
+      ].join('');
+      return dayHtml+rows;
+    }).join('');
 
     const badge=document.getElementById(idp+'badge');
     if(badge){
       const major=(data.model_version||'').split('.')[0];
       badge.textContent=major?'v'+major:'';
     }
-    const note=document.getElementById(idp+'note');
-    if(note){
-      const r=data.train_range||{};
+    const why=document.getElementById(idp+'why');
+    if(why){
+      const d1=days.find(d=>d.lead===1);
+      why.textContent=d1?mtrWhyText(d1):'';
+    }
+    const trust=document.getElementById(idp+'trust');
+    if(trust){
       // Živa, sproti izračunana %-izboljšava (data/mtr-accuracy.json, glej
       // tools/compute_mtr_accuracy_metrics.py) — ne hindcast iz učenja modela.
       // Ista številka kot na /trendi/, en vir resnice za oboje.
       const d1acc=accData&&accData.leads&&accData.leads['1'];
       const atx=d1acc&&d1acc.all_time&&d1acc.all_time.tmax;
       const atn=d1acc&&d1acc.all_time&&d1acc.all_time.tmin;
-      const skillTxt=(atx&&atn&&Number.isFinite(atx.improvement_pct)&&Number.isFinite(atn.improvement_pct)&&d1acc.n>=5)
-        ?' Na živih napovedih za jutrišnji dan (D+1, '+d1acc.n+' razrešenih dni) je MTR v povprečju za '
-          +Math.round((atx.improvement_pct+atn.improvement_pct)/2)+' % natančnejši od surovega Open-Meteo.'
-          +' <a href="/trendi/">Trend →</a>'
-        :'';
-      note.innerHTML='MTR (Meteorec) je poskusni model za to dolino: Open-Meteo kot vhod, popravek naučen na meritvah postaje'
-        +(r.from&&r.to?' ('+r.from+' → '+r.to+')':'')
-        +'. Količine padavin MTR ne popravlja — za to ostaja Open-Meteo.'+skillTxt;
+      if(atx&&atn&&Number.isFinite(atx.improvement_pct)&&Number.isFinite(atn.improvement_pct)&&d1acc.n>=5){
+        const spark=((d1acc.rolling&&d1acc.rolling.tmax)||[]).map(r=>r.mae_mtr).filter(Number.isFinite);
+        const maeMtr=(atx.mae_mtr+atn.mae_mtr)/2,maeOm=(atx.mae_om+atn.mae_om)/2;
+        trust.innerHTML=mtrSparkline(spark)
+          +'<span>Zadnjih '+d1acc.n+' dni (D+1): povprečna napaka <b>'+f(maeMtr)+' °C</b>'
+          +' (Open-Meteo '+f(maeOm)+' °C) · <b>'+Math.round((atx.improvement_pct+atn.improvement_pct)/2)+' %</b> natančneje.'
+          +' <a href="/trendi/#mtr-accuracy">Trend →</a></span>';
+      }else{
+        trust.innerHTML='';
+      }
     }
     const upd=document.getElementById(idp+'updated');
     if(upd&&data.generated_at){
@@ -6917,61 +6884,64 @@ async function fetchMosForecast(idp){
         +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     }
   }catch(e){
-    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved MTR trenutno ni na voljo.</div>';
-    const spark=document.getElementById(idp+'spark-row');
-    if(spark)spark.innerHTML='';
+    rowsEl.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved MTR trenutno ni na voljo.</div>';
+    const why=document.getElementById(idp+'why');
+    if(why)why.textContent='';
+    const trust=document.getElementById(idp+'trust');
+    if(trust)trust.innerHTML='';
     const upd=document.getElementById(idp+'updated');
     if(upd)upd.textContent='ni na voljo';
     console.warn('MOS:',e);
   }
 }
 
-/* Dva majhna sparkline grafa (Tmax, Tmin): polna črta MTR, črtkana Open-Meteo.
-   Samo 3 točke — smoothPath ni potreben, navadna lomljena črta je jasnejša. */
-function drawMosSpark(days,labels,idp){
-  const row=document.getElementById((idp||'mos-')+'spark-row');
-  if(!row)return;
-  row.innerHTML='';
-  if(days.length<2)return; // ena sama točka ni graf
+/* Ena vrstica kartice MTR (Tmax ali Tmin za en dan): prečrtana Open-Meteo
+   vrednost → popravek MTR, pilula razlike in pas negotovosti. */
+function mtrRow(m,f){
+  if(!Number.isFinite(m.mtr))return'';
+  const hasBase=Number.isFinite(m.base);
+  const delta=hasBase?m.mtr-m.base:null;
+  const cls=delta!==null&&delta<0?'down':'up';
+  const sign=delta!==null&&delta<0?'−':'+';
+  return '<div class="mtr-row">'
+    +'<span class="mtr-lbl">'+m.lbl+'</span>'
+    +(hasBase?'<span class="mtr-base">'+f(m.base)+'°</span><span class="mtr-arrow">→</span>':'')
+    +'<span class="mtr-val '+m.cls+'">'+f(m.mtr)+'°</span>'
+    +(delta!==null?'<span class="mtr-delta '+cls+'">'+sign+f(Math.abs(delta))+' °C</span>':'')
+    +mtrBand(m)
+    +'</div>';
+}
 
-  const VW=140,VH=54,pad={t:6,r:4,b:14,l:4};
-  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
-  const xS=i=>pad.l+(days.length===1?cw/2:i/(days.length-1)*cw);
+/* Pas negotovosti: MTR ± 1,2816·SD ≈ razpon P10–P90 pod normalno porazdelitvijo
+   napake (SD je izmerjena v treningu, glej tools/train_recica_mos.py). */
+function mtrBand(m){
+  if(!Number.isFinite(m.sd))return'<span class="mtr-band"></span>';
+  const lo=m.mtr-1.2816*m.sd,hi=m.mtr+1.2816*m.sd,w=(hi-lo)||1,pos=((m.mtr-lo)/w)*100;
+  return '<svg class="mtr-band" viewBox="0 0 100 20" preserveAspectRatio="none" role="img"'
+    +' aria-label="Razpon '+lo.toFixed(1)+' do '+hi.toFixed(1)+' stopinj">'
+    +'<rect x="0" y="8" width="100" height="4" rx="2" fill="currentColor" opacity=".14"></rect>'
+    +'<circle cx="'+pos.toFixed(1)+'" cy="10" r="3.2" fill="#34d399"></circle></svg>';
+}
 
-  [{key:'tmax',omKey:'om_tmax',lbl:'Tmax',color:'#f87171'},
-   {key:'tmin',omKey:'om_tmin',lbl:'Tmin',color:CC.tempLine}].forEach(spec=>{
-    const vals=days.map(d=>d[spec.key]).concat(days.map(d=>d[spec.omKey])).filter(Number.isFinite);
-    if(!vals.length)return;
-    const lo=Math.min(...vals),hi=Math.max(...vals);
-    const span=Math.max(hi-lo,1);
-    const yS=v=>pad.t+(1-(v-lo)/span)*ch;
+/* Eno-stavčna razlaga za jutri (D+1) — samo iz številk, ki jih model dejansko
+   izračuna (d_tmax/d_tmin), brez izmišljenih vremenskih razlogov (jasno,
+   vetrovno …), ki jih ta podatek ne pozna. */
+function mtrWhyText(d1){
+  const dmax=d1.d_tmax,dmin=d1.d_tmin;
+  if(!Number.isFinite(dmax)||!Number.isFinite(dmin))return'';
+  const dirTxt=v=>(v>=0?'topleje':'hladneje')+' za '+Math.abs(v).toFixed(1).replace('.',',')+' °C';
+  return 'Jutri dno doline podnevi '+dirTxt(dmax)+', ponoči '+dirTxt(dmin)+', kot kaže mreža Open-Meteo.';
+}
 
-    const col=document.createElement('div');
-    col.className='mos-spark-col';
-    col.innerHTML='<div class="mos-spark-lbl">'+spec.lbl+'</div>';
-
-    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
-    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-
-    const mtrPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.key])}));
-    const omPts=days.map((d,i)=>({x:xS(i),y:yS(d[spec.omKey])}));
-    const toLine=pts=>'M '+pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ');
-
-    mkSVG(svg,'path',{d:toLine(omPts),fill:'none',stroke:spec.color,'stroke-width':'1.5',
-      'stroke-dasharray':'3,2',opacity:'.45'});
-    mkSVG(svg,'path',{d:toLine(mtrPts),fill:'none',stroke:spec.color,'stroke-width':'2',
-      'stroke-linecap':'round'});
-    mtrPts.forEach(p=>mkSVG(svg,'circle',{cx:p.x,cy:p.y,r:'2',fill:spec.color}));
-    labels.forEach((lbl,i)=>{
-      const t=mkSVG(svg,'text',{x:xS(i),y:VH-2,'text-anchor':i===0?'start':(i===labels.length-1?'end':'middle'),
-        'font-size':'7','font-family':'JetBrains Mono,monospace',fill:CC.label});
-      t.textContent=lbl.replace('Jutri','jut').split(' ')[0];
-    });
-
-    col.appendChild(svg);
-    row.appendChild(col);
-  });
+/* Sparkline zaupanja: rolling MAE (Tmax, D+1) po dnevih iz
+   data/mtr-accuracy.json — nižje je bolje, starejše levo. */
+function mtrSparkline(v){
+  if(!v||v.length<2)return'';
+  const w=54,h=18,max=Math.max(...v),min=Math.min(...v),r=(max-min)||1;
+  const pts=v.map((y,i)=>(i/(v.length-1)*w).toFixed(1)+','+(h-((y-min)/r)*h).toFixed(1)).join(' ');
+  return '<svg class="mtr-spark" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"'
+    +' role="img" aria-label="Gibanje napake modela"><polyline points="'+pts+'" fill="none" stroke="#34d399"'
+    +' stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>';
 }
 
 function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}

@@ -299,7 +299,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=2b05bb63">
+<link rel="stylesheet" href="/style.min.css?v=c53b8c0e">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -3034,11 +3034,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </span>
         <span class="chart-range" id="mos-updated">Nalaganje…</span>
       </div>
-      <div class="mos-spark-row" id="mos-spark-row"></div>
-      <div id="mos-grid" class="mos-grid">
-        <div style="grid-column:1/-1;color:var(--muted);font-size:.8rem;padding:.5rem 0">Nalaganje…</div>
-      </div>
-      <div class="mos-note" id="mos-note"></div>
+      <div class="mtr-rows" id="mos-rows"><div class="mtr-skel"></div><div class="mtr-skel"></div></div>
+      <p class="mtr-why" id="mos-why"></p>
+      <div class="mtr-trust" id="mos-trust"></div>
     </div>
 
     <!-- Natančnost: semafor D+1 dan-za-dnem in rolling trend skozi čas na
@@ -3670,7 +3668,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=373fb883" defer></script>
+<script src="app.min.js?v=8bdd1cd5" defer></script>
 
 
 <div id="toast"></div>
