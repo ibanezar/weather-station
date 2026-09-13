@@ -669,12 +669,24 @@ def main():
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--aifs", action="store_true",
                     help="dodaj ECMWF AIFS kot drugi vhod (učno okno se skrajša na arhiv AIFS)")
-    ap.add_argument("--use-bias", action="store_true",
-                    help="dodaj avtokorelirano pristranskost (err_lag1/ma3/ma7) kot prediktor")
-    ap.add_argument("--use-cond", action="store_true",
-                    help="dodaj pogojne/režimske prediktorje in interakcije (glej COND_FEATURES)")
+    # Ločeno po cilju (ne en sam --use-bias/--use-cond): validacija
+    # (data/mtr-validation-report.md) je pokazala, da +bias/+cond pri tminu
+    # izboljša na celotnem obdobju za vse vodilne čase, pri tmaxu pa v sezoni
+    # "jesen" poslabša (premalo pretekle zgodovine te sezone) — zato mora biti
+    # mogoče vklopiti eno brez druge.
+    ap.add_argument("--use-bias-tmax", action="store_true",
+                    help="dodaj avtokorelirano pristranskost (err_lag1/ma3/ma7) k modelu tmax")
+    ap.add_argument("--use-bias-tmin", action="store_true",
+                    help="dodaj avtokorelirano pristranskost (err_lag1/ma3/ma7) k modelu tmin")
+    ap.add_argument("--use-cond-tmax", action="store_true",
+                    help="dodaj pogojne/režimske prediktorje (glej COND_FEATURES) k modelu tmax")
+    ap.add_argument("--use-cond-tmin", action="store_true",
+                    help="dodaj pogojne/režimske prediktorje (glej COND_FEATURES) k modelu tmin")
     ap.add_argument("--out", default=None, help="druga izhodna pot (za poskuse)")
     args = ap.parse_args()
+    use_bias_for = {"tmax": args.use_bias_tmax, "tmin": args.use_bias_tmin}
+    use_cond_for = {"tmax": args.use_cond_tmax, "tmin": args.use_cond_tmin}
+    any_bias = any(use_bias_for.values())
 
     end = args.end or (dt.date.today() - dt.timedelta(days=1)).isoformat()
     # Z AIFS se učno okno samo po sebi skrči na to, kar arhiv sploh ima. Brez
@@ -694,11 +706,16 @@ def main():
         "hourly_vars": HOURLY_VARS,
         "uses_aifs": bool(args.aifs),
         "aifs_model": AIFS_MODEL if args.aifs else None,
-        "uses_bias_features": bool(args.use_bias),
-        "uses_cond_features": bool(args.use_cond),
-        "temp_features": (TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else [])
-                          + (BIAS_FEATURES if args.use_bias else [])
-                          + (COND_FEATURES if args.use_cond else [])),
+        # Slovar po cilju (tmax/tmin) — ne en sam bool, ker se lahko vklopita
+        # neodvisno (glej opombo pri --use-bias-tmax/--use-bias-tmin zgoraj).
+        "uses_bias_features": dict(use_bias_for),
+        "uses_cond_features": dict(use_cond_for),
+        "temp_features": {
+            target: (TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else [])
+                     + (BIAS_FEATURES if use_bias_for[target] else [])
+                     + (COND_FEATURES if use_cond_for[target] else []))
+            for target in ("tmax", "tmin")
+        },
         "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
         "wet_day_mm": WET_DAY_MM,
         "ridge_lambda": RIDGE_LAMBDA,  # rezervna vrednost; dejanska je od uvedbe select_lambda po ciljih spodaj
@@ -728,12 +745,13 @@ def main():
         return rows
 
     bias_series = None
-    if args.use_bias:
+    if any_bias:
         # D+1 arhiv je EDINI vir pristranskosti (glej build_bias_series) — vedno
         # ta, ne glede na to, kateri vodilni čas se v zanki spodaj ravno uči.
         lead1_rows = archive_rows(1)
         if lead1_rows is None:
-            print("✗ --use-bias zahteva D+1 arhiv, ta pa ni dosegljiv.", file=sys.stderr)
+            print("✗ --use-bias-tmax/--use-bias-tmin zahteva D+1 arhiv, ta pa ni dosegljiv.",
+                  file=sys.stderr)
             return 1
         bias_series = build_bias_series(lead1_rows, hist)
         print(f"  pristranskost izračunana za {len(bias_series['tmax'])} dni")
@@ -760,19 +778,20 @@ def main():
                  "skill": {}, "coefficients": {}, "residual_sd": {}, "lambda": {}}
 
         for target, om_key in (("tmax", "om_tmax"), ("tmin", "om_tmin")):
-            skill = walk_forward_cv(samples, target, om_key, args.aifs, args.use_bias, args.use_cond)
+            use_bias, use_cond = use_bias_for[target], use_cond_for[target]
+            skill = walk_forward_cv(samples, target, om_key, args.aifs, use_bias, use_cond)
             # Končna lambda za objavljene koeficiente: izbrana z isto notranjo
             # časovno validacijo, tokrat na CELI učni množici (kar bo v produkciji
             # dejansko na voljo), ne na eni izmed zunanjih rezin zgoraj.
-            lam = select_lambda(samples, target, args.aifs, args.use_bias, args.use_cond)
-            coefs = solve_ridge([temp_vector(s["f"], target, args.aifs, args.use_bias, args.use_cond)
+            lam = select_lambda(samples, target, args.aifs, use_bias, use_cond)
+            coefs = solve_ridge([temp_vector(s["f"], target, args.aifs, use_bias, use_cond)
                                  for s in samples],
                                 [s[target] for s in samples], lam)
             entry["skill"][target] = skill
             entry["coefficients"][target] = [round(c, 6) for c in coefs]
             entry["lambda"][target] = lam
             entry["residual_sd"][target] = residual_sd(samples, coefs, target, args.aifs,
-                                                        args.use_bias, args.use_cond)
+                                                        use_bias, use_cond)
             if skill:
                 print(f"  {target}: Open-Meteo {skill['mae_open_meteo']} °C → "
                       f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %, λ={lam})")

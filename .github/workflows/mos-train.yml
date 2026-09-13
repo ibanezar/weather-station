@@ -21,8 +21,12 @@ jobs:
           python-version: '3.12'
 
       # Brez predpomnilnika: v CI ga tako ali tako ni, zajem pa je nekaj minut.
+      # --use-bias-tmin/--use-cond-tmin: validacija (data/mtr-validation-report.md)
+      # je pokazala izboljšavo za tmin na celotnem obdobju pri vseh vodilnih
+      # časih; pri tmaxu je zaradi kratke učne zgodovine (2-3 pretekle jeseni)
+      # sezona "jesen" poslabšala, zato tmax ostane na osnovnih značilkah.
       - name: Nauči model in izmeri veščino
-        run: python3 tools/train_recica_mos.py --no-cache
+        run: python3 tools/train_recica_mos.py --no-cache --use-bias-tmin --use-cond-tmin
 
       - name: Commit & push if changed
         run: |
