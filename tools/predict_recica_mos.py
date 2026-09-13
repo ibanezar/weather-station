@@ -82,14 +82,18 @@ def predict_day(model, lead, feats):
         return None
 
     with_aifs = bool(model.get("uses_aifs"))
-    use_bias = bool(model.get("uses_bias_features"))
-    use_cond = bool(model.get("uses_cond_features"))
+    # Slovar po cilju, ne en sam bool — model se lahko za tmax/tmin uči z
+    # različnimi zastavicami (glej --use-bias-tmax/--use-bias-tmin v
+    # train_recica_mos.py).
+    uses_bias = model.get("uses_bias_features") or {}
+    uses_cond = model.get("uses_cond_features") or {}
     out = {}
     for target in ("tmax", "tmin"):
         coefs = entry["coefficients"].get(target)
         if not coefs:
             return None
-        tvec = mos.temp_vector(feats, target, with_aifs, use_bias, use_cond)
+        tvec = mos.temp_vector(feats, target, with_aifs,
+                               bool(uses_bias.get(target)), bool(uses_cond.get(target)))
         out[target] = round(mos.predict_linear(coefs, tvec), 1)
         out[f"{target}_sd"] = entry["residual_sd"].get(target)
         skill = (entry.get("skill") or {}).get(target) or {}
@@ -140,7 +144,7 @@ def main():
     # ~10 dni (dovolj za ma7 + varnostna rezerva), ne glede na to, koliko
     # vodilnih časov napovedujemo.
     bias_series = None
-    if model.get("uses_bias_features"):
+    if any((model.get("uses_bias_features") or {}).values()):
         try:
             hist = mos.load_history()
             b_start = (today - dt.timedelta(days=10)).isoformat()
