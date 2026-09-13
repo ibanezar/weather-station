@@ -66,6 +66,9 @@ function setTheme(t){
   }
   if(_tempData.length) drawTempChart(_tempData);
   if(_rainData.length) drawRainChart(_rainData);
+  // Grafi MTR nosijo lastno paleto po temi (MTR_CC), zato jih je treba prerisati
+  // — barve so v atributih SVG, ne v CSS, in se same ne posodobijo.
+  if(_mtrState) renderMtrCard();
   const mc = document.getElementById('mesh-canvas');
   if(mc) mc.style.opacity = meshOpacity();
 }
@@ -1581,7 +1584,7 @@ async function fetchTrustBadge(){
   const el=document.getElementById('mtr-trust-badge');
   if(!el)return;
   try{
-    const data=await fetch('/forecast_verification.json').then(r=>r.json());
+    const data=await _verifOnce();
     const errs=Object.values(data||{})
       .map(r=>r.meteorec&&r.meteorec.err_tmax)
       .filter(v=>v!=null);
@@ -6803,139 +6806,493 @@ async function fetchTextForecast(){
   }
 }
 
-/* ── Naš model (MOS) ────────────────────────────────────────────────────────
-   Bere napoved-modela.json, ki ga vsak dan zapiše tools/predict_recica_mos.py.
-   Kartica je vrstična: vsak dan dobi dve vrstici (Tmax/Tmin), vsaka pokaže
-   prečrtano Open-Meteo vrednost → popravek MTR, pilulo razlike in pas
-   negotovosti — prav ta razlika je vse, kar je model prispeval, in edino, po
-   čemer se loči od že prikazanih napovedi. Kartica ni simple-keep, zato gre
-   eager klic (brez idp) skozi runAdvancedOnly() v init(); lazy klic ob
-   preklopu na zavihek #tab-mtr osveži isto kartico.
-   idp: id-predpona elementov na strani, privzeto 'mos-' — samo ta kartica
-   obstaja (prej podvojena tudi v "AI napoved" pod 'ai-mos-', odstranjeno, ko
-   je MTR dobil svoj zavihek — glej #tab-mtr). */
+/* ── MTR (MOS) — lastni model za dno doline ─────────────────────────────────
+   Kartica je GRAFIČNA, ne tabelarična. Prejšnja različica je bila seznam
+   številk v vrsticah: bralec je moral popravek modela sestaviti v glavi iz
+   dveh vrednosti in pilule. Zdaj to pokaže geometrija — hero graf nariše
+   zadnjih 14 IZMERJENIH dni postaje in nanje pripne 3 dni napovedi MTR s
+   pasom negotovosti ter Open-Meteo kot primerjalno črto; razmik med zeleno
+   in vijolično črto JE popravek modela, edino, kar model prispeva.
+
+   Pod grafom "dvoboj": za vsak razrešen dan stolpec v smer tistega vira, ki
+   je bil bližje meritvi postaje. To je polarnost (kdo je zmagal), zato
+   divergentni prikaz z nevtralno ničlo, ne dve ločeni krivulji.
+
+   Preklopnik Tmax/Tmin prerisuje oboje in prešteje KPI ploščice — model
+   popravlja obe meritvi po svoje (podnevi navzgor, ponoči navzdol), zato sta
+   to dve zgodbi in ne ena.
+
+   Viri — vsi so že objavljeni, committani JSON-i, NOBENEGA novega klica na
+   worker (glej razdelek o mejah Cloudflare v CLAUDE.md):
+     napoved-modela.json        3 dni naprej (tools/predict_recica_mos.py)
+     data/mtr-accuracy.json     rolling + all-time MAE
+                                (tools/compute_mtr_accuracy_metrics.py)
+     forecast_verification.json dan-za-dnem meritev + napovedi vseh virov;
+       isto datoteko bere fetchTrustBadge() v heroju, zato gre skozi
+       _verifOnce() in se po žici prenese samo enkrat.
+
+   BARVE SERIJ SO IZRAČUNANE, NE IZBRANE NA OKO. Par #059669/#a855f7 (temna
+   tema) in #047857/#6d28d9 (svetla) gre skozi vseh šest testov palete —
+   svetlost, kroma, ločljivost pri barvni slepoti (ΔE ≈ 25 deutan), kontrast
+   proti podlagi. Znamčna zelena #34d399 ostaja na znački in logotipu, v graf
+   pa ne gre: na tem zelo temnem ozadju pade test svetlosti. Če menjaš barve,
+   jih spet poženi skozi validator (skill dataviz, scripts/validate_palette.js)
+   in ne ugibaj — to je bil izvorni razlog, da je bil graf prej neberljiv.
+
+   Kartica ni simple-keep, zato gre eager klic (brez idp) skozi
+   runAdvancedOnly() v init(); lazy klic ob preklopu na zavihek #tab-mtr
+   osveži isto kartico. idp je id-predpona elementov, privzeto 'mos-'. */
+
+const MTR_PAST_DAYS=14;
+const MTR_Z80=1.2816;            // MTR ± 1,2816·SD ≈ razpon P10–P90
+const MTR_CC={
+  get actual() {return isDark()?'#e8edf8':'#0a1628';},
+  get mtr()    {return isDark()?'#059669':'#047857';},
+  get om()     {return isDark()?'#a855f7':'#6d28d9';},
+  get mtrSoft(){return isDark()?'rgba(5,150,105,.22)':'rgba(4,120,87,.14)';},
+  get surface(){return isDark()?'#0a0f1c':'#ffffff';},
+};
+const MTR_METRICS={
+  tmax:{key:'tmax',om:'om_tmax',sd:'tmax_sd',err:'err_tmax',lbl:'Najvišja dnevna',kdaj:'podnevi'},
+  tmin:{key:'tmin',om:'om_tmin',sd:'tmin_sd',err:'err_tmin',lbl:'Najnižja nočna',kdaj:'ponoči'},
+};
+const MTR_SL_DAYS=['nedelja','ponedeljek','torek','sreda','četrtek','petek','sobota'];
+let _mtrState=null;
+
+/* forecast_verification.json bereta ta kartica in značka zaupanja v heroju —
+   en prenos za oba, sicer gre ista 46 kB datoteka po žici dvakrat. */
+let _verifPromise=null;
+function _verifOnce(){
+  if(!_verifPromise){
+    _verifPromise=fetch('/forecast_verification.json?_='+Math.floor(Date.now()/36e5))
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});
+  }
+  return _verifPromise;
+}
+
+/* Razrešeni dnevi iz verifikacije, urejeni po datumu naraščajoče. */
+function _mtrVerifRows(){
+  const st=_mtrState;
+  if(!st||!st.verif)return[];
+  return Object.values(st.verif)
+    .filter(r=>r&&r.date&&r.actual)
+    .sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:0));
+}
+
 async function fetchMosForecast(idp){
   idp=idp||'mos-';
-  const rowsEl=document.getElementById(idp+'rows');
-  if(!rowsEl)return;
+  if(!document.getElementById(idp+'chart'))return;
   try{
-    const cacheBust='?_='+Math.floor(Date.now()/36e5);
-    const [res,accRes]=await Promise.all([
-      fetch('/napoved-modela.json'+cacheBust),
-      fetch('/data/mtr-accuracy.json'+cacheBust).catch(()=>null),
+    const cb='?_='+Math.floor(Date.now()/36e5);
+    const [fcRes,accRes,verif]=await Promise.all([
+      fetch('/napoved-modela.json'+cb),
+      fetch('/data/mtr-accuracy.json'+cb).catch(()=>null),
+      _verifOnce().catch(()=>null),
     ]);
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    const accData=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
-    const days=(data.days||[]).slice(0,3);
+    if(!fcRes.ok)throw new Error('HTTP '+fcRes.status);
+    const data=await fcRes.json();
+    const acc=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
+    const days=(data.days||[]).filter(d=>Number.isFinite(d.tmax)&&Number.isFinite(d.tmin));
     if(!days.length)throw new Error('brez dni');
-
-    const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
-    const dayLabel=d=>{
-      const date=new Date(d.date+'T12:00:00');
-      return d.lead===1?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
-    };
-    const f=n=>Number.isFinite(n)?n.toLocaleString('sl-SI',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
-
-    rowsEl.innerHTML=days.map(d=>{
-      const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
-      const dayHtml='<div class="mtr-daylbl">'+dayLabel(d)
-        +(pop!==null?' <span class="mtr-pop">🌧 '+pop+' %</span>':'')+'</div>';
-      const rows=[
-        mtrRow({lbl:'Tmax',base:d.om_tmax,mtr:d.tmax,sd:d.tmax_sd,cls:'warm'},f),
-        mtrRow({lbl:'Tmin',base:d.om_tmin,mtr:d.tmin,sd:d.tmin_sd,cls:'cool'},f),
-      ].join('');
-      return dayHtml+rows;
-    }).join('');
-
-    const badge=document.getElementById(idp+'badge');
-    if(badge){
-      const major=(data.model_version||'').split('.')[0];
-      badge.textContent=major?'v'+major:'';
-    }
-    const why=document.getElementById(idp+'why');
-    if(why){
-      const d1=days.find(d=>d.lead===1);
-      why.textContent=d1?mtrWhyText(d1):'';
-    }
-    const trust=document.getElementById(idp+'trust');
-    if(trust){
-      // Živa, sproti izračunana %-izboljšava (data/mtr-accuracy.json, glej
-      // tools/compute_mtr_accuracy_metrics.py) — ne hindcast iz učenja modela.
-      // Ista številka kot na /trendi/, en vir resnice za oboje.
-      const d1acc=accData&&accData.leads&&accData.leads['1'];
-      const atx=d1acc&&d1acc.all_time&&d1acc.all_time.tmax;
-      const atn=d1acc&&d1acc.all_time&&d1acc.all_time.tmin;
-      if(atx&&atn&&Number.isFinite(atx.improvement_pct)&&Number.isFinite(atn.improvement_pct)&&d1acc.n>=5){
-        const spark=((d1acc.rolling&&d1acc.rolling.tmax)||[]).map(r=>r.mae_mtr).filter(Number.isFinite);
-        const maeMtr=(atx.mae_mtr+atn.mae_mtr)/2,maeOm=(atx.mae_om+atn.mae_om)/2;
-        trust.innerHTML=mtrSparkline(spark)
-          +'<span>Zadnjih '+d1acc.n+' dni (D+1): povprečna napaka <b>'+f(maeMtr)+' °C</b>'
-          +' (Open-Meteo '+f(maeOm)+' °C) · <b>'+Math.round((atx.improvement_pct+atn.improvement_pct)/2)+' %</b> natančneje.'
-          +' <a href="/trendi/#mtr-accuracy">Trend →</a></span>';
-      }else{
-        trust.innerHTML='';
-      }
-    }
-    const upd=document.getElementById(idp+'updated');
-    if(upd&&data.generated_at){
-      const t=new Date(data.generated_at);
-      upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
-        +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    }
+    _mtrState={idp,data,days,acc,verif:verif||null,metric:(_mtrState&&_mtrState.metric)||'tmax'};
+    _mtrBindSeg();
+    renderMtrCard();
   }catch(e){
-    rowsEl.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved MTR trenutno ni na voljo.</div>';
-    const why=document.getElementById(idp+'why');
-    if(why)why.textContent='';
-    const trust=document.getElementById(idp+'trust');
-    if(trust)trust.innerHTML='';
+    const ch=document.getElementById(idp+'chart');
+    if(ch)ch.innerHTML='';
+    const days=document.getElementById(idp+'days');
+    if(days)days.innerHTML='<div class="mtr-empty">Napoved MTR trenutno ni na voljo.</div>';
     const upd=document.getElementById(idp+'updated');
     if(upd)upd.textContent='ni na voljo';
-    console.warn('MOS:',e);
+    console.warn('MTR:',e);
   }
 }
 
-/* Ena vrstica kartice MTR (Tmax ali Tmin za en dan): prečrtana Open-Meteo
-   vrednost → popravek MTR, pilula razlike in razpon negotovosti kot besedilo.
-   (Prejšnja različica je razpon risala kot SVG "gauge" s piko na sredini traku
-   — ker je MTR po definiciji sredina svojega razpona, je bila pika vedno na
-   istem mestu (brez informacije) in se je pri raztezanju v širino vrstice
-   spremenila v popačen, sploščen krog namesto kroga. Golo besedilo je jasnejše
-   in ne more biti popačeno.) */
-function mtrRow(m,f){
-  if(!Number.isFinite(m.mtr))return'';
-  const hasBase=Number.isFinite(m.base);
-  const delta=hasBase?m.mtr-m.base:null;
-  const cls=delta!==null&&delta<0?'down':'up';
-  const sign=delta!==null&&delta<0?'−':'+';
-  return '<div class="mtr-row">'
-    +'<span class="mtr-lbl">'+m.lbl+'</span>'
-    +(hasBase?'<span class="mtr-base">'+f(m.base)+'°</span><span class="mtr-arrow">→</span>':'')
-    +'<span class="mtr-val '+m.cls+'">'+f(m.mtr)+'°</span>'
-    +(delta!==null?'<span class="mtr-delta '+cls+'">'+sign+f(Math.abs(delta))+' °C</span>':'')
-    +(Number.isFinite(m.sd)?'<span class="mtr-range">±'+f(1.2816*m.sd)+' °C</span>':'')
-    +'</div>';
+/* Preklopnik Tmax/Tmin. Poslušalci se pripnejo enkrat (dataset.bound), ker
+   fetchMosForecast() teče znova ob vsakem preklopu na zavihek. */
+function _mtrBindSeg(){
+  const st=_mtrState;if(!st)return;
+  const seg=document.getElementById(st.idp+'seg');
+  if(!seg||seg.dataset.bound)return;
+  seg.dataset.bound='1';
+  seg.querySelectorAll('.mtr-seg-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const m=btn.dataset.metric;
+      if(!MTR_METRICS[m]||!_mtrState||_mtrState.metric===m)return;
+      _mtrState.metric=m;
+      renderMtrCard();
+    });
+  });
 }
 
-/* Eno-stavčna razlaga za jutri (D+1) — samo iz številk, ki jih model dejansko
-   izračuna (d_tmax/d_tmin), brez izmišljenih vremenskih razlogov (jasno,
-   vetrovno …), ki jih ta podatek ne pozna. */
-function mtrWhyText(d1){
-  const dmax=d1.d_tmax,dmin=d1.d_tmin;
-  if(!Number.isFinite(dmax)||!Number.isFinite(dmin))return'';
-  const dirTxt=v=>(v>=0?'topleje':'hladneje')+' za '+Math.abs(v).toFixed(1).replace('.',',')+' °C';
-  return 'Jutri dno doline podnevi '+dirTxt(dmax)+', ponoči '+dirTxt(dmin)+', kot kaže mreža Open-Meteo.';
+function renderMtrCard(){
+  const st=_mtrState;if(!st)return;
+  const M=MTR_METRICS[st.metric];
+  _mtrNarrow=(window.innerWidth||880)<620;
+
+  const seg=document.getElementById(st.idp+'seg');
+  if(seg)seg.querySelectorAll('.mtr-seg-btn').forEach(b=>{
+    const on=b.dataset.metric===st.metric;
+    b.classList.toggle('is-on',on);
+    b.setAttribute('aria-selected',on?'true':'false');
+  });
+
+  const badge=document.getElementById(st.idp+'badge');
+  if(badge){
+    const major=(st.data.model_version||'').split('.')[0];
+    badge.textContent=major?'v'+major:'';
+  }
+  const upd=document.getElementById(st.idp+'updated');
+  if(upd&&st.data.generated_at){
+    const t=new Date(st.data.generated_at);
+    upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
+      +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+  }
+  const leg=document.getElementById(st.idp+'legend');
+  if(leg)leg.innerHTML=
+     '<span class="mtr-lg"><i class="mtr-lg-line" style="background:'+MTR_CC.actual+'"></i>Izmerjeno (IREICA1)</span>'
+    +'<span class="mtr-lg"><i class="mtr-lg-line" style="background:'+MTR_CC.mtr+'"></i>MTR — napoved</span>'
+    +'<span class="mtr-lg"><i class="mtr-lg-line mtr-lg-dash" style="background:'+MTR_CC.om+'"></i>Open-Meteo</span>'
+    +'<span class="mtr-lg"><i class="mtr-lg-band" style="background:'+MTR_CC.mtrSoft+';border-color:'+MTR_CC.mtr+'"></i>razpon MTR (P10–P90)</span>';
+
+  drawMtrChart();
+  renderMtrDays();
+  renderMtrWhy();
+  renderMtrKpis();
+  drawMtrDuel();
+  const dl=document.getElementById(st.idp+'duel-lbl');
+  if(dl)dl.textContent=M.lbl.toLowerCase();
 }
 
-/* Sparkline zaupanja: rolling MAE (Tmax, D+1) po dnevih iz
-   data/mtr-accuracy.json — nižje je bolje, starejše levo. */
-function mtrSparkline(v){
+/* Hero graf: izmerjena preteklost → napoved. Pas negotovosti in obe napovedni
+   črti se začneta v zadnji izmerjeni točki, da je prehod iz meritve v napoved
+   ena sama zvezna zgodba in ne dva ločena grafa. */
+function drawMtrChart(){
+  const st=_mtrState;if(!st)return;
+  const svg=document.getElementById(st.idp+'chart');if(!svg)return;
+  const M=MTR_METRICS[st.metric];
+  svg.innerHTML='';
+
+  // Na ozkem zaslonu se enak viewBox stisne v pas in pisava pade pod 5 px —
+  // zato je ožji (in s tem sorazmerno večja pisava), preteklost pa krajša, da
+  // se točke ne zlepijo. Enote v SVG so relativne na viewBox, ne na piksle.
+  const narrow=(window.innerWidth||880)<620;
+  const past=_mtrVerifRows().slice(narrow?-8:-MTR_PAST_DAYS)
+    .map(r=>({date:r.date,v:r.actual?r.actual[M.key]:null}))
+    .filter(p=>Number.isFinite(p.v));
+  const fut=st.days
+    .map(d=>({date:d.date,lead:d.lead,mtr:d[M.key],om:d[M.om],sd:d[M.sd],pop:d.pop}))
+    .filter(f=>Number.isFinite(f.mtr));
+  if(!fut.length)return;
+
+  const VW=narrow?430:880,VH=narrow?290:300;
+  const pad=narrow?{t:26,r:46,b:30,l:36}:{t:28,r:62,b:34,l:46};
+  svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const n=past.length+fut.length;
+  const xS=i=>pad.l+(n<2?cw/2:i/(n-1)*cw);
+
+  const vals=past.map(p=>p.v);
+  fut.forEach(f=>{
+    vals.push(f.mtr);
+    if(Number.isFinite(f.om))vals.push(f.om);
+    if(Number.isFinite(f.sd))vals.push(f.mtr+MTR_Z80*f.sd,f.mtr-MTR_Z80*f.sd);
+  });
+  const lo=Math.min(...vals),hi=Math.max(...vals),span=Math.max(hi-lo,2);
+  const yMin=lo-span*0.12,yMax=hi+span*0.12;
+  const yS=v=>pad.t+(1-(v-yMin)/(yMax-yMin))*ch;
+
+  for(let i=0;i<=4;i++){
+    const y=pad.t+i/4*ch,val=yMax-(i/4)*(yMax-yMin);
+    mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y.toFixed(1),y2:y.toFixed(1),stroke:CC.grid,'stroke-width':'1'});
+    const t=mkSVG(svg,'text',{x:pad.l-8,y:(y+4).toFixed(1),'text-anchor':'end','font-size':'11',
+      fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+    t.textContent=Math.round(val)+'°';
+  }
+
+  const jx=past.length-1;
+  const junction=jx>=0?{x:xS(jx),y:yS(past[jx].v)}:null;
+  const fx=k=>xS(past.length+k);
+
+  // Napovedni del dobi rahlo podlago: subjekt kartice je napoved, izmerjena
+  // preteklost je kontekst. Brez tega se oko ustavi pri veliki krivulji meritev.
+  if(junction){
+    const dx=(junction.x+fx(0))/2;
+    mkSVG(svg,'rect',{x:dx.toFixed(1),y:pad.t,width:(VW-pad.r-dx).toFixed(1),height:ch.toFixed(1),
+      fill:MTR_CC.mtr,opacity:'.05'});
+    mkSVG(svg,'line',{x1:dx.toFixed(1),x2:dx.toFixed(1),y1:pad.t,y2:(pad.t+ch).toFixed(1),
+      stroke:CC.now,'stroke-width':'1','stroke-dasharray':'4,4'});
+    const t=mkSVG(svg,'text',{x:dx.toFixed(1),y:(pad.t-10).toFixed(1),'text-anchor':'middle','font-size':'10',
+      fill:CC.label,'font-family':'Inter,sans-serif','letter-spacing':'.08em'});
+    t.textContent='DANES';
+  }
+
+  // Pas negotovosti (P10–P90) — pod črtami, da jih ne prekrije.
+  const up=(junction?[junction]:[]).concat(fut.map((f,k)=>({x:fx(k),y:yS(f.mtr+(Number.isFinite(f.sd)?MTR_Z80*f.sd:0))})));
+  const dn=fut.map((f,k)=>({x:fx(k),y:yS(f.mtr-(Number.isFinite(f.sd)?MTR_Z80*f.sd:0))})).reverse()
+    .concat(junction?[junction]:[]);
+  const ring=up.concat(dn);
+  if(ring.length>2)mkSVG(svg,'path',{d:'M '+ring.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ')+' Z',
+    fill:MTR_CC.mtrSoft,stroke:'none'});
+
+  const line=pts=>'M '+pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ');
+  // Meritve so ravne daljice med dnevi, NE zglajena krivulja: smoothPath bi med
+  // dvema dnevoma narisal preval pod izmerjeni minimum oziroma nad maksimum —
+  // torej vrednosti, ki jih postaja ni izmerila. Zglajena je lahko urna serija,
+  // dnevna ne.
+  const pastPts=past.map((p,i)=>({x:xS(i),y:yS(p.v)}));
+  if(pastPts.length>1)mkSVG(svg,'path',{d:line(pastPts),fill:'none',stroke:MTR_CC.actual,
+    'stroke-width':'2.2','stroke-linecap':'round','stroke-linejoin':'round',opacity:'.85'});
+  if(pastPts.length===1)mkSVG(svg,'circle',{cx:pastPts[0].x.toFixed(1),cy:pastPts[0].y.toFixed(1),r:'4',fill:MTR_CC.actual});
+  else pastPts.forEach(p=>mkSVG(svg,'circle',{cx:p.x.toFixed(1),cy:p.y.toFixed(1),r:'2.2',
+    fill:MTR_CC.actual,opacity:'.85'}));
+
+  const omPts=(junction?[junction]:[]).concat(
+    fut.map((f,k)=>Number.isFinite(f.om)?{x:fx(k),y:yS(f.om)}:null).filter(Boolean));
+  if(omPts.length>1)mkSVG(svg,'path',{d:line(omPts),fill:'none',stroke:MTR_CC.om,'stroke-width':'2',
+    'stroke-dasharray':'7,5','stroke-linecap':'round'});
+  const mtrPts=(junction?[junction]:[]).concat(fut.map((f,k)=>({x:fx(k),y:yS(f.mtr)})));
+  if(mtrPts.length>1)mkSVG(svg,'path',{d:line(mtrPts),fill:'none',stroke:MTR_CC.mtr,'stroke-width':'2.8',
+    'stroke-linecap':'round','stroke-linejoin':'round'});
+
+  fut.forEach((f,k)=>{
+    if(Number.isFinite(f.om))mkSVG(svg,'circle',{cx:fx(k).toFixed(1),cy:yS(f.om).toFixed(1),r:'4',
+      fill:MTR_CC.om,stroke:MTR_CC.surface,'stroke-width':'2'});
+    mkSVG(svg,'circle',{cx:fx(k).toFixed(1),cy:yS(f.mtr).toFixed(1),r:'5',
+      fill:MTR_CC.mtr,stroke:MTR_CC.surface,'stroke-width':'2'});
+  });
+
+  // Neposredni oznaki ob koncu črt (identiteta ni samo barva). Če se prekrivata,
+  // ju razmakneta na najmanjšo berljivo razdaljo.
+  const last=fut[fut.length-1],lx=xS(n-1)+9;
+  let yM=yS(last.mtr),yO=Number.isFinite(last.om)?yS(last.om):null;
+  if(yO!==null&&Math.abs(yM-yO)<13){const d=yM<=yO?-1:1;yM+=d*6.5;yO-=d*6.5;}
+  const lm=mkSVG(svg,'text',{x:lx.toFixed(1),y:(yM+4).toFixed(1),'font-size':'12','font-weight':'700',
+    fill:MTR_CC.mtr,'font-family':'Inter,sans-serif'});
+  lm.textContent='MTR';
+  if(yO!==null){
+    const lo2=mkSVG(svg,'text',{x:lx.toFixed(1),y:(yO+4).toFixed(1),'font-size':'11','font-weight':'600',
+      fill:MTR_CC.om,'font-family':'Inter,sans-serif'});
+    lo2.textContent='O-M';
+  }
+
+  // Zadnji datum dobi oznako le, če je od prejšnje označene dovolj oddaljen —
+  // sicer se na ozkem zaslonu zlepita v "11. 9.12. 9.".
+  const stepX=narrow?3:4;
+  const lastLbl=past.length-1;
+  const showLast=lastLbl>0&&(lastLbl%stepX)>=Math.ceil(stepX/2);
+  past.forEach((p,i)=>{
+    if(i%stepX!==0&&!(i===lastLbl&&showLast))return;
+    const d=new Date(p.date+'T12:00:00');
+    const t=mkSVG(svg,'text',{x:xS(i).toFixed(1),y:VH-12,'text-anchor':'middle','font-size':'10',
+      fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+    t.textContent=d.getDate()+'. '+(d.getMonth()+1)+'.';
+  });
+  // Osne oznake nosijo barvo besedila, ne barve serije — identiteto serij
+  // nosijo črte, legenda in neposredni oznaki ob koncu.
+  fut.forEach((f,k)=>{
+    const d=new Date(f.date+'T12:00:00');
+    const t=mkSVG(svg,'text',{x:fx(k).toFixed(1),y:VH-12,'text-anchor':'middle','font-size':'10',
+      'font-weight':'700',fill:CC.label,'font-family':'Inter,sans-serif'});
+    t.textContent=f.lead===1?'jutri':MTR_SL_DAYS[d.getDay()].slice(0,3);
+  });
+
+  // Drsnik: ista interakcija kot drugi grafi na strani (miška + prst).
+  const pts=past.map((p,i)=>({kind:'past',x:xS(i),date:p.date,v:p.v}))
+    .concat(fut.map((f,k)=>({kind:'fut',x:fx(k),date:f.date,f})));
+  const vline=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:(pad.t+ch).toFixed(1),stroke:CC.now,'stroke-width':'1',
+    opacity:'0',style:'pointer-events:none'});
+  const dot=mkSVG(svg,'circle',{cx:0,cy:0,r:'5.5',fill:'none','stroke-width':'2.5',opacity:'0',
+    style:'pointer-events:none'});
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const tip=document.getElementById('chart-tip');
+  attachScrub(svg,(sx,clientX,clientY)=>{
+    let best=null,bd=1e9;
+    pts.forEach(p=>{const d=Math.abs(p.x-sx);if(d<bd){bd=d;best=p;}});
+    if(!best||!tip)return;
+    const dd=new Date(best.date+'T12:00:00');
+    const dateTxt=MTR_SL_DAYS[dd.getDay()].slice(0,3)+' '+dd.getDate()+'. '+(dd.getMonth()+1)+'.';
+    let html,cy,col;
+    if(best.kind==='past'){
+      col=MTR_CC.actual;cy=yS(best.v);
+      html='<b>'+dateTxt+'</b>&ensp;izmerjeno <b style="color:'+col+'">'+fmt(best.v,1)+' °C</b>';
+    }else{
+      const f=best.f;col=MTR_CC.mtr;cy=yS(f.mtr);
+      html='<b>'+dateTxt+'</b>&ensp;MTR <b style="color:'+MTR_CC.mtr+'">'+fmt(f.mtr,1)+' °C</b>'
+        +(Number.isFinite(f.om)?'&ensp;·&ensp;Open-Meteo <b style="color:'+MTR_CC.om+'">'+fmt(f.om,1)+' °C</b>':'')
+        +(Number.isFinite(f.sd)?'<br>razpon '+fmt(f.mtr-MTR_Z80*f.sd,1)+' – '+fmt(f.mtr+MTR_Z80*f.sd,1)+' °C':'')
+        +(Number.isFinite(f.pop)?'&ensp;·&ensp;dež '+Math.round(f.pop*100)+' %':'');
+    }
+    vline.setAttribute('x1',best.x.toFixed(1));vline.setAttribute('x2',best.x.toFixed(1));
+    vline.setAttribute('opacity','1');
+    dot.setAttribute('cx',best.x.toFixed(1));dot.setAttribute('cy',cy.toFixed(1));
+    dot.setAttribute('stroke',col);dot.setAttribute('opacity','1');
+    tip.innerHTML=html;tip.style.opacity='1';
+    tip.style.left=Math.min(clientX+14,window.innerWidth-240)+'px';
+    tip.style.top=Math.max(8,clientY-34)+'px';
+  },()=>{
+    vline.setAttribute('opacity','0');dot.setAttribute('opacity','0');
+    if(tip)tip.style.opacity='0';
+  });
+}
+
+/* Tri dnevne ploščice pod grafom: velika številka je MTR, pod njo Open-Meteo
+   in popravek. Velika številka nosi nevtralno barvo besedila, identiteto pa
+   pike ob njej — barva se v tej kartici uporablja za serijo, ne za številko. */
+function renderMtrDays(){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(st.idp+'days');if(!el)return;
+  const M=MTR_METRICS[st.metric];
+  el.innerHTML=st.days.map(d=>{
+    const v=d[M.key],om=d[M.om],sd=d[M.sd];
+    if(!Number.isFinite(v))return'';
+    const dt=new Date(d.date+'T12:00:00');
+    const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+    const delta=Number.isFinite(om)?v-om:null;
+    const chip=delta===null?''
+      :'<span class="mtr-chip '+(delta<0?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta),1)+' °C</span>';
+    const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+    return '<div class="mtr-day">'
+      +'<div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
+      +'<div class="mtr-day-val"><span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'
+        +fmt(v,1)+'<span class="mtr-day-unit">°C</span></div>'
+      +(Number.isFinite(om)?'<div class="mtr-day-base">Open-Meteo '+fmt(om,1)+' °C '+chip+'</div>':'')
+      +'<div class="mtr-day-meta">'
+        +(Number.isFinite(sd)?'razpon ±'+fmt(MTR_Z80*sd,1)+' °C':'')
+        +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+' %':'')
+      +'</div></div>';
+  }).join('');
+}
+
+function renderMtrWhy(){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(st.idp+'why');if(!el)return;
+  const d1=st.days.find(d=>d.lead===1);
+  if(!d1||!Number.isFinite(d1.d_tmax)||!Number.isFinite(d1.d_tmin)){el.textContent='';return;}
+  const t=v=>(v>=0?'topleje':'hladneje')+' za '+fmt(Math.abs(v),1)+' °C';
+  el.textContent='Jutri dno doline podnevi '+t(d1.d_tmax)+', ponoči '+t(d1.d_tmin)
+    +', kot kaže mreža Open-Meteo — to je celoten prispevek modela.';
+}
+
+/* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
+   razlika med njima. Vse tri so D+1 in za izbrano meritev, da se ne mešajo
+   vodilni časi — semafor po dnevih in rolling trend sta na svojih straneh. */
+function renderMtrKpis(){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(st.idp+'kpis');if(!el)return;
+  const M=MTR_METRICS[st.metric];
+  const l1=st.acc&&st.acc.leads&&st.acc.leads['1'];
+  const at=l1&&l1.all_time&&l1.all_time[M.key];
+  if(!at||!Number.isFinite(at.mae_mtr)||!Number.isFinite(at.mae_om)){
+    el.innerHTML='<div class="mtr-empty">Za oceno natančnosti še ni dovolj razrešenih dni.</div>';
+    return;
+  }
+  const roll=((l1.rolling&&l1.rolling[M.key])||[]).map(r=>r.mae_mtr).filter(Number.isFinite);
+  const spark=mtrSparkline(roll,MTR_CC.mtr);
+  el.innerHTML=
+     '<div class="mtr-kpi"><div class="mtr-kpi-lbl"><span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'
+      +'MTR — povprečna napaka</div><div class="mtr-kpi-val">'+fmt(at.mae_mtr,1)+'<span class="mtr-kpi-unit">°C</span></div>'
+      +'<div class="mtr-kpi-sub">'+spark+'<span>'+(l1.n||at.n)+' razrešenih dni (D+1)</span></div></div>'
+    +'<div class="mtr-kpi"><div class="mtr-kpi-lbl"><span class="mtr-dot" style="background:'+MTR_CC.om+'"></span>'
+      +'Open-Meteo — povprečna napaka</div><div class="mtr-kpi-val">'+fmt(at.mae_om,1)+'<span class="mtr-kpi-unit">°C</span></div>'
+      +'<div class="mtr-kpi-sub"><span>surova mreža, brez popravka</span></div></div>'
+    +'<div class="mtr-kpi is-gain"><div class="mtr-kpi-lbl">MTR je natančnejši za</div>'
+      +'<div class="mtr-kpi-val">'+Math.round(at.improvement_pct)+'<span class="mtr-kpi-unit">%</span></div>'
+      +'<div class="mtr-kpi-sub"><span>'+MTR_METRICS[st.metric].lbl.toLowerCase()+', jutrišnji dan</span></div></div>';
+}
+
+/* "Dvoboj": za vsak razrešen dan stolpec v smeri vira, ki je bil bližje
+   meritvi. Višina je razlika absolutnih napak — torej koliko je zmaga štela,
+   ne samo kdo je zmagal. */
+function drawMtrDuel(){
+  const st=_mtrState;if(!st)return;
+  const svg=document.getElementById(st.idp+'duel');if(!svg)return;
+  const note=document.getElementById(st.idp+'duel-note');
+  const M=MTR_METRICS[st.metric];
+  svg.innerHTML='';
+
+  const rows=_mtrVerifRows().filter(r=>r.meteorec&&r.open_meteo
+    &&Number.isFinite(r.meteorec[M.err])&&Number.isFinite(r.open_meteo[M.err]));
+  if(rows.length<3){
+    svg.style.display='none';
+    if(note)note.textContent='Za dvoboj še ni dovolj razrešenih dni.';
+    return;
+  }
+  svg.style.display='';
+  const data=rows.map(r=>({date:r.date,mtr:r.meteorec[M.err],om:r.open_meteo[M.err],
+    diff:r.open_meteo[M.err]-r.meteorec[M.err]}));
+
+  const narrow=(window.innerWidth||880)<620;
+  const VW=narrow?430:880,VH=narrow?150:132,pad={t:16,r:14,b:16,l:14};
+  svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
+  const mid=pad.t+ch/2,half=ch/2;
+  const maxAbs=Math.max(...data.map(d=>Math.abs(d.diff)),0.5);
+  const bw=Math.max(3,(cw/data.length)*0.62);
+  const xB=i=>pad.l+(i+0.5)/data.length*cw;
+
+  data.forEach((d,i)=>{
+    const h=Math.max(1.5,Math.abs(d.diff)/maxAbs*(half-4));
+    const win=d.diff>0;
+    mkSVG(svg,'rect',{x:(xB(i)-bw/2).toFixed(1),y:(win?mid-h:mid+1).toFixed(1),
+      width:bw.toFixed(1),height:h.toFixed(1),rx:'2',fill:win?MTR_CC.mtr:MTR_CC.om,opacity:'.92'});
+  });
+  mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:mid.toFixed(1),y2:mid.toFixed(1),stroke:CC.grid,'stroke-width':'1.5'});
+
+  const t1=mkSVG(svg,'text',{x:pad.l,y:(pad.t-4).toFixed(1),'font-size':'10','font-weight':'700',
+    fill:MTR_CC.mtr,'font-family':'Inter,sans-serif'});
+  t1.textContent='▲ MTR bližje meritvi';
+  const t2=mkSVG(svg,'text',{x:pad.l,y:(VH-4).toFixed(1),'font-size':'10','font-weight':'700',
+    fill:MTR_CC.om,'font-family':'Inter,sans-serif'});
+  t2.textContent='▼ Open-Meteo bližje';
+
+  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
+  const hl=mkSVG(svg,'rect',{x:0,y:pad.t,width:bw.toFixed(1),height:ch.toFixed(1),fill:CC.grid,
+    opacity:'0',rx:'2',style:'pointer-events:none'});
+  const tip=document.getElementById('chart-tip');
+  attachScrub(svg,(sx,clientX,clientY)=>{
+    const i=Math.max(0,Math.min(data.length-1,Math.round((sx-pad.l)/cw*data.length-0.5)));
+    const d=data[i];if(!d||!tip)return;
+    const dd=new Date(d.date+'T12:00:00');
+    hl.setAttribute('x',(xB(i)-bw/2).toFixed(1));hl.setAttribute('opacity','.5');
+    tip.innerHTML='<b>'+MTR_SL_DAYS[dd.getDay()].slice(0,3)+' '+dd.getDate()+'. '+(dd.getMonth()+1)+'.</b>'
+      +'&ensp;zgrešil za: MTR <b style="color:'+MTR_CC.mtr+'">'+fmt(d.mtr,1)+' °C</b>'
+      +'&ensp;·&ensp;Open-Meteo <b style="color:'+MTR_CC.om+'">'+fmt(d.om,1)+' °C</b>';
+    tip.style.opacity='1';
+    tip.style.left=Math.min(clientX+14,window.innerWidth-260)+'px';
+    tip.style.top=Math.max(8,clientY-34)+'px';
+  },()=>{hl.setAttribute('opacity','0');if(tip)tip.style.opacity='0';});
+
+  if(note){
+    const wins=data.filter(d=>d.diff>0).length,ties=data.filter(d=>d.diff===0).length;
+    note.innerHTML='MTR je bil bližje meritvi postaje v <b>'+wins+' od '+data.length+' dni</b>'
+      +(ties?' (·'+ties+' neodločeno)':'')+' — '+M.lbl.toLowerCase()
+      +', napoved za naslednji dan. Vsak stolpec je en dan, višina je razlika napak.';
+  }
+}
+
+/* Ob spremembi širine se viewBox grafov spremeni šele ob ponovnem izrisu, zato
+   prerišemo — a samo takrat, ko je prag res prestopljen (obrat telefona,
+   povlek okna), ne ob vsakem dogodku med vlečenjem. */
+let _mtrNarrow=null,_mtrResizeT=null;
+window.addEventListener('resize',()=>{
+  if(!_mtrState)return;
+  const n=(window.innerWidth||880)<620;
+  if(n===_mtrNarrow)return;
+  _mtrNarrow=n;
+  clearTimeout(_mtrResizeT);
+  _mtrResizeT=setTimeout(()=>{if(_mtrState)renderMtrCard();},180);
+});
+
+/* Sparkline rolling MAE (nižje je bolje, starejše levo). Barvo poda klicatelj,
+   ker mora biti ista kot serija MTR v grafih nad njim. */
+function mtrSparkline(v,color){
   if(!v||v.length<2)return'';
-  const w=54,h=18,max=Math.max(...v),min=Math.min(...v),r=(max-min)||1;
+  const w=58,h=18,max=Math.max(...v),min=Math.min(...v),r=(max-min)||1;
   const pts=v.map((y,i)=>(i/(v.length-1)*w).toFixed(1)+','+(h-((y-min)/r)*h).toFixed(1)).join(' ');
   return '<svg class="mtr-spark" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"'
-    +' role="img" aria-label="Gibanje napake modela"><polyline points="'+pts+'" fill="none" stroke="#34d399"'
-    +' stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>';
+    +' role="img" aria-label="Gibanje napake modela"><polyline points="'+pts+'" fill="none" stroke="'+(color||MTR_CC.mtr)+'"'
+    +' stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>';
 }
 
 function _omxNums(arr){return (arr||[]).filter(v=>Number.isFinite(v));}
