@@ -396,10 +396,10 @@ def t_frost(ctx):
     if ctx["tmin"] is None or ctx["tmin"] > 0:
         return None
     variants = [
-        ("Bo danes\nzmrzovalo?", "pod ničlo ponoči/zjutraj"),
+        ("Bo danes\nzmrzovalo?", "ponoči/zjutraj bo temperatura pod ničlo"),
         ("Pozor,\nzmrzal!", "najnižja napovedana temperatura"),
         ("Danes pod\nničlo", "najnižja napovedana temperatura"),
-        ("Jutranja\nzmrzal", "termometer pade pod 0 °C"),
+        ("Jutranja\nzmrzal", "termometer bo padel pod 0 °C"),
         ("Hladna past\nza rastline", "najnižja napovedana temperatura"),
     ]
     headline, big_sub = pick(ctx, "FROST", variants)
@@ -419,7 +419,7 @@ def t_snow(ctx):
         ("Danes bo\nzapadel sneg", "napovedano sneženje"),
         ("Bel dan\nv dolini?", "napovedano sneženje"),
         ("Pripravi\nlopato", "napovedano sneženje"),
-        ("Zima ni\nrekla zadnje", "napovedano sneženje"),
+        ("Zima še ni\nrekla zadnje", "napovedano sneženje"),
         ("Sneg se\nvrača", "napovedano sneženje"),
     ]
     headline, big_sub = pick(ctx, "SNOW", variants)
@@ -451,7 +451,7 @@ def t_storm(ctx):
     # `big` umakne v splošno "čez dan" in bi bil naslov v nasprotju z njim.
     variants = [
         ("Bo danes\ngrmelo?", "možnost neviht po napovedi"),
-        ("Nevihtni dan\nv dolini", "najvišja verjetnost danes"),
+        ("Nevihtni dan\nv dolini", "danes je največja verjetnost neviht"),
         ("Pazi na\nnebo danes", "možnost neviht po napovedi"),
         ("Danes lahko\nzagrmi", "možnost neviht po napovedi"),
         ("Nevihtni\nobeti", "možnost neviht po napovedi"),
@@ -492,11 +492,11 @@ def t_uv_extreme(ctx):
     if ctx["uv_max"] is None or ctx["uv_max"] < 9:
         return None
     variants = [
-        ("UV je danes\nzelo visok", "vrh UV indeksa"),
-        ("Sonce danes\nne odpušča", "vrh UV indeksa"),
-        ("Zaščita\nobvezna", "vrh UV indeksa"),
-        ("Koža v\nnevarnosti", "vrh UV indeksa"),
-        ("Ekstremen\nUV danes", "vrh UV indeksa"),
+        ("UV je danes\nzelo visok", "vrh UV-indeksa"),
+        ("Sonce danes\nne odpušča", "vrh UV-indeksa"),
+        ("Zaščita\nobvezna", "vrh UV-indeksa"),
+        ("Koža v\nnevarnosti", "vrh UV-indeksa"),
+        ("Ekstremen\nUV danes", "vrh UV-indeksa"),
     ]
     headline, big_sub = pick(ctx, "UV_EXTREME", variants)
     return card(ctx, "UV_EXTREME", headline, num_sl(ctx["uv_max"], 1), big_sub,
@@ -512,11 +512,11 @@ def t_windy(ctx):
     if ctx["gust_max"] is None or ctx["gust_max"] < 45:
         return None
     variants = [
-        ("Danes bo\npihalo", "najmočnejši napovedan sunek"),
-        ("Veter se\nkrepi", "najmočnejši napovedan sunek"),
-        ("Pridrži\nklobuk", "najmočnejši napovedan sunek"),
-        ("Sunkovit\ndan", "najmočnejši napovedan sunek"),
-        ("Veter danes\nnagaja", "najmočnejši napovedan sunek"),
+        ("Danes bo\npihalo", "najmočnejši napovedani sunek"),
+        ("Veter se\nkrepi", "najmočnejši napovedani sunek"),
+        ("Pridrži\nklobuk", "najmočnejši napovedani sunek"),
+        ("Sunkovit\ndan", "najmočnejši napovedani sunek"),
+        ("Veter danes\nnagaja", "najmočnejši napovedani sunek"),
     ]
     headline, big_sub = pick(ctx, "WINDY", variants)
     return card(ctx, "WINDY", headline, f"{num_sl(ctx['gust_max'])} km/h", big_sub,
@@ -558,11 +558,11 @@ def t_rain_heavy(ctx):
     if not is_rain or total < 12:
         return None
     variants = [
-        ("Danes bo\nzalilo", "napovedana skupna količina"),
-        ("Pripravi\ndežnik", "napovedana skupna količina"),
-        ("Izdaten dež\nv napovedi", "napovedana skupna količina"),
-        ("Danes bo\nmoker dan", "napovedana skupna količina"),
-        ("Veliko dežja\ndanes", "napovedana skupna količina"),
+        ("Danes bo\nzalilo", "napovedana skupna količina padavin"),
+        ("Pripravi\ndežnik", "napovedana skupna količina padavin"),
+        ("Izdaten dež\nv napovedi", "napovedana skupna količina padavin"),
+        ("Danes bo\nmoker dan", "napovedana skupna količina padavin"),
+        ("Veliko dežja\ndanes", "napovedana skupna količina padavin"),
     ]
     headline, big_sub = pick(ctx, "RAIN_HEAVY", variants)
     if ctx["arso_precip"]:
@@ -680,11 +680,11 @@ def t_uv_high(ctx):
     if ctx["uv_max"] is None or not (7 <= ctx["uv_max"] < 9):
         return None
     variants = [
-        ("Visok UV\ndanes", "vrh UV indeksa"),
-        ("Sonce danes\npeče močno", "vrh UV indeksa"),
-        ("Ne pozabi\nna kremo", "vrh UV indeksa"),
-        ("UV indeks\nv rdečem", "vrh UV indeksa"),
-        ("Danes previdno\nna soncu", "vrh UV indeksa"),
+        ("Visok UV\ndanes", "vrh UV-indeksa"),
+        ("Sonce danes\nmočno peče", "vrh UV-indeksa"),
+        ("Ne pozabi\nna kremo", "vrh UV-indeksa"),
+        ("UV-indeks\nv rdečem", "vrh UV-indeksa"),
+        ("Danes previdno\nna soncu", "vrh UV-indeksa"),
     ]
     headline, big_sub = pick(ctx, "UV_HIGH", variants)
     return card(ctx, "UV_HIGH", headline, num_sl(ctx["uv_max"], 1), big_sub,
@@ -950,19 +950,19 @@ def t_vs_yesterday(ctx):
         return None
     if diff > 0:
         variants = [
-            ("Danes bo\ntopleje kot včeraj", "razlika od včerajšnjega vrha"),
-            ("Segreva\nse", "razlika od včerajšnjega vrha"),
-            ("Toplejši dan\nod včeraj", "razlika od včerajšnjega vrha"),
-            ("Termometer\ngre gor", "razlika od včerajšnjega vrha"),
-            ("Danes več\nkot včeraj", "razlika od včerajšnjega vrha"),
+            ("Danes bo\ntopleje kot včeraj", "razlika glede na včerajšnji vrh"),
+            ("Segreva\nse", "razlika glede na včerajšnji vrh"),
+            ("Toplejši dan\nod včeraj", "razlika glede na včerajšnji vrh"),
+            ("Termometer\ngre gor", "razlika glede na včerajšnji vrh"),
+            ("Danes več\nkot včeraj", "razlika glede na včerajšnji vrh"),
         ]
     else:
         variants = [
-            ("Danes bo\nhladneje kot včeraj", "razlika od včerajšnjega vrha"),
-            ("Ohladitev\nje tu", "razlika od včerajšnjega vrha"),
-            ("Hladnejši dan\nod včeraj", "razlika od včerajšnjega vrha"),
-            ("Termometer\ngre dol", "razlika od včerajšnjega vrha"),
-            ("Danes manj\nkot včeraj", "razlika od včerajšnjega vrha"),
+            ("Danes bo\nhladneje kot včeraj", "razlika glede na včerajšnji vrh"),
+            ("Ohladitev\nje tu", "razlika glede na včerajšnji vrh"),
+            ("Hladnejši dan\nod včeraj", "razlika glede na včerajšnji vrh"),
+            ("Termometer\ngre dol", "razlika glede na včerajšnji vrh"),
+            ("Danes manj\nkot včeraj", "razlika glede na včerajšnji vrh"),
         ]
     headline, big_sub = pick(ctx, "VS_YESTERDAY", variants)
     sign = "+" if diff > 0 else "−"
@@ -989,19 +989,19 @@ def t_pressure(ctx):
         return None
     if diff < 0:
         variants = [
-            ("Tlak danes\nhitro pada", "sprememba od včerajšnjega povprečja"),
-            ("Sprememba\nvremena prihaja", "sprememba od včerajšnjega povprečja"),
-            ("Barometer\npada", "sprememba od včerajšnjega povprečja"),
-            ("Zrak se\npremika", "sprememba od včerajšnjega povprečja"),
-            ("Tlak v\nupadu", "sprememba od včerajšnjega povprečja"),
+            ("Tlak danes\nhitro pada", "sprememba glede na včerajšnje povprečje"),
+            ("Sprememba\nvremena prihaja", "sprememba glede na včerajšnje povprečje"),
+            ("Barometer\npada", "sprememba glede na včerajšnje povprečje"),
+            ("Zrak se\npremika", "sprememba glede na včerajšnje povprečje"),
+            ("Tlak v\nupadu", "sprememba glede na včerajšnje povprečje"),
         ]
     else:
         variants = [
-            ("Tlak danes\nhitro raste", "sprememba od včerajšnjega povprečja"),
-            ("Vreme se\numirja", "sprememba od včerajšnjega povprečja"),
-            ("Barometer\nraste", "sprememba od včerajšnjega povprečja"),
-            ("Stabilnejše\nvreme prihaja", "sprememba od včerajšnjega povprečja"),
-            ("Tlak v\nporastu", "sprememba od včerajšnjega povprečja"),
+            ("Tlak danes\nhitro raste", "sprememba glede na včerajšnje povprečje"),
+            ("Vreme se\numirja", "sprememba glede na včerajšnje povprečje"),
+            ("Barometer\nraste", "sprememba glede na včerajšnje povprečje"),
+            ("Stabilnejše\nvreme prihaja", "sprememba glede na včerajšnje povprečje"),
+            ("Tlak v\nporastu", "sprememba glede na včerajšnje povprečje"),
         ]
     headline, big_sub = pick(ctx, "PRESSURE_TREND", variants)
     sign = "+" if diff > 0 else "−"
@@ -1028,7 +1028,7 @@ def t_daylength(ctx):
     variants = [
         ("Dan se danes\ndaljša" if growing else "Dan se danes\nkrajša", "razlika glede na včeraj"),
         ("Svetlobe je\nvse več" if growing else "Svetlobe je\nvse manj", "razlika glede na včeraj"),
-        ("Sonce vstaja\nprej" if growing else "Sonce vstaja\npozneje", "razlika glede na včeraj"),
+        ("Sonce vzhaja\nprej" if growing else "Sonce vzhaja\npozneje", "razlika glede na včeraj"),
         ("Dnevi se\npodaljšujejo" if growing else "Dnevi se\nkrajšajo", "razlika glede na včeraj"),
         ("Malo več\nsvetlobe danes" if growing else "Malo manj\nsvetlobe danes", "razlika glede na včeraj"),
     ]
