@@ -34,6 +34,178 @@ TODAY = seo.TODAY
 VERIFICATION_PATH = os.path.join(ROOT, "forecast_verification.json")
 MODEL_PATH = os.path.join(ROOT, "model", "recica-mos.json")
 
+# ── SVG grafi (client-side, brez zunanjih JS knjižnic — isti vzorec kot
+# CHART_JS v generate_test_napovedi_page.py: stran fetcha isti JSON, ki ga že
+# bere tabela zgoraj, in nariše <svg> v brskalniku). MTR barva (#059669) je
+# ista validirana zelena kot na kartici MTR na naslovni strani (glej opombo o
+# barvni paleti pri MTR_CC v app.js) — ne generična barva stat-kartice tu na
+# strani (c-temp/c-rain/… so samo dekorativni razredi brez fiksnega pomena,
+# glej npr. generate_test_napovedi_page.py, kjer isti razred nosijo vsi viri).
+# ARSO/Open-Meteo/AIFS barve so amber/modra/vijolična — štiri jasno ločene
+# barve, amber in zelena pa dovolj narazen, da ARSO in MTR na grafu nista
+# zamenljiva (prvi poskus z oranžno za MTR je bil ARSO-ju prepodoben, glej
+# zaslonsko sliko ob gradnji). MTR oznaka (»MTR v1« ipd.) se izpelje iz
+# model_version v samem JSON-u, ne podvaja se kot niz iz Pythona — ista
+# logika kot mtr_label zgoraj.
+CHART_JS = """<script>
+(function(){
+  var dailyEl = document.getElementById("tnc-chart-daily");
+  var monthEl = document.getElementById("tnc-chart-monthly");
+  if (!dailyEl && !monthEl) return;
+  var SRC = [
+    {key:"arso", label:"ARSO", color:"#f59e0b"},
+    {key:"open_meteo", label:"Open-Meteo", color:"#60a5fa"},
+    {key:"aifs", label:"ECMWF AIFS", color:"#a78bfa"},
+    {key:"meteorec", label:"MTR", color:"#059669"}
+  ];
+  var MES = ["","jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"];
+
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function activeSources(rows){
+    return SRC.filter(function(s){ return rows.some(function(r){ return r[s.key]!=null; }); });
+  }
+
+  function legendHtml(sources){
+    return '<div class="tnc-legend">' + sources.map(function(s){
+      return '<span><i style="background:'+s.color+'"></i>'+esc(s.label)+'</span>';
+    }).join('') + '</div>';
+  }
+
+  function dailyChart(rows){
+    var recent = rows.slice(-30);
+    var active = activeSources(recent);
+    if (!active.length) return "";
+    var W=680,H=260,padL=34,padR=14,padT=16,padB=28;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxErr=1;
+    recent.forEach(function(r){ active.forEach(function(s){ if(r[s.key]!=null) maxErr=Math.max(maxErr,r[s.key]); }); });
+    maxErr = Math.ceil(maxErr*1.15*10)/10;
+    function x(i){ return padL + plotW*(recent.length<=1?0:i/(recent.length-1)); }
+    function y(v){ return padT + plotH*(1-v/maxErr); }
+
+    var svg='<svg viewBox="0 0 '+W+' '+H+'" class="tnc-svg" preserveAspectRatio="xMidYMid meet">';
+    [0,.25,.5,.75,1].forEach(function(f){
+      var v=maxErr*f;
+      svg += '<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)"/>';
+      svg += '<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+    });
+    var nTicks = Math.min(6, recent.length);
+    for (var t=0;t<nTicks;t++){
+      var idx = Math.round(t*(recent.length-1)/Math.max(1,nTicks-1));
+      var lbl = recent[idx].date.slice(5).replace('-','.');
+      svg += '<text x="'+x(idx)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+lbl+'</text>';
+    }
+    active.forEach(function(s){
+      var pts=[];
+      recent.forEach(function(r,i){ if(r[s.key]!=null) pts.push(x(i)+","+y(r[s.key])); });
+      if(pts.length>=2){
+        svg += '<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>';
+      }
+      recent.forEach(function(r,i){ if(r[s.key]!=null) svg += '<circle cx="'+x(i)+'" cy="'+y(r[s.key])+'" r="2.2" fill="'+s.color+'"/>'; });
+    });
+    svg += '</svg>';
+    return '<div class="tnc-chart-title">Napaka najvišje temperature (°C), zadnjih '+recent.length+' dni</div>'
+      + svg + legendHtml(active);
+  }
+
+  function monthKey(d){ return d.slice(0,7); }
+  function monthLabel(ym){ return MES[parseInt(ym.slice(5,7),10)]+" "+ym.slice(0,4); }
+  function mean(vals){
+    if(!vals.length) return null;
+    var s=0; vals.forEach(function(v){s+=v;});
+    return s/vals.length;
+  }
+
+  function monthlyChart(rows){
+    var byMonth = {};
+    rows.forEach(function(r){ (byMonth[monthKey(r.date)] = byMonth[monthKey(r.date)] || []).push(r); });
+    var months = Object.keys(byMonth).sort();
+    var active = activeSources(rows);
+    if (!months.length || !active.length) return "";
+    var maeByMonth = {};
+    months.forEach(function(ym){
+      maeByMonth[ym] = {};
+      active.forEach(function(s){
+        maeByMonth[ym][s.key] = mean(byMonth[ym].map(function(r){return r[s.key];}).filter(function(v){return v!=null;}));
+      });
+    });
+    var W=680,H=260,padL=34,padR=14,padT=16,padB=32;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxMae=1;
+    months.forEach(function(ym){ active.forEach(function(s){ var m=maeByMonth[ym][s.key]; if(m!=null) maxMae=Math.max(maxMae,m); }); });
+    maxMae = Math.ceil(maxMae*1.15*10)/10;
+    function y(v){ return padT+plotH*(1-v/maxMae); }
+    var groupW = plotW/months.length;
+    var barW = groupW/(active.length+0.8);
+
+    var svg='<svg viewBox="0 0 '+W+' '+H+'" class="tnc-svg" preserveAspectRatio="xMidYMid meet">';
+    [0,.25,.5,.75,1].forEach(function(f){
+      var v=maxMae*f;
+      svg += '<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)"/>';
+      svg += '<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+    });
+    months.forEach(function(ym,mi){
+      var gx = padL + groupW*mi;
+      active.forEach(function(s,si){
+        var m = maeByMonth[ym][s.key];
+        if (m==null) return;
+        var bx = gx + barW*(si+0.4);
+        var by = y(m);
+        svg += '<rect x="'+bx+'" y="'+by+'" width="'+(barW*0.82)+'" height="'+Math.max(y(0)-by,1)+'" fill="'+s.color+'" rx="2"/>';
+      });
+      svg += '<text x="'+(gx+groupW/2)+'" y="'+(H-12)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+esc(monthLabel(ym))+'</text>';
+    });
+    svg += '</svg>';
+    return '<div class="tnc-chart-title">Povprečna napaka najvišje temperature po mesecih (MAE, °C)</div>'
+      + svg + legendHtml(active);
+  }
+
+  fetch("/forecast_verification.json?_="+Math.floor(Date.now()/36e5))
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(data){
+      var dates = Object.keys(data).sort();
+      var mtrLabel = "MTR";
+      for (var i=dates.length-1;i>=0;i--){
+        var mm = data[dates[i]] && data[dates[i]].meteorec;
+        if (mm && mm.model_version){ mtrLabel = "MTR v"+String(mm.model_version).split(".")[0]; break; }
+      }
+      SRC.forEach(function(s){ if (s.key==="meteorec") s.label = mtrLabel; });
+
+      var rows = dates.map(function(d){
+        var r = data[d], out = {date:d};
+        SRC.forEach(function(s){
+          var src = r[s.key];
+          out[s.key] = (src && src.err_tmax!=null) ? src.err_tmax : null;
+        });
+        return out;
+      });
+      if (rows.length < 2){
+        if (dailyEl) dailyEl.innerHTML = "";
+        if (monthEl) monthEl.innerHTML = "";
+        return;
+      }
+      if (dailyEl) dailyEl.innerHTML = dailyChart(rows);
+      if (monthEl) monthEl.innerHTML = monthlyChart(rows);
+    })
+    .catch(function(){
+      if (dailyEl) dailyEl.innerHTML = '<div class="tnc-msg">Graf trenutno ni na voljo.</div>';
+      if (monthEl) monthEl.innerHTML = '<div class="tnc-msg">Graf trenutno ni na voljo.</div>';
+    });
+})();
+</script>"""
+
+CHART_CSS = """<style>
+.tnc-chart-block{margin:1.2rem 0 1.8rem}
+.tnc-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.tnc-svg{width:100%;height:auto;display:block}
+.tnc-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem;font-size:.8rem;color:var(--muted)}
+.tnc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+.tnc-msg{font-size:.85rem;color:var(--muted)}
+.best-val{color:var(--green);font-weight:700}
+</style>"""
+
 
 def load_verification():
     try:
@@ -62,18 +234,31 @@ def source_stats(records, source):
     }
 
 
-def pred_txt(src):
+def pred_txt(src, is_best=False):
     """»28,4 °C (±1,1)« za posamezno napoved v tabeli zadnjih dni."""
     if not src or src.get("tmax") is None:
         return "—"
-    return f'{seo.num(src.get("tmax"))} °C (±{seo.num(src.get("err_tmax"))})'
+    txt = f'{seo.num(src.get("tmax"))} °C (±{seo.num(src.get("err_tmax"))})'
+    return f'<span class="best-val">{txt}</span>' if is_best else txt
 
 
-def mae_txt(stats):
+def mae_txt(stats, is_best=False):
     """»±1,2 °C« ali pomišljaj, kadar vir tisti mesec ni napovedoval."""
     if stats["mae_tmax"] is None:
         return "—"
-    return f'±{seo.num(stats["mae_tmax"])} °C'
+    txt = f'±{seo.num(stats["mae_tmax"])} °C'
+    return f'<span class="best-val">{txt}</span>' if is_best else txt
+
+
+def best_keys(vals):
+    """Ključi z najmanjšo (najboljšo) vrednostjo, za poudarek v tabeli — samo,
+    če sta na voljo vsaj dva vira tisti dan/mesec, sicer bi bil poudarek en
+    sam stolpec brez primerjave."""
+    present = {k: v for k, v in vals.items() if v is not None}
+    if len(present) < 2:
+        return set()
+    m = min(present.values())
+    return {k for k, v in present.items() if abs(v - m) < 1e-9}
 
 
 def latest_day_block(verification, labels):
@@ -218,6 +403,13 @@ def build_body(verification):
               + (stat_card(mtr_label, mos_stats, "c-up") + "\n" if has_mos else "")
               + '  </div>') if n_days else ""
 
+    daily_chart_block = (
+        '  <h2 id="gibanje">Kako se napaka giblje skozi čas?</h2>\n'
+        '  <p class="archive-intro">Napaka najvišje temperature za vsak razrešen dan v zadnjih 30 dneh — '
+        'konice pokažejo dneve, ko je vir zgrešil bolj kot običajno.</p>\n'
+        '  <div class="tnc-chart-block" id="tnc-chart-daily">Graf se nalaga …</div>'
+    ) if n_days >= 2 else ""
+
     # ── Mesečni scoreboard ──────────────────────────────────────────────
     by_month = defaultdict(list)
     for d, r in zip(dates, records):
@@ -230,18 +422,25 @@ def build_body(verification):
         mm = source_stats(recs, "meteorec")
         ai = source_stats(recs, "aifs")
         y, m = int(ym[:4]), int(ym[5:7])
-        a_txt = mae_txt(a)
-        o_txt = mae_txt(o)
-        ai_col = f'<td>{mae_txt(ai)}</td>' if has_aifs else ""
-        m_col = f'<td>{mae_txt(mm)}</td>' if has_mos else ""
+        best = best_keys({
+            "arso": a["mae_tmax"], "open_meteo": o["mae_tmax"],
+            **({"aifs": ai["mae_tmax"]} if has_aifs else {}),
+            **({"meteorec": mm["mae_tmax"]} if has_mos else {}),
+        })
+        a_txt = mae_txt(a, "arso" in best)
+        o_txt = mae_txt(o, "open_meteo" in best)
+        ai_col = f'<td>{mae_txt(ai, "aifs" in best)}</td>' if has_aifs else ""
+        m_col = f'<td>{mae_txt(mm, "meteorec" in best)}</td>' if has_mos else ""
         month_rows.append(f'    <tr><th>{seo.MES_NOM[m].capitalize()} {y}</th><td>{a_txt}</td><td>{o_txt}</td>{ai_col}{m_col}<td>{len(recs)}</td></tr>')
     month_head = ('    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th>'
                   + ('<th>ECMWF AIFS</th>' if has_aifs else '')
                   + (f'<th>{mtr_label}</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
-    month_table = ('  <table class="stats">\n'
+    month_table = ('  <div class="table-scroll"><table class="stats">\n'
                     + month_head
-                    + "\n".join(month_rows) + '\n  </table>') if month_rows else \
+                    + "\n".join(month_rows) + '\n  </table></div>') if month_rows else \
         '  <p class="muted-note">Še ni dovolj podatkov za mesečni pregled.</p>'
+    monthly_chart_block = ('  <div class="tnc-chart-block" id="tnc-chart-monthly">Graf se nalaga …</div>'
+                            if len(month_rows) >= 2 else "")
 
     # ── Zadnji dnevi ─────────────────────────────────────────────────────
     recent = list(reversed(dates))[:20]
@@ -253,10 +452,15 @@ def build_body(verification):
         o = r.get("open_meteo") or {}
         mm = r.get("meteorec") or {}
         ai = r.get("aifs") or {}
-        a_txt = pred_txt(a)
-        o_txt = pred_txt(o)
-        ai_col = f'<td>{pred_txt(ai)}</td>' if has_aifs else ""
-        m_col = f'<td>{pred_txt(mm)}</td>' if has_mos else ""
+        best = best_keys({
+            "arso": a.get("err_tmax"), "open_meteo": o.get("err_tmax"),
+            **({"aifs": ai.get("err_tmax")} if has_aifs else {}),
+            **({"meteorec": mm.get("err_tmax")} if has_mos else {}),
+        })
+        a_txt = pred_txt(a, "arso" in best)
+        o_txt = pred_txt(o, "open_meteo" in best)
+        ai_col = f'<td>{pred_txt(ai, "aifs" in best)}</td>' if has_aifs else ""
+        m_col = f'<td>{pred_txt(mm, "meteorec" in best)}</td>' if has_mos else ""
         recent_rows.append(
             f'    <tr><th><a href="/vreme/{d[:4]}/{d[5:7]}/{d[8:10]}/">{seo.fmtd(d)}</a></th>'
             f'<td>{seo.num(act.get("tmax"))} °C</td><td>{a_txt}</td><td>{o_txt}</td>{ai_col}{m_col}</tr>'
@@ -265,9 +469,9 @@ def build_body(verification):
                    '<th>Open-Meteo je napovedal</th>'
                    + ('<th>AIFS je napovedal</th>' if has_aifs else '')
                    + (f'<th>{mtr_label} je napovedal</th>' if has_mos else '') + '</tr>\n')
-    recent_table = ('  <table class="stats">\n'
+    recent_table = ('  <div class="table-scroll"><table class="stats">\n'
                      + recent_head
-                     + "\n".join(recent_rows) + '\n  </table>') if recent_rows else \
+                     + "\n".join(recent_rows) + '\n  </table></div>') if recent_rows else \
         '  <p class="muted-note">Še ni razrešenih dni.</p>'
 
     intro_block = intro + ("\n" + mos_intro if mos_intro else "") + ("\n" + aifs_intro if aifs_intro else "")
@@ -320,21 +524,21 @@ def build_body(verification):
                         )
                     year_blocks.append(
                         f'    <details><summary>D+{ln} po letih</summary>\n'
-                        '      <table class="stats">\n'
+                        '      <div class="table-scroll"><table class="stats">\n'
                         f'      <tr><th>Leto</th><th colspan="2">Tmax (Open-Meteo / {mtr_label})</th>'
                         f'<th colspan="2">Tmin (Open-Meteo / {mtr_label})</th><th>Vzorcev</th></tr>\n'
-                        + "\n".join(py_rows) + '\n      </table>\n    </details>'
+                        + "\n".join(py_rows) + '\n      </table></div>\n    </details>'
                     )
 
             trained_iso = (model.get("trained_at") or "")[:10]
             trained_txt = seo.fmtd(trained_iso) if len(trained_iso) == 10 else "—"
             lead_table = (
-                '  <table class="stats">\n'
+                '  <div class="table-scroll"><table class="stats">\n'
                 '    <tr><th>Vodilni čas</th><th colspan="3">Maks. temp. (Tmax)</th>'
                 '<th colspan="3">Min. temp. (Tmin)</th><th>Vzorcev</th></tr>\n'
                 f'    <tr><th></th><th>Open-Meteo</th><th>{mtr_label}</th><th>Izboljšava</th>'
                 f'<th>Open-Meteo</th><th>{mtr_label}</th><th>Izboljšava</th><th></th></tr>\n'
-                + "\n".join(lead_rows) + '\n  </table>'
+                + "\n".join(lead_rows) + '\n  </table></div>'
             )
             skill_section = (
                 f'  <h2>{mtr_label}: veščina glede na vodilni čas</h2>\n'
@@ -402,8 +606,10 @@ def build_body(verification):
 {intro_block}
 {status}
 {cards}
+{daily_chart_block}
 {skill_section}
   <h2>Mesečni pregled</h2>
+{monthly_chart_block}
 {month_table}
   <h2>Zadnji dnevi</h2>
 {recent_table}
@@ -424,7 +630,7 @@ def build_body(verification):
 
 def main():
     verification = load_verification()
-    body = build_body(verification)
+    body = build_body(verification) + "\n" + CHART_JS
 
     url = "/tocnost-napovedi/"
     title = "Točnost vremenske napovedi — Rečica ob Savinji"
@@ -441,7 +647,7 @@ def main():
             "Dnevna primerjava napovedi ARSO, Open-Meteo in ECMWF AIFS z dejansko meritvijo postaje IREICA1.",
             variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
         ),
-    ])
+    ]) + "\n" + CHART_CSS
 
     html_out = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("tocnost-napovedi/index.html", html_out, force=True)

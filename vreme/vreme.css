@@ -165,10 +165,16 @@
 .gobe-sp-nt{font-size:.75rem;color:var(--muted);line-height:1.5}
 
 /* ── Podatkovne tabele ──
-   .data-table / .table-scroll sta bila v uporabi na 12 straneh /vreme/mesec/*/,
-   definirana pa v nobenem CSS — tabele so se izrisovale s privzetim slogom
-   brskalnika (glave skupaj, brez razmikov). Sloga uporablja tudi napoved na
-   /vreme-recica-ob-savinji/. */
+   .data-table / .table-scroll sta bila v uporabi na 12 mesečnih straneh pod
+   /vreme/mesec/, definirana pa v nobenem CSS — tabele so se izrisovale s
+   privzetim slogom brskalnika (glave skupaj, brez razmikov). Sloga uporablja
+   tudi napoved na /vreme-recica-ob-savinji/.
+   POZOR: zvezdica tik pred poševnico v tem komentarju (kot je bila prej v
+   zapisu poti z nadomestnim znakom) predčasno zapre komentar, ker CSS ne
+   pozna gnezdenja — to je pobrisalo prav pravilo .table-scroll spodaj,
+   najdeno 15. 9. 2026 pri gradnji /tocnost-napovedi/, ko se je tabela kljub
+   razredu razlezla čez zaslon na ozkih napravah. V tem komentarju se ta dva
+   znaka torej ne smeta znajti enega tik ob drugem. */
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9rem 0}
 .data-table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:32rem}
 .data-table th,.data-table td{padding:.5rem .7rem;text-align:right;
