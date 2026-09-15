@@ -1344,6 +1344,98 @@ def gen_archive_index(hist, sitemap_urls, seasons=None):
     sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "weekly", "0.8"))
 
 
+# ── Rekordi po temah: graf "po letih" ──────────────────────────────────────
+# Vsaka /rekord/<tema>/ podstran je bila doslej ena sama vrednost + en stavek
+# — najbolj suhoparna vsebina na strani. Statičen SVG, izrisan tu v Pythonu
+# (ista utemeljitev kot v generate_vodostaj_page.py in ostalih: vsi podatki so
+# že v Pythonu, strani nastanejo enkrat dnevno ob generiranju sitemapa, client
+# fetch bi zahteval nov javni JSON samo za to).
+
+REC_CHART_CSS = """<style>
+.rec-chart-block{margin:1.4rem 0}
+.rec-svg{width:100%;height:auto;display:block}
+</style>"""
+
+
+def yearly_daily_extreme(hist, key, fn, attr=None):
+    """Rekord po letih iz dnevnih meritev (npr. najvišja Tmax vsako leto)."""
+    by_year = defaultdict(list)
+    for d, v in hist.items():
+        val = v.get(attr or key)
+        if val is not None:
+            by_year[d[:4]].append(val)
+    return {y: fn(vals) for y, vals in by_year.items() if vals}
+
+
+def yearly_wind_extreme(hist):
+    """Isto pravilo kot skupni rekord vetra zgoraj (sunek, če je na voljo in
+    ni manjši od hitrosti, sicer hitrost) — samo po letih."""
+    gust, speed = defaultdict(list), defaultdict(list)
+    for d, v in hist.items():
+        y = d[:4]
+        if v.get("windgustHigh") is not None:
+            gust[y].append(v["windgustHigh"])
+        if v.get("windspeedHigh") is not None:
+            speed[y].append(v["windspeedHigh"])
+    out = {}
+    for y in set(gust) | set(speed):
+        g = max(gust[y]) if gust.get(y) else None
+        s = max(speed[y]) if speed.get(y) else None
+        out[y] = g if (g is not None and (s is None or g >= s)) else s
+    return out
+
+
+def yearly_from_monthly(monthly_dict, fn):
+    """Rekord po letih iz že izračunanih mesečnih agregatov (najtoplejši/
+    najbolj deževen mesec vsako leto) — isti month_avgs/month_precs kot za
+    skupni rekord zgoraj, samo grupirano po letu namesto po vseh letih skupaj."""
+    by_year = defaultdict(list)
+    for ym, v in monthly_dict.items():
+        by_year[ym[:4]].append(v)
+    return {y: fn(vals) for y, vals in by_year.items() if vals}
+
+
+def yearly_extreme_svg(year_vals, record_year, fmt):
+    """Stolpčni graf: vrednost rekorda za vsako leto, rekordno leto poudarjeno.
+    Izhodišče 0 z bipolarnim razponom (Tmin je lahko negativen)."""
+    years = sorted(year_vals)
+    if len(years) < 2:
+        return ""
+    vals = [year_vals[y] for y in years]
+    n = len(years)
+    W, H = 640, 200
+    pad_l, pad_r, pad_t, pad_b = 14, 14, 18, 26
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    lo, hi = min(vals + [0]), max(vals + [0])
+    if lo == hi:
+        lo, hi = lo - 1, hi + 1
+    span = hi - lo
+    lo -= span * 0.06
+    hi += span * 0.16
+
+    def y(v):
+        return pad_t + plot_h * (1 - (v - lo) / (hi - lo))
+
+    zero_y = y(0)
+    bar_w = plot_w / n * 0.6
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="rec-svg" preserveAspectRatio="xMidYMid meet">']
+    if lo < 0 < hi:
+        parts.append(f'<line x1="{pad_l}" y1="{zero_y:.1f}" x2="{W - pad_r}" y2="{zero_y:.1f}" stroke="rgba(255,255,255,.25)"/>')
+    for i, yr in enumerate(years):
+        v = year_vals[yr]
+        gx = pad_l + (plot_w / n) * i + (plot_w / n - bar_w) / 2
+        top, bh = min(y(v), zero_y), abs(y(v) - zero_y)
+        is_record = (yr == record_year)
+        col = "#f59e0b" if is_record else "#60a5fa"
+        parts.append(f'<rect x="{gx:.1f}" y="{top:.1f}" width="{bar_w:.1f}" height="{max(bh, 1):.1f}" fill="{col}" rx="3"/>')
+        lbl_y = y(v) - 6 if v >= 0 else y(v) + 14
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{lbl_y:.1f}" text-anchor="middle" font-size="10" '
+                     f'font-weight="700" fill="{col}">{html.escape(fmt(v))}</text>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{H - 8}" text-anchor="middle" font-size="9" fill="var(--muted)">{yr}</text>')
+    parts.append("</svg>")
+    return f'  <div class="rec-chart-block">{"".join(parts)}</div>'
+
+
 def gen_records_page(hist, sitemap_urls):
     url = "/rekord/"
     rel = "rekord/index.html"
@@ -1476,7 +1568,7 @@ def gen_records_page(hist, sitemap_urls):
     # ── Posamezne tematske podstrani (long-tail iskanja: "najvišja temperatura
     # Rečica ob Savinji" ipd.) — glej SEO audit 2026-08, točka 9. Vsaka podstran
     # je majhna, samostojna stran z eno vrednostjo, ne podvojitev tabel zgoraj.
-    def record_subpage(slug, h1, label, value_str, when_html, context_p):
+    def record_subpage(slug, h1, label, value_str, when_html, context_p, year_vals=None, record_year=None, fmt=None):
         r_url, r_rel = f"/rekord/{slug}/", f"rekord/{slug}/index.html"
         r_title = f"{h1} — rekord postaje IREICA1"
         r_desc = f"{label} v Rečici ob Savinji (postaja IREICA1): {value_str}. {context_p}"
@@ -1485,7 +1577,12 @@ def gen_records_page(hist, sitemap_urls):
         r_schema = "\n".join([
             webpage_schema(r_url, r_title, r_desc),
             crumbs_schema(r_crumbs),
-        ])
+        ]) + "\n" + REC_CHART_CSS
+        r_chart = ""
+        if year_vals and record_year:
+            svg = yearly_extreme_svg(year_vals, record_year, fmt)
+            if svg:
+                r_chart = f'  <h2>Po letih</h2>\n{svg}'
         r_body = f'''{crumbs_html(r_crumbs)}
 {stn_badge()}
   <h1 class="page-title">{h1}</h1>
@@ -1498,6 +1595,7 @@ def gen_records_page(hist, sitemap_urls):
     </div>
   </div>
   <p>{context_p}</p>
+{r_chart}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
   Zadnja posodobitev: {fmtd(lastmod)}.</p>
   <a class="back-link" href="/rekord/">← Vsi rekordi Rečice ob Savinji</a>'''
@@ -1505,54 +1603,66 @@ def gen_records_page(hist, sitemap_urls):
         sitemap_urls.append(sitemap_entry(SITE + r_url, lastmod, "weekly", "0.6"))
         return (slug, h1, value_str)
 
+    fmt_c = lambda v: f"{num(v)} °C"
+    fmt_mm = lambda v: f"{num(v, 0)} mm"
+    fmt_kmh = lambda v: f"{round(v)} km/h"
+
     record_cards = []
     if tmax_d:
         record_cards.append(record_subpage(
             "najvisja-temperatura", "Najvišja temperatura v Rečici ob Savinji",
             "Absolutno najvišja temperatura", tmax_str, tmax_link,
-            f"Postaja IREICA1 je najvišjo temperaturo doslej izmerila {fmtd(tmax_d)}."))
+            f"Postaja IREICA1 je najvišjo temperaturo doslej izmerila {fmtd(tmax_d)}.",
+            yearly_daily_extreme(hist, "tempHigh", max), tmax_d[:4], fmt_c))
     if tmin_d:
         record_cards.append(record_subpage(
             "najnizja-temperatura", "Najnižja temperatura v Rečici ob Savinji",
             "Absolutno najnižja temperatura", tmin_str, tmin_link,
-            f"Postaja IREICA1 je najnižjo temperaturo doslej izmerila {fmtd(tmin_d)}."))
+            f"Postaja IREICA1 je najnižjo temperaturo doslej izmerila {fmtd(tmin_d)}.",
+            yearly_daily_extreme(hist, "tempLow", min), tmin_d[:4], fmt_c))
     if prec_d:
         record_cards.append(record_subpage(
             "najvec-padavin-v-dnevu", "Največ padavin v enem dnevu v Rečici ob Savinji",
             "Dnevni rekord padavin", prec_str, prec_link,
-            f"Toliko dežja je v enem dnevu padlo {fmtd(prec_d)} — dnevni rekord postaje IREICA1."))
+            f"Toliko dežja je v enem dnevu padlo {fmtd(prec_d)} — dnevni rekord postaje IREICA1.",
+            yearly_daily_extreme(hist, "precipTotal", max), prec_d[:4], fmt_mm))
     if wind_d:
         record_cards.append(record_subpage(
             "najmocnejsi-veter", "Najmočnejši veter v Rečici ob Savinji",
             wind_label, wind_str, wind_link,
-            f"{wind_label} je postaja IREICA1 izmerila {fmtd(wind_d)}."))
+            f"{wind_label} je postaja IREICA1 izmerila {fmtd(wind_d)}.",
+            yearly_wind_extreme(hist), wind_d[:4], fmt_kmh))
     if hottest_ym:
         record_cards.append(record_subpage(
             "najbolj-vroc-mesec", "Najbolj vroč mesec v Rečici ob Savinji",
             "Najtoplejši mesec (povprečna temperatura)",
             f"{num(month_avgs.get(hottest_ym))} °C", ym_link(hottest_ym),
             f"{MES_NOM[int(hottest_ym[5:7])].capitalize()} {hottest_ym[:4]} je bil doslej "
-            f"najtoplejši mesec po povprečni temperaturi na postaji IREICA1."))
+            f"najtoplejši mesec po povprečni temperaturi na postaji IREICA1.",
+            yearly_from_monthly(month_avgs, max), hottest_ym[:4], fmt_c))
     if coldest_ym:
         record_cards.append(record_subpage(
             "najbolj-hladen-mesec", "Najbolj hladen mesec v Rečici ob Savinji",
             "Najhladnejši mesec (povprečna temperatura)",
             f"{num(month_avgs.get(coldest_ym))} °C", ym_link(coldest_ym),
             f"{MES_NOM[int(coldest_ym[5:7])].capitalize()} {coldest_ym[:4]} je bil doslej "
-            f"najhladnejši mesec po povprečni temperaturi na postaji IREICA1."))
+            f"najhladnejši mesec po povprečni temperaturi na postaji IREICA1.",
+            yearly_from_monthly(month_avgs, min), coldest_ym[:4], fmt_c))
     if wettest_ym:
         record_cards.append(record_subpage(
             "najbolj-dezeven-mesec", "Najbolj deževen mesec v Rečici ob Savinji",
             "Mesec z največ padavinami", f"{num(month_precs.get(wettest_ym))} mm", ym_link(wettest_ym),
             f"{MES_NOM[int(wettest_ym[5:7])].capitalize()} {wettest_ym[:4]} je bil doslej mesec "
-            f"z največ padavinami na postaji IREICA1."))
+            f"z največ padavinami na postaji IREICA1.",
+            yearly_from_monthly(month_precs, max), wettest_ym[:4], fmt_mm))
     if driest_ym:
         record_cards.append(record_subpage(
             "najbolj-suh-mesec", "Najbolj sušen mesec v Rečici ob Savinji",
             "Mesec z najmanj padavinami (≥20 meritev)",
             f"{num(month_precs.get(driest_ym))} mm", ym_link(driest_ym),
             f"{MES_NOM[int(driest_ym[5:7])].capitalize()} {driest_ym[:4]} je bil doslej najsušnejši "
-            f"mesec (z vsaj 20 dnevi meritev) na postaji IREICA1."))
+            f"mesec (z vsaj 20 dnevi meritev) na postaji IREICA1.",
+            yearly_from_monthly(month_precs, min), driest_ym[:4], fmt_mm))
 
     records_hub_html = ('  <h2>Rekordi po temah</h2>\n  <div class="card-grid">\n' + "\n".join(
         f'    <a class="phenom-card" href="/rekord/{slug}/">{h1.split(" v Rečici")[0]}'
