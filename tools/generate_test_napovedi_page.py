@@ -338,9 +338,9 @@ def build_body(data, n_csv_rows):
                 cells.append('<td>—</td>')
         if any_data:
             lead_table_rows.append(f'    <tr><th>D+{lead}</th>' + "".join(cells) + '</tr>')
-    lead_table = ('  <table class="table-scroll stats">\n    <tr><th>Vodilni čas</th>'
+    lead_table = ('  <div class="table-scroll"><table class="stats">\n    <tr><th>Vodilni čas</th>'
                   + "".join(f'<th>{l}</th>' for l in models.values()) + '</tr>\n'
-                  + "\n".join(lead_table_rows) + '\n  </table>')
+                  + "\n".join(lead_table_rows) + '\n  </table></div>')
 
     # ── ARSO/Yr sprotno beleženje ──────────────────────────────────────────
     forward_html = ""
