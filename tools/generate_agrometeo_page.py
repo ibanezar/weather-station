@@ -67,6 +67,153 @@ def load_history():
     return json.load(open(os.path.join(ROOT, "history.json"), encoding="utf-8"))
 
 
+# ── Grafa: statičen SVG, izrisan tu v Pythonu ob generiranju strani — ne
+# client-side fetch+draw kot na /tocnost-napovedi/. Vsi vhodni podatki
+# (history.json, napoved Open-Meteo) so že v Pythonu v trenutku izrisa in
+# stran se tako ali tako regenerira dnevno; JS-fetch bi tu pomenil nov javni
+# JSON samo za ta dva grafa, ki bi bil brez JS prazen (glej isto opombo v
+# generate_vodostaj_page.py).
+
+def _svg_esc(s):
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def gdd_cum_series(hist, year, base, end_date):
+    """Kumulativna vsota GDD(base) za `year` od 1. januarja do end_date (vključno).
+    Isto pravilo kot calc_accum() zgoraj (samo dnevno, ne le končna vsota)."""
+    d = datetime.date(year, 1, 1)
+    total, out = 0.0, []
+    while d <= end_date:
+        v = hist.get(d.isoformat())
+        if v:
+            th, tl, ta = v.get("tempHigh"), v.get("tempLow"), v.get("tempAvg")
+            avg = (th + tl) / 2 if (th is not None and tl is not None) else ta
+            if avg is not None:
+                total += max(0, avg - base)
+        out.append(total)
+        d += datetime.timedelta(days=1)
+    return out
+
+
+def gdd_chart_svg(hist, base, upto):
+    """Letošnja kumulativna GDD krivulja proti povprečju prejšnjih let na isti
+    koledarski dan — klasičen agrometeo graf namesto ene same številke."""
+    this_year = upto.year
+    hist_years = list(range(2020, this_year))
+    cur = gdd_cum_series(hist, this_year, base, upto)
+    if not cur:
+        return ""
+    n = len(cur)
+    past = []
+    for y in hist_years:
+        try:
+            md_end = upto.replace(year=y)
+        except ValueError:
+            md_end = datetime.date(y, 2, 28)  # 29. feb v ne-prestopnem letu
+        s = gdd_cum_series(hist, y, base, md_end)
+        if s:
+            past.append(s)
+    avg = None
+    if past:
+        m = min(len(s) for s in past + [cur])
+        avg = [sum(s[i] for s in past) / len(past) for i in range(m)]
+
+    W, H = 640, 240
+    pad_l, pad_r, pad_t, pad_b = 40, 14, 16, 26
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    max_v = max(cur + (avg or [0])) * 1.1 or 1
+
+    def x(i):
+        return pad_l + plot_w * (i / (n - 1) if n > 1 else 0)
+
+    def y(v):
+        return pad_t + plot_h * (1 - v / max_v)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="agro-svg" preserveAspectRatio="xMidYMid meet">']
+    for f in (0, .25, .5, .75, 1):
+        v = max_v * f
+        parts.append(f'<line x1="{pad_l}" y1="{y(v):.1f}" x2="{W - pad_r}" y2="{y(v):.1f}" stroke="rgba(255,255,255,.08)"/>')
+        parts.append(f'<text x="{pad_l - 6}" y="{y(v) + 3:.1f}" text-anchor="end" font-size="9" fill="var(--muted)">{v:.0f}</text>')
+    if avg:
+        pts_a = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in enumerate(avg))
+        parts.append(f'<polyline points="{pts_a}" fill="none" stroke="#a78bfa" stroke-width="1.8" '
+                     f'stroke-dasharray="5,4" stroke-linecap="round"/>')
+        parts.append(f'<text x="{x(len(avg) - 1):.1f}" y="{y(avg[-1]) - 8:.1f}" text-anchor="end" font-size="9" '
+                     f'fill="#a78bfa">povprečje {hist_years[0]}–{hist_years[-1]} ({avg[-1]:.0f})</text>')
+    pts_c = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in enumerate(cur))
+    parts.append(f'<polyline points="{pts_c}" fill="none" stroke="#059669" stroke-width="2.6" '
+                 f'stroke-linecap="round" stroke-linejoin="round"/>')
+    parts.append(f'<circle cx="{x(n - 1):.1f}" cy="{y(cur[-1]):.1f}" r="3.2" fill="#059669"/>')
+    parts.append(f'<text x="{x(n - 1):.1f}" y="{y(cur[-1]) - 9:.1f}" text-anchor="end" font-size="10" '
+                 f'font-weight="700" fill="var(--text)">{this_year}: {cur[-1]:.0f}</text>')
+    for i in (0, n - 1):
+        dt = datetime.date(this_year, 1, 1) + datetime.timedelta(days=i)
+        parts.append(f'<text x="{x(i):.1f}" y="{H - 8}" text-anchor="{"start" if i == 0 else "end"}" '
+                     f'font-size="9" fill="var(--muted)">{dt.day}. {dt.month}.</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def frost_chart_svg(fd_time, tmin_l, tmax_l):
+    """Tmin/Tmax naslednjih 7 dni z opozorilnima črtama pri 0 °C (zmrzal) in
+    3 °C (pozor) — namesto branja iste dvojice številk v tabeli spodaj."""
+    rows = []
+    for i in range(min(7, len(fd_time))):
+        tmin = tmin_l[i] if i < len(tmin_l) else None
+        tmax = tmax_l[i] if i < len(tmax_l) else None
+        if tmin is None or tmax is None:
+            continue
+        dt = datetime.date.fromisoformat(fd_time[i])
+        lbl = "danes" if i == 0 else DAN_KRATKO[(dt.weekday() + 1) % 7] + f" {dt.day}. {dt.month}."
+        rows.append((lbl, tmin, tmax))
+    if not rows:
+        return ""
+    n = len(rows)
+    W, H = 640, 210
+    pad_l, pad_r, pad_t, pad_b = 30, 14, 16, 26
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    all_v = [v for _, tmin, tmax in rows for v in (tmin, tmax)] + [0, 3]
+    lo, hi = min(all_v) - 2, max(all_v) + 2
+
+    def x(i):
+        return pad_l + plot_w * (i / (n - 1) if n > 1 else 0)
+
+    def y(v):
+        return pad_t + plot_h * (1 - (v - lo) / (hi - lo))
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="agro-svg" preserveAspectRatio="xMidYMid meet">']
+    for ref, col, lbl in ((0, "#ef4444", "zmrzal"), (3, "#f59e0b", "pozor")):
+        if lo <= ref <= hi:
+            parts.append(f'<line x1="{pad_l}" y1="{y(ref):.1f}" x2="{W - pad_r}" y2="{y(ref):.1f}" '
+                         f'stroke="{col}" stroke-width="1" stroke-dasharray="4,3" opacity=".7"/>')
+            parts.append(f'<text x="{W - pad_r}" y="{y(ref) - 4:.1f}" text-anchor="end" font-size="8.5" fill="{col}">{lbl} ({ref}°)</text>')
+    pts_max = " ".join(f"{x(i):.1f},{y(tmax):.1f}" for i, (_, tmin, tmax) in enumerate(rows))
+    pts_min = " ".join(f"{x(i):.1f},{y(tmin):.1f}" for i, (_, tmin, tmax) in enumerate(rows))
+    parts.append(f'<polyline points="{pts_max}" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>')
+    parts.append(f'<polyline points="{pts_min}" fill="none" stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>')
+    for i, (lbl, tmin, tmax) in enumerate(rows):
+        mcol = "#ef4444" if tmin <= 0 else ("#f59e0b" if tmin < 3 else "#60a5fa")
+        parts.append(f'<circle cx="{x(i):.1f}" cy="{y(tmin):.1f}" r="3" fill="{mcol}"/>')
+        parts.append(f'<text x="{x(i):.1f}" y="{y(tmin) + 14:.1f}" text-anchor="middle" font-size="9" font-weight="600" fill="{mcol}">{seo.num(tmin)}°</text>')
+        parts.append(f'<circle cx="{x(i):.1f}" cy="{y(tmax):.1f}" r="2.4" fill="#fb923c"/>')
+        parts.append(f'<text x="{x(i):.1f}" y="{y(tmax) - 7:.1f}" text-anchor="middle" font-size="8.5" fill="#fb923c">{seo.num(tmax)}°</text>')
+        parts.append(f'<text x="{x(i):.1f}" y="{H - 8}" text-anchor="middle" font-size="9" fill="var(--muted)">{_svg_esc(lbl)}</text>')
+    parts.append("</svg>")
+    legend = ('<div class="agro-legend"><span><i style="background:#60a5fa"></i>Tmin</span>'
+              '<span><i style="background:#fb923c"></i>Tmax</span></div>')
+    return "".join(parts) + legend
+
+
+CHART_CSS = """<style>
+.agro-chart-block{margin:1.2rem 0 1.8rem}
+.agro-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.agro-svg{width:100%;height:auto;display:block}
+.agro-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem;font-size:.78rem;color:var(--muted)}
+.agro-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+</style>"""
+
+
 def calc_accum(hist):
     year = TODAY.year
     today_s = TODAY.isoformat()
@@ -219,6 +366,11 @@ def build_body(hist, fc):
     <p class="muted-note">Gre za meteorološki indikator vremenske ugodnosti za razvoj bolezni, ne za prognostično napoved ali diagnozo po metodologiji IHPS.</p>
   </div>'''
 
+    gdd_chart = (
+        '  <div class="agro-chart-block" id="agro-chart-gdd">\n'
+        f'  {gdd_chart_svg(hist, 10, TODAY)}\n  </div>'
+    )
+
     # ── crop GDD table ────────────────────────────────────────────────────
     crop_rows = []
     for name, emoji, base, milestones in CROP_GDD:
@@ -251,9 +403,16 @@ def build_body(hist, fc):
             badge = "Pozor"
         else:
             badge = "Varno"
-        frost_rows.append(f'      <tr><th>{lbl}</th><td>{seo.num(tmax) if tmax is not None else "—"} / '
-                           f'{seo.num(tmin) if tmin is not None else "—"} °C — {badge}</td></tr>')
-    frost_table = '  <table class="stats">\n' + "\n".join(frost_rows) + "\n  </table>"
+        frost_rows.append(f'      <tr><th>{lbl}</th>'
+                           f'<td>{seo.num(tmax) if tmax is not None else "—"} °C</td>'
+                           f'<td>{seo.num(tmin) if tmin is not None else "—"} °C</td>'
+                           f'<td>{badge}</td></tr>')
+    frost_table = ('  <table class="stats">\n    <tr><th>Dan</th><th>Tmax</th><th>Tmin</th><th>Stanje</th></tr>\n'
+                    + "\n".join(frost_rows) + "\n  </table>")
+    frost_chart = (
+        '  <div class="agro-chart-block" id="agro-chart-frost">\n'
+        f'  {frost_chart_svg(fd_time, tmin_l, tmax_l)}\n  </div>'
+    )
     frost_note = (f'⚠️ Predvidena je pozeba/zmrzal: ' + ", ".join(f"{lbl} ({seo.num(t)} °C)" for lbl, t in frost_warnings)
                   if frost_warnings else "✅ V prihodnjih 7 dneh ni predvidene pozebe.")
 
@@ -359,12 +518,16 @@ def build_body(hist, fc):
 {quick}
   <h2>Fenologija hmelja</h2>
 {hop_html}
+  <h2>Vsota efektivnih temperatur (GDD) — letos proti povprečju</h2>
+  <p class="archive-intro">Kumulativna vsota GDD₁₀ od 1. januarja do danes, letos proti povprečju let 2020–{TODAY.year - 1} na isti koledarski dan — razmik med krivuljama pove, ali je sezona pred ali za običajnim tempom.</p>
+{gdd_chart}
   <h2>Vsota efektivnih temperatur (GDD) — po pridelkih</h2>
   <p class="archive-intro">Ocenjena razvojna faza za pet pridelkov, značilnih za Zgornjo Savinjsko dolino, glede na vsoto GDD letos.</p>
 {crop_table}
   <h2>Alarm pred pozebo — naslednjih 7 dni</h2>
   <p class="archive-intro">{frost_note} Za tveganje po sadni vrsti in fenofazi (jabolka, hruške, breskve, slive,
   češnje) glej <a href="/opozorilo-pred-pozebo/">podroben model opozorila pred pozebo</a>.</p>
+{frost_chart}
 {frost_table}
   <h2>Meteorološko okno za nanos — naslednjih 7 dni</h2>
   <p class="archive-intro">Primerne ure: veter ≤ 4 km/h, brez padavin, temperatura ≥ 5 °C.</p>
@@ -402,7 +565,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Agrometeo", None)]),
-    ])
+    ]) + "\n" + CHART_CSS
 
     html = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("agrometeo/index.html", html, force=True)

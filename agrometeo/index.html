@@ -34,6 +34,14 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Agrometeo"}]}
 </script>
+<style>
+.agro-chart-block{margin:1.2rem 0 1.8rem}
+.agro-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.agro-svg{width:100%;height:auto;display:block}
+.agro-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem;font-size:.78rem;color:var(--muted)}
+.agro-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+</style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
 <link rel="stylesheet" href="/blog/blog.css?v=602ed072">
 <link rel="stylesheet" href="/vreme/vreme.css?v=2caede4a">
@@ -63,7 +71,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1 class="page-title">Agrometeo — Zgornja Savinjska dolina</h1>
   <p class="post-meta">GDD, vodna bilanca in fenologija iz meritev IREICA1 + napoved Open-Meteo · osvežuje se dnevno · 2026-09-15</p>
   <p class="archive-intro">Vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes <strong>GDD₅ 2380</strong> in <strong>GDD₁₀ 1455</strong> (od 1. januarja 2026). Modelirani razvoj hmelja je po vsoti GDD₁₀ v fazi <strong>tehnološka zrelost / obiranje</strong>. Danes: ET₀ 3,2 mm, sonce 12,0 h, vodna bilanca -3,2 mm — nazadnje posodobljeno 2026-09-15.</p>
-  <div id="agro-fresh" class="muted-note" data-generated="2026-09-15T10:27:34.642729" style="margin:.2rem 0 .8rem"></div>
+  <div id="agro-fresh" class="muted-note" data-generated="2026-09-15T13:35:20.415679" style="margin:.2rem 0 .8rem"></div>
   <script>(function(){var el=document.getElementById("agro-fresh");if(!el)return;var then=new Date(el.dataset.generated).getTime();if(isNaN(then))return;var ageH=(Date.now()-then)/3600000;if(ageH<26)return;var d=new Date(then);var datum=d.toLocaleDateString("sl",{day:"2-digit",month:"2-digit",year:"numeric"});var ura=d.toLocaleTimeString("sl",{hour:"2-digit",minute:"2-digit"});var rdece=ageH>=50;el.innerHTML=(rdece?"🔴":"🟡")+" <strong>Podatki niso sveži.</strong> Zadnja uspešna posodobitev: "+datum+" ob "+ura+"."+(rdece?" Trenutnih priporočil ne uporabljajte za odločanje.":"");el.style.color=rdece?"#dc2626":"#b45309";})();</script>
   <div class="stat-grid">
     <div class="stat-card c-up">
@@ -104,11 +112,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ne osvežuje samodejno — za sorte brez vnosa ali za najnovejše stanje preveri neposredno pri IHPS.</p>
     <div class="clabel" style="margin-top:.9rem">🌦️ Meteorološka primernost pogojev za bolezni</div>
     <table class="stats">
-      <tr><th>Hmeljeva peronospora</th><td>Pogoji: <strong>zmerna</strong> primernost <span class="muted-note" style="margin:0;display:inline">(T > 10 °C + visoka vlaga)</span></td></tr>
+      <tr><th>Hmeljeva peronospora</th><td>Pogoji: <strong>nizka</strong> primernost <span class="muted-note" style="margin:0;display:inline">(T > 10 °C + visoka vlaga)</span></td></tr>
       <tr><th>Hmeljeva pepelovka</th><td>Pogoji: <strong>visoka</strong> primernost <span class="muted-note" style="margin:0;display:inline">(T 15–27 °C + zmerna vlaga)</span></td></tr>
       <tr><th>Siva plesen (Botrytis)</th><td>Pogoji: <strong>zmerna</strong> primernost <span class="muted-note" style="margin:0;display:inline">(T 15–22 °C + vlaga > 80 %)</span></td></tr>
     </table>
     <p class="muted-note">Gre za meteorološki indikator vremenske ugodnosti za razvoj bolezni, ne za prognostično napoved ali diagnozo po metodologiji IHPS.</p>
+  </div>
+  <h2>Vsota efektivnih temperatur (GDD) — letos proti povprečju</h2>
+  <p class="archive-intro">Kumulativna vsota GDD₁₀ od 1. januarja do danes, letos proti povprečju let 2020–2025 na isti koledarski dan — razmik med krivuljama pove, ali je sezona pred ali za običajnim tempom.</p>
+  <div class="agro-chart-block" id="agro-chart-gdd">
+  <svg viewBox="0 0 640 240" class="agro-svg" preserveAspectRatio="xMidYMid meet"><line x1="40" y1="214.0" x2="626" y2="214.0" stroke="rgba(255,255,255,.08)"/><text x="34" y="217.0" text-anchor="end" font-size="9" fill="var(--muted)">0</text><line x1="40" y1="164.5" x2="626" y2="164.5" stroke="rgba(255,255,255,.08)"/><text x="34" y="167.5" text-anchor="end" font-size="9" fill="var(--muted)">400</text><line x1="40" y1="115.0" x2="626" y2="115.0" stroke="rgba(255,255,255,.08)"/><text x="34" y="118.0" text-anchor="end" font-size="9" fill="var(--muted)">800</text><line x1="40" y1="65.5" x2="626" y2="65.5" stroke="rgba(255,255,255,.08)"/><text x="34" y="68.5" text-anchor="end" font-size="9" fill="var(--muted)">1201</text><line x1="40" y1="16.0" x2="626" y2="16.0" stroke="rgba(255,255,255,.08)"/><text x="34" y="19.0" text-anchor="end" font-size="9" fill="var(--muted)">1601</text><polyline points="40.0,214.0 42.3,214.0 44.6,214.0 46.8,214.0 49.1,214.0 51.4,214.0 53.7,214.0 56.0,214.0 58.2,214.0 60.5,214.0 62.8,214.0 65.1,214.0 67.4,214.0 69.6,214.0 71.9,214.0 74.2,214.0 76.5,214.0 78.8,214.0 81.0,214.0 83.3,214.0 85.6,214.0 87.9,214.0 90.2,214.0 92.4,214.0 94.7,214.0 97.0,214.0 99.3,214.0 101.6,214.0 103.8,214.0 106.1,214.0 108.4,214.0 110.7,213.9 113.0,213.9 115.2,213.9 117.5,213.9 119.8,213.9 122.1,213.9 124.4,213.8 126.6,213.8 128.9,213.8 131.2,213.8 133.5,213.8 135.8,213.8 138.0,213.8 140.3,213.8 142.6,213.8 144.9,213.8 147.2,213.8 149.4,213.8 151.7,213.8 154.0,213.8 156.3,213.8 158.6,213.8 160.8,213.8 163.1,213.8 165.4,213.8 167.7,213.8 170.0,213.8 172.2,213.8 174.5,213.8 176.8,213.8 179.1,213.8 181.4,213.8 183.6,213.8 185.9,213.8 188.2,213.8 190.5,213.8 192.8,213.8 195.1,213.8 197.3,213.8 199.6,213.8 201.9,213.8 204.2,213.8 206.5,213.8 208.7,213.8 211.0,213.8 213.3,213.7 215.6,213.7 217.9,213.7 220.1,213.7 222.4,213.7 224.7,213.6 227.0,213.5 229.3,213.5 231.5,213.5 233.8,213.4 236.1,213.4 238.4,213.4 240.7,213.2 242.9,213.1 245.2,212.9 247.5,212.6 249.8,212.6 252.1,212.6 254.3,212.5 256.6,212.5 258.9,212.3 261.2,212.1 263.5,212.0 265.7,211.7 268.0,211.6 270.3,211.5 272.6,211.3 274.9,210.9 277.1,210.6 279.4,210.2 281.7,210.1 284.0,210.0 286.3,209.9 288.5,209.6 290.8,209.4 293.1,209.3 295.4,209.1 297.7,209.0 299.9,208.9 302.2,208.8 304.5,208.7 306.8,208.5 309.1,208.1 311.3,207.6 313.6,207.1 315.9,206.7 318.2,206.3 320.5,206.0 322.7,205.7 325.0,205.4 327.3,205.1 329.6,204.8 331.9,204.4 334.1,203.9 336.4,203.3 338.7,202.8 341.0,202.3 343.3,201.8 345.5,201.2 347.8,200.7 350.1,200.3 352.4,199.8 354.7,199.3 356.9,198.5 359.2,197.8 361.5,197.0 363.8,196.3 366.1,195.7 368.3,195.0 370.6,194.2 372.9,193.5 375.2,192.9 377.5,192.4 379.7,191.8 382.0,191.2 384.3,190.5 386.6,189.6 388.9,188.6 391.1,187.4 393.4,186.3 395.7,185.2 398.0,184.1 400.3,182.9 402.5,182.0 404.8,180.9 407.1,179.8 409.4,178.8 411.7,177.8 413.9,176.9 416.2,175.8 418.5,174.7 420.8,173.6 423.1,172.3 425.3,170.8 427.6,169.3 429.9,167.8 432.2,166.3 434.5,164.7 436.7,163.2 439.0,161.7 441.3,160.3 443.6,158.9 445.9,157.4 448.1,155.8 450.4,154.2 452.7,152.7 455.0,151.3 457.3,150.0 459.5,148.7 461.8,147.4 464.1,146.0 466.4,144.7 468.7,143.5 470.9,142.2 473.2,140.8 475.5,139.4 477.8,138.0 480.1,136.6 482.4,135.2 484.6,133.8 486.9,132.5 489.2,131.1 491.5,129.8 493.8,128.4 496.0,126.9 498.3,125.6 500.6,124.1 502.9,122.5 505.2,121.0 507.4,119.6 509.7,118.2 512.0,116.9 514.3,115.5 516.6,114.0 518.8,112.7 521.1,111.3 523.4,109.8 525.7,108.4 528.0,107.4 530.2,106.3 532.5,105.2 534.8,104.2 537.1,103.0 539.4,101.6 541.6,100.3 543.9,98.8 546.2,97.3 548.5,95.9 550.8,94.4 553.0,92.7 555.3,91.1 557.6,89.5 559.9,88.0 562.2,86.7 564.4,85.6 566.7,84.4 569.0,83.2 571.3,82.0 573.6,81.0 575.8,79.8 578.1,78.5 580.4,77.1 582.7,75.8 585.0,74.5 587.2,73.4 589.5,72.2 591.8,71.0 594.1,70.0 596.4,69.0 598.6,68.0 600.9,66.9 603.2,65.8 605.5,64.7 607.8,63.6 610.0,62.6 612.3,61.7 614.6,60.8 616.9,59.8 619.2,58.7 621.4,57.7 623.7,56.7 626.0,55.8" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="5,4" stroke-linecap="round"/><text x="626.0" y="47.8" text-anchor="end" font-size="9" fill="#a78bfa">povprečje 2020–2025 (1279)</text><polyline points="40.0,214.0 42.3,214.0 44.6,214.0 46.8,214.0 49.1,214.0 51.4,214.0 53.7,214.0 56.0,214.0 58.2,214.0 60.5,214.0 62.8,214.0 65.1,214.0 67.4,214.0 69.6,214.0 71.9,214.0 74.2,214.0 76.5,214.0 78.8,214.0 81.0,214.0 83.3,214.0 85.6,214.0 87.9,214.0 90.2,214.0 92.4,214.0 94.7,214.0 97.0,214.0 99.3,214.0 101.6,214.0 103.8,214.0 106.1,214.0 108.4,214.0 110.7,214.0 113.0,214.0 115.2,214.0 117.5,214.0 119.8,214.0 122.1,214.0 124.4,214.0 126.6,214.0 128.9,214.0 131.2,214.0 133.5,214.0 135.8,214.0 138.0,214.0 140.3,214.0 142.6,214.0 144.9,214.0 147.2,214.0 149.4,214.0 151.7,214.0 154.0,214.0 156.3,214.0 158.6,214.0 160.8,214.0 163.1,214.0 165.4,214.0 167.7,214.0 170.0,214.0 172.2,214.0 174.5,214.0 176.8,214.0 179.1,214.0 181.4,214.0 183.6,214.0 185.9,214.0 188.2,214.0 190.5,214.0 192.8,214.0 195.1,214.0 197.3,214.0 199.6,214.0 201.9,214.0 204.2,214.0 206.5,214.0 208.7,214.0 211.0,214.0 213.3,214.0 215.6,214.0 217.9,214.0 220.1,214.0 222.4,214.0 224.7,214.0 227.0,214.0 229.3,214.0 231.5,214.0 233.8,214.0 236.1,214.0 238.4,214.0 240.7,214.0 242.9,214.0 245.2,214.0 247.5,214.0 249.8,214.0 252.1,214.0 254.3,213.6 256.6,213.1 258.9,212.6 261.2,212.6 263.5,212.6 265.7,212.6 268.0,212.6 270.3,212.4 272.6,212.2 274.9,212.1 277.1,211.8 279.4,211.4 281.7,210.9 284.0,210.5 286.3,210.1 288.5,210.1 290.8,210.1 293.1,210.1 295.4,210.1 297.7,209.8 299.9,209.4 302.2,208.7 304.5,208.4 306.8,208.1 309.1,208.1 311.3,208.1 313.6,208.1 315.9,207.7 318.2,207.1 320.5,206.5 322.7,205.7 325.0,205.1 327.3,204.5 329.6,204.0 331.9,203.3 334.1,202.6 336.4,202.0 338.7,202.0 341.0,202.0 343.3,202.0 345.5,202.0 347.8,201.9 350.1,201.8 352.4,201.6 354.7,201.3 356.9,200.9 359.2,200.1 361.5,199.4 363.8,198.4 366.1,197.3 368.3,195.8 370.6,194.2 372.9,192.7 375.2,191.6 377.5,190.5 379.7,189.4 382.0,188.3 384.3,187.3 386.6,186.3 388.9,185.7 391.1,184.9 393.4,184.3 395.7,183.4 398.0,182.2 400.3,180.8 402.5,179.5 404.8,178.6 407.1,178.1 409.4,177.4 411.7,176.4 413.9,175.2 416.2,174.3 418.5,173.2 420.8,171.7 423.1,170.1 425.3,168.4 427.6,166.5 429.9,164.7 432.2,162.8 434.5,161.1 436.7,159.3 439.0,157.5 441.3,155.8 443.6,153.9 445.9,152.0 448.1,149.9 450.4,147.8 452.7,146.0 455.0,144.6 457.3,143.4 459.5,142.2 461.8,140.9 464.1,139.4 466.4,137.7 468.7,136.2 470.9,135.0 473.2,133.3 475.5,131.7 477.8,130.2 480.1,128.6 482.4,126.9 484.6,125.2 486.9,123.3 489.2,121.6 491.5,119.8 493.8,118.2 496.0,117.0 498.3,115.9 500.6,114.8 502.9,113.7 505.2,112.7 507.4,111.7 509.7,110.1 512.0,108.5 514.3,106.7 516.6,105.0 518.8,103.0 521.1,101.0 523.4,99.0 525.7,97.0 528.0,95.0 530.2,92.9 532.5,90.8 534.8,88.7 537.1,87.0 539.4,85.4 541.6,83.7 543.9,81.9 546.2,79.9 548.5,78.3 550.8,77.0 553.0,75.7 555.3,74.2 557.6,72.5 559.9,71.0 562.2,69.8 564.4,68.1 566.7,66.1 569.0,64.7 571.3,63.5 573.6,62.3 575.8,61.0 578.1,59.8 580.4,58.2 582.7,56.6 585.0,54.8 587.2,53.7 589.5,52.3 591.8,50.8 594.1,49.4 596.4,48.0 598.6,46.5 600.9,44.9 603.2,43.5 605.5,42.0 607.8,40.7 610.0,39.1 612.3,37.8 614.6,37.2 616.9,36.8 619.2,36.0 621.4,35.1 623.7,34.0 626.0,34.0" fill="none" stroke="#059669" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="626.0" cy="34.0" r="3.2" fill="#059669"/><text x="626.0" y="25.0" text-anchor="end" font-size="10" font-weight="700" fill="var(--text)">2026: 1455</text><text x="40.0" y="232" text-anchor="start" font-size="9" fill="var(--muted)">1. 1.</text><text x="626.0" y="232" text-anchor="end" font-size="9" fill="var(--muted)">15. 9.</text></svg>
   </div>
   <h2>Vsota efektivnih temperatur (GDD) — po pridelkih</h2>
   <p class="archive-intro">Ocenjena razvojna faza za pet pridelkov, značilnih za Zgornjo Savinjsko dolino, glede na vsoto GDD letos.</p>
@@ -123,21 +136,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h2>Alarm pred pozebo — naslednjih 7 dni</h2>
   <p class="archive-intro">✅ V prihodnjih 7 dneh ni predvidene pozebe. Za tveganje po sadni vrsti in fenofazi (jabolka, hruške, breskve, slive,
   češnje) glej <a href="/opozorilo-pred-pozebo/">podroben model opozorila pred pozebo</a>.</p>
+  <div class="agro-chart-block" id="agro-chart-frost">
+  <svg viewBox="0 0 640 210" class="agro-svg" preserveAspectRatio="xMidYMid meet"><line x1="30" y1="172.6" x2="626" y2="172.6" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity=".7"/><text x="626" y="168.6" text-anchor="end" font-size="8.5" fill="#ef4444">zmrzal (0°)</text><line x1="30" y1="155.6" x2="626" y2="155.6" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3" opacity=".7"/><text x="626" y="151.6" text-anchor="end" font-size="8.5" fill="#f59e0b">pozor (3°)</text><polyline points="30.0,41.5 129.3,27.4 228.7,77.3 328.0,86.9 427.3,58.0 526.7,34.2 626.0,51.8" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><polyline points="30.0,106.8 129.3,113.6 228.7,107.4 328.0,97.7 427.3,102.3 526.7,118.2 626.0,97.2" fill="none" stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30.0" cy="106.8" r="3" fill="#60a5fa"/><text x="30.0" y="120.8" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">11,6°</text><circle cx="30.0" cy="41.5" r="2.4" fill="#fb923c"/><text x="30.0" y="34.5" text-anchor="middle" font-size="8.5" fill="#fb923c">23,1°</text><text x="30.0" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">danes</text><circle cx="129.3" cy="113.6" r="3" fill="#60a5fa"/><text x="129.3" y="127.6" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">10,4°</text><circle cx="129.3" cy="27.4" r="2.4" fill="#fb923c"/><text x="129.3" y="20.4" text-anchor="middle" font-size="8.5" fill="#fb923c">25,6°</text><text x="129.3" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">sre 16. 9.</text><circle cx="228.7" cy="107.4" r="3" fill="#60a5fa"/><text x="228.7" y="121.4" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">11,5°</text><circle cx="228.7" cy="77.3" r="2.4" fill="#fb923c"/><text x="228.7" y="70.3" text-anchor="middle" font-size="8.5" fill="#fb923c">16,8°</text><text x="228.7" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">čet 17. 9.</text><circle cx="328.0" cy="97.7" r="3" fill="#60a5fa"/><text x="328.0" y="111.7" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">13,2°</text><circle cx="328.0" cy="86.9" r="2.4" fill="#fb923c"/><text x="328.0" y="79.9" text-anchor="middle" font-size="8.5" fill="#fb923c">15,1°</text><text x="328.0" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">pet 18. 9.</text><circle cx="427.3" cy="102.3" r="3" fill="#60a5fa"/><text x="427.3" y="116.3" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">12,4°</text><circle cx="427.3" cy="58.0" r="2.4" fill="#fb923c"/><text x="427.3" y="51.0" text-anchor="middle" font-size="8.5" fill="#fb923c">20,2°</text><text x="427.3" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">sob 19. 9.</text><circle cx="526.7" cy="118.2" r="3" fill="#60a5fa"/><text x="526.7" y="132.2" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">9,6°</text><circle cx="526.7" cy="34.2" r="2.4" fill="#fb923c"/><text x="526.7" y="27.2" text-anchor="middle" font-size="8.5" fill="#fb923c">24,4°</text><text x="526.7" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">ned 20. 9.</text><circle cx="626.0" cy="97.2" r="3" fill="#60a5fa"/><text x="626.0" y="111.2" text-anchor="middle" font-size="9" font-weight="600" fill="#60a5fa">13,3°</text><circle cx="626.0" cy="51.8" r="2.4" fill="#fb923c"/><text x="626.0" y="44.8" text-anchor="middle" font-size="8.5" fill="#fb923c">21,3°</text><text x="626.0" y="202" text-anchor="middle" font-size="9" fill="var(--muted)">pon 21. 9.</text></svg><div class="agro-legend"><span><i style="background:#60a5fa"></i>Tmin</span><span><i style="background:#fb923c"></i>Tmax</span></div>
+  </div>
   <table class="stats">
-      <tr><th>danes</th><td>23,2 / 11,7 °C — Varno</td></tr>
-      <tr><th>sre 16. 9.</th><td>25,7 / 9,2 °C — Varno</td></tr>
-      <tr><th>čet 17. 9.</th><td>17,7 / 11,4 °C — Varno</td></tr>
-      <tr><th>pet 18. 9.</th><td>15,1 / 13,2 °C — Varno</td></tr>
-      <tr><th>sob 19. 9.</th><td>20,2 / 12,4 °C — Varno</td></tr>
-      <tr><th>ned 20. 9.</th><td>24,4 / 9,6 °C — Varno</td></tr>
-      <tr><th>pon 21. 9.</th><td>21,3 / 13,3 °C — Varno</td></tr>
+    <tr><th>Dan</th><th>Tmax</th><th>Tmin</th><th>Stanje</th></tr>
+      <tr><th>danes</th><td>23,1 °C</td><td>11,6 °C</td><td>Varno</td></tr>
+      <tr><th>sre 16. 9.</th><td>25,6 °C</td><td>10,4 °C</td><td>Varno</td></tr>
+      <tr><th>čet 17. 9.</th><td>16,8 °C</td><td>11,5 °C</td><td>Varno</td></tr>
+      <tr><th>pet 18. 9.</th><td>15,1 °C</td><td>13,2 °C</td><td>Varno</td></tr>
+      <tr><th>sob 19. 9.</th><td>20,2 °C</td><td>12,4 °C</td><td>Varno</td></tr>
+      <tr><th>ned 20. 9.</th><td>24,4 °C</td><td>9,6 °C</td><td>Varno</td></tr>
+      <tr><th>pon 21. 9.</th><td>21,3 °C</td><td>13,3 °C</td><td>Varno</td></tr>
   </table>
   <h2>Meteorološko okno za nanos — naslednjih 7 dni</h2>
   <p class="archive-intro">Primerne ure: veter ≤ 4 km/h, brez padavin, temperatura ≥ 5 °C.</p>
   <table class="stats">
-      <tr><th>danes</th><td>7 primernih ur (6h, 7h, 8h, 9h, 10h, 11h)</td></tr>
-      <tr><th>sre 16. 9.</th><td>12 primernih ur (6h, 7h, 8h, 9h, 10h, 11h)</td></tr>
-      <tr><th>čet 17. 9.</th><td>9 primernih ur (6h, 7h, 8h, 10h, 13h, 15h)</td></tr>
+      <tr><th>danes</th><td>6 primernih ur (6h, 7h, 8h, 9h, 10h, 11h)</td></tr>
+      <tr><th>sre 16. 9.</th><td>13 primernih ur (6h, 7h, 8h, 9h, 10h, 11h)</td></tr>
+      <tr><th>čet 17. 9.</th><td>8 primernih ur (6h, 7h, 8h, 9h, 15h, 17h)</td></tr>
       <tr><th>pet 18. 9.</th><td>5 primernih ur (15h, 16h, 17h, 18h, 19h)</td></tr>
       <tr><th>sob 19. 9.</th><td>8 primernih ur (6h, 7h, 8h, 9h, 10h, 11h)</td></tr>
       <tr><th>ned 20. 9.</th><td>9 primernih ur (8h, 9h, 10h, 11h, 12h, 13h)</td></tr>
@@ -146,12 +163,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <p class="muted-note">Ocena temelji samo na vremenu (veter, padavine, temperatura) — ne upošteva etikete konkretnega sredstva, zanašanja, bližine voda ali opraševalcev. Pred uporabo FFS preveri etiketo sredstva, FITO-INFO in aktualna priporočila IHPS.</p>
   <h2>Okno za sušenje sena — naslednjih 5 dni</h2>
   <table class="stats">
-      <tr><th>tor 15. 9. 11:00–18:00</th><td>8h sušenja · min. vlaga 45 % · maks. T 23 °C — odlično</td></tr>
-      <tr><th>sre 16. 9. 12:00–18:00</th><td>7h sušenja · min. vlaga 46 % · maks. T 26 °C — dobro</td></tr>
+      <tr><th>tor 15. 9. 11:00–18:00</th><td>8h sušenja · min. vlaga 46 % · maks. T 23 °C — odlično</td></tr>
+      <tr><th>sre 16. 9. 12:00–18:00</th><td>7h sušenja · min. vlaga 45 % · maks. T 26 °C — dobro</td></tr>
       <tr><th>sob 19. 9. 14:00–17:00</th><td>4h sušenja · min. vlaga 59 % · maks. T 20 °C — zadostno</td></tr>
   </table>
   <h2>Vodna bilanca — zadnjih 14 dni + 7-dnevna napoved</h2>
-  <p class="archive-intro">Skupaj padavin v zadnjih 14 dneh: <strong>142 mm</strong>.</p>
+  <p class="archive-intro">Skupaj padavin v zadnjih 14 dneh: <strong>141 mm</strong>.</p>
   <table class="stats">
       <tr><th>01.09.</th><td>1,2 mm padavin</td></tr>
       <tr><th>02.09.</th><td>9,7 mm padavin</td></tr>
@@ -168,7 +185,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><th>13.09.</th><td>0,0 mm padavin</td></tr>
       <tr><th>14.09.</th><td>0,2 mm padavin</td></tr>
       <tr><th>16.09. (napoved)</th><td>0,0 mm padavin · ET₀ 3,2 mm</td></tr>
-      <tr><th>17.09. (napoved)</th><td>0,8 mm padavin · ET₀ 0,7 mm</td></tr>
+      <tr><th>17.09. (napoved)</th><td>4,0 mm padavin · ET₀ 0,6 mm</td></tr>
       <tr><th>18.09. (napoved)</th><td>9,0 mm padavin · ET₀ 0,7 mm</td></tr>
       <tr><th>19.09. (napoved)</th><td>0,0 mm padavin · ET₀ 2,6 mm</td></tr>
       <tr><th>20.09. (napoved)</th><td>0,0 mm padavin · ET₀ 2,9 mm</td></tr>
