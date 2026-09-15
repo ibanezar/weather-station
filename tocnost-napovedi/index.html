@@ -37,9 +37,19 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Dataset","@id":"https://meteorec.si/tocnost-napovedi/#dataset","name":"Verifikacija vremenske napovedi — Rečica ob Savinji","description":"Dnevna primerjava napovedi ARSO, Open-Meteo in ECMWF AIFS z dejansko meritvijo postaje IREICA1.","url":"https://meteorec.si/tocnost-napovedi/","inLanguage":"sl","isAccessibleForFree":true,"license":"https://creativecommons.org/licenses/by/4.0/","creator":{"@id":"https://meteorec.si/#person"},"includedInDataCatalog":{"@id":"https://meteorec.si/#localbusiness","name":"Meteorec — Meteorološka postaja Rečica ob Savinji","url":"https://meteorec.si/"},"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326","https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"variableMeasured":[{"@type":"PropertyValue","name":"Razrešeni dnevi","value":62,"unitText":"dni"}]}
 </script>
+<style>
+.tnc-chart-block{margin:1.2rem 0 1.8rem}
+.tnc-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.tnc-svg{width:100%;height:auto;display:block}
+.tnc-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.4rem;font-size:.8rem;color:var(--muted)}
+.tnc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+.tnc-msg{font-size:.85rem;color:var(--muted)}
+.best-val{color:var(--green);font-weight:700}
+</style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
 <link rel="stylesheet" href="/blog/blog.css?v=602ed072">
-<link rel="stylesheet" href="/vreme/vreme.css?v=b23e42bf">
+<link rel="stylesheet" href="/vreme/vreme.css?v=2caede4a">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -83,46 +93,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="stat-card c-wind"><div class="sc-label">ECMWF AIFS</div><div class="sc-val">±2,8</div><div class="sc-sub">°C povp. napaka maks. T · 62 napovedi</div></div>
     <div class="stat-card c-up"><div class="sc-label">MTR v1</div><div class="sc-val">±1,0</div><div class="sc-sub">°C povp. napaka maks. T · 42 napovedi</div></div>
   </div>
+  <h2 id="gibanje">Kako se napaka giblje skozi čas?</h2>
+  <p class="archive-intro">Napaka najvišje temperature za vsak razrešen dan v zadnjih 30 dneh — konice pokažejo dneve, ko je vir zgrešil bolj kot običajno.</p>
+  <div class="tnc-chart-block" id="tnc-chart-daily">Graf se nalaga …</div>
   <h2>MTR v1: veščina glede na vodilni čas</h2>
   <p class="archive-intro">To ni ista številka kot zgoraj — kartice in mesečni pregled merijo samo napoved za jutri (D+1), sproti, na dneh, ki so se dejansko zgodili po objavi. Spodnja tabela je hindcast ob zadnjem učenju modela (13. septembra 2026): izpuščanje celega leta iz učne množice in ocena na izpuščenem, za vse tri vodilne čase (D+1 do D+3) in ločeno po letih.</p>
-  <table class="stats">
+  <div class="table-scroll"><table class="stats">
     <tr><th>Vodilni čas</th><th colspan="3">Maks. temp. (Tmax)</th><th colspan="3">Min. temp. (Tmin)</th><th>Vzorcev</th></tr>
     <tr><th></th><th>Open-Meteo</th><th>MTR v1</th><th>Izboljšava</th><th>Open-Meteo</th><th>MTR v1</th><th>Izboljšava</th><th></th></tr>
     <tr><th>D+1</th><td>±1,4 °C</td><td>±1,1 °C</td><td>19,9 %</td><td>±1,6 °C</td><td>±1,2 °C</td><td>22,5 %</td><td>343</td></tr>
     <tr><th>D+2</th><td>±1,7 °C</td><td>±1,3 °C</td><td>21,9 %</td><td>±2,6 °C</td><td>±1,3 °C</td><td>50,1 %</td><td>343</td></tr>
     <tr><th>D+3</th><td>±1,8 °C</td><td>±1,5 °C</td><td>18,3 %</td><td>±2,6 °C</td><td>±1,4 °C</td><td>46,5 %</td><td>343</td></tr>
-  </table>
+  </table></div>
   <h2>Mesečni pregled</h2>
-  <table class="stats">
+  <div class="tnc-chart-block" id="tnc-chart-monthly">Graf se nalaga …</div>
+  <div class="table-scroll"><table class="stats">
     <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th><th>ECMWF AIFS</th><th>MTR v1</th><th>Dni</th></tr>
-    <tr><th>September 2026</th><td>±4,2 °C</td><td>±1,7 °C</td><td>±2,5 °C</td><td>±1,0 °C</td><td>14</td></tr>
-    <tr><th>Avgust 2026</th><td>±4,8 °C</td><td>±1,4 °C</td><td>±2,8 °C</td><td>±1,0 °C</td><td>31</td></tr>
-    <tr><th>Julij 2026</th><td>—</td><td>±1,5 °C</td><td>±2,9 °C</td><td>—</td><td>17</td></tr>
-  </table>
+    <tr><th>September 2026</th><td>±4,2 °C</td><td>±1,7 °C</td><td>±2,5 °C</td><td><span class="best-val">±1,0 °C</span></td><td>14</td></tr>
+    <tr><th>Avgust 2026</th><td>±4,8 °C</td><td>±1,4 °C</td><td>±2,8 °C</td><td><span class="best-val">±1,0 °C</span></td><td>31</td></tr>
+    <tr><th>Julij 2026</th><td>—</td><td><span class="best-val">±1,5 °C</span></td><td>±2,9 °C</td><td>—</td><td>17</td></tr>
+  </table></div>
   <h2>Zadnji dnevi</h2>
-  <table class="stats">
+  <div class="table-scroll"><table class="stats">
     <tr><th>Datum</th><th>Dejanska maks. T</th><th>ARSO je napovedal</th><th>Open-Meteo je napovedal</th><th>AIFS je napovedal</th><th>MTR v1 je napovedal</th></tr>
-    <tr><th><a href="/vreme/2026/09/14/">14. septembra 2026</a></th><td>24,6 °C</td><td>21,0 °C (±3,6)</td><td>20,9 °C (±3,7)</td><td>21,9 °C (±2,7)</td><td>22,0 °C (±2,6)</td></tr>
-    <tr><th><a href="/vreme/2026/09/13/">13. septembra 2026</a></th><td>26,3 °C</td><td>18,0 °C (±8,3)</td><td>22,8 °C (±3,5)</td><td>22,8 °C (±3,5)</td><td>24,4 °C (±1,9)</td></tr>
-    <tr><th><a href="/vreme/2026/09/12/">12. septembra 2026</a></th><td>23,8 °C</td><td>17,0 °C (±6,8)</td><td>21,0 °C (±2,8)</td><td>20,4 °C (±3,4)</td><td>22,8 °C (±1,0)</td></tr>
-    <tr><th><a href="/vreme/2026/09/11/">11. septembra 2026</a></th><td>16,5 °C</td><td>15,0 °C (±1,5)</td><td>15,3 °C (±1,2)</td><td>16,3 °C (±0,2)</td><td>16,8 °C (±0,3)</td></tr>
-    <tr><th><a href="/vreme/2026/09/10/">10. septembra 2026</a></th><td>17,5 °C</td><td>15,0 °C (±2,5)</td><td>18,8 °C (±1,3)</td><td>17,8 °C (±0,3)</td><td>18,9 °C (±1,4)</td></tr>
-    <tr><th><a href="/vreme/2026/09/09/">9. septembra 2026</a></th><td>27,7 °C</td><td>27,0 °C (±0,7)</td><td>28,4 °C (±0,7)</td><td>24,9 °C (±2,8)</td><td>28,3 °C (±0,6)</td></tr>
-    <tr><th><a href="/vreme/2026/09/08/">8. septembra 2026</a></th><td>32,9 °C</td><td>28,0 °C (±4,9)</td><td>31,7 °C (±1,2)</td><td>29,2 °C (±3,7)</td><td>32,9 °C (±0,0)</td></tr>
-    <tr><th><a href="/vreme/2026/09/07/">7. septembra 2026</a></th><td>29,0 °C</td><td>24,0 °C (±5,0)</td><td>28,5 °C (±0,5)</td><td>26,8 °C (±2,2)</td><td>29,7 °C (±0,7)</td></tr>
-    <tr><th><a href="/vreme/2026/09/06/">6. septembra 2026</a></th><td>29,4 °C</td><td>23,0 °C (±6,4)</td><td>27,4 °C (±2,0)</td><td>24,7 °C (±4,7)</td><td>29,0 °C (±0,4)</td></tr>
-    <tr><th><a href="/vreme/2026/09/05/">5. septembra 2026</a></th><td>28,4 °C</td><td>28,0 °C (±0,4)</td><td>28,5 °C (±0,1)</td><td>27,9 °C (±0,5)</td><td>28,8 °C (±0,4)</td></tr>
-    <tr><th><a href="/vreme/2026/09/04/">4. septembra 2026</a></th><td>30,7 °C</td><td>27,0 °C (±3,7)</td><td>30,8 °C (±0,1)</td><td>29,1 °C (±1,6)</td><td>31,6 °C (±0,9)</td></tr>
-    <tr><th><a href="/vreme/2026/09/03/">3. septembra 2026</a></th><td>31,0 °C</td><td>25,0 °C (±6,0)</td><td>28,1 °C (±2,9)</td><td>27,3 °C (±3,7)</td><td>29,3 °C (±1,7)</td></tr>
-    <tr><th><a href="/vreme/2026/09/02/">2. septembra 2026</a></th><td>27,4 °C</td><td>25,0 °C (±2,4)</td><td>27,0 °C (±0,4)</td><td>25,9 °C (±1,5)</td><td>28,0 °C (±0,6)</td></tr>
-    <tr><th><a href="/vreme/2026/09/01/">1. septembra 2026</a></th><td>28,1 °C</td><td>22,0 °C (±6,1)</td><td>25,3 °C (±2,8)</td><td>23,7 °C (±4,4)</td><td>26,2 °C (±1,9)</td></tr>
-    <tr><th><a href="/vreme/2026/08/31/">31. avgusta 2026</a></th><td>32,5 °C</td><td>26,0 °C (±6,5)</td><td>31,3 °C (±1,2)</td><td>29,4 °C (±3,1)</td><td>32,3 °C (±0,2)</td></tr>
-    <tr><th><a href="/vreme/2026/08/30/">30. avgusta 2026</a></th><td>29,6 °C</td><td>22,0 °C (±7,6)</td><td>28,5 °C (±1,1)</td><td>27,4 °C (±2,2)</td><td>29,9 °C (±0,3)</td></tr>
-    <tr><th><a href="/vreme/2026/08/29/">29. avgusta 2026</a></th><td>25,7 °C</td><td>20,0 °C (±5,7)</td><td>24,0 °C (±1,7)</td><td>23,3 °C (±2,4)</td><td>24,7 °C (±1,0)</td></tr>
-    <tr><th><a href="/vreme/2026/08/28/">28. avgusta 2026</a></th><td>32,2 °C</td><td>32,0 °C (±0,2)</td><td>32,9 °C (±0,7)</td><td>30,7 °C (±1,5)</td><td>32,1 °C (±0,1)</td></tr>
-    <tr><th><a href="/vreme/2026/08/27/">27. avgusta 2026</a></th><td>30,9 °C</td><td>28,0 °C (±2,9)</td><td>32,0 °C (±1,1)</td><td>28,9 °C (±2,0)</td><td>32,3 °C (±1,4)</td></tr>
-    <tr><th><a href="/vreme/2026/08/26/">26. avgusta 2026</a></th><td>30,6 °C</td><td>25,0 °C (±5,6)</td><td>27,8 °C (±2,8)</td><td>26,2 °C (±4,4)</td><td>28,9 °C (±1,7)</td></tr>
-  </table>
+    <tr><th><a href="/vreme/2026/09/14/">14. septembra 2026</a></th><td>24,6 °C</td><td>21,0 °C (±3,6)</td><td>20,9 °C (±3,7)</td><td>21,9 °C (±2,7)</td><td><span class="best-val">22,0 °C (±2,6)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/13/">13. septembra 2026</a></th><td>26,3 °C</td><td>18,0 °C (±8,3)</td><td>22,8 °C (±3,5)</td><td>22,8 °C (±3,5)</td><td><span class="best-val">24,4 °C (±1,9)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/12/">12. septembra 2026</a></th><td>23,8 °C</td><td>17,0 °C (±6,8)</td><td>21,0 °C (±2,8)</td><td>20,4 °C (±3,4)</td><td><span class="best-val">22,8 °C (±1,0)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/11/">11. septembra 2026</a></th><td>16,5 °C</td><td>15,0 °C (±1,5)</td><td>15,3 °C (±1,2)</td><td><span class="best-val">16,3 °C (±0,2)</span></td><td>16,8 °C (±0,3)</td></tr>
+    <tr><th><a href="/vreme/2026/09/10/">10. septembra 2026</a></th><td>17,5 °C</td><td>15,0 °C (±2,5)</td><td>18,8 °C (±1,3)</td><td><span class="best-val">17,8 °C (±0,3)</span></td><td>18,9 °C (±1,4)</td></tr>
+    <tr><th><a href="/vreme/2026/09/09/">9. septembra 2026</a></th><td>27,7 °C</td><td>27,0 °C (±0,7)</td><td>28,4 °C (±0,7)</td><td>24,9 °C (±2,8)</td><td><span class="best-val">28,3 °C (±0,6)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/08/">8. septembra 2026</a></th><td>32,9 °C</td><td>28,0 °C (±4,9)</td><td>31,7 °C (±1,2)</td><td>29,2 °C (±3,7)</td><td><span class="best-val">32,9 °C (±0,0)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/07/">7. septembra 2026</a></th><td>29,0 °C</td><td>24,0 °C (±5,0)</td><td><span class="best-val">28,5 °C (±0,5)</span></td><td>26,8 °C (±2,2)</td><td>29,7 °C (±0,7)</td></tr>
+    <tr><th><a href="/vreme/2026/09/06/">6. septembra 2026</a></th><td>29,4 °C</td><td>23,0 °C (±6,4)</td><td>27,4 °C (±2,0)</td><td>24,7 °C (±4,7)</td><td><span class="best-val">29,0 °C (±0,4)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/05/">5. septembra 2026</a></th><td>28,4 °C</td><td>28,0 °C (±0,4)</td><td><span class="best-val">28,5 °C (±0,1)</span></td><td>27,9 °C (±0,5)</td><td>28,8 °C (±0,4)</td></tr>
+    <tr><th><a href="/vreme/2026/09/04/">4. septembra 2026</a></th><td>30,7 °C</td><td>27,0 °C (±3,7)</td><td><span class="best-val">30,8 °C (±0,1)</span></td><td>29,1 °C (±1,6)</td><td>31,6 °C (±0,9)</td></tr>
+    <tr><th><a href="/vreme/2026/09/03/">3. septembra 2026</a></th><td>31,0 °C</td><td>25,0 °C (±6,0)</td><td>28,1 °C (±2,9)</td><td>27,3 °C (±3,7)</td><td><span class="best-val">29,3 °C (±1,7)</span></td></tr>
+    <tr><th><a href="/vreme/2026/09/02/">2. septembra 2026</a></th><td>27,4 °C</td><td>25,0 °C (±2,4)</td><td><span class="best-val">27,0 °C (±0,4)</span></td><td>25,9 °C (±1,5)</td><td>28,0 °C (±0,6)</td></tr>
+    <tr><th><a href="/vreme/2026/09/01/">1. septembra 2026</a></th><td>28,1 °C</td><td>22,0 °C (±6,1)</td><td>25,3 °C (±2,8)</td><td>23,7 °C (±4,4)</td><td><span class="best-val">26,2 °C (±1,9)</span></td></tr>
+    <tr><th><a href="/vreme/2026/08/31/">31. avgusta 2026</a></th><td>32,5 °C</td><td>26,0 °C (±6,5)</td><td>31,3 °C (±1,2)</td><td>29,4 °C (±3,1)</td><td><span class="best-val">32,3 °C (±0,2)</span></td></tr>
+    <tr><th><a href="/vreme/2026/08/30/">30. avgusta 2026</a></th><td>29,6 °C</td><td>22,0 °C (±7,6)</td><td>28,5 °C (±1,1)</td><td>27,4 °C (±2,2)</td><td><span class="best-val">29,9 °C (±0,3)</span></td></tr>
+    <tr><th><a href="/vreme/2026/08/29/">29. avgusta 2026</a></th><td>25,7 °C</td><td>20,0 °C (±5,7)</td><td>24,0 °C (±1,7)</td><td>23,3 °C (±2,4)</td><td><span class="best-val">24,7 °C (±1,0)</span></td></tr>
+    <tr><th><a href="/vreme/2026/08/28/">28. avgusta 2026</a></th><td>32,2 °C</td><td>32,0 °C (±0,2)</td><td>32,9 °C (±0,7)</td><td>30,7 °C (±1,5)</td><td><span class="best-val">32,1 °C (±0,1)</span></td></tr>
+    <tr><th><a href="/vreme/2026/08/27/">27. avgusta 2026</a></th><td>30,9 °C</td><td>28,0 °C (±2,9)</td><td><span class="best-val">32,0 °C (±1,1)</span></td><td>28,9 °C (±2,0)</td><td>32,3 °C (±1,4)</td></tr>
+    <tr><th><a href="/vreme/2026/08/26/">26. avgusta 2026</a></th><td>30,6 °C</td><td>25,0 °C (±5,6)</td><td>27,8 °C (±2,8)</td><td>26,2 °C (±4,4)</td><td><span class="best-val">28,9 °C (±1,7)</span></td></tr>
+  </table></div>
   <h2>Misliš, da zmoreš bolje?</h2>
   <p class="archive-intro">V igri <a href="/napovej/"><strong>Prehiti model</strong></a> vsak dan napoveš
   jutrišnjo najvišjo in najnižjo temperaturo za Rečico, naslednje jutro pa te oceni ista meritev in isto
@@ -142,6 +156,153 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   IREICA1. Napaka je absolutna razlika v °C. Nobena pretekla napoved se ne popravlja ali briše; kadar
   arhiv postaje naknadno dopolni meritev za pretekli dan, napako preračunamo na dopolnjeno meritev. ARSO za Rečico ob Savinji ne objavlja krajevne napovedi, zato jemljemo najbližji kraj z njihovega seznama — Ljubno ob Savinji. Open-Meteo je vezan neposredno na koordinate postaje. ECMWF AIFS jemljemo prek Open-Meteo (model ecmwf_aifs025_single); dnevi, napolnjeni iz arhiva preteklih napovedi, so sešteti iz urnih vrednosti, sproti zabeleženi pa iz dnevne agregacije Open-Meteo — razlika je nekaj desetink stopinje.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+<script>
+(function(){
+  var dailyEl = document.getElementById("tnc-chart-daily");
+  var monthEl = document.getElementById("tnc-chart-monthly");
+  if (!dailyEl && !monthEl) return;
+  var SRC = [
+    {key:"arso", label:"ARSO", color:"#f59e0b"},
+    {key:"open_meteo", label:"Open-Meteo", color:"#60a5fa"},
+    {key:"aifs", label:"ECMWF AIFS", color:"#a78bfa"},
+    {key:"meteorec", label:"MTR", color:"#059669"}
+  ];
+  var MES = ["","jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"];
+
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function activeSources(rows){
+    return SRC.filter(function(s){ return rows.some(function(r){ return r[s.key]!=null; }); });
+  }
+
+  function legendHtml(sources){
+    return '<div class="tnc-legend">' + sources.map(function(s){
+      return '<span><i style="background:'+s.color+'"></i>'+esc(s.label)+'</span>';
+    }).join('') + '</div>';
+  }
+
+  function dailyChart(rows){
+    var recent = rows.slice(-30);
+    var active = activeSources(recent);
+    if (!active.length) return "";
+    var W=680,H=260,padL=34,padR=14,padT=16,padB=28;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxErr=1;
+    recent.forEach(function(r){ active.forEach(function(s){ if(r[s.key]!=null) maxErr=Math.max(maxErr,r[s.key]); }); });
+    maxErr = Math.ceil(maxErr*1.15*10)/10;
+    function x(i){ return padL + plotW*(recent.length<=1?0:i/(recent.length-1)); }
+    function y(v){ return padT + plotH*(1-v/maxErr); }
+
+    var svg='<svg viewBox="0 0 '+W+' '+H+'" class="tnc-svg" preserveAspectRatio="xMidYMid meet">';
+    [0,.25,.5,.75,1].forEach(function(f){
+      var v=maxErr*f;
+      svg += '<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)"/>';
+      svg += '<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+    });
+    var nTicks = Math.min(6, recent.length);
+    for (var t=0;t<nTicks;t++){
+      var idx = Math.round(t*(recent.length-1)/Math.max(1,nTicks-1));
+      var lbl = recent[idx].date.slice(5).replace('-','.');
+      svg += '<text x="'+x(idx)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+lbl+'</text>';
+    }
+    active.forEach(function(s){
+      var pts=[];
+      recent.forEach(function(r,i){ if(r[s.key]!=null) pts.push(x(i)+","+y(r[s.key])); });
+      if(pts.length>=2){
+        svg += '<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>';
+      }
+      recent.forEach(function(r,i){ if(r[s.key]!=null) svg += '<circle cx="'+x(i)+'" cy="'+y(r[s.key])+'" r="2.2" fill="'+s.color+'"/>'; });
+    });
+    svg += '</svg>';
+    return '<div class="tnc-chart-title">Napaka najvišje temperature (°C), zadnjih '+recent.length+' dni</div>'
+      + svg + legendHtml(active);
+  }
+
+  function monthKey(d){ return d.slice(0,7); }
+  function monthLabel(ym){ return MES[parseInt(ym.slice(5,7),10)]+" "+ym.slice(0,4); }
+  function mean(vals){
+    if(!vals.length) return null;
+    var s=0; vals.forEach(function(v){s+=v;});
+    return s/vals.length;
+  }
+
+  function monthlyChart(rows){
+    var byMonth = {};
+    rows.forEach(function(r){ (byMonth[monthKey(r.date)] = byMonth[monthKey(r.date)] || []).push(r); });
+    var months = Object.keys(byMonth).sort();
+    var active = activeSources(rows);
+    if (!months.length || !active.length) return "";
+    var maeByMonth = {};
+    months.forEach(function(ym){
+      maeByMonth[ym] = {};
+      active.forEach(function(s){
+        maeByMonth[ym][s.key] = mean(byMonth[ym].map(function(r){return r[s.key];}).filter(function(v){return v!=null;}));
+      });
+    });
+    var W=680,H=260,padL=34,padR=14,padT=16,padB=32;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxMae=1;
+    months.forEach(function(ym){ active.forEach(function(s){ var m=maeByMonth[ym][s.key]; if(m!=null) maxMae=Math.max(maxMae,m); }); });
+    maxMae = Math.ceil(maxMae*1.15*10)/10;
+    function y(v){ return padT+plotH*(1-v/maxMae); }
+    var groupW = plotW/months.length;
+    var barW = groupW/(active.length+0.8);
+
+    var svg='<svg viewBox="0 0 '+W+' '+H+'" class="tnc-svg" preserveAspectRatio="xMidYMid meet">';
+    [0,.25,.5,.75,1].forEach(function(f){
+      var v=maxMae*f;
+      svg += '<line x1="'+padL+'" y1="'+y(v)+'" x2="'+(W-padR)+'" y2="'+y(v)+'" stroke="rgba(255,255,255,.08)"/>';
+      svg += '<text x="'+(padL-6)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+    });
+    months.forEach(function(ym,mi){
+      var gx = padL + groupW*mi;
+      active.forEach(function(s,si){
+        var m = maeByMonth[ym][s.key];
+        if (m==null) return;
+        var bx = gx + barW*(si+0.4);
+        var by = y(m);
+        svg += '<rect x="'+bx+'" y="'+by+'" width="'+(barW*0.82)+'" height="'+Math.max(y(0)-by,1)+'" fill="'+s.color+'" rx="2"/>';
+      });
+      svg += '<text x="'+(gx+groupW/2)+'" y="'+(H-12)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+esc(monthLabel(ym))+'</text>';
+    });
+    svg += '</svg>';
+    return '<div class="tnc-chart-title">Povprečna napaka najvišje temperature po mesecih (MAE, °C)</div>'
+      + svg + legendHtml(active);
+  }
+
+  fetch("/forecast_verification.json?_="+Math.floor(Date.now()/36e5))
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(data){
+      var dates = Object.keys(data).sort();
+      var mtrLabel = "MTR";
+      for (var i=dates.length-1;i>=0;i--){
+        var mm = data[dates[i]] && data[dates[i]].meteorec;
+        if (mm && mm.model_version){ mtrLabel = "MTR v"+String(mm.model_version).split(".")[0]; break; }
+      }
+      SRC.forEach(function(s){ if (s.key==="meteorec") s.label = mtrLabel; });
+
+      var rows = dates.map(function(d){
+        var r = data[d], out = {date:d};
+        SRC.forEach(function(s){
+          var src = r[s.key];
+          out[s.key] = (src && src.err_tmax!=null) ? src.err_tmax : null;
+        });
+        return out;
+      });
+      if (rows.length < 2){
+        if (dailyEl) dailyEl.innerHTML = "";
+        if (monthEl) monthEl.innerHTML = "";
+        return;
+      }
+      if (dailyEl) dailyEl.innerHTML = dailyChart(rows);
+      if (monthEl) monthEl.innerHTML = monthlyChart(rows);
+    })
+    .catch(function(){
+      if (dailyEl) dailyEl.innerHTML = '<div class="tnc-msg">Graf trenutno ni na voljo.</div>';
+      if (monthEl) monthEl.innerHTML = '<div class="tnc-msg">Graf trenutno ni na voljo.</div>';
+    });
+})();
+</script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
