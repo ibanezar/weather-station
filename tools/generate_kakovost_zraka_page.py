@@ -86,6 +86,94 @@ def now_index(times):
     return len(times) // 2  # fallback: middle of the fetched window
 
 
+# Statičen SVG, izrisan tu v Pythonu ob generiranju strani — ista utemeljitev
+# kot v generate_vodostaj_page.py/generate_agrometeo_page.py: podatki so že v
+# Pythonu, stran se regenerira dnevno, client fetch bi zahteval nov javni
+# JSON samo za en graf.
+AQI_BANDS = [
+    (20, "#059669", "odlično"), (40, "#65a30d", "dobro"), (60, "#eab308", "zmerno"),
+    (80, "#f97316", "slabo"), (100, "#ef4444", "zelo slabo"), (float("inf"), "#991b1b", "nevzdržno"),
+]
+
+
+def _svg_esc(s):
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def aqi_band_color(aqi):
+    if aqi is None:
+        return "var(--muted)"
+    for limit, color, _ in AQI_BANDS:
+        if aqi <= limit:
+            return color
+    return AQI_BANDS[-1][1]
+
+
+def aqi_chart_svg(day_lbls, day_vals):
+    """Stolpčni graf najvišjega dnevnega EU AQI za naslednjih 5 dni, barvan po
+    isti lestvici kot aqi_level() — nadomesti trenutno edino številko z
+    obetom za teden."""
+    rows = [(lbl, v) for lbl, v in zip(day_lbls, day_vals) if v is not None]
+    if not rows:
+        return ""
+    n = len(rows)
+    W, H = 640, 200
+    pad_l, pad_r, pad_t, pad_b = 28, 14, 16, 26
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    max_v = max(v for _, v in rows + [("", 40)]) * 1.15
+    bar_w = plot_w / n * 0.55
+
+    def y(v):
+        return pad_t + plot_h * (1 - v / max_v)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="aq-svg" preserveAspectRatio="xMidYMid meet">']
+    for f in (0, .25, .5, .75, 1):
+        v = max_v * f
+        parts.append(f'<line x1="{pad_l}" y1="{y(v):.1f}" x2="{W - pad_r}" y2="{y(v):.1f}" stroke="rgba(255,255,255,.08)"/>')
+    for i, (lbl, v) in enumerate(rows):
+        gx = pad_l + (plot_w / n) * i + (plot_w / n - bar_w) / 2
+        col = aqi_band_color(v)
+        parts.append(f'<rect x="{gx:.1f}" y="{y(v):.1f}" width="{bar_w:.1f}" height="{(y(0) - y(v)):.1f}" fill="{col}" rx="3"/>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{y(v) - 6:.1f}" text-anchor="middle" font-size="10" font-weight="700" fill="{col}">{round(v)}</text>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{H - 8}" text-anchor="middle" font-size="9" fill="var(--muted)">{_svg_esc(lbl)}</text>')
+    parts.append("</svg>")
+    legend = ('<div class="aq-legend">' + "".join(
+        f'<span><i style="background:{c}"></i>{lbl}</span>' for _, c, lbl in AQI_BANDS
+    ) + '</div>')
+    return "".join(parts) + legend
+
+
+POLLEN_LEVEL_COLORS = {"—": "rgba(255,255,255,.06)", "nizka": "#059669", "zmerna": "#eab308",
+                        "visoka": "#f97316", "zelo visoka": "#ef4444"}
+
+
+def pollen_heatmap_html(day_lbls, rows):
+    """Mreža vrsta × dan namesto pikčasto ločenega besedila v eni celici —
+    barva celice nosi resnost, besedilo pa jo vedno pove tudi z besedo."""
+    head = "<th></th>" + "".join(f"<th>{_svg_esc(lbl)}</th>" for lbl in day_lbls)
+    body_rows = []
+    for name, levels in rows:
+        cells = "".join(
+            f'<td style="background:{POLLEN_LEVEL_COLORS.get(lvl, "transparent")};'
+            f'color:#04070e;font-weight:700">{lvl}</td>' if lvl != "—" else '<td>—</td>'
+            for lvl in levels
+        )
+        body_rows.append(f"<tr><th>{name}</th>{cells}</tr>")
+    return ('  <div class="table-scroll"><table class="stats aq-heatmap">\n'
+            f'    <tr>{head}</tr>\n    ' + "\n    ".join(body_rows) + "\n  </table></div>")
+
+
+CHART_CSS = """<style>
+.aq-chart-block{margin:1.2rem 0 1.8rem}
+.aq-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.aq-svg{width:100%;height:auto;display:block}
+.aq-legend{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.5rem;font-size:.75rem;color:var(--muted)}
+.aq-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+.aq-heatmap td{text-align:center}
+</style>"""
+
+
 def build_body(data):
     h = data.get("hourly") or {}
     times = h.get("time") or []
@@ -159,7 +247,7 @@ def build_body(data):
         poll_html_rows.append(f'      <tr><th>{name}</th><td>{disp} — {lvl} <span class="muted-note" style="margin:0;display:inline">({note})</span></td></tr>')
     poll_table = '  <table class="stats">\n' + "\n".join(poll_html_rows) + "\n  </table>"
 
-    # ── pollen 5-day forecast ────────────────────────────────────────────
+    # ── skupno: dnevi za AQI graf + pelodno mrežo ───────────────────────────
     today0 = datetime.date.today()
     day_strs = [(today0 + datetime.timedelta(days=i)).isoformat() for i in range(5)]
     day_lbls = ["Danes" if i == 0 else "Jutri" if i == 1 else DAN_KRATKO[(datetime.date.fromisoformat(d).weekday() + 1) % 7]
@@ -174,11 +262,19 @@ def build_body(data):
                     mx = v if mx is None else max(mx, v)
         return mx
 
-    pollen_rows = []
-    for key, lbl, th in POLLEN_TYPES:
-        cells = " · ".join(f'{day_lbls[i]}: {pollen_level(daily_max(key, d), th)}' for i, d in enumerate(day_strs))
-        pollen_rows.append(f'      <tr><th>{lbl}</th><td>{cells}</td></tr>')
-    pollen_table = '  <table class="stats">\n' + "\n".join(pollen_rows) + "\n  </table>"
+    # ── AQI outlook: naslednjih 5 dni ───────────────────────────────────────
+    aqi_day_vals = [daily_max("european_aqi", d) for d in day_strs]
+    aqi_chart = (
+        '  <div class="aq-chart-block" id="aq-chart-outlook">\n'
+        f'  {aqi_chart_svg(day_lbls, aqi_day_vals)}\n  </div>'
+    )
+
+    # ── pollen 5-day forecast: mreža vrsta × dan ───────────────────────────
+    pollen_rows = [
+        (lbl, [pollen_level(daily_max(key, d), th) for d in day_strs])
+        for key, lbl, th in POLLEN_TYPES
+    ]
+    pollen_table = pollen_heatmap_html(day_lbls, pollen_rows)
 
     # ── health recommendations ───────────────────────────────────────────
     health_items = []
@@ -231,6 +327,9 @@ def build_body(data):
   <p class="post-meta">EU AQI, onesnaževala in pelodna napoved (Open-Meteo / CAMS Europe) · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {answer}
 {quick}
+  <h2>EU AQI — naslednjih 5 dni</h2>
+  <p class="archive-intro">Najvišji dnevni EU AQI (worst-case ura tistega dne) — pove, kdaj bo teden zraka najslabši, ne le kakšen je zdaj.</p>
+{aqi_chart}
   <h2>Onesnaževala — trenutne vrednosti glede na mejne</h2>
 {poll_table}
   <h2>Cvetni prah — 5-dnevna napoved</h2>
@@ -280,7 +379,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Kakovost zraka", None)]),
-    ])
+    ]) + "\n" + CHART_CSS
 
     html = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("kakovost-zraka/index.html", html, force=True)

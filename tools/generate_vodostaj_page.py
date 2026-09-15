@@ -36,6 +36,118 @@ THRESHOLDS = {"raised": 80, "warning": 200, "alarm": 400}
 
 DAN_KRATKO = ["pon", "tor", "sre", "čet", "pet", "sob", "ned"]
 
+# Resnost 0..3 (station_level) -> barva. Zelena je ista validirana temna
+# zelena kot na MTR grafu (#34d399 na tem ozadju pade test svetlosti, glej
+# opombo pri MTR_CC v app.js); amber/rdeča sta isti barvi kot .warn-banner
+# .lvl-orange/.lvl-red v vreme.css — resnost mora izgledati enako povsod na
+# strani, ne nova paleta samo za ta graf.
+LEVEL_COLORS = ["#059669", "#f59e0b", "#fb923c", "#ef4444"]
+LEVEL_LABELS = ["Normalno", "Povečano", "Opozorilo", "Alarm"]
+
+# Grafa na tej strani sta statičen SVG, izrisan tu v Pythonu ob generiranju
+# strani — ne client-side fetch+draw kot na /tocnost-napovedi/ ali
+# /test-napovedi/. Razlog: vsi podatki (7-dnevna GloFAS napoved, trenutne
+# meritve ARSO) so že v Pythonu v trenutku izrisa in stran se tako ali tako
+# regenerira enkrat dnevno (glej post-meta besedilo) — client fetch bi tu
+# pomenil nov javni JSON samo za dva grafa brez drugega odjemalca, graf pa bi
+# bil brez JS prazen. Tak SVG je viden tudi crawlerjem/brez JS, kar je tu
+# vrednota (isto načelo kot pri /podatki/, ki je namenoma brez JS).
+
+
+def _svg_esc(s):
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def outlook_chart_svg(rows, mean_q):
+    """Linijski graf 7-dnevne GloFAS napovedi z vodoravno črto tipičnega pretoka."""
+    W, H = 640, 220
+    pad_l, pad_r, pad_t, pad_b = 34, 14, 20, 28
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    vals = [v for _, v in rows]
+    max_v = max(vals + ([mean_q] if mean_q else [])) * 1.2 or 1
+
+    def x(i):
+        return pad_l + plot_w * (i / (len(rows) - 1) if len(rows) > 1 else 0)
+
+    def y(v):
+        return pad_t + plot_h * (1 - max(0, v) / max_v)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="vod-svg" preserveAspectRatio="xMidYMid meet">']
+    for f in (0, .25, .5, .75, 1):
+        v = max_v * f
+        parts.append(f'<line x1="{pad_l}" y1="{y(v):.1f}" x2="{W - pad_r}" y2="{y(v):.1f}" stroke="rgba(255,255,255,.08)"/>')
+        parts.append(f'<text x="{pad_l - 6}" y="{y(v) + 3:.1f}" text-anchor="end" font-size="9" fill="var(--muted)">{seo.num(v, 0)}</text>')
+    if mean_q:
+        parts.append(f'<line x1="{pad_l}" y1="{y(mean_q):.1f}" x2="{W - pad_r}" y2="{y(mean_q):.1f}" '
+                      f'stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,4"/>')
+        parts.append(f'<text x="{W - pad_r}" y="{y(mean_q) - 5:.1f}" text-anchor="end" font-size="9" fill="#a78bfa">'
+                      f'tipičen pretok ({seo.num(mean_q, 1)})</text>')
+    pts = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, (_, v) in enumerate(rows))
+    parts.append(f'<polyline points="{pts}" fill="none" stroke="#60a5fa" stroke-width="2.4" '
+                 f'stroke-linecap="round" stroke-linejoin="round"/>')
+    for i, (lbl, v) in enumerate(rows):
+        parts.append(f'<circle cx="{x(i):.1f}" cy="{y(v):.1f}" r="3" fill="#60a5fa"/>')
+        parts.append(f'<text x="{x(i):.1f}" y="{y(v) - 9:.1f}" text-anchor="middle" font-size="9" '
+                     f'fill="var(--text)" font-weight="600">{seo.num(v, 1)}</text>')
+        parts.append(f'<text x="{x(i):.1f}" y="{H - 8}" text-anchor="middle" font-size="9" '
+                     f'fill="var(--muted)">{_svg_esc(lbl)}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def stations_chart_svg(stations):
+    """Vodoravni prikaz stanja vsake postaje na njeni LASTNI lestvici (do
+    njenega tretjega praga) — ista logika kot station_level()/station_status()
+    zgoraj, samo narisana namesto izpisana."""
+    rows = [s for s in stations[:6] if s.get("pretok") is not None]
+    if not rows:
+        return ""
+    W = 640
+    row_h = 48
+    pad_l, pad_r, pad_t = 108, 46, 10
+    bar_h = 14
+    plot_w = W - pad_l - pad_r
+    H = pad_t + row_h * len(rows) + 6
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="vod-svg" preserveAspectRatio="xMidYMid meet">']
+    for i, s in enumerate(rows):
+        q = s["pretok"]
+        vv1, vv2, vv3 = s.get("vv1"), s.get("vv2"), s.get("vv3")
+        if vv3 is not None:
+            scale_max = vv3 * 1.15
+            ticks = [t for t in (vv1, vv2, vv3) if t is not None]
+        else:
+            scale_max = THRESHOLDS["alarm"] * 1.15
+            ticks = [THRESHOLDS["raised"], THRESHOLDS["warning"], THRESHOLDS["alarm"]]
+        lvl = station_level(q, s) or 0
+        frac = max(0, min(1, q / scale_max)) if scale_max else 0
+        y0 = pad_t + row_h * i
+        cy = y0 + bar_h / 2
+        color = LEVEL_COLORS[lvl]
+        parts.append(f'<text x="0" y="{cy + 3:.1f}" font-size="10.5" font-weight="600" fill="var(--text)">{_svg_esc(s["name"])}</text>')
+        parts.append(f'<rect x="{pad_l}" y="{y0}" width="{plot_w}" height="{bar_h}" rx="4" fill="rgba(255,255,255,.08)"/>')
+        parts.append(f'<rect x="{pad_l}" y="{y0}" width="{plot_w * frac:.1f}" height="{bar_h}" rx="4" fill="{color}"/>')
+        for t in ticks:
+            tx = pad_l + plot_w * min(1, t / scale_max)
+            parts.append(f'<line x1="{tx:.1f}" y1="{y0 - 2}" x2="{tx:.1f}" y2="{y0 + bar_h + 2}" stroke="rgba(255,255,255,.35)" stroke-width="1"/>')
+        parts.append(f'<text x="{pad_l + plot_w + 8}" y="{cy + 3:.1f}" font-size="10" fill="{color}" font-weight="700">{seo.num(q, 1)}</text>')
+        parts.append(f'<text x="0" y="{cy + 16:.1f}" font-size="8.5" fill="var(--muted)">{_svg_esc(LEVEL_LABELS[lvl])}</text>')
+    parts.append("</svg>")
+    legend = ('<div class="vod-legend">' + "".join(
+        f'<span><i style="background:{c}"></i>{lbl}</span>' for c, lbl in zip(LEVEL_COLORS, LEVEL_LABELS)
+    ) + '<span>┆ oznaka = prag ARSO</span></div>')
+    return "".join(parts) + legend
+
+
+CHART_CSS = """<style>
+.vod-chart-block{margin:1.2rem 0 1.8rem}
+.vod-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.vod-svg{width:100%;height:auto;display:block}
+.vod-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.5rem;font-size:.78rem;color:var(--muted)}
+.vod-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+</style>"""
+
 FLOOD_HISTORY = [
     {"date": "November 1990", "q": 820, "desc": "Poplave Savinje — ena prvih večjih po vojni, škoda po celotni dolini."},
     {"date": "Oktober 1998", "q": 950, "desc": "Katastrofalne poplave Zgornje Savinjske doline, škoda presegla 100 mio DEM."},
@@ -213,20 +325,30 @@ def build_body(flood, stations):
   </div>
 {warn_box}'''
 
-    # ── ARSO stations table ────────────────────────────────────────────────
+    # ── ARSO stations: graf + tabela ────────────────────────────────────────
     if stations:
+        rows6 = stations[:6]
         st_rows = "\n".join(
             f'      <tr><th>{s["name"]}</th>'
-            f'<td>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm · '
-            f'{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s · '
-            f'{station_status(s["pretok"], s)}</td></tr>'
-            for s in stations[:6]
+            f'<td>{seo.num(s["vodostaj"], 0) if s["vodostaj"] is not None else "—"} cm</td>'
+            f'<td>{seo.num(s["pretok"], 1) if s["pretok"] is not None else "—"} m³/s</td>'
+            f'<td>{station_status(s["pretok"], s)}</td></tr>'
+            for s in rows6
         )
-        st_table = f'  <table class="stats">\n{st_rows}\n  </table>'
+        st_table = ('  <div class="table-scroll"><table class="stats">\n'
+                    '    <tr><th>Postaja</th><th>Vodostaj</th><th>Pretok</th><th>Stanje</th></tr>\n'
+                    f'{st_rows}\n  </table></div>')
+        st_chart_svg = stations_chart_svg(rows6)
+        st_chart = (
+            '  <div class="vod-chart-block" id="vod-chart-stations">\n'
+            '  <div class="vod-chart-title">Stanje postaje glede na njene lastne pragove</div>\n'
+            f'  {st_chart_svg}\n  </div>'
+        ) if st_chart_svg else ""
     else:
         st_table = '  <p class="muted-note">Postaje ARSO trenutno niso dosegljive.</p>'
+        st_chart = ""
 
-    # ── 7-day GloFAS outlook ───────────────────────────────────────────────
+    # ── 7-day GloFAS outlook: graf + tabela ─────────────────────────────────
     times = d.get("time") or []
     out_rows = []
     for k, q in enumerate(discharge[:FORECAST_DAYS]):
@@ -236,17 +358,24 @@ def build_body(flood, stations):
         else:
             lbl = f"+{k} d"
         out_rows.append((lbl, q))
-    outlook_table = '  <table class="stats">\n' + "\n".join(
+    outlook_chart = (
+        '  <div class="vod-chart-block" id="vod-chart-outlook">\n'
+        '  <div class="vod-chart-title">Napoved pretoka GloFAS, naslednjih 7 dni</div>\n'
+        f'  {outlook_chart_svg(out_rows, mean_q)}\n  </div>'
+    )
+    outlook_table = '  <div class="table-scroll"><table class="stats">\n' + "\n".join(
         f'      <tr><th>{lbl}</th><td>{seo.num(q, 1)} m³/s</td></tr>' for lbl, q in out_rows
-    ) + "\n  </table>"
+    ) + "\n  </table></div>"
 
     # ── Flood history ───────────────────────────────────────────────────────
     max_hist_q = max(e["q"] for e in FLOOD_HISTORY)
     hist_rows = "\n".join(
-        f'      <tr><th>{e["date"]}</th><td>{e["q"]} m³/s — {e["desc"]}</td></tr>'
+        f'      <tr><th>{e["date"]}</th><td>{e["q"]} m³/s</td><td>{e["desc"]}</td></tr>'
         for e in reversed(FLOOD_HISTORY)
     )
-    hist_table = f'  <table class="stats">\n{hist_rows}\n  </table>'
+    hist_table = ('  <div class="table-scroll"><table class="stats">\n'
+                  '    <tr><th>Datum</th><th>Vršni pretok</th><th>Opis</th></tr>\n'
+                  f'{hist_rows}\n  </table></div>')
 
     # ── FAQ ─────────────────────────────────────────────────────────────────
     qa = [
@@ -281,9 +410,11 @@ def build_body(flood, stations):
 {quick}
   <h2>Merilne postaje ARSO ob Savinji</h2>
   <p class="archive-intro">Trenutno izmerjeni vodostaj, pretok in ocena stanja na postajah ARSO od izvira proti dolvodno — od Solčave do Celja.</p>
+{st_chart}
 {st_table}
   <h2>Napoved pretoka — naslednjih {FORECAST_DAYS} dni</h2>
   <p class="archive-intro">GloFAS napoved pretoka Savinje pri Rečici ob Savinji.</p>
+{outlook_chart}
 {outlook_table}
   <h2>Zgodovina poplav Savinje</h2>
   <p class="archive-intro">Največje zabeležene poplave Savinje po ocenjenem vršnem pretoku pri postaji Letuš.
@@ -344,7 +475,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Vodostaj Savinje", None)]),
-    ])
+    ]) + "\n" + CHART_CSS
 
     html = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("vodostaj-savinje/index.html", html, force=True)

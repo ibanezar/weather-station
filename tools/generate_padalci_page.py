@@ -88,6 +88,71 @@ def fly_label(score):
     return "NE"
 
 
+# Statičen SVG, izrisan v Pythonu ob generiranju strani — ista utemeljitev kot
+# v generate_vodostaj_page.py/generate_agrometeo_page.py/generate_kakovost_
+# zraka_page.py: vsi podatki so že tu v trenutku izrisa, stran se regenerira
+# dnevno, client fetch bi zahteval nov javni JSON samo za dva grafa.
+FLY_BANDS = [(70, "#059669", "LETI"), (40, "#f59e0b", "MEJNO"), (0, "#ef4444", "NE")]
+
+
+def _svg_esc(s):
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def fly_score_color(score):
+    if score < 0:
+        return "var(--muted)"
+    for limit, color, _ in FLY_BANDS:
+        if score >= limit:
+            return color
+    return FLY_BANDS[-1][1]
+
+
+def fly_bar_chart_svg(labels, scores, title_note=""):
+    """Skupna risalna funkcija za urni (danes) in dnevni (7 dni) stolpčni
+    graf ocene priletnosti — isti podatki, ista barvna lestvica kot fly_label()."""
+    rows = [(lbl, s) for lbl, s in zip(labels, scores) if s is not None and s >= 0]
+    if not rows:
+        return ""
+    n = len(rows)
+    W, H = 640, 200
+    pad_l, pad_r, pad_t, pad_b = 26, 14, 16, 26
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    bar_w = plot_w / n * (0.7 if n <= 8 else 0.55)
+
+    def y(v):
+        return pad_t + plot_h * (1 - v / 100)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="pad-svg" preserveAspectRatio="xMidYMid meet">']
+    for f in (0, .25, .5, .75, 1):
+        v = 100 * f
+        parts.append(f'<line x1="{pad_l}" y1="{y(v):.1f}" x2="{W - pad_r}" y2="{y(v):.1f}" stroke="rgba(255,255,255,.08)"/>')
+    for limit, color, _ in FLY_BANDS[:2]:
+        parts.append(f'<line x1="{pad_l}" y1="{y(limit):.1f}" x2="{W - pad_r}" y2="{y(limit):.1f}" '
+                     f'stroke="{color}" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>')
+    for i, (lbl, s) in enumerate(rows):
+        gx = pad_l + (plot_w / n) * i + (plot_w / n - bar_w) / 2
+        col = fly_score_color(s)
+        parts.append(f'<rect x="{gx:.1f}" y="{y(s):.1f}" width="{bar_w:.1f}" height="{(y(0) - y(s)):.1f}" fill="{col}" rx="3"/>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{y(s) - 6:.1f}" text-anchor="middle" font-size="9.5" font-weight="700" fill="{col}">{round(s)}</text>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{H - 8}" text-anchor="middle" font-size="9" fill="var(--muted)">{_svg_esc(lbl)}</text>')
+    parts.append("</svg>")
+    legend = ('<div class="pad-legend">' + "".join(
+        f'<span><i style="background:{c}"></i>{lbl} ({"≥" + str(limit) if limit else "<40"})</span>' for limit, c, lbl in FLY_BANDS
+    ) + f'{title_note}</div>')
+    return "".join(parts) + legend
+
+
+CHART_CSS = """<style>
+.pad-chart-block{margin:1.2rem 0 1.8rem}
+.pad-chart-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cyan,#22d3ee);opacity:.85;margin-bottom:.3rem}
+.pad-svg{width:100%;height:auto;display:block}
+.pad-legend{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.5rem;font-size:.78rem;color:var(--muted)}
+.pad-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
+</style>"""
+
+
 def build_body(data):
     h = data.get("hourly") or {}
     d = data.get("daily") or {}
@@ -151,7 +216,7 @@ def build_body(data):
   </div>'''
 
     # ── today's flying window (6-20h) ────────────────────────────────────
-    window_rows = []
+    window_rows, window_lbls, window_scores = [], [], []
     for i in today_idxs:
         hr = int(times[i][11:13])
         if hr < 6 or hr > 20:
@@ -161,14 +226,21 @@ def build_body(data):
         cape = hv("cape", i)
         bl = hv("boundary_layer_height", i)
         score = fly_score(wind, precip, cape, bl, 1)
-        window_rows.append(f'      <tr><th>{hr}h</th><td>{fly_label(score)}'
-                            f'{f" ({score} %)" if score >= 0 else ""} · BL {round(bl)} m · veter {round(wind)} km/h · dež {round(precip)} %</td></tr>')
-    window_table = ('  <table class="stats">\n' + "\n".join(window_rows) + "\n  </table>") if window_rows \
+        window_lbls.append(f"{hr}h")
+        window_scores.append(score)
+        window_rows.append(f'      <tr><th>{hr}h</th><td>{fly_label(score)}{f" ({score} %)" if score >= 0 else ""}</td>'
+                            f'<td>{round(bl)} m</td><td>{round(wind)} km/h</td><td>{round(precip)} %</td></tr>')
+    window_table = ('  <table class="stats">\n    <tr><th>Ura</th><th>Ocena</th><th>BL</th><th>Veter</th><th>Dež</th></tr>\n'
+                     + "\n".join(window_rows) + "\n  </table>") if window_rows \
         else '  <p class="muted-note">Ni podatkov za danes.</p>'
+    window_chart = (
+        '  <div class="pad-chart-block" id="pad-chart-hourly">\n'
+        f'  {fly_bar_chart_svg(window_lbls, window_scores)}\n  </div>'
+    )
 
     # ── 7-day outlook ──────────────────────────────────────────────────────
     dd_time = d.get("time") or []
-    day_rows = []
+    day_rows, day_lbls, day_scores = [], [], []
     for di in range(min(7, len(dd_time))):
         date = dd_time[di]
         dt = datetime.date.fromisoformat(date)
@@ -182,9 +254,19 @@ def build_body(data):
         tmax = (d.get("temperature_2m_max") or [None] * len(dd_time))[di]
         precip = (d.get("precipitation_sum") or [None] * len(dd_time))[di]
         sun_h = ((d.get("sunshine_duration") or [None] * len(dd_time))[di] or 0) / 3600
-        day_rows.append(f'      <tr><th>{dn}</th><td>{score_lbl} ({max_score} %) · {fly_hrs}h letenja · '
-                         f'{round(tmax) if tmax is not None else "—"}° · {seo.num(precip, 0) if precip is not None else "—"} mm · {seo.num(sun_h, 1)} h sonca</td></tr>')
-    day_table = '  <table class="stats">\n' + "\n".join(day_rows) + "\n  </table>"
+        day_lbls.append(dn)
+        day_scores.append(max_score)
+        day_rows.append(f'      <tr><th>{dn}</th><td>{score_lbl} ({max_score} %)</td><td>{fly_hrs} h</td>'
+                         f'<td>{round(tmax) if tmax is not None else "—"} °C</td>'
+                         f'<td>{seo.num(precip, 0) if precip is not None else "—"} mm</td>'
+                         f'<td>{seo.num(sun_h, 1)} h</td></tr>')
+    day_table = ('  <div class="table-scroll"><table class="stats">\n'
+                 '    <tr><th>Dan</th><th>Ocena</th><th>Ure letenja</th><th>Tmax</th><th>Padavine</th><th>Sonce</th></tr>\n'
+                 + "\n".join(day_rows) + "\n  </table></div>")
+    day_chart = (
+        '  <div class="pad-chart-block" id="pad-chart-days">\n'
+        f'  {fly_bar_chart_svg(day_lbls, day_scores)}\n  </div>'
+    )
 
     # ── FAQ ─────────────────────────────────────────────────────────────────
     qa = [
@@ -211,8 +293,10 @@ def build_body(data):
 {answer}
 {quick}
   <h2>Okno letenja — danes (6–20h)</h2>
+{window_chart}
 {window_table}
   <h2>7-dnevni pregled — priletnost</h2>
+{day_chart}
 {day_table}
   <h2>Kako beremo oceno</h2>
   <p class="archive-intro">Ocena (0–100 %) upošteva veter na 10 m, verjetnost padavin, CAPE (nevihtni potencial) in
@@ -269,7 +353,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme za padalce", None)]),
-    ])
+    ]) + "\n" + CHART_CSS
 
     html = seo.page_shell(title, desc, url, schema, body)
     seo.write_page("vreme-za-padalce/index.html", html, force=True)
