@@ -117,6 +117,113 @@ def load_mos():
     return by_date, label
 
 
+def _svg_esc(s):
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+# Grafa (temperatura + padavine) sta statičen SVG, izrisan tu v Pythonu ob
+# vsakem urnem teku — ista utemeljitev kot v generate_vodostaj_page.py in
+# ostalih: podatki so že tu, stran se tako ali tako prepiše vsako uro, JS-graf
+# bi bil brez JS prazen na strani, ki je namenoma JS-neodvisna (crawlable, glej
+# docstring na vrhu datoteke). Ker ta skript samo vbrizga BODY med markerja in
+# ne ureja <head>, graf uporablja izključno CSS spremenljivke, ki jih blog.css
+# že postavi globalno (--muted, --cyan …) — brez lastnega <style> bloka.
+def temp_chart_svg(days, tmax, tmin, mos=None):
+    n = len(days)
+    if n < 2:
+        return ""
+    W, H = 640, 190
+    pad_l, pad_r, pad_t, pad_b = 28, 14, 16, 24
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    vals = [v for v in tmax + tmin if v is not None]
+    if mos:
+        vals += [v for m in mos if m for v in (m.get("tmax"), m.get("tmin")) if v is not None]
+    lo, hi = min(vals), max(vals)
+    span = hi - lo or 1
+    lo -= span * 0.1
+    hi += span * 0.15
+
+    def x(i):
+        return pad_l + plot_w * (i / (n - 1))
+
+    def y(v):
+        return pad_t + plot_h * (1 - (v - lo) / (hi - lo))
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;height:auto;display:block" preserveAspectRatio="xMidYMid meet">']
+    for f in (0, .5, 1):
+        v = lo + (hi - lo) * f
+        parts.append(f'<line x1="{pad_l}" y1="{y(v):.1f}" x2="{W - pad_r}" y2="{y(v):.1f}" stroke="rgba(255,255,255,.08)"/>')
+        parts.append(f'<text x="{pad_l - 6}" y="{y(v) + 3:.1f}" text-anchor="end" font-size="9" fill="var(--muted)">{round(v)}°</text>')
+
+    def series(vals_i, color, label_fmt):
+        pts = [(i, v) for i, v in enumerate(vals_i) if v is not None]
+        if len(pts) < 2:
+            return
+        poly = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in pts)
+        parts.append(f'<polyline points="{poly}" fill="none" stroke="{color}" stroke-width="2.2" '
+                     f'stroke-linecap="round" stroke-linejoin="round"/>')
+        for i, v in pts:
+            parts.append(f'<circle cx="{x(i):.1f}" cy="{y(v):.1f}" r="2.6" fill="{color}"/>')
+            parts.append(f'<text x="{x(i):.1f}" y="{label_fmt(y(v)):.1f}" text-anchor="middle" font-size="8.5" '
+                         f'font-weight="700" fill="{color}">{round(v)}°</text>')
+
+    series(tmax, "#fb923c", lambda y_: y_ - 7)
+    series(tmin, "#60a5fa", lambda y_: y_ + 13)
+    if mos:
+        mos_tmax = [m.get("tmax") if m else None for m in mos]
+        mos_tmin = [m.get("tmin") if m else None for m in mos]
+        for vals_i in (mos_tmax, mos_tmin):
+            pts = [(i, v) for i, v in enumerate(vals_i) if v is not None]
+            if len(pts) < 2:
+                continue
+            poly = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in pts)
+            parts.append(f'<polyline points="{poly}" fill="none" stroke="#059669" stroke-width="1.6" '
+                         f'stroke-dasharray="4,3" stroke-linecap="round"/>')
+    for i, day in enumerate(days):
+        parts.append(f'<text x="{x(i):.1f}" y="{H - 6}" text-anchor="middle" font-size="9" fill="var(--muted)">{_svg_esc(day)}</text>')
+    parts.append("</svg>")
+
+    legend = ('<div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.4rem;font-size:.78rem;color:var(--muted)">'
+              '<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;'
+              'vertical-align:middle;background:#fb923c"></i>Maks. T</span>'
+              '<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;'
+              'vertical-align:middle;background:#60a5fa"></i>Min. T</span>')
+    if mos:
+        legend += ('<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;'
+                   'vertical-align:middle;background:#059669"></i>MTR (črtkano)</span>')
+    legend += '</div>'
+    return f'  <div style="margin:1rem 0">{"".join(parts)}{legend}</div>'
+
+
+def precip_chart_svg(days, precip, pop):
+    n = len(days)
+    if n < 2:
+        return ""
+    W, H = 640, 170
+    pad_l, pad_r, pad_t, pad_b = 24, 14, 22, 24
+    plot_w, plot_h = W - pad_l - pad_r, H - pad_t - pad_b
+    max_v = max([v for v in precip if v is not None] + [1]) * 1.3
+    bar_w = plot_w / n * 0.5
+
+    def y(v):
+        return pad_t + plot_h * (1 - v / max_v)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;height:auto;display:block" preserveAspectRatio="xMidYMid meet">']
+    for i, (day, v, p) in enumerate(zip(days, precip, pop)):
+        gx = pad_l + (plot_w / n) * i + (plot_w / n - bar_w) / 2
+        v = v or 0
+        by = y(v)
+        parts.append(f'<rect x="{gx:.1f}" y="{by:.1f}" width="{bar_w:.1f}" height="{max(y(0) - by, 1):.1f}" fill="#60a5fa" rx="2"/>')
+        if p is not None:
+            parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{pad_t - 6}" text-anchor="middle" font-size="8.5" fill="var(--muted)">{round(p)} %</text>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{by - 5:.1f}" text-anchor="middle" font-size="9" font-weight="700" fill="#60a5fa">{num(v, 1)}</text>')
+        parts.append(f'<text x="{gx + bar_w / 2:.1f}" y="{H - 6}" text-anchor="middle" font-size="9" fill="var(--muted)">{_svg_esc(day)}</text>')
+    parts.append("</svg>")
+    return (f'  <div style="margin:1rem 0">{"".join(parts)}'
+            f'<div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">Stolpec: napovedana '
+            f'količina (mm) · številka zgoraj: verjetnost padavin — vira se ne zlivata v eno število.</div></div>')
+
+
 def build_fc7_station(om, mos, mos_label):
     """7-dnevna tabela za postajo. MTR ima svoj stolpec in se z Open-Meteo ne zliva."""
     d = om["daily"]
@@ -143,8 +250,15 @@ def build_fc7_station(om, mos, mos_label):
                 if have_mos else
                 f"{mos_label} za te dni trenutno nima napovedi, zato je stolpec prazen.")
 
+    days = [daylabel(day) for day in d["time"]]
+    mos_days = [mos.get(day) for day in d["time"]]
+    temp_chart = temp_chart_svg(days, d["temperature_2m_max"], d["temperature_2m_min"], mos_days if have_mos else None)
+    precip_chart = precip_chart_svg(days, d["precipitation_sum"], d["precipitation_probability_max"])
+
     return (f'{FC7_START}\n'
             f'  <h2 id="napoved">Napoved za Rečico ob Savinji, 7 dni</h2>\n'
+            f'{temp_chart}\n'
+            f'{precip_chart}\n'
             f'  <div class="table-scroll">\n'
             f'  <table class="data-table">\n'
             f'    <caption>Najvišja / najnižja temperatura (°C), padavine (mm), verjetnost '
@@ -170,8 +284,14 @@ def build_fc7_town(om, town):
             f"<td>{num(pop, 0) if pop is not None else '—'} %</td>"
             f"<td>{num(d['wind_speed_10m_max'][i], 0)}</td></tr>")
 
+    days = [daylabel(day) for day in d["time"]]
+    temp_chart = temp_chart_svg(days, d["temperature_2m_max"], d["temperature_2m_min"])
+    precip_chart = precip_chart_svg(days, d["precipitation_sum"], d["precipitation_probability_max"])
+
     return (f'{FC7_START}\n'
             f'  <h2 id="napoved">Napoved, {town} — 7 dni</h2>\n'
+            f'{temp_chart}\n'
+            f'{precip_chart}\n'
             f'  <div class="table-scroll">\n'
             f'  <table class="data-table">\n'
             f'    <caption>Open-Meteo napoved za koordinate kraja {town} — modelska ocena, '
