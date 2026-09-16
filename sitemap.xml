@@ -393,6 +393,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zima-2026-2027-el-nino-napoved.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.html</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
