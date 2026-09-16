@@ -1539,6 +1539,19 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .install-btn{display:none;align-items:center;justify-content:center;gap:.3rem;background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--blue);border-radius:30px;height:44px;padding:0 .7rem;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .install-btn.show{display:inline-flex}
 
+/* Wraps refresh + install + notif buttons as one unit so `.status`'s
+   flex-wrap breaks before/after the whole group, never in the middle of it */
+.status-actions{display:inline-flex;align-items:center;gap:1rem}
+@media(max-width:520px){
+  .status-actions{gap:.35rem;flex-wrap:nowrap;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .status-actions::-webkit-scrollbar{display:none}
+  .status-actions .share-btn,.status-actions .install-btn,.status-actions .notif-group,.status-actions .notif-btn{flex:0 0 auto}
+  .status-actions .share-btn{width:38px;height:38px}
+  .status-actions .install-btn{height:38px;padding:0 .5rem;font-size:.68rem;gap:.2rem}
+  .status-actions .notif-btn.labeled{height:38px;padding:0 .45rem;font-size:.66rem;gap:.25rem}
+  .status-actions .notif-group{gap:.3rem}
+}
+
 /* Toast */
 #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--card-bg);border:1px solid var(--card-border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:.55rem 1.4rem;border-radius:30px;font-size:.75rem;color:var(--text);box-shadow:var(--card-shadow);opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:400;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
