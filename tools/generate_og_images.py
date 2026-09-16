@@ -28,6 +28,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 ARTICLES = [
     {
+        'slug': 'zima-2026-2027-el-nino-napoved',
+        'title': 'Zima 2026/27:\nnajmočnejši El Niño?',
+        'subtitle': 'Kaj to pomeni za Zgornjo Savinjsko dolino · IREICA1',
+        'section': 'Analize',
+        'accent': (34, 211, 238),
+        'photo': 'misty-valley',
+    },
+    {
         'slug': 'anketa-android-aplikacija-meteorec',
         'title': 'Anketa:\n10 proti 9',
         'subtitle': 'Bi si res naložili aplikacijo Meteorec? · IREICA1',
