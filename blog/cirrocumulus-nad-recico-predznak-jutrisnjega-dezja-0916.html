@@ -159,42 +159,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <p>Postaja pri tleh o višini oblakov ne pove ničesar – to je izračun Open-Meteo po tlačnih ravneh za točko postaje. Najbližja ura izračuna glede na trenutek fotografiranja (9.42) je 10. ura:</p>
 
-    <div class="src-compare">
-      <div class="src-row">
-        <div class="src-row-head">
-          <span class="src-name">850 hPa <span class="src-note">1 522 m</span></span>
-          <span class="src-meta"><span class="src-temp">veter 261° / 2,8 km/h</span><span class="src-val" style="color:#7f92ab">53 %</span></span>
-        </div>
-        <div class="src-track"><div class="src-fill" style="width:53%;background:#7f92ab"></div></div>
-      </div>
-      <div class="src-row">
-        <div class="src-row-head">
-          <span class="src-name">700 hPa <span class="src-note">3 140 m</span></span>
-          <span class="src-meta"><span class="src-temp">veter 278° / 4,4 km/h</span><span class="src-val" style="color:#7f92ab">43 %</span></span>
-        </div>
-        <div class="src-track"><div class="src-fill" style="width:43%;background:#7f92ab"></div></div>
-      </div>
-      <div class="src-row">
-        <div class="src-row-head">
-          <span class="src-name">500 hPa <span class="src-note">5 812 m · suho</span></span>
-          <span class="src-meta"><span class="src-temp">veter 287° / 25,1 km/h</span><span class="src-val" style="color:#f59e0b">10 %</span></span>
-        </div>
-        <div class="src-track"><div class="src-fill" style="width:10%;background:#f59e0b"></div></div>
-      </div>
-      <div class="src-row">
-        <div class="src-row-head">
-          <span class="src-name">400 hPa <span class="src-note">7 493 m · tu je bil cirokumulus</span></span>
-          <span class="src-meta"><span class="src-temp">veter 283° / 25,9 km/h</span><span class="src-val" style="color:#4d9ff8">68 %</span></span>
-        </div>
-        <div class="src-track"><div class="src-fill" style="width:68%;background:#4d9ff8"></div></div>
-      </div>
-      <div class="src-row">
-        <div class="src-row-head">
-          <span class="src-name">300 hPa <span class="src-note">9 531 m</span></span>
-          <span class="src-meta"><span class="src-temp">veter 290° / 35,7 km/h</span><span class="src-val" style="color:#7f92ab">46 %</span></span>
-        </div>
-        <div class="src-track"><div class="src-fill" style="width:46%;background:#7f92ab"></div></div>
-      </div>
+    <div class="chart-card">
+      <h3>Relativna vlaga po tlačnih ravneh, 16. 9. 2026 ob 10. uri</h3>
+      <canvas id="chartProfile"></canvas>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:.7rem">Vsak steber je ena tlačna raven (od najvišje do najnižje); zapelji z miško ali prstom čeznjo za veter na tisti višini. Modro je plast s cirokumulusom, oranžno suh pas tik pod njo.</p>
     </div>
 
     <p>Slika je jasna: zrak tik pod tlemi je bil zjutraj nasičen (megla), višje, med 1,5 in 3,1 kilometra, pa razmeroma suh. Na <span class="mono">5 812 m</span> (500 hPa) je vlaga padla na samo 10 % – povsem jasen pas. Šele na <span class="mono">7 493 m</span> (400 hPa), pri <span class="mono">−23,2 °C</span>, vlaga spet skoči na 68 %, nad njo, na <span class="mono">9 531 m</span>, pa spet upade na 46 %. Cirokumulus torej ni bil del kake sklenjene debele plasti, ki sega od tal navzgor, ampak ozka, izolirana rezina vlažnega zraka, obdana s suhim zrakom pod njo in nad njo – natanko taka geometrija, kot jo pričakujemo pri visokih oblakih iz ledenih kristalov.</p>
@@ -351,6 +319,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              ticks: { color: '#f97316', font: { size: 10 }, callback: v => v + ' °C' } },
         y1: { position: 'right', min: 0, grid: { display: false },
               ticks: { color: '#60a5fa', font: { size: 10 }, callback: v => v + ' mm' } }
+      }
+    }
+  });
+
+  const PROFILE_WIND = ["290° / 35,7 km/h", "283° / 25,9 km/h", "287° / 25,1 km/h", "278° / 4,4 km/h", "261° / 2,8 km/h"];
+  new Chart(document.getElementById('chartProfile'), {
+    type: 'bar',
+    data: {
+      labels: ["300 hPa · 9 531 m", "400 hPa · 7 493 m", "500 hPa · 5 812 m", "700 hPa · 3 140 m", "850 hPa · 1 522 m"],
+      datasets: [
+        { label: 'Relativna vlaga (%)', data: [46, 68, 10, 43, 53],
+          backgroundColor: ['#7f92ab', '#4d9ff8', '#f59e0b', '#7f92ab', '#7f92ab'],
+          borderRadius: 5, borderSkipped: false }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 700, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#adc0d8', bodyColor: '#e8edf8', padding: 10,
+          callbacks: {
+            label: ctx => [`Vlaga: ${ctx.parsed.x} %`, `Veter: ${PROFILE_WIND[ctx.dataIndex]}`]
+          }
+        }
+      },
+      scales: {
+        x: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,.05)' },
+             ticks: { color: '#adc0d8', font: { size: 10 }, callback: v => v + ' %' } },
+        y: { grid: { display: false }, ticks: { color: '#adc0d8', font: { size: 10.5 } } }
       }
     }
   });
