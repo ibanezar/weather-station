@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-09-17T06:35:25Z",
-  "n_records": 60,
+  "generated_at": "2026-09-18T06:31:32Z",
+  "n_records": 62,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-09-16"
+    "to": "2026-09-17"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 43,
+      "n": 44,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-09-16"
+        "to": "2026-09-17"
       },
       "all_time": {
         "tmax": {
-          "n": 43,
-          "mae_mtr": 0.99,
-          "mae_om": 1.49,
-          "improvement_pct": 33.6
+          "n": 44,
+          "mae_mtr": 0.98,
+          "mae_om": 1.46,
+          "improvement_pct": 32.9
         },
         "tmin": {
-          "n": 43,
-          "mae_mtr": 0.99,
-          "mae_om": 1.24,
-          "improvement_pct": 20.2
+          "n": 44,
+          "mae_mtr": 1.0,
+          "mae_om": 1.23,
+          "improvement_pct": 18.7
         }
       },
       "rolling": {
@@ -301,6 +301,13 @@
             "mae_mtr": 1.08,
             "mae_om": 1.72,
             "improvement_pct": 37.2
+          },
+          {
+            "date": "2026-09-17",
+            "n": 29,
+            "mae_mtr": 1.07,
+            "mae_om": 1.72,
+            "improvement_pct": 37.8
           }
         ],
         "tmin": [
@@ -576,28 +583,35 @@
             "mae_mtr": 0.86,
             "mae_om": 1.18,
             "improvement_pct": 27.1
+          },
+          {
+            "date": "2026-09-17",
+            "n": 29,
+            "mae_mtr": 0.89,
+            "mae_om": 1.19,
+            "improvement_pct": 25.2
           }
         ]
       }
     },
     "2": {
-      "n": 17,
+      "n": 18,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-09-16"
+        "to": "2026-09-17"
       },
       "all_time": {
         "tmax": {
-          "n": 17,
+          "n": 18,
           "mae_mtr": 1.69,
-          "mae_om": 2.59,
-          "improvement_pct": 34.7
+          "mae_om": 2.48,
+          "improvement_pct": 31.9
         },
         "tmin": {
-          "n": 17,
-          "mae_mtr": 0.98,
-          "mae_om": 1.92,
-          "improvement_pct": 49.0
+          "n": 18,
+          "mae_mtr": 0.94,
+          "mae_om": 1.91,
+          "improvement_pct": 50.8
         }
       },
       "rolling": {
@@ -692,6 +706,13 @@
             "mae_mtr": 1.69,
             "mae_om": 2.59,
             "improvement_pct": 34.7
+          },
+          {
+            "date": "2026-09-17",
+            "n": 18,
+            "mae_mtr": 1.69,
+            "mae_om": 2.48,
+            "improvement_pct": 31.9
           }
         ],
         "tmin": [
@@ -785,6 +806,13 @@
             "mae_mtr": 0.98,
             "mae_om": 1.92,
             "improvement_pct": 49.0
+          },
+          {
+            "date": "2026-09-17",
+            "n": 18,
+            "mae_mtr": 0.94,
+            "mae_om": 1.91,
+            "improvement_pct": 50.8
           }
         ]
       }
@@ -825,33 +853,33 @@
     },
     "jesen": {
       "1": {
-        "n": 16,
+        "n": 17,
         "tmax": {
-          "n": 16,
-          "mae_mtr": 1.01,
-          "mae_om": 1.66,
-          "improvement_pct": 39.2
+          "n": 17,
+          "mae_mtr": 0.98,
+          "mae_om": 1.56,
+          "improvement_pct": 37.2
         },
         "tmin": {
-          "n": 16,
-          "mae_mtr": 0.78,
-          "mae_om": 1.43,
-          "improvement_pct": 45.5
+          "n": 17,
+          "mae_mtr": 0.81,
+          "mae_om": 1.37,
+          "improvement_pct": 40.9
         }
       },
       "2": {
-        "n": 16,
+        "n": 17,
         "tmax": {
-          "n": 16,
+          "n": 17,
           "mae_mtr": 1.63,
-          "mae_om": 2.52,
-          "improvement_pct": 35.3
+          "mae_om": 2.41,
+          "improvement_pct": 32.4
         },
         "tmin": {
-          "n": 16,
-          "mae_mtr": 0.91,
-          "mae_om": 1.97,
-          "improvement_pct": 53.8
+          "n": 17,
+          "mae_mtr": 0.87,
+          "mae_om": 1.95,
+          "improvement_pct": 55.4
         }
       }
     }
