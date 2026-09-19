@@ -1,23 +1,5 @@
 [
   {
-    "target_date": "2026-09-18",
-    "lead": 2,
-    "made_at": "2026-09-16",
-    "mtr_tmax": 19.3,
-    "mtr_tmin": 12.1,
-    "om_tmax": 18.0,
-    "om_tmin": 13.8
-  },
-  {
-    "target_date": "2026-09-18",
-    "lead": 1,
-    "made_at": "2026-09-17",
-    "mtr_tmax": 18.6,
-    "mtr_tmin": 9.6,
-    "om_tmax": 17.2,
-    "om_tmin": 10.1
-  },
-  {
     "target_date": "2026-09-19",
     "lead": 2,
     "made_at": "2026-09-17",
