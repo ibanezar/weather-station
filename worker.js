@@ -4955,6 +4955,95 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Gobarska opažanja (crowdsourced sightings) ───────────
+      // Ločeno od "Gobarjev dnevnik" v app-u gobarske strani (ta je izrecno
+      // zaseben, samo localStorage — glej CLAUDE.md). Opažanje je namenoma
+      // vedno javno: bralec pove, katero vrsto je dejansko našel, kje (eno od
+      // znanih nabiralnih območij modela, NE GPS — nabiralci so zaščitniški
+      // do točnih lokacij) in koliko, drugi obiskovalci in kasneje model to
+      // vidijo kot dodaten, resničen signal poleg izračunanega indeksa.
+      // Isti R2/feedback vzorec kot /observations in /blog-comments zgoraj
+      // (honeypot, dedup, kapica na dolžino seznama) — samo zbiranje in
+      // prikaz za zdaj, brez povratne vezave v gobe_model.py (ta pride šele,
+      // ko se nabere dovolj podatkov).
+      //   GET  /gobe/opazovanja?dni=14 → { opazovanja:[…], total, updatedAt }
+      //   POST /gobe/opazovanje { vrsta, obmocje, kolicina, opomba?, website? }
+      if (path === "/gobe/opazovanja" || path === "/gobe/opazovanje") {
+        const r2 = env?.PHOTOS_R2;
+        // Lokalna _json() — ni v skupnem obsegu na tem mestu v datoteki
+        // (obstaja samo znotraj poznejših /premium/* blokov).
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+        const OPZ_KEY = "feedback/gobe-opazovanja.json";
+        const OPZ_MAX_DNI = 30;       // dlje od tega se opažanje ne šteje več kot "nedavno"
+        const OPZ_STORE_CAP = 1000;   // koliko vnosov obdržimo v datoteki (ne vseh se vrne)
+        const OPZ_LIST_CAP = 200;     // koliko jih vrne GET
+        const KOLICINE = ["posamezno", "nekaj", "obilo"];
+
+        async function _opzRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get(OPZ_KEY);
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+
+        if (path === "/gobe/opazovanja" && request.method === "GET") {
+          const dni = Math.min(OPZ_MAX_DNI, Math.max(1, parseInt(url.searchParams.get("dni")) || 14));
+          const all = await _opzRead();
+          const now = Date.now();
+          const fresh = all.filter(i => now - new Date(i.ts).getTime() < dni * 86400000);
+          const pub = fresh.slice(0, OPZ_LIST_CAP).map(i => ({
+            id: i.id, ts: i.ts, vrsta: i.vrsta, obmocje: i.obmocje, kolicina: i.kolicina, opomba: i.opomba || null
+          }));
+          return _json({ opazovanja: pub, total: fresh.length, updatedAt: new Date().toISOString() });
+        }
+
+        if (path === "/gobe/opazovanje" && request.method === "POST") {
+          if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (body.website) return _json({ ok: true }); // honeypot — boti izpolnijo skrito polje
+
+          const vrsta = (body.vrsta || "").trim().slice(0, 60);
+          const obmocje = (body.obmocje || "").trim().slice(0, 80);
+          const kolicina = KOLICINE.includes(body.kolicina) ? body.kolicina : null;
+          const opomba = (body.opomba || "").trim().slice(0, 200);
+          if (!vrsta || !obmocje || !kolicina) {
+            return _json({ error: "Izberi vrsto, območje in količino" }, 400);
+          }
+
+          // Blag ščit pred skriptnim poplavljanjem — isto načelo kot
+          // premium_login_rl zgoraj (per-IP, ne per-email, ker opažanje ne
+          // zahteva e-naslova).
+          const kv = env?.COUNTER_KV;
+          if (kv) {
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const rlKey = "gobe_obs_rl:" + ip;
+            const count = parseInt((await kv.get(rlKey)) || "0") || 0;
+            if (count >= 20) return _json({ error: "Preveč opažanj v kratkem času — poskusi kasneje" }, 429);
+            await kv.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+          }
+
+          const all = await _opzRead();
+          const now = Date.now();
+          // Isti dvojni-klik ščit kot pri /blog-comments: enak vnos v zadnji minuti.
+          const dup = all.some(i => i.vrsta === vrsta && i.obmocje === obmocje && i.kolicina === kolicina
+            && (now - new Date(i.ts).getTime()) < 60000);
+          if (dup) return _json({ ok: true });
+
+          const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(),
+            vrsta, obmocje, kolicina, opomba: opomba || undefined };
+          all.unshift(entry);
+          await r2.put(OPZ_KEY, JSON.stringify(all.slice(0, OPZ_STORE_CAP)), {
+            httpMetadata: { contentType: "application/json" }
+          });
+          return _json({ ok: true, opazovanje: entry });
+        }
+      }
+
       // ── Gallery / photo endpoints ──────────────────────────
       // Vsi galerijski objekti živijo pod ključem "photos/…" v istem R2
       // bucketu kot radar cache, feedback in subscriber podatki — list()
