@@ -787,10 +787,11 @@ body{
   padding:1rem 1.1rem;margin:.6rem 0 1rem;box-shadow:var(--card-shadow)}
 .gp-diary-priv{font-size:.78rem;color:var(--muted);margin-bottom:.7rem}
 .gp-diary-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.55rem;align-items:center}
-.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary-row input[type=email],.gp-diary textarea{
+.gp-diary-row input[type=date],.gp-diary-row input[type=text],.gp-diary-row input[type=email],
+.gp-diary-row select,.gp-diary textarea{
   background:var(--badge-bg);border:1px solid var(--card-border);border-radius:9px;
-  padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit}
-.gp-diary-row input[type=text]{flex:1;min-width:160px}
+  padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit;min-height:2.6rem}
+.gp-diary-row input[type=text],.gp-diary-row select{flex:1;min-width:160px}
 .gp-diary textarea{width:100%;min-height:4.5rem;resize:vertical;box-sizing:border-box}
 .gp-diary-btn{display:inline-flex;align-items:center;min-height:2.75rem;background:var(--badge-bg);
   border:1px solid var(--card-border);color:var(--text);
@@ -2240,6 +2241,87 @@ DANES_JS = """<script>
 })();
 </script>"""
 
+# ── Dodaj opažanje (crowdsourced sightings) — glej opazovanje_section_html()
+# in worker.js /gobe/opazovanje(a). Progresivna izboljšava kot dnevnik/prijava
+# spodaj: brez JS obrazec ne dela (POST v Worker), nedavni seznam pa se ne
+# more strežniško izrisati, ker se spreminja sproti, ko ljudje oddajajo.
+OPZ_JS = """<script>
+(function(){
+  var API=""" + '"' + WORKER_BASE + '"' + """;
+  var form=document.getElementById("gp-opz-form");
+  if(!form)return;
+  var msgEl=document.getElementById("gp-opz-msg");
+  var listEl=document.getElementById("gp-opz-list");
+  var KOLICINE={posamezno:"Par kosov",nekaj:"Kar nekaj",obilo:"Obilo"};
+
+  function relTime(iso){
+    var min=Math.floor((Date.now()-new Date(iso).getTime())/60000);
+    if(min<1)return"pravkar";
+    if(min<60)return"pred "+min+" min";
+    var h=Math.floor(min/60);
+    if(h<24)return"pred "+h+" h";
+    return"pred "+Math.floor(h/24)+" dnevi";
+  }
+  // Vse besedilo iz opažanj (vrsta/območje/opomba) je uporabniški vnos —
+  // textContent povsod, nikoli innerHTML z vgrajenim nizom (isto načelo kot
+  // escHtml() pri javnih lestvicah /napovej/ in /igra/).
+  function renderList(items){
+    listEl.innerHTML="";
+    if(!items.length){
+      var p=document.createElement("p");
+      p.className="gp-hero-sub";
+      p.textContent="Zaenkrat še ni opažanj zadnjih 14 dni — bodi prvi.";
+      listEl.appendChild(p);
+      return;
+    }
+    items.forEach(function(o){
+      var row=document.createElement("div"); row.className="gp-forest";
+      var info=document.createElement("div"); info.className="gp-forest-info";
+      var nm=document.createElement("span"); nm.className="gp-forest-nm"; nm.textContent=o.vrsta;
+      var terr=document.createElement("span"); terr.className="gp-terr";
+      terr.textContent=o.obmocje+" · "+relTime(o.ts);
+      info.appendChild(nm); info.appendChild(terr);
+      if(o.opomba){
+        var note=document.createElement("span"); note.className="gp-forest-sp"; note.textContent=o.opomba;
+        info.appendChild(note);
+      }
+      var badge=document.createElement("div"); badge.className="gp-forest-pct gp-pct-hi";
+      var n=document.createElement("span"); n.className="n"; n.textContent=KOLICINE[o.kolicina]||o.kolicina;
+      badge.appendChild(n);
+      row.appendChild(info); row.appendChild(badge);
+      listEl.appendChild(row);
+    });
+  }
+  function loadList(){
+    fetch(API+"/gobe/opazovanja?dni=14").then(function(r){return r.json();})
+      .then(function(d){ renderList(d.opazovanja||[]); }).catch(function(){});
+  }
+  form.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    var btn=form.querySelector("button[type=submit]");
+    var vrsta=document.getElementById("gp-opz-vrsta").value.trim();
+    var obmocje=document.getElementById("gp-opz-obmocje").value;
+    var kolicina=document.getElementById("gp-opz-kolicina").value;
+    var opomba=document.getElementById("gp-opz-opomba").value.trim();
+    var website=document.getElementById("gp-opz-website").value;
+    if(!vrsta||!obmocje||!kolicina){ msgEl.textContent="Izberi vrsto, območje in količino."; return; }
+    btn.disabled=true; msgEl.textContent="Oddajam …";
+    fetch(API+"/gobe/opazovanje",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({vrsta:vrsta,obmocje:obmocje,kolicina:kolicina,opomba:opomba,website:website})})
+      .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
+      .then(function(res){
+        btn.disabled=false;
+        if(!res.ok){ msgEl.textContent=(res.data&&res.data.error)||"Napaka pri oddaji."; return; }
+        msgEl.textContent="Hvala! Opažanje je dodano.";
+        form.reset();
+        loadList();
+      })
+      .catch(function(){ btn.disabled=false; msgEl.textContent="Napaka pri oddaji — poskusi znova."; });
+  });
+  loadList();
+})();
+</script>"""
+
 # ── Sezonski trend: SVG graf letos vs. pretekla leta (iz trend.json) ─────────
 TREND_JS = """<script>
 (function(){
@@ -3174,7 +3256,51 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
 # je prišel samo pogledat, ali se danes splača v gozd.
 
 
-def build_danes_page(forests_html, free):
+def opazovanje_section_html(indexed, area_names):
+    """Kartica "Dodaj opažanje" na /danes/ — ločena od zasebnega Gobarjevega
+    dnevnika (localStorage, glej diary_html/build_dnevnik_page): to opažanje
+    gre vedno na Worker in je javno vsem obiskovalcem (worker.js
+    /gobe/opazovanje(a)). Namenoma brez GPS — območje je eno od že znanih
+    nabiralnih območij modela (isti seznam kot .gp-forest vrstice zgoraj na
+    tej strani), ne točka na karti, ker so nabiralci zaščitniški do
+    natančnih lokacij najdb. Za zdaj samo zbira in prikazuje — povratna
+    vezava v gobe_model.py pride šele, ko se nabere dovolj podatkov."""
+    sp_options = "".join(f'<option value="{_esc(s["name_sl"])}">' for s in indexed)
+    area_options = "".join(f'<option value="{_esc(n)}">{_esc(n)}</option>' for n in area_names)
+    return f'''  <div class="gp-diary" id="gp-opz">
+    <h2 class="gp-h2" id="opazovanja" style="margin-top:0">📝 Dodaj opažanje</h2>
+    <p class="gp-diary-priv">Si danes v gozdu res našel gobo? Povej katero, kje (samo območje, brez natančne
+    lokacije) in koliko — brez prijave. Opažanje je <b>javno</b> in pomaga do bolj zanesljivih napovedi za vse
+    (drugače od dnevnika spodaj, ki ostane samo v tvojem brskalniku).</p>
+    <form id="gp-opz-form">
+      <input type="text" id="gp-opz-website" name="website" autocomplete="off" tabindex="-1"
+        style="position:absolute;left:-9999px" aria-hidden="true">
+      <div class="gp-diary-row">
+        <input type="text" id="gp-opz-vrsta" list="gp-opz-vrsta-list" placeholder="Katera vrsta?"
+          maxlength="60" required>
+        <datalist id="gp-opz-vrsta-list">{sp_options}</datalist>
+        <select id="gp-opz-obmocje" required>
+          <option value="">Katero območje?</option>
+          {area_options}
+        </select>
+      </div>
+      <div class="gp-diary-row">
+        <select id="gp-opz-kolicina" required>
+          <option value="">Koliko?</option>
+          <option value="posamezno">Par kosov</option>
+          <option value="nekaj">Kar nekaj</option>
+          <option value="obilo">Obilo</option>
+        </select>
+        <input type="text" id="gp-opz-opomba" placeholder="Opomba (neobvezno)" maxlength="200">
+      </div>
+      <button type="submit" class="gp-cta gp-diary-submit">Oddaj opažanje</button>
+    </form>
+    <div id="gp-opz-msg" class="gp-msg"></div>
+    <div id="gp-opz-list" class="gp-diary-list" aria-live="polite"></div>
+  </div>'''
+
+
+def build_danes_page(forests_html, free, indexed, area_names):
     """Dnevni indeks po nabiralnih območjih — brezplačno jedro napovedi.
     Ker ta stran nosi vsakodnevno sveže število, je v sitemapu daily."""
     body = ('  <p class="post-meta">Gobarski indeks za nabiralna območja Zgornje Savinjske doline za '
@@ -3184,12 +3310,13 @@ def build_danes_page(forests_html, free):
             f'  <p class="archive-intro">Danes v Rečici ob Savinji: <strong>{free["index"]} % · '
             f'{_esc(free["level"])}</strong>. Indeks je ocena ugodnosti pogojev za rast, ne obljuba '
             'najdbe — gozd ima vedno zadnjo besedo.</p>\n'
-            + forests_html)
+            + forests_html
+            + "\n" + opazovanje_section_html(indexed, area_names))
     return subpage_shell(
         "danes", "Danes po gozdovih — gobarski indeks po območjih",
         "Gobarski indeks po nabiralnih območjih Zgornje Savinjske doline za današnji dan — Golte, Menina, "
         "Smrekovec, Dleskovška planota in okolica.",
-        "Danes po gozdovih", body, extra_js=DANES_JS)
+        "Danes po gozdovih", body, extra_js=DANES_JS + OPZ_JS)
 
 
 def build_tereni_page(terrain_html):
@@ -4244,6 +4371,11 @@ def build_body(rules, premium, free):
         "credits_html": credits_html, "vrste_credits_html": vrste_credits_html,
         # Razdelki, ki so se z glavne strani preselili na svoje podstrani.
         "forests_html": forests_html, "terrain_html": terrain_html, "diary_html": diary_html,
+        # Za "Dodaj opažanje" na /danes/ (opazovanje_section_html) — isti
+        # indeksirani seznam vrst kot povsod drugod, imena območij brez
+        # zaščitenih (premium["locations"] jih že izloči, glej compute_forecast).
+        "indexed": indexed,
+        "area_names": sorted(loc["name"] for loc in premium["locations"]),
         # Isti seznam kot vidni FAQ zgoraj — FAQPage shema ne sme obljubljati
         # vprašanj/odgovorov, ki jih na strani dejansko ni (glej geo_audit.py).
         "qa": qa,
@@ -4276,7 +4408,7 @@ def main():
     build_valovi_page()
     n_baza = build_baza_vrst_pages(sub["species"], sub["vrste_credits_html"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
-    build_danes_page(sub["forests_html"], free)
+    build_danes_page(sub["forests_html"], free, sub["indexed"], sub["area_names"])
     build_tereni_page(sub["terrain_html"])
     build_nasveti_page()
     build_metodologija_page()

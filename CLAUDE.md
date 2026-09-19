@@ -758,6 +758,55 @@ razdelek na glavni strani" zgoraj, ne spodrsljaj. `picker_section_html()` v
   `_smerBesedilo`/`_ltgDecode` drugod v repozitoriju; če spremeniš pragove
   tam, spremeni tudi tu.
 
+## Gobarska opažanja — javna, ločena od dnevnika
+
+Kartica **»Dodaj opažanje«** na `/gobarska-napoved/danes/` (18. 9. 2026) pusti
+obiskovalca prijaviti, katero vrsto je res našel, kje in koliko —
+`opazovanje_section_html()`/`OPZ_JS` v `tools/generate_gobe_page.py`, shranjeno
+prek `worker.js` `/gobe/opazovanje` (POST) in `/gobe/opazovanja` (GET).
+
+- **To NI Gobarjev dnevnik.** Dnevnik (`diary_html`/`build_dnevnik_page`) je
+  izrecno zaseben — samo `localStorage`, nikamor se ne pošlje (glej pravilo o
+  zasebnosti na vrhu tega dokumenta, ki velja za notranje meritve, isto načelo
+  pa je veljalo za razlog dnevnikove zasebnosti). Opažanje je namenoma
+  nasprotno: vedno gre na strežnik in je **javno vsem obiskovalcem** — brez
+  tega ne more pomagati pri zanesljivosti napovedi. Dve ločeni funkciji, ne
+  ena z stikalom, da dnevnikova zasebnost ostane brezpogojna.
+- **Območje, ne GPS.** Nabiralci so znano zaščitniški do točnih lokacij
+  najdb — obrazec zato ponudi izbiro med že znanimi nabiralnimi območji
+  modela (`premium["locations"]`, brez zaščitenih — ista izločitev kot
+  povsod drugod), nikoli koordinat. `sorted(loc["name"] for loc in
+  premium["locations"])` v `build_body()` je edini vir tega seznama za
+  spustni meni — ne uvajaj drugega.
+- **Zaenkrat samo zbira in prikazuje — brez povratne vezave v
+  `gobe_model.py`.** Model se še naprej uči izključno iz `history.json` in
+  Open-Meteo (glej opombo pri MTR zgoraj o istem načelu). Ko se nabere dovolj
+  opažanj, je vgradnja kot dodaten signal ločen, kasnejši korak — ne
+  poskušaj indeksa popravljati po opažanjih, dokler te odločitve ni.
+- **Shramba je isti R2/`feedback/` vzorec kot `/observations` in
+  `/blog-comments`** v `worker.js`: en JSON seznam (`feedback/gobe-opazovanja.json`),
+  honeypot polje `website` (tiho `{ok:true}`, isto ime povsod v repozitoriju),
+  ščit pred dvojnim oddajanjem (isti vnos v zadnji minuti) in kapica na
+  dolžino datoteke (1000 vnosov) — ločeno od kapice, koliko jih vrne `GET`
+  (200, znotraj zadnjih ≤30 dni). Brez avtentikacije in brez e-naslova, ker
+  opažanje (drugače od `/premium/*`) ne odklepa ničesar.
+- **Blag per-IP rate limit** (`gobe_obs_rl:<ip>` v `COUNTER_KV`, 20/uro) —
+  isto načelo kot `premium_login_rl`, samo po IP namesto po e-naslovu, ker tu
+  ni e-naslova za ključ.
+- **`KOLICINE` (`posamezno`/`nekaj`/`obilo`) je namerna podvojitev** med
+  `worker.js` (validacija) in spustnim menijem v `opazovanje_section_html()`
+  — če dodaš/preimenuješ stopnjo, popravi oboje, sicer strežnik zavrne
+  vrednost, ki jo obrazec pošlje.
+- Vrsta in opomba sta prosto besedilo (brez strežniške validacije proti
+  `species_rules.yaml` — worker nima dostopa do Python podatkov, isto načelo
+  kot vzdevek pri `/napovej/` in `/igra/`); klientski datalist ponudi znane
+  vrste, ne prisili vanje. Vse uporabniško besedilo se pri izrisu seznama
+  vstavlja prek `textContent`, nikoli `innerHTML` z vgrajenim nizom.
+- Obrazec je progresivna izboljšava kot dnevnik in prijava na napoved —
+  brez JS ne odda ničesar; seznam nedavnih opažanj se prav tako ne da
+  strežniško izrisati (spreminja se sproti), zato ga `OPZ_JS` ob nalaganju
+  strani prenese sam.
+
 ## SEO smart routina — hub strani in vremenski dogodki
 
 `tools/seo_smart_routine.py` teče dnevno ob 01:45 UTC
