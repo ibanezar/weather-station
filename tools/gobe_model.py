@@ -57,6 +57,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RULES_PATH = os.path.join(ROOT, "species_rules.yaml")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 FREE_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "index.json")
+PICKER_JSON_DEFAULT = os.path.join(ROOT, "gobarska-napoved", "izbirnik.json")
 
 MODEL_VERSION = "1.3"
 FORECAST_DAYS = 7
@@ -594,6 +595,71 @@ def premium_today(premium):
     }
 
 
+# ── homepage picker (free) ──────────────────────────────────────────────────
+# Compact species/day/area picker on the /gobarska-napoved/ hero — a taste of
+# the paid 7-day × 97-location × 300-species forecast, not a substitute for
+# it. Deliberately capped to 5 well-known edible species and a curated,
+# stable list of named locations (not "top N by today's score", which would
+# reorder daily and make the picker feel inconsistent) spanning the doline's
+# three terrains and its elevation range. If a name below ever stops
+# matching species_rules.yaml (renamed/removed location), it is silently
+# skipped — same "tiho odpade" principle as VALLEY_DUEL and other optional
+# widgets elsewhere in this codebase.
+PICKER_SPECIES_IDS = [
+    "boletus_edulis",         # Jesenski goban (Jurček)
+    "cantharellus_cibarius",  # Navadna lisička
+    "macrolepiota_procera",   # Orjaški dežnik (Marela)
+    "russula_cyanoxantha",    # Modrikasta (modrozelena) golobica
+    "leccinum_versipelle",    # Brezov turek
+]
+PICKER_LOCATION_NAMES = [
+    "Rečica ob Savinji",                  # home, vlažna dolina, 400 m
+    "Nazarje – sotočje Drete in Savinje",  # vlažna, 340 m
+    "Luče (nad dolino)",                  # vlažna, 600 m
+    "Solčava – ob Savinji",               # vlažna, 640 m
+    "Radegunda spodaj",                   # kisla, 495 m
+    "Gozdovi nad Ljubnim",                # kisla, 700 m
+    "Smrekovško pogorje",                 # kisla, 1300 m
+    "Dobrovlje – Čreta",                  # bazična, 900 m
+    "Mozirska koča – gozd precej nižje",  # bazična, 1100 m
+    "Golte",                              # bazična, 1300 m
+    "Menina planina",                     # bazična, 1453 m
+    "Dleskovška planota",                 # bazična, 1500 m
+]
+
+
+def picker_wire(premium, species_ids=None, location_names=None):
+    """Free JSON za interaktivni izbirnik na glavni strani: PICKER_SPECIES_IDS
+    × PICKER_LOCATION_NAMES × 7 dni, izluščeno iz iste `premium` izračunane
+    napovedi, ki jo build_body() že ima v pomnilniku — brez dodatnega klica
+    na Open-Meteo. Zapis je matrika (ne seznam vnosov), da ostane majhen:
+    5 × 12 × 7 = 420 celih števil."""
+    species_ids = [s for s in (species_ids or PICKER_SPECIES_IDS) if s in premium["species_meta"]]
+    by_name = {loc["name"]: loc for loc in premium["locations"]}
+    locations = [by_name[n] for n in (location_names or PICKER_LOCATION_NAMES) if n in by_name]
+    days = [d["date"] for d in locations[0]["days"]] if locations else []
+    index = {}
+    for sid in species_ids:
+        per_loc = {}
+        for loc in locations:
+            row = []
+            for day in loc["days"]:
+                sp = next((s for s in day["species"] if s["id"] == sid), None)
+                row.append(sp["index"] if sp else 0)
+            per_loc[loc["name"]] = row
+        index[sid] = per_loc
+    return {
+        "generated": premium["generated"],
+        "model_version": premium["model_version"],
+        "days": days,
+        "species": [{"id": sid, "name_sl": premium["species_meta"][sid]["name_sl"],
+                      "name_lat": premium["species_meta"][sid]["name_lat"]} for sid in species_ids],
+        "locations": [{"name": loc["name"], "terrain": loc.get("terrain"), "elev_m": loc["elev_m"],
+                        "home": bool(loc.get("home"))} for loc in locations],
+        "index": index,
+    }
+
+
 def free_payload(premium):
     """Public teaser: today's overall index at the home location only."""
     meta = premium["species_meta"]
@@ -644,6 +710,8 @@ def main():
     ap = argparse.ArgumentParser(description="Species-level gobarski indeks model")
     ap.add_argument("--out-free", default=FREE_JSON_DEFAULT,
                     help="path for the public free-tier JSON")
+    ap.add_argument("--out-picker", default=PICKER_JSON_DEFAULT,
+                    help="path for the public homepage species/day/area picker JSON")
     ap.add_argument("--out-premium", default=None,
                     help="path for the premium JSON (omit to skip writing)")
     ap.add_argument("--out-premium-today", default=None,
@@ -677,6 +745,10 @@ def main():
         with open(args.out_free, "w", encoding="utf-8") as f:
             json.dump(free, f, ensure_ascii=False, indent=1)
         print(f"\n→ free JSON: {args.out_free}")
+        if args.out_picker:
+            with open(args.out_picker, "w", encoding="utf-8") as f:
+                json.dump(picker_wire(premium), f, ensure_ascii=False, indent=1)
+            print(f"→ picker JSON: {args.out_picker}")
         if args.out_premium:
             # Kompakten zapis (brez indent) — glej premium_wire(): payload gre
             # v KV in vsak odvečen presledek se pomnoži s 73k vnosi.

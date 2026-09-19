@@ -728,6 +728,36 @@ ločenih `zemljevid`, `koledar`, `trend`, `baza-vrst`, `dvojnice`.
 - FAQ ostane na glavni strani, ker nosi `FAQPage` strukturirane podatke za
   glavni URL.
 
+**Izjema (18. 9. 2026): interaktivni izbirnik takoj pod junaško kartico.**
+Filip je izrecno želel, da uporabnik vrsto/dan/območje preizkusi takoj, brez
+klika na podstran — to je zavestna izjema od pravila "nova zmožnost ni nov
+razdelek na glavni strani" zgoraj, ne spodrsljaj. `picker_section_html()` v
+`tools/generate_gobe_page.py` izriše majhen izbirnik (5 najpogostejših vrst
+× 7 dni × 12 osrednjih območij) med heroj in mrežo zmožnosti.
+
+- Podatke da `gm.picker_wire()` (`tools/gobe_model.py`) iz iste `premium`
+  napovedi, ki jo `build_body()` že ima v pomnilniku — brez dodatnega klica
+  na Open-Meteo. Matrika je **namenoma pod-množica**: `PICKER_SPECIES_IDS`
+  (5 vrst, ne vseh ~100 z indeksom) × `PICKER_LOCATION_NAMES` (12 fiksnih,
+  poimenskih lokacij, ne "top N po današnji oceni" — slednje bi se
+  razvrstilo drugače vsak dan in izbirnik bi bil videti nedosleden med obiski).
+  To ostaja **okus** polne premium napovedi (97 lokacij × ~100+ vrst), ne
+  njena brezplačna zamenjava — če se seznam kdaj razširi, naj ostane manjši
+  red velikosti od premium ponudbe, sicer se ogrozi razlog za plačilo.
+- Isti `gm.picker_wire()` piše tudi prost, javen `gobarska-napoved/izbirnik.json`
+  (privzeta pot `--out-picker` v `gobe_model.py`, zapisan poleg `index.json`
+  v isti `gobe-forecast.yml` step — `git add gobarska-napoved/` ga pobere
+  samodejno, brez sprememb workflowa). Stran ga ne prenaša prek omrežja:
+  `build_body()` isto matriko vgradi neposredno v HTML (`<script>` z JSON),
+  da izbirnik deluje takoj, brez dodatnega klica — datoteka obstaja za
+  morebitno drugo uporabo, ne kot vir strani same.
+- Privzeto stanje (prva vrsta, danes, domača lokacija) je izrisano
+  strežniško (vidno brez JS in za pajke); JS ob spremembi izbire samo bere
+  že vgrajeno matriko. Pragova `levelWord()`/`levelClass()` v vgrajenem JS-u
+  sta namerna podvojitev `gm.level()`/`level_class()` — isto načelo kot
+  `_smerBesedilo`/`_ltgDecode` drugod v repozitoriju; če spremeniš pragove
+  tam, spremeni tudi tu.
+
 ## SEO smart routina — hub strani in vremenski dogodki
 
 `tools/seo_smart_routine.py` teče dnevno ob 01:45 UTC

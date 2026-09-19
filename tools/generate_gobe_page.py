@@ -1053,6 +1053,26 @@ body .app-bottomnav{display:none}
    links to the map), so it needs its own link-style reset; .gp-forest
    itself is only ever a <div> elsewhere. */
 .gp-mmap-card{text-decoration:none;color:inherit}
+/* ── Homepage species/day/area picker (picker_section_html) — sits right
+   under the hero, ahead of the feature-card grid, so a visitor sees a
+   usable tool in the same glance as the overall index, not just a teaser
+   of one. Reuses .gp-forest-pct/.gp-pct-* for the result badge so it reads
+   as the same "percentage disc" language as every other index on the
+   page, instead of inventing a second visual vocabulary for the same
+   number. See CLAUDE.md "Glavna stran gobarja" for why this is a
+   documented exception to "ni zbirna, nova zmožnost ne gre na glavno". */
+.gp-picker{margin:1.2rem 0;padding:1rem 1.1rem;border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
+  background:var(--card-bg)}
+.gp-picker-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem;margin:.7rem 0}
+.gp-picker-field{display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:var(--muted);
+  font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.gp-picker-field select{font:inherit;font-size:.92rem;font-weight:600;color:var(--text);text-transform:none;
+  letter-spacing:normal;padding:.55rem .6rem;border-radius:10px;border:1px solid var(--card-border);
+  background:var(--bg);min-height:2.6rem}
+.gp-picker-result{display:flex;align-items:center;gap:.9rem;margin-top:.3rem;flex-wrap:wrap}
+.gp-picker-result .gp-forest-pct{box-shadow:none;border:1px solid var(--card-border)}
+.gp-picker-txt{font-size:.92rem;color:var(--text)}
+.gp-picker-note{font-size:.82rem;color:var(--muted);margin-top:.7rem}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
@@ -3638,6 +3658,103 @@ def mini_map_preview_html(premium):
             '  </div>')
 
 
+def picker_section_html(picker, total_species, total_locations):
+    """Kompakten interaktivni izbirnik (vrsta + dan + območje) takoj pod
+    junaško kartico — glej CLAUDE.md "Glavna stran gobarja je pristajalna,
+    ne zbirna" za zapisano izjemo, zakaj je to vseeno nov razdelek na glavni
+    strani in ne na svoji podstrani.
+
+    Kaže gm.PICKER_SPECIES_IDS × gm.PICKER_LOCATION_NAMES × 7 dni (iz
+    gm.picker_wire()) — okus polne 7-dnevne × {total_locations}-lokacijske ×
+    {total_species}-vrstne premium napovedi, ne njena zamenjava.
+
+    Privzeto stanje (prva vrsta, danes, domača lokacija) je izrisano
+    strežniško, da rezultat obstaja tudi brez JS in za pajke; cela matrika
+    je vgrajena v stran (ni ločenega omrežnega klica), JS ob spremembi izbire
+    samo prebere iz nje — isto načelo kot MR_PADDLE konfiguracija zgoraj."""
+    if not (picker["species"] and picker["locations"] and picker["days"]):
+        return ""
+    sp0 = picker["species"][0]
+    home = next((l for l in picker["locations"] if l["home"]), picker["locations"][0])
+    val0 = picker["index"][sp0["id"]][home["name"]][0]
+
+    sp_options = "".join(
+        f'<option value="{_esc(s["id"])}">{_esc(s["name_sl"])}</option>' for s in picker["species"])
+    day_options = "".join(
+        f'<option value="{i}">{"Danes" if i == 0 else f"{_dt.date.fromisoformat(d).day}.{_dt.date.fromisoformat(d).month}."}</option>'
+        for i, d in enumerate(picker["days"]))
+    loc_options = "".join(
+        f'<option value="{_esc(l["name"])}"{" selected" if l is home else ""}>{_esc(l["name"])}</option>'
+        for l in picker["locations"])
+
+    data_json = _json_mod.dumps(picker, ensure_ascii=False, separators=(",", ":"))
+
+    return f'''  <div class="gp-picker" id="gp-picker">
+    <h2 class="gp-h2" id="izbirnik" style="margin-top:1.5rem">🔎 Preveri vrsto, dan in območje</h2>
+    <p class="gp-hero-sub">{len(picker["species"])} najpogostejših vrst za naslednjih {len(picker["days"])} dni in
+    {len(picker["locations"])} osrednjih območij doline — brez prijave.</p>
+    <div class="gp-picker-row">
+      <label class="gp-picker-field">Vrsta<select id="gp-picker-sp" aria-label="Izberi vrsto">{sp_options}</select></label>
+      <label class="gp-picker-field">Dan<select id="gp-picker-day" aria-label="Izberi dan">{day_options}</select></label>
+      <label class="gp-picker-field">Območje<select id="gp-picker-loc" aria-label="Izberi območje">{loc_options}</select></label>
+    </div>
+    <div class="gp-picker-result" id="gp-picker-result">
+      <div class="gp-forest-pct {level_class(val0)}" id="gp-picker-pct">
+        <span class="n">{val0}/100</span><span class="lvl">{_esc(gm.level(val0))}</span>
+      </div>
+      <div class="gp-picker-txt" id="gp-picker-txt"><strong>{_esc(sp0["name_sl"])}</strong> · danes · {_esc(home["name"])}</div>
+    </div>
+    <p class="gp-picker-note">Za vseh {total_species} vrst in vsa {total_locations} nabiralnih območij glej
+    <a href="#premium">7-dnevno napoved po vrstah</a>.</p>
+  </div>
+  <script>
+  (function(){{
+    var D={data_json};
+    var selSp=document.getElementById("gp-picker-sp");
+    var selDay=document.getElementById("gp-picker-day");
+    var selLoc=document.getElementById("gp-picker-loc");
+    var pctEl=document.getElementById("gp-picker-pct");
+    var txtEl=document.getElementById("gp-picker-txt");
+    if(!selSp||!selDay||!selLoc||!pctEl||!txtEl)return;
+    var spById={{}};
+    D.species.forEach(function(s){{spById[s.id]=s;}});
+    // Isti pragovi kot level()/level_class() v gobe_model.py/generate_gobe_page.py
+    // — namerna podvojitev, klient nima dostopa do Python kode (isto načelo
+    // kot _smerBesedilo/_ltgDecode drugod v repozitoriju). Če spremeniš
+    // pragove tam, spremeni tudi tu.
+    function levelWord(p){{
+      if(p>=75)return"Odlično"; if(p>=55)return"Dobro"; if(p>=35)return"Zmerno";
+      if(p>=18)return"Slabo"; return"Zelo neugodno";
+    }}
+    function levelClass(p){{
+      if(p>=55)return"gp-pct-hi"; if(p>=35)return"gp-pct-mid"; if(p>=18)return"gp-pct-low";
+      return"gp-pct-none";
+    }}
+    function dayLabel(i){{
+      if(i===0)return"danes";
+      var dt=new Date(D.days[i]);
+      return dt.getDate()+"."+(dt.getMonth()+1)+".";
+    }}
+    function render(){{
+      var sid=selSp.value, di=parseInt(selDay.value,10)||0, loc=selLoc.value;
+      var row=(D.index[sid]||{{}})[loc];
+      var val=row?(row[di]||0):0;
+      pctEl.className="gp-forest-pct "+levelClass(val);
+      pctEl.innerHTML='<span class="n">'+val+'/100</span><span class="lvl">'+levelWord(val)+'</span>';
+      var sp=spById[sid]||{{name_sl:sid}};
+      txtEl.innerHTML="";
+      var strong=document.createElement("strong");
+      strong.textContent=sp.name_sl;
+      txtEl.appendChild(strong);
+      txtEl.appendChild(document.createTextNode(" · "+dayLabel(di)+" · "+loc));
+    }}
+    selSp.addEventListener("change",render);
+    selDay.addEventListener("change",render);
+    selLoc.addEventListener("change",render);
+  }})();
+  </script>'''
+
+
 def photo_credits_html(img_dir):
     """CC BY / CC BY-SA / GFDL all require visible attribution — render the
     CREDITS.json sitting next to gobarska-napoved/img/<img_dir>/*.jpg as a
@@ -3733,6 +3850,10 @@ def build_body(rules, premium, free):
     nočno ohladitev — po vrstah in po geologiji terena.
     <a href="/gobarska-napoved/metodologija/">Kako deluje indeks →</a></div>
   </div>'''
+
+    # ── interactive species/day/area picker (free) — right under the hero,
+    # see CLAUDE.md "Glavna stran gobarja" for the documented exception.
+    picker_html = picker_section_html(gm.picker_wire(premium), len(indexed), len(premium["locations"]))
 
     # ── today per forest (free) — compact row: info left, % disc right ────────
     # data-q/data-sp feed the /danes/ search box (DANES_JS): data-q is the
@@ -4095,6 +4216,7 @@ def build_body(rules, premium, free):
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
 {hero}
+{picker_html}
 {features_html}
 {mini_map_html}
   <h2 class="gp-h2" id="premium">{premium_h2}</h2>
