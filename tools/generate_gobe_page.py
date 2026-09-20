@@ -4464,7 +4464,7 @@ def main():
     spots, protected = gm.load_locations(rules)
     try:
         locs = gm.fetch_forecast(spots)
-    except (urllib.error.URLError, TimeoutError) as e:
+    except (urllib.error.URLError, TimeoutError, _json_mod.JSONDecodeError) as e:
         print(f"✗ Open-Meteo: {e}", file=sys.stderr)
         sys.exit(1)
     if len(locs) != len(spots):
