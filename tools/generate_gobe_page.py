@@ -3303,15 +3303,15 @@ def opazovanje_section_html(indexed, area_names):
 def build_danes_page(forests_html, free, indexed, area_names):
     """Dnevni indeks po nabiralnih območjih — brezplačno jedro napovedi.
     Ker ta stran nosi vsakodnevno sveže število, je v sitemapu daily."""
-    body = ('  <p class="post-meta">Gobarski indeks za nabiralna območja Zgornje Savinjske doline za '
+    body = (opazovanje_section_html(indexed, area_names)
+            + '\n  <p class="post-meta">Gobarski indeks za nabiralna območja Zgornje Savinjske doline za '
             f'{TODAY.isoformat()}. Izračunan je iz vlage in temperature tal, kumulativnih padavin '
             '(lokalno iz postaje IREICA1), zračne vlage in nočne ohladitve — po vrstah in po geologiji '
             'terena.</p>\n'
             f'  <p class="archive-intro">Danes v Rečici ob Savinji: <strong>{free["index"]} % · '
             f'{_esc(free["level"])}</strong>. Indeks je ocena ugodnosti pogojev za rast, ne obljuba '
             'najdbe — gozd ima vedno zadnjo besedo.</p>\n'
-            + forests_html
-            + "\n" + opazovanje_section_html(indexed, area_names))
+            + forests_html)
     return subpage_shell(
         "danes", "Danes po gozdovih — gobarski indeks po območjih",
         "Gobarski indeks po nabiralnih območjih Zgornje Savinjske doline za današnji dan — Golte, Menina, "
