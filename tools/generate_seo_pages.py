@@ -115,6 +115,21 @@ HEADER = '''  <header class="site-head">
   </header>'''
 
 
+# Ikona MeteoZima (sub-brand /zima/ podportala) — gora s snežno mejo + majhna
+# snežinka nad drugim vrhom. Isti vizualni jezik kot ic_* spodaj (24×24,
+# obris currentColor, ploskev pri nizki prekrivnosti, brez emoji). Uporablja
+# jo generate_zima_page.py na svojih treh straneh. NAMENOMA (še) ni med ic_*
+# spodaj oz. v app_bottomnav() klicu — vstop v glavno navigacijo je vezan na
+# prvi sneg/november (glej CLAUDE.md), ne na datum, ko je bila stran zgrajena.
+IC_METEOZIMA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                '<path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" '
+                'fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+                '<g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">'
+                '<line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/>'
+                '<line x1="13.8" y1="5.2" x2="17.2" y2="7"/>'
+                '<line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg>')
+
+
 # Mobile fixed bottom tab bar — same markup as index.html's, kept in sync by
 # hand (see blog/blog.css, which every page using this shell loads). `active`
 # is derived from the page's own canonical path in page_shell() below, so

@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
-tools/generate_zima_page.py — /zima/ podportal (hub + 2 spoke strani, Faza 1)
+tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 2 spoke strani, Faza 1)
+
+"MeteoZima" je ime podportala (ikona + kicker nad H1, glej brand_kicker() in
+seo.IC_METEOZIMA v generate_seo_pages.py) — isto načelo kot MeteoGasilec ali
+Termika drugod na strani. URL ostane /zima/ (ni razloga za preusmeritev);
+imenu portala ni treba ustrezati slug-u. V app_bottomnav() NAMENOMA še ni —
+CLAUDE.md vstop v glavno navigacijo veže na prvi sneg/november, ne na datum
+gradnje.
 
 Bere data/winter-data.json (tools/winter_engine.py) in iz njega sestavi tri
 statične strani po istem vzorcu kot ostale spoke strani
@@ -53,6 +60,25 @@ def risk_badge(level):
     return f'<span class="badge-risk {RISK_CLASS[level]}">{RISK_ICON[level]} {RISK_LABEL[level]}</span>'
 
 
+def _mz_icon(size=22):
+    """seo.IC_METEOZIMA brez lastnega width/height (glej opombo tam — velja
+    zaradi app_bottomnav()-jevega CSS-a, ki bo velikost postavil sam, ko bo
+    ikona nekoč vključena vanj) -- tu, izven te vrstice, ji velikost damo
+    eksplicitno."""
+    return seo.IC_METEOZIMA.replace('<svg viewBox="0 0 24 24"',
+                                     f'<svg viewBox="0 0 24 24" width="{size}" height="{size}"', 1)
+
+
+def brand_kicker():
+    """Majhna oznaka blagovne znamke nad H1 na vseh treh straneh — ikona +
+    ime. Barva #38bdf8 je ista "hladna" barva kot badge-risk-nizko drugod na
+    strani (glej vreme.css), ne nova izbira."""
+    return ('  <div style="display:flex;align-items:center;gap:.45rem;margin-bottom:.3rem">'
+            f'<span style="color:#38bdf8;display:inline-flex" aria-hidden="true">{_mz_icon()}</span>'
+            '<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;'
+            'letter-spacing:.06em;color:#94a3b8;text-transform:uppercase">MeteoZima</span></div>')
+
+
 def fmt_hour(iso):
     """'2026-11-16T05:00' -> 'jutri, 05:00' / 'danes, 05:00' glede na TODAY."""
     try:
@@ -102,15 +128,16 @@ def build_hub_body(data):
   </div>'''
 
     faq = [
-        ("Katere kraje pokriva /zima/?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
+        ("Katere kraje pokriva MeteoZima?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
          "Savinji in Gornji Grad — ista naselja kot na straneh »Vreme po krajih v dolini«."),
         ("Ali je to uradno opozorilo?", "Ne. Oba indeksa sta ocena Meteoreca iz javnih napovednih virov "
          "(Open-Meteo), ne uradno opozorilo ARSO. Za uradna opozorila glej "
          "<a href=\"/nevihte/\">stran opozoril</a>."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("Zima", None)])}
+    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
+{brand_kicker()}
   <h1 class="page-title">Zimski nadzorni center — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
@@ -127,8 +154,8 @@ def build_hub_body(data):
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
   </div>
   <p class="muted-note">Podatki izhajajo iz javne napovedi Open-Meteo za postajo IREICA1 in okoliška
-  naselja, brez notranjih meritev. Stran je v prvi fazi — meja sneženja in poledica; nadaljnji zimski
-  indeksi (kurilni semafor, prevoznost prelazov, snežna odeja …) sledijo pozneje.</p>
+  naselja, brez notranjih meritev. MeteoZima je v prvi fazi — meja sneženja in poledica; nadaljnji
+  zimski indeksi (kurilni semafor, prevoznost prelazov, snežna odeja …) sledijo pozneje.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
 
 
@@ -172,8 +199,9 @@ def build_snow_line_body(data):
          "tveganjem (gorske ture, prevoznost) preveri tudi uradno napoved ARSO."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("Zima", "/zima/"), ("Meja sneženja", None)])}
+    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)])}
 {seo.stn_badge()}
+{brand_kicker()}
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
@@ -220,8 +248,9 @@ def build_black_ice_body(data):
          "izračunano posebej za vsak most."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("Zima", "/zima/"), ("Poledica", None)])}
+    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)])}
 {seo.stn_badge()}
+{brand_kicker()}
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
@@ -249,15 +278,16 @@ def main():
     # ── hub ──
     body, faq = build_hub_body(data)
     schema = "\n".join([
-        seo.webpage_schema("/zima/", "Zima — Zgornja Savinjska dolina",
-                            "Zimski nadzorni center: meja sneženja in tveganje poledice za Zgornjo "
-                            "Savinjsko dolino, iz meritev IREICA1 in javne napovedi.",
+        seo.webpage_schema("/zima/", "MeteoZima — Zgornja Savinjska dolina",
+                            "MeteoZima — zimski nadzorni center: meja sneženja in tveganje poledice za "
+                            "Zgornjo Savinjsko dolino, iz meritev IREICA1 in javne napovedi.",
                             date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("Zima", None)]),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", None)]),
         seo.faq_schema(faq),
     ])
-    html = seo.page_shell("Zima — Zgornja Savinjska dolina",
-                           "Meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, posodobljeno dnevno.",
+    html = seo.page_shell("MeteoZima — Zgornja Savinjska dolina",
+                           "MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, "
+                           "posodobljeno dnevno.",
                            "/zima/", schema, body)
     seo.write_page("zima/index.html", html, force=True)
     print("  → zima/index.html")
@@ -269,7 +299,7 @@ def main():
                             "Trenutna in 24-urna napoved meje sneženja po višinskih pasovih za Zgornjo "
                             "Savinjsko dolino.",
                             date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("Zima", "/zima/"), ("Meja sneženja", None)]),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)]),
         seo.faq_schema(faq),
     ])
     html = seo.page_shell("Meja sneženja — Zgornja Savinjska dolina",
@@ -285,7 +315,7 @@ def main():
                             "Ocena tveganja poledice po krajih Zgornje Savinjske doline, iz meritev "
                             "IREICA1 in javne napovedi.",
                             date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("Zima", "/zima/"), ("Poledica", None)]),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)]),
         seo.faq_schema(faq),
     ])
     html = seo.page_shell("Tveganje poledice — Zgornja Savinjska dolina",
