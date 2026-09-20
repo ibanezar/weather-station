@@ -107,6 +107,20 @@ BLACK_ICE_LOCATIONS = [
     for t in seo.NEARBY_TOWNS if t["slug"] in _TOWN_SLUGS_PHASE1
 ]
 
+# Znane vzpetine nad dolino, dovolj preverjene za /zima/nad-meglo/ (za razliko
+# od ELEVATION_BANDS_M spodaj, ki namenoma ostajajo neimenovani pasovi) —
+# Golte (~1400 m) in Menina planina (~1500 m) sta v tools/build_igra_corridors.py
+# OBJAVLJENI/preverjeni višini vzletišč (Open-Meteo Elevation API ju napačno
+# splošči na 705 m oz. 1077 m, glej opombo tam), Raduha (2062 m) in Smrekovec
+# (1577 m) sta vrhova od tam, uporabljena za iste jadralne koridorje. Niso
+# naselja (NEARBY_TOWNS), zato ločen seznam samo za to eno stran.
+HIGH_POINTS = [
+    {"name": "Golte", "elevation_m": 1400},
+    {"name": "Menina planina", "elevation_m": 1500},
+    {"name": "Smrekovec", "elevation_m": 1577},
+    {"name": "Raduha", "elevation_m": 2062},
+]
+
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske
 # ravni. NAMENOMA ne poimenujemo konkretnih vrhov s trdno višino (Golte,
 # Menina, Raduha se med seboj razlikujejo za stotine metrov in bi bila trdna
@@ -591,8 +605,9 @@ def compute_heating_daily(hourly, times, idx_now):
 
 def compute_fog(hourly, idx_now, times):
     """Nad-meglo: ocenjena zgornja meja megle/nizke oblačnosti naslednje
-    jutro, primerjana z višinami postaje + vseh NEARBY_TOWNS krajev (glej
-    opombo v generate_zima_page.py, zakaj samo ti, brez ugibanih vrhov).
+    jutro, primerjana z višinami postaje + vseh NEARBY_TOWNS krajev + znanih
+    vzpetin (HIGH_POINTS zgoraj — Golte, Menina planina, Smrekovec, Raduha;
+    preverjene, ne ugibane, glej opombo pri HIGH_POINTS).
 
     Predstavniška ura znotraj FOG_MORNING_HOURS je tista z NAJMOČNEJŠO
     inverzijo, ne tista z najnižjim vrhom -- uro brez inverzije sploh
@@ -617,9 +632,9 @@ def compute_fog(hourly, idx_now, times):
     has_inversion = strength > 0
     morning_date = times[morning_idxs[0]][:10]
 
-    all_locs = [{"name": "Rečica ob Savinji", "elevation_m": ELEV}] + [
-        {"name": t["town"], "elevation_m": t["elev"]} for t in seo.NEARBY_TOWNS
-    ]
+    all_locs = ([{"name": "Rečica ob Savinji", "elevation_m": ELEV}]
+                + [{"name": t["town"], "elevation_m": t["elev"]} for t in seo.NEARBY_TOWNS]
+                + HIGH_POINTS)
     locations = [
         {"name": l["name"], "elevation_m": l["elevation_m"],
          "above": (l["elevation_m"] > top) if has_inversion else None}

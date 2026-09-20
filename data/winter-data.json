@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-20T18:47:18.700459+00:00",
-  "generated_at_local": "20. 9. 2026 ob 20:47",
+  "generated_at": "2026-09-20T19:04:09.658432+00:00",
+  "generated_at_local": "20. 9. 2026 ob 21:04",
   "station": "IREICA1",
   "snow_line": {
-    "current_line_m": 4060,
-    "forecast_24h_m": 2710,
+    "current_line_m": 3960,
+    "forecast_24h_m": 2660,
     "expected_cm_at_station": 0.0,
     "expected_cm_by_elevation": [
       {
@@ -153,6 +153,26 @@
         "name": "Solčava",
         "elevation_m": 644,
         "above": false
+      },
+      {
+        "name": "Golte",
+        "elevation_m": 1400,
+        "above": true
+      },
+      {
+        "name": "Menina planina",
+        "elevation_m": 1500,
+        "above": true
+      },
+      {
+        "name": "Smrekovec",
+        "elevation_m": 1577,
+        "above": true
+      },
+      {
+        "name": "Raduha",
+        "elevation_m": 2062,
+        "above": true
       }
     ],
     "daily": [
@@ -284,8 +304,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 18.1,
-          "dew_point_c": 13.6
+          "ground_temp_c": 16.0,
+          "dew_point_c": 11.0
         }
       }
     },
@@ -303,8 +323,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 18.3,
-          "dew_point_c": 13.6
+          "ground_temp_c": 16.2,
+          "dew_point_c": 11.0
         }
       }
     },
@@ -322,8 +342,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 18.0,
-          "dew_point_c": 13.6
+          "ground_temp_c": 15.9,
+          "dew_point_c": 11.0
         }
       }
     },
@@ -341,8 +361,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 17.7,
-          "dew_point_c": 13.6
+          "ground_temp_c": 15.6,
+          "dew_point_c": 11.0
         }
       }
     },
@@ -360,8 +380,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 17.7,
-          "dew_point_c": 13.6
+          "ground_temp_c": 15.6,
+          "dew_point_c": 11.0
         }
       }
     }

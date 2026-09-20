@@ -553,10 +553,11 @@ def build_fog_body(data):
         ("Kaj pomeni »nad meglo«?", "Da je kraj po oceni više od pričakovane zgornje meje jutranje "
          "temperaturne inverzije — v resnični megli/nizki oblačnosti torej morda ne bi bil, ampak nad njo, "
          "na soncu."),
-        ("Zakaj samo ti kraji, ne konkretni razgledi (Golte, Menina …)?", "Ker za te vrhove nimamo "
-         "preverjenih nadmorskih višin v repozitoriju — ocena namenoma uporablja samo že znane kraje iz "
-         "»Vreme po krajih v dolini«. Za dejanski pogled uporabi spletno kamero na naslovni strani "
-         "(napredni pogled → Zgornja Savinjska/Logarska dolina)."),
+        ("Od kod nadmorske višine za Golte, Menino, Smrekovec in Raduho?", "Iz objavljenih/preverjenih "
+         "podatkov, ki jih na strani že uporablja igra Termika (koridorji jadralnega letenja) — ne iz "
+         "surovega Elevation API-ja, ki gorske vrhove napačno splošči (npr. Golte na 705 m namesto pravih "
+         "~1400 m). Za dejanski pogled uporabi tudi spletno kamero na naslovni strani (napredni pogled → "
+         "Zgornja Savinjska/Logarska dolina)."),
         ("Kako natančna je ocena?", "Meri temperaturno inverzijo iz regionalnega profila (Open-Meteo), ne "
          "dejanske megle — resnična megla je odvisna tudi od vlage in se lahko krajevno razlikuje. Vzemi jo "
          "kot grobo usmeritev, ne zagotovilo."),
