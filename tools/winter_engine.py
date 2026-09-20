@@ -119,6 +119,7 @@ INVERSION_TOLERANCE_C = 0.3  # temperatura, ki pade manj kot toliko, še šteje 
 HEATING_WINDOW_H = 36
 HEATING_MIDDAY_EXCLUDE = range(11, 17)  # sonce čez dan praviloma prevetri dolino
 FOG_MORNING_HOURS = range(5, 10)
+DAILY_FORECAST_DAYS = 7
 
 
 def log(msg):
@@ -153,7 +154,7 @@ def fetch_open_meteo():
         "latitude": LAT, "longitude": LON,
         "hourly": ",".join(hourly_vars),
         "timezone": "Europe/Ljubljana",
-        "forecast_days": 3,
+        "forecast_days": DAILY_FORECAST_DAYS + 1,  # +1 rezerve, da idx_now sredi dneva ne odreže zadnjega dne
     })
     url = f"https://api.open-meteo.com/v1/forecast?{params}"
     req = urllib.request.Request(url, headers={
@@ -180,6 +181,24 @@ def nearest_hour_index(times, now_local):
         if best_diff is None or diff < best_diff:
             best_i, best_diff = i, diff
     return best_i
+
+
+def group_by_day(times, idx_now, n_days):
+    """Razdeli urno serijo od idx_now naprej po koledarskih dnevih (lokalno) —
+    dan 0 je danes (samo preostale ure), naslednjih n_days-1 so polni dnevi.
+    Uporabljajo ga vse *_daily() funkcije spodaj, da se logika grupiranja po
+    dnevih ne podvaja štirikrat."""
+    days = []
+    current_date = None
+    for i in range(idx_now or 0, len(times)):
+        d = times[i][:10]
+        if d != current_date:
+            if len(days) >= n_days:
+                break
+            days.append((d, []))
+            current_date = d
+        days[-1][1].append(i)
+    return days[:n_days]
 
 
 # ── Meja sneženja ─────────────────────────────────────────────────────────
@@ -227,7 +246,27 @@ def compute_snow_line(hourly, idx_now):
         "expected_cm_at_station": expected_cm_at_station,
         "expected_cm_by_elevation": by_elevation,
         "confidence": confidence,
+        "daily": compute_snow_daily(hourly, times, idx_now),
     }
+
+
+def compute_snow_daily(hourly, times, idx_now):
+    """Dnevni pregled meje sneženja za DAILY_FORECAST_DAYS dni — najnižja
+    (najbolj snežna) meja tisti dan + pričakovan sneg na postaji, isti
+    snow_fraction()/SNOW_RATIO_CM_PER_MM kot compute_snow_line zgoraj."""
+    fl = hourly.get("freezing_level_height") or []
+    precip = hourly.get("precipitation") or []
+    out = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        day_fl = [fl[i] for i in idxs if i < len(fl) and fl[i] is not None]
+        cm = sum((precip[i] or 0) * snow_fraction(ELEV, fl[i] if i < len(fl) else None) * SNOW_RATIO_CM_PER_MM
+                  for i in idxs if i < len(precip))
+        out.append({
+            "date": date,
+            "line_m": round(min(day_fl)) if day_fl else None,
+            "cm_at_station": round(cm, 1),
+        })
+    return out
 
 
 # ── Poledica (black ice) ──────────────────────────────────────────────────
@@ -247,15 +286,39 @@ def ground_temp_c(air_temp_c, cloud_pct, wind_kmh):
     return air_temp_c - offset
 
 
+def black_ice_category_for_hour(hourly, i, elevation_m):
+    """Kategorija poledice za en kraj/eno uro — jedro tako za 36h pogled po
+    krajih (compute_black_ice_for_location) kot za dnevni povzetek
+    (compute_black_ice_daily); ne podvajaj te logike na klicnem mestu."""
+    t_air = hval(hourly, "temperature_2m", i)
+    if t_air is None:
+        return None
+    elev_diff = elevation_m - ELEV
+    # Isti gradient kot gen_nearby_town_pages v generate_seo_pages.py — uvožen, ne podvojen.
+    t_air_loc = t_air - seo.LAPSE_RATE_C_PER_100M * elev_diff / 100
+    c = hval(hourly, "cloud_cover", i)
+    w = hval(hourly, "wind_speed_10m", i)
+    d = hval(hourly, "dew_point_2m", i)
+    p_now = hval(hourly, "precipitation", i) or 0
+    p_prev = (hval(hourly, "precipitation", i - 1) or 0) if i > 0 else 0
+
+    g = ground_temp_c(t_air_loc, c, w)
+    if g is None:
+        return None
+
+    cat = "nizko"
+    if g <= 0.5:
+        near_saturated = d is not None and d >= g - 1.0
+        wet_then_freezing = p_now > 0.1 or p_prev > 0.1
+        cat = "visoko" if (near_saturated or wet_then_freezing) else "srednje"
+    elif g <= 1.5 and d is not None and d >= g - 1.0:
+        cat = "srednje"
+    return cat, g, d
+
+
 def compute_black_ice_for_location(hourly, idx_now, elevation_m):
     times = hourly.get("time") or []
-    temp = hourly.get("temperature_2m") or []
-    dew = hourly.get("dew_point_2m") or []
-    cloud = hourly.get("cloud_cover") or []
-    wind = hourly.get("wind_speed_10m") or []
-    precip = hourly.get("precipitation") or []
     n = len(times)
-    elev_diff = elevation_m - ELEV
 
     risk_hours = []
     worst_rank, worst_ground, worst_dew = -1, None, None
@@ -263,28 +326,10 @@ def compute_black_ice_for_location(hourly, idx_now, elevation_m):
     start = idx_now if idx_now is not None else 0
     end = min(start + 36, n)
     for i in range(start, end):
-        t_air = temp[i] if i < len(temp) else None
-        if t_air is None:
+        result = black_ice_category_for_hour(hourly, i, elevation_m)
+        if result is None:
             continue
-        # Isti gradient kot gen_nearby_town_pages v generate_seo_pages.py — uvožen, ne podvojen.
-        t_air_loc = t_air - seo.LAPSE_RATE_C_PER_100M * elev_diff / 100
-        c = cloud[i] if i < len(cloud) else None
-        w = wind[i] if i < len(wind) else None
-        d = dew[i] if i < len(dew) else None
-        p_now = precip[i] if i < len(precip) else 0
-        p_prev = precip[i - 1] if i > 0 and (i - 1) < len(precip) else 0
-
-        g = ground_temp_c(t_air_loc, c, w)
-        if g is None:
-            continue
-
-        cat = "nizko"
-        if g <= 0.5:
-            near_saturated = d is not None and d >= g - 1.0
-            wet_then_freezing = (p_now or 0) > 0.1 or (p_prev or 0) > 0.1
-            cat = "visoko" if (near_saturated or wet_then_freezing) else "srednje"
-        elif g <= 1.5 and d is not None and d >= g - 1.0:
-            cat = "srednje"
+        cat, g, d = result
 
         if cat == "visoko":
             risk_hours.append(times[i])
@@ -302,6 +347,26 @@ def compute_black_ice_for_location(hourly, idx_now, elevation_m):
         "ground_temp_c": worst_ground,
         "dew_point_c": worst_dew,
     }
+
+
+def compute_black_ice_daily(hourly, times, idx_now):
+    """Dnevni povzetek poledice za DAILY_FORECAST_DAYS dni — najslabša
+    kategorija tisti dan MED VSEMI spremljanimi kraji (ne po kraju posebej,
+    da graf ostane en sam, berljiv niz stolpcev; podrobnost po krajih ostane
+    na 36h pogledu compute_black_ice_for_location)."""
+    out = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        worst_rank = -1
+        for loc in BLACK_ICE_LOCATIONS:
+            for i in idxs:
+                result = black_ice_category_for_hour(hourly, i, loc["elevation_m"])
+                if result is None:
+                    continue
+                rank = RANK_ORDER.index(result[0])
+                if rank > worst_rank:
+                    worst_rank = rank
+        out.append({"date": date, "level": RANK_ORDER[worst_rank] if worst_rank >= 0 else "nizko"})
+    return out
 
 
 # ── Skupna ocena inverzije (heating_index + fog) ─────────────────────────
@@ -334,14 +399,37 @@ def compute_inversion_profile(hourly, i):
     return (round(top_h) if strength > 0 else ELEV), round(strength, 1)
 
 
+def hour_heating_category(hourly, i):
+    """Kategorija kurilnega semaforja za eno uro (brez izločanja poldanskih
+    ur — to naredi klicatelj) — jedro tako za compute_heating_index (36h
+    pogled) kot compute_heating_daily (7-dnevni pregled)."""
+    _, strength = compute_inversion_profile(hourly, i)
+    if strength is None:
+        return None
+    wind = hval(hourly, "wind_speed_10m", i)
+    calm = wind is not None and wind <= 8
+    if strength >= 3.0 and calm:
+        cat = "visoko"
+    elif strength >= 1.5 or (strength > 0 and calm):
+        cat = "srednje"
+    else:
+        cat = "nizko"
+    return cat, strength, wind
+
+
+HEATING_ADVICE = {
+    "nizko": "Ni posebnih omejitev za kurjenje — zrak se dobro prevetri.",
+    "srednje": "Zmerna inverzija — po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno.",
+    "visoko": ("Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas "
+               "ali dan z boljšo prevetrenostjo."),
+}
+
+
 def compute_heating_index(hourly, idx_now, times):
     """Kurilni semafor: najslabša ocenjena prevetrenost v naslednjih
     HEATING_WINDOW_H urah, izven poldanskih ur (11-16), ko sonce dolino
-    praviloma prevetri. Kombinira jakost inverzije in veter — isto načelo
-    (interp/clamp pragovi) kot ground_temp_c zgoraj, ne nova formula
-    "od nikoder"."""
+    praviloma prevetri."""
     n = len(times)
-    wind_arr = hourly.get("wind_speed_10m") or []
     start = idx_now if idx_now is not None else 0
     end = min(start + HEATING_WINDOW_H, n)
 
@@ -354,18 +442,10 @@ def compute_heating_index(hourly, idx_now, times):
             continue
         if hh in HEATING_MIDDAY_EXCLUDE:
             continue
-        _, strength = compute_inversion_profile(hourly, i)
-        if strength is None:
+        result = hour_heating_category(hourly, i)
+        if result is None:
             continue
-        wind = wind_arr[i] if i < len(wind_arr) else None
-        calm = wind is not None and wind <= 8
-
-        if strength >= 3.0 and calm:
-            cat = "visoko"
-        elif strength >= 1.5 or (strength > 0 and calm):
-            cat = "srednje"
-        else:
-            cat = "nizko"
+        cat, strength, wind = result
 
         if cat == "visoko":
             risk_hours.append(times[i])
@@ -374,19 +454,43 @@ def compute_heating_index(hourly, idx_now, times):
             worst_rank, worst_strength, worst_wind = rank, strength, wind
 
     level = RANK_ORDER[worst_rank] if worst_rank >= 0 else "nizko"
-    advice = {
-        "nizko": "Ni posebnih omejitev za kurjenje — zrak se dobro prevetri.",
-        "srednje": "Zmerna inverzija — po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno.",
-        "visoko": ("Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas "
-                   "ali dan z boljšo prevetrenostjo."),
-    }[level]
     return {
         "level": level,
         "inversion_strength_c": worst_strength,
         "wind_kmh": worst_wind,
         "risk_hours": risk_hours[:6],
-        "advice": advice,
+        "advice": HEATING_ADVICE[level],
+        "daily": compute_heating_daily(hourly, times, idx_now),
     }
+
+
+def compute_heating_daily(hourly, times, idx_now):
+    """Dnevni pregled kurilnega semaforja za DAILY_FORECAST_DAYS dni —
+    najslabša kategorija tisti dan, izven poldanskih ur, isto pravilo kot
+    compute_heating_index."""
+    out = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        worst_rank, worst_strength = -1, 0.0
+        for i in idxs:
+            try:
+                hh = int(times[i][11:13])
+            except (ValueError, IndexError):
+                continue
+            if hh in HEATING_MIDDAY_EXCLUDE:
+                continue
+            result = hour_heating_category(hourly, i)
+            if result is None:
+                continue
+            cat, strength, _ = result
+            rank = RANK_ORDER.index(cat)
+            if rank > worst_rank:
+                worst_rank, worst_strength = rank, strength
+        out.append({
+            "date": date,
+            "level": RANK_ORDER[worst_rank] if worst_rank >= 0 else "nizko",
+            "inversion_strength_c": round(worst_strength, 1),
+        })
+    return out
 
 
 def compute_fog(hourly, idx_now, times):
@@ -413,13 +517,8 @@ def compute_fog(hourly, idx_now, times):
     if not morning_idxs:
         return None
 
-    best_top, best_strength = ELEV, 0.0
-    for i in morning_idxs:
-        top, strength = compute_inversion_profile(hourly, i)
-        if strength is not None and strength > best_strength:
-            best_top, best_strength = top, strength
-
-    has_inversion = best_strength > 0
+    top, strength = _fog_top_for_hours(hourly, morning_idxs)
+    has_inversion = strength > 0
     morning_date = times[morning_idxs[0]][:10]
 
     all_locs = [{"name": "Rečica ob Savinji", "elevation_m": ELEV}] + [
@@ -427,15 +526,43 @@ def compute_fog(hourly, idx_now, times):
     ]
     locations = [
         {"name": l["name"], "elevation_m": l["elevation_m"],
-         "above": (l["elevation_m"] > best_top) if has_inversion else None}
+         "above": (l["elevation_m"] > top) if has_inversion else None}
         for l in all_locs
     ]
     return {
         "has_inversion": has_inversion,
-        "top_m": best_top if has_inversion else None,
+        "top_m": top if has_inversion else None,
         "morning_date": morning_date,
         "locations": locations,
+        "daily": compute_fog_daily(hourly, times, idx_now),
     }
+
+
+def _fog_top_for_hours(hourly, idxs):
+    """Vrne (top_m, strength) za najmočnejšo inverzijo med danimi urami —
+    isto načelo kot compute_fog uporablja za svoje FOG_MORNING_HOURS okno,
+    tu izpostavljeno tudi za compute_fog_daily spodaj."""
+    best_top, best_strength = ELEV, 0.0
+    for i in idxs:
+        top, strength = compute_inversion_profile(hourly, i)
+        if strength is not None and strength > best_strength:
+            best_top, best_strength = top, strength
+    return best_top, best_strength
+
+
+def compute_fog_daily(hourly, times, idx_now):
+    """Jutranja meja megle za DAILY_FORECAST_DAYS dni — isto pravilo kot
+    compute_fog, samo eno jutro na dan namesto enega samega okna."""
+    out = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        morning = [i for i in idxs if int(times[i][11:13]) in FOG_MORNING_HOURS]
+        if not morning:
+            out.append({"date": date, "has_inversion": False, "top_m": None})
+            continue
+        top, strength = _fog_top_for_hours(hourly, morning)
+        has_inversion = strength > 0
+        out.append({"date": date, "has_inversion": has_inversion, "top_m": top if has_inversion else None})
+    return out
 
 
 def main():
@@ -476,6 +603,9 @@ def main():
         "snow_line": snow_line,
         "heating_index": heating_index,
         "fog": fog,
+        # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
+        # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
+        "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},
         "locations": locations,
     }
 
