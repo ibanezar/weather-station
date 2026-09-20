@@ -1,8 +1,11 @@
 name: Zima
 
-# MeteoZima (glej docs spec za /zima/): winter_engine.py izračuna vse štiri
-# indekse (meja sneženja, poledica, kurilni semafor, nad-meglo) iz Open-Meteo,
-# generate_zima_page.py iz tega sestavi hub + 4 spoke strani. Cron po
+# MeteoZima (glej docs spec za /zima/): winter_engine.py izračuna vse indekse
+# (meja sneženja, poledica, kurilni semafor, nad-meglo, snežna odeja) iz
+# Open-Meteo, plus sezonski dnevnik (data/winter-history.json) in tekočo
+# oceno snežne odeje (data/winter-snowpack.json, glej compute_snowpack v
+# winter_engine.py — zakaj mora biti pognan točno enkrat na dan, ne večkrat).
+# generate_zima_page.py iz tega sestavi hub + 5 spoke strani. Cron po
 # agrometeo-forecast.yml (5:45 UTC), ista ureno-dnevna kadenca kot ostali
 # zimski/vremenski risk-indeksi na strani (vodostaj-forecast.yml,
 # gasilec-forecast.yml).
@@ -35,7 +38,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json zima/
+          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json zima/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

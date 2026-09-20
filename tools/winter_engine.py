@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-tools/winter_engine.py — skupno podatkovno jedro za /zima/ podportal (Faza 1)
+tools/winter_engine.py — skupno podatkovno jedro za /zima/ (MeteoZima) podportal
 
 Enkrat dnevno izračuna zimske indekse iz Open-Meteo napovedi (edini napovedni
 vir tukaj — brez notranjih meritev, glej CLAUDE.md) in jih zapiše v
-data/winter-data.json, ki ga bereta oba spoke generatorja v
+data/winter-data.json, ki ga bereta vsi spoke generatorji v
 tools/generate_zima_page.py — isti vzorec kot calculate_frost_risk.py /
 generate_frost_page.py (izračun ločen od izrisa strani, da se stran lahko
 prerenderira brez ponovnega klica Open-Meteo).
 
-Faza 1 (glej spec) je izračunala dva indeksa (snow_line, black_ice); Faza 2
-dodaja heating_index (kurilni semafor) in fog (nad-meglo) — glej spodaj.
+Faza 1 je izračunala dva indeksa (snow_line, black_ice); Faza 2 doda
+heating_index (kurilni semafor) in fog (nad-meglo); Faza 3 doda vsakemu
+indeksu 7-dnevni pregled (`daily`, glej group_by_day()), tekočo oceno snežne
+odeje (snowpack, poenostavljen degree-day model — glej compute_snowpack) in
+sezonski dnevnik (season — arhiv brez verifikacije, samo štetje dni po
+kategoriji, glej compute_season_stats). Vse to piše v podatke tega vira, ne
+kot nove ločene strani — generate_zima_page.py jih doda na obstoječe 5
+strani (npr. season na hub, snowpack na novo /zima/snezna-odeja/).
 
   - snow_line (meja sneženja) — REGIONALEN indeks, ne po krajih: ničta
     izoterma (Open-Meteo `freezing_level_height`) je sinoptična količina, ki
@@ -80,6 +86,9 @@ import generate_seo_pages as seo  # noqa: E402 — NEARBY_TOWNS/LAPSE_RATE/LAT/L
 ROOT = seo.ROOT
 LAT, LON, ELEV = seo.LAT, seo.LON, seo.ELEV
 OUT_PATH = os.path.join(ROOT, "data", "winter-data.json")
+SNOWPACK_PATH = os.path.join(ROOT, "data", "winter-snowpack.json")
+HISTORY_PATH = os.path.join(ROOT, "data", "winter-history.json")
+HISTORY_MAX_AGE_DAYS = 400  # nekaj sezon nazaj — isti rok kot frost-risk-history.json
 
 try:
     from zoneinfo import ZoneInfo
@@ -110,6 +119,11 @@ SNOW_RATIO_CM_PER_MM = 1.0   # ~10:1 približek (1 mm padavin ≈ 1 cm svežega 
 
 GROUND_OFFSET_MAX_C = 3.0    # največji sevalni primanjkljaj cestišča pod zrakom (jasno, mirno)
 RANK_ORDER = ["nizko", "srednje", "visoko"]
+
+# Snežna odeja: poenostavljen degree-day model (dodaj nov sneg, odštej
+# taljenje) — glej opombo pri compute_snowpack(), zakaj je to TEKOČA OCENA,
+# ne meritev, in zakaj lahko čez sezono brez senzorja za umerjanje zaide.
+MELT_CM_PER_DEGREE_DAY = 0.6  # groba literaturna vrednost za odprt, temperaten sneg
 
 # Tlačni nivoji za oceno inverzije (heating_index/fog) — 925 hPa (~750-800 m),
 # 850 hPa (~1400-1500 m) in 700 hPa (~3000 m) so vsi zanesljivo nad postajo
@@ -155,6 +169,11 @@ def fetch_open_meteo():
         "hourly": ",".join(hourly_vars),
         "timezone": "Europe/Ljubljana",
         "forecast_days": DAILY_FORECAST_DAYS + 1,  # +1 rezerve, da idx_now sredi dneva ne odreže zadnjega dne
+        # compute_snowpack_update potrebuje polnih zadnjih 24 ur NAZAJ od idx_now
+        # -- brez tega bi urna serija ob jutranjem cron teku segala šele od
+        # polnoči danes (par ur), ne polnega dne, in bi dnevno odejo sistematsko
+        # podcenila (in podcenila taljenje) glede na uro, ob kateri teče cron.
+        "past_days": 1,
     })
     url = f"https://api.open-meteo.com/v1/forecast?{params}"
     req = urllib.request.Request(url, headers={
@@ -267,6 +286,83 @@ def compute_snow_daily(hourly, times, idx_now):
             "cm_at_station": round(cm, 1),
         })
     return out
+
+
+# ── Snežna odeja ──────────────────────────────────────────────────────────
+
+def load_snowpack():
+    try:
+        return json.load(open(SNOWPACK_PATH, encoding="utf-8"))
+    except Exception:
+        return {"updated": None, "depth_cm": {}}
+
+
+def compute_snowpack_update(hourly, times, idx_now, prev_depths):
+    """Posodobi tekočo oceno snežne odeje po višinskih pasovih (ELEVATION_BANDS_M):
+    doda nov sneg zadnjih 24 ur (isti snow_fraction()/SNOW_RATIO_CM_PER_MM kot
+    meja sneženja) in odšteje taljenje po poenostavljenem degree-day modelu
+    (MELT_CM_PER_DEGREE_DAY na stopinjo-dan nad 0 °C, temperatura po pasu
+    prilagojena z LAPSE_RATE_C_PER_100M).
+
+    To NI mikrofizikalni snežni model in NI verificirana proti meritvi —
+    postaja nima senzorja za sneg/tla (glej CLAUDE.md). Zadnjih 24 ur
+    (ne napoved naprej) je edino okno, ki je za napovedni API najbližje
+    "izmerjenemu" — kliče se enkrat dnevno (glej main(), zaščita pred
+    dvojnim štetjem ob ročnem ponovnem zagonu isti dan). Ocena lahko čez
+    sezono brez kontrolne točke zaide — stran to pove (generate_zima_page.py)."""
+    start = max((idx_now or 0) - 24, 0)
+    end = idx_now or 0
+    updated = {}
+    for e in ELEVATION_BANDS_M:
+        new_snow, degree_days = 0.0, 0.0
+        for i in range(start, end):
+            t = hval(hourly, "temperature_2m", i)
+            if t is not None:
+                t_band = t - seo.LAPSE_RATE_C_PER_100M * (e - ELEV) / 100
+                if t_band > 0:
+                    degree_days += t_band / 24  # urni prispevek k stopinja-dnevu
+            p = hval(hourly, "precipitation", i)
+            fl = hval(hourly, "freezing_level_height", i)
+            if p:
+                new_snow += p * snow_fraction(e, fl) * SNOW_RATIO_CM_PER_MM
+        melt = degree_days * MELT_CM_PER_DEGREE_DAY
+        prev = prev_depths.get(str(e), 0.0) or 0.0
+        updated[str(e)] = round(max(prev + new_snow - melt, 0.0), 1)
+    return updated
+
+
+def forward_snow_accum(hourly, times, idx_now, elevation_m, n_days):
+    """Bruto pričakovan NOV sneg (brez taljenja) v naslednjih n_days dneh za
+    en višinski pas — namenoma ločeno število od trenutne odeje (ne eno
+    sestavljeno "odeja čez teden dni"), isto načelo kot povsod na strani
+    ("dva vira/dve merili se ne smeta zliti v eno število")."""
+    total = 0.0
+    for _, idxs in group_by_day(times, idx_now, n_days):
+        for i in idxs:
+            p = hval(hourly, "precipitation", i)
+            fl = hval(hourly, "freezing_level_height", i)
+            if p:
+                total += p * snow_fraction(elevation_m, fl) * SNOW_RATIO_CM_PER_MM
+    return round(total, 1)
+
+
+def compute_snowpack(hourly, times, idx_now, today_iso):
+    """Vrne (snowpack_out, changed) — changed=False, če je bila odeja za
+    danes že posodobljena (ne podvoji dodajanja/taljenja ob ročnem
+    ponovnem zagonu istega dne)."""
+    prev = load_snowpack()
+    if prev.get("updated") == today_iso:
+        depths = prev.get("depth_cm") or {}
+        changed = False
+    else:
+        depths = compute_snowpack_update(hourly, times, idx_now, prev.get("depth_cm") or {})
+        changed = True
+    by_elevation = [
+        {"elevation_m": e, "depth_cm": depths.get(str(e), 0.0),
+         "new_snow_7d_cm": forward_snow_accum(hourly, times, idx_now, e, DAILY_FORECAST_DAYS)}
+        for e in ELEVATION_BANDS_M
+    ]
+    return {"updated": today_iso, "depth_cm": depths, "by_elevation": by_elevation}, changed
 
 
 # ── Poledica (black ice) ──────────────────────────────────────────────────
@@ -565,10 +661,52 @@ def compute_fog_daily(hourly, times, idx_now):
     return out
 
 
+# ── Sezonski dnevnik ──────────────────────────────────────────────────────
+# Enostaven arhivski dnevnik (isti upsert/prune vzorec kot
+# calculate_frost_risk.py) — BREZ verifikacije proti meritvi (ni je, s čim bi
+# te indekse preverili), samo štetje, koliko dni je bila letos katera
+# kategorija dosežena. "Sezona" je od 1. novembra najbližje pretekle jeseni.
+
+def load_history_log():
+    try:
+        return json.load(open(HISTORY_PATH, encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def upsert_history(entries, today_iso, snapshot):
+    entries[:] = [e for e in entries if e["date"] != today_iso]
+    entries.append(snapshot)
+    entries.sort(key=lambda e: e["date"])
+
+
+def prune_history(entries, today):
+    cutoff = (today - datetime.timedelta(days=HISTORY_MAX_AGE_DAYS)).isoformat()
+    entries[:] = [e for e in entries if e["date"] >= cutoff]
+
+
+def season_start(today):
+    year = today.year if today.month >= 11 else today.year - 1
+    return datetime.date(year, 11, 1)
+
+
+def compute_season_stats(entries, today):
+    start = season_start(today)
+    season = [e for e in entries if e["date"] >= start.isoformat()]
+    return {
+        "start_date": start.isoformat(),
+        "days_logged": len(season),
+        "heating_high_days": sum(1 for e in season if e.get("heating_level") == "visoko"),
+        "black_ice_high_days": sum(1 for e in season if e.get("black_ice_level") == "visoko"),
+        "snow_days": sum(1 for e in season if (e.get("snow_cm_at_station") or 0) > 0),
+    }
+
+
 def main():
     dry = "--dry-run" in sys.argv[1:]
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     now_local = now_utc.astimezone(LOCAL_TZ)
+    today_iso = now_local.date().isoformat()
 
     try:
         om = fetch_open_meteo()
@@ -586,6 +724,7 @@ def main():
     snow_line = compute_snow_line(hourly, idx_now)
     heating_index = compute_heating_index(hourly, idx_now, times)
     fog = compute_fog(hourly, idx_now, times)
+    snowpack, snowpack_changed = compute_snowpack(hourly, times, idx_now, today_iso)
 
     locations = []
     for loc in BLACK_ICE_LOCATIONS:
@@ -596,6 +735,21 @@ def main():
             "indices": {"black_ice": black_ice},
         })
 
+    worst = max((l["indices"]["black_ice"]["risk_level"] for l in locations),
+                key=RANK_ORDER.index, default="nizko")
+
+    history_entries = load_history_log()
+    upsert_history(history_entries, today_iso, {
+        "date": today_iso,
+        "snow_line_m": snow_line["current_line_m"],
+        "snow_cm_at_station": snow_line["expected_cm_at_station"],
+        "heating_level": heating_index["level"],
+        "black_ice_level": worst,
+        "fog_top_m": fog["top_m"] if fog and fog.get("has_inversion") else None,
+    })
+    prune_history(history_entries, now_local.date())
+    season = compute_season_stats(history_entries, now_local.date())
+
     out = {
         "generated_at": now_utc.isoformat(),
         "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M"),
@@ -603,14 +757,13 @@ def main():
         "snow_line": snow_line,
         "heating_index": heating_index,
         "fog": fog,
+        "snowpack": snowpack,
+        "season": season,
         # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
         # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
         "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},
         "locations": locations,
     }
-
-    worst = max((l["indices"]["black_ice"]["risk_level"] for l in locations),
-                key=RANK_ORDER.index, default="nizko")
 
     if dry:
         print(json.dumps(out, indent=2, ensure_ascii=False))
@@ -620,8 +773,20 @@ def main():
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
         f.write("\n")
+
+    if snowpack_changed:
+        with open(SNOWPACK_PATH, "w", encoding="utf-8") as f:
+            json.dump({"updated": snowpack["updated"], "depth_cm": snowpack["depth_cm"]}, f,
+                      indent=2, ensure_ascii=False)
+            f.write("\n")
+
+    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(history_entries, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
     print(f"data/winter-data.json: meja sneženja {snow_line['current_line_m']} m, "
-          f"kurilni semafor {heating_index['level']}, najvišje tveganje poledice: {worst}")
+          f"kurilni semafor {heating_index['level']}, najvišje tveganje poledice: {worst}, "
+          f"odeja na postaji {snowpack['depth_cm'].get(str(ELEV), 0)} cm")
     return 0
 
 
