@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-20T18:23:44.081689+00:00",
-  "generated_at_local": "20. 9. 2026 ob 20:23",
+  "generated_at": "2026-09-20T18:37:48.880972+00:00",
+  "generated_at_local": "20. 9. 2026 ob 20:37",
   "station": "IREICA1",
   "snow_line": {
     "current_line_m": 4060,
@@ -28,7 +28,44 @@
         "cm": 0.0
       }
     ],
-    "confidence": "nizka"
+    "confidence": "nizka",
+    "daily": [
+      {
+        "date": "2026-09-20",
+        "line_m": 3770,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-21",
+        "line_m": 2530,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-22",
+        "line_m": 2100,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-23",
+        "line_m": 2170,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-24",
+        "line_m": 2700,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-25",
+        "line_m": 2730,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-26",
+        "line_m": 3650,
+        "cm_at_station": 0.0
+      }
+    ]
   },
   "heating_index": {
     "level": "visoko",
@@ -38,7 +75,44 @@
       "2026-09-20T21:00",
       "2026-09-21T04:00"
     ],
-    "advice": "Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo."
+    "advice": "Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo.",
+    "daily": [
+      {
+        "date": "2026-09-20",
+        "level": "visoko",
+        "inversion_strength_c": 3.0
+      },
+      {
+        "date": "2026-09-21",
+        "level": "visoko",
+        "inversion_strength_c": 3.3
+      },
+      {
+        "date": "2026-09-22",
+        "level": "srednje",
+        "inversion_strength_c": 1.5
+      },
+      {
+        "date": "2026-09-23",
+        "level": "visoko",
+        "inversion_strength_c": 3.2
+      },
+      {
+        "date": "2026-09-24",
+        "level": "visoko",
+        "inversion_strength_c": 3.0
+      },
+      {
+        "date": "2026-09-25",
+        "level": "visoko",
+        "inversion_strength_c": 3.2
+      },
+      {
+        "date": "2026-09-26",
+        "level": "visoko",
+        "inversion_strength_c": 3.9
+      }
+    ]
   },
   "fog": {
     "has_inversion": true,
@@ -79,6 +153,75 @@
         "name": "Solčava",
         "elevation_m": 644,
         "above": false
+      }
+    ],
+    "daily": [
+      {
+        "date": "2026-09-20",
+        "has_inversion": false,
+        "top_m": null
+      },
+      {
+        "date": "2026-09-21",
+        "has_inversion": true,
+        "top_m": 858
+      },
+      {
+        "date": "2026-09-22",
+        "has_inversion": true,
+        "top_m": 860
+      },
+      {
+        "date": "2026-09-23",
+        "has_inversion": true,
+        "top_m": 863
+      },
+      {
+        "date": "2026-09-24",
+        "has_inversion": true,
+        "top_m": 843
+      },
+      {
+        "date": "2026-09-25",
+        "has_inversion": true,
+        "top_m": 835
+      },
+      {
+        "date": "2026-09-26",
+        "has_inversion": true,
+        "top_m": 1530
+      }
+    ]
+  },
+  "black_ice_outlook": {
+    "daily": [
+      {
+        "date": "2026-09-20",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-21",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-22",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-23",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-24",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-25",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-26",
+        "level": "nizko"
       }
     ]
   },

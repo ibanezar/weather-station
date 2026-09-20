@@ -97,6 +97,123 @@ def fmt_hour(iso):
     return f"{fmt_day(iso[:10])}, {dt.strftime('%H:%M')}"
 
 
+def fmt_day_short(date_iso):
+    d, m = int(date_iso[8:10]), int(date_iso[5:7])
+    return "danes" if date_iso == TODAY.isoformat() else f"{d}.{m}."
+
+
+# ── Grafi (7-dnevni pregled) ─────────────────────────────────────────────
+#
+# Statični, strežniško izrisan SVG — isti vzorec kot history_chart_svg v
+# generate_frost_page.py (brez JS, brez zunanjih knjižnic; te strani so
+# statične SEO strani, ne živi app.js pripomočki na naslovni strani).
+# Razred "frost-chart" (width:100%;height:auto;display:block v vreme.css) je
+# generičen kljub imenu — uporabljen tudi tu, da se CSS ne podvaja.
+#
+# Barve (CHART_COLOR) so LOČENE od badge-risk/RISK_CLASS: to so paličaste/
+# črtne barve za velike ploskve na grafu, ne majhne značke. Preverjene s
+# skill `dataviz`, `scripts/validate_palette.js "#0284c7,#d97706,#e11d48"
+# --mode dark --surface "#04070e"` (dejansko ozadje strani, ne privzeto iz
+# skripte) — vse šest preverjanj (svetlost, kroma, CVD-ločljivost, normalna
+# ločljivost, kontrast) je uspešno. Ne menjaj teh barv brez ponovne
+# validacije (glej CLAUDE.md, opomba pri MTR grafu).
+CHART_COLOR = {"nizko": "#0284c7", "srednje": "#d97706", "visoko": "#e11d48"}
+CHART_LINE_COLOR = "#38bdf8"  # en sam niz (meja sneženja/megla) — brez kategorij, brez validacije potrebno
+
+
+def daily_bar_chart_svg(days, values, levels, unit=""):
+    """Stolpci: višina = values[i] (magnituda), barva = levels[i] (kategorija
+    iz CHART_COLOR). Uporabljeno za kurilni semafor (jakost inverzije)."""
+    n = len(days)
+    if n == 0:
+        return None
+    w, h, pad_l, pad_r, pad_t, pad_b = 640, 190, 8, 8, 26, 26
+    known = [v for v in values if v is not None]
+    hi = max(known + [0.1])
+    plot_w, plot_h = w - pad_l - pad_r, h - pad_t - pad_b
+    slot_w = plot_w / n
+    bar_w = slot_w * 0.55
+
+    parts = []
+    for i, (v, lvl) in enumerate(zip(values, levels)):
+        cx = pad_l + slot_w * (i + 0.5)
+        color = CHART_COLOR.get(lvl, "#64748b")
+        bh = max((v / hi) * plot_h, 3) if v else 3
+        y = pad_t + plot_h - bh
+        parts.append(f'<rect x="{cx - bar_w / 2:.1f}" y="{y:.1f}" width="{bar_w:.1f}" '
+                      f'height="{bh:.1f}" rx="3" fill="{color}"/>')
+        if v is not None:
+            parts.append(f'<text x="{cx:.1f}" y="{y - 5:.1f}" text-anchor="middle" font-size="9.5" '
+                          f'fill="#94a3b8">{RISK_ICON.get(lvl, "")} {num(v, 1)}{unit}</text>')
+        parts.append(f'<text x="{cx:.1f}" y="{h - 8}" text-anchor="middle" font-size="9.5" '
+                      f'fill="#94a3b8">{fmt_day_short(days[i])}</text>')
+
+    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart" role="img" '
+            f'aria-label="Sedemdnevni pregled po dnevih">' + "".join(parts) + '</svg>')
+
+
+def daily_line_chart_svg(days, values, unit="", color=CHART_LINE_COLOR):
+    """Ena črta (magnituda skozi dneve) — uporabljeno za mejo sneženja in
+    mejo megle. Manjkajoča vrednost (None, npr. dan brez inverzije pri
+    megli) PRETRGA črto namesto da bi jo povezala čez prazen dan."""
+    n = len(days)
+    known_idx = [i for i, v in enumerate(values) if v is not None]
+    if len(known_idx) < 2:
+        return None
+    w, h, pad_l, pad_r, pad_t, pad_b = 640, 190, 40, 12, 16, 28
+    vals = [values[i] for i in known_idx]
+    lo, hi = min(vals), max(vals)
+    if hi == lo:
+        hi, lo = hi + 1, lo - 1
+    pad = (hi - lo) * 0.2
+    lo, hi = lo - pad, hi + pad
+    plot_w, plot_h = w - pad_l - pad_r, h - pad_t - pad_b
+    slot_w = plot_w / n
+
+    def x_of(i):
+        return pad_l + slot_w * (i + 0.5)
+
+    def y_of(v):
+        return pad_t + plot_h * (1 - (v - lo) / (hi - lo))
+
+    segments, seg = [], []
+    for i, v in enumerate(values):
+        if v is None:
+            if len(seg) > 1:
+                segments.append(seg)
+            seg = []
+        else:
+            seg.append((x_of(i), y_of(v)))
+    if len(seg) > 1:
+        segments.append(seg)
+
+    lines = "".join(
+        '<polyline points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in s) +
+        f'" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+        for s in segments
+    )
+    dots = "".join(
+        f'<circle cx="{x_of(i):.1f}" cy="{y_of(v):.1f}" r="3.2" fill="{color}"/>'
+        for i, v in enumerate(values) if v is not None
+    )
+    gaps = "".join(
+        f'<circle cx="{x_of(i):.1f}" cy="{h - pad_b + 4}" r="2" fill="#475569"/>'
+        for i, v in enumerate(values) if v is None
+    )
+    labels = "".join(
+        f'<text x="{x_of(i):.1f}" y="{h - 8}" text-anchor="middle" font-size="9.5" '
+        f'fill="#94a3b8">{fmt_day_short(days[i])}</text>'
+        for i in range(n)
+    )
+    y_lbl = (f'<text x="{pad_l - 6}" y="{y_of(hi) + 3:.1f}" text-anchor="end" font-size="9" '
+             f'fill="#94a3b8">{num(hi, 0)}{unit}</text>'
+             f'<text x="{pad_l - 6}" y="{y_of(lo) + 3:.1f}" text-anchor="end" font-size="9" '
+             f'fill="#94a3b8">{num(lo, 0)}{unit}</text>')
+
+    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart" role="img" '
+            f'aria-label="Sedemdnevni trend">' + lines + dots + gaps + y_lbl + labels + '</svg>')
+
+
 # ── /zima/ hub ────────────────────────────────────────────────────────────
 
 def build_hub_body(data):
@@ -219,6 +336,12 @@ def build_snow_line_body(data):
         rows.append(f'      <tr><th>{b["elevation_m"]} m n. m.</th><td>{num(b["cm"], 1)} cm v naslednjih 24 h</td></tr>')
     table = '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>"
 
+    daily = snow.get("daily") or []
+    chart = daily_line_chart_svg([d["date"] for d in daily], [d["line_m"] for d in daily], unit=" m")
+    chart_html = (f'  <h2>Trend meje sneženja (7 dni)</h2>\n  <div class="frost-chart-wrap">{chart}'
+                   '<p class="muted-note" style="margin-top:.3rem">Nižja črta = meja sneženja se spusti niže = '
+                   'sneg je verjetnejši na nižjih legah tisti dan.</p></div>' if chart else "")
+
     faq = [
         ("Kaj pomeni »meja sneženja«?", "To je nadmorska višina, nad katero padavine padajo kot sneg — "
          "izpeljana iz ničte izoterme (Open-Meteo), znižane za približno 200–300 m, ker se padavina ob "
@@ -243,6 +366,7 @@ def build_snow_line_body(data):
   </div>
   <h2>Pričakovan sneg po višinskih pasovih (naslednjih 24 h)</h2>
 {table}
+{chart_html}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
@@ -269,6 +393,17 @@ def build_black_ice_body(data):
 
     micro_items = "\n".join(f'    <li><strong>{l["name"]}:</strong> {l["microclimate"]}</li>' for l in locations)
 
+    outlook = (data.get("black_ice_outlook") or {}).get("daily") or []
+    outlook_html = ""
+    if outlook:
+        chips = "\n".join(
+            f'    <div class="stat-card"><div class="sc-label">{fmt_day_short(d["date"])}</div>'
+            f'<div class="sc-val">{RISK_ICON.get(d["level"], "⚪")}</div>'
+            f'<div class="sc-sub">{RISK_LABEL.get(d["level"], "ni podatka")}</div></div>'
+            for d in outlook
+        )
+        outlook_html = f'  <h2>7-dnevni pregled (najslabši kraj tisti dan)</h2>\n  <div class="stat-grid">\n{chips}\n  </div>'
+
     faq = [
         ("Je to uradno opozorilo ARSO?", "Ne. To je Meteorecov lasten kriterij (ocenjena temperatura cestišča "
          "proti rosišču, iz javne napovedi Open-Meteo) — enako poimenovana previdnostna opomba kot pri "
@@ -288,6 +423,7 @@ def build_black_ice_body(data):
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
 {table}
+{outlook_html}
   <h2>Mikroklima po krajih</h2>
   <ul>
 {micro_items}
@@ -318,6 +454,13 @@ def build_heating_index_body(data):
                     f'(ocenjena jakost inverzije {num(strength, 1)} °C, veter {num(wind, 1)} km/h '
                     f'v najslabši uri). Ure z največjim tveganjem: {hours}.')
 
+    daily = heating.get("daily") or []
+    chart = daily_bar_chart_svg([d["date"] for d in daily], [d["inversion_strength_c"] for d in daily],
+                                 [d["level"] for d in daily], unit="°C")
+    chart_html = (f'  <h2>7-dnevni pregled jakosti inverzije</h2>\n  <div class="frost-chart-wrap">{chart}'
+                   '<p class="muted-note" style="margin-top:.3rem">Višji stolpec = močnejša inverzija tisti dan '
+                   '(izven poldanskih ur) — 🟢 nizko · 🟡 srednje · 🔴 visoko tveganje.</p></div>' if chart else "")
+
     faq = [
         ("Kaj je temperaturna inverzija?", "Stanje, ko je zrak više toplejši kot pri tleh — obrnjeno od "
          "običajnega. Topel zrak deluje kot pokrov in prepreči mešanje: dim iz dimnikov in izpušni plini "
@@ -342,6 +485,7 @@ def build_heating_index_body(data):
     <div class="clabel">🔥 Prevetrenost za kurjenje</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
+{chart_html}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
@@ -373,6 +517,13 @@ def build_fog_body(data):
         table = ('  <h2>Kraji glede na pričakovano mejo megle</h2>\n'
                   '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>")
 
+    daily = fog.get("daily") if fog else []
+    chart = daily_line_chart_svg([d["date"] for d in (daily or [])], [d["top_m"] for d in (daily or [])], unit=" m")
+    chart_html = (f'  <h2>Trend jutranje meje megle (7 dni)</h2>\n  <div class="frost-chart-wrap">{chart}'
+                   '<p class="muted-note" style="margin-top:.3rem">Prekinjena črta = tisto jutro ni pričakovane '
+                   'pomembne inverzije (siva pika na osnovni črti), megla torej ni verjetna.</p></div>'
+                   if chart else "")
+
     faq = [
         ("Kaj pomeni »nad meglo«?", "Da je kraj po oceni više od pričakovane zgornje meje jutranje "
          "temperaturne inverzije — v resnični megli/nizki oblačnosti torej morda ne bi bil, ampak nad njo, "
@@ -396,6 +547,7 @@ def build_fog_body(data):
     <p class="fh-sub">{hero_sub}</p>
   </div>
 {table}
+{chart_html}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
