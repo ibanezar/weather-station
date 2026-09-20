@@ -75,6 +75,10 @@ CORE = {
     "ekstremno-vreme/":          ("weekly",  "0.7"),
     "agrometeo/":                ("daily",   "0.7"),
     "opozorilo-pred-pozebo/":    ("daily",   "0.7"),
+    # /zima/ podportal (Faza 1 — glej tools/winter_engine.py): hub + 2 spoke strani.
+    "zima/":                     ("daily",   "0.7"),
+    "zima/meja-snezenja/":       ("daily",   "0.7"),
+    "zima/poledica/":            ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),

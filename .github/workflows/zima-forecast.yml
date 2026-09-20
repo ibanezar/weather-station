@@ -1,0 +1,51 @@
+name: Zima
+
+# Faza 1 (glej docs spec za /zima/): winter_engine.py izračuna meja
+# sneženja + poledica iz Open-Meteo, generate_zima_page.py iz tega sestavi
+# hub + 2 spoke strani. Cron po agrometeo-forecast.yml (5:45 UTC), ista
+# ureno-dnevna kadenca kot ostali zimski/vremenski risk-indeksi na strani
+# (vodostaj-forecast.yml, gasilec-forecast.yml).
+
+on:
+  schedule:
+    - cron: '50 5 * * *'   # 5:50 UTC daily, po agrometeo-forecast.yml
+  workflow_dispatch:
+
+jobs:
+  zima:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Izračunaj zimske indekse
+        run: python3 tools/winter_engine.py
+
+      - name: Sestavi strani /zima/
+        run: python3 tools/generate_zima_page.py
+
+      - name: Commit & push (samo če se je stanje spremenilo)
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/winter-data.json zima/
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            exit 0
+          fi
+          git commit -m "zima: posodobi meteorec.si/zima/ $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
