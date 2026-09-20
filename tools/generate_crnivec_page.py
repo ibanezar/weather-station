@@ -149,6 +149,10 @@ CSS = '''
     background-size:16px 16px!important;background-position:-4px -4px!important}
   .wrap{max-width:720px}
   .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
+  .crn-hero{display:flex;align-items:center;gap:.8rem;margin-top:.4rem}
+  .crn-icon{width:96px;height:auto;flex-shrink:0}
+  @media (max-width:520px){.crn-hero{flex-direction:column;align-items:flex-start}
+    .crn-icon{width:78px}}
   .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
     color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
     transform:rotate(-1.5deg);margin:0 0 .3rem;text-transform:uppercase}
@@ -183,6 +187,28 @@ CSS = '''
 '''
 
 
+def mountain_icon_svg():
+    """Stripovska "maskota" strani — gora z ostrim cik-cak klancem in
+    (mock) prometnim znakom "pozor" ob vznožju. Čisto okrasje (aria-hidden),
+    poenostavljeno za berljivost pri ~90 px (prvotna različica s
+    podrobnim avtomobilčkom se je pri tej velikosti izgubila — glej git
+    zgodovino). Isti stil kot gauge_svg/starburst_svg zgoraj (debel črn
+    obris, ploskovite barve, brez naloženih slik)."""
+    return '''<svg viewBox="0 0 200 180" class="crn-icon" aria-hidden="true">
+    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(38,150) rotate(-8)">
+      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
+    </g>
+  </svg>'''
+
+
 def build_body(data):
     passes = data.get("passes") or []
     crnivec = next((p for p in passes if p["id"] == "crnivec"), None)
@@ -199,9 +225,14 @@ def build_body(data):
     return f'''{CSS}
   <div class="crn-wrap">
 {seo.crumbs_html([("Meteorec", "/"), ("Kako je čez Črnivec?", None)])}
-    <h1 class="crn-title">Kako je čez Črnivec?</h1>
-    <p class="crn-sub">Vprašanje, ki ga v tej dolini nekdo vpraša vsak dan. Uradnega odgovora
-    ni — tale je (skoraj) enako zanesljiv.</p>
+    <div class="crn-hero">
+      {mountain_icon_svg()}
+      <div>
+        <h1 class="crn-title">Kako je čez Črnivec?</h1>
+        <p class="crn-sub">Vprašanje, ki ga v tej dolini nekdo vpraša vsak dan. Uradnega odgovora
+        ni — tale je (skoraj) enako zanesljiv.</p>
+      </div>
+    </div>
 
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
