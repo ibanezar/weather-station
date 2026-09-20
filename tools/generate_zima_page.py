@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 2 spoke strani, Faza 1)
+tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 4 spoke strani, Faza 1+2)
 
 "MeteoZima" je ime podportala. Glava (logo + ime) se na vseh treh straneh
 klientsko zamenja z zimsko izdajo — BRAND_SWAP spodaj, isti vzorec kot
@@ -17,13 +17,17 @@ statične strani po istem vzorcu kot ostale spoke strani
 nobenega API-ja sama, izračun je ločen (winter_engine.py), da se strani
 lahko prerenderirajo brez ponovnega klica Open-Meteo:
 
-  /zima/                    — hub: povzetek obeh indeksov za danes/jutri
-  /zima/meja-snezenja/      — meja sneženja po višinskih pasovih
-  /zima/poledica/           — tveganje poledice po krajih v dolini
+  /zima/                    — hub: povzetek vseh štirih indeksov za danes/jutri
+  /zima/meja-snezenja/      — meja sneženja po višinskih pasovih (Faza 1)
+  /zima/poledica/           — tveganje poledice po krajih v dolini (Faza 1)
+  /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje (Faza 2)
+  /zima/nad-meglo/          — kateri kraji so nad pričakovano meglo (Faza 2)
 
-Preostalih 15 spoke strani iz specifikacije (kurilni semafor, prevoznost
-prelazov, snežna odeja …) NAMENOMA ni tu — Faza 1 gradi samo jedro + dve
-najmočnejši strani po specifikaciji, širitev je ločeno delo.
+Preostalih 13 spoke strani iz specifikacije (prevoznost prelazov, snežna
+odeja, ločena stran za kakovost zraka …) NAMENOMA ni tu — glej odprta
+vprašanja v specifikaciji: ni javnega API-ja za gorske prelaze, ni senzorja
+za snežno odejo, ločena stran za kakovost zraka bi podvajala obstoječi
+/kakovost-zraka/ (glej opombo pri heating_index v winter_engine.py).
 
 Usage:
   python3 tools/generate_zima_page.py
@@ -73,20 +77,24 @@ def risk_badge(level):
     return f'<span class="badge-risk {RISK_CLASS[level]}">{RISK_ICON[level]} {RISK_LABEL[level]}</span>'
 
 
+def fmt_day(date_iso):
+    """'2026-11-16' -> 'jutri' / 'danes' glede na TODAY, sicer 'D. M.'."""
+    y, m, d = int(date_iso[:4]), int(date_iso[5:7]), int(date_iso[8:10])
+    date_obj = datetime.date(y, m, d)
+    if date_obj == TODAY:
+        return "danes"
+    if date_obj == TODAY + datetime.timedelta(days=1):
+        return "jutri"
+    return f"{d}. {m}."
+
+
 def fmt_hour(iso):
     """'2026-11-16T05:00' -> 'jutri, 05:00' / 'danes, 05:00' glede na TODAY."""
     try:
         dt = datetime.datetime.strptime(iso[:16], "%Y-%m-%dT%H:%M")
     except ValueError:
         return iso
-    d = dt.date()
-    if d == TODAY:
-        day = "danes"
-    elif d == TODAY + datetime.timedelta(days=1):
-        day = "jutri"
-    else:
-        day = f"{d.day}. {d.month}."
-    return f"{day}, {dt.strftime('%H:%M')}"
+    return f"{fmt_day(iso[:10])}, {dt.strftime('%H:%M')}"
 
 
 # ── /zima/ hub ────────────────────────────────────────────────────────────
@@ -114,19 +122,42 @@ def build_hub_body(data):
                    if worst_level == "nizko" else
                    f"Najbolj izpostavljen je trenutno kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
 
+    heating = data.get("heating_index") or {}
+    heating_level = heating.get("level")
+    heating_verdict = (f"Zrak se dobro prevetri, posebnih omejitev za kurjenje ni."
+                        if heating_level == "nizko" else
+                        f"{heating.get('advice', '')}" if heating.get("advice")
+                        else "Ocena kurilnega semaforja trenutno ni na voljo.")
+
+    fog = data.get("fog")
+    if not fog:
+        fog_verdict = "Ocena megle trenutno ni na voljo."
+    elif not fog.get("has_inversion"):
+        fog_verdict = "Jutri zjutraj ni pričakovane pomembne inverzije — megla v dolini ni verjetna."
+    else:
+        above = [l["name"] for l in fog["locations"] if l["above"]]
+        fog_verdict = (f"Jutri zjutraj pričakovana megla/nizka oblačnost do ~{fog['top_m']} m — "
+                        + (f"nad njo bi lahko bili: {', '.join(above)}." if above
+                           else "noben spremljan kraj v dolini danes ne bi bil nad njo."))
+
     cards = f'''  <div class="card-grid">
     <a class="phenom-card" href="/zima/meja-snezenja/">Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
     <a class="phenom-card" href="/zima/poledica/">Tveganje poledice
       <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>
+    <a class="phenom-card" href="/zima/kurilni-semafor/">Kurilni semafor
+      <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
+    <a class="phenom-card" href="/zima/nad-meglo/">Nad meglo
+      <div class="ph-count">{f"~{fog['top_m']} m" if fog and fog.get("has_inversion") else "brez megle"}</div></a>
   </div>'''
 
     faq = [
         ("Katere kraje pokriva MeteoZima?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
-         "Savinji in Gornji Grad — ista naselja kot na straneh »Vreme po krajih v dolini«."),
-        ("Ali je to uradno opozorilo?", "Ne. Oba indeksa sta ocena Meteoreca iz javnih napovednih virov "
+         "Savinji, Gornji Grad, Luče in Solčavo — ista naselja kot na straneh »Vreme po krajih v dolini«."),
+        ("Ali je to uradno opozorilo?", "Ne. Vsi štirje indeksi so ocena Meteoreca iz javnih napovednih virov "
          "(Open-Meteo), ne uradno opozorilo ARSO. Za uradna opozorila glej "
-         "<a href=\"/nevihte/\">stran opozoril</a>."),
+         "<a href=\"/nevihte/\">stran opozoril</a>, za dejansko kakovost zraka pa "
+         "<a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>."),
     ]
 
     return f'''{BRAND_SWAP}
@@ -142,14 +173,22 @@ def build_hub_body(data):
     <div class="clabel">🧊 Poledica</div>
     <p class="fh-sub">{ice_verdict}</p>
   </div>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🔥 Kurilni semafor</div>
+    <p class="fh-sub">{heating_verdict}</p>
+  </div>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🌫️ Nad meglo</div>
+    <p class="fh-sub">{fog_verdict}</p>
+  </div>
 {cards}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
   </div>
   <p class="muted-note">Podatki izhajajo iz javne napovedi Open-Meteo za postajo IREICA1 in okoliška
-  naselja, brez notranjih meritev. MeteoZima je v prvi fazi — meja sneženja in poledica; nadaljnji
-  zimski indeksi (kurilni semafor, prevoznost prelazov, snežna odeja …) sledijo pozneje.</p>
+  naselja, brez notranjih meritev. MeteoZima trenutno pokriva mejo sneženja, poledico, kurilni semafor
+  in oceno megle; prevoznost prelazov in snežna odeja čakata na javno dostopen vir podatkov.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
 
 
@@ -263,6 +302,109 @@ def build_black_ice_body(data):
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
+# ── /zima/kurilni-semafor/ ────────────────────────────────────────────────
+
+def build_heating_index_body(data):
+    heating = data.get("heating_index") or {}
+    level = heating.get("level")
+    strength = heating.get("inversion_strength_c")
+    wind = heating.get("wind_kmh")
+    hours = ", ".join(fmt_hour(h) for h in heating.get("risk_hours", [])[:4]) if heating.get("risk_hours") else "—"
+
+    if level is None:
+        hero_sub = "Ocena trenutno ni na voljo — poskusi znova pozneje."
+    else:
+        hero_sub = (f'{risk_badge(level)} — {heating.get("advice", "")} '
+                    f'(ocenjena jakost inverzije {num(strength, 1)} °C, veter {num(wind, 1)} km/h '
+                    f'v najslabši uri). Ure z največjim tveganjem: {hours}.')
+
+    faq = [
+        ("Kaj je temperaturna inverzija?", "Stanje, ko je zrak više toplejši kot pri tleh — obrnjeno od "
+         "običajnega. Topel zrak deluje kot pokrov in prepreči mešanje: dim iz dimnikov in izpušni plini "
+         "ostanejo ujeti v dolini namesto da bi se razredčili navzgor."),
+        ("Zakaj je pomembna za kurjenje?", "Ob močni inverziji in mirnem vetru se dim iz kurjenja slabo "
+         "razprši in se v dolini kopiči — to poslabša kakovost zraka za vse. Ocena zato svetuje previdnost "
+         "ali odlog kurjenja, ne prepoveduje ga."),
+        ("Kako je izračunano?", "Iz primerjave temperature na postaji s temperaturo na 925/850/700 hPa "
+         "(Open-Meteo) — če je više topleje, gre za inverzijo. Ta izračun je nov (v repozitoriju ni obstajal "
+         "prej) in je ocena, ne uradna meritev prevetrenosti."),
+        ("Ali to pove, kako onesnažen je zrak zdaj?", "Ne — za dejanske koncentracije delcev (PM10, PM2,5) "
+         "in cvetni prah glej <a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>. Ta stran meri samo, kako "
+         "dobro se zrak giblje, ne kaj je trenutno v njem."),
+    ]
+
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Kurilni semafor", None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">Kurilni semafor — Zgornja Savinjska dolina</h1>
+  <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🔥 Prevetrenost za kurjenje</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
+  </div>
+  <p class="muted-note">Ocena Meteoreca iz javne napovedi Open-Meteo, ne uradno opozorilo ali predpis o
+  kurjenju. Za dejansko kakovost zraka glej <a href="/kakovost-zraka/">/kakovost-zraka/</a>, za uradna
+  opozorila ARSO <a href="/nevihte/">stran opozoril</a>.</p>
+  <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
+
+
+# ── /zima/nad-meglo/ ──────────────────────────────────────────────────────
+
+def build_fog_body(data):
+    fog = data.get("fog")
+    table = ""
+
+    if not fog:
+        hero_sub = "Ocena trenutno ni na voljo — poskusi znova pozneje."
+    elif not fog.get("has_inversion"):
+        hero_sub = ("Jutri zjutraj ni pričakovane pomembne temperaturne inverzije — "
+                     "megla v dolini ni verjetna.")
+    else:
+        hero_sub = (f'{fmt_day(fog["morning_date"]).capitalize()} zjutraj je pričakovana zgornja meja '
+                     f'megle/nizke oblačnosti pri približno <strong>{fog["top_m"]} m n. m.</strong>')
+        rows = []
+        for l in fog["locations"]:
+            status = "🌤️ nad meglo" if l["above"] else "☁️ v megli / pod njo"
+            rows.append(f'      <tr><th>{l["name"]} ({l["elevation_m"]} m)</th><td>{status}</td></tr>')
+        table = ('  <h2>Kraji glede na pričakovano mejo megle</h2>\n'
+                  '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>")
+
+    faq = [
+        ("Kaj pomeni »nad meglo«?", "Da je kraj po oceni više od pričakovane zgornje meje jutranje "
+         "temperaturne inverzije — v resnični megli/nizki oblačnosti torej morda ne bi bil, ampak nad njo, "
+         "na soncu."),
+        ("Zakaj samo ti kraji, ne konkretni razgledi (Golte, Menina …)?", "Ker za te vrhove nimamo "
+         "preverjenih nadmorskih višin v repozitoriju — ocena namenoma uporablja samo že znane kraje iz "
+         "»Vreme po krajih v dolini«. Za dejanski pogled uporabi spletno kamero na naslovni strani "
+         "(napredni pogled → Zgornja Savinjska/Logarska dolina)."),
+        ("Kako natančna je ocena?", "Meri temperaturno inverzijo iz regionalnega profila (Open-Meteo), ne "
+         "dejanske megle — resnična megla je odvisna tudi od vlage in se lahko krajevno razlikuje. Vzemi jo "
+         "kot grobo usmeritev, ne zagotovilo."),
+    ]
+
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Nad meglo", None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">Nad meglo — Zgornja Savinjska dolina</h1>
+  <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🌫️ Jutranja megla</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
+{table}
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
+  </div>
+  <p class="muted-note">Ocena Meteoreca iz javne napovedi Open-Meteo (temperaturni profil), ne meritev
+  megle. Za živo sliko preveri spletne kamere na naslovni strani.</p>
+  <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
+
+
 def main():
     data = load_json(DATA_PATH)
     if not data:
@@ -317,6 +459,40 @@ def main():
                            "/zima/poledica/", schema, body)
     seo.write_page("zima/poledica/index.html", html, force=True)
     print("  → zima/poledica/index.html")
+
+    # ── kurilni-semafor ──
+    body, faq = build_heating_index_body(data)
+    schema = "\n".join([
+        seo.webpage_schema("/zima/kurilni-semafor/", "Kurilni semafor — Zgornja Savinjska dolina",
+                            "Ocena prevetrenosti za kurjenje na podlagi temperaturne inverzije v Zgornji "
+                            "Savinjski dolini.",
+                            date_published="2026-09-20"),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Kurilni semafor", None)]),
+        seo.faq_schema(faq),
+    ])
+    html = seo.page_shell("Kurilni semafor — Zgornja Savinjska dolina",
+                           "Ocena prevetrenosti za kurjenje (temperaturna inverzija) za Zgornjo Savinjsko "
+                           "dolino, posodobljeno dnevno.",
+                           "/zima/kurilni-semafor/", schema, body)
+    seo.write_page("zima/kurilni-semafor/index.html", html, force=True)
+    print("  → zima/kurilni-semafor/index.html")
+
+    # ── nad-meglo ──
+    body, faq = build_fog_body(data)
+    schema = "\n".join([
+        seo.webpage_schema("/zima/nad-meglo/", "Nad meglo — Zgornja Savinjska dolina",
+                            "Kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj po oceni nad "
+                            "pričakovano meglo/nizko oblačnostjo.",
+                            date_published="2026-09-20"),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Nad meglo", None)]),
+        seo.faq_schema(faq),
+    ])
+    html = seo.page_shell("Nad meglo — Zgornja Savinjska dolina",
+                           "Ocena, kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj nad pričakovano "
+                           "meglo, posodobljeno dnevno.",
+                           "/zima/nad-meglo/", schema, body)
+    seo.write_page("zima/nad-meglo/index.html", html, force=True)
+    print("  → zima/nad-meglo/index.html")
 
     return 0
 
