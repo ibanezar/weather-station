@@ -1,11 +1,13 @@
 name: Zima
 
 # MeteoZima (glej docs spec za /zima/): winter_engine.py izračuna vse indekse
-# (meja sneženja, poledica, kurilni semafor, nad-meglo, snežna odeja) iz
-# Open-Meteo, plus sezonski dnevnik (data/winter-history.json) in tekočo
-# oceno snežne odeje (data/winter-snowpack.json, glej compute_snowpack v
-# winter_engine.py — zakaj mora biti pognan točno enkrat na dan, ne večkrat).
-# generate_zima_page.py iz tega sestavi hub + 5 spoke strani. Cron po
+# (meja sneženja, poledica, kurilni semafor, nad-meglo, snežna odeja,
+# prevoznost prelazov) iz Open-Meteo, plus sezonski dnevnik
+# (data/winter-history.json) in tekočo oceno snežne odeje
+# (data/winter-snowpack.json, glej compute_snowpack v winter_engine.py —
+# zakaj mora biti pognan točno enkrat na dan, ne večkrat). PASSES (prelazi)
+# je ročno vzdrževan seznam v isti datoteki — stanje ceste se ne osveži samo.
+# generate_zima_page.py iz tega sestavi hub + 6 spoke strani. Cron po
 # agrometeo-forecast.yml (5:45 UTC), ista ureno-dnevna kadenca kot ostali
 # zimski/vremenski risk-indeksi na strani (vodostaj-forecast.yml,
 # gasilec-forecast.yml).

@@ -82,6 +82,7 @@ CORE = {
     "zima/kurilni-semafor/":     ("daily",   "0.7"),
     "zima/nad-meglo/":           ("daily",   "0.7"),
     "zima/snezna-odeja/":        ("daily",   "0.7"),
+    "zima/prevoznost-prelazov/": ("daily",   "0.7"),
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),

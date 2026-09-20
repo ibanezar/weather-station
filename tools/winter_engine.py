@@ -121,6 +121,59 @@ HIGH_POINTS = [
     {"name": "Raduha", "elevation_m": 2062},
 ]
 
+# Gorski prelazi za /zima/prevoznost-prelazov/ — ROČNO VZDRŽEVAN seznam, isti
+# vzorec kot HYDRANT_OVERRIDES (fetch_hydrants.py) / CALIBRATION
+# (import_species_db.py): ni javnega API-ja za stanje gorskih prelazov v
+# Sloveniji, zato "status"/"status_checked" ostaneta None, dokler ju kdo
+# ročno ne posodobi tu v kodi (z virom in datumom, isto načelo kot povsod v
+# repozitoriju). Nadmorski višini in povezavi STA preverjeni (ne ugibani):
+#   - Črnivec, 902 m: sl.wikipedia.org/wiki/Črnivec_(preval)
+#   - Pavličevo sedlo, 1339 m: sl.wikipedia.org/wiki/Pavličevo_sedlo,
+#     tudi na amzs.si/na-poti/alpski-prelazi/pavlicevo-sedlo-slovenija
+# Vremenska ocena (compute_pass_weather) NI enako kot "status" — prva je
+# izračunana (temperatura/sneg na tej višini, ista metoda kot povsod v tej
+# datoteki), druga je dejansko stanje ceste, ki ga lahko pove samo nekdo, ki
+# jo je pravkar videl.
+PASSES = [
+    {
+        "id": "crnivec",
+        "name": "Črnivec",
+        "elevation_m": 902,
+        "connects": "Kamniška Bistrica (Kamnik) ↔ Gornji Grad",
+        "source": "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)",
+        "status": None,
+        "status_checked": None,
+    },
+    {
+        "id": "pavlicevo-sedlo",
+        "name": "Pavličevo sedlo",
+        "elevation_m": 1339,
+        "connects": "Logarska dolina ↔ Bela pri Črni (Avstrija) — mejni prehod",
+        "source": "https://sl.wikipedia.org/wiki/Pavli%C4%8Devo_sedlo",
+        "status": None,
+        "status_checked": None,
+    },
+]
+
+
+def compute_pass_weather(hourly, idx_now, elevation_m):
+    """Vremenska ocena NA VIŠINI prelaza — isti lapse-rate/snow_fraction kot
+    povsod v tej datoteki, NE stanje ceste (glej opombo pri PASSES)."""
+    t_now = hval(hourly, "temperature_2m", idx_now)
+    temp_c = (t_now - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100) if t_now is not None else None
+
+    times = hourly.get("time") or []
+    precip = hourly.get("precipitation") or []
+    fl = hourly.get("freezing_level_height") or []
+    n = len(times)
+    window = range(idx_now, min(idx_now + 24, n)) if idx_now is not None else range(0)
+    snow_cm = sum((precip[i] or 0) * snow_fraction(elevation_m, fl[i] if i < len(fl) else None) * SNOW_RATIO_CM_PER_MM
+                   for i in window if i < len(precip))
+    return {
+        "temp_c": round(temp_c, 1) if temp_c is not None else None,
+        "expected_snow_cm_24h": round(snow_cm, 1),
+    }
+
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske
 # ravni. NAMENOMA ne poimenujemo konkretnih vrhov s trdno višino (Golte,
 # Menina, Raduha se med seboj razlikujejo za stotine metrov in bi bila trdna
@@ -740,6 +793,7 @@ def main():
     heating_index = compute_heating_index(hourly, idx_now, times)
     fog = compute_fog(hourly, idx_now, times)
     snowpack, snowpack_changed = compute_snowpack(hourly, times, idx_now, today_iso)
+    passes = [{**p, "weather": compute_pass_weather(hourly, idx_now, p["elevation_m"])} for p in PASSES]
 
     locations = []
     for loc in BLACK_ICE_LOCATIONS:
@@ -774,6 +828,7 @@ def main():
         "fog": fog,
         "snowpack": snowpack,
         "season": season,
+        "passes": passes,
         # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
         # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
         "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},

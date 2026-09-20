@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-20T19:04:09.658432+00:00",
-  "generated_at_local": "20. 9. 2026 ob 21:04",
+  "generated_at": "2026-09-20T19:11:31.479868+00:00",
+  "generated_at_local": "20. 9. 2026 ob 21:11",
   "station": "IREICA1",
   "snow_line": {
     "current_line_m": 3960,
@@ -257,6 +257,34 @@
     "black_ice_high_days": 0,
     "snow_days": 0
   },
+  "passes": [
+    {
+      "id": "crnivec",
+      "name": "Črnivec",
+      "elevation_m": 902,
+      "connects": "Kamniška Bistrica (Kamnik) ↔ Gornji Grad",
+      "source": "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)",
+      "status": null,
+      "status_checked": null,
+      "weather": {
+        "temp_c": 12.5,
+        "expected_snow_cm_24h": 0.0
+      }
+    },
+    {
+      "id": "pavlicevo-sedlo",
+      "name": "Pavličevo sedlo",
+      "elevation_m": 1339,
+      "connects": "Logarska dolina ↔ Bela pri Črni (Avstrija) — mejni prehod",
+      "source": "https://sl.wikipedia.org/wiki/Pavli%C4%8Devo_sedlo",
+      "status": null,
+      "status_checked": null,
+      "weather": {
+        "temp_c": 9.7,
+        "expected_snow_cm_24h": 0.0
+      }
+    }
+  ],
   "black_ice_outlook": {
     "daily": [
       {
