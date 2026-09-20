@@ -2,12 +2,14 @@
 """
 tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 2 spoke strani, Faza 1)
 
-"MeteoZima" je ime podportala (ikona + kicker nad H1, glej brand_kicker() in
-seo.IC_METEOZIMA v generate_seo_pages.py) — isto načelo kot MeteoGasilec ali
-Termika drugod na strani. URL ostane /zima/ (ni razloga za preusmeritev);
-imenu portala ni treba ustrezati slug-u. V app_bottomnav() NAMENOMA še ni —
-CLAUDE.md vstop v glavno navigacijo veže na prvi sneg/november, ne na datum
-gradnje.
+"MeteoZima" je ime podportala. Glava (logo + ime) se na vseh treh straneh
+klientsko zamenja z zimsko izdajo — BRAND_SWAP spodaj, isti vzorec kot
+BRAND_SWAP v generate_gobe_page.py (MeteoGobar) — logo je zima/logo-zima.svg,
+ista ilustrativna družina kot logo.svg/logo-gobar.svg (64×64, gradienti), ne
+ploski ikonski slog spodnjega menija. seo.IC_METEOZIMA (ta slednji slog) je
+ločena, še neuporabljena priprava za app_bottomnav() — vstop v glavno
+navigacijo CLAUDE.md veže na prvi sneg/november, ne na datum gradnje, zato je
+(za razliko od glave) namenoma še ni tu.
 
 Bere data/winter-data.json (tools/winter_engine.py) in iz njega sestavi tri
 statične strani po istem vzorcu kot ostale spoke strani
@@ -37,6 +39,17 @@ TODAY = seo.TODAY
 
 DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 
+# Zamenja glavo (logo + ime) na vseh treh straneh z MeteoZima izdajo, klientsko
+# -- isti vzorec kot BRAND_SWAP v generate_gobe_page.py (MeteoGobar). Namenoma
+# tako, ne s spreminjanjem skupnega HEADER-ja v generate_seo_pages.py -- vsaka
+# druga generirana stran obdrži navadno glavo Meteorec nespremenjeno.
+BRAND_SWAP = '''<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/zima/logo-zima.svg";img.alt="MeteoZima";}
+  if(nm){nm.innerHTML="Meteo<em>Zima</em>";}
+})();</script>'''
+
 RISK_LABEL = {"nizko": "Nizko tveganje", "srednje": "Srednje tveganje", "visoko": "Visoko tveganje"}
 RISK_ICON = {"nizko": "🟢", "srednje": "🟡", "visoko": "🔴"}
 RISK_CLASS = {"nizko": "badge-risk-nizko", "srednje": "badge-risk-srednje", "visoko": "badge-risk-visoko"}
@@ -58,25 +71,6 @@ def risk_badge(level):
     if level is None:
         return '<span class="badge-risk badge-risk-none">ni podatka</span>'
     return f'<span class="badge-risk {RISK_CLASS[level]}">{RISK_ICON[level]} {RISK_LABEL[level]}</span>'
-
-
-def _mz_icon(size=22):
-    """seo.IC_METEOZIMA brez lastnega width/height (glej opombo tam — velja
-    zaradi app_bottomnav()-jevega CSS-a, ki bo velikost postavil sam, ko bo
-    ikona nekoč vključena vanj) -- tu, izven te vrstice, ji velikost damo
-    eksplicitno."""
-    return seo.IC_METEOZIMA.replace('<svg viewBox="0 0 24 24"',
-                                     f'<svg viewBox="0 0 24 24" width="{size}" height="{size}"', 1)
-
-
-def brand_kicker():
-    """Majhna oznaka blagovne znamke nad H1 na vseh treh straneh — ikona +
-    ime. Barva #38bdf8 je ista "hladna" barva kot badge-risk-nizko drugod na
-    strani (glej vreme.css), ne nova izbira."""
-    return ('  <div style="display:flex;align-items:center;gap:.45rem;margin-bottom:.3rem">'
-            f'<span style="color:#38bdf8;display:inline-flex" aria-hidden="true">{_mz_icon()}</span>'
-            '<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;'
-            'letter-spacing:.06em;color:#94a3b8;text-transform:uppercase">MeteoZima</span></div>')
 
 
 def fmt_hour(iso):
@@ -135,9 +129,9 @@ def build_hub_body(data):
          "<a href=\"/nevihte/\">stran opozoril</a>."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
-{brand_kicker()}
   <h1 class="page-title">Zimski nadzorni center — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
@@ -199,9 +193,9 @@ def build_snow_line_body(data):
          "tveganjem (gorske ture, prevoznost) preveri tudi uradno napoved ARSO."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)])}
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)])}
 {seo.stn_badge()}
-{brand_kicker()}
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
@@ -248,9 +242,9 @@ def build_black_ice_body(data):
          "izračunano posebej za vsak most."),
     ]
 
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)])}
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)])}
 {seo.stn_badge()}
-{brand_kicker()}
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
