@@ -1,10 +1,11 @@
 name: Zima
 
-# Faza 1 (glej docs spec za /zima/): winter_engine.py izračuna meja
-# sneženja + poledica iz Open-Meteo, generate_zima_page.py iz tega sestavi
-# hub + 2 spoke strani. Cron po agrometeo-forecast.yml (5:45 UTC), ista
-# ureno-dnevna kadenca kot ostali zimski/vremenski risk-indeksi na strani
-# (vodostaj-forecast.yml, gasilec-forecast.yml).
+# MeteoZima (glej docs spec za /zima/): winter_engine.py izračuna vse štiri
+# indekse (meja sneženja, poledica, kurilni semafor, nad-meglo) iz Open-Meteo,
+# generate_zima_page.py iz tega sestavi hub + 4 spoke strani. Cron po
+# agrometeo-forecast.yml (5:45 UTC), ista ureno-dnevna kadenca kot ostali
+# zimski/vremenski risk-indeksi na strani (vodostaj-forecast.yml,
+# gasilec-forecast.yml).
 
 on:
   schedule:

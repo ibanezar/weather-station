@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-20T16:58:27.361991+00:00",
-  "generated_at_local": "20. 9. 2026 ob 18:58",
+  "generated_at": "2026-09-20T18:23:44.081689+00:00",
+  "generated_at_local": "20. 9. 2026 ob 20:23",
   "station": "IREICA1",
   "snow_line": {
-    "current_line_m": 4200,
-    "forecast_24h_m": 2860,
+    "current_line_m": 4060,
+    "forecast_24h_m": 2710,
     "expected_cm_at_station": 0.0,
     "expected_cm_by_elevation": [
       {
@@ -30,6 +30,58 @@
     ],
     "confidence": "nizka"
   },
+  "heating_index": {
+    "level": "visoko",
+    "inversion_strength_c": 3.0,
+    "wind_kmh": 3.6,
+    "risk_hours": [
+      "2026-09-20T21:00",
+      "2026-09-21T04:00"
+    ],
+    "advice": "Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo."
+  },
+  "fog": {
+    "has_inversion": true,
+    "top_m": 858,
+    "morning_date": "2026-09-21",
+    "locations": [
+      {
+        "name": "Rečica ob Savinji",
+        "elevation_m": 366,
+        "above": false
+      },
+      {
+        "name": "Mozirje",
+        "elevation_m": 340,
+        "above": false
+      },
+      {
+        "name": "Nazarje",
+        "elevation_m": 387,
+        "above": false
+      },
+      {
+        "name": "Ljubno ob Savinji",
+        "elevation_m": 434,
+        "above": false
+      },
+      {
+        "name": "Gornji Grad",
+        "elevation_m": 431,
+        "above": false
+      },
+      {
+        "name": "Luče",
+        "elevation_m": 522,
+        "above": false
+      },
+      {
+        "name": "Solčava",
+        "elevation_m": 644,
+        "above": false
+      }
+    ]
+  },
   "locations": [
     {
       "id": "recica-ob-savinji",
@@ -45,8 +97,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 23.2,
-          "dew_point_c": 15.5
+          "ground_temp_c": 18.1,
+          "dew_point_c": 13.6
         }
       }
     },
@@ -64,8 +116,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 23.4,
-          "dew_point_c": 15.5
+          "ground_temp_c": 18.3,
+          "dew_point_c": 13.6
         }
       }
     },
@@ -83,8 +135,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 23.1,
-          "dew_point_c": 15.5
+          "ground_temp_c": 18.0,
+          "dew_point_c": 13.6
         }
       }
     },
@@ -102,8 +154,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 22.8,
-          "dew_point_c": 15.5
+          "ground_temp_c": 17.7,
+          "dew_point_c": 13.6
         }
       }
     },
@@ -121,8 +173,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 22.8,
-          "dew_point_c": 15.5
+          "ground_temp_c": 17.7,
+          "dew_point_c": 13.6
         }
       }
     }

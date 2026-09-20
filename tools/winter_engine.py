@@ -9,7 +9,8 @@ tools/generate_zima_page.py — isti vzorec kot calculate_frost_risk.py /
 generate_frost_page.py (izračun ločen od izrisa strani, da se stran lahko
 prerenderira brez ponovnega klica Open-Meteo).
 
-Faza 1 (glej spec) izračuna samo dva indeksa:
+Faza 1 (glej spec) je izračunala dva indeksa (snow_line, black_ice); Faza 2
+dodaja heating_index (kurilni semafor) in fog (nad-meglo) — glej spodaj.
 
   - snow_line (meja sneženja) — REGIONALEN indeks, ne po krajih: ničta
     izoterma (Open-Meteo `freezing_level_height`) je sinoptična količina, ki
@@ -23,6 +24,18 @@ Faza 1 (glej spec) izračuna samo dva indeksa:
     mikroklimami dolinskih krajev (glej NEARBY_TOWNS v generate_seo_pages.py
     — Nazarje ob sotočju je vlažnejše, Gornji Grad v zaprti stranski dolini
     ima močnejšo inverzijo …) dejansko razlikuje.
+  - heating_index (kurilni semafor, Faza 2) in fog (nad-meglo, Faza 2) — oba
+    REGIONALNA (isto načelo kot snow_line), izpeljana iz istega
+    `compute_inversion_profile()`: primerjava temperature na postaji (2 m) s
+    temperaturo na 925/850/700 hPa (Open-Meteo `geopotential_height_*hPa` +
+    `temperature_*hPa`) poišče, do katere višine temperatura z višino NE
+    pada — to je ocenjena zgornja meja temperaturne inverzije. Ta izračun
+    prej NI obstajal nikjer v repozitoriju (preverjeno pred pisanjem) — ni ga
+    torej treba uvažati, a heating_index in fog ga MORATA deliti (isto
+    izhodišče), ne vsak svoje. `/kakovost-zraka/` (obstoječa stran, AQI iz
+    Open-Meteo air-quality API) je namenoma NE podvojena tu — heating_index
+    meri prevetrenost/inverzijo, ne koncentracijo delcev; kurilni semafor
+    stran nanjo samo linka.
 
 Lokacije za black_ice so postaja (Rečica ob Savinji) + 4 sosednja naselja iz
 NEARBY_TOWNS (Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad) — koordinate,
@@ -98,6 +111,15 @@ SNOW_RATIO_CM_PER_MM = 1.0   # ~10:1 približek (1 mm padavin ≈ 1 cm svežega 
 GROUND_OFFSET_MAX_C = 3.0    # največji sevalni primanjkljaj cestišča pod zrakom (jasno, mirno)
 RANK_ORDER = ["nizko", "srednje", "visoko"]
 
+# Tlačni nivoji za oceno inverzije (heating_index/fog) — 925 hPa (~750-800 m),
+# 850 hPa (~1400-1500 m) in 700 hPa (~3000 m) so vsi zanesljivo nad postajo
+# (366 m) in nad najvišjim NEARBY_TOWNS krajem (Solčava, 644 m).
+INVERSION_LEVELS_HPA = [925, 850, 700]
+INVERSION_TOLERANCE_C = 0.3  # temperatura, ki pade manj kot toliko, še šteje za "se ni ohladilo"
+HEATING_WINDOW_H = 36
+HEATING_MIDDAY_EXCLUDE = range(11, 17)  # sonce čez dan praviloma prevetri dolino
+FOG_MORNING_HOURS = range(5, 10)
+
 
 def log(msg):
     print(msg, file=sys.stderr)
@@ -117,10 +139,19 @@ def interp(x, x0, y0, x1, y1):
     return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
 
 
+def hval(hourly, key, i):
+    arr = hourly.get(key) or []
+    return arr[i] if 0 <= i < len(arr) else None
+
+
 def fetch_open_meteo():
+    hourly_vars = ["temperature_2m", "dew_point_2m", "cloud_cover", "wind_speed_10m",
+                   "precipitation", "freezing_level_height"]
+    for hpa in INVERSION_LEVELS_HPA:
+        hourly_vars += [f"temperature_{hpa}hPa", f"geopotential_height_{hpa}hPa"]
     params = urllib.parse.urlencode({
         "latitude": LAT, "longitude": LON,
-        "hourly": "temperature_2m,dew_point_2m,cloud_cover,wind_speed_10m,precipitation,freezing_level_height",
+        "hourly": ",".join(hourly_vars),
         "timezone": "Europe/Ljubljana",
         "forecast_days": 3,
     })
@@ -273,6 +304,140 @@ def compute_black_ice_for_location(hourly, idx_now, elevation_m):
     }
 
 
+# ── Skupna ocena inverzije (heating_index + fog) ─────────────────────────
+
+def compute_inversion_profile(hourly, i):
+    """Vrne (inversion_top_m, inversion_strength_c) za eno uro. Sestavi profil
+    postaja (2 m) -> 925 -> 850 -> 700 hPa in poišče najvišjo točko, do katere
+    temperatura z višino NE pada (inverzija/izotermija) — to je ocenjena
+    zgornja meja temperaturne inverzije (in s tem megle/nizke oblačnosti pod
+    njo). Če se ohlaja že takoj nad tlemi, inverzije ni: vrne (ELEV, 0.0)."""
+    t2m = hval(hourly, "temperature_2m", i)
+    if t2m is None:
+        return None, None
+    profile = [(ELEV, t2m)]
+    for hpa in INVERSION_LEVELS_HPA:
+        h = hval(hourly, f"geopotential_height_{hpa}hPa", i)
+        t = hval(hourly, f"temperature_{hpa}hPa", i)
+        if h is not None and t is not None and h > profile[-1][0]:
+            profile.append((h, t))
+
+    top_h, top_t = profile[0]
+    base_t = t2m
+    strength = 0.0
+    for h, t in profile[1:]:
+        if t >= top_t - INVERSION_TOLERANCE_C:
+            top_h, top_t = h, t
+            strength = max(strength, t - base_t)
+        else:
+            break
+    return (round(top_h) if strength > 0 else ELEV), round(strength, 1)
+
+
+def compute_heating_index(hourly, idx_now, times):
+    """Kurilni semafor: najslabša ocenjena prevetrenost v naslednjih
+    HEATING_WINDOW_H urah, izven poldanskih ur (11-16), ko sonce dolino
+    praviloma prevetri. Kombinira jakost inverzije in veter — isto načelo
+    (interp/clamp pragovi) kot ground_temp_c zgoraj, ne nova formula
+    "od nikoder"."""
+    n = len(times)
+    wind_arr = hourly.get("wind_speed_10m") or []
+    start = idx_now if idx_now is not None else 0
+    end = min(start + HEATING_WINDOW_H, n)
+
+    risk_hours = []
+    worst_rank, worst_strength, worst_wind = -1, None, None
+    for i in range(start, end):
+        try:
+            hh = int(times[i][11:13])
+        except (ValueError, IndexError):
+            continue
+        if hh in HEATING_MIDDAY_EXCLUDE:
+            continue
+        _, strength = compute_inversion_profile(hourly, i)
+        if strength is None:
+            continue
+        wind = wind_arr[i] if i < len(wind_arr) else None
+        calm = wind is not None and wind <= 8
+
+        if strength >= 3.0 and calm:
+            cat = "visoko"
+        elif strength >= 1.5 or (strength > 0 and calm):
+            cat = "srednje"
+        else:
+            cat = "nizko"
+
+        if cat == "visoko":
+            risk_hours.append(times[i])
+        rank = RANK_ORDER.index(cat)
+        if rank > worst_rank:
+            worst_rank, worst_strength, worst_wind = rank, strength, wind
+
+    level = RANK_ORDER[worst_rank] if worst_rank >= 0 else "nizko"
+    advice = {
+        "nizko": "Ni posebnih omejitev za kurjenje — zrak se dobro prevetri.",
+        "srednje": "Zmerna inverzija — po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno.",
+        "visoko": ("Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas "
+                   "ali dan z boljšo prevetrenostjo."),
+    }[level]
+    return {
+        "level": level,
+        "inversion_strength_c": worst_strength,
+        "wind_kmh": worst_wind,
+        "risk_hours": risk_hours[:6],
+        "advice": advice,
+    }
+
+
+def compute_fog(hourly, idx_now, times):
+    """Nad-meglo: ocenjena zgornja meja megle/nizke oblačnosti naslednje
+    jutro, primerjana z višinami postaje + vseh NEARBY_TOWNS krajev (glej
+    opombo v generate_zima_page.py, zakaj samo ti, brez ugibanih vrhov).
+
+    Predstavniška ura znotraj FOG_MORNING_HOURS je tista z NAJMOČNEJŠO
+    inverzijo, ne tista z najnižjim vrhom -- uro brez inverzije sploh
+    (strength=0) compute_inversion_profile vrne kot (ELEV, 0.0), zato bi
+    min() čez okno skoraj vedno padel na ELEV, brž ko ena sama ura v oknu
+    nima inverzije, in indeks bi bil skoraj vedno neuporaben. Če NOBENA ura
+    v oknu ne pokaže inverzije, to pove has_inversion=False namesto da bi
+    primerjala višine proti smiselno neobstoječi megli."""
+    n = len(times)
+    morning_idxs = []
+    for i in range(idx_now or 0, min((idx_now or 0) + 48, n)):
+        try:
+            hh = int(times[i][11:13])
+        except (ValueError, IndexError):
+            continue
+        if hh in FOG_MORNING_HOURS:
+            morning_idxs.append(i)
+    if not morning_idxs:
+        return None
+
+    best_top, best_strength = ELEV, 0.0
+    for i in morning_idxs:
+        top, strength = compute_inversion_profile(hourly, i)
+        if strength is not None and strength > best_strength:
+            best_top, best_strength = top, strength
+
+    has_inversion = best_strength > 0
+    morning_date = times[morning_idxs[0]][:10]
+
+    all_locs = [{"name": "Rečica ob Savinji", "elevation_m": ELEV}] + [
+        {"name": t["town"], "elevation_m": t["elev"]} for t in seo.NEARBY_TOWNS
+    ]
+    locations = [
+        {"name": l["name"], "elevation_m": l["elevation_m"],
+         "above": (l["elevation_m"] > best_top) if has_inversion else None}
+        for l in all_locs
+    ]
+    return {
+        "has_inversion": has_inversion,
+        "top_m": best_top if has_inversion else None,
+        "morning_date": morning_date,
+        "locations": locations,
+    }
+
+
 def main():
     dry = "--dry-run" in sys.argv[1:]
     now_utc = datetime.datetime.now(datetime.timezone.utc)
@@ -292,6 +457,8 @@ def main():
         return 0 if not dry else 1
 
     snow_line = compute_snow_line(hourly, idx_now)
+    heating_index = compute_heating_index(hourly, idx_now, times)
+    fog = compute_fog(hourly, idx_now, times)
 
     locations = []
     for loc in BLACK_ICE_LOCATIONS:
@@ -307,6 +474,8 @@ def main():
         "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M"),
         "station": seo.STATION_ID,
         "snow_line": snow_line,
+        "heating_index": heating_index,
+        "fog": fog,
         "locations": locations,
     }
 
@@ -322,7 +491,7 @@ def main():
         json.dump(out, f, indent=2, ensure_ascii=False)
         f.write("\n")
     print(f"data/winter-data.json: meja sneženja {snow_line['current_line_m']} m, "
-          f"najvišje tveganje poledice: {worst}")
+          f"kurilni semafor {heating_index['level']}, najvišje tveganje poledice: {worst}")
     return 0
 
 
