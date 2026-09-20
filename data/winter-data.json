@@ -1,0 +1,130 @@
+{
+  "generated_at": "2026-09-20T16:58:27.361991+00:00",
+  "generated_at_local": "20. 9. 2026 ob 18:58",
+  "station": "IREICA1",
+  "snow_line": {
+    "current_line_m": 4200,
+    "forecast_24h_m": 2860,
+    "expected_cm_at_station": 0.0,
+    "expected_cm_by_elevation": [
+      {
+        "elevation_m": 366,
+        "cm": 0.0
+      },
+      {
+        "elevation_m": 600,
+        "cm": 0.0
+      },
+      {
+        "elevation_m": 900,
+        "cm": 0.0
+      },
+      {
+        "elevation_m": 1200,
+        "cm": 0.0
+      },
+      {
+        "elevation_m": 1600,
+        "cm": 0.0
+      }
+    ],
+    "confidence": "nizka"
+  },
+  "locations": [
+    {
+      "id": "recica-ob-savinji",
+      "name": "Rečica ob Savinji",
+      "elevation_m": 366,
+      "microclimate": "Dno doline pri postaji IREICA1 — referenčna lokacija za ostale.",
+      "indices": {
+        "black_ice": {
+          "risk_level": "nizko",
+          "risk_hours": [],
+          "affected_spots": [
+            "mostovi",
+            "senčni odseki",
+            "stranske ceste"
+          ],
+          "ground_temp_c": 23.2,
+          "dew_point_c": 15.5
+        }
+      }
+    },
+    {
+      "id": "mozirje",
+      "name": "Mozirje",
+      "elevation_m": 340,
+      "microclimate": "Mozirje leži nekoliko niže in na širšem, bolj odprtem delu doline kot postaja IREICA1, zato je manj podvrženo nočnemu zbiranju hladnega zraka kot ožji, više ležeči kraji gorvodno — jutranje temperaturne inverzije so tu praviloma šibkejše.",
+      "indices": {
+        "black_ice": {
+          "risk_level": "nizko",
+          "risk_hours": [],
+          "affected_spots": [
+            "mostovi",
+            "senčni odseki",
+            "stranske ceste"
+          ],
+          "ground_temp_c": 23.4,
+          "dew_point_c": 15.5
+        }
+      }
+    },
+    {
+      "id": "nazarje",
+      "name": "Nazarje",
+      "elevation_m": 387,
+      "microclimate": "Nazarje leži na sotočju dveh rek (Drete in Savinje), kjer se stikata dve dolinski veji — to lokalno poveča vlažnost zraka in pogostost jutranje megle glede na bolj enodolinsko lego postaje IREICA1.",
+      "indices": {
+        "black_ice": {
+          "risk_level": "nizko",
+          "risk_hours": [],
+          "affected_spots": [
+            "mostovi",
+            "senčni odseki",
+            "stranske ceste"
+          ],
+          "ground_temp_c": 23.1,
+          "dew_point_c": 15.5
+        }
+      }
+    },
+    {
+      "id": "ljubno-ob-savinji",
+      "name": "Ljubno ob Savinji",
+      "elevation_m": 434,
+      "microclimate": "Dolina se pri Ljubnem opazno zoži in strmi pobočji senčita dno doline dlje v jutro kot pri postaji — v kombinaciji z višjo nadmorsko višino to pomeni hladnejša zimska jutra in izrazitejšo temperaturno inverzijo.",
+      "indices": {
+        "black_ice": {
+          "risk_level": "nizko",
+          "risk_hours": [],
+          "affected_spots": [
+            "mostovi",
+            "senčni odseki",
+            "stranske ceste"
+          ],
+          "ground_temp_c": 22.8,
+          "dew_point_c": 15.5
+        }
+      }
+    },
+    {
+      "id": "gornji-grad",
+      "name": "Gornji Grad",
+      "elevation_m": 431,
+      "microclimate": "Gornji Grad leži v Zadrečki dolini, ki je ožja in bolj zaprta stranska dolina kot glavna dolina Savinje pri postaji IREICA1. Take zaprte stranske doline so klasično bolj nagnjene k nabiranju hladnega zraka — pričakuj izrazitejše in dlje trajajoče jutranje temperaturne inverzije, zlasti pozimi.",
+      "indices": {
+        "black_ice": {
+          "risk_level": "nizko",
+          "risk_hours": [],
+          "affected_spots": [
+            "mostovi",
+            "senčni odseki",
+            "stranske ceste"
+          ],
+          "ground_temp_c": 22.8,
+          "dew_point_c": 15.5
+        }
+      }
+    }
+  ]
+}
