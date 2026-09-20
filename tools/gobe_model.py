@@ -47,6 +47,7 @@ import datetime as dt
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -106,6 +107,15 @@ def past_days_needed(rules):
     return max(MIN_PAST_DAYS, (max(lags) if lags else 0) + BASE_WINDOW_DAYS)
 
 
+# Med poskusi ob prehodni napaki (SSL handshake/read timeout proti
+# Open-Meteo) — 19.–20. 9. 2026 je bilo v eni uri sedem zaporednih tekov
+# gobe-forecast.yml neuspešnih iz istega razloga, ker en sam spodleteli klic
+# takoj sesuje cel tek (97 lokacij v enem klicu je velika, počasna zahteva).
+# Ročno ponavljanje celega delovnega toka je počasno in drago v primerjavi s
+# tem, da skripta sama počaka in poskusi znova.
+FETCH_RETRY_DELAYS_S = (5, 15, 45)
+
+
 def fetch_forecast(spots, past_days=MIN_PAST_DAYS):
     params = urllib.parse.urlencode({
         "latitude": ",".join(str(s["lat"]) for s in spots),
@@ -118,9 +128,20 @@ def fetch_forecast(spots, past_days=MIN_PAST_DAYS):
     }, safe=",")
     url = f"https://api.open-meteo.com/v1/forecast?{params}"
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = json.load(r)
-    return data if isinstance(data, list) else [data]
+    delays = (0,) + FETCH_RETRY_DELAYS_S
+    for i, delay in enumerate(delays):
+        if delay:
+            print(f"Open-Meteo poskus {i + 1}/{len(delays)} čez {delay}s …")
+            time.sleep(delay)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.load(r)
+            return data if isinstance(data, list) else [data]
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+            last_err = e
+            if i < len(delays) - 1:
+                print(f"✗ Open-Meteo (poskus {i + 1}/{len(delays)}): {e} — poskusim znova")
+    raise last_err
 
 
 def load_station_precip(path=HISTORY_PATH):

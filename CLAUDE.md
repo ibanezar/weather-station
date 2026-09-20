@@ -589,6 +589,28 @@ Pravila, ki jih ne obračaj:
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
 
+### Open-Meteo klic ima retry — en spodleteli poskus ne sme sesuti teka
+
+19.–20. 9. 2026 je bilo v eni uri sedem zaporednih tekov `gobe-forecast.yml`
+neuspešnih zaradi prehodnih napak proti Open-Meteo (SSL handshake/read
+timeout) — vsakič je en sam spodleteli klic (97 lokacij v enem zahtevku je
+velika, počasna poizvedba) takoj sesul cel tek, ročno ponavljanje celega
+delovnega toka pa počasno in drago v primerjavi s tem, da skripta sama
+počaka in poskusi znova.
+
+- `gobe_model.fetch_forecast()` zdaj ob `URLError`/`TimeoutError`/
+  `JSONDecodeError` počaka in poskusi znova — `FETCH_RETRY_DELAYS_S = (5, 15,
+  45)` sekund, torej do 4 poskusov skupaj. Oba klicatelja
+  (`gobe_model.py` in `generate_gobe_page.py`) to dobita zastonj, ker gre
+  skozi isto funkcijo — **ne podvajaj retry logike na klicnem mestu**.
+- Po izčrpanih poskusih funkcija vrže zadnjo napako naprej — oba klicatelja jo
+  še vedno lovita in končata z `sys.exit(1)` (raje jasna napaka v logu kot
+  napol zapisana stran), samo da je zdaj to zadnja možnost, ne prva.
+- `generate_gobe_page.py`-jev `except` je ob tem popravku dobil še
+  `json.JSONDecodeError` (prej ga ni lovil, `gobe_model.py`-jev ga je) — brez
+  tega bi ta specifična napaka po izčrpanih poskusih ušla kot nepričakovan
+  sledljivostni izpis namesto standardnega "✗ Open-Meteo: …".
+
 ## Gobarski model — rastni zamik po ekoloških skupinah
 
 Vsaka vrsta v `species_rules.yaml` ima `ecology` (`mikorizna`, `razkrojevalka`,
