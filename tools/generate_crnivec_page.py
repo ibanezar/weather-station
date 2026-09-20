@@ -45,7 +45,7 @@ DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 # kot na klasičnem "risk" merilniku. Kot je sredina cone na polkrogu
 # (180°=levo, 0°=desno, 90°=zgoraj), isti konvenciji sledi needle_angle().
 ZONES = [
-    {"id": "sonce",    "label": "SUHO K'MOU",     "color": "#16a34a", "mid": 157.5},
+    {"id": "sonce",    "label": "SUHO K POPR",    "color": "#16a34a", "mid": 157.5},
     {"id": "nekaj",    "label": "JE, PA NEKAJ",   "color": "#eab308", "mid": 112.5},
     {"id": "verige",   "label": "VZEMI VERIGE",   "color": "#ea580c", "mid": 67.5},
     {"id": "spolzko",  "label": "SPOLZKO, PAZI",  "color": "#dc2626", "mid": 22.5},
