@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 5 spoke strani)
+tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 6 spoke strani)
 
 "MeteoZima" je ime podportala. Glava (logo + ime) se na vseh treh straneh
 klientsko zamenja z zimsko izdajo — BRAND_SWAP spodaj, isti vzorec kot
@@ -23,13 +23,13 @@ lahko prerenderirajo brez ponovnega klica Open-Meteo:
   /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje + 7-dnevni graf
   /zima/nad-meglo/          — kateri kraji so nad pričakovano meglo + 7-dnevni trend
   /zima/snezna-odeja/       — tekoča modelirana ocena snežne odeje (degree-day model)
+  /zima/prevoznost-prelazov/ — vreme na višini gorskih prelazov (Črnivec, Pavličevo sedlo);
+                              PASSES v winter_engine.py je ROČNO vzdrževan seznam (glej
+                              opombo tam) — nadmorski višini/povezavi sta preverjeni
+                              (Wikipedija), dejansko stanje ceste pa ni samodejno
 
-/zima/prevoznost-prelazov/ in ločena stran za kakovost zraka NISTA tu — glej
-odprta vprašanja v specifikaciji: prva rabi javni vir/ročno vzdrževano tabelo
-podatkov o gorskih prelazih, ki ju v repozitoriju ni (prazna stran bi bila
-slabša izbira kot nobena — glej CLAUDE.md o tankih/praznih straneh); druga bi
-podvajala obstoječi /kakovost-zraka/ (glej opombo pri heating_index v
-winter_engine.py).
+Ločena stran za kakovost zraka NI tu — bi podvajala obstoječi /kakovost-zraka/
+(glej opombo pri heating_index v winter_engine.py).
 
 Usage:
   python3 tools/generate_zima_page.py
@@ -262,6 +262,8 @@ def build_hub_body(data):
     snowpack = data.get("snowpack") or {}
     station_depth = next((b["depth_cm"] for b in snowpack.get("by_elevation", []) if b["elevation_m"] == seo.ELEV), None)
 
+    passes = data.get("passes") or []
+
     cards = f'''  <div class="card-grid">
     <a class="phenom-card" href="/zima/meja-snezenja/">Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
@@ -273,6 +275,8 @@ def build_hub_body(data):
       <div class="ph-count">{f"~{fog['top_m']} m" if fog and fog.get("has_inversion") else "brez megle"}</div></a>
     <a class="phenom-card" href="/zima/snezna-odeja/">Snežna odeja
       <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
+    <a class="phenom-card" href="/zima/prevoznost-prelazov/">Prevoznost prelazov
+      <div class="ph-count">{len(passes)} prelaza</div></a>
   </div>'''
 
     season = data.get("season") or {}
@@ -329,8 +333,8 @@ def build_hub_body(data):
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
   </div>
   <p class="muted-note">Podatki izhajajo iz javne napovedi Open-Meteo za postajo IREICA1 in okoliška
-  naselja, brez notranjih meritev. Prevoznost prelazov (Menina, Črnivec …) čaka na javno dostopen vir
-  podatkov o stanju cest.</p>
+  naselja, brez notranjih meritev. Dejansko stanje prelazov je ročno vzdrževano polje — preveri tudi
+  promet.si, AMZS ali DARS pred vožnjo.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
 
 
@@ -636,6 +640,54 @@ def build_snowpack_body(data):
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
+# ── /zima/prevoznost-prelazov/ ────────────────────────────────────────────
+
+def build_passes_body(data):
+    passes = data.get("passes") or []
+
+    rows = []
+    for p in passes:
+        w = p.get("weather") or {}
+        weather_txt = (f'{num(w.get("temp_c"), 1)} °C, pričakovanih {num(w.get("expected_snow_cm_24h"), 1)} '
+                        'cm snega v 24 h' if w.get("temp_c") is not None else "ni podatka")
+        if p.get("status"):
+            status_txt = f'{p["status"]} (preverjeno {fmt_day(p["status_checked"])})' if p.get("status_checked") else p["status"]
+        else:
+            status_txt = f'ni ročno preverjeno — glej <a href="{p["source"]}">vir</a>'
+        rows.append(
+            f'      <tr><th>{p["name"]} ({p["elevation_m"]} m)</th>'
+            f'<td>{p["connects"]}<br>Vreme na tej višini: {weather_txt}.<br>Stanje: {status_txt}.</td></tr>'
+        )
+    table = '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>" if rows else ""
+
+    faq = [
+        ("Je »stanje« uradna prometna informacija?", "Ne. Stanje je ročno vzdrževano polje (kot pri "
+         "hidrantih v MeteoGasilcu) — dokler ga nihče ne preveri in vnese, stran to jasno pove, namesto da "
+         "bi si izmislila »prevozno«. Za uradno stanje cest pred vožnjo preveri promet.si, AMZS ali DARS."),
+        ("Kaj pomeni »vreme na tej višini«?", "Izračunana ocena (isti gradient in metoda za sneg kot na "
+         "/zima/meja-snezenja/ in /zima/poledica/) — NE meritev na prelazu, ker tam ni postaje. Pove, kakšno "
+         "vreme lahko pričakuješ, ne ali je cesta dejansko prevozna (sneg lahko počisti plug, poledica pa "
+         "ostane kljub plusu na termometru)."),
+        ("Od kod nadmorski višini in povezavi?", "S slovenske Wikipedije (Črnivec, Pavličevo sedlo) — "
+         "preverjeni podatki, ne ocena. Viri so navedeni ob vsakem prelazu v tabeli."),
+    ]
+
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Prevoznost prelazov", None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">Prevoznost prelazov — Zgornja Savinjska dolina</h1>
+  <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+{table}
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
+  </div>
+  <p class="muted-note">Vreme na višini prelaza je ocena Meteoreca iz javne napovedi Open-Meteo — NI
+  uradna prometna informacija in ne pove, ali je cesta dejansko odprta. Pred vožnjo čez prelaz vedno
+  preveri promet.si, AMZS ali DARS.</p>
+  <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
+
+
 def main():
     data = load_json(DATA_PATH)
     if not data:
@@ -740,6 +792,23 @@ def main():
                            "/zima/snezna-odeja/", schema, body)
     seo.write_page("zima/snezna-odeja/index.html", html, force=True)
     print("  → zima/snezna-odeja/index.html")
+
+    # ── prevoznost-prelazov ──
+    body, faq = build_passes_body(data)
+    schema = "\n".join([
+        seo.webpage_schema("/zima/prevoznost-prelazov/", "Prevoznost prelazov — Zgornja Savinjska dolina",
+                            "Vreme na višini gorskih prelazov (Črnivec, Pavličevo sedlo) okoli Zgornje "
+                            "Savinjske doline.",
+                            date_published="2026-09-20"),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Prevoznost prelazov", None)]),
+        seo.faq_schema(faq),
+    ])
+    html = seo.page_shell("Prevoznost prelazov — Zgornja Savinjska dolina",
+                           "Vreme na višini gorskih prelazov okoli Zgornje Savinjske doline, posodobljeno "
+                           "dnevno.",
+                           "/zima/prevoznost-prelazov/", schema, body)
+    seo.write_page("zima/prevoznost-prelazov/index.html", html, force=True)
+    print("  → zima/prevoznost-prelazov/index.html")
 
     return 0
 
