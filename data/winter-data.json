@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-20T18:37:48.880972+00:00",
-  "generated_at_local": "20. 9. 2026 ob 20:37",
+  "generated_at": "2026-09-20T18:47:18.700459+00:00",
+  "generated_at_local": "20. 9. 2026 ob 20:47",
   "station": "IREICA1",
   "snow_line": {
     "current_line_m": 4060,
@@ -192,6 +192,50 @@
         "top_m": 1530
       }
     ]
+  },
+  "snowpack": {
+    "updated": "2026-09-20",
+    "depth_cm": {
+      "366": 0.0,
+      "600": 0.0,
+      "900": 0.0,
+      "1200": 0.0,
+      "1600": 0.0
+    },
+    "by_elevation": [
+      {
+        "elevation_m": 366,
+        "depth_cm": 0.0,
+        "new_snow_7d_cm": 0.0
+      },
+      {
+        "elevation_m": 600,
+        "depth_cm": 0.0,
+        "new_snow_7d_cm": 0.0
+      },
+      {
+        "elevation_m": 900,
+        "depth_cm": 0.0,
+        "new_snow_7d_cm": 0.0
+      },
+      {
+        "elevation_m": 1200,
+        "depth_cm": 0.0,
+        "new_snow_7d_cm": 0.0
+      },
+      {
+        "elevation_m": 1600,
+        "depth_cm": 0.0,
+        "new_snow_7d_cm": 0.0
+      }
+    ]
+  },
+  "season": {
+    "start_date": "2025-11-01",
+    "days_logged": 1,
+    "heating_high_days": 1,
+    "black_ice_high_days": 0,
+    "snow_days": 0
   },
   "black_ice_outlook": {
     "daily": [

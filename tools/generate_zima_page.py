@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 4 spoke strani, Faza 1+2)
+tools/generate_zima_page.py — MeteoZima, /zima/ podportal (hub + 5 spoke strani)
 
 "MeteoZima" je ime podportala. Glava (logo + ime) se na vseh treh straneh
 klientsko zamenja z zimsko izdajo — BRAND_SWAP spodaj, isti vzorec kot
@@ -17,17 +17,19 @@ statične strani po istem vzorcu kot ostale spoke strani
 nobenega API-ja sama, izračun je ločen (winter_engine.py), da se strani
 lahko prerenderirajo brez ponovnega klica Open-Meteo:
 
-  /zima/                    — hub: povzetek vseh štirih indeksov za danes/jutri
-  /zima/meja-snezenja/      — meja sneženja po višinskih pasovih (Faza 1)
-  /zima/poledica/           — tveganje poledice po krajih v dolini (Faza 1)
-  /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje (Faza 2)
-  /zima/nad-meglo/          — kateri kraji so nad pričakovano meglo (Faza 2)
+  /zima/                    — hub: povzetek vseh indeksov za danes/jutri + sezonski dnevnik
+  /zima/meja-snezenja/      — meja sneženja po višinskih pasovih + 7-dnevni trend
+  /zima/poledica/           — tveganje poledice po krajih v dolini + 7-dnevni pregled
+  /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje + 7-dnevni graf
+  /zima/nad-meglo/          — kateri kraji so nad pričakovano meglo + 7-dnevni trend
+  /zima/snezna-odeja/       — tekoča modelirana ocena snežne odeje (degree-day model)
 
-Preostalih 13 spoke strani iz specifikacije (prevoznost prelazov, snežna
-odeja, ločena stran za kakovost zraka …) NAMENOMA ni tu — glej odprta
-vprašanja v specifikaciji: ni javnega API-ja za gorske prelaze, ni senzorja
-za snežno odejo, ločena stran za kakovost zraka bi podvajala obstoječi
-/kakovost-zraka/ (glej opombo pri heating_index v winter_engine.py).
+/zima/prevoznost-prelazov/ in ločena stran za kakovost zraka NISTA tu — glej
+odprta vprašanja v specifikaciji: prva rabi javni vir/ročno vzdrževano tabelo
+podatkov o gorskih prelazih, ki ju v repozitoriju ni (prazna stran bi bila
+slabša izbira kot nobena — glej CLAUDE.md o tankih/praznih straneh); druga bi
+podvajala obstoječi /kakovost-zraka/ (glej opombo pri heating_index v
+winter_engine.py).
 
 Usage:
   python3 tools/generate_zima_page.py
@@ -257,6 +259,9 @@ def build_hub_body(data):
                         + (f"nad njo bi lahko bili: {', '.join(above)}." if above
                            else "noben spremljan kraj v dolini danes ne bi bil nad njo."))
 
+    snowpack = data.get("snowpack") or {}
+    station_depth = next((b["depth_cm"] for b in snowpack.get("by_elevation", []) if b["elevation_m"] == seo.ELEV), None)
+
     cards = f'''  <div class="card-grid">
     <a class="phenom-card" href="/zima/meja-snezenja/">Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
@@ -266,12 +271,27 @@ def build_hub_body(data):
       <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
     <a class="phenom-card" href="/zima/nad-meglo/">Nad meglo
       <div class="ph-count">{f"~{fog['top_m']} m" if fog and fog.get("has_inversion") else "brez megle"}</div></a>
+    <a class="phenom-card" href="/zima/snezna-odeja/">Snežna odeja
+      <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
   </div>'''
+
+    season = data.get("season") or {}
+    season_html = ""
+    if season.get("days_logged"):
+        y, m, d = season["start_date"][:4], int(season["start_date"][5:7]), int(season["start_date"][8:10])
+        start_fmt = f"{d}. {m}. {y}"
+        season_html = (
+            '  <h2>Ta sezona</h2>\n'
+            f'  <p>Od {start_fmt}: <strong>{season["heating_high_days"]}</strong> dni z visoko jakostjo '
+            f'inverzije, <strong>{season["black_ice_high_days"]}</strong> dni z visokim tveganjem poledice, '
+            f'<strong>{season["snow_days"]}</strong> dni s pričakovanim snegom na postaji '
+            f'(od {season["days_logged"]} zabeleženih dni).</p>'
+        )
 
     faq = [
         ("Katere kraje pokriva MeteoZima?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
          "Savinji, Gornji Grad, Luče in Solčavo — ista naselja kot na straneh »Vreme po krajih v dolini«."),
-        ("Ali je to uradno opozorilo?", "Ne. Vsi štirje indeksi so ocena Meteoreca iz javnih napovednih virov "
+        ("Ali je to uradno opozorilo?", "Ne. Vsi indeksi so ocena Meteoreca iz javnih napovednih virov "
          "(Open-Meteo), ne uradno opozorilo ARSO. Za uradna opozorila glej "
          "<a href=\"/nevihte/\">stran opozoril</a>, za dejansko kakovost zraka pa "
          "<a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>."),
@@ -298,14 +318,19 @@ def build_hub_body(data):
     <div class="clabel">🌫️ Nad meglo</div>
     <p class="fh-sub">{fog_verdict}</p>
   </div>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🏔️ Snežna odeja</div>
+    <p class="fh-sub">{f"Tekoča ocena na postaji: <strong>{num(station_depth, 0)} cm</strong> (modelirano, ni meritev)." if station_depth is not None else "Ocena trenutno ni na voljo."}</p>
+  </div>
 {cards}
+{season_html}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
   </div>
   <p class="muted-note">Podatki izhajajo iz javne napovedi Open-Meteo za postajo IREICA1 in okoliška
-  naselja, brez notranjih meritev. MeteoZima trenutno pokriva mejo sneženja, poledico, kurilni semafor
-  in oceno megle; prevoznost prelazov in snežna odeja čakata na javno dostopen vir podatkov.</p>
+  naselja, brez notranjih meritev. Prevoznost prelazov (Menina, Črnivec …) čaka na javno dostopen vir
+  podatkov o stanju cest.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
 
 
@@ -557,6 +582,59 @@ def build_fog_body(data):
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
+# ── /zima/snezna-odeja/ ───────────────────────────────────────────────────
+
+def build_snowpack_body(data):
+    snowpack = data.get("snowpack") or {}
+    by_elev = snowpack.get("by_elevation") or []
+    station_row = next((b for b in by_elev if b["elevation_m"] == seo.ELEV), None)
+
+    if station_row is None:
+        hero_sub = "Ocena trenutno ni na voljo — poskusi znova pozneje."
+    else:
+        hero_sub = (f'Tekoča ocena na postaji: <strong>{num(station_row["depth_cm"], 0)} cm</strong>. '
+                    f'V naslednjih 7 dneh je pričakovanih še do {num(station_row["new_snow_7d_cm"], 1)} cm '
+                    f'novega snega (brez upoštevanega taljenja).')
+
+    rows = []
+    for b in by_elev:
+        rows.append(f'      <tr><th>{b["elevation_m"]} m n. m.</th>'
+                     f'<td>{num(b["depth_cm"], 0)} cm zdaj · +{num(b["new_snow_7d_cm"], 1)} cm v 7 dneh</td></tr>')
+    table = '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>"
+
+    faq = [
+        ("Ali je to izmerjena snežna odeja?", "Ne — postaja IREICA1 nima senzorja za sneg ali tla. To je "
+         "TEKOČA OCENA iz poenostavljenega modela: vsak dan prišteje pričakovan nov sneg in odšteje taljenje "
+         "(degree-day model — vsaka stopinja nad 0 °C stopi približno 0,6 cm snega), izračunano iz javne "
+         "napovedi Open-Meteo."),
+        ("Zakaj se lahko ocena čez sezono zmoti?", "Ker nima kontrolne točke (meritve), s katero bi se "
+         "vsakič znova umerila — majhne napake se dan za dnem seštevajo. Najbolj zanesljiva je kmalu po "
+         "sveže zapadlem snegu, manj proti koncu dolge zime brez padavin."),
+        ("Zakaj je »novi sneg v 7 dneh« ločeno število od trenutne odeje?", "Ker prvo NE upošteva "
+         "vmesnega taljenja (bruto pričakovana količina), drugo pa je tekoča neto ocena — sešteti v eno "
+         "število bi bilo zavajajoče, če vmes pride otoplitev."),
+    ]
+
+    return f'''{BRAND_SWAP}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snežna odeja", None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">Snežna odeja — Zgornja Savinjska dolina</h1>
+  <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">🏔️ Tekoča ocena snežne odeje</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
+  <h2>Po višinskih pasovih</h2>
+{table}
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
+  </div>
+  <p class="muted-note">Modelirana ocena Meteoreca (degree-day model iz javne napovedi Open-Meteo), NI
+  meritev — postaja nima senzorja za sneg/tla. Vzemi kot grobo usmeritev, ne natančno število.</p>
+  <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
+
+
 def main():
     data = load_json(DATA_PATH)
     if not data:
@@ -645,6 +723,22 @@ def main():
                            "/zima/nad-meglo/", schema, body)
     seo.write_page("zima/nad-meglo/index.html", html, force=True)
     print("  → zima/nad-meglo/index.html")
+
+    # ── snezna-odeja ──
+    body, faq = build_snowpack_body(data)
+    schema = "\n".join([
+        seo.webpage_schema("/zima/snezna-odeja/", "Snežna odeja — Zgornja Savinjska dolina",
+                            "Tekoča modelirana ocena snežne odeje po višinskih pasovih za Zgornjo Savinjsko "
+                            "dolino.",
+                            date_published="2026-09-20"),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snežna odeja", None)]),
+        seo.faq_schema(faq),
+    ])
+    html = seo.page_shell("Snežna odeja — Zgornja Savinjska dolina",
+                           "Tekoča modelirana ocena snežne odeje po višinskih pasovih, posodobljeno dnevno.",
+                           "/zima/snezna-odeja/", schema, body)
+    seo.write_page("zima/snezna-odeja/index.html", html, force=True)
+    print("  → zima/snezna-odeja/index.html")
 
     return 0
 
