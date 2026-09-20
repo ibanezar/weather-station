@@ -793,6 +793,16 @@ body{
   padding:.5rem .7rem;color:var(--text);font-size:.88rem;font-family:inherit;min-height:2.6rem}
 .gp-diary-row input[type=text],.gp-diary-row select{flex:1;min-width:160px}
 .gp-diary textarea{width:100%;min-height:4.5rem;resize:vertical;box-sizing:border-box}
+/* Custom species autocomplete (OPZ_JS) — wraps the input so the suggestion
+   menu can be positioned absolute against it. The input's own flex sizing
+   moves to this wrapper since it's no longer a direct .gp-diary-row child. */
+.gp-diary-row .gp-opz-ac{position:relative;flex:1;min-width:160px}
+.gp-opz-ac input[type=text]{width:100%;box-sizing:border-box}
+.gp-opz-ac-menu{position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:.3rem;
+  max-height:220px;overflow-y:auto;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:10px;box-shadow:var(--card-shadow)}
+.gp-opz-ac-item{padding:.5rem .8rem;font-size:.88rem;cursor:pointer}
+.gp-opz-ac-item:hover,.gp-opz-ac-item.active{background:var(--badge-bg)}
 .gp-diary-btn{display:inline-flex;align-items:center;min-height:2.75rem;background:var(--badge-bg);
   border:1px solid var(--card-border);color:var(--text);
   border-radius:9px;padding:.5rem .8rem;font-size:.85rem;font-weight:600;cursor:pointer}
@@ -2254,6 +2264,62 @@ OPZ_JS = """<script>
   var listEl=document.getElementById("gp-opz-list");
   var KOLICINE={posamezno:"Par kosov",nekaj:"Kar nekaj",obilo:"Obilo"};
 
+  // Živo iskanje vrst med tipkanjem — brskalnikov <datalist> na mobilu
+  // (predvsem iOS Safari) predlogov med tipkanjem sploh ne pokaže, zato je
+  // tu lasten spustni seznam. Imena vrst bere iz že vgrajenega <datalist>
+  // (isti vir kot spOptions v DANES_JS), ne podvaja jih v ločen JS seznam.
+  var vrstaInput=document.getElementById("gp-opz-vrsta");
+  var vrstaMenu=document.getElementById("gp-opz-vrsta-menu");
+  if(vrstaInput&&vrstaMenu){
+    var speciesNames=[].slice.call(document.querySelectorAll("#gp-opz-vrsta-list option"))
+      .map(function(o){ return o.value; });
+    var acActive=-1, acItems=[];
+    // Ista normalizacija (brez šumnikov, male črke) kot norm() v DANES_JS —
+    // ločen majhen izvod, ker vsak skript na strani teče v svojem IIFE.
+    function norm(s){
+      return (s||"").toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"")
+        .replace(/[^a-z0-9 ]+/g," ").trim();
+    }
+    function hideMenu(){ vrstaMenu.hidden=true; vrstaMenu.innerHTML=""; acItems=[]; acActive=-1; }
+    function setActive(i){
+      acItems.forEach(function(el){ el.classList.remove("active"); });
+      acActive=i;
+      if(i>=0&&acItems[i]){ acItems[i].classList.add("active"); acItems[i].scrollIntoView({block:"nearest"}); }
+    }
+    function showMatches(){
+      var q=norm(vrstaInput.value);
+      if(!q){ hideMenu(); return; }
+      var matches=speciesNames.filter(function(nm){ return norm(nm).indexOf(q)>=0; }).slice(0,8);
+      if(!matches.length){ hideMenu(); return; }
+      vrstaMenu.innerHTML="";
+      acItems=matches.map(function(nm){
+        var item=document.createElement("div");
+        item.className="gp-opz-ac-item";
+        item.textContent=nm;
+        item.addEventListener("mousedown",function(ev){
+          ev.preventDefault();          // prepreči blur pred klikom
+          vrstaInput.value=nm;
+          hideMenu();
+        });
+        vrstaMenu.appendChild(item);
+        return item;
+      });
+      acActive=-1;
+      vrstaMenu.hidden=false;
+    }
+    vrstaInput.addEventListener("input",showMatches);
+    vrstaInput.addEventListener("focus",showMatches);
+    vrstaInput.addEventListener("blur",hideMenu);
+    vrstaInput.addEventListener("keydown",function(ev){
+      if(vrstaMenu.hidden)return;
+      if(ev.key==="ArrowDown"){ ev.preventDefault(); setActive(Math.min(acActive+1,acItems.length-1)); }
+      else if(ev.key==="ArrowUp"){ ev.preventDefault(); setActive(Math.max(acActive-1,0)); }
+      else if(ev.key==="Enter"){
+        if(acActive>=0){ ev.preventDefault(); vrstaInput.value=acItems[acActive].textContent; hideMenu(); }
+      } else if(ev.key==="Escape"){ hideMenu(); }
+    });
+  }
+
   function relTime(iso){
     var min=Math.floor((Date.now()-new Date(iso).getTime())/60000);
     if(min<1)return"pravkar";
@@ -3264,7 +3330,13 @@ def opazovanje_section_html(indexed, area_names):
     nabiralnih območij modela (isti seznam kot .gp-forest vrstice zgoraj na
     tej strani), ne točka na karti, ker so nabiralci zaščitniški do
     natančnih lokacij najdb. Za zdaj samo zbira in prikazuje — povratna
-    vezava v gobe_model.py pride šele, ko se nabere dovolj podatkov."""
+    vezava v gobe_model.py pride šele, ko se nabere dovolj podatkov.
+
+    Vrsta ima lasten JS spustni seznam (OPZ_JS), ne brskalnikov `<datalist>`
+    — mobilni brskalniki (predvsem iOS Safari) `<datalist>` predlogov med
+    tipkanjem sploh ne pokažejo. `<datalist>` ostane v HTML-ju samo kot vir
+    podatkov za JS (bere `<option>` prek querySelectorAll, isti vzorec kot
+    `spOptions` v DANES_JS), nanj pa noben input nima več `list=`."""
     sp_options = "".join(f'<option value="{_esc(s["name_sl"])}">' for s in indexed)
     area_options = "".join(f'<option value="{_esc(n)}">{_esc(n)}</option>' for n in area_names)
     return f'''  <div class="gp-diary" id="gp-opz">
@@ -3276,9 +3348,12 @@ def opazovanje_section_html(indexed, area_names):
       <input type="text" id="gp-opz-website" name="website" autocomplete="off" tabindex="-1"
         style="position:absolute;left:-9999px" aria-hidden="true">
       <div class="gp-diary-row">
-        <input type="text" id="gp-opz-vrsta" list="gp-opz-vrsta-list" placeholder="Katera vrsta?"
-          maxlength="60" required>
-        <datalist id="gp-opz-vrsta-list">{sp_options}</datalist>
+        <div class="gp-opz-ac">
+          <input type="text" id="gp-opz-vrsta" placeholder="Katera vrsta?" autocomplete="off"
+            maxlength="60" required>
+          <datalist id="gp-opz-vrsta-list">{sp_options}</datalist>
+          <div class="gp-opz-ac-menu" id="gp-opz-vrsta-menu" hidden></div>
+        </div>
         <select id="gp-opz-obmocje" required>
           <option value="">Katero območje?</option>
           {area_options}
