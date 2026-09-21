@@ -341,6 +341,18 @@ CSS = '''
     .crn-fine{text-align:center}
     .crn-back{display:table;margin:1.6rem auto 0}}
   @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
+  /* Nad ~600px je .crn-panel (do 720px, glej .wrap zgoraj) veliko širši od
+     merilnika (340px) -- ostal je velik prazen pas na obeh straneh. Merilnik
+     in izid (zvezda+ikona+napis) tu zato skupaj zrastejo namesto da bi samo
+     osamljeno stala sredi bele površine. */
+  @media (min-width:600px){
+    .crn-gauge{max-width:460px}
+    .crn-verdict{min-height:280px}
+    .crn-verdict-star{width:280px;height:280px}
+    .crn-zicon{width:66px;height:66px}
+    .crn-verdict span{font-size:2.2rem}
+    .crn-data{font-size:1rem;padding:1rem 1.3rem}
+  }
 </style>
 '''
 
