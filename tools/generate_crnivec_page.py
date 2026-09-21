@@ -149,10 +149,10 @@ CSS = '''
     background-size:16px 16px!important;background-position:-4px -4px!important}
   .wrap{max-width:720px}
   .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
-  .crn-hero{display:flex;align-items:center;gap:.8rem;margin-top:.4rem}
-  .crn-icon{width:96px;height:auto;flex-shrink:0}
+  .crn-hero{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
+  .crn-icon{width:170px;height:auto;flex-shrink:0}
   @media (max-width:520px){.crn-hero{flex-direction:column;align-items:flex-start}
-    .crn-icon{width:78px}}
+    .crn-icon{width:150px}}
   .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
     color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
     transform:rotate(-1.5deg);margin:0 0 .3rem;text-transform:uppercase}
