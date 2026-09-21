@@ -66,8 +66,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   if(nm){nm.innerHTML="Meteo<em>Zima</em>";}
 })();</script>
 <style>
-.zima-icon{display:inline-block;vertical-align:-6px;margin-right:.35rem;color:inherit}
-.zima-icon svg{display:block}
+.zima-icon{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;
+  border-radius:10px;background:var(--fa-soft,rgba(148,163,184,.14));color:var(--fa,#94a3b8);
+  margin-right:.6rem;flex:0 0 auto;vertical-align:-.65rem}
+.zima-icon svg{width:1.3rem;height:1.3rem;display:block}
+.zima-card{position:relative;overflow:hidden}
+.zima-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom{position:relative;overflow:hidden}
+.zima-phenom .ph-icon{display:flex;justify-content:center}
+.zima-phenom .ph-icon .zima-icon{margin-right:0}
+.zima-phenom::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom:hover{border-color:var(--fa,#38bdf8)!important}
 .zima-bar{animation:zimaGrow .5s ease-out backwards;animation-delay:var(--zdelay,0ms)}
 @keyframes zimaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 .zima-line{stroke-dasharray:3000;stroke-dashoffset:3000;animation:zimaDraw 1.4s ease-out forwards}
@@ -82,8 +91,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno 20. 9. 2026 ob 21:11</p>
-  <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel"><span class="zima-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica zdaj</div>
+  <div class="card zima-card" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);margin-bottom:1.2rem">
+    <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica zdaj</div>
     <p class="fh-sub">Danes ni povečanega tveganja poledice v dolini.</p>
   </div>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
