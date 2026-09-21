@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-20T19:11:31.479868+00:00",
-  "generated_at_local": "20. 9. 2026 ob 21:11",
+  "generated_at": "2026-09-21T11:08:36.343653+00:00",
+  "generated_at_local": "21. 9. 2026 ob 13:08",
   "station": "IREICA1",
   "snow_line": {
-    "current_line_m": 3960,
-    "forecast_24h_m": 2660,
+    "current_line_m": 3430,
+    "forecast_24h_m": 2220,
     "expected_cm_at_station": 0.0,
     "expected_cm_by_elevation": [
       {
@@ -31,38 +31,38 @@
     "confidence": "nizka",
     "daily": [
       {
-        "date": "2026-09-20",
-        "line_m": 3770,
-        "cm_at_station": 0.0
-      },
-      {
         "date": "2026-09-21",
-        "line_m": 2530,
+        "line_m": 2500,
         "cm_at_station": 0.0
       },
       {
         "date": "2026-09-22",
-        "line_m": 2100,
+        "line_m": 2090,
         "cm_at_station": 0.0
       },
       {
         "date": "2026-09-23",
-        "line_m": 2170,
+        "line_m": 2110,
         "cm_at_station": 0.0
       },
       {
         "date": "2026-09-24",
-        "line_m": 2700,
+        "line_m": 2370,
         "cm_at_station": 0.0
       },
       {
         "date": "2026-09-25",
-        "line_m": 2730,
+        "line_m": 2390,
         "cm_at_station": 0.0
       },
       {
         "date": "2026-09-26",
-        "line_m": 3650,
+        "line_m": 3730,
+        "cm_at_station": 0.0
+      },
+      {
+        "date": "2026-09-27",
+        "line_m": 3770,
         "cm_at_station": 0.0
       }
     ]
@@ -70,27 +70,23 @@
   "heating_index": {
     "level": "visoko",
     "inversion_strength_c": 3.0,
-    "wind_kmh": 3.6,
+    "wind_kmh": 4.4,
     "risk_hours": [
-      "2026-09-20T21:00",
-      "2026-09-21T04:00"
+      "2026-09-22T02:00",
+      "2026-09-22T07:00",
+      "2026-09-23T00:00"
     ],
     "advice": "Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo.",
     "daily": [
       {
-        "date": "2026-09-20",
-        "level": "visoko",
-        "inversion_strength_c": 3.0
-      },
-      {
         "date": "2026-09-21",
-        "level": "visoko",
-        "inversion_strength_c": 3.3
+        "level": "srednje",
+        "inversion_strength_c": 0.4
       },
       {
         "date": "2026-09-22",
-        "level": "srednje",
-        "inversion_strength_c": 1.5
+        "level": "visoko",
+        "inversion_strength_c": 3.0
       },
       {
         "date": "2026-09-23",
@@ -105,19 +101,24 @@
       {
         "date": "2026-09-25",
         "level": "visoko",
-        "inversion_strength_c": 3.2
+        "inversion_strength_c": 3.0
       },
       {
         "date": "2026-09-26",
         "level": "visoko",
-        "inversion_strength_c": 3.9
+        "inversion_strength_c": 4.1
+      },
+      {
+        "date": "2026-09-27",
+        "level": "visoko",
+        "inversion_strength_c": 5.8
       }
     ]
   },
   "fog": {
     "has_inversion": true,
-    "top_m": 858,
-    "morning_date": "2026-09-21",
+    "top_m": 868,
+    "morning_date": "2026-09-22",
     "locations": [
       {
         "name": "Rečica ob Savinji",
@@ -177,44 +178,44 @@
     ],
     "daily": [
       {
-        "date": "2026-09-20",
+        "date": "2026-09-21",
         "has_inversion": false,
         "top_m": null
       },
       {
-        "date": "2026-09-21",
-        "has_inversion": true,
-        "top_m": 858
-      },
-      {
         "date": "2026-09-22",
         "has_inversion": true,
-        "top_m": 860
+        "top_m": 857
       },
       {
         "date": "2026-09-23",
         "has_inversion": true,
-        "top_m": 863
+        "top_m": 868
       },
       {
         "date": "2026-09-24",
         "has_inversion": true,
-        "top_m": 843
+        "top_m": 822
       },
       {
         "date": "2026-09-25",
         "has_inversion": true,
-        "top_m": 835
+        "top_m": 839
       },
       {
         "date": "2026-09-26",
         "has_inversion": true,
-        "top_m": 1530
+        "top_m": 851
+      },
+      {
+        "date": "2026-09-27",
+        "has_inversion": true,
+        "top_m": 839
       }
     ]
   },
   "snowpack": {
-    "updated": "2026-09-20",
+    "updated": "2026-09-21",
     "depth_cm": {
       "366": 0.0,
       "600": 0.0,
@@ -252,8 +253,8 @@
   },
   "season": {
     "start_date": "2025-11-01",
-    "days_logged": 1,
-    "heating_high_days": 1,
+    "days_logged": 2,
+    "heating_high_days": 2,
     "black_ice_high_days": 0,
     "snow_days": 0
   },
@@ -267,7 +268,7 @@
       "status": null,
       "status_checked": null,
       "weather": {
-        "temp_c": 12.5,
+        "temp_c": 14.8,
         "expected_snow_cm_24h": 0.0
       }
     },
@@ -280,17 +281,13 @@
       "status": null,
       "status_checked": null,
       "weather": {
-        "temp_c": 9.7,
+        "temp_c": 12.0,
         "expected_snow_cm_24h": 0.0
       }
     }
   ],
   "black_ice_outlook": {
     "daily": [
-      {
-        "date": "2026-09-20",
-        "level": "nizko"
-      },
       {
         "date": "2026-09-21",
         "level": "nizko"
@@ -301,7 +298,7 @@
       },
       {
         "date": "2026-09-23",
-        "level": "nizko"
+        "level": "visoko"
       },
       {
         "date": "2026-09-24",
@@ -313,6 +310,10 @@
       },
       {
         "date": "2026-09-26",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-09-27",
         "level": "nizko"
       }
     ]
@@ -332,8 +333,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 16.0,
-          "dew_point_c": 11.0
+          "ground_temp_c": 18.3,
+          "dew_point_c": 13.2
         }
       }
     },
@@ -351,8 +352,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 16.2,
-          "dew_point_c": 11.0
+          "ground_temp_c": 18.5,
+          "dew_point_c": 13.2
         }
       }
     },
@@ -370,8 +371,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 15.9,
-          "dew_point_c": 11.0
+          "ground_temp_c": 18.2,
+          "dew_point_c": 13.2
         }
       }
     },
@@ -389,8 +390,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 15.6,
-          "dew_point_c": 11.0
+          "ground_temp_c": 17.9,
+          "dew_point_c": 13.2
         }
       }
     },
@@ -408,8 +409,8 @@
             "senčni odseki",
             "stranske ceste"
           ],
-          "ground_temp_c": 15.6,
-          "dew_point_c": 11.0
+          "ground_temp_c": 17.9,
+          "dew_point_c": 13.2
         }
       }
     }
