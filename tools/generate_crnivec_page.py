@@ -111,7 +111,10 @@ def gauge_svg(zone):
 
     rot = 90 - needle_angle(zone)
     nx, ny = cx, cy - r * 0.8
-    needle = (f'<g transform="rotate({rot:.1f} {cx} {cy})">'
+    # Brez transform="rotate(...)" atributa -- CSS animacija (crn-needle-settle
+    # spodaj) rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo
+    # tiho prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
+    needle = (f'<g class="crn-needle" style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">'
               f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
               f'stroke-linecap="round"/></g>'
               f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
@@ -125,6 +128,49 @@ def gauge_svg(zone):
     return (f'<svg viewBox="0 0 380 230" class="crn-gauge" role="img" '
             f'aria-label="Črnivski indeks: {zone["label"]}">'
             + "".join(arcs) + "".join(labels) + needle + "</svg>")
+
+
+ZONE_ICONS = {
+    "sonce": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
+        <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
+        <line x1="9" y1="9" x2="17" y2="17"/><line x1="43" y1="43" x2="51" y2="51"/>
+        <line x1="51" y1="9" x2="43" y2="17"/><line x1="17" y1="43" x2="9" y2="51"/>
+      </g>
+      <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
+    </svg>''',
+    "nekaj": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+      <g fill="#fef3c7" stroke="#111" stroke-width="3.5" stroke-linejoin="round">
+        <circle cx="20" cy="33" r="10"/><circle cx="33" cy="24" r="13"/>
+        <circle cx="45" cy="33" r="9"/><rect x="15" y="30" width="35" height="15" rx="7.5"/>
+      </g>
+      <circle cx="26" cy="35" r="2.2" fill="#111"/><circle cx="40" cy="35" r="2.2" fill="#111"/>
+      <line x1="26" y1="42" x2="38" y2="42" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>
+    </svg>''',
+    "verige": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+      <rect x="9" y="18" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+      <rect x="30" y="12" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+    </svg>''',
+    "spolzko": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+      <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
+        <line x1="30" y1="6" x2="30" y2="54"/><line x1="10" y1="17" x2="50" y2="43"/><line x1="10" y1="43" x2="50" y2="17"/>
+        <path d="M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6"/>
+        <path d="M10 17 l7.5 1 M10 17 l3 6.5 M50 43 l-7.5 -1 M50 43 l-3 -6.5"/>
+        <path d="M10 43 l3 -6.5 M10 43 l7.5 -1 M50 17 l-3 6.5 M50 17 l-7.5 1"/>
+      </g>
+    </svg>''',
+}
+
+
+def avatar_svg():
+    """Generičen "nekdo iz skupine" avatar za ob citatu — brez obraza/imena
+    (nihče konkreten), samo silhueta, isti debel-obris slog kot vse ostalo."""
+    return '''<svg viewBox="0 0 44 44" class="crn-avatar-icon" aria-hidden="true">
+      <circle cx="22" cy="22" r="20" fill="#e5e7eb" stroke="#111" stroke-width="3.5"/>
+      <circle cx="22" cy="17" r="7.5" fill="#fff" stroke="#111" stroke-width="3"/>
+      <path d="M7 40 a15 13 0 0 1 30 0 Z" fill="#fff" stroke="#111" stroke-width="3"/>
+    </svg>'''
 
 
 def starburst_svg(color, points=14):
@@ -150,9 +196,15 @@ CSS = '''
   .wrap{max-width:720px}
   .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
   .crn-hero{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
-  .crn-icon{width:170px;height:auto;flex-shrink:0}
+  .crn-icon{width:170px;height:auto;flex-shrink:0;transition:transform .25s}
+  .crn-icon:hover{animation:crnWobble .5s ease}
+  @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
   @media (max-width:520px){.crn-hero{flex-direction:column;align-items:flex-start}
     .crn-icon{width:150px}}
+  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
+  @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
+  @media (prefers-reduced-motion:reduce){.crn-icon:hover{animation:none}
+    .crn-needle{animation:none;transform:rotate(var(--rot))}}
   .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
     color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
     transform:rotate(-1.5deg);margin:0 0 .3rem;text-transform:uppercase}
@@ -165,14 +217,25 @@ CSS = '''
   .crn-verdict{text-align:center;position:relative;margin-top:.4rem}
   .crn-verdict-star{position:absolute;left:50%;top:50%;width:210px;height:210px;
     transform:translate(-50%,-50%);z-index:0;opacity:.5}
+  .crn-zicon{position:relative;z-index:1;width:52px;height:52px;display:block;margin:0 auto .2rem}
   .crn-verdict span{position:relative;z-index:1;display:inline-block;font-size:1.7rem;
     font-weight:800;text-transform:uppercase;letter-spacing:.01em;background:#fff;
     padding:0 .3rem}
+  .crn-quote-row{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-top:.2rem}
   .crn-quote{background:#fef08a;border:3px solid #111;border-radius:14px;padding:1rem 1.2rem;
-    font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-0.8deg)}
+    font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-0.8deg);flex:1 1 240px}
   .crn-quote::before{content:"\\201C";font-size:2.4rem;color:#111;line-height:0;
     position:absolute;left:.5rem;top:1.6rem}
+  .crn-quote::after{content:"";position:absolute;left:2rem;bottom:-15px;width:0;height:0;
+    border-left:15px solid transparent;border-right:15px solid transparent;border-top:16px solid #111;
+    transform:rotate(-6deg)}
+  .crn-quote-tail{position:absolute;left:2.15rem;bottom:-9.5px;width:0;height:0;
+    border-left:12px solid transparent;border-right:12px solid transparent;border-top:13px solid #fef08a;
+    transform:rotate(-6deg);z-index:1}
   .crn-quote p{margin:0 0 0 1.6rem}
+  .crn-avatar{display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:0 0 auto}
+  .crn-avatar-icon{width:44px;height:44px}
+  .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -236,12 +299,15 @@ def build_body(data):
 
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
-      <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}<span>{zone['label']}</span></div>
+      <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}{ZONE_ICONS[zone['id']]}<span>{zone['label']}</span></div>
       <div class="crn-data">Trenutno na 902 m: {temp_txt}, pričakovanih {snow_txt}
       (ista metoda kot na <a href="/zima/prevoznost-prelazov/">resni strani</a> — le nalepke so tu za hec).</div>
     </div>
 
-    <div class="crn-quote"><p>{quote}</p></div>
+    <div class="crn-quote-row">
+      <div class="crn-quote"><p>{quote}</p><div class="crn-quote-tail"></div></div>
+      <div class="crn-avatar">{avatar_svg()}<span>nekdo iz skupine</span></div>
+    </div>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
