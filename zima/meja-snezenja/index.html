@@ -66,8 +66,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   if(nm){nm.innerHTML="Meteo<em>Zima</em>";}
 })();</script>
 <style>
-.zima-icon{display:inline-block;vertical-align:-6px;margin-right:.35rem;color:inherit}
-.zima-icon svg{display:block}
+.zima-icon{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;
+  border-radius:10px;background:var(--fa-soft,rgba(148,163,184,.14));color:var(--fa,#94a3b8);
+  margin-right:.6rem;flex:0 0 auto;vertical-align:-.65rem}
+.zima-icon svg{width:1.3rem;height:1.3rem;display:block}
+.zima-card{position:relative;overflow:hidden}
+.zima-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom{position:relative;overflow:hidden}
+.zima-phenom .ph-icon{display:flex;justify-content:center}
+.zima-phenom .ph-icon .zima-icon{margin-right:0}
+.zima-phenom::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom:hover{border-color:var(--fa,#38bdf8)!important}
 .zima-bar{animation:zimaGrow .5s ease-out backwards;animation-delay:var(--zdelay,0ms)}
 @keyframes zimaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 .zima-line{stroke-dasharray:3000;stroke-dashoffset:3000;animation:zimaDraw 1.4s ease-out forwards}
@@ -82,8 +91,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno 20. 9. 2026 ob 21:11</p>
-  <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel"><span class="zima-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Trenutna meja sneženja</div>
+  <div class="card zima-card" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);margin-bottom:1.2rem">
+    <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Trenutna meja sneženja</div>
     <p class="fh-sub">Trenutna meja sneženja je pri <strong>3960 m n. m.</strong>. V naslednjih 24 h se pričakuje premik na 2660 m (spust).</p>
   </div>
   <h2>Pričakovan sneg po višinskih pasovih (naslednjih 24 h)</h2>

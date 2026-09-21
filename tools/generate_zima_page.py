@@ -106,10 +106,45 @@ INDEX_ICONS = {
 }
 
 
+# Barvni poudarek na indeks -- isti vzorec kot GOBE_CATEGORIES (--fa/--fa-soft)
+# v generate_gobe_page.py: brez tega so vse ikone samo currentColor (siva/bela,
+# ista kot besedilo) in stran deluje monotono. Šest jasno ločenih barvnih
+# tonov (modra/cian/oranžna/vijolična/roza/rumena), da se sosednje kartice v
+# mreži ločijo tudi po barvi, ne le po besedilu. snow_line obdrži isto modro
+# kot CHART_LINE_COLOR (isti motiv na kartici in na grafu).
+ZIMA_ACCENT = {
+    "snow_line": "#38bdf8",
+    "black_ice": "#2dd4bf",
+    "heating_index": "#fb923c",
+    "fog": "#a78bfa",
+    "snowpack": "#f472b6",
+    "passes": "#fbbf24",
+}
+
+
+def _rgba(hex_color, alpha):
+    """#rrggbb -> rgba(r,g,b,alpha) -- mehka podlaga ikone iz istega poudarka
+    (namerna podvojitev _rgba() iz generate_gobe_page.py, isto načelo kot
+    drugod v repozitoriju -- generatorji strani si ne delijo knjižnic)."""
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
+
+
 def icon_html(key, size=26):
     svg = seo.IC_METEOZIMA if key == "snow_line" else INDEX_ICONS[key]
     svg = svg.replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)
-    return f'<span class="zima-icon" aria-hidden="true">{svg}</span>'
+    accent = ZIMA_ACCENT[key]
+    style = f'--fa:{accent};--fa-soft:{_rgba(accent, ".16")}'
+    return f'<span class="zima-icon" aria-hidden="true" style="{style}">{svg}</span>'
+
+
+def card_style(key, extra="margin-bottom:1.2rem"):
+    """--fa/--fa-soft za .zima-card (barvni vrhnji rob, glej ZIMA_CSS) -- iste
+    spremenljivke kot na icon_html()-ovi ikoni v isti kartici, da se barva
+    roba in ikone ujemata."""
+    accent = ZIMA_ACCENT[key]
+    return f'--fa:{accent};--fa-soft:{_rgba(accent, ".16")};{extra}'
 
 
 # Subtilne animacije za ikone/grafe -- ista TEHNIKA (ročno narisan SVG + CSS,
@@ -126,8 +161,17 @@ def icon_html(key, size=26):
 # /igra/.
 ZIMA_CSS = '''
 <style>
-.zima-icon{display:inline-block;vertical-align:-6px;margin-right:.35rem;color:inherit}
-.zima-icon svg{display:block}
+.zima-icon{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;
+  border-radius:10px;background:var(--fa-soft,rgba(148,163,184,.14));color:var(--fa,#94a3b8);
+  margin-right:.6rem;flex:0 0 auto;vertical-align:-.65rem}
+.zima-icon svg{width:1.3rem;height:1.3rem;display:block}
+.zima-card{position:relative;overflow:hidden}
+.zima-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom{position:relative;overflow:hidden}
+.zima-phenom .ph-icon{display:flex;justify-content:center}
+.zima-phenom .ph-icon .zima-icon{margin-right:0}
+.zima-phenom::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa,#38bdf8)}
+.zima-phenom:hover{border-color:var(--fa,#38bdf8)!important}
 .zima-bar{animation:zimaGrow .5s ease-out backwards;animation-delay:var(--zdelay,0ms)}
 @keyframes zimaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 .zima-line{stroke-dasharray:3000;stroke-dashoffset:3000;animation:zimaDraw 1.4s ease-out forwards}
@@ -344,17 +388,23 @@ def build_hub_body(data):
     passes = data.get("passes") or []
 
     cards = f'''  <div class="card-grid">
-    <a class="phenom-card" href="/zima/meja-snezenja/">Meja sneženja
+    <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="{card_style("snow_line", "")}">
+      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
-    <a class="phenom-card" href="/zima/poledica/">Tveganje poledice
+    <a class="phenom-card zima-phenom" href="/zima/poledica/" style="{card_style("black_ice", "")}">
+      <span class="ph-icon">{icon_html("black_ice", 30)}</span>Tveganje poledice
       <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>
-    <a class="phenom-card" href="/zima/kurilni-semafor/">Kurilni semafor
+    <a class="phenom-card zima-phenom" href="/zima/kurilni-semafor/" style="{card_style("heating_index", "")}">
+      <span class="ph-icon">{icon_html("heating_index", 30)}</span>Kurilni semafor
       <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
-    <a class="phenom-card" href="/zima/nad-meglo/">Nad meglo
+    <a class="phenom-card zima-phenom" href="/zima/nad-meglo/" style="{card_style("fog", "")}">
+      <span class="ph-icon">{icon_html("fog", 30)}</span>Nad meglo
       <div class="ph-count">{f"~{fog['top_m']} m" if fog and fog.get("has_inversion") else "brez megle"}</div></a>
-    <a class="phenom-card" href="/zima/snezna-odeja/">Snežna odeja
+    <a class="phenom-card zima-phenom" href="/zima/snezna-odeja/" style="{card_style("snowpack", "")}">
+      <span class="ph-icon">{icon_html("snowpack", 30)}</span>Snežna odeja
       <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
-    <a class="phenom-card" href="/zima/prevoznost-prelazov/">Prevoznost prelazov
+    <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="{card_style("passes", "")}">
+      <span class="ph-icon">{icon_html("passes", 30)}</span>Prevoznost prelazov
       <div class="ph-count">{len(passes)} prelaza</div></a>
   </div>'''
 
@@ -385,23 +435,23 @@ def build_hub_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Zimski nadzorni center — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("snow_line")}">
     <div class="clabel">{icon_html("snow_line")}Meja sneženja</div>
     <p class="fh-sub">{snow_verdict}</p>
   </div>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("black_ice")}">
     <div class="clabel">{icon_html("black_ice")}Poledica</div>
     <p class="fh-sub">{ice_verdict}</p>
   </div>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("heating_index")}">
     <div class="clabel">{icon_html("heating_index")}Kurilni semafor</div>
     <p class="fh-sub">{heating_verdict}</p>
   </div>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("fog")}">
     <div class="clabel">{icon_html("fog")}Nad meglo</div>
     <p class="fh-sub">{fog_verdict}</p>
   </div>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("snowpack")}">
     <div class="clabel">{icon_html("snowpack")}Snežna odeja</div>
     <p class="fh-sub">{f"Tekoča ocena na postaji: <strong>{num(station_depth, 0)} cm</strong> (modelirano, ni meritev)." if station_depth is not None else "Ocena trenutno ni na voljo."}</p>
   </div>
@@ -468,7 +518,7 @@ def build_snow_line_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("snow_line")}">
     <div class="clabel">{icon_html("snow_line")}Trenutna meja sneženja</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
@@ -534,7 +584,7 @@ def build_black_ice_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("black_ice")}">
     <div class="clabel">{icon_html("black_ice")}Poledica zdaj</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
@@ -598,7 +648,7 @@ def build_heating_index_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Kurilni semafor — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("heating_index")}">
     <div class="clabel">{icon_html("heating_index")}Prevetrenost za kurjenje</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
@@ -660,7 +710,7 @@ def build_fog_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Nad meglo — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("fog")}">
     <div class="clabel">{icon_html("fog")}Jutranja megla</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
@@ -713,7 +763,7 @@ def build_snowpack_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Snežna odeja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("snowpack")}">
     <div class="clabel">{icon_html("snowpack")}Tekoča ocena snežne odeje</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
@@ -776,7 +826,7 @@ def build_passes_body(data):
 {seo.stn_badge()}
   <h1 class="page-title">Prevoznost prelazov — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
-  <div class="card" style="margin-bottom:1.2rem">
+  <div class="card zima-card" style="{card_style("passes")}">
     <div class="clabel">{icon_html("passes")}Prelazi zdaj</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
