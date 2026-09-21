@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 18 Sep 2026 09:33:10 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Sep 2026 08:37:58 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
+      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
+      <pubDate>Mon, 21 Sep 2026 08:00:00 +0000</pubDate>
+      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
+      <category>gobe</category>
+      <category>luna</category>
+      <category>gobarski indeks</category>
+      <category>mit ali resnica</category>
+    </item>
     <item>
       <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
       <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
