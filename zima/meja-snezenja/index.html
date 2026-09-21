@@ -65,6 +65,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   if(img){img.src="/zima/logo-zima.svg";img.alt="MeteoZima";}
   if(nm){nm.innerHTML="Meteo<em>Zima</em>";}
 })();</script>
+<style>
+.zima-icon{display:inline-block;vertical-align:-6px;margin-right:.35rem;color:inherit}
+.zima-icon svg{display:block}
+.zima-bar{animation:zimaGrow .5s ease-out backwards;animation-delay:var(--zdelay,0ms)}
+@keyframes zimaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.zima-line{stroke-dasharray:3000;stroke-dashoffset:3000;animation:zimaDraw 1.4s ease-out forwards}
+@keyframes zimaDraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){
+  .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
+}
+</style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Meja sneženja</span>
   </nav>
@@ -72,7 +83,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno 20. 9. 2026 ob 21:11</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">❄️ Trenutna meja sneženja</div>
+    <div class="clabel"><span class="zima-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Trenutna meja sneženja</div>
     <p class="fh-sub">Trenutna meja sneženja je pri <strong>3960 m n. m.</strong>. V naslednjih 24 h se pričakuje premik na 2660 m (spust).</p>
   </div>
   <h2>Pričakovan sneg po višinskih pasovih (naslednjih 24 h)</h2>
@@ -84,7 +95,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><th>1600 m n. m.</th><td>0,0 cm v naslednjih 24 h</td></tr>
   </table>
   <h2>Trend meje sneženja (7 dni)</h2>
-  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart" role="img" aria-label="Sedemdnevni trend"><polyline points="82.0,36.9 166.0,114.3 250.0,141.1 334.0,136.8 418.0,103.7 502.0,101.8 586.0,44.4" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="82.0" cy="36.9" r="3.2" fill="#38bdf8"/><circle cx="166.0" cy="114.3" r="3.2" fill="#38bdf8"/><circle cx="250.0" cy="141.1" r="3.2" fill="#38bdf8"/><circle cx="334.0" cy="136.8" r="3.2" fill="#38bdf8"/><circle cx="418.0" cy="103.7" r="3.2" fill="#38bdf8"/><circle cx="502.0" cy="101.8" r="3.2" fill="#38bdf8"/><circle cx="586.0" cy="44.4" r="3.2" fill="#38bdf8"/><text x="34" y="19.0" text-anchor="end" font-size="9" fill="#94a3b8">4104 m</text><text x="34" y="165.0" text-anchor="end" font-size="9" fill="#94a3b8">1766 m</text><text x="82.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><text x="166.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">21.9.</text><text x="250.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">22.9.</text><text x="334.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><text x="418.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><text x="502.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><text x="586.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Nižja črta = meja sneženja se spusti niže = sneg je verjetnejši na nižjih legah tisti dan.</p></div>
+  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart" role="img" aria-label="Sedemdnevni trend"><polyline class="zima-line" points="82.0,36.9 166.0,114.3 250.0,141.1 334.0,136.8 418.0,103.7 502.0,101.8 586.0,44.4" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="82.0" cy="36.9" r="3.2" fill="#38bdf8"/><circle cx="166.0" cy="114.3" r="3.2" fill="#38bdf8"/><circle cx="250.0" cy="141.1" r="3.2" fill="#38bdf8"/><circle cx="334.0" cy="136.8" r="3.2" fill="#38bdf8"/><circle cx="418.0" cy="103.7" r="3.2" fill="#38bdf8"/><circle cx="502.0" cy="101.8" r="3.2" fill="#38bdf8"/><circle cx="586.0" cy="44.4" r="3.2" fill="#38bdf8"/><text x="34" y="19.0" text-anchor="end" font-size="9" fill="#94a3b8">4104 m</text><text x="34" y="165.0" text-anchor="end" font-size="9" fill="#94a3b8">1766 m</text><text x="82.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">20.9.</text><text x="166.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><text x="250.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">22.9.</text><text x="334.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><text x="418.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><text x="502.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><text x="586.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Nižja črta = meja sneženja se spusti niže = sneg je verjetnejši na nižjih legah tisti dan.</p></div>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Kaj pomeni »meja sneženja«?</summary><p>To je nadmorska višina, nad katero padavine padajo kot sneg — izpeljana iz ničte izoterme (Open-Meteo), znižane za približno 200–300 m, ker se padavina ob padanju skozi zrak dodatno ohlaja. Pod to mejo pada dež, tik ob njej pa mešano.</p></details>
