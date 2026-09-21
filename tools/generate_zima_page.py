@@ -61,6 +61,82 @@ RISK_ICON = {"nizko": "🟢", "srednje": "🟡", "visoko": "🔴"}
 RISK_CLASS = {"nizko": "badge-risk-nizko", "srednje": "badge-risk-srednje", "visoko": "badge-risk-visoko"}
 CONF_LABEL = {"visoka": "visoka zanesljivost", "srednja": "srednja zanesljivost", "nizka": "nizka zanesljivost"}
 
+# Ročno narisane ikone namesto emoji na kartah/heroj-kartah — isti vizualni
+# jezik kot seo.IC_METEOZIMA in app_bottomnav()-jevi ic_* (24×24, obris
+# currentColor, ploskev pri nizki prekrivnosti, brez emoji). snow_line
+# UPORABI seo.IC_METEOZIMA neposredno (gora + snežinka) namesto lastne
+# različice — isti motiv, ne podvojen. Vsaka ostala je zasnovana, da nosi
+# pomen svojega indeksa (dimnik s "pokrovom" inverzije, cesta z ledeno
+# kepo, vrh nad meglo, snežna odeja z merilno palico, prelaz med vrhovoma).
+INDEX_ICONS = {
+    "snow_line": None,  # glej icon_html() -- posebna obravnava, uporabi seo.IC_METEOZIMA
+    "black_ice": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                  '<path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'
+                  '<path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'
+                  '<path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" '
+                  'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'),
+    "heating_index": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                       '<rect x="5" y="13.5" width="6" height="7.5" fill="currentColor" fill-opacity=".15" '
+                       'stroke="currentColor" stroke-width="1.6"/>'
+                       '<path d="M8 13.5 V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+                       '<path d="M8 9.5 Q11 6.8 8 4.8 Q6 3.5 8 1.8" stroke="currentColor" stroke-width="1.4" '
+                       'stroke-linecap="round" fill="none"/>'
+                       '<line x1="3" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.6" '
+                       'stroke-linecap="round" stroke-dasharray="1 3.2"/></svg>'),
+    "fog": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            '<circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/>'
+            '<path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" '
+            'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+            '<path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
+            '<path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" '
+            'stroke-linecap="round"/></svg>'),
+    "snowpack": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                 '<path d="M3 18.5 Q7 16.5 11 18.5 T21 18.5" fill="currentColor" fill-opacity=".18" '
+                 'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+                 '<path d="M3 14.5 Q7 12.5 11 14.5 T21 14.5" fill="none" stroke="currentColor" stroke-width="1.4" '
+                 'stroke-linecap="round"/>'
+                 '<line x1="17" y1="3.5" x2="17" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+                 '<line x1="14.7" y1="6.5" x2="17" y2="6.5" stroke="currentColor" stroke-width="1.3"/>'
+                 '<line x1="14.7" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.3"/></svg>'),
+    "passes": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+               '<path d="M2 19 L8.5 6 L11.5 12 L14.5 5 L21 19 Z" fill="currentColor" fill-opacity=".13" '
+               'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+               '<path d="M9.5 11 Q7 13.3 10 15.3 Q13 17.3 10.5 19.3" stroke="currentColor" stroke-width="1.4" '
+               'stroke-linecap="round" fill="none"/></svg>'),
+}
+
+
+def icon_html(key, size=26):
+    svg = seo.IC_METEOZIMA if key == "snow_line" else INDEX_ICONS[key]
+    svg = svg.replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)
+    return f'<span class="zima-icon" aria-hidden="true">{svg}</span>'
+
+
+# Subtilne animacije za ikone/grafe -- ista TEHNIKA (ročno narisan SVG + CSS,
+# brez JS knjižnic) kot na /crnivec/, a NAMENOMA drugačen videz: kratka rast/
+# izris namesto poskoka/vrtenja -- /zima/ ostane temna in resna, ne stripovska
+# (glej opombo pri INDEX_ICONS zgoraj in uporabnikov izrecni "enako tehniko,
+# ne izgled"). `.zima-bar` uporablja transform-origin, nastavljen inline v
+# daily_bar_chart_svg() (isti vzorec kot crn-needle na /crnivec/ -- CSS
+# transform ima prednost pred XML atributom, zato ga stolpec sploh nima).
+# `.zima-line` je klasičen "draw-in" trik (stroke-dasharray/dashoffset) --
+# 3000 je namenoma precej več od dejanske dolžine katerekoli poti v viewBoxu
+# 640x190, da je začetni odmik zagotovo daljši od same črte.
+# `prefers-reduced-motion` obe animaciji izklopi, isto kot na /crnivec/ in
+# /igra/.
+ZIMA_CSS = '''
+<style>
+.zima-icon{display:inline-block;vertical-align:-6px;margin-right:.35rem;color:inherit}
+.zima-icon svg{display:block}
+.zima-bar{animation:zimaGrow .5s ease-out backwards;animation-delay:var(--zdelay,0ms)}
+@keyframes zimaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.zima-line{stroke-dasharray:3000;stroke-dashoffset:3000;animation:zimaDraw 1.4s ease-out forwards}
+@keyframes zimaDraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){
+  .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
+}
+</style>'''
+
 
 def load_json(path, default=None):
     try:
@@ -142,15 +218,18 @@ def daily_bar_chart_svg(days, values, levels, unit=""):
         color = CHART_COLOR.get(lvl, "#64748b")
         bh = max((v / hi) * plot_h, 3) if v else 3
         y = pad_t + plot_h - bh
-        parts.append(f'<rect x="{cx - bar_w / 2:.1f}" y="{y:.1f}" width="{bar_w:.1f}" '
-                      f'height="{bh:.1f}" rx="3" fill="{color}"/>')
+        # zima-bar + --by/--delay: CSS animira rast iz osnovne črte (glej ZIMA_CSS) --
+        # zaporedoma po dnevih, ne vseh naenkrat, da graf deluje kot da se "izriše".
+        parts.append(f'<rect class="zima-bar" x="{cx - bar_w / 2:.1f}" y="{y:.1f}" width="{bar_w:.1f}" '
+                      f'height="{bh:.1f}" rx="3" fill="{color}" '
+                      f'style="--zdelay:{i * 70}ms;transform-origin:{cx:.1f}px {h - pad_b:.1f}px"/>')
         if v is not None:
             parts.append(f'<text x="{cx:.1f}" y="{y - 5:.1f}" text-anchor="middle" font-size="9.5" '
                           f'fill="#94a3b8">{RISK_ICON.get(lvl, "")} {num(v, 1)}{unit}</text>')
         parts.append(f'<text x="{cx:.1f}" y="{h - 8}" text-anchor="middle" font-size="9.5" '
                       f'fill="#94a3b8">{fmt_day_short(days[i])}</text>')
 
-    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart" role="img" '
+    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart zima-chart" role="img" '
             f'aria-label="Sedemdnevni pregled po dnevih">' + "".join(parts) + '</svg>')
 
 
@@ -190,7 +269,7 @@ def daily_line_chart_svg(days, values, unit="", color=CHART_LINE_COLOR):
         segments.append(seg)
 
     lines = "".join(
-        '<polyline points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in s) +
+        '<polyline class="zima-line" points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in s) +
         f'" fill="none" stroke="{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
         for s in segments
     )
@@ -301,29 +380,29 @@ def build_hub_body(data):
          "<a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Zimski nadzorni center — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">❄️ Meja sneženja</div>
+    <div class="clabel">{icon_html("snow_line")}Meja sneženja</div>
     <p class="fh-sub">{snow_verdict}</p>
   </div>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🧊 Poledica</div>
+    <div class="clabel">{icon_html("black_ice")}Poledica</div>
     <p class="fh-sub">{ice_verdict}</p>
   </div>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🔥 Kurilni semafor</div>
+    <div class="clabel">{icon_html("heating_index")}Kurilni semafor</div>
     <p class="fh-sub">{heating_verdict}</p>
   </div>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🌫️ Nad meglo</div>
+    <div class="clabel">{icon_html("fog")}Nad meglo</div>
     <p class="fh-sub">{fog_verdict}</p>
   </div>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🏔️ Snežna odeja</div>
+    <div class="clabel">{icon_html("snowpack")}Snežna odeja</div>
     <p class="fh-sub">{f"Tekoča ocena na postaji: <strong>{num(station_depth, 0)} cm</strong> (modelirano, ni meritev)." if station_depth is not None else "Ocena trenutno ni na voljo."}</p>
   </div>
 {cards}
@@ -384,13 +463,13 @@ def build_snow_line_body(data):
          "tveganjem (gorske ture, prevoznost) preveri tudi uradno napoved ARSO."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">❄️ Trenutna meja sneženja</div>
+    <div class="clabel">{icon_html("snow_line")}Trenutna meja sneženja</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
   <h2>Pričakovan sneg po višinskih pasovih (naslednjih 24 h)</h2>
@@ -410,6 +489,11 @@ def build_snow_line_body(data):
 
 def build_black_ice_body(data):
     locations = data["locations"]
+    worst_loc = max(locations, key=lambda l: ["nizko", "srednje", "visoko"].index(l["indices"]["black_ice"]["risk_level"]))
+    worst_level = worst_loc["indices"]["black_ice"]["risk_level"]
+    hero_sub = (f"Danes ni povečanega tveganja poledice v dolini."
+                if worst_level == "nizko" else
+                f"Najbolj izpostavljen je trenutno kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
     rows = []
     for loc in locations:
         bi = loc["indices"]["black_ice"]
@@ -445,11 +529,15 @@ def build_black_ice_body(data):
          "izračunano posebej za vsak most."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">{icon_html("black_ice")}Poledica zdaj</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
 {table}
 {outlook_html}
@@ -505,13 +593,13 @@ def build_heating_index_body(data):
          "dobro se zrak giblje, ne kaj je trenutno v njem."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Kurilni semafor", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Kurilni semafor — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🔥 Prevetrenost za kurjenje</div>
+    <div class="clabel">{icon_html("heating_index")}Prevetrenost za kurjenje</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
 {chart_html}
@@ -567,13 +655,13 @@ def build_fog_body(data):
          "kot grobo usmeritev, ne zagotovilo."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Nad meglo", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Nad meglo — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🌫️ Jutranja megla</div>
+    <div class="clabel">{icon_html("fog")}Jutranja megla</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
 {table}
@@ -620,13 +708,13 @@ def build_snowpack_body(data):
          "število bi bilo zavajajoče, če vmes pride otoplitev."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snežna odeja", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Snežna odeja — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card" style="margin-bottom:1.2rem">
-    <div class="clabel">🏔️ Tekoča ocena snežne odeje</div>
+    <div class="clabel">{icon_html("snowpack")}Tekoča ocena snežne odeje</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
   <h2>Po višinskih pasovih</h2>
@@ -644,6 +732,15 @@ def build_snowpack_body(data):
 
 def build_passes_body(data):
     passes = data.get("passes") or []
+
+    known = [(p, p["weather"]) for p in passes if (p.get("weather") or {}).get("expected_snow_cm_24h") is not None]
+    if known:
+        worst_pass, worst_w = max(known, key=lambda pw: pw[1]["expected_snow_cm_24h"])
+        hero_sub = (f'{len(passes)} spremljana prelaza. Največ snega v naslednjih 24 h je pričakovanih na '
+                    f'{worst_pass["name"]} ({worst_pass["elevation_m"]} m) — do '
+                    f'{num(worst_w["expected_snow_cm_24h"], 1)} cm.')
+    else:
+        hero_sub = f'{len(passes)} spremljana prelaza — vreme na višini trenutno ni na voljo.'
 
     rows = []
     for p in passes:
@@ -674,11 +771,15 @@ def build_passes_body(data):
          "preverjeni podatki, ne ocena. Viri so navedeni ob vsakem prelazu v tabeli."),
     ]
 
-    return f'''{BRAND_SWAP}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Prevoznost prelazov", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Prevoznost prelazov — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="clabel">{icon_html("passes")}Prelazi zdaj</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
 {table}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
