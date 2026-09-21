@@ -131,7 +131,7 @@ def gauge_svg(zone):
 
 
 ZONE_ICONS = {
-    "sonce": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+    "sonce": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
       <g stroke="#111" stroke-width="4" stroke-linecap="round">
         <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
         <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
@@ -140,7 +140,7 @@ ZONE_ICONS = {
       </g>
       <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
     </svg>''',
-    "nekaj": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+    "nekaj": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-nekaj" aria-hidden="true">
       <g fill="#fef3c7" stroke="#111" stroke-width="3.5" stroke-linejoin="round">
         <circle cx="20" cy="33" r="10"/><circle cx="33" cy="24" r="13"/>
         <circle cx="45" cy="33" r="9"/><rect x="15" y="30" width="35" height="15" rx="7.5"/>
@@ -148,11 +148,11 @@ ZONE_ICONS = {
       <circle cx="26" cy="35" r="2.2" fill="#111"/><circle cx="40" cy="35" r="2.2" fill="#111"/>
       <line x1="26" y1="42" x2="38" y2="42" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>
     </svg>''',
-    "verige": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+    "verige": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-verige" aria-hidden="true">
       <rect x="9" y="18" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
       <rect x="30" y="12" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
     </svg>''',
-    "spolzko": '''<svg viewBox="0 0 60 60" class="crn-zicon" aria-hidden="true">
+    "spolzko": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-spolzko" aria-hidden="true">
       <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
         <line x1="30" y1="6" x2="30" y2="54"/><line x1="10" y1="17" x2="50" y2="43"/><line x1="10" y1="43" x2="50" y2="17"/>
         <path d="M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6"/>
@@ -203,8 +203,33 @@ CSS = '''
     .crn-icon{width:150px}}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
+  .crn-panel.tilt{animation:crnPanelPop .6s cubic-bezier(.34,1.56,.64,1) .15s backwards}
+  @keyframes crnPanelPop{0%{opacity:0;transform:scale(.82) rotate(-4deg)}
+    60%{opacity:1;transform:scale(1.03) rotate(1.2deg)}100%{opacity:1;transform:scale(1) rotate(.6deg)}}
+  .crn-verdict-star{animation:crnStarPulse 2.6s ease-in-out .8s infinite backwards}
+  @keyframes crnStarPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}
+    50%{transform:translate(-50%,-50%) scale(1.08);opacity:.65}}
+  .crn-quote{animation:crnQuoteIn .5s ease-out .65s backwards}
+  @keyframes crnQuoteIn{0%{opacity:0;transform:translateY(14px) rotate(0deg)}
+    100%{opacity:1;transform:translateY(0) rotate(-0.8deg)}}
+  .crn-avatar{animation:crnAvatarIn .45s ease-out .8s backwards}
+  @keyframes crnAvatarIn{0%{opacity:0;transform:translateY(10px) scale(.85)}100%{opacity:1;transform:translateY(0) scale(1)}}
+  .crn-zicon-sonce{animation:crnSunSpin 9s linear infinite}
+  @keyframes crnSunSpin{to{transform:rotate(360deg)}}
+  .crn-zicon-nekaj{animation:crnCloudFloat 3s ease-in-out infinite}
+  @keyframes crnCloudFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .crn-zicon-verige{animation:crnChainShake 2.4s ease-in-out infinite}
+  @keyframes crnChainShake{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+  .crn-zicon-spolzko{animation:crnIceGlint 1.8s ease-in-out infinite}
+  @keyframes crnIceGlint{0%,100%{opacity:1}50%{opacity:.55}}
   @media (prefers-reduced-motion:reduce){.crn-icon:hover{animation:none}
-    .crn-needle{animation:none;transform:rotate(var(--rot))}}
+    .crn-needle{animation:none;transform:rotate(var(--rot))}
+    .crn-panel.tilt,.crn-verdict-star,.crn-quote,.crn-avatar,
+    .crn-zicon-sonce,.crn-zicon-nekaj,.crn-zicon-verige,.crn-zicon-spolzko{animation:none}
+    .crn-panel.tilt{opacity:1;transform:rotate(.6deg)}
+    .crn-verdict-star{opacity:.5;transform:translate(-50%,-50%) scale(1)}
+    .crn-quote{opacity:1;transform:rotate(-.8deg)}
+    .crn-avatar{opacity:1;transform:none}}
   .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
     color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
     transform:rotate(-1.5deg);margin:0 0 .3rem;text-transform:uppercase}
