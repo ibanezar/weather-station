@@ -130,17 +130,28 @@ def gauge_svg(zone, static=False):
                   f'stroke-linecap="round"/></g>'
                   f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
 
+    # text-anchor="middle" centrira napis simetrično okoli sidrne točke -- za
+    # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
+    # pomeni, da polovica napisa raste NAZAJ proti loku namesto stran od
+    # njega, zato se je dotikala barvnega pasu. Za ti dve coni napis raste
+    # samo stran od središča (end=levo, start=desno); zgornji dve coni (mid
+    # blizu 90°) sta že dovolj visoko nad lokom in ostaneta na "middle".
     labels = []
     for z in ZONES:
         lx, ly = arc_point(cx, cy, r + 40, z["mid"])
-        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" font-size="10.5" '
+        anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
+        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="10.5" '
                        f'font-weight="800" fill="#111">{z["label"]}</text>')
 
     # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
     # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
     # in ga brez xmlns molče zavrže -- zato je tu vedno, ne le pri static=True.
-    size_attrs = ' width="380" height="230"' if static else ''
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 230"{size_attrs} '
+    # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
+    # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
+    # pri prejšnji ožji širini obrezan čez rob (izmerjeno z getBBox(): "SUHO K
+    # POPR" sega do x=-15.5, "SPOLZKO, PAZI" do x=403.4).
+    size_attrs = ' width="430" height="230"' if static else ''
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + "".join(arcs) + "".join(labels) + needle + "</svg>")
 
@@ -227,7 +238,7 @@ CSS = '''
   .crn-icon{width:170px;height:auto;flex-shrink:0;transition:transform .25s}
   .crn-icon:hover{animation:crnWobble .5s ease}
   @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-  @media (max-width:520px){.crn-hero{flex-direction:column;align-items:flex-start}
+  @media (max-width:520px){.crn-hero{flex-direction:column}
     .crn-icon{width:150px}}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
@@ -318,6 +329,17 @@ CSS = '''
   @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
     100%{transform:rotate(-0.8deg) scale(1)}}
   @media (max-width:480px){.crn-title{font-size:2rem}}
+  /* Mobilno: cel sklop poravnan na sredino namesto ob levi rob. Ta blok mora
+     priti PO osnovnih pravilih zgoraj (.crn-quote-row/.crn-back/...), ker so
+     ta deklarirana kasneje v datoteki in bi sicer pri enaki specifičnosti
+     povozila zgornjo (prejšnjo) medijsko poizvedbo -- glej git zgodovino. */
+  @media (max-width:520px){.crn-hero{align-items:center;text-align:center}
+    .crn-hero>div{width:100%}
+    .crn-quote-row{flex-direction:column;align-items:center}
+    .crn-quote{width:100%}
+    .crn-actions{justify-content:center}
+    .crn-fine{text-align:center}
+    .crn-back{display:table;margin:1.6rem auto 0}}
   @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
 </style>
 '''
@@ -404,7 +426,7 @@ SHARE_JS_TEMPLATE = '''
     var fontsReady = (window.document && document.fonts && document.fonts.ready) ?
       document.fonts.ready : Promise.resolve();
     return Promise.all([
-      loadSvgImage(share.gauge, 380, 230),
+      loadSvgImage(share.gauge, 430, 230),
       loadSvgImage(share.icon, 60, 60),
       fontsReady
     ]).then(function(imgs){
@@ -446,7 +468,7 @@ SHARE_JS_TEMPLATE = '''
       ctx.strokeStyle = "#111";
       ctx.strokeRect(px, py, pw, ph);
 
-      ctx.drawImage(gaugeImg, px + (pw - 380) / 2, py + 20, 380, 230);
+      ctx.drawImage(gaugeImg, px + (pw - 430) / 2, py + 20, 430, 230);
       ctx.drawImage(iconImg, W / 2 - 26, py + 260, 52, 52);
 
       ctx.font = "800 30px Inter, system-ui, sans-serif";
