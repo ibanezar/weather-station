@@ -59,8 +59,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <style>
   .site-head,#bg,.site-foot,.app-bottomnav{display:none!important}
+  /* Brez site-foot/app-bottomnav ni nič, kar bi zapolnilo sitewide
+     body{min-height:100vh} (style.css) na širših zaslonih/krajši vsebini --
+     ostal je prazen pikčast prostor pod "Nazaj na meteorec.si". Ta stran
+     nima lepljive noge, zato naj se telo skrči na dejansko vsebino. */
   body{background:#fdf6e3!important;background-image:radial-gradient(#111 1px,transparent 1.4px)!important;
-    background-size:16px 16px!important;background-position:-4px -4px!important}
+    background-size:16px 16px!important;background-position:-4px -4px!important;min-height:0!important}
   .wrap{max-width:720px}
   .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
   .crn-hero{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
@@ -107,7 +111,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     box-shadow:8px 8px 0 #111;margin-bottom:1.6rem;position:relative}
   .crn-panel.tilt{transform:rotate(0.6deg)}
   .crn-gauge{width:100%;max-width:340px;display:block;margin:0 auto}
-  .crn-verdict{text-align:center;position:relative;margin-top:.4rem}
+  /* min-height + flex-center: brez tega .crn-verdict rezervira samo prostor
+     za ikono+napis (~90px), zvezda (210px, sredinjena nanj) pa je absolutno
+     pozicionirana in seže čez spodnji rob -- v .crn-data škatlo pod njo
+     (obe sta znotraj istega .crn-panel). Rezervirana višina ujame zvezdo v
+     celoti, centriranje pa badge postavi točno v njeno sredino namesto na vrh. */
+  .crn-verdict{text-align:center;position:relative;margin-top:.4rem;min-height:210px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center}
   .crn-verdict-star{position:absolute;left:50%;top:50%;width:210px;height:210px;
     transform:translate(-50%,-50%);z-index:0;opacity:.5}
   .crn-zicon{position:relative;z-index:1;width:52px;height:52px;display:block;margin:0 auto .2rem}
@@ -128,7 +138,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-quote p{margin:0 0 0 1.6rem}
   .crn-avatar{display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:0 0 auto}
   .crn-avatar-icon{width:44px;height:44px}
-  .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px}
+  /* Brez neprosojnega ozadja pikčasto ozadje strani (glej body zgoraj)
+     sveti skozi ta drobni napis in ga navidez "prečrta" -- isti trik kot
+     .crn-sub zgoraj (background v barvi strani + padding). */
+  .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px;
+    background:#fdf6e3;padding:.15rem .3rem;border-radius:4px}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
