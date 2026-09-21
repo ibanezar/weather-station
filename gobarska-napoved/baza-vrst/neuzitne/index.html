@@ -151,6 +151,11 @@ body{
   padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
   color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
 .gp-chip-action:hover{border-color:var(--blue)}
+/* .hi — same green as .e-ok (already palette-validated elsewhere on this
+   page), for the one chip in the row that should read as "do this", not
+   just "you can also go here" like the plain Deli/zemljevid chips. */
+.gp-chip-action.hi{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
+.gp-chip-action.hi:hover{background:rgba(52,211,153,.24);border-color:var(--green)}
 .gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
   border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
