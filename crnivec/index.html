@@ -138,7 +138,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-back{display:inline-block;margin-top:1.6rem;font-weight:700;color:#111;
     background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
     text-decoration:none;box-shadow:4px 4px 0 #111}
+  .crn-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+  .crn-action-btn{font:inherit;font-weight:700;font-size:.92rem;color:#111;cursor:pointer;
+    background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
+    box-shadow:4px 4px 0 #111;transition:transform .1s}
+  .crn-action-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+  .crn-share-status{font-size:.82rem;font-weight:600;color:#374151;margin-top:.5rem}
+  .crn-quote-pop{animation:crnQuoteReroll .35s ease}
+  @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
+    100%{transform:rotate(-0.8deg) scale(1)}}
   @media (max-width:480px){.crn-title{font-size:2rem}}
+  @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
 </style>
 
   <div class="crn-wrap">
@@ -167,7 +177,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="crn-panel tilt">
-      <svg viewBox="0 0 380 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><path d="M 85.0 175.0 A 105 105 0 0 1 115.8 100.8" fill="none" stroke="#16a34a" stroke-width="26" stroke-linecap="butt"/><path d="M 115.8 100.8 A 105 105 0 0 1 190.0 70.0" fill="none" stroke="#eab308" stroke-width="26" stroke-linecap="butt"/><path d="M 190.0 70.0 A 105 105 0 0 1 264.2 100.8" fill="none" stroke="#ea580c" stroke-width="26" stroke-linecap="butt"/><path d="M 264.2 100.8 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="#dc2626" stroke-width="26" stroke-linecap="butt"/><text x="56.0" y="119.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">SUHO K POPR</text><text x="134.5" y="41.0" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">JE, PA NEKAJ</text><text x="245.5" y="41.0" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">VZEMI VERIGE</text><text x="324.0" y="119.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">SPOLZKO, PAZI</text><g class="crn-needle" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="91.0" stroke="#111" stroke-width="7" stroke-linecap="round"/></g><circle cx="190" cy="175" r="13" fill="#111" stroke="#fff" stroke-width="3"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><path d="M 85.0 175.0 A 105 105 0 0 1 115.8 100.8" fill="none" stroke="#16a34a" stroke-width="26" stroke-linecap="butt"/><path d="M 115.8 100.8 A 105 105 0 0 1 190.0 70.0" fill="none" stroke="#eab308" stroke-width="26" stroke-linecap="butt"/><path d="M 190.0 70.0 A 105 105 0 0 1 264.2 100.8" fill="none" stroke="#ea580c" stroke-width="26" stroke-linecap="butt"/><path d="M 264.2 100.8 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="#dc2626" stroke-width="26" stroke-linecap="butt"/><text x="56.0" y="119.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">SUHO K POPR</text><text x="134.5" y="41.0" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">JE, PA NEKAJ</text><text x="245.5" y="41.0" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">VZEMI VERIGE</text><text x="324.0" y="119.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#111">SPOLZKO, PAZI</text><g class="crn-needle" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="91.0" stroke="#111" stroke-width="7" stroke-linecap="round"/></g><circle cx="190" cy="175" r="13" fill="#111" stroke="#fff" stroke-width="3"/></svg>
       <div class="crn-verdict" style="color:#16a34a"><svg viewBox="0 0 200 200" class="crn-verdict-star" aria-hidden="true"><polygon points="198.0,100.0 160.4,86.2 188.3,57.5 148.5,61.3 161.1,23.4 126.9,44.1 121.8,4.5 100.0,38.0 78.2,4.5 73.1,44.1 38.9,23.4 51.5,61.3 11.7,57.5 39.6,86.2 2.0,100.0 39.6,113.8 11.7,142.5 51.5,138.7 38.9,176.6 73.1,155.9 78.2,195.5 100.0,162.0 121.8,195.5 126.9,155.9 161.1,176.6 148.5,138.7 188.3,142.5 160.4,113.8" fill="#16a34a" opacity=".35"/></svg><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
       <g stroke="#111" stroke-width="4" stroke-linecap="round">
         <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
@@ -190,6 +200,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </svg><span>nekdo iz skupine</span></div>
     </div>
 
+    <div class="crn-actions">
+      <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
+      <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
+    </div>
+    <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
     resnici čisto drugače — kar je, mimogrede, tudi bistvo te strani.
@@ -198,6 +214,198 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <a class="crn-back" href="/">← Nazaj na meteorec.si</a>
   </div>
+
+<script>
+(function(){
+  "use strict";
+  var quotes = ["Meni je teta rekla, da je suho. Sosed pravi katastrofa. Nekdo laže.", "Grem pogledat in sporočim… čez kakšne tri ure.", "Odvisno, kdaj vprašaš — in koga.", "Kamera kaže sonce, komentarji pod njo pravijo drugače.", "Bilo je super, ko sem jaz šel. Pred dvema letoma, poleti.", "Pol skupine pravi zimske, pol pravi, da ni treba. Vzemi obe mnenji.", "Vprašaj raje v skupini — jaz osebno ne grem gledat zate.", "Nekdo je pravkar vprašal isto. Odgovori so spet drugačni kot včeraj.", "Tehnično prevozno. Praktično — na lastno odgovornost, kot vedno.", "Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje."];
+  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje.", "temp": "12,5 °C", "snow": "0,0 cm snega v 24 h", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 380 230\" width=\"380\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 115.8 100.8\" fill=\"none\" stroke=\"#16a34a\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 115.8 100.8 A 105 105 0 0 1 190.0 70.0\" fill=\"none\" stroke=\"#eab308\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 190.0 70.0 A 105 105 0 0 1 264.2 100.8\" fill=\"none\" stroke=\"#ea580c\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 264.2 100.8 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"26\" stroke-linecap=\"butt\"/><text x=\"56.0\" y=\"119.5\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SUHO K POPR<\/text><text x=\"134.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">JE, PA NEKAJ<\/text><text x=\"245.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">VZEMI VERIGE<\/text><text x=\"324.0\" y=\"119.5\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SPOLZKO, PAZI<\/text><g transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"91.0\" stroke=\"#111\" stroke-width=\"7\" stroke-linecap=\"round\"/><\/g><circle cx=\"190\" cy=\"175\" r=\"13\" fill=\"#111\" stroke=\"#fff\" stroke-width=\"3\"/><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
+
+  var rerollBtn = document.getElementById("crn-reroll");
+  var quoteP = document.querySelector(".crn-quote p");
+  var quoteBubble = document.querySelector(".crn-quote");
+  if (rerollBtn && quoteP && quoteBubble && quotes.length > 1) {
+    rerollBtn.hidden = false;
+    rerollBtn.addEventListener("click", function(){
+      var cur = quoteP.textContent;
+      var next = cur;
+      var tries = 0;
+      while (next === cur && tries < 20) {
+        next = quotes[Math.floor(Math.random() * quotes.length)];
+        tries++;
+      }
+      quoteP.textContent = next;
+      quoteBubble.classList.remove("crn-quote-pop");
+      void quoteBubble.offsetWidth;
+      quoteBubble.classList.add("crn-quote-pop");
+    });
+  }
+
+  var shareBtn = document.getElementById("crn-share");
+  var statusEl = document.getElementById("crn-share-status");
+  if (!shareBtn || !window.HTMLCanvasElement || !share) return;
+
+  function setStatus(msg){
+    if (!statusEl) return;
+    statusEl.hidden = !msg;
+    statusEl.textContent = msg || "";
+  }
+
+  function loadSvgImage(svgStr, w, h){
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      img.onload = function(){ resolve(img); };
+      img.onerror = reject;
+      img.width = w;
+      img.height = h;
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+    });
+  }
+
+  function wrapText(ctx, text, maxWidth){
+    var words = text.split(" ");
+    var lines = [];
+    var line = "";
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + " " + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function downloadBlob(blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "crnivec.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    setStatus("Slika je bila prenesena.");
+  }
+
+  function buildCanvas(){
+    var fontsReady = (window.document && document.fonts && document.fonts.ready) ?
+      document.fonts.ready : Promise.resolve();
+    return Promise.all([
+      loadSvgImage(share.gauge, 380, 230),
+      loadSvgImage(share.icon, 60, 60),
+      fontsReady
+    ]).then(function(imgs){
+      var gaugeImg = imgs[0];
+      var iconImg = imgs[1];
+      var W = 640, H = 860;
+      var canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      var ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#fdf6e3";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#111";
+      for (var y = 8; y < H; y += 16) {
+        for (var x = 8; x < W; x += 16) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.font = "800 40px Inter, system-ui, sans-serif";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "#111";
+      ctx.strokeText("KAKO JE ČEZ ČRNIVEC?", W / 2, 74);
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText("KAKO JE ČEZ ČRNIVEC?", W / 2, 74);
+
+      var px = 40, py = 100, pw = W - 80, ph = 430;
+      ctx.fillStyle = "#111";
+      ctx.fillRect(px + 8, py + 8, pw, ph);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(px, py, pw, ph);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#111";
+      ctx.strokeRect(px, py, pw, ph);
+
+      ctx.drawImage(gaugeImg, px + (pw - 380) / 2, py + 20, 380, 230);
+      ctx.drawImage(iconImg, W / 2 - 26, py + 260, 52, 52);
+
+      ctx.font = "800 30px Inter, system-ui, sans-serif";
+      ctx.fillStyle = share.color;
+      ctx.fillText(share.verdict, W / 2, py + 345);
+
+      ctx.font = "600 18px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#374151";
+      ctx.fillText(share.temp + " \u00b7 " + share.snow, W / 2, py + 380);
+
+      var qx = 40, qy = py + ph + 30, qw = W - 80;
+      ctx.textAlign = "left";
+      ctx.font = "700 20px Inter, system-ui, sans-serif";
+      var lines = wrapText(ctx, share.quote, qw - 60);
+      var qh = 46 + lines.length * 28;
+      ctx.fillStyle = "#111";
+      ctx.fillRect(qx + 6, qy + 6, qw, qh);
+      ctx.fillStyle = "#fef08a";
+      ctx.fillRect(qx, qy, qw, qh);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#111";
+      ctx.strokeRect(qx, qy, qw, qh);
+      ctx.fillStyle = "#111";
+      for (var li = 0; li < lines.length; li++) {
+        ctx.fillText(lines[li], qx + 26, qy + 34 + li * 28);
+      }
+
+      ctx.textAlign = "center";
+      ctx.font = "700 16px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText("meteorec.si/crnivec", W / 2, H - 20);
+
+      return canvas;
+    });
+  }
+
+  shareBtn.hidden = false;
+  shareBtn.addEventListener("click", function(){
+    shareBtn.disabled = true;
+    setStatus("Pripravljam sliko\u2026");
+    buildCanvas().then(function(canvas){
+      canvas.toBlob(function(blob){
+        if (!blob) { setStatus("Slike ni bilo mogoče pripraviti."); shareBtn.disabled = false; return; }
+        var file = new File([blob], "crnivec.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: "Kako je čez Črnivec?",
+            text: share.verdict + " \u2014 meteorec.si/crnivec"
+          }).then(function(){
+            setStatus("");
+          }).catch(function(err){
+            if (err && err.name === "AbortError") { setStatus(""); return; }
+            downloadBlob(blob);
+          }).then(function(){ shareBtn.disabled = false; });
+        } else {
+          downloadBlob(blob);
+          shareBtn.disabled = false;
+        }
+      }, "image/png");
+    }).catch(function(){
+      setStatus("Slike ni bilo mogoče pripraviti.");
+      shareBtn.disabled = false;
+    });
+  });
+})();
+</script>
+
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>

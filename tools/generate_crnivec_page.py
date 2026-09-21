@@ -99,7 +99,12 @@ def arc_point(cx, cy, r, deg):
     return cx + r * math.cos(rad), cy - r * math.sin(rad)
 
 
-def gauge_svg(zone):
+def gauge_svg(zone, static=False):
+    """static=True: samostojna različica za "Deli kot sliko" (glej
+    build_body/SHARE_JS) — eksplicitna width/height (canvas Image potrebuje
+    znano velikost) in kazalec zapečen kot SVG transform atribut namesto
+    CSS --rot spremenljivke (canvas slika nima dostopa do strani CSS/animacije,
+    zato mora biti statična kopija samozadostna)."""
     cx, cy, r = 190, 175, 105
     bounds = [180, 135, 90, 45, 0]
     arcs = []
@@ -111,13 +116,19 @@ def gauge_svg(zone):
 
     rot = 90 - needle_angle(zone)
     nx, ny = cx, cy - r * 0.8
-    # Brez transform="rotate(...)" atributa -- CSS animacija (crn-needle-settle
-    # spodaj) rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo
-    # tiho prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
-    needle = (f'<g class="crn-needle" style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">'
-              f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
-              f'stroke-linecap="round"/></g>'
-              f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
+    if static:
+        needle = (f'<g transform="rotate({rot:.1f} {cx} {cy})">'
+                  f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
+                  f'stroke-linecap="round"/></g>'
+                  f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
+    else:
+        # Brez transform="rotate(...)" atributa -- CSS animacija (crn-needle-settle
+        # spodaj) rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo
+        # tiho prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
+        needle = (f'<g class="crn-needle" style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">'
+                  f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
+                  f'stroke-linecap="round"/></g>'
+                  f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
 
     labels = []
     for z in ZONES:
@@ -125,9 +136,22 @@ def gauge_svg(zone):
         labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" font-size="10.5" '
                        f'font-weight="800" fill="#111">{z["label"]}</text>')
 
-    return (f'<svg viewBox="0 0 380 230" class="crn-gauge" role="img" '
-            f'aria-label="Črnivski indeks: {zone["label"]}">'
+    # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
+    # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
+    # in ga brez xmlns molče zavrže -- zato je tu vedno, ne le pri static=True.
+    size_attrs = ' width="380" height="230"' if static else ''
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 230"{size_attrs} '
+            f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + "".join(arcs) + "".join(labels) + needle + "</svg>")
+
+
+def icon_svg_static(zone_id):
+    """ZONE_ICONS ima viewBox brez width/height/xmlns (velikost pride iz CSS
+    .crn-zicon, xmlns je za inline uporabo odveč) — za canvas Image
+    potrebujemo oboje, isto načelo kot pri gauge_svg(static=True)."""
+    svg = ZONE_ICONS[zone_id].replace('viewBox="0 0 60 60"',
+                                       'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"', 1)
+    return svg
 
 
 ZONE_ICONS = {
@@ -270,8 +294,212 @@ CSS = '''
   .crn-back{display:inline-block;margin-top:1.6rem;font-weight:700;color:#111;
     background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
     text-decoration:none;box-shadow:4px 4px 0 #111}
+  .crn-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+  .crn-action-btn{font:inherit;font-weight:700;font-size:.92rem;color:#111;cursor:pointer;
+    background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
+    box-shadow:4px 4px 0 #111;transition:transform .1s}
+  .crn-action-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+  .crn-share-status{font-size:.82rem;font-weight:600;color:#374151;margin-top:.5rem}
+  .crn-quote-pop{animation:crnQuoteReroll .35s ease}
+  @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
+    100%{transform:rotate(-0.8deg) scale(1)}}
   @media (max-width:480px){.crn-title{font-size:2rem}}
+  @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
 </style>
+'''
+
+
+SHARE_JS_TEMPLATE = '''
+<script>
+(function(){
+  "use strict";
+  var quotes = __QUOTES_JSON__;
+  var share = __SHARE_JSON__;
+
+  var rerollBtn = document.getElementById("crn-reroll");
+  var quoteP = document.querySelector(".crn-quote p");
+  var quoteBubble = document.querySelector(".crn-quote");
+  if (rerollBtn && quoteP && quoteBubble && quotes.length > 1) {
+    rerollBtn.hidden = false;
+    rerollBtn.addEventListener("click", function(){
+      var cur = quoteP.textContent;
+      var next = cur;
+      var tries = 0;
+      while (next === cur && tries < 20) {
+        next = quotes[Math.floor(Math.random() * quotes.length)];
+        tries++;
+      }
+      quoteP.textContent = next;
+      quoteBubble.classList.remove("crn-quote-pop");
+      void quoteBubble.offsetWidth;
+      quoteBubble.classList.add("crn-quote-pop");
+    });
+  }
+
+  var shareBtn = document.getElementById("crn-share");
+  var statusEl = document.getElementById("crn-share-status");
+  if (!shareBtn || !window.HTMLCanvasElement || !share) return;
+
+  function setStatus(msg){
+    if (!statusEl) return;
+    statusEl.hidden = !msg;
+    statusEl.textContent = msg || "";
+  }
+
+  function loadSvgImage(svgStr, w, h){
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      img.onload = function(){ resolve(img); };
+      img.onerror = reject;
+      img.width = w;
+      img.height = h;
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+    });
+  }
+
+  function wrapText(ctx, text, maxWidth){
+    var words = text.split(" ");
+    var lines = [];
+    var line = "";
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + " " + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function downloadBlob(blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "crnivec.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    setStatus("Slika je bila prenesena.");
+  }
+
+  function buildCanvas(){
+    var fontsReady = (window.document && document.fonts && document.fonts.ready) ?
+      document.fonts.ready : Promise.resolve();
+    return Promise.all([
+      loadSvgImage(share.gauge, 380, 230),
+      loadSvgImage(share.icon, 60, 60),
+      fontsReady
+    ]).then(function(imgs){
+      var gaugeImg = imgs[0];
+      var iconImg = imgs[1];
+      var W = 640, H = 860;
+      var canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      var ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#fdf6e3";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#111";
+      for (var y = 8; y < H; y += 16) {
+        for (var x = 8; x < W; x += 16) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.font = "800 40px Inter, system-ui, sans-serif";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "#111";
+      ctx.strokeText("KAKO JE ČEZ ČRNIVEC?", W / 2, 74);
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText("KAKO JE ČEZ ČRNIVEC?", W / 2, 74);
+
+      var px = 40, py = 100, pw = W - 80, ph = 430;
+      ctx.fillStyle = "#111";
+      ctx.fillRect(px + 8, py + 8, pw, ph);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(px, py, pw, ph);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#111";
+      ctx.strokeRect(px, py, pw, ph);
+
+      ctx.drawImage(gaugeImg, px + (pw - 380) / 2, py + 20, 380, 230);
+      ctx.drawImage(iconImg, W / 2 - 26, py + 260, 52, 52);
+
+      ctx.font = "800 30px Inter, system-ui, sans-serif";
+      ctx.fillStyle = share.color;
+      ctx.fillText(share.verdict, W / 2, py + 345);
+
+      ctx.font = "600 18px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#374151";
+      ctx.fillText(share.temp + " \\u00b7 " + share.snow, W / 2, py + 380);
+
+      var qx = 40, qy = py + ph + 30, qw = W - 80;
+      ctx.textAlign = "left";
+      ctx.font = "700 20px Inter, system-ui, sans-serif";
+      var lines = wrapText(ctx, share.quote, qw - 60);
+      var qh = 46 + lines.length * 28;
+      ctx.fillStyle = "#111";
+      ctx.fillRect(qx + 6, qy + 6, qw, qh);
+      ctx.fillStyle = "#fef08a";
+      ctx.fillRect(qx, qy, qw, qh);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#111";
+      ctx.strokeRect(qx, qy, qw, qh);
+      ctx.fillStyle = "#111";
+      for (var li = 0; li < lines.length; li++) {
+        ctx.fillText(lines[li], qx + 26, qy + 34 + li * 28);
+      }
+
+      ctx.textAlign = "center";
+      ctx.font = "700 16px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText("meteorec.si/crnivec", W / 2, H - 20);
+
+      return canvas;
+    });
+  }
+
+  shareBtn.hidden = false;
+  shareBtn.addEventListener("click", function(){
+    shareBtn.disabled = true;
+    setStatus("Pripravljam sliko\\u2026");
+    buildCanvas().then(function(canvas){
+      canvas.toBlob(function(blob){
+        if (!blob) { setStatus("Slike ni bilo mogoče pripraviti."); shareBtn.disabled = false; return; }
+        var file = new File([blob], "crnivec.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: "Kako je čez Črnivec?",
+            text: share.verdict + " \\u2014 meteorec.si/crnivec"
+          }).then(function(){
+            setStatus("");
+          }).catch(function(err){
+            if (err && err.name === "AbortError") { setStatus(""); return; }
+            downloadBlob(blob);
+          }).then(function(){ shareBtn.disabled = false; });
+        } else {
+          downloadBlob(blob);
+          shareBtn.disabled = false;
+        }
+      }, "image/png");
+    }).catch(function(){
+      setStatus("Slike ni bilo mogoče pripraviti.");
+      shareBtn.disabled = false;
+    });
+  });
+})();
+</script>
 '''
 
 
@@ -310,6 +538,23 @@ def build_body(data):
     snow_txt = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm snega v 24 h'
                 if weather.get("expected_snow_cm_24h") is not None else "ni podatka")
 
+    # "Deli kot sliko" bere ta paket, ne živega animiranega DOM-a (glej
+    # gauge_svg(static=True)/icon_svg_static) — vsi podatki za canvas so tu
+    # že pripravljeni, JS jih samo nariše. "Vprašaj še enkrat" dobi cel
+    # QUOTES seznam za klientski reroll (server izbere samo dnevni privzetek).
+    share_payload = {
+        "verdict": zone["label"],
+        "color": zone["color"],
+        "quote": quote,
+        "temp": temp_txt,
+        "snow": snow_txt,
+        "gauge": gauge_svg(zone, static=True),
+        "icon": icon_svg_static(zone["id"]),
+    }
+    quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
+    share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
+    share_js = SHARE_JS_TEMPLATE.replace("__QUOTES_JSON__", quotes_json).replace("__SHARE_JSON__", share_json)
+
     return f'''{CSS}
   <div class="crn-wrap">
 {seo.crumbs_html([("Meteorec", "/"), ("Kako je čez Črnivec?", None)])}
@@ -334,6 +579,12 @@ def build_body(data):
       <div class="crn-avatar">{avatar_svg()}<span>nekdo iz skupine</span></div>
     </div>
 
+    <div class="crn-actions">
+      <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
+      <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
+    </div>
+    <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
     resnici čisto drugače — kar je, mimogrede, tudi bistvo te strani.
@@ -341,7 +592,8 @@ def build_body(data):
     prevoznost prelazov</a> · za uradno stanje ceste: promet.si, AMZS, DARS.</span></p>
 
     <a class="crn-back" href="/">← Nazaj na meteorec.si</a>
-  </div>'''
+  </div>
+{share_js}'''
 
 
 def main():
