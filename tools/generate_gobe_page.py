@@ -4044,7 +4044,8 @@ def build_body(rules, premium, free):
     <div class="gp-action-chips">
       <button type="button" class="gp-chip-action" id="gp-share-btn"
         data-pct="{pct}" data-lvl="{_esc(lvl)}">Deli</button>
-      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">Odpri zemljevid</a>{alert_chip}
+      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">Odpri zemljevid</a>
+      <a class="gp-chip-action" href="/gobarska-napoved/danes/#opazovanja">📝 Dodaj opažanje</a>{alert_chip}
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
