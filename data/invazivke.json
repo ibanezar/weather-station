@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T09:09:26.052184+00:00",
+  "updated": "2026-09-21T09:11:34.661276+00:00",
   "region": {
     "name": "Zgornja Savinjska dolina",
     "bbox": {
@@ -73,7 +73,7 @@
       "sci": "Ambrosia artemisiifolia",
       "severity": "high",
       "total_cells": 2,
-      "new_cells_30d": 2,
+      "new_cells_30d": 1,
       "last_observed": "2026-08-30",
       "recent": [
         {
