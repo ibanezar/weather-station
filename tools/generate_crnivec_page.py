@@ -45,26 +45,50 @@ DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 # kot na klasičnem "risk" merilniku. Kot je sredina cone na polkrogu
 # (180°=levo, 0°=desno, 90°=zgoraj), isti konvenciji sledi needle_angle().
 ZONES = [
-    {"id": "sonce",    "label": "SUHO K POPR",    "color": "#16a34a", "mid": 157.5},
-    {"id": "nekaj",    "label": "JE, PA NEKAJ",   "color": "#eab308", "mid": 112.5},
-    {"id": "verige",   "label": "VZEMI VERIGE",   "color": "#ea580c", "mid": 67.5},
-    {"id": "spolzko",  "label": "SPOLZKO, PAZI",  "color": "#dc2626", "mid": 22.5},
+    {"id": "sonce",    "label": "SUHO K POPR",    "desc": "Popolnoma čisto, cesta je suha.",
+     "color": "#16a34a", "mid": 157.5},
+    {"id": "nekaj",    "label": "JE, PA NEKAJ",   "desc": "Nekaj snega ali ledu, zato previdno.",
+     "color": "#eab308", "mid": 112.5},
+    {"id": "verige",   "label": "VZEMI VERIGE",   "desc": "Sneg ali led na cesti, verige so priporočljive.",
+     "color": "#ea580c", "mid": 67.5},
+    {"id": "spolzko",  "label": "SPOLZKO, PAZI",  "desc": "Cesta je spolzka, vozite zelo previdno.",
+     "color": "#dc2626", "mid": 22.5},
 ]
 
 # Izvirni citati v duhu šale (glej opombo zgoraj) — NISO navedki resničnih
 # objav, ker jih nimamo preverjenih; namenoma zvenijo kot tipičen odgovor v
 # FB skupini. Če imaš prave, jih zamenjaj tu.
 QUOTES = [
-    "Meni je teta rekla, da je suho. Sosed pravi katastrofa. Nekdo laže.",
-    "Grem pogledat in sporočim… čez kakšne tri ure.",
-    "Odvisno, kdaj vprašaš — in koga.",
-    "Kamera kaže sonce, komentarji pod njo pravijo drugače.",
-    "Bilo je super, ko sem jaz šel. Pred dvema letoma, poleti.",
-    "Pol skupine pravi zimske, pol pravi, da ni treba. Vzemi obe mnenji.",
-    "Vprašaj raje v skupini — jaz osebno ne grem gledat zate.",
-    "Nekdo je pravkar vprašal isto. Odgovori so spet drugačni kot včeraj.",
-    "Tehnično prevozno. Praktično — na lastno odgovornost, kot vedno.",
-    "Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje.",
+    "Teta pravi, da je suho. Sosed pravi, da je katastrofa. Nekdo se moti.",
+    "Grem pogledat in sporočim. Če se vrnem.",
+    "Odvisno, kdaj vprašaš. In predvsem – koga.",
+    "Kamera kaže sonce. Komentarji pod njo kažejo zimo.",
+    "Ko sem jaz šel čez, je bilo čisto suho. Resda pred dvema letoma.",
+    "Pol skupine pravi, da rabiš zimske. Druga polovica, da ne. Vzemi oboje.",
+    "Vprašaj raje v skupini. Tam imajo vedno tri različne odgovore.",
+    "Nekdo je pravkar vprašal isto. Odgovori so že drugačni kot včeraj.",
+    "Tehnično prevozno. Praktično pa … saj veš, kako je s Črnivcem.",
+    "Indeks pravi eno, dedek drugo. Za zdaj ima dedek boljši rekord.",
+    "Če sprašuješ, ali je prevozno, je odgovor verjetno: previdno.",
+    "Na kameri je videti dobro. Kar je vedno dober začetek.",
+    "Črnivec je prevozen. Vprašanje je samo, za koga.",
+    "Cesta pravi »pojdi«. Vreme pravi »premisli«.",
+    "Snega ni veliko. Ampak tisti, ki je, je očitno dovolj.",
+    "Danes brez težav. Jutri? Vprašaj jutri.",
+    "Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.",
+    "V dolini suho, na vrhu pa … dobrodošel na Črnivcu.",
+    "Črnivec danes: bolj vprašanje kot odgovor.",
+    "Stanje se spreminja. Mnenja še hitreje.",
+    "Ni panike. Razen če je.",
+    "Zaenkrat gre. Slab znak je, da sem dodal »zaenkrat«.",
+    "Lahko greš čez. Ali pa najprej preveriš, kako zelo ti je všeč tvoj avto.",
+    "Po podatkih je v redu. Po pripovedovanju soseda pa nikakor.",
+    "Črnivec: kraj, kjer »samo malo snega« pomeni štiri različne stvari.",
+    "Če greš čez, poročaj. Če ne greš, tudi.",
+    "Včeraj je bilo prevozno. Danes je danes.",
+    "Stanje na cesti: odvisno od tega, kako samozavestno ga gledaš.",
+    "Ni še za paniko. Ampak verige imajo danes lep dan.",
+    "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri.",
 ]
 
 
@@ -324,6 +348,8 @@ CSS = '''
   .crn-verdict span{position:relative;z-index:1;display:inline-block;font-size:1.9rem;
     font-weight:800;text-transform:uppercase;letter-spacing:.01em;background:#fff;
     border:3px solid currentColor;border-radius:12px;padding:.3rem 1rem;margin-top:.15rem}
+  .crn-verdict-desc{position:relative;z-index:1;font-size:.92rem;font-weight:600;
+    color:#374151;margin-top:.6rem;max-width:32ch}
   .crn-quote-row{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-top:.2rem}
   .crn-quote{background:#fef08a;border:3px solid #111;border-radius:14px;padding:1rem 1.2rem;
     font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-.3deg);flex:1 1 240px}
@@ -485,7 +511,7 @@ SHARE_JS_TEMPLATE = '''
       if (!installHint) return;
       installHint.hidden = false;
       installHint.textContent = isIOS ?
-        "Tapni ⬆️ (Deli) spodaj in izberi »Na začetni zaslon« — pa boš zraven tistih, ki pogledajo sami." :
+        "Tapni ⬆️ (Deli) spodaj in izberi »Na začetni zaslon«." :
         "Namestitev v tem brskalniku ni na voljo.";
     });
   }
@@ -635,7 +661,7 @@ SHARE_JS_TEMPLATE = '''
           navigator.share({
             files: [file],
             title: "Kako je čez Črnivec?",
-            text: share.verdict + " \\u2014 meteorec.si/crnivec"
+            text: share.verdict + " \\u2013 meteorec.si/crnivec"
           }).then(function(){
             setStatus("");
           }).catch(function(err){
@@ -688,14 +714,14 @@ def build_body(data):
     today_iso = seo.TODAY.isoformat()
     quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
 
-    temp_txt = f'{seo.num(weather.get("temp_c"), 1)} °C' if weather.get("temp_c") is not None else "ni podatka"
+    temp_txt = f'{seo.num(weather.get("temp_c"), 1)} °C' if weather.get("temp_c") is not None else "– °C"
     snow_txt = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm snega v 24 h'
-                if weather.get("expected_snow_cm_24h") is not None else "ni podatka")
+                if weather.get("expected_snow_cm_24h") is not None else "– cm snega v 24 h")
     # Kratki različici samo za crn-stat kartice (glej build_body spodaj) --
     # temp_txt/snow_txt (polna poved) grosta naprej v share_payload za "Deli
     # kot sliko", da tam ni treba podvajati logike.
     snow_val = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm'
-                if weather.get("expected_snow_cm_24h") is not None else "ni podatka")
+                if weather.get("expected_snow_cm_24h") is not None else "– cm")
 
     # "Deli kot sliko" bere ta paket, ne živega animiranega DOM-a (glej
     # gauge_svg(static=True)/icon_svg_static) — vsi podatki za canvas so tu
@@ -724,14 +750,15 @@ def build_body(data):
       {mountain_icon_svg()}
       <div>
         <h1 class="crn-title">Kako je čez Črnivec?</h1>
-        <p class="crn-sub">Vprašanje, ki ga v tej dolini nekdo vpraša vsak dan. Uradnega odgovora
-        ni — tale je (skoraj) enako zanesljiv.</p>
+        <p class="crn-sub">Vprašanje, ki ga v dolini postavijo vsak dan. Uradnega odgovora
+        ni – tale indeks pa (skoraj) enako zanesljivo kaže razmere.</p>
       </div>
     </div>
 
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
-      <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}{ZONE_ICONS[zone['id']]}<span>{zone['label']}</span></div>
+      <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}{ZONE_ICONS[zone['id']]}<span>{zone['label']}</span>
+      <p class="crn-verdict-desc">{zone['desc']}</p></div>
       <div class="crn-stats">
         <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
           <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
@@ -739,7 +766,7 @@ def build_body(data):
           <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">snega v 24 h</span></div>
       </div>
       <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
-      — le nalepke conov so tu za hec.</div>
+      – tukaj so nalepke con samo za hec.</div>
     </div>
 
     <div class="crn-quote-row">
@@ -754,10 +781,10 @@ def build_body(data):
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
-    klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
-    resnici čisto drugače — kar je, mimogrede, tudi bistvo te strani.
-    <span class="crn-links">Za dejansko uporabno oceno: <a href="/zima/prevoznost-prelazov/">MeteoZima:
-    prevoznost prelazov</a> · za uradno stanje ceste: promet.si, AMZS, DARS.</span></p>
+    klepetom v čakalnici in kakšnim komentarjem iz FB. Meteorec ne odgovarja, če je bilo v
+    resnici drugače – kar je, mimogrede, tudi bistvo te strani.
+    <span class="crn-links">Za resnično stanje ceste glej <a href="/zima/prevoznost-prelazov/">MeteoZima:
+    prevoznost prelazov</a> ali uradne vire: promet.si, AMZS, DARS.</span></p>
 
     <a class="crn-back" href="/">← Nazaj na meteorec.si</a>
   </div>
@@ -771,8 +798,8 @@ def main():
         return 1
 
     body = build_body(data)
-    title = "Kako je čez Črnivec? — (ne)uradni indeks"
-    desc = "Vsakodnevno vprašanje iz lokalnih FB skupin, s(e) samoironičnim indeksom in resničnim vremenom na prelazu."
+    title = "Kako je čez Črnivec? – (ne)uradni indeks"
+    desc = "Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza."
     # manifest.json ima relativne poti ("./") -- te se po specifikaciji Web App
     # Manifest razrešijo proti URL-ju SAME manifest.json (koren strani), ne
     # proti tej podstrani, zato je varno linkati isti manifest tudi od tu brez
