@@ -83,6 +83,40 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .mono{font-family:'JetBrains Mono',monospace;color:var(--cyan);white-space:nowrap}
 .disclaimer{background:rgba(239,68,68,.06);border:1px solid var(--card-border);border-radius:10px;padding:.8rem 1rem;margin:1.2rem 0;font-size:.85rem;color:var(--muted)}
 .sources{font-size:.82rem;color:var(--muted);border-top:1px solid rgba(255,255,255,.07);margin-top:2.2rem;padding-top:1rem;line-height:1.7}
+
+/* ── grafi (dataviz: 1 os, barve po color-formula.md, hover po interaction.md) ── */
+.chart-card h3{margin-top:0}
+.mrchart{width:100%;height:auto;display:block}
+.mrchart text{font-family:'JetBrains Mono',monospace}
+.mr-grid{stroke:rgba(255,255,255,.08);stroke-width:1}
+.mr-axis{fill:var(--muted);font-size:9px}
+.mr-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mr-dot{stroke:var(--card-bg);stroke-width:2}
+.mr-label{fill:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px}
+.mr-crosshair{stroke:rgba(255,255,255,.25);stroke-width:1}
+.mr-sep{stroke:rgba(255,255,255,.22);stroke-width:1;stroke-dasharray:3 3}
+.mr-sep-label{fill:var(--muted);font-size:8px}
+.mr-hit{cursor:crosshair}
+.mr-hit:focus{outline:2px solid rgba(255,255,255,.4);outline-offset:-2px}
+.mr-bar-cur{opacity:.55}
+.mr-chartwrap{position:relative}
+.mr-chart-fallback{color:var(--muted);font-size:.85rem;padding:2rem 0;text-align:center}
+.mr-tooltip{position:absolute;pointer-events:none;background:rgba(4,7,14,.96);border:1px solid var(--card-border);
+  border-radius:8px;padding:.45rem .65rem;font-size:.76rem;line-height:1.5;color:var(--text);
+  box-shadow:0 8px 22px rgba(0,0,0,.45);white-space:nowrap;opacity:0;left:0;top:0;
+  transform:translate(-50%,calc(-100% - 10px));transition:opacity .12s;z-index:6;font-family:'JetBrains Mono',monospace}
+.mr-tooltip.show{opacity:1}
+.mr-tooltip .mrt-val{font-weight:800;color:#fff;font-family:'Space Grotesk',sans-serif}
+.mr-tooltip .mrt-row{display:flex;justify-content:space-between;gap:.9rem}
+.mr-tooltip .mrt-key{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.35rem;vertical-align:middle}
+.mr-species-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:0 0 1rem}
+.mr-sp-btn{font:inherit;font-size:.78rem;font-weight:600;color:var(--muted);background:rgba(255,255,255,.04);
+  border:1px solid var(--card-border);border-radius:999px;padding:.34rem .8rem .34rem .6rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.4rem;transition:background .15s,border-color .15s,color .15s}
+.mr-sp-btn i{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mr-sp-btn:hover{background:rgba(255,255,255,.08)}
+.mr-sp-btn.active{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.3)}
+.mr-chart-note{font-size:.78rem;color:var(--muted);margin:.6rem 0 0}
 </style>
 </head>
 <body>
@@ -124,9 +158,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p>Konec avgusta in v prvih dneh septembra se je gobarski indeks za Rečico gibal med 75 in 79 – solidno, a brez posebnega vzpona. 8. septembra je nato padel na 58: dolino je takrat za kratek čas zajela vroča in suha epizoda, o kateri smo pisali v članku <a href="/blog/trije-vali-gob-po-dezju-0911.html" style="color:var(--cyan)">Trije valovi gob po dežju</a>. Sledil je obrat. Dež sredi meseca je indeks v enem tednu dvignil nazaj na 76 (12. 9.), nato na letošnji vrh pri 93 (17. 9.), od takrat pa se drži visoko, pri 87–88.</p>
     <p>Trenutnih 88 torej ni izoliran podatek, ampak zaključek tedenskega vzpona po dežju – in hkrati dober trenutek, da pogledamo širše od zadnjega meseca.</p>
 
+    <div class="chart-card">
+      <h3>Gobarski indeks, zadnjih 18 dni</h3>
+      <div id="mr-hist-chart"><div class="mr-chart-fallback">Nalagam graf …</div></div>
+      <p class="mr-chart-note">Premaknite miško ali prst čez graf za natančno vrednost posameznega dne. Presledki na osi so dnevi brez zapisa v zgodovini indeksa.</p>
+    </div>
+
     <span class="section-label">02 — pet septembrov v številkah</span>
     <h2 id="pet-septembrov">Pet septembrov v številkah: dež, temperatura in indeks</h2>
     <p>Iz postajne zgodovine in modela smo za prvih 21 dni septembra vsakega leta izračunali skupno količino dežja, število dežnih dni in povprečno dnevno najvišjo temperaturo, ob strani pa dodali še septembrsko povprečje gobarskega indeksa za isto leto:</p>
+
+    <div class="chart-card">
+      <h3>Septembrski gobarski indeks, 2022–2026</h3>
+      <div id="mr-years-chart"><div class="mr-chart-fallback">Nalagam graf …</div></div>
+      <p class="mr-chart-note">Premaknite miško ali prst čez stolpec za dež, dneve z dežjem in povprečno temperaturo tistega leta. Vse vrednosti so tudi v tabeli spodaj.</p>
+    </div>
 
     <table class="stats">
       <thead><tr><th>Leto</th><th>Dež, 1.–21. 9.</th><th>Dni z dežjem</th><th>Povp. Tmax</th><th>Sept. indeks</th></tr></thead>
@@ -145,6 +191,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="section-label">03 — kaj trenutno raste</span>
     <h2 id="kaj-raste">Kaj trenutno raste: lisička v polnem zamahu, jurček se šele prebuja</h2>
     <p>Med vsemi 108 vrstami ima trenutno najvišji indeks bezgova uhljevka – gre pa za vrsto, ki raste vse leto in ima med vsemi najnižje zahteve, zato v modelu pogosto vodi ne glede na sezono (metodologija je opisana na <a href="/gobarska-napoved/metodologija/" style="color:var(--cyan)">strani o metodologiji</a>). Bolj poveden je pogled na pet sezonsko značilnih jesenskih vrst v izbirniku na naslovni strani gobarske napovedi:</p>
+
+    <div class="chart-card">
+      <h3>7-dnevni indeks po vrstah, Rečica ob Savinji</h3>
+      <div class="mr-species-row" id="mr-species-tabs" role="tablist" aria-label="Izberi vrsto"></div>
+      <div id="mr-species-chart"><div class="mr-chart-fallback">Nalagam graf …</div></div>
+      <p class="mr-chart-note">Izberite vrsto zgoraj. Prva točka (21. 9.) je izmerjeni dan, ostalih šest je napoved.</p>
+    </div>
+
     <ul>
       <li><strong>Navadna lisička</strong> je v polnem zamahu – indeks se ves teden drži okoli 70.</li>
       <li><strong>Jesenski goban (jurček)</strong> se šele prebuja: na dan meritve je pri 39, napoved pa kaže hiter skok proti 70 že v naslednjih dneh.</li>
@@ -225,6 +279,256 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
     nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
   }
+})();
+</script>
+<script>
+// Grafi članka: gobarski indeks (18 dni), petletna primerjava, vrste 7-dnevno.
+// Ročno pisano, brez zunanjih JS knjižnic -- isti vzorec kot TREND_JS
+// (tools/generate_gobe_page.py) in interaktivna časovnica v drugih gobarskih
+// člankih. Barve validirane (dataviz skill, validate_palette.js) proti
+// dejanski temni podlagi članka (~#0a0f1b), ne proti privzeti referenčni.
+(function () {
+  var W = 640, H = 230, PAD_L = 30, PAD_R = 14, PAD_T = 16, PAD_B = 28;
+  var PLOT_W = W - PAD_L - PAD_R, PLOT_H = H - PAD_T - PAD_B;
+
+  function svgOpen() {
+    return '<svg class="mrchart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img">';
+  }
+  function yPos(v) { return PAD_T + PLOT_H * (1 - Math.max(0, Math.min(100, v)) / 100); }
+  function gridAndAxis() {
+    var s = '';
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      s += '<line class="mr-grid" x1="' + PAD_L + '" y1="' + yPos(v) + '" x2="' + (W - PAD_R) + '" y2="' + yPos(v) + '"/>';
+      s += '<text class="mr-axis" x="' + (PAD_L - 6) + '" y="' + (yPos(v) + 3) + '" text-anchor="end">' + v + '</text>';
+    });
+    return s;
+  }
+
+  function attachHover(wrap, svgEl, hitEls, tipFor) {
+    var tip = document.createElement('div');
+    tip.className = 'mr-tooltip';
+    wrap.appendChild(tip);
+    var xh = svgEl.querySelector('.mr-crosshair');
+
+    function show(el) {
+      var rect = svgEl.getBoundingClientRect();
+      var scale = rect.width / W;
+      var cx = parseFloat(el.dataset.cx), cy = parseFloat(el.dataset.cy);
+      if (xh) { xh.setAttribute('x1', cx); xh.setAttribute('x2', cx); xh.style.display = 'block'; }
+      tip.innerHTML = tipFor(el);
+      tip.style.left = (cx * scale) + 'px';
+      tip.style.top = (cy * scale) + 'px';
+      tip.classList.add('show');
+    }
+    function hide() {
+      tip.classList.remove('show');
+      if (xh) xh.style.display = 'none';
+    }
+    hitEls.forEach(function (el) {
+      el.addEventListener('pointerenter', function () { show(el); });
+      el.addEventListener('pointermove', function () { show(el); });
+      el.addEventListener('focus', function () { show(el); });
+      el.addEventListener('pointerleave', hide);
+      el.addEventListener('blur', hide);
+    });
+    wrap.addEventListener('pointerleave', hide);
+  }
+
+  // ---- graf 1: 18-dnevna zgodovina indeksa (enojna serija, brez legende) ----
+  var HIST = [
+    { d: '24. 8.', v: 78 }, { d: '25. 8.', v: 81 }, { d: '26. 8.', v: 66 }, { d: '27. 8.', v: 61 },
+    { d: '28. 8.', v: 73 }, { d: '29. 8.', v: 78 }, { d: '30. 8.', v: 77 }, { d: '31. 8.', v: 76 },
+    { d: '1. 9.', v: 77 }, { d: '2. 9.', v: 79 }, { d: '3. 9.', v: 77 }, { d: '4. 9.', v: 75 },
+    { d: '8. 9.', v: 58 }, { d: '12. 9.', v: 76 }, { d: '17. 9.', v: 93 }, { d: '19. 9.', v: 87 },
+    { d: '20. 9.', v: 87 }, { d: '21. 9.', v: 88 }
+  ];
+  var HIST_LABELED = [0, 3, 8, 12, 14, 17]; // 24.8, 27.8(dip pred), 1.9, 8.9(dip), 17.9(vrh), 21.9(zadnji)
+  var HIST_COLOR = '#3987e5';
+
+  function renderHist() {
+    var el = document.getElementById('mr-hist-chart');
+    if (!el) return;
+    var n = HIST.length;
+    function x(i) { return PAD_L + PLOT_W * (i / (n - 1)); }
+    var svg = svgOpen() + gridAndAxis();
+    HIST_LABELED.forEach(function (i) {
+      svg += '<text class="mr-axis" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + HIST[i].d + '</text>';
+    });
+    var pts = HIST.map(function (p, i) { return x(i) + ',' + yPos(p.v); }).join(' ');
+    svg += '<polyline class="mr-line" points="' + pts + '" stroke="' + HIST_COLOR + '"/>';
+    HIST.forEach(function (p, i) {
+      svg += '<circle class="mr-dot" cx="' + x(i) + '" cy="' + yPos(p.v) + '" r="3.2" fill="' + HIST_COLOR + '"/>';
+    });
+    // direktne oznake: dno (58), vrh (93), zadnja točka (88)
+    [{ i: 12, dy: 14 }, { i: 14, dy: -9 }, { i: 17, dy: -9 }].forEach(function (o) {
+      svg += '<text class="mr-label" x="' + x(o.i) + '" y="' + (yPos(HIST[o.i].v) + o.dy) + '" text-anchor="middle">' + HIST[o.i].v + '</text>';
+    });
+    svg += '<line class="mr-crosshair" x1="0" y1="' + PAD_T + '" x2="0" y2="' + (H - PAD_B) + '" style="display:none"/>';
+    var hitW = Math.max(10, PLOT_W / n);
+    HIST.forEach(function (p, i) {
+      svg += '<rect class="mr-hit" tabindex="0" pointer-events="all" fill="transparent" ' +
+        'data-cx="' + x(i) + '" data-cy="' + yPos(p.v) + '" data-i="' + i + '" ' +
+        'aria-label="' + p.d + ': indeks ' + p.v + '" ' +
+        'x="' + (x(i) - hitW / 2) + '" y="' + PAD_T + '" width="' + hitW + '" height="' + PLOT_H + '"/>';
+    });
+    svg += '</svg>';
+    var wrap = document.createElement('div');
+    wrap.className = 'mr-chartwrap';
+    wrap.innerHTML = svg;
+    el.innerHTML = '';
+    el.appendChild(wrap);
+    var svgEl = wrap.querySelector('svg');
+    attachHover(wrap, svgEl, Array.prototype.slice.call(wrap.querySelectorAll('.mr-hit')), function (hitEl) {
+      var p = HIST[+hitEl.dataset.i];
+      return '<span class="mr-tooltip-row"><span class="mrt-key" style="background:' + HIST_COLOR + '"></span>' +
+        p.d + ' — <span class="mrt-val">' + p.v + '</span></span>';
+    });
+  }
+
+  // ---- graf 2: petletna primerjava (stolpci, enojna serija) ----
+  var YEARS = [
+    { y: '2022', rain: '166,9 mm', days: '12', tmax: '22,9 °C', idx: 89.3 },
+    { y: '2023', rain: '21,8 mm', days: '6', tmax: '26,7 °C', idx: 77.6 },
+    { y: '2024', rain: '199,7 mm', days: '13', tmax: '23,1 °C', idx: 79.5 },
+    { y: '2025', rain: '148,6 mm', days: '9', tmax: '24,9 °C', idx: 83.1 },
+    { y: '2026', rain: '150,9 mm', days: '9', tmax: '25,8 °C', idx: 81.1, cur: true }
+  ];
+  var BAR_COLOR = '#3987e5';
+
+  function roundedTopBar(x, y, w, h, r) {
+    return 'M' + x + ',' + (y + h) +
+      ' L' + x + ',' + (y + r) +
+      ' Q' + x + ',' + y + ' ' + (x + r) + ',' + y +
+      ' L' + (x + w - r) + ',' + y +
+      ' Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) +
+      ' L' + (x + w) + ',' + (y + h) + ' Z';
+  }
+
+  function renderYears() {
+    var el = document.getElementById('mr-years-chart');
+    if (!el) return;
+    var n = YEARS.length;
+    var band = PLOT_W / n;
+    var barW = Math.min(24, band * 0.5);
+    var baseY = H - PAD_B;
+    var svg = svgOpen() + gridAndAxis();
+    YEARS.forEach(function (yr, i) {
+      var cx = PAD_L + band * (i + 0.5);
+      var top = yPos(yr.idx);
+      var barH = baseY - top;
+      svg += '<path class="' + (yr.cur ? 'mr-bar-cur' : '') + '" d="' +
+        roundedTopBar(cx - barW / 2, top, barW, barH, 4) + '" fill="' + BAR_COLOR + '"' +
+        (yr.cur ? ' stroke="' + BAR_COLOR + '" stroke-width="1.5" stroke-dasharray="3 3"' : '') + '/>';
+      svg += '<text class="mr-label" x="' + cx + '" y="' + (top - 8) + '" text-anchor="middle">' +
+        yr.idx.toFixed(1).replace('.', ',') + (yr.cur ? '*' : '') + '</text>';
+      svg += '<text class="mr-axis" x="' + cx + '" y="' + (H - 6) + '" text-anchor="middle">' + yr.y + '</text>';
+    });
+    svg += '</svg>';
+    var wrap = document.createElement('div');
+    wrap.className = 'mr-chartwrap';
+    wrap.innerHTML = svg;
+    el.innerHTML = '';
+    el.appendChild(wrap);
+    var svgEl = wrap.querySelector('svg');
+
+    // hit-cone: cel stolpčni pas, ne le sam stolpec
+    var hitSvg = '';
+    YEARS.forEach(function (yr, i) {
+      var cx = PAD_L + band * (i + 0.5);
+      hitSvg += '<rect class="mr-hit" tabindex="0" pointer-events="all" fill="transparent" ' +
+        'data-cx="' + cx + '" data-cy="' + (yPos(yr.idx) - 4) + '" data-i="' + i + '" ' +
+        'aria-label="' + yr.y + ': indeks ' + yr.idx + ', dež ' + yr.rain + ', ' + yr.days + ' dni z dežjem, povprečni Tmax ' + yr.tmax + '" ' +
+        'x="' + (cx - band / 2) + '" y="' + PAD_T + '" width="' + band + '" height="' + PLOT_H + '"/>';
+    });
+    svgEl.insertAdjacentHTML('beforeend', hitSvg);
+    attachHover(wrap, svgEl, Array.prototype.slice.call(wrap.querySelectorAll('.mr-hit')), function (hitEl) {
+      var yr = YEARS[+hitEl.dataset.i];
+      return '<div class="mrt-row"><span>Indeks</span><span class="mrt-val">' + yr.idx + (yr.cur ? '*' : '') + '</span></div>' +
+        '<div class="mrt-row"><span>Dež</span><span>' + yr.rain + '</span></div>' +
+        '<div class="mrt-row"><span>Dni z dežjem</span><span>' + yr.days + '</span></div>' +
+        '<div class="mrt-row"><span>Povp. Tmax</span><span>' + yr.tmax + '</span></div>';
+    });
+  }
+
+  // ---- graf 3: izbirnik vrst, 7-dnevni indeks (kategorialna paleta, validirana) ----
+  var SPECIES_DAYS = ['21. 9.', '22. 9.', '23. 9.', '24. 9.', '25. 9.', '26. 9.', '27. 9.'];
+  var SPECIES = [
+    { id: 'lisicka', name: 'Navadna lisička', color: '#d95926', vals: [70, 68, 69, 71, 71, 70, 71] },
+    { id: 'jurcek', name: 'Jesenski goban (jurček)', color: '#3987e5', vals: [39, 66, 67, 69, 69, 68, 71] },
+    { id: 'marela', name: 'Orjaški dežnik (marela)', color: '#199e70', vals: [61, 58, 59, 61, 61, 58, 51] },
+    { id: 'golobica', name: 'Modrikasta golobica', color: '#c98500', vals: [58, 56, 57, 59, 58, 57, 63] },
+    { id: 'turek', name: 'Brezov turek', color: '#d55181', vals: [40, 39, 40, 42, 41, 40, 44] }
+  ];
+  var activeSpecies = 'lisicka';
+
+  function renderSpeciesTabs() {
+    var tabs = document.getElementById('mr-species-tabs');
+    if (!tabs) return;
+    tabs.innerHTML = '';
+    SPECIES.forEach(function (sp) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mr-sp-btn' + (sp.id === activeSpecies ? ' active' : '');
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', sp.id === activeSpecies ? 'true' : 'false');
+      var dot = document.createElement('i');
+      dot.style.background = sp.color;
+      btn.appendChild(dot);
+      btn.appendChild(document.createTextNode(sp.name));
+      btn.addEventListener('click', function () {
+        activeSpecies = sp.id;
+        renderSpeciesTabs();
+        renderSpeciesChart();
+      });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderSpeciesChart() {
+    var el = document.getElementById('mr-species-chart');
+    if (!el) return;
+    var sp = SPECIES.filter(function (s) { return s.id === activeSpecies; })[0];
+    var n = SPECIES_DAYS.length;
+    function x(i) { return PAD_L + PLOT_W * (i / (n - 1)); }
+    var splitX = PAD_L + PLOT_W * (0.5 / (n - 1));
+    var svg = svgOpen() + gridAndAxis();
+    svg += '<line class="mr-sep" x1="' + splitX + '" y1="' + PAD_T + '" x2="' + splitX + '" y2="' + (H - PAD_B) + '"/>';
+    svg += '<text class="mr-sep-label" x="' + (splitX + 4) + '" y="' + (PAD_T + 9) + '">napoved →</text>';
+    SPECIES_DAYS.forEach(function (d, i) {
+      svg += '<text class="mr-axis" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + d + '</text>';
+    });
+    var pts = sp.vals.map(function (v, i) { return x(i) + ',' + yPos(v); }).join(' ');
+    svg += '<polyline class="mr-line" points="' + pts + '" stroke="' + sp.color + '"/>';
+    sp.vals.forEach(function (v, i) {
+      svg += '<circle class="mr-dot" cx="' + x(i) + '" cy="' + yPos(v) + '" r="3.5" fill="' + sp.color + '"/>';
+    });
+    svg += '<text class="mr-label" x="' + x(n - 1) + '" y="' + (yPos(sp.vals[n - 1]) - 10) + '" text-anchor="end">' + sp.vals[n - 1] + '</text>';
+    svg += '<line class="mr-crosshair" x1="0" y1="' + PAD_T + '" x2="0" y2="' + (H - PAD_B) + '" style="display:none"/>';
+    var hitW = Math.max(10, PLOT_W / n);
+    sp.vals.forEach(function (v, i) {
+      svg += '<rect class="mr-hit" tabindex="0" pointer-events="all" fill="transparent" ' +
+        'data-cx="' + x(i) + '" data-cy="' + yPos(v) + '" data-i="' + i + '" ' +
+        'aria-label="' + SPECIES_DAYS[i] + ': indeks ' + v + '" ' +
+        'x="' + (x(i) - hitW / 2) + '" y="' + PAD_T + '" width="' + hitW + '" height="' + PLOT_H + '"/>';
+    });
+    svg += '</svg>';
+    var wrap = document.createElement('div');
+    wrap.className = 'mr-chartwrap';
+    wrap.innerHTML = svg;
+    el.innerHTML = '';
+    el.appendChild(wrap);
+    var svgEl = wrap.querySelector('svg');
+    attachHover(wrap, svgEl, Array.prototype.slice.call(wrap.querySelectorAll('.mr-hit')), function (hitEl) {
+      var i = +hitEl.dataset.i;
+      return '<span class="mr-tooltip-row"><span class="mrt-key" style="background:' + sp.color + '"></span>' +
+        sp.name + ' · ' + SPECIES_DAYS[i] + (i === 0 ? ' (izmerjeno)' : '') + ' — <span class="mrt-val">' + sp.vals[i] + '</span></span>';
+    });
+  }
+
+  renderHist();
+  renderYears();
+  renderSpeciesTabs();
+  renderSpeciesChart();
 })();
 </script>
 <script src="/blog/likes.js?v=252186ff" defer></script>
