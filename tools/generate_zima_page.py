@@ -183,11 +183,33 @@ ZIMA_CSS = '''
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
-/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+/* Širši layout na VSEH /zima/* straneh (:has(.zima-card) jih loči od ostalih
    generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
-   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
-   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
-.wrap:has(.zima-hero){max-width:1150px}
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. .zima-card
+   je na vseh sedmih straneh (hub + 6 spoke), .zima-hero samo na hubu -- prvi
+   poskus je pomotoma zožil samo hub, spoke strani so ostale na 720px.
+   Brskalnik brez podpore :has() preprosto obdrži 720px, varno degradiranje. */
+.wrap:has(.zima-card){max-width:1150px}
+/* Accordion vizual za FAQ (native <details>/<summary>, glej faq v vsakem
+   build_*_body). SAMO tu, ne globalno v blog.css -- isti <div class="faq">
+   vzorec uporabljajo desetine drugih generiranih strani in bi jih nehoteno
+   spremenili. */
+.wrap:has(.zima-card) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.7rem}
+.wrap:has(.zima-card) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
+  list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.wrap:has(.zima-card) .faq summary::-webkit-details-marker{display:none}
+.wrap:has(.zima-card) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
+  font-weight:400;flex:0 0 auto;transition:transform .2s;line-height:1}
+.wrap:has(.zima-card) .faq details[open] summary::after{transform:rotate(45deg)}
+.wrap:has(.zima-card) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+.zima-fog-ladder{display:flex;flex-direction:column;gap:.35rem;margin:1rem 0}
+.zima-fog-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .9rem;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--card-border);font-size:.88rem}
+.zima-fog-row.below{color:var(--muted)}
+.zima-fog-elev{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.zima-fog-line{text-align:center;font-size:.76rem;color:#94a3b8;padding:.4rem 0;
+  border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);margin:.15rem 0}
 .zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
   border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
 .zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
@@ -682,13 +704,27 @@ def build_hub_body(data):
     if season.get("days_logged"):
         y, m, d = season["start_date"][:4], int(season["start_date"][5:7]), int(season["start_date"][8:10])
         start_fmt = f"{d}. {m}. {y}"
-        season_html = (
-            '  <h2>Ta sezona</h2>\n'
-            f'  <p>Od {start_fmt}: <strong>{season["heating_high_days"]}</strong> dni z visoko jakostjo '
-            f'inverzije, <strong>{season["black_ice_high_days"]}</strong> dni z visokim tveganjem poledice, '
-            f'<strong>{season["snow_days"]}</strong> dni s pričakovanim snegom na postaji '
-            f'(od {season["days_logged"]} zabeleženih dni).</p>'
-        )
+        # "Zima v številkah" -- glej uporabnikov predlog: štiri velike kartice
+        # namesto enega stavka, isti .stat-grid/.stat-card/sc-* vzorec kot
+        # black_ice_outlook zgoraj v tej datoteki in stat-card v blog.css, ne
+        # nov razred. Vsi štirje šteti so DEJANSKI dnevi iz zabeleženega
+        # dnevnika (glej compute_season_stats), ne modelirana ocena.
+        season_html = f'''  <h2 class="zima-section-title">📊 Zima v številkah</h2>
+  <p class="muted-note" style="margin-top:-.6rem">Od {start_fmt}, {season["days_logged"]} zabeleženih dni.</p>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="sc-label">Dni z visoko inverzijo</div>
+      <div class="sc-val">{season["heating_high_days"]}</div>
+      <div class="sc-sub">kurilni semafor 🔴</div></div>
+    <div class="stat-card"><div class="sc-label">Dni z visokim tveganjem poledice</div>
+      <div class="sc-val">{season["black_ice_high_days"]}</div>
+      <div class="sc-sub">vsaj en kraj v dolini</div></div>
+    <div class="stat-card"><div class="sc-label">Dni s snegom na postaji</div>
+      <div class="sc-val">{season["snow_days"]}</div>
+      <div class="sc-sub">pričakovan sneg, IREICA1</div></div>
+    <div class="stat-card"><div class="sc-label">Zabeleženih dni</div>
+      <div class="sc-val">{season["days_logged"]}</div>
+      <div class="sc-sub">od {start_fmt}</div></div>
+  </div>'''
 
     faq = [
         ("Katere kraje pokriva MeteoZima?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
@@ -917,9 +953,34 @@ def build_heating_index_body(data):
 
 # ── /zima/nad-meglo/ ──────────────────────────────────────────────────────
 
+def fog_ladder_html(fog):
+    """Kraji, razvrščeni po nadmorski višini, s prelomno črto pri pričakovani
+    meji megle — grafičen odgovor na "kje bo jutri sonce?" namesto gole
+    tabele (glej uporabnikov predlog: "Nad meglo je super feature, daj mu
+    več prostora"). Uporabi fog["locations"] tak, kot ga vrne compute_fog
+    (postaja + NEARBY_TOWNS + HIGH_POINTS, glej winter_engine.py) — brez
+    lastnega, ožjega izbora krajev."""
+    if not fog or not fog.get("has_inversion"):
+        return ""
+    locs = sorted(fog["locations"], key=lambda l: l["elevation_m"], reverse=True)
+    top = fog["top_m"]
+    rows, divider_done = [], False
+    for l in locs:
+        if not divider_done and l["elevation_m"] <= top:
+            rows.append(f'<div class="zima-fog-line">☁️ zgornja meja megle/oblačnosti — ~{top} m n. m.</div>')
+            divider_done = True
+        icon = "☀️" if l["above"] else "🌫️"
+        cls = "" if l["above"] else " below"
+        rows.append(f'<div class="zima-fog-row{cls}"><span>{icon} {l["name"]}</span>'
+                     f'<span class="zima-fog-elev">{l["elevation_m"]} m</span></div>')
+    if not divider_done:
+        rows.append(f'<div class="zima-fog-line">☁️ zgornja meja megle/oblačnosti — ~{top} m n. m.</div>')
+    return '  <div class="zima-fog-ladder">' + "".join(rows) + '</div>'
+
+
 def build_fog_body(data):
     fog = data.get("fog")
-    table = ""
+    ladder = ""
 
     if not fog:
         hero_sub = "Ocena trenutno ni na voljo — poskusi znova pozneje."
@@ -929,12 +990,9 @@ def build_fog_body(data):
     else:
         hero_sub = (f'{fmt_day(fog["morning_date"]).capitalize()} zjutraj je pričakovana zgornja meja '
                      f'megle/nizke oblačnosti pri približno <strong>{fog["top_m"]} m n. m.</strong>')
-        rows = []
-        for l in fog["locations"]:
-            status = "🌤️ nad meglo" if l["above"] else "☁️ v megli / pod njo"
-            rows.append(f'      <tr><th>{l["name"]} ({l["elevation_m"]} m)</th><td>{status}</td></tr>')
-        table = ('  <h2>Kraji glede na pričakovano mejo megle</h2>\n'
-                  '  <table class="stats">\n' + "\n".join(rows) + "\n  </table>")
+        ladder = ('  <h2 class="zima-section-title">☁️ Kje bo jutri sonce?</h2>\n' + fog_ladder_html(fog)
+                   + f'\n  <p class="muted-note">Za dejanske razmere v gorah preveri tudi '
+                     f'<a href="{seo.ARSO_MOUNTAIN_FORECAST}" rel="nofollow">uradno gorsko napoved ARSO</a>.</p>')
 
     daily = fog.get("daily") if fog else []
     chart = daily_line_chart_svg([d["date"] for d in (daily or [])], [d["top_m"] for d in (daily or [])], unit=" m")
@@ -966,7 +1024,7 @@ def build_fog_body(data):
     <div class="clabel">{icon_html("fog")}Jutranja megla</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
-{table}
+{ladder}
 {chart_html}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
