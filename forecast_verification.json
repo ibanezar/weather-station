@@ -2708,5 +2708,50 @@
       "err_tmin": 2.8,
       "err_precip": 0.2
     }
+  },
+  "2026-09-21": {
+    "date": "2026-09-21",
+    "made_at": "2026-09-20",
+    "actual": {
+      "tmax": 18.9,
+      "tmin": 8.9,
+      "precip": 0.0
+    },
+    "arso": {
+      "tmax": 20,
+      "tmin": 9,
+      "loc": "Ljubno ob Savinji",
+      "err_tmax": 1.1,
+      "err_tmin": 0.1
+    },
+    "open_meteo": {
+      "tmax": 21.0,
+      "tmin": 9.7,
+      "precip": 0.0,
+      "err_tmax": 2.1,
+      "err_tmin": 0.8,
+      "err_precip": 0.0
+    },
+    "aifs": {
+      "tmax": 19.4,
+      "tmin": 12.6,
+      "precip": 0.4,
+      "model": "ecmwf_aifs025_single",
+      "src": "live",
+      "err_tmax": 0.5,
+      "err_tmin": 3.7,
+      "err_precip": 0.4
+    },
+    "meteorec": {
+      "tmax": 21.7,
+      "tmin": 9.1,
+      "pop": 0.33,
+      "lead": 1,
+      "model_version": "1.0",
+      "err_tmax": 2.8,
+      "err_tmin": 0.2,
+      "wet": 0.0,
+      "brier": 0.109
+    }
   }
 }
