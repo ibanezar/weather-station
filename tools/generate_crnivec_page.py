@@ -104,31 +104,61 @@ def gauge_svg(zone, static=False):
     build_body/SHARE_JS) — eksplicitna width/height (canvas Image potrebuje
     znano velikost) in kazalec zapečen kot SVG transform atribut namesto
     CSS --rot spremenljivke (canvas slika nima dostopa do strani CSS/animacije,
-    zato mora biti statična kopija samozadostna)."""
+    zato mora biti statična kopija samozadostna).
+
+    "Premium" prenova 22. 9. 2026: en sam lok z gladkim prelivom (namesto 4
+    ločenih barvnih segmentov -- brez trdih šivov med conami), tanke bele
+    ločnice na mejah conov (da so cone kljub prelivu še vedno razločne), rahla
+    senca (feDropShadow) za globino in dvoslojni kazalec/os za bolj "urni"
+    videz. Geometrija (cx/cy/r) ostane enaka kot prej -- velikost na strani
+    uravnava CSS (.crn-gauge max-width), ne viewBox."""
     cx, cy, r = 190, 175, 105
     bounds = [180, 135, 90, 45, 0]
-    arcs = []
-    for i, z in enumerate(ZONES):
-        x1, y1 = arc_point(cx, cy, r, bounds[i])
-        x2, y2 = arc_point(cx, cy, r, bounds[i + 1])
-        arcs.append(f'<path d="M {x1:.1f} {y1:.1f} A {r} {r} 0 0 1 {x2:.1f} {y2:.1f}" '
-                     f'fill="none" stroke="{z["color"]}" stroke-width="26" stroke-linecap="butt"/>')
+    sw = 30  # stroke-width loka -- debelejši pas kot prej (26) za bolj čvrst videz
+
+    x1, y1 = arc_point(cx, cy, r, 180)
+    x2, y2 = arc_point(cx, cy, r, 0)
+    arc_path = f'M {x1:.1f} {y1:.1f} A {r} {r} 0 0 1 {x2:.1f} {y2:.1f}'
+    grad_stops = "".join(
+        f'<stop offset="{i / (len(ZONES) - 1) * 100:.0f}%" stop-color="{z["color"]}"/>'
+        for i, z in enumerate(ZONES)
+    )
+    defs = (
+        '<defs>'
+        f'<linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0">{grad_stops}</linearGradient>'
+        '<filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%">'
+        '<feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/>'
+        '</filter>'
+        '</defs>'
+    )
+    # Tanka svetla ločnica na vsaki notranji meji conov (135°/90°/45°), čez
+    # celo širino pasu -- brez nje bi gladek preliv zabrisal, kje se cona
+    # dejansko konča (glej pick_zone/ZONES bounds).
+    ticks = []
+    for b in bounds[1:-1]:
+        ix1, iy1 = arc_point(cx, cy, r - sw / 2, b)
+        ix2, iy2 = arc_point(cx, cy, r + sw / 2, b)
+        ticks.append(f'<line x1="{ix1:.1f}" y1="{iy1:.1f}" x2="{ix2:.1f}" y2="{iy2:.1f}" '
+                      f'stroke="#fff" stroke-width="2" opacity=".8"/>')
+    arc = (f'<g filter="url(#crnGaugeShadow)">'
+           f'<path d="{arc_path}" fill="none" stroke="url(#crnGrad)" stroke-width="{sw}" '
+           f'stroke-linecap="round"/>{"".join(ticks)}</g>')
 
     rot = 90 - needle_angle(zone)
-    nx, ny = cx, cy - r * 0.8
+    nx, ny = cx, cy - r * 0.72
+    needle_shape = (f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#171717" stroke-width="6" '
+                     f'stroke-linecap="round"/>'
+                     f'<circle cx="{cx}" cy="{cy}" r="14" fill="#171717"/>'
+                     f'<circle cx="{cx}" cy="{cy}" r="14" fill="none" stroke="#fff" stroke-width="3"/>'
+                     f'<circle cx="{cx}" cy="{cy}" r="4.5" fill="#fff"/>')
     if static:
-        needle = (f'<g transform="rotate({rot:.1f} {cx} {cy})">'
-                  f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
-                  f'stroke-linecap="round"/></g>'
-                  f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
+        needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
     else:
         # Brez transform="rotate(...)" atributa -- CSS animacija (crn-needle-settle
         # spodaj) rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo
         # tiho prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
-        needle = (f'<g class="crn-needle" style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">'
-                  f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#111" stroke-width="7" '
-                  f'stroke-linecap="round"/></g>'
-                  f'<circle cx="{cx}" cy="{cy}" r="13" fill="#111" stroke="#fff" stroke-width="3"/>')
+        needle = (f'<g class="crn-needle" filter="url(#crnGaugeShadow)" '
+                   f'style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">{needle_shape}</g>')
 
     # text-anchor="middle" centrira napis simetrično okoli sidrne točke -- za
     # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
@@ -138,22 +168,21 @@ def gauge_svg(zone, static=False):
     # blizu 90°) sta že dovolj visoko nad lokom in ostaneta na "middle".
     labels = []
     for z in ZONES:
-        lx, ly = arc_point(cx, cy, r + 40, z["mid"])
+        lx, ly = arc_point(cx, cy, r + 42, z["mid"])
         anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
-        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="10.5" '
-                       f'font-weight="800" fill="#111">{z["label"]}</text>')
+        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="11" '
+                       f'font-weight="800" fill="#171717">{z["label"]}</text>')
 
     # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
     # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
     # in ga brez xmlns molče zavrže -- zato je tu vedno, ne le pri static=True.
     # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
     # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
-    # pri prejšnji ožji širini obrezan čez rob (izmerjeno z getBBox(): "SUHO K
-    # POPR" sega do x=-15.5, "SPOLZKO, PAZI" do x=403.4).
+    # pri preozkem viewBoxu se obreže čez rob (izmerjeno z getBBox()).
     size_attrs = ' width="430" height="230"' if static else ''
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
-            + "".join(arcs) + "".join(labels) + needle + "</svg>")
+            + defs + arc + "".join(labels) + needle + "</svg>")
 
 
 def icon_svg_static(zone_id):
@@ -243,14 +272,14 @@ CSS = '''
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
   .crn-panel.tilt{animation:crnPanelPop .6s cubic-bezier(.34,1.56,.64,1) .15s backwards}
-  @keyframes crnPanelPop{0%{opacity:0;transform:scale(.82) rotate(-4deg)}
-    60%{opacity:1;transform:scale(1.03) rotate(1.2deg)}100%{opacity:1;transform:scale(1) rotate(.6deg)}}
+  @keyframes crnPanelPop{0%{opacity:0;transform:scale(.86) rotate(-2deg)}
+    60%{opacity:1;transform:scale(1.02) rotate(.5deg)}100%{opacity:1;transform:scale(1) rotate(.2deg)}}
   .crn-verdict-star{animation:crnStarPulse 2.6s ease-in-out .8s infinite backwards}
   @keyframes crnStarPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}
     50%{transform:translate(-50%,-50%) scale(1.08);opacity:.65}}
   .crn-quote{animation:crnQuoteIn .5s ease-out .65s backwards}
   @keyframes crnQuoteIn{0%{opacity:0;transform:translateY(14px) rotate(0deg)}
-    100%{opacity:1;transform:translateY(0) rotate(-0.8deg)}}
+    100%{opacity:1;transform:translateY(0) rotate(-.3deg)}}
   .crn-avatar{animation:crnAvatarIn .45s ease-out .8s backwards}
   @keyframes crnAvatarIn{0%{opacity:0;transform:translateY(10px) scale(.85)}100%{opacity:1;transform:translateY(0) scale(1)}}
   .crn-zicon-sonce{animation:crnSunSpin 9s linear infinite}
@@ -263,21 +292,25 @@ CSS = '''
   @keyframes crnIceGlint{0%,100%{opacity:1}50%{opacity:.55}}
   @media (prefers-reduced-motion:reduce){.crn-icon:hover{animation:none}
     .crn-needle{animation:none;transform:rotate(var(--rot))}
-    .crn-panel.tilt,.crn-verdict-star,.crn-quote,.crn-avatar,
+    .crn-panel.tilt,.crn-verdict-star,.crn-quote,.crn-avatar,.crn-stats,
     .crn-zicon-sonce,.crn-zicon-nekaj,.crn-zicon-verige,.crn-zicon-spolzko{animation:none}
-    .crn-panel.tilt{opacity:1;transform:rotate(.6deg)}
+    .crn-panel.tilt{opacity:1;transform:rotate(.2deg)}
     .crn-verdict-star{opacity:.5;transform:translate(-50%,-50%) scale(1)}
-    .crn-quote{opacity:1;transform:rotate(-.8deg)}
+    .crn-quote{opacity:1;transform:rotate(-.3deg)}
     .crn-avatar{opacity:1;transform:none}}
   .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
     color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
-    transform:rotate(-1.5deg);margin:0 0 .3rem;text-transform:uppercase}
+    transform:rotate(-.6deg);margin:0 0 .3rem;text-transform:uppercase}
   .crn-sub{font-size:1.05rem;font-weight:600;color:#111;margin:0 0 1.6rem;max-width:44ch;
     background:#fdf6e3;display:inline-block;padding:.1rem .3rem}
   .crn-panel{background:#fff;border:4px solid #111;border-radius:18px;padding:1.4rem 1.2rem;
     box-shadow:8px 8px 0 #111;margin-bottom:1.6rem;position:relative}
-  .crn-panel.tilt{transform:rotate(0.6deg)}
-  .crn-gauge{width:100%;max-width:340px;display:block;margin:0 auto}
+  .crn-panel.tilt{transform:rotate(.2deg)}
+  /* max-width je namenoma velikodušen (ne ozek "mobilni" strop): width:100%
+     ga na ozkih telefonih itak strne na širino .crn-panel, na širših
+     telefonih/tablicah pa merilnik zdaj dejansko zapolni prostor, ki ga ima
+     -- prej je pri 340px na 500-600px zaslonu ostajal velik prazen pas. */
+  .crn-gauge{width:100%;max-width:480px;display:block;margin:0 auto}
   /* min-height + flex-center: brez tega .crn-verdict rezervira samo prostor
      za ikono+napis (~90px), zvezda (210px, sredinjena nanj) pa je absolutno
      pozicionirana in seže čez spodnji rob -- v .crn-data škatlo pod njo
@@ -288,12 +321,12 @@ CSS = '''
   .crn-verdict-star{position:absolute;left:50%;top:50%;width:210px;height:210px;
     transform:translate(-50%,-50%);z-index:0;opacity:.5}
   .crn-zicon{position:relative;z-index:1;width:52px;height:52px;display:block;margin:0 auto .2rem}
-  .crn-verdict span{position:relative;z-index:1;display:inline-block;font-size:1.7rem;
+  .crn-verdict span{position:relative;z-index:1;display:inline-block;font-size:1.9rem;
     font-weight:800;text-transform:uppercase;letter-spacing:.01em;background:#fff;
-    padding:0 .3rem}
+    border:3px solid currentColor;border-radius:12px;padding:.3rem 1rem;margin-top:.15rem}
   .crn-quote-row{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-top:.2rem}
   .crn-quote{background:#fef08a;border:3px solid #111;border-radius:14px;padding:1rem 1.2rem;
-    font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-0.8deg);flex:1 1 240px}
+    font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-.3deg);flex:1 1 240px}
   .crn-quote::before{content:"\\201C";font-size:2.4rem;color:#111;line-height:0;
     position:absolute;left:.5rem;top:1.6rem}
   .crn-quote::after{content:"";position:absolute;left:2rem;bottom:-15px;width:0;height:0;
@@ -310,6 +343,14 @@ CSS = '''
      .crn-sub zgoraj (background v barvi strani + padding). */
   .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px;
     background:#fdf6e3;padding:.15rem .3rem;border-radius:4px}
+  .crn-stats{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.1rem;
+    animation:crnStatIn .4s ease-out .3s backwards}
+  @keyframes crnStatIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+  .crn-stat{background:#fff;border:3px solid #111;border-radius:14px;box-shadow:5px 5px 0 #111;
+    padding:.7rem .5rem;text-align:center}
+  .crn-stat-emoji{font-size:1.25rem;line-height:1;display:block;margin-bottom:.15rem}
+  .crn-stat-val{font-weight:800;font-size:1.3rem;display:block;color:#111}
+  .crn-stat-lbl{font-size:.7rem;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.03em}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -351,16 +392,20 @@ CSS = '''
     .crn-back{display:table;margin:1.6rem auto 0}}
   @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
   /* Nad ~600px je .crn-panel (do 720px, glej .wrap zgoraj) veliko širši od
-     merilnika (340px) -- ostal je velik prazen pas na obeh straneh. Merilnik
-     in izid (zvezda+ikona+napis) tu zato skupaj zrastejo namesto da bi samo
-     osamljeno stala sredi bele površine. */
+     merilnika -- brez tega ostane velik prazen pas na obeh straneh. 640px
+     je skoraj polna notranja širina panela (720 - 2×(1.2rem padding + 4px
+     border) ≈ 674px), tako da merilnik zares zapolni prostor, ki ga ima, s
+     še vedno vidnim zračnim robom. Izid (zvezda+ikona+napis) tu zato skupaj
+     zraste namesto da bi samo osamljeno stal sredi bele površine. */
   @media (min-width:600px){
-    .crn-gauge{max-width:460px}
+    .crn-gauge{max-width:640px}
     .crn-verdict{min-height:280px}
     .crn-verdict-star{width:280px;height:280px}
     .crn-zicon{width:66px;height:66px}
-    .crn-verdict span{font-size:2.2rem}
+    .crn-verdict span{font-size:2.4rem;padding:.4rem 1.3rem}
     .crn-data{font-size:1rem;padding:1rem 1.3rem}
+    .crn-stats{max-width:420px;margin-left:auto;margin-right:auto;gap:1rem}
+    .crn-stat-val{font-size:1.5rem}
   }
 </style>
 '''
@@ -646,6 +691,11 @@ def build_body(data):
     temp_txt = f'{seo.num(weather.get("temp_c"), 1)} °C' if weather.get("temp_c") is not None else "ni podatka"
     snow_txt = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm snega v 24 h'
                 if weather.get("expected_snow_cm_24h") is not None else "ni podatka")
+    # Kratki različici samo za crn-stat kartice (glej build_body spodaj) --
+    # temp_txt/snow_txt (polna poved) grosta naprej v share_payload za "Deli
+    # kot sliko", da tam ni treba podvajati logike.
+    snow_val = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm'
+                if weather.get("expected_snow_cm_24h") is not None else "ni podatka")
 
     # "Deli kot sliko" bere ta paket, ne živega animiranega DOM-a (glej
     # gauge_svg(static=True)/icon_svg_static) — vsi podatki za canvas so tu
@@ -682,8 +732,14 @@ def build_body(data):
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
       <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}{ZONE_ICONS[zone['id']]}<span>{zone['label']}</span></div>
-      <div class="crn-data">Trenutno na 902 m: {temp_txt}, pričakovanih {snow_txt}
-      (ista metoda kot na <a href="/zima/prevoznost-prelazov/">resni strani</a> — le nalepke so tu za hec).</div>
+      <div class="crn-stats">
+        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
+          <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
+        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
+          <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">snega v 24 h</span></div>
+      </div>
+      <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
+      — le nalepke conov so tu za hec.</div>
     </div>
 
     <div class="crn-quote-row">
