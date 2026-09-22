@@ -28,6 +28,12 @@
 <meta name="twitter:title" content="Kako je čez Črnivec? — (ne)uradni indeks">
 <meta name="twitter:description" content="Vsakodnevno vprašanje iz lokalnih FB skupin, s(e) samoironičnim indeksom in resničnim vremenom na prelazu.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<meta name="theme-color" content="#dc2626">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meteorec">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/crnivec/","name":"Kako je \u010dez \u010crnivec? \u2014 (ne)uradni indeks","description":"Vsakodnevno vpra\u0161anje iz lokalnih FB skupin, s(e) samoironi\u010dnim indeksom in resni\u010dnim vremenom na prelazu.","url":"https://meteorec.si/crnivec/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-09-20"}
 </script>
@@ -158,6 +164,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     box-shadow:4px 4px 0 #111;transition:transform .1s}
   .crn-action-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
   .crn-share-status{font-size:.82rem;font-weight:600;color:#374151;margin-top:.5rem}
+  /* Zelena podlaga loči namestitveni gumb od nevtralnih reroll/deli gumbov
+     zgoraj -- edini na tej vrsti, ki vodi ven s strani (na domači zaslon),
+     zato sme izstopati. */
+  .crn-install-btn{background:#bbf7d0}
   .crn-quote-pop{animation:crnQuoteReroll .35s ease}
   @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
     100%{transform:rotate(-0.8deg) scale(1)}}
@@ -229,7 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="crn-quote-row">
-      <div class="crn-quote"><p>Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje.</p><div class="crn-quote-tail"></div></div>
+      <div class="crn-quote"><p>Nekdo je pravkar vprašal isto. Odgovori so spet drugačni kot včeraj.</p><div class="crn-quote-tail"></div></div>
       <div class="crn-avatar"><svg viewBox="0 0 44 44" class="crn-avatar-icon" aria-hidden="true">
       <circle cx="22" cy="22" r="20" fill="#e5e7eb" stroke="#111" stroke-width="3.5"/>
       <circle cx="22" cy="17" r="7.5" fill="#fff" stroke="#111" stroke-width="3"/>
@@ -240,8 +250,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="crn-actions">
       <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
       <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
+      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
     </div>
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+    <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
@@ -256,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 (function(){
   "use strict";
   var quotes = ["Meni je teta rekla, da je suho. Sosed pravi katastrofa. Nekdo laže.", "Grem pogledat in sporočim… čez kakšne tri ure.", "Odvisno, kdaj vprašaš — in koga.", "Kamera kaže sonce, komentarji pod njo pravijo drugače.", "Bilo je super, ko sem jaz šel. Pred dvema letoma, poleti.", "Pol skupine pravi zimske, pol pravi, da ni treba. Vzemi obe mnenji.", "Vprašaj raje v skupini — jaz osebno ne grem gledat zate.", "Nekdo je pravkar vprašal isto. Odgovori so spet drugačni kot včeraj.", "Tehnično prevozno. Praktično — na lastno odgovornost, kot vedno.", "Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje."];
-  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Tale indeks pravi eno, dedek pa drugo. Dedek ima še vedno prav pogosteje.", "temp": "14,8 °C", "snow": "0,0 cm snega v 24 h", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 115.8 100.8\" fill=\"none\" stroke=\"#16a34a\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 115.8 100.8 A 105 105 0 0 1 190.0 70.0\" fill=\"none\" stroke=\"#eab308\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 190.0 70.0 A 105 105 0 0 1 264.2 100.8\" fill=\"none\" stroke=\"#ea580c\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 264.2 100.8 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"26\" stroke-linecap=\"butt\"/><text x=\"56.0\" y=\"119.5\" text-anchor=\"end\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SUHO K POPR<\/text><text x=\"134.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">JE, PA NEKAJ<\/text><text x=\"245.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">VZEMI VERIGE<\/text><text x=\"324.0\" y=\"119.5\" text-anchor=\"start\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SPOLZKO, PAZI<\/text><g transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"91.0\" stroke=\"#111\" stroke-width=\"7\" stroke-linecap=\"round\"/><\/g><circle cx=\"190\" cy=\"175\" r=\"13\" fill=\"#111\" stroke=\"#fff\" stroke-width=\"3\"/><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
+  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Nekdo je pravkar vprašal isto. Odgovori so spet drugačni kot včeraj.", "temp": "14,8 °C", "snow": "0,0 cm snega v 24 h", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 115.8 100.8\" fill=\"none\" stroke=\"#16a34a\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 115.8 100.8 A 105 105 0 0 1 190.0 70.0\" fill=\"none\" stroke=\"#eab308\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 190.0 70.0 A 105 105 0 0 1 264.2 100.8\" fill=\"none\" stroke=\"#ea580c\" stroke-width=\"26\" stroke-linecap=\"butt\"/><path d=\"M 264.2 100.8 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"26\" stroke-linecap=\"butt\"/><text x=\"56.0\" y=\"119.5\" text-anchor=\"end\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SUHO K POPR<\/text><text x=\"134.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">JE, PA NEKAJ<\/text><text x=\"245.5\" y=\"41.0\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">VZEMI VERIGE<\/text><text x=\"324.0\" y=\"119.5\" text-anchor=\"start\" font-size=\"10.5\" font-weight=\"800\" fill=\"#111\">SPOLZKO, PAZI<\/text><g transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"91.0\" stroke=\"#111\" stroke-width=\"7\" stroke-linecap=\"round\"/><\/g><circle cx=\"190\" cy=\"175\" r=\"13\" fill=\"#111\" stroke=\"#fff\" stroke-width=\"3\"/><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
 
   var rerollBtn = document.getElementById("crn-reroll");
   var quoteP = document.querySelector(".crn-quote p");
@@ -275,6 +287,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       quoteBubble.classList.remove("crn-quote-pop");
       void quoteBubble.offsetWidth;
       quoteBubble.classList.add("crn-quote-pop");
+    });
+  }
+
+  // Namerna podvojitev namestitvenega toka iz app.js (_installPrompt/_isIOS/
+  // installApp) -- ta stran ne nalaga app.js (glej opombo na vrhu datoteke o
+  // samostojnih generatorjih), zato je edini način za "Namesti na zaslon" tu
+  // lasten, majhen odjemalec istega beforeinstallprompt/iOS vzorca.
+  var installBtn = document.getElementById("crn-install");
+  var installHint = document.getElementById("crn-install-hint");
+  if (installBtn) {
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+      navigator.standalone === true;
+    var deferredPrompt = null;
+
+    function showInstallBtn(){ installBtn.hidden = false; }
+    function hideInstallBtn(){
+      installBtn.hidden = true;
+      if (installHint) installHint.hidden = true;
+    }
+
+    if (!isStandalone) {
+      window.addEventListener("beforeinstallprompt", function(e){
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallBtn();
+      });
+      window.addEventListener("appinstalled", function(){
+        deferredPrompt = null;
+        hideInstallBtn();
+      });
+      // Safari na iOS-u beforeinstallprompt ne pozna, zato gumb tu prikažemo
+      // takoj -- klik pokaže ročna navodila (glej spodaj), isto kot na
+      // naslovni strani.
+      if (isIOS) showInstallBtn();
+    }
+
+    installBtn.addEventListener("click", function(){
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){
+          deferredPrompt = null;
+          hideInstallBtn();
+        });
+        return;
+      }
+      if (!installHint) return;
+      installHint.hidden = false;
+      installHint.textContent = isIOS ?
+        "Tapni ⬆️ (Deli) spodaj in izberi »Na začetni zaslon« — pa boš zraven tistih, ki pogledajo sami." :
+        "Namestitev v tem brskalniku ni na voljo.";
     });
   }
 
