@@ -329,6 +329,11 @@ CSS = '''
      zgoraj -- edini na tej vrsti, ki vodi ven s strani (na domači zaslon),
      zato sme izstopati. */
   .crn-install-btn{background:#bbf7d0}
+  /* Namestitveni CTA je čisto na vrhu, nad junaškim naslovom, na sredini --
+     prej skrite drobtine ("Meteorec › Kako je čez Črnivec?") so tu odstranjene,
+     ta prostor prevzame gumb (JSON-LD BreadcrumbList v <head> ostaja, samo
+     vidni napis je bil odveč na strani, ki nima drugih podstrani). */
+  .crn-install-top{text-align:center;margin-bottom:.6rem}
   .crn-quote-pop{animation:crnQuoteReroll .35s ease}
   @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
     100%{transform:rotate(-0.8deg) scale(1)}}
@@ -661,7 +666,10 @@ def build_body(data):
 
     return f'''{CSS}
   <div class="crn-wrap">
-{seo.crumbs_html([("Meteorec", "/"), ("Kako je čez Črnivec?", None)])}
+    <div class="crn-install-top">
+      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
+      <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+    </div>
     <div class="crn-hero">
       {mountain_icon_svg()}
       <div>
@@ -686,10 +694,8 @@ def build_body(data):
     <div class="crn-actions">
       <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
       <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
-      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
     </div>
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-    <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
