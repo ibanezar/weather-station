@@ -84,13 +84,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
+/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+   generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
+   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
+.wrap:has(.zima-hero){max-width:1150px}
+.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
+.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
+.zima-hero .page-title{margin:.1rem 0 .15rem}
+.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
+.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
+.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
+.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
+.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  margin:.25rem 0 0;line-height:1.1}
+.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
+.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
+  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
+.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zima-section-title{display:flex;align-items:center;gap:.5rem}
+/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
+   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
+   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
+   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
+.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
+.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
+.zima-meter-svg{width:100%;height:auto;display:block}
+.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
+.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.zima-pass-name{font-weight:700;color:var(--text)}
+.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
 </style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Snežna odeja</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Snežna odeja — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:22</p>
+  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:43</p>
   <div class="card zima-card" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16);margin-bottom:1.2rem">
     <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 18.5 Q7 16.5 11 18.5 T21 18.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 14.5 Q7 12.5 11 14.5 T21 14.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="17" y1="3.5" x2="17" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="14.7" y1="6.5" x2="17" y2="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="14.7" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.3"/></svg></span>Tekoča ocena snežne odeje</div>
     <p class="fh-sub">Tekoča ocena na postaji: <strong>0 cm</strong>. V naslednjih 7 dneh je pričakovanih še do 0,0 cm novega snega (brez upoštevanega taljenja).</p>
