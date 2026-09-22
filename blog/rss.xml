@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 21 Sep 2026 08:37:58 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Sep 2026 06:07:09 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Jesenski vrh gob 2026: kaj pravijo številke iz petih let</title>
+      <link>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</guid>
+      <pubDate>Tue, 22 Sep 2026 08:00:00 +0000</pubDate>
+      <description>Gobarski indeks za Rečico ob Savinji je 21. septembra dosegel 88 (Odlično). Primerjava zadnjih pet septembrov pokaže, da je letošnji le srednje dober – in zakaj.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
       <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
