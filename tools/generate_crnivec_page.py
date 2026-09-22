@@ -325,6 +325,10 @@ CSS = '''
     box-shadow:4px 4px 0 #111;transition:transform .1s}
   .crn-action-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
   .crn-share-status{font-size:.82rem;font-weight:600;color:#374151;margin-top:.5rem}
+  /* Zelena podlaga loči namestitveni gumb od nevtralnih reroll/deli gumbov
+     zgoraj -- edini na tej vrsti, ki vodi ven s strani (na domači zaslon),
+     zato sme izstopati. */
+  .crn-install-btn{background:#bbf7d0}
   .crn-quote-pop{animation:crnQuoteReroll .35s ease}
   @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
     100%{transform:rotate(-0.8deg) scale(1)}}
@@ -381,6 +385,58 @@ SHARE_JS_TEMPLATE = '''
       quoteBubble.classList.remove("crn-quote-pop");
       void quoteBubble.offsetWidth;
       quoteBubble.classList.add("crn-quote-pop");
+    });
+  }
+
+  // Namerna podvojitev namestitvenega toka iz app.js (_installPrompt/_isIOS/
+  // installApp) -- ta stran ne nalaga app.js (glej opombo na vrhu datoteke o
+  // samostojnih generatorjih), zato je edini način za "Namesti na zaslon" tu
+  // lasten, majhen odjemalec istega beforeinstallprompt/iOS vzorca.
+  var installBtn = document.getElementById("crn-install");
+  var installHint = document.getElementById("crn-install-hint");
+  if (installBtn) {
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+      navigator.standalone === true;
+    var deferredPrompt = null;
+
+    function showInstallBtn(){ installBtn.hidden = false; }
+    function hideInstallBtn(){
+      installBtn.hidden = true;
+      if (installHint) installHint.hidden = true;
+    }
+
+    if (!isStandalone) {
+      window.addEventListener("beforeinstallprompt", function(e){
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallBtn();
+      });
+      window.addEventListener("appinstalled", function(){
+        deferredPrompt = null;
+        hideInstallBtn();
+      });
+      // Safari na iOS-u beforeinstallprompt ne pozna, zato gumb tu prikažemo
+      // takoj -- klik pokaže ročna navodila (glej spodaj), isto kot na
+      // naslovni strani.
+      if (isIOS) showInstallBtn();
+    }
+
+    installBtn.addEventListener("click", function(){
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){
+          deferredPrompt = null;
+          hideInstallBtn();
+        });
+        return;
+      }
+      if (!installHint) return;
+      installHint.hidden = false;
+      installHint.textContent = isIOS ?
+        "Tapni ⬆️ (Deli) spodaj in izberi »Na začetni zaslon« — pa boš zraven tistih, ki pogledajo sami." :
+        "Namestitev v tem brskalniku ni na voljo.";
     });
   }
 
@@ -630,8 +686,10 @@ def build_body(data):
     <div class="crn-actions">
       <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
       <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
+      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
     </div>
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+    <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
@@ -653,7 +711,20 @@ def main():
     body = build_body(data)
     title = "Kako je čez Črnivec? — (ne)uradni indeks"
     desc = "Vsakodnevno vprašanje iz lokalnih FB skupin, s(e) samoironičnim indeksom in resničnim vremenom na prelazu."
+    # manifest.json ima relativne poti ("./") -- te se po specifikaciji Web App
+    # Manifest razrešijo proti URL-ju SAME manifest.json (koren strani), ne
+    # proti tej podstrani, zato je varno linkati isti manifest tudi od tu brez
+    # tveganja, da bi "namesti" ustvaril ločeno aplikacijo z obsegom /crnivec/.
+    pwa_head = (
+        '<meta name="theme-color" content="#dc2626">\n'
+        '<meta name="mobile-web-app-capable" content="yes">\n'
+        '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+        '<meta name="apple-mobile-web-app-title" content="Meteorec">\n'
+        '<link rel="manifest" href="/manifest.json">\n'
+        '<link rel="apple-touch-icon" href="/icon-192.png">'
+    )
     schema = "\n".join([
+        pwa_head,
         seo.webpage_schema("/crnivec/", title, desc, date_published="2026-09-20"),
         seo.crumbs_schema([("Meteorec", "/"), ("Kako je čez Črnivec?", None)]),
     ])
