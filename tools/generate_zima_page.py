@@ -580,9 +580,9 @@ def build_hub_body(data):
         else:
             snow_verdict = f"Meja sneženja je pri {line_m} m, a v naslednjih 24 h ni pričakovanih pomembnejših padavin."
 
-    ice_verdict = (f"Danes ni povečanega tveganja poledice v dolini."
+    ice_verdict = (f"V naslednjih 36 h ni povečanega tveganja poledice v dolini."
                    if worst_level == "nizko" else
-                   f"Najbolj izpostavljen je trenutno kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
+                   f"V naslednjih 36 h je najbolj izpostavljen kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
 
     heating = data.get("heating_index") or {}
     heating_level = heating.get("level")
@@ -907,9 +907,9 @@ def build_black_ice_body(data):
     locations = data["locations"]
     worst_loc = max(locations, key=lambda l: ["nizko", "srednje", "visoko"].index(l["indices"]["black_ice"]["risk_level"]))
     worst_level = worst_loc["indices"]["black_ice"]["risk_level"]
-    hero_sub = (f"Danes ni povečanega tveganja poledice v dolini."
+    hero_sub = (f"V naslednjih 36 h ni povečanega tveganja poledice v dolini."
                 if worst_level == "nizko" else
-                f"Najbolj izpostavljen je trenutno kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
+                f"V naslednjih 36 h je najbolj izpostavljen kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
     rows = []
     for loc in locations:
         bi = loc["indices"]["black_ice"]
@@ -951,7 +951,7 @@ def build_black_ice_body(data):
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card zima-card" style="{card_style("black_ice")}">
-    <div class="clabel">{icon_html("black_ice")}Poledica zdaj</div>
+    <div class="clabel">{icon_html("black_ice")}Poledica — naslednjih 36 h</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
