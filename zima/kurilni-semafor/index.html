@@ -84,19 +84,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
+/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+   generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
+   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
+.wrap:has(.zima-hero){max-width:1150px}
+.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
+.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
+.zima-hero .page-title{margin:.1rem 0 .15rem}
+.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
+.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
+.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
+.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
+.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  margin:.25rem 0 0;line-height:1.1}
+.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
+.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
+  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
+.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zima-section-title{display:flex;align-items:center;gap:.5rem}
+/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
+   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
+   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
+   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
+.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
+.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
+.zima-meter-svg{width:100%;height:auto;display:block}
+.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
+.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.zima-pass-name{font-weight:700;color:var(--text)}
+.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
 </style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Kurilni semafor</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Kurilni semafor — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:22</p>
+  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:43</p>
   <div class="card zima-card" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16);margin-bottom:1.2rem">
     <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="13.5" width="6" height="7.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M8 13.5 V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 9.5 Q11 6.8 8 4.8 Q6 3.5 8 1.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><line x1="3" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 3.2"/></svg></span>Prevetrenost za kurjenje</div>
-    <p class="fh-sub"><span class="badge-risk badge-risk-visoko">🔴 Visoko tveganje</span> — Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo. (ocenjena jakost inverzije 3,1 °C, veter 4,1 km/h v najslabši uri). Ure z največjim tveganjem: jutri, 04:00, jutri, 05:00, jutri, 06:00, jutri, 07:00.</p>
+    <p class="fh-sub"><span class="badge-risk badge-risk-visoko">🔴 Visoko tveganje</span> — Močna inverzija ob mirnem vetru — po možnosti odloži kurjenje na poznejši čas ali dan z boljšo prevetrenostjo. (ocenjena jakost inverzije 3,1 °C, veter 3,8 km/h v najslabši uri). Ure z največjim tveganjem: jutri, 04:00, jutri, 05:00, jutri, 06:00, jutri, 07:00.</p>
   </div>
   <h2>7-dnevni pregled jakosti inverzije</h2>
-  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart zima-chart" role="img" aria-label="Sedemdnevni pregled po dnevih"><rect class="zima-bar" x="28.1" y="140.0" width="49.0" height="24.0" rx="3" fill="#d97706" style="--zdelay:0ms;transform-origin:52.6px 164.0px"/><text x="52.6" y="135.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🟡 0,8°C</text><text x="52.6" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><rect class="zima-bar" x="117.2" y="71.0" width="49.0" height="93.0" rx="3" fill="#e11d48" style="--zdelay:70ms;transform-origin:141.7px 164.0px"/><text x="141.7" y="66.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,1°C</text><text x="141.7" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><rect class="zima-bar" x="206.3" y="53.0" width="49.0" height="111.0" rx="3" fill="#e11d48" style="--zdelay:140ms;transform-origin:230.9px 164.0px"/><text x="230.9" y="48.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,7°C</text><text x="230.9" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><rect class="zima-bar" x="295.5" y="62.0" width="49.0" height="102.0" rx="3" fill="#e11d48" style="--zdelay:210ms;transform-origin:320.0px 164.0px"/><text x="320.0" y="57.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,4°C</text><text x="320.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><rect class="zima-bar" x="384.6" y="74.0" width="49.0" height="90.0" rx="3" fill="#e11d48" style="--zdelay:280ms;transform-origin:409.1px 164.0px"/><text x="409.1" y="69.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,0°C</text><text x="409.1" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text><rect class="zima-bar" x="473.8" y="68.0" width="49.0" height="96.0" rx="3" fill="#e11d48" style="--zdelay:350ms;transform-origin:498.3px 164.0px"/><text x="498.3" y="63.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,2°C</text><text x="498.3" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">27.9.</text><rect class="zima-bar" x="562.9" y="26.0" width="49.0" height="138.0" rx="3" fill="#e11d48" style="--zdelay:420ms;transform-origin:587.4px 164.0px"/><text x="587.4" y="21.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 4,6°C</text><text x="587.4" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">28.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Višji stolpec = močnejša inverzija tisti dan (izven poldanskih ur) — 🟢 nizko · 🟡 srednje · 🔴 visoko tveganje.</p></div>
+  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart zima-chart" role="img" aria-label="Sedemdnevni pregled po dnevih"><rect class="zima-bar" x="28.1" y="146.0" width="49.0" height="18.0" rx="3" fill="#d97706" style="--zdelay:0ms;transform-origin:52.6px 164.0px"/><text x="52.6" y="141.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🟡 0,6°C</text><text x="52.6" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><rect class="zima-bar" x="117.2" y="71.0" width="49.0" height="93.0" rx="3" fill="#e11d48" style="--zdelay:70ms;transform-origin:141.7px 164.0px"/><text x="141.7" y="66.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,1°C</text><text x="141.7" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><rect class="zima-bar" x="206.3" y="68.0" width="49.0" height="96.0" rx="3" fill="#e11d48" style="--zdelay:140ms;transform-origin:230.9px 164.0px"/><text x="230.9" y="63.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,2°C</text><text x="230.9" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><rect class="zima-bar" x="295.5" y="62.0" width="49.0" height="102.0" rx="3" fill="#e11d48" style="--zdelay:210ms;transform-origin:320.0px 164.0px"/><text x="320.0" y="57.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,4°C</text><text x="320.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><rect class="zima-bar" x="384.6" y="74.0" width="49.0" height="90.0" rx="3" fill="#e11d48" style="--zdelay:280ms;transform-origin:409.1px 164.0px"/><text x="409.1" y="69.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,0°C</text><text x="409.1" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text><rect class="zima-bar" x="473.8" y="68.0" width="49.0" height="96.0" rx="3" fill="#e11d48" style="--zdelay:350ms;transform-origin:498.3px 164.0px"/><text x="498.3" y="63.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 3,2°C</text><text x="498.3" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">27.9.</text><rect class="zima-bar" x="562.9" y="26.0" width="49.0" height="138.0" rx="3" fill="#e11d48" style="--zdelay:420ms;transform-origin:587.4px 164.0px"/><text x="587.4" y="21.0" text-anchor="middle" font-size="9.5" fill="#94a3b8">🔴 4,6°C</text><text x="587.4" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">28.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Višji stolpec = močnejša inverzija tisti dan (izven poldanskih ur) — 🟢 nizko · 🟡 srednje · 🔴 visoko tveganje.</p></div>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Kaj je temperaturna inverzija?</summary><p>Stanje, ko je zrak više toplejši kot pri tleh — obrnjeno od običajnega. Topel zrak deluje kot pokrov in prepreči mešanje: dim iz dimnikov in izpušni plini ostanejo ujeti v dolini namesto da bi se razredčili navzgor.</p></details>

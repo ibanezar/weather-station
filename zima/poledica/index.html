@@ -84,24 +84,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
+/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+   generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
+   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
+.wrap:has(.zima-hero){max-width:1150px}
+.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
+.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
+.zima-hero .page-title{margin:.1rem 0 .15rem}
+.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
+.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
+.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
+.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
+.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  margin:.25rem 0 0;line-height:1.1}
+.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
+.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
+  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
+.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zima-section-title{display:flex;align-items:center;gap:.5rem}
+/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
+   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
+   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
+   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
+.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
+.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
+.zima-meter-svg{width:100%;height:auto;display:block}
+.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
+.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.zima-pass-name{font-weight:700;color:var(--text)}
+.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
 </style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Poledica</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Tveganje poledice — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:22</p>
+  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:43</p>
   <div class="card zima-card" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);margin-bottom:1.2rem">
     <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica zdaj</div>
     <p class="fh-sub">Najbolj izpostavljen je trenutno kraj Nazarje — <span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span>.</p>
   </div>
   <h2>Ocena po krajih (naslednjih 36 h)</h2>
   <table class="stats">
-      <tr><th>Rečica ob Savinji (366 m)</th><td><span class="badge-risk badge-risk-nizko">🟢 Nizko tveganje</span> — cestišče ~15,6 °C, rosišče 8,8 °C. Ure tveganja: —.</td></tr>
-      <tr><th>Mozirje (340 m)</th><td><span class="badge-risk badge-risk-nizko">🟢 Nizko tveganje</span> — cestišče ~15,8 °C, rosišče 8,8 °C. Ure tveganja: —.</td></tr>
-      <tr><th>Nazarje (387 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,2 °C. Ure tveganja: —.</td></tr>
-      <tr><th>Ljubno ob Savinji (434 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,3 °C. Ure tveganja: —.</td></tr>
-      <tr><th>Gornji Grad (431 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,3 °C. Ure tveganja: —.</td></tr>
+      <tr><th>Rečica ob Savinji (366 m)</th><td><span class="badge-risk badge-risk-nizko">🟢 Nizko tveganje</span> — cestišče ~15,5 °C, rosišče 8,9 °C. Ure tveganja: —.</td></tr>
+      <tr><th>Mozirje (340 m)</th><td><span class="badge-risk badge-risk-nizko">🟢 Nizko tveganje</span> — cestišče ~15,7 °C, rosišče 8,9 °C. Ure tveganja: —.</td></tr>
+      <tr><th>Nazarje (387 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,4 °C. Ure tveganja: —.</td></tr>
+      <tr><th>Ljubno ob Savinji (434 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,7 °C. Ure tveganja: —.</td></tr>
+      <tr><th>Gornji Grad (431 m)</th><td><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span> — cestišče ~1,5 °C, rosišče 3,7 °C. Ure tveganja: —.</td></tr>
   </table>
   <h2>7-dnevni pregled (najslabši kraj tisti dan)</h2>
   <div class="stat-grid">

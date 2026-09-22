@@ -226,6 +226,28 @@ def hval(hourly, key, i):
     return arr[i] if 0 <= i < len(arr) else None
 
 
+def compute_hourly_48h(hourly, times, idx_now):
+    """Surova urna serija (6 ur nazaj za kontekst + 48 ur naprej) za graf
+    'Naslednjih 48 ur' na hub strani — NAMENOMA ločena od group_by_day()
+    zgoraj, ki agregira po koledarskih dnevih za 7-dnevne preglede; ta graf
+    rabi posamezne ure, ne dnevnih povprečij. now_idx je indeks trenutne ure
+    ZNOTRAJ te izrezane serije (ne v polni hourly), da ga generate_zima_page.py
+    lahko neposredno uporabi za navpično črto "zdaj" brez ponovnega iskanja."""
+    if idx_now is None:
+        return None
+    start = max(idx_now - 6, 0)
+    end = min(idx_now + 48, len(times))
+    idxs = list(range(start, end))
+    if len(idxs) < 2:
+        return None
+    return {
+        "now_idx": idx_now - start,
+        "times": [times[i] for i in idxs],
+        "temp_c": [hval(hourly, "temperature_2m", i) for i in idxs],
+        "precip_mm": [hval(hourly, "precipitation", i) for i in idxs],
+    }
+
+
 def fetch_open_meteo():
     hourly_vars = ["temperature_2m", "dew_point_2m", "cloud_cover", "wind_speed_10m",
                    "precipitation", "freezing_level_height"]
@@ -794,6 +816,7 @@ def main():
     fog = compute_fog(hourly, idx_now, times)
     snowpack, snowpack_changed = compute_snowpack(hourly, times, idx_now, today_iso)
     passes = [{**p, "weather": compute_pass_weather(hourly, idx_now, p["elevation_m"])} for p in PASSES]
+    hourly_48h = compute_hourly_48h(hourly, times, idx_now)
 
     locations = []
     for loc in BLACK_ICE_LOCATIONS:
@@ -829,6 +852,7 @@ def main():
         "snowpack": snowpack,
         "season": season,
         "passes": passes,
+        "hourly_48h": hourly_48h,
         # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
         # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
         "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},

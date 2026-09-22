@@ -84,16 +84,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
+/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+   generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
+   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
+.wrap:has(.zima-hero){max-width:1150px}
+.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
+.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
+.zima-hero .page-title{margin:.1rem 0 .15rem}
+.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
+.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
+.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
+.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
+.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  margin:.25rem 0 0;line-height:1.1}
+.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
+.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
+  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
+.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zima-section-title{display:flex;align-items:center;gap:.5rem}
+/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
+   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
+   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
+   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
+.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
+.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
+.zima-meter-svg{width:100%;height:auto;display:block}
+.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
+.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
+  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.zima-pass-name{font-weight:700;color:var(--text)}
+.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
 </style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Nad meglo</span>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Nad meglo — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:22</p>
+  <p class="post-meta">Posodobljeno 22. 9. 2026 ob 12:43</p>
   <div class="card zima-card" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16);margin-bottom:1.2rem">
     <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Jutranja megla</div>
-    <p class="fh-sub">Jutri zjutraj je pričakovana zgornja meja megle/nizke oblačnosti pri približno <strong>815 m n. m.</strong></p>
+    <p class="fh-sub">Jutri zjutraj je pričakovana zgornja meja megle/nizke oblačnosti pri približno <strong>1529 m n. m.</strong></p>
   </div>
   <h2>Kraji glede na pričakovano mejo megle</h2>
   <table class="stats">
@@ -104,13 +141,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><th>Gornji Grad (431 m)</th><td>☁️ v megli / pod njo</td></tr>
       <tr><th>Luče (522 m)</th><td>☁️ v megli / pod njo</td></tr>
       <tr><th>Solčava (644 m)</th><td>☁️ v megli / pod njo</td></tr>
-      <tr><th>Golte (1400 m)</th><td>🌤️ nad meglo</td></tr>
-      <tr><th>Menina planina (1500 m)</th><td>🌤️ nad meglo</td></tr>
+      <tr><th>Golte (1400 m)</th><td>☁️ v megli / pod njo</td></tr>
+      <tr><th>Menina planina (1500 m)</th><td>☁️ v megli / pod njo</td></tr>
       <tr><th>Smrekovec (1577 m)</th><td>🌤️ nad meglo</td></tr>
       <tr><th>Raduha (2062 m)</th><td>🌤️ nad meglo</td></tr>
   </table>
   <h2>Trend jutranje meje megle (7 dni)</h2>
-  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart" role="img" aria-label="Sedemdnevni trend"><polyline class="zima-line" points="166.0,133.7 250.0,141.0 334.0,139.6 418.0,141.1 502.0,36.9 586.0,137.4" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="166.0" cy="133.7" r="3.2" fill="#38bdf8"/><circle cx="250.0" cy="141.0" r="3.2" fill="#38bdf8"/><circle cx="334.0" cy="139.6" r="3.2" fill="#38bdf8"/><circle cx="418.0" cy="141.1" r="3.2" fill="#38bdf8"/><circle cx="502.0" cy="36.9" r="3.2" fill="#38bdf8"/><circle cx="586.0" cy="137.4" r="3.2" fill="#38bdf8"/><circle cx="82.0" cy="166" r="2" fill="#475569"/><text x="34" y="19.0" text-anchor="end" font-size="9" fill="#94a3b8">1685 m</text><text x="34" y="165.0" text-anchor="end" font-size="9" fill="#94a3b8">669 m</text><text x="82.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><text x="166.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><text x="250.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><text x="334.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><text x="418.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text><text x="502.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">27.9.</text><text x="586.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">28.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Prekinjena črta = tisto jutro ni pričakovane pomembne inverzije (siva pika na osnovni črti), megla torej ni verjetna.</p></div>
+  <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart" role="img" aria-label="Sedemdnevni trend"><polyline class="zima-line" points="166.0,133.7 250.0,38.4 334.0,139.6 418.0,141.1 502.0,36.9 586.0,137.4" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="166.0" cy="133.7" r="3.2" fill="#38bdf8"/><circle cx="250.0" cy="38.4" r="3.2" fill="#38bdf8"/><circle cx="334.0" cy="139.6" r="3.2" fill="#38bdf8"/><circle cx="418.0" cy="141.1" r="3.2" fill="#38bdf8"/><circle cx="502.0" cy="36.9" r="3.2" fill="#38bdf8"/><circle cx="586.0" cy="137.4" r="3.2" fill="#38bdf8"/><circle cx="82.0" cy="166" r="2" fill="#475569"/><text x="34" y="19.0" text-anchor="end" font-size="9" fill="#94a3b8">1685 m</text><text x="34" y="165.0" text-anchor="end" font-size="9" fill="#94a3b8">669 m</text><text x="82.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">danes</text><text x="166.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">23.9.</text><text x="250.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">24.9.</text><text x="334.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">25.9.</text><text x="418.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">26.9.</text><text x="502.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">27.9.</text><text x="586.0" y="182" text-anchor="middle" font-size="9.5" fill="#94a3b8">28.9.</text></svg><p class="muted-note" style="margin-top:.3rem">Prekinjena črta = tisto jutro ni pričakovane pomembne inverzije (siva pika na osnovni črti), megla torej ni verjetna.</p></div>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Kaj pomeni »nad meglo«?</summary><p>Da je kraj po oceni više od pričakovane zgornje meje jutranje temperaturne inverzije — v resnični megli/nizki oblačnosti torej morda ne bi bil, ampak nad njo, na soncu.</p></details>
