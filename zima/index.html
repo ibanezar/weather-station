@@ -84,11 +84,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 @media (prefers-reduced-motion: reduce){
   .zima-bar,.zima-line{animation:none;stroke-dashoffset:0}
 }
-/* Širši layout SAMO na /zima/* strani (:has(.zima-hero) jih loči od ostalih
+/* Širši layout na VSEH /zima/* straneh (:has(.zima-card) jih loči od ostalih
    generiranih strani, ki delijo isti .wrap iz blog.css s privzetim
-   max-width:720px) -- glej opombo uporabnika o "preozki" strani. Brskalnik
-   brez podpore :has() preprosto obdrži 720px, kar je varno degradiranje. */
-.wrap:has(.zima-hero){max-width:1150px}
+   max-width:720px) -- glej opombo uporabnika o "preozki" strani. .zima-card
+   je na vseh sedmih straneh (hub + 6 spoke), .zima-hero samo na hubu -- prvi
+   poskus je pomotoma zožil samo hub, spoke strani so ostale na 720px.
+   Brskalnik brez podpore :has() preprosto obdrži 720px, varno degradiranje. */
+.wrap:has(.zima-card){max-width:1150px}
+/* Accordion vizual za FAQ (native <details>/<summary>, glej faq v vsakem
+   build_*_body). SAMO tu, ne globalno v blog.css -- isti <div class="faq">
+   vzorec uporabljajo desetine drugih generiranih strani in bi jih nehoteno
+   spremenili. */
+.wrap:has(.zima-card) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.7rem}
+.wrap:has(.zima-card) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
+  list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.wrap:has(.zima-card) .faq summary::-webkit-details-marker{display:none}
+.wrap:has(.zima-card) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
+  font-weight:400;flex:0 0 auto;transition:transform .2s;line-height:1}
+.wrap:has(.zima-card) .faq details[open] summary::after{transform:rotate(45deg)}
+.wrap:has(.zima-card) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+.zima-fog-ladder{display:flex;flex-direction:column;gap:.35rem;margin:1rem 0}
+.zima-fog-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .9rem;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--card-border);font-size:.88rem}
+.zima-fog-row.below{color:var(--muted)}
+.zima-fog-elev{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.zima-fog-line{text-align:center;font-size:.76rem;color:#94a3b8;padding:.4rem 0;
+  border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);margin:.15rem 0}
 .zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
   border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
 .zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
@@ -215,8 +237,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#fbbf24;--fa-soft:rgba(251,191,36,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 19 L8.5 6 L11.5 12 L14.5 5 L21 19 Z" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 11 Q7 13.3 10 15.3 Q13 17.3 10.5 19.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></span></span>Prevoznost prelazov
       <div class="ph-count">2 prelaza</div></a>
   </div>
-  <h2>Ta sezona</h2>
-  <p>Od 1. 11. 2025: <strong>3</strong> dni z visoko jakostjo inverzije, <strong>0</strong> dni z visokim tveganjem poledice, <strong>0</strong> dni s pričakovanim snegom na postaji (od 3 zabeleženih dni).</p>
+  <h2 class="zima-section-title">📊 Zima v številkah</h2>
+  <p class="muted-note" style="margin-top:-.6rem">Od 1. 11. 2025, 3 zabeleženih dni.</p>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="sc-label">Dni z visoko inverzijo</div>
+      <div class="sc-val">3</div>
+      <div class="sc-sub">kurilni semafor 🔴</div></div>
+    <div class="stat-card"><div class="sc-label">Dni z visokim tveganjem poledice</div>
+      <div class="sc-val">0</div>
+      <div class="sc-sub">vsaj en kraj v dolini</div></div>
+    <div class="stat-card"><div class="sc-label">Dni s snegom na postaji</div>
+      <div class="sc-val">0</div>
+      <div class="sc-sub">pričakovan sneg, IREICA1</div></div>
+    <div class="stat-card"><div class="sc-label">Zabeleženih dni</div>
+      <div class="sc-val">3</div>
+      <div class="sc-sub">od 1. 11. 2025</div></div>
+  </div>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
     <details><summary>Katere kraje pokriva MeteoZima?</summary><p>Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad, Luče in Solčavo — ista naselja kot na straneh »Vreme po krajih v dolini«.</p></details>
