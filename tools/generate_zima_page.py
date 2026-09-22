@@ -613,12 +613,29 @@ def build_hub_body(data):
     # zmaga najslabši od poledice/kurjenja. hero_verdict je NAMENOMA isto
     # besedilo kot snow_verdict v "brez razmer" primeru -- eno besedilo o
     # trenutni meji sneženja, ne dve različici, ki bi se sčasoma razšli.
-    overall_level = max((l for l in (worst_level, heating_level) if l), key=RANK_ORDER.index, default=None)
+    ice_rank = RANK_ORDER.index(worst_level)
+    heat_rank = RANK_ORDER.index(heating_level) if heating_level in RANK_ORDER else -1
+    overall_rank = max(ice_rank, heat_rank)
+    overall_level = RANK_ORDER[overall_rank] if overall_rank >= 0 else None
+    # Kurilni semafor meri prevetrenost/inverzijo -- pojav, ki ni vezan na
+    # sneg/led/zimo (jasna mirna noč ga sproži tudi sredi jeseni, glej opombo
+    # uporabnika 22. 9. 2026: hero je javil "POVEČANO ZIMSKO TVEGANJE", ker je
+    # bil edini presežen indeks kurilni semafor, poledica pa je bila le
+    # srednja). Zato, kadar kurilni semafor edini preseže poledico, hero
+    # poroča o PREVETRENOSTI, ne o "zimskem tveganju" -- isto načelo kot
+    # "primernost, ne tveganje %" pri agrometeo (glej CLAUDE.md).
+    heating_only = heat_rank > ice_rank
     has_snow = station_depth is not None and station_depth > 0
     if has_snow:
         hero_icon, hero_label, status_cls = "⚪", "SNEŽNA ODEJA V DOLINI", "snow"
         hero_verdict = (f"V dolini trenutno po oceni leži <strong>{num(station_depth, 0)} cm</strong> "
                          f"snežne odeje (modelirano, ni meritev).")
+    elif heating_only and overall_level in ("visoko", "srednje"):
+        hero_icon = "🔴" if overall_level == "visoko" else "🟡"
+        hero_label = ("KURILNI SEMAFOR: SLABA PREVETRENOST" if overall_level == "visoko"
+                       else "KURILNI SEMAFOR: ZMERNA PREVETRENOST")
+        status_cls = overall_level
+        hero_verdict = heating.get("advice") or "Ocena kurilnega semaforja trenutno ni na voljo."
     elif overall_level == "visoko":
         hero_icon, hero_label, status_cls = "🔴", "POVEČANO ZIMSKO TVEGANJE", "visoko"
         hero_verdict = "Danes je vsaj eden od zimskih indeksov na visoki stopnji — poglej razmere spodaj."
