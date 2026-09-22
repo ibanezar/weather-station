@@ -1381,6 +1381,8 @@ function openThresholdModal(){
   const notifOn=localStorage.getItem('wx-notif')==='on';
   const digestEl=document.getElementById('thr-digest');
   if(digestEl){digestEl.checked=notifOn&&localStorage.getItem(DIGEST_KEY)==='on';digestEl.disabled=!notifOn;}
+  const fcEl=document.getElementById('thr-fc');
+  if(fcEl){fcEl.checked=notifOn&&localStorage.getItem(FC_THR_KEY)==='on';fcEl.disabled=!notifOn;}
   const hint=document.getElementById('thr-digest-hint');
   if(hint)hint.hidden=notifOn;
   const m=document.getElementById('threshold-modal');if(m){m.style.display='flex';}
@@ -1388,17 +1390,31 @@ function openThresholdModal(){
 function closeThresholdModal(){
   const m=document.getElementById('threshold-modal');if(m)m.style.display='none';
 }
-// Posodobi "jutranji povzetek" na obstoječi push-naročnini (če je ni, ni kaj
-// posodobiti — kljukica je v tem primeru onemogočena, glej openThresholdModal).
-async function updateDigestPreference(on){
+// Posodobi nastavitve na obstoječi push-naročnini (če je ni, ni kaj
+// posodobiti — kljukici sta v tem primeru onemogočeni, glej openThresholdModal).
+// `prefs` pošlje samo polja, ki jih spreminjamo — strežnik ostalih ne dotakne.
+async function updatePushPrefs(prefs){
   try{
     if(!('serviceWorker' in navigator))return;
     const reg=await navigator.serviceWorker.ready;
     const sub=await reg.pushManager.getSubscription();
     if(!sub)return;
     const vas=getNowcastVas();
-    await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,digest:on})});
-  }catch(e){console.warn('digest pref:',e);}
+    await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,...prefs})});
+  }catch(e){console.warn('push prefs:',e);}
+}
+// Opozori vnaprej: isti pragovi gredo na strežnik, ki jih enkrat na uro
+// primerja z napovedjo za izbrano vas (worker.js, _cronCheckForecastThresholds).
+// Meje so dvojnik FC_THR_LIMITS v worker.js — če spremeniš eno, spremeni drugo.
+const FC_THR_KEY='wx-fc-thr';
+const FC_THR_LIMITS={wind:[10,200],rain:[0.5,100],tempMin:[-40,40],tempMax:[-20,50]};
+function fcThresholdsPayload(){
+  if(localStorage.getItem(FC_THR_KEY)!=='on')return null;
+  const out={};let any=false;
+  for(const [k,[lo,hi]] of Object.entries(FC_THR_LIMITS)){
+    const v=_thr[k];if(v!==null&&v>=lo&&v<=hi){out[k]=v;any=true;}
+  }
+  return any?out:null;
 }
 function saveThresholdSettings(){
   const gv=(id)=>{const v=parseFloat(document.getElementById(id)?.value);return isNaN(v)?null:v;};
@@ -1407,12 +1423,19 @@ function saveThresholdSettings(){
   try{localStorage.setItem(THRESHOLD_KEY,JSON.stringify(_thr));}catch{}
   const hasAny=Object.values(_thr).some(v=>v!==null);
   document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
+  const prefs={};
   const digestEl=document.getElementById('thr-digest');
   if(digestEl&&!digestEl.disabled){
     const on=!!digestEl.checked;
     try{localStorage.setItem(DIGEST_KEY,on?'on':'off');}catch{}
-    updateDigestPreference(on);
+    prefs.digest=on;
   }
+  const fcEl=document.getElementById('thr-fc');
+  if(fcEl&&!fcEl.disabled){
+    try{localStorage.setItem(FC_THR_KEY,fcEl.checked?'on':'off');}catch{}
+    prefs.fc=fcThresholdsPayload();
+  }
+  if(Object.keys(prefs).length)updatePushPrefs(prefs);
   closeThresholdModal();
   if(_lastBriefObs)checkThresholdAlerts(_lastBriefObs);
 }
@@ -1423,6 +1446,8 @@ function clearThresholdSettings(){
   document.getElementById('threshold-btn')?.classList.remove('has-thresholds');
   _liveAlerts=_liveAlerts.filter(a=>!a._threshold);
   renderAllAlerts();
+  // Brez pragov ni česa primerjati z napovedjo — izklopi tudi na strežniku.
+  if(localStorage.getItem('wx-notif')==='on')updatePushPrefs({fc:null});
 }
 function checkThresholdAlerts(obs){
   const m=obs.metric;
@@ -6288,7 +6313,7 @@ async function toggleNotifications(){
   }
   try{
     const vas=getNowcastVas();
-    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas})});
+    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,fc:fcThresholdsPayload()})});
     if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');

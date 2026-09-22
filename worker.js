@@ -617,13 +617,15 @@ async function _sendPush(env, sub, payloadObj) {
 // Brez `filter` gre vsem; z njim samo tistim, ki mu ustrezajo — tako gredo
 // obvestila za posamezno vas res le naročnikom te vasi. Potekle naročnine
 // počistimo iz celotnega seznama, ne le iz izbranega podniza.
+// `payload` je lahko tudi funkcija naročnine — za obvestila, ki so za vsakega
+// naročnika drugačna (osebni napovedni pragovi).
 async function _pushAll(env, payload, filter) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
   let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
   const target = filter ? subs.filter(filter) : subs;
   const dead = [];
   await Promise.all(target.map(async s => {
-    try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
+    try { const st = await _sendPush(env, s, typeof payload === "function" ? payload(s) : payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
     catch (_) {}
   }));
   if (dead.length) await r2.put("push/subs.json", JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
@@ -702,6 +704,131 @@ async function _cronCheckPrecipNowcast(env) {
   await maybeFire("rain_soon", !isWetNow && firstWet, s => "🌧️ Dež pričakovan čez ~" + s.minAway + " min v Rečici ob Savinji.");
   await maybeFire("storm_soon", firstStorm, s => "⛈️ Nevihta pričakovana čez ~" + s.minAway + " min v Rečici ob Savinji.");
   if (changed) await r2.put("push/nowcast_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+}
+
+// ── Osebni pragovi po NAPOVEDI (push vnaprej) ───────────────
+// Pragovi iz "Moja opozorila" (app.js) so prej veljali samo za izmerjene
+// vrednosti in samo pri odprti strani. Kdor izrecno vklopi "Opozori vnaprej",
+// pošlje iste pragove ob naročnini (`fc` v push/subs.json); tu jih enkrat na
+// uro primerjamo z urno napovedjo Open-Meteo za njegovo vas.
+// - Ura, ki teče, se ne šteje (to je že meritev, ne napoved) — gledamo 1–12 h.
+// - Isti dogodek se naznani enkrat: obvestilo gre, ko prag v oknu NA NOVO
+//   preseže, potem pa šele, ko napoved pod pragom pade in spet zraste
+//   (in najprej po FC_THR_COOLDOWN_MS) — sicer bi vsaka ura poslala isto.
+// - Besedilo vedno pove, da gre za modelsko napoved, ne uradno opozorilo.
+// Meje vrednosti so dvojnik tistih v app.js (`FC_THR_LIMITS`) — če spremeniš
+// eno, spremeni drugo, sicer strežnik tiho zavrže prag, ki ga obrazec pošlje.
+const FC_THR_LIMITS = { wind: [10, 200], rain: [0.5, 100], tempMin: [-40, 40], tempMax: [-20, 50] };
+const FC_THR_HOURS = 12;
+const FC_THR_EVERY_MS = 55 * 60 * 1000;
+const FC_THR_COOLDOWN_MS = 12 * 3600 * 1000;
+const FC_THR_STATE = "push/fc_state.json";
+
+// Očisti pragove iz zahtevka: samo znani ključi, števila v mejah. Vrne null,
+// če ni nobenega veljavnega praga (= izklopljeno).
+function _fcThrSanitize(fc) {
+  if (!fc || typeof fc !== "object") return null;
+  const out = {}; let any = false;
+  for (const [k, [lo, hi]] of Object.entries(FC_THR_LIMITS)) {
+    const v = typeof fc[k] === "number" ? fc[k] : NaN;
+    if (Number.isFinite(v) && v >= lo && v <= hi) { out[k] = Math.round(v * 10) / 10; any = true; }
+  }
+  return any ? out : null;
+}
+
+// Prvi presežek vsakega praga v oknu 1–12 h za eno vas. Čista funkcija —
+// `h` je hourly blok Open-Meteo (časi v UTC), `now` ms.
+function _fcThrHits(fc, h, now) {
+  // Urna vrednost Open-Meteo z žigom T velja za uro PRED njim (T-1h..T:
+  // padavine so vsota, sunki maksimum te ure). Ura, ki teče, je torej žig
+  // naslednje polne ure — zato mora začetek intervala (T-1h) biti po `now`.
+  const hits = [];
+  const idx = [];
+  const HOUR = 3600 * 1000;
+  for (let i = 0; i < (h?.time?.length || 0); i++) {
+    const start = Date.parse(h.time[i] + "Z") - HOUR;
+    if (start > now && start <= now + FC_THR_HOURS * HOUR) idx.push(i);
+  }
+  const first = (arr, test) => { for (const i of idx) { const v = arr?.[i]; if (v != null && test(v)) return i; } return -1; };
+  const peak = (arr, from, better) => { let b = arr[from]; for (const i of idx) if (i >= from && arr[i] != null && better(arr[i], b)) b = arr[i]; return b; };
+  const add = (key, arr, test, better) => {
+    const i = first(arr, test); if (i < 0) return;
+    hits.push({ key, value: peak(arr, i, better), at: Date.parse(h.time[i] + "Z") - HOUR });
+  };
+  if (fc.wind != null)    add("wind", h.wind_gusts_10m, v => v >= fc.wind, (a, b) => a > b);
+  if (fc.rain != null)    add("rain", h.precipitation, v => v >= fc.rain, (a, b) => a > b);
+  if (fc.tempMax != null) add("tempMax", h.temperature_2m, v => v >= fc.tempMax, (a, b) => a > b);
+  if (fc.tempMin != null) add("tempMin", h.temperature_2m, v => v <= fc.tempMin, (a, b) => a < b);
+  return hits;
+}
+
+function _fcThrText(hit, fc) {
+  const ura = new Date(hit.at).toLocaleTimeString("sl-SI", { timeZone: "Europe/Ljubljana", hour: "2-digit", minute: "2-digit" });
+  const f = (v, d) => v.toFixed(d).replace(".", ",");
+  if (hit.key === "wind")    return "💨 sunki do " + Math.round(hit.value) + " km/h od ~" + ura + " (tvoj prag " + fc.wind + ")";
+  if (hit.key === "rain")    return "🌧️ dež do " + f(hit.value, 1) + " mm/h od ~" + ura + " (tvoj prag " + f(fc.rain, 1) + ")";
+  if (hit.key === "tempMax") return "🌡️ do " + f(hit.value, 1) + " °C od ~" + ura + " (tvoj prag " + f(fc.tempMax, 1) + ")";
+  return "🧊 do " + f(hit.value, 1) + " °C od ~" + ura + " (tvoj prag " + f(fc.tempMin, 1) + ")";
+}
+
+async function _cronCheckForecastThresholds(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let state = {}; try { const o = await r2.get(FC_THR_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  // Petminutni tik lahko izpade, zato ne vežemo na minuto 0, ampak na čas
+  // zadnjega teka — tako ena izpuščena minuta ne pomeni izpuščene ure.
+  if (now - (state._lastRun || 0) < FC_THR_EVERY_MS) return;
+
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const vasOf = (s) => NOWCAST_VASI.find(v => v.id === s.vas) || NOWCAST_VASI[0];
+  const withFc = subs.filter(s => s.fc);
+  const subsState = state.subs || {};
+  if (!withFc.length) {
+    await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: {} }), { httpMetadata: { contentType: "application/json" } });
+    return;
+  }
+
+  // En zahtevek za vse vasi z naročniki (Open-Meteo sprejme več točk naenkrat).
+  const vasi = [...new Map(withFc.map(s => [vasOf(s).id, vasOf(s)])).values()];
+  let data;
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + vasi.map(v => v.lat).join(",")
+      + "&longitude=" + vasi.map(v => v.lon).join(",")
+      + "&hourly=temperature_2m,precipitation,wind_gusts_10m&forecast_hours=" + (FC_THR_HOURS + 3) + "&timezone=UTC";
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+    if (!res.ok) return;                                  // brez _lastRun: poskusi naslednji tik
+    data = await res.json();
+  } catch (_) { return; }
+  const list = Array.isArray(data) ? data : [data];
+  const hourlyByVas = new Map(vasi.map((v, i) => [v.id, list[i]?.hourly]));
+
+  const plan = new Map();
+  const nextSubs = {};
+  for (const s of withFc) {
+    const h = hourlyByVas.get(vasOf(s).id); if (!h) continue;
+    const hits = _fcThrHits(s.fc, h, now);
+    const prev = subsState[s.endpoint] || {};
+    const cur = {};
+    const nove = [];
+    for (const k of Object.keys(FC_THR_LIMITS)) {
+      const p = prev[k] || { over: false, lastSent: 0 };
+      const hit = hits.find(x => x.key === k);
+      if (hit && !p.over && now - (p.lastSent || 0) > FC_THR_COOLDOWN_MS) { nove.push(hit); p.lastSent = now; }
+      p.over = !!hit;
+      if (p.over || p.lastSent) cur[k] = p;
+    }
+    if (Object.keys(cur).length) nextSubs[s.endpoint] = cur;
+    if (nove.length) {
+      plan.set(s.endpoint, {
+        title: "Meteorec — napoved " + vasOf(s).loc,
+        body: nove.map(x => _fcThrText(x, s.fc)).join(" · ") + ". Modelska napoved (Open-Meteo), ne uradno opozorilo.",
+        url: "/", tag: "wx-fcthr",
+      });
+    }
+  }
+  if (plan.size) await _pushAll(env, s => plan.get(s.endpoint), s => plan.has(s.endpoint));
+  await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: nextSubs }), { httpMetadata: { contentType: "application/json" } });
 }
 
 // ── Začetek/konec dejanskih padavin na postaji ──────────────
@@ -2604,6 +2731,7 @@ export default {
       if (!ok) await _cronCheckPrecipNowcast(env);
     })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
+    ctx.waitUntil(_cronCheckForecastThresholds(env));   // sam se omeji na enkrat na uro
     ctx.waitUntil(_cronCheckAurora(env));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
@@ -6431,15 +6559,20 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           // nedotaknjena — klic, ki posodablja samo vas, drugače ne bi smel
           // tiho izklopiti že vklopljenega povzetka.
           const hasDigest = typeof body.digest === "boolean";
+          // `fc` (osebni pragovi po napovedi) je prav tako ločen opt-in in se
+          // posodobi samo, če ga klic pošlje — `null` ga izklopi.
+          const hasFc = body.fc !== undefined;
+          const fc = hasFc ? _fcThrSanitize(body.fc) : null;
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
           if (obstoječa) {
             let changed = false;
             if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; changed = true; }
             if (hasDigest && obstoječa.digest !== body.digest) { obstoječa.digest = body.digest; changed = true; }
+            if (hasFc && JSON.stringify(obstoječa.fc || null) !== JSON.stringify(fc)) { obstoječa.fc = fc; changed = true; }
             if (changed) await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });

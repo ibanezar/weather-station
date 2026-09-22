@@ -326,6 +326,26 @@ heroju (`forecastPhrase()`), kar je dvoumnost še povečalo.
   napovedna vrstica ločen sosednji element in v statičnem HTML ostane prazna —
   brez JS napovedi ni in je stran ne sme trditi.
 
+## Moja opozorila — pragovi tudi po napovedi (push vnaprej)
+
+Osebni pragovi v »Moja opozorila« (`_thr` v `app.js`) so do 22. 9. 2026 veljali
+samo za **izmerjene** vrednosti in samo pri odprti strani. Po zgledu aplikacije
+Meteocentar (opozorilo, ko napovedani sunki presežejo uporabnikov prag) je zdaj
+v obrazcu kljukica **»Opozori vnaprej po napovedi«**:
+
+- Ločen opt-in, kot jutranji povzetek: pragovi gredo na strežnik kot `fc` na
+  naročnini v `push/subs.json` samo, če je kljukica vklopljena; `fc: null` ga
+  izklopi, klic brez `fc` ga pusti pri miru.
+- `_cronCheckForecastThresholds()` v `worker.js` teče v petminutnem cronu, a se
+  sam omeji na enkrat na uro (`_lastRun` v `push/fc_state.json` — ne na minuto 0,
+  ker tik lahko izpade). En klic Open-Meteo za vse vasi z naročniki.
+- Okno je 1–12 h; **ura, ki teče, se ne šteje** (urna vrednost z žigom T velja
+  za T-1h..T). Isti dogodek se naznani enkrat — ponovno šele, ko napoved pade pod
+  prag in spet zraste, in najprej po 12 h.
+- Besedilo vedno pove, da gre za modelsko napoved in ne uradno opozorilo.
+- `FC_THR_LIMITS` je namerna podvojitev med `worker.js` in `app.js` — če
+  spremeniš eno, spremeni drugo, sicer strežnik tiho zavrže prag iz obrazca.
+
 ## Lasten radar padavin — luknja v animaciji ni dovoljena
 
 Kompozit (ARSO jedro + obroč EUMETNET OPERA) sestavi `worker.js`
