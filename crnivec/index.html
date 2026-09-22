@@ -168,6 +168,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      zgoraj -- edini na tej vrsti, ki vodi ven s strani (na domači zaslon),
      zato sme izstopati. */
   .crn-install-btn{background:#bbf7d0}
+  /* Namestitveni CTA je čisto na vrhu, nad junaškim naslovom, na sredini --
+     prej skrite drobtine ("Meteorec › Kako je čez Črnivec?") so tu odstranjene,
+     ta prostor prevzame gumb (JSON-LD BreadcrumbList v <head> ostaja, samo
+     vidni napis je bil odveč na strani, ki nima drugih podstrani). */
+  .crn-install-top{text-align:center;margin-bottom:.6rem}
   .crn-quote-pop{animation:crnQuoteReroll .35s ease}
   @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
     100%{transform:rotate(-0.8deg) scale(1)}}
@@ -199,9 +204,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </style>
 
   <div class="crn-wrap">
-  <nav class="crumbs" aria-label="Drobtine">
-    <a href="/">Meteorec</a> › <span aria-current="page">Kako je čez Črnivec?</span>
-  </nav>
+    <div class="crn-install-top">
+      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
+      <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+    </div>
     <div class="crn-hero">
       <svg viewBox="0 0 200 180" class="crn-icon" aria-hidden="true">
     <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
@@ -250,10 +256,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="crn-actions">
       <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
       <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
-      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
     </div>
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-    <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in enim komentarjem iz FB skupine. Meteorec ne odgovarja, če je bilo v
