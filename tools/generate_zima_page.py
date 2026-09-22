@@ -163,6 +163,36 @@ def card_style(key, extra="margin-bottom:1.2rem"):
 # 640x190, da je začetni odmik zagotovo daljši od same črte.
 # `prefers-reduced-motion` obe animaciji izklopi, isto kot na /crnivec/ in
 # /igra/.
+
+# Subtilen zimski ambient za ozadje hero-ja -- statičen (ni podatkovno odvisen,
+# zato konstanta, ne funkcija): nebesni prelivi, tri plasti topografskih
+# kontur in silhueta gora, izrisano kot ena SVG (position:absolute, glej
+# .zima-hero-bg v ZIMA_CSS spodaj). NAMENOMA brez letečih snežink -- uporabnik
+# je to eksplicitno izključil ("ne snežink, ki letijo po ekranu"), samo mirna
+# dekoracija. Ni "risan" motiv nobene resnične gore (isto načelo kot
+# storm_threat_score -- vizualni jezik, ne trditev o geografiji).
+ZIMA_AMBIENT_BG = '''
+      <svg class="zima-hero-bg" viewBox="0 0 1150 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="zimaSkyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0c1c33" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#04070e" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="zimaHalo" cx="80%" cy="12%" r="50%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity=".2"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1150" height="300" fill="url(#zimaSkyGrad)"/>
+        <rect width="1150" height="300" fill="url(#zimaHalo)"/>
+        <path d="M-20 235 Q 200 205 420 232 T 900 220 T 1180 240" fill="none" stroke="#1e293b" stroke-width="1"/>
+        <path d="M-20 253 Q 220 224 440 250 T 920 240 T 1180 258" fill="none" stroke="#1e293b" stroke-width="1"/>
+        <path d="M-20 270 Q 240 244 460 266 T 940 258 T 1180 274" fill="none" stroke="#1e293b" stroke-width="1"/>
+        <path d="M-20 300 L110 170 L215 235 L340 105 L455 220 L610 70 L755 205 L890 135 L1015 225 L1150 165 L1180 190 L1180 300 Z"
+              fill="#0a1120" fill-opacity=".62"/>
+      </svg>
+'''
+
 ZIMA_CSS = '''
 <style>
 .zima-icon{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;
@@ -212,11 +242,32 @@ ZIMA_CSS = '''
   border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);margin:.15rem 0}
 .zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
   border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
-.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:2;
   background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
+/* ZIMA_AMBIENT_BG (glej konstanto zgoraj) -- position:absolute čez cel hero,
+   za besedilom (.zh-content nosi position:relative;z-index:1, glej spodaj). */
+/* Fiksna višina (ne inset:0 čez cel hero) -- na ozkem/visokem mobilnem heroju
+   (skladi CTA/stat kartic naredijo hero visok) bi raztegnjena celotna višina
+   silhueto gora popačila v navpično konico. Fiksnih 220px + preserveAspectRatio
+   "slice" pomeni: obreže robove na ozkih zaslonih, ne raztegne proporcev. */
+.zima-hero-bg{position:absolute;left:0;right:0;bottom:0;width:100%;height:220px;z-index:0;pointer-events:none;display:block}
+.zh-content{position:relative;z-index:1}
 .zima-hero .page-title{margin:.1rem 0 .15rem}
 .zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
 .zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
+/* Utripajoča piko ob statusu ("bolj animiran status", glej uporabnikov predlog)
+   -- barva po stanju (isto besedišče kot RISK_ICON/RANK_ORDER: visoko/srednje/
+   nizko + snow za snežno odejo, ki prevlada nad tveganji). Izklopljeno pod
+   prefers-reduced-motion, isto načelo kot .zima-bar/.zima-line zgoraj. */
+.zh-status{display:inline-flex;align-items:center;gap:.5rem}
+.zh-dot{width:.6rem;height:.6rem;border-radius:50%;flex:0 0 auto;animation:zhPulse 2.2s ease-out infinite}
+.zh-status-visoko .zh-dot{background:#f87171;--dot-glow:rgba(248,113,113,.55)}
+.zh-status-srednje .zh-dot{background:var(--amber);--dot-glow:rgba(245,158,11,.5)}
+.zh-status-nizko .zh-dot{background:#34d399;--dot-glow:rgba(52,211,153,.5)}
+.zh-status-snow .zh-dot{background:#e2e8f0;--dot-glow:rgba(226,232,240,.5)}
+@keyframes zhPulse{0%{box-shadow:0 0 0 0 var(--dot-glow,rgba(148,163,184,.5))}
+  70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion: reduce){.zh-dot{animation:none}}
 .zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
 .zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
 .zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
@@ -565,23 +616,32 @@ def build_hub_body(data):
     overall_level = max((l for l in (worst_level, heating_level) if l), key=RANK_ORDER.index, default=None)
     has_snow = station_depth is not None and station_depth > 0
     if has_snow:
-        hero_icon, hero_label = "⚪", "SNEŽNA ODEJA V DOLINI"
+        hero_icon, hero_label, status_cls = "⚪", "SNEŽNA ODEJA V DOLINI", "snow"
         hero_verdict = (f"V dolini trenutno po oceni leži <strong>{num(station_depth, 0)} cm</strong> "
                          f"snežne odeje (modelirano, ni meritev).")
     elif overall_level == "visoko":
-        hero_icon, hero_label = "🔴", "POVEČANO ZIMSKO TVEGANJE"
+        hero_icon, hero_label, status_cls = "🔴", "POVEČANO ZIMSKO TVEGANJE", "visoko"
         hero_verdict = "Danes je vsaj eden od zimskih indeksov na visoki stopnji — poglej razmere spodaj."
     elif overall_level == "srednje":
-        hero_icon, hero_label = "🟡", "DELNO ZIMSKO TVEGANJE"
+        hero_icon, hero_label, status_cls = "🟡", "DELNO ZIMSKO TVEGANJE", "srednje"
         hero_verdict = "Danes je vsaj eden od zimskih indeksov na srednji stopnji — poglej razmere spodaj."
     else:
-        hero_icon, hero_label = "🟢", "BREZ ZIMSKIH RAZMER"
+        hero_icon, hero_label, status_cls = "🟢", "BREZ ZIMSKIH RAZMER", "nizko"
         hero_verdict = snow_verdict
 
+    # ── Subtilen zimski ambient v ozadju hero-ja: nebesni prelivi + topografske
+    # konture + silhueta gora, glej ZIMA_AMBIENT_BG. NAMENOMA brez snežink, ki
+    # bi letele čez zaslon (uporabnik je to izrecno izključil) — samo statična
+    # dekoracija za .zh-content (glej ZIMA_CSS za z-index sklad). Živ status
+    # dobi utripajočo piko (isti prefers-reduced-motion izklop kot zima-bar/
+    # zima-line zgoraj), da hero deluje kot "živ" nadzorni center, ne statičen
+    # posnetek. ──
     hero_html = f'''  <div class="zima-hero">
+{ZIMA_AMBIENT_BG}
+    <div class="zh-content">
     <h1 class="page-title">❄️ Zimski nadzorni center</h1>
     <p class="zh-sub">Zgornja Savinjska dolina · MeteoZima</p>
-    <p class="zh-verdict">{hero_icon} <strong>{hero_label}</strong><br>{hero_verdict}</p>
+    <p class="zh-verdict"><span class="zh-status zh-status-{status_cls}"><span class="zh-dot"></span>{hero_icon} <strong>{hero_label}</strong></span><br>{hero_verdict}</p>
     <div class="zh-stats">
       <div class="zh-stat"><div class="zh-stat-label">Sneg zdaj</div>
         <div class="zh-stat-val">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></div>
@@ -596,6 +656,7 @@ def build_hub_body(data):
       <a href="#zimske-ceste">🚗 Zimske ceste</a>
     </div>
     <p class="post-meta" style="margin:.9rem 0 0">Posodobljeno {data.get("generated_at_local", "—")}</p>
+    </div>
   </div>'''
 
     # ── 48-urni graf temperature (glej compute_hourly_48h v winter_engine.py) ──
