@@ -1,0 +1,31 @@
+name: Ročna objava zgodbe (FB/IG) po URL-ju
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_url:
+        description: 'Javen URL slike (1080x1920) za objavo kot zgodba'
+        required: true
+
+jobs:
+  repost:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Objavi zgodbo na Facebook
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_story_to_facebook.py "${{ inputs.image_url }}"
+
+      - name: Objavi zgodbo na Instagram
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_story_to_instagram.py "${{ inputs.image_url }}"
