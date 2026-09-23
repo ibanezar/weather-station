@@ -86,18 +86,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 .stats .yr-cold { color: #22d3ee; font-weight: 700; }
 .stats .yr-warm { color: #f97316; font-weight: 700; }
-
-.share-bar { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin: 2rem 0 1.4rem; padding: 1rem 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
-.share-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-right: .3rem; flex-shrink: 0; }
-.share-btn { display: inline-flex; align-items: center; gap: .38rem; padding: .42rem .85rem; border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: opacity .15s, transform .1s; line-height: 1; }
-.share-btn:hover { opacity: .85; transform: translateY(-1px); }
-.share-btn:active { transform: translateY(0); }
-.share-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-.share-btn.wa  { background: #25d366; color: #fff; }
-.share-btn.x   { background: #000;    color: #fff; }
-.share-btn.fb  { background: #1877f2; color: #fff; }
-.share-btn.copy { background: rgba(77,159,248,.15); color: var(--blue); border: 1px solid rgba(77,159,248,.3); }
-.share-btn.native { background: rgba(255,255,255,.08); color: #e8edf8; border: 1px solid rgba(255,255,255,.12); }
 </style>
 </head>
 <body>
@@ -249,34 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Za pravo slano (≤ 0 °C na postaji) bo po vsej verjetnosti treba počakati na naslednje podobno stabilno obdobje, najverjetneje v prvi polovici oktobra.</p>
     </div>
 
-    <div class="share-bar" id="share-bar">
-      <span class="share-label">Deli</span>
-
-      <a class="share-btn wa" id="btn-wa" href="#" target="_blank" rel="noopener" aria-label="Deli na WhatsApp">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.528 5.855L.044 23.956l6.247-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.007-1.373l-.36-.214-3.706.869.936-3.619-.234-.371A9.793 9.793 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
-        WhatsApp
-      </a>
-
-      <a class="share-btn x" id="btn-x" href="#" target="_blank" rel="noopener" aria-label="Deli na X">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        X
-      </a>
-
-      <a class="share-btn fb" id="btn-fb" href="#" target="_blank" rel="noopener" aria-label="Deli na Facebooku">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.887v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
-        Facebook
-      </a>
-
-      <button class="share-btn copy" id="btn-copy" aria-label="Kopiraj povezavo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        <span id="copy-label">Kopiraj</span>
-      </button>
-
-      <button class="share-btn native" id="btn-native" aria-label="Deli" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        Deli
-      </button>
-    </div>
+    <!-- Vrstico za deljenje izriše /blog/share-bar.js (edini vir za vse generatorje). -->
 
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.); postajna zgodovina 2019–2026. Napoved: yr.no (MET Norway). Meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
     <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem">Opomba: v prispevku ločimo <strong>uradno izmerjeno temperaturo zraka</strong> (postaja, 1,5–2 m nad tlemi) od <strong>razmer tik ob tleh</strong>, kjer je slana lahko prisotna tudi, ko postaja še ne izmeri 0 °C ali manj.</p>
@@ -411,36 +372,12 @@ new Chart(document.getElementById('chartForecast'), {
   }
 });
 </script>
-<script>
-(function () {
-  const PAGE_URL   = 'https://meteorec.si/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html';
-  const PAGE_TITLE = '2,1 °C zjutraj: najhladnejše jutro letošnje jeseni v Rečici ob Savinji | Meteorec';
-  const PAGE_TEXT  = 'Najhladnejše jutro letošnje jeseni na Rečici: 2,1 °C, skoraj 7 °C pod normalo. Zakaj — in kdaj bo prva prava slana? 🥶';
-
-  function wa()  { window.open('https://wa.me/?text=' + encodeURIComponent(PAGE_TEXT + ' ' + PAGE_URL), '_blank'); }
-  function xsh() { window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(PAGE_TEXT) + '&url=' + encodeURIComponent(PAGE_URL), '_blank'); }
-  function fb()  { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PAGE_URL), '_blank'); }
-  function copy() {
-    navigator.clipboard.writeText(PAGE_URL).then(() => {
-      const l = document.getElementById('copy-label');
-      const prev = l.textContent; l.textContent = 'Kopirano!';
-      setTimeout(() => l.textContent = prev, 1600);
-    });
-  }
-
-  document.getElementById('btn-wa').addEventListener('click', e => { e.preventDefault(); wa(); });
-  document.getElementById('btn-x').addEventListener('click', e => { e.preventDefault(); xsh(); });
-  document.getElementById('btn-fb').addEventListener('click', e => { e.preventDefault(); fb(); });
-  document.getElementById('btn-copy').addEventListener('click', copy);
-
-  if (navigator.share) {
-    const nativeBtn = document.getElementById('btn-native');
-    nativeBtn.style.display = '';
-    nativeBtn.addEventListener('click', () => {
-      navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(() => {});
-    });
-  }
-})();
-</script>
+<script data-goatcounter="https://ibanezar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script src="/blog/likes.js?v=252186ff" defer></script>
+<script src="/blog/views.js?v=619b6ac0" defer></script>
+<script src="/blog/comments.js?v=d0edb069" defer></script>
+<script src="/blog/share-bar.js?v=4587b9e2" defer></script>
+<script src="/blog/article-enhance.js?v=73b716df" defer></script>
+<script src="/blog/subscribe.js?v=01bdb1be" defer></script>
 </body>
 </html>
