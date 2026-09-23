@@ -188,6 +188,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     transition:width .5s ease}
   .crn-vote-count{text-align:center;font-weight:700;font-size:.88rem;margin:.7rem 0 0;
     color:#374151}
+  .crn-cam{margin-top:0}
+  .crn-cam-label{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-cam-frame{border:3px solid #111;border-radius:14px;overflow:hidden;
+    box-shadow:5px 5px 0 #111;background:#111;aspect-ratio:640/480}
+  .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
+  .crn-cam-fallback{margin:0;padding:1.6rem 1rem;text-align:center;color:#fff;
+    font-weight:600;font-size:.92rem}
+  .crn-cam-fallback a{color:#93c5fd}
+  .crn-cam-meta{font-size:.78rem;color:#4b5563;text-align:center;margin:.7rem 0 0}
+  .crn-cam-meta a{color:#1d4ed8;font-weight:700}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -297,6 +307,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       – tukaj so nalepke con samo za hec.</div>
     </div>
 
+    <div class="crn-panel crn-cam">
+      <p class="crn-cam-label">📷 Namesto da vprašaš — poglej. Živa kamera s prelaza:</p>
+      <div class="crn-cam-frame">
+        <img id="crn-cam-img" src="https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+        <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
+        <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej neposredno na promet.si</a>.</p>
+      </div>
+      <p class="crn-cam-meta">Vir: <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
+      (Direkcija RS za infrastrukturo) — samodejno se osveži vsakih nekaj minut.</p>
+    </div>
+
     <div class="crn-quote-row">
       <div class="crn-quote"><p>Če greš čez, poročaj. Če ne greš, tudi.</p><div class="crn-quote-tail"></div></div>
       <div class="crn-avatar"><svg viewBox="0 0 44 44" class="crn-avatar-icon" aria-hidden="true">
@@ -340,6 +361,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var rareQuote = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj.";
   var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Če greš čez, poročaj. Če ne greš, tudi.", "temp": "12,0 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 2 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">JE, PA NEKAJ<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
   var API = "https://weatherireica1.filip-eremita.workers.dev";
+  var CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg";
+
+  // Živa kamera s prelaza (glej opombo na vrhu generate_crnivec_page.py) --
+  // neposreden hotlink, brez našega workerja. Prvi prikaz je iz statičnega
+  // <img src> (deluje tudi brez JS), JS doda samo periodično osvežitev in
+  // padavinsko varovalko, če DRSI kdaj spremeni pot/zavrne hotlink.
+  var camImg = document.getElementById("crn-cam-img");
+  var camFallback = document.getElementById("crn-cam-fallback");
+  if (camImg && CAM_URL) {
+    // Samozdravilno: vsak neuspeh pokaže nadomestno sporočilo, vsak naslednji
+    // uspešen prenos ga spet skrije -- brez trajne zastavice, ker je prehoden
+    // izpad (DRSI stran ne odgovori enkrat) povsem verjeten in se sam popravi.
+    camImg.addEventListener("error", function(){
+      camImg.hidden = true;
+      if (camFallback) camFallback.hidden = false;
+    });
+    camImg.addEventListener("load", function(){
+      camImg.hidden = false;
+      if (camFallback) camFallback.hidden = true;
+    });
+    setInterval(function(){
+      // Vljudnostna oznaka v poizvedbi (isto kot ...?hribi.net dela pri
+      // drugih straneh, ki isto kamero hotlinkajo) + časovni žig, da brskalnik
+      // ne postreže slike iz predpomnilnika iste URL.
+      camImg.src = CAM_URL + "?src=meteorec.si&t=" + Date.now();
+    }, 5 * 60 * 1000);
+  }
 
   // Koliko obiskov te strani je brskalnik že videl -- namig na to, da bralec
   // raje vpraša (spet), kot da bi pogledal enkrat in si zapomnil (glej uvodno

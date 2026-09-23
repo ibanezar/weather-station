@@ -22,6 +22,17 @@ izmišljenih podatkih. Citat dneva je deterministično izbran po datumu (isti
 vzorec kot izbira teme/različice v generate_story_card.py:
 hashlib.sha256(datum|niz)), da je ista cel dan za vse, drug dan pa drugačna.
 
+Živa kamera s prelaza (CAM_URL spodaj) je neposreden hotlink na uradno
+kamero DRSI/promet.si (Direkcija RS za infrastrukturo, Prometno-informacijski
+center) — ista slika, ki jo že leta hotlinkajo hribi.net, svethribov.si in
+podobne strani (preverjeno pred vgradnjo, ni ugibana pot). Vgrajena je
+namenoma neposredno kot <img>, brez Worker proxyja: za prikaz slike (za
+razliko od /varpolje-current) CORS ni ovira, samo za branje njenih pikslov
+prek JS bi bil. Klientski JS jo osveži vsakih 5 minut (isto pravilo kot
+povsod na strani — glej CLAUDE.md, "noben klic pogosteje kot na 5 minut" —
+tu še toliko bolj, ker gre klic na tuj strežnik, ne na naš worker). Attribucija
+vira (promet.si) je obvezna po njihovih pogojih uporabe za razvijalce.
+
 Piše: crnivec/index.html
 Wired into: .github/workflows/zima-forecast.yml (po generate_zima_page.py —
 potrebuje isti data/winter-data.json)
@@ -42,6 +53,10 @@ from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot n
 
 ROOT = seo.ROOT
 DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
+
+# Uradna kamera DRSI na prelazu (glej opombo na vrhu datoteke) — spremeni
+# samo tu, JS jo bere iz istega niza (glej CAM_URL v build_body spodaj).
+CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
 
 # Coni merilnika, levo (najboljše) proti desno (najslabše) — isti vrstni red
 # kot na klasičnem "risk" merilniku. Kot je sredina cone na polkrogu
@@ -411,6 +426,16 @@ CSS = '''
     transition:width .5s ease}
   .crn-vote-count{text-align:center;font-weight:700;font-size:.88rem;margin:.7rem 0 0;
     color:#374151}
+  .crn-cam{margin-top:0}
+  .crn-cam-label{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-cam-frame{border:3px solid #111;border-radius:14px;overflow:hidden;
+    box-shadow:5px 5px 0 #111;background:#111;aspect-ratio:640/480}
+  .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
+  .crn-cam-fallback{margin:0;padding:1.6rem 1rem;text-align:center;color:#fff;
+    font-weight:600;font-size:.92rem}
+  .crn-cam-fallback a{color:#93c5fd}
+  .crn-cam-meta{font-size:.78rem;color:#4b5563;text-align:center;margin:.7rem 0 0}
+  .crn-cam-meta a{color:#1d4ed8;font-weight:700}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -479,6 +504,33 @@ SHARE_JS_TEMPLATE = '''
   var rareQuote = __RARE_QUOTE_JSON__;
   var share = __SHARE_JSON__;
   var API = "https://weatherireica1.filip-eremita.workers.dev";
+  var CAM_URL = __CAM_URL_JSON__;
+
+  // Živa kamera s prelaza (glej opombo na vrhu generate_crnivec_page.py) --
+  // neposreden hotlink, brez našega workerja. Prvi prikaz je iz statičnega
+  // <img src> (deluje tudi brez JS), JS doda samo periodično osvežitev in
+  // padavinsko varovalko, če DRSI kdaj spremeni pot/zavrne hotlink.
+  var camImg = document.getElementById("crn-cam-img");
+  var camFallback = document.getElementById("crn-cam-fallback");
+  if (camImg && CAM_URL) {
+    // Samozdravilno: vsak neuspeh pokaže nadomestno sporočilo, vsak naslednji
+    // uspešen prenos ga spet skrije -- brez trajne zastavice, ker je prehoden
+    // izpad (DRSI stran ne odgovori enkrat) povsem verjeten in se sam popravi.
+    camImg.addEventListener("error", function(){
+      camImg.hidden = true;
+      if (camFallback) camFallback.hidden = false;
+    });
+    camImg.addEventListener("load", function(){
+      camImg.hidden = false;
+      if (camFallback) camFallback.hidden = true;
+    });
+    setInterval(function(){
+      // Vljudnostna oznaka v poizvedbi (isto kot ...?hribi.net dela pri
+      // drugih straneh, ki isto kamero hotlinkajo) + časovni žig, da brskalnik
+      // ne postreže slike iz predpomnilnika iste URL.
+      camImg.src = CAM_URL + "?src=meteorec.si&t=" + Date.now();
+    }, 5 * 60 * 1000);
+  }
 
   // Koliko obiskov te strani je brskalnik že videl -- namig na to, da bralec
   // raje vpraša (spet), kot da bi pogledal enkrat in si zapomnil (glej uvodno
@@ -884,10 +936,12 @@ def build_body(data):
     quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
     rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
+    cam_url_json = json.dumps(CAM_URL, ensure_ascii=False).replace("</", "<\\/")
     share_js = (SHARE_JS_TEMPLATE
                 .replace("__QUOTES_JSON__", quotes_json)
                 .replace("__RARE_QUOTE_JSON__", rare_quote_json)
                 .replace("__SHARE_JSON__", share_json)
+                .replace("__CAM_URL_JSON__", cam_url_json)
                 .replace("__TODAY_ISO__", today_iso))
 
     body = f'''{CSS}
@@ -920,6 +974,17 @@ def build_body(data):
       </div>
       <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
       – tukaj so nalepke con samo za hec.</div>
+    </div>
+
+    <div class="crn-panel crn-cam">
+      <p class="crn-cam-label">📷 Namesto da vprašaš — poglej. Živa kamera s prelaza:</p>
+      <div class="crn-cam-frame">
+        <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+        <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
+        <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej neposredno na promet.si</a>.</p>
+      </div>
+      <p class="crn-cam-meta">Vir: <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
+      (Direkcija RS za infrastrukturo) — samodejno se osveži vsakih nekaj minut.</p>
     </div>
 
     <div class="crn-quote-row">
