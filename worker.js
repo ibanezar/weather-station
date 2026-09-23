@@ -450,6 +450,7 @@ const _memLikes = {}; // fallback za všečke, kadar KV ni na voljo (resetira se
 const _memViews = {}; // fallback za oglede člankov, kadar KV ni na voljo
 const _memPoll = {}; // fallback za dnevni poll, kadar KV ni na voljo (resetira se ob restartu)
 let _memAndroidPoll = { da: 0, ne: 0 }; // fallback za android-poll, kadar KV ni na voljo
+const _memCrnGlas = {}; // fallback za /crnivec/glas, kadar KV ni na voljo (resetira se ob restartu)
 
 // ── Glavni handler ─────────────────────────────────────────
 // ── Edge-rendered weather archive page helpers ─────────────────────────────
@@ -2984,6 +2985,59 @@ export default {
         POLL_OPTIONS.forEach(o => full[o] = counts[o] || 0);
         return new Response(
           JSON.stringify({ date: today, counts: full }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
+        );
+      }
+
+      // ── /crnivec/glas ────────────────────────────────────────
+      // Dnevno glasovanje skupnosti na humorni strani /crnivec/ ("Kako je čez
+      // Črnivec?"): "se ti zdi indeks danes pošten?". Namerno LOČENO od
+      // izračunanega kazalca (data/winter-data.json prek
+      // generate_crnivec_page.py) — ravno razkorak med izračunom in tem, kar
+      // pravijo ljudje, JE bistvo strani (glej citate tam). Isti vzorec kot
+      // /poll zgoraj: dnevni ključ (_ljDatum, ne fmtDate — Ljubljana, ne UTC),
+      // brez prijave, brez omejitve enega glasu na obiskovalca (klient sam
+      // prek localStorage prepreči ponavljanje, glej crnivec/index.html —
+      // strežnik tega ne uveljavlja, to je vzdušje, ne meritev).
+      // Ključ v KV: "crnivec_glas:YYYY-MM-DD". Vrednost: { gre, ne }.
+      // GET  /crnivec/glas                 → { datum, counts }
+      // POST /crnivec/glas?option=gre|ne   → { datum, counts }
+      if (path === "/crnivec/glas") {
+        const CRN_GLAS_OPTIONS = ["gre", "ne"];
+        const datum = _ljDatum();
+        const key = "crnivec_glas:" + datum;
+        let counts;
+        if (env?.COUNTER_KV) {
+          try { counts = JSON.parse(await env.COUNTER_KV.get(key)) || {}; } catch (_) { counts = {}; }
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!CRN_GLAS_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna možnost" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            counts[option] = (counts[option] || 0) + 1;
+            await env.COUNTER_KV.put(key, JSON.stringify(counts), { expirationTtl: 3 * 86400 });
+          }
+        } else {
+          _memCrnGlas[key] = _memCrnGlas[key] || {};
+          if (request.method === "POST") {
+            const option = url.searchParams.get("option") || "";
+            if (!CRN_GLAS_OPTIONS.includes(option)) {
+              return new Response(
+                JSON.stringify({ error: "neveljavna možnost" }),
+                { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+              );
+            }
+            _memCrnGlas[key][option] = (_memCrnGlas[key][option] || 0) + 1;
+          }
+          counts = _memCrnGlas[key];
+        }
+        const full = {};
+        CRN_GLAS_OPTIONS.forEach(o => full[o] = counts[o] || 0);
+        return new Response(
+          JSON.stringify({ datum, counts: full }),
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } }
         );
       }

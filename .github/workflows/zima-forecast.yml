@@ -40,6 +40,11 @@ jobs:
       - name: Sestavi strani /zima/
         run: python3 tools/generate_zima_page.py
 
+      - name: Namesti Pillow
+        # Za dnevno OG kartico /crnivec/ (generate_crnivec_og.py, glej opombo
+        # tam) — isti vzorec kot v padalci-forecast.yml/daily-story.yml.
+        run: pip install Pillow --quiet
+
       - name: Sestavi /crnivec/
         run: python3 tools/generate_crnivec_page.py
 
@@ -47,7 +52,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json zima/ crnivec/
+          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json zima/ crnivec/ og/crnivec/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0
