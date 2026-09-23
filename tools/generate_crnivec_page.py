@@ -1148,6 +1148,23 @@ def build_body(data):
       – tukaj so nalepke con samo za hec.</div>
     </div>
 
+    <div class="crn-panel crn-report" id="crn-report" hidden>
+      <p class="crn-report-q">📋 Poročaj, kako je bilo, ko si šel čez</p>
+      <div class="crn-report-zones" id="crn-report-zones">
+        {report_zone_buttons}
+      </div>
+      <div id="crn-report-form" hidden>
+        <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
+          placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
+        <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
+          style="position:absolute;left:-9999px" aria-hidden="true">
+        <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
+      </div>
+      <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      <div id="crn-report-badge" class="crn-report-badge" hidden></div>
+      <div id="crn-report-feed" class="crn-report-feed"></div>
+    </div>
+
     <div class="crn-panel crn-cam">
       <p class="crn-cam-label">📷 Namesto da vprašaš — poglej. Živa kamera s prelaza:</p>
       <div class="crn-cam-frame">
@@ -1174,23 +1191,6 @@ def build_body(data):
         <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
         <p class="crn-vote-count" id="crn-vote-count"></p>
       </div>
-    </div>
-
-    <div class="crn-panel crn-report" id="crn-report" hidden>
-      <p class="crn-report-q">📋 Poročaj, kako je bilo, ko si šel čez</p>
-      <div class="crn-report-zones" id="crn-report-zones">
-        {report_zone_buttons}
-      </div>
-      <div id="crn-report-form" hidden>
-        <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
-          placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
-        <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
-          style="position:absolute;left:-9999px" aria-hidden="true">
-        <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
-      </div>
-      <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      <div id="crn-report-badge" class="crn-report-badge" hidden></div>
-      <div id="crn-report-feed" class="crn-report-feed"></div>
     </div>
 
     <div class="crn-actions">
