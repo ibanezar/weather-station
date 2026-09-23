@@ -27,6 +27,7 @@ Teme (razvrščene po prioriteti, višja zmaga, če je več hkrati aktualnih):
   TROPICAL_NIGHT                            — tropska noč za nami
   DROUGHT_DRY_STREAK                         — dolg suh niz
   MUSHROOM                                    — gobarski pogoji
+  CRNIVEC                                      — nosilno (nevarno) stanje na prelazu Črnivec
   AIR_QUALITY_GOOD                             — čist zrak
   IGRA                                          — nosilen termični dan (igra Termika)
   VS_YESTERDAY                                   — velika sprememba od včeraj
@@ -58,6 +59,9 @@ from zoneinfo import ZoneInfo
 
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from crnivec_zones import pick_zone  # noqa: E402 — deljeno z generate_crnivec_page.py, glej opombo tam
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, "og", "story")
 BG_DIR = os.path.join(ROOT, "og", "bg")
@@ -67,6 +71,7 @@ HISTORY = os.path.join(ROOT, "history.json")
 GOBE_JSON = os.path.join(ROOT, "gobarska-napoved", "index.json")
 MTR_JSON = os.path.join(ROOT, "napoved-modela.json")
 IGRA_JSON = os.path.join(ROOT, "igra", "nivo.json")
+CRNIVEC_JSON = os.path.join(ROOT, "data", "winter-data.json")
 
 LAT, LON = 46.325779, 14.921137
 TZ = ZoneInfo("Europe/Ljubljana")
@@ -256,6 +261,32 @@ def load_igra_level(today_iso):
     return None
 
 
+def load_crnivec_weather():
+    """Vreme na prelazu Črnivec iz že izračunanega data/winter-data.json (piše
+    ga tools/winter_engine.py prek zima-forecast.yml) -- ne preračunava znova,
+    isto načelo kot pri gobarskem indeksu/nivoju igre.
+
+    Za razliko od load_igra_level() tu NI strogega "samo današnji datum"
+    pogoja: zima-forecast.yml teče ob 5:50 UTC, ta skript pa ob 04:00/05:00
+    UTC (dvojni cron, glej CLAUDE.md) -- vrstni red teka ni zagotovljen, zato
+    bi strog pogoj temo pogosto izpustil brez pravega razloga. Namesto tega
+    samo groba svežina (<20 ur)."""
+    try:
+        with open(CRNIVEC_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+        gen = datetime.datetime.fromisoformat(data["generated_at"])
+        if gen.tzinfo is None:
+            gen = gen.replace(tzinfo=datetime.timezone.utc)
+        age_h = (datetime.datetime.now(datetime.timezone.utc) - gen).total_seconds() / 3600
+        if age_h > 20:
+            return None
+        crnivec = next((p for p in data.get("passes", []) if p.get("id") == "crnivec"), None)
+        return (crnivec or {}).get("weather")
+    except Exception as e:
+        print(f"⚠ vreme za Črnivec ni dosegljivo: {e}", file=sys.stderr)
+        return None
+
+
 def load_mtr_forecast():
     """Jutrišnja (D+1) napoved lastnega modela MTR -- bere lokalni
     napoved-modela.json (piše ga tools/predict_recica_mos.py), ne uvaža
@@ -348,6 +379,7 @@ def build_ctx():
     hist = load_history()
     gobe = load_gobe_index(today.isoformat())
     igra = load_igra_level(today.isoformat())
+    crnivec = load_crnivec_weather()
 
     yday_key = (today - datetime.timedelta(days=1)).isoformat()
     hist_yesterday = hist.get(yday_key)
@@ -370,6 +402,7 @@ def build_ctx():
         current_temp=((current.get("outdoor") or {}).get("temperature") or {}).get("value"),
         varpolje=varpolje,
         aq=aq, hist=hist, hist_yesterday=hist_yesterday, gobe=gobe, igra=igra,
+        crnivec=crnivec,
     )
 
 
@@ -876,6 +909,35 @@ def t_mushroom(ctx):
                  ("Najobetavnejša", g.get("top_species_sl", "–")),
                  ("Vreme danes", ctx["cond"] or "spremenljivo")],
                 C_GREEN, photo)
+
+
+# ── CRNIVEC ──
+# Namig na humorno stran /crnivec/, SAMO ob dejansko nosilnem (nevarnem)
+# stanju na prelazu -- vsakodnevna kartica "danes je suho" bi imela isto
+# usodo kot stare ARSO objave (glej CLAUDE.md), zato tema pride v poštev
+# samo pri conah verige/spolzko. Cono izbere ISTA pick_zone() kot merilnik na
+# strani (uvožena iz crnivec_zones, ne podvojena).
+@topic("CRNIVEC", 41)
+def t_crnivec(ctx):
+    weather = ctx["crnivec"]
+    if not weather:
+        return None
+    zone = pick_zone(weather)
+    if zone["id"] not in ("verige", "spolzko"):
+        return None
+    variants = [
+        ("Črnivec danes\nzahteva verige", "razmere na prelazu"),
+        ("Prelaz Črnivec:\nne kar tako", "razmere na prelazu"),
+        ("Čez Črnivec\nsamo previdno", "razmere na prelazu"),
+        ("Črnivec: verige\npriporočene", "razmere na prelazu"),
+        ("Gor na Črnivec?\nRazmisli", "razmere na prelazu"),
+    ]
+    headline, big_sub = pick(ctx, "CRNIVEC", variants)
+    return card(ctx, "CRNIVEC", headline, zone["label"], big_sub,
+                [("Temperatura", f"{num_sl(weather.get('temp_c'), 1)} °C"),
+                 ("Sneg / 24 h", f"{num_sl(weather.get('expected_snow_cm_24h'), 1)} cm"),
+                 ("Neuradna ocena", "meteorec.si/crnivec")],
+                C_CYAN, "misty-valley")
 
 
 # ── AIR_QUALITY_GOOD ──

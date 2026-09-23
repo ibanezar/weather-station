@@ -3045,7 +3045,7 @@ export default {
       // ── Poročila s Črnivca (crowdsourced) + šaljive značke ───
       // Bogatejše od /crnivec/glas zgoraj (ki je samo dnevno da/ne
       // razpoloženje): tu obiskovalec pove, katero CONO je dejansko naletel
-      // (isti štirje ID-ji kot ZONES v generate_crnivec_page.py — namerna
+      // (isti štirje ID-ji kot ZONES v tools/crnivec_zones.py — namerna
       // podvojitev, worker Python kode ne more uvoziti, isto načelo kot
       // IGRA_KORIDORJI_KM zgoraj) + neobvezno opombo. Javno, brez prijave.
       // Isti R2/feedback vzorec kot /gobe/opazovanje (honeypot, dedup,
@@ -3054,12 +3054,19 @@ export default {
       // Značka je ŠTEVILO doslej oddanih poročil TEGA (anonimnega)
       // porocevalca — naključen ID v localStorage na strani, isti vzorec kot
       // igralecId() v igra/igra.js. Čisto za hec, ne resna lestvica: brisanje
-      // localStorage šteje nazaj na nič, in to je v redu (glej opombo pri
-      // izračunu spodaj).
+      // localStorage šteje nazaj na nič, in to je v redu.
+      //
+      // Vzdevek (ime) je okras za javno lestvico, ne identiteta — isto
+      // načelo kot pri /napovej/ in /igra/. crnivec_lestvica v KV je EN
+      // JSON blob { [porocevalec]: {ime, stevilo} } (ne posamezni ključi na
+      // porocevalca kot prej) — samo tako lahko /crnivec/lestvica prebere
+      // top 10 v enem branju namesto s KV `list`, ki bi bil počasnejši in
+      // dražji vzorec za nekaj deset/sto vnosov.
       //   GET  /crnivec/porocila?dni=3 → { porocila:[…], total, updatedAt }
-      //   POST /crnivec/porocilo { zona, opomba?, porocevalec, website? }
+      //   POST /crnivec/porocilo { zona, opomba?, porocevalec, ime?, website? }
       //        → { ok:true, stevilo, znacka:{naziv,opis} }
-      if (path === "/crnivec/porocila" || path === "/crnivec/porocilo") {
+      //   GET  /crnivec/lestvica → { lestvica:[{ime,stevilo,znacka},…] }
+      if (path === "/crnivec/porocila" || path === "/crnivec/porocilo" || path === "/crnivec/lestvica") {
         const r2 = env?.PHOTOS_R2;
         // Lokalna _json() — ni v skupnem obsegu na tem mestu v datoteki
         // (obstaja samo znotraj poznejših /premium/* in /gobe/* blokov).
@@ -3070,6 +3077,8 @@ export default {
         const POR_MAX_DNI = 30;
         const POR_STORE_CAP = 1000;
         const POR_LIST_CAP = 100;
+        const LESTVICA_KEY = "crnivec_lestvica";
+        const LESTVICA_CAP = 300; // koliko RAZLIČNIH porocevalcev obdržimo, glej _lestvicaWrite
         const CRN_ZONE_IDS = ["sonce", "nekaj", "verige", "spolzko"];
         // Pragovi so namenoma rastoči in vedno bolj smešni — enkratno
         // poročilo že šteje (namig na to, da je večina ljudi raje vpraša,
@@ -3078,10 +3087,13 @@ export default {
         const CRN_BADGES = [
           { min: 1, naziv: "🔍 Prvi izvidnik", opis: "Enkrat si pogledal, namesto da bi vprašal." },
           { min: 3, naziv: "📡 Redni opazovalec", opis: "Skupina te še ne pozna, ampak ti nje že." },
-          { min: 7, naziv: "🛡️ Črnivski straž", opis: "Ljudje bi lahko že vprašali tebe." },
+          { min: 7, naziv: "🔭 Črnivski izvidnik", opis: "Ljudje bi lahko že vprašali tebe." },
           { min: 15, naziv: "🏔️ Legenda prelaza", opis: "Cesta te pozna po imenu. Verjetno." },
           { min: 30, naziv: "👑 Uradni Črnivec (neuradno)", opis: "Nihče te ni imenoval, a nihče te tudi ne izpodbija." },
         ];
+        function _znackaZa(stevilo) {
+          return CRN_BADGES.slice().reverse().find(b => stevilo >= b.min) || CRN_BADGES[0];
+        }
 
         async function _porRead() {
           if (!r2) return [];
@@ -3101,6 +3113,19 @@ export default {
           return _json({ porocila: pub, total: fresh.length, updatedAt: new Date().toISOString() });
         }
 
+        if (path === "/crnivec/lestvica" && request.method === "GET") {
+          const kv = env?.COUNTER_KV;
+          let lestvica = {};
+          if (kv) {
+            try { lestvica = JSON.parse(await kv.get(LESTVICA_KEY)) || {}; } catch (_) { lestvica = {}; }
+          }
+          const top = Object.values(lestvica)
+            .sort((a, b) => b.stevilo - a.stevilo)
+            .slice(0, 10)
+            .map(r => ({ ime: r.ime, stevilo: r.stevilo, znacka: _znackaZa(r.stevilo).naziv }));
+          return _json({ lestvica: top });
+        }
+
         if (path === "/crnivec/porocilo" && request.method === "POST") {
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
@@ -3110,6 +3135,10 @@ export default {
           const zona = CRN_ZONE_IDS.includes(body.zona) ? body.zona : null;
           const opomba = (body.opomba || "").trim().slice(0, 140);
           const porocevalec = (body.porocevalec || "").trim();
+          // Prazen niz šteje kot "brez vzdevka" -- pusti "Anonimni" spodaj,
+          // ne prazno vrstico na lestvici.
+          let ime = (body.ime || "").trim().slice(0, 24);
+          if (!ime) ime = "Anonimni";
           if (!zona) return _json({ error: "Izberi, kakšno je bilo stanje" }, 400);
           if (!/^[a-zA-Z0-9_-]{8,40}$/.test(porocevalec)) return _json({ error: "Neveljaven odjemalec" }, 400);
 
@@ -3141,11 +3170,22 @@ export default {
 
           let stevilo = 1;
           if (kv) {
-            const skey = "crnivec_st:" + porocevalec;
-            stevilo = (parseInt((await kv.get(skey)) || "0") || 0) + 1;
-            await kv.put(skey, String(stevilo));
+            let lestvica = {};
+            try { lestvica = JSON.parse(await kv.get(LESTVICA_KEY)) || {}; } catch (_) { lestvica = {}; }
+            stevilo = ((lestvica[porocevalec] || {}).stevilo || 0) + 1;
+            lestvica[porocevalec] = { ime, stevilo };
+            // Kapica na ŠTEVILO SLEDENIH porocevalcev, ne na velikost datoteke
+            // neposredno -- brez tega bi blob čez leta neomejeno rasel. Vrže
+            // tiste z najmanj poročili, ki so tako ali tako najmanj verjetni
+            // za top 10 (glej GET zgoraj).
+            const kljuci = Object.keys(lestvica);
+            if (kljuci.length > LESTVICA_CAP) {
+              kljuci.sort((a, b) => lestvica[a].stevilo - lestvica[b].stevilo);
+              for (const k of kljuci.slice(0, kljuci.length - LESTVICA_CAP)) delete lestvica[k];
+            }
+            await kv.put(LESTVICA_KEY, JSON.stringify(lestvica));
           }
-          const znacka = CRN_BADGES.slice().reverse().find(b => stevilo >= b.min) || CRN_BADGES[0];
+          const znacka = _znackaZa(stevilo);
           return _json({ ok: true, porocilo: entry, stevilo, znacka: { naziv: znacka.naziv, opis: znacka.opis } });
         }
       }
