@@ -58,6 +58,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
 from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot na zgodbah, ne podvojen tu
+from crnivec_zones import ZONES, pick_zone  # noqa: E402 — deljeno z generate_story_card.py (tema CRNIVEC)
 
 ROOT = seo.ROOT
 DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
@@ -66,19 +67,9 @@ DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 # samo tu, JS jo bere iz istega niza (glej CAM_URL v build_body spodaj).
 CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
 
-# Coni merilnika, levo (najboljše) proti desno (najslabše) — isti vrstni red
-# kot na klasičnem "risk" merilniku. Kot je sredina cone na polkrogu
-# (180°=levo, 0°=desno, 90°=zgoraj), isti konvenciji sledi needle_angle().
-ZONES = [
-    {"id": "sonce",    "label": "SUHO K POPR",    "desc": "Popolnoma čisto, cesta je suha.",
-     "color": "#16a34a", "mid": 157.5},
-    {"id": "nekaj",    "label": "JE, PA NEKAJ",   "desc": "Nekaj snega ali ledu, zato previdno.",
-     "color": "#eab308", "mid": 112.5},
-    {"id": "verige",   "label": "VZEMI VERIGE",   "desc": "Sneg ali led na cesti, verige so priporočljive.",
-     "color": "#ea580c", "mid": 67.5},
-    {"id": "spolzko",  "label": "SPOLZKO, PAZI",  "desc": "Cesta je spolzka, vozite zelo previdno.",
-     "color": "#dc2626", "mid": 22.5},
-]
+# ZONES/pick_zone sta v skupnem crnivec_zones.py (uvožena spodaj) — tudi
+# generate_story_card.py (tema CRNIVEC) ju rabi, glej opombo tam o krožnem
+# uvozu.
 
 # Kratke oznake ISTIH con za gumbe poročanja (glej crn-report spodaj) — polni
 # ZONES["label"] (npr. "SPOLZKO, PAZI") je glasen naslov za merilnik, v
@@ -134,21 +125,6 @@ def load_json(path, default=None):
         return json.load(open(path, encoding="utf-8"))
     except Exception:
         return default
-
-
-def pick_zone(weather):
-    """Resnična izbira cone iz izračunanega vremena na Črnivcu (weather =
-    passes["crnivec"]["weather"] iz winter_engine.py) — samo nalepka/barva
-    je šala, uvrstitev ne."""
-    temp = (weather or {}).get("temp_c")
-    snow = (weather or {}).get("expected_snow_cm_24h") or 0
-    if snow >= 2:
-        return ZONES[2]  # verige
-    if temp is not None and temp <= 0:
-        return ZONES[3]  # spolzko
-    if temp is not None and temp > 5:
-        return ZONES[0]  # sonce
-    return ZONES[1]  # nekaj vmes
 
 
 def needle_angle(zone):
@@ -463,6 +439,20 @@ CSS = '''
   .crn-report-note{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
     padding:.6rem .8rem;font:inherit;font-size:.92rem;resize:vertical;min-height:3rem;
     margin:0 0 .7rem}
+  .crn-report-ime{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
+    padding:.5rem .8rem;font:inherit;font-size:.88rem;margin:0 0 .7rem}
+  .crn-report-week{font-size:.82rem;color:#374151;text-align:center;font-weight:600;margin:1rem 0 0}
+  .crn-board{margin-top:0}
+  .crn-board-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-board-list{display:flex;flex-direction:column;gap:.3rem}
+  .crn-board-row{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+    font-size:.88rem;border-bottom:1px dashed #d1d5db;padding:.35rem 0;margin:0}
+  .crn-board-row:last-child{border-bottom:none}
+  .crn-board-rank{font-weight:800;color:#111;width:1.6rem;flex:0 0 auto}
+  .crn-board-name{flex:1;color:#111;font-weight:700;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .crn-board-badge{color:#6b7280;font-size:.78rem;flex:0 0 auto;text-align:right}
+  .crn-board-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
   .crn-report-badge{margin-top:1rem;text-align:center;background:#fef08a;border:3px solid #111;
     border-radius:14px;padding:.9rem 1rem;box-shadow:5px 5px 0 #111}
   .crn-report-badge-title{font-weight:800;font-size:1.15rem;margin:0 0 .2rem}
@@ -739,8 +729,11 @@ SHARE_JS_TEMPLATE = '''
     var repSubmit = document.getElementById("crn-report-submit");
     var repStatus = document.getElementById("crn-report-status");
     var repBadge = document.getElementById("crn-report-badge");
+    var repWeek = document.getElementById("crn-report-week");
     var repFeed = document.getElementById("crn-report-feed");
+    var repIme = document.getElementById("crn-report-ime");
     var izbranaCona = null;
+    var ZONE_LABELS = { sonce: "suho", nekaj: "nekaj je", verige: "verige", spolzko: "spolzko" };
 
     function porocevalecId(){
       var re = /^[a-zA-Z0-9_-]{8,40}$/;
@@ -756,6 +749,12 @@ SHARE_JS_TEMPLATE = '''
       return nov;
     }
 
+    // Vzdevek je okras za javno lestvico, ne identiteta -- isti vzorec kot
+    // beriIme()/shraniIme() v napovej.js/igra.js.
+    if (repIme) {
+      try { repIme.value = localStorage.getItem("crn-porocevalec-ime") || ""; } catch (_) {}
+    }
+
     function setStatusRep(msg){
       if (!repStatus) return;
       repStatus.hidden = !msg;
@@ -768,13 +767,12 @@ SHARE_JS_TEMPLATE = '''
         repFeed.innerHTML = '<p class="crn-report-feed-empty">Še nihče ni poročal danes. Bodi prvi.</p>';
         return;
       }
-      var labels = { sonce: "suho", nekaj: "nekaj je", verige: "verige", spolzko: "spolzko" };
       repFeed.innerHTML = "";
       porocila.slice(0, 6).forEach(function(p){
         var el = document.createElement("p");
         el.className = "crn-report-feed-item";
         var b = document.createElement("b");
-        b.textContent = labels[p.zona] || p.zona;
+        b.textContent = ZONE_LABELS[p.zona] || p.zona;
         el.appendChild(b);
         // textContent, ne innerHTML -- opomba je prosto uporabniško besedilo
         // (isto pravilo kot pri gobarskih opažanjih).
@@ -783,9 +781,29 @@ SHARE_JS_TEMPLATE = '''
       });
     }
 
+    // Tedenski povzetek je čisto klientski izračun iz istega odgovora kot
+    // seznam (dni=7 namesto 3) -- brez ločenega endpointa na worker.js.
+    function renderWeekStats(porocila){
+      if (!repWeek) return;
+      if (!porocila || !porocila.length) { repWeek.hidden = true; return; }
+      var stevec = {};
+      porocila.forEach(function(p){ stevec[p.zona] = (stevec[p.zona] || 0) + 1; });
+      var najpogostejsa = null, najvec = 0;
+      Object.keys(stevec).forEach(function(z){
+        if (stevec[z] > najvec) { najvec = stevec[z]; najpogostejsa = z; }
+      });
+      repWeek.textContent = "🗓️ Ta teden: " + porocila.length +
+        (porocila.length === 1 ? " poročilo" : " poročil") +
+        (najpogostejsa ? " · največkrat: " + (ZONE_LABELS[najpogostejsa] || najpogostejsa) : "");
+      repWeek.hidden = false;
+    }
+
     function loadFeed(){
-      fetch(API + "/crnivec/porocila?dni=3").then(function(r){ return r.json(); })
-        .then(function(d){ renderFeed(d && d.porocila); })
+      fetch(API + "/crnivec/porocila?dni=7").then(function(r){ return r.json(); })
+        .then(function(d){
+          renderFeed(d && d.porocila);
+          renderWeekStats(d && d.porocila);
+        })
         .catch(function(){});
     }
 
@@ -797,9 +815,93 @@ SHARE_JS_TEMPLATE = '''
       });
     });
 
+    // Samostojna, majhna canvas risba za "Deli značko" -- namenoma NE deli
+    // helperjev z gauge-jevim "Deli kot sliko" spodaj (wrapText/loadSvgImage
+    // ipd.): tisti so definirani ŠELE za zgodnjim-vrnitvenim stavkom
+    // (if (!shareBtn...) return;), ta blok pa teče PRED njim in bi jih torej
+    // tako ali tako ne mogel poklicati.
+    function wrapTextRep(ctx, text, maxWidth){
+      var words = text.split(" "), lines = [], line = "";
+      for (var i = 0; i < words.length; i++) {
+        var test = line ? line + " " + words[i] : words[i];
+        if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = words[i]; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+    function drawBadgeCanvas(znacka, stevilo){
+      var W = 640, H = 420;
+      var canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fdf6e3";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#111";
+      for (var y = 8; y < H; y += 16) {
+        for (var x = 8; x < W; x += 16) { ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill(); }
+      }
+      ctx.textAlign = "center";
+      ctx.font = "800 26px Inter, system-ui, sans-serif";
+      ctx.lineJoin = "round"; ctx.lineWidth = 6; ctx.strokeStyle = "#111";
+      ctx.strokeText("KAKO JE ČEZ ČRNIVEC?", W / 2, 56);
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText("KAKO JE ČEZ ČRNIVEC?", W / 2, 56);
+
+      var px = 40, py = 90, pw = W - 80, ph = 240;
+      ctx.fillStyle = "#111"; ctx.fillRect(px + 6, py + 6, pw, ph);
+      ctx.fillStyle = "#fef08a"; ctx.fillRect(px, py, pw, ph);
+      ctx.lineWidth = 4; ctx.strokeStyle = "#111"; ctx.strokeRect(px, py, pw, ph);
+
+      ctx.fillStyle = "#111";
+      ctx.font = "800 32px Inter, system-ui, sans-serif";
+      ctx.fillText(znacka.naziv, W / 2, py + 62);
+
+      ctx.font = "600 19px Inter, system-ui, sans-serif";
+      var lines = wrapTextRep(ctx, znacka.opis, pw - 60);
+      lines.forEach(function(line, i){ ctx.fillText(line, W / 2, py + 108 + i * 27); });
+
+      ctx.font = "700 17px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#374151";
+      ctx.fillText("Poročil doslej: " + stevilo, W / 2, py + ph - 22);
+
+      ctx.font = "700 16px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText("meteorec.si/crnivec", W / 2, H - 22);
+      return canvas;
+    }
+    function dodajBadgeShareBtn(znacka, stevilo){
+      if (!repBadge || !window.HTMLCanvasElement) return;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "crn-action-btn";
+      btn.textContent = "📤 Deli značko";
+      btn.style.marginTop = ".8rem";
+      btn.addEventListener("click", function(){
+        var canvas = drawBadgeCanvas(znacka, stevilo);
+        canvas.toBlob(function(blob){
+          if (!blob) return;
+          var file = new File([blob], "crnivec-znacka.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], title: znacka.naziv, text: znacka.naziv + " – meteorec.si/crnivec" })
+              .catch(function(){});
+            return;
+          }
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url; a.download = "crnivec-znacka.png";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+        }, "image/png");
+      });
+      repBadge.appendChild(btn);
+    }
+
     if (repSubmit) {
       repSubmit.addEventListener("click", function(){
         if (!izbranaCona) { setStatusRep("Najprej izberi stanje zgoraj."); return; }
+        var ime = repIme ? repIme.value.trim() : "";
+        try { localStorage.setItem("crn-porocevalec-ime", ime); } catch (_) {}
         repSubmit.disabled = true;
         setStatusRep("Pošiljam …");
         fetch(API + "/crnivec/porocilo", {
@@ -809,6 +911,7 @@ SHARE_JS_TEMPLATE = '''
             zona: izbranaCona,
             opomba: repNote ? repNote.value.trim() : "",
             porocevalec: porocevalecId(),
+            ime: ime,
             website: repHp ? repHp.value : ""
           })
         }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
@@ -834,10 +937,12 @@ SHARE_JS_TEMPLATE = '''
               repBadge.appendChild(t);
               repBadge.appendChild(d2);
               repBadge.appendChild(c);
+              dodajBadgeShareBtn(res.data.znacka, res.data.stevilo);
             }
             if (repForm) repForm.hidden = true;
             repZones.forEach(function(b){ b.disabled = true; });
             loadFeed();
+            loadBoard();
           }).catch(function(){
             setStatusRep("Poročilo ni uspelo — preveri povezavo.");
             repSubmit.disabled = false;
@@ -847,6 +952,41 @@ SHARE_JS_TEMPLATE = '''
 
     loadFeed();
   }
+
+  // Javna lestvica poročevalcev (glej GET /crnivec/lestvica v worker.js) --
+  // ista, ki jo osveži oddaja zgoraj (loadBoard po uspešni oddaji). Ločen
+  // blok, da deluje tudi, če je crn-report panel iz kakšnega razloga izpuščen.
+  var boardBox = document.getElementById("crn-board");
+  var boardList = document.getElementById("crn-board-list");
+  function loadBoard(){
+    if (!boardBox || !boardList || !window.fetch) return;
+    boardBox.hidden = false;
+    fetch(API + "/crnivec/lestvica").then(function(r){ return r.json(); })
+      .then(function(d){
+        var lestvica = (d && d.lestvica) || [];
+        if (!lestvica.length) {
+          boardList.innerHTML = '<p class="crn-board-empty">Še ni dovolj poročil za lestvico. Bodi prvi zgoraj.</p>';
+          return;
+        }
+        boardList.innerHTML = "";
+        lestvica.forEach(function(r, i){
+          var row = document.createElement("div");
+          row.className = "crn-board-row";
+          var rank = document.createElement("span");
+          rank.className = "crn-board-rank";
+          rank.textContent = (i + 1) + ".";
+          var name = document.createElement("span");
+          name.className = "crn-board-name";
+          name.textContent = r.ime || "Anonimni";
+          var badge = document.createElement("span");
+          badge.className = "crn-board-badge";
+          badge.textContent = r.znacka + " · " + r.stevilo;
+          row.appendChild(rank); row.appendChild(name); row.appendChild(badge);
+          boardList.appendChild(row);
+        });
+      }).catch(function(){});
+  }
+  loadBoard();
 
   var shareBtn = document.getElementById("crn-share");
   var statusEl = document.getElementById("crn-share-status");
@@ -1156,13 +1296,21 @@ def build_body(data):
       <div id="crn-report-form" hidden>
         <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
           placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
+        <input type="text" id="crn-report-ime" class="crn-report-ime" maxlength="24"
+          placeholder="Vzdevek za lestvico (neobvezno)">
         <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
           style="position:absolute;left:-9999px" aria-hidden="true">
         <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
       </div>
       <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
       <div id="crn-report-badge" class="crn-report-badge" hidden></div>
+      <p id="crn-report-week" class="crn-report-week" hidden></p>
       <div id="crn-report-feed" class="crn-report-feed"></div>
+    </div>
+
+    <div class="crn-panel crn-board" id="crn-board" hidden>
+      <p class="crn-board-q">🏆 Lestvica poročevalcev</p>
+      <div id="crn-board-list" class="crn-board-list"></div>
     </div>
 
     <div class="crn-panel crn-cam">
