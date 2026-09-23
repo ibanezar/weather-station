@@ -33,6 +33,14 @@ povsod na strani — glej CLAUDE.md, "noben klic pogosteje kot na 5 minut" —
 tu še toliko bolj, ker gre klic na tuj strežnik, ne na naš worker). Attribucija
 vira (promet.si) je obvezna po njihovih pogojih uporabe za razvijalce.
 
+Poročanje (#crn-report) je bogatejše od dnevnega glasovanja (#crn-vote):
+obiskovalec izbere ISTO cono kot merilnik (ne novo lestvico) + neobvezno
+opombo, javno, brez prijave — /crnivec/porocilo in /crnivec/porocila v
+worker.js, isti R2/feedback vzorec kot /gobe/opazovanje. Šaljive značke
+(CRN_BADGES v worker.js) nagradijo ŠTEVILO oddanih poročil enega anonimnega
+(localStorage) porocevalca — hec, ne resna lestvica; brisanje localStorage
+šteje nazaj na nič in to je v redu.
+
 Piše: crnivec/index.html
 Wired into: .github/workflows/zima-forecast.yml (po generate_zima_page.py —
 potrebuje isti data/winter-data.json)
@@ -71,6 +79,11 @@ ZONES = [
     {"id": "spolzko",  "label": "SPOLZKO, PAZI",  "desc": "Cesta je spolzka, vozite zelo previdno.",
      "color": "#dc2626", "mid": 22.5},
 ]
+
+# Kratke oznake ISTIH con za gumbe poročanja (glej crn-report spodaj) — polni
+# ZONES["label"] (npr. "SPOLZKO, PAZI") je glasen naslov za merilnik, v
+# štirih ozkih gumbih v vrsti pa ne bi bil čitljiv.
+ZONE_SHORT = {"sonce": "Suho", "nekaj": "Nekaj je", "verige": "Verige", "spolzko": "Spolzko"}
 
 # Izvirni citati v duhu šale (glej opombo zgoraj) — NISO navedki resničnih
 # objav, ker jih nimamo preverjenih; namenoma zvenijo kot tipičen odgovor v
@@ -436,6 +449,30 @@ CSS = '''
   .crn-cam-fallback a{color:#93c5fd}
   .crn-cam-meta{font-size:.78rem;color:#4b5563;text-align:center;margin:.7rem 0 0}
   .crn-cam-meta a{color:#1d4ed8;font-weight:700}
+  .crn-report{margin-top:0}
+  .crn-report-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-report-zones{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+  .crn-report-zbtn{font:inherit;font-weight:700;font-size:.76rem;cursor:pointer;
+    background:#fff;border:3px solid #111;border-radius:12px;padding:.6rem .2rem;
+    box-shadow:3px 3px 0 #111;transition:transform .1s;text-align:center}
+  .crn-report-zbtn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #111}
+  .crn-report-zbtn.sel{background:var(--zc);color:#111}
+  .crn-report-zbtn .crn-zicon{width:26px;height:26px;margin:0 auto .25rem;display:block}
+  .crn-report-zbtn span{display:block}
+  #crn-report-form{margin-top:1rem}
+  .crn-report-note{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
+    padding:.6rem .8rem;font:inherit;font-size:.92rem;resize:vertical;min-height:3rem;
+    margin:0 0 .7rem}
+  .crn-report-badge{margin-top:1rem;text-align:center;background:#fef08a;border:3px solid #111;
+    border-radius:14px;padding:.9rem 1rem;box-shadow:5px 5px 0 #111}
+  .crn-report-badge-title{font-weight:800;font-size:1.15rem;margin:0 0 .2rem}
+  .crn-report-badge-desc{font-size:.85rem;color:#374151;margin:0}
+  .crn-report-badge-count{font-size:.75rem;color:#6b7280;margin:.4rem 0 0}
+  .crn-report-feed{margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
+  .crn-report-feed-item{font-size:.82rem;border-left:3px solid #111;padding:.15rem .7rem;
+    color:#374151;margin:0}
+  .crn-report-feed-item b{color:#111}
+  .crn-report-feed-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -686,6 +723,131 @@ SHARE_JS_TEMPLATE = '''
     }
   }
 
+  // Poročanje o dejanskem stanju + šaljive značke (glej CRN_BADGES v
+  // worker.js) -- bogatejše od glasovanja zgoraj: tu obiskovalec izbere
+  // eno od ISTIH štirih con kot merilnik (gumbi imajo data-zona, glej
+  // report_zone_buttons v generate_crnivec_page.py) in po želji doda opombo.
+  // Anonimen porocevalec ID v localStorage, isti vzorec kot igralecId() v
+  // igra/igra.js -- namerna podvojitev, ta stran ne nalaga igra.js.
+  var repBox = document.getElementById("crn-report");
+  if (repBox && window.fetch) {
+    repBox.hidden = false;
+    var repZones = Array.prototype.slice.call(repBox.querySelectorAll(".crn-report-zbtn"));
+    var repForm = document.getElementById("crn-report-form");
+    var repNote = document.getElementById("crn-report-note");
+    var repHp = document.getElementById("crn-report-hp");
+    var repSubmit = document.getElementById("crn-report-submit");
+    var repStatus = document.getElementById("crn-report-status");
+    var repBadge = document.getElementById("crn-report-badge");
+    var repFeed = document.getElementById("crn-report-feed");
+    var izbranaCona = null;
+
+    function porocevalecId(){
+      var re = /^[a-zA-Z0-9_-]{8,40}$/;
+      try {
+        var id = localStorage.getItem("crn-porocevalec");
+        if (id && re.test(id)) return id;
+      } catch (_) {}
+      var abc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      var bajti = (window.crypto && crypto.getRandomValues) ? crypto.getRandomValues(new Uint8Array(24)) : null;
+      var nov = "";
+      for (var i = 0; i < 24; i++) nov += abc[(bajti ? bajti[i] : Math.floor(Math.random() * 256)) % abc.length];
+      try { localStorage.setItem("crn-porocevalec", nov); } catch (_) {}
+      return nov;
+    }
+
+    function setStatusRep(msg){
+      if (!repStatus) return;
+      repStatus.hidden = !msg;
+      repStatus.textContent = msg || "";
+    }
+
+    function renderFeed(porocila){
+      if (!repFeed) return;
+      if (!porocila || !porocila.length) {
+        repFeed.innerHTML = '<p class="crn-report-feed-empty">Še nihče ni poročal danes. Bodi prvi.</p>';
+        return;
+      }
+      var labels = { sonce: "suho", nekaj: "nekaj je", verige: "verige", spolzko: "spolzko" };
+      repFeed.innerHTML = "";
+      porocila.slice(0, 6).forEach(function(p){
+        var el = document.createElement("p");
+        el.className = "crn-report-feed-item";
+        var b = document.createElement("b");
+        b.textContent = labels[p.zona] || p.zona;
+        el.appendChild(b);
+        // textContent, ne innerHTML -- opomba je prosto uporabniško besedilo
+        // (isto pravilo kot pri gobarskih opažanjih).
+        el.appendChild(document.createTextNode(p.opomba ? (" — " + p.opomba) : ""));
+        repFeed.appendChild(el);
+      });
+    }
+
+    function loadFeed(){
+      fetch(API + "/crnivec/porocila?dni=3").then(function(r){ return r.json(); })
+        .then(function(d){ renderFeed(d && d.porocila); })
+        .catch(function(){});
+    }
+
+    repZones.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        izbranaCona = btn.getAttribute("data-zona");
+        repZones.forEach(function(b){ b.classList.toggle("sel", b === btn); });
+        if (repForm) repForm.hidden = false;
+      });
+    });
+
+    if (repSubmit) {
+      repSubmit.addEventListener("click", function(){
+        if (!izbranaCona) { setStatusRep("Najprej izberi stanje zgoraj."); return; }
+        repSubmit.disabled = true;
+        setStatusRep("Pošiljam …");
+        fetch(API + "/crnivec/porocilo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            zona: izbranaCona,
+            opomba: repNote ? repNote.value.trim() : "",
+            porocevalec: porocevalecId(),
+            website: repHp ? repHp.value : ""
+          })
+        }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+          .then(function(res){
+            if (!res.ok || !res.data || res.data.error) {
+              setStatusRep((res.data && res.data.error) || "Poročilo ni uspelo.");
+              repSubmit.disabled = false;
+              return;
+            }
+            setStatusRep("Hvala za poročilo!");
+            if (repBadge && res.data.znacka) {
+              repBadge.hidden = false;
+              var t = document.createElement("p");
+              t.className = "crn-report-badge-title";
+              t.textContent = res.data.znacka.naziv;
+              var d2 = document.createElement("p");
+              d2.className = "crn-report-badge-desc";
+              d2.textContent = res.data.znacka.opis;
+              var c = document.createElement("p");
+              c.className = "crn-report-badge-count";
+              c.textContent = "Poročil doslej: " + res.data.stevilo;
+              repBadge.innerHTML = "";
+              repBadge.appendChild(t);
+              repBadge.appendChild(d2);
+              repBadge.appendChild(c);
+            }
+            if (repForm) repForm.hidden = true;
+            repZones.forEach(function(b){ b.disabled = true; });
+            loadFeed();
+          }).catch(function(){
+            setStatusRep("Poročilo ni uspelo — preveri povezavo.");
+            repSubmit.disabled = false;
+          });
+      });
+    }
+
+    loadFeed();
+  }
+
   var shareBtn = document.getElementById("crn-share");
   var statusEl = document.getElementById("crn-share-status");
   if (!shareBtn || !window.HTMLCanvasElement || !share) return;
@@ -933,6 +1095,16 @@ def build_body(data):
         "gauge": gauge_svg(zone, static=True),
         "icon": icon_svg_static(zone["id"]),
     }
+    # Gumbi za poročanje uporabijo ISTE cone/ikone kot merilnik zgoraj (glej
+    # ZONE_ICONS), samo s krajšo oznako (ZONE_SHORT) -- da poročevalec izbira
+    # med istimi štirimi možnostmi, ki jih izračuna prikazuje, in je
+    # razkorak med njima (bistvo strani) dejansko primerljiv.
+    report_zone_buttons = "".join(
+        f'<button type="button" class="crn-report-zbtn" data-zona="{z["id"]}" '
+        f'style="--zc:{z["color"]}">{ZONE_ICONS[z["id"]]}<span>{ZONE_SHORT[z["id"]]}</span></button>'
+        for z in ZONES
+    )
+
     quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
     rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
@@ -1002,6 +1174,23 @@ def build_body(data):
         <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
         <p class="crn-vote-count" id="crn-vote-count"></p>
       </div>
+    </div>
+
+    <div class="crn-panel crn-report" id="crn-report" hidden>
+      <p class="crn-report-q">📋 Poročaj, kako je bilo, ko si šel čez</p>
+      <div class="crn-report-zones" id="crn-report-zones">
+        {report_zone_buttons}
+      </div>
+      <div id="crn-report-form" hidden>
+        <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
+          placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
+        <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
+          style="position:absolute;left:-9999px" aria-hidden="true">
+        <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
+      </div>
+      <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      <div id="crn-report-badge" class="crn-report-badge" hidden></div>
+      <div id="crn-report-feed" class="crn-report-feed"></div>
     </div>
 
     <div class="crn-actions">

@@ -198,6 +198,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-cam-fallback a{color:#93c5fd}
   .crn-cam-meta{font-size:.78rem;color:#4b5563;text-align:center;margin:.7rem 0 0}
   .crn-cam-meta a{color:#1d4ed8;font-weight:700}
+  .crn-report{margin-top:0}
+  .crn-report-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-report-zones{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+  .crn-report-zbtn{font:inherit;font-weight:700;font-size:.76rem;cursor:pointer;
+    background:#fff;border:3px solid #111;border-radius:12px;padding:.6rem .2rem;
+    box-shadow:3px 3px 0 #111;transition:transform .1s;text-align:center}
+  .crn-report-zbtn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #111}
+  .crn-report-zbtn.sel{background:var(--zc);color:#111}
+  .crn-report-zbtn .crn-zicon{width:26px;height:26px;margin:0 auto .25rem;display:block}
+  .crn-report-zbtn span{display:block}
+  #crn-report-form{margin-top:1rem}
+  .crn-report-note{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
+    padding:.6rem .8rem;font:inherit;font-size:.92rem;resize:vertical;min-height:3rem;
+    margin:0 0 .7rem}
+  .crn-report-badge{margin-top:1rem;text-align:center;background:#fef08a;border:3px solid #111;
+    border-radius:14px;padding:.9rem 1rem;box-shadow:5px 5px 0 #111}
+  .crn-report-badge-title{font-weight:800;font-size:1.15rem;margin:0 0 .2rem}
+  .crn-report-badge-desc{font-size:.85rem;color:#374151;margin:0}
+  .crn-report-badge-count{font-size:.75rem;color:#6b7280;margin:.4rem 0 0}
+  .crn-report-feed{margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
+  .crn-report-feed-item{font-size:.82rem;border-left:3px solid #111;padding:.15rem .7rem;
+    color:#374151;margin:0}
+  .crn-report-feed-item b{color:#111}
+  .crn-report-feed-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -337,6 +361,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
         <p class="crn-vote-count" id="crn-vote-count"></p>
       </div>
+    </div>
+
+    <div class="crn-panel crn-report" id="crn-report" hidden>
+      <p class="crn-report-q">📋 Poročaj, kako je bilo, ko si šel čez</p>
+      <div class="crn-report-zones" id="crn-report-zones">
+        <button type="button" class="crn-report-zbtn" data-zona="sonce" style="--zc:#16a34a"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
+        <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
+        <line x1="9" y1="9" x2="17" y2="17"/><line x1="43" y1="43" x2="51" y2="51"/>
+        <line x1="51" y1="9" x2="43" y2="17"/><line x1="17" y1="43" x2="9" y2="51"/>
+      </g>
+      <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
+    </svg><span>Suho</span></button><button type="button" class="crn-report-zbtn" data-zona="nekaj" style="--zc:#eab308"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-nekaj" aria-hidden="true">
+      <g fill="#fef3c7" stroke="#111" stroke-width="3.5" stroke-linejoin="round">
+        <circle cx="20" cy="33" r="10"/><circle cx="33" cy="24" r="13"/>
+        <circle cx="45" cy="33" r="9"/><rect x="15" y="30" width="35" height="15" rx="7.5"/>
+      </g>
+      <circle cx="26" cy="35" r="2.2" fill="#111"/><circle cx="40" cy="35" r="2.2" fill="#111"/>
+      <line x1="26" y1="42" x2="38" y2="42" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>
+    </svg><span>Nekaj je</span></button><button type="button" class="crn-report-zbtn" data-zona="verige" style="--zc:#ea580c"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-verige" aria-hidden="true">
+      <rect x="9" y="18" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+      <rect x="30" y="12" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+    </svg><span>Verige</span></button><button type="button" class="crn-report-zbtn" data-zona="spolzko" style="--zc:#dc2626"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-spolzko" aria-hidden="true">
+      <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
+        <line x1="30" y1="6" x2="30" y2="54"/><line x1="10" y1="17" x2="50" y2="43"/><line x1="10" y1="43" x2="50" y2="17"/>
+        <path d="M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6"/>
+        <path d="M10 17 l7.5 1 M10 17 l3 6.5 M50 43 l-7.5 -1 M50 43 l-3 -6.5"/>
+        <path d="M10 43 l3 -6.5 M10 43 l7.5 -1 M50 17 l-3 6.5 M50 17 l-7.5 1"/>
+      </g>
+    </svg><span>Spolzko</span></button>
+      </div>
+      <div id="crn-report-form" hidden>
+        <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
+          placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
+        <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
+          style="position:absolute;left:-9999px" aria-hidden="true">
+        <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
+      </div>
+      <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      <div id="crn-report-badge" class="crn-report-badge" hidden></div>
+      <div id="crn-report-feed" class="crn-report-feed"></div>
     </div>
 
     <div class="crn-actions">
@@ -541,6 +607,131 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       voteBtnGre.addEventListener("click", function(){ oddajGlas("gre"); });
       voteBtnNe.addEventListener("click", function(){ oddajGlas("ne"); });
     }
+  }
+
+  // Poročanje o dejanskem stanju + šaljive značke (glej CRN_BADGES v
+  // worker.js) -- bogatejše od glasovanja zgoraj: tu obiskovalec izbere
+  // eno od ISTIH štirih con kot merilnik (gumbi imajo data-zona, glej
+  // report_zone_buttons v generate_crnivec_page.py) in po želji doda opombo.
+  // Anonimen porocevalec ID v localStorage, isti vzorec kot igralecId() v
+  // igra/igra.js -- namerna podvojitev, ta stran ne nalaga igra.js.
+  var repBox = document.getElementById("crn-report");
+  if (repBox && window.fetch) {
+    repBox.hidden = false;
+    var repZones = Array.prototype.slice.call(repBox.querySelectorAll(".crn-report-zbtn"));
+    var repForm = document.getElementById("crn-report-form");
+    var repNote = document.getElementById("crn-report-note");
+    var repHp = document.getElementById("crn-report-hp");
+    var repSubmit = document.getElementById("crn-report-submit");
+    var repStatus = document.getElementById("crn-report-status");
+    var repBadge = document.getElementById("crn-report-badge");
+    var repFeed = document.getElementById("crn-report-feed");
+    var izbranaCona = null;
+
+    function porocevalecId(){
+      var re = /^[a-zA-Z0-9_-]{8,40}$/;
+      try {
+        var id = localStorage.getItem("crn-porocevalec");
+        if (id && re.test(id)) return id;
+      } catch (_) {}
+      var abc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      var bajti = (window.crypto && crypto.getRandomValues) ? crypto.getRandomValues(new Uint8Array(24)) : null;
+      var nov = "";
+      for (var i = 0; i < 24; i++) nov += abc[(bajti ? bajti[i] : Math.floor(Math.random() * 256)) % abc.length];
+      try { localStorage.setItem("crn-porocevalec", nov); } catch (_) {}
+      return nov;
+    }
+
+    function setStatusRep(msg){
+      if (!repStatus) return;
+      repStatus.hidden = !msg;
+      repStatus.textContent = msg || "";
+    }
+
+    function renderFeed(porocila){
+      if (!repFeed) return;
+      if (!porocila || !porocila.length) {
+        repFeed.innerHTML = '<p class="crn-report-feed-empty">Še nihče ni poročal danes. Bodi prvi.</p>';
+        return;
+      }
+      var labels = { sonce: "suho", nekaj: "nekaj je", verige: "verige", spolzko: "spolzko" };
+      repFeed.innerHTML = "";
+      porocila.slice(0, 6).forEach(function(p){
+        var el = document.createElement("p");
+        el.className = "crn-report-feed-item";
+        var b = document.createElement("b");
+        b.textContent = labels[p.zona] || p.zona;
+        el.appendChild(b);
+        // textContent, ne innerHTML -- opomba je prosto uporabniško besedilo
+        // (isto pravilo kot pri gobarskih opažanjih).
+        el.appendChild(document.createTextNode(p.opomba ? (" — " + p.opomba) : ""));
+        repFeed.appendChild(el);
+      });
+    }
+
+    function loadFeed(){
+      fetch(API + "/crnivec/porocila?dni=3").then(function(r){ return r.json(); })
+        .then(function(d){ renderFeed(d && d.porocila); })
+        .catch(function(){});
+    }
+
+    repZones.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        izbranaCona = btn.getAttribute("data-zona");
+        repZones.forEach(function(b){ b.classList.toggle("sel", b === btn); });
+        if (repForm) repForm.hidden = false;
+      });
+    });
+
+    if (repSubmit) {
+      repSubmit.addEventListener("click", function(){
+        if (!izbranaCona) { setStatusRep("Najprej izberi stanje zgoraj."); return; }
+        repSubmit.disabled = true;
+        setStatusRep("Pošiljam …");
+        fetch(API + "/crnivec/porocilo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            zona: izbranaCona,
+            opomba: repNote ? repNote.value.trim() : "",
+            porocevalec: porocevalecId(),
+            website: repHp ? repHp.value : ""
+          })
+        }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+          .then(function(res){
+            if (!res.ok || !res.data || res.data.error) {
+              setStatusRep((res.data && res.data.error) || "Poročilo ni uspelo.");
+              repSubmit.disabled = false;
+              return;
+            }
+            setStatusRep("Hvala za poročilo!");
+            if (repBadge && res.data.znacka) {
+              repBadge.hidden = false;
+              var t = document.createElement("p");
+              t.className = "crn-report-badge-title";
+              t.textContent = res.data.znacka.naziv;
+              var d2 = document.createElement("p");
+              d2.className = "crn-report-badge-desc";
+              d2.textContent = res.data.znacka.opis;
+              var c = document.createElement("p");
+              c.className = "crn-report-badge-count";
+              c.textContent = "Poročil doslej: " + res.data.stevilo;
+              repBadge.innerHTML = "";
+              repBadge.appendChild(t);
+              repBadge.appendChild(d2);
+              repBadge.appendChild(c);
+            }
+            if (repForm) repForm.hidden = true;
+            repZones.forEach(function(b){ b.disabled = true; });
+            loadFeed();
+          }).catch(function(){
+            setStatusRep("Poročilo ni uspelo — preveri povezavo.");
+            repSubmit.disabled = false;
+          });
+      });
+    }
+
+    loadFeed();
   }
 
   var shareBtn = document.getElementById("crn-share");
