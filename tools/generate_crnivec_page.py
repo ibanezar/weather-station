@@ -29,6 +29,7 @@ potrebuje isti data/winter-data.json)
 Usage:
   python3 tools/generate_crnivec_page.py
 """
+import datetime
 import hashlib
 import json
 import math
@@ -37,6 +38,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
+from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot na zgodbah, ne podvojen tu
 
 ROOT = seo.ROOT
 DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
@@ -90,6 +92,13 @@ QUOTES = [
     "Ni še za paniko. Ampak verige imajo danes lep dan.",
     "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri.",
 ]
+
+# Izven dnevnega izbora (glej pick spodaj) in izven navadnega kroga za gumb
+# "Vprašaj še enkrat" — RARE_QUOTE se v rerollu prikaže samo z majhno
+# verjetnostjo (glej crn-reroll v SHARE_JS_TEMPLATE), kot easter egg, ne kot
+# še en enakovreden citat. Ni deterministična po datumu, ker bi sicer
+# "redka" izguba smisel — mora biti presenečenje ob kliku, ne stalnica dneva.
+RARE_QUOTE = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj."
 
 
 def load_json(path, default=None):
@@ -369,14 +378,39 @@ CSS = '''
      .crn-sub zgoraj (background v barvi strani + padding). */
   .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px;
     background:#fdf6e3;padding:.15rem .3rem;border-radius:4px}
-  .crn-stats{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.1rem;
+  .crn-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1.1rem;
     animation:crnStatIn .4s ease-out .3s backwards}
   @keyframes crnStatIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
   .crn-stat{background:#fff;border:3px solid #111;border-radius:14px;box-shadow:5px 5px 0 #111;
     padding:.7rem .5rem;text-align:center}
   .crn-stat-emoji{font-size:1.25rem;line-height:1;display:block;margin-bottom:.15rem}
-  .crn-stat-val{font-weight:800;font-size:1.3rem;display:block;color:#111}
-  .crn-stat-lbl{font-size:.7rem;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.03em}
+  .crn-stat-val{font-weight:800;font-size:1.1rem;display:block;color:#111}
+  .crn-stat-lbl{font-size:.64rem;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.02em}
+  /* Citat, ki ga (redko) nariše "Vprašaj še enkrat" namesto navadnega
+     reroll-a (glej RARE_QUOTE/crn-reroll) -- zlat rob namesto črnega, da je
+     jasno, da gre za nekaj izjemnega, ne le drugačno besedilo. */
+  .crn-quote.crn-quote-rare{border-color:#ca8a04;background:#fffbeb;box-shadow:0 0 0 3px #fde68a}
+  .crn-quote.crn-quote-rare::after{border-top-color:#ca8a04}
+  .crn-quote.crn-quote-rare .crn-quote-tail{border-top-color:#fffbeb}
+  .crn-visits{display:inline-block;font-size:.76rem;font-weight:700;color:#111;
+    background:#fef08a;border:2px solid #111;border-radius:8px;padding:.25rem .6rem;
+    margin:0 0 1rem}
+  .crn-vote{margin-top:0}
+  .crn-vote-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-vote-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+  .crn-vote-btn{font:inherit;font-weight:800;font-size:1rem;cursor:pointer;
+    background:#fff;border:3px solid #111;border-radius:999px;padding:.6rem 1.5rem;
+    box-shadow:4px 4px 0 #111;transition:transform .1s}
+  .crn-vote-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+  .crn-vote-btn:disabled{opacity:.6;cursor:default}
+  .crn-vote-btn-gre{background:#bbf7d0}
+  .crn-vote-btn-ne{background:#fecaca}
+  .crn-vote-bar{height:22px;border:3px solid #111;border-radius:999px;overflow:hidden;
+    background:#fecaca}
+  .crn-vote-bar span{display:block;height:100%;width:50%;background:#16a34a;
+    transition:width .5s ease}
+  .crn-vote-count{text-align:center;font-weight:700;font-size:.88rem;margin:.7rem 0 0;
+    color:#374151}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
@@ -430,8 +464,8 @@ CSS = '''
     .crn-zicon{width:66px;height:66px}
     .crn-verdict span{font-size:2.4rem;padding:.4rem 1.3rem}
     .crn-data{font-size:1rem;padding:1rem 1.3rem}
-    .crn-stats{max-width:420px;margin-left:auto;margin-right:auto;gap:1rem}
-    .crn-stat-val{font-size:1.5rem}
+    .crn-stats{max-width:560px;margin-left:auto;margin-right:auto;gap:1rem}
+    .crn-stat-val{font-size:1.25rem}
   }
 </style>
 '''
@@ -442,7 +476,25 @@ SHARE_JS_TEMPLATE = '''
 (function(){
   "use strict";
   var quotes = __QUOTES_JSON__;
+  var rareQuote = __RARE_QUOTE_JSON__;
   var share = __SHARE_JSON__;
+  var API = "https://weatherireica1.filip-eremita.workers.dev";
+
+  // Koliko obiskov te strani je brskalnik že videl -- namig na to, da bralec
+  // raje vpraša (spet), kot da bi pogledal enkrat in si zapomnil (glej uvodno
+  // opombo v generate_crnivec_page.py o tem, kaj je sploh šala te strani).
+  // Prvi obisk se ne prikaže -- šele od drugega dalje ima "spet si tu" smisel.
+  var visitsEl = document.getElementById("crn-visits");
+  if (visitsEl) {
+    try {
+      var obiski = (parseInt(localStorage.getItem("crn-obiski"), 10) || 0) + 1;
+      localStorage.setItem("crn-obiski", String(obiski));
+      if (obiski > 1) {
+        visitsEl.textContent = "To je tvoj " + obiski + ". obisk te strani. Očitno tudi ti raje vprašaš, kot pogledaš sam.";
+        visitsEl.hidden = false;
+      }
+    } catch (_) {}
+  }
 
   var rerollBtn = document.getElementById("crn-reroll");
   var quoteP = document.querySelector(".crn-quote p");
@@ -452,12 +504,21 @@ SHARE_JS_TEMPLATE = '''
     rerollBtn.addEventListener("click", function(){
       var cur = quoteP.textContent;
       var next = cur;
-      var tries = 0;
-      while (next === cur && tries < 20) {
-        next = quotes[Math.floor(Math.random() * quotes.length)];
-        tries++;
+      // ~1/30 (torej približno tako redko, kot je citatov v navadnem krogu)
+      // pokaže RARE_QUOTE namesto navadnega izbora -- presenečenje, ne
+      // enakovreden citat, zato ni v `quotes` in ne v dnevnem izboru.
+      var rare = rareQuote && Math.random() < (1 / 30) && cur !== rareQuote;
+      if (rare) {
+        next = rareQuote;
+      } else {
+        var tries = 0;
+        while (next === cur && tries < 20) {
+          next = quotes[Math.floor(Math.random() * quotes.length)];
+          tries++;
+        }
       }
       quoteP.textContent = next;
+      quoteBubble.classList.toggle("crn-quote-rare", !!rare);
       quoteBubble.classList.remove("crn-quote-pop");
       void quoteBubble.offsetWidth;
       quoteBubble.classList.add("crn-quote-pop");
@@ -514,6 +575,63 @@ SHARE_JS_TEMPLATE = '''
         "Tapni ⬆️ (Deli) spodaj in izberi »Na začetni zaslon«." :
         "Namestitev v tem brskalniku ni na voljo.";
     });
+  }
+
+  // Dnevno glasovanje skupnosti: "se ti zdi indeks danes pošten?". Namerno
+  // ločeno od IZRAČUNANEGA kazalca (isti razkorak med izračunom in tem, kar
+  // pravijo ljudje, je bistvo cele strani -- glej citate zgoraj). Isti vzorec
+  // kot /poll v worker.js (dnevni ključ, brez prijave, brez omejitve enega
+  // glasu na obiskovalca -- to je vzdušje, ne meritev). localStorage samo
+  // prepreči, da bi isti brskalnik zase klikal v neskončnost isti dan;
+  // strežnik tega ne uveljavlja.
+  var voteBox = document.getElementById("crn-vote");
+  var voteBtnGre = document.getElementById("crn-vote-gre");
+  var voteBtnNe = document.getElementById("crn-vote-ne");
+  var voteResult = document.getElementById("crn-vote-result");
+  var voteBar = document.getElementById("crn-vote-bar-gre");
+  var voteCount = document.getElementById("crn-vote-count");
+  if (voteBox && voteBtnGre && voteBtnNe && voteResult && window.fetch) {
+    voteBox.hidden = false;
+    var VOTE_KEY = "crn-glas-__TODAY_ISO__";
+
+    function showVoteResult(counts){
+      var gre = (counts && counts.gre) || 0, ne = (counts && counts.ne) || 0;
+      var total = gre + ne;
+      var pct = total ? Math.round((gre / total) * 100) : 50;
+      if (voteBar) voteBar.style.width = pct + "%";
+      if (voteCount) {
+        voteCount.textContent = total ?
+          (pct + " % pravi, da gre (" + total + (total === 1 ? " glas" : " glasov") + " danes)") :
+          "Bodi prvi, ki danes glasuje.";
+      }
+      voteBtnGre.hidden = true;
+      voteBtnNe.hidden = true;
+      voteResult.hidden = false;
+    }
+
+    function loadVotes(){
+      fetch(API + "/crnivec/glas").then(function(r){ return r.json(); })
+        .then(function(d){ showVoteResult(d && d.counts); })
+        .catch(function(){});
+    }
+
+    var already = null;
+    try { already = localStorage.getItem(VOTE_KEY); } catch (_) {}
+    if (already) {
+      loadVotes();
+    } else {
+      var oddajGlas = function(option){
+        voteBtnGre.disabled = true;
+        voteBtnNe.disabled = true;
+        try { localStorage.setItem(VOTE_KEY, option); } catch (_) {}
+        fetch(API + "/crnivec/glas?option=" + option, { method: "POST" })
+          .then(function(r){ return r.json(); })
+          .then(function(d){ showVoteResult(d && d.counts); })
+          .catch(function(){ loadVotes(); });
+      };
+      voteBtnGre.addEventListener("click", function(){ oddajGlas("gre"); });
+      voteBtnNe.addEventListener("click", function(){ oddajGlas("ne"); });
+    }
   }
 
   var shareBtn = document.getElementById("crn-share");
@@ -622,6 +740,9 @@ SHARE_JS_TEMPLATE = '''
       ctx.font = "600 18px Inter, system-ui, sans-serif";
       ctx.fillStyle = "#374151";
       ctx.fillText(share.temp + " \\u00b7 " + share.snow, W / 2, py + 380);
+      ctx.font = "600 15px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText(share.streak, W / 2, py + 402);
 
       var qx = 40, qy = py + ph + 30, qw = W - 80;
       ctx.textAlign = "left";
@@ -714,6 +835,15 @@ def build_body(data):
     today_iso = seo.TODAY.isoformat()
     quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
 
+    # Suh niz je iz IZMERJENE zgodovine postaje (dolina), ne iz izračuna za
+    # sam prelaz (902 m) — namenoma OZNAČEN kot tak na kartici (isto načelo
+    # kot ARSO/Open-Meteo, ki se na padavinski ploščici ne smeta zliti v eno
+    # število). dry_streak() je uvožen iz generate_story_card.py, ne
+    # podvojen tu; konča na VČERAJ, ker je danes še nepopoln dan (isti klic
+    # kot pri story-cardovem DROUGHT_DRY_STREAK).
+    hist = seo.load_history()
+    streak = dry_streak(hist, seo.TODAY - datetime.timedelta(days=1))
+
     temp_txt = f'{seo.num(weather.get("temp_c"), 1)} °C' if weather.get("temp_c") is not None else "– °C"
     snow_txt = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm snega v 24 h'
                 if weather.get("expected_snow_cm_24h") is not None else "– cm snega v 24 h")
@@ -722,6 +852,20 @@ def build_body(data):
     # kot sliko", da tam ni treba podvajati logike.
     snow_val = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm'
                 if weather.get("expected_snow_cm_24h") is not None else "– cm")
+    streak_val = f"{streak} dni"
+
+    # Dnevna OG kartica: isti vzorec kot generate_igra_og.py, poklican iz
+    # generate_igra_page.py -- riše se tu (ne v svojem koraku delavnega toka),
+    # da slika in og:image na strani nikoli ne moreta biti iz različnih dni.
+    # Ob manjkajočem Pillow ali napaki stran pade nazaj na splošno
+    # og-image.jpg in stran se vseeno objavi (slika ni vredna tega, da bi
+    # zaradi nje izostala stran).
+    og_slika = None
+    try:
+        import generate_crnivec_og  # noqa: PLC0415 — lokalno, da manjkajoč Pillow ne podre teka
+        og_slika = generate_crnivec_og.zapisi(zone, weather, quote, streak)
+    except Exception as e:  # noqa: BLE001 — namenoma široko, glej opombo zgoraj
+        print(f"! OG kartica ni nastala ({e}) — ostane splošna og-image.jpg", file=sys.stderr)
 
     # "Deli kot sliko" bere ta paket, ne živega animiranega DOM-a (glej
     # gauge_svg(static=True)/icon_svg_static) — vsi podatki za canvas so tu
@@ -733,14 +877,20 @@ def build_body(data):
         "quote": quote,
         "temp": temp_txt,
         "snow": snow_txt,
+        "streak": f"suh niz v dolini: {streak_val}",
         "gauge": gauge_svg(zone, static=True),
         "icon": icon_svg_static(zone["id"]),
     }
     quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
+    rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
-    share_js = SHARE_JS_TEMPLATE.replace("__QUOTES_JSON__", quotes_json).replace("__SHARE_JSON__", share_json)
+    share_js = (SHARE_JS_TEMPLATE
+                .replace("__QUOTES_JSON__", quotes_json)
+                .replace("__RARE_QUOTE_JSON__", rare_quote_json)
+                .replace("__SHARE_JSON__", share_json)
+                .replace("__TODAY_ISO__", today_iso))
 
-    return f'''{CSS}
+    body = f'''{CSS}
   <div class="crn-wrap">
     <div class="crn-install-top">
       <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
@@ -752,6 +902,7 @@ def build_body(data):
         <h1 class="crn-title">Kako je čez Črnivec?</h1>
         <p class="crn-sub">Vprašanje, ki ga v dolini postavijo vsak dan. Uradnega odgovora
         ni – tale indeks pa (skoraj) enako zanesljivo kaže razmere.</p>
+        <p id="crn-visits" class="crn-visits" hidden></p>
       </div>
     </div>
 
@@ -764,6 +915,8 @@ def build_body(data):
           <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
         <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
           <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">snega v 24 h</span></div>
+        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌂</span>
+          <span class="crn-stat-val">{streak_val}</span><span class="crn-stat-lbl">suh niz v dolini</span></div>
       </div>
       <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
       – tukaj so nalepke con samo za hec.</div>
@@ -772,6 +925,18 @@ def build_body(data):
     <div class="crn-quote-row">
       <div class="crn-quote"><p>{quote}</p><div class="crn-quote-tail"></div></div>
       <div class="crn-avatar">{avatar_svg()}<span>nekdo iz skupine</span></div>
+    </div>
+
+    <div class="crn-panel crn-vote" id="crn-vote" hidden>
+      <p class="crn-vote-q">Se ti zdi ta ocena danes poštena?</p>
+      <div class="crn-vote-btns">
+        <button type="button" id="crn-vote-gre" class="crn-vote-btn crn-vote-btn-gre">🟢 Gre</button>
+        <button type="button" id="crn-vote-ne" class="crn-vote-btn crn-vote-btn-ne">🔴 Ne gre</button>
+      </div>
+      <div class="crn-vote-result" id="crn-vote-result" hidden>
+        <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
+        <p class="crn-vote-count" id="crn-vote-count"></p>
+      </div>
     </div>
 
     <div class="crn-actions">
@@ -789,6 +954,7 @@ def build_body(data):
     <a class="crn-back" href="/">← Nazaj na meteorec.si</a>
   </div>
 {share_js}'''
+    return body, og_slika
 
 
 def main():
@@ -797,7 +963,7 @@ def main():
         print("✗ data/winter-data.json manjka -- najprej poženi tools/winter_engine.py.", file=sys.stderr)
         return 1
 
-    body = build_body(data)
+    body, og_slika = build_body(data)
     title = "Kako je čez Črnivec? – (ne)uradni indeks"
     desc = "Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza."
     # manifest.json ima relativne poti ("./") -- te se po specifikaciji Web App
@@ -814,12 +980,12 @@ def main():
     )
     schema = "\n".join([
         pwa_head,
-        seo.webpage_schema("/crnivec/", title, desc, date_published="2026-09-20"),
+        seo.webpage_schema("/crnivec/", title, desc, date_published="2026-09-20", image=og_slika),
         seo.crumbs_schema([("Meteorec", "/"), ("Kako je čez Črnivec?", None)]),
     ])
-    html = seo.page_shell(title, desc, "/crnivec/", schema, body)
+    html = seo.page_shell(title, desc, "/crnivec/", schema, body, og_image=og_slika)
     seo.write_page("crnivec/index.html", html, force=True)
-    print("  → crnivec/index.html")
+    print(f"  → crnivec/index.html{f' (OG: {og_slika})' if og_slika else ''}")
     return 0
 
 
