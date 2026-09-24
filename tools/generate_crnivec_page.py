@@ -465,6 +465,7 @@ CSS = '''
   .crn-report-feed-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
+  .crn-fresh{font-size:.82rem;font-weight:700;text-align:center;margin:.7rem 0 0}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
     padding-top:1rem;margin-top:1.8rem}
   .crn-links{margin-top:.6rem;font-size:.85rem}
@@ -573,6 +574,29 @@ SHARE_JS_TEMPLATE = '''
         visitsEl.hidden = false;
       }
     } catch (_) {}
+  }
+
+  // Podatki za merilnik pridejo iz enkrat-dnevnega crona (zima-forecast.yml),
+  // ki lahko (isto kot ostali GitHub cron na tej strani) zamuja za ure --
+  // brez tega bi stran tiho kazala včerajšnje stanje kot današnje. Isti
+  // pragovi kot povsod na strani (MeteoGasilec/Agrometeo): 🟡 26-50h, 🔴 nad
+  // 50h; pod tem ostane element skrit, staro vrednost pa nikoli ne skrijemo,
+  // samo označimo.
+  var freshEl = document.getElementById("crn-fresh");
+  if (freshEl && freshEl.dataset.generated) {
+    var genThen = new Date(freshEl.dataset.generated).getTime();
+    if (!isNaN(genThen)) {
+      var ageH = (Date.now() - genThen) / 3600000;
+      if (ageH >= 26) {
+        var rdece = ageH >= 50;
+        var gd = new Date(genThen);
+        var datum = gd.toLocaleDateString("sl", { day: "2-digit", month: "2-digit", year: "numeric" });
+        var ura = gd.toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit" });
+        freshEl.textContent = (rdece ? "🔴 " : "🟡 ") + "Podatki niso sveži — zadnja posodobitev " + datum + " ob " + ura + ".";
+        freshEl.style.color = rdece ? "#dc2626" : "#b45309";
+        freshEl.hidden = false;
+      }
+    }
   }
 
   var rerollBtn = document.getElementById("crn-reroll");
@@ -1185,6 +1209,12 @@ def build_body(data):
     crnivec = next((p for p in passes if p["id"] == "crnivec"), None)
     weather = (crnivec or {}).get("weather") or {}
     zone = pick_zone(weather)
+    # zima-forecast.yml teče enkrat na dan in lahko (kot ostali GitHub cron
+    # na tej strani) zamuja za ure — brez tega bi stran tiho kazala včerajšnje
+    # stanje kot današnje. Isto načelo kot MeteoGasilec/Agrometeo
+    # (renderFreshness()/data-generated v generate_agrometeo_page.py): ne
+    # skrivaj stare vrednosti, samo jo označi.
+    generated_at = data.get("generated_at") or ""
 
     today_iso = seo.TODAY.isoformat()
     quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
@@ -1286,6 +1316,7 @@ def build_body(data):
       </div>
       <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
       – tukaj so nalepke con samo za hec.</div>
+      <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
     </div>
 
     <div class="crn-panel crn-report" id="crn-report" hidden>
