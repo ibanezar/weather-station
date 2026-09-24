@@ -54,6 +54,8 @@ import json
 import math
 import os
 import sys
+import urllib.error
+import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
@@ -66,6 +68,10 @@ DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 # Uradna kamera DRSI na prelazu (glej opombo na vrhu datoteke) — spremeni
 # samo tu, JS jo bere iz istega niza (glej CAM_URL v build_body spodaj).
 CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
+
+# Isti worker, ki streže /crnivec/porocilo, /crnivec/glas ipd. — tudi
+# /crnivec/znacka.svg (vstavljiva značka, glej opombo pri crn-embed spodaj).
+WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
 
 # ZONES/pick_zone sta v skupnem crnivec_zones.py (uvožena spodaj) — tudi
 # generate_story_card.py (tema CRNIVEC) ju rabi, glej opombo tam o krožnem
@@ -125,6 +131,62 @@ def load_json(path, default=None):
         return json.load(open(path, encoding="utf-8"))
     except Exception:
         return default
+
+
+HISTORY_JSON_PATH = os.path.join(ROOT, "data", "crnivec-history.json")
+
+
+def archive_yesterday_vote():
+    """Enkrat na dan arhivira VČERAJŠNJI (že zaključen) izid dnevnega
+    glasovanja (/crnivec/glas v worker.js) v data/crnivec-history.json --
+    brez tega bi crnivec_glas:<datum> v KV po 400 dneh (glej opombo tam)
+    izginil, ne da bi kdaj postal del dolgoročne statistike na strani (glej
+    accuracy_section_html spodaj). Idempotentno (če je včerajšnji dan že
+    zapisan, ne kliče znova) in tiho odpove ob mrežni napaki ali izpadu
+    workerja -- en manjkajoč dan ne sme podreti generiranja strani."""
+    hist = load_json(HISTORY_JSON_PATH, default=[]) or []
+    yesterday = (seo.TODAY - datetime.timedelta(days=1)).isoformat()
+    if any(e.get("datum") == yesterday for e in hist):
+        return hist
+    try:
+        url = f"{WORKER_BASE}/crnivec/glas?datum={yesterday}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Crnivec/1.0)"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        counts = data.get("counts") or {}
+        gre, ne = int(counts.get("gre") or 0), int(counts.get("ne") or 0)
+        if gre + ne == 0:
+            return hist  # nihče ni glasoval -- ni kaj arhivirati, poskusi spet jutri
+        hist.append({"datum": yesterday, "gre": gre, "ne": ne})
+        hist = hist[-365:]
+        with open(HISTORY_JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump(hist, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError) as e:
+        print(f"⚠ crnivec-history.json ni bil posodobljen: {e}", file=sys.stderr)
+    return hist
+
+
+def accuracy_section_html(history):
+    """Poštenost merilnika, izmerjena z GLASOVANJEM skupnosti (isti vzorec
+    kot samo glasovanje -- ravno razkorak med izračunom in tem, kar
+    pravijo ljudje, je bistvo strani), ne s primerjavo con/poročil: to bi
+    zahtevalo dodatno arhiviranje računanega stanja vsak dan, glasovanje pa
+    že samo neposredno odgovarja na vprašanje "je ocena poštena?"."""
+    n = len(history)
+    if n < 7:
+        note = (f"Šele začenjam zbirati podatke iz glasovanja (imam {n} od 7 dni, "
+                "ki jih rabim za prvo številko) — vrni se čez teden dni.")
+        return (f'<div class="crn-panel crn-accuracy">'
+                f'<p class="crn-accuracy-q">📊 Kako pošten je indeks?</p>'
+                f'<p class="crn-accuracy-note">{note}</p></div>')
+    fair_days = sum(1 for e in history if e.get("gre", 0) >= e.get("ne", 0))
+    pct = round(100 * fair_days / n)
+    return (f'<div class="crn-panel crn-accuracy">'
+            f'<p class="crn-accuracy-q">📊 Kako pošten je indeks?</p>'
+            f'<p class="crn-accuracy-big">{pct} %</p>'
+            f'<p class="crn-accuracy-note">dni ({fair_days} od {n} zabeleženih), ko je večina '
+            f'glasovalcev rekla, da je bila ocena tistega dne poštena.</p></div>')
 
 
 def needle_angle(zone):
@@ -307,6 +369,10 @@ CSS = '''
   .crn-mascot-msg{font-size:.85rem;font-weight:700;color:#111;background:#fef08a;
     border:2px solid #111;border-radius:10px;display:inline-block;padding:.4rem .8rem;
     margin:.7rem 0 0;animation:crnQuoteIn .3s ease-out}
+  .crn-strike-banner{font-size:.92rem;font-weight:800;text-align:center;color:#fff;
+    background:#dc2626;border:3px solid #111;border-radius:12px;box-shadow:4px 4px 0 #111;
+    padding:.7rem 1rem;margin:0 0 1.4rem;animation:crnStrikePulse 1.6s ease-in-out infinite}
+  @keyframes crnStrikePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
   @media (max-width:520px){.crn-hero{flex-direction:column}
     .crn-icon{width:150px}}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
@@ -331,6 +397,7 @@ CSS = '''
   .crn-zicon-spolzko{animation:crnIceGlint 1.8s ease-in-out infinite}
   @keyframes crnIceGlint{0%,100%{opacity:1}50%{opacity:.55}}
   @media (prefers-reduced-motion:reduce){.crn-icon:hover{animation:none}
+    .crn-strike-banner{animation:none}
     .crn-needle{animation:none;transform:rotate(var(--rot))}
     .crn-panel.tilt,.crn-verdict-star,.crn-quote,.crn-avatar,.crn-stats,
     .crn-zicon-sonce,.crn-zicon-nekaj,.crn-zicon-verige,.crn-zicon-spolzko{animation:none}
@@ -482,6 +549,18 @@ CSS = '''
   .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
     border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
   .crn-fresh{font-size:.82rem;font-weight:700;text-align:center;margin:.7rem 0 0}
+  .crn-embed{margin-top:0}
+  .crn-embed-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
+  .crn-embed-preview{display:block;margin:0 auto 1rem}
+  .crn-embed-code-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+  .crn-embed-code{flex:1 1 200px;background:#f3f4f6;border:2px dashed #9ca3af;border-radius:8px;
+    padding:.5rem .7rem;font-family:ui-monospace,Consolas,monospace;font-size:.76rem;
+    overflow-x:auto;white-space:nowrap;color:#111}
+  .crn-embed-note{font-size:.78rem;color:#6b7280;text-align:center;margin:.8rem 0 0}
+  .crn-accuracy{margin-top:0;text-align:center}
+  .crn-accuracy-q{font-weight:800;font-size:1.05rem;margin:0 0 .6rem}
+  .crn-accuracy-big{font-weight:800;font-size:2.4rem;color:#111;margin:0}
+  .crn-accuracy-note{font-size:.85rem;color:#374151;margin:.4rem 0 0}
   .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
     padding-top:1rem;margin-top:1.8rem}
   .crn-links{margin-top:.6rem;font-size:.85rem}
@@ -652,6 +731,93 @@ SHARE_JS_TEMPLATE = '''
     mascot.addEventListener("keydown", function(e){
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pokaziMaskotnoSporocilo(); }
     });
+  }
+
+  // "Vstavi značko" -- kopiraj gumb za <img> kodo (glej crn-embed zgoraj in
+  // GET /crnivec/znacka.svg v worker.js). Brez JS je koda še vedno vidna in
+  // ročno izbirljiva (navadno besedilo v <code>), gumb je samo bližnjica.
+  var embedCopyBtn = document.getElementById("crn-embed-copy");
+  var embedCodeEl = document.getElementById("crn-embed-code");
+  var embedStatusEl = document.getElementById("crn-embed-status");
+  if (embedCopyBtn && embedCodeEl) {
+    embedCopyBtn.addEventListener("click", function(){
+      var besedilo = embedCodeEl.textContent;
+      function povejStatus(msg){
+        if (!embedStatusEl) return;
+        embedStatusEl.hidden = false;
+        embedStatusEl.textContent = msg;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(besedilo).then(function(){ povejStatus("Kopirano!"); })
+          .catch(function(){ povejStatus("Kopiranje ni uspelo — označi kodo zgoraj in kopiraj ročno."); });
+      } else {
+        povejStatus("Označi kodo zgoraj in kopiraj ročno.");
+      }
+    });
+  }
+
+  // "Poslušaj namesto beri" -- prebere TRENUTNO stanje neposredno iz DOM-a
+  // (ne spečenih vrednosti), zato je pravilen tudi po živi posodobitvi
+  // spodaj ali po rerollu citata: bere ob kliku, ne ob nalaganju strani.
+  // window.speechSynthesis je vgrajen v brskalnik -- brez strežnika, brez
+  // zvočne datoteke za gostiti.
+  var listenBtn = document.getElementById("crn-listen");
+  if (listenBtn && window.speechSynthesis && window.SpeechSynthesisUtterance) {
+    listenBtn.hidden = false;
+    listenBtn.addEventListener("click", function(){
+      if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
+      var labelEl = document.getElementById("crn-verdict-label");
+      var descEl = document.getElementById("crn-verdict-desc");
+      var quoteEl = document.querySelector(".crn-quote p");
+      var label = labelEl ? labelEl.textContent : "";
+      var desc = descEl ? descEl.textContent : "";
+      var quote = quoteEl ? quoteEl.textContent : "";
+      var besedilo = "Kako je čez Črnivec? " + label + ". " + desc +
+        (quote ? (" Nekdo iz skupine pravi: " + quote) : "");
+      var u = new SpeechSynthesisUtterance(besedilo);
+      u.lang = "sl-SI";
+      u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  // Opozorilo o strelah blizu prelaza -- bere isti trajni zapis kot klientska
+  // kartica "Strele v bližini" na naslovni strani (LightningLogger v
+  // worker.js), samo da tu primerja razdaljo do PRELAZA (46.25, 14.6833 --
+  // sl.wikipedia.org/wiki/Črnivec_(prelaz)), ne do postaje. _crnDist je
+  // namerna podvojitev _ltgDist (worker.js/app.js) -- isto načelo kot
+  // _smerBesedilo/_ltgDecode drugod v repozitoriju.
+  function _crnDist(lat1, lon1, lat2, lon2){
+    var R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  var strikeBanner = document.getElementById("crn-strike-banner");
+  if (strikeBanner && window.fetch) {
+    var CRN_PASS_LAT = 46.25, CRN_PASS_LON = 14.6833, CRN_STRIKE_RADIUS_KM = 15;
+    var preveriStrele = function(){
+      fetch(API + "/strele-zgodovina.json?ur=1").then(function(r){ return r.json(); })
+        .then(function(d){
+          var strikes = (d && d.strikes) || [];
+          var najblizja = null;
+          strikes.forEach(function(s){
+            var km = _crnDist(CRN_PASS_LAT, CRN_PASS_LON, s.lat, s.lon);
+            if (km <= CRN_STRIKE_RADIUS_KM && (najblizja === null || km < najblizja.km)) {
+              najblizja = { km: km, ts: s.ts };
+            }
+          });
+          if (najblizja) {
+            var ura = new Date(najblizja.ts).toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit" });
+            strikeBanner.textContent = "⚡ V zadnji uri je treščilo blizu prelaza (" +
+              najblizja.km.toFixed(1).replace(".", ",") + " km stran, ob " + ura + ").";
+            strikeBanner.hidden = false;
+          } else {
+            strikeBanner.hidden = true;
+          }
+        }).catch(function(){ /* tiho -- ni to primarna vsebina strani */ });
+    };
+    preveriStrele();
+    setInterval(preveriStrele, 5 * 60 * 1000);
   }
 
   // Merilnik je zdaj ŽIV: namesto da samo prikaže enkrat-dnevni strežniški
@@ -1419,6 +1585,12 @@ def build_body(data):
     # skrivaj stare vrednosti, samo jo označi.
     generated_at = data.get("generated_at") or ""
 
+    # Arhivira včerajšnji glasovalni izid (glej opombo pri funkciji) in iz
+    # nabranega ("koliko dni je večina rekla, da je pošteno") sestavi
+    # razdelek — samostojen podatek, ne odvisen od živega JS spodaj.
+    vote_history = archive_yesterday_vote()
+    accuracy_html = accuracy_section_html(vote_history)
+
     today_iso = seo.TODAY.isoformat()
     quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
 
@@ -1488,6 +1660,11 @@ def build_body(data):
         for z in ZONES
     ]
 
+    # Koda za "Vstavi značko" (crn-embed spodaj) -- ročno pobegel niz (ne
+    # html.escape, ta modul tu ni uvožen), ker gre za en sam znan literal, ne
+    # uporabniški vnos.
+    embed_snippet = f'&lt;img src="{WORKER_BASE}/crnivec/znacka.svg" alt="Kako je čez Črnivec? – indeks"&gt;'
+
     quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
     rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
@@ -1517,6 +1694,8 @@ def build_body(data):
         <p id="crn-mascot-msg" class="crn-mascot-msg" hidden></p>
       </div>
     </div>
+
+    <p id="crn-strike-banner" class="crn-strike-banner" hidden></p>
 
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
@@ -1589,11 +1768,26 @@ def build_body(data):
       </div>
     </div>
 
+    {accuracy_html}
+
     <div class="crn-actions">
       <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
+      <button type="button" id="crn-listen" class="crn-action-btn" hidden>🔊 Poslušaj namesto beri</button>
       <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
     </div>
     <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+
+    <div class="crn-panel crn-embed">
+      <p class="crn-embed-q">🔗 Vstavi značko na svojo stran</p>
+      <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
+        alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
+      <div class="crn-embed-code-row">
+        <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
+        <button type="button" id="crn-embed-copy" class="crn-action-btn">📋 Kopiraj</button>
+      </div>
+      <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      <p class="crn-embed-note">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
+    </div>
 
     <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
     klepetom v čakalnici in kakšnim komentarjem iz FB. Meteorec ne odgovarja, če je bilo v

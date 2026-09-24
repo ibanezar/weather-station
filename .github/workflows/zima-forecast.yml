@@ -52,7 +52,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json zima/ crnivec/ og/crnivec/
+          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json zima/ crnivec/ og/crnivec/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

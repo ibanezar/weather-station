@@ -2999,12 +2999,20 @@ export default {
       // brez prijave, brez omejitve enega glasu na obiskovalca (klient sam
       // prek localStorage prepreči ponavljanje, glej crnivec/index.html —
       // strežnik tega ne uveljavlja, to je vzdušje, ne meritev).
-      // Ključ v KV: "crnivec_glas:YYYY-MM-DD". Vrednost: { gre, ne }.
-      // GET  /crnivec/glas                 → { datum, counts }
-      // POST /crnivec/glas?option=gre|ne   → { datum, counts }
+      // Ključ v KV: "crnivec_glas:YYYY-MM-DD". Vrednost: { gre, ne }. TTL
+      // 400 dni (ne 3 kot prej) — tools/generate_crnivec_page.py ob vsakem
+      // dnevnem teku prebere VČERAJŠNJI (zaključen) dan in ga arhivira v
+      // data/crnivec-history.json (glej opombo tam); daljši TTL je varovalka,
+      // če ta korak kdaj izpade, ne primarna hramba.
+      // GET  /crnivec/glas?datum=YYYY-MM-DD  → { datum, counts } (datum
+      //      neobvezen, samo za branje pretekle statistike — privzeto danes)
+      // POST /crnivec/glas?option=gre|ne     → { datum, counts } (vedno
+      //      danes, ?datum= se pri POST ignorira -- glasov ni mogoče datirati
+      //      nazaj)
       if (path === "/crnivec/glas") {
         const CRN_GLAS_OPTIONS = ["gre", "ne"];
-        const datum = _ljDatum();
+        const datumQ = url.searchParams.get("datum") || "";
+        const datum = (request.method === "GET" && /^\d{4}-\d{2}-\d{2}$/.test(datumQ)) ? datumQ : _ljDatum();
         const key = "crnivec_glas:" + datum;
         let counts;
         if (env?.COUNTER_KV) {
@@ -3018,7 +3026,7 @@ export default {
               );
             }
             counts[option] = (counts[option] || 0) + 1;
-            await env.COUNTER_KV.put(key, JSON.stringify(counts), { expirationTtl: 3 * 86400 });
+            await env.COUNTER_KV.put(key, JSON.stringify(counts), { expirationTtl: 400 * 86400 });
           }
         } else {
           _memCrnGlas[key] = _memCrnGlas[key] || {};
@@ -3187,6 +3195,107 @@ export default {
           }
           const znacka = _znackaZa(stevilo);
           return _json({ ok: true, porocilo: entry, stevilo, znacka: { naziv: znacka.naziv, opis: znacka.opis } });
+        }
+      }
+
+      // ── /crnivec/znacka.svg ──────────────────────────────────
+      // Vstavljiva značka za DRUGE strani ("<img src=…>", isto načelo kot
+      // shields.io) — namesto da si stran samo deli, jo ljudje lahko
+      // vgradijo vase (FB skupina, hribi.net, gostišče GTC 902 …), kar je
+      // širši doseg kot "Deli kot sliko". NAMERNA TRETJA PODVOJITEV
+      // lapse-rate/snow_fraction formule iz compute_pass_weather() v
+      // winter_engine.py — poleg tools/crnivec_zones.py (Python stran) in
+      // klientskega JS na sami strani (SHARE_JS_TEMPLATE v
+      // generate_crnivec_page.py). Worker ne more uvoziti niti enega od
+      // njiju, zato: če spremeniš LAPSE_RATE/SNOW_* konstante ali formulo,
+      // popravi na VSEH TREH mestih.
+      //
+      // Open-Meteo pokličemo največ enkrat na CRN_BADGE_CACHE_MS (10 min) --
+      // vstavljena značka je lahko na katerikoli strani z lastnim,
+      // nenadzorovanim prometom, zato en sam Open-Meteo klic na obisk ni
+      // sprejemljivo (isto skrb kot "noben klic pogosteje kot na 5 minut"
+      // drugod v repozitoriju, tu še ostreje, ker prometa ne nadzorujemo).
+      // GET /crnivec/znacka.svg → image/svg+xml
+      if (path === "/crnivec/znacka.svg") {
+        const CRN_BADGE_CACHE_MS = 10 * 60 * 1000;
+        const CRN_BADGE_KEY = "crnivec_znacka_cache";
+        const kv = env?.COUNTER_KV;
+
+        function badgeSvg(label, value, color) {
+          const fLab = 6.9, fVal = 7.3; // groba povprečna širina znaka (px) pri font-size 11 Verdana --
+          // namenoma radodarna ocena (izmerjeno na "tak-tak"/"spolzko", ki sta
+          // najširša pričakovana vrednosti): brez merjenja pravega širine
+          // znakov (Worker nima canvasa/DOM-a) je varneje pustiti nekaj px
+          // praznega prostora ob robu kot odrezati zadnjo črko.
+          const wLab = Math.round(label.length * fLab) + 24;
+          const wVal = Math.round(value.length * fVal) + 24;
+          const w = wLab + wVal;
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="20" role="img" aria-label="${label}: ${value}">` +
+            `<linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>` +
+            `<clipPath id="r"><rect width="${w}" height="20" rx="3" fill="#fff"/></clipPath>` +
+            `<g clip-path="url(#r)"><rect width="${wLab}" height="20" fill="#111"/><rect x="${wLab}" width="${wVal}" height="20" fill="${color}"/><rect width="${w}" height="20" fill="url(#s)"/></g>` +
+            `<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">` +
+            `<text x="${wLab / 2}" y="14">${label}</text><text x="${wLab + wVal / 2}" y="14">${value}</text></g></svg>`;
+        }
+
+        try {
+          let cached = null;
+          if (kv) {
+            try { cached = JSON.parse(await kv.get(CRN_BADGE_KEY)); } catch (_) { cached = null; }
+          }
+          let svg;
+          if (cached && (Date.now() - cached.ts) < CRN_BADGE_CACHE_MS) {
+            svg = cached.svg;
+          } else {
+            const params = new URLSearchParams({
+              latitude: "46.325779", longitude: "14.921137",
+              hourly: "temperature_2m,precipitation,freezing_level_height",
+              timezone: "Europe/Ljubljana", forecast_days: "2",
+            });
+            const omRes = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
+            if (!omRes.ok) throw new Error("Open-Meteo HTTP " + omRes.status);
+            const om = await omRes.json();
+            const times = (om.hourly && om.hourly.time) || [];
+            const temps = (om.hourly && om.hourly.temperature_2m) || [];
+            if (!times.length || !temps.length) throw new Error("prazen odgovor Open-Meteo");
+            const t0 = Date.parse(times[0] + ":00Z");
+            const nowShifted = Date.now() + (om.utc_offset_seconds || 0) * 1000;
+            const idx = Math.max(0, Math.min(Math.round((nowShifted - t0) / 3600000), times.length - 1));
+            const tNow = temps[idx];
+            const LAPSE = 0.65, STATION_ELEV = 366, PASS_ELEV = 902;
+            const SNOW_OFFSET = 250, SNOW_HALFWIDTH = 100;
+            const tempC = tNow == null ? null : (tNow - LAPSE * (PASS_ELEV - STATION_ELEV) / 100);
+            const precip = om.hourly.precipitation || [];
+            const fl = om.hourly.freezing_level_height || [];
+            let snowCm = 0;
+            for (let i = idx; i < Math.min(idx + 24, times.length); i++) {
+              const flv = fl[i];
+              let frac = 0;
+              if (flv != null) {
+                const eff = flv - SNOW_OFFSET, lo = eff - SNOW_HALFWIDTH, hi = eff + SNOW_HALFWIDTH;
+                frac = PASS_ELEV <= lo ? 0 : PASS_ELEV >= hi ? 1 : (PASS_ELEV - lo) / (hi - lo);
+              }
+              snowCm += (precip[i] || 0) * frac;
+            }
+            let zoneLabel, zoneColor;
+            if (snowCm >= 2) { zoneLabel = "verige"; zoneColor = "#ea580c"; }
+            else if (tempC != null && tempC <= 0) { zoneLabel = "spolzko"; zoneColor = "#dc2626"; }
+            else if (tempC != null && tempC > 5) { zoneLabel = "suho"; zoneColor = "#16a34a"; }
+            else { zoneLabel = "tak-tak"; zoneColor = "#eab308"; }
+            svg = badgeSvg("črnivec", zoneLabel, zoneColor);
+            if (kv) await kv.put(CRN_BADGE_KEY, JSON.stringify({ ts: Date.now(), svg }), { expirationTtl: 3600 });
+          }
+          return new Response(svg, {
+            headers: { ...CORS_ALLOWED, "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=300" }
+          });
+        } catch (e) {
+          // Rezervna nevtralna značka namesto HTTP napake -- vgrajena slika,
+          // ki na tuji strani nenadoma izgine, je slabša izkušnja kot ena, ki
+          // enkrat pokaže "?" (isto načelo "raje star/nevtralen podatek kot
+          // prazna stran" kot drugod v repozitoriju).
+          return new Response(badgeSvg("črnivec", "?", "#6b7280"), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=60" }
+          });
         }
       }
 
