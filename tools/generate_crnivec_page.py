@@ -103,6 +103,39 @@ STATUS = {
                 "bg": "#fee2e2", "ink": "#7f1d1d"},
 }
 
+# Velike stripovske ilustracije za kartici Temperatura/Sneg (samo na namizju,
+# kjer je v desnem stolpcu heroja prostor -- glej .crn-card-art). Isti slog
+# kot ZONE_ICONS: debel črn obris, ploskovite barve. Čisti okras (aria-hidden).
+CARD_ART = {
+    "temp": '''<svg viewBox="0 0 80 120" aria-hidden="true">
+      <rect x="28" y="6" width="24" height="80" rx="12" fill="#fff" stroke="#111" stroke-width="5"/>
+      <circle cx="40" cy="94" r="20" fill="#dc2626" stroke="#111" stroke-width="5"/>
+      <rect x="35" y="40" width="10" height="50" rx="5" fill="#dc2626"/>
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="52" y1="24" x2="62" y2="24"/><line x1="52" y1="40" x2="62" y2="40"/>
+        <line x1="52" y1="56" x2="62" y2="56"/><line x1="52" y1="72" x2="62" y2="72"/>
+      </g>
+      <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
+    </svg>''',
+    "snow": '''<svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="54" fill="#e0f2fe" stroke="#111" stroke-width="5"/>
+      <g stroke="#111" stroke-width="7" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g stroke="#0284c7" stroke-width="4" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 26 60 36 70 26"/><path d="M50 94 60 84 70 94"/>
+        <path d="M26 52 38 50 34 38"/><path d="M94 68 82 70 86 82"/>
+        <path d="M26 68 38 70 34 82"/><path d="M94 52 82 50 86 38"/>
+      </g>
+      <circle cx="60" cy="60" r="7" fill="#fff" stroke="#111" stroke-width="4"/>
+    </svg>''',
+}
+
 # Enotne obrisne ikone za UI (24×24, currentColor) -- emoji ostanejo samo v
 # sproščenih, šaljivih delih strani, ne v osnovni ikonografiji.
 UI_ICONS = {
@@ -417,7 +450,8 @@ CSS = '''
     background:#fff;color:var(--ink);border:2px solid #111;border-radius:999px;padding:4px var(--s2)}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
-  .crn-card{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
+  .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
+  .crn-card-art{display:none}
   .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
   .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
@@ -602,7 +636,10 @@ CSS = '''
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
-    .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center}
+    .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
+    .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
+      width:96px;height:96px;transform:translateY(-50%) rotate(4deg)}
+    .crn-hero-side .crn-card-art svg{width:100%;height:100%;display:block}
     .crn-hero-side .crn-btn-primary{max-width:none}
     .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
     .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
@@ -1792,11 +1829,13 @@ def build_body(data):
       <div class="crn-hero-side">
       <div class="crn-cards">
         <div class="crn-card">
+          <span class="crn-card-art">{CARD_ART['temp']}</span>
           <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
           {temp_html}
           <p class="crn-card-sub">na prelazu</p>
         </div>
         <div class="crn-card">
+          <span class="crn-card-art">{CARD_ART['snow']}</span>
           <p class="crn-card-h">{UI_ICONS['snow']}Sneg</p>
           {snowpack_html}
           <p class="crn-card-sub">snežna odeja (ocena)</p>
