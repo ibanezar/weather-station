@@ -65,20 +65,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <style>
   /* Prenova 24. 9. 2026: stran je hiter mobilni DASHBOARD za stanje prelaza,
-     ne stripovski plakat. Hierarhija: status ceste > kamera > meritve > vse
+     oblečen v prvotni stripovski slog (debel črn obris, zamaknjena senca,
+     pikčasto ozadje, rdeč naslov z obrisom). Hierarhija: status ceste > kamera > meritve > vse
      ostalo (humor, lestvica, značka, drobni tisk). Mobile-first: osnovna
      pravila so za telefon, @media (min-width:…) jih samo razširijo.
      Razmiki so iz lestvice 8/12/16/24/32/48/64 px (--s1…--s7), zaobljenost
-     12–16 px, tanek rob in komaj opazna senca. Statusna kartica je edina
+     12–18 px. Statusna kartica je edina
      vizualno "glasna" -- njeno barvo nosi data-zone (glej STATUS spodaj),
      barva pa NIKOLI ni edini nosilec pomena (vedno tudi besedilo). */
   .site-head,#bg,.site-foot,.app-bottomnav{display:none!important}
   /* Brez site-foot/app-bottomnav ni nič, kar bi zapolnilo sitewide
      body{min-height:100vh} (style.css) -- telo naj se skrči na vsebino. */
-  body{background:#f6f4ef!important;background-image:none!important;min-height:0!important}
+  body{background:#fdf6e3!important;background-image:radial-gradient(#111 1px,transparent 1.4px)!important;
+    background-size:16px 16px!important;background-position:-4px -4px!important;min-height:0!important}
   .wrap{max-width:1140px}
   .crn{--s1:8px;--s2:12px;--s3:16px;--s4:24px;--s5:32px;--s6:48px;--s7:64px;
-    --ink:#111827;--ink2:#374151;--muted:#4b5563;--line:#e5e1d8;--card:#fff;--link:#1d4ed8;
+    --ink:#111;--ink2:#374151;--muted:#4b5563;--line:#111;--card:#fff;--link:#1d4ed8;
+    --bd:3px solid #111;--sh:5px 5px 0 #111;
     font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:16px;line-height:1.5;
     padding:var(--s3) 0 var(--s6)}
   .crn a{color:var(--link)}
@@ -88,32 +91,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
     min-height:48px;margin-bottom:var(--s3)}
   .crn-brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:48px}
+    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;
+    background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s3);box-shadow:3px 3px 0 #111}
   .crn-install-wrap{text-align:right}
 
   /* ── HERO ───────────────────────────────────────────────────── */
   .crn-hero{max-width:760px;margin:0 auto var(--s5);text-align:center}
-  .crn-eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 var(--s1)}
-  .crn-title{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.01em;margin:0 0 var(--s3)}
-  .crn-strike{font-size:15px;font-weight:700;color:#7f1d1d;background:#fee2e2;border:1px solid #fca5a5;
-    border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
+  .crn-eyebrow{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
+    margin:0 0 var(--s2)}
+  /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:var(--s1);margin-bottom:var(--s4)}
+  .crn-head .crn-title{margin:0}
+  .crn-title{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+    color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
+    text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
+  .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
+    box-shadow:var(--sh);border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
 
   .crn-status{--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d;
-    background:var(--zbg);color:var(--zink);border:2px solid var(--zc);border-radius:16px;
-    padding:var(--s4) var(--s3);box-shadow:0 1px 2px rgba(17,24,39,.06);
+    background:var(--zbg);color:var(--zink);border:4px solid #111;border-radius:18px;
+    padding:var(--s3) var(--s3) var(--s4);box-shadow:8px 8px 0 #111;
     transition:background-color .4s,border-color .4s,color .4s}
-  .crn-status-icon{display:flex;justify-content:center;margin-bottom:var(--s1)}
-  .crn-status-icon .crn-zicon{width:56px;height:56px}
+  .crn-gauge{width:100%;max-width:460px;display:block;margin:0 auto}
+  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
+  @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
+  .crn-status-icon{display:flex;justify-content:center;margin:-4px 0 var(--s1)}
+  .crn-status-icon .crn-zicon{width:48px;height:48px}
   .crn-status-title{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:.01em;
     text-transform:uppercase;margin:0}
   .crn-status-desc{font-size:16px;font-weight:600;margin:var(--s1) auto 0;max-width:34ch}
   .crn-status-index{display:inline-block;font-size:13px;font-weight:700;margin-top:var(--s2);
-    background:rgba(255,255,255,.7);border:1px solid var(--zc);border-radius:999px;padding:4px var(--s2)}
+    background:#fff;color:var(--ink);border:2px solid #111;border-radius:999px;padding:4px var(--s2)}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
-  .crn-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s3)}
+  .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
+  .crn-card-art{display:none}
   .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
   .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
@@ -123,25 +136,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-card-sub b{color:var(--ink2)}
   .crn-na{font-size:15px;font-weight:600;color:var(--muted)}
 
-  .crn-updated{font-size:13px;font-weight:600;color:var(--muted);margin:var(--s3) 0 0}
+  .crn-updated{display:inline-block;font-size:13px;font-weight:700;color:var(--ink2);margin:var(--s4) 0 0;
+    background:#fdf6e3;padding:2px var(--s1);border-radius:6px}
   .crn-fresh{font-size:13px;font-weight:700;margin:var(--s1) 0 0}
   .crn-btn{font:inherit;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;
     align-items:center;justify-content:center;gap:var(--s1);min-height:48px;padding:0 var(--s4);
-    border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)!important;
-    text-decoration:none;transition:background-color .15s,border-color .15s,transform .1s}
-  .crn-btn:hover{border-color:#bdb6a6}
-  .crn-btn:active{transform:translateY(1px)}
+    border-radius:999px;border:var(--bd);background:var(--card);color:var(--ink)!important;
+    box-shadow:4px 4px 0 #111;text-decoration:none;transition:background-color .15s,transform .1s}
+  .crn-btn:hover{background:#fef9c3}
+  .crn-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
   .crn-btn:disabled{opacity:.6;cursor:default}
   .crn-btn:focus-visible,.crn-zbtn:focus-visible,.crn summary:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
-  .crn-btn-primary{background:var(--ink);border-color:var(--ink);color:#fff!important;
+  .crn-btn-primary{background:#dc2626;color:#fff!important;
     text-transform:uppercase;letter-spacing:.04em;width:100%;max-width:420px;margin-top:var(--s3)}
-  .crn-btn-primary:hover{background:#000;border-color:#000}
+  .crn-btn-primary:hover{background:#b91c1c}
   .crn-btn svg{width:20px;height:20px}
 
   /* ── Sekcije pod herojem ────────────────────────────────────── */
-  .crn-grid{display:grid;grid-template-columns:1fr;gap:var(--s4)}
-  .crn-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
-    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s4) var(--s3)}
+  /* Telefon: stolpca ne obstajata (display:contents), vrstni red je iz
+     .crn-o1…7 -- kamera, poročanje, nasvet, glasovanje, poštenost, lestvica,
+     razlaga indeksa + značka. */
+  .crn-cols{display:flex;flex-direction:column;gap:var(--s4)}
+  .crn-col{display:contents}
+  .crn-o1{order:1}.crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
+  .crn-o7{order:7}
+  .crn-cols .crn-o7{margin-top:0}
+  .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
+    box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3)}
   .crn-h2{font-size:20px;font-weight:800;line-height:1.25;margin:0}
   .crn-lead{font-size:15px;color:var(--muted);margin:4px 0 var(--s3)}
   .crn-h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
@@ -149,7 +170,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-stack{display:flex;flex-direction:column;gap:var(--s4);margin-top:var(--s4)}
 
   /* Kamera */
-  .crn-cam-frame{position:relative;border-radius:12px;overflow:hidden;background:#1f2937;
+  .crn-cam-frame{position:relative;border-radius:12px;overflow:hidden;background:#1f2937;border:var(--bd);
     aspect-ratio:4/3;margin-top:var(--s3)}
   .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
   .crn-cam-badge{position:absolute;top:var(--s2);left:var(--s2);display:inline-flex;align-items:center;gap:6px;
@@ -175,19 +196,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-zones{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
   .crn-zbtn{--zc:#16a34a;--zbg:#dcfce7;font:inherit;font-size:14px;font-weight:800;letter-spacing:.03em;
     text-transform:uppercase;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:var(--s1);
-    padding:var(--s1) var(--s2);background:var(--card);color:var(--ink);border:1px solid var(--line);
-    border-left:6px solid var(--zc);border-radius:12px;text-align:left;transition:background-color .15s}
+    padding:var(--s1) var(--s2);background:var(--card);color:var(--ink);border:var(--bd);
+    border-left:8px solid var(--zc);border-radius:12px;box-shadow:3px 3px 0 #111;text-align:left;
+    transition:background-color .15s}
   .crn-zbtn:hover{background:#faf9f6}
-  .crn-zbtn.sel{background:var(--zbg);border-color:var(--zc)}
+  .crn-zbtn.sel{background:var(--zbg);border-left-color:var(--zc)}
   .crn-zbtn:disabled{cursor:default;opacity:.7}
   .crn-zbtn .crn-zicon{width:24px;height:24px;flex:0 0 auto}
   .crn-form{margin-top:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
-  .crn-input{width:100%;box-sizing:border-box;border:1px solid #cfc8b8;border-radius:12px;background:#fff;
+  .crn-input{width:100%;box-sizing:border-box;border:var(--bd);border-radius:12px;background:#fff;
     padding:var(--s2);font:inherit;font-size:16px;color:var(--ink)}
   textarea.crn-input{resize:vertical;min-height:72px}
   .crn-status-msg{font-size:15px;font-weight:600;color:var(--ink2);margin:var(--s2) 0 0}
   .crn-status-msg.ok{color:#166534}
-  .crn-badge{margin-top:var(--s3);background:#fefce8;border:1px solid #fde68a;border-radius:12px;
+  .crn-badge{margin-top:var(--s3);background:#fef08a;border:var(--bd);box-shadow:var(--sh);border-radius:12px;
     padding:var(--s3);text-align:center}
   .crn-badge-title{font-weight:800;font-size:17px;margin:0 0 4px}
   .crn-badge-desc{font-size:14px;color:var(--ink2);margin:0}
@@ -214,21 +236,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-vote-q{font-size:15px;font-weight:700;margin:0;flex:1 1 220px}
   .crn-vote-btns{display:flex;gap:var(--s1)}
   .crn-vote-btns .crn-btn{padding:0 var(--s3);font-size:14px}
-  .crn-vote-bar{height:8px;border-radius:999px;overflow:hidden;background:#fecaca;margin-top:var(--s2)}
+  .crn-vote-bar{height:14px;border:2px solid #111;border-radius:999px;overflow:hidden;background:#fecaca;margin-top:var(--s2)}
   .crn-vote-bar span{display:block;height:100%;width:50%;background:#16a34a;transition:width .5s ease}
   .crn-vote-count{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
 
-  .crn-tip{position:relative;background:#fefce8;border:1px solid #fde68a;border-radius:16px;
-    padding:var(--s4) var(--s3)}
-  .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#854d0e;
-    margin:0 0 var(--s1);padding-right:56px}
-  .crn-tip .crn-quote p{font-size:17px;font-weight:600;line-height:1.45;margin:0;padding-right:40px}
+  .crn-tip{position:relative;background:#fef08a;border:4px solid #111;border-radius:18px;
+    box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3);transform:rotate(-.3deg)}
+  .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#111;
+    margin:0 0 var(--s1)}
+  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0}
   .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
   .crn-quote-pop{animation:crnQuoteReroll .3s ease}
   @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
-  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:48px;height:auto;cursor:pointer}
-  .crn-mascot-msg{font-size:14px;font-weight:600;color:#854d0e;margin:var(--s1) 0 0}
-  .crn-visits{font-size:13px;color:#854d0e;margin:var(--s1) 0 0}
+  .crn-icon{width:84px;height:auto;flex:0 0 auto;cursor:pointer}
+  .crn-icon:hover{animation:crnWobble .5s ease}
+  @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+  .crn-mascot-msg{display:inline-block;font-size:14px;font-weight:700;color:#111;background:#fef08a;
+    border:2px solid #111;border-radius:10px;padding:4px var(--s2);margin:var(--s2) 0 0}
+  .crn-visits{font-size:13px;color:#374151;margin:var(--s1) 0 0}
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
@@ -244,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-accuracy-note{font-size:14px;color:var(--muted);margin:4px 0 0}
 
   /* Accordioni (razlaga indeksa, značka) */
-  .crn-acc{background:var(--card);border:1px solid var(--line);border-radius:16px}
+  .crn-acc{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh)}
   .crn-acc summary{cursor:pointer;list-style:none;min-height:48px;display:flex;align-items:center;
     gap:var(--s1);padding:0 var(--s3);font-weight:700;font-size:15px}
   .crn-acc summary::-webkit-details-marker{display:none}
@@ -258,14 +283,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     padding:var(--s1) var(--s2);font-family:ui-monospace,Consolas,monospace;font-size:12px;
     overflow-x:auto;white-space:nowrap;color:var(--ink)}
 
-  .crn-official{font-size:14px;color:var(--ink2);border-top:1px solid var(--line);
-    padding-top:var(--s3);margin-top:var(--s5)}
+  .crn-official{font-size:14px;color:var(--ink2);background:#fdf6e3;border-top:2px dotted #111;
+    padding:var(--s3) var(--s1) 0;margin-top:var(--s5)}
   .crn-official p{margin:0 0 var(--s1)}
   .crn-back{margin-top:var(--s3)}
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-title{font-size:36px}
+    .crn-title{font-size:52px}
+    .crn-icon{width:140px}
+    .crn-gauge{max-width:560px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:40px}
     .crn-status-icon .crn-zicon{width:64px;height:64px}
@@ -275,16 +302,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
-    .crn-title{font-size:44px}
-    /* Po heroju: kamera (široka) | poročanje. Poročilni stolpec je ožji,
-       zato gumbi tam ostanejo 2 × 2. */
-    .crn-grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
-    .crn-grid .crn-zones{grid-template-columns:1fr 1fr}
-    .crn-lower{margin-top:var(--s4);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);align-items:start}
-    .crn-lower .crn-stack{margin-top:0}
+    .crn-title{font-size:68px}
+    .crn-head{flex-direction:row;justify-content:center;gap:var(--s4)}
+    .crn-head-txt{text-align:left}
+    .crn-icon{width:170px}
+    /* Namizje: celotna širina (1140 px) je izkoriščena -- v heroju merilnik
+       levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
+       se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
+    .crn-hero{max-width:none}
+    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);
+      align-items:stretch;text-align:left}
+    .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
+    .crn-hero-main .crn-status-index{align-self:center}
+    .crn-hero-side{display:flex;flex-direction:column}
+    .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
+    .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
+    .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
+      width:96px;height:96px;transform:translateY(-50%) rotate(4deg)}
+    .crn-hero-side .crn-card-art svg{width:100%;height:100%;display:block}
+    .crn-hero-side .crn-btn-primary{max-width:none}
+    .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
+    .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
+    .crn-col .crn-zones{grid-template-columns:1fr 1fr}
   }
   @media (prefers-reduced-motion:reduce){
-    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop{animation:none}
+    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover{animation:none}
+    .crn-needle{animation:none;transform:rotate(var(--rot))}
     .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
 </style>
@@ -299,13 +342,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <section class="crn-hero" aria-labelledby="crn-h1">
-      <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
-      <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+      <div class="crn-head">
+        <svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
+       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
+    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(38,150) rotate(-8)">
+      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
+    </g>
+  </svg>
+        <div class="crn-head-txt">
+          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+          <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        </div>
+      </div>
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
 
+      <div class="crn-hero-main">
       <div class="crn-status" id="crn-status" data-zone="sonce"
         style="--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d" role="status" aria-live="polite">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-34 0 458 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><defs><linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#16a34a"/><stop offset="33%" stop-color="#eab308"/><stop offset="67%" stop-color="#ea580c"/><stop offset="100%" stop-color="#dc2626"/></linearGradient><filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/></filter></defs><g filter="url(#crnGaugeShadow)"><path d="M 85.0 175.0 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="url(#crnGrad)" stroke-width="30" stroke-linecap="round"/><line x1="126.4" y1="111.4" x2="105.1" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="190.0" y1="85.0" x2="190.0" y2="55.0" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="253.6" y1="111.4" x2="274.9" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/></g><text x="54.2" y="118.7" text-anchor="end" font-size="11" font-weight="800" fill="#171717">SUHO K POPR</text><text x="133.7" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">TAK-TAK</text><text x="246.3" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">VZEMI VERIGE</text><text x="325.8" y="118.7" text-anchor="start" font-size="11" font-weight="800" fill="#171717">SPOLZKO, PAZI</text><g class="crn-needle" filter="url(#crnGaugeShadow)" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="99.4" stroke="#171717" stroke-width="6" stroke-linecap="round"/><circle cx="190" cy="175" r="14" fill="#171717"/><circle cx="190" cy="175" r="14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="190" cy="175" r="4.5" fill="#fff"/></g></svg>
         <div class="crn-status-icon" id="crn-status-icon"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
       <g stroke="#111" stroke-width="4" stroke-linecap="round">
         <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
@@ -320,13 +384,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
 
+      <div class="crn-hero-side">
       <div class="crn-cards">
         <div class="crn-card">
+          <span class="crn-card-art"><svg viewBox="0 0 80 120" aria-hidden="true">
+      <rect x="28" y="6" width="24" height="80" rx="12" fill="#fff" stroke="#111" stroke-width="5"/>
+      <circle cx="40" cy="94" r="20" fill="#dc2626" stroke="#111" stroke-width="5"/>
+      <rect x="35" y="40" width="10" height="50" rx="5" fill="#dc2626"/>
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="52" y1="24" x2="62" y2="24"/><line x1="52" y1="40" x2="62" y2="40"/>
+        <line x1="52" y1="56" x2="62" y2="56"/><line x1="52" y1="72" x2="62" y2="72"/>
+      </g>
+      <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
+    </svg></span>
           <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>Temperatura</p>
           <p class="crn-big" id="crn-temp-val">8,4 °C</p>
           <p class="crn-card-sub">na prelazu</p>
         </div>
         <div class="crn-card">
+          <span class="crn-card-art"><svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="54" fill="#e0f2fe" stroke="#111" stroke-width="5"/>
+      <g stroke="#111" stroke-width="7" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g stroke="#0284c7" stroke-width="4" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 26 60 36 70 26"/><path d="M50 94 60 84 70 94"/>
+        <path d="M26 52 38 50 34 38"/><path d="M94 68 82 70 86 82"/>
+        <path d="M26 68 38 70 34 82"/><path d="M94 52 82 50 86 38"/>
+      </g>
+      <circle cx="60" cy="60" r="7" fill="#fff" stroke="#111" stroke-width="4"/>
+    </svg></span>
           <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>Sneg</p>
           <p class="crn-big">0 cm</p>
           <p class="crn-card-sub">snežna odeja (ocena)</p>
@@ -339,10 +431,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-24T08:51:37.390090+00:00" hidden></p>
 
       <a class="crn-btn crn-btn-primary" href="#kamera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>Poglej kamero</a>
+      </div>
+      </div>
     </section>
 
-    <div class="crn-grid">
-      <section class="crn-panel" id="kamera" aria-labelledby="crn-cam-h">
+    <div class="crn-cols">
+      <div class="crn-col">
+      <section class="crn-panel crn-o1" id="kamera" aria-labelledby="crn-cam-h">
         <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
         <div class="crn-cam-frame is-loading">
           <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
@@ -356,7 +451,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
       </section>
 
-      <section class="crn-panel crn-report" id="crn-report" aria-labelledby="crn-rep-h" hidden>
+      <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
+        <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
+        <div class="crn-quote"><p>Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.</p></div>
+        <p id="crn-visits" class="crn-visits" hidden></p>
+        <div class="crn-actions">
+          <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
+          <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
+          <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+        </div>
+        <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="crn-panel crn-vote crn-o4" id="crn-vote" hidden>
+        <div class="crn-vote-row">
+          <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
+          <div class="crn-vote-btns">
+            <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
+            <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+          </div>
+        </div>
+        <div class="crn-vote-result" id="crn-vote-result" hidden>
+          <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
+          <p class="crn-vote-count" id="crn-vote-count"></p>
+        </div>
+      </section>
+      </div>
+
+      <div class="crn-col">
+
+      <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
         <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
         <p class="crn-lead">Povej naslednjemu vozniku.</p>
         <div class="crn-zones" id="crn-report-zones">
@@ -406,91 +530,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </ul>
         <p id="crn-report-week" class="crn-week" hidden></p>
       </section>
-    </div>
+      <div class="crn-o5"><section class="crn-panel crn-accuracy"><h2 class="crn-h2">Kako pošten je indeks?</h2><p class="crn-accuracy-note">Šele začenjam zbirati podatke iz glasovanja (imam 1 od 7 dni, ki jih rabim za prvo številko) — vrni se čez teden dni.</p></section></div>
 
-    <div class="crn-lower">
-      <div class="crn-stack">
-        <section class="crn-tip" aria-labelledby="crn-tip-h">
-          <svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
-       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
-    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
-    <g transform="translate(38,150) rotate(-8)">
-      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
-      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
-    </g>
-  </svg>
-          <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
-          <div class="crn-quote"><p>Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.</p></div>
-          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
-          <p id="crn-visits" class="crn-visits" hidden></p>
-          <div class="crn-actions">
-            <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
-            <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
-            <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+      <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
+        <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
+        <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
+      </section>
+
+      <div class="crn-stack crn-o7">
+        <details class="crn-acc">
+          <summary>ⓘ Kako nastane Meteorec indeks?</summary>
+          <div class="crn-acc-body">
+            <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
+            prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
+            24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
+            prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
+            spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
+            za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
+            <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
+            indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
+            Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
           </div>
-          <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-        </section>
+        </details>
 
-        <section class="crn-panel crn-vote" id="crn-vote" hidden>
-          <div class="crn-vote-row">
-            <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
-            <div class="crn-vote-btns">
-              <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
-              <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+        <details class="crn-acc crn-embed">
+          <summary>Vstavi značko na svojo stran</summary>
+          <div class="crn-acc-body">
+            <img class="crn-embed-preview" src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg"
+              alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
+            <div class="crn-embed-row">
+              <code id="crn-embed-code" class="crn-embed-code">&lt;img src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg" alt="Kako je čez Črnivec? – indeks"&gt;</code>
+              <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
             </div>
+            <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+            <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
           </div>
-          <div class="crn-vote-result" id="crn-vote-result" hidden>
-            <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
-            <p class="crn-vote-count" id="crn-vote-count"></p>
-          </div>
-        </section>
+        </details>
       </div>
-
-      <div class="crn-stack">
-        <section class="crn-panel crn-accuracy"><h2 class="crn-h2">Kako pošten je indeks?</h2><p class="crn-accuracy-note">Šele začenjam zbirati podatke iz glasovanja (imam 1 od 7 dni, ki jih rabim za prvo številko) — vrni se čez teden dni.</p></section>
-
-        <section class="crn-panel crn-board" id="crn-board" aria-labelledby="crn-board-h" hidden>
-          <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
-          <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
-        </section>
       </div>
-    </div>
-
-    <div class="crn-stack">
-      <details class="crn-acc">
-        <summary>ⓘ Kako nastane Meteorec indeks?</summary>
-        <div class="crn-acc-body">
-          <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
-          prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
-          24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
-          prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
-          spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
-          za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
-          <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
-          indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
-          Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
-        </div>
-      </details>
-
-      <details class="crn-acc crn-embed">
-        <summary>Vstavi značko na svojo stran</summary>
-        <div class="crn-acc-body">
-          <img class="crn-embed-preview" src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg"
-            alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
-          <div class="crn-embed-row">
-            <code id="crn-embed-code" class="crn-embed-code">&lt;img src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg" alt="Kako je čez Črnivec? – indeks"&gt;</code>
-            <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
-          </div>
-          <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-          <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
-        </div>
-      </details>
     </div>
 
     <footer class="crn-official">
@@ -797,10 +874,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (idx) idx.textContent = "Meteorec indeks: " + zone.label;
     if (iconWrap) iconWrap.innerHTML = zone.icon;
 
+    // Kazalec: iz CSS animacije (prvi izris) na neposreden SVG transform
+    // atribut -- isti mehanizem kot static=True veja gauge_svg().
+    var needle = document.querySelector(".crn-status .crn-needle");
+    var gaugeSvg = document.querySelector(".crn-status .crn-gauge");
+    if (needle) {
+      needle.removeAttribute("style");
+      needle.setAttribute("transform", "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)");
+    }
+    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
+
     // "Deli kot sliko" naj deli TRENUTNO (živo) stanje, ne tisto, spečeno ob
-    // generiranju strani. Merilnik na strani ni več prikazan (glej opombo pri
-    // gauge_svg), zato se kazalec v statični SVG kopiji zasuka neposredno --
-    // share.gauge ima en sam rotate(), tisti na kazalcu.
+    // generiranju strani. Kazalec v statični SVG kopiji se zasuka
+    // neposredno -- share.gauge ima en sam rotate(), tisti na kazalcu.
     if (share) {
       share.verdict = zone.label;
       share.color = zone.color;
