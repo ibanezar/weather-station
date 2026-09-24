@@ -301,9 +301,12 @@ CSS = '''
   .wrap{max-width:720px}
   .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
   .crn-hero{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
-  .crn-icon{width:170px;height:auto;flex-shrink:0;transition:transform .25s}
+  .crn-icon{width:170px;height:auto;flex-shrink:0;transition:transform .25s;cursor:pointer}
   .crn-icon:hover{animation:crnWobble .5s ease}
   @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+  .crn-mascot-msg{font-size:.85rem;font-weight:700;color:#111;background:#fef08a;
+    border:2px solid #111;border-radius:10px;display:inline-block;padding:.4rem .8rem;
+    margin:.7rem 0 0;animation:crnQuoteIn .3s ease-out}
   @media (max-width:520px){.crn-hero{flex-direction:column}
     .crn-icon{width:150px}}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
@@ -399,6 +402,11 @@ CSS = '''
   .crn-visits{display:inline-block;font-size:.76rem;font-weight:700;color:#111;
     background:#fef08a;border:2px solid #111;border-radius:8px;padding:.25rem .6rem;
     margin:0 0 1rem}
+  /* Isti razlog kot pri .crn-cam-loading[hidden] spodaj: brez tega bi
+     display:inline-block tiho povozil UA-jev [hidden]{display:none}. Tu je
+     posledica trenutno neopazna (element je do izpisa besedila prazen), a
+     napačna je vseeno -- popravljeno ob isti priložnosti. */
+  .crn-visits[hidden]{display:none}
   .crn-vote{margin-top:0}
   .crn-vote-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
   .crn-vote-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
@@ -418,8 +426,16 @@ CSS = '''
   .crn-cam{margin-top:0}
   .crn-cam-label{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
   .crn-cam-frame{border:3px solid #111;border-radius:14px;overflow:hidden;
-    box-shadow:5px 5px 0 #111;background:#111;aspect-ratio:640/480}
+    box-shadow:5px 5px 0 #111;background:#111;aspect-ratio:640/480;position:relative}
   .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
+  .crn-cam-loading{position:absolute;inset:0;margin:0;display:flex;align-items:center;
+    justify-content:center;padding:1.4rem;text-align:center;color:#9ca3af;
+    font-weight:600;font-size:.88rem}
+  /* [hidden] iz UA sloga nastavi display:none, a ima enako specifičnost kot
+     zgornje pravilo -- avtorski slog (torej ta datoteka) po vrstnem redu
+     izvora vedno zmaga nad UA slogom, zato bi brez tega JS-ov hidden=true
+     tiho ne naredil ničesar in bi "nalagam …" obvisel čez sliko za vedno. */
+  .crn-cam-loading[hidden]{display:none}
   .crn-cam-fallback{margin:0;padding:1.6rem 1rem;text-align:center;color:#fff;
     font-weight:600;font-size:.92rem}
   .crn-cam-fallback a{color:#93c5fd}
@@ -540,18 +556,41 @@ SHARE_JS_TEMPLATE = '''
   // padavinsko varovalko, če DRSI kdaj spremeni pot/zavrne hotlink.
   var camImg = document.getElementById("crn-cam-img");
   var camFallback = document.getElementById("crn-cam-fallback");
+  var camLoading = document.getElementById("crn-cam-loading");
   if (camImg && CAM_URL) {
+    // Nalaganje ni nujno takojšnje (DRSI strežnik, ne naš CDN) -- brez tega bi
+    // obiskovalec na počasni povezavi videl samo prazno črno škatlo in
+    // sklepal, da je kamera pokvarjena. Šaljiva vrstica namesto generičnega
+    // "nalagam …", ista logika izbire kot pick()/variant_index v
+    // generate_story_card.py, samo tu (ne v Pythonu), ker mora biti vsak
+    // obisk lahko drugačen, ne enkrat na dan.
+    if (camLoading) {
+      var CAM_LOADING_LINES = [
+        "Nalagam kamero (počasneje kot teta bere komentarje) …",
+        "Kamera se prav tako sprašuje, kako je …",
+        "Nalagam sliko s prelaza — saj veš, kako je z internetom tam gor …"
+      ];
+      camLoading.textContent = CAM_LOADING_LINES[Math.floor(Math.random() * CAM_LOADING_LINES.length)];
+    }
     // Samozdravilno: vsak neuspeh pokaže nadomestno sporočilo, vsak naslednji
     // uspešen prenos ga spet skrije -- brez trajne zastavice, ker je prehoden
     // izpad (DRSI stran ne odgovori enkrat) povsem verjeten in se sam popravi.
-    camImg.addEventListener("error", function(){
-      camImg.hidden = true;
-      if (camFallback) camFallback.hidden = false;
-    });
-    camImg.addEventListener("load", function(){
-      camImg.hidden = false;
-      if (camFallback) camFallback.hidden = true;
-    });
+    // Sporočilo "nalagam" izgine po PRVEM izidu (uspeh ali neuspeh) in se ne
+    // vrača ob periodičnih osvežitvah spodaj -- takrat stara slika ostane
+    // vidna, dokler nova ne prispe, prekrivanje ni potrebno.
+    function camIzid(ok){
+      camImg.hidden = !ok;
+      if (camFallback) camFallback.hidden = ok;
+      if (camLoading) camLoading.hidden = true;
+    }
+    camImg.addEventListener("error", function(){ camIzid(false); });
+    camImg.addEventListener("load", function(){ camIzid(true); });
+    // Ta skript je na dnu strani -- če je bila slika hitrejša (predpomnjena
+    // ali takojšnja napaka), sta se load/error dogodka morda že zgodila,
+    // preden je zgornji addEventListener sploh tekel, in ju ta skript ne bi
+    // nikoli ujel ("nalagam …" bi ostalo obviselo za vedno). complete +
+    // naturalWidth povesta dejansko stanje neposredno, brez čakanja na dogodek.
+    if (camImg.complete) camIzid(camImg.naturalWidth > 0);
     setInterval(function(){
       // Vljudnostna oznaka v poizvedbi (isto kot ...?hribi.net dela pri
       // drugih straneh, ki isto kamero hotlinkajo) + časovni žig, da brskalnik
@@ -574,6 +613,45 @@ SHARE_JS_TEMPLATE = '''
         visitsEl.hidden = false;
       }
     } catch (_) {}
+  }
+
+  // Gorska maskota je klikljiv easter egg -- čist hec, ne nosi nobene
+  // vsebine (glej role="button"/aria-label v mountain_icon_svg()). Vsak
+  // klik pokaže novo (drugačno od prejšnje) šaljivo vrstico, ki po nekaj
+  // sekundah sama izgine -- isti reroll-vzorec kot crn-reroll spodaj, samo
+  // brez strežniško izbranega privzetka (maskota nima "dnevnega" stanja).
+  var mascot = document.getElementById("crn-mascot");
+  var mascotMsg = document.getElementById("crn-mascot-msg");
+  if (mascot && mascotMsg) {
+    var MASCOT_LINES = [
+      "Ne, tudi jaz ne vem.",
+      "Vprašaj spodaj, jaz sem samo slika.",
+      "Prenehaj me risati na zemljevid.",
+      "Če bi vedela, bi ti povedala prva.",
+      "Jaz sem gora. Gore ne govorijo. Tehnično.",
+      "Klikni še enkrat, morda pa vseeno vem."
+    ];
+    var mascotTimer = null;
+    var pokaziMaskotnoSporocilo = function(){
+      var cur = mascotMsg.textContent;
+      var next = cur;
+      var tries = 0;
+      while (next === cur && tries < 10) {
+        next = MASCOT_LINES[Math.floor(Math.random() * MASCOT_LINES.length)];
+        tries++;
+      }
+      mascotMsg.textContent = next;
+      mascotMsg.hidden = false;
+      if (mascotTimer) clearTimeout(mascotTimer);
+      mascotTimer = setTimeout(function(){ mascotMsg.hidden = true; }, 4000);
+    };
+    mascot.addEventListener("click", pokaziMaskotnoSporocilo);
+    // role="button" na SVG-ju ne da tipkovničnega vedenja zastonj -- Enter in
+    // presledek morata sprožiti klik ročno, isto kot bi ga privzeto naredil
+    // pravi <button>.
+    mascot.addEventListener("keydown", function(e){
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pokaziMaskotnoSporocilo(); }
+    });
   }
 
   // Merilnik je zdaj ŽIV: namesto da samo prikaže enkrat-dnevni strežniški
@@ -1304,12 +1382,17 @@ SHARE_JS_TEMPLATE = '''
 
 def mountain_icon_svg():
     """Stripovska "maskota" strani — gora z ostrim cik-cak klancem in
-    (mock) prometnim znakom "pozor" ob vznožju. Čisto okrasje (aria-hidden),
-    poenostavljeno za berljivost pri ~90 px (prvotna različica s
-    podrobnim avtomobilčkom se je pri tej velikosti izgubila — glej git
-    zgodovino). Isti stil kot gauge_svg/starburst_svg zgoraj (debel črn
-    obris, ploskovite barve, brez naloženih slik)."""
-    return '''<svg viewBox="0 0 200 180" class="crn-icon" aria-hidden="true">
+    (mock) prometnim znakom "pozor" ob vznožju. Poenostavljeno za berljivost
+    pri ~90 px (prvotna različica s podrobnim avtomobilčkom se je pri tej
+    velikosti izgubila — glej git zgodovino). Isti stil kot
+    gauge_svg/starburst_svg zgoraj (debel črn obris, ploskovite barve, brez
+    naloženih slik).
+
+    Klikljiva (glej #crn-mascot v SHARE_JS_TEMPLATE) -- zato role="button" +
+    aria-label namesto aria-hidden: čeprav gre za čisti hec (glej
+    crn-mascot-msg), je zdaj interaktivna, ne le okrasje."""
+    return '''<svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
+       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
     <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
     <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
     <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
@@ -1431,6 +1514,7 @@ def build_body(data):
         <p class="crn-sub">Vprašanje, ki ga v dolini postavijo vsak dan. Uradnega odgovora
         ni – tale indeks pa (skoraj) enako zanesljivo kaže razmere.</p>
         <p id="crn-visits" class="crn-visits" hidden></p>
+        <p id="crn-mascot-msg" class="crn-mascot-msg" hidden></p>
       </div>
     </div>
 
@@ -1442,7 +1526,7 @@ def build_body(data):
         <div class="crn-stat" id="crn-stat-temp"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
           <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
         <div class="crn-stat" id="crn-stat-snow"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
-          <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">snega v 24 h</span></div>
+          <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">sneg&nbsp;/&nbsp;24h</span></div>
         <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌂</span>
           <span class="crn-stat-val">{streak_val}</span><span class="crn-stat-lbl">suh niz v dolini</span></div>
       </div>
@@ -1479,6 +1563,7 @@ def build_body(data):
     <div class="crn-panel crn-cam">
       <p class="crn-cam-label">📷 Namesto da vprašaš — poglej. Živa kamera s prelaza:</p>
       <div class="crn-cam-frame">
+        <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
         <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
         <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
         <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej neposredno na promet.si</a>.</p>
