@@ -17,7 +17,7 @@ naredil krožno odvisnost med njima.
 ZONES = [
     {"id": "sonce",    "label": "SUHO K POPR",    "desc": "Popolnoma čisto, cesta je suha.",
      "color": "#16a34a", "mid": 157.5},
-    {"id": "nekaj",    "label": "JE, PA NEKAJ",   "desc": "Nekaj snega ali ledu, zato previdno.",
+    {"id": "nekaj",    "label": "TAK-TAK",   "desc": "Nekaj snega ali ledu, zato previdno.",
      "color": "#eab308", "mid": 112.5},
     {"id": "verige",   "label": "VZEMI VERIGE",   "desc": "Sneg ali led na cesti, verige so priporočljive.",
      "color": "#ea580c", "mid": 67.5},
